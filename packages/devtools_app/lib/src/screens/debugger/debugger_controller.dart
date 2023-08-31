@@ -554,7 +554,7 @@ class DebuggerController extends DisposableController
         frame != null ? _createVariablesForFrame(frame.frame) : [],
       );
     }
-    // Notify that the stack frame has been succesfully selected:
+    // Notify that the stack frame has been successfully selected:
     _selectedStackFrame.value = frame;
   }
 
