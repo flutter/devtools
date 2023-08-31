@@ -49,13 +49,14 @@ class BuildExtensionCommand extends Command {
 
   @override
   Future<void> run() async {
-    final source = argResults?[_sourceKey]!;
-    final destination = argResults?[_destinationKey]!;
+    final source = argResults?[_sourceKey]! as String;
+    final destination = argResults?[_destinationKey]! as String;
 
     final processManager = ProcessManager();
 
     _log('Building the extension Flutter web app...');
-    final buildProcess = await processManager.spawn(
+    await _runProcess(
+      processManager,
       'flutter',
       [
         'build',
@@ -68,15 +69,19 @@ class BuildExtensionCommand extends Command {
       ],
       workingDirectory: source,
     );
-    await buildProcess.exitCode;
 
     _log('Setting canvaskit permissions...');
-    final chmodProcess = await processManager.spawn(
+    await _runProcess(
+      processManager,
       'chmod',
-      ['0755', 'build/web/canvaskit/canvaskit.*'],
+      [
+        '0755',
+        // Note: using a wildcard `canvaskit.*` throws.
+        'build/web/canvaskit/canvaskit.js',
+        'build/web/canvaskit/canvaskit.wasm',
+      ],
       workingDirectory: source,
     );
-    await chmodProcess.exitCode;
 
     _log('Copying built output to the extension destination...');
     await _copyBuildToDestination(source: source, dest: destination);
@@ -120,4 +125,21 @@ class BuildExtensionCommand extends Command {
   }
 
   void _log(String message) => print('[$name] $message');
+
+  Future<void> _runProcess(
+    ProcessManager processManager,
+    String exe,
+    List<String> args, {
+    String? workingDirectory,
+  }) async {
+    final buildProcess = await processManager.spawn(
+      exe,
+      args,
+      workingDirectory: workingDirectory,
+    );
+    final code = await buildProcess.exitCode;
+    if (code != 0) {
+      throw ProcessException(exe, args, 'Failed with exit code: $code', code);
+    }
+  }
 }
