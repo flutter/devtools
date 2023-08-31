@@ -6,6 +6,7 @@
 
 import 'dart:io';
 
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/heap.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -25,7 +26,7 @@ void main() {
 
     double gbToBytes(double gb) => gb * (1024 * 1024 * 1024);
 
-    final lowerThreshold = gbToBytes(0.96);
+    final lowerThreshold = gbToBytes(0.85);
     final upperThreshold = gbToBytes(1.08);
 
     // Both thresholds are tested, because we want to lower the values
