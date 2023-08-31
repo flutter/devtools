@@ -6,7 +6,6 @@
 
 import 'dart:io';
 
-import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/heap.dart';
 import 'package:flutter_test/flutter_test.dart';
 
