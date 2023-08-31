@@ -7,9 +7,7 @@ import 'package:vm_service/vm_service.dart';
 import 'class_name.dart';
 import 'simple_items.dart';
 
-// Wrappers for fiels are needed to separate memory footprint for
-// AdaptedHeapObject, in heap snapshots, taken for DevTools,
-// for analysis and optimization.
+// TODO: remove wrappers.
 
 class _OutRefs {
   _OutRefs(this.refs);
@@ -17,16 +15,28 @@ class _OutRefs {
   final Set<int> refs;
 }
 
+class _InRefs {
+  _InRefs(this.refs);
+
+  final Set<int> refs;
+}
+
+class _ClassName {
+  _ClassName(this.name);
+
+  final HeapClassName name;
+}
+
 /// Contains information from [HeapSnapshotObject] needed for
 /// memory analysis on memory screen.
 class AdaptedHeapObject {
   AdaptedHeapObject({
     required this.code,
-    required outRefs,
-    required heapClass,
+    required Set<int> outRefs,
+    required HeapClassName heapClass,
     required this.shallowSize,
   })  : _outRefs = _OutRefs(outRefs),
-        _heapClass = heapClass;
+        _heapClass = _ClassName(heapClass);
 
   factory AdaptedHeapObject.fromHeapSnapshotObject(
     HeapSnapshotObject object,
@@ -40,16 +50,14 @@ class AdaptedHeapObject {
     );
   }
 
-  _OutRefs _outRefs;
+  final _OutRefs _outRefs;
   Set<int> get outRefs => _outRefs.refs;
 
-  Set<int>? _inRefs = {};
-  Set<int> get inRefs => _inRefs!;
-  set inRefs(Set<int> value) => _inRefs = value;
+  final _InRefs _inRefs = _InRefs({});
+  Set<int> get inRefs => _inRefs.refs;
 
-  HeapClassName? _heapClass;
-  HeapClassName get heapClass => _heapClass!;
-  set heapClass(HeapClassName value) => _heapClass = value;
+  final _ClassName _heapClass;
+  HeapClassName get heapClass => _heapClass.name;
 
   final IdentityHashCode code;
   final int shallowSize;
