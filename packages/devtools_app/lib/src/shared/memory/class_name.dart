@@ -75,7 +75,7 @@ class HeapClassName {
   HeapClassName._({required String? library, required this.className})
       : library = _normalizeLibrary(library);
 
-  static const _instances = <HeapClassName>{};
+  static final _instances = <HeapClassName>{};
 
   static HeapClassName fromPath({
     required String? library,

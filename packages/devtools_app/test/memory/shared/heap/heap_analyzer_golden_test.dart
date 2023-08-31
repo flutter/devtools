@@ -24,9 +24,15 @@ void main() {
     final after = ProcessInfo.currentRss;
     final delta = after - before;
 
-    print(prettyPrintBytes(delta, includeUnit: true, gbFractionDigits: 3));
+    double gbToBytes(double gb) => gb * (1024 * 1024 * 1024);
 
-    // baseline: 1.209 GB - 1.281 GB
+    final lowerThreshold = gbToBytes(1.0);
+    final upperThreshold = gbToBytes(1.15);
+
+    // Both threshold are tested, because we want to update thresholds
+    // in case of optimisation.
+    expect(delta, greaterThan(lowerThreshold));
+    expect(delta, lessThan(upperThreshold));
   });
 
   for (var t in goldenHeapTests) {
