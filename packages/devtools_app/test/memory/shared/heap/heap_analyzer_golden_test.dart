@@ -4,7 +4,6 @@
 
 import 'dart:io';
 
-import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/heap.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/spanning_tree.dart';
 import 'package:devtools_app/src/shared/memory/adapted_heap_data.dart';
