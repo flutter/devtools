@@ -75,11 +75,19 @@ class HeapClassName {
   HeapClassName._({required String? library, required this.className})
       : library = _normalizeLibrary(library);
 
+  static const _instances = <HeapClassName>{};
+
   static HeapClassName fromPath({
     required String? library,
     required String className,
   }) {
-    return HeapClassName._(library: library, className: className);
+    final newInstance = HeapClassName._(library: library, className: className);
+
+    final existingInstance = _instances.lookup(newInstance);
+    if (existingInstance != null) return existingInstance;
+
+    _instances.add(newInstance);
+    return newInstance;
   }
 
   static HeapClassName fromClassRef(ClassRef? classRef) => fromPath(
