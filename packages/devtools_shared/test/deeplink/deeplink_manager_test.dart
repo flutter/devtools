@@ -6,7 +6,6 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:devtools_shared/src/deeplink/deeplink_manager.dart';
-import 'package:devtools_shared/src/server/server_api.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -51,8 +50,10 @@ Running Gradle task 'printBuildVariants'...                        10.4s
         rootPath: projectRoot,
       );
       expect(response[DeeplinkManager.kErrorField], isNull);
-      expect(response[DeeplinkManager.kOutputJsonField],
-          '["debug","release","profile"]');
+      expect(
+        response[DeeplinkManager.kOutputJsonField],
+        '["debug","release","profile"]',
+      );
     });
 
     test('getBuildVariants return internal server error if command failed',
