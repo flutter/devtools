@@ -20,6 +20,8 @@ class TestFlutterApp extends IntegrationTestApp {
   }) : super(appPath, appDevice);
 
   String? _currentRunningAppId;
+  Future<Map<String, Object?>>? _startedFuture;
+  Future<Map<String, Object?>>? _debugPortFuture;
 
   @override
   Future<void> startProcess() async {
@@ -35,18 +37,16 @@ class TestFlutterApp extends IntegrationTestApp {
     );
   }
 
-  Future<Map<String, Object?>>? startedFuture;
-  Future<Map<String, Object?>>? debugPortFuture;
   @override
   void beforeStartProcess() async {
     // Set this up now, but we don't await it yet. We want to make sure we don't
     // miss it while waiting for debugPort below.
-    startedFuture = waitFor(
+    _startedFuture = waitFor(
       event: FlutterDaemonConstants.appStarted.key,
       timeout: IntegrationTestApp._appStartTimeout,
     );
 
-    debugPortFuture = waitFor(
+    _debugPortFuture = waitFor(
       event: FlutterDaemonConstants.appDebugPort.key,
       timeout: IntegrationTestApp._appStartTimeout,
     );
@@ -54,8 +54,8 @@ class TestFlutterApp extends IntegrationTestApp {
 
   @override
   Future<void> waitForAppStart() async {
-    final startedResult = await startedFuture!;
-    final debugPort = await debugPortFuture!;
+    final startedResult = await _startedFuture!;
+    final debugPort = await _debugPortFuture!;
 
     final wsUriString = (debugPort[FlutterDaemonConstants.params.key]!
         as Map<String, Object?>)[FlutterDaemonConstants.wsUri.key] as String;
@@ -211,6 +211,7 @@ class TestDartCliApp extends IntegrationTestApp {
   }) : super(appPath, TestAppDevice.cli);
 
   static const vmServicePrefix = 'The Dart VM service is listening on ';
+  Future<String>? _vmServiceUriFuture;
 
   @override
   Future<void> startProcess() async {
@@ -229,7 +230,6 @@ class TestDartCliApp extends IntegrationTestApp {
     );
   }
 
-  Future<String>? _vmServiceUriFuture;
   @override
   void beforeStartProcess() async {
     _vmServiceUriFuture = waitFor(
@@ -318,6 +318,7 @@ abstract class IntegrationTestApp with IOMixin {
   Future<void> start() async {
     _debugPrint('starting the test app process...');
 
+    /// Setup that needs to happen before `startProcess` can be run here.
     beforeStartProcess();
 
     await startProcess();
