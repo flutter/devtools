@@ -81,7 +81,6 @@ class BuildExtensionCommand extends Command {
         'build/web/canvaskit/canvaskit.wasm',
       ],
       workingDirectory: source,
-      throwOnError: false,
     );
 
     _log('Copying built output to the extension destination...');
@@ -132,7 +131,6 @@ class BuildExtensionCommand extends Command {
     String exe,
     List<String> args, {
     String? workingDirectory,
-    bool throwOnError = true,
   }) async {
     final buildProcess = await processManager.spawn(
       exe,
@@ -140,7 +138,7 @@ class BuildExtensionCommand extends Command {
       workingDirectory: workingDirectory,
     );
     final code = await buildProcess.exitCode;
-    if (code != 0 && throwOnError) {
+    if (code != 0) {
       throw ProcessException(exe, args, 'Failed with exit code: $code', code);
     }
   }
