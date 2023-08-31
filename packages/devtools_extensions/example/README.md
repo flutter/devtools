@@ -1,12 +1,15 @@
 # Example DevTools Extension
 
 This is an end-to-end example of a DevTools extension, including
-- the extension Flutter web app that will be embedded in DevTools
-(`foo/packages/foo_devtools_extension`)
-- the parent package that provides the DevTools extension (`foo/packages/foo`)
-- the end-user application that depends on `package:foo` (`app_that_uses_foo`),
-which will trigger a load of the `pacakge:foo` DevTools extension when debugging
-this app with DevTools.
+- the parent `package:foo` that provides the DevTools extension to end-user
+applications (`foo/packages/foo`)
+- the end-user application (`app_that_uses_foo`) that depends on `package:foo`,
+which will trigger a load of the `package:foo` DevTools extension when debugging
+this app with DevTools
+- the `package:foo` DevTools extension (`foo/packages/foo_devtools_extension`),
+which is a Flutter web app that will be embedded in DevTools when debugging an
+app the uses `package:foo`
+
 
 This example will show you how to:
 1. Structure your package for optimal extension development and publishing
