@@ -72,26 +72,32 @@ enum ClassType {
 }
 
 class HeapClassName {
-  HeapClassName({required this.className, required String? library})
+  HeapClassName._({required String? library, required this.className})
       : library = _normalizeLibrary(library);
 
-  HeapClassName.fromClassRef(ClassRef? classRef)
-      : this(
-          library: _library(
-            classRef?.library?.name,
-            classRef?.library?.uri,
-          ),
-          className: classRef?.name ?? '',
-        );
+  static HeapClassName fromPath({
+    required String? library,
+    required String className,
+  }) {
+    return HeapClassName._(library: library, className: className);
+  }
 
-  HeapClassName.fromHeapSnapshotClass(HeapSnapshotClass? theClass)
-      : this(
-          library: _library(
-            theClass?.libraryName,
-            theClass?.libraryUri.toString(),
-          ),
-          className: theClass?.name ?? '',
-        );
+  static HeapClassName fromClassRef(ClassRef? classRef) => fromPath(
+        library: _library(
+          classRef?.library?.name,
+          classRef?.library?.uri,
+        ),
+        className: classRef?.name ?? '',
+      );
+
+  static HeapClassName fromHeapSnapshotClass(HeapSnapshotClass? theClass) =>
+      fromPath(
+        library: _library(
+          theClass?.libraryName,
+          theClass?.libraryUri.toString(),
+        ),
+        className: theClass?.name ?? '',
+      );
 
   static String _library(String? libName, String? libUrl) {
     if (libName != null && libName.isNotEmpty) return libName;
