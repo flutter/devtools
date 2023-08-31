@@ -1,6 +1,7 @@
 ## 0.0.3-wip
 * Add `showNotification` and `showBannerMessage` endpoints to the extensions API.
 * Add hot reload and hot restart actions to the simulated DevTools environment.
+* Add exception handling to `devtools_extensions build_and_copy` command.
 
 ## 0.0.2
 * Add a simulated DevTools environment that for easier development.
