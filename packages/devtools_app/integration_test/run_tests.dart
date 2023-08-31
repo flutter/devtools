@@ -28,10 +28,10 @@ void main(List<String> args) async {
   Exception? exception;
   final chromedriver = ChromeDriver();
 
-  try {
-    // Start chrome driver before running the flutter integration test.
-    await chromedriver.start();
+  // Start chrome driver before running the flutter integration test.
+  await chromedriver.start();
 
+  try {
     if (testRunnerArgs.testTarget != null) {
       // TODO(kenz): add support for specifying a directory as the target instead
       // of a single file.
