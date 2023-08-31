@@ -1,13 +1,17 @@
+// Copyright 2023 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:devtools_extensions/api.dart';
 import 'package:devtools_extensions/devtools_extensions.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const FooPackageDevToolsExtension());
+  runApp(const FooDevToolsExtension());
 }
 
-class FooPackageDevToolsExtension extends StatelessWidget {
-  const FooPackageDevToolsExtension({super.key});
+class FooDevToolsExtension extends StatelessWidget {
+  const FooDevToolsExtension({super.key});
 
   @override
   Widget build(BuildContext context) {
