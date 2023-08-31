@@ -5,10 +5,11 @@ This page describes the fastest way to build DevTools with the goal to use it. D
 You may want to build DevTools to:
 
 1. Try experimental features
-2. Run desktop version to get away from browser memory limit. For example, if
-heap snapshots of your application casues aout of memory crash of the Chrome tab.
 
-The steps were tested for Mac. They may require adjustments for other platforms. Contributions,
+2. Run desktop version, instead of Web version, to get get rid of browser memory limit. For example,
+to be able to analyze heap snapshots of more complicated applications.
+
+The steps were tested for Mac and may require adjustments for other platforms. Contributions,
 that make the steps more platform agnostic, are welcome.
 
 ## Prerequisites
@@ -50,10 +51,16 @@ If some steps failed, remove the directory and redo to [Setup](#setup).
 
 ## Start DevTools
 
+1. `cd packages/devtools_app`
 
-```
-cd devtools/packages/devtools_app
-../../tool/flutter-sdk/bin/flutter run -d chrome --dart-define=enable_experiments=true
-```
+2. Start DevTools
 
-3. Paste the URL of your application (for example [Gallery](https://github.com/flutter/devtools/blob/master/CONTRIBUTING.md#connect-to-application)) to the connection textbox.
+In Chrome: `../../tool/flutter-sdk/bin/flutter run --release -d chrome`
+On Mac: `../../tool/flutter-sdk/bin/flutter run --release -d macos`
+On Windows: `../../tool/flutter-sdk/bin/flutter run --release -d windows`
+
+Add `--dart-define=enable_experiments=true` to enable experimental features.
+
+3. Paste the URL of your application
+(for example [Gallery](https://github.com/flutter/devtools/blob/master/CONTRIBUTING.md#connect-to-application))
+to the connection textbox.
