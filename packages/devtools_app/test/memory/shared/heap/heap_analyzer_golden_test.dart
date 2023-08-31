@@ -28,7 +28,7 @@ void main() {
     final lowerThreshold = gbToBytes(1.0);
     final upperThreshold = gbToBytes(1.15);
 
-    // Both threshold are tested, because we want to update thresholds
+    // Both thresholds are tested, because we want to lower the values
     // in case of optimisation.
     expect(delta, greaterThan(lowerThreshold));
     expect(delta, lessThan(upperThreshold));
