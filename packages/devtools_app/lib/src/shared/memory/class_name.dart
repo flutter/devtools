@@ -223,6 +223,10 @@ class HeapClassName {
   bool matches(ClassRef ref) {
     return HeapClassName.fromClassRef(ref) == this;
   }
+
+  static void dispose() {
+    _instances.clear();
+  }
 }
 
 /// Packages that are published by Google.
