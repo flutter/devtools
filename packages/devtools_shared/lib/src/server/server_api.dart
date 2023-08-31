@@ -32,11 +32,11 @@ class ServerApi {
   ///
   /// To override an API call, pass in a subclass of [ServerApi].
   static FutureOr<shelf.Response> handle(
-    shelf.Request request,
-    ExtensionsManager extensionsManager,
-    DeeplinkManager deeplinkManager, [
+    shelf.Request request, {
+    required ExtensionsManager extensionsManager,
+    required DeeplinkManager deeplinkManager,
     ServerApi? api,
-  ]) {
+  }) {
     api ??= ServerApi();
     final queryParams = request.requestedUri.queryParameters;
     // TODO(kenz): break this switch statement up so that it uses helper methods
@@ -223,7 +223,7 @@ class ServerApi {
           queryParams,
         );
 
-      // ----- deeplinks api. -----
+      // ----- deeplink api. -----
 
       case DeeplinkApi.androidBuildVariants:
         return _DeeplinkApiHandler.handleAndroidBuildVariants(
@@ -391,7 +391,12 @@ abstract class _DeeplinkApiHandler {
     if (missingRequiredParams != null) return missingRequiredParams;
 
     final rootPath = queryParams[DeeplinkApi.deeplinkRootPathPropertyName]!;
-
-    return deeplinkManager.getBuildVariants(rootPath: rootPath, api: api);
+    final result = await deeplinkManager.getBuildVariants(rootPath: rootPath);
+    final error = result[DeeplinkManager.kErrorField] as String?;
+    if (error != null) {
+      api.serverError(error);
+    }
+    return api
+        .getCompleted(result[DeeplinkManager.kOutputJsonField]! as String);
   }
 }

@@ -1,6 +1,10 @@
-# 3.0.2
+# 4.0.0
 
 - Bump `package:extension_discovery` version to ^2.0.0
+- Adds a `DeeplinkApi.androidBuildVariants` endpoint to ServerAPi.
+- **BREAKING CHANGE**:
+  - ServerApi.handle extensionsManager, api parameter are converted to named parameters
+  - Adds a new required name parameter deeplinkManager to `ServerApi.handle`.
 
 # 3.0.1
 

@@ -1,6 +1,6 @@
-// Copyright (c) 2023, the Dart project authors.  Please see the AUTHORS file
-// for details. All rights reserved. Use of this source code is governed by a
-// BSD-style license that can be found in the LICENSE file.
+// Copyright 2023 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 import 'dart:io';
 
@@ -39,17 +39,20 @@ void main() {
           result: ProcessResult(
             0,
             0,
-            '["release", "profile"]',
+            r'''
+Running Gradle task 'printBuildVariants'...                        10.4s
+["debug","release","profile"]
+            ''',
             '',
           ),
         ),
       );
       final response = await manager.getBuildVariants(
         rootPath: projectRoot,
-        api: ServerApi(),
       );
-      expect(response.statusCode, HttpStatus.ok);
-      expect(await response.readAsString(), '["release", "profile"]');
+      expect(response[DeeplinkManager.kErrorField], isNull);
+      expect(response[DeeplinkManager.kOutputJsonField],
+          '["debug","release","profile"]');
     });
 
     test('getBuildVariants return internal server error if command failed',
@@ -74,9 +77,8 @@ void main() {
       );
       final response = await manager.getBuildVariants(
         rootPath: projectRoot,
-        api: ServerApi(),
       );
-      expect(response.statusCode, HttpStatus.internalServerError);
+      expect(response[DeeplinkManager.kErrorField], contains('unknown error'));
     });
   });
 }

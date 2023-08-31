@@ -1,4 +1,4 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -26,15 +26,16 @@ void main() {
       ),
     );
     final fakeManager = FakeDeeplinkManager();
-    final expectedResponse = Response(HttpStatus.ok);
-    fakeManager.responseForGetBuildVariants = expectedResponse;
+    fakeManager.responseForGetBuildVariants = <String, String>{
+      DeeplinkManager.kOutputJsonField: '["debug", "release]',
+    };
     final response = await ServerApi.handle(
       request,
-      ExtensionsManager(buildDir: '/'),
-      fakeManager,
+      extensionsManager: ExtensionsManager(buildDir: '/'),
+      deeplinkManager: fakeManager,
     );
-    expect(response, expectedResponse);
-    expect(fakeManager.receivedPathFromGetBuildVariants, expectedRootPath);
+    expect(response.statusCode, HttpStatus.ok);
+    expect(await response.readAsString(), '["debug", "release]');
   });
 
   test('handle deeplink api returns bad request if no root path', () async {
@@ -48,8 +49,8 @@ void main() {
     );
     final response = await ServerApi.handle(
       request,
-      ExtensionsManager(buildDir: '/'),
-      FakeDeeplinkManager(),
+      extensionsManager: ExtensionsManager(buildDir: '/'),
+      deeplinkManager: FakeDeeplinkManager(),
     );
     expect(response.statusCode, HttpStatus.badRequest);
   });
@@ -57,12 +58,11 @@ void main() {
 
 class FakeDeeplinkManager extends DeeplinkManager {
   String? receivedPathFromGetBuildVariants;
-  late Response responseForGetBuildVariants;
+  late Map<String, String> responseForGetBuildVariants;
 
   @override
-  Future<Response> getBuildVariants({
+  Future<Map<String, String>> getBuildVariants({
     required String rootPath,
-    required ServerApi api,
   }) async {
     receivedPathFromGetBuildVariants = rootPath;
     return responseForGetBuildVariants;
