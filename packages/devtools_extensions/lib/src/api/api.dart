@@ -57,7 +57,7 @@ abstract interface class DevToolsExtensionHostInterface {
 
   /// Handles events sent by the extension.
   ///
-  /// If an unknown event is recevied, this handler should call [onUnknownEvent]
+  /// If an unknown event is received, this handler should call [onUnknownEvent]
   /// if non-null.
   void onEventReceived(
     DevToolsExtensionEvent event, {

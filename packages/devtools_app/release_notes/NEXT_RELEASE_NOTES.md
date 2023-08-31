@@ -24,11 +24,13 @@ TODO: Remove this section if there are not any general updates.
 TODO: Remove this section if there are not any general updates.
 
 ## Network profiler updates
-- Fixed a crash with large text in request or response - [#6254](https://github.com/flutter/devtools/pull/6254)
-
-## Logging updates
 TODO: Remove this section if there are not any general updates.
 
+## Logging updates
+* Improved responsiveness of the top bar in the Logging page - [#6281](https://github.com/flutter/devtools/pull/6281)
+
+* Add the ability to copy filtered logs - [#6260](https://github.com/flutter/devtools/pull/6260)
+![Logger tab copy](images/logger_copy.png "Logger tab copy")
 ## App size tool updates
 TODO: Remove this section if there are not any general updates.
 
