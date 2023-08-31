@@ -20,8 +20,6 @@ class TestFlutterApp extends IntegrationTestApp {
   }) : super(appPath, appDevice);
 
   String? _currentRunningAppId;
-  Future<Map<String, Object?>>? _startedFuture;
-  Future<Map<String, Object?>>? _debugPortFuture;
 
   @override
   Future<void> startProcess() async {
@@ -38,25 +36,18 @@ class TestFlutterApp extends IntegrationTestApp {
   }
 
   @override
-  void beforeStartProcess() async {
+  Future<void> waitForAppStart() async {
     // Set this up now, but we don't await it yet. We want to make sure we don't
     // miss it while waiting for debugPort below.
-    _startedFuture = waitFor(
+    final started = waitFor(
       event: FlutterDaemonConstants.appStarted.key,
       timeout: IntegrationTestApp._appStartTimeout,
     );
 
-    _debugPortFuture = waitFor(
+    final debugPort = await waitFor(
       event: FlutterDaemonConstants.appDebugPort.key,
       timeout: IntegrationTestApp._appStartTimeout,
     );
-  }
-
-  @override
-  Future<void> waitForAppStart() async {
-    final startedResult = await _startedFuture!;
-    final debugPort = await _debugPortFuture!;
-
     final wsUriString = (debugPort[FlutterDaemonConstants.params.key]!
         as Map<String, Object?>)[FlutterDaemonConstants.wsUri.key] as String;
     _vmServiceWsUri = Uri.parse(wsUriString);
@@ -67,6 +58,7 @@ class TestFlutterApp extends IntegrationTestApp {
 
     // Now await the started event; if it had already happened the future will
     // have already completed.
+    final startedResult = await started;
     final params = startedResult[FlutterDaemonConstants.params.key]!
         as Map<String, Object?>;
     _currentRunningAppId = params[FlutterDaemonConstants.appId.key] as String?;
@@ -211,7 +203,6 @@ class TestDartCliApp extends IntegrationTestApp {
   }) : super(appPath, TestAppDevice.cli);
 
   static const vmServicePrefix = 'The Dart VM service is listening on ';
-  Future<String>? _vmServiceUriFuture;
 
   @override
   Future<void> startProcess() async {
@@ -231,16 +222,11 @@ class TestDartCliApp extends IntegrationTestApp {
   }
 
   @override
-  void beforeStartProcess() async {
-    _vmServiceUriFuture = waitFor(
+  Future<void> waitForAppStart() async {
+    final vmServiceUri = await waitFor(
       message: vmServicePrefix,
       timeout: IntegrationTestApp._appStartTimeout,
     );
-  }
-
-  @override
-  Future<void> waitForAppStart() async {
-    final vmServiceUri = await _vmServiceUriFuture!;
     final parsedVmServiceUri = Uri.parse(vmServiceUri);
 
     // Map to WS URI.
@@ -285,8 +271,7 @@ class TestDartCliApp extends IntegrationTestApp {
 abstract class IntegrationTestApp with IOMixin {
   IntegrationTestApp(this.testAppPath, this.testAppDevice);
 
-  static const _appStartTimeout =
-      Duration(seconds: 300); // TODO change this to 200
+  static const _appStartTimeout = Duration(seconds: 240);
 
   static const _defaultTimeout = Duration(seconds: 40);
 
@@ -311,17 +296,12 @@ abstract class IntegrationTestApp with IOMixin {
 
   Future<void> startProcess();
 
-  void beforeStartProcess();
   Future<void> waitForAppStart();
 
   Future<void> manuallyStopApp() async {}
 
   Future<void> start() async {
     _debugPrint('starting the test app process...');
-
-    /// Setup that needs to happen before `startProcess` can be run here.
-    beforeStartProcess();
-
     await startProcess();
     assert(
       runProcess != null,
