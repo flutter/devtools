@@ -4,6 +4,7 @@
 
 import 'dart:io';
 
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/heap.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/spanning_tree.dart';
 import 'package:devtools_app/src/shared/memory/adapted_heap_data.dart';
@@ -25,8 +26,8 @@ void main() {
 
     double gbToBytes(double gb) => gb * (1024 * 1024 * 1024);
 
-    final lowerThreshold = gbToBytes(1.0);
-    final upperThreshold = gbToBytes(1.15);
+    final lowerThreshold = gbToBytes(0.96);
+    final upperThreshold = gbToBytes(1.08);
 
     // Both thresholds are tested, because we want to lower the values
     // in case of optimisation.

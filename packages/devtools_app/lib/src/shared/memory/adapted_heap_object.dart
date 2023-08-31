@@ -7,36 +7,15 @@ import 'package:vm_service/vm_service.dart';
 import 'class_name.dart';
 import 'simple_items.dart';
 
-// TODO: remove wrappers.
-
-class _OutRefs {
-  _OutRefs(this.refs);
-
-  final Set<int> refs;
-}
-
-class _InRefs {
-  _InRefs(this.refs);
-
-  final Set<int> refs;
-}
-
-class _ClassName {
-  _ClassName(this.name);
-
-  final HeapClassName name;
-}
-
 /// Contains information from [HeapSnapshotObject] needed for
 /// memory analysis on memory screen.
 class AdaptedHeapObject {
   AdaptedHeapObject({
     required this.code,
-    required Set<int> outRefs,
-    required HeapClassName heapClass,
+    required this.outRefs,
+    required this.heapClass,
     required this.shallowSize,
-  })  : _outRefs = _OutRefs(outRefs),
-        _heapClass = _ClassName(heapClass);
+  });
 
   factory AdaptedHeapObject.fromHeapSnapshotObject(
     HeapSnapshotObject object,
@@ -50,15 +29,9 @@ class AdaptedHeapObject {
     );
   }
 
-  final _OutRefs _outRefs;
-  Set<int> get outRefs => _outRefs.refs;
-
-  final _InRefs _inRefs = _InRefs({});
-  Set<int> get inRefs => _inRefs.refs;
-
-  final _ClassName _heapClass;
-  HeapClassName get heapClass => _heapClass.name;
-
+  final Set<int> outRefs;
+  final Set<int> inRefs = {};
+  final HeapClassName heapClass;
   final IdentityHashCode code;
   final int shallowSize;
 
