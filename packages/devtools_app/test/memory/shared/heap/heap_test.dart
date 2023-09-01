@@ -24,9 +24,9 @@ class _ClassSizeTest {
   final int expectedClassARetainedSize;
 }
 
-final _root = HeapClassName(className: 'Root', library: 'l');
-final _classA = HeapClassName(className: 'A', library: 'l');
-final _classB = HeapClassName(className: 'B', library: 'l');
+final _root = HeapClassName.fromPath(className: 'Root', library: 'l');
+final _classA = HeapClassName.fromPath(className: 'A', library: 'l');
+final _classB = HeapClassName.fromPath(className: 'B', library: 'l');
 
 final _classSizeTests = <_ClassSizeTest>[
   _ClassSizeTest(

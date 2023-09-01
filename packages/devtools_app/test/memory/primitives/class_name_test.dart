@@ -68,7 +68,8 @@ void main() {
   group('$HeapClassName', () {
     for (var t in _classTests) {
       test('isCore and isDartOrFlutter for ${t.name}', () {
-        final theClass = HeapClassName(className: 'x', library: t.library);
+        final theClass =
+            HeapClassName.fromPath(className: 'x', library: t.library);
         expect(theClass.isPackageless, t.isCore);
         expect(theClass.isDartOrFlutter, t.isDartOrFlutter);
       });
