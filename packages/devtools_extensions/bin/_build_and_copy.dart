@@ -94,10 +94,10 @@ class BuildExtensionCommand extends Command {
     required String source,
     required String dest,
   }) async {
-    _log('Copying the extension config.json file into a temp directory...');
+    _log('Copying the extension config.yaml file into a temp directory...');
     final tmp = Directory.current.createTempSync();
-    final tmpConfigPath = path.join(tmp.path, 'config.json');
-    final destinationConfigPath = path.join(dest, 'config.json');
+    final tmpConfigPath = path.join(tmp.path, 'config.yaml');
+    final destinationConfigPath = path.join(dest, 'config.yaml');
     File(destinationConfigPath)..copySync(tmpConfigPath);
 
     _log('Replacing the existing extension build with the new one...');
@@ -111,7 +111,7 @@ class BuildExtensionCommand extends Command {
     );
 
     _log(
-      'Copying the extension config.json file back to the destination '
+      'Copying the extension config.yaml file back to the destination '
       'directory...',
     );
     File(tmpConfigPath)..copySync(destinationConfigPath);

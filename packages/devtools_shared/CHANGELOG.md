@@ -1,3 +1,7 @@
+# 3.0.2
+
+- Bump `package:extension_discovery` version to ^2.0.0
+
 # 3.0.1
 
 - Bump `package:extension_discovery` version to ^1.0.1
