@@ -8,7 +8,7 @@ import '_io_utils.dart';
 import '_utils.dart';
 
 class ChromeDriver with IOMixin {
-  late final Process _process;
+  Process? _process;
 
   // TODO(kenz): add error messaging if the chromedriver executable is not
   // found. We can also consider using web installers directly in this script:
@@ -16,13 +16,13 @@ class ChromeDriver with IOMixin {
   Future<void> start() async {
     try {
       debugLog('starting the chromedriver process');
-      _process = await Process.start(
+      final process = _process = await Process.start(
         'chromedriver',
         [
           '--port=4444',
         ],
       );
-      listenToProcessOutput(_process, printTag: 'ChromeDriver');
+      listenToProcessOutput(process, printTag: 'ChromeDriver');
     } catch (e) {
       // ignore: avoid-throw-in-catch-block, by design
       throw Exception('Error starting chromedriver: $e');
@@ -30,8 +30,13 @@ class ChromeDriver with IOMixin {
   }
 
   Future<void> stop() async {
+    final process = _process;
+    _process = null;
+
+    if (process == null) return;
+
     await cancelAllStreamSubscriptions();
     debugLog('killing the chromedriver process');
-    await killGracefully(_process);
+    await killGracefully(process);
   }
 }
