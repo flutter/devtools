@@ -51,7 +51,6 @@ class DeeplinkManager {
       };
     }
     return <String, String?>{
-      kErrorField: null,
       kOutputJsonField: outputJson,
     };
   }

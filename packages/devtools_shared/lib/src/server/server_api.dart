@@ -396,7 +396,8 @@ abstract class _DeeplinkApiHandler {
     if (error != null) {
       api.serverError(error);
     }
-    return api
-        .getCompleted(result[DeeplinkManager.kOutputJsonField]! as String);
+    return api.getCompleted(
+      result[DeeplinkManager.kOutputJsonField]! as String,
+    );
   }
 }
