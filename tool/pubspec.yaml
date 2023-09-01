@@ -9,6 +9,7 @@ dependencies:
   cli_util: ^0.3.3
   devtools_shared: ^2.18.0
   http: ^0.13.3
+  io: ^1.0.4
   lints: any
   path: ^1.8.0
 
