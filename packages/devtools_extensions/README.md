@@ -10,6 +10,10 @@ package, your extension will show up in its own DevTools tab:
 
 ![Example devtools extension](_readme_images/example_devtools_extension.png)
 
+Follow the instructions below to get started, and use the
+[end-to-end example](https://github.com/flutter/devtools/tree/master/packages/devtools_extensions/example/)
+for reference.
+
 ## Setup your package to provide a DevTools extension
 
 DevTools extensions must be written as Flutter web apps. This is because DevTools embeds

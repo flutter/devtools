@@ -116,9 +116,17 @@ class BannerMessages extends StatelessWidget {
   }
 }
 
+// TODO(kenz): add an 'info' type.
 enum BannerMessageType {
   warning,
-  error,
+  error;
+
+  static BannerMessageType? parse(String? value) {
+    for (final type in BannerMessageType.values) {
+      if (type.name == value) return type;
+    }
+    return null;
+  }
 }
 
 @visibleForTesting

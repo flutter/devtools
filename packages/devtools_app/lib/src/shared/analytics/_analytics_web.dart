@@ -11,6 +11,7 @@ import 'dart:async';
 // ignore: avoid_web_libraries_in_flutter, by design
 import 'dart:html';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:js/js.dart';
 import 'package:logging/logging.dart';

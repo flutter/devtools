@@ -10,28 +10,32 @@ import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
-import '../../service.dart';
-import '../../service_extensions.dart';
-import '../../utils.dart';
+import '../utils/utils.dart';
+import 'connected_app.dart';
+import 'flutter_version.dart';
+import 'isolate_manager.dart';
+import 'isolate_state.dart';
+import 'service_extension_manager.dart';
+import 'service_extensions.dart';
 
 final _log = Logger('service_manager');
 
 typedef ServiceManagerCallback<T> = FutureOr<void> Function(T? service);
 
 enum ServiceManagerLifecycle {
-  /// Lifecycle phase that occurrs before the service manager is set up for
+  /// Lifecycle phase that occurs before the service manager is set up for
   /// connection to a [VmService].
   beforeOpenVmService,
 
-  /// Lifecycle phase that occurrs after the service manager is set up for
+  /// Lifecycle phase that occurs after the service manager is set up for
   /// connection to a [VmService].
   afterOpenVmService,
 
-  /// Lifecycle phase that occurrs before the service manager closes the
+  /// Lifecycle phase that occurs before the service manager closes the
   /// connection to a [VmService].
   beforeCloseVmService,
 
-  /// Lifecycle phase that occurrs after the service manager closes the
+  /// Lifecycle phase that occurs after the service manager closes the
   /// connection to a [VmService].
   afterCloseVmService,
 }

@@ -101,7 +101,7 @@ void main() {
 
     // Tap on the gutter for the line to set a breakpoint:
     await tester.tap(gutter30Finder);
-    await tester.pumpAndSettle(safePumpDuration);
+    await tester.pumpAndSettle(longPumpDuration);
 
     logStatus('pausing at breakpoint');
 

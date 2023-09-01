@@ -111,7 +111,8 @@ class ProfileRecord with PinnableListEntry {
 
   ProfileRecord.total(AllocationProfile profile)
       : isTotal = true,
-        heapClass = HeapClassName(className: 'All Classes', library: ''),
+        heapClass =
+            HeapClassName.fromPath(className: 'All Classes', library: ''),
         totalInstances = null,
         totalSize = (profile.memoryUsage?.externalUsage ?? 0) +
             (profile.memoryUsage?.heapUsage ?? 0),

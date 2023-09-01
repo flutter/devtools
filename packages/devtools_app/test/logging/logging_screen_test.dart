@@ -15,6 +15,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
+import '../test_infra/utils/test_utils.dart';
+
 void main() {
   late LoggingScreen screen;
   late MockLoggingController mockLoggingController;
@@ -61,6 +63,41 @@ void main() {
     });
 
     testWidgetsWithWindowSize(
+      'copy log contents',
+      windowSize,
+      (WidgetTester tester) async {
+        final LogData logA = LogData('TEST A', 'Log A', 123);
+        final LogData logB = LogData('TEST B', 'Log B', 124);
+        mockLoggingController = createMockLoggingControllerWithDefaults(
+          data: [
+            logA,
+            logB,
+          ],
+        );
+
+        String clipboardContents = '';
+        setupClipboardCopyListener(
+          clipboardContentsCallback: (contents) {
+            clipboardContents = contents ?? '';
+          },
+        );
+
+        await pumpLoggingScreen(tester);
+        await tester.tap(find.byTooltip('Copy filtered logs'));
+
+        expect(
+          clipboardContents,
+          equals(
+            [
+              '${logA.timestamp} [${logA.kind}] ${logA.details}',
+              '${logB.timestamp} [${logB.kind}] ${logB.details}',
+            ].joinWithTrailing('\n'),
+          ),
+        );
+      },
+    );
+
+    testWidgetsWithWindowSize(
       'builds with no data',
       windowSize,
       (WidgetTester tester) async {
@@ -71,7 +108,7 @@ void main() {
         expect(find.byType(ClearButton), findsOneWidget);
         expect(find.byType(TextField), findsOneWidget);
         expect(find.byType(DevToolsFilterButton), findsOneWidget);
-        expect(find.byType(StructuredErrorsToggle), findsOneWidget);
+        expect(find.byType(SettingsOutlinedButton), findsOneWidget);
       },
     );
 
@@ -114,7 +151,15 @@ void main() {
           serviceConnection,
         );
         await pumpLoggingScreen(tester);
-        Switch toggle = tester.widget(find.byType(Switch));
+
+        await tester.tap(find.byType(SettingsOutlinedButton));
+        await tester.pump();
+        Switch toggle = tester.widget(
+          find.descendant(
+            of: find.byType(StructuredErrorsToggle),
+            matching: find.byType(Switch),
+          ),
+        );
         expect(toggle.value, false);
 
         serviceConnection.serviceManager.serviceExtensionManager

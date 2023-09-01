@@ -37,7 +37,7 @@ void main() {
 ```
 
 2. Use utilities like the `AutoDisposeMixin`, which supports adding listeners
-that will automatically dispose as part of the `StatefulWidget` lifecyle.
+that will automatically dispose as part of the `StatefulWidget` lifecycle.
 
 ```dart
 import 'package:devtools_app_shared/utils.dart';

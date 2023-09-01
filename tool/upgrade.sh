@@ -32,4 +32,16 @@ pushd "$ROOT_DIR/packages/devtools_extensions"
 flutter pub upgrade
 popd
 
+pushd "$ROOT_DIR/packages/devtools_extensions/example/app_that_uses_foo"
+flutter pub upgrade
+popd
+
+pushd "$ROOT_DIR/packages/devtools_extensions/example/foo/packages/foo"
+flutter pub upgrade
+popd
+
+pushd "$ROOT_DIR/packages/devtools_extensions/example/foo/packages/foo_devtools_extension"
+flutter pub upgrade
+popd
+
 echo "upgrade.sh: upgraded packages."

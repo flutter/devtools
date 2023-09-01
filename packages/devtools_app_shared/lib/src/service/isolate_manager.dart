@@ -9,7 +9,8 @@ import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
-import '../../utils.dart';
+import '../utils/auto_dispose.dart';
+import '../utils/list.dart';
 import 'isolate_state.dart';
 import 'service_extensions.dart' as extensions;
 
