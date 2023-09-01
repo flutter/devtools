@@ -9,20 +9,18 @@ You may want to build DevTools to:
 2. Run desktop version, instead of Web version, to get get rid of browser memory limit. For example,
 to be able to analyze heap snapshots of more complicated applications.
 
-The steps were tested for Mac and may require adjustments for other platforms. Contributions,
-that make the steps more platform agnostic, are welcome.
+These steps were tested for Mac and may require adjustments for other platforms. Contributions
+that make the steps more platform agnostic are welcome.
 
 ## Prerequisites
 
 1. [Configure](https://docs.flutter.dev/get-started/install) Dart or Flutter.
 
-## Setup DevTools
-
-If it is initial setup:
+## Setup DevTools (first time only)
 
 1. In your terminal `cd` to a folder where you want to clone devtools, and that does not have subfolder `devtools` yet.
 
-2. Clone the repo and get needed Flutter version to local folder:
+2. Clone the repo and update the Flutter SDK that DevTools will be built with:
 
 ```bash
 git clone https://github.com/flutter/devtools.git
@@ -33,7 +31,7 @@ cd devtools
 
 ## Or refresh DevTools
 
-If you are refreting previously configured version:
+If you have already configured the DevTools environment and need to refresh to get the latest DevTools code, follow these instructions:
 
 1. `cd` to the `devtools` directory created in the [Setup and start](#setup-and-start) section.
 
@@ -49,15 +47,15 @@ bash tool/upgrade.sh
 
 If some steps failed, remove the directory and redo to [Setup](#setup).
 
-## Start DevTools
+## Start DevTools and connect to an app
 
-1. `cd packages/devtools_app`
+1. From the main devtools directory, run `cd packages/devtools_app``
 
 2. Start DevTools
 
-In Chrome: `../../tool/flutter-sdk/bin/flutter run --release -d chrome`
-On Mac: `../../tool/flutter-sdk/bin/flutter run --release -d macos`
-On Windows: `../../tool/flutter-sdk/bin/flutter run --release -d windows`
+- On Chrome: `../../tool/flutter-sdk/bin/flutter run --release -d chrome`
+- On Mac: `../../tool/flutter-sdk/bin/flutter run --release -d macos`
+- On Windows: `../../tool/flutter-sdk/bin/flutter run --release -d windows`
 
 Add `--dart-define=enable_experiments=true` to enable experimental features.
 
