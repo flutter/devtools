@@ -60,12 +60,12 @@ final class VsCodeApiImpl extends ToolApiImpl implements VsCodeApi {
   }
 
   @override
-  Future<bool> openDevToolsFeature(String debugSessionId, String page) {
+  Future<bool> openDevToolsPage(String debugSessionId, String page) {
     return sendRequest(
-      VsCodeApi.openDevToolsFeatureMethod,
+      VsCodeApi.openDevToolsPageMethod,
       {
-        VsCodeApi.openDevToolsFeatureDebugSessionIdParameter: debugSessionId,
-        VsCodeApi.openDevToolsFeaturePageParameter: page,
+        VsCodeApi.openDevToolsPageDebugSessionIdParameter: debugSessionId,
+        VsCodeApi.openDevToolsPagePageParameter: page,
       },
     );
   }
@@ -245,6 +245,6 @@ class VsCodeCapabilitiesImpl implements VsCodeCapabilities {
       _raw?[VsCodeCapabilities.jsonSelectDeviceField] == true;
 
   @override
-  bool get openDevToolsFeature =>
-      _raw?[VsCodeCapabilities.openDevToolsFeatureField] == true;
+  bool get openDevToolsPage =>
+      _raw?[VsCodeCapabilities.openDevToolsPageField] == true;
 }

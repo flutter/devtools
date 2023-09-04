@@ -33,7 +33,7 @@ class DebugSessionInfo extends StatelessWidget {
           debugSession?.name ?? 'Begin a debug session to use DevTools',
           style: Theme.of(context).textTheme.titleSmall,
         ),
-        if (api.capabilities.openDevToolsFeature)
+        if (api.capabilities.openDevToolsPage)
           Row(
             children: [
               // TODO(dantup): Make these conditions use the real screen
@@ -70,7 +70,7 @@ class DebugSessionInfo extends StatelessWidget {
     final debugSession = this.debugSession;
     return ElevatedButton(
       onPressed: debugSession != null && enabled
-          ? () => unawaited(api.openDevToolsFeature(debugSession.id, page))
+          ? () => unawaited(api.openDevToolsPage(debugSession.id, page))
           : null,
       child: Text(text),
     );

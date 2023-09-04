@@ -65,13 +65,13 @@ class MockDartToolingApi extends DartToolingApiImpl {
       return {
         'executeCommand': true,
         'selectDevice': true,
-        'openDevToolsFeature': true,
+        'openDevToolsPage': true,
       };
     });
     server.registerMethod('vsCode.initialize', initialize);
     server.registerMethod('vsCode.executeCommand', executeCommand);
     server.registerMethod('vsCode.selectDevice', selectDevice);
-    server.registerMethod('vsCode.openDevToolsFeature', openDevToolsFeature);
+    server.registerMethod('vsCode.openDevToolsPage', openDevToolsPage);
   }
 
   final json_rpc_2.Peer client;
@@ -145,7 +145,7 @@ class MockDartToolingApi extends DartToolingApiImpl {
   }
 
   /// Simulates opening a DevTools feature.
-  Future<void> openDevToolsFeature(json_rpc_2.Parameters parameters) async {}
+  Future<void> openDevToolsPage(json_rpc_2.Parameters parameters) async {}
 
   /// Simulates devices being connected in the IDE by notifying the embedded
   /// panel about a set of test devices.

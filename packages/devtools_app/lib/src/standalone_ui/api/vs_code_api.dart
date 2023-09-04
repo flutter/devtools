@@ -15,7 +15,7 @@ abstract interface class VsCodeApi {
   Stream<VsCodeDebugSessionsEvent> get debugSessionsChanged;
   Future<Object?> executeCommand(String command, [List<Object?>? arguments]);
   Future<bool> selectDevice(String id);
-  Future<bool> openDevToolsFeature(String debugSessionId, String page);
+  Future<bool> openDevToolsPage(String debugSessionId, String page);
 
   static const jsonApiName = 'vsCode';
 
@@ -30,9 +30,9 @@ abstract interface class VsCodeApi {
   static const jsonSelectDeviceMethod = 'selectDevice';
   static const jsonSelectDeviceIdParameter = 'id';
 
-  static const openDevToolsFeatureMethod = 'openDevToolsFeature';
-  static const openDevToolsFeatureDebugSessionIdParameter = 'debugSessionId';
-  static const openDevToolsFeaturePageParameter = 'page';
+  static const openDevToolsPageMethod = 'openDevToolsPage';
+  static const openDevToolsPageDebugSessionIdParameter = 'debugSessionId';
+  static const openDevToolsPagePageParameter = 'page';
 
   static const jsonDebugSessionsChangedEvent = 'debugSessionsChanged';
 }
@@ -139,9 +139,9 @@ abstract interface class VsCodeDebugSessionsEvent {
 abstract interface class VsCodeCapabilities {
   bool get executeCommand;
   bool get selectDevice;
-  bool get openDevToolsFeature;
+  bool get openDevToolsPage;
 
   static const jsonExecuteCommandField = 'executeCommand';
   static const jsonSelectDeviceField = 'selectDevice';
-  static const openDevToolsFeatureField = 'openDevToolsFeature';
+  static const openDevToolsPageField = 'openDevToolsPage';
 }
