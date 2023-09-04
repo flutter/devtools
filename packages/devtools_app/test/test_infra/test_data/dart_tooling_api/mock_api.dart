@@ -163,7 +163,7 @@ class MockDartToolingApi extends DartToolingApiImpl {
     _debugSessions.add(
       VsCodeDebugSessionImpl(
         id: 'debug-$sessionNum',
-        name: 'Session $sessionNum ($mode)',
+        name: 'Session $sessionNum',
         vmServiceUri: 'ws://127.0.0.1:1234/ws',
         flutterMode: mode,
         flutterDeviceId: 'flutter-tester',

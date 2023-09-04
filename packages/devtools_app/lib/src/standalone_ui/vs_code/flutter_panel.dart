@@ -11,8 +11,8 @@ import '../../../devtools_app.dart';
 import '../../shared/feature_flags.dart';
 import '../api/dart_tooling_api.dart';
 import '../api/vs_code_api.dart';
-import 'debug_session_info.dart';
-import 'device_selector.dart';
+import 'debug_sessions.dart';
+import 'devices.dart';
 
 /// A general Flutter sidebar panel for embedding inside IDEs.
 ///
@@ -66,73 +66,59 @@ class _VsCodeConnectedPanelState extends State<_VsCodeConnectedPanel> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const SizedBox(height: defaultSpacing),
-        if (widget.api.capabilities.executeCommand)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              ElevatedButton(
-                onPressed: () => unawaited(
-                  widget.api.executeCommand('flutter.createProject'),
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          const SizedBox(height: defaultSpacing),
+          if (widget.api.capabilities.executeCommand)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: () => unawaited(
+                    widget.api.executeCommand('flutter.createProject'),
+                  ),
+                  child: const Text('New Flutter Project'),
                 ),
-                child: const Text('New Flutter Project'),
-              ),
-              ElevatedButton(
-                onPressed: () => unawaited(
-                  widget.api.executeCommand('flutter.doctor'),
+                ElevatedButton(
+                  onPressed: () => unawaited(
+                    widget.api.executeCommand('flutter.doctor'),
+                  ),
+                  child: const Text('Run Flutter Doctor'),
                 ),
-                child: const Text('Run Flutter Doctor'),
-              ),
-            ],
-          ),
-        if (widget.api.capabilities.selectDevice)
+              ],
+            ),
+          const SizedBox(height: defaultSpacing),
           StreamBuilder(
-            stream: widget.api.devicesChanged,
+            stream: widget.api.debugSessionsChanged,
             builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return const SizedBox.shrink();
-              }
-              return Column(
-                children: [
-                  const SizedBox(height: defaultSpacing),
-                  Text(
-                    'Devices',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  DeviceSelector(
-                    api: widget.api,
-                    deviceInfo: snapshot.data!,
-                  ),
-                ],
+              final sessions = snapshot.data?.sessions ?? const [];
+              return SizedBox(
+                width: double.infinity,
+                child: DebugSessions(widget.api, sessions),
               );
             },
           ),
-        const SizedBox(height: defaultSpacing),
-        StreamBuilder(
-          stream: widget.api.debugSessionsChanged,
-          builder: (context, snapshot) {
-            final sessions = snapshot.data?.sessions ?? const [];
-            return Column(
-              children: [
-                Text(
-                  'Debug Sessions',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                if (sessions.isEmpty)
-                  DebugSessionInfo(api: widget.api)
-                else
-                  for (final session in sessions)
-                    DebugSessionInfo(
-                      api: widget.api,
-                      debugSession: session,
-                    ),
-              ],
-            );
-          },
-        ),
-      ],
+          const SizedBox(height: defaultSpacing),
+          if (widget.api.capabilities.selectDevice)
+            StreamBuilder(
+              stream: widget.api.devicesChanged,
+              builder: (context, snapshot) {
+                final devices = snapshot.data?.devices ?? const [];
+                final selectedDeviceId = snapshot.data?.selectedDeviceId;
+                return SizedBox(
+                  width: double.infinity,
+                  child: Devices(
+                    widget.api,
+                    devices,
+                    selectedDeviceId: selectedDeviceId,
+                  ),
+                );
+              },
+            ),
+        ],
+      ),
     );
   }
 }

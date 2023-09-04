@@ -15,7 +15,7 @@ abstract interface class VsCodeApi {
   Stream<VsCodeDebugSessionsEvent> get debugSessionsChanged;
   Future<Object?> executeCommand(String command, [List<Object?>? arguments]);
   Future<bool> selectDevice(String id);
-  Future<bool> openDevToolsPage(String debugSessionId, String page);
+  Future<void> openDevToolsPage(String debugSessionId, String page);
 
   static const jsonApiName = 'vsCode';
 
