@@ -59,9 +59,10 @@ dart --version
 
 pushd tool/
 flutter pub get
+popd
 
 # The `devtools_tool` executable should be available after running `flutter pub global activate`
-flutter pub global activate --source path .
+flutter pub global activate --source path ./tool
 
 # Fetch dependencies
 pushd packages/devtools_app
