@@ -64,6 +64,7 @@ popd
 
 # The `devtools_tool` executable should be available after running `flutter pub global activate`
 flutter pub global activate --source path tool
+export PATH="$PATH":"$HOME/.pub-cache/bin"
 
 devtools_tool -h
 
