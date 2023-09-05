@@ -10,6 +10,7 @@ import 'dart:io';
 
 import 'package:shelf/shelf.dart' as shelf;
 
+import '../deeplink/deeplink_manager.dart';
 import '../devtools_api.dart';
 import '../extensions/extension_enablement.dart';
 import '../extensions/extension_manager.dart';
@@ -31,10 +32,11 @@ class ServerApi {
   ///
   /// To override an API call, pass in a subclass of [ServerApi].
   static FutureOr<shelf.Response> handle(
-    shelf.Request request,
-    ExtensionsManager extensionsManager, [
+    shelf.Request request, {
+    required ExtensionsManager extensionsManager,
+    required DeeplinkManager deeplinkManager,
     ServerApi? api,
-  ]) {
+  }) {
     api ??= ServerApi();
     final queryParams = request.requestedUri.queryParameters;
     // TODO(kenz): break this switch statement up so that it uses helper methods
@@ -221,6 +223,15 @@ class ServerApi {
           queryParams,
         );
 
+      // ----- deeplink api. -----
+
+      case DeeplinkApi.androidBuildVariants:
+        return _DeeplinkApiHandler.handleAndroidBuildVariants(
+          api,
+          queryParams,
+          deeplinkManager,
+        );
+
       default:
         return api.notImplemented();
     }
@@ -284,6 +295,15 @@ class ServerApi {
   shelf.Response badRequest([String? logError]) {
     if (logError != null) print(logError);
     return shelf.Response(HttpStatus.badRequest);
+  }
+
+  /// A [shelf.Response] for API calls that encountered a server error e.g.,
+  /// setActiveSurvey not called.
+  ///
+  /// This is a 500 Internal Server Error response.
+  shelf.Response serverError([String? logError]) {
+    if (logError != null) print(logError);
+    return shelf.Response(HttpStatus.internalServerError);
   }
 
   /// A [shelf.Response] for API calls that have not been implemented in this
@@ -353,5 +373,31 @@ abstract class _ExtensionsApiHandler {
       extensionName: extensionName,
     );
     return ServerApi._encodeResponse(activationState.name, api: api);
+  }
+}
+
+abstract class _DeeplinkApiHandler {
+  static Future<shelf.Response> handleAndroidBuildVariants(
+    ServerApi api,
+    Map<String, String> queryParams,
+    DeeplinkManager deeplinkManager,
+  ) async {
+    final missingRequiredParams = ServerApi._checkRequiredParameters(
+      [DeeplinkApi.deeplinkRootPathPropertyName],
+      queryParams: queryParams,
+      api: api,
+      requestName: DeeplinkApi.androidBuildVariants,
+    );
+    if (missingRequiredParams != null) return missingRequiredParams;
+
+    final rootPath = queryParams[DeeplinkApi.deeplinkRootPathPropertyName]!;
+    final result = await deeplinkManager.getBuildVariants(rootPath: rootPath);
+    final error = result[DeeplinkManager.kErrorField] as String?;
+    if (error != null) {
+      api.serverError(error);
+    }
+    return api.getCompleted(
+      result[DeeplinkManager.kOutputJsonField]! as String,
+    );
   }
 }
