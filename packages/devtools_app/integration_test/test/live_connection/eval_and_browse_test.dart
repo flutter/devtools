@@ -137,17 +137,7 @@ class _EvalAndBrowseTester {
     await tester.pump(safePumpDuration);
     await _pressEnter();
 
-    try {
-      expect(expectedResponse, findsOneWidget);
-    } catch (e) {
-      const goldenName = 'debug_golden.png';
-      // In case of unexpected response take golden for troubleshooting.
-      logStatus('Unexpected response. Taking $goldenName.\n$e');
-      await expectLater(
-        find.byType(ConsolePane),
-        matchesGoldenFile(goldenName),
-      );
-    }
+    expect(expectedResponse, findsOneWidget);
   }
 
   Future<void> _pressEnter() async {

@@ -487,18 +487,15 @@ const defaultCurve = Curves.easeInOutCubic;
 CurvedAnimation defaultCurvedAnimation(AnimationController parent) =>
     CurvedAnimation(curve: defaultCurve, parent: parent);
 
-/// Measures the screen size to determine whether text should be included for
-/// the value of [minScreenWidthForTextBeforeScaling].
-///
-/// Returns false if the screen width is smaller than minimum size required to
-/// include text [minScreenWidthForTextBeforeScaling].
-bool includeText(
+/// Measures the screen size to determine whether it is strictly larger
+/// than [width], scaled to the current font factor.
+bool isScreenWiderThan(
   BuildContext context,
-  double? minScreenWidthForTextBeforeScaling,
+  double? width,
 ) {
-  return minScreenWidthForTextBeforeScaling == null ||
+  return width == null ||
       MediaQuery.of(context).size.width >
-          scaleByFontFactor(minScreenWidthForTextBeforeScaling);
+          scaleByFontFactor(width);
 }
 
 ButtonStyle denseAwareOutlinedButtonStyle(
@@ -532,7 +529,7 @@ ButtonStyle _generateButtonStyle({
   required ButtonStyle buttonStyle,
   double? minScreenWidthForTextBeforeScaling,
 }) {
-  if (!includeText(context, minScreenWidthForTextBeforeScaling)) {
+  if (!isScreenWiderThan(context, minScreenWidthForTextBeforeScaling)) {
     buttonStyle = buttonStyle.copyWith(
       padding: MaterialStateProperty.resolveWith<EdgeInsets>((_) {
         return EdgeInsets.zero;

@@ -11,6 +11,7 @@ import 'package:leak_tracker/devtools_integration.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/globals.dart';
+import '../../../../shared/memory/class_name.dart';
 import '../../../../shared/utils.dart';
 import '../../panes/chart/primitives.dart';
 import '../../panes/diff/controller/diff_pane_controller.dart';
@@ -52,10 +53,12 @@ class MemoryFeatureControllers {
   }
 }
 
-/// This class contains the business logic for [memory.dart].
+/// This class contains the business logic for memory screen, for a connected application.
 ///
 /// This class must not have direct dependencies on dart:html. This allows tests
 /// of the complicated logic in this class to run on the VM.
+///
+/// The controller should be recreated for every new connection.
 class MemoryController extends DisposableController
     with AutoDisposeControllerMixin {
   MemoryController({
@@ -330,5 +333,6 @@ class MemoryController extends DisposableController
     unawaited(_memoryTrackerController.close());
     _memoryTracker?.dispose();
     controllers.dispose();
+    HeapClassName.dispose();
   }
 }

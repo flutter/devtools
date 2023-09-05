@@ -53,14 +53,14 @@ class DevToolsExtensionConfig implements Comparable {
           );
         }
         throw StateError(
-          'Unexpected value types in the extension config.json. Expected all '
+          'Unexpected value types in the extension config.yaml. Expected all '
           'values to be of type String, but one or more had a different type:\n'
           '${sb.toString()}',
         );
       } else {
         throw StateError(
           'Missing required fields ${diff.toString()} in the extension '
-          'config.json.',
+          'config.yaml.',
         );
       }
     }

@@ -25,7 +25,6 @@ void main(List<String> args) async {
     return;
   }
 
-  Exception? exception;
   final chromedriver = ChromeDriver();
 
   try {
@@ -52,14 +51,8 @@ void main(List<String> args) async {
         await _runTest(newArgsWithTarget);
       }
     }
-  } on Exception catch (e) {
-    exception = e;
   } finally {
     await chromedriver.stop();
-  }
-
-  if (exception != null) {
-    throw exception;
   }
 }
 

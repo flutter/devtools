@@ -21,6 +21,7 @@ import '../../shared/utils.dart';
 import '_log_details.dart';
 import '_logs_table.dart';
 import 'logging_controller.dart';
+import 'shared/constants.dart';
 
 /// Presents logs from the connected app.
 class LoggingScreen extends Screen {
@@ -123,13 +124,15 @@ class _LoggingScreenState extends State<LoggingScreenBody>
           onPressed: controller.clear,
           gaScreen: gac.logging,
           gaSelection: gac.clear,
+          minScreenWidthForTextBeforeScaling: loggingMinVerboseWidth,
         ),
         const Spacer(),
-        const StructuredErrorsToggle(),
         const SizedBox(width: denseSpacing),
         // TODO(kenz): fix focus issue when state is refreshed
         SearchField<LoggingController>(
-          searchFieldWidth: wideSearchFieldWidth,
+          searchFieldWidth: isScreenWiderThan(context, loggingMinVerboseWidth)
+              ? wideSearchFieldWidth
+              : defaultSearchFieldWidth,
           searchController: controller,
           searchFieldEnabled: hasData,
         ),
@@ -144,6 +147,20 @@ class _LoggingScreenState extends State<LoggingScreenBody>
               .map((e) => '${e.timestamp} [${e.kind}] ${e.prettyPrinted()}')
               .joinWithTrailing('\n'),
           tooltip: 'Copy filtered logs',
+        ),
+        const SizedBox(width: denseSpacing),
+        SettingsOutlinedButton(
+          gaScreen: gac.logging,
+          gaSelection: gac.loggingSettings,
+          tooltip: 'Logging Settings',
+          onPressed: () {
+            unawaited(
+              showDialog(
+                context: context,
+                builder: (context) => const LoggingSettingsDialog(),
+              ),
+            );
+          },
         ),
       ],
     );
@@ -186,6 +203,35 @@ class _LoggingScreenState extends State<LoggingScreenBody>
           queryInstructions: LoggingScreenBody.filterQueryInstructions,
         ),
       ),
+    );
+  }
+}
+
+class LoggingSettingsDialog extends StatelessWidget {
+  const LoggingSettingsDialog({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return DevToolsDialog(
+      title: const DialogTitleText('Logging Settings'),
+      content: SizedBox(
+        width: defaultDialogWidth,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ...dialogSubHeader(
+              theme,
+              'General',
+            ),
+            const StructuredErrorsToggle(),
+          ],
+        ),
+      ),
+      actions: const [
+        DialogCloseButton(),
+      ],
     );
   }
 }
