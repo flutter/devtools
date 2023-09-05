@@ -89,13 +89,13 @@ if [ "$BOT" = "main" ]; then
     $(dirname $(which flutter))/dart format --output=none --set-exit-if-changed .
 
     # Make sure the app versions are in sync.
-    devtools_tool repo-check
+    dart run bin/devtools_tool.dart repo-check
 
     # Get packages
-    devtools_tool packages-get
+    dart run bin/devtools_tool.dart packages-get
 
     # Analyze the code
-    devtools_tool analyze
+    dart run bin/devtools_tool.dart analyze
 
     popd
 

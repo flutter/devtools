@@ -13,7 +13,7 @@ import 'commands/update_dart_sdk_deps.dart';
 
 class DevToolsCommandRunner extends CommandRunner {
   DevToolsCommandRunner()
-      : super('repo_tool', 'A repo management tool for DevTools.') {
+      : super('devtools_tool', 'A repo management tool for DevTools.') {
     addCommand(AnalyzeCommand());
     addCommand(RepoCheckCommand());
     addCommand(ListCommand());

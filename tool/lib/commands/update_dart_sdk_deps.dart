@@ -19,7 +19,7 @@ const _argCommit = 'commit';
 /// automatically built and uploaded to CIPD on each DevTools commit.
 ///
 /// To run this script:
-/// `dart run tool/bin/repo_tool.dart update-sdk-deps -c <commit-hash>`
+/// `dart run tool/bin/devtools_tool.dart update-sdk-deps -c <commit-hash>`
 class UpdateDartSdkDepsCommand extends Command {
   UpdateDartSdkDepsCommand() {
     argParser.addOption(
