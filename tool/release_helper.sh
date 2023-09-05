@@ -50,8 +50,7 @@ git push -u $DEVTOOLS_REMOTE $RELEASE_BRANCH
 echo "$0: Creating the PR"
 echo
 
-PR_URL=$(gh pr create --draft --title "$COMMIT_MESSAGE" --fill $CREATION_FLAGS)
-
+PR_URL=$(gh pr create --repo flutter/devtools --draft --title "$COMMIT_MESSAGE" --fill)
 
 echo "$0: Updating your flutter version to the most recent candidate."
 echo
@@ -60,4 +59,5 @@ echo
 echo "$0: Your Draft release PR can be found at: $PR_URL"
 echo
 echo "$0: DONE.
-echo "$0: Next Step: Build, run and test this release using: `dart ./tool/build_e2e.dart`"
+echo "$0: Build, run and test this release using: 'dart ./tool/build_e2e.dart'"
+
