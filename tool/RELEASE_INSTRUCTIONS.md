@@ -28,6 +28,9 @@ Make sure:
 
 > If you need to install the [Github CLI](https://cli.github.com/manual/installation) you can run: `brew install gh`
 
+> Ensure the `devtools_tool` executable has been globally activated:
+> `flutter pub global activate --source path tool`
+
 - Run: `./tool/release_helper.sh`
 - This will create a PR for you using the tip of master.
 - The branch for that PR will be checked out locally for you.

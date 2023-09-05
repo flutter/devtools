@@ -54,7 +54,10 @@ jobs:
           dart pub get
           popd
 
-          ORIGINAL_VERSION=$(dart tool/update_version.dart current-version)
+          dart pub global activate --source path tool
+          export PATH="$PATH":"$HOME/.pub-cache/bin"
+
+          ORIGINAL_VERSION=$(devtools_tool update-version current-version)
 
           if [ -z "$UPDATE_TYPE" ]; then
             # If $UPDATE_TYPE is not set, then assume it is dev
@@ -64,14 +67,14 @@ jobs:
           # If there is a major, minor, or patch bump, do it.
 
           if [ "$UPDATE_TYPE" == "patch+dev" ]; then
-            dart tool/update_version.dart auto --type patch
-            dart tool/update_version.dart auto --type dev
+            devtools_tool update-version auto --type patch
+            devtools_tool update-version auto --type dev
           elif [ "$UPDATE_TYPE" == "minor+dev" ]; then
-            dart tool/update_version.dart auto --type minor
-            dart tool/update_version.dart auto --type dev
+            devtools_tool update-version auto --type minor
+            devtools_tool update-version auto --type dev
           elif [ "$UPDATE_TYPE" == "major+dev" ]; then
-            dart tool/update_version.dart auto --type major
-            dart tool/update_version.dart auto --type dev
+            devtools_tool update-version auto --type major
+            devtools_tool update-version auto --type dev
           elif [ "$UPDATE_TYPE" == "dev" ]; then
             if ! echo "$ORIGINAL_VERSION" | grep -Eq "\-dev\.[0-9]+" ; then
               ERROR_DESCRIPTION="Doing \
@@ -82,13 +85,13 @@ jobs:
               echo "::error ,title=Cannot do a dev bump on a Release Version ($ORIGINAL_VERSION)::$ERROR_DESCRIPTION" 
               exit 1;
             fi
-            dart tool/update_version.dart auto --type dev
+            devtools_tool update-version auto --type dev
           else
             echo "ERROR: UNEXPECTED UPDATE TYPE: $UPDATE_TYPE"
             exit 1
           fi
 
-          NEW_VERSION=$(dart tool/update_version.dart current-version)
+          NEW_VERSION=$(devtools_tool update-version current-version)
 
           echo "COMMIT_MESSAGE=Updating from $ORIGINAL_VERSION to $NEW_VERSION" >> $GITHUB_OUTPUT
         env:
