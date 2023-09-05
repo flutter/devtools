@@ -13,7 +13,6 @@ import 'package:path/path.dart' as path;
 ///
 /// Example usage:
 ///
-/// dart pub global activate devtools_extensions;
 /// dart run devtools_extensions build_and_copy \
 ///  --source=path/to/your_extension_web_app \
 ///  --dest=path/to/your_pub_package/extension/devtools
