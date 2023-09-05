@@ -59,6 +59,4 @@ echo
 
 echo "Your Draft release PR can be found at: $PR_URL"
 echo
-echo "$0 DONE: Build, run and test this release using: `dart ./tool/build_e2e.dart`"
-
-exit
+echo "$0 DONE: Build, run and test this release using: 'dart ./tool/build_e2e.dart'"
