@@ -271,7 +271,7 @@ class ManualUpdateCommand extends Command {
   final description = 'Manually update devtools to a new version.';
 
   @override
-  void run() {
+  Future<void> run() async {
     final newVersion = argResults!['new-version'].toString();
     final currentVersion =
         argResults!['current-version']?.toString() ?? versionFromPubspecFile();
@@ -280,7 +280,7 @@ class ManualUpdateCommand extends Command {
       throw 'Could not determine the version, please set the current-version or determine why getting the version is failing.';
     }
 
-    performTheVersionUpdate(
+    await performTheVersionUpdate(
       currentVersion: currentVersion,
       newVersion: newVersion,
     );
@@ -359,7 +359,7 @@ class AutoUpdateCommand extends Command {
   final description = 'Automatically update devtools to a new version.';
 
   @override
-  void run() async {
+  Future<void> run() async {
     final type = argResults!['type'].toString();
     final isDryRun = argResults!['dry-run'];
     final currentVersion = versionFromPubspecFile();
@@ -386,13 +386,13 @@ class AutoUpdateCommand extends Command {
       return;
     }
 
-    performTheVersionUpdate(
+    await performTheVersionUpdate(
       currentVersion: currentVersion,
       newVersion: newVersion,
     );
     if (['minor', 'major'].contains(type)) {
       // Only cycle the release notes when doing a minor or major version bump
-      resetReleaseNotes(
+      await resetReleaseNotes(
         version: newVersion,
       );
     }
