@@ -7,12 +7,6 @@
 # Fast fail the script on failures.
 set -ex
 
-# Contains a path to this script, relative to the directory it was called from.
-RELATIVE_PATH_TO_SCRIPT="${BASH_SOURCE[0]}"
-
-# The directory that this script is located in.
-TOOL_DIR=`dirname "${RELATIVE_PATH_TO_SCRIPT}"`
-
 # TODO: Also support windows on github actions.
 if [[ $RUNNER_OS == "Windows" ]]; then
     echo Installing Google Chrome Stable...
@@ -95,13 +89,13 @@ if [ "$BOT" = "main" ]; then
     $(dirname $(which flutter))/dart format --output=none --set-exit-if-changed .
 
     # Make sure the app versions are in sync.
-    dart run $TOOL_DIR/bin/devtools_tool.dart repo-check
+    dart run ../../tool/bin/devtools_tool.dart repo-check
 
     # Get packages
-    dart run $TOOL_DIR/bin/devtools_tool.dart packages-get
+    dart run ../../tool/bin/devtools_tool.dart packages-get
 
     # Analyze the code
-    dart run $TOOL_DIR/bin/devtools_tool.dart analyze
+    dart run ../../tool/bin/devtools_tool.dart analyze
 
     popd
 
