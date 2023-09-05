@@ -58,6 +58,7 @@ flutter --version
 dart --version
 
 echo `pwd`
+echo `ls -la`
 
 # Fetch dependencies for the tool/ directory
 flutter pub get
