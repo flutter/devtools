@@ -57,12 +57,15 @@ dart --disable-analytics
 flutter --version
 dart --version
 
-pushd tool/
+echo `pwd`
+
+# Fetch dependencies for the tool/ directory
 flutter pub get
-popd
 
 # The `devtools_tool` executable should be available after running `flutter pub global activate`
-flutter pub global activate --source path ./tool
+flutter pub global activate --source path .
+
+devtools_tool -h
 
 # Fetch dependencies
 pushd packages/devtools_app
