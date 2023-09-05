@@ -57,6 +57,12 @@ dart --disable-analytics
 flutter --version
 dart --version
 
+pushd tool/
+flutter pub get
+
+# The `devtools_tool` executable should be available after running `flutter pub global activate`
+flutter pub global activate --source path .
+
 # Fetch dependencies
 pushd packages/devtools_app
 flutter pub get
@@ -89,13 +95,13 @@ if [ "$BOT" = "main" ]; then
     $(dirname $(which flutter))/dart format --output=none --set-exit-if-changed .
 
     # Make sure the app versions are in sync.
-    dart run ../../tool/bin/devtools_tool.dart repo-check
+    devtools_tool repo-check
 
     # Get packages
-    dart run ../../tool/bin/devtools_tool.dart packages-get
+    devtools_tool packages-get
 
     # Analyze the code
-    dart run ../../tool/bin/devtools_tool.dart analyze
+    devtools_tool analyze
 
     popd
 
