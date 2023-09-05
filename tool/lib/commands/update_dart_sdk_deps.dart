@@ -11,8 +11,6 @@ import 'package:path/path.dart' as path;
 import '../utils.dart';
 
 const _argCommit = 'commit';
-const _additionalErrorMessage = 'Consider running this command from your'
-    'Dart SDK directory locally to debug.';
 
 /// This command updates the "devtools_rev" hash in the Dart SDK DEPS file with
 /// the provided commit hash, and creates a Gerrit CL for review.
@@ -46,14 +44,12 @@ class UpdateDartSdkDepsCommand extends Command {
     final processManager = ProcessManager();
 
     print('Preparing a local Dart SDK branch...');
+    await DartSdkHelper.fetchAndCheckoutMaster(processManager);
     await runAll(
       processManager,
       workingDirectory: dartSdkLocation,
-      additionalErrorMessage: _additionalErrorMessage,
+      additionalErrorMessage: DartSdkHelper.commandDebugMessage,
       commands: [
-        CliCommand('git fetch origin'),
-        CliCommand('git rebase-update'),
-        CliCommand('git checkout origin/main'),
         CliCommand(
           'git branch -D devtools-$commit',
           throwOnException: false,
@@ -69,7 +65,7 @@ class UpdateDartSdkDepsCommand extends Command {
     await runAll(
       processManager,
       workingDirectory: dartSdkLocation,
-      additionalErrorMessage: _additionalErrorMessage,
+      additionalErrorMessage: DartSdkHelper.commandDebugMessage,
       commands: [
         CliCommand('git add .'),
         CliCommand.from(

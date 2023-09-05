@@ -18,6 +18,27 @@ String convertProcessOutputToString(List<List<int>> output, String indent) {
   return result;
 }
 
+abstract class DartSdkHelper {
+  static const commandDebugMessage = 'Consider running this command from your'
+      'Dart SDK directory locally to debug.';
+
+  static Future<void> fetchAndCheckoutMaster(
+    ProcessManager processManager,
+  ) async {
+    final dartSdkLocation = localDartSdkLocation();
+    await runAll(
+      processManager,
+      workingDirectory: dartSdkLocation,
+      additionalErrorMessage: commandDebugMessage,
+      commands: [
+        CliCommand('git fetch origin'),
+        CliCommand('git rebase-update'),
+        CliCommand('git checkout origin/main'),
+      ],
+    );
+  }
+}
+
 String localDartSdkLocation() {
   final localDartSdkLocation = Platform.environment['LOCAL_DART_SDK'];
   if (localDartSdkLocation == null) {
