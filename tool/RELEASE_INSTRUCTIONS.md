@@ -97,7 +97,7 @@ status of the builds on this [dashboard](https://ci.chromium.org/ui/p/dart-inter
 
 Run the tool script with the commit hash you just merged and tagged:
 ```shell
-dart run tool/bin/repo_tool.dart update-sdk-deps -c <commit-hash>
+dart run tool/bin/devtools_tool.dart update-sdk-deps -c <commit-hash>
 ```
 
 This automatically creates a Gerrit CL with the DEPS update for DevTools.

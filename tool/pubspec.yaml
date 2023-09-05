@@ -6,7 +6,7 @@ environment:
   sdk: '>=2.12.0 <4.0.0'
 
 executables:
-  repo_tool: repo_tool
+  devtools_tool: devtools_tool
 
 dependencies:
   args: ^2.1.0
