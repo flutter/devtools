@@ -5,8 +5,9 @@
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
+import 'package:devtools_tool/devtools_command_runner.dart';
 import 'package:devtools_tool/model.dart';
-import 'package:io/io.dart';
+import 'package:path/path.dart' as path;
 
 // This script must be executed from the top level devtools/ directory.
 // TODO(kenz): If changes are made to this script, first consider refactoring to
@@ -18,9 +19,10 @@ import 'package:io/io.dart';
 final _pubspecs = [
   'packages/devtools_app/pubspec.yaml',
   'packages/devtools_test/pubspec.yaml',
-].map((path) => File(path)).toList();
+].map((p) => File(pathFromRepoRoot(p))).toList();
 
-const _releaseNoteDirPath = './packages/devtools_app/release_notes';
+final _releaseNoteDirPath =
+    pathFromRepoRoot('packages/devtools_app/release_notes');
 
 class UpdateDevToolsVersionCommand extends Command {
   UpdateDevToolsVersionCommand() {
@@ -50,25 +52,15 @@ Future<void> performTheVersionUpdate({
 
   print('Updating devtools.dart to version $newVersion...');
   writeVersionToVersionFile(
-    File('packages/devtools_app/lib/devtools.dart'),
+    File(pathFromRepoRoot('packages/devtools_app/lib/devtools.dart')),
     newVersion,
   );
 
-  final processManager = ProcessManager();
-  final process = await processManager.spawn(
-    'dart',
-    [
-      'run',
-      'tool/bin/devtools_tool.dart',
-      'pub-get',
-      '--upgrade',
-      '--only-main',
-    ],
-    workingDirectory: DevToolsRepo.getInstance()!.repoPath,
-  );
-  await process.exitCode;
-  // Closes stdin for the entire program.
-  await sharedStdIn.terminate();
+  await DevToolsCommandRunner().run([
+    'pub-get',
+    '--upgrade',
+    '--only-main',
+  ]);
 }
 
 Future<void> resetReleaseNotes({
@@ -405,4 +397,8 @@ class AutoUpdateCommand extends Command {
       );
     }
   }
+}
+
+String pathFromRepoRoot(String pathFromRoot) {
+  return path.join(DevToolsRepo.getInstance()!.repoPath, pathFromRoot);
 }
