@@ -41,7 +41,6 @@ dart tool/update_version.dart auto --type release
 NEW_VERSION=$(dart tool/update_version.dart current-version)
 
 COMMIT_MESSAGE="Releasing from $ORIGINAL_VERSION to $NEW_VERSION"
-echo "test" >> README.md
 
 # Stage the file, commit and push
 git commit -a -m "$COMMIT_MESSAGE"
@@ -61,3 +60,5 @@ echo
 echo "Your Draft release PR can be found at: $PR_URL"
 echo
 echo "$0 DONE: Build, run and test this release using: `dart ./tool/build_e2e.dart`"
+
+exit
