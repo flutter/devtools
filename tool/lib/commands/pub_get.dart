@@ -34,9 +34,6 @@ class PubGetCommand extends Command {
   String get description => "Run 'flutter pub get' in all DevTools packages.";
 
   @override
-  List<String> get aliases => const ['packages-get'];
-
-  @override
   Future run() async {
     final sdk = FlutterSdk.getSdk();
     if (sdk == null) {

@@ -59,7 +59,7 @@ class DevToolsRepo {
   void _collectPackages(Directory dir, List<Package> result) {
     // Do not collect packages from the Flutter SDK that is stored in the tool/
     // directory.
-    if (dir.path.contains('tool/flutter-sdk')) return;
+    if (dir.path.contains('flutter-sdk/')) return;
 
     if (_fileExists(dir, 'pubspec.yaml')) {
       result.add(Package._(this, dir.path));

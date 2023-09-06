@@ -87,7 +87,7 @@ if [ "$BOT" = "main" ]; then
     devtools_tool repo-check
 
     # Get packages
-    devtools_tool packages-get
+    devtools_tool pub-get
 
     # Analyze the code
     devtools_tool analyze
