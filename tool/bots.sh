@@ -66,24 +66,8 @@ popd
 flutter pub global activate --source path tool
 export PATH="$PATH":"$HOME/.pub-cache/bin"
 
-devtools_tool -h
-
 # Fetch dependencies
-pushd packages/devtools_app
-flutter pub get
-popd
-pushd packages/devtools_app_shared
-flutter pub get
-popd
-pushd packages/devtools_extensions
-flutter pub get
-popd
-pushd packages/devtools_shared
-flutter pub get
-popd
-pushd packages/devtools_test
-flutter pub get
-popd
+devtools_tool pub-get --only-main
 
 # Generate code.
 bash tool/generate_code.sh
@@ -103,7 +87,7 @@ if [ "$BOT" = "main" ]; then
     devtools_tool repo-check
 
     # Get packages
-    devtools_tool packages-get
+    devtools_tool pub-get
 
     # Analyze the code
     devtools_tool analyze
