@@ -7,6 +7,7 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:cli_util/cli_logging.dart';
+import 'package:path/path.dart' as path;
 
 import '../model.dart';
 import '../utils.dart';
@@ -56,7 +57,7 @@ class PubGetCommand extends Command {
     int failureCount = 0;
 
     for (Package p in packages) {
-      final packagePathParts = p.relativePath.split('/');
+      final packagePathParts = path.split(p.relativePath);
       final isMainPackage = packagePathParts.length == 2 &&
           packagePathParts.first == 'packages' &&
           packagePathParts[1].startsWith('devtools_');
