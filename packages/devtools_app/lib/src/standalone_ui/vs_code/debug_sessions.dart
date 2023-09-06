@@ -57,6 +57,8 @@ class DebugSessions extends StatelessWidget {
           '$name ($mode)',
           style: Theme.of(context).textTheme.titleSmall,
         ),
+        // TODO(dantup): Ensure the order matches the DevTools tab bar (if
+        //  possible, share this order).
         if (api.capabilities.openDevToolsPage) ...[
           // TODO(dantup): Make these conditions use the real screen
           //  conditions and/or verify if these conditions are correct.
@@ -88,6 +90,8 @@ class DebugSessions extends StatelessWidget {
             session,
             ScreenMetaData.logging,
           ),
+          // TODO(dantup): Check other screens (like appSize) work embedded and
+          //  add here.
         ],
       ],
     );

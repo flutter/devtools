@@ -65,6 +65,7 @@ class Devices extends StatelessWidget {
             onPressed: () => unawaited(api.selectDevice(device.id)),
           ),
         ),
+        // TODO(dantup): Use a highlighted/select row for this instead of text.
         Text(isSelected ? 'current device' : ''),
       ],
     );

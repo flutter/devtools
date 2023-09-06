@@ -9,12 +9,46 @@
 /// [VsCodeCapabilities] to advertise which capabilities are available and
 /// handle any changes in behaviour.
 abstract interface class VsCodeApi {
+  /// The capabilities of the instance of VS Code / Dart VS Code extension that
+  /// we are connected to.
+  ///
+  /// All API calls should be guarded by checks of capabilities because the API
+  /// may change over time.
   VsCodeCapabilities get capabilities;
+
+  /// Informs the VS Code extension we are initialized, allowing it to send
+  /// initial events to all streams with an initial set of data.
   Future<void> initialize();
+
+  /// A stream of events for whenever the set of devices (or selected device)
+  /// change in VS Code.
+  ///
+  /// An event with initial devices is sent after [initialize] is called.
   Stream<VsCodeDevicesEvent> get devicesChanged;
+
+  /// A stream of events for whenever the set of debug sessions change or are
+  /// updated in VS Code.
+  ///
+  /// An event with initial sessions is sent after [initialize] is called.
   Stream<VsCodeDebugSessionsEvent> get debugSessionsChanged;
+
+  /// Executes a VS Code command.
+  ///
+  /// Commands can be native VS Code commands or commands registered by the
+  /// Dart/Flutter extensions.
+  ///
+  /// Which commands are available is not part of the API contract so callers
+  /// should take care when calling APIs that might evolve over time.
   Future<Object?> executeCommand(String command, [List<Object?>? arguments]);
+
+  /// Changes the current Flutter device.
+  ///
+  /// The selected device is the same one shown in the status bar in VS Code.
+  /// Calling this API will update the device for the whole VS Code extension.
   Future<bool> selectDevice(String id);
+
+  /// Opens a specific DevTools [page] for the debug session with ID
+  /// [debugSessionId].
   Future<void> openDevToolsPage(String debugSessionId, String page);
 
   static const jsonApiName = 'vsCode';
@@ -79,8 +113,8 @@ abstract interface class VsCodeDebugSession {
   /// These values are defined by Flutter and at the time of writing can include
   /// 'debug', 'profile', 'release' and 'jit_release'.
   ///
-  /// This value may be unavailable (`null`) for older SDKs or for Dart/Test
-  /// sessions.
+  /// This value may be unavailable (`null`) for Dart/Test sessions or those
+  /// that have not fully started yet.
   String? get flutterMode;
 
   /// The ID of the device the Flutter app is running on, if available.
@@ -111,7 +145,13 @@ abstract interface class VsCodeDebugSession {
 /// [VsCodeCapabilities] to advertise which capabilities are available and
 /// handle any changes in behaviour.
 abstract interface class VsCodeDevicesEvent {
+  /// The ID of the selected Flutter device in VS Code.
+  ///
+  /// This device can be changed with the `selectDevice` method but can also
+  /// be changed by the VS Code extension (which will emit a new event).
   String? get selectedDeviceId;
+
+  /// A list of the devices that are available to select.
   List<VsCodeDevice> get devices;
 
   static const jsonSelectedDeviceIdField = 'selectedDeviceId';
@@ -125,6 +165,7 @@ abstract interface class VsCodeDevicesEvent {
 /// [VsCodeCapabilities] to advertise which capabilities are available and
 /// handle any changes in behaviour.
 abstract interface class VsCodeDebugSessionsEvent {
+  /// A list of debug sessions that are currently active in VS Code.
   List<VsCodeDebugSession> get sessions;
 
   static const jsonSessionsField = 'sessions';
@@ -137,8 +178,16 @@ abstract interface class VsCodeDebugSessionsEvent {
 /// [VsCodeCapabilities] to advertise which capabilities are available and
 /// handle any changes in behaviour.
 abstract interface class VsCodeCapabilities {
+  /// Whether the `executeCommand` method is available to call to execute VS
+  /// Code commands.
   bool get executeCommand;
+
+  /// Whether the `selectDevice` method is available to call to change the
+  /// selected Flutter device.
   bool get selectDevice;
+
+  /// Whether the `openDevToolsPage` method is available call to open a specific
+  /// DevTools page.
   bool get openDevToolsPage;
 
   static const jsonExecuteCommandField = 'executeCommand';

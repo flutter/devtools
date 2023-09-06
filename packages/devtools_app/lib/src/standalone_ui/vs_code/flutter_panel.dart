@@ -67,7 +67,7 @@ class _VsCodeConnectedPanelState extends State<_VsCodeConnectedPanel> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(denseSpacing),
       child: Column(
         children: [
           const SizedBox(height: defaultSpacing),
