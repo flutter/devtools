@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:path/path.dart' as path;
 
 import 'package:args/command_runner.dart';
 import 'package:devtools_tool/utils.dart';
+import 'package:path/path.dart' as path;
 
 class ReleaseHelperCommand extends Command {
   @override
@@ -60,14 +60,21 @@ class ReleaseHelperCommand extends Command {
 // git checkout -b $MASTER $DEVTOOLS_REMOTE/master
     final uniqueBranch =
         '_release_helper_master_${DateTime.now().millisecondsSinceEpoch}';
-    print(uniqueBranch);
-    Process.run('git', ['fetch', remoteOrigin, 'master']);
-    Process.run('git', [
+    final fetchResult =
+        await Process.run('git', ['fetch', remoteOrigin, 'master']);
+    if (fetchResult.exitCode != 0) {
+      throw "Error: failed to fetch $remoteOrigin master";
+    }
+
+    final checkoutResult = await Process.run('git', [
       'checkout',
       '-b',
       uniqueBranch,
       '$remoteOrigin/master',
     ]);
+    if (checkoutResult.exitCode != 0) {
+      throw "Error: failed to checkout a clean branch for master";
+    }
 
 // RELEASE_BRANCH="clean_release_$(date +%s)"
 // git checkout -b "$RELEASE_BRANCH"
@@ -81,7 +88,7 @@ class ReleaseHelperCommand extends Command {
     Directory.current = pathFromRepoRoot("tool");
     Process.run('dart', ['pub', 'get']);
 
-// cd ..
+    Directory.current = pathFromRepoRoot("");
 
 // ORIGINAL_VERSION=$(dart tool/update_version.dart current-version)
     final currentVersionResult = await Process.run('dart', [
