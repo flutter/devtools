@@ -188,7 +188,7 @@ class _ExtensionIFrameController extends DisposableController
     DevToolsExtensionEvent event, {
     void Function()? onUnknownEvent,
   }) {
-    // Ignore events that are not supported for the DevTools => Extension
+    // Ignore events that are not supported for the Extension => DevTools
     // direction.
     if (!event.type.supportedForDirection(ExtensionEventDirection.toDevTools)) {
       return;
