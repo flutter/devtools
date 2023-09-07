@@ -72,7 +72,7 @@ Future<void> resetReleaseNotes({
   if (imagesDir.existsSync()) {
     await imagesDir.delete(recursive: true);
   }
-  await imagesDir.create();
+  imagesDir.create();
   await File('$_releaseNoteDirPath/images/.gitkeep').create();
 
   final currentReleaseNotesFile =
@@ -94,7 +94,7 @@ Future<void> resetReleaseNotes({
   final templateFile =
       File('$_releaseNoteDirPath/helpers/release_notes_template.md');
   final templateFileContents = await templateFile.readAsString();
-  await currentReleaseNotesFile.writeAsString(
+  currentReleaseNotesFile.writeAsString(
     templateFileContents.replaceAll(
       RegExp(r'<number>'),
       normalizedVersionNumber,
