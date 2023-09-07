@@ -7,13 +7,24 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:cli_util/cli_logging.dart';
+import 'package:path/path.dart' as path;
 
 import '../model.dart';
 import '../utils.dart';
 
-class PackagesGetCommand extends Command {
-  PackagesGetCommand() {
-    argParser.addFlag('upgrade', negatable: false, help: 'Run pub upgrade.');
+const _upgradeFlag = 'upgrade';
+const _onlyMainFlag = 'only-main';
+
+class PubGetCommand extends Command {
+  PubGetCommand() {
+    argParser
+      ..addFlag(_upgradeFlag, negatable: false, help: 'Run pub upgrade.')
+      ..addFlag(
+        _onlyMainFlag,
+        negatable: false,
+        help: 'Only execute on the top-level `devtools/packages/devtools_*` '
+            'packages',
+      );
   }
 
   @override
@@ -21,9 +32,6 @@ class PackagesGetCommand extends Command {
 
   @override
   String get description => "Run 'flutter pub get' in all DevTools packages.";
-
-  @override
-  List<String> get aliases => const ['packages-get'];
 
   @override
   Future run() async {
@@ -37,7 +45,8 @@ class PackagesGetCommand extends Command {
     final repo = DevToolsRepo.getInstance()!;
     final packages = repo.getPackages();
 
-    final upgrade = argResults!['upgrade'];
+    final upgrade = argResults![_upgradeFlag];
+    final onlyMainPackages = argResults![_onlyMainFlag];
     final command = upgrade ? 'upgrade' : 'get';
 
     log.stdout('Running flutter pub $command...');
@@ -45,6 +54,12 @@ class PackagesGetCommand extends Command {
     int failureCount = 0;
 
     for (Package p in packages) {
+      final packagePathParts = path.split(p.relativePath);
+      final isMainPackage = packagePathParts.length == 2 &&
+          packagePathParts.first == 'packages' &&
+          packagePathParts[1].startsWith('devtools_');
+      if (onlyMainPackages && !isMainPackage) continue;
+
       final progress = log.progress('  ${p.relativePath}');
 
       final process = await Process.start(

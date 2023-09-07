@@ -32,13 +32,13 @@ dart pub get
 
 cd ..
 
-ORIGINAL_VERSION=$(dart tool/update_version.dart current-version)
+ORIGINAL_VERSION=$(devtools_tool update-version current-version)
 
 echo "Setting the release version"
 echo
-dart tool/update_version.dart auto --type release
+devtools_tool update-version auto --type release
 
-NEW_VERSION=$(dart tool/update_version.dart current-version)
+NEW_VERSION=$(devtools_tool update-version current-version)
 
 COMMIT_MESSAGE="Releasing from $ORIGINAL_VERSION to $NEW_VERSION"
 

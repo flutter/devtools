@@ -2,37 +2,42 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
+import 'package:devtools_tool/devtools_command_runner.dart';
+import 'package:devtools_tool/model.dart';
+import 'package:path/path.dart' as path;
 
 // This script must be executed from the top level devtools/ directory.
 // TODO(kenz): If changes are made to this script, first consider refactoring to
 // use https://github.com/dart-lang/pubspec_parse.
 
-// `package:devtools_extensions` and `package:devtools_shared` have their
-// own versioning strategies. Do not include those packages in the list here.
+// `package:devtools_app_shared`, `package:devtools_extensions` and
+// `package:devtools_shared` have their own versioning strategies. Do not
+// include those packages in the list here.
 final _pubspecs = [
   'packages/devtools_app/pubspec.yaml',
   'packages/devtools_test/pubspec.yaml',
-].map((path) => File(path)).toList();
-const _releaseNoteDirPath = './packages/devtools_app/release_notes';
+].map((p) => File(pathFromRepoRoot(p))).toList();
 
-void main(List<String> args) async {
-  final runner = CommandRunner(
-    'update_version.dart',
-    'A program for updating the devtools version',
-  )
-    ..addCommand(ManualUpdateCommand())
-    ..addCommand(AutoUpdateCommand())
-    ..addCommand(CurrentVersionCommand());
-  runner.run(args).catchError((error) {
-    if (error is! UsageException) throw error;
-    print(error);
-    exit(64); // Exit code 64 indicates a usage error.
-  });
-  return;
+final _releaseNoteDirPath =
+    pathFromRepoRoot('packages/devtools_app/release_notes');
+
+class UpdateDevToolsVersionCommand extends Command {
+  UpdateDevToolsVersionCommand() {
+    addSubcommand(ManualUpdateCommand());
+    addSubcommand(AutoUpdateCommand());
+    addSubcommand(CurrentVersionCommand());
+  }
+
+  @override
+  String get name => 'update-version';
+
+  @override
+  String get description =>
+      'Updates the main DevTools version and any packages that are versioned '
+      'in lock-step.';
 }
 
 Future<void> performTheVersionUpdate({
@@ -47,14 +52,15 @@ Future<void> performTheVersionUpdate({
 
   print('Updating devtools.dart to version $newVersion...');
   writeVersionToVersionFile(
-    File('packages/devtools_app/lib/devtools.dart'),
+    File(pathFromRepoRoot('packages/devtools_app/lib/devtools.dart')),
     newVersion,
   );
 
-  final process = await Process.start('./tool/pub_upgrade.sh', []);
-  process.stdout.asBroadcastStream().listen((event) {
-    print(utf8.decode(event));
-  });
+  await DevToolsCommandRunner().run([
+    'pub-get',
+    '--upgrade',
+    '--only-main',
+  ]);
 }
 
 Future<void> resetReleaseNotes({
@@ -242,29 +248,30 @@ extension JoinExtension on List<String> {
 }
 
 class ManualUpdateCommand extends Command {
+  ManualUpdateCommand() {
+    argParser
+      ..addOption(
+        'new-version',
+        abbr: 'n',
+        mandatory: true,
+        help: 'The new version code that devtools will be set to.',
+      )
+      ..addOption(
+        'current-version',
+        abbr: 'c',
+        help: '''The current devtools version, this should be set to the version
+          inside the index.html. This is only necessary to set this if automatic
+          detection is failing.''',
+      );
+  }
   @override
   final name = 'manual';
+
   @override
   final description = 'Manually update devtools to a new version.';
 
-  ManualUpdateCommand() {
-    argParser.addOption(
-      'new-version',
-      abbr: 'n',
-      mandatory: true,
-      help: 'The new version code that devtools will be set to.',
-    );
-    argParser.addOption(
-      'current-version',
-      abbr: 'c',
-      help: '''The current devtools version, this should be set to the version
-          inside the index.html. This is only necessary to set this if automatic
-          detection is failing.''',
-    );
-  }
-
   @override
-  void run() {
+  Future<void> run() async {
     final newVersion = argResults!['new-version'].toString();
     final currentVersion =
         argResults!['current-version']?.toString() ?? versionFromPubspecFile();
@@ -273,7 +280,7 @@ class ManualUpdateCommand extends Command {
       throw 'Could not determine the version, please set the current-version or determine why getting the version is failing.';
     }
 
-    performTheVersionUpdate(
+    await performTheVersionUpdate(
       currentVersion: currentVersion,
       newVersion: newVersion,
     );
@@ -283,6 +290,7 @@ class ManualUpdateCommand extends Command {
 class CurrentVersionCommand extends Command {
   @override
   final name = 'current-version';
+
   @override
   final description = 'Print the current devtools_app version.';
 
@@ -293,61 +301,65 @@ class CurrentVersionCommand extends Command {
 }
 
 class AutoUpdateCommand extends Command {
-  @override
-  final name = 'auto';
-  @override
-  final description = 'Automatically update devtools to a new version.';
   AutoUpdateCommand() {
-    argParser.addOption(
-      'type',
-      abbr: 't',
-      allowed: ['release', 'dev', 'patch', 'minor', 'major'],
-      allowedHelp: {
-        'release': [
-          'strips any pre-release versions from the version.',
-          'Examples:',
-          '\t1.2.3       => 1.2.3',
-          '\t1.2.3-dev.4 => 1.2.3',
-        ].join('\n'),
-        'dev': [
-          'bumps the version to the next dev pre-release value (minor by default).',
-          'Examples:',
-          '\t1.2.3       => 1.2.3-dev.0',
-          '\t1.2.3-dev.4 => 1.2.3-dev.5',
-        ].join('\n'),
-        'patch': [
-          'bumps the version to the next patch value.',
-          'Examples:',
-          '\t1.2.3       => 1.2.4',
-          '\t1.2.3-dev.4 => 1.2.4',
-        ].join('\n'),
-        'minor': [
-          'bumps the version to the next minor value.',
-          'Examples:',
-          '\t1.2.3       => 1.3.0',
-          '\t1.2.3-dev.4 => 1.3.0',
-        ].join('\n'),
-        'major': [
-          'bumps the version to the next major value.',
-          'Examples:',
-          '\t1.2.3       => 2.0.0',
-          '\t1.2.3-dev.4 => 2.0.0',
-        ].join('\n'),
-      },
-      mandatory: true,
-      help: 'Bumps the devtools version by the selected type.',
-    );
-    argParser.addFlag(
-      'dry-run',
-      abbr: 'd',
-      defaultsTo: false,
-      help: 'Displays the version change that would happen, without performing '
-          'it.',
-    );
+    argParser
+      ..addOption(
+        'type',
+        abbr: 't',
+        allowed: ['release', 'dev', 'patch', 'minor', 'major'],
+        allowedHelp: {
+          'release': [
+            'strips any pre-release versions from the version.',
+            'Examples:',
+            '\t1.2.3       => 1.2.3',
+            '\t1.2.3-dev.4 => 1.2.3',
+          ].join('\n'),
+          'dev': [
+            'bumps the version to the next dev pre-release value (minor by default).',
+            'Examples:',
+            '\t1.2.3       => 1.2.3-dev.0',
+            '\t1.2.3-dev.4 => 1.2.3-dev.5',
+          ].join('\n'),
+          'patch': [
+            'bumps the version to the next patch value.',
+            'Examples:',
+            '\t1.2.3       => 1.2.4',
+            '\t1.2.3-dev.4 => 1.2.4',
+          ].join('\n'),
+          'minor': [
+            'bumps the version to the next minor value.',
+            'Examples:',
+            '\t1.2.3       => 1.3.0',
+            '\t1.2.3-dev.4 => 1.3.0',
+          ].join('\n'),
+          'major': [
+            'bumps the version to the next major value.',
+            'Examples:',
+            '\t1.2.3       => 2.0.0',
+            '\t1.2.3-dev.4 => 2.0.0',
+          ].join('\n'),
+        },
+        mandatory: true,
+        help: 'Bumps the devtools version by the selected type.',
+      )
+      ..addFlag(
+        'dry-run',
+        abbr: 'd',
+        defaultsTo: false,
+        help:
+            'Displays the version change that would happen, without performing '
+            'it.',
+      );
   }
 
   @override
-  void run() async {
+  final name = 'auto';
+
+  @override
+  final description = 'Automatically update devtools to a new version.';
+
+  @override
+  Future<void> run() async {
     final type = argResults!['type'].toString();
     final isDryRun = argResults!['dry-run'];
     final currentVersion = versionFromPubspecFile();
@@ -374,15 +386,19 @@ class AutoUpdateCommand extends Command {
       return;
     }
 
-    performTheVersionUpdate(
+    await performTheVersionUpdate(
       currentVersion: currentVersion,
       newVersion: newVersion,
     );
     if (['minor', 'major'].contains(type)) {
       // Only cycle the release notes when doing a minor or major version bump
-      resetReleaseNotes(
+      await resetReleaseNotes(
         version: newVersion,
       );
     }
   }
+}
+
+String pathFromRepoRoot(String pathFromRoot) {
+  return path.join(DevToolsRepo.getInstance()!.repoPath, pathFromRoot);
 }

@@ -28,6 +28,9 @@ Make sure:
 
 > If you need to install the [Github CLI](https://cli.github.com/manual/installation) you can run: `brew install gh`
 
+> Ensure the `devtools_tool` executable has been globally activated:
+> `flutter pub global activate --source path tool`
+
 - Run: `./tool/release_helper.sh`
 - This will create a PR for you using the tip of master.
 - The branch for that PR will be checked out locally for you.
@@ -97,7 +100,7 @@ status of the builds on this [dashboard](https://ci.chromium.org/ui/p/dart-inter
 
 Run the tool script with the commit hash you just merged and tagged:
 ```shell
-dart run tool/bin/devtools_tool.dart update-sdk-deps -c <commit-hash>
+devtools_tool update-sdk-deps -c <commit-hash>
 ```
 
 This automatically creates a Gerrit CL with the DEPS update for DevTools.

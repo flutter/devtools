@@ -115,13 +115,44 @@ class _VsCodeFlutterPanelMockEditorState
                   const Text(''),
                   Row(
                     children: [
+                      const Text('Devices: '),
                       ElevatedButton(
                         onPressed: api.connectDevices,
-                        child: const Text('Connect Devices'),
+                        child: const Text('Connect'),
                       ),
                       ElevatedButton(
                         onPressed: api.disconnectDevices,
-                        child: const Text('Disconnect Devices'),
+                        child: const Text('Disconnect'),
+                      ),
+                    ],
+                  ),
+                  const Text(''),
+                  Row(
+                    children: [
+                      const Text('Debug Sessions: '),
+                      ElevatedButton(
+                        onPressed: () => api.startSession(null),
+                        child: const Text('Start null'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () => api.startSession('debug'),
+                        child: const Text('Start debug'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () => api.startSession('profile'),
+                        child: const Text('Start profile'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () => api.startSession('release'),
+                        child: const Text('Start release'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () => api.startSession('jit_release'),
+                        child: const Text('Start jit_release'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () => api.endSessions(),
+                        child: const Text('Stop All'),
                       ),
                     ],
                   ),

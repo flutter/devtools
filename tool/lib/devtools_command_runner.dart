@@ -7,10 +7,11 @@ import 'package:devtools_tool/commands/release_helper.dart';
 
 import 'commands/analyze.dart';
 import 'commands/list.dart';
-import 'commands/packages_get.dart';
+import 'commands/pub_get.dart';
 import 'commands/repo_check.dart';
 import 'commands/rollback.dart';
 import 'commands/update_dart_sdk_deps.dart';
+import 'commands/update_version.dart';
 
 class DevToolsCommandRunner extends CommandRunner {
   DevToolsCommandRunner()
@@ -18,9 +19,10 @@ class DevToolsCommandRunner extends CommandRunner {
     addCommand(AnalyzeCommand());
     addCommand(RepoCheckCommand());
     addCommand(ListCommand());
-    addCommand(PackagesGetCommand());
+    addCommand(PubGetCommand());
     addCommand(RollbackCommand());
     addCommand(UpdateDartSdkDepsCommand());
     addCommand(ReleaseHelperCommand());
+    addCommand(UpdateDevToolsVersionCommand());
   }
 }
