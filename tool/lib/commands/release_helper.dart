@@ -147,7 +147,7 @@ class ReleaseHelperCommand extends Command {
               .join(
                 '.',
                 'tool',
-                'update_flutter_sdk.sh',
+                'update_flutter_sdk.sh', // TODO: update this when it is converted to .dart format
               )
               .toString(),
           ['--local']);
