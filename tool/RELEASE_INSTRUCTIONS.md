@@ -31,7 +31,7 @@ Make sure:
 > Ensure the `devtools_tool` executable has been globally activated:
 > `flutter pub global activate --source path tool`
 
-- Run: `./tool/release_helper.sh`
+- Run: `devtools_tool release-helper`
 - This will create a PR for you using the tip of master.
 - The branch for that PR will be checked out locally for you.
 - It will also update your local version of flutter to the Latest flutter candidate
