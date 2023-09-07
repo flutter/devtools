@@ -49,6 +49,9 @@ abstract interface class VsCodeApi {
 
   /// Opens a specific DevTools [page] for the debug session with ID
   /// [debugSessionId].
+  ///
+  /// Depending on user settings, this may open embedded (the default) or in an
+  /// external browser window.
   Future<void> openDevToolsPage(String debugSessionId, String page);
 
   static const jsonApiName = 'vsCode';

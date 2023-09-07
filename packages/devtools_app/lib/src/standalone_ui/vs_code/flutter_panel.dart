@@ -69,6 +69,7 @@ class _VsCodeConnectedPanelState extends State<_VsCodeConnectedPanel> {
     return Padding(
       padding: const EdgeInsets.all(denseSpacing),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: defaultSpacing),
           if (widget.api.capabilities.executeCommand)
@@ -94,10 +95,7 @@ class _VsCodeConnectedPanelState extends State<_VsCodeConnectedPanel> {
             stream: widget.api.debugSessionsChanged,
             builder: (context, snapshot) {
               final sessions = snapshot.data?.sessions ?? const [];
-              return SizedBox(
-                width: double.infinity,
-                child: DebugSessions(widget.api, sessions),
-              );
+              return DebugSessions(widget.api, sessions);
             },
           ),
           const SizedBox(height: defaultSpacing),
@@ -107,13 +105,10 @@ class _VsCodeConnectedPanelState extends State<_VsCodeConnectedPanel> {
               builder: (context, snapshot) {
                 final devices = snapshot.data?.devices ?? const [];
                 final selectedDeviceId = snapshot.data?.selectedDeviceId;
-                return SizedBox(
-                  width: double.infinity,
-                  child: Devices(
-                    widget.api,
-                    devices,
-                    selectedDeviceId: selectedDeviceId,
-                  ),
+                return Devices(
+                  widget.api,
+                  devices,
+                  selectedDeviceId: selectedDeviceId,
                 );
               },
             ),
