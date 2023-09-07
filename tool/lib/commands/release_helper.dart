@@ -15,7 +15,8 @@ class ReleaseHelperCommand extends Command {
     );
   }
   @override
-  String get description => 'Creates a release version of devtools from the master branch, and pushes up a draft PR.';
+  String get description =>
+      'Creates a release version of devtools from the master branch, and pushes up a draft PR.';
 
   @override
   String get name => 'release-helper';
@@ -29,7 +30,6 @@ class ReleaseHelperCommand extends Command {
       'HEAD',
     ]);
     final initialBranch = currentBranchResult.stdout.toString().trim();
-    String? cleanBranch;
     String? releaseBranch;
 
     try {
@@ -60,8 +60,8 @@ class ReleaseHelperCommand extends Command {
         throw "Error: Make sure your working directory is clean before running the helper";
       }
 
-      cleanBranch =
-          '_release_helper_master_${DateTime.now().millisecondsSinceEpoch}';
+      releaseBranch =
+          '_release_helper_release_${DateTime.now().millisecondsSinceEpoch}';
 
       if (!useCurrentBranch) {
         print("Preparing the release branch.");
@@ -71,15 +71,10 @@ class ReleaseHelperCommand extends Command {
         await DevtoolsProcess.runOrThrow('git', [
           'checkout',
           '-b',
-          cleanBranch,
+          releaseBranch,
           '$remoteOrigin/master',
         ]);
       }
-
-      releaseBranch =
-          '_release_helper_release_${DateTime.now().millisecondsSinceEpoch}';
-      await DevtoolsProcess.runOrThrow(
-          'git', ['checkout', '-b', releaseBranch]);
 
       print("Ensuring ./tool packages are ready.");
       Directory.current = pathFromRepoRoot("tool");
@@ -95,7 +90,7 @@ class ReleaseHelperCommand extends Command {
 
       final originalVersion = currentVersionResult.stdout;
 
-      print( "Setting the release version.");
+      print("Setting the release version.");
       await DevtoolsProcess.runOrThrow('devtools_tool', [
         'update-version',
         'auto',
@@ -161,14 +156,7 @@ class ReleaseHelperCommand extends Command {
       // try to bring the caller back to their original branch if we have failed
       await Process.run('git', ['checkout', initialBranch]);
 
-      // Try to clean up the temporary branches we made
-      if (cleanBranch != null) {
-        await Process.run('git', [
-          'branch',
-          '-D',
-          cleanBranch,
-        ]);
-      }
+      // Try to clean up the temporary branch we made
       if (releaseBranch != null) {
         await Process.run('git', [
           'branch',
