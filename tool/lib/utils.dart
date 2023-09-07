@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:html';
 import 'dart:io';
 
 import 'package:devtools_tool/model.dart';
@@ -127,4 +128,34 @@ Future<void> runAll(
 
 String pathFromRepoRoot(String pathFromRoot) {
   return path.join(DevToolsRepo.getInstance()!.repoPath, pathFromRoot);
+}
+
+extension DevtoolsProcess on Process {
+  static Future<dynamic> runOrThrow(
+    String executable,
+    List<String> arguments, {
+    String? workingDirectory,
+    Map<String, String>? environment,
+    bool includeParentEnvironment = true,
+    bool runInShell = false,
+    Encoding? stdoutEncoding = systemEncoding,
+    Encoding? stderrEncoding = systemEncoding,
+  }) async {
+    final result = await Process.run(
+      executable,
+      arguments,
+      workingDirectory: workingDirectory,
+      environment: environment,
+      includeParentEnvironment: includeParentEnvironment,
+      runInShell: runInShell,
+      stdoutEncoding: stdoutEncoding,
+      stderrEncoding: stderrEncoding,
+    );
+
+    if (result.exitCode != 0) {
+      throw 'FAILED: $executable $arguments\nSTDOUT:\n${result.stdout}\nSTDERR${result.stderr}}';
+    }
+
+    return result;
+  }
 }
