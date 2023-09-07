@@ -65,11 +65,13 @@ class MockDartToolingApi extends DartToolingApiImpl {
       return {
         'executeCommand': true,
         'selectDevice': true,
+        'openDevToolsPage': true,
       };
     });
     server.registerMethod('vsCode.initialize', initialize);
     server.registerMethod('vsCode.executeCommand', executeCommand);
     server.registerMethod('vsCode.selectDevice', selectDevice);
+    server.registerMethod('vsCode.openDevToolsPage', openDevToolsPage);
   }
 
   final json_rpc_2.Peer client;
@@ -101,6 +103,12 @@ class MockDartToolingApi extends DartToolingApiImpl {
 
   /// The current set of devices being presented to the embedded panel.
   final _devices = <VsCodeDevice>[];
+
+  /// The current set of debug sessions that are running.
+  final _debugSessions = <VsCodeDebugSession>[];
+
+  /// The number of the next debug session to start.
+  var _nextDebugSessionNumber = 1;
 
   /// The currently selected device presented to the embedded panel.
   String? _selectedDeviceId;
@@ -136,6 +144,9 @@ class MockDartToolingApi extends DartToolingApiImpl {
     return true;
   }
 
+  /// Simulates opening a DevTools feature.
+  Future<void> openDevToolsPage(json_rpc_2.Parameters parameters) async {}
+
   /// Simulates devices being connected in the IDE by notifying the embedded
   /// panel about a set of test devices.
   void connectDevices() {
@@ -144,6 +155,28 @@ class MockDartToolingApi extends DartToolingApiImpl {
       ..addAll(_mockDevices);
     _selectedDeviceId = _devices.lastOrNull?.id;
     _sendDevicesChanged();
+  }
+
+  /// Simulates starting a debug session.
+  void startSession(String? mode) {
+    final sessionNum = _nextDebugSessionNumber++;
+    _debugSessions.add(
+      VsCodeDebugSessionImpl(
+        id: 'debug-$sessionNum',
+        name: 'Session $sessionNum',
+        vmServiceUri: 'ws://127.0.0.1:1234/ws',
+        flutterMode: mode,
+        flutterDeviceId: 'flutter-tester',
+        debuggerType: 'Flutter',
+      ),
+    );
+    _sendDebugSessionsChanged();
+  }
+
+  /// Simulates ending all debug sessions.
+  void endSessions() {
+    _debugSessions.clear();
+    _sendDebugSessionsChanged();
   }
 
   /// Simulates devices being disconnected in the IDE by notifying the embedded
@@ -156,10 +189,19 @@ class MockDartToolingApi extends DartToolingApiImpl {
 
   void _sendDevicesChanged() {
     server.sendNotification(
-      'vsCode.devicesChanged',
+      '${VsCodeApi.jsonApiName}.${VsCodeApi.jsonDevicesChangedEvent}',
       VsCodeDevicesEventImpl(
         devices: _devices,
         selectedDeviceId: _selectedDeviceId,
+      ).toJson(),
+    );
+  }
+
+  void _sendDebugSessionsChanged() {
+    server.sendNotification(
+      '${VsCodeApi.jsonApiName}.${VsCodeApi.jsonDebugSessionsChangedEvent}',
+      VsCodeDebugSessionsEventImpl(
+        sessions: _debugSessions,
       ).toJson(),
     );
   }
