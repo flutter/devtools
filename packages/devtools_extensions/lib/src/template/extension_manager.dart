@@ -10,11 +10,16 @@ class ExtensionManager {
   final _registeredEventHandlers =
       <DevToolsExtensionEventType, ExtensionEventHandler>{};
 
+  /// Registers an event handler for [DevToolsExtensionEvent]s of type [type].
+  ///
+  /// When an event of type [type] is received by the extension, [handler] will
+  /// be called after any default event handling takes place for event [type].
+  /// See [_handleExtensionEvent].
   void registerEventHandler(
-    DevToolsExtensionEventType event,
+    DevToolsExtensionEventType type,
     ExtensionEventHandler handler,
   ) {
-    _registeredEventHandlers[event] = handler;
+    _registeredEventHandlers[type] = handler;
   }
 
   // ignore: unused_element, false positive due to part files
@@ -43,35 +48,44 @@ class ExtensionManager {
     if (e is html.MessageEvent) {
       final extensionEvent = DevToolsExtensionEvent.tryParse(e.data);
       if (extensionEvent != null) {
-        // Do not handle messages that come from the [ExtensionManager] itself.
-        if (extensionEvent.source == '$ExtensionManager') return;
-
-        switch (extensionEvent.type) {
-          case DevToolsExtensionEventType.ping:
-            postMessageToDevTools(
-              DevToolsExtensionEvent(DevToolsExtensionEventType.pong),
-              targetOrigin: e.origin,
-            );
-            break;
-          case DevToolsExtensionEventType.vmServiceConnection:
-            final vmServiceUri = extensionEvent.data?['uri'] as String?;
-            unawaited(_connectToVmService(vmServiceUri));
-            break;
-          case DevToolsExtensionEventType.pong:
-          case DevToolsExtensionEventType.showNotification:
-          case DevToolsExtensionEventType.showBannerMessage:
-            // Ignore. These events are sent from extensions to DevTools only.
-            break;
-          case DevToolsExtensionEventType.unknown:
-          default:
-            _log.warning(
-              'Unrecognized event received by extension: '
-              '(${extensionEvent.type} - ${e.data}',
-            );
-        }
-        _registeredEventHandlers[extensionEvent.type]?.call(extensionEvent);
+        _handleExtensionEvent(extensionEvent, e);
       }
     }
+  }
+
+  void _handleExtensionEvent(
+    DevToolsExtensionEvent extensionEvent,
+    html.MessageEvent e,
+  ) {
+    // Ignore events that come from the [ExtensionManager] itself.
+    if (extensionEvent.source == '$ExtensionManager') return;
+
+    // Ignore events that are not supported for the DevTools => Extension
+    // direction.
+    if (!extensionEvent.type
+        .supportedForDirection(ExtensionEventDirection.toExtension)) {
+      return;
+    }
+
+    switch (extensionEvent.type) {
+      case DevToolsExtensionEventType.ping:
+        postMessageToDevTools(
+          DevToolsExtensionEvent(DevToolsExtensionEventType.pong),
+          targetOrigin: e.origin,
+        );
+        break;
+      case DevToolsExtensionEventType.vmServiceConnection:
+        final vmServiceUri = extensionEvent.data?['uri'] as String?;
+        unawaited(_connectToVmService(vmServiceUri));
+        break;
+      case DevToolsExtensionEventType.unknown:
+      default:
+        _log.warning(
+          'Unrecognized event received by extension: '
+          '(${extensionEvent.type} - ${e.data}',
+        );
+    }
+    _registeredEventHandlers[extensionEvent.type]?.call(extensionEvent);
   }
 
   /// Posts a [DevToolsExtensionEvent] to the DevTools extension host.
