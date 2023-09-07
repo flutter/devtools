@@ -23,7 +23,7 @@ class ReleaseHelperCommand extends Command {
     Directory.current = pathFromRepoRoot("");
 
     final String devtoolsRemotes =
-        (await Process.run('git', ['remote', '-v'])).stdout;
+        (await DevtoolsProcess.runOrThrow('git', ['remote', '-v'])).stdout;
     final remoteRegexp = RegExp(
       r'^(?<remote>\S+)\s+(?<path>\S+)\s+\((?<action>\S+)\)',
       multiLine: true,
@@ -53,7 +53,6 @@ class ReleaseHelperCommand extends Command {
     if (gitStatusResult.stdout.isNotEmpty) {
       throw "Error: Make sure your working directory is clean before running the helper";
     }
-    return;
 // echo "Getting a fresh copy of master"
 // echo
 // MASTER="tmp_master_$(date +%s)"
@@ -61,67 +60,53 @@ class ReleaseHelperCommand extends Command {
 // git checkout -b $MASTER $DEVTOOLS_REMOTE/master
     final uniqueBranch =
         '_release_helper_master_${DateTime.now().millisecondsSinceEpoch}';
-    final fetchResult =
-        await Process.run('git', ['fetch', remoteOrigin, 'master']);
-    if (fetchResult.exitCode != 0) {
-      throw "Error: failed to fetch $remoteOrigin master";
-    }
+    await DevtoolsProcess.runOrThrow('git', ['fetch', remoteOrigin, 'master']);
 
-    final checkoutResult = await Process.run('git', [
+    await DevtoolsProcess.runOrThrow('git', [
       'checkout',
       '-b',
       uniqueBranch,
       '$remoteOrigin/master',
     ]);
-    if (checkoutResult.exitCode != 0) {
-      throw "Error: failed to checkout a clean branch for master";
-    }
 
 // RELEASE_BRANCH="clean_release_$(date +%s)"
 // git checkout -b "$RELEASE_BRANCH"
     final releaseBranch =
         '_release_helper_release_${DateTime.now().millisecondsSinceEpoch}';
-    Process.run('git', ['checkout', '-b', releaseBranch]);
+    DevtoolsProcess.runOrThrow('git', ['checkout', '-b', releaseBranch]);
 
 // echo "Ensuring ./tool packages are ready"
 // echo
 // dart pub get
     Directory.current = pathFromRepoRoot("tool");
-    Process.run('dart', ['pub', 'get']);
+    DevtoolsProcess.runOrThrow('dart', ['pub', 'get']);
 
     Directory.current = pathFromRepoRoot("");
 
 // ORIGINAL_VERSION=$(dart tool/update_version.dart current-version)
-    final currentVersionResult = await Process.run('dart', [
+    final currentVersionResult = await DevtoolsProcess.runOrThrow('dart', [
       'tool/update_version.dart',
       'current-version',
     ]);
-    if (currentVersionResult.exitCode != 0) {
-      throw "Error: failed to get current version";
-    }
+
     final originalVersion = currentVersionResult.stdout;
 
 // echo "Setting the release version"
 // echo
 // dart tool/update_version.dart auto --type release
-    final createReleaseResult = await Process.run('dart', [
+    await DevtoolsProcess.runOrThrow('dart', [
       'tool/update_version.dart',
       'auto',
       '--type',
       'release',
     ]);
-    if (createReleaseResult.exitCode != 0) {
-      throw "Error: failed to create release";
-    }
 
 // NEW_VERSION=$(dart tool/update_version.dart current-version)
-    final getNewVersionResult = await Process.run('dart', [
+    final getNewVersionResult = await DevtoolsProcess.runOrThrow('dart', [
       'tool/update_version.dart',
       'current-version',
     ]);
-    if (getNewVersionResult.exitCode != 0) {
-      throw "Error: failed to get version after creating release";
-    }
+
     final newVersion = getNewVersionResult.stdout;
 
 // COMMIT_MESSAGE="Releasing from $ORIGINAL_VERSION to $NEW_VERSION"
@@ -129,33 +114,26 @@ class ReleaseHelperCommand extends Command {
 
 // # Stage the file, commit and push
 // git commit -a -m "$COMMIT_MESSAGE"
-    final commitResult = await Process.run('git', [
+    await DevtoolsProcess.runOrThrow('git', [
       'commit',
       '-a',
       '-m',
       commitMessage,
     ]);
-    if (commitResult.exitCode != 0) {
-      throw "Error: failed to commit";
-    }
 
 // git push -u $DEVTOOLS_REMOTE $RELEASE_BRANCH
-    final pushResult = await Process.run('git', [
+    await DevtoolsProcess.runOrThrow('git', [
       'push',
       '-u',
       remoteOrigin,
       releaseBranch,
     ]);
 
-    if (pushResult.exitCode != 0) {
-      throw "Error: failed to push results";
-    }
-
 // echo "$0: Creating the PR"
 // echo
     print('Creating the PR');
 // PR_URL=$(gh pr create --repo flutter/devtools --draft --title "$COMMIT_MESSAGE" --fill)
-    final createPRResult = await Process.run('gh', [
+    final createPRResult = await DevtoolsProcess.runOrThrow('gh', [
       'pr',
       'create',
       '--repo',
@@ -165,15 +143,13 @@ class ReleaseHelperCommand extends Command {
       commitMessage,
       '--fill',
     ]);
-    if (createPRResult.exitCode != 0) {
-      throw "Error: failed to create PR";
-    }
+
     final prURL = createPRResult.stdout;
 
 // echo "$0: Updating your flutter version to the most recent candidate."
 // echo
 // ./tool/update_flutter_sdk.sh --local
-    final updateFlutterResult = await Process.run(
+    await DevtoolsProcess.runOrThrow(
         path
             .join(
               '.',
@@ -182,9 +158,6 @@ class ReleaseHelperCommand extends Command {
             )
             .toString(),
         ['--local']);
-    if (updateFlutterResult.exitCode != 0) {
-      throw "Error: failed to update the flutter sdk";
-    }
 
 // echo "$0: Your Draft release PR can be found at: $PR_URL"
 // echo

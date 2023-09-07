@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:html';
 import 'dart:io';
 
 import 'package:devtools_tool/model.dart';
@@ -153,7 +152,7 @@ extension DevtoolsProcess on Process {
     );
 
     if (result.exitCode != 0) {
-      throw 'FAILED: $executable $arguments\nSTDOUT:\n${result.stdout}\nSTDERR${result.stderr}}';
+      throw 'FAILED: $executable $arguments\nSTDOUT:\n${result.stdout}\nSTDERR:\n${result.stderr}}';
     }
 
     return result;
