@@ -31,6 +31,8 @@ class ReleaseHelperCommand extends Command {
       'HEAD',
     ]);
     final initialBranch = currentBranchResult.stdout.toString().trim();
+    String? cleanBranch;
+    String? releaseBranch;
     try {
 // #!/bin/bash -e
 // DEVTOOLS_REMOTE=$(git remote -v | grep "flutter/devtools.git" | grep "(fetch)"| tail -n1 | cut -w -f1)
@@ -75,7 +77,7 @@ class ReleaseHelperCommand extends Command {
 // git fetch $DEVTOOLS_REMOTE master
 // git checkout -b $MASTER $DEVTOOLS_REMOTE/master
 
-      final uniqueBranch =
+      cleanBranch =
           '_release_helper_master_${DateTime.now().millisecondsSinceEpoch}';
 
       if (!useCurrentBranch) {
@@ -85,14 +87,14 @@ class ReleaseHelperCommand extends Command {
         await DevtoolsProcess.runOrThrow('git', [
           'checkout',
           '-b',
-          uniqueBranch,
+          cleanBranch,
           '$remoteOrigin/master',
         ]);
       }
 
 // RELEASE_BRANCH="clean_release_$(date +%s)"
 // git checkout -b "$RELEASE_BRANCH"
-      final releaseBranch =
+      releaseBranch =
           '_release_helper_release_${DateTime.now().millisecondsSinceEpoch}';
       await DevtoolsProcess.runOrThrow(
           'git', ['checkout', '-b', releaseBranch]);
@@ -194,11 +196,25 @@ class ReleaseHelperCommand extends Command {
         'Build, run and test this release using: `dart ./tool/build_e2e.dart`',
       );
     } catch (_) {
-      print(
-        'Encountered an error, try to restore your branch to $initialBranch',
-      );
-      await DevtoolsProcess.runOrThrow('git', ['checkout', initialBranch]);
+      // try to bring the caller back to their original branch if we have failed
+      await Process.run('git', ['checkout', initialBranch]);
       rethrow;
+    } finally {
+      // Try to clean up the temporary branches we made
+      if (cleanBranch != null) {
+        await Process.run('git', [
+          'branch',
+          '-D',
+          cleanBranch,
+        ]);
+      }
+      if (releaseBranch != null) {
+        await Process.run('git', [
+          'branch',
+          '-D',
+          releaseBranch,
+        ]);
+      }
     }
   }
 }
