@@ -92,6 +92,7 @@ class ReleaseHelperCommand extends Command {
 // echo "Ensuring ./tool packages are ready"
 // echo
 // dart pub get
+    print(pathFromRepoRoot("tool"));
     Directory.current = pathFromRepoRoot("tool");
     DevtoolsProcess.runOrThrow('dart', ['pub', 'get']);
 
