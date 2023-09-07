@@ -87,14 +87,14 @@ class ReleaseHelperCommand extends Command {
 // git checkout -b "$RELEASE_BRANCH"
     final releaseBranch =
         '_release_helper_release_${DateTime.now().millisecondsSinceEpoch}';
-    DevtoolsProcess.runOrThrow('git', ['checkout', '-b', releaseBranch]);
+    await DevtoolsProcess.runOrThrow('git', ['checkout', '-b', releaseBranch]);
 
 // echo "Ensuring ./tool packages are ready"
 // echo
 // dart pub get
     print(pathFromRepoRoot("tool"));
     Directory.current = pathFromRepoRoot("tool");
-    DevtoolsProcess.runOrThrow('dart', ['pub', 'get']);
+    await DevtoolsProcess.runOrThrow('dart', ['pub', 'get']);
 
     Directory.current = pathFromRepoRoot("");
 
