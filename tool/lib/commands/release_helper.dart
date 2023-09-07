@@ -47,9 +47,8 @@ class ReleaseHelperCommand extends Command {
 //     echo "Make sure your working directory is clean before running the helper"
 //     exit 1
 // fi
-    final String gitStatus =
-        (await Process.run('git', ['status', '-s'])).stdout;
-    if (gitStatus.isNotEmpty) {
+    final gitStatusResult = await Process.run('git', ['status', '-s']);
+    if (gitStatusResult.stdout.isNotEmpty || gitStatusResult.exitCode != 0) {
       throw "Error: Make sure your working directory is clean before running the helper";
     }
 
