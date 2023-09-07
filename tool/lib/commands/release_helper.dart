@@ -85,7 +85,7 @@ class ReleaseHelperCommand extends Command {
 
 // ORIGINAL_VERSION=$(dart tool/update_version.dart current-version)
     final currentVersionResult = await DevtoolsProcess.runOrThrow('dart', [
-      'tool/update_version.dart',
+      path.join('tool', 'update_version.dart').toString(),
       'current-version',
     ]);
 
