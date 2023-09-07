@@ -107,8 +107,9 @@ class ReleaseHelperCommand extends Command {
       Directory.current = pathFromRepoRoot("");
 
 // ORIGINAL_VERSION=$(dart tool/update_version.dart current-version)
-      final currentVersionResult = await DevtoolsProcess.runOrThrow('dart', [
-        path.join('tool', 'update_version.dart').toString(),
+      final currentVersionResult =
+          await DevtoolsProcess.runOrThrow('devtools_tool', [
+        'update-version',
         'current-version',
       ]);
 
@@ -117,16 +118,17 @@ class ReleaseHelperCommand extends Command {
 // echo "Setting the release version"
 // echo
 // dart tool/update_version.dart auto --type release
-      await DevtoolsProcess.runOrThrow('dart', [
-        'tool/update_version.dart',
+      await DevtoolsProcess.runOrThrow('devtools_tool', [
+        'update-version',
         'auto',
         '--type',
         'release',
       ]);
 
 // NEW_VERSION=$(dart tool/update_version.dart current-version)
-      final getNewVersionResult = await DevtoolsProcess.runOrThrow('dart', [
-        'tool/update_version.dart',
+      final getNewVersionResult =
+          await DevtoolsProcess.runOrThrow('devtools_tool', [
+        'update-version',
         'current-version',
       ]);
 
