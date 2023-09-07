@@ -31,9 +31,9 @@ enum DevToolsExtensionEventType {
   /// Any unrecognized event that is not one of the above supported event types.
   unknown(ExtensionEventDirection.bidirectional);
 
-  const DevToolsExtensionEventType(this.direction);
+  const DevToolsExtensionEventType(this._direction);
 
-  final ExtensionEventDirection direction;
+  final ExtensionEventDirection _direction;
 
   static DevToolsExtensionEventType from(String name) {
     for (final event in DevToolsExtensionEventType.values) {
@@ -44,8 +44,9 @@ enum DevToolsExtensionEventType {
     return unknown;
   }
 
-  bool supportedForDirection(ExtensionEventDirection d) {
-    return direction == d || direction == ExtensionEventDirection.bidirectional;
+  bool supportedForDirection(ExtensionEventDirection direction) {
+    return _direction == direction ||
+        _direction == ExtensionEventDirection.bidirectional;
   }
 }
 
