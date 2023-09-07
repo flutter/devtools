@@ -130,7 +130,7 @@ String pathFromRepoRoot(String pathFromRoot) {
 }
 
 extension DevtoolsProcess on Process {
-  static Future<dynamic> runOrThrow(
+  static Future<ProcessResult> runOrThrow(
     String executable,
     List<String> arguments, {
     String? workingDirectory,
