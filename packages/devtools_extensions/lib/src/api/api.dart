@@ -7,8 +7,8 @@ import 'model.dart';
 /// Supported events that can be sent and received over 'postMessage' between
 /// DevTools and a DevTools extension running in an embedded iFrame.
 enum DevToolsExtensionEventType {
-  /// An DevTools will send to an extension to verify that the extension is
-  /// ready for use.
+  /// An event DevTools will send to an extension to verify that the extension
+  /// is ready for use.
   ping(ExtensionEventDirection.toExtension),
 
   /// An event that a DevTools extension will send back to DevTools after
