@@ -75,8 +75,7 @@ class ExtensionManager {
         );
         break;
       case DevToolsExtensionEventType.vmServiceConnection:
-        final vmServiceUri = extensionEvent
-            .data?[ExtensionEventParameters.vmServiceConnectionUri] as String?;
+        final vmServiceUri = extensionEvent.data?['uri'] as String?;
         unawaited(_connectToVmService(vmServiceUri));
         break;
       case DevToolsExtensionEventType.unknown:
