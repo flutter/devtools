@@ -11,8 +11,8 @@ enum DevToolsExtensionEventType {
   /// is ready for use.
   ping(ExtensionEventDirection.toExtension),
 
-  /// An event that a DevTools extension will send back to DevTools after
-  /// receiving a [ping] event.
+  /// An event that an extension will send back to DevTools after receiving a
+  /// [ping] event.
   pong(ExtensionEventDirection.toDevTools),
 
   /// An event that DevTools will send to an extension to notify of the
