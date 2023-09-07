@@ -41,7 +41,6 @@ class Devices extends StatelessWidget {
             children: [
               for (final device in devices)
                 _createDeviceRow(
-                  context,
                   device,
                   isSelected: device.id == selectedDeviceId,
                 ),
@@ -51,11 +50,7 @@ class Devices extends StatelessWidget {
     );
   }
 
-  TableRow _createDeviceRow(
-    BuildContext context,
-    VsCodeDevice device, {
-    required bool isSelected,
-  }) {
+  TableRow _createDeviceRow(VsCodeDevice device, {required bool isSelected}) {
     return TableRow(
       children: [
         Align(

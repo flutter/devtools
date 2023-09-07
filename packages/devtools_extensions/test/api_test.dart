@@ -127,7 +127,7 @@ void main() {
         (bidirectional: true, toDevTools: true, toExtension: true),
       );
       verifyEventDirection(
-        DevToolsExtensionEventType.vmServiceConnection,
+        DevToolsExtensionEventType.themeUpdate,
         (bidirectional: false, toDevTools: false, toExtension: true),
       );
       verifyEventDirection(
@@ -300,4 +300,22 @@ void main() {
       );
     });
   });
+}
+
+void verifyEventDirection(
+  DevToolsExtensionEventType type,
+  ({bool bidirectional, bool toDevTools, bool toExtension}) expected,
+) {
+  expect(
+    type.supportedForDirection(ExtensionEventDirection.bidirectional),
+    expected.bidirectional,
+  );
+  expect(
+    type.supportedForDirection(ExtensionEventDirection.toDevTools),
+    expected.toDevTools,
+  );
+  expect(
+    type.supportedForDirection(ExtensionEventDirection.toExtension),
+    expected.toExtension,
+  );
 }
