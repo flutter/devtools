@@ -6,6 +6,14 @@ import 'package:devtools_tool/utils.dart';
 import 'package:path/path.dart' as path;
 
 class ReleaseHelperCommand extends Command {
+  ReleaseHelperCommand() {
+    argParser.addFlag(
+      'use-current-branch',
+      negatable: false,
+      help:
+          'Uses the current branch as the base for the release, instead of a fresh copy of master. For use when developing.',
+    );
+  }
   @override
   // TODO: implement description
   String get description => 'Creates a draft PR for ';
@@ -16,6 +24,7 @@ class ReleaseHelperCommand extends Command {
 
   @override
   FutureOr? run() async {
+    final useCurrentBranch = argResults!['use-current-branch']!;
 // #!/bin/bash -e
 // DEVTOOLS_REMOTE=$(git remote -v | grep "flutter/devtools.git" | grep "(fetch)"| tail -n1 | cut -w -f1)
 
@@ -58,16 +67,21 @@ class ReleaseHelperCommand extends Command {
 // MASTER="tmp_master_$(date +%s)"
 // git fetch $DEVTOOLS_REMOTE master
 // git checkout -b $MASTER $DEVTOOLS_REMOTE/master
+
     final uniqueBranch =
         '_release_helper_master_${DateTime.now().millisecondsSinceEpoch}';
-    await DevtoolsProcess.runOrThrow('git', ['fetch', remoteOrigin, 'master']);
 
-    await DevtoolsProcess.runOrThrow('git', [
-      'checkout',
-      '-b',
-      uniqueBranch,
-      '$remoteOrigin/master',
-    ]);
+    if (!useCurrentBranch) {
+      await DevtoolsProcess.runOrThrow(
+          'git', ['fetch', remoteOrigin, 'master']);
+
+      await DevtoolsProcess.runOrThrow('git', [
+        'checkout',
+        '-b',
+        uniqueBranch,
+        '$remoteOrigin/master',
+      ]);
+    }
 
 // RELEASE_BRANCH="clean_release_$(date +%s)"
 // git checkout -b "$RELEASE_BRANCH"
