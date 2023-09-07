@@ -40,9 +40,7 @@ class ExtensionManager {
 
     final vmServiceUri = queryParams['uri'];
     if (connectToVmService) {
-      if (vmServiceUri != null) {
-        unawaited(_connectToVmService(vmServiceUri));
-      } else {
+      if (vmServiceUri == null) {
         // Request the vm service uri for the connected app. DevTools will
         // respond with a [DevToolsPluginEventType.connectedVmService] event
         // containing the currently connected app's vm service URI.
@@ -51,6 +49,8 @@ class ExtensionManager {
             DevToolsExtensionEventType.vmServiceConnection,
           ),
         );
+      } else {
+        unawaited(_connectToVmService(vmServiceUri));
       }
     }
   }
