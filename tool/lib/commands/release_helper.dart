@@ -30,7 +30,7 @@ class ReleaseHelperCommand extends Command {
       '--abbrev-ref',
       'HEAD',
     ]);
-    final initialBranch = currentBranchResult.stdout;
+    final initialBranch = currentBranchResult.stdout.toString().trim();
     try {
 // #!/bin/bash -e
 // DEVTOOLS_REMOTE=$(git remote -v | grep "flutter/devtools.git" | grep "(fetch)"| tail -n1 | cut -w -f1)
