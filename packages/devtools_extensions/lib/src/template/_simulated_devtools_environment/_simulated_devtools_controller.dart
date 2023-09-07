@@ -15,7 +15,7 @@ class _SimulatedDevToolsController extends DisposableController
     html.window.addEventListener('message', _handleMessage);
     addAutoDisposeListener(serviceManager.connectedState, () {
       if (!serviceManager.connectedState.value.connected) {
-        vmServiceConnectionChanged(uri: null);
+        updateVmServiceConnection(uri: null);
         messageLogs.clear();
       }
     });
@@ -48,15 +48,31 @@ class _SimulatedDevToolsController extends DisposableController
   }
 
   @override
-  void vmServiceConnectionChanged({required String? uri}) {
+  void updateVmServiceConnection({required String? uri}) {
     // TODO(kenz): add some validation and error handling if [uri] is bad input.
     final normalizedUri =
         uri != null ? normalizeVmServiceUri(uri).toString() : null;
     final event = DevToolsExtensionEvent(
       DevToolsExtensionEventType.vmServiceConnection,
-      data: {'uri': normalizedUri},
+      data: {
+        ExtensionEventParameters.vmServiceConnectionUri: normalizedUri,
+      },
     );
     _postMessageToExtension(event);
+  }
+
+  @override
+  void updateTheme({required String theme}) {
+    assert(
+      theme == ExtensionEventParameters.themeValueLight ||
+          theme == ExtensionEventParameters.themeValueDark,
+    );
+    _postMessageToExtension(
+      DevToolsExtensionEvent(
+        DevToolsExtensionEventType.themeUpdate,
+        data: {ExtensionEventParameters.theme: theme},
+      ),
+    );
   }
 
   @override
@@ -106,6 +122,15 @@ class _SimulatedDevToolsController extends DisposableController
         source: _MessageSource.info,
         message: 'Hot restart performed on connected app',
       ),
+    );
+  }
+
+  void toggleTheme() {
+    final darkThemeEnabled = extensionManager.darkThemeEnabled.value;
+    updateTheme(
+      theme: darkThemeEnabled
+          ? ExtensionEventParameters.themeValueLight
+          : ExtensionEventParameters.themeValueDark,
     );
   }
 }

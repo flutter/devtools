@@ -146,9 +146,8 @@ class MockDartToolingApi extends DartToolingApiImpl {
 
   /// Simulates opening a DevTools feature.
   // TODO(dantup): does this method need to be async and is the [parameters]
-  // paraeter actually unnecessary?
-  // ignore: avoid-unused-parameters, todo investigate
-  // ignore: avoid-redundant-async, todo investigate
+  // parameter actually unnecessary?
+  // ignore: avoid-redundant-async, avoid-unused-parameters, todo investigate
   Future<void> openDevToolsPage(json_rpc_2.Parameters parameters) async {}
 
   /// Simulates devices being connected in the IDE by notifying the embedded

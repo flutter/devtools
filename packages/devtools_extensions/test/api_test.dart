@@ -95,6 +95,11 @@ void main() {
         DevToolsExtensionEventType.from('vmServiceConnection'),
         DevToolsExtensionEventType.vmServiceConnection,
       );
+
+      expect(
+        DevToolsExtensionEventType.from('themeUpdate'),
+        DevToolsExtensionEventType.themeUpdate,
+      );
     });
 
     test('parses for unexpected values', () {
@@ -120,6 +125,10 @@ void main() {
       verifyEventDirection(
         DevToolsExtensionEventType.vmServiceConnection,
         (bidirectional: true, toDevTools: true, toExtension: true),
+      );
+      verifyEventDirection(
+        DevToolsExtensionEventType.themeUpdate,
+        (bidirectional: false, toDevTools: false, toExtension: true),
       );
       verifyEventDirection(
         DevToolsExtensionEventType.showNotification,

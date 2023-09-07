@@ -10,6 +10,12 @@ class ExtensionManager {
   final _registeredEventHandlers =
       <DevToolsExtensionEventType, ExtensionEventHandler>{};
 
+  /// Whether dark theme is enabled for DevTools.
+  ///
+  /// The DevTools extension will rebuild with the appropriate theme on
+  /// notifications from this notifier.
+  final darkThemeEnabled = ValueNotifier<bool>(true);
+
   /// Registers an event handler for [DevToolsExtensionEvent]s of type [type].
   ///
   /// When an event of type [type] is received by the extension, [handler] will
@@ -24,6 +30,12 @@ class ExtensionManager {
 
   // ignore: unused_element, false positive due to part files
   void _init({required bool connectToVmService}) {
+    // TODO(kenz): handle the ide theme that may be part of the query params.
+    final queryParams = loadQueryParams();
+    final themeValue = queryParams[ExtensionEventParameters.theme];
+    darkThemeEnabled.value = themeValue == null ||
+        themeValue == ExtensionEventParameters.themeValueDark;
+
     html.window.addEventListener('message', _handleMessage);
     // TODO(kenz) instead of connecting to the VM service through an event, load
     // the vm service URI through a query parameter like we already do in
@@ -75,8 +87,17 @@ class ExtensionManager {
         );
         break;
       case DevToolsExtensionEventType.vmServiceConnection:
-        final vmServiceUri = extensionEvent.data?['uri'] as String?;
+        final vmServiceUri = extensionEvent
+            .data?[ExtensionEventParameters.vmServiceConnectionUri] as String?;
         unawaited(_connectToVmService(vmServiceUri));
+        break;
+      case DevToolsExtensionEventType.themeUpdate:
+        final value =
+            extensionEvent.data?[ExtensionEventParameters.theme] as String?;
+        // Default to use dark theme if [value] is null.
+        final useDarkTheme =
+            value == null || value == ExtensionEventParameters.themeValueDark;
+        darkThemeEnabled.value = useDarkTheme;
         break;
       case DevToolsExtensionEventType.unknown:
       default:

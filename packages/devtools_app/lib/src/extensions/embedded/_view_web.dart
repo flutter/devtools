@@ -103,6 +103,19 @@ class _ExtensionIFrameController extends DisposableController
         }
       }),
     );
+
+    addAutoDisposeListener(preferences.darkModeTheme, () {
+      _postMessage(
+        DevToolsExtensionEvent(
+          DevToolsExtensionEventType.themeUpdate,
+          data: {
+            ExtensionEventParameters.theme: preferences.darkModeTheme.value
+                ? ExtensionEventParameters.themeValueDark
+                : ExtensionEventParameters.themeValueLight,
+          },
+        ),
+      );
+    });
   }
 
   void _postMessage(DevToolsExtensionEvent event) async {
@@ -174,11 +187,25 @@ class _ExtensionIFrameController extends DisposableController
   }
 
   @override
-  void vmServiceConnectionChanged({required String? uri}) {
+  void updateVmServiceConnection({required String? uri}) {
     _postMessage(
       DevToolsExtensionEvent(
         DevToolsExtensionEventType.vmServiceConnection,
-        data: {'uri': uri},
+        data: {ExtensionEventParameters.vmServiceConnectionUri: uri},
+      ),
+    );
+  }
+
+  @override
+  void updateTheme({required String theme}) {
+    assert(
+      theme == ExtensionEventParameters.themeValueLight ||
+          theme == ExtensionEventParameters.themeValueDark,
+    );
+    _postMessage(
+      DevToolsExtensionEvent(
+        DevToolsExtensionEventType.themeUpdate,
+        data: {ExtensionEventParameters.theme: theme},
       ),
     );
   }
@@ -202,7 +229,7 @@ class _ExtensionIFrameController extends DisposableController
         break;
       case DevToolsExtensionEventType.vmServiceConnection:
         final service = serviceConnection.serviceManager.service;
-        vmServiceConnectionChanged(uri: service?.connectedUri.toString());
+        updateVmServiceConnection(uri: service?.connectedUri.toString());
         break;
       case DevToolsExtensionEventType.showNotification:
         _handleShowNotification(event);

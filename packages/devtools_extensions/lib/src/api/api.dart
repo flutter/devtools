@@ -19,6 +19,10 @@ enum DevToolsExtensionEventType {
   /// connected vm service uri.
   vmServiceConnection(ExtensionEventDirection.bidirectional),
 
+  /// An event that DevTools will send to an extension to notify of changes to
+  /// the active DevTools theme (light or dark).
+  themeUpdate(ExtensionEventDirection.toExtension),
+
   /// An event that an extension will send to DevTools asking DevTools to post
   /// a notification to the DevTools global [notificationService].
   showNotification(ExtensionEventDirection.toDevTools),
@@ -67,6 +71,29 @@ enum ExtensionEventDirection {
   toExtension,
 }
 
+/// Parameter names and expected values for DevTools extension events.
+abstract class ExtensionEventParameters {
+  /// The parameter name for the theme value 'light' or 'dark' sent with the
+  /// [DevToolsExtensionEventType.themeUpdate] event.
+  static const theme = 'theme';
+
+  /// The value for the [theme] parameter that indicates use of a light theme.
+  ///
+  /// This value is sent with a [DevToolsExtensionEventType.themeUpdate] event
+  /// from DevTools when the theme is changed to use light mode.
+  static const themeValueLight = 'light';
+
+  /// The value for the [theme] parameter that indicates use of a dark theme.
+  ///
+  /// This value is sent with a [DevToolsExtensionEventType.themeUpdate] event
+  /// from DevTools when the theme is changed to use dark mode.
+  static const themeValueDark = 'dark';
+
+  /// The parameter name for the vm service uri value that is optionally sent
+  /// with the [DevToolsExtensionEventType.vmServiceConnection] event.
+  static const vmServiceConnectionUri = 'uri';
+}
+
 /// Interface that a DevTools extension host should implement.
 ///
 /// This interface is implemented by DevTools itself as well as by a simulated
@@ -79,7 +106,14 @@ abstract interface class DevToolsExtensionHostInterface {
   /// This method should send a [DevToolsExtensionEventType.vmServiceConnection]
   /// event to the extension to notify it of the vm service uri it should
   /// establish a connection to.
-  void vmServiceConnectionChanged({required String? uri});
+  void updateVmServiceConnection({required String? uri});
+
+  /// This method should send a [DevToolsExtensionEventType.themeUpdate] event
+  /// to the extension to notify if of a theme change in DevTools.
+  ///
+  /// [theme] should be one of [ExtensionEventParameters.themeValueLight] or
+  /// [ExtensionEventParameters.themeValueDark].
+  void updateTheme({required String theme});
 
   /// Handles events sent by the extension.
   ///
