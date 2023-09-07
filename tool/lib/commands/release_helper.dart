@@ -35,7 +35,7 @@ class ReleaseHelperCommand extends Command {
     try {
       // Change the CWD to the repo root
       Directory.current = pathFromRepoRoot("");
-
+      print("Finding a remote that points to flutter/devtools.git.");
       final String devtoolsRemotes =
           (await DevtoolsProcess.runOrThrow('git', ['remote', '-v'])).stdout;
       final remoteRegexp = RegExp(
@@ -50,7 +50,7 @@ class ReleaseHelperCommand extends Command {
             RegExp(r'flutter/devtools.git$')
                 .hasMatch(element.namedGroup('path')!));
       } on StateError {
-        throw "ERROR: Couldn't find a remote that points to flutter/devtools git. Instead got: \n$devtoolsRemotes";
+        throw "ERROR: Couldn't find a remote that points to flutter/devtools.git. Instead got: \n$devtoolsRemotes";
       }
       final remoteOrigin = devtoolsRemoteResult.namedGroup('remote')!;
 
@@ -64,7 +64,7 @@ class ReleaseHelperCommand extends Command {
           '_release_helper_master_${DateTime.now().millisecondsSinceEpoch}';
 
       if (!useCurrentBranch) {
-        print("Getting a fresh copy of master");
+        print("Preparing the release branch.");
         await DevtoolsProcess.runOrThrow(
             'git', ['fetch', remoteOrigin, 'master']);
 
@@ -81,7 +81,7 @@ class ReleaseHelperCommand extends Command {
       await DevtoolsProcess.runOrThrow(
           'git', ['checkout', '-b', releaseBranch]);
 
-      print("Ensuring ./tool packages are ready");
+      print("Ensuring ./tool packages are ready.");
       Directory.current = pathFromRepoRoot("tool");
       await DevtoolsProcess.runOrThrow('dart', ['pub', 'get']);
 
@@ -95,7 +95,7 @@ class ReleaseHelperCommand extends Command {
 
       final originalVersion = currentVersionResult.stdout;
 
-      print( "Setting the release version");
+      print( "Setting the release version.");
       await DevtoolsProcess.runOrThrow('devtools_tool', [
         'update-version',
         'auto',
@@ -127,7 +127,7 @@ class ReleaseHelperCommand extends Command {
         releaseBranch,
       ]);
 
-      print('Creating the PR');
+      print('Creating the PR.');
       final createPRResult = await DevtoolsProcess.runOrThrow('gh', [
         'pr',
         'create',
