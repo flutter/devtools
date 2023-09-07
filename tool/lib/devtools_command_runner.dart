@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
+import 'package:devtools_tool/commands/release_helper.dart';
 
 import 'commands/analyze.dart';
 import 'commands/list.dart';
@@ -20,5 +21,6 @@ class DevToolsCommandRunner extends CommandRunner {
     addCommand(PackagesGetCommand());
     addCommand(RollbackCommand());
     addCommand(UpdateDartSdkDepsCommand());
+    addCommand(ReleaseHelperCommand());
   }
 }

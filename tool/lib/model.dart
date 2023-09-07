@@ -172,3 +172,6 @@ bool _fileExists(Directory parent, String name) {
 bool _dirExists(Directory parent, String name) {
   return FileSystemEntity.isDirectorySync(path.join(parent.path, name));
 }
+String pathFromRepoRoot(String pathFromRoot) {
+  return path.join(DevToolsRepo.getInstance()!.repoPath, pathFromRoot);
+}

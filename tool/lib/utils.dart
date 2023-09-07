@@ -5,7 +5,9 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:devtools_tool/model.dart';
 import 'package:io/io.dart';
+import 'package:path/path.dart' as path;
 
 String convertProcessOutputToString(List<List<int>> output, String indent) {
   String result = output.map((codes) => utf8.decode(codes)).join();
@@ -121,4 +123,8 @@ Future<void> runAll(
       additionalErrorMessage: additionalErrorMessage,
     );
   }
+}
+
+String pathFromRepoRoot(String pathFromRoot) {
+  return path.join(DevToolsRepo.getInstance()!.repoPath, pathFromRoot);
 }
