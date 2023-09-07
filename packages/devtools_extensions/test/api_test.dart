@@ -107,6 +107,33 @@ void main() {
         DevToolsExtensionEventType.unknown,
       );
     });
+
+    test('supportedForDirection', () {
+      verifyEventDirection(
+        DevToolsExtensionEventType.ping,
+        (bidirectional: false, toDevTools: false, toExtension: true),
+      );
+      verifyEventDirection(
+        DevToolsExtensionEventType.pong,
+        (bidirectional: false, toDevTools: true, toExtension: false),
+      );
+      verifyEventDirection(
+        DevToolsExtensionEventType.vmServiceConnection,
+        (bidirectional: true, toDevTools: true, toExtension: true),
+      );
+      verifyEventDirection(
+        DevToolsExtensionEventType.showNotification,
+        (bidirectional: false, toDevTools: true, toExtension: false),
+      );
+      verifyEventDirection(
+        DevToolsExtensionEventType.showBannerMessage,
+        (bidirectional: false, toDevTools: true, toExtension: false),
+      );
+      verifyEventDirection(
+        DevToolsExtensionEventType.unknown,
+        (bidirectional: true, toDevTools: true, toExtension: true),
+      );
+    });
   });
 
   group('$ShowNotificationExtensionEvent', () {
@@ -264,4 +291,22 @@ void main() {
       );
     });
   });
+}
+
+void verifyEventDirection(
+  DevToolsExtensionEventType type,
+  ({bool bidirectional, bool toDevTools, bool toExtension}) expected,
+) {
+  expect(
+    type.supportedForDirection(ExtensionEventDirection.bidirectional),
+    expected.bidirectional,
+  );
+  expect(
+    type.supportedForDirection(ExtensionEventDirection.toDevTools),
+    expected.toDevTools,
+  );
+  expect(
+    type.supportedForDirection(ExtensionEventDirection.toExtension),
+    expected.toExtension,
+  );
 }
