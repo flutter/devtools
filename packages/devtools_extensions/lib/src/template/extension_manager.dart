@@ -10,6 +10,17 @@ class ExtensionManager {
   final _registeredEventHandlers =
       <DevToolsExtensionEventType, ExtensionEventHandler>{};
 
+  /// Whether dark theme is enabled for DevTools.
+  ///
+  /// The DevTools extension will rebuild with the appropriate theme on
+  /// notifications from this notifier.
+  final darkThemeEnabled = ValueNotifier<bool>(true);
+
+  /// Registers an event handler for [DevToolsExtensionEvent]s of type [type].
+  ///
+  /// When an event of type [type] is received by the extension, [handler] will
+  /// be called after any default event handling takes place for event [type].
+  /// See [_handleExtensionEvent].
   void registerEventHandler(
     DevToolsExtensionEventType event,
     ExtensionEventHandler handler,
@@ -19,6 +30,12 @@ class ExtensionManager {
 
   // ignore: unused_element, false positive due to part files
   void _init({required bool connectToVmService}) {
+    // TODO(kenz): handle the ide theme that may be part of the query params.
+    final queryParams = loadQueryParams();
+    final themeValue = queryParams[ExtensionEventParameters.theme];
+    darkThemeEnabled.value = themeValue == null ||
+        themeValue == ExtensionEventParameters.themeValueDark;
+
     html.window.addEventListener('message', _handleMessage);
     // TODO(kenz) instead of connecting to the VM service through an event, load
     // the vm service URI through a query parameter like we already do in
@@ -72,6 +89,50 @@ class ExtensionManager {
         _registeredEventHandlers[extensionEvent.type]?.call(extensionEvent);
       }
     }
+  }
+
+  void _handleExtensionEvent(
+    DevToolsExtensionEvent extensionEvent,
+    html.MessageEvent e,
+  ) {
+    // Ignore events that come from the [ExtensionManager] itself.
+    if (extensionEvent.source == '$ExtensionManager') return;
+
+    // Ignore events that are not supported for the DevTools => Extension
+    // direction.
+    if (!extensionEvent.type
+        .supportedForDirection(ExtensionEventDirection.toExtension)) {
+      return;
+    }
+
+    switch (extensionEvent.type) {
+      case DevToolsExtensionEventType.ping:
+        postMessageToDevTools(
+          DevToolsExtensionEvent(DevToolsExtensionEventType.pong),
+          targetOrigin: e.origin,
+        );
+        break;
+      case DevToolsExtensionEventType.vmServiceConnection:
+        final vmServiceUri = extensionEvent
+            .data?[ExtensionEventParameters.vmServiceConnectionUri] as String?;
+        unawaited(_connectToVmService(vmServiceUri));
+        break;
+      case DevToolsExtensionEventType.themeUpdate:
+        final value =
+            extensionEvent.data?[ExtensionEventParameters.theme] as String?;
+        // Default to use dark theme if [value] is null.
+        final useDarkTheme =
+            value == null || value == ExtensionEventParameters.themeValueDark;
+        darkThemeEnabled.value = useDarkTheme;
+        break;
+      case DevToolsExtensionEventType.unknown:
+      default:
+        _log.warning(
+          'Unrecognized event received by extension: '
+          '(${extensionEvent.type} - ${e.data}',
+        );
+    }
+    _registeredEventHandlers[extensionEvent.type]?.call(extensionEvent);
   }
 
   /// Posts a [DevToolsExtensionEvent] to the DevTools extension host.

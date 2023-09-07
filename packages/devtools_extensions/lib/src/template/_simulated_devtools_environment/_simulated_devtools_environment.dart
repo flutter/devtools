@@ -150,11 +150,15 @@ class _SimulatedApi extends StatelessWidget {
     return Column(
       children: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             DevToolsButton(
               label: 'PING',
               onPressed: simController.ping,
+            ),
+            const SizedBox(width: denseSpacing),
+            DevToolsButton(
+              label: 'TOGGLE THEME',
+              onPressed: simController.toggleTheme,
             ),
             // TODO(kenz): add buttons for other simulated events as the extension
             // API expands.
