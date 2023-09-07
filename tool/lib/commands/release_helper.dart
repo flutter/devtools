@@ -26,7 +26,6 @@ class ReleaseHelperCommand extends Command {
   FutureOr? run() async {
     final useCurrentBranch = argResults!['use-current-branch']!;
     final currentBranchResult = await DevtoolsProcess.runOrThrow('git', [
-      'git',
       'rev-parse',
       '--abbrev-ref',
       'HEAD',
