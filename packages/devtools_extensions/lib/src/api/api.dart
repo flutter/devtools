@@ -7,29 +7,33 @@ import 'model.dart';
 /// Supported events that can be sent and received over 'postMessage' between
 /// DevTools and a DevTools extension running in an embedded iFrame.
 enum DevToolsExtensionEventType {
-  /// An event that a DevTools extension expects from DevTools to verify that
-  /// the extension is ready for use.
-  ping,
+  /// An DevTools will send to an extension to verify that the extension is
+  /// ready for use.
+  ping(ExtensionEventDirection.toExtension),
 
   /// An event that a DevTools extension will send back to DevTools after
   /// receiving a [ping] event.
-  pong,
+  pong(ExtensionEventDirection.toDevTools),
 
   /// An event that DevTools will send to an extension to notify of the
   /// connected vm service uri.
-  vmServiceConnection,
+  vmServiceConnection(ExtensionEventDirection.bidirectional),
 
   /// An event that an extension will send to DevTools asking DevTools to post
   /// a notification to the DevTools global [notificationService].
-  showNotification,
+  showNotification(ExtensionEventDirection.toDevTools),
 
   /// An event that an extension will send to DevTools asking DevTools to post
   /// a banner message to the extension's screen using the global
   /// [bannerMessages].
-  showBannerMessage,
+  showBannerMessage(ExtensionEventDirection.toDevTools),
 
   /// Any unrecognized event that is not one of the above supported event types.
-  unknown;
+  unknown(ExtensionEventDirection.bidirectional);
+
+  const DevToolsExtensionEventType(this.direction);
+
+  final ExtensionEventDirection direction;
 
   static DevToolsExtensionEventType from(String name) {
     for (final event in DevToolsExtensionEventType.values) {
@@ -39,6 +43,27 @@ enum DevToolsExtensionEventType {
     }
     return unknown;
   }
+
+  bool supportedForDirection(ExtensionEventDirection d) {
+    return direction == d || direction == ExtensionEventDirection.bidirectional;
+  }
+}
+
+/// Describes the flow direction for a [DevToolsExtensionEventType].
+///
+/// Some events are unidirecitonal and some are bidirectional.
+enum ExtensionEventDirection {
+  /// Describes events that can be sent both from DevTools to extensions and
+  /// from extensions to DevTools.
+  bidirectional,
+
+  /// Describes events that can be sent from extensions to DevTools, but not
+  /// from DevTools to extensions.
+  toDevTools,
+
+  /// Describes events that can be sent from DevTools to extensions, but not
+  /// from extensions to DevTools.
+  toExtension,
 }
 
 /// Interface that a DevTools extension host should implement.
