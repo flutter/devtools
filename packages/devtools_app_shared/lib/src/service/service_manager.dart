@@ -416,7 +416,13 @@ class ServiceManager<T extends VmService> {
 
   /// This can throw an [RPCError].
   Future<void> performHotReload() async {
-    await callServiceOnMainIsolate(hotReloadServiceName);
+    if (connectedApp?.isFlutterAppNow ?? false) {
+      await callServiceOnMainIsolate(hotReloadServiceName);
+    } else {
+      await service?.forEachIsolate((isolate) async {
+        await service?.reloadSources(isolate.id!);
+      });
+    }
   }
 
   /// This can throw an [RPCError].

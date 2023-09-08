@@ -279,6 +279,9 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
               .where((p) => embed && page != null ? p.screenId == page : true)
               .where((p) => !hide.contains(p.screenId))
               .toList();
+          final connectedToFlutterApp =
+              serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ??
+                  false;
           return MultiProvider(
             providers: _providedControllers(),
             child: DevToolsScaffold(
@@ -286,29 +289,12 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
               page: page,
               screens: screens,
               actions: [
-                if (connectedToVmService)
-                  if (serviceConnection
-                          .serviceManager.connectedApp?.isFlutterAppNow ??
-                      false) ...[
-                    ValueListenableBuilder(
-                      valueListenable: serviceConnection.serviceManager
-                          .registeredServiceListenable(hotReloadServiceName),
-                      builder: (context, available, _) {
-                        return available
-                            ? const HotReloadButton()
-                            : const SizedBox.shrink();
-                      },
-                    ),
-                    ValueListenableBuilder(
-                      valueListenable: serviceConnection.serviceManager
-                          .registeredServiceListenable(hotRestartServiceName),
-                      builder: (context, available, _) {
-                        return available
-                            ? const HotRestartButton()
-                            : const SizedBox.shrink();
-                      },
-                    ),
-                  ],
+                if (connectedToVmService) ...[
+                  HotReloadButton(
+                    callOnVmServiceDirectly: !connectedToFlutterApp,
+                  ),
+                  const HotRestartButton(),
+                ],
                 ...DevToolsScaffold.defaultActions(isEmbedded: embed),
               ],
             ),

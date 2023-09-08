@@ -14,6 +14,7 @@ import 'package:logging/logging.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 
 import '../shared/analytics/analytics.dart' as ga;
+import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
 import '../shared/primitives/message_bus.dart';
@@ -201,33 +202,54 @@ class ServiceExtensionButton extends StatelessWidget {
 
 /// Button that performs a hot reload on the [serviceConnection].
 class HotReloadButton extends StatelessWidget {
-  const HotReloadButton({super.key});
+  const HotReloadButton({super.key, this.callOnVmServiceDirectly = false});
+
+  /// Whether to initiate hot reload via [VmService.reloadSources] instead of by
+  /// calling a registered service from Flutter.
+  final bool callOnVmServiceDirectly;
 
   @override
   Widget build(BuildContext context) {
     // TODO(devoncarew): Show as disabled when reload service calls are in progress.
 
-    return DevToolsTooltip(
-      message: 'Hot reload',
-      child: _RegisteredServiceExtensionButton._(
-        serviceDescription: hotReload,
-        action: () {
-          // The future is returned.
-          // ignore: discarded_futures
-          return serviceConnection.serviceManager.runDeviceBusyTask(
-            // The future is returned.
-            // ignore: discarded_futures
-            _wrapReloadCall(
-              'reload',
-              serviceConnection.serviceManager.performHotReload,
+    return callOnVmServiceDirectly
+        ? _HotReloadScaffoldAction()
+        : DevToolsTooltip(
+            message: 'Hot reload',
+            child: _RegisteredServiceExtensionButton._(
+              serviceDescription: hotReload,
+              action: _callHotReload,
+              completedText: 'Hot reload completed.',
+              describeError: (error) => 'Unable to hot reload the app: $error',
             ),
           );
-        },
-        completedText: 'Hot reload completed.',
-        describeError: (error) => 'Unable to hot reload the app: $error',
-      ),
-    );
   }
+}
+
+class _HotReloadScaffoldAction extends ScaffoldAction {
+  _HotReloadScaffoldAction({Color? color})
+      : super(
+          icon: hotReloadIcon,
+          tooltip: 'Hot reload',
+          color: color,
+          onPressed: (context) {
+            ga.select(gac.devToolsMain, gac.hotReload);
+            _callHotReload();
+          },
+        );
+}
+
+Future<void> _callHotReload() {
+  // The future is returned.
+  // ignore: discarded_futures
+  return serviceConnection.serviceManager.runDeviceBusyTask(
+    // The future is returned.
+    // ignore: discarded_futures
+    _wrapReloadCall(
+      'reload',
+      serviceConnection.serviceManager.performHotReload,
+    ),
+  );
 }
 
 /// Button that performs a hot restart on the [serviceConnection].
@@ -327,7 +349,7 @@ class _RegisteredServiceExtensionButtonState
 
   @override
   Widget build(BuildContext context) {
-    if (_hidden) return const SizedBox();
+    if (_hidden) return const SizedBox.shrink();
 
     return InkWell(
       onTap: () => unawaited(
