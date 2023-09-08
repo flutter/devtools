@@ -31,12 +31,13 @@ class ReleaseHelperCommand extends Command {
 
     final useCurrentBranch = argResults!['use-current-branch']!;
     final currentBranchResult = await runProcess(
-        processManager,
-        CliCommand.from('git', [
-          'rev-parse',
-          '--abbrev-ref',
-          'HEAD',
-        ]));
+      processManager,
+      CliCommand.from('git', [
+        'rev-parse',
+        '--abbrev-ref',
+        'HEAD',
+      ]),
+    );
     final initialBranch = currentBranchResult.trim();
     String? releaseBranch;
 
@@ -59,9 +60,10 @@ class ReleaseHelperCommand extends Command {
       final RegExpMatch devtoolsRemoteResult;
 
       try {
-        devtoolsRemoteResult = remoteRegexpResults.firstWhere((element) =>
-            RegExp(r'flutter/devtools.git$')
-                .hasMatch(element.namedGroup('path')!));
+        devtoolsRemoteResult = remoteRegexpResults.firstWhere(
+          (element) => RegExp(r'flutter/devtools.git$')
+              .hasMatch(element.namedGroup('path')!),
+        );
       } on StateError {
         throw "ERROR: Couldn't find a remote that points to flutter/devtools.git. Instead got: \n$devtoolsRemotes";
       }
@@ -87,13 +89,14 @@ class ReleaseHelperCommand extends Command {
       }
 
       await runProcess(
-          processManager,
-          CliCommand.from('git', [
-            'checkout',
-            '-b',
-            releaseBranch,
-            ...(useCurrentBranch ? [] : ['$remoteOrigin/master']),
-          ]));
+        processManager,
+        CliCommand.from('git', [
+          'checkout',
+          '-b',
+          releaseBranch,
+          ...(useCurrentBranch ? [] : ['$remoteOrigin/master']),
+        ]),
+      );
 
       print("Ensuring ./tool packages are ready.");
       Directory.current = pathFromRepoRoot("tool");
@@ -107,64 +110,70 @@ class ReleaseHelperCommand extends Command {
       );
 
       final originalVersion = await runProcess(
-          processManager,
-          CliCommand.from('devtools_tool', [
-            'update-version',
-            'current-version',
-          ]));
+        processManager,
+        CliCommand.from('devtools_tool', [
+          'update-version',
+          'current-version',
+        ]),
+      );
 
       print("Setting the release version.");
       await runProcess(
-          processManager,
-          CliCommand.from('devtools_tool', [
-            'update-version',
-            'auto',
-            '--type',
-            'release',
-          ]));
+        processManager,
+        CliCommand.from('devtools_tool', [
+          'update-version',
+          'auto',
+          '--type',
+          'release',
+        ]),
+      );
 
       final getNewVersionResult = await runProcess(
-          processManager,
-          CliCommand.from('devtools_tool', [
-            'update-version',
-            'current-version',
-          ]));
+        processManager,
+        CliCommand.from('devtools_tool', [
+          'update-version',
+          'current-version',
+        ]),
+      );
 
       final newVersion = getNewVersionResult;
 
       final commitMessage = "Releasing from $originalVersion to $newVersion";
 
       await runProcess(
-          processManager,
-          CliCommand.from('git', [
-            'commit',
-            '-a',
-            '-m',
-            commitMessage,
-          ]));
+        processManager,
+        CliCommand.from('git', [
+          'commit',
+          '-a',
+          '-m',
+          commitMessage,
+        ]),
+      );
 
       await runProcess(
-          processManager,
-          CliCommand.from('git', [
-            'push',
-            '-u',
-            remoteOrigin,
-            releaseBranch,
-          ]));
+        processManager,
+        CliCommand.from('git', [
+          'push',
+          '-u',
+          remoteOrigin,
+          releaseBranch,
+        ]),
+      );
 
       print('Creating the PR.');
       final prURL = await runProcess(
-          processManager,
-          CliCommand.from('gh', [
-            'pr',
-            'create',
-            '--repo',
-            'flutter/devtools',
-            '--draft',
-            '--title',
-            commitMessage,
-            '--fill',
-          ]));
+        processManager,
+        CliCommand.from('gh', [
+          'pr',
+          'create',
+          '--repo',
+          'flutter/devtools',
+          '--draft',
+          '--title',
+          commitMessage,
+          '--fill',
+        ]),
+      );
 
       print('Your Draft release PR can be found at: $prURL');
       print('DONE');

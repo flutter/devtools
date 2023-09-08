@@ -195,8 +195,8 @@ String incrementDevVersion(String currentVersion) {
   final alreadyHasDevVersion = isDevVersion(currentVersion);
   if (alreadyHasDevVersion) {
     final devVerMatch = RegExp(
-            r'^(?<prefix>\d+\.\d+\.\d+.*-dev\.)(?<devVersion>\d+)(?<suffix>.*)$')
-        .firstMatch(currentVersion);
+      r'^(?<prefix>\d+\.\d+\.\d+.*-dev\.)(?<devVersion>\d+)(?<suffix>.*)$',
+    ).firstMatch(currentVersion);
 
     if (devVerMatch == null) {
       throw 'Invalid version, could not increment dev version';

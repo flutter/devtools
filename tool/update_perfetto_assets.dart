@@ -16,7 +16,8 @@ void main(List<String> args) {
 
   final perfettoDistDir = Directory.fromUri(
     Uri.parse(
-        '${mainDevToolsDirectory.path}/third_party/packages/perfetto_ui_compiled/lib/dist'),
+      '${mainDevToolsDirectory.path}/third_party/packages/perfetto_ui_compiled/lib/dist',
+    ),
   );
 
   // Find the new perfetto version number.
@@ -42,14 +43,16 @@ void main(List<String> args) {
 
   final pubspec = File.fromUri(
     Uri.parse(
-        '${mainDevToolsDirectory.path}/packages/devtools_app/pubspec.yaml'),
+      '${mainDevToolsDirectory.path}/packages/devtools_app/pubspec.yaml',
+    ),
   );
 
   // TODO(kenz): Ensure the pubspec.yaml contains an entry for each file in
   // [perfettoDistDir].
 
   final perfettoAssetRegExp = RegExp(
-      r'(?<prefix>^.*packages\/perfetto_ui_compiled\/dist\/)(?<version>v\d+[.]\d+-[0-9a-fA-F]+)(?<suffix>\/.*$)');
+    r'(?<prefix>^.*packages\/perfetto_ui_compiled\/dist\/)(?<version>v\d+[.]\d+-[0-9a-fA-F]+)(?<suffix>\/.*$)',
+  );
   final lines = pubspec.readAsLinesSync();
   for (int i = 0; i < lines.length; i++) {
     final line = lines[i];
