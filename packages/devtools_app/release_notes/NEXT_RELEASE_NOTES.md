@@ -7,7 +7,8 @@ Dart & Flutter DevTools - A Suite of Performance Tools for Dart and Flutter
 
 ## General updates
 
-TODO: Remove this section if there are not any general updates.
+* Show the hot reload button for Dart server apps that support hot reload -
+[#6341](https://github.com/flutter/devtools/pull/6341)
 
 ## Inspector updates
 
