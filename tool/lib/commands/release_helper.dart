@@ -109,14 +109,6 @@ class ReleaseHelperCommand extends Command {
         workingDirectory: pathFromRepoRoot("tool"),
       );
 
-      final originalVersion = await runProcess(
-        processManager,
-        CliCommand.from('devtools_tool', [
-          'update-version',
-          'current-version',
-        ]),
-      );
-
       print("Setting the release version.");
       await runProcess(
         processManager,
@@ -138,7 +130,7 @@ class ReleaseHelperCommand extends Command {
 
       final newVersion = getNewVersionResult;
 
-      final commitMessage = "Releasing from $originalVersion to $newVersion";
+      final commitMessage = "Prepare for release $newVersion";
 
       await runAll(
         processManager,
