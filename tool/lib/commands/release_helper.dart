@@ -92,7 +92,7 @@ class ReleaseHelperCommand extends Command {
             'checkout',
             '-b',
             releaseBranch,
-            useCurrentBranch ? '' : '$remoteOrigin/master',
+            ...(useCurrentBranch ? [] : ['$remoteOrigin/master']),
           ]));
 
       print("Ensuring ./tool packages are ready.");
