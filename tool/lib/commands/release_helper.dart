@@ -40,6 +40,7 @@ class ReleaseHelperCommand extends Command {
     );
     final initialBranch = currentBranchResult.trim();
     String? releaseBranch;
+    bool errorOccurred = false;
 
     try {
       // Change the CWD to the repo root
@@ -170,18 +171,19 @@ class ReleaseHelperCommand extends Command {
       print(
         'Build, run and test this release using: `dart ./tool/build_e2e.dart`',
       );
+    } catch (_) {
+      errorOccurred = true;
     } finally {
-      // try to bring the caller back to their original branch if we have failed
+      // try to bring the caller back to their original branch
       await Process.run('git', ['checkout', initialBranch]);
-
-      // Try to clean up the temporary branch we made
-      if (releaseBranch != null) {
-        await Process.run('git', [
-          'branch',
-          '-D',
-          releaseBranch,
-        ]);
-      }
+    }
+    // If there was an error, try to clean up the temporary branch we made
+    if (errorOccurred && releaseBranch != null) {
+      await Process.run('git', [
+        'branch',
+        '-D',
+        releaseBranch,
+      ]);
     }
   }
 }
