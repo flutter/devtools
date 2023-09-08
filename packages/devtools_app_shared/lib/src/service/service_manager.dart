@@ -258,6 +258,7 @@ class ServiceManager<T extends VmService> {
     serviceExtensionManager.vmServiceClosed();
     isolateManager.handleVmServiceClosed();
     _registeredMethodsForService.clear();
+    _registeredServiceNotifiers.clear();
     setDeviceBusy(false);
 
     _connectedState.value = connectionState;

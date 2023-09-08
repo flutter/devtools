@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/service_extensions.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
@@ -286,12 +287,27 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
               screens: screens,
               actions: [
                 if (connectedToVmService)
-                  // TODO(https://github.com/flutter/devtools/issues/1941)
                   if (serviceConnection
                           .serviceManager.connectedApp?.isFlutterAppNow ??
                       false) ...[
-                    const HotReloadButton(),
-                    const HotRestartButton(),
+                    ValueListenableBuilder(
+                      valueListenable: serviceConnection.serviceManager
+                          .registeredServiceListenable(hotReloadServiceName),
+                      builder: (context, available, _) {
+                        return available
+                            ? const HotReloadButton()
+                            : const SizedBox.shrink();
+                      },
+                    ),
+                    ValueListenableBuilder(
+                      valueListenable: serviceConnection.serviceManager
+                          .registeredServiceListenable(hotRestartServiceName),
+                      builder: (context, available, _) {
+                        return available
+                            ? const HotRestartButton()
+                            : const SizedBox.shrink();
+                      },
+                    ),
                   ],
                 ...DevToolsScaffold.defaultActions(isEmbedded: embed),
               ],
