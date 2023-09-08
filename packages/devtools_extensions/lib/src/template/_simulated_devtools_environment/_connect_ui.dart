@@ -123,7 +123,7 @@ class _DisconnectedVmServiceDisplayState
               hintStyle: theme.regularTextStyle,
             ),
             onSubmitted: (value) =>
-                widget.simController.vmServiceConnectionChanged(uri: value),
+                widget.simController.updateVmServiceConnection(uri: value),
             controller: _connectTextFieldController,
           ),
         ),
@@ -133,7 +133,7 @@ class _DisconnectedVmServiceDisplayState
           label: 'Connect',
           onPressed: () {
             _connectedUri = _connectTextFieldController.text;
-            widget.simController.vmServiceConnectionChanged(
+            widget.simController.updateVmServiceConnection(
               uri: _connectTextFieldController.text,
             );
           },

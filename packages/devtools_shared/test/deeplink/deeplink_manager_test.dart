@@ -56,31 +56,36 @@ Running Gradle task 'printBuildVariants'...                        10.4s
       );
     });
 
-    test('getBuildVariants return internal server error if command failed',
-        () async {
-      const String projectRoot = '/abc';
-      manager.expectedCommands.add(
-        TestCommand(
-          executable: 'flutter',
-          arguments: <String>[
-            'analyze',
-            '--android',
-            '--list-build-variants',
-            projectRoot,
-          ],
-          result: ProcessResult(
-            0,
-            1,
-            '',
-            'unknown error',
+    test(
+      'getBuildVariants return internal server error if command failed',
+      () async {
+        const String projectRoot = '/abc';
+        manager.expectedCommands.add(
+          TestCommand(
+            executable: 'flutter',
+            arguments: <String>[
+              'analyze',
+              '--android',
+              '--list-build-variants',
+              projectRoot,
+            ],
+            result: ProcessResult(
+              0,
+              1,
+              '',
+              'unknown error',
+            ),
           ),
-        ),
-      );
-      final response = await manager.getBuildVariants(
-        rootPath: projectRoot,
-      );
-      expect(response[DeeplinkManager.kErrorField], contains('unknown error'));
-    });
+        );
+        final response = await manager.getBuildVariants(
+          rootPath: projectRoot,
+        );
+        expect(
+          response[DeeplinkManager.kErrorField],
+          contains('unknown error'),
+        );
+      },
+    );
   });
 }
 

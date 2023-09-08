@@ -77,7 +77,8 @@ class DevToolsExtension extends StatefulWidget {
   State<DevToolsExtension> createState() => _DevToolsExtensionState();
 }
 
-class _DevToolsExtensionState extends State<DevToolsExtension> {
+class _DevToolsExtensionState extends State<DevToolsExtension>
+    with AutoDisposeMixin {
   @override
   void initState() {
     super.initState();
@@ -88,6 +89,8 @@ class _DevToolsExtensionState extends State<DevToolsExtension> {
     for (final handler in widget.eventHandlers.entries) {
       extensionManager.registerEventHandler(handler.key, handler.value);
     }
+
+    addAutoDisposeListener(extensionManager.darkThemeEnabled);
   }
 
   void _initGlobals() {
@@ -119,6 +122,9 @@ class _DevToolsExtensionState extends State<DevToolsExtension> {
       child: widget.child,
     );
     return MaterialApp(
+      themeMode: extensionManager.darkThemeEnabled.value
+          ? ThemeMode.dark
+          : ThemeMode.light,
       theme: themeFor(
         isDarkTheme: false,
         ideTheme: ideTheme,
