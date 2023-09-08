@@ -95,7 +95,6 @@ Future<String> runProcess(
   String? additionalErrorMessage = '',
 }) async {
   String stdout = '';
-  String stderr = '';
 
   final process = await processManager.spawn(
     command.exe,
@@ -109,23 +108,15 @@ Future<String> runProcess(
         )
         .forEach((x) => stdout += x),
   );
-  unawaited(
-    process.stderr
-        .transform(
-          utf8.decoder,
-        )
-        .forEach((x) => stderr += x),
-  );
   final code = await process.exitCode;
   if (command.throwOnException && code != 0) {
     throw ProcessException(
       command.exe,
       command.args,
-      'Failed with exit code: $code. $additionalErrorMessage\n$stderr',
+      'Failed with exit code: $code. $additionalErrorMessage',
       code,
     );
   }
-  print('STDOUT: $stdout'); // TODO REMOVE THIS
   return stdout;
 }
 

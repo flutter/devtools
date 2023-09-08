@@ -84,16 +84,16 @@ class ReleaseHelperCommand extends Command {
           processManager,
           CliCommand.from('git', ['fetch', remoteOrigin, 'master']),
         );
-
-        await runProcess(
-            processManager,
-            CliCommand.from('git', [
-              'checkout',
-              '-b',
-              releaseBranch,
-              '$remoteOrigin/master',
-            ]));
       }
+
+      await runProcess(
+          processManager,
+          CliCommand.from('git', [
+            'checkout',
+            '-b',
+            releaseBranch,
+            useCurrentBranch ? '' : '$remoteOrigin/master',
+          ]));
 
       print("Ensuring ./tool packages are ready.");
       Directory.current = pathFromRepoRoot("tool");
