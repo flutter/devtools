@@ -6,8 +6,7 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:devtools_tool/devtools_command_runner.dart';
-import 'package:devtools_tool/model.dart';
-import 'package:path/path.dart' as path;
+import 'package:devtools_tool/utils.dart';
 
 // This script must be executed from the top level devtools/ directory.
 // TODO(kenz): If changes are made to this script, first consider refactoring to
@@ -397,8 +396,4 @@ class AutoUpdateCommand extends Command {
       );
     }
   }
-}
-
-String pathFromRepoRoot(String pathFromRoot) {
-  return path.join(DevToolsRepo.getInstance()!.repoPath, pathFromRoot);
 }
