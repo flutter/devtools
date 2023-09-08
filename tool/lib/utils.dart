@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -87,16 +88,25 @@ class CliCommand {
   final bool throwOnException;
 }
 
-Future<void> runProcess(
+Future<String> runProcess(
   ProcessManager processManager,
   CliCommand command, {
   String? workingDirectory,
   String? additionalErrorMessage = '',
 }) async {
+  String stdout = '';
+
   final process = await processManager.spawn(
     command.exe,
     command.args,
     workingDirectory: workingDirectory,
+  );
+  unawaited(
+    process.stdout
+        .transform(
+          utf8.decoder,
+        )
+        .forEach((x) => stdout += x),
   );
   final code = await process.exitCode;
   if (command.throwOnException && code != 0) {
@@ -107,6 +117,8 @@ Future<void> runProcess(
       code,
     );
   }
+  print('STDOUT: $stdout'); // TODO REMOVE THIS
+  return stdout;
 }
 
 Future<void> runAll(
@@ -127,34 +139,4 @@ Future<void> runAll(
 
 String pathFromRepoRoot(String pathFromRoot) {
   return path.join(DevToolsRepo.getInstance()!.repoPath, pathFromRoot);
-}
-
-extension DevtoolsProcess on Process {
-  static Future<ProcessResult> runOrThrow(
-    String executable,
-    List<String> arguments, {
-    String? workingDirectory,
-    Map<String, String>? environment,
-    bool includeParentEnvironment = true,
-    bool runInShell = false,
-    Encoding? stdoutEncoding = systemEncoding,
-    Encoding? stderrEncoding = systemEncoding,
-  }) async {
-    final result = await Process.run(
-      executable,
-      arguments,
-      workingDirectory: workingDirectory,
-      environment: environment,
-      includeParentEnvironment: includeParentEnvironment,
-      runInShell: runInShell,
-      stdoutEncoding: stdoutEncoding,
-      stderrEncoding: stderrEncoding,
-    );
-
-    if (result.exitCode != 0) {
-      throw 'FAILED: $executable $arguments\nSTDOUT:\n${result.stdout}\nSTDERR:\n${result.stderr}}';
-    }
-
-    return result;
-  }
 }
