@@ -140,24 +140,22 @@ class ReleaseHelperCommand extends Command {
 
       final commitMessage = "Releasing from $originalVersion to $newVersion";
 
-      await runProcess(
+      await runAll(
         processManager,
-        CliCommand.from('git', [
-          'commit',
-          '-a',
-          '-m',
-          commitMessage,
-        ]),
-      );
-
-      await runProcess(
-        processManager,
-        CliCommand.from('git', [
-          'push',
-          '-u',
-          remoteOrigin,
-          releaseBranch,
-        ]),
+        commands: [
+          CliCommand.from('git', [
+            'commit',
+            '-a',
+            '-m',
+            commitMessage,
+          ]),
+          CliCommand.from('git', [
+            'push',
+            '-u',
+            remoteOrigin,
+            releaseBranch,
+          ])
+        ],
       );
 
       print('Creating the PR.');
