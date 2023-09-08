@@ -71,7 +71,7 @@ class MockDartToolingApi extends DartToolingApiImpl {
     server.registerMethod('vsCode.initialize', initialize);
     server.registerMethod('vsCode.executeCommand', executeCommand);
     server.registerMethod('vsCode.selectDevice', selectDevice);
-    server.registerMethod('vsCode.openDevToolsPage', openDevToolsPage);
+    server.registerMethod('vsCode.openDevToolsPage', noOpHandler);
   }
 
   final json_rpc_2.Peer client;
@@ -144,11 +144,9 @@ class MockDartToolingApi extends DartToolingApiImpl {
     return true;
   }
 
-  /// Simulates opening a DevTools feature.
-  // TODO(dantup): does this method need to be async and is the [parameters]
-  // parameter actually unnecessary?
-  // ignore: avoid-redundant-async, avoid-unused-parameters, todo investigate
-  Future<void> openDevToolsPage(json_rpc_2.Parameters parameters) async {}
+  /// A no-op handler for method handlers that don't require an implementation
+  /// but need to exist so that the request/response is successful.
+  void noOpHandler(json_rpc_2.Parameters _) {}
 
   /// Simulates devices being connected in the IDE by notifying the embedded
   /// panel about a set of test devices.
