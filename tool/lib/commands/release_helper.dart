@@ -79,7 +79,7 @@ class ReleaseHelperCommand extends Command {
       }
 
       releaseBranch =
-          '_release_helper_release_${DateTime.now().millisecondsSinceEpoch}';
+          'release_helper_branch_${DateTime.now().millisecondsSinceEpoch}';
 
       if (!useCurrentBranch) {
         print("Preparing the release branch.");
@@ -166,18 +166,18 @@ class ReleaseHelperCommand extends Command {
       );
     } catch (e) {
       print(e);
-      errorOccurred = true;
-    } finally {
+
       // try to bring the caller back to their original branch
       await Process.run('git', ['checkout', initialBranch]);
-    }
-    // If there was an error, try to clean up the temporary branch we made
-    if (errorOccurred && releaseBranch != null) {
-      await Process.run('git', [
-        'branch',
-        '-D',
-        releaseBranch,
-      ]);
+
+      // try to clean up the temporary branch we made
+      if (releaseBranch != null) {
+        await Process.run('git', [
+          'branch',
+          '-D',
+          releaseBranch,
+        ]);
+      }
     }
   }
 }
