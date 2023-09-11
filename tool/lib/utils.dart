@@ -29,8 +29,7 @@ abstract class DartSdkHelper {
     ProcessManager processManager,
   ) async {
     final dartSdkLocation = localDartSdkLocation();
-    await runAll(
-      processManager,
+    await processManager.runAll(
       workingDirectory: dartSdkLocation,
       additionalErrorMessage: commandDebugMessage,
       commands: [
