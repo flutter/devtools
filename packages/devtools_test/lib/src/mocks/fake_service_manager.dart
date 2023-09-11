@@ -168,9 +168,6 @@ class FakeServiceManager extends Fake
   bool hasConnection;
 
   @override
-  bool hasService;
-
-  @override
   bool connectedAppInitialized;
 
   @override

@@ -104,9 +104,7 @@ class ServiceManager<T extends VmService> {
   VM? vm;
   String? sdkVersion;
 
-  bool get hasService => service != null;
-
-  bool get hasConnection => hasService && connectedApp != null;
+  bool get hasConnection => service != null && connectedApp != null;
 
   bool get connectedAppInitialized =>
       hasConnection && connectedApp!.connectedAppInitialized;
