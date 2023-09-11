@@ -88,9 +88,7 @@ class CliCommand {
   final bool throwOnException;
 }
 
-class DevToolsProcessManager {
-  final processManager = ProcessManager();
-
+extension DevToolsProcessManagerExtension on ProcessManager {
   Future<String> runProcess(
     CliCommand command, {
     String? workingDirectory,
@@ -98,7 +96,7 @@ class DevToolsProcessManager {
   }) async {
     String stdout = '';
 
-    final process = await processManager.spawn(
+    final process = await spawn(
       command.exe,
       command.args,
       workingDirectory: workingDirectory,

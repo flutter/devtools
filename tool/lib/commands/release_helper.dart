@@ -27,7 +27,7 @@ class ReleaseHelperCommand extends Command {
 
   @override
   FutureOr? run() async {
-    final processManager = DevToolsProcessManager();
+    final processManager = ProcessManager();
 
     final useCurrentBranch = argResults!['use-current-branch']!;
     final currentBranchResult = await processManager.runProcess(
