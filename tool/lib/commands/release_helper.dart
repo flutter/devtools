@@ -164,7 +164,8 @@ class ReleaseHelperCommand extends Command {
       print(
         'Build, run and test this release using: `dart ./tool/build_e2e.dart`',
       );
-    } catch (_) {
+    } catch (e) {
+      print(e);
       errorOccurred = true;
     } finally {
       // try to bring the caller back to their original branch

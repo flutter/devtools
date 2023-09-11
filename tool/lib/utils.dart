@@ -105,7 +105,7 @@ extension DevToolsProcessManagerExtension on ProcessManager {
           .transform(
             utf8.decoder,
           )
-          .forEach((x) => '$stdout$x'),
+          .forEach((x) => stdout = '$stdout$x'),
     );
     final code = await process.exitCode;
     if (command.throwOnException && code != 0) {
