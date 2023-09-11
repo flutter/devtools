@@ -197,6 +197,10 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     Map<String, String?> args,
     DevToolsNavigationState? state,
   ) {
+    if (FrameworkCore.initializationInProgress) {
+      return const MaterialPage(child: CenteredCircularProgressIndicator());
+    }
+
     // Provide the appropriate page route.
     if (pages.containsKey(page)) {
       Widget widget = pages[page!]!(

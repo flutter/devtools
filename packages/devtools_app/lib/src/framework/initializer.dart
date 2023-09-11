@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
-import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
@@ -130,17 +129,9 @@ class _InitializerState extends State<Initializer>
       return;
     }
 
-    errorReporter ??= (String message, Object error) {
-      notificationService.pushError(
-        '$message, $error',
-        isReportable: false,
-      );
-    };
-
-    final uri = normalizeVmServiceUri(widget.url!);
     final connected = await FrameworkCore.initVmService(
       '',
-      explicitUri: uri,
+      serviceUriAsString: widget.url!,
       errorReporter: errorReporter,
       logException: logException,
     );

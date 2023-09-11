@@ -60,7 +60,10 @@ final class ImmediateValueNotifier<T> extends ValueNotifier<T> {
   }
 }
 
-Future<T> whenValueNonNull<T>(ValueListenable<T> listenable) {
+Future<T> whenValueNonNull<T>(
+  ValueListenable<T> listenable, {
+  Duration? timeout,
+}) {
   if (listenable.value != null) return Future.value(listenable.value);
   final completer = Completer<T>();
   void listener() {
@@ -72,6 +75,10 @@ Future<T> whenValueNonNull<T>(ValueListenable<T> listenable) {
   }
 
   listenable.addListener(listener);
+
+  if (timeout != null) {
+    return completer.future.timeout(timeout);
+  }
   return completer.future;
 }
 

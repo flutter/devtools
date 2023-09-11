@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../framework/framework_core.dart';
 import 'globals.dart';
 import 'primitives/utils.dart';
 
@@ -46,7 +47,7 @@ class DevToolsRouteInformationParser
   @override
   Future<DevToolsRouteConfiguration> parseRouteInformation(
     RouteInformation routeInformation,
-  ) {
+  ) async {
     var uri = routeInformation.uri;
     if (_forceVmServiceUri != null) {
       final newQueryParams = Map<String, dynamic>.from(uri.queryParameters);
@@ -54,11 +55,16 @@ class DevToolsRouteInformationParser
       uri = uri.copyWith(queryParameters: newQueryParams);
     }
 
-    // If the uri has been modified and we do not have a vm service uri as a
-    // query parameter, ensure we manually disconnect from any previously
-    // connected applications.
-    if (uri.queryParameters['uri'] == null) {
-      serviceConnection.serviceManager.manuallyDisconnect();
+    final uriFromParams = uri.queryParameters['uri'];
+    if (uriFromParams == null) {
+      // If the uri has been modified and we do not have a vm service uri as a
+      // query parameter, ensure we manually disconnect from any previously
+      // connected applications.
+      await serviceConnection.serviceManager.manuallyDisconnect();
+    } else {
+      // Otherwise, connect to the vm service from the query parameter before
+      // loading the route.
+      await FrameworkCore.initVmService('', serviceUriAsString: uriFromParams);
     }
 
     // routeInformation.path comes from the address bar and (when not empty) is
