@@ -42,7 +42,6 @@ class ReleaseHelperCommand extends Command {
     );
     final initialBranch = currentBranchResult.trim();
     String? releaseBranch;
-    bool errorOccurred = false;
 
     try {
       // Change the CWD to the repo root
@@ -141,7 +140,7 @@ class ReleaseHelperCommand extends Command {
             '-u',
             remoteOrigin,
             releaseBranch,
-          ])
+          ]),
         ],
       );
 
