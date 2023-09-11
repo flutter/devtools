@@ -27,11 +27,10 @@ class ReleaseHelperCommand extends Command {
 
   @override
   FutureOr? run() async {
-    final processManager = ProcessManager();
+    final processManager = DevToolsProcessManager();
 
     final useCurrentBranch = argResults!['use-current-branch']!;
-    final currentBranchResult = await runProcess(
-      processManager,
+    final currentBranchResult = await processManager.runProcess(
       CliCommand.from('git', [
         'rev-parse',
         '--abbrev-ref',
@@ -46,8 +45,7 @@ class ReleaseHelperCommand extends Command {
       // Change the CWD to the repo root
       Directory.current = pathFromRepoRoot("");
       print("Finding a remote that points to flutter/devtools.git.");
-      final String devtoolsRemotes = await runProcess(
-        processManager,
+      final String devtoolsRemotes = await processManager.runProcess(
         CliCommand.from(
           'git',
           ['remote', '-v'],
@@ -70,8 +68,7 @@ class ReleaseHelperCommand extends Command {
       }
       final remoteOrigin = devtoolsRemoteResult.namedGroup('remote')!;
 
-      final gitStatus = await runProcess(
-        processManager,
+      final gitStatus = await processManager.runProcess(
         CliCommand.from('git', ['status', '-s']),
       );
       if (gitStatus.isNotEmpty) {
@@ -83,14 +80,12 @@ class ReleaseHelperCommand extends Command {
 
       if (!useCurrentBranch) {
         print("Preparing the release branch.");
-        await runProcess(
-          processManager,
+        await processManager.runProcess(
           CliCommand.from('git', ['fetch', remoteOrigin, 'master']),
         );
       }
 
-      await runProcess(
-        processManager,
+      await processManager.runProcess(
         CliCommand.from('git', [
           'checkout',
           '-b',
@@ -101,8 +96,7 @@ class ReleaseHelperCommand extends Command {
 
       print("Ensuring ./tool packages are ready.");
       Directory.current = pathFromRepoRoot("tool");
-      await runProcess(
-        processManager,
+      await processManager.runProcess(
         CliCommand.from(
           'dart',
           ['pub', 'get'],
@@ -111,8 +105,7 @@ class ReleaseHelperCommand extends Command {
       );
 
       print("Setting the release version.");
-      await runProcess(
-        processManager,
+      await processManager.runProcess(
         CliCommand.from('devtools_tool', [
           'update-version',
           'auto',
@@ -121,8 +114,7 @@ class ReleaseHelperCommand extends Command {
         ]),
       );
 
-      final getNewVersionResult = await runProcess(
-        processManager,
+      final getNewVersionResult = await processManager.runProcess(
         CliCommand.from('devtools_tool', [
           'update-version',
           'current-version',
@@ -133,8 +125,7 @@ class ReleaseHelperCommand extends Command {
 
       final commitMessage = "Prepare for release $newVersion";
 
-      await runAll(
-        processManager,
+      await processManager.runAll(
         commands: [
           CliCommand.from('git', [
             'commit',
@@ -152,8 +143,7 @@ class ReleaseHelperCommand extends Command {
       );
 
       print('Creating the PR.');
-      final prURL = await runProcess(
-        processManager,
+      final prURL = await processManager.runProcess(
         CliCommand.from('gh', [
           'pr',
           'create',

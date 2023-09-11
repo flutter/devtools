@@ -88,51 +88,52 @@ class CliCommand {
   final bool throwOnException;
 }
 
-Future<String> runProcess(
-  ProcessManager processManager,
-  CliCommand command, {
-  String? workingDirectory,
-  String? additionalErrorMessage = '',
-}) async {
-  String stdout = '';
+class DevToolsProcessManager {
+  final processManager = ProcessManager();
 
-  final process = await processManager.spawn(
-    command.exe,
-    command.args,
-    workingDirectory: workingDirectory,
-  );
-  unawaited(
-    process.stdout
-        .transform(
-          utf8.decoder,
-        )
-        .forEach((x) => stdout += x),
-  );
-  final code = await process.exitCode;
-  if (command.throwOnException && code != 0) {
-    throw ProcessException(
+  Future<String> runProcess(
+    CliCommand command, {
+    String? workingDirectory,
+    String? additionalErrorMessage = '',
+  }) async {
+    String stdout = '';
+
+    final process = await processManager.spawn(
       command.exe,
       command.args,
-      'Failed with exit code: $code. $additionalErrorMessage',
-      code,
-    );
-  }
-  return stdout;
-}
-
-Future<void> runAll(
-  ProcessManager processManager, {
-  required List<CliCommand> commands,
-  String? workingDirectory,
-  String? additionalErrorMessage = '',
-}) async {
-  for (final command in commands) {
-    await runProcess(
-      processManager,
-      command,
       workingDirectory: workingDirectory,
-      additionalErrorMessage: additionalErrorMessage,
     );
+    unawaited(
+      process.stdout
+          .transform(
+            utf8.decoder,
+          )
+          .forEach((x) => '$stdout$x'),
+    );
+    final code = await process.exitCode;
+    if (command.throwOnException && code != 0) {
+      throw ProcessException(
+        command.exe,
+        command.args,
+        'Failed with exit code: $code. $additionalErrorMessage',
+        code,
+      );
+    }
+    return stdout;
+  }
+
+  Future<void> runAll({
+    required List<CliCommand> commands,
+    String? workingDirectory,
+    String? additionalErrorMessage = '',
+  }) async {
+    for (final command in commands) {
+      await runProcess(
+        command,
+        workingDirectory: workingDirectory,
+        additionalErrorMessage: additionalErrorMessage,
+      );
+    }
   }
 }
 
