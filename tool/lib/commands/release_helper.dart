@@ -31,11 +31,14 @@ class ReleaseHelperCommand extends Command {
 
     final useCurrentBranch = argResults!['use-current-branch']!;
     final currentBranchResult = await processManager.runProcess(
-      CliCommand.from('git', [
-        'rev-parse',
-        '--abbrev-ref',
-        'HEAD',
-      ]),
+      CliCommand.from(
+        'git',
+        [
+          'rev-parse',
+          '--abbrev-ref',
+          'HEAD',
+        ],
+      ),
     );
     final initialBranch = currentBranchResult.trim();
     String? releaseBranch;
