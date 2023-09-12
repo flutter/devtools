@@ -13,6 +13,7 @@ import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:logging/logging.dart';
 
+import '../../development_helpers.dart';
 import '../../primitives/utils.dart';
 
 final _log = Logger('_server_web');
@@ -365,6 +366,8 @@ Future<List<DevToolsExtensionConfig>> refreshAvailableExtensions(
       logWarning(resp, ExtensionsApi.apiServeAvailableExtensions);
       return [];
     }
+  } else if (debugDevToolsExtensions) {
+    return debugHandleRefreshAvailableExtensions(rootPath);
   }
   return [];
 }
@@ -398,6 +401,12 @@ Future<ExtensionEnabledState> extensionEnabledState({
     } else {
       logWarning(resp, ExtensionsApi.apiExtensionEnabledState);
     }
+  } else if (debugDevToolsExtensions) {
+    return debugHandleExtensionEnabledState(
+      rootPath: rootPath,
+      extensionName: extensionName,
+      enable: enable,
+    );
   }
   return ExtensionEnabledState.error;
 }
