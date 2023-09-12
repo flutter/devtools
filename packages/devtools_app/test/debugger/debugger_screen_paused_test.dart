@@ -18,8 +18,6 @@ import 'package:vm_service/vm_service.dart';
 import '../test_infra/utils/test_utils.dart';
 
 void main() {
-  final screen = DebuggerScreen();
-
   const windowSize = Size(2500.0, 1500.0);
 
   late FakeServiceConnectionManager fakeServiceConnection;
