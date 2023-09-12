@@ -72,25 +72,6 @@ class _VsCodeConnectedPanelState extends State<_VsCodeConnectedPanel> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: defaultSpacing),
-          if (widget.api.capabilities.executeCommand)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () => unawaited(
-                    widget.api.executeCommand('flutter.createProject'),
-                  ),
-                  child: const Text('New Flutter Project'),
-                ),
-                ElevatedButton(
-                  onPressed: () => unawaited(
-                    widget.api.executeCommand('flutter.doctor'),
-                  ),
-                  child: const Text('Run Flutter Doctor'),
-                ),
-              ],
-            ),
-          const SizedBox(height: defaultSpacing),
           StreamBuilder(
             stream: widget.api.debugSessionsChanged,
             builder: (context, snapshot) {

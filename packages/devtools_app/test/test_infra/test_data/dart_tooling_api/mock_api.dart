@@ -126,10 +126,6 @@ class MockDartToolingApi extends DartToolingApiImpl {
     final params = parameters.asMap;
     final command = params['command'];
     switch (command) {
-      case 'flutter.createProject':
-        return null;
-      case 'flutter.doctor':
-        return null;
       default:
         throw 'Unknown command $command';
     }
