@@ -47,6 +47,16 @@ class ExtensionService extends DisposableController
       _maybeRefreshExtensions,
     );
 
+    // TODO(https://github.com/flutter/flutter/issues/134470): refresh on
+    // hot reload and hot restart events instead.
+    addAutoDisposeListener(
+        serviceConnection.serviceManager.isolateManager.mainIsolate, () async {
+      if (serviceConnection.serviceManager.isolateManager.mainIsolate.value !=
+          null) {
+        await _maybeRefreshExtensions();
+      }
+    });
+
     // TODO(kenz): we should also refresh the available extensions on some event
     // from the analysis server that is watching the
     // .dart_tool/package_config.json file for changes.
