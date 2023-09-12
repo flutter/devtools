@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/shared/debug_constants.dart';
+import 'package:devtools_app/src/shared/development_helpers.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
