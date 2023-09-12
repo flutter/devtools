@@ -99,7 +99,8 @@ class _DebuggerScreenBodyWrapper extends StatefulWidget {
 class _DebuggerScreenBodyWrapperState extends State<_DebuggerScreenBodyWrapper>
     with
         AutoDisposeMixin,
-        ProvidedControllerMixin<DebuggerController, _DebuggerScreenBodyWrapper> {
+        ProvidedControllerMixin<DebuggerController,
+            _DebuggerScreenBodyWrapper> {
   late bool _shownFirstScript;
 
   @override
