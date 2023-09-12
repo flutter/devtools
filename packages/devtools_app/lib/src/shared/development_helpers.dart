@@ -8,7 +8,7 @@ import 'package:devtools_shared/devtools_extensions.dart';
 ///
 /// Turning this flag to [true] allows for debugging the extensions framework
 /// without a server connection.
-/// 
+///
 /// This flag should never be checked in with a value of true - this is covered
 /// by a test.
 const debugDevToolsExtensions = false;
