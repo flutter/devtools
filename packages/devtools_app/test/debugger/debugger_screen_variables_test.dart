@@ -55,7 +55,7 @@ void main() {
   ) async {
     await tester.pumpWidget(
       wrapWithControllers(
-        const DebuggerScreenBody(),
+        const DebuggerWindows(),
         debugger: controller,
       ),
     );

@@ -77,7 +77,7 @@ class DebuggerScreen extends Screen {
       const FixedValueListenable<bool>(true);
 
   @override
-  Widget build(BuildContext context) => const DebuggerScreenBody();
+  Widget build(BuildContext context) => const _DebuggerScreenBodyWrapper();
 
   @override
   Widget buildStatus(BuildContext context) {
@@ -86,22 +86,20 @@ class DebuggerScreen extends Screen {
   }
 }
 
-class DebuggerScreenBody extends StatefulWidget {
-  const DebuggerScreenBody({super.key});
-
-  static final codeViewKey = GlobalKey(debugLabel: 'codeViewKey');
-  static final scriptViewKey = GlobalKey(debugLabel: 'scriptViewKey');
-  static const callStackCopyButtonKey =
-      Key('debugger_call_stack_copy_to_clipboard_button');
+/// Wrapper widget for the [DebuggerScreenBody] that handles screen
+/// initialization.
+class _DebuggerScreenBodyWrapper extends StatefulWidget {
+  const _DebuggerScreenBodyWrapper();
 
   @override
-  DebuggerScreenBodyState createState() => DebuggerScreenBodyState();
+  _DebuggerScreenBodyWrapperState createState() =>
+      _DebuggerScreenBodyWrapperState();
 }
 
-class DebuggerScreenBodyState extends State<DebuggerScreenBody>
+class _DebuggerScreenBodyWrapperState extends State<_DebuggerScreenBodyWrapper>
     with
         AutoDisposeMixin,
-        ProvidedControllerMixin<DebuggerController, DebuggerScreenBody> {
+        ProvidedControllerMixin<DebuggerController, _DebuggerScreenBodyWrapper> {
   late bool _shownFirstScript;
 
   @override
@@ -132,6 +130,27 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
 
   @override
   Widget build(BuildContext context) {
+    return DebuggerScreenBody(
+      shownFirstScript: () => _shownFirstScript,
+      setShownFirstScript: (value) => _shownFirstScript = value,
+    );
+  }
+}
+
+@visibleForTesting
+class DebuggerScreenBody extends StatelessWidget {
+  const DebuggerScreenBody({
+    super.key,
+    required this.shownFirstScript,
+    required this.setShownFirstScript,
+  });
+
+  final bool Function() shownFirstScript;
+
+  final void Function(bool) setShownFirstScript;
+
+  @override
+  Widget build(BuildContext context) {
     return Split(
       axis: Axis.horizontal,
       initialFractions: const [0.25, 0.75],
@@ -141,8 +160,8 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
           child: DebuggerWindows(),
         ),
         DebuggerSourceAndControls(
-          shownFirstScript: () => _shownFirstScript,
-          setShownFirstScript: (value) => _shownFirstScript = value,
+          shownFirstScript: shownFirstScript,
+          setShownFirstScript: setShownFirstScript,
         ),
       ],
     );
@@ -182,7 +201,6 @@ class DebuggerWindows extends StatelessWidget {
                     }
                     return callStackList.join('\n');
                   },
-                  buttonKey: DebuggerScreenBody.callStackCopyButtonKey,
                 ),
               ],
             ),
@@ -307,7 +325,6 @@ class DebuggerSourceAndControls extends StatelessWidget {
                 }
 
                 return CodeView(
-                  key: DebuggerScreenBody.codeViewKey,
                   codeViewController: codeViewController,
                   debuggerController: controller,
                   scriptRef: scriptRef,
