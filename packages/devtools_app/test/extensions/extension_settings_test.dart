@@ -34,7 +34,7 @@ void main() {
           ExtensionService,
           await createMockExtensionServiceWithDefaults([]),
         );
-        await tester.pumpWidget(wrap(dialog));
+        await tester.pumpWidget(wrapSimple(dialog));
         expect(find.text('DevTools Extensions'), findsOneWidget);
         expect(
           find.textContaining('Extensions are provided by the pub packages'),
@@ -49,7 +49,7 @@ void main() {
     testWidgets(
       'builds dialog with available extensions',
       (WidgetTester tester) async {
-        await tester.pumpWidget(wrap(dialog));
+        await tester.pumpWidget(wrapSimple(dialog));
         expect(find.text('DevTools Extensions'), findsOneWidget);
         expect(
           find.textContaining('Extensions are provided by the pub packages'),
@@ -70,7 +70,7 @@ void main() {
     testWidgets(
       'pressing toggle buttons makes calls to the $ExtensionService',
       (WidgetTester tester) async {
-        await tester.pumpWidget(wrap(dialog));
+        await tester.pumpWidget(wrapSimple(dialog));
 
         expect(
           extensionService.enabledStateListenable(barExtension.name).value,
@@ -141,7 +141,7 @@ void main() {
           ExtensionEnabledState.disabled,
         );
 
-        await tester.pumpWidget(wrap(dialog));
+        await tester.pumpWidget(wrapSimple(dialog));
         await expectLater(
           find.byWidget(dialog),
           matchesDevToolsGolden(
@@ -154,7 +154,7 @@ void main() {
     testWidgets(
       'toggle buttons update for changes to value notifiers',
       (WidgetTester tester) async {
-        await tester.pumpWidget(wrap(dialog));
+        await tester.pumpWidget(wrapSimple(dialog));
         await expectLater(
           find.byWidget(dialog),
           matchesDevToolsGolden(
@@ -175,7 +175,7 @@ void main() {
           enable: false,
         );
 
-        await tester.pumpWidget(wrap(dialog));
+        await tester.pumpWidget(wrapSimple(dialog));
         await expectLater(
           find.byWidget(dialog),
           matchesDevToolsGolden(

@@ -71,7 +71,10 @@ void main() {
   ) async {
     await tester.pumpWidget(
       wrapWithControllers(
-        const DebuggerScreenBody(),
+        DebuggerSourceAndControls(
+          shownFirstScript: () => true,
+          setShownFirstScript: (_) {},
+        ),
         debugger: controller,
       ),
     );
@@ -101,7 +104,7 @@ void main() {
         findsOneWidget,
       );
       await expectLater(
-        find.byKey(DebuggerScreenBody.codeViewKey),
+        find.byType(CodeView),
         matchesDevToolsGolden(
           '../test_infra/goldens/codeview_scrollbars.png',
         ),

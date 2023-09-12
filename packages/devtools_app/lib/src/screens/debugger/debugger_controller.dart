@@ -52,7 +52,7 @@ class DebuggerController extends DisposableController
     addAutoDisposeListener(_selectedStackFrame, _updateCurrentFrame);
     addAutoDisposeListener(_stackFramesWithLocation, _updateCurrentFrame);
 
-    if (serviceConnection.serviceManager.hasService) {
+    if (serviceConnection.serviceManager.connectedState.value.connected) {
       _initialize();
     }
   }

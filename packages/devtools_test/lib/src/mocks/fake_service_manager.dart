@@ -34,7 +34,6 @@ class FakeServiceConnectionManager extends Fake
       service: service,
       hasConnection: hasConnection,
       connectedAppInitialized: connectedAppInitialized,
-      hasService: hasService,
       availableLibraries: availableLibraries,
       availableServices: availableServices,
       onVmServiceOpened: resolvedUriManager.vmServiceOpened,
@@ -102,7 +101,6 @@ class FakeServiceManager extends Fake
     VmServiceWrapper? service,
     this.hasConnection = true,
     this.connectedAppInitialized = true,
-    this.hasService = true,
     this.availableServices = const [],
     this.availableLibraries = const [],
     this.onVmServiceOpened,
@@ -166,9 +164,6 @@ class FakeServiceManager extends Fake
 
   @override
   bool hasConnection;
-
-  @override
-  bool hasService;
 
   @override
   bool connectedAppInitialized;

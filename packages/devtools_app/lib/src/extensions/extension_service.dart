@@ -37,6 +37,10 @@ class ExtensionService extends DisposableController
     );
   }
 
+  /// Whether extensions are actively being refreshed by the DevTools server.
+  ValueListenable<bool> get refreshInProgress => _refreshInProgress;
+  final _refreshInProgress = ValueNotifier(false);
+
   final _extensionEnabledStates =
       <String, ValueNotifier<ExtensionEnabledState>>{};
 
@@ -44,7 +48,9 @@ class ExtensionService extends DisposableController
     await _maybeRefreshExtensions();
     addAutoDisposeListener(
       serviceConnection.serviceManager.connectedState,
-      _maybeRefreshExtensions,
+      () async {
+        await _maybeRefreshExtensions();
+      },
     );
 
     // TODO(https://github.com/flutter/flutter/issues/134470): refresh on
@@ -66,10 +72,12 @@ class ExtensionService extends DisposableController
     final appRootPath = await _connectedAppRootPath();
     if (appRootPath == null) return;
 
+    _refreshInProgress.value = true;
     _availableExtensions.value =
         await server.refreshAvailableExtensions(appRootPath)
           ..sort();
     await _refreshExtensionEnabledStates();
+    _refreshInProgress.value = false;
   }
 
   Future<void> _refreshExtensionEnabledStates() async {
