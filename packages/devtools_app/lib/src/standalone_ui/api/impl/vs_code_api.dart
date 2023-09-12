@@ -69,6 +69,26 @@ final class VsCodeApiImpl extends ToolApiImpl implements VsCodeApi {
       },
     );
   }
+
+  @override
+  Future<void> hotReload(String debugSessionId) {
+    return sendRequest(
+      VsCodeApi.hotReloadMethod,
+      {
+        VsCodeApi.hotReloadDebugSessionIdParameter: debugSessionId,
+      },
+    );
+  }
+
+  @override
+  Future<void> hotRestart(String debugSessionId) {
+    return sendRequest(
+      VsCodeApi.hotRestartMethod,
+      {
+        VsCodeApi.hotRestartDebugSessionIdParameter: debugSessionId,
+      },
+    );
+  }
 }
 
 class VsCodeDeviceImpl implements VsCodeDevice {
@@ -247,4 +267,10 @@ class VsCodeCapabilitiesImpl implements VsCodeCapabilities {
   @override
   bool get openDevToolsPage =>
       _raw?[VsCodeCapabilities.openDevToolsPageField] == true;
+
+  @override
+  bool get hotReload => _raw?[VsCodeCapabilities.hotReloadField] == true;
+
+  @override
+  bool get hotRestart => _raw?[VsCodeCapabilities.hotRestartField] == true;
 }

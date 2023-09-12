@@ -54,6 +54,12 @@ abstract interface class VsCodeApi {
   /// external browser window.
   Future<void> openDevToolsPage(String debugSessionId, String page);
 
+  /// Sends a Hot Reload request to the debug session with ID [debugSessionId].
+  Future<void> hotReload(String debugSessionId);
+
+  /// Sends a Hot Restart request to the debug session with ID [debugSessionId].
+  Future<void> hotRestart(String debugSessionId);
+
   static const jsonApiName = 'vsCode';
 
   static const jsonInitializeMethod = 'initialize';
@@ -70,6 +76,12 @@ abstract interface class VsCodeApi {
   static const openDevToolsPageMethod = 'openDevToolsPage';
   static const openDevToolsPageDebugSessionIdParameter = 'debugSessionId';
   static const openDevToolsPagePageParameter = 'page';
+
+  static const hotReloadMethod = 'hotReload';
+  static const hotReloadDebugSessionIdParameter = 'debugSessionId';
+
+  static const hotRestartMethod = 'hotRestart';
+  static const hotRestartDebugSessionIdParameter = 'debugSessionId';
 
   static const jsonDebugSessionsChangedEvent = 'debugSessionsChanged';
 }
@@ -193,7 +205,17 @@ abstract interface class VsCodeCapabilities {
   /// DevTools page.
   bool get openDevToolsPage;
 
+  /// Whether the `hotReload` method is available call to hot reload a specific
+  /// debug session.
+  bool get hotReload;
+
+  /// Whether the `hotRestart` method is available call to restart a specific
+  /// debug session.
+  bool get hotRestart;
+
   static const jsonExecuteCommandField = 'executeCommand';
   static const jsonSelectDeviceField = 'selectDevice';
   static const openDevToolsPageField = 'openDevToolsPage';
+  static const hotReloadField = 'hotReload';
+  static const hotRestartField = 'hotRestart';
 }
