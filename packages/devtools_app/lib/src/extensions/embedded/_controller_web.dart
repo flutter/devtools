@@ -11,7 +11,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_extensions/api.dart';
 import 'package:path/path.dart' as path;
 
-import '../../shared/debug_constants.dart';
+import '../../shared/development_helpers.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
 import 'controller.dart';

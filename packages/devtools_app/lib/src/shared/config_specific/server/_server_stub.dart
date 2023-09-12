@@ -8,7 +8,7 @@ import 'dart:async';
 
 import 'package:devtools_shared/devtools_extensions.dart';
 
-import '../../debug_constants.dart';
+import '../../development_helpers.dart';
 import '../../primitives/utils.dart';
 
 const unsupportedMessage =
