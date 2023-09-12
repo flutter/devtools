@@ -96,6 +96,14 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController
   }
 
   @override
+  void forceReload() {
+    if (_extensionIFrame.contentWindow != null) {
+      // ignore: unsafe_html, forcing reload.
+      _extensionIFrame.src = _extensionIFrame.src;
+    }
+  }
+
+  @override
   void dispose() async {
     await extensionPostEventStream.close();
     super.dispose();

@@ -97,7 +97,10 @@ class ExtensionView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        EmbeddedExtensionHeader(extension: extension),
+        EmbeddedExtensionHeader(
+          extension: extension,
+          onForceReload: controller.forceReload,
+        ),
         const SizedBox(height: intermediateSpacing),
         Expanded(
           child: ValueListenableBuilder<ExtensionEnabledState>(

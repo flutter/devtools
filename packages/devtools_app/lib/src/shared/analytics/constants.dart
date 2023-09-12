@@ -47,6 +47,7 @@ const extensionSettingsId = 'devtoolsExtensionSettings';
 String extensionFeedback(String name) => 'extensionFeedback-$name';
 String extensionEnable(String name) => 'extensionEnable-$name';
 String extensionDisable(String name) => 'extensionDisable-$name';
+String extensionForceReload(String name) => 'extensionForceReload-$name';
 
 // Inspector UX actions:
 const refresh = 'refresh';
