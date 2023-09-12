@@ -9,7 +9,7 @@ the same logic or styling.
 
 Add a dependency to your `pubspec.yaml` file:
 ```yaml
-devtools_app_shared: ^1.0.0
+devtools_app_shared: ^0.0.2
 ```
 
 Import the component library that you need:
