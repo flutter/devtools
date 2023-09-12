@@ -11,7 +11,7 @@ import 'package:devtools_shared/devtools_extensions.dart';
 /// 
 /// This flag should never be checked in with a value of true - this is covered
 /// by a test.
-const debugDevToolsExtensions = true;
+const debugDevToolsExtensions = false;
 
 List<DevToolsExtensionConfig> debugHandleRefreshAvailableExtensions(
   String rootPath,
