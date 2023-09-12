@@ -61,9 +61,9 @@ class DevToolsRouteInformationParser
       // query parameter, ensure we manually disconnect from any previously
       // connected applications.
       await serviceConnection.serviceManager.manuallyDisconnect();
-    } else {
+    } else if (_forceVmServiceUri == null) {
       // Otherwise, connect to the vm service from the query parameter before
-      // loading the route.
+      // loading the route (but do not do this in a testing environment).
       await FrameworkCore.initVmService('', serviceUriAsString: uriFromParams);
     }
 
@@ -137,11 +137,11 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   ///
   /// This will usually only contain a single item (it's the visible stack,
   /// not the history).
-  final routes = ListQueue<DevToolsRouteConfiguration>();
+  final _routes = ListQueue<DevToolsRouteConfiguration>();
 
   @override
   DevToolsRouteConfiguration? get currentConfiguration =>
-      routes.isEmpty ? null : routes.last;
+      _routes.isEmpty ? null : _routes.last;
 
   @override
   Widget build(BuildContext context) {
@@ -154,11 +154,11 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
       key: navigatorKey,
       pages: [_getPage(context, page, args, state)],
       onPopPage: (_, __) {
-        if (routes.length <= 1) {
+        if (_routes.length <= 1) {
           return false;
         }
 
-        routes.removeLast();
+        _routes.removeLast();
         notifyListeners();
         return true;
       },
@@ -225,7 +225,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   /// Replaces the navigation stack with a new route.
   void _replaceStack(DevToolsRouteConfiguration configuration) {
     _currentPage = configuration.page;
-    routes
+    _routes
       ..clear()
       ..add(configuration);
   }

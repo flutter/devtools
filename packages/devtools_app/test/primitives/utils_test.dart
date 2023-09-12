@@ -1343,7 +1343,7 @@ void main() {
                 value: controller,
                 child: Builder(
                   builder: (context) {
-                    return wrap(
+                    return wrapSimple(
                       const TestStatefulWidget(),
                     );
                   },

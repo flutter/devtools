@@ -86,7 +86,7 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          wrap(
+          wrapSimple(
             VmObjectPoolDisplay(
               objectPool: mockObjectPool,
               controller: ObjectInspectorViewController(),

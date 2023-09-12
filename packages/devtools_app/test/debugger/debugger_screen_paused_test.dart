@@ -22,62 +22,50 @@ void main() {
 
   const windowSize = Size(2500.0, 1500.0);
 
-  final fakeServiceConnection = FakeServiceConnectionManager();
-  final scriptManager = MockScriptManager();
-  mockConnectedApp(
-    fakeServiceConnection.serviceManager.connectedApp!,
-    isFlutterApp: true,
-    isProfileBuild: false,
-    isWebApp: false,
-  );
-  setGlobal(ServiceConnectionManager, fakeServiceConnection);
-  setGlobal(IdeTheme, IdeTheme());
-  setGlobal(ScriptManager, scriptManager);
-  setGlobal(NotificationService, NotificationService());
-  setGlobal(BreakpointManager, BreakpointManager());
-  setGlobal(
-    DevToolsEnvironmentParameters,
-    ExternalDevToolsEnvironmentParameters(),
-  );
-  setGlobal(PreferencesController, PreferencesController());
-  fakeServiceConnection.consoleService.ensureServiceInitialized();
-  when(fakeServiceConnection.errorBadgeManager.errorCountNotifier('debugger'))
-      .thenReturn(ValueNotifier<int>(0));
-  final debuggerController = createMockDebuggerControllerWithDefaults();
-  final codeViewController = debuggerController.codeViewController;
-  final scriptsHistory = ScriptsHistory();
-  scriptsHistory.pushEntry(mockScript!);
-  when(codeViewController.scriptsHistory).thenReturn(scriptsHistory);
-  when(debuggerController.stackFramesWithLocation).thenReturn(
-    ValueNotifier([
-      _stackFrame1,
-      _stackFrame2,
-    ]),
-  );
-  when(codeViewController.currentScriptRef)
-      .thenReturn(ValueNotifier(mockScriptRef));
-  when(codeViewController.currentParsedScript)
-      .thenReturn(ValueNotifier(mockParsedScript));
-  when(codeViewController.navigationInProgress).thenReturn(false);
+  late FakeServiceConnectionManager fakeServiceConnection;
+  late MockScriptManager scriptManager;
+  late MockDebuggerController debuggerController;
 
-  Finder findDebuggerButtonWithTitle(String title) => find.byWidgetPredicate(
-        (Widget widget) => widget is DebuggerButton && widget.title == title,
-      );
+  setUp(() {
+    fakeServiceConnection = FakeServiceConnectionManager();
+    scriptManager = MockScriptManager();
 
-  Finder findStackFrameWithText(String text) => find.byWidgetPredicate(
-        (Widget widget) =>
-            widget is RichText && widget.text.toPlainText().contains(text),
-      );
-
-  bool gutterItemForLineIsVisible(int lineNumber) {
-    final gutterItems = find.byType(GutterItem);
-    final firstGutterItem = getWidgetFromFinder<GutterItem>(gutterItems.first);
-    final lastGutterItem = getWidgetFromFinder<GutterItem>(gutterItems.last);
-    final lineRange =
-        Range(firstGutterItem.lineNumber, lastGutterItem.lineNumber);
-
-    return lineRange.contains(lineNumber);
-  }
+    mockConnectedApp(
+      fakeServiceConnection.serviceManager.connectedApp!,
+      isFlutterApp: true,
+      isProfileBuild: false,
+      isWebApp: false,
+    );
+    setGlobal(ServiceConnectionManager, fakeServiceConnection);
+    setGlobal(IdeTheme, IdeTheme());
+    setGlobal(ScriptManager, scriptManager);
+    setGlobal(NotificationService, NotificationService());
+    setGlobal(BreakpointManager, BreakpointManager());
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
+    setGlobal(PreferencesController, PreferencesController());
+    fakeServiceConnection.consoleService.ensureServiceInitialized();
+    when(fakeServiceConnection.errorBadgeManager.errorCountNotifier('debugger'))
+        .thenReturn(ValueNotifier<int>(0));
+    debuggerController = createMockDebuggerControllerWithDefaults();
+    final codeViewController = debuggerController.codeViewController;
+    final scriptsHistory = ScriptsHistory();
+    scriptsHistory.pushEntry(mockScript!);
+    when(codeViewController.scriptsHistory).thenReturn(scriptsHistory);
+    when(debuggerController.stackFramesWithLocation).thenReturn(
+      ValueNotifier([
+        _stackFrame1,
+        _stackFrame2,
+      ]),
+    );
+    when(codeViewController.currentScriptRef)
+        .thenReturn(ValueNotifier(mockScriptRef));
+    when(codeViewController.currentParsedScript)
+        .thenReturn(ValueNotifier(mockParsedScript));
+    when(codeViewController.navigationInProgress).thenReturn(false);
+  });
 
   testWidgetsWithWindowSize(
     'debugger controls paused',
@@ -193,3 +181,22 @@ final _stackFrame2 = StackFrameAndSourcePosition(
   ),
   position: const SourcePosition(line: _stackFrame2Line, column: 1),
 );
+
+Finder findDebuggerButtonWithTitle(String title) => find.byWidgetPredicate(
+      (Widget widget) => widget is DebuggerButton && widget.title == title,
+    );
+
+Finder findStackFrameWithText(String text) => find.byWidgetPredicate(
+      (Widget widget) =>
+          widget is RichText && widget.text.toPlainText().contains(text),
+    );
+
+bool gutterItemForLineIsVisible(int lineNumber) {
+  final gutterItems = find.byType(GutterItem);
+  final firstGutterItem = getWidgetFromFinder<GutterItem>(gutterItems.first);
+  final lastGutterItem = getWidgetFromFinder<GutterItem>(gutterItems.last);
+  final lineRange =
+      Range(firstGutterItem.lineNumber, lastGutterItem.lineNumber);
+
+  return lineRange.contains(lineNumber);
+}
