@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:devtools_tool/model.dart';
 import 'package:io/io.dart';
+import 'package:path/path.dart' as path;
 
 String convertProcessOutputToString(List<List<int>> output, String indent) {
   String result = output.map((codes) => utf8.decode(codes)).join();
@@ -26,8 +29,7 @@ abstract class DartSdkHelper {
     ProcessManager processManager,
   ) async {
     final dartSdkLocation = localDartSdkLocation();
-    await runAll(
-      processManager,
+    await processManager.runAll(
       workingDirectory: dartSdkLocation,
       additionalErrorMessage: commandDebugMessage,
       commands: [
@@ -85,40 +87,53 @@ class CliCommand {
   final bool throwOnException;
 }
 
-Future<void> runProcess(
-  ProcessManager processManager,
-  CliCommand command, {
-  String? workingDirectory,
-  String? additionalErrorMessage = '',
-}) async {
-  final process = await processManager.spawn(
-    command.exe,
-    command.args,
-    workingDirectory: workingDirectory,
-  );
-  final code = await process.exitCode;
-  if (command.throwOnException && code != 0) {
-    throw ProcessException(
+extension DevToolsProcessManagerExtension on ProcessManager {
+  Future<String> runProcess(
+    CliCommand command, {
+    String? workingDirectory,
+    String? additionalErrorMessage = '',
+  }) async {
+    String stdout = '';
+
+    final process = await spawn(
       command.exe,
       command.args,
-      'Failed with exit code: $code. $additionalErrorMessage',
-      code,
+      workingDirectory: workingDirectory,
     );
+    unawaited(
+      process.stdout
+          .transform(
+            utf8.decoder,
+          )
+          .forEach((x) => stdout = '$stdout$x'),
+    );
+    final code = await process.exitCode;
+    if (command.throwOnException && code != 0) {
+      throw ProcessException(
+        command.exe,
+        command.args,
+        'Failed with exit code: $code. $additionalErrorMessage',
+        code,
+      );
+    }
+    return stdout;
+  }
+
+  Future<void> runAll({
+    required List<CliCommand> commands,
+    String? workingDirectory,
+    String? additionalErrorMessage = '',
+  }) async {
+    for (final command in commands) {
+      await runProcess(
+        command,
+        workingDirectory: workingDirectory,
+        additionalErrorMessage: additionalErrorMessage,
+      );
+    }
   }
 }
 
-Future<void> runAll(
-  ProcessManager processManager, {
-  required List<CliCommand> commands,
-  String? workingDirectory,
-  String? additionalErrorMessage = '',
-}) async {
-  for (final command in commands) {
-    await runProcess(
-      processManager,
-      command,
-      workingDirectory: workingDirectory,
-      additionalErrorMessage: additionalErrorMessage,
-    );
-  }
+String pathFromRepoRoot(String pathFromRoot) {
+  return path.join(DevToolsRepo.getInstance()!.repoPath, pathFromRoot);
 }
