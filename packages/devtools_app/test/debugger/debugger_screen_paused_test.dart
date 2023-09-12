@@ -67,16 +67,24 @@ void main() {
     when(codeViewController.navigationInProgress).thenReturn(false);
   });
 
+  Future<void> pumpDebuggerScreen(WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrapWithControllers(
+        DebuggerScreenBody(
+          shownFirstScript: () => true,
+          setShownFirstScript: (_) {},
+        ),
+        debugger: debuggerController,
+      ),
+    );
+  }
+
   testWidgetsWithWindowSize(
     'debugger controls paused',
     windowSize,
     (WidgetTester tester) async {
-      await tester.pumpWidget(
-        wrapWithControllers(
-          Builder(builder: screen.build),
-          debugger: debuggerController,
-        ),
-      );
+      await pumpDebuggerScreen(tester);
+
       (serviceConnection.serviceManager.isolateManager as FakeIsolateManager)
           .setMainIsolatePausedState(true);
       await tester.pump();
@@ -109,12 +117,7 @@ void main() {
       when(debuggerController.selectedStackFrame)
           .thenReturn(stackFrameNotifier);
 
-      await tester.pumpWidget(
-        wrapWithControllers(
-          Builder(builder: screen.build),
-          debugger: debuggerController,
-        ),
-      );
+      await pumpDebuggerScreen(tester);
       await tester.pumpAndSettle();
 
       // The first stack frame is visible:
