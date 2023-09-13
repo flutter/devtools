@@ -4,6 +4,8 @@
 
 import 'package:devtools_shared/devtools_extensions.dart';
 
+import 'globals.dart';
+
 /// Whether to build DevTools for conveniently debugging DevTools extensions.
 ///
 /// Turning this flag to [true] allows for debugging the extensions framework
@@ -11,7 +13,7 @@ import 'package:devtools_shared/devtools_extensions.dart';
 ///
 /// This flag should never be checked in with a value of true - this is covered
 /// by a test.
-const debugDevToolsExtensions = false;
+final debugDevToolsExtensions = false || integrationTestMode;
 
 List<DevToolsExtensionConfig> debugHandleRefreshAvailableExtensions(
   String rootPath,

@@ -21,7 +21,7 @@ class ExtensionScreen extends Screen {
       : super.conditional(
           // TODO(kenz): we may need to ensure this is a unique id.
           id: '${extensionConfig.name}_ext',
-          title: extensionConfig.name.toSentenceCase(),
+          title: extensionConfig.screenTitle,
           icon: extensionConfig.icon,
           // TODO(kenz): support static DevTools extensions.
           requiresConnection: true,
@@ -131,4 +131,6 @@ extension ExtensionConfigExtension on DevToolsExtensionConfig {
         materialIconCodePoint,
         fontFamily: 'MaterialIcons',
       );
+
+  String get screenTitle => name.toSentenceCase();
 }
