@@ -25,4 +25,6 @@ abstract class EmbeddedExtensionController extends DisposableController {
     DevToolsExtensionEventType type, {
     Map<String, String> data = const <String, String>{},
   }) {}
+
+  void forceReload() {}
 }
