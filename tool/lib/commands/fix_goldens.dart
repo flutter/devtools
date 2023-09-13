@@ -1,5 +1,7 @@
-// #!/bin/bash -e
-// RUN_ID=$1
+// Copyright 2023 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:async';
 import 'dart:io';
 
@@ -9,6 +11,7 @@ import 'package:path/path.dart' as path;
 
 import '../utils.dart';
 
+/// A command for downloading and applying golden fixes, when they are broken.
 class FixGoldensCommand extends Command {
   FixGoldensCommand() {
     argParser.addOption(
@@ -21,7 +24,7 @@ class FixGoldensCommand extends Command {
   }
   @override
   String get description =>
-      'A helper script for downloading and applying golden fixes, when they are broken.';
+      'A command for downloading and applying golden fixes, when they are broken.';
 
   @override
   String get name => 'fix-goldens';
@@ -34,22 +37,22 @@ class FixGoldensCommand extends Command {
     Directory.current = pathFromRepoRoot("");
 
     final runId = argResults!['run-id']!;
-    final tmpDownloadDir = Directory(
-      path.join('.tmp${DateTime.now().millisecondsSinceEpoch}'),
-    );
-    tmpDownloadDir.createSync();
+    final tmpDownloadDir = await Directory.systemTemp.createTemp();
     try {
       print('Downloading the artifacts to ${tmpDownloadDir.path}');
       await processManager.runProcess(
-        CliCommand.from('gh', [
-          'run',
-          'download',
-          runId,
-          '-p',
-          '*golden_image_failures*',
-          '-D',
-          tmpDownloadDir.path,
-        ]),
+        CliCommand.from(
+          'gh',
+          [
+            'run',
+            'download',
+            runId,
+            '-p',
+            '*golden_image_failures*',
+            '-D',
+            tmpDownloadDir.path,
+          ],
+        ),
       );
 
       final downloadedGoldens = tmpDownloadDir
@@ -96,6 +99,8 @@ class FixGoldensCommand extends Command {
       print('Done updating ${downloadedGoldens.length} goldens');
     } finally {
       tmpDownloadDir.deleteSync(recursive: true);
+      // Closes stdin for the entire program.
+      await sharedStdIn.terminate();
     }
   }
 }
