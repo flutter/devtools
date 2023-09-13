@@ -4,9 +4,6 @@
 
 // Do not delete these arguments. They are parsed by test runner.
 // test-argument:appPath="test/test_infra/fixtures/memory_app"
-// test-argument:experimentsOn=true
-
-// ignore_for_file: avoid_print
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/memory/panes/control/primary_controls.dart';
@@ -18,9 +15,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-
-// TODO(polina-c): enable the test
-// https://github.com/flutter/devtools/issues/6271
 
 // To run:
 // dart run integration_test/run_tests.dart --target=integration_test/test/live_connection/eval_and_browse_test.dart
@@ -155,7 +149,11 @@ class _EvalAndBrowseTester {
   /// visible on the screen for testing.
   Future<void> prepareMemoryUI() async {
     // Open memory screen.
-    await switchToScreen(tester, ScreenMetaData.memory);
+    await switchToScreen(
+      tester,
+      tabIcon: ScreenMetaData.memory.icon!,
+      screenId: ScreenMetaData.memory.id,
+    );
 
     // Close warning and chart to get screen space.
     await tapAndPump(

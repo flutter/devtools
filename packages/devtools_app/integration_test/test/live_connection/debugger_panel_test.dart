@@ -29,7 +29,11 @@ void main() {
 
   testWidgets('Debugger panel', (tester) async {
     await pumpAndConnectDevTools(tester, testApp);
-    await switchToScreen(tester, ScreenMetaData.debugger);
+    await switchToScreen(
+      tester,
+      tabIcon: ScreenMetaData.debugger.icon!,
+      screenId: ScreenMetaData.debugger.id,
+    );
     await tester.pump(safePumpDuration);
 
     logStatus('looking for the main.dart file');

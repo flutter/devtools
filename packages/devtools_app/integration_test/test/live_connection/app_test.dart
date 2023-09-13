@@ -59,7 +59,11 @@ void main() {
     final screens = (ScreenMetaData.values.toList()
       ..removeWhere((data) => !availableScreenIds.contains(data.id)));
     for (final screen in screens) {
-      await switchToScreen(tester, screen);
+      await switchToScreen(
+        tester,
+        tabIcon: screen.icon!,
+        screenId: screen.id,
+      );
     }
   });
 }

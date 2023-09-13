@@ -101,6 +101,7 @@ class DevToolsExtensionConfig implements Comparable {
   /// [IconData] class for displaying in DevTools.
   ///
   /// This code point should be part of the 'MaterialIcons' font family.
+  /// See https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/material/icons.dart.
   final int materialIconCodePoint;
 
   String get displayName => name.toLowerCase();
