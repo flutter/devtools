@@ -45,8 +45,8 @@ final class VsCodeApiImpl extends ToolApiImpl implements VsCodeApi {
     return sendRequest(
       VsCodeApi.jsonExecuteCommandMethod,
       {
-        VsCodeApi.jsonExecuteCommandCommandParameter: command,
-        VsCodeApi.jsonExecuteCommandArgumentsParameter: arguments,
+        VsCodeApi.jsonCommandParameter: command,
+        VsCodeApi.jsonArgumentsParameter: arguments,
       },
     );
   }
@@ -55,17 +55,17 @@ final class VsCodeApiImpl extends ToolApiImpl implements VsCodeApi {
   Future<bool> selectDevice(String id) {
     return sendRequest(
       VsCodeApi.jsonSelectDeviceMethod,
-      {VsCodeApi.jsonSelectDeviceIdParameter: id},
+      {VsCodeApi.jsonIdParameter: id},
     );
   }
 
   @override
   Future<void> openDevToolsPage(String debugSessionId, String page) {
     return sendRequest(
-      VsCodeApi.openDevToolsPageMethod,
+      VsCodeApi.jsonOpenDevToolsPageMethod,
       {
-        VsCodeApi.openDevToolsPageDebugSessionIdParameter: debugSessionId,
-        VsCodeApi.openDevToolsPagePageParameter: page,
+        VsCodeApi.jsonDebugSessionIdParameter: debugSessionId,
+        VsCodeApi.openPageParameter: page,
       },
     );
   }
@@ -73,9 +73,9 @@ final class VsCodeApiImpl extends ToolApiImpl implements VsCodeApi {
   @override
   Future<void> hotReload(String debugSessionId) {
     return sendRequest(
-      VsCodeApi.hotReloadMethod,
+      VsCodeApi.jsonHotReloadMethod,
       {
-        VsCodeApi.hotReloadDebugSessionIdParameter: debugSessionId,
+        VsCodeApi.jsonDebugSessionIdParameter: debugSessionId,
       },
     );
   }
@@ -83,9 +83,9 @@ final class VsCodeApiImpl extends ToolApiImpl implements VsCodeApi {
   @override
   Future<void> hotRestart(String debugSessionId) {
     return sendRequest(
-      VsCodeApi.hotRestartMethod,
+      VsCodeApi.jsonHotRestartMethod,
       {
-        VsCodeApi.hotRestartDebugSessionIdParameter: debugSessionId,
+        VsCodeApi.jsonDebugSessionIdParameter: debugSessionId,
       },
     );
   }

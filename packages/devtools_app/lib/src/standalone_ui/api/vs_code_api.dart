@@ -63,27 +63,21 @@ abstract interface class VsCodeApi {
   static const jsonApiName = 'vsCode';
 
   static const jsonInitializeMethod = 'initialize';
-
   static const jsonExecuteCommandMethod = 'executeCommand';
-  static const jsonExecuteCommandCommandParameter = 'command';
-  static const jsonExecuteCommandArgumentsParameter = 'arguments';
-
-  static const jsonDevicesChangedEvent = 'devicesChanged';
 
   static const jsonSelectDeviceMethod = 'selectDevice';
-  static const jsonSelectDeviceIdParameter = 'id';
+  static const jsonOpenDevToolsPageMethod = 'openDevToolsPage';
+  static const jsonHotReloadMethod = 'hotReload';
+  static const jsonHotRestartMethod = 'hotRestart';
 
-  static const openDevToolsPageMethod = 'openDevToolsPage';
-  static const openDevToolsPageDebugSessionIdParameter = 'debugSessionId';
-  static const openDevToolsPagePageParameter = 'page';
-
-  static const hotReloadMethod = 'hotReload';
-  static const hotReloadDebugSessionIdParameter = 'debugSessionId';
-
-  static const hotRestartMethod = 'hotRestart';
-  static const hotRestartDebugSessionIdParameter = 'debugSessionId';
-
+  static const jsonDevicesChangedEvent = 'devicesChanged';
   static const jsonDebugSessionsChangedEvent = 'debugSessionsChanged';
+
+  static const jsonCommandParameter = 'command';
+  static const jsonArgumentsParameter = 'arguments';
+  static const jsonIdParameter = 'id';
+  static const openPageParameter = 'page';
+  static const jsonDebugSessionIdParameter = 'debugSessionId';
 }
 
 /// This class defines a device exposed by the Dart/Flutter extensions in VS
