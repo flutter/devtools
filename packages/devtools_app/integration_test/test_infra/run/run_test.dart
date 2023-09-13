@@ -30,11 +30,19 @@ Future<void> runFlutterIntegrationTest(
 
   if (!offline) {
     if (testRunnerArgs.testAppUri == null) {
+      debugLog('Starting a test application');
       // Create the test app and start it.
       try {
         if (testRunnerArgs.testAppDevice == TestAppDevice.cli) {
+          debugLog(
+            'Creating a TestDartCliApp with path ${testFileArgs.appPath}',
+          );
           testApp = TestDartCliApp(appPath: testFileArgs.appPath);
         } else {
+          debugLog(
+            'Creating a TestFlutterApp with path ${testFileArgs.appPath} and '
+            'device ${testRunnerArgs.testAppDevice}',
+          );
           testApp = TestFlutterApp(
             appPath: testFileArgs.appPath,
             appDevice: testRunnerArgs.testAppDevice,

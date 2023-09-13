@@ -111,7 +111,11 @@ void main() {
 
     // TODO(kenz): re-work this integration test so that we do not have to be
     // on the inspector screen for this to pass.
-    await switchToScreen(tester, ScreenMetaData.inspector);
+    await switchToScreen(
+      tester,
+      tabIcon: ScreenMetaData.inspector.icon!,
+      screenId: ScreenMetaData.inspector.id,
+    );
     await tester.pump(longDuration);
 
     // Ensure all futures are completed before running checks.

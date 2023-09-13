@@ -69,9 +69,31 @@ void _verifyFooterColor(WidgetTester tester, Color? expectedColor) {
   );
 }
 
-Future<void> switchToScreen(WidgetTester tester, ScreenMetaData screen) async {
-  logStatus('switching to ${screen.name} screen (icon ${screen.icon})');
-  final tabFinder = find.widgetWithIcon(Tab, screen.icon!);
+/// Switches to the DevTools screen with icon [tabIcon] and pumps the tester
+/// to settle the UI.
+Future<void> switchToScreen(
+  WidgetTester tester, {
+  required IconData tabIcon,
+  required String screenId,
+  bool warnIfTapMissed = true,
+}) async {
+  logStatus('switching to $screenId screen (icon $tabIcon)');
+  final tabFinder = await findTabOrOpenOverflowMenu(tester, tabIcon);
+  expect(tabFinder, findsOneWidget);
+
+  await tester.tap(tabFinder, warnIfMissed: warnIfTapMissed);
+  // We use pump here instead of pumpAndSettle because pumpAndSettle will
+  // never complete if there is an animation (e.g. a progress indicator).
+  await tester.pump(safePumpDuration);
+}
+
+/// Finds the tab with [icon], opening the tab overflow menu if the tab is not
+/// immediately visible. 
+Future<Finder> findTabOrOpenOverflowMenu(
+  WidgetTester tester,
+  IconData icon,
+) async {
+  final tabFinder = find.widgetWithIcon(Tab, icon);
 
   // If we cannot find the tab, try opening the tab overflow menu, if present.
   if (tabFinder.evaluate().isEmpty) {
@@ -81,11 +103,7 @@ Future<void> switchToScreen(WidgetTester tester, ScreenMetaData screen) async {
       await tester.pump(shortPumpDuration);
     }
   }
-
-  await tester.tap(tabFinder);
-  // We use pump here instead of pumpAndSettle because pumpAndSettle will
-  // never complete if there is an animation (e.g. a progress indicator).
-  await tester.pump(safePumpDuration);
+  return tabFinder;
 }
 
 Future<void> pumpDevTools(WidgetTester tester) async {

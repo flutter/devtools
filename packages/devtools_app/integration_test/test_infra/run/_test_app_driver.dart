@@ -30,6 +30,8 @@ class TestFlutterApp extends IntegrationTestApp {
         '--machine',
         '-d',
         testAppDevice.argName,
+        // Do not serve DevTools from Flutter Tools.
+        '--no-devtools',
       ],
       workingDirectory: testAppPath,
     );
@@ -301,7 +303,7 @@ abstract class IntegrationTestApp with IOMixin {
   Future<void> manuallyStopApp() async {}
 
   Future<void> start() async {
-    _debugPrint('starting the test app process...');
+    _debugPrint('starting the test app process for $testAppPath');
     await startProcess();
     assert(
       runProcess != null,
