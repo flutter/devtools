@@ -99,8 +99,6 @@ class FixGoldensCommand extends Command {
       print('Done updating ${downloadedGoldens.length} goldens');
     } finally {
       tmpDownloadDir.deleteSync(recursive: true);
-      // Closes stdin for the entire program.
-      await sharedStdIn.terminate();
     }
   }
 }
