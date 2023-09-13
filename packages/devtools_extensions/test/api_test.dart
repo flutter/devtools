@@ -222,7 +222,7 @@ void main() {
           'id': 'fooMessageId',
           'message': 'foo message',
           'bannerMessageType': 'warning',
-          'extensionName': 'foo_package',
+          'extensionName': 'foo',
         },
       });
       final showBannerMessageEvent =
@@ -231,14 +231,14 @@ void main() {
       expect(showBannerMessageEvent.messageId, 'fooMessageId');
       expect(showBannerMessageEvent.message, 'foo message');
       expect(showBannerMessageEvent.bannerMessageType, 'warning');
-      expect(showBannerMessageEvent.extensionName, 'foo_package');
+      expect(showBannerMessageEvent.extensionName, 'foo');
     });
     test('throws for unexpected values', () async {
       final event1 = DevToolsExtensionEvent.parse({
         'type': 'showBannerMessage',
         'data': {
           // Missing required fields.
-          'extensionName': 'foo_package',
+          'extensionName': 'foo',
         },
       });
       expect(
@@ -255,7 +255,7 @@ void main() {
           'bad_key': 'fooMessageId',
           'messages': 'foo message',
           'bannerMessageTypeee': 'warning',
-          'extension_name': 'foo_package',
+          'extension_name': 'foo',
         },
       });
       expect(
@@ -272,7 +272,7 @@ void main() {
           'id': 1,
           'message': 'foo message',
           'bannerMessageType': 2.0,
-          'extensionName': 'foo_package',
+          'extensionName': 'foo',
         },
       });
       expect(
@@ -289,7 +289,7 @@ void main() {
           'id': 'fooMessageId',
           'message': 'foo message',
           'bannerMessageType': 'warning',
-          'extensionName': 'foo_package',
+          'extensionName': 'foo',
         },
       });
       expect(
