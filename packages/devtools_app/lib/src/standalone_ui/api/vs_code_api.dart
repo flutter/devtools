@@ -76,7 +76,7 @@ abstract interface class VsCodeApi {
   static const jsonCommandParameter = 'command';
   static const jsonArgumentsParameter = 'arguments';
   static const jsonIdParameter = 'id';
-  static const openPageParameter = 'page';
+  static const jsonOpenPageParameter = 'page';
   static const jsonDebugSessionIdParameter = 'debugSessionId';
 }
 

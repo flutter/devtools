@@ -65,7 +65,7 @@ final class VsCodeApiImpl extends ToolApiImpl implements VsCodeApi {
       VsCodeApi.jsonOpenDevToolsPageMethod,
       {
         VsCodeApi.jsonDebugSessionIdParameter: debugSessionId,
-        VsCodeApi.openPageParameter: page,
+        VsCodeApi.jsonOpenPageParameter: page,
       },
     );
   }
