@@ -48,7 +48,7 @@ material_icon_code_point: '0xe0b1'
 
 Now it is time to build your extension.
 
-## Develop a DevTools extension
+## Create a DevTools extension
 
 ### Where to put your source code
 
