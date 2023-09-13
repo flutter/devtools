@@ -98,8 +98,7 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController
   @override
   void forceReload() {
     if (_extensionIFrame.contentWindow != null) {
-      // ignore: unsafe_html, forcing reload by resetting the pre-existing
-      // IFrame src.
+      // ignore: unsafe_html, forcing reload by resetting the pre-existing IFrame src.
       _extensionIFrame.src = _extensionIFrame.src;
     }
   }
