@@ -63,10 +63,7 @@ void main() {
         );
         expect(find.richTextContaining('(v1.0.0)'), findsOneWidget);
         expect(find.richTextContaining('Report an issue'), findsOneWidget);
-        await verifyContextMenuContents(
-          tester,
-          disableActionVisible: false,
-        );
+        expect(_extensionContextMenuFinder, findsNothing);
         expect(find.byType(EnableExtensionPrompt), findsOneWidget);
         expect(find.byType(EmbeddedExtensionView), findsNothing);
 
@@ -79,10 +76,7 @@ void main() {
         );
         expect(find.richTextContaining('(v2.0.0)'), findsOneWidget);
         expect(find.richTextContaining('Report an issue'), findsOneWidget);
-        await verifyContextMenuContents(
-          tester,
-          disableActionVisible: false,
-        );
+        expect(_extensionContextMenuFinder, findsNothing);
         expect(find.byType(EnableExtensionPrompt), findsOneWidget);
         expect(find.byType(EmbeddedExtensionView), findsNothing);
 
@@ -95,10 +89,7 @@ void main() {
         );
         expect(find.richTextContaining('(v3.0.0)'), findsOneWidget);
         expect(find.richTextContaining('Report an issue'), findsOneWidget);
-        await verifyContextMenuContents(
-          tester,
-          disableActionVisible: false,
-        );
+        expect(_extensionContextMenuFinder, findsNothing);
         expect(find.byType(EnableExtensionPrompt), findsOneWidget);
         expect(find.byType(EmbeddedExtensionView), findsNothing);
       },
@@ -122,10 +113,7 @@ void main() {
         );
         expect(find.richTextContaining('(v1.0.0)'), findsOneWidget);
         expect(find.richTextContaining('Report an issue'), findsOneWidget);
-        await verifyContextMenuContents(
-          tester,
-          disableActionVisible: true,
-        );
+        await verifyContextMenuContents(tester);
         expect(find.byType(EnableExtensionPrompt), findsNothing);
         expect(find.byType(EmbeddedExtensionView), findsOneWidget);
       },
@@ -149,10 +137,7 @@ void main() {
         );
         expect(find.richTextContaining('(v1.0.0)'), findsOneWidget);
         expect(find.richTextContaining('Report an issue'), findsOneWidget);
-        await verifyContextMenuContents(
-          tester,
-          disableActionVisible: false,
-        );
+        expect(_extensionContextMenuFinder, findsNothing);
         expect(find.byType(EnableExtensionPrompt), findsOneWidget);
         expect(find.byType(EmbeddedExtensionView), findsNothing);
       },
@@ -170,10 +155,7 @@ void main() {
         );
         expect(find.byType(EnableExtensionPrompt), findsOneWidget);
         expect(find.byType(EmbeddedExtensionView), findsNothing);
-        await verifyContextMenuContents(
-          tester,
-          disableActionVisible: false,
-        );
+        expect(_extensionContextMenuFinder, findsNothing);
 
         await tester.tap(
           find.descendant(
@@ -191,7 +173,6 @@ void main() {
         expect(find.byType(EmbeddedExtensionView), findsOneWidget);
         await verifyContextMenuContents(
           tester,
-          disableActionVisible: true,
           autoDismiss: false,
         );
 
@@ -209,10 +190,7 @@ void main() {
         );
         expect(find.byType(EnableExtensionPrompt), findsOneWidget);
         expect(find.byType(EmbeddedExtensionView), findsNothing);
-        await verifyContextMenuContents(
-          tester,
-          disableActionVisible: false,
-        );
+        expect(_extensionContextMenuFinder, findsNothing);
       },
     );
   });
@@ -220,24 +198,21 @@ void main() {
 
 Future<void> verifyContextMenuContents(
   WidgetTester tester, {
-  required bool disableActionVisible,
   bool autoDismiss = true,
 }) async {
-  final contextMenuFinder = find.descendant(
-    of: find.byType(EmbeddedExtensionHeader),
-    matching: find.byType(ContextMenuButton),
-  );
-  expect(contextMenuFinder, findsOneWidget);
-  await tester.tap(contextMenuFinder);
+  expect(_extensionContextMenuFinder, findsOneWidget);
+  await tester.tap(_extensionContextMenuFinder);
   await tester.pumpAndSettle();
-  expect(
-    find.text('Disable extension'),
-    disableActionVisible ? findsOneWidget : findsNothing,
-  );
+  expect(find.text('Disable extension'), findsOneWidget);
   expect(find.text('Force reload extension'), findsOneWidget);
   if (autoDismiss) {
     // Tap the context menu again to dismiss it.
-    await tester.tap(contextMenuFinder);
+    await tester.tap(_extensionContextMenuFinder);
     await tester.pumpAndSettle();
   }
 }
+
+Finder get _extensionContextMenuFinder => find.descendant(
+      of: find.byType(EmbeddedExtensionHeader),
+      matching: find.byType(ContextMenuButton),
+    );

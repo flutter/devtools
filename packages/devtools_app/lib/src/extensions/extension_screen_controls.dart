@@ -61,11 +61,11 @@ class EmbeddedExtensionHeader extends StatelessWidget {
           valueListenable:
               extensionService.enabledStateListenable(extension.displayName),
           builder: (context, activationState, _) {
-            return ContextMenuButton(
-              iconSize: defaultIconSize,
-              buttonWidth: buttonMinWidth,
-              menuChildren: <Widget>[
-                if (activationState == ExtensionEnabledState.enabled)
+            if (activationState == ExtensionEnabledState.enabled) {
+              return ContextMenuButton(
+                iconSize: defaultIconSize,
+                buttonWidth: buttonMinWidth,
+                menuChildren: <Widget>[
                   PointerInterceptor(
                     child: MenuItemButton(
                       onPressed: () {
@@ -87,23 +87,25 @@ class EmbeddedExtensionHeader extends StatelessWidget {
                       ),
                     ),
                   ),
-                PointerInterceptor(
-                  child: MenuItemButton(
-                    onPressed: () {
-                      ga.select(
-                        gac.extensionScreenId,
-                        gac.extensionForceReload(extension.displayName),
-                      );
-                      onForceReload();
-                    },
-                    child: const MaterialIconLabel(
-                      label: 'Force reload extension',
-                      iconData: Icons.refresh,
+                  PointerInterceptor(
+                    child: MenuItemButton(
+                      onPressed: () {
+                        ga.select(
+                          gac.extensionScreenId,
+                          gac.extensionForceReload(extension.displayName),
+                        );
+                        onForceReload();
+                      },
+                      child: const MaterialIconLabel(
+                        label: 'Force reload extension',
+                        iconData: Icons.refresh,
+                      ),
                     ),
                   ),
-                ),
-              ],
-            );
+                ],
+              );
+            }
+            return const SizedBox.shrink();
           },
         ),
       ],
