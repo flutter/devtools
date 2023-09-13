@@ -47,4 +47,4 @@ TODO: Remove this section if there are not any general updates.
 ## Full commit history
 
 To find a complete list of changes in this release, check out the
-[DevTools git log](https://github.com/flutter/devtools/tree/<number>).
+[DevTools git log](https://github.com/flutter/devtools/tree/v<number>).
