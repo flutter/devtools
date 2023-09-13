@@ -16,12 +16,14 @@ import 'globals.dart';
 final debugDevToolsExtensions = false || integrationTestMode;
 
 List<DevToolsExtensionConfig> debugHandleRefreshAvailableExtensions(
+  // ignore: avoid-unused-parameters, false positive due to conditional imports
   String rootPath,
 ) {
   return debugExtensions;
 }
 
 ExtensionEnabledState debugHandleExtensionEnabledState({
+  // ignore: avoid-unused-parameters, false positive due to conditional imports
   required String rootPath,
   required String extensionName,
   bool? enable,
