@@ -30,7 +30,7 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          wrap(
+          wrapSimple(
             EditableList(
               entries: entries([]),
               textFieldLabel: label,
@@ -59,7 +59,7 @@ void main() {
           gaScreen: '',
         );
         await tester.pumpWidget(
-          wrap(widget),
+          wrapSimple(widget),
         );
 
         final actionBar = find.byType(EditableListActionBar);
@@ -94,7 +94,7 @@ void main() {
           gaScreen: '',
         );
         await tester.pumpWidget(
-          wrap(widget),
+          wrapSimple(widget),
         );
         final refreshButton = find.byType(RefreshButton);
 
@@ -121,7 +121,7 @@ void main() {
           gaScreen: '',
         );
         await tester.pumpWidget(
-          wrap(widget),
+          wrapSimple(widget),
         );
         final removeButton = find.byType(EditableListRemoveDirectoryButton);
 
@@ -150,7 +150,7 @@ void main() {
           gaScreen: '',
         );
         await tester.pumpWidget(
-          wrap(widget),
+          wrapSimple(widget),
         );
         final copyButton = find.byType(EditableListCopyDirectoryButton);
 
@@ -175,7 +175,7 @@ void main() {
             gaScreen: '',
           );
           await tester.pumpWidget(
-            wrap(widget),
+            wrapSimple(widget),
           );
 
           final actionBar = find.byType(EditableListActionBar);
@@ -208,7 +208,7 @@ void main() {
             gaScreen: '',
           );
           await tester.pumpWidget(
-            wrap(widget),
+            wrapSimple(widget),
           );
           final removeButton = find.byType(EditableListRemoveDirectoryButton);
 

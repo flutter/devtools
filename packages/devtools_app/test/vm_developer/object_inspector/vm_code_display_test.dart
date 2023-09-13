@@ -227,7 +227,7 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          wrap(
+          wrapSimple(
             VmCodeDisplay(
               code: mockCodeObject,
               controller: ObjectInspectorViewController(),

@@ -12,6 +12,7 @@ import 'package:devtools_extensions/api.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/banner_messages.dart';
+import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
 import '_controller_web.dart';
 import 'controller.dart';
@@ -25,7 +26,8 @@ class EmbeddedExtension extends StatefulWidget {
   State<EmbeddedExtension> createState() => _EmbeddedExtensionState();
 }
 
-class _EmbeddedExtensionState extends State<EmbeddedExtension> {
+class _EmbeddedExtensionState extends State<EmbeddedExtension>
+    with AutoDisposeMixin {
   late final EmbeddedExtensionControllerImpl _embeddedExtensionController;
   late final _ExtensionIFrameController iFrameController;
 
@@ -42,8 +44,16 @@ class _EmbeddedExtensionState extends State<EmbeddedExtension> {
   Widget build(BuildContext context) {
     return Container(
       color: Theme.of(context).scaffoldBackgroundColor,
-      child: HtmlElementView(
-        viewType: _embeddedExtensionController.viewId,
+      child: ValueListenableBuilder<bool>(
+        valueListenable: extensionService.refreshInProgress,
+        builder: (context, refreshing, _) {
+          if (refreshing) {
+            return const CenteredCircularProgressIndicator();
+          }
+          return HtmlElementView(
+            viewType: _embeddedExtensionController.viewId,
+          );
+        },
       ),
     );
   }

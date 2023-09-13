@@ -88,11 +88,11 @@ class ExtensionsManager {
         );
 
         try {
-          final pluginConfig = DevToolsExtensionConfig.parse({
+          final extensionConfig = DevToolsExtensionConfig.parse({
             ...config,
             DevToolsExtensionConfig.pathKey: location,
           });
-          devtoolsExtensions.add(pluginConfig);
+          devtoolsExtensions.add(extensionConfig);
         } on StateError catch (e) {
           print(e.message);
           continue;

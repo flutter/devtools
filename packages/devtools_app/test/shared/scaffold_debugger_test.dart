@@ -69,6 +69,7 @@ void main() {
       await tester.pumpWidget(
         wrapWithControllers(
           DevToolsScaffold(
+            page: DebuggerScreen.id,
             screens: [
               _TestScreen(
                 DebuggerScreen.id,

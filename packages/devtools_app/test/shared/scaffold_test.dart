@@ -58,6 +58,7 @@ void main() {
       await tester.pumpWidget(
         wrapScaffold(
           DevToolsScaffold(
+            page: _screen1.screenId,
             screens: const [_screen1, _screen2, _screen3, _screen4, _screen5],
           ),
         ),
@@ -81,6 +82,7 @@ void main() {
       await tester.pumpWidget(
         wrapScaffold(
           DevToolsScaffold(
+            page: _screen1.screenId,
             screens: const [_screen1, _screen2, _screen3, _screen4, _screen5],
           ),
         ),
@@ -104,6 +106,7 @@ void main() {
       await tester.pumpWidget(
         wrapScaffold(
           DevToolsScaffold(
+            page: _screen1.screenId,
             screens: const [_screen1, _screen2, _screen3, _screen4, _screen5],
           ),
         ),
@@ -154,7 +157,7 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(
         wrapScaffold(
-          DevToolsScaffold(screens: const [_screen1]),
+          DevToolsScaffold(page: _screen1.screenId, screens: const [_screen1]),
         ),
       );
       expect(find.byKey(_k1), findsOneWidget);
@@ -165,7 +168,10 @@ void main() {
   testWidgets('displays only the selected tab', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrapScaffold(
-        DevToolsScaffold(screens: const [_screen1, _screen2]),
+        DevToolsScaffold(
+          page: _screen1.screenId,
+          screens: const [_screen1, _screen2],
+        ),
       ),
     );
     expect(find.byKey(_k1), findsOneWidget);

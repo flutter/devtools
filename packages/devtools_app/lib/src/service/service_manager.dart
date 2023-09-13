@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
@@ -34,6 +35,10 @@ final _log = Logger('service_manager');
 const debugLogServiceProtocolEvents = false;
 
 const defaultRefreshRate = 60.0;
+
+/// The amount of time we will wait for the main isolate to become non-null when
+/// calling [ServiceConnectionManager.rootLibraryForMainIsolate].
+const _waitForRootLibraryTimeout = Duration(seconds: 3);
 
 class ServiceConnectionManager {
   ServiceConnectionManager() {
@@ -167,9 +172,10 @@ class ServiceConnectionManager {
   }
 
   Future<String?> rootLibraryForMainIsolate() async {
-    if (!serviceManager.connectedState.value.connected) return null;
-
-    final mainIsolateRef = serviceManager.isolateManager.mainIsolate.value;
+    final mainIsolateRef = await whenValueNonNull(
+      serviceManager.isolateManager.mainIsolate,
+      timeout: _waitForRootLibraryTimeout,
+    );
     if (mainIsolateRef == null) return null;
 
     final isolateState =

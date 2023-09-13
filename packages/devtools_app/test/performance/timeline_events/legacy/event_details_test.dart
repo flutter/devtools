@@ -21,7 +21,7 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        wrap(EventDetails(selectedEvent)),
+        wrapSimple(EventDetails(selectedEvent)),
       );
       expect(find.byType(EventDetails), findsOneWidget);
     }
@@ -85,7 +85,7 @@ void main() {
     EventSummary eventSummary;
     testWidgets('event with connected events', (WidgetTester tester) async {
       eventSummary = EventSummary(asyncEventWithInstantChildren);
-      await tester.pumpWidget(wrap(eventSummary));
+      await tester.pumpWidget(wrapSimple(eventSummary));
       expect(find.byType(EventSummary), findsOneWidget);
       expect(find.text('Time:  29.1 ms'), findsOneWidget);
       expect(find.text('Thread id:  19333'), findsOneWidget);
@@ -97,7 +97,7 @@ void main() {
 
     testWidgets('event without connected events', (WidgetTester tester) async {
       eventSummary = EventSummary(goldenUiTimelineEvent);
-      await tester.pumpWidget(wrap(eventSummary));
+      await tester.pumpWidget(wrapSimple(eventSummary));
       expect(find.byType(EventSummary), findsOneWidget);
       expect(find.text('Time:  1.6 ms'), findsOneWidget);
       expect(find.text('Thread id:  1'), findsOneWidget);
@@ -109,7 +109,7 @@ void main() {
 
     testWidgets('event with args', (WidgetTester tester) async {
       eventSummary = EventSummary(goldenRasterTimelineEvent);
-      await tester.pumpWidget(wrap(eventSummary));
+      await tester.pumpWidget(wrapSimple(eventSummary));
       expect(find.byType(EventSummary), findsOneWidget);
       expect(find.text('Time:  28.4 ms'), findsOneWidget);
       expect(find.text('Thread id:  2'), findsOneWidget);
@@ -121,7 +121,7 @@ void main() {
 
     testWidgets('event without args', (WidgetTester tester) async {
       eventSummary = EventSummary(goldenUiTimelineEvent);
-      await tester.pumpWidget(wrap(eventSummary));
+      await tester.pumpWidget(wrapSimple(eventSummary));
       expect(find.byType(EventSummary), findsOneWidget);
       expect(find.text('Time:  1.6 ms'), findsOneWidget);
       expect(find.text('Thread id:  1'), findsOneWidget);
