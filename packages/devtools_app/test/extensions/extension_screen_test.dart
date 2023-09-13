@@ -113,7 +113,7 @@ void main() {
         );
         expect(find.richTextContaining('(v1.0.0)'), findsOneWidget);
         expect(find.richTextContaining('Report an issue'), findsOneWidget);
-        await verifyContextMenuContents(tester);
+        await _verifyContextMenuContents(tester);
         expect(find.byType(EnableExtensionPrompt), findsNothing);
         expect(find.byType(EmbeddedExtensionView), findsOneWidget);
       },
@@ -171,7 +171,7 @@ void main() {
         );
         expect(find.byType(EnableExtensionPrompt), findsNothing);
         expect(find.byType(EmbeddedExtensionView), findsOneWidget);
-        await verifyContextMenuContents(
+        await _verifyContextMenuContents(
           tester,
           autoDismiss: false,
         );
@@ -196,7 +196,7 @@ void main() {
   });
 }
 
-Future<void> verifyContextMenuContents(
+Future<void> _verifyContextMenuContents(
   WidgetTester tester, {
   bool autoDismiss = true,
 }) async {
