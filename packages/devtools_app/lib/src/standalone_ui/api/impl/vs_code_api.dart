@@ -45,8 +45,8 @@ final class VsCodeApiImpl extends ToolApiImpl implements VsCodeApi {
     return sendRequest(
       VsCodeApi.jsonExecuteCommandMethod,
       {
-        VsCodeApi.jsonExecuteCommandCommandParameter: command,
-        VsCodeApi.jsonExecuteCommandArgumentsParameter: arguments,
+        VsCodeApi.jsonCommandParameter: command,
+        VsCodeApi.jsonArgumentsParameter: arguments,
       },
     );
   }
@@ -55,17 +55,37 @@ final class VsCodeApiImpl extends ToolApiImpl implements VsCodeApi {
   Future<bool> selectDevice(String id) {
     return sendRequest(
       VsCodeApi.jsonSelectDeviceMethod,
-      {VsCodeApi.jsonSelectDeviceIdParameter: id},
+      {VsCodeApi.jsonIdParameter: id},
     );
   }
 
   @override
   Future<void> openDevToolsPage(String debugSessionId, String page) {
     return sendRequest(
-      VsCodeApi.openDevToolsPageMethod,
+      VsCodeApi.jsonOpenDevToolsPageMethod,
       {
-        VsCodeApi.openDevToolsPageDebugSessionIdParameter: debugSessionId,
-        VsCodeApi.openDevToolsPagePageParameter: page,
+        VsCodeApi.jsonDebugSessionIdParameter: debugSessionId,
+        VsCodeApi.jsonOpenPageParameter: page,
+      },
+    );
+  }
+
+  @override
+  Future<void> hotReload(String debugSessionId) {
+    return sendRequest(
+      VsCodeApi.jsonHotReloadMethod,
+      {
+        VsCodeApi.jsonDebugSessionIdParameter: debugSessionId,
+      },
+    );
+  }
+
+  @override
+  Future<void> hotRestart(String debugSessionId) {
+    return sendRequest(
+      VsCodeApi.jsonHotRestartMethod,
+      {
+        VsCodeApi.jsonDebugSessionIdParameter: debugSessionId,
       },
     );
   }
@@ -247,4 +267,10 @@ class VsCodeCapabilitiesImpl implements VsCodeCapabilities {
   @override
   bool get openDevToolsPage =>
       _raw?[VsCodeCapabilities.openDevToolsPageField] == true;
+
+  @override
+  bool get hotReload => _raw?[VsCodeCapabilities.hotReloadField] == true;
+
+  @override
+  bool get hotRestart => _raw?[VsCodeCapabilities.hotRestartField] == true;
 }

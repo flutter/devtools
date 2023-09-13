@@ -66,6 +66,8 @@ class MockDartToolingApi extends DartToolingApiImpl {
         'executeCommand': true,
         'selectDevice': true,
         'openDevToolsPage': true,
+        'hotReload': true,
+        'hotRestart': true,
       };
     });
     server.registerMethod('vsCode.initialize', initialize);
