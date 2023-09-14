@@ -31,10 +31,10 @@ class BannerMessagesController {
   final _dismissedMessageKeys = <Key?>{};
 
   /// Adds a banner message to top of DevTools.
-  /// 
+  ///
   /// If the message is already visible or has already been dismissed, this
   /// method call will be a no-op.
-  /// 
+  ///
   /// [callInPostFrameCallback] determines whether the message will be added in
   /// a post frame callback. This should be true (default) whenever this method
   /// is called from a Flutter lifecycle method (initState,
