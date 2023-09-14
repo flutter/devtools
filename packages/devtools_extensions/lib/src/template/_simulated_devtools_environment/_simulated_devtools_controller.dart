@@ -11,8 +11,18 @@ class _SimulatedDevToolsController extends DisposableController
   /// the extension and the simulated DevTools environment.
   final messageLogs = ListValueNotifier<_MessageLogEntry>([]);
 
+  /// The listener that is added to simulated DevTools window to receive
+  /// messages from the extension.
+  ///
+  /// We need to store this in a variable so that the listener is properly
+  /// removed in [dispose].
+  html.EventListener? _handleMessageListener;
+
   void init() {
-    html.window.addEventListener('message', _handleMessage);
+    html.window.addEventListener(
+      'message',
+      _handleMessageListener = _handleMessage,
+    );
     addAutoDisposeListener(serviceManager.connectedState, () {
       if (!serviceManager.connectedState.value.connected) {
         updateVmServiceConnection(uri: null);
@@ -36,7 +46,8 @@ class _SimulatedDevToolsController extends DisposableController
 
   @override
   void dispose() {
-    html.window.removeEventListener('message', _handleMessage);
+    html.window.removeEventListener('message', _handleMessageListener);
+    _handleMessageListener = null;
     super.dispose();
   }
 
