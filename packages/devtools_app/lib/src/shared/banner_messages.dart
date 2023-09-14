@@ -30,15 +30,26 @@ class BannerMessagesController {
   final _messages = <String, ListValueNotifier<BannerMessage>>{};
   final _dismissedMessageKeys = <Key?>{};
 
-  void addMessage(BannerMessage message) {
-    // We push the banner message in a post frame callback because otherwise,
-    // we'd be trying to call setState while the parent widget `BannerMessages`
-    // is in the middle of `build`.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+  void addMessage(
+    BannerMessage message, {
+    bool callInPostFrameCallback = true,
+  }) {
+    void add() {
       if (isMessageDismissed(message) || isMessageVisible(message)) return;
       final messages = _messagesForScreen(message.screenId);
       messages.add(message);
-    });
+    }
+
+    if (callInPostFrameCallback) {
+      // We push the banner message in a post frame callback because otherwise,
+      // we'd be trying to call setState while the parent widget `BannerMessages`
+      // is in the middle of `build`.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        add();
+      });
+    } else {
+      add();
+    }
   }
 
   void removeMessage(BannerMessage message, {bool dismiss = false}) {

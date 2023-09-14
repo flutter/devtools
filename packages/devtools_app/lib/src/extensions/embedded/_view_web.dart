@@ -292,6 +292,6 @@ class _ExtensionIFrameController extends DisposableController
         ),
       ],
     );
-    bannerMessages.addMessage(bannerMessage);
+    bannerMessages.addMessage(bannerMessage, callInPostFrameCallback: false);
   }
 }
