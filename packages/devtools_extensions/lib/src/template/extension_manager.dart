@@ -28,9 +28,19 @@ class ExtensionManager {
     _registeredEventHandlers[type] = handler;
   }
 
+  /// The listener that is added to the extension iFrame to receive messages
+  /// from DevTools.
+  ///
+  /// We need to store this in a variable so that the listener is properly
+  /// removed in [dispose].
+  html.EventListener? _handleMessageListener;
+
   // ignore: unused_element, false positive due to part files
   void _init({required bool connectToVmService}) {
-    html.window.addEventListener('message', _handleMessage);
+    html.window.addEventListener(
+      'message',
+      _handleMessageListener = _handleMessage,
+    );
 
     // TODO(kenz): handle the ide theme that may be part of the query params.
     final queryParams = loadQueryParams();
@@ -58,7 +68,8 @@ class ExtensionManager {
   // ignore: unused_element, false positive due to part files
   void _dispose() {
     _registeredEventHandlers.clear();
-    html.window.removeEventListener('message', _handleMessage);
+    html.window.removeEventListener('message', _handleMessageListener);
+    _handleMessageListener = null;
   }
 
   void _handleMessage(html.Event e) {

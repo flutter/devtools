@@ -41,6 +41,12 @@ class _EmbeddedExtensionState extends State<EmbeddedExtension>
   }
 
   @override
+  void dispose() {
+    iFrameController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Container(
       color: Theme.of(context).scaffoldBackgroundColor,
@@ -84,6 +90,14 @@ class _ExtensionIFrameController extends DisposableController
 
   static const _pollUntilReadyTimeout = Duration(seconds: 10);
 
+  /// The listener that is added to DevTools' [html.window] to receive messages
+  /// from the extension.
+  ///
+  /// We need to store this in a variable so that the listener is properly
+  /// removed in [dispose]. Otherwise, we will end up in a state where we are
+  /// leaking listeners when an extension is disabled and re-enabled.
+  html.EventListener? _handleMessageListener;
+
   void init() {
     _iFrameReady = Completer<void>();
 
@@ -93,7 +107,10 @@ class _ExtensionIFrameController extends DisposableController
       }),
     );
 
-    html.window.addEventListener('message', _handleMessage);
+    html.window.addEventListener(
+      'message',
+      _handleMessageListener = _handleMessage,
+    );
 
     autoDisposeStreamSubscription(
       embeddedExtensionController.extensionPostEventStream.stream
@@ -186,7 +203,8 @@ class _ExtensionIFrameController extends DisposableController
 
   @override
   void dispose() {
-    html.window.removeEventListener('message', _handleMessage);
+    html.window.removeEventListener('message', _handleMessageListener);
+    _handleMessageListener = null;
     _pollForExtensionHandlerReady?.cancel();
     super.dispose();
   }

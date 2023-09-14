@@ -1,3 +1,6 @@
+## 0.0.4
+* Fix a leaking event listener in the simulated DevTools environment.
+
 ## 0.0.3
 * Connect the template extension manager to the VM service URI that is passed as a
 query parameter to the embedded extension iFrame.
