@@ -418,12 +418,53 @@ class InspectorService extends InspectorServiceBase {
     return false;
   }
 
+  /// Ensures that addPubRootDirectories, getPubRootDirectories, and
+  /// removePubRootDirectories have all registered as services
+  /// before completing.
+  Future<void> waitUntilPubRootDirectoriesInitialized() {
+    final futureListener = Completer();
+    bool addAvailable = false;
+    bool getAvailable = false;
+    bool removeAvailable = false;
+    void checkIfComplete() {
+      if (addAvailable && getAvailable && removeAvailable) {
+        futureListener.complete();
+      }
+    }
+
+    serviceConnection.serviceManager
+        .registeredServiceListenable(
+            WidgetInspectorServiceExtensions.addPubRootDirectories.name)
+        .addListener(() {
+      addAvailable = true;
+      checkIfComplete();
+    });
+    serviceConnection.serviceManager
+        .registeredServiceListenable(
+            WidgetInspectorServiceExtensions.getPubRootDirectories.name)
+        .addListener(() {
+      getAvailable = true;
+      checkIfComplete();
+    });
+    serviceConnection.serviceManager
+        .registeredServiceListenable(
+            WidgetInspectorServiceExtensions.removePubRootDirectories.name)
+        .addListener(() {
+      removeAvailable = true;
+      checkIfComplete();
+    });
+
+    return futureListener.future;
+  }
+
   Future<void> addPubRootDirectories(List<String> rootDirectories) async {
+    await waitUntilPubRootDirectoriesInitialized();
     await _addPubRootDirectories(rootDirectories);
     await _onRootDirectoriesChanged(rootDirectories);
   }
 
   Future<void> removePubRootDirectories(List<String> rootDirectories) async {
+    await waitUntilPubRootDirectoriesInitialized();
     await _removePubRootDirectories(rootDirectories);
     await _onRootDirectoriesChanged(rootDirectories);
   }
@@ -446,6 +487,7 @@ class InspectorService extends InspectorServiceBase {
 
   Future<List<String>?> getPubRootDirectories() async {
     assert(useDaemonApi);
+    await waitUntilPubRootDirectoriesInitialized();
     final response = await invokeServiceMethodDaemonNoGroupArgs(
       WidgetInspectorServiceExtensions.getPubRootDirectories.name,
     );
