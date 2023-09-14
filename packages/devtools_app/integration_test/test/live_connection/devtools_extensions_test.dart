@@ -45,6 +45,8 @@ void main() {
       ],
     );
 
+    await _verifyExtensionVisibilitySetting(tester);
+
     // Bar extension.
     // Enable, test context menu actions, then disable from context menu.
     await _switchToExtensionScreen(
@@ -188,10 +190,7 @@ Future<void> _verifyExtensionTabVisibility(
   );
   final extensionConfig =
       extensionService.availableExtensions.value[extensionIndex];
-  final tabFinder = await findTabOrOpenOverflowMenu(
-    tester,
-    extensionConfig.icon,
-  );
+  final tabFinder = await findTab(tester, extensionConfig.icon);
   expect(tabFinder.evaluate(), visible ? isNotEmpty : isEmpty);
 }
 
@@ -304,6 +303,41 @@ Future<void> _changeExtensionSetting(
     find.descendant(
       of: find.byWidget(extensionSetting),
       matching: find.text(enable ? 'Enabled' : 'Disabled'),
+    ),
+  );
+  await tester.pumpAndSettle(shortPumpDuration);
+  await _closeExtensionSettingsMenu(tester);
+}
+
+Future<void> _verifyExtensionVisibilitySetting(WidgetTester tester) async {
+  logStatus('verify we can toggle the show only enabled extensions setting');
+  expect(
+    preferences.devToolsExtensions.showOnlyEnabledExtensions.value,
+    isFalse,
+  );
+  expect(extensionService.visibleExtensions.value.length, 3);
+  await _toggleShowOnlyEnabledExtensions(tester);
+  expect(
+    preferences.devToolsExtensions.showOnlyEnabledExtensions.value,
+    isTrue,
+  );
+  expect(extensionService.visibleExtensions.value.length, 0);
+
+  // Return the setting to its original state.
+  await _toggleShowOnlyEnabledExtensions(tester);
+  expect(
+    preferences.devToolsExtensions.showOnlyEnabledExtensions.value,
+    isFalse,
+  );
+  expect(extensionService.visibleExtensions.value.length, 3);
+}
+
+Future<void> _toggleShowOnlyEnabledExtensions(WidgetTester tester) async {
+  await _openExtensionSettingsMenu(tester);
+  await tester.tap(
+    find.descendant(
+      of: find.byType(ExtensionSettingsDialog),
+      matching: find.byType(NotifierCheckbox),
     ),
   );
   await tester.pumpAndSettle(shortPumpDuration);

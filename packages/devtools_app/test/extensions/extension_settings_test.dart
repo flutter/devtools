@@ -20,6 +20,7 @@ void main() {
   group('$ExtensionSettingsDialog', () {
     setUp(() async {
       dialog = const ExtensionSettingsDialog();
+      setGlobal(PreferencesController, PreferencesController());
       setGlobal(
         ExtensionService,
         await createMockExtensionServiceWithDefaults(testExtensions),
