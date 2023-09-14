@@ -1,3 +1,6 @@
+## 0.0.3
+* Bump `package:vm_service` dependency to ^11.10.0
+
 ## 0.0.2
 * Remove public `hasService` getter from `ServiceManager`.
 * Add optional `timeout` parameter to the `whenValueNonNull` utility.
