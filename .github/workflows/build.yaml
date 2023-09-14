@@ -19,98 +19,98 @@ jobs:
   flutter-prep:
     uses: ./.github/workflows/flutter-prep.yaml
 
-  # main:
-  #   name: main
-  #   needs: flutter-prep
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     fail-fast: false
-  #   steps:
-  #     - name: git clone
-  #       uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac
-  #     - name: Load Cached Flutter SDK
-  #       uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84
-  #       with:
-  #         path: |
-  #           ./flutter-sdk
-  #         key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
+  main:
+    name: main
+    needs: flutter-prep
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    steps:
+      - name: git clone
+        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac
+      - name: Load Cached Flutter SDK
+        uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84
+        with:
+          path: |
+            ./flutter-sdk
+          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
 
-  #     - name: tool/bots.sh
-  #       env:
-  #         BOT: main
-  #       run: ./tool/bots.sh
+      - name: tool/bots.sh
+        env:
+          BOT: main
+        run: ./tool/bots.sh
 
-  # test:
-  #   name: ${{ matrix.bot }}
-  #   needs: flutter-prep
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       bot:
-  #         - build_ddc
-  #         - build_dart2js
-  #         - test_ddc
-  #         - test_dart2js
-  #   steps:
-  #     - name: git clone
-  #       uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac
-  #     - name: Load Cached Flutter SDK
-  #       uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84
-  #       with:
-  #         path: |
-  #           ./flutter-sdk
-  #         key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
-  #     - name: tool/bots.sh
-  #       env:
-  #         BOT: ${{ matrix.bot }}
-  #         PLATFORM: vm
-  #       run: ./tool/bots.sh
+  test:
+    name: ${{ matrix.bot }}
+    needs: flutter-prep
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        bot:
+          - build_ddc
+          - build_dart2js
+          - test_ddc
+          - test_dart2js
+    steps:
+      - name: git clone
+        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac
+      - name: Load Cached Flutter SDK
+        uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84
+        with:
+          path: |
+            ./flutter-sdk
+          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
+      - name: tool/bots.sh
+        env:
+          BOT: ${{ matrix.bot }}
+          PLATFORM: vm
+        run: ./tool/bots.sh
 
-  # macos-test:
-  #   needs: flutter-prep
-  #   name: macos goldens ${{ matrix.bot }}
-  #   runs-on: macos-latest
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       bot:
-  #         - test_dart2js
-  #       only_golden:
-  #         - true
+  macos-test:
+    needs: flutter-prep
+    name: macos goldens ${{ matrix.bot }}
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        bot:
+          - test_dart2js
+        only_golden:
+          - true
 
-  #   steps:
-  #     - name: git clone
-  #       uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac
-  #     - name: Load Cached Flutter SDK
-  #       uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84
-  #       with:
-  #         path: |
-  #           ./flutter-sdk
-  #         key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
-  #     - name: tool/bots.sh
-  #       env:
-  #         BOT: ${{ matrix.bot }}
-  #         PLATFORM: vm
-  #         ONLY_GOLDEN: ${{ matrix.only_golden }}
-  #       run: ./tool/bots.sh
+    steps:
+      - name: git clone
+        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac
+      - name: Load Cached Flutter SDK
+        uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84
+        with:
+          path: |
+            ./flutter-sdk
+          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
+      - name: tool/bots.sh
+        env:
+          BOT: ${{ matrix.bot }}
+          PLATFORM: vm
+          ONLY_GOLDEN: ${{ matrix.only_golden }}
+        run: ./tool/bots.sh
 
-  #     - name: Upload Golden Failure Artifacts
-  #       uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32
-  #       if: failure()
-  #       with:
-  #         name: golden_image_failures.${{ matrix.bot }}
-  #         path: packages/devtools_app/test/**/failures/*.png
-  #     - name: Notify of Quick Fix
-  #       if: failure()
-  #       env:
-  #         WORKFLOW_ID: ${{ github.run_id }}
-  #       run: |
-  #         echo "::notice title=To Quickly Fix Goldens:: Run \`./tool/fix_goldens.sh $WORKFLOW_ID\` on your local branch."
+      - name: Upload Golden Failure Artifacts
+        uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32
+        if: failure()
+        with:
+          name: golden_image_failures.${{ matrix.bot }}
+          path: packages/devtools_app/test/**/failures/*.png
+      - name: Notify of Quick Fix
+        if: failure()
+        env:
+          WORKFLOW_ID: ${{ github.run_id }}
+        run: |
+          echo "::notice title=To Quickly Fix Goldens:: Run \`./tool/fix_goldens.sh $WORKFLOW_ID\` on your local branch."
 
   integration-test:
     name: integration-test ${{ matrix.bot }} - ${{ matrix.device }} - shard ${{ matrix.shard }}
-    # needs: flutter-prep
+    needs: flutter-prep
     runs-on: macos-latest
     strategy:
       fail-fast: false

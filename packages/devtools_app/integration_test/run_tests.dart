@@ -25,11 +25,11 @@ void main(List<String> args) async {
     return;
   }
 
-  // final chromedriver = ChromeDriver();
+  final chromedriver = ChromeDriver();
 
   try {
     // Start chrome driver before running the flutter integration test.
-    // await chromedriver.start();
+    await chromedriver.start();
 
     if (testRunnerArgs.testTarget != null) {
       // TODO(kenz): add support for specifying a directory as the target instead
@@ -54,19 +54,19 @@ void main(List<String> args) async {
         testFiles = testFiles.sublist(shardStart, shardEnd);
       }
 
-      print('would be testing files: $testFiles');
+      print('testing files: $testFiles');
 
-      // for (final testFile in testFiles) {
-      //   final testTarget = testFile.path;
-      //   final newArgsWithTarget = TestRunnerArgs([
-      //     ...args,
-      //     '--${TestRunnerArgs.testTargetArg}=$testTarget',
-      //   ]);
-      //   await _runTest(newArgsWithTarget);
-      // }
+      for (final testFile in testFiles) {
+        final testTarget = testFile.path;
+        final newArgsWithTarget = TestRunnerArgs([
+          ...args,
+          '--${TestRunnerArgs.testTargetArg}=$testTarget',
+        ]);
+        await _runTest(newArgsWithTarget);
+      }
     }
   } finally {
-    // await chromedriver.stop();
+    await chromedriver.stop();
   }
 }
 
