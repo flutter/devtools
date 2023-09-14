@@ -181,7 +181,7 @@ class ServiceConnectionManager {
     final isolateState =
         serviceManager.isolateManager.isolateState(mainIsolateRef);
     await isolateState.waitForIsolateLoad();
-    final rootLib = isolateState.rootInfo!.library;
+    final rootLib = isolateState.rootInfo?.library;
     if (rootLib == null) return null;
 
     final selectedIsolateRefId = mainIsolateRef.id!;

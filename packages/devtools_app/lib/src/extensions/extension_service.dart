@@ -49,7 +49,11 @@ class ExtensionService extends DisposableController
     addAutoDisposeListener(
       serviceConnection.serviceManager.connectedState,
       () async {
-        await _maybeRefreshExtensions();
+        if (serviceConnection.serviceManager.connectedState.value.connected) {
+          await _maybeRefreshExtensions();
+        } else {
+          _reset();
+        }
       },
     );
 
@@ -61,6 +65,8 @@ class ExtensionService extends DisposableController
         if (serviceConnection.serviceManager.isolateManager.mainIsolate.value !=
             null) {
           await _maybeRefreshExtensions();
+        } else {
+          _reset();
         }
       },
     );
@@ -136,6 +142,13 @@ class ExtensionService extends DisposableController
       );
       await _refreshExtensionEnabledStates();
     }
+  }
+
+  void _reset() {
+    _availableExtensions.value = [];
+    _visibleExtensions.value = [];
+    _extensionEnabledStates.clear();
+    _refreshInProgress.value = false;
   }
 }
 
