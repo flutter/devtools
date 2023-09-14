@@ -11,6 +11,7 @@ import 'package:devtools_app/src/extensions/embedded/view.dart';
 import 'package:devtools_app/src/extensions/extension_screen.dart';
 import 'package:devtools_app/src/extensions/extension_screen_controls.dart';
 import 'package:devtools_app/src/extensions/extension_settings.dart';
+import 'package:devtools_app/src/shared/development_helpers.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:devtools_test/devtools_integration_test.dart';
@@ -31,8 +32,13 @@ void main() {
     expect(testApp.vmServiceUri, isNotNull);
   });
 
+  tearDown(() {
+    resetDevToolsExtensionEnabledStates();
+  });
+
   testWidgets('end to end extensions flow', (tester) async {
     await pumpAndConnectDevTools(tester, testApp);
+    resetDevToolsExtensionEnabledStates();
 
     expect(extensionService.availableExtensions.value.length, 3);
     expect(extensionService.visibleExtensions.value.length, 3);
@@ -243,7 +249,7 @@ Future<void> _verifyContextMenuActions(WidgetTester tester) async {
   await tester.tap(disableExtensionFinder);
   await tester.pumpAndSettle(shortPumpDuration);
   await tester.tap(find.text('YES, DISABLE'));
-  await tester.pumpAndSettle(longPumpDuration);
+  await tester.pumpAndSettle(safePumpDuration);
 }
 
 Future<void> _verifyExtensionsSettingsMenu(
