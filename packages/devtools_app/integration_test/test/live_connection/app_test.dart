@@ -28,6 +28,9 @@ void main() {
   testWidgets('connect to app and switch tabs', (tester) async {
     await pumpAndConnectDevTools(tester, testApp);
 
+    // For the sake of this test, do not show extension screens by default.
+    preferences.devToolsExtensions.showOnlyEnabledExtensions.value = true;
+
     logStatus('verify that we can load each DevTools screen');
     final availableScreenIds = <String>[];
     for (final screen in devtoolsScreens!) {
