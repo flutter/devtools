@@ -110,7 +110,7 @@ jobs:
 
   integration-test:
     name: integration-test ${{ matrix.bot }} - ${{ matrix.device }} ${{ matrix.shard }}
-    needs: flutter-prep
+    # needs: flutter-prep
     runs-on: macos-latest
     strategy:
       fail-fast: false
