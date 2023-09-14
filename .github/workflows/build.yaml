@@ -109,7 +109,7 @@ jobs:
   #         echo "::notice title=To Quickly Fix Goldens:: Run \`./tool/fix_goldens.sh $WORKFLOW_ID\` on your local branch."
 
   integration-test:
-    name: integration-test ${{ matrix.bot }} - ${{ matrix.device }}
+    name: integration-test ${{ matrix.bot }} - ${{ matrix.device }} ${{ matrix.shard }}
     needs: flutter-prep
     runs-on: macos-latest
     strategy:
