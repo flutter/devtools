@@ -22,25 +22,23 @@ class Devices extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Devices',
-          style: Theme.of(context).textTheme.titleSmall,
+          style: Theme.of(context).textTheme.titleMedium,
         ),
         if (devices.isEmpty)
           const Text('Connect a device or enable web/desktop platforms.')
         else
           Table(
-            columnWidths: const {
-              0: FlexColumnWidth(3),
-              1: FlexColumnWidth(),
-            },
             defaultVerticalAlignment: TableCellVerticalAlignment.middle,
             children: [
               for (final device in devices)
                 _createDeviceRow(
+                  colorScheme,
                   device,
                   isSelected: device.id == selectedDeviceId,
                 ),
@@ -50,18 +48,29 @@ class Devices extends StatelessWidget {
     );
   }
 
-  TableRow _createDeviceRow(VsCodeDevice device, {required bool isSelected}) {
+  TableRow _createDeviceRow(
+    ColorScheme colorScheme,
+    VsCodeDevice device, {
+    required bool isSelected,
+  }) {
     return TableRow(
+      decoration: BoxDecoration(color: isSelected ? colorScheme.primary : null),
       children: [
-        Align(
-          alignment: Alignment.centerLeft,
+        SizedBox(
+          width: double.infinity,
           child: TextButton(
-            child: Text(device.name),
+            style: TextButton.styleFrom(
+              alignment: Alignment.centerLeft,
+              shape: const ContinuousRectangleBorder(),
+            ),
+            child: Text(
+              device.name,
+              style:
+                  TextStyle(color: isSelected ? colorScheme.onPrimary : null),
+            ),
             onPressed: () => unawaited(api.selectDevice(device.id)),
           ),
         ),
-        // TODO(dantup): Use a highlighted/select row for this instead of text.
-        Text(isSelected ? 'current device' : ''),
       ],
     );
   }

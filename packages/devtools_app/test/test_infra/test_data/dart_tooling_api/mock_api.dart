@@ -74,6 +74,8 @@ class MockDartToolingApi extends DartToolingApiImpl {
     server.registerMethod('vsCode.executeCommand', executeCommand);
     server.registerMethod('vsCode.selectDevice', selectDevice);
     server.registerMethod('vsCode.openDevToolsPage', noOpHandler);
+    server.registerMethod('vsCode.hotReload', noOpHandler);
+    server.registerMethod('vsCode.hotRestart', noOpHandler);
   }
 
   final json_rpc_2.Peer client;
