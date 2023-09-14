@@ -21,7 +21,7 @@ class ExtensionScreen extends Screen {
       : super.conditional(
           // TODO(kenz): we may need to ensure this is a unique id.
           id: '${extensionConfig.name}_ext',
-          title: extensionConfig.name.toSentenceCase(),
+          title: extensionConfig.screenTitle,
           icon: extensionConfig.icon,
           // TODO(kenz): support static DevTools extensions.
           requiresConnection: true,
@@ -97,7 +97,10 @@ class ExtensionView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        EmbeddedExtensionHeader(extension: extension),
+        EmbeddedExtensionHeader(
+          extension: extension,
+          onForceReload: controller.forceReload,
+        ),
         const SizedBox(height: intermediateSpacing),
         Expanded(
           child: ValueListenableBuilder<ExtensionEnabledState>(
@@ -128,4 +131,6 @@ extension ExtensionConfigExtension on DevToolsExtensionConfig {
         materialIconCodePoint,
         fontFamily: 'MaterialIcons',
       );
+
+  String get screenTitle => name.toSentenceCase();
 }

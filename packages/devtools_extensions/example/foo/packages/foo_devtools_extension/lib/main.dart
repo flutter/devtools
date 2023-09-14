@@ -95,7 +95,7 @@ class _FooExtensionHomePageState extends State<FooExtensionHomePage> {
                     type: 'warning',
                     message:
                         'Warning: with great power, comes great responsibility.',
-                    extensionName: 'foo_package',
+                    extensionName: 'foo',
                   ),
                   child: const Text('Show DevTools warning'),
                 ),

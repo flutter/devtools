@@ -63,7 +63,7 @@ void main() {
         );
         expect(find.richTextContaining('(v1.0.0)'), findsOneWidget);
         expect(find.richTextContaining('Report an issue'), findsOneWidget);
-        expect(find.byType(DisableExtensionButton), findsNothing);
+        expect(_extensionContextMenuFinder, findsNothing);
         expect(find.byType(EnableExtensionPrompt), findsOneWidget);
         expect(find.byType(EmbeddedExtensionView), findsNothing);
 
@@ -76,7 +76,7 @@ void main() {
         );
         expect(find.richTextContaining('(v2.0.0)'), findsOneWidget);
         expect(find.richTextContaining('Report an issue'), findsOneWidget);
-        expect(find.byType(DisableExtensionButton), findsNothing);
+        expect(_extensionContextMenuFinder, findsNothing);
         expect(find.byType(EnableExtensionPrompt), findsOneWidget);
         expect(find.byType(EmbeddedExtensionView), findsNothing);
 
@@ -89,7 +89,7 @@ void main() {
         );
         expect(find.richTextContaining('(v3.0.0)'), findsOneWidget);
         expect(find.richTextContaining('Report an issue'), findsOneWidget);
-        expect(find.byType(DisableExtensionButton), findsNothing);
+        expect(_extensionContextMenuFinder, findsNothing);
         expect(find.byType(EnableExtensionPrompt), findsOneWidget);
         expect(find.byType(EmbeddedExtensionView), findsNothing);
       },
@@ -113,7 +113,7 @@ void main() {
         );
         expect(find.richTextContaining('(v1.0.0)'), findsOneWidget);
         expect(find.richTextContaining('Report an issue'), findsOneWidget);
-        expect(find.byType(DisableExtensionButton), findsOneWidget);
+        await _verifyContextMenuContents(tester);
         expect(find.byType(EnableExtensionPrompt), findsNothing);
         expect(find.byType(EmbeddedExtensionView), findsOneWidget);
       },
@@ -137,7 +137,7 @@ void main() {
         );
         expect(find.richTextContaining('(v1.0.0)'), findsOneWidget);
         expect(find.richTextContaining('Report an issue'), findsOneWidget);
-        expect(find.byType(DisableExtensionButton), findsNothing);
+        expect(_extensionContextMenuFinder, findsNothing);
         expect(find.byType(EnableExtensionPrompt), findsOneWidget);
         expect(find.byType(EmbeddedExtensionView), findsNothing);
       },
@@ -155,7 +155,7 @@ void main() {
         );
         expect(find.byType(EnableExtensionPrompt), findsOneWidget);
         expect(find.byType(EmbeddedExtensionView), findsNothing);
-        expect(find.byType(DisableExtensionButton), findsNothing);
+        expect(_extensionContextMenuFinder, findsNothing);
 
         await tester.tap(
           find.descendant(
@@ -171,9 +171,12 @@ void main() {
         );
         expect(find.byType(EnableExtensionPrompt), findsNothing);
         expect(find.byType(EmbeddedExtensionView), findsOneWidget);
-        expect(find.byType(DisableExtensionButton), findsOneWidget);
+        await _verifyContextMenuContents(
+          tester,
+          autoDismiss: false,
+        );
 
-        await tester.tap(find.byType(DisableExtensionButton));
+        await tester.tap(find.text('Disable extension'));
         await tester.pumpAndSettle();
 
         expect(find.byType(DisableExtensionDialog), findsOneWidget);
@@ -187,8 +190,29 @@ void main() {
         );
         expect(find.byType(EnableExtensionPrompt), findsOneWidget);
         expect(find.byType(EmbeddedExtensionView), findsNothing);
-        expect(find.byType(DisableExtensionButton), findsNothing);
+        expect(_extensionContextMenuFinder, findsNothing);
       },
     );
   });
 }
+
+Future<void> _verifyContextMenuContents(
+  WidgetTester tester, {
+  bool autoDismiss = true,
+}) async {
+  expect(_extensionContextMenuFinder, findsOneWidget);
+  await tester.tap(_extensionContextMenuFinder);
+  await tester.pumpAndSettle();
+  expect(find.text('Disable extension'), findsOneWidget);
+  expect(find.text('Force reload extension'), findsOneWidget);
+  if (autoDismiss) {
+    // Tap the context menu again to dismiss it.
+    await tester.tap(_extensionContextMenuFinder);
+    await tester.pumpAndSettle();
+  }
+}
+
+Finder get _extensionContextMenuFinder => find.descendant(
+      of: find.byType(EmbeddedExtensionHeader),
+      matching: find.byType(ContextMenuButton),
+    );

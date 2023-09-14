@@ -3,7 +3,10 @@ This is draft for future release notes, that are going to land on
 
 # DevTools 2.28.0 release notes
 
-Dart & Flutter DevTools - A Suite of Performance Tools for Dart and Flutter
+The 2.28.0 release of the Dart and Flutter DevTools
+includes the following changes among other general improvements.
+To learn more about DevTools, check out the
+[DevTools overview](https://docs.flutter.dev/tools/devtools/overview).
 
 ## General updates
 
@@ -38,7 +41,7 @@ TODO: Remove this section if there are not any general updates.
 * Improved responsiveness of the top bar on the Logging view -
   [#6281](https://github.com/flutter/devtools/pull/6281)
 
-* Add the ability to copy filtered logs -
+* Added the ability to copy filtered logs -
   [#6260](https://github.com/flutter/devtools/pull/6260)
 
   ![The copy button on the Logging view to the right of the filter tool](images/logger_copy.png "The Logging view copy button")
@@ -49,5 +52,5 @@ TODO: Remove this section if there are not any general updates.
 
 ## Full commit history
 
-More details about changes and fixes are available from the
-[DevTools git log](https://github.com/flutter/devtools/commits/master).
+To find a complete list of changes in this release, check out the
+[DevTools git log](https://github.com/flutter/devtools/tree/v2.28.0).
