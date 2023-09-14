@@ -30,6 +30,7 @@ void main() {
 
     // For the sake of this test, do not show extension screens by default.
     preferences.devToolsExtensions.showOnlyEnabledExtensions.value = true;
+    await tester.pumpAndSettle(shortPumpDuration);
 
     logStatus('verify that we can load each DevTools screen');
     final availableScreenIds = <String>[];

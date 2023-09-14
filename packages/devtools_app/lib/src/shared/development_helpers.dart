@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_shared/devtools_extensions.dart';
+import 'package:meta/meta.dart';
 
 import 'globals.dart';
 
@@ -37,6 +38,10 @@ ExtensionEnabledState debugHandleExtensionEnabledState({
     () => ExtensionEnabledState.none,
   );
 }
+
+@visibleForTesting
+void resetDevToolsExtensionEnabledStates() =>
+    stubExtensionEnabledStates.clear();
 
 /// Stubbed activation states so we can develop DevTools extensions without a
 /// server connection.
