@@ -454,7 +454,7 @@ class InspectorService extends InspectorServiceBase {
       checkIfComplete();
     });
 
-    return futureListener.future;
+    return futureListener.future.timeout(const Duration(seconds: 15));
   }
 
   Future<void> addPubRootDirectories(List<String> rootDirectories) async {
