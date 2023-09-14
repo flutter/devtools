@@ -65,6 +65,13 @@ class ExtensionService extends DisposableController
       },
     );
 
+    addAutoDisposeListener(
+      preferences.devToolsExtensions.showOnlyEnabledExtensions,
+      () async {
+        await _refreshExtensionEnabledStates();
+      },
+    );
+
     // TODO(kenz): we should also refresh the available extensions on some event
     // from the analysis server that is watching the
     // .dart_tool/package_config.json file for changes.
@@ -86,6 +93,9 @@ class ExtensionService extends DisposableController
     final appRootPath = await _connectedAppRootPath();
     if (appRootPath == null) return;
 
+    final onlyIncludeEnabled =
+        preferences.devToolsExtensions.showOnlyEnabledExtensions.value;
+
     final visible = <DevToolsExtensionConfig>[];
     for (final extension in _availableExtensions.value) {
       final stateFromOptionsFile = await server.extensionEnabledState(
@@ -97,7 +107,11 @@ class ExtensionService extends DisposableController
         () => ValueNotifier<ExtensionEnabledState>(stateFromOptionsFile),
       );
       stateNotifier.value = stateFromOptionsFile;
-      if (stateFromOptionsFile != ExtensionEnabledState.disabled) {
+
+      final shouldIncludeInVisible = onlyIncludeEnabled
+          ? stateFromOptionsFile == ExtensionEnabledState.enabled
+          : stateFromOptionsFile != ExtensionEnabledState.disabled;
+      if (shouldIncludeInVisible) {
         visible.add(extension);
       }
     }

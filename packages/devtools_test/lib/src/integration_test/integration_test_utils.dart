@@ -78,7 +78,7 @@ Future<void> switchToScreen(
   bool warnIfTapMissed = true,
 }) async {
   logStatus('switching to $screenId screen (icon $tabIcon)');
-  final tabFinder = await findTabOrOpenOverflowMenu(tester, tabIcon);
+  final tabFinder = await findTab(tester, tabIcon);
   expect(tabFinder, findsOneWidget);
 
   await tester.tap(tabFinder, warnIfMissed: warnIfTapMissed);
@@ -87,23 +87,16 @@ Future<void> switchToScreen(
   await tester.pump(safePumpDuration);
 }
 
-/// Finds the tab with [icon], opening the tab overflow menu if the tab is not
-/// immediately visible. 
-Future<Finder> findTabOrOpenOverflowMenu(
-  WidgetTester tester,
-  IconData icon,
-) async {
-  final tabFinder = find.widgetWithIcon(Tab, icon);
-
-  // If we cannot find the tab, try opening the tab overflow menu, if present.
-  if (tabFinder.evaluate().isEmpty) {
-    final tabOverflowButtonFinder = find.byType(TabOverflowButton);
-    if (tabOverflowButtonFinder.evaluate().isNotEmpty) {
-      await tester.tap(tabOverflowButtonFinder);
-      await tester.pump(shortPumpDuration);
-    }
+/// Finds the tab with [icon] either in the top-level DevTools tab bar or in the
+/// tab overflow menu for tabs that don't fit on screen.
+Future<Finder> findTab(WidgetTester tester, IconData icon) async {
+  // Open the tab overflow menu before looking for the tab.
+  final tabOverflowButtonFinder = find.byType(TabOverflowButton);
+  if (tabOverflowButtonFinder.evaluate().isNotEmpty) {
+    await tester.tap(tabOverflowButtonFinder);
+    await tester.pump(shortPumpDuration);
   }
-  return tabFinder;
+  return find.widgetWithIcon(Tab, icon);
 }
 
 Future<void> pumpDevTools(WidgetTester tester) async {
