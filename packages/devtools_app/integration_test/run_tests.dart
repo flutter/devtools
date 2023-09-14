@@ -36,11 +36,15 @@ void main(List<String> args) async {
       // of a single file.
       await _runTest(testRunnerArgs);
     } else {
-      // Run all tests since a target test was not provided.
+      // Run all supported tests since a specific target test was not provided.
       final testDirectory = Directory(_testDirectory);
       var testFiles = testDirectory
           .listSync(recursive: true)
-          .where((testFile) => testFile.path.endsWith(_testSuffix))
+          .where(
+            (testFile) =>
+                testFile.path.endsWith(_testSuffix) &&
+                !testRunnerArgs.testAppDevice.supportsTest(testFile.path),
+          )
           .toList();
 
       final shard = testRunnerArgs.shard;
@@ -53,8 +57,6 @@ void main(List<String> args) async {
             : shardStart + shardSize;
         testFiles = testFiles.sublist(shardStart, shardEnd);
       }
-
-      print('testing files: $testFiles');
 
       for (final testFile in testFiles) {
         final testTarget = testFile.path;
