@@ -118,9 +118,16 @@ jobs:
           # Consider running integration tests in ddc mode, too.
         bot: [dart2js]
         device: [flutter, flutter-web, dart-cli]
-        include:
-          - device: flutter
-            shard: [1/2, 2/2]
+        shard: [1/2, 2/2]
+        exclude:
+          - device: flutter-web
+            shard: 1/2
+          - device: flutter-web
+            shard: 2/2
+          - device: dart-cli
+            shard: 1/2
+          - device: dart-cli
+            shard: 2/2
     steps:
       - name: git clone
         uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac
