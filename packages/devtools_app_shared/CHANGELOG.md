@@ -1,3 +1,9 @@
+## 0.0.2
+* Remove public `hasService` getter from `ServiceManager`.
+* Add optional `timeout` parameter to the `whenValueNonNull` utility.
+* Rename `includeText` utility to `isScreenWiderThan`.
+* Move `ideTheme` getter from `devtools_app_shared/utils.dart` to `devtools_app_shared/ui.dart`.
+
 ## 0.0.1
 
 * Add README.md with usage examples.

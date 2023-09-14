@@ -48,7 +48,7 @@ material_icon_code_point: '0xe0b1'
 
 Now it is time to build your extension.
 
-## Build a DevTools extension
+## Create a DevTools extension
 
 ### Where to put your source code
 
@@ -78,7 +78,7 @@ flutter create --template app --platforms web foo_package_devtools_extension
 
 In `foo_package_devtools_extension/pubspec.yaml`, add a dependency on `devtools_extensions`:
 ```yaml
-devtools_extensions: ^1.0.0
+devtools_extensions: ^0.0.3
 ```
 
 In `lib/main.dart`, place a `DevToolsExtension` widget at the root of your app:
