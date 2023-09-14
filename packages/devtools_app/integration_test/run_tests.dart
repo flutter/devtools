@@ -43,7 +43,7 @@ void main(List<String> args) async {
           .where(
             (testFile) =>
                 testFile.path.endsWith(_testSuffix) &&
-                !testRunnerArgs.testAppDevice.supportsTest(testFile.path),
+                testRunnerArgs.testAppDevice.supportsTest(testFile.path),
           )
           .toList();
 
