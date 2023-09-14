@@ -115,13 +115,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        bot:
           # Consider running integration tests in ddc mode, too.
-          - dart2js
-        device:
-          - flutter
-          - flutter-web
-          - dart-cli
+        bot: [dart2js]
+        device: [flutter, flutter-web, dart-cli]
         include:
           - device: flutter
             shard: "1/2"
@@ -140,6 +136,7 @@ jobs:
         env:
           BOT: ${{ matrix.bot }}
           DEVICE: ${{ matrix.device }}
+          SHARD: ${{ matrix.shard }}
         run: ./tool/bots.sh
 
       - name: Upload Golden Failure Artifacts
