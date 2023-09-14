@@ -290,6 +290,22 @@ class TestRunnerArgs {
   /// instead of 'chrome'.
   bool get headless => _argResults[_headlessArg];
 
+  /// Sharding information for this test run.
+  ({int shardNumber, int totalShards})? get shard {
+    final shardValue = _argResults[_shardArg];
+    if (shardValue != null) {
+      final shardParts = shardValue.split('/');
+      if (shardParts.length == 2) {
+        final shardNumber = int.tryParse(shardParts[0]);
+        final totalShards = int.tryParse(shardParts[1]);
+        if (shardNumber is int && totalShards is int) {
+          return (shardNumber: shardNumber, totalShards: totalShards);
+        }
+      }
+    }
+    return null;
+  }
+
   /// Whether the help flag `-h` was passed to the integration test command.
   bool get help => _argResults[_helpArg];
 
@@ -304,6 +320,7 @@ class TestRunnerArgs {
   static const _testAppDeviceArg = 'test-app-device';
   static const _updateGoldensArg = 'update-goldens';
   static const _headlessArg = 'headless';
+  static const _shardArg = 'shard';
 
   /// Builds an arg parser for DevTools integration tests.
   static ArgParser _buildArgParser() {
@@ -343,6 +360,12 @@ class TestRunnerArgs {
             'Runs the integration test on the \'web-server\' device instead of '
             'the \'chrome\' device. For headless test runs, you will not be '
             'able to see the integration test run visually in a Chrome browser.',
+      )
+      ..addOption(
+        _shardArg,
+        valueHelp: '1/3',
+        help: 'The shard number for this run out of the total number of shards '
+            '(e.g. 1/3)',
       );
     return argParser;
   }

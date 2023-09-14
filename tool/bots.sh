@@ -169,7 +169,7 @@ $ dart run integration_test/run_tests.dart --headless"
 
     if [ "$DEVICE" = "flutter" ]; then
 
-        dart run integration_test/run_tests.dart --headless
+        dart run integration_test/run_tests.dart --headless --shard="$SHARD"
 
     elif [ "$DEVICE" = "flutter-web" ]; then
 
