@@ -30,6 +30,16 @@ class BannerMessagesController {
   final _messages = <String, ListValueNotifier<BannerMessage>>{};
   final _dismissedMessageKeys = <Key?>{};
 
+  /// Adds a banner message to top of DevTools.
+  /// 
+  /// If the message is already visible or has already been dismissed, this
+  /// method call will be a no-op.
+  /// 
+  /// [callInPostFrameCallback] determines whether the message will be added in
+  /// a post frame callback. This should be true (default) whenever this method
+  /// is called from a Flutter lifecycle method (initState,
+  /// didChangeDependencies, etc.). Set this value to false when the banner
+  /// message is being added from outside of the Flutter widget lifecycle.
   void addMessage(
     BannerMessage message, {
     bool callInPostFrameCallback = true,
