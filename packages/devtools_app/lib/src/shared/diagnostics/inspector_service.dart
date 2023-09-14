@@ -421,7 +421,7 @@ class InspectorService extends InspectorServiceBase {
   /// Ensures that addPubRootDirectories, getPubRootDirectories, and
   /// removePubRootDirectories have all registered as services
   /// before completing.
-  Future<void> waitUntilPubRootDirectoriesInitialized() {
+  Future<void> waitUntilPubRootDirectoriesServicesAvailable() {
     final futureListener = Completer();
     bool addAvailable = false;
     bool getAvailable = false;
@@ -458,13 +458,13 @@ class InspectorService extends InspectorServiceBase {
   }
 
   Future<void> addPubRootDirectories(List<String> rootDirectories) async {
-    await waitUntilPubRootDirectoriesInitialized();
+    await waitUntilPubRootDirectoriesServicesAvailable();
     await _addPubRootDirectories(rootDirectories);
     await _onRootDirectoriesChanged(rootDirectories);
   }
 
   Future<void> removePubRootDirectories(List<String> rootDirectories) async {
-    await waitUntilPubRootDirectoriesInitialized();
+    await waitUntilPubRootDirectoriesServicesAvailable();
     await _removePubRootDirectories(rootDirectories);
     await _onRootDirectoriesChanged(rootDirectories);
   }
@@ -487,7 +487,7 @@ class InspectorService extends InspectorServiceBase {
 
   Future<List<String>?> getPubRootDirectories() async {
     assert(useDaemonApi);
-    await waitUntilPubRootDirectoriesInitialized();
+    await waitUntilPubRootDirectoriesServicesAvailable();
     final response = await invokeServiceMethodDaemonNoGroupArgs(
       WidgetInspectorServiceExtensions.getPubRootDirectories.name,
     );
