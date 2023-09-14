@@ -173,11 +173,11 @@ $ dart run integration_test/run_tests.dart --headless"
 
     elif [ "$DEVICE" = "flutter-web" ]; then
 
-        dart run integration_test/run_tests.dart --test-app-device=chrome --headless
+        dart run integration_test/run_tests.dart --test-app-device=chrome --headless --shard="$SHARD"
 
     elif [ "$DEVICE" = "dart-cli" ]; then
 
-        dart run integration_test/run_tests.dart --test-app-device=cli --headless
+        dart run integration_test/run_tests.dart --test-app-device=cli --headless --shard="$SHARD"
 
     fi
 fi
