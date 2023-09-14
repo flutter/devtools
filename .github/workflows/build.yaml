@@ -109,17 +109,21 @@ jobs:
   #         echo "::notice title=To Quickly Fix Goldens:: Run \`./tool/fix_goldens.sh $WORKFLOW_ID\` on your local branch."
 
   integration-test:
-    name: integration-test ${{ matrix.bot }} - ${{ matrix.device }} ${{ matrix.shard }}
+    name: integration-test ${{ matrix.bot }} - ${{ matrix.device }} - shard ${{ matrix.shard }}
     # needs: flutter-prep
     runs-on: macos-latest
     strategy:
       fail-fast: false
       matrix:
-          # Consider running integration tests in ddc mode, too.
+        # Consider running integration tests in ddc mode, too.
         bot: [dart2js]
         device: [flutter, flutter-web, dart-cli]
-        shard: [1/2, 2/2]
+        # Option 1/1 will run all tests for a device in a single shard.
+        # Option 1/2 and 2/2 should be enabled to run tests for a device in 2 shards.
+        shard: [1/1, 1/2, 2/2]
         exclude:
+          - device: flutter
+            shard: 1/1
           - device: flutter-web
             shard: 1/2
           - device: flutter-web
