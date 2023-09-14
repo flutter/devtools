@@ -49,6 +49,7 @@ void main() {
         ExtensionEnabledState.none,
         ExtensionEnabledState.none,
       ],
+      closeMenuWhenDone: false,
     );
 
     await _verifyExtensionVisibilitySetting(tester);
@@ -254,8 +255,9 @@ Future<void> _verifyContextMenuActions(WidgetTester tester) async {
 
 Future<void> _verifyExtensionsSettingsMenu(
   WidgetTester tester,
-  List<ExtensionEnabledState> enabledStates,
-) async {
+  List<ExtensionEnabledState> enabledStates, {
+  bool closeMenuWhenDone = true,
+}) async {
   await _openExtensionSettingsMenu(tester);
 
   expect(find.byType(ExtensionSetting), findsNWidgets(enabledStates.length));
@@ -272,8 +274,9 @@ Future<void> _verifyExtensionsSettingsMenu(
     };
     expect(group.selectedStates, expectedStates);
   }
-
-  await _closeExtensionSettingsMenu(tester);
+  if (closeMenuWhenDone) {
+    await _closeExtensionSettingsMenu(tester);
+  }
 }
 
 Future<void> _openExtensionSettingsMenu(WidgetTester tester) async {
@@ -322,6 +325,7 @@ Future<void> _verifyExtensionVisibilitySetting(WidgetTester tester) async {
     isFalse,
   );
   expect(extensionService.visibleExtensions.value.length, 3);
+  // No need to open the settings menu as it should already be open.
   await _toggleShowOnlyEnabledExtensions(tester);
   expect(
     preferences.devToolsExtensions.showOnlyEnabledExtensions.value,
@@ -336,10 +340,11 @@ Future<void> _verifyExtensionVisibilitySetting(WidgetTester tester) async {
     isFalse,
   );
   expect(extensionService.visibleExtensions.value.length, 3);
+
+  await _closeExtensionSettingsMenu(tester);
 }
 
 Future<void> _toggleShowOnlyEnabledExtensions(WidgetTester tester) async {
-  await _openExtensionSettingsMenu(tester);
   await tester.tap(
     find.descendant(
       of: find.byType(ExtensionSettingsDialog),
@@ -347,5 +352,4 @@ Future<void> _toggleShowOnlyEnabledExtensions(WidgetTester tester) async {
     ),
   );
   await tester.pumpAndSettle(shortPumpDuration);
-  await _closeExtensionSettingsMenu(tester);
 }

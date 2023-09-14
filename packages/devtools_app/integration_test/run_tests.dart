@@ -36,11 +36,27 @@ void main(List<String> args) async {
       // of a single file.
       await _runTest(testRunnerArgs);
     } else {
-      // Run all tests since a target test was not provided.
+      // Run all supported tests since a specific target test was not provided.
       final testDirectory = Directory(_testDirectory);
-      final testFiles = testDirectory
+      var testFiles = testDirectory
           .listSync(recursive: true)
-          .where((testFile) => testFile.path.endsWith(_testSuffix));
+          .where(
+            (testFile) =>
+                testFile.path.endsWith(_testSuffix) &&
+                testRunnerArgs.testAppDevice.supportsTest(testFile.path),
+          )
+          .toList();
+
+      final shard = testRunnerArgs.shard;
+      if (shard != null) {
+        final shardSize = testFiles.length ~/ shard.totalShards;
+        // Subtract 1 since the [shard.shardNumber] index is 1-based.
+        final shardStart = (shard.shardNumber - 1) * shardSize;
+        final shardEnd = shard.shardNumber == shard.totalShards
+            ? null
+            : shardStart + shardSize;
+        testFiles = testFiles.sublist(shardStart, shardEnd);
+      }
 
       for (final testFile in testFiles) {
         final testTarget = testFile.path;
