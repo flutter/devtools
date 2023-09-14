@@ -41,7 +41,7 @@ TODO: Remove this section if there are not any general updates.
 * Improved responsiveness of the top bar on the Logging view -
   [#6281](https://github.com/flutter/devtools/pull/6281)
 
-* Add the ability to copy filtered logs -
+* Added the ability to copy filtered logs -
   [#6260](https://github.com/flutter/devtools/pull/6260)
 
   ![The copy button on the Logging view to the right of the filter tool](images/logger_copy.png "The Logging view copy button")
