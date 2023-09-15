@@ -30,15 +30,36 @@ class BannerMessagesController {
   final _messages = <String, ListValueNotifier<BannerMessage>>{};
   final _dismissedMessageKeys = <Key?>{};
 
-  void addMessage(BannerMessage message) {
-    // We push the banner message in a post frame callback because otherwise,
-    // we'd be trying to call setState while the parent widget `BannerMessages`
-    // is in the middle of `build`.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+  /// Adds a banner message to top of DevTools.
+  ///
+  /// If the message is already visible or has already been dismissed, this
+  /// method call will be a no-op.
+  ///
+  /// [callInPostFrameCallback] determines whether the message will be added in
+  /// a post frame callback. This should be true (default) whenever this method
+  /// is called from a Flutter lifecycle method (initState,
+  /// didChangeDependencies, etc.). Set this value to false when the banner
+  /// message is being added from outside of the Flutter widget lifecycle.
+  void addMessage(
+    BannerMessage message, {
+    bool callInPostFrameCallback = true,
+  }) {
+    void add() {
       if (isMessageDismissed(message) || isMessageVisible(message)) return;
       final messages = _messagesForScreen(message.screenId);
       messages.add(message);
-    });
+    }
+
+    if (callInPostFrameCallback) {
+      // We push the banner message in a post frame callback because otherwise,
+      // we'd be trying to call setState while the parent widget `BannerMessages`
+      // is in the middle of `build`.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        add();
+      });
+    } else {
+      add();
+    }
   }
 
   void removeMessage(BannerMessage message, {bool dismiss = false}) {
