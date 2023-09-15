@@ -206,6 +206,7 @@ class EnableExtensionPrompt extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           RichText(
+            textAlign: TextAlign.center,
             text: TextSpan(
               text: 'The ',
               style: theme.regularTextStyle,
@@ -216,7 +217,17 @@ class EnableExtensionPrompt extends StatelessWidget {
                 ),
                 const TextSpan(
                   text: ' extension has not been enabled. Do you want to enable'
-                      ' this extension?',
+                      ' this extension?\nYou can always change this setting '
+                      'later from the DevTools Extensions ',
+                ),
+                WidgetSpan(
+                  child: Icon(
+                    Icons.extension_outlined,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+                const TextSpan(
+                  text: ' menu. ',
                 ),
               ],
             ),
