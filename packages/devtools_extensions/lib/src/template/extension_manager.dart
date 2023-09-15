@@ -191,6 +191,7 @@ class ExtensionManager {
     required String type,
     required String message,
     required String extensionName,
+    bool ignoreIfAlreadyDismissed = true,
   }) async {
     postMessageToDevTools(
       ShowBannerMessageExtensionEvent(
@@ -198,6 +199,7 @@ class ExtensionManager {
         bannerMessageType: type,
         message: message,
         extensionName: extensionName,
+        ignoreIfAlreadyDismissed: ignoreIfAlreadyDismissed,
       ),
     );
   }
