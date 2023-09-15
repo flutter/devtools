@@ -106,7 +106,7 @@ jobs:
         env:
           WORKFLOW_ID: ${{ github.run_id }}
         run: |
-          echo "::notice title=To Quickly Fix Goldens:: Run \`./tool/fix_goldens.sh $WORKFLOW_ID\` on your local branch."
+          echo "::notice title=To Quickly Fix Goldens:: Run \`devtools_tool fix-goldens --run-id=$WORKFLOW_ID\` on your local branch."
 
   integration-test:
     name: integration-test ${{ matrix.bot }} - ${{ matrix.device }} - shard ${{ matrix.shard }}

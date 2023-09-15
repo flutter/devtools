@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
+import 'package:devtools_tool/commands/fix_goldens.dart';
 
 import 'commands/analyze.dart';
 import 'commands/list.dart';
@@ -24,5 +25,6 @@ class DevToolsCommandRunner extends CommandRunner {
     addCommand(UpdateDartSdkDepsCommand());
     addCommand(ReleaseHelperCommand());
     addCommand(UpdateDevToolsVersionCommand());
+    addCommand(FixGoldensCommand());
   }
 }
