@@ -53,11 +53,15 @@ class DebugSessions extends StatelessWidget {
     // final isRelease = mode == 'release' || mode == 'jit_release';
     final isFlutter = session.debuggerType?.contains('Flutter') ?? false;
 
+    final label = session.flutterMode != null
+        ? '${session.name} (${session.flutterMode})'
+        : session.name;
+
     return TableRow(
       children: [
         Text(
-          '${session.name} (${session.flutterMode})',
-          style: Theme.of(context).textTheme.titleSmall,
+          label,
+          style: Theme.of(context).regularTextStyle,
         ),
         IconButton(
           onPressed: api.capabilities.hotReload && (isDebug || !isFlutter)
@@ -132,14 +136,13 @@ class _DevToolsMenu extends StatelessWidget {
     }
 
     return Directionality(
-      textDirection: reversedDirection,
+      // Reverse the direction so the menu is anchored on the far side and
+      // expands in the opposite direction with the icons on the right.
+      textDirection: normalDirection,
       child: MenuAnchor(
-        // TODO(dantup): How to flip the menu to be anchored from the right
-        //  and expand to the left?
         style: const MenuStyle(
           alignment: AlignmentDirectional.bottomStart,
         ),
-        alignmentOffset: const Offset(2, 0),
         menuChildren: [
           // TODO(dantup): Ensure the order matches the DevTools tab bar (if
           //  possible, share this order).

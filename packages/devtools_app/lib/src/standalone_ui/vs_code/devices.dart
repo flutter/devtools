@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../api/vs_code_api.dart';
@@ -22,7 +23,6 @@ class Devices extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -38,7 +38,7 @@ class Devices extends StatelessWidget {
             children: [
               for (final device in devices)
                 _createDeviceRow(
-                  colorScheme,
+                  Theme.of(context),
                   device,
                   isSelected: device.id == selectedDeviceId,
                 ),
@@ -49,12 +49,15 @@ class Devices extends StatelessWidget {
   }
 
   TableRow _createDeviceRow(
-    ColorScheme colorScheme,
+    ThemeData theme,
     VsCodeDevice device, {
     required bool isSelected,
   }) {
+    final backgroundColor = isSelected ? theme.colorScheme.primary : null;
+    final foregroundColor = isSelected ? theme.colorScheme.onPrimary : null;
+
     return TableRow(
-      decoration: BoxDecoration(color: isSelected ? colorScheme.primary : null),
+      decoration: BoxDecoration(color: backgroundColor),
       children: [
         SizedBox(
           width: double.infinity,
@@ -62,11 +65,11 @@ class Devices extends StatelessWidget {
             style: TextButton.styleFrom(
               alignment: Alignment.centerLeft,
               shape: const ContinuousRectangleBorder(),
+              textStyle: theme.regularTextStyle,
             ),
             child: Text(
               device.name,
-              style:
-                  TextStyle(color: isSelected ? colorScheme.onPrimary : null),
+              style: theme.regularTextStyle.copyWith(color: foregroundColor),
             ),
             onPressed: () => unawaited(api.selectDevice(device.id)),
           ),
