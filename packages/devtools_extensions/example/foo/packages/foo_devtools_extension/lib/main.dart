@@ -118,7 +118,7 @@ class _FooExtensionHomePageState extends State<FooExtensionHomePage> {
                   child: const Text(
                     'Show DevTools warning (can show again after dismiss)',
                   ),
-                )
+                ),
               ],
             ),
           ],

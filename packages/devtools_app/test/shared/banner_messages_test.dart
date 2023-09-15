@@ -153,8 +153,10 @@ void main() {
         expect(find.byKey(k1), findsNothing);
 
         // Verify message can be re-added with ignoreIfAlreadyDismissed = false.
-        bannerMessages.addMessage(testMessage1,
-            ignoreIfAlreadyDismissed: false);
+        bannerMessages.addMessage(
+          testMessage1,
+          ignoreIfAlreadyDismissed: false,
+        );
         await pumpTestFrame(tester);
         expect(find.byKey(k1), findsOneWidget);
       },
