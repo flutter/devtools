@@ -1,3 +1,6 @@
+## 0.0.5
+* Update README.md to include package publishing instructions.
+
 ## 0.0.4
 * Bump `package:vm_service` dependency to ^11.10.0
 * Fix a leaking event listener in the simulated DevTools environment.
