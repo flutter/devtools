@@ -184,7 +184,7 @@ class _DevToolsMenu extends StatelessWidget {
           tooltip: 'DevTools',
           // TODO(dantup): Icon for DevTools menu?
           icon: Icon(
-            Icons.developer_mode,
+            Icons.construction,
             size: actionsIconSize,
           ),
         ),
