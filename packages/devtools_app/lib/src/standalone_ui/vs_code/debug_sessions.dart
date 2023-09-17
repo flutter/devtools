@@ -138,7 +138,7 @@ class _DevToolsMenu extends StatelessWidget {
     return Directionality(
       // Reverse the direction so the menu is anchored on the far side and
       // expands in the opposite direction with the icons on the right.
-      textDirection: normalDirection,
+      textDirection: reversedDirection,
       child: MenuAnchor(
         style: const MenuStyle(
           alignment: AlignmentDirectional.bottomStart,

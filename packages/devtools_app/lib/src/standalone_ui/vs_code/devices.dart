@@ -23,12 +23,13 @@ class Devices extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Devices',
-          style: Theme.of(context).textTheme.titleMedium,
+          style: theme.textTheme.titleMedium,
         ),
         if (devices.isEmpty)
           const Text('Connect a device or enable web/desktop platforms.')
@@ -38,7 +39,7 @@ class Devices extends StatelessWidget {
             children: [
               for (final device in devices)
                 _createDeviceRow(
-                  Theme.of(context),
+                  theme,
                   device,
                   isSelected: device.id == selectedDeviceId,
                 ),
