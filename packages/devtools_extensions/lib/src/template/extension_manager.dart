@@ -14,7 +14,7 @@ class ExtensionManager {
   ///
   /// The DevTools extension will rebuild with the appropriate theme on
   /// notifications from this notifier.
-  final darkThemeEnabled = ValueNotifier<bool>(true);
+  final darkThemeEnabled = ValueNotifier<bool>(useDarkThemeAsDefault);
 
   /// Registers an event handler for [DevToolsExtensionEvent]s of type [type].
   ///
@@ -189,8 +189,7 @@ class ExtensionManager {
   }
 
   void _setThemeForValue(String? themeValue) {
-    // Default to use dark theme if [value] is null.
-    final useDarkTheme = themeValue == null ||
+    final useDarkTheme = (themeValue == null && useDarkThemeAsDefault) ||
         themeValue == ExtensionEventParameters.themeValueDark;
     darkThemeEnabled.value = useDarkTheme;
     // Use a post frame callback so that we do not try to update this while a
