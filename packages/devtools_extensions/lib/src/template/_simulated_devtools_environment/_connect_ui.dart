@@ -21,16 +21,16 @@ class _VmServiceConnection extends StatelessWidget {
     return SizedBox(
       height: _totalControlsHeight,
       child: connected
-          ? const _ConnectedVmServiceDisplay()
-          : _DisconnectedVmServiceDisplay(
-              simController: simController,
-            ),
+          ? _ConnectedVmServiceDisplay(simController: simController)
+          : _DisconnectedVmServiceDisplay(simController: simController),
     );
   }
 }
 
 class _ConnectedVmServiceDisplay extends StatelessWidget {
-  const _ConnectedVmServiceDisplay();
+  const _ConnectedVmServiceDisplay({required this.simController});
+
+  final _SimulatedDevToolsController simController;
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +58,7 @@ class _ConnectedVmServiceDisplay extends StatelessWidget {
           elevated: true,
           label: 'Disconnect',
           onPressed: () {
-            unawaited(serviceManager.manuallyDisconnect());
+            simController.updateVmServiceConnection(uri: null);
           },
         ),
       ],
