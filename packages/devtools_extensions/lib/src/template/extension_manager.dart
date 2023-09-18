@@ -14,7 +14,7 @@ class ExtensionManager {
   ///
   /// The DevTools extension will rebuild with the appropriate theme on
   /// notifications from this notifier.
-  final darkThemeEnabled = ValueNotifier<bool>(true);
+  final darkThemeEnabled = ValueNotifier<bool>(useDarkThemeAsDefault);
 
   /// Registers an event handler for [DevToolsExtensionEvent]s of type [type].
   ///
@@ -45,8 +45,7 @@ class ExtensionManager {
     // TODO(kenz): handle the ide theme that may be part of the query params.
     final queryParams = loadQueryParams();
     final themeValue = queryParams[ExtensionEventParameters.theme];
-    darkThemeEnabled.value = themeValue == null ||
-        themeValue == ExtensionEventParameters.themeValueDark;
+    _setThemeForValue(themeValue);
 
     final vmServiceUri = queryParams['uri'];
     if (connectToVmService) {
@@ -110,10 +109,7 @@ class ExtensionManager {
       case DevToolsExtensionEventType.themeUpdate:
         final value =
             extensionEvent.data?[ExtensionEventParameters.theme] as String?;
-        // Default to use dark theme if [value] is null.
-        final useDarkTheme =
-            value == null || value == ExtensionEventParameters.themeValueDark;
-        darkThemeEnabled.value = useDarkTheme;
+        _setThemeForValue(value);
         break;
       case DevToolsExtensionEventType.forceReload:
         html.window.location.reload();
@@ -151,7 +147,15 @@ class ExtensionManager {
   Future<void> _connectToVmService(String? vmServiceUri) async {
     // TODO(kenz): investigate. this is weird but `vmServiceUri` != null even
     // when the `toString()` representation is 'null'.
-    if (vmServiceUri == null || '$vmServiceUri' == 'null') return;
+    if (vmServiceUri == null || '$vmServiceUri' == 'null') {
+      if (serviceManager.hasConnection) {
+        await serviceManager.manuallyDisconnect();
+      }
+      if (loadQueryParams().containsKey('uri')) {
+        _updateQueryParameter('uri', null);
+      }
+      return;
+    }
 
     try {
       final finishedCompleter = Completer<void>();
@@ -167,6 +171,7 @@ class ExtensionManager {
           return VmService(
             inStream,
             writeMessage,
+            wsUri: connectedUri.toString(),
           );
         },
       );
@@ -174,11 +179,29 @@ class ExtensionManager {
         vmService,
         onClosed: finishedCompleter.future,
       );
+      _updateQueryParameter('uri', serviceManager.service!.wsUri!);
     } catch (e) {
-      // TODO(kenz): post a notification to DevTools for errors
-      // or create an error panel for the extensions screens.
-      print('Unable to connect to VM service at $vmServiceUri: $e');
+      final errorMessage =
+          'Unable to connect extension to VM service at $vmServiceUri: $e';
+      showNotification('Error: $errorMessage');
+      _log.shout(errorMessage);
     }
+  }
+
+  void _setThemeForValue(String? themeValue) {
+    final useDarkTheme = (themeValue == null && useDarkThemeAsDefault) ||
+        themeValue == ExtensionEventParameters.themeValueDark;
+    darkThemeEnabled.value = useDarkTheme;
+    // Use a post frame callback so that we do not try to update this while a
+    // build is in progress.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateQueryParameter(
+        'theme',
+        useDarkTheme
+            ? ExtensionEventParameters.themeValueDark
+            : ExtensionEventParameters.themeValueLight,
+      );
+    });
   }
 
   void showNotification(String message) async {
@@ -203,5 +226,17 @@ class ExtensionManager {
         ignoreIfAlreadyDismissed: ignoreIfAlreadyDismissed,
       ),
     );
+  }
+
+  void _updateQueryParameter(String key, String? value) {
+    final newQueryParams = Map.of(loadQueryParams());
+    if (value == null) {
+      newQueryParams.remove(key);
+    } else {
+      newQueryParams[key] = value;
+    }
+    final newUri = Uri.parse(html.window.location.toString())
+        .replace(queryParameters: newQueryParams);
+    html.window.history.replaceState(null, '', newUri.toString());
   }
 }
