@@ -1,4 +1,6 @@
 ## 0.0.5
+* Ensure theme and vm service connection are preserved on refresh of the extension
+iFrame or the simulated DevTools environment.
 * Add a `forceReload` endpoint to the extensions API.
 * Add a `toString()` representation for `DevToolsExtensionEvent`.
 * Add `ignoreIfAlreadyDismissed` parameter to `ExtensionManager.showBannerMessage` api.
