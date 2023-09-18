@@ -38,10 +38,12 @@ class _FooExtensionHomePageState extends State<FooExtensionHomePage> {
     super.initState();
     // Example of the devtools extension registering a custom handler.
     extensionManager.registerEventHandler(
-      DevToolsExtensionEventType.unknown,
+      DevToolsExtensionEventType.themeUpdate,
       (event) {
+        final themeUpdateValue =
+            event.data?[ExtensionEventParameters.theme] as String?;
         setState(() {
-          _message = event.data?['message'] as String?;
+          _message = themeUpdateValue;
         });
       },
     );
@@ -77,27 +79,45 @@ class _FooExtensionHomePageState extends State<FooExtensionHomePage> {
               child: const Text('Increment and post count to DevTools'),
             ),
             const SizedBox(height: 48.0),
-            Text('Received message from DevTools: $_message'),
+            Text('Received theme update from DevTools: $_message'),
             const SizedBox(height: 48.0),
+            ElevatedButton(
+              onPressed: () => extensionManager
+                  .showNotification('Yay, DevTools Extensions!'),
+              child: const Text('Show DevTools notification'),
+            ),
+            const SizedBox(height: 16.0),
             Row(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ElevatedButton(
-                  onPressed: () => extensionManager
-                      .showNotification('Yay, DevTools Extensions!'),
-                  child: const Text('Show DevTools notification'),
+                  onPressed: () => extensionManager.showBannerMessage(
+                    key: 'example_message_single_dismiss',
+                    type: 'warning',
+                    message: 'Warning: with great power, comes great '
+                        'responsibility. I\'m not going to tell you twice.\n'
+                        '(This message can only be shown once)',
+                    extensionName: 'foo',
+                  ),
+                  child: const Text(
+                    'Show DevTools warning (ignore if already dismissed)',
+                  ),
                 ),
                 const SizedBox(width: 16.0),
                 ElevatedButton(
                   onPressed: () => extensionManager.showBannerMessage(
-                    key: 'example_message',
+                    key: 'example_message_multi_dismiss',
                     type: 'warning',
-                    message:
-                        'Warning: with great power, comes great responsibility.',
+                    message: 'Warning: with great power, comes great '
+                        'responsibility. I\'ll keep reminding you if you '
+                        'forget.\n(This message can be shown multiple times)',
                     extensionName: 'foo',
+                    ignoreIfAlreadyDismissed: false,
                   ),
-                  child: const Text('Show DevTools warning'),
+                  child: const Text(
+                    'Show DevTools warning (can show again after dismiss)',
+                  ),
                 ),
               ],
             ),

@@ -1,4 +1,5 @@
 ## 0.0.5
+* Add `ignoreIfAlreadyDismissed` parameter to `ExtensionManager.showBannerMessage` api.
 * Update README.md to include package publishing instructions.
 
 ## 0.0.4

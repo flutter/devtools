@@ -32,8 +32,9 @@ class BannerMessagesController {
 
   /// Adds a banner message to top of DevTools.
   ///
-  /// If the message is already visible or has already been dismissed, this
-  /// method call will be a no-op.
+  /// If the message is already visible, or if this message has already been
+  /// dismissed once and [ignoreIfAlreadyDismissed] is true, this method call
+  /// will be a no-op.
   ///
   /// [callInPostFrameCallback] determines whether the message will be added in
   /// a post frame callback. This should be true (default) whenever this method
@@ -43,9 +44,13 @@ class BannerMessagesController {
   void addMessage(
     BannerMessage message, {
     bool callInPostFrameCallback = true,
+    bool ignoreIfAlreadyDismissed = true,
   }) {
     void add() {
-      if (isMessageDismissed(message) || isMessageVisible(message)) return;
+      if ((ignoreIfAlreadyDismissed && isMessageDismissed(message)) ||
+          isMessageVisible(message)) {
+        return;
+      }
       final messages = _messagesForScreen(message.screenId);
       messages.add(message);
     }
