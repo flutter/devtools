@@ -49,6 +49,12 @@ class DevToolsExtensionEvent {
       if (data != null) _dataKey: data!,
     };
   }
+
+  @override
+  String toString() {
+    return '[$type, data: ${data.toString()}'
+        '${source != null ? ', source: $source' : ''}]';
+  }
 }
 
 /// A void callback that handles a [DevToolsExtensionEvent].

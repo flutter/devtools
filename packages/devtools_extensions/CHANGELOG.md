@@ -1,9 +1,11 @@
 ## 0.0.5
+* Add a `forceReload` endpoint to the extensions API.
+* Add a `toString()` representation for `DevToolsExtensionEvent`.
 * Add `ignoreIfAlreadyDismissed` parameter to `ExtensionManager.showBannerMessage` api.
 * Update README.md to include package publishing instructions.
 
 ## 0.0.4
-* Bump `package:vm_service` dependency to ^11.10.0
+* Bump `package:vm_service` dependency to ^11.10.0.
 * Fix a leaking event listener in the simulated DevTools environment.
 
 ## 0.0.3

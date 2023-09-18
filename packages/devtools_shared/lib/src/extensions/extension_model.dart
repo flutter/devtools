@@ -124,6 +124,25 @@ class DevToolsExtensionConfig implements Comparable {
     }
     return compare;
   }
+
+  @override
+  bool operator ==(Object? other) {
+    return other is DevToolsExtensionConfig &&
+        other.name == name &&
+        other.path == path &&
+        other.issueTrackerLink == issueTrackerLink &&
+        other.version == version &&
+        other.materialIconCodePoint == materialIconCodePoint;
+  }
+
+  @override
+  int get hashCode => Object.hash(
+        name,
+        path,
+        issueTrackerLink,
+        version,
+        materialIconCodePoint,
+      );
 }
 
 /// Describes the enablement state of a DevTools extension.

@@ -115,7 +115,8 @@ class ExtensionManager {
             value == null || value == ExtensionEventParameters.themeValueDark;
         darkThemeEnabled.value = useDarkTheme;
         break;
-      case DevToolsExtensionEventType.unknown:
+      case DevToolsExtensionEventType.forceReload:
+        html.window.location.reload();
       default:
         _log.warning(
           'Unrecognized event received by extension: '
