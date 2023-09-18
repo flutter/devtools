@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_extensions/api.dart';
 import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -44,10 +45,10 @@ class _ExtensionScreenBody extends StatefulWidget {
   final DevToolsExtensionConfig extensionConfig;
 
   @override
-  State<_ExtensionScreenBody> createState() => __ExtensionScreenBodyState();
+  State<_ExtensionScreenBody> createState() => _ExtensionScreenBodyState();
 }
 
-class __ExtensionScreenBodyState extends State<_ExtensionScreenBody> {
+class _ExtensionScreenBodyState extends State<_ExtensionScreenBody> {
   EmbeddedExtensionController? extensionController;
 
   @override
@@ -99,7 +100,8 @@ class ExtensionView extends StatelessWidget {
       children: [
         EmbeddedExtensionHeader(
           extension: extension,
-          onForceReload: controller.forceReload,
+          onForceReload: () =>
+              controller.postMessage(DevToolsExtensionEventType.forceReload),
         ),
         const SizedBox(height: intermediateSpacing),
         Expanded(

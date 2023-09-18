@@ -60,6 +60,10 @@ class _SimulatedDevToolsController extends DisposableController
 
   @override
   void updateVmServiceConnection({required String? uri}) {
+    // TODO(https://github.com/flutter/devtools/issues/6416): write uri to the
+    // window location query parameters so that the vm service connection
+    // persists on hot restart.
+
     // TODO(kenz): add some validation and error handling if [uri] is bad input.
     final normalizedUri =
         uri != null ? normalizeVmServiceUri(uri).toString() : null;
@@ -142,6 +146,13 @@ class _SimulatedDevToolsController extends DisposableController
       theme: darkThemeEnabled
           ? ExtensionEventParameters.themeValueLight
           : ExtensionEventParameters.themeValueDark,
+    );
+  }
+
+  @override
+  void forceReload() {
+    _postMessageToExtension(
+      DevToolsExtensionEvent(DevToolsExtensionEventType.forceReload),
     );
   }
 }

@@ -100,6 +100,7 @@ class _ExtensionIFrameController extends DisposableController
 
   void init() {
     _iFrameReady = Completer<void>();
+    _extensionHandlerReady = Completer<void>();
 
     unawaited(
       embeddedExtensionController.extensionIFrame.onLoad.first.then((_) {
@@ -117,7 +118,13 @@ class _ExtensionIFrameController extends DisposableController
           .listen((event) async {
         final ready = await _pingExtensionUntilReady();
         if (ready) {
-          _postMessage(event);
+          switch (event.type) {
+            case DevToolsExtensionEventType.forceReload:
+              forceReload();
+              break;
+            default:
+              _postMessage(event);
+          }
         } else {
           // TODO(kenz): we may want to give the user a way to retry the failed
           // request or show a more permanent error UI where we guide them to
@@ -132,15 +139,10 @@ class _ExtensionIFrameController extends DisposableController
     );
 
     addAutoDisposeListener(preferences.darkModeTheme, () {
-      _postMessage(
-        DevToolsExtensionEvent(
-          DevToolsExtensionEventType.themeUpdate,
-          data: {
-            ExtensionEventParameters.theme: preferences.darkModeTheme.value
-                ? ExtensionEventParameters.themeValueDark
-                : ExtensionEventParameters.themeValueLight,
-          },
-        ),
+      updateTheme(
+        theme: preferences.darkModeTheme.value
+            ? ExtensionEventParameters.themeValueDark
+            : ExtensionEventParameters.themeValueLight,
       );
     });
   }
@@ -235,6 +237,13 @@ class _ExtensionIFrameController extends DisposableController
         DevToolsExtensionEventType.themeUpdate,
         data: {ExtensionEventParameters.theme: theme},
       ),
+    );
+  }
+
+  @override
+  void forceReload() {
+    _postMessage(
+      DevToolsExtensionEvent(DevToolsExtensionEventType.forceReload),
     );
   }
 

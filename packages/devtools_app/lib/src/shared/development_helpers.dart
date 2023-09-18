@@ -14,7 +14,8 @@ import 'globals.dart';
 ///
 /// This flag should never be checked in with a value of true - this is covered
 /// by a test.
-final debugDevToolsExtensions = false || integrationTestMode;
+final debugDevToolsExtensions = _debugDevToolsExtensions || integrationTestMode;
+const _debugDevToolsExtensions = false;
 
 List<DevToolsExtensionConfig> debugHandleRefreshAvailableExtensions(
   // ignore: avoid-unused-parameters, false positive due to conditional imports

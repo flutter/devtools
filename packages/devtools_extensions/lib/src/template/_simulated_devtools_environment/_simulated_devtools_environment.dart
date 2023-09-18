@@ -160,6 +160,11 @@ class _SimulatedApi extends StatelessWidget {
               label: 'TOGGLE THEME',
               onPressed: simController.toggleTheme,
             ),
+            const SizedBox(width: denseSpacing),
+            DevToolsButton(
+              label: 'FORCE RELOAD',
+              onPressed: simController.forceReload,
+            ),
             // TODO(kenz): add buttons for other simulated events as the extension
             // API expands.
           ],
