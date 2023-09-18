@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
@@ -48,7 +49,9 @@ class PreferencesController extends DisposableController
   Future<void> init() async {
     // Get the current values and listen for and write back changes.
     String? value = await storage.getValue('ui.darkMode');
-    final useDarkMode = value == null || value == 'true';
+
+    final useDarkMode =
+        (value == null && useDarkThemeAsDefault) || value == 'true';
     toggleDarkModeTheme(useDarkMode);
     addAutoDisposeListener(darkModeTheme, () {
       storage.setValue('ui.darkMode', '${darkModeTheme.value}');
