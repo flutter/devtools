@@ -110,14 +110,14 @@ class ShowBannerMessageExtensionEvent extends DevToolsExtensionEvent {
     final message = eventData.checkValid<String>(_messageKey);
     final type = eventData.checkValid<String>(_bannerMessageTypeKey);
     final extensionName = eventData.checkValid<String>(_extensionNameKey);
-    final skipIfAlreadyDismissed =
+    final ignoreIfAlreadyDismissed =
         (eventData[_ignoreIfAlreadyDismissedKey] as bool?) ?? true;
     return ShowBannerMessageExtensionEvent(
       id: id,
       bannerMessageType: type,
       message: message,
       extensionName: extensionName,
-      ignoreIfAlreadyDismissed: skipIfAlreadyDismissed,
+      ignoreIfAlreadyDismissed: ignoreIfAlreadyDismissed,
     );
   }
 

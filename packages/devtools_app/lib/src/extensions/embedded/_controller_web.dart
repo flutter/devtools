@@ -100,7 +100,7 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController
   }) {
     extensionPostEventStream.add(DevToolsExtensionEvent(type, data: data));
   }
-  
+
   @override
   void dispose() async {
     await extensionPostEventStream.close();

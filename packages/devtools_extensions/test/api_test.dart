@@ -82,6 +82,11 @@ void main() {
       );
 
       expect(
+        DevToolsExtensionEventType.from('forceReload'),
+        DevToolsExtensionEventType.forceReload,
+      );
+
+      expect(
         DevToolsExtensionEventType.from('showNotification'),
         DevToolsExtensionEventType.showNotification,
       );
@@ -121,6 +126,10 @@ void main() {
       verifyEventDirection(
         DevToolsExtensionEventType.pong,
         (bidirectional: false, toDevTools: true, toExtension: false),
+      );
+      verifyEventDirection(
+        DevToolsExtensionEventType.forceReload,
+        (bidirectional: false, toDevTools: false, toExtension: true),
       );
       verifyEventDirection(
         DevToolsExtensionEventType.vmServiceConnection,
@@ -216,7 +225,7 @@ void main() {
 
   group('$ShowBannerMessageExtensionEvent', () {
     test('constructs for expected values', () {
-      final event = DevToolsExtensionEvent.parse({
+      var event = DevToolsExtensionEvent.parse({
         'type': 'showBannerMessage',
         'data': {
           'id': 'fooMessageId',
@@ -225,13 +234,31 @@ void main() {
           'extensionName': 'foo',
         },
       });
-      final showBannerMessageEvent =
-          ShowBannerMessageExtensionEvent.from(event);
+      var showBannerMessageEvent = ShowBannerMessageExtensionEvent.from(event);
 
       expect(showBannerMessageEvent.messageId, 'fooMessageId');
       expect(showBannerMessageEvent.message, 'foo message');
       expect(showBannerMessageEvent.bannerMessageType, 'warning');
       expect(showBannerMessageEvent.extensionName, 'foo');
+      expect(showBannerMessageEvent.ignoreIfAlreadyDismissed, true);
+
+      event = DevToolsExtensionEvent.parse({
+        'type': 'showBannerMessage',
+        'data': {
+          'id': 'blah',
+          'message': 'blah message',
+          'bannerMessageType': 'error',
+          'extensionName': 'blah',
+          'ignoreIfAlreadyDismissed': false,
+        },
+      });
+      showBannerMessageEvent = ShowBannerMessageExtensionEvent.from(event);
+
+      expect(showBannerMessageEvent.messageId, 'blah');
+      expect(showBannerMessageEvent.message, 'blah message');
+      expect(showBannerMessageEvent.bannerMessageType, 'error');
+      expect(showBannerMessageEvent.extensionName, 'blah');
+      expect(showBannerMessageEvent.ignoreIfAlreadyDismissed, false);
     });
     test('throws for unexpected values', () async {
       final event1 = DevToolsExtensionEvent.parse({
