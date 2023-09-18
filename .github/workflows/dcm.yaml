@@ -59,7 +59,7 @@ jobs:
           sudo apt-get install dcm
           sudo chmod +x /usr/bin/dcm
       - name: Setup Dart SDK
-        uses: dart-lang/setup-dart@d6a63dab3335f427404425de0fbfed4686d93c4f
+        uses: dart-lang/setup-dart@8a4b97ea2017cc079571daec46542f76189836b1
       - name: Run DCM on root
         run: |
           dcm analyze --ci-key="${{ secrets.DCM_CI_KEY }}" --email="${{ secrets.DCM_EMAIL }}" packages/devtools_app packages/devtools_shared packages/devtools_test
