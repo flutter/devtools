@@ -24,45 +24,28 @@ class DebugSessions extends StatelessWidget {
       children: [
         Text(
           'Debug Sessions',
-          style: Theme.of(context).textTheme.titleSmall,
+          style: Theme.of(context).textTheme.titleMedium,
         ),
         if (sessions.isEmpty)
           const Text('Begin a debug session to use DevTools.')
         else
           Table(
             columnWidths: const {
-              0: FlexColumnWidth(2),
-              // TODO(dantup): Fixed width icons+menu?
-              1: FlexColumnWidth(),
+              0: FlexColumnWidth(),
             },
+            defaultColumnWidth:
+                FixedColumnWidth(actionsIconSize + denseSpacing),
             defaultVerticalAlignment: TableCellVerticalAlignment.middle,
             children: [
               for (final session in sessions)
-                TableRow(
-                  children: [
-                    Text(
-                      '${session.name} (${session.flutterMode})',
-                      style: Theme.of(context).textTheme.titleSmall,
-                    ),
-                    if (api.capabilities.openDevToolsPage)
-                      _DevToolsMenu(api: api, session: session),
-                  ],
-                ),
+                _debugSessionRow(session, context),
             ],
           ),
       ],
     );
   }
-}
 
-class _DevToolsMenu extends StatelessWidget {
-  const _DevToolsMenu({required this.api, required this.session});
-
-  final VsCodeApi api;
-  final VsCodeDebugSession session;
-
-  @override
-  Widget build(BuildContext context) {
+  TableRow _debugSessionRow(VsCodeDebugSession session, BuildContext context) {
     // TODO(dantup): What to show if mode is unknown (null)?
     final mode = session.flutterMode;
     final isDebug = mode == 'debug';
@@ -70,8 +53,16 @@ class _DevToolsMenu extends StatelessWidget {
     // final isRelease = mode == 'release' || mode == 'jit_release';
     final isFlutter = session.debuggerType?.contains('Flutter') ?? false;
 
-    return MenuBar(
+    final label = session.flutterMode != null
+        ? '${session.name} (${session.flutterMode})'
+        : session.name;
+
+    return TableRow(
       children: [
+        Text(
+          label,
+          style: Theme.of(context).regularTextStyle,
+        ),
         IconButton(
           onPressed: api.capabilities.hotReload && (isDebug || !isFlutter)
               ? () => unawaited(api.hotReload(session.id))
@@ -86,53 +77,118 @@ class _DevToolsMenu extends StatelessWidget {
           tooltip: 'Hot Restart',
           icon: Icon(hotRestartIcon, size: actionsIconSize),
         ),
-        SubmenuButton(
-          menuChildren: [
-            // TODO(dantup): Ensure the order matches the DevTools tab bar (if
-            //  possible, share this order).
-            // TODO(dantup): Make these conditions use the real screen
-            //  conditions and/or verify if these conditions are correct.
-            _devToolsButton(
-              ScreenMetaData.inspector,
-              enabled: isFlutter && isDebug,
-            ),
-            _devToolsButton(
-              ScreenMetaData.cpuProfiler,
-              enabled: isDebug || isProfile,
-            ),
-            _devToolsButton(
-              ScreenMetaData.memory,
-              enabled: isDebug || isProfile,
-            ),
-            _devToolsButton(
-              ScreenMetaData.performance,
-            ),
-            _devToolsButton(
-              ScreenMetaData.network,
-              enabled: isDebug,
-            ),
-            _devToolsButton(
-              ScreenMetaData.logging,
-            ),
-            // TODO(dantup): Check other screens (like appSize) work embedded and
-            //  add here.
-          ],
-          child: const Text('DevTools'),
-        ),
+        if (api.capabilities.openDevToolsPage)
+          _DevToolsMenu(
+            api: api,
+            session: session,
+            isFlutter: isFlutter,
+            isDebug: isDebug,
+            isProfile: isProfile,
+          ),
       ],
     );
   }
+}
 
-  Widget _devToolsButton(
-    ScreenMetaData screen, {
-    bool enabled = true,
-  }) {
-    return IconButton(
-      onPressed: enabled
-          ? () => unawaited(api.openDevToolsPage(session.id, screen.id))
-          : null,
-      tooltip: screen.title ?? screen.id,
-      icon: Icon(screen.icon, size: actionsIconSize),
+class _DevToolsMenu extends StatelessWidget {
+  const _DevToolsMenu({
+    required this.api,
+    required this.session,
+    required this.isFlutter,
+    required this.isDebug,
+    required this.isProfile,
+  });
+
+  final VsCodeApi api;
+  final VsCodeDebugSession session;
+  final bool isFlutter;
+  final bool isDebug;
+  final bool isProfile;
+
+  @override
+  Widget build(BuildContext context) {
+    final normalDirection = Directionality.of(context);
+    final reversedDirection = normalDirection == TextDirection.ltr
+        ? TextDirection.rtl
+        : TextDirection.ltr;
+
+    Widget devToolsButton(
+      ScreenMetaData screen, {
+      bool enabled = true,
+    }) {
+      return SizedBox(
+        width: double.infinity,
+        child: TextButton.icon(
+          style: TextButton.styleFrom(
+            alignment: Alignment.centerRight,
+            shape: const ContinuousRectangleBorder(),
+          ),
+          onPressed: enabled
+              ? () => unawaited(api.openDevToolsPage(session.id, screen.id))
+              : null,
+          label: Directionality(
+            textDirection: normalDirection,
+            child: Text(screen.title ?? screen.id),
+          ),
+          icon: Icon(screen.icon, size: actionsIconSize),
+        ),
+      );
+    }
+
+    return Directionality(
+      // Reverse the direction so the menu is anchored on the far side and
+      // expands in the opposite direction with the icons on the right.
+      textDirection: reversedDirection,
+      child: MenuAnchor(
+        style: const MenuStyle(
+          alignment: AlignmentDirectional.bottomStart,
+        ),
+        menuChildren: [
+          // TODO(dantup): Ensure the order matches the DevTools tab bar (if
+          //  possible, share this order).
+          // TODO(dantup): Make these conditions use the real screen
+          //  conditions and/or verify if these conditions are correct.
+          devToolsButton(
+            ScreenMetaData.inspector,
+            enabled: isFlutter && isDebug,
+          ),
+          devToolsButton(
+            ScreenMetaData.cpuProfiler,
+            enabled: isDebug || isProfile,
+          ),
+          devToolsButton(
+            ScreenMetaData.memory,
+            enabled: isDebug || isProfile,
+          ),
+          devToolsButton(
+            ScreenMetaData.performance,
+          ),
+          devToolsButton(
+            ScreenMetaData.network,
+            enabled: isDebug,
+          ),
+          devToolsButton(
+            ScreenMetaData.logging,
+          ),
+          // TODO(dantup): Check other screens (like appSize) work embedded and
+          //  add here.
+        ],
+        builder: (context, controller, child) => IconButton(
+          onPressed: () {
+            if (controller.isOpen) {
+              controller.close();
+            } else {
+              controller.open();
+            }
+          },
+          tooltip: 'DevTools',
+          // TODO(dantup): Icon for DevTools menu?
+          icon: Icon(
+            Icons.construction,
+            size: actionsIconSize,
+          ),
+        ),
+      ),
     );
   }
 }
