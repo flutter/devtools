@@ -12,7 +12,7 @@ executables:
 
 dependencies:
   args: ^2.4.2
-  devtools_shared: ^4.0.0
+  devtools_shared: ^4.0.1
   devtools_app_shared: ^0.0.3
   flutter:
     sdk: flutter
