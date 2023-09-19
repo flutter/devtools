@@ -9,8 +9,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
+import 'package:devtools_shared/devtools_test_utils.dart';
 
-import '_io_utils.dart';
 import '_utils.dart';
 
 class TestFlutterApp extends IntegrationTestApp {
@@ -331,7 +331,10 @@ abstract class IntegrationTestApp with IOMixin {
     _debugPrint('Waiting for process to end');
     return runProcess!.exitCode.timeout(
       IOMixin.killTimeout,
-      onTimeout: () => killGracefully(runProcess!),
+      onTimeout: () => killGracefully(
+        runProcess!,
+        debugLogging: debugTestScript,
+      ),
     );
   }
 
