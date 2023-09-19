@@ -14,6 +14,9 @@ dependencies:
   flutter:
     sdk: flutter
 
+flutter:
+  uses-material-design: true
+
 dependency_overrides:
   devtools_app_shared:
     path: ../../../../../devtools_app_shared
