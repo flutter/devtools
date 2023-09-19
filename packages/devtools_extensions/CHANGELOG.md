@@ -1,3 +1,6 @@
+## 0.0.6
+* Bump `package:devtools_app_shared` dependency to version ^0.0.4.
+
 ## 0.0.5
 * Ensure theme and vm service connection are preserved on refresh of the extension
 iFrame or the simulated DevTools environment.
