@@ -18,6 +18,7 @@ dependencies:
   vm_service: ^11.10.0
 
 dev_dependencies:
+  flutter_lints: ^2.0.0
   flutter_test:
     sdk: flutter
   lints: ^2.0.0
