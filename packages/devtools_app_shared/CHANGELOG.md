@@ -1,3 +1,6 @@
+## 0.0.4
+* Add `useDarkThemeAsDefault` constant for defining the default theme behavior.
+
 ## 0.0.3
 * Bump `package:vm_service` dependency to ^11.10.0
 
