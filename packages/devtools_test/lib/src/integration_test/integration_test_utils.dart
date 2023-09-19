@@ -144,7 +144,7 @@ Future<void> disconnectFromTestApp(WidgetTester tester) async {
 }
 
 void logStatus(String log) {
-  // ignore: avoid_print
+  // ignore: avoid_print, intentional print for test output
   print('TEST STATUS: $log');
 }
 
