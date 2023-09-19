@@ -8,7 +8,21 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import '_utils.dart';
+import 'package:path/path.dart' as path;
+
+/// The directory used to store per-user settings for Dart tooling.
+Directory getDartPrefsDirectory() {
+  return Directory(path.join(getUserHomeDir(), '.dart'));
+}
+
+/// Return the user's home directory.
+String getUserHomeDir() {
+  final String envKey =
+      Platform.operatingSystem == 'windows' ? 'APPDATA' : 'HOME';
+  final String? value = Platform.environment[envKey];
+  return value == null ? '.' : value;
+}
+
 
 Stream<String> transformToLines(Stream<List<int>> byteStream) {
   return byteStream
@@ -64,20 +78,32 @@ mixin IOMixin {
     print(tag.isNotEmpty ? '$tag - $line' : line);
   }
 
-  Future<int> killGracefully(Process process) async {
+  Future<int> killGracefully(
+    Process process, {
+    bool debugLogging = false,
+  }) async {
     final processId = process.pid;
-    debugLog('Sending SIGTERM to $processId..');
+    if (debugLogging) {
+      print('Sending SIGTERM to $processId..');
+    }
     await cancelAllStreamSubscriptions();
     Process.killPid(processId);
-    return process.exitCode
-        .timeout(killTimeout, onTimeout: () => killForcefully(process));
+    return process.exitCode.timeout(
+      killTimeout,
+      onTimeout: () => killForcefully(process, debugLogging: debugLogging),
+    );
   }
 
-  Future<int> killForcefully(Process process) {
+  Future<int> killForcefully(
+    Process process, {
+    bool debugLogging = false,
+  }) {
     final processId = process.pid;
     // Use sigint here instead of sigkill. See
     // https://github.com/flutter/flutter/issues/117415.
-    debugLog('Sending SIGINT to $processId..');
+    if (debugLogging) {
+      print('Sending SIGINT to $processId..');
+    }
     Process.killPid(processId, ProcessSignal.sigint);
     return process.exitCode;
   }

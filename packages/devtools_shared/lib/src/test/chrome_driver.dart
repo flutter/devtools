@@ -4,8 +4,7 @@
 
 import 'dart:io';
 
-import '_io_utils.dart';
-import '_utils.dart';
+import 'io_utils.dart';
 
 class ChromeDriver with IOMixin {
   Process? _process;
@@ -13,9 +12,11 @@ class ChromeDriver with IOMixin {
   // TODO(kenz): add error messaging if the chromedriver executable is not
   // found. We can also consider using web installers directly in this script:
   // https://github.com/flutter/flutter/wiki/Running-Flutter-Driver-tests-with-Web#web-installers-repo.
-  Future<void> start() async {
+  Future<void> start({bool debugLogging = false}) async {
     try {
-      debugLog('starting the chromedriver process');
+      if (debugLogging) {
+        print('starting the chromedriver process');
+      }
       final process = _process = await Process.start(
         'chromedriver',
         [
@@ -29,14 +30,17 @@ class ChromeDriver with IOMixin {
     }
   }
 
-  Future<void> stop() async {
+  Future<void> stop({bool debugLogging = false}) async {
     final process = _process;
     _process = null;
 
     if (process == null) return;
 
     await cancelAllStreamSubscriptions();
-    debugLog('killing the chromedriver process');
-    await killGracefully(process);
+
+    if (debugLogging) {
+      print('killing the chromedriver process');
+    }
+    await killGracefully(process,  debugLogging: debugLogging);
   }
 }

@@ -11,7 +11,7 @@ import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
     as wip show ChromeTab;
 
-import 'utils_io.dart';
+import 'io_utils.dart';
 
 // Change this if you want to be able to see Chrome opening while tests run
 // to aid debugging.
