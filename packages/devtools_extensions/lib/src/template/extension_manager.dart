@@ -147,7 +147,7 @@ class ExtensionManager {
   Future<void> _connectToVmService(String? vmServiceUri) async {
     // TODO(kenz): investigate. this is weird but `vmServiceUri` != null even
     // when the `toString()` representation is 'null'.
-    if (vmServiceUri == null || '$vmServiceUri' == 'null') {
+    if (vmServiceUri == null || vmServiceUri == 'null') {
       if (serviceManager.hasConnection) {
         await serviceManager.manuallyDisconnect();
       }
