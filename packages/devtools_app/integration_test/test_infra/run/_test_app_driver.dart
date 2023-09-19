@@ -331,7 +331,10 @@ abstract class IntegrationTestApp with IOMixin {
     _debugPrint('Waiting for process to end');
     return runProcess!.exitCode.timeout(
       IOMixin.killTimeout,
-      onTimeout: () => killGracefully(runProcess!, debugLogging: debugTestScript,),
+      onTimeout: () => killGracefully(
+        runProcess!,
+        debugLogging: debugTestScript,
+      ),
     );
   }
 
