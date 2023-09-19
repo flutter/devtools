@@ -28,14 +28,7 @@ import 'inspector_screen_details_tab.dart';
 import 'inspector_tree_controller.dart';
 
 class InspectorScreen extends Screen {
-  InspectorScreen()
-      : super.conditional(
-          id: id,
-          requiresFlutter: true,
-          requiresDebugBuild: true,
-          title: ScreenMetaData.inspector.title,
-          icon: ScreenMetaData.inspector.icon,
-        );
+  InspectorScreen() : super.fromMetaData(ScreenMetaData.inspector);
 
   static final id = ScreenMetaData.inspector.id;
 

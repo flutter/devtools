@@ -11,13 +11,7 @@ import '../../../shared/screen.dart';
 import 'connected/connected_screen_body.dart';
 
 class MemoryScreen extends Screen {
-  MemoryScreen()
-      : super.conditional(
-          id: id,
-          requiresDartVm: true,
-          title: ScreenMetaData.memory.title,
-          icon: ScreenMetaData.memory.icon,
-        );
+  MemoryScreen() : super.fromMetaData(ScreenMetaData.memory);
 
   static final id = ScreenMetaData.memory.id;
 

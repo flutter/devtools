@@ -26,13 +26,7 @@ import 'tabbed_performance_view.dart';
 // where applicable.
 
 class PerformanceScreen extends Screen {
-  PerformanceScreen()
-      : super.conditional(
-          id: id,
-          worksOffline: true,
-          title: ScreenMetaData.performance.title,
-          icon: ScreenMetaData.performance.icon,
-        );
+  PerformanceScreen() : super.fromMetaData(ScreenMetaData.performance);
 
   static final id = ScreenMetaData.performance.id;
 

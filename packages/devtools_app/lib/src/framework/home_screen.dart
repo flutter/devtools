@@ -29,10 +29,8 @@ import 'framework_core.dart';
 
 class HomeScreen extends Screen {
   HomeScreen({this.sampleData = const []})
-      : super.conditional(
-          id: id,
-          requiresConnection: false,
-          icon: ScreenMetaData.home.icon,
+      : super.fromMetaData(
+          ScreenMetaData.home,
           titleGenerator: () => devToolsTitle.value,
         );
 

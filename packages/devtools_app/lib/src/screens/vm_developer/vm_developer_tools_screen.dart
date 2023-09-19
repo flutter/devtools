@@ -39,13 +39,7 @@ abstract class VMDeveloperView {
 }
 
 class VMDeveloperToolsScreen extends Screen {
-  VMDeveloperToolsScreen()
-      : super.conditional(
-          id: id,
-          title: ScreenMetaData.vmTools.title,
-          icon: ScreenMetaData.vmTools.icon,
-          requiresVmDeveloperMode: true,
-        );
+  VMDeveloperToolsScreen() : super.fromMetaData(ScreenMetaData.vmTools);
 
   static final id = ScreenMetaData.vmTools.id;
 
