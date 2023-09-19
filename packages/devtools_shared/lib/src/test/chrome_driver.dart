@@ -43,6 +43,6 @@ class ChromeDriver with IOMixin {
     if (debugLogging) {
       print('killing the chromedriver process');
     }
-    await killGracefully(process,  debugLogging: debugLogging);
+    await killGracefully(process, debugLogging: debugLogging);
   }
 }

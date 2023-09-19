@@ -23,7 +23,6 @@ String getUserHomeDir() {
   return value == null ? '.' : value;
 }
 
-
 Stream<String> transformToLines(Stream<List<int>> byteStream) {
   return byteStream
       .transform<String>(utf8.decoder)
