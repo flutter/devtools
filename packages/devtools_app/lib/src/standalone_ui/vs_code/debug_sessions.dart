@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
@@ -12,8 +13,9 @@ import '../../shared/screen.dart';
 import '../api/vs_code_api.dart';
 
 class DebugSessions extends StatelessWidget {
-  const DebugSessions(this.api, this.sessions, {super.key});
+  const DebugSessions(this.screens, this.api, this.sessions, {super.key});
 
+  final List<Screen> screens;
   final VsCodeApi api;
   final List<VsCodeDebugSession> sessions;
 
@@ -84,6 +86,7 @@ class DebugSessions extends StatelessWidget {
             isFlutter: isFlutter,
             isDebug: isDebug,
             isProfile: isProfile,
+            screens: screens,
           ),
       ],
     );
@@ -97,6 +100,7 @@ class _DevToolsMenu extends StatelessWidget {
     required this.isFlutter,
     required this.isDebug,
     required this.isProfile,
+    required this.screens,
   });
 
   final VsCodeApi api;
@@ -104,6 +108,7 @@ class _DevToolsMenu extends StatelessWidget {
   final bool isFlutter;
   final bool isDebug;
   final bool isProfile;
+  final List<Screen> screens;
 
   @override
   Widget build(BuildContext context) {
@@ -112,10 +117,18 @@ class _DevToolsMenu extends StatelessWidget {
         ? TextDirection.rtl
         : TextDirection.ltr;
 
-    Widget devToolsButton(
-      ScreenMetaData screen, {
-      bool enabled = true,
-    }) {
+    Widget? devToolsButton(Screen screen) {
+      // Don't include any screens that aren't appropriate.
+      if (!screen.requiresConnection ||
+          screen.requiresLibrary != null ||
+          screen.requiresVmDeveloperMode ||
+          screen.screenId == 'debugger') {
+        return null;
+      }
+
+      final enabled = (!screen.requiresDartVm || isDebug /* && !isWeb */) &&
+          (!screen.requiresDebugBuild || isDebug) &&
+          (!screen.requiresFlutter || isFlutter);
       return SizedBox(
         width: double.infinity,
         child: TextButton.icon(
@@ -124,11 +137,12 @@ class _DevToolsMenu extends StatelessWidget {
             shape: const ContinuousRectangleBorder(),
           ),
           onPressed: enabled
-              ? () => unawaited(api.openDevToolsPage(session.id, screen.id))
+              ? () =>
+                  unawaited(api.openDevToolsPage(session.id, screen.screenId))
               : null,
           label: Directionality(
             textDirection: normalDirection,
-            child: Text(screen.title ?? screen.id),
+            child: Text(screen.title ?? screen.screenId),
           ),
           icon: Icon(screen.icon, size: actionsIconSize),
         ),
@@ -143,36 +157,12 @@ class _DevToolsMenu extends StatelessWidget {
         style: const MenuStyle(
           alignment: AlignmentDirectional.bottomStart,
         ),
-        menuChildren: [
-          // TODO(dantup): Ensure the order matches the DevTools tab bar (if
-          //  possible, share this order).
-          // TODO(dantup): Make these conditions use the real screen
-          //  conditions and/or verify if these conditions are correct.
-          devToolsButton(
-            ScreenMetaData.inspector,
-            enabled: isFlutter && isDebug,
-          ),
-          devToolsButton(
-            ScreenMetaData.cpuProfiler,
-            enabled: isDebug || isProfile,
-          ),
-          devToolsButton(
-            ScreenMetaData.memory,
-            enabled: isDebug || isProfile,
-          ),
-          devToolsButton(
-            ScreenMetaData.performance,
-          ),
-          devToolsButton(
-            ScreenMetaData.network,
-            enabled: isDebug,
-          ),
-          devToolsButton(
-            ScreenMetaData.logging,
-          ),
-          // TODO(dantup): Check other screens (like appSize) work embedded and
-          //  add here.
-        ],
+        // TODO(dantup): Why is appSize etc. still missing?
+        menuChildren: screens
+            .map((screen) => devToolsButton(screen))
+            .whereNotNull()
+            .toList(),
+
         builder: (context, controller, child) => IconButton(
           onPressed: () {
             if (controller.isOpen) {

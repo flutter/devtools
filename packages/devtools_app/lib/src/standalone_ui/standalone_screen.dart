@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../../devtools_app.dart';
 import 'api/impl/dart_tooling_api.dart';
 import 'vs_code/flutter_panel.dart';
 
@@ -16,6 +17,7 @@ import 'vs_code/flutter_panel.dart';
 enum StandaloneScreenType {
   vsCodeFlutterPanel;
 
+  // TODO(dantup): This seems unused, is it needed?
   static StandaloneScreenType? parse(String? id) {
     if (id == null) return null;
 
@@ -25,10 +27,10 @@ enum StandaloneScreenType {
     return null;
   }
 
-  Widget get screen {
+  Widget build(List<Screen> screens) {
     return switch (this) {
       StandaloneScreenType.vsCodeFlutterPanel =>
-        VsCodeFlutterPanel(DartToolingApiImpl.postMessage()),
+        VsCodeFlutterPanel(screens, DartToolingApiImpl.postMessage()),
     };
   }
 }
