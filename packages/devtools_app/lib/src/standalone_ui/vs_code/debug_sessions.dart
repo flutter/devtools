@@ -12,10 +12,11 @@ import '../../shared/screen.dart';
 import '../api/vs_code_api.dart';
 
 class DebugSessions extends StatelessWidget {
-  const DebugSessions(this.api, this.sessions, {super.key});
+  const DebugSessions(this.api, this.sessions, this.deviceMap, {super.key});
 
   final VsCodeApi api;
   final List<VsCodeDebugSession> sessions;
+  final Map<String, VsCodeDevice> deviceMap;
 
   @override
   Widget build(BuildContext context) {
@@ -51,8 +52,7 @@ class DebugSessions extends StatelessWidget {
     final isProfile = mode == 'profile';
     final isRelease = mode == 'release' || mode == 'jit_release';
     final isFlutter = session.debuggerType?.contains('Flutter') ?? false;
-    // TODO(dantup): Detect web so we can handle requiresDartVm correctly.
-    const isWeb = false;
+    final isWeb = deviceMap[session.flutterDeviceId]?.platformType == 'web';
 
     final label = session.flutterMode != null
         ? '${session.name} (${session.flutterMode})'
