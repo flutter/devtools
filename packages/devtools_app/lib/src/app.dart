@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:devtools_app_shared/service_extensions.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
@@ -296,6 +295,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
               screens: screens,
               actions: [
                 if (connectedToVmService) ...[
+                  // TODO(kenz): do we need to hide this for Dart Web?
                   HotReloadButton(
                     callOnVmServiceDirectly: !connectedToFlutterApp,
                   ),
