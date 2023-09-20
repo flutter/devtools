@@ -45,7 +45,7 @@ class EvalOnDartLibrary extends DisposableController
     _libraryRef = Completer<LibraryRef>();
 
     // For evals in tests, we will pass the isolateId into the constructor.
-    isolate ??= serviceManager.isolateManager.selectedIsolate;
+    isolate ??= serviceManager.isolateManager.mainIsolate;
     addAutoDisposeListener(isolate, () => _init(isolate!.value));
     _init(isolate.value);
   }
