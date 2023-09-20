@@ -8,6 +8,7 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/constants.dart';
+import '../../shared/feature_flags.dart';
 import '../../shared/screen.dart';
 import '../api/vs_code_api.dart';
 
@@ -184,11 +185,15 @@ class _DevToolsMenu extends StatelessWidget {
   }
 
   bool _shouldIncludeScreen(ScreenMetaData screen) {
-    // Don't show home screen or debugger in the menu.
+    // Some screens shouldn't show up in the menu.
     return screen != ScreenMetaData.home &&
         screen != ScreenMetaData.debugger &&
+        screen != ScreenMetaData.vmTools &&
         // Or the generic "simple" screen.
         screen != ScreenMetaData.simple &&
+        // DeepLink is currently behind a feature flag.
+        (screen != ScreenMetaData.deepLinks ||
+            FeatureFlags.deepLinkValidation) &&
         // Or anything that requires some specific library that we can't
         // check (`requiresLibrary` will be removed for extensions
         // in future, and those will need some extra work to detect).
