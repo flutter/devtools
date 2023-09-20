@@ -12,6 +12,10 @@ import 'ide_theme.dart';
 // TODO(kenz): try to eliminate as many custom colors as possible, and pull
 // colors only from the [lightColorScheme] and the [darkColorScheme].
 
+/// Whether dark theme should be used as the default theme if none has been
+/// explicitly set.
+const useDarkThemeAsDefault = true;
+
 /// Constructs the light or dark theme for the app taking into account
 /// IDE-supplied theming.
 ThemeData themeFor({
@@ -494,8 +498,7 @@ bool isScreenWiderThan(
   double? width,
 ) {
   return width == null ||
-      MediaQuery.of(context).size.width >
-          scaleByFontFactor(width);
+      MediaQuery.of(context).size.width > scaleByFontFactor(width);
 }
 
 ButtonStyle denseAwareOutlinedButtonStyle(

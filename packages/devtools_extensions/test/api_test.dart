@@ -82,6 +82,11 @@ void main() {
       );
 
       expect(
+        DevToolsExtensionEventType.from('forceReload'),
+        DevToolsExtensionEventType.forceReload,
+      );
+
+      expect(
         DevToolsExtensionEventType.from('showNotification'),
         DevToolsExtensionEventType.showNotification,
       );
@@ -121,6 +126,10 @@ void main() {
       verifyEventDirection(
         DevToolsExtensionEventType.pong,
         (bidirectional: false, toDevTools: true, toExtension: false),
+      );
+      verifyEventDirection(
+        DevToolsExtensionEventType.forceReload,
+        (bidirectional: false, toDevTools: false, toExtension: true),
       );
       verifyEventDirection(
         DevToolsExtensionEventType.vmServiceConnection,
@@ -216,29 +225,47 @@ void main() {
 
   group('$ShowBannerMessageExtensionEvent', () {
     test('constructs for expected values', () {
-      final event = DevToolsExtensionEvent.parse({
+      var event = DevToolsExtensionEvent.parse({
         'type': 'showBannerMessage',
         'data': {
           'id': 'fooMessageId',
           'message': 'foo message',
           'bannerMessageType': 'warning',
-          'extensionName': 'foo_package',
+          'extensionName': 'foo',
         },
       });
-      final showBannerMessageEvent =
-          ShowBannerMessageExtensionEvent.from(event);
+      var showBannerMessageEvent = ShowBannerMessageExtensionEvent.from(event);
 
       expect(showBannerMessageEvent.messageId, 'fooMessageId');
       expect(showBannerMessageEvent.message, 'foo message');
       expect(showBannerMessageEvent.bannerMessageType, 'warning');
-      expect(showBannerMessageEvent.extensionName, 'foo_package');
+      expect(showBannerMessageEvent.extensionName, 'foo');
+      expect(showBannerMessageEvent.ignoreIfAlreadyDismissed, true);
+
+      event = DevToolsExtensionEvent.parse({
+        'type': 'showBannerMessage',
+        'data': {
+          'id': 'blah',
+          'message': 'blah message',
+          'bannerMessageType': 'error',
+          'extensionName': 'blah',
+          'ignoreIfAlreadyDismissed': false,
+        },
+      });
+      showBannerMessageEvent = ShowBannerMessageExtensionEvent.from(event);
+
+      expect(showBannerMessageEvent.messageId, 'blah');
+      expect(showBannerMessageEvent.message, 'blah message');
+      expect(showBannerMessageEvent.bannerMessageType, 'error');
+      expect(showBannerMessageEvent.extensionName, 'blah');
+      expect(showBannerMessageEvent.ignoreIfAlreadyDismissed, false);
     });
     test('throws for unexpected values', () async {
       final event1 = DevToolsExtensionEvent.parse({
         'type': 'showBannerMessage',
         'data': {
           // Missing required fields.
-          'extensionName': 'foo_package',
+          'extensionName': 'foo',
         },
       });
       expect(
@@ -255,7 +282,7 @@ void main() {
           'bad_key': 'fooMessageId',
           'messages': 'foo message',
           'bannerMessageTypeee': 'warning',
-          'extension_name': 'foo_package',
+          'extension_name': 'foo',
         },
       });
       expect(
@@ -272,7 +299,7 @@ void main() {
           'id': 1,
           'message': 'foo message',
           'bannerMessageType': 2.0,
-          'extensionName': 'foo_package',
+          'extensionName': 'foo',
         },
       });
       expect(
@@ -289,7 +316,7 @@ void main() {
           'id': 'fooMessageId',
           'message': 'foo message',
           'bannerMessageType': 'warning',
-          'extensionName': 'foo_package',
+          'extensionName': 'foo',
         },
       });
       expect(

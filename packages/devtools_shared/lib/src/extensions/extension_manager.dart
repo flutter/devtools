@@ -2,6 +2,8 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+// ignore_for_file: avoid_print
+
 import 'dart:io';
 
 import 'package:extension_discovery/extension_discovery.dart';
@@ -88,11 +90,11 @@ class ExtensionsManager {
         );
 
         try {
-          final pluginConfig = DevToolsExtensionConfig.parse({
+          final extensionConfig = DevToolsExtensionConfig.parse({
             ...config,
             DevToolsExtensionConfig.pathKey: location,
           });
-          devtoolsExtensions.add(pluginConfig);
+          devtoolsExtensions.add(extensionConfig);
         } on StateError catch (e) {
           print(e.message);
           continue;

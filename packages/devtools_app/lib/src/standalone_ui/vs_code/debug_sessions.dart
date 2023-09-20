@@ -7,14 +7,22 @@ import 'dart:async';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
+import '../../shared/constants.dart';
+import '../../shared/feature_flags.dart';
 import '../../shared/screen.dart';
 import '../api/vs_code_api.dart';
 
 class DebugSessions extends StatelessWidget {
-  const DebugSessions(this.api, this.sessions, {super.key});
+  const DebugSessions({
+    required this.api,
+    required this.sessions,
+    required this.deviceMap,
+    super.key,
+  });
 
   final VsCodeApi api;
   final List<VsCodeDebugSession> sessions;
+  final Map<String, VsCodeDevice> deviceMap;
 
   @override
   Widget build(BuildContext context) {
@@ -23,94 +31,180 @@ class DebugSessions extends StatelessWidget {
       children: [
         Text(
           'Debug Sessions',
-          style: Theme.of(context).textTheme.titleSmall,
+          style: Theme.of(context).textTheme.titleMedium,
         ),
         if (sessions.isEmpty)
           const Text('Begin a debug session to use DevTools.')
         else
           Table(
-            columnWidths: const {0: FlexColumnWidth()},
+            columnWidths: const {
+              0: FlexColumnWidth(),
+            },
             defaultColumnWidth:
-                FixedColumnWidth(defaultIconSize + defaultSpacing),
+                FixedColumnWidth(actionsIconSize + denseSpacing),
             defaultVerticalAlignment: TableCellVerticalAlignment.middle,
             children: [
               for (final session in sessions)
-                _createSessionRow(context, session),
+                _debugSessionRow(session, context),
             ],
           ),
       ],
     );
   }
 
-  TableRow _createSessionRow(BuildContext context, VsCodeDebugSession session) {
-    // TODO(dantup): What to show if mode is unknown (null)?
-    final name = session.name;
+  TableRow _debugSessionRow(VsCodeDebugSession session, BuildContext context) {
     final mode = session.flutterMode;
     final isDebug = mode == 'debug';
     final isProfile = mode == 'profile';
-    // final isRelease = mode == 'release' || mode == 'jit_release';
+    final isRelease = mode == 'release' || mode == 'jit_release';
     final isFlutter = session.debuggerType?.contains('Flutter') ?? false;
+    final isWeb = deviceMap[session.flutterDeviceId]?.platformType == 'web';
+
+    final label = session.flutterMode != null
+        ? '${session.name} (${session.flutterMode})'
+        : session.name;
 
     return TableRow(
       children: [
         Text(
-          '$name ($mode)',
-          style: Theme.of(context).textTheme.titleSmall,
+          label,
+          style: Theme.of(context).regularTextStyle,
         ),
-        // TODO(dantup): Ensure the order matches the DevTools tab bar (if
-        //  possible, share this order).
-        if (api.capabilities.openDevToolsPage) ...[
-          // TODO(dantup): Make these conditions use the real screen
-          //  conditions and/or verify if these conditions are correct.
-          _devToolsButton(
-            session,
-            ScreenMetaData.inspector,
-            enabled: isFlutter && isDebug,
+        IconButton(
+          onPressed: api.capabilities.hotReload && (isDebug || !isFlutter)
+              ? () => unawaited(api.hotReload(session.id))
+              : null,
+          tooltip: 'Hot Reload',
+          icon: Icon(hotReloadIcon, size: actionsIconSize),
+        ),
+        IconButton(
+          onPressed: api.capabilities.hotRestart && (isDebug || !isFlutter)
+              ? () => unawaited(api.hotRestart(session.id))
+              : null,
+          tooltip: 'Hot Restart',
+          icon: Icon(hotRestartIcon, size: actionsIconSize),
+        ),
+        if (api.capabilities.openDevToolsPage)
+          _DevToolsMenu(
+            api: api,
+            session: session,
+            isFlutter: isFlutter,
+            isDebug: isDebug,
+            isProfile: isProfile,
+            isRelease: isRelease,
+            isWeb: isWeb,
           ),
-          _devToolsButton(
-            session,
-            ScreenMetaData.cpuProfiler,
-            enabled: isDebug || isProfile,
-          ),
-          _devToolsButton(
-            session,
-            ScreenMetaData.memory,
-            enabled: isDebug || isProfile,
-          ),
-          _devToolsButton(
-            session,
-            ScreenMetaData.performance,
-          ),
-          _devToolsButton(
-            session,
-            ScreenMetaData.network,
-            enabled: isDebug,
-          ),
-          _devToolsButton(
-            session,
-            ScreenMetaData.logging,
-          ),
-          // TODO(dantup): Check other screens (like appSize) work embedded and
-          //  add here.
-        ],
       ],
     );
   }
+}
 
-  Widget _devToolsButton(
-    VsCodeDebugSession session,
-    ScreenMetaData screen, {
-    bool enabled = true,
-  }) {
-    return DevToolsTooltip(
-      message: screen.title ?? screen.id,
-      padding: const EdgeInsets.all(denseSpacing),
-      child: TextButton(
-        onPressed: enabled
-            ? () => unawaited(api.openDevToolsPage(session.id, screen.id))
-            : null,
-        child: Icon(screen.icon, size: actionsIconSize),
+class _DevToolsMenu extends StatelessWidget {
+  const _DevToolsMenu({
+    required this.api,
+    required this.session,
+    required this.isFlutter,
+    required this.isDebug,
+    required this.isProfile,
+    required this.isRelease,
+    required this.isWeb,
+  });
+
+  final VsCodeApi api;
+  final VsCodeDebugSession session;
+  final bool isFlutter;
+  final bool isDebug;
+  final bool isProfile;
+  final bool isRelease;
+  final bool isWeb;
+
+  @override
+  Widget build(BuildContext context) {
+    final normalDirection = Directionality.of(context);
+    final reversedDirection = normalDirection == TextDirection.ltr
+        ? TextDirection.rtl
+        : TextDirection.ltr;
+
+    Widget devToolsButton(ScreenMetaData screen) {
+      final title = screen.title ?? screen.id;
+      String? disabledReason;
+      if (isRelease) {
+        disabledReason = 'Not available in release mode';
+      } else if (screen.requiresFlutter && !isFlutter) {
+        disabledReason = 'Only available for Flutter applications';
+      } else if (screen.requiresDebugBuild && !isDebug) {
+        disabledReason = 'Only available in debug mode';
+      } else if (screen.requiresDartVm && isWeb) {
+        disabledReason = 'Not available when running on the web';
+      }
+
+      // Because we flipped the direction so the menu is aligned to the end, we
+      // should revert the text direction back to normal for the label.
+      Widget text = Directionality(
+        textDirection: normalDirection,
+        child: Text(title),
+      );
+
+      if (disabledReason != null) {
+        text = Tooltip(
+          preferBelow: false,
+          message: disabledReason,
+          child: text,
+        );
+      }
+
+      return MenuItemButton(
+        leadingIcon: Icon(screen.icon, size: actionsIconSize),
+        onPressed: disabledReason != null
+            ? null
+            : () => unawaited(api.openDevToolsPage(session.id, screen.id)),
+        child: text,
+      );
+    }
+
+    return Directionality(
+      // Reverse the direction so the menu is anchored on the far side and
+      // expands in the opposite direction with the icons on the right.
+      textDirection: reversedDirection,
+      child: MenuAnchor(
+        style: const MenuStyle(
+          alignment: AlignmentDirectional.bottomStart,
+        ),
+        menuChildren: ScreenMetaData.values
+            .where(_shouldIncludeScreen)
+            .map(devToolsButton)
+            .toList(),
+        builder: (context, controller, child) => IconButton(
+          onPressed: () {
+            if (controller.isOpen) {
+              controller.close();
+            } else {
+              controller.open();
+            }
+          },
+          tooltip: 'DevTools',
+          icon: Icon(
+            Icons.construction,
+            size: actionsIconSize,
+          ),
+        ),
       ),
     );
+  }
+
+  bool _shouldIncludeScreen(ScreenMetaData screen) {
+    return switch (screen) {
+      // Some screens shouldn't show up in the menu.
+      ScreenMetaData.home => false,
+      ScreenMetaData.debugger => false,
+      ScreenMetaData.simple => false, // generic screen isn't a screen itself
+      // TODO(dantup): Check preferences.vmDeveloperModeEnabled
+      ScreenMetaData.vmTools => false,
+      // DeepLink is currently behind a feature flag.
+      ScreenMetaData.deepLinks => FeatureFlags.deepLinkValidation,
+      // Anything else can be shown as long as it doesn't require a specific
+      // library.
+      _ => screen.requiresLibrary == null,
+    };
   }
 }

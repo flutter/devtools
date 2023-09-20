@@ -3,7 +3,10 @@ This is draft for future release notes, that are going to land on
 
 # DevTools <number> release notes
 
-Dart & Flutter DevTools - A Suite of Performance Tools for Dart and Flutter
+The <number> release of the Dart and Flutter DevTools
+includes the following changes among other general improvements.
+To learn more about DevTools, check out the
+[DevTools overview](https://docs.flutter.dev/tools/devtools/overview).
 
 ## General updates
 
@@ -43,5 +46,5 @@ TODO: Remove this section if there are not any general updates.
 
 ## Full commit history
 
-More details about changes and fixes are available from the
-[DevTools git log](https://github.com/flutter/devtools/commits/master).
+To find a complete list of changes in this release, check out the
+[DevTools git log](https://github.com/flutter/devtools/tree/v<number>).

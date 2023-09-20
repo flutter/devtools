@@ -29,10 +29,8 @@ import 'framework_core.dart';
 
 class HomeScreen extends Screen {
   HomeScreen({this.sampleData = const []})
-      : super.conditional(
-          id: id,
-          requiresConnection: false,
-          icon: ScreenMetaData.home.icon,
+      : super.fromMetaData(
+          ScreenMetaData.home,
           titleGenerator: () => devToolsTitle.value,
         );
 
@@ -279,20 +277,20 @@ class _ConnectDialogState extends State<ConnectDialog>
       gac.home,
       gac.HomeScreenEvents.connectToApp.name,
     );
-    if (connectDialogController.text.isEmpty) {
+
+    final uri = connectDialogController.text;
+    if (uri.isEmpty) {
       notificationService.push('Please enter a VM Service URL.');
       return;
     }
 
     assert(() {
       if (_debugSharedPreferences != null) {
-        _debugSharedPreferences!
-            .setString(_vmServiceUriKey, connectDialogController.text);
+        _debugSharedPreferences!.setString(_vmServiceUriKey, uri);
       }
       return true;
     }());
 
-    final uri = normalizeVmServiceUri(connectDialogController.text);
     // Cache the routerDelegate and notifications providers before the async
     // gap as the landing screen may not be displayed by the time the async gap
     // is complete but we still want to show notifications and change the route.
@@ -302,13 +300,7 @@ class _ConnectDialogState extends State<ConnectDialog>
     final routerDelegate = DevToolsRouterDelegate.of(context);
     final connected = await FrameworkCore.initVmService(
       '',
-      explicitUri: uri,
-      errorReporter: (message, error) {
-        notificationService.pushError(
-          '$message $error',
-          isReportable: false,
-        );
-      },
+      serviceUriAsString: uri,
     );
     if (connected) {
       final connectedUri =
@@ -316,7 +308,7 @@ class _ConnectDialogState extends State<ConnectDialog>
       routerDelegate.updateArgsIfChanged({'uri': '$connectedUri'});
       final shortUri = connectedUri.replace(path: '');
       notificationService.push('Successfully connected to $shortUri.');
-    } else if (uri == null) {
+    } else if (normalizeVmServiceUri(uri) == null) {
       notificationService.push(
         'Failed to connect to the VM Service at "${connectDialogController.text}".\n'
         'The link was not valid.',

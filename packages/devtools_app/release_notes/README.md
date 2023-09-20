@@ -3,6 +3,8 @@
 When you add a user-facing change to DevTools,
 please add a release note entry to document this improvement.
 
+This entry should be phrased in the past tense (e.g. "Added XYZ" instead of "Add XYZ").
+
 If you want to add an image to the release note entry,
 add the image to the `release_notes/images` folder,
 and then reference it in the markdown. For example:

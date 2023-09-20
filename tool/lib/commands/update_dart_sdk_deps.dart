@@ -45,8 +45,7 @@ class UpdateDartSdkDepsCommand extends Command {
 
     print('Preparing a local Dart SDK branch...');
     await DartSdkHelper.fetchAndCheckoutMaster(processManager);
-    await runAll(
-      processManager,
+    await processManager.runAll(
       workingDirectory: dartSdkLocation,
       additionalErrorMessage: DartSdkHelper.commandDebugMessage,
       commands: [
@@ -62,8 +61,7 @@ class UpdateDartSdkDepsCommand extends Command {
     _writeToDepsFile(commit, dartSdkLocation);
 
     print('Committing the changes and creating a Gerrit CL...');
-    await runAll(
-      processManager,
+    await processManager.runAll(
       workingDirectory: dartSdkLocation,
       additionalErrorMessage: DartSdkHelper.commandDebugMessage,
       commands: [

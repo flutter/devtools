@@ -85,7 +85,10 @@ void main() {
   ) async {
     await tester.pumpWidget(
       wrapWithControllers(
-        const DebuggerScreenBody(),
+        DebuggerSourceAndControls(
+          shownFirstScript: () => true,
+          setShownFirstScript: (_) {},
+        ),
         debugger: controller,
       ),
     );

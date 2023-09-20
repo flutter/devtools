@@ -226,6 +226,7 @@ class IsolateSelector extends StatelessWidget {
         isolateManager.selectedIsolate,
       ],
       builder: (context, values, _) {
+        final theme = Theme.of(context);
         final isolates = values.first as List<IsolateRef>;
         final selectedIsolateRef = values.second as IsolateRef?;
         return PopupMenuButton<IsolateRef?>(
@@ -236,11 +237,17 @@ class IsolateSelector extends StatelessWidget {
             (ref) {
               return PopupMenuItem<IsolateRef>(
                 value: ref,
-                child: IsolateOption(ref),
+                child: IsolateOption(
+                  ref,
+                  color: theme.colorScheme.onSurface,
+                ),
               );
             },
           ).toList(),
-          child: IsolateOption(isolateManager.selectedIsolate.value),
+          child: IsolateOption(
+            isolateManager.selectedIsolate.value,
+            color: theme.colorScheme.onPrimary,
+          ),
         );
       },
     );
@@ -250,28 +257,29 @@ class IsolateSelector extends StatelessWidget {
 class IsolateOption extends StatelessWidget {
   const IsolateOption(
     this.ref, {
+    required this.color,
     super.key,
   });
 
   final IsolateRef? ref;
 
+  final Color color;
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
+    final textTheme = Theme.of(context).textTheme;
     return Row(
       children: [
         Icon(
           ref?.isSystemIsolate ?? false
               ? Icons.settings_applications
               : Icons.call_split,
-          color: theme.colorScheme.onPrimary,
+          color: color,
         ),
         const SizedBox(width: denseSpacing),
         Text(
           ref == null ? 'isolate' : _isolateName(ref!),
-          style: textTheme.bodyMedium!
-              .copyWith(color: theme.colorScheme.onPrimary),
+          style: textTheme.bodyMedium!.copyWith(color: color),
         ),
       ],
     );

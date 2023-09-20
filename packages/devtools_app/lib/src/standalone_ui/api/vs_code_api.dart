@@ -54,24 +54,30 @@ abstract interface class VsCodeApi {
   /// external browser window.
   Future<void> openDevToolsPage(String debugSessionId, String page);
 
+  /// Sends a Hot Reload request to the debug session with ID [debugSessionId].
+  Future<void> hotReload(String debugSessionId);
+
+  /// Sends a Hot Restart request to the debug session with ID [debugSessionId].
+  Future<void> hotRestart(String debugSessionId);
+
   static const jsonApiName = 'vsCode';
 
   static const jsonInitializeMethod = 'initialize';
-
   static const jsonExecuteCommandMethod = 'executeCommand';
-  static const jsonExecuteCommandCommandParameter = 'command';
-  static const jsonExecuteCommandArgumentsParameter = 'arguments';
-
-  static const jsonDevicesChangedEvent = 'devicesChanged';
 
   static const jsonSelectDeviceMethod = 'selectDevice';
-  static const jsonSelectDeviceIdParameter = 'id';
+  static const jsonOpenDevToolsPageMethod = 'openDevToolsPage';
+  static const jsonHotReloadMethod = 'hotReload';
+  static const jsonHotRestartMethod = 'hotRestart';
 
-  static const openDevToolsPageMethod = 'openDevToolsPage';
-  static const openDevToolsPageDebugSessionIdParameter = 'debugSessionId';
-  static const openDevToolsPagePageParameter = 'page';
-
+  static const jsonDevicesChangedEvent = 'devicesChanged';
   static const jsonDebugSessionsChangedEvent = 'debugSessionsChanged';
+
+  static const jsonCommandParameter = 'command';
+  static const jsonArgumentsParameter = 'arguments';
+  static const jsonIdParameter = 'id';
+  static const jsonOpenPageParameter = 'page';
+  static const jsonDebugSessionIdParameter = 'debugSessionId';
 }
 
 /// This class defines a device exposed by the Dart/Flutter extensions in VS
@@ -193,7 +199,17 @@ abstract interface class VsCodeCapabilities {
   /// DevTools page.
   bool get openDevToolsPage;
 
+  /// Whether the `hotReload` method is available call to hot reload a specific
+  /// debug session.
+  bool get hotReload;
+
+  /// Whether the `hotRestart` method is available call to restart a specific
+  /// debug session.
+  bool get hotRestart;
+
   static const jsonExecuteCommandField = 'executeCommand';
   static const jsonSelectDeviceField = 'selectDevice';
   static const openDevToolsPageField = 'openDevToolsPage';
+  static const hotReloadField = 'hotReload';
+  static const hotRestartField = 'hotRestart';
 }

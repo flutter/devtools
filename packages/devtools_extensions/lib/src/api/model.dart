@@ -49,6 +49,12 @@ class DevToolsExtensionEvent {
       if (data != null) _dataKey: data!,
     };
   }
+
+  @override
+  String toString() {
+    return '[$type, data: ${data.toString()}'
+        '${source != null ? ', source: $source' : ''}]';
+  }
 }
 
 /// A void callback that handles a [DevToolsExtensionEvent].
@@ -85,6 +91,7 @@ class ShowBannerMessageExtensionEvent extends DevToolsExtensionEvent {
     required String bannerMessageType,
     required String message,
     required String extensionName,
+    bool ignoreIfAlreadyDismissed = true,
   }) : super(
           DevToolsExtensionEventType.showBannerMessage,
           data: {
@@ -92,6 +99,7 @@ class ShowBannerMessageExtensionEvent extends DevToolsExtensionEvent {
             _bannerMessageTypeKey: bannerMessageType,
             _messageKey: message,
             _extensionNameKey: extensionName,
+            _ignoreIfAlreadyDismissedKey: ignoreIfAlreadyDismissed,
           },
         );
 
@@ -102,11 +110,14 @@ class ShowBannerMessageExtensionEvent extends DevToolsExtensionEvent {
     final message = eventData.checkValid<String>(_messageKey);
     final type = eventData.checkValid<String>(_bannerMessageTypeKey);
     final extensionName = eventData.checkValid<String>(_extensionNameKey);
+    final ignoreIfAlreadyDismissed =
+        (eventData[_ignoreIfAlreadyDismissedKey] as bool?) ?? true;
     return ShowBannerMessageExtensionEvent(
       id: id,
       bannerMessageType: type,
       message: message,
       extensionName: extensionName,
+      ignoreIfAlreadyDismissed: ignoreIfAlreadyDismissed,
     );
   }
 
@@ -114,11 +125,14 @@ class ShowBannerMessageExtensionEvent extends DevToolsExtensionEvent {
   static const _idKey = 'id';
   static const _bannerMessageTypeKey = 'bannerMessageType';
   static const _extensionNameKey = 'extensionName';
+  static const _ignoreIfAlreadyDismissedKey = 'ignoreIfAlreadyDismissed';
 
   String get messageId => data![_idKey] as String;
   String get bannerMessageType => data![_bannerMessageTypeKey] as String;
   String get message => data![_messageKey] as String;
   String get extensionName => data![_extensionNameKey] as String;
+  bool get ignoreIfAlreadyDismissed =>
+      (data![_ignoreIfAlreadyDismissedKey] as bool?) ?? true;
 }
 
 extension ParseExtension on Map<String, Object?> {

@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../api/vs_code_api.dart';
@@ -22,25 +23,23 @@ class Devices extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Devices',
-          style: Theme.of(context).textTheme.titleSmall,
+          style: theme.textTheme.titleMedium,
         ),
         if (devices.isEmpty)
           const Text('Connect a device or enable web/desktop platforms.')
         else
           Table(
-            columnWidths: const {
-              0: FlexColumnWidth(3),
-              1: FlexColumnWidth(),
-            },
             defaultVerticalAlignment: TableCellVerticalAlignment.middle,
             children: [
               for (final device in devices)
                 _createDeviceRow(
+                  theme,
                   device,
                   isSelected: device.id == selectedDeviceId,
                 ),
@@ -50,19 +49,55 @@ class Devices extends StatelessWidget {
     );
   }
 
-  TableRow _createDeviceRow(VsCodeDevice device, {required bool isSelected}) {
+  TableRow _createDeviceRow(
+    ThemeData theme,
+    VsCodeDevice device, {
+    required bool isSelected,
+  }) {
+    final backgroundColor = isSelected ? theme.colorScheme.secondary : null;
+    final foregroundColor = isSelected
+        ? theme.colorScheme.onSecondary
+        : theme.colorScheme.secondary;
+
     return TableRow(
+      decoration: BoxDecoration(color: backgroundColor),
       children: [
-        Align(
-          alignment: Alignment.centerLeft,
-          child: TextButton(
-            child: Text(device.name),
+        SizedBox(
+          width: double.infinity,
+          child: TextButton.icon(
+            style: TextButton.styleFrom(
+              alignment: Alignment.centerLeft,
+              shape: const ContinuousRectangleBorder(),
+              textStyle: theme.regularTextStyle,
+            ),
+            icon: Icon(
+              device.iconData,
+              size: actionsIconSize,
+              color: foregroundColor,
+            ),
+            label: Text(
+              device.name,
+              style: theme.regularTextStyle.copyWith(color: foregroundColor),
+            ),
             onPressed: () => unawaited(api.selectDevice(device.id)),
           ),
         ),
-        // TODO(dantup): Use a highlighted/select row for this instead of text.
-        Text(isSelected ? 'current device' : ''),
       ],
     );
+  }
+}
+
+extension on VsCodeDevice {
+  IconData get iconData {
+    return switch ((category, platformType)) {
+      ('desktop', 'macos') => Icons.desktop_mac_outlined,
+      ('desktop', 'windows') => Icons.desktop_windows_outlined,
+      ('desktop', _) => Icons.computer_outlined,
+      ('mobile', 'android') => Icons.phone_android_outlined,
+      ('mobile', 'ios') => Icons.phone_iphone_outlined,
+      ('mobile', _) => Icons.smartphone_outlined,
+      ('web', _) => Icons.web_outlined,
+      _ => Icons.device_unknown_outlined,
+    };
   }
 }

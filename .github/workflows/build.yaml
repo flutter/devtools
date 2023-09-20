@@ -106,22 +106,49 @@ jobs:
         env:
           WORKFLOW_ID: ${{ github.run_id }}
         run: |
-          echo "::notice title=To Quickly Fix Goldens:: Run \`./tool/fix_goldens.sh $WORKFLOW_ID\` on your local branch."
+          echo "::notice title=To Quickly Fix Goldens:: Run \`devtools_tool fix-goldens --run-id=$WORKFLOW_ID\` on your local branch."
 
   integration-test:
-    name: integration-test ${{ matrix.bot }} - ${{ matrix.device }}
+    name: integration-test ${{ matrix.bot }} - ${{ matrix.device }} - shard ${{ matrix.shard }}
     needs: flutter-prep
     runs-on: macos-latest
     strategy:
       fail-fast: false
       matrix:
-        bot:
-          # Consider running integration tests in ddc mode, too.
-          - dart2js
-        device:
-          - flutter
-          - flutter-web
-          - dart-cli
+        # Consider running integration tests in ddc mode, too.
+        bot: [dart2js]
+        device: [flutter, flutter-web, dart-cli]
+        # Option 1/1 will run all tests for a device in a single shard.
+        # Option 1/2 and 2/2 should be enabled to run tests for a device in 2 shards.
+        shard: [1/1, 1/2, 2/2, 1/3, 2/3, 3/3]
+        exclude:
+          # The 'flutter' device should be ran in three shards.
+          - device: flutter
+            shard: 1/1
+          - device: flutter
+            shard: 1/2
+          - device: flutter
+            shard: 2/2
+          # The 'flutter-web' device should be ran in two shards.
+          - device: flutter-web
+            shard: 1/1
+          - device: flutter-web
+            shard: 1/3
+          - device: flutter-web
+            shard: 2/3
+          - device: flutter-web
+            shard: 3/3
+          # The 'dart-cli' device can be ran in a single shard.
+          - device: dart-cli
+            shard: 1/2
+          - device: dart-cli
+            shard: 2/2
+          - device: dart-cli
+            shard: 1/3
+          - device: dart-cli
+            shard: 2/3
+          - device: dart-cli
+            shard: 3/3
     steps:
       - name: git clone
         uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac
@@ -135,6 +162,7 @@ jobs:
         env:
           BOT: ${{ matrix.bot }}
           DEVICE: ${{ matrix.device }}
+          SHARD: ${{ matrix.shard }}
         run: ./tool/bots.sh
 
       - name: Upload Golden Failure Artifacts

@@ -11,8 +11,18 @@ class _SimulatedDevToolsController extends DisposableController
   /// the extension and the simulated DevTools environment.
   final messageLogs = ListValueNotifier<_MessageLogEntry>([]);
 
+  /// The listener that is added to simulated DevTools window to receive
+  /// messages from the extension.
+  ///
+  /// We need to store this in a variable so that the listener is properly
+  /// removed in [dispose].
+  html.EventListener? _handleMessageListener;
+
   void init() {
-    html.window.addEventListener('message', _handleMessage);
+    html.window.addEventListener(
+      'message',
+      _handleMessageListener = _handleMessage,
+    );
     addAutoDisposeListener(serviceManager.connectedState, () {
       if (!serviceManager.connectedState.value.connected) {
         updateVmServiceConnection(uri: null);
@@ -36,7 +46,8 @@ class _SimulatedDevToolsController extends DisposableController
 
   @override
   void dispose() {
-    html.window.removeEventListener('message', _handleMessage);
+    html.window.removeEventListener('message', _handleMessageListener);
+    _handleMessageListener = null;
     super.dispose();
   }
 
@@ -49,6 +60,10 @@ class _SimulatedDevToolsController extends DisposableController
 
   @override
   void updateVmServiceConnection({required String? uri}) {
+    // TODO(https://github.com/flutter/devtools/issues/6416): write uri to the
+    // window location query parameters so that the vm service connection
+    // persists on hot restart.
+
     // TODO(kenz): add some validation and error handling if [uri] is bad input.
     final normalizedUri =
         uri != null ? normalizeVmServiceUri(uri).toString() : null;
@@ -131,6 +146,13 @@ class _SimulatedDevToolsController extends DisposableController
       theme: darkThemeEnabled
           ? ExtensionEventParameters.themeValueLight
           : ExtensionEventParameters.themeValueDark,
+    );
+  }
+
+  @override
+  void forceReload() {
+    _postMessageToExtension(
+      DevToolsExtensionEvent(DevToolsExtensionEventType.forceReload),
     );
   }
 }

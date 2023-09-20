@@ -15,6 +15,10 @@ enum DevToolsExtensionEventType {
   /// [ping] event.
   pong(ExtensionEventDirection.toDevTools),
 
+  /// An event that DevTools will send to an extension to force the extension
+  /// iFrame to reload.
+  forceReload(ExtensionEventDirection.toExtension),
+
   /// An event that DevTools will send to an extension to notify of the
   /// connected vm service uri.
   vmServiceConnection(ExtensionEventDirection.bidirectional),
@@ -103,13 +107,17 @@ abstract interface class DevToolsExtensionHostInterface {
   /// DevTools extension to check that it is ready.
   void ping();
 
+  /// This method should send a [DevToolsExtensionEventType.forceReload] event
+  /// to the extension to notify it to perform a reload on itself.
+  void forceReload();
+
   /// This method should send a [DevToolsExtensionEventType.vmServiceConnection]
   /// event to the extension to notify it of the vm service uri it should
   /// establish a connection to.
   void updateVmServiceConnection({required String? uri});
 
   /// This method should send a [DevToolsExtensionEventType.themeUpdate] event
-  /// to the extension to notify if of a theme change in DevTools.
+  /// to the extension to notify it of a theme change in DevTools.
   ///
   /// [theme] should be one of [ExtensionEventParameters.themeValueLight] or
   /// [ExtensionEventParameters.themeValueDark].

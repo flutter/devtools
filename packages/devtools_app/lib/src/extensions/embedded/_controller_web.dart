@@ -11,6 +11,8 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_extensions/api.dart';
 import 'package:path/path.dart' as path;
 
+import '../../shared/config_specific/server/server.dart';
+import '../../shared/development_helpers.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
 import 'controller.dart';
@@ -37,6 +39,10 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController
   late final viewId = 'ext-${extensionConfig.name}-${_viewIdIncrementer++}';
 
   String get extensionUrl {
+    if (debugDevToolsExtensions && !isDevToolsServerAvailable) {
+      return 'https://flutter.dev/';
+    }
+
     final baseUri = path.join(
       html.window.location.origin,
       'devtools_extensions',

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore: avoid_web_libraries_in_flutter, as designed
 import 'dart:async';
+// ignore: avoid_web_libraries_in_flutter, as designed
 import 'dart:html' as html;
 
 import 'package:devtools_app_shared/service.dart';
@@ -159,6 +159,11 @@ class _SimulatedApi extends StatelessWidget {
             DevToolsButton(
               label: 'TOGGLE THEME',
               onPressed: simController.toggleTheme,
+            ),
+            const SizedBox(width: denseSpacing),
+            DevToolsButton(
+              label: 'FORCE RELOAD',
+              onPressed: simController.forceReload,
             ),
             // TODO(kenz): add buttons for other simulated events as the extension
             // API expands.

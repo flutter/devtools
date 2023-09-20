@@ -14,6 +14,14 @@ Follow the instructions below to get started, and use the
 [end-to-end example](https://github.com/flutter/devtools/tree/master/packages/devtools_extensions/example/)
 for reference.
 
+# Table of contents
+1. [Setup your package to provide a DevTools extension](#setup-your-package-to-provide-a-DevTools-extension)
+2. [Create a DevTools extension](#create-a-devtools-extension)
+    - [Where to put your source code](#where-to-put-your-source-code)
+    - [Development](#create-the-extension-web-app)
+    - [Debugging](#debug-the-extension-web-app)
+3. [Publish your package with a DevTools extension](#publish-your-package-with-a-DevTools-extension)
+
 ## Setup your package to provide a DevTools extension
 
 DevTools extensions must be written as Flutter web apps. This is because DevTools embeds
@@ -48,7 +56,7 @@ material_icon_code_point: '0xe0b1'
 
 Now it is time to build your extension.
 
-## Build a DevTools extension
+## Create a DevTools extension
 
 ### Where to put your source code
 
@@ -78,7 +86,7 @@ flutter create --template app --platforms web foo_package_devtools_extension
 
 In `foo_package_devtools_extension/pubspec.yaml`, add a dependency on `devtools_extensions`:
 ```yaml
-devtools_extensions: ^1.0.0
+devtools_extensions: ^0.0.5
 ```
 
 In `lib/main.dart`, place a `DevToolsExtension` widget at the root of your app:
@@ -157,11 +165,11 @@ real DevTools environment. Build your flutter web app and copy the built assets 
 `your_extension_web_app/build` to your pub package's `extension/devtools/build` directory.
 
 Use the `build_extension` command from `package:devtools_extensions` to help with this step.
-```
+```sh
 cd your_extension_web_app &&
 flutter pub get &&
 dart run devtools_extensions build_and_copy \
-  --source=path/to/your_extension_web_app \
+  --source=. \
   --dest=path/to/your_pub_package/extension/devtools 
 ```
 
@@ -183,3 +191,46 @@ source code. Once you have done this, run `pub get`, and run the application.
 in the DevTools app bar for your extension. The enabled or disabled state of your extension is
 managed by DevTools, which is exposed from an "Extensions" menu in DevTools, available from the
 action buttons in the upper right corner of the screen.
+
+## Publish your package with a DevTools extension
+
+In order for a package to provide a DevTools extension to its users, it must be published with the
+expected content in the `your_package/extension/devtools/` directory (see the
+[setup instructions](#setup-your-package-to-provide-a-DevTools-extension) above).
+
+1. Ensure the `extension/devtools/config.yaml` file exists and is configured per the
+[specifications above](#setup-your-package-to-provide-a-DevTools-extension).
+2. Use the `build_and_copy` command provided by `package:devtools_extensions` to build
+your extension and copy the output to the `extension/devtools` directory:
+```sh
+cd your_extension_web_app &&
+flutter pub get &&
+dart run devtools_extensions build_and_copy \
+  --source=. \
+  --dest=path/to/your_pub_package/extension/devtools 
+```
+
+### What if I don't want the `extension/devtools/build/` contents checked into source control?
+
+As a package author, the content that you check into your git repository is completely up to you.
+If you want the contents of `extension/devtools/build/` to be git ignored, then you'll just need
+to ensure that the extension web app is always built and included in `extension/devtools/build/`
+when you publish your package.
+
+Consider adding a tool script to your repo that looks something like this:
+
+**publish.sh**
+```sh
+pushd your_extension_web_app
+
+flutter pub get &&
+dart run devtools_extensions build_and_copy \
+  --source=. \
+  --dest=path/to/your_pub_package/extension/devtools 
+
+popd
+
+pushd your_pub_package
+flutter pub publish
+popd
+```

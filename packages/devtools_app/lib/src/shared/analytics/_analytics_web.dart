@@ -12,7 +12,6 @@ import 'dart:async';
 import 'dart:html';
 
 import 'package:devtools_app_shared/ui.dart';
-import 'package:devtools_app_shared/utils.dart';
 import 'package:js/js.dart';
 import 'package:logging/logging.dart';
 
@@ -21,6 +20,7 @@ import '../config_specific/server/server.dart' as server;
 import '../globals.dart';
 import '../primitives/url_utils.dart';
 import '../ui/gtags.dart';
+import '../utils.dart';
 import 'analytics_common.dart';
 import 'constants.dart' as gac;
 import 'metrics.dart';
@@ -42,7 +42,6 @@ const String devToolsChromeOS = 'CrOS'; // Chrome OS
 // Dimension6 devToolsVersion
 
 // Dimension7 ideLaunched
-const String ideLaunchedQuery = 'ide'; // '&ide=' query parameter
 const String ideLaunchedCLI = 'CLI'; // Command Line Interface
 
 final _log = Logger('_analytics_web');
@@ -764,8 +763,7 @@ void computeDevToolsCustomGTagsData() {
 void computeDevToolsQueryParams() {
   ideLaunched = ideLaunchedCLI; // Default is Command Line launch.
 
-  final queryParameters = loadQueryParams();
-  final ideValue = queryParameters[ideLaunchedQuery];
+  final ideValue = ideFromUrl();
   if (ideValue != null) {
     ideLaunched = ideValue;
   }

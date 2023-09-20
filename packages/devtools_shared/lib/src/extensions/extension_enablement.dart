@@ -117,6 +117,7 @@ $_extensionsKey:
   File? _lookupOptionsFile(Uri rootUri) {
     final rootDir = Directory.fromUri(rootUri);
     if (!rootDir.existsSync()) {
+      // ignore: avoid_print, intentional print for server-side logs.
       print('Directory does not exist at path: ${rootUri.toString()}');
       return null;
     }

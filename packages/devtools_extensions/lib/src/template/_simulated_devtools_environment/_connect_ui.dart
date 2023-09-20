@@ -4,9 +4,6 @@
 
 part of '_simulated_devtools_environment.dart';
 
-// TODO(kenz): delete this once we can bump to vm_service ^11.10.0
-String? _connectedUri;
-
 class _VmServiceConnection extends StatelessWidget {
   const _VmServiceConnection({
     required this.simController,
@@ -24,16 +21,16 @@ class _VmServiceConnection extends StatelessWidget {
     return SizedBox(
       height: _totalControlsHeight,
       child: connected
-          ? const _ConnectedVmServiceDisplay()
-          : _DisconnectedVmServiceDisplay(
-              simController: simController,
-            ),
+          ? _ConnectedVmServiceDisplay(simController: simController)
+          : _DisconnectedVmServiceDisplay(simController: simController),
     );
   }
 }
 
 class _ConnectedVmServiceDisplay extends StatelessWidget {
-  const _ConnectedVmServiceDisplay();
+  const _ConnectedVmServiceDisplay({required this.simController});
+
+  final _SimulatedDevToolsController simController;
 
   @override
   Widget build(BuildContext context) {
@@ -48,12 +45,10 @@ class _ConnectedVmServiceDisplay extends StatelessWidget {
               'Debugging:',
               style: theme.regularTextStyle,
             ),
-            Text(_connectedUri ?? '--'),
-            // TODO(kenz): uncomment once we can bump to vm_service ^11.10.0
-            // Text(
-            //   serviceManager.service!.wsUri ?? '--',
-            //   style: theme.boldTextStyle,
-            // ),
+            Text(
+              serviceManager.service!.wsUri ?? '--',
+              style: theme.boldTextStyle,
+            ),
           ],
         ),
         const Expanded(
@@ -63,8 +58,7 @@ class _ConnectedVmServiceDisplay extends StatelessWidget {
           elevated: true,
           label: 'Disconnect',
           onPressed: () {
-            _connectedUri = null;
-            unawaited(serviceManager.manuallyDisconnect());
+            simController.updateVmServiceConnection(uri: null);
           },
         ),
       ],
@@ -132,7 +126,6 @@ class _DisconnectedVmServiceDisplayState
           elevated: true,
           label: 'Connect',
           onPressed: () {
-            _connectedUri = _connectTextFieldController.text;
             widget.simController.updateVmServiceConnection(
               uri: _connectTextFieldController.text,
             );

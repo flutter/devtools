@@ -30,14 +30,7 @@ const initialFractionForTreemap = 0.67;
 const initialFractionForTreeTable = 0.33;
 
 class AppSizeScreen extends Screen {
-  AppSizeScreen()
-      : super.conditional(
-          id: id,
-          requiresConnection: false,
-          requiresDartVm: true,
-          title: ScreenMetaData.appSize.title,
-          icon: ScreenMetaData.appSize.icon,
-        );
+  AppSizeScreen() : super.fromMetaData(ScreenMetaData.appSize);
 
   static const analysisTabKey = Key('Analysis Tab');
   static const diffTabKey = Key('Diff Tab');

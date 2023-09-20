@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
@@ -42,10 +43,15 @@ class PreferencesController extends DisposableController
   CpuProfilerPreferencesController get cpuProfiler => _cpuProfiler;
   final _cpuProfiler = CpuProfilerPreferencesController();
 
+  ExtensionsPreferencesController get devToolsExtensions => _extensions;
+  final _extensions = ExtensionsPreferencesController();
+
   Future<void> init() async {
     // Get the current values and listen for and write back changes.
     String? value = await storage.getValue('ui.darkMode');
-    final useDarkMode = value == null || value == 'true';
+
+    final useDarkMode =
+        (value == null && useDarkThemeAsDefault) || value == 'true';
     toggleDarkModeTheme(useDarkMode);
     addAutoDisposeListener(darkModeTheme, () {
       storage.setValue('ui.darkMode', '${darkModeTheme.value}');
@@ -69,6 +75,7 @@ class PreferencesController extends DisposableController
     await memory.init();
     await performance.init();
     await cpuProfiler.init();
+    await devToolsExtensions.init();
 
     setGlobal(PreferencesController, this);
   }
@@ -99,6 +106,7 @@ class PreferencesController extends DisposableController
     memory.dispose();
     performance.dispose();
     cpuProfiler.dispose();
+    devToolsExtensions.dispose();
     super.dispose();
   }
 
@@ -491,5 +499,34 @@ class PerformancePreferencesController extends DisposableController
     );
     showFlutterFramesChart.value =
         await storage.getValue(_showFlutterFramesChartId) != 'false';
+  }
+}
+
+class ExtensionsPreferencesController extends DisposableController
+    with AutoDisposeControllerMixin {
+  final showOnlyEnabledExtensions = ValueNotifier<bool>(false);
+
+  static final _showOnlyEnabledExtensionsId =
+      '${gac.DevToolsExtensionEvents.extensionScreenId}.'
+      '${gac.DevToolsExtensionEvents.showOnlyEnabledExtensionsSetting.name}';
+
+  Future<void> init() async {
+    addAutoDisposeListener(
+      showOnlyEnabledExtensions,
+      () {
+        storage.setValue(
+          _showOnlyEnabledExtensionsId,
+          showOnlyEnabledExtensions.value.toString(),
+        );
+        ga.select(
+          gac.DevToolsExtensionEvents.extensionScreenId.name,
+          gac.DevToolsExtensionEvents.showOnlyEnabledExtensionsSetting.name,
+          value: showOnlyEnabledExtensions.value ? 1 : 0,
+        );
+      },
+    );
+    // Default the value to false if it is not set.
+    showOnlyEnabledExtensions.value =
+        await storage.getValue(_showOnlyEnabledExtensionsId) == 'true';
   }
 }

@@ -66,12 +66,16 @@ class MockDartToolingApi extends DartToolingApiImpl {
         'executeCommand': true,
         'selectDevice': true,
         'openDevToolsPage': true,
+        'hotReload': true,
+        'hotRestart': true,
       };
     });
     server.registerMethod('vsCode.initialize', initialize);
     server.registerMethod('vsCode.executeCommand', executeCommand);
     server.registerMethod('vsCode.selectDevice', selectDevice);
-    server.registerMethod('vsCode.openDevToolsPage', openDevToolsPage);
+    server.registerMethod('vsCode.openDevToolsPage', noOpHandler);
+    server.registerMethod('vsCode.hotReload', noOpHandler);
+    server.registerMethod('vsCode.hotRestart', noOpHandler);
   }
 
   final json_rpc_2.Peer client;
@@ -98,6 +102,16 @@ class MockDartToolingApi extends DartToolingApiImpl {
       ephemeral: true,
       platform: 'android-x64',
       platformType: 'android',
+    ),
+    VsCodeDeviceImpl(
+      id: 'chrome',
+      name: 'Chrome',
+      category: 'web',
+      emulator: false,
+      emulatorId: null,
+      ephemeral: true,
+      platform: 'web-javascript',
+      platformType: 'web',
     ),
   ];
 
@@ -126,10 +140,6 @@ class MockDartToolingApi extends DartToolingApiImpl {
     final params = parameters.asMap;
     final command = params['command'];
     switch (command) {
-      case 'flutter.createProject':
-        return null;
-      case 'flutter.doctor':
-        return null;
       default:
         throw 'Unknown command $command';
     }
@@ -144,11 +154,9 @@ class MockDartToolingApi extends DartToolingApiImpl {
     return true;
   }
 
-  /// Simulates opening a DevTools feature.
-  // TODO(dantup): does this method need to be async and is the [parameters]
-  // parameter actually unnecessary?
-  // ignore: avoid-redundant-async, avoid-unused-parameters, todo investigate
-  Future<void> openDevToolsPage(json_rpc_2.Parameters parameters) async {}
+  /// A no-op handler for method handlers that don't require an implementation
+  /// but need to exist so that the request/response is successful.
+  void noOpHandler(json_rpc_2.Parameters _) {}
 
   /// Simulates devices being connected in the IDE by notifying the embedded
   /// panel about a set of test devices.
@@ -161,7 +169,7 @@ class MockDartToolingApi extends DartToolingApiImpl {
   }
 
   /// Simulates starting a debug session.
-  void startSession(String? mode) {
+  void startSession(String mode, String deviceId) {
     final sessionNum = _nextDebugSessionNumber++;
     _debugSessions.add(
       VsCodeDebugSessionImpl(
@@ -169,7 +177,7 @@ class MockDartToolingApi extends DartToolingApiImpl {
         name: 'Session $sessionNum',
         vmServiceUri: 'ws://127.0.0.1:1234/ws',
         flutterMode: mode,
-        flutterDeviceId: 'flutter-tester',
+        flutterDeviceId: deviceId,
         debuggerType: 'Flutter',
       ),
     );

@@ -37,6 +37,10 @@ class ExtensionService extends DisposableController
     );
   }
 
+  /// Whether extensions are actively being refreshed by the DevTools server.
+  ValueListenable<bool> get refreshInProgress => _refreshInProgress;
+  final _refreshInProgress = ValueNotifier(false);
+
   final _extensionEnabledStates =
       <String, ValueNotifier<ExtensionEnabledState>>{};
 
@@ -44,7 +48,34 @@ class ExtensionService extends DisposableController
     await _maybeRefreshExtensions();
     addAutoDisposeListener(
       serviceConnection.serviceManager.connectedState,
-      _maybeRefreshExtensions,
+      () async {
+        if (serviceConnection.serviceManager.connectedState.value.connected) {
+          await _maybeRefreshExtensions();
+        } else {
+          _reset();
+        }
+      },
+    );
+
+    // TODO(https://github.com/flutter/flutter/issues/134470): refresh on
+    // hot reload and hot restart events instead.
+    addAutoDisposeListener(
+      serviceConnection.serviceManager.isolateManager.mainIsolate,
+      () async {
+        if (serviceConnection.serviceManager.isolateManager.mainIsolate.value !=
+            null) {
+          await _maybeRefreshExtensions();
+        } else {
+          _reset();
+        }
+      },
+    );
+
+    addAutoDisposeListener(
+      preferences.devToolsExtensions.showOnlyEnabledExtensions,
+      () async {
+        await _refreshExtensionEnabledStates();
+      },
     );
 
     // TODO(kenz): we should also refresh the available extensions on some event
@@ -56,15 +87,20 @@ class ExtensionService extends DisposableController
     final appRootPath = await _connectedAppRootPath();
     if (appRootPath == null) return;
 
+    _refreshInProgress.value = true;
     _availableExtensions.value =
         await server.refreshAvailableExtensions(appRootPath)
           ..sort();
     await _refreshExtensionEnabledStates();
+    _refreshInProgress.value = false;
   }
 
   Future<void> _refreshExtensionEnabledStates() async {
     final appRootPath = await _connectedAppRootPath();
     if (appRootPath == null) return;
+
+    final onlyIncludeEnabled =
+        preferences.devToolsExtensions.showOnlyEnabledExtensions.value;
 
     final visible = <DevToolsExtensionConfig>[];
     for (final extension in _availableExtensions.value) {
@@ -77,7 +113,11 @@ class ExtensionService extends DisposableController
         () => ValueNotifier<ExtensionEnabledState>(stateFromOptionsFile),
       );
       stateNotifier.value = stateFromOptionsFile;
-      if (stateFromOptionsFile != ExtensionEnabledState.disabled) {
+
+      final shouldIncludeInVisible = onlyIncludeEnabled
+          ? stateFromOptionsFile == ExtensionEnabledState.enabled
+          : stateFromOptionsFile != ExtensionEnabledState.disabled;
+      if (shouldIncludeInVisible) {
         visible.add(extension);
       }
     }
@@ -102,6 +142,13 @@ class ExtensionService extends DisposableController
       );
       await _refreshExtensionEnabledStates();
     }
+  }
+
+  void _reset() {
+    _availableExtensions.value = [];
+    _visibleExtensions.value = [];
+    _extensionEnabledStates.clear();
+    _refreshInProgress.value = false;
   }
 }
 

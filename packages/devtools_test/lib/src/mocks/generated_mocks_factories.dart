@@ -220,7 +220,7 @@ Future<MockExtensionService> createMockExtensionServiceWithDefaults(
 
   final _stubEnabledStates = <String, ValueNotifier<ExtensionEnabledState>>{};
   for (final e in extensions) {
-    _stubEnabledStates[e.name.toLowerCase()] =
+    _stubEnabledStates[e.displayName] =
         ValueNotifier<ExtensionEnabledState>(ExtensionEnabledState.none);
     when(mockExtensionService.enabledStateListenable(e.name))
         .thenReturn(_stubEnabledStates[e.name.toLowerCase()]!);

@@ -6,8 +6,7 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:devtools_tool/devtools_command_runner.dart';
-import 'package:devtools_tool/model.dart';
-import 'package:path/path.dart' as path;
+import '../utils.dart';
 
 // This script must be executed from the top level devtools/ directory.
 // TODO(kenz): If changes are made to this script, first consider refactoring to
@@ -196,8 +195,8 @@ String incrementDevVersion(String currentVersion) {
   final alreadyHasDevVersion = isDevVersion(currentVersion);
   if (alreadyHasDevVersion) {
     final devVerMatch = RegExp(
-            r'^(?<prefix>\d+\.\d+\.\d+.*-dev\.)(?<devVersion>\d+)(?<suffix>.*)$')
-        .firstMatch(currentVersion);
+      r'^(?<prefix>\d+\.\d+\.\d+.*-dev\.)(?<devVersion>\d+)(?<suffix>.*)$',
+    ).firstMatch(currentVersion);
 
     if (devVerMatch == null) {
       throw 'Invalid version, could not increment dev version';
@@ -397,8 +396,4 @@ class AutoUpdateCommand extends Command {
       );
     }
   }
-}
-
-String pathFromRepoRoot(String pathFromRoot) {
-  return path.join(DevToolsRepo.getInstance()!.repoPath, pathFromRoot);
 }

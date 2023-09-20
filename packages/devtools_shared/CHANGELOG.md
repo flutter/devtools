@@ -1,3 +1,12 @@
+# 4.1.0
+- Add shared integration test utilities to `package:devtools_shared`. These test
+utilities are exported as part of the existing `devtools_test_utils.dart` library.
+
+# 4.0.1
+
+- Override equality operator and hashCode for `DevToolsExtensionConfig`
+to be based on the values of its fields.
+
 # 4.0.0
 
 - Bump `package:extension_discovery` version to ^2.0.0

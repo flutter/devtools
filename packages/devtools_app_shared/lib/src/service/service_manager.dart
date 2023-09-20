@@ -104,9 +104,7 @@ class ServiceManager<T extends VmService> {
   VM? vm;
   String? sdkVersion;
 
-  bool get hasService => service != null;
-
-  bool get hasConnection => hasService && connectedApp != null;
+  bool get hasConnection => service != null && connectedApp != null;
 
   bool get connectedAppInitialized =>
       hasConnection && connectedApp!.connectedAppInitialized;
@@ -129,7 +127,7 @@ class ServiceManager<T extends VmService> {
   }
 
   /// Set the device as busy during the duration of the given async task.
-  Future<T> runDeviceBusyTask<T>(Future<T> task) async {
+  Future<V> runDeviceBusyTask<V>(Future<V> task) async {
     try {
       setDeviceBusy(true);
       return await task;

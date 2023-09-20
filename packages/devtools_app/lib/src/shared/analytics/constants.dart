@@ -41,12 +41,24 @@ const feedbackButton = 'feedbackButton';
 const contributingLink = 'contributing';
 const discordLink = 'discord';
 
-// Extension screens UX actions.
-const extensionScreenId = 'devtoolsExtension';
-const extensionSettingsId = 'devtoolsExtensionSettings';
-String extensionFeedback(String name) => 'extensionFeedback-$name';
-String extensionEnable(String name) => 'extensionEnable-$name';
-String extensionDisable(String name) => 'extensionDisable-$name';
+/// Extension screens UX actions.
+enum DevToolsExtensionEvents {
+  /// Analytics id to track events that come from an extension screen.
+  extensionScreenId,
+
+  /// Analytics id to track events that come from the extension settings menu.
+  extensionSettingsId,
+
+  /// Analytics id for the setting to only show DevTools tabs for extensions
+  /// that have been manually opted into.
+  showOnlyEnabledExtensionsSetting;
+
+  static String extensionFeedback(String name) => 'extensionFeedback-$name';
+  static String extensionEnable(String name) => 'extensionEnable-$name';
+  static String extensionDisable(String name) => 'extensionDisable-$name';
+  static String extensionForceReload(String name) =>
+      'extensionForceReload-$name';
+}
 
 // Inspector UX actions:
 const refresh = 'refresh';

@@ -9,8 +9,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
+import 'package:devtools_shared/devtools_test_utils.dart';
 
-import '_io_utils.dart';
 import '_utils.dart';
 
 class TestFlutterApp extends IntegrationTestApp {
@@ -30,6 +30,8 @@ class TestFlutterApp extends IntegrationTestApp {
         '--machine',
         '-d',
         testAppDevice.argName,
+        // Do not serve DevTools from Flutter Tools.
+        '--no-devtools',
       ],
       workingDirectory: testAppPath,
     );
@@ -301,7 +303,7 @@ abstract class IntegrationTestApp with IOMixin {
   Future<void> manuallyStopApp() async {}
 
   Future<void> start() async {
-    _debugPrint('starting the test app process...');
+    _debugPrint('starting the test app process for $testAppPath');
     await startProcess();
     assert(
       runProcess != null,
@@ -329,7 +331,10 @@ abstract class IntegrationTestApp with IOMixin {
     _debugPrint('Waiting for process to end');
     return runProcess!.exitCode.timeout(
       IOMixin.killTimeout,
-      onTimeout: () => killGracefully(runProcess!),
+      onTimeout: () => killGracefully(
+        runProcess!,
+        debugLogging: debugTestScript,
+      ),
     );
   }
 

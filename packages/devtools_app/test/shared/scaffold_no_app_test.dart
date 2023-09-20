@@ -58,7 +58,10 @@ void main() {
       when(mockServiceManager.connectedAppInitialized).thenReturn(false);
       await tester.pumpWidget(
         wrapScaffold(
-          DevToolsScaffold(screens: const [_screen1, _screen2]),
+          DevToolsScaffold(
+            page: _screen1.screenId,
+            screens: const [_screen1, _screen2],
+          ),
         ),
       );
       expect(find.byKey(_k1), findsOneWidget);
