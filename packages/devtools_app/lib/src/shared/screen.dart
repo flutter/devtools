@@ -17,31 +17,102 @@ import 'ui/icons.dart';
 final _log = Logger('screen.dart');
 
 enum ScreenMetaData {
-  home('home', icon: Icons.home_rounded),
+  home(
+    'home',
+    icon: Icons.home_rounded,
+    requiresConnection: false,
+  ),
   inspector(
     'inspector',
     title: 'Flutter Inspector',
     icon: Octicons.deviceMobile,
+    requiresFlutter: true,
+    requiresDebugBuild: true,
   ),
-  performance('performance', title: 'Performance', icon: Octicons.pulse),
-  cpuProfiler('cpu-profiler', title: 'CPU Profiler', icon: Octicons.dashboard),
-  memory('memory', title: 'Memory', icon: Octicons.package),
-  debugger('debugger', title: 'Debugger', icon: Octicons.bug),
-  network('network', title: 'Network', icon: Icons.network_check),
+  performance(
+    'performance',
+    title: 'Performance',
+    icon: Octicons.pulse,
+    worksOffline: true,
+  ),
+  cpuProfiler(
+    'cpu-profiler',
+    title: 'CPU Profiler',
+    icon: Octicons.dashboard,
+    requiresDartVm: true,
+    worksOffline: true,
+  ),
+  memory(
+    'memory',
+    title: 'Memory',
+    icon: Octicons.package,
+    requiresDartVm: true,
+  ),
+  debugger(
+    'debugger',
+    title: 'Debugger',
+    icon: Octicons.bug,
+    requiresDebugBuild: true,
+  ),
+  network(
+    'network',
+    title: 'Network',
+    icon: Icons.network_check,
+    requiresDartVm: true,
+  ),
   logging('logging', title: 'Logging', icon: Octicons.clippy),
-  provider('provider', title: 'Provider', icon: Icons.attach_file),
-  appSize('app-size', title: 'App Size', icon: Octicons.fileZip),
-  deepLinks('deep-links', title: 'Deep Links', icon: Icons.link_rounded),
-  vmTools('vm-tools', title: 'VM Tools', icon: Icons.settings_applications),
+  provider(
+    'provider',
+    title: 'Provider',
+    icon: Icons.attach_file,
+    requiresLibrary: 'package:provider/',
+    requiresDebugBuild: true,
+  ),
+  appSize(
+    'app-size',
+    title: 'App Size',
+    icon: Octicons.fileZip,
+    requiresConnection: false,
+    requiresDartVm: true,
+  ),
+  deepLinks(
+    'deep-links',
+    title: 'Deep Links',
+    icon: Icons.link_rounded,
+    requiresConnection: false,
+    requiresDartVm: true,
+  ),
+  vmTools(
+    'vm-tools',
+    title: 'VM Tools',
+    icon: Icons.settings_applications,
+    requiresVmDeveloperMode: true,
+  ),
   simple('simple');
 
-  const ScreenMetaData(this.id, {this.title, this.icon});
+  const ScreenMetaData(
+    this.id, {
+    this.title,
+    this.icon,
+    this.requiresConnection = true,
+    this.requiresDartVm = false,
+    this.requiresFlutter = false,
+    this.requiresDebugBuild = false,
+    this.requiresVmDeveloperMode = false,
+    this.worksOffline = false,
+    this.requiresLibrary,
+  });
 
   final String id;
-
   final String? title;
-
   final IconData? icon;
+  final bool requiresConnection;
+  final bool requiresDartVm;
+  final bool requiresFlutter;
+  final bool requiresDebugBuild;
+  final bool requiresVmDeveloperMode;
+  final bool worksOffline;
+  final String? requiresLibrary;
 }
 
 /// Defines a page shown in the DevTools [TabBar].
@@ -93,6 +164,29 @@ abstract class Screen {
           title: title,
           titleGenerator: titleGenerator,
           icon: icon,
+          tabKey: tabKey,
+        );
+
+  Screen.fromMetaData(
+    ScreenMetaData metadata, {
+    bool Function(FlutterVersion? currentVersion)? shouldShowForFlutterVersion,
+    bool showFloatingDebuggerControls = true,
+    String Function()? titleGenerator,
+    Key? tabKey,
+  }) : this.conditional(
+          id: metadata.id,
+          requiresLibrary: metadata.requiresLibrary,
+          requiresConnection: metadata.requiresConnection,
+          requiresDartVm: metadata.requiresDartVm,
+          requiresFlutter: metadata.requiresFlutter,
+          requiresDebugBuild: metadata.requiresDebugBuild,
+          requiresVmDeveloperMode: metadata.requiresVmDeveloperMode,
+          worksOffline: metadata.worksOffline,
+          shouldShowForFlutterVersion: shouldShowForFlutterVersion,
+          showFloatingDebuggerControls: showFloatingDebuggerControls,
+          title: titleGenerator == null ? metadata.title : null,
+          titleGenerator: titleGenerator,
+          icon: metadata.icon,
           tabKey: tabKey,
         );
 

@@ -23,14 +23,7 @@ import 'profiler_screen_controller.dart';
 import 'profiler_status.dart';
 
 class ProfilerScreen extends Screen {
-  ProfilerScreen()
-      : super.conditional(
-          id: id,
-          requiresDartVm: true,
-          worksOffline: true,
-          title: ScreenMetaData.cpuProfiler.title,
-          icon: ScreenMetaData.cpuProfiler.icon,
-        );
+  ProfilerScreen() : super.fromMetaData(ScreenMetaData.cpuProfiler);
 
   static final id = ScreenMetaData.cpuProfiler.id;
 

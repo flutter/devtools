@@ -38,11 +38,8 @@ import 'variables.dart';
 
 class DebuggerScreen extends Screen {
   DebuggerScreen()
-      : super.conditional(
-          id: id,
-          requiresDebugBuild: true,
-          title: ScreenMetaData.debugger.title,
-          icon: ScreenMetaData.debugger.icon,
+      : super.fromMetaData(
+          ScreenMetaData.debugger,
           showFloatingDebuggerControls: false,
         );
 
