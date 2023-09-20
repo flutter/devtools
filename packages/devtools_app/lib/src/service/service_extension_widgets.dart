@@ -208,14 +208,18 @@ class HotReloadButton extends StatelessWidget {
   /// calling a registered service from Flutter.
   final bool callOnVmServiceDirectly;
 
+  static const _hotReloadTooltip = 'Hot reload';
+
   @override
   Widget build(BuildContext context) {
     // TODO(devoncarew): Show as disabled when reload service calls are in progress.
-
     return callOnVmServiceDirectly
+        // We cannot use a [_RegisteredServiceExtensionButton] here because
+        // there is no service extensions when we are calling hot reload
+        // directly on the VM service.
         ? _HotReloadScaffoldAction()
         : DevToolsTooltip(
-            message: 'Hot reload',
+            message: _hotReloadTooltip,
             child: _RegisteredServiceExtensionButton._(
               serviceDescription: hotReload,
               action: _callHotReload,
@@ -230,7 +234,7 @@ class _HotReloadScaffoldAction extends ScaffoldAction {
   _HotReloadScaffoldAction({Color? color})
       : super(
           icon: hotReloadIcon,
-          tooltip: 'Hot reload',
+          tooltip: HotReloadButton._hotReloadTooltip,
           color: color,
           onPressed: (context) {
             ga.select(gac.devToolsMain, gac.hotReload);

@@ -17,6 +17,7 @@ import 'isolate_manager.dart';
 import 'isolate_state.dart';
 import 'service_extension_manager.dart';
 import 'service_extensions.dart';
+import 'service_utils.dart';
 
 final _log = Logger('service_manager');
 
