@@ -111,6 +111,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         (e) => DevToolsScreen<void>(ExtensionScreen(e)).screen,
       );
 
+  // TODO(dantup): This does not take IDE preference into account, so results
+  //  in Dark mode embedded sidebar in VS Code.
   bool get isDarkThemeEnabled => _isDarkThemeEnabled;
   bool _isDarkThemeEnabled = true;
 
