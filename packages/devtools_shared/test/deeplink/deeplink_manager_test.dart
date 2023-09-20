@@ -32,7 +32,7 @@ void main() {
       const projectRoot = '/abc';
       manager.expectedCommands.add(
         TestCommand(
-          executable: manager.mockedFlutterBinary!,
+          executable: manager.mockedFlutterBinary,
           arguments: <String>[
             'analyze',
             '--android',
@@ -66,7 +66,7 @@ Running Gradle task 'printBuildVariants'...                        10.4s
         const String projectRoot = '/abc';
         manager.expectedCommands.add(
           TestCommand(
-            executable: manager.mockedFlutterBinary!,
+            executable: manager.mockedFlutterBinary,
             arguments: <String>[
               'analyze',
               '--android',
@@ -91,23 +91,6 @@ Running Gradle task 'printBuildVariants'...                        10.4s
       },
     );
 
-    test(
-      'getBuildVariants return internal server error if can not locate flutter binary',
-      () async {
-        const String projectRoot = '/abc';
-        manager.mockedFlutterBinary = null;
-        final response = await manager.getAndroidBuildVariants(
-          rootPath: projectRoot,
-        );
-        expect(
-          response[DeeplinkManager.kErrorField],
-          contains(
-            'Cannot locate Flutter sdk',
-          ),
-        );
-      },
-    );
-
     test('getAndroidAppLinkSettings calls flutter command correctly', () async {
       const String projectRoot = '/abc';
       const String json = '"some json"';
@@ -116,7 +99,7 @@ Running Gradle task 'printBuildVariants'...                        10.4s
       jsonFile.writeAsStringSync(json);
       manager.expectedCommands.add(
         TestCommand(
-          executable: manager.mockedFlutterBinary!,
+          executable: manager.mockedFlutterBinary,
           arguments: <String>[
             'analyze',
             '--android',
@@ -156,7 +139,7 @@ result saved in ${jsonFile.absolute.path}
       jsonFile.writeAsStringSync(json);
       manager.expectedCommands.add(
         TestCommand(
-          executable: manager.mockedFlutterBinary!,
+          executable: manager.mockedFlutterBinary,
           arguments: <String>[
             'analyze',
             '--ios',
@@ -192,7 +175,7 @@ result saved in ${jsonFile.absolute.path}
       const String projectRoot = '/abc';
       manager.expectedCommands.add(
         TestCommand(
-          executable: manager.mockedFlutterBinary!,
+          executable: manager.mockedFlutterBinary,
           arguments: <String>[
             'analyze',
             '--ios',
@@ -223,10 +206,10 @@ result saved in ${jsonFile.absolute.path}
 
 class StubbedDeeplinkManager extends DeeplinkManager {
   final List<TestCommand> expectedCommands = <TestCommand>[];
-  String? mockedFlutterBinary = 'somebinary';
+  String mockedFlutterBinary = 'somebinary';
 
   @override
-  String? getFlutterBinary() => mockedFlutterBinary;
+  String getFlutterBinary() => mockedFlutterBinary;
 
   @override
   Future<ProcessResult> runProcess(
