@@ -132,29 +132,24 @@ class _DevToolsMenu extends StatelessWidget {
         disabledReason = 'Not available when running on the web';
       }
 
-      Widget button = TextButton.icon(
-        style: TextButton.styleFrom(
-          alignment: Alignment.centerRight,
-          shape: const ContinuousRectangleBorder(),
-        ),
-        onPressed: disabledReason != null
-            ? null
-            : () => unawaited(api.openDevToolsPage(session.id, screen.id)),
-        label: Directionality(
-          textDirection: normalDirection,
-          child: Text(title),
-        ),
-        icon: Icon(screen.icon, size: actionsIconSize),
+      // Because we flipped the direction so the menu is aligned to the end, we
+      // should revert the text direction back to normal for the label.
+      Widget text = Directionality(
+        textDirection: normalDirection,
+        child: Text(title),
       );
 
       if (disabledReason != null) {
-        button =
-            Tooltip(preferBelow: false, message: disabledReason, child: button);
+        text =
+            Tooltip(preferBelow: false, message: disabledReason, child: text);
       }
 
-      return SizedBox(
-        width: double.infinity,
-        child: button,
+      return MenuItemButton(
+        leadingIcon: Icon(screen.icon, size: actionsIconSize),
+        onPressed: disabledReason != null
+            ? null
+            : () => unawaited(api.openDevToolsPage(session.id, screen.id)),
+        child: text,
       );
     }
 
