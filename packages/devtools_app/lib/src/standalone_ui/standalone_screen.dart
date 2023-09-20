@@ -16,6 +16,7 @@ import 'vs_code/flutter_panel.dart';
 enum StandaloneScreenType {
   vsCodeFlutterPanel;
 
+  // TODO(dantup): This seems unused, is it needed?
   static StandaloneScreenType? parse(String? id) {
     if (id == null) return null;
 

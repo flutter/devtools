@@ -67,33 +67,43 @@ class _VsCodeConnectedPanelState extends State<_VsCodeConnectedPanel> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(denseSpacing),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: defaultSpacing),
-          StreamBuilder(
-            stream: widget.api.debugSessionsChanged,
-            builder: (context, snapshot) {
-              final sessions = snapshot.data?.sessions ?? const [];
-              return DebugSessions(widget.api, sessions);
-            },
-          ),
-          const SizedBox(height: defaultSpacing),
-          if (widget.api.capabilities.selectDevice)
-            StreamBuilder(
-              stream: widget.api.devicesChanged,
-              builder: (context, snapshot) {
-                final devices = snapshot.data?.devices ?? const [];
-                final selectedDeviceId = snapshot.data?.selectedDeviceId;
-                return Devices(
+      padding: const EdgeInsets.symmetric(
+        horizontal: denseSpacing,
+        vertical: defaultSpacing,
+      ),
+      // Debug sessions rely on devices too, because they look up the sessions
+      // device for some capabilities (for example to know if the session is
+      // running on a web device).
+      child: StreamBuilder(
+        stream: widget.api.devicesChanged,
+        builder: (context, devicesSnapshot) {
+          final devices = devicesSnapshot.data?.devices ?? const [];
+          final deviceMap = {for (final device in devices) device.id: device};
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              StreamBuilder(
+                stream: widget.api.debugSessionsChanged,
+                builder: (context, debugSessionsSnapshot) {
+                  final sessions =
+                      debugSessionsSnapshot.data?.sessions ?? const [];
+                  return DebugSessions(
+                    api: widget.api,
+                    sessions: sessions,
+                    deviceMap: deviceMap,
+                  );
+                },
+              ),
+              const SizedBox(height: defaultSpacing),
+              if (widget.api.capabilities.selectDevice)
+                Devices(
                   widget.api,
                   devices,
-                  selectedDeviceId: selectedDeviceId,
-                );
-              },
-            ),
-        ],
+                  selectedDeviceId: devicesSnapshot.data?.selectedDeviceId,
+                ),
+            ],
+          );
+        },
       ),
     );
   }

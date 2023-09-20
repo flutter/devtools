@@ -103,6 +103,16 @@ class MockDartToolingApi extends DartToolingApiImpl {
       platform: 'android-x64',
       platformType: 'android',
     ),
+    VsCodeDeviceImpl(
+      id: 'chrome',
+      name: 'Chrome',
+      category: 'web',
+      emulator: false,
+      emulatorId: null,
+      ephemeral: true,
+      platform: 'web-javascript',
+      platformType: 'web',
+    ),
   ];
 
   /// The current set of devices being presented to the embedded panel.
@@ -159,7 +169,7 @@ class MockDartToolingApi extends DartToolingApiImpl {
   }
 
   /// Simulates starting a debug session.
-  void startSession(String? mode) {
+  void startSession(String mode, String deviceId) {
     final sessionNum = _nextDebugSessionNumber++;
     _debugSessions.add(
       VsCodeDebugSessionImpl(
@@ -167,7 +177,7 @@ class MockDartToolingApi extends DartToolingApiImpl {
         name: 'Session $sessionNum',
         vmServiceUri: 'ws://127.0.0.1:1234/ws',
         flutterMode: mode,
-        flutterDeviceId: 'flutter-tester',
+        flutterDeviceId: deviceId,
         debuggerType: 'Flutter',
       ),
     );

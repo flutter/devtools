@@ -131,24 +131,25 @@ class _VsCodeFlutterPanelMockEditorState
                     children: [
                       const Text('Debug Sessions: '),
                       ElevatedButton(
-                        onPressed: () => api.startSession(null),
-                        child: const Text('Start null'),
+                        onPressed: () => api.startSession('debug', 'myMac'),
+                        child: const Text('Desktop debug'),
                       ),
                       ElevatedButton(
-                        onPressed: () => api.startSession('debug'),
-                        child: const Text('Start debug'),
+                        onPressed: () => api.startSession('debug', 'chrome'),
+                        child: const Text('Web debug'),
                       ),
                       ElevatedButton(
-                        onPressed: () => api.startSession('profile'),
-                        child: const Text('Start profile'),
+                        onPressed: () => api.startSession('profile', 'myMac'),
+                        child: const Text('Desktop profile'),
                       ),
                       ElevatedButton(
-                        onPressed: () => api.startSession('release'),
-                        child: const Text('Start release'),
+                        onPressed: () => api.startSession('release', 'myMac'),
+                        child: const Text('Desktop release'),
                       ),
                       ElevatedButton(
-                        onPressed: () => api.startSession('jit_release'),
-                        child: const Text('Start jit_release'),
+                        onPressed: () =>
+                            api.startSession('jit_release', 'myMac'),
+                        child: const Text('Desktop jit_release'),
                       ),
                       ElevatedButton(
                         onPressed: () => api.endSessions(),
