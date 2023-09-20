@@ -129,47 +129,49 @@ result saved in ${jsonFile.absolute.path}
       );
     });
 
-    test('getIosUniversalLinkSettings calls flutter command correctly',
-        () async {
-      const String projectRoot = '/abc';
-      const String json = '"some json"';
-      const String configuration = 'someConfig';
-      const String target = 'someTarget';
-      final File jsonFile = File('${tmpDir.path}/some-output.json');
-      jsonFile.writeAsStringSync(json);
-      manager.expectedCommands.add(
-        TestCommand(
-          executable: manager.mockedFlutterBinary,
-          arguments: <String>[
-            'analyze',
-            '--ios',
-            '--output-universal-link-settings',
-            '--configuration=$configuration',
-            '--target=$target',
-            projectRoot,
-          ],
-          result: ProcessResult(
-            0,
-            0,
-            '''
+    test(
+      'getIosUniversalLinkSettings calls flutter command correctly',
+      () async {
+        const String projectRoot = '/abc';
+        const String json = '"some json"';
+        const String configuration = 'someConfig';
+        const String target = 'someTarget';
+        final File jsonFile = File('${tmpDir.path}/some-output.json');
+        jsonFile.writeAsStringSync(json);
+        manager.expectedCommands.add(
+          TestCommand(
+            executable: manager.mockedFlutterBinary,
+            arguments: <String>[
+              'analyze',
+              '--ios',
+              '--output-universal-link-settings',
+              '--configuration=$configuration',
+              '--target=$target',
+              projectRoot,
+            ],
+            result: ProcessResult(
+              0,
+              0,
+              '''
 Running Gradle task 'printBuildVariants'...                        10.4s
 result saved in ${jsonFile.absolute.path}
             ''',
-            '',
+              '',
+            ),
           ),
-        ),
-      );
-      final response = await manager.getIosUniversalLinkSettings(
-        configuration: configuration,
-        target: target,
-        rootPath: projectRoot,
-      );
-      expect(response[DeeplinkManager.kErrorField], isNull);
-      expect(
-        response[DeeplinkManager.kOutputJsonField],
-        json,
-      );
-    });
+        );
+        final response = await manager.getIosUniversalLinkSettings(
+          configuration: configuration,
+          target: target,
+          rootPath: projectRoot,
+        );
+        expect(response[DeeplinkManager.kErrorField], isNull);
+        expect(
+          response[DeeplinkManager.kOutputJsonField],
+          json,
+        );
+      },
+    );
 
     test('getIosBuildOptions calls flutter command correctly', () async {
       const String projectRoot = '/abc';

@@ -40,23 +40,24 @@ void main() {
   });
 
   test(
-      'handle deeplink api ${DeeplinkApi.androidBuildVariants} returns bad request if no root path',
-      () async {
-    final request = Request(
-      'get',
-      Uri(
-        scheme: 'https',
-        host: 'localhost',
-        path: DeeplinkApi.androidBuildVariants,
-      ),
-    );
-    final response = await ServerApi.handle(
-      request,
-      extensionsManager: ExtensionsManager(buildDir: '/'),
-      deeplinkManager: FakeDeeplinkManager(),
-    );
-    expect(response.statusCode, HttpStatus.badRequest);
-  });
+    'handle deeplink api ${DeeplinkApi.androidBuildVariants} returns bad request if no root path',
+    () async {
+      final request = Request(
+        'get',
+        Uri(
+          scheme: 'https',
+          host: 'localhost',
+          path: DeeplinkApi.androidBuildVariants,
+        ),
+      );
+      final response = await ServerApi.handle(
+        request,
+        extensionsManager: ExtensionsManager(buildDir: '/'),
+        deeplinkManager: FakeDeeplinkManager(),
+      );
+      expect(response.statusCode, HttpStatus.badRequest);
+    },
+  );
 
   test('handle deeplink api ${DeeplinkApi.androidAppLinkSettings}', () async {
     const expectedRootPath = '/abc';
