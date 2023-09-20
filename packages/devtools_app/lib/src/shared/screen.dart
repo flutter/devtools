@@ -133,7 +133,10 @@ abstract class Screen {
     this.worksOffline = false,
     this.shouldShowForFlutterVersion,
     this.showFloatingDebuggerControls = true,
-  }) : assert((title == null) || (titleGenerator == null));
+  }) : assert(
+          (title == null) != (titleGenerator == null),
+          'Exactly one of title/titleGenerator should be supplied',
+        );
 
   const Screen.conditional({
     required String id,
@@ -184,7 +187,7 @@ abstract class Screen {
           worksOffline: metadata.worksOffline,
           shouldShowForFlutterVersion: shouldShowForFlutterVersion,
           showFloatingDebuggerControls: showFloatingDebuggerControls,
-          title: metadata.title,
+          title: titleGenerator == null ? metadata.title : null,
           titleGenerator: titleGenerator,
           icon: metadata.icon,
           tabKey: tabKey,
