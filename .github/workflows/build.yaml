@@ -108,15 +108,15 @@ jobs:
         run: |
           echo "::notice title=To Quickly Fix Goldens:: Run \`devtools_tool fix-goldens --run-id=$WORKFLOW_ID\` on your local branch."
 
-  integration-test:
-    name: integration-test ${{ matrix.bot }} - ${{ matrix.device }} - shard ${{ matrix.shard }}
+  devtools-app-integration-test:
+    name: devtools_app integration-test ${{ matrix.bot }} - ${{ matrix.device }} - shard ${{ matrix.shard }}
     needs: flutter-prep
     runs-on: macos-latest
     strategy:
       fail-fast: false
       matrix:
         # Consider running integration tests in ddc mode, too.
-        bot: [dart2js]
+        bot: [integration_dart2js]
         device: [flutter, flutter-web, dart-cli]
         # Option 1/1 will run all tests for a device in a single shard.
         # Option 1/2 and 2/2 should be enabled to run tests for a device in 2 shards.
@@ -163,6 +163,38 @@ jobs:
           BOT: ${{ matrix.bot }}
           DEVICE: ${{ matrix.device }}
           SHARD: ${{ matrix.shard }}
+          DEVTOOLS_PACKAGE: devtools_app
+        run: ./tool/bots.sh
+
+      - name: Upload Golden Failure Artifacts
+        uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32
+        if: failure()
+        with:
+          name: golden_image_failures.${{ matrix.bot }}
+          path: packages/devtools_app/integration_test/**/failures/*.png
+
+  devtools-extensions-integration-test:
+    name: devtools_extensions integration-test ${{ matrix.bot }}
+    needs: flutter-prep
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Consider running integration tests in ddc mode, too.
+        bot: [integration_dart2js]
+    steps:
+      - name: git clone
+        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac
+      - name: Load Cached Flutter SDK
+        uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84
+        with:
+          path: |
+            ./flutter-sdk
+          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
+      - name: tool/bots.sh
+        env:
+          BOT: ${{ matrix.bot }}
+          DEVTOOLS_PACKAGE: devtools_extensions
         run: ./tool/bots.sh
 
       - name: Upload Golden Failure Artifacts

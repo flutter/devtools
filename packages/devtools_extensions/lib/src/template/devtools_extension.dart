@@ -35,7 +35,7 @@ part 'extension_manager.dart';
 const bool _simulatedEnvironmentEnabled =
     bool.fromEnvironment('use_simulated_environment');
 
-bool get _debugUseSimulatedEnvironment =>
+bool get _useSimulatedEnvironment =>
     !kReleaseMode && _simulatedEnvironmentEnabled;
 
 /// A manager that allows extensions to interact with DevTools or the DevTools
@@ -136,8 +136,11 @@ class _DevToolsExtensionState extends State<DevToolsExtension>
         theme: ThemeData(useMaterial3: true, colorScheme: darkColorScheme),
       ),
       home: Scaffold(
-        body: _debugUseSimulatedEnvironment
-            ? SimulatedDevToolsWrapper(child: child)
+        body: _useSimulatedEnvironment
+            ? SimulatedDevToolsWrapper(
+                requiresRunningApplication: widget.requiresRunningApplication,
+                child: child,
+              )
             : child,
       ),
     );

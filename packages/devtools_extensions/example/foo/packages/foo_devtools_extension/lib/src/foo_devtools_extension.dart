@@ -25,9 +25,9 @@ class FooExtensionHomePage extends StatefulWidget {
 }
 
 class _FooExtensionHomePageState extends State<FooExtensionHomePage> {
-  int _counter = 0;
+  int counter = 0;
 
-  String? _message;
+  String? message;
 
   @override
   void initState() {
@@ -39,7 +39,7 @@ class _FooExtensionHomePageState extends State<FooExtensionHomePage> {
         final themeUpdateValue =
             event.data?[ExtensionEventParameters.theme] as String?;
         setState(() {
-          _message = themeUpdateValue;
+          message = themeUpdateValue;
         });
       },
     );
@@ -47,12 +47,12 @@ class _FooExtensionHomePageState extends State<FooExtensionHomePage> {
 
   void _incrementCounter() {
     setState(() {
-      _counter++;
+      counter++;
     });
     extensionManager.postMessageToDevTools(
       DevToolsExtensionEvent(
         DevToolsExtensionEventType.unknown,
-        data: {'increment_count': _counter},
+        data: {'increment_count': counter},
       ),
     );
   }
@@ -68,14 +68,14 @@ class _FooExtensionHomePageState extends State<FooExtensionHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text('You have pushed the button $_counter times:'),
+            Text('You have pushed the button $counter times'),
             const SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: _incrementCounter,
               child: const Text('Increment and post count to DevTools'),
             ),
             const SizedBox(height: 48.0),
-            Text('Received theme update from DevTools: $_message'),
+            Text('Received theme update from DevTools: $message'),
             const SizedBox(height: 48.0),
             ElevatedButton(
               onPressed: () => extensionManager
@@ -83,39 +83,33 @@ class _FooExtensionHomePageState extends State<FooExtensionHomePage> {
               child: const Text('Show DevTools notification'),
             ),
             const SizedBox(height: 16.0),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: () => extensionManager.showBannerMessage(
-                    key: 'example_message_single_dismiss',
-                    type: 'warning',
-                    message: 'Warning: with great power, comes great '
-                        'responsibility. I\'m not going to tell you twice.\n'
-                        '(This message can only be shown once)',
-                    extensionName: 'foo',
-                  ),
-                  child: const Text(
-                    'Show DevTools warning (ignore if already dismissed)',
-                  ),
-                ),
-                const SizedBox(width: 16.0),
-                ElevatedButton(
-                  onPressed: () => extensionManager.showBannerMessage(
-                    key: 'example_message_multi_dismiss',
-                    type: 'warning',
-                    message: 'Warning: with great power, comes great '
-                        'responsibility. I\'ll keep reminding you if you '
-                        'forget.\n(This message can be shown multiple times)',
-                    extensionName: 'foo',
-                    ignoreIfAlreadyDismissed: false,
-                  ),
-                  child: const Text(
-                    'Show DevTools warning (can show again after dismiss)',
-                  ),
-                ),
-              ],
+            ElevatedButton(
+              onPressed: () => extensionManager.showBannerMessage(
+                key: 'examplemessage_single_dismiss',
+                type: 'warning',
+                message: 'Warning: with great power, comes great '
+                    'responsibility. I\'m not going to tell you twice.\n'
+                    '(This message can only be shown once)',
+                extensionName: 'foo',
+              ),
+              child: const Text(
+                'Show DevTools warning (ignore if already dismissed)',
+              ),
+            ),
+            const SizedBox(height: 16.0),
+            ElevatedButton(
+              onPressed: () => extensionManager.showBannerMessage(
+                key: 'examplemessage_multi_dismiss',
+                type: 'warning',
+                message: 'Warning: with great power, comes great '
+                    'responsibility. I\'ll keep reminding you if you '
+                    'forget.\n(This message can be shown multiple times)',
+                extensionName: 'foo',
+                ignoreIfAlreadyDismissed: false,
+              ),
+              child: const Text(
+                'Show DevTools warning (can show again after dismiss)',
+              ),
             ),
           ],
         ),

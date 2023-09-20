@@ -4,12 +4,13 @@
 
 part of '_simulated_devtools_environment.dart';
 
-class _SimulatedDevToolsController extends DisposableController
+@visibleForTesting
+class SimulatedDevToolsController extends DisposableController
     with AutoDisposeControllerMixin
     implements DevToolsExtensionHostInterface {
   /// Logs of the post message communication that goes back and forth between
   /// the extension and the simulated DevTools environment.
-  final messageLogs = ListValueNotifier<_MessageLogEntry>([]);
+  final messageLogs = ListValueNotifier<MessageLogEntry>([]);
 
   /// The listener that is added to simulated DevTools window to receive
   /// messages from the extension.
@@ -37,7 +38,7 @@ class _SimulatedDevToolsController extends DisposableController
       if (extensionEvent != null) {
         // Do not handle messages that come from the
         // [_SimulatedDevToolsController] itself.
-        if (extensionEvent.source == '$_SimulatedDevToolsController') return;
+        if (extensionEvent.source == '$SimulatedDevToolsController') return;
 
         onEventReceived(extensionEvent);
       }
@@ -96,8 +97,8 @@ class _SimulatedDevToolsController extends DisposableController
     void Function()? onUnknownEvent,
   }) {
     messageLogs.add(
-      _MessageLogEntry(
-        source: _MessageSource.extension,
+      MessageLogEntry(
+        source: MessageSource.extension,
         data: event.toJson(),
       ),
     );
@@ -108,13 +109,13 @@ class _SimulatedDevToolsController extends DisposableController
     html.window.postMessage(
       {
         ...eventJson,
-        DevToolsExtensionEvent.sourceKey: '$_SimulatedDevToolsController',
+        DevToolsExtensionEvent.sourceKey: '$SimulatedDevToolsController',
       },
       html.window.origin!,
     );
     messageLogs.add(
-      _MessageLogEntry(
-        source: _MessageSource.devtools,
+      MessageLogEntry(
+        source: MessageSource.devtools,
         data: eventJson,
       ),
     );
@@ -123,8 +124,8 @@ class _SimulatedDevToolsController extends DisposableController
   Future<void> hotReloadConnectedApp() async {
     await serviceManager.performHotReload();
     messageLogs.add(
-      _MessageLogEntry(
-        source: _MessageSource.info,
+      MessageLogEntry(
+        source: MessageSource.info,
         message: 'Hot reload performed on connected app',
       ),
     );
@@ -133,8 +134,8 @@ class _SimulatedDevToolsController extends DisposableController
   Future<void> hotRestartConnectedApp() async {
     await serviceManager.performHotRestart();
     messageLogs.add(
-      _MessageLogEntry(
-        source: _MessageSource.info,
+      MessageLogEntry(
+        source: MessageSource.info,
         message: 'Hot restart performed on connected app',
       ),
     );
@@ -157,17 +158,19 @@ class _SimulatedDevToolsController extends DisposableController
   }
 }
 
-class _MessageLogEntry {
-  _MessageLogEntry({required this.source, this.data, this.message})
+@visibleForTesting
+class MessageLogEntry {
+  MessageLogEntry({required this.source, this.data, this.message})
       : timestamp = DateTime.now();
 
-  final _MessageSource source;
+  final MessageSource source;
   final Map<String, Object?>? data;
   final String? message;
   final DateTime timestamp;
 }
 
-enum _MessageSource {
+@visibleForTesting
+enum MessageSource {
   devtools,
   extension,
   info;

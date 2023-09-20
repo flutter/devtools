@@ -1,5 +1,6 @@
 ## 0.0.7-wip
 * Add integration testing.
+* Add `ExtensionManager.unregisterEventHandler` method.
 
 ## 0.0.6
 * Bump `package:devtools_app_shared` dependency to version ^0.0.4.
