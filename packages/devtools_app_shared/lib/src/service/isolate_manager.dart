@@ -19,6 +19,12 @@ base mixin TestIsolateManager implements IsolateManager {}
 
 final class IsolateManager with DisposerMixin {
   final _isolateStates = <IsolateRef, IsolateState>{};
+
+  /// Signifies whether the main isolate should be selected if it is started.
+  /// This is used to make sure the the main isolate remains selected after
+  /// a hot restart.
+  bool _shouldReselectMainIsolate = false;
+
   VmService? _service;
 
   final StreamController<IsolateRef?> _isolateCreatedController =
@@ -129,6 +135,9 @@ final class IsolateManager with DisposerMixin {
 
       if (_selectedIsolate.value == null) {
         _setSelectedIsolate(event.isolate);
+      } else if (_shouldReselectMainIsolate) {
+        _shouldReselectMainIsolate = false;
+        _setSelectedIsolate(event.isolate);
       }
     } else if (event.kind == EventKind.kServiceExtensionAdded) {
       // Check to see if there is a new isolate.
@@ -141,6 +150,11 @@ final class IsolateManager with DisposerMixin {
       if (event.isolate != null) _isolates.remove(event.isolate!);
       _isolateExitedController.add(event.isolate);
       if (_mainIsolate.value == event.isolate) {
+        if (_selectedIsolate.value == _mainIsolate.value) {
+          // If the main isolate was selected and exits, then assume that a hot
+          // restart is happening. So reselect when the main isolate comes back.
+          _shouldReselectMainIsolate = true;
+        }
         _mainIsolate.value = null;
       }
       if (_selectedIsolate.value == event.isolate) {
