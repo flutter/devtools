@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:collection/collection.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
@@ -13,9 +12,8 @@ import '../../shared/screen.dart';
 import '../api/vs_code_api.dart';
 
 class DebugSessions extends StatelessWidget {
-  const DebugSessions(this.screens, this.api, this.sessions, {super.key});
+  const DebugSessions(this.api, this.sessions, {super.key});
 
-  final List<Screen> screens;
   final VsCodeApi api;
   final List<VsCodeDebugSession> sessions;
 
@@ -48,12 +46,13 @@ class DebugSessions extends StatelessWidget {
   }
 
   TableRow _debugSessionRow(VsCodeDebugSession session, BuildContext context) {
-    // TODO(dantup): What to show if mode is unknown (null)?
     final mode = session.flutterMode;
     final isDebug = mode == 'debug';
     final isProfile = mode == 'profile';
-    // final isRelease = mode == 'release' || mode == 'jit_release';
+    final isRelease = mode == 'release' || mode == 'jit_release';
     final isFlutter = session.debuggerType?.contains('Flutter') ?? false;
+    // TODO(dantup): Detect web so we can handle requiresDartVm correctly.
+    const isWeb = false;
 
     final label = session.flutterMode != null
         ? '${session.name} (${session.flutterMode})'
@@ -86,7 +85,8 @@ class DebugSessions extends StatelessWidget {
             isFlutter: isFlutter,
             isDebug: isDebug,
             isProfile: isProfile,
-            screens: screens,
+            isRelease: isRelease,
+            isWeb: isWeb,
           ),
       ],
     );
@@ -100,7 +100,8 @@ class _DevToolsMenu extends StatelessWidget {
     required this.isFlutter,
     required this.isDebug,
     required this.isProfile,
-    required this.screens,
+    required this.isRelease,
+    required this.isWeb,
   });
 
   final VsCodeApi api;
@@ -108,7 +109,8 @@ class _DevToolsMenu extends StatelessWidget {
   final bool isFlutter;
   final bool isDebug;
   final bool isProfile;
-  final List<Screen> screens;
+  final bool isRelease;
+  final bool isWeb;
 
   @override
   Widget build(BuildContext context) {
@@ -117,35 +119,42 @@ class _DevToolsMenu extends StatelessWidget {
         ? TextDirection.rtl
         : TextDirection.ltr;
 
-    Widget? devToolsButton(Screen screen) {
-      // Don't include any screens that aren't appropriate.
-      if (!screen.requiresConnection ||
-          screen.requiresLibrary != null ||
-          screen.requiresVmDeveloperMode ||
-          screen.screenId == 'debugger') {
-        return null;
+    Widget devToolsButton(ScreenMetaData screen) {
+      final title = screen.title ?? screen.id;
+      String? disabledReason;
+      if (isRelease) {
+        disabledReason = 'Not available in release mode';
+      } else if (screen.requiresFlutter && !isFlutter) {
+        disabledReason = 'Only available for Flutter applications';
+      } else if (screen.requiresDebugBuild && !isDebug) {
+        disabledReason = 'Only available in debug mode';
+      } else if (screen.requiresDartVm && isWeb) {
+        disabledReason = 'Not available when running on the web';
       }
 
-      final enabled = (!screen.requiresDartVm || isDebug /* && !isWeb */) &&
-          (!screen.requiresDebugBuild || isDebug) &&
-          (!screen.requiresFlutter || isFlutter);
+      Widget button = TextButton.icon(
+        style: TextButton.styleFrom(
+          alignment: Alignment.centerRight,
+          shape: const ContinuousRectangleBorder(),
+        ),
+        onPressed: disabledReason != null
+            ? null
+            : () => unawaited(api.openDevToolsPage(session.id, screen.id)),
+        label: Directionality(
+          textDirection: normalDirection,
+          child: Text(title),
+        ),
+        icon: Icon(screen.icon, size: actionsIconSize),
+      );
+
+      if (disabledReason != null) {
+        button =
+            Tooltip(preferBelow: false, message: disabledReason, child: button);
+      }
+
       return SizedBox(
         width: double.infinity,
-        child: TextButton.icon(
-          style: TextButton.styleFrom(
-            alignment: Alignment.centerRight,
-            shape: const ContinuousRectangleBorder(),
-          ),
-          onPressed: enabled
-              ? () =>
-                  unawaited(api.openDevToolsPage(session.id, screen.screenId))
-              : null,
-          label: Directionality(
-            textDirection: normalDirection,
-            child: Text(screen.title ?? screen.screenId),
-          ),
-          icon: Icon(screen.icon, size: actionsIconSize),
-        ),
+        child: button,
       );
     }
 
@@ -157,12 +166,10 @@ class _DevToolsMenu extends StatelessWidget {
         style: const MenuStyle(
           alignment: AlignmentDirectional.bottomStart,
         ),
-        // TODO(dantup): Why is appSize etc. still missing?
-        menuChildren: screens
-            .map((screen) => devToolsButton(screen))
-            .whereNotNull()
+        menuChildren: ScreenMetaData.values
+            .where(_shouldIncludeScreen)
+            .map(devToolsButton)
             .toList(),
-
         builder: (context, controller, child) => IconButton(
           onPressed: () {
             if (controller.isOpen) {
@@ -172,7 +179,6 @@ class _DevToolsMenu extends StatelessWidget {
             }
           },
           tooltip: 'DevTools',
-          // TODO(dantup): Icon for DevTools menu?
           icon: Icon(
             Icons.construction,
             size: actionsIconSize,
@@ -180,5 +186,17 @@ class _DevToolsMenu extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  bool _shouldIncludeScreen(ScreenMetaData screen) {
+    // Don't show home screen or debugger in the menu.
+    return screen != ScreenMetaData.home &&
+        screen != ScreenMetaData.debugger &&
+        // Or the generic "simple" screen.
+        screen != ScreenMetaData.simple &&
+        // Or anything that requires some specific library that we can't
+        // check (`requiresLibrary` will be removed for extensions
+        // in future, and those will need some extra work to detect).
+        screen.requiresLibrary == null;
   }
 }

@@ -38,10 +38,7 @@ class VsCodeScene extends Scene {
       home: Scaffold(
         body: VsCodeFlutterPanelMockEditor(
           api: _api,
-          child: VsCodeFlutterPanel(
-            defaultScreens().map((screen) => screen.screen).toList(),
-            _api,
-          ),
+          child: VsCodeFlutterPanel(_api),
         ),
       ),
     );

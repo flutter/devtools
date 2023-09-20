@@ -4,7 +4,6 @@
 
 import 'package:flutter/material.dart';
 
-import '../../devtools_app.dart';
 import 'api/impl/dart_tooling_api.dart';
 import 'vs_code/flutter_panel.dart';
 
@@ -27,10 +26,10 @@ enum StandaloneScreenType {
     return null;
   }
 
-  Widget build(List<Screen> screens) {
+  Widget get screen {
     return switch (this) {
       StandaloneScreenType.vsCodeFlutterPanel =>
-        VsCodeFlutterPanel(screens, DartToolingApiImpl.postMessage()),
+        VsCodeFlutterPanel(DartToolingApiImpl.postMessage()),
     };
   }
 }

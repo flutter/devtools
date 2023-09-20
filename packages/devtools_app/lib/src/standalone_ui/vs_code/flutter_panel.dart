@@ -19,9 +19,8 @@ import 'devices.dart';
 /// Provides some basic functionality to improve discoverability of features
 /// such as creation of new projects, device selection and DevTools features.
 class VsCodeFlutterPanel extends StatelessWidget {
-  const VsCodeFlutterPanel(this._screens, this.api, {super.key});
+  const VsCodeFlutterPanel(this.api, {super.key});
 
-  final List<Screen> _screens;
   final DartToolingApi api;
 
   @override
@@ -35,7 +34,7 @@ class VsCodeFlutterPanel extends StatelessWidget {
           builder: (context, snapshot) =>
               switch ((snapshot.connectionState, snapshot.data)) {
             (ConnectionState.done, final vsCodeApi?) =>
-              _VsCodeConnectedPanel(_screens, vsCodeApi),
+              _VsCodeConnectedPanel(vsCodeApi),
             (ConnectionState.done, null) =>
               const Text('VS Code is not available'),
             _ => const CenteredCircularProgressIndicator(),
@@ -49,9 +48,8 @@ class VsCodeFlutterPanel extends StatelessWidget {
 /// The panel shown once we know VS Code is available (the host has responded to
 /// the `vsCode.getCapabilities` request).
 class _VsCodeConnectedPanel extends StatefulWidget {
-  const _VsCodeConnectedPanel(this.screens, this.api);
+  const _VsCodeConnectedPanel(this.api);
 
-  final List<Screen> screens;
   final VsCodeApi api;
 
   @override
@@ -78,7 +76,7 @@ class _VsCodeConnectedPanelState extends State<_VsCodeConnectedPanel> {
             stream: widget.api.debugSessionsChanged,
             builder: (context, snapshot) {
               final sessions = snapshot.data?.sessions ?? const [];
-              return DebugSessions(widget.screens, widget.api, sessions);
+              return DebugSessions(widget.api, sessions);
             },
           ),
           const SizedBox(height: defaultSpacing),

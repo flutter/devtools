@@ -344,8 +344,14 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
           );
         },
       if (FeatureFlags.vsCodeSidebarTooling)
-        for (final type in StandaloneScreenType.values)
-          type.name: (_, __, args, ___) => type.build(_screens),
+        if (FeatureFlags.vsCodeSidebarTooling) ..._standaloneScreens,
+    };
+  }
+
+  Map<String, UrlParametersBuilder> get _standaloneScreens {
+    return {
+      for (final type in StandaloneScreenType.values)
+        type.name: (_, __, args, ___) => type.screen,
     };
   }
 
