@@ -343,8 +343,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
             ),
           );
         },
-      if (FeatureFlags.vsCodeSidebarTooling)
-        if (FeatureFlags.vsCodeSidebarTooling) ..._standaloneScreens,
+      if (FeatureFlags.vsCodeSidebarTooling) ..._standaloneScreens,
     };
   }
 
