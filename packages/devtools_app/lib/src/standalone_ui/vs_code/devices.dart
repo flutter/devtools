@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
+import '../../screens/inspector/layout_explorer/ui/theme.dart';
 import '../api/vs_code_api.dart';
 
 class Devices extends StatelessWidget {
@@ -54,21 +55,28 @@ class Devices extends StatelessWidget {
     VsCodeDevice device, {
     required bool isSelected,
   }) {
-    final backgroundColor = isSelected ? theme.colorScheme.primary : null;
-    final foregroundColor = isSelected ? theme.colorScheme.onPrimary : null;
+    final backgroundColor = isSelected ? theme.colorScheme.secondary : null;
+    final foregroundColor = isSelected
+        ? theme.colorScheme.onSecondary
+        : theme.colorScheme.secondary;
 
     return TableRow(
       decoration: BoxDecoration(color: backgroundColor),
       children: [
         SizedBox(
           width: double.infinity,
-          child: TextButton(
+          child: TextButton.icon(
             style: TextButton.styleFrom(
               alignment: Alignment.centerLeft,
               shape: const ContinuousRectangleBorder(),
               textStyle: theme.regularTextStyle,
             ),
-            child: Text(
+            icon: Icon(
+              device.iconData,
+              size: actionsIconSize,
+              color: foregroundColor,
+            ),
+            label: Text(
               device.name,
               style: theme.regularTextStyle.copyWith(color: foregroundColor),
             ),
@@ -77,5 +85,20 @@ class Devices extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+extension on VsCodeDevice {
+  IconData get iconData {
+    return switch ((category, platformType)) {
+      ('desktop', 'macos') => Icons.desktop_mac_outlined,
+      ('desktop', 'windows') => Icons.desktop_windows_outlined,
+      ('desktop', _) => Icons.computer_outlined,
+      ('mobile', 'android') => Icons.phone_android_outlined,
+      ('mobile', 'ios') => Icons.phone_iphone_outlined,
+      ('mobile', _) => Icons.smartphone_outlined,
+      ('web', _) => Icons.web_outlined,
+      _ => Icons.device_unknown_outlined,
+    };
   }
 }
