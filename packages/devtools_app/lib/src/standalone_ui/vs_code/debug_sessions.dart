@@ -193,18 +193,18 @@ class _DevToolsMenu extends StatelessWidget {
   }
 
   bool _shouldIncludeScreen(ScreenMetaData screen) {
-    // Some screens shouldn't show up in the menu.
-    return screen != ScreenMetaData.home &&
-        screen != ScreenMetaData.debugger &&
-        screen != ScreenMetaData.vmTools &&
-        // Or the generic "simple" screen.
-        screen != ScreenMetaData.simple &&
-        // DeepLink is currently behind a feature flag.
-        (screen != ScreenMetaData.deepLinks ||
-            FeatureFlags.deepLinkValidation) &&
-        // Or anything that requires some specific library that we can't
-        // check (`requiresLibrary` will be removed for extensions
-        // in future, and those will need some extra work to detect).
-        screen.requiresLibrary == null;
+    return switch (screen) {
+      // Some screens shouldn't show up in the menu.
+      ScreenMetaData.home => false,
+      ScreenMetaData.debugger => false,
+      ScreenMetaData.simple => false, // generic screen isn't a screen itself
+      // TODO(dantup): Check preferences.vmDeveloperModeEnabled
+      ScreenMetaData.vmTools => false,
+      // DeepLink is currently behind a feature flag.
+      ScreenMetaData.deepLinks => FeatureFlags.deepLinkValidation,
+      // Anything else can be shown as long as it doesn't require a specific
+      // library.
+      _ => screen.requiresLibrary == null,
+    };
   }
 }
