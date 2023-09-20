@@ -136,8 +136,8 @@ final class IsolateManager with DisposerMixin {
       if (_selectedIsolate.value == null) {
         _setSelectedIsolate(event.isolate);
       } else if (_shouldReselectMainIsolate) {
-        // Assume the main isolate has come back up after a restart, so select
-        // it.
+        // Assume the main isolate has come back up after a hot restart, so
+        // select it.
         _shouldReselectMainIsolate = false;
         _setSelectedIsolate(event.isolate);
       }
