@@ -21,6 +21,7 @@ final class IsolateManager with DisposerMixin {
   final _isolateStates = <IsolateRef, IsolateState>{};
 
   /// Signifies whether the main isolate should be selected if it is started.
+  ///
   /// This is used to make sure the the main isolate remains selected after
   /// a hot restart.
   bool _shouldReselectMainIsolate = false;
