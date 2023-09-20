@@ -104,11 +104,8 @@ enum ScreenMetaData {
   });
 
   final String id;
-
   final String? title;
-
   final IconData? icon;
-
   final bool requiresConnection;
   final bool requiresDartVm;
   final bool requiresFlutter;
