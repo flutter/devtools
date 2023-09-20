@@ -19,6 +19,7 @@ DevTools extension for your pub package, see the getting started guide for
 ![Example DevTools extension](images/example_devtools_extension.png "Example DevTools extension for package:foo_package")
 
 * Fixed theming bug in isolate selector - [#6403](https://github.com/flutter/devtools/pull/6403)
+* Fixed multiple isolate bug where main isolate was not reselecting on hot restart. - [#6436](https://github.com/flutter/devtools/pull/6436)
 
 ## Inspector updates
 
