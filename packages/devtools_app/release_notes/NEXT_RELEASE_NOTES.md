@@ -22,7 +22,7 @@ DevTools extension for your pub package, see the getting started guide for
 
 ## Inspector updates
 
-* Fixed bug where inspector service calls were done on the selected isolate, instead of the main isolate - [#6434](https://github.com/flutter/devtools/pull/6434)
+TODO: Remove this section if there are not any general updates.
 
 ## Performance updates
 
