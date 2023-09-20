@@ -180,7 +180,7 @@ elif [ "$BOT" = "integration_dart2js" ]; then
             dart run integration_test/run_tests.dart --test-app-device=cli --headless --shard="$SHARD"
 
         fi        
-    elif [ "$DEVTOOLS_PACKAGE" = "devtools_extensions" ]
+    elif [ "$DEVTOOLS_PACKAGE" = "devtools_extensions" ]; then
         popd
         pushd packages/devtools_extensions
         dart run integration_test/run_tests.dart --headless
