@@ -237,8 +237,10 @@ class ExtensionManager {
     }
     final newUri = Uri.parse(html.window.location.toString())
         .replace(queryParameters: newQueryParams);
-    print('trying to call window.history');
-    html.window.history.replaceState(null, '', newUri.toString());
-    print('after calling window.history');
+    html.window.history.replaceState(
+      html.window.history.state,
+      '',
+      newUri.toString(),
+    );
   }
 }
