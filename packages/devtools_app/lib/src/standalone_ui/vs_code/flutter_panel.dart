@@ -87,7 +87,11 @@ class _VsCodeConnectedPanelState extends State<_VsCodeConnectedPanel> {
                 builder: (context, debugSessionsSnapshot) {
                   final sessions =
                       debugSessionsSnapshot.data?.sessions ?? const [];
-                  return DebugSessions(widget.api, sessions, deviceMap);
+                  return DebugSessions(
+                    api: widget.api,
+                    sessions: sessions,
+                    deviceMap: deviceMap,
+                  );
                 },
               ),
               const SizedBox(height: defaultSpacing),

@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../screens/inspector/layout_explorer/ui/theme.dart';
 import '../api/vs_code_api.dart';
 
 class Devices extends StatelessWidget {

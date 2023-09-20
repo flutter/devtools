@@ -13,7 +13,12 @@ import '../../shared/screen.dart';
 import '../api/vs_code_api.dart';
 
 class DebugSessions extends StatelessWidget {
-  const DebugSessions(this.api, this.sessions, this.deviceMap, {super.key});
+  const DebugSessions({
+    required this.api,
+    required this.sessions,
+    required this.deviceMap,
+    super.key,
+  });
 
   final VsCodeApi api;
   final List<VsCodeDebugSession> sessions;
@@ -141,8 +146,11 @@ class _DevToolsMenu extends StatelessWidget {
       );
 
       if (disabledReason != null) {
-        text =
-            Tooltip(preferBelow: false, message: disabledReason, child: text);
+        text = Tooltip(
+          preferBelow: false,
+          message: disabledReason,
+          child: text,
+        );
       }
 
       return MenuItemButton(
