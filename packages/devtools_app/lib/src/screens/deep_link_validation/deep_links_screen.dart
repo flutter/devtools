@@ -14,7 +14,7 @@ import '../../shared/utils.dart';
 import 'deep_links_controller.dart';
 import 'deep_links_model.dart';
 
-enum TableView {
+enum TableViewType {
   domainView,
   pathView,
   singleUrlView,
@@ -63,7 +63,7 @@ class _DeepLinkPageState extends State<DeepLinkPage>
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: TableView.values.length,
+      length: TableViewType.values.length,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -106,19 +106,19 @@ class _DeepLinkPageState extends State<DeepLinkPage>
                 builder: (context, showSpitScreen, _) => TabBarView(
                   children: [
                     _DataTableWithValidationDetails(
-                      tableView: TableView.domainView,
+                      tableView: TableViewType.domainView,
                       linkDatas: controller.getLinkDatasByDomain,
                       controller: controller,
                       showSpitScreen: showSpitScreen,
                     ),
                     _DataTableWithValidationDetails(
-                      tableView: TableView.pathView,
+                      tableView: TableViewType.pathView,
                       linkDatas: controller.getLinkDatasByPath,
                       controller: controller,
                       showSpitScreen: showSpitScreen,
                     ),
                     _DataTableWithValidationDetails(
-                      tableView: TableView.singleUrlView,
+                      tableView: TableViewType.singleUrlView,
                       linkDatas: linkDatas,
                       controller: controller,
                       showSpitScreen: showSpitScreen,
@@ -142,7 +142,7 @@ class _DataTableWithValidationDetails extends StatelessWidget {
     required this.showSpitScreen,
   });
   final List<LinkData> linkDatas;
-  final TableView tableView;
+  final TableViewType tableView;
   final DeepLinksController controller;
   final bool showSpitScreen;
 
@@ -180,7 +180,7 @@ class _DataTable extends StatelessWidget {
     required this.controller,
   });
   final List<LinkData> linkDatas;
-  final TableView tableView;
+  final TableViewType tableView;
   final DeepLinksController controller;
 
   @override
@@ -193,9 +193,9 @@ class _DataTable extends StatelessWidget {
       data: linkDatas,
       dataKey: 'deep-links',
       autoScrollContent: true,
-      columns: [
-        if (tableView != TableView.pathView) domain,
-        if (tableView != TableView.domainView) path,
+      columns: <ColumnData>[
+        if (tableView != TableViewType.pathView) domain,
+        if (tableView != TableViewType.domainView) path,
         SchemeColumn(),
         OSColumn(),
         if (!controller.showSpitScreen) ...[
@@ -204,7 +204,7 @@ class _DataTable extends StatelessWidget {
         ],
       ],
       selectionNotifier: controller.selectedLink,
-      defaultSortColumn: tableView == TableView.pathView ? path : domain,
+      defaultSortColumn: tableView == TableViewType.pathView ? path : domain,
       defaultSortDirection: SortDirection.ascending,
       onItemSelected: (item) => controller.showSpitScreen = true,
     );
@@ -219,7 +219,7 @@ class _ValidationDetailScreen extends StatelessWidget {
   });
 
   final LinkData linkData;
-  final TableView tableView;
+  final TableViewType tableView;
   final DeepLinksController controller;
 
   @override
