@@ -41,16 +41,11 @@ class EvalOnDartLibrary extends DisposableController
     ValueListenable<IsolateRef?>? isolate,
     this.disableBreakpoints = true,
     this.oneRequestAtATime = false,
-    this.forceMainIsolate = false,
   }) : _clientId = Random().nextInt(1000000000) {
     _libraryRef = Completer<LibraryRef>();
 
     // For evals in tests, we will pass the isolateId into the constructor.
-    if (forceMainIsolate) {
-      isolate ??= serviceManager.isolateManager.mainIsolate;
-    } else {
-      isolate ??= serviceManager.isolateManager.selectedIsolate;
-    }
+    isolate ??= serviceManager.isolateManager.selectedIsolate;
     addAutoDisposeListener(isolate, () => _init(isolate!.value));
     _init(isolate.value);
   }
@@ -65,9 +60,6 @@ class EvalOnDartLibrary extends DisposableController
 
   /// Whether to disable breakpoints triggered while evaluating expressions.
   final bool disableBreakpoints;
-
-  /// Forces the use of the mainIsolate, rather than the selected isolate.
-  final bool forceMainIsolate;
 
   /// An ID unique to this instance, so that [asyncEval] keeps working even if
   /// the devtool is opened on multiple tabs at the same time.

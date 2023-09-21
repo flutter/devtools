@@ -42,7 +42,7 @@ abstract class InspectorServiceBase extends DisposableController
           inspectorLibraryUri,
           serviceConnection.serviceManager.service!,
           serviceManager: serviceConnection.serviceManager,
-          forceMainIsolate: true, // widget inspector only operates on main
+          isolate: serviceConnection.serviceManager.isolateManager.mainIsolate,
         ) {
     _lastMainIsolate =
         serviceConnection.serviceManager.isolateManager.mainIsolate.value;
