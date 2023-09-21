@@ -24,8 +24,6 @@ class RegisteredServiceDescription extends RegisteredService {
   final String? gaItem;
 }
 
-const hotReloadIcon = Icons.electric_bolt_outlined;
-
 /// Hot reload service registered by Flutter Tools.
 ///
 /// We call this service to perform hot reload.
