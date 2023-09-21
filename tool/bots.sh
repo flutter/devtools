@@ -159,7 +159,7 @@ elif [[ "$BOT" == "test_ddc" || "$BOT" == "test_dart2js" ]]; then
 
 # TODO(https://github.com/flutter/devtools/issues/1987): rewrite legacy integration tests.
 elif [ "$BOT" = "integration_dart2js" ]; then
-    if [ "$DEVTOOLS_PACKAGE" = "devtools_app" ]
+    if [ "$DEVTOOLS_PACKAGE" = "devtools_app" ]; then
         flutter pub get
 
         # TODO(https://github.com/flutter/flutter/issues/118470): remove this warning.
@@ -171,17 +171,11 @@ elif [ "$BOT" = "integration_dart2js" ]; then
     $ dart run integration_test/run_tests.dart --headless"
 
         if [ "$DEVICE" = "flutter" ]; then
-
             dart run integration_test/run_tests.dart --headless --shard="$SHARD"
-
         elif [ "$DEVICE" = "flutter-web" ]; then
-
             dart run integration_test/run_tests.dart --test-app-device=chrome --headless --shard="$SHARD"
-
         elif [ "$DEVICE" = "dart-cli" ]; then
-
             dart run integration_test/run_tests.dart --test-app-device=cli --headless --shard="$SHARD"
-
         fi        
     elif [ "$DEVTOOLS_PACKAGE" = "devtools_extensions" ]; then
         pushd $DEVTOOLS_DIR/packages/devtools_extensions
