@@ -7,6 +7,9 @@
 # Fast fail the script on failures.
 set -ex
 
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+DEVTOOLS_DIR=$SCRIPT_DIR/..
+
 # TODO: Also support windows on github actions.
 if [[ $RUNNER_OS == "Windows" ]]; then
     echo Installing Google Chrome Stable...
@@ -58,7 +61,7 @@ flutter --version
 dart --version
 
 # Fetch dependencies for the tool/ directory
-pushd tool
+pushd $DEVTOOLS_DIR/tool
 flutter pub get
 popd
 
@@ -73,7 +76,7 @@ devtools_tool pub-get --only-main
 bash tool/generate_code.sh
 
 # Change the CI to the packages/devtools_app directory.
-pushd packages/devtools_app
+pushd $DEVTOOLS_DIR/packages/devtools_app
 echo `pwd`
 
 if [ "$BOT" = "main" ]; then
@@ -96,23 +99,23 @@ if [ "$BOT" = "main" ]; then
 
     # Test the `devtools_app_shared`, `devtools_shared` and `devtools_extensions` package tests on the
     # main bot.
-    pushd packages/devtools_app_shared
+    pushd $DEVTOOLS_DIR/packages/devtools_app_shared
     echo `pwd`
     flutter test test/
     popd
 
-    pushd packages/devtools_shared
+    pushd $DEVTOOLS_DIR/packages/devtools_shared
     echo `pwd`
     flutter test test/
     popd
 
-    pushd packages/devtools_extensions
+    pushd $DEVTOOLS_DIR/packages/devtools_extensions
     echo `pwd`
     flutter test test/
     popd
 
     # Change the directory back to devtools_app.
-    pushd packages/devtools_app
+    pushd $DEVTOOLS_DIR/packages/devtools_app
     echo `pwd`
 
 elif [ "$BOT" = "build_ddc" ]; then
@@ -181,9 +184,9 @@ elif [ "$BOT" = "integration_dart2js" ]; then
 
         fi        
     elif [ "$DEVTOOLS_PACKAGE" = "devtools_extensions" ]; then
-        popd
-        pushd packages/devtools_extensions
+        pushd $DEVTOOLS_DIR/packages/devtools_extensions
         dart run integration_test/run_tests.dart --headless
+        popd
     fi
 fi
 

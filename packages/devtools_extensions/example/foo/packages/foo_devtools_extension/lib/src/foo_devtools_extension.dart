@@ -85,7 +85,7 @@ class _FooExtensionHomePageState extends State<FooExtensionHomePage> {
             const SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: () => extensionManager.showBannerMessage(
-                key: 'examplemessage_single_dismiss',
+                key: 'example_message_single_dismiss',
                 type: 'warning',
                 message: 'Warning: with great power, comes great '
                     'responsibility. I\'m not going to tell you twice.\n'
@@ -99,7 +99,7 @@ class _FooExtensionHomePageState extends State<FooExtensionHomePage> {
             const SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: () => extensionManager.showBannerMessage(
-                key: 'examplemessage_multi_dismiss',
+                key: 'example_message_multi_dismiss',
                 type: 'warning',
                 message: 'Warning: with great power, comes great '
                     'responsibility. I\'ll keep reminding you if you '

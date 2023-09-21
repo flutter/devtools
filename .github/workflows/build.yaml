@@ -197,12 +197,6 @@ jobs:
           DEVTOOLS_PACKAGE: devtools_extensions
         run: ./tool/bots.sh
 
-      - name: Upload Golden Failure Artifacts
-        uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32
-        if: failure()
-        with:
-          name: golden_image_failures.${{ matrix.bot }}
-          path: packages/devtools_app/integration_test/**/failures/*.png
 # TODO(https://github.com/flutter/devtools/issues/1715): add a windows compatible version of tool/bots.sh
 # and run it from this job.
 #  windows-test:
