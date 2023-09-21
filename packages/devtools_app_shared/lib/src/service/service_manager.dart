@@ -418,8 +418,9 @@ class ServiceManager<T extends VmService> {
     if (connectedApp?.isFlutterAppNow ?? false) {
       await callServiceOnMainIsolate(hotReloadServiceName);
     } else {
-      await service?.forEachIsolate((isolate) async {
-        await service?.reloadSources(isolate.id!);
+      final serviceLocal = service;
+      await serviceLocal?.forEachIsolate((isolate) async {
+        await serviceLocal.reloadSources(isolate.id!);
       });
     }
   }
