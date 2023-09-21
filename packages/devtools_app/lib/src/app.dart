@@ -307,6 +307,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
                     HotReloadButton(
                       callOnVmServiceDirectly: !connectedToFlutterApp,
                     ),
+                  // This button will hide itself based on whether the
+                  // hot restart service is available for the connected app.
                   const HotRestartButton(),
                 ],
                 ...DevToolsScaffold.defaultActions(isEmbedded: embed),
