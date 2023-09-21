@@ -105,7 +105,7 @@ class DeeplinkManager {
     };
   }
 
-  Future<Map<String, Object?>> _handleReadJsonFile(String filePath) async {
+  Future<Map<String, Object?>> _handleReadJsonFile(String filePath) {
     return File(filePath)
         .readAsString()
         .then<Map<String, Object?>>(_handleJsonOutput);
@@ -126,7 +126,7 @@ class DeeplinkManager {
 
   Future<Map<String, Object?>> getAndroidBuildVariants({
     required String rootPath,
-  }) async {
+  }) {
     return _runFlutterCommand(
       <String>['analyze', '--android', '--list-build-variants', rootPath],
       outputMatcher: _androidBuildVariantJsonRegex,
@@ -157,7 +157,7 @@ class DeeplinkManager {
 
   Future<Map<String, Object?>> getIosBuildOptions({
     required String rootPath,
-  }) async {
+  }) {
     return _runFlutterCommand(
       <String>['analyze', '--ios', '--list-build-options', rootPath],
       outputMatcher: _iosBuildOptionsJsonRegex,
