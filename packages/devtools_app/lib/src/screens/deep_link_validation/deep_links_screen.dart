@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../../shared/common_widgets.dart';
 import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/screen.dart';
@@ -67,16 +68,12 @@ class _DeepLinkPageState extends State<DeepLinkPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  'All deep links',
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-              ),
-              const SizedBox(width: denseSpacing),
-              SearchBar(
+          AreaPaneHeader(
+            title: Text(
+              'All deep links',
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+            actions: [SearchBar(
                 leading: const Icon(Icons.search),
                 hintText: 'Search a URL, domain or path',
                 onChanged: (value) {
@@ -85,9 +82,9 @@ class _DeepLinkPageState extends State<DeepLinkPage>
                 constraints: BoxConstraints.tight(
                   Size(wideSearchFieldWidth, defaultTextFieldHeight),
                 ),
-              ),
-            ],
+              ),],
           ),
+  
           const SizedBox(height: denseSpacing),
           const TabBar(
             tabs: [
