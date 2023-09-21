@@ -7,46 +7,63 @@ import 'package:flutter/foundation.dart';
 import 'deep_links_model.dart';
 import 'fake_data.dart';
 
-
 class DeepLinksController {
-
-  final _linkDatasNotifier = ValueNotifier<List<LinkData>>(allLinkDatas);
   ValueListenable<List<LinkData>> get linkDatasNotifier => _linkDatasNotifier;
+  ValueListenable<String> get searchContentNotifier => _searchContentNotifier;
+  ValueListenable<bool> get showSpitScreenNotifier => _showSpitScreenNotifier;
+
   List<LinkData> get linkDatas => _linkDatasNotifier.value;
 
+  bool get showSpitScreen => _showSpitScreenNotifier.value;
+
+  final selectedLink = ValueNotifier<LinkData?>(null);
+
+  final _linkDatasNotifier = ValueNotifier<List<LinkData>>(allLinkDatas);
   final _searchContentNotifier = ValueNotifier<String>('');
-  ValueListenable<String> get searchContentNotifier => _searchContentNotifier;
+  final _showSpitScreenNotifier = ValueNotifier<bool>(false);
+
+  set showSpitScreen(bool value) {
+    _showSpitScreenNotifier.value = value;
+  }
+
   set searchContent(String content) {
     _searchContentNotifier.value = content;
     _updateLinks();
   }
 
-  final _bundleByDomainNotifier = ValueNotifier<bool>(false);
-  ValueListenable<bool> get bundleByDomainNotifier => _bundleByDomainNotifier;
-  set bundleByDomain(bool value) {
-    _bundleByDomainNotifier.value = value;
-    _updateLinks();
-  }
-  bool get bundleByDomain => _bundleByDomainNotifier.value;
-
   void _updateLinks() {
     final searchContent = _searchContentNotifier.value;
-    List<LinkData> linkDatas = searchContent.isNotEmpty
+    final List<LinkData> linkDatas = searchContent.isNotEmpty
         ? allLinkDatas
             .where(
-              (linkData) => linkData.searchLabel.contains(searchContent),
+              (linkData) => linkData.matchesSearchToken(
+                RegExp(
+                  searchContent,
+                  caseSensitive: false,
+                ),
+              ),
             )
             .toList()
         : allLinkDatas;
 
-    if (bundleByDomain) {
-      final Map<String, LinkData> bundleByDomainMap = {};
-      for (var linkData in linkDatas) {
-        bundleByDomainMap[linkData.domain] =
-            linkData.mergeByDomain(bundleByDomainMap[linkData.domain]);
-      }
-      linkDatas = bundleByDomainMap.values.toList();
-    }
     _linkDatasNotifier.value = linkDatas;
+  }
+
+  List<LinkData> get getLinkDatasByPath {
+    final linkDatasByPath = <String, LinkData>{};
+
+    for (var linkData in _linkDatasNotifier.value) {
+      linkDatasByPath[linkData.path] = linkData;
+    }
+    return linkDatasByPath.values.toList();
+  }
+
+  List<LinkData> get getLinkDatasByDomain {
+    final linkDatasByDomain = <String, LinkData>{};
+
+    for (var linkData in _linkDatasNotifier.value) {
+      linkDatasByDomain[linkData.domain] = linkData;
+    }
+    return linkDatasByDomain.values.toList();
   }
 }

@@ -230,6 +230,7 @@ double get tableIconSize => scaleByFontFactor(12.0);
 const defaultIconSizeBeforeScaling = 16.0;
 const defaultActionsIconSizeBeforeScaling = 20.0;
 
+const largeSpacing = 32.0;
 const defaultSpacing = 16.0;
 const tabBarSpacing = 14.0;
 const intermediateSpacing = 12.0;

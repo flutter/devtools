@@ -17,24 +17,24 @@ const paths = <String>[
 final allLinkDatas = <LinkData>[
   for (var path in paths)
     LinkData(
-      os: 'Android, iOS',
+      os: ['Android', 'iOS'],
       domain: 'm.shopping.com',
-      paths: [path],
+      path: path,
       domainError: true,
       pathError: path.contains('shoe'),
     ),
   for (var path in paths)
     LinkData(
-      os: 'iOS',
+      os: ['iOS'],
       domain: 'm.french.shopping.com',
-      paths: [path],
+      path: path,
       pathError: path.contains('shoe'),
     ),
   for (var path in paths)
     LinkData(
-      os: 'Android',
+      os: ['Android'],
       domain: 'm.chinese.shopping.com',
-      paths: [path],
+      path: path,
       pathError: path.contains('shoe'),
     ),
 ];
