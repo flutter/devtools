@@ -302,6 +302,8 @@ extension DevToolsColorScheme on ColorScheme {
 
   Color get grey => const Color.fromARGB(255, 128, 128, 128);
 
+  Color get green =>const Color.fromARGB(255, 156, 233, 195);
+
   Color get breakpointColor => primary;
 
   /// Background colors for charts.

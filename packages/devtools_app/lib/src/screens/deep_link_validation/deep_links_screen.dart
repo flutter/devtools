@@ -234,7 +234,8 @@ class _ValidationDetailScreen extends StatelessWidget {
             children: [
               const Text('Selected Deep link validation details'),
               IconButton(
-                onPressed: () => controller.showSpitScreenNotifier.value = false,
+                onPressed: () =>
+                    controller.showSpitScreenNotifier.value = false,
                 icon: const Icon(Icons.close),
               ),
             ],
@@ -283,26 +284,26 @@ class _DomainCheckTable extends StatelessWidget {
                           color: Theme.of(context).colorScheme.error,
                         ),
                       )
-                    : const Text(
+                    : Text(
                         'No issues found',
                         style: TextStyle(
                           // TODO: Update devtool colorscheme and use color from there.
-                          color: Color.fromARGB(255, 156, 233, 195),
+                          color: Theme.of(context).colorScheme.green,
                         ),
                       ),
               ),
             ],
           ),
         if (linkData.os.contains('iOS'))
-          const DataRow(
+          DataRow(
             cells: [
-              DataCell(Text('iOS')),
-              DataCell(Text('Apple-App-Site-Association file')),
+              const DataCell(Text('iOS')),
+              const DataCell(Text('Apple-App-Site-Association file')),
               DataCell(
                 Text(
                   'No issues found',
                   // TODO: Update devtool colorscheme and use color from there.
-                  style: TextStyle(color: Color.fromARGB(255, 156, 233, 195)),
+                  style: TextStyle(color: Theme.of(context).colorScheme.green),
                 ),
               ),
             ],
