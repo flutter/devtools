@@ -28,6 +28,12 @@ class ExtensionManager {
     _registeredEventHandlers[type] = handler;
   }
 
+  /// Unregisters an event handler for [DevToolsExtensionEvent]s of type [type]
+  /// that was originally registered by calling [registerEventHandler].
+  void unregisterEventHandler(DevToolsExtensionEventType type) {
+    _registeredEventHandlers.remove(type);
+  }
+
   /// The listener that is added to the extension iFrame to receive messages
   /// from DevTools.
   ///
@@ -127,14 +133,14 @@ class ExtensionManager {
   /// If [targetOrigin] is null, the message will be posed to
   /// [html.window.origin].
   ///
-  /// When [_debugUseSimulatedEnvironment] is true, this message will be posted
+  /// When [_useSimulatedEnvironment] is true, this message will be posted
   /// to the same [html.window] that the extension is hosted in.
   void postMessageToDevTools(
     DevToolsExtensionEvent event, {
     String? targetOrigin,
   }) {
     final postWindow =
-        _debugUseSimulatedEnvironment ? html.window : html.window.parent;
+        _useSimulatedEnvironment ? html.window : html.window.parent;
     postWindow?.postMessage(
       {
         ...event.toJson(),
@@ -237,6 +243,10 @@ class ExtensionManager {
     }
     final newUri = Uri.parse(html.window.location.toString())
         .replace(queryParameters: newQueryParams);
-    html.window.history.replaceState(null, '', newUri.toString());
+    html.window.history.replaceState(
+      html.window.history.state,
+      '',
+      newUri.toString(),
+    );
   }
 }
