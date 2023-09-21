@@ -8,28 +8,29 @@ import 'deep_links_model.dart';
 import 'fake_data.dart';
 
 class DeepLinksController {
-  ValueListenable<List<LinkData>> get linkDatasNotifier => _linkDatasNotifier;
-  ValueListenable<String> get searchContentNotifier => _searchContentNotifier;
-  ValueListenable<bool> get showSpitScreenNotifier => _showSpitScreenNotifier;
+  bool get showSpitScreen => showSpitScreenNotifier.value;
 
-  List<LinkData> get linkDatas => _linkDatasNotifier.value;
+  List<LinkData> get getLinkDatasByPath {
+    final linkDatasByPath = <String, LinkData>{};
+    for (var linkData in linkDatasNotifier.value) {
+      linkDatasByPath[linkData.path] = linkData;
+    }
+    return linkDatasByPath.values.toList();
+  }
 
-  bool get showSpitScreen => _showSpitScreenNotifier.value;
+  List<LinkData> get getLinkDatasByDomain {
+    final linkDatasByDomain = <String, LinkData>{};
+    for (var linkData in linkDatasNotifier.value) {
+      linkDatasByDomain[linkData.domain] = linkData;
+    }
+    return linkDatasByDomain.values.toList();
+  }
 
   final selectedLink = ValueNotifier<LinkData?>(null);
+  final linkDatasNotifier = ValueNotifier<List<LinkData>>(allLinkDatas);
+  final showSpitScreenNotifier = ValueNotifier<bool>(false);
 
-  final _linkDatasNotifier = ValueNotifier<List<LinkData>>(allLinkDatas);
   final _searchContentNotifier = ValueNotifier<String>('');
-  final _showSpitScreenNotifier = ValueNotifier<bool>(false);
-
-  set showSpitScreen(bool value) {
-    _showSpitScreenNotifier.value = value;
-  }
-
-  set searchContent(String content) {
-    _searchContentNotifier.value = content;
-    _updateLinks();
-  }
 
   void _updateLinks() {
     final searchContent = _searchContentNotifier.value;
@@ -46,24 +47,11 @@ class DeepLinksController {
             .toList()
         : allLinkDatas;
 
-    _linkDatasNotifier.value = linkDatas;
+    linkDatasNotifier.value = linkDatas;
   }
 
-  List<LinkData> get getLinkDatasByPath {
-    final linkDatasByPath = <String, LinkData>{};
-
-    for (var linkData in _linkDatasNotifier.value) {
-      linkDatasByPath[linkData.path] = linkData;
-    }
-    return linkDatasByPath.values.toList();
-  }
-
-  List<LinkData> get getLinkDatasByDomain {
-    final linkDatasByDomain = <String, LinkData>{};
-
-    for (var linkData in _linkDatasNotifier.value) {
-      linkDatasByDomain[linkData.domain] = linkData;
-    }
-    return linkDatasByDomain.values.toList();
+  set searchContent(String content) {
+    _searchContentNotifier.value = content;
+    _updateLinks();
   }
 }

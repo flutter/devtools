@@ -206,7 +206,7 @@ class _DataTable extends StatelessWidget {
       selectionNotifier: controller.selectedLink,
       defaultSortColumn: tableView == TableViewType.pathView ? path : domain,
       defaultSortDirection: SortDirection.ascending,
-      onItemSelected: (item) => controller.showSpitScreen = true,
+      onItemSelected: (item) => controller.showSpitScreenNotifier.value = true,
     );
   }
 }
@@ -234,7 +234,7 @@ class _ValidationDetailScreen extends StatelessWidget {
             children: [
               const Text('Selected Deep link validation details'),
               IconButton(
-                onPressed: () => controller.showSpitScreen = false,
+                onPressed: () => controller.showSpitScreenNotifier.value = false,
                 icon: const Icon(Icons.close),
               ),
             ],
@@ -247,7 +247,7 @@ class _ValidationDetailScreen extends StatelessWidget {
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const Text('Domain check'),
-          _DomainCheckTable(linkData: linkData),
+          Expanded(child: _DomainCheckTable(linkData: linkData)),
         ],
       ),
     );
@@ -287,7 +287,7 @@ class _DomainCheckTable extends StatelessWidget {
                         'No issues found',
                         style: TextStyle(
                           // TODO: Update devtool colorscheme and use color from there.
-                          color:  Color.fromARGB(255, 156, 233, 195),
+                          color: Color.fromARGB(255, 156, 233, 195),
                         ),
                       ),
               ),
