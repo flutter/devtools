@@ -232,6 +232,27 @@ class ServerApi {
           deeplinkManager,
         );
 
+      case DeeplinkApi.androidAppLinkSettings:
+        return _DeeplinkApiHandler.handleAndroidAppLinkSettings(
+          api,
+          queryParams,
+          deeplinkManager,
+        );
+
+      case DeeplinkApi.iosBuildOptions:
+        return _DeeplinkApiHandler.handleIosBuildOptions(
+          api,
+          queryParams,
+          deeplinkManager,
+        );
+
+      case DeeplinkApi.iosUniversalLinkSettings:
+        return _DeeplinkApiHandler.handleIosUniversalLinkSettings(
+          api,
+          queryParams,
+          deeplinkManager,
+        );
+
       default:
         return api.notImplemented();
     }
@@ -391,7 +412,84 @@ abstract class _DeeplinkApiHandler {
     if (missingRequiredParams != null) return missingRequiredParams;
 
     final rootPath = queryParams[DeeplinkApi.deeplinkRootPathPropertyName]!;
-    final result = await deeplinkManager.getBuildVariants(rootPath: rootPath);
+    final result =
+        await deeplinkManager.getAndroidBuildVariants(rootPath: rootPath);
+    return _resultOutputOrError(api, result);
+  }
+
+  static Future<shelf.Response> handleAndroidAppLinkSettings(
+    ServerApi api,
+    Map<String, String> queryParams,
+    DeeplinkManager deeplinkManager,
+  ) async {
+    final missingRequiredParams = ServerApi._checkRequiredParameters(
+      [
+        DeeplinkApi.deeplinkRootPathPropertyName,
+        DeeplinkApi.androidBuildVariantPropertyName,
+      ],
+      queryParams: queryParams,
+      api: api,
+      requestName: DeeplinkApi.androidBuildVariants,
+    );
+    if (missingRequiredParams != null) return missingRequiredParams;
+
+    final rootPath = queryParams[DeeplinkApi.deeplinkRootPathPropertyName]!;
+    final buildVariant =
+        queryParams[DeeplinkApi.androidBuildVariantPropertyName]!;
+    final result = await deeplinkManager.getAndroidAppLinkSettings(
+      rootPath: rootPath,
+      buildVariant: buildVariant,
+    );
+    return _resultOutputOrError(api, result);
+  }
+
+  static Future<shelf.Response> handleIosBuildOptions(
+    ServerApi api,
+    Map<String, String> queryParams,
+    DeeplinkManager deeplinkManager,
+  ) async {
+    final missingRequiredParams = ServerApi._checkRequiredParameters(
+      [DeeplinkApi.deeplinkRootPathPropertyName],
+      queryParams: queryParams,
+      api: api,
+      requestName: DeeplinkApi.iosBuildOptions,
+    );
+    if (missingRequiredParams != null) return missingRequiredParams;
+
+    final rootPath = queryParams[DeeplinkApi.deeplinkRootPathPropertyName]!;
+    final result = await deeplinkManager.getIosBuildOptions(rootPath: rootPath);
+    return _resultOutputOrError(api, result);
+  }
+
+  static Future<shelf.Response> handleIosUniversalLinkSettings(
+    ServerApi api,
+    Map<String, String> queryParams,
+    DeeplinkManager deeplinkManager,
+  ) async {
+    final missingRequiredParams = ServerApi._checkRequiredParameters(
+      [
+        DeeplinkApi.deeplinkRootPathPropertyName,
+        DeeplinkApi.xcodeConfigurationPropertyName,
+        DeeplinkApi.xcodeTargetPropertyName,
+      ],
+      queryParams: queryParams,
+      api: api,
+      requestName: DeeplinkApi.iosUniversalLinkSettings,
+    );
+    if (missingRequiredParams != null) return missingRequiredParams;
+
+    final result = await deeplinkManager.getIosUniversalLinkSettings(
+      rootPath: queryParams[DeeplinkApi.deeplinkRootPathPropertyName]!,
+      configuration: queryParams[DeeplinkApi.xcodeConfigurationPropertyName]!,
+      target: queryParams[DeeplinkApi.xcodeTargetPropertyName]!,
+    );
+    return _resultOutputOrError(api, result);
+  }
+
+  static shelf.Response _resultOutputOrError(
+    ServerApi api,
+    Map<String, Object?> result,
+  ) {
     final error = result[DeeplinkManager.kErrorField] as String?;
     if (error != null) {
       api.serverError(error);

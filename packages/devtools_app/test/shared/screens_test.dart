@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('ScreenMetaData', () {
-    test('values matches order of screens', () async {
+    test('values matches order of screens', () {
       final enumOrder = ScreenMetaData.values.map((s) => s.id).toList();
       final screenOrder =
           defaultScreens().map((screen) => screen.screen.screenId).toList();
