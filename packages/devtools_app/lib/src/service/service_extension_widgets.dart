@@ -215,8 +215,8 @@ class HotReloadButton extends StatelessWidget {
     // TODO(devoncarew): Show as disabled when reload service calls are in progress.
     return callOnVmServiceDirectly
         // We cannot use a [_RegisteredServiceExtensionButton] here because
-        // there is no service extensions when we are calling hot reload
-        // directly on the VM service.
+        // there is no hot reload service extension when we are calling hot
+        // reload directly on the VM service (e.g. for Dart CLI apps).
         ? _HotReloadScaffoldAction()
         : DevToolsTooltip(
             message: _hotReloadTooltip,
