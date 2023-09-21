@@ -73,7 +73,7 @@ abstract class FeatureFlags {
   ///
   /// TODO(https://github.com/flutter/devtools/issues/1632): remove this flag
   /// once the feature lands well.
-  static bool devToolsExtensions = true;
+  static bool devToolsExtensions = isExternalBuild;
 
   /// Flag to enable debugging via DAP.
   ///
