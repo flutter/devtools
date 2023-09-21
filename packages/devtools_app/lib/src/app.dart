@@ -298,11 +298,11 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
               screens: screens,
               actions: [
                 if (connectedToVmService) ...[
-                  // Hide the hot reload button for Dart web apps, where the 
+                  // Hide the hot reload button for Dart web apps, where the
                   // hot reload service extension is not avilable and where the
                   // [service.reloadServices] RPC is not implemented.
-                  // TODO(kenz): find a way to show this for Dart web apps when
-                  // supported.
+                  // TODO(https://github.com/flutter/devtools/issues/6441): find
+                  // a way to show this for Dart web apps when supported.
                   if (!connectedToDartWebApp)
                     HotReloadButton(
                       callOnVmServiceDirectly: !connectedToFlutterApp,
