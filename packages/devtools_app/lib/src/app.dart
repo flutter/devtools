@@ -287,6 +287,9 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
           final connectedToFlutterApp =
               serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ??
                   false;
+          final connectedToDartWebApp =
+              serviceConnection.serviceManager.connectedApp?.isDartWebAppNow ??
+                  false;
           return MultiProvider(
             providers: _providedControllers(),
             child: DevToolsScaffold(
@@ -295,10 +298,15 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
               screens: screens,
               actions: [
                 if (connectedToVmService) ...[
-                  // TODO(kenz): do we need to hide this for Dart Web?
-                  HotReloadButton(
-                    callOnVmServiceDirectly: !connectedToFlutterApp,
-                  ),
+                  // Hide the hot reload button for Dart web apps, where the 
+                  // hot reload service extension is not avilable and where the
+                  // [service.reloadServices] RPC is not implemented.
+                  // TODO(kenz): find a way to show this for Dart web apps when
+                  // supported.
+                  if (!connectedToDartWebApp)
+                    HotReloadButton(
+                      callOnVmServiceDirectly: !connectedToFlutterApp,
+                    ),
                   const HotRestartButton(),
                 ],
                 ...DevToolsScaffold.defaultActions(isEmbedded: embed),
