@@ -632,7 +632,7 @@ void select(
 }
 
 /// Sends an analytics event to signal that something in DevTools was viewed.
-/// 
+///
 /// Impression events should not signal user interaction like [select].
 void impression(
   String screenName,
