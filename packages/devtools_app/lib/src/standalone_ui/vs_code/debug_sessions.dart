@@ -7,6 +7,8 @@ import 'dart:async';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
+import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/constants.dart';
 import '../../shared/feature_flags.dart';
 import '../../shared/screen.dart';
@@ -72,14 +74,26 @@ class DebugSessions extends StatelessWidget {
         ),
         IconButton(
           onPressed: api.capabilities.hotReload && (isDebug || !isFlutter)
-              ? () => unawaited(api.hotReload(session.id))
+              ? () {
+                  ga.select(
+                    gac.VsCodeFlutterSidebar.id,
+                    gac.hotReload,
+                  );
+                  unawaited(api.hotReload(session.id));
+                }
               : null,
           tooltip: 'Hot Reload',
           icon: Icon(hotReloadIcon, size: actionsIconSize),
         ),
         IconButton(
           onPressed: api.capabilities.hotRestart && (isDebug || !isFlutter)
-              ? () => unawaited(api.hotRestart(session.id))
+              ? () {
+                  ga.select(
+                    gac.VsCodeFlutterSidebar.id,
+                    gac.hotRestart,
+                  );
+                  unawaited(api.hotRestart(session.id));
+                }
               : null,
           tooltip: 'Hot Restart',
           icon: Icon(hotRestartIcon, size: actionsIconSize),
@@ -157,7 +171,13 @@ class _DevToolsMenu extends StatelessWidget {
         leadingIcon: Icon(screen.icon, size: actionsIconSize),
         onPressed: disabledReason != null
             ? null
-            : () => unawaited(api.openDevToolsPage(session.id, screen.id)),
+            : () {
+                ga.select(
+                  gac.VsCodeFlutterSidebar.id,
+                  gac.VsCodeFlutterSidebar.openDevToolsScreen(screen.id),
+                );
+                unawaited(api.openDevToolsPage(session.id, screen.id));
+              },
         child: text,
       );
     }
