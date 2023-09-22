@@ -82,7 +82,8 @@ class GtagEventDevTools extends GtagEvent {
     String? is_embedded, // dimension10 Whether devtools is embedded
     String? g3_username, // dimension11 g3 username (null for external users)
 
-    // dimension12 IDE feature that launched Devtools:
+    // dimension12 IDE feature that launched Devtools
+    // The following is a non-exhaustive list of possible values for this dimension:
     // "command" - VS Code command palette
     // "sidebarContent" - the content of the sidebar (e.g. the DevTools dropdown for a debug session)
     // "sidebarTitle" - the DevTools action in the sidebar title
@@ -339,7 +340,8 @@ class GtagExceptionDevTools extends GtagException {
     String? is_embedded, // dimension10 Whether devtools is embedded
     String? g3_username, // dimension11 g3 username (null for external users)
 
-    // dimension12 IDE feature that launched Devtools:
+    // dimension12 IDE feature that launched Devtools
+    // The following is a non-exhaustive list of possible values for this dimension:
     // "command" - VS Code command palette
     // "sidebarContent" - the content of the sidebar (e.g. the DevTools dropdown for a debug session)
     // "sidebarTitle" - the DevTools action in the sidebar title
