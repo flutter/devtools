@@ -82,7 +82,15 @@ class GtagEventDevTools extends GtagEvent {
     String? is_embedded, // dimension10 Whether devtools is embedded
     String? g3_username, // dimension11 g3 username (null for external users)
 
-    // dimension12 IDE feature that launched Devtools (command, sidebarContent, sidebarToolbar)
+    // dimension12 IDE feature that launched Devtools:
+    // "command" - VS Code command palette
+    // "sidebarContent" - the content of the sidebar (e.g. the DevTools dropdown for a debug session)
+    // "sidebarTitle" - the DevTools action in the sidebar title
+    // "touchbar" - MacOS touchbar button
+    // "launchConfiguration" - configured explicitly in launch configuration
+    // "onDebugAutomatic" - configured to always run on debug session start
+    // "onDebugPrompt" - user responded to prompt when running a debug session
+    // "languageStatus" - launched from the language status popout
     String? ide_launched_feature,
 
     // Performance screen metrics. See [PerformanceScreenMetrics].
@@ -331,7 +339,15 @@ class GtagExceptionDevTools extends GtagException {
     String? is_embedded, // dimension10 Whether devtools is embedded
     String? g3_username, // dimension11 g3 username (null for external users)
 
-    // dimension12 IDE feature that launched Devtools (command, sidebarContent, sidebarToolbar)
+    // dimension12 IDE feature that launched Devtools:
+    // "command" - VS Code command palette
+    // "sidebarContent" - the content of the sidebar (e.g. the DevTools dropdown for a debug session)
+    // "sidebarTitle" - the DevTools action in the sidebar title
+    // "touchbar" - MacOS touchbar button
+    // "launchConfiguration" - configured explicitly in launch configuration
+    // "onDebugAutomatic" - configured to always run on debug session start
+    // "onDebugPrompt" - user responded to prompt when running a debug session
+    // "languageStatus" - launched from the language status popout
     String? ide_launched_feature,
 
     // Performance screen metrics. See [PerformanceScreenMetrics].
@@ -650,7 +666,7 @@ const String devtoolsVersion = devtools.version; //dimension6 n.n.n
 
 String _ideLaunched = ''; // dimension7 IDE launched DevTools (VSCode, CLI, ...)
 
-// dimension12 IDE feature that launched DevTools (command, sidebarContent, sidebarToolbar)
+// dimension12 IDE feature that launched DevTools
 String _ideLaunchedFeature = '';
 
 String _flutterClientId = ''; // dimension8 Flutter tool clientId.
