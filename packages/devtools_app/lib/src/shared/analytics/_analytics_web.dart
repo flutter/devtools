@@ -630,6 +630,29 @@ void select(
   );
 }
 
+void impression(
+  String screenName,
+  String item, {
+  ScreenAnalyticsMetrics Function()? screenMetricsProvider,
+}) {
+  _log.fine(
+    'Event: impression('
+    'screenName:$screenName, '
+    'item:$item)',
+  );
+  GTag.event(
+    screenName,
+    gaEventProvider: () => _gtagEvent(
+      event_category: gac.impressionEvent,
+      event_label: item,
+      non_interaction: true,
+      send_to: gaDevToolsPropertyId(),
+      screenMetrics:
+          screenMetricsProvider != null ? screenMetricsProvider() : null,
+    ),
+  );
+}
+
 String? _lastGaError;
 
 void reportError(
