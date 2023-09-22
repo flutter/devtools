@@ -31,18 +31,22 @@ class SimulatedDevToolsWrapper extends StatefulWidget {
   const SimulatedDevToolsWrapper({
     super.key,
     required this.child,
+    required this.requiresRunningApplication,
   });
 
   final Widget child;
 
+  final bool requiresRunningApplication;
+
   @override
   State<SimulatedDevToolsWrapper> createState() =>
-      _SimulatedDevToolsWrapperState();
+      SimulatedDevToolsWrapperState();
 }
 
-class _SimulatedDevToolsWrapperState extends State<SimulatedDevToolsWrapper>
+@visibleForTesting
+class SimulatedDevToolsWrapperState extends State<SimulatedDevToolsWrapper>
     with AutoDisposeMixin {
-  late final _SimulatedDevToolsController simController;
+  late final SimulatedDevToolsController simController;
 
   late ConnectedState connectionState;
 
@@ -51,7 +55,7 @@ class _SimulatedDevToolsWrapperState extends State<SimulatedDevToolsWrapper>
   @override
   void initState() {
     super.initState();
-    simController = _SimulatedDevToolsController()..init();
+    simController = SimulatedDevToolsController()..init();
 
     connectionState = serviceManager.connectedState.value;
     addAutoDisposeListener(serviceManager.connectedState, () {
@@ -99,11 +103,12 @@ class _SimulatedDevToolsWrapperState extends State<SimulatedDevToolsWrapper>
                   connected: connected,
                   simController: simController,
                 ),
-                if (connected)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: denseSpacing),
-                    child: _SimulatedApi(simController: simController),
-                  ),
+                const SizedBox(height: denseSpacing),
+                _SimulatedApi(
+                  simController: simController,
+                  requiresRunningApplication: widget.requiresRunningApplication,
+                  connectedToApplication: connected,
+                ),
                 const PaddedDivider(),
                 Expanded(
                   child: Column(
@@ -141,51 +146,66 @@ class _SimulatedDevToolsWrapperState extends State<SimulatedDevToolsWrapper>
 }
 
 class _SimulatedApi extends StatelessWidget {
-  const _SimulatedApi({required this.simController});
+  const _SimulatedApi({
+    required this.simController,
+    required this.requiresRunningApplication,
+    required this.connectedToApplication,
+  });
 
-  final _SimulatedDevToolsController simController;
+  final SimulatedDevToolsController simController;
+
+  final bool requiresRunningApplication;
+
+  final bool connectedToApplication;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            DevToolsButton(
-              label: 'PING',
-              onPressed: simController.ping,
+    if (requiresRunningApplication && !connectedToApplication) {
+      return const SizedBox.shrink();
+    }
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: denseSpacing),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              DevToolsButton(
+                label: 'PING',
+                onPressed: simController.ping,
+              ),
+              const SizedBox(width: denseSpacing),
+              DevToolsButton(
+                label: 'TOGGLE THEME',
+                onPressed: simController.toggleTheme,
+              ),
+              const SizedBox(width: denseSpacing),
+              DevToolsButton(
+                label: 'FORCE RELOAD',
+                onPressed: simController.forceReload,
+              ),
+              // TODO(kenz): add buttons for other simulated events as the extension
+              // API expands.
+            ],
+          ),
+          const SizedBox(height: defaultSpacing),
+          if (connectedToApplication)
+            Row(
+              children: [
+                DevToolsButton(
+                  icon: Icons.bolt,
+                  tooltip: 'Hot reload connected app',
+                  onPressed: simController.hotReloadConnectedApp,
+                ),
+                const SizedBox(width: denseSpacing),
+                DevToolsButton(
+                  icon: Icons.replay,
+                  tooltip: 'Hot restart connected app',
+                  onPressed: simController.hotRestartConnectedApp,
+                ),
+              ],
             ),
-            const SizedBox(width: denseSpacing),
-            DevToolsButton(
-              label: 'TOGGLE THEME',
-              onPressed: simController.toggleTheme,
-            ),
-            const SizedBox(width: denseSpacing),
-            DevToolsButton(
-              label: 'FORCE RELOAD',
-              onPressed: simController.forceReload,
-            ),
-            // TODO(kenz): add buttons for other simulated events as the extension
-            // API expands.
-          ],
-        ),
-        const SizedBox(height: defaultSpacing),
-        Row(
-          children: [
-            DevToolsButton(
-              icon: Icons.bolt,
-              tooltip: 'Hot reload connected app',
-              onPressed: simController.hotReloadConnectedApp,
-            ),
-            const SizedBox(width: denseSpacing),
-            DevToolsButton(
-              icon: Icons.replay,
-              tooltip: 'Hot restart connected app',
-              onPressed: simController.hotRestartConnectedApp,
-            ),
-          ],
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -193,7 +213,7 @@ class _SimulatedApi extends StatelessWidget {
 class _LogMessages extends StatefulWidget {
   const _LogMessages({required this.simController});
 
-  final _SimulatedDevToolsController simController;
+  final SimulatedDevToolsController simController;
 
   @override
   State<_LogMessages> createState() => _LogMessagesState();
@@ -210,7 +230,6 @@ class _LogMessagesState extends State<_LogMessages> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return ValueListenableBuilder(
       valueListenable: widget.simController.messageLogs,
       builder: (context, logs, _) {
@@ -225,23 +244,7 @@ class _LogMessagesState extends State<_LogMessages> {
             itemCount: logs.length,
             itemBuilder: (context, index) {
               final log = logs[index];
-              Widget logEntry = Padding(
-                padding: const EdgeInsets.symmetric(vertical: densePadding),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '[${log.timestamp.toString()}] from ${log.source.display}',
-                      style: theme.fixedFontStyle,
-                    ),
-                    if (log.message != null) Text(log.message!),
-                    if (log.data != null)
-                      FormattedJson(
-                        json: log.data,
-                      ),
-                  ],
-                ),
-              );
+              Widget logEntry = LogListItem(log: log);
               if (index != 0) {
                 logEntry = OutlineDecoration.onlyTop(child: logEntry);
               }
@@ -250,6 +253,34 @@ class _LogMessagesState extends State<_LogMessages> {
           ),
         );
       },
+    );
+  }
+}
+
+@visibleForTesting
+class LogListItem extends StatelessWidget {
+  const LogListItem({super.key, required this.log});
+
+  final MessageLogEntry log;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: densePadding),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '[${log.timestamp.toString()}] from ${log.source.display}',
+            style: Theme.of(context).fixedFontStyle,
+          ),
+          if (log.message != null) Text(log.message!),
+          if (log.data != null)
+            FormattedJson(
+              json: log.data,
+            ),
+        ],
+      ),
     );
   }
 }

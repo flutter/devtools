@@ -13,7 +13,7 @@ class _VmServiceConnection extends StatelessWidget {
   static const _totalControlsHeight = 45.0;
   static const _totalControlsWidth = 415.0;
 
-  final _SimulatedDevToolsController simController;
+  final SimulatedDevToolsController simController;
   final bool connected;
 
   @override
@@ -30,7 +30,7 @@ class _VmServiceConnection extends StatelessWidget {
 class _ConnectedVmServiceDisplay extends StatelessWidget {
   const _ConnectedVmServiceDisplay({required this.simController});
 
-  final _SimulatedDevToolsController simController;
+  final SimulatedDevToolsController simController;
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +69,7 @@ class _ConnectedVmServiceDisplay extends StatelessWidget {
 class _DisconnectedVmServiceDisplay extends StatefulWidget {
   const _DisconnectedVmServiceDisplay({required this.simController});
 
-  final _SimulatedDevToolsController simController;
+  final SimulatedDevToolsController simController;
 
   @override
   State<_DisconnectedVmServiceDisplay> createState() =>
@@ -106,6 +106,7 @@ class _DisconnectedVmServiceDisplayState
             autofocus: true,
             style: theme.regularTextStyle,
             decoration: InputDecoration(
+              contentPadding: const EdgeInsets.all(denseSpacing),
               isDense: true,
               border: const OutlineInputBorder(),
               enabledBorder: OutlineInputBorder(

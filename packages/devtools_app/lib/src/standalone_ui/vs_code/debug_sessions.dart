@@ -8,14 +8,21 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/constants.dart';
+import '../../shared/feature_flags.dart';
 import '../../shared/screen.dart';
 import '../api/vs_code_api.dart';
 
 class DebugSessions extends StatelessWidget {
-  const DebugSessions(this.api, this.sessions, {super.key});
+  const DebugSessions({
+    required this.api,
+    required this.sessions,
+    required this.deviceMap,
+    super.key,
+  });
 
   final VsCodeApi api;
   final List<VsCodeDebugSession> sessions;
+  final Map<String, VsCodeDevice> deviceMap;
 
   @override
   Widget build(BuildContext context) {
@@ -46,12 +53,12 @@ class DebugSessions extends StatelessWidget {
   }
 
   TableRow _debugSessionRow(VsCodeDebugSession session, BuildContext context) {
-    // TODO(dantup): What to show if mode is unknown (null)?
     final mode = session.flutterMode;
     final isDebug = mode == 'debug';
     final isProfile = mode == 'profile';
-    // final isRelease = mode == 'release' || mode == 'jit_release';
+    final isRelease = mode == 'release' || mode == 'jit_release';
     final isFlutter = session.debuggerType?.contains('Flutter') ?? false;
+    final isWeb = deviceMap[session.flutterDeviceId]?.platformType == 'web';
 
     final label = session.flutterMode != null
         ? '${session.name} (${session.flutterMode})'
@@ -84,6 +91,8 @@ class DebugSessions extends StatelessWidget {
             isFlutter: isFlutter,
             isDebug: isDebug,
             isProfile: isProfile,
+            isRelease: isRelease,
+            isWeb: isWeb,
           ),
       ],
     );
@@ -97,6 +106,8 @@ class _DevToolsMenu extends StatelessWidget {
     required this.isFlutter,
     required this.isDebug,
     required this.isProfile,
+    required this.isRelease,
+    required this.isWeb,
   });
 
   final VsCodeApi api;
@@ -104,6 +115,8 @@ class _DevToolsMenu extends StatelessWidget {
   final bool isFlutter;
   final bool isDebug;
   final bool isProfile;
+  final bool isRelease;
+  final bool isWeb;
 
   @override
   Widget build(BuildContext context) {
@@ -112,26 +125,40 @@ class _DevToolsMenu extends StatelessWidget {
         ? TextDirection.rtl
         : TextDirection.ltr;
 
-    Widget devToolsButton(
-      ScreenMetaData screen, {
-      bool enabled = true,
-    }) {
-      return SizedBox(
-        width: double.infinity,
-        child: TextButton.icon(
-          style: TextButton.styleFrom(
-            alignment: Alignment.centerRight,
-            shape: const ContinuousRectangleBorder(),
-          ),
-          onPressed: enabled
-              ? () => unawaited(api.openDevToolsPage(session.id, screen.id))
-              : null,
-          label: Directionality(
-            textDirection: normalDirection,
-            child: Text(screen.title ?? screen.id),
-          ),
-          icon: Icon(screen.icon, size: actionsIconSize),
-        ),
+    Widget devToolsButton(ScreenMetaData screen) {
+      final title = screen.title ?? screen.id;
+      String? disabledReason;
+      if (isRelease) {
+        disabledReason = 'Not available in release mode';
+      } else if (screen.requiresFlutter && !isFlutter) {
+        disabledReason = 'Only available for Flutter applications';
+      } else if (screen.requiresDebugBuild && !isDebug) {
+        disabledReason = 'Only available in debug mode';
+      } else if (screen.requiresDartVm && isWeb) {
+        disabledReason = 'Not available when running on the web';
+      }
+
+      // Because we flipped the direction so the menu is aligned to the end, we
+      // should revert the text direction back to normal for the label.
+      Widget text = Directionality(
+        textDirection: normalDirection,
+        child: Text(title),
+      );
+
+      if (disabledReason != null) {
+        text = Tooltip(
+          preferBelow: false,
+          message: disabledReason,
+          child: text,
+        );
+      }
+
+      return MenuItemButton(
+        leadingIcon: Icon(screen.icon, size: actionsIconSize),
+        onPressed: disabledReason != null
+            ? null
+            : () => unawaited(api.openDevToolsPage(session.id, screen.id)),
+        child: text,
       );
     }
 
@@ -143,36 +170,10 @@ class _DevToolsMenu extends StatelessWidget {
         style: const MenuStyle(
           alignment: AlignmentDirectional.bottomStart,
         ),
-        menuChildren: [
-          // TODO(dantup): Ensure the order matches the DevTools tab bar (if
-          //  possible, share this order).
-          // TODO(dantup): Make these conditions use the real screen
-          //  conditions and/or verify if these conditions are correct.
-          devToolsButton(
-            ScreenMetaData.inspector,
-            enabled: isFlutter && isDebug,
-          ),
-          devToolsButton(
-            ScreenMetaData.cpuProfiler,
-            enabled: isDebug || isProfile,
-          ),
-          devToolsButton(
-            ScreenMetaData.memory,
-            enabled: isDebug || isProfile,
-          ),
-          devToolsButton(
-            ScreenMetaData.performance,
-          ),
-          devToolsButton(
-            ScreenMetaData.network,
-            enabled: isDebug,
-          ),
-          devToolsButton(
-            ScreenMetaData.logging,
-          ),
-          // TODO(dantup): Check other screens (like appSize) work embedded and
-          //  add here.
-        ],
+        menuChildren: ScreenMetaData.values
+            .where(_shouldIncludeScreen)
+            .map(devToolsButton)
+            .toList(),
         builder: (context, controller, child) => IconButton(
           onPressed: () {
             if (controller.isOpen) {
@@ -182,7 +183,6 @@ class _DevToolsMenu extends StatelessWidget {
             }
           },
           tooltip: 'DevTools',
-          // TODO(dantup): Icon for DevTools menu?
           icon: Icon(
             Icons.construction,
             size: actionsIconSize,
@@ -190,5 +190,21 @@ class _DevToolsMenu extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  bool _shouldIncludeScreen(ScreenMetaData screen) {
+    return switch (screen) {
+      // Some screens shouldn't show up in the menu.
+      ScreenMetaData.home => false,
+      ScreenMetaData.debugger => false,
+      ScreenMetaData.simple => false, // generic screen isn't a screen itself
+      // TODO(dantup): Check preferences.vmDeveloperModeEnabled
+      ScreenMetaData.vmTools => false,
+      // DeepLink is currently behind a feature flag.
+      ScreenMetaData.deepLinks => FeatureFlags.deepLinkValidation,
+      // Anything else can be shown as long as it doesn't require a specific
+      // library.
+      _ => screen.requiresLibrary == null,
+    };
   }
 }

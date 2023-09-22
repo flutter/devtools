@@ -19,6 +19,8 @@ DevTools extension for your pub package, see the getting started guide for
 ![Example DevTools extension](images/example_devtools_extension.png "Example DevTools extension for package:foo_package")
 
 * Fixed theming bug in isolate selector - [#6403](https://github.com/flutter/devtools/pull/6403)
+* Show the hot reload button for Dart server apps that support hot reload -
+[#6341](https://github.com/flutter/devtools/pull/6341)
 
 ## Inspector updates
 
