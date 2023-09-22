@@ -21,6 +21,7 @@ DevTools extension for your pub package, see the getting started guide for
 * Fixed theming bug in isolate selector - [#6403](https://github.com/flutter/devtools/pull/6403)
 * Show the hot reload button for Dart server apps that support hot reload -
 [#6341](https://github.com/flutter/devtools/pull/6341)
+* Fixed exceptions on hot restart - [#6450](https://github.com/flutter/devtools/pull/6450)
 
 ## Inspector updates
 
