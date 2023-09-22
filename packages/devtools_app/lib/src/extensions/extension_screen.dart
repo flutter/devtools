@@ -29,11 +29,7 @@ class ExtensionScreen extends Screen {
         );
 
   final DevToolsExtensionConfig extensionConfig;
-
-  @override
-  ValueListenable<bool> get showIsolateSelector =>
-      const FixedValueListenable<bool>(true);
-
+  
   @override
   Widget build(BuildContext context) =>
       _ExtensionScreenBody(extensionConfig: extensionConfig);
