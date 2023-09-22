@@ -226,6 +226,10 @@ class ConnectionDescription {
 }
 
 String? ideFromUrl() {
+  return lookupFromQueryParams('ide');
+}
+
+String? lookupFromQueryParams(String key) {
   final queryParameters = loadQueryParams();
-  return queryParameters['ide'];
+  return queryParameters[key];
 }

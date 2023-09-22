@@ -82,6 +82,9 @@ class GtagEventDevTools extends GtagEvent {
     String? is_embedded, // dimension10 Whether devtools is embedded
     String? g3_username, // dimension11 g3 username (null for external users)
 
+    // dimension12 IDE feature that launched Devtools (command, sidebarContent, sidebarToolbar)
+    String? ide_launched_feature,
+
     // Performance screen metrics. See [PerformanceScreenMetrics].
     int? ui_duration_micros, // metric1
     int? raster_duration_micros, // metric2
@@ -142,6 +145,8 @@ class GtagEventDevTools extends GtagEvent {
 
   external String? get g3_username;
 
+  external String? get ide_launched_feature;
+
   // Custom metrics:
   external int? get ui_duration_micros;
 
@@ -195,6 +200,7 @@ GtagEventDevTools _gtagEvent({
     is_external_build: isExternalBuild.toString(),
     is_embedded: ideTheme.embed.toString(),
     g3_username: devToolsExtensionPoints.username(),
+    ide_launched_feature: ideLaunchedFeature,
     // [PerformanceScreenMetrics]
     ui_duration_micros: screenMetrics is PerformanceScreenMetrics
         ? screenMetrics.uiDuration?.inMicroseconds
@@ -259,6 +265,7 @@ GtagExceptionDevTools _gtagException(
     is_external_build: isExternalBuild.toString(),
     is_embedded: ideTheme.embed.toString(),
     g3_username: devToolsExtensionPoints.username(),
+    ide_launched_feature: ideLaunchedFeature,
     // [PerformanceScreenMetrics]
     ui_duration_micros: screenMetrics is PerformanceScreenMetrics
         ? screenMetrics.uiDuration?.inMicroseconds
@@ -324,6 +331,9 @@ class GtagExceptionDevTools extends GtagException {
     String? is_embedded, // dimension10 Whether devtools is embedded
     String? g3_username, // dimension11 g3 username (null for external users)
 
+    // dimension12 IDE feature that launched Devtools (command, sidebarContent, sidebarToolbar)
+    String? ide_launched_feature,
+
     // Performance screen metrics. See [PerformanceScreenMetrics].
     int? ui_duration_micros, // metric1
     int? raster_duration_micros, // metric2
@@ -370,6 +380,8 @@ class GtagExceptionDevTools extends GtagException {
   external String? get is_embedded;
 
   external String? get g3_username;
+
+  external String? get ide_launched_feature;
 
   // Custom metrics:
   external int? get ui_duration_micros;
@@ -638,6 +650,9 @@ const String devtoolsVersion = devtools.version; //dimension6 n.n.n
 
 String _ideLaunched = ''; // dimension7 IDE launched DevTools (VSCode, CLI, ...)
 
+// dimension12 IDE feature that launched DevTools (command, sidebarContent, sidebarToolbar)
+String _ideLaunchedFeature = '';
+
 String _flutterClientId = ''; // dimension8 Flutter tool clientId.
 
 String get userAppType => _userAppType;
@@ -674,6 +689,12 @@ String get ideLaunched => _ideLaunched;
 
 set ideLaunched(String newIdeLaunched) {
   _ideLaunched = newIdeLaunched;
+}
+
+String get ideLaunchedFeature => _ideLaunchedFeature;
+
+set ideLaunchedFeature(String newIdeLaunchedFeature) {
+  _ideLaunchedFeature = newIdeLaunchedFeature;
 }
 
 String get flutterClientId => _flutterClientId;
@@ -766,6 +787,11 @@ void computeDevToolsQueryParams() {
   final ideValue = ideFromUrl();
   if (ideValue != null) {
     ideLaunched = ideValue;
+  }
+
+  final ideFeature = lookupFromQueryParams('ideFeature');
+  if (ideFeature != null) {
+    ideLaunchedFeature = ideFeature;
   }
 }
 
