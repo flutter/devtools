@@ -115,7 +115,7 @@ final class IsolateManager with DisposerMixin {
         state.handleIsolateLoad(isolate);
       }
     } on SentinelException catch (_) {
-      //Isolate doesn't exist anymore, nothing to do.
+      // Isolate doesn't exist anymore, nothing to do.
       _log.info(
         'isolateRef($isolateRef) ceased to exist while loading isolate state',
       );
