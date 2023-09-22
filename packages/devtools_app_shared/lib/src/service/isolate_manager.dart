@@ -134,12 +134,12 @@ final class IsolateManager with DisposerMixin {
       // but that may not always be a safe assumption.
       _mainIsolate.value ??= event.isolate;
 
-      if (_selectedIsolate.value == null) {
-        _setSelectedIsolate(event.isolate);
-      } else if (_shouldReselectMainIsolate) {
+      if (_shouldReselectMainIsolate && event.isolate?.name == 'main') {
         // Assume the main isolate has come back up after a hot restart, so
         // select it.
         _shouldReselectMainIsolate = false;
+        _setSelectedIsolate(event.isolate);
+      } else if (_selectedIsolate.value == null) {
         _setSelectedIsolate(event.isolate);
       }
     } else if (event.kind == EventKind.kServiceExtensionAdded) {
