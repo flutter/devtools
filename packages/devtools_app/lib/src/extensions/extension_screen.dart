@@ -29,7 +29,7 @@ class ExtensionScreen extends Screen {
         );
 
   final DevToolsExtensionConfig extensionConfig;
-  
+
   @override
   Widget build(BuildContext context) =>
       _ExtensionScreenBody(extensionConfig: extensionConfig);
