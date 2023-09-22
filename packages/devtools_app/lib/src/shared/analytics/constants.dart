@@ -310,8 +310,7 @@ enum MemoryAreas {
 }
 
 enum VsCodeFlutterSidebar {
-  /// Analytics id to track events that come from the Flutter sidebar in VS
-  /// code.
+  /// Analytics id to track events that come from the VS Code Flutter sidebar.
   vsCodeFlutterSidebar,
 
   /// Analytics event that is sent when a device selection occurs from the list
