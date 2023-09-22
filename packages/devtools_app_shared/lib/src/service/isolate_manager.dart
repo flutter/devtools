@@ -7,12 +7,15 @@ import 'dart:core';
 
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
 import '../utils/auto_dispose.dart';
 import '../utils/list.dart';
 import 'isolate_state.dart';
 import 'service_extensions.dart' as extensions;
+
+final _log = Logger('isolate_manager');
 
 @visibleForTesting
 base mixin TestIsolateManager implements IsolateManager {}
@@ -92,23 +95,30 @@ final class IsolateManager with DisposerMixin {
   }
 
   Future<void> _loadIsolateState(IsolateRef isolateRef) async {
-    final service = _service;
-    var isolate = await _service!.getIsolate(isolateRef.id!);
-    if (isolate.runnable == false) {
-      final isolateRunnableCompleter = _isolateRunnableCompleters.putIfAbsent(
-        isolate.id,
-        () => Completer<void>(),
-      );
-      if (!isolateRunnableCompleter.isCompleted) {
-        await isolateRunnableCompleter.future;
-        isolate = await _service!.getIsolate(isolate.id!);
+    try {
+      final service = _service;
+      var isolate = await _service!.getIsolate(isolateRef.id!);
+      if (isolate.runnable == false) {
+        final isolateRunnableCompleter = _isolateRunnableCompleters.putIfAbsent(
+          isolate.id,
+          () => Completer<void>(),
+        );
+        if (!isolateRunnableCompleter.isCompleted) {
+          await isolateRunnableCompleter.future;
+          isolate = await _service!.getIsolate(isolate.id!);
+        }
       }
-    }
-    if (service != _service) return;
-    final state = _isolateStates[isolateRef];
-    if (state != null) {
-      // Isolate might have already been closed.
-      state.handleIsolateLoad(isolate);
+      if (service != _service) return;
+      final state = _isolateStates[isolateRef];
+      if (state != null) {
+        // Isolate might have already been closed.
+        state.handleIsolateLoad(isolate);
+      }
+    } on SentinelException catch (_) {
+      //Isolate doesn't exist anymore, nothing to do.
+      _log.info(
+        'isolateRef($isolateRef) ceased to exist while loading isolate state',
+      );
     }
   }
 
