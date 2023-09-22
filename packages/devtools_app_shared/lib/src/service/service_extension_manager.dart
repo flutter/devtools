@@ -249,10 +249,14 @@ final class ServiceExtensionManager with DisposerMixin {
       // extension. This will restore extension states on the device after a hot
       // restart. [_enabledServiceExtensions] will be empty on page refresh or
       // initial start.
-      return await _callServiceExtension(
-        name,
-        _enabledServiceExtensions[name]!.value,
-      );
+      try {
+        return await _callServiceExtension(
+          name,
+          _enabledServiceExtensions[name]!.value,
+        );
+      } on SentinelException catch (_) {
+        // Service stopped existing while calling, so do nothing.
+      }
     } else {
       // Set any extensions that are already enabled on the device. This will
       // enable extension states in DevTools on page refresh or initial start.
