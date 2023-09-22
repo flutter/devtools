@@ -17,6 +17,7 @@ import 'isolate_manager.dart';
 import 'isolate_state.dart';
 import 'service_extension_manager.dart';
 import 'service_extensions.dart';
+import 'service_utils.dart';
 
 final _log = Logger('service_manager');
 
@@ -256,6 +257,7 @@ class ServiceManager<T extends VmService> {
     serviceExtensionManager.vmServiceClosed();
     isolateManager.handleVmServiceClosed();
     _registeredMethodsForService.clear();
+    _registeredServiceNotifiers.clear();
     setDeviceBusy(false);
 
     _connectedState.value = connectionState;
@@ -413,7 +415,14 @@ class ServiceManager<T extends VmService> {
 
   /// This can throw an [RPCError].
   Future<void> performHotReload() async {
-    await callServiceOnMainIsolate(hotReloadServiceName);
+    if (connectedApp?.isFlutterAppNow ?? false) {
+      await callServiceOnMainIsolate(hotReloadServiceName);
+    } else {
+      final serviceLocal = service;
+      await serviceLocal?.forEachIsolate((isolate) async {
+        await serviceLocal.reloadSources(isolate.id!);
+      });
+    }
   }
 
   /// This can throw an [RPCError].

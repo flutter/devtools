@@ -1,4 +1,10 @@
+# 4.2.0
+
+- Adds `DeeplinkApi.androidAppLinkSettings`, `DeeplinkApi.iosBuildOptions`, and
+  `DeeplinkApi.iosUniversalLinkSettings` endpoints to ServerApi.
+
 # 4.1.0
+
 - Add shared integration test utilities to `package:devtools_shared`. These test
 utilities are exported as part of the existing `devtools_test_utils.dart` library.
 

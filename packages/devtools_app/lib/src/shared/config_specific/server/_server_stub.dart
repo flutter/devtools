@@ -6,6 +6,7 @@
 // ignore_for_file: avoid-unused-parameters
 import 'dart:async';
 
+import 'package:devtools_shared/devtools_deeplink.dart';
 import 'package:devtools_shared/devtools_extensions.dart';
 
 import '../../development_helpers.dart';
@@ -98,6 +99,22 @@ Future<ExtensionEnabledState> extensionEnabledState({
 
 Future<List<String>> requestAndroidBuildVariants(String path) async =>
     const <String>[];
+
+Future<AppLinkSettings> requestAndroidAppLinkSettings(
+  String path, {
+  required String buildVariant,
+}) async =>
+    AppLinkSettings.empty;
+
+Future<XcodeBuildOptions> requestIosBuildOptions(String path) async =>
+    XcodeBuildOptions.empty;
+
+Future<UniversalLinkSettings> requestIosUniversalLinkSettings(
+  String path, {
+  required String configuration,
+  required String target,
+}) async =>
+    UniversalLinkSettings.empty;
 
 void logWarning() {
   throw Exception(unsupportedMessage);

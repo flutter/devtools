@@ -478,7 +478,7 @@ final class ServiceExtensionManager with DisposerMixin {
       final listenable = hasServiceExtension(name);
       late VoidCallback listener;
       listener = () {
-        if (listenable.value || completer.isCompleted) {
+        if (listenable.value || !completer.isCompleted) {
           listenable.removeListener(listener);
           completer.complete(true);
         }
