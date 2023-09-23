@@ -5,12 +5,10 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_extensions/api.dart';
 import 'package:devtools_shared/devtools_extensions.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
-import '../shared/primitives/listenable.dart';
 import '../shared/primitives/utils.dart';
 import '../shared/screen.dart';
 import 'embedded/controller.dart';
