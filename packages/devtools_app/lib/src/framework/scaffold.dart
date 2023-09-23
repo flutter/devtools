@@ -148,9 +148,13 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     } else if (widget.screens[_tabController!.index].screenId != widget.page) {
       // If the page changed (eg. the route was modified by pressing back in the
       // browser), animate to the new one.
-      final newIndex = widget.page == null
+      var newIndex = widget.page == null
           ? 0 // When there's no supplied page, we show the first one.
           : widget.screens.indexWhere((t) => t.screenId == widget.page);
+      // Ensure the returned index is in range, otherwise set to 0.
+      if (newIndex == -1) {
+        newIndex = 0;
+      }
       _tabController!.animateTo(newIndex);
     }
   }
