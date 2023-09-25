@@ -8,7 +8,6 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../devtools_app.dart';
-import '../../shared/feature_flags.dart';
 import '../api/dart_tooling_api.dart';
 import '../api/vs_code_api.dart';
 import 'debug_sessions.dart';
@@ -25,8 +24,6 @@ class VsCodeFlutterPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    assert(FeatureFlags.vsCodeSidebarTooling);
-
     return Column(
       children: [
         FutureBuilder(
