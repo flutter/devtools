@@ -7,6 +7,12 @@ import 'package:meta/meta.dart';
 
 import 'globals.dart';
 
+/// Enable this flag to debug analytics when DevTools is run in debug or profile
+/// mode, otherwise analytics will only be sent in release builds.
+///
+/// `ga.isAnalyticsEnabled()` still must return true for analytics to be sent.
+bool debugAnalytics = true;
+
 /// Whether to build DevTools for conveniently debugging DevTools extensions.
 ///
 /// Turning this flag to [true] allows for debugging the extensions framework
