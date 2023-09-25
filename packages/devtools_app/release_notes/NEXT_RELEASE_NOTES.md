@@ -22,7 +22,8 @@ DevTools extension for your pub package, see the getting started guide for
 * Fixed multiple isolate bug where main isolate was not reselecting on hot restart. - [#6436](https://github.com/flutter/devtools/pull/6436)
 * Show the hot reload button for Dart server apps that support hot reload -
 [#6341](https://github.com/flutter/devtools/pull/6341)
-* Fixed exceptions on hot restart - [#6450](https://github.com/flutter/devtools/pull/6450)
+* Fixed exceptions on hot restart - [#6451](https://github.com/flutter/devtools/pull/6451), [#6450](https://github.com/flutter/devtools/pull/6450)
+
 
 ## Inspector updates
 
