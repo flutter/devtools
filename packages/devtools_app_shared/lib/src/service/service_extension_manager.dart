@@ -255,7 +255,8 @@ final class ServiceExtensionManager with DisposerMixin {
           _enabledServiceExtensions[name]!.value,
         );
       } on SentinelException catch (_) {
-        // Service stopped existing while calling, so do nothing.
+        // Service extension stopped existing while calling, so do nothing.
+        // This typically happens during hot restarts.
       }
     } else {
       // Set any extensions that are already enabled on the device. This will
