@@ -19,10 +19,10 @@ import '../../../devtools.dart' as devtools show version;
 import '../config_specific/server/server.dart' as server;
 import '../globals.dart';
 import '../primitives/url_utils.dart';
-import '../ui/gtags.dart';
 import '../utils.dart';
 import 'analytics_common.dart';
 import 'constants.dart' as gac;
+import 'gtags.dart';
 import 'metrics.dart';
 
 // Dimensions1 AppType values:

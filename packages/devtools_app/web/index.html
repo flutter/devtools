@@ -19,16 +19,18 @@
 
   <!-- Global site tag (gtag.js) - Google Analytics -->
   <script>
-    // The value of GA_DEVTOOLS_PROPERTY here must match the value of the '?id='
+    // The value of DEVTOOLS_GOOGLE_TAG_ID here must match the value of the '?id='
     // query parameter below in the 'https://www.googletagmanager.com' script.
-    const GA_DEVTOOLS_PROPERTY = '384507717'; // Dart DevTools - GA4 Property.
+    // This is the value of the "Dart DevTools - GA4" Google Tag, which is linked
+    // to the DevTools GA4 analytics property.
+    const DEVTOOLS_GOOGLE_TAG_ID = 'G-69MPZE94D5'; // 
 
     function getDevToolsPropertyID() {
-      return GA_DEVTOOLS_PROPERTY;
+      return DEVTOOLS_GOOGLE_TAG_ID;
     }
   </script>
-  <!-- The below URI ?id= must match the GA_DEVTOOLS_PROPERTY above. -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=384507717"></script>
+  <!-- The below URI ?id= must match the DEVTOOLS_GOOGLE_TAG_ID above. -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-69MPZE94D5"></script>
   <script src="devtools_analytics.js"></script>
   <!-- End of DevTools Google Analytics -->
 

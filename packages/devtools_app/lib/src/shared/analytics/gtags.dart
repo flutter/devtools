@@ -10,16 +10,11 @@ library gtags;
 import 'package:flutter/foundation.dart';
 import 'package:js/js.dart';
 
-import '../analytics/analytics.dart' as ga;
+import '../../shared/development_helpers.dart';
+import 'analytics.dart' as ga;
 
 /// For gtags API see https://developers.google.com/gtagjs/reference/api
 /// For debugging install the Chrome Plugin "Google Analytics Debugger".
-
-/// Enable this flag to debug analytics when DevTools is run in debug or profile
-/// mode, otherwise analytics will only be sent in release builds.
-///
-/// `ga.isAnalyticsEnabled()` still must return true for analytics to be sent.
-bool _debugAnalytics = false;
 
 @JS('gtag')
 external void _gTagCommandName(String command, String name, [Object? params]);
@@ -35,7 +30,7 @@ class GTag {
     String eventName, {
     required GtagEvent Function() gaEventProvider,
   }) async {
-    if (_debugAnalytics || (kReleaseMode && await ga.isAnalyticsEnabled())) {
+    if (debugAnalytics || (kReleaseMode && await ga.isAnalyticsEnabled())) {
       _gTagCommandName(_event, eventName, gaEventProvider());
     }
   }
@@ -43,7 +38,7 @@ class GTag {
   static void exception({
     required GtagException Function() gaExceptionProvider,
   }) async {
-    if (_debugAnalytics || (kReleaseMode && await ga.isAnalyticsEnabled())) {
+    if (debugAnalytics || (kReleaseMode && await ga.isAnalyticsEnabled())) {
       _gTagCommandName(_event, _exception, gaExceptionProvider());
     }
   }

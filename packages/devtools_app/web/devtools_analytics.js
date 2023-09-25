@@ -16,7 +16,7 @@ function gtag() {
 function initializeGA() {
   gtag('js', new Date());
   gtag('event', 'config', {
-    'send_to': GA_DEVTOOLS_PROPERTY,
+    'send_to': DEVTOOLS_GOOGLE_TAG_ID,
     'custom_map': {
       // Custom dimensions:
       'dimension1': 'user_app',
@@ -31,7 +31,7 @@ function initializeGA() {
       'dimension10': 'is_embedded',
       'dimension11': 'g3_username',
       'dimension12': 'ide_launched_feature',
-       // Custom metrics:
+      // Custom metrics:
       'metric1': 'ui_duration_micros',
       'metric2': 'raster_duration_micros',
       'metric3': 'shader_compilation_duration_micros',
