@@ -1,6 +1,7 @@
-## 0.0.7-wip
+## 0.0.7
 * Add integration testing.
 * Add `ExtensionManager.unregisterEventHandler` method.
+* Update README.md to include `.pubignore` recommendation.
 
 ## 0.0.6
 * Bump `package:devtools_app_shared` dependency to version ^0.0.4.
