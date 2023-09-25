@@ -82,6 +82,18 @@ class GtagEventDevTools extends GtagEvent {
     String? is_embedded, // dimension10 Whether devtools is embedded
     String? g3_username, // dimension11 g3 username (null for external users)
 
+    // dimension12 IDE feature that launched Devtools
+    // The following is a non-exhaustive list of possible values for this dimension:
+    // "command" - VS Code command palette
+    // "sidebarContent" - the content of the sidebar (e.g. the DevTools dropdown for a debug session)
+    // "sidebarTitle" - the DevTools action in the sidebar title
+    // "touchbar" - MacOS touchbar button
+    // "launchConfiguration" - configured explicitly in launch configuration
+    // "onDebugAutomatic" - configured to always run on debug session start
+    // "onDebugPrompt" - user responded to prompt when running a debug session
+    // "languageStatus" - launched from the language status popout
+    String? ide_launched_feature,
+
     // Performance screen metrics. See [PerformanceScreenMetrics].
     int? ui_duration_micros, // metric1
     int? raster_duration_micros, // metric2
@@ -142,6 +154,8 @@ class GtagEventDevTools extends GtagEvent {
 
   external String? get g3_username;
 
+  external String? get ide_launched_feature;
+
   // Custom metrics:
   external int? get ui_duration_micros;
 
@@ -195,6 +209,7 @@ GtagEventDevTools _gtagEvent({
     is_external_build: isExternalBuild.toString(),
     is_embedded: ideTheme.embed.toString(),
     g3_username: devToolsExtensionPoints.username(),
+    ide_launched_feature: ideLaunchedFeature,
     // [PerformanceScreenMetrics]
     ui_duration_micros: screenMetrics is PerformanceScreenMetrics
         ? screenMetrics.uiDuration?.inMicroseconds
@@ -259,6 +274,7 @@ GtagExceptionDevTools _gtagException(
     is_external_build: isExternalBuild.toString(),
     is_embedded: ideTheme.embed.toString(),
     g3_username: devToolsExtensionPoints.username(),
+    ide_launched_feature: ideLaunchedFeature,
     // [PerformanceScreenMetrics]
     ui_duration_micros: screenMetrics is PerformanceScreenMetrics
         ? screenMetrics.uiDuration?.inMicroseconds
@@ -324,6 +340,18 @@ class GtagExceptionDevTools extends GtagException {
     String? is_embedded, // dimension10 Whether devtools is embedded
     String? g3_username, // dimension11 g3 username (null for external users)
 
+    // dimension12 IDE feature that launched Devtools
+    // The following is a non-exhaustive list of possible values for this dimension:
+    // "command" - VS Code command palette
+    // "sidebarContent" - the content of the sidebar (e.g. the DevTools dropdown for a debug session)
+    // "sidebarTitle" - the DevTools action in the sidebar title
+    // "touchbar" - MacOS touchbar button
+    // "launchConfiguration" - configured explicitly in launch configuration
+    // "onDebugAutomatic" - configured to always run on debug session start
+    // "onDebugPrompt" - user responded to prompt when running a debug session
+    // "languageStatus" - launched from the language status popout
+    String? ide_launched_feature,
+
     // Performance screen metrics. See [PerformanceScreenMetrics].
     int? ui_duration_micros, // metric1
     int? raster_duration_micros, // metric2
@@ -370,6 +398,8 @@ class GtagExceptionDevTools extends GtagException {
   external String? get is_embedded;
 
   external String? get g3_username;
+
+  external String? get ide_launched_feature;
 
   // Custom metrics:
   external int? get ui_duration_micros;
@@ -572,6 +602,7 @@ void _timing(
   );
 }
 
+/// Sends an analytics event to signal that something in DevTools was selected.
 void select(
   String screenName,
   String selectedItem, {
@@ -593,6 +624,32 @@ void select(
       event_label: selectedItem,
       value: value,
       non_interaction: nonInteraction,
+      send_to: gaDevToolsPropertyId(),
+      screenMetrics:
+          screenMetricsProvider != null ? screenMetricsProvider() : null,
+    ),
+  );
+}
+
+/// Sends an analytics event to signal that something in DevTools was viewed.
+///
+/// Impression events should not signal user interaction like [select].
+void impression(
+  String screenName,
+  String item, {
+  ScreenAnalyticsMetrics Function()? screenMetricsProvider,
+}) {
+  _log.fine(
+    'Event: impression('
+    'screenName:$screenName, '
+    'item:$item)',
+  );
+  GTag.event(
+    screenName,
+    gaEventProvider: () => _gtagEvent(
+      event_category: gac.impressionEvent,
+      event_label: item,
+      non_interaction: true,
       send_to: gaDevToolsPropertyId(),
       screenMetrics:
           screenMetricsProvider != null ? screenMetricsProvider() : null,
@@ -638,6 +695,9 @@ const String devtoolsVersion = devtools.version; //dimension6 n.n.n
 
 String _ideLaunched = ''; // dimension7 IDE launched DevTools (VSCode, CLI, ...)
 
+// dimension12 IDE feature that launched DevTools
+String _ideLaunchedFeature = '';
+
 String _flutterClientId = ''; // dimension8 Flutter tool clientId.
 
 String get userAppType => _userAppType;
@@ -674,6 +734,12 @@ String get ideLaunched => _ideLaunched;
 
 set ideLaunched(String newIdeLaunched) {
   _ideLaunched = newIdeLaunched;
+}
+
+String get ideLaunchedFeature => _ideLaunchedFeature;
+
+set ideLaunchedFeature(String newIdeLaunchedFeature) {
+  _ideLaunchedFeature = newIdeLaunchedFeature;
 }
 
 String get flutterClientId => _flutterClientId;
@@ -766,6 +832,11 @@ void computeDevToolsQueryParams() {
   final ideValue = ideFromUrl();
   if (ideValue != null) {
     ideLaunched = ideValue;
+  }
+
+  final ideFeature = lookupFromQueryParams('ideFeature');
+  if (ideFeature != null) {
+    ideLaunchedFeature = ideFeature;
   }
 }
 

@@ -142,7 +142,7 @@ class ExtensionSetting extends StatelessWidget {
         onPressed: () {
           ga.select(
             gac.DevToolsExtensionEvents.extensionSettingsId.name,
-            gac.DevToolsExtensionEvents.extensionEnable(
+            gac.DevToolsExtensionEvents.extensionEnableManual(
               extension.name.toLowerCase(),
             ),
           );
@@ -161,7 +161,7 @@ class ExtensionSetting extends StatelessWidget {
         onPressed: () {
           ga.select(
             gac.DevToolsExtensionEvents.extensionSettingsId.name,
-            gac.DevToolsExtensionEvents.extensionDisable(
+            gac.DevToolsExtensionEvents.extensionDisableManual(
               extension.name.toLowerCase(),
             ),
           );

@@ -5,12 +5,12 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_extensions/api.dart';
 import 'package:devtools_shared/devtools_extensions.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../shared/analytics/analytics.dart' as ga;
+import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
-import '../shared/primitives/listenable.dart';
 import '../shared/primitives/utils.dart';
 import '../shared/screen.dart';
 import 'embedded/controller.dart';
@@ -29,10 +29,6 @@ class ExtensionScreen extends Screen {
         );
 
   final DevToolsExtensionConfig extensionConfig;
-
-  @override
-  ValueListenable<bool> get showIsolateSelector =>
-      const FixedValueListenable<bool>(true);
 
   @override
   Widget build(BuildContext context) =>
@@ -54,6 +50,15 @@ class _ExtensionScreenBodyState extends State<_ExtensionScreenBody> {
   @override
   void initState() {
     super.initState();
+    _init();
+  }
+
+  void _init() {
+    ga.screen(
+      gac.DevToolsExtensionEvents.extensionScreenName(
+        widget.extensionConfig.name,
+      ),
+    );
     extensionController =
         createEmbeddedExtensionController(widget.extensionConfig)..init();
   }
@@ -69,8 +74,7 @@ class _ExtensionScreenBodyState extends State<_ExtensionScreenBody> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.extensionConfig != widget.extensionConfig) {
       extensionController?.dispose();
-      extensionController =
-          createEmbeddedExtensionController(widget.extensionConfig)..init();
+      _init();
     }
   }
 

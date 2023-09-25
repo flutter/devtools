@@ -4,10 +4,13 @@
 
 import '../screen.dart';
 
+part 'constants/_extension_constants.dart';
+
 // Type of events (event_category):
 const screenViewEvent = 'screen'; // Active screen (tab selected).
 const selectEvent = 'select'; // User selected something.
 const timingEvent = 'timing'; // Timed operation.
+const impressionEvent = 'impression'; // Something was viewed.
 
 // DevTools GA screenNames:
 // These screen ids must match the `screenId` for each respective subclass of
@@ -40,25 +43,6 @@ const feedbackLink = 'feedback';
 const feedbackButton = 'feedbackButton';
 const contributingLink = 'contributing';
 const discordLink = 'discord';
-
-/// Extension screens UX actions.
-enum DevToolsExtensionEvents {
-  /// Analytics id to track events that come from an extension screen.
-  extensionScreenId,
-
-  /// Analytics id to track events that come from the extension settings menu.
-  extensionSettingsId,
-
-  /// Analytics id for the setting to only show DevTools tabs for extensions
-  /// that have been manually opted into.
-  showOnlyEnabledExtensionsSetting;
-
-  static String extensionFeedback(String name) => 'extensionFeedback-$name';
-  static String extensionEnable(String name) => 'extensionEnable-$name';
-  static String extensionDisable(String name) => 'extensionDisable-$name';
-  static String extensionForceReload(String name) =>
-      'extensionForceReload-$name';
-}
 
 // Inspector UX actions:
 const refresh = 'refresh';
@@ -307,4 +291,20 @@ enum MemoryAreas {
   const MemoryAreas(this.name);
 
   final String name;
+}
+
+enum VsCodeFlutterSidebar {
+  /// Analytics id to track events that come from the VS Code Flutter sidebar.
+  vsCodeFlutterSidebar,
+
+  /// Analytics event that is sent when a device selection occurs from the list
+  /// of available devices in the sidebar.
+  changeSelectedDevice;
+
+  static String get id => VsCodeFlutterSidebar.vsCodeFlutterSidebar.name;
+
+  /// Analytics event that is sent when a DevTools screen is opened from the
+  /// actions toolbar for a debug session.
+  static String openDevToolsScreen(String screen) =>
+      'openDevToolsScreen-$screen';
 }

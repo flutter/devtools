@@ -7,6 +7,8 @@ import 'dart:async';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
+import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/analytics/constants.dart' as gac;
 import '../api/vs_code_api.dart';
 
 class Devices extends StatelessWidget {
@@ -79,7 +81,13 @@ class Devices extends StatelessWidget {
               device.name,
               style: theme.regularTextStyle.copyWith(color: foregroundColor),
             ),
-            onPressed: () => unawaited(api.selectDevice(device.id)),
+            onPressed: () {
+              ga.select(
+                gac.VsCodeFlutterSidebar.id,
+                gac.VsCodeFlutterSidebar.changeSelectedDevice.name,
+              );
+              unawaited(api.selectDevice(device.id));
+            },
           ),
         ),
       ],

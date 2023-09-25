@@ -4,6 +4,9 @@
 
 import 'package:flutter/material.dart';
 
+import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/analytics/constants.dart' as gac;
+
 import '_view_desktop.dart' if (dart.library.html) '_view_web.dart';
 import 'controller.dart';
 
@@ -14,14 +17,30 @@ import 'controller.dart';
 ///
 /// When DevTools is run on Desktop for development, this widget displays a
 /// placeholder, since Flutter Desktop does not currently support web views.
-class EmbeddedExtensionView extends StatelessWidget {
+class EmbeddedExtensionView extends StatefulWidget {
   const EmbeddedExtensionView({Key? key, required this.controller})
       : super(key: key);
 
   final EmbeddedExtensionController controller;
 
   @override
+  State<EmbeddedExtensionView> createState() => _EmbeddedExtensionViewState();
+}
+
+class _EmbeddedExtensionViewState extends State<EmbeddedExtensionView> {
+  @override
+  void initState() {
+    super.initState();
+    ga.impression(
+      gac.DevToolsExtensionEvents.extensionScreenName(
+        widget.controller.extensionConfig.name,
+      ),
+      gac.DevToolsExtensionEvents.embeddedExtension.name,
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return EmbeddedExtension(controller: controller);
+    return EmbeddedExtension(controller: widget.controller);
   }
 }

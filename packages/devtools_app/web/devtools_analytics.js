@@ -30,6 +30,7 @@ function initializeGA() {
       'dimension9': 'is_external_build',
       'dimension10': 'is_embedded',
       'dimension11': 'g3_username',
+      'dimension12': 'ide_launched_feature',
        // Custom metrics:
       'metric1': 'ui_duration_micros',
       'metric2': 'raster_duration_micros',
