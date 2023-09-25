@@ -35,6 +35,7 @@ abstract class InspectorServiceBase extends DisposableController
     required this.clientInspectorName,
     required this.serviceExtensionPrefix,
     required String inspectorLibraryUri,
+    ValueListenable<IsolateRef?>? evalIsolate,
   })  : assert(serviceConnection.serviceManager.connectedAppInitialized),
         assert(serviceConnection.serviceManager.service != null),
         clients = {},
@@ -42,6 +43,7 @@ abstract class InspectorServiceBase extends DisposableController
           inspectorLibraryUri,
           serviceConnection.serviceManager.service!,
           serviceManager: serviceConnection.serviceManager,
+          isolate: evalIsolate,
         ) {
     _lastMainIsolate =
         serviceConnection.serviceManager.isolateManager.mainIsolate.value;
@@ -194,6 +196,8 @@ class InspectorService extends InspectorServiceBase {
           clientInspectorName: 'WidgetInspectorService',
           serviceExtensionPrefix: inspectorExtensionPrefix,
           inspectorLibraryUri: inspectorLibraryUri,
+          evalIsolate:
+              serviceConnection.serviceManager.isolateManager.mainIsolate,
         ) {
     // Note: We do not need to listen to event history here because the
     // inspector uses a separate API to get the current inspector selection.
