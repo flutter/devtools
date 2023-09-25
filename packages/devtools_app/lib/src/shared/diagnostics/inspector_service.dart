@@ -35,15 +35,16 @@ abstract class InspectorServiceBase extends DisposableController
     required this.clientInspectorName,
     required this.serviceExtensionPrefix,
     required String inspectorLibraryUri,
+    IsolateRef? evalIsolate,
   })  : assert(serviceConnection.serviceManager.connectedAppInitialized),
         assert(serviceConnection.serviceManager.service != null),
-        clients = {},
-        inspectorLibrary = EvalOnDartLibrary(
-          inspectorLibraryUri,
-          serviceConnection.serviceManager.service!,
-          serviceManager: serviceConnection.serviceManager,
-          isolate: serviceConnection.serviceManager.isolateManager.mainIsolate,
-        ) {
+        clients = {} {
+    inspectorLibrary = EvalOnDartLibrary(
+      inspectorLibraryUri,
+      serviceConnection.serviceManager.service!,
+      serviceManager: serviceConnection.serviceManager,
+      isolate: ValueNotifier<IsolateRef?>(evalIsolate),
+    );
     _lastMainIsolate =
         serviceConnection.serviceManager.isolateManager.mainIsolate.value;
     addAutoDisposeListener(
@@ -72,7 +73,7 @@ abstract class InspectorServiceBase extends DisposableController
   final String serviceExtensionPrefix;
 
   final Set<InspectorServiceClient> clients;
-  final EvalOnDartLibrary inspectorLibrary;
+  late final EvalOnDartLibrary inspectorLibrary;
   IsolateRef? _lastMainIsolate;
 
   /// Reference to the isolate running the inspector that [InspectorServiceBase]
@@ -190,11 +191,12 @@ abstract class InspectorServiceBase extends DisposableController
 /// Manages communication between inspector code running in the Flutter app and
 /// the inspector.
 class InspectorService extends InspectorServiceBase {
-  InspectorService()
+  InspectorService(IsolateRef? evalIsolate)
       : super(
           clientInspectorName: 'WidgetInspectorService',
           serviceExtensionPrefix: inspectorExtensionPrefix,
           inspectorLibraryUri: inspectorLibraryUri,
+          evalIsolate: evalIsolate,
         ) {
     // Note: We do not need to listen to event history here because the
     // inspector uses a separate API to get the current inspector selection.
@@ -210,7 +212,6 @@ class InspectorService extends InspectorServiceBase {
 
   ValueListenable<List<String>> get rootDirectories => _rootDirectories;
   final ValueNotifier<List<String>> _rootDirectories = ValueNotifier([]);
-
   @visibleForTesting
   Set<String> get rootPackages => _rootPackages;
   late Set<String> _rootPackages;
