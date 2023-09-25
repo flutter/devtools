@@ -35,7 +35,7 @@ abstract class InspectorServiceBase extends DisposableController
     required this.clientInspectorName,
     required this.serviceExtensionPrefix,
     required String inspectorLibraryUri,
-    IsolateRef? evalIsolate,
+    ValueListenable<IsolateRef?>? evalIsolate,
   })  : assert(serviceConnection.serviceManager.connectedAppInitialized),
         assert(serviceConnection.serviceManager.service != null),
         clients = {} {
@@ -43,7 +43,7 @@ abstract class InspectorServiceBase extends DisposableController
       inspectorLibraryUri,
       serviceConnection.serviceManager.service!,
       serviceManager: serviceConnection.serviceManager,
-      isolate: ValueNotifier<IsolateRef?>(evalIsolate),
+      isolate: evalIsolate,
     );
     _lastMainIsolate =
         serviceConnection.serviceManager.isolateManager.mainIsolate.value;
@@ -191,7 +191,7 @@ abstract class InspectorServiceBase extends DisposableController
 /// Manages communication between inspector code running in the Flutter app and
 /// the inspector.
 class InspectorService extends InspectorServiceBase {
-  InspectorService(IsolateRef? evalIsolate)
+  InspectorService({ValueListenable<IsolateRef?>? evalIsolate})
       : super(
           clientInspectorName: 'WidgetInspectorService',
           serviceExtensionPrefix: inspectorExtensionPrefix,

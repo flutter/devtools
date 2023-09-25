@@ -53,7 +53,8 @@ class ExternalDevToolsEnvironmentParameters
   InspectorServiceBase? inspectorServiceProvider() =>
       serviceConnection.serviceManager.connectedApp!.isFlutterAppNow == true
           ? InspectorService(
-              serviceConnection.serviceManager.isolateManager.mainIsolate.value,
+              evalIsolate:
+                  serviceConnection.serviceManager.isolateManager.mainIsolate,
             )
           : null;
 
