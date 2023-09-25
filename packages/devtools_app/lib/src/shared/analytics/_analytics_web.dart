@@ -602,6 +602,7 @@ void _timing(
   );
 }
 
+/// Sends an analytics event to signal that something in DevTools was selected.
 void select(
   String screenName,
   String selectedItem, {
@@ -623,6 +624,32 @@ void select(
       event_label: selectedItem,
       value: value,
       non_interaction: nonInteraction,
+      send_to: gaDevToolsPropertyId(),
+      screenMetrics:
+          screenMetricsProvider != null ? screenMetricsProvider() : null,
+    ),
+  );
+}
+
+/// Sends an analytics event to signal that something in DevTools was viewed.
+///
+/// Impression events should not signal user interaction like [select].
+void impression(
+  String screenName,
+  String item, {
+  ScreenAnalyticsMetrics Function()? screenMetricsProvider,
+}) {
+  _log.fine(
+    'Event: impression('
+    'screenName:$screenName, '
+    'item:$item)',
+  );
+  GTag.event(
+    screenName,
+    gaEventProvider: () => _gtagEvent(
+      event_category: gac.impressionEvent,
+      event_label: item,
+      non_interaction: true,
       send_to: gaDevToolsPropertyId(),
       screenMetrics:
           screenMetricsProvider != null ? screenMetricsProvider() : null,
