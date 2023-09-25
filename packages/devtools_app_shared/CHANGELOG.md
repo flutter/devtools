@@ -1,6 +1,7 @@
 ## 0.0.5-wip
 * Fix bug where registered services were not getting cleared on app disconnect.
 * Fix a bug with the logic to wait for a service extension's availability.
+* Fixed an exception on hot restart.
 
 ## 0.0.4
 * Add `useDarkThemeAsDefault` constant for defining the default theme behavior.
