@@ -38,13 +38,13 @@ abstract class InspectorServiceBase extends DisposableController
     ValueListenable<IsolateRef?>? evalIsolate,
   })  : assert(serviceConnection.serviceManager.connectedAppInitialized),
         assert(serviceConnection.serviceManager.service != null),
-        clients = {} {
-    inspectorLibrary = EvalOnDartLibrary(
-      inspectorLibraryUri,
-      serviceConnection.serviceManager.service!,
-      serviceManager: serviceConnection.serviceManager,
-      isolate: evalIsolate,
-    );
+        clients = {},
+        inspectorLibrary = EvalOnDartLibrary(
+          inspectorLibraryUri,
+          serviceConnection.serviceManager.service!,
+          serviceManager: serviceConnection.serviceManager,
+          isolate: evalIsolate,
+        ) {
     _lastMainIsolate =
         serviceConnection.serviceManager.isolateManager.mainIsolate.value;
     addAutoDisposeListener(
@@ -73,7 +73,7 @@ abstract class InspectorServiceBase extends DisposableController
   final String serviceExtensionPrefix;
 
   final Set<InspectorServiceClient> clients;
-  late final EvalOnDartLibrary inspectorLibrary;
+  final EvalOnDartLibrary inspectorLibrary;
   IsolateRef? _lastMainIsolate;
 
   /// Reference to the isolate running the inspector that [InspectorServiceBase]
@@ -191,12 +191,13 @@ abstract class InspectorServiceBase extends DisposableController
 /// Manages communication between inspector code running in the Flutter app and
 /// the inspector.
 class InspectorService extends InspectorServiceBase {
-  InspectorService({ValueListenable<IsolateRef?>? evalIsolate})
+  InspectorService()
       : super(
           clientInspectorName: 'WidgetInspectorService',
           serviceExtensionPrefix: inspectorExtensionPrefix,
           inspectorLibraryUri: inspectorLibraryUri,
-          evalIsolate: evalIsolate,
+          evalIsolate:
+              serviceConnection.serviceManager.isolateManager.mainIsolate,
         ) {
     // Note: We do not need to listen to event history here because the
     // inspector uses a separate API to get the current inspector selection.

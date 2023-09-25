@@ -52,10 +52,7 @@ class ExternalDevToolsEnvironmentParameters
   @override
   InspectorServiceBase? inspectorServiceProvider() =>
       serviceConnection.serviceManager.connectedApp!.isFlutterAppNow == true
-          ? InspectorService(
-              evalIsolate:
-                  serviceConnection.serviceManager.isolateManager.mainIsolate,
-            )
+          ? InspectorService()
           : null;
 
   @override
