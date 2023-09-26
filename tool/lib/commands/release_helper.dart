@@ -116,7 +116,7 @@ class ReleaseHelperCommand extends Command {
           '--type',
           'release',
         ]),
-        workingDirectory: pathFromRepoRoot("tool"),
+        workingDirectory: pathFromRepoRoot("tool/bin"),
       );
 
       final getNewVersionResult = await processManager.runProcess(
