@@ -120,10 +120,13 @@ class ReleaseHelperCommand extends Command {
       );
 
       final getNewVersionResult = await processManager.runProcess(
-        CliCommand.from('devtools_tool', [
+        CliCommand.from('dart', [
+          'run',
+          'devtools_tool.dart',
           'update-version',
           'current-version',
         ]),
+        workingDirectory: pathFromRepoRoot("tool/bin"),
       );
 
       final newVersion = getNewVersionResult;
