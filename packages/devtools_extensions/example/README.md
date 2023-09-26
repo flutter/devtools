@@ -15,14 +15,14 @@ This example will show you how to:
 1. Structure your package for optimal extension development and publishing
     ```
     foo/  # formerly the repository root of your pub package
-    packages/
-        foo/  # your pub package
-        extension/
-            devtools/
-            build/
-                ...  # pre-compiled output of foo_devtools_extension
-            config.yaml
-        foo_devtools_extension/  # source code for your extension
+        packages/
+            foo/  # your pub package
+            extension/
+                devtools/
+                build/
+                    ...  # pre-compiled output of foo_devtools_extension
+                config.yaml
+            foo_devtools_extension/  # source code for your extension
     ```
 2. Configure your extension using the `foo/extension/devtools/config.yaml` file
     ```yaml
