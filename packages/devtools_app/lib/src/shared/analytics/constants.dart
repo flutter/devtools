@@ -5,6 +5,7 @@
 import '../screen.dart';
 
 part 'constants/_extension_constants.dart';
+part 'constants/_vs_code_sidebar_constants.dart';
 
 // Type of events (event_category):
 const screenViewEvent = 'screen'; // Active screen (tab selected).
