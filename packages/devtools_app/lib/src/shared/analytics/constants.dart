@@ -4,6 +4,7 @@
 
 import '../screen.dart';
 
+part 'constants/_cpu_profiler_constants.dart';
 part 'constants/_extension_constants.dart';
 
 // Type of events (event_category):
@@ -117,19 +118,6 @@ enum PerformanceDocs {
   shaderCompilationDocs,
   shaderCompilationDocsTooltipLink,
   impellerWikiLink,
-}
-
-enum CpuProfilerEvents {
-  profileGranularity,
-  loadAllCpuSamples,
-  profileAppStartUp,
-  cpuProfileFlameChartHelp,
-  cpuProfileProcessingTime,
-  cpuProfileDisplayTreeGuidelines,
-}
-
-enum CpuProfilerDocs {
-  profileGranularityDocs,
 }
 
 // Debugger UX actions:
