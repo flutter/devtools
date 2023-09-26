@@ -4,6 +4,7 @@
 
 import '../screen.dart';
 
+part 'constants/_cpu_profiler_constants.dart';
 part 'constants/_extension_constants.dart';
 part 'constants/_vs_code_sidebar_constants.dart';
 
@@ -118,19 +119,6 @@ enum PerformanceDocs {
   shaderCompilationDocs,
   shaderCompilationDocsTooltipLink,
   impellerWikiLink,
-}
-
-enum CpuProfilerEvents {
-  profileGranularity,
-  loadAllCpuSamples,
-  profileAppStartUp,
-  cpuProfileFlameChartHelp,
-  cpuProfileProcessingTime,
-  cpuProfileDisplayTreeGuidelines,
-}
-
-enum CpuProfilerDocs {
-  profileGranularityDocs,
 }
 
 // Debugger UX actions:
