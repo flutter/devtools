@@ -281,19 +281,3 @@ enum MemoryAreas {
 
   final String name;
 }
-
-enum VsCodeFlutterSidebar {
-  /// Analytics id to track events that come from the VS Code Flutter sidebar.
-  vsCodeFlutterSidebar,
-
-  /// Analytics event that is sent when a device selection occurs from the list
-  /// of available devices in the sidebar.
-  changeSelectedDevice;
-
-  static String get id => VsCodeFlutterSidebar.vsCodeFlutterSidebar.name;
-
-  /// Analytics event that is sent when a DevTools screen is opened from the
-  /// actions toolbar for a debug session.
-  static String openDevToolsScreen(String screen) =>
-      'openDevToolsScreen-$screen';
-}
