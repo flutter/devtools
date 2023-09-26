@@ -86,7 +86,7 @@ flutter create --template app --platforms web foo_package_devtools_extension
 
 In `foo_package_devtools_extension/pubspec.yaml`, add a dependency on `devtools_extensions`:
 ```yaml
-devtools_extensions: ^0.0.7
+devtools_extensions: ^0.0.8
 ```
 
 In `lib/main.dart`, place a `DevToolsExtension` widget at the root of your app:
