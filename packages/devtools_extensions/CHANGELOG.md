@@ -1,3 +1,7 @@
+## 0.0.8
+* Fix the `build_and_copy` command so that it succeeds when there is not
+an existing `extension/devtools/build` directory.
+
 ## 0.0.7
 * Update the `build_and_copy` command to stop copying unnecessary files.
 * Add `ExtensionManager.unregisterEventHandler` method.

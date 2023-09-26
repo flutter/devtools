@@ -96,8 +96,13 @@ class BuildExtensionCommand extends Command {
     _log('Replacing the existing extension build with the new one...');
     final sourceBuildPath = path.join(source, 'build', 'web');
     final destinationBuildPath = path.join(dest, 'build');
-    Directory(destinationBuildPath)..deleteSync(recursive: true);
+
+    final destinationDirectory = Directory(destinationBuildPath);
+    if (destinationDirectory.existsSync()) {
+      destinationDirectory.deleteSync(recursive: true);
+    }
     Directory(destinationBuildPath)..createSync(recursive: true);
+
     await copyPath(
       sourceBuildPath,
       destinationBuildPath,
