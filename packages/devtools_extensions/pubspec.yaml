@@ -14,7 +14,7 @@ executables:
 dependencies:
   args: ^2.4.2
   devtools_shared: ^4.0.1
-  devtools_app_shared: ^0.0.4
+  devtools_app_shared: ^0.0.5
   flutter:
     sdk: flutter
   io: ^1.0.4
