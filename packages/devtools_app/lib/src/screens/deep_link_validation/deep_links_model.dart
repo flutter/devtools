@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Contains all data relevant to a deep link.
-///
 import 'package:flutter/material.dart';
 
 import '../../shared/primitives/utils.dart';
@@ -15,6 +13,7 @@ import '../../shared/utils.dart';
 
 const kDeeplinkTableCellDefaultWidth = 200.0;
 
+/// Contains all data relevant to a deep link.
 class LinkData with SearchableDataMixin {
   LinkData({
     required this.domain,
@@ -95,7 +94,9 @@ class DomainColumn extends ColumnData<LinkData>
     VoidCallback? onPressed,
   }) {
     return _ErrorAwareText(
-        isError: dataObject.domainError, text: dataObject.domain);
+      isError: dataObject.domainError,
+      text: dataObject.domain,
+    );
   }
 }
 
@@ -121,7 +122,9 @@ class PathColumn extends ColumnData<LinkData>
     VoidCallback? onPressed,
   }) {
     return _ErrorAwareText(
-        isError: dataObject.pathError, text: dataObject.path);
+      isError: dataObject.pathError,
+      text: dataObject.path,
+    );
   }
 }
 
@@ -180,9 +183,9 @@ class StatusColumn extends ColumnData<LinkData>
         style: TextStyle(color: Theme.of(context).colorScheme.error),
       );
     } else {
-      return const Text(
+      return Text(
         'No issues found',
-        style: TextStyle(color: Color.fromARGB(255, 156, 233, 195)),
+        style: TextStyle(color: Theme.of(context).colorScheme.green),
         overflow: TextOverflow.ellipsis,
       );
     }

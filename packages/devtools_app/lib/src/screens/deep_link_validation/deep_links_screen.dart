@@ -11,6 +11,7 @@ import '../../shared/screen.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
 import '../../shared/theme.dart';
+import '../../shared/ui/search.dart';
 import '../../shared/utils.dart';
 import 'deep_links_controller.dart';
 import 'deep_links_model.dart';
@@ -73,18 +74,20 @@ class _DeepLinkPageState extends State<DeepLinkPage>
               'All deep links',
               style: Theme.of(context).textTheme.bodyLarge,
             ),
-            actions: [SearchBar(
-                leading: const Icon(Icons.search),
-                hintText: 'Search a URL, domain or path',
-                onChanged: (value) {
-                  controller.searchContent = value;
-                },
-                constraints: BoxConstraints.tight(
-                  Size(wideSearchFieldWidth, defaultTextFieldHeight),
+            actions: [
+              SizedBox(
+                width: wideSearchFieldWidth,
+                child: DevToolsClearableTextField(
+                  labelText: '',
+                  hintText: 'Search a URL, domain or path',
+                  prefixIcon: const Icon(Icons.search),
+                  onChanged: (value) {
+                    controller.searchContent = value;
+                  },
                 ),
-              ),],
+              ),
+            ],
           ),
-  
           const SizedBox(height: denseSpacing),
           const TabBar(
             tabs: [
