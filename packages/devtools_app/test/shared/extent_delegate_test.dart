@@ -11,12 +11,13 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../test_infra/utils/extent_delegate_utils.dart';
 import '../test_infra/utils/rendering_tester.dart';
+import '../test_infra/utils/test_utils.dart';
 
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
   group('RenderSliverFixedExtentDelgate', () {
     group('extentDelegate', () {
-      test('itemExtent', () {
+      testWithFlutterTestRegistry('itemExtent', () {
         final extents = [100.0, 200.0, 50.0, 100.0];
         final extentDelegate = FixedExtentDelegate(
           // Create items with increasing extents.
@@ -34,7 +35,7 @@ void main() {
         expect(extentDelegate.itemExtent(1), 500.0);
       });
 
-      test('getMinChildIndexForScrollOffset', () {
+      testWithFlutterTestRegistry('getMinChildIndexForScrollOffset', () {
         final extents = [100.0, 200.0, 50.0, 100.0];
         final extentDelegate = FixedExtentDelegate(
           // Create items with increasing extents.
@@ -59,7 +60,7 @@ void main() {
       });
 
       try {
-        test('getMaxChildIndexForScrollOffset', () {
+        testWithFlutterTestRegistry('getMaxChildIndexForScrollOffset', () {
           final extents = [100.0, 200.0, 50.0, 100.0];
           final extentDelegate = FixedExtentDelegate(
             // Create items with increasing extents.
@@ -96,7 +97,7 @@ void main() {
         print(s);
       }
 
-      test('zeroHeightChildren', () {
+      testWithFlutterTestRegistry('zeroHeightChildren', () {
         // Zero height children could cause problems for the logic to find the
         // min and max matching children.
         final extents = [100.0, 200.0, 0.0, 0.0, 0.0, 100.0];
@@ -117,7 +118,7 @@ void main() {
       });
     });
 
-    test('layout test - rounding error', () {
+    testWithFlutterTestRegistry('layout test - rounding error', () {
       // These heights are ignored as the FixedExtentDelegate determines the
       // size.
       final List<RenderBox> children = <RenderBox>[

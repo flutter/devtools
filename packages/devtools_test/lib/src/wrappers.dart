@@ -8,6 +8,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:meta/meta.dart';
 import 'package:provider/provider.dart';
 
 /// The RouterDelegate must use the same NavigatorKey when building in order
@@ -169,6 +170,7 @@ void testWidgetsWithContext(
 }
 
 /// Runs a test with the size of the app window under test to [windowSize].
+@isTest
 void testWidgetsWithWindowSize(
   String name,
   Size windowSize,
