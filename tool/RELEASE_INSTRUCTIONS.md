@@ -34,8 +34,8 @@ Make sure:
       - add the following to your `~/.bashrc` file.
         - `export PATH=$PATH:<DEVTOOLS_DIR>/tool/bin`
           > [!NOTE]  
-          > Replace `<DEVTOOLS_DIR>` with the local path to your > DevTools
-          > repo.
+          > Replace `<DEVTOOLS_DIR>` with the local path to your DevTools
+          > repo path.
   - For Windows Users
     - Ensure the `devtools_tool` executable has been globally activated:
       - `flutter pub global activate --source path tool`
