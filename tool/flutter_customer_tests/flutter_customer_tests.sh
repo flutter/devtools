@@ -2,17 +2,17 @@
 # https://github.com/flutter/tests
 # This is executed as a pre-submit check for every PR in flutter/flutter
 
-# Generate mocks for tests
-# flutter/tests does not allow output from execution.
-./tool/generate_code.sh >> output.txt
+# At this point we can expect that mocks have already been generated
+# from the setup steps in
+# https://github.com/flutter/tests/blob/main/registry/flutter_devtools.test
 
 # Test all tests in devtools_app_shared
-# flutter pub get
-# cd packages/devtools_app_shared
-# flutter test test/
+cd packages/devtools_app_shared
+flutter pub get
+flutter test test/
 
 # Test only tests in devtools_app with the 'flutterTestRegistry' tag
-cd packages/devtools_app
+cd ../devtools_app
 flutter pub get
 flutter test test/ -t flutterTestRegistry
 
