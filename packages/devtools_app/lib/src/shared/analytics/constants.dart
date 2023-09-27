@@ -4,7 +4,11 @@
 
 import '../screen.dart';
 
+part 'constants/_cpu_profiler_constants.dart';
 part 'constants/_extension_constants.dart';
+part 'constants/_memory_constants.dart';
+part 'constants/_performance_constants.dart';
+part 'constants/_vs_code_sidebar_constants.dart';
 
 // Type of events (event_category):
 const screenViewEvent = 'screen'; // Active screen (tab selected).
@@ -71,65 +75,6 @@ enum HomeScreenEvents {
   connectToApp,
   connectToNewApp,
   viewVmFlags,
-}
-
-enum PerformanceEvents {
-  refreshTimelineEvents,
-  performanceOverlay,
-  timelineFlameChartHelp,
-  framesChartVisibility,
-  selectFlutterFrame,
-  traceEventProcessingTime,
-  trackRebuilds,
-  trackUserCreatedWidgetBuilds,
-  trackPaints,
-  trackLayouts,
-  enhanceTracingButtonSmall,
-  disableClipLayers,
-  disableOpacityLayers,
-  disablePhysicalShapeLayers,
-  collectRasterStats,
-  clearRasterStats,
-  fullScreenLayerImage,
-  clearRebuildStats,
-  perfettoModeTraceEventProcessingTime('traceEventProcessingTime-perfettoMode'),
-  perfettoLoadTrace,
-  perfettoScrollToTimeRange,
-  perfettoShowHelp,
-  performanceSettings,
-  traceCategories;
-
-  const PerformanceEvents([this.nameOverride]);
-
-  final String? nameOverride;
-}
-
-enum PerformanceDocs {
-  performanceOverlayDocs,
-  trackWidgetBuildsDocs,
-  trackPaintsDocs,
-  trackLayoutsDocs,
-  disableClipLayersDocs,
-  disableOpacityLayersDocs,
-  disablePhysicalShapeLayersDocs,
-  canvasSaveLayerDocs,
-  intrinsicOperationsDocs,
-  shaderCompilationDocs,
-  shaderCompilationDocsTooltipLink,
-  impellerWikiLink,
-}
-
-enum CpuProfilerEvents {
-  profileGranularity,
-  loadAllCpuSamples,
-  profileAppStartUp,
-  cpuProfileFlameChartHelp,
-  cpuProfileProcessingTime,
-  cpuProfileDisplayTreeGuidelines,
-}
-
-enum CpuProfilerDocs {
-  profileGranularityDocs,
 }
 
 // Debugger UX actions:
@@ -204,107 +149,4 @@ class ConsoleEvent {
   static const helpInline = 'consoleHelpInline';
   static const String evalInStoppedApp = 'consoleEvalInStoppedApp';
   static const String evalInRunningApp = 'consoleEvalInRunningApp';
-}
-
-/// Analytic time constants specific for memory screen.
-class MemoryTime {
-  static const adaptSnapshot = 'adaptSnapshot';
-  static const calculateDiff = 'calculateDiff';
-  static const updateValues = 'updateValues';
-}
-
-// ignore: avoid_classes_with_only_static_members, requires refactor.
-/// Analytic event constants specific for memory screen.
-class MemoryEvent {
-  static const gc = 'gc';
-  static const settings = 'settings';
-
-  static const showChartLegend = 'showMemoryLegend';
-  static const hideChartLegend = 'hideMemoryLegend';
-  static const chartAndroid = 'androidChart';
-
-  static const pauseChart = 'pauseChart';
-  static const resumeChart = 'resumeChart';
-  static const clearChart = 'clearChart';
-  static const showChart = 'showChart';
-  static const hideChart = 'hideChart';
-  static const chartInterval = 'chartInterval';
-  static const chartHelp = 'memoryChartHelp';
-
-  static const leaksAnalyze = 'leaksAnalyze';
-
-  static const profileDownloadCsv = 'profileDownloadCsv';
-  static const profileRefreshManual = 'profileRefreshManual';
-  static const profileRefreshOnGc = 'profileRefreshOnGc';
-  static const profileHelp = 'memoryProfileHelp';
-
-  static const tracingClear = 'tracingClear';
-  static const tracingRefresh = 'tracingRefresh';
-  static const tracingClassFilter = 'tracingClassFilter';
-  static const tracingTraceCheck = 'tracingTraceCheck';
-  static const tracingTreeExpandAll = 'tracingTreeExpandAll';
-  static const tracingTreeCollapseAll = 'tracingTreeCollapseAll';
-  static const tracingHelp = 'memoryTracingHelp';
-
-  static const diffTakeSnapshotControlPane = 'diffTakeSnapshotControlPane';
-  static const diffClearSnapshots = 'diffClearSnapshots';
-  static const diffHelp = 'memoryDiffHelp';
-
-  static const diffSnapshotDiffSelect = 'diffSnapshotDiffSelect';
-  static const diffSnapshotDiffOff = 'diffSnapshotDiffSelectOff';
-  static const diffSnapshotFilter = 'diffSnapshotFilter';
-  static const diffSnapshotDownloadCsv = 'diffSnapshotDownloadCsv';
-  static const diffSnapshotDelete = 'diffSnapshotDelete';
-
-  static const diffClassDiffSelect = 'diffClassDiffSelect';
-  static const diffClassSingleSelect = 'diffClassSingleSelect';
-  static const diffPathSelect = 'diffPathSelect';
-  static const diffClassDiffCopy = 'diffClassDiffCopy';
-  static const diffClassSingleCopy = 'diffClassSingleCopy';
-  static const diffPathCopy = 'diffPathCopy';
-  static const diffPathFilter = 'diffPathFilter';
-  static const diffPathInvert = 'diffPathInvert';
-
-  static const diffSnapshotFilterType = 'diffSnapshotFilterType';
-  static const diffSnapshotFilterReset = 'diffSnapshotFilterReset';
-
-  static const browseRefLimit = 'browseRefLimit';
-
-  static const dropOneLiveVariable = 'dropOneLiveVariable';
-  static const dropOneStaticVariable = 'dropOneStaticVariable';
-  static String dropAllLiveToConsole({
-    required bool includeSubclasses,
-    required bool includeImplementers,
-  }) =>
-      'dropAllVariables${includeSubclasses ? '_Subclasses' : ''}${includeImplementers ? '_Imlementers' : ''}';
-}
-
-/// Areas of memory screen, to prefix event names, when events are emitted
-/// by a widget used in different contexts.
-enum MemoryAreas {
-  profile('profile'),
-  snapshotSingle('single'),
-  snapshotDiff('diff'),
-  snapshotDiffDelta('diff-delta'),
-  snapshotDiffNew('diff-new');
-
-  const MemoryAreas(this.name);
-
-  final String name;
-}
-
-enum VsCodeFlutterSidebar {
-  /// Analytics id to track events that come from the VS Code Flutter sidebar.
-  vsCodeFlutterSidebar,
-
-  /// Analytics event that is sent when a device selection occurs from the list
-  /// of available devices in the sidebar.
-  changeSelectedDevice;
-
-  static String get id => VsCodeFlutterSidebar.vsCodeFlutterSidebar.name;
-
-  /// Analytics event that is sent when a DevTools screen is opened from the
-  /// actions toolbar for a debug session.
-  static String openDevToolsScreen(String screen) =>
-      'openDevToolsScreen-$screen';
 }

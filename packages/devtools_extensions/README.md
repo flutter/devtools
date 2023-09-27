@@ -86,7 +86,7 @@ flutter create --template app --platforms web foo_package_devtools_extension
 
 In `foo_package_devtools_extension/pubspec.yaml`, add a dependency on `devtools_extensions`:
 ```yaml
-devtools_extensions: ^0.0.7
+devtools_extensions: ^0.0.8
 ```
 
 In `lib/main.dart`, place a `DevToolsExtension` widget at the root of your app:
@@ -217,11 +217,11 @@ Then publish your package.
 As a package author, the content that you check into your git repository is completely up to you.
 If you want the contents of `extension/devtools/build/` to be git ignored, then you'll just need
 to ensure that the extension web app is always built and included in `extension/devtools/build/`
-when you publish your package. To do so, add the following to a `.pubignore` file at the root
-of your pub package:
+when you publish your package. To do so, add the following to a `.pubignore` file in the
+`extension/devtools/` directory:
 
 ```
-!./extension/devtools/build
+!./build
 ```
 
 This will ensure that, even if the `extension/devtools/build` directory has been been git
