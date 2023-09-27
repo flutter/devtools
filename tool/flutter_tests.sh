@@ -6,15 +6,15 @@
 # flutter/tests does not allow output from execution.
 ./tool/generate_code.sh >> output.txt
 
-# Test devtools_shared
+# Test all tests in devtools_app_shared
 # flutter pub get
-# cd packages/devtools_shared
+# cd packages/devtools_app_shared
 # flutter test test/
 
-# Test devtools_app
+# Test only tests in devtools_app with the 'flutterTestRegistry' tag
 cd packages/devtools_app
 flutter pub get
-flutter test test/inspector/
+flutter test test/ -t flutterTestRegistry
 
 # Run the integration test that builds every DevTools screen. 
 # dart run integration_test/run_tests.dart --target=integration_test/test/live_connection/app_test.dart

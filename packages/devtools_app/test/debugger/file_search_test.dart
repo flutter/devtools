@@ -76,7 +76,7 @@ void main() {
         equals('kitchen:food/catering/party.dart'),
       );
     },
-    tags: flutterTestRegistryTag,
+    tags: [flutterTestRegistryTag],
   );
 
   testWidgetsWithWindowSize(
@@ -248,7 +248,7 @@ void main() {
         ]),
       );
     },
-    tags: flutterTestRegistryTag,
+    tags: [flutterTestRegistryTag],
   );
 
   testWidgetsWithWindowSize(
@@ -474,7 +474,7 @@ void main() {
         ),
       );
     },
-    tags: flutterTestRegistryTag,
+    tags: [flutterTestRegistryTag],
   );
 }
 

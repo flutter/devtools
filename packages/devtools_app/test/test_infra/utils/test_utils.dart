@@ -82,5 +82,5 @@ const flutterTestRegistryTag = 'flutterTestRegistry';
 
 @isTest
 void testWithFlutterTestRegistry(Object description, dynamic Function() body) {
-  test(description, body, tags: flutterTestRegistryTag);
+  test(description, body, tags: [flutterTestRegistryTag]);
 }
