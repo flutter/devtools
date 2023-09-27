@@ -74,9 +74,7 @@ class UpdateDartSdkDepsCommand extends Command {
             'Update DevTools rev to $commit',
           ],
         ),
-        // TODO(kenz): is there a way to automatically close the file that pops up
-        // with the commit description?
-        CliCommand('git cl upload -s --message=""'),
+        CliCommand('git cl upload -s -f'),
       ],
     );
 
