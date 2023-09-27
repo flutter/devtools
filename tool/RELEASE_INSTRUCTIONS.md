@@ -33,11 +33,14 @@ Make sure:
     - Ensure the `devtools_tool` executable is in your path:
       - add the following to your `~/.bashrc` file.
         - `export PATH=$PATH:<DEVTOOLS_DIR>/tool/bin`
-          > [!INFO]  Replace `<DEVTOOLS_DIR>` with the local path to your > DevTools repo.
+          > [!NOTE]  
+          > Replace `<DEVTOOLS_DIR>` with the local path to your > DevTools
+          > repo.
   - For Windows Users
     - Ensure the `devtools_tool` executable has been globally activated:
       - `flutter pub global activate --source path tool`
-        > [!WARNING]  Always do this activation step before running
+        > [!WARNING]  
+        > Always do this activation step before running
         > `devtools_tool`. If there have been changes to the tool since the
         > last time you have run the activate, then it needs to be rerun to
         > pick up those changes.
