@@ -11,7 +11,7 @@ import 'globals.dart';
 /// mode, otherwise analytics will only be sent in release builds.
 ///
 /// `ga.isAnalyticsEnabled()` still must return true for analytics to be sent.
-bool debugAnalytics = true;
+bool debugAnalytics = false;
 
 /// Whether to build DevTools for conveniently debugging DevTools extensions.
 ///

@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('debug flags are false', () {
+    expect(debugAnalytics, isFalse);
     expect(debugDevToolsExtensions, isFalse);
   });
 }
