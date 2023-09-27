@@ -108,9 +108,7 @@ class ReleaseHelperCommand extends Command {
 
       print("Setting the release version.");
       await processManager.runProcess(
-        CliCommand.from('dart', [
-          'run',
-          'devtools_tool.dart',
+        CliCommand.from('devtools_tool', [
           'update-version',
           'auto',
           '--type',
@@ -120,9 +118,7 @@ class ReleaseHelperCommand extends Command {
       );
 
       final getNewVersionResult = await processManager.runProcess(
-        CliCommand.from('dart', [
-          'run',
-          'devtools_tool.dart',
+        CliCommand.from('devtools_tool', [
           'update-version',
           'current-version',
         ]),
