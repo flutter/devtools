@@ -9,5 +9,6 @@ void main() {
   test('debug flags are false', () {
     expect(debugAnalytics, isFalse);
     expect(debugDevToolsExtensions, isFalse);
+    expect(debugSurvey, isFalse);
   });
 }
