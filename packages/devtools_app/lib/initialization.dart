@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
@@ -12,9 +14,7 @@ import 'src/screens/debugger/syntax_highlighter.dart';
 import 'src/screens/provider/riverpod_error_logger_observer.dart';
 import 'src/shared/analytics/analytics_controller.dart';
 import 'src/shared/config_specific/framework_initialize/framework_initialize.dart';
-import 'src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'src/shared/config_specific/logger/logger_helpers.dart';
-import 'src/shared/config_specific/url/url.dart';
 import 'src/shared/feature_flags.dart';
 import 'src/shared/globals.dart';
 import 'src/shared/preferences.dart';
@@ -29,12 +29,13 @@ import 'src/shared/primitives/utils.dart';
 /// If the initialization is specific to running Devtools in google3 or
 /// externally, then it should be added to that respective main.dart file.
 void runDevTools({
+  bool integrationTestMode = false,
   bool shouldEnableExperiments = false,
   List<DevToolsJsonFile> sampleData = const [],
   List<DevToolsScreen>? screens,
 }) {
   setupErrorHandling(() async {
-    screens ??= defaultScreens;
+    screens ??= defaultScreens(sampleData: sampleData);
 
     initDevToolsLogging();
 
@@ -44,12 +45,10 @@ void runDevTools({
 
     usePathUrlStrategy();
 
-    // This may be set to true from our Flutter integration tests. Since we call
-    // [runDevTools] from Dart code, we cannot set the 'enable_experiments'
-    // environment variable before calling [runDevTools].
-    if (shouldEnableExperiments) {
-      setEnableExperiments();
-    }
+    _maybeInitForIntegrationTestMode(
+      integrationTestMode: integrationTestMode,
+      enableExperiments: shouldEnableExperiments,
+    );
 
     // Initialize the framework before we do anything else, otherwise the
     // StorageController won't be initialized and preferences won't be loaded.
@@ -77,6 +76,23 @@ void runDevTools({
       ),
     );
   });
+}
+
+/// Initializes some DevTools global fields for our Flutter integration tests.
+///
+/// Since we call [runDevTools] from Dart code, we cannot set environment
+/// variables before calling [runDevTools], and therefore have to pass in these
+/// values manually to [runDevTools].
+void _maybeInitForIntegrationTestMode({
+  required bool integrationTestMode,
+  required bool enableExperiments,
+}) {
+  if (!integrationTestMode) return;
+
+  setIntegrationTestMode();
+  if (enableExperiments) {
+    setEnableExperiments();
+  }
 }
 
 /// Checks if the request is for a legacy URL and if so, redirects to the new

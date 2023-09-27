@@ -8,6 +8,8 @@ import 'package:devtools_app/src/screens/profiler/panes/method_table/method_tabl
 import 'package:devtools_app/src/screens/profiler/panes/method_table/method_table_controller.dart';
 import 'package:devtools_app/src/screens/profiler/panes/method_table/method_table_model.dart';
 import 'package:devtools_app/src/shared/table/table.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -23,7 +25,10 @@ void main() {
 
   setUp(() async {
     setCharacterWidthForTables();
-    setGlobal(ServiceConnectionManager, MockServiceConnectionManager());
+    setGlobal(
+      ServiceConnectionManager,
+      createMockServiceConnectionWithDefaults(),
+    );
     setGlobal(IdeTheme, IdeTheme());
     final mockScriptManager = MockScriptManager();
     when(mockScriptManager.sortedScripts).thenReturn(

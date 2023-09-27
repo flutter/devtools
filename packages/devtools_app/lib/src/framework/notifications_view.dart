@@ -4,16 +4,15 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
 import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
 import '../shared/notifications.dart';
-import '../shared/primitives/auto_dispose.dart';
 import '../shared/primitives/utils.dart';
-import '../shared/theme.dart';
-import '../shared/utils.dart';
 
 double get _notificationHeight => scaleByFontFactor(175.0);
 final _notificationWidth = _notificationHeight * goldenRatio;
@@ -246,44 +245,42 @@ class _NotificationState extends State<_Notification>
           child: child,
         );
       },
-      child: Padding(
-        padding: const EdgeInsets.all(denseSpacing),
-        child: Card(
-          color: theme.snackBarTheme.backgroundColor,
-          child: DefaultTextStyle(
-            style: theme.snackBarTheme.contentTextStyle ??
-                theme.primaryTextTheme.titleMedium!,
-            child: Padding(
-              padding: const EdgeInsets.all(denseSpacing),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  widget.message.isDismissible
-                      ? Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Flexible(
-                              child: _NotificationMessage(
-                                widget: widget,
-                                context: context,
-                              ),
+      child: Card(
+        color: theme.snackBarTheme.backgroundColor,
+        margin: const EdgeInsets.fromLTRB(0, 0, 0, densePadding),
+        child: DefaultTextStyle(
+          style: theme.snackBarTheme.contentTextStyle ??
+              theme.primaryTextTheme.titleMedium!,
+          child: Padding(
+            padding: const EdgeInsets.all(denseSpacing),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                widget.message.isDismissible
+                    ? Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Flexible(
+                            child: _NotificationMessage(
+                              widget: widget,
+                              context: context,
                             ),
-                            _DismissAction(
-                              onPressed: () {
-                                widget.remove(widget);
-                              },
-                            ),
-                          ],
-                        )
-                      : _NotificationMessage(
-                          widget: widget,
-                          context: context,
-                        ),
-                  const SizedBox(height: defaultSpacing),
-                  _NotificationActions(widget: widget),
-                ],
-              ),
+                          ),
+                          _DismissAction(
+                            onPressed: () {
+                              widget.remove(widget);
+                            },
+                          ),
+                        ],
+                      )
+                    : _NotificationMessage(
+                        widget: widget,
+                        context: context,
+                      ),
+                const SizedBox(height: defaultSpacing),
+                _NotificationActions(widget: widget),
+              ],
             ),
           ),
         ),

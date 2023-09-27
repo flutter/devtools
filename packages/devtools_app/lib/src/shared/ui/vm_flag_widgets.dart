@@ -4,18 +4,21 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../screens/profiler/cpu_profile_service.dart';
 import '../../screens/profiler/sampling_rate.dart';
-import '../analytics/analytics.dart' as ga;
 import '../analytics/constants.dart' as gac;
 import '../banner_messages.dart';
 import '../common_widgets.dart';
 import '../globals.dart';
-import '../theme.dart';
+import '../primitives/utils.dart';
+import '../table/table.dart';
+import '../table/table_data.dart';
+import 'drop_down_button.dart';
 
 /// DropdownButton that controls the value of the 'profile_period' vm flag.
 ///
@@ -52,56 +55,251 @@ class CpuSamplingRateDropdown extends StatelessWidget {
           unawaited(_onSamplingFrequencyChanged(safeValue));
         }
 
-        final bannerMessageController =
-            Provider.of<BannerMessagesController>(context);
         if (safeValue == highProfilePeriod) {
-          bannerMessageController.addMessage(
+          bannerMessages.addMessage(
             HighCpuSamplingRateMessage(screenId).build(context),
           );
         } else {
-          bannerMessageController.removeMessageByKey(
+          bannerMessages.removeMessageByKey(
             HighCpuSamplingRateMessage(screenId).key,
             screenId,
           );
         }
-        return SizedBox(
-          height: defaultButtonHeight,
-          child: DevToolsTooltip(
-            message:
-                'The frequency at which the CPU profiler will sample the call stack',
-            child: RoundedDropDownButton<String>(
-              key: CpuSamplingRateDropdown.dropdownKey,
-              isDense: true,
-              style: Theme.of(context).textTheme.bodyMedium,
-              value: safeValue,
-              items: [
-                _buildMenuItem(CpuSamplingRate.low),
-                _buildMenuItem(CpuSamplingRate.medium),
-                _buildMenuItem(CpuSamplingRate.high),
-              ],
-              onChanged: _onSamplingFrequencyChanged,
-            ),
-          ),
+        return AnalyticsDropDownButton(
+          key: CpuSamplingRateDropdown.dropdownKey,
+          gaScreen: screenId,
+          isDense: true,
+          gaDropDownId: gac.CpuProfilerEvents.profileGranularity.name,
+          message:
+              'The frequency at which the CPU profiler will sample the call stack',
+          value: safeValue,
+          items: [
+            _buildMenuItem(CpuSamplingRate.low),
+            _buildMenuItem(CpuSamplingRate.medium),
+            _buildMenuItem(CpuSamplingRate.high),
+          ],
+          onChanged: _onSamplingFrequencyChanged,
         );
       },
     );
   }
 
-  DropdownMenuItem<String> _buildMenuItem(CpuSamplingRate samplingRate) {
-    return DropdownMenuItem<String>(
-      value: samplingRate.value,
-      child: Text(samplingRate.display),
+  ({DropdownMenuItem<String> item, String gaId}) _buildMenuItem(
+    CpuSamplingRate samplingRate,
+  ) {
+    return (
+      item: DropdownMenuItem<String>(
+        value: samplingRate.value,
+        child: Text(samplingRate.display),
+      ),
+      gaId: samplingRate.displayShort,
     );
   }
 
   Future<void> _onSamplingFrequencyChanged(String? newValue) async {
-    ga.select(
-      screenId,
-      '${gac.CpuProfilerEvents.profileGranularity.name}'
-      '${CpuSamplingRateExtension.fromValue(newValue ?? '').displayShort}',
-    );
-    await serviceManager.service!.setProfilePeriod(
+    await serviceConnection.serviceManager.service!.setProfilePeriod(
       newValue ?? mediumProfilePeriod,
     );
   }
+}
+
+class ViewVmFlagsButton extends StatelessWidget {
+  const ViewVmFlagsButton({
+    super.key,
+    required this.gaScreen,
+    this.elevated = false,
+    this.minScreenWidthForTextBeforeScaling,
+  });
+
+  final String gaScreen;
+
+  final bool elevated;
+
+  final double? minScreenWidthForTextBeforeScaling;
+
+  @override
+  Widget build(BuildContext context) {
+    return GaDevToolsButton(
+      elevated: elevated,
+      label: 'View VM flags',
+      icon: Icons.flag_rounded,
+      gaScreen: gaScreen,
+      gaSelection: gac.HomeScreenEvents.viewVmFlags.name,
+      minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
+      onPressed: () {
+        Navigator.of(context, rootNavigator: true).pop('dialog');
+        unawaited(
+          showDialog(
+            context: context,
+            builder: (context) => const VMFlagsDialog(),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class VMFlagsDialog extends StatefulWidget {
+  const VMFlagsDialog({super.key});
+
+  @override
+  State<VMFlagsDialog> createState() => _VMFlagsDialogState();
+}
+
+class _VMFlagsDialogState extends State<VMFlagsDialog> with AutoDisposeMixin {
+  late final TextEditingController filterController;
+
+  var flags = <_DialogFlag>[];
+
+  var filteredFlags = <_DialogFlag>[];
+
+  @override
+  void initState() {
+    super.initState();
+
+    filterController = TextEditingController();
+    addAutoDisposeListener(filterController, () {
+      setState(() {
+        _refilter();
+      });
+    });
+
+    _updateFromController();
+    addAutoDisposeListener(serviceConnection.vmFlagManager.flags, () {
+      setState(() {
+        _updateFromController();
+      });
+    });
+  }
+
+  void _updateFromController() {
+    flags = (serviceConnection.vmFlagManager.flags.value?.flags ?? [])
+        .map((flag) => _DialogFlag(flag))
+        .toList();
+    _refilter();
+  }
+
+  void _refilter() {
+    final filter = filterController.text.trim().toLowerCase();
+
+    filteredFlags = filter.isEmpty
+        ? flags
+        : flags.where((flag) => flag.filterText.contains(filter)).toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DevToolsDialog(
+      title: Row(
+        children: [
+          const DialogTitleText('VM Flags'),
+          const Expanded(child: SizedBox(width: denseSpacing)),
+          SizedBox(
+            width: defaultSearchFieldWidth,
+            height: defaultTextFieldHeight,
+            child: TextField(
+              controller: filterController,
+              decoration: const InputDecoration(
+                isDense: true,
+                border: OutlineInputBorder(),
+                labelText: 'Filter',
+              ),
+            ),
+          ),
+        ],
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 875,
+            height: 375,
+            child: _FlagTable(filteredFlags),
+          ),
+        ],
+      ),
+      actions: const [
+        DialogCloseButton(),
+      ],
+    );
+  }
+}
+
+class _FlagTable extends StatelessWidget {
+  const _FlagTable(this.flags);
+
+  final List<_DialogFlag> flags;
+
+  static final name = _NameColumn();
+  static final description = _DescriptionColumn();
+  static final value = _ValueColumn();
+  static final columns = <ColumnData<_DialogFlag>>[name, description, value];
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlineDecoration(
+      child: FlatTable<_DialogFlag>(
+        keyFactory: (_DialogFlag flag) => ValueKey<String?>(flag.name),
+        data: flags,
+        dataKey: 'vm-flags',
+        columns: columns,
+        defaultSortColumn: name,
+        defaultSortDirection: SortDirection.ascending,
+      ),
+    );
+  }
+}
+
+class _NameColumn extends ColumnData<_DialogFlag> {
+  _NameColumn()
+      : super(
+          'Name',
+          fixedWidthPx: scaleByFontFactor(180),
+        );
+
+  @override
+  String getValue(_DialogFlag dataObject) => dataObject.name ?? '';
+}
+
+class _DescriptionColumn extends ColumnData<_DialogFlag> {
+  _DescriptionColumn()
+      : super.wide(
+          'Description',
+          minWidthPx: scaleByFontFactor(100),
+        );
+
+  @override
+  String getValue(_DialogFlag dataObject) => dataObject.description ?? '';
+
+  @override
+  String getTooltip(_DialogFlag dataObject) => getValue(dataObject);
+}
+
+class _ValueColumn extends ColumnData<_DialogFlag> {
+  _ValueColumn()
+      : super(
+          'Value',
+          fixedWidthPx: scaleByFontFactor(160),
+          alignment: ColumnAlignment.right,
+        );
+
+  @override
+  String getValue(_DialogFlag dataObject) => dataObject.value ?? '';
+}
+
+class _DialogFlag {
+  _DialogFlag(this.flag)
+      : filterText = '${flag.name?.toLowerCase()}\n'
+            '${flag.comment?.toLowerCase()}\n'
+            '${flag.valueAsString?.toLowerCase()}';
+
+  final Flag flag;
+  final String filterText;
+
+  String? get name => flag.name;
+
+  String? get description => flag.comment;
+
+  String? get value => flag.valueAsString;
 }

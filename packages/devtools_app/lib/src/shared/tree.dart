@@ -4,51 +4,42 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
 
 import 'collapsible_mixin.dart';
-import 'primitives/auto_dispose.dart';
 import 'primitives/trees.dart';
-import 'theme.dart';
+
+double get defaultTreeViewRowHeight => scaleByFontFactor(20.0);
 
 class TreeView<T extends TreeNode<T>> extends StatefulWidget {
   const TreeView({
     super.key,
     required this.dataRootsListenable,
     required this.dataDisplayProvider,
-    required this.onItemSelected,
+    this.onItemSelected,
     this.onItemExpanded,
-    this.shrinkWrap = false,
-    this.itemExtent,
     this.onTraverse,
     this.emptyTreeViewBuilder,
     this.scrollController,
     this.includeScrollbar = false,
+    this.isSelectable = true,
   });
 
   final ValueListenable<List<T>> dataRootsListenable;
-
-  /// Use [shrinkWrap] iff you need to place a TreeView inside a ListView or
-  /// other container with unconstrained height.
-  ///
-  /// Enabling shrinkWrap impacts performance.
-  ///
-  /// Defaults to false.
-  final bool shrinkWrap;
 
   final Widget Function(T, VoidCallback) dataDisplayProvider;
 
   /// Invoked when a tree node is selected. If [onItemExpanded] is not
   /// provided, this method will also be called when the expand button is
   /// tapped.
-  final FutureOr<void> Function(T) onItemSelected;
+  final FutureOr<void> Function(T)? onItemSelected;
 
   /// If provided, this method will be called when the expand button is tapped.
   /// Otherwise, [onItemSelected] will be invoked, if provided.
   final FutureOr<void> Function(T)? onItemExpanded;
-
-  final double? itemExtent;
 
   /// Called on traversal of child node during [buildFlatList].
   final void Function(T)? onTraverse;
@@ -60,6 +51,8 @@ class TreeView<T extends TreeNode<T>> extends StatefulWidget {
   final ScrollController? scrollController;
 
   final bool includeScrollbar;
+
+  final bool isSelectable;
 
   @override
   State<TreeView<T>> createState() => _TreeViewState<T>();
@@ -82,22 +75,26 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
   @override
   Widget build(BuildContext context) {
     if (dataFlatList.isEmpty) return _emptyTreeViewBuilder();
-    final content = ListView.builder(
-      itemCount: dataFlatList.length,
-      itemExtent: widget.itemExtent,
-      shrinkWrap: widget.shrinkWrap,
-      physics: widget.shrinkWrap ? const ClampingScrollPhysics() : null,
-      controller: widget.scrollController,
-      itemBuilder: (context, index) {
-        final T item = dataFlatList[index];
-        return _TreeViewItem<T>(
-          item,
-          buildDisplay: (onPressed) =>
-              widget.dataDisplayProvider(item, onPressed),
-          onItemSelected: _onItemSelected,
-          onItemExpanded: _onItemExpanded,
-        );
-      },
+    final content = SizedBox(
+      height: dataFlatList.length * defaultTreeViewRowHeight,
+      child: _maybeWrapInSelectionArea(
+        ListView.builder(
+          itemCount: dataFlatList.length,
+          itemExtent: defaultTreeViewRowHeight,
+          physics: const ClampingScrollPhysics(),
+          controller: widget.scrollController,
+          itemBuilder: (context, index) {
+            final T item = dataFlatList[index];
+            return _TreeViewItem<T>(
+              item,
+              buildDisplay: (onPressed) =>
+                  widget.dataDisplayProvider(item, onPressed),
+              onItemSelected: _onItemSelected,
+              onItemExpanded: _onItemExpanded,
+            );
+          },
+        ),
+      ),
     );
     if (widget.includeScrollbar) {
       return Scrollbar(
@@ -116,13 +113,22 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
     return const SizedBox();
   }
 
+  Widget _maybeWrapInSelectionArea(Widget tree) {
+    if (widget.isSelectable) {
+      return SelectionArea(child: tree);
+    }
+    return tree;
+  }
+
   // TODO(kenz): animate expansions and collapses.
   void _onItemSelected(T item) async {
     // Order of execution matters for the below calls.
     if (widget.onItemExpanded == null && item.isExpandable) {
       item.toggleExpansion();
     }
-    await widget.onItemSelected(item);
+    if (widget.onItemSelected != null) {
+      await widget.onItemSelected!(item);
+    }
 
     _updateItems();
   }
@@ -133,8 +139,8 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
     }
     if (widget.onItemExpanded != null) {
       await widget.onItemExpanded!(item);
-    } else {
-      await widget.onItemSelected(item);
+    } else if (widget.onItemSelected != null) {
+      await widget.onItemSelected!(item);
     }
     _updateItems();
   }

@@ -2,21 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:collection';
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../framework/framework_core.dart';
 import 'globals.dart';
-import 'primitives/auto_dispose.dart';
 import 'primitives/utils.dart';
 
-/// The page ID (used in routing) for the standalone app-size page.
-///
-/// This must be different to the AppSizeScreen ID which is also used in routing when
-/// cnnected to a VM to ensure they have unique URLs.
-const appSizeScreenId = 'appsize';
+const memoryAnalysisScreenId = 'memoryanalysis';
 
 const homeScreenId = '';
 const snapshotScreenId = 'snapshot';
@@ -49,7 +47,7 @@ class DevToolsRouteInformationParser
   @override
   Future<DevToolsRouteConfiguration> parseRouteInformation(
     RouteInformation routeInformation,
-  ) {
+  ) async {
     var uri = routeInformation.uri;
     if (_forceVmServiceUri != null) {
       final newQueryParams = Map<String, dynamic>.from(uri.queryParameters);
@@ -57,11 +55,16 @@ class DevToolsRouteInformationParser
       uri = uri.copyWith(queryParameters: newQueryParams);
     }
 
-    // If the uri has been modified and we do not have a vm service uri as a
-    // query parameter, ensure we manually disconnect from any previously
-    // connected applications.
-    if (uri.queryParameters['uri'] == null) {
-      serviceManager.manuallyDisconnect();
+    final uriFromParams = uri.queryParameters['uri'];
+    if (uriFromParams == null) {
+      // If the uri has been modified and we do not have a vm service uri as a
+      // query parameter, ensure we manually disconnect from any previously
+      // connected applications.
+      await serviceConnection.serviceManager.manuallyDisconnect();
+    } else if (_forceVmServiceUri == null) {
+      // Otherwise, connect to the vm service from the query parameter before
+      // loading the route (but do not do this in a testing environment).
+      await FrameworkCore.initVmService('', serviceUriAsString: uriFromParams);
     }
 
     // routeInformation.path comes from the address bar and (when not empty) is
@@ -134,11 +137,11 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   ///
   /// This will usually only contain a single item (it's the visible stack,
   /// not the history).
-  final routes = ListQueue<DevToolsRouteConfiguration>();
+  final _routes = ListQueue<DevToolsRouteConfiguration>();
 
   @override
   DevToolsRouteConfiguration? get currentConfiguration =>
-      routes.isEmpty ? null : routes.last;
+      _routes.isEmpty ? null : _routes.last;
 
   @override
   Widget build(BuildContext context) {
@@ -151,11 +154,11 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
       key: navigatorKey,
       pages: [_getPage(context, page, args, state)],
       onPopPage: (_, __) {
-        if (routes.length <= 1) {
+        if (_routes.length <= 1) {
           return false;
         }
 
-        routes.removeLast();
+        _routes.removeLast();
         notifyListeners();
         return true;
       },
@@ -197,7 +200,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     // not have a vm service uri as a query parameter, unless we are loading an
     // offline file.
     if (page != snapshotScreenId && newArgs['uri'] == null) {
-      serviceManager.manuallyDisconnect();
+      unawaited(serviceConnection.serviceManager.manuallyDisconnect());
     }
 
     _replaceStack(
@@ -222,7 +225,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   /// Replaces the navigation stack with a new route.
   void _replaceStack(DevToolsRouteConfiguration configuration) {
     _currentPage = configuration.page;
-    routes
+    _routes
       ..clear()
       ..add(configuration);
   }

@@ -2,17 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
-import 'common_widgets.dart';
 import 'config_specific/launch_url/launch_url.dart';
-import 'primitives/auto_dispose.dart';
 import 'primitives/utils.dart';
-import 'theme.dart';
 
 class SidePanelViewer extends StatefulWidget {
   const SidePanelViewer({
@@ -159,7 +159,7 @@ class SidePanel extends AnimatedWidget {
         color: theme.scaffoldBackgroundColor,
         clipBehavior: Clip.hardEdge,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(defaultBorderRadius),
+          borderRadius: defaultBorderRadius,
           side: BorderSide(
             color: theme.focusColor,
           ),
@@ -182,8 +182,8 @@ class SidePanel extends AnimatedWidget {
                 : Expanded(
                     child: Markdown(
                       data: markdownData!,
-                      onTapLink: (text, url, title) async =>
-                          await launchUrl(url!),
+                      onTapLink: (text, url, title) =>
+                          unawaited(launchUrl(url!)),
                     ),
                   ),
           ],

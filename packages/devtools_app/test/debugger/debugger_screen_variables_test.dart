@@ -4,6 +4,8 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/diagnostics/tree_builder.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -12,31 +14,34 @@ import 'package:mockito/mockito.dart';
 import '../test_infra/utils/variable_utils.dart';
 
 void main() {
-  late FakeServiceManager fakeServiceManager;
+  late FakeServiceConnectionManager fakeServiceConnection;
   late MockDebuggerController debuggerController;
   late MockScriptManager scriptManager;
 
   const windowSize = Size(4000, 4000);
 
   setUp(() {
-    fakeServiceManager = FakeServiceManager();
+    fakeServiceConnection = FakeServiceConnectionManager();
     scriptManager = MockScriptManager();
 
     mockConnectedApp(
-      fakeServiceManager.connectedApp!,
+      fakeServiceConnection.serviceManager.connectedApp!,
       isProfileBuild: false,
       isFlutterApp: true,
       isWebApp: false,
     );
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
+    setGlobal(ServiceConnectionManager, fakeServiceConnection);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(ScriptManager, scriptManager);
     setGlobal(NotificationService, NotificationService());
     setGlobal(BreakpointManager, BreakpointManager());
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
     setGlobal(PreferencesController, PreferencesController());
-    fakeServiceManager.consoleService.ensureServiceInitialized();
-    when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
+    fakeServiceConnection.consoleService.ensureServiceInitialized();
+    when(fakeServiceConnection.errorBadgeManager.errorCountNotifier('debugger'))
         .thenReturn(ValueNotifier<int>(0));
     debuggerController = createMockDebuggerControllerWithDefaults();
 
@@ -50,7 +55,7 @@ void main() {
   ) async {
     await tester.pumpWidget(
       wrapWithControllers(
-        const DebuggerScreenBody(),
+        const DebuggerWindows(),
         debugger: controller,
       ),
     );
@@ -60,17 +65,14 @@ void main() {
     WidgetTester tester, {
     required Finder parentFinder,
   }) async {
-    final group0To9999Finder = find.selectableTextContaining('[0 - 9999]');
-    final group10000To19999Finder =
-        find.selectableTextContaining('[10000 - 19999]');
-    final group230000To239999Finder =
-        find.selectableTextContaining('[230000 - 239999]');
-    final group240000To243620Finder =
-        find.selectableTextContaining('[240000 - 243620]');
+    final group0To9999Finder = find.textContaining('[0 - 9999]');
+    final group10000To19999Finder = find.textContaining('[10000 - 19999]');
+    final group230000To239999Finder = find.textContaining('[230000 - 239999]');
+    final group240000To243620Finder = find.textContaining('[240000 - 243620]');
 
-    final group0To99Finder = find.selectableTextContaining('[0 - 99]');
-    final group100To199Finder = find.selectableTextContaining('[100 - 199]');
-    final group200To299Finder = find.selectableTextContaining('[200 - 299]');
+    final group0To99Finder = find.textContaining('[0 - 99]');
+    final group100To199Finder = find.textContaining('[100 - 199]');
+    final group200To299Finder = find.textContaining('[200 - 299]');
 
     // Initially the parent variable is not expanded.
     expect(parentFinder, findsOneWidget);
@@ -104,7 +106,7 @@ void main() {
     'Variables shows items',
     windowSize,
     (WidgetTester tester) async {
-      fakeServiceManager.appState.setVariables(
+      fakeServiceConnection.appState.setVariables(
         [
           buildListVariable(),
           buildMapVariable(),
@@ -116,40 +118,36 @@ void main() {
       await pumpDebuggerScreen(tester, debuggerController);
       expect(find.text('Variables'), findsOneWidget);
 
-      final listFinder = find.selectableText('Root 1: List (2 items)');
+      final listFinder = find.text('Root 1: List (2 items)');
 
-      // expect a tooltip for the list value
-      expect(
-        find.byTooltip('List (2 items)'),
-        findsOneWidget,
-      );
+      expect(listFinder, findsOneWidget);
 
-      final mapFinder = find.selectableTextContaining(
+      final mapFinder = find.textContaining(
         'Root 2: Map (2 items)',
       );
-      final mapElement1Finder = find.selectableTextContaining("['key1']: 1.0");
-      final mapElement2Finder = find.selectableTextContaining("['key2']: 2.0");
+      final mapElement1Finder = find.textContaining("['key1']: 1.0");
+      final mapElement2Finder = find.textContaining("['key2']: 2.0");
 
       expect(listFinder, findsOneWidget);
       expect(mapFinder, findsOneWidget);
       expect(
-        find.selectableTextContaining("Root 3: 'test str...'"),
+        find.textContaining("Root 3: 'test str...'"),
         findsOneWidget,
       );
       expect(
-        find.selectableTextContaining('Root 4: true'),
+        find.textContaining('Root 4: true'),
         findsOneWidget,
       );
 
       // Initially list is not expanded.
-      expect(find.selectableTextContaining('0: 3'), findsNothing);
-      expect(find.selectableTextContaining('1: 4'), findsNothing);
+      expect(find.textContaining('0: 3'), findsNothing);
+      expect(find.textContaining('1: 4'), findsNothing);
 
       // Expand list.
       await tester.tap(listFinder);
       await tester.pump();
-      expect(find.selectableTextContaining('0: 0'), findsOneWidget);
-      expect(find.selectableTextContaining('1: 1'), findsOneWidget);
+      expect(find.textContaining('0: 0'), findsOneWidget);
+      expect(find.textContaining('1: 1'), findsOneWidget);
 
       // Initially map is not expanded.
       expect(mapElement1Finder, findsNothing);
@@ -162,18 +160,18 @@ void main() {
       expect(mapElement2Finder, findsOneWidget);
 
       // Expect a tooltip for the set instance.
-      final setFinder = find.selectableText('Root 5: Set (2 items)');
+      final setFinder = find.text('Root 5: Set (2 items)');
       expect(setFinder, findsOneWidget);
 
       // Initially set is not expanded.
-      expect(find.selectableTextContaining('set value 0'), findsNothing);
-      expect(find.selectableTextContaining('set value 1'), findsNothing);
+      expect(find.textContaining('set value 0'), findsNothing);
+      expect(find.textContaining('set value 1'), findsNothing);
 
       // Expand set
       await tester.tap(setFinder);
       await tester.pump();
-      expect(find.selectableTextContaining('set value 0'), findsOneWidget);
-      expect(find.selectableTextContaining('set value 1'), findsOneWidget);
+      expect(find.textContaining('set value 0'), findsOneWidget);
+      expect(find.textContaining('set value 1'), findsOneWidget);
     },
   );
 
@@ -184,12 +182,12 @@ void main() {
       final list = buildParentListVariable(length: 243621);
       await buildVariablesTree(list);
 
-      final appState = serviceManager.appState;
+      final appState = serviceConnection.appState;
       appState.setVariables([list]);
 
       await pumpDebuggerScreen(tester, debuggerController);
 
-      final listFinder = find.selectableText('Root 1: List (243,621 items)');
+      final listFinder = find.text('Root 1: List (243,621 items)');
       await verifyGroupings(tester, parentFinder: listFinder);
     },
   );
@@ -201,12 +199,12 @@ void main() {
       final map = buildParentMapVariable(length: 243621);
       await buildVariablesTree(map);
 
-      final appState = serviceManager.appState;
+      final appState = serviceConnection.appState;
       appState.setVariables([map]);
 
       await pumpDebuggerScreen(tester, debuggerController);
 
-      final mapFinder = find.selectableText('Root 1: Map (243,621 items)');
+      final mapFinder = find.text('Root 1: Map (243,621 items)');
       await verifyGroupings(tester, parentFinder: mapFinder);
     },
   );
@@ -218,12 +216,12 @@ void main() {
       final set = buildParentSetVariable(length: 243621);
       await buildVariablesTree(set);
 
-      final appState = serviceManager.appState;
+      final appState = serviceConnection.appState;
       appState.setVariables([set]);
 
       await pumpDebuggerScreen(tester, debuggerController);
 
-      final setFinder = find.selectableText('Root 1: Set (243,621 items)');
+      final setFinder = find.text('Root 1: Set (243,621 items)');
       await verifyGroupings(tester, parentFinder: setFinder);
     },
   );

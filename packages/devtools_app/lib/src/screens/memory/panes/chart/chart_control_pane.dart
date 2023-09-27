@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
-import '../../../../shared/primitives/auto_dispose.dart';
 import '../../../../shared/primitives/simple_items.dart';
-import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
-import '../../memory_controller.dart';
+import '../../framework/connected/memory_controller.dart';
 import '../../shared/primitives/simple_elements.dart';
 import 'chart_pane_controller.dart';
 import 'interval_dropdown.dart';
@@ -27,11 +27,8 @@ class ChartControlPane extends StatefulWidget {
 
 @visibleForTesting
 class ChartPaneTooltips {
-  static const String pauseTooltip =
-      'Pause the chart and auto-collection of snapshots\n'
-      'in case of aggressive memory consumption\n'
-      '(if enabled in settings)';
-  static const String resumeTooltip = 'Resume recording memory statistics';
+  static const String pauseTooltip = 'Pause the chart';
+  static const String resumeTooltip = 'Resume the chart';
 }
 
 class _ChartControlPaneState extends State<ChartControlPane>
@@ -119,7 +116,7 @@ class _LegendButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
       valueListenable: chartController.legendVisibleNotifier,
-      builder: (_, legendVisible, __) => DevToolsButton(
+      builder: (_, legendVisible, __) => GaDevToolsButton(
         onPressed: chartController.toggleLegendVisibility,
         gaScreen: gac.memory,
         gaSelection: legendVisible

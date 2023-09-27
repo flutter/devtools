@@ -28,7 +28,10 @@ Make sure:
 
 > If you need to install the [Github CLI](https://cli.github.com/manual/installation) you can run: `brew install gh`
 
-- Run: `./tool/release_helper.sh`
+> Ensure the `devtools_tool` executable has been globally activated:
+> `flutter pub global activate --source path tool`
+
+- Run: `devtools_tool release-helper`
 - This will create a PR for you using the tip of master.
 - The branch for that PR will be checked out locally for you.
 - It will also update your local version of flutter to the Latest flutter candidate
@@ -37,8 +40,8 @@ Make sure:
 #### Verify the version changes for the Release PR
 
 Verify the code on the release PR:
-- updated the pubspecs under packages/
-- updated all references to those packages
+- updated the `devtools_app` and `devtools_test` pubspec versions
+- updated all references to those packages in other `pubspec.yaml` files
 - updated the version constant in `packages/devtools_app/lib/devtools.dart`
 
 These packages always have their version numbers updated in lock, so we don't have to worry about versioning.
@@ -76,7 +79,6 @@ These packages always have their version numbers updated in lock, so we don't ha
 
 Receive an LGTM for the PR, squash and commit.
 
-
 ### Tag the release
 - Checkout the commit from which you want to release DevTools
    - This is likely the commit, on `master`, for the PR you just landed
@@ -89,38 +91,20 @@ Receive an LGTM for the PR, squash and commit.
    tool/tag_version.sh;
    ```
 
-### Upload the DevTools binary to CIPD
-- Use the update.sh script to build and upload the DevTools binary to CIPD:
-   ```shell
-   TARGET_COMMIT_HASH=<Commit hash for the version bump commit in DevTools>
-   ```
+### Wait for the binary to be uploaded CIPD
 
-   ```shell
-   cd $LOCAL_DART_SDK && \
-   git rebase-update && \
-   third_party/devtools/update.sh $TARGET_COMMIT_HASH [optional --no-update-flutter];
-   ```
-For cherry pick releases that need to be built from a specific version of Flutter,
-checkout the Flutter version on your local flutter repo (the Flutter SDK that
-`which flutter` points to). Then when you run the `update.sh` command, include the
-`--no-update-flutter` flag:
-
-   ```shell
-   third_party/devtools/update.sh $TARGET_COMMIT_HASH --no-update-flutter
-   ```
+On each DevTools commit, DevTools is built and uploaded to CIPD. You can check the
+status of the builds on this [dashboard](https://ci.chromium.org/ui/p/dart-internal/builders/flutter/devtools). Within minutes, a build should be uploaded for the commit you just merged and tagged.
 
 ### Update the DevTools hash in the Dart SDK
 
-- Create new branch for your changes:
-   ```shell
-   cd $LOCAL_DART_SDK && \
-   git new-branch dt-release;
-   ```
+Run the tool script with the commit hash you just merged and tagged:
+```shell
+devtools_tool update-sdk-deps -c <commit-hash>
+```
 
-- Update the `devtools_rev` entry in the Dart SDK [DEPS file](https://github.com/dart-lang/sdk/blob/master/DEPS)
-   - set the `devtools_rev` entry to the `TARGET_COMMIT_HASH`.
-   - See this [example CL](https://dart-review.googlesource.com/c/sdk/+/215520) for reference.
-
+This automatically creates a Gerrit CL with the DEPS update for DevTools.
+Quickly test the build and then add a reviewer.
 
 - Build the dart sdk locally
 
@@ -140,22 +124,17 @@ checkout the Flutter version on your local flutter repo (the Flutter SDK that
       out/ReleaseX64/dart-sdk/bin/dart devtools
       ```
 
-- If the version of DevTools you just published to CIPD loads properly
+- If the version of DevTools you just published to CIPD does not load properly, 
+you may need to hard reload and clear your browser cache.
 
-   > You may need to hard reload and clear your browser cache in order to see the changes.
+- Add a reviewer and submit once approved.
 
-   - push up the SDK CL for review.
-      ```shell
-      git add . && \
-      git commit -m "Bump DevTools DEP to $NEW_DEVTOOLS_VERSION" && \
-      git cl upload -s;
-      ```
+### Publish DevTools pub packages
 
-### Publish package:devtools_shared on pub
+If `package:devtools_app_shared`, `package:devtools_extensions`, or `package:devtools_shared`
+have unreleased changes, publish these packages to pub.
 
-`package:devtools_shared` is the only DevTools package that is published on pub.
-
-- From the `devtools/packages/devtools_shared` directory, run:
+- From the respective `devtools/packages/devtools_*` directories, run:
    ```shell
    flutter pub publish
    ```

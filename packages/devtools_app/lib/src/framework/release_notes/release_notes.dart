@@ -18,7 +18,15 @@ final _log = Logger('release_notes');
 // This is not const because it is manipulated for testing as well as for
 // local development.
 bool debugTestReleaseNotes = false;
-const debugUseStagedFlutterWebsite = false;
+
+// To load markdown from a staged flutter website, set this string to the url
+// from the flutter/website PR, which has a GitHub action that automatically
+// stages commits to firebase. Example:
+// https://flutter-docs-prod--pr8928-dt-notes-links-b0b33er1.web.app/tools/devtools/release-notes/release-notes-2.24.0-src.md.
+String? _debugReleaseNotesUrl;
+
+const _flutterDocsSite = 'https://docs.flutter.dev';
+
 const releaseNotesKey = Key('release_notes');
 
 class ReleaseNotesViewer extends SidePanelViewer {
@@ -40,12 +48,10 @@ class ReleaseNotesController extends SidePanelController {
 
   static const _unsupportedPathSyntax = '{{site.url}}';
 
-  String get _flutterDocsSite => debugUseStagedFlutterWebsite
-      ? 'https://flutter-website-dt-staging.web.app'
-      : 'https://docs.flutter.dev';
-
   void _init() {
-    if (debugTestReleaseNotes || server.isDevToolsServerAvailable) {
+    if (debugTestReleaseNotes ||
+        _debugReleaseNotesUrl != null ||
+        server.isDevToolsServerAvailable) {
       _maybeShowReleaseNotes();
     }
   }
@@ -87,8 +93,9 @@ class ReleaseNotesController extends SidePanelController {
         final versionString = notesVersion.toString();
         try {
           String releaseNotesMarkdown = await http.read(
-            Uri.parse(_releaseNotesUrl(versionString)),
+            Uri.parse(_debugReleaseNotesUrl ?? _releaseNotesUrl(versionString)),
           );
+
           // This is a workaround so that the images in release notes will appear.
           // The {{site.url}} syntax is best practices for the flutter website
           // repo, where these release notes are hosted, so we are performing this
@@ -100,7 +107,10 @@ class ReleaseNotesController extends SidePanelController {
 
           markdown.value = releaseNotesMarkdown;
           toggleVisibility(true);
-          if (server.isDevToolsServerAvailable) {
+          if (_debugReleaseNotesUrl == null &&
+              server.isDevToolsServerAvailable) {
+            // Only set the last release notes version if we are using a real
+            // url and not [_debugReleaseNotesUrl].
             unawaited(
               server.setLastShownReleaseNotesVersion(versionString),
             );

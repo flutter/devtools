@@ -3,14 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:collection/collection.dart' show IterableExtension;
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
 import 'analytics/constants.dart' as gac;
 import 'common_widgets.dart';
 import 'globals.dart';
-import 'primitives/auto_dispose.dart';
 import 'screen.dart';
-import 'theme.dart';
 
 /// The screen used for displaying offline data (data that does not require a
 /// connected app to explore).

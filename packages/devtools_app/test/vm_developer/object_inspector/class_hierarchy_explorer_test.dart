@@ -4,6 +4,8 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_developer_common_widgets.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -101,24 +103,24 @@ void main() {
     (tester) async {
       final controller = objectInspectorViewController.classHierarchyController;
       await tester.pumpWidget(
-        wrapWithControllers(
+        wrapSimple(
           ClassHierarchyExplorer(
             controller: objectInspectorViewController,
           ),
         ),
       );
 
-      expect(find.text('Object'), findsOneWidget);
+      expect(find.text('Object', findRichText: true), findsOneWidget);
 
       controller.selectedIsolateClassHierarchy.value.first.expandCascading();
       (controller.selectedIsolateClassHierarchy as ValueNotifier)
           .notifyListeners();
       await tester.pumpAndSettle();
 
-      expect(find.text('Object'), findsOneWidget);
-      expect(find.text('Super'), findsOneWidget);
-      expect(find.text('Sub'), findsOneWidget);
-      expect(find.text('NoSub'), findsOneWidget);
+      expect(find.text('Object', findRichText: true), findsOneWidget);
+      expect(find.text('Super', findRichText: true), findsOneWidget);
+      expect(find.text('Sub', findRichText: true), findsOneWidget);
+      expect(find.text('NoSub', findRichText: true), findsOneWidget);
 
       expect(
         find.byType(VmServiceObjectLink),

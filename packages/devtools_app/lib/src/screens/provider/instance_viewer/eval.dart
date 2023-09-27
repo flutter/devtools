@@ -6,21 +6,31 @@
 
 library eval;
 
+import 'dart:async';
+
+import 'package:devtools_app_shared/service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../service/vm_service_wrapper.dart';
-import '../../../shared/eval_on_dart_library.dart';
 import '../../../shared/globals.dart';
 
+Stream<VmServiceWrapper> get _serviceConnectionStream =>
+    _serviceConnectionStreamController.stream;
+final _serviceConnectionStreamController =
+    StreamController<VmServiceWrapper>.broadcast();
+void setServiceConnectionForProviderScreen(VmServiceWrapper service) {
+  _serviceConnectionStreamController.add(service);
+}
+
 /// Exposes the current VmServiceWrapper.
-/// By listening to this provider instead of directly accessing `serviceManager.service`,
+/// By listening to this provider instead of directly accessing `serviceManager.manager.service`,
 /// this ensures that providers reload properly when the devtool is connected
 /// to a different application.
 final serviceProvider = StreamProvider<VmServiceWrapper>((ref) async* {
-  yield serviceManager.service!;
-  yield* serviceManager.onConnectionAvailable;
+  yield serviceConnection.serviceManager.service!;
+  yield* _serviceConnectionStream;
 });
 
 /// An [EvalOnDartLibrary] that has access to no specific library in particular
@@ -38,7 +48,11 @@ final libraryEvalProvider =
     FutureProviderFamily<EvalOnDartLibrary, String>((ref, libraryPath) async {
   final service = await ref.watch(serviceProvider.future);
 
-  final eval = EvalOnDartLibrary(libraryPath, service);
+  final eval = EvalOnDartLibrary(
+    libraryPath,
+    service,
+    serviceManager: serviceConnection.serviceManager,
+  );
   ref.onDispose(eval.dispose);
   return eval;
 });
@@ -46,7 +60,7 @@ final libraryEvalProvider =
 final hotRestartEventProvider =
     ChangeNotifierProvider<ValueNotifier<void>>((ref) {
   final selectedIsolateListenable =
-      serviceManager.isolateManager.selectedIsolate;
+      serviceConnection.serviceManager.isolateManager.selectedIsolate;
 
   // Since ChangeNotifierProvider calls `dispose` on the returned ChangeNotifier
   // when the provider is destroyed, we can't simply return `selectedIsolateListenable`.

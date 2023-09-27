@@ -2,38 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
+import 'package:flutter/services.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../shared/common_widgets.dart';
-import '../../../shared/globals.dart';
-import '../../../shared/primitives/selection_controls.dart';
-import '../../../shared/primitives/utils.dart';
-import '../../../shared/routing.dart';
-import '../../../shared/theme.dart';
+import '../../diagnostics/dap_object_node.dart';
 import '../../diagnostics/dart_object_node.dart';
-import '../../primitives/simple_items.dart';
+import '../../globals.dart';
+import '../../primitives/utils.dart';
+import '../../routing.dart';
+import '../../screen.dart';
+import '../../ui/colors.dart';
 import 'description.dart';
 
-VariableSelectionControls _selectionControls({
-  required DartObjectNode variable,
-  required Function(TextSelectionDelegate delegate)? onInspect,
-}) {
-  final ref = variable.ref;
-  return VariableSelectionControls(
-    onReroot: variable.isRerootable
-        ? (delegate) {
-            serviceManager.consoleService.appendBrowsableInstance(
-              instanceRef: variable.value as InstanceRef?,
-              isolateRef: ref?.isolateRef,
-              heapSelection: ref?.heapSelection,
-            );
-          }
-        : null,
-    onInspect: onInspect,
-  );
-}
-
+/// The display provider for variables fetched via the VM service protocol.
 class DisplayProvider extends StatelessWidget {
   const DisplayProvider({
     super.key,
@@ -48,21 +32,18 @@ class DisplayProvider extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    // TODO(devoncarew): Here, we want to wait until the tooltip wants to show,
-    // then call toString() on variable and render the result in a tooltip. We
-    // should also include the type of the value in the tooltip if the variable
-    // is not null.
     if (variable.text != null) {
-      return SelectableText.rich(
-        TextSpan(
-          children: processAnsiTerminalCodes(
-            variable.text,
-            theme.subtleFixedFontStyle,
+      return InteractivityWrapper(
+        onTap: onTap,
+        menuButtons: _getMenuButtons(context),
+        child: Text.rich(
+          TextSpan(
+            children: processAnsiTerminalCodes(
+              variable.text,
+              theme.subtleFixedFontStyle,
+            ),
           ),
         ),
-        onTap: onTap,
-        selectionControls:
-            _selectionControls(variable: variable, onInspect: null),
       );
     }
     final diagnostic = variable.ref?.diagnostic;
@@ -75,10 +56,10 @@ class DisplayProvider extends StatelessWidget {
     }
 
     final hasName = variable.name?.isNotEmpty ?? false;
-    return DevToolsTooltip(
-      message: variable.displayValue.toString(),
-      waitDuration: tooltipWaitLong,
-      child: SelectableText.rich(
+    return InteractivityWrapper(
+      onTap: onTap,
+      menuButtons: _getMenuButtons(context),
+      child: Text.rich(
         TextSpan(
           text: hasName ? variable.name : null,
           style: variable.artificialName
@@ -100,24 +81,43 @@ class DisplayProvider extends StatelessWidget {
             ),
           ],
         ),
-        selectionControls: _selectionControls(
-          variable: variable,
-          onInspect: serviceManager.inspectorService == null
-              ? null
-              : (delegate) => _handleInspect(delegate, context),
-        ),
-        onTap: onTap,
       ),
     );
   }
 
+  List<ContextMenuButtonItem> _getMenuButtons(
+    BuildContext context,
+  ) {
+    return [
+      if (variable.isRerootable)
+        ContextMenuButtonItem(
+          onPressed: () {
+            ContextMenuController.removeAny();
+            final ref = variable.ref;
+            serviceConnection.consoleService.appendBrowsableInstance(
+              instanceRef: variable.value as InstanceRef?,
+              isolateRef: ref?.isolateRef,
+              heapSelection: ref?.heapSelection,
+            );
+          },
+          label: 'Reroot',
+        ),
+      if (serviceConnection.inspectorService != null && variable.isRoot)
+        ContextMenuButtonItem(
+          onPressed: () {
+            ContextMenuController.removeAny();
+            _handleInspect(context);
+          },
+          label: 'Inspect',
+        ),
+    ];
+  }
+
   void _handleInspect(
-    TextSelectionDelegate delegate,
     BuildContext context,
   ) async {
-    delegate.hideToolbar();
     final router = DevToolsRouterDelegate.of(context);
-    final inspectorService = serviceManager.inspectorService;
+    final inspectorService = serviceConnection.inspectorService;
     if (await variable.inspectWidget()) {
       router.navigateIfNotCurrent(ScreenMetaData.inspector.id);
     } else {
@@ -175,5 +175,134 @@ class DisplayProvider extends StatelessWidget {
       default:
         return style;
     }
+  }
+}
+
+/// The display provider for variables fetched via the Debug Adapter Protocol.
+class DapDisplayProvider extends StatelessWidget {
+  const DapDisplayProvider({
+    super.key,
+    required this.node,
+    required this.onTap,
+  });
+
+  final DapObjectNode node;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    final variable = node.variable;
+    final name = variable.name;
+    final value = variable.value;
+
+    // TODO(https://github.com/flutter/devtools/issues/6056): Wrap in
+    // interactivity wrapper to provide inspect and re-root functionality. Add
+    // tooltip on hover to provide type information.
+    return Text.rich(
+      TextSpan(
+        text: name,
+        style: theme.fixedFontStyle.apply(
+          color: theme.colorScheme.controlFlowSyntaxColor,
+        ),
+        children: [
+          TextSpan(
+            text: ': ',
+            style: theme.fixedFontStyle,
+          ),
+          // TODO(https://github.com/flutter/devtools/issues/6056): Change text
+          // style based on variable type.
+          TextSpan(
+            text: value,
+            style: theme.subtleFixedFontStyle,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A wrapper that allows the user to interact with the variable.
+///
+/// Responds to primary and secondary click events.
+class InteractivityWrapper extends StatefulWidget {
+  const InteractivityWrapper({
+    super.key,
+    required this.child,
+    this.menuButtons,
+    this.onTap,
+  });
+
+  /// Button items shown in a context menu on secondary click.
+  ///
+  /// If none are provided, then no action will happen on secondary click.
+  final List<ContextMenuButtonItem>? menuButtons;
+
+  /// Optional callback when tapped.
+  final void Function()? onTap;
+
+  /// The child widget that will be listened to for gestures.
+  final Widget child;
+
+  @override
+  State<InteractivityWrapper> createState() => _InteractivityWrapperState();
+}
+
+class _InteractivityWrapperState extends State<InteractivityWrapper> {
+  final ContextMenuController _contextMenuController = ContextMenuController();
+
+  void _onTap() {
+    ContextMenuController.removeAny();
+    final onTap = widget.onTap;
+    if (onTap != null) {
+      onTap();
+    }
+  }
+
+  void _onSecondaryTapUp(TapUpDetails details) {
+    _maybeShowMenu(details.globalPosition);
+  }
+
+  void _maybeShowMenu(Offset offset) {
+    // TODO(https://github.com/flutter/devtools/issues/6018): Once
+    // https://github.com/flutter/flutter/issues/129692 is fixed, disable the
+    // browser's native context menu on secondary-click, and enable this menu.
+    if (kIsWeb && BrowserContextMenu.enabled) {
+      return;
+    }
+
+    if (_contextMenuController.isShown) {
+      return;
+    }
+    _contextMenuController.show(
+      context: context,
+      contextMenuBuilder: (context) {
+        return AdaptiveTextSelectionToolbar.buttonItems(
+          anchors: TextSelectionToolbarAnchors(primaryAnchor: offset),
+          buttonItems: widget.menuButtons,
+        );
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _contextMenuController.remove();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final contextMenuOnSecondaryTapEnabled =
+        widget.menuButtons != null && widget.menuButtons!.isNotEmpty;
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: _onTap,
+      onSecondaryTapUp:
+          contextMenuOnSecondaryTapEnabled ? _onSecondaryTapUp : null,
+      child: widget.child,
+    );
   }
 }

@@ -5,11 +5,11 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
-import '../../globals.dart';
 import '../../primitives/storage.dart';
 
 final _log = Logger('_framework_initialize_desktop');

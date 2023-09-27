@@ -7,7 +7,9 @@ import 'package:devtools_app/src/screens/provider/instance_viewer/instance_detai
 import 'package:devtools_app/src/screens/provider/instance_viewer/instance_providers.dart';
 import 'package:devtools_app/src/screens/provider/instance_viewer/instance_viewer.dart';
 import 'package:devtools_app/src/screens/provider/instance_viewer/result.dart';
-import 'package:devtools_app/src/shared/eval_on_dart_library.dart';
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -124,9 +126,12 @@ void main() {
   setUpAll(() async => await loadFonts());
 
   setUp(() {
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
     setGlobal(IdeTheme, getIdeTheme());
-    setGlobal(ServiceConnectionManager, FakeServiceManager());
+    setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
   });
 
   group('InstanceViewer', () {
@@ -1534,4 +1539,5 @@ void main() {
   });
 }
 
+// ignore: subtype_of_sealed_class, fake for testing.
 class FakeEvalOnDartLibrary extends Fake implements EvalOnDartLibrary {}

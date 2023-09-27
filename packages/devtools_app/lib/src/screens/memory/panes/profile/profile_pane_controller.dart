@@ -4,12 +4,13 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/config_specific/import_export/import_export.dart';
 import '../../../../shared/globals.dart';
-import '../../../../shared/primitives/auto_dispose.dart';
+import '../../shared/heap/class_filter.dart';
 import 'model.dart';
 
 class ProfilePaneController extends DisposableController
@@ -30,24 +31,47 @@ class ProfilePaneController extends DisposableController
   ValueListenable<bool> get refreshOnGc => _refreshOnGc;
   final _refreshOnGc = ValueNotifier<bool>(false);
 
+  /// Current class filter.
+  ValueListenable<ClassFilter> get classFilter => _classFilter;
+  final _classFilter = ValueNotifier(ClassFilter.empty());
+
+  late final _rootPackage =
+      serviceConnection.serviceManager.rootInfoNow().package;
+
   bool _initialized = false;
 
   void initialize() {
     if (_initialized) {
       return;
     }
+
     autoDisposeStreamSubscription(
-      serviceManager.service!.onGCEvent.listen((event) {
+      serviceConnection.serviceManager.service!.onGCEvent.listen((event) {
         if (refreshOnGc.value) {
           unawaited(refresh());
         }
       }),
     );
-    addAutoDisposeListener(serviceManager.isolateManager.selectedIsolate, () {
-      unawaited(refresh());
-    });
+    addAutoDisposeListener(
+      serviceConnection.serviceManager.isolateManager.selectedIsolate,
+      () {
+        unawaited(refresh());
+      },
+    );
     unawaited(refresh());
     _initialized = true;
+  }
+
+  void setFilter(ClassFilter filter) {
+    if (filter.equals(_classFilter.value)) return;
+    _classFilter.value = filter;
+    final currentProfile = _currentAllocationProfile.value;
+    if (currentProfile == null) return;
+    _currentAllocationProfile.value = AdaptedProfile.withNewFilter(
+      currentProfile,
+      classFilter.value,
+      _rootPackage,
+    );
   }
 
   @visibleForTesting
@@ -59,19 +83,37 @@ class ProfilePaneController extends DisposableController
     _refreshOnGc.value = !_refreshOnGc.value;
   }
 
+  final selection = ValueNotifier<ProfileRecord?>(null);
+
   /// Clear the current allocation profile and request an updated version from
   /// the VM service.
   Future<void> refresh() async {
-    final service = serviceManager.service;
+    final service = serviceConnection.serviceManager.service;
     if (service == null) return;
     _currentAllocationProfile.value = null;
 
-    final isolate = serviceManager.isolateManager.selectedIsolate.value;
+    final isolate =
+        serviceConnection.serviceManager.isolateManager.selectedIsolate.value;
     if (isolate == null) return;
 
     final allocationProfile = await service.getAllocationProfile(isolate.id!);
-    _currentAllocationProfile.value =
-        AdaptedProfile.fromAllocationProfile(allocationProfile);
+    _currentAllocationProfile.value = AdaptedProfile.fromAllocationProfile(
+      allocationProfile,
+      classFilter.value,
+      _rootPackage,
+    );
+    _initializeSelection();
+  }
+
+  void _initializeSelection() {
+    final records = _currentAllocationProfile.value?.records;
+    if (records == null) return;
+    records.sort((a, b) => b.totalSize.compareTo(a.totalSize));
+    var recordToSelect = records.elementAtOrNull(0);
+    if (recordToSelect?.isTotal ?? false) {
+      recordToSelect = records.elementAtOrNull(1);
+    }
+    selection.value = recordToSelect;
   }
 
   /// Converts the current [AllocationProfile] to CSV format and downloads it.

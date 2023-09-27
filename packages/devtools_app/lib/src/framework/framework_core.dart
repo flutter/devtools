@@ -4,13 +4,17 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/utils.dart';
+import 'package:devtools_shared/devtools_shared.dart';
+import 'package:devtools_shared/service.dart';
 import 'package:logging/logging.dart';
 
 import '../../devtools.dart' as devtools show version;
+import '../extensions/extension_service.dart';
 import '../screens/debugger/breakpoint_manager.dart';
-import '../service/service.dart';
 import '../service/service_manager.dart';
 import '../service/vm_service_wrapper.dart';
+import '../shared/banner_messages.dart';
 import '../shared/console/eval/eval_service.dart';
 import '../shared/framework_controller.dart';
 import '../shared/globals.dart';
@@ -36,8 +40,10 @@ class FrameworkCore {
     setGlobal(OfflineModeController, OfflineModeController());
     setGlobal(ScriptManager, ScriptManager());
     setGlobal(NotificationService, NotificationService());
+    setGlobal(BannerMessagesController, BannerMessagesController());
     setGlobal(BreakpointManager, BreakpointManager());
     setGlobal(EvalService, EvalService());
+    setGlobal(ExtensionService, ExtensionService());
   }
 
   static void init() {
@@ -45,27 +51,46 @@ class FrameworkCore {
     _log.info('DevTools version ${devtools.version}.');
   }
 
+  static bool initializationInProgress = false;
+
   /// Returns true if we're able to connect to a device and false otherwise.
   static Future<bool> initVmService(
     String url, {
-    Uri? explicitUri,
-    required ErrorReporter errorReporter,
+    required String serviceUriAsString,
+    ErrorReporter? errorReporter = _defaultErrorReporter,
     bool logException = true,
   }) async {
-    if (serviceManager.hasConnection) {
+    if (serviceConnection.serviceManager.hasConnection) {
       // TODO(https://github.com/flutter/devtools/issues/1568): why do we call
       // this multiple times?
       return true;
     }
 
-    final Uri? uri = explicitUri ?? getServiceUriFromQueryString(url);
+    final normalizedUri = normalizeVmServiceUri(serviceUriAsString);
+    final Uri? uri = normalizedUri ?? getServiceUriFromQueryString(url);
     if (uri != null) {
+      initializationInProgress = true;
       final finishedCompleter = Completer<void>();
 
       try {
-        final VmServiceWrapper service = await connect(uri, finishedCompleter);
+        final VmServiceWrapper service = await connect<VmServiceWrapper>(
+          uri: uri,
+          finishedCompleter: finishedCompleter,
+          createService: ({
+            // ignore: avoid-dynamic, code needs to match API from VmService.
+            required Stream<dynamic> /*String|List<int>*/ inStream,
+            required void Function(String message) writeMessage,
+            required Uri connectedUri,
+          }) =>
+              VmServiceWrapper.fromNewVmService(
+            inStream: inStream,
+            writeMessage: writeMessage,
+            connectedUri: connectedUri,
+            trackFutures: integrationTestMode,
+          ),
+        );
 
-        await serviceManager.vmServiceOpened(
+        await serviceConnection.serviceManager.vmServiceOpened(
           service,
           onClosed: finishedCompleter.future,
         );
@@ -75,12 +100,21 @@ class FrameworkCore {
         if (logException) {
           _log.shout(e, e, st);
         }
-        errorReporter('Unable to connect to VM service at $uri: $e', e);
+        errorReporter!('Unable to connect to VM service at $uri: $e', e);
         return false;
+      } finally {
+        initializationInProgress = false;
       }
     } else {
       // Don't report an error here because we do not have a URI to connect to.
       return false;
     }
+  }
+
+  static void _defaultErrorReporter(String title, Object error) {
+    notificationService.pushError(
+      '$title, $error',
+      isReportable: false,
+    );
   }
 }

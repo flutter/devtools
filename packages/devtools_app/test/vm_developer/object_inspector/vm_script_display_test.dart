@@ -5,6 +5,8 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_script_display.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_developer_common_widgets.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -23,8 +25,11 @@ void main() {
   setUp(() {
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(BreakpointManager, BreakpointManager());
-    setGlobal(ServiceConnectionManager, FakeServiceManager());
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(NotificationService, NotificationService());
     setUpMockScriptManager();
@@ -59,9 +64,9 @@ void main() {
       expect(find.text('General Information'), findsOneWidget);
       expect(find.text('1 KB'), findsOneWidget);
       expect(find.text('Library:'), findsOneWidget);
-      expect(find.text('fooLib'), findsOneWidget);
+      expect(find.text('fooLib', findRichText: true), findsOneWidget);
       expect(find.text('URI:'), findsOneWidget);
-      expect(find.text('fooScript.dart'), findsOneWidget);
+      expect(find.text('fooScript.dart', findRichText: true), findsOneWidget);
       expect(find.text('Load time:'), findsOneWidget);
       expect(find.text('2022-08-10 06:30:00.000'), findsOneWidget);
 
@@ -69,7 +74,7 @@ void main() {
 
       expect(find.byType(RetainingPathWidget), findsOneWidget);
 
-      expect(find.byType(InboundReferencesWidget), findsOneWidget);
+      expect(find.byType(InboundReferencesTree), findsOneWidget);
     },
   );
 }

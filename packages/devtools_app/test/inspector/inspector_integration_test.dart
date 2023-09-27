@@ -10,7 +10,6 @@ import 'package:flutter_test/flutter_test.dart';
 import '../test_infra/flutter_test_driver.dart' show FlutterRunConfiguration;
 import '../test_infra/flutter_test_environment.dart';
 import '../test_infra/matchers/matchers.dart';
-import '../test_infra/utils/test_utils.dart';
 
 // This is a bit conservative to ensure we do not get flakes due to
 // slow interactions with the VM Service. This delay could likely be
@@ -20,42 +19,34 @@ const inspectorChangeSettleTime = Duration(seconds: 2);
 void main() {
   // We need to use real async in this test so we need to use this binding.
   initializeLiveTestWidgetsFlutterBindingWithAssets();
-
   const windowSize = Size(2600.0, 1200.0);
-  final env = FlutterTestEnvironment(
+
+  final FlutterTestEnvironment env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
   );
 
-  setUpAll(() async {
+  env.afterEverySetup = () async {
+    final service = serviceConnection.inspectorService;
+    if (env.reuseTestEnvironment) {
+      // Ensure the previous test did not set the selection on the device.
+      // TODO(jacobr): add a proper method to WidgetInspectorService that does
+      // this. setSelection currently ignores null selection requests which is
+      // a misfeature.
+      await service!.inspectorLibrary.eval(
+        'WidgetInspectorService.instance.selection.clear()',
+        isAlive: null,
+      );
+    }
+
+    if (service is InspectorService) {
+      await service.inferPubRootDirectoryIfNeeded();
+    }
+  };
+
+  setUp(() async {
     await env.setupEnvironment();
     await storage.setValue('ui.denseMode', 'true');
-
-    env.afterEverySetup = () async {
-      final service = serviceManager.inspectorService;
-      if (env.reuseTestEnvironment) {
-        // Ensure the previous test did not set the selection on the device.
-        // TODO(jacobr): add a proper method to WidgetInspectorService that does
-        // this. setSelection currently ignores null selection requests which is
-        // a misfeature.
-        await service!.inspectorLibrary.eval(
-          'WidgetInspectorService.instance.selection.clear()',
-          isAlive: null,
-        );
-      }
-
-      if (service is InspectorService) {
-        await service.inferPubRootDirectoryIfNeeded();
-      }
-    };
-
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
-    setGlobal(BreakpointManager, BreakpointManager());
-    setGlobal(IdeTheme, IdeTheme());
-    setGlobal(NotificationService, NotificationService());
-  });
-
-  tearDown(() async {
-    await env.tearDownEnvironment();
+    preferences.toggleDenseMode(true);
   });
 
   tearDownAll(() async {
@@ -63,16 +54,13 @@ void main() {
   });
 
   group('screenshot tests', () {
-    setUp(() async {
-      await env.setupEnvironment();
-    });
-
     testWidgetsWithWindowSize(
       'navigation',
       windowSize,
       (WidgetTester tester) async {
-        expect(serviceManager.service, equals(env.service));
-        expect(serviceManager.isolateManager, isNotNull);
+        await env.setupEnvironment();
+        expect(serviceConnection.serviceManager.service, equals(env.service));
+        expect(serviceConnection.serviceManager.isolateManager, isNotNull);
 
         final screen = InspectorScreen();
         await tester.pumpWidget(
@@ -158,8 +146,9 @@ void main() {
             '../test_infra/goldens/integration_animated_physical_model_selected.png',
           ),
         );
+
+        await env.tearDownEnvironment();
       },
-      tags: skipForFlutterTestRegistry,
     );
 
     // TODO(jacobr): convert these tests to screenshot tests like the initial
@@ -315,6 +304,7 @@ void main() {
         // TODO(dantup): Remove this.
         return;
       }
+      await env.setupEnvironment();
 
       await serviceManager.performHotReload();
       // Ensure the inspector does not fall over and die after a hot reload.
@@ -342,6 +332,8 @@ void main() {
 // https://github.com/flutter/devtools/issues/337 is fixed.
 /*
     test('hotRestart', () async {
+      await env.setupEnvironment();
+
       // The important thing about this is that the details tree should scroll
       // instead of re-rooting as the selected row is already visible in the
       // details tree.
@@ -362,13 +354,13 @@ void main() {
 
       /// After the hot restart some existing calls to the vm service may
       /// timeout and that is ok.
-      serviceManager.service.doNotWaitForPendingFuturesBeforeExit();
+      serviceManager.manager.service.doNotWaitForPendingFuturesBeforeExit();
 
       await serviceManager.performHotRestart();
       // The isolate starts out paused on a hot restart so we have to resume
       // it manually to make the test pass.
 
-      await serviceManager.service
+      await serviceManager.manager.service
           .resume(serviceManager.isolateManager.selectedIsolate.id);
 
       // First UI transition is to an empty tree.
@@ -412,21 +404,18 @@ void main() {
   });
 
   group('widget errors', () {
-    setUp(() async {
-      await env.setupEnvironment(
-        config: const FlutterRunConfiguration(
-          withDebugger: true,
-          entryScript: 'lib/overflow_errors.dart',
-        ),
-      );
-    });
-
     testWidgetsWithWindowSize(
       'show navigator and error labels',
       windowSize,
       (WidgetTester tester) async {
-        expect(serviceManager.service, equals(env.service));
-        expect(serviceManager.isolateManager, isNotNull);
+        await env.setupEnvironment(
+          config: const FlutterRunConfiguration(
+            withDebugger: true,
+            entryScript: 'lib/overflow_errors.dart',
+          ),
+        );
+        expect(serviceConnection.serviceManager.service, equals(env.service));
+        expect(serviceConnection.serviceManager.isolateManager, isNotNull);
 
         final screen = InspectorScreen();
         await tester.pumpWidget(
@@ -461,8 +450,9 @@ void main() {
             '../test_infra/goldens/integration_inspector_errors_2_error_selected.png',
           ),
         );
+
+        await env.tearDownEnvironment();
       },
-      tags: skipForFlutterTestRegistry,
     );
   });
 }

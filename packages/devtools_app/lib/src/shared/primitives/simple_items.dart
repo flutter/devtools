@@ -25,26 +25,6 @@ class PackagePrefixes {
   static const dartUi = 'dart:ui';
 }
 
-enum ScreenMetaData {
-  inspector('inspector', 'Flutter Inspector'),
-  performance('performance', 'Performance'),
-  cpuProfiler('cpu-profiler', 'CPU Profiler'),
-  memory('memory', 'Memory'),
-  debugger('debugger', 'Debugger'),
-  network('network', 'Network'),
-  logging('logging', 'Logging'),
-  provider('provider', 'Provider'),
-  appSize('app-size', 'App Size'),
-  vmTools('vm-tools', 'VM Tools'),
-  simple('simple', '');
-
-  const ScreenMetaData(this.id, this.title);
-
-  final String id;
-
-  final String title;
-}
-
 const String traceEventsFieldName = 'traceEvents';
 
 const closureName = '<closure>';

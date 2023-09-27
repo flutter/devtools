@@ -7,6 +7,8 @@ import 'package:devtools_app/src/screens/performance/panes/timeline_events/legac
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/legacy/timeline_flame_chart.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/timeline_events_view.dart';
 import 'package:devtools_app/src/shared/charts/flame_chart.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -17,26 +19,29 @@ import '../../../test_infra/matchers/matchers.dart';
 import '../../../test_infra/test_data/performance.dart';
 
 void main() {
-  FakeServiceManager fakeServiceManager;
+  FakeServiceConnectionManager fakeServiceConnection;
   late PerformanceController controller;
 
   void setUpServiceManagerWithTimeline(
     Map<String, dynamic> timelineJson,
   ) {
-    fakeServiceManager = FakeServiceManager(
+    fakeServiceConnection = FakeServiceConnectionManager(
       service: FakeServiceManager.createFakeService(
         timelineData: vm_service.Timeline.parse(timelineJson)!,
       ),
     );
     mockConnectedApp(
-      fakeServiceManager.connectedApp!,
+      fakeServiceConnection.serviceManager.connectedApp!,
       isFlutterApp: true,
       isProfileBuild: true,
       isWebApp: false,
     );
 
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
+    setGlobal(ServiceConnectionManager, fakeServiceConnection);
     setGlobal(OfflineModeController, OfflineModeController());
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(PreferencesController, PreferencesController());

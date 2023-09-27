@@ -7,15 +7,6 @@ import 'package:vm_service/vm_service.dart';
 import 'class_name.dart';
 import 'simple_items.dart';
 
-/// Names for json fields.
-class _JsonFields {
-  static const String code = 'code';
-  static const String references = 'references';
-  static const String klass = 'klass';
-  static const String library = 'library';
-  static const String shallowSize = 'shallowSize';
-}
-
 /// Contains information from [HeapSnapshotObject] needed for
 /// memory analysis on memory screen.
 class AdaptedHeapObject {
@@ -38,20 +29,6 @@ class AdaptedHeapObject {
     );
   }
 
-  factory AdaptedHeapObject.fromJson(Map<String, Object?> json, int index) =>
-      AdaptedHeapObject(
-        code: json[_JsonFields.code] as int,
-        outRefs: (json[_JsonFields.references] as List<Object?>)
-            .cast<int>()
-            .where((i) => i != index)
-            .toSet(),
-        heapClass: HeapClassName(
-          className: json[_JsonFields.klass] as String,
-          library: json[_JsonFields.library],
-        ),
-        shallowSize: (json[_JsonFields.shallowSize] ?? 0) as int,
-      );
-
   final Set<int> outRefs;
   final Set<int> inRefs = {};
   final HeapClassName heapClass;
@@ -70,14 +47,6 @@ class AdaptedHeapObject {
   ///
   /// Null, if object is not reachable.
   int? retainedSize;
-
-  Map<String, dynamic> toJson() => {
-        _JsonFields.code: code,
-        _JsonFields.references: outRefs.toList(),
-        _JsonFields.klass: heapClass.className,
-        _JsonFields.library: heapClass.library,
-        _JsonFields.shallowSize: shallowSize,
-      };
 
   String get shortName => '${heapClass.className}-$code';
 

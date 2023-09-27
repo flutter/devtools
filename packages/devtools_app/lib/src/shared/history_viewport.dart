@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../screens/debugger/common.dart';
 import 'common_widgets.dart';
 import 'primitives/history_manager.dart';
-import 'theme.dart';
 
 /// A [Widget] that allows for displaying content based on the current state of a
 /// [HistoryManager]. Includes built-in controls for navigating back and forth

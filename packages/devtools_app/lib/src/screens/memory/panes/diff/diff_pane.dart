@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
@@ -9,8 +12,7 @@ import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/config_specific/launch_url/launch_url.dart';
 import '../../../../shared/primitives/simple_items.dart';
-import '../../../../shared/split.dart';
-import '../../../../shared/theme.dart';
+import '../../shared/widgets/shared_memory_widgets.dart';
 import 'controller/diff_pane_controller.dart';
 import 'controller/item_controller.dart';
 import 'widgets/snapshot_control_pane.dart';
@@ -62,13 +64,20 @@ class _SnapshotItemContent extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
-                  child: Markdown(
-                    data: _snapshotDocumentation,
-                    onTapLink: (text, url, title) async =>
-                        await launchUrl(url!),
+                  child: ListView(
+                    children: [
+                      SizedBox(
+                        height: 450,
+                        child: Markdown(
+                          data: _snapshotDocumentation,
+                          onTapLink: (text, url, title) =>
+                              unawaited(launchUrl(url!)),
+                        ),
+                      ),
+                      const ClassTypeLegend(),
+                    ],
                   ),
                 ),
-                const SizedBox(height: denseSpacing),
                 MoreInfoLink(
                   url: DocLinks.diff.value,
                   gaScreenName: gac.memory,
@@ -140,7 +149,8 @@ Find unexpected memory usage by comparing two heap snapshots:
 
     b. Execute the feature in your application
 
-    c. Take a second snapshot
+    c. Take a second snapshot. If you are experiencing DevTools crashes due to size of snapshots,
+       switch to the [desktop version](https://github.com/flutter/devtools/blob/master/BETA_TESTING.md).
 
     d. While viewing the second snapshot, click **Diff with:** and select the first snapshot from the drop-down menu;
     the results area will display the diff

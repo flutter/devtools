@@ -8,7 +8,7 @@ import '../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/utils.dart';
-import '../../memory_controller.dart';
+import '../../framework/connected/memory_controller.dart';
 import 'chart_pane_controller.dart';
 import 'primitives.dart';
 

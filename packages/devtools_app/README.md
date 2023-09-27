@@ -2,9 +2,7 @@
 
 This is a companion repo to the main Flutter repo. It contains the source code
 for a suite of performance tools for Dart and Flutter. All of the core logic for
-the devtools app is in package:devtools_app with package:devtools just serving
-as a container to serve precompiled versions of the app for easy use with
-`pub global activate`.
+the devtools app is in package:devtools_app.
 
 ## Getting started
 

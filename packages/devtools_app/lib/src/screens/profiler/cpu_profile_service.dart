@@ -5,13 +5,12 @@
 import 'package:vm_service/vm_service.dart';
 
 import '../../service/vm_flags.dart' as vm_flags;
-import '../../service/vm_service_wrapper.dart';
 import '../../shared/globals.dart';
 import '../vm_developer/vm_service_private_extensions.dart';
 import 'cpu_profile_model.dart';
 
 /// Manages interactions between the Cpu Profiler and the VmService.
-extension CpuProfilerExtension on VmServiceWrapper {
+extension CpuProfilerExtension on VmService {
   Future<CpuProfilePair> getCpuProfile({
     required int startMicros,
     required int extentMicros,
@@ -19,8 +18,10 @@ extension CpuProfilerExtension on VmServiceWrapper {
     // Grab the value of this flag before doing asynchronous work.
     final vmDeveloperModeEnabled = preferences.vmDeveloperModeEnabled.value;
 
-    final isolateId = serviceManager.isolateManager.selectedIsolate.value!.id!;
-    final cpuSamples = await serviceManager.service!.getCpuSamples(
+    final isolateId = serviceConnection
+        .serviceManager.isolateManager.selectedIsolate.value!.id!;
+    final cpuSamples =
+        await serviceConnection.serviceManager.service!.getCpuSamples(
       isolateId,
       startMicros,
       extentMicros,
@@ -71,16 +72,19 @@ extension CpuProfilerExtension on VmServiceWrapper {
   }
 
   Future clearSamples() {
-    return serviceManager.service!.clearCpuSamples(
-      serviceManager.isolateManager.selectedIsolate.value!.id!,
+    return serviceConnection.serviceManager.service!.clearCpuSamples(
+      serviceConnection
+          .serviceManager.isolateManager.selectedIsolate.value!.id!,
     );
   }
 
   Future<Response> setProfilePeriod(String value) {
-    return serviceManager.service!.setFlag(vm_flags.profilePeriod, value);
+    return serviceConnection.serviceManager.service!
+        .setFlag(vm_flags.profilePeriod, value);
   }
 
   Future<Response> enableCpuProfiler() async {
-    return await serviceManager.service!.setFlag(vm_flags.profiler, 'true');
+    return await serviceConnection.serviceManager.service!
+        .setFlag(vm_flags.profiler, 'true');
   }
 }

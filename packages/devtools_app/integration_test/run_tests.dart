@@ -2,68 +2,50 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
+import 'package:devtools_shared/devtools_test_utils.dart';
 
 import 'test_infra/run/_in_file_args.dart';
+import 'test_infra/run/_utils.dart';
 import 'test_infra/run/run_test.dart';
 
 // To run integration tests, run the following from `devtools_app/`:
 // `dart run integration_test/run_tests.dart`
 //
-// Arguments that may be passed to this command:
-// --target=<path/to/test.dart> - this will run a single test at the path
-//    provided.
-// --test-app-uri=<some vm service uri> - this will connect DevTools to the app
-//    you specify instead of spinning up a test app inside
-//    [runFlutterIntegrationTest].
-// --update-goldens - this will update the current golden images with the
-//   results from this test run
-// --headless - this will run the integration test on the 'web-server' device
-//    instead of the 'chrome' device, meaning you will not be able to see the
-//    integration test run in Chrome when running locally.
+// To see a list of arguments that you can pass to this test script, please run
+// the above command with the '-h' flag.
 
 const _testDirectory = 'integration_test/test';
-const _testSuffix = '_test.dart';
 const _offlineIndicator = 'integration_test/test/offline';
 
-void main(List<String> testRunnerArgs) async {
-  final testTargetProvided = testRunnerArgs
-      .where((arg) => arg.startsWith(TestRunnerArgs.testTargetArg))
-      .isNotEmpty;
+void main(List<String> args) async {
+  final testRunnerArgs = DevToolsAppTestRunnerArgs(
+    args,
+    verifyValidTarget: false,
+  );
 
-  if (testTargetProvided) {
-    final testFilePath = TestRunnerArgs(testRunnerArgs).testTarget;
-
-    // TODO(kenz): add support for specifying a directory as the target instead
-    // of a single file.
-    await _runTest(testRunnerArgs, testFilePath);
-  } else {
-    // Run all tests since a target test was not provided.
-    final testDirectory = Directory(_testDirectory);
-    final testFiles = testDirectory
-        .listSync(recursive: true)
-        .where((testFile) => testFile.path.endsWith(_testSuffix));
-
-    for (final testFile in testFiles) {
-      final testTarget = testFile.path;
-      await _runTest(
-        [
-          ...testRunnerArgs,
-          '${TestRunnerArgs.testTargetArg}$testTarget',
-        ],
-        testTarget,
-      );
-    }
-  }
+  await runOneOrManyTests<DevToolsAppTestRunnerArgs>(
+    testDirectoryPath: _testDirectory,
+    testRunnerArgs: testRunnerArgs,
+    runTest: _runTest,
+    newArgsGenerator: (args) => DevToolsAppTestRunnerArgs(args),
+    testIsSupported: (testFile) =>
+        testRunnerArgs.testAppDevice.supportsTest(testFile.path),
+    debugLogging: debugTestScript,
+  );
 }
 
 Future<void> _runTest(
-  List<String> testRunnerArgs,
-  String testFilePath,
+  DevToolsAppTestRunnerArgs testRunnerArgs,
 ) async {
+  final testTarget = testRunnerArgs.testTarget!;
+  if (!testRunnerArgs.testAppDevice.supportsTest(testTarget)) {
+    // Skip test, since it is not supported for device.
+    return;
+  }
+
   await runFlutterIntegrationTest(
-    TestRunnerArgs(testRunnerArgs),
-    TestFileArgs(testFilePath),
-    offline: testFilePath.startsWith(_offlineIndicator),
+    testRunnerArgs,
+    TestFileArgs(testTarget, testAppDevice: testRunnerArgs.testAppDevice),
+    offline: testTarget.startsWith(_offlineIndicator),
   );
 }

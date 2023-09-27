@@ -10,6 +10,8 @@ import '../../../shared/heap/spanning_tree.dart';
 import 'model.dart';
 
 /// Analyzes notGCed leaks and returns result of the analysis.
+// TODO(polina-c): add tests for this method.
+// https://github.com/flutter/devtools/issues/3951
 Future<NotGCedAnalyzed> analyzeNotGCed(NotGCedAnalyzerTask task) async {
   await analyzeHeapAndSetRetainingPaths(task.heap, task.reports);
 

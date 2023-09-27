@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/screens/memory/memory_screen.dart';
-import 'package:devtools_app/src/screens/memory/memory_tabs.dart';
+import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/screens/memory/framework/connected/memory_tabs.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/diff_pane.dart';
+import 'package:devtools_app/src/screens/memory/panes/diff/widgets/snapshot_list.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -80,7 +81,19 @@ void main() {
         );
 
         // Delete a snapshot.
-        await tester.tap(find.byTooltip('Delete snapshot'));
+        await tester.tap(
+          find.descendant(
+            of: find.byType(SnapshotListTitle),
+            matching: find.byType(ContextMenuButton),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(
+          find.descendant(
+            of: find.byType(MenuItemButton),
+            matching: find.text('Delete'),
+          ),
+        );
         await tester.pumpAndSettle();
         expect(snapshots.value.length, equals(1 + 3 - 1));
 

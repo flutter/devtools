@@ -26,7 +26,7 @@ import 'package:vm_service/vm_service_io.dart';
 // Set this to true for debugging to get JSON written to stdout.
 const bool _printDebugOutputToStdOut = false;
 const Duration defaultTimeout = Duration(seconds: 40);
-const Duration appStartTimeout = Duration(seconds: 120);
+const Duration appStartTimeout = Duration(seconds: 240);
 const Duration quitTimeout = Duration(seconds: 10);
 
 abstract class FlutterTestDriver {

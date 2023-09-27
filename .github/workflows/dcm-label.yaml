@@ -9,6 +9,7 @@ on:
       - master
     paths:
       - "**/*.dart"
+      - "!packages/devtools_app/lib/devtools.dart"
 
 jobs:
   dcm-label-reminder:

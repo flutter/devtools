@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -14,11 +15,12 @@ import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/table/table.dart';
 import '../../../../shared/table/table_controller.dart';
 import '../../../../shared/table/table_data.dart';
-import '../../../../shared/theme.dart';
-import '../../../../shared/utils.dart';
 import '../../../vm_developer/vm_service_private_extensions.dart';
+import '../../shared/heap/class_filter.dart';
 import '../../shared/primitives/simple_elements.dart';
-import '../../shared/shared_memory_widgets.dart';
+import '../../shared/widgets/class_filter.dart';
+import '../../shared/widgets/shared_memory_widgets.dart';
+import 'instances.dart';
 import 'model.dart';
 import 'profile_pane_controller.dart';
 
@@ -30,8 +32,10 @@ import 'profile_pane_controller.dart';
 const _defaultNumberFieldWidth = 90.0;
 
 class _FieldClassNameColumn extends ColumnData<ProfileRecord>
-    implements ColumnRenderer<ProfileRecord> {
-  _FieldClassNameColumn()
+    implements
+        ColumnRenderer<ProfileRecord>,
+        ColumnHeaderRenderer<ProfileRecord> {
+  _FieldClassNameColumn(this.classFilterData)
       : super(
           'Class',
           fixedWidthPx: scaleByFontFactor(200),
@@ -47,6 +51,8 @@ class _FieldClassNameColumn extends ColumnData<ProfileRecord>
   @override
   bool get supportsSorting => true;
 
+  final ClassFilterData classFilterData;
+
   @override
   Widget? build(
     BuildContext context,
@@ -60,7 +66,21 @@ class _FieldClassNameColumn extends ColumnData<ProfileRecord>
       theClass: data.heapClass,
       showCopyButton: isRowSelected,
       copyGaItem: gac.MemoryEvent.diffClassSingleCopy,
-      rootPackage: serviceManager.rootInfoNow().package,
+      rootPackage: serviceConnection.serviceManager.rootInfoNow().package,
+    );
+  }
+
+  @override
+  Widget? buildHeader(
+    BuildContext context,
+    Widget Function() defaultHeaderRenderer,
+  ) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(child: defaultHeaderRenderer()),
+        ClassFilterButton(classFilterData),
+      ],
     );
   }
 }
@@ -85,7 +105,8 @@ enum HeapGeneration {
   }
 }
 
-class _FieldInstanceCountColumn extends ColumnData<ProfileRecord> {
+class _FieldInstanceCountColumn extends ColumnData<ProfileRecord>
+    implements ColumnRenderer<ProfileRecord> {
   _FieldInstanceCountColumn({required this.heap})
       : super(
           'Instances',
@@ -110,6 +131,21 @@ class _FieldInstanceCountColumn extends ColumnData<ProfileRecord> {
 
   @override
   bool get numeric => true;
+
+  @override
+  Widget? build(
+    BuildContext context,
+    ProfileRecord data, {
+    bool isRowSelected = false,
+    VoidCallback? onPressed,
+  }) {
+    return ProfileInstanceTableCell(
+      data.heapClass,
+      gac.MemoryAreas.profile,
+      isSelected: isRowSelected,
+      count: data.totalInstances ?? 0,
+    );
+  }
 }
 
 class _FieldExternalSizeColumn extends _FieldSizeColumn {
@@ -469,7 +505,7 @@ class AllocationProfileTableViewState
 }
 
 class _AllocationProfileTable extends StatelessWidget {
-  const _AllocationProfileTable({
+  _AllocationProfileTable({
     Key? key,
     required this.controller,
   }) : super(key: key);
@@ -498,14 +534,19 @@ class _AllocationProfileTable extends StatelessWidget {
     heap: HeapGeneration.total,
   );
 
-  static final _columns = [
-    _FieldClassNameColumn(),
+  late final List<ColumnData<ProfileRecord>> _columns = [
+    _FieldClassNameColumn(
+      ClassFilterData(
+        filter: controller.classFilter,
+        onChanged: controller.setFilter,
+      ),
+    ),
     _FieldInstanceCountColumn(heap: HeapGeneration.total),
     _fieldSizeColumn,
     _FieldDartHeapSizeColumn(heap: HeapGeneration.total),
   ];
 
-  static final _vmDeveloperModeColumns = [
+  late final _vmDeveloperModeColumns = [
     _FieldExternalSizeColumn(heap: HeapGeneration.total),
     _FieldInstanceCountColumn(heap: HeapGeneration.newSpace),
     _FieldSizeColumn(heap: HeapGeneration.newSpace),
@@ -533,28 +574,22 @@ class _AllocationProfileTable extends StatelessWidget {
         return ValueListenableBuilder<bool>(
           valueListenable: preferences.vmDeveloperModeEnabled,
           builder: (context, vmDeveloperModeEnabled, _) {
-            return LayoutBuilder(
-              builder: (context, constraints) {
-                return OutlineDecoration.onlyTop(
-                  child: FlatTable<ProfileRecord>(
-                    keyFactory: (element) => Key(element.heapClass.fullName),
-                    data: profile.records,
-                    dataKey: 'allocation-profile',
-                    columnGroups: vmDeveloperModeEnabled
-                        ? _AllocationProfileTable._vmModeColumnGroups
-                        : null,
-                    columns: [
-                      ..._AllocationProfileTable._columns,
-                      if (vmDeveloperModeEnabled)
-                        ..._AllocationProfileTable._vmDeveloperModeColumns,
-                    ],
-                    defaultSortColumn: _AllocationProfileTable._fieldSizeColumn,
-                    defaultSortDirection: SortDirection.descending,
-                    pinBehavior: FlatTablePinBehavior.pinOriginalToTop,
-                    includeColumnGroupHeaders: false,
-                  ),
-                );
-              },
+            return FlatTable<ProfileRecord>(
+              keyFactory: (element) => Key(element.heapClass.fullName),
+              data: profile.records,
+              dataKey: 'allocation-profile',
+              columnGroups: vmDeveloperModeEnabled
+                  ? _AllocationProfileTable._vmModeColumnGroups
+                  : null,
+              columns: [
+                ..._columns,
+                if (vmDeveloperModeEnabled) ..._vmDeveloperModeColumns,
+              ],
+              defaultSortColumn: _AllocationProfileTable._fieldSizeColumn,
+              defaultSortDirection: SortDirection.descending,
+              pinBehavior: FlatTablePinBehavior.pinOriginalToTop,
+              includeColumnGroupHeaders: false,
+              selectionNotifier: controller.selection,
             );
           },
         );
@@ -636,7 +671,7 @@ class _RefreshOnGCToggleButton extends StatelessWidget {
     return ValueListenableBuilder<bool>(
       valueListenable: allocationProfileController.refreshOnGc,
       builder: (context, refreshOnGc, _) {
-        return ToggleButton(
+        return DevToolsToggleButton(
           message: 'Auto-refresh on garbage collection',
           label: 'Refresh on GC',
           icon: Icons.autorenew_outlined,
@@ -671,6 +706,8 @@ class _ProfileHelpLink extends StatelessWidget {
           const Text('The allocation profile tab displays information about\n'
               'allocated objects in the Dart heap of the selected\n'
               'isolate.'),
+          const SizedBox(height: denseSpacing),
+          const ClassTypeLegend(),
           MoreInfoLink(
             url: DocLinks.profile.value,
             gaScreenName: '',

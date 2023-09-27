@@ -6,13 +6,9 @@
 
 import 'package:ansi_up/ansi_up.dart';
 import 'package:ansicolor/ansicolor.dart';
-import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
-import 'package:devtools_app/src/screens/logging/logging_controller.dart';
-import 'package:devtools_app/src/screens/logging/logging_screen.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/console/widgets/console_pane.dart';
-import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/primitives/utils.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -105,7 +101,7 @@ void main() {
 
   group('Logging Screen', () {
     late MockLoggingController mockLoggingController;
-    late FakeServiceManager fakeServiceManager;
+    late FakeServiceConnectionManager fakeServiceConnection;
     const windowSize = Size(1000.0, 1000.0);
 
     const totalLogs = 10;
@@ -175,8 +171,8 @@ void main() {
       when(mockLoggingController.filteredData)
           .thenReturn(ListValueNotifier<LogData>([]));
 
-      fakeServiceManager = FakeServiceManager();
-      final app = fakeServiceManager.connectedApp!;
+      fakeServiceConnection = FakeServiceConnectionManager();
+      final app = fakeServiceConnection.serviceManager.connectedApp!;
       when(app.isFlutterWebAppNow).thenReturn(false);
       when(app.isProfileBuildNow).thenReturn(false);
       // TODO(polinach): when we start supporting browser tests, uncomment
@@ -184,7 +180,7 @@ void main() {
       // See https://github.com/flutter/devtools/issues/3616.
       // when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
       //     .thenReturn(ValueNotifier<int>(0));
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(ServiceConnectionManager, fakeServiceConnection);
       when(mockLoggingController.data).thenReturn(fakeLogData);
       when(mockLoggingController.filteredData)
           .thenReturn(ListValueNotifier<LogData>(fakeLogData));
@@ -237,7 +233,7 @@ void main() {
   });
 
   group('Debugger Screen', () {
-    late FakeServiceManager fakeServiceManager;
+    late FakeServiceConnectionManager fakeServiceConnection;
     late MockDebuggerController debuggerController;
 
     const windowSize = Size(4000.0, 4000.0);
@@ -270,12 +266,12 @@ void main() {
     setUp(() {
       // TODO(polinach): remove unnecessary setup steps after fixing
       // https://github.com/flutter/devtools/issues/3616.
-      fakeServiceManager = FakeServiceManager();
-      final app = fakeServiceManager.connectedApp!;
+      fakeServiceConnection = FakeServiceConnectionManager();
+      final app = fakeServiceConnection.serviceManager.connectedApp!;
       when(app.isProfileBuildNow).thenReturn(false);
       when(app.isDartWebAppNow).thenReturn(false);
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
-      fakeServiceManager.consoleService.ensureServiceInitialized();
+      setGlobal(ServiceConnectionManager, fakeServiceConnection);
+      fakeServiceConnection.consoleService.ensureServiceInitialized();
 
       // TODO(polinach): when we start supporting browser tests, uncomment
       // and fix the mock configuration.
@@ -290,7 +286,7 @@ void main() {
       'Console area shows processed ansi text',
       windowSize,
       (WidgetTester tester) async {
-        serviceManager.consoleService.appendStdio(ansiCodesOutput());
+        serviceConnection.consoleService.appendStdio(ansiCodesOutput());
 
         await pumpConsole(tester, debuggerController);
 

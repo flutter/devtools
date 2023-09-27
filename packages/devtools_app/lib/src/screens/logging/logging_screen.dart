@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -11,18 +13,15 @@ import '../../service/service_extension_widgets.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
-import '../../shared/primitives/auto_dispose.dart';
-import '../../shared/primitives/simple_items.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/screen.dart';
-import '../../shared/split.dart';
-import '../../shared/theme.dart';
 import '../../shared/ui/filter.dart';
-import '../../shared/ui/icons.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/utils.dart';
 import '_log_details.dart';
 import '_logs_table.dart';
 import 'logging_controller.dart';
+import 'shared/constants.dart';
 
 /// Presents logs from the connected app.
 class LoggingScreen extends Screen {
@@ -30,7 +29,7 @@ class LoggingScreen extends Screen {
       : super(
           id,
           title: ScreenMetaData.logging.title,
-          icon: Octicons.clippy,
+          icon: ScreenMetaData.logging.icon,
         );
 
   static final id = ScreenMetaData.logging.id;
@@ -125,20 +124,43 @@ class _LoggingScreenState extends State<LoggingScreenBody>
           onPressed: controller.clear,
           gaScreen: gac.logging,
           gaSelection: gac.clear,
+          minScreenWidthForTextBeforeScaling: loggingMinVerboseWidth,
         ),
         const Spacer(),
-        const StructuredErrorsToggle(),
         const SizedBox(width: denseSpacing),
         // TODO(kenz): fix focus issue when state is refreshed
         SearchField<LoggingController>(
-          searchFieldWidth: wideSearchFieldWidth,
+          searchFieldWidth: isScreenWiderThan(context, loggingMinVerboseWidth)
+              ? wideSearchFieldWidth
+              : defaultSearchFieldWidth,
           searchController: controller,
           searchFieldEnabled: hasData,
         ),
         const SizedBox(width: denseSpacing),
-        FilterButton(
+        DevToolsFilterButton(
           onPressed: _showFilterDialog,
           isFilterActive: controller.isFilterActive,
+        ),
+        const SizedBox(width: denseSpacing),
+        CopyToClipboardControl(
+          dataProvider: () => controller.filteredData.value
+              .map((e) => '${e.timestamp} [${e.kind}] ${e.prettyPrinted()}')
+              .joinWithTrailing('\n'),
+          tooltip: 'Copy filtered logs',
+        ),
+        const SizedBox(width: denseSpacing),
+        SettingsOutlinedButton(
+          gaScreen: gac.logging,
+          gaSelection: gac.loggingSettings,
+          tooltip: 'Logging Settings',
+          onPressed: () {
+            unawaited(
+              showDialog(
+                context: context,
+                builder: (context) => const LoggingSettingsDialog(),
+              ),
+            );
+          },
         ),
       ],
     );
@@ -181,6 +203,35 @@ class _LoggingScreenState extends State<LoggingScreenBody>
           queryInstructions: LoggingScreenBody.filterQueryInstructions,
         ),
       ),
+    );
+  }
+}
+
+class LoggingSettingsDialog extends StatelessWidget {
+  const LoggingSettingsDialog({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return DevToolsDialog(
+      title: const DialogTitleText('Logging Settings'),
+      content: SizedBox(
+        width: defaultDialogWidth,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ...dialogSubHeader(
+              theme,
+              'General',
+            ),
+            const StructuredErrorsToggle(),
+          ],
+        ),
+      ),
+      actions: const [
+        DialogCloseButton(),
+      ],
     );
   }
 }

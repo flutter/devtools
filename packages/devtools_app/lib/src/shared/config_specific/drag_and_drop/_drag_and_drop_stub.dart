@@ -4,7 +4,8 @@
 
 import 'drag_and_drop.dart';
 
-DragAndDropManager createDragAndDropManager() {
+// ignore: avoid-unused-parameters, method is used from a conditional import
+DragAndDropManager createDragAndDropManager(int viewId) {
   throw Exception(
     'Attempting to create DragAndDrop for unrecognized platform.',
   );

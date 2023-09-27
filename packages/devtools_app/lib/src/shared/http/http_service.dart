@@ -2,16 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
+import 'package:devtools_app_shared/service.dart';
+import 'package:flutter/foundation.dart';
+
+import '../../service/service_extensions.dart' as extensions;
 import '../globals.dart';
 import '../primitives/utils.dart';
 
 /// Enables or disables HTTP logging for all isolates.
 Future<void> toggleHttpRequestLogging(bool state) async {
-  await serviceManager.service!.forEachIsolate((isolate) async {
-    final httpLoggingAvailable = await serviceManager.service!
+  await serviceConnection.serviceManager.service!
+      .forEachIsolate((isolate) async {
+    final httpLoggingAvailable = await serviceConnection.serviceManager.service!
         .isHttpTimelineLoggingAvailable(isolate.id!);
     if (httpLoggingAvailable) {
-      final future = serviceManager.service!.httpEnableTimelineLogging(
+      final future =
+          serviceConnection.serviceManager.service!.httpEnableTimelineLogging(
         isolate.id!,
         state,
       );
@@ -24,3 +32,11 @@ Future<void> toggleHttpRequestLogging(bool state) async {
     }
   });
 }
+
+bool get httpLoggingEnabled => httpLoggingState.value.enabled;
+
+ValueListenable<ServiceExtensionState> get httpLoggingState =>
+    serviceConnection.serviceManager.serviceExtensionManager
+        .getServiceExtensionState(
+      extensions.httpEnableTimelineLogging.extension,
+    );

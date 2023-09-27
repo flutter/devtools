@@ -4,25 +4,22 @@
 
 @TestOn('vm')
 
-import 'package:devtools_app/src/screens/network/network_controller.dart';
-import 'package:devtools_app/src/screens/network/network_model.dart';
-import 'package:devtools_app/src/screens/network/network_screen.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/http/http_request_data.dart';
+import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../test_infra/test_data/network.dart';
+
 import 'utils/network_test_utils.dart';
 
 void main() {
   group('NetworkScreen NetworkRequestsTable', () {
     late NetworkController controller;
     late CurrentNetworkRequests currentRequests;
-    late FakeServiceManager fakeServiceManager;
+    late FakeServiceConnectionManager fakeServiceConnection;
     late SocketProfile socketProfile;
     late HttpProfile httpProfile;
     late List<NetworkRequest> requests;
@@ -30,13 +27,13 @@ void main() {
     setUpAll(() {
       httpProfile = loadHttpProfile();
       socketProfile = loadSocketProfile();
-      fakeServiceManager = FakeServiceManager(
+      fakeServiceConnection = FakeServiceConnectionManager(
         service: FakeServiceManager.createFakeService(
           httpProfile: httpProfile,
           socketProfile: socketProfile,
         ),
       );
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(ServiceConnectionManager, fakeServiceConnection);
       setGlobal(IdeTheme, IdeTheme());
 
       // Bypass controller recording so timelineMicroOffset is not time dependant

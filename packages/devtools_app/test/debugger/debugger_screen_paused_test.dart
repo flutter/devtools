@@ -7,6 +7,8 @@ import 'package:devtools_app/src/screens/debugger/codeview.dart';
 import 'package:devtools_app/src/screens/debugger/controls.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_model.dart';
 import 'package:devtools_app/src/shared/diagnostics/primitives/source_location.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -16,74 +18,72 @@ import 'package:vm_service/vm_service.dart';
 import '../test_infra/utils/test_utils.dart';
 
 void main() {
-  final screen = DebuggerScreen();
-
   const windowSize = Size(2500.0, 1500.0);
 
-  final fakeServiceManager = FakeServiceManager();
-  final scriptManager = MockScriptManager();
-  mockConnectedApp(
-    fakeServiceManager.connectedApp!,
-    isFlutterApp: true,
-    isProfileBuild: false,
-    isWebApp: false,
-  );
-  setGlobal(ServiceConnectionManager, fakeServiceManager);
-  setGlobal(IdeTheme, IdeTheme());
-  setGlobal(ScriptManager, scriptManager);
-  setGlobal(NotificationService, NotificationService());
-  setGlobal(BreakpointManager, BreakpointManager());
-  setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
-  setGlobal(PreferencesController, PreferencesController());
-  fakeServiceManager.consoleService.ensureServiceInitialized();
-  when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
-      .thenReturn(ValueNotifier<int>(0));
-  final debuggerController = createMockDebuggerControllerWithDefaults();
-  final codeViewController = debuggerController.codeViewController;
-  final scriptsHistory = ScriptsHistory();
-  scriptsHistory.pushEntry(mockScript!);
-  when(codeViewController.scriptsHistory).thenReturn(scriptsHistory);
-  when(debuggerController.stackFramesWithLocation).thenReturn(
-    ValueNotifier([
-      _stackFrame1,
-      _stackFrame2,
-    ]),
-  );
-  when(codeViewController.currentScriptRef)
-      .thenReturn(ValueNotifier(mockScriptRef));
-  when(codeViewController.currentParsedScript)
-      .thenReturn(ValueNotifier(mockParsedScript));
+  late FakeServiceConnectionManager fakeServiceConnection;
+  late MockScriptManager scriptManager;
+  late MockDebuggerController debuggerController;
 
-  Finder findDebuggerButtonWithTitle(String title) => find.byWidgetPredicate(
-        (Widget widget) => widget is DebuggerButton && widget.title == title,
-      );
+  setUp(() {
+    fakeServiceConnection = FakeServiceConnectionManager();
+    scriptManager = MockScriptManager();
 
-  Finder findStackFrameWithText(String text) => find.byWidgetPredicate(
-        (Widget widget) =>
-            widget is RichText && widget.text.toPlainText().contains(text),
-      );
+    mockConnectedApp(
+      fakeServiceConnection.serviceManager.connectedApp!,
+      isFlutterApp: true,
+      isProfileBuild: false,
+      isWebApp: false,
+    );
+    setGlobal(ServiceConnectionManager, fakeServiceConnection);
+    setGlobal(IdeTheme, IdeTheme());
+    setGlobal(ScriptManager, scriptManager);
+    setGlobal(NotificationService, NotificationService());
+    setGlobal(BreakpointManager, BreakpointManager());
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
+    setGlobal(PreferencesController, PreferencesController());
+    fakeServiceConnection.consoleService.ensureServiceInitialized();
+    when(fakeServiceConnection.errorBadgeManager.errorCountNotifier('debugger'))
+        .thenReturn(ValueNotifier<int>(0));
+    debuggerController = createMockDebuggerControllerWithDefaults();
+    final codeViewController = debuggerController.codeViewController;
+    final scriptsHistory = ScriptsHistory();
+    scriptsHistory.pushEntry(mockScript!);
+    when(codeViewController.scriptsHistory).thenReturn(scriptsHistory);
+    when(debuggerController.stackFramesWithLocation).thenReturn(
+      ValueNotifier([
+        _stackFrame1,
+        _stackFrame2,
+      ]),
+    );
+    when(codeViewController.currentScriptRef)
+        .thenReturn(ValueNotifier(mockScriptRef));
+    when(codeViewController.currentParsedScript)
+        .thenReturn(ValueNotifier(mockParsedScript));
+    when(codeViewController.navigationInProgress).thenReturn(false);
+  });
 
-  bool gutterItemForLineIsVisible(int lineNumber) {
-    final gutterItems = find.byType(GutterItem);
-    final firstGutterItem = getWidgetFromFinder<GutterItem>(gutterItems.first);
-    final lastGutterItem = getWidgetFromFinder<GutterItem>(gutterItems.last);
-    final lineRange =
-        Range(firstGutterItem.lineNumber, lastGutterItem.lineNumber);
-
-    return lineRange.contains(lineNumber);
+  Future<void> pumpDebuggerScreen(WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrapWithControllers(
+        DebuggerScreenBody(
+          shownFirstScript: () => true,
+          setShownFirstScript: (_) {},
+        ),
+        debugger: debuggerController,
+      ),
+    );
   }
 
   testWidgetsWithWindowSize(
     'debugger controls paused',
     windowSize,
     (WidgetTester tester) async {
-      await tester.pumpWidget(
-        wrapWithControllers(
-          Builder(builder: screen.build),
-          debugger: debuggerController,
-        ),
-      );
-      (serviceManager.isolateManager as FakeIsolateManager)
+      await pumpDebuggerScreen(tester);
+
+      (serviceConnection.serviceManager.isolateManager as FakeIsolateManager)
           .setMainIsolatePausedState(true);
       await tester.pump();
 
@@ -115,12 +115,7 @@ void main() {
       when(debuggerController.selectedStackFrame)
           .thenReturn(stackFrameNotifier);
 
-      await tester.pumpWidget(
-        wrapWithControllers(
-          Builder(builder: screen.build),
-          debugger: debuggerController,
-        ),
-      );
+      await pumpDebuggerScreen(tester);
       await tester.pumpAndSettle();
 
       // The first stack frame is visible:
@@ -187,3 +182,22 @@ final _stackFrame2 = StackFrameAndSourcePosition(
   ),
   position: const SourcePosition(line: _stackFrame2Line, column: 1),
 );
+
+Finder findDebuggerButtonWithTitle(String title) => find.byWidgetPredicate(
+      (Widget widget) => widget is DebuggerButton && widget.title == title,
+    );
+
+Finder findStackFrameWithText(String text) => find.byWidgetPredicate(
+      (Widget widget) =>
+          widget is RichText && widget.text.toPlainText().contains(text),
+    );
+
+bool gutterItemForLineIsVisible(int lineNumber) {
+  final gutterItems = find.byType(GutterItem);
+  final firstGutterItem = getWidgetFromFinder<GutterItem>(gutterItems.first);
+  final lastGutterItem = getWidgetFromFinder<GutterItem>(gutterItems.last);
+  final lineRange =
+      Range(firstGutterItem.lineNumber, lastGutterItem.lineNumber);
+
+  return lineRange.contains(lineNumber);
+}

@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
-import '../../../../shared/theme.dart';
 import '../../../../shared/ui/vm_flag_widgets.dart';
 import '../../profiler_screen_controller.dart';
 
@@ -120,8 +120,9 @@ class _SecondaryControls extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        if (serviceManager.connectedApp!.isFlutterNativeAppNow)
-          DevToolsButton(
+        if (serviceConnection
+            .serviceManager.connectedApp!.isFlutterNativeAppNow)
+          GaDevToolsButton(
             icon: Icons.timer,
             label: 'Profile app start up',
             tooltip: 'Load all Dart CPU samples that occurred before \n'

@@ -11,6 +11,8 @@ import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/inspector/layout_explorer/flex/flex.dart';
 import 'package:devtools_app/src/screens/inspector/layout_explorer/layout_explorer.dart';
 import 'package:devtools_app/src/service/service_extensions.dart' as extensions;
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart' hide Fake;
@@ -21,7 +23,7 @@ import '../test_infra/flutter_test_storage.dart';
 void main() {
   final screen = InspectorScreen();
 
-  late FakeServiceManager fakeServiceManager;
+  late FakeServiceConnectionManager fakeServiceConnection;
   late FakeServiceExtensionManager fakeExtensionManager;
   late InspectorController inspectorController;
   const windowSize = Size(2600.0, 1200.0);
@@ -37,24 +39,29 @@ void main() {
   }
 
   setUp(() {
-    fakeServiceManager = FakeServiceManager();
-    fakeExtensionManager = fakeServiceManager.serviceExtensionManager;
+    fakeServiceConnection = FakeServiceConnectionManager();
+    fakeExtensionManager =
+        fakeServiceConnection.serviceManager.serviceExtensionManager;
     mockConnectedApp(
-      fakeServiceManager.connectedApp!,
+      fakeServiceConnection.serviceManager.connectedApp!,
       isFlutterApp: true,
       isProfileBuild: false,
       isWebApp: false,
     );
-    when(fakeServiceManager.errorBadgeManager.errorCountNotifier('inspector'))
-        .thenReturn(ValueNotifier<int>(0));
+    when(
+      fakeServiceConnection.errorBadgeManager.errorCountNotifier('inspector'),
+    ).thenReturn(ValueNotifier<int>(0));
 
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
+    setGlobal(ServiceConnectionManager, fakeServiceConnection);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(Storage, FlutterTestStorage());
     setGlobal(NotificationService, NotificationService());
-    fakeServiceManager.consoleService.ensureServiceInitialized();
+    fakeServiceConnection.consoleService.ensureServiceInitialized();
 
     inspectorController = InspectorController(
       inspectorTree: InspectorTreeController(),
@@ -63,21 +70,23 @@ void main() {
     )..firstInspectorTreeLoadCompleted = true;
   });
 
-  void mockExtensions() {
+  Future<void> mockExtensions() async {
     fakeExtensionManager.extensionValueOnDevice = {
       extensions.toggleSelectWidgetMode.extension: true,
       extensions.enableOnDeviceInspector.extension: true,
       extensions.toggleOnDeviceWidgetInspector.extension: true,
       extensions.debugPaint.extension: false,
     };
-    fakeExtensionManager
-      ..fakeAddServiceExtension(
-        extensions.toggleOnDeviceWidgetInspector.extension,
-      )
-      ..fakeAddServiceExtension(extensions.toggleSelectWidgetMode.extension)
-      ..fakeAddServiceExtension(extensions.enableOnDeviceInspector.extension)
-      ..fakeAddServiceExtension(extensions.debugPaint.extension)
-      ..fakeFrame();
+    await fakeExtensionManager.fakeAddServiceExtension(
+      extensions.toggleOnDeviceWidgetInspector.extension,
+    );
+    await fakeExtensionManager
+        .fakeAddServiceExtension(extensions.toggleSelectWidgetMode.extension);
+    await fakeExtensionManager
+        .fakeAddServiceExtension(extensions.enableOnDeviceInspector.extension);
+    await fakeExtensionManager
+        .fakeAddServiceExtension(extensions.debugPaint.extension);
+    await fakeExtensionManager.fakeFrame();
   }
 
   void mockNoExtensionsAvailable() {
@@ -138,7 +147,7 @@ void main() {
     'Test toggling service extension buttons',
     windowSize,
     (WidgetTester tester) async {
-      mockExtensions();
+      await mockExtensions();
       expect(
         fakeExtensionManager
             .extensionValueOnDevice[extensions.debugPaint.extension],

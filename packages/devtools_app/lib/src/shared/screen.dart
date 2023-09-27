@@ -4,54 +4,189 @@
 
 import 'dart:math' as math;
 
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 
 import 'globals.dart';
 import 'primitives/listenable.dart';
-import 'theme.dart';
-import 'version.dart';
+import 'ui/icons.dart';
+
+final _log = Logger('screen.dart');
+
+enum ScreenMetaData {
+  home(
+    'home',
+    icon: Icons.home_rounded,
+    requiresConnection: false,
+  ),
+  inspector(
+    'inspector',
+    title: 'Flutter Inspector',
+    icon: Octicons.deviceMobile,
+    requiresFlutter: true,
+    requiresDebugBuild: true,
+  ),
+  performance(
+    'performance',
+    title: 'Performance',
+    icon: Octicons.pulse,
+    worksOffline: true,
+  ),
+  cpuProfiler(
+    'cpu-profiler',
+    title: 'CPU Profiler',
+    icon: Octicons.dashboard,
+    requiresDartVm: true,
+    worksOffline: true,
+  ),
+  memory(
+    'memory',
+    title: 'Memory',
+    icon: Octicons.package,
+    requiresDartVm: true,
+  ),
+  debugger(
+    'debugger',
+    title: 'Debugger',
+    icon: Octicons.bug,
+    requiresDebugBuild: true,
+  ),
+  network(
+    'network',
+    title: 'Network',
+    icon: Icons.network_check,
+    requiresDartVm: true,
+  ),
+  logging('logging', title: 'Logging', icon: Octicons.clippy),
+  provider(
+    'provider',
+    title: 'Provider',
+    icon: Icons.attach_file,
+    requiresLibrary: 'package:provider/',
+    requiresDebugBuild: true,
+  ),
+  appSize(
+    'app-size',
+    title: 'App Size',
+    icon: Octicons.fileZip,
+    requiresConnection: false,
+    requiresDartVm: true,
+  ),
+  deepLinks(
+    'deep-links',
+    title: 'Deep Links',
+    icon: Icons.link_rounded,
+    requiresConnection: false,
+    requiresDartVm: true,
+  ),
+  vmTools(
+    'vm-tools',
+    title: 'VM Tools',
+    icon: Icons.settings_applications,
+    requiresVmDeveloperMode: true,
+  ),
+  simple('simple');
+
+  const ScreenMetaData(
+    this.id, {
+    this.title,
+    this.icon,
+    this.requiresConnection = true,
+    this.requiresDartVm = false,
+    this.requiresFlutter = false,
+    this.requiresDebugBuild = false,
+    this.requiresVmDeveloperMode = false,
+    this.worksOffline = false,
+    this.requiresLibrary,
+  });
+
+  final String id;
+  final String? title;
+  final IconData? icon;
+  final bool requiresConnection;
+  final bool requiresDartVm;
+  final bool requiresFlutter;
+  final bool requiresDebugBuild;
+  final bool requiresVmDeveloperMode;
+  final bool worksOffline;
+  final String? requiresLibrary;
+}
 
 /// Defines a page shown in the DevTools [TabBar].
 @immutable
 abstract class Screen {
   const Screen(
     this.screenId, {
-    this.title = '',
+    this.title,
+    this.titleGenerator,
     this.icon,
     this.tabKey,
     this.requiresLibrary,
+    this.requiresConnection = true,
     this.requiresDartVm = false,
+    this.requiresFlutter = false,
     this.requiresDebugBuild = false,
     this.requiresVmDeveloperMode = false,
     this.worksOffline = false,
     this.shouldShowForFlutterVersion,
     this.showFloatingDebuggerControls = true,
-  });
+  }) : assert((title == null) || (titleGenerator == null));
 
   const Screen.conditional({
     required String id,
     String? requiresLibrary,
+    bool requiresConnection = true,
     bool requiresDartVm = false,
+    bool requiresFlutter = false,
     bool requiresDebugBuild = false,
     bool requiresVmDeveloperMode = false,
     bool worksOffline = false,
     bool Function(FlutterVersion? currentVersion)? shouldShowForFlutterVersion,
     bool showFloatingDebuggerControls = true,
-    String title = '',
+    String? title,
+    String Function()? titleGenerator,
     IconData? icon,
     Key? tabKey,
   }) : this(
           id,
           requiresLibrary: requiresLibrary,
+          requiresConnection: requiresConnection,
           requiresDartVm: requiresDartVm,
+          requiresFlutter: requiresFlutter,
           requiresDebugBuild: requiresDebugBuild,
           requiresVmDeveloperMode: requiresVmDeveloperMode,
           worksOffline: worksOffline,
           shouldShowForFlutterVersion: shouldShowForFlutterVersion,
           showFloatingDebuggerControls: showFloatingDebuggerControls,
           title: title,
+          titleGenerator: titleGenerator,
           icon: icon,
+          tabKey: tabKey,
+        );
+
+  Screen.fromMetaData(
+    ScreenMetaData metadata, {
+    bool Function(FlutterVersion? currentVersion)? shouldShowForFlutterVersion,
+    bool showFloatingDebuggerControls = true,
+    String Function()? titleGenerator,
+    Key? tabKey,
+  }) : this.conditional(
+          id: metadata.id,
+          requiresLibrary: metadata.requiresLibrary,
+          requiresConnection: metadata.requiresConnection,
+          requiresDartVm: metadata.requiresDartVm,
+          requiresFlutter: metadata.requiresFlutter,
+          requiresDebugBuild: metadata.requiresDebugBuild,
+          requiresVmDeveloperMode: metadata.requiresVmDeveloperMode,
+          worksOffline: metadata.worksOffline,
+          shouldShowForFlutterVersion: shouldShowForFlutterVersion,
+          showFloatingDebuggerControls: showFloatingDebuggerControls,
+          title: titleGenerator == null ? metadata.title : null,
+          titleGenerator: titleGenerator,
+          icon: metadata.icon,
           tabKey: tabKey,
         );
 
@@ -71,7 +206,16 @@ abstract class Screen {
   final String screenId;
 
   /// The user-facing name of the page.
-  final String title;
+  ///
+  /// At most, only one of [title] and [titleGenerator] should be non-null.
+  final String? title;
+
+  /// A callback that returns the user-facing name of the page.
+  ///
+  /// At most, only one of [title] and [titleGenerator] should be non-null.
+  final String Function()? titleGenerator;
+
+  String get _userFacingTitle => title ?? titleGenerator?.call() ?? '';
 
   final IconData? icon;
 
@@ -89,8 +233,14 @@ abstract class Screen {
   ///  * 'package:provider/'
   final String? requiresLibrary;
 
+  /// Whether this screen requires a running app connection to work.
+  final bool requiresConnection;
+
   /// Whether this screen should only be included when the app is running on the Dart VM.
   final bool requiresDartVm;
+
+  /// Whether this screen should only be included when the app is a Flutter app.
+  final bool requiresFlutter;
 
   /// Whether this screen should only be included when the app is debuggable.
   final bool requiresDebugBuild;
@@ -126,14 +276,19 @@ abstract class Screen {
     TextTheme textTheme, {
     bool includeTabBarSpacing = true,
   }) {
+    final title = _userFacingTitle;
     final painter = TextPainter(
       text: TextSpan(text: title),
       textDirection: TextDirection.ltr,
     )..layout();
+    const measurementBuffer = 2.0;
     return painter.width +
         denseSpacing +
         defaultIconSize +
-        (includeTabBarSpacing ? tabBarSpacing * 2 : 0.0);
+        (includeTabBarSpacing ? tabBarSpacing * 2 : 0.0) +
+        // Add a small buffer to account for variances between the text painter
+        // approximation and the actual measurement.
+        measurementBuffer;
   }
 
   /// Builds the tab to show for this screen in the [DevToolsScaffold]'s main
@@ -142,19 +297,21 @@ abstract class Screen {
   /// This will not be used if the [Screen] is the only one shown in the
   /// scaffold.
   Widget buildTab(BuildContext context) {
+    final title = _userFacingTitle;
     return ValueListenableBuilder<int>(
       valueListenable:
-          serviceManager.errorBadgeManager.errorCountNotifier(screenId),
+          serviceConnection.errorBadgeManager.errorCountNotifier(screenId),
       builder: (context, count, _) {
         final tab = Tab(
           key: tabKey,
           child: Row(
             children: <Widget>[
               Icon(icon, size: defaultIconSize),
-              Padding(
-                padding: const EdgeInsets.only(left: denseSpacing),
-                child: Text(title),
-              ),
+              if (title.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(left: denseSpacing),
+                  child: Text(title),
+                ),
             ],
           ),
         );
@@ -207,44 +364,74 @@ abstract class Screen {
 
 /// Check whether a screen should be shown in the UI.
 bool shouldShowScreen(Screen screen) {
+  _log.finest('shouldShowScreen: ${screen.screenId}');
   if (offlineController.offlineMode.value) {
+    _log.finest('for offline mode: returning ${screen.worksOffline}');
     return screen.worksOffline;
   }
-  // No sense in ever showing screens in non-offline mode unless the service
-  // is available. This also avoids odd edge cases where we could show screens
-  // while the ServiceManager is still initializing.
-  if (!serviceManager.isServiceAvailable ||
-      !serviceManager.connectedApp!.connectedAppInitialized) return false;
+
+  final serviceReady = serviceConnection.serviceManager.isServiceAvailable &&
+      serviceConnection.serviceManager.connectedApp!.connectedAppInitialized;
+  if (!serviceReady) {
+    if (!screen.requiresConnection) {
+      _log.finest('screen does not require connection: returning true');
+      return true;
+    } else {
+      // All of the following checks require a connected vm service, so verify
+      // that one exists. This also avoids odd edge cases where we could show
+      // screens while the ServiceManager is still initializing.
+      _log.finest('service not ready: returning false');
+      return false;
+    }
+  }
 
   if (screen.requiresLibrary != null) {
-    if (serviceManager.isolateManager.mainIsolate.value == null ||
-        !serviceManager.libraryUriAvailableNow(screen.requiresLibrary)) {
+    if (serviceConnection.serviceManager.isolateManager.mainIsolate.value ==
+            null ||
+        !serviceConnection.serviceManager
+            .libraryUriAvailableNow(screen.requiresLibrary)) {
+      _log.finest(
+        'screen requires library ${screen.requiresLibrary}: returning false',
+      );
       return false;
     }
   }
   if (screen.requiresDartVm) {
-    if (serviceManager.connectedApp!.isRunningOnDartVM != true) {
+    if (serviceConnection.serviceManager.connectedApp!.isRunningOnDartVM !=
+        true) {
+      _log.finest('screen requires Dart VM: returning false');
       return false;
     }
   }
+  if (screen.requiresFlutter &&
+      serviceConnection.serviceManager.connectedApp!.isFlutterAppNow == false) {
+    _log.finest('screen requires Flutter: returning false');
+    return false;
+  }
   if (screen.requiresDebugBuild) {
-    if (serviceManager.connectedApp!.isProfileBuildNow == true) {
+    if (serviceConnection.serviceManager.connectedApp!.isProfileBuildNow ==
+        true) {
+      _log.finest('screen requires debug build: returning false');
       return false;
     }
   }
   if (screen.requiresVmDeveloperMode) {
     if (!preferences.vmDeveloperModeEnabled.value) {
+      _log.finest('screen requires vm developer mode: returning false');
       return false;
     }
   }
   if (screen.shouldShowForFlutterVersion != null) {
-    if (serviceManager.connectedApp!.isFlutterAppNow == true &&
+    if (serviceConnection.serviceManager.connectedApp!.isFlutterAppNow ==
+            true &&
         !screen.shouldShowForFlutterVersion!(
-          serviceManager.connectedApp!.flutterVersionNow,
+          serviceConnection.serviceManager.connectedApp!.flutterVersionNow,
         )) {
+      _log.finest('screen has flutter version restraints: returning false');
       return false;
     }
   }
+  _log.finest('${screen.screenId} screen supported: returning true');
   return true;
 }
 

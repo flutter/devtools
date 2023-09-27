@@ -58,27 +58,6 @@ final _heapPathTests = <_HeapPathTest>[
 ];
 
 void main() {
-  test('$AdaptedHeapData serializes.', () {
-    final json = AdaptedHeapData(
-      [
-        AdaptedHeapObject(
-          code: 1,
-          outRefs: {3, 4, 5},
-          heapClass: HeapClassName(
-            className: 'class',
-            library: 'library',
-          ),
-          shallowSize: 1,
-        ),
-      ],
-      rootIndex: 0,
-      isolateId: '',
-      created: DateTime(2000),
-    ).toJson();
-
-    expect(json, AdaptedHeapData.fromJson(json).toJson());
-  });
-
   test('$HeapPath.isRetainedBySameClass returns expected result for.', () {
     for (final t in _heapPathTests) {
       expect(
@@ -94,6 +73,6 @@ AdaptedHeapObject _objectForClass(String lib, String theClass) =>
     AdaptedHeapObject(
       code: 1,
       outRefs: {},
-      heapClass: HeapClassName(className: theClass, library: lib),
+      heapClass: HeapClassName.fromPath(className: theClass, library: lib),
       shallowSize: 1,
     );

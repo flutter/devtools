@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:leak_tracker/devtools_integration.dart';
@@ -27,8 +26,8 @@ class LeaksPaneController {
           supportedLeakTrackingProtocols
               .contains(appLeakTrackerProtocolVersion),
         ) {
-    subscriptionWithHistory = serviceManager
-        .service!.onExtensionEventWithHistory
+    subscriptionWithHistory = serviceConnection
+        .serviceManager.service!.onExtensionEventWithHistory
         .listen(_onAppMessageWithHistory);
   }
 
@@ -116,17 +115,14 @@ class LeaksPaneController {
         notGCed: notGCedAnalyzed,
       );
 
-      _saveResultAndSetAnalysisStatus(yaml, task);
+      _saveResultAndSetAnalysisStatus(yaml);
     } catch (error) {
       analysisStatus.message.value = 'Error: $error';
       analysisStatus.status.value = AnalysisStatus.showingError;
     }
   }
 
-  void _saveResultAndSetAnalysisStatus(
-    String yaml,
-    NotGCedAnalyzerTask? task,
-  ) async {
+  void _saveResultAndSetAnalysisStatus(String yaml) {
     final now = DateTime.now();
     final yamlFile = ExportController.generateFileName(
       time: now,
@@ -134,27 +130,8 @@ class LeaksPaneController {
       type: ExportFileType.yaml,
     );
     _exportController.downloadFile(yaml, fileName: yamlFile);
-    final String? taskFile = _saveTask(task, now);
 
-    final taskFileMessage = taskFile == null ? '' : ' and $taskFile';
-    await _setMessageWithDelay(
-      'Downloaded the leak analysis to $yamlFile$taskFileMessage.',
-    );
     analysisStatus.status.value = AnalysisStatus.showingResult;
-  }
-
-  /// Saves raw analysis task for troubleshooting and deeper analysis.
-  String? _saveTask(NotGCedAnalyzerTask? task, DateTime? now) {
-    if (task == null) return null;
-
-    final json = jsonEncode(task.toJson());
-    final jsonFile = ExportController.generateFileName(
-      time: now,
-      prefix: yamlFilePrefix,
-      postfix: '.raw',
-      type: ExportFileType.json,
-    );
-    return _exportController.downloadFile(json, fileName: jsonFile);
   }
 
   Future<void> _setMessageWithDelay(String message) async {
@@ -165,9 +142,11 @@ class LeaksPaneController {
   Future<R> _invokeLeakExtension<M extends Object, R extends Object>(
     M message,
   ) async {
-    final response = await serviceManager.service!.callServiceExtension(
+    final response =
+        await serviceConnection.serviceManager.service!.callServiceExtension(
       memoryLeakTrackingExtensionName,
-      isolateId: serviceManager.isolateManager.mainIsolate.value!.id!,
+      isolateId: serviceConnection
+          .serviceManager.isolateManager.mainIsolate.value!.id!,
       args: RequestToApp(message).toRequestParameters(),
     );
 

@@ -4,13 +4,13 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/config_specific/logger/allowed_error.dart';
 import '../../shared/globals.dart';
 import '../../shared/offline_mode.dart';
-import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/utils.dart';
 import 'cpu_profile_model.dart';
 import 'cpu_profile_service.dart';
@@ -39,18 +39,23 @@ class ProfilerScreenController extends DisposableController
     initReviewHistoryOnDisconnectListener();
     if (!offlineController.offlineMode.value) {
       await allowedError(
-        serviceManager.service!.setProfilePeriod(mediumProfilePeriod),
+        serviceConnection.serviceManager.service!
+            .setProfilePeriod(mediumProfilePeriod),
         logError: false,
       );
 
-      _currentIsolate = serviceManager.isolateManager.selectedIsolate.value;
-      addAutoDisposeListener(serviceManager.isolateManager.selectedIsolate, () {
-        final selectedIsolate =
-            serviceManager.isolateManager.selectedIsolate.value;
-        if (selectedIsolate != null) {
-          switchToIsolate(selectedIsolate);
-        }
-      });
+      _currentIsolate =
+          serviceConnection.serviceManager.isolateManager.selectedIsolate.value;
+      addAutoDisposeListener(
+        serviceConnection.serviceManager.isolateManager.selectedIsolate,
+        () {
+          final selectedIsolate = serviceConnection
+              .serviceManager.isolateManager.selectedIsolate.value;
+          if (selectedIsolate != null) {
+            switchToIsolate(selectedIsolate);
+          }
+        },
+      );
 
       addAutoDisposeListener(preferences.vmDeveloperModeEnabled, () async {
         if (preferences.vmDeveloperModeEnabled.value) {

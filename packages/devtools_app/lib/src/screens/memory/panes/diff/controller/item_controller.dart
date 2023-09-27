@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../../shared/memory/adapted_heap_data.dart';
-import '../../../../../shared/primitives/auto_dispose.dart';
 import '../../../shared/heap/heap.dart';
 
 abstract class SnapshotItem extends DisposableController {
@@ -57,7 +57,9 @@ class SnapshotInstanceItem extends SnapshotItem {
   @override
   final int displayNumber;
 
-  String get name => '$isolateName-$displayNumber';
+  String get name => nameOverride ?? '$isolateName-$displayNumber';
+
+  String? nameOverride;
 
   final diffWith = ValueNotifier<SnapshotInstanceItem?>(null);
 

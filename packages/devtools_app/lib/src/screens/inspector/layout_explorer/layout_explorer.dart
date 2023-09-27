@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../shared/diagnostics/diagnostics_node.dart';
-import '../../../shared/primitives/auto_dispose.dart';
 import '../inspector_controller.dart';
 import '../layout_explorer/box/box.dart';
 import '../layout_explorer/flex/flex.dart';

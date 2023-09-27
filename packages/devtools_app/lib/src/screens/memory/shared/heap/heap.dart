@@ -75,33 +75,17 @@ mixin FilterableHeapClasses<T extends ClassStats> on HeapClasses<T> {
   List<T>? _filtered;
 
   List<T> filtered(ClassFilter newFilter, String? rootPackage) {
-    final oldFilter = _appliedFilter;
-    final oldFiltered = _filtered;
+    _filtered = ClassFilter.filter(
+      oldFilter: _appliedFilter,
+      oldFiltered: _filtered,
+      newFilter: newFilter,
+      original: classStatsList,
+      extractClass: (s) => s.heapClass,
+      rootPackage: rootPackage,
+    );
     _appliedFilter = newFilter;
-    if ((oldFilter == null) != (oldFiltered == null)) {
-      throw StateError('Nullness should match.');
-    }
 
-    // Return previous data if filter did not change.
-    if (oldFilter == newFilter) return oldFiltered!;
-
-    // Return previous data if filter is identical.
-    final task = newFilter.task(previous: oldFilter);
-    if (task == FilteringTask.doNothing) return oldFiltered!;
-
-    final Iterable<T> dataToFilter;
-    if (task == FilteringTask.refilter) {
-      dataToFilter = classStatsList;
-    } else if (task == FilteringTask.reuse) {
-      dataToFilter = oldFiltered!;
-    } else {
-      throw StateError('Unexpected task: $task.');
-    }
-
-    final result = dataToFilter
-        .where((e) => newFilter.apply(e.heapClass, rootPackage))
-        .toList();
-    return _filtered = result;
+    return _filtered!;
   }
 }
 

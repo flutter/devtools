@@ -4,9 +4,11 @@
 
 // ignore_for_file: constant_identifier_names
 
+import 'package:flutter/widgets.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/globals.dart';
+import '../../shared/primitives/utils.dart';
 import '../memory/panes/profile/profile_view.dart';
 
 /// NOTE: this file contains extensions to classes provided by
@@ -509,8 +511,9 @@ extension FunctionPrivateViewExtension on Func {
   Future<Instance?> get icDataArray async {
     final String? icDataArrayId = json![_icDataArrayKey]?['id'];
     if (icDataArrayId != null) {
-      final service = serviceManager.service!;
-      final isolate = serviceManager.isolateManager.selectedIsolate.value;
+      final service = serviceConnection.serviceManager.service!;
+      final isolate =
+          serviceConnection.serviceManager.isolateManager.selectedIsolate.value;
 
       return await service.getObject(isolate!.id!, icDataArrayId) as Instance;
     } else {
@@ -598,6 +601,71 @@ extension CodePrivateViewExtension on Code {
   String get kind => json![_kindKey];
 
   ObjectPoolRef get objectPool => ObjectPoolRef.parse(json![_objectPoolKey]);
+
+  bool get hasInliningData => json!.containsKey(InliningData.kInlinedFunctions);
+  InliningData get inliningData => InliningData.parse(json!);
+}
+
+extension AddressExtension on num {
+  String get asAddress =>
+      '0x${toInt().toRadixString(16).toUpperCase().padLeft(8, '0')}';
+}
+
+class InliningData {
+  const InliningData._({required this.entries});
+
+  factory InliningData.parse(Map<String, dynamic> json) {
+    final startAddress = int.parse(json[kStartAddressKey], radix: 16);
+    final intervals = json[kInlinedIntervals] as List;
+    final functions = (json[kInlinedFunctions] as List)
+        .cast<Map<String, dynamic>>()
+        .map<FuncRef>((e) => FuncRef.parse(e)!)
+        .toList();
+
+    final entries = <InliningEntry>[];
+
+    // Inlining data format: [startAddress, endAddress, 0, inline functions...]
+    for (final interval in intervals) {
+      assert(interval.length >= 2);
+      final range = Range(
+        startAddress + interval[0],
+        startAddress + interval[1],
+      );
+      // We start at i = 3 as `interval[2]` is always present and set to 0,
+      // likely serving as a sentinel. `functions[0]` is not inlined for every
+      // range, so we'll ignore this value.
+      final inlinedFunctions = <FuncRef>[
+        for (int i = 3; i < interval.length; ++i) functions[interval[i]],
+      ];
+      entries.add(
+        InliningEntry(
+          addressRange: range,
+          functions: inlinedFunctions,
+        ),
+      );
+    }
+
+    return InliningData._(entries: entries);
+  }
+
+  @visibleForTesting
+  static const kInlinedIntervals = '_inlinedIntervals';
+  @visibleForTesting
+  static const kInlinedFunctions = '_inlinedFunctions';
+  @visibleForTesting
+  static const kStartAddressKey = '_startAddress';
+
+  final List<InliningEntry> entries;
+}
+
+class InliningEntry {
+  const InliningEntry({
+    required this.addressRange,
+    required this.functions,
+  });
+
+  final Range addressRange;
+  final List<FuncRef> functions;
 }
 
 class ObjectPoolRef extends ObjRef {
@@ -721,8 +789,9 @@ extension FieldPrivateViewExtension on Field {
 
   Future<Class?> get guardClass async {
     if (_guardClassIsClass()) {
-      final service = serviceManager.service!;
-      final isolate = serviceManager.isolateManager.selectedIsolate.value;
+      final service = serviceConnection.serviceManager.service!;
+      final isolate =
+          serviceConnection.serviceManager.isolateManager.selectedIsolate.value;
 
       return await service.getObject(isolate!.id!, json![_guardClassKey]['id'])
           as Class;

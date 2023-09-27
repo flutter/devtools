@@ -2,21 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../service/service_extension_manager.dart';
 import '../../../../service/service_extension_widgets.dart';
 import '../../../../service/service_extensions.dart' as extensions;
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
-import '../../../../shared/primitives/auto_dispose.dart';
 import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/table/table.dart';
 import '../../../../shared/table/table_data.dart';
-import '../../../../shared/theme.dart';
-import '../../../../shared/utils.dart';
 import '../flutter_frames/flutter_frame_model.dart';
 import 'rebuild_stats_model.dart';
 
@@ -118,8 +117,9 @@ class _RebuildStatsViewState extends State<RebuildStatsView>
         ),
         Expanded(
           child: ValueListenableBuilder<ServiceExtensionState>(
-            valueListenable:
-                serviceManager.serviceExtensionManager.getServiceExtensionState(
+            valueListenable: serviceConnection
+                .serviceManager.serviceExtensionManager
+                .getServiceExtensionState(
               extensions.trackRebuildWidgets.extension,
             ),
             builder: (context, state, _) {

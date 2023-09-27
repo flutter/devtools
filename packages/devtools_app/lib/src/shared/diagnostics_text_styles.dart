@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
-
-import 'theme.dart';
 
 // Enum-like static classes are ok.
 // ignore: avoid_classes_with_only_static_members

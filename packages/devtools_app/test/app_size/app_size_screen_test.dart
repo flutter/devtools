@@ -7,6 +7,8 @@ import 'dart:convert';
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/app_size/app_size_table.dart';
 import 'package:devtools_app/src/shared/file_import.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_test_utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
@@ -23,8 +25,11 @@ import '../test_infra/test_data/app_size/unsupported_file.dart';
 
 void main() {
   setUp(() {
-    setGlobal(ServiceConnectionManager, FakeServiceManager());
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());
@@ -64,7 +69,7 @@ void main() {
 
   late AppSizeScreen screen;
   late AppSizeTestController appSizeController;
-  FakeServiceManager fakeServiceManager;
+  FakeServiceConnectionManager fakeServiceConnection;
 
   const windowSize = Size(2560.0, 1338.0);
 
@@ -99,10 +104,11 @@ void main() {
     setUp(() {
       screen = AppSizeScreen();
       appSizeController = AppSizeTestController();
-      fakeServiceManager = FakeServiceManager();
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
-      when(fakeServiceManager.errorBadgeManager.errorCountNotifier('app-size'))
-          .thenReturn(ValueNotifier<int>(0));
+      fakeServiceConnection = FakeServiceConnectionManager();
+      setGlobal(ServiceConnectionManager, fakeServiceConnection);
+      when(
+        fakeServiceConnection.errorBadgeManager.errorCountNotifier('app-size'),
+      ).thenReturn(ValueNotifier<int>(0));
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {

@@ -5,21 +5,19 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide TableRow;
 import 'package:flutter/services.dart';
 
 import '../collapsible_mixin.dart';
 import '../common_widgets.dart';
-import '../primitives/auto_dispose.dart';
 import '../primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
-import '../theme.dart';
-import '../ui/colors.dart';
 import '../ui/search.dart';
 import '../ui/utils.dart';
-import '../utils.dart';
 import 'column_widths.dart';
 import 'table_controller.dart';
 import 'table_data.dart';
@@ -1669,12 +1667,16 @@ class _TableRowState<T> extends State<TableRow<T>>
 class _RowGuidelinePainter extends CustomPainter {
   _RowGuidelinePainter(this.level, this.colorScheme);
 
+  static const _treeGuidelineColors = [
+    Color(0xFF13B9FD),
+    Color(0xFF5BC43B),
+  ];
+
   final int level;
   final ColorScheme colorScheme;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final colors = colorScheme.treeGuidelineColors;
     for (int i = 0; i < level; ++i) {
       final currentX = i * TreeColumnData.treeToggleWidth + defaultIconSize / 2;
       // Draw a vertical line for each tick identifying a connection between
@@ -1683,7 +1685,7 @@ class _RowGuidelinePainter extends CustomPainter {
         Offset(currentX, 0.0),
         Offset(currentX, defaultRowHeight),
         Paint()
-          ..color = colors[i % colors.length]
+          ..color = _treeGuidelineColors[i % _treeGuidelineColors.length]
           ..strokeWidth = 1.0,
       );
     }

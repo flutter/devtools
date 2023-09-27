@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -17,15 +19,11 @@ import '../../shared/console/widgets/expandable_variable.dart';
 import '../../shared/diagnostics/dart_object_node.dart';
 import '../../shared/diagnostics/primitives/source_location.dart';
 import '../../shared/diagnostics/tree_builder.dart';
-import '../../shared/dialogs.dart';
 import '../../shared/globals.dart';
 import '../../shared/history_viewport.dart';
-import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../../shared/primitives/listenable.dart';
 import '../../shared/primitives/utils.dart';
-import '../../shared/theme.dart';
-import '../../shared/ui/colors.dart';
 import '../../shared/ui/hover.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/ui/utils.dart';
@@ -168,7 +166,7 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
     }
 
     if (oldWidget.scriptRef != widget.scriptRef) {
-      verticalController.resetScroll();
+      _updateScrollPosition();
     }
   }
 
@@ -232,8 +230,9 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
       final lineCount = parsedScript?.lineCount;
       if (lineCount != null && lineCount * CodeView.rowHeight > extent) {
         final lineIndex = line - 1;
-        final scrollPosition = lineIndex * CodeView.rowHeight -
+        var scrollPosition = lineIndex * CodeView.rowHeight -
             ((extent - CodeView.rowHeight) / 2);
+        scrollPosition = scrollPosition.clamp(0.0, position.extentTotal);
         if (animate) {
           unawaited(
             verticalController.animateTo(
@@ -787,10 +786,15 @@ class Gutters extends StatelessWidget {
 
     return Row(
       children: [
-        DualValueListenableBuilder<List<BreakpointAndSourcePosition>, bool>(
-          firstListenable: breakpointManager.breakpointsWithLocation,
-          secondListenable: codeViewController.showCodeCoverage,
-          builder: (context, breakpoints, showCodeCoverage, _) {
+        MultiValueListenableBuilder(
+          listenables: [
+            breakpointManager.breakpointsWithLocation,
+            codeViewController.showCodeCoverage,
+          ],
+          builder: (context, values, _) {
+            final breakpoints =
+                values.first as List<BreakpointAndSourcePosition>;
+            final showCodeCoverage = values.second as bool;
             return Gutter(
               gutterWidth: gutterWidth,
               scrollController: gutterController,
@@ -929,7 +933,7 @@ class GutterItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final breakpointColor = theme.colorScheme.breakpointColor;
+    final breakpointColor = theme.colorScheme.primary;
     final subtleColor = theme.unselectedWidgetColor;
 
     final bpBoxSize = breakpointRadius * 2;
@@ -1053,29 +1057,31 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
     final pausedFrame = widget.selectedFrameNotifier?.value;
     final pausedLine = pausedFrame?.line;
 
-    return ListView.builder(
-      controller: widget.scrollController,
-      physics: const ClampingScrollPhysics(),
-      itemExtent: CodeView.rowHeight,
-      itemCount: widget.lines.length,
-      itemBuilder: (context, index) {
-        final lineNum = index + 1;
-        final isPausedLine = pausedLine == lineNum;
-        return ValueListenableBuilder<int>(
-          valueListenable: widget.codeViewController.focusLine,
-          builder: (context, focusLine, _) {
-            final isFocusedLine = focusLine == lineNum;
-            return LineItem(
-              lineContents: widget.lines[index],
-              pausedFrame: isPausedLine ? pausedFrame : null,
-              focused: isPausedLine || isFocusedLine,
-              searchMatches: _searchMatchesForLine(index),
-              activeSearchMatch:
-                  activeSearch?.position.line == index ? activeSearch : null,
-            );
-          },
-        );
-      },
+    return SelectionArea(
+      child: ListView.builder(
+        controller: widget.scrollController,
+        physics: const ClampingScrollPhysics(),
+        itemExtent: CodeView.rowHeight,
+        itemCount: widget.lines.length,
+        itemBuilder: (context, index) {
+          final lineNum = index + 1;
+          final isPausedLine = pausedLine == lineNum;
+          return ValueListenableBuilder<int>(
+            valueListenable: widget.codeViewController.focusLine,
+            builder: (context, focusLine, _) {
+              final isFocusedLine = focusLine == lineNum;
+              return LineItem(
+                lineContents: widget.lines[index],
+                pausedFrame: isPausedLine ? pausedFrame : null,
+                focused: isPausedLine || isFocusedLine,
+                searchMatches: _searchMatchesForLine(index),
+                activeSearchMatch:
+                    activeSearch?.position.line == index ? activeSearch : null,
+              );
+            },
+          );
+        },
+      ),
     );
   }
 
@@ -1138,7 +1144,7 @@ class _LineItemState extends State<LineItem>
     required PointerEvent event,
     required bool Function() isHoverStale,
   }) async {
-    if (!serviceManager.isMainIsolatePaused) return null;
+    if (!serviceConnection.serviceManager.isMainIsolatePaused) return null;
 
     final word = wordForHover(
       event.localPosition.dx,
@@ -1148,7 +1154,8 @@ class _LineItemState extends State<LineItem>
     if (word != '') {
       try {
         final response = await evalService.evalAtCurrentFrame(word);
-        final isolateRef = serviceManager.isolateManager.selectedIsolate.value;
+        final isolateRef = serviceConnection
+            .serviceManager.isolateManager.selectedIsolate.value;
         if (response is! InstanceRef) return null;
         final variable = DartObjectNode.fromValue(
           value: response,
@@ -1190,7 +1197,7 @@ class _LineItemState extends State<LineItem>
     Widget child;
     final column = widget.pausedFrame?.column;
     if (column != null) {
-      final breakpointColor = theme.colorScheme.breakpointColor;
+      final breakpointColor = theme.colorScheme.primary;
       final widthToCurrentColumn = calculateTextSpanWidth(
         truncateTextSpan(widget.lineContents, column - 1),
       );
@@ -1242,9 +1249,8 @@ class _LineItemState extends State<LineItem>
         enabled: () => true,
         asyncTimeout: 100,
         asyncGenerateHoverCardData: _generateHoverCardData,
-        child: SelectableText.rich(
+        child: Text.rich(
           searchAwareLineContents(),
-          scrollPhysics: const NeverScrollableScrollPhysics(),
           maxLines: 1,
         ),
       );
@@ -1494,17 +1500,18 @@ Future<String?> fetchScriptLocationFullFilePath(
   String? filePath;
   final packagePath = controller.scriptLocation.value!.scriptRef.uri;
   if (packagePath != null) {
-    final isolateId = serviceManager.isolateManager.selectedIsolate.value!.id!;
-    filePath = serviceManager.resolvedUriManager.lookupFileUri(
+    final isolateId = serviceConnection
+        .serviceManager.isolateManager.selectedIsolate.value!.id!;
+    filePath = serviceConnection.resolvedUriManager.lookupFileUri(
       isolateId,
       packagePath,
     );
     if (filePath == null) {
-      await serviceManager.resolvedUriManager.fetchFileUris(
+      await serviceConnection.resolvedUriManager.fetchFileUris(
         isolateId,
         [packagePath],
       );
-      filePath = serviceManager.resolvedUriManager.lookupFileUri(
+      filePath = serviceConnection.resolvedUriManager.lookupFileUri(
         isolateId,
         packagePath,
       );
@@ -1617,4 +1624,13 @@ class PositionedPopup extends StatelessWidget {
       },
     );
   }
+}
+
+extension CodeViewColorScheme on ColorScheme {
+  Color get performanceLowImpactColor => const Color(0xFF5CB246);
+  Color get performanceMediumImpactColor => const Color(0xFFF7AC2A);
+  Color get performanceHighImpactColor => const Color(0xFFC94040);
+
+  Color get coverageHitColor => performanceLowImpactColor;
+  Color get coverageMissColor => performanceHighImpactColor;
 }

@@ -5,6 +5,8 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_class_display.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_developer_common_widgets.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -24,8 +26,11 @@ void main() {
     setUpMockScriptManager();
     setGlobal(BreakpointManager, BreakpointManager());
     setGlobal(IdeTheme, IdeTheme());
-    setGlobal(ServiceConnectionManager, FakeServiceManager());
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(NotificationService, NotificationService());
     mockClassObject = MockClassObject();
@@ -56,10 +61,13 @@ void main() {
       expect(find.byType(VMInfoCard), findsOneWidget);
       expect(find.text('General Information'), findsOneWidget);
       expect(find.text('1 KB'), findsOneWidget);
-      expect(find.text('fooLib'), findsOneWidget);
-      expect(find.text('fooScript.dart:10:4'), findsOneWidget);
-      expect(find.text('fooSuperClass'), findsOneWidget);
-      expect(find.text('fooSuperType'), findsOneWidget);
+      expect(find.text('fooLib', findRichText: true), findsOneWidget);
+      expect(
+        find.text('fooScript.dart:10:4', findRichText: true),
+        findsOneWidget,
+      );
+      expect(find.text('fooSuperClass', findRichText: true), findsOneWidget);
+      expect(find.text('fooSuperType', findRichText: true), findsOneWidget);
       expect(find.text('Currently allocated instances:'), findsOneWidget);
       expect(find.text('3'), findsOneWidget);
 
@@ -67,7 +75,7 @@ void main() {
 
       expect(find.byType(RetainingPathWidget), findsOneWidget);
 
-      expect(find.byType(InboundReferencesWidget), findsOneWidget);
+      expect(find.byType(InboundReferencesTree), findsOneWidget);
 
       // TODO(mtaylee): test ClassInstancesWidget when implemented
     },

@@ -5,12 +5,12 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../shared/diagnostics/diagnostics_node.dart';
 import '../../../../shared/primitives/math_utils.dart';
 import '../../../../shared/primitives/utils.dart';
-import '../../../../shared/theme.dart';
 import '../../inspector_controller.dart';
 import '../../inspector_data_models.dart';
 import '../ui/free_space.dart';
@@ -87,7 +87,16 @@ class BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
 
   @override
   Widget build(BuildContext context) {
-    if (properties == null) return const SizedBox();
+    if (properties == null) {
+      final selectedNodeLocal = selectedNode;
+      return Center(
+        child: Text(
+          '${selectedNodeLocal?.description ?? 'Widget'} has no layout properties to display.',
+          textAlign: TextAlign.center,
+          overflow: TextOverflow.clip,
+        ),
+      );
+    }
     return Container(
       margin: const EdgeInsets.all(margin),
       padding: const EdgeInsets.only(bottom: margin, right: margin),

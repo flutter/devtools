@@ -4,7 +4,6 @@
 
 import 'package:flutter/foundation.dart';
 
-import '../../../../../shared/globals.dart';
 import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../shared/heap/class_filter.dart';
 import '../../../shared/heap/heap.dart';
@@ -14,17 +13,6 @@ import 'heap_diff.dart';
 class RetainingPathController {
   final hideStandard = ValueNotifier<bool>(true);
   final invert = ValueNotifier<bool>(true);
-}
-
-class ClassFilterData {
-  ClassFilterData({
-    required this.filter,
-    required this.onChanged,
-  });
-
-  final ValueListenable<ClassFilter> filter;
-  final ApplyFilterCallback onChanged;
-  late final String? rootPackage = serviceManager.rootInfoNow().package;
 }
 
 class ClassesTableSingleData {

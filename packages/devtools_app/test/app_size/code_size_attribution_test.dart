@@ -5,6 +5,8 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/app_size/code_size_attribution.dart';
 import 'package:devtools_app/src/shared/table/table.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -17,8 +19,11 @@ void main() {
   late CallGraph callGraph;
 
   setUp(() {
-    setGlobal(ServiceConnectionManager, FakeServiceManager());
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(IdeTheme, IdeTheme());
     callGraph = generateCallGraphWithDominators(

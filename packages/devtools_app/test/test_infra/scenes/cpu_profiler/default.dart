@@ -5,6 +5,8 @@
 import 'dart:async';
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:mockito/mockito.dart';
@@ -14,10 +16,10 @@ import 'package:vm_service/vm_service.dart';
 import '../../test_data/cpu_profiler/cpu_profile.dart';
 
 /// To run:
-/// flutter run -t test/test_infra/scenes/cpu_profiler/default.stager_app.dart -d macos
+/// flutter run -t test/test_infra/scenes/cpu_profiler/default.stager_app.g.dart -d macos
 class CpuProfilerDefaultScene extends Scene {
   late ProfilerScreenController controller;
-  late FakeServiceManager fakeServiceManager;
+  late FakeServiceConnectionManager fakeServiceConnection;
   late ProfilerScreen screen;
 
   @override
@@ -30,27 +32,31 @@ class CpuProfilerDefaultScene extends Scene {
 
   @override
   Future<void> setUp() async {
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
     setGlobal(OfflineModeController, OfflineModeController());
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());
     setGlobal(PreferencesController, PreferencesController());
+    setGlobal(BannerMessagesController, BannerMessagesController());
 
-    fakeServiceManager = FakeServiceManager(
+    fakeServiceConnection = FakeServiceConnectionManager(
       service: FakeServiceManager.createFakeService(
         cpuSamples: CpuSamples.parse(goldenCpuSamplesJson),
       ),
     );
-    final app = fakeServiceManager.connectedApp!;
+    final app = fakeServiceConnection.serviceManager.connectedApp!;
     mockConnectedApp(
       app,
       isFlutterApp: false,
       isProfileBuild: false,
       isWebApp: false,
     );
-    when(fakeServiceManager.errorBadgeManager.errorCountNotifier('profiler'))
+    when(fakeServiceConnection.errorBadgeManager.errorCountNotifier('profiler'))
         .thenReturn(ValueNotifier<int>(0));
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
+    setGlobal(ServiceConnectionManager, fakeServiceConnection);
 
     final mockScriptManager = MockScriptManager();
     when(mockScriptManager.scriptRefForUri(any)).thenReturn(

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
@@ -9,10 +11,8 @@ import '../../../../shared/charts/chart.dart';
 import '../../../../shared/charts/chart_controller.dart';
 import '../../../../shared/charts/chart_trace.dart' as trace;
 import '../../../../shared/charts/chart_trace.dart' show ChartType;
-import '../../../../shared/primitives/auto_dispose.dart';
-import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
-import '../../memory_controller.dart';
+import '../../framework/connected/memory_controller.dart';
 import '../../shared/primitives/memory_timeline.dart';
 
 // TODO(terry): Consider custom painter?
@@ -24,8 +24,8 @@ const resetDarkLegend = '${_base}reset_glyph_dark.png';
 const resetLightLegend = '${_base}reset_glyph_light.png';
 const gcManualLegend = '${_base}gc_manual_glyph.png';
 const gcVMLegend = '${_base}gc_vm_glyph.png';
-const eventLegend = '${_base}event_glyph.png';
-const eventsLegend = '${_base}events_glyph.png';
+String eventLegendAsset(int eventCount) =>
+    '$_base${pluralize('event', eventCount)}_glyph.png';
 
 /// Events trace name displayed
 const manualSnapshotLegendName = 'Snapshot';

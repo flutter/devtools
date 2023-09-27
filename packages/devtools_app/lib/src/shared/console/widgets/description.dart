@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../diagnostics/dart_object_node.dart';
@@ -10,7 +11,6 @@ import '../../diagnostics/tree_builder.dart';
 import '../../diagnostics_text_styles.dart';
 import '../../globals.dart';
 import '../../primitives/utils.dart';
-import '../../theme.dart';
 import '../../ui/hover.dart';
 import '../../ui/icons.dart';
 import '../../ui/utils.dart';
@@ -181,12 +181,12 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     );
 
     final diagnosticLocal = diagnostic!;
-    final inspectorService = serviceManager.inspectorService!;
+    final inspectorService = serviceConnection.inspectorService!;
 
     return HoverCardTooltip.async(
       enabled: () =>
           preferences.inspector.hoverEvalModeEnabled.value &&
-          diagnosticLocal.inspectorService != null,
+          diagnosticLocal.objectGroupApi != null,
       asyncGenerateHoverCardData: ({
         required event,
         required isHoverStale,

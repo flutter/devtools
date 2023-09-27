@@ -8,14 +8,18 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import '_io_utils.dart';
+import 'package:collection/collection.dart';
+import 'package:devtools_shared/devtools_test_utils.dart';
 
-// Set this to true for debugging to get JSON written to stdout.
-const bool _printDebugOutputToStdOut = false;
+import '_utils.dart';
 
-class TestFlutterApp extends _TestApp {
-  TestFlutterApp({String appPath = 'test/test_infra/fixtures/flutter_app'})
-      : super(appPath);
+class TestFlutterApp extends IntegrationTestApp {
+  TestFlutterApp({
+    String appPath = 'test/test_infra/fixtures/flutter_app',
+    TestAppDevice appDevice = TestAppDevice.flutterTester,
+  }) : super(appPath, appDevice);
+
+  String? _currentRunningAppId;
 
   @override
   Future<void> startProcess() async {
@@ -25,81 +29,26 @@ class TestFlutterApp extends _TestApp {
         'run',
         '--machine',
         '-d',
-        'flutter-tester',
+        testAppDevice.argName,
+        // Do not serve DevTools from Flutter Tools.
+        '--no-devtools',
       ],
       workingDirectory: testAppPath,
     );
   }
-}
 
-// TODO(kenz): implement for running integration tests against a Dart CLI app.
-class TestDartCliApp {}
-
-abstract class _TestApp with IOMixin {
-  _TestApp(this.testAppPath);
-
-  static const _appStartTimeout = Duration(seconds: 120);
-
-  static const _defaultTimeout = Duration(seconds: 40);
-
-  static const _quitTimeout = Duration(seconds: 10);
-
-  /// The path relative to the 'devtools_app' directory where the test app
-  /// lives.
-  ///
-  /// This will either be a file path or a directory path depending on the type
-  /// of app.
-  final String testAppPath;
-
-  late Process? runProcess;
-
-  late int runProcessId;
-
-  final _allMessages = StreamController<String>.broadcast();
-
-  Uri get vmServiceUri => _vmServiceWsUri;
-  late Uri _vmServiceWsUri;
-
-  String? _currentRunningAppId;
-
-  Future<void> startProcess();
-
-  Future<void> start() async {
-    await startProcess();
-    assert(
-      runProcess != null,
-      '\'runProcess\' cannot be null. Assign \'runProcess\' inside the '
-      '\'startProcess\' method.',
-    );
-
-    // This class doesn't use the result of the future. It's made available
-    // via a getter for external uses.
-    unawaited(
-      runProcess!.exitCode.then((int code) {
-        _debugPrint('Process exited ($code)');
-      }),
-    );
-
-    listenToProcessOutput(runProcess!, printCallback: _debugPrint);
-
-    // Stash the PID so that we can terminate the VM more reliably than using
-    // proc.kill() (because proc is a shell, because `flutter` is a shell
-    // script).
-    final connected =
-        await waitFor(event: FlutterDaemonConstants.daemonConnected.key);
-    runProcessId = (connected[FlutterDaemonConstants.params.key]!
-        as Map<String, Object?>)[FlutterDaemonConstants.pid.key] as int;
-
+  @override
+  Future<void> waitForAppStart() async {
     // Set this up now, but we don't await it yet. We want to make sure we don't
     // miss it while waiting for debugPort below.
     final started = waitFor(
       event: FlutterDaemonConstants.appStarted.key,
-      timeout: _appStartTimeout,
+      timeout: IntegrationTestApp._appStartTimeout,
     );
 
     final debugPort = await waitFor(
       event: FlutterDaemonConstants.appDebugPort.key,
-      timeout: _appStartTimeout,
+      timeout: IntegrationTestApp._appStartTimeout,
     );
     final wsUriString = (debugPort[FlutterDaemonConstants.params.key]!
         as Map<String, Object?>)[FlutterDaemonConstants.wsUri.key] as String;
@@ -117,34 +66,32 @@ abstract class _TestApp with IOMixin {
     _currentRunningAppId = params[FlutterDaemonConstants.appId.key] as String?;
   }
 
-  Future<int> stop() async {
+  @override
+  Future<void> manuallyStopApp() async {
     if (_currentRunningAppId != null) {
       _debugPrint('Stopping app');
       await Future.any<void>(<Future<void>>[
         runProcess!.exitCode,
-        _sendRequest(
+        _sendFlutterDaemonRequest(
           'app.stop',
           <String, dynamic>{'appId': _currentRunningAppId},
         ),
       ]).timeout(
-        _quitTimeout,
+        IOMixin.killTimeout,
         onTimeout: () {
-          _debugPrint('app.stop did not return within $_quitTimeout');
+          _debugPrint('app.stop did not return within ${IOMixin.killTimeout}');
         },
       );
       _currentRunningAppId = null;
     }
-
-    _debugPrint('Waiting for process to end');
-    return runProcess!.exitCode.timeout(
-      _quitTimeout,
-      onTimeout: _killGracefully,
-    );
   }
 
   int _requestId = 1;
   // ignore: avoid-dynamic, dynamic by design.
-  Future<dynamic> _sendRequest(String method, dynamic params) async {
+  Future<dynamic> _sendFlutterDaemonRequest(
+    String method,
+    Object? params,
+  ) async {
     final int requestId = _requestId++;
     final Map<String, dynamic> request = <String, dynamic>{
       'id': requestId,
@@ -169,22 +116,6 @@ abstract class _TestApp with IOMixin {
     }
 
     return response['result'];
-  }
-
-  Future<int> _killGracefully() async {
-    _debugPrint('Sending SIGTERM to $runProcessId..');
-    await cancelAllStreamSubscriptions();
-    Process.killPid(runProcessId);
-    return runProcess!.exitCode
-        .timeout(_quitTimeout, onTimeout: _killForcefully);
-  }
-
-  Future<int> _killForcefully() {
-    // Use sigint here instead of sigkill. See
-    // https://github.com/flutter/flutter/issues/117415.
-    _debugPrint('Sending SIGINT to $runProcessId..');
-    Process.killPid(runProcessId, ProcessSignal.sigint);
-    return runProcess!.exitCode;
   }
 
   Future<Map<String, Object?>> waitFor({
@@ -254,6 +185,159 @@ abstract class _TestApp with IOMixin {
     }
   }
 
+  Map<String, Object?>? _parseFlutterResponse(String line) {
+    if (line.startsWith('[') && line.endsWith(']')) {
+      try {
+        final Map<String, Object?>? resp = json.decode(line)[0];
+        return resp;
+      } catch (e) {
+        // Not valid JSON, so likely some other output that was surrounded by [brackets]
+        return null;
+      }
+    }
+    return null;
+  }
+}
+
+class TestDartCliApp extends IntegrationTestApp {
+  TestDartCliApp({
+    String appPath = 'test/test_infra/fixtures/empty_app.dart',
+  }) : super(appPath, TestAppDevice.cli);
+
+  static const vmServicePrefix = 'The Dart VM service is listening on ';
+
+  @override
+  Future<void> startProcess() async {
+    const separator = '/';
+    final parts = testAppPath.split(separator);
+    final scriptName = parts.removeLast();
+    final workingDir = parts.join(separator);
+    runProcess = await Process.start(
+      'dart',
+      [
+        '--observe=0',
+        'run',
+        scriptName,
+      ],
+      workingDirectory: workingDir,
+    );
+  }
+
+  @override
+  Future<void> waitForAppStart() async {
+    final vmServiceUri = await waitFor(
+      message: vmServicePrefix,
+      timeout: IntegrationTestApp._appStartTimeout,
+    );
+    final parsedVmServiceUri = Uri.parse(vmServiceUri);
+
+    // Map to WS URI.
+    _vmServiceWsUri =
+        convertToWebSocketUrl(serviceProtocolUrl: parsedVmServiceUri);
+  }
+
+  Future<String> waitFor({required String message, Duration? timeout}) {
+    final response = Completer<String>();
+    late StreamSubscription<String> sub;
+    sub = stdoutController.stream.listen(
+      (String line) => _handleStdout(
+        line,
+        subscription: sub,
+        response: response,
+        message: message,
+      ),
+    );
+
+    return _timeoutWithMessages<String>(
+      () => response.future,
+      timeout: timeout,
+      message: 'Did not receive expected message: $message.',
+    ).whenComplete(() => sub.cancel());
+  }
+
+  void _handleStdout(
+    String line, {
+    required StreamSubscription<String> subscription,
+    required Completer<String> response,
+    required String message,
+  }) async {
+    if (message == vmServicePrefix && line.startsWith(vmServicePrefix)) {
+      final vmServiceUri = line
+          .substring(line.indexOf(vmServicePrefix) + vmServicePrefix.length);
+      await subscription.cancel();
+      response.complete(vmServiceUri);
+    }
+  }
+}
+
+abstract class IntegrationTestApp with IOMixin {
+  IntegrationTestApp(this.testAppPath, this.testAppDevice);
+
+  static const _appStartTimeout = Duration(seconds: 240);
+
+  static const _defaultTimeout = Duration(seconds: 40);
+
+  /// The path relative to the 'devtools_app' directory where the test app
+  /// lives.
+  ///
+  /// This will either be a file path or a directory path depending on the type
+  /// of app.
+  final String testAppPath;
+
+  /// The device the test app should run on, e.g. flutter-tester, chrome.
+  final TestAppDevice testAppDevice;
+
+  late Process? runProcess;
+
+  int get runProcessId => runProcess!.pid;
+
+  final _allMessages = StreamController<String>.broadcast();
+
+  Uri get vmServiceUri => _vmServiceWsUri;
+  late Uri _vmServiceWsUri;
+
+  Future<void> startProcess();
+
+  Future<void> waitForAppStart();
+
+  Future<void> manuallyStopApp() async {}
+
+  Future<void> start() async {
+    _debugPrint('starting the test app process for $testAppPath');
+    await startProcess();
+    assert(
+      runProcess != null,
+      '\'runProcess\' cannot be null. Assign \'runProcess\' inside the '
+      '\'startProcess\' method.',
+    );
+    _debugPrint('process started (pid $runProcessId)');
+
+    // This class doesn't use the result of the future. It's made available
+    // via a getter for external uses.
+    unawaited(
+      runProcess!.exitCode.then((int code) {
+        _debugPrint('Process exited ($code)');
+      }),
+    );
+
+    listenToProcessOutput(runProcess!, printCallback: _debugPrint);
+
+    _debugPrint('waiting for app start...');
+    await waitForAppStart();
+  }
+
+  Future<int> stop({Future<int>? onTimeout}) async {
+    await manuallyStopApp();
+    _debugPrint('Waiting for process to end');
+    return runProcess!.exitCode.timeout(
+      IOMixin.killTimeout,
+      onTimeout: () => killGracefully(
+        runProcess!,
+        debugLogging: debugTestScript,
+      ),
+    );
+  }
+
   Future<T> _timeoutWithMessages<T>(
     Future<T> Function() f, {
     Duration? timeout,
@@ -281,27 +365,12 @@ abstract class _TestApp with IOMixin {
     }).whenComplete(() => sub.cancel());
   }
 
-  Map<String, Object?>? _parseFlutterResponse(String line) {
-    if (line.startsWith('[') && line.endsWith(']')) {
-      try {
-        final Map<String, Object?>? resp = json.decode(line)[0];
-        return resp;
-      } catch (e) {
-        // Not valid JSON, so likely some other output that was surrounded by [brackets]
-        return null;
-      }
-    }
-    return null;
-  }
-
   String _debugPrint(String msg) {
     const maxLength = 500;
     final truncatedMsg =
         msg.length > maxLength ? '${msg.substring(0, maxLength)}...' : msg;
     _allMessages.add(truncatedMsg);
-    if (_printDebugOutputToStdOut) {
-      print(truncatedMsg);
-    }
+    debugLog('_TestApp - $truncatedMsg');
     return msg;
   }
 }
@@ -346,4 +415,49 @@ enum FlutterDaemonConstants {
   final String? _nameOverride;
 
   String get key => _nameOverride ?? name;
+}
+
+enum TestAppDevice {
+  flutterTester('flutter-tester'),
+  flutterChrome('chrome'),
+  cli('cli');
+
+  const TestAppDevice(this.argName);
+
+  final String argName;
+
+  /// A mapping of test app device to the unsupported tests for that device.
+  static final _unsupportedTestsForDevice = <TestAppDevice, List<String>>{
+    TestAppDevice.flutterTester: [],
+    TestAppDevice.flutterChrome: [
+      // TODO(https://github.com/flutter/devtools/issues/5874): Remove once supported on web.
+      'eval_and_browse_test.dart',
+      'perfetto_test.dart',
+      'performance_screen_event_recording_test.dart',
+      'service_connection_test.dart',
+    ],
+    TestAppDevice.cli: [
+      'debugger_panel_test.dart',
+      'eval_and_browse_test.dart',
+      'perfetto_test.dart',
+      'performance_screen_event_recording_test.dart',
+      'service_connection_test.dart',
+    ],
+  };
+
+  static final _argNameToDeviceMap =
+      TestAppDevice.values.fold(<String, TestAppDevice>{}, (map, device) {
+    map[device.argName] = device;
+    return map;
+  });
+
+  static TestAppDevice? fromArgName(String argName) {
+    return _argNameToDeviceMap[argName];
+  }
+
+  bool supportsTest(String testPath) {
+    final unsupportedTests = _unsupportedTestsForDevice[this] ?? [];
+    return unsupportedTests
+        .none((unsupportedTestPath) => testPath.endsWith(unsupportedTestPath));
+  }
 }

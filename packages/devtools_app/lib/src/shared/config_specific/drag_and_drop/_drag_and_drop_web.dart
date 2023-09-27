@@ -11,12 +11,12 @@ import '../../globals.dart';
 import '../../primitives/utils.dart';
 import 'drag_and_drop.dart';
 
-DragAndDropManagerWeb createDragAndDropManager() {
-  return DragAndDropManagerWeb();
+DragAndDropManagerWeb createDragAndDropManager(int viewId) {
+  return DragAndDropManagerWeb(viewId);
 }
 
 class DragAndDropManagerWeb extends DragAndDropManager {
-  DragAndDropManagerWeb() : super.impl();
+  DragAndDropManagerWeb(int viewId) : super.impl(viewId);
 
   late final StreamSubscription<MouseEvent> onDragOverSubscription;
 

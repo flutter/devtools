@@ -53,10 +53,27 @@ abstract class FeatureFlags {
   /// https://github.com/flutter/devtools/issues/4564.
   static bool widgetRebuildstats = enableExperiments;
 
-  /// Flag to enable VS code sidebar tooling GUIs powered by DevTools.
+  /// Flag to enable analysis of snapshots in disconnected mode.
   ///
-  /// https://github.com/flutter/devtools/issues/5868.
-  static bool vsCodeSidebarTooling = enableExperiments;
+  /// https://github.com/flutter/devtools/issues/5606
+  static bool memoryAnalysis = enableExperiments;
+
+  /// Flag to enable the deep link validation tooling in DevTools, both for the
+  /// DevTools screen and the standalone tool for IDE embedding.
+  ///
+  /// https://github.com/flutter/devtools/issues/6013
+  static bool deepLinkValidation = enableExperiments;
+
+  /// Flag to enable DevTools extensions.
+  ///
+  /// TODO(https://github.com/flutter/devtools/issues/6443): remove this flag
+  /// once extension support is added in g3.
+  static bool devToolsExtensions = isExternalBuild;
+
+  /// Flag to enable debugging via DAP.
+  ///
+  /// https://github.com/flutter/devtools/issues/6056
+  static bool dapDebugging = enableExperiments;
 
   /// Stores a map of all the feature flags for debugging purposes.
   ///
@@ -64,6 +81,8 @@ abstract class FeatureFlags {
   /// well.
   static final _allFlags = <String, bool>{
     'widgetRebuildStats': widgetRebuildstats,
+    'memoryAnalysis': memoryAnalysis,
+    'dapDebugging': dapDebugging,
   };
 
   /// A helper to print the status of all the feature flags.

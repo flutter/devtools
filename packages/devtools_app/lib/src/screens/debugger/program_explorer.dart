@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
@@ -11,19 +13,16 @@ import 'package:vm_service/vm_service.dart' hide Stack;
 import '../../shared/common_widgets.dart';
 import '../../shared/flex_split_column.dart';
 import '../../shared/globals.dart';
-import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/utils.dart';
-import '../../shared/theme.dart';
 import '../../shared/tree.dart';
-import '../../shared/utils.dart';
+import '../../shared/ui/colors.dart';
 import 'program_explorer_controller.dart';
 import 'program_explorer_model.dart';
 
 const containerIcon = Icons.folder;
 const libraryIcon = Icons.insert_drive_file;
 
-double get _programExplorerRowHeight => scaleByFontFactor(22.0);
-double get _selectedNodeTopSpacing => _programExplorerRowHeight * 3;
+double get _selectedNodeTopSpacing => defaultTreeViewRowHeight * 3;
 
 class _ProgramExplorerRow extends StatelessWidget {
   const _ProgramExplorerRow({
@@ -267,7 +266,7 @@ class ProgramStructureIcon extends StatelessWidget {
                     height: 1,
                     fontFamily: theme.fixedFontStyle.fontFamily,
                     color: theme.colorScheme.defaultBackgroundColor,
-                    fontSize: chartFontSizeSmall,
+                    fontSize: smallFontSize,
                   ),
                   // Required to center the individual character within the
                   // shape. Since letters like 'm' are shorter than letters
@@ -313,7 +312,7 @@ class _FileExplorerState extends State<_FileExplorer> with AutoDisposeMixin {
   double get selectedNodeOffset => widget.controller.selectedNodeIndex.value ==
           -1
       ? -1
-      : widget.controller.selectedNodeIndex.value * _programExplorerRowHeight;
+      : widget.controller.selectedNodeIndex.value * defaultTreeViewRowHeight;
 
   @override
   void initState() {
@@ -334,7 +333,6 @@ class _FileExplorerState extends State<_FileExplorer> with AutoDisposeMixin {
   @override
   Widget build(BuildContext context) {
     return TreeView<VMServiceObjectNode>(
-      itemExtent: _programExplorerRowHeight,
       dataRootsListenable: widget.controller.rootObjectNodes,
       onItemSelected: widget.onItemSelected,
       onItemExpanded: widget.onItemExpanded,
@@ -392,7 +390,6 @@ class _ProgramOutlineView extends StatelessWidget {
           return const CenteredCircularProgressIndicator();
         }
         return TreeView<VMServiceObjectNode>(
-          itemExtent: _programExplorerRowHeight,
           dataRootsListenable: controller.outlineNodes,
           onItemSelected: onItemSelected,
           onItemExpanded: onItemExpanded,
@@ -463,7 +460,8 @@ class ProgramExplorer extends StatelessWidget {
               // the above issues are resolved.
               //
               // See https://github.com/flutter/devtools/issues/3447.
-              return serviceManager.connectedApp!.isDartWebAppNow!
+              return serviceConnection
+                      .serviceManager.connectedApp!.isDartWebAppNow!
                   ? Column(
                       children: [
                         fileExplorerHeader,

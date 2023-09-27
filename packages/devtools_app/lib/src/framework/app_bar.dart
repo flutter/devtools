@@ -4,25 +4,23 @@
 
 import 'dart:math' as math;
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
+import 'package:pointer_interceptor/pointer_interceptor.dart';
 
 import '../shared/common_widgets.dart';
 import '../shared/primitives/utils.dart';
 import '../shared/screen.dart';
-import '../shared/theme.dart';
 
 class DevToolsAppBar extends StatelessWidget {
   const DevToolsAppBar({
     super.key,
     required this.tabController,
-    required this.title,
     required this.screens,
     required this.actions,
   });
 
   final TabController? tabController;
-
-  final String title;
 
   final List<Screen> screens;
 
@@ -37,7 +35,6 @@ class DevToolsAppBar extends StatelessWidget {
     List<Screen> visibleScreens = screens;
     bool tabsOverflow({bool includeOverflowButtonWidth = false}) {
       return _scaffoldHeaderWidth(
-                title: title,
                 screens: visibleScreens,
                 actions: actions,
                 textTheme: textTheme,
@@ -46,13 +43,11 @@ class DevToolsAppBar extends StatelessWidget {
           MediaQuery.of(context).size.width;
     }
 
-    var hideTitle = false;
     var overflow = tabsOverflow();
     while (overflow) {
       visibleScreens = List.of(visibleScreens)..safeRemoveLast();
       overflow = tabsOverflow(includeOverflowButtonWidth: true);
       if (overflow && visibleScreens.isEmpty) {
-        hideTitle = true;
         break;
       }
     }
@@ -82,21 +77,13 @@ class DevToolsAppBar extends StatelessWidget {
         ],
       );
 
-      final leftPadding = hideTitle
-          ? 0.0
-          : calculateTitleWidth(
-              title,
-              textTheme: Theme.of(context).textTheme,
-            );
       final rightPadding = math.max(
         0.0,
         // Use [actions] here instead of [actionsWithSpacer] because we may
         // have added a spacer element to [actionsWithSpacer] above, which
         // should be excluded from the width calculation.
         actionWidgetSize * ((actions ?? []).length) +
-            (actionsWithSpacer.safeFirst is VerticalLineSpacer
-                ? VerticalLineSpacer.totalWidth
-                : 0.0),
+            VerticalLineSpacer.totalWidth,
       );
 
       flexibleSpace = Align(
@@ -104,7 +91,6 @@ class DevToolsAppBar extends StatelessWidget {
         child: Padding(
           padding: EdgeInsets.only(
             top: densePadding,
-            left: leftPadding,
             right: rightPadding,
           ),
           child: Row(
@@ -135,7 +121,6 @@ class DevToolsAppBar extends StatelessWidget {
     return AppBar(
       // Turn off the appbar's back button.
       automaticallyImplyLeading: false,
-      title: hideTitle ? const SizedBox.shrink() : DevToolsTitle(title: title),
       centerTitle: false,
       toolbarHeight: defaultToolbarHeight,
       actions: actionsWithSpacer,
@@ -145,18 +130,16 @@ class DevToolsAppBar extends StatelessWidget {
 
   /// Returns the width of the scaffold title, tabs and default icons.
   double _scaffoldHeaderWidth({
-    required String title,
     required List<Screen> screens,
     required List<Widget>? actions,
     required TextTheme textTheme,
   }) {
-    final titleWidth = calculateTitleWidth(title, textTheme: textTheme);
     final tabsWidth = screens.fold(
       0.0,
       (prev, screen) => prev + screen.approximateTabWidth(textTheme),
     );
     final actionsWidth = (actions?.length ?? 0) * actionWidgetSize;
-    return titleWidth + tabsWidth + actionsWidth;
+    return tabsWidth + VerticalLineSpacer.totalWidth + actionsWidth;
   }
 }
 
@@ -182,7 +165,7 @@ class TabOverflowButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final selectedColor = Theme.of(context).colorScheme.primary;
     final button = ContextMenuButton(
-      icon: Icons.keyboard_double_arrow_right,
+      icon: Icons.keyboard_double_arrow_right_sharp,
       iconSize: actionsIconSize,
       color: overflowTabSelected ? selectedColor : null,
       buttonWidth: buttonMinWidth,
@@ -212,17 +195,19 @@ class TabOverflowButton extends StatelessWidget {
         );
       }
       children.add(
-        SizedBox(
-          // Match the height of the main tab bar.
-          height: defaultToolbarHeight,
-          child: MenuItemButton(
-            style: const ButtonStyle().copyWith(
-              textStyle: MaterialStateProperty.resolveWith<TextStyle>((_) {
-                return theme.textTheme.titleSmall!;
-              }),
+        PointerInterceptor(
+          child: SizedBox(
+            // Match the height of the main tab bar.
+            height: defaultToolbarHeight,
+            child: MenuItemButton(
+              style: const ButtonStyle().copyWith(
+                textStyle: MaterialStateProperty.resolveWith<TextStyle>((_) {
+                  return theme.textTheme.titleSmall!;
+                }),
+              ),
+              onPressed: () => onItemSelected(i),
+              child: tab,
             ),
-            onPressed: () => onItemSelected(i),
-            child: tab,
           ),
         ),
       );
@@ -266,47 +251,4 @@ class SelectedTabWrapper extends StatelessWidget {
       ],
     );
   }
-}
-
-class DevToolsTitle extends StatelessWidget {
-  const DevToolsTitle({super.key, required this.title});
-
-  final String title;
-
-  static double get paddingSize =>
-      intermediateSpacing * 2 + VerticalLineSpacer.totalWidth;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          title,
-          style: Theme.of(context).devToolsTitleStyle,
-        ),
-        const SizedBox(width: intermediateSpacing),
-        VerticalLineSpacer(height: defaultToolbarHeight),
-      ],
-    );
-  }
-}
-
-// TODO(kenz): make private once app bar code is refactored out of scaffold.dart
-// and into this file.
-double calculateTitleWidth(
-  String title, {
-  required TextTheme textTheme,
-  bool includeTitlePadding = true,
-}) {
-  final painter = TextPainter(
-    text: TextSpan(
-      text: title,
-      style: textTheme.titleMedium,
-    ),
-    textDirection: TextDirection.ltr,
-  )..layout();
-  // Approximate size of the title. Add [defaultSpacing] to account for
-  // title's leading padding.
-  return painter.width + (includeTitlePadding ? DevToolsTitle.paddingSize : 0);
 }

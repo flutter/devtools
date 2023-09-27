@@ -5,7 +5,7 @@
 import 'dart:async';
 // ignore: avoid_web_libraries_in_flutter, as designed
 import 'dart:html' as html;
-import 'dart:ui' as ui;
+import 'dart:ui_web' as ui_web;
 
 import 'package:flutter/foundation.dart';
 
@@ -31,7 +31,7 @@ const _debugUseLocalPerfetto = false;
 /// app and for each load of offline data. Each time [PerfettoController.init]
 /// is called, we create a new [html.IFrameElement] and register it to
 /// [PerfettoController.viewId] via
-/// [ui.platformViewRegistry.registerViewFactory]. Each new [html.IFrameElement]
+/// [ui_web.platformViewRegistry.registerViewFactory]. Each new [html.IFrameElement]
 /// must have a unique id in the [PlatformViewRegistry], which
 /// [_viewIdIncrementer] is used to create.
 var _viewIdIncrementer = 0;
@@ -39,7 +39,7 @@ var _viewIdIncrementer = 0;
 /// Events that are passed between DevTools and the embedded Perfetto iFrame via
 /// [window.postMessage].
 enum EmbeddedPerfettoEvent {
-  /// Id for an event Perfetto excpects to verify the trace viewer is ready.
+  /// Id for an event Perfetto expects to verify the trace viewer is ready.
   ping('PING'),
 
   /// Id for an event that Perfetto will send back after receiving a [ping]
@@ -123,8 +123,7 @@ class PerfettoControllerImpl extends PerfettoController {
       origin: html.window.location.origin,
       path: html.window.location.pathname ?? '',
     );
-    // ignore: undefined_prefixed_name, doesn't understand conditional imports.
-    final indexFilePath = ui.webOnlyAssetManager
+    final indexFilePath = ui_web.assetManager
         .getAssetUrl(devToolsExtensionPoints.perfettoIndexLocation);
     final baseUrl = '$basePath/$indexFilePath';
     return '$baseUrl$_embeddedModeQuery';
@@ -178,10 +177,7 @@ class PerfettoControllerImpl extends PerfettoController {
       ..height = '100%'
       ..width = '100%';
 
-    // This ignore is required due to
-    // https://github.com/flutter/flutter/issues/41563
-    // ignore: undefined_prefixed_name
-    final registered = ui.platformViewRegistry.registerViewFactory(
+    final registered = ui_web.platformViewRegistry.registerViewFactory(
       viewId,
       (int viewId) => _perfettoIFrame,
     );

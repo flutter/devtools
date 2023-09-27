@@ -2,12 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(https://github.com/flutter/devtools/issues/6215): remove this test.
+
 @TestOn('vm')
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/provider/instance_viewer/instance_details.dart';
 import 'package:devtools_app/src/screens/provider/instance_viewer/instance_providers.dart';
 import 'package:devtools_app/src/screens/provider/provider_list.dart';
 import 'package:devtools_app/src/screens/provider/provider_nodes.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,28 +24,30 @@ void main() {
   const windowSize = Size(2225.0, 1000.0);
 
   late Widget providerScreen;
-  late BannerMessagesController bannerMessagesController;
 
   setUpAll(() async => await loadFonts());
 
   setUp(() {
     setGlobal(IdeTheme, getIdeTheme());
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
     setGlobal(PreferencesController, PreferencesController());
-    setGlobal(ServiceConnectionManager, FakeServiceManager());
+    setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
     setGlobal(NotificationService, NotificationService());
+    setGlobal(BannerMessagesController, BannerMessagesController());
   });
 
   setUp(() {
-    bannerMessagesController = BannerMessagesController();
-
     providerScreen = Container(
       color: Colors.grey,
       child: Directionality(
         textDirection: TextDirection.ltr,
-        child: wrapWithControllers(
-          BannerMessages(screen: ProviderScreen()),
-          bannerMessages: bannerMessagesController,
+        child: wrap(
+          BannerMessages(
+            screen: ProviderScreen(),
+          ),
         ),
       ),
     );

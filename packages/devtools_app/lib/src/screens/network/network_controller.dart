@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -11,13 +12,29 @@ import '../../shared/config_specific/logger/allowed_error.dart';
 import '../../shared/globals.dart';
 import '../../shared/http/http_request_data.dart';
 import '../../shared/http/http_service.dart' as http_service;
-import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
 import 'network_model.dart';
 import 'network_screen.dart';
 import 'network_service.dart';
+
+/// Different types of Network Response which can be used to visualise response
+/// on Response tab
+enum NetworkResponseViewType {
+  auto,
+  text,
+  json;
+
+  @override
+  String toString() {
+    return switch (this) {
+      NetworkResponseViewType.json => 'Json',
+      NetworkResponseViewType.text => 'Text',
+      _ => 'Auto',
+    };
+  }
+}
 
 class NetworkController extends DisposableController
     with
@@ -49,6 +66,22 @@ class NetworkController extends DisposableController
   ValueListenable<NetworkRequests> get requests => _requests;
 
   final _requests = ValueNotifier<NetworkRequests>(NetworkRequests());
+
+  /// Notifies that current response type has been changed
+  ValueListenable<NetworkResponseViewType> get currentResponseViewType =>
+      _currentResponseViewType;
+
+  final _currentResponseViewType =
+      ValueNotifier<NetworkResponseViewType>(NetworkResponseViewType.auto);
+
+  /// Change current response type
+  set setResponseViewType(NetworkResponseViewType type) =>
+      _currentResponseViewType.value = type;
+
+  /// Reset drop down to initial state when current network request is changed
+  void resetDropDown() {
+    _currentResponseViewType.value = NetworkResponseViewType.auto;
+  }
 
   final selectedRequest = ValueNotifier<NetworkRequest?>(null);
   late CurrentNetworkRequests _currentNetworkRequests;
@@ -175,7 +208,8 @@ class NetworkController extends DisposableController
     // fewer flags risks breaking functionality on the timeline view that
     // assumes that all flags are set.
     await allowedError(
-      serviceManager.service!.setVMTimelineFlags(['GC', 'Dart', 'Embedder']),
+      serviceConnection.serviceManager.service!
+          .setVMTimelineFlags(['GC', 'Dart', 'Embedder']),
     );
 
     // TODO(kenz): only call these if http logging and socket profiling are not
@@ -199,7 +233,7 @@ class NetworkController extends DisposableController
 
   Future<bool> recordingHttpTraffic() async {
     bool enabled = true;
-    final service = serviceManager.service!;
+    final service = serviceConnection.serviceManager.service!;
     await service.forEachIsolate(
       (isolate) async {
         final httpFuture = service.httpEnableTimelineLogging(isolate.id!);
@@ -246,7 +280,7 @@ class NetworkController extends DisposableController
   @override
   void filterData(Filter<NetworkRequest> filter) {
     super.filterData(filter);
-    serviceManager.errorBadgeManager.clearErrors(NetworkScreen.id);
+    serviceConnection.errorBadgeManager.clearErrors(NetworkScreen.id);
     final queryFilter = filter.queryFilter;
     if (queryFilter.isEmpty) {
       _requests.value.requests.forEach(_checkForError);
@@ -299,7 +333,7 @@ class NetworkController extends DisposableController
 
   void _checkForError(NetworkRequest r) {
     if (r.didFail) {
-      serviceManager.errorBadgeManager.incrementBadgeCount(NetworkScreen.id);
+      serviceConnection.errorBadgeManager.incrementBadgeCount(NetworkScreen.id);
     }
   }
 }

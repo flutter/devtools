@@ -7,16 +7,16 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../shared/diagnostics_text_styles.dart';
-import '../../../shared/eval_on_dart_library.dart';
-import '../../../shared/primitives/sliver_iterable_child_delegate.dart';
-import '../../../shared/primitives/utils.dart';
-import '../../../shared/theme.dart';
+import '../sliver_iterable_child_delegate.dart';
 import 'instance_details.dart';
 import 'instance_providers.dart';
 
@@ -515,6 +515,7 @@ class _EditableFieldState extends State<_EditableField> {
           final setter = widget.setter;
           if (setter != null) await setter(value);
         } catch (err) {
+          if (!context.mounted) return;
           showErrorSnackBar(context, err);
         }
       },
@@ -539,9 +540,7 @@ class _EditableFieldState extends State<_EditableField> {
             right: -5,
             child: DecoratedBox(
               decoration: BoxDecoration(
-                borderRadius: const BorderRadius.all(
-                  Radius.circular(defaultBorderRadius),
-                ),
+                borderRadius: defaultBorderRadius,
                 border: Border.all(color: colorScheme.surface),
               ),
             ),

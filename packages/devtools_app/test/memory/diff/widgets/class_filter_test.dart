@@ -4,8 +4,8 @@
 
 import 'package:devtools_app/src/screens/memory/panes/diff/controller/item_controller.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/diff_pane.dart';
-import 'package:devtools_app/src/screens/memory/panes/diff/widgets/class_filter.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/class_filter.dart';
+import 'package:devtools_app/src/screens/memory/shared/widgets/class_filter.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -41,114 +41,115 @@ final _customFilter = ClassFilter(
 );
 
 void main() {
-  final scene = DiffSnapshotScene();
-  // The setup should happen one time, so that there is only one instance of
-  // DiffPaneController accross tests.
-  // Otherwize tests may exchange controllers, because, for performance purposes,
-  // table builds only first provided instance of column accross table instances.
-  // See [FlatTable.columns].
-  setUpAll(() async => await scene.setUp());
+  group('Class Filter', () {
+    late DiffSnapshotScene scene;
 
-  Future<DiffSnapshotScene> pumpScene(
-    WidgetTester tester,
-    _FilterTest test,
-  ) async {
-    scene.setClassFilterToShowAll();
+    setUp(() async {
+      scene = DiffSnapshotScene();
+      await scene.setUp();
+    });
 
-    expect(
-      scene.diffController.core.snapshots.value
-          .where((element) => element.hasData),
-      hasLength(2),
-    );
+    Future<DiffSnapshotScene> pumpScene(
+      WidgetTester tester,
+      _FilterTest test,
+    ) async {
+      scene.setClassFilterToShowAll();
 
-    final diffWith = test.isDiff
-        ? scene.diffController.core.snapshots.value[1] as SnapshotInstanceItem
-        : null;
+      expect(
+        scene.diffController.core.snapshots.value
+            .where((element) => element.hasData),
+        hasLength(2),
+      );
 
-    scene.diffController.setDiffing(
-      scene.diffController.derived.selectedItem.value as SnapshotInstanceItem,
-      diffWith,
-    );
+      final diffWith = test.isDiff
+          ? scene.diffController.core.snapshots.value[1] as SnapshotInstanceItem
+          : null;
 
-    await tester.pumpScene(scene);
-    await tester.pumpAndSettle();
-    expect(
-      scene.diffController.core.classFilter.value.filterType,
-      ClassFilterType.showAll,
-    );
-    await expectLater(
-      find.byType(SnapshotInstanceItemPane),
-      matchesDevToolsGolden(test.sceneGolden),
-    );
+      scene.diffController.setDiffing(
+        scene.diffController.derived.selectedItem.value as SnapshotInstanceItem,
+        diffWith,
+      );
 
-    return scene;
-  }
+      await tester.pumpScene(scene);
+      await tester.pumpAndSettle();
+      expect(
+        scene.diffController.core.classFilter.value.filterType,
+        ClassFilterType.showAll,
+      );
+      await expectLater(
+        find.byType(SnapshotInstanceItemPane),
+        matchesDevToolsGolden(test.sceneGolden),
+      );
 
-  // Set a wide enough screen width that we do not run into overflow.
-  const windowSize = Size(2225.0, 1000.0);
+      return scene;
+    }
 
-  for (final test in _tests) {
-    testWidgetsWithWindowSize(
-      '$ClassFilterDialog filters classes, ${test.name}',
-      windowSize,
-      (WidgetTester tester) async {
-        final scene = await pumpScene(tester, test);
+    // Set a wide enough screen width that we do not run into overflow.
+    const windowSize = Size(2225.0, 1000.0);
 
-        await _switchFilter(
-          scene,
-          ClassFilterType.showAll,
-          ClassFilterType.except,
-          tester,
-          test,
-        );
+    for (final test in _tests) {
+      testWidgetsWithWindowSize(
+        '$ClassFilterDialog filters classes, ${test.name}',
+        windowSize,
+        (WidgetTester tester) async {
+          final scene = await pumpScene(tester, test);
 
-        await _switchFilter(
-          scene,
-          ClassFilterType.except,
-          ClassFilterType.only,
-          tester,
-          test,
-        );
+          await _switchFilter(
+            scene,
+            ClassFilterType.showAll,
+            ClassFilterType.except,
+            tester,
+            test,
+          );
 
-        await _switchFilter(
-          scene,
-          ClassFilterType.only,
-          ClassFilterType.showAll,
-          tester,
-          test,
-        );
-      },
-    );
-  }
+          await _switchFilter(
+            scene,
+            ClassFilterType.except,
+            ClassFilterType.only,
+            tester,
+            test,
+          );
 
-  for (final test in _tests) {
-    testWidgetsWithWindowSize(
-      '$ClassFilterDialog customizes and resets to default, ${test.name}',
-      windowSize,
-      (WidgetTester tester) async {
-        final scene = await pumpScene(tester, test);
+          await _switchFilter(
+            scene,
+            ClassFilterType.only,
+            ClassFilterType.showAll,
+            tester,
+            test,
+          );
+        },
+      );
+    }
 
-        // Customize filter.
-        scene.diffController.derived.applyFilter(_customFilter);
-        await _checkDataGolden(scene, null, tester, test);
+    for (final test in _tests) {
+      testWidgetsWithWindowSize(
+        '$ClassFilterDialog customizes and resets to default, ${test.name}',
+        windowSize,
+        (WidgetTester tester) async {
+          final scene = await pumpScene(tester, test);
 
-        // Open dialog.
-        await tester.tap(find.byType(ClassFilterButton));
-        await _checkFilterGolden(null, tester);
+          // Customize filter.
+          scene.diffController.derived.applyFilter(_customFilter);
+          await _checkDataGolden(scene, null, tester, test);
 
-        // Reset to default.
-        await tester.tap(find.text('Reset to default'));
-        await tester.pumpAndSettle();
-        await tester.tap(find.text('APPLY'));
-        await tester.pumpAndSettle();
-        await tester.pumpAndSettle();
+          // Open dialog.
+          await tester.tap(find.byType(ClassFilterButton));
+          await _checkFilterGolden(null, tester);
 
-        final actualFilter = scene.diffController.core.classFilter.value;
-        expect(actualFilter.filterType, equals(ClassFilterType.except));
-        expect(actualFilter.except, equals(ClassFilter.defaultExceptString));
-      },
-    );
-  }
+          // Reset to default.
+          await tester.tap(find.text('Reset to default'));
+          await tester.pumpAndSettle();
+          await tester.tap(find.text('APPLY'));
+          await tester.pumpAndSettle();
+          await tester.pumpAndSettle();
+
+          final actualFilter = scene.diffController.core.classFilter.value;
+          expect(actualFilter.filterType, equals(ClassFilterType.except));
+          expect(actualFilter.except, equals(ClassFilter.defaultExceptString));
+        },
+      );
+    }
+  });
 }
 
 /// Verifies original and new state of filter and data.

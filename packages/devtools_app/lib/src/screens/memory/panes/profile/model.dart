@@ -7,26 +7,76 @@ import 'package:vm_service/vm_service.dart';
 import '../../../../shared/memory/class_name.dart';
 import '../../../../shared/table/table_data.dart';
 import '../../../vm_developer/vm_service_private_extensions.dart';
+import '../../shared/heap/class_filter.dart';
 
 class AdaptedProfile {
-  AdaptedProfile.fromAllocationProfile(AllocationProfile profile)
-      : newSpaceGCStats = profile.newSpaceGCStats,
+  AdaptedProfile.fromAllocationProfile(
+    AllocationProfile profile,
+    this.filter,
+    String? rootPackage,
+  )   : newSpaceGCStats = profile.newSpaceGCStats,
         oldSpaceGCStats = profile.oldSpaceGCStats,
         totalGCStats = profile.totalGCStats {
-    final elements = (profile.members ?? []).where((element) {
-      return element.bytesCurrent != 0 ||
-          element.newSpace.externalSize != 0 ||
-          element.oldSpace.externalSize != 0;
-    }).map((e) => ProfileRecord.fromClassHeapStats(e));
+    _items = (profile.members ?? [])
+        .where((element) {
+          return element.bytesCurrent != 0 ||
+              element.newSpace.externalSize != 0 ||
+              element.oldSpace.externalSize != 0;
+        })
+        .map((e) => ProfileRecord.fromClassHeapStats(e))
+        .toList();
+
+    _itemsFiltered = _items
+        .where((element) => filter.apply(element.heapClass, rootPackage))
+        .toList();
+
+    _total = ProfileRecord.total(profile);
 
     records = [
-      ProfileRecord.total(profile),
-      ...elements,
+      _total,
+      ..._itemsFiltered,
     ];
   }
 
-  /// A record per class plus one total record.
+  AdaptedProfile.withNewFilter(
+    AdaptedProfile profile,
+    this.filter,
+    String? rootPackage,
+  )   : newSpaceGCStats = profile.newSpaceGCStats,
+        oldSpaceGCStats = profile.oldSpaceGCStats,
+        totalGCStats = profile.totalGCStats {
+    _items = profile._items;
+    _total = profile._total;
+
+    _itemsFiltered = ClassFilter.filter(
+      oldFilter: profile.filter,
+      oldFiltered: profile._itemsFiltered,
+      newFilter: filter,
+      original: profile._items,
+      extractClass: (s) => s.heapClass,
+      rootPackage: rootPackage,
+    );
+
+    records = [
+      _total,
+      ..._itemsFiltered,
+    ];
+  }
+
+  /// A record per class plus one total record, with applied filter.
   late final List<ProfileRecord> records;
+
+  /// Record for totals.
+  late final ProfileRecord _total;
+
+  /// A record per class.
+  late final List<ProfileRecord> _items;
+
+  /// A record per class, filtered.
+  late final List<ProfileRecord> _itemsFiltered;
+
+  /// Applied filter.
+  final ClassFilter filter;
 
   final GCStats newSpaceGCStats;
   final GCStats oldSpaceGCStats;
@@ -61,7 +111,8 @@ class ProfileRecord with PinnableListEntry {
 
   ProfileRecord.total(AllocationProfile profile)
       : isTotal = true,
-        heapClass = HeapClassName(className: 'All Classes', library: ''),
+        heapClass =
+            HeapClassName.fromPath(className: 'All Classes', library: ''),
         totalInstances = null,
         totalSize = (profile.memoryUsage?.externalUsage ?? 0) +
             (profile.memoryUsage?.heapUsage ?? 0),

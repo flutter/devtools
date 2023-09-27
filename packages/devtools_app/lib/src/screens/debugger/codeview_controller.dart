@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
@@ -14,7 +15,6 @@ import '../../shared/config_specific/launch_url/launch_url.dart';
 import '../../shared/diagnostics/primitives/source_location.dart';
 import '../../shared/globals.dart';
 import '../../shared/notifications.dart';
-import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/history_manager.dart';
 import '../../shared/routing.dart';
 import '../../shared/ui/search.dart';
@@ -63,6 +63,7 @@ class CodeViewController extends DisposableController
     final processedState =
         CodeViewSourceLocationNavigationState._fromState(state);
     final object = processedState.object;
+    _navigationInProgress = true;
     await showScriptLocation(processedState.location, focusLine: true);
     if (programExplorerController.initialized.value) {
       if (object != null) {
@@ -78,7 +79,13 @@ class CodeViewController extends DisposableController
         programExplorerController.clearOutlineSelection();
       }
     }
+    _navigationInProgress = false;
   }
+
+  /// Whether there is a [CodeViewSourceLocationNavigationState] currently being
+  /// processed and handled.
+  bool get navigationInProgress => _navigationInProgress;
+  bool _navigationInProgress = false;
 
   ValueListenable<ScriptLocation?> get scriptLocation => _scriptLocation;
   final _scriptLocation = ValueNotifier<ScriptLocation?>(null);
@@ -202,7 +209,8 @@ class CodeViewController extends DisposableController
     if (current == null) {
       return;
     }
-    final isolateRef = serviceManager.isolateManager.selectedIsolate.value!;
+    final isolateRef =
+        serviceConnection.serviceManager.isolateManager.selectedIsolate.value!;
     final processedReport = await _getSourceReport(
       isolateRef,
       current.script,
@@ -267,7 +275,8 @@ class CodeViewController extends DisposableController
     final hitLines = <int>{};
     final missedLines = <int>{};
     try {
-      final report = await serviceManager.service!.getSourceReport(
+      final report =
+          await serviceConnection.serviceManager.service!.getSourceReport(
         isolateRef.id!,
         // TODO(bkonyi): make _Profile a public report type.
         // See https://github.com/dart-lang/sdk/issues/50641
@@ -305,6 +314,10 @@ class CodeViewController extends DisposableController
   /// Parses the given script into executable lines and prepares the script
   /// for syntax highlighting.
   Future<ParsedScript?> _parseScript(ScriptRef scriptRef) async {
+    final isolateRef =
+        serviceConnection.serviceManager.isolateManager.selectedIsolate.value;
+    if (isolateRef == null) return null;
+
     final script = await getScriptForRef(scriptRef);
     if (script == null || script.source == null) return null;
 
@@ -315,7 +328,6 @@ class CodeViewController extends DisposableController
     // Gather the data to display breakable lines.
     var executableLines = <int>{};
 
-    final isolateRef = serviceManager.isolateManager.selectedIsolate.value!;
     try {
       final positions = await breakpointManager.getBreakablePositions(
         isolateRef,
@@ -365,7 +377,8 @@ class CodeViewController extends DisposableController
   }
 
   void _maybeShowSourceMapsWarning() {
-    final isWebApp = serviceManager.connectedApp?.isDartWebAppNow ?? false;
+    final isWebApp =
+        serviceConnection.serviceManager.connectedApp?.isDartWebAppNow ?? false;
     final enableSourceMapsLink = devToolsExtensionPoints.enableSourceMapsLink();
     if (isWebApp && enableSourceMapsLink != null) {
       final enableSourceMapsAction = NotificationAction(

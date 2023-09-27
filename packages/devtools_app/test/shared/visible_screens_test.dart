@@ -4,6 +4,7 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/framework_controller.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -12,12 +13,16 @@ import 'package:vm_service/vm_service.dart';
 
 void main() {
   group('visible_screens', () {
-    late FakeServiceManager fakeServiceManager;
+    late FakeServiceConnectionManager fakeServiceConnection;
 
     setUp(() async {
-      fakeServiceManager = FakeServiceManager(availableLibraries: []);
-      setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
+      fakeServiceConnection =
+          FakeServiceConnectionManager(availableLibraries: []);
+      setGlobal(
+        DevToolsEnvironmentParameters,
+        ExternalDevToolsEnvironmentParameters(),
+      );
+      setGlobal(ServiceConnectionManager, fakeServiceConnection);
       setGlobal(BreakpointManager, BreakpointManager());
       setGlobal(FrameworkController, FrameworkController());
       setGlobal(PreferencesController, PreferencesController());
@@ -28,7 +33,9 @@ void main() {
       );
       setGlobal(ScriptManager, scriptManager);
 
-      await whenValueNonNull(serviceManager.isolateManager.selectedIsolate);
+      await whenValueNonNull(
+        serviceConnection.serviceManager.isolateManager.selectedIsolate,
+      );
     });
 
     void setupMockValues({
@@ -38,21 +45,22 @@ void main() {
       SemanticVersion? flutterVersion,
     }) {
       if (web) {
-        fakeServiceManager.availableLibraries.add('dart:html');
+        fakeServiceConnection.serviceManager.availableLibraries
+            .add('dart:html');
       }
       mockConnectedApp(
-        fakeServiceManager.connectedApp!,
+        fakeServiceConnection.serviceManager.connectedApp!,
         isFlutterApp: flutter,
         isProfileBuild: !debugMode,
         isWebApp: web,
       );
       if (flutter) {
-        fakeServiceManager.availableLibraries
+        fakeServiceConnection.serviceManager.availableLibraries
             .add('package:flutter/src/widgets/binding.dart');
       }
       flutterVersion ??= SemanticVersion(major: 2, minor: 3, patch: 1);
       mockFlutterVersion(
-        fakeServiceManager.connectedApp!,
+        fakeServiceConnection.serviceManager.connectedApp!,
         flutterVersion,
       );
     }
@@ -63,6 +71,7 @@ void main() {
       expect(
         visibleScreenTypes,
         equals([
+          HomeScreen,
           // InspectorScreen,
           // LegacyPerformanceScreen,
           PerformanceScreen,
@@ -83,9 +92,10 @@ void main() {
       expect(
         visibleScreenTypes,
         equals([
+          HomeScreen,
           // InspectorScreen,
           // LegacyPerformanceScreen,
-          // PerformanceScreen,
+          PerformanceScreen,
           // ProfilerScreen,
           // MemoryScreen,
           DebuggerScreen,
@@ -105,6 +115,7 @@ void main() {
         expect(
           visibleScreenTypes,
           equals([
+            HomeScreen,
             InspectorScreen,
             // LegacyPerformanceScreen,
             PerformanceScreen,
@@ -128,6 +139,7 @@ void main() {
         expect(
           visibleScreenTypes,
           equals([
+            HomeScreen,
             // InspectorScreen,
             // LegacyPerformanceScreen,
             PerformanceScreen,
@@ -151,9 +163,10 @@ void main() {
         expect(
           visibleScreenTypes,
           equals([
+            HomeScreen,
             InspectorScreen,
             // LegacyPerformanceScreen,
-            // PerformanceScreen,
+            PerformanceScreen,
             // ProfilerScreen,
             // MemoryScreen,
             DebuggerScreen,
@@ -185,6 +198,7 @@ void main() {
         expect(
           visibleScreenTypes,
           equals([
+            HomeScreen,
             InspectorScreen,
             PerformanceScreen,
             ProfilerScreen,
@@ -201,13 +215,14 @@ void main() {
 
     testWidgets('are correct when offline', (WidgetTester tester) async {
       offlineController.enterOfflineMode(
-        offlineApp: serviceManager.connectedApp!,
+        offlineApp: serviceConnection.serviceManager.connectedApp!,
       );
       setupMockValues(web: true); // Web apps would normally hide
 
       expect(
         visibleScreenTypes,
         equals([
+          // HomeScreen,
           // InspectorScreen,
           PerformanceScreen, // Works offline, so appears regardless of web flag
           ProfilerScreen, // Works offline, so appears regardless of web flag
@@ -230,6 +245,7 @@ void main() {
         expect(
           visibleScreenTypes,
           equals([
+            HomeScreen,
             // InspectorScreen,
             // LegacyPerformanceScreen,
             PerformanceScreen,
@@ -248,7 +264,7 @@ void main() {
   });
 }
 
-List<Type> get visibleScreenTypes => defaultScreens
+List<Type> get visibleScreenTypes => defaultScreens()
     .map((s) => s.screen)
     .where(shouldShowScreen)
     .map((s) => s.runtimeType)

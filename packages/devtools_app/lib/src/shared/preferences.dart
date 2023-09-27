@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 
@@ -15,8 +17,6 @@ import 'config_specific/logger/logger_helpers.dart';
 import 'constants.dart';
 import 'diagnostics/inspector_service.dart';
 import 'globals.dart';
-import 'primitives/auto_dispose.dart';
-import 'primitives/utils.dart';
 
 /// A controller for global application preferences.
 class PreferencesController extends DisposableController
@@ -43,10 +43,15 @@ class PreferencesController extends DisposableController
   CpuProfilerPreferencesController get cpuProfiler => _cpuProfiler;
   final _cpuProfiler = CpuProfilerPreferencesController();
 
+  ExtensionsPreferencesController get devToolsExtensions => _extensions;
+  final _extensions = ExtensionsPreferencesController();
+
   Future<void> init() async {
     // Get the current values and listen for and write back changes.
     String? value = await storage.getValue('ui.darkMode');
-    final useDarkMode = value == null || value == 'true';
+
+    final useDarkMode =
+        (value == null && useDarkThemeAsDefault) || value == 'true';
     toggleDarkModeTheme(useDarkMode);
     addAutoDisposeListener(darkModeTheme, () {
       storage.setValue('ui.darkMode', '${darkModeTheme.value}');
@@ -70,6 +75,7 @@ class PreferencesController extends DisposableController
     await memory.init();
     await performance.init();
     await cpuProfiler.init();
+    await devToolsExtensions.init();
 
     setGlobal(PreferencesController, this);
   }
@@ -100,6 +106,7 @@ class PreferencesController extends DisposableController
     memory.dispose();
     performance.dispose();
     cpuProfiler.dispose();
+    devToolsExtensions.dispose();
     super.dispose();
   }
 
@@ -140,7 +147,7 @@ class InspectorPreferencesController extends DisposableController
   ValueListenable<bool> get isRefreshingCustomPubRootDirectories =>
       _customPubRootDirectoriesAreBusy;
   InspectorServiceBase? get _inspectorService =>
-      serviceManager.inspectorService;
+      serviceConnection.inspectorService;
 
   final _hoverEvalMode = ValueNotifier<bool>(false);
   final _customPubRootDirectories = ListValueNotifier<String>([]);
@@ -153,7 +160,8 @@ class InspectorPreferencesController extends DisposableController
 
   Future<void> _updateMainScriptRef() async {
     final rootLibUriString =
-        (await serviceManager.tryToDetectMainRootInfo())?.library;
+        (await serviceConnection.serviceManager.tryToDetectMainRootInfo())
+            ?.library;
     final rootLibUri = Uri.parse(rootLibUriString ?? '');
     final directorySegments =
         rootLibUri.pathSegments.sublist(0, rootLibUri.pathSegments.length - 1);
@@ -190,22 +198,27 @@ class InspectorPreferencesController extends DisposableController
   }
 
   void _initCustomPubRootDirectories() {
-    autoDisposeStreamSubscription(
-      serviceManager.onConnectionAvailable
-          .listen(_handleConnectionToNewService),
-    );
-    autoDisposeStreamSubscription(
-      serviceManager.onConnectionClosed.listen(_handleConnectionClosed),
+    addAutoDisposeListener(
+      serviceConnection.serviceManager.connectedState,
+      () async {
+        if (serviceConnection.serviceManager.connectedState.value.connected) {
+          await _handleConnectionToNewService();
+        } else {
+          _handleConnectionClosed();
+        }
+      },
     );
     addAutoDisposeListener(_busyCounter, () {
       _customPubRootDirectoriesAreBusy.value = _busyCounter.value != 0;
     });
     addAutoDisposeListener(
-      serviceManager.isolateManager.mainIsolate,
+      serviceConnection.serviceManager.isolateManager.mainIsolate,
       () {
         if (_mainScriptDir != null &&
-            serviceManager.isolateManager.mainIsolate.value != null) {
-          final debuggerState = serviceManager.isolateManager.mainIsolateState;
+            serviceConnection.serviceManager.isolateManager.mainIsolate.value !=
+                null) {
+          final debuggerState =
+              serviceConnection.serviceManager.isolateManager.mainIsolateState;
 
           if (debuggerState?.isPaused.value == false) {
             // the isolate is already unpaused, we can try to load
@@ -230,12 +243,12 @@ class InspectorPreferencesController extends DisposableController
     );
   }
 
-  void _handleConnectionClosed(Object? _) {
+  void _handleConnectionClosed() {
     _mainScriptDir = null;
     _customPubRootDirectories.clear();
   }
 
-  Future<void> _handleConnectionToNewService(VmServiceWrapper _) async {
+  Future<void> _handleConnectionToNewService() async {
     await _updateMainScriptRef();
     await _updateHoverEvalMode();
 
@@ -274,7 +287,7 @@ class InspectorPreferencesController extends DisposableController
       (element) => RegExp('^[/\\s]*\$').firstMatch(element) != null,
     );
 
-    if (!serviceManager.hasConnection) return;
+    if (!serviceConnection.serviceManager.hasConnection) return;
     await _customPubRootDirectoryBusyTracker(() async {
       final localInspectorService = _inspectorService;
       if (localInspectorService is! InspectorService) return;
@@ -287,7 +300,7 @@ class InspectorPreferencesController extends DisposableController
   Future<void> removePubRootDirectories(
     List<String> pubRootDirectories,
   ) async {
-    if (!serviceManager.hasConnection) return;
+    if (!serviceConnection.serviceManager.hasConnection) return;
     await _customPubRootDirectoryBusyTracker(() async {
       final localInspectorService = _inspectorService;
       if (localInspectorService is! InspectorService) return;
@@ -325,7 +338,7 @@ class InspectorPreferencesController extends DisposableController
   }
 
   Future<void> loadCustomPubRootDirectories() async {
-    if (!serviceManager.hasConnection) return;
+    if (!serviceConnection.serviceManager.hasConnection) return;
 
     await _customPubRootDirectoryBusyTracker(() async {
       final storedCustomPubRootDirectories =
@@ -486,5 +499,34 @@ class PerformancePreferencesController extends DisposableController
     );
     showFlutterFramesChart.value =
         await storage.getValue(_showFlutterFramesChartId) != 'false';
+  }
+}
+
+class ExtensionsPreferencesController extends DisposableController
+    with AutoDisposeControllerMixin {
+  final showOnlyEnabledExtensions = ValueNotifier<bool>(false);
+
+  static final _showOnlyEnabledExtensionsId =
+      '${gac.DevToolsExtensionEvents.extensionScreenId}.'
+      '${gac.DevToolsExtensionEvents.showOnlyEnabledExtensionsSetting.name}';
+
+  Future<void> init() async {
+    addAutoDisposeListener(
+      showOnlyEnabledExtensions,
+      () {
+        storage.setValue(
+          _showOnlyEnabledExtensionsId,
+          showOnlyEnabledExtensions.value.toString(),
+        );
+        ga.select(
+          gac.DevToolsExtensionEvents.extensionScreenId.name,
+          gac.DevToolsExtensionEvents.showOnlyEnabledExtensionsSetting.name,
+          value: showOnlyEnabledExtensions.value ? 1 : 0,
+        );
+      },
+    );
+    // Default the value to false if it is not set.
+    showOnlyEnabledExtensions.value =
+        await storage.getValue(_showOnlyEnabledExtensionsId) == 'true';
   }
 }

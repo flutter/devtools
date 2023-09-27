@@ -5,6 +5,8 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/memory/panes/chart/chart_control_pane.dart';
 import 'package:devtools_app/src/screens/memory/panes/chart/memory_vm_chart.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +19,7 @@ import '../test_infra/test_data/memory_allocation.dart';
 void main() {
   late MemoryScreen screen;
   late MemoryController controller;
-  late FakeServiceManager fakeServiceManager;
+  late FakeServiceConnectionManager fakeServiceConnection;
 
   // Load canned data testHeapSampleData.
   final memoryJson =
@@ -26,22 +28,33 @@ void main() {
       AllocationMemoryJson.decode(argJsonString: testAllocationData);
 
   void setUpServiceManagerForMemory() {
-    fakeServiceManager = FakeServiceManager(
+    fakeServiceConnection = FakeServiceConnectionManager(
       service: FakeServiceManager.createFakeService(
         memoryData: memoryJson,
         allocationData: allocationJson,
       ),
     );
-    when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
-    when(fakeServiceManager.connectedApp!.isFlutterAppNow).thenReturn(true);
-    when(fakeServiceManager.connectedApp!.isDartCliAppNow).thenReturn(false);
-    when(fakeServiceManager.connectedApp!.isDebugFlutterAppNow)
+    when(fakeServiceConnection.serviceManager.connectedApp!.isDartWebAppNow)
         .thenReturn(false);
-    when(fakeServiceManager.connectedApp!.isDartWebApp)
+    when(fakeServiceConnection.serviceManager.connectedApp!.isFlutterAppNow)
+        .thenReturn(true);
+    when(fakeServiceConnection.serviceManager.connectedApp!.isDartCliAppNow)
+        .thenReturn(false);
+    when(
+      fakeServiceConnection.serviceManager.connectedApp!.isDebugFlutterAppNow,
+    ).thenReturn(false);
+    when(fakeServiceConnection.serviceManager.connectedApp!.isDartWebApp)
         .thenAnswer((_) => Future.value(false));
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
+    setGlobal(ServiceConnectionManager, fakeServiceConnection);
     setGlobal(PreferencesController, PreferencesController());
+    setGlobal(OfflineModeController, OfflineModeController());
+    setGlobal(IdeTheme, IdeTheme());
+    setGlobal(NotificationService, NotificationService());
+    setGlobal(BannerMessagesController, BannerMessagesController());
   }
 
   Future<void> pumpMemoryScreen(
@@ -64,19 +77,6 @@ void main() {
 
   group('MemoryScreen', () {
     setUp(() {
-      setGlobal(OfflineModeController, OfflineModeController());
-      fakeServiceManager = FakeServiceManager();
-      when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
-      when(fakeServiceManager.connectedApp!.isDebugFlutterAppNow)
-          .thenReturn(false);
-      when(fakeServiceManager.vm.operatingSystem).thenReturn('android');
-      when(fakeServiceManager.connectedApp!.isDartWebApp)
-          .thenAnswer((_) => Future.value(false));
-      when(fakeServiceManager.errorBadgeManager.errorCountNotifier('memory'))
-          .thenReturn(ValueNotifier<int>(0));
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
-      setGlobal(IdeTheme, IdeTheme());
-      setGlobal(NotificationService, NotificationService());
       screen = MemoryScreen();
       controller = MemoryController();
       setUpServiceManagerForMemory();

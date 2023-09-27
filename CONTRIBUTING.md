@@ -18,6 +18,8 @@ You can do this online, and it only takes a minute.
 
 ## Workflow for making changes
 
+- Change flutter to the latest flutter candidate:
+    `./tool/update_flutter_sdk.sh --local`
 - Create a branch from your cloned repo: `git checkout -b myBranch`
 - Refresh local code: `sh tool/refresh.sh`
 - Implement your changes
@@ -112,6 +114,8 @@ from the main devtools/ directory run:
 export LOCAL_DART_SDK=/path/to/dart-sdk
 dart ./tool/build_e2e.dart
 ```
+* Note: the LOCAL_DART_SDK needs to point to a local checkout of [dart-sdk](https://github.com/dart-lang/sdk/tree/main)
+* Note: if you are also developing server side code, e.g. the devtools_shared package, add a devtools_shared path override to `<path-to-dart-sdk>/pkg/dds/pubspec.yaml`.
 
 That will:
 - start the devtools server
@@ -144,23 +148,18 @@ This instructs VS Code to run the `tool/build_e2e.dart` script instead of runnin
 
 Next, restart VS Code (or run the **Developer: Reload Window** command from the command palette (`F1`)) and DevTools will be run from your local code. After making any code changes to DevTools or the server, you will need to re-run the **Developer: Reload Window** command to rebuild and restart the server.
 
-### Desktop Embedder
+### Running with Flutter Desktop
 
-You can also run the app in the Flutter desktop embedder on linux or macos.
+You can also run DevTools using the Flutter desktop embedder on linux or macos. Some DevTools features only work on the web, like the embedded Perfetto trace viewer or DevTools analytics, but the limitations on the desktop app are few.
 
-*NOTE:* The Linux desktop version only works with the master branch of Flutter (and sometimes this is true for MacOS as well). Syncing
-to a the master branch of Flutter may fail with a runner version error. If this occurs run
-`flutter create .` from `devtools/packages/devtools_app`, re-generates files in the linux and
-macos directories.
+The advantage of developing with the desktop embedder is that you can use hot reload to speed up your development cycle.
 
-Depending on your OS, set up like this:
-- `flutter config --enable-macos-desktop`
-- `flutter config --enable-linux-desktop`
-
-Now you can run with either of the following:
+To run DevTools with the desktop embedder, you can run with either of the following from `devtools/packages/devtools_app`:
 
 - `flutter run -d macos`
 - `flutter run -d linux`
+
+If this  fails, you may need to run `flutter create .` from `devtools/packages/devtools_app` to generate the updated files for your platform.
 
 ## Developing with VS Code
 

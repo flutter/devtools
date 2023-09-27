@@ -4,12 +4,12 @@
 
 import 'dart:convert';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/primitives/utils.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
-import '../../shared/theme.dart';
 import 'logging_controller.dart';
 
 @visibleForTesting

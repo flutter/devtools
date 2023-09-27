@@ -4,6 +4,8 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/performance/panes/raster_stats/raster_stats.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -17,11 +19,11 @@ void main() {
     late RasterStatsController controller;
 
     setUp(() async {
-      final mockServiceManager = MockServiceConnectionManager();
-      when(mockServiceManager.renderFrameWithRasterStats).thenAnswer(
+      final mockServiceConnection = createMockServiceConnectionWithDefaults();
+      when(mockServiceConnection.renderFrameWithRasterStats).thenAnswer(
         (_) => Future.value(Response.parse(rasterStatsFromServiceJson)),
       );
-      setGlobal(ServiceConnectionManager, mockServiceManager);
+      setGlobal(ServiceConnectionManager, mockServiceConnection);
       setGlobal(OfflineModeController, OfflineModeController());
       setGlobal(IdeTheme, IdeTheme());
 

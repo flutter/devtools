@@ -4,13 +4,12 @@
 
 import 'dart:developer';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
-import '../../../../shared/theme.dart';
 import '../../../../shared/ui/filter.dart';
-import '../../../../shared/utils.dart';
 import '../../cpu_profile_model.dart';
 import '../../cpu_profiler_controller.dart';
 import '../../profiler_screen_controller.dart';
@@ -26,7 +25,7 @@ class DisplayTreeGuidelinesToggle extends StatelessWidget {
     return ValueListenableBuilder<bool>(
       valueListenable: preferences.cpuProfiler.displayTreeGuidelines,
       builder: (context, displayTreeGuidelines, _) {
-        return ToggleButton(
+        return DevToolsToggleButton(
           onPressed: () {
             preferences.cpuProfiler.displayTreeGuidelines.value =
                 !displayTreeGuidelines;

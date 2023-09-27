@@ -7,12 +7,6 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../../../shared/memory/adapted_heap_data.dart';
 
-/// Names for json fields.
-class _JsonFields {
-  static const String reports = 'reports';
-  static const String heap = 'heap';
-}
-
 /// Result of analysis of [notGCed] memory leaks.
 class NotGCedAnalyzed {
   NotGCedAnalyzed({
@@ -37,16 +31,6 @@ class NotGCedAnalyzerTask {
     required this.reports,
   });
 
-  factory NotGCedAnalyzerTask.fromJson(Map<String, Object?> json) =>
-      NotGCedAnalyzerTask(
-        reports: (json[_JsonFields.reports] as List<Object?>)
-            .map((e) => LeakReport.fromJson((e as Map).cast<String, Object?>()))
-            .toList(),
-        heap: AdaptedHeapData.fromJson(
-          json[_JsonFields.heap] as Map<String, Object?>,
-        ),
-      );
-
   static Future<NotGCedAnalyzerTask> fromSnapshot(
     HeapSnapshotGraph graph,
     List<LeakReport> reports,
@@ -60,9 +44,4 @@ class NotGCedAnalyzerTask {
 
   final AdaptedHeapData heap;
   final List<LeakReport> reports;
-
-  Map<String, Object?> toJson() => {
-        _JsonFields.reports: reports.map((e) => e.toJson()).toList(),
-        _JsonFields.heap: heap.toJson(),
-      };
 }

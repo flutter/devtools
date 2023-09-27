@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
@@ -13,19 +15,12 @@ import '../../service/service_extensions.dart' as extensions;
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
-import '../../shared/connected_app.dart';
 import '../../shared/console/eval/inspector_tree.dart';
-import '../../shared/dialogs.dart';
 import '../../shared/editable_list.dart';
 import '../../shared/error_badge_manager.dart';
 import '../../shared/globals.dart';
-import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/blocking_action_mixin.dart';
-import '../../shared/primitives/simple_items.dart';
 import '../../shared/screen.dart';
-import '../../shared/split.dart';
-import '../../shared/theme.dart';
-import '../../shared/ui/icons.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/utils.dart';
 import 'inspector_controller.dart';
@@ -33,14 +28,7 @@ import 'inspector_screen_details_tab.dart';
 import 'inspector_tree_controller.dart';
 
 class InspectorScreen extends Screen {
-  InspectorScreen()
-      : super.conditional(
-          id: id,
-          requiresLibrary: flutterLibraryUri,
-          requiresDebugBuild: true,
-          title: ScreenMetaData.inspector.title,
-          icon: Octicons.deviceMobile,
-        );
+  InspectorScreen() : super.fromMetaData(ScreenMetaData.inspector);
 
   static final id = ScreenMetaData.inspector.id;
 
@@ -112,7 +100,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     super.didChangeDependencies();
     if (!initController()) return;
 
-    if (serviceManager.inspectorService == null) {
+    if (serviceConnection.inspectorService == null) {
       // The app must not be a Flutter app.
       return;
     }
@@ -138,7 +126,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       }
     });
     addAutoDisposeListener(preferences.inspector.customPubRootDirectories, () {
-      if (serviceManager.hasConnection &&
+      if (serviceConnection.serviceManager.hasConnection &&
           controller.firstInspectorTreeLoadCompleted) {
         _refreshInspector();
       }
@@ -180,8 +168,9 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ValueListenableBuilder<bool>(
-              valueListenable:
-                  serviceManager.serviceExtensionManager.hasServiceExtension(
+              valueListenable: serviceConnection
+                  .serviceManager.serviceExtensionManager
+                  .hasServiceExtension(
                 extensions.toggleSelectWidgetMode.extension,
               ),
               builder: (_, selectModeSupported, __) {
@@ -230,7 +219,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
               ),
               Expanded(
                 child: ValueListenableBuilder(
-                  valueListenable: serviceManager.errorBadgeManager
+                  valueListenable: serviceConnection.errorBadgeManager
                       .erroredItemsForPage(InspectorScreen.id),
                   builder:
                       (_, LinkedHashMap<String, DevToolsError> errors, __) {
@@ -452,7 +441,7 @@ class InspectorSummaryTreeControls extends StatelessWidget {
 
   Container _controlsContainer(BuildContext context, Widget child) {
     return Container(
-      height: defaultHeaderHeight,
+      height: defaultHeaderHeight(isDense: isDense()),
       decoration: BoxDecoration(
         border: Border(
           bottom: defaultBorderSide(Theme.of(context)),
@@ -570,7 +559,8 @@ class PubRootDirectorySection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<IsolateRef?>(
-      valueListenable: serviceManager.isolateManager.mainIsolate,
+      valueListenable:
+          serviceConnection.serviceManager.isolateManager.mainIsolate,
       builder: (_, __, ___) {
         return SizedBox(
           height: 200.0,

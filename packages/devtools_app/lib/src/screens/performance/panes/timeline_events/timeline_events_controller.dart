@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 
@@ -13,8 +14,6 @@ import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/analytics/metrics.dart';
 import '../../../../shared/future_work_tracker.dart';
 import '../../../../shared/globals.dart';
-import '../../../../shared/http/http_service.dart' as http_service;
-import '../../../../shared/primitives/auto_dispose.dart';
 import '../../../../shared/primitives/trace_event.dart';
 import '../../../../shared/primitives/utils.dart';
 import '../../performance_controller.dart';
@@ -84,16 +83,6 @@ class TimelineEventsController extends PerformanceFeatureController
 
   final _workTracker = FutureWorkTracker();
 
-  // TODO(jacobr): this isn't accurate. Another page of DevTools
-  // or a different instance of DevTools could change this value. We need to
-  // sync the value with the server like we do for other vm service extensions
-  // that we track with the vm service extension manager.
-  // See https://github.com/dart-lang/sdk/issues/41823.
-  /// Whether http timeline logging is enabled.
-  ValueListenable<bool> get httpTimelineLoggingEnabled =>
-      _httpTimelineLoggingEnabled;
-  final _httpTimelineLoggingEnabled = ValueNotifier<bool>(false);
-
   Timer? _pollingTimer;
 
   int _nextPollStartMicros = 0;
@@ -134,15 +123,14 @@ class TimelineEventsController extends PerformanceFeatureController
   }
 
   Future<void> _initForServiceConnection() async {
-    await serviceManager.timelineStreamManager.setDefaultTimelineStreams();
-    await toggleHttpRequestLogging(true);
+    await serviceConnection.timelineStreamManager.setDefaultTimelineStreams();
 
-    autoDisposeStreamSubscription(
-      serviceManager.onConnectionClosed.listen((_) {
+    addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
+      if (!serviceConnection.serviceManager.connectedState.value.connected) {
         _pollingTimer?.cancel();
         _timelinePollingRateLimiter?.dispose();
-      }),
-    );
+      }
+    });
 
     // Load available timeline events.
     await _pullTraceEventsFromVmTimeline(isInitialPull: true);
@@ -166,7 +154,7 @@ class TimelineEventsController extends PerformanceFeatureController
   Future<void> _pullTraceEventsFromVmTimeline({
     bool isInitialPull = false,
   }) async {
-    final service = serviceManager.service;
+    final service = serviceConnection.serviceManager.service;
     if (service == null) return;
     final currentVmTime = await service.getVMTimelineMicros();
     debugTraceEventCallback(
@@ -215,12 +203,12 @@ class TimelineEventsController extends PerformanceFeatureController
   }) {
     // This can happen if there is a race between this method being called and
     // losing connection to the app.
-    if (serviceManager.connectedApp == null) return;
+    if (serviceConnection.serviceManager.connectedApp == null) return;
 
     final offlineData = performanceController.offlinePerformanceData;
     final isFlutterApp = offlineController.offlineMode.value
         ? offlineData != null && offlineData.frames.isNotEmpty
-        : serviceManager.connectedApp!.isFlutterAppNow!;
+        : serviceConnection.serviceManager.connectedApp!.isFlutterAppNow!;
 
     // TODO(kenz): Remove this logic once ui/raster distinction changes are
     // available in the engine.
@@ -419,8 +407,8 @@ class TimelineEventsController extends PerformanceFeatureController
     data!.addTimelineEvent(event);
     if (event is SyncTimelineEvent) {
       if (!offlineController.offlineMode.value &&
-          serviceManager.hasConnection &&
-          !serviceManager.connectedApp!.isFlutterAppNow!) {
+          serviceConnection.serviceManager.hasConnection &&
+          !serviceConnection.serviceManager.connectedApp!.isFlutterAppNow!) {
         return;
       }
 
@@ -482,11 +470,6 @@ class TimelineEventsController extends PerformanceFeatureController
     if (event != null) {
       frame.setEventFlow(event, type: type);
     }
-  }
-
-  Future<void> toggleHttpRequestLogging(bool state) async {
-    await http_service.toggleHttpRequestLogging(state);
-    _httpTimelineLoggingEnabled.value = state;
   }
 
   Future<void> toggleUseLegacyTraceViewer(bool? value) async {

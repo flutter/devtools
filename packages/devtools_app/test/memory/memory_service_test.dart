@@ -5,8 +5,8 @@
 @TestOn('vm')
 import 'dart:async';
 
-import 'package:devtools_app/src/screens/memory/memory_controller.dart';
-import 'package:devtools_app/src/screens/memory/memory_protocol.dart';
+import 'package:devtools_app/src/screens/memory/framework/connected/memory_controller.dart';
+import 'package:devtools_app/src/screens/memory/framework/connected/memory_protocol.dart';
 import 'package:devtools_app/src/screens/memory/shared/primitives/memory_timeline.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_shared/devtools_shared.dart';
@@ -46,7 +46,7 @@ void main() {
         await env.setupEnvironment();
 
         memoryController.onMemory.listen((MemoryTracker? memoryTracker) {
-          if (!serviceManager.hasConnection) {
+          if (!serviceConnection.serviceManager.hasConnection) {
             // VM Service connection has stopped - unexpected.
             fail('VM Service connection stoped unexpectantly.');
           } else {

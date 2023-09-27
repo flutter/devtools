@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -11,40 +12,25 @@ import '../shared/analytics/analytics_controller.dart';
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
 import '../shared/config_specific/server/server.dart';
-import '../shared/dialogs.dart';
 import '../shared/globals.dart';
 import '../shared/log_storage.dart';
-import '../shared/theme.dart';
 import '../shared/utils.dart';
 
-class OpenSettingsAction extends StatelessWidget {
-  const OpenSettingsAction({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return DevToolsTooltip(
-      message: 'Settings',
-      child: InkWell(
-        onTap: () {
-          unawaited(
-            showDialog(
-              context: context,
-              builder: (context) => const SettingsDialog(),
-            ),
-          );
-        },
-        child: Container(
-          width: actionWidgetSize,
-          height: actionWidgetSize,
-          alignment: Alignment.center,
-          child: Icon(
-            Icons.settings_outlined,
-            size: actionsIconSize,
-          ),
-        ),
-      ),
-    );
-  }
+class OpenSettingsAction extends ScaffoldAction {
+  OpenSettingsAction({super.key, Color? color})
+      : super(
+          icon: Icons.settings_outlined,
+          tooltip: 'Settings',
+          color: color,
+          onPressed: (context) {
+            unawaited(
+              showDialog(
+                context: context,
+                builder: (context) => const SettingsDialog(),
+              ),
+            );
+          },
+        );
 }
 
 class SettingsDialog extends StatelessWidget {
@@ -123,7 +109,7 @@ class _VerboseLoggingSetting extends StatelessWidget {
               ),
             ),
             const SizedBox(width: defaultSpacing),
-            DevToolsButton(
+            GaDevToolsButton(
               label: 'Copy logs',
               icon: Icons.copy_outlined,
               gaScreen: gac.settingsDialog,

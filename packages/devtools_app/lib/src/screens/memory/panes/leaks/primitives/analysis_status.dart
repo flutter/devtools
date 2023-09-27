@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../shared/common_widgets.dart';
-import '../../../../../shared/theme.dart';
+import '../../../../../shared/primitives/utils.dart';
 
 enum AnalysisStatus {
   notStarted,
@@ -67,10 +68,14 @@ class AnalysisStatusView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DualValueListenableBuilder<AnalysisStatus, String>(
-      firstListenable: controller.status,
-      secondListenable: controller.message,
-      builder: (_, status, message, __) {
+    return MultiValueListenableBuilder(
+      listenables: [
+        controller.status,
+        controller.message,
+      ],
+      builder: (_, values, __) {
+        final status = values.first as AnalysisStatus;
+        final message = values.second as String;
         if (status == AnalysisStatus.notStarted) {
           return analysisStarter;
         }

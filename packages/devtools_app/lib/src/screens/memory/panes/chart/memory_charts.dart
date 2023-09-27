@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../shared/charts/chart_trace.dart';
 import '../../../../shared/primitives/utils.dart';
-import '../../memory_controller.dart';
+import '../../framework/connected/memory_controller.dart';
 import 'memory_android_chart.dart';
 import 'memory_events_pane.dart';
 import 'memory_vm_chart.dart';
@@ -265,22 +265,6 @@ class ChartsValues {
 
     if (hasManualGc) {
       eventsDisplayed['User GC'] = gcManualLegend;
-    }
-
-    return eventsDisplayed;
-  }
-
-  Map<String, String> get extensionEventsToDisplay {
-    final eventsDisplayed = <String, String>{};
-
-    if (hasExtensionEvents) {
-      final eventLength = extensionEventsLength;
-      if (eventLength > 0) {
-        final displayKey = '$eventLength'
-            '${eventLength == 1 ? eventDisplayName : eventsDisplayName}';
-        eventsDisplayed[displayKey] =
-            eventLength == 1 ? eventLegend : eventsLegend;
-      }
     }
 
     return eventsDisplayed;

@@ -4,17 +4,32 @@
 
 import 'dart:io';
 
-const argDevToolsBuild = 'devtools-build';
-const argUpdatePerfetto = '--update-perfetto';
+const argNoBuildApp = '--no-build-app';
 const argNoUpdateFlutter = '--no-update-flutter';
+const argUpdatePerfetto = '--update-perfetto';
 
+/// This script builds DevTools in release mode by running the
+/// `./tool/build_release.sh` script and then serves DevTools with a locally
+/// running DevTools server.
+///
+/// If [argNoBuildApp] is present, the DevTools web app will not be rebuilt.
+///
+/// If [argNoUpdateFlutter] is present, the Flutter SDK will not be updated to
+/// the latest Flutter candidate. Use this flag to save the cost of updating the
+/// Flutter SDK when you already have the proper SDK checked out.
+///
+/// If [argUpdatePerfetto] is present, the precompiled bits for Perfetto will
+/// be updated from the [update_perfetto.sh] script as part of the DevTools
+/// build process (e.g. [build_release.sh]).
 void main(List<String> args) async {
   final shouldUpdatePerfetto = args.contains(argUpdatePerfetto);
   final noUpdateFlutter = args.contains(argNoUpdateFlutter);
+  final noBuildApp = args.contains(argNoBuildApp);
 
   final argsCopy = List.of(args)
     ..remove(argUpdatePerfetto)
-    ..remove(argNoUpdateFlutter);
+    ..remove(argNoUpdateFlutter)
+    ..remove(argNoBuildApp);
 
   final mainDevToolsDirectory = Directory.current;
   if (!mainDevToolsDirectory.path.endsWith('/devtools')) {
@@ -29,27 +44,28 @@ void main(List<String> args) async {
         'export LOCAL_DART_SDK=<absolute/path/to/my/dart/sdk>');
   }
 
-  print('Running the build_release.sh script...');
-  final buildProcess = await Process.start(
-    './tool/build_release.sh',
-    [
-      if (shouldUpdatePerfetto) argUpdatePerfetto,
-      if (noUpdateFlutter) argNoUpdateFlutter,
-    ],
-    workingDirectory: mainDevToolsDirectory.path,
-  );
-  _forwardOutputStreams(buildProcess);
-  final buildProcessExitCode = await buildProcess.exitCode;
-  if (buildProcessExitCode == 1) {
-    throw Exception(
-      'Something went wrong while running `tool/build_release.sh.',
-    );
-  }
-
   final devToolsBuildLocation =
       '${mainDevToolsDirectory.path}/packages/devtools_app/build/web';
 
-  print('Completed building DevTools: $devToolsBuildLocation');
+  if (!noBuildApp) {
+    print('Running the build_release.sh script...');
+    final buildProcess = await Process.start(
+      './tool/build_release.sh',
+      [
+        if (shouldUpdatePerfetto) argUpdatePerfetto,
+        if (noUpdateFlutter) argNoUpdateFlutter,
+      ],
+      workingDirectory: mainDevToolsDirectory.path,
+    );
+    _forwardOutputStreams(buildProcess);
+    final buildProcessExitCode = await buildProcess.exitCode;
+    if (buildProcessExitCode == 1) {
+      throw Exception(
+        'Something went wrong while running `tool/build_release.sh.',
+      );
+    }
+    print('Completed building DevTools: $devToolsBuildLocation');
+  }
 
   print('Run pub get for DDS in local dart sdk');
   await Process.start(

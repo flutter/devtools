@@ -4,6 +4,8 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/performance/panes/controls/performance_controls.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -13,7 +15,10 @@ void main() {
   const windowSize = Size(3000.0, 1000.0);
 
   setUp(() {
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(OfflineModeController, OfflineModeController());
@@ -21,11 +26,14 @@ void main() {
   });
 
   group('$PerformanceControls', () {
-    late MockServiceConnectionManager mockServiceManager;
+    late MockServiceConnectionManager mockServiceConnection;
+    late MockServiceManager mockServiceManager;
     late MockPerformanceController mockPerformanceController;
 
     setUp(() {
-      mockServiceManager = MockServiceConnectionManager();
+      mockServiceConnection = createMockServiceConnectionWithDefaults();
+      mockServiceManager =
+          mockServiceConnection.serviceManager as MockServiceManager;
       when(mockServiceManager.serviceExtensionManager)
           .thenReturn(FakeServiceExtensionManager());
       final connectedApp = MockConnectedApp();
@@ -36,7 +44,7 @@ void main() {
         isWebApp: false,
       );
       when(mockServiceManager.connectedApp).thenReturn(connectedApp);
-      setGlobal(ServiceConnectionManager, mockServiceManager);
+      setGlobal(ServiceConnectionManager, mockServiceConnection);
       mockPerformanceController = createMockPerformanceControllerWithDefaults();
     });
 
@@ -101,7 +109,7 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         offlineController.enterOfflineMode(
-          offlineApp: serviceManager.connectedApp!,
+          offlineApp: serviceConnection.serviceManager.connectedApp!,
         );
         await pumpControls(tester);
         expect(find.byType(ExitOfflineButton), findsOneWidget);

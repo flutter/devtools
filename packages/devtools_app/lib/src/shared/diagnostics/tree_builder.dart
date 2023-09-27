@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -17,6 +18,7 @@ import 'diagnostics_node.dart';
 import 'generic_instance_reference.dart';
 import 'helpers.dart';
 import 'inspector_service.dart';
+import 'object_group_api.dart';
 import 'references.dart';
 import 'variable_factory.dart';
 
@@ -46,7 +48,7 @@ Future<void> _addDiagnosticsIfNeeded(
 ) async {
   if (diagnostic == null || !includeDiagnosticPropertiesInDebugger) return;
 
-  final service = diagnostic.inspectorService;
+  final service = diagnostic.objectGroupApi;
   Future<void> addPropertiesHelper(
     List<RemoteDiagnosticsNode>? properties,
   ) async {
@@ -81,7 +83,8 @@ Future<void> _addDiagnosticChildrenIfNeeded(
   if (diagnostic == null || !includeDiagnosticChildren) return;
 
   // Always add children last after properties to avoid confusion.
-  final ObjectGroupBase? service = diagnostic.inspectorService;
+  final InspectorObjectGroupApi<RemoteDiagnosticsNode>? service =
+      diagnostic.objectGroupApi;
   final diagnosticChildren = await diagnostic.children;
   if (diagnosticChildren != null && diagnosticChildren.isNotEmpty) {
     final childrenNode = DartObjectNode.text(
@@ -150,7 +153,7 @@ Future<void> _addInstanceRefItems(
     final name = child.name;
     if (name != null && name.isNotEmpty) {
       existingNames.add(name);
-      if (!isPrivate(name)) {
+      if (!isPrivateMember(name)) {
         // Assume private and public names with the same name reference the same
         // data so showing both is not useful.
         existingNames.add('_$name');
@@ -323,10 +326,10 @@ Future<void> _addValueItems(
 }
 
 Future<void> _addInspectorItems(variable, IsolateRef? isolateRef) async {
-  final inspectorService = serviceManager.inspectorService;
+  final inspectorService = serviceConnection.inspectorService;
   if (inspectorService != null) {
     final tasks = <Future>[];
-    ObjectGroupBase? group;
+    InspectorObjectGroupBase? group;
     Future<void> maybeUpdateRef(DartObjectNode child) async {
       final childRef = child.ref;
       if (childRef == null) return;
@@ -406,7 +409,8 @@ Future<void> buildVariablesTree(
       await addChildReferences(variable);
     } else if (variable.childCount > DartObjectNode.maxChildrenInGrouping) {
       _setupGrouping(variable);
-    } else if (instanceRef != null && serviceManager.service != null) {
+    } else if (instanceRef != null &&
+        serviceConnection.serviceManager.service != null) {
       await _addInstanceRefItems(variable, instanceRef, isolateRef);
     } else if (value is InstanceSet) {
       _addInstanceSetItems(variable, isolateRef, value);

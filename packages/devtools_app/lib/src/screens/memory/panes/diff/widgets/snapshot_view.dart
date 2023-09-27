@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../shared/common_widgets.dart';
-import '../../../../../shared/split.dart';
+import '../../../../../shared/primitives/utils.dart';
 import '../../../shared/heap/heap.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/heap_diff.dart';
@@ -20,11 +21,14 @@ class SnapshotView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DualValueListenableBuilder<List<SingleClassStats>?,
-        List<DiffClassStats>?>(
-      firstListenable: controller.derived.singleClassesToShow,
-      secondListenable: controller.derived.diffClassesToShow,
-      builder: (_, singleClasses, diffClasses, __) {
+    return MultiValueListenableBuilder(
+      listenables: [
+        controller.derived.singleClassesToShow,
+        controller.derived.diffClassesToShow,
+      ],
+      builder: (_, values, __) {
+        final singleClasses = values.first as List<SingleClassStats>?;
+        final diffClasses = values.second as List<DiffClassStats>?;
         if (controller.derived.updatingValues) {
           return const Center(child: Text('Calculating...'));
         }

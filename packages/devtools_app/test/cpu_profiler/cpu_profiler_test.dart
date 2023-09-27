@@ -14,6 +14,8 @@ import 'package:devtools_app/src/screens/profiler/panes/cpu_flame_chart.dart';
 import 'package:devtools_app/src/screens/profiler/panes/method_table/method_table.dart';
 import 'package:devtools_app/src/screens/profiler/panes/method_table/method_table_controller.dart';
 import 'package:devtools_app/src/shared/charts/flame_chart.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -29,8 +31,9 @@ void main() {
   late CpuProfileData cpuProfileData;
   late CpuProfilerController controller;
 
-  final ServiceConnectionManager fakeServiceManager = FakeServiceManager();
-  final app = fakeServiceManager.connectedApp!;
+  final ServiceConnectionManager fakeServiceManager =
+      FakeServiceConnectionManager();
+  final app = fakeServiceManager.serviceManager.connectedApp!;
   when(app.isFlutterNativeAppNow).thenReturn(false);
   when(app.isFlutterAppNow).thenReturn(false);
   when(app.isDebugFlutterAppNow).thenReturn(false);
@@ -47,9 +50,13 @@ void main() {
       processId: 'test',
     );
 
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
     setGlobal(OfflineModeController, OfflineModeController());
     setGlobal(NotificationService, NotificationService());
+    setGlobal(BannerMessagesController, BannerMessagesController());
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(IdeTheme, IdeTheme());
     final mockScriptManager = MockScriptManager();
@@ -297,7 +304,7 @@ void main() {
         expect(find.byType(CpuCallTreeTable), findsNothing);
         expect(find.byType(CpuMethodTable), findsNothing);
         expect(find.byType(CpuProfileFlameChart), findsNothing);
-        expect(find.byType(FilterButton), findsOneWidget);
+        expect(find.byType(DevToolsFilterButton), findsOneWidget);
         expect(find.byType(DisplayTreeGuidelinesToggle), findsOneWidget);
         expect(find.byType(UserTagDropdown), findsOneWidget);
         expect(find.byType(ExpandAllButton), findsOneWidget);
@@ -319,7 +326,7 @@ void main() {
         expect(find.byType(CpuCallTreeTable), findsOneWidget);
         expect(find.byType(CpuMethodTable), findsNothing);
         expect(find.byType(CpuProfileFlameChart), findsNothing);
-        expect(find.byType(FilterButton), findsOneWidget);
+        expect(find.byType(DevToolsFilterButton), findsOneWidget);
         expect(find.byType(DisplayTreeGuidelinesToggle), findsOneWidget);
         expect(find.byType(UserTagDropdown), findsOneWidget);
         expect(find.byType(ExpandAllButton), findsOneWidget);
@@ -341,7 +348,7 @@ void main() {
         expect(find.byType(CpuCallTreeTable), findsNothing);
         expect(find.byType(CpuMethodTable), findsOneWidget);
         expect(find.byType(CpuProfileFlameChart), findsNothing);
-        expect(find.byType(FilterButton), findsOneWidget);
+        expect(find.byType(DevToolsFilterButton), findsOneWidget);
         expect(find.byType(DisplayTreeGuidelinesToggle), findsNothing);
         expect(find.byType(UserTagDropdown), findsOneWidget);
         expect(find.byType(ExpandAllButton), findsNothing);
@@ -363,7 +370,7 @@ void main() {
         expect(find.byType(CpuCallTreeTable), findsNothing);
         expect(find.byType(CpuMethodTable), findsNothing);
         expect(find.byType(CpuProfileFlameChart), findsOneWidget);
-        expect(find.byType(FilterButton), findsOneWidget);
+        expect(find.byType(DevToolsFilterButton), findsOneWidget);
         expect(find.byType(DisplayTreeGuidelinesToggle), findsNothing);
         expect(find.byType(UserTagDropdown), findsOneWidget);
         expect(find.byType(ExpandAllButton), findsNothing);

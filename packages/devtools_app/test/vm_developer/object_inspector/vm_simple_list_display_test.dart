@@ -5,6 +5,8 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_simple_list_display.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_developer_common_widgets.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -22,8 +24,11 @@ void main() {
     setUpMockScriptManager();
     setGlobal(BreakpointManager, BreakpointManager());
     setGlobal(IdeTheme, IdeTheme());
-    setGlobal(ServiceConnectionManager, FakeServiceManager());
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
     setGlobal(PreferencesController, PreferencesController());
 
     mockSubtypeTestCacheObject = MockSubtypeTestCacheObject();
@@ -70,7 +75,7 @@ void main() {
 
         expect(find.byType(RequestableSizeWidget), findsNWidgets(2));
         expect(find.byType(RetainingPathWidget), findsOneWidget);
-        expect(find.byType(InboundReferencesWidget), findsOneWidget);
+        expect(find.byType(InboundReferencesTree), findsOneWidget);
         expect(find.byType(ExpansionTileInstanceList), findsOneWidget);
       },
     );

@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/analytics/constants.dart' as gac;
-import '../../shared/common_widgets.dart';
 import '../../shared/http/http_request_data.dart';
 import '../../shared/ui/tab.dart';
 import 'network_controller.dart';
@@ -96,12 +96,26 @@ class NetworkRequestInspector extends StatelessWidget {
             (
               tab: _buildTab(
                 tabName: NetworkRequestInspector._responseTabTitle,
-                trailing: HttpViewTrailingCopyButton(
-                  data,
-                  (data) => data.responseBody,
+                trailing: Row(
+                  children: [
+                    HttpResponseTrailingDropDown(
+                      data,
+                      currentResponseViewType:
+                          controller.currentResponseViewType,
+                      onChanged: (value) =>
+                          controller.setResponseViewType = value,
+                    ),
+                    HttpViewTrailingCopyButton(
+                      data,
+                      (data) => data.responseBody,
+                    ),
+                  ],
                 ),
               ),
-              tabView: HttpResponseView(data),
+              tabView: HttpResponseView(
+                data,
+                currentResponseViewType: controller.currentResponseViewType,
+              ),
             ),
           if (data.hasCookies)
             (

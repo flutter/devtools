@@ -17,20 +17,19 @@ library inspector_controller;
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../service/service_extensions.dart' as extensions;
-import '../../shared/config_specific/url/url.dart';
 import '../../shared/console/eval/inspector_tree.dart';
 import '../../shared/console/primitives/simple_items.dart';
 import '../../shared/diagnostics/diagnostics_node.dart';
 import '../../shared/diagnostics/inspector_service.dart';
 import '../../shared/diagnostics/primitives/instance_ref.dart';
 import '../../shared/globals.dart';
-import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/utils.dart';
 import 'inspector_screen.dart';
 import 'inspector_tree_controller.dart';
@@ -77,26 +76,30 @@ class InspectorController extends DisposableController
           )
         : null;
 
-    await serviceManager.onServiceAvailable;
+    await serviceConnection.serviceManager.onServiceAvailable;
 
     if (inspectorService is InspectorService) {
       _treeGroups = InspectorObjectGroupManager(
-        serviceManager.inspectorService as InspectorService,
+        serviceConnection.inspectorService as InspectorService,
         'tree',
       );
       _selectionGroups = InspectorObjectGroupManager(
-        serviceManager.inspectorService as InspectorService,
+        serviceConnection.inspectorService as InspectorService,
         'selection',
       );
     }
 
-    addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
-      final isolate = serviceManager.isolateManager.mainIsolate.value;
-      if (isolate != _mainIsolate) {
-        onIsolateStopped();
-      }
-      _mainIsolate = isolate;
-    });
+    addAutoDisposeListener(
+      serviceConnection.serviceManager.isolateManager.mainIsolate,
+      () {
+        final isolate =
+            serviceConnection.serviceManager.isolateManager.mainIsolate.value;
+        if (isolate != _mainIsolate) {
+          onIsolateStopped();
+        }
+        _mainIsolate = isolate;
+      },
+    );
 
     // This logic only needs to be run once so run it in the outermost
     // controller.
@@ -105,7 +108,8 @@ class InspectorController extends DisposableController
       // won't interfere with users.
       addAutoDisposeListener(_supportsToggleSelectWidgetMode, () {
         if (_supportsToggleSelectWidgetMode.value) {
-          serviceManager.serviceExtensionManager.setServiceExtensionState(
+          serviceConnection.serviceManager.serviceExtensionManager
+              .setServiceExtensionState(
             extensions.enableOnDeviceInspector.extension,
             enabled: true,
             value: true,
@@ -114,18 +118,19 @@ class InspectorController extends DisposableController
       });
     }
 
-    autoDisposeStreamSubscription(
-      serviceManager.onConnectionAvailable
-          .listen((_) => _handleConnectionStart()),
-    );
-    if (serviceManager.connectedAppInitialized) {
+    addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
+      if (serviceConnection.serviceManager.connectedState.value.connected) {
+        _handleConnectionStart();
+      } else {
+        _handleConnectionStop();
+      }
+    });
+
+    if (serviceConnection.serviceManager.connectedAppInitialized) {
       _handleConnectionStart();
     }
-    autoDisposeStreamSubscription(
-      serviceManager.onConnectionClosed.listen((_) => _handleConnectionStop()),
-    );
 
-    serviceManager.consoleService.ensureServiceInitialized();
+    serviceConnection.consoleService.ensureServiceInitialized();
   }
 
   void _handleConnectionStart() {
@@ -136,7 +141,7 @@ class InspectorController extends DisposableController
     // TODO(kenz): When this method is called outside  createState(), this post
     // frame callback can be removed.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      serviceManager.errorBadgeManager.clearErrors(InspectorScreen.id);
+      serviceConnection.errorBadgeManager.clearErrors(InspectorScreen.id);
     });
     filterErrors();
   }
@@ -151,7 +156,7 @@ class InspectorController extends DisposableController
   IsolateRef? _mainIsolate;
 
   ValueListenable<bool> get _supportsToggleSelectWidgetMode =>
-      serviceManager.serviceExtensionManager
+      serviceConnection.serviceManager.serviceExtensionManager
           .hasServiceExtension(extensions.toggleSelectWidgetMode.extension);
 
   void _onClientChange(bool added) {
@@ -196,7 +201,7 @@ class InspectorController extends DisposableController
   late RateLimiter _refreshRateLimiter;
 
   InspectorServiceBase get inspectorService =>
-      serviceManager.inspectorService as InspectorServiceBase;
+      serviceConnection.inspectorService as InspectorServiceBase;
 
   /// Groups used to manage and cancel requests to load data to display directly
   /// in the tree.
@@ -379,7 +384,7 @@ class InspectorController extends DisposableController
 
   void filterErrors() {
     if (isSummaryTree) {
-      serviceManager.errorBadgeManager.filterErrors(
+      serviceConnection.errorBadgeManager.filterErrors(
         InspectorScreen.id,
         (id) => hasDiagnosticsValue(InspectorInstanceRef(id)),
       );
@@ -603,16 +608,6 @@ class InspectorController extends DisposableController
     _refreshRateLimiter.scheduleRequest();
   }
 
-  bool identicalDiagnosticsNodes(
-    RemoteDiagnosticsNode a,
-    RemoteDiagnosticsNode b,
-  ) {
-    if (a == b) {
-      return true;
-    }
-    return a.dartDiagnosticRef == b.dartDiagnosticRef;
-  }
-
   @override
   void onInspectorSelectionChanged() {
     if (!visibleToUser) {
@@ -746,7 +741,7 @@ class InspectorController extends DisposableController
   void _updateSelectedErrorFromNode(InspectorTreeNode? node) {
     final inspectorRef = node?.diagnostic?.valueRef.id;
 
-    final errors = serviceManager.errorBadgeManager
+    final errors = serviceConnection.errorBadgeManager
         .erroredItemsForPage(InspectorScreen.id)
         .value;
 
@@ -764,13 +759,13 @@ class InspectorController extends DisposableController
     if (errorIndex != null) {
       // Mark the error as "seen" as this will render slightly differently
       // so the user can track which errored nodes they've viewed.
-      serviceManager.errorBadgeManager
+      serviceConnection.errorBadgeManager
           .markErrorAsRead(InspectorScreen.id, errors[inspectorRef!]!);
       // Also clear the error badge since new errors may have arrived while
       // the inspector was visible (normally they're cleared when visiting
       // the screen) and visiting an errored node seems an appropriate
       // acknowledgement of the errors.
-      serviceManager.errorBadgeManager.clearErrors(InspectorScreen.id);
+      serviceConnection.errorBadgeManager.clearErrors(InspectorScreen.id);
     }
   }
 
@@ -778,7 +773,7 @@ class InspectorController extends DisposableController
   void selectErrorByIndex(int index) {
     _selectedErrorIndex.value = index;
 
-    final errors = serviceManager.errorBadgeManager
+    final errors = serviceConnection.errorBadgeManager
         .erroredItemsForPage(InspectorScreen.id)
         .value;
 
@@ -797,12 +792,12 @@ class InspectorController extends DisposableController
   Future<void> _addNodeToConsole(InspectorTreeNode node) async {
     final valueRef = node.diagnostic!.valueRef;
     final isolateRef = inspectorService.isolateRef;
-    final instanceRef = await node.diagnostic!.inspectorService
+    final instanceRef = await node.diagnostic!.objectGroupApi
         ?.toObservatoryInstanceRef(valueRef);
     if (_disposed) return;
 
     if (instanceRef != null) {
-      serviceManager.consoleService.appendInstanceRef(
+      serviceConnection.consoleService.appendInstanceRef(
         value: instanceRef,
         diagnostic: node.diagnostic,
         isolateRef: isolateRef,
@@ -913,7 +908,7 @@ class InspectorController extends DisposableController
   void dispose() {
     assert(!_disposed);
     _disposed = true;
-    if (serviceManager.inspectorService != null) {
+    if (serviceConnection.inspectorService != null) {
       shutdownTree(false);
     }
     _treeGroups?.clear(false);
