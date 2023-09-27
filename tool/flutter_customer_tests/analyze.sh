@@ -4,5 +4,6 @@
 
 cd tool
 flutter pub get
+dart bin/devtools_tool.dart pub-get
 dart bin/devtools_tool.dart analyze
 cd ..
