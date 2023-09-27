@@ -287,7 +287,6 @@ class _DomainCheckTable extends StatelessWidget {
                     : Text(
                         'No issues found',
                         style: TextStyle(
-                          // TODO: Update devtool colorscheme and use color from there.
                           color: Theme.of(context).colorScheme.green,
                         ),
                       ),
@@ -302,7 +301,6 @@ class _DomainCheckTable extends StatelessWidget {
               DataCell(
                 Text(
                   'No issues found',
-                  // TODO: Update devtool colorscheme and use color from there.
                   style: TextStyle(color: Theme.of(context).colorScheme.green),
                 ),
               ),
