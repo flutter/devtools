@@ -96,6 +96,9 @@ Receive an LGTM for the PR, squash and commit.
 On each DevTools commit, DevTools is built and uploaded to CIPD. You can check the
 status of the builds on this [dashboard](https://ci.chromium.org/ui/p/dart-internal/builders/flutter/devtools). Within minutes, a build should be uploaded for the commit you just merged and tagged.
 
+> [!NOTE]  
+> If the CIPD build times out, instructions for re-triggering can be found at [go/dart-engprod/release.md](go/dart-engprod/release.md)
+
 ### Update the DevTools hash in the Dart SDK
 
 Run the tool script with the commit hash you just merged and tagged:
