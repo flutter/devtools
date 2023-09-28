@@ -28,7 +28,6 @@ class DevToolsRepo {
     final result = <Package>[];
     final repoDir = Directory(repoPath);
 
-    // For the first level of packages, ignore any directory named 'flutter'.
     for (FileSystemEntity entity in repoDir.listSync()) {
       final name = path.basename(entity.path);
       if (entity is Directory && !name.startsWith('.')) {
