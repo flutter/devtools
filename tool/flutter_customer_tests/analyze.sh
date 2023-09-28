@@ -1,3 +1,4 @@
+#!/bin/bash -e
 # Script to analyze the devtools repo for the flutter/tests registry
 # https://github.com/flutter/tests
 # This is executed as a pre-submit check for every PR in flutter/flutter
