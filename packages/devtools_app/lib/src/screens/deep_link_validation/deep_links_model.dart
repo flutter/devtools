@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/primitives/utils.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
-import '../../shared/theme.dart';
+import '../../shared/ui/colors.dart';
 import '../../shared/ui/search.dart';
-import '../../shared/utils.dart';
 
 const kDeeplinkTableCellDefaultWidth = 200.0;
 

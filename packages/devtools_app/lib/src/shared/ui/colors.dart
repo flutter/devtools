@@ -145,6 +145,7 @@ extension DevToolsColorExtension on ColorScheme {
       isLight ? Colors.grey[50]! : const Color(0xFF1B1B1F);
 
   Color get grey => const Color.fromARGB(255, 128, 128, 128);
+  Color get green =>const Color.fromARGB(255, 156, 233, 195);
 
   Color get overlayShadowColor => const Color.fromRGBO(0, 0, 0, 0.5);
 }

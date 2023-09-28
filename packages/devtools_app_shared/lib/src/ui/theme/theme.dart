@@ -259,6 +259,7 @@ double get statusLineHeight => scaleByFontFactor(24.0);
 double get inputDecorationElementHeight => scaleByFontFactor(20.0);
 
 // Padding / spacing constants:
+const largeSpacing = 32.0;
 const defaultSpacing = 16.0;
 const intermediateSpacing = 12.0;
 const denseSpacing = 8.0;
