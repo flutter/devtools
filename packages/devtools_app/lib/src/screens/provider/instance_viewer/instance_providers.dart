@@ -5,12 +5,12 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vm_service/vm_service.dart' hide SentinelException;
 
-import '../../../shared/eval_on_dart_library.dart';
 import '../../../shared/globals.dart';
-import '../../../shared/primitives/utils.dart';
 import 'eval.dart';
 import 'instance_details.dart';
 import 'result.dart';
@@ -167,7 +167,7 @@ Future<void> _mutate(
   ref.refresh(instanceProvider(path.root));
 
   // Forces the UI to rebuild after the state change
-  await serviceManager.performHotReload();
+  await serviceConnection.serviceManager.performHotReload();
 }
 
 Future<InstanceDetails?> _resolveParent(

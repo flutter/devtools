@@ -4,6 +4,7 @@
 
 import 'dart:convert';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 
@@ -11,8 +12,6 @@ import 'common_widgets.dart';
 import 'config_specific/drag_and_drop/drag_and_drop.dart';
 import 'globals.dart';
 import 'primitives/utils.dart';
-import 'theme.dart';
-import 'utils.dart';
 
 class FileImportContainer extends StatefulWidget {
   const FileImportContainer({
@@ -162,12 +161,12 @@ class _FileImportContainerState extends State<FileImportContainer> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            DevToolsButton(
+            GaDevToolsButton(
               gaScreen: widget.gaScreen,
               gaSelection: widget.gaSelectionAction!,
               label: widget.actionText!,
               icon: Icons.highlight,
-              elevatedButton: true,
+              elevated: true,
               onPressed: importedFile != null
                   ? () => widget.onAction!(importedFile!)
                   : null,
@@ -246,13 +245,13 @@ class FileImportButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DevToolsButton(
+    return GaDevToolsButton(
       onPressed: onPressed,
       icon: Icons.file_upload,
       label: 'Import File',
       gaScreen: gaScreen,
       gaSelection: gaSelection,
-      elevatedButton: elevatedButton,
+      elevated: elevatedButton,
     );
   }
 }
@@ -372,12 +371,12 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            DevToolsButton(
+            GaDevToolsButton(
               gaScreen: widget.gaScreen,
               gaSelection: widget.gaSelectionAction,
               label: widget.actionText,
               icon: Icons.highlight,
-              elevatedButton: true,
+              elevated: true,
               onPressed: firstImportedFile != null && secondImportedFile != null
                   ? () => widget.onAction(
                         firstImportedFile!,

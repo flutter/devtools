@@ -6,32 +6,42 @@ import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/framework/scaffold.dart';
 import 'package:devtools_app/src/shared/framework_controller.dart';
 import 'package:devtools_app/src/shared/survey.dart';
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 void main() {
-  final mockServiceManager = MockServiceConnectionManager();
-  when(mockServiceManager.service).thenReturn(null);
-  when(mockServiceManager.connectedAppInitialized).thenReturn(false);
-  when(mockServiceManager.connectedState).thenReturn(
-    ValueNotifier<ConnectedState>(const ConnectedState(false)),
-  );
-  when(mockServiceManager.hasConnection).thenReturn(false);
+  late MockServiceConnectionManager mockServiceConnection;
 
-  final mockErrorBadgeManager = MockErrorBadgeManager();
-  when(mockServiceManager.errorBadgeManager).thenReturn(mockErrorBadgeManager);
-  when(mockErrorBadgeManager.errorCountNotifier(any))
-      .thenReturn(ValueNotifier<int>(0));
+  setUp(() {
+    mockServiceConnection = createMockServiceConnectionWithDefaults();
+    final mockServiceManager =
+        mockServiceConnection.serviceManager as MockServiceManager;
+    when(mockServiceManager.service).thenReturn(null);
+    when(mockServiceManager.connectedAppInitialized).thenReturn(false);
+    when(mockServiceManager.connectedState).thenReturn(
+      ValueNotifier<ConnectedState>(const ConnectedState(false)),
+    );
+    when(mockServiceManager.hasConnection).thenReturn(false);
 
-  setGlobal(ServiceConnectionManager, mockServiceManager);
-  setGlobal(FrameworkController, FrameworkController());
-  setGlobal(SurveyService, SurveyService());
-  setGlobal(OfflineModeController, OfflineModeController());
-  setGlobal(IdeTheme, IdeTheme());
-  setGlobal(NotificationService, NotificationService());
-  setGlobal(BannerMessagesController, BannerMessagesController());
+    final mockErrorBadgeManager = MockErrorBadgeManager();
+    when(mockServiceConnection.errorBadgeManager)
+        .thenReturn(mockErrorBadgeManager);
+    when(mockErrorBadgeManager.errorCountNotifier(any))
+        .thenReturn(ValueNotifier<int>(0));
+
+    setGlobal(ServiceConnectionManager, mockServiceConnection);
+    setGlobal(FrameworkController, FrameworkController());
+    setGlobal(SurveyService, SurveyService());
+    setGlobal(OfflineModeController, OfflineModeController());
+    setGlobal(IdeTheme, IdeTheme());
+    setGlobal(NotificationService, NotificationService());
+    setGlobal(BannerMessagesController, BannerMessagesController());
+  });
 
   Widget wrapScaffold(Widget child) {
     return wrapWithControllers(
@@ -48,6 +58,7 @@ void main() {
       await tester.pumpWidget(
         wrapScaffold(
           DevToolsScaffold(
+            page: _screen1.screenId,
             screens: const [_screen1, _screen2, _screen3, _screen4, _screen5],
           ),
         ),
@@ -71,6 +82,7 @@ void main() {
       await tester.pumpWidget(
         wrapScaffold(
           DevToolsScaffold(
+            page: _screen1.screenId,
             screens: const [_screen1, _screen2, _screen3, _screen4, _screen5],
           ),
         ),
@@ -94,6 +106,7 @@ void main() {
       await tester.pumpWidget(
         wrapScaffold(
           DevToolsScaffold(
+            page: _screen1.screenId,
             screens: const [_screen1, _screen2, _screen3, _screen4, _screen5],
           ),
         ),
@@ -144,7 +157,7 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(
         wrapScaffold(
-          DevToolsScaffold(screens: const [_screen1]),
+          DevToolsScaffold(page: _screen1.screenId, screens: const [_screen1]),
         ),
       );
       expect(find.byKey(_k1), findsOneWidget);
@@ -155,7 +168,10 @@ void main() {
   testWidgets('displays only the selected tab', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrapScaffold(
-        DevToolsScaffold(screens: const [_screen1, _screen2]),
+        DevToolsScaffold(
+          page: _screen1.screenId,
+          screens: const [_screen1, _screen2],
+        ),
       ),
     );
     expect(find.byKey(_k1), findsOneWidget);

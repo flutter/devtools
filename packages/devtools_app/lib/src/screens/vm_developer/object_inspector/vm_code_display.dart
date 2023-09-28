@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:string_scanner/string_scanner.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../shared/common_widgets.dart';
 import '../../../shared/primitives/utils.dart';
-import '../../../shared/split.dart';
 import '../../../shared/table/table.dart';
 import '../../../shared/table/table_data.dart';
-import '../../../shared/theme.dart';
+import '../../../shared/ui/colors.dart';
 import '../vm_developer_common_widgets.dart';
 import '../vm_service_private_extensions.dart';
 import 'object_inspector_view_controller.dart';

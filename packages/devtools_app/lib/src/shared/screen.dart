@@ -4,44 +4,115 @@
 
 import 'dart:math' as math;
 
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
 import 'globals.dart';
 import 'primitives/listenable.dart';
-import 'theme.dart';
 import 'ui/icons.dart';
-import 'version.dart';
 
 final _log = Logger('screen.dart');
 
 enum ScreenMetaData {
-  home('home', icon: Icons.home_rounded),
+  home(
+    'home',
+    icon: Icons.home_rounded,
+    requiresConnection: false,
+  ),
   inspector(
     'inspector',
     title: 'Flutter Inspector',
     icon: Octicons.deviceMobile,
+    requiresFlutter: true,
+    requiresDebugBuild: true,
   ),
-  performance('performance', title: 'Performance', icon: Octicons.pulse),
-  cpuProfiler('cpu-profiler', title: 'CPU Profiler', icon: Octicons.dashboard),
-  memory('memory', title: 'Memory', icon: Octicons.package),
-  debugger('debugger', title: 'Debugger', icon: Octicons.bug),
-  network('network', title: 'Network', icon: Icons.network_check),
+  performance(
+    'performance',
+    title: 'Performance',
+    icon: Octicons.pulse,
+    worksOffline: true,
+  ),
+  cpuProfiler(
+    'cpu-profiler',
+    title: 'CPU Profiler',
+    icon: Octicons.dashboard,
+    requiresDartVm: true,
+    worksOffline: true,
+  ),
+  memory(
+    'memory',
+    title: 'Memory',
+    icon: Octicons.package,
+    requiresDartVm: true,
+  ),
+  debugger(
+    'debugger',
+    title: 'Debugger',
+    icon: Octicons.bug,
+    requiresDebugBuild: true,
+  ),
+  network(
+    'network',
+    title: 'Network',
+    icon: Icons.network_check,
+    requiresDartVm: true,
+  ),
   logging('logging', title: 'Logging', icon: Octicons.clippy),
-  provider('provider', title: 'Provider', icon: Icons.attach_file),
-  appSize('app-size', title: 'App Size', icon: Octicons.fileZip),
-  deepLinks('deep-links', title: 'Deep Links', icon: Icons.link_rounded),
-  vmTools('vm-tools', title: 'VM Tools', icon: Icons.settings_applications),
+  provider(
+    'provider',
+    title: 'Provider',
+    icon: Icons.attach_file,
+    requiresLibrary: 'package:provider/',
+    requiresDebugBuild: true,
+  ),
+  appSize(
+    'app-size',
+    title: 'App Size',
+    icon: Octicons.fileZip,
+    requiresConnection: false,
+    requiresDartVm: true,
+  ),
+  deepLinks(
+    'deep-links',
+    title: 'Deep Links',
+    icon: Icons.link_rounded,
+    requiresConnection: false,
+    requiresDartVm: true,
+  ),
+  vmTools(
+    'vm-tools',
+    title: 'VM Tools',
+    icon: Icons.settings_applications,
+    requiresVmDeveloperMode: true,
+  ),
   simple('simple');
 
-  const ScreenMetaData(this.id, {this.title, this.icon});
+  const ScreenMetaData(
+    this.id, {
+    this.title,
+    this.icon,
+    this.requiresConnection = true,
+    this.requiresDartVm = false,
+    this.requiresFlutter = false,
+    this.requiresDebugBuild = false,
+    this.requiresVmDeveloperMode = false,
+    this.worksOffline = false,
+    this.requiresLibrary,
+  });
 
   final String id;
-
   final String? title;
-
   final IconData? icon;
+  final bool requiresConnection;
+  final bool requiresDartVm;
+  final bool requiresFlutter;
+  final bool requiresDebugBuild;
+  final bool requiresVmDeveloperMode;
+  final bool worksOffline;
+  final String? requiresLibrary;
 }
 
 /// Defines a page shown in the DevTools [TabBar].
@@ -93,6 +164,29 @@ abstract class Screen {
           title: title,
           titleGenerator: titleGenerator,
           icon: icon,
+          tabKey: tabKey,
+        );
+
+  Screen.fromMetaData(
+    ScreenMetaData metadata, {
+    bool Function(FlutterVersion? currentVersion)? shouldShowForFlutterVersion,
+    bool showFloatingDebuggerControls = true,
+    String Function()? titleGenerator,
+    Key? tabKey,
+  }) : this.conditional(
+          id: metadata.id,
+          requiresLibrary: metadata.requiresLibrary,
+          requiresConnection: metadata.requiresConnection,
+          requiresDartVm: metadata.requiresDartVm,
+          requiresFlutter: metadata.requiresFlutter,
+          requiresDebugBuild: metadata.requiresDebugBuild,
+          requiresVmDeveloperMode: metadata.requiresVmDeveloperMode,
+          worksOffline: metadata.worksOffline,
+          shouldShowForFlutterVersion: shouldShowForFlutterVersion,
+          showFloatingDebuggerControls: showFloatingDebuggerControls,
+          title: titleGenerator == null ? metadata.title : null,
+          titleGenerator: titleGenerator,
+          icon: metadata.icon,
           tabKey: tabKey,
         );
 
@@ -206,7 +300,7 @@ abstract class Screen {
     final title = _userFacingTitle;
     return ValueListenableBuilder<int>(
       valueListenable:
-          serviceManager.errorBadgeManager.errorCountNotifier(screenId),
+          serviceConnection.errorBadgeManager.errorCountNotifier(screenId),
       builder: (context, count, _) {
         final tab = Tab(
           key: tabKey,
@@ -276,8 +370,8 @@ bool shouldShowScreen(Screen screen) {
     return screen.worksOffline;
   }
 
-  final serviceReady = serviceManager.isServiceAvailable &&
-      serviceManager.connectedApp!.connectedAppInitialized;
+  final serviceReady = serviceConnection.serviceManager.isServiceAvailable &&
+      serviceConnection.serviceManager.connectedApp!.connectedAppInitialized;
   if (!serviceReady) {
     if (!screen.requiresConnection) {
       _log.finest('screen does not require connection: returning true');
@@ -292,8 +386,10 @@ bool shouldShowScreen(Screen screen) {
   }
 
   if (screen.requiresLibrary != null) {
-    if (serviceManager.isolateManager.mainIsolate.value == null ||
-        !serviceManager.libraryUriAvailableNow(screen.requiresLibrary)) {
+    if (serviceConnection.serviceManager.isolateManager.mainIsolate.value ==
+            null ||
+        !serviceConnection.serviceManager
+            .libraryUriAvailableNow(screen.requiresLibrary)) {
       _log.finest(
         'screen requires library ${screen.requiresLibrary}: returning false',
       );
@@ -301,18 +397,20 @@ bool shouldShowScreen(Screen screen) {
     }
   }
   if (screen.requiresDartVm) {
-    if (serviceManager.connectedApp!.isRunningOnDartVM != true) {
+    if (serviceConnection.serviceManager.connectedApp!.isRunningOnDartVM !=
+        true) {
       _log.finest('screen requires Dart VM: returning false');
       return false;
     }
   }
   if (screen.requiresFlutter &&
-      serviceManager.connectedApp!.isFlutterAppNow == false) {
+      serviceConnection.serviceManager.connectedApp!.isFlutterAppNow == false) {
     _log.finest('screen requires Flutter: returning false');
     return false;
   }
   if (screen.requiresDebugBuild) {
-    if (serviceManager.connectedApp!.isProfileBuildNow == true) {
+    if (serviceConnection.serviceManager.connectedApp!.isProfileBuildNow ==
+        true) {
       _log.finest('screen requires debug build: returning false');
       return false;
     }
@@ -324,9 +422,10 @@ bool shouldShowScreen(Screen screen) {
     }
   }
   if (screen.shouldShowForFlutterVersion != null) {
-    if (serviceManager.connectedApp!.isFlutterAppNow == true &&
+    if (serviceConnection.serviceManager.connectedApp!.isFlutterAppNow ==
+            true &&
         !screen.shouldShowForFlutterVersion!(
-          serviceManager.connectedApp!.flutterVersionNow,
+          serviceConnection.serviceManager.connectedApp!.flutterVersionNow,
         )) {
       _log.finest('screen has flutter version restraints: returning false');
       return false;

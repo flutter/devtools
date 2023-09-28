@@ -22,14 +22,7 @@ enum TableViewType {
 }
 
 class DeepLinksScreen extends Screen {
-  DeepLinksScreen()
-      : super.conditional(
-          id: id,
-          requiresConnection: false,
-          requiresDartVm: true,
-          title: ScreenMetaData.deepLinks.title,
-          icon: ScreenMetaData.deepLinks.icon,
-        );
+  DeepLinksScreen() : super.fromMetaData(ScreenMetaData.deepLinks);
 
   static final id = ScreenMetaData.deepLinks.id;
 

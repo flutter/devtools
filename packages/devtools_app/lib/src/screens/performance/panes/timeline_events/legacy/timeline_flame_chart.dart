@@ -6,19 +6,18 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../shared/charts/flame_chart.dart';
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/globals.dart';
-import '../../../../../shared/primitives/auto_dispose.dart';
 import '../../../../../shared/primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../../../../../shared/primitives/geometry.dart';
 import '../../../../../shared/primitives/trace_event.dart';
 import '../../../../../shared/primitives/utils.dart';
-import '../../../../../shared/split.dart';
-import '../../../../../shared/theme.dart';
 import '../../../../../shared/ui/colors.dart';
 import '../../../../../shared/ui/utils.dart';
 import '../../../../../shared/utils.dart';
@@ -596,7 +595,7 @@ class TimelineFlameChartState
             color: backgroundWithOpacity,
             child: Text(
               groupName,
-              style: TextStyle(color: colorScheme.chartTextColor),
+              style: TextStyle(color: colorScheme.contrastTextColor),
             ),
           ),
         ),
@@ -1307,7 +1306,7 @@ class ThreadNavigatorButton extends StatelessWidget {
         color: backgroundColor,
       ),
       // Using [buttonMinWidth] will result in a square button.
-      height: useSmallButton ? smallButtonHeight : buttonMinWidth,
+      height: useSmallButton ? actionsIconSize : defaultButtonHeight,
       width: buttonMinWidth,
       child: DevToolsTooltip(
         message: tooltip,

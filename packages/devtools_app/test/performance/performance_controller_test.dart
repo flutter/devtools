@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,7 +14,7 @@ import 'package:mockito/mockito.dart';
 
 void main() {
   late PerformanceController controller;
-  late MockServiceConnectionManager mockServiceManager;
+  late MockServiceConnectionManager mockServiceConnection;
 
   group('$PerformanceController', () {
     setUp(() {
@@ -22,7 +25,9 @@ void main() {
         ExternalDevToolsEnvironmentParameters(),
       );
       setGlobal(PreferencesController, PreferencesController());
-      mockServiceManager = MockServiceConnectionManager();
+      mockServiceConnection = createMockServiceConnectionWithDefaults();
+      final mockServiceManager =
+          mockServiceConnection.serviceManager as MockServiceManager;
       final connectedApp = MockConnectedApp();
       mockConnectedApp(
         connectedApp,
@@ -33,9 +38,9 @@ void main() {
       when(mockServiceManager.connectedApp).thenReturn(connectedApp);
       when(mockServiceManager.connectedState)
           .thenReturn(ValueNotifier(const ConnectedState(true)));
-      setGlobal(ServiceConnectionManager, mockServiceManager);
+      setGlobal(ServiceConnectionManager, mockServiceConnection);
       offlineController.enterOfflineMode(
-        offlineApp: serviceManager.connectedApp!,
+        offlineApp: serviceConnection.serviceManager.connectedApp!,
       );
       controller = PerformanceController();
     });

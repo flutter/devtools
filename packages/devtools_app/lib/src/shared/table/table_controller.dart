@@ -1,9 +1,9 @@
 import 'dart:collection';
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import '../primitives/auto_dispose.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
 import 'column_widths.dart';

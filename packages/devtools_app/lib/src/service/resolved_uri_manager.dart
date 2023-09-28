@@ -27,9 +27,9 @@ class ResolvedUriManager {
   Future<void> fetchPackageUris(String isolateId, List<String> uris) async {
     if (uris.isEmpty) return;
     if (_packagePathMappings != null) {
-      final packageUris =
-          (await serviceManager.service!.lookupPackageUris(isolateId, uris))
-              .uris;
+      final packageUris = (await serviceConnection.serviceManager.service!
+              .lookupPackageUris(isolateId, uris))
+          .uris;
 
       if (packageUris != null) {
         _packagePathMappings!.addMappings(
@@ -50,11 +50,13 @@ class ResolvedUriManager {
   /// [packageUris] List of uris to fetch full file paths for.
   Future<void> fetchFileUris(String isolateId, List<String> packageUris) async {
     if (_packagePathMappings != null) {
-      final fileUris = (await serviceManager.service!
+      final fileUris = (await serviceConnection.serviceManager.service!
               .lookupResolvedPackageUris(isolateId, packageUris))
           .uris;
 
-      if (fileUris != null) {
+      // [_packagePathMappings] could have been set to null during the async gap
+      // so check that it is non-null again here.
+      if (fileUris != null && _packagePathMappings != null) {
         _packagePathMappings!.addMappings(
           isolateId: isolateId,
           fullPaths: fileUris,

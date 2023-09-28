@@ -6,6 +6,8 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/performance/panes/flutter_frames/flutter_frames_chart.dart';
 import 'package:devtools_app/src/shared/ui/colors.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -33,14 +35,14 @@ void main() {
 
   group('FlutterFramesChart', () {
     setUp(() {
-      final fakeServiceManager = FakeServiceManager();
+      final fakeServiceConnection = FakeServiceConnectionManager();
       mockConnectedApp(
-        fakeServiceManager.connectedApp!,
+        fakeServiceConnection.serviceManager.connectedApp!,
         isFlutterApp: true,
         isProfileBuild: true,
         isWebApp: false,
       );
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(ServiceConnectionManager, fakeServiceConnection);
       setGlobal(OfflineModeController, OfflineModeController());
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(NotificationService, NotificationService());

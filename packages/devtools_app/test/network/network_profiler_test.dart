@@ -8,6 +8,8 @@ import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/network/network_request_inspector.dart';
 import 'package:devtools_app/src/screens/network/network_request_inspector_views.dart';
 import 'package:devtools_app/src/shared/http/http.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -38,7 +40,7 @@ Future<void> clearTimeouts(WidgetTester tester) async {
 }
 
 void main() {
-  late FakeServiceManager fakeServiceManager;
+  late FakeServiceConnectionManager fakeServiceConnection;
   late SocketProfile socketProfile;
   late HttpProfile httpProfile;
 
@@ -59,13 +61,13 @@ void main() {
 
   group('Network Profiler', () {
     setUp(() {
-      fakeServiceManager = FakeServiceManager(
+      fakeServiceConnection = FakeServiceConnectionManager(
         service: FakeServiceManager.createFakeService(
           socketProfile: socketProfile,
           httpProfile: httpProfile,
         ),
       );
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(ServiceConnectionManager, fakeServiceConnection);
     });
 
     testWidgetsWithWindowSize('starts and stops', windowSize, (

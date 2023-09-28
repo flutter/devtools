@@ -4,8 +4,8 @@
 
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/charts/treemap.dart';
-import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -49,7 +49,7 @@ void main() {
   const windowSize = Size(2225.0, 1000.0);
 
   setUp(() {
-    setGlobal(ServiceConnectionManager, FakeServiceManager());
+    setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
     setGlobal(IdeTheme, IdeTheme());
   });
 

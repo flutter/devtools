@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart' show IterableExtension;
+import 'package:devtools_app_shared/utils.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../connected_app.dart';
@@ -13,7 +14,7 @@ import '../../primitives/utils.dart';
 import '../../ui/search.dart';
 import 'eval_service.dart';
 
-AppState get _appState => serviceManager.appState;
+AppState get _appState => serviceConnection.appState;
 
 Future<List<String>> autoCompleteResultsFor(
   EditingParts parts,
@@ -178,7 +179,7 @@ Future<Set<String>> libraryMemberAutocompletes(
     ),
   );
   if (!includePrivates) {
-    result = result.where((name) => !isPrivate(name));
+    result = result.where((name) => !isPrivateMember(name));
   }
   return result.toSet();
 }
@@ -352,5 +353,6 @@ bool _isAccessible(
 ) {
   final frame = _appState.currentFrame.value!;
   final currentScript = frame.location!.script;
-  return !isPrivate(member) || currentScript!.id == clazz?.location?.script?.id;
+  return !isPrivateMember(member) ||
+      currentScript!.id == clazz?.location?.script?.id;
 }

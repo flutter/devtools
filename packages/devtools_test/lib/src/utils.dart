@@ -213,6 +213,7 @@ void _mockFlutterAssets() {
   );
 }
 
+// TODO(https://github.com/flutter/devtools/issues/6215): remove this helper.
 /// Load fonts used by the devtool for golden-tests to use them
 Future<void> loadFonts() async {
   // source: https://medium.com/swlh/test-your-flutter-widgets-using-golden-files-b533ac0de469

@@ -4,16 +4,16 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/charts/flame_chart.dart';
 import '../../../../shared/common_widgets.dart';
-import '../../../../shared/dialogs.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/http/http_service.dart' as http_service;
-import '../../../../shared/primitives/auto_dispose.dart';
-import '../../../../shared/theme.dart';
+import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/ui/search.dart';
 import 'legacy/legacy_events_controller.dart';
 import 'legacy/timeline_flame_chart.dart';
@@ -32,12 +32,14 @@ class TimelineEventsTabView extends StatelessWidget {
       builder: (context, useLegacy, _) {
         return useLegacy
             ? KeepAliveWrapper(
-                child:
-                    DualValueListenableBuilder<EventsControllerStatus, double>(
-                  firstListenable: controller.status,
-                  secondListenable:
-                      controller.legacyController.processor.progressNotifier,
-                  builder: (context, status, processingProgress, _) {
+                child: MultiValueListenableBuilder(
+                  listenables: [
+                    controller.status,
+                    controller.legacyController.processor.progressNotifier,
+                  ],
+                  builder: (context, values, _) {
+                    final status = values.first as EventsControllerStatus;
+                    final processingProgress = values.second as double;
                     return TimelineEventsView(
                       controller: controller,
                       processing: status == EventsControllerStatus.processing,
@@ -120,7 +122,7 @@ class TraceCategoriesButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DevToolsButton.iconOnly(
+    return GaDevToolsButton.iconOnly(
       icon: Icons.checklist_outlined,
       outlined: false,
       tooltip: 'Trace categories',
@@ -261,8 +263,8 @@ class _TraceCategoriesDialogState extends State<TraceCategoriesDialog>
     required bool advanced,
   }) {
     final streams = advanced
-        ? serviceManager.timelineStreamManager.advancedStreams
-        : serviceManager.timelineStreamManager.basicStreams;
+        ? serviceConnection.timelineStreamManager.advancedStreams
+        : serviceConnection.timelineStreamManager.basicStreams;
     final settings = streams
         .map(
           (stream) => CheckboxSetting(
@@ -270,7 +272,7 @@ class _TraceCategoriesDialogState extends State<TraceCategoriesDialog>
             description: stream.description,
             notifier: stream.recorded as ValueNotifier<bool?>,
             onChanged: (newValue) => unawaited(
-              serviceManager.timelineStreamManager.updateTimelineStream(
+              serviceConnection.timelineStreamManager.updateTimelineStream(
                 stream,
                 newValue ?? false,
               ),

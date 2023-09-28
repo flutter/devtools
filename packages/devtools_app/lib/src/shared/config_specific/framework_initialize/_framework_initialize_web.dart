@@ -5,6 +5,8 @@
 // ignore: avoid_web_libraries_in_flutter, as designed
 import 'dart:html' hide Storage;
 
+import 'package:devtools_app_shared/utils.dart';
+
 import '../../../service/service_manager.dart';
 import '../../globals.dart';
 import '../../primitives/storage.dart';
@@ -59,7 +61,7 @@ void _sendKeyPressToParent(KeyboardEvent event) {
   // because we can't use targetOrigin in postMessage as only the scheme is fixed
   // for VS Code (vscode-webview://[some guid]).
   if (globals.containsKey(ServiceConnectionManager) &&
-      !serviceManager.hasConnection) {
+      !serviceConnection.serviceManager.hasConnection) {
     return;
   }
   if (!window.navigator.userAgent.contains('Electron')) return;

@@ -7,6 +7,9 @@
 # Fast fail the script on failures.
 set -ex
 
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+DEVTOOLS_DIR=$SCRIPT_DIR/..
+
 # TODO: Also support windows on github actions.
 if [[ $RUNNER_OS == "Windows" ]]; then
     echo Installing Google Chrome Stable...
@@ -57,17 +60,23 @@ dart --disable-analytics
 flutter --version
 dart --version
 
+# Fetch dependencies for the tool/ directory
+pushd $DEVTOOLS_DIR/tool
+flutter pub get
+popd
+
+# Ensure the devtools_tool command is available
+export PATH="$PATH":"$DEVTOOLS_DIR/tool/bin"
+
+
+# Fetch dependencies
+devtools_tool pub-get --only-main
+
 # Generate code.
-pushd packages/devtools_app
-flutter pub get
-popd
-pushd packages/devtools_test
-flutter pub get
-popd
 bash tool/generate_code.sh
 
 # Change the CI to the packages/devtools_app directory.
-pushd packages/devtools_app
+pushd $DEVTOOLS_DIR/packages/devtools_app
 echo `pwd`
 
 if [ "$BOT" = "main" ]; then
@@ -78,29 +87,35 @@ if [ "$BOT" = "main" ]; then
     $(dirname $(which flutter))/dart format --output=none --set-exit-if-changed .
 
     # Make sure the app versions are in sync.
-    repo_tool repo-check
+    devtools_tool repo-check
 
     # Get packages
-    repo_tool packages-get
+    devtools_tool pub-get
 
     # Analyze the code
-    repo_tool analyze
+    devtools_tool analyze
 
     popd
 
-    # Test the devtools_shared and devtools_extensions package tests on the main bot.
-    pushd packages/devtools_shared
+    # Test the `devtools_app_shared`, `devtools_shared` and `devtools_extensions` package tests on the
+    # main bot.
+    pushd $DEVTOOLS_DIR/packages/devtools_app_shared
     echo `pwd`
     flutter test test/
     popd
 
-    pushd packages/devtools_extensions
+    pushd $DEVTOOLS_DIR/packages/devtools_shared
+    echo `pwd`
+    flutter test test/
+    popd
+
+    pushd $DEVTOOLS_DIR/packages/devtools_extensions
     echo `pwd`
     flutter test test/
     popd
 
     # Change the directory back to devtools_app.
-    pushd packages/devtools_app
+    pushd $DEVTOOLS_DIR/packages/devtools_app
     echo `pwd`
 
 elif [ "$BOT" = "build_ddc" ]; then
@@ -143,30 +158,29 @@ elif [[ "$BOT" == "test_ddc" || "$BOT" == "test_dart2js" ]]; then
 # elif [ "$BOT" = "integration_ddc" ]; then
 
 # TODO(https://github.com/flutter/devtools/issues/1987): rewrite legacy integration tests.
-elif [ "$BOT" = "dart2js" ]; then
+elif [ "$BOT" = "integration_dart2js" ]; then
+    if [ "$DEVTOOLS_PACKAGE" = "devtools_app" ]; then
+        flutter pub get
 
-    flutter pub get
+        # TODO(https://github.com/flutter/flutter/issues/118470): remove this warning.
+        echo "Preparing to run integration tests.\nWarning: if you see the exception \
+    'Web Driver Command WebDriverCommandType.screenshot failed while waiting for driver side', \
+    this is a known issue and likely means that the golden image check failed (see \
+    https://github.com/flutter/flutter/issues/118470). Run the test locally to see if new \
+    images under a 'failures/' directory are created as a result of the test run:\n\
+    $ dart run integration_test/run_tests.dart --headless"
 
-    # TODO(https://github.com/flutter/flutter/issues/118470): remove this warning.
-    echo "Preparing to run integration tests.\nWarning: if you see the exception \
-'Web Driver Command WebDriverCommandType.screenshot failed while waiting for driver side', \
-this is a known issue and likely means that the golden image check failed (see \
-https://github.com/flutter/flutter/issues/118470). Run the test locally to see if new \
-images under a 'failures/' directory are created as a result of the test run:\n\
-$ dart run integration_test/run_tests.dart --headless"
-
-    if [ "$DEVICE" = "flutter" ]; then
-
+        if [ "$DEVICE" = "flutter" ]; then
+            dart run integration_test/run_tests.dart --headless --shard="$SHARD"
+        elif [ "$DEVICE" = "flutter-web" ]; then
+            dart run integration_test/run_tests.dart --test-app-device=chrome --headless --shard="$SHARD"
+        elif [ "$DEVICE" = "dart-cli" ]; then
+            dart run integration_test/run_tests.dart --test-app-device=cli --headless --shard="$SHARD"
+        fi        
+    elif [ "$DEVTOOLS_PACKAGE" = "devtools_extensions" ]; then
+        pushd $DEVTOOLS_DIR/packages/devtools_extensions
         dart run integration_test/run_tests.dart --headless
-
-    elif [ "$DEVICE" = "flutter-web" ]; then
-
-        dart run integration_test/run_tests.dart --test-app-device=chrome --headless
-
-    elif [ "$DEVICE" = "dart-cli" ]; then
-
-        dart run integration_test/run_tests.dart --test-app-device=cli --headless
-
+        popd
     fi
 fi
 

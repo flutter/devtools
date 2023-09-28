@@ -2,9 +2,11 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+// ignore_for_file: avoid_print
+
 import 'dart:io';
 
-import 'package:io/io.dart';
+import 'package:extension_discovery/extension_discovery.dart';
 import 'package:path/path.dart' as path;
 
 import 'extension_model.dart';
@@ -58,25 +60,28 @@ class ExtensionsManager {
     devtoolsExtensions.clear();
 
     if (rootPath != null) {
-      // TODO(kenz): use 'findExtensions' from package:extension_discovery once it
-      // is published.
-      // final extensions = findExtensions(
-      //   'devtools',
-      //   packageConfig: '$rootPath/.dart_tool/package_config.json',
-      // );
-      final extensions = <_Extension>[];
+      late final List<Extension> extensions;
+      try {
+        extensions = await findExtensions(
+          'devtools',
+          packageConfig: Uri.parse(
+            path.join(
+              rootPath,
+              '.dart_tool',
+              'package_config.json',
+            ),
+          ),
+        );
+      } catch (e) {
+        print('[ERROR] `findExtensions` failed: $e');
+        extensions = <Extension>[];
+      }
       for (final extension in extensions) {
         final config = extension.config;
-        if (config is! Map) {
-          // Fail gracefully. Invalid content in the extension's config.json.
-          continue;
-        }
-        final configAsMap = config as Map<String, Object?>;
-
         // This should be relative to the 'extension/devtools/' directory and
         // defaults to 'build';
         final relativeExtensionLocation =
-            configAsMap['buildLocation'] as String? ?? 'build';
+            config['buildLocation'] as String? ?? 'build';
 
         final location = path.join(
           extension.rootUri.toFilePath(),
@@ -85,11 +90,11 @@ class ExtensionsManager {
         );
 
         try {
-          final pluginConfig = DevToolsExtensionConfig.parse({
-            ...configAsMap,
+          final extensionConfig = DevToolsExtensionConfig.parse({
+            ...config,
             DevToolsExtensionConfig.pathKey: location,
           });
-          devtoolsExtensions.add(pluginConfig);
+          devtoolsExtensions.add(extensionConfig);
         } on StateError catch (e) {
           print(e.message);
           continue;
@@ -131,20 +136,34 @@ class ExtensionsManager {
   }
 }
 
-/// TODO(kenz): remove this class. This is copied from
-/// package:extension_discovery, which is drafed here:
-/// https://github.com/dart-lang/tools/pull/129. Remove this temporary copy once
-/// package:extension_discovery is published.
-class _Extension {
-  _Extension._({
-    required this.package,
-    required this.rootUri,
-    required this.packageUri,
-    required this.config,
-  });
+// NOTE: this code is copied from `package:io`:
+// https://github.com/dart-lang/io/blob/master/lib/src/copy_path.dart.
+/// Copies all of the files in the [from] directory to [to].
+///
+/// This is similar to `cp -R <from> <to>`:
+/// * Symlinks are supported.
+/// * Existing files are over-written, if any.
+/// * If [to] is within [from], throws [ArgumentError] (an infinite operation).
+/// * If [from] and [to] are canonically the same, no operation occurs.
+///
+/// Returns a future that completes when complete.
+Future<void> copyPath(String from, String to) async {
+  if (path.canonicalize(from) == path.canonicalize(to)) {
+    return;
+  }
+  if (path.isWithin(from, to)) {
+    throw ArgumentError('Cannot copy from $from to $to');
+  }
 
-  final String package;
-  final Uri rootUri;
-  final Uri packageUri;
-  final Object? config;
+  await Directory(to).create(recursive: true);
+  await for (final file in Directory(from).list(recursive: true)) {
+    final copyTo = path.join(to, path.relative(file.path, from: from));
+    if (file is Directory) {
+      await Directory(copyTo).create(recursive: true);
+    } else if (file is File) {
+      await File(file.path).copy(copyTo);
+    } else if (file is Link) {
+      await Link(copyTo).create(await file.target(), recursive: true);
+    }
+  }
 }

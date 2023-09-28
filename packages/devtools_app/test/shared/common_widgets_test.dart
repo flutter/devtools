@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -18,7 +20,7 @@ void main() {
       ExternalDevToolsEnvironmentParameters(),
     );
     setGlobal(PreferencesController, PreferencesController());
-    setGlobal(ServiceConnectionManager, FakeServiceManager());
+    setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
     setGlobal(IdeTheme, IdeTheme());
   });
 
@@ -123,58 +125,6 @@ void main() {
       trueNotifier.value = true;
       await tester.pump();
       expect(findCheckboxValue(), isTrue);
-    });
-  });
-
-  group('AreaPaneHeader', () {
-    const titleText = 'The title';
-
-    testWidgets(
-      'actions do not take up space when not present',
-      (WidgetTester tester) async {
-        await tester.pumpWidget(
-          wrap(
-            const AreaPaneHeader(
-              title: Text(titleText),
-            ),
-          ),
-        );
-
-        final Row row = tester.widget(find.byType(Row)) as Row;
-        expect(
-          row.children.length,
-          equals(1),
-        );
-        expect(
-          find.text(titleText),
-          findsOneWidget,
-        );
-      },
-    );
-
-    testWidgets('shows actions', (WidgetTester tester) async {
-      const actionText = 'The Action Text';
-      const action = Text(actionText);
-
-      await tester.pumpWidget(
-        wrap(
-          const AreaPaneHeader(
-            title: Text(titleText),
-            actions: [action],
-          ),
-        ),
-      );
-
-      final Row row = tester.widget(find.byType(Row)) as Row;
-      expect(
-        row.children.length,
-        equals(2),
-      );
-      expect(find.text(actionText), findsOneWidget);
-      expect(
-        find.text(titleText),
-        findsOneWidget,
-      );
     });
   });
 }

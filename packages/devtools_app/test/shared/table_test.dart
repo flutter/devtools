@@ -2,16 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/primitives/trees.dart';
-import 'package:devtools_app/src/shared/primitives/utils.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/table/column_widths.dart';
 import 'package:devtools_app/src/shared/table/table.dart';
 import 'package:devtools_app/src/shared/table/table_controller.dart';
 import 'package:devtools_app/src/shared/table/table_data.dart';
-import 'package:devtools_app/src/shared/utils.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart' hide TableRow;
 import 'package:flutter/services.dart';
@@ -46,7 +43,7 @@ class _NonSortableFlatNumColumn extends ColumnData<TestData> {
 
 void main() {
   setUp(() {
-    setGlobal(ServiceConnectionManager, FakeServiceManager());
+    setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
     setGlobal(IdeTheme, IdeTheme());
     TableUiStateStore.clear();
   });

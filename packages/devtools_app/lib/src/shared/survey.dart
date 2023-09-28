@@ -12,6 +12,7 @@ import '../shared/notifications.dart';
 import 'analytics/analytics.dart' as ga;
 import 'config_specific/launch_url/launch_url.dart';
 import 'config_specific/server/server.dart' as server;
+import 'development_helpers.dart';
 import 'globals.dart';
 import 'primitives/utils.dart';
 
@@ -117,6 +118,9 @@ class SurveyService {
 
   Future<DevToolsSurvey?> _fetchSurveyContent() async {
     try {
+      if (debugSurvey) {
+        return debugSurveyMetadata;
+      }
       final response = await get(_metadataUrl);
       if (response.statusCode == 200) {
         final Map<String, dynamic> contents = json.decode(response.body);

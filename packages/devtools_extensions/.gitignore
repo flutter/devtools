@@ -28,4 +28,3 @@ migrate_working_dir/
 **/doc/api/
 .dart_tool/
 .packages
-build/

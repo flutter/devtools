@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -12,14 +14,10 @@ import '../../screens/profiler/sampling_rate.dart';
 import '../analytics/constants.dart' as gac;
 import '../banner_messages.dart';
 import '../common_widgets.dart';
-import '../dialogs.dart';
 import '../globals.dart';
-import '../primitives/auto_dispose.dart';
 import '../primitives/utils.dart';
 import '../table/table.dart';
 import '../table/table_data.dart';
-import '../theme.dart';
-import '../utils.dart';
 import 'drop_down_button.dart';
 
 /// DropdownButton that controls the value of the 'profile_period' vm flag.
@@ -99,7 +97,7 @@ class CpuSamplingRateDropdown extends StatelessWidget {
   }
 
   Future<void> _onSamplingFrequencyChanged(String? newValue) async {
-    await serviceManager.service!.setProfilePeriod(
+    await serviceConnection.serviceManager.service!.setProfilePeriod(
       newValue ?? mediumProfilePeriod,
     );
   }
@@ -121,8 +119,8 @@ class ViewVmFlagsButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DevToolsButton(
-      elevatedButton: elevated,
+    return GaDevToolsButton(
+      elevated: elevated,
       label: 'View VM flags',
       icon: Icons.flag_rounded,
       gaScreen: gaScreen,
@@ -167,7 +165,7 @@ class _VMFlagsDialogState extends State<VMFlagsDialog> with AutoDisposeMixin {
     });
 
     _updateFromController();
-    addAutoDisposeListener(serviceManager.vmFlagManager.flags, () {
+    addAutoDisposeListener(serviceConnection.vmFlagManager.flags, () {
       setState(() {
         _updateFromController();
       });
@@ -175,7 +173,7 @@ class _VMFlagsDialogState extends State<VMFlagsDialog> with AutoDisposeMixin {
   }
 
   void _updateFromController() {
-    flags = (serviceManager.vmFlagManager.flags.value?.flags ?? [])
+    flags = (serviceConnection.vmFlagManager.flags.value?.flags ?? [])
         .map((flag) => _DialogFlag(flag))
         .toList();
     _refilter();

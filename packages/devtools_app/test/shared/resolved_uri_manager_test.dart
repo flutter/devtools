@@ -4,9 +4,8 @@
 
 import 'dart:async';
 
-import 'package:devtools_app/src/service/resolved_uri_manager.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -16,7 +15,10 @@ void main() {
   late ResolvedUriManager resolvedUriManager;
   final service = createMockVmServiceWrapperWithDefaults();
 
-  setGlobal(ServiceConnectionManager, FakeServiceManager(service: service));
+  setGlobal(
+    ServiceConnectionManager,
+    FakeServiceConnectionManager(service: service),
+  );
   resolvedUriManager = ResolvedUriManager();
 
   const String isolateId = 'anIsolateId';
@@ -29,7 +31,8 @@ void main() {
     setUp(() {
       when(
         unawaited(
-          serviceManager.service!.lookupPackageUris(isolateId, [uri1]),
+          serviceConnection.serviceManager.service!
+              .lookupPackageUris(isolateId, [uri1]),
         ),
       ).thenAnswer(
         (realInvocation) => Future.value(UriList(uris: [packageUri1])),
@@ -72,8 +75,10 @@ void main() {
     });
 
     test('lookupPackageUris', () async {
-      when(serviceManager.service!.lookupPackageUris(isolateId, [uri1, uri2]))
-          .thenAnswer(
+      when(
+        serviceConnection.serviceManager.service!
+            .lookupPackageUris(isolateId, [uri1, uri2]),
+      ).thenAnswer(
         (realInvocation) =>
             Future.value(UriList(uris: [packageUri1, packageUri2])),
       );
@@ -91,12 +96,16 @@ void main() {
     });
 
     test('remembers already fetched uris', () async {
-      when(serviceManager.service!.lookupPackageUris(isolateId, [uri1]))
-          .thenAnswer(
+      when(
+        serviceConnection.serviceManager.service!
+            .lookupPackageUris(isolateId, [uri1]),
+      ).thenAnswer(
         (realInvocation) => Future.value(UriList(uris: [packageUri1])),
       );
-      when(serviceManager.service!.lookupPackageUris(isolateId, [uri2]))
-          .thenAnswer(
+      when(
+        serviceConnection.serviceManager.service!
+            .lookupPackageUris(isolateId, [uri2]),
+      ).thenAnswer(
         (realInvocation) => Future.value(UriList(uris: [packageUri2])),
       );
 
@@ -121,12 +130,16 @@ void main() {
       const String isolateId2 = 'anIsolateId2';
       const String packageUriFromDifferentIsolate =
           'this/is/a/third/packageUri3';
-      when(serviceManager.service!.lookupPackageUris(isolateId, [uri1]))
-          .thenAnswer(
+      when(
+        serviceConnection.serviceManager.service!
+            .lookupPackageUris(isolateId, [uri1]),
+      ).thenAnswer(
         (realInvocation) => Future.value(UriList(uris: [packageUri1])),
       );
-      when(serviceManager.service!.lookupPackageUris(isolateId2, [uri1]))
-          .thenAnswer(
+      when(
+        serviceConnection.serviceManager.service!
+            .lookupPackageUris(isolateId2, [uri1]),
+      ).thenAnswer(
         (realInvocation) =>
             Future.value(UriList(uris: [packageUriFromDifferentIsolate])),
       );
@@ -146,7 +159,7 @@ void main() {
 
     test('preserves the reverse package to file mapping', () async {
       when(
-        serviceManager.service!.lookupPackageUris(
+        serviceConnection.serviceManager.service!.lookupPackageUris(
           isolateId,
           [uri1],
         ),
@@ -180,7 +193,7 @@ void main() {
 
     test('lookupFileUri', () async {
       when(
-        serviceManager.service!.lookupResolvedPackageUris(
+        serviceConnection.serviceManager.service!.lookupResolvedPackageUris(
           isolateId,
           [packageUri1, packageUri2],
         ),
@@ -203,13 +216,13 @@ void main() {
 
     test('remembers already fetched file paths', () async {
       when(
-        serviceManager.service!
+        serviceConnection.serviceManager.service!
             .lookupResolvedPackageUris(isolateId, [packageUri1]),
       ).thenAnswer(
         (realInvocation) => Future.value(UriList(uris: [uri1])),
       );
       when(
-        serviceManager.service!
+        serviceConnection.serviceManager.service!
             .lookupResolvedPackageUris(isolateId, [packageUri2]),
       ).thenAnswer(
         (realInvocation) => Future.value(UriList(uris: [uri2])),
@@ -237,13 +250,13 @@ void main() {
       const String fileUriFromDifferentIsolate =
           'file:///this/is/a/third/fileUri3';
       when(
-        serviceManager.service!
+        serviceConnection.serviceManager.service!
             .lookupResolvedPackageUris(isolateId, [packageUri1]),
       ).thenAnswer(
         (realInvocation) => Future.value(UriList(uris: [uri1])),
       );
       when(
-        serviceManager.service!
+        serviceConnection.serviceManager.service!
             .lookupResolvedPackageUris(isolateId2, [packageUri1]),
       ).thenAnswer(
         (realInvocation) =>
@@ -265,7 +278,7 @@ void main() {
 
     test('preserves the reverse file to package mapping', () async {
       when(
-        serviceManager.service!.lookupResolvedPackageUris(
+        serviceConnection.serviceManager.service!.lookupResolvedPackageUris(
           isolateId,
           [packageUri1],
         ),

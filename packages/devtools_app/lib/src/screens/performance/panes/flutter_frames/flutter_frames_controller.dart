@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../service/service_manager.dart';
@@ -69,14 +70,14 @@ class FlutterFramesController extends PerformanceFeatureController {
   @override
   Future<void> init() async {
     if (!offlineController.offlineMode.value) {
-      await serviceManager.onServiceAvailable;
-      final connectedApp = serviceManager.connectedApp!;
+      await serviceConnection.serviceManager.onServiceAvailable;
+      final connectedApp = serviceConnection.serviceManager.connectedApp!;
       if (connectedApp.isFlutterAppNow!) {
         // Default to true for profile builds only.
         _badgeTabForJankyFrames.value = await connectedApp.isProfileBuild;
 
         final refreshRate = connectedApp.isFlutterAppNow!
-            ? await serviceManager.queryDisplayRefreshRate
+            ? await serviceConnection.queryDisplayRefreshRate
             : defaultRefreshRate;
 
         _displayRefreshRate.value = refreshRate ?? defaultRefreshRate;
@@ -90,7 +91,8 @@ class FlutterFramesController extends PerformanceFeatureController {
   // feature controllers, which respond to tab switches.
   @override
   Future<void> setIsActiveFeature(bool value) async {
-    final isFlutterApp = serviceManager.connectedApp?.isFlutterAppNow ?? false;
+    final isFlutterApp =
+        serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ?? false;
     final shouldShowFramesChart =
         preferences.performance.showFlutterFramesChart.value;
     value = isFlutterApp && shouldShowFramesChart;
@@ -149,7 +151,7 @@ class FlutterFramesController extends PerformanceFeatureController {
   void _maybeBadgeTabForJankyFrame(FlutterFrame frame) {
     if (_badgeTabForJankyFrames.value) {
       if (frame.isJanky(_displayRefreshRate.value)) {
-        serviceManager.errorBadgeManager
+        serviceConnection.errorBadgeManager
             .incrementBadgeCount(PerformanceScreen.id);
       }
     }

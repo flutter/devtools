@@ -82,6 +82,18 @@ void select(
   );
 }
 
+void impression(
+  String screenName,
+  String item, {
+  ScreenAnalyticsMetrics Function()? screenMetricsProvider,
+}) {
+  _log.fine(
+    'Event: impression('
+    'screenName:$screenName, '
+    'item:$item)',
+  );
+}
+
 void reportError(
   String errorMessage, {
   bool fatal = false,

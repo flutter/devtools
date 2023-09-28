@@ -66,7 +66,8 @@ class DartIOHttpRequestData extends NetworkRequest {
     try {
       if (isFetchingFullData) return; // We are already fetching
       isFetchingFullData = true;
-      final updated = await serviceManager.service!.getHttpProfileRequest(
+      final updated =
+          await serviceConnection.serviceManager.service!.getHttpProfileRequest(
         _request.isolateId,
         _request.id.toString(),
       );

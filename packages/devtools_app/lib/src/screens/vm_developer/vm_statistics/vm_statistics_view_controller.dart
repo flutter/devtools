@@ -5,12 +5,12 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart' hide VmService;
 
 import '../../../service/vm_service_wrapper.dart';
 import '../../../shared/globals.dart';
-import '../../../shared/primitives/auto_dispose.dart';
 
 class VMStatisticsViewController extends DisposableController {
   VMStatisticsViewController() {
@@ -37,7 +37,7 @@ class VMStatisticsViewController extends DisposableController {
   ValueListenable<bool> get refreshing => _refreshing;
   final _refreshing = ValueNotifier<bool>(true);
 
-  VmServiceWrapper get _service => serviceManager.service!;
+  VmServiceWrapper get _service => serviceConnection.serviceManager.service!;
 
   VM? get vm => _vm;
   VM? _vm;
