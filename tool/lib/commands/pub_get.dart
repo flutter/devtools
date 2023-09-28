@@ -42,7 +42,7 @@ class PubGetCommand extends Command {
     }
 
     final log = Logger.standard();
-    final repo = DevToolsRepo.getInstance()!;
+    final repo = DevToolsRepo.requireInstance();
     final packages = repo.getPackages();
 
     final upgrade = argResults![_upgradeFlag];

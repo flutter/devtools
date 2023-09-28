@@ -135,5 +135,5 @@ extension DevToolsProcessManagerExtension on ProcessManager {
 }
 
 String pathFromRepoRoot(String pathFromRoot) {
-  return path.join(DevToolsRepo.getInstance()!.repoPath, pathFromRoot);
+  return path.join(DevToolsRepo.requireInstance().repoPath, pathFromRoot);
 }
