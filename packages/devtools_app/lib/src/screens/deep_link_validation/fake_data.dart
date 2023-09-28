@@ -18,23 +18,23 @@ final allLinkDatas = <LinkData>[
   for (var path in paths)
     LinkData(
       os: ['Android', 'iOS'],
-      domain: 'm.shopping.com',
-      path: path,
+      domain: ['m.shopping.com'],
+      path: [path],
       domainError: true,
       pathError: path.contains('shoe'),
     ),
   for (var path in paths)
     LinkData(
       os: ['iOS'],
-      domain: 'm.french.shopping.com',
-      path: path,
+      domain: ['m.french.shopping.com'],
+      path: [path],
       pathError: path.contains('shoe'),
     ),
   for (var path in paths)
     LinkData(
       os: ['Android'],
-      domain: 'm.chinese.shopping.com',
-      path: path,
+      domain: ['m.chinese.shopping.com'],
+      path: [path],
       pathError: path.contains('shoe'),
     ),
 ];

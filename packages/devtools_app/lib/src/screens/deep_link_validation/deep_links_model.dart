@@ -24,8 +24,8 @@ class LinkData with SearchableDataMixin {
     this.pathError = false,
   });
 
-  final String path;
-  final String domain;
+  final List<String> path;
+  final List<String> domain;
   final List<String> os;
   final List<String> scheme;
   final bool domainError;
@@ -33,12 +33,34 @@ class LinkData with SearchableDataMixin {
 
   @override
   bool matchesSearchToken(RegExp regExpSearch) {
-    return (domain.caseInsensitiveContains(regExpSearch) == true) ||
-        (path.caseInsensitiveContains(regExpSearch) == true);
+    return (domain.join().caseInsensitiveContains(regExpSearch) == true) ||
+        (path.join().caseInsensitiveContains(regExpSearch) == true);
   }
 
   @override
   String toString() => 'LinkData($domain $path)';
+
+  LinkData mergePath(LinkData? linkdata) {
+    if (linkdata == null) return this;
+    assert(domain.single == linkdata.domain.single);
+    return LinkData(
+      domain: domain,
+      path: [...path, ...linkdata.path],
+      os: os,
+      domainError: domainError,
+    );
+  }
+
+  LinkData mergeDomain(LinkData? linkdata) {
+    if (linkdata == null) return this;
+    assert(path.single == linkdata.path.single);
+    return LinkData(
+      domain: [...domain, ...linkdata.domain],
+      path: path,
+      os: os,
+      domainError: domainError,
+    );
+  }
 }
 
 class _ErrorAwareText extends StatelessWidget {
@@ -84,7 +106,7 @@ class DomainColumn extends ColumnData<LinkData>
   bool get supportsSorting => true;
 
   @override
-  String getValue(LinkData dataObject) => dataObject.domain;
+  String getValue(LinkData dataObject) => dataObject.domain.single;
 
   @override
   Widget build(
@@ -95,7 +117,7 @@ class DomainColumn extends ColumnData<LinkData>
   }) {
     return _ErrorAwareText(
       isError: dataObject.domainError,
-      text: dataObject.domain,
+      text: dataObject.domain.single,
     );
   }
 }
@@ -112,7 +134,7 @@ class PathColumn extends ColumnData<LinkData>
   bool get supportsSorting => true;
 
   @override
-  String getValue(LinkData dataObject) => dataObject.path;
+  String getValue(LinkData dataObject) => dataObject.path.first;
 
   @override
   Widget build(
@@ -123,9 +145,31 @@ class PathColumn extends ColumnData<LinkData>
   }) {
     return _ErrorAwareText(
       isError: dataObject.pathError,
-      text: dataObject.path,
+      text: dataObject.path.first,
     );
   }
+}
+
+class NumberOfAssociatedPathColumn extends ColumnData<LinkData> {
+  NumberOfAssociatedPathColumn()
+      : super(
+          'Number of associated path',
+          fixedWidthPx: scaleByFontFactor(kDeeplinkTableCellDefaultWidth),
+        );
+
+  @override
+  String getValue(LinkData dataObject) => dataObject.path.length.toString();
+}
+
+class NumberOfAssociatedDomainColumn extends ColumnData<LinkData> {
+  NumberOfAssociatedDomainColumn()
+      : super(
+          'Number of associated domain',
+          fixedWidthPx: scaleByFontFactor(kDeeplinkTableCellDefaultWidth),
+        );
+
+  @override
+  String getValue(LinkData dataObject) => dataObject.domain.length.toString();
 }
 
 class SchemeColumn extends ColumnData<LinkData> {
@@ -192,7 +236,7 @@ class StatusColumn extends ColumnData<LinkData>
   }
 }
 
-// TODO: implement this column.
+// TODO: Implement this column.
 class NavigationColumn extends ColumnData<LinkData>
     implements ColumnRenderer<LinkData> {
   NavigationColumn()

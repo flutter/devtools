@@ -15,6 +15,8 @@ import '../../shared/utils.dart';
 import 'deep_links_controller.dart';
 import 'deep_links_model.dart';
 
+const double _kNotificationCardWidth = 475;
+
 enum TableViewType {
   domainView,
   pathView,
@@ -70,10 +72,24 @@ class _DeepLinkPageState extends State<DeepLinkPage>
         children: [
           AreaPaneHeader(
             title: Text(
-              'All deep links',
+              'Validate and fix',
               style: Theme.of(context).textTheme.bodyLarge,
             ),
-            actions: [
+          ),
+          ValueListenableBuilder<int>(
+            valueListenable: controller.domainErrorCountNotifier,
+            builder: (context, domainErrorCount, _) =>
+                _NotificationCard(domainErrorCount: domainErrorCount),
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'All deep links',
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+              ),
+              const SizedBox(width: denseSpacing),
               SizedBox(
                 width: wideSearchFieldWidth,
                 child: DevToolsClearableTextField(
@@ -193,8 +209,15 @@ class _DataTable extends StatelessWidget {
       dataKey: 'deep-links',
       autoScrollContent: true,
       columns: <ColumnData>[
-        if (tableView != TableViewType.pathView) domain,
-        if (tableView != TableViewType.domainView) path,
+        if (tableView == TableViewType.domainView) ...[
+          domain,
+          NumberOfAssociatedPathColumn(),
+        ],
+        if (tableView == TableViewType.pathView) ...[
+          path,
+          NumberOfAssociatedDomainColumn(),
+        ],
+        if (tableView == TableViewType.singleUrlView) ...[domain, path],
         SchemeColumn(),
         OSColumn(),
         if (!controller.showSpitScreen) ...[
@@ -306,6 +329,49 @@ class _DomainCheckTable extends StatelessWidget {
             ],
           ),
       ],
+    );
+  }
+}
+
+class _NotificationCard extends StatelessWidget {
+  const _NotificationCard({
+    required this.domainErrorCount,
+  });
+
+  final int domainErrorCount;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    return SizedBox(
+      width: _kNotificationCardWidth,
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(defaultSpacing),
+          child: Wrap(
+            children: [
+              Icon(Icons.error, color: colorScheme.error),
+              const SizedBox(width: denseSpacing),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('$domainErrorCount domain not verified'),
+                  Text(
+                    '(Placeholder) This affects all deep links. Fix issues to make users go directly to your app.',
+                    style: textTheme.bodyMedium,
+                  ),
+                  TextButton(
+                    // TODO: Implement this.
+                    onPressed: () {},
+                    child: const Text('Fix domain'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

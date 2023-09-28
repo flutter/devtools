@@ -13,7 +13,8 @@ class DeepLinksController {
   List<LinkData> get getLinkDatasByPath {
     final linkDatasByPath = <String, LinkData>{};
     for (var linkData in linkDatasNotifier.value) {
-      linkDatasByPath[linkData.path] = linkData;
+      linkDatasByPath[linkData.path.single] =
+          linkData.mergeDomain(linkDatasByPath[linkData.path.single]);
     }
     return linkDatasByPath.values.toList();
   }
@@ -21,14 +22,21 @@ class DeepLinksController {
   List<LinkData> get getLinkDatasByDomain {
     final linkDatasByDomain = <String, LinkData>{};
     for (var linkData in linkDatasNotifier.value) {
-      linkDatasByDomain[linkData.domain] = linkData;
+      linkDatasByDomain[linkData.domain.single] =
+          linkData.mergePath(linkDatasByDomain[linkData.domain.single]);
     }
-    return linkDatasByDomain.values.toList();
+    final List<LinkData> linkDatasByDomainValues =
+        linkDatasByDomain.values.toList();
+    domainErrorCountNotifier.value =
+        linkDatasByDomainValues.where((element) => element.domainError).length;
+    return linkDatasByDomainValues;
   }
+
 
   final selectedLink = ValueNotifier<LinkData?>(null);
   final linkDatasNotifier = ValueNotifier<List<LinkData>>(allLinkDatas);
   final showSpitScreenNotifier = ValueNotifier<bool>(false);
+  final domainErrorCountNotifier = ValueNotifier<int>(0);
 
   final _searchContentNotifier = ValueNotifier<String>('');
 
