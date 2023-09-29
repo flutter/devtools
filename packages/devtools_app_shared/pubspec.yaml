@@ -53,6 +53,9 @@ flutter:
         weight: 500
       - asset: fonts/Roboto_Mono/RobotoMono-Bold.ttf
         weight: 700
+  - family: Noto
+      fonts:
+        - asset: fonts/Noto/NotoMusic-Regular.ttf
 
 dependency_overrides:
   devtools_shared:

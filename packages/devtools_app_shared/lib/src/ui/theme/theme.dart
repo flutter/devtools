@@ -362,6 +362,7 @@ extension ThemeDataExtension on ThemeData {
           // Slightly smaller for fixes font text since it will appear larger
           // to begin with.
           fontSize: defaultFontSize - 1,
+          fontFamilyFallback: ['Noto'],
         ),
       );
 
