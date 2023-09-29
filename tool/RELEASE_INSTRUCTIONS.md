@@ -28,8 +28,20 @@ Make sure:
 
 > If you need to install the [Github CLI](https://cli.github.com/manual/installation) you can run: `brew install gh`
 
-> Ensure the `devtools_tool` executable has been globally activated:
-> `flutter pub global activate --source path tool`
+- Ensure that you have access to `devtools_tool` by adding the `tool/bin` folder to your `PATH` environment variable
+  - **MacOS Users**
+    - add the following to your `~/.bashrc` file.
+    - `export PATH=$PATH:<DEVTOOLS_DIR>/tool/bin`
+      > [!NOTE]  
+      > Replace `<DEVTOOLS_DIR>` with the local path to your DevTools
+      > repo path.
+  - **Windows Users**
+    - Open "Edit environment variables for your account" from Control Panel
+    - Locate the `Path` variable and click **Edit**
+    - Click the **New** button and paste in `<DEVTOOLS_DIR>/tool/bin`
+      > [!NOTE]  
+      > Replace `<DEVTOOLS_DIR>` with the local path to your DevTools
+      > repo path.
 
 - Run: `devtools_tool release-helper`
 - This will create a PR for you using the tip of master.
@@ -95,6 +107,9 @@ Receive an LGTM for the PR, squash and commit.
 
 On each DevTools commit, DevTools is built and uploaded to CIPD. You can check the
 status of the builds on this [dashboard](https://ci.chromium.org/ui/p/dart-internal/builders/flutter/devtools). Within minutes, a build should be uploaded for the commit you just merged and tagged.
+
+> [!NOTE]  
+> If the CIPD build times out, instructions for re-triggering can be found at [go/dart-engprod/release.md](go/dart-engprod/release.md)
 
 ### Update the DevTools hash in the Dart SDK
 
