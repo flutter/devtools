@@ -28,22 +28,20 @@ Make sure:
 
 > If you need to install the [Github CLI](https://cli.github.com/manual/installation) you can run: `brew install gh`
 
-- Ensure that you have access to `devtools_tool`
-  - For MacOS Users
-    - Ensure the `devtools_tool` executable is in your path:
-      - add the following to your `~/.bashrc` file.
-        - `export PATH=$PATH:<DEVTOOLS_DIR>/tool/bin`
-          > [!NOTE]  
-          > Replace `<DEVTOOLS_DIR>` with the local path to your DevTools
-          > repo path.
-  - For Windows Users
-    - Ensure the `devtools_tool` executable has been globally activated:
-      - `flutter pub global activate --source path tool`
-        > [!WARNING]  
-        > Always do this activation step before running
-        > `devtools_tool`. If there have been changes to the tool since the
-        > last time you have run the activate, then it needs to be rerun to
-        > pick up those changes.
+- Ensure that you have access to `devtools_tool` by adding the `tool/bin` folder to your `PATH` environment variable
+  - **MacOS Users**
+    - add the following to your `~/.bashrc` file.
+    - `export PATH=$PATH:<DEVTOOLS_DIR>/tool/bin`
+      > [!NOTE]  
+      > Replace `<DEVTOOLS_DIR>` with the local path to your DevTools
+      > repo path.
+  - **Windows Users**
+    - Open "Edit environment variables for your account" from Control Panel
+    - Locate the `Path` variable and click **Edit**
+    - Click the **New** button and paste in `<DEVTOOLS_DIR>/tool/bin`
+      > [!NOTE]  
+      > Replace `<DEVTOOLS_DIR>` with the local path to your DevTools
+      > repo path.
 
 - Run: `devtools_tool release-helper`
 - This will create a PR for you using the tip of master.
