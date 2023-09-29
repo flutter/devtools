@@ -1265,7 +1265,7 @@ class _LineItemState extends State<LineItem>
         _searchMatchAwareLineContents(activeSearchAwareContents!);
     return TextSpan(
       children: allSearchAwareContents,
-      style: widget.lineContents.style,
+      style: widget.lineContents.style?.copyWith(fontFamilyFallback: ['Noto']),
     );
   }
 
@@ -1289,7 +1289,7 @@ class _LineItemState extends State<LineItem>
         contentsWithMatch.add(
           TextSpan(
             text: spanText.substring(0, matchStartInSpan),
-            style: span.style,
+            style: span.style?.copyWith(fontFamilyFallback: ['Noto']),
           ),
         );
 
@@ -1297,6 +1297,7 @@ class _LineItemState extends State<LineItem>
             (span.style ?? DefaultTextStyle.of(context).style).copyWith(
           color: Colors.black,
           backgroundColor: matchColor,
+          fontFamilyFallback: ['Noto'],
         );
 
         if (matchEndInSpan <= spanText.length) {
@@ -1313,7 +1314,7 @@ class _LineItemState extends State<LineItem>
             if (trailingText.isNotEmpty)
               TextSpan(
                 text: spanText.substring(matchEndInSpan),
-                style: span.style,
+                style: span.style?.copyWith(fontFamilyFallback: ['Noto']),
               ),
           ]);
         } else {

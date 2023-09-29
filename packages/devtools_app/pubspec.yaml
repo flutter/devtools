@@ -163,6 +163,9 @@ flutter:
     - family: Octicons
       fonts:
         - asset: fonts/Octicons.ttf
+    - family: Noto
+      fonts:
+        - asset: fonts/Noto/NotoMusic-Regular.ttf
     - family: Codicon
       fonts:
         - asset: packages/codicon/font/codicon.ttf
