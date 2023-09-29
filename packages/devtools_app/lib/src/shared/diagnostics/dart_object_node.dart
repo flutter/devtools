@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -387,7 +388,7 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     if (ref?.instanceRef == null) {
       return false;
     }
-    final inspectorService = serviceManager.inspectorService;
+    final inspectorService = serviceConnection.inspectorService;
     if (inspectorService == null) {
       return false;
     }
@@ -411,7 +412,7 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     if (_isInspectable != null) return _isInspectable!;
 
     if (ref == null) return false;
-    final inspectorService = serviceManager.inspectorService;
+    final inspectorService = serviceConnection.inspectorService;
     if (inspectorService == null) {
       return false;
     }

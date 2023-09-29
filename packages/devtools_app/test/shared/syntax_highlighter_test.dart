@@ -8,10 +8,10 @@ import 'dart:io';
 
 import 'package:devtools_app/src/screens/debugger/span_parser.dart';
 import 'package:devtools_app/src/screens/debugger/syntax_highlighter.dart';
-import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/routing.dart';
-import 'package:devtools_app/src/shared/theme.dart';
+import 'package:devtools_app/src/shared/ui/colors.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';

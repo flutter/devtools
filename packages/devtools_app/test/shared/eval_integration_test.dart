@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/shared/eval_on_dart_library.dart';
 import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app_shared/service.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../test_infra/flutter_test_driver.dart';
@@ -30,7 +30,11 @@ void main() {
       'getHashCode',
       () async {
         await env.setupEnvironment();
-        final eval = EvalOnDartLibrary('dart:core', serviceManager.service!);
+        final eval = EvalOnDartLibrary(
+          'dart:core',
+          serviceConnection.serviceManager.service!,
+          serviceManager: serviceConnection.serviceManager,
+        );
 
         final instance = await eval.safeEval('42', isAlive: isAlive);
 
@@ -50,7 +54,8 @@ void main() {
 
           final eval = EvalOnDartLibrary(
             'dart:core',
-            serviceManager.service!,
+            serviceConnection.serviceManager.service!,
+            serviceManager: serviceConnection.serviceManager,
           );
 
           final instance = (await eval.asyncEval('42', isAlive: isAlive))!;
@@ -67,12 +72,14 @@ void main() {
         'returns the result of the future completion',
         () async {
           await env.setupEnvironment();
-          final mainIsolate = serviceManager.isolateManager.mainIsolate;
+          final mainIsolate =
+              serviceConnection.serviceManager.isolateManager.mainIsolate;
           expect(mainIsolate, isNotNull);
 
           final eval = EvalOnDartLibrary(
             'dart:core',
-            serviceManager.service!,
+            serviceConnection.serviceManager.service!,
+            serviceManager: serviceConnection.serviceManager,
             isolate: mainIsolate,
           );
 
@@ -94,7 +101,8 @@ void main() {
 
           final eval = EvalOnDartLibrary(
             'dart:core',
-            serviceManager.service!,
+            serviceConnection.serviceManager.service!,
+            serviceManager: serviceConnection.serviceManager,
           );
 
           final instance = await eval

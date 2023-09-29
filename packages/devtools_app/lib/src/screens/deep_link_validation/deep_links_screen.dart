@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/common_widgets.dart';
-import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/screen.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
-import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import 'deep_links_controller.dart';
 import 'deep_links_model.dart';
@@ -24,14 +24,7 @@ enum TableViewType {
 }
 
 class DeepLinksScreen extends Screen {
-  DeepLinksScreen()
-      : super.conditional(
-          id: id,
-          requiresConnection: false,
-          requiresDartVm: true,
-          title: ScreenMetaData.deepLinks.title,
-          icon: ScreenMetaData.deepLinks.icon,
-        );
+  DeepLinksScreen() : super.fromMetaData(ScreenMetaData.deepLinks);
 
   static final id = ScreenMetaData.deepLinks.id;
 

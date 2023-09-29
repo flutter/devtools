@@ -5,13 +5,13 @@
 import 'package:devtools_app/src/screens/debugger/codeview_controller.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/console/primitives/eval_history.dart';
-import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
 
 void main() {
-  setGlobal(ServiceConnectionManager, FakeServiceManager());
+  setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
 
   group('ScriptsHistory', () {
     late ScriptsHistory history;

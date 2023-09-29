@@ -4,7 +4,8 @@
 
 import 'dart:async';
 
-import 'package:devtools_shared/devtools_shared.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
@@ -14,10 +15,9 @@ import '../shared/common_widgets.dart';
 import '../shared/config_specific/import_export/import_export.dart';
 import '../shared/framework_controller.dart';
 import '../shared/globals.dart';
-import '../shared/primitives/auto_dispose.dart';
 import '../shared/primitives/utils.dart';
 import '../shared/routing.dart';
-import '../shared/theme.dart';
+import '../shared/ui/colors.dart';
 import 'framework_core.dart';
 
 final _log = Logger('initializer');
@@ -62,7 +62,7 @@ class _InitializerState extends State<Initializer>
   ///
   /// This is a method and not a getter to communicate that its value may
   /// change between successive calls.
-  bool _checkLoaded() => serviceManager.hasConnection;
+  bool _checkLoaded() => serviceConnection.serviceManager.hasConnection;
 
   OverlayEntry? currentDisconnectedOverlay;
 
@@ -76,8 +76,9 @@ class _InitializerState extends State<Initializer>
 
     // If we become disconnected by means other than a manual disconnect action,
     // attempt to reconnect.
-    addAutoDisposeListener(serviceManager.connectedState, () {
-      final connectionState = serviceManager.connectedState.value;
+    addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
+      final connectionState =
+          serviceConnection.serviceManager.connectedState.value;
       if (connectionState.connected) {
         setState(() {});
       } else if (!connectionState.userInitiatedConnectionState) {
@@ -128,17 +129,9 @@ class _InitializerState extends State<Initializer>
       return;
     }
 
-    errorReporter ??= (String message, Object error) {
-      notificationService.pushError(
-        '$message, $error',
-        isReportable: false,
-      );
-    };
-
-    final uri = normalizeVmServiceUri(widget.url!);
     final connected = await FrameworkCore.initVmService(
       '',
-      explicitUri: uri,
+      serviceUriAsString: widget.url!,
       errorReporter: errorReporter,
       logException: logException,
     );
@@ -160,13 +153,17 @@ class _InitializerState extends State<Initializer>
         );
         Overlay.of(context).insert(_createDisconnectedOverlay());
 
-        addAutoDisposeListener(serviceManager.connectedState, () {
-          final connectedState = serviceManager.connectedState.value;
-          if (connectedState.connected) {
-            // Hide the overlay if we become reconnected.
-            hideDisconnectedOverlay();
-          }
-        });
+        addAutoDisposeListener(
+          serviceConnection.serviceManager.connectedState,
+          () {
+            final connectedState =
+                serviceConnection.serviceManager.connectedState.value;
+            if (connectedState.connected) {
+              // Hide the overlay if we become reconnected.
+              hideDisconnectedOverlay();
+            }
+          },
+        );
       }
     });
   }

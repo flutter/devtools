@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
+
 /// Describes an extension that can be dynamically loaded into a custom screen
 /// in DevTools.
-class DevToolsExtensionConfig {
+class DevToolsExtensionConfig implements Comparable {
   DevToolsExtensionConfig._({
     required this.name,
     required this.path,
@@ -51,14 +53,14 @@ class DevToolsExtensionConfig {
           );
         }
         throw StateError(
-          'Unexpected value types in the extension config.json. Expected all '
+          'Unexpected value types in the extension config.yaml. Expected all '
           'values to be of type String, but one or more had a different type:\n'
           '${sb.toString()}',
         );
       } else {
         throw StateError(
           'Missing required fields ${diff.toString()} in the extension '
-          'config.json.',
+          'config.yaml.',
         );
       }
     }
@@ -99,7 +101,10 @@ class DevToolsExtensionConfig {
   /// [IconData] class for displaying in DevTools.
   ///
   /// This code point should be part of the 'MaterialIcons' font family.
+  /// See https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/material/icons.dart.
   final int materialIconCodePoint;
+
+  String get displayName => name.toLowerCase();
 
   Map<String, Object?> toJson() => {
         nameKey: name,
@@ -108,4 +113,58 @@ class DevToolsExtensionConfig {
         versionKey: version,
         materialIconCodePointKey: materialIconCodePoint,
       };
+
+  @override
+  // ignore: avoid-dynamic, avoids invalid_override error
+  int compareTo(other) {
+    final otherConfig = other as DevToolsExtensionConfig;
+    final compare = name.compareTo(otherConfig.name);
+    if (compare == 0) {
+      return path.compareTo(otherConfig.path);
+    }
+    return compare;
+  }
+
+  @override
+  bool operator ==(Object? other) {
+    return other is DevToolsExtensionConfig &&
+        other.name == name &&
+        other.path == path &&
+        other.issueTrackerLink == issueTrackerLink &&
+        other.version == version &&
+        other.materialIconCodePoint == materialIconCodePoint;
+  }
+
+  @override
+  int get hashCode => Object.hash(
+        name,
+        path,
+        issueTrackerLink,
+        version,
+        materialIconCodePoint,
+      );
+}
+
+/// Describes the enablement state of a DevTools extension.
+enum ExtensionEnabledState {
+  /// The extension has been enabled manually by the user.
+  enabled,
+
+  /// The extension has been disabled manually by the user.
+  disabled,
+
+  /// The extension has been neither enabled nor disabled by the user.
+  none,
+
+  /// Something went wrong with reading or writing the activation state.
+  ///
+  /// We should ignore extensions with this activation state.
+  error;
+
+  /// Parses [value] and returns the matching [ExtensionEnabledState] if found.
+  static ExtensionEnabledState from(String? value) {
+    return ExtensionEnabledState.values
+            .firstWhereOrNull((e) => e.name == value) ??
+        ExtensionEnabledState.none;
+  }
 }

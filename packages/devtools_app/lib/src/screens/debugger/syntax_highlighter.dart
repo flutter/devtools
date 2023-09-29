@@ -10,7 +10,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:logging/logging.dart';
 
 import '../../shared/primitives/utils.dart';
-import '../../shared/theme.dart';
+import '../../shared/ui/colors.dart';
 import 'span_parser.dart';
 
 final _log = Logger('syntax_highlighter');

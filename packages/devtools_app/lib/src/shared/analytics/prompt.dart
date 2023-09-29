@@ -4,11 +4,11 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import '../config_specific/launch_url/launch_url.dart';
-import '../theme.dart';
 import '../utils.dart';
 import 'analytics_controller.dart';
 
@@ -48,7 +48,7 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt>
       },
       child: Card(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(defaultBorderRadius),
+          borderRadius: defaultBorderRadius,
           side: BorderSide(
             color: theme.focusColor,
           ),

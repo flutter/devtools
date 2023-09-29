@@ -46,25 +46,25 @@
             "name": "memory/default",
             "request": "launch",
             "type": "dart",
-            "program": "devtools_app/test/test_infra/scenes/memory/default.stager_app.dart",
+            "program": "devtools_app/test/test_infra/scenes/memory/default.stager_app.g.dart",
         },
         {
             "name": "memory/diff_snapshot",
             "request": "launch",
             "type": "dart",
-            "program": "devtools_app/test/test_infra/scenes/memory/diff_snapshot.stager_app.dart",
+            "program": "devtools_app/test/test_infra/scenes/memory/diff_snapshot.stager_app.g.dart",
         },
         {
             "name": "performance/default",
             "request": "launch",
             "type": "dart",
-            "program": "devtools_app/test/test_infra/scenes/performance/default.stager_app.dart",
+            "program": "devtools_app/test/test_infra/scenes/performance/default.stager_app.g.dart",
         },
         {
             "name": "profiler/default",
             "request": "launch",
             "type": "dart",
-            "program": "devtools_app/test/test_infra/scenes/cpu_profiler/default.stager_app.dart",
+            "program": "devtools_app/test/test_infra/scenes/cpu_profiler/default.stager_app.g.dart",
         },
         {
             "name": "fixtures/flutter_app",
@@ -77,6 +77,12 @@
             "request": "launch",
             "type": "dart",
             "program": "devtools_app/test/test_infra/fixtures/memory_app/lib/main.dart",
+        },
+        {
+            "name": "standalone_ui/vs_code",
+            "request": "launch",
+            "type": "dart",
+            "program": "devtools_app/test/test_infra/scenes/standalone_ui/vs_code.stager_app.g.dart",
         },
         {
             "name": "attach",

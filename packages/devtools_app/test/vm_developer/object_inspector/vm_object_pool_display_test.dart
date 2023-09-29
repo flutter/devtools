@@ -6,6 +6,8 @@ import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/inbound_references_tree.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_object_pool_display.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_developer_common_widgets.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -84,7 +86,7 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          wrap(
+          wrapSimple(
             VmObjectPoolDisplay(
               objectPool: mockObjectPool,
               controller: ObjectInspectorViewController(),

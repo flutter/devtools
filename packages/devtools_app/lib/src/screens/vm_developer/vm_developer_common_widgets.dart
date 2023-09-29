@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -14,9 +16,7 @@ import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
-import '../../shared/split.dart';
 import '../../shared/table/table.dart';
-import '../../shared/theme.dart';
 import '../../shared/tree.dart';
 import '../debugger/codeview.dart';
 import '../debugger/codeview_controller.dart';
@@ -221,7 +221,7 @@ class RequestableSizeWidget extends StatelessWidget {
         } else {
           final size = sizeProvider();
           return size == null
-              ? DevToolsButton(
+              ? GaDevToolsButton(
                   icon: Icons.call_made,
                   label: 'Request',
                   outlined: false,

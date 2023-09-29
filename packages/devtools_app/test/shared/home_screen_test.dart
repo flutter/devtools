@@ -4,22 +4,24 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/ui/vm_flag_widgets.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 void main() {
-  late FakeServiceManager fakeServiceManager;
+  late FakeServiceConnectionManager fakeServiceConnection;
 
   group('home screen with no app connection', () {
     setUp(() {
       setGlobal(
         ServiceConnectionManager,
-        fakeServiceManager = FakeServiceManager(),
+        fakeServiceConnection = FakeServiceConnectionManager(),
       );
       setGlobal(IdeTheme, IdeTheme());
-      fakeServiceManager.hasConnection = false;
+      fakeServiceConnection.serviceManager.hasConnection = false;
     });
 
     testWidgetsWithWindowSize(
@@ -67,19 +69,21 @@ void main() {
 
   group('home screen with app connection', () {
     void initServiceManager() {
-      fakeServiceManager = FakeServiceManager();
-      when(fakeServiceManager.vm.version).thenReturn('1.9.1');
-      when(fakeServiceManager.vm.targetCPU).thenReturn('x64');
-      when(fakeServiceManager.vm.architectureBits).thenReturn(64);
-      when(fakeServiceManager.vm.operatingSystem).thenReturn('android');
-      final app = fakeServiceManager.connectedApp!;
+      fakeServiceConnection = FakeServiceConnectionManager();
+      when(fakeServiceConnection.serviceManager.vm.version).thenReturn('1.9.1');
+      when(fakeServiceConnection.serviceManager.vm.targetCPU).thenReturn('x64');
+      when(fakeServiceConnection.serviceManager.vm.architectureBits)
+          .thenReturn(64);
+      when(fakeServiceConnection.serviceManager.vm.operatingSystem)
+          .thenReturn('android');
+      final app = fakeServiceConnection.serviceManager.connectedApp!;
       mockConnectedApp(
         app,
         isFlutterApp: true,
         isProfileBuild: false,
         isWebApp: false,
       );
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(ServiceConnectionManager, fakeServiceConnection);
       setGlobal(IdeTheme, IdeTheme());
     }
 

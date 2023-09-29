@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../../../../../shared/common_widgets.dart';
-import '../../../../../../shared/split.dart';
 import '../../../../shared/heap/heap.dart';
 import '../../controller/class_data.dart';
 import 'path.dart';

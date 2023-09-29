@@ -6,6 +6,8 @@ import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/debugger/program_explorer.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/object_inspector_view.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/object_viewport.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -17,7 +19,7 @@ import '../vm_developer_test_utils.dart';
 void main() {
   late ObjectInspectorView objectInspector;
 
-  late FakeServiceManager fakeServiceManager;
+  late FakeServiceConnectionManager fakeServiceConnection;
 
   late MockScriptManager scriptManager;
 
@@ -25,7 +27,7 @@ void main() {
 
   setUp(() {
     objectInspector = ObjectInspectorView();
-    fakeServiceManager = FakeServiceManager();
+    fakeServiceConnection = FakeServiceConnectionManager();
     scriptManager = MockScriptManager();
 
     when(scriptManager.sortedScripts).thenReturn(
@@ -35,15 +37,17 @@ void main() {
     when(scriptManager.retrieveAndSortScripts(any)).thenAnswer(
       (_) => Future.value([testScript]),
     );
-    when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
-    when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
+    when(fakeServiceConnection.serviceManager.connectedApp!.isProfileBuildNow)
+        .thenReturn(false);
+    when(fakeServiceConnection.serviceManager.connectedApp!.isDartWebAppNow)
+        .thenReturn(false);
 
     setGlobal(
       DevToolsEnvironmentParameters,
       ExternalDevToolsEnvironmentParameters(),
     );
     setGlobal(PreferencesController, PreferencesController());
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
+    setGlobal(ServiceConnectionManager, fakeServiceConnection);
     setGlobal(ScriptManager, scriptManager);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());

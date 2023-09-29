@@ -6,23 +6,21 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../common_widgets.dart';
-import '../dialogs.dart';
-import '../primitives/auto_dispose.dart';
 import '../primitives/extent_delegate_list.dart';
 import '../primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
-import '../theme.dart';
 import '../ui/colors.dart';
 import '../ui/search.dart';
 import '../ui/utils.dart';
-import '../utils.dart';
 
 const double rowPadding = 2.0;
 // Flame chart rows contain text so are not readable if they do not scale with
@@ -1388,7 +1386,7 @@ class TimelineGridPainter extends FlameChartPainter {
       text: TextSpan(
         text: timestampText,
         style: TextStyle(
-          color: colorScheme.chartTextColor,
+          color: colorScheme.contrastTextColor,
           fontSize: defaultFontSize,
         ),
       ),

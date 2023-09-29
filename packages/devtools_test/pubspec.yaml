@@ -7,7 +7,7 @@ publish_to: none
 # When publishing new versions of this package be sure to publish a new version
 # of package:devtools as well. package:devtools contains a compiled snapshot of
 # this package.
-version: 2.26.0-dev.12
+version: 2.28.1
 
 repository: https://github.com/flutter/devtools/tree/master/packages/devtools_test
 
@@ -18,8 +18,10 @@ environment:
 dependencies:
   async: ^2.0.0
   collection: ^1.15.0
-  devtools_shared: 2.26.0-dev.12
-  devtools_app: 2.26.0-dev.12
+  devtools_shared: ^4.0.1
+  devtools_app: 2.28.1
+  devtools_app_shared:
+    path: ../devtools_app_shared
   flutter:
     sdk: flutter
   flutter_test:
@@ -27,13 +29,17 @@ dependencies:
   mockito: ^5.4.1
   path: ^1.8.0
   provider: ^6.0.2
-  vm_service: ">=10.1.0 <12.0.0"
+  vm_service: ^11.10.0
   vm_snapshot_analysis: ^0.7.1
   webkit_inspection_protocol: '>=0.5.0 <2.0.0'
 
 dependency_overrides:
   devtools_app:
     path: ../devtools_app
+  devtools_app_shared:
+    path: ../devtools_app_shared
+  devtools_extensions:
+    path: ../devtools_extensions
   devtools_shared:
     path: ../devtools_shared
 

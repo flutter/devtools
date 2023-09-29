@@ -4,6 +4,8 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/editable_list.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -28,7 +30,7 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          wrap(
+          wrapSimple(
             EditableList(
               entries: entries([]),
               textFieldLabel: label,
@@ -57,7 +59,7 @@ void main() {
           gaScreen: '',
         );
         await tester.pumpWidget(
-          wrap(widget),
+          wrapSimple(widget),
         );
 
         final actionBar = find.byType(EditableListActionBar);
@@ -92,7 +94,7 @@ void main() {
           gaScreen: '',
         );
         await tester.pumpWidget(
-          wrap(widget),
+          wrapSimple(widget),
         );
         final refreshButton = find.byType(RefreshButton);
 
@@ -119,7 +121,7 @@ void main() {
           gaScreen: '',
         );
         await tester.pumpWidget(
-          wrap(widget),
+          wrapSimple(widget),
         );
         final removeButton = find.byType(EditableListRemoveDirectoryButton);
 
@@ -148,7 +150,7 @@ void main() {
           gaScreen: '',
         );
         await tester.pumpWidget(
-          wrap(widget),
+          wrapSimple(widget),
         );
         final copyButton = find.byType(EditableListCopyDirectoryButton);
 
@@ -173,7 +175,7 @@ void main() {
             gaScreen: '',
           );
           await tester.pumpWidget(
-            wrap(widget),
+            wrapSimple(widget),
           );
 
           final actionBar = find.byType(EditableListActionBar);
@@ -206,7 +208,7 @@ void main() {
             gaScreen: '',
           );
           await tester.pumpWidget(
-            wrap(widget),
+            wrapSimple(widget),
           );
           final removeButton = find.byType(EditableListRemoveDirectoryButton);
 

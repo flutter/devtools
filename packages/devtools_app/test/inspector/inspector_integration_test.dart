@@ -26,7 +26,7 @@ void main() {
   );
 
   env.afterEverySetup = () async {
-    final service = serviceManager.inspectorService;
+    final service = serviceConnection.inspectorService;
     if (env.reuseTestEnvironment) {
       // Ensure the previous test did not set the selection on the device.
       // TODO(jacobr): add a proper method to WidgetInspectorService that does
@@ -59,8 +59,8 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         await env.setupEnvironment();
-        expect(serviceManager.service, equals(env.service));
-        expect(serviceManager.isolateManager, isNotNull);
+        expect(serviceConnection.serviceManager.service, equals(env.service));
+        expect(serviceConnection.serviceManager.isolateManager, isNotNull);
 
         final screen = InspectorScreen();
         await tester.pumpWidget(
@@ -354,13 +354,13 @@ void main() {
 
       /// After the hot restart some existing calls to the vm service may
       /// timeout and that is ok.
-      serviceManager.service.doNotWaitForPendingFuturesBeforeExit();
+      serviceManager.manager.service.doNotWaitForPendingFuturesBeforeExit();
 
       await serviceManager.performHotRestart();
       // The isolate starts out paused on a hot restart so we have to resume
       // it manually to make the test pass.
 
-      await serviceManager.service
+      await serviceManager.manager.service
           .resume(serviceManager.isolateManager.selectedIsolate.id);
 
       // First UI transition is to an empty tree.
@@ -414,8 +414,8 @@ void main() {
             entryScript: 'lib/overflow_errors.dart',
           ),
         );
-        expect(serviceManager.service, equals(env.service));
-        expect(serviceManager.isolateManager, isNotNull);
+        expect(serviceConnection.serviceManager.service, equals(env.service));
+        expect(serviceConnection.serviceManager.isolateManager, isNotNull);
 
         final screen = InspectorScreen();
         await tester.pumpWidget(

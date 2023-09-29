@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:devtools_app_shared/service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -13,13 +14,11 @@ import '../../../../devtools.dart';
 import '../../analytics/analytics.dart' as ga;
 import '../../analytics/constants.dart' as gac;
 import '../../common_widgets.dart';
-import '../../connected_app.dart';
 import '../../file_import.dart';
 import '../../globals.dart';
 import '../../primitives/simple_items.dart';
 import '../../primitives/utils.dart';
 import '../../screen.dart';
-import '../../theme.dart';
 import '_export_stub.dart'
     if (dart.library.html) '_export_web.dart'
     if (dart.library.io) '_export_desktop.dart';
@@ -162,8 +161,8 @@ abstract class ExportController {
     final contents = {
       DevToolsExportKeys.devToolsSnapshot.name: true,
       DevToolsExportKeys.devToolsVersion.name: version,
-      DevToolsExportKeys.connectedApp.name:
-          connectedApp?.toJson() ?? serviceManager.connectedApp!.toJson(),
+      DevToolsExportKeys.connectedApp.name: connectedApp?.toJson() ??
+          serviceConnection.serviceManager.connectedApp!.toJson(),
       ...offlineScreenData,
     };
     final activeScreenId = contents[DevToolsExportKeys.activeScreenId.name];
@@ -187,32 +186,16 @@ abstract class ExportController {
   }
 }
 
-class ImportToolbarAction extends StatelessWidget {
-  const ImportToolbarAction({super.key, this.color});
+class ImportToolbarAction extends ScaffoldAction {
+  ImportToolbarAction({super.key, Color? color})
+      : super(
+          icon: Icons.upload_rounded,
+          tooltip: 'Load data for viewing in DevTools.',
+          color: color,
+          onPressed: (context) => unawaited(_importFile(context)),
+        );
 
-  final Color? color;
-
-  @override
-  Widget build(BuildContext context) {
-    return DevToolsTooltip(
-      message: 'Load data for viewing in DevTools.',
-      child: InkWell(
-        onTap: () => unawaited(_importFile(context)),
-        child: Container(
-          width: actionWidgetSize,
-          height: actionWidgetSize,
-          alignment: Alignment.center,
-          child: Icon(
-            Icons.upload_rounded,
-            size: actionsIconSize,
-            color: color,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _importFile(BuildContext context) async {
+  static Future<void> _importFile(BuildContext context) async {
     ga.select(
       gac.devToolsMain,
       gac.importFile,
