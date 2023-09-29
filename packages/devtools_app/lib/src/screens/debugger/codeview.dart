@@ -1265,7 +1265,7 @@ class _LineItemState extends State<LineItem>
         _searchMatchAwareLineContents(activeSearchAwareContents!);
     return TextSpan(
       children: allSearchAwareContents,
-      style: widget.lineContents.style?.copyWith(fontFamilyFallback: ['Noto']),
+      style: widget.lineContents.style,
     );
   }
 

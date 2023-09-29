@@ -275,6 +275,7 @@ const densePadding = 4.0;
 const noPadding = 0.0;
 
 const defaultScrollBarOffset = 10.0;
+const fallbackFonts = ['Noto'];
 
 // Other UI related constants:
 final defaultBorderRadius = BorderRadius.circular(_defaultBorderRadiusValue);
@@ -344,6 +345,7 @@ extension ThemeDataExtension on ThemeData {
         TextStyle(
           color: colorScheme.onSurface,
           fontSize: defaultFontSize,
+          fontFamilyFallback: fallbackFonts,
         ),
       );
 
@@ -353,6 +355,7 @@ extension ThemeDataExtension on ThemeData {
   TextStyle get subtleTextStyle => fixBlurryText(
         TextStyle(
           color: colorScheme.subtleTextColor,
+          fontFamilyFallback: fallbackFonts,
         ),
       );
 
@@ -363,6 +366,7 @@ extension ThemeDataExtension on ThemeData {
           // Slightly smaller for fixes font text since it will appear larger
           // to begin with.
           fontSize: defaultFontSize - 1,
+          fontFamilyFallback: fallbackFonts,
         ),
       );
 
@@ -387,6 +391,7 @@ extension ThemeDataExtension on ThemeData {
           color: colorScheme._devtoolsLink,
           decoration: TextDecoration.underline,
           fontSize: defaultFontSize,
+          fontFamilyFallback: fallbackFonts,
         ),
       );
 
@@ -394,6 +399,7 @@ extension ThemeDataExtension on ThemeData {
         TextStyle(
           color: colorScheme._chartSubtleColor,
           fontSize: smallFontSize,
+          fontFamilyFallback: fallbackFonts,
         ),
       );
 
@@ -401,6 +407,7 @@ extension ThemeDataExtension on ThemeData {
         const TextStyle(
           color: Colors.black,
           backgroundColor: activeSearchMatchColor,
+          fontFamilyFallback: fallbackFonts,
         ),
       );
 
@@ -408,6 +415,7 @@ extension ThemeDataExtension on ThemeData {
         const TextStyle(
           color: Colors.black,
           backgroundColor: searchMatchColor,
+          fontFamilyFallback: fallbackFonts,
         ),
       );
 
@@ -416,6 +424,7 @@ extension ThemeDataExtension on ThemeData {
           fontWeight: FontWeight.normal,
           fontSize: smallFontSize,
           decoration: TextDecoration.none,
+          fontFamilyFallback: fallbackFonts,
         ),
       );
 }
