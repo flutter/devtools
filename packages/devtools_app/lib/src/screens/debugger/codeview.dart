@@ -1289,7 +1289,7 @@ class _LineItemState extends State<LineItem>
         contentsWithMatch.add(
           TextSpan(
             text: spanText.substring(0, matchStartInSpan),
-            style: span.style?.copyWith(fontFamilyFallback: ['Noto']),
+            style: span.style,
           ),
         );
 
@@ -1297,7 +1297,6 @@ class _LineItemState extends State<LineItem>
             (span.style ?? DefaultTextStyle.of(context).style).copyWith(
           color: Colors.black,
           backgroundColor: matchColor,
-          fontFamilyFallback: ['Noto'],
         );
 
         if (matchEndInSpan <= spanText.length) {
@@ -1314,7 +1313,7 @@ class _LineItemState extends State<LineItem>
             if (trailingText.isNotEmpty)
               TextSpan(
                 text: spanText.substring(matchEndInSpan),
-                style: span.style?.copyWith(fontFamilyFallback: ['Noto']),
+                style: span.style,
               ),
           ]);
         } else {

@@ -74,10 +74,7 @@ class DebuggerScreen extends Screen {
       const FixedValueListenable<bool>(true);
 
   @override
-  Widget build(BuildContext context) => const DefaultTextStyle(
-        style: TextStyle(fontFamilyFallback: ['Noto']),
-        child: _DebuggerScreenBodyWrapper(),
-      );
+  Widget build(BuildContext context) => const _DebuggerScreenBodyWrapper();
 
   @override
   Widget buildStatus(BuildContext context) {
