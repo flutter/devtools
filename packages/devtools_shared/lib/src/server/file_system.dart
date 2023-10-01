@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
@@ -39,6 +40,40 @@ class LocalFileSystem {
   /// Creates the ~/.flutter-devtools directory if it does not already exist.
   static void ensureDevToolsDirectory() {
     Directory('${devToolsDir()}').createSync();
+  }
+
+  /// Returns a DevTools file from the given path.
+  ///
+  /// Only files within ~/.flutter-devtools/ can be accessed.
+  static File? devToolsFileFromPath(String pathFromDevToolsDir) {
+    if (pathFromDevToolsDir.contains('..')) {
+      // The passed in path should not be able to walk up the directory tree
+      // outside of the ~/.flutter-devtools/ directory.
+      return null;
+    }
+
+    ensureDevToolsDirectory();
+    final file = File(path.join(devToolsDir(), pathFromDevToolsDir));
+    if (!file.existsSync()) {
+      return null;
+    }
+    return file;
+  }
+
+  /// Returns a DevTools file from the given path as encoded json.
+  ///
+  /// Only files within ~/.flutter-devtools/ can be accessed.
+  static String? devToolsFileAsJson(String pathFromDevToolsDir) {
+    final file = devToolsFileFromPath(pathFromDevToolsDir);
+    if (file == null) return null;
+
+    final fileName = path.basename(file.path);
+    if (!fileName.endsWith('.json')) return null;
+
+    final content = file.readAsStringSync();
+    final json = jsonDecode(content);
+    json['lastModifiedTime'] = file.lastModifiedSync().toString();
+    return jsonEncode(json);
   }
 
   /// Whether the flutter store file exists.

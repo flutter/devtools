@@ -17,7 +17,6 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../utils/auto_dispose.dart';
 import 'service_manager.dart';
-import 'service_utils.dart';
 
 final _log = Logger('eval_on_dart_library');
 
@@ -130,7 +129,7 @@ class EvalOnDartLibrary extends DisposableController
         }
       }
       assert(!_libraryRef.isCompleted);
-      _libraryRef.completeError(LibraryNotFound());
+      _libraryRef.completeError(LibraryNotFound(libraryName));
     } catch (e, stack) {
       _handleError(e, stack);
     }
@@ -632,7 +631,10 @@ final class LibraryNotFound implements Exception {
 
   final String name;
 
-  String get message => 'Library matchining $name not found';
+  String get message => 'Library matching $name not found';
+
+  @override
+  String toString() => message;
 }
 
 final class FutureFailedException implements Exception {

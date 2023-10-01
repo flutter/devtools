@@ -5,9 +5,11 @@
 class RegisteredService {
   const RegisteredService({
     required this.service,
+    required this.title,
   });
 
   final String service;
+  final String title;
 }
 
 /// Flutter memory service registered by Flutter Tools.
@@ -16,7 +18,10 @@ class RegisteredService {
 /// memory info using Android's ADB.
 const flutterMemory = RegisteredService(
   service: 'flutterMemoryInfo',
+  title: 'Flutter Memory Info',
 );
+
+const flutterListViews = '_flutter.listViews';
 
 /// Flutter engine returns estimate how much memory is used by layer/picture
 /// raster cache entries in bytes.
