@@ -4,6 +4,7 @@
 
 export 'src/devtools_api.dart';
 export 'src/memory/adb_memory_info.dart';
+export 'src/memory/class_heap_detail_stats.dart';
 export 'src/memory/event_sample.dart';
 export 'src/memory/heap_sample.dart';
 export 'src/memory/heap_space.dart';

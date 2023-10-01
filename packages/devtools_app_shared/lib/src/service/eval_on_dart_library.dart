@@ -501,17 +501,20 @@ class EvalOnDartLibrary extends DisposableController
         if (result is ErrorRef) {
           throw EvalErrorException(
             expression: expression,
+            scope: scope,
             errorRef: result,
           );
         }
         if (result is Sentinel) {
           throw EvalSentinelException(
             expression: expression,
+            scope: scope,
             sentinel: result,
           );
         }
         throw UnknownEvalException(
           expression: expression,
+          scope: scope,
           exception: result,
         );
       }
@@ -655,15 +658,17 @@ final class CancelledException implements Exception {}
 final class UnknownEvalException implements Exception {
   UnknownEvalException({
     required this.expression,
+    required this.scope,
     required this.exception,
   });
 
   final String expression;
   final Object? exception;
+  final Map<String, String?>? scope;
 
   @override
   String toString() {
-    return 'Unknown error during the evaluation of `$expression`: $exception';
+    return 'Unknown error during the evaluation of `$expression`: $exception for scope: $scope';
   }
 }
 
@@ -681,28 +686,32 @@ final class SentinelException implements Exception {
 final class EvalSentinelException extends SentinelException {
   EvalSentinelException({
     required this.expression,
+    required this.scope,
     required Sentinel sentinel,
   }) : super(sentinel);
 
   final String expression;
+  final Map<String, String?>? scope;
 
   @override
   String toString() {
-    return 'Evaluation `$expression` returned the Sentinel $sentinel';
+    return 'Evaluation `$expression` returned the Sentinel $sentinel for scope: $scope';
   }
 }
 
 final class EvalErrorException implements Exception {
   EvalErrorException({
     required this.expression,
+    required this.scope,
     required this.errorRef,
   });
 
   final ErrorRef errorRef;
   final String expression;
+  final Map<String, String?>? scope;
 
   @override
   String toString() {
-    return 'Evaluation `$expression` failed with $errorRef';
+    return 'Evaluation `$expression` failed with $errorRef for scope: $scope';
   }
 }

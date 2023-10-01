@@ -17,7 +17,7 @@ class RegisteredServiceDescription extends RegisteredService {
     this.icon,
     this.gaScreenName,
     this.gaItem,
-  }) : super(service: service);
+  }) : super(service: service, title: title);
 
   final Widget? icon;
   final String? gaScreenName;

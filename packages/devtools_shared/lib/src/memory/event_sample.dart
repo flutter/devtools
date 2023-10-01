@@ -15,6 +15,19 @@ import 'dart:convert';
 class AllocationAccumulator {
   AllocationAccumulator(this._start, this._continues, this._reset);
 
+  AllocationAccumulator.start()
+      : _start = true,
+        _continues = false,
+        _reset = false;
+  AllocationAccumulator.continues()
+      : _start = false,
+        _continues = true,
+        _reset = false;
+  AllocationAccumulator.reset()
+      : _start = false,
+        _continues = false,
+        _reset = true;
+
   factory AllocationAccumulator.fromJson(Map<String, dynamic> json) =>
       AllocationAccumulator(
         json['start'] as bool,
@@ -78,6 +91,15 @@ class ExtensionEvent {
         'customEventName': customEventName,
       };
 
+  static ExtensionEvent empty() =>
+      ExtensionEvent.custom(null, null, null, null);
+
+  bool get isEmpty =>
+      timestamp == null &&
+      eventKind == null &&
+      data == null &&
+      customEventName == null;
+
   final int? timestamp;
 
   final String? eventKind;
@@ -109,7 +131,11 @@ class ExtensionEvents {
 
   final theEvents = <ExtensionEvent>[];
 
+  bool get isEmpty => theEvents.isEmpty;
+
   bool get isNotEmpty => theEvents.isNotEmpty;
+
+  void clear() => theEvents.clear();
 
   Map<String, dynamic> toJson() {
     final eventsAsJson = <String, dynamic>{};
@@ -142,6 +168,43 @@ class EventSample {
         isEventSnapshot = false,
         isEventSnapshotAuto = false,
         allocationAccumulator = null,
+        extensionEvents = events;
+
+  EventSample.snapshotEvent(
+    this.timestamp, {
+    snapshotAuto = false,
+    ExtensionEvents? events,
+  })  : isEventGC = false,
+        isEventSnapshot = !snapshotAuto,
+        isEventSnapshotAuto = snapshotAuto,
+        allocationAccumulator = null,
+        extensionEvents = events;
+
+  EventSample.accumulatorStart(
+    this.timestamp, {
+    ExtensionEvents? events,
+  })  : isEventGC = false,
+        isEventSnapshot = false,
+        isEventSnapshotAuto = false,
+        allocationAccumulator = AllocationAccumulator.start(),
+        extensionEvents = events;
+
+  EventSample.accumulatorContinues(
+    this.timestamp, {
+    ExtensionEvents? events,
+  })  : isEventGC = false,
+        isEventSnapshot = false,
+        isEventSnapshotAuto = false,
+        allocationAccumulator = AllocationAccumulator.continues(),
+        extensionEvents = events;
+
+  EventSample.accumulatorReset(
+    this.timestamp, {
+    ExtensionEvents? events,
+  })  : isEventGC = false,
+        isEventSnapshot = false,
+        isEventSnapshotAuto = false,
+        allocationAccumulator = AllocationAccumulator.reset(),
         extensionEvents = events;
 
   EventSample.extensionEvent(this.timestamp, this.extensionEvents)
@@ -198,6 +261,9 @@ class EventSample {
       );
 
   bool get isEmpty => timestamp == -1;
+
+  /// Version of EventSample JSON payload.
+  static const version = 1;
 
   final int timestamp;
 
