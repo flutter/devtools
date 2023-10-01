@@ -8,6 +8,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../primitives/enum_utils.dart';
 import '../primitives/utils.dart';
@@ -88,6 +89,8 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// This node's parent (if it's been set).
   RemoteDiagnosticsNode? parent;
 
+  Future<String>? propertyDocFuture;
+
   List<RemoteDiagnosticsNode>? cachedProperties;
 
   /// Service used to retrieve more detailed information about the value of
@@ -97,10 +100,14 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// JSON describing the diagnostic node.
   final Map<String, Object?> json;
 
+  Future<Map<String, InstanceRef>?>? _valueProperties;
+
   final bool isProperty;
 
   // TODO(albertusangga): Refactor to cleaner/more robust solution
   bool get isFlex => ['Row', 'Column', 'Flex'].contains(widgetRuntimeType);
+
+  bool get isBox => json['isBox'] == true;
 
   int? get flexFactor => json['flexFactor'] as int?;
 
@@ -148,6 +155,20 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   Size get size => deserializeSize(
         (json['size'] as Map?)?.cast<String, Object>() ?? <String, Object>{},
       );
+
+  bool get isLocalClass {
+    final objectGroup = objectGroupApi;
+    if (objectGroup != null) {
+      return _isLocalClass ??= objectGroup.isLocalClass(this);
+    } else {
+      // TODO(jacobr): if objectGroup is a Future<ObjectGroup> we cannot compute
+      // whether classes are local as for convenience we need this method to
+      // return synchronously.
+      return _isLocalClass = false;
+    }
+  }
+
+  bool? _isLocalClass;
 
   @override
   bool operator ==(Object other) {
@@ -212,6 +233,9 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// will make the name self-evident.
   bool get showName => getBooleanMember('showName', true);
 
+  /// Description to show if the node has no displayed properties or children.
+  String? getEmptyBodyDescription() => getStringMember('emptyBodyDescription');
+
   late DiagnosticsTreeStyle style =
       getStyleMember('style', DiagnosticsTreeStyle.sparse);
 
@@ -220,6 +244,13 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// This should rarely be required except for cases where custom rendering is desired
   /// of a specific Dart diagnostic class.
   String? get type => getStringMember('type');
+
+  /// Whether the description is enclosed in double quotes.
+  ///
+  /// Only relevant for String properties.
+  bool get isQuoted => getBooleanMember('quoted', false);
+
+  bool get hasIsQuoted => json.containsKey('quoted');
 
   /// Optional unit the [value] is measured in.
   ///
@@ -230,6 +261,64 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// Only specified for Number properties.
   String? get unit => getStringMember('unit');
 
+  bool get hasUnit => json.containsKey('unit');
+
+  /// String describing just the numeric [value] without a unit suffix.
+  ///
+  /// Only specified for Number properties.
+  String? get numberToString => getStringMember('numberToString');
+
+  bool get hasNumberToString => json.containsKey('numberToString');
+
+  /// Description to use if the property [value] is true.
+  ///
+  /// If not specified and [value] equals true the property's priority [level]
+  /// will be [DiagnosticLevel.hidden].
+  ///
+  /// Only applies to Flag properties.
+  String? get ifTrue => getStringMember('ifTrue');
+
+  bool get hasIfTrue => json.containsKey('ifTrue');
+
+  /// Description to use if the property value is false.
+  ///
+  /// If not specified and [value] equals false, the property's priority [level]
+  /// will be [DiagnosticLevel.hidden].
+  ///
+  /// Only applies to Flag properties.
+  String? get ifFalse => getStringMember('ifFalse');
+
+  bool get hasIfFalse => json.containsKey('ifFalse');
+
+  /// Value as a List of strings.
+  ///
+  /// The raw value can always be extracted with the regular observatory protocol.
+  ///
+  /// Only applies to IterableProperty.
+  List<String>? get values {
+    final rawValues = json['values'] as List<Object?>?;
+    if (rawValues == null) {
+      return null;
+    }
+    return List<String>.from(rawValues);
+  }
+
+  /// Whether each of the values is itself a primitive value.
+  ///
+  /// For example, bool|num|string are primitive values. This is useful as for
+  /// non-primitive values, the user may want to view the value with an
+  /// interactive object debugger view to get more information on what the value
+  /// is.
+  List<bool>? get primitiveValues {
+    final rawValues = json['primitiveValues'] as List<Object?>?;
+    if (rawValues == null) {
+      return null;
+    }
+    return List<bool>.from(rawValues);
+  }
+
+  bool get hasValues => json.containsKey('values');
+
   /// Description to use if the property [value] is not null.
   ///
   /// If the property [value] is not null and [ifPresent] is null, the
@@ -238,6 +327,8 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   ///
   /// Only specified for ObjectFlagProperty.
   String? get ifPresent => getStringMember('ifPresent');
+
+  bool get hasIfPresent => json.containsKey('ifPresent');
 
   /// If the [value] of the property equals [defaultValue] the priority [level]
   /// of the property is downgraded to [DiagnosticLevel.fine] as the property
@@ -256,6 +347,17 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// Whether a property has a default value.
   bool get hasDefaultValue => json.containsKey('defaultValue');
 
+  /// Description if the property description would otherwise be empty.
+  ///
+  /// Consider showing the property value in gray in an IDE if the description matches
+  /// ifEmpty.
+  String? get ifEmpty => getStringMember('ifEmpty');
+
+  /// Description if the property [value] is null.
+  String? get ifNull => getStringMember('ifNull');
+
+  bool get allowWrap => getBooleanMember('allowWrap', true);
+
   /// Optional tooltip typically describing the property.
   ///
   /// Example tooltip: 'physical pixels per logical pixel'
@@ -264,9 +366,25 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// generating the string description.
   String get tooltip => getStringMember('tooltip') ?? '';
 
+  bool get hasTooltip => json.containsKey('tooltip');
+
+  /// Whether a [value] of null causes the property to have [level]
+  /// [DiagnosticLevel.warning] warning that the property is missing a [value].
+  bool get missingIfNull => getBooleanMember('missingIfNull', false);
+
+  /// String representation of exception thrown if accessing the property
+  /// [value] threw an exception.
+  String? get exception => getStringMember('exception');
+
+  /// Whether accessing the property throws an exception.
+  bool get hasException => json.containsKey('exception');
+
   bool get hasCreationLocation {
     return _creationLocation != null || json.containsKey('creationLocation');
   }
+
+  /// Location id compatible with rebuild location tracking code.
+  int get locationId => JsonUtils.getIntMember(json, 'locationId');
 
   set creationLocation(InspectorSourceLocation? location) {
     _creationLocation = location;
@@ -300,6 +418,15 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// tool might display a null [Color] value as an empty rectangle instead of
   /// the word "null".
   String? get propertyType => getStringMember('propertyType');
+
+  /// If the [value] of the property equals [defaultValue] the priority [level]
+  /// of the property is downgraded to [DiagnosticLevel.fine] as the property
+  /// value is uninteresting.
+  ///
+  /// [defaultValue] has type [T] or is [kNoDefaultValue].
+  DiagnosticLevel get defaultLevel {
+    return getLevelMember('defaultLevel', DiagnosticLevel.info);
+  }
 
   /// Whether the value of the property is a Diagnosticable value itself.
   /// Optionally, properties that are themselves Diagnosticable should be
@@ -355,6 +482,47 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   InspectorInstanceRef get valueRef =>
       InspectorInstanceRef(json['valueId'] as String?);
 
+  bool isEnumProperty() {
+    return type?.startsWith('EnumProperty<') ?? false;
+  }
+
+  /// Returns a list of raw Dart property values of the Dart value of this
+  /// property that are useful for custom display of the property value.
+  /// For example, get the red, green, and blue components of color.
+  ///
+  /// Unfortunately we cannot just use the list of fields from the Observatory
+  /// Instance object for the Dart value because much of the relevant
+  /// information to display good visualizations of Flutter values is stored
+  /// in properties not in fields.
+  Future<Map<String, InstanceRef>?> get valueProperties async {
+    if (_valueProperties == null) {
+      if (propertyType == null || valueRef.id == null) {
+        return _valueProperties = Future.value();
+      }
+      if (isEnumProperty()) {
+        // Populate all the enum property values.
+        return objectGroupApi?.getEnumPropertyValues(valueRef);
+      }
+
+      List<String> propertyNames;
+      // Add more cases here as visual displays for additional Dart objects
+      // are added.
+      switch (propertyType) {
+        case 'Color':
+          propertyNames = ['red', 'green', 'blue', 'alpha'];
+          break;
+        case 'IconData':
+          propertyNames = ['codePoint'];
+          break;
+        default:
+          return _valueProperties = Future.value();
+      }
+      _valueProperties =
+          objectGroupApi?.getDartObjectProperties(valueRef, propertyNames);
+    }
+    return _valueProperties;
+  }
+
   Map<String, Object?>? get valuePropertiesJson =>
       json['valueProperties'] as Map<String, Object?>?;
 
@@ -378,6 +546,9 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   /// Whether this node is being displayed as a full tree or a filtered tree.
   bool get isSummaryTree => getBooleanMember('summaryTree', false);
+
+  /// Whether this node is being displayed as a full tree or a filtered tree.
+  bool get isStateful => getBooleanMember('stateful', false);
 
   String? get widgetRuntimeType => getStringMember('widgetRuntimeType');
 
@@ -471,6 +642,31 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     if (isProperty) return null;
 
     return iconMaker.fromWidgetName(widgetRuntimeType);
+  }
+
+  /// Returns true if two diagnostic nodes are indistinguishable from
+  /// the perspective of a user debugging.
+  ///
+  /// In practice this means that all fields but the objectId and valueId
+  /// properties for the DiagnosticsNode objects are identical. The valueId
+  /// field may change even for properties that have not changed because in
+  /// some cases such as the 'created' property for an element, the property
+  /// value is created dynamically each time 'getProperties' is called.
+  bool identicalDisplay(RemoteDiagnosticsNode node) {
+    final entries = json.entries;
+    if (entries.length != node.json.entries.length) {
+      return false;
+    }
+    for (var entry in entries) {
+      final String key = entry.key;
+      if (key == 'valueId') {
+        continue;
+      }
+      if (entry.value == node.json[key]) {
+        return false;
+      }
+    }
+    return true;
   }
 
   @override

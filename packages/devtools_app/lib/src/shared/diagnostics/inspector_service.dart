@@ -638,6 +638,20 @@ abstract class InspectorObjectGroupBase
           );
   }
 
+  Future<RemoteDiagnosticsNode?> invokeServiceMethodWithArgReturningNode(
+    String methodName,
+    String arg,
+  ) async {
+    if (disposed) return null;
+    return useDaemonApi
+        ? parseDiagnosticsNodeDaemon(
+            invokeServiceMethodDaemonArg(methodName, arg, groupName),
+          )
+        : parseDiagnosticsNodeObservatory(
+            invokeServiceMethodObservatoryWithGroupName1(methodName, arg),
+          );
+  }
+
   Future<Object?> invokeServiceMethodDaemonArg(
     String methodName,
     String? arg,
@@ -692,6 +706,16 @@ abstract class InspectorObjectGroupBase
   ) {
     return inspectorLibrary.eval(
       "${inspectorService.clientInspectorName}.instance.$methodName('$arg1')",
+      isAlive: this,
+    );
+  }
+
+  Future<InstanceRef?> invokeServiceMethodObservatoryWithGroupName1(
+    String methodName,
+    String arg1,
+  ) {
+    return inspectorLibrary.eval(
+      "${inspectorService.clientInspectorName}.instance.$methodName('$arg1', '$groupName')",
       isAlive: this,
     );
   }
