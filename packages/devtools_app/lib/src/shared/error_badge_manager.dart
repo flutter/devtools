@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:collection/collection.dart' show IterableExtension;
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -17,7 +18,6 @@ import '../service/service_extensions.dart' as extensions;
 import '../service/vm_service_wrapper.dart';
 import 'diagnostics/diagnostics_node.dart';
 import 'globals.dart';
-import 'primitives/auto_dispose.dart';
 import 'primitives/listenable.dart';
 import 'primitives/utils.dart';
 
@@ -38,7 +38,8 @@ class ErrorBadgeManager extends DisposableController
   void vmServiceOpened(VmServiceWrapper service) {
     // Ensure structured errors are enabled.
     unawaited(
-      serviceManager.serviceExtensionManager.setServiceExtensionState(
+      serviceConnection.serviceManager.serviceExtensionManager
+          .setServiceExtensionState(
         extensions.structuredErrors.extension,
         enabled: true,
         value: true,

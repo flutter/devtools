@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../../shared/common_widgets.dart';
-import '../../../../../../shared/theme.dart';
+import '../../../../../../shared/primitives/utils.dart';
 import '../../../../shared/heap/model.dart';
 import '../../controller/class_data.dart';
 
@@ -82,7 +83,7 @@ class _PathControlPane extends StatelessWidget {
         const SizedBox(width: denseSpacing),
         ValueListenableBuilder<bool>(
           valueListenable: controller.hideStandard,
-          builder: (_, hideStandard, __) => FilterButton(
+          builder: (_, hideStandard, __) => DevToolsFilterButton(
             onPressed: () {
               ga.select(
                 gac.memory,
@@ -97,7 +98,7 @@ class _PathControlPane extends StatelessWidget {
         const SizedBox(width: denseSpacing),
         ValueListenableBuilder<bool>(
           valueListenable: controller.invert,
-          builder: (_, invert, __) => ToggleButton(
+          builder: (_, invert, __) => DevToolsToggleButton(
             onPressed: () {
               ga.select(
                 gac.memory,
@@ -123,18 +124,24 @@ class _PathView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DualValueListenableBuilder<bool, bool>(
-      firstListenable: controller.hideStandard,
-      secondListenable: controller.invert,
-      builder: (_, hideStandard, invert, __) => SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: SingleChildScrollView(
-          child: Text(
-            path.toLongString(inverted: invert, hideStandard: hideStandard),
-            overflow: TextOverflow.visible,
+    return MultiValueListenableBuilder(
+      listenables: [
+        controller.hideStandard,
+        controller.invert,
+      ],
+      builder: (_, values, __) {
+        final hideStandard = values.first as bool;
+        final invert = values.second as bool;
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: SingleChildScrollView(
+            child: Text(
+              path.toLongString(inverted: invert, hideStandard: hideStandard),
+              overflow: TextOverflow.visible,
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

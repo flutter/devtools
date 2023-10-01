@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: avoid_print
+
 import 'dart:async';
 import 'dart:io';
 
@@ -11,7 +13,7 @@ import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
     as wip show ChromeTab;
 
-import 'utils_io.dart';
+import 'io_utils.dart';
 
 // Change this if you want to be able to see Chrome opening while tests run
 // to aid debugging.

@@ -8,6 +8,8 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:math';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -24,9 +26,7 @@ import '../../shared/diagnostics/diagnostics_node.dart';
 import '../../shared/diagnostics_text_styles.dart';
 import '../../shared/error_badge_manager.dart';
 import '../../shared/globals.dart';
-import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/utils.dart';
-import '../../shared/theme.dart';
 import '../../shared/ui/colors.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/ui/utils.dart';
@@ -669,7 +669,7 @@ class InspectorTreeController extends DisposableController
     int debugStatsSearchOps = 0;
     final debugStatsWidgets = _searchableCachedRows.length;
 
-    final inspectorService = serviceManager.inspectorService;
+    final inspectorService = serviceConnection.inspectorService;
     if (search.isEmpty ||
         inspectorService == null ||
         inspectorService.isDisposed) {
@@ -796,9 +796,10 @@ class _InspectorTreeState extends State<InspectorTree>
     }
     _focusNode = FocusNode(debugLabel: 'inspector-tree');
     autoDisposeFocusNode(_focusNode);
-    final mainIsolateState = serviceManager.isolateManager.mainIsolateState;
+    final mainIsolateState =
+        serviceConnection.serviceManager.isolateManager.mainIsolateState;
     if (mainIsolateState != null) {
-      callOnceWhenReady(
+      callOnceWhenReady<bool>(
         trigger: mainIsolateState.isPaused,
         callback: _bindToController,
         readyWhen: (triggerValue) => !triggerValue,
@@ -1011,7 +1012,7 @@ class _InspectorTreeState extends State<InspectorTree>
       if (screenId != null) {
         ga.timeEnd(screenId, gac.pageReady);
         unawaited(
-          serviceManager.sendDwdsEvent(
+          serviceConnection.sendDwdsEvent(
             screen: screenId,
             action: gac.pageReady,
           ),

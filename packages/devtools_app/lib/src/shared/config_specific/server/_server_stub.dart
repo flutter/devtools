@@ -6,6 +6,10 @@
 // ignore_for_file: avoid-unused-parameters
 import 'dart:async';
 
+import 'package:devtools_shared/devtools_deeplink.dart';
+import 'package:devtools_shared/devtools_extensions.dart';
+
+import '../../development_helpers.dart';
 import '../../primitives/utils.dart';
 
 const unsupportedMessage =
@@ -74,6 +78,43 @@ Future<DevToolsJsonFile?> requestBaseAppSizeFile(String path) async {
 Future<DevToolsJsonFile?> requestTestAppSizeFile(String path) async {
   throw Exception(unsupportedMessage);
 }
+
+Future<List<DevToolsExtensionConfig>> refreshAvailableExtensions(
+  String rootPath,
+) async {
+  return debugHandleRefreshAvailableExtensions(rootPath);
+}
+
+Future<ExtensionEnabledState> extensionEnabledState({
+  required String rootPath,
+  required String extensionName,
+  bool? enable,
+}) async {
+  return debugHandleExtensionEnabledState(
+    rootPath: rootPath,
+    extensionName: extensionName,
+    enable: enable,
+  );
+}
+
+Future<List<String>> requestAndroidBuildVariants(String path) async =>
+    const <String>[];
+
+Future<AppLinkSettings> requestAndroidAppLinkSettings(
+  String path, {
+  required String buildVariant,
+}) async =>
+    AppLinkSettings.empty;
+
+Future<XcodeBuildOptions> requestIosBuildOptions(String path) async =>
+    XcodeBuildOptions.empty;
+
+Future<UniversalLinkSettings> requestIosUniversalLinkSettings(
+  String path, {
+  required String configuration,
+  required String target,
+}) async =>
+    UniversalLinkSettings.empty;
 
 void logWarning() {
   throw Exception(unsupportedMessage);

@@ -25,13 +25,20 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
     CpuSamples? allocationSamples,
     this._resolvedUriMap,
     this._classList,
-  )   : cpuSamples = cpuSamples ?? _defaultProfile,
+    List<({String flagName, String value})>? flags,
+  )   : _startingSockets = _socketProfile?.sockets ?? [],
+        _startingRequests = _httpProfile?.requests ?? [],
+        cpuSamples = cpuSamples ?? _defaultProfile,
         allocationSamples = allocationSamples ?? _defaultProfile {
     _reverseResolvedUriMap = <String, String>{};
     if (_resolvedUriMap != null) {
       for (var e in _resolvedUriMap!.entries) {
         _reverseResolvedUriMap![e.value] = e.key;
       }
+    }
+
+    for (final flag in flags ?? []) {
+      unawaited(setFlag(flag.flagName, flag.value));
     }
   }
 
@@ -44,9 +51,9 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
     'pid': 54321,
     'functions': [],
     'samples': [],
-  });
+  })!;
 
-  CpuSamples? cpuSamples;
+  CpuSamples cpuSamples;
 
   CpuSamples? allocationSamples;
 
@@ -242,7 +249,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
             },
           ),
         },
-      ),
+      )!,
     );
   }
 
@@ -331,7 +338,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
 
   @override
   Future<TimelineFlags> getVMTimelineFlags() =>
-      Future.value(TimelineFlags.parse(_vmTimelineFlags));
+      Future.value(TimelineFlags.parse(_vmTimelineFlags)!);
 
   @override
   Future<Timeline> getVMTimeline({
@@ -392,7 +399,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   ) async {
     final httpProfile = await getHttpProfile(isolateId);
     return Future.value(
-      httpProfile.requests.firstWhereOrNull((request) => request.id == id),
+      httpProfile.requests.firstWhere((request) => request.id == id),
     );
   }
 

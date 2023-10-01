@@ -67,6 +67,7 @@ class NotificationService {
   /// dismissed after [NotificationMessage.defaultDuration].
   bool pushError(
     String errorMessage, {
+    String? stackTrace,
     isDismissible = true,
     isReportable = true,
   }) {
@@ -78,6 +79,7 @@ class NotificationService {
             devToolsExtensionPoints
                 .issueTrackerLink(
                   issueTitle: 'Reporting error: $errorMessage',
+                  additionalInfo: 'Stack trace:\n$stackTrace',
                 )
                 .url,
           ),

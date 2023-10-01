@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../screens/debugger/codeview_controller.dart';
@@ -11,7 +12,6 @@ import 'globals.dart';
 import 'primitives/trees.dart';
 import 'primitives/utils.dart';
 import 'routing.dart';
-import 'theme.dart';
 
 mixin ProfilableDataMixin<T extends TreeNode<T>> on TreeNode<T> {
   ProfileMetaData get profileMetaData;

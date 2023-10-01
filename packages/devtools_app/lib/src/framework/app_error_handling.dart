@@ -76,6 +76,9 @@ void reportError(
 
   // Show error message in a notification pop-up:
   if (notifyUser) {
-    notificationService.pushError(error.toString());
+    notificationService.pushError(
+      error.toString(),
+      stackTrace: terseStackTrace,
+    );
   }
 }

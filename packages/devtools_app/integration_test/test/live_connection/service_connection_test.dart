@@ -8,7 +8,9 @@ import 'package:collection/collection.dart';
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/service/service_extension_widgets.dart';
 import 'package:devtools_app/src/service/service_extensions.dart' as extensions;
-import 'package:devtools_app/src/shared/eval_on_dart_library.dart';
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_integration_test.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -41,10 +43,11 @@ void main() {
     await tester.pump(longDuration);
 
     // Ensure all futures are completed before running checks.
-    await serviceManager.service!.allFuturesCompleted;
+    await serviceConnection.serviceManager.service!.allFuturesCompleted;
 
     logStatus('verify the vm service calls that occur on connect');
-    final vmServiceCallCount = serviceManager.service!.vmServiceCallCount;
+    final vmServiceCallCount =
+        serviceConnection.serviceManager.service!.vmServiceCallCount;
     expect(
       // Use a range instead of an exact number because service extension
       // calls are not consistent. This will still catch any spurious calls
@@ -54,13 +57,13 @@ void main() {
       reason: 'Unexpected number of vm service calls upon connection: '
           '$vmServiceCallCount. If this is expected, please update this test '
           'to the new expected number of calls. Here are the calls for this '
-          'test run:\n ${serviceManager.service!.vmServiceCalls.toString()}',
+          'test run:\n ${serviceConnection.serviceManager.service!.vmServiceCalls.toString()}',
     );
 
     // Check the ordering of the vm service calls we can expect to occur
     // in a stable order.
     expect(
-      serviceManager.service!.vmServiceCalls
+      serviceConnection.serviceManager.service!.vmServiceCalls
           // Filter out unawaited streamListen calls.
           .where((call) => call != 'streamListen')
           .toList()
@@ -75,7 +78,7 @@ void main() {
     );
 
     expect(
-      serviceManager.service!.vmServiceCalls
+      serviceConnection.serviceManager.service!.vmServiceCalls
           .where((call) => call == 'streamListen')
           .toList()
           .length,
@@ -83,14 +86,20 @@ void main() {
     );
 
     logStatus('verify managers have all been initialized');
-    expect(serviceManager.isolateManager, isNotNull);
-    expect(serviceManager.serviceExtensionManager, isNotNull);
-    expect(serviceManager.vmFlagManager, isNotNull);
-    expect(serviceManager.isolateManager.isolates.value, isNotEmpty);
-    expect(serviceManager.vmFlagManager.flags.value, isNotNull);
+    expect(serviceConnection.serviceManager.isolateManager, isNotNull);
+    expect(serviceConnection.serviceManager.serviceExtensionManager, isNotNull);
+    expect(serviceConnection.vmFlagManager, isNotNull);
+    expect(
+      serviceConnection.serviceManager.isolateManager.isolates.value,
+      isNotEmpty,
+    );
+    expect(serviceConnection.vmFlagManager.flags.value, isNotNull);
 
-    if (serviceManager.isolateManager.selectedIsolate.value == null) {
-      await whenValueNonNull(serviceManager.isolateManager.selectedIsolate);
+    if (serviceConnection.serviceManager.isolateManager.selectedIsolate.value ==
+        null) {
+      await whenValueNonNull(
+        serviceConnection.serviceManager.isolateManager.selectedIsolate,
+      );
     }
 
     await disconnectFromTestApp(tester);
@@ -102,11 +111,15 @@ void main() {
 
     // TODO(kenz): re-work this integration test so that we do not have to be
     // on the inspector screen for this to pass.
-    await switchToScreen(tester, ScreenMetaData.inspector);
+    await switchToScreen(
+      tester,
+      tabIcon: ScreenMetaData.inspector.icon!,
+      screenId: ScreenMetaData.inspector.id,
+    );
     await tester.pump(longDuration);
 
     // Ensure all futures are completed before running checks.
-    await serviceManager.service!.allFuturesCompleted;
+    await serviceConnection.serviceManager.service!.allFuturesCompleted;
 
     logStatus('verify Flutter framework service extensions');
     await _verifyBooleanExtension(tester);
@@ -114,12 +127,15 @@ void main() {
     await _verifyStringExtension(tester);
 
     logStatus('verify Flutter engine service extensions');
-    expect(await serviceManager.queryDisplayRefreshRate, equals(60));
+    expect(
+      await serviceConnection.queryDisplayRefreshRate,
+      equals(60),
+    );
 
     logStatus('verify services that are registered to exactly one client');
     await _verifyHotReloadAndHotRestart();
     await expectLater(
-      serviceManager.callService('fakeMethod'),
+      serviceConnection.serviceManager.callService('fakeMethod'),
       throwsException,
     );
 
@@ -131,7 +147,7 @@ void main() {
     await tester.pump(longDuration);
 
     // Ensure all futures are completed before running checks.
-    final service = serviceManager.service!;
+    final service = serviceConnection.serviceManager.service!;
     await service.allFuturesCompleted;
 
     final serviceExtensionsToEnable = [
@@ -143,7 +159,8 @@ void main() {
     logStatus('enabling service extensions on the test device');
     // Enable a service extension of each type (boolean, numeric, string).
     for (final ext in serviceExtensionsToEnable) {
-      await serviceManager.serviceExtensionManager.setServiceExtensionState(
+      await serviceConnection.serviceManager.serviceExtensionManager
+          .setServiceExtensionState(
         ext.$1,
         enabled: true,
         value: ext.$2,
@@ -155,7 +172,7 @@ void main() {
 
     for (final ext in serviceExtensionsToEnable) {
       expect(
-        serviceManager.serviceExtensionManager
+        serviceConnection.serviceManager.serviceExtensionManager
             .isServiceExtensionAvailable(ext.$1),
         isFalse,
       );
@@ -167,7 +184,7 @@ void main() {
     logStatus('verify extension states have been restored from the device');
     for (final ext in serviceExtensionsToEnable) {
       expect(
-        serviceManager.serviceExtensionManager
+        serviceConnection.serviceManager.serviceExtensionManager
             .isServiceExtensionAvailable(ext.$1),
         isTrue,
       );
@@ -187,7 +204,8 @@ Future<void> _verifyBooleanExtension(WidgetTester tester) async {
   const evalExpression = 'debugPaintSizeEnabled';
   final library = EvalOnDartLibrary(
     'package:flutter/src/rendering/debug.dart',
-    serviceManager.service!,
+    serviceConnection.serviceManager.service!,
+    serviceManager: serviceConnection.serviceManager,
   );
   await _verifyExtension(
     tester,
@@ -204,7 +222,8 @@ Future<void> _verifyNumericExtension(WidgetTester tester) async {
   const evalExpression = 'timeDilation';
   final library = EvalOnDartLibrary(
     'package:flutter/src/scheduler/binding.dart',
-    serviceManager.service!,
+    serviceConnection.serviceManager.service!,
+    serviceManager: serviceConnection.serviceManager,
   );
   await _verifyExtension(
     tester,
@@ -224,7 +243,8 @@ Future<void> _verifyStringExtension(WidgetTester tester) async {
   const evalExpression = 'defaultTargetPlatform.toString()';
   final library = EvalOnDartLibrary(
     'package:flutter/src/foundation/platform.dart',
-    serviceManager.service!,
+    serviceConnection.serviceManager.service!,
+    serviceManager: serviceConnection.serviceManager,
   );
   await _verifyExtension(
     tester,
@@ -246,7 +266,8 @@ Future<void> _verifyHotReloadAndHotRestart() async {
   const evalExpression = 'topLevelFieldForTest';
   final library = EvalOnDartLibrary(
     'package:flutter_app/main.dart',
-    serviceManager.service!,
+    serviceConnection.serviceManager.service!,
+    serviceManager: serviceConnection.serviceManager,
   );
 
   // Verify the initial value of [topLevelFieldForTest].
@@ -262,7 +283,7 @@ Future<void> _verifyHotReloadAndHotRestart() async {
   expect(value.runtimeType, InstanceRef);
   expect(value!.valueAsString, 'true');
 
-  await serviceManager.performHotReload();
+  await serviceConnection.serviceManager.performHotReload();
 
   // Verify the value of [topLevelFieldForTest] is still changed after hot
   // reload.
@@ -270,7 +291,7 @@ Future<void> _verifyHotReloadAndHotRestart() async {
   expect(value.runtimeType, InstanceRef);
   expect(value!.valueAsString, 'true');
 
-  await serviceManager.performHotRestart();
+  await serviceConnection.serviceManager.performHotRestart();
 
   // Verify the value of [topLevelFieldForTest] is back to its original value
   // after hot restart.
@@ -305,7 +326,8 @@ Future<void> _verifyExtension(
   );
 
   // Enable the service extension state from the service manager.
-  await serviceManager.serviceExtensionManager.setServiceExtensionState(
+  await serviceConnection.serviceManager.serviceExtensionManager
+      .setServiceExtensionState(
     extensionName,
     enabled: true,
     value: newValue,
@@ -366,8 +388,8 @@ Future<void> _changeServiceExtensionFromButton(
 
 /// Returns a future that completes when the service extension is available.
 Future<void> _serviceExtensionAvailable(String extensionName) async {
-  final listenable =
-      serviceManager.serviceExtensionManager.hasServiceExtension(extensionName);
+  final listenable = serviceConnection.serviceManager.serviceExtensionManager
+      .hasServiceExtension(extensionName);
 
   final completer = Completer<void>();
   void listener() {
@@ -398,7 +420,8 @@ Future<void> _verifyExtensionStateInServiceManager(
   required bool enabled,
   required Object? value,
 }) async {
-  final stateListenable = serviceManager.serviceExtensionManager
+  final stateListenable = serviceConnection
+      .serviceManager.serviceExtensionManager
       .getServiceExtensionState(extensionName);
 
   // Wait for the service extension state to match the expected value.

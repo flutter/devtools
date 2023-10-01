@@ -6,6 +6,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
 
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
@@ -17,7 +19,6 @@ import '../../service/vm_service_wrapper.dart';
 import '../../shared/diagnostics/diagnostics_node.dart';
 import '../../shared/diagnostics/inspector_service.dart';
 import '../../shared/globals.dart';
-import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/message_bus.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/filter.dart';
@@ -68,13 +69,25 @@ class LoggingController extends DisposableController
         FilterControllerMixin<LogData>,
         AutoDisposeControllerMixin {
   LoggingController() {
-    addAutoDisposeListener(serviceManager.connectedState, () {
-      if (serviceManager.connectedState.value.connected) {
-        _handleConnectionStart(serviceManager.service!);
+    addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
+      if (serviceConnection.serviceManager.connectedState.value.connected) {
+        _handleConnectionStart(serviceConnection.serviceManager.service!);
+
+        autoDisposeStreamSubscription(
+          serviceConnection.serviceManager.service!.onIsolateEvent
+              .listen((event) {
+            messageBus.addEvent(
+              BusEvent(
+                'debugger',
+                data: event,
+              ),
+            );
+          }),
+        );
       }
     });
-    if (serviceManager.connectedAppInitialized) {
-      _handleConnectionStart(serviceManager.service!);
+    if (serviceConnection.serviceManager.connectedAppInitialized) {
+      _handleConnectionStart(serviceConnection.serviceManager.service!);
     }
     _handleBusEvents();
     subscribeToFilterChanges();
@@ -118,7 +131,7 @@ class LoggingController extends DisposableController
   }
 
   ObjectGroup get objectGroup =>
-      serviceManager.consoleService.objectGroup as ObjectGroup;
+      serviceConnection.consoleService.objectGroup as ObjectGroup;
 
   String get statusText {
     final int totalCount = data.length;
@@ -143,7 +156,7 @@ class LoggingController extends DisposableController
   void clear() {
     resetFilter();
     _updateData([]);
-    serviceManager.errorBadgeManager.clearErrors(LoggingScreen.id);
+    serviceConnection.errorBadgeManager.clearErrors(LoggingScreen.id);
   }
 
   void _handleConnectionStart(VmServiceWrapper service) {
@@ -315,7 +328,7 @@ class LoggingController extends DisposableController
   }
 
   void _handleDeveloperLogEvent(Event e) {
-    final VmServiceWrapper? service = serviceManager.service;
+    final VmServiceWrapper? service = serviceConnection.serviceManager.service;
 
     final logRecord = e.json!['logRecord'];
 

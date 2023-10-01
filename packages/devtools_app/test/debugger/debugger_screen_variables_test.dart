@@ -4,6 +4,8 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/diagnostics/tree_builder.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -12,23 +14,23 @@ import 'package:mockito/mockito.dart';
 import '../test_infra/utils/variable_utils.dart';
 
 void main() {
-  late FakeServiceManager fakeServiceManager;
+  late FakeServiceConnectionManager fakeServiceConnection;
   late MockDebuggerController debuggerController;
   late MockScriptManager scriptManager;
 
   const windowSize = Size(4000, 4000);
 
   setUp(() {
-    fakeServiceManager = FakeServiceManager();
+    fakeServiceConnection = FakeServiceConnectionManager();
     scriptManager = MockScriptManager();
 
     mockConnectedApp(
-      fakeServiceManager.connectedApp!,
+      fakeServiceConnection.serviceManager.connectedApp!,
       isProfileBuild: false,
       isFlutterApp: true,
       isWebApp: false,
     );
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
+    setGlobal(ServiceConnectionManager, fakeServiceConnection);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(ScriptManager, scriptManager);
     setGlobal(NotificationService, NotificationService());
@@ -38,8 +40,8 @@ void main() {
       ExternalDevToolsEnvironmentParameters(),
     );
     setGlobal(PreferencesController, PreferencesController());
-    fakeServiceManager.consoleService.ensureServiceInitialized();
-    when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
+    fakeServiceConnection.consoleService.ensureServiceInitialized();
+    when(fakeServiceConnection.errorBadgeManager.errorCountNotifier('debugger'))
         .thenReturn(ValueNotifier<int>(0));
     debuggerController = createMockDebuggerControllerWithDefaults();
 
@@ -53,7 +55,7 @@ void main() {
   ) async {
     await tester.pumpWidget(
       wrapWithControllers(
-        const DebuggerScreenBody(),
+        const DebuggerWindows(),
         debugger: controller,
       ),
     );
@@ -104,7 +106,7 @@ void main() {
     'Variables shows items',
     windowSize,
     (WidgetTester tester) async {
-      fakeServiceManager.appState.setVariables(
+      fakeServiceConnection.appState.setVariables(
         [
           buildListVariable(),
           buildMapVariable(),
@@ -180,7 +182,7 @@ void main() {
       final list = buildParentListVariable(length: 243621);
       await buildVariablesTree(list);
 
-      final appState = serviceManager.appState;
+      final appState = serviceConnection.appState;
       appState.setVariables([list]);
 
       await pumpDebuggerScreen(tester, debuggerController);
@@ -197,7 +199,7 @@ void main() {
       final map = buildParentMapVariable(length: 243621);
       await buildVariablesTree(map);
 
-      final appState = serviceManager.appState;
+      final appState = serviceConnection.appState;
       appState.setVariables([map]);
 
       await pumpDebuggerScreen(tester, debuggerController);
@@ -214,7 +216,7 @@ void main() {
       final set = buildParentSetVariable(length: 243621);
       await buildVariablesTree(set);
 
-      final appState = serviceManager.appState;
+      final appState = serviceConnection.appState;
       appState.setVariables([set]);
 
       await pumpDebuggerScreen(tester, debuggerController);

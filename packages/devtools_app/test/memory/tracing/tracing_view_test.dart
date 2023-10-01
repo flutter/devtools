@@ -9,6 +9,7 @@ import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/memory/framework/connected/memory_tabs.dart';
 import 'package:devtools_app/src/screens/memory/panes/tracing/tracing_pane_controller.dart';
 import 'package:devtools_app/src/screens/memory/panes/tracing/tracing_tree.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -80,7 +81,7 @@ void main() {
       scene = MemoryDefaultScene();
       await scene.setUp(classList: classList);
       mockConnectedApp(
-        scene.fakeServiceManager.connectedApp!,
+        scene.fakeServiceConnection.serviceManager.connectedApp!,
         isFlutterApp: true,
         isProfileBuild: false,
         isWebApp: false,
@@ -167,7 +168,8 @@ void main() {
         );
 
         // Set fake sample data and refresh to populate the trace view.
-        final fakeService = serviceManager.service as FakeVmServiceWrapper;
+        final fakeService =
+            serviceConnection.serviceManager.service as FakeVmServiceWrapper;
         fakeService.allocationSamples = allocationTracingProfile;
 
         await tester.tap(refresh);
@@ -331,7 +333,8 @@ void main() {
         );
 
         // Set fake sample data and refresh to populate the trace view.
-        final fakeService = serviceManager.service as FakeVmServiceWrapper;
+        final fakeService =
+            serviceConnection.serviceManager.service as FakeVmServiceWrapper;
         fakeService.allocationSamples = allocationTracingProfile;
 
         await tester.tap(refresh);

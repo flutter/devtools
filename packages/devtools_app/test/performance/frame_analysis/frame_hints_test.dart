@@ -5,6 +5,8 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/performance/panes/controls/enhance_tracing/enhance_tracing_model.dart';
 import 'package:devtools_app/src/screens/performance/panes/frame_analysis/frame_hints.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -41,11 +43,11 @@ void main() {
 
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(OfflineModeController, OfflineModeController());
-      final fakeServiceManager = FakeServiceManager();
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
+      final fakeServiceConnection = FakeServiceConnectionManager();
+      setGlobal(ServiceConnectionManager, fakeServiceConnection);
       setGlobal(NotificationService, NotificationService());
       mockConnectedApp(
-        fakeServiceManager.connectedApp!,
+        fakeServiceConnection.serviceManager.connectedApp!,
         isFlutterApp: true,
         isProfileBuild: true,
         isWebApp: false,
@@ -363,7 +365,7 @@ void main() {
           frame: testFrameWithShaderJank,
         );
         mockConnectedApp(
-          serviceManager.connectedApp!,
+          serviceConnection.serviceManager.connectedApp!,
           isFlutterApp: true,
           isProfileBuild: true,
           isWebApp: false,

@@ -3,15 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:core';
 
 import 'package:collection/collection.dart';
-import 'package:flutter/foundation.dart';
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
-import '../screens/logging/vm_service_logger.dart';
-import '../screens/performance/timeline_streams.dart';
 import '../shared/analytics/analytics.dart' as ga;
 import '../shared/connected_app.dart';
 import '../shared/console/console_service.dart';
@@ -19,15 +17,13 @@ import '../shared/diagnostics/inspector_service.dart';
 import '../shared/error_badge_manager.dart';
 import '../shared/feature_flags.dart';
 import '../shared/globals.dart';
-import '../shared/primitives/utils.dart';
 import '../shared/title.dart';
 import '../shared/utils.dart';
-import 'isolate_manager.dart';
-import 'isolate_state.dart';
 import 'resolved_uri_manager.dart';
-import 'service_extension_manager.dart';
 import 'service_registrations.dart' as registrations;
+import 'timeline_streams.dart';
 import 'vm_flags.dart';
+import 'vm_service_logger.dart';
 import 'vm_service_wrapper.dart';
 
 final _log = Logger('service_manager');
@@ -38,63 +34,44 @@ final _log = Logger('service_manager');
 /// events from the service protocol device.
 const debugLogServiceProtocolEvents = false;
 
-// TODO(kenz): add an offline service manager implementation.
-
 const defaultRefreshRate = 60.0;
 
-// TODO(jacobr): refactor all of these apis to be in terms of ValueListenable
-// instead of Streams.
+/// The amount of time we will wait for the main isolate to become non-null when
+/// calling [ServiceConnectionManager.rootLibraryForMainIsolate].
+const _waitForRootLibraryTimeout = Duration(seconds: 3);
+
 class ServiceConnectionManager {
   ServiceConnectionManager() {
-    _serviceExtensionManager = ServiceExtensionManager(isolateManager);
+    serviceManager = ServiceManager()
+      ..registerLifecycleCallback(
+        ServiceManagerLifecycle.beforeOpenVmService,
+        _beforeOpenVmService,
+      )
+      ..registerLifecycleCallback(
+        ServiceManagerLifecycle.afterOpenVmService,
+        _afterOpenVmService,
+      )
+      ..registerLifecycleCallback(
+        ServiceManagerLifecycle.beforeCloseVmService,
+        _beforeCloseVmService,
+      )
+      ..registerLifecycleCallback(
+        ServiceManagerLifecycle.afterCloseVmService,
+        _afterCloseVmService,
+      )
+      ..registerOverride(
+        ServiceManagerOverride.initIsolates,
+        (service) async => await serviceManager.isolateManager.init(
+          serviceManager.vm?.isolatesForDevToolsMode() ?? <IsolateRef>[],
+        ),
+      );
   }
 
-  Completer<VmService> _serviceAvailable = Completer();
-
-  // TODO(kenz): try to replace uses of this with a listener on [connectedState]
-  Future<VmService> get onServiceAvailable => _serviceAvailable.future;
-
-  bool get isServiceAvailable => _serviceAvailable.isCompleted;
-
-  VmServiceCapabilities? _serviceCapabilities;
-  VmServiceTrafficLogger? serviceTrafficLogger;
-
-  Future<VmServiceCapabilities> get serviceCapabilities async {
-    if (_serviceCapabilities == null) {
-      await _serviceAvailable.future;
-      final version = await service!.getVersion();
-      _serviceCapabilities = VmServiceCapabilities(version);
-    }
-    return _serviceCapabilities!;
-  }
-
-  final _registeredServiceNotifiers = <String, ImmediateValueNotifier<bool>>{};
-
-  /// Mapping of service name to service method.
-  Map<String, String> get registeredMethodsForService =>
-      _registeredMethodsForService;
-  final Map<String, String> _registeredMethodsForService = {};
+  late final ServiceManager<VmServiceWrapper> serviceManager;
 
   final vmFlagManager = VmFlagManager();
 
   final timelineStreamManager = TimelineStreamManager();
-
-  final isolateManager = IsolateManager();
-
-  /// Proxy to state inside the isolateManager, for code consizeness.
-  ///
-  /// Defaults to false if there is no main isolate.
-  bool get isMainIsolatePaused =>
-      isolateManager.mainIsolateState?.isPaused.value ?? false;
-
-  Future<RootInfo?> tryToDetectMainRootInfo() async {
-    await isolateManager.mainIsolateState?.waitForIsolateLoad();
-    return isolateManager.mainIsolateState?.rootInfo;
-  }
-
-  RootInfo rootInfoNow() {
-    return isolateManager.mainIsolateState?.rootInfo ?? RootInfo(null);
-  }
 
   final consoleService = ConsoleService();
 
@@ -106,335 +83,117 @@ class ServiceConnectionManager {
   ErrorBadgeManager get errorBadgeManager => _errorBadgeManager;
   final _errorBadgeManager = ErrorBadgeManager();
 
-  ServiceExtensionManager get serviceExtensionManager =>
-      _serviceExtensionManager;
-  late final ServiceExtensionManager _serviceExtensionManager;
-
-  ConnectedApp? connectedApp;
+  VmServiceTrafficLogger? serviceTrafficLogger;
 
   // TODO (polina-c and kenzieschmoll): make appState member of ConnectedApp.
   // https://github.com/flutter/devtools/pull/4993#discussion_r1061774726
   AppState get appState => _appState!;
   AppState? _appState;
 
-  VmServiceWrapper? service;
-  VM? vm;
-  String? sdkVersion;
-
-  bool get hasService => service != null;
-
-  bool get hasConnection => hasService && connectedApp != null;
-
-  bool get connectedAppInitialized =>
-      hasConnection && connectedApp!.connectedAppInitialized;
-
-  ValueListenable<ConnectedState> get connectedState => _connectedState;
-
-  final ValueNotifier<ConnectedState> _connectedState =
-      ValueNotifier(const ConnectedState(false));
-
-  final ValueNotifier<bool> _deviceBusy = ValueNotifier<bool>(false);
-
-  /// Whether the device is currently busy - performing a long-lived, blocking
-  /// operation.
-  ValueListenable<bool> get deviceBusy => _deviceBusy;
-
-  /// Set whether the device is currently busy - performing a long-lived,
-  /// blocking operation.
-  void setDeviceBusy(bool isBusy) {
-    _deviceBusy.value = isBusy;
-  }
-
-  /// Set the device as busy during the duration of the given async task.
-  Future<T> runDeviceBusyTask<T>(Future<T> task) async {
-    try {
-      setDeviceBusy(true);
-      return await task;
-    } finally {
-      setDeviceBusy(false);
-    }
-  }
-
-  /// Call a service that is registered by exactly one client.
-  Future<Response> callService(
-    String name, {
-    String? isolateId,
-    Map<String, dynamic>? args,
-  }) async {
-    final registeredMethod = _registeredMethodsForService[name];
-    if (registeredMethod == null) {
-      throw Exception('There is no registered method for service "$name"');
-    }
-    return service!.callMethod(
-      registeredMethod,
-      isolateId: isolateId,
-      args: args,
-    );
-  }
-
-  ValueListenable<bool> registeredServiceListenable(String name) {
-    final listenable = _registeredServiceNotifiers.putIfAbsent(
-      name,
-      () => ImmediateValueNotifier(false),
-    );
-    return listenable;
-  }
-
-  Future<void> vmServiceOpened(
-    VmServiceWrapper service, {
-    required Future<void> onClosed,
-  }) async {
-    if (service == this.service) {
-      // Service already opened.
-      return;
-    }
-    this.service = service;
-    if (_serviceAvailable.isCompleted) {
-      _serviceAvailable = Completer();
-    }
-
-    connectedApp = ConnectedApp();
-
-    _appState?.dispose();
-    _appState = AppState(isolateManager.selectedIsolate);
-
-    // It is critical we call vmServiceOpened on each manager class before
-    // performing any async operations. Otherwise, we may get end up with
-    // race conditions where managers cannot listen for events soon enough.
-    isolateManager.vmServiceOpened(service);
-    consoleService.vmServiceOpened(service);
-    serviceExtensionManager.vmServiceOpened(service, connectedApp!);
+  Future<void> _beforeOpenVmService(VmServiceWrapper? service) async {
+    consoleService.vmServiceOpened(service!);
     resolvedUriManager.vmServiceOpened();
     await vmFlagManager.vmServiceOpened(service);
-    timelineStreamManager.vmServiceOpened(service, connectedApp!);
+    timelineStreamManager.vmServiceOpened(
+      service,
+      serviceManager.connectedApp!,
+    );
     // This needs to be called last in the above group of `vmServiceOpened`
     // calls.
     errorBadgeManager.vmServiceOpened(service);
 
-    if (debugLogServiceProtocolEvents) {
-      serviceTrafficLogger = VmServiceTrafficLogger(service);
-    }
-
     _inspectorService?.dispose();
     _inspectorService = null;
+  }
 
-    if (service != this.service) {
-      // A different service has been opened.
-      return;
-    }
-
-    vm = await service.getVM();
-
-    if (service != this.service) {
-      // A different service has been opened.
-      return;
-    }
-    sdkVersion = vm!.version;
-    if (sdkVersion?.contains(' ') == true) {
-      sdkVersion = sdkVersion!.substring(0, sdkVersion!.indexOf(' '));
-    }
-
-    if (_serviceAvailable.isCompleted) {
-      return;
-    }
-    _serviceAvailable.complete(service);
-
-    setDeviceBusy(false);
-
-    unawaited(onClosed.then((_) => vmServiceClosed()));
-
-    void handleServiceEvent(Event e) {
-      _log.fine('ServiceEvent: [${e.kind}] - ${e.service}');
-      if (e.kind == EventKind.kServiceRegistered) {
-        final serviceName = e.service!;
-        _registeredMethodsForService[serviceName] = e.method!;
-        final serviceNotifier = _registeredServiceNotifiers.putIfAbsent(
-          serviceName,
-          () => ImmediateValueNotifier(true),
-        );
-        serviceNotifier.value = true;
-      }
-
-      if (e.kind == EventKind.kServiceUnregistered) {
-        final serviceName = e.service!;
-        _registeredMethodsForService.remove(serviceName);
-        final serviceNotifier = _registeredServiceNotifiers.putIfAbsent(
-          serviceName,
-          () => ImmediateValueNotifier(false),
-        );
-        serviceNotifier.value = false;
-      }
-    }
-
-    service.onEvent(EventStreams.kService).listen(handleServiceEvent);
-
-    final streamIds = [
-      EventStreams.kDebug,
-      EventStreams.kExtension,
-      EventStreams.kGC,
-      EventStreams.kIsolate,
-      EventStreams.kLogging,
-      EventStreams.kStderr,
-      EventStreams.kStdout,
-      EventStreams.kTimeline,
-      EventStreams.kVM,
-      EventStreams.kService,
-    ];
-
-    for (final id in streamIds) {
-      try {
-        unawaited(service.streamListen(id));
-      } catch (e, st) {
-        if (id.endsWith('Logging')) {
-          // Don't complain about '_Logging' or 'Logging' events (new VMs don't
-          // have the private names, and older ones don't have the public ones).
-        } else {
-          _log.shout("Service client stream not supported: '$id'\n  $e", e, st);
-        }
-      }
-    }
-    if (service != this.service) {
-      // A different service has been opened.
-      return;
-    }
-
-    final isolates = vm?.isolatesForDevToolsMode() ?? <IsolateRef>[];
-    await isolateManager.init(isolates);
-    if (service != this.service) {
-      // A different service has been opened.
-      return;
-    }
+  Future<void> _afterOpenVmService(VmServiceWrapper? service) async {
+    // Re-initialize isolates when VM developer mode is enabled/disabled to
+    // display/hide system isolates.
+    preferences.vmDeveloperModeEnabled
+        .addListener(_handleVmDeveloperModeChanged);
 
     // This needs to be called before calling
-    // `ga.setupUserApplicationDimensions()`.
-    await connectedApp!.initializeValues();
-    if (service != this.service) {
-      // A different service has been opened.
-      return;
+    // `ga.setupUserApplicationDimensions()` and before initializing
+    // [_inspectorService], since both require access to an initialized
+    // [serviceManager.connectedApp] object.
+    await serviceManager.connectedApp!
+        .initializeValues(onComplete: generateDevToolsTitle);
+
+    // Set up analytics dimensions for the connected app.
+    ga.setupUserApplicationDimensions();
+    if (FeatureFlags.devToolsExtensions) {
+      await extensionService.initialize();
     }
 
     _inspectorService = devToolsExtensionPoints.inspectorServiceProvider();
 
-    // Set up analytics dimensions for the connected app.
-    ga.setupUserApplicationDimensions();
-    if (service != this.service) {
-      // A different service has been opened.
-      return;
-    }
+    _appState?.dispose();
+    _appState = AppState(serviceManager.isolateManager.selectedIsolate);
 
-    if (FeatureFlags.devToolsExtensions) {
-      extensionService.initialize();
+    if (debugLogServiceProtocolEvents) {
+      serviceTrafficLogger = VmServiceTrafficLogger(service!);
     }
-
-    _connectedState.value = const ConnectedState(true);
   }
 
-  void manuallyDisconnect() {
-    vmServiceClosed(
-      connectionState:
-          const ConnectedState(false, userInitiatedConnectionState: true),
-    );
-  }
-
-  void vmServiceClosed({
-    ConnectedState connectionState = const ConnectedState(false),
-  }) {
+  void _beforeCloseVmService(VmServiceWrapper? service) {
     // Set [offlineController.previousConnectedApp] in case we need it for
     // viewing data after disconnect. This must be done before resetting the
     // rest of the service manager state.
-    final previousConnectedApp = connectedApp != null
-        ? OfflineConnectedApp.parse(connectedApp!.toJson())
+    final previousConnectedApp = serviceManager.connectedApp != null
+        ? OfflineConnectedApp.parse(serviceManager.connectedApp!.toJson())
         : null;
     offlineController.previousConnectedApp = previousConnectedApp;
+  }
 
-    _serviceAvailable = Completer();
-
-    service = null;
-    vm = null;
-    sdkVersion = null;
-    connectedApp = null;
-
+  void _afterCloseVmService(VmServiceWrapper? service) {
     generateDevToolsTitle();
-
     vmFlagManager.vmServiceClosed();
     timelineStreamManager.vmServiceClosed();
-    serviceExtensionManager.vmServiceClosed();
     resolvedUriManager.vmServiceClosed();
-
-    serviceTrafficLogger?.dispose();
-
-    isolateManager.handleVmServiceClosed();
     consoleService.handleVmServiceClosed();
-    setDeviceBusy(false);
-
-    _connectedState.value = connectionState;
-
-    _registeredMethodsForService.clear();
-
     _inspectorService?.onIsolateStopped();
     _inspectorService?.dispose();
     _inspectorService = null;
+    serviceTrafficLogger?.dispose();
+    preferences.vmDeveloperModeEnabled
+        .removeListener(_handleVmDeveloperModeChanged);
   }
 
-  /// This can throw an [RPCError].
-  Future<void> performHotReload() async {
-    await _callServiceOnMainIsolate(
-      registrations.hotReload.service,
+  Future<void> _handleVmDeveloperModeChanged() async {
+    final vm = await serviceConnection.serviceManager.service!.getVM();
+    final isolates = vm.isolatesForDevToolsMode();
+    final vmDeveloperModeEnabled = preferences.vmDeveloperModeEnabled.value;
+    if (serviceManager.isolateManager.selectedIsolate.value!.isSystemIsolate! &&
+        !vmDeveloperModeEnabled) {
+      serviceManager.isolateManager
+          .selectIsolate(serviceManager.isolateManager.isolates.value.first);
+    }
+    await serviceManager.isolateManager.init(isolates);
+  }
+
+  Future<String?> rootLibraryForMainIsolate() async {
+    final mainIsolateRef = await whenValueNonNull(
+      serviceManager.isolateManager.mainIsolate,
+      timeout: _waitForRootLibraryTimeout,
     );
-  }
+    if (mainIsolateRef == null) return null;
 
-  /// This can throw an [RPCError].
-  Future<void> performHotRestart() async {
-    await _callServiceOnMainIsolate(
-      registrations.hotRestart.service,
-    );
-  }
+    final isolateState =
+        serviceManager.isolateManager.isolateState(mainIsolateRef);
+    await isolateState.waitForIsolateLoad();
+    final rootLib = isolateState.rootInfo?.library;
+    if (rootLib == null) return null;
 
-  Future<Response> get flutterVersion async {
-    return await _callServiceOnMainIsolate(
-      registrations.flutterVersion.service,
-    );
-  }
-
-  Future<void> sendDwdsEvent({
-    required String screen,
-    required String action,
-  }) async {
-    final serviceRegistered = serviceManager.registeredMethodsForService
-        .containsKey(registrations.dwdsSendEvent);
-    if (!serviceRegistered) return;
-    await _callServiceExtensionOnMainIsolate(
-      registrations.dwdsSendEvent,
-      args: {
-        'type': 'DevtoolsEvent',
-        'payload': {
-          'screen': screen,
-          'action': action,
-        },
-      },
-    );
-  }
-
-  Future<Response> _callServiceOnMainIsolate(String name) async {
-    final isolate = await whenValueNonNull(isolateManager.mainIsolate);
-    return await callService(name, isolateId: isolate?.id);
-  }
-
-  Future<Response> _callServiceExtensionOnMainIsolate(
-    String method, {
-    Map<String, dynamic>? args,
-  }) async {
-    final isolate = await whenValueNonNull(isolateManager.mainIsolate);
-
-    return await service!.callServiceExtension(
-      method,
-      args: args,
-      isolateId: isolate?.id,
+    final selectedIsolateRefId = mainIsolateRef.id!;
+    await resolvedUriManager.fetchFileUris(selectedIsolateRefId, [rootLib]);
+    return resolvedUriManager.lookupFileUri(
+      selectedIsolateRefId,
+      rootLib,
     );
   }
 
   Future<Response> get adbMemoryInfo async {
-    return await _callServiceOnMainIsolate(
+    return await serviceManager.callServiceOnMainIsolate(
       registrations.flutterMemoryInfo.service,
     );
   }
@@ -443,7 +202,8 @@ class ServiceConnectionManager {
   ///
   /// Throws an Exception if no 'FlutterView' is present in this isolate.
   Future<String> get flutterViewId async {
-    final flutterViewListResponse = await _callServiceExtensionOnMainIsolate(
+    final flutterViewListResponse =
+        await serviceManager.callServiceExtensionOnMainIsolate(
       registrations.flutterListViews,
     );
     final List<Map<String, Object?>> views =
@@ -471,13 +231,14 @@ class ServiceConnectionManager {
   ///   layerBytes - layer raster cache entries in bytes
   ///   pictureBytes - picture raster cache entries in bytes
   Future<Response?> get rasterCacheMetrics async {
-    if (connectedApp == null || !await connectedApp!.isFlutterApp) {
+    if (serviceManager.connectedApp == null ||
+        !await serviceManager.connectedApp!.isFlutterApp) {
       return null;
     }
 
     final viewId = await flutterViewId;
 
-    return await _callServiceExtensionOnMainIsolate(
+    return await serviceManager.callServiceExtensionOnMainIsolate(
       registrations.flutterEngineEstimateRasterCache,
       args: {
         'viewId': viewId,
@@ -486,13 +247,14 @@ class ServiceConnectionManager {
   }
 
   Future<Response?> get renderFrameWithRasterStats async {
-    if (connectedApp == null || !await connectedApp!.isFlutterApp) {
+    if (serviceManager.connectedApp == null ||
+        !await serviceManager.connectedApp!.isFlutterApp) {
       return null;
     }
 
     final viewId = await flutterViewId;
 
-    return await _callServiceExtensionOnMainIsolate(
+    return await serviceManager.callServiceExtensionOnMainIsolate(
       registrations.renderFrameWithRasterStats,
       args: {
         'viewId': viewId,
@@ -501,14 +263,16 @@ class ServiceConnectionManager {
   }
 
   Future<double?> get queryDisplayRefreshRate async {
-    if (connectedApp == null || !await connectedApp!.isFlutterApp) {
+    if (serviceManager.connectedApp == null ||
+        !await serviceManager.connectedApp!.isFlutterApp) {
       return null;
     }
 
     const unknownRefreshRate = 0.0;
 
     final viewId = await flutterViewId;
-    final displayRefreshRateResponse = await _callServiceExtensionOnMainIsolate(
+    final displayRefreshRateResponse =
+        await serviceManager.callServiceExtensionOnMainIsolate(
       registrations.displayRefreshRate,
       args: {'viewId': viewId},
     );
@@ -523,52 +287,22 @@ class ServiceConnectionManager {
     return fps.roundToDouble();
   }
 
-  bool libraryUriAvailableNow(String? uri) {
-    if (uri == null) return false;
-    assert(_serviceAvailable.isCompleted);
-    assert(serviceManager.isolateManager.mainIsolate.value != null);
-    final isolate = isolateManager.mainIsolateState?.isolateNow;
-    return (isolate?.libraries ?? [])
-        .map((ref) => ref.uri)
-        .toList()
-        .any((u) => u?.startsWith(uri) == true);
+  Future<void> sendDwdsEvent({
+    required String screen,
+    required String action,
+  }) async {
+    final serviceRegistered = serviceManager.registeredMethodsForService
+        .containsKey(registrations.dwdsSendEvent);
+    if (!serviceRegistered) return;
+    await serviceManager.callServiceExtensionOnMainIsolate(
+      registrations.dwdsSendEvent,
+      args: {
+        'type': 'DevtoolsEvent',
+        'payload': {
+          'screen': screen,
+          'action': action,
+        },
+      },
+    );
   }
-
-  Future<bool> libraryUriAvailable(String uri) async {
-    assert(_serviceAvailable.isCompleted);
-    await whenValueNonNull(isolateManager.mainIsolate);
-    return libraryUriAvailableNow(uri);
-  }
-}
-
-class VmServiceCapabilities {
-  VmServiceCapabilities(this.version);
-
-  final Version version;
-}
-
-class ConnectedState {
-  const ConnectedState(
-    this.connected, {
-    this.userInitiatedConnectionState = false,
-  });
-
-  final bool connected;
-
-  /// Whether this [ConnectedState] was manually initiated by the user.
-  final bool userInitiatedConnectionState;
-
-  @override
-  bool operator ==(Object? other) {
-    return other is ConnectedState &&
-        other.connected == connected &&
-        other.userInitiatedConnectionState == userInitiatedConnectionState;
-  }
-
-  @override
-  int get hashCode => Object.hash(connected, userInitiatedConnectionState);
-
-  @override
-  String toString() =>
-      'ConnectedState(connected: $connected, userInitiated: $userInitiatedConnectionState)';
 }

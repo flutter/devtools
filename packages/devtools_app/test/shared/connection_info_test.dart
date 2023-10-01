@@ -3,15 +3,16 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/service/service_registrations.dart'
-    as registrations;
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 void main() {
-  late FakeServiceManager fakeServiceManager;
+  late FakeServiceConnectionManager fakeServiceConnection;
 
   const windowSize = Size(2000.0, 1000.0);
 
@@ -20,24 +21,25 @@ void main() {
       bool flutterVersionServiceAvailable = true,
     }) {
       final availableServices = [
-        if (flutterVersionServiceAvailable)
-          registrations.flutterVersion.service,
+        if (flutterVersionServiceAvailable) flutterVersionService.service,
       ];
-      fakeServiceManager = FakeServiceManager(
+      fakeServiceConnection = FakeServiceConnectionManager(
         availableServices: availableServices,
       );
-      when(fakeServiceManager.vm.version).thenReturn('1.9.1');
-      when(fakeServiceManager.vm.targetCPU).thenReturn('x64');
-      when(fakeServiceManager.vm.architectureBits).thenReturn(64);
-      when(fakeServiceManager.vm.operatingSystem).thenReturn('android');
-      final app = fakeServiceManager.connectedApp!;
+      when(fakeServiceConnection.serviceManager.vm.version).thenReturn('1.9.1');
+      when(fakeServiceConnection.serviceManager.vm.targetCPU).thenReturn('x64');
+      when(fakeServiceConnection.serviceManager.vm.architectureBits)
+          .thenReturn(64);
+      when(fakeServiceConnection.serviceManager.vm.operatingSystem)
+          .thenReturn('android');
+      final app = fakeServiceConnection.serviceManager.connectedApp!;
       mockConnectedApp(
         app,
         isFlutterApp: true,
         isProfileBuild: false,
         isWebApp: false,
       );
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(ServiceConnectionManager, fakeServiceConnection);
       setGlobal(IdeTheme, IdeTheme());
     }
 
@@ -49,8 +51,8 @@ void main() {
       'builds summary for dart web app',
       windowSize,
       (WidgetTester tester) async {
-        final app = fakeServiceManager.connectedApp!;
-        mockWebVm(fakeServiceManager.vm);
+        final app = fakeServiceConnection.serviceManager.connectedApp!;
+        mockWebVm(fakeServiceConnection.serviceManager.vm);
         mockConnectedApp(
           app,
           isFlutterApp: false,
@@ -80,8 +82,9 @@ void main() {
       'builds dialog for dart CLI app',
       windowSize,
       (WidgetTester tester) async {
-        final app = fakeServiceManager.connectedApp!;
-        when(fakeServiceManager.vm.operatingSystem).thenReturn('macos');
+        final app = fakeServiceConnection.serviceManager.connectedApp!;
+        when(fakeServiceConnection.serviceManager.vm.operatingSystem)
+            .thenReturn('macos');
         mockConnectedApp(
           app,
           isFlutterApp: false,
@@ -111,7 +114,7 @@ void main() {
       'builds dialog for flutter native app (debug)',
       windowSize,
       (WidgetTester tester) async {
-        final app = fakeServiceManager.connectedApp!;
+        final app = fakeServiceConnection.serviceManager.connectedApp!;
         mockConnectedApp(
           app,
           isFlutterApp: true,
@@ -143,7 +146,7 @@ void main() {
       'builds dialog for flutter native app (profile)',
       windowSize,
       (WidgetTester tester) async {
-        final app = fakeServiceManager.connectedApp!;
+        final app = fakeServiceConnection.serviceManager.connectedApp!;
         mockConnectedApp(
           app,
           isFlutterApp: true,
@@ -174,8 +177,8 @@ void main() {
       'builds dialog for flutter web app (debug)',
       windowSize,
       (WidgetTester tester) async {
-        final app = fakeServiceManager.connectedApp!;
-        mockWebVm(fakeServiceManager.vm);
+        final app = fakeServiceConnection.serviceManager.connectedApp!;
+        mockWebVm(fakeServiceConnection.serviceManager.vm);
         mockConnectedApp(
           app,
           isFlutterApp: true,
@@ -207,8 +210,8 @@ void main() {
       'builds dialog for flutter web app (profile)',
       windowSize,
       (WidgetTester tester) async {
-        final app = fakeServiceManager.connectedApp!;
-        mockWebVm(fakeServiceManager.vm);
+        final app = fakeServiceConnection.serviceManager.connectedApp!;
+        mockWebVm(fakeServiceConnection.serviceManager.vm);
         mockConnectedApp(
           app,
           isFlutterApp: true,

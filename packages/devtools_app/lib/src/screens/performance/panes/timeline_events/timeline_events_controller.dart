@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 
@@ -13,7 +14,6 @@ import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/analytics/metrics.dart';
 import '../../../../shared/future_work_tracker.dart';
 import '../../../../shared/globals.dart';
-import '../../../../shared/primitives/auto_dispose.dart';
 import '../../../../shared/primitives/trace_event.dart';
 import '../../../../shared/primitives/utils.dart';
 import '../../performance_controller.dart';
@@ -123,10 +123,10 @@ class TimelineEventsController extends PerformanceFeatureController
   }
 
   Future<void> _initForServiceConnection() async {
-    await serviceManager.timelineStreamManager.setDefaultTimelineStreams();
+    await serviceConnection.timelineStreamManager.setDefaultTimelineStreams();
 
-    addAutoDisposeListener(serviceManager.connectedState, () {
-      if (!serviceManager.connectedState.value.connected) {
+    addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
+      if (!serviceConnection.serviceManager.connectedState.value.connected) {
         _pollingTimer?.cancel();
         _timelinePollingRateLimiter?.dispose();
       }
@@ -154,7 +154,7 @@ class TimelineEventsController extends PerformanceFeatureController
   Future<void> _pullTraceEventsFromVmTimeline({
     bool isInitialPull = false,
   }) async {
-    final service = serviceManager.service;
+    final service = serviceConnection.serviceManager.service;
     if (service == null) return;
     final currentVmTime = await service.getVMTimelineMicros();
     debugTraceEventCallback(
@@ -203,12 +203,12 @@ class TimelineEventsController extends PerformanceFeatureController
   }) {
     // This can happen if there is a race between this method being called and
     // losing connection to the app.
-    if (serviceManager.connectedApp == null) return;
+    if (serviceConnection.serviceManager.connectedApp == null) return;
 
     final offlineData = performanceController.offlinePerformanceData;
     final isFlutterApp = offlineController.offlineMode.value
         ? offlineData != null && offlineData.frames.isNotEmpty
-        : serviceManager.connectedApp!.isFlutterAppNow!;
+        : serviceConnection.serviceManager.connectedApp!.isFlutterAppNow!;
 
     // TODO(kenz): Remove this logic once ui/raster distinction changes are
     // available in the engine.
@@ -407,8 +407,8 @@ class TimelineEventsController extends PerformanceFeatureController
     data!.addTimelineEvent(event);
     if (event is SyncTimelineEvent) {
       if (!offlineController.offlineMode.value &&
-          serviceManager.hasConnection &&
-          !serviceManager.connectedApp!.isFlutterAppNow!) {
+          serviceConnection.serviceManager.hasConnection &&
+          !serviceConnection.serviceManager.connectedApp!.isFlutterAppNow!) {
         return;
       }
 

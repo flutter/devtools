@@ -28,7 +28,11 @@ void main() {
         'Open the Performance screen and switch to the Timeline Events tab',
       );
 
-      await switchToScreen(tester, ScreenMetaData.performance);
+      await switchToScreen(
+        tester,
+        tabIcon: ScreenMetaData.performance.icon!,
+        screenId: ScreenMetaData.performance.id,
+      );
       await tester.pump(safePumpDuration);
 
       await tester.tap(find.widgetWithText(InkWell, 'Timeline Events'));

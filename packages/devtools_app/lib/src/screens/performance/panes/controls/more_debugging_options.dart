@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../service/service_extension_widgets.dart';
 import '../../../../service/service_extensions.dart' as extensions;
 import '../../../../shared/feature_flags.dart';
 import '../../../../shared/globals.dart';
-import '../../../../shared/theme.dart';
 import 'performance_controls.dart';
 
 class MoreDebuggingOptionsButton extends StatelessWidget {
@@ -41,7 +41,8 @@ class MoreDebuggingOptionsButton extends StatelessWidget {
             'layer might help identify expensive operations in your app.',
             style: theme.subtleTextStyle,
           ),
-          if (serviceManager.connectedApp!.isProfileBuildNow!) ...[
+          if (serviceConnection
+              .serviceManager.connectedApp!.isProfileBuildNow!) ...[
             const SizedBox(height: denseSpacing),
             RichText(
               text: TextSpan(

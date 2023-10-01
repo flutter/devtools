@@ -9,8 +9,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
+import 'package:devtools_shared/devtools_test_utils.dart';
 
-import '_io_utils.dart';
 import '_utils.dart';
 
 class TestFlutterApp extends IntegrationTestApp {
@@ -30,6 +30,8 @@ class TestFlutterApp extends IntegrationTestApp {
         '--machine',
         '-d',
         testAppDevice.argName,
+        // Do not serve DevTools from Flutter Tools.
+        '--no-devtools',
       ],
       workingDirectory: testAppPath,
     );
@@ -271,7 +273,7 @@ class TestDartCliApp extends IntegrationTestApp {
 abstract class IntegrationTestApp with IOMixin {
   IntegrationTestApp(this.testAppPath, this.testAppDevice);
 
-  static const _appStartTimeout = Duration(seconds: 120);
+  static const _appStartTimeout = Duration(seconds: 240);
 
   static const _defaultTimeout = Duration(seconds: 40);
 
@@ -301,6 +303,7 @@ abstract class IntegrationTestApp with IOMixin {
   Future<void> manuallyStopApp() async {}
 
   Future<void> start() async {
+    _debugPrint('starting the test app process for $testAppPath');
     await startProcess();
     assert(
       runProcess != null,
@@ -319,6 +322,7 @@ abstract class IntegrationTestApp with IOMixin {
 
     listenToProcessOutput(runProcess!, printCallback: _debugPrint);
 
+    _debugPrint('waiting for app start...');
     await waitForAppStart();
   }
 
@@ -327,7 +331,10 @@ abstract class IntegrationTestApp with IOMixin {
     _debugPrint('Waiting for process to end');
     return runProcess!.exitCode.timeout(
       IOMixin.killTimeout,
-      onTimeout: () => killGracefully(runProcess!),
+      onTimeout: () => killGracefully(
+        runProcess!,
+        debugLogging: debugTestScript,
+      ),
     );
   }
 
@@ -363,9 +370,7 @@ abstract class IntegrationTestApp with IOMixin {
     final truncatedMsg =
         msg.length > maxLength ? '${msg.substring(0, maxLength)}...' : msg;
     _allMessages.add(truncatedMsg);
-    if (debugTestScript) {
-      print('_TestApp - $truncatedMsg');
-    }
+    debugLog('_TestApp - $truncatedMsg');
     return msg;
   }
 }

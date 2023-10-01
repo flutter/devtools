@@ -8,7 +8,7 @@ import '../../globals.dart';
 import '../../vm_utils.dart';
 
 class EvalScope {
-  /// Parameter `scope` for `serviceManager.service!.evaluate(...)`.
+  /// Parameter `scope` for `serviceManager.manager.service!.evaluate(...)`.
   ///
   /// Maps variable name to targetId.
   Map<String, String> value({required String isolateId}) =>
@@ -54,7 +54,7 @@ class EvalScope {
   ) async {
     Obj? object;
     try {
-      object = await serviceManager.service!.getObject(
+      object = await serviceConnection.serviceManager.service!.getObject(
         isolateId,
         ref.id!,
       );

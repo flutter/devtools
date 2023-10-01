@@ -7,11 +7,9 @@
 @TestOn('vm')
 import 'dart:async';
 
-import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/shared/console/primitives/simple_items.dart';
-import 'package:devtools_app/src/shared/diagnostics/diagnostics_node.dart';
-import 'package:devtools_app/src/shared/diagnostics/inspector_service.dart';
-import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -29,7 +27,7 @@ void main() {
   InspectorService? inspectorService;
 
   env.afterEverySetup = () async {
-    assert(serviceManager.connectedAppInitialized);
+    assert(serviceConnection.serviceManager.connectedAppInitialized);
     setGlobal(IdeTheme, IdeTheme());
 
     inspectorService = InspectorService();

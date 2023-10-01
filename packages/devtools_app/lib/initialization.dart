@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
@@ -12,9 +14,7 @@ import 'src/screens/debugger/syntax_highlighter.dart';
 import 'src/screens/provider/riverpod_error_logger_observer.dart';
 import 'src/shared/analytics/analytics_controller.dart';
 import 'src/shared/config_specific/framework_initialize/framework_initialize.dart';
-import 'src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'src/shared/config_specific/logger/logger_helpers.dart';
-import 'src/shared/config_specific/url/url.dart';
 import 'src/shared/feature_flags.dart';
 import 'src/shared/globals.dart';
 import 'src/shared/preferences.dart';

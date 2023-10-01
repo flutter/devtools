@@ -6,8 +6,8 @@ import 'dart:convert';
 
 import 'package:devtools_app/src/screens/network/network_controller.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/primitives/utils.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
@@ -71,7 +71,7 @@ void main() {
 
   group('DartIOHttpRequestData', () {
     NetworkController controller;
-    FakeServiceManager fakeServiceManager;
+    FakeServiceConnectionManager fakeServiceConnection;
     SocketProfile socketProfile;
     HttpProfile httpProfile;
 
@@ -80,13 +80,13 @@ void main() {
       httpProfile = loadHttpProfile();
       // DartIOHttpRequestData.getFullRequestData relies on a call to serviceManager to
       // retrieve request details.
-      fakeServiceManager = FakeServiceManager(
+      fakeServiceConnection = FakeServiceConnectionManager(
         service: FakeServiceManager.createFakeService(
           socketProfile: socketProfile,
           httpProfile: httpProfile,
         ),
       );
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(ServiceConnectionManager, fakeServiceConnection);
       controller = NetworkController();
       await controller.startRecording();
     });

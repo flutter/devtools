@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/ui/utils.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -14,7 +14,7 @@ import '../test_infra/matchers/matchers.dart';
 
 void main() {
   setUp(() {
-    setGlobal(ServiceConnectionManager, FakeServiceManager());
+    setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
     setGlobal(IdeTheme, IdeTheme());
   });
 

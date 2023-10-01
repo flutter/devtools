@@ -8,9 +8,13 @@ import 'dart:convert';
 // ignore: avoid_web_libraries_in_flutter, as designed
 import 'dart:html';
 
+import 'package:collection/collection.dart';
+import 'package:devtools_shared/devtools_deeplink.dart';
+import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:logging/logging.dart';
 
+import '../../development_helpers.dart';
 import '../../primitives/utils.dart';
 
 final _log = Logger('_server_web');
@@ -335,6 +339,159 @@ DevToolsJsonFile _devToolsJsonFileFromResponse(
     lastModifiedTime: lastModifiedTime,
     data: data,
   );
+}
+
+/// Makes a request to the server to refresh the list of available extensions,
+/// serve their assets on the server, and return the list of available
+/// extensions here.
+Future<List<DevToolsExtensionConfig>> refreshAvailableExtensions(
+  String rootPath,
+) async {
+  if (isDevToolsServerAvailable) {
+    final uri = Uri(
+      path: ExtensionsApi.apiServeAvailableExtensions,
+      queryParameters: {ExtensionsApi.extensionRootPathPropertyName: rootPath},
+    );
+    final resp = await request(uri.toString());
+    if (resp?.status == HttpStatus.ok) {
+      final parsedResult = json.decode(resp!.responseText!);
+      final extensionsAsJson =
+          (parsedResult[ExtensionsApi.extensionsResultPropertyName]!
+                  as List<Object?>)
+              .whereNotNull()
+              .cast<Map<String, Object?>>();
+      return extensionsAsJson
+          .map((p) => DevToolsExtensionConfig.parse(p))
+          .toList();
+    } else {
+      logWarning(resp, ExtensionsApi.apiServeAvailableExtensions);
+      return [];
+    }
+  } else if (debugDevToolsExtensions) {
+    return debugHandleRefreshAvailableExtensions(rootPath);
+  }
+  return [];
+}
+
+/// Makes a request to the server to look up the enabled state for a
+/// DevTools extension, and optionally to set the enabled state (when [enable]
+/// is non-null).
+///
+/// If [enable] is specified, the server will first set the enabled state
+/// to the value set forth by [enable] and then return the value that is saved
+/// to disk.
+Future<ExtensionEnabledState> extensionEnabledState({
+  required String rootPath,
+  required String extensionName,
+  bool? enable,
+}) async {
+  if (isDevToolsServerAvailable) {
+    final uri = Uri(
+      path: ExtensionsApi.apiExtensionEnabledState,
+      queryParameters: {
+        ExtensionsApi.extensionRootPathPropertyName: rootPath,
+        ExtensionsApi.extensionNamePropertyName: extensionName,
+        if (enable != null)
+          ExtensionsApi.enabledStatePropertyName: enable.toString(),
+      },
+    );
+    final resp = await request(uri.toString());
+    if (resp?.status == HttpStatus.ok) {
+      final parsedResult = json.decode(resp!.responseText!);
+      return ExtensionEnabledState.from(parsedResult);
+    } else {
+      logWarning(resp, ExtensionsApi.apiExtensionEnabledState);
+    }
+  } else if (debugDevToolsExtensions) {
+    return debugHandleExtensionEnabledState(
+      rootPath: rootPath,
+      extensionName: extensionName,
+      enable: enable,
+    );
+  }
+  return ExtensionEnabledState.error;
+}
+
+Future<List<String>> requestAndroidBuildVariants(String path) async {
+  if (isDevToolsServerAvailable) {
+    final uri = Uri(
+      path: DeeplinkApi.androidBuildVariants,
+      queryParameters: {
+        DeeplinkApi.deeplinkRootPathPropertyName: path,
+      },
+    );
+    final resp = await request(uri.toString());
+    if (resp?.status == HttpStatus.ok) {
+      return json.decode(resp!.responseText!);
+    } else {
+      logWarning(resp, DeeplinkApi.androidBuildVariants);
+    }
+  }
+  return const <String>[];
+}
+
+Future<AppLinkSettings> requestAndroidAppLinkSettings(
+  String path, {
+  required String buildVariant,
+}) async {
+  if (isDevToolsServerAvailable) {
+    final uri = Uri(
+      path: DeeplinkApi.androidAppLinkSettings,
+      queryParameters: {
+        DeeplinkApi.deeplinkRootPathPropertyName: path,
+        DeeplinkApi.androidBuildVariantPropertyName: buildVariant,
+      },
+    );
+    final resp = await request(uri.toString());
+    if (resp?.status == HttpStatus.ok) {
+      return AppLinkSettings.fromJson(resp!.responseText!);
+    } else {
+      logWarning(resp, DeeplinkApi.androidAppLinkSettings);
+    }
+  }
+  return AppLinkSettings.empty;
+}
+
+Future<XcodeBuildOptions> requestIosBuildOptions(String path) async {
+  if (isDevToolsServerAvailable) {
+    final uri = Uri(
+      path: DeeplinkApi.iosBuildOptions,
+      queryParameters: {
+        DeeplinkApi.deeplinkRootPathPropertyName: path,
+      },
+    );
+    final resp = await request(uri.toString());
+    if (resp?.status == HttpStatus.ok) {
+      return XcodeBuildOptions.fromJson(resp!.responseText!);
+    } else {
+      logWarning(resp, DeeplinkApi.iosBuildOptions);
+    }
+  }
+  return XcodeBuildOptions.empty;
+}
+
+Future<UniversalLinkSettings> requestIosUniversalLinkSettings(
+  String path, {
+  required String configuration,
+  required String target,
+}) async {
+  if (isDevToolsServerAvailable) {
+    final uri = Uri(
+      path: DeeplinkApi.iosUniversalLinkSettings,
+      queryParameters: {
+        DeeplinkApi.deeplinkRootPathPropertyName: path,
+        DeeplinkApi.xcodeConfigurationPropertyName: configuration,
+        DeeplinkApi.xcodeTargetPropertyName: target,
+      },
+    );
+    final resp = await request(uri.toString());
+    if (resp?.status == HttpStatus.ok) {
+      return UniversalLinkSettings.fromJson(resp!.responseText!);
+    } else {
+      logWarning(resp, DeeplinkApi.iosUniversalLinkSettings);
+    }
+  }
+  return UniversalLinkSettings.empty;
 }
 
 void logWarning(HttpRequest? response, String apiType, [String? respText]) {

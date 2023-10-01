@@ -2,35 +2,33 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_extensions/api.dart';
+import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:flutter/material.dart';
 
+import '../shared/analytics/analytics.dart' as ga;
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
-import '../shared/primitives/listenable.dart';
+import '../shared/globals.dart';
 import '../shared/primitives/utils.dart';
 import '../shared/screen.dart';
-import '../shared/theme.dart';
 import 'embedded/controller.dart';
 import 'embedded/view.dart';
-import 'extension_model.dart';
+import 'extension_screen_controls.dart';
 
 class ExtensionScreen extends Screen {
   ExtensionScreen(this.extensionConfig)
       : super.conditional(
           // TODO(kenz): we may need to ensure this is a unique id.
-          id: '${extensionConfig.name}-ext',
-          title: extensionConfig.name.toSentenceCase(),
+          id: '${extensionConfig.name}_ext',
+          title: extensionConfig.screenTitle,
           icon: extensionConfig.icon,
           // TODO(kenz): support static DevTools extensions.
           requiresConnection: true,
         );
 
   final DevToolsExtensionConfig extensionConfig;
-
-  @override
-  ValueListenable<bool> get showIsolateSelector =>
-      const FixedValueListenable<bool>(true);
 
   @override
   Widget build(BuildContext context) =>
@@ -43,15 +41,24 @@ class _ExtensionScreenBody extends StatefulWidget {
   final DevToolsExtensionConfig extensionConfig;
 
   @override
-  State<_ExtensionScreenBody> createState() => __ExtensionScreenBodyState();
+  State<_ExtensionScreenBody> createState() => _ExtensionScreenBodyState();
 }
 
-class __ExtensionScreenBodyState extends State<_ExtensionScreenBody> {
+class _ExtensionScreenBodyState extends State<_ExtensionScreenBody> {
   EmbeddedExtensionController? extensionController;
 
   @override
   void initState() {
     super.initState();
+    _init();
+  }
+
+  void _init() {
+    ga.screen(
+      gac.DevToolsExtensionEvents.extensionScreenName(
+        widget.extensionConfig.name,
+      ),
+    );
     extensionController =
         createEmbeddedExtensionController(widget.extensionConfig)..init();
   }
@@ -67,8 +74,7 @@ class __ExtensionScreenBodyState extends State<_ExtensionScreenBody> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.extensionConfig != widget.extensionConfig) {
       extensionController?.dispose();
-      extensionController =
-          createEmbeddedExtensionController(widget.extensionConfig)..init();
+      _init();
     }
   }
 
@@ -94,64 +100,43 @@ class ExtensionView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RoundedOutlinedBorder(
-      clip: true,
-      child: Column(
-        children: [
-          EmbeddedExtensionHeader(extension: extension),
-          Expanded(
-            child: KeepAliveWrapper(
-              child: Center(
-                child: EmbeddedExtensionView(controller: controller),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// TODO(kenz): add button to deactivate extension once activate / deactivate
-// logic is hooked up.
-class EmbeddedExtensionHeader extends StatelessWidget {
-  const EmbeddedExtensionHeader({super.key, required this.extension});
-
-  final DevToolsExtensionConfig extension;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final extensionName = extension.name.toLowerCase();
-    return AreaPaneHeader(
-      title: RichText(
-        text: TextSpan(
-          text: 'package:$extensionName extension',
-          style: theme.regularTextStyle.copyWith(fontWeight: FontWeight.bold),
-          children: [
-            TextSpan(
-              text: ' (v${extension.version})',
-              style: theme.subtleTextStyle,
-            ),
-          ],
+    return Column(
+      children: [
+        EmbeddedExtensionHeader(
+          extension: extension,
+          onForceReload: () =>
+              controller.postMessage(DevToolsExtensionEventType.forceReload),
         ),
-      ),
-      includeTopBorder: false,
-      roundedTopBorder: false,
-      rightPadding: defaultSpacing,
-      actions: [
-        RichText(
-          text: LinkTextSpan(
-            link: Link(
-              display: 'Report an issue',
-              url: extension.issueTrackerLink,
-              gaScreenName: gac.extensionScreenId,
-              gaSelectedItemDescription: gac.extensionFeedback(extensionName),
+        const SizedBox(height: intermediateSpacing),
+        Expanded(
+          child: ValueListenableBuilder<ExtensionEnabledState>(
+            valueListenable: extensionService.enabledStateListenable(
+              extension.name,
             ),
-            context: context,
+            builder: (context, activationState, _) {
+              if (activationState == ExtensionEnabledState.enabled) {
+                return KeepAliveWrapper(
+                  child: Center(
+                    child: EmbeddedExtensionView(controller: controller),
+                  ),
+                );
+              }
+              return EnableExtensionPrompt(
+                extension: controller.extensionConfig,
+              );
+            },
           ),
         ),
       ],
     );
   }
+}
+
+extension ExtensionConfigExtension on DevToolsExtensionConfig {
+  IconData get icon => IconData(
+        materialIconCodePoint,
+        fontFamily: 'MaterialIcons',
+      );
+
+  String get screenTitle => name.toSentenceCase();
 }

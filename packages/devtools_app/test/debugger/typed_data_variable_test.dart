@@ -5,10 +5,10 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/diagnostics/dart_object_node.dart';
 import 'package:devtools_app/src/shared/diagnostics/tree_builder.dart';
-import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -31,7 +31,7 @@ void main() {
   setUp(() {
     final service = createMockVmServiceWrapperWithDefaults();
 
-    manager = FakeServiceManager(service: service);
+    manager = FakeServiceConnectionManager(service: service);
     setGlobal(ServiceConnectionManager, manager);
   });
 
@@ -51,7 +51,8 @@ void main() {
       isolateRef,
     );
 
-    when(manager.service!.getObject(isolateId, objectId)).thenAnswer((_) async {
+    when(manager.serviceManager.service!.getObject(isolateId, objectId))
+        .thenAnswer((_) async {
       return instance;
     });
 
@@ -80,7 +81,8 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service!.getObject(isolateId, objectId)).thenAnswer((_) async {
+    when(manager.serviceManager.service!.getObject(isolateId, objectId))
+        .thenAnswer((_) async {
       return instance;
     });
 
@@ -109,7 +111,8 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service!.getObject(isolateId, objectId)).thenAnswer((_) async {
+    when(manager.serviceManager.service!.getObject(isolateId, objectId))
+        .thenAnswer((_) async {
       return instance;
     });
 
@@ -138,7 +141,8 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service!.getObject(isolateId, objectId)).thenAnswer((_) async {
+    when(manager.serviceManager.service!.getObject(isolateId, objectId))
+        .thenAnswer((_) async {
       return instance;
     });
 
@@ -170,7 +174,7 @@ void main() {
         ),
         isolateRef,
       );
-      when(manager.service!.getObject(isolateId, objectId))
+      when(manager.serviceManager.service!.getObject(isolateId, objectId))
           .thenAnswer((_) async {
         return instance;
       });
@@ -202,7 +206,8 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service!.getObject(isolateId, objectId)).thenAnswer((_) async {
+    when(manager.serviceManager.service!.getObject(isolateId, objectId))
+        .thenAnswer((_) async {
       return instance;
     });
 
@@ -231,7 +236,8 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service!.getObject(isolateId, objectId)).thenAnswer((_) async {
+    when(manager.serviceManager.service!.getObject(isolateId, objectId))
+        .thenAnswer((_) async {
       return instance;
     });
 
@@ -260,7 +266,8 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service!.getObject(isolateId, objectId)).thenAnswer((_) async {
+    when(manager.serviceManager.service!.getObject(isolateId, objectId))
+        .thenAnswer((_) async {
       return instance;
     });
 
@@ -292,7 +299,7 @@ void main() {
         ),
         isolateRef,
       );
-      when(manager.service!.getObject(isolateId, objectId))
+      when(manager.serviceManager.service!.getObject(isolateId, objectId))
           .thenAnswer((_) async {
         return instance;
       });
@@ -325,7 +332,8 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service!.getObject(isolateId, objectId)).thenAnswer((_) async {
+    when(manager.serviceManager.service!.getObject(isolateId, objectId))
+        .thenAnswer((_) async {
       return instance;
     });
 
@@ -354,7 +362,8 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service!.getObject(isolateId, objectId)).thenAnswer((_) async {
+    when(manager.serviceManager.service!.getObject(isolateId, objectId))
+        .thenAnswer((_) async {
       return instance;
     });
 
@@ -384,7 +393,8 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service!.getObject(isolateId, objectId)).thenAnswer((_) async {
+    when(manager.serviceManager.service!.getObject(isolateId, objectId))
+        .thenAnswer((_) async {
       return instance;
     });
     await buildVariablesTree(variable);
@@ -420,7 +430,8 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service!.getObject(isolateId, objectId)).thenAnswer((_) async {
+    when(manager.serviceManager.service!.getObject(isolateId, objectId))
+        .thenAnswer((_) async {
       return instance;
     });
 
@@ -454,7 +465,8 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service!.getObject(isolateId, objectId)).thenAnswer((_) async {
+    when(manager.serviceManager.service!.getObject(isolateId, objectId))
+        .thenAnswer((_) async {
       return instance;
     });
 

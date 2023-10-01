@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../framework/scaffold.dart';
@@ -14,13 +16,10 @@ import '../../../../shared/analytics/metrics.dart';
 import '../../../../shared/banner_messages.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
-import '../../../../shared/primitives/auto_dispose.dart';
 import '../../../../shared/primitives/utils.dart';
-import '../../../../shared/theme.dart';
 import '../../../../shared/ui/colors.dart';
 import '../../../../shared/ui/hover.dart';
 import '../../../../shared/ui/utils.dart';
-import '../../../../shared/utils.dart';
 import '../../performance_screen.dart';
 import '../../performance_utils.dart';
 import 'flutter_frame_model.dart';
@@ -42,21 +41,22 @@ class FlutterFramesChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DualValueListenableBuilder<List<FlutterFrame>, double>(
-      firstListenable: framesController.flutterFrames,
-      secondListenable: framesController.displayRefreshRate,
-      builder: (context, frames, displayRefreshRate, child) {
-        return ValueListenableBuilder<bool>(
-          valueListenable: preferences.performance.showFlutterFramesChart,
-          builder: (context, show, _) {
-            return _FlutterFramesChart(
-              framesController: framesController,
-              frames: frames,
-              displayRefreshRate: displayRefreshRate,
-              isVisible: show,
-              offlineMode: offlineMode,
-            );
-          },
+    return MultiValueListenableBuilder(
+      listenables: [
+        framesController.flutterFrames,
+        framesController.displayRefreshRate,
+        preferences.performance.showFlutterFramesChart,
+      ],
+      builder: (context, values, child) {
+        final frames = values.first as List<FlutterFrame>;
+        final displayRefreshRate = values.second as double;
+        final showChart = values.third as bool;
+        return _FlutterFramesChart(
+          framesController: framesController,
+          frames: frames,
+          displayRefreshRate: displayRefreshRate,
+          isVisible: showChart,
+          offlineMode: offlineMode,
         );
       },
     );

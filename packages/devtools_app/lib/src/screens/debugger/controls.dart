@@ -5,15 +5,15 @@
 import 'dart:async';
 
 import 'package:codicon/codicon.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
-import '../../shared/primitives/auto_dispose.dart';
-import '../../shared/theme.dart';
-import '../../shared/ui/label.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/utils.dart';
 import 'debugger_controller.dart';
 
@@ -35,7 +35,8 @@ class _DebuggingControlsState extends State<DebuggingControls>
     super.didChangeDependencies();
     if (!initController()) return;
     addAutoDisposeListener(
-      serviceManager.isolateManager.mainIsolateState?.isPaused,
+      serviceConnection
+          .serviceManager.isolateManager.mainIsolateState?.isPaused,
     );
     addAutoDisposeListener(controller.resuming);
     addAutoDisposeListener(controller.stackFramesWithLocation);
@@ -46,17 +47,19 @@ class _DebuggingControlsState extends State<DebuggingControls>
     final resuming = controller.resuming.value;
     final hasStackFrames = controller.stackFramesWithLocation.value.isNotEmpty;
     final isSystemIsolate = controller.isSystemIsolate;
-    final canStep = serviceManager.isMainIsolatePaused &&
+    final canStep = serviceConnection.serviceManager.isMainIsolatePaused &&
         !resuming &&
         hasStackFrames &&
         !isSystemIsolate;
-    final isVmApp = serviceManager.connectedApp?.isRunningOnDartVM ?? false;
+    final isVmApp =
+        serviceConnection.serviceManager.connectedApp?.isRunningOnDartVM ??
+            false;
     return SizedBox(
       height: defaultButtonHeight,
       child: Row(
         children: [
           _pauseAndResumeButtons(
-            isPaused: serviceManager.isMainIsolatePaused,
+            isPaused: serviceConnection.serviceManager.isMainIsolatePaused,
             resuming: resuming,
           ),
           const SizedBox(width: denseSpacing),
@@ -143,7 +146,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
     return ValueListenableBuilder<bool>(
       valueListenable: controller.codeViewController.fileExplorerVisible,
       builder: (context, visible, _) {
-        return DevToolsButton(
+        return GaDevToolsButton(
           icon: Icons.folder_outlined,
           label: 'File Explorer',
           onPressed: controller.codeViewController.toggleLibrariesVisible,
@@ -167,10 +170,14 @@ class CodeStatisticsControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DualValueListenableBuilder<bool, bool>(
-      firstListenable: controller.codeViewController.showCodeCoverage,
-      secondListenable: controller.codeViewController.showProfileInformation,
-      builder: (context, showCodeCoverage, showProfileInformation, _) {
+    return MultiValueListenableBuilder(
+      listenables: [
+        controller.codeViewController.showCodeCoverage,
+        controller.codeViewController.showProfileInformation,
+      ],
+      builder: (context, values, _) {
+        final showCodeCoverage = values.first as bool;
+        final showProfileInformation = values.second as bool;
         return Row(
           children: [
             // TODO(kenz): clean up this button group when records are
@@ -339,12 +346,8 @@ class DebuggerButton extends StatelessWidget {
           side: BorderSide.none,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.horizontal(
-              left: roundedLeftBorder
-                  ? const Radius.circular(defaultBorderRadius)
-                  : Radius.zero,
-              right: roundedRightBorder
-                  ? const Radius.circular(defaultBorderRadius)
-                  : Radius.zero,
+              left: roundedLeftBorder ? defaultRadius : Radius.zero,
+              right: roundedRightBorder ? defaultRadius : Radius.zero,
             ),
           ),
         ),

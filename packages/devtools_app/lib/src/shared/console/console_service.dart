@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -15,7 +16,6 @@ import '../diagnostics/inspector_service.dart';
 import '../diagnostics/tree_builder.dart';
 import '../globals.dart';
 import '../memory/adapted_heap_data.dart';
-import '../primitives/auto_dispose.dart';
 import '../primitives/utils.dart';
 
 /// A line in the console.
@@ -73,7 +73,7 @@ class VariableConsoleLine extends ConsoleLine {
 
 /// Source of truth for the state of the Console including both events from the
 /// VM and events emitted from other UI.
-class ConsoleService extends Disposer {
+class ConsoleService with DisposerMixin {
   void appendBrowsableInstance({
     required InstanceRef? instanceRef,
     required IsolateRef? isolateRef,
@@ -82,7 +82,7 @@ class ConsoleService extends Disposer {
     if (instanceRef == null) {
       final object = heapSelection?.object;
       if (object == null || isolateRef == null) {
-        serviceManager.consoleService.appendStdio(
+        serviceConnection.consoleService.appendStdio(
           'Not enough information to browse the instance.',
         );
         return;
@@ -136,7 +136,7 @@ class ConsoleService extends Disposer {
   bool _stdioTrailingNewline = false;
 
   InspectorObjectGroupBase get objectGroup {
-    final inspectorService = serviceManager.inspectorService!;
+    final inspectorService = serviceConnection.inspectorService!;
     if (_objectGroup?.inspectorService == inspectorService) {
       return _objectGroup!;
     }
@@ -231,9 +231,12 @@ class ConsoleService extends Disposer {
     autoDisposeStreamSubscription(
       service.onDebugEvent.listen(_handleDebugEvent),
     );
-    addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
-      clearStdio();
-    });
+    addAutoDisposeListener(
+      serviceConnection.serviceManager.isolateManager.mainIsolate,
+      () {
+        clearStdio();
+      },
+    );
   }
 
   /// Whether the console service has been initialized.
@@ -251,18 +254,19 @@ class ConsoleService extends Disposer {
   /// low-end devices, as well as when DevTools pages that don't need the
   /// [ConsoleService] are being used.
   void ensureServiceInitialized() {
-    assert(serviceManager.isServiceAvailable);
-    if (!_serviceInitialized && serviceManager.isServiceAvailable) {
+    assert(serviceConnection.serviceManager.isServiceAvailable);
+    if (!_serviceInitialized &&
+        serviceConnection.serviceManager.isServiceAvailable) {
       autoDisposeStreamSubscription(
-        serviceManager.service!.onStdoutEventWithHistory
+        serviceConnection.serviceManager.service!.onStdoutEventWithHistory
             .listen(_handleStdoutEvent),
       );
       autoDisposeStreamSubscription(
-        serviceManager.service!.onStderrEventWithHistory
+        serviceConnection.serviceManager.service!.onStderrEventWithHistory
             .listen(_handleStderrEvent),
       );
       autoDisposeStreamSubscription(
-        serviceManager.service!.onExtensionEventWithHistory
+        serviceConnection.serviceManager.service!.onExtensionEventWithHistory
             .listen(_handleExtensionEvent),
       );
       _serviceInitialized = true;
@@ -272,7 +276,8 @@ class ConsoleService extends Disposer {
   void _handleExtensionEvent(Event e) async {
     if (e.extensionKind == 'Flutter.Error' ||
         e.extensionKind == 'Flutter.Print') {
-      if (serviceManager.connectedApp?.isProfileBuildNow != true) {
+      if (serviceConnection.serviceManager.connectedApp?.isProfileBuildNow !=
+          true) {
         // The app isn't a debug build.
         return;
       }

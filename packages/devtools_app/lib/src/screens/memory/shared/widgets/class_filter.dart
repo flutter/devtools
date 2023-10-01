@@ -4,15 +4,13 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
-import '../../../../shared/dialogs.dart';
 import '../../../../shared/memory/class_name.dart';
-import '../../../../shared/theme.dart';
-import '../../../../shared/utils.dart';
 import '../heap/class_filter.dart';
 
 String _adaptRootPackageForFilter(String? rootPackage) {
@@ -32,7 +30,7 @@ class ClassFilterButton extends StatelessWidget {
     return ValueListenableBuilder<ClassFilter>(
       valueListenable: data.filter,
       builder: (context, filter, _) {
-        return FilterButton(
+        return DevToolsFilterButton(
           onPressed: () {
             ga.select(
               gac.memory,

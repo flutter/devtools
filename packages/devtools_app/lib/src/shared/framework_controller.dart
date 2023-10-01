@@ -63,10 +63,12 @@ class FrameworkController {
   Stream get onDisconnected => _disconnectedController.stream;
 
   void _init() {
-    serviceManager.connectedState.addListener(() {
-      final connectionState = serviceManager.connectedState.value;
+    serviceConnection.serviceManager.connectedState.addListener(() {
+      final connectionState =
+          serviceConnection.serviceManager.connectedState.value;
       if (connectionState.connected) {
-        _connectedController.add(serviceManager.service!.connectedUri);
+        _connectedController
+            .add(serviceConnection.serviceManager.service!.connectedUri);
       } else {
         _disconnectedController.add(null);
       }

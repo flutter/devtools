@@ -4,6 +4,7 @@
 
 import 'dart:convert';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as image;
@@ -13,7 +14,6 @@ import '../../shared/http/http.dart';
 import '../../shared/http/http_request_data.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/table/table.dart';
-import '../../shared/theme.dart';
 import '../../shared/ui/colors.dart';
 import 'network_controller.dart';
 import 'network_model.dart';
@@ -159,8 +159,8 @@ class HttpRequestView extends StatelessWidget {
         Widget child;
         child = isJson
             ? JsonViewer(encodedJson: data.requestBody!)
-            : Text(
-                data.requestBody!,
+            : TextViewer(
+                text: data.requestBody!,
                 style: theme.fixedFontStyle,
               );
         return Padding(
@@ -356,8 +356,8 @@ class HttpTextResponseViewer extends StatelessWidget {
 
         return switch (currentLocalResponseType) {
           NetworkResponseViewType.json => JsonViewer(encodedJson: responseBody),
-          NetworkResponseViewType.text => Text(
-              responseBody,
+          NetworkResponseViewType.text => TextViewer(
+              text: responseBody,
               style: textStyle,
             ),
           _ => const SizedBox(),

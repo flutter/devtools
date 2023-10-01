@@ -17,7 +17,7 @@ DEVTOOLS_DIR="${TOOL_DIR}/.."
 # Fast fail the script on failures.
 set -ex
 
-echo "Generating code for devtools_app..."
+echo "generate_code.sh: generating code for devtools_app..."
 
 echo $(pwd)
 
@@ -43,4 +43,4 @@ fi
 
 popd
 
-echo "Done generating code."
+echo "generate_code.sh: done generating code."

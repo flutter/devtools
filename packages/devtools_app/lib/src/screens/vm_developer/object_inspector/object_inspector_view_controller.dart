@@ -5,11 +5,11 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../shared/globals.dart';
-import '../../../shared/primitives/auto_dispose.dart';
 import '../../debugger/codeview_controller.dart';
 import '../../debugger/program_explorer_controller.dart';
 import '../vm_service_private_extensions.dart';
@@ -131,7 +131,7 @@ class ObjectInspectorViewController extends DisposableController
     ObjRef objRef, {
     ScriptRef? scriptRef,
   }) async {
-    VmObject? object;
+    VmObject object;
     if (objRef is ClassRef) {
       object = ClassObject(
         ref: objRef,
@@ -181,9 +181,13 @@ class ObjectInspectorViewController extends DisposableController
       object = WeakArrayObject(
         ref: objRef,
       );
+    } else {
+      object = UnknownObject(
+        ref: objRef,
+      );
     }
 
-    await object?.initialize();
+    await object.initialize();
 
     return object;
   }
@@ -196,9 +200,10 @@ class ObjectInspectorViewController extends DisposableController
     await classHierarchyController.refresh();
 
     final scriptRefs = scriptManager.sortedScripts.value;
-    final service = serviceManager.service!;
+    final service = serviceConnection.serviceManager.service!;
     final isolate = await service.getIsolate(
-      serviceManager.isolateManager.selectedIsolate.value!.id!,
+      serviceConnection
+          .serviceManager.isolateManager.selectedIsolate.value!.id!,
     );
 
     final mainScriptRef = scriptRefs.firstWhereOrNull((ref) {

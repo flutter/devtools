@@ -2,19 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:flutter/services.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../diagnostics/dap_object_node.dart';
 import '../../diagnostics/dart_object_node.dart';
 import '../../globals.dart';
 import '../../primitives/utils.dart';
 import '../../routing.dart';
 import '../../screen.dart';
-import '../../theme.dart';
+import '../../ui/colors.dart';
 import 'description.dart';
 
+/// The display provider for variables fetched via the VM service protocol.
 class DisplayProvider extends StatelessWidget {
   const DisplayProvider({
     super.key,
@@ -91,7 +94,7 @@ class DisplayProvider extends StatelessWidget {
           onPressed: () {
             ContextMenuController.removeAny();
             final ref = variable.ref;
-            serviceManager.consoleService.appendBrowsableInstance(
+            serviceConnection.consoleService.appendBrowsableInstance(
               instanceRef: variable.value as InstanceRef?,
               isolateRef: ref?.isolateRef,
               heapSelection: ref?.heapSelection,
@@ -99,7 +102,7 @@ class DisplayProvider extends StatelessWidget {
           },
           label: 'Reroot',
         ),
-      if (serviceManager.inspectorService != null && variable.isRoot)
+      if (serviceConnection.inspectorService != null && variable.isRoot)
         ContextMenuButtonItem(
           onPressed: () {
             ContextMenuController.removeAny();
@@ -114,7 +117,7 @@ class DisplayProvider extends StatelessWidget {
     BuildContext context,
   ) async {
     final router = DevToolsRouterDelegate.of(context);
-    final inspectorService = serviceManager.inspectorService;
+    final inspectorService = serviceConnection.inspectorService;
     if (await variable.inspectWidget()) {
       router.navigateIfNotCurrent(ScreenMetaData.inspector.id);
     } else {
@@ -172,6 +175,51 @@ class DisplayProvider extends StatelessWidget {
       default:
         return style;
     }
+  }
+}
+
+/// The display provider for variables fetched via the Debug Adapter Protocol.
+class DapDisplayProvider extends StatelessWidget {
+  const DapDisplayProvider({
+    super.key,
+    required this.node,
+    required this.onTap,
+  });
+
+  final DapObjectNode node;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    final variable = node.variable;
+    final name = variable.name;
+    final value = variable.value;
+
+    // TODO(https://github.com/flutter/devtools/issues/6056): Wrap in
+    // interactivity wrapper to provide inspect and re-root functionality. Add
+    // tooltip on hover to provide type information.
+    return Text.rich(
+      TextSpan(
+        text: name,
+        style: theme.fixedFontStyle.apply(
+          color: theme.colorScheme.controlFlowSyntaxColor,
+        ),
+        children: [
+          TextSpan(
+            text: ': ',
+            style: theme.fixedFontStyle,
+          ),
+          // TODO(https://github.com/flutter/devtools/issues/6056): Change text
+          // style based on variable type.
+          TextSpan(
+            text: value,
+            style: theme.subtleFixedFontStyle,
+          ),
+        ],
+      ),
+    );
   }
 }
 

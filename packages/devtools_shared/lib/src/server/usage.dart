@@ -30,7 +30,7 @@ class FlutterUsage {
   String get clientId => _analytics.clientId;
 }
 
-// Access the DevTools on disk store (~/.devtools/.devtools).
+// Access the DevTools on disk store (~/.flutter-devtools/.devtools).
 class DevToolsUsage {
   DevToolsUsage() {
     LocalFileSystem.maybeMoveLegacyDevToolsStore();

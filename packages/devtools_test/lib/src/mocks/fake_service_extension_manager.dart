@@ -2,18 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: invalid_use_of_visible_for_testing_member, devtools_test is only used in test code.
+
 import 'dart:async';
 
-import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app_shared/service_extensions.dart';
+// ignore: implementation_imports, intentional import from src/
+import 'package:devtools_app_shared/src/service/service_extension_manager.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mockito/mockito.dart';
 
+// ignore: subtype_of_sealed_class, fake for testing.
 /// Fake that simplifies writing UI tests that depend on the
 /// ServiceExtensionManager.
 // TODO(jacobr): refactor ServiceExtensionManager so this fake can reuse more
 // code from ServiceExtensionManager instead of reimplementing it.
-class FakeServiceExtensionManager extends Fake
-    implements ServiceExtensionManager {
+base class FakeServiceExtensionManager extends Fake
+    with TestServiceExtensionManager {
   bool _firstFrameEventReceived = false;
 
   final _serviceExtensionStateController =
@@ -35,7 +40,7 @@ class FakeServiceExtensionManager extends Fake
   /// Hook to simulate receiving the first frame event.
   ///
   /// Service extensions are only reported once a frame has been received.
-  void fakeFrame() async {
+  Future<void> fakeFrame() async {
     await _onFrameEventReceived();
   }
 
@@ -82,7 +87,7 @@ class FakeServiceExtensionManager extends Fake
     if (extension != null) {
       final Object? value = _getExtensionValueFromJson(name, valueFromJson);
 
-      final enabled = extension is ToggleableServiceExtensionDescription
+      final enabled = extension is ToggleableServiceExtension
           ? value == extension.enabledValue
           // For extensions that have more than two states
           // (enabled / disabled), we will always consider them to be
@@ -167,15 +172,13 @@ class FakeServiceExtensionManager extends Fake
     }
     final extensionDescription = serviceExtensionsAllowlist[name];
     final value = extensionValueOnDevice[name];
-    if (extensionDescription is ToggleableServiceExtensionDescription) {
-      if (value == extensionDescription.enabledValue) {
-        await setServiceExtensionState(
-          name,
-          enabled: true,
-          value: value,
-          callExtension: false,
-        );
-      }
+    if (extensionDescription is ToggleableServiceExtension) {
+      await setServiceExtensionState(
+        name,
+        enabled: value == extensionDescription.enabledValue,
+        value: value,
+        callExtension: false,
+      );
     } else {
       await setServiceExtensionState(
         name,

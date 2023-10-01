@@ -22,23 +22,6 @@ import 'simple_items.dart';
 
 final _log = Logger('utils');
 
-bool isPrivate(String member) => member.startsWith('_');
-
-/// Public properties first, then sort alphabetically
-int sortFieldsByName(String a, String b) {
-  final isAPrivate = isPrivate(a);
-  final isBPrivate = isPrivate(b);
-
-  if (isAPrivate && !isBPrivate) {
-    return 1;
-  }
-  if (!isAPrivate && isBPrivate) {
-    return -1;
-  }
-
-  return a.compareTo(b);
-}
-
 bool collectionEquals(e1, e2, {bool ordered = true}) {
   if (ordered) {
     return const DeepCollectionEquality().equals(e1, e2);
@@ -330,14 +313,6 @@ String longestFittingSubstring(
 bool isLetter(int codeUnit) =>
     (codeUnit >= 65 && codeUnit <= 90) || (codeUnit >= 97 && codeUnit <= 122);
 
-/// Pluralizes a word, following english rules (1, many).
-///
-/// Pass a custom named `plural` for irregular plurals:
-/// `pluralize('index', count, plural: 'indices')`
-/// So it returns `indices` and not `indexs`.
-String pluralize(String word, int count, {String? plural}) =>
-    count == 1 ? word : (plural ?? '${word}s');
-
 /// Returns a simplified version of a StackFrame name.
 ///
 /// Given an input such as
@@ -360,38 +335,85 @@ String getSimpleStackFrameName(String? name) {
   return newName.split('&').last;
 }
 
-/// Parses a 3 or 6 digit CSS Hex Color into a dart:ui Color.
-Color parseCssHexColor(String input) {
-  // Remove any leading # (and the escaped version to be lenient)
-  input = input.replaceAll('#', '').replaceAll('%23', '');
+/// Return a Stream that fires events whenever any of the three given parameter
+/// streams fire.
+Stream combineStreams(Stream a, Stream b, Stream c) {
+  late StreamController controller;
 
-  // Handle 3/4-digit hex codes (eg. #123 == #112233)
-  if (input.length == 3 || input.length == 4) {
-    input = input.split('').map((c) => '$c$c').join();
-  }
+  StreamSubscription? asub;
+  StreamSubscription? bsub;
+  StreamSubscription? csub;
 
-  // Pad alpha with FF.
-  if (input.length == 6) {
-    input = '${input}ff';
-  }
+  controller = StreamController(
+    onListen: () {
+      asub = a.listen(controller.add);
+      bsub = b.listen(controller.add);
+      csub = c.listen(controller.add);
+    },
+    onCancel: () {
+      unawaited(asub?.cancel());
+      unawaited(bsub?.cancel());
+      unawaited(csub?.cancel());
+    },
+  );
 
-  // In CSS, alpha is in the lowest bits, but for Flutter's value, it's in the
-  // highest bits, so move the alpha from the end to the start before parsing.
-  if (input.length == 8) {
-    input = '${input.substring(6)}${input.substring(0, 6)}';
-  }
-  final value = int.parse(input, radix: 16);
-
-  return Color(value);
+  return controller.stream;
 }
 
-/// Converts a dart:ui Color into #RRGGBBAA format for use in CSS.
-String toCssHexColor(Color color) {
-  // In CSS Hex, Alpha comes last, but in Flutter's `value` field, alpha is
-  // in the high bytes, so just using `value.toRadixString(16)` will put alpha
-  // in the wrong position.
-  String hex(int val) => val.toRadixString(16).padLeft(2, '0');
-  return '#${hex(color.red)}${hex(color.green)}${hex(color.blue)}${hex(color.alpha)}';
+class Property<T> {
+  Property(this._value);
+
+  final StreamController<T> _changeController = StreamController<T>.broadcast();
+  T _value;
+
+  T get value => _value;
+
+  set value(T newValue) {
+    if (newValue != _value) {
+      _value = newValue;
+      _changeController.add(newValue);
+    }
+  }
+
+  Stream<T> get onValueChange => _changeController.stream;
+}
+
+/// Batch up calls to the given closure. Repeated calls to [invoke] will
+/// overwrite the closure to be called. We'll delay at least [minDelay] before
+/// calling the closure, but will not delay more than [maxDelay].
+class DelayedTimer {
+  DelayedTimer(this.minDelay, this.maxDelay);
+
+  final Duration minDelay;
+  final Duration maxDelay;
+
+  VoidCallback? _closure;
+
+  Timer? _minTimer;
+  Timer? _maxTimer;
+
+  void invoke(VoidCallback closure) {
+    _closure = closure;
+
+    if (_minTimer == null) {
+      _minTimer = Timer(minDelay, _fire);
+      _maxTimer = Timer(maxDelay, _fire);
+    } else {
+      _minTimer!.cancel();
+      _minTimer = Timer(minDelay, _fire);
+    }
+  }
+
+  void _fire() {
+    _minTimer?.cancel();
+    _minTimer = null;
+
+    _maxTimer?.cancel();
+    _maxTimer = null;
+
+    _closure!();
+    _closure = null;
+  }
 }
 
 /// These utilities are ported from the Flutter IntelliJ plugin.
@@ -702,18 +724,6 @@ String toStringAsFixed(double num, [int fractionDigit = 1]) {
   return num.toStringAsFixed(fractionDigit);
 }
 
-/// A value notifier that calls each listener immediately when registered.
-class ImmediateValueNotifier<T> extends ValueNotifier<T> {
-  ImmediateValueNotifier(T value) : super(value);
-
-  /// Adds a listener and calls the listener upon registration.
-  @override
-  void addListener(VoidCallback listener) {
-    super.addListener(listener);
-    listener();
-  }
-}
-
 extension SafeAccessList<T> on List<T> {
   T? safeGet(int index) => index < 0 || index >= length ? null : this[index];
 
@@ -792,9 +802,13 @@ extension SortDirectionExtension on SortDirection {
   }
 }
 
-/// A small double value, used to ensure that comparisons between double are
-/// valid.
-const defaultEpsilon = 1 / 1000;
+// /// A small double value, used to ensure that comparisons between double are
+// /// valid.
+// const defaultEpsilon = 1 / 1000;
+
+// bool equalsWithinEpsilon(double a, double b) {
+//   return (a - b).abs() < defaultEpsilon;
+// }
 
 /// A dev time class to help trace DevTools application events.
 class DebugTimingLogger {
@@ -972,9 +986,6 @@ extension LogicalKeySetExtension on LogicalKeySet {
   }
 }
 
-// Method to convert degrees to radians
-double degToRad(num deg) => deg * (pi / 180.0);
-
 typedef DevToolsJsonFileHandler = void Function(DevToolsJsonFile file);
 
 class DevToolsJsonFile extends DevToolsFile<Object> {
@@ -1076,6 +1087,17 @@ extension StringExtension on String {
   }
 }
 
+extension IterableExtension<T> on Iterable<T> {
+  /// Joins the iterable with [separator], and also adds a trailing [separator].
+  String joinWithTrailing([String separator = '']) {
+    var result = join(separator);
+    if (length > 0) {
+      result += separator;
+    }
+    return result;
+  }
+}
+
 extension ListExtension<T> on List<T> {
   List<T> joinWith(T separator) {
     return [
@@ -1094,6 +1116,10 @@ extension ListExtension<T> on List<T> {
     }
     return false;
   }
+
+  T get second => this[1];
+
+  T get third => this[2];
 }
 
 extension SetExtension<T> on Set<T> {
@@ -1120,15 +1146,19 @@ extension UiListExtension<T> on List<T> {
   int get numSpacers => max(0, length - 1);
 }
 
-Map<String, String> devToolsQueryParams(String url) {
+String simplifyDevToolsUrl(String url) {
   // DevTools urls can have the form:
   // http://localhost:123/?key=value
   // http://localhost:123/#/?key=value
   // http://localhost:123/#/page-id?key=value
   // Since we just want the query params, we will modify the url to have an
   // easy-to-parse form.
-  final modifiedUri = url.replaceFirst(RegExp(r'#\/(\w*)[?]'), '?');
-  final uri = Uri.parse(modifiedUri);
+  return url.replaceFirst(RegExp(r'#\/(\w*)[?]'), '?');
+}
+
+Map<String, String> devToolsQueryParams(String url) {
+  final modifiedUrl = simplifyDevToolsUrl(url);
+  final uri = Uri.parse(modifiedUrl);
   return uri.queryParameters;
 }
 
@@ -1196,270 +1226,12 @@ String prettyTimestamp(
   return DateFormat.Hms().format(timestampDT); // HH:mm:ss
 }
 
-/// A [ChangeNotifier] that holds a list of data.
-///
-/// This class also exposes methods to interact with the data. By default,
-/// listeners are notified whenever the data is modified, but notifying can be
-/// optionally disabled.
-class ListValueNotifier<T> extends ChangeNotifier
-    implements ValueListenable<List<T>> {
-  /// Creates a [ListValueNotifier] that wraps this value [_rawList].
-  ListValueNotifier(List<T> rawList) : _rawList = List<T>.of(rawList) {
-    _currentList = ImmutableList(_rawList);
-  }
-
-  List<T> _rawList;
-
-  late ImmutableList<T> _currentList;
-
-  @override
-  List<T> get value => _currentList;
-
-  @override
-  // This override is needed to change visibility of the method.
-  // ignore: unnecessary_overrides
-  void notifyListeners() {
-    super.notifyListeners();
-  }
-
-  void _listChanged() {
-    _currentList = ImmutableList(_rawList);
-    notifyListeners();
-  }
-
-  set last(T value) {
-    // TODO(jacobr): use a more sophisticated data structure such as
-    // https://en.wikipedia.org/wiki/Rope_(data_structure) to make last more
-    // efficient.
-    _rawList = _rawList.toList();
-    _rawList.last = value;
-    _listChanged();
-  }
-
-  /// Adds an element to the list and notifies listeners.
-  void add(T element) {
-    _rawList.add(element);
-    _listChanged();
-  }
-
-  /// Replaces the first occurrence of [value] in this list.
-  ///
-  /// Runtime is O(n).
-  bool replace(T existing, T replacement) {
-    final index = _rawList.indexOf(existing);
-    if (index == -1) return false;
-    _rawList = _rawList.toList();
-    _rawList.removeAt(index);
-    _rawList.insert(index, replacement);
-    _listChanged();
-    return true;
-  }
-
-  /// Replaces all elements in the list and notifies listeners. It's preferred
-  /// to calling .clear() then .addAll(), because it only notifies listeners
-  /// once.
-  void replaceAll(Iterable<T> elements) {
-    _rawList = <T>[];
-    _rawList.addAll(elements);
-    _listChanged();
-  }
-
-  /// Adds elements to the list and notifies listeners.
-  void addAll(Iterable<T> elements) {
-    _rawList.addAll(elements);
-    _listChanged();
-  }
-
-  void removeAll(Iterable<T> elements) {
-    elements.forEach(_rawList.remove);
-    _listChanged();
-  }
-
-  /// Clears the list and notifies listeners.
-  void clear() {
-    _rawList = <T>[];
-    _listChanged();
-  }
-
-  /// Truncates to just the elements between [start] and [end].
-  ///
-  /// If [end] is omitted, it defaults to the [length] of this list.
-  ///
-  /// The `start` and `end` positions must satisfy the relations
-  /// 0 ≤ `start` ≤ `end` ≤ [length]
-  /// If `end` is equal to `start`, then the returned list is empty.
-  void trimToSublist(int start, [int? end]) {
-    // TODO(jacobr): use a more sophisticated data structure such as
-    // https://en.wikipedia.org/wiki/Rope_(data_structure) to make the
-    // implementation of this method more efficient.
-    _rawList = _rawList.sublist(start, end);
-    _listChanged();
-  }
-
-  /// Removes the first occurrence of [value] from this list.
-  ///
-  /// Runtime is O(n).
-  bool remove(T value) {
-    final index = _rawList.indexOf(value);
-    if (index == -1) return false;
-    _rawList = _rawList.toList();
-    _rawList.removeAt(index);
-    _listChanged();
-    return true;
-  }
-
-  /// Removes a range of elements from the list.
-  ///
-  /// https://api.flutter.dev/flutter/dart-core/List/removeRange.html
-  void removeRange(int start, int end) {
-    _rawList = _rawList.toList();
-    _rawList.removeRange(start, end);
-    _listChanged();
-  }
-
-  /// Removes the object at position `index` from this list.
-  ///
-  /// https://api.flutter.dev/flutter/dart-core/List/removeAt.html
-  void removeAt(int index) {
-    _rawList = _rawList.toList();
-    _rawList.removeAt(index);
-    _listChanged();
-  }
-}
-
-/// Wrapper for a list that prevents any modification of the list's content.
-///
-/// This class should only be used as part of [ListValueNotifier].
-@visibleForTesting
-class ImmutableList<T> with ListMixin<T> implements List<T> {
-  ImmutableList(this._rawList) : length = _rawList.length;
-
-  final List<T> _rawList;
-
-  @override
-  int length;
-
-  @override
-  T operator [](int index) {
-    if (index >= 0 && index < length) {
-      return _rawList[index];
-    } else {
-      throw Exception('Index out of range [0-${length - 1}]: $index');
-    }
-  }
-
-  @override
-  void operator []=(int index, T value) {
-    throw Exception('Cannot modify the content of ImmutableList');
-  }
-
-  @override
-  void add(T element) {
-    throw Exception('Cannot modify the content of ImmutableList');
-  }
-
-  @override
-  void addAll(Iterable<T> iterable) {
-    throw Exception('Cannot modify the content of ImmutableList');
-  }
-
-  @override
-  bool remove(Object? element) {
-    throw Exception('Cannot modify the content of ImmutableList');
-  }
-
-  @override
-  T removeAt(int index) {
-    throw Exception('Cannot modify the content of ImmutableList');
-  }
-
-  @override
-  T removeLast() {
-    throw Exception('Cannot modify the content of ImmutableList');
-  }
-
-  @override
-  void removeRange(int start, int end) {
-    throw Exception('Cannot modify the content of ImmutableList');
-  }
-
-  @override
-  void removeWhere(bool Function(T element) test) {
-    throw Exception('Cannot modify the content of ImmutableList');
-  }
-
-  @override
-  void retainWhere(bool Function(T element) test) {
-    throw Exception('Cannot modify the content of ImmutableList');
-  }
-
-  @override
-  void insert(int index, T element) {
-    throw Exception('Cannot modify the content of ImmutableList');
-  }
-
-  @override
-  void insertAll(int index, Iterable<T> iterable) {
-    throw Exception('Cannot modify the content of ImmutableList');
-  }
-
-  @override
-  void clear() {
-    throw Exception('Cannot modify the content of ImmutableList');
-  }
-
-  @override
-  void fillRange(int start, int end, [T? fill]) {
-    throw Exception('Cannot modify the content of ImmutableList');
-  }
-
-  @override
-  void setRange(int start, int end, Iterable<T> iterable, [int skipCount = 0]) {
-    throw Exception('Cannot modify the content of ImmutableList');
-  }
-
-  @override
-  void replaceRange(int start, int end, Iterable<T> newContents) {
-    throw Exception('Cannot modify the content of ImmutableList');
-  }
-
-  @override
-  void setAll(int index, Iterable<T> iterable) {
-    throw Exception('Cannot modify the content of ImmutableList');
-  }
-
-  @override
-  void sort([int Function(T a, T b)? compare]) {
-    throw Exception('Cannot modify the content of ImmutableList');
-  }
-
-  @override
-  void shuffle([Random? random]) {
-    throw Exception('Cannot modify the content of ImmutableList');
-  }
-}
-
 extension BoolExtension on bool {
   int boolCompare(bool other) {
     if ((this && other) || (!this && !other)) return 0;
     if (other) return 1;
     return -1;
   }
-}
-
-Future<T> whenValueNonNull<T>(ValueListenable<T> listenable) {
-  if (listenable.value != null) return Future.value(listenable.value);
-  final completer = Completer<T>();
-  void listener() {
-    final value = listenable.value;
-    if (value != null) {
-      completer.complete(value);
-      listenable.removeListener(listener);
-    }
-  }
-
-  listenable.addListener(listener);
-  return completer.future;
 }
 
 const connectToNewAppText = 'Connect to a new app';
