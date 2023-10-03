@@ -8,6 +8,7 @@ import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
+import '../app.dart';
 import 'config_specific/import_export/import_export.dart';
 import 'globals.dart';
 
@@ -88,7 +89,7 @@ mixin OfflineScreenControllerMixin<T> on AutoDisposeControllerMixin {
         // Only store data for the current page. We can change this in the
         // future if we support offline imports for more than once screen at a
         // time.
-        if (DevToolsRouterDelegate.currentPage == currentScreenData.screenId) {
+        if (DevToolsAppState.currentPage == currentScreenData.screenId) {
           final previouslyConnectedApp = offlineController.previousConnectedApp;
           final offlineData = _exportController.generateDataForExport(
             offlineScreenData: currentScreenData.json,

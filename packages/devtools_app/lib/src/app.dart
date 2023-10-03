@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -83,7 +84,7 @@ class DevToolsApp extends StatefulWidget {
   final AnalyticsController analyticsController;
   final List<DevToolsJsonFile> sampleData;
 
-  DevToolsAppState of(BuildContext context) {
+  static DevToolsAppState of(BuildContext context) {
     return context.findAncestorStateOfType<DevToolsAppState>()!;
   }
 
@@ -98,6 +99,11 @@ class DevToolsApp extends StatefulWidget {
 class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
 
   GoRouter? _router;
+  Uri get _currentUri => _router!.routerDelegate.currentConfiguration.uri;
+  DevToolsNavigationState? get _currentState => _router!.routerDelegate.currentConfiguration.extra as DevToolsNavigationState?;
+
+  static String get currentPage => _currentPage;
+  static late String _currentPage;
 
   List<Screen> get _screens {
     if (FeatureFlags.devToolsExtensions) {
@@ -190,7 +196,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   }
 
   GoRouter _initGoRouter() {
-    return GoRouter(
+    final router = GoRouter(
       routes: _getRoutes(),
       errorBuilder: (_, GoRouterState state) {
         return DevToolsScaffold.withChild(
@@ -213,6 +219,10 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         );
       },
     );
+    router.routerDelegate.addListener(() {
+      _currentPage = router.routerDelegate.currentConfiguration.uri.path;
+    });
+    return router;
   }
 
   List<GoRoute> _getRoutes() {
@@ -245,18 +255,21 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   }
 
   void navigateIfNotCurrent(
-    String name, [
+    String page, [
       Map<String, String?>? queryParameters,
       DevToolsNavigationState? stateUpdates,
     ]) {
-    final pageChanged = page != currentConfiguration!.page;
-    final argsChanged = _changesArgs(argUpdates);
-    final stateChanged = _changesState(stateUpdates);
+    final pageChanged = page != _currentUri.path;
+    final argsChanged = !mapEquals(
+      {..._currentUri.queryParameters, ...?queryParameters},
+      _currentUri.queryParameters,
+    );
+    final stateChanged = _currentState?.hasChanges(stateUpdates) ?? stateUpdates != null;
     if (!pageChanged && !argsChanged && !stateChanged) {
       return;
     }
 
-    navigate(page, argUpdates, stateUpdates);
+    navigate(page, queryParameters, stateUpdates);
   }
 
   /// Navigates to a new page, optionally updating arguments and state.
@@ -268,19 +281,34 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         Map<String, String?>? argUpdates,
         DevToolsNavigationState? state,
       ]) {
-    final newArgs = {...currentConfiguration?.args ?? {}, ...?argUpdates};
+    final uri = _router!.routerDelegate.currentConfiguration.uri;
+    final queryParameters = {...uri.queryParameters, ...?argUpdates};
 
     // Ensure we disconnect from any previously connected applications if we do
     // not have a vm service uri as a query parameter, unless we are loading an
     // offline file.
-    if (page != snapshotScreenId && newArgs['uri'] == null) {
+    if (uri.path != snapshotScreenId && queryParameters['uri'] == null) {
       unawaited(serviceConnection.serviceManager.manuallyDisconnect());
     }
 
-    _replaceStack(
-      DevToolsRouteConfiguration(page, newArgs, state),
+    _router!.goNamed(
+      page,
+      queryParameters: queryParameters,
+      extra: state,
     );
-    notifyListeners();
+  }
+
+  void navigateHome({
+    bool clearUriParam = false,
+    required bool clearScreenParam,
+  }) {
+    navigate(
+      homeScreenId,
+      {
+        if (clearUriParam) 'uri': null,
+        if (clearScreenParam) 'screen': null,
+      },
+    );
   }
 
   Widget _wrap(Widget child) {
@@ -420,6 +448,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   // Map<String, UrlParametersBuilder>? _routes;
 
   void _clearGoRouter() {
+    _router?.dispose();
     _router = null;
   }
 
@@ -479,6 +508,55 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
           const MaterialScrollBehavior().copyWith(scrollbars: !kIsWeb),
     );
   }
+}
+
+/// Encapsulates state associated with a [Router] navigation event.
+class DevToolsNavigationState {
+  DevToolsNavigationState({
+    required this.kind,
+    required Map<String, String?> state,
+  }) : _state = {
+    _kKind: kind,
+    ...state,
+  };
+
+  factory DevToolsNavigationState.fromJson(Map<String, dynamic> json) =>
+      DevToolsNavigationState._(json.cast<String, String?>());
+
+  DevToolsNavigationState._(this._state) : kind = _state[_kKind]!;
+
+  static const _kKind = '_kind';
+
+  final String kind;
+
+  UnmodifiableMapView<String, String?> get state => UnmodifiableMapView(_state);
+  final Map<String, String?> _state;
+
+  bool hasChanges(DevToolsNavigationState? other) {
+    return !mapEquals(
+      {...state, ...?other?.state},
+      state,
+    );
+  }
+
+  /// Creates a new [DevToolsNavigationState] by merging this instance with
+  /// [other].
+  ///
+  /// State contained in [other] will take precedence over state contained in
+  /// this instance (e.g., if both instances have state with the same key, the
+  /// state in [other] will be used).
+  DevToolsNavigationState merge(DevToolsNavigationState other) {
+    final newState = <String, String?>{
+      ..._state,
+      ...other._state,
+    };
+    return DevToolsNavigationState(kind: kind, state: newState);
+  }
+
+  @override
+  String toString() => _state.toString();
+
+  Map<String, dynamic> toJson() => _state;
 }
 
 /// DevTools screen wrapper that is responsible for creating and providing the
