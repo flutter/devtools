@@ -187,6 +187,12 @@ the bots. To update your local flutter version, run:
 
 ```
 
+You also need to generate the required mock for the tests. To generate the mock, run:
+```
+cd packages/devtools_test
+dart run build_runner build
+```
+
 Now you can proceed with running DevTools tests:
 
 ```
