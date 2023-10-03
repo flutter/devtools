@@ -847,6 +847,7 @@ class DevToolsClearableTextField extends StatelessWidget {
     required this.labelText,
     TextEditingController? controller,
     this.hintText,
+    this.prefixIcon,
     this.onChanged,
     this.autofocus = false,
   })  : controller = controller ?? TextEditingController(),
@@ -854,6 +855,7 @@ class DevToolsClearableTextField extends StatelessWidget {
 
   final TextEditingController controller;
   final String? hintText;
+  final Widget? prefixIcon;
   final String labelText;
   final Function(String)? onChanged;
   final bool autofocus;
@@ -873,6 +875,7 @@ class DevToolsClearableTextField extends StatelessWidget {
         border: const OutlineInputBorder(),
         labelText: labelText,
         hintText: hintText,
+        prefixIcon: prefixIcon,
         suffixIcon: IconButton(
           tooltip: 'Clear',
           icon: const Icon(Icons.clear),
