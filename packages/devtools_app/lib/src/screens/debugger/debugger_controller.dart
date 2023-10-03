@@ -12,6 +12,7 @@ import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../app.dart';
 import '../../service/vm_service_wrapper.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
@@ -36,17 +37,16 @@ class DebuggerController extends DisposableController
     with AutoDisposeControllerMixin {
   // `initialSwitchToIsolate` can be set to false for tests to skip the logic
   // in `switchToIsolate`.
-  DebuggerController({
+  DebuggerController(
+    DevToolsAppState? state, {
     bool initialSwitchToIsolate = true,
-  }) : _initialSwitchToIsolate = initialSwitchToIsolate {
+  }) : _initialSwitchToIsolate = initialSwitchToIsolate,
+       codeViewController = CodeViewController(state) {
     addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
       if (serviceConnection.serviceManager.connectedState.value.connected) {
         _handleConnectionAvailable(serviceConnection.serviceManager.service!);
       }
     });
-    if (routerDelegate != null) {
-      codeViewController.subscribeToRouterEvents(routerDelegate);
-    }
     addAutoDisposeListener(_selectedStackFrame, _updateCurrentFrame);
     addAutoDisposeListener(_stackFramesWithLocation, _updateCurrentFrame);
 
@@ -55,7 +55,7 @@ class DebuggerController extends DisposableController
     }
   }
 
-  final codeViewController = CodeViewController();
+  final CodeViewController codeViewController;
 
   bool _firstDebuggerScreenLoaded = false;
 

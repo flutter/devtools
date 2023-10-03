@@ -57,7 +57,7 @@ import 'shared/screen.dart';
 import 'shared/ui/hover.dart';
 import 'standalone_ui/standalone_screen.dart';
 
-typedef ControllerCreator<T> = T Function();
+typedef ControllerCreator<T> = T Function(DevToolsAppState state);
 
 const homeScreenId = '/';
 const snapshotScreenId = '/snapshot';
@@ -98,9 +98,9 @@ class DevToolsApp extends StatefulWidget {
 /// flutter route parameters.
 class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
 
-  GoRouter? _router;
-  Uri get _currentUri => _router!.routerDelegate.currentConfiguration.uri;
-  DevToolsNavigationState? get _currentState => _router!.routerDelegate.currentConfiguration.extra as DevToolsNavigationState?;
+  GoRouter? router;
+  Uri get _currentUri => router!.routerDelegate.currentConfiguration.uri;
+  DevToolsNavigationState? get _currentState => router!.routerDelegate.currentConfiguration.extra as DevToolsNavigationState?;
 
   static String get currentPage => _currentPage;
   static late String _currentPage;
@@ -281,7 +281,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         Map<String, String?>? argUpdates,
         DevToolsNavigationState? state,
       ]) {
-    final uri = _router!.routerDelegate.currentConfiguration.uri;
+    final uri = router!.routerDelegate.currentConfiguration.uri;
     final queryParameters = {...uri.queryParameters, ...?argUpdates};
 
     // Ensure we disconnect from any previously connected applications if we do
@@ -291,7 +291,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       unawaited(serviceConnection.serviceManager.manuallyDisconnect());
     }
 
-    _router!.goNamed(
+    router!.goNamed(
       page,
       queryParameters: queryParameters,
       extra: state,
@@ -308,6 +308,34 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         if (clearUriParam) 'uri': null,
         if (clearScreenParam) 'screen': null,
       },
+    );
+  }
+
+  void updateQueryParametersIfChanged(Map<String, String> queryParameters) {
+    final argsChanged = !mapEquals(
+      {..._currentUri.queryParameters, ...queryParameters},
+      _currentUri.queryParameters,
+    );
+    if (!argsChanged) {
+      return;
+    }
+
+    router!.goNamed(
+      _currentUri.path,
+      queryParameters: queryParameters,
+      extra: _currentState,
+    );
+  }
+
+  void updateStateIfChanged(DevToolsNavigationState stateUpdates) {
+    final stateChanged = _currentState?.hasChanges(stateUpdates) ?? true;
+    if (!stateChanged) {
+      return;
+    }
+
+    router!.go(
+      _currentUri.toString(),
+      extra: stateChanged,
     );
   }
 
@@ -448,8 +476,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   // Map<String, UrlParametersBuilder>? _routes;
 
   void _clearGoRouter() {
-    _router?.dispose();
-    _router = null;
+    router?.dispose();
+    router = null;
   }
 
   List<Screen> _visibleScreens() => _screens.where(shouldShowScreen).toList();
@@ -461,7 +489,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         .where(
           (s) => s.providesController && (offline ? s.supportsOffline : true),
         )
-        .map((s) => s.controllerProvider())
+        .map((s) => s.controllerProvider(this))
         .toList();
   }
 
@@ -501,7 +529,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
           ),
         );
       },
-      routerConfig: _router ??= _initGoRouter(),
+      routerConfig: router ??= _initGoRouter(),
       // Disable default scrollbar behavior on web to fix duplicate scrollbars
       // bug, see https://github.com/flutter/flutter/issues/90697:
       scrollBehavior:
@@ -603,14 +631,14 @@ class DevToolsScreen<C> {
   /// Defaults to false.
   final bool supportsOffline;
 
-  Provider<C> controllerProvider() {
+  Provider<C> controllerProvider(DevToolsAppState state) {
     // The construct has guaranteed at least one of controller or
     // createController is not null, but not both.
     final controllerLocal = controller;
     if (controllerLocal != null) {
       return Provider<C>.value(value: controllerLocal);
     }
-    return Provider<C>(create: (_) => createController!());
+    return Provider<C>(create: (_) => createController!(state));
   }
 }
 
@@ -651,7 +679,7 @@ List<DevToolsScreen> defaultScreens({
     DevToolsScreen<void>(HomeScreen(sampleData: sampleData)),
     DevToolsScreen<InspectorController>(
       InspectorScreen(),
-      createController: () => InspectorController(
+      createController: (_) => InspectorController(
         inspectorTree: InspectorTreeController(
           gaId: InspectorScreenMetrics.summaryTreeGaId,
         ),
@@ -663,49 +691,49 @@ List<DevToolsScreen> defaultScreens({
     ),
     DevToolsScreen<PerformanceController>(
       PerformanceScreen(),
-      createController: () => PerformanceController(),
+      createController: (_) => PerformanceController(),
       supportsOffline: true,
     ),
     DevToolsScreen<ProfilerScreenController>(
       ProfilerScreen(),
-      createController: () => ProfilerScreenController(),
+      createController: (_) => ProfilerScreenController(),
       supportsOffline: true,
     ),
     DevToolsScreen<MemoryController>(
       MemoryScreen(),
-      createController: () => MemoryController(),
+      createController: (_) => MemoryController(),
     ),
     DevToolsScreen<DebuggerController>(
       DebuggerScreen(),
-      createController: () => DebuggerController(),
+      createController: (DevToolsAppState state) => DebuggerController(state),
     ),
     DevToolsScreen<NetworkController>(
       NetworkScreen(),
-      createController: () => NetworkController(),
+      createController: (_) => NetworkController(),
     ),
     DevToolsScreen<LoggingController>(
       LoggingScreen(),
-      createController: () => LoggingController(),
+      createController: (_) => LoggingController(),
     ),
     DevToolsScreen<void>(ProviderScreen()),
     DevToolsScreen<AppSizeController>(
       AppSizeScreen(),
-      createController: () => AppSizeController(),
+      createController: (_) => AppSizeController(),
     ),
     if (FeatureFlags.deepLinkValidation)
       DevToolsScreen<DeepLinksController>(
         DeepLinksScreen(),
-        createController: () => DeepLinksController(),
+        createController: (_) => DeepLinksController(),
       ),
     DevToolsScreen<VMDeveloperToolsController>(
       VMDeveloperToolsScreen(),
-      createController: () => VMDeveloperToolsController(),
+      createController: (_) => VMDeveloperToolsController(),
     ),
     // Show the sample DevTools screen.
     if (debugEnableSampleScreen && (kDebugMode || kProfileMode))
       DevToolsScreen<ExampleController>(
         const ExampleConditionalScreen(),
-        createController: () => ExampleController(),
+        createController: (_) => ExampleController(),
         supportsOffline: true,
       ),
   ];

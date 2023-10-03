@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../app.dart';
 import '../shared/analytics/analytics.dart' as ga;
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
@@ -296,7 +297,7 @@ class _ConnectDialogState extends State<ConnectDialog>
     // TODO(jacobr): better understand why this is the case. It is bit counter
     // intuitive that we don't want to just cancel the route change or
     // notification if we are already on a different screen.
-    final routerDelegate = DevToolsRouterDelegate.of(context);
+    final state = DevToolsApp.of(context);
     final connected = await FrameworkCore.initVmService(
       '',
       serviceUriAsString: uri,
@@ -304,7 +305,7 @@ class _ConnectDialogState extends State<ConnectDialog>
     if (connected) {
       final connectedUri =
           serviceConnection.serviceManager.service!.connectedUri;
-      routerDelegate.updateArgsIfChanged({'uri': '$connectedUri'});
+      state.updateQueryParametersIfChanged({'uri': '$connectedUri'});
       final shortUri = connectedUri.replace(path: '');
       notificationService.push('Successfully connected to $shortUri.');
     } else if (normalizeVmServiceUri(uri) == null) {
@@ -350,7 +351,7 @@ class MemoryAnalysisInstructions extends StatelessWidget {
   }
 
   void _onOpen(BuildContext context) {
-    DevToolsRouterDelegate.of(context).navigate(memoryAnalysisScreenId);
+    DevToolsApp.of(context).navigate(memoryAnalysisScreenId);
   }
 }
 

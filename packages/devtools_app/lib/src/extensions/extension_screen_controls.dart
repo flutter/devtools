@@ -9,6 +9,7 @@ import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 
+import '../app.dart';
 import '../shared/analytics/analytics.dart' as ga;
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
@@ -182,8 +183,7 @@ class DisableExtensionDialog extends StatelessWidget {
               ),
             );
             Navigator.of(context).pop(dialogDefaultContext);
-            GoRouter.of(context).goNamed()
-            DevToolsRouterDelegate.of(context)
+            DevToolsApp.of(context)
                 .navigateHome(clearScreenParam: true);
           },
           child: const Text('YES, DISABLE'),
@@ -271,7 +271,7 @@ class EnableExtensionPrompt extends StatelessWidget {
                       enable: false,
                     ),
                   );
-                  DevToolsRouterDelegate.of(context)
+                  DevToolsApp.of(context)
                       .navigateHome(clearScreenParam: true);
                 },
               ),

@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../app.dart';
 import '../../framework/app_error_handling.dart';
 import '../../shared/config_specific/launch_url/launch_url.dart';
 import '../../shared/diagnostics/primitives/source_location.dart';
@@ -27,9 +28,8 @@ final _log = Logger('codeview_controller');
 class CodeViewController extends DisposableController
     with
         AutoDisposeControllerMixin,
-        SearchControllerMixin<SourceToken>,
-        RouteStateHandlerMixin {
-  CodeViewController() {
+        SearchControllerMixin<SourceToken> {
+  CodeViewController(this.state) {
     _scriptHistoryListener = () async {
       final currentScriptValue = scriptsHistory.current.value;
       if (currentScriptValue != null) {
@@ -37,23 +37,27 @@ class CodeViewController extends DisposableController
       }
     };
     scriptsHistory.current.addListener(_scriptHistoryListener);
+    state?.router?.routerDelegate.addListener(_onRouteStateUpdate);
   }
+
+  final DevToolsAppState? state;
 
   @override
   void dispose() {
-    super.dispose();
     scriptsHistory.current.removeListener(_scriptHistoryListener);
+    state?.router?.routerDelegate.removeListener(_onRouteStateUpdate);
+    super.dispose();
   }
 
   /// Perform operations based on changes in navigation state.
   ///
   /// This method is only invoked if [subscribeToRouterEvents] has been called on
   /// this instance with a valid [DevToolsRouterDelegate].
-  @override
-  Future<void> onRouteStateUpdate(DevToolsNavigationState state) async {
-    switch (state.kind) {
+  Future<void> _onRouteStateUpdate() async {
+    final navigationState = state!.router!.routerDelegate.currentConfiguration.extra! as DevToolsNavigationState;
+    switch (navigationState.kind) {
       case CodeViewSourceLocationNavigationState.type:
-        await _handleNavigationEvent(state);
+        await _handleNavigationEvent(navigationState);
         break;
     }
   }

@@ -9,6 +9,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
+import '../app.dart';
 import '../shared/analytics/analytics.dart' as ga;
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
@@ -113,7 +114,7 @@ class _InitializerState extends State<Initializer>
   /// IDE via the server API to reuse the DevTools window after being disconnected
   /// (for example if the user stops a debug session then launches a new one).
   void _connectVm(ConnectVmEvent event) {
-    DevToolsRouterDelegate.of(context).updateArgsIfChanged({
+    DevToolsApp.of(context).updateQueryParametersIfChanged({
       'uri': event.serviceProtocolUri.toString(),
       if (event.notify) 'notify': 'true',
     });
@@ -186,10 +187,10 @@ class _InitializerState extends State<Initializer>
       'screen': offlineController
           .offlineDataJson[DevToolsExportKeys.activeScreenId.name] as String,
     };
-    final routerDelegate = DevToolsRouterDelegate.of(context);
+    final state = DevToolsApp.of(context);
     Router.neglect(
       context,
-      () => routerDelegate.navigate(snapshotScreenId, args),
+      () => state.navigate(snapshotScreenId, args),
     );
   }
 
@@ -208,7 +209,7 @@ class _InitializerState extends State<Initializer>
                 ElevatedButton(
                   onPressed: () {
                     hideDisconnectedOverlay();
-                    DevToolsRouterDelegate.of(context).navigateHome(
+                    DevToolsApp.of(context).navigateHome(
                       clearUriParam: true,
                       clearScreenParam: true,
                     );

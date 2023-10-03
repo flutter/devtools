@@ -13,6 +13,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../app.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
@@ -108,8 +109,7 @@ class _DebuggerScreenBodyWrapperState extends State<_DebuggerScreenBodyWrapper>
     SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
       if (!_shownFirstScript ||
           controller.codeViewController.navigationInProgress) return;
-      final routerDelegate = DevToolsRouterDelegate.of(context);
-      routerDelegate.updateStateIfChanged(
+      DevToolsApp.of(context).updateStateIfChanged(
         CodeViewSourceLocationNavigationState(
           script: controller.codeViewController.currentScriptRef.value!,
           line: 0,
@@ -341,9 +341,8 @@ class DebuggerSourceAndControls extends StatelessWidget {
   void _onNodeSelected(BuildContext context, VMServiceObjectNode? node) {
     final location = node?.location;
     if (location != null) {
-      final routerDelegate = DevToolsRouterDelegate.of(context);
       Router.navigate(context, () {
-        routerDelegate.updateStateIfChanged(
+        DevToolsApp.of(context).updateStateIfChanged(
           CodeViewSourceLocationNavigationState(
             script: location.scriptRef,
             line: location.location?.line ?? 0,

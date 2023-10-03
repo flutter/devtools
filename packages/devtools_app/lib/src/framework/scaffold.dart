@@ -210,8 +210,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
         // Update routing with the change.
         WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-          final routerDelegate = DevToolsRouterDelegate.of(context);
-          routerDelegate.navigateIfNotCurrent(screen.screenId);
+          DevToolsApp.of(context).navigateIfNotCurrent(screen.screenId);
         });
       }
     });
@@ -221,12 +220,9 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     // we have to wrap this in `Future.microtask`.
     if (widget.page == null && _currentScreen is! SimpleScreen) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        final routerDelegate = DevToolsRouterDelegate.of(context);
         Router.neglect(context, () {
-          routerDelegate.navigateIfNotCurrent(
+          DevToolsApp.of(context).navigateIfNotCurrent(
             _currentScreen.screenId,
-            routerDelegate.currentConfiguration?.args,
-            routerDelegate.currentConfiguration?.state,
           );
         });
       });
@@ -248,16 +244,15 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         widget.screens.indexWhere((screen) => screen.screenId == pageId);
 
     if (newIndex != -1 && newIndex != existingTabIndex) {
-      DevToolsRouterDelegate.of(context).navigateIfNotCurrent(pageId);
+      DevToolsApp.of(context).navigateIfNotCurrent(pageId);
     }
   }
 
   /// Pushes the snapshot screen for an offline import.
   void _pushSnapshotScreenForImport(String screenId) {
     final args = {'screen': screenId};
-    final routerDelegate = DevToolsRouterDelegate.of(context);
     if (!offlineController.offlineMode.value) {
-      routerDelegate.navigate(snapshotScreenId, args);
+      DevToolsApp.of(context).navigate(snapshotScreenId, args);
     } else {
       // If we are already in offline mode, we need to replace the existing page
       // so clicking Back does not go through all of the old snapshots.
@@ -266,7 +261,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       // history entry.
       Router.neglect(
         context,
-        () => routerDelegate.navigate(snapshotScreenId, args),
+        () => DevToolsApp.of(context).navigate(snapshotScreenId, args),
       );
     }
   }
