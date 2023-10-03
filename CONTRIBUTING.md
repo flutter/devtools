@@ -187,7 +187,7 @@ the bots. To update your local flutter version, run:
 
 ```
 
-You also need to generate the required mock for the tests. To generate the mock, run:
+You also need to generate the required mocks for the tests. To generate the mocks, run:
 ```
 cd packages/devtools_test
 dart run build_runner build
