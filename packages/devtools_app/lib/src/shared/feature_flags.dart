@@ -26,7 +26,7 @@ bool get enableExperiments =>
 const bool _experimentsEnabledByEnvironment =
     bool.fromEnvironment('enable_experiments');
 
-bool _experimentsEnabledFromMain = false;
+bool _experimentsEnabledFromMain = true;
 
 void setEnableExperiments() {
   _experimentsEnabledFromMain = true;

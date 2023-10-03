@@ -18,7 +18,6 @@ import '../shared/console/widgets/console_pane.dart';
 import '../shared/feature_flags.dart';
 import '../shared/framework_controller.dart';
 import '../shared/globals.dart';
-import '../shared/routing.dart';
 import '../shared/screen.dart';
 import '../shared/title.dart';
 import '../shared/utils.dart';

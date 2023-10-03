@@ -23,7 +23,6 @@ import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/message_bus.dart';
 import '../../shared/primitives/utils.dart';
-import '../../shared/routing.dart';
 import 'codeview_controller.dart';
 import 'debugger_model.dart';
 
@@ -38,7 +37,6 @@ class DebuggerController extends DisposableController
   // `initialSwitchToIsolate` can be set to false for tests to skip the logic
   // in `switchToIsolate`.
   DebuggerController({
-    DevToolsRouterDelegate? routerDelegate,
     bool initialSwitchToIsolate = true,
   }) : _initialSwitchToIsolate = initialSwitchToIsolate {
     addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {

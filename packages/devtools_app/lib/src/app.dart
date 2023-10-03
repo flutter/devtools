@@ -8,6 +8,7 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import 'example/conditional_screen.dart';
@@ -51,10 +52,15 @@ import 'shared/feature_flags.dart';
 import 'shared/globals.dart';
 import 'shared/offline_screen.dart';
 import 'shared/primitives/utils.dart';
-import 'shared/routing.dart';
 import 'shared/screen.dart';
 import 'shared/ui/hover.dart';
 import 'standalone_ui/standalone_screen.dart';
+
+typedef ControllerCreator<T> = T Function();
+
+const homeScreenId = '/';
+const snapshotScreenId = '/snapshot';
+const memoryAnalysisScreenId = '/memoryanalysis';
 
 // Assign to true to use a sample implementation of a conditional screen.
 // WARNING: Do not check in this file if debugEnableSampleScreen is true.
@@ -77,6 +83,10 @@ class DevToolsApp extends StatefulWidget {
   final AnalyticsController analyticsController;
   final List<DevToolsJsonFile> sampleData;
 
+  DevToolsAppState of(BuildContext context) {
+    return context.findAncestorStateOfType<DevToolsAppState>()!;
+  }
+
   @override
   State<DevToolsApp> createState() => DevToolsAppState();
 }
@@ -86,6 +96,9 @@ class DevToolsApp extends StatefulWidget {
 /// This manages the route generation, and marshals URL query parameters into
 /// flutter route parameters.
 class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
+
+  GoRouter? _router;
+
   List<Screen> get _screens {
     if (FeatureFlags.devToolsExtensions) {
       // TODO(https://github.com/flutter/devtools/issues/6273): stop special
@@ -123,8 +136,6 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
 
   late ReleaseNotesController releaseNotesController;
 
-  late final routerDelegate = DevToolsRouterDelegate(_getPage);
-
   @override
   void initState() {
     super.initState();
@@ -142,12 +153,12 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     if (FeatureFlags.devToolsExtensions) {
       addAutoDisposeListener(extensionService.availableExtensions, () {
         setState(() {
-          _clearCachedRoutes();
+          _clearGoRouter();
         });
       });
       addAutoDisposeListener(extensionService.visibleExtensions, () {
         setState(() {
-          _clearCachedRoutes();
+          _clearGoRouter();
         });
       });
     }
@@ -156,7 +167,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       serviceConnection.serviceManager.isolateManager.mainIsolate,
       () {
         setState(() {
-          _clearCachedRoutes();
+          _clearGoRouter();
         });
       },
     );
@@ -178,6 +189,47 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     releaseNotesController = ReleaseNotesController();
   }
 
+  GoRouter _initGoRouter() {
+    return GoRouter(
+      routes: _getRoutes(),
+      errorBuilder: (_, GoRouterState state) {
+        return DevToolsScaffold.withChild(
+          key: const Key('not-found'),
+          embed: isEmbedded(state.uri.queryParameters),
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text("'${state.uri.path}' not found."),
+                const SizedBox(height: defaultSpacing),
+                ElevatedButton(
+                  onPressed: () =>
+                      GoRouter.of(context).goNamed(homeScreenId),
+                  child: const Text('Go to Home screen'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  List<GoRoute> _getRoutes() {
+    return <GoRoute>[
+      for (final screenPath in pages.keys)
+        GoRoute(
+          name: screenPath,
+          path: screenPath,
+          builder: (_, __) {
+            return _wrap(
+              Builder(builder: pages[screenPath]!),
+            );
+          },
+        ),
+    ];
+  }
+
   @override
   void dispose() {
     // preferences is initialized in main() to avoid flash of content with
@@ -189,82 +241,76 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   @override
   void didUpdateWidget(DevToolsApp oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _clearCachedRoutes();
+    _clearGoRouter();
   }
 
-  /// Gets the page for a given page/path and args.
-  Page _getPage(
-    BuildContext context,
-    String? page,
-    Map<String, String?> args,
-    DevToolsNavigationState? state,
-  ) {
-    if (FrameworkCore.initializationInProgress) {
-      return const MaterialPage(child: CenteredCircularProgressIndicator());
+  void navigateIfNotCurrent(
+    String name, [
+      Map<String, String?>? queryParameters,
+      DevToolsNavigationState? stateUpdates,
+    ]) {
+    final pageChanged = page != currentConfiguration!.page;
+    final argsChanged = _changesArgs(argUpdates);
+    final stateChanged = _changesState(stateUpdates);
+    if (!pageChanged && !argsChanged && !stateChanged) {
+      return;
     }
 
-    // Provide the appropriate page route.
-    if (pages.containsKey(page)) {
-      Widget widget = pages[page!]!(
-        context,
-        page,
-        args,
-        state,
-      );
-      assert(
-        () {
-          widget = _AlternateCheckedModeBanner(
-            builder: (context) => pages[page]!(
-              context,
-              page,
-              args,
-              state,
-            ),
-          );
-          return true;
-        }(),
-      );
-      return MaterialPage(child: widget);
+    navigate(page, argUpdates, stateUpdates);
+  }
+
+  /// Navigates to a new page, optionally updating arguments and state.
+  ///
+  /// Existing arguments (for example &uri=) will be preserved unless
+  /// overwritten by [argUpdates].
+  void navigate(
+      String page, [
+        Map<String, String?>? argUpdates,
+        DevToolsNavigationState? state,
+      ]) {
+    final newArgs = {...currentConfiguration?.args ?? {}, ...?argUpdates};
+
+    // Ensure we disconnect from any previously connected applications if we do
+    // not have a vm service uri as a query parameter, unless we are loading an
+    // offline file.
+    if (page != snapshotScreenId && newArgs['uri'] == null) {
+      unawaited(serviceConnection.serviceManager.manuallyDisconnect());
     }
 
-    // Return a page not found.
-    return MaterialPage(
-      child: DevToolsScaffold.withChild(
-        key: const Key('not-found'),
-        embed: isEmbedded(args),
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text("'$page' not found."),
-              const SizedBox(height: defaultSpacing),
-              ElevatedButton(
-                onPressed: () =>
-                    routerDelegate.navigateHome(clearScreenParam: true),
-                child: const Text('Go to Home screen'),
-              ),
-            ],
-          ),
-        ),
-      ),
+    _replaceStack(
+      DevToolsRouteConfiguration(page, newArgs, state),
     );
+    notifyListeners();
+  }
+
+  Widget _wrap(Widget child) {
+    if (FrameworkCore.initializationInProgress) {
+      return const CenteredCircularProgressIndicator();
+    }
+    assert(
+      () {
+        child = _AlternateCheckedModeBanner(builder: (context) => child);
+        return true;
+      }(),
+    );
+    return child;
   }
 
   Widget _buildTabbedPage(
-    BuildContext _,
-    String? page,
-    Map<String, String?> params,
-    DevToolsNavigationState? __,
+    BuildContext context,
   ) {
-    final vmServiceUri = params['uri'];
-    final embed = isEmbedded(params);
-    final hide = {...?params['hide']?.split(',')};
+    final GoRouterState state = GoRouterState.of(context);
+    final queryParams = state.uri.queryParameters;
+    final vmServiceUri = queryParams['uri'];
+    final embed = isEmbedded(queryParams);
+    final hide = {...?queryParams['hide']?.split(',')};
 
     // TODO(dantup): We should be able simplify this a little, removing params['page']
     // and only supporting /inspector (etc.) instead of also &page=inspector if
     // all IDEs switch over to those URLs.
-    if (page?.isEmpty ?? true) {
-      page = params['page'];
+    String? page = state.path;
+    if (state.path?.isEmpty ?? true) {
+      page = queryParams['page'];
     }
 
     final connectedToVmService =
@@ -329,13 +375,14 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   }
 
   /// The pages that the app exposes.
-  Map<String, UrlParametersBuilder> get pages {
-    return _routes ??= {
+  Map<String, WidgetBuilder> get pages {
+    return {
       homeScreenId: _buildTabbedPage,
       for (final screen in _screens) screen.screenId: _buildTabbedPage,
-      snapshotScreenId: (_, __, args, ___) {
-        final snapshotArgs = OfflineDataArguments.fromArgs(args);
-        final embed = isEmbedded(args);
+      snapshotScreenId: (_) {
+        final queryParameters = GoRouterState.of(context).uri.queryParameters;
+        final snapshotArgs = OfflineDataArguments.fromArgs(queryParameters);
+        final embed = isEmbedded(queryParameters);
         return DevToolsScaffold.withChild(
           key: UniqueKey(),
           embed: embed,
@@ -346,8 +393,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         );
       },
       if (FeatureFlags.memoryAnalysis)
-        memoryAnalysisScreenId: (_, __, args, ____) {
-          final embed = isEmbedded(args);
+        memoryAnalysisScreenId: (_) {
+          final embed = isEmbedded(GoRouterState.of(context).uri.queryParameters);
           return DevToolsScaffold.withChild(
             key: const Key('memoryanalysis'),
             embed: embed,
@@ -361,19 +408,19 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     };
   }
 
-  Map<String, UrlParametersBuilder> get _standaloneScreens {
+  Map<String, WidgetBuilder> get _standaloneScreens {
     return {
       for (final type in StandaloneScreenType.values)
-        type.name: (_, __, args, ___) => type.screen,
+        type.name: (_) => type.screen,
     };
   }
 
   bool isEmbedded(Map<String, String?> args) => args['embed'] == 'true';
 
-  Map<String, UrlParametersBuilder>? _routes;
+  // Map<String, UrlParametersBuilder>? _routes;
 
-  void _clearCachedRoutes() {
-    _routes = null;
+  void _clearGoRouter() {
+    _router = null;
   }
 
   List<Screen> _visibleScreens() => _screens.where(shouldShowScreen).toList();
@@ -385,7 +432,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         .where(
           (s) => s.providesController && (offline ? s.supportsOffline : true),
         )
-        .map((s) => s.controllerProvider(routerDelegate))
+        .map((s) => s.controllerProvider())
         .toList();
   }
 
@@ -425,8 +472,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
           ),
         );
       },
-      routerDelegate: routerDelegate,
-      routeInformationParser: DevToolsRouteInformationParser(),
+      routerConfig: _router ??= _initGoRouter(),
       // Disable default scrollbar behavior on web to fix duplicate scrollbars
       // bug, see https://github.com/flutter/flutter/issues/90697:
       scrollBehavior:
@@ -446,7 +492,7 @@ class DevToolsScreen<C> {
     this.createController,
     this.controller,
     this.supportsOffline = false,
-  }) : assert(createController == null || controller == null);
+  }) : assert((createController == null) != (controller == null));
 
   final Screen screen;
 
@@ -458,7 +504,7 @@ class DevToolsScreen<C> {
   ///
   /// If [createController] and [controller] are both null, [screen] will be
   /// responsible for creating and maintaining its own controller.
-  final C Function(DevToolsRouterDelegate)? createController;
+  final ControllerCreator<C>? createController;
 
   /// A provided controller for this screen, if non-null.
   ///
@@ -479,27 +525,16 @@ class DevToolsScreen<C> {
   /// Defaults to false.
   final bool supportsOffline;
 
-  Provider<C> controllerProvider(DevToolsRouterDelegate routerDelegate) {
-    assert(
-      (createController != null && controller == null) ||
-          (createController == null && controller != null),
-    );
+  Provider<C> controllerProvider() {
+    // The construct has guaranteed at least one of controller or
+    // createController is not null, but not both.
     final controllerLocal = controller;
     if (controllerLocal != null) {
       return Provider<C>.value(value: controllerLocal);
     }
-    return Provider<C>(create: (_) => createController!(routerDelegate));
+    return Provider<C>(create: (_) => createController!());
   }
 }
-
-/// A [WidgetBuilder] that takes an additional map of URL query parameters and
-/// args, as well a state not included in the URL.
-typedef UrlParametersBuilder = Widget Function(
-  BuildContext,
-  String?,
-  Map<String, String?>,
-  DevToolsNavigationState?,
-);
 
 /// Displays the checked mode banner in the bottom end corner instead of the
 /// top end corner.
@@ -538,7 +573,7 @@ List<DevToolsScreen> defaultScreens({
     DevToolsScreen<void>(HomeScreen(sampleData: sampleData)),
     DevToolsScreen<InspectorController>(
       InspectorScreen(),
-      createController: (_) => InspectorController(
+      createController: () => InspectorController(
         inspectorTree: InspectorTreeController(
           gaId: InspectorScreenMetrics.summaryTreeGaId,
         ),
@@ -550,51 +585,49 @@ List<DevToolsScreen> defaultScreens({
     ),
     DevToolsScreen<PerformanceController>(
       PerformanceScreen(),
-      createController: (_) => PerformanceController(),
+      createController: () => PerformanceController(),
       supportsOffline: true,
     ),
     DevToolsScreen<ProfilerScreenController>(
       ProfilerScreen(),
-      createController: (_) => ProfilerScreenController(),
+      createController: () => ProfilerScreenController(),
       supportsOffline: true,
     ),
     DevToolsScreen<MemoryController>(
       MemoryScreen(),
-      createController: (_) => MemoryController(),
+      createController: () => MemoryController(),
     ),
     DevToolsScreen<DebuggerController>(
       DebuggerScreen(),
-      createController: (routerDelegate) => DebuggerController(
-        routerDelegate: routerDelegate,
-      ),
+      createController: () => DebuggerController(),
     ),
     DevToolsScreen<NetworkController>(
       NetworkScreen(),
-      createController: (_) => NetworkController(),
+      createController: () => NetworkController(),
     ),
     DevToolsScreen<LoggingController>(
       LoggingScreen(),
-      createController: (_) => LoggingController(),
+      createController: () => LoggingController(),
     ),
     DevToolsScreen<void>(ProviderScreen()),
     DevToolsScreen<AppSizeController>(
       AppSizeScreen(),
-      createController: (_) => AppSizeController(),
+      createController: () => AppSizeController(),
     ),
     if (FeatureFlags.deepLinkValidation)
       DevToolsScreen<DeepLinksController>(
         DeepLinksScreen(),
-        createController: (_) => DeepLinksController(),
+        createController: () => DeepLinksController(),
       ),
     DevToolsScreen<VMDeveloperToolsController>(
       VMDeveloperToolsScreen(),
-      createController: (_) => VMDeveloperToolsController(),
+      createController: () => VMDeveloperToolsController(),
     ),
     // Show the sample DevTools screen.
     if (debugEnableSampleScreen && (kDebugMode || kProfileMode))
       DevToolsScreen<ExampleController>(
         const ExampleConditionalScreen(),
-        createController: (_) => ExampleController(),
+        createController: () => ExampleController(),
         supportsOffline: true,
       ),
   ];

@@ -8,7 +8,6 @@ import 'dart:io';
 
 import 'package:devtools_app/src/screens/debugger/span_parser.dart';
 import 'package:devtools_app/src/screens/debugger/syntax_highlighter.dart';
-import 'package:devtools_app/src/shared/routing.dart';
 import 'package:devtools_app/src/shared/ui/colors.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';

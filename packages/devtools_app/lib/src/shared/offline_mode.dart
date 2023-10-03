@@ -10,7 +10,6 @@ import 'package:flutter/foundation.dart';
 
 import 'config_specific/import_export/import_export.dart';
 import 'globals.dart';
-import 'routing.dart';
 
 class OfflineModeController {
   bool get isOffline => _offlineMode.value;

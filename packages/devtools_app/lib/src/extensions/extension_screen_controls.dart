@@ -13,7 +13,6 @@ import '../shared/analytics/analytics.dart' as ga;
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
-import '../shared/routing.dart';
 
 class EmbeddedExtensionHeader extends StatelessWidget {
   const EmbeddedExtensionHeader({
@@ -183,6 +182,7 @@ class DisableExtensionDialog extends StatelessWidget {
               ),
             );
             Navigator.of(context).pop(dialogDefaultContext);
+            GoRouter.of(context).goNamed()
             DevToolsRouterDelegate.of(context)
                 .navigateHome(clearScreenParam: true);
           },

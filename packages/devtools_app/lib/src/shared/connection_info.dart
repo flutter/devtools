@@ -4,13 +4,14 @@
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../devtools_app.dart';
 import 'analytics/constants.dart' as gac;
 import 'common_widgets.dart';
 import 'globals.dart';
 import 'primitives/utils.dart';
-import 'routing.dart';
 import 'ui/utils.dart';
 import 'utils.dart';
 
@@ -116,9 +117,8 @@ class ConnectToNewAppButton extends StatelessWidget {
       gaSelection: gac.HomeScreenEvents.connectToNewApp.name,
       minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
       onPressed: () {
-        DevToolsRouterDelegate.of(context).navigateHome(
-          clearUriParam: true,
-          clearScreenParam: true,
+        GoRouter.of(context).goNamed(
+          homeScreenId,
         );
         Navigator.of(context, rootNavigator: true).pop('dialog');
       },

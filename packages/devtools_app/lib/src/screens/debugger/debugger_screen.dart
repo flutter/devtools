@@ -21,7 +21,6 @@ import '../../shared/flex_split_column.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/listenable.dart';
 import '../../shared/primitives/utils.dart';
-import '../../shared/routing.dart';
 import '../../shared/screen.dart';
 import '../../shared/utils.dart';
 import 'breakpoints.dart';

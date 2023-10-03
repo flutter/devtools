@@ -6,13 +6,13 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../diagnostics/dap_object_node.dart';
 import '../../diagnostics/dart_object_node.dart';
 import '../../globals.dart';
 import '../../primitives/utils.dart';
-import '../../routing.dart';
 import '../../screen.dart';
 import '../../ui/colors.dart';
 import 'description.dart';
@@ -116,10 +116,13 @@ class DisplayProvider extends StatelessWidget {
   void _handleInspect(
     BuildContext context,
   ) async {
-    final router = DevToolsRouterDelegate.of(context);
+    final state = GoRouterState.of(context);
+    final router = GoRouter.of(context);
     final inspectorService = serviceConnection.inspectorService;
     if (await variable.inspectWidget()) {
-      router.navigateIfNotCurrent(ScreenMetaData.inspector.id);
+      if (state.name != ScreenMetaData.inspector.id) {
+        router.navigateIfNotCurrent(ScreenMetaData.inspector.id);
+      }
     } else {
       if (inspectorService!.isDisposed) return;
       final isInspectable = await variable.isInspectable;

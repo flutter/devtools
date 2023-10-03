@@ -18,77 +18,77 @@ final _log = Logger('screen.dart');
 
 enum ScreenMetaData {
   home(
-    'home',
+    '/home',
     icon: Icons.home_rounded,
     requiresConnection: false,
   ),
   inspector(
-    'inspector',
+    '/inspector',
     title: 'Flutter Inspector',
     icon: Octicons.deviceMobile,
     requiresFlutter: true,
     requiresDebugBuild: true,
   ),
   performance(
-    'performance',
+    '/performance',
     title: 'Performance',
     icon: Octicons.pulse,
     worksOffline: true,
   ),
   cpuProfiler(
-    'cpu-profiler',
+    '/cpu-profiler',
     title: 'CPU Profiler',
     icon: Octicons.dashboard,
     requiresDartVm: true,
     worksOffline: true,
   ),
   memory(
-    'memory',
+    '/memory',
     title: 'Memory',
     icon: Octicons.package,
     requiresDartVm: true,
   ),
   debugger(
-    'debugger',
+    '/debugger',
     title: 'Debugger',
     icon: Octicons.bug,
     requiresDebugBuild: true,
   ),
   network(
-    'network',
+    '/network',
     title: 'Network',
     icon: Icons.network_check,
     requiresDartVm: true,
   ),
   logging('logging', title: 'Logging', icon: Octicons.clippy),
   provider(
-    'provider',
+    '/provider',
     title: 'Provider',
     icon: Icons.attach_file,
     requiresLibrary: 'package:provider/',
     requiresDebugBuild: true,
   ),
   appSize(
-    'app-size',
+    '/app-size',
     title: 'App Size',
     icon: Octicons.fileZip,
     requiresConnection: false,
     requiresDartVm: true,
   ),
   deepLinks(
-    'deep-links',
+    '/deep-links',
     title: 'Deep Links',
     icon: Icons.link_rounded,
     requiresConnection: false,
     requiresDartVm: true,
   ),
   vmTools(
-    'vm-tools',
+    '/vm-tools',
     title: 'VM Tools',
     icon: Icons.settings_applications,
     requiresVmDeveloperMode: true,
   ),
-  simple('simple');
+  simple('/simple');
 
   const ScreenMetaData(
     this.id, {

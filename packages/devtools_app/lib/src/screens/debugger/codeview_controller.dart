@@ -16,7 +16,6 @@ import '../../shared/diagnostics/primitives/source_location.dart';
 import '../../shared/globals.dart';
 import '../../shared/notifications.dart';
 import '../../shared/primitives/history_manager.dart';
-import '../../shared/routing.dart';
 import '../../shared/ui/search.dart';
 import '../vm_developer/vm_service_private_extensions.dart';
 import 'debugger_model.dart';

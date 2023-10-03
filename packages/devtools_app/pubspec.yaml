@@ -41,6 +41,7 @@ dependencies:
   flutter_riverpod: 2.0.0-dev.9
   flutter_web_plugins:
     sdk: flutter
+  go_router: ^11.1.2
   http: ^0.13.4
   image: ^3.0.2
   intl: ">=0.16.1 <0.18.0"

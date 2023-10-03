@@ -4,6 +4,7 @@
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../screens/debugger/codeview_controller.dart';
 import '../screens/debugger/debugger_screen.dart';
@@ -11,7 +12,6 @@ import '../screens/vm_developer/vm_developer_common_widgets.dart';
 import 'globals.dart';
 import 'primitives/trees.dart';
 import 'primitives/utils.dart';
-import 'routing.dart';
 
 mixin ProfilableDataMixin<T extends TreeNode<T>> on TreeNode<T> {
   ProfileMetaData get profileMetaData;
@@ -287,10 +287,9 @@ class MethodAndSourceDisplay extends StatelessWidget {
             object: script,
             textBuilder: (_) => sourceDisplay,
             onTap: (e) {
-              DevToolsRouterDelegate.of(context).navigate(
+              GoRouter.of(context).goNamed(
                 DebuggerScreen.id,
-                const {},
-                CodeViewSourceLocationNavigationState(
+                extra: CodeViewSourceLocationNavigationState(
                   script: script,
                   line: sourceLine!,
                 ),

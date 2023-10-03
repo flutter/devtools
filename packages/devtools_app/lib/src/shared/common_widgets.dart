@@ -11,8 +11,10 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../devtools_app.dart';
 import '../screens/debugger/debugger_controller.dart';
 import '../screens/inspector/layout_explorer/ui/theme.dart';
 import 'analytics/analytics.dart' as ga;
@@ -24,7 +26,6 @@ import 'diagnostics/tree_builder.dart';
 import 'globals.dart';
 import 'primitives/flutter_widgets/linked_scroll_controller.dart';
 import 'primitives/utils.dart';
-import 'routing.dart';
 import 'utils.dart';
 
 /// The width of the package:flutter_test debugger device.
@@ -507,7 +508,13 @@ class ExitOfflineButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final routerDelegate = DevToolsRouterDelegate.of(context);
+    final uri = GoRouterState.of(context).uri.queryParameters['uri'];
+    final Map<String, String> queryParameters;
+    if (uri != null) {
+      queryParameters = <String, String> {'uri' : uri};
+    } else {
+      queryParameters = const <String, String> {};
+    }
     return GaDevToolsButton(
       key: const Key('exit offline button'),
       label: 'Exit offline mode',
@@ -520,7 +527,7 @@ class ExitOfflineButton extends StatelessWidget {
         // the homepage so that clicking Back will not return here.
         Router.neglect(
           context,
-          () => routerDelegate.navigateHome(clearScreenParam: true),
+          () => GoRouter.of(context).goNamed(homeScreenId, queryParameters: queryParameters),
         );
       },
     );

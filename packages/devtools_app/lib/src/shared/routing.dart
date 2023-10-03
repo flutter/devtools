@@ -16,8 +16,20 @@ import 'primitives/utils.dart';
 
 const memoryAnalysisScreenId = 'memoryanalysis';
 
-const homeScreenId = '';
-const snapshotScreenId = 'snapshot';
+const homeScreenId = '/';
+const snapshotScreenId = '/snapshot';
+
+/// Builds a page for [DevToolsRouterDelegate].
+///
+/// The `page` contains is string path from url.
+///
+/// The `args` contains query parameters from url.
+typedef PageBuilder = Page Function(
+    BuildContext context,
+    String? page,
+    Map<String, String?> args,
+    DevToolsNavigationState? state,
+);
 
 /// Represents a Page/route for a DevTools screen.
 class DevToolsRouteConfiguration {
@@ -126,12 +138,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   static String get currentPage => _currentPage;
   static late String _currentPage;
 
-  final Page Function(
-    BuildContext,
-    String?,
-    Map<String, String?>,
-    DevToolsNavigationState?,
-  ) _getPage;
+  final PageBuilder _getPage;
 
   /// A list of any routes/pages on the stack.
   ///

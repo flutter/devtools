@@ -21,7 +21,6 @@ import '../shared/feature_flags.dart';
 import '../shared/globals.dart';
 import '../shared/primitives/blocking_action_mixin.dart';
 import '../shared/primitives/utils.dart';
-import '../shared/routing.dart';
 import '../shared/screen.dart';
 import '../shared/title.dart';
 import '../shared/ui/vm_flag_widgets.dart';
