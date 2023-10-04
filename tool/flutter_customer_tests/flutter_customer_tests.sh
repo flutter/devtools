@@ -14,7 +14,8 @@ flutter test test/
 # Test only tests in devtools_app with the 'flutterTestRegistry' tag
 cd ../devtools_app
 flutter pub get
-flutter test test/ -t flutterTestRegistry
+# flutter test test/ -t flutterTestRegistry
+flutter test test/
 
 # Run the integration test that builds every DevTools screen. 
 # dart run integration_test/run_tests.dart --target=integration_test/test/live_connection/app_test.dart
