@@ -60,7 +60,7 @@ enum ScreenMetaData {
     icon: Icons.network_check,
     requiresDartVm: true,
   ),
-  logging('logging', title: 'Logging', icon: Octicons.clippy),
+  logging('/logging', title: 'Logging', icon: Octicons.clippy),
   provider(
     '/provider',
     title: 'Provider',

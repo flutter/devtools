@@ -343,13 +343,14 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     if (FrameworkCore.initializationInProgress) {
       return const CenteredCircularProgressIndicator();
     }
+    Widget result = child;
     assert(
       () {
-        child = _AlternateCheckedModeBanner(builder: (context) => child);
+        result = _AlternateCheckedModeBanner(builder: (context) => child);
         return true;
       }(),
     );
-    return child;
+    return result;
   }
 
   Widget _buildTabbedPage(
@@ -467,7 +468,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   Map<String, WidgetBuilder> get _standaloneScreens {
     return {
       for (final type in StandaloneScreenType.values)
-        type.name: (_) => type.screen,
+        '/${type.name}': (_) => type.screen,
     };
   }
 
@@ -598,7 +599,7 @@ class DevToolsScreen<C> {
     this.createController,
     this.controller,
     this.supportsOffline = false,
-  }) : assert((createController == null) != (controller == null));
+  }) : assert(createController == null || controller == null);
 
   final Screen screen;
 
@@ -632,8 +633,7 @@ class DevToolsScreen<C> {
   final bool supportsOffline;
 
   Provider<C> controllerProvider(DevToolsAppState state) {
-    // The construct has guaranteed at least one of controller or
-    // createController is not null, but not both.
+    assert((createController != null) != (controller != null));
     final controllerLocal = controller;
     if (controllerLocal != null) {
       return Provider<C>.value(value: controllerLocal);
