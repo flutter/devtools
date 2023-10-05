@@ -210,7 +210,7 @@ class ExtensionManager {
     });
   }
 
-  void showNotification(String message) async {
+  void showNotification(String message) {
     postMessageToDevTools(
       ShowNotificationExtensionEvent(message: message),
     );
@@ -222,7 +222,7 @@ class ExtensionManager {
     required String message,
     required String extensionName,
     bool ignoreIfAlreadyDismissed = true,
-  }) async {
+  }) {
     postMessageToDevTools(
       ShowBannerMessageExtensionEvent(
         id: key,
