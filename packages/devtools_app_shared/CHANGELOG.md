@@ -1,3 +1,6 @@
+## 0.0.6
+* Bump to `vm_service` version 12.0.0.
+
 ## 0.0.5
 * Fix bug where registered services were not getting cleared on app disconnect.
 * Fix a bug with the logic to wait for a service extension's availability.

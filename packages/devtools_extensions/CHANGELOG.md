@@ -1,3 +1,7 @@
+## 0.0.9
+* Bump to `vm_service` version 12.0.0.
+* Update README.md.
+
 ## 0.0.8
 * Fix the `build_and_copy` command so that it succeeds when there is not
 an existing `extension/devtools/build` directory.
