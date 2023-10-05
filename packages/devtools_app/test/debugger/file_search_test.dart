@@ -74,7 +74,6 @@ void main() {
         equals('kitchen:food/catering/party.dart'),
       );
     },
-    
   );
 
   testWidgetsWithWindowSize(
@@ -246,7 +245,6 @@ void main() {
         ]),
       );
     },
-    
   );
 
   testWidgetsWithWindowSize(
@@ -472,7 +470,6 @@ void main() {
         ),
       );
     },
-    
   );
 }
 
