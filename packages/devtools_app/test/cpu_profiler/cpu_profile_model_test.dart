@@ -11,7 +11,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../test_infra/test_data/cpu_profiler/cpu_profile.dart';
-import '../test_infra/utils/test_utils.dart';
 
 void main() {
   group('CpuProfileData', () {
@@ -29,7 +28,7 @@ void main() {
       );
     });
 
-    testWithFlutterTestRegistry(
+    test(
       'empty frame regression test',
       () {
         final cpuProfileEmptyData =
@@ -44,7 +43,7 @@ void main() {
       },
     );
 
-    testWithFlutterTestRegistry('init from parse', () {
+    test('init from parse', () {
       expect(
         cpuProfileData.stackFramesJson,
         equals(goldenCpuProfileStackFrames),
@@ -65,7 +64,7 @@ void main() {
       );
     });
 
-    testWithFlutterTestRegistry('subProfile', () {
+    test('subProfile', () {
       final subProfile = CpuProfileData.subProfile(
         cpuProfileData,
         TimeRange()
@@ -88,7 +87,7 @@ void main() {
       );
     });
 
-    testWithFlutterTestRegistry('filterFrom', () {
+    test('filterFrom', () {
       final filteredProfile = CpuProfileData.filterFrom(
         cpuProfileData,
         (stackFrame) => !stackFrame.packageUri.startsWith('dart:'),
@@ -108,43 +107,49 @@ void main() {
       );
     });
 
-    testWithFlutterTestRegistry('samples to json', () {
+    test('samples to json', () {
       expect(cpuSamples.toJson(), equals(goldenCpuSamplesJson));
     });
 
-    testWithFlutterTestRegistry('profileData to json', () {
+    test('profileData to json', () {
       expect(cpuProfileData.toJson, equals(goldenCpuProfileDataJson));
     });
 
-    testWithFlutterTestRegistry(
-        'converts golden samples to golden cpu profile data', () async {
-      final generatedCpuProfileData =
-          await CpuProfileData.generateFromCpuSamples(
-        isolateId: goldenSamplesIsolate,
-        cpuSamples: CpuSamples.parse(goldenCpuSamplesJson)!,
-      );
+    test(
+      'converts golden samples to golden cpu profile data',
+      () async {
+        final generatedCpuProfileData =
+            await CpuProfileData.generateFromCpuSamples(
+          isolateId: goldenSamplesIsolate,
+          cpuSamples: CpuSamples.parse(goldenCpuSamplesJson)!,
+        );
 
-      expect(generatedCpuProfileData.toJson, equals(goldenCpuProfileDataJson));
-    });
+        expect(
+          generatedCpuProfileData.toJson,
+          equals(goldenCpuProfileDataJson),
+        );
+      },
+    );
 
-    testWithFlutterTestRegistry('to json defaults packageUri to resolvedUrl',
-        () {
-      const id = '140357727781376-12';
-      final profileData = Map<String, dynamic>.from(goldenCpuProfileDataJson);
-      profileData['stackFrames'] = Map<String, Map<String, String?>>.from(
-        {id: goldenCpuProfileStackFrames[id]},
-      );
-      profileData['stackFrames'][id]
-          .remove(CpuProfileData.resolvedPackageUriKey);
+    test(
+      'to json defaults packageUri to resolvedUrl',
+      () {
+        const id = '140357727781376-12';
+        final profileData = Map<String, dynamic>.from(goldenCpuProfileDataJson);
+        profileData['stackFrames'] = Map<String, Map<String, String?>>.from(
+          {id: goldenCpuProfileStackFrames[id]},
+        );
+        profileData['stackFrames'][id]
+            .remove(CpuProfileData.resolvedPackageUriKey);
 
-      final parsedProfileData = CpuProfileData.parse(profileData);
+        final parsedProfileData = CpuProfileData.parse(profileData);
 
-      final jsonPackageUri = parsedProfileData.stackFrames[id]!.packageUri;
-      expect(jsonPackageUri, goldenCpuProfileStackFrames[id]!['resolvedUrl']);
-    });
+        final jsonPackageUri = parsedProfileData.stackFrames[id]!.packageUri;
+        expect(jsonPackageUri, goldenCpuProfileStackFrames[id]!['resolvedUrl']);
+      },
+    );
 
-    testWithFlutterTestRegistry(
-        'generateFromCpuSamples handles duplicate resolvedUrls', () async {
+    test('generateFromCpuSamples handles duplicate resolvedUrls', () async {
       const resolvedUrl = 'the/resolved/Url';
       const packageUri = 'the/package/Uri';
       setGlobal(
@@ -182,7 +187,7 @@ void main() {
   });
 
   group('CpuStackFrame', () {
-    testWithFlutterTestRegistry('isNative', () {
+    test('isNative', () {
       expect(stackFrameA.isNative, isTrue);
       expect(stackFrameB.isNative, isFalse);
       expect(stackFrameC.isNative, isFalse);
@@ -204,20 +209,20 @@ void main() {
       );
     });
 
-    testWithFlutterTestRegistry('isDartCore', () {
+    test('isDartCore', () {
       expect(stackFrameA.isDartCore, isFalse);
       expect(stackFrameB.isDartCore, isTrue);
       expect(stackFrameC.isDartCore, isFalse);
     });
 
-    testWithFlutterTestRegistry('isFlutterCore', () {
+    test('isFlutterCore', () {
       expect(stackFrameA.isFlutterCore, isFalse);
       expect(stackFrameB.isFlutterCore, isFalse);
       expect(stackFrameC.isFlutterCore, isTrue);
       expect(flutterEngineStackFrame.isFlutterCore, isTrue);
     });
 
-    testWithFlutterTestRegistry('isTag', () {
+    test('isTag', () {
       expect(stackFrameA.isTag, isFalse);
       expect(stackFrameB.isTag, isFalse);
       expect(stackFrameC.isTag, isFalse);
@@ -239,11 +244,11 @@ void main() {
       );
     });
 
-    testWithFlutterTestRegistry('sampleCount', () {
+    test('sampleCount', () {
       expect(testStackFrame.inclusiveSampleCount, equals(10));
     });
 
-    testWithFlutterTestRegistry('totalTime and selfTime', () {
+    test('totalTime and selfTime', () {
       expect(testStackFrame.totalTimeRatio, equals(1.0));
       expect(testStackFrame.totalTime.inMicroseconds, equals(10000));
       expect(testStackFrame.selfTimeRatio, equals(0.0));
@@ -265,7 +270,7 @@ void main() {
       expect(stackFrameF.selfTime.inMicroseconds, equals(0));
     });
 
-    testWithFlutterTestRegistry('ancestorIds', () {
+    test('ancestorIds', () {
       expect(testStackFrame.ancestorIds.toList(), ['cpuProfileRoot']);
       expect(stackFrameA.ancestorIds.toList(), ['cpuProfileRoot']);
       expect(stackFrameB.ancestorIds.toList(), ['id_0', 'cpuProfileRoot']);
@@ -299,7 +304,7 @@ void main() {
       );
     });
 
-    testWithFlutterTestRegistry('shallowCopy', () {
+    test('shallowCopy', () {
       expect(stackFrameD.children.length, 2);
       expect(stackFrameD.parent, stackFrameB);
       CpuStackFrame copy = stackFrameD.shallowCopy();
@@ -319,7 +324,7 @@ void main() {
       expect(copy.sourceLine, stackFrameD.sourceLine);
     });
 
-    testWithFlutterTestRegistry('shallowCopy overrides', () {
+    test('shallowCopy overrides', () {
       final overrides = {
         'id': 'overriddenId',
         'name': 'overriddenName',
@@ -354,7 +359,7 @@ void main() {
       expect(copy.profileMetaData, stackFrameD.profileMetaData);
     });
 
-    testWithFlutterTestRegistry('deepCopy', () {
+    test('deepCopy', () {
       expect(testStackFrame.isExpanded, isFalse);
       expect(testStackFrame.children.length, equals(1));
       testStackFrame.expand();
@@ -377,14 +382,14 @@ void main() {
       expect(copyFromMidTree.level, equals(0));
     });
 
-    testWithFlutterTestRegistry('handles zero values', () {
+    test('handles zero values', () {
       expect(zeroStackFrame.totalTime, const Duration());
       expect(zeroStackFrame.totalTimeRatio, 0.0);
       expect(zeroStackFrame.selfTime, const Duration());
       expect(zeroStackFrame.selfTimeRatio, 0.0);
     });
 
-    testWithFlutterTestRegistry('tooltip', () {
+    test('tooltip', () {
       expect(
         testTagRootedStackFrame.tooltip,
         equals('[Tag] TagA - 10.0 ms'),
@@ -400,7 +405,7 @@ void main() {
     });
 
     group('packageUriWithSourceLine', () {
-      testWithFlutterTestRegistry('with a sourceLine', () {
+      test('with a sourceLine', () {
         const sourceLine = 38239;
         final copy = stackFrameD.shallowCopy(sourceLine: sourceLine);
         expect(
@@ -409,7 +414,7 @@ void main() {
         );
       });
 
-      testWithFlutterTestRegistry('without sourceLine', () {
+      test('without sourceLine', () {
         expect(
           stackFrameD.packageUriWithSourceLine,
           equals('processedflutter::AnimatorBeginFrame'),
@@ -418,7 +423,7 @@ void main() {
     });
   });
 
-  testWithFlutterTestRegistry('matches', () {
+  test('matches', () {
     expect(stackFrameC.matches(stackFrameC2), isTrue);
     expect(stackFrameC.matches(stackFrameG), isFalse);
     expect(stackFrameC.matches(stackFrameC4), isFalse);

@@ -9,7 +9,6 @@ import 'dart:io';
 import 'package:devtools_app/devtools_app.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meta/meta.dart';
 
 SyncTimelineEvent testSyncTimelineEvent(TraceEventWrapper eventWrapper) =>
     SyncTimelineEvent(eventWrapper);
@@ -77,10 +76,3 @@ void setCharacterWidthForTables() {
 
 T getWidgetFromFinder<T>(Finder finder) =>
     finder.first.evaluate().first.widget as T;
-
-const flutterTestRegistryTag = 'flutterTestRegistry';
-
-@isTest
-void testWithFlutterTestRegistry(Object description, dynamic Function() body) {
-  test(description, body, tags: [flutterTestRegistryTag]);
-}

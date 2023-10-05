@@ -11,8 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-import '../test_infra/utils/test_utils.dart';
-
 void main() {
   final codeViewController = createMockCodeViewControllerWithDefaults();
   final scriptManager = MockScriptManager();
@@ -76,7 +74,7 @@ void main() {
         equals('kitchen:food/catering/party.dart'),
       );
     },
-    tags: [flutterTestRegistryTag],
+    
   );
 
   testWidgetsWithWindowSize(
@@ -248,7 +246,7 @@ void main() {
         ]),
       );
     },
-    tags: [flutterTestRegistryTag],
+    
   );
 
   testWidgetsWithWindowSize(
@@ -474,7 +472,7 @@ void main() {
         ),
       );
     },
-    tags: [flutterTestRegistryTag],
+    
   );
 }
 

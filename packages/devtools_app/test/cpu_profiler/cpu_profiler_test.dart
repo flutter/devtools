@@ -386,7 +386,6 @@ void main() {
           findsOneWidget,
         );
       },
-      tags: [flutterTestRegistryTag],
     );
 
     testWidgetsWithWindowSize(
@@ -504,7 +503,6 @@ void main() {
           ),
         );
       },
-      tags: [flutterTestRegistryTag],
     );
 
     group('UserTag filters', () {

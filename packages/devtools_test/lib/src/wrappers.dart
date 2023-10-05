@@ -176,7 +176,6 @@ void testWidgetsWithWindowSize(
   Size windowSize,
   WidgetTesterCallback test, {
   bool skip = false,
-  dynamic tags,
 }) {
   testWidgets(
     name,
@@ -186,7 +185,6 @@ void testWidgetsWithWindowSize(
       await _resetWindowSize(tester);
     },
     skip: skip,
-    tags: tags,
   );
 }
 
