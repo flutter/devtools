@@ -1,4 +1,4 @@
-# Script to execute smoke tests for the flutter/tests registry
+# Script to execute integration tests for the flutter/tests registry
 # https://github.com/flutter/tests
 # This is executed as a pre-submit check for every PR in flutter/flutter
 
@@ -6,11 +6,8 @@
 # from the setup steps in
 # https://github.com/flutter/tests/blob/main/registry/flutter_devtools.test
 
-# Test all tests in devtools_app_shared
-cd packages/devtools_app_shared
+cd packages/devtools_app
 flutter pub get
-flutter test test/
 
-cd ../devtools_app
-flutter pub get
-flutter test test/
+# Run the integration test that builds every DevTools screen. 
+dart run integration_test/run_tests.dart --target=integration_test/test/live_connection/app_test.dart
