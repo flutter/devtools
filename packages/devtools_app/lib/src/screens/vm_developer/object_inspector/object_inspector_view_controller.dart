@@ -41,7 +41,7 @@ class ObjectInspectorViewController extends DisposableController
       ProgramExplorerController(showCodeNodes: true);
 
   final ClassHierarchyExplorerController classHierarchyController;
-  final codeViewController = CodeViewController(null);
+  final codeViewController = CodeViewController();
   final objectStoreController = ObjectStoreController();
 
   final objectHistory = ObjectHistory();

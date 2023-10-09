@@ -305,10 +305,12 @@ class _ConnectDialogState extends State<ConnectDialog>
     if (connected) {
       final connectedUri =
           serviceConnection.serviceManager.service!.connectedUri;
+      print('connected $connectedUri !!!!!! ${state}');
       state.updateQueryParametersIfChanged({'uri': '$connectedUri'});
       final shortUri = connectedUri.replace(path: '');
       notificationService.push('Successfully connected to $shortUri.');
     } else if (normalizeVmServiceUri(uri) == null) {
+      print('not connected');
       notificationService.push(
         'Failed to connect to the VM Service at "${connectDialogController.text}".\n'
         'The link was not valid.',

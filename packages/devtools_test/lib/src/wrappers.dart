@@ -30,6 +30,9 @@ Widget wrap(Widget widget) {
         colorScheme: lightColorScheme,
       ),
     ),
+    routerConfig: GoRouter(
+      routes: <GoRoute>[GoRoute(path: '*', )]
+    ),
     routerDelegate: DevToolsRouterDelegate(
       (context, page, args, state) => MaterialPage(
         child: Material(

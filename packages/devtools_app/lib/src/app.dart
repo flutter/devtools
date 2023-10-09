@@ -60,8 +60,8 @@ import 'standalone_ui/standalone_screen.dart';
 typedef ControllerCreator<T> = T Function(DevToolsAppState state);
 
 const homeScreenId = '/';
-const snapshotScreenId = '/snapshot';
-const memoryAnalysisScreenId = '/memoryanalysis';
+const snapshotScreenId = 'snapshot';
+const memoryAnalysisScreenId = 'memoryanalysis';
 
 // Assign to true to use a sample implementation of a conditional screen.
 // WARNING: Do not check in this file if debugEnableSampleScreen is true.
@@ -210,7 +210,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
                 const SizedBox(height: defaultSpacing),
                 ElevatedButton(
                   onPressed: () =>
-                      GoRouter.of(context).goNamed(homeScreenId),
+                      this.router!.goNamed(homeScreenId),
                   child: const Text('Go to Home screen'),
                 ),
               ],
@@ -227,13 +227,29 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
 
   List<GoRoute> _getRoutes() {
     return <GoRoute>[
-      for (final screenPath in pages.keys)
+      GoRoute(
+        name: homeScreenId,
+        path: homeScreenId,
+        pageBuilder: (_, __) {
+          return MaterialPage(
+            child: _wrap(
+              Builder(builder: _buildTabbedPage),
+            ),
+          );
+        },
+      ),
+      for (final screen in pages.keys)
         GoRoute(
-          name: screenPath,
-          path: screenPath,
-          builder: (_, __) {
-            return _wrap(
-              Builder(builder: pages[screenPath]!),
+          name: screen,
+          path: '/$screen',
+          pageBuilder: (_, __) {
+            // TODO(chunhtai): Instead of using a MaterialPage without a key to
+            // build a Scaffold shell with routable body, this should be
+            // use ShellRoute instead.
+            return MaterialPage(
+              child: _wrap(
+                Builder(builder: pages[screen]!),
+              ),
             );
           },
         ),
@@ -275,25 +291,24 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   /// Navigates to a new page, optionally updating arguments and state.
   ///
   /// Existing arguments (for example &uri=) will be preserved unless
-  /// overwritten by [argUpdates].
+  /// overwritten by [queryParameters].
   void navigate(
       String page, [
-        Map<String, String?>? argUpdates,
+        Map<String, String?>? queryParameters,
         DevToolsNavigationState? state,
       ]) {
     final uri = router!.routerDelegate.currentConfiguration.uri;
-    final queryParameters = {...uri.queryParameters, ...?argUpdates};
+    final newQueryParameters = {...uri.queryParameters, ...?queryParameters};
 
     // Ensure we disconnect from any previously connected applications if we do
     // not have a vm service uri as a query parameter, unless we are loading an
     // offline file.
-    if (uri.path != snapshotScreenId && queryParameters['uri'] == null) {
+    if (page != snapshotScreenId && newQueryParameters['uri'] == null) {
       unawaited(serviceConnection.serviceManager.manuallyDisconnect());
     }
-
     router!.goNamed(
       page,
-      queryParameters: queryParameters,
+      queryParameters: newQueryParameters,
       extra: state,
     );
   }
@@ -312,17 +327,19 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   }
 
   void updateQueryParametersIfChanged(Map<String, String> queryParameters) {
+    print('updateQueryParametersIfChanged! ${queryParameters} ${router?.routerDelegate.currentConfiguration.uri}');
+    final newQueryParameter = <String, String>{..._currentUri.queryParameters, ...queryParameters};
+    print('newQueryParameter! ${newQueryParameter}');
     final argsChanged = !mapEquals(
-      {..._currentUri.queryParameters, ...queryParameters},
+      newQueryParameter,
       _currentUri.queryParameters,
     );
     if (!argsChanged) {
       return;
     }
-
-    router!.goNamed(
-      _currentUri.path,
-      queryParameters: queryParameters,
+    print('go! ${_currentUri.replace(queryParameters: newQueryParameter).toString()}');
+    router!.go(
+      _currentUri.replace(queryParameters: newQueryParameter).toString(),
       extra: _currentState,
     );
   }
@@ -365,7 +382,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     // TODO(dantup): We should be able simplify this a little, removing params['page']
     // and only supporting /inspector (etc.) instead of also &page=inspector if
     // all IDEs switch over to those URLs.
-    String? page = state.path;
+    String? page = state.name;
     if (state.path?.isEmpty ?? true) {
       page = queryParams['page'];
     }
@@ -434,9 +451,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   /// The pages that the app exposes.
   Map<String, WidgetBuilder> get pages {
     return {
-      homeScreenId: _buildTabbedPage,
       for (final screen in _screens) screen.screenId: _buildTabbedPage,
-      snapshotScreenId: (_) {
+      snapshotScreenId: (context) {
         final queryParameters = GoRouterState.of(context).uri.queryParameters;
         final snapshotArgs = OfflineDataArguments.fromArgs(queryParameters);
         final embed = isEmbedded(queryParameters);
@@ -450,7 +466,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         );
       },
       if (FeatureFlags.memoryAnalysis)
-        memoryAnalysisScreenId: (_) {
+        memoryAnalysisScreenId: (context) {
           final embed = isEmbedded(GoRouterState.of(context).uri.queryParameters);
           return DevToolsScaffold.withChild(
             key: const Key('memoryanalysis'),
@@ -468,7 +484,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   Map<String, WidgetBuilder> get _standaloneScreens {
     return {
       for (final type in StandaloneScreenType.values)
-        '/${type.name}': (_) => type.screen,
+        type.name: (_) => type.screen,
     };
   }
 
@@ -477,6 +493,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   // Map<String, UrlParametersBuilder>? _routes;
 
   void _clearGoRouter() {
+    print('clear go router ${StackTrace.current}');
     router?.dispose();
     router = null;
   }
@@ -705,7 +722,7 @@ List<DevToolsScreen> defaultScreens({
     ),
     DevToolsScreen<DebuggerController>(
       DebuggerScreen(),
-      createController: (DevToolsAppState state) => DebuggerController(state),
+      createController: (DevToolsAppState state) => DebuggerController(state: state),
     ),
     DevToolsScreen<NetworkController>(
       NetworkScreen(),

@@ -37,11 +37,11 @@ class DebuggerController extends DisposableController
     with AutoDisposeControllerMixin {
   // `initialSwitchToIsolate` can be set to false for tests to skip the logic
   // in `switchToIsolate`.
-  DebuggerController(
-    DevToolsAppState? state, {
+  DebuggerController({
+    DevToolsAppState? state,
     bool initialSwitchToIsolate = true,
   }) : _initialSwitchToIsolate = initialSwitchToIsolate,
-       codeViewController = CodeViewController(state) {
+       codeViewController = CodeViewController(state: state) {
     addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
       if (serviceConnection.serviceManager.connectedState.value.connected) {
         _handleConnectionAvailable(serviceConnection.serviceManager.service!);

@@ -193,7 +193,6 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     _currentScreen = widget.screens[_tabController!.index];
     _tabController!.addListener(() {
       final screen = widget.screens[_tabController!.index];
-
       if (_currentScreen != screen) {
         setState(() {
           _currentScreen = screen;

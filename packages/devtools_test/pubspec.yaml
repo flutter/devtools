@@ -26,6 +26,7 @@ dependencies:
     sdk: flutter
   flutter_test:
     sdk: flutter
+  go_router:
   mockito: ^5.4.1
   path: ^1.8.0
   provider: ^6.0.2

@@ -29,7 +29,7 @@ class CodeViewController extends DisposableController
     with
         AutoDisposeControllerMixin,
         SearchControllerMixin<SourceToken> {
-  CodeViewController(this.state) {
+  CodeViewController({this.state}) {
     _scriptHistoryListener = () async {
       final currentScriptValue = scriptsHistory.current.value;
       if (currentScriptValue != null) {
