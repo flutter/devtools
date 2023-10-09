@@ -340,10 +340,9 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       _vmServiceWsUri =
           convertToWebSocketUrl(serviceProtocolUrl: _vmServiceWsUri);
 
-      vmService = VmServiceWrapper(
-        await vmServiceConnectUri(_vmServiceWsUri.toString()),
-        _vmServiceWsUri,
-        trackFutures: true,
+      vmService = await vmServiceConnectUriWithCreator<VmServiceWrapper>(
+        _vmServiceWsUri.toString(),
+        vmServiceCreator: VmServiceWrapper.defaultCreator,
       );
 
       final vmServiceLocal = vmService!;

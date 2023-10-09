@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:devtools_app_shared/service.dart';
 import 'package:flutter/foundation.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../../service/service_extensions.dart' as extensions;
 import '../globals.dart';

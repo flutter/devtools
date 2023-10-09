@@ -27,7 +27,7 @@ class LeaksPaneController {
               .contains(appLeakTrackerProtocolVersion),
         ) {
     subscriptionWithHistory = serviceConnection
-        .serviceManager.service!.onExtensionEventWithHistory
+        .serviceManager.service!.onExtensionEventWithHistorySafe
         .listen(_onAppMessageWithHistory);
   }
 

@@ -76,18 +76,7 @@ class FrameworkCore {
         final VmServiceWrapper service = await connect<VmServiceWrapper>(
           uri: uri,
           finishedCompleter: finishedCompleter,
-          createService: ({
-            // ignore: avoid-dynamic, code needs to match API from VmService.
-            required Stream<dynamic> /*String|List<int>*/ inStream,
-            required void Function(String message) writeMessage,
-            required Uri connectedUri,
-          }) =>
-              VmServiceWrapper.fromNewVmService(
-            inStream: inStream,
-            writeMessage: writeMessage,
-            connectedUri: connectedUri,
-            trackFutures: integrationTestMode,
-          ),
+          createService: VmServiceWrapper.defaultCreator,
         );
 
         await serviceConnection.serviceManager.vmServiceOpened(

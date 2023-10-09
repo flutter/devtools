@@ -149,8 +149,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   }
 
   @override
-  Uri get connectedUri => _connectedUri;
-  final _connectedUri = Uri.parse('ws://127.0.0.1:56137/ISsyt6ki0no=/ws');
+  String get wsUri => 'ws://127.0.0.1:56137/ISsyt6ki0no=/ws';
 
   @override
   Future<void> forEachIsolate(Future<void> Function(IsolateRef) callback) =>
@@ -365,65 +364,67 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
     return _classList ?? ClassList(classes: []);
   }
 
-  @override
-  Future<bool> isSocketProfilingAvailable(String isolateId) {
-    return Future.value(true);
-  }
+  // TODO(kenz): fix up this fake before landing.
 
-  @override
-  Future<SocketProfilingState> socketProfilingEnabled(
-    String isolateId, [
-    bool? enabled,
-  ]) {
-    if (enabled != null) {
-      return Future.value(SocketProfilingState(enabled: enabled));
-    }
-    return Future.value(
-      SocketProfilingState(enabled: socketProfilingEnabledResult),
-    );
-  }
+  // @override
+  // Future<bool> isSocketProfilingAvailable(String isolateId) {
+  //   return Future.value(true);
+  // }
 
-  @override
-  Future<Success> clearSocketProfile(String isolateId) async {
-    _socketProfile?.sockets.clear();
-    return Future.value(Success());
-  }
+  // @override
+  // Future<SocketProfilingState> socketProfilingEnabled(
+  //   String isolateId, [
+  //   bool? enabled,
+  // ]) {
+  //   if (enabled != null) {
+  //     return Future.value(SocketProfilingState(enabled: enabled));
+  //   }
+  //   return Future.value(
+  //     SocketProfilingState(enabled: socketProfilingEnabledResult),
+  //   );
+  // }
 
-  @override
-  Future<SocketProfile> getSocketProfile(String isolateId) {
-    return Future.value(_socketProfile ?? SocketProfile(sockets: []));
-  }
+  // @override
+  // Future<Success> clearSocketProfile(String isolateId) async {
+  //   _socketProfile?.sockets.clear();
+  //   return Future.value(Success());
+  // }
 
-  void restoreFakeSockets() {
-    _socketProfile = SocketProfile(sockets: _startingSockets);
-  }
+  // @override
+  // Future<SocketProfile> getSocketProfile(String isolateId) {
+  //   return Future.value(_socketProfile ?? SocketProfile(sockets: []));
+  // }
 
-  @override
-  Future<bool> isHttpProfilingAvailable(String isolateId) => Future.value(true);
+  // void restoreFakeSockets() {
+  //   _socketProfile = SocketProfile(sockets: _startingSockets);
+  // }
 
-  @override
-  Future<HttpProfileRequest> getHttpProfileRequest(
-    String isolateId,
-    String id,
-  ) async {
-    final httpProfile = await getHttpProfile(isolateId);
-    return Future.value(
-      httpProfile.requests.firstWhere((request) => request.id == id),
-    );
-  }
+  // @override
+  // Future<bool> isHttpProfilingAvailable(String isolateId) => Future.value(true);
 
-  @override
-  Future<HttpProfile> getHttpProfile(String isolateId, {int? updatedSince}) {
-    return Future.value(
-      _httpProfile ?? HttpProfile(requests: [], timestamp: 0),
-    );
-  }
+  // @override
+  // Future<HttpProfileRequest> getHttpProfileRequest(
+  //   String isolateId,
+  //   String id,
+  // ) async {
+  //   final httpProfile = await getHttpProfile(isolateId);
+  //   return Future.value(
+  //     httpProfile.requests.firstWhere((request) => request.id == id),
+  //   );
+  // }
 
-  @override
-  Future<Success> clearHttpProfile(String isolateId) {
-    _httpProfile?.requests.clear();
-    return Future.value(Success());
-  }
+  // @override
+  // Future<HttpProfile> getHttpProfile(String isolateId, {int? updatedSince}) {
+  //   return Future.value(
+  //     _httpProfile ?? HttpProfile(requests: [], timestamp: 0),
+  //   );
+  // }
+
+  // @override
+  // Future<Success> clearHttpProfile(String isolateId) {
+  //   _httpProfile?.requests.clear();
+  //   return Future.value(Success());
+  // }
 
   void restoreFakeHttpProfileRequests() {
     _httpProfile = HttpProfile(requests: _startingRequests, timestamp: 0);
@@ -432,22 +433,22 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   @override
   Future<Success> clearCpuSamples(String isolateId) => Future.value(Success());
 
-  @override
-  Future<bool> isHttpTimelineLoggingAvailable(String isolateId) =>
-      Future.value(isHttpProfilingAvailableResult);
+  // @override
+  // Future<bool> isHttpTimelineLoggingAvailable(String isolateId) =>
+  //     Future.value(isHttpProfilingAvailableResult);
 
-  @override
-  Future<HttpTimelineLoggingState> httpEnableTimelineLogging(
-    String isolateId, [
-    bool? enabled,
-  ]) async {
-    if (enabled != null) {
-      return Future.value(HttpTimelineLoggingState(enabled: enabled));
-    }
-    return Future.value(
-      HttpTimelineLoggingState(enabled: httpEnableTimelineLoggingResult),
-    );
-  }
+  // @override
+  // Future<HttpTimelineLoggingState> httpEnableTimelineLogging(
+  //   String isolateId, [
+  //   bool? enabled,
+  // ]) async {
+  //   if (enabled != null) {
+  //     return Future.value(HttpTimelineLoggingState(enabled: enabled));
+  //   }
+  //   return Future.value(
+  //     HttpTimelineLoggingState(enabled: httpEnableTimelineLoggingResult),
+  //   );
+  // }
 
   @override
   Future<SourceReport> getSourceReport(
@@ -459,6 +460,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
     bool? forceCompile,
     bool? reportLines,
     List<String>? libraryFilters,
+    List<String>? librariesAlreadyCompiled,
   }) async {
     return SourceReport(ranges: [], scripts: []);
   }
@@ -483,13 +485,13 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   Stream<Event> get onStdoutEvent => const Stream.empty();
 
   @override
-  Stream<Event> get onStdoutEventWithHistory => const Stream.empty();
+  Stream<Event> get onStdoutEventWithHistorySafe => const Stream.empty();
 
   @override
   Stream<Event> get onStderrEvent => const Stream.empty();
 
   @override
-  Stream<Event> get onStderrEventWithHistory => const Stream.empty();
+  Stream<Event> get onStderrEventWithHistorySafe => const Stream.empty();
 
   @override
   Stream<Event> get onGCEvent => _gcEventStream.stream;
@@ -509,13 +511,13 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   Stream<Event> get onLoggingEvent => const Stream.empty();
 
   @override
-  Stream<Event> get onLoggingEventWithHistory => const Stream.empty();
+  Stream<Event> get onLoggingEventWithHistorySafe => const Stream.empty();
 
   @override
   Stream<Event> get onExtensionEvent => const Stream.empty();
 
   @override
-  Stream<Event> get onExtensionEventWithHistory => const Stream.empty();
+  Stream<Event> get onExtensionEventWithHistorySafe => const Stream.empty();
 
   @override
   Stream<Event> get onDebugEvent => const Stream.empty();

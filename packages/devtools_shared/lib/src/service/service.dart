@@ -13,17 +13,11 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../sse/sse_shim.dart';
 
-typedef ServiceCreator<T extends VmService> = T Function({
-  required Stream<dynamic> /*String|List<int>*/ inStream,
-  required void Function(String message) writeMessage,
-  required Uri connectedUri,
-});
-
 Future<T> _connectWithSse<T extends VmService>({
   required Uri uri,
   required void Function(Object?) onError,
   required Completer<void> finishedCompleter,
-  required ServiceCreator<T> createService,
+  required VmServiceCreator<T> createService,
 }) {
   final serviceCompleter = Completer<T>();
 
@@ -36,7 +30,7 @@ Future<T> _connectWithSse<T extends VmService>({
   final service = createService(
     inStream: stream,
     writeMessage: client.sink!.add,
-    connectedUri: uri,
+    wsUri: uri.toString(),
   );
 
   unawaited(
@@ -55,7 +49,7 @@ Future<T> _connectWithWebSocket<T extends VmService>({
   required Uri uri,
   required void Function(Object?) onError,
   required Completer<void> finishedCompleter,
-  required ServiceCreator<T> createService,
+  required VmServiceCreator<T> createService,
 }) async {
   // Map the URI (which may be Observatory web app) to a WebSocket URI for
   // the VM service.
@@ -67,7 +61,7 @@ Future<T> _connectWithWebSocket<T extends VmService>({
     writeMessage: (String message) {
       ws.sink.add(message);
     },
-    connectedUri: uri,
+    wsUri: uri.toString(),
   );
 
   if (ws.closeCode != null) {
@@ -89,7 +83,7 @@ Future<T> _connectWithWebSocket<T extends VmService>({
 Future<T> connect<T extends VmService>({
   required Uri uri,
   required Completer<void> finishedCompleter,
-  required ServiceCreator<T> createService,
+  required VmServiceCreator<T> createService,
 }) {
   final connectedCompleter = Completer<T>();
 

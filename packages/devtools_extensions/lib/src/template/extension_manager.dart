@@ -168,18 +168,7 @@ class ExtensionManager {
       final vmService = await connect<VmService>(
         uri: Uri.parse(vmServiceUri),
         finishedCompleter: finishedCompleter,
-        createService: ({
-          // ignore: avoid-dynamic, code needs to match API from VmService.
-          required Stream<dynamic> /*String|List<int>*/ inStream,
-          required void Function(String message) writeMessage,
-          required Uri connectedUri,
-        }) {
-          return VmService(
-            inStream,
-            writeMessage,
-            wsUri: connectedUri.toString(),
-          );
-        },
+        createService: VmService.defaultCreator,
       );
       await serviceManager.vmServiceOpened(
         vmService,

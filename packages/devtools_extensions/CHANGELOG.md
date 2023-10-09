@@ -1,3 +1,6 @@
+## 0.0.9
+* Bump `package:vm_service` dependency to 13.0.0.
+
 ## 0.0.8
 * Fix the `build_and_copy` command so that it succeeds when there is not
 an existing `extension/devtools/build` directory.
