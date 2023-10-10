@@ -1657,63 +1657,70 @@ class CheckboxSetting extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
-    Widget textContent = RichText(
-      overflow: TextOverflow.visible,
-      text: TextSpan(
-        text: title,
-        style: enabled ? theme.regularTextStyle : theme.subtleTextStyle,
-      ),
-    );
-
-    if (description != null) {
-      textContent = Row(
+    return maybeWrapWithTooltip(
+      tooltip: tooltip,
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          textContent,
-          Expanded(
-            child: RichText(
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              text: TextSpan(
-                text: ' • $description',
-                style: theme.subtleTextStyle,
+          Row(
+            children: [
+              NotifierCheckbox(
+                notifier: notifier,
+                onChanged: (bool? value) {
+                  final gaScreenName = this.gaScreenName;
+                  final gaItem = this.gaItem;
+                  if (gaScreenName != null && gaItem != null) {
+                    ga.select(gaScreenName, gaItem);
+                  }
+                  final onChanged = this.onChanged;
+                  if (onChanged != null) {
+                    onChanged(value);
+                  }
+                },
+                enabled: enabled,
+                checkboxKey: checkboxKey,
+              ),
+              RichText(
+                overflow: TextOverflow.visible,
+                text: TextSpan(
+                  text: title,
+                  style:
+                      enabled ? theme.regularTextStyle : theme.subtleTextStyle,
+                ),
+              ),
+            ],
+          ),
+          if (description != null) ...[
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(top: denseSpacing),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    RichText(
+                      text: TextSpan(
+                        text: ' • ',
+                        style: theme.subtleTextStyle,
+                      ),
+                    ),
+                    Flexible(
+                      child: RichText(
+                        maxLines: 4,
+                        overflow: TextOverflow.ellipsis,
+                        text: TextSpan(
+                          text: description,
+                          style: theme.subtleTextStyle,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
+          ],
         ],
-      );
-    }
-    final content = Row(
-      children: [
-        NotifierCheckbox(
-          notifier: notifier,
-          onChanged: (bool? value) {
-            final gaScreenName = this.gaScreenName;
-            final gaItem = this.gaItem;
-            if (gaScreenName != null && gaItem != null) {
-              ga.select(gaScreenName, gaItem);
-            }
-            final onChanged = this.onChanged;
-            if (onChanged != null) {
-              onChanged(value);
-            }
-          },
-          enabled: enabled,
-          checkboxKey: checkboxKey,
-        ),
-        Flexible(
-          child: textContent,
-        ),
-      ],
+      ),
     );
-    if (tooltip != null && tooltip!.isNotEmpty) {
-      return DevToolsTooltip(
-        message: tooltip,
-        child: content,
-      );
-    }
-    return content;
   }
 }
 
