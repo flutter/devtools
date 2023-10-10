@@ -7,6 +7,7 @@
 
 import 'dart:async';
 import 'dart:collection';
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:ansi_up/ansi_up.dart';
@@ -432,6 +433,11 @@ class JsonUtils {
   static int getIntMember(Map<String, Object?> json, String memberName) {
     return json[memberName] as int? ?? -1;
   }
+}
+
+/// Add pretty print for a JSON payload.
+extension JsonMap on Map<String, Object?> {
+  String prettyPrint() => const JsonEncoder.withIndent('  ').convert(this);
 }
 
 typedef RateLimiterCallback = Future<void> Function();
