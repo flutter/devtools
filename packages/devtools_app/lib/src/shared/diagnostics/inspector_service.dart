@@ -16,6 +16,7 @@ import 'package:devtools_app_shared/service_extensions.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../console/primitives/simple_items.dart';
