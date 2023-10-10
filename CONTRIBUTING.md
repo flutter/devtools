@@ -187,10 +187,10 @@ the bots. To update your local flutter version, run:
 
 ```
 
-You also need to generate the required mocks for the tests. To generate the mocks, run:
+Auto-generated mocks are required for running the tests. If you haven't run refresh
+script yet, run:
 ```
-cd packages/devtools_test
-dart run build_runner build
+./tool/refresh.sh
 ```
 
 Now you can proceed with running DevTools tests:
