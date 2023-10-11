@@ -13,7 +13,7 @@ dependencies:
   flutter:
     sdk: flutter
   logging: ^1.1.1
-  vm_service: ">=10.1.0 <12.0.0"
+  vm_service: ">=10.1.0 <13.0.0"
 
 dev_dependencies:
   flutter_test:
