@@ -7,17 +7,47 @@ import 'dart:core';
 
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
+import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
-import '../../service.dart';
-import '../../service_extensions.dart';
-import '../../utils.dart';
+import '../utils/utils.dart';
+import 'connected_app.dart';
+import 'flutter_version.dart';
+import 'isolate_manager.dart';
+import 'isolate_state.dart';
+import 'service_extension_manager.dart';
+import 'service_extensions.dart';
+import 'service_utils.dart';
 
 final _log = Logger('service_manager');
 
+typedef ServiceManagerCallback<T> = FutureOr<void> Function(T? service);
+
+enum ServiceManagerLifecycle {
+  /// Lifecycle phase that occurs before the service manager is set up for
+  /// connection to a [VmService].
+  beforeOpenVmService,
+
+  /// Lifecycle phase that occurs after the service manager is set up for
+  /// connection to a [VmService].
+  afterOpenVmService,
+
+  /// Lifecycle phase that occurs before the service manager closes the
+  /// connection to a [VmService].
+  beforeCloseVmService,
+
+  /// Lifecycle phase that occurs after the service manager closes the
+  /// connection to a [VmService].
+  afterCloseVmService,
+}
+
+enum ServiceManagerOverride {
+  initIsolates,
+}
+
 // TODO(kenz): add an offline service manager implementation.
-// TODO(jacobr): refactor all of these apis to be in terms of ValueListenable
-// instead of Streams.
+// TODO(https://github.com/flutter/devtools/issues/6239): try to remove this.
+@sealed
 class ServiceManager<T extends VmService> {
   ServiceManager() {
     _serviceExtensionManager = ServiceExtensionManager(isolateManager);
@@ -75,9 +105,7 @@ class ServiceManager<T extends VmService> {
   VM? vm;
   String? sdkVersion;
 
-  bool get hasService => service != null;
-
-  bool get hasConnection => hasService && connectedApp != null;
+  bool get hasConnection => service != null && connectedApp != null;
 
   bool get connectedAppInitialized =>
       hasConnection && connectedApp!.connectedAppInitialized;
@@ -100,7 +128,7 @@ class ServiceManager<T extends VmService> {
   }
 
   /// Set the device as busy during the duration of the given async task.
-  Future<T> runDeviceBusyTask<T>(Future<T> task) async {
+  Future<V> runDeviceBusyTask<V>(Future<V> task) async {
     try {
       setDeviceBusy(true);
       return await task;
@@ -127,11 +155,51 @@ class ServiceManager<T extends VmService> {
   }
 
   ValueListenable<bool> registeredServiceListenable(String name) {
-    final listenable = _registeredServiceNotifiers.putIfAbsent(
+    return _registeredServiceNotifiers.putIfAbsent(
       name,
       () => ImmediateValueNotifier(false),
     );
-    return listenable;
+  }
+
+  final _lifecycleCallbacks =
+      <ServiceManagerLifecycle, List<ServiceManagerCallback<T>>>{};
+
+  /// Registers a callback that will be called at a particular phase in the
+  /// lifecycle of opening or closing a [VmService] connection.
+  ///
+  /// See [ServiceManagerLifecycle].
+  void registerLifecycleCallback(
+    ServiceManagerLifecycle lifecycle,
+    ServiceManagerCallback<T> callback,
+  ) {
+    _lifecycleCallbacks
+        .putIfAbsent(
+          lifecycle,
+          () => <ServiceManagerCallback<T>>[],
+        )
+        .add(callback);
+  }
+
+  @protected
+  FutureOr<void> callLifecycleCallbacks(
+    ServiceManagerLifecycle lifecycle,
+    T? service,
+  ) async {
+    final callbacks =
+        _lifecycleCallbacks[lifecycle] ?? <ServiceManagerCallback<T>>[];
+    await Future.wait(callbacks.map((c) async => await c.call(service)));
+  }
+
+  final _overrides = <ServiceManagerOverride, ServiceManagerCallback<T>>{};
+
+  /// Registers a callback that will be called in place of the default
+  /// [ServiceManager] logic for a codeblock defined by a
+  /// [ServiceManagerOverride].
+  void registerOverride(
+    ServiceManagerOverride override,
+    ServiceManagerCallback<T> callback,
+  ) {
+    _overrides[override] = callback;
   }
 
   /// Initializes the service manager for a new vm service connection [service].
@@ -150,64 +218,49 @@ class ServiceManager<T extends VmService> {
 
     connectedApp = ConnectedApp(this);
 
-    await beforeOpenVmService(service);
+    // It is critical we call vmServiceOpened on each manager class before
+    // performing any async operations. Otherwise, we may get end up with
+    // race conditions where managers cannot listen for events soon enough.
+    isolateManager.vmServiceOpened(service);
+    serviceExtensionManager.vmServiceOpened(service, connectedApp!);
+
+    await callLifecycleCallbacks(
+      ServiceManagerLifecycle.beforeOpenVmService,
+      service,
+    );
     await _openVmServiceConnection(service, onClosed: onClosed);
-    await afterOpenVmService();
+    await callLifecycleCallbacks(
+      ServiceManagerLifecycle.afterOpenVmService,
+      service,
+    );
+
+    await connectedApp!.initializeValues();
 
     // This needs to be the last call in this method.
     _connectedState.value = const ConnectedState(true);
   }
 
   /// Shuts down the service manager's current vm service connection.
-  void vmServiceClosed({
+  FutureOr<void> vmServiceClosed({
     ConnectedState connectionState = const ConnectedState(false),
-  }) {
-    beforeCloseVmService();
+  }) async {
+    await callLifecycleCallbacks(
+      ServiceManagerLifecycle.beforeCloseVmService,
+      this.service,
+    );
     _closeVmServiceConnection();
-    afterCloseVmService();
+    await callLifecycleCallbacks(
+      ServiceManagerLifecycle.afterCloseVmService,
+      this.service,
+    );
 
-    _connectedState.value = connectionState;
-  }
-
-  /// Callback that is called before the service manager is set up for the
-  /// connection to [service].
-  ///
-  /// If this method is overridden by a subclass, super must be called and it
-  /// should be called as the first line in the override.
-  @mustCallSuper
-  FutureOr<void> beforeOpenVmService(T service) {
-    // It is critical we call vmServiceOpened on each manager class before
-    // performing any async operations. Otherwise, we may get end up with
-    // race conditions where managers cannot listen for events soon enough.
-    isolateManager.vmServiceOpened(service);
-    serviceExtensionManager.vmServiceOpened(service, connectedApp!);
-  }
-
-  /// Callback that is called after the service manager is set up for the
-  /// connection to [service].
-  ///
-  /// If this method is overridden by a subclass, the override should either
-  /// call `super.afterInitForVmService()` or manually call this methods content
-  /// with any extra logic / parameters needed.
-  Future<void> afterOpenVmService() async {
-    await connectedApp!.initializeValues();
-  }
-
-  /// Callback that is called before the service manager closes the connection
-  /// to [service].
-  void beforeCloseVmService() {}
-
-  /// Callback that is called after the service manager closes the connection to
-  /// [service].
-  ///
-  /// If this method is overridden by a subclass, super must be called and it
-  /// should be called as the last line in the override.
-  @mustCallSuper
-  void afterCloseVmService() {
     serviceExtensionManager.vmServiceClosed();
     isolateManager.handleVmServiceClosed();
     _registeredMethodsForService.clear();
+    _registeredServiceNotifiers.clear();
     setDeviceBusy(false);
+
+    _connectedState.value = connectionState;
   }
 
   /// Initializes the service manager for [service], including setting up other
@@ -296,7 +349,12 @@ class ServiceManager<T extends VmService> {
       return;
     }
 
-    await isolateManager.init(isolatesFromVm(vm));
+    final override = _overrides[ServiceManagerOverride.initIsolates];
+    if (override != null) {
+      await override.call(service);
+    } else {
+      await isolateManager.init(vm?.isolates ?? <IsolateRef>[]);
+    }
   }
 
   void _closeVmServiceConnection() {
@@ -307,28 +365,18 @@ class ServiceManager<T extends VmService> {
     connectedApp = null;
   }
 
-  /// Returns the list of isolates for the given [vm].
-  ///
-  /// This method may be overridden by a subclass to do something like
-  /// conditionally including system isolates.
-  List<IsolateRef> isolatesFromVm(VM? vm) {
-    return vm?.isolates ?? <IsolateRef>[];
-  }
-
-  void manuallyDisconnect() {
-    vmServiceClosed(
+  Future<void> manuallyDisconnect() async {
+    await vmServiceClosed(
       connectionState:
           const ConnectedState(false, userInitiatedConnectionState: true),
     );
   }
 
-  @protected
   Future<Response> callServiceOnMainIsolate(String name) async {
     final isolate = await whenValueNonNull(isolateManager.mainIsolate);
     return await callService(name, isolateId: isolate?.id);
   }
 
-  @protected
   Future<Response> callServiceExtensionOnMainIsolate(
     String method, {
     Map<String, dynamic>? args,
@@ -367,7 +415,14 @@ class ServiceManager<T extends VmService> {
 
   /// This can throw an [RPCError].
   Future<void> performHotReload() async {
-    await callServiceOnMainIsolate(hotReloadServiceName);
+    if (connectedApp?.isFlutterAppNow ?? false) {
+      await callServiceOnMainIsolate(hotReloadServiceName);
+    } else {
+      final serviceLocal = service;
+      await serviceLocal?.forEachIsolate((isolate) async {
+        await serviceLocal.reloadSources(isolate.id!);
+      });
+    }
   }
 
   /// This can throw an [RPCError].

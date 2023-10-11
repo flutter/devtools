@@ -64,7 +64,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
   void initState() {
     super.initState();
 
-    serviceManager.consoleService.ensureServiceInitialized();
+    serviceConnection.consoleService.ensureServiceInitialized();
 
     addAutoDisposeListener(_autoCompleteController.searchNotifier, () {
       _autoCompleteController.handleAutoCompleteOverlay(
@@ -323,14 +323,15 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
       return;
     }
 
-    serviceManager.consoleService.appendStdio('> $expressionText\n');
+    serviceConnection.consoleService.appendStdio('> $expressionText\n');
     setState(() {
       historyPosition = -1;
-      serviceManager.appState.evalHistory.pushEvalHistory(expressionText);
+      serviceConnection.appState.evalHistory.pushEvalHistory(expressionText);
     });
 
     try {
-      final isolateRef = serviceManager.isolateManager.selectedIsolate.value;
+      final isolateRef =
+          serviceConnection.serviceManager.isolateManager.selectedIsolate.value;
 
       // Response is either a ErrorRef, InstanceRef, or Sentinel.
       final Response response;
@@ -371,7 +372,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
   }
 
   void _emitToConsole(String text) {
-    serviceManager.consoleService.appendStdio(
+    serviceConnection.consoleService.appendStdio(
       '  ${text.replaceAll('\n', '\n  ')}\n',
     );
   }
@@ -380,7 +381,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
     InstanceRef ref,
     IsolateRef? isolate,
   ) {
-    serviceManager.consoleService.appendInstanceRef(
+    serviceConnection.consoleService.appendInstanceRef(
       value: ref,
       diagnostic: null,
       isolateRef: isolate,
@@ -394,7 +395,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
     super.dispose();
   }
 
-  EvalHistory get _evalHistory => serviceManager.appState.evalHistory;
+  EvalHistory get _evalHistory => serviceConnection.appState.evalHistory;
 
   void _historyNavUp() {
     if (!_evalHistory.canNavigateUp) {
@@ -440,8 +441,8 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
       return kSuccess;
     }
 
-    final variable =
-        serviceManager.consoleService.itemAt(assignment.consoleItemIndex + 1);
+    final variable = serviceConnection.consoleService
+        .itemAt(assignment.consoleItemIndex + 1);
     final value = variable?.value;
     if (value is! InstanceRef) {
       _emitToConsole(
@@ -450,9 +451,10 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
       return kSuccess;
     }
 
-    final isolateId = serviceManager.isolateManager.selectedIsolate.value?.id;
-    final isolateName =
-        serviceManager.isolateManager.selectedIsolate.value?.name;
+    final isolateId = serviceConnection
+        .serviceManager.isolateManager.selectedIsolate.value?.id;
+    final isolateName = serviceConnection
+        .serviceManager.isolateManager.selectedIsolate.value?.name;
 
     if (isolateId == null || isolateName == null) {
       _emitToConsole(

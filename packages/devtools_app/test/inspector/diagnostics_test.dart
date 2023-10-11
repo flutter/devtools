@@ -53,7 +53,7 @@ void main() {
       );
       setGlobal(PreferencesController, PreferencesController());
       setGlobal(IdeTheme, IdeTheme());
-      setGlobal(ServiceConnectionManager, FakeServiceManager());
+      setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
     });
 
     group('hover eval', () {

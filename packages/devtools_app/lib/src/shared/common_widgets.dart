@@ -847,6 +847,7 @@ class DevToolsClearableTextField extends StatelessWidget {
     required this.labelText,
     TextEditingController? controller,
     this.hintText,
+    this.prefixIcon,
     this.onChanged,
     this.autofocus = false,
   })  : controller = controller ?? TextEditingController(),
@@ -854,6 +855,7 @@ class DevToolsClearableTextField extends StatelessWidget {
 
   final TextEditingController controller;
   final String? hintText;
+  final Widget? prefixIcon;
   final String labelText;
   final Function(String)? onChanged;
   final bool autofocus;
@@ -873,6 +875,7 @@ class DevToolsClearableTextField extends StatelessWidget {
         border: const OutlineInputBorder(),
         labelText: labelText,
         hintText: hintText,
+        prefixIcon: prefixIcon,
         suffixIcon: IconButton(
           tooltip: 'Clear',
           icon: const Icon(Icons.clear),
@@ -939,73 +942,6 @@ class OutlinedRowGroup extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: childrenWithOutlines,
-    );
-  }
-}
-
-class OutlineDecoration extends StatelessWidget {
-  const OutlineDecoration({
-    Key? key,
-    this.child,
-    this.showTop = true,
-    this.showBottom = true,
-    this.showLeft = true,
-    this.showRight = true,
-  }) : super(key: key);
-
-  factory OutlineDecoration.onlyBottom({required Widget? child}) =>
-      OutlineDecoration(
-        showTop: false,
-        showLeft: false,
-        showRight: false,
-        child: child,
-      );
-
-  factory OutlineDecoration.onlyTop({required Widget? child}) =>
-      OutlineDecoration(
-        showBottom: false,
-        showLeft: false,
-        showRight: false,
-        child: child,
-      );
-
-  factory OutlineDecoration.onlyLeft({required Widget? child}) =>
-      OutlineDecoration(
-        showBottom: false,
-        showTop: false,
-        showRight: false,
-        child: child,
-      );
-
-  factory OutlineDecoration.onlyRight({required Widget? child}) =>
-      OutlineDecoration(
-        showBottom: false,
-        showTop: false,
-        showLeft: false,
-        child: child,
-      );
-
-  final bool showTop;
-  final bool showBottom;
-  final bool showLeft;
-  final bool showRight;
-
-  final Widget? child;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = Theme.of(context).focusColor;
-    final border = BorderSide(color: color);
-    return Container(
-      decoration: BoxDecoration(
-        border: Border(
-          left: showLeft ? border : BorderSide.none,
-          right: showRight ? border : BorderSide.none,
-          top: showTop ? border : BorderSide.none,
-          bottom: showBottom ? border : BorderSide.none,
-        ),
-      ),
-      child: child,
     );
   }
 }
@@ -1085,37 +1021,6 @@ class CenteredCircularProgressIndicator extends StatelessWidget {
       height: size,
       child: indicator,
     );
-  }
-}
-
-/// An extension on [ScrollController] to facilitate having the scrolling widget
-/// auto scroll to the bottom on new content.
-extension ScrollControllerAutoScroll on ScrollController {
-// TODO(devoncarew): We lose dock-to-bottom when we receive content when we're
-// off screen.
-
-  /// Return whether the view is currently scrolled to the bottom.
-  bool get atScrollBottom {
-    final pos = position;
-    return pos.pixels == pos.maxScrollExtent;
-  }
-
-  /// Scroll the content to the bottom using the app's default animation
-  /// duration and curve..
-  Future<void> autoScrollToBottom() async {
-    await animateTo(
-      position.maxScrollExtent,
-      duration: rapidDuration,
-      curve: defaultCurve,
-    );
-
-    // Scroll again if we've received new content in the interim.
-    if (hasClients) {
-      final pos = position;
-      if (pos.pixels != pos.maxScrollExtent) {
-        jumpTo(pos.maxScrollExtent);
-      }
-    }
   }
 }
 
@@ -1236,7 +1141,7 @@ class Breadcrumb extends StatelessWidget {
       text: TextSpan(
         text: text,
         style: TextStyle(
-          color: theme.colorScheme.chartTextColor,
+          color: theme.colorScheme.contrastTextColor,
           decoration: TextDecoration.underline,
         ),
       ),
@@ -1319,34 +1224,6 @@ class _BreadcrumbPainter extends CustomPainter {
   }
 }
 
-// TODO(bkonyi): replace uses of this class with `JsonViewer`.
-class FormattedJson extends StatelessWidget {
-  const FormattedJson({
-    super.key,
-    this.json,
-    this.formattedString,
-    this.useSubtleStyle = false,
-  }) : assert((json == null) != (formattedString == null));
-
-  static const encoder = JsonEncoder.withIndent('  ');
-
-  final Map<String, dynamic>? json;
-
-  final String? formattedString;
-
-  final bool useSubtleStyle;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    // TODO(kenz): we could consider using a prettier format like YAML.
-    return SelectableText(
-      json != null ? encoder.convert(json) : formattedString!,
-      style: useSubtleStyle ? theme.subtleFixedFontStyle : theme.fixedFontStyle,
-    );
-  }
-}
-
 class JsonViewer extends StatefulWidget {
   const JsonViewer({
     super.key,
@@ -1357,6 +1234,38 @@ class JsonViewer extends StatefulWidget {
 
   @override
   State<JsonViewer> createState() => _JsonViewerState();
+}
+
+/// A wrapper for a Text widget, which allows for concatenating text if it
+/// becomes too long.
+class TextViewer extends StatelessWidget {
+  const TextViewer({
+    super.key,
+    required this.text,
+    this.maxLength = 65536, //2^16
+    this.style,
+  });
+
+  final String text;
+  // TODO: change the maxLength if we determine a more appropriate limit
+  // in https://github.com/flutter/devtools/issues/6263.
+  final int maxLength;
+  final TextStyle? style;
+
+  @override
+  Widget build(BuildContext context) {
+    final String displayText;
+    // Limit the length of the displayed text to maxLength
+    if (text.length > maxLength) {
+      displayText = '${text.substring(0, min(maxLength, text.length))}...';
+    } else {
+      displayText = text;
+    }
+    return Text(
+      displayText,
+      style: style,
+    );
+  }
 }
 
 class _JsonViewerState extends State<JsonViewer>
@@ -1381,8 +1290,8 @@ class _JsonViewerState extends State<JsonViewer>
     final responseJson = json.decode(widget.encodedJson);
     // Insert the JSON data into the fake service cache so we can use it with
     // the `ExpandableVariable` widget.
-    final root =
-        serviceManager.service!.fakeServiceCache.insertJsonObject(responseJson);
+    final root = serviceConnection.serviceManager.service!.fakeServiceCache
+        .insertJsonObject(responseJson);
     variable = DartObjectNode.fromValue(
       name: '[root]',
       value: root,
@@ -1416,7 +1325,7 @@ class _JsonViewerState extends State<JsonViewer>
     super.dispose();
     // Remove the JSON object from the fake service cache to avoid holding on
     // to large objects indefinitely.
-    serviceManager.service!.fakeServiceCache
+    serviceConnection.serviceManager.service!.fakeServiceCache
         .removeJsonObject(variable.value as Instance);
   }
 
@@ -1814,7 +1723,8 @@ class PubWarningText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isFlutterApp = serviceManager.connectedApp!.isFlutterAppNow == true;
+    final isFlutterApp =
+        serviceConnection.serviceManager.connectedApp!.isFlutterAppNow == true;
     final sdkName = isFlutterApp ? 'Flutter' : 'Dart';
     final minSdkVersion = isFlutterApp ? '2.8.0' : '2.15.0';
     return SelectableText.rich(

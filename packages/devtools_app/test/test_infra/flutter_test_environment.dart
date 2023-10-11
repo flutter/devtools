@@ -148,7 +148,7 @@ class FlutterTestEnvironment {
         // ignore: invalid_use_of_visible_for_testing_member
         _service.clearVmServiceCalls();
 
-        await serviceManager.vmServiceOpened(
+        await serviceConnection.serviceManager.vmServiceOpened(
           _service,
           onClosed: Completer().future,
         );
@@ -179,7 +179,7 @@ class FlutterTestEnvironment {
 
     if (_beforeFinalTearDown != null) await _beforeFinalTearDown!();
 
-    serviceManager.manuallyDisconnect();
+    await serviceConnection.serviceManager.manuallyDisconnect();
 
     await _service.allFuturesCompleted.timeout(
       const Duration(seconds: 20),

@@ -37,7 +37,7 @@ class VMStatisticsViewController extends DisposableController {
   ValueListenable<bool> get refreshing => _refreshing;
   final _refreshing = ValueNotifier<bool>(true);
 
-  VmServiceWrapper get _service => serviceManager.service!;
+  VmServiceWrapper get _service => serviceConnection.serviceManager.service!;
 
   VM? get vm => _vm;
   VM? _vm;

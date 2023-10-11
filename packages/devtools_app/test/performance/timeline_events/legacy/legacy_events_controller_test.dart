@@ -15,7 +15,8 @@ import 'package:vm_service/vm_service.dart' hide TimelineEvent;
 import '../../../test_infra/test_data/performance.dart';
 
 void main() {
-  final ServiceConnectionManager fakeServiceManager = FakeServiceManager(
+  final ServiceConnectionManager fakeServiceManager =
+      FakeServiceConnectionManager(
     service: FakeServiceManager.createFakeService(
       timelineData: Timeline.parse(testTimelineJson)!,
     ),
@@ -25,11 +26,11 @@ void main() {
     late TimelineEventsController eventsController;
 
     setUp(() {
-      when(fakeServiceManager.connectedApp!.isProfileBuild)
+      when(fakeServiceManager.serviceManager.connectedApp!.isProfileBuild)
           .thenAnswer((realInvocation) => Future.value(false));
       final initializedCompleter = Completer<bool>();
       initializedCompleter.complete(true);
-      when(fakeServiceManager.connectedApp!.initialized)
+      when(fakeServiceManager.serviceManager.connectedApp!.initialized)
           .thenReturn(initializedCompleter);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(IdeTheme, IdeTheme());

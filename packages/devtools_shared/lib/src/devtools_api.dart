@@ -90,3 +90,48 @@ abstract class ExtensionsApi {
   /// enabled state for the extension.
   static const enabledStatePropertyName = 'enable';
 }
+
+abstract class DeeplinkApi {
+  /// Returns a list of available build variants of the android sub-project.
+  ///
+  /// The [deeplinkRootPathPropertyName] must be provided.
+  static const androidBuildVariants = '${apiPrefix}androidBuildVariants';
+
+  /// Returns app link settings of the android sub-project in json format.
+  ///
+  /// The [androidBuildVariantPropertyName] and [deeplinkRootPathPropertyName]
+  /// must be provided.
+  static const androidAppLinkSettings = '${apiPrefix}androidAppLinkSettings';
+
+  /// The property name for the query parameter passed along with
+  /// [androidAppLinkSettings] requests to the server that describes the
+  /// build variant the api is targeting.
+  static const androidBuildVariantPropertyName = 'buildVariant';
+
+  /// Returns available build options of the ios sub-project in json format.
+  ///
+  /// The [deeplinkRootPathPropertyName] must be provided.
+  static const iosBuildOptions = '${apiPrefix}iosBuildOptions';
+
+  /// Returns universal link settings of the ios sub-project in json format.
+  ///
+  /// The [deeplinkRootPathPropertyName], [xcodeConfigurationPropertyName],
+  /// and [xcodeTargetPropertyName] must be provided.
+  static const iosUniversalLinkSettings =
+      '${apiPrefix}iosUniversalLinkSettings';
+
+  /// The property name for the query parameter passed along with
+  /// [iosUniversalLinkSettings] requests to the server that describes the
+  /// Xcode configuration the api is targeting.
+  static const xcodeConfigurationPropertyName = 'configuration';
+
+  /// The property name for the query parameter passed along with
+  /// [iosUniversalLinkSettings] requests to the server that describes the
+  /// Xcode `target` the api is targeting.
+  static const xcodeTargetPropertyName = 'target';
+
+  /// The property name for the query parameter passed along with
+  /// deeplink-related requests to the server that describes the package root
+  /// for the app.
+  static const deeplinkRootPathPropertyName = 'rootPath';
+}

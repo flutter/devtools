@@ -13,7 +13,7 @@ const flutterVersionService = RegisteredService(
   title: 'Flutter Version',
 );
 
-class FlutterVersion extends SemanticVersion {
+final class FlutterVersion extends SemanticVersion {
   FlutterVersion._({
     required this.version,
     required this.channel,

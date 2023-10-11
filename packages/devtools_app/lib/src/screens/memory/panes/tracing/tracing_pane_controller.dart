@@ -104,7 +104,8 @@ class TracingIsolateState {
   int _lastClearTimeMicros = 0;
 
   Future<void> initialize() async {
-    final classList = await serviceManager.service!.getClassList(isolate.id!);
+    final classList = await serviceConnection.serviceManager.service!
+        .getClassList(isolate.id!);
     for (final cls in classList.classes!) {
       tracedClasses[cls.id!] = TracedClass(cls: cls);
     }
@@ -146,7 +147,8 @@ class TracingIsolateState {
   /// Clears the allocation profiles for the currently traced classes.
   Future<void> clear() async {
     _lastClearTimeMicros =
-        (await serviceManager.service!.getVMTimelineMicros()).timestamp!;
+        (await serviceConnection.serviceManager.service!.getVMTimelineMicros())
+            .timestamp!;
     // Reset the counts for traced classes.
     final updatedTracedClasses = tracedClasses.map((key, value) {
       return MapEntry(key, value.copyWith(instances: 0));
@@ -168,8 +170,9 @@ class TracingIsolateState {
 
   /// Enables or disables tracing of allocations of [cls].
   Future<void> setAllocationTracingForClass(ClassRef cls, bool enabled) async {
-    final service = serviceManager.service!;
-    final isolate = serviceManager.isolateManager.selectedIsolate.value!;
+    final service = serviceConnection.serviceManager.service!;
+    final isolate =
+        serviceConnection.serviceManager.isolateManager.selectedIsolate.value!;
     final tracedClass = tracedClasses[cls.id!]!;
 
     // Only update if the tracing state has changed for `cls`.
@@ -200,8 +203,9 @@ class TracingIsolateState {
         'Attempted to request an allocation profile for a non-traced class',
       );
     }
-    final service = serviceManager.service!;
-    final isolateId = serviceManager.isolateManager.selectedIsolate.value!.id!;
+    final service = serviceConnection.serviceManager.service!;
+    final isolateId = serviceConnection
+        .serviceManager.isolateManager.selectedIsolate.value!.id!;
     final cls = tracedClass.cls;
 
     // Note: we need to provide `timeExtentMicros` to `getAllocationTraces`,
@@ -269,7 +273,8 @@ class TracingPaneController extends DisposableController
     _initializing.value = true;
 
     Future<void> updateState() async {
-      final isolate = serviceManager.isolateManager.selectedIsolate.value!;
+      final isolate = serviceConnection
+          .serviceManager.isolateManager.selectedIsolate.value!;
       final isolateId = isolate.id!;
       var state = _stateForIsolate[isolateId];
       if (state == null) {
@@ -286,7 +291,7 @@ class TracingPaneController extends DisposableController
     }
 
     addAutoDisposeListener(
-      serviceManager.isolateManager.selectedIsolate,
+      serviceConnection.serviceManager.isolateManager.selectedIsolate,
       updateState,
     );
 

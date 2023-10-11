@@ -30,15 +30,41 @@ class BannerMessagesController {
   final _messages = <String, ListValueNotifier<BannerMessage>>{};
   final _dismissedMessageKeys = <Key?>{};
 
-  void addMessage(BannerMessage message) {
-    // We push the banner message in a post frame callback because otherwise,
-    // we'd be trying to call setState while the parent widget `BannerMessages`
-    // is in the middle of `build`.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (isMessageDismissed(message) || isMessageVisible(message)) return;
+  /// Adds a banner message to top of DevTools.
+  ///
+  /// If the message is already visible, or if this message has already been
+  /// dismissed once and [ignoreIfAlreadyDismissed] is true, this method call
+  /// will be a no-op.
+  ///
+  /// [callInPostFrameCallback] determines whether the message will be added in
+  /// a post frame callback. This should be true (default) whenever this method
+  /// is called from a Flutter lifecycle method (initState,
+  /// didChangeDependencies, etc.). Set this value to false when the banner
+  /// message is being added from outside of the Flutter widget lifecycle.
+  void addMessage(
+    BannerMessage message, {
+    bool callInPostFrameCallback = true,
+    bool ignoreIfAlreadyDismissed = true,
+  }) {
+    void add() {
+      if ((ignoreIfAlreadyDismissed && isMessageDismissed(message)) ||
+          isMessageVisible(message)) {
+        return;
+      }
       final messages = _messagesForScreen(message.screenId);
       messages.add(message);
-    });
+    }
+
+    if (callInPostFrameCallback) {
+      // We push the banner message in a post frame callback because otherwise,
+      // we'd be trying to call setState while the parent widget `BannerMessages`
+      // is in the middle of `build`.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        add();
+      });
+    } else {
+      add();
+    }
   }
 
   void removeMessage(BannerMessage message, {bool dismiss = false}) {
@@ -116,9 +142,17 @@ class BannerMessages extends StatelessWidget {
   }
 }
 
+// TODO(kenz): add an 'info' type.
 enum BannerMessageType {
   warning,
-  error,
+  error;
+
+  static BannerMessageType? parse(String? value) {
+    for (final type in BannerMessageType.values) {
+      if (type.name == value) return type;
+    }
+    return null;
+  }
 }
 
 @visibleForTesting
@@ -313,7 +347,7 @@ class ShaderJankMessage {
           style: theme.errorMessageLinkStyle,
         ),
         const TextSpan(text: '.'),
-        if (serviceManager.connectedApp!.isIosApp) ...[
+        if (serviceConnection.serviceManager.connectedApp!.isIosApp) ...[
           const TextSpan(
             text: '\n\nNote: this is a legacy solution with many pitfalls. '
                 'Try ',
@@ -480,13 +514,15 @@ void maybePushUnsupportedFlutterVersionWarning(
   String screenId, {
   required SemanticVersion supportedFlutterVersion,
 }) {
-  final isFlutterApp = serviceManager.connectedApp?.isFlutterAppNow;
+  final isFlutterApp =
+      serviceConnection.serviceManager.connectedApp?.isFlutterAppNow;
   if (offlineController.offlineMode.value ||
       isFlutterApp == null ||
       !isFlutterApp) {
     return;
   }
-  final currentVersion = serviceManager.connectedApp!.flutterVersionNow!;
+  final currentVersion =
+      serviceConnection.serviceManager.connectedApp!.flutterVersionNow!;
   if (currentVersion < supportedFlutterVersion) {
     bannerMessages.addMessage(
       UnsupportedFlutterVersionWarning(
@@ -503,7 +539,8 @@ void maybePushDebugModePerformanceMessage(
   String screenId,
 ) {
   if (offlineController.offlineMode.value) return;
-  if (serviceManager.connectedApp?.isDebugFlutterAppNow ?? false) {
+  if (serviceConnection.serviceManager.connectedApp?.isDebugFlutterAppNow ??
+      false) {
     bannerMessages.addMessage(
       DebugModePerformanceMessage(screenId).build(context),
     );
@@ -515,7 +552,8 @@ void maybePushDebugModeMemoryMessage(
   String screenId,
 ) {
   if (offlineController.offlineMode.value) return;
-  if (serviceManager.connectedApp?.isDebugFlutterAppNow ?? false) {
+  if (serviceConnection.serviceManager.connectedApp?.isDebugFlutterAppNow ??
+      false) {
     bannerMessages.addMessage(DebugModeMemoryMessage(screenId).build(context));
   }
 }

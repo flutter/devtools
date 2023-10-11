@@ -202,9 +202,10 @@ class ObjectInspectorViewController extends DisposableController
     await classHierarchyController.refresh();
 
     final scriptRefs = scriptManager.sortedScripts.value;
-    final service = serviceManager.service!;
+    final service = serviceConnection.serviceManager.service!;
     final isolate = await service.getIsolate(
-      serviceManager.isolateManager.selectedIsolate.value!.id!,
+      serviceConnection
+          .serviceManager.isolateManager.selectedIsolate.value!.id!,
     );
 
     final mainScriptRef = scriptRefs.firstWhereOrNull((ref) {

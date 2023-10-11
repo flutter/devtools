@@ -18,6 +18,7 @@ import '../primitives/trees.dart';
 import '../primitives/utils.dart';
 import '../ui/utils.dart';
 import '../utils.dart';
+import 'colors.dart';
 
 // TODO(https://github.com/flutter/devtools/issues/5416): break this file up
 // into managable pieces.
@@ -329,7 +330,7 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
 
     final autoCompleteTextStyle = Theme.of(context)
         .regularTextStyle
-        .copyWith(color: colorScheme.autoCompleteTextColor);
+        .copyWith(color: colorScheme.contrastTextColor);
 
     final autoCompleteHighlightedTextStyle =
         Theme.of(context).regularTextStyle.copyWith(
@@ -1547,4 +1548,10 @@ class AutoCompleteMatch {
     assert(segments.isNotEmpty);
     return combineSegments(segments);
   }
+}
+
+// TODO(kenz): try to use colors from the DevTools color schemes instead
+extension AutoCompleteColorExtension on ColorScheme {
+  Color get autoCompleteHighlightColor =>
+      isLight ? Colors.grey[300]! : Colors.grey[700]!;
 }

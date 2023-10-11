@@ -15,30 +15,40 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 void main() {
-  final mockServiceManager = MockServiceConnectionManager();
-  when(mockServiceManager.service).thenReturn(null);
-  when(mockServiceManager.connectedState).thenReturn(
-    ValueNotifier<ConnectedState>(const ConnectedState(false)),
-  );
-  when(mockServiceManager.hasConnection).thenReturn(false);
-  when(mockServiceManager.isolateManager).thenReturn(FakeIsolateManager());
-  when(mockServiceManager.appState).thenReturn(
-    AppState(mockServiceManager.isolateManager.selectedIsolate),
-  );
+  late MockServiceConnectionManager mockServiceConnection;
+  late MockServiceManager mockServiceManager;
 
-  final mockErrorBadgeManager = MockErrorBadgeManager();
-  when(mockServiceManager.errorBadgeManager).thenReturn(mockErrorBadgeManager);
-  when(mockErrorBadgeManager.errorCountNotifier(any))
-      .thenReturn(ValueNotifier<int>(0));
-  when(mockServiceManager.isMainIsolatePaused).thenReturn(false);
+  setUp(() {
+    mockServiceConnection = createMockServiceConnectionWithDefaults();
+    mockServiceManager =
+        mockServiceConnection.serviceManager as MockServiceManager;
+    when(mockServiceManager.service).thenReturn(null);
+    when(mockServiceManager.connectedState).thenReturn(
+      ValueNotifier<ConnectedState>(const ConnectedState(false)),
+    );
+    when(mockServiceManager.hasConnection).thenReturn(false);
+    when(mockServiceManager.isolateManager).thenReturn(FakeIsolateManager());
+    when(mockServiceConnection.appState).thenReturn(
+      AppState(
+        mockServiceManager.isolateManager.selectedIsolate,
+      ),
+    );
 
-  setGlobal(ServiceConnectionManager, mockServiceManager);
-  setGlobal(FrameworkController, FrameworkController());
-  setGlobal(SurveyService, SurveyService());
-  setGlobal(OfflineModeController, OfflineModeController());
-  setGlobal(IdeTheme, IdeTheme());
-  setGlobal(NotificationService, NotificationService());
-  setGlobal(BannerMessagesController, BannerMessagesController());
+    final mockErrorBadgeManager = MockErrorBadgeManager();
+    when(mockServiceConnection.errorBadgeManager)
+        .thenReturn(mockErrorBadgeManager);
+    when(mockErrorBadgeManager.errorCountNotifier(any))
+        .thenReturn(ValueNotifier<int>(0));
+    when(mockServiceManager.isMainIsolatePaused).thenReturn(false);
+
+    setGlobal(ServiceConnectionManager, mockServiceConnection);
+    setGlobal(FrameworkController, FrameworkController());
+    setGlobal(SurveyService, SurveyService());
+    setGlobal(OfflineModeController, OfflineModeController());
+    setGlobal(IdeTheme, IdeTheme());
+    setGlobal(NotificationService, NotificationService());
+    setGlobal(BannerMessagesController, BannerMessagesController());
+  });
 
   testWidgets(
     'does not display floating debugger controls when debugger screen is showing',
@@ -59,6 +69,7 @@ void main() {
       await tester.pumpWidget(
         wrapWithControllers(
           DevToolsScaffold(
+            page: DebuggerScreen.id,
             screens: [
               _TestScreen(
                 DebuggerScreen.id,

@@ -209,7 +209,8 @@ class CodeViewController extends DisposableController
     if (current == null) {
       return;
     }
-    final isolateRef = serviceManager.isolateManager.selectedIsolate.value!;
+    final isolateRef =
+        serviceConnection.serviceManager.isolateManager.selectedIsolate.value!;
     final processedReport = await _getSourceReport(
       isolateRef,
       current.script,
@@ -274,7 +275,8 @@ class CodeViewController extends DisposableController
     final hitLines = <int>{};
     final missedLines = <int>{};
     try {
-      final report = await serviceManager.service!.getSourceReport(
+      final report =
+          await serviceConnection.serviceManager.service!.getSourceReport(
         isolateRef.id!,
         // TODO(bkonyi): make _Profile a public report type.
         // See https://github.com/dart-lang/sdk/issues/50641
@@ -312,7 +314,8 @@ class CodeViewController extends DisposableController
   /// Parses the given script into executable lines and prepares the script
   /// for syntax highlighting.
   Future<ParsedScript?> _parseScript(ScriptRef scriptRef) async {
-    final isolateRef = serviceManager.isolateManager.selectedIsolate.value;
+    final isolateRef =
+        serviceConnection.serviceManager.isolateManager.selectedIsolate.value;
     if (isolateRef == null) return null;
 
     final script = await getScriptForRef(scriptRef);
@@ -374,7 +377,8 @@ class CodeViewController extends DisposableController
   }
 
   void _maybeShowSourceMapsWarning() {
-    final isWebApp = serviceManager.connectedApp?.isDartWebAppNow ?? false;
+    final isWebApp =
+        serviceConnection.serviceManager.connectedApp?.isDartWebAppNow ?? false;
     final enableSourceMapsLink = devToolsExtensionPoints.enableSourceMapsLink();
     if (isWebApp && enableSourceMapsLink != null) {
       final enableSourceMapsAction = NotificationAction(

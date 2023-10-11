@@ -54,6 +54,16 @@ class ExtensionSettingsDialog extends StatelessWidget {
               'extensions will be available in a separate DevTools tab.',
             ),
             const SizedBox(height: defaultSpacing),
+            CheckboxSetting(
+              notifier:
+                  preferences.devToolsExtensions.showOnlyEnabledExtensions,
+              title: 'Only show screens for enabled extensions',
+              tooltip:
+                  'Only show top-level DevTools tabs for extensions that are '
+                  'enabled\n(i.e. do not show tabs for extensions that have no '
+                  'preference set).',
+            ),
+            const SizedBox(height: defaultSpacing),
             Expanded(
               child: availableExtensions.isEmpty
                   ? Center(
@@ -131,8 +141,10 @@ class ExtensionSetting extends StatelessWidget {
             state == ExtensionEnabledState.enabled,
         onPressed: () {
           ga.select(
-            gac.extensionSettingsId,
-            gac.extensionEnable(extension.name.toLowerCase()),
+            gac.DevToolsExtensionEvents.extensionSettingsId.name,
+            gac.DevToolsExtensionEvents.extensionEnableManual(
+              extension.name.toLowerCase(),
+            ),
           );
           unawaited(
             extensionService.setExtensionEnabledState(
@@ -148,8 +160,10 @@ class ExtensionSetting extends StatelessWidget {
             state == ExtensionEnabledState.disabled,
         onPressed: () {
           ga.select(
-            gac.extensionSettingsId,
-            gac.extensionDisable(extension.name.toLowerCase()),
+            gac.DevToolsExtensionEvents.extensionSettingsId.name,
+            gac.DevToolsExtensionEvents.extensionDisableManual(
+              extension.name.toLowerCase(),
+            ),
           );
           unawaited(
             extensionService.setExtensionEnabledState(

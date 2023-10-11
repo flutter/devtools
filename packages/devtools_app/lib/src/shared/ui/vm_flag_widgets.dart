@@ -97,7 +97,7 @@ class CpuSamplingRateDropdown extends StatelessWidget {
   }
 
   Future<void> _onSamplingFrequencyChanged(String? newValue) async {
-    await serviceManager.service!.setProfilePeriod(
+    await serviceConnection.serviceManager.service!.setProfilePeriod(
       newValue ?? mediumProfilePeriod,
     );
   }
@@ -165,7 +165,7 @@ class _VMFlagsDialogState extends State<VMFlagsDialog> with AutoDisposeMixin {
     });
 
     _updateFromController();
-    addAutoDisposeListener(serviceManager.vmFlagManager.flags, () {
+    addAutoDisposeListener(serviceConnection.vmFlagManager.flags, () {
       setState(() {
         _updateFromController();
       });
@@ -173,7 +173,7 @@ class _VMFlagsDialogState extends State<VMFlagsDialog> with AutoDisposeMixin {
   }
 
   void _updateFromController() {
-    flags = (serviceManager.vmFlagManager.flags.value?.flags ?? [])
+    flags = (serviceConnection.vmFlagManager.flags.value?.flags ?? [])
         .map((flag) => _DialogFlag(flag))
         .toList();
     _refilter();

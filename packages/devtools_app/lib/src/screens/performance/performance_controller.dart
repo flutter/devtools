@@ -41,7 +41,8 @@ class PerformanceController extends DisposableController
       rasterStatsController,
     ];
 
-    if (serviceManager.connectedApp?.isDartWebAppNow ?? false) {
+    if (serviceConnection.serviceManager.connectedApp?.isDartWebAppNow ??
+        false) {
       // Do not perform initialization for web apps.
       return;
     }
@@ -112,14 +113,15 @@ class PerformanceController extends DisposableController
 
     await _applyToFeatureControllersAsync((c) => c.init());
     if (!offlineController.offlineMode.value) {
-      await serviceManager.onServiceAvailable;
+      await serviceConnection.serviceManager.onServiceAvailable;
 
       enhanceTracingController.init();
 
       // Listen for Flutter.Frame events with frame timing data.
       // Listen for Flutter.RebuiltWidgets events.
       autoDisposeStreamSubscription(
-        serviceManager.service!.onExtensionEventWithHistory.listen((event) {
+        serviceConnection.serviceManager.service!.onExtensionEventWithHistory
+            .listen((event) {
           if (event.extensionKind == 'Flutter.Frame') {
             final frame = FlutterFrame.parse(event.extensionData!.data);
             enhanceTracingController.assignStateForFrame(frame);
@@ -175,7 +177,7 @@ class PerformanceController extends DisposableController
     // include locations that have not yet been sent with an event.
     _fetchMissingLocationsStarted = true;
     final inspectorService =
-        serviceManager.inspectorService! as InspectorService;
+        serviceConnection.inspectorService! as InspectorService;
     final expectedIsolate = _currentRebuildWidgetsIsolate;
     final json = await inspectorService.widgetLocationIdMap();
     // Don't apply the json if the isolate has been restarted
@@ -242,12 +244,12 @@ class PerformanceController extends DisposableController
   /// Clears the timeline data currently stored by the controller as well the
   /// VM timeline if a connected app is present.
   Future<void> clearData() async {
-    if (serviceManager.connectedAppInitialized) {
-      await serviceManager.service!.clearVMTimeline();
+    if (serviceConnection.serviceManager.connectedAppInitialized) {
+      await serviceConnection.serviceManager.service!.clearVMTimeline();
     }
     offlinePerformanceData = null;
     data?.clear();
-    serviceManager.errorBadgeManager.clearErrors(PerformanceScreen.id);
+    serviceConnection.errorBadgeManager.clearErrors(PerformanceScreen.id);
     await _applyToFeatureControllersAsync((c) => c.clearData());
   }
 

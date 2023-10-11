@@ -12,9 +12,9 @@ import 'ide_theme.dart';
 // TODO(kenz): try to eliminate as many custom colors as possible, and pull
 // colors only from the [lightColorScheme] and the [darkColorScheme].
 
-const _contrastForegroundWhite = Color.fromARGB(255, 240, 240, 240);
-
-const contrastForegroundWhite = _contrastForegroundWhite;
+/// Whether dark theme should be used as the default theme if none has been
+/// explicitly set.
+const useDarkThemeAsDefault = true;
 
 /// Constructs the light or dark theme for the app taking into account
 /// IDE-supplied theming.
@@ -187,6 +187,18 @@ const darkColorScheme = ColorScheme(
   scrim: Color(0xFF000000),
 );
 
+const searchMatchColor = Colors.yellow;
+final searchMatchColorOpaque = Colors.yellow.withOpacity(0.5);
+const activeSearchMatchColor = Colors.orangeAccent;
+final activeSearchMatchColorOpaque = Colors.orangeAccent.withOpacity(0.5);
+
+/// Gets an alternating color to use for indexed UI elements.
+Color alternatingColorForIndex(int index, ColorScheme colorScheme) {
+  return index % 2 == 1
+      ? colorScheme.alternatingBackgroundColor1
+      : colorScheme.alternatingBackgroundColor2;
+}
+
 /// Threshold used to determine whether a colour is light/dark enough for us to
 /// override the default DevTools themes with.
 ///
@@ -209,67 +221,36 @@ bool isValidLightColor(Color? color) {
   return color.computeLuminance() >= 1 - _lightDarkLuminanceThreshold;
 }
 
+// Size constants:
 double get defaultToolbarHeight => scaleByFontFactor(32.0);
 double defaultHeaderHeight({bool isDense = false}) =>
     isDense ? scaleByFontFactor(34.0) : scaleByFontFactor(38.0);
-const defaultTabBarPadding = 14.0;
-
 double get defaultButtonHeight => scaleByFontFactor(32.0);
-double get smallButtonHeight => scaleByFontFactor(20.0);
 double get defaultSwitchHeight => scaleByFontFactor(26.0);
 double get defaultLinearProgressIndicatorHeight => scaleByFontFactor(4.0);
-
 double get buttonMinWidth => scaleByFontFactor(36.0);
 
+const defaultIconSizeBeforeScaling = 16.0;
+const defaultActionsIconSizeBeforeScaling = 20.0;
 double get defaultIconSize => scaleByFontFactor(defaultIconSizeBeforeScaling);
 double get actionsIconSize =>
     scaleByFontFactor(defaultActionsIconSizeBeforeScaling);
 double get tooltipIconSize => scaleByFontFactor(12.0);
 double get tableIconSize => scaleByFontFactor(12.0);
-
-const defaultIconSizeBeforeScaling = 16.0;
-const defaultActionsIconSizeBeforeScaling = 20.0;
-
-const defaultSpacing = 16.0;
-const tabBarSpacing = 14.0;
-const intermediateSpacing = 12.0;
-const denseSpacing = 8.0;
-const denseModeDenseSpacing = 2.0;
-const denseRowSpacing = 6.0;
-
-final defaultBorderRadius = BorderRadius.circular(_defaultBorderRadiusValue);
-const defaultRadius = Radius.circular(_defaultBorderRadiusValue);
-const _defaultBorderRadiusValue = 16.0;
-
-const defaultElevation = 4.0;
-
-const borderPadding = 2.0;
-const densePadding = 4.0;
-const noPadding = 0.0;
-
-double get smallProgressSize => scaleByFontFactor(12.0);
-double get mediumProgressSize => scaleByFontFactor(24.0);
-
 double get defaultListItemHeight => scaleByFontFactor(28.0);
+double get defaultDialogWidth => scaleByFontFactor(700.0);
+
+const extraWideSearchFieldWidth = 600.0;
+const wideSearchFieldWidth = 400.0;
+const defaultSearchFieldWidth = 200.0;
+
+double get defaultTextFieldHeight => scaleByFontFactor(32.0);
+double get defaultTextFieldNumberWidth => scaleByFontFactor(100.0);
 
 // TODO(jacobr) define a more sophisticated formula for chart height.
 // The chart height does need to increase somewhat to leave room for the legend
 // and tick marks but does not need to scale linearly with the font factor.
 double get defaultChartHeight => scaleByFontFactor(120.0);
-
-/// Width of all settings dialogs.
-double get dialogSettingsWidth => scaleByFontFactor(700.0);
-
-const defaultScrollBarOffset = 10.0;
-
-const defaultTabBarViewPhysics = NeverScrollableScrollPhysics();
-
-double get defaultDialogWidth => scaleByFontFactor(700.0);
-
-const unscaledDefaultFontSize = 14.0;
-double get defaultFontSize => scaleByFontFactor(unscaledDefaultFontSize);
-
-double get consoleLineHeight => scaleByFontFactor(18.0);
 
 double get actionWidgetSize => scaleByFontFactor(48.0);
 
@@ -277,11 +258,45 @@ double get statusLineHeight => scaleByFontFactor(24.0);
 
 double get inputDecorationElementHeight => scaleByFontFactor(20.0);
 
-const chartTextFontSize = 10.0;
+// Padding / spacing constants:
+const largeSpacing = 32.0;
+const defaultSpacing = 16.0;
+const intermediateSpacing = 12.0;
+const denseSpacing = 8.0;
+const denseModeDenseSpacing = 2.0;
 
-const devtoolsGreen = Color(0xFF5BC43B);
+const defaultTabBarPadding = 14.0;
+const tabBarSpacing = 14.0;
+const denseRowSpacing = 6.0;
 
-extension DevToolsColorScheme on ColorScheme {
+const hoverCardBorderSize = 2.0;
+const borderPadding = 2.0;
+const densePadding = 4.0;
+const noPadding = 0.0;
+
+const defaultScrollBarOffset = 10.0;
+
+// Other UI related constants:
+final defaultBorderRadius = BorderRadius.circular(_defaultBorderRadiusValue);
+const defaultRadius = Radius.circular(_defaultBorderRadiusValue);
+const _defaultBorderRadiusValue = 16.0;
+
+const defaultElevation = 4.0;
+
+double get smallProgressSize => scaleByFontFactor(12.0);
+double get mediumProgressSize => scaleByFontFactor(24.0);
+
+const defaultTabBarViewPhysics = NeverScrollableScrollPhysics();
+
+// Font size constants:
+
+double get defaultFontSize => scaleByFontFactor(unscaledDefaultFontSize);
+const unscaledDefaultFontSize = 14.0;
+
+double get smallFontSize => scaleByFontFactor(unscaledSmallFontSize);
+const unscaledSmallFontSize = 10.0;
+
+extension DevToolsSharedColorScheme on ColorScheme {
   bool get isLight => brightness == Brightness.light;
 
   bool get isDark => brightness == Brightness.dark;
@@ -297,30 +312,8 @@ extension DevToolsColorScheme on ColorScheme {
 
   Color get subtleTextColor => const Color(0xFF919094);
 
-  Color get overlayShadowColor => const Color.fromRGBO(0, 0, 0, 0.5);
-
-  Color get overlayBackgroundColor =>
-      isLight ? Colors.white : const Color(0xFF424242);
-
-  Color get grey => const Color.fromARGB(255, 128, 128, 128);
-
-  Color get breakpointColor => primary;
-
-  /// Background colors for charts.
-  Color get chartBackground => isLight ? Colors.white : const Color(0xFF2D2E31);
-
-  Color get devtoolsLink =>
+  Color get _devtoolsLink =>
       isLight ? const Color(0xFF1976D2) : Colors.lightBlueAccent;
-
-  Color get devtoolsSelectedLink =>
-      isLight ? Colors.white : Colors.lightBlueAccent;
-
-  // TODO(jacobr): replace this with Theme.of(context).scaffoldBackgroundColor, but we use
-  // this in places where we do not have access to the context.
-  // remove.
-  // TODO(kenz): get rid of this.
-  Color get defaultBackgroundColor =>
-      isLight ? Colors.grey[50]! : const Color(0xFF1B1B1F);
 
   Color get alternatingBackgroundColor1 =>
       isLight ? Colors.white : const Color(0xFF1B1B1F);
@@ -334,73 +327,12 @@ extension DevToolsColorScheme on ColorScheme {
   Color get chartAccentColor =>
       isLight ? const Color(0xFFCCCCCC) : const Color(0xFF585858);
 
-  Color get chartTextColor => isLight ? Colors.black : Colors.white;
+  Color get contrastTextColor => isLight ? Colors.black : Colors.white;
 
-  Color get chartSubtleColor =>
+  Color get _chartSubtleColor =>
       isLight ? const Color(0xFF999999) : const Color(0xFF8A8A8A);
 
   Color get tooltipTextColor => isLight ? Colors.white : Colors.black;
-
-  Color get functionSyntaxColor =>
-      isLight ? const Color(0xFF795E26) : const Color(0xFFDCDCAA);
-
-  Color get declarationsSyntaxColor =>
-      isLight ? const Color(0xFF267f99) : const Color(0xFF4EC9B0);
-
-  Color get modifierSyntaxColor =>
-      isLight ? const Color(0xFF0000FF) : const Color(0xFF569CD6);
-
-  Color get controlFlowSyntaxColor =>
-      isLight ? const Color(0xFFAF00DB) : const Color(0xFFC586C0);
-
-  Color get variableSyntaxColor =>
-      isLight ? const Color(0xFF001080) : const Color(0xFF9CDCFE);
-
-  Color get commentSyntaxColor =>
-      isLight ? const Color(0xFF008000) : const Color(0xFF6A9955);
-
-  Color get stringSyntaxColor =>
-      isLight ? const Color(0xFFB20001) : const Color(0xFFD88E73);
-
-  Color get numericConstantSyntaxColor =>
-      isLight ? const Color(0xFF098658) : const Color(0xFFB5CEA8);
-
-  // Bar color for current selection (hover).
-  Color get hoverSelectionBarColor =>
-      isLight ? Colors.lime[600]! : Colors.yellowAccent;
-
-  // Highlight color for an selected item in the autocomplete dropdown list.
-  Color get autoCompleteHighlightColor =>
-      isLight ? Colors.grey[300]! : Colors.grey[700]!;
-
-  Color get autoCompleteTextColor => isLight ? Colors.black : Colors.white;
-
-  Color get expandedColor => isLight ? Colors.grey[200]! : Colors.grey[800]!;
-
-  Color get expandedTopContentColor =>
-      isLight ? Colors.grey[50]! : Colors.grey[850]!;
-
-  Color get expandedBottomContentColor =>
-      isLight ? Colors.grey[200]! : Colors.grey[800]!;
-
-  Gradient get verticalGradient => LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [expandedTopContentColor, expandedBottomContentColor],
-        tileMode: TileMode.repeated,
-      );
-
-  Color get performanceLowImpactColor => const Color(0xFF5CB246);
-  Color get performanceMediumImpactColor => const Color(0xFFF7AC2A);
-  Color get performanceHighImpactColor => const Color(0xFFC94040);
-
-  Color get coverageHitColor => performanceLowImpactColor;
-  Color get coverageMissColor => performanceHighImpactColor;
-
-  List<Color> get treeGuidelineColors => [
-        const Color(0xFF13B9FD),
-        devtoolsGreen,
-      ];
 }
 
 /// Utility extension methods to the [ThemeData] class.
@@ -408,7 +340,7 @@ extension ThemeDataExtension on ThemeData {
   /// Returns whether we are currently using a dark theme.
   bool get isDarkTheme => brightness == Brightness.dark;
 
-  TextStyle get regularTextStyle => _fixBlurryText(
+  TextStyle get regularTextStyle => fixBlurryText(
         TextStyle(
           color: colorScheme.onSurface,
           fontSize: defaultFontSize,
@@ -418,13 +350,13 @@ extension ThemeDataExtension on ThemeData {
   TextStyle get boldTextStyle =>
       regularTextStyle.copyWith(fontWeight: FontWeight.bold);
 
-  TextStyle get subtleTextStyle => _fixBlurryText(
+  TextStyle get subtleTextStyle => fixBlurryText(
         TextStyle(
           color: colorScheme.subtleTextColor,
         ),
       );
 
-  TextStyle get fixedFontStyle => _fixBlurryText(
+  TextStyle get fixedFontStyle => fixBlurryText(
         textTheme.bodyMedium!.copyWith(
           fontFamily: 'RobotoMono',
           color: colorScheme.onSurface,
@@ -446,104 +378,57 @@ extension ThemeDataExtension on ThemeData {
       );
 
   TextStyle get fixedFontLinkStyle => fixedFontStyle.copyWith(
-        color: colorScheme.devtoolsLink,
+        color: colorScheme._devtoolsLink,
         decoration: TextDecoration.underline,
       );
 
-  TextStyle get devToolsTitleStyle => _fixBlurryText(textTheme.titleMedium!);
-
-  TextStyle get linkTextStyle => _fixBlurryText(
+  TextStyle get linkTextStyle => fixBlurryText(
         TextStyle(
-          color: colorScheme.devtoolsLink,
+          color: colorScheme._devtoolsLink,
           decoration: TextDecoration.underline,
           fontSize: defaultFontSize,
         ),
       );
 
-  TextStyle get selectedLinkTextStyle => _fixBlurryText(
-        linkTextStyle.copyWith(color: colorScheme.devtoolsSelectedLink),
-      );
-
-  TextStyle get subtleChartTextStyle => _fixBlurryText(
+  TextStyle get subtleChartTextStyle => fixBlurryText(
         TextStyle(
-          color: colorScheme.chartSubtleColor,
-          fontSize: chartFontSizeSmall,
+          color: colorScheme._chartSubtleColor,
+          fontSize: smallFontSize,
         ),
       );
 
-  TextStyle get searchMatchHighlightStyle => _fixBlurryText(
+  TextStyle get searchMatchHighlightStyle => fixBlurryText(
         const TextStyle(
           color: Colors.black,
           backgroundColor: activeSearchMatchColor,
         ),
       );
 
-  TextStyle get searchMatchHighlightStyleFocused => _fixBlurryText(
+  TextStyle get searchMatchHighlightStyleFocused => fixBlurryText(
         const TextStyle(
           color: Colors.black,
           backgroundColor: searchMatchColor,
         ),
       );
 
-  // Title of the hover card.
-  TextStyle get hoverTitleTextStyle => _fixBlurryText(
+  TextStyle get legendTextStyle => fixBlurryText(
         TextStyle(
           fontWeight: FontWeight.normal,
-          fontSize: scaleByFontFactor(15.0),
+          fontSize: smallFontSize,
           decoration: TextDecoration.none,
         ),
       );
-
-  // Last allocation timestamp displayed.
-  TextStyle get italicTextStyle => _fixBlurryText(
-        TextStyle(
-          fontWeight: FontWeight.normal,
-          fontSize: scaleByFontFactor(14.0),
-          fontStyle: FontStyle.italic,
-          decoration: TextDecoration.none,
-        ),
-      );
-
-  // Items in a chart's legend.
-  TextStyle get legendTextStyle => _fixBlurryText(
-        TextStyle(
-          fontWeight: FontWeight.normal,
-          fontSize: chartFontSizeSmall,
-          decoration: TextDecoration.none,
-        ),
-      );
-
-  /// TextStyle for callstack.
-  TextStyle get stackTraceCall => _fixBlurryText(
-        TextStyle(
-          fontWeight: FontWeight.normal,
-          fontSize: scaleByFontFactor(12.0),
-        ),
-      );
-
-  /// TextStyle for source file displayed in callstack.
-  TextStyle get stackTraceSource => _fixBlurryText(
-        TextStyle(
-          fontWeight: FontWeight.w100,
-          fontSize: scaleByFontFactor(12.0),
-        ),
-      );
-
-  TextStyle _fixBlurryText(TextStyle style) {
-    return style.copyWith(
-      fontFeatures: [const FontFeature.proportionalFigures()],
-    );
-  }
 }
 
-const extraWideSearchFieldWidth = 600.0;
-const wideSearchFieldWidth = 400.0;
-const defaultSearchFieldWidth = 200.0;
-double get defaultTextFieldHeight => scaleByFontFactor(32.0);
-double get defaultTextFieldNumberWidth => scaleByFontFactor(100.0);
+/// Returns a [TextStyle] with [FontFeature.proportionalFigures] applied to
+/// fix blurry text.
+TextStyle fixBlurryText(TextStyle style) {
+  return style.copyWith(
+    fontFeatures: [const FontFeature.proportionalFigures()],
+  );
+}
 
-double get maxHoverCardHeight => scaleByFontFactor(250.0);
-const hoverCardBorderWidth = 2.0;
+// Duration and animation constants:
 
 /// A short duration to use for animations.
 ///
@@ -607,17 +492,14 @@ const defaultCurve = Curves.easeInOutCubic;
 CurvedAnimation defaultCurvedAnimation(AnimationController parent) =>
     CurvedAnimation(curve: defaultCurve, parent: parent);
 
-double get chartFontSizeSmall => scaleByFontFactor(10.0);
-
-const lightSelection = Color(0xFFD4D7DA);
-
-bool includeText(
+/// Measures the screen size to determine whether it is strictly larger
+/// than [width], scaled to the current font factor.
+bool isScreenWiderThan(
   BuildContext context,
-  double? minScreenWidthForTextBeforeScaling,
+  double? width,
 ) {
-  return minScreenWidthForTextBeforeScaling == null ||
-      MediaQuery.of(context).size.width >
-          scaleByFontFactor(minScreenWidthForTextBeforeScaling);
+  return width == null ||
+      MediaQuery.of(context).size.width > scaleByFontFactor(width);
 }
 
 ButtonStyle denseAwareOutlinedButtonStyle(
@@ -651,7 +533,7 @@ ButtonStyle _generateButtonStyle({
   required ButtonStyle buttonStyle,
   double? minScreenWidthForTextBeforeScaling,
 }) {
-  if (!includeText(context, minScreenWidthForTextBeforeScaling)) {
+  if (!isScreenWiderThan(context, minScreenWidthForTextBeforeScaling)) {
     buttonStyle = buttonStyle.copyWith(
       padding: MaterialStateProperty.resolveWith<EdgeInsets>((_) {
         return EdgeInsets.zero;
@@ -659,16 +541,4 @@ ButtonStyle _generateButtonStyle({
     );
   }
   return buttonStyle;
-}
-
-const searchMatchColor = Colors.yellow;
-final searchMatchColorOpaque = Colors.yellow.withOpacity(0.5);
-const activeSearchMatchColor = Colors.orangeAccent;
-final activeSearchMatchColorOpaque = Colors.orangeAccent.withOpacity(0.5);
-
-/// Gets an alternating color to use for indexed UI elements.
-Color alternatingColorForIndex(int index, ColorScheme colorScheme) {
-  return index % 2 == 1
-      ? colorScheme.alternatingBackgroundColor1
-      : colorScheme.alternatingBackgroundColor2;
 }

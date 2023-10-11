@@ -15,26 +15,34 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 void main() {
-  final mockServiceManager = MockServiceConnectionManager();
-  when(mockServiceManager.service).thenReturn(null);
-  when(mockServiceManager.connectedAppInitialized).thenReturn(false);
-  when(mockServiceManager.connectedState).thenReturn(
-    ValueNotifier<ConnectedState>(const ConnectedState(false)),
-  );
-  when(mockServiceManager.hasConnection).thenReturn(false);
+  late MockServiceConnectionManager mockServiceConnection;
+  late MockServiceManager mockServiceManager;
 
-  final mockErrorBadgeManager = MockErrorBadgeManager();
-  when(mockServiceManager.errorBadgeManager).thenReturn(mockErrorBadgeManager);
-  when(mockErrorBadgeManager.errorCountNotifier(any))
-      .thenReturn(ValueNotifier<int>(0));
+  setUp(() {
+    mockServiceConnection = createMockServiceConnectionWithDefaults();
+    mockServiceManager =
+        mockServiceConnection.serviceManager as MockServiceManager;
+    when(mockServiceManager.service).thenReturn(null);
+    when(mockServiceManager.connectedAppInitialized).thenReturn(false);
+    when(mockServiceManager.connectedState).thenReturn(
+      ValueNotifier<ConnectedState>(const ConnectedState(false)),
+    );
+    when(mockServiceManager.hasConnection).thenReturn(false);
 
-  setGlobal(ServiceConnectionManager, mockServiceManager);
-  setGlobal(FrameworkController, FrameworkController());
-  setGlobal(SurveyService, SurveyService());
-  setGlobal(OfflineModeController, OfflineModeController());
-  setGlobal(IdeTheme, IdeTheme());
-  setGlobal(NotificationService, NotificationService());
-  setGlobal(BannerMessagesController, BannerMessagesController());
+    final mockErrorBadgeManager = MockErrorBadgeManager();
+    when(mockServiceConnection.errorBadgeManager)
+        .thenReturn(mockErrorBadgeManager);
+    when(mockErrorBadgeManager.errorCountNotifier(any))
+        .thenReturn(ValueNotifier<int>(0));
+
+    setGlobal(ServiceConnectionManager, mockServiceConnection);
+    setGlobal(FrameworkController, FrameworkController());
+    setGlobal(SurveyService, SurveyService());
+    setGlobal(OfflineModeController, OfflineModeController());
+    setGlobal(IdeTheme, IdeTheme());
+    setGlobal(NotificationService, NotificationService());
+    setGlobal(BannerMessagesController, BannerMessagesController());
+  });
 
   Widget wrapScaffold(Widget child) {
     return wrapWithControllers(
@@ -50,7 +58,10 @@ void main() {
       when(mockServiceManager.connectedAppInitialized).thenReturn(false);
       await tester.pumpWidget(
         wrapScaffold(
-          DevToolsScaffold(screens: const [_screen1, _screen2]),
+          DevToolsScaffold(
+            page: _screen1.screenId,
+            screens: const [_screen1, _screen2],
+          ),
         ),
       );
       expect(find.byKey(_k1), findsOneWidget);

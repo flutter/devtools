@@ -21,20 +21,22 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 void main() {
-  late MockServiceConnectionManager mockServiceManager;
+  late MockServiceConnectionManager mockServiceConnection;
+  late MockServiceManager mockServiceManager;
 
   setUp(() {
-    mockServiceManager = MockServiceConnectionManager();
-    when(mockServiceManager.serviceExtensionManager)
-        .thenReturn(FakeServiceExtensionManager());
-    when(mockServiceManager.isolateManager).thenReturn(FakeIsolateManager());
-    when(mockServiceManager.appState).thenReturn(
-      AppState(mockServiceManager.isolateManager.selectedIsolate),
+    mockServiceConnection = createMockServiceConnectionWithDefaults();
+    mockServiceManager =
+        mockServiceConnection.serviceManager as MockServiceManager;
+    when(mockServiceConnection.appState).thenReturn(
+      AppState(
+        mockServiceManager.isolateManager.selectedIsolate,
+      ),
     );
     when(unawaited(mockServiceManager.runDeviceBusyTask(any)))
         .thenAnswer((_) => Future<void>.value());
     when(mockServiceManager.isMainIsolatePaused).thenReturn(false);
-    setGlobal(ServiceConnectionManager, mockServiceManager);
+    setGlobal(ServiceConnectionManager, mockServiceConnection);
     setGlobal(NotificationService, NotificationService());
     setGlobal(IdeTheme, IdeTheme());
   });
@@ -169,7 +171,8 @@ void main() {
       await (mockServiceManager.serviceExtensionManager
               as FakeServiceExtensionManager)
           .fakeFrame();
-      serviceState = mockServiceManager.serviceExtensionManager
+      serviceState = mockServiceConnection
+          .serviceManager.serviceExtensionManager
           .getServiceExtensionState(extensions.structuredErrors.extension);
       serviceState.addListener(serviceStateListener);
     });
@@ -232,12 +235,13 @@ void main() {
 }
 
 void registerServiceExtension(
-  MockServiceConnectionManager mockServiceManager,
+  MockServiceManager mockServiceManager,
   RegisteredServiceDescription description, {
   bool serviceAvailable = true,
 }) {
-  when(mockServiceManager.registeredServiceListenable(description.service))
-      .thenAnswer((invocation) {
+  when(
+    mockServiceManager.registeredServiceListenable(description.service),
+  ).thenAnswer((invocation) {
     final listenable = ImmediateValueNotifier(serviceAvailable);
     return listenable;
   });

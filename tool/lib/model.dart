@@ -28,12 +28,9 @@ class DevToolsRepo {
     final result = <Package>[];
     final repoDir = Directory(repoPath);
 
-    // For the first level of packages, ignore any directory named 'flutter'.
     for (FileSystemEntity entity in repoDir.listSync()) {
       final name = path.basename(entity.path);
-      if (entity is Directory &&
-          !name.startsWith('flutter') &&
-          !name.startsWith('.')) {
+      if (entity is Directory && !name.startsWith('.')) {
         _collectPackages(entity, result);
       }
     }
@@ -59,7 +56,14 @@ class DevToolsRepo {
   }
 
   void _collectPackages(Directory dir, List<Package> result) {
-    if (_fileExists(dir, 'pubspec.yaml')) {
+    // Do not collect packages from the Flutter SDK that is stored in the tool/
+    // directory.
+    if (dir.path.contains('flutter-sdk/')) return;
+
+    // Do not include the top level devtools/packages directory in the results
+    // even though it has a pubspec.yaml file.
+    if (_fileExists(dir, 'pubspec.yaml') &&
+        !dir.path.endsWith('/devtools/packages')) {
       result.add(Package._(this, dir.path));
     }
 

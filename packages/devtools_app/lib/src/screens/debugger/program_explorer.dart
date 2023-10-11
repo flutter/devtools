@@ -15,6 +15,7 @@ import '../../shared/flex_split_column.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/tree.dart';
+import '../../shared/ui/colors.dart';
 import 'program_explorer_controller.dart';
 import 'program_explorer_model.dart';
 
@@ -265,7 +266,7 @@ class ProgramStructureIcon extends StatelessWidget {
                     height: 1,
                     fontFamily: theme.fixedFontStyle.fontFamily,
                     color: theme.colorScheme.defaultBackgroundColor,
-                    fontSize: chartFontSizeSmall,
+                    fontSize: smallFontSize,
                   ),
                   // Required to center the individual character within the
                   // shape. Since letters like 'm' are shorter than letters
@@ -459,7 +460,8 @@ class ProgramExplorer extends StatelessWidget {
               // the above issues are resolved.
               //
               // See https://github.com/flutter/devtools/issues/3447.
-              return serviceManager.connectedApp!.isDartWebAppNow!
+              return serviceConnection
+                      .serviceManager.connectedApp!.isDartWebAppNow!
                   ? Column(
                       children: [
                         fileExplorerHeader,

@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:collection/collection.dart';
 import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
@@ -33,7 +36,39 @@ const debugLogServiceProtocolEvents = false;
 
 const defaultRefreshRate = 60.0;
 
-class ServiceConnectionManager extends ServiceManager<VmServiceWrapper> {
+/// The amount of time we will wait for the main isolate to become non-null when
+/// calling [ServiceConnectionManager.rootLibraryForMainIsolate].
+const _waitForRootLibraryTimeout = Duration(seconds: 3);
+
+class ServiceConnectionManager {
+  ServiceConnectionManager() {
+    serviceManager = ServiceManager()
+      ..registerLifecycleCallback(
+        ServiceManagerLifecycle.beforeOpenVmService,
+        _beforeOpenVmService,
+      )
+      ..registerLifecycleCallback(
+        ServiceManagerLifecycle.afterOpenVmService,
+        _afterOpenVmService,
+      )
+      ..registerLifecycleCallback(
+        ServiceManagerLifecycle.beforeCloseVmService,
+        _beforeCloseVmService,
+      )
+      ..registerLifecycleCallback(
+        ServiceManagerLifecycle.afterCloseVmService,
+        _afterCloseVmService,
+      )
+      ..registerOverride(
+        ServiceManagerOverride.initIsolates,
+        (service) async => await serviceManager.isolateManager.init(
+          serviceManager.vm?.isolatesForDevToolsMode() ?? <IsolateRef>[],
+        ),
+      );
+  }
+
+  late final ServiceManager<VmServiceWrapper> serviceManager;
+
   final vmFlagManager = VmFlagManager();
 
   final timelineStreamManager = TimelineStreamManager();
@@ -55,28 +90,14 @@ class ServiceConnectionManager extends ServiceManager<VmServiceWrapper> {
   AppState get appState => _appState!;
   AppState? _appState;
 
-  @override
-  Future<void> vmServiceOpened(
-    VmServiceWrapper service, {
-    required Future<void> onClosed,
-  }) async {
-    await super.vmServiceOpened(service, onClosed: onClosed);
-
-    _appState?.dispose();
-    _appState = AppState(isolateManager.selectedIsolate);
-
-    if (debugLogServiceProtocolEvents) {
-      serviceTrafficLogger = VmServiceTrafficLogger(service);
-    }
-  }
-
-  @override
-  Future<void> beforeOpenVmService(VmServiceWrapper service) async {
-    super.beforeOpenVmService(service);
-    consoleService.vmServiceOpened(service);
+  Future<void> _beforeOpenVmService(VmServiceWrapper? service) async {
+    consoleService.vmServiceOpened(service!);
     resolvedUriManager.vmServiceOpened();
     await vmFlagManager.vmServiceOpened(service);
-    timelineStreamManager.vmServiceOpened(service, connectedApp!);
+    timelineStreamManager.vmServiceOpened(
+      service,
+      serviceManager.connectedApp!,
+    );
     // This needs to be called last in the above group of `vmServiceOpened`
     // calls.
     errorBadgeManager.vmServiceOpened(service);
@@ -85,8 +106,7 @@ class ServiceConnectionManager extends ServiceManager<VmServiceWrapper> {
     _inspectorService = null;
   }
 
-  @override
-  Future<void> afterOpenVmService() async {
+  Future<void> _afterOpenVmService(VmServiceWrapper? service) async {
     // Re-initialize isolates when VM developer mode is enabled/disabled to
     // display/hide system isolates.
     preferences.vmDeveloperModeEnabled
@@ -95,8 +115,9 @@ class ServiceConnectionManager extends ServiceManager<VmServiceWrapper> {
     // This needs to be called before calling
     // `ga.setupUserApplicationDimensions()` and before initializing
     // [_inspectorService], since both require access to an initialized
-    // [connectedApp] object.
-    await connectedApp!.initializeValues(onComplete: generateDevToolsTitle);
+    // [serviceManager.connectedApp] object.
+    await serviceManager.connectedApp!
+        .initializeValues(onComplete: generateDevToolsTitle);
 
     // Set up analytics dimensions for the connected app.
     ga.setupUserApplicationDimensions();
@@ -105,21 +126,26 @@ class ServiceConnectionManager extends ServiceManager<VmServiceWrapper> {
     }
 
     _inspectorService = devToolsExtensionPoints.inspectorServiceProvider();
+
+    _appState?.dispose();
+    _appState = AppState(serviceManager.isolateManager.selectedIsolate);
+
+    if (debugLogServiceProtocolEvents) {
+      serviceTrafficLogger = VmServiceTrafficLogger(service!);
+    }
   }
 
-  @override
-  void beforeCloseVmService() {
+  void _beforeCloseVmService(VmServiceWrapper? service) {
     // Set [offlineController.previousConnectedApp] in case we need it for
     // viewing data after disconnect. This must be done before resetting the
     // rest of the service manager state.
-    final previousConnectedApp = connectedApp != null
-        ? OfflineConnectedApp.parse(connectedApp!.toJson())
+    final previousConnectedApp = serviceManager.connectedApp != null
+        ? OfflineConnectedApp.parse(serviceManager.connectedApp!.toJson())
         : null;
     offlineController.previousConnectedApp = previousConnectedApp;
   }
 
-  @override
-  void afterCloseVmService() {
+  void _afterCloseVmService(VmServiceWrapper? service) {
     generateDevToolsTitle();
     vmFlagManager.vmServiceClosed();
     timelineStreamManager.vmServiceClosed();
@@ -131,17 +157,43 @@ class ServiceConnectionManager extends ServiceManager<VmServiceWrapper> {
     serviceTrafficLogger?.dispose();
     preferences.vmDeveloperModeEnabled
         .removeListener(_handleVmDeveloperModeChanged);
-
-    super.afterCloseVmService();
   }
 
-  @override
-  List<IsolateRef> isolatesFromVm(VM? vm) {
-    return vm?.isolatesForDevToolsMode() ?? <IsolateRef>[];
+  Future<void> _handleVmDeveloperModeChanged() async {
+    final vm = await serviceConnection.serviceManager.service!.getVM();
+    final isolates = vm.isolatesForDevToolsMode();
+    final vmDeveloperModeEnabled = preferences.vmDeveloperModeEnabled.value;
+    if (serviceManager.isolateManager.selectedIsolate.value!.isSystemIsolate! &&
+        !vmDeveloperModeEnabled) {
+      serviceManager.isolateManager
+          .selectIsolate(serviceManager.isolateManager.isolates.value.first);
+    }
+    await serviceManager.isolateManager.init(isolates);
+  }
+
+  Future<String?> rootLibraryForMainIsolate() async {
+    final mainIsolateRef = await whenValueNonNull(
+      serviceManager.isolateManager.mainIsolate,
+      timeout: _waitForRootLibraryTimeout,
+    );
+    if (mainIsolateRef == null) return null;
+
+    final isolateState =
+        serviceManager.isolateManager.isolateState(mainIsolateRef);
+    await isolateState.waitForIsolateLoad();
+    final rootLib = isolateState.rootInfo?.library;
+    if (rootLib == null) return null;
+
+    final selectedIsolateRefId = mainIsolateRef.id!;
+    await resolvedUriManager.fetchFileUris(selectedIsolateRefId, [rootLib]);
+    return resolvedUriManager.lookupFileUri(
+      selectedIsolateRefId,
+      rootLib,
+    );
   }
 
   Future<Response> get adbMemoryInfo async {
-    return await callServiceOnMainIsolate(
+    return await serviceManager.callServiceOnMainIsolate(
       registrations.flutterMemoryInfo.service,
     );
   }
@@ -150,7 +202,8 @@ class ServiceConnectionManager extends ServiceManager<VmServiceWrapper> {
   ///
   /// Throws an Exception if no 'FlutterView' is present in this isolate.
   Future<String> get flutterViewId async {
-    final flutterViewListResponse = await callServiceExtensionOnMainIsolate(
+    final flutterViewListResponse =
+        await serviceManager.callServiceExtensionOnMainIsolate(
       registrations.flutterListViews,
     );
     final List<Map<String, Object?>> views =
@@ -178,13 +231,14 @@ class ServiceConnectionManager extends ServiceManager<VmServiceWrapper> {
   ///   layerBytes - layer raster cache entries in bytes
   ///   pictureBytes - picture raster cache entries in bytes
   Future<Response?> get rasterCacheMetrics async {
-    if (connectedApp == null || !await connectedApp!.isFlutterApp) {
+    if (serviceManager.connectedApp == null ||
+        !await serviceManager.connectedApp!.isFlutterApp) {
       return null;
     }
 
     final viewId = await flutterViewId;
 
-    return await callServiceExtensionOnMainIsolate(
+    return await serviceManager.callServiceExtensionOnMainIsolate(
       registrations.flutterEngineEstimateRasterCache,
       args: {
         'viewId': viewId,
@@ -193,13 +247,14 @@ class ServiceConnectionManager extends ServiceManager<VmServiceWrapper> {
   }
 
   Future<Response?> get renderFrameWithRasterStats async {
-    if (connectedApp == null || !await connectedApp!.isFlutterApp) {
+    if (serviceManager.connectedApp == null ||
+        !await serviceManager.connectedApp!.isFlutterApp) {
       return null;
     }
 
     final viewId = await flutterViewId;
 
-    return await callServiceExtensionOnMainIsolate(
+    return await serviceManager.callServiceExtensionOnMainIsolate(
       registrations.renderFrameWithRasterStats,
       args: {
         'viewId': viewId,
@@ -208,14 +263,16 @@ class ServiceConnectionManager extends ServiceManager<VmServiceWrapper> {
   }
 
   Future<double?> get queryDisplayRefreshRate async {
-    if (connectedApp == null || !await connectedApp!.isFlutterApp) {
+    if (serviceManager.connectedApp == null ||
+        !await serviceManager.connectedApp!.isFlutterApp) {
       return null;
     }
 
     const unknownRefreshRate = 0.0;
 
     final viewId = await flutterViewId;
-    final displayRefreshRateResponse = await callServiceExtensionOnMainIsolate(
+    final displayRefreshRateResponse =
+        await serviceManager.callServiceExtensionOnMainIsolate(
       registrations.displayRefreshRate,
       args: {'viewId': viewId},
     );
@@ -230,25 +287,6 @@ class ServiceConnectionManager extends ServiceManager<VmServiceWrapper> {
     return fps.roundToDouble();
   }
 
-  Future<String?> rootLibraryForMainIsolate() async {
-    if (!connectedState.value.connected) return null;
-
-    final mainIsolateRef = isolateManager.mainIsolate.value;
-    if (mainIsolateRef == null) return null;
-
-    final isolateState = isolateManager.isolateState(mainIsolateRef);
-    await isolateState.waitForIsolateLoad();
-    final rootLib = isolateState.rootInfo!.library;
-    if (rootLib == null) return null;
-
-    final selectedIsolateRefId = mainIsolateRef.id!;
-    await resolvedUriManager.fetchFileUris(selectedIsolateRefId, [rootLib]);
-    return resolvedUriManager.lookupFileUri(
-      selectedIsolateRefId,
-      rootLib,
-    );
-  }
-
   Future<void> sendDwdsEvent({
     required String screen,
     required String action,
@@ -256,7 +294,7 @@ class ServiceConnectionManager extends ServiceManager<VmServiceWrapper> {
     final serviceRegistered = serviceManager.registeredMethodsForService
         .containsKey(registrations.dwdsSendEvent);
     if (!serviceRegistered) return;
-    await callServiceExtensionOnMainIsolate(
+    await serviceManager.callServiceExtensionOnMainIsolate(
       registrations.dwdsSendEvent,
       args: {
         'type': 'DevtoolsEvent',
@@ -266,16 +304,5 @@ class ServiceConnectionManager extends ServiceManager<VmServiceWrapper> {
         },
       },
     );
-  }
-
-  Future<void> _handleVmDeveloperModeChanged() async {
-    final vm = await serviceManager.service!.getVM();
-    final isolates = vm.isolatesForDevToolsMode();
-    final vmDeveloperModeEnabled = preferences.vmDeveloperModeEnabled.value;
-    if (isolateManager.selectedIsolate.value!.isSystemIsolate! &&
-        !vmDeveloperModeEnabled) {
-      isolateManager.selectIsolate(isolateManager.isolates.value.first);
-    }
-    await isolateManager.init(isolates);
   }
 }

@@ -120,7 +120,8 @@ class _SecondaryControls extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        if (serviceManager.connectedApp!.isFlutterNativeAppNow)
+        if (serviceConnection
+            .serviceManager.connectedApp!.isFlutterNativeAppNow)
           GaDevToolsButton(
             icon: Icons.timer,
             label: 'Profile app start up',

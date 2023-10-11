@@ -53,7 +53,7 @@ class EnhanceTracingController extends DisposableController
   /// event is received, and then cancels the stream subscription.
   void _listenForFirstLiveFrame() {
     _firstFrameEventSubscription =
-        serviceManager.service!.onExtensionEvent.listen(
+        serviceConnection.serviceManager.service!.onExtensionEvent.listen(
       (event) {
         if (event.extensionKind == 'Flutter.Frame' &&
             _firstLiveFrameId == null) {
@@ -70,7 +70,7 @@ class EnhanceTracingController extends DisposableController
   void init() {
     for (int i = 0; i < enhanceTracingExtensions.length; i++) {
       final extension = enhanceTracingExtensions[i];
-      final state = serviceManager.serviceExtensionManager
+      final state = serviceConnection.serviceManager.serviceExtensionManager
           .getServiceExtensionState(extension.extension);
       _extensionStates[extension] = state.value.enabled;
       // Listen for extension state changes so that we can update the value of

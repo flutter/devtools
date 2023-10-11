@@ -9,7 +9,7 @@ import 'theme.dart';
 export '_ide_theme_desktop.dart' if (dart.library.html) '_ide_theme_web.dart';
 
 /// IDE-supplied theming.
-class IdeTheme {
+final class IdeTheme {
   IdeTheme({
     this.backgroundColor,
     this.foregroundColor,

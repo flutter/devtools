@@ -145,16 +145,16 @@ class StatusLine extends StatelessWidget {
     final textTheme = theme.textTheme;
     const noConnectionMsg = 'No client connection';
     return ValueListenableBuilder<ConnectedState>(
-      valueListenable: serviceManager.connectedState,
+      valueListenable: serviceConnection.serviceManager.connectedState,
       builder: (context, connectedState, child) {
         if (connectedState.connected) {
-          final app = serviceManager.connectedApp!;
+          final app = serviceConnection.serviceManager.connectedApp!;
 
           String description;
           if (!app.isRunningOnDartVM!) {
             description = 'web app';
           } else {
-            final vm = serviceManager.vm!;
+            final vm = serviceConnection.serviceManager.vm!;
             description = vm.deviceDisplay;
           }
 
@@ -166,7 +166,7 @@ class StatusLine extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               ValueListenableBuilder(
-                valueListenable: serviceManager.deviceBusy,
+                valueListenable: serviceConnection.serviceManager.deviceBusy,
                 builder: (context, bool isBusy, _) {
                   return SizedBox(
                     width: smallProgressSize,
@@ -218,13 +218,15 @@ class IsolateSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final IsolateManager isolateManager = serviceManager.isolateManager;
+    final IsolateManager isolateManager =
+        serviceConnection.serviceManager.isolateManager;
     return MultiValueListenableBuilder(
       listenables: [
         isolateManager.isolates,
         isolateManager.selectedIsolate,
       ],
       builder: (context, values, _) {
+        final theme = Theme.of(context);
         final isolates = values.first as List<IsolateRef>;
         final selectedIsolateRef = values.second as IsolateRef?;
         return PopupMenuButton<IsolateRef?>(
@@ -235,11 +237,17 @@ class IsolateSelector extends StatelessWidget {
             (ref) {
               return PopupMenuItem<IsolateRef>(
                 value: ref,
-                child: IsolateOption(ref),
+                child: IsolateOption(
+                  ref,
+                  color: theme.colorScheme.onSurface,
+                ),
               );
             },
           ).toList(),
-          child: IsolateOption(isolateManager.selectedIsolate.value),
+          child: IsolateOption(
+            isolateManager.selectedIsolate.value,
+            color: theme.colorScheme.onPrimary,
+          ),
         );
       },
     );
@@ -249,28 +257,29 @@ class IsolateSelector extends StatelessWidget {
 class IsolateOption extends StatelessWidget {
   const IsolateOption(
     this.ref, {
+    required this.color,
     super.key,
   });
 
   final IsolateRef? ref;
 
+  final Color color;
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
+    final textTheme = Theme.of(context).textTheme;
     return Row(
       children: [
         Icon(
           ref?.isSystemIsolate ?? false
               ? Icons.settings_applications
               : Icons.call_split,
-          color: theme.colorScheme.onPrimary,
+          color: color,
         ),
         const SizedBox(width: denseSpacing),
         Text(
           ref == null ? 'isolate' : _isolateName(ref!),
-          style: textTheme.bodyMedium!
-              .copyWith(color: theme.colorScheme.onPrimary),
+          style: textTheme.bodyMedium!.copyWith(color: color),
         ),
       ],
     );
@@ -278,6 +287,6 @@ class IsolateOption extends StatelessWidget {
 
   String _isolateName(IsolateRef ref) {
     final name = ref.name;
-    return '$name #${serviceManager.isolateManager.isolateIndex(ref)}';
+    return '$name #${serviceConnection.serviceManager.isolateManager.isolateIndex(ref)}';
   }
 }

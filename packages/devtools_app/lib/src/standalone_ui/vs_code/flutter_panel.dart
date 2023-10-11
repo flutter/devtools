@@ -8,9 +8,10 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../devtools_app.dart';
-import '../../shared/feature_flags.dart';
 import '../api/dart_tooling_api.dart';
 import '../api/vs_code_api.dart';
+import 'debug_sessions.dart';
+import 'devices.dart';
 
 /// A general Flutter sidebar panel for embedding inside IDEs.
 ///
@@ -23,8 +24,6 @@ class VsCodeFlutterPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    assert(FeatureFlags.vsCodeSidebarTooling);
-
     return Column(
       children: [
         FutureBuilder(
@@ -64,52 +63,45 @@ class _VsCodeConnectedPanelState extends State<_VsCodeConnectedPanel> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const SizedBox(height: defaultSpacing),
-        if (widget.api.capabilities.executeCommand)
-          ElevatedButton(
-            onPressed: () =>
-                unawaited(widget.api.executeCommand('flutter.createProject')),
-            child: const Text('New Flutter Project'),
-          ),
-        if (widget.api.capabilities.selectDevice)
-          StreamBuilder(
-            stream: widget.api.devicesChanged,
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return const SizedBox.shrink();
-              }
-              final deviceEvent = snapshot.data!;
-              return Table(
-                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                children: [
-                  for (final device in deviceEvent.devices)
-                    TableRow(
-                      children: [
-                        TextButton(
-                          child: Text(device.name),
-                          onPressed: () =>
-                              unawaited(widget.api.selectDevice(device.id)),
-                        ),
-                        Text(
-                          device.id == deviceEvent.selectedDeviceId
-                              ? '(selected)'
-                              : '',
-                        ),
-                      ],
-                    ),
-                ],
-              );
-            },
-          ),
-        if (widget.api.capabilities.executeCommand)
-          ElevatedButton(
-            onPressed: () =>
-                unawaited(widget.api.executeCommand('flutter.doctor')),
-            child: const Text('Run Flutter Doctor'),
-          ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: denseSpacing,
+        vertical: defaultSpacing,
+      ),
+      // Debug sessions rely on devices too, because they look up the sessions
+      // device for some capabilities (for example to know if the session is
+      // running on a web device).
+      child: StreamBuilder(
+        stream: widget.api.devicesChanged,
+        builder: (context, devicesSnapshot) {
+          final devices = devicesSnapshot.data?.devices ?? const [];
+          final deviceMap = {for (final device in devices) device.id: device};
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              StreamBuilder(
+                stream: widget.api.debugSessionsChanged,
+                builder: (context, debugSessionsSnapshot) {
+                  final sessions =
+                      debugSessionsSnapshot.data?.sessions ?? const [];
+                  return DebugSessions(
+                    api: widget.api,
+                    sessions: sessions,
+                    deviceMap: deviceMap,
+                  );
+                },
+              ),
+              const SizedBox(height: defaultSpacing),
+              if (widget.api.capabilities.selectDevice)
+                Devices(
+                  widget.api,
+                  devices,
+                  selectedDeviceId: devicesSnapshot.data?.selectedDeviceId,
+                ),
+            ],
+          );
+        },
+      ),
     );
   }
 }

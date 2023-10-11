@@ -19,7 +19,7 @@ void main() {
   group('NetworkScreen NetworkRequestsTable', () {
     late NetworkController controller;
     late CurrentNetworkRequests currentRequests;
-    late FakeServiceManager fakeServiceManager;
+    late FakeServiceConnectionManager fakeServiceConnection;
     late SocketProfile socketProfile;
     late HttpProfile httpProfile;
     late List<NetworkRequest> requests;
@@ -27,13 +27,13 @@ void main() {
     setUpAll(() {
       httpProfile = loadHttpProfile();
       socketProfile = loadSocketProfile();
-      fakeServiceManager = FakeServiceManager(
+      fakeServiceConnection = FakeServiceConnectionManager(
         service: FakeServiceManager.createFakeService(
           httpProfile: httpProfile,
           socketProfile: socketProfile,
         ),
       );
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(ServiceConnectionManager, fakeServiceConnection);
       setGlobal(IdeTheme, IdeTheme());
 
       // Bypass controller recording so timelineMicroOffset is not time dependant

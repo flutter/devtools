@@ -11,7 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
 
 void main() {
-  setGlobal(ServiceConnectionManager, FakeServiceManager());
+  setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
 
   group('ScriptsHistory', () {
     late ScriptsHistory history;

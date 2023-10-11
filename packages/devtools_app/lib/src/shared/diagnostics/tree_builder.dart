@@ -326,7 +326,7 @@ Future<void> _addValueItems(
 }
 
 Future<void> _addInspectorItems(variable, IsolateRef? isolateRef) async {
-  final inspectorService = serviceManager.inspectorService;
+  final inspectorService = serviceConnection.inspectorService;
   if (inspectorService != null) {
     final tasks = <Future>[];
     InspectorObjectGroupBase? group;
@@ -409,7 +409,8 @@ Future<void> buildVariablesTree(
       await addChildReferences(variable);
     } else if (variable.childCount > DartObjectNode.maxChildrenInGrouping) {
       _setupGrouping(variable);
-    } else if (instanceRef != null && serviceManager.service != null) {
+    } else if (instanceRef != null &&
+        serviceConnection.serviceManager.service != null) {
       await _addInstanceRefItems(variable, instanceRef, isolateRef);
     } else if (value is InstanceSet) {
       _addInstanceSetItems(variable, isolateRef, value);

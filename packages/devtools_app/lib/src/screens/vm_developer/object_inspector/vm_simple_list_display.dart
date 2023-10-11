@@ -59,9 +59,9 @@ class _VmSimpleListDisplayState extends State<VmSimpleListDisplay> {
         return;
       }
 
-      final isolateId =
-          serviceManager.isolateManager.selectedIsolate.value!.id!;
-      final service = serviceManager.service!;
+      final isolateId = serviceConnection
+          .serviceManager.isolateManager.selectedIsolate.value!.id!;
+      final service = serviceConnection.serviceManager.service!;
       _initialized = service.getObject(isolateId, elementsInstance.id!).then(
             (e) => entries.addAll((e as Instance).elements!.cast<Response?>()),
           );

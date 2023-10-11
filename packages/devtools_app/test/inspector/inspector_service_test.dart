@@ -27,7 +27,7 @@ void main() {
   InspectorService? inspectorService;
 
   env.afterEverySetup = () async {
-    assert(serviceManager.connectedAppInitialized);
+    assert(serviceConnection.serviceManager.connectedAppInitialized);
     setGlobal(IdeTheme, IdeTheme());
 
     inspectorService = InspectorService();

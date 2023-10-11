@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../test_infra/flutter_test_storage.dart';
 
 void main() {
-  setGlobal(ServiceConnectionManager, FakeServiceManager());
+  setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
 
   group('$PreferencesController', () {
     late PreferencesController controller;
@@ -89,7 +89,7 @@ void main() {
         await controller.init();
         expect(
           controller.hoverEvalModeEnabled.value,
-          serviceManager.inspectorService!.hoverEvalModeEnabledByDefault,
+          serviceConnection.inspectorService!.hoverEvalModeEnabledByDefault,
         );
       });
 
@@ -264,6 +264,57 @@ void main() {
       expect(
         controller.showFlutterFramesChart.value,
         showFramesChart,
+      );
+    });
+  });
+
+  group('$ExtensionsPreferencesController', () {
+    late ExtensionsPreferencesController controller;
+    late FlutterTestStorage storage;
+
+    setUp(() async {
+      setGlobal(Storage, storage = FlutterTestStorage());
+      controller = ExtensionsPreferencesController();
+      await controller.init();
+    });
+
+    test('has expected default values', () {
+      expect(controller.showOnlyEnabledExtensions.value, isFalse);
+    });
+
+    test('stores values and reads them on init', () async {
+      storage.values.clear();
+
+      // Remember original values.
+      final showOnlyEnabled = controller.showOnlyEnabledExtensions.value;
+
+      // Flip the values in controller.
+      controller.showOnlyEnabledExtensions.value = !showOnlyEnabled;
+
+      // Check the values are stored.
+      expect(storage.values, hasLength(1));
+
+      // Reload the values from storage.
+      await controller.init();
+
+      // Check they did not change back to default.
+      expect(
+        controller.showOnlyEnabledExtensions.value,
+        !showOnlyEnabled,
+      );
+
+      // Flip the values in storage.
+      for (var key in storage.values.keys) {
+        storage.values[key] = (!(storage.values[key] == 'true')).toString();
+      }
+
+      // Reload the values from storage.
+      await controller.init();
+
+      // Check they flipped values are loaded.
+      expect(
+        controller.showOnlyEnabledExtensions.value,
+        showOnlyEnabled,
       );
     });
   });

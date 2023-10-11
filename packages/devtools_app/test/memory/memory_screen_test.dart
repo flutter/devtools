@@ -19,7 +19,7 @@ import '../test_infra/test_data/memory_allocation.dart';
 void main() {
   late MemoryScreen screen;
   late MemoryController controller;
-  late FakeServiceManager fakeServiceManager;
+  late FakeServiceConnectionManager fakeServiceConnection;
 
   // Load canned data testHeapSampleData.
   final memoryJson =
@@ -28,24 +28,28 @@ void main() {
       AllocationMemoryJson.decode(argJsonString: testAllocationData);
 
   void setUpServiceManagerForMemory() {
-    fakeServiceManager = FakeServiceManager(
+    fakeServiceConnection = FakeServiceConnectionManager(
       service: FakeServiceManager.createFakeService(
         memoryData: memoryJson,
         allocationData: allocationJson,
       ),
     );
-    when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
-    when(fakeServiceManager.connectedApp!.isFlutterAppNow).thenReturn(true);
-    when(fakeServiceManager.connectedApp!.isDartCliAppNow).thenReturn(false);
-    when(fakeServiceManager.connectedApp!.isDebugFlutterAppNow)
+    when(fakeServiceConnection.serviceManager.connectedApp!.isDartWebAppNow)
         .thenReturn(false);
-    when(fakeServiceManager.connectedApp!.isDartWebApp)
+    when(fakeServiceConnection.serviceManager.connectedApp!.isFlutterAppNow)
+        .thenReturn(true);
+    when(fakeServiceConnection.serviceManager.connectedApp!.isDartCliAppNow)
+        .thenReturn(false);
+    when(
+      fakeServiceConnection.serviceManager.connectedApp!.isDebugFlutterAppNow,
+    ).thenReturn(false);
+    when(fakeServiceConnection.serviceManager.connectedApp!.isDartWebApp)
         .thenAnswer((_) => Future.value(false));
     setGlobal(
       DevToolsEnvironmentParameters,
       ExternalDevToolsEnvironmentParameters(),
     );
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
+    setGlobal(ServiceConnectionManager, fakeServiceConnection);
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(OfflineModeController, OfflineModeController());
     setGlobal(IdeTheme, IdeTheme());

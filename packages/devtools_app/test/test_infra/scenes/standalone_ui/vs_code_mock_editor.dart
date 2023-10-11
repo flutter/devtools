@@ -68,6 +68,7 @@ class _VsCodeFlutterPanelMockEditorState
   @override
   Widget build(BuildContext context) {
     final editorTheme = VsCodeTheme.of(context);
+    final theme = Theme.of(context);
     return Split(
       axis: Axis.horizontal,
       initialFractions: const [0.25, 0.75],
@@ -106,22 +107,69 @@ class _VsCodeFlutterPanelMockEditorState
                 children: [
                   Text(
                     'Mock Editor',
-                    style: Theme.of(context).textTheme.headlineMedium,
+                    style: theme.textTheme.headlineMedium,
                   ),
-                  const Text(''),
+                  const SizedBox(height: defaultSpacing),
                   const Text(
                     'Use these buttons to simulate actions that would usually occur in the IDE.',
                   ),
-                  const Text(''),
+                  const SizedBox(height: defaultSpacing),
                   Row(
                     children: [
+                      const Text('Devices: '),
                       ElevatedButton(
                         onPressed: api.connectDevices,
-                        child: const Text('Connect Devices'),
+                        child: const Text('Connect'),
                       ),
                       ElevatedButton(
                         onPressed: api.disconnectDevices,
-                        child: const Text('Disconnect Devices'),
+                        child: const Text('Disconnect'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: defaultSpacing),
+                  const Text('Debug Sessions: '),
+                  const SizedBox(height: denseSpacing),
+                  Row(
+                    children: [
+                      ElevatedButton(
+                        onPressed: () => api.startSession('debug', 'myMac'),
+                        child: const Text('Desktop debug'),
+                      ),
+                      const SizedBox(width: denseSpacing),
+                      ElevatedButton(
+                        onPressed: () => api.startSession('debug', 'chrome'),
+                        child: const Text('Web debug'),
+                      ),
+                      const SizedBox(width: denseSpacing),
+                      ElevatedButton(
+                        onPressed: () => api.startSession('profile', 'myMac'),
+                        child: const Text('Desktop profile'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: denseSpacing),
+                  Row(
+                    children: [
+                      ElevatedButton(
+                        onPressed: () => api.startSession('release', 'myMac'),
+                        child: const Text('Desktop release'),
+                      ),
+                      const SizedBox(width: denseSpacing),
+                      ElevatedButton(
+                        onPressed: () =>
+                            api.startSession('jit_release', 'myMac'),
+                        child: const Text('Desktop jit_release'),
+                      ),
+                      const SizedBox(width: denseSpacing),
+                      ElevatedButton(
+                        onPressed: () => api.endSessions(),
+                        style: theme.elevatedButtonTheme.style!.copyWith(
+                          backgroundColor: const MaterialStatePropertyAll(
+                            Colors.red,
+                          ),
+                        ),
+                        child: const Text('Stop All'),
                       ),
                     ],
                   ),
@@ -134,15 +182,25 @@ class _VsCodeFlutterPanelMockEditorState
               child: StreamBuilder(
                 stream: logUpdated,
                 builder: (context, snapshot) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      for (final log in logRing)
-                        Text(
-                          log,
-                          style: Theme.of(context).fixedFontStyle,
-                        ),
-                    ],
+                  return SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        for (final log in logRing)
+                          OutlineDecoration.onlyBottom(
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(
+                                vertical: denseSpacing,
+                              ),
+                              child: Text(
+                                log,
+                                style: Theme.of(context).fixedFontStyle,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
                   );
                 },
               ),

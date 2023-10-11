@@ -15,29 +15,40 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 void main() {
-  final mockServiceManager = MockServiceConnectionManager();
-  when(mockServiceManager.service).thenReturn(null);
-  when(mockServiceManager.connectedState).thenReturn(
-    ValueNotifier<ConnectedState>(const ConnectedState(false)),
-  );
-  when(mockServiceManager.hasConnection).thenReturn(false);
-  when(mockServiceManager.isolateManager).thenReturn(FakeIsolateManager());
-  when(mockServiceManager.appState).thenReturn(
-    AppState(mockServiceManager.isolateManager.selectedIsolate),
-  );
+  late MockServiceConnectionManager mockServiceConnection;
+  late MockServiceManager mockServiceManager;
 
-  final mockErrorBadgeManager = MockErrorBadgeManager();
-  when(mockServiceManager.errorBadgeManager).thenReturn(mockErrorBadgeManager);
-  when(mockErrorBadgeManager.errorCountNotifier(any))
-      .thenReturn(ValueNotifier<int>(0));
+  setUp(() {
+    mockServiceConnection = createMockServiceConnectionWithDefaults();
+    mockServiceManager =
+        mockServiceConnection.serviceManager as MockServiceManager;
 
-  setGlobal(ServiceConnectionManager, mockServiceManager);
-  setGlobal(FrameworkController, FrameworkController());
-  setGlobal(SurveyService, SurveyService());
-  setGlobal(OfflineModeController, OfflineModeController());
-  setGlobal(IdeTheme, IdeTheme());
-  setGlobal(NotificationService, NotificationService());
-  setGlobal(BannerMessagesController, BannerMessagesController());
+    when(mockServiceManager.service).thenReturn(null);
+    when(mockServiceManager.connectedState).thenReturn(
+      ValueNotifier<ConnectedState>(const ConnectedState(false)),
+    );
+    when(mockServiceManager.hasConnection).thenReturn(false);
+    when(mockServiceManager.isolateManager).thenReturn(FakeIsolateManager());
+    when(mockServiceConnection.appState).thenReturn(
+      AppState(
+        mockServiceManager.isolateManager.selectedIsolate,
+      ),
+    );
+
+    final mockErrorBadgeManager = MockErrorBadgeManager();
+    when(mockServiceConnection.errorBadgeManager)
+        .thenReturn(mockErrorBadgeManager);
+    when(mockErrorBadgeManager.errorCountNotifier(any))
+        .thenReturn(ValueNotifier<int>(0));
+
+    setGlobal(ServiceConnectionManager, mockServiceConnection);
+    setGlobal(FrameworkController, FrameworkController());
+    setGlobal(SurveyService, SurveyService());
+    setGlobal(OfflineModeController, OfflineModeController());
+    setGlobal(IdeTheme, IdeTheme());
+    setGlobal(NotificationService, NotificationService());
+    setGlobal(BannerMessagesController, BannerMessagesController());
+  });
 
   testWidgets(
     'displays floating debugger controls',
@@ -52,18 +63,23 @@ void main() {
       when(mockServiceManager.connectedAppInitialized).thenReturn(true);
       when(mockServiceManager.connectedApp).thenReturn(connectedApp);
       when(mockServiceManager.isolateManager).thenReturn(FakeIsolateManager());
-      when(mockServiceManager.appState).thenReturn(
-        AppState(mockServiceManager.isolateManager.selectedIsolate),
+      when(mockServiceConnection.appState).thenReturn(
+        AppState(
+          mockServiceManager.isolateManager.selectedIsolate,
+        ),
       );
       final mockDebuggerController = MockDebuggerController();
-      final state =
-          serviceManager.isolateManager.mainIsolateState! as MockIsolateState;
+      final state = serviceConnection
+          .serviceManager.isolateManager.mainIsolateState! as MockIsolateState;
       when(state.isPaused).thenReturn(ValueNotifier(true));
       when(mockServiceManager.isMainIsolatePaused).thenReturn(false);
 
       await tester.pumpWidget(
         wrapWithControllers(
-          DevToolsScaffold(screens: const [_screen1, _screen2]),
+          DevToolsScaffold(
+            page: _screen1.screenId,
+            screens: const [_screen1, _screen2],
+          ),
           debugger: mockDebuggerController,
           analytics: AnalyticsController(enabled: false, firstRun: false),
           releaseNotes: ReleaseNotesController(),

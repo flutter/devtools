@@ -14,11 +14,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  late FakeServiceManager fakeServiceManager;
+  late FakeServiceConnectionManager fakeServiceConnection;
 
   setUp(() {
-    fakeServiceManager = FakeServiceManager();
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
+    fakeServiceConnection = FakeServiceConnectionManager();
+    setGlobal(ServiceConnectionManager, fakeServiceConnection);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());
     setGlobal(BannerMessagesController, BannerMessagesController());
@@ -138,6 +138,29 @@ void main() {
       await pumpTestFrame(tester);
       expect(find.byKey(k1), findsNothing);
     });
+
+    testWidgets(
+      'dismissed messages can be re-added when ignoreIfAlreadyDismissed is false',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(buildBannerMessages());
+        expect(find.byKey(k1), findsNothing);
+        bannerMessages.addMessage(testMessage1);
+        await pumpTestFrame(tester);
+        expect(find.byKey(k1), findsOneWidget);
+
+        await tester.tap(find.byType(IconButton));
+        await pumpTestFrame(tester);
+        expect(find.byKey(k1), findsNothing);
+
+        // Verify message can be re-added with ignoreIfAlreadyDismissed = false.
+        bannerMessages.addMessage(
+          testMessage1,
+          ignoreIfAlreadyDismissed: false,
+        );
+        await pumpTestFrame(tester);
+        expect(find.byKey(k1), findsOneWidget);
+      },
+    );
   });
 }
 

@@ -9,10 +9,12 @@ import 'dart:convert';
 import 'dart:html';
 
 import 'package:collection/collection.dart';
+import 'package:devtools_shared/devtools_deeplink.dart';
 import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:logging/logging.dart';
 
+import '../../development_helpers.dart';
 import '../../primitives/utils.dart';
 
 final _log = Logger('_server_web');
@@ -365,6 +367,8 @@ Future<List<DevToolsExtensionConfig>> refreshAvailableExtensions(
       logWarning(resp, ExtensionsApi.apiServeAvailableExtensions);
       return [];
     }
+  } else if (debugDevToolsExtensions) {
+    return debugHandleRefreshAvailableExtensions(rootPath);
   }
   return [];
 }
@@ -398,8 +402,96 @@ Future<ExtensionEnabledState> extensionEnabledState({
     } else {
       logWarning(resp, ExtensionsApi.apiExtensionEnabledState);
     }
+  } else if (debugDevToolsExtensions) {
+    return debugHandleExtensionEnabledState(
+      rootPath: rootPath,
+      extensionName: extensionName,
+      enable: enable,
+    );
   }
   return ExtensionEnabledState.error;
+}
+
+Future<List<String>> requestAndroidBuildVariants(String path) async {
+  if (isDevToolsServerAvailable) {
+    final uri = Uri(
+      path: DeeplinkApi.androidBuildVariants,
+      queryParameters: {
+        DeeplinkApi.deeplinkRootPathPropertyName: path,
+      },
+    );
+    final resp = await request(uri.toString());
+    if (resp?.status == HttpStatus.ok) {
+      return json.decode(resp!.responseText!);
+    } else {
+      logWarning(resp, DeeplinkApi.androidBuildVariants);
+    }
+  }
+  return const <String>[];
+}
+
+Future<AppLinkSettings> requestAndroidAppLinkSettings(
+  String path, {
+  required String buildVariant,
+}) async {
+  if (isDevToolsServerAvailable) {
+    final uri = Uri(
+      path: DeeplinkApi.androidAppLinkSettings,
+      queryParameters: {
+        DeeplinkApi.deeplinkRootPathPropertyName: path,
+        DeeplinkApi.androidBuildVariantPropertyName: buildVariant,
+      },
+    );
+    final resp = await request(uri.toString());
+    if (resp?.status == HttpStatus.ok) {
+      return AppLinkSettings.fromJson(resp!.responseText!);
+    } else {
+      logWarning(resp, DeeplinkApi.androidAppLinkSettings);
+    }
+  }
+  return AppLinkSettings.empty;
+}
+
+Future<XcodeBuildOptions> requestIosBuildOptions(String path) async {
+  if (isDevToolsServerAvailable) {
+    final uri = Uri(
+      path: DeeplinkApi.iosBuildOptions,
+      queryParameters: {
+        DeeplinkApi.deeplinkRootPathPropertyName: path,
+      },
+    );
+    final resp = await request(uri.toString());
+    if (resp?.status == HttpStatus.ok) {
+      return XcodeBuildOptions.fromJson(resp!.responseText!);
+    } else {
+      logWarning(resp, DeeplinkApi.iosBuildOptions);
+    }
+  }
+  return XcodeBuildOptions.empty;
+}
+
+Future<UniversalLinkSettings> requestIosUniversalLinkSettings(
+  String path, {
+  required String configuration,
+  required String target,
+}) async {
+  if (isDevToolsServerAvailable) {
+    final uri = Uri(
+      path: DeeplinkApi.iosUniversalLinkSettings,
+      queryParameters: {
+        DeeplinkApi.deeplinkRootPathPropertyName: path,
+        DeeplinkApi.xcodeConfigurationPropertyName: configuration,
+        DeeplinkApi.xcodeTargetPropertyName: target,
+      },
+    );
+    final resp = await request(uri.toString());
+    if (resp?.status == HttpStatus.ok) {
+      return UniversalLinkSettings.fromJson(resp!.responseText!);
+    } else {
+      logWarning(resp, DeeplinkApi.iosUniversalLinkSettings);
+    }
+  }
+  return UniversalLinkSettings.empty;
 }
 
 void logWarning(HttpRequest? response, String apiType, [String? respText]) {

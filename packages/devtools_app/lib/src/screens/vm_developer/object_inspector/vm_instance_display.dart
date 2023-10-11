@@ -14,6 +14,7 @@ import '../../../shared/diagnostics/dart_object_node.dart';
 import '../../../shared/diagnostics/tree_builder.dart';
 import '../../../shared/globals.dart';
 import '../../../shared/primitives/utils.dart';
+import '../../../shared/ui/colors.dart';
 import '../vm_developer_common_widgets.dart';
 import 'object_inspector_view_controller.dart';
 import 'vm_object_model.dart';
@@ -52,7 +53,8 @@ class _VmInstanceDisplayState extends State<VmInstanceDisplay> {
   }
 
   void _populate() {
-    final isolateRef = serviceManager.isolateManager.selectedIsolate.value;
+    final isolateRef =
+        serviceConnection.serviceManager.isolateManager.selectedIsolate.value;
     _root = DartObjectNode.fromValue(
       name: 'value',
       value: widget.instance.obj,

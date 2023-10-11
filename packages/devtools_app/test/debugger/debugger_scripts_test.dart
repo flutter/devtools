@@ -23,8 +23,8 @@ void main() {
   const smallWindowSize = Size(1200.0, 1000.0);
 
   void initializeGlobalsAndMockApp() {
-    final fakeServiceManager = FakeServiceManager();
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
+    final fakeServiceConnection = FakeServiceConnectionManager();
+    setGlobal(ServiceConnectionManager, fakeServiceConnection);
     setGlobal(BreakpointManager, BreakpointManager());
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(ScriptManager, MockScriptManager());
@@ -36,7 +36,7 @@ void main() {
     setGlobal(PreferencesController, PreferencesController());
 
     mockConnectedApp(
-      fakeServiceManager.connectedApp!,
+      fakeServiceConnection.serviceManager.connectedApp!,
       isProfileBuild: false,
       isFlutterApp: true,
       isWebApp: false,
@@ -49,7 +49,10 @@ void main() {
   ) async {
     await tester.pumpWidget(
       wrapWithControllers(
-        const DebuggerScreenBody(),
+        DebuggerSourceAndControls(
+          shownFirstScript: () => true,
+          setShownFirstScript: (_) {},
+        ),
         debugger: controller,
       ),
     );

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 import '../utils/utils.dart';
@@ -109,7 +111,15 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
   }
 }
 
-class RoundedOutlinedBorder extends StatelessWidget {
+/// Wraps [child] in a rounded border with default styling.
+///
+/// This border can optionally be made non-uniform by setting any of
+/// [showTop], [showBottom], [showLeft] or [showRight] to false.
+///
+/// If [clip] is true, the child will be wrapped in a [ClipRRect] to ensure the
+/// rounded corner of the border is drawn as expected. This should not be
+/// necessary in most cases.
+final class RoundedOutlinedBorder extends StatelessWidget {
   const RoundedOutlinedBorder({
     super.key,
     this.showTopLeft = true,
@@ -182,13 +192,84 @@ class RoundedOutlinedBorder extends StatelessWidget {
   }
 }
 
+/// Wraps [child] in a border with default styling.
+///
+/// This border can optionally be made non-uniform by setting any of
+/// [showTop], [showBottom], [showLeft] or [showRight] to false.
+final class OutlineDecoration extends StatelessWidget {
+  const OutlineDecoration({
+    Key? key,
+    this.child,
+    this.showTop = true,
+    this.showBottom = true,
+    this.showLeft = true,
+    this.showRight = true,
+  }) : super(key: key);
+
+  factory OutlineDecoration.onlyBottom({required Widget? child}) =>
+      OutlineDecoration(
+        showTop: false,
+        showLeft: false,
+        showRight: false,
+        child: child,
+      );
+
+  factory OutlineDecoration.onlyTop({required Widget? child}) =>
+      OutlineDecoration(
+        showBottom: false,
+        showLeft: false,
+        showRight: false,
+        child: child,
+      );
+
+  factory OutlineDecoration.onlyLeft({required Widget? child}) =>
+      OutlineDecoration(
+        showBottom: false,
+        showTop: false,
+        showRight: false,
+        child: child,
+      );
+
+  factory OutlineDecoration.onlyRight({required Widget? child}) =>
+      OutlineDecoration(
+        showBottom: false,
+        showTop: false,
+        showLeft: false,
+        child: child,
+      );
+
+  final bool showTop;
+  final bool showBottom;
+  final bool showLeft;
+  final bool showRight;
+
+  final Widget? child;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).focusColor;
+    final border = BorderSide(color: color);
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(
+          left: showLeft ? border : BorderSide.none,
+          right: showRight ? border : BorderSide.none,
+          top: showTop ? border : BorderSide.none,
+          bottom: showBottom ? border : BorderSide.none,
+        ),
+      ),
+      child: child,
+    );
+  }
+}
+
 /// [BorderSide] styled with the DevTools default color palette.
 BorderSide defaultBorderSide(ThemeData theme) {
   return BorderSide(color: theme.focusColor);
 }
 
 /// Convenience [Divider] with [Padding] that provides a good divider in forms.
-class PaddedDivider extends StatelessWidget {
+final class PaddedDivider extends StatelessWidget {
   const PaddedDivider({
     Key? key,
     this.padding = const EdgeInsets.only(bottom: 10.0),
@@ -323,7 +404,7 @@ class DevToolsButton extends StatelessWidget {
       tooltipPadding: tooltipPadding,
       child: SizedBox(
         height: defaultButtonHeight,
-        width: !includeText(context, minScreenWidthForTextBeforeScaling)
+        width: !isScreenWiderThan(context, minScreenWidthForTextBeforeScaling)
             ? buttonMinWidth
             : null,
         child: outlined
@@ -351,7 +432,7 @@ class DevToolsButton extends StatelessWidget {
 
 /// A widget, commonly used for icon buttons, that provides a tooltip with a
 /// common delay before the tooltip is shown.
-class DevToolsTooltip extends StatelessWidget {
+final class DevToolsTooltip extends StatelessWidget {
   const DevToolsTooltip({
     Key? key,
     this.message,
@@ -396,7 +477,7 @@ class DevToolsTooltip extends StatelessWidget {
   }
 }
 
-class DevToolsToggleButtonGroup extends StatelessWidget {
+final class DevToolsToggleButtonGroup extends StatelessWidget {
   const DevToolsToggleButtonGroup({
     Key? key,
     required this.children,
@@ -438,7 +519,7 @@ class DevToolsToggleButtonGroup extends StatelessWidget {
   }
 }
 
-class DevToolsToggleButton extends StatelessWidget {
+final class DevToolsToggleButton extends StatelessWidget {
   const DevToolsToggleButton({
     Key? key,
     required this.onPressed,
@@ -485,7 +566,7 @@ class DevToolsToggleButton extends StatelessWidget {
   }
 }
 
-class DevToolsFilterButton extends StatelessWidget {
+final class DevToolsFilterButton extends StatelessWidget {
   const DevToolsFilterButton({
     Key? key,
     required this.onPressed,
@@ -512,7 +593,7 @@ class DevToolsFilterButton extends StatelessWidget {
 }
 
 /// Label including an image icon and optional text.
-class ImageIconLabel extends StatelessWidget {
+final class ImageIconLabel extends StatelessWidget {
   const ImageIconLabel(
     this.icon,
     this.text, {
@@ -532,7 +613,7 @@ class ImageIconLabel extends StatelessWidget {
       children: [
         icon,
         // TODO(jacobr): animate showing and hiding the text.
-        if (includeText(context, unscaledMinIncludeTextWidth))
+        if (isScreenWiderThan(context, unscaledMinIncludeTextWidth))
           Padding(
             padding: const EdgeInsets.only(left: 8.0),
             child: Text(text),
@@ -542,7 +623,7 @@ class ImageIconLabel extends StatelessWidget {
   }
 }
 
-class MaterialIconLabel extends StatelessWidget {
+final class MaterialIconLabel extends StatelessWidget {
   const MaterialIconLabel({
     super.key,
     required this.label,
@@ -574,7 +655,7 @@ class MaterialIconLabel extends StatelessWidget {
           ),
         // TODO(jacobr): animate showing and hiding the text.
         if (label != null &&
-            includeText(context, minScreenWidthForTextBeforeScaling))
+            isScreenWiderThan(context, minScreenWidthForTextBeforeScaling))
           Padding(
             padding: EdgeInsets.only(
               left: iconData != null ? denseSpacing : 0.0,
@@ -604,4 +685,62 @@ Widget maybeWrapWithTooltip({
     );
   }
   return child;
+}
+
+/// Displays a [json] map as selectable, formatted text.
+final class FormattedJson extends StatelessWidget {
+  const FormattedJson({
+    super.key,
+    this.json,
+    this.formattedString,
+    this.useSubtleStyle = false,
+  }) : assert((json == null) != (formattedString == null));
+
+  static const encoder = JsonEncoder.withIndent('  ');
+
+  final Map<String, dynamic>? json;
+
+  final String? formattedString;
+
+  final bool useSubtleStyle;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return SelectableText(
+      json != null ? encoder.convert(json) : formattedString!,
+      style: useSubtleStyle ? theme.subtleFixedFontStyle : theme.fixedFontStyle,
+    );
+  }
+}
+
+/// An extension on [ScrollController] to facilitate having the scrolling widget
+/// auto scroll to the bottom on new content.
+extension ScrollControllerAutoScroll on ScrollController {
+// TODO(devoncarew): We lose dock-to-bottom when we receive content when we're
+// off screen.
+
+  /// Return whether the view is currently scrolled to the bottom.
+  bool get atScrollBottom {
+    final pos = position;
+    return pos.pixels == pos.maxScrollExtent;
+  }
+
+  /// Scroll the content to the bottom using the app's default animation
+  /// duration and curve..
+  Future<void> autoScrollToBottom() async {
+    await animateTo(
+      position.maxScrollExtent,
+      duration: rapidDuration,
+      curve: defaultCurve,
+    );
+
+    // Scroll again if we've received new content in the interim.
+    if (hasClients) {
+      final pos = position;
+      if (pos.pixels != pos.maxScrollExtent) {
+        jumpTo(pos.maxScrollExtent);
+      }
+    }
+  }
 }

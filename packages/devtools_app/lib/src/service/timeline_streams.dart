@@ -13,7 +13,7 @@ import 'package:vm_service/vm_service.dart' hide Error;
 import '../shared/globals.dart';
 import 'vm_service_wrapper.dart';
 
-class TimelineStreamManager extends Disposer {
+class TimelineStreamManager with DisposerMixin {
   static const dartTimelineStream = 'Dart';
   static const embedderTimelineStream = 'Embedder';
   static const gcTimelineStream = 'GC';
@@ -152,7 +152,7 @@ class TimelineStreamManager extends Disposer {
   }
 
   Future<void> setDefaultTimelineStreams() async {
-    await serviceManager.service!.setVMTimelineFlags([
+    await serviceConnection.serviceManager.service!.setVMTimelineFlags([
       dartTimelineStream,
       embedderTimelineStream,
       gcTimelineStream,
@@ -171,7 +171,8 @@ class TimelineStreamManager extends Disposer {
     } else if (!alreadyBeingRecorded && value) {
       recordedStreamNames.add(stream.name);
     }
-    await serviceManager.service!.setVMTimelineFlags(recordedStreamNames);
+    await serviceConnection.serviceManager.service!
+        .setVMTimelineFlags(recordedStreamNames);
   }
 }
 

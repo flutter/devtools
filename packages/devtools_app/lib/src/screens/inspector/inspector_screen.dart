@@ -28,14 +28,7 @@ import 'inspector_screen_details_tab.dart';
 import 'inspector_tree_controller.dart';
 
 class InspectorScreen extends Screen {
-  InspectorScreen()
-      : super.conditional(
-          id: id,
-          requiresFlutter: true,
-          requiresDebugBuild: true,
-          title: ScreenMetaData.inspector.title,
-          icon: ScreenMetaData.inspector.icon,
-        );
+  InspectorScreen() : super.fromMetaData(ScreenMetaData.inspector);
 
   static final id = ScreenMetaData.inspector.id;
 
@@ -107,7 +100,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     super.didChangeDependencies();
     if (!initController()) return;
 
-    if (serviceManager.inspectorService == null) {
+    if (serviceConnection.inspectorService == null) {
       // The app must not be a Flutter app.
       return;
     }
@@ -133,7 +126,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       }
     });
     addAutoDisposeListener(preferences.inspector.customPubRootDirectories, () {
-      if (serviceManager.hasConnection &&
+      if (serviceConnection.serviceManager.hasConnection &&
           controller.firstInspectorTreeLoadCompleted) {
         _refreshInspector();
       }
@@ -175,8 +168,9 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ValueListenableBuilder<bool>(
-              valueListenable:
-                  serviceManager.serviceExtensionManager.hasServiceExtension(
+              valueListenable: serviceConnection
+                  .serviceManager.serviceExtensionManager
+                  .hasServiceExtension(
                 extensions.toggleSelectWidgetMode.extension,
               ),
               builder: (_, selectModeSupported, __) {
@@ -225,7 +219,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
               ),
               Expanded(
                 child: ValueListenableBuilder(
-                  valueListenable: serviceManager.errorBadgeManager
+                  valueListenable: serviceConnection.errorBadgeManager
                       .erroredItemsForPage(InspectorScreen.id),
                   builder:
                       (_, LinkedHashMap<String, DevToolsError> errors, __) {
@@ -565,7 +559,8 @@ class PubRootDirectorySection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<IsolateRef?>(
-      valueListenable: serviceManager.isolateManager.mainIsolate,
+      valueListenable:
+          serviceConnection.serviceManager.isolateManager.mainIsolate,
       builder: (_, __, ___) {
         return SizedBox(
           height: 200.0,

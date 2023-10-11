@@ -18,8 +18,10 @@ extension CpuProfilerExtension on VmService {
     // Grab the value of this flag before doing asynchronous work.
     final vmDeveloperModeEnabled = preferences.vmDeveloperModeEnabled.value;
 
-    final isolateId = serviceManager.isolateManager.selectedIsolate.value!.id!;
-    final cpuSamples = await serviceManager.service!.getCpuSamples(
+    final isolateId = serviceConnection
+        .serviceManager.isolateManager.selectedIsolate.value!.id!;
+    final cpuSamples =
+        await serviceConnection.serviceManager.service!.getCpuSamples(
       isolateId,
       startMicros,
       extentMicros,
@@ -70,16 +72,19 @@ extension CpuProfilerExtension on VmService {
   }
 
   Future clearSamples() {
-    return serviceManager.service!.clearCpuSamples(
-      serviceManager.isolateManager.selectedIsolate.value!.id!,
+    return serviceConnection.serviceManager.service!.clearCpuSamples(
+      serviceConnection
+          .serviceManager.isolateManager.selectedIsolate.value!.id!,
     );
   }
 
   Future<Response> setProfilePeriod(String value) {
-    return serviceManager.service!.setFlag(vm_flags.profilePeriod, value);
+    return serviceConnection.serviceManager.service!
+        .setFlag(vm_flags.profilePeriod, value);
   }
 
   Future<Response> enableCpuProfiler() async {
-    return await serviceManager.service!.setFlag(vm_flags.profiler, 'true');
+    return await serviceConnection.serviceManager.service!
+        .setFlag(vm_flags.profiler, 'true');
   }
 }

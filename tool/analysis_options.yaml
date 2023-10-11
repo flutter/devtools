@@ -7,6 +7,8 @@ analyzer:
 linter:
   rules:
     # - avoid_dynamic_calls
+    - require_trailing_commas
+    - unawaited_futures
     - depend_on_referenced_packages
     - directives_ordering
     - sort_pub_dependencies

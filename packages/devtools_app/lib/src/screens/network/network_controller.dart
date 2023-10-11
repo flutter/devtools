@@ -208,7 +208,8 @@ class NetworkController extends DisposableController
     // fewer flags risks breaking functionality on the timeline view that
     // assumes that all flags are set.
     await allowedError(
-      serviceManager.service!.setVMTimelineFlags(['GC', 'Dart', 'Embedder']),
+      serviceConnection.serviceManager.service!
+          .setVMTimelineFlags(['GC', 'Dart', 'Embedder']),
     );
 
     // TODO(kenz): only call these if http logging and socket profiling are not
@@ -232,7 +233,7 @@ class NetworkController extends DisposableController
 
   Future<bool> recordingHttpTraffic() async {
     bool enabled = true;
-    final service = serviceManager.service!;
+    final service = serviceConnection.serviceManager.service!;
     await service.forEachIsolate(
       (isolate) async {
         final httpFuture = service.httpEnableTimelineLogging(isolate.id!);
@@ -279,7 +280,7 @@ class NetworkController extends DisposableController
   @override
   void filterData(Filter<NetworkRequest> filter) {
     super.filterData(filter);
-    serviceManager.errorBadgeManager.clearErrors(NetworkScreen.id);
+    serviceConnection.errorBadgeManager.clearErrors(NetworkScreen.id);
     final queryFilter = filter.queryFilter;
     if (queryFilter.isEmpty) {
       _requests.value.requests.forEach(_checkForError);
@@ -332,7 +333,7 @@ class NetworkController extends DisposableController
 
   void _checkForError(NetworkRequest r) {
     if (r.didFail) {
-      serviceManager.errorBadgeManager.incrementBadgeCount(NetworkScreen.id);
+      serviceConnection.errorBadgeManager.incrementBadgeCount(NetworkScreen.id);
     }
   }
 }

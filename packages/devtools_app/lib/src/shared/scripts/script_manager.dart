@@ -15,16 +15,19 @@ import '../globals.dart';
 class ScriptManager extends DisposableController
     with AutoDisposeControllerMixin {
   ScriptManager() {
-    addAutoDisposeListener(serviceManager.connectedState, () {
-      if (serviceManager.connectedState.value.connected) {
-        if (serviceManager.service == _lastService) return;
-        _lastService = serviceManager.service;
+    addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
+      if (serviceConnection.serviceManager.connectedState.value.connected) {
+        if (serviceConnection.serviceManager.service == _lastService) return;
+        _lastService = serviceConnection.serviceManager.service;
         _scriptCache.clear();
       }
     });
-    addAutoDisposeListener(serviceManager.isolateManager.selectedIsolate, () {
-      _scriptCache.clear();
-    });
+    addAutoDisposeListener(
+      serviceConnection.serviceManager.isolateManager.selectedIsolate,
+      () {
+        _scriptCache.clear();
+      },
+    );
   }
 
   /// Return the sorted list of ScriptRefs active in the current isolate.
@@ -32,11 +35,11 @@ class ScriptManager extends DisposableController
 
   final _sortedScripts = ValueNotifier<List<ScriptRef>>([]);
 
-  VmServiceWrapper get _service => serviceManager.service!;
+  VmServiceWrapper get _service => serviceConnection.serviceManager.service!;
   VmServiceWrapper? _lastService;
 
   IsolateRef get _currentIsolate =>
-      serviceManager.isolateManager.selectedIsolate.value!;
+      serviceConnection.serviceManager.isolateManager.selectedIsolate.value!;
 
   final _scriptCache = _ScriptCache();
 
@@ -105,8 +108,9 @@ class _ScriptCache {
     ScriptRef scriptRef,
   ) {
     final scriptId = scriptRef.id!;
-    if (_scripts.containsKey(scriptId)) {
-      return Future.value(_scripts[scriptId]);
+    final script = _scripts[scriptId];
+    if (script != null) {
+      return Future.value(script);
     }
 
     if (_inProgress.containsKey(scriptId)) {

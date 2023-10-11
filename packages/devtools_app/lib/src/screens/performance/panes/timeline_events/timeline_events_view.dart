@@ -263,8 +263,8 @@ class _TraceCategoriesDialogState extends State<TraceCategoriesDialog>
     required bool advanced,
   }) {
     final streams = advanced
-        ? serviceManager.timelineStreamManager.advancedStreams
-        : serviceManager.timelineStreamManager.basicStreams;
+        ? serviceConnection.timelineStreamManager.advancedStreams
+        : serviceConnection.timelineStreamManager.basicStreams;
     final settings = streams
         .map(
           (stream) => CheckboxSetting(
@@ -272,7 +272,7 @@ class _TraceCategoriesDialogState extends State<TraceCategoriesDialog>
             description: stream.description,
             notifier: stream.recorded as ValueNotifier<bool?>,
             onChanged: (newValue) => unawaited(
-              serviceManager.timelineStreamManager.updateTimelineStream(
+              serviceConnection.timelineStreamManager.updateTimelineStream(
                 stream,
                 newValue ?? false,
               ),

@@ -5,7 +5,6 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../shared/common_widgets.dart';
 import '../../shared/utils.dart';
 
 /// Create a header area for a debugger component.

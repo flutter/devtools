@@ -20,7 +20,7 @@ import '../test_infra/utils/test_utils.dart';
 void main() {
   group('NetworkRequestInspector', () {
     late NetworkController controller;
-    late FakeServiceManager fakeServiceManager;
+    late FakeServiceConnectionManager fakeServiceConnection;
     final HttpProfileRequest? httpRequest =
         HttpProfileRequest.parse(httpPostJson);
     String clipboardContents = '';
@@ -33,7 +33,7 @@ void main() {
       );
       setGlobal(PreferencesController, PreferencesController());
       clipboardContents = '';
-      fakeServiceManager = FakeServiceManager(
+      fakeServiceConnection = FakeServiceConnectionManager(
         service: FakeServiceManager.createFakeService(
           httpProfile: HttpProfile(
             requests: [
@@ -43,7 +43,7 @@ void main() {
           ),
         ),
       );
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(ServiceConnectionManager, fakeServiceConnection);
       setGlobal(NotificationService, NotificationService());
       controller = NetworkController();
       setupClipboardCopyListener(

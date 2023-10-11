@@ -671,7 +671,7 @@ class InspectorTreeController extends DisposableController
     int debugStatsSearchOps = 0;
     final debugStatsWidgets = _searchableCachedRows.length;
 
-    final inspectorService = serviceManager.inspectorService;
+    final inspectorService = serviceConnection.inspectorService;
     if (search.isEmpty ||
         inspectorService == null ||
         inspectorService.isDisposed) {
@@ -798,7 +798,8 @@ class _InspectorTreeState extends State<InspectorTree>
     }
     _focusNode = FocusNode(debugLabel: 'inspector-tree');
     autoDisposeFocusNode(_focusNode);
-    final mainIsolateState = serviceManager.isolateManager.mainIsolateState;
+    final mainIsolateState =
+        serviceConnection.serviceManager.isolateManager.mainIsolateState;
     if (mainIsolateState != null) {
       callOnceWhenReady<bool>(
         trigger: mainIsolateState.isPaused,
@@ -1013,7 +1014,7 @@ class _InspectorTreeState extends State<InspectorTree>
       if (screenId != null) {
         ga.timeEnd(screenId, gac.pageReady);
         unawaited(
-          serviceManager.sendDwdsEvent(
+          serviceConnection.sendDwdsEvent(
             screen: screenId,
             action: gac.pageReady,
           ),

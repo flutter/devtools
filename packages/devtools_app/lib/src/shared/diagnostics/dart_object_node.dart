@@ -388,7 +388,7 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     if (ref?.instanceRef == null) {
       return false;
     }
-    final inspectorService = serviceManager.inspectorService;
+    final inspectorService = serviceConnection.inspectorService;
     if (inspectorService == null) {
       return false;
     }
@@ -412,7 +412,7 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     if (_isInspectable != null) return _isInspectable!;
 
     if (ref == null) return false;
-    final inspectorService = serviceManager.inspectorService;
+    final inspectorService = serviceConnection.inspectorService;
     if (inspectorService == null) {
       return false;
     }

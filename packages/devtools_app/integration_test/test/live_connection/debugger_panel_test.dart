@@ -29,7 +29,11 @@ void main() {
 
   testWidgets('Debugger panel', (tester) async {
     await pumpAndConnectDevTools(tester, testApp);
-    await switchToScreen(tester, ScreenMetaData.debugger);
+    await switchToScreen(
+      tester,
+      tabIcon: ScreenMetaData.debugger.icon!,
+      screenId: ScreenMetaData.debugger.id,
+    );
     await tester.pump(safePumpDuration);
 
     logStatus('looking for the main.dart file');
@@ -101,7 +105,7 @@ void main() {
 
     // Tap on the gutter for the line to set a breakpoint:
     await tester.tap(gutter30Finder);
-    await tester.pumpAndSettle(safePumpDuration);
+    await tester.pumpAndSettle(longPumpDuration);
 
     logStatus('pausing at breakpoint');
 

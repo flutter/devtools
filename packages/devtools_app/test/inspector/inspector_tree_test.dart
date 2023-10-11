@@ -14,12 +14,12 @@ import 'package:mockito/mockito.dart';
 import 'utils/inspector_tree.dart';
 
 void main() {
-  late FakeServiceManager fakeServiceManager;
+  late FakeServiceConnectionManager fakeServiceConnection;
   late InspectorController inspectorController;
 
   setUp(() {
-    fakeServiceManager = FakeServiceManager();
-    final app = fakeServiceManager.connectedApp!;
+    fakeServiceConnection = FakeServiceConnectionManager();
+    final app = fakeServiceConnection.serviceManager.connectedApp!;
     when(app.isFlutterAppNow).thenReturn(true);
     when(app.isProfileBuildNow).thenReturn(false);
 
@@ -27,13 +27,13 @@ void main() {
       DevToolsEnvironmentParameters,
       ExternalDevToolsEnvironmentParameters(),
     );
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
+    setGlobal(ServiceConnectionManager, fakeServiceConnection);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(NotificationService, NotificationService());
     setGlobal(BreakpointManager, BreakpointManager());
     mockConnectedApp(
-      fakeServiceManager.connectedApp!,
+      fakeServiceConnection.serviceManager.connectedApp!,
       isFlutterApp: true,
       isProfileBuild: false,
       isWebApp: false,

@@ -32,13 +32,13 @@ class OfflineModeController {
   }
 
   void enterOfflineMode({required ConnectedApp offlineApp}) {
-    previousConnectedApp = serviceManager.connectedApp;
-    serviceManager.connectedApp = offlineApp;
+    previousConnectedApp = serviceConnection.serviceManager.connectedApp;
+    serviceConnection.serviceManager.connectedApp = offlineApp;
     _offlineMode.value = true;
   }
 
   void exitOfflineMode() {
-    serviceManager.connectedApp = previousConnectedApp;
+    serviceConnection.serviceManager.connectedApp = previousConnectedApp;
     _offlineMode.value = false;
     offlineDataJson.clear();
     previousConnectedApp = null;
@@ -80,8 +80,9 @@ mixin OfflineScreenControllerMixin<T> on AutoDisposeControllerMixin {
   /// This is in preparation for the user clicking the 'Review History' button
   /// from the disconnect screen.
   void initReviewHistoryOnDisconnectListener() {
-    addAutoDisposeListener(serviceManager.connectedState, () {
-      final connectionState = serviceManager.connectedState.value;
+    addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
+      final connectionState =
+          serviceConnection.serviceManager.connectedState.value;
       if (!connectionState.connected &&
           !connectionState.userInitiatedConnectionState) {
         final currentScreenData = screenDataForExport();

@@ -14,7 +14,7 @@ import '../../primitives/utils.dart';
 import '../../ui/search.dart';
 import 'eval_service.dart';
 
-AppState get _appState => serviceManager.appState;
+AppState get _appState => serviceConnection.appState;
 
 Future<List<String>> autoCompleteResultsFor(
   EditingParts parts,

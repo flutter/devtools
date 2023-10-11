@@ -10,7 +10,61 @@ import 'theme/theme.dart';
 
 const dialogDefaultContext = 'dialog';
 
-class DialogTitleText extends StatelessWidget {
+/// A standardized dialog for use in DevTools.
+///
+/// It normalizes dialog layout, spacing, and look and feel.
+final class DevToolsDialog extends StatelessWidget {
+  const DevToolsDialog({
+    super.key,
+    Widget? title,
+    required this.content,
+    this.includeDivider = true,
+    this.scrollable = true,
+    this.actions,
+    this.actionsAlignment,
+  }) : titleContent = title ?? const SizedBox();
+
+  static const contentPadding = 24.0;
+
+  final Widget titleContent;
+  final Widget content;
+  final bool includeDivider;
+  final bool scrollable;
+  final List<Widget>? actions;
+  final MainAxisAlignment? actionsAlignment;
+
+  @override
+  Widget build(BuildContext context) {
+    return PointerInterceptor(
+      child: AlertDialog(
+        scrollable: scrollable,
+        title: Column(
+          children: [
+            titleContent,
+            includeDivider
+                ? const PaddedDivider(
+                    padding: EdgeInsets.only(bottom: denseRowSpacing),
+                  )
+                : const SizedBox(height: defaultSpacing),
+          ],
+        ),
+        contentPadding: const EdgeInsets.fromLTRB(
+          contentPadding,
+          0,
+          contentPadding,
+          contentPadding,
+        ),
+        content: content,
+        actions: actions,
+        actionsAlignment: actionsAlignment,
+        buttonPadding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+      ),
+    );
+  }
+}
+
+/// A [Text] widget styled for dialog titles.
+final class DialogTitleText extends StatelessWidget {
   const DialogTitleText(this.text, {super.key});
 
   final String text;
@@ -35,7 +89,7 @@ final dialogTextFieldDecoration = InputDecoration(
 
 /// A standardized dialog with help text and buttons `Reset to default`,
 /// `APPLY` and `CANCEL`.
-class StateUpdateDialog extends StatelessWidget {
+final class StateUpdateDialog extends StatelessWidget {
   const StateUpdateDialog({
     super.key,
     required this.title,
@@ -95,7 +149,7 @@ class StateUpdateDialog extends StatelessWidget {
   }
 }
 
-class _StateUpdateDialogTitle extends StatelessWidget {
+final class _StateUpdateDialogTitle extends StatelessWidget {
   const _StateUpdateDialogTitle({required this.title, this.onResetDefaults});
 
   final String title;
@@ -119,7 +173,7 @@ class _StateUpdateDialogTitle extends StatelessWidget {
   }
 }
 
-class DialogHelpText extends StatelessWidget {
+final class DialogHelpText extends StatelessWidget {
   const DialogHelpText({super.key, required this.helpText});
 
   static TextStyle? textStyle(BuildContext context) =>
@@ -136,61 +190,8 @@ class DialogHelpText extends StatelessWidget {
   }
 }
 
-/// A standardized dialog for use in DevTools.
-///
-/// It normalizes dialog layout, spacing, and look and feel.
-class DevToolsDialog extends StatelessWidget {
-  const DevToolsDialog({
-    super.key,
-    Widget? title,
-    required this.content,
-    this.includeDivider = true,
-    this.scrollable = true,
-    this.actions,
-    this.actionsAlignment,
-  }) : titleContent = title ?? const SizedBox();
-
-  static const contentPadding = 24.0;
-
-  final Widget titleContent;
-  final Widget content;
-  final bool includeDivider;
-  final bool scrollable;
-  final List<Widget>? actions;
-  final MainAxisAlignment? actionsAlignment;
-
-  @override
-  Widget build(BuildContext context) {
-    return PointerInterceptor(
-      child: AlertDialog(
-        scrollable: scrollable,
-        title: Column(
-          children: [
-            titleContent,
-            includeDivider
-                ? const PaddedDivider(
-                    padding: EdgeInsets.only(bottom: denseRowSpacing),
-                  )
-                : const SizedBox(height: defaultSpacing),
-          ],
-        ),
-        contentPadding: const EdgeInsets.fromLTRB(
-          contentPadding,
-          0,
-          contentPadding,
-          contentPadding,
-        ),
-        content: content,
-        actions: actions,
-        actionsAlignment: actionsAlignment,
-        buttonPadding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-      ),
-    );
-  }
-}
-
 /// A TextButton used to close a containing dialog (Close).
-class DialogCloseButton extends StatelessWidget {
+final class DialogCloseButton extends StatelessWidget {
   const DialogCloseButton({super.key, this.onClose, this.label = 'CLOSE'});
 
   final VoidCallback? onClose;
@@ -209,7 +210,7 @@ class DialogCloseButton extends StatelessWidget {
 }
 
 /// A TextButton used to close a containing dialog (Cancel).
-class DialogCancelButton extends StatelessWidget {
+final class DialogCancelButton extends StatelessWidget {
   const DialogCancelButton({super.key, this.cancelAction});
 
   final VoidCallback? cancelAction;
@@ -227,7 +228,7 @@ class DialogCancelButton extends StatelessWidget {
 }
 
 /// A TextButton used to close a containing dialog (APPLY).
-class DialogApplyButton extends StatelessWidget {
+final class DialogApplyButton extends StatelessWidget {
   const DialogApplyButton({super.key, required this.onPressed});
 
   final Function onPressed;
@@ -244,7 +245,7 @@ class DialogApplyButton extends StatelessWidget {
   }
 }
 
-class DialogTextButton extends StatelessWidget {
+final class DialogTextButton extends StatelessWidget {
   const DialogTextButton({super.key, this.onPressed, required this.child});
 
   final VoidCallback? onPressed;

@@ -23,11 +23,11 @@ final uiColorPalette = [
 final rasterColorPalette = [
   const ColorPair(
     background: mainRasterColor,
-    foreground: contrastForegroundWhite,
+    foreground: Colors.white,
   ),
   const ColorPair(
     background: Color(0xFF386EB6),
-    foreground: contrastForegroundWhite,
+    foreground: Colors.white,
   ),
 ];
 
@@ -56,7 +56,7 @@ const uiJankColor = Color(0xFFF5846B);
 const rasterJankColor = Color(0xFFC3595A);
 const shaderCompilationColor = ColorPair(
   background: Color(0xFF77102F),
-  foreground: contrastForegroundWhite,
+  foreground: Colors.white,
 );
 
 const treemapIncreaseColor = Color(0xFF3FB549);
@@ -107,3 +107,45 @@ const dartCoreColor = ThemedColorPair(
     dark: Color(0xFF202124),
   ),
 );
+
+extension SyntaxHighlightingExtension on ColorScheme {
+  Color get functionSyntaxColor =>
+      isLight ? const Color(0xFF795E26) : const Color(0xFFDCDCAA);
+
+  Color get declarationsSyntaxColor =>
+      isLight ? const Color(0xFF267f99) : const Color(0xFF4EC9B0);
+
+  Color get modifierSyntaxColor =>
+      isLight ? const Color(0xFF0000FF) : const Color(0xFF569CD6);
+
+  Color get controlFlowSyntaxColor =>
+      isLight ? const Color(0xFFAF00DB) : const Color(0xFFC586C0);
+
+  Color get variableSyntaxColor =>
+      isLight ? const Color(0xFF001080) : const Color(0xFF9CDCFE);
+
+  Color get commentSyntaxColor =>
+      isLight ? const Color(0xFF008000) : const Color(0xFF6A9955);
+
+  Color get stringSyntaxColor =>
+      isLight ? const Color(0xFFB20001) : const Color(0xFFD88E73);
+
+  Color get numericConstantSyntaxColor =>
+      isLight ? const Color(0xFF098658) : const Color(0xFFB5CEA8);
+}
+
+// TODO(kenz): try to get rid of these colors and replace with something from
+// the light and dark DevTools color schemes.
+extension DevToolsColorExtension on ColorScheme {
+  // TODO(jacobr): replace this with Theme.of(context).scaffoldBackgroundColor, but we use
+  // this in places where we do not have access to the context.
+  // remove.
+  // TODO(kenz): get rid of this.
+  Color get defaultBackgroundColor =>
+      isLight ? Colors.grey[50]! : const Color(0xFF1B1B1F);
+
+  Color get grey => const Color.fromARGB(255, 128, 128, 128);
+  Color get green => const Color.fromARGB(255, 156, 233, 195);
+
+  Color get overlayShadowColor => const Color.fromRGBO(0, 0, 0, 0.5);
+}

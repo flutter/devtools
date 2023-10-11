@@ -26,13 +26,7 @@ import 'tabbed_performance_view.dart';
 // where applicable.
 
 class PerformanceScreen extends Screen {
-  PerformanceScreen()
-      : super.conditional(
-          id: id,
-          worksOffline: true,
-          title: ScreenMetaData.performance.title,
-          icon: ScreenMetaData.performance.icon,
-        );
+  PerformanceScreen() : super.fromMetaData(ScreenMetaData.performance);
 
   static final id = ScreenMetaData.performance.id;
 
@@ -41,7 +35,8 @@ class PerformanceScreen extends Screen {
 
   @override
   Widget build(BuildContext context) {
-    if (serviceManager.connectedApp?.isDartWebAppNow ?? false) {
+    if (serviceConnection.serviceManager.connectedApp?.isDartWebAppNow ??
+        false) {
       return const WebPerformanceScreenBody();
     }
     return const PerformanceScreenBody();
@@ -115,7 +110,9 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
             ),
             const SizedBox(height: intermediateSpacing),
             if (isOfflineFlutterApp ||
-                (!offlineMode && serviceManager.connectedApp!.isFlutterAppNow!))
+                (!offlineMode &&
+                    serviceConnection
+                        .serviceManager.connectedApp!.isFlutterAppNow!))
               FlutterFramesChart(
                 controller.flutterFramesController,
                 offlineMode: offlineMode,
@@ -134,7 +131,8 @@ class WebPerformanceScreenBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isFlutterWebApp =
-        serviceManager.connectedApp?.isFlutterWebAppNow ?? false;
+        serviceConnection.serviceManager.connectedApp?.isFlutterWebAppNow ??
+            false;
     return Markdown(
       data: isFlutterWebApp ? flutterWebInstructionsMd : dartWebInstructionsMd,
       onTapLink: (_, url, __) {

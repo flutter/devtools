@@ -28,13 +28,7 @@ import 'network_model.dart';
 import 'network_request_inspector.dart';
 
 class NetworkScreen extends Screen {
-  NetworkScreen()
-      : super.conditional(
-          id: id,
-          requiresDartVm: true,
-          title: ScreenMetaData.network.title,
-          icon: ScreenMetaData.network.icon,
-        );
+  NetworkScreen() : super.fromMetaData(ScreenMetaData.network);
 
   static final id = ScreenMetaData.network.id;
 
@@ -132,11 +126,15 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
 
     cancelListeners();
 
-    addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
-      if (serviceManager.isolateManager.mainIsolate.value != null) {
-        unawaited(controller.startRecording());
-      }
-    });
+    addAutoDisposeListener(
+      serviceConnection.serviceManager.isolateManager.mainIsolate,
+      () {
+        if (serviceConnection.serviceManager.isolateManager.mainIsolate.value !=
+            null) {
+          unawaited(controller.startRecording());
+        }
+      },
+    );
   }
 
   @override

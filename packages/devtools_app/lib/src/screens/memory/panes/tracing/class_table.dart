@@ -91,7 +91,7 @@ class _ClassNameColumn extends ColumnData<TracedClass>
       theClass: data.name,
       showCopyButton: isRowSelected,
       copyGaItem: gac.MemoryEvent.diffClassSingleCopy,
-      rootPackage: serviceManager.rootInfoNow().package,
+      rootPackage: serviceConnection.serviceManager.rootInfoNow().package,
     );
   }
 }

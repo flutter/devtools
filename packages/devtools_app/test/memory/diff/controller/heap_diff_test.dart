@@ -31,7 +31,8 @@ void main() {
   );
 
   test('$DiffClassStats calculates mix of cases as expected', () async {
-    final className = HeapClassName(className: 'myClass', library: 'library');
+    final className =
+        HeapClassName.fromPath(className: 'myClass', library: 'library');
 
     final deleted = _createObject(className, 1, {});
     final persistedBefore = _createObject(className, 2, {});
@@ -53,7 +54,8 @@ void main() {
   });
 
   test('$DiffClassStats calculates deletion as expected', () async {
-    final className = HeapClassName(className: 'myClass', library: 'library');
+    final className =
+        HeapClassName.fromPath(className: 'myClass', library: 'library');
 
     final deleted = _createObject(className, 1, {});
 
@@ -77,7 +79,7 @@ Future<SingleClassStats> _createClassStats(
 
   final objects = [
     _createObject(
-      HeapClassName(className: 'root', library: 'lib'),
+      HeapClassName.fromPath(className: 'root', library: 'lib'),
       0,
       indexes,
     ),
@@ -117,7 +119,8 @@ Future<AdaptedHeap> _createSimplestHeap() async => await AdaptedHeap.create(
           AdaptedHeapObject(
             code: 0,
             outRefs: {},
-            heapClass: HeapClassName(className: 'root', library: 'lib'),
+            heapClass:
+                HeapClassName.fromPath(className: 'root', library: 'lib'),
             shallowSize: 1,
           ),
         ],

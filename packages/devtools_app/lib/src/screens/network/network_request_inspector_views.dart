@@ -159,8 +159,8 @@ class HttpRequestView extends StatelessWidget {
         Widget child;
         child = isJson
             ? JsonViewer(encodedJson: data.requestBody!)
-            : Text(
-                data.requestBody!,
+            : TextViewer(
+                text: data.requestBody!,
                 style: theme.fixedFontStyle,
               );
         return Padding(
@@ -356,8 +356,8 @@ class HttpTextResponseViewer extends StatelessWidget {
 
         return switch (currentLocalResponseType) {
           NetworkResponseViewType.json => JsonViewer(encodedJson: responseBody),
-          NetworkResponseViewType.text => Text(
-              responseBody,
+          NetworkResponseViewType.text => TextViewer(
+              text: responseBody,
               style: textStyle,
             ),
           _ => const SizedBox(),

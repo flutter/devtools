@@ -43,7 +43,7 @@ class _NonSortableFlatNumColumn extends ColumnData<TestData> {
 
 void main() {
   setUp(() {
-    setGlobal(ServiceConnectionManager, FakeServiceManager());
+    setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
     setGlobal(IdeTheme, IdeTheme());
     TableUiStateStore.clear();
   });

@@ -16,18 +16,18 @@ import '../../test_infra/test_data/performance_raster_stats.dart';
 void main() {
   group('$RasterStatsController', () {
     late RasterStatsController controller;
-    late MockServiceConnectionManager mockServiceManager;
+    late MockServiceConnectionManager mockServiceConnection;
 
     setUp(() {
-      mockServiceManager = MockServiceConnectionManager();
-      when(mockServiceManager.renderFrameWithRasterStats).thenAnswer(
+      mockServiceConnection = createMockServiceConnectionWithDefaults();
+      when(mockServiceConnection.renderFrameWithRasterStats).thenAnswer(
         (_) => Future.value(Response.parse(rasterStatsFromServiceJson)),
       );
       setGlobal(
         DevToolsEnvironmentParameters,
         ExternalDevToolsEnvironmentParameters(),
       );
-      setGlobal(ServiceConnectionManager, mockServiceManager);
+      setGlobal(ServiceConnectionManager, mockServiceConnection);
       setGlobal(IdeTheme, IdeTheme());
 
       controller =
@@ -54,7 +54,7 @@ void main() {
         var rasterStats = controller.rasterStats.value;
         expect(rasterStats, isNull);
 
-        when(mockServiceManager.renderFrameWithRasterStats)
+        when(mockServiceConnection.renderFrameWithRasterStats)
             .thenAnswer((_) => throw Exception('something went wrong'));
         await controller.collectRasterStats();
 

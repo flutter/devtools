@@ -84,7 +84,8 @@ class _PrimaryControls extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        if (serviceManager.connectedApp!.isFlutterAppNow!) ...[
+        if (serviceConnection
+            .serviceManager.connectedApp!.isFlutterAppNow!) ...[
           VisibilityButton(
             show: preferences.performance.showFlutterFramesChart,
             gaScreen: gac.performance,
@@ -130,7 +131,8 @@ class _SecondaryPerformanceControls extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        if (serviceManager.connectedApp!.isFlutterAppNow!) ...[
+        if (serviceConnection
+            .serviceManager.connectedApp!.isFlutterAppNow!) ...[
           ServiceExtensionButtonGroup(
             minScreenWidthForTextBeforeScaling:
                 PerformanceControls.minScreenWidthForTextBeforeScaling,

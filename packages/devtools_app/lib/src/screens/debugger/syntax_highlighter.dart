@@ -5,12 +5,12 @@
 import 'dart:collection';
 import 'dart:convert';
 
-import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:logging/logging.dart';
 
 import '../../shared/primitives/utils.dart';
+import '../../shared/ui/colors.dart';
 import 'span_parser.dart';
 
 final _log = Logger('syntax_highlighter');

@@ -24,7 +24,7 @@ bool get isExternalBuild => _isExternalBuild;
 bool _isExternalBuild = true;
 void setInternalBuild() => _isExternalBuild = false;
 
-ServiceConnectionManager get serviceManager =>
+ServiceConnectionManager get serviceConnection =>
     globals[ServiceConnectionManager] as ServiceConnectionManager;
 
 ScriptManager get scriptManager => globals[ScriptManager] as ScriptManager;

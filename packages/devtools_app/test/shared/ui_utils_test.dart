@@ -14,7 +14,7 @@ import '../test_infra/matchers/matchers.dart';
 
 void main() {
   setUp(() {
-    setGlobal(ServiceConnectionManager, FakeServiceManager());
+    setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
     setGlobal(IdeTheme, IdeTheme());
   });
 

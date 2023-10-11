@@ -26,11 +26,14 @@ void main() {
   });
 
   group('$PerformanceControls', () {
-    late MockServiceConnectionManager mockServiceManager;
+    late MockServiceConnectionManager mockServiceConnection;
+    late MockServiceManager mockServiceManager;
     late MockPerformanceController mockPerformanceController;
 
     setUp(() {
-      mockServiceManager = MockServiceConnectionManager();
+      mockServiceConnection = createMockServiceConnectionWithDefaults();
+      mockServiceManager =
+          mockServiceConnection.serviceManager as MockServiceManager;
       when(mockServiceManager.serviceExtensionManager)
           .thenReturn(FakeServiceExtensionManager());
       final connectedApp = MockConnectedApp();
@@ -41,7 +44,7 @@ void main() {
         isWebApp: false,
       );
       when(mockServiceManager.connectedApp).thenReturn(connectedApp);
-      setGlobal(ServiceConnectionManager, mockServiceManager);
+      setGlobal(ServiceConnectionManager, mockServiceConnection);
       mockPerformanceController = createMockPerformanceControllerWithDefaults();
     });
 
@@ -106,7 +109,7 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         offlineController.enterOfflineMode(
-          offlineApp: serviceManager.connectedApp!,
+          offlineApp: serviceConnection.serviceManager.connectedApp!,
         );
         await pumpControls(tester);
         expect(find.byType(ExitOfflineButton), findsOneWidget);

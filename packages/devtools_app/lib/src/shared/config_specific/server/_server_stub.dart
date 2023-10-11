@@ -6,9 +6,10 @@
 // ignore_for_file: avoid-unused-parameters
 import 'dart:async';
 
+import 'package:devtools_shared/devtools_deeplink.dart';
 import 'package:devtools_shared/devtools_extensions.dart';
-import 'package:flutter/foundation.dart';
 
+import '../../development_helpers.dart';
 import '../../primitives/utils.dart';
 
 const unsupportedMessage =
@@ -81,7 +82,7 @@ Future<DevToolsJsonFile?> requestTestAppSizeFile(String path) async {
 Future<List<DevToolsExtensionConfig>> refreshAvailableExtensions(
   String rootPath,
 ) async {
-  return kDebugMode ? _debugExtensions : [];
+  return debugHandleRefreshAvailableExtensions(rootPath);
 }
 
 Future<ExtensionEnabledState> extensionEnabledState({
@@ -89,46 +90,32 @@ Future<ExtensionEnabledState> extensionEnabledState({
   required String extensionName,
   bool? enable,
 }) async {
-  if (enable != null) {
-    _stubEnabledStates[extensionName] =
-        enable ? ExtensionEnabledState.enabled : ExtensionEnabledState.disabled;
-  }
-  return _stubEnabledStates.putIfAbsent(
-    extensionName,
-    () => ExtensionEnabledState.none,
+  return debugHandleExtensionEnabledState(
+    rootPath: rootPath,
+    extensionName: extensionName,
+    enable: enable,
   );
 }
+
+Future<List<String>> requestAndroidBuildVariants(String path) async =>
+    const <String>[];
+
+Future<AppLinkSettings> requestAndroidAppLinkSettings(
+  String path, {
+  required String buildVariant,
+}) async =>
+    AppLinkSettings.empty;
+
+Future<XcodeBuildOptions> requestIosBuildOptions(String path) async =>
+    XcodeBuildOptions.empty;
+
+Future<UniversalLinkSettings> requestIosUniversalLinkSettings(
+  String path, {
+  required String configuration,
+  required String target,
+}) async =>
+    UniversalLinkSettings.empty;
 
 void logWarning() {
   throw Exception(unsupportedMessage);
 }
-
-/// Stubbed activation states so we can develop DevTools extensions without a
-/// server connection on Desktop.
-final _stubEnabledStates = <String, ExtensionEnabledState>{};
-
-/// Stubbed extensions so we can develop DevTools Extensions without a server
-/// connection on Desktop.
-final List<DevToolsExtensionConfig> _debugExtensions = [
-  DevToolsExtensionConfig.parse({
-    DevToolsExtensionConfig.nameKey: 'foo',
-    DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
-    DevToolsExtensionConfig.versionKey: '1.0.0',
-    DevToolsExtensionConfig.pathKey: '/path/to/foo',
-  }),
-  DevToolsExtensionConfig.parse({
-    DevToolsExtensionConfig.nameKey: 'bar',
-    DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
-    DevToolsExtensionConfig.versionKey: '2.0.0',
-    DevToolsExtensionConfig.materialIconCodePointKey: 0xe638,
-    DevToolsExtensionConfig.pathKey: '/path/to/bar',
-  }),
-  DevToolsExtensionConfig.parse({
-    DevToolsExtensionConfig.nameKey: 'provider',
-    DevToolsExtensionConfig.issueTrackerKey:
-        'https://github.com/rrousselGit/provider/issues',
-    DevToolsExtensionConfig.versionKey: '3.0.0',
-    DevToolsExtensionConfig.materialIconCodePointKey: 0xe50a,
-    DevToolsExtensionConfig.pathKey: '/path/to/provider',
-  }),
-];

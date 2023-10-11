@@ -65,11 +65,17 @@ class MockDartToolingApi extends DartToolingApiImpl {
       return {
         'executeCommand': true,
         'selectDevice': true,
+        'openDevToolsPage': true,
+        'hotReload': true,
+        'hotRestart': true,
       };
     });
     server.registerMethod('vsCode.initialize', initialize);
     server.registerMethod('vsCode.executeCommand', executeCommand);
     server.registerMethod('vsCode.selectDevice', selectDevice);
+    server.registerMethod('vsCode.openDevToolsPage', noOpHandler);
+    server.registerMethod('vsCode.hotReload', noOpHandler);
+    server.registerMethod('vsCode.hotRestart', noOpHandler);
   }
 
   final json_rpc_2.Peer client;
@@ -97,10 +103,26 @@ class MockDartToolingApi extends DartToolingApiImpl {
       platform: 'android-x64',
       platformType: 'android',
     ),
+    VsCodeDeviceImpl(
+      id: 'chrome',
+      name: 'Chrome',
+      category: 'web',
+      emulator: false,
+      emulatorId: null,
+      ephemeral: true,
+      platform: 'web-javascript',
+      platformType: 'web',
+    ),
   ];
 
   /// The current set of devices being presented to the embedded panel.
   final _devices = <VsCodeDevice>[];
+
+  /// The current set of debug sessions that are running.
+  final _debugSessions = <VsCodeDebugSession>[];
+
+  /// The number of the next debug session to start.
+  var _nextDebugSessionNumber = 1;
 
   /// The currently selected device presented to the embedded panel.
   String? _selectedDeviceId;
@@ -109,7 +131,7 @@ class MockDartToolingApi extends DartToolingApiImpl {
   final Stream<String> log;
 
   /// Simulates executing a VS Code command requested by the embedded panel.
-  Future<void> initialize() async {
+  void initialize() {
     connectDevices();
   }
 
@@ -118,10 +140,6 @@ class MockDartToolingApi extends DartToolingApiImpl {
     final params = parameters.asMap;
     final command = params['command'];
     switch (command) {
-      case 'flutter.createProject':
-        return null;
-      case 'flutter.doctor':
-        return null;
       default:
         throw 'Unknown command $command';
     }
@@ -136,6 +154,10 @@ class MockDartToolingApi extends DartToolingApiImpl {
     return true;
   }
 
+  /// A no-op handler for method handlers that don't require an implementation
+  /// but need to exist so that the request/response is successful.
+  void noOpHandler(json_rpc_2.Parameters _) {}
+
   /// Simulates devices being connected in the IDE by notifying the embedded
   /// panel about a set of test devices.
   void connectDevices() {
@@ -144,6 +166,28 @@ class MockDartToolingApi extends DartToolingApiImpl {
       ..addAll(_mockDevices);
     _selectedDeviceId = _devices.lastOrNull?.id;
     _sendDevicesChanged();
+  }
+
+  /// Simulates starting a debug session.
+  void startSession(String mode, String deviceId) {
+    final sessionNum = _nextDebugSessionNumber++;
+    _debugSessions.add(
+      VsCodeDebugSessionImpl(
+        id: 'debug-$sessionNum',
+        name: 'Session $sessionNum',
+        vmServiceUri: 'ws://127.0.0.1:1234/ws',
+        flutterMode: mode,
+        flutterDeviceId: deviceId,
+        debuggerType: 'Flutter',
+      ),
+    );
+    _sendDebugSessionsChanged();
+  }
+
+  /// Simulates ending all debug sessions.
+  void endSessions() {
+    _debugSessions.clear();
+    _sendDebugSessionsChanged();
   }
 
   /// Simulates devices being disconnected in the IDE by notifying the embedded
@@ -156,10 +200,19 @@ class MockDartToolingApi extends DartToolingApiImpl {
 
   void _sendDevicesChanged() {
     server.sendNotification(
-      'vsCode.devicesChanged',
+      '${VsCodeApi.jsonApiName}.${VsCodeApi.jsonDevicesChangedEvent}',
       VsCodeDevicesEventImpl(
         devices: _devices,
         selectedDeviceId: _selectedDeviceId,
+      ).toJson(),
+    );
+  }
+
+  void _sendDebugSessionsChanged() {
+    server.sendNotification(
+      '${VsCodeApi.jsonApiName}.${VsCodeApi.jsonDebugSessionsChangedEvent}',
+      VsCodeDebugSessionsEventImpl(
+        sessions: _debugSessions,
       ).toJson(),
     );
   }

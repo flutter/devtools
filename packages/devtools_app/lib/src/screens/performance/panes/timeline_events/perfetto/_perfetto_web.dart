@@ -119,6 +119,13 @@ class _PerfettoViewController extends DisposableController
 
   static const _pollUntilReadyTimeout = Duration(seconds: 10);
 
+  /// The listener that is added to DevTools' [html.window] to receive messages
+  /// from the Perfetto iFrame.
+  ///
+  /// We need to store this in a variable so that the listener is properly
+  /// removed in [dispose].
+  html.EventListener? _handleMessageListener;
+
   void init() {
     _perfettoIFrameReady = Completer<void>();
     _perfettoHandlerReady = Completer<void>();
@@ -130,7 +137,10 @@ class _PerfettoViewController extends DisposableController
       }),
     );
 
-    html.window.addEventListener('message', _handleMessage);
+    html.window.addEventListener(
+      'message',
+      _handleMessageListener = _handleMessage,
+    );
 
     unawaited(_loadStyle(preferences.darkModeTheme.value));
     addAutoDisposeListener(preferences.darkModeTheme, () async {
@@ -305,7 +315,8 @@ class _PerfettoViewController extends DisposableController
 
   @override
   void dispose() {
-    html.window.removeEventListener('message', _handleMessage);
+    html.window.removeEventListener('message', _handleMessageListener);
+    _handleMessageListener = null;
     _pollForPerfettoHandlerReady?.cancel();
     _pollForThemeHandlerReady?.cancel();
     super.dispose();

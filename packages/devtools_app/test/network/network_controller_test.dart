@@ -18,20 +18,20 @@ import 'utils/network_test_utils.dart';
 void main() {
   group('NetworkController', () {
     late NetworkController controller;
-    late FakeServiceManager fakeServiceManager;
+    late FakeServiceConnectionManager fakeServiceConnection;
     late SocketProfile socketProfile;
     late HttpProfile httpProfile;
 
     setUp(() {
       socketProfile = loadSocketProfile();
       httpProfile = loadHttpProfile();
-      fakeServiceManager = FakeServiceManager(
+      fakeServiceConnection = FakeServiceConnectionManager(
         service: FakeServiceManager.createFakeService(
           socketProfile: socketProfile,
           httpProfile: httpProfile,
         ),
       );
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(ServiceConnectionManager, fakeServiceConnection);
       controller = NetworkController();
     });
 

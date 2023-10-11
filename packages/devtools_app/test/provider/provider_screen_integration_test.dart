@@ -37,13 +37,13 @@ void main() {
     await env.setupEnvironment(
       config: const FlutterRunConfiguration(withDebugger: true),
     );
-    await serviceManager.service!.allFuturesCompleted;
+    await serviceConnection.serviceManager.service!.allFuturesCompleted;
 
     isAlive = Disposable();
     evalOnDartLibrary = EvalOnDartLibrary(
       'package:provider_app/main.dart',
       env.service,
-      serviceManager: serviceManager,
+      serviceManager: serviceConnection.serviceManager,
     );
   });
 
@@ -106,7 +106,7 @@ void main() {
       final evalOnDartLibrary2 = EvalOnDartLibrary(
         'package:provider_app/main.dart',
         env.service,
-        serviceManager: serviceManager,
+        serviceManager: serviceConnection.serviceManager,
       );
       addTearDown(evalOnDartLibrary2.dispose);
 

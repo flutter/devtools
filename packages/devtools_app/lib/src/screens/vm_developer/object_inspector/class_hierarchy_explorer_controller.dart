@@ -17,8 +17,9 @@ class ClassHierarchyExplorerController {
 
   Future<void> refresh() async {
     _selectedIsolateClassHierarchy.value = <ClassHierarchyNode>[];
-    final service = serviceManager.service!;
-    final isolate = serviceManager.isolateManager.selectedIsolate.value;
+    final service = serviceConnection.serviceManager.service!;
+    final isolate =
+        serviceConnection.serviceManager.isolateManager.selectedIsolate.value;
     if (isolate == null) {
       return;
     }

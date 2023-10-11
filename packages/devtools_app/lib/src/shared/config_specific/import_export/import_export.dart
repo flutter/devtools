@@ -14,7 +14,6 @@ import '../../../../devtools.dart';
 import '../../analytics/analytics.dart' as ga;
 import '../../analytics/constants.dart' as gac;
 import '../../common_widgets.dart';
-import '../../connected_app.dart';
 import '../../file_import.dart';
 import '../../globals.dart';
 import '../../primitives/simple_items.dart';
@@ -162,8 +161,8 @@ abstract class ExportController {
     final contents = {
       DevToolsExportKeys.devToolsSnapshot.name: true,
       DevToolsExportKeys.devToolsVersion.name: version,
-      DevToolsExportKeys.connectedApp.name:
-          connectedApp?.toJson() ?? serviceManager.connectedApp!.toJson(),
+      DevToolsExportKeys.connectedApp.name: connectedApp?.toJson() ??
+          serviceConnection.serviceManager.connectedApp!.toJson(),
       ...offlineScreenData,
     };
     final activeScreenId = contents[DevToolsExportKeys.activeScreenId.name];

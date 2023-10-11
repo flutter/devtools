@@ -131,7 +131,7 @@ void main() {
       ExternalDevToolsEnvironmentParameters(),
     );
     setGlobal(IdeTheme, getIdeTheme());
-    setGlobal(ServiceConnectionManager, FakeServiceManager());
+    setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
   });
 
   group('InstanceViewer', () {
@@ -1539,4 +1539,5 @@ void main() {
   });
 }
 
+// ignore: subtype_of_sealed_class, fake for testing.
 class FakeEvalOnDartLibrary extends Fake implements EvalOnDartLibrary {}

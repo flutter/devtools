@@ -7,14 +7,28 @@ import 'dart:core';
 
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
-import '../../utils.dart';
+import '../utils/auto_dispose.dart';
+import '../utils/list.dart';
 import 'isolate_state.dart';
 import 'service_extensions.dart' as extensions;
 
-class IsolateManager extends Disposer {
+final _log = Logger('isolate_manager');
+
+@visibleForTesting
+base mixin TestIsolateManager implements IsolateManager {}
+
+final class IsolateManager with DisposerMixin {
   final _isolateStates = <IsolateRef, IsolateState>{};
+
+  /// Signifies whether the main isolate should be selected if it is started.
+  ///
+  /// This is used to make sure the the main isolate remains selected after
+  /// a hot restart.
+  bool _shouldReselectMainIsolate = false;
+
   VmService? _service;
 
   final StreamController<IsolateRef?> _isolateCreatedController =
@@ -88,23 +102,30 @@ class IsolateManager extends Disposer {
   }
 
   Future<void> _loadIsolateState(IsolateRef isolateRef) async {
-    final service = _service;
-    var isolate = await _service!.getIsolate(isolateRef.id!);
-    if (isolate.runnable == false) {
-      final isolateRunnableCompleter = _isolateRunnableCompleters.putIfAbsent(
-        isolate.id,
-        () => Completer<void>(),
-      );
-      if (!isolateRunnableCompleter.isCompleted) {
-        await isolateRunnableCompleter.future;
-        isolate = await _service!.getIsolate(isolate.id!);
+    try {
+      final service = _service;
+      var isolate = await _service!.getIsolate(isolateRef.id!);
+      if (isolate.runnable == false) {
+        final isolateRunnableCompleter = _isolateRunnableCompleters.putIfAbsent(
+          isolate.id,
+          () => Completer<void>(),
+        );
+        if (!isolateRunnableCompleter.isCompleted) {
+          await isolateRunnableCompleter.future;
+          isolate = await _service!.getIsolate(isolate.id!);
+        }
       }
-    }
-    if (service != _service) return;
-    final state = _isolateStates[isolateRef];
-    if (state != null) {
-      // Isolate might have already been closed.
-      state.handleIsolateLoad(isolate);
+      if (service != _service) return;
+      final state = _isolateStates[isolateRef];
+      if (state != null) {
+        // Isolate might have already been closed.
+        state.handleIsolateLoad(isolate);
+      }
+    } on SentinelException catch (_) {
+      // Isolate doesn't exist anymore, nothing to do.
+      _log.info(
+        'isolateRef($isolateRef) ceased to exist while loading isolate state',
+      );
     }
   }
 
@@ -121,7 +142,15 @@ class IsolateManager extends Disposer {
       _isolateCreatedController.add(event.isolate);
       // TODO(jacobr): we assume the first isolate started is the main isolate
       // but that may not always be a safe assumption.
-      _mainIsolate.value ??= event.isolate;
+      if (_mainIsolate.value == null) {
+        _mainIsolate.value = event.isolate;
+        if (_shouldReselectMainIsolate) {
+          // Assume the main isolate has come back up after a hot restart, so
+          // select it.
+          _shouldReselectMainIsolate = false;
+          _setSelectedIsolate(event.isolate);
+        }
+      }
 
       if (_selectedIsolate.value == null) {
         _setSelectedIsolate(event.isolate);
@@ -137,6 +166,11 @@ class IsolateManager extends Disposer {
       if (event.isolate != null) _isolates.remove(event.isolate!);
       _isolateExitedController.add(event.isolate);
       if (_mainIsolate.value == event.isolate) {
+        if (_selectedIsolate.value == _mainIsolate.value) {
+          // If the main isolate was selected and exits, then assume that a hot
+          // restart is happening. So reselect when the main isolate comes back.
+          _shouldReselectMainIsolate = true;
+        }
         _mainIsolate.value = null;
       }
       if (_selectedIsolate.value == event.isolate) {

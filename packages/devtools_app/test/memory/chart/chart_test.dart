@@ -22,7 +22,7 @@ void main() {
   const windowSize = Size(2225.0, 1000.0);
 
   setUp(() {
-    setGlobal(ServiceConnectionManager, FakeServiceManager());
+    setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
     setGlobal(IdeTheme, IdeTheme());
   });
 

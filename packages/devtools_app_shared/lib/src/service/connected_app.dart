@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:logging/logging.dart';
+import 'package:meta/meta.dart';
 
 import 'eval_on_dart_library.dart';
 import 'flutter_version.dart';
@@ -15,6 +16,8 @@ final _log = Logger('connected_app');
 const flutterLibraryUri = 'package:flutter/src/widgets/binding.dart';
 const dartHtmlLibraryUri = 'dart:html';
 
+// TODO(https://github.com/flutter/devtools/issues/6239): try to remove this.
+@sealed
 class ConnectedApp {
   ConnectedApp(this.serviceManager);
 
@@ -131,16 +134,21 @@ class ConnectedApp {
     // the future (flutter web), we can modify this check.
     if (!isRunningOnDartVM || !await isFlutterApp) return false;
 
-    await serviceConnectionManager.serviceExtensionManager.extensionStatesUpdated.future;
+    await serviceConnectionManager.manager.serviceExtensionManager.extensionStatesUpdated.future;
 
     // The debugAllowBanner extension is only available in debug builds
-    final hasDebugExtension = serviceConnectionManager.serviceExtensionManager
+    final hasDebugExtension = serviceConnectionManager.manager.serviceExtensionManager
         .isServiceExtensionAvailable(extensions.debugAllowBanner.extension);
     return !hasDebugExtension;
     */
   }
 
   Future<void> initializeValues({void Function()? onComplete}) async {
+    // Return early if already initialized.
+    if (initialized.isCompleted) return;
+
+    assert(serviceManager!.isServiceAvailable);
+
     await Future.wait([isFlutterApp, isProfileBuild, isDartWebApp]);
 
     _operatingSystem = serviceManager!.vm!.operatingSystem ?? unknownOS;
@@ -187,4 +195,41 @@ class ConnectedApp {
         if (flutterVersionNow != null)
           flutterVersionKey: flutterVersionNow!.version,
       };
+}
+
+final class OfflineConnectedApp extends ConnectedApp {
+  OfflineConnectedApp({
+    this.isFlutterAppNow,
+    this.isProfileBuildNow,
+    this.isDartWebAppNow,
+    this.isRunningOnDartVM,
+    this.operatingSystem = ConnectedApp.unknownOS,
+  }) : super(null);
+
+  factory OfflineConnectedApp.parse(Map<String, Object?>? json) {
+    if (json == null) return OfflineConnectedApp();
+    return OfflineConnectedApp(
+      isFlutterAppNow: json[ConnectedApp.isFlutterAppKey] as bool?,
+      isProfileBuildNow: json[ConnectedApp.isProfileBuildKey] as bool?,
+      isDartWebAppNow: json[ConnectedApp.isDartWebAppKey] as bool?,
+      isRunningOnDartVM: json[ConnectedApp.isRunningOnDartVMKey] as bool?,
+      operatingSystem: (json[ConnectedApp.operatingSystemKey] as String?) ??
+          ConnectedApp.unknownOS,
+    );
+  }
+
+  @override
+  final bool? isFlutterAppNow;
+
+  @override
+  final bool? isProfileBuildNow;
+
+  @override
+  final bool? isDartWebAppNow;
+
+  @override
+  final bool? isRunningOnDartVM;
+
+  @override
+  final String operatingSystem;
 }

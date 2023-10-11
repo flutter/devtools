@@ -13,11 +13,18 @@ import 'package:mockito/mockito.dart';
 
 void main() {
   late FakeServiceExtensionManager fakeExtensionManager;
-  final mockServiceManager = MockServiceConnectionManager();
-  when(mockServiceManager.serviceExtensionManager)
-      .thenAnswer((realInvocation) => fakeExtensionManager);
-  setGlobal(ServiceConnectionManager, mockServiceManager);
-  setGlobal(IdeTheme, getIdeTheme());
+  late MockServiceConnectionManager mockServiceConnection;
+  late MockServiceManager mockServiceManager;
+
+  setUp(() {
+    mockServiceConnection = createMockServiceConnectionWithDefaults();
+    mockServiceManager =
+        mockServiceConnection.serviceManager as MockServiceManager;
+    when(mockServiceManager.serviceExtensionManager)
+        .thenAnswer((realInvocation) => fakeExtensionManager);
+    setGlobal(ServiceConnectionManager, mockServiceConnection);
+    setGlobal(IdeTheme, getIdeTheme());
+  });
 
   group('TrackWidgetBuildsSetting', () {
     setUp(() async {
@@ -413,7 +420,7 @@ void main() {
 }
 
 void verifyExtensionStates({
-  required MockServiceConnectionManager mockServiceManager,
+  required MockServiceManager mockServiceManager,
   required bool trackAllWidgets,
   required bool trackUserCreatedWidgets,
 }) {

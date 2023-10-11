@@ -44,6 +44,7 @@ class VmServiceWrapper implements VmService {
     _vmService = VmService(
       inStream,
       writeMessage,
+      wsUri: connectedUri.toString(),
     );
     unawaited(_initSupportedProtocols());
   }

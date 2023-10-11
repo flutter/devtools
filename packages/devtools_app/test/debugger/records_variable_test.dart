@@ -20,7 +20,7 @@ void main() {
   setUp(() {
     final service = createMockVmServiceWrapperWithDefaults();
 
-    manager = FakeServiceManager(service: service);
+    manager = FakeServiceConnectionManager(service: service);
     setGlobal(ServiceConnectionManager, manager);
   });
 
@@ -73,7 +73,7 @@ void main() {
       );
 
       when(
-        manager.service!.getObject(
+        manager.serviceManager.service!.getObject(
           isolateId,
           objectId,
         ),

@@ -35,7 +35,7 @@ void main() {
   group('AnalyticsPrompt', () {
     setUp(() {
       didCallEnableAnalytics = false;
-      setGlobal(ServiceConnectionManager, FakeServiceManager());
+      setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
       setGlobal(IdeTheme, IdeTheme());
     });
     group('with analytics enabled', () {

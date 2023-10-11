@@ -47,14 +47,7 @@ final _selectedProviderNode = AutoDisposeProvider<ProviderNode?>((ref) {
 final _showInternals = StateProvider<bool>((ref) => false);
 
 class ProviderScreen extends Screen {
-  ProviderScreen()
-      : super.conditional(
-          id: id,
-          requiresLibrary: 'package:provider/',
-          title: ScreenMetaData.provider.title,
-          icon: ScreenMetaData.provider.icon,
-          requiresDebugBuild: true,
-        );
+  ProviderScreen() : super.fromMetaData(ScreenMetaData.provider);
 
   static final id = ScreenMetaData.provider.id;
 
@@ -79,9 +72,11 @@ class _ProviderScreenWrapperState extends State<ProviderScreenWrapper>
     ga.screen(ProviderScreen.id);
 
     cancelListeners();
-    addAutoDisposeListener(serviceManager.connectedState, () {
-      if (serviceManager.connectedState.value.connected) {
-        setServiceConnectionForProviderScreen(serviceManager.service!);
+    addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
+      if (serviceConnection.serviceManager.connectedState.value.connected) {
+        setServiceConnectionForProviderScreen(
+          serviceConnection.serviceManager.service!,
+        );
       }
     });
   }

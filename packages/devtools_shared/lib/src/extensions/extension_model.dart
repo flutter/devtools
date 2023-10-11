@@ -53,14 +53,14 @@ class DevToolsExtensionConfig implements Comparable {
           );
         }
         throw StateError(
-          'Unexpected value types in the extension config.json. Expected all '
+          'Unexpected value types in the extension config.yaml. Expected all '
           'values to be of type String, but one or more had a different type:\n'
           '${sb.toString()}',
         );
       } else {
         throw StateError(
           'Missing required fields ${diff.toString()} in the extension '
-          'config.json.',
+          'config.yaml.',
         );
       }
     }
@@ -101,6 +101,7 @@ class DevToolsExtensionConfig implements Comparable {
   /// [IconData] class for displaying in DevTools.
   ///
   /// This code point should be part of the 'MaterialIcons' font family.
+  /// See https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/material/icons.dart.
   final int materialIconCodePoint;
 
   String get displayName => name.toLowerCase();
@@ -123,6 +124,25 @@ class DevToolsExtensionConfig implements Comparable {
     }
     return compare;
   }
+
+  @override
+  bool operator ==(Object? other) {
+    return other is DevToolsExtensionConfig &&
+        other.name == name &&
+        other.path == path &&
+        other.issueTrackerLink == issueTrackerLink &&
+        other.version == version &&
+        other.materialIconCodePoint == materialIconCodePoint;
+  }
+
+  @override
+  int get hashCode => Object.hash(
+        name,
+        path,
+        issueTrackerLink,
+        version,
+        materialIconCodePoint,
+      );
 }
 
 /// Describes the enablement state of a DevTools extension.

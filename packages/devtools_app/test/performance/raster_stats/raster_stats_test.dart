@@ -19,11 +19,11 @@ void main() {
     late RasterStatsController controller;
 
     setUp(() async {
-      final mockServiceManager = MockServiceConnectionManager();
-      when(mockServiceManager.renderFrameWithRasterStats).thenAnswer(
+      final mockServiceConnection = createMockServiceConnectionWithDefaults();
+      when(mockServiceConnection.renderFrameWithRasterStats).thenAnswer(
         (_) => Future.value(Response.parse(rasterStatsFromServiceJson)),
       );
-      setGlobal(ServiceConnectionManager, mockServiceManager);
+      setGlobal(ServiceConnectionManager, mockServiceConnection);
       setGlobal(OfflineModeController, OfflineModeController());
       setGlobal(IdeTheme, IdeTheme());
 

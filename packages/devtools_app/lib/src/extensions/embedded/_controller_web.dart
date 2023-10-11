@@ -7,9 +7,14 @@ import 'dart:async';
 import 'dart:html' as html;
 import 'dart:ui_web' as ui_web;
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_extensions/api.dart';
 import 'package:path/path.dart' as path;
 
+import '../../shared/config_specific/server/server.dart';
+import '../../shared/development_helpers.dart';
+import '../../shared/globals.dart';
+import '../../shared/primitives/utils.dart';
 import 'controller.dart';
 
 /// Incrementer for the extension iFrame view that will live for the entire
@@ -23,7 +28,8 @@ import 'controller.dart';
 /// which [_viewIdIncrementer] is used to create.
 var _viewIdIncrementer = 0;
 
-class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController {
+class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController
+    with AutoDisposeControllerMixin {
   EmbeddedExtensionControllerImpl(super.extensionConfig);
 
   /// The view id for the extension iFrame.
@@ -32,14 +38,24 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController {
   /// in the id.
   late final viewId = 'ext-${extensionConfig.name}-${_viewIdIncrementer++}';
 
-  // TODO(kenz): pass along IDE theme query parameters from the DevTools URL.
   String get extensionUrl {
-    return path.join(
+    if (debugDevToolsExtensions && !isDevToolsServerAvailable) {
+      return 'https://flutter.dev/';
+    }
+
+    final baseUri = path.join(
       html.window.location.origin,
       'devtools_extensions',
       extensionConfig.name,
       'index.html',
     );
+    final queryParams = {
+      ...loadQueryParams(),
+      ExtensionEventParameters.theme: preferences.darkModeTheme.value
+          ? ExtensionEventParameters.themeValueDark
+          : ExtensionEventParameters.themeValueLight,
+    };
+    return Uri.parse(baseUri).copyWith(queryParameters: queryParams).toString();
   }
 
   html.IFrameElement get extensionIFrame => _extensionIFrame;
@@ -78,13 +94,11 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController {
   }
 
   @override
-  void postMessage(DevToolsExtensionEventType type, String message) {
-    extensionPostEventStream.add(
-      DevToolsExtensionEvent(
-        type,
-        data: {'message': message},
-      ),
-    );
+  void postMessage(
+    DevToolsExtensionEventType type, {
+    Map<String, String> data = const <String, String>{},
+  }) {
+    extensionPostEventStream.add(DevToolsExtensionEvent(type, data: data));
   }
 
   @override

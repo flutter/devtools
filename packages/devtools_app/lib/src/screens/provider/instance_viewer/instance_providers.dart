@@ -167,7 +167,7 @@ Future<void> _mutate(
   ref.refresh(instanceProvider(path.root));
 
   // Forces the UI to rebuild after the state change
-  await serviceManager.performHotReload();
+  await serviceConnection.serviceManager.performHotReload();
 }
 
 Future<InstanceDetails?> _resolveParent(

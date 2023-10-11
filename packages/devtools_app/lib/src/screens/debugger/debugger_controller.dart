@@ -41,9 +41,9 @@ class DebuggerController extends DisposableController
     DevToolsRouterDelegate? routerDelegate,
     bool initialSwitchToIsolate = true,
   }) : _initialSwitchToIsolate = initialSwitchToIsolate {
-    addAutoDisposeListener(serviceManager.connectedState, () {
-      if (serviceManager.connectedState.value.connected) {
-        _handleConnectionAvailable(serviceManager.service!);
+    addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
+      if (serviceConnection.serviceManager.connectedState.value.connected) {
+        _handleConnectionAvailable(serviceConnection.serviceManager.service!);
       }
     });
     if (routerDelegate != null) {
@@ -52,7 +52,7 @@ class DebuggerController extends DisposableController
     addAutoDisposeListener(_selectedStackFrame, _updateCurrentFrame);
     addAutoDisposeListener(_stackFramesWithLocation, _updateCurrentFrame);
 
-    if (serviceManager.hasService) {
+    if (serviceConnection.serviceManager.connectedState.value.connected) {
       _initialize();
     }
   }
@@ -62,7 +62,7 @@ class DebuggerController extends DisposableController
   bool _firstDebuggerScreenLoaded = false;
 
   void _updateCurrentFrame() {
-    serviceManager.appState.setCurrentFrame(
+    serviceConnection.appState.setCurrentFrame(
       _selectedStackFrame.value?.frame ??
           _stackFramesWithLocation.value.safeFirst?.frame,
     );
@@ -88,7 +88,7 @@ class DebuggerController extends DisposableController
     unawaited(_getStackOperation?.cancel());
     _getStackOperation = null;
 
-    final appState = serviceManager.appState;
+    final appState = serviceConnection.appState;
 
     _resuming.value = false;
     _lastEvent = null;
@@ -109,7 +109,7 @@ class DebuggerController extends DisposableController
   }
 
   ValueListenable<IsolateRef?> get _isolate =>
-      serviceManager.isolateManager.selectedIsolate;
+      serviceConnection.serviceManager.isolateManager.selectedIsolate;
 
   void _initialize() {
     if (_initialSwitchToIsolate) {
@@ -131,7 +131,7 @@ class DebuggerController extends DisposableController
   final bool _initialSwitchToIsolate;
 
   VmServiceWrapper get _service {
-    return serviceManager.service!;
+    return serviceConnection.serviceManager.service!;
   }
 
   final _resuming = ValueNotifier<bool>(false);
@@ -391,7 +391,7 @@ class DebuggerController extends DisposableController
     // TODO(elliette): Find a better solution for this. Currently, this means
     // we fetch all variable objects twice (once in _getFullStack and once in
     // in_createStackFrameWithLocation).
-    if (await serviceManager.connectedApp!.isDartWebApp) {
+    if (await serviceConnection.serviceManager.connectedApp!.isDartWebApp) {
       final topFrame = pauseEvent?.topFrame;
       if (topFrame == null) {
         _log.warning(
@@ -546,15 +546,15 @@ class DebuggerController extends DisposableController
     }
     // Update the variables for the stack frame:
     if (FeatureFlags.dapDebugging) {
-      serviceManager.appState.setDapVariables(
+      serviceConnection.appState.setDapVariables(
         frame != null ? await _createDapVariablesForFrame(frame.frame) : [],
       );
     } else {
-      serviceManager.appState.setVariables(
+      serviceConnection.appState.setVariables(
         frame != null ? _createVariablesForFrame(frame.frame) : [],
       );
     }
-    // Notify that the stack frame has been succesfully selected:
+    // Notify that the stack frame has been successfully selected:
     _selectedStackFrame.value = frame;
   }
 
@@ -604,8 +604,8 @@ class DebuggerController extends DisposableController
   }
 
   Future<dap.StackFrame?> _fetchDapFrame(Frame vmFrame) async {
-    final isolateNumber =
-        serviceManager.isolateManager.selectedIsolate.value?.number;
+    final isolateNumber = serviceConnection
+        .serviceManager.isolateManager.selectedIsolate.value?.number;
     final frameIndex = vmFrame.index;
     if (isolateNumber == null || frameIndex == null) return null;
 

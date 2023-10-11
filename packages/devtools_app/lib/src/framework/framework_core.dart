@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:devtools_app_shared/utils.dart';
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_shared/service.dart';
 import 'package:logging/logging.dart';
 
@@ -50,21 +51,25 @@ class FrameworkCore {
     _log.info('DevTools version ${devtools.version}.');
   }
 
+  static bool initializationInProgress = false;
+
   /// Returns true if we're able to connect to a device and false otherwise.
   static Future<bool> initVmService(
     String url, {
-    Uri? explicitUri,
-    required ErrorReporter errorReporter,
+    required String serviceUriAsString,
+    ErrorReporter? errorReporter = _defaultErrorReporter,
     bool logException = true,
   }) async {
-    if (serviceManager.hasConnection) {
+    if (serviceConnection.serviceManager.hasConnection) {
       // TODO(https://github.com/flutter/devtools/issues/1568): why do we call
       // this multiple times?
       return true;
     }
 
-    final Uri? uri = explicitUri ?? getServiceUriFromQueryString(url);
+    final normalizedUri = normalizeVmServiceUri(serviceUriAsString);
+    final Uri? uri = normalizedUri ?? getServiceUriFromQueryString(url);
     if (uri != null) {
+      initializationInProgress = true;
       final finishedCompleter = Completer<void>();
 
       try {
@@ -85,7 +90,7 @@ class FrameworkCore {
           ),
         );
 
-        await serviceManager.vmServiceOpened(
+        await serviceConnection.serviceManager.vmServiceOpened(
           service,
           onClosed: finishedCompleter.future,
         );
@@ -95,12 +100,21 @@ class FrameworkCore {
         if (logException) {
           _log.shout(e, e, st);
         }
-        errorReporter('Unable to connect to VM service at $uri: $e', e);
+        errorReporter!('Unable to connect to VM service at $uri: $e', e);
         return false;
+      } finally {
+        initializationInProgress = false;
       }
     } else {
       // Don't report an error here because we do not have a URI to connect to.
       return false;
     }
+  }
+
+  static void _defaultErrorReporter(String title, Object error) {
+    notificationService.pushError(
+      '$title, $error',
+      isReportable: false,
+    );
   }
 }

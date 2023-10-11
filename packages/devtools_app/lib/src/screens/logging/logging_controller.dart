@@ -164,12 +164,13 @@ class LoggingController extends DisposableController
         FilterControllerMixin<LogData>,
         AutoDisposeControllerMixin {
   LoggingController() {
-    addAutoDisposeListener(serviceManager.connectedState, () {
-      if (serviceManager.connectedState.value.connected) {
-        _handleConnectionStart(serviceManager.service!);
+    addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
+      if (serviceConnection.serviceManager.connectedState.value.connected) {
+        _handleConnectionStart(serviceConnection.serviceManager.service!);
 
         autoDisposeStreamSubscription(
-          serviceManager.service!.onIsolateEvent.listen((event) {
+          serviceConnection.serviceManager.service!.onIsolateEvent
+              .listen((event) {
             messageBus.addEvent(
               BusEvent(
                 'debugger',
@@ -180,8 +181,8 @@ class LoggingController extends DisposableController
         );
       }
     });
-    if (serviceManager.connectedAppInitialized) {
-      _handleConnectionStart(serviceManager.service!);
+    if (serviceConnection.serviceManager.connectedAppInitialized) {
+      _handleConnectionStart(serviceConnection.serviceManager.service!);
     }
     _handleBusEvents();
     subscribeToFilterChanges();
@@ -225,7 +226,7 @@ class LoggingController extends DisposableController
   }
 
   ObjectGroup get objectGroup =>
-      serviceManager.consoleService.objectGroup as ObjectGroup;
+      serviceConnection.consoleService.objectGroup as ObjectGroup;
 
   String get statusText {
     final int totalCount = data.length;
@@ -250,7 +251,7 @@ class LoggingController extends DisposableController
   void clear() {
     resetFilter();
     _updateData([]);
-    serviceManager.errorBadgeManager.clearErrors(LoggingScreen.id);
+    serviceConnection.errorBadgeManager.clearErrors(LoggingScreen.id);
   }
 
   void _handleConnectionStart(VmServiceWrapper service) {
@@ -422,7 +423,7 @@ class LoggingController extends DisposableController
   }
 
   void _handleDeveloperLogEvent(Event e) {
-    final VmServiceWrapper? service = serviceManager.service;
+    final VmServiceWrapper? service = serviceConnection.serviceManager.service;
 
     final logRecord = e.json!['logRecord'];
 

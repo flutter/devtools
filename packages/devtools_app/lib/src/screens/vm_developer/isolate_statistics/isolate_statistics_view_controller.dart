@@ -23,7 +23,8 @@ class IsolateStatisticsViewController extends DisposableController
       () => unawaited(refresh()),
     );
 
-    final isolateListenable = serviceManager.isolateManager.selectedIsolate;
+    final isolateListenable =
+        serviceConnection.serviceManager.isolateManager.selectedIsolate;
     addAutoDisposeListener(isolateListenable, () {
       final isolate = isolateListenable.value;
       if (isolate != null) {
@@ -38,7 +39,7 @@ class IsolateStatisticsViewController extends DisposableController
 
   final cpuProfilerController = CpuProfilerController();
 
-  VmServiceWrapper get _service => serviceManager.service!;
+  VmServiceWrapper get _service => serviceConnection.serviceManager.service!;
 
   Isolate? get isolate => _isolate;
   Isolate? _isolate;

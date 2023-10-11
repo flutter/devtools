@@ -9,14 +9,16 @@ import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
-import '../../service.dart';
 import '../utils/auto_dispose.dart';
+import 'connected_app.dart';
+import 'isolate_manager.dart';
 import 'service_extensions.dart' as extensions;
+import 'service_utils.dart';
 
 final _log = Logger('service_extension_manager');
 
 /// Manager that handles tracking the service extension for the main isolate.
-class ServiceExtensionManager extends Disposer {
+final class ServiceExtensionManager with DisposerMixin {
   ServiceExtensionManager(this._isolateManager);
 
   VmService? _service;
@@ -247,10 +249,15 @@ class ServiceExtensionManager extends Disposer {
       // extension. This will restore extension states on the device after a hot
       // restart. [_enabledServiceExtensions] will be empty on page refresh or
       // initial start.
-      return await _callServiceExtension(
-        name,
-        _enabledServiceExtensions[name]!.value,
-      );
+      try {
+        return await _callServiceExtension(
+          name,
+          _enabledServiceExtensions[name]!.value,
+        );
+      } on SentinelException catch (_) {
+        // Service extension stopped existing while calling, so do nothing.
+        // This typically happens during hot restarts.
+      }
     } else {
       // Set any extensions that are already enabled on the device. This will
       // enable extension states in DevTools on page refresh or initial start.
@@ -476,7 +483,7 @@ class ServiceExtensionManager extends Disposer {
       final listenable = hasServiceExtension(name);
       late VoidCallback listener;
       listener = () {
-        if (listenable.value || completer.isCompleted) {
+        if (listenable.value || !completer.isCompleted) {
           listenable.removeListener(listener);
           completer.complete(true);
         }
@@ -582,3 +589,6 @@ class ServiceExtensionState {
     return 'ServiceExtensionState(enabled: $enabled, value: $value)';
   }
 }
+
+@visibleForTesting
+base mixin TestServiceExtensionManager implements ServiceExtensionManager {}

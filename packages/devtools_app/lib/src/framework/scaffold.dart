@@ -12,7 +12,6 @@ import '../extensions/extension_settings.dart';
 import '../screens/debugger/debugger_screen.dart';
 import '../shared/analytics/prompt.dart';
 import '../shared/banner_messages.dart';
-import '../shared/common_widgets.dart';
 import '../shared/config_specific/drag_and_drop/drag_and_drop.dart';
 import '../shared/config_specific/import_export/import_export.dart';
 import '../shared/console/widgets/console_pane.dart';
@@ -149,9 +148,13 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     } else if (widget.screens[_tabController!.index].screenId != widget.page) {
       // If the page changed (eg. the route was modified by pressing back in the
       // browser), animate to the new one.
-      final newIndex = widget.page == null
+      var newIndex = widget.page == null
           ? 0 // When there's no supplied page, we show the first one.
           : widget.screens.indexWhere((t) => t.screenId == widget.page);
+      // Ensure the returned index is in range, otherwise set to 0.
+      if (newIndex == -1) {
+        newIndex = 0;
+      }
       _tabController!.animateTo(newIndex);
     }
   }
@@ -204,11 +207,13 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         );
 
         // Clear error count when navigating to a screen.
-        serviceManager.errorBadgeManager.clearErrors(screen.screenId);
+        serviceConnection.errorBadgeManager.clearErrors(screen.screenId);
 
         // Update routing with the change.
-        final routerDelegate = DevToolsRouterDelegate.of(context);
-        routerDelegate.navigateIfNotCurrent(screen.screenId);
+        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+          final routerDelegate = DevToolsRouterDelegate.of(context);
+          routerDelegate.navigateIfNotCurrent(screen.screenId);
+        });
       }
     });
 
@@ -291,8 +296,9 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           controller: _tabController,
           children: tabBodies,
         ),
-        if (serviceManager.connectedAppInitialized &&
-            !serviceManager.connectedApp!.isProfileBuildNow! &&
+        if (serviceConnection.serviceManager.connectedAppInitialized &&
+            !serviceConnection
+                .serviceManager.connectedApp!.isProfileBuildNow! &&
             !offlineController.offlineMode.value &&
             _currentScreen.showFloatingDebuggerControls)
           Container(
@@ -306,9 +312,10 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     return Provider<ImportController>.value(
       value: _importController,
       builder: (context, _) {
-        final showConsole = serviceManager.connectedAppInitialized &&
-            !offlineController.offlineMode.value &&
-            _currentScreen.showConsole(widget.embed);
+        final showConsole =
+            serviceConnection.serviceManager.connectedAppInitialized &&
+                !offlineController.offlineMode.value &&
+                _currentScreen.showConsole(widget.embed);
 
         return DragAndDrop(
           handleDrop: _importController.importData,
@@ -362,8 +369,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
               bottomNavigationBar: StatusLine(
                 currentScreen: _currentScreen,
                 isEmbedded: widget.embed,
-                isConnected: serviceManager.hasConnection &&
-                    serviceManager.connectedAppInitialized,
+                isConnected: serviceConnection.serviceManager.hasConnection &&
+                    serviceConnection.serviceManager.connectedAppInitialized,
               ),
             ),
           ),

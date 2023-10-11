@@ -86,10 +86,22 @@ class DevToolsApp extends StatefulWidget {
 /// This manages the route generation, and marshals URL query parameters into
 /// flutter route parameters.
 class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
-  List<Screen> get _screens => [
-        ..._originalScreens,
-        if (FeatureFlags.devToolsExtensions) ..._extensionScreens,
-      ];
+  List<Screen> get _screens {
+    if (FeatureFlags.devToolsExtensions) {
+      // TODO(https://github.com/flutter/devtools/issues/6273): stop special
+      // casing the package:provider extension.
+      final containsProviderExtension = extensionService.visibleExtensions.value
+          .where((e) => e.name == 'provider')
+          .isNotEmpty;
+      final devToolsScreens = containsProviderExtension
+          ? _originalScreens
+              .where((s) => s.screenId != ScreenMetaData.provider.id)
+              .toList()
+          : _originalScreens;
+      return [...devToolsScreens, ..._extensionScreens];
+    }
+    return _originalScreens;
+  }
 
   List<Screen> get _originalScreens =>
       widget.originalScreens.map((s) => s.screen).toList();
@@ -99,6 +111,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         (e) => DevToolsScreen<void>(ExtensionScreen(e)).screen,
       );
 
+  // TODO(dantup): This does not take IDE preference into account, so results
+  //  in Dark mode embedded sidebar in VS Code.
   bool get isDarkThemeEnabled => _isDarkThemeEnabled;
   bool _isDarkThemeEnabled = true;
 
@@ -138,11 +152,14 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       });
     }
 
-    addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
-      setState(() {
-        _clearCachedRoutes();
-      });
-    });
+    addAutoDisposeListener(
+      serviceConnection.serviceManager.isolateManager.mainIsolate,
+      () {
+        setState(() {
+          _clearCachedRoutes();
+        });
+      },
+    );
 
     _isDarkThemeEnabled = preferences.darkModeTheme.value;
     addAutoDisposeListener(preferences.darkModeTheme, () {
@@ -182,6 +199,10 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     Map<String, String?> args,
     DevToolsNavigationState? state,
   ) {
+    if (FrameworkCore.initializationInProgress) {
+      return const MaterialPage(child: CenteredCircularProgressIndicator());
+    }
+
     // Provide the appropriate page route.
     if (pages.containsKey(page)) {
       Widget widget = pages[page!]!(
@@ -263,6 +284,12 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
               .where((p) => embed && page != null ? p.screenId == page : true)
               .where((p) => !hide.contains(p.screenId))
               .toList();
+          final connectedToFlutterApp =
+              serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ??
+                  false;
+          final connectedToDartWebApp =
+              serviceConnection.serviceManager.connectedApp?.isDartWebAppNow ??
+                  false;
           return MultiProvider(
             providers: _providedControllers(),
             child: DevToolsScaffold(
@@ -270,13 +297,20 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
               page: page,
               screens: screens,
               actions: [
-                if (connectedToVmService)
-                  // TODO(https://github.com/flutter/devtools/issues/1941)
-                  if (serviceManager.connectedApp?.isFlutterAppNow ??
-                      false) ...[
-                    const HotReloadButton(),
-                    const HotRestartButton(),
-                  ],
+                if (connectedToVmService) ...[
+                  // Hide the hot reload button for Dart web apps, where the
+                  // hot reload service extension is not avilable and where the
+                  // [service.reloadServices] RPC is not implemented.
+                  // TODO(https://github.com/flutter/devtools/issues/6441): find
+                  // a way to show this for Dart web apps when supported.
+                  if (!connectedToDartWebApp)
+                    HotReloadButton(
+                      callOnVmServiceDirectly: !connectedToFlutterApp,
+                    ),
+                  // This button will hide itself based on whether the
+                  // hot restart service is available for the connected app.
+                  const HotRestartButton(),
+                ],
                 ...DevToolsScaffold.defaultActions(isEmbedded: embed),
               ],
             ),
@@ -323,7 +357,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
             ),
           );
         },
-      if (FeatureFlags.vsCodeSidebarTooling) ..._standaloneScreens,
+      ..._standaloneScreens,
     };
   }
 

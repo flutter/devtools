@@ -11,13 +11,13 @@ const argUpdatePerfetto = '--update-perfetto';
 /// This script builds DevTools in release mode by running the
 /// `./tool/build_release.sh` script and then serves DevTools with a locally
 /// running DevTools server.
-/// 
+///
 /// If [argNoBuildApp] is present, the DevTools web app will not be rebuilt.
-/// 
+///
 /// If [argNoUpdateFlutter] is present, the Flutter SDK will not be updated to
 /// the latest Flutter candidate. Use this flag to save the cost of updating the
 /// Flutter SDK when you already have the proper SDK checked out.
-/// 
+///
 /// If [argUpdatePerfetto] is present, the precompiled bits for Perfetto will
 /// be updated from the [update_perfetto.sh] script as part of the DevTools
 /// build process (e.g. [build_release.sh]).

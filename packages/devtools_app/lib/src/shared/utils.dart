@@ -93,8 +93,10 @@ List<ConnectionDescription> generateDeviceDescription(
   final flutterVersion = connectedApp.flutterVersionNow;
 
   ConnectionDescription? vmServiceConnection;
-  if (includeVmServiceConnection && serviceManager.service != null) {
-    final description = serviceManager.service!.connectedUri.toString();
+  if (includeVmServiceConnection &&
+      serviceConnection.serviceManager.service != null) {
+    final description =
+        serviceConnection.serviceManager.service!.connectedUri.toString();
     vmServiceConnection = ConnectionDescription(
       title: 'VM Service Connection',
       description: description,
@@ -131,13 +133,15 @@ List<ConnectionDescription> generateDeviceDescription(
 
 /// This method should be public, because it is used by g3 specific code.
 List<String> issueLinkDetails() {
+  final ide = ideFromUrl();
   final issueDescriptionItems = [
     '<-- Please describe your problem here. Be sure to include repro steps. -->',
     '___', // This will create a separator in the rendered markdown.
     '**DevTools version**: ${devtools.version}',
+    if (ide != null) '**IDE**: $ide',
   ];
-  final vm = serviceManager.vm;
-  final connectedApp = serviceManager.connectedApp;
+  final vm = serviceConnection.serviceManager.vm;
+  final connectedApp = serviceConnection.serviceManager.connectedApp;
   if (vm != null && connectedApp != null) {
     final descriptionEntries = generateDeviceDescription(
       vm,
@@ -219,4 +223,13 @@ class ConnectionDescription {
   final String description;
 
   final List<Widget> actions;
+}
+
+String? ideFromUrl() {
+  return lookupFromQueryParams('ide');
+}
+
+String? lookupFromQueryParams(String key) {
+  final queryParameters = loadQueryParams();
+  return queryParameters[key];
 }

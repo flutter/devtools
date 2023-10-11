@@ -8,13 +8,15 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:meta/meta.dart';
 import 'package:provider/provider.dart';
 
 /// The RouterDelegate must use the same NavigatorKey when building in order
 /// for widget state to be preserved.
 final _testNavigatorKey = GlobalKey<NavigatorState>();
 
-/// Wraps [widget] with the build context it needs to load in a test.
+/// Wraps [widget] with the build context it needs to load in a test as well as
+/// the [DevToolsRouterDelegate].
 ///
 /// This includes a [MaterialApp] to provide context like [Theme.of], a
 /// [Material] to support elements like [TextField] that draw ink effects, and a
@@ -49,6 +51,33 @@ Widget wrap(Widget widget) {
   );
 }
 
+/// Wraps [widget] with the build context it needs to load in a test.
+///
+/// This includes a [MaterialApp] to provide context like [Theme.of], a
+/// [Material] to support elements like [TextField] that draw ink effects, and a
+/// [Directionality] to support [RenderFlex] widgets like [Row] and [Column].
+Widget wrapSimple(Widget widget) {
+  return MaterialApp(
+    theme: themeFor(
+      isDarkTheme: false,
+      ideTheme: IdeTheme(),
+      theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: lightColorScheme,
+      ),
+    ),
+    home: Material(
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Provider<HoverCardController>.value(
+          value: HoverCardController(),
+          child: widget,
+        ),
+      ),
+    ),
+  );
+}
+
 Widget wrapWithControllers(
   Widget widget, {
   InspectorController? inspector,
@@ -62,6 +91,7 @@ Widget wrapWithControllers(
   AnalyticsController? analytics,
   ReleaseNotesController? releaseNotes,
   VMDeveloperToolsController? vmDeveloperTools,
+  bool includeRouter = true,
 }) {
   final _providers = [
     if (inspector != null)
@@ -82,14 +112,13 @@ Widget wrapWithControllers(
     if (vmDeveloperTools != null)
       Provider<VMDeveloperToolsController>.value(value: vmDeveloperTools),
   ];
-  return wrap(
-    wrapWithNotifications(
-      MultiProvider(
-        providers: _providers,
-        child: widget,
-      ),
+  final child = wrapWithNotifications(
+    MultiProvider(
+      providers: _providers,
+      child: widget,
     ),
   );
+  return includeRouter ? wrap(child) : wrapSimple(child);
 }
 
 Widget wrapWithNotifications(Widget child) {
@@ -141,6 +170,7 @@ void testWidgetsWithContext(
 }
 
 /// Runs a test with the size of the app window under test to [windowSize].
+@isTest
 void testWidgetsWithWindowSize(
   String name,
   Size windowSize,

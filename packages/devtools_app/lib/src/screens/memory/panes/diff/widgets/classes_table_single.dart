@@ -54,7 +54,7 @@ class _ClassNameColumn extends ColumnData<SingleClassStats>
       theClass: data.heapClass,
       showCopyButton: isRowSelected,
       copyGaItem: gac.MemoryEvent.diffClassSingleCopy,
-      rootPackage: serviceManager.rootInfoNow().package,
+      rootPackage: serviceConnection.serviceManager.rootInfoNow().package,
     );
   }
 

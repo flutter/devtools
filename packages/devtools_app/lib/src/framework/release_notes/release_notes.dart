@@ -95,9 +95,6 @@ class ReleaseNotesController extends SidePanelController {
           String releaseNotesMarkdown = await http.read(
             Uri.parse(_debugReleaseNotesUrl ?? _releaseNotesUrl(versionString)),
           );
-          // final response = await http.get(
-          // Uri.parse(_debugReleaseNotesUrl ?? _releaseNotesUrl(versionString)),
-          // );
 
           // This is a workaround so that the images in release notes will appear.
           // The {{site.url}} syntax is best practices for the flutter website

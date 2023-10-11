@@ -71,7 +71,7 @@ void main() {
 
   group('DartIOHttpRequestData', () {
     NetworkController controller;
-    FakeServiceManager fakeServiceManager;
+    FakeServiceConnectionManager fakeServiceConnection;
     SocketProfile socketProfile;
     HttpProfile httpProfile;
 
@@ -80,13 +80,13 @@ void main() {
       httpProfile = loadHttpProfile();
       // DartIOHttpRequestData.getFullRequestData relies on a call to serviceManager to
       // retrieve request details.
-      fakeServiceManager = FakeServiceManager(
+      fakeServiceConnection = FakeServiceConnectionManager(
         service: FakeServiceManager.createFakeService(
           socketProfile: socketProfile,
           httpProfile: httpProfile,
         ),
       );
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(ServiceConnectionManager, fakeServiceConnection);
       controller = NetworkController();
       await controller.startRecording();
     });

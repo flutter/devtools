@@ -102,8 +102,8 @@ Future<T> connect<T extends VmService>({
   // Connects to a VM Service but does not verify the connection was fully
   // successful.
   Future<T> connectHelper() async {
-    T service;
-    service = uri.scheme == 'sse' || uri.scheme == 'sses'
+    final useSse = uri.scheme == 'sse' || uri.scheme == 'sses';
+    final T service = useSse
         ? await _connectWithSse<T>(
             uri: uri,
             onError: onError,

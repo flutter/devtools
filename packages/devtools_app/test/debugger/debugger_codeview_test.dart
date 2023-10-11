@@ -18,7 +18,7 @@ import '../test_infra/matchers/matchers.dart';
 
 void main() {
   const mockScriptRefFileUri = 'the/path/mapped/to/script/ref/uri';
-  late FakeServiceManager fakeServiceManager;
+  late FakeServiceConnectionManager fakeServiceConnection;
   late MockDebuggerController debuggerController;
   late MockCodeViewController codeViewController;
   late ScriptsHistory scriptsHistory;
@@ -27,7 +27,7 @@ void main() {
 
   setUpAll(() {
     setGlobal(BreakpointManager, BreakpointManager());
-    fakeServiceManager = FakeServiceManager(
+    fakeServiceConnection = FakeServiceConnectionManager(
       service: FakeServiceManager.createFakeService(
         resolvedUriMap: {mockScriptRefFileUri: mockScriptRef.uri!},
       ),
@@ -38,12 +38,12 @@ void main() {
     );
     scriptsHistory = ScriptsHistory();
     mockConnectedApp(
-      fakeServiceManager.connectedApp!,
+      fakeServiceConnection.serviceManager.connectedApp!,
       isProfileBuild: false,
       isFlutterApp: true,
       isWebApp: false,
     );
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
+    setGlobal(ServiceConnectionManager, fakeServiceConnection);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(ScriptManager, MockScriptManager());
     setGlobal(NotificationService, NotificationService());
@@ -52,8 +52,8 @@ void main() {
       ExternalDevToolsEnvironmentParameters(),
     );
     setGlobal(PreferencesController, PreferencesController());
-    fakeServiceManager.consoleService.ensureServiceInitialized();
-    when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
+    fakeServiceConnection.consoleService.ensureServiceInitialized();
+    when(fakeServiceConnection.errorBadgeManager.errorCountNotifier('debugger'))
         .thenReturn(ValueNotifier<int>(0));
 
     scriptsHistory.pushEntry(mockScript!);
@@ -71,7 +71,10 @@ void main() {
   ) async {
     await tester.pumpWidget(
       wrapWithControllers(
-        const DebuggerScreenBody(),
+        DebuggerSourceAndControls(
+          shownFirstScript: () => true,
+          setShownFirstScript: (_) {},
+        ),
         debugger: controller,
       ),
     );
@@ -101,7 +104,7 @@ void main() {
         findsOneWidget,
       );
       await expectLater(
-        find.byKey(DebuggerScreenBody.codeViewKey),
+        find.byType(CodeView),
         matchesDevToolsGolden(
           '../test_infra/goldens/codeview_scrollbars.png',
         ),
@@ -167,8 +170,9 @@ void main() {
           ),
         );
         // Prefetch File Uris
-        await serviceManager.resolvedUriManager.fetchFileUris(
-          serviceManager.isolateManager.selectedIsolate.value!.id!,
+        await serviceConnection.resolvedUriManager.fetchFileUris(
+          serviceConnection
+              .serviceManager.isolateManager.selectedIsolate.value!.id!,
           [mockScriptRef.uri!],
         );
 
