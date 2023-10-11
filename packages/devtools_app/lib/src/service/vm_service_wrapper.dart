@@ -380,6 +380,7 @@ class VmServiceWrapper implements VmService {
     bool? forceCompile,
     bool? reportLines,
     List<String>? libraryFilters,
+    List<String>? librariesAlreadyCompiled,
   }) async {
     return trackFuture(
       'getSourceReport',
