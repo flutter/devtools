@@ -27,7 +27,7 @@ dependencies:
   dds_service_extensions: ^1.6.0
   devtools_app_shared: ^0.0.5
   devtools_extensions: ^0.0.8
-  devtools_shared: ^4.0.1
+  devtools_shared: ^4.1.0
   file: ^6.0.0
   file_selector: ^0.8.0
   file_selector_linux: ^0.0.2
