@@ -177,7 +177,7 @@ class VmServiceWrapper extends VmService {
   @override
   Future<Success> streamCancel(String streamId) {
     _activeStreams.remove(streamId);
-    return wrapFuture('streamCancel', super.streamCancel(streamId));
+    return super.streamCancel(streamId);
   }
 
   // We tweaked this method so that we do not try to listen to the same stream
@@ -186,10 +186,7 @@ class VmServiceWrapper extends VmService {
   @override
   Future<Success> streamListen(String streamId) {
     if (!_activeStreams.containsKey(streamId)) {
-      final Future<Success> future = wrapFuture(
-        'streamListen',
-        super.streamListen(streamId),
-      );
+      final Future<Success> future = super.streamListen(streamId);
       _activeStreams[streamId] = future;
       return future;
     } else {
@@ -422,15 +419,12 @@ class VmServiceWrapper extends VmService {
       return null;
     }
 
-    final response = await wrapFuture(
-      'dap.$command',
-      sendDapRequest(
-        jsonEncode(
-          dap.Request(
-            command: command,
-            seq: _dapSeq++,
-            arguments: args,
-          ),
+    final response = await sendDapRequest(
+      jsonEncode(
+        dap.Request(
+          command: command,
+          seq: _dapSeq++,
+          arguments: args,
         ),
       ),
     );
