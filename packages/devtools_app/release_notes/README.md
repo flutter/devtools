@@ -28,6 +28,8 @@ to match the structure of the Flutter website.
     the running release notes for the current version.
   - See an example [PR](https://github.com/flutter/website/pull/6791) for
     an example of how to add those to the Flutter website.
+  - Make sure all images contain the `site_url`
+    - e.g. `{{site.url}}/tools/devtools/release-notes/images-<version>/`
   - NOTE: When adding images, be cognizant that the images will be
     rendered in a relatively small window in DevTools,
     and they should be sized accordingly.
