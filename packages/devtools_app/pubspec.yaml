@@ -177,3 +177,4 @@ dependency_overrides:
     path: ../devtools_test
   devtools_extensions:
     path: ../devtools_extensions
+  vm_service: 12.0.0
