@@ -1,7 +1,9 @@
-# 4.1.0
+# 4.2.0
 * Bump `package:vm_service` dependency to 13.0.0.
-* Remove `ServiceCreator` typedef and replace usages with `VmServiceCreator`
-typedef from `package:vm_service`.
+* Remove `ServiceCreator` typedef and replace usages with `VmServiceFactory`
+
+# 4.1.0
+* Bump `package:vm_service` to ^12.0.0.
 * Adds `DeeplinkApi.androidAppLinkSettings`, `DeeplinkApi.iosBuildOptions`, and
   `DeeplinkApi.iosUniversalLinkSettings` endpoints to ServerApi.
 * Add shared integration test utilities to `package:devtools_shared`. These test
