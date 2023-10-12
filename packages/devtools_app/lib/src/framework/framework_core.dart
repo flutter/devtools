@@ -76,7 +76,7 @@ class FrameworkCore {
         final VmServiceWrapper service = await connect<VmServiceWrapper>(
           uri: uri,
           finishedCompleter: finishedCompleter,
-          createService: VmServiceWrapper.defaultCreator,
+          serviceFactory: VmServiceWrapper.defaultFactory,
         );
 
         await serviceConnection.serviceManager.vmServiceOpened(

@@ -32,7 +32,7 @@ void main() async {
   final vmService = await connect<VmService>(
     uri: Uri.parse(someVmServiceUri),
     finishedCompleter: finishedCompleter,
-    createService: VmService.defaultCreator,
+    serviceFactory: VmService.defaultFactory,
   );
 
   await serviceManager.vmServiceOpened(

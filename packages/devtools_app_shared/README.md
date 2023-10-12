@@ -124,7 +124,7 @@ void main() {
   final vmService = await connect<VmService>(
     uri: Uri.parse(vmServiceUri),
     finishedCompleter: finishedCompleter,
-    createService: VmService.defaultCreator,
+    serviceFactory: VmService.defaultFactory,
   );
 
   await serviceManager.vmServiceOpened(

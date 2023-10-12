@@ -39,7 +39,7 @@ class VmServiceWrapper extends VmService {
     unawaited(_initSupportedProtocols());
   }
 
-  static VmServiceWrapper defaultCreator({
+  static VmServiceWrapper defaultFactory({
     required Stream<dynamic> /*String|List<int>*/ inStream,
     required void Function(String message) writeMessage,
     Log? log,
@@ -186,9 +186,7 @@ class VmServiceWrapper extends VmService {
   @override
   Future<Success> streamListen(String streamId) {
     if (!_activeStreams.containsKey(streamId)) {
-      final Future<Success> future = super.streamListen(streamId);
-      _activeStreams[streamId] = future;
-      return future;
+      return _activeStreams[streamId] = super.streamListen(streamId);
     } else {
       return _activeStreams[streamId]!.then((value) => value);
     }

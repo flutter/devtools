@@ -17,7 +17,7 @@ Future<T> _connectWithSse<T extends VmService>({
   required Uri uri,
   required void Function(Object?) onError,
   required Completer<void> finishedCompleter,
-  required VmServiceCreator<T> createService,
+  required VmServiceFactory<T> serviceFactory,
 }) {
   final serviceCompleter = Completer<T>();
 
@@ -27,7 +27,7 @@ Future<T> _connectWithSse<T extends VmService>({
   final client = SseClient('$uri', debugKey: 'DevToolsService');
   final Stream<String> stream =
       client.stream!.asBroadcastStream() as Stream<String>;
-  final service = createService(
+  final service = serviceFactory(
     inStream: stream,
     writeMessage: client.sink!.add,
     wsUri: uri.toString(),
@@ -49,14 +49,14 @@ Future<T> _connectWithWebSocket<T extends VmService>({
   required Uri uri,
   required void Function(Object?) onError,
   required Completer<void> finishedCompleter,
-  required VmServiceCreator<T> createService,
+  required VmServiceFactory<T> serviceFactory,
 }) async {
   // Map the URI (which may be Observatory web app) to a WebSocket URI for
   // the VM service.
   uri = convertToWebSocketUrl(serviceProtocolUrl: uri);
   final ws = WebSocketChannel.connect(uri);
   final stream = ws.stream.handleError(onError);
-  final service = createService(
+  final service = serviceFactory(
     inStream: stream,
     writeMessage: (String message) {
       ws.sink.add(message);
@@ -83,7 +83,7 @@ Future<T> _connectWithWebSocket<T extends VmService>({
 Future<T> connect<T extends VmService>({
   required Uri uri,
   required Completer<void> finishedCompleter,
-  required VmServiceCreator<T> createService,
+  required VmServiceFactory<T> serviceFactory,
 }) {
   final connectedCompleter = Completer<T>();
 
@@ -102,13 +102,13 @@ Future<T> connect<T extends VmService>({
             uri: uri,
             onError: onError,
             finishedCompleter: finishedCompleter,
-            createService: createService,
+            serviceFactory: serviceFactory,
           )
         : await _connectWithWebSocket<T>(
             uri: uri,
             onError: onError,
             finishedCompleter: finishedCompleter,
-            createService: createService,
+            serviceFactory: serviceFactory,
           );
     // Verify that the VM is alive enough to actually get the version before
     // considering it successfully connected. Otherwise, VMService instances
