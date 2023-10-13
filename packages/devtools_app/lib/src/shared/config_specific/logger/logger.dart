@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 export 'logger_default.dart'
-    if (dart.library.html) 'logger_html.dart'
+    if (dart.library.js_interop) 'logger_html.dart'
     if (dart.library.io) 'logger_io.dart';
 
 enum LogLevel {
