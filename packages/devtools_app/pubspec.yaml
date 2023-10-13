@@ -176,3 +176,20 @@ dependency_overrides:
     path: ../devtools_test
   devtools_extensions:
     path: ../devtools_extensions
+
+
+  file_selector_web:
+    git:
+      url: https://github.com/flutter/packages
+      ref: pkg_web_wip
+      path: packages/file_selector/file_selector_web
+  shared_preferences_web:
+    git:
+      url: https://github.com/flutter/packages
+      ref: pkg_web_wip
+      path: packages/shared_preferences/shared_preferences_web
+  url_launcher_web:
+    git:
+      url: https://github.com/flutter/packages
+      ref: pkg_web_wip
+      path: packages/url_launcher/url_launcher_web
