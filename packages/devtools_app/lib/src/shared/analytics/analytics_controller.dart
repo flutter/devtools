@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import '_analytics_controller_stub.dart'
-    if (dart.library.html) '_analytics_controller_web.dart';
+    if (dart.library.js_interop) '_analytics_controller_web.dart';
 
 Future<AnalyticsController> get analyticsController async =>
     await devToolsAnalyticsController;

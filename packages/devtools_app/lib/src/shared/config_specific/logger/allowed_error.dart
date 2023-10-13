@@ -3,4 +3,4 @@
 // found in the LICENSE file.
 
 export 'allowed_error_default.dart'
-    if (dart.library.html) 'allowed_error_html.dart';
+    if (dart.library.js_interop) 'allowed_error_html.dart';

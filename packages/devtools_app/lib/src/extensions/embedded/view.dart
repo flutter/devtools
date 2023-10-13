@@ -6,8 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
-
-import '_view_desktop.dart' if (dart.library.html) '_view_web.dart';
+import '_view_desktop.dart' if (dart.library.js_interop) '_view_web.dart';
 import 'controller.dart';
 
 /// A widget that displays a DevTools extension in an embedded iFrame.
