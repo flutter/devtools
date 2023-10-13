@@ -32,7 +32,7 @@ class DevToolsRepo {
   /// checkout of DevTools.
   static DevToolsRepo requireInstance() {
     return getInstance() ??
-        (throw Exception('devtools_tool must be run from a DevTools checkout'));
+        (throw Exception('devtools_tool must be run from inside of the DevTools repository directory'));
   }
 
   List<Package> getPackages() {
