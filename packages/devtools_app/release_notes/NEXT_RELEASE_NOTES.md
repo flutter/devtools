@@ -22,7 +22,7 @@ TODO: Remove this section if there are not any general updates.
 
 ## CPU profiler updates
 
-TODO: Remove this section if there are not any general updates.
+- Tree guidelines are now always enabled for the "Bottom Up" and "Call Tree" tabs. [#6534](https://github.com/flutter/devtools/pull/6534)
 
 ## Memory updates
 
