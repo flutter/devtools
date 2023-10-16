@@ -64,6 +64,8 @@ class DiffPaneController extends DisposableController {
     try {
       final heapData = await snapshotTaker.take();
       await item.initializeHeapData(heapData);
+
+      /// ???
     } catch (e) {
       snapshots.remove(item);
       rethrow;

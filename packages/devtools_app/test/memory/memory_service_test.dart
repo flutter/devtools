@@ -50,7 +50,7 @@ void main() {
             // VM Service connection has stopped - unexpected.
             fail('VM Service connection stoped unexpectantly.');
           } else {
-            validateHeapInfo(memoryController.memoryTimeline);
+            validateHeapInfo(memoryController.controllers.memoryTimeline);
           }
         });
 
