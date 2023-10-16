@@ -34,7 +34,7 @@ TODO: Remove this section if there are not any general updates.
 
 ## Network profiler updates
 
-TODO: Remove this section if there are not any general updates.
+- Network statuses now show with an error color when the request failed [#6527](https://github.com/flutter/devtools/pull/6527)
 
 ## Logging updates
 
