@@ -17,28 +17,6 @@ import '../../profiler_screen_controller.dart';
 final profilerScreenSearchFieldKey =
     GlobalKey(debugLabel: 'ProfilerScreenSearchFieldKey');
 
-class DisplayTreeGuidelinesToggle extends StatelessWidget {
-  const DisplayTreeGuidelinesToggle({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: preferences.cpuProfiler.displayTreeGuidelines,
-      builder: (context, displayTreeGuidelines, _) {
-        return DevToolsToggleButton(
-          onPressed: () {
-            preferences.cpuProfiler.displayTreeGuidelines.value =
-                !displayTreeGuidelines;
-          },
-          isSelected: displayTreeGuidelines,
-          message: 'Display guidelines',
-          icon: Icons.stacked_bar_chart,
-        );
-      },
-    );
-  }
-}
-
 class CpuProfileFilterDialog extends StatelessWidget {
   const CpuProfileFilterDialog({required this.controller, Key? key})
       : super(key: key);
