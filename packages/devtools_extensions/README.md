@@ -1,5 +1,4 @@
 # Dart & Flutter DevTools Extensions
-Note: this package is under active development; more thorough documentation coming soon.
 
 Extend Dart & Flutter's developer tool suite,
 [Dart DevTools](https://docs.flutter.dev/tools/devtools/overview), with a custom tool for
@@ -21,6 +20,7 @@ for reference.
     - [Development](#create-the-extension-web-app)
     - [Debugging](#debug-the-extension-web-app)
 3. [Publish your package with a DevTools extension](#publish-your-package-with-a-DevTools-extension)
+4. [Resources and support](#resources-and-support)
 
 ## Setup your package to provide a DevTools extension
 
@@ -245,3 +245,11 @@ pushd your_pub_package
 flutter pub publish
 popd
 ```
+
+## Resources and support
+
+Check out the [#devtools-extension-authors](https://discord.com/channels/608014603317936148/1159561514072690739)
+Discord channel to connect with other DevTools extension authors and the DevTools team.
+
+For feature requests or bugs, please [file an issue](https://github.com/flutter/devtools/issues/new)
+on the DevTools Github repository.

@@ -25,7 +25,7 @@ activity. This is useful for apps with plugins.
 
 ## CPU profiler updates
 
-TODO: Remove this section if there are not any general updates.
+- Tree guidelines are now always enabled for the "Bottom Up" and "Call Tree" tabs. [#6534](https://github.com/flutter/devtools/pull/6534)
 
 ## Memory updates
 
@@ -37,7 +37,7 @@ TODO: Remove this section if there are not any general updates.
 
 ## Network profiler updates
 
-TODO: Remove this section if there are not any general updates.
+- Network statuses now show with an error color when the request failed [#6527](https://github.com/flutter/devtools/pull/6527)
 
 ## Logging updates
 
