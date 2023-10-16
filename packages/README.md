@@ -1,3 +1,5 @@
+This PR is not for merge.
+
 # Coding agreements in DevTools
 
 We fully follow [Effective Dart](https://dart.dev/guides/language/effective-dart)
