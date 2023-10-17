@@ -29,7 +29,7 @@ extensions in an iFrame to display them dynamically in DevTools.
 
 To add an extension to your Dart package, add a top-level `extension` directory:
 ```
-foo_package
+foo
   extension/
   lib/
   ...
@@ -46,7 +46,7 @@ extension
 The `config.yaml` file contains metadata that DevTools needs to load the extension.
 
 ```yaml
-name: foo_package
+name: foo
 issueTracker: <link_to_your_issue_tracker.com>
 version: 0.0.1
 materialIconCodePoint: '0xe0b1'
@@ -84,26 +84,26 @@ in order for DevTools to load it. To keep the size of your pub package small, we
 you develop your DevTools extension outside of your pub package. Here is the recommended package structure:
 
 ```
-foo_package/  # formerly the repository root of your pub package
+foo/  # formerly the repository root of your pub package
   packages/
-    foo_package/  # your pub package
+    foo/  # your pub package
       extension/
         devtools/
           build/
-            ...  # pre-compiled output of foo_package_devtools_extension
+            ...  # pre-compiled output of foo_devtools_extension
           config.yaml
-    foo_package_devtools_extension/  # source code for your extension
+    foo_devtools_extension/  # source code for your extension
 ```
 
 ### Create the extension web app
 
 From the directory where you want your extension source code to live, run the following command,
-replacing `foo_package_devtools_extension` with `<your_package_name>_devtools_extension``:
+replacing `foo_devtools_extension` with `<your_package_name>_devtools_extension``:
 ```sh
-flutter create --template app --platforms web foo_package_devtools_extension
+flutter create --template app --platforms web foo_devtools_extension
 ```
 
-In `foo_package_devtools_extension/pubspec.yaml`, add a dependency on `devtools_extensions`:
+In `foo_devtools_extension/pubspec.yaml`, add a dependency on `devtools_extensions`:
 ```yaml
 devtools_extensions: ^0.0.9
 ```
@@ -159,7 +159,7 @@ file in VS code:
         ...
         {
             "name": "foo_devtools_extension + simulated environment",
-            "program": "foo_package/extension/foo_devtools_extension/lib/main.dart",
+            "program": "foo/extension/foo_devtools_extension/lib/main.dart",
             "request": "launch",
             "type": "dart",
             "args": [
