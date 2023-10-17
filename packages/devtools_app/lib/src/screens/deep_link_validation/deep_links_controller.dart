@@ -7,59 +7,145 @@ import 'package:flutter/foundation.dart';
 import 'deep_links_model.dart';
 import 'fake_data.dart';
 
+enum SchemeFilterOption {
+  http,
+  custom,
+  showAll,
+}
+
+enum OsFilterOption {
+  android,
+  ios,
+  showAll,
+}
+
+enum StatusFilterOption {
+  noIssue,
+  failedDomainCheck,
+  failedPathCheck,
+  failedAllCheck,
+  showAll,
+}
+
 class DeepLinksController {
-  bool get showSpitScreen => showSpitScreenNotifier.value;
+  bool get showSplitScreen => showSplitScreenNotifier.value;
 
-  List<LinkData> get getLinkDatasByPath {
-    final linkDatasByPath = <String, LinkData>{};
-    for (var linkData in linkDatasNotifier.value) {
-      linkDatasByPath[linkData.path.single] =
-          linkData.mergeDomain(linkDatasByPath[linkData.path.single]);
-    }
-    return linkDatasByPath.values.toList();
-  }
-
-  List<LinkData> get getLinkDatasByDomain {
-    final linkDatasByDomain = <String, LinkData>{};
-    for (var linkData in linkDatasNotifier.value) {
-      linkDatasByDomain[linkData.domain.single] =
-          linkData.mergePath(linkDatasByDomain[linkData.domain.single]);
-    }
-    final List<LinkData> linkDatasByDomainValues =
-        linkDatasByDomain.values.toList();
-    domainErrorCountNotifier.value =
-        linkDatasByDomainValues.where((element) => element.domainError).length;
-    return linkDatasByDomainValues;
-  }
-
+  List<LinkData> get getLinkDatasByPath =>
+      _getFilterredLinks(linkDatasByPath, _searchContentNotifier.value);
+  List<LinkData> get getLinkDatasByDomain =>
+      _getFilterredLinks(linkDatasByDomain, _searchContentNotifier.value);
 
   final selectedLink = ValueNotifier<LinkData?>(null);
   final linkDatasNotifier = ValueNotifier<List<LinkData>>(allLinkDatas);
-  final showSpitScreenNotifier = ValueNotifier<bool>(false);
+  final showSplitScreenNotifier = ValueNotifier<bool>(false);
   final domainErrorCountNotifier = ValueNotifier<int>(0);
-
+  final pathErrorCountNotifier = ValueNotifier<int>(0);
   final _searchContentNotifier = ValueNotifier<String>('');
+  final schemeFilterOptionNotifier =
+      ValueNotifier<SchemeFilterOption>(SchemeFilterOption.showAll);
+  final osFilterOptionNotifier =
+      ValueNotifier<OsFilterOption>(OsFilterOption.showAll);
+  final statusFilterOptionNotifier =
+      ValueNotifier<StatusFilterOption>(StatusFilterOption.showAll);
 
-  void _updateLinks() {
-    final searchContent = _searchContentNotifier.value;
-    final List<LinkData> linkDatas = searchContent.isNotEmpty
-        ? allLinkDatas
-            .where(
-              (linkData) => linkData.matchesSearchToken(
-                RegExp(
-                  searchContent,
-                  caseSensitive: false,
-                ),
-              ),
-            )
-            .toList()
-        : allLinkDatas;
+  var linkDatasByDomain = <LinkData>[];
+  var linkDatasByPath = <LinkData>[];
 
-    linkDatasNotifier.value = linkDatas;
+  void initLinkDatas() {
+    linkDatasNotifier.value = allLinkDatas;
+    final linkDatasByDomainMap = <String, LinkData>{};
+    for (var linkData in allLinkDatas) {
+      linkDatasByDomainMap[linkData.domain.single] =
+          linkData.mergebyDomain(linkDatasByDomainMap[linkData.domain.single]);
+    }
+    final List<LinkData> linkDatasByDomainValues =
+        linkDatasByDomainMap.values.toList();
+    domainErrorCountNotifier.value =
+        linkDatasByDomainValues.where((element) => element.domainError).length;
+    linkDatasByDomain = linkDatasByDomainValues;
+
+    final linkDatasByPathMap = <String, LinkData>{};
+    for (var linkData in allLinkDatas) {
+      linkDatasByPathMap[linkData.path.single] =
+          linkData.mergebyPath(linkDatasByPathMap[linkData.path.single]);
+    }
+    final List<LinkData> linkDatasByPathValues =
+        linkDatasByPathMap.values.toList();
+    pathErrorCountNotifier.value =
+        linkDatasByPathValues.where((element) => element.pathError).length;
+    linkDatasByPath = linkDatasByPathValues;
   }
 
   set searchContent(String content) {
     _searchContentNotifier.value = content;
-    _updateLinks();
+    linkDatasNotifier.value =
+        _getFilterredLinks(allLinkDatas, _searchContentNotifier.value);
+  }
+
+  void updateFilterOptions({
+    SchemeFilterOption? schemeOption,
+    OsFilterOption? osOption,
+    StatusFilterOption? statusOption,
+  }) {
+    if (schemeOption != null) schemeFilterOptionNotifier.value = schemeOption;
+    if (osOption != null) osFilterOptionNotifier.value = osOption;
+    if (statusOption != null) statusFilterOptionNotifier.value = statusOption;
+
+    linkDatasNotifier.value =
+        _getFilterredLinks(allLinkDatas, _searchContentNotifier.value);
+  }
+
+  List<LinkData> _getFilterredLinks(
+    List<LinkData> linkDatas,
+    String searchContent,
+  ) {
+    if (searchContent.isNotEmpty) {
+      linkDatas = linkDatas
+          .where(
+            (linkData) => linkData.matchesSearchToken(
+              RegExp(
+                searchContent,
+                caseSensitive: false,
+              ),
+            ),
+          )
+          .toList();
+    }
+    switch (statusFilterOptionNotifier.value) {
+      case StatusFilterOption.failedAllCheck:
+        linkDatas = linkDatas
+            .where((linkData) => linkData.domainError && linkData.pathError)
+            .toList();
+        break;
+      case StatusFilterOption.failedDomainCheck:
+        linkDatas =
+            linkDatas.where((linkData) => linkData.domainError).toList();
+        break;
+      case StatusFilterOption.failedPathCheck:
+        linkDatas = linkDatas.where((linkData) => linkData.pathError).toList();
+        break;
+      case StatusFilterOption.noIssue:
+        linkDatas = linkDatas
+            .where((linkData) => !linkData.pathError && !linkData.domainError)
+            .toList();
+        break;
+      case StatusFilterOption.showAll:
+        break;
+    }
+    switch (osFilterOptionNotifier.value) {
+      case OsFilterOption.android:
+        linkDatas = linkDatas
+            .where((linkData) => linkData.os.contains('Android'))
+            .toList();
+        break;
+      case OsFilterOption.ios:
+        linkDatas =
+            linkDatas.where((linkData) => linkData.os.contains('iOS')).toList();
+        break;
+      case OsFilterOption.showAll:
+        break;
+    }
+
+    return linkDatas;
   }
 }
