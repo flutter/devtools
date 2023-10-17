@@ -18,7 +18,7 @@ const _testDirectory = 'integration_test/test';
 const _offlineIndicator = 'integration_test/test/offline';
 
 /// The set of test that should be skipped for all devices.
-/// 
+///
 /// This list should be empty most of the time, but may contain a broken test
 /// while a fix being worked on.
 const _skipTests = <String>[
