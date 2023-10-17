@@ -168,7 +168,7 @@ class _EvalAndBrowseTester {
     // Make console wider.
     // The distance is big enough to see more items in console,
     // but not too big to make classes in snapshot hidden.
-    const dragDistance = -360.0;
+    const dragDistance = -320.0;
     await tester.drag(
       find.byType(ConsolePaneHeader),
       const Offset(0, dragDistance),
