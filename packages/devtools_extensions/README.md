@@ -43,16 +43,35 @@ extension
     config.yaml
 ```
 
-The `config.yaml` file contains metadata that DevTools needs in order to load the
-extension. Copy the `config.yaml` file below and fill in the approproate value for each key.
-The `materialIconCodePoint` field should correspond to the codepoint value of an icon from
-[material/icons.dart](https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/material/icons.dart).
+The `config.yaml` file contains metadata that DevTools needs to load the extension.
+
 ```yaml
 name: foo_package
 issueTracker: <link_to_your_issue_tracker.com>
 version: 0.0.1
 materialIconCodePoint: '0xe0b1'
 ```
+
+Copy the `config.yaml` file content above and paste it into the `config.yaml` file you just 
+created in your package. For each key, fill in the appropriate value for your package. 
+* `name`: the package name that this DevTools extension belongs to. The value of this field 
+will be used in the extension page title bar. **(required)**
+* `issueTracker`: the url for your issue tracker. When a user clicks the “Report an issue” 
+link in the DevTools UI, they will be directed to this url. **(required)**
+* `version`: the version of your DevTools extension. This version number should evolve over 
+time as you ship new features for your extension. The value of this field will be used in the 
+extension page title bar. **(required)**
+
+  ![Extension title bar components](_readme_images/extension_title_bar.png)
+
+* `materialIconCodePoint`: corresponds to the codepoint value of an icon from
+[material/icons.dart](https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/material/icons.dart).
+This icon will be used for the extension’s tab in the top-level DevTools tab bar. **(required)**
+
+  ![Extension tab icon](_readme_images/extension_tab_icon.png)
+
+For the most up-to-date documentation on the `config.yaml` spec, see
+[extension_config_spec.md](https://github.com/flutter/devtools/blob/master/packages/devtools_extensions/extension_config_spec.md)
 
 Now it is time to build your extension.
 
