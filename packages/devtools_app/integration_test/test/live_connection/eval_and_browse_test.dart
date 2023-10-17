@@ -9,6 +9,7 @@ import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/memory/panes/control/primary_controls.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/widgets/snapshot_list.dart';
 import 'package:devtools_app/src/screens/memory/shared/primitives/instance_context_menu.dart';
+import 'package:devtools_app/src/shared/console/console.dart';
 import 'package:devtools_app/src/shared/console/widgets/console_pane.dart';
 import 'package:devtools_test/devtools_integration_test.dart';
 import 'package:flutter/material.dart';
@@ -101,21 +102,22 @@ Future<void> _inboundReferencesAreListed(_EvalAndBrowseTester tester) async {
   await tester.tapAndPump(find.textContaining('one instance'));
   await tester.tapAndPump(find.text('Any'), duration: longPumpDuration);
 
-  Widget? next = await tester.tapAndPump(
+  Finder? next = await tester.tapAndPump(
     find.textContaining('MyApp, retained size '),
     next: find.text('references'),
   );
   next = await tester.tapAndPump(
-    find.byWidget(next!),
+    next!,
     next: find.textContaining('static ('),
   );
   next = await tester.tapAndPump(
-    find.byWidget(next!),
+    next!,
+    description: 'text containing "static ("',
     next: find.text('inbound'),
   );
   next = await tester.tapAndPump(
-    find.byWidget(next!),
-    next: find.text('Context'),
+    next!,
+    next: find.text('View'),
   );
 }
 
@@ -167,7 +169,7 @@ class _EvalAndBrowseTester {
     // Make console wider.
     // The distance is big enough to see more items in console,
     // but not too big to make classes in snapshot hidden.
-    const dragDistance = -320.0;
+    const dragDistance = -360.0;
     await tester.drag(
       find.byType(ConsolePaneHeader),
       const Offset(0, dragDistance),
@@ -199,13 +201,15 @@ class _EvalAndBrowseTester {
   ///
   /// If [next] is provided, will repeat the tap untill [next] returns results.
   /// If [next] is not null returns [next].
-  Future<Widget?> tapAndPump(
+  Future<Finder?> tapAndPump(
     Finder finder, {
     Duration? duration,
     Finder? next,
+    String? description,
   }) async {
     Future<void> action(int tryNumber) async {
-      logStatus('attempt #$tryNumber, tapping \n[$finder]\n');
+      logStatus('\nattempt #$tryNumber, tapping');
+      logStatus(description ?? finder.toString());
       tryNumber++;
       await tester.tap(finder);
       await tester.pump(duration);
@@ -220,7 +224,7 @@ class _EvalAndBrowseTester {
     for (var tryNumber = 1; tryNumber < 10; tryNumber++) {
       try {
         final items = tester.widgetList(next);
-        if (items.isNotEmpty) return items.first;
+        if (items.isNotEmpty) return next;
         await action(tryNumber);
       } on StateError {
         // tester.widgetList throws StateError if no widgets found.
