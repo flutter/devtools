@@ -15,7 +15,6 @@ import 'cpu_profile_columns.dart';
 class CpuBottomUpTable extends StatelessWidget {
   const CpuBottomUpTable({
     required this.bottomUpRoots,
-    required this.displayTreeGuidelines,
     super.key,
   });
 
@@ -52,8 +51,6 @@ For children methods in the bottom-up tree (the callers), this is the self time 
 the top-level method (the callee) when called through the child method (the caller).''';
 
   final List<CpuStackFrame> bottomUpRoots;
-
-  final bool displayTreeGuidelines;
 
   static InlineSpan? _bottomUpTimeTooltipBuilder(
     _TimeType type,
@@ -110,7 +107,7 @@ the top-level method (the callee) when called through the child method (the call
   Widget build(BuildContext context) {
     return TreeTable<CpuStackFrame>(
       keyFactory: (frame) => PageStorageKey<String>(frame.id),
-      displayTreeGuidelines: displayTreeGuidelines,
+      displayTreeGuidelines: true,
       dataRoots: bottomUpRoots,
       dataKey: 'cpu-bottom-up',
       columns: columns,

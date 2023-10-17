@@ -36,8 +36,8 @@ class LinkData with SearchableDataMixin {
 
   @override
   bool matchesSearchToken(RegExp regExpSearch) {
-    return (domain.join().caseInsensitiveContains(regExpSearch) == true) ||
-        (path.join().caseInsensitiveContains(regExpSearch) == true);
+    return domain.join().caseInsensitiveContains(regExpSearch) ||
+        path.join().caseInsensitiveContains(regExpSearch);
   }
 
   @override
