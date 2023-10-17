@@ -1,5 +1,11 @@
 ## 0.0.6
 * Fix a bug where service extension states were not getting cleared on app disconnect.
+* Add optional parameter `id` to `DisposerMixin.addAutoDisposeListener` and
+`AutoDisposeMixin.addAutoDisposeListener` that allows for tagging a listener
+with a specific id.
+* Add optional parameter `excludeIds` to `DisposerMixin.cancelListeners` and 
+`AutoDisposeMixin.cancelListeners` that allows for excluding listeners with
+a specific id from the cancel operation.
 
 ## 0.0.5
 * Fix bug where registered services were not getting cleared on app disconnect.
