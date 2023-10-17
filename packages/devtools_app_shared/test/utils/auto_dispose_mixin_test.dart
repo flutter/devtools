@@ -192,7 +192,7 @@ void main() {
       disposer.cancelListeners();
       expect(notifier.hasListeners, isFalse);
       notifier.value = 19;
-      
+
       // Verify neither listeners fire.
       expect(values1.length, equals(1));
       expect(values1.last, equals(13));

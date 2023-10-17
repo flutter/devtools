@@ -421,7 +421,7 @@ final class ServiceExtensionManager with DisposerMixin {
   void vmServiceClosed() {
     cancelStreamSubscriptions();
     _mainIsolateClosed();
-    
+
     _enabledServiceExtensions.clear();
     _callbacksOnIsolateResume.clear();
     _connectedApp = null;
@@ -456,7 +456,6 @@ final class ServiceExtensionManager with DisposerMixin {
         value: null,
       ),
     );
-
   }
 
   /// Performs [action] over the values in [map], and then clears the [map] once
