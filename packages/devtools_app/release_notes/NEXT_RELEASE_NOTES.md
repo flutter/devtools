@@ -10,7 +10,8 @@ To learn more about DevTools, check out the
 
 ## General updates
 
-TODO: Remove this section if there are not any general updates.
+- Fix a bug with service extension states not being cleared on app disconnect.
+[#6547](https://github.com/flutter/devtools/pull/6547)
 
 ## Inspector updates
 
