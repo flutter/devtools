@@ -17,22 +17,15 @@ class DevToolsRepo {
   /// This returns the DevToolsRepo instance based on the current working
   /// directory.
   ///
-  /// This will return null if the current working directory is not
-  /// contained within a git checkout of DevTools. Use [requireInstance] for a
-  /// descriptive exception in this case.
-  static DevToolsRepo? getInstance() {
-    final repoPath = _findRepoRoot(Directory.current);
-    return repoPath == null ? null : DevToolsRepo._create(repoPath);
-  }
-
-  /// This returns the DevToolsRepo instance based on the current working
-  /// directory.
-  ///
   /// Throws if the current working directory is not contained within a git
   /// checkout of DevTools.
-  static DevToolsRepo requireInstance() {
-    return getInstance() ??
-        (throw Exception('devtools_tool must be run from inside of the DevTools repository directory'));
+  static DevToolsRepo getInstance() {
+    final repoPath = _findRepoRoot(Directory.current);
+    if (repoPath == null) {
+      throw Exception(
+          'devtools_tool must be run from inside of the DevTools repository directory');
+    }
+    return DevToolsRepo._create(repoPath);
   }
 
   List<Package> getPackages() {

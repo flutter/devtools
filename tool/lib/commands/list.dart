@@ -17,7 +17,7 @@ class ListCommand extends Command {
 
   @override
   Future run() async {
-    final repo = DevToolsRepo.requireInstance();
+    final repo = DevToolsRepo.getInstance();
     print('DevTools repo at ${repo.repoPath}.');
 
     final packages = repo.getPackages();
