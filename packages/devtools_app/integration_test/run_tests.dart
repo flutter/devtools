@@ -22,8 +22,7 @@ const _offlineIndicator = 'integration_test/test/offline';
 /// This list should be empty most of the time, but may contain a broken test
 /// while a fix being worked on.
 const _skipTests = <String>[
-  // TODO(https://github.com/flutter/devtools/issues/6541): re-enable once fixed.
-  'eval_and_browse_test.dart',
+  'my_test.dart', // example
 ];
 
 void main(List<String> args) async {
