@@ -5,6 +5,8 @@
 // Do not delete these arguments. They are parsed by test runner.
 // test-argument:appPath="test/test_infra/fixtures/memory_app"
 
+// TODO(https://github.com/flutter/devtools/issues/6541): re-enable once fixed.
+
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/memory/panes/control/primary_controls.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/widgets/snapshot_list.dart';
