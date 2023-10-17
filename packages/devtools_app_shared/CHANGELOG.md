@@ -1,3 +1,6 @@
+## 0.0.6
+* Fix a bug where service extension states were not getting cleared on app disconnect.
+
 ## 0.0.5
 * Fix bug where registered services were not getting cleared on app disconnect.
 * Fix a bug with the logic to wait for a service extension's availability.
