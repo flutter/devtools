@@ -45,13 +45,13 @@ extension
 
 The `config.yaml` file contains metadata that DevTools needs in order to load the
 extension. Copy the `config.yaml` file below and fill in the approproate value for each key.
-The `material_icon_code_point` field should correspond to the codepoint value of an icon from
+The `materialIconCodePoint` field should correspond to the codepoint value of an icon from
 [material/icons.dart](https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/material/icons.dart).
 ```yaml
 name: foo_package
-issue_tracker: <link_to_your_issue_tracker.com>
+issueTracker: <link_to_your_issue_tracker.com>
 version: 0.0.1
-material_icon_code_point: '0xe0b1'
+materialIconCodePoint: '0xe0b1'
 ```
 
 Now it is time to build your extension.

@@ -4,12 +4,12 @@ The `config.yaml` file for a DevTools extension must follow the format below.
 
 - `name` : the package name that this DevTools extension belongs to. The value of this field
 will be used in the extension page title bar.
-- `issue_tracker`: the url for the extension's issue tracker. When a user clicks the “Report an 
+- `issueTracker`: the url for the extension's issue tracker. When a user clicks the “Report an 
 issue” link in the DevTools UI, they will be directed to this url.
 - `version`: the version of the DevTools extension. This version number should evolve over time 
 as the extension is developed. The value of this field will be used in the extension page 
 title bar.
-- `material_icon_code_point`: corresponds to the codepoint value of an icon from
+- `materialIconCodePoint`: corresponds to the codepoint value of an icon from
 [material/icons.dart](https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/material/icons.dart).
 This icon will be used for the extension’s tab in the top-level DevTools tab bar.
 
@@ -17,7 +17,7 @@ This icon will be used for the extension’s tab in the top-level DevTools tab b
 
 ```yaml
 name: foo_package
-issue_tracker: <link_to_your_issue_tracker.com>
+issueTracker: <link_to_your_issue_tracker.com>
 version: 0.0.1
-material_icon_code_point: '0xe0b1'
+materialIconCodePoint: '0xe0b1'
 ```
