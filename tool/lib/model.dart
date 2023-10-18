@@ -23,7 +23,8 @@ class DevToolsRepo {
     final repoPath = _findRepoRoot(Directory.current);
     if (repoPath == null) {
       throw Exception(
-          'devtools_tool must be run from inside of the DevTools repository directory');
+        'devtools_tool must be run from inside of the DevTools repository directory',
+      );
     }
     return DevToolsRepo._create(repoPath);
   }
