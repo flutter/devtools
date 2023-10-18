@@ -257,7 +257,8 @@ class VideoTutorialLink extends StatelessWidget {
         url:
             '$_devToolsYouTubeVideoUrl${screenMetaData.tutorialVideoTimestamp}',
         gaScreenName: screenMetaData.id,
-        gaSelectedItemDescription: '${gac.videoTutorialLink}-${screenMetaData.id}',
+        gaSelectedItemDescription:
+            '${gac.videoTutorialLink}-${screenMetaData.id}',
       ),
       color: color,
     );
