@@ -509,6 +509,7 @@ final profilePlatformChannels =
       'apps with plugins). Also periodically prints platform channel '
       'statistics to console.',
   tooltip: '',
-  documentationUrl: 'https://docs.flutter.dev/platform-integration/platform-channels',
+  documentationUrl:
+      'https://docs.flutter.dev/platform-integration/platform-channels',
   gaDocsItem: gac.PerformanceDocs.platformChannelsDocs.name,
 );
