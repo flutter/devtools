@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:collection/collection.dart';
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/foundation.dart';
@@ -21,6 +22,7 @@ enum ScreenMetaData {
     'home',
     icon: Icons.home_rounded,
     requiresConnection: false,
+    tutorialVideoTimestamp: '?t=0',
   ),
   inspector(
     'inspector',
@@ -28,12 +30,14 @@ enum ScreenMetaData {
     icon: Octicons.deviceMobile,
     requiresFlutter: true,
     requiresDebugBuild: true,
+    tutorialVideoTimestamp: '?t=172',
   ),
   performance(
     'performance',
     title: 'Performance',
     icon: Octicons.pulse,
     worksOffline: true,
+    tutorialVideoTimestamp: '?t=261',
   ),
   cpuProfiler(
     'cpu-profiler',
@@ -41,26 +45,35 @@ enum ScreenMetaData {
     icon: Octicons.dashboard,
     requiresDartVm: true,
     worksOffline: true,
+    tutorialVideoTimestamp: '?t=340',
   ),
   memory(
     'memory',
     title: 'Memory',
     icon: Octicons.package,
     requiresDartVm: true,
+    tutorialVideoTimestamp: '?t=420',
   ),
   debugger(
     'debugger',
     title: 'Debugger',
     icon: Octicons.bug,
     requiresDebugBuild: true,
+    tutorialVideoTimestamp: '?t=513',
   ),
   network(
     'network',
     title: 'Network',
     icon: Icons.network_check,
     requiresDartVm: true,
+    tutorialVideoTimestamp: '?t=547',
   ),
-  logging('logging', title: 'Logging', icon: Octicons.clippy),
+  logging(
+    'logging',
+    title: 'Logging',
+    icon: Octicons.clippy,
+    tutorialVideoTimestamp: '?t=558',
+  ),
   provider(
     'provider',
     title: 'Provider',
@@ -74,6 +87,7 @@ enum ScreenMetaData {
     icon: Octicons.fileZip,
     requiresConnection: false,
     requiresDartVm: true,
+    tutorialVideoTimestamp: '?t=575',
   ),
   deepLinks(
     'deep-links',
@@ -101,6 +115,7 @@ enum ScreenMetaData {
     this.requiresVmDeveloperMode = false,
     this.worksOffline = false,
     this.requiresLibrary,
+    this.tutorialVideoTimestamp,
   });
 
   final String id;
@@ -113,6 +128,18 @@ enum ScreenMetaData {
   final bool requiresVmDeveloperMode;
   final bool worksOffline;
   final String? requiresLibrary;
+
+  /// The timestamp for the chapter of "Dive in to DevTools" YouTube video that
+  /// correlates to a screen.
+  /// 
+  /// This value will be appended to "https://youtu.be/_EYk-E29edo" to link to
+  /// a particular chapter.
+  final String? tutorialVideoTimestamp;
+
+  /// Looks up the [ScreenMetaData] value for the screen [id].
+  static ScreenMetaData? lookup(String id) {
+    return ScreenMetaData.values.firstWhereOrNull((screen) => screen.id == id);
+  }
 }
 
 /// Defines a page shown in the DevTools [TabBar].

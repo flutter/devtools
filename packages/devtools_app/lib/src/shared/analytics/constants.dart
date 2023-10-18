@@ -141,6 +141,7 @@ const pageReady = 'pageReady';
 
 /// Documentation actions shared across screens.
 const documentationLink = 'documentationLink';
+const videoTutorialLink = 'videoTutorialLink';
 String topicDocumentationButton(String topic) => '${topic}DocumentationButton';
 String topicDocumentationLink(String topic) => '${topic}DocumentationLink';
 
