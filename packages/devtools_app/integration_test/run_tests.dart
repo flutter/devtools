@@ -21,9 +21,9 @@ const _offlineIndicator = 'integration_test/test/offline';
 ///
 /// This list should be empty most of the time, but may contain a broken test
 /// while a fix being worked on.
-const _skipTests = <String>[
-  'my_example_test.dart',
-];
+///
+/// Format: `'my_example_test.dart'`.
+const _skipTests = <String>[];
 
 void main(List<String> args) async {
   final testRunnerArgs = DevToolsAppTestRunnerArgs(
