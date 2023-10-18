@@ -12,6 +12,7 @@ To learn more about DevTools, check out the
 
 - Fix a bug with service extension states not being cleared on app disconnect.
 [#6547](https://github.com/flutter/devtools/pull/6547)
+- Improved styling of bottom status bar when connected to an app. [#6525](https://github.com/flutter/devtools/pull/6525)
 
 ## Inspector updates
 
