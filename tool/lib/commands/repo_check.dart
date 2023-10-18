@@ -17,7 +17,7 @@ class RepoCheckCommand extends Command {
 
   @override
   Future run() async {
-    final repo = DevToolsRepo.getInstance()!;
+    final repo = DevToolsRepo.getInstance();
     print('DevTools repo at ${repo.repoPath}.');
 
     final checks = <Check>[

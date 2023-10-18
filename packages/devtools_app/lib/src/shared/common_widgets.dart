@@ -1657,34 +1657,8 @@ class CheckboxSetting extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
-    Widget textContent = RichText(
-      overflow: TextOverflow.visible,
-      text: TextSpan(
-        text: title,
-        style: enabled ? theme.regularTextStyle : theme.subtleTextStyle,
-      ),
-    );
-
-    if (description != null) {
-      textContent = Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          textContent,
-          Expanded(
-            child: RichText(
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              text: TextSpan(
-                text: ' • $description',
-                style: theme.subtleTextStyle,
-              ),
-            ),
-          ),
-        ],
-      );
-    }
-    final content = Row(
+    Widget checkboxAndTitle = Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         NotifierCheckbox(
           notifier: notifier,
@@ -1703,17 +1677,57 @@ class CheckboxSetting extends StatelessWidget {
           checkboxKey: checkboxKey,
         ),
         Flexible(
-          child: textContent,
+          child: RichText(
+            overflow: TextOverflow.visible,
+            maxLines: 2,
+            text: TextSpan(
+              text: title,
+              style: enabled ? theme.regularTextStyle : theme.subtleTextStyle,
+            ),
+          ),
         ),
       ],
     );
-    if (tooltip != null && tooltip!.isNotEmpty) {
-      return DevToolsTooltip(
-        message: tooltip,
-        child: content,
-      );
+    if (description == null) {
+      checkboxAndTitle = Expanded(child: checkboxAndTitle);
     }
-    return content;
+    return maybeWrapWithTooltip(
+      tooltip: tooltip,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          checkboxAndTitle,
+          if (description != null) ...[
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(top: denseSpacing),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    RichText(
+                      text: TextSpan(
+                        text: ' • ',
+                        style: theme.subtleTextStyle,
+                      ),
+                    ),
+                    Flexible(
+                      child: RichText(
+                        maxLines: 4,
+                        overflow: TextOverflow.ellipsis,
+                        text: TextSpan(
+                          text: description,
+                          style: theme.subtleTextStyle,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
   }
 }
 
