@@ -131,7 +131,7 @@ enum ScreenMetaData {
 
   /// The timestamp for the chapter of "Dive in to DevTools" YouTube video that
   /// correlates to a screen.
-  /// 
+  ///
   /// This value will be appended to "https://youtu.be/_EYk-E29edo" to link to
   /// a particular chapter.
   final String? tutorialVideoTimestamp;
