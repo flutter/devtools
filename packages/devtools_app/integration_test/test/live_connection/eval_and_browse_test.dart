@@ -199,7 +199,7 @@ class _EvalAndBrowseTester {
   /// Taps and settles.
   ///
   /// If [next] is provided, will repeat the tap untill [next] returns results.
-  /// If [next] is not null returns [next].
+  /// Returns [next].
   Future<Finder?> tapAndPump(
     Finder finder, {
     Duration? duration,
