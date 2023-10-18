@@ -1,4 +1,5 @@
 ## 0.0.6
+* Add `profilePlatformChannels` to known service extensions.
 * Fix a bug where service extension states were not getting cleared on app disconnect.
 * Add optional parameter `id` to `DisposerMixin.addAutoDisposeListener` and
 `AutoDisposeMixin.addAutoDisposeListener` that allows for tagging a listener

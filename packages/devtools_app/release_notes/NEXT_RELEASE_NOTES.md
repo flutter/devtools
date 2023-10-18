@@ -20,7 +20,10 @@ TODO: Remove this section if there are not any general updates.
 
 ## Performance updates
 
-TODO: Remove this section if there are not any general updates.
+* Added an option in the "Enhance Tracing" menu for tracking platform channel
+activity. This is useful for apps with plugins.
+
+![Track platform channels setting](images/track_platform_channels.png "Track platform channels setting")
 
 ## CPU profiler updates
 

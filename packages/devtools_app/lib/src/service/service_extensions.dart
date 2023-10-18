@@ -272,7 +272,7 @@ final performanceOverlay = ToggleableServiceExtensionDescription<bool>.from(
 
 final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>.from(
   extensions.profileWidgetBuilds,
-  title: 'Track Widget Builds',
+  title: 'Track widget builds',
   iconAsset: 'icons/trackwidget-white.png',
   gaScreenName: gac.performance,
   gaItem: gac.PerformanceEvents.trackRebuilds.name,
@@ -286,7 +286,7 @@ final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>.from(
 final profileUserWidgetBuilds =
     ToggleableServiceExtensionDescription<bool>.from(
   extensions.profileUserWidgetBuilds,
-  title: 'Track User-Created Widget Builds',
+  title: 'Track user-created widget builds',
   iconAsset: 'icons/trackwidget-white.png',
   gaScreenName: gac.performance,
   gaItem: gac.PerformanceEvents.trackUserCreatedWidgetBuilds.name,
@@ -298,7 +298,7 @@ final profileUserWidgetBuilds =
 final profileRenderObjectPaints =
     ToggleableServiceExtensionDescription<bool>.from(
   extensions.profileRenderObjectPaints,
-  title: 'Track Paints',
+  title: 'Track paints',
   iconData: Icons.format_paint,
   gaScreenName: gac.performance,
   gaItem: gac.PerformanceEvents.trackPaints.name,
@@ -312,7 +312,7 @@ final profileRenderObjectPaints =
 final profileRenderObjectLayouts =
     ToggleableServiceExtensionDescription<bool>.from(
   extensions.profileRenderObjectLayouts,
-  title: 'Track Layouts',
+  title: 'Track layouts',
   iconData: Icons.auto_awesome_mosaic,
   gaScreenName: gac.performance,
   gaItem: gac.PerformanceEvents.trackLayouts.name,
@@ -495,4 +495,21 @@ final trackRebuildWidgets = ToggleableServiceExtensionDescription<bool>.from(
   tooltip: 'Show widget rebuild counts since the last reload',
   gaScreenName: gac.inspector,
   gaItem: gac.trackRebuildWidgets,
+);
+
+final profilePlatformChannels =
+    ToggleableServiceExtensionDescription<bool>.from(
+  extensions.profilePlatformChannels,
+  title: 'Track platform channels',
+  iconAsset: 'icons/trackwidget-white.png',
+  gaScreenName: gac.performance,
+  gaItem: gac.PerformanceEvents.profilePlatformChannels.name,
+  description:
+      'Adds an event to the timeline for platform channel messages (useful for '
+      'apps with plugins). Also periodically prints platform channel '
+      'statistics to console.',
+  tooltip: '',
+  documentationUrl:
+      'https://docs.flutter.dev/platform-integration/platform-channels',
+  gaDocsItem: gac.PerformanceDocs.platformChannelsDocs.name,
 );
