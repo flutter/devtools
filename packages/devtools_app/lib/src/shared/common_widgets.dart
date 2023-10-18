@@ -1657,39 +1657,46 @@ class CheckboxSetting extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    Widget checkboxAndTitle = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        NotifierCheckbox(
+          notifier: notifier,
+          onChanged: (bool? value) {
+            final gaScreenName = this.gaScreenName;
+            final gaItem = this.gaItem;
+            if (gaScreenName != null && gaItem != null) {
+              ga.select(gaScreenName, gaItem);
+            }
+            final onChanged = this.onChanged;
+            if (onChanged != null) {
+              onChanged(value);
+            }
+          },
+          enabled: enabled,
+          checkboxKey: checkboxKey,
+        ),
+        Flexible(
+          child: RichText(
+            overflow: TextOverflow.visible,
+            maxLines: 2,
+            text: TextSpan(
+              text: title,
+              style: enabled ? theme.regularTextStyle : theme.subtleTextStyle,
+            ),
+          ),
+        ),
+      ],
+    );
+    if (description == null) {
+      checkboxAndTitle = Expanded(child: checkboxAndTitle);
+    }
     return maybeWrapWithTooltip(
       tooltip: tooltip,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              NotifierCheckbox(
-                notifier: notifier,
-                onChanged: (bool? value) {
-                  final gaScreenName = this.gaScreenName;
-                  final gaItem = this.gaItem;
-                  if (gaScreenName != null && gaItem != null) {
-                    ga.select(gaScreenName, gaItem);
-                  }
-                  final onChanged = this.onChanged;
-                  if (onChanged != null) {
-                    onChanged(value);
-                  }
-                },
-                enabled: enabled,
-                checkboxKey: checkboxKey,
-              ),
-              RichText(
-                overflow: TextOverflow.visible,
-                text: TextSpan(
-                  text: title,
-                  style:
-                      enabled ? theme.regularTextStyle : theme.subtleTextStyle,
-                ),
-              ),
-            ],
-          ),
+          checkboxAndTitle,
           if (description != null) ...[
             Expanded(
               child: Padding(

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
@@ -779,7 +780,11 @@ class _ServiceExtensionCheckboxGroupButtonState
   /// The overlay will appear directly below the button, and will be dismissed
   /// if there is a click outside of the list of toggles.
   void _insertOverlay(BuildContext context) {
-    final offset = _calculateOverlayPosition(widget.overlayWidth, context);
+    final width = math.min(
+      widget.overlayWidth,
+      MediaQuery.of(context).size.width - 2 * denseSpacing,
+    );
+    final offset = _calculateOverlayPosition(width, context);
     _overlay?.remove();
     Overlay.of(context).insert(
       _overlay = OverlayEntry(
@@ -799,7 +804,7 @@ class _ServiceExtensionCheckboxGroupButtonState
                     child: _ServiceExtensionCheckboxGroupOverlay(
                       description: widget.overlayDescription,
                       extensions: widget.extensions,
-                      width: widget.overlayWidth,
+                      width: width,
                       customExtensionUi: widget.customExtensionUi,
                     ),
                   ),
@@ -817,7 +822,7 @@ class _ServiceExtensionCheckboxGroupButtonState
         Overlay.of(context).context.findRenderObject() as RenderBox;
     final box = context.findRenderObject() as RenderBox;
 
-    final maxX = overlayBox.size.width - width;
+    final maxX = overlayBox.size.width - width - denseSpacing;
     final maxY = overlayBox.size.height;
 
     final offset = box.localToGlobal(
@@ -826,7 +831,7 @@ class _ServiceExtensionCheckboxGroupButtonState
     );
 
     return Offset(
-      offset.dx.clamp(0.0, maxX),
+      offset.dx.clamp(denseSpacing, maxX),
       offset.dy.clamp(0.0, maxY),
     );
   }
