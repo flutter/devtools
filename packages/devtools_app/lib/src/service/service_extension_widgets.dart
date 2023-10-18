@@ -59,7 +59,10 @@ class ServiceExtensionButtonGroup extends StatefulWidget {
 }
 
 class _ServiceExtensionButtonGroupState
-    extends State<ServiceExtensionButtonGroup> with AutoDisposeMixin {
+    extends State<ServiceExtensionButtonGroup>
+    with
+        AutoDisposeMixin<ServiceExtensionButtonGroup>,
+        MainIsolateChangeMixin<ServiceExtensionButtonGroup> {
   late List<ExtensionState> _extensionStates;
 
   @override
@@ -70,6 +73,9 @@ class _ServiceExtensionButtonGroupState
     // which would be more natural.
     _initExtensionState();
   }
+
+  @override
+  void _onMainIsolateChanged() => _initExtensionState();
 
   void _initExtensionState() {
     _extensionStates = [for (var e in widget.extensions) ExtensionState(e)];
@@ -82,12 +88,12 @@ class _ServiceExtensionButtonGroupState
       final state = serviceConnection.serviceManager.serviceExtensionManager
           .getServiceExtensionState(extensionName);
       extension.isSelected = state.value.enabled;
-
       addAutoDisposeListener(state, () {
         setState(() {
           extension.isSelected = state.value.enabled;
         });
       });
+
       // Track whether the extension is actually exposed by the VM.
       final listenable = serviceConnection
           .serviceManager.serviceExtensionManager
@@ -418,25 +424,31 @@ class _ServiceExtensionToggle extends ServiceExtensionWidget {
 }
 
 class _ServiceExtensionToggleState extends State<_ServiceExtensionToggle>
-    with ServiceExtensionMixin, AutoDisposeMixin {
+    with
+        ServiceExtensionMixin,
+        AutoDisposeMixin<_ServiceExtensionToggle>,
+        MainIsolateChangeMixin<_ServiceExtensionToggle> {
   bool value = false;
 
   @override
   void initState() {
     super.initState();
+    _initExtensionState();
+  }
+
+  @override
+  void _onMainIsolateChanged() => _initExtensionState();
+
+  void _initExtensionState() {
     final state = serviceConnection.serviceManager.serviceExtensionManager
         .getServiceExtensionState(widget.service.extension);
-
     value = state.value.enabled;
 
-    addAutoDisposeListener(
-      state,
-      () {
-        setState(() {
-          value = state.value.enabled;
-        });
-      },
-    );
+    addAutoDisposeListener(state, () {
+      setState(() {
+        value = state.value.enabled;
+      });
+    });
   }
 
   @override
@@ -511,7 +523,10 @@ class ServiceExtensionCheckbox extends ServiceExtensionWidget {
 }
 
 class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
-    with ServiceExtensionMixin, AutoDisposeMixin {
+    with
+        ServiceExtensionMixin,
+        AutoDisposeMixin<ServiceExtensionCheckbox>,
+        MainIsolateChangeMixin<ServiceExtensionCheckbox> {
   /// Whether this checkbox value is set to true.
   ///
   /// This notifier listens to extension state changes from the service manager
@@ -524,7 +539,13 @@ class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
   @override
   void initState() {
     super.initState();
+    _initExtensionState();
+  }
 
+  @override
+  void _onMainIsolateChanged() => _initExtensionState();
+
+  void _initExtensionState() {
     if (serviceConnection.serviceManager.serviceExtensionManager
         .isServiceExtensionAvailable(widget.serviceExtension.extension)) {
       final state = serviceConnection.serviceManager.serviceExtensionManager
@@ -665,7 +686,10 @@ class ServiceExtensionCheckboxGroupButton extends StatefulWidget {
 }
 
 class _ServiceExtensionCheckboxGroupButtonState
-    extends State<ServiceExtensionCheckboxGroupButton> with AutoDisposeMixin {
+    extends State<ServiceExtensionCheckboxGroupButton>
+    with
+        AutoDisposeMixin<ServiceExtensionCheckboxGroupButton>,
+        MainIsolateChangeMixin<ServiceExtensionCheckboxGroupButton> {
   static const _hoverYOffset = 10.0;
 
   /// Whether this button should have the enabled state, which makes the
@@ -682,6 +706,13 @@ class _ServiceExtensionCheckboxGroupButtonState
   @override
   void initState() {
     super.initState();
+    _initExtensionState();
+  }
+
+  @override
+  void _onMainIsolateChanged() => _initExtensionState();
+
+  void _initExtensionState() {
     _extensionStates = List.filled(widget.extensions.length, false);
     for (int i = 0; i < widget.extensions.length; i++) {
       final extension = widget.extensions[i];
@@ -698,6 +729,7 @@ class _ServiceExtensionCheckboxGroupButtonState
     _enabled.value = _isEnabled();
 
     if (widget.forceShowOverlayController != null) {
+      cancelStreamSubscriptions();
       autoDisposeStreamSubscription(
         widget.forceShowOverlayController!.stream.listen(
           (_) => _insertOverlay(context),
@@ -1060,6 +1092,28 @@ class ServiceExtensionIcon extends StatelessWidget {
       color: color,
     );
   }
+}
+
+mixin MainIsolateChangeMixin<T extends StatefulWidget>
+    on State<T>, AutoDisposeMixin<T> {
+  static const _mainIsolateListenerId = 'mainIsolateListener';
+
+  @override
+  void initState() {
+    super.initState();
+    addAutoDisposeListener(
+      serviceConnection.serviceManager.isolateManager.mainIsolate,
+      () {
+        setState(() {
+          cancelListeners(excludeIds: [_mainIsolateListenerId]);
+          _onMainIsolateChanged();
+        });
+      },
+      _mainIsolateListenerId,
+    );
+  }
+
+  void _onMainIsolateChanged();
 }
 
 // TODO(jacobr): port these classes to Flutter.
