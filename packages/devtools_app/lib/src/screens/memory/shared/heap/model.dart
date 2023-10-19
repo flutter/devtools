@@ -11,6 +11,7 @@ import '../../../../shared/analytics/metrics.dart';
 import '../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../shared/memory/class_name.dart';
 import '../../../../shared/primitives/utils.dart';
+import '../primitives/memory_timeline.dart';
 import '../primitives/memory_utils.dart';
 
 /// Heap path represented by classes only, without object details.
@@ -106,8 +107,13 @@ class ClassOnlyHeapPath {
 
 /// This class is needed to make the snapshot taking operation mockable.
 class SnapshotTaker {
+  SnapshotTaker(this._timeline);
+
+  final MemoryTimeline? _timeline;
+
   Future<AdaptedHeapData?> take() async {
     final snapshot = await snapshotMemoryInSelectedIsolate();
+    _timeline?.addSnapshotEvent();
     if (snapshot == null) return null;
     final result =
         await _adaptSnapshotGaWrapper(snapshot, isolateId: selectedIsolateId!);
