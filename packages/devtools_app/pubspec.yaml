@@ -66,6 +66,7 @@ dependencies:
   vm_service: ^11.10.0
   # TODO https://github.com/dart-lang/sdk/issues/52853 - unpin this version
   vm_snapshot_analysis: 0.7.2
+  web: ^0.3.0
   web_socket_channel: ^2.1.0
   # widget_icons: ^0.0.1
 

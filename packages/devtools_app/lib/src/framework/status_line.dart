@@ -7,7 +7,6 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../devtools.dart' as devtools;
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
@@ -75,8 +74,27 @@ class StatusLine extends StatelessWidget {
     final screenWidth = ScreenSize(context).width;
     final Widget? pageStatus = currentScreen.buildStatus(context);
     final widerThanXxs = screenWidth > MediaSize.xxs;
+    final screenMetaData = ScreenMetaData.lookup(currentScreen.screenId);
+    final showVideoTutorial = screenMetaData?.tutorialVideoTimestamp != null;
     return [
-      buildHelpUrlStatus(context, currentScreen, screenWidth),
+      Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          DocumentationLink(
+            screen: currentScreen,
+            screenWidth: screenWidth,
+            isConnected: isConnected,
+          ),
+          if (showVideoTutorial) ...[
+            BulletSpacer(color: color),
+            VideoTutorialLink(
+              screenMetaData: screenMetaData!,
+              screenWidth: screenWidth,
+              isConnected: isConnected,
+            ),
+          ],
+        ],
+      ),
       BulletSpacer(color: color),
       if (widerThanXxs && showIsolateSelector) ...[
         const IsolateSelector(),
@@ -98,46 +116,6 @@ class StatusLine extends StatelessWidget {
         ),
       ],
     ];
-  }
-
-  Widget buildHelpUrlStatus(
-    BuildContext context,
-    Screen currentScreen,
-    MediaSize screenWidth,
-  ) {
-    final theme = Theme.of(context);
-    final style = theme.linkTextStyle;
-    final String? docPageId = currentScreen.docPageId;
-    if (docPageId != null) {
-      return RichText(
-        text: LinkTextSpan(
-          link: Link(
-            display: screenWidth <= MediaSize.xs
-                ? docPageId
-                : 'flutter.dev/devtools/$docPageId',
-            url: 'https://flutter.dev/devtools/$docPageId',
-            gaScreenName: currentScreen.screenId,
-            gaSelectedItemDescription: gac.documentationLink,
-          ),
-          style: isConnected
-              ? style.copyWith(color: theme.colorScheme.onPrimary)
-              : style,
-          context: context,
-        ),
-      );
-    } else {
-      // Use a placeholder for pages with no explicit documentation.
-      return Flexible(
-        child: Text(
-          '${screenWidth <= MediaSize.xs ? '' : 'DevTools '}${devtools.version}',
-          overflow: TextOverflow.ellipsis,
-          style: isConnected
-              ? theme.regularTextStyle
-                  .copyWith(color: theme.colorScheme.onPrimary)
-              : theme.regularTextStyle,
-        ),
-      );
-    }
   }
 
   Widget buildConnectionStatus(BuildContext context, MediaSize screenWidth) {
@@ -209,6 +187,75 @@ class StatusLine extends StatelessWidget {
               noConnectionMsg,
               style: textTheme.bodyMedium,
             ),
+    );
+  }
+}
+
+/// A widget that links to DevTools documentation on docs.flutter.dev for the
+/// given [screen].
+class DocumentationLink extends StatelessWidget {
+  const DocumentationLink({
+    super.key,
+    required this.screen,
+    required this.screenWidth,
+    required this.isConnected,
+  });
+
+  final Screen screen;
+
+  final MediaSize screenWidth;
+
+  final bool isConnected;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = isConnected ? Theme.of(context).colorScheme.onPrimary : null;
+    final docPageId = screen.docPageId ?? '';
+    return LinkIconLabel(
+      icon: Icons.library_books_outlined,
+      link: Link(
+        display: screenWidth <= MediaSize.xs ? 'Docs' : 'Read docs',
+        url: 'https://docs.flutter.dev/tools/devtools/$docPageId',
+        gaScreenName: screen.screenId,
+        gaSelectedItemDescription: gac.documentationLink,
+      ),
+      color: color,
+    );
+  }
+}
+
+/// A widget that links to the "Dive in to DevTools" YouTube video at the
+/// chapter for the given [screenMetaData].
+class VideoTutorialLink extends StatelessWidget {
+  const VideoTutorialLink({
+    super.key,
+    required this.screenMetaData,
+    required this.screenWidth,
+    required this.isConnected,
+  });
+
+  final ScreenMetaData screenMetaData;
+
+  final MediaSize screenWidth;
+
+  final bool isConnected;
+
+  static const _devToolsYouTubeVideoUrl = 'https://youtu.be/_EYk-E29edo';
+
+  @override
+  Widget build(BuildContext context) {
+    final color = isConnected ? Theme.of(context).colorScheme.onPrimary : null;
+    return LinkIconLabel(
+      icon: Icons.ondemand_video_rounded,
+      link: Link(
+        display: screenWidth <= MediaSize.xs ? 'Tutorial' : 'Watch tutorial',
+        url:
+            '$_devToolsYouTubeVideoUrl${screenMetaData.tutorialVideoTimestamp}',
+        gaScreenName: screenMetaData.id,
+        gaSelectedItemDescription:
+            '${gac.videoTutorialLink}-${screenMetaData.id}',
+      ),
+      color: color,
     );
   }
 }

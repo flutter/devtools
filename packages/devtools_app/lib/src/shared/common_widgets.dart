@@ -1409,6 +1409,51 @@ class MoreInfoLink extends StatelessWidget {
   }
 }
 
+class LinkIconLabel extends StatelessWidget {
+  const LinkIconLabel({
+    super.key,
+    required this.icon,
+    required this.link,
+    required this.color,
+  });
+
+  final IconData icon;
+  final Link link;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: _onLinkTap,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: defaultIconSize,
+            color: color,
+          ),
+          const SizedBox(width: densePadding),
+          Padding(
+            padding: const EdgeInsets.only(bottom: densePadding),
+            child: RichText(
+              text: TextSpan(
+                text: link.display,
+                style: Theme.of(context).linkTextStyle.copyWith(color: color),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _onLinkTap() {
+    unawaited(launchUrl(link.url));
+    ga.select(link.gaScreenName, link.gaSelectedItemDescription);
+  }
+}
+
 class LinkTextSpan extends TextSpan {
   LinkTextSpan({
     required Link link,
