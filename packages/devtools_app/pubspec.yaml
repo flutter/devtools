@@ -43,10 +43,10 @@ dependencies:
     sdk: flutter
   http: ^0.13.4
   image: ^3.0.2
-  intl: ">=0.16.1 <0.18.0"
+  intl: ">=0.16.1 <=0.18.0"
   js: ^0.6.1+1
   json_rpc_2: ^3.0.2
-  leak_tracker: 2.0.1
+  leak_tracker: 9.0.8
   logging: ^1.1.1
   meta: ^1.9.1
   mime: ^1.0.0
