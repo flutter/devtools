@@ -111,7 +111,7 @@ jobs:
   devtools-app-integration-test:
     name: devtools_app integration-test ${{ matrix.bot }} - ${{ matrix.device }} - shard ${{ matrix.shard }}
     needs: flutter-prep
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
