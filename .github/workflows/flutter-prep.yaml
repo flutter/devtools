@@ -54,9 +54,7 @@ jobs:
       - name: Get Latest Flutter Candidate
         id: flutter-candidate
         run: |
-          LATEST_FLUTTER_CANDIDATE=01eef7ca13a9b69ecf16e172ae01b80ded66c053
-          # Uncomment when commit "01eef7ca13a9b69ecf16e172ae01b80ded66c053" hits the latest flutter candidate branch
-          # LATEST_FLUTTER_CANDIDATE=$(./tool/latest_flutter_candidate.sh)
+          LATEST_FLUTTER_CANDIDATE=$(./tool/latest_flutter_candidate.sh)
           echo "FLUTTER_CANDIDATE=$LATEST_FLUTTER_CANDIDATE" >> $GITHUB_OUTPUT
 
       - name: Load Cached Flutter SDK
