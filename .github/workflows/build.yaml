@@ -17,7 +17,8 @@ env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 jobs:
   flutter-prep:
-    os-name: "ubuntu"
+    with:
+      os-name: ubuntu
     uses: ./.github/workflows/flutter-prep.yaml
 
   main:
