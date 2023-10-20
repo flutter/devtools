@@ -18,6 +18,7 @@ env:
 jobs:
   flutter-prep:
     uses: ./.github/workflows/flutter-prep.yaml
+    os-name: ubuntu
 
   main:
     name: main
