@@ -4,7 +4,6 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/debugger/codeview.dart';
-import 'package:devtools_app/src/screens/debugger/controls.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_model.dart';
 import 'package:devtools_app/src/shared/diagnostics/primitives/source_location.dart';
 import 'package:devtools_app_shared/ui.dart';
@@ -15,6 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../test_infra/utils/debugger_utils.dart';
 import '../test_infra/utils/test_utils.dart';
 
 void main() {
@@ -88,20 +88,20 @@ void main() {
       await tester.pump();
 
       expect(
-        findDebuggerButtonWithTitle('Pause'),
+        findDebuggerButtonWithLabel('Pause'),
         findsOneWidget,
       );
-      final pause = getWidgetFromFinder<DebuggerButton>(
-        findDebuggerButtonWithTitle('Pause'),
+      final pause = getWidgetFromFinder<OutlinedButton>(
+        findDebuggerButtonWithLabel('Pause'),
       );
       expect(pause.onPressed, isNull);
 
       expect(
-        findDebuggerButtonWithTitle('Resume'),
+        findDebuggerButtonWithLabel('Resume'),
         findsOneWidget,
       );
-      final resume = getWidgetFromFinder<DebuggerButton>(
-        findDebuggerButtonWithTitle('Resume'),
+      final resume = getWidgetFromFinder<OutlinedButton>(
+        findDebuggerButtonWithLabel('Resume'),
       );
       expect(resume.onPressed, isNotNull);
     },
@@ -182,10 +182,6 @@ final _stackFrame2 = StackFrameAndSourcePosition(
   ),
   position: const SourcePosition(line: _stackFrame2Line, column: 1),
 );
-
-Finder findDebuggerButtonWithTitle(String title) => find.byWidgetPredicate(
-      (Widget widget) => widget is DebuggerButton && widget.title == title,
-    );
 
 Finder findStackFrameWithText(String text) => find.byWidgetPredicate(
       (Widget widget) =>

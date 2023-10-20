@@ -4,7 +4,6 @@
 
 import 'package:collection/collection.dart';
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/screens/debugger/controls.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_model.dart';
 import 'package:devtools_app/src/shared/console/widgets/console_pane.dart';
 import 'package:devtools_app_shared/ui.dart';
@@ -16,6 +15,8 @@ import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../test_infra/test_data/debugger/vm_service_object_tree.dart';
+import '../test_infra/utils/debugger_utils.dart';
+import '../test_infra/utils/test_utils.dart';
 import '../test_infra/utils/tree_utils.dart';
 
 void main() {
@@ -114,15 +115,6 @@ void main() {
     },
   );
 
-  WidgetPredicate createDebuggerButtonPredicate(String title) {
-    return (Widget widget) {
-      if (widget is DebuggerButton && widget.title == title) {
-        return true;
-      }
-      return false;
-    };
-  }
-
   testWidgetsWithWindowSize(
     'debugger controls running',
     windowSize,
@@ -135,21 +127,21 @@ void main() {
       );
 
       expect(
-        find.byWidgetPredicate(createDebuggerButtonPredicate('Pause')),
+        findDebuggerButtonWithLabel('Pause'),
         findsOneWidget,
       );
-      final pause = _getWidgetFromFinder(
-        find.byWidgetPredicate(createDebuggerButtonPredicate('Pause')),
-      ) as DebuggerButton;
+      final pause = getWidgetFromFinder<OutlinedButton>(
+        findDebuggerButtonWithLabel('Pause'),
+      );
       expect(pause.onPressed, isNotNull);
 
       expect(
-        find.byWidgetPredicate(createDebuggerButtonPredicate('Resume')),
+        findDebuggerButtonWithLabel('Resume'),
         findsOneWidget,
       );
-      final resume = _getWidgetFromFinder(
-        find.byWidgetPredicate(createDebuggerButtonPredicate('Resume')),
-      ) as DebuggerButton;
+      final resume = getWidgetFromFinder<OutlinedButton>(
+        findDebuggerButtonWithLabel('Resume'),
+      );
       expect(resume.onPressed, isNull);
     },
   );
@@ -251,8 +243,4 @@ void main() {
       expect(state.line, testClassRef.location!.line);
     },
   );
-}
-
-Widget _getWidgetFromFinder(Finder finder) {
-  return finder.first.evaluate().first.widget;
 }
