@@ -15,10 +15,10 @@ import 'primitives/utils.dart';
 
 class FileImportContainer extends StatefulWidget {
   const FileImportContainer({
-    required this.title,
     required this.instructions,
     required this.gaScreen,
     required this.gaSelectionImport,
+    this.title,
     this.gaSelectionAction,
     this.actionText,
     this.onAction,
@@ -28,7 +28,7 @@ class FileImportContainer extends StatefulWidget {
     super.key,
   });
 
-  final String title;
+  final String? title;
 
   final String instructions;
 
@@ -59,13 +59,16 @@ class _FileImportContainerState extends State<FileImportContainer> {
 
   @override
   Widget build(BuildContext context) {
+    final title = widget.title;
     return Column(
       children: [
-        Text(
-          widget.title,
-          style: TextStyle(fontSize: scaleByFontFactor(18.0)),
-        ),
-        const SizedBox(height: defaultSpacing),
+        if (title != null) ...[
+          Text(
+            title,
+            style: TextStyle(fontSize: scaleByFontFactor(18.0)),
+          ),
+          const SizedBox(height: defaultSpacing),
+        ],
         Expanded(
           // TODO(kenz): improve drag over highlight.
           child: DragAndDrop(
@@ -165,7 +168,6 @@ class _FileImportContainerState extends State<FileImportContainer> {
               gaScreen: widget.gaScreen,
               gaSelection: widget.gaSelectionAction!,
               label: widget.actionText!,
-              icon: Icons.highlight,
               elevated: true,
               onPressed: importedFile != null
                   ? () => widget.onAction!(importedFile!)
@@ -248,7 +250,7 @@ class FileImportButton extends StatelessWidget {
     return GaDevToolsButton(
       onPressed: onPressed,
       icon: Icons.file_upload,
-      label: 'Import File',
+      label: 'Open file',
       gaScreen: gaScreen,
       gaSelection: gaSelection,
       elevated: elevatedButton,

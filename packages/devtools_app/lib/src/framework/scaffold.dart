@@ -41,7 +41,7 @@ class DevToolsScaffold extends StatefulWidget {
     this.page,
     List<Widget>? actions,
     this.embed = false,
-  })  : actions = actions ?? defaultActions(isEmbedded: embed),
+  })  : actions = actions ?? defaultActions(),
         super(key: key);
 
   DevToolsScaffold.withChild({
@@ -56,16 +56,11 @@ class DevToolsScaffold extends StatefulWidget {
           embed: embed,
         );
 
-  static List<Widget> defaultActions({
-    required bool isEmbedded,
-    Color? color,
-  }) =>
-      [
+  static List<Widget> defaultActions({Color? color}) => [
         OpenSettingsAction(color: color),
         if (FeatureFlags.devToolsExtensions)
           ExtensionSettingsAction(color: color),
         ReportFeedbackButton(color: color),
-        if (!isEmbedded) ImportToolbarAction(color: color),
         OpenAboutAction(color: color),
       ];
 
