@@ -7,11 +7,63 @@ import 'dart:convert';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import 'analytics/analytics.dart' as ga;
+import 'analytics/constants.dart' as gac;
 import 'common_widgets.dart';
 import 'config_specific/drag_and_drop/drag_and_drop.dart';
+import 'config_specific/import_export/import_export.dart';
 import 'globals.dart';
 import 'primitives/utils.dart';
+
+class OpenSaveButtonGroup extends StatelessWidget {
+  const OpenSaveButtonGroup({
+    super.key,
+    required this.screenId,
+    required this.onSave,
+  });
+
+  final String screenId;
+
+  final VoidCallback? onSave;
+
+  @override
+  Widget build(BuildContext context) {
+    return RoundedButtonGroup(
+      items: [
+        ButtonGroupItemData(
+          icon: Icons.file_upload,
+          tooltip: 'Open a file that was previously saved from DevTools',
+          onPressed: () async {
+            ga.select(screenId, gac.openFile);
+            final importedFile =
+                await importFileFromPicker(acceptedTypes: const ['json']);
+            if (importedFile != null) {
+              // ignore: use_build_context_synchronously, intentional use.
+              Provider.of<ImportController>(context, listen: false)
+                  .importData(importedFile, expectedScreenId: screenId);
+            } else {
+              notificationService.push(
+                'Something went wrong. Could not open selected file.',
+              );
+            }
+          },
+        ),
+        ButtonGroupItemData(
+          icon: Icons.file_download,
+          tooltip: 'Save this screen\'s data for offline viewing',
+          onPressed: onSave != null
+              ? () {
+                  ga.select(screenId, gac.saveFile);
+                  onSave!.call();
+                }
+              : null,
+        ),
+      ],
+    );
+  }
+}
 
 class FileImportContainer extends StatefulWidget {
   const FileImportContainer({

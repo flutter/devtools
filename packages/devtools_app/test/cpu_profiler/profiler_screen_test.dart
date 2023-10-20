@@ -7,6 +7,7 @@ import 'package:devtools_app/src/screens/profiler/cpu_profiler.dart';
 import 'package:devtools_app/src/screens/profiler/panes/controls/cpu_profiler_controls.dart';
 import 'package:devtools_app/src/screens/profiler/profiler_status.dart';
 import 'package:devtools_app/src/service/vm_flags.dart' as vm_flags;
+import 'package:devtools_app/src/shared/file_import.dart';
 import 'package:devtools_app/src/shared/ui/vm_flag_widgets.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
@@ -38,6 +39,7 @@ void main() {
         expect(find.text('Profile app start up'), findsOneWidget);
       }
       expect(find.byType(CpuSamplingRateDropdown), findsOneWidget);
+      expect(find.byType(OpenSaveButtonGroup), findsOneWidget);
       expect(
         find.byType(ProfileRecordingInstructions),
         findsOneWidget,
@@ -144,6 +146,7 @@ void main() {
         expect(find.byType(StopRecordingButton), findsNothing);
         expect(find.byType(ClearButton), findsNothing);
         expect(find.byType(CpuSamplingRateDropdown), findsNothing);
+        expect(find.byType(OpenSaveButtonGroup), findsNothing);
 
         await tester.runAsync(() async {
           await tester.tap(find.text('Enable profiler'));
