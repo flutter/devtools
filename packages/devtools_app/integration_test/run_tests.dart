@@ -17,6 +17,14 @@ import 'test_infra/run/run_test.dart';
 const _testDirectory = 'integration_test/test';
 const _offlineIndicator = 'integration_test/test/offline';
 
+/// The set of test that should be skipped for all devices.
+///
+/// This list should be empty most of the time, but may contain a broken test
+/// while a fix being worked on.
+///
+/// Format: `'my_example_test.dart'`.
+const _skipTests = <String>[];
+
 void main(List<String> args) async {
   final testRunnerArgs = DevToolsAppTestRunnerArgs(
     args,
@@ -38,6 +46,10 @@ Future<void> _runTest(
   DevToolsAppTestRunnerArgs testRunnerArgs,
 ) async {
   final testTarget = testRunnerArgs.testTarget!;
+
+  final shouldSkip = _skipTests.any((t) => testTarget.endsWith(t));
+  if (shouldSkip) return;
+
   if (!testRunnerArgs.testAppDevice.supportsTest(testTarget)) {
     // Skip test, since it is not supported for device.
     return;

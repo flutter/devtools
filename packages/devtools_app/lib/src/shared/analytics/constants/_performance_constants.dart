@@ -15,6 +15,7 @@ enum PerformanceEvents {
   trackUserCreatedWidgetBuilds,
   trackPaints,
   trackLayouts,
+  profilePlatformChannels,
   enhanceTracingButtonSmall,
   disableClipLayers,
   disableOpacityLayers,
@@ -48,4 +49,5 @@ enum PerformanceDocs {
   shaderCompilationDocs,
   shaderCompilationDocsTooltipLink,
   impellerWikiLink,
+  platformChannelsDocs,
 }

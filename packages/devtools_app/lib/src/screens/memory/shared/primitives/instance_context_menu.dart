@@ -19,6 +19,7 @@ class InstanceViewWithContextMenu extends StatelessWidget {
 
   final int count;
   final MenuBuilder? menuBuilder;
+
   @override
   Widget build(BuildContext context) {
     final menu = menuBuilder?.call() ?? [];

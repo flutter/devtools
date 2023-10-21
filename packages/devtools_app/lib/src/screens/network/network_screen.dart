@@ -41,8 +41,7 @@ class NetworkScreen extends Screen {
   @override
   Widget buildStatus(BuildContext context) {
     final networkController = Provider.of<NetworkController>(context);
-    final color = Theme.of(context).textTheme.bodyMedium!.color!;
-
+    final color = Theme.of(context).colorScheme.onPrimary;
     return MultiValueListenableBuilder(
       listenables: [
         networkController.requests,

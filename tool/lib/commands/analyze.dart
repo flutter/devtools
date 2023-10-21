@@ -27,7 +27,7 @@ class AnalyzeCommand extends Command {
     }
 
     final log = Logger.standard();
-    final repo = DevToolsRepo.getInstance()!;
+    final repo = DevToolsRepo.getInstance();
     final packages = repo.getPackages();
 
     log.stdout('Running flutter analyze...');

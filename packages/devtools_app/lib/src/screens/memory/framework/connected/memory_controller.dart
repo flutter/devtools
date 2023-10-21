@@ -27,23 +27,28 @@ class MemoryFeatureControllers {
     DiffPaneController? diffPaneController,
     ProfilePaneController? profilePaneController,
   ) {
-    diff = diffPaneController ?? DiffPaneController(SnapshotTaker());
+    memoryTimeline = MemoryTimeline();
+    diff =
+        diffPaneController ?? DiffPaneController(SnapshotTaker(memoryTimeline));
     profile = profilePaneController ?? ProfilePaneController();
   }
 
   late DiffPaneController diff;
   late ProfilePaneController profile;
+  late MemoryTimeline memoryTimeline;
   TracingPaneController tracing = TracingPaneController();
 
   void reset() {
     diff.dispose();
-    diff = DiffPaneController(SnapshotTaker());
+    diff = DiffPaneController(SnapshotTaker(memoryTimeline));
 
     profile.dispose();
     profile = ProfilePaneController();
 
     tracing.dispose();
     tracing = TracingPaneController();
+
+    memoryTimeline.reset();
   }
 
   void dispose() {
@@ -65,8 +70,6 @@ class MemoryController extends DisposableController
     DiffPaneController? diffPaneController,
     ProfilePaneController? profilePaneController,
   }) {
-    memoryTimeline = MemoryTimeline();
-
     controllers = MemoryFeatureControllers(
       diffPaneController,
       profilePaneController,
@@ -86,8 +89,6 @@ class MemoryController extends DisposableController
 
   final _shouldShowLeaksTab = ValueNotifier<bool>(false);
   ValueListenable<bool> get shouldShowLeaksTab => _shouldShowLeaksTab;
-
-  late MemoryTimeline memoryTimeline;
 
   HeapSample? _selectedDartSample;
 
@@ -190,14 +191,14 @@ class MemoryController extends DisposableController
         // TODO(terry): Display events enabled in a settings page for now only these events.
         switch (extensionEventKind) {
           case 'Flutter.ImageSizesForFrame':
-            memoryTimeline.addExtensionEvent(
+            controllers.memoryTimeline.addExtensionEvent(
               event.timestamp,
               event.extensionKind,
               jsonData,
             );
             break;
           case MemoryTimeline.devToolsExtensionEvent:
-            memoryTimeline.addExtensionEvent(
+            controllers.memoryTimeline.addExtensionEvent(
               event.timestamp,
               MemoryTimeline.customDevToolsEvent,
               jsonData,

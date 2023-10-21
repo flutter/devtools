@@ -17,6 +17,7 @@ final enhanceTracingExtensions = [
   extensions.profileUserWidgetBuilds,
   extensions.profileRenderObjectLayouts,
   extensions.profileRenderObjectPaints,
+  extensions.profilePlatformChannels,
 ];
 
 class EnhanceTracingController extends DisposableController

@@ -93,8 +93,8 @@ class MemoryDefaultScene extends Scene {
       profilePaneController: profileController,
     )
       ..offline = true
-      ..memoryTimeline.offlineData.clear()
-      ..memoryTimeline.offlineData.addAll(memoryJson.data);
+      ..controllers.memoryTimeline.offlineData.clear()
+      ..controllers.memoryTimeline.offlineData.addAll(memoryJson.data);
   }
 
   @override

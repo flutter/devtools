@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import '_file_stub.dart'
-    if (dart.library.html) '_file_web.dart'
+    if (dart.library.js_interop) '_file_web.dart'
     if (dart.library.io) '_file_desktop.dart';
 
 abstract class FileIO {

@@ -1,5 +1,4 @@
 # Dart & Flutter DevTools Extensions
-Note: this package is under active development; more thorough documentation coming soon.
 
 Extend Dart & Flutter's developer tool suite,
 [Dart DevTools](https://docs.flutter.dev/tools/devtools/overview), with a custom tool for
@@ -21,6 +20,7 @@ for reference.
     - [Development](#create-the-extension-web-app)
     - [Debugging](#debug-the-extension-web-app)
 3. [Publish your package with a DevTools extension](#publish-your-package-with-a-DevTools-extension)
+4. [Resources and support](#resources-and-support)
 
 ## Setup your package to provide a DevTools extension
 
@@ -29,7 +29,7 @@ extensions in an iFrame to display them dynamically in DevTools.
 
 To add an extension to your Dart package, add a top-level `extension` directory:
 ```
-foo_package
+foo
   extension/
   lib/
   ...
@@ -43,16 +43,35 @@ extension
     config.yaml
 ```
 
-The `config.yaml` file contains metadata that DevTools needs in order to load the
-extension. Copy the `config.yaml` file below and fill in the approproate value for each key.
-The `material_icon_code_point` field should correspond to the codepoint value of an icon from
-[material/icons.dart](https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/material/icons.dart).
+The `config.yaml` file contains metadata that DevTools needs to load the extension.
+
 ```yaml
-name: foo_package
-issue_tracker: <link_to_your_issue_tracker.com>
+name: foo
+issueTracker: <link_to_your_issue_tracker.com>
 version: 0.0.1
-material_icon_code_point: '0xe0b1'
+materialIconCodePoint: '0xe0b1'
 ```
+
+Copy the `config.yaml` file content above and paste it into the `config.yaml` file you just 
+created in your package. For each key, fill in the appropriate value for your package. 
+* `name`: the package name that this DevTools extension belongs to. The value of this field 
+will be used in the extension page title bar. **(required)**
+* `issueTracker`: the url for your issue tracker. When a user clicks the “Report an issue” 
+link in the DevTools UI, they will be directed to this url. **(required)**
+* `version`: the version of your DevTools extension. This version number should evolve over 
+time as you ship new features for your extension. The value of this field will be used in the 
+extension page title bar. **(required)**
+
+  ![Extension title bar components](_readme_images/extension_title_bar.png)
+
+* `materialIconCodePoint`: corresponds to the codepoint value of an icon from
+[material/icons.dart](https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/material/icons.dart).
+This icon will be used for the extension’s tab in the top-level DevTools tab bar. **(required)**
+
+  ![Extension tab icon](_readme_images/extension_tab_icon.png)
+
+For the most up-to-date documentation on the `config.yaml` spec, see
+[extension_config_spec.md](https://github.com/flutter/devtools/blob/master/packages/devtools_extensions/extension_config_spec.md)
 
 Now it is time to build your extension.
 
@@ -65,28 +84,28 @@ in order for DevTools to load it. To keep the size of your pub package small, we
 you develop your DevTools extension outside of your pub package. Here is the recommended package structure:
 
 ```
-foo_package/  # formerly the repository root of your pub package
+foo/  # formerly the repository root of your pub package
   packages/
-    foo_package/  # your pub package
+    foo/  # your pub package
       extension/
         devtools/
           build/
-            ...  # pre-compiled output of foo_package_devtools_extension
+            ...  # pre-compiled output of foo_devtools_extension
           config.yaml
-    foo_package_devtools_extension/  # source code for your extension
+    foo_devtools_extension/  # source code for your extension
 ```
 
 ### Create the extension web app
 
 From the directory where you want your extension source code to live, run the following command,
-replacing `foo_package_devtools_extension` with `<your_package_name>_devtools_extension``:
+replacing `foo_devtools_extension` with `<your_package_name>_devtools_extension``:
 ```sh
-flutter create --template app --platforms web foo_package_devtools_extension
+flutter create --template app --platforms web foo_devtools_extension
 ```
 
-In `foo_package_devtools_extension/pubspec.yaml`, add a dependency on `devtools_extensions`:
+In `foo_devtools_extension/pubspec.yaml`, add a dependency on `devtools_extensions`:
 ```yaml
-devtools_extensions: ^0.0.8
+devtools_extensions: ^0.0.9
 ```
 
 In `lib/main.dart`, place a `DevToolsExtension` widget at the root of your app:
@@ -140,7 +159,7 @@ file in VS code:
         ...
         {
             "name": "foo_devtools_extension + simulated environment",
-            "program": "foo_package/extension/foo_devtools_extension/lib/main.dart",
+            "program": "foo/extension/foo_devtools_extension/lib/main.dart",
             "request": "launch",
             "type": "dart",
             "args": [
@@ -245,3 +264,11 @@ pushd your_pub_package
 flutter pub publish
 popd
 ```
+
+## Resources and support
+
+Check out the [#devtools-extension-authors](https://discord.com/channels/608014603317936148/1159561514072690739)
+Discord channel to connect with other DevTools extension authors and the DevTools team.
+
+For feature requests or bugs, please [file an issue](https://github.com/flutter/devtools/issues/new)
+on the DevTools Github repository.

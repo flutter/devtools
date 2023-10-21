@@ -6,7 +6,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
-import '_perfetto_desktop.dart' if (dart.library.html) '_perfetto_web.dart';
+import '_perfetto_desktop.dart'
+    if (dart.library.js_interop) '_perfetto_web.dart';
 import 'perfetto_controller.dart';
 
 class EmbeddedPerfetto extends StatelessWidget {

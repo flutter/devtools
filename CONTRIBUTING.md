@@ -19,7 +19,7 @@ You can do this online, and it only takes a minute.
 ## Workflow for making changes
 
 - Change flutter to the latest flutter candidate:
-    `./tool/update_flutter_sdk.sh --local`
+  `./tool/update_flutter_sdk.sh --local`
 - Create a branch from your cloned repo: `git checkout -b myBranch`
 - Refresh local code: `sh tool/refresh.sh`
 - Implement your changes
@@ -61,7 +61,7 @@ From a separate terminal, start running a flutter app to connect to DevTools:
 
 **[Contributors who work at Google]** You can use the Google-purchased license key to activate DCM. See [go/dash-devexp-dcm-keys](http://goto.google.com/dash-devexp-dcm-keys).
 
-**[All other contributors]** Please follow instructions at <https://dcm.dev/pricing/>. You can either use the free tier of DCM, or purchase a team license. Note that the free tier doesn't support all the rules of the paid tier, so you will also need to consult the output of the Dart Code Metrics workflow on Github when you open your PR.
+**[All other contributors]** Please follow instructions at <https://dcm.dev/pricing/>. You can either use the free tier of DCM, or purchase a team license. Note that the free tier doesn't support all the rules of the paid tier, so you will also need to consult the output of the [Dart Code Metrics workflow on Github](#running-the-dart-code-metrics-github-workflow) when you open your PR.
 
 To enable DCM:
 
@@ -228,6 +228,16 @@ To update goldens for all tests, run:
 ```
 flutter test test/ --update-goldens
 ```
+
+## Opening a PR
+
+### Running the Dart Code Metrics Github workflow
+
+Any PRs that change Dart code require the Dart Code Metrics workflow to be run before being submitted. To trigger the workflow, add the
+label `run-dcm-workflow` to your PR. If you don't have permission to add the label, your reviewer can add it for you.
+
+Any DCM errors will be caught by the workflow. Fix them and push up your changes. To trigger the DCM workflow to run again, you will
+need to remove and then re-add the `run-dcm-workflow` label.
 
 ## Manual Testing
 
