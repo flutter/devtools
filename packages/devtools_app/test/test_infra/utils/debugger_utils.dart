@@ -6,9 +6,10 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Finder findDebuggerButtonWithLabel(String title) => find.ancestor(
+Finder findDebuggerButtonWithIcon(IconData icon) => find.ancestor(
       of: find.byWidgetPredicate(
-        (Widget widget) => widget is MaterialIconLabel && widget.label == title,
+        (Widget widget) =>
+            widget is MaterialIconLabel && widget.iconData == icon,
       ),
       matching: find.byType(OutlinedButton),
     );

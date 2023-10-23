@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:codicon/codicon.dart';
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/debugger/codeview.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_model.dart';
@@ -88,20 +89,20 @@ void main() {
       await tester.pump();
 
       expect(
-        findDebuggerButtonWithLabel('Pause'),
+        findDebuggerButtonWithIcon(Codicons.debugPause),
         findsOneWidget,
       );
       final pause = getWidgetFromFinder<OutlinedButton>(
-        findDebuggerButtonWithLabel('Pause'),
+        findDebuggerButtonWithIcon(Codicons.debugPause),
       );
       expect(pause.onPressed, isNull);
 
       expect(
-        findDebuggerButtonWithLabel('Resume'),
+        findDebuggerButtonWithIcon(Codicons.debugContinue),
         findsOneWidget,
       );
       final resume = getWidgetFromFinder<OutlinedButton>(
-        findDebuggerButtonWithLabel('Resume'),
+        findDebuggerButtonWithIcon(Codicons.debugContinue),
       );
       expect(resume.onPressed, isNotNull);
     },
