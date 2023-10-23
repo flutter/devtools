@@ -84,6 +84,16 @@ class MemoryTimeline {
     _eventSamples.add(event);
   }
 
+  void addSnapshotEvent({bool auto = false}) {
+    postEventSample(
+      EventSample.snapshotEvent(
+        DateTime.now().millisecondsSinceEpoch,
+        snapshotAuto: auto,
+        events: extensionEvents,
+      ),
+    );
+  }
+
   void addGCEvent() {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     postEventSample(
