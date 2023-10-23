@@ -162,7 +162,7 @@ class DisconnectedPerformanceScreenBody extends StatelessWidget {
   const DisconnectedPerformanceScreenBody({super.key});
 
   static const importInstructions =
-      'Open a performance data file that was previously saved from DevTools';
+      'Open a performance data file that was previously saved from DevTools.';
 
   @override
   Widget build(BuildContext context) {
