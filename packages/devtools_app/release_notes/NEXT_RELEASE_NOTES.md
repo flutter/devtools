@@ -32,9 +32,18 @@ activity. This is useful for apps with plugins.
 
     ![Track platform channels setting](images/track_platform_channels.png "Track platform channels setting")
 
+* Made the Performance screen available when there is no connected app. Performance data that was
+previously saved from DevTools can be reloaded for viewing from this screen. [#6567](https://github.com/flutter/devtools/pull/6567)
+* Added an "Open" button to the Performance controls for loading data that was previously saved
+from DevTools. [#6567](https://github.com/flutter/devtools/pull/6567)
+
 ## CPU profiler updates
 
 * Tree guidelines are now always enabled for the "Bottom Up" and "Call Tree" tabs. [#6534](https://github.com/flutter/devtools/pull/6534)
+* Made the CPU profiler screen available when there is no connected app. CPU profiles that were
+previously saved from DevTools can be reloaded for viewing from this screen. [#6567](https://github.com/flutter/devtools/pull/6567)
+* Added an "Open" button to the CPU profiler controls for loading data that was previously saved
+from DevTools. [#6567](https://github.com/flutter/devtools/pull/6567)
 
 ## Memory updates
 

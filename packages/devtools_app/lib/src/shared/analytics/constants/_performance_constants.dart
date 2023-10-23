@@ -29,7 +29,9 @@ enum PerformanceEvents {
   perfettoScrollToTimeRange,
   perfettoShowHelp,
   performanceSettings,
-  traceCategories;
+  traceCategories,
+  openDataFile,
+  loadDataFromFile;
 
   const PerformanceEvents([this.nameOverride]);
 

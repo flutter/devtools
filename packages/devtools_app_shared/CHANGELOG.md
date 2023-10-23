@@ -1,3 +1,6 @@
+## 0.0.7
+* Add `RoundedButtonGroup` common widget.
+
 ## 0.0.6
 * Add `profilePlatformChannels` to known service extensions.
 * Fix a bug where service extension states were not getting cleared on app disconnect.
