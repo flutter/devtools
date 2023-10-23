@@ -13,6 +13,11 @@ import '../../shared/ui/search.dart';
 
 const kDeeplinkTableCellDefaultWidth = 200.0;
 
+enum PlatformOS {
+  android,
+  ios,
+}
+
 /// Contains all data relevant to a deep link.
 class LinkData with SearchableDataMixin {
   LinkData({
@@ -26,7 +31,7 @@ class LinkData with SearchableDataMixin {
 
   final String path;
   final String domain;
-  final List<String> os;
+  final List<PlatformOS> os;
   final List<String> scheme;
   final bool domainError;
   final bool pathError;
@@ -213,4 +218,13 @@ class NavigationColumn extends ColumnData<LinkData>
   }) {
     return const Icon(Icons.arrow_forward);
   }
+}
+
+class FlutterProject {
+  FlutterProject({
+    required this.path,
+    required this.androidVariants,
+  });
+  final String path;
+  final List<String> androidVariants;
 }
