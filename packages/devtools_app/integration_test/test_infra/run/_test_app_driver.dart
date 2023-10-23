@@ -419,7 +419,7 @@ enum FlutterDaemonConstants {
 
 enum TestAppDevice {
   flutterTester('flutter-tester'),
-  flutterChrome('chrome'),
+  flutterWebServer('web-server'),
   cli('cli');
 
   const TestAppDevice(this.argName);
@@ -429,7 +429,7 @@ enum TestAppDevice {
   /// A mapping of test app device to the unsupported tests for that device.
   static final _unsupportedTestsForDevice = <TestAppDevice, List<String>>{
     TestAppDevice.flutterTester: [],
-    TestAppDevice.flutterChrome: [
+    TestAppDevice.flutterWebServer: [
       // TODO(https://github.com/flutter/devtools/issues/5874): Remove once supported on web.
       'eval_and_browse_test.dart',
       'perfetto_test.dart',
