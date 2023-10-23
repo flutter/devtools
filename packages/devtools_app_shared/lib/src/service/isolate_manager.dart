@@ -45,10 +45,6 @@ final class IsolateManager with DisposerMixin {
   ValueListenable<List<IsolateRef>> get isolates => _isolates;
   final _isolates = ListValueNotifier(const <IsolateRef>[]);
 
-  Stream<IsolateRef?> get onIsolateCreated => _isolateCreatedController.stream;
-
-  Stream<IsolateRef?> get onIsolateExited => _isolateExitedController.stream;
-
   ValueListenable<IsolateRef?> get mainIsolate => _mainIsolate;
   final _mainIsolate = ValueNotifier<IsolateRef?>(null);
 

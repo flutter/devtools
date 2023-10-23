@@ -4,7 +4,6 @@
 
 import 'package:vm_service/vm_service.dart';
 
-import '../../shared/http/http_request_data.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/search.dart';
 
@@ -185,21 +184,10 @@ class WebSocket extends NetworkRequest {
 class NetworkRequests {
   NetworkRequests({
     this.requests = const [],
-    this.invalidHttpRequests = const [],
   });
 
   /// A list of network requests.
   ///
   /// Individual requests in this list can be either completed or in-progress.
   List<NetworkRequest> requests;
-
-  /// A list of invalid HTTP requests received.
-  ///
-  /// These are requests that have completed but do not contain all the required
-  /// information to display normally in the UI.
-  List<DartIOHttpRequestData> invalidHttpRequests;
-
-  void clear() {
-    requests.clear();
-  }
 }

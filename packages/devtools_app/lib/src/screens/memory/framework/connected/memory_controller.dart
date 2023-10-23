@@ -112,18 +112,10 @@ class MemoryController extends DisposableController
 
   final _refreshCharts = ValueNotifier<int>(0);
 
-  void refreshAllCharts() {
-    _refreshCharts.value++;
-    _updateAndroidChartVisibility();
-  }
-
   /// Default is to display default tick width based on width of chart of the collected
   /// data in the chart.
   final _displayIntervalNotifier =
       ValueNotifier<ChartInterval>(ChartInterval.theDefault);
-
-  ValueListenable<ChartInterval> get displayIntervalNotifier =>
-      _displayIntervalNotifier;
 
   set displayInterval(ChartInterval interval) {
     _displayIntervalNotifier.value = interval;

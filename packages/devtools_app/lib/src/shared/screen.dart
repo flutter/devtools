@@ -299,8 +299,6 @@ abstract class Screen {
   /// should return `null`.
   String? get docPageId => null;
 
-  int get badgeCount => 0;
-
   double approximateTabWidth(
     TextTheme textTheme, {
     bool includeTabBarSpacing = true,

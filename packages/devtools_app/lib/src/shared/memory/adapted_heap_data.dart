@@ -51,7 +51,6 @@ typedef HeapDataCallback = AdaptedHeapData Function();
 class AdaptedHeapData {
   AdaptedHeapData(
     this.objects, {
-    required this.isolateId,
     this.rootIndex = _defaultRootIndex,
     DateTime? created,
   })  : assert(objects.isNotEmpty),
@@ -62,9 +61,8 @@ class AdaptedHeapData {
   static final _uiReleaser = UiReleaser();
 
   static Future<AdaptedHeapData> fromHeapSnapshot(
-    HeapSnapshotGraph graph, {
-    required String isolateId,
-  }) async {
+    HeapSnapshotGraph graph,
+  ) async {
     final objects = <AdaptedHeapObject>[];
     for (final i in Iterable.generate(graph.objects.length)) {
       if (_uiReleaser.step()) await _uiReleaser.releaseUi();
@@ -73,19 +71,18 @@ class AdaptedHeapData {
       objects.add(object);
     }
 
-    return AdaptedHeapData(objects, isolateId: isolateId);
+    return AdaptedHeapData(objects);
   }
 
   @visibleForTesting
   static Future<AdaptedHeapData> fromFile(
-    String fileName, {
-    String isolateId = '',
-  }) async {
+    String fileName,
+  ) async {
     final file = File(fileName);
     final bytes = await file.readAsBytes();
     final data = bytes.buffer.asByteData();
     final graph = HeapSnapshotGraph.fromChunks([data]);
-    return AdaptedHeapData.fromHeapSnapshot(graph, isolateId: isolateId);
+    return AdaptedHeapData.fromHeapSnapshot(graph);
   }
 
   /// Default value for rootIndex is taken from the doc:
@@ -97,8 +94,6 @@ class AdaptedHeapData {
   AdaptedHeapObject get root => objects[rootIndex];
 
   final List<AdaptedHeapObject> objects;
-
-  final String isolateId;
 
   /// Total size of all objects in the heap.
   ///

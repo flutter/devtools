@@ -152,7 +152,6 @@ AdaptedHeapData _createHeap(Map<String, int> classToInstanceCount) {
   return AdaptedHeapData(
     objects,
     rootIndex: rootIndex,
-    isolateId: '',
   );
 }
 
