@@ -6,11 +6,15 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';
+import '../../shared/config_specific/import_export/import_export.dart';
+import '../../shared/file_import.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/listenable.dart';
 import '../../shared/screen.dart';
@@ -35,7 +39,15 @@ class ProfilerScreen extends Screen {
       const FixedValueListenable<bool>(true);
 
   @override
-  Widget build(BuildContext context) => const ProfilerScreenBody();
+  Widget build(BuildContext context) {
+    final connected = serviceConnection.serviceManager.hasConnection &&
+        serviceConnection.serviceManager.connectedAppInitialized;
+    if (!connected && !offlineController.offlineMode.value) {
+      return const DisconnectedCpuProfilerScreenBody();
+    }
+
+    return const ProfilerScreenBody();
+  }
 }
 
 class ProfilerScreenBody extends StatefulWidget {
@@ -160,6 +172,28 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
             ),
           ],
         );
+      },
+    );
+  }
+}
+
+class DisconnectedCpuProfilerScreenBody extends StatelessWidget {
+  const DisconnectedCpuProfilerScreenBody({super.key});
+
+  static const importInstructions =
+      'Open a CPU profile that was previously saved from DevTools';
+
+  @override
+  Widget build(BuildContext context) {
+    return FileImportContainer(
+      instructions: importInstructions,
+      actionText: 'Load data',
+      gaScreen: gac.appSize,
+      gaSelectionImport: gac.CpuProfilerEvents.openDataFile.name,
+      gaSelectionAction: gac.CpuProfilerEvents.loadDataFromFile.name,
+      onAction: (jsonFile) {
+        Provider.of<ImportController>(context, listen: false)
+            .importData(jsonFile, expectedScreenId: ProfilerScreen.id);
       },
     );
   }

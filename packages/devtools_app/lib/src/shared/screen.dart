@@ -37,6 +37,7 @@ enum ScreenMetaData {
     title: 'Performance',
     icon: Octicons.pulse,
     worksOffline: true,
+    requiresConnection: false,
     tutorialVideoTimestamp: '?t=261',
   ),
   cpuProfiler(
@@ -45,6 +46,7 @@ enum ScreenMetaData {
     icon: Octicons.dashboard,
     requiresDartVm: true,
     worksOffline: true,
+    requiresConnection: false,
     tutorialVideoTimestamp: '?t=340',
   ),
   memory(
