@@ -6,6 +6,7 @@
 * Remove public getters `onIsolateCreated` and `onIsolateExited` from `IsolateManager`.
 * Remove public getter `firstFrameReceived` from `ServiceExtensionManager`.
 * Add `RoundedButtonGroup` common widget.
+* Move from `dart:html` to `package:web`.
 
 ## 0.0.6
 * Add `profilePlatformChannels` to known service extensions.
