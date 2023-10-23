@@ -16,9 +16,9 @@ String analyzedLeaksToYaml({
 }) {
   return '# For memory leaks troubleshooting tips see\n'
       '# $linkToGuidance\n\n'
-      '${LeakReport.iterableToYaml('not-disposed', notDisposed)}'
+      '${LeakReport.iterableToYaml('not-disposed', notDisposed, phasesAreTests: false)}'
       '${_notGCedToYaml(notGCed)}'
-      '${LeakReport.iterableToYaml('gced-late', gcedLate)}';
+      '${LeakReport.iterableToYaml('gced-late', gcedLate, phasesAreTests: false)}';
 }
 
 String _notGCedToYaml(NotGCedAnalyzed? notGCed) {
@@ -54,6 +54,7 @@ String _notGCedToYaml(NotGCedAnalyzed? notGCed) {
     LeakReport.iterableToYaml(
       'not-gced-without-path',
       notGCed.leaksWithoutRetainingPath,
+      phasesAreTests: false,
     ),
   );
 
@@ -65,11 +66,11 @@ String _culpritToYaml(
   List<LeakReport> victims, {
   String indent = '',
 }) {
-  final culpritYaml = culprit.toYaml(indent);
+  final culpritYaml = culprit.toYaml(indent, phasesAreTests: false);
   if (victims.isEmpty) return culpritYaml;
 
   return '$culpritYaml'
       '''$indent  total-victims: ${victims.length}
 $indent  victims:
-${victims.map((e) => e.toYaml('$indent    ')).join()}''';
+${victims.map((e) => e.toYaml('$indent    ', phasesAreTests: false)).join()}''';
 }

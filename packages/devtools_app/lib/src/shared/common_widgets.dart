@@ -704,25 +704,6 @@ class BlankHeader extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => Size.zero;
 }
 
-/// Button to export data.
-///
-/// * `minScreenWidthForTextBeforeScaling`: The minimum width the button can be before the text is
-///    omitted.
-/// * `onPressed`: The callback to be called upon pressing the button.
-class ExportButton extends GaDevToolsButton {
-  ExportButton({
-    required super.gaScreen,
-    super.key,
-    super.onPressed,
-    super.minScreenWidthForTextBeforeScaling,
-    super.tooltip = 'Export data',
-  }) : super(
-          icon: Icons.file_download,
-          label: 'Export',
-          gaSelection: gac.export,
-        );
-}
-
 /// Button to open related information / documentation.
 ///
 /// [tooltip] specifies the hover text for the button.

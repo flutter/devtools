@@ -13,14 +13,14 @@ executables:
 
 dependencies:
   args: ^2.4.2
-  devtools_shared: ^4.0.1
+  devtools_shared: ^4.1.0
   devtools_app_shared: ^0.0.5
   flutter:
     sdk: flutter
   io: ^1.0.4
   path: ^1.8.0
   logging: ^1.1.1
-  vm_service: ^11.10.0
+  vm_service: ^12.0.0
 
 dev_dependencies:
   flutter_driver:

@@ -566,6 +566,117 @@ final class DevToolsToggleButton extends StatelessWidget {
   }
 }
 
+/// A group of buttons that share a common border.
+/// 
+/// This widget ensures the buttons are displayed with proper borders on the
+/// interior and exterior of the group. The attirbutes for each button can be
+/// defined by [ButtonGroupItemData] and included in [items].
+final class RoundedButtonGroup extends StatelessWidget {
+  const RoundedButtonGroup({
+    super.key,
+    required this.items,
+    this.minScreenWidthForTextBeforeScaling,
+  });
+
+  final List<ButtonGroupItemData> items;
+  final double? minScreenWidthForTextBeforeScaling;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget buildButton(int index) {
+      final itemData = items[index];
+      Widget button = _ButtonGroupButton(
+        buttonData: itemData,
+        roundedLeftBorder: index == 0,
+        roundedRightBorder: index == items.length - 1,
+        minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
+      );
+      if (index != 0) {
+        button = Container(
+          decoration: BoxDecoration(
+            border: Border(
+              left: BorderSide(
+                color: Theme.of(context).focusColor,
+              ),
+            ),
+          ),
+          child: button,
+        );
+      }
+      return button;
+    }
+
+    return SizedBox(
+      height: defaultButtonHeight,
+      child: RoundedOutlinedBorder(
+        child: Row(
+          children: [
+            for (int i = 0; i < items.length; i++) buildButton(i),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+final class _ButtonGroupButton extends StatelessWidget {
+  const _ButtonGroupButton({
+    required this.buttonData,
+    this.roundedLeftBorder = false,
+    this.roundedRightBorder = false,
+    this.minScreenWidthForTextBeforeScaling,
+  });
+
+  final ButtonGroupItemData buttonData;
+  final bool roundedLeftBorder;
+  final bool roundedRightBorder;
+  final double? minScreenWidthForTextBeforeScaling;
+
+  @override
+  Widget build(BuildContext context) {
+    return DevToolsTooltip(
+      message: buttonData.tooltip,
+      child: OutlinedButton(
+        autofocus: buttonData.autofocus,
+        style: OutlinedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: densePadding),
+          side: BorderSide.none,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.horizontal(
+              left: roundedLeftBorder ? defaultRadius : Radius.zero,
+              right: roundedRightBorder ? defaultRadius : Radius.zero,
+            ),
+          ),
+        ),
+        onPressed: buttonData.onPressed,
+        child: MaterialIconLabel(
+          label: buttonData.label,
+          iconData: buttonData.icon,
+          minScreenWidthForTextBeforeScaling:
+              minScreenWidthForTextBeforeScaling,
+        ),
+      ),
+    );
+  }
+}
+
+final class ButtonGroupItemData {
+  const ButtonGroupItemData({
+    this.label,
+    this.icon,
+    String? tooltip,
+    this.onPressed,
+    this.autofocus = false,
+  })  : tooltip = tooltip ?? label,
+        assert(label != null || icon != null);
+
+  final String? label;
+  final IconData? icon;
+  final String? tooltip;
+  final VoidCallback? onPressed;
+  final bool autofocus;
+}
+
 final class DevToolsFilterButton extends StatelessWidget {
   const DevToolsFilterButton({
     Key? key,
