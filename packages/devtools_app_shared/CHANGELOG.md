@@ -1,4 +1,5 @@
 ## 0.0.7
+* Bump the `devtools_shared` dependency to ^5.0.0
 * Remove public getter `libraryRef`, and public methods `getLibrary` and `retrieveFullValueAsString` from `EvalOnDartLibrary`.
 * Change `toString` output for `UnknownEvalException`, `EvalSentinelException`, and `EvalErrorException`.
 * Remove public getters `flutterVersionSummary`, `frameworkVersionSummary`, and `engineVersionSummary` from `FlutterVersion`.
