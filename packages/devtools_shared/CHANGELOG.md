@@ -1,4 +1,5 @@
-# 4.1.0
+# 5.0.0
+- Split deeplink exports into `devtools_deeplink_io.dart` and `devtools_deeplink.dart`.
 - Bump `package:vm_service` to ^12.0.0.
 - Adds `DeeplinkApi.androidAppLinkSettings`, `DeeplinkApi.iosBuildOptions`, and
   `DeeplinkApi.iosUniversalLinkSettings` endpoints to ServerApi.
