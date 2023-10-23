@@ -444,6 +444,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
     bool? forceCompile,
     bool? reportLines,
     List<String>? libraryFilters,
+    List<String>? librariesAlreadyCompiled,
   }) async {
     return SourceReport(ranges: [], scripts: []);
   }
