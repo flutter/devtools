@@ -261,11 +261,6 @@ Future<void> loadFonts() async {
   await Future.wait(loadFontsFuture);
 }
 
-/// Helper method for finding widgets by type when they have a generic type.
-///
-/// E.g. `find.byType(typeOf<MyTypeWithAGeneric<String>>());`
-Type typeOf<T>() => T;
-
 void verifyIsSearchMatch(
   List<SearchableDataMixin> data,
   List<SearchableDataMixin> matches,

@@ -333,9 +333,6 @@ class DevToolsNavigationState {
           ...state,
         };
 
-  factory DevToolsNavigationState.fromJson(Map<String, dynamic> json) =>
-      DevToolsNavigationState._(json.cast<String, String?>());
-
   DevToolsNavigationState._(this._state) : kind = _state[_kKind]!;
 
   static const _kKind = '_kind';

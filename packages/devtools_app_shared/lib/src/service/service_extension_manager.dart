@@ -27,7 +27,6 @@ final class ServiceExtensionManager with DisposerMixin {
 
   final IsolateManager _isolateManager;
 
-  Future<void> get firstFrameReceived => _firstFrameReceived.future;
   Completer<void> _firstFrameReceived = Completer();
 
   bool get _firstFrameEventReceived => _firstFrameReceived.isCompleted;

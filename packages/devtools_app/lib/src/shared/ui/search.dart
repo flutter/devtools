@@ -762,14 +762,6 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
     );
   }
 
-  void selectFromSearchField(String selection) {
-    searchTextFieldController.clear();
-    search = selection;
-    clearSearchField(force: true);
-    selectTheSearch = true;
-    closeAutoCompleteOverlay();
-  }
-
   void clearSearchField({bool force = false}) {
     if (force || search.isNotEmpty) {
       resetSearch();
@@ -801,12 +793,6 @@ typedef HighlightAutoComplete = Function(
   AutoCompleteSearchControllerMixin controller,
   bool directionDown,
 );
-
-/// Callback for clearing the search field.
-typedef ClearSearchField = Function(
-  AutoCompleteSearchControllerMixin controller, {
-  bool force,
-});
 
 /// Provided by clients to specify where the autocomplete overlay should be
 /// positioned relative to the input text.

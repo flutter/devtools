@@ -70,10 +70,6 @@ class TimelineStreamManager with DisposerMixin {
     return _streams.values.where(condition).toList();
   }
 
-  ValueListenable<bool>? timelineStreamListenable(String name) {
-    return _streams.containsKey(name) ? _streams[name]!.recorded : null;
-  }
-
   /// Initializes stream values from the vm service as a source of truth.
   Future<void> _initStreams() async {
     final timelineFlags = await service!.getVMTimelineFlags();

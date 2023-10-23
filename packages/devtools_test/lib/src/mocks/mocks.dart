@@ -289,17 +289,6 @@ final mockParsedScript = ParsedScript(
   ),
 );
 
-final mockLargeParsedScript = ParsedScript(
-  script: mockLargeScript!,
-  highlighter: mockSyntaxHighlighter,
-  executableLines: executableLines,
-  sourceReport: ProcessedSourceReport(
-    coverageHitLines: coverageHitLines,
-    coverageMissedLines: coverageMissLines,
-    profilerEntries: profilerEntries,
-  ),
-);
-
 final mockScriptRefs = [
   ScriptRef(uri: 'zoo:animals/cats/meow.dart', id: 'fake/id/1'),
   ScriptRef(uri: 'zoo:animals/cats/purr.dart', id: 'fake/id/2'),
