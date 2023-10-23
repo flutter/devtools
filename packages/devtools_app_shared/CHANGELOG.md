@@ -1,4 +1,5 @@
 ## 0.0.7
+* Bump the `devtools_shared` dependency to ^5.0.0
 * Add `RoundedButtonGroup` common widget.
 
 ## 0.0.6
