@@ -341,12 +341,16 @@ void main() {
               findsOneWidget,
             );
             expect(
-              find.richTextContaining('Track Widget Builds'),
+              find.richTextContaining('Track widget builds'),
               findsOneWidget,
             );
-            expect(find.richTextContaining('Track Layouts'), findsOneWidget);
-            expect(find.richTextContaining('Track Paints'), findsOneWidget);
-            expect(find.byType(MoreInfoLink), findsNWidgets(3));
+            expect(find.richTextContaining('Track layouts'), findsOneWidget);
+            expect(find.richTextContaining('Track paints'), findsOneWidget);
+            expect(
+              find.richTextContaining('Track platform channels'),
+              findsOneWidget,
+            );
+            expect(find.byType(MoreInfoLink), findsNWidgets(4));
           });
         },
       );

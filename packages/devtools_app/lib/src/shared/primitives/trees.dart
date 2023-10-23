@@ -158,10 +158,6 @@ abstract class TreeNode<T extends TreeNode<T>> {
     );
   }
 
-  void removeLastChild() {
-    children.removeLast();
-  }
-
   bool subtreeHasNodeWithCondition(bool Function(T node) condition) {
     final T? childWithCondition = firstChildWithCondition(condition);
     return childWithCondition != null;

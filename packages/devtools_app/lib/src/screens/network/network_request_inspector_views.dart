@@ -70,7 +70,11 @@ class HttpRequestHeadersView extends StatelessWidget {
               'General',
               [
                 for (final entry in general.entries)
-                  _Row(entry: entry, constraints: constraints),
+                  _Row(
+                    entry: entry,
+                    constraints: constraints,
+                    isErrorValue: data.didFail && entry.key == 'statusCode',
+                  ),
               ],
               key: generalKey,
             ),
@@ -103,10 +107,12 @@ class _Row extends StatelessWidget {
   const _Row({
     required this.entry,
     required this.constraints,
+    this.isErrorValue = false,
   });
 
   final MapEntry<String, Object?> entry;
   final BoxConstraints constraints;
+  final bool isErrorValue;
 
   @override
   Widget build(BuildContext context) {
@@ -122,6 +128,9 @@ class _Row extends StatelessWidget {
           ),
           Expanded(
             child: SelectableText(
+              style: isErrorValue
+                  ? TextStyle(color: Theme.of(context).colorScheme.error)
+                  : null,
               '${entry.value}',
               minLines: 1,
             ),
@@ -654,7 +663,12 @@ class NetworkRequestOverviewView extends StatelessWidget {
       _buildRow(
         context: context,
         title: 'Status',
-        child: _valueText(data.status ?? '--'),
+        child: _valueText(
+          data.status ?? '--',
+          data.didFail
+              ? TextStyle(color: Theme.of(context).colorScheme.error)
+              : null,
+        ),
       ),
       const SizedBox(height: defaultSpacing),
       if (data.port != null) ...[
@@ -897,8 +911,9 @@ class NetworkRequestOverviewView extends StatelessWidget {
     );
   }
 
-  Widget _valueText(String value) {
+  Widget _valueText(String value, [TextStyle? style]) {
     return SelectableText(
+      style: style,
       value,
       minLines: 1,
     );

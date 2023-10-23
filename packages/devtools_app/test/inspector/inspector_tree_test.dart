@@ -74,8 +74,6 @@ void main() {
       (WidgetTester tester) async {
         final treeController = InspectorTreeController()
           ..config = InspectorTreeConfig(
-            summaryTree: false,
-            treeType: FlutterTreeType.widget,
             onNodeAdded: (_, __) {},
             onClientActiveChange: (_) {},
           );

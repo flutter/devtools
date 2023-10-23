@@ -27,14 +27,13 @@ final class ServiceExtensionManager with DisposerMixin {
 
   final IsolateManager _isolateManager;
 
-  Future<void> get firstFrameReceived => _firstFrameReceived.future;
   Completer<void> _firstFrameReceived = Completer();
 
   bool get _firstFrameEventReceived => _firstFrameReceived.isCompleted;
 
   final _serviceExtensionAvailable = <String, ValueNotifier<bool>>{};
 
-  final _serviceExtensionStateController =
+  final _serviceExtensionStates =
       <String, ValueNotifier<ServiceExtensionState>>{};
 
   /// All available service extensions.
@@ -54,8 +53,8 @@ final class ServiceExtensionManager with DisposerMixin {
 
   Map<IsolateRef, List<AsyncCallback>> _callbacksOnIsolateResume = {};
 
-  ConnectedApp get connectedApp => _connectedApp;
-  late ConnectedApp _connectedApp;
+  ConnectedApp get connectedApp => _connectedApp!;
+  ConnectedApp? _connectedApp;
 
   Future<void> _handleIsolateEvent(Event event) async {
     if (event.kind == EventKind.kServiceExtensionAdded) {
@@ -421,6 +420,10 @@ final class ServiceExtensionManager with DisposerMixin {
   void vmServiceClosed() {
     cancelStreamSubscriptions();
     _mainIsolateClosed();
+
+    _enabledServiceExtensions.clear();
+    _callbacksOnIsolateResume.clear();
+    _connectedApp = null;
   }
 
   void _mainIsolateClosed() {
@@ -431,16 +434,38 @@ final class ServiceExtensionManager with DisposerMixin {
 
     // If the isolate has closed, there is no need to wait any longer for
     // service extensions that might be registered.
-    for (var completer in _maybeRegisteringServiceExtensions.values) {
-      if (!completer.isCompleted) {
-        completer.complete(false);
-      }
-    }
-    _maybeRegisteringServiceExtensions.clear();
+    _performActionAndClearMap<Completer<bool>>(
+      _maybeRegisteringServiceExtensions,
+      action: (completer) {
+        if (!completer.isCompleted) {
+          completer.complete(false);
+        }
+      },
+    );
 
-    for (var listenable in _serviceExtensionAvailable.values) {
-      listenable.value = false;
-    }
+    _performActionAndClearMap<ValueNotifier<bool>>(
+      _serviceExtensionAvailable,
+      action: (listenable) => listenable.value = false,
+    );
+
+    _performActionAndClearMap(
+      _serviceExtensionStates,
+      action: (state) => state.value = ServiceExtensionState(
+        enabled: false,
+        value: null,
+      ),
+    );
+  }
+
+  /// Performs [action] over the values in [map], and then clears the [map] once
+  /// finished.
+  void _performActionAndClearMap<T>(
+    Map<Object, T> map, {
+    required void Function(T) action,
+  }) {
+    map
+      ..values.forEach(action)
+      ..clear();
   }
 
   /// Sets the state for a service extension and makes the call to the VMService.
@@ -512,7 +537,7 @@ final class ServiceExtensionManager with DisposerMixin {
   }
 
   ValueNotifier<ServiceExtensionState> _serviceExtensionState(String name) {
-    return _serviceExtensionStateController.putIfAbsent(
+    return _serviceExtensionStates.putIfAbsent(
       name,
       () {
         return ValueNotifier<ServiceExtensionState>(

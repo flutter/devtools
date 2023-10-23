@@ -14,8 +14,6 @@ InspectorTreeController inspectorTreeControllerFromNode(
 ) {
   final controller = InspectorTreeController()
     ..config = InspectorTreeConfig(
-      summaryTree: false,
-      treeType: FlutterTreeType.widget,
       onNodeAdded: (_, __) {},
       onClientActiveChange: (_) {},
     );

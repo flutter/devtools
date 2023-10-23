@@ -26,9 +26,10 @@ class VMChartController extends ChartController {
   @override
   void setupData() {
     final chartDataLength = timestampsLength;
-    final dataLength = _memoryController.memoryTimeline.data.length;
+    final dataLength = _memoryController.controllers.memoryTimeline.data.length;
 
-    final dataRange = _memoryController.memoryTimeline.data.getRange(
+    final dataRange =
+        _memoryController.controllers.memoryTimeline.data.getRange(
       chartDataLength,
       dataLength,
     );
@@ -107,7 +108,7 @@ class MemoryVMChartState extends State<MemoryVMChart>
   /// Controller attached to the chart.
   VMChartController get _chartController => widget.chartController;
 
-  MemoryTimeline get _memoryTimeline => controller.memoryTimeline;
+  MemoryTimeline get _memoryTimeline => controller.controllers.memoryTimeline;
 
   @override
   void initState() {
