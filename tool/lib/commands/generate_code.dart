@@ -47,11 +47,13 @@ class GenerateCodeCommand extends Command {
       ),
     );
     var mockFileContents = mockFile.readAsStringSync();
-    mockFileContents = mockFileContents.replaceAll(
-      '// ignore_for_file:',
-      '// ignore_for_file: require_trailing_commas\n// ignore_for_file:',
-    );
-    mockFile.writeAsStringSync(mockFileContents);
+    if (!mockFileContents.contains('require_trailing_commas')) {
+      mockFileContents = mockFileContents.replaceFirst(
+        '// ignore_for_file:',
+        '// ignore_for_file: require_trailing_commas\n// ignore_for_file:',
+      );
+      mockFile.writeAsStringSync(mockFileContents);
+    }
 
     // Closes stdin for the entire program.
     await sharedStdIn.terminate();
