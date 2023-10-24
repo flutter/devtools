@@ -82,6 +82,17 @@ class CliCommand {
     );
   }
 
+  factory CliCommand.flutter(
+    String args, {
+    bool throwOnException = true,
+  }) {
+    return CliCommand._(
+      exe: Platform.isWindows ? 'flutter.bat' : 'flutter',
+      args: args.split(' '),
+      throwOnException: throwOnException,
+    );
+  }
+
   late final String exe;
   late final List<String> args;
   final bool throwOnException;

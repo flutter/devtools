@@ -11,6 +11,6 @@ echo "refresh.sh: refreshing local clone..."
 
 bash tool/upgrade.sh
 
-bash tool/generate_code.sh
+bash tool/bin/devtools_tool generate-code
 
 echo "refresh.sh: refreshed local clone."
