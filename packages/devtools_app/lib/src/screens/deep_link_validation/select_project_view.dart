@@ -37,12 +37,15 @@ class _SelectProjectViewState extends State<SelectProjectView>
     setState(() {
       _retrievingFlutterProject = true;
     });
+    ga.timeStart(gac.deeplink, gac.AnalyzeFlutterProject.loadVariants.name);
     final List<String> androidVariants =
         await server.requestAndroidBuildVariants(directory);
     if (!context.mounted) {
+      ga.cancelTimingOperation(gac.deeplink, gac.AnalyzeFlutterProject.loadVariants.name);
       return;
     }
     if (androidVariants.isEmpty) {
+      ga.cancelTimingOperation(gac.deeplink, gac.AnalyzeFlutterProject.loadVariants.name);
       await showDialog(
         context: context,
         builder: (_) {
@@ -58,7 +61,8 @@ class _SelectProjectViewState extends State<SelectProjectView>
         },
       );
     } else {
-      ga.select(gac.deeplink, gac.SelectProjectView.flutterProjectSelected.name);
+      ga.timeEnd(gac.deeplink, gac.AnalyzeFlutterProject.loadVariants.name);
+      ga.select(gac.deeplink, gac.AnalyzeFlutterProject.flutterProjectSelected.name);
       controller.selectedProject.value =
           FlutterProject(path: directory, androidVariants: androidVariants);
     }

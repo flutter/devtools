@@ -4,6 +4,8 @@
 
 part of '../constants.dart';
 
-enum SelectProjectView {
-  flutterProjectSelected;
+enum AnalyzeFlutterProject {
+  flutterProjectSelected,
+  loadVariants,
+  loadAppLinks,
 }
