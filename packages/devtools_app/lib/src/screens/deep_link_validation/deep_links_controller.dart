@@ -7,46 +7,82 @@ import 'package:flutter/foundation.dart';
 import 'deep_links_model.dart';
 import 'fake_data.dart';
 
-enum SchemeFilterOption {
-  http,
-  custom,
-  showAll,
+enum FilterOption {
+  http('http://, https://'),
+  custom('Custom scheme'),
+  android('Android'),
+  ios('iOS'),
+  noIssue('No issues found'),
+  failedDomainCheck('Failed domain checks '),
+  failedPathCheck('Failed path checks');
+
+  const FilterOption(this.description);
+  final String description;
 }
 
-enum OsFilterOption {
-  android,
-  ios,
-  showAll,
-}
+class DisplayOptions {
+  DisplayOptions({
+    this.domainErrorCount = 0,
+    this.pathErrorCount = 0,
+    this.showSplitScreen = false,
+    this.filters = const {
+      FilterOption.http: true,
+      FilterOption.custom: true,
+      FilterOption.android: true,
+      FilterOption.ios: true,
+      FilterOption.noIssue: true,
+      FilterOption.failedDomainCheck: true,
+      FilterOption.failedPathCheck: true,
+    },
+  });
 
-enum StatusFilterOption {
-  noIssue,
-  failedDomainCheck,
-  failedPathCheck,
-  failedAllCheck,
-  showAll,
+  int domainErrorCount = 0;
+  int pathErrorCount = 0;
+  bool showSplitScreen = false;
+
+  Map<FilterOption, bool> filters = {
+    for (var item in FilterOption.values) item: true,
+  };
+
+  DisplayOptions updateFilter(FilterOption option, bool value) {
+    filters[option] = value;
+    return DisplayOptions(
+      domainErrorCount: domainErrorCount,
+      pathErrorCount: pathErrorCount,
+      showSplitScreen: showSplitScreen,
+      filters: filters,
+    );
+  }
+
+  DisplayOptions copyWith({
+    int? domainErrorCount,
+    int? pathErrorCount,
+    bool? showSplitScreen,
+  }) {
+    return DisplayOptions(
+      domainErrorCount: domainErrorCount ?? this.domainErrorCount,
+      pathErrorCount: pathErrorCount ?? this.pathErrorCount,
+      showSplitScreen: showSplitScreen ?? this.showSplitScreen,
+      filters: filters,
+    );
+  }
 }
 
 class DeepLinksController {
-  bool get showSplitScreen => showSplitScreenNotifier.value;
-
   List<LinkData> get getLinkDatasByPath =>
       _getFilterredLinks(linkDatasByPath, _searchContentNotifier.value);
   List<LinkData> get getLinkDatasByDomain =>
       _getFilterredLinks(linkDatasByDomain, _searchContentNotifier.value);
 
+  DisplayOptions get displayOptions => displayOptionsNotifier.value;
+
   final selectedLink = ValueNotifier<LinkData?>(null);
   final linkDatasNotifier = ValueNotifier<List<LinkData>>(allLinkDatas);
-  final showSplitScreenNotifier = ValueNotifier<bool>(false);
-  final domainErrorCountNotifier = ValueNotifier<int>(0);
-  final pathErrorCountNotifier = ValueNotifier<int>(0);
+
+  final displayOptionsNotifier =
+      ValueNotifier<DisplayOptions>(DisplayOptions());
+
   final _searchContentNotifier = ValueNotifier<String>('');
-  final schemeFilterOptionNotifier =
-      ValueNotifier<SchemeFilterOption>(SchemeFilterOption.showAll);
-  final osFilterOptionNotifier =
-      ValueNotifier<OsFilterOption>(OsFilterOption.showAll);
-  final statusFilterOptionNotifier =
-      ValueNotifier<StatusFilterOption>(StatusFilterOption.showAll);
 
   var linkDatasByDomain = <LinkData>[];
   var linkDatasByPath = <LinkData>[];
@@ -60,8 +96,6 @@ class DeepLinksController {
     }
     final List<LinkData> linkDatasByDomainValues =
         linkDatasByDomainMap.values.toList();
-    domainErrorCountNotifier.value =
-        linkDatasByDomainValues.where((element) => element.domainError).length;
     linkDatasByDomain = linkDatasByDomainValues;
 
     final linkDatasByPathMap = <String, LinkData>{};
@@ -71,9 +105,15 @@ class DeepLinksController {
     }
     final List<LinkData> linkDatasByPathValues =
         linkDatasByPathMap.values.toList();
-    pathErrorCountNotifier.value =
-        linkDatasByPathValues.where((element) => element.pathError).length;
     linkDatasByPath = linkDatasByPathValues;
+
+    displayOptionsNotifier.value = displayOptionsNotifier.value.copyWith(
+      domainErrorCount: linkDatasByDomainValues
+          .where((element) => element.domainError)
+          .length,
+      pathErrorCount:
+          linkDatasByPathValues.where((element) => element.pathError).length,
+    );
   }
 
   set searchContent(String content) {
@@ -83,14 +123,26 @@ class DeepLinksController {
   }
 
   void updateFilterOptions({
-    SchemeFilterOption? schemeOption,
-    OsFilterOption? osOption,
-    StatusFilterOption? statusOption,
+    required FilterOption option,
+    required bool value,
   }) {
-    if (schemeOption != null) schemeFilterOptionNotifier.value = schemeOption;
-    if (osOption != null) osFilterOptionNotifier.value = osOption;
-    if (statusOption != null) statusFilterOptionNotifier.value = statusOption;
+    displayOptionsNotifier.value =
+        displayOptionsNotifier.value.updateFilter(option, value);
 
+    linkDatasNotifier.value =
+        _getFilterredLinks(allLinkDatas, _searchContentNotifier.value);
+  }
+
+  void updateDisplayOptions({
+    int? domainErrorCount,
+    int? pathErrorCount,
+    bool? showSplitScreen,
+  }) {
+    displayOptionsNotifier.value = displayOptionsNotifier.value.copyWith(
+      domainErrorCount: domainErrorCount,
+      pathErrorCount: pathErrorCount,
+      showSplitScreen: showSplitScreen,
+    );
     linkDatasNotifier.value =
         _getFilterredLinks(allLinkDatas, _searchContentNotifier.value);
   }
@@ -99,52 +151,36 @@ class DeepLinksController {
     List<LinkData> linkDatas,
     String searchContent,
   ) {
-    if (searchContent.isNotEmpty) {
-      linkDatas = linkDatas
-          .where(
-            (linkData) => linkData.matchesSearchToken(
-              RegExp(
-                searchContent,
-                caseSensitive: false,
-              ),
+    linkDatas = linkDatas.where((linkData) {
+      if (searchContent.isNotEmpty &&
+          !linkData.matchesSearchToken(
+            RegExp(
+              searchContent,
+              caseSensitive: false,
             ),
-          )
-          .toList();
-    }
-    switch (statusFilterOptionNotifier.value) {
-      case StatusFilterOption.failedAllCheck:
-        linkDatas = linkDatas
-            .where((linkData) => linkData.domainError && linkData.pathError)
-            .toList();
-        break;
-      case StatusFilterOption.failedDomainCheck:
-        linkDatas =
-            linkDatas.where((linkData) => linkData.domainError).toList();
-        break;
-      case StatusFilterOption.failedPathCheck:
-        linkDatas = linkDatas.where((linkData) => linkData.pathError).toList();
-        break;
-      case StatusFilterOption.noIssue:
-        linkDatas = linkDatas
-            .where((linkData) => !linkData.pathError && !linkData.domainError)
-            .toList();
-        break;
-      case StatusFilterOption.showAll:
-        break;
-    }
-    switch (osFilterOptionNotifier.value) {
-      case OsFilterOption.android:
-        linkDatas = linkDatas
-            .where((linkData) => linkData.os.contains('Android'))
-            .toList();
-        break;
-      case OsFilterOption.ios:
-        linkDatas =
-            linkDatas.where((linkData) => linkData.os.contains('iOS')).toList();
-        break;
-      case OsFilterOption.showAll:
-        break;
-    }
+          )) {
+        return false;
+      }
+
+      if (!((linkData.os.contains('Android') &&
+              displayOptions.filters[FilterOption.android]!) ||
+          (linkData.os.contains('iOS') &&
+              displayOptions.filters[FilterOption.ios]!))) {
+        return false;
+      }
+
+      if (!((linkData.domainError &&
+              displayOptions.filters[FilterOption.failedDomainCheck]!) ||
+          (linkData.pathError &&
+              displayOptions.filters[FilterOption.failedPathCheck]!) ||
+          (!linkData.domainError &&
+              !linkData.pathError &&
+              displayOptions.filters[FilterOption.noIssue]!))) {
+        return false;
+      }
+
+      return true;
+    }).toList();
 
     return linkDatas;
   }

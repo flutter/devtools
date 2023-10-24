@@ -22,7 +22,7 @@ class LinkData with SearchableDataMixin {
     required this.domain,
     required this.path,
     required this.os,
-    this.scheme = const <String>['Http://', 'Https://'],
+    this.scheme = const <String>['http://', 'https://'],
     this.domainError = false,
     this.pathError = false,
   });
@@ -212,43 +212,12 @@ class SchemeColumn extends ColumnData<LinkData>
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         const Text('Scheme'),
-        PopupMenuButton<SchemeFilterOption>(
-          onSelected: (option) {
-            controller.updateFilterOptions(schemeOption: option);
-          },
+        PopupMenuButton<FilterOption>(
           itemBuilder: (BuildContext context) {
-            return [SchemeFilterOption.http, SchemeFilterOption.custom]
-                .map(
-                  (value) => PopupMenuItem<SchemeFilterOption>(
-                    value: value,
-                    child: Row(
-                      children: [
-                        ValueListenableBuilder<SchemeFilterOption>(
-                          valueListenable:
-                              controller.schemeFilterOptionNotifier,
-                          builder: (context, option, _) => Checkbox(
-                            value: option == value,
-                            onChanged: (bool? checked) {
-                              if (checked!) {
-                                controller.updateFilterOptions(
-                                    schemeOption: value);
-                              } else {
-                                controller.updateFilterOptions(
-                                  schemeOption: SchemeFilterOption.showAll,
-                                );
-                              }
-                            },
-                          ),
-                        ),
-                        if (value == SchemeFilterOption.http)
-                          const Text('Http://, https://'),
-                        if (value == SchemeFilterOption.custom)
-                          const Text('Custom scheme'),
-                      ],
-                    ),
-                  ),
-                )
-                .toList();
+            return [
+              _buildPopupMenuEntry(controller, FilterOption.http),
+              _buildPopupMenuEntry(controller, FilterOption.custom),
+            ];
           },
           child: Icon(
             Icons.arrow_drop_down,
@@ -282,42 +251,12 @@ class OSColumn extends ColumnData<LinkData>
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         const Text('OS'),
-        PopupMenuButton<OsFilterOption>(
-          onSelected: (option) {
-            controller.updateFilterOptions(osOption: option);
-          },
+        PopupMenuButton<FilterOption>(
           itemBuilder: (BuildContext context) {
-            return OsFilterOption.values
-                .map(
-                  (value) => PopupMenuItem<OsFilterOption>(
-                    value: value,
-                    child: Row(
-                      children: [
-                        ValueListenableBuilder<OsFilterOption>(
-                          valueListenable: controller.osFilterOptionNotifier,
-                          builder: (context, option, _) => Checkbox(
-                            value: option == value,
-                            onChanged: (bool? checked) {
-                              if (checked!) {
-                                controller.updateFilterOptions(osOption: value);
-                              } else {
-                                controller.updateFilterOptions(
-                                  osOption: OsFilterOption.showAll,
-                                );
-                              }
-                            },
-                          ),
-                        ),
-                        if (value == OsFilterOption.showAll)
-                          const Text('Android, iOS'),
-                        if (value == OsFilterOption.android)
-                          const Text('Android'),
-                        if (value == OsFilterOption.ios) const Text('iOS'),
-                      ],
-                    ),
-                  ),
-                )
-                .toList();
+            return [
+              _buildPopupMenuEntry(controller, FilterOption.android),
+              _buildPopupMenuEntry(controller, FilterOption.ios),
+            ];
           },
           child: Icon(
             Icons.arrow_drop_down,
@@ -339,8 +278,11 @@ class StatusColumn extends ColumnData<LinkData>
           'Status',
           fixedWidthPx: scaleByFontFactor(kDeeplinkTableCellDefaultWidth),
         );
+
   DeepLinksController controller;
+
   TableViewType tableViewType;
+
   @override
   String getValue(LinkData dataObject) {
     if (dataObject.domainError) {
@@ -361,71 +303,38 @@ class StatusColumn extends ColumnData<LinkData>
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         const Text('Status'),
-        PopupMenuButton<StatusFilterOption>(
-          onSelected: (option) {
-            controller.updateFilterOptions(statusOption: option);
-          },
+        PopupMenuButton<FilterOption>(
           itemBuilder: (BuildContext context) {
-            var statusFilterOptions = <StatusFilterOption>[];
             switch (tableViewType) {
               case TableViewType.singleUrlView:
-                statusFilterOptions = [
-                  StatusFilterOption.failedAllCheck,
-                  StatusFilterOption.failedDomainCheck,
-                  StatusFilterOption.failedPathCheck,
-                  StatusFilterOption.noIssue,
-                ];
-                break;
-              case TableViewType.domainView:
-                statusFilterOptions = [
-                  StatusFilterOption.failedDomainCheck,
-                  StatusFilterOption.noIssue,
-                ];
-                break;
-              case TableViewType.pathView:
-                statusFilterOptions = [
-                  StatusFilterOption.failedPathCheck,
-                  StatusFilterOption.noIssue,
-                ];
-                break;
-            }
-            return statusFilterOptions
-                .map(
-                  (value) => PopupMenuItem<StatusFilterOption>(
-                    value: value,
-                    child: Row(
-                      children: [
-                        ValueListenableBuilder<StatusFilterOption>(
-                          valueListenable:
-                              controller.statusFilterOptionNotifier,
-                          builder: (context, option, _) => Checkbox(
-                            value: option == value,
-                            onChanged: (bool? checked) {
-                              if (checked!) {
-                                controller.updateFilterOptions(
-                                  statusOption: value,
-                                );
-                              } else {
-                                controller.updateFilterOptions(
-                                  statusOption: StatusFilterOption.showAll,
-                                );
-                              }
-                            },
-                          ),
-                        ),
-                        if (value == StatusFilterOption.failedAllCheck)
-                          const Text('Failed domain and path checks'),
-                        if (value == StatusFilterOption.failedDomainCheck)
-                          const Text('Failed domain checks'),
-                        if (value == StatusFilterOption.failedPathCheck)
-                          const Text('Failed path checks'),
-                        if (value == StatusFilterOption.noIssue)
-                          const Text('No issues found'),
-                      ],
-                    ),
+                return [
+                  _buildPopupMenuEntry(
+                    controller,
+                    FilterOption.failedDomainCheck,
                   ),
-                )
-                .toList();
+                  _buildPopupMenuEntry(
+                    controller,
+                    FilterOption.failedPathCheck,
+                  ),
+                  _buildPopupMenuEntry(controller, FilterOption.noIssue),
+                ];
+              case TableViewType.domainView:
+                return [
+                  _buildPopupMenuEntry(
+                    controller,
+                    FilterOption.failedPathCheck,
+                  ),
+                  _buildPopupMenuEntry(controller, FilterOption.noIssue),
+                ];
+              case TableViewType.pathView:
+                return [
+                  _buildPopupMenuEntry(
+                    controller,
+                    FilterOption.failedDomainCheck,
+                  ),
+                  _buildPopupMenuEntry(controller, FilterOption.noIssue),
+                ];
+            }
           },
           child: Icon(
             Icons.arrow_drop_down,
@@ -480,4 +389,28 @@ class NavigationColumn extends ColumnData<LinkData>
   }) {
     return const Icon(Icons.arrow_forward);
   }
+}
+
+PopupMenuEntry<FilterOption> _buildPopupMenuEntry(
+  DeepLinksController controller,
+  FilterOption filterOption,
+) {
+  return PopupMenuItem<FilterOption>(
+    value: filterOption,
+    child: Row(
+      children: [
+        ValueListenableBuilder<DisplayOptions>(
+          valueListenable: controller.displayOptionsNotifier,
+          builder: (context, option, _) => Checkbox(
+            value: option.filters[filterOption],
+            onChanged: (bool? checked) => controller.updateFilterOptions(
+              option: filterOption,
+              value: checked!,
+            ),
+          ),
+        ),
+        Text(filterOption.description),
+      ],
+    ),
+  );
 }

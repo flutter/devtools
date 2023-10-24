@@ -148,5 +148,6 @@ extension DevToolsColorExtension on ColorScheme {
   Color get green => const Color.fromARGB(255, 156, 233, 195);
 
   Color get overlayShadowColor => const Color.fromRGBO(0, 0, 0, 0.5);
-  Color get deeplinkUnavailableColor => const  Color(0xFFFE7C04);
+  Color get deeplinkUnavailableColor => const Color(0xFFFE7C04);
+  Color get deeplinkTableHeaderColor => Colors.black;
 }

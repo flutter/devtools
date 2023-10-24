@@ -62,66 +62,60 @@ class _DeepLinkPageState extends State<DeepLinkPage>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
-    return ValueListenableBuilder<bool>(
-      valueListenable: controller.showSplitScreenNotifier,
-      builder: (context, showSplitScreen, _) => DefaultTabController(
+    return ValueListenableBuilder<DisplayOptions>(
+      valueListenable: controller.displayOptionsNotifier,
+      builder: (context, displayOptions, _) => DefaultTabController(
         length: TableViewType.values.length,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            AreaPaneHeader(
-              title: Text('Validate and fix', style: textTheme.bodyLarge),
-            ),
-            showSplitScreen
-                ? const SizedBox.shrink()
-                : ValueListenableBuilder<int>(
-                    valueListenable: controller.domainErrorCountNotifier,
-                    builder: (context, domainErrorCount, _) =>
-                        ValueListenableBuilder<int>(
-                      valueListenable: controller.pathErrorCountNotifier,
-                      builder: (context, pathErrorCount, _) =>
-                          _NotificationCardSection(
-                        domainErrorCount: domainErrorCount,
-                        pathErrorCount: pathErrorCount,
-                        controller: controller,
-                      ),
+        child: RoundedOutlinedBorder(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AreaPaneHeader(
+                title: Text('Validate and fix', style: textTheme.bodyLarge),
+              ),
+              displayOptions.showSplitScreen
+                  ? const SizedBox.shrink()
+                  : _NotificationCardSection(
+                      domainErrorCount: displayOptions.domainErrorCount,
+                      pathErrorCount: displayOptions.pathErrorCount,
+                      controller: controller,
                     ),
-                  ),
-            Expanded(
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _AllDeepLinkDataTable(controller: controller),
-                  ),
-                  if (showSplitScreen)
+              Expanded(
+                child: Row(
+                  children: [
                     Expanded(
-                      child: ValueListenableBuilder<LinkData?>(
-                        valueListenable: controller.selectedLink,
-                        builder: (context, selectedLink, _) => TabBarView(
-                          children: [
-                            _ValidationDetailScreen(
-                              linkData: selectedLink!,
-                              controller: controller,
-                              tableView: TableViewType.domainView,
-                            ),
-                            _ValidationDetailScreen(
-                              linkData: selectedLink,
-                              controller: controller,
-                              tableView: TableViewType.pathView,
-                            ),
-                            _ValidationDetailScreen(
-                              linkData: selectedLink,
-                              controller: controller,
-                              tableView: TableViewType.singleUrlView,
-                            ),
-                          ],
+                      child: _AllDeepLinkDataTable(controller: controller),
+                    ),
+                    if (displayOptions.showSplitScreen)
+                      Expanded(
+                        child: ValueListenableBuilder<LinkData?>(
+                          valueListenable: controller.selectedLink,
+                          builder: (context, selectedLink, _) => TabBarView(
+                            children: [
+                              _ValidationDetailScreen(
+                                linkData: selectedLink!,
+                                controller: controller,
+                                tableView: TableViewType.domainView,
+                              ),
+                              _ValidationDetailScreen(
+                                linkData: selectedLink,
+                                controller: controller,
+                                tableView: TableViewType.pathView,
+                              ),
+                              _ValidationDetailScreen(
+                                linkData: selectedLink,
+                                controller: controller,
+                                tableView: TableViewType.singleUrlView,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -137,90 +131,77 @@ class _AllDeepLinkDataTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
     return Column(
       children: <Widget>[
-        Container(
-          decoration: BoxDecoration(
-            border: Border.fromBorderSide(
-              defaultBorderSide(Theme.of(context)),
+        OutlineDecoration(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              defaultSpacing,
+              denseSpacing,
+              denseSpacing,
+              denseSpacing,
             ),
-            color: colorScheme.surface,
-          ),
-          padding: const EdgeInsets.fromLTRB(
-            defaultSpacing,
-            denseSpacing,
-            denseSpacing,
-            denseSpacing,
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  'All deep links',
-                  style: textTheme.bodyLarge,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'All deep links',
+                    style: textTheme.bodyLarge,
+                  ),
                 ),
-              ),
-              const SizedBox(width: denseSpacing),
-              SizedBox(
-                width: wideSearchFieldWidth,
-                child: DevToolsClearableTextField(
-                  labelText: '',
-                  hintText: 'Search a URL, domain or path',
-                  prefixIcon: const Icon(Icons.search),
-                  onChanged: (value) {
-                    controller.searchContent = value;
-                  },
+                const SizedBox(width: denseSpacing),
+                SizedBox(
+                  width: wideSearchFieldWidth,
+                  child: DevToolsClearableTextField(
+                    labelText: '',
+                    hintText: 'Search a URL, domain or path',
+                    prefixIcon: const Icon(Icons.search),
+                    onChanged: (value) {
+                      controller.searchContent = value;
+                    },
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-        Container(
-          decoration: BoxDecoration(
-            border: Border.fromBorderSide(
-              defaultBorderSide(Theme.of(context)),
+        Row(
+          children: [
+            TabBar(
+              tabs: [
+                Text(
+                  'Domain view',
+                  style: textTheme.bodyLarge,
+                ),
+                Text(
+                  'Path view',
+                  style: textTheme.bodyLarge,
+                ),
+                Text(
+                  'Single URL view',
+                  style: textTheme.bodyLarge,
+                ),
+              ],
+              tabAlignment: TabAlignment.start,
+              isScrollable: true,
             ),
-            color: colorScheme.surface,
-          ),
-          child: Row(
-            children: [
-              TabBar(
-                tabs: [
-                  Text(
-                    'Domain view',
-                    style: textTheme.bodyLarge,
-                  ),
-                  Text(
-                    'Path view',
-                    style: textTheme.bodyLarge,
-                  ),
-                  Text(
-                    'Single URL view',
-                    style: textTheme.bodyLarge,
-                  ),
-                ],
-                tabAlignment: TabAlignment.start,
-                isScrollable: true,
-              ),
-              const Spacer(),
+            const Spacer(),
 
-              // TODO: Add functions to these icons.
-              IconButton(
-                onPressed: () {},
-                icon: Icon(Icons.restart_alt, size: actionsIconSize),
-              ),
-              IconButton(
-                onPressed: () {},
-                icon: Icon(Icons.settings, size: actionsIconSize),
-              ),
-              IconButton(
-                onPressed: () {},
-                icon: Icon(Icons.help_outline, size: actionsIconSize),
-              ),
-            ],
-          ),
+            // TODO: Add functions to these icons.
+            IconButton(
+              onPressed: () {},
+              icon: Icon(Icons.restart_alt, size: actionsIconSize),
+            ),
+            IconButton(
+              onPressed: () {},
+              icon: Icon(Icons.settings, size: actionsIconSize),
+            ),
+            IconButton(
+              onPressed: () {},
+              icon: Icon(Icons.help_outline, size: actionsIconSize),
+            ),
+          ],
         ),
         Expanded(
           child: ValueListenableBuilder<List<LinkData>>(
@@ -266,19 +247,14 @@ class _DataTable extends StatelessWidget {
     final ColumnData<LinkData> domain = DomainColumn();
     final ColumnData<LinkData> path = PathColumn();
 
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.fromBorderSide(
-          defaultBorderSide(Theme.of(context)),
-        ),
-        color: Theme.of(context).colorScheme.surface,
-      ),
+    return Padding(
       padding: const EdgeInsets.only(top: denseSpacing),
       child: FlatTable(
         keyFactory: (node) => ValueKey(node.toString),
         data: linkDatas,
         dataKey: 'deep-links',
         autoScrollContent: true,
+        headerColor: Theme.of(context).colorScheme.deeplinkTableHeaderColor,
         columns: <ColumnData>[
           if (tableView == TableViewType.domainView) ...[
             domain,
@@ -291,7 +267,7 @@ class _DataTable extends StatelessWidget {
           if (tableView == TableViewType.singleUrlView) ...[domain, path],
           SchemeColumn(controller),
           OSColumn(controller),
-          if (!controller.showSplitScreen) ...[
+          if (!controller.displayOptionsNotifier.value.showSplitScreen) ...[
             StatusColumn(controller, tableView),
             NavigationColumn(),
           ],
@@ -300,7 +276,7 @@ class _DataTable extends StatelessWidget {
         defaultSortColumn: tableView == TableViewType.pathView ? path : domain,
         defaultSortDirection: SortDirection.ascending,
         onItemSelected: (item) =>
-            controller.showSplitScreenNotifier.value = true,
+            controller.updateDisplayOptions(showSplitScreen: true),
       ),
     );
   }
@@ -321,90 +297,101 @@ class _ValidationDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: largeSpacing),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        OutlineDecoration(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: largeSpacing),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  tableView == TableViewType.domainView
+                      ? 'Selected domain validation details'
+                      : 'Selected Deep link validation details',
+                  style: textTheme.titleSmall,
+                ),
+                IconButton(
+                  onPressed: () =>
+                      controller.updateDisplayOptions(showSplitScreen: false),
+                  icon: const Icon(Icons.close),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: largeSpacing,
+            vertical: defaultSpacing,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                tableView == TableViewType.domainView
-                    ? 'Selected domain validation details'
-                    : 'Selected Deep link validation details',
-                style: textTheme.titleSmall,
+                'This tool assistants helps you diagnose Universal Links, App Links,'
+                ' and Custom Schemes in your app. Web check are done for the web association'
+                ' file on your website. App checks are done for the intent filters in'
+                ' the manifest and info.plist file, routing issues, URL format, etc.',
+                style: Theme.of(context).subtleTextStyle,
               ),
-              IconButton(
-                onPressed: () =>
-                    controller.showSplitScreenNotifier.value = false,
-                icon: const Icon(Icons.close),
-              ),
-            ],
-          ),
-          Text(
-            'This tool assistants helps you diagnose Universal Links, App Links,'
-            ' and Custom Schemes in your app. Web check are done for the web association'
-            ' file on your website. App checks are done for the intent filters in'
-            ' the manifest and info.plist file, routing issues, URL format, etc.',
-            style: textTheme.bodyMedium!.copyWith(
-              color: colorScheme.onSurface.withOpacity(0.6),
-            ),
-          ),
-          if (tableView != TableViewType.pathView) ...[
-            const SizedBox(height: intermediateSpacing),
-            Text('Domain check', style: textTheme.titleSmall),
-            _DomainCheckTable(linkData: linkData),
-          ],
-          if (tableView != TableViewType.domainView) ...[
-            const SizedBox(height: intermediateSpacing),
-            Text('Path check (coming soon)', style: textTheme.titleSmall),
-            _PathCheckTable(),
-          ],
-          Align(
-            alignment: Alignment.bottomRight,
-            child: FilledButton(
-              onPressed: () {
-                controller.initLinkDatas();
-              },
-              child: const Text('Recheck all'),
-            ),
-          ),
-          if (tableView == TableViewType.domainView) ...[
-            Text('Associated deep link URL', style: textTheme.titleSmall),
-            Card(
-              color: colorScheme.surface,
-              shape: const RoundedRectangleBorder(),
-              child: Padding(
-                padding: const EdgeInsets.all(denseSpacing),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: linkData.path
-                      .map(
-                        (path) => Padding(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: denseRowSpacing,
-                          ),
-                          child: Row(
-                            children: <Widget>[
-                              Icon(
-                                Icons.error,
-                                color: colorScheme.error,
-                                size: defaultIconSize,
-                              ),
-                              const SizedBox(width: denseSpacing),
-                              Text(path),
-                            ],
-                          ),
-                        ),
-                      )
-                      .toList(),
+              if (tableView != TableViewType.pathView) ...[
+                const SizedBox(height: intermediateSpacing),
+                Text('Domain check', style: textTheme.titleSmall),
+                _DomainCheckTable(linkData: linkData),
+              ],
+              if (tableView != TableViewType.domainView) ...[
+                const SizedBox(height: intermediateSpacing),
+                Text('Path check (coming soon)', style: textTheme.titleSmall),
+                _PathCheckTable(),
+              ],
+              Align(
+                alignment: Alignment.bottomRight,
+                child: FilledButton(
+                  onPressed: () {
+                    controller.initLinkDatas();
+                  },
+                  child: const Text('Recheck all'),
                 ),
               ),
-            ),
-          ],
-        ],
-      ),
+              if (tableView == TableViewType.domainView) ...[
+                Text('Associated deep link URL', style: textTheme.titleSmall),
+                Card(
+                  color: colorScheme.surface,
+                  shape: const RoundedRectangleBorder(),
+                  child: Padding(
+                    padding: const EdgeInsets.all(denseSpacing),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: linkData.path
+                          .map(
+                            (path) => Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: denseRowSpacing,
+                              ),
+                              child: Row(
+                                children: <Widget>[
+                                  Icon(
+                                    Icons.error,
+                                    color: colorScheme.error,
+                                    size: defaultIconSize,
+                                  ),
+                                  const SizedBox(width: denseSpacing),
+                                  Text(path),
+                                ],
+                              ),
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
@@ -419,6 +406,9 @@ class _DomainCheckTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DataTable(
+      headingRowColor: MaterialStateProperty.all(
+        Theme.of(context).colorScheme.deeplinkTableHeaderColor,
+      ),
       dataRowColor: MaterialStateProperty.all(
         Theme.of(context).colorScheme.alternatingBackgroundColor2,
       ),
@@ -482,6 +472,9 @@ class _PathCheckTable extends StatelessWidget {
     return Opacity(
       opacity: 0.5,
       child: DataTable(
+        headingRowColor: MaterialStateProperty.all(
+          Theme.of(context).colorScheme.deeplinkTableHeaderColor,
+        ),
         dataRowColor: MaterialStateProperty.all(
           Theme.of(context).colorScheme.alternatingBackgroundColor2,
         ),
@@ -537,56 +530,54 @@ class _NotificationCardSection extends StatelessWidget {
   final DeepLinksController controller;
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     if (domainErrorCount == 0 && domainErrorCount == 0) {
       return const SizedBox.shrink();
     }
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.fromBorderSide(defaultBorderSide(Theme.of(context))),
-        color: colorScheme.surface,
-      ),
-      padding: const EdgeInsets.all(defaultSpacing),
-      child: Row(
-        children: [
-          if (domainErrorCount > 0)
-            _NotificationCard(
-              title: '$domainErrorCount domain not verified',
-              description:
-                  'This affects all deep links. Fix issues to make users go directly to your app.',
-              actionButton: TextButton(
-                onPressed: () {
-                  // Switch to the domain view. Select the first link with domain error and show the split screen.
-                  DefaultTabController.of(context).index = 0;
-                  controller.selectedLink.value = controller
-                      .getLinkDatasByDomain
-                      .where((element) => element.domainError)
-                      .first;
-                  controller.showSplitScreenNotifier.value = true;
-                },
-                child: const Text('Fix domain'),
+    return OutlineDecoration(
+      child: Padding(
+        padding: const EdgeInsets.all(defaultSpacing),
+        child: Row(
+          children: [
+            if (domainErrorCount > 0)
+              _NotificationCard(
+                title: '$domainErrorCount domain not verified',
+                description:
+                    'This affects all deep links. Fix issues to make users go directly to your app.',
+                actionButton: TextButton(
+                  onPressed: () {
+                    // Switch to the domain view. Select the first link with domain error and show the split screen.
+                    DefaultTabController.of(context).index = 0;
+                    controller.selectedLink.value = controller
+                        .getLinkDatasByDomain
+                        .where((element) => element.domainError)
+                        .first;
+                    controller.updateDisplayOptions(showSplitScreen: true);
+                  },
+                  child: const Text('Fix domain'),
+                ),
               ),
-            ),
-          if (domainErrorCount > 0 && pathErrorCount > 0)
-            const SizedBox(width: defaultSpacing),
-          if (pathErrorCount > 0)
-            _NotificationCard(
-              title: '$pathErrorCount path not working',
-              description:
-                  'Fix these path to make sure users are directed to your app',
-              actionButton: TextButton(
-                onPressed: () {
-                  // Switch to the path view. Select the first link with path error and show the split screen.
-                  DefaultTabController.of(context).index = 1;
-                  controller.selectedLink.value = controller.getLinkDatasByPath
-                      .where((element) => element.pathError)
-                      .first;
-                  controller.showSplitScreenNotifier.value = true;
-                },
-                child: const Text('Fix path'),
+            if (domainErrorCount > 0 && pathErrorCount > 0)
+              const SizedBox(width: defaultSpacing),
+            if (pathErrorCount > 0)
+              _NotificationCard(
+                title: '$pathErrorCount path not working',
+                description:
+                    'Fix these path to make sure users are directed to your app',
+                actionButton: TextButton(
+                  onPressed: () {
+                    // Switch to the path view. Select the first link with path error and show the split screen.
+                    DefaultTabController.of(context).index = 1;
+                    controller.selectedLink.value = controller
+                        .getLinkDatasByPath
+                        .where((element) => element.pathError)
+                        .first;
+                    controller.updateDisplayOptions(showSplitScreen: true);
+                  },
+                  child: const Text('Fix path'),
+                ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -634,9 +625,7 @@ class _NotificationCard extends StatelessWidget {
                     ),
                     Text(
                       description,
-                      style: textTheme.bodyMedium!.copyWith(
-                        color: colorScheme.onSurface.withOpacity(0.6),
-                      ),
+                      style: Theme.of(context).subtleTextStyle,
                     ),
                     Expanded(
                       child: Align(

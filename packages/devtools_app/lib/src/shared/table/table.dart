@@ -113,6 +113,7 @@ class FlatTable<T> extends StatefulWidget {
     this.includeColumnGroupHeaders = true,
     this.tallHeaders = false,
     this.sizeColumnsToFit = true,
+    this.headerColor,
     ValueNotifier<T?>? selectionNotifier,
   })  : selectionNotifier = selectionNotifier ?? ValueNotifier<T?>(null),
         super(key: key);
@@ -150,6 +151,11 @@ class FlatTable<T> extends StatefulWidget {
   /// Whether the table headers should be slightly taller than the table rows to
   /// support multiline text.
   final bool tallHeaders;
+
+  /// The background color of the header.
+  ///
+  /// If null, defaults to `Theme.of(context).canvasColor`.
+  final Color? headerColor;
 
   /// Data set to show as rows in this table.
   final List<T> data;
@@ -319,6 +325,7 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
           rowItemExtent: defaultRowHeight,
           preserveVerticalScrollPosition: widget.preserveVerticalScrollPosition,
           tallHeaders: widget.tallHeaders,
+          headerColor: widget.headerColor,
         );
     if (widget.sizeColumnsToFit || tableController.columnWidths == null) {
       return LayoutBuilder(
@@ -424,6 +431,7 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
     this.preserveVerticalScrollPosition = false,
     this.displayTreeGuidelines = false,
     this.tallHeaders = false,
+    this.headerColor,
     ValueNotifier<Selection<T?>>? selectionNotifier,
   })  : selectionNotifier = selectionNotifier ??
             ValueNotifier<Selection<T?>>(Selection.empty()),
@@ -497,6 +505,11 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
   /// Whether the table headers should be slightly taller than the table rows to
   /// support multiline text.
   final bool tallHeaders;
+
+  /// The background color of the header.
+  ///
+  /// If null, defaults to `Theme.of(context).canvasColor`.
+  final Color? headerColor;
 
   @override
   TreeTableState<T> createState() => TreeTableState<T>();
@@ -658,6 +671,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       selectionNotifier: widget.selectionNotifier,
       preserveVerticalScrollPosition: widget.preserveVerticalScrollPosition,
       tallHeaders: widget.tallHeaders,
+      headerColor: widget.headerColor,
     );
   }
 
@@ -837,6 +851,7 @@ class _Table<T> extends StatefulWidget {
     this.activeSearchMatchNotifier,
     this.rowItemExtent,
     this.tallHeaders = false,
+    this.headerColor,
   }) : super(key: key);
 
   final TableControllerBase<T> tableController;
@@ -850,6 +865,7 @@ class _Table<T> extends StatefulWidget {
   final ValueListenable<T?>? activeSearchMatchNotifier;
   final bool preserveVerticalScrollPosition;
   final bool tallHeaders;
+  final Color? headerColor;
 
   @override
   _TableState<T> createState() => _TableState<T>();
@@ -1048,6 +1064,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
                       widget.tableController.secondarySortColumn,
                   onSortChanged: widget.tableController.sortDataAndNotify,
                   tall: widget.tallHeaders,
+                  backgroundColor: widget.headerColor,
                 ),
               TableRow<T>.tableColumnHeader(
                 key: const Key('Table header'),
@@ -1061,6 +1078,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
                 secondarySortColumn: widget.tableController.secondarySortColumn,
                 onSortChanged: widget.tableController.sortDataAndNotify,
                 tall: widget.tallHeaders,
+                backgroundColor: widget.headerColor,
               ),
               if (pinnedData.isNotEmpty) ...[
                 SizedBox(
@@ -1195,13 +1213,13 @@ class TableRow<T> extends StatefulWidget {
     this.secondarySortColumn,
     this.onPressed,
     this.tall = false,
+    this.backgroundColor,
   })  : node = null,
         isExpanded = false,
         isExpandable = false,
         isSelected = false,
         expandableColumn = null,
         isShown = true,
-        backgroundColor = null,
         searchMatchesNotifier = null,
         activeSearchMatchNotifier = null,
         displayTreeGuidelines = false,
@@ -1221,6 +1239,7 @@ class TableRow<T> extends StatefulWidget {
     this.secondarySortColumn,
     this.onPressed,
     this.tall = false,
+    this.backgroundColor,
   })  : node = null,
         isExpanded = false,
         isExpandable = false,
@@ -1228,7 +1247,6 @@ class TableRow<T> extends StatefulWidget {
         expandableColumn = null,
         columns = const [],
         isShown = true,
-        backgroundColor = null,
         searchMatchesNotifier = null,
         activeSearchMatchNotifier = null,
         displayTreeGuidelines = false,
