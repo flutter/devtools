@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/screen.dart';
 import '../../shared/utils.dart';
 import 'deep_link_list_view.dart';
@@ -41,6 +43,12 @@ class DeepLinkPage extends StatefulWidget {
 
 class _DeepLinkPageState extends State<DeepLinkPage>
     with ProvidedControllerMixin<DeepLinksController, DeepLinkPage> {
+  @override
+  void initState() {
+    super.initState();
+    ga.screen(gac.deeplink);
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
