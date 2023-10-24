@@ -11,17 +11,36 @@ import 'package:path/path.dart' as path;
 
 import '../utils.dart';
 
+const _upgradeFlag = 'upgrade';
+
 class GenerateCodeCommand extends Command {
+  GenerateCodeCommand() {
+    argParser.addFlag(
+      _upgradeFlag,
+      negatable: false,
+      help:
+          'Run pub upgrade on the DevTools packages before performing the code generation.',
+    );
+  }
+
   @override
   String get name => 'generate-code';
 
   @override
-  String get description => 'Runs build_runner build for required packages';
+  String get description =>
+      'Performs code generation by running `build_runner build` for required packages.';
 
   @override
   Future run() async {
     final repo = DevToolsRepo.getInstance();
     final processManager = ProcessManager();
+
+    final upgrade = argResults![_upgradeFlag];
+    if (upgrade) {
+      await processManager.runProcess(
+        CliCommand.tool('pub-get --only-main --upgrade'),
+      );
+    }
 
     for (final packageName in ['devtools_app', 'devtools_test']) {
       print('Running build_runner build for $packageName');

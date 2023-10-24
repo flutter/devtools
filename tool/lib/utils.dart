@@ -93,6 +93,17 @@ class CliCommand {
     );
   }
 
+  factory CliCommand.tool(
+    String args, {
+    bool throwOnException = true,
+  }) {
+    return CliCommand._(
+      exe: 'devtools_tool',
+      args: args.split(' '),
+      throwOnException: throwOnException,
+    );
+  }
+
   late final String exe;
   late final List<String> args;
   final bool throwOnException;
