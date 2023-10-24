@@ -67,7 +67,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## VS Code Sidebar updates
 
-* When using VS Code with a light theme, the embedded sidebar provided by DevTools will now also show in the light theme
+* When using VS Code with a light theme, the embedded sidebar provided by DevTools will now also show in the light
+theme [#6581](https://github.com/flutter/devtools/pull/6581)
 
 ## Full commit history
 
