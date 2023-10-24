@@ -15,7 +15,7 @@ DEVTOOLS_DIR="${TOOL_DIR}/.."
 
 pushd $DEVTOOLS_DIR
 
-./bin/devtools_tool generate_code
+./bin/devtools_tool generate-code
 
 popd
 
