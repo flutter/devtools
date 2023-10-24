@@ -5,6 +5,8 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
+import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
 import '../../shared/config_specific/server/server.dart' as server;
 import '../../shared/directory_picker.dart';
@@ -56,6 +58,7 @@ class _SelectProjectViewState extends State<SelectProjectView>
         },
       );
     } else {
+      ga.select(gac.deeplink, gac.SelectProjectView.flutterProjectSelected.name);
       controller.selectedProject.value =
           FlutterProject(path: directory, androidVariants: androidVariants);
     }

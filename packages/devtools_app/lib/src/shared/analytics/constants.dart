@@ -5,6 +5,7 @@
 import '../screen.dart';
 
 part 'constants/_cpu_profiler_constants.dart';
+part 'constants/_deep_links_constants.dart';
 part 'constants/_extension_constants.dart';
 part 'constants/_memory_constants.dart';
 part 'constants/_performance_constants.dart';
