@@ -73,7 +73,7 @@ export PATH="$PATH":"$DEVTOOLS_DIR/tool/bin"
 devtools_tool pub-get --only-main
 
 # Generate code.
-bash tool/generate_code.sh
+bash tool/bin/devtools_tool generate-code
 
 # Change the CI to the packages/devtools_app directory.
 pushd $DEVTOOLS_DIR/packages/devtools_app
@@ -176,7 +176,7 @@ elif [ "$BOT" = "integration_dart2js" ]; then
             dart run integration_test/run_tests.dart --test-app-device=chrome --headless --shard="$SHARD"
         elif [ "$DEVICE" = "dart-cli" ]; then
             dart run integration_test/run_tests.dart --test-app-device=cli --headless --shard="$SHARD"
-        fi        
+        fi
     elif [ "$DEVTOOLS_PACKAGE" = "devtools_extensions" ]; then
         pushd $DEVTOOLS_DIR/packages/devtools_extensions
         dart run integration_test/run_tests.dart --headless
