@@ -23,7 +23,7 @@ class PubGetCommand extends Command {
         _onlyMainFlag,
         negatable: false,
         help: 'Only execute on the top-level `devtools/packages/devtools_*` '
-            'packages',
+            'packages and any of their subdirectories',
       );
   }
 
@@ -42,7 +42,7 @@ class PubGetCommand extends Command {
     }
 
     final log = Logger.standard();
-    final repo = DevToolsRepo.getInstance()!;
+    final repo = DevToolsRepo.getInstance();
     final packages = repo.getPackages();
 
     final upgrade = argResults![_upgradeFlag];
@@ -55,10 +55,10 @@ class PubGetCommand extends Command {
 
     for (Package p in packages) {
       final packagePathParts = path.split(p.relativePath);
-      final isMainPackage = packagePathParts.length == 2 &&
+      final isMainPackageOrSubdirectory = packagePathParts.length >= 2 &&
           packagePathParts.first == 'packages' &&
           packagePathParts[1].startsWith('devtools_');
-      if (onlyMainPackages && !isMainPackage) continue;
+      if (onlyMainPackages && !isMainPackageOrSubdirectory) continue;
 
       final progress = log.progress('  ${p.relativePath}');
 

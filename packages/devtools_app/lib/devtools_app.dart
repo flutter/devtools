@@ -19,6 +19,8 @@ export 'src/screens/debugger/program_explorer_controller.dart';
 export 'src/screens/debugger/program_explorer_model.dart';
 export 'src/screens/debugger/span_parser.dart';
 export 'src/screens/debugger/syntax_highlighter.dart';
+export 'src/screens/deep_link_validation/deep_links_controller.dart';
+export 'src/screens/deep_link_validation/deep_links_screen.dart';
 export 'src/screens/inspector/inspector_controller.dart';
 export 'src/screens/inspector/inspector_screen.dart';
 export 'src/screens/inspector/inspector_tree_controller.dart';

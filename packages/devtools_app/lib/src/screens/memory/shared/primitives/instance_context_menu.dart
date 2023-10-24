@@ -4,7 +4,6 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../shared/analytics/constants.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/primitives/utils.dart';
 
@@ -15,13 +14,11 @@ class InstanceViewWithContextMenu extends StatelessWidget {
   const InstanceViewWithContextMenu({
     super.key,
     required this.count,
-    required this.gaContext,
     required this.menuBuilder,
   }) : assert(count >= 0);
 
   final int count;
   final MenuBuilder? menuBuilder;
-  final MemoryAreas gaContext;
 
   @override
   Widget build(BuildContext context) {

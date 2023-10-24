@@ -311,7 +311,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
                   // hot restart service is available for the connected app.
                   const HotRestartButton(),
                 ],
-                ...DevToolsScaffold.defaultActions(isEmbedded: embed),
+                ...DevToolsScaffold.defaultActions(),
               ],
             ),
           );

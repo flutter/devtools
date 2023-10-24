@@ -19,9 +19,9 @@ You can do this online, and it only takes a minute.
 ## Workflow for making changes
 
 - Change flutter to the latest flutter candidate:
-    `./tool/update_flutter_sdk.sh --local`
+  `./tool/update_flutter_sdk.sh --local`
 - Create a branch from your cloned repo: `git checkout -b myBranch`
-- Refresh local code: `sh tool/refresh.sh`
+- Ensure your branch, dependencies, and generated code are up to date: `devtools_tool sync`
 - Implement your changes
 - Commit work to your branch: `git commit -m “description”`
 - Push to your branch: `git push origin myBranch`
@@ -29,7 +29,7 @@ You can do this online, and it only takes a minute.
 
 ### Keeping your fork in-sync
 
-- Pull the code from the upstream DevTools and refresh local code: `sh tool/pull_and_refresh.sh`
+- Pull the code from the upstream DevTools, upgrade dependencies, and perform code generation: `devtools_tool sync`
 
 ### Announcing your changes
 
@@ -43,17 +43,21 @@ If your improvement is user-facing, document it in
 1. If you haven't already, follow the [instructions](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh) to generate a new SSH key and connect to Github with SSH
 2. Follow the [instructions](https://docs.github.com/en/get-started/quickstart/fork-a-repo) to fork the DevTools repo to your own Github account, and clone using SSH
 3. Make sure to [configure Git to keep your fork in sync](https://docs.github.com/en/get-started/quickstart/fork-a-repo#configuring-git-to-sync-your-fork-with-the-original-repository) with the main DevTools repo
-4. Finally, run `sh tool/refresh.sh` to pull the latest version from repo, generate missing code and upgrade dependencies.
-
-### Connect to application
-
-From a separate terminal, start running a flutter app to connect to DevTools:
-- `git clone https://github.com/flutter/gallery.git` (this is an existing application with many examples of Flutter widgets)
-- `cd gallery`
-- ensure your flutter channel is the one required by the [gallery documentation](https://github.com/flutter/gallery#running-flutter-gallery-on-flutters-master-channel)
-- ensure the iOS Simulator is open (or a physical device is connected)
-- `flutter run`
-- copy the "Observatory debugger and profiler" uri printed in the command output, to connect to the app from DevTools later
+4. Ensure that you have access to the `devtools_tool` executable by adding the `tool/bin` folder to your `PATH` environment variable:
+  - **MacOS Users**
+    - add the following to your `~/.bashrc` file.
+    - `export PATH=$PATH:<DEVTOOLS_DIR>/tool/bin`
+      > [!NOTE]  
+      > Replace `<DEVTOOLS_DIR>` with the local path to your DevTools
+      > repo path.
+  - **Windows Users**
+    - Open "Edit environment variables for your account" from Control Panel
+    - Locate the `Path` variable and click **Edit**
+    - Click the **New** button and paste in `<DEVTOOLS_DIR>/tool/bin`
+      > [!NOTE]  
+      > Replace `<DEVTOOLS_DIR>` with the local path to your DevTools
+      > repo path.
+5. Finally, run `devtools_tool sync` to pull the code from the upstream DevTools, upgrade dependencies, and perform code generation.
 
 ### **[Optional]** Enable and activate DCM (Dart Code Metrics)
 
@@ -61,7 +65,7 @@ From a separate terminal, start running a flutter app to connect to DevTools:
 
 **[Contributors who work at Google]** You can use the Google-purchased license key to activate DCM. See [go/dash-devexp-dcm-keys](http://goto.google.com/dash-devexp-dcm-keys).
 
-**[All other contributors]** Please follow instructions at <https://dcm.dev/pricing/>. You can either use the free tier of DCM, or purchase a team license. Note that the free tier doesn't support all the rules of the paid tier, so you will also need to consult the output of the Dart Code Metrics workflow on Github when you open your PR.
+**[All other contributors]** Please follow instructions at <https://dcm.dev/pricing/>. You can either use the free tier of DCM, or purchase a team license. Note that the free tier doesn't support all the rules of the paid tier, so you will also need to consult the output of the [Dart Code Metrics workflow on Github](#running-the-dart-code-metrics-github-workflow) when you open your PR.
 
 To enable DCM:
 
@@ -72,17 +76,29 @@ To enable DCM:
 
 **Note:** DCM issues can be distinguished from the Dart analyzer issues by their name: DCM rule names contain `-`. Some of the issues can be fixed via CLI, to do so, run `dcm fix` for any directory. To apply `dcm fix` on a file save in the IDE, refer to [this guide](https://dcm.dev/docs/teams/ide-integrations/vscode/#extension-capabilities).
 
+### Run a test application
+
+For working on most DevTools tools, a connection to a running Dart or Flutter app is required. To run Flutter gallery as your test app,
+run the following from a separate terminal:
+- `git clone https://github.com/flutter/gallery.git` (this is an existing application with many examples of Flutter widgets)
+- `cd gallery`
+- ensure your Flutter channel is the one required by the [gallery documentation](https://github.com/flutter/gallery#running-flutter-gallery-on-flutters-master-channel)
+- ensure the iOS Simulator or Android emulator is open (or a physical device is connected)
+- `flutter run`
+- copy the uri printed to the command output "A Dart VM Service on iPhone 14 Pro Max is available at: <copy-this-uri>". You will use this
+uri to connect to DevTools later
+
 ## Development
 
 *NOTE:* Though DevTools is shipped as a Flutter Web app, we recommend developing as a Flutter Desktop app where possible for a more efficient development workflow. Please see the [Desktop Embedder] section below for instructions on running DevTools as a Flutter Desktop app.
 
-To pull fresh version, regenerate code and upgrade dependencies:
+To pull the latest code from HEAD, upgrade dependencies and regenerate code, run:
 
-- `sh tool/pull_and_refresh.sh`
+- `devtools_tool sync`
 
-To regenerate mocks and upgrade dependencies (after switching branches, for example):
+To upgrade dependencies and regenerate code (after switching branches, for example):
 
-- `sh tool/refresh.sh`
+- `devtools_tool generate-code --upgrade`
 
 To run DevTools as a Flutter web app, with all experiments enabled, from the packages/devtools_app directory:
 
@@ -228,6 +244,16 @@ To update goldens for all tests, run:
 ```
 flutter test test/ --update-goldens
 ```
+
+## Opening a PR
+
+### Running the Dart Code Metrics Github workflow
+
+Any PRs that change Dart code require the Dart Code Metrics workflow to be run before being submitted. To trigger the workflow, add the
+label `run-dcm-workflow` to your PR. If you don't have permission to add the label, your reviewer can add it for you.
+
+Any DCM errors will be caught by the workflow. Fix them and push up your changes. To trigger the DCM workflow to run again, you will
+need to remove and then re-add the `run-dcm-workflow` label.
 
 ## Manual Testing
 

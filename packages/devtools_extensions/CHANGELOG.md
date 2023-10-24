@@ -1,3 +1,6 @@
+## 0.0.10
+* Bump the `devtools_shared` dependency to ^5.0.0
+
 ## 0.0.9
 * Add a link to the new #devtools-extension-authors Discord channel in the README.md.
 * Fix typos that incorrectly used snake case instead of camel case for `config.yaml` examples.

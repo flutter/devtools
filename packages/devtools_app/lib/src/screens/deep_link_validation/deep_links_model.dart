@@ -16,6 +16,11 @@ import 'deep_links_screen.dart';
 
 const kDeeplinkTableCellDefaultWidth = 200.0;
 
+enum PlatformOS {
+  android,
+  ios,
+}
+
 /// Contains all data relevant to a deep link.
 class LinkData with SearchableDataMixin {
   LinkData({
@@ -27,45 +32,45 @@ class LinkData with SearchableDataMixin {
     this.pathError = false,
   });
 
-  final List<String> path;
-  final List<String> domain;
-  final List<String> os;
+  final String path;
+  final String domain;
+  final List<PlatformOS> os;
   final List<String> scheme;
   final bool domainError;
   final bool pathError;
 
   @override
   bool matchesSearchToken(RegExp regExpSearch) {
-    return domain.join().caseInsensitiveContains(regExpSearch) ||
-        path.join().caseInsensitiveContains(regExpSearch);
+    return domain.caseInsensitiveContains(regExpSearch) ||
+        path.caseInsensitiveContains(regExpSearch);
   }
 
   @override
   String toString() => 'LinkData($domain $path)';
 
-  // Used for [TableViewType.pathView].
-  LinkData mergebyPath(LinkData? linkdata) {
-    if (linkdata == null) return this;
-    assert(path.single == linkdata.path.single);
-    return LinkData(
-      domain: [...domain, ...linkdata.domain],
-      path: path,
-      os: os,
-      pathError: pathError,
-    );
-  }
+  // // Used for [TableViewType.pathView].
+  // LinkData mergebyPath(LinkData? linkdata) {
+  //   if (linkdata == null) return this;
+  //   assert(path == linkdata.path);
+  //   return LinkData(
+  //     domain: [...domain, ...linkdata.domain],
+  //     path: path,
+  //     os: os,
+  //     pathError: pathError,
+  //   );
+  // }
 
-  // Used for [TableViewType.domainView].
-  LinkData mergebyDomain(LinkData? linkdata) {
-    if (linkdata == null) return this;
-    assert(domain.single == linkdata.domain.single);
-    return LinkData(
-      domain: domain,
-      path: [...path, ...linkdata.path],
-      os: os,
-      domainError: domainError,
-    );
-  }
+  // // Used for [TableViewType.domainView].
+  // LinkData mergebyDomain(LinkData? linkdata) {
+  //   if (linkdata == null) return this;
+  //   assert(domain.single == linkdata.domain.single);
+  //   return LinkData(
+  //     domain: domain,
+  //     path: [...path, ...linkdata.path],
+  //     os: os,
+  //     domainError: domainError,
+  //   );
+  // }
 }
 
 class _ErrorAwareText extends StatelessWidget {
@@ -111,7 +116,7 @@ class DomainColumn extends ColumnData<LinkData>
   bool get supportsSorting => true;
 
   @override
-  String getValue(LinkData dataObject) => dataObject.domain.single;
+  String getValue(LinkData dataObject) => dataObject.domain;
 
   @override
   Widget build(
@@ -122,7 +127,7 @@ class DomainColumn extends ColumnData<LinkData>
   }) {
     return _ErrorAwareText(
       isError: dataObject.domainError,
-      text: dataObject.domain.single,
+      text: dataObject.domain,
     );
   }
 
@@ -147,7 +152,7 @@ class PathColumn extends ColumnData<LinkData>
   bool get supportsSorting => true;
 
   @override
-  String getValue(LinkData dataObject) => dataObject.path.first;
+  String getValue(LinkData dataObject) => dataObject.path;
 
   @override
   Widget build(
@@ -158,7 +163,7 @@ class PathColumn extends ColumnData<LinkData>
   }) {
     return _ErrorAwareText(
       isError: dataObject.pathError,
-      text: dataObject.path.first,
+      text: dataObject.path,
     );
   }
 
@@ -413,4 +418,12 @@ PopupMenuEntry<FilterOption> _buildPopupMenuEntry(
       ],
     ),
   );
+}
+class FlutterProject {
+  FlutterProject({
+    required this.path,
+    required this.androidVariants,
+  });
+  final String path;
+  final List<String> androidVariants;
 }

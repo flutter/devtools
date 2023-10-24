@@ -82,6 +82,28 @@ class CliCommand {
     );
   }
 
+  factory CliCommand.flutter(
+    String args, {
+    bool throwOnException = true,
+  }) {
+    return CliCommand._(
+      exe: Platform.isWindows ? 'flutter.bat' : 'flutter',
+      args: args.split(' '),
+      throwOnException: throwOnException,
+    );
+  }
+
+  factory CliCommand.tool(
+    String args, {
+    bool throwOnException = true,
+  }) {
+    return CliCommand._(
+      exe: 'devtools_tool',
+      args: args.split(' '),
+      throwOnException: throwOnException,
+    );
+  }
+
   late final String exe;
   late final List<String> args;
   final bool throwOnException;
@@ -135,5 +157,5 @@ extension DevToolsProcessManagerExtension on ProcessManager {
 }
 
 String pathFromRepoRoot(String pathFromRoot) {
-  return path.join(DevToolsRepo.getInstance()!.repoPath, pathFromRoot);
+  return path.join(DevToolsRepo.getInstance().repoPath, pathFromRoot);
 }

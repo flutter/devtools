@@ -256,7 +256,7 @@ AdaptedHeapObject _createOneByteWeakObject(
 }
 
 AdaptedHeapData _heapData(List<AdaptedHeapObject> objects) {
-  return AdaptedHeapData(objects, isolateId: '', rootIndex: 0);
+  return AdaptedHeapData(objects, rootIndex: 0);
 }
 
 /// For convenience of testing each heap object has code equal to the

@@ -54,9 +54,10 @@ class EventChartController extends ChartController {
   @override
   void setupData() {
     final chartDataLength = timestampsLength;
-    final dataLength = _memoryController.memoryTimeline.data.length;
+    final dataLength = _memoryController.controllers.memoryTimeline.data.length;
 
-    final dataRange = _memoryController.memoryTimeline.data.getRange(
+    final dataRange =
+        _memoryController.controllers.memoryTimeline.data.getRange(
       chartDataLength,
       dataLength,
     );
@@ -184,7 +185,7 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
   /// VM's GCs are displayed in a smaller glyph and closer to the heap graph.
   static const visibleVmEvent = 0.4;
 
-  MemoryTimeline get _memoryTimeline => controller.memoryTimeline;
+  MemoryTimeline get _memoryTimeline => controller.controllers.memoryTimeline;
 
   @override
   void initState() {

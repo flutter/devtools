@@ -4,6 +4,8 @@
 
 import 'package:args/command_runner.dart';
 import 'package:devtools_tool/commands/fix_goldens.dart';
+import 'package:devtools_tool/commands/generate_code.dart';
+import 'package:devtools_tool/commands/sync.dart';
 
 import 'commands/analyze.dart';
 import 'commands/list.dart';
@@ -26,5 +28,7 @@ class DevToolsCommandRunner extends CommandRunner {
     addCommand(ReleaseHelperCommand());
     addCommand(UpdateDevToolsVersionCommand());
     addCommand(FixGoldensCommand());
+    addCommand(GenerateCodeCommand());
+    addCommand(SyncCommand());
   }
 }

@@ -126,7 +126,6 @@ class NetworkController extends DisposableController
     List<HttpProfileRequest>? httpRequests,
     int timelineMicrosOffset, {
     required CurrentNetworkRequests currentRequests,
-    required List<DartIOHttpRequestData> invalidRequests,
   }) {
     currentRequests.updateWebSocketRequests(sockets, timelineMicrosOffset);
 
@@ -146,7 +145,6 @@ class NetworkController extends DisposableController
 
     return NetworkRequests(
       requests: currentRequests.requests,
-      invalidHttpRequests: invalidRequests,
     );
   }
 
@@ -160,7 +158,6 @@ class NetworkController extends DisposableController
       httpRequests,
       _timelineMicrosOffset,
       currentRequests: _currentNetworkRequests,
-      invalidRequests: [],
     );
     _filterAndRefreshSearchMatches();
     _updateSelection();

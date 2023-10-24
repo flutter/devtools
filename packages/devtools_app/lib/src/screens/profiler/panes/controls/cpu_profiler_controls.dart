@@ -34,14 +34,11 @@ Example queries:
     '.toString -uri:flutter'
 ''';
 
-  double get _filterDialogWidth => scaleByFontFactor(400.0);
-
   final CpuProfilerController controller;
 
   @override
   Widget build(BuildContext context) {
     return FilterDialog<CpuStackFrame>(
-      dialogWidth: _filterDialogWidth,
       controller: controller,
       queryInstructions: filterQueryInstructions,
     );
