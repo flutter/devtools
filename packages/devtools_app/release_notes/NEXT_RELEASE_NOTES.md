@@ -65,6 +65,10 @@ TODO: Remove this section if there are not any general updates.
 
 TODO: Remove this section if there are not any general updates.
 
+## VS Code Sidebar updates
+
+* When using VS Code with a light theme, the embedded sidebar provided by DevTools will now also show in the light theme
+
 ## Full commit history
 
 To find a complete list of changes in this release, check out the
