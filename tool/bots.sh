@@ -73,7 +73,7 @@ export PATH="$PATH":"$DEVTOOLS_DIR/tool/bin"
 devtools_tool pub-get --only-main
 
 # Generate code.
-bash tool/bin/devtools_tool generate-code
+devtools_tool generate-code
 
 # Change the CI to the packages/devtools_app directory.
 pushd $DEVTOOLS_DIR/packages/devtools_app
