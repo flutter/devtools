@@ -15,12 +15,14 @@ final class IdeTheme {
     this.foregroundColor,
     this.fontSize = unscaledDefaultFontSize,
     this.embed = false,
+    this.isDarkMode = true,
   });
 
   final Color? backgroundColor;
   final Color? foregroundColor;
   final double fontSize;
   final bool embed;
+  final bool isDarkMode;
 
   double get fontSizeFactor => fontSize / unscaledDefaultFontSize;
 }
