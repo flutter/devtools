@@ -11,6 +11,7 @@ import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/config_specific/server/server.dart' as server;
 import 'deep_links_model.dart';
+import 'fake_data.dart';
 
 typedef _DomainAndPath = ({String domain, String path});
 
@@ -41,23 +42,27 @@ class DisplayOptions {
       FilterOption.failedDomainCheck: true,
       FilterOption.failedPathCheck: true,
     },
+    this.searchContent = '',
   });
 
   int domainErrorCount = 0;
   int pathErrorCount = 0;
   bool showSplitScreen = false;
+  String searchContent;
 
-  Map<FilterOption, bool> filters = {
-    for (var item in FilterOption.values) item: true,
-  };
+  Map<FilterOption, bool> filters;
 
   DisplayOptions updateFilter(FilterOption option, bool value) {
-    filters[option] = value;
+    final Map<FilterOption, bool> newFilters =
+        Map<FilterOption, bool>.from(filters);
+    newFilters[option] = value;
+
     return DisplayOptions(
       domainErrorCount: domainErrorCount,
       pathErrorCount: pathErrorCount,
       showSplitScreen: showSplitScreen,
-      filters: filters,
+      filters: newFilters,
+      searchContent: searchContent,
     );
   }
 
@@ -65,12 +70,14 @@ class DisplayOptions {
     int? domainErrorCount,
     int? pathErrorCount,
     bool? showSplitScreen,
+    String? searchContent,
   }) {
     return DisplayOptions(
       domainErrorCount: domainErrorCount ?? this.domainErrorCount,
       pathErrorCount: pathErrorCount ?? this.pathErrorCount,
       showSplitScreen: showSplitScreen ?? this.showSplitScreen,
       filters: filters,
+      searchContent: searchContent ?? '',
     );
   }
 }
@@ -85,17 +92,46 @@ class DeepLinksController {
   List<LinkData> get getLinkDatasByPath {
     final linkDatasByPath = <String, LinkData>{};
     for (var linkData in linkDatasNotifier.value!) {
-      linkDatasByPath[linkData.path] = linkData;
+      final prevoisRecord = linkDatasByPath[linkData.path];
+      linkDatasByPath[linkData.path] = LinkData(
+        domain: linkData.domain,
+        path: linkData.path,
+        os: [
+          if (prevoisRecord?.os.contains(PlatformOS.android) ??
+              false || linkData.os.contains(PlatformOS.android))
+            PlatformOS.android,
+          if (prevoisRecord?.os.contains(PlatformOS.ios) ??
+              false || linkData.os.contains(PlatformOS.ios))
+            PlatformOS.ios,
+        ],
+        associatedDomains: [
+          ...prevoisRecord?.associatedDomains ?? [],
+          linkData.domain,
+        ],
+        pathError: linkData.pathError,
+      );
     }
-    return linkDatasByPath.values.toList();
+
+    return _getFilterredLinks(linkDatasByPath.values.toList());
   }
 
   List<LinkData> get getLinkDatasByDomain {
     final linkDatasByDomain = <String, LinkData>{};
+
     for (var linkData in linkDatasNotifier.value!) {
-      linkDatasByDomain[linkData.domain] = linkData;
+      final prevoisRecord = linkDatasByDomain[linkData.domain];
+      linkDatasByDomain[linkData.domain] = LinkData(
+        domain: linkData.domain,
+        path: linkData.path,
+        os: linkData.os,
+        associatedPath: [
+          ...prevoisRecord?.associatedPath ?? [],
+          linkData.path,
+        ],
+        domainError: linkData.domainError,
+      );
     }
-    return linkDatasByDomain.values.toList();
+    return _getFilterredLinks(linkDatasByDomain.values.toList());
   }
 
   final Map<int, AppLinkSettings> _androidAppLinks = <int, AppLinkSettings>{};
@@ -152,14 +188,12 @@ class DeepLinksController {
 
   final selectedProject = ValueNotifier<FlutterProject?>(null);
   final selectedLink = ValueNotifier<LinkData?>(null);
-  final linkDatasNotifier = ValueNotifier<List<LinkData>?>();
+  final linkDatasNotifier = ValueNotifier<List<LinkData>?>(null);
 
   final displayOptionsNotifier =
       ValueNotifier<DisplayOptions>(DisplayOptions());
 
-  final _searchContentNotifier = ValueNotifier<String>('');
-
-  void initLinkDatas() {
+  void _updateLinks() {
     linkDatasNotifier.value = _allLinkDatas;
 
     displayOptionsNotifier.value = displayOptionsNotifier.value.copyWith(
@@ -170,15 +204,10 @@ class DeepLinksController {
     );
   }
 
-  void _updateLinks() {
-    final searchContent = _searchContentNotifier.value;
-    linkDatasNotifier.value = _getFilterredLinks(_allLinkDatas, searchContent);
-  }
-
   set searchContent(String content) {
-    _searchContentNotifier.value = content;
-    linkDatasNotifier.value =
-        _getFilterredLinks(_allLinkDatas, _searchContentNotifier.value);
+    displayOptionsNotifier.value =
+        displayOptionsNotifier.value.copyWith(searchContent: content);
+    linkDatasNotifier.value = _getFilterredLinks(_allLinkDatas);
   }
 
   void updateFilterOptions({
@@ -188,8 +217,7 @@ class DeepLinksController {
     displayOptionsNotifier.value =
         displayOptionsNotifier.value.updateFilter(option, value);
 
-    linkDatasNotifier.value =
-        _getFilterredLinks(_allLinkDatas, _searchContentNotifier.value);
+    linkDatasNotifier.value = _getFilterredLinks(_allLinkDatas);
   }
 
   void updateDisplayOptions({
@@ -202,14 +230,11 @@ class DeepLinksController {
       pathErrorCount: pathErrorCount,
       showSplitScreen: showSplitScreen,
     );
-    linkDatasNotifier.value =
-        _getFilterredLinks(_allLinkDatas, _searchContentNotifier.value);
+    linkDatasNotifier.value = _getFilterredLinks(_allLinkDatas);
   }
 
-  List<LinkData> _getFilterredLinks(
-    List<LinkData> linkDatas,
-    String searchContent,
-  ) {
+  List<LinkData> _getFilterredLinks(List<LinkData> linkDatas) {
+    final String searchContent = displayOptions.searchContent;
     linkDatas = linkDatas.where((linkData) {
       if (searchContent.isNotEmpty &&
           !linkData.matchesSearchToken(

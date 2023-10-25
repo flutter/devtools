@@ -12,13 +12,16 @@ import '../../shared/ui/colors.dart';
 import '../../shared/ui/search.dart';
 
 import 'deep_links_controller.dart';
-import 'deep_links_screen.dart';
+import 'deep_link_list_view.dart';
 
 const kDeeplinkTableCellDefaultWidth = 200.0;
 
 enum PlatformOS {
-  android,
-  ios,
+  android('Android'),
+  ios('iOS');
+
+  const PlatformOS(this.description);
+  final String description;
 }
 
 /// Contains all data relevant to a deep link.
@@ -30,6 +33,8 @@ class LinkData with SearchableDataMixin {
     this.scheme = const <String>['http://', 'https://'],
     this.domainError = false,
     this.pathError = false,
+    this.associatedPath = const <String>[],
+    this.associatedDomains = const <String>[],
   });
 
   final String path;
@@ -39,6 +44,9 @@ class LinkData with SearchableDataMixin {
   final bool domainError;
   final bool pathError;
 
+  final List<String> associatedPath;
+  final List<String> associatedDomains;
+
   @override
   bool matchesSearchToken(RegExp regExpSearch) {
     return domain.caseInsensitiveContains(regExpSearch) ||
@@ -47,30 +55,6 @@ class LinkData with SearchableDataMixin {
 
   @override
   String toString() => 'LinkData($domain $path)';
-
-  // // Used for [TableViewType.pathView].
-  // LinkData mergebyPath(LinkData? linkdata) {
-  //   if (linkdata == null) return this;
-  //   assert(path == linkdata.path);
-  //   return LinkData(
-  //     domain: [...domain, ...linkdata.domain],
-  //     path: path,
-  //     os: os,
-  //     pathError: pathError,
-  //   );
-  // }
-
-  // // Used for [TableViewType.domainView].
-  // LinkData mergebyDomain(LinkData? linkdata) {
-  //   if (linkdata == null) return this;
-  //   assert(domain.single == linkdata.domain.single);
-  //   return LinkData(
-  //     domain: domain,
-  //     path: [...path, ...linkdata.path],
-  //     os: os,
-  //     domainError: domainError,
-  //   );
-  // }
 }
 
 class _ErrorAwareText extends StatelessWidget {
@@ -184,7 +168,8 @@ class NumberOfAssociatedPathColumn extends ColumnData<LinkData> {
         );
 
   @override
-  String getValue(LinkData dataObject) => dataObject.path.length.toString();
+  String getValue(LinkData dataObject) =>
+      dataObject.associatedPath.length.toString();
 }
 
 class NumberOfAssociatedDomainColumn extends ColumnData<LinkData> {
@@ -195,7 +180,8 @@ class NumberOfAssociatedDomainColumn extends ColumnData<LinkData> {
         );
 
   @override
-  String getValue(LinkData dataObject) => dataObject.domain.length.toString();
+  String getValue(LinkData dataObject) =>
+      dataObject.associatedDomains.length.toString();
 }
 
 class SchemeColumn extends ColumnData<LinkData>
@@ -273,7 +259,8 @@ class OSColumn extends ColumnData<LinkData>
   }
 
   @override
-  String getValue(LinkData dataObject) => dataObject.os.join(',');
+  String getValue(LinkData dataObject) =>
+      dataObject.os.map((e) => e.description).toList().join(',');
 }
 
 class StatusColumn extends ColumnData<LinkData>
@@ -310,36 +297,19 @@ class StatusColumn extends ColumnData<LinkData>
         const Text('Status'),
         PopupMenuButton<FilterOption>(
           itemBuilder: (BuildContext context) {
-            switch (tableViewType) {
-              case TableViewType.singleUrlView:
-                return [
-                  _buildPopupMenuEntry(
-                    controller,
-                    FilterOption.failedDomainCheck,
-                  ),
-                  _buildPopupMenuEntry(
-                    controller,
-                    FilterOption.failedPathCheck,
-                  ),
-                  _buildPopupMenuEntry(controller, FilterOption.noIssue),
-                ];
-              case TableViewType.domainView:
-                return [
-                  _buildPopupMenuEntry(
-                    controller,
-                    FilterOption.failedPathCheck,
-                  ),
-                  _buildPopupMenuEntry(controller, FilterOption.noIssue),
-                ];
-              case TableViewType.pathView:
-                return [
-                  _buildPopupMenuEntry(
-                    controller,
-                    FilterOption.failedDomainCheck,
-                  ),
-                  _buildPopupMenuEntry(controller, FilterOption.noIssue),
-                ];
-            }
+            return [
+              if (tableViewType != TableViewType.domainView)
+                _buildPopupMenuEntry(
+                  controller,
+                  FilterOption.failedPathCheck,
+                ),
+              if (tableViewType != TableViewType.pathView)
+                _buildPopupMenuEntry(
+                  controller,
+                  FilterOption.failedDomainCheck,
+                ),
+              _buildPopupMenuEntry(controller, FilterOption.noIssue),
+            ];
           },
           child: Icon(
             Icons.arrow_drop_down,
@@ -419,6 +389,7 @@ PopupMenuEntry<FilterOption> _buildPopupMenuEntry(
     ),
   );
 }
+
 class FlutterProject {
   FlutterProject({
     required this.path,
