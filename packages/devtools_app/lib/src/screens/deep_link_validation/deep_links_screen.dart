@@ -7,13 +7,11 @@ import 'package:flutter/material.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/screen.dart';
-import '../../shared/ui/colors.dart';
 import '../../shared/utils.dart';
 import 'deep_link_list_view.dart';
 import 'deep_links_controller.dart';
 import 'deep_links_model.dart';
 import 'select_project_view.dart';
-import 'package:devtools_app_shared/ui.dart';
 
 class DeepLinksScreen extends Screen {
   DeepLinksScreen() : super.fromMetaData(ScreenMetaData.deepLinks);

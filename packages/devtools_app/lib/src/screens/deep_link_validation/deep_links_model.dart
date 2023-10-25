@@ -10,9 +10,8 @@ import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
 import '../../shared/ui/colors.dart';
 import '../../shared/ui/search.dart';
-
-import 'deep_links_controller.dart';
 import 'deep_link_list_view.dart';
+import 'deep_links_controller.dart';
 
 const kDeeplinkTableCellDefaultWidth = 200.0;
 

@@ -11,7 +11,6 @@ import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/config_specific/server/server.dart' as server;
 import 'deep_links_model.dart';
-import 'fake_data.dart';
 
 typedef _DomainAndPath = ({String domain, String path});
 
