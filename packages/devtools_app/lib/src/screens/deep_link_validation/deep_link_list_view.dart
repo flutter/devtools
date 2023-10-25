@@ -104,6 +104,7 @@ class _DeepLinkListViewMainPanel extends StatelessWidget {
               Expanded(
                 child: Row(
                   children: [
+                    const SizedBox(width: denseSpacing),
                     Expanded(
                       child: _AllDeepLinkDataTable(controller: controller),
                     ),
@@ -447,12 +448,7 @@ class _AllDeepLinkDataTable extends StatelessWidget {
       children: <Widget>[
         OutlineDecoration(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(
-              defaultSpacing,
-              denseSpacing,
-              denseSpacing,
-              denseSpacing,
-            ),
+            padding: const EdgeInsets.all(denseSpacing),
             child: Row(
               children: [
                 Expanded(
