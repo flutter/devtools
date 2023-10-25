@@ -158,7 +158,7 @@ class DeepLinksController {
         },
       );
     }
-    _updateLinks();
+    updateLinks();
   }
 
   List<LinkData> get _allLinkDatas {
@@ -193,7 +193,7 @@ class DeepLinksController {
   final displayOptionsNotifier =
       ValueNotifier<DisplayOptions>(DisplayOptions());
 
-  void _updateLinks() {
+  void updateLinks() {
     linkDatasNotifier.value = _allLinkDatas;
 
     displayOptionsNotifier.value = displayOptionsNotifier.value.copyWith(

@@ -49,7 +49,6 @@ class _DeepLinkListViewState extends State<DeepLinkListView>
       // If not found, default to 0.
       releaseVariantIndex = max(releaseVariantIndex, 0);
       controller.selectedVariantIndex.value = releaseVariantIndex;
-      controller.initLinkDatas();
     });
   }
 
@@ -263,7 +262,7 @@ class _ValidationDetailScreen extends StatelessWidget {
                 alignment: Alignment.bottomRight,
                 child: FilledButton(
                   onPressed: () {
-                    controller.initLinkDatas();
+                    controller.updateLinks();
                   },
                   child: const Text('Recheck all'),
                 ),
