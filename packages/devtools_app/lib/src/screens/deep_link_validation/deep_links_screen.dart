@@ -15,8 +15,6 @@ import 'deep_links_model.dart';
 import 'select_project_view.dart';
 import 'package:devtools_app_shared/ui.dart';
 
-
-
 class DeepLinksScreen extends Screen {
   DeepLinksScreen() : super.fromMetaData(ScreenMetaData.deepLinks);
 
@@ -55,7 +53,6 @@ class _DeepLinkPageState extends State<DeepLinkPage>
 
   @override
   Widget build(BuildContext context) {
-
     return ValueListenableBuilder(
       valueListenable: controller.selectedProject,
       builder: (_, FlutterProject? project, __) {
@@ -66,4 +63,3 @@ class _DeepLinkPageState extends State<DeepLinkPage>
     );
   }
 }
-
