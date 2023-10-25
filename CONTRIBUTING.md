@@ -44,13 +44,13 @@ You can do this online, and it only takes a minute.
 
 ### Set up your DevTools environment
 
-> Before setting up your DevTools environment, please make sure you have
+**Before setting up your DevTools environment**, please make sure you have
 [cloned the Flutter SDK from GitHub](https://docs.flutter.dev/get-started/install/macos#downloading-straight-from-github-instead-of-using-an-archive)
 and added the included `flutter` and `dart` executables to your `PATH` environment variable (see Flutter
 instructions for how to [update your PATH](https://docs.flutter.dev/get-started/install/macos#update-your-path)).
->
-> Typing `which flutter` and `which dart` into your terminal should print the path to those binaries from
-Flutter SDK you cloned from Github.
+
+Typing `which flutter` and `which dart` (or `where.exe flutter` and `where.exe dart` for Windows)
+into your terminal should print the path to the binaries from Flutter SDK you cloned from Github.
 
 1. [Fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo) the DevTools repo to your
 own Github account, and then clone it using SSH. If you haven't already, you may need to
@@ -126,7 +126,7 @@ in one of the environments below, connect to a test application to debug DevTool
 Most of the time, you will not need to run DevTools with the DevTools server to test your changes.
 You can run DevTools in debug mode as either a Flutter web or Flutter desktop app.
 
-> NOTE: though DevTools is shipped as a Flutter Web app, we recommend developing as a Flutter
+> Note: though DevTools is shipped as a Flutter Web app, we recommend developing as a Flutter
 Desktop app whenever possible for a more efficient development workflow. Please see the
 [running on Flutter desktop](#running-devtools-on-flutter-desktop) section below for instructions.
 
