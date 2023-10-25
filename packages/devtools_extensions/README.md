@@ -267,8 +267,9 @@ popd
 
 ## Resources and support
 
-Check out the [#devtools-extension-authors](https://discord.com/channels/608014603317936148/1159561514072690739)
-Discord channel to connect with other DevTools extension authors and the DevTools team.
+Please join the [Flutter Discord server](https://github.com/flutter/flutter/wiki/Chat) and then check out
+the [#devtools-extension-authors](https://discord.com/channels/608014603317936148/1159561514072690739)
+channel to connect with other DevTools extension authors and the DevTools team.
 
 For feature requests or bugs, please [file an issue](https://github.com/flutter/devtools/issues/new)
 on the DevTools Github repository.
