@@ -238,10 +238,7 @@ class DeepLinksController {
     linkDatas = linkDatas.where((linkData) {
       if (searchContent.isNotEmpty &&
           !linkData.matchesSearchToken(
-            RegExp(
-              searchContent,
-              caseSensitive: false,
-            ),
+            RegExp(searchContent, caseSensitive: false),
           )) {
         return false;
       }

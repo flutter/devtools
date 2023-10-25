@@ -167,15 +167,16 @@ class _DataTable extends StatelessWidget {
         autoScrollContent: true,
         headerColor: Theme.of(context).colorScheme.deeplinkTableHeaderColor,
         columns: <ColumnData>[
-          if (tableView == TableViewType.domainView) ...[
-            domain,
-            NumberOfAssociatedPathColumn(),
-          ],
-          if (tableView == TableViewType.pathView) ...[
-            path,
-            NumberOfAssociatedDomainColumn(),
-          ],
-          if (tableView == TableViewType.singleUrlView) ...[domain, path],
+          ...(() {
+            switch (tableView) {
+              case TableViewType.domainView:
+                return [domain, NumberOfAssociatedPathColumn()];
+              case TableViewType.pathView:
+                return [path, NumberOfAssociatedDomainColumn()];
+              case TableViewType.singleUrlView:
+                return [domain, path];
+            }
+          })(),
           SchemeColumn(controller),
           OSColumn(controller),
           if (!controller.displayOptionsNotifier.value.showSplitScreen) ...[
