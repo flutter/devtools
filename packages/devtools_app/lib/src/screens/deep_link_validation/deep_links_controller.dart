@@ -7,6 +7,8 @@ import 'dart:async';
 import 'package:devtools_shared/devtools_deeplink.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/config_specific/server/server.dart' as server;
 import 'deep_links_model.dart';
 
@@ -47,11 +49,17 @@ class DeepLinksController {
     if (!_androidAppLinks.containsKey(selectedVariantIndex.value)) {
       final variant =
           selectedProject.value!.androidVariants[selectedVariantIndex.value];
-      final result = await server.requestAndroidAppLinkSettings(
-        selectedProject.value!.path,
-        buildVariant: variant,
+      await ga.timeAsync(
+        gac.deeplink,
+        gac.AnalyzeFlutterProject.loadAppLinks.name,
+        asyncOperation: () async {
+          final result = await server.requestAndroidAppLinkSettings(
+            selectedProject.value!.path,
+            buildVariant: variant,
+          );
+          _androidAppLinks[selectedVariantIndex.value] = result;
+        },
       );
-      _androidAppLinks[selectedVariantIndex.value] = result;
     }
     _updateLinks();
   }

@@ -25,6 +25,7 @@ IdeTheme getIdeTheme() {
     fontSize:
         _tryParseDouble(queryParams['fontSize']) ?? unscaledDefaultFontSize,
     embed: queryParams['embed'] == 'true',
+    isDarkMode: queryParams['theme'] != 'light',
   );
 
   // If the environment has provided a background color, set it immediately

@@ -5,6 +5,8 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
+import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
 import '../../shared/config_specific/server/server.dart' as server;
 import '../../shared/directory_picker.dart';
@@ -35,12 +37,21 @@ class _SelectProjectViewState extends State<SelectProjectView>
     setState(() {
       _retrievingFlutterProject = true;
     });
+    ga.timeStart(gac.deeplink, gac.AnalyzeFlutterProject.loadVariants.name);
     final List<String> androidVariants =
         await server.requestAndroidBuildVariants(directory);
     if (!context.mounted) {
+      ga.cancelTimingOperation(
+        gac.deeplink,
+        gac.AnalyzeFlutterProject.loadVariants.name,
+      );
       return;
     }
     if (androidVariants.isEmpty) {
+      ga.cancelTimingOperation(
+        gac.deeplink,
+        gac.AnalyzeFlutterProject.loadVariants.name,
+      );
       await showDialog(
         context: context,
         builder: (_) {
@@ -56,6 +67,11 @@ class _SelectProjectViewState extends State<SelectProjectView>
         },
       );
     } else {
+      ga.timeEnd(gac.deeplink, gac.AnalyzeFlutterProject.loadVariants.name);
+      ga.select(
+        gac.deeplink,
+        gac.AnalyzeFlutterProject.flutterProjectSelected.name,
+      );
       controller.selectedProject.value =
           FlutterProject(path: directory, androidVariants: androidVariants);
     }
