@@ -23,7 +23,10 @@ const _offlineIndicator = 'integration_test/test/offline';
 /// while a fix being worked on.
 ///
 /// Format: `'my_example_test.dart'`.
-const _skipTests = <String>[];
+const _skipTests = <String>[
+  // https://github.com/flutter/devtools/issues/6592
+  'eval_and_browse_test.dart',
+];
 
 void main(List<String> args) async {
   final testRunnerArgs = DevToolsAppTestRunnerArgs(
