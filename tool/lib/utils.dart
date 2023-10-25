@@ -10,15 +10,13 @@ import 'package:devtools_tool/model.dart';
 import 'package:io/io.dart';
 import 'package:path/path.dart' as path;
 
-String convertProcessOutputToString(List<List<int>> output, String indent) {
-  String result = output.map((codes) => utf8.decode(codes)).join();
-  result = result.trim();
-  result = result
+String convertProcessOutputToString(String output, String indent) {
+  return output
+      .trim()
       .split('\n')
       .where((line) => line.isNotEmpty)
       .map((line) => '$indent$line')
       .join('\n');
-  return result;
 }
 
 abstract class DartSdkHelper {
@@ -87,6 +85,8 @@ class CliCommand {
     bool throwOnException = true,
   }) {
     return CliCommand._(
+      // TODO(dantup): Accept an instance of FlutterSdk instead of relying on
+      //  PATH here?
       exe: FlutterSdk.flutterExecutableName,
       args: args.split(' '),
       throwOnException: throwOnException,
@@ -109,26 +109,24 @@ class CliCommand {
   final bool throwOnException;
 }
 
+typedef DevToolsProcessResult = ({int exitCode, String stdout, String stderr});
+
 extension DevToolsProcessManagerExtension on ProcessManager {
-  Future<String> runProcess(
+  Future<DevToolsProcessResult> runProcess(
     CliCommand command, {
     String? workingDirectory,
     String? additionalErrorMessage = '',
   }) async {
-    String stdout = '';
+    final processStdout = StringBuffer();
+    final processStderr = StringBuffer();
 
     final process = await spawn(
       command.exe,
       command.args,
       workingDirectory: workingDirectory,
     );
-    unawaited(
-      process.stdout
-          .transform(
-            utf8.decoder,
-          )
-          .forEach((x) => stdout = '$stdout$x'),
-    );
+    process.stdout.transform(utf8.decoder).listen(processStdout.write);
+    process.stderr.transform(utf8.decoder).listen(processStderr.write);
     final code = await process.exitCode;
     if (command.throwOnException && code != 0) {
       throw ProcessException(
@@ -138,7 +136,11 @@ extension DevToolsProcessManagerExtension on ProcessManager {
         code,
       );
     }
-    return stdout;
+    return (
+      exitCode: code,
+      stdout: processStdout.toString(),
+      stderr: processStderr.toString()
+    );
   }
 
   Future<void> runAll({

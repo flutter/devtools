@@ -92,6 +92,8 @@ class FlutterSdk {
   ///
   /// This can return null if the Flutter SDK can't be found.
   static FlutterSdk? getSdk() {
+    // TODO(dantup): Everywhere that calls this just prints and exits - should
+    //  we just make this throw like DevToolsRepo.getInstance();
     // Look for it relative to the current Dart process.
     final dartVmPath = Platform.resolvedExecutable;
     final pathSegments = path.split(dartVmPath);
@@ -117,6 +119,7 @@ class FlutterSdk {
     }
 
     // Look to see if we can find the 'flutter' command in the PATH.
+    // TODO(dantup): This won't work on Windows.
     final result = Process.runSync('which', ['flutter']);
     if (result.exitCode == 0) {
       final sdkPath = result.stdout.toString().split('\n').first.trim();

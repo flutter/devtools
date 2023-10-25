@@ -40,19 +40,20 @@ class ReleaseHelperCommand extends Command {
         ],
       ),
     );
-    final initialBranch = currentBranchResult.trim();
+    final initialBranch = currentBranchResult.stdout.trim();
     String? releaseBranch;
 
     try {
       // Change the CWD to the repo root
       Directory.current = pathFromRepoRoot("");
       print("Finding a remote that points to flutter/devtools.git.");
-      final String devtoolsRemotes = await processManager.runProcess(
+      final devtoolsRemotesResult = await processManager.runProcess(
         CliCommand.from(
           'git',
           ['remote', '-v'],
         ),
       );
+      final String devtoolsRemotes = devtoolsRemotesResult.stdout;
       final remoteRegexp = RegExp(
         r'^(?<remote>\S+)\s+(?<path>\S+)\s+\((?<action>\S+)\)',
         multiLine: true,
@@ -70,9 +71,10 @@ class ReleaseHelperCommand extends Command {
       }
       final remoteOrigin = devtoolsRemoteResult.namedGroup('remote')!;
 
-      final gitStatus = await processManager.runProcess(
+      final gitStatusResult = await processManager.runProcess(
         CliCommand.from('git', ['status', '-s']),
       );
+      final gitStatus = gitStatusResult.stdout;
       if (gitStatus.isNotEmpty) {
         throw "Error: Make sure your working directory is clean before running the helper";
       }
