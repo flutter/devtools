@@ -581,7 +581,7 @@ List<DevToolsScreen> defaultScreens({
       AppSizeScreen(),
       createController: (_) => AppSizeController(),
     ),
-    //if (FeatureFlags.deepLinkValidation)
+    if (FeatureFlags.deepLinkValidation)
       DevToolsScreen<DeepLinksController>(
         DeepLinksScreen(),
         createController: (_) => DeepLinksController(),
