@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
@@ -67,6 +68,10 @@ class PubGetCommand extends Command {
         ['pub', command],
         workingDirectory: p.packagePath,
       );
+      // For me (dantup), these processes never complete unless we are
+      // consuming stdout too, so run it through log.trace.
+      process.stdout.transform(utf8.decoder).listen(log.trace);
+
       final stderr = process.stderr;
 
       final exitCode = await process.exitCode;

@@ -87,7 +87,7 @@ class CliCommand {
     bool throwOnException = true,
   }) {
     return CliCommand._(
-      exe: Platform.isWindows ? 'flutter.bat' : 'flutter',
+      exe: FlutterSdk.flutterExecutableName,
       args: args.split(' '),
       throwOnException: throwOnException,
     );
@@ -98,7 +98,7 @@ class CliCommand {
     bool throwOnException = true,
   }) {
     return CliCommand._(
-      exe: 'devtools_tool',
+      exe: Platform.isWindows ? 'devtools_tool.bat' : 'devtools_tool',
       args: args.split(' '),
       throwOnException: throwOnException,
     );
