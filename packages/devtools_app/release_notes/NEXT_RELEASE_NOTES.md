@@ -19,7 +19,8 @@ video provides a brief tutorial for each DevTools screen.
 
 * Fix a bug with service extension states not being cleared on app disconnect.
 [#6547](https://github.com/flutter/devtools/pull/6547)
-- Improved styling of bottom status bar when connected to an app. [#6525](https://github.com/flutter/devtools/pull/6525)
+* Improved styling of bottom status bar when connected to an app. [#6525](https://github.com/flutter/devtools/pull/6525)
+* Added a work around to fix copy button functionality in VSCode. [#6598](https://github.com/flutter/devtools/pull/6598)
 
 ## Inspector updates
 
