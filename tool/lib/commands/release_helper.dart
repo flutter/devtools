@@ -33,7 +33,7 @@ class ReleaseHelperCommand extends Command {
     final currentBranchResult = await processManager.runProcess(
       CliCommand.git('rev-parse --abbrev-ref HEAD'),
     );
-    final initialBranch = currentBranchResult.trim();
+    final initialBranch = currentBranchResult.stdout.trim();
     String? releaseBranch;
 
     try {
@@ -43,9 +43,10 @@ class ReleaseHelperCommand extends Command {
         remoteId: 'flutter/devtools.git',
       );
 
-      final gitStatus = await processManager.runProcess(
+      final gitStatusResult = await processManager.runProcess(
         CliCommand.git('status -s'),
       );
+      final gitStatus = gitStatusResult.stdout;
       if (gitStatus.isNotEmpty) {
         throw "Error: Make sure your working directory is clean before running the helper";
       }

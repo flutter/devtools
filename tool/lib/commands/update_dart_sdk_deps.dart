@@ -70,9 +70,6 @@ class UpdateDartSdkDepsCommand extends Command {
         CliCommand.git('cl upload -s -f'),
       ],
     );
-
-    // Closes stdin for the entire program.
-    await sharedStdIn.terminate();
   }
 
   void _writeToDepsFile(String commit, String localDartSdkLocation) {
