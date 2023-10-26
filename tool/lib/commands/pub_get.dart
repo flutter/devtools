@@ -70,19 +70,12 @@ class PubGetCommand extends Command {
         workingDirectory: p.packagePath,
       );
 
-      final stderr = process.stderr;
       final exitCode = process.exitCode;
-
       if (exitCode == 0) {
         progress.finish(showTiming: true);
       } else {
         failureCount++;
-
-        // Display stderr when pub get goes wrong.
-        final errorOutput = convertProcessOutputToString(stderr, '    ');
         progress.finish(message: 'failed (exit code $exitCode)');
-
-        log.stderr(log.ansi.error(errorOutput));
       }
     }
 

@@ -50,23 +50,12 @@ class AnalyzeCommand extends Command {
         workingDirectory: p.packagePath,
       );
 
-      final stdout = process.stdout;
-      final stderr = process.stderr;
-      final int exitCode = process.exitCode;
-
-      if (exitCode == 0) {
+      if (process.exitCode == 0) {
         progress.finish(showTiming: true);
       } else {
         failureCount++;
 
-        // Display stderr when there's an error.
-        final stdOutput = convertProcessOutputToString(stdout, '    ');
-        final errorOutput = convertProcessOutputToString(stderr, '    ');
-
         progress.finish(message: 'failed');
-
-        log.stderr(stdOutput);
-        log.stderr(log.ansi.error(errorOutput));
       }
     }
 

@@ -10,15 +10,6 @@ import 'package:devtools_tool/model.dart';
 import 'package:io/io.dart';
 import 'package:path/path.dart' as path;
 
-String convertProcessOutputToString(String output, String indent) {
-  return output
-      .trim()
-      .split('\n')
-      .where((line) => line.isNotEmpty)
-      .map((line) => '$indent$line')
-      .join('\n');
-}
-
 abstract class DartSdkHelper {
   static const commandDebugMessage = 'Consider running this command from your'
       'Dart SDK directory locally to debug.';

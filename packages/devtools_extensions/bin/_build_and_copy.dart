@@ -84,9 +84,6 @@ class BuildExtensionCommand extends Command {
 
     _log('Copying built output to the extension destination...');
     await _copyBuildToDestination(source: source, dest: destination);
-
-    // Closes stdin for the entire program.
-    await sharedStdIn.terminate();
   }
 
   Future<void> _copyBuildToDestination({

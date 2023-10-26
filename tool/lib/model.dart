@@ -137,10 +137,17 @@ class FlutterSdk {
   static String get flutterExecutableName =>
       Platform.isWindows ? 'flutter.bat' : 'flutter';
 
+  /// On windows, 'dart' is fine for running the .exe from the Dart SDK directly
+  /// but the wrapper in the Flutter bin folder is a .bat and needs an explicit
+  /// extension.
+  static String get dartWrapperExecutableName =>
+      Platform.isWindows ? 'dart.bat' : 'dart';
+
   String get flutterToolPath =>
       path.join(sdkPath, 'bin', flutterExecutableName);
 
-  String get dartToolPath => path.join(sdkPath, 'bin', 'dart');
+  String get dartToolPath =>
+      path.join(sdkPath, 'bin', dartWrapperExecutableName);
 
   String get dartSdkPath => path.join(sdkPath, 'bin', 'cache', 'dart-sdk');
 
