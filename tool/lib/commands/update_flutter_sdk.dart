@@ -45,7 +45,7 @@ class UpdateFlutterSdkCommand extends Command {
         defaultsTo: true,
         help:
             'Use the cached Flutter version stored in "flutter-candidate.txt" '
-            'instead of the version at '
+            'instead of the latest version at '
             '"https://flutter.googlesource.com/mirrors/flutter/"',
       );
   }

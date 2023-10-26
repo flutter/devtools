@@ -66,7 +66,14 @@ class UpdateDartSdkDepsCommand extends Command {
       additionalErrorMessage: DartSdkHelper.commandDebugMessage,
       commands: [
         CliCommand.git('add .'),
-        CliCommand.git("commit -m 'Update DevTools rev to $commit'"),
+        CliCommand.from(
+          'git',
+          [
+            'commit',
+            '-m',
+            'Update DevTools rev to $commit',
+          ],
+        ),
         CliCommand.git('cl upload -s -f'),
       ],
     );
