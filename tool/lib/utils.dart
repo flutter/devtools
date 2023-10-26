@@ -183,10 +183,11 @@ Future<String> findRemote(
   String? workingDirectory,
 }) async {
   print('Searching for a remote that points to $remoteId.');
-  final String remotes = await processManager.runProcess(
+  final remotesResult = await processManager.runProcess(
     CliCommand.git('remote -v'),
     workingDirectory: workingDirectory,
   );
+  final String remotes = remotesResult.stdout;
   final remoteRegexp = RegExp(
     r'^(?<remote>\S+)\s+(?<path>\S+)\s+\((?<action>\S+)\)',
     multiLine: true,

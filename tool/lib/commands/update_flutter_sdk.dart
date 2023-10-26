@@ -17,15 +17,15 @@ const _useCacheFlag = 'use-cache';
 
 /// This command updates the the Flutter SDK contained in the 'tool/' directory
 /// to the latest Flutter candidate branch.
-/// 
+///
 /// When the '--local' flag is passed, your local flutter/flutter checkout will
 /// be updated as well.
-/// 
+///
 /// This command will use the Flutter version from the 'flutter-candidate.txt'
 /// file in the repository root, unless the '--no-use-cache' flag is passed,
 /// in which case it will run the 'tool/latest_flutter_candidate.sh' script to
 /// fetch the latest version from upstream.
-/// 
+///
 /// The version from 'flutter-candidate.txt' should be identical most of the
 /// time since the GitHub workflow that updates this file runs twice per day.
 ///
@@ -88,6 +88,7 @@ class UpdateFlutterSdkCommand extends Command {
         CliCommand('sh latest_flutter_candidate.sh'),
         workingDirectory: repo.toolDirectoryPath,
       ))
+          .stdout
           .replaceFirst('refs/', '');
     }
 
@@ -162,8 +163,5 @@ class UpdateFlutterSdkCommand extends Command {
     }
 
     log.stdout('Finished updating $toolSdkPath.');
-
-    // Closes stdin for the entire program.
-    await sharedStdIn.terminate();
   }
 }
