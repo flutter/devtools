@@ -25,22 +25,6 @@ import 'globals.dart';
 
 final _log = Logger('lib/src/shared/utils');
 
-/// Attempts to copy a String of `data` to the clipboard.
-///
-/// Shows a `successMessage` [Notification] on the passed in `context`.
-Future<void> copyToClipboard(
-  String data,
-  String? successMessage,
-) async {
-  await Clipboard.setData(
-    ClipboardData(
-      text: data,
-    ),
-  );
-
-  if (successMessage != null) notificationService.push(successMessage);
-}
-
 /// Logging to debug console only in debug runs.
 void debugLogger(String message) {
   assert(
