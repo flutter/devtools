@@ -33,9 +33,9 @@ abstract class DartSdkHelper {
       workingDirectory: dartSdkLocation,
       additionalErrorMessage: commandDebugMessage,
       commands: [
-        CliCommand('git fetch origin'),
-        CliCommand('git rebase-update'),
-        CliCommand('git checkout origin/main'),
+        CliCommand.git('fetch origin'),
+        CliCommand.git('rebase-update'),
+        CliCommand.git('checkout origin/main'),
       ],
     );
   }
@@ -93,6 +93,17 @@ class CliCommand {
     );
   }
 
+  factory CliCommand.git(
+    String args, {
+    bool throwOnException = true,
+  }) {
+    return CliCommand._(
+      exe: 'git',
+      args: args.split(' '),
+      throwOnException: throwOnException,
+    );
+  }
+
   factory CliCommand.tool(
     String args, {
     bool throwOnException = true,
@@ -107,6 +118,11 @@ class CliCommand {
   late final String exe;
   late final List<String> args;
   final bool throwOnException;
+
+  @override
+  String toString() {
+    return [exe, ...args].join(' ');
+  }
 }
 
 extension DevToolsProcessManagerExtension on ProcessManager {
@@ -158,4 +174,46 @@ extension DevToolsProcessManagerExtension on ProcessManager {
 
 String pathFromRepoRoot(String pathFromRoot) {
   return path.join(DevToolsRepo.getInstance().repoPath, pathFromRoot);
+}
+
+/// Returns the name of the git remote with id [remoteId] in
+/// [workingDirectory].
+/// 
+/// When [workingDirectory] is null, this method will look for the remote in
+/// the current directory.
+/// 
+/// [remoteId] should have the form <organization>/<repository>.git. For
+/// example: 'flutter/flutter.git' or 'flutter/devtools.git'.
+Future<String> findRemote(
+  ProcessManager processManager, {
+  required String remoteId,
+  String? workingDirectory,
+}) async {
+  print('Searching for a remote that points to $remoteId.');
+  final String remotes = await processManager.runProcess(
+    CliCommand.git('remote -v'),
+    workingDirectory: workingDirectory,
+  );
+  final remoteRegexp = RegExp(
+    r'^(?<remote>\S+)\s+(?<path>\S+)\s+\((?<action>\S+)\)',
+    multiLine: true,
+  );
+  final remoteRegexpResults = remoteRegexp.allMatches(remotes);
+  final RegExpMatch upstreamRemoteResult;
+
+  try {
+    upstreamRemoteResult = remoteRegexpResults.firstWhere(
+      // ignore: prefer_interpolation_to_compose_strings
+      (element) => RegExp(r'' + remoteId + '\$')
+          .hasMatch(element.namedGroup('path')!),
+    );
+  } on StateError {
+    throw StateError(
+      "Couldn't find a remote that points to flutter/devtools.git. "
+      "Instead got: \n$remotes",
+    );
+  }
+  final remoteUpstream = upstreamRemoteResult.namedGroup('remote')!;
+  print('Found upstream remote.');
+  return remoteUpstream;
 }

@@ -6,6 +6,7 @@ import 'package:args/command_runner.dart';
 import 'package:devtools_tool/commands/fix_goldens.dart';
 import 'package:devtools_tool/commands/generate_code.dart';
 import 'package:devtools_tool/commands/sync.dart';
+import 'package:devtools_tool/commands/update_flutter_sdk.dart';
 
 import 'commands/analyze.dart';
 import 'commands/list.dart';
@@ -20,15 +21,16 @@ class DevToolsCommandRunner extends CommandRunner {
   DevToolsCommandRunner()
       : super('devtools_tool', 'A repo management tool for DevTools.') {
     addCommand(AnalyzeCommand());
-    addCommand(RepoCheckCommand());
-    addCommand(ListCommand());
-    addCommand(PubGetCommand());
-    addCommand(RollbackCommand());
-    addCommand(UpdateDartSdkDepsCommand());
-    addCommand(ReleaseHelperCommand());
-    addCommand(UpdateDevToolsVersionCommand());
     addCommand(FixGoldensCommand());
     addCommand(GenerateCodeCommand());
+    addCommand(ListCommand());
+    addCommand(PubGetCommand());
+    addCommand(ReleaseHelperCommand());
+    addCommand(RepoCheckCommand());
+    addCommand(RollbackCommand());
     addCommand(SyncCommand());
+    addCommand(UpdateDartSdkDepsCommand());
+    addCommand(UpdateDevToolsVersionCommand());
+    addCommand(UpdateFlutterSdkCommand());
   }
 }
