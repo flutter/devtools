@@ -46,6 +46,9 @@ class AnalyzeCommand extends Command {
         CliCommand.from(
           sdk.dartToolPath,
           ['analyze', '--fatal-infos'],
+          // Run all so we can see the full set of results instead of stopping
+          // on the first error.
+          throwOnException: false,
         ),
         workingDirectory: p.packagePath,
       );

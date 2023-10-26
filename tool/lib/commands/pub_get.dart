@@ -66,6 +66,9 @@ class PubGetCommand extends Command {
       final process = await processManager.runProcess(
         CliCommand.flutter(
           'pub $command',
+          // Run all so we can see the full set of results instead of stopping
+          // on the first error.
+          throwOnException: false,
         ),
         workingDirectory: p.packagePath,
       );
