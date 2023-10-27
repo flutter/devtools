@@ -32,8 +32,7 @@ class RasterStatsView extends StatelessWidget {
   Widget build(BuildContext context) {
     if (impellerEnabled) {
       return const CenteredMessage(
-        'The Raster Stats tool is not yet ready for the Impeller rendering '
-        'engine.',
+        'The Raster Stats tool is not yet ready for the Impeller backend.',
       );
     }
     return Column(
