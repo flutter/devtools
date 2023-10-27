@@ -119,11 +119,16 @@ class PerformanceController extends DisposableController
     if (!offlineController.offlineMode.value) {
       await serviceConnection.serviceManager.onServiceAvailable;
 
-      final impellerEnabledResponse = await serviceConnection.serviceManager
-          .callServiceExtensionOnMainIsolate(
-        registrations.isImpellerEnabled,
-      );
-      _impellerEnabled = impellerEnabledResponse.json?['enabled'] == true;
+      if (serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ??
+          false) {
+        final impellerEnabledResponse = await serviceConnection.serviceManager
+            .callServiceExtensionOnMainIsolate(
+          registrations.isImpellerEnabled,
+        );
+        _impellerEnabled = impellerEnabledResponse.json?['enabled'] == true;
+      } else {
+        _impellerEnabled = false;
+      }
 
       enhanceTracingController.init();
 
