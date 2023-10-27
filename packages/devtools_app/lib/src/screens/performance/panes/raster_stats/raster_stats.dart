@@ -14,6 +14,7 @@ import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/table/table.dart';
 import '../../../../shared/table/table_data.dart';
+import '../../performance_utils.dart';
 import 'raster_stats_controller.dart';
 import 'raster_stats_model.dart';
 
@@ -31,8 +32,28 @@ class RasterStatsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (impellerEnabled) {
-      return const CenteredMessage(
-        'The Raster Stats tool is not yet ready for the Impeller backend.',
+      return Center(
+        child: RichText(
+          textAlign: TextAlign.center,
+          text: TextSpan(
+            text: 'The Raster Stats tool is not currently available for the '
+                'Impeller backend.\nLearn more about the status of ',
+            style: Theme.of(context).regularTextStyle,
+            children: [
+              LinkTextSpan(
+                link: Link(
+                  display: 'Impeller',
+                  url: impellerDocsUrl,
+                  gaScreenName: gac.performance,
+                  gaSelectedItemDescription:
+                      gac.PerformanceDocs.impellerDocsLinkFromRasterStats.name,
+                ),
+                context: context,
+              ),
+              const TextSpan(text: '.'),
+            ],
+          ),
+        ),
       );
     }
     return Column(

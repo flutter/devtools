@@ -355,10 +355,10 @@ class ShaderJankMessage {
           LinkTextSpan(
             link: Link(
               display: 'Impeller',
-              url: impellerWikiUrl,
+              url: impellerDocsUrl,
               gaScreenName: screenId,
               gaSelectedItemDescription:
-                  gac.PerformanceDocs.impellerWikiLink.name,
+                  gac.PerformanceDocs.impellerDocsLink.name,
             ),
             context: context,
             style: theme.errorMessageLinkStyle,
