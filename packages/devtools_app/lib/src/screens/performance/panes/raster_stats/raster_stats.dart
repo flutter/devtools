@@ -21,12 +21,21 @@ class RasterStatsView extends StatelessWidget {
   const RasterStatsView({
     super.key,
     required this.rasterStatsController,
+    required this.impellerEnabled,
   });
 
   final RasterStatsController rasterStatsController;
 
+  final bool impellerEnabled;
+
   @override
   Widget build(BuildContext context) {
+    if (impellerEnabled) {
+      return const CenteredMessage(
+        'The Raster Stats tool is not yet ready for the Impeller rendering '
+        'engine.',
+      );
+    }
     return Column(
       children: [
         if (!offlineController.offlineMode.value)
