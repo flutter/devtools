@@ -31,48 +31,22 @@ class ReleaseHelperCommand extends Command {
 
     final useCurrentBranch = argResults!['use-current-branch']!;
     final currentBranchResult = await processManager.runProcess(
-      CliCommand.from(
-        'git',
-        [
-          'rev-parse',
-          '--abbrev-ref',
-          'HEAD',
-        ],
-      ),
+      CliCommand.git('rev-parse --abbrev-ref HEAD'),
     );
-    final initialBranch = currentBranchResult.trim();
+    final initialBranch = currentBranchResult.stdout.trim();
     String? releaseBranch;
 
     try {
-      // Change the CWD to the repo root
       Directory.current = pathFromRepoRoot("");
-      print("Finding a remote that points to flutter/devtools.git.");
-      final String devtoolsRemotes = await processManager.runProcess(
-        CliCommand.from(
-          'git',
-          ['remote', '-v'],
-        ),
+      final remoteUpstream = await findRemote(
+        processManager,
+        remoteId: 'flutter/devtools.git',
       );
-      final remoteRegexp = RegExp(
-        r'^(?<remote>\S+)\s+(?<path>\S+)\s+\((?<action>\S+)\)',
-        multiLine: true,
-      );
-      final remoteRegexpResults = remoteRegexp.allMatches(devtoolsRemotes);
-      final RegExpMatch devtoolsRemoteResult;
 
-      try {
-        devtoolsRemoteResult = remoteRegexpResults.firstWhere(
-          (element) => RegExp(r'flutter/devtools.git$')
-              .hasMatch(element.namedGroup('path')!),
-        );
-      } on StateError {
-        throw "ERROR: Couldn't find a remote that points to flutter/devtools.git. Instead got: \n$devtoolsRemotes";
-      }
-      final remoteOrigin = devtoolsRemoteResult.namedGroup('remote')!;
-
-      final gitStatus = await processManager.runProcess(
-        CliCommand.from('git', ['status', '-s']),
+      final gitStatusResult = await processManager.runProcess(
+        CliCommand.git('status -s'),
       );
+      final gitStatus = gitStatusResult.stdout;
       if (gitStatus.isNotEmpty) {
         throw "Error: Make sure your working directory is clean before running the helper";
       }
@@ -83,17 +57,15 @@ class ReleaseHelperCommand extends Command {
       if (!useCurrentBranch) {
         print("Preparing the release branch.");
         await processManager.runProcess(
-          CliCommand.from('git', ['fetch', remoteOrigin, 'master']),
+          CliCommand.git('fetch $remoteUpstream master'),
         );
       }
 
       await processManager.runProcess(
-        CliCommand.from('git', [
-          'checkout',
-          '-b',
-          releaseBranch,
-          ...(useCurrentBranch ? [] : ['$remoteOrigin/master']),
-        ]),
+        CliCommand.git(
+          'checkout -b $releaseBranch'
+          '${useCurrentBranch ? '' : ' $remoteUpstream/master'}',
+        ),
       );
 
       print("Ensuring ./tool packages are ready.");
@@ -129,18 +101,8 @@ class ReleaseHelperCommand extends Command {
 
       await processManager.runAll(
         commands: [
-          CliCommand.from('git', [
-            'commit',
-            '-a',
-            '-m',
-            commitMessage,
-          ]),
-          CliCommand.from('git', [
-            'push',
-            '-u',
-            remoteOrigin,
-            releaseBranch,
-          ]),
+          CliCommand.git('commit -a -m $commitMessage'),
+          CliCommand.git('push -u $remoteUpstream $releaseBranch'),
         ],
       );
 
