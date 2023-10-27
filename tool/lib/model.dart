@@ -9,7 +9,11 @@ import 'package:path/path.dart' as path;
 class DevToolsRepo {
   DevToolsRepo._create(this.repoPath);
 
+  /// The path to the DevTools repository root.
   final String repoPath;
+
+  /// The path to the DevTools 'tool' directory.
+  String get toolDirectoryPath => path.join(repoPath, 'tool');
 
   @override
   String toString() => '[DevTools $repoPath]';
@@ -80,8 +84,9 @@ class DevToolsRepo {
     }
   }
 
-  String readFile(String filePath) {
-    return File(path.join(repoPath, filePath)).readAsStringSync();
+  /// Reads the file at [uri], which should be a relative path from [repoPath].
+  String readFile(Uri uri) {
+    return File(path.join(repoPath, uri.path)).readAsStringSync();
   }
 }
 
