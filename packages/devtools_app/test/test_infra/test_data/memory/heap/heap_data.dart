@@ -23,8 +23,7 @@ class GoldenHeapTest {
   /// Loads the heap data from a file.
   ///
   /// Format is format used by [NativeRuntime.writeHeapSnapshotToFile].
-  Future<AdaptedHeapData> loadHeap() =>
-      AdaptedHeapData.fromFile('$_dataDir$fileName');
+  Future<AdaptedHeapData> loadHeap() => heapFromFile('$_dataDir$fileName');
 }
 
 List<GoldenHeapTest> goldenHeapTests = <GoldenHeapTest>[
@@ -46,14 +45,12 @@ List<GoldenHeapTest> goldenHeapTests = <GoldenHeapTest>[
   ),
 ];
 
-extension TestHeapDataExtension on AdaptedHeapData {
-  static Future<AdaptedHeapData> fromFile(
-    String fileName,
-  ) async {
-    final file = File(fileName);
-    final bytes = await file.readAsBytes();
-    final data = bytes.buffer.asByteData();
-    final graph = HeapSnapshotGraph.fromChunks([data]);
-    return AdaptedHeapData.fromHeapSnapshot(graph);
-  }
+Future<AdaptedHeapData> heapFromFile(
+  String fileName,
+) async {
+  final file = File(fileName);
+  final bytes = await file.readAsBytes();
+  final data = bytes.buffer.asByteData();
+  final graph = HeapSnapshotGraph.fromChunks([data]);
+  return AdaptedHeapData.fromHeapSnapshot(graph);
 }
