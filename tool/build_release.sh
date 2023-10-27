@@ -26,7 +26,7 @@ else
   PATH="$FLUTTER_DIR/bin":$PATH
 
   # Make sure the flutter sdk is on the correct branch.
-  ./update_flutter_sdk.sh
+  devtools_tool update-flutter-sdk
 fi
 
 popd
