@@ -132,7 +132,7 @@ class UpdateFlutterSdkCommand extends Command {
       repo.toolDirectoryPath,
       flutterSdkDirName,
     );
-    final toolFlutterSdk = Directory.fromUri(Uri.parse(toolSdkPath));
+    final toolFlutterSdk = Directory.fromUri(Uri.file(toolSdkPath));
     log.stdout('Updating "$toolSdkPath" to branch $flutterTag');
 
     if (toolFlutterSdk.existsSync()) {
@@ -141,7 +141,7 @@ class UpdateFlutterSdkCommand extends Command {
         commands: [
           CliCommand.git('fetch'),
           CliCommand.git('checkout $flutterTag -f'),
-          CliCommand('./bin/flutter --version'),
+          CliCommand.flutter('--version'),
         ],
         workingDirectory: toolFlutterSdk.path,
       );
@@ -156,7 +156,7 @@ class UpdateFlutterSdkCommand extends Command {
       await processManager.runAll(
         commands: [
           CliCommand.git('checkout $flutterTag -f'),
-          CliCommand('./bin/flutter --version'),
+          CliCommand.flutter('--version'),
         ],
         workingDirectory: toolFlutterSdk.path,
       );
