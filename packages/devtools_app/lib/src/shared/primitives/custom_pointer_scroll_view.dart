@@ -812,9 +812,7 @@ class _RenderScrollSemantics extends RenderProxyBox {
     }
 
     _innerNode ??= SemanticsNode(showOnScreen: showOnScreen);
-    _innerNode!
-      ..isMergedIntoParent = node.isPartOfNodeMerging
-      ..rect = Offset.zero & node.rect.size;
+    _innerNode!..rect = Offset.zero & node.rect.size;
 
     int? firstVisibleIndex;
     final List<SemanticsNode> excluded = <SemanticsNode>[_innerNode!];
