@@ -152,6 +152,7 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
             child: Center(
               child: RasterStatsView(
                 rasterStatsController: controller.rasterStatsController,
+                impellerEnabled: controller.impellerEnabled,
               ),
             ),
           ),

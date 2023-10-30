@@ -50,6 +50,7 @@ enum PerformanceDocs {
   intrinsicOperationsDocs,
   shaderCompilationDocs,
   shaderCompilationDocsTooltipLink,
-  impellerWikiLink,
+  impellerDocsLink,
+  impellerDocsLinkFromRasterStats,
   platformChannelsDocs,
 }

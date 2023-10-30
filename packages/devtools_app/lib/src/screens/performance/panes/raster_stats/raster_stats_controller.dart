@@ -41,6 +41,10 @@ class RasterStatsController extends PerformanceFeatureController {
       setData(rasterStats);
     } catch (e, st) {
       _log.shout('Error collecting raster stats: $e', e, st);
+      notificationService.pushError(
+        'Error collecting raster stats: $e',
+        stackTrace: st.toString(),
+      );
       clearData();
     } finally {
       _loadingSnapshot.value = false;
