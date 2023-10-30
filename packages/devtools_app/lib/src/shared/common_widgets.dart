@@ -993,10 +993,7 @@ class CenteredMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Text(
-        message,
-        style: Theme.of(context).textTheme.titleLarge,
-      ),
+      child: Text(message),
     );
   }
 }

@@ -55,6 +55,7 @@ export 'src/service/json_to_service_cache.dart';
 export 'src/service/resolved_uri_manager.dart';
 export 'src/service/service_extensions.dart';
 export 'src/service/service_manager.dart';
+export 'src/service/service_registrations.dart';
 export 'src/service/timeline_streams.dart';
 export 'src/service/vm_flags.dart';
 export 'src/service/vm_service_wrapper.dart';
