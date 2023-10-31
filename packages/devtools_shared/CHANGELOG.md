@@ -1,5 +1,5 @@
 # 6.0.0
-* Bump `package:vm_service` dependency to 13.0.0.
+* Bump `package:vm_service` dependency to ^13.0.0.
 * Remove `ServiceCreator` typedef and replace usages with `VmServiceFactory` typedef from `package:vm_service`.
 
 # 5.0.0
