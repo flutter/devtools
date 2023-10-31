@@ -3,4 +3,4 @@
 // in the LICENSE file.
 
 export '_host_platform_desktop.dart'
-    if (dart.library.js_interop) 'host_platform_web.dart';
+    if (dart.library.js_interop) '_host_platform_web.dart';

@@ -3,7 +3,7 @@
 // in the LICENSE file.
 
 export '_post_message_stub.dart'
-    if (dart.library.js_interop) 'post_message_web.dart';
+    if (dart.library.js_interop) '_post_message_web.dart';
 
 class PostMessageEvent {
   PostMessageEvent({

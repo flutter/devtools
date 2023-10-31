@@ -3,4 +3,4 @@
 // in the LICENSE file.
 
 export '_notifications_desktop.dart'
-    if (dart.library.js_interop) 'notifications_web.dart';
+    if (dart.library.js_interop) '_notifications_web.dart';
