@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be found
 // in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 
 import '../../globals.dart';
-import '_copy_to_clipboard_stub.dart'
-    if (dart.library.js_interop) '_copy_to_clipboard_web.dart'
-    if (dart.library.io) '_copy_to_clipboard_desktop.dart';
+import '_copy_to_clipboard_desktop.dart'
+    if (dart.library.js_interop) '_copy_to_clipboard_web.dart';
 
 final _log = Logger('copy_to_clipboard');
 
@@ -31,17 +31,22 @@ Future<void> copyToClipboard(
 
     if (successMessage != null) notificationService.push(successMessage);
   } catch (e) {
-    _log.warning(
-      'DevTools copy failed. This may be as a result of a known bug in VSCode. '
-      'See https://github.com/Dart-Code/Dart-Code/issues/4540 for more '
-      'information. DevTools will now attempt to use a fallback method of '
-      'copying the contents.',
-    );
-    // Trying to use Clipboard.setData to copy in vscode will not work as a
-    // result of a bug. So we should fallback to `copyToClipboardVSCode` which
-    // delegates the copy to the frame above DevTools.
-    // See https://github.com/Dart-Code/Dart-Code/issues/4540 for more
-    // information.
-    copyToClipboardVSCode(data);
+    if (ideTheme.embed) {
+      _log.warning(
+        'DevTools copy failed. This may be as a result of a known bug in VSCode. '
+        'See https://github.com/Dart-Code/Dart-Code/issues/4540 for more '
+        'information. DevTools will now attempt to use a fallback method of '
+        'copying the contents.',
+      );
+      // Trying to use Clipboard.setData to copy in vscode will not work as a
+      // result of a bug. So we should fallback to `copyToClipboardVSCode` which
+      // delegates the copy to the frame above DevTools.
+      // Sending this message in other environments will just have no effect.
+      // See https://github.com/Dart-Code/Dart-Code/issues/4540 for more
+      // information.
+      copyToClipboardVSCode(data);
+    } else {
+      rethrow;
+    }
   }
 }
