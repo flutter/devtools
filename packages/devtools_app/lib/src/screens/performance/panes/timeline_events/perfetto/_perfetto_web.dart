@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:js_interop';
 
 import 'package:devtools_app_shared/utils.dart';
+import 'package:devtools_app_shared/web_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:web/helpers.dart';
@@ -139,7 +140,7 @@ class _PerfettoViewController extends DisposableController
 
     window.addEventListener(
       'message',
-      _handleMessageListener = _handleMessage as EventListener,
+      _handleMessageListener = _handleMessage.toJS,
     );
 
     unawaited(_loadStyle(preferences.darkModeTheme.value));
@@ -262,13 +263,14 @@ class _PerfettoViewController extends DisposableController
   }
 
   void _handleMessage(Event e) {
-    if (e is MessageEvent) {
-      if (e.data.toString() == EmbeddedPerfettoEvent.pong.event &&
+    if (e.isMessageEvent) {
+      final messageData = ((e as MessageEvent).data as JSString).toDart;
+      if (messageData == EmbeddedPerfettoEvent.pong.event &&
           !_perfettoHandlerReady.isCompleted) {
         _perfettoHandlerReady.complete();
       }
 
-      if (e.data.toString() == EmbeddedPerfettoEvent.devtoolsThemePong.event &&
+      if (messageData == EmbeddedPerfettoEvent.devtoolsThemePong.event &&
           !_devtoolsThemeHandlerReady.isCompleted) {
         _devtoolsThemeHandlerReady.complete();
       }

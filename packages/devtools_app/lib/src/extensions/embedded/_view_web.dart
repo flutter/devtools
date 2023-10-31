@@ -7,6 +7,7 @@ import 'dart:js_interop';
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
+import 'package:devtools_app_shared/web_utils.dart';
 import 'package:devtools_extensions/api.dart';
 import 'package:flutter/material.dart';
 import 'package:web/helpers.dart';
@@ -110,7 +111,7 @@ class _ExtensionIFrameController extends DisposableController
 
     window.addEventListener(
       'message',
-      _handleMessageListener = _handleMessage as EventListener,
+      _handleMessageListener = _handleMessage.toJS,
     );
 
     autoDisposeStreamSubscription(
@@ -162,7 +163,7 @@ class _ExtensionIFrameController extends DisposableController
   }
 
   void _handleMessage(Event e) {
-    if (e is MessageEvent) {
+    if (e.isMessageEvent) {
       final extensionEvent = DevToolsExtensionEvent.tryParse(e.data!);
       if (extensionEvent != null) {
         onEventReceived(

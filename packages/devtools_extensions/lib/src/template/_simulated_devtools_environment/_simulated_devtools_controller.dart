@@ -22,7 +22,7 @@ class SimulatedDevToolsController extends DisposableController
   void init() {
     window.addEventListener(
       'message',
-      _handleMessageListener = _handleMessage as EventListener,
+      _handleMessageListener = _handleMessage.toJS,
     );
     addAutoDisposeListener(serviceManager.connectedState, () {
       if (!serviceManager.connectedState.value.connected) {
@@ -33,7 +33,7 @@ class SimulatedDevToolsController extends DisposableController
   }
 
   void _handleMessage(Event e) {
-    if (e is MessageEvent) {
+    if (e.isMessageEvent) {
       final extensionEvent = DevToolsExtensionEvent.tryParse(e.data!);
       if (extensionEvent != null) {
         // Do not handle messages that come from the

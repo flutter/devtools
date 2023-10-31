@@ -45,7 +45,7 @@ class ExtensionManager {
   void _init({required bool connectToVmService}) {
     window.addEventListener(
       'message',
-      _handleMessageListener = _handleMessage as EventListener,
+      _handleMessageListener = _handleMessage.toJS,
     );
 
     // TODO(kenz): handle the ide theme that may be part of the query params.
@@ -78,7 +78,7 @@ class ExtensionManager {
   }
 
   void _handleMessage(Event e) {
-    if (e is MessageEvent) {
+    if (e.isMessageEvent) {
       final extensionEvent = DevToolsExtensionEvent.tryParse(e.data!);
       if (extensionEvent != null) {
         _handleExtensionEvent(extensionEvent, e);
