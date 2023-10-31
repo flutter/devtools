@@ -43,7 +43,7 @@ dependencies:
     sdk: flutter
   http: ^0.13.4
   image: ^3.0.2
-  intl: ">=0.16.1 <=0.18.0"
+  intl: ^0.18.0
   js: ^0.6.1+1
   json_rpc_2: ^3.0.2
   logging: ^1.1.1
@@ -65,6 +65,7 @@ dependencies:
   vm_service: ^12.0.0
   # TODO https://github.com/dart-lang/sdk/issues/52853 - unpin this version
   vm_snapshot_analysis: 0.7.2
+  web: ^0.3.0
   web_socket_channel: ^2.1.0
   # widget_icons: ^0.0.1
 
@@ -81,8 +82,9 @@ dev_dependencies:
   integration_test:
     sdk: flutter
   mockito: ^5.4.1
-  webkit_inspection_protocol: ">=0.5.0 <2.0.0"
   stager: ^1.0.1
+  test: ^1.21.1
+  webkit_inspection_protocol: ">=0.5.0 <2.0.0"
 
 flutter:
   uses-material-design: true

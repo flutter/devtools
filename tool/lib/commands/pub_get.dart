@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:cli_util/cli_logging.dart';
+import 'package:io/io.dart';
 import 'package:path/path.dart' as path;
 
 import '../model.dart';
@@ -43,6 +43,7 @@ class PubGetCommand extends Command {
 
     final log = Logger.standard();
     final repo = DevToolsRepo.getInstance();
+    final processManager = ProcessManager();
     final packages = repo.getPackages();
 
     final upgrade = argResults![_upgradeFlag];
@@ -62,26 +63,22 @@ class PubGetCommand extends Command {
 
       final progress = log.progress('  ${p.relativePath}');
 
-      final process = await Process.start(
-        sdk.flutterToolPath,
-        ['pub', command],
+      final process = await processManager.runProcess(
+        CliCommand.flutter(
+          'pub $command',
+          // Run all so we can see the full set of results instead of stopping
+          // on the first error.
+          throwOnException: false,
+        ),
         workingDirectory: p.packagePath,
       );
-      final stderr = process.stderr;
 
-      final exitCode = await process.exitCode;
-
+      final exitCode = process.exitCode;
       if (exitCode == 0) {
         progress.finish(showTiming: true);
       } else {
         failureCount++;
-
-        // Display stderr when pub get goes wrong.
-        final List<List<int>> err = await stderr.toList();
-        final errorOutput = convertProcessOutputToString(err, '    ');
         progress.finish(message: 'failed (exit code $exitCode)');
-
-        log.stderr(log.ansi.error(errorOutput));
       }
     }
 

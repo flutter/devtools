@@ -73,8 +73,5 @@ class GenerateCodeCommand extends Command {
       );
       mockFile.writeAsStringSync(mockFileContents);
     }
-
-    // Closes stdin for the entire program.
-    await sharedStdIn.terminate();
   }
 }

@@ -3,7 +3,7 @@ on:
   workflow_dispatch: # Allows for manual triggering if needed
   schedule:
     # * is a special character in YAML so you have to quote this string
-    - cron: "0 8 * * *" # Run every day at midnight Pacific Time
+    - cron: "0 8/12 * * *" # Run every day at midnight and noon Pacific Time
 
 permissions:
   contents: write
