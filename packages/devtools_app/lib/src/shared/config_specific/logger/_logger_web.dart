@@ -2,20 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore: avoid_web_libraries_in_flutter, as designed
-import 'dart:html';
+import 'dart:js_interop';
+
+import 'package:web/helpers.dart';
 
 import 'logger.dart';
 
 void printToConsole(Object message, [LogLevel level = LogLevel.debug]) {
+  final jsMessage = message.jsify();
   switch (level) {
     case LogLevel.debug:
-      window.console.log(message);
+      console.log(jsMessage);
       break;
     case LogLevel.warning:
-      window.console.warn(message);
+      console.warn(jsMessage);
       break;
     case LogLevel.error:
-      window.console.error(message);
+      console.error(jsMessage);
   }
 }
