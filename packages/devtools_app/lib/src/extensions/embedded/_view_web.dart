@@ -164,12 +164,13 @@ class _ExtensionIFrameController extends DisposableController
 
   void _handleMessage(Event e) {
     if (e.isMessageEvent) {
-      final extensionEvent = DevToolsExtensionEvent.tryParse(e.data!);
+      final messageData = (e as MessageEvent).data!;
+      final extensionEvent = DevToolsExtensionEvent.tryParse(messageData);
       if (extensionEvent != null) {
         onEventReceived(
           extensionEvent,
           onUnknownEvent: () => notificationService.push(
-            'Unknown event received from extension: ${e.data}',
+            'Unknown event received from extension: $messageData',
           ),
         );
       }

@@ -34,7 +34,8 @@ class SimulatedDevToolsController extends DisposableController
 
   void _handleMessage(Event e) {
     if (e.isMessageEvent) {
-      final extensionEvent = DevToolsExtensionEvent.tryParse(e.data!);
+      final messageData = (e as MessageEvent).data!;
+      final extensionEvent = DevToolsExtensionEvent.tryParse(messageData);
       if (extensionEvent != null) {
         // Do not handle messages that come from the
         // [_SimulatedDevToolsController] itself.

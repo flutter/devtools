@@ -79,7 +79,8 @@ class ExtensionManager {
 
   void _handleMessage(Event e) {
     if (e.isMessageEvent) {
-      final extensionEvent = DevToolsExtensionEvent.tryParse(e.data!);
+      final messageData = (e as MessageEvent).data!;
+      final extensionEvent = DevToolsExtensionEvent.tryParse(messageData);
       if (extensionEvent != null) {
         _handleExtensionEvent(extensionEvent, e);
       }
