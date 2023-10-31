@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-// ignore: avoid_web_libraries_in_flutter, as designed
-import 'dart:html' as html;
+import 'dart:js_interop';
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_extensions/api.dart';
 import 'package:flutter/material.dart';
+import 'package:web/helpers.dart';
 
 import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';
@@ -96,7 +96,7 @@ class _ExtensionIFrameController extends DisposableController
   /// We need to store this in a variable so that the listener is properly
   /// removed in [dispose]. Otherwise, we will end up in a state where we are
   /// leaking listeners when an extension is disabled and re-enabled.
-  html.EventListener? _handleMessageListener;
+  EventListener? _handleMessageListener;
 
   void init() {
     _iFrameReady = Completer<void>();
@@ -108,9 +108,9 @@ class _ExtensionIFrameController extends DisposableController
       }),
     );
 
-    html.window.addEventListener(
+    window.addEventListener(
       'message',
-      _handleMessageListener = _handleMessage,
+      _handleMessageListener = _handleMessage as EventListener,
     );
 
     autoDisposeStreamSubscription(
@@ -156,14 +156,14 @@ class _ExtensionIFrameController extends DisposableController
       ' _iFrameReady future completed.',
     );
     embeddedExtensionController.extensionIFrame.contentWindow!.postMessage(
-      message,
-      embeddedExtensionController.extensionUrl,
+      message.jsify(),
+      embeddedExtensionController.extensionUrl.toJS,
     );
   }
 
-  void _handleMessage(html.Event e) {
-    if (e is html.MessageEvent) {
-      final extensionEvent = DevToolsExtensionEvent.tryParse(e.data);
+  void _handleMessage(Event e) {
+    if (e is MessageEvent) {
+      final extensionEvent = DevToolsExtensionEvent.tryParse(e.data!);
       if (extensionEvent != null) {
         onEventReceived(
           extensionEvent,
@@ -205,7 +205,7 @@ class _ExtensionIFrameController extends DisposableController
 
   @override
   void dispose() {
-    html.window.removeEventListener('message', _handleMessageListener);
+    window.removeEventListener('message', _handleMessageListener);
     _handleMessageListener = null;
     _pollForExtensionHandlerReady?.cancel();
     super.dispose();

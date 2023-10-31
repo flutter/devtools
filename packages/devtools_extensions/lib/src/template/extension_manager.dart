@@ -39,13 +39,13 @@ class ExtensionManager {
   ///
   /// We need to store this in a variable so that the listener is properly
   /// removed in [dispose].
-  html.EventListener? _handleMessageListener;
+  EventListener? _handleMessageListener;
 
   // ignore: unused_element, false positive due to part files
   void _init({required bool connectToVmService}) {
-    html.window.addEventListener(
+    window.addEventListener(
       'message',
-      _handleMessageListener = _handleMessage,
+      _handleMessageListener = _handleMessage as EventListener,
     );
 
     // TODO(kenz): handle the ide theme that may be part of the query params.
@@ -73,13 +73,13 @@ class ExtensionManager {
   // ignore: unused_element, false positive due to part files
   void _dispose() {
     _registeredEventHandlers.clear();
-    html.window.removeEventListener('message', _handleMessageListener);
+    window.removeEventListener('message', _handleMessageListener);
     _handleMessageListener = null;
   }
 
-  void _handleMessage(html.Event e) {
-    if (e is html.MessageEvent) {
-      final extensionEvent = DevToolsExtensionEvent.tryParse(e.data);
+  void _handleMessage(Event e) {
+    if (e is MessageEvent) {
+      final extensionEvent = DevToolsExtensionEvent.tryParse(e.data!);
       if (extensionEvent != null) {
         _handleExtensionEvent(extensionEvent, e);
       }
@@ -88,7 +88,7 @@ class ExtensionManager {
 
   void _handleExtensionEvent(
     DevToolsExtensionEvent extensionEvent,
-    html.MessageEvent e,
+    MessageEvent e,
   ) {
     // Ignore events that come from the [ExtensionManager] itself.
     if (extensionEvent.source == '$ExtensionManager') return;
@@ -118,7 +118,7 @@ class ExtensionManager {
         _setThemeForValue(value);
         break;
       case DevToolsExtensionEventType.forceReload:
-        html.window.location.reload();
+        window.location.reload();
       default:
         _log.warning(
           'Unrecognized event received by extension: '
@@ -139,14 +139,13 @@ class ExtensionManager {
     DevToolsExtensionEvent event, {
     String? targetOrigin,
   }) {
-    final postWindow =
-        _useSimulatedEnvironment ? html.window : html.window.parent;
+    final postWindow = _useSimulatedEnvironment ? window : window.parent;
     postWindow?.postMessage(
       {
         ...event.toJson(),
         DevToolsExtensionEvent.sourceKey: '$ExtensionManager',
-      },
-      targetOrigin ?? html.window.origin!,
+      }.jsify(),
+      (targetOrigin ?? window.origin).toJS,
     );
   }
 
@@ -241,10 +240,10 @@ class ExtensionManager {
     } else {
       newQueryParams[key] = value;
     }
-    final newUri = Uri.parse(html.window.location.toString())
+    final newUri = Uri.parse(window.location.toString())
         .replace(queryParameters: newQueryParams);
-    html.window.history.replaceState(
-      html.window.history.state,
+    window.history.replaceState(
+      window.history.state,
       '',
       newUri.toString(),
     );

@@ -3,9 +3,11 @@
 // found in the LICENSE file.
 
 // ignore: avoid_web_libraries_in_flutter, as designed
-import 'dart:html' hide Storage;
+import 'dart:html' as html hide Storage;
+import 'dart:js_interop';
 
 import 'package:devtools_app_shared/utils.dart';
+import 'package:web/helpers.dart' hide Storage;
 
 import '../../../service/service_manager.dart';
 import '../../globals.dart';
@@ -15,7 +17,7 @@ import '../../server_api_client.dart';
 /// Return the url the application is launched from.
 Future<String> initializePlatform() async {
   // Clear out the unneeded HTML from index.html.
-  for (var element in document.body!.querySelectorAll('.legacy-dart')) {
+  for (var element in html.document.body!.querySelectorAll('.legacy-dart')) {
     element.remove();
   }
 
@@ -77,7 +79,10 @@ void _sendKeyPressToParent(KeyboardEvent event) {
     'repeat': event.repeat,
     'shiftKey': event.shiftKey,
   };
-  window.parent?.postMessage({'command': 'keydown', 'data': data}, '*');
+  window.parent?.postMessage(
+    {'command': 'keydown', 'data': data}.jsify(),
+    '*'.toJS,
+  );
 }
 
 class ServerConnectionStorage implements Storage {

@@ -3,8 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-// ignore: avoid_web_libraries_in_flutter, as designed
-import 'dart:html' as html;
+import 'dart:js_interop';
 
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
@@ -13,7 +12,8 @@ import 'package:devtools_shared/service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:vm_service/vm_service.dart';
+import 'package:vm_service/vm_service.dart' hide Event;
+import 'package:web/helpers.dart' hide Text;
 
 import '../api/api.dart';
 import '../api/model.dart';

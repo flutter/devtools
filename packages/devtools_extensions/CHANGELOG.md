@@ -1,4 +1,5 @@
 ## 0.0.10
+* Migrate from `dart:html` to `package:web`.
 * Update the README with instructions for joining the Flutter Discord server.
 * Bump the `devtools_shared` dependency to ^5.0.0
 

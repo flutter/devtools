@@ -17,12 +17,12 @@ class SimulatedDevToolsController extends DisposableController
   ///
   /// We need to store this in a variable so that the listener is properly
   /// removed in [dispose].
-  html.EventListener? _handleMessageListener;
+  EventListener? _handleMessageListener;
 
   void init() {
-    html.window.addEventListener(
+    window.addEventListener(
       'message',
-      _handleMessageListener = _handleMessage,
+      _handleMessageListener = _handleMessage as EventListener,
     );
     addAutoDisposeListener(serviceManager.connectedState, () {
       if (!serviceManager.connectedState.value.connected) {
@@ -32,9 +32,9 @@ class SimulatedDevToolsController extends DisposableController
     });
   }
 
-  void _handleMessage(html.Event e) {
-    if (e is html.MessageEvent) {
-      final extensionEvent = DevToolsExtensionEvent.tryParse(e.data);
+  void _handleMessage(Event e) {
+    if (e is MessageEvent) {
+      final extensionEvent = DevToolsExtensionEvent.tryParse(e.data!);
       if (extensionEvent != null) {
         // Do not handle messages that come from the
         // [_SimulatedDevToolsController] itself.
@@ -47,7 +47,7 @@ class SimulatedDevToolsController extends DisposableController
 
   @override
   void dispose() {
-    html.window.removeEventListener('message', _handleMessageListener);
+    window.removeEventListener('message', _handleMessageListener);
     _handleMessageListener = null;
     super.dispose();
   }
@@ -106,12 +106,12 @@ class SimulatedDevToolsController extends DisposableController
 
   void _postMessageToExtension(DevToolsExtensionEvent event) {
     final eventJson = event.toJson();
-    html.window.postMessage(
+    window.postMessage(
       {
         ...eventJson,
         DevToolsExtensionEvent.sourceKey: '$SimulatedDevToolsController',
-      },
-      html.window.origin!,
+      }.jsify(),
+      window.origin.toJS,
     );
     messageLogs.add(
       MessageLogEntry(

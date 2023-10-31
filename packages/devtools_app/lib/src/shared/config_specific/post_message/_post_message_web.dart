@@ -3,6 +3,9 @@
 // in the LICENSE file.
 
 import 'dart:html' as html;
+import 'dart:js_interop';
+
+import 'package:web/helpers.dart';
 
 import 'post_message.dart';
 
@@ -16,4 +19,4 @@ Stream<PostMessageEvent> get onPostMessage {
 }
 
 void postMessage(Object? message, String targetOrigin) =>
-    html.window.parent?.postMessage(message, targetOrigin);
+    window.parent?.postMessage(message.jsify(), targetOrigin.toJS);
