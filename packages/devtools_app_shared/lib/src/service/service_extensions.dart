@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 
 class ServiceExtension<T> {
   ServiceExtension({
@@ -215,6 +216,13 @@ final trackRebuildWidgets = ToggleableServiceExtension<bool>(
   disabledValue: false,
 );
 
+final profilePlatformChannels = ToggleableServiceExtension<bool>(
+  extension:
+      '$flutterExtensionPrefix${ServicesServiceExtensions.profilePlatformChannels.name}',
+  enabledValue: true,
+  disabledValue: false,
+);
+
 // This extensions below should never be displayed as a button so does not need
 // a ServiceExtensionDescription object.
 final String didSendFirstFrameEvent =
@@ -247,6 +255,7 @@ final List<ServiceExtension> _extensionDescriptions = [
   togglePlatformMode,
   toggleSelectWidgetMode,
   trackRebuildWidgets,
+  profilePlatformChannels,
 ];
 
 /// Service extensions that are not safe to call unless a frame has already

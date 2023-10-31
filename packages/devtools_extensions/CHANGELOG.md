@@ -1,6 +1,12 @@
+## 0.0.10
+* Update the README with instructions for joining the Flutter Discord server.
+* Bump the `devtools_shared` dependency to ^5.0.0
+
 ## 0.0.9
 * Bump `package:vm_service` dependency to 13.0.0.
 * Add a link to the new #devtools-extension-authors Discord channel in the README.md.
+* Fix typos that incorrectly used snake case instead of camel case for `config.yaml` examples.
+* Add a VS Code launch config for the `app_that_uses_foo` example app.
 
 ## 0.0.8
 * Fix the `build_and_copy` command so that it succeeds when there is not

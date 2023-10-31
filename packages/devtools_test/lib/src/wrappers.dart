@@ -86,6 +86,7 @@ Widget wrapWithControllers(
   PerformanceController? performance,
   ProfilerScreenController? profiler,
   DebuggerController? debugger,
+  DeepLinksController? deepLink,
   NetworkController? network,
   AppSizeController? appSize,
   AnalyticsController? analytics,
@@ -104,6 +105,7 @@ Widget wrapWithControllers(
       Provider<ProfilerScreenController>.value(value: profiler),
     if (network != null) Provider<NetworkController>.value(value: network),
     if (debugger != null) Provider<DebuggerController>.value(value: debugger),
+    if (deepLink != null) Provider<DeepLinksController>.value(value: deepLink),
     if (appSize != null) Provider<AppSizeController>.value(value: appSize),
     if (analytics != null)
       Provider<AnalyticsController>.value(value: analytics),

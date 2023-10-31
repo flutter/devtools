@@ -190,8 +190,6 @@ class InspectableWidgetError extends DevToolsError {
   InspectableWidgetError(String errorMessage, String id, {bool read = false})
       : super(errorMessage, id, read: read);
 
-  String get inspectorRef => id;
-
   @override
   InspectableWidgetError asRead() =>
       InspectableWidgetError(errorMessage, id, read: true);

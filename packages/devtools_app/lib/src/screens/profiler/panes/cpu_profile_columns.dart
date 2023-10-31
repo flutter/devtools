@@ -71,7 +71,6 @@ class MethodAndSourceColumn extends TreeColumnData<CpuStackFrame>
       methodName: data.name,
       packageUri: data.packageUri,
       sourceLine: data.sourceLine,
-      isSelected: isRowSelected,
     );
   }
 }

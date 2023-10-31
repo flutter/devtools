@@ -11,7 +11,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  intl: '>=0.16.1 <0.18.0'
+  intl: ^0.18.0
   http: ^0.13.5
 
 # For information on the generic Dart part of this file, see the

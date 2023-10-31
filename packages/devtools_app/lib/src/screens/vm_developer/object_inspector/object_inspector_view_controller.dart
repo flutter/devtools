@@ -46,8 +46,6 @@ class ObjectInspectorViewController extends DisposableController
 
   final objectHistory = ObjectHistory();
 
-  Isolate? isolate;
-
   ValueListenable<bool> get refreshing => _refreshing;
   final _refreshing = ValueNotifier<bool>(false);
 

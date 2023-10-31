@@ -1,7 +1,7 @@
 name: devtools_shared
 description: Package of shared Dart structures between devtools_app, dds, and other tools.
 
-version: 4.1.0
+version: 6.0.0
 
 repository: https://github.com/flutter/devtools/tree/master/packages/devtools_shared
 
@@ -9,6 +9,7 @@ environment:
   sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
+  args: ^2.4.2
   collection: ^1.15.0
   extension_discovery: ^2.0.0
   meta: ^1.9.1

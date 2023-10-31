@@ -492,7 +492,7 @@ abstract class _DeeplinkApiHandler {
   ) {
     final error = result[DeeplinkManager.kErrorField] as String?;
     if (error != null) {
-      api.serverError(error);
+      return api.serverError(error);
     }
     return api.getCompleted(
       result[DeeplinkManager.kOutputJsonField]! as String,

@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:cli_util/cli_logging.dart';
+import 'package:io/io.dart';
 
 import '../model.dart';
 import '../utils.dart';
@@ -27,7 +27,8 @@ class AnalyzeCommand extends Command {
     }
 
     final log = Logger.standard();
-    final repo = DevToolsRepo.getInstance()!;
+    final repo = DevToolsRepo.getInstance();
+    final processManager = ProcessManager();
     final packages = repo.getPackages();
 
     log.stdout('Running flutter analyze...');
@@ -41,32 +42,23 @@ class AnalyzeCommand extends Command {
 
       final progress = log.progress('  ${p.relativePath}');
 
-      final process = await Process.start(
-        sdk.dartToolPath,
-        ['analyze', '--fatal-infos'],
+      final process = await processManager.runProcess(
+        CliCommand.from(
+          sdk.dartToolPath,
+          ['analyze', '--fatal-infos'],
+          // Run all so we can see the full set of results instead of stopping
+          // on the first error.
+          throwOnException: false,
+        ),
         workingDirectory: p.packagePath,
       );
-      final Stream<List<int>> stdout = process.stdout;
-      final Stream<List<int>> stderr = process.stderr;
 
-      final int exitCode = await process.exitCode;
-
-      if (exitCode == 0) {
+      if (process.exitCode == 0) {
         progress.finish(showTiming: true);
       } else {
         failureCount++;
 
-        // Display stderr when there's an error.
-        final List<List<int>> out = await stdout.toList();
-        final stdOutput = convertProcessOutputToString(out, '    ');
-
-        final List<List<int>> err = await stderr.toList();
-        final errorOutput = convertProcessOutputToString(err, '    ');
-
         progress.finish(message: 'failed');
-
-        log.stderr(stdOutput);
-        log.stderr(log.ansi.error(errorOutput));
       }
     }
 

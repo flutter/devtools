@@ -8,7 +8,7 @@ import 'package:mockito/annotations.dart';
 import 'package:vm_service/vm_service.dart';
 
 // See https://github.com/dart-lang/mockito/blob/master/NULL_SAFETY_README.md
-// Run `sh tool/generate_code.sh` to regenerate mocks.
+// Run `devtools_tool generate-code` to regenerate mocks.
 @GenerateNiceMocks([
   MockSpec<ConnectedApp>(),
   MockSpec<DebuggerController>(),
