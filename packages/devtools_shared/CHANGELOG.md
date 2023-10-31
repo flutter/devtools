@@ -3,11 +3,11 @@
 * Remove `ServiceCreator` typedef and replace usages with `VmServiceFactory` typedef from `package:vm_service`.
 
 # 5.0.0
-- Split deeplink exports into `devtools_deeplink_io.dart` and `devtools_deeplink.dart`.
-- Bump `package:vm_service` to ^12.0.0.
-- Adds `DeeplinkApi.androidAppLinkSettings`, `DeeplinkApi.iosBuildOptions`, and
+* Split deeplink exports into `devtools_deeplink_io.dart` and `devtools_deeplink.dart`.
+* Bump `package:vm_service` to ^12.0.0.
+* Adds `DeeplinkApi.androidAppLinkSettings`, `DeeplinkApi.iosBuildOptions`, and
   `DeeplinkApi.iosUniversalLinkSettings` endpoints to ServerApi.
-- Add shared integration test utilities to `package:devtools_shared`. These test
+* Add shared integration test utilities to `package:devtools_shared`. These test
 utilities are exported as part of the existing `devtools_test_utils.dart` library.
 
 # 4.0.1
