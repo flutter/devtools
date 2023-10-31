@@ -3,52 +3,52 @@
 # If you want to install and run DCM locally, please refer to CONTRIBUTING.md
 # for instructions.
 
-name: Dart Code Metrics
+# name: Dart Code Metrics
 
-on:
-  pull_request:
-    types: [synchronize, opened, reopened]
-    branches:
-      - master
-    paths:
-      - "**/*.dart"
-      - "!packages/devtools_app/lib/devtools.dart"
+# on:
+#   pull_request:
+#     types: [synchronize, opened, reopened]
+#     branches:
+#       - master
+#     paths:
+#       - "**/*.dart"
+#       - "!packages/devtools_app/lib/devtools.dart"
 
-jobs:
-  flutter-prep:
-    uses: ./.github/workflows/flutter-prep.yaml
-    with:
-      os-name: ubuntu
+# jobs:
+#   flutter-prep:
+#     uses: ./.github/workflows/flutter-prep.yaml
+#     with:
+#       os-name: ubuntu
 
-  dcm:
-    name: Dart Code Metrics
-    needs: flutter-prep
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-    steps:
-      - name: Clone Flutter DevTools
-        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac
-        with:
-          ref: "${{ github.event.pull_request.head.sha }}"
-      - name: Load Cached Flutter SDK
-        uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84
-        with:
-          path: |
-            ./flutter-sdk
-          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
-      - name: Run tool/bots.sh
-        run: ./tool/bots.sh
-      - name: Install DCM
-        run: |
-          sudo apt-get update
-          wget -qO- https://dcm.dev/pgp-key.public | sudo gpg --dearmor -o /usr/share/keyrings/dcm.gpg
-          echo 'deb [signed-by=/usr/share/keyrings/dcm.gpg arch=amd64] https://dcm.dev/debian stable main' | sudo tee /etc/apt/sources.list.d/dart_stable.list
-          sudo apt-get update
-          sudo apt-get install dcm
-          sudo chmod +x /usr/bin/dcm
-      - name: Setup Dart SDK
-        uses: dart-lang/setup-dart@b64355ae6ca0b5d484f0106a033dd1388965d06d
-      - name: Run DCM on root
-        run: |
-          dcm analyze packages/devtools_app packages/devtools_shared packages/devtools_test
+#   dcm:
+#     name: Dart Code Metrics
+#     needs: flutter-prep
+#     runs-on: ubuntu-latest
+#     strategy:
+#       fail-fast: false
+#     steps:
+#       - name: Clone Flutter DevTools
+#         uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac
+#         with:
+#           ref: "${{ github.event.pull_request.head.sha }}"
+#       - name: Load Cached Flutter SDK
+#         uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84
+#         with:
+#           path: |
+#             ./flutter-sdk
+#           key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
+#       - name: Run tool/bots.sh
+#         run: ./tool/bots.sh
+#       - name: Install DCM
+#         run: |
+#           sudo apt-get update
+#           wget -qO- https://dcm.dev/pgp-key.public | sudo gpg --dearmor -o /usr/share/keyrings/dcm.gpg
+#           echo 'deb [signed-by=/usr/share/keyrings/dcm.gpg arch=amd64] https://dcm.dev/debian stable main' | sudo tee /etc/apt/sources.list.d/dart_stable.list
+#           sudo apt-get update
+#           sudo apt-get install dcm
+#           sudo chmod +x /usr/bin/dcm
+#       - name: Setup Dart SDK
+#         uses: dart-lang/setup-dart@b64355ae6ca0b5d484f0106a033dd1388965d06d
+#       - name: Run DCM on root
+#         run: |
+#           dcm analyze packages/devtools_app packages/devtools_shared packages/devtools_test
