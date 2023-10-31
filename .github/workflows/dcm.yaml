@@ -1,23 +1,13 @@
 # A CI workflow to run the Dart Code Metrics analyzer (https://dcm.dev).
 
-# NOTE: DCM usage in DevTools is currently experimental!
-
-# The DCM_CI_KEY and DCM_EMAIL secrets are set in the admin settings page
-# of the flutter/devtools repo. They can be found at: go/dash-devexp-dcm-keys
-# These are associated with a trial license of DCM, and will need to be changed
-# if we decide to purchase an actual license. The trial license will expire on
-# April 11, 2024.
-
 # If you want to install and run DCM locally, please refer to CONTRIBUTING.md
 # for instructions.
 
 name: Dart Code Metrics
 
 on:
-  pull_request_target:
-    # labeled and unlabeled are required along with open to re-run
-    # workflow when the run-dcm-workflow label is added or removed.
-    types: [opened, labeled, unlabeled]
+  pull_request:
+    types: [synchronize, opened, reopened]
     branches:
       - master
     paths:
@@ -29,11 +19,8 @@ jobs:
     uses: ./.github/workflows/flutter-prep.yaml
     with:
       os-name: ubuntu
-      requires-label: "run-dcm-workflow"
-      needs-checkout-merge: true
 
   dcm:
-    if: contains(github.event.pull_request.labels.*.name, 'run-dcm-workflow')
     name: Dart Code Metrics
     needs: flutter-prep
     runs-on: ubuntu-latest
@@ -62,4 +49,4 @@ jobs:
         uses: dart-lang/setup-dart@b64355ae6ca0b5d484f0106a033dd1388965d06d
       - name: Run DCM on root
         run: |
-          dcm analyze --ci-key="${{ secrets.DCM_CI_KEY }}" --email="${{ secrets.DCM_EMAIL }}" packages/devtools_app packages/devtools_shared packages/devtools_test
+          dcm analyze packages/devtools_app packages/devtools_shared packages/devtools_test
