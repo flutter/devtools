@@ -7,7 +7,5 @@ import 'dart:js_interop';
 import 'package:web/helpers.dart';
 
 extension MessageExtension on Event {
-  bool get isMessageEvent =>
-      // ignore: avoid-unnecessary-type-casts, intentional cast.
-      (this as JSObject).instanceOfString('MessageEvent');
+  bool get isMessageEvent => instanceOfString('MessageEvent');
 }
