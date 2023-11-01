@@ -111,6 +111,7 @@ devtools_extensions: ^0.0.9
 In `lib/main.dart`, place a `DevToolsExtension` widget at the root of your app:
 ```dart
 import 'package:devtools_extensions/devtools_extensions.dart';
+import 'package:flutter/material.dart';
 
 void main() {
   runApp(const FooDevToolsExtension());
