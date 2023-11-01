@@ -36,11 +36,13 @@ class UpdatePerfettoCommand extends Command {
   Future run() async {
     final processManager = ProcessManager();
 
-    final perfettoUiCompiledLib = pathFromRepoRoot(
+    final perfettoUiCompiledLibPath = pathFromRepoRoot(
       path.join('third_party', 'packages', 'perfetto_ui_compiled', 'lib'),
     );
+    final perfettoUiCompiledBuildPath =
+        path.join(perfettoUiCompiledLibPath, 'dist');
     final perfettoDevToolsPath =
-        path.join(perfettoUiCompiledLib, 'dist', 'devtools');
+        path.join(perfettoUiCompiledBuildPath, 'devtools');
 
     logStatus(
       'moving DevTools-Perfetto integration files to a temp directory.',
@@ -51,7 +53,7 @@ class UpdatePerfettoCommand extends Command {
     await copyPath(perfettoDevToolsPath, tempPerfettoDevTools.path);
 
     logStatus('deleting existing Perfetto build');
-    final existingBuild = Directory(path.join(perfettoUiCompiledLib, 'dist'));
+    final existingBuild = Directory(perfettoUiCompiledBuildPath);
     existingBuild.deleteSync(recursive: true);
 
     logStatus('updating Perfetto build');
@@ -59,9 +61,9 @@ class UpdatePerfettoCommand extends Command {
     if (buildLocation != null) {
       logStatus('using Perfetto build from $buildLocation');
       logStatus(
-        'copying content from $buildLocation to $perfettoUiCompiledLib',
+        'copying content from $buildLocation to $perfettoUiCompiledLibPath',
       );
-      await copyPath(buildLocation, perfettoUiCompiledLib);
+      await copyPath(buildLocation, perfettoUiCompiledLibPath);
     } else {
       logStatus('cloning Perfetto from HEAD and building from source');
       final tempPerfettoClone =
@@ -91,9 +93,9 @@ class UpdatePerfettoCommand extends Command {
         'dist',
       );
       logStatus(
-        'copying content from $buildOutputPath to $perfettoUiCompiledLib',
+        'copying content from $buildOutputPath to $perfettoUiCompiledLibPath',
       );
-      await copyPath(buildOutputPath, perfettoUiCompiledLib);
+      await copyPath(buildOutputPath, perfettoUiCompiledLibPath);
 
       logStatus('deleting perfetto clone');
       tempPerfettoClone.deleteSync(recursive: true);
@@ -107,7 +109,7 @@ class UpdatePerfettoCommand extends Command {
       RegExp(r'catapult_trace_viewer\..*'),
       RegExp(r'rec_.*\.png'),
     ];
-    final libDirectory = Directory(perfettoUiCompiledLib);
+    final libDirectory = Directory(perfettoUiCompiledLibPath);
     final libFiles = libDirectory.listSync();
     for (final file in libFiles) {
       if (deleteMatchers.any((matcher) => matcher.hasMatch(file.path))) {
@@ -119,15 +121,14 @@ class UpdatePerfettoCommand extends Command {
     logStatus(
       'moving DevTools-Perfetto integration files back from the temp directory',
     );
-    Directory(path.join(perfettoUiCompiledLib, 'dist', 'devtools'))
-        .createSync(recursive: true);
+    Directory(perfettoDevToolsPath).createSync(recursive: true);
     await copyPath(tempPerfettoDevTools.path, perfettoDevToolsPath);
 
     logStatus(
       'updating index.html headers to include DevTools-Perfetto integration files',
     );
     final indexFile =
-        File(path.join(perfettoUiCompiledLib, 'dist', 'index.html'));
+        File(path.join(perfettoUiCompiledBuildPath, 'index.html'));
     final fileLines = indexFile.readAsLinesSync();
     final fileLinesCopy = <String>[];
     for (final line in fileLines) {
