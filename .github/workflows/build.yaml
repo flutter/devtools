@@ -57,8 +57,6 @@ jobs:
           path: |
             ./flutter-sdk
           key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
-      - name: Run tool/bots.sh
-        run: ./tool/bots.sh
       - name: Install DCM
         run: |
           sudo apt-get update
