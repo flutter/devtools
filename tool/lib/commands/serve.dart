@@ -57,10 +57,12 @@ class ServeCommand extends Command {
   }
 
   @override
-  String get name => 'build-release';
+  String get name => 'serve';
 
   @override
-  String get description => 'Runs ';
+  String get description =>
+      'Builds DevTools in release mode and serves the web app with a locally '
+      'running DevTools server.';
 
   @override
   Future run() async {
