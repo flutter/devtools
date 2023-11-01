@@ -60,21 +60,63 @@ class _ErrorAwareText extends StatelessWidget {
   const _ErrorAwareText({
     required this.text,
     required this.isError,
+    required this.controller,
+    required this.link,
   });
   final String text;
   final bool isError;
+  final DeepLinksController controller;
+  final LinkData link;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         if (isError)
-          Padding(
-            padding: const EdgeInsets.only(right: denseSpacing),
-            child: Icon(
-              Icons.error,
-              color: Theme.of(context).colorScheme.error,
-              size: defaultIconSize,
+          DevToolsTooltip(
+            padding: const EdgeInsets.only(
+              top: defaultSpacing,
+              left: defaultSpacing,
+              right: defaultSpacing,
+            ),
+            preferBelow: true,
+            richMessage: WidgetSpan(
+              child: SizedBox(
+                width: 344,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      'This m.shopping.com domain has 1 issue to fix. Fixing this domain will fix ${link.associatedPath.length} associated deep links.',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.tooltipTextColor,
+                        fontSize: defaultFontSize,
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        controller.updateDisplayOptions(showSplitScreen: true);
+                        controller.selectedLink.value = link;
+                      },
+                      child: Text(
+                        'Fix this domain',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.inversePrimary,
+                          fontSize: defaultFontSize,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.only(right: denseSpacing),
+              child: Icon(
+                Icons.error,
+                color: Theme.of(context).colorScheme.error,
+                size: defaultIconSize,
+              ),
             ),
           ),
         const SizedBox(width: denseSpacing),
@@ -88,15 +130,52 @@ class _ErrorAwareText extends StatelessWidget {
 }
 
 class DomainColumn extends ColumnData<LinkData>
-    implements ColumnRenderer<LinkData> {
-  DomainColumn()
+    implements ColumnRenderer<LinkData>, ColumnHeaderRenderer<LinkData> {
+  DomainColumn(this.controller)
       : super(
           'Domain',
           fixedWidthPx: scaleByFontFactor(kDeeplinkTableCellDefaultWidth),
         );
 
+  DeepLinksController controller;
+
   @override
-  bool get supportsSorting => true;
+  Widget? buildHeader(
+    BuildContext context,
+    Widget Function() defaultHeaderRenderer,
+  ) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        const Text('Domain'),
+        PopupMenuButton<SortingOption>(
+          itemBuilder: (BuildContext context) {
+            return [
+              _buildPopupMenuSortingEntry(
+                controller,
+                SortingOption.errorOnTop,
+                isPath: false,
+              ),
+              _buildPopupMenuSortingEntry(
+                controller,
+                SortingOption.aToZ,
+                isPath: false,
+              ),
+              _buildPopupMenuSortingEntry(
+                controller,
+                SortingOption.zToA,
+                isPath: false,
+              ),
+            ];
+          },
+          child: Icon(
+            Icons.arrow_drop_down,
+            size: actionsIconSize,
+          ),
+        ),
+      ],
+    );
+  }
 
   @override
   String getValue(LinkData dataObject) => dataObject.domain;
@@ -110,29 +189,79 @@ class DomainColumn extends ColumnData<LinkData>
   }) {
     return _ErrorAwareText(
       isError: dataObject.domainError,
+      controller: controller,
       text: dataObject.domain,
+      link: dataObject,
     );
   }
 
-  // Shows result with error first.
+  // Default to show result with error first.
   @override
   int compare(LinkData a, LinkData b) {
-    if (a.domainError) return -1;
-    if (b.domainError) return 1;
-    return getValue(a).compareTo(getValue(b));
+    final SortingOption? sortingOption =
+        controller.displayOptions.domainSortingOption;
+    if (sortingOption == null) return 0;
+
+    switch (sortingOption) {
+      case SortingOption.errorOnTop:
+        if (a.domainError) return 1;
+        if (b.domainError) return -1;
+        return 0;
+      case SortingOption.aToZ:
+        return a.domain.compareTo(b.domain);
+      case SortingOption.zToA:
+        return b.domain.compareTo(a.domain);
+    }
   }
 }
 
 class PathColumn extends ColumnData<LinkData>
-    implements ColumnRenderer<LinkData> {
-  PathColumn()
+    implements ColumnRenderer<LinkData>, ColumnHeaderRenderer<LinkData> {
+  PathColumn(this.controller)
       : super(
           'Path',
           fixedWidthPx: scaleByFontFactor(kDeeplinkTableCellDefaultWidth),
         );
 
+  DeepLinksController controller;
+
   @override
-  bool get supportsSorting => true;
+  Widget? buildHeader(
+    BuildContext context,
+    Widget Function() defaultHeaderRenderer,
+  ) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        const Text('Path'),
+        PopupMenuButton<SortingOption>(
+          itemBuilder: (BuildContext context) {
+            return [
+              _buildPopupMenuSortingEntry(
+                controller,
+                SortingOption.errorOnTop,
+                isPath: true,
+              ),
+              _buildPopupMenuSortingEntry(
+                controller,
+                SortingOption.aToZ,
+                isPath: true,
+              ),
+              _buildPopupMenuSortingEntry(
+                controller,
+                SortingOption.zToA,
+                isPath: true,
+              ),
+            ];
+          },
+          child: Icon(
+            Icons.arrow_drop_down,
+            size: actionsIconSize,
+          ),
+        ),
+      ],
+    );
+  }
 
   @override
   String getValue(LinkData dataObject) => dataObject.path;
@@ -146,16 +275,30 @@ class PathColumn extends ColumnData<LinkData>
   }) {
     return _ErrorAwareText(
       isError: dataObject.pathError,
+      controller: controller,
       text: dataObject.path,
+      link: dataObject,
     );
   }
 
-  // Shows result with error first.
+  // Default to show result with error first.
   @override
   int compare(LinkData a, LinkData b) {
-    if (a.pathError) return -1;
-    if (b.pathError) return 1;
-    return getValue(a).compareTo(getValue(b));
+    final SortingOption? sortingOption =
+        controller.displayOptions.pathSortingOption;
+
+    if (sortingOption == null) return 0;
+
+    switch (sortingOption) {
+      case SortingOption.errorOnTop:
+        if (a.pathError) return -1;
+        if (b.pathError) return 1;
+        return 0;
+      case SortingOption.aToZ:
+        return a.path.compareTo(b.path);
+      case SortingOption.zToA:
+        return b.path.compareTo(a.path);
+    }
   }
 }
 
@@ -184,7 +327,7 @@ class NumberOfAssociatedDomainColumn extends ColumnData<LinkData> {
 }
 
 class SchemeColumn extends ColumnData<LinkData>
-    implements ColumnHeaderRenderer<LinkData> {
+    implements ColumnRenderer<LinkData>, ColumnHeaderRenderer<LinkData> {
   SchemeColumn(this.controller)
       : super(
           'Scheme',
@@ -205,8 +348,8 @@ class SchemeColumn extends ColumnData<LinkData>
         PopupMenuButton<FilterOption>(
           itemBuilder: (BuildContext context) {
             return [
-              _buildPopupMenuEntry(controller, FilterOption.http),
-              _buildPopupMenuEntry(controller, FilterOption.custom),
+              _buildPopupMenuFilterEntry(controller, FilterOption.http),
+              _buildPopupMenuFilterEntry(controller, FilterOption.custom),
             ];
           },
           child: Icon(
@@ -219,11 +362,21 @@ class SchemeColumn extends ColumnData<LinkData>
   }
 
   @override
-  String getValue(LinkData dataObject) => dataObject.scheme.join(',');
+  Widget build(
+    BuildContext context,
+    LinkData dataObject, {
+    bool isRowSelected = false,
+    VoidCallback? onPressed,
+  }) {
+    return Text(getValue(dataObject));
+  }
+
+  @override
+  String getValue(LinkData dataObject) => dataObject.scheme.join(', ');
 }
 
 class OSColumn extends ColumnData<LinkData>
-    implements ColumnHeaderRenderer<LinkData> {
+    implements ColumnRenderer<LinkData>, ColumnHeaderRenderer<LinkData> {
   OSColumn(this.controller)
       : super(
           'OS',
@@ -244,8 +397,8 @@ class OSColumn extends ColumnData<LinkData>
         PopupMenuButton<FilterOption>(
           itemBuilder: (BuildContext context) {
             return [
-              _buildPopupMenuEntry(controller, FilterOption.android),
-              _buildPopupMenuEntry(controller, FilterOption.ios),
+              _buildPopupMenuFilterEntry(controller, FilterOption.android),
+              _buildPopupMenuFilterEntry(controller, FilterOption.ios),
             ];
           },
           child: Icon(
@@ -258,13 +411,23 @@ class OSColumn extends ColumnData<LinkData>
   }
 
   @override
+  Widget build(
+    BuildContext context,
+    LinkData dataObject, {
+    bool isRowSelected = false,
+    VoidCallback? onPressed,
+  }) {
+    return Text(getValue(dataObject));
+  }
+
+  @override
   String getValue(LinkData dataObject) =>
-      dataObject.os.map((e) => e.description).toList().join(',');
+      dataObject.os.map((e) => e.description).toList().join(', ');
 }
 
 class StatusColumn extends ColumnData<LinkData>
     implements ColumnRenderer<LinkData>, ColumnHeaderRenderer<LinkData> {
-  StatusColumn(this.controller, this.tableViewType)
+  StatusColumn(this.controller, this.viewType)
       : super(
           'Status',
           fixedWidthPx: scaleByFontFactor(kDeeplinkTableCellDefaultWidth),
@@ -272,7 +435,7 @@ class StatusColumn extends ColumnData<LinkData>
 
   DeepLinksController controller;
 
-  TableViewType tableViewType;
+  TableViewType viewType;
 
   @override
   String getValue(LinkData dataObject) {
@@ -297,17 +460,17 @@ class StatusColumn extends ColumnData<LinkData>
         PopupMenuButton<FilterOption>(
           itemBuilder: (BuildContext context) {
             return [
-              if (tableViewType != TableViewType.domainView)
-                _buildPopupMenuEntry(
+              if (viewType != TableViewType.domainView)
+                _buildPopupMenuFilterEntry(
                   controller,
                   FilterOption.failedPathCheck,
                 ),
-              if (tableViewType != TableViewType.pathView)
-                _buildPopupMenuEntry(
+              if (viewType != TableViewType.pathView)
+                _buildPopupMenuFilterEntry(
                   controller,
                   FilterOption.failedDomainCheck,
                 ),
-              _buildPopupMenuEntry(controller, FilterOption.noIssue),
+              _buildPopupMenuFilterEntry(controller, FilterOption.noIssue),
             ];
           },
           child: Icon(
@@ -365,7 +528,7 @@ class NavigationColumn extends ColumnData<LinkData>
   }
 }
 
-PopupMenuEntry<FilterOption> _buildPopupMenuEntry(
+PopupMenuEntry<FilterOption> _buildPopupMenuFilterEntry(
   DeepLinksController controller,
   FilterOption filterOption,
 ) {
@@ -376,16 +539,33 @@ PopupMenuEntry<FilterOption> _buildPopupMenuEntry(
         ValueListenableBuilder<DisplayOptions>(
           valueListenable: controller.displayOptionsNotifier,
           builder: (context, option, _) => Checkbox(
-            value: option.filters[filterOption],
-            onChanged: (bool? checked) => controller.updateFilterOptions(
-              option: filterOption,
-              value: checked!,
+            value: option.filters.contains(filterOption),
+            onChanged: (bool? checked) => controller.updateDisplayOptions(
+              removedFilter: checked! ? null : filterOption,
+              addedFilter: checked ? filterOption : null,
             ),
           ),
         ),
         Text(filterOption.description),
       ],
     ),
+  );
+}
+
+PopupMenuEntry<SortingOption> _buildPopupMenuSortingEntry(
+  DeepLinksController controller,
+  SortingOption sortingOption, {
+  required bool isPath,
+}) {
+  return PopupMenuItem<SortingOption>(
+    onTap: () {
+      controller.updateDisplayOptions(
+        pathSortingOption: isPath ? sortingOption : null,
+        domainSortingOption: isPath ? null : sortingOption,
+      );
+    },
+    value: sortingOption,
+    child: Text(sortingOption.description),
   );
 }
 

@@ -11,6 +11,7 @@ import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/config_specific/server/server.dart' as server;
 import 'deep_links_model.dart';
+import 'fake_data.dart';
 
 typedef _DomainAndPath = ({String domain, String path});
 
@@ -27,41 +28,61 @@ enum FilterOption {
   final String description;
 }
 
+enum SortingOption {
+  aToZ('A-Z'),
+  zToA('Z-A'),
+  errorOnTop('Error on top');
+
+  const SortingOption(this.description);
+  final String description;
+}
+
 class DisplayOptions {
   DisplayOptions({
     this.domainErrorCount = 0,
     this.pathErrorCount = 0,
     this.showSplitScreen = false,
     this.filters = const {
-      FilterOption.http: true,
-      FilterOption.custom: true,
-      FilterOption.android: true,
-      FilterOption.ios: true,
-      FilterOption.noIssue: true,
-      FilterOption.failedDomainCheck: true,
-      FilterOption.failedPathCheck: true,
+      FilterOption.http,
+      FilterOption.custom,
+      FilterOption.android,
+      FilterOption.ios,
+      FilterOption.noIssue,
+      FilterOption.failedDomainCheck,
+      FilterOption.failedPathCheck,
     },
     this.searchContent = '',
+    this.domainSortingOption = SortingOption.errorOnTop,
+    this.pathSortingOption = SortingOption.errorOnTop,
   });
 
   int domainErrorCount = 0;
   int pathErrorCount = 0;
   bool showSplitScreen = false;
   String searchContent;
+  SortingOption? domainSortingOption;
+  SortingOption? pathSortingOption;
 
-  Map<FilterOption, bool> filters;
+  Set<FilterOption> filters;
 
   DisplayOptions updateFilter(FilterOption option, bool value) {
-    final Map<FilterOption, bool> newFilters =
-        Map<FilterOption, bool>.from(filters);
-    newFilters[option] = value;
+
+ final Set<FilterOption> newFilter = Set<FilterOption>.from(filters);
+
+    if (value) {
+      newFilter.add(option);
+    } else {
+      newFilter.remove(option);
+    }
 
     return DisplayOptions(
       domainErrorCount: domainErrorCount,
       pathErrorCount: pathErrorCount,
       showSplitScreen: showSplitScreen,
-      filters: newFilters,
+      filters: newFilter,
       searchContent: searchContent,
+      domainSortingOption: domainSortingOption,
+      pathSortingOption: pathSortingOption,
     );
   }
 
@@ -70,6 +91,8 @@ class DisplayOptions {
     int? pathErrorCount,
     bool? showSplitScreen,
     String? searchContent,
+    SortingOption? domainSortingOption,
+    SortingOption? pathSortingOption,
   }) {
     return DisplayOptions(
       domainErrorCount: domainErrorCount ?? this.domainErrorCount,
@@ -77,6 +100,8 @@ class DisplayOptions {
       showSplitScreen: showSplitScreen ?? this.showSplitScreen,
       filters: filters,
       searchContent: searchContent ?? '',
+      domainSortingOption: domainSortingOption ?? this.domainSortingOption,
+      pathSortingOption: pathSortingOption ?? this.pathSortingOption,
     );
   }
 }
@@ -142,47 +167,48 @@ class DeepLinksController {
   }
 
   Future<void> _loadAndroidAppLinks() async {
-    if (!_androidAppLinks.containsKey(selectedVariantIndex.value)) {
-      final variant =
-          selectedProject.value!.androidVariants[selectedVariantIndex.value];
-      await ga.timeAsync(
-        gac.deeplink,
-        gac.AnalyzeFlutterProject.loadAppLinks.name,
-        asyncOperation: () async {
-          final result = await server.requestAndroidAppLinkSettings(
-            selectedProject.value!.path,
-            buildVariant: variant,
-          );
-          _androidAppLinks[selectedVariantIndex.value] = result;
-        },
-      );
-    }
+    // if (!_androidAppLinks.containsKey(selectedVariantIndex.value)) {
+    //   final variant =
+    //       selectedProject.value!.androidVariants[selectedVariantIndex.value];
+    //   await ga.timeAsync(
+    //     gac.deeplink,
+    //     gac.AnalyzeFlutterProject.loadAppLinks.name,
+    //     asyncOperation: () async {
+    //       final result = await server.requestAndroidAppLinkSettings(
+    //         selectedProject.value!.path,
+    //         buildVariant: variant,
+    //       );
+    //       _androidAppLinks[selectedVariantIndex.value] = result;
+    //     },
+    //   );
+    // }
     updateLinks();
   }
 
   List<LinkData> get _allLinkDatas {
-    final appLinks = _androidAppLinks[selectedVariantIndex.value]?.deeplinks;
-    if (appLinks == null) {
-      return const <LinkData>[];
-    }
-    final domainPathToScheme = <_DomainAndPath, Set<String>>{};
-    for (final appLink in appLinks) {
-      final schemes = domainPathToScheme.putIfAbsent(
-        (domain: appLink.host, path: appLink.path),
-        () => <String>{},
-      );
-      schemes.add(appLink.scheme);
-    }
-    return domainPathToScheme.entries
-        .map(
-          (entry) => LinkData(
-            domain: entry.key.domain,
-            path: entry.key.path,
-            os: [PlatformOS.android],
-            scheme: entry.value.toList(),
-          ),
-        )
-        .toList();
+    return allLinkDatas;
+    // final appLinks = _androidAppLinks[selectedVariantIndex.value]?.deeplinks;
+    // if (appLinks == null) {
+    //   return const <LinkData>[];
+    // }
+    // final domainPathToScheme = <_DomainAndPath, Set<String>>{};
+    // for (final appLink in appLinks) {
+    //   final schemes = domainPathToScheme.putIfAbsent(
+    //     (domain: appLink.host, path: appLink.path),
+    //     () => <String>{},
+    //   );
+    //   schemes.add(appLink.scheme);
+    // }
+    // return domainPathToScheme.entries
+    //     .map(
+    //       (entry) => LinkData(
+    //         domain: entry.key.domain,
+    //         path: entry.key.path,
+    //         os: [PlatformOS.android],
+    //         scheme: entry.value.toList(),
+    //       ),
+    //     )
+    //     .toList();
   }
 
   final selectedProject = ValueNotifier<FlutterProject?>(null);
@@ -209,26 +235,30 @@ class DeepLinksController {
     linkDatasNotifier.value = _getFilterredLinks(_allLinkDatas);
   }
 
-  void updateFilterOptions({
-    required FilterOption option,
-    required bool value,
-  }) {
-    displayOptionsNotifier.value =
-        displayOptionsNotifier.value.updateFilter(option, value);
-
-    linkDatasNotifier.value = _getFilterredLinks(_allLinkDatas);
-  }
-
   void updateDisplayOptions({
     int? domainErrorCount,
     int? pathErrorCount,
     bool? showSplitScreen,
+    SortingOption? domainSortingOption,
+    SortingOption? pathSortingOption,
+    FilterOption? addedFilter,
+    FilterOption? removedFilter,
   }) {
     displayOptionsNotifier.value = displayOptionsNotifier.value.copyWith(
       domainErrorCount: domainErrorCount,
       pathErrorCount: pathErrorCount,
       showSplitScreen: showSplitScreen,
+      domainSortingOption: domainSortingOption,
+      pathSortingOption: pathSortingOption,
     );
+    if (addedFilter != null) {
+      displayOptionsNotifier.value =
+          displayOptionsNotifier.value.updateFilter(addedFilter, true);
+    }    if (removedFilter != null) {
+      displayOptionsNotifier.value =
+          displayOptionsNotifier.value.updateFilter(removedFilter, false);
+    }
+
     linkDatasNotifier.value = _getFilterredLinks(_allLinkDatas);
   }
 
@@ -243,19 +273,20 @@ class DeepLinksController {
       }
 
       if (!((linkData.os.contains(PlatformOS.android) &&
-              displayOptions.filters[FilterOption.android]!) ||
+              displayOptions.filters.contains(FilterOption.android)) ||
           (linkData.os.contains(PlatformOS.ios) &&
-              displayOptions.filters[FilterOption.ios]!))) {
+              displayOptions.filters.contains(FilterOption.ios)))) {
         return false;
       }
 
       if (!((linkData.domainError &&
-              displayOptions.filters[FilterOption.failedDomainCheck]!) ||
+              displayOptions.filters
+                  .contains(FilterOption.failedDomainCheck)) ||
           (linkData.pathError &&
-              displayOptions.filters[FilterOption.failedPathCheck]!) ||
+              displayOptions.filters.contains(FilterOption.failedPathCheck)) ||
           (!linkData.domainError &&
               !linkData.pathError &&
-              displayOptions.filters[FilterOption.noIssue]!))) {
+              displayOptions.filters.contains(FilterOption.noIssue)))) {
         return false;
       }
 
