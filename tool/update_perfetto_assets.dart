@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(kenz): delete this script once we can confirm it is not used in the
+// Dart SDK or in infra tooling.
+
 import 'dart:io';
 
 void main(List<String> args) {

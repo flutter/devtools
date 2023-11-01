@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# TODO(kenz): delete this script once we can confirm it is not used in the
+# Dart SDK or in infra tooling.
+
 # This script requires the use of `gsed`. If you do not have this installed, please run
 # `brew install gnu-sed` from your Mac. This script will take several minutes to complete,
 # and for that reason it should be ran once per quarter instead of once per montly release.

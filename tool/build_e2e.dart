@@ -19,8 +19,8 @@ const argUpdatePerfetto = '--update-perfetto';
 /// Flutter SDK when you already have the proper SDK checked out.
 ///
 /// If [argUpdatePerfetto] is present, the precompiled bits for Perfetto will
-/// be updated from the [update_perfetto.sh] script as part of the DevTools
-/// build process (e.g. [build_release.sh]).
+/// be updated from the `devtools_tool update-perfetto` command as part of the
+/// DevTools build process (e.g. running `devtools_tool build-release`).
 void main(List<String> args) async {
   final shouldUpdatePerfetto = args.contains(argUpdatePerfetto);
   final noUpdateFlutter = args.contains(argNoUpdateFlutter);
