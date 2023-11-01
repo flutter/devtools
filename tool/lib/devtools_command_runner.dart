@@ -4,6 +4,7 @@
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
+import 'package:devtools_tool/commands/build_release.dart';
 import 'package:devtools_tool/commands/fix_goldens.dart';
 import 'package:devtools_tool/commands/generate_code.dart';
 import 'package:devtools_tool/commands/sync.dart';
@@ -23,6 +24,7 @@ class DevToolsCommandRunner extends CommandRunner {
   DevToolsCommandRunner()
       : super('devtools_tool', 'A repo management tool for DevTools.') {
     addCommand(AnalyzeCommand());
+    addCommand(BuildReleaseCommand());
     addCommand(FixGoldensCommand());
     addCommand(GenerateCodeCommand());
     addCommand(ListCommand());
