@@ -35,9 +35,4 @@ class DevToolsCommandRunner extends CommandRunner {
     addCommand(UpdateDevToolsVersionCommand());
     addCommand(UpdateFlutterSdkCommand());
   }
-
-  @override
-  Future runCommand(ArgResults topLevelResults) async {
-    return await super.runCommand(topLevelResults);
-  }
 }
