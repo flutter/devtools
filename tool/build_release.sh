@@ -41,7 +41,7 @@ echo "Flutter Path: $(which flutter)"
 echo "Flutter Version: $(flutter --version)"
 
 if [[ $1 = "--update-perfetto" ]]; then
-  $TOOL_DIR/update_perfetto.sh
+  devtools_tool update-perfetto
 fi
 
 pushd $DEVTOOLS_DIR/packages/devtools_shared
