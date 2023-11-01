@@ -126,19 +126,19 @@ class UpdatePerfettoCommand extends Command {
     logStatus(
       'updating index.html headers to include DevTools-Perfetto integration files',
     );
-    await processManager.runAll(
-      commands: [
-        CliCommand(
-          // ignore: unnecessary_string_escapes
-          'gsed -i "s/<\/head>/  <link id=\"devtools-style\" rel=\"stylesheet\" href=\"devtools\/devtools_dark.css\">\n<\/head>/g" ${path.join('dist', 'index.html')}',
-        ),
-        CliCommand(
-          // ignore: unnecessary_string_escapes
-          'gsed -i "s/<\/head>/  <script src=\"devtools\/devtools_theme_handler.js\"><\/script>\n<\/head>/g" ${path.join('dist', 'index.html')}',
-        ),
-      ],
-      workingDirectory: perfettoUiCompiledLib,
-    );
+    final indexFile =
+        File(path.join(perfettoUiCompiledLib, 'dist', 'index.html'));
+    final fileLines = indexFile.readAsLinesSync();
+    final fileLinesCopy = <String>[];
+    for (final line in fileLines) {
+      if (line == '</head>') {
+        fileLinesCopy.addAll([
+          '  <link id="devtools-style" rel="stylesheet" href="devtools/devtools_dark.css">',
+          '  <script src="devtools/devtools_theme_handler.js"></script>',
+        ]);
+      }
+      fileLinesCopy.add(line);
+    }
 
     logStatus('deleting temporary directory');
     tempPerfettoDevTools.deleteSync(recursive: true);
