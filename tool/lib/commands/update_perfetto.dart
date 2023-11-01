@@ -58,7 +58,10 @@ class UpdatePerfettoCommand extends Command {
     final buildLocation = argResults![_buildFlag];
     if (buildLocation != null) {
       logStatus('using Perfetto build from $buildLocation');
-      await processManager.runProcess(CliCommand('cp -R $buildLocation ./'));
+      logStatus(
+        'copying content from $buildLocation to $perfettoUiCompiledLib',
+      );
+      await copyPath(buildLocation, perfettoUiCompiledLib);
     } else {
       logStatus('cloning Perfetto from HEAD and building from source');
       final tempPerfettoClone =
@@ -79,17 +82,18 @@ class UpdatePerfettoCommand extends Command {
         ],
         workingDirectory: path.join(tempPerfettoClone.path, 'perfetto'),
       );
-      await copyPath(
-        path.join(
-          tempPerfettoClone.path,
-          'perfetto',
-          'out',
-          'ui',
-          'ui',
-          'dist',
-        ),
-        perfettoUiCompiledLib,
+      final buildOutputPath = path.join(
+        tempPerfettoClone.path,
+        'perfetto',
+        'out',
+        'ui',
+        'ui',
+        'dist',
       );
+      logStatus(
+        'copying content from $buildOutputPath to $perfettoUiCompiledLib',
+      );
+      await copyPath(buildOutputPath, perfettoUiCompiledLib);
 
       logStatus('deleting perfetto clone');
       tempPerfettoClone.deleteSync(recursive: true);
