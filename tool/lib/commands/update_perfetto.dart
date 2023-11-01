@@ -104,13 +104,14 @@ class UpdatePerfettoCommand extends Command {
     logStatus('deleting unnecessary js source map files from build');
     final deleteMatchers = [
       RegExp(r'\.js\.map'),
+      RegExp(r'\.css\.map'),
       RegExp(r'traceconv\.wasm'),
       RegExp(r'traceconv_bundle\.js'),
       RegExp(r'catapult_trace_viewer\..*'),
       RegExp(r'rec_.*\.png'),
     ];
     final libDirectory = Directory(perfettoUiCompiledLibPath);
-    final libFiles = libDirectory.listSync();
+    final libFiles = libDirectory.listSync(recursive: true);
     for (final file in libFiles) {
       if (deleteMatchers.any((matcher) => matcher.hasMatch(file.path))) {
         logStatus('deleting ${file.path}');
@@ -123,12 +124,20 @@ class UpdatePerfettoCommand extends Command {
     );
     Directory(perfettoDevToolsPath).createSync(recursive: true);
     await copyPath(tempPerfettoDevTools.path, perfettoDevToolsPath);
+    logStatus('deleting temporary directory');
+    tempPerfettoDevTools.deleteSync(recursive: true);
 
+    _updateIndexFileForDevToolsEmbedding(
+      path.join(perfettoUiCompiledBuildPath, 'index.html'),
+    );
+    _updatePerfettoAssetsInPubspec();
+  }
+
+  void _updateIndexFileForDevToolsEmbedding(String indexFilePath) {
     logStatus(
       'updating index.html headers to include DevTools-Perfetto integration files',
     );
-    final indexFile =
-        File(path.join(perfettoUiCompiledBuildPath, 'index.html'));
+    final indexFile = File(indexFilePath);
     final fileLines = indexFile.readAsLinesSync();
     final fileLinesCopy = <String>[];
     for (final line in fileLines) {
@@ -140,19 +149,20 @@ class UpdatePerfettoCommand extends Command {
       }
       fileLinesCopy.add(line);
     }
-
-    logStatus('deleting temporary directory');
-    tempPerfettoDevTools.deleteSync(recursive: true);
-
-    logStatus('updating perfetto assets in the devtools_app pubspec.yaml file');
-    _updatePerfettoAssetsInPubspec();
+    indexFile.writeAsStringSync(fileLinesCopy.joinWithNewLine());
   }
 
   void _updatePerfettoAssetsInPubspec() {
-    final mainDevToolsDirectory = DevToolsRepo.getInstance().repoPath;
-    final perfettoDistDir = Directory.fromUri(
-      Uri.parse(
-        '$mainDevToolsDirectory/third_party/packages/perfetto_ui_compiled/lib/dist',
+    logStatus('updating perfetto assets in the devtools_app pubspec.yaml file');
+    final repo = DevToolsRepo.getInstance();
+    final perfettoDistDir = Directory(
+      path.join(
+        repo.repoPath,
+        'third_party',
+        'packages',
+        'perfetto_ui_compiled',
+        'lib',
+        'dist',
       ),
     );
 
@@ -177,8 +187,8 @@ class UpdatePerfettoCommand extends Command {
       );
     }
 
-    final pubspec = File.fromUri(
-      Uri.parse('$mainDevToolsDirectory/packages/devtools_app/pubspec.yaml'),
+    final pubspec = File(
+      path.join(repo.devtoolsAppDirectoryPath, 'pubspec.yaml'),
     );
 
     // TODO(kenz): Ensure the pubspec.yaml contains an entry for each file in
