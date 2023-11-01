@@ -38,11 +38,6 @@ class DevToolsCommandRunner extends CommandRunner {
 
   @override
   Future runCommand(ArgResults topLevelResults) async {
-    try {
-      return await super.runCommand(topLevelResults);
-    } finally {
-      // Closes stdin for the entire program.
-      await sharedStdIn.terminate();
-    }
+    return await super.runCommand(topLevelResults);
   }
 }
