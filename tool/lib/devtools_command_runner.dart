@@ -6,6 +6,7 @@ import 'package:args/command_runner.dart';
 import 'package:devtools_tool/commands/build_release.dart';
 import 'package:devtools_tool/commands/fix_goldens.dart';
 import 'package:devtools_tool/commands/generate_code.dart';
+import 'package:devtools_tool/commands/serve.dart';
 import 'package:devtools_tool/commands/sync.dart';
 import 'package:devtools_tool/commands/update_flutter_sdk.dart';
 import 'package:devtools_tool/commands/update_perfetto.dart';
@@ -31,6 +32,7 @@ class DevToolsCommandRunner extends CommandRunner {
     addCommand(ReleaseHelperCommand());
     addCommand(RepoCheckCommand());
     addCommand(RollbackCommand());
+    addCommand(ServeCommand());
     addCommand(SyncCommand());
     addCommand(UpdateDartSdkDepsCommand());
     addCommand(UpdateDevToolsVersionCommand());
