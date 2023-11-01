@@ -113,8 +113,8 @@ flutter:
     - packages/perfetto_ui_compiled/dist/devtools/devtools_light.css
     - packages/perfetto_ui_compiled/dist/devtools/devtools_shared.css
     - packages/perfetto_ui_compiled/dist/devtools/devtools_theme_handler.js
-    # The version number for all the Perfetto asset paths below is updated by running the
-    # ./tool/update_perfetto.sh script.
+    # The version number for all the Perfetto asset paths below is updated by running
+    # `devtools_tool update-perfetto`.
     - packages/perfetto_ui_compiled/dist/v33.0-1838a06af/engine_bundle.js
     - packages/perfetto_ui_compiled/dist/v33.0-1838a06af/frontend_bundle.js
     - packages/perfetto_ui_compiled/dist/v33.0-1838a06af/manifest.json
