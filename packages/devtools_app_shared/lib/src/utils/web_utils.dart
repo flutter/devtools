@@ -9,3 +9,7 @@ import 'package:web/helpers.dart';
 extension MessageExtension on Event {
   bool get isMessageEvent => instanceOfString('MessageEvent');
 }
+
+extension NodeListExtension on NodeList {
+  external void forEach(JSFunction callback);
+}
