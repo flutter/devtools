@@ -58,3 +58,7 @@ const renderFrameWithRasterStats = '_flutter.renderFrameWithRasterStats';
 
 /// Dwds listens to events for recording end-to-end analytics.
 const dwdsSendEvent = 'ext.dwds.sendEvent';
+
+/// Service extension that returns whether or not the Impeller rendering engine
+/// is being used (if false, the app is using SKIA).
+const isImpellerEnabled = 'ext.ui.window.impellerEnabled';

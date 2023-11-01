@@ -9,7 +9,11 @@ import 'package:path/path.dart' as path;
 class DevToolsRepo {
   DevToolsRepo._create(this.repoPath);
 
+  /// The path to the DevTools repository root.
   final String repoPath;
+
+  /// The path to the DevTools 'tool' directory.
+  String get toolDirectoryPath => path.join(repoPath, 'tool');
 
   @override
   String toString() => '[DevTools $repoPath]';
@@ -80,8 +84,9 @@ class DevToolsRepo {
     }
   }
 
-  String readFile(String filePath) {
-    return File(path.join(repoPath, filePath)).readAsStringSync();
+  /// Reads the file at [uri], which should be a relative path from [repoPath].
+  String readFile(Uri uri) {
+    return File(path.join(repoPath, uri.path)).readAsStringSync();
   }
 }
 
@@ -92,6 +97,8 @@ class FlutterSdk {
   ///
   /// This can return null if the Flutter SDK can't be found.
   static FlutterSdk? getSdk() {
+    // TODO(dantup): Everywhere that calls this just prints and exits - should
+    //  we just make this throw like DevToolsRepo.getInstance();
     // Look for it relative to the current Dart process.
     final dartVmPath = Platform.resolvedExecutable;
     final pathSegments = path.split(dartVmPath);
@@ -117,6 +124,7 @@ class FlutterSdk {
     }
 
     // Look to see if we can find the 'flutter' command in the PATH.
+    // TODO(dantup): This won't work on Windows.
     final result = Process.runSync('which', ['flutter']);
     if (result.exitCode == 0) {
       final sdkPath = result.stdout.toString().split('\n').first.trim();
@@ -131,9 +139,20 @@ class FlutterSdk {
 
   final String sdkPath;
 
-  String get flutterToolPath => path.join(sdkPath, 'bin', 'flutter');
+  static String get flutterExecutableName =>
+      Platform.isWindows ? 'flutter.bat' : 'flutter';
 
-  String get dartToolPath => path.join(sdkPath, 'bin', 'dart');
+  /// On windows, 'dart' is fine for running the .exe from the Dart SDK directly
+  /// but the wrapper in the Flutter bin folder is a .bat and needs an explicit
+  /// extension.
+  static String get dartWrapperExecutableName =>
+      Platform.isWindows ? 'dart.bat' : 'dart';
+
+  String get flutterToolPath =>
+      path.join(sdkPath, 'bin', flutterExecutableName);
+
+  String get dartToolPath =>
+      path.join(sdkPath, 'bin', dartWrapperExecutableName);
 
   String get dartSdkPath => path.join(sdkPath, 'bin', 'cache', 'dart-sdk');
 

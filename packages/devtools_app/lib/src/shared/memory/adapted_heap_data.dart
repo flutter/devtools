@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -72,17 +70,6 @@ class AdaptedHeapData {
     }
 
     return AdaptedHeapData(objects);
-  }
-
-  @visibleForTesting
-  static Future<AdaptedHeapData> fromFile(
-    String fileName,
-  ) async {
-    final file = File(fileName);
-    final bytes = await file.readAsBytes();
-    final data = bytes.buffer.asByteData();
-    final graph = HeapSnapshotGraph.fromChunks([data]);
-    return AdaptedHeapData.fromHeapSnapshot(graph);
   }
 
   /// Default value for rootIndex is taken from the doc:

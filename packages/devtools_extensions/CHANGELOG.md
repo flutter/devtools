@@ -1,4 +1,5 @@
 ## 0.0.10
+* Update the README with instructions for joining the Flutter Discord server.
 * Bump the `devtools_shared` dependency to ^5.0.0
 
 ## 0.0.9

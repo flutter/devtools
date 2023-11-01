@@ -24,8 +24,5 @@ class SyncCommand extends Command {
     await processManager.runProcess(
       CliCommand.tool('generate-code --upgrade'),
     );
-
-    // Closes stdin for the entire program.
-    await sharedStdIn.terminate();
   }
 }

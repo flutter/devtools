@@ -17,6 +17,7 @@ import '../screens/debugger/debugger_controller.dart';
 import '../screens/inspector/layout_explorer/ui/theme.dart';
 import 'analytics/analytics.dart' as ga;
 import 'analytics/constants.dart' as gac;
+import 'config_specific/copy_to_clipboard/copy_to_clipboard.dart';
 import 'config_specific/launch_url/launch_url.dart';
 import 'console/widgets/expandable_variable.dart';
 import 'diagnostics/dart_object_node.dart';
@@ -976,10 +977,7 @@ class CenteredMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Text(
-        message,
-        style: Theme.of(context).textTheme.titleLarge,
-      ),
+      child: Text(message),
     );
   }
 }

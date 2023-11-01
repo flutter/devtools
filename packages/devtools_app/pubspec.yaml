@@ -4,7 +4,7 @@ publish_to: none
 
 # Note: this version should only be updated by running tools/update_version.dart
 # that updates all versions of devtools packages (devtools_app, devtools_test).
-version: 2.28.1
+version: 2.29.0
 
 repository: https://github.com/flutter/devtools/tree/master/packages/devtools_app
 
@@ -43,10 +43,9 @@ dependencies:
     sdk: flutter
   http: ^0.13.4
   image: ^3.0.2
-  intl: ">=0.16.1 <=0.18.0"
+  intl: ^0.18.0
   js: ^0.6.1+1
   json_rpc_2: ^3.0.2
-  leak_tracker: 9.0.8
   logging: ^1.1.1
   meta: ^1.9.1
   mime: ^1.0.0
@@ -66,13 +65,14 @@ dependencies:
   vm_service: ^12.0.0
   # TODO https://github.com/dart-lang/sdk/issues/52853 - unpin this version
   vm_snapshot_analysis: 0.7.2
+  web: ^0.3.0
   web_socket_channel: ^2.1.0
   # widget_icons: ^0.0.1
 
 dev_dependencies:
   args: ^2.4.2
   build_runner: ^2.3.3
-  devtools_test: 2.28.1
+  devtools_test: 2.29.0
   fake_async: ^1.3.1
   flutter_driver:
     sdk: flutter
@@ -82,8 +82,9 @@ dev_dependencies:
   integration_test:
     sdk: flutter
   mockito: ^5.4.1
-  webkit_inspection_protocol: ">=0.5.0 <2.0.0"
   stager: ^1.0.1
+  test: ^1.21.1
+  webkit_inspection_protocol: ">=0.5.0 <2.0.0"
 
 flutter:
   uses-material-design: true

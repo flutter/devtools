@@ -29,6 +29,7 @@ void main() {
       );
       setGlobal(ServiceConnectionManager, mockServiceConnection);
       setGlobal(IdeTheme, IdeTheme());
+      setGlobal(NotificationService, NotificationService());
 
       controller =
           RasterStatsController(createMockPerformanceControllerWithDefaults());

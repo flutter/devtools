@@ -1,4 +1,4 @@
-# Coding agreements in DevTools
+# DevTools style guide
 
 We fully follow [Effective Dart](https://dart.dev/guides/language/effective-dart)
 and some items of

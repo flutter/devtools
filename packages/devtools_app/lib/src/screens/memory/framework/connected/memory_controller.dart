@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
-import 'package:leak_tracker/devtools_integration.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/globals.dart';
@@ -87,9 +86,6 @@ class MemoryController extends DisposableController
   /// instead of the widget state.
   int selectedFeatureTabIndex = 0;
 
-  final _shouldShowLeaksTab = ValueNotifier<bool>(false);
-  ValueListenable<bool> get shouldShowLeaksTab => _shouldShowLeaksTab;
-
   HeapSample? _selectedDartSample;
 
   HeapSample? _selectedAndroidSample;
@@ -159,16 +155,7 @@ class MemoryController extends DisposableController
     // TODO(terry): Need an event on the controller for this too?
   }
 
-  void _refreshShouldShowLeaksTab() {
-    _shouldShowLeaksTab.value = serviceConnection
-        .serviceManager.serviceExtensionManager
-        .hasServiceExtension(memoryLeakTrackingExtensionName)
-        .value;
-  }
-
   void _handleConnectionStart() {
-    _refreshShouldShowLeaksTab();
-
     if (_memoryTracker == null) {
       _memoryTracker = MemoryTracker(this);
       _memoryTracker!.start();

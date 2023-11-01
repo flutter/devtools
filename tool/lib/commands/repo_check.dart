@@ -61,14 +61,15 @@ class DevToolsVersionCheck extends Check {
   Future<void> performCheck(DevToolsRepo repo) {
     // TODO(devoncarew): Update this to use a package to parse the pubspec file;
     //                   https://pub.dev/packages/pubspec.
-    final pubspecContents = repo.readFile('packages/devtools_app/pubspec.yaml');
+    final pubspecContents =
+        repo.readFile(Uri.parse('packages/devtools_app/pubspec.yaml'));
     final versionString = pubspecContents
         .split('\n')
         .firstWhere((line) => line.startsWith('version:'));
     final pubspecVersion = versionString.substring('version:'.length).trim();
 
     final dartFileContents =
-        repo.readFile('packages/devtools_app/lib/devtools.dart');
+        repo.readFile(Uri.parse('packages/devtools_app/lib/devtools.dart'));
 
     final regexp = RegExp(r"version = '(\S+)';");
     final match = regexp.firstMatch(dartFileContents);

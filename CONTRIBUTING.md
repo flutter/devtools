@@ -1,12 +1,24 @@
-# Contributing code
+# Contributing to DevTools
 
 ![GitHub contributors](https://img.shields.io/github/contributors/flutter/devtools.svg)
 
-We gladly accept contributions via GitHub pull requests!
-This page instructs how to contribute code changes to DevTools.
+_tl;dr: join [Discord](https://github.com/flutter/flutter/wiki/Chat), be
+[courteous](https://github.com/flutter/flutter/blob/master/CODE_OF_CONDUCT.md), follow the steps below
+to set up a development environment; if you stick around and contribute, you can
+[join the team](https://github.com/flutter/flutter/wiki/Contributor-access) and get commit access._
 
-> If you just want to test newest functionality, follow
-[beta testing guidance](https://github.com/flutter/devtools/blob/master/BETA_TESTING.md).
+> If you are here because you just want to test the bleeding-edge (unreleased) DevTools functionality,
+follow our [beta testing guidance](https://github.com/flutter/devtools/blob/master/BETA_TESTING.md).
+
+## Welcome
+
+We gladly accept contributions via GitHub pull requests! We encourage you to read the
+[Welcome](https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md#welcome) remarks in the Flutter
+framework's contributing guide, as all of that information applies to contributing to the `flutter/devtools`
+repo as well.
+
+We communicate primarily over GitHub and [Discord](https://github.com/flutter/flutter/wiki/Chat) on the
+[#hackers-devtools](https://discord.com/channels/608014603317936148/1106667330093723668) channel.
 
 Before contributing code:
 
@@ -14,141 +26,146 @@ Before contributing code:
 [Contributor License Agreement](https://cla.developers.google.com/clas).
 You can do this online, and it only takes a minute.
 
-2. Understand [coding agreements](packages/README.md).
+2. Review the [DevTools style guide](STYLE.md), which uses a combination of Dart and Flutter best practices.
 
-## Workflow for making changes
+## Table of contents
+1. [Developing for DevTools](#developing-for-devtools)
+	- [Set up your DevTools environment](#set-up-your-devtools-environment)
+	- [Workflow for making changes](#workflow-for-making-changes)
+	- [Keeping your fork in sync](#keeping-your-fork-in-sync)
+2. [Running and debugging DevTools](#running-and-debugging-devtools)
+    - [Frontend only (most common)](#frontend-only-most-common)
+    - [Frontend + DevTools server](#frontend--devtools-server)
+    - [DevTools + VS Code integration](#devtools--vs-code-integration-ide-embedded-devtools-experience)
+3. [Testing for DevTools](#testing-for-devtools)
+4. [Appendix](#appendix)
 
-- Change flutter to the latest flutter candidate:
-  `./tool/update_flutter_sdk.sh --local`
-- Create a branch from your cloned repo: `git checkout -b myBranch`
-- Ensure your branch, dependencies, and generated code are up to date: `devtools_tool sync`
-- Implement your changes
-- Commit work to your branch: `git commit -m “description”`
-- Push to your branch: `git push origin myBranch`
-- Navigate to the Pull Requests tab in the main [DevTools repo](https://github.com/flutter/devtools). You should see a popup to create a pull request from the branch in your cloned repo to DevTools master. Create a pull request.
+## Developing for DevTools
+
+### Set up your DevTools environment
+
+**Before setting up your DevTools environment**, please make sure you have
+[cloned the Flutter SDK from GitHub](https://docs.flutter.dev/get-started/install/macos#downloading-straight-from-github-instead-of-using-an-archive)
+and added the included `flutter` and `dart` executables to your `PATH` environment variable (see Flutter
+instructions for how to [update your PATH](https://docs.flutter.dev/get-started/install/macos#update-your-path)).
+
+Typing `which flutter` and `which dart` (or `where.exe flutter` and `where.exe dart` for Windows)
+into your terminal should print the path to the binaries from Flutter SDK you cloned from Github.
+
+1. [Fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo) the DevTools repo to your
+own Github account, and then clone it using SSH. If you haven't already, you may need to
+[generate a new SSH key](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh)
+to connect to Github with SSH.
+2. Make sure to [configure Git to keep your fork in sync](https://docs.github.com/en/get-started/quickstart/fork-a-repo#configuring-git-to-sync-your-fork-with-the-upstream-repository)
+with the upstream DevTools repo.
+3. Ensure that you have access to the `devtools_tool` executable by adding the `tool/bin` folder to your `PATH` environment variable:
+	- **MacOS Users**
+		- add the following to your `~/.bashrc` file, replacing `<DEVTOOLS_DIR>` with the local path to your DevTools repo:
+
+			```
+			export PATH=$PATH:<DEVTOOLS_DIR>/tool/bin
+			```
+	- **Windows Users**
+		- Open "Edit environment variables for your account" from Control Panel
+		- Locate the `Path` variable and click **Edit**
+		- Click the **New** button and paste in `<DEVTOOLS_DIR>/tool/bin`, replacing `<DEVTOOLS_DIR>`
+		with the local path to your DevTools repo.
+	
+	Explore the commands and helpers that the `devtools_tool` provides by running `devtools_tool -h`. 
+4. **Optional:** enable and activate DCM (Dart Code Metrics) - see the [DCM section below](#enable-and-activate-dcm-dart-code-metrics)
+
+#### Set up your IDE
+
+We recommend using VS Code for your DevTools development environment because this gives you
+access to some advanced development and configuration features. When you open DevTools in VS Code,
+open the `devtools/packages` directory in your VS Code workspace. This will give you access to a set
+of launch configurations for running and debugging DevTools:
+![VS Code launch configurations](_markdown_images/vs_code_launch_configurations.png)
+
+### Workflow for making changes
+
+1. Change your local Flutter SDK to the latest flutter candidate branch: `devtools_tool update-flutter-sdk --local`
+2. Create a branch from your cloned DevTools repo: `git checkout -b myBranch`
+3. Ensure your branch, dependencies, and generated code are up-to-date: `devtools_tool sync`
+4. Implement your changes, and commit to your branch: `git commit -m “description”`
+	- If your improvement is user-facing, document it in [NEXT_RELEASE_NOTES.md](packages/devtools_app/release_notes/NEXT_RELEASE_NOTES.md)
+	and include this edit as part of your PR.
+5. Push to your branch to GitHub: `git push origin myBranch`
+6. Navigate to the [Pull Requests](https://github.com/flutter/devtools/pulls) tab in the main
+[DevTools repo](https://github.com/flutter/devtools). You should see a popup to create a pull
+request from the branch in your cloned repo to the DevTools master branch. Create a pull request.
+	- **Running the Dart Code Metrics Github workflow:** any PRs that change Dart code require the
+	Dart Code Metrics workflow to be run before being submitted. To trigger the workflow, add the
+	label `run-dcm-workflow` to your PR. If you don't have permission to add the label, your
+	reviewer can add it for you.
+		- Any DCM errors will be caught by the workflow. Fix them and push up your changes. To trigger
+		the DCM workflow to run again, you will need to remove and then re-add the `run-dcm-workflow` label.
 
 ### Keeping your fork in-sync
 
-- Pull the code from the upstream DevTools, upgrade dependencies, and perform code generation: `devtools_tool sync`
+- If at any time you need to re-sync your branch, run:
+	```
+	devtools_tool sync
+	```
+	This will pull the latest code from the upstream DevTools, upgrade dependencies, and perform code generation.
 
-### Announcing your changes
+- If you want to upgrade dependencies and re-generate code (like mocks), but do not want to merge `upstream/master`, instead run
+	```
+	devtools_tool generate-code --upgrade
+	```
 
-If your improvement is user-facing, document it in
-[NEXT_RELEASE_NOTES.md](packages/devtools_app/release_notes/NEXT_RELEASE_NOTES.md).
+## Running and debugging DevTools
 
-## Development prep
+There are a few different environments that you may need to run DevTools in. After running DevTools
+in one of the environments below, connect to a test application to debug DevTools runtime tooling
+(the majority of DevTools tools). See the
+[Connect DevTools to a test application](#connect-devtools-to-a-test-application) section below.
 
-### Configure DevTools
+### Frontend only (most common)
 
-1. If you haven't already, follow the [instructions](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh) to generate a new SSH key and connect to Github with SSH
-2. Follow the [instructions](https://docs.github.com/en/get-started/quickstart/fork-a-repo) to fork the DevTools repo to your own Github account, and clone using SSH
-3. Make sure to [configure Git to keep your fork in sync](https://docs.github.com/en/get-started/quickstart/fork-a-repo#configuring-git-to-sync-your-fork-with-the-original-repository) with the main DevTools repo
-4. Ensure that you have access to the `devtools_tool` executable by adding the `tool/bin` folder to your `PATH` environment variable:
-  - **MacOS Users**
-    - add the following to your `~/.bashrc` file.
-    - `export PATH=$PATH:<DEVTOOLS_DIR>/tool/bin`
-      > [!NOTE]  
-      > Replace `<DEVTOOLS_DIR>` with the local path to your DevTools
-      > repo path.
-  - **Windows Users**
-    - Open "Edit environment variables for your account" from Control Panel
-    - Locate the `Path` variable and click **Edit**
-    - Click the **New** button and paste in `<DEVTOOLS_DIR>/tool/bin`
-      > [!NOTE]  
-      > Replace `<DEVTOOLS_DIR>` with the local path to your DevTools
-      > repo path.
-5. Finally, run `devtools_tool sync` to pull the code from the upstream DevTools, upgrade dependencies, and perform code generation.
+Most of the time, you will not need to run DevTools with the DevTools server to test your changes.
+You can run DevTools in debug mode as either a Flutter web or Flutter desktop app.
 
-### **[Optional]** Enable and activate DCM (Dart Code Metrics)
+> Note: though DevTools is shipped as a Flutter Web app, we recommend developing as a Flutter
+Desktop app whenever possible for a more efficient development workflow. Please see the
+[running on Flutter desktop](#running-devtools-on-flutter-desktop) section below for instructions.
 
-**Note:** Enabling and activating DCM is optional. When you open a PR, the CI bots will show you any DCM warnings introduced by your change which should be fixed before submitting.
+- To run DevTools as a Flutter web app **from VS Code**, run with the **devtools (packages)** configuration and the "Chrome" device
+	- To run with experiments enabled, run from VS Code with the **devtools + experiments (packages)** configuration
+- To run DevTools as a Flutter web app **from the command line**, run `flutter run -d chrome`
+	- To run with experiments enabled, add the flag `--dart-define=enable_experiments=true`
 
-**[Contributors who work at Google]** You can use the Google-purchased license key to activate DCM. See [go/dash-devexp-dcm-keys](http://goto.google.com/dash-devexp-dcm-keys).
-
-**[All other contributors]** Please follow instructions at <https://dcm.dev/pricing/>. You can either use the free tier of DCM, or purchase a team license. Note that the free tier doesn't support all the rules of the paid tier, so you will also need to consult the output of the [Dart Code Metrics workflow on Github](#running-the-dart-code-metrics-github-workflow) when you open your PR.
-
-To enable DCM:
-
-1. Install the executable for your target platform. You can refer to [this guide](https://dcm.dev/docs/teams/getting-started/#installation).
-2. [Get the license key](http://goto.google.com/dash-devexp-dcm-keys) and activate DCM. To do so, run `dcm activate --license-key=YOUR_KEY` from the console.
-3. Install the extension for your IDE. If you use VS Code, you can get it from [the marketplace](https://marketplace.visualstudio.com/items?itemName=dcmdev.dcm-vscode-extension). If you use IntelliJ IDEA or Android Studio, you can find the plugin [here](https://plugins.jetbrains.com/plugin/20856-dcm).
-4. Reload the IDE.
-
-**Note:** DCM issues can be distinguished from the Dart analyzer issues by their name: DCM rule names contain `-`. Some of the issues can be fixed via CLI, to do so, run `dcm fix` for any directory. To apply `dcm fix` on a file save in the IDE, refer to [this guide](https://dcm.dev/docs/teams/ide-integrations/vscode/#extension-capabilities).
-
-### Run a test application
-
-For working on most DevTools tools, a connection to a running Dart or Flutter app is required. To run Flutter gallery as your test app,
-run the following from a separate terminal:
-- `git clone https://github.com/flutter/gallery.git` (this is an existing application with many examples of Flutter widgets)
-- `cd gallery`
-- ensure your Flutter channel is the one required by the [gallery documentation](https://github.com/flutter/gallery#running-flutter-gallery-on-flutters-master-channel)
-- ensure the iOS Simulator or Android emulator is open (or a physical device is connected)
-- `flutter run`
-- copy the uri printed to the command output "A Dart VM Service on iPhone 14 Pro Max is available at: <copy-this-uri>". You will use this
-uri to connect to DevTools later
-
-## Development
-
-*NOTE:* Though DevTools is shipped as a Flutter Web app, we recommend developing as a Flutter Desktop app where possible for a more efficient development workflow. Please see the [Desktop Embedder] section below for instructions on running DevTools as a Flutter Desktop app.
-
-To pull the latest code from HEAD, upgrade dependencies and regenerate code, run:
-
-- `devtools_tool sync`
-
-To upgrade dependencies and regenerate code (after switching branches, for example):
-
-- `devtools_tool generate-code --upgrade`
-
-To run DevTools as a Flutter web app, with all experiments enabled, from the packages/devtools_app directory:
-
-- `flutter run -d chrome  --dart-define=enable_experiments=true`
-
-To test release performance:
-
-- `flutter run -d web-server --release --dart-define=FLUTTER_WEB_USE_SKIA=true`
-
-You can also use `-d headless-server`, which will start a headless server that serves the HTML
-files for the DevTools Flutter app.
-
-To connect to your running application, paste the earlier copied observatory URL into the section "Connect to a Running App" in DevTools.
-
-To enable all experiments by default when you are running with VS Code, add the following to your debugging configuration:
-
-```
-"args": [
-  "--dart-define=enable_experiments=true"
-]
-```
-
-## Development (DevTools server + DevTools Flutter web app)
+### Frontend + DevTools server
 
 To develop with a workflow that exercises the DevTools server <==> DevTools client connection,
-from the main devtools/ directory run:
+you will need to perform the following set up steps (first time only).
 
+1. Clone the [Dart SDK](https://github.com/dart-lang/sdk) fron GitHub.
+2. The `LOCAL_DART_SDK` environment variable needs to point to this path: `export LOCAL_DART_SDK=/path/to/dart/sdk`
+
+If you are also developing server side code (e.g. the `devtools_shared` package), you will need to add a
+dependency override to `sdk/pkg/dds/pubspec.yaml`.
+
+```yaml
+dependency_overrides:
+  devtools_shared:
+    path: relative/path/to/devtools/packages/devtools_shared
 ```
-export LOCAL_DART_SDK=/path/to/dart-sdk
+
+Then you can run DevTools with the server by running the following from the top-level `devtools` directory:
+```
 dart ./tool/build_e2e.dart
 ```
-* Note: the LOCAL_DART_SDK needs to point to a local checkout of [dart-sdk](https://github.com/dart-lang/sdk/tree/main)
-* Note: if you are also developing server side code, e.g. the devtools_shared package, add a devtools_shared path override to `<path-to-dart-sdk>/pkg/dds/pubspec.yaml`.
 
-That will:
-- start the devtools server
-- start an instance of `flutter run -d web-server` from the `packages/devtools_app` directory
-- proxy all web traffic the devtools server doesn't handle directly to the `flutter run`
-  development web server
+### DevTools + VS Code integration (IDE-embedded DevTools experience)
 
-You can then open a browser at the regular DevTools server URL (typically http://127.0.0.1:9100).
-When you make changes on disk, you can hit `r` in your command-line to rebuild the app, and
-refresh in your browser to see the changes. Hit `q` in the command line to terminate both the
-`flutter run` instance and the devtools server instance.
+To test the integration with VS Code, you can set up the Dart VS Code extension to run DevTools
+and the server from your local source code. Follow the
+[Frontend + DevTools server](#frontend--devtools-server) setup instructions above, and make sure
+you have version v3.47 or newer of the Dart extension for VS Code.
 
-## Development (VS Code Integration)
-
-To test integration with VS Code, you can instruct the Dart extension to run DevTools and the server from local code. You will need to have the Dart SDK source set up (see [dart-lang/sdk/CONTRIBUTING.md](https://github.com/dart-lang/sdk/blob/main/CONTRIBUTING.md#getting-the-code)) and you will need version v3.47 or newer of the Dart extension for VS Code.
-
-Open your VS Code settings (Run the **Preferences: Open User Settings (JSON)** command from the command palette (`F1`)) and add the following to your settings:
+Open your VS Code settings (Run the **Preferences: Open User Settings (JSON)** command from the
+command palette (`F1`)) and add the following to your settings:
 
 ```js
 "dart.customDevTools": {
@@ -160,122 +177,73 @@ Open your VS Code settings (Run the **Preferences: Open User Settings (JSON)** c
 },
 ```
 
-This instructs VS Code to run the `tool/build_e2e.dart` script instead of running `dart devtools`. You must set the `cwd` and `LOCAL_DART_SDK` env variable correctly for the script to work.
+This instructs VS Code to run the `tool/build_e2e.dart` script instead of running `dart devtools`.
+You must set the `cwd` and `LOCAL_DART_SDK` env variable correctly for the script to work.
 
-Next, restart VS Code (or run the **Developer: Reload Window** command from the command palette (`F1`)) and DevTools will be run from your local code. After making any code changes to DevTools or the server, you will need to re-run the **Developer: Reload Window** command to rebuild and restart the server.
+Next, restart VS Code (or run the **Developer: Reload Window** command from the command palette (`F1`))
+and DevTools will be run from your local source code. After making any code changes to DevTools or the
+server, you will need to re-run the **Developer: Reload Window** command to rebuild and restart the server.
 
-### Running with Flutter Desktop
+## Testing for DevTools
 
-You can also run DevTools using the Flutter desktop embedder on linux or macos. Some DevTools features only work on the web, like the embedded Perfetto trace viewer or DevTools analytics, but the limitations on the desktop app are few.
+Please see [TESTING.md](TESTING.md) for guidance on running and writing tests.
 
-The advantage of developing with the desktop embedder is that you can use hot reload to speed up your development cycle.
+## Appendix
+
+### Connect DevTools to a test application
+
+For working on most DevTools tools, a connection to a running Dart or Flutter app is required. Run any Dart of Flutter app of your choice to
+connect it to DevTools. Consider running the [Flutter gallery](https://github.com/flutter/gallery#running) app, as it has plenty of interesting
+code to debug.
+1. Run your Dart or Flutter app
+	> Note: some DevTools features may be unavailable depending on the test app platform (Flutter native, Flutter web, Dart CLI, etc.) or run mode
+	(debug, profile) you choose.
+2. Copy the URI printed to the command line (you will use this uri to connect to DevTools) 
+
+	```
+	"A Dart VM Service on iPhone 14 Pro Max is available at: <copy-this-uri>"
+	```
+3. Paste this URI into the connect dialog in DevTools and click "Connect"
+
+	![Connect dialog example](_markdown_images/connect_dialog_example.png)
+
+### Running DevTools on Flutter Desktop
+
+For a faster development cycle with hot reload, you can run DevTools on Flutter desktop. Some DevTools
+features only work on the web, like the embedded Perfetto trace viewer, DevTools extensions, or DevTools
+analytics, but the limitations on the desktop app are few.
 
 To run DevTools with the desktop embedder, you can run with either of the following from `devtools/packages/devtools_app`:
 
 - `flutter run -d macos`
 - `flutter run -d linux`
 
-If this  fails, you may need to run `flutter create .` from `devtools/packages/devtools_app` to generate the updated files for your platform.
+If this fails, you may need to run `flutter create .` from `devtools/packages/devtools_app` to generate
+the updated files for your platform. If you want to run DevTools on Flutter desktop for Windows, you will
+need to generate the files for this platform using the same command, and then run using `flutter run -d windows`.
 
-## Developing with VS Code
+### Enable and activate DCM (Dart Code Metrics)
 
-### DevTools Web
+Enabling and activating DCM is optional. When you open a PR, the CI bots will show you any DCM warnings introduced
+by your change which should be fixed before submitting.
 
-If you're using VS Code to work on DevTools you can run DevTools from the editor
-using the VS Code tasks without having to run in a terminal window:
+- **Contributors who work at Google:** you can use the Google-purchased license key to activate DCM.
+See [go/dash-devexp-dcm-keys](http://goto.google.com/dash-devexp-dcm-keys).
 
-- Open the root of the repository in VS Code
-- Press `F5`
+- **All other contributors:** please follow instructions at <https://dcm.dev/pricing/>. You can either use the free tier of DCM, or purchase a team license. Note that the free tier doesn't support all the rules of the paid tier, so you will also need to consult the output of the [Dart Code Metrics workflow on Github](#running-the-dart-code-metrics-github-workflow) when you open your PR.
 
-This will serve the application in the background and launch Google Chrome. Subsequent
-launches will just re-launch the browser since the task remains running in the background
-and rebuilding as necessary.
+To enable DCM:
 
-## Automated Testing
+1. Install the executable for your target platform. You can refer to [this guide](https://dcm.dev/docs/teams/getting-started/#installation).
+2. [Get the license key](http://goto.google.com/dash-devexp-dcm-keys) and activate DCM. To do so, run `dcm activate --license-key=YOUR_KEY` from the console.
+3. Install the extension for your IDE. If you use VS Code, you can get it from [the marketplace](https://marketplace.visualstudio.com/items?itemName=dcmdev.dcm-vscode-extension). If you use IntelliJ IDEA or Android Studio, you can find the plugin [here](https://plugins.jetbrains.com/plugin/20856-dcm).
+4. Reload the IDE.
 
-### Running tests
+>Note:  DCM issues can be distinguished from the Dart analyzer issues by their name: DCM rule names contain `-`. Some of the issues can be fixed via CLI, to do so, run `dcm fix` for any directory. To apply `dcm fix` on a file save in the IDE, refer to [this guide](https://dcm.dev/docs/teams/ide-integrations/vscode/#extension-capabilities).
 
-Before running tests, make sure your Flutter SDK matches the version that will be used on
-the bots. To update your local flutter version, run:
+### third_party dependencies
 
-```
-./tool/update_flutter_sdk.sh --local
-
-```
-
-Now you can proceed with running DevTools tests:
-
-```
-cd packages/devtools_app
-flutter test -j1
-```
-
-The flag `-j1` tells Flutter to run tests with 1 concurrent test runner. If your test run does
-not include the directory `devtools_app/test/integration_tests`, then you do not need to include
-this flag.
-
-### Updating golden files
-
-**Note: golden images should only be generated on MacOS.**
-
-Golden image tests will fail for one of three reasons:
-
-1) The UI has been _intentionally_ modified.
-2) Something changed in the Flutter framework that would cause downstream changes for our tests.
-3) The UI has been _unintentionally_ modified, in which case we should not accept the changes.
-
-For valid golden image updates (1 and 2 above), the failing golden tests will need to be ran
-with the `--update-goldens` flag.
-
-Before updating the goldens, ensure your version of Flutter matches the version of Flutter that
-will be used on the bots. To update your local flutter version, run:
-
-```
-./tool/update_flutter_sdk.sh --local
-```
-
-Now you can proceed with updating the goldens:
-
-```
-flutter test <path/to/my/test> --update-goldens
-```
-
-To update goldens for all tests, run:
-```
-flutter test test/ --update-goldens
-```
-
-## Opening a PR
-
-### Running the Dart Code Metrics Github workflow
-
-Any PRs that change Dart code require the Dart Code Metrics workflow to be run before being submitted. To trigger the workflow, add the
-label `run-dcm-workflow` to your PR. If you don't have permission to add the label, your reviewer can add it for you.
-
-Any DCM errors will be caught by the workflow. Fix them and push up your changes. To trigger the DCM workflow to run again, you will
-need to remove and then re-add the `run-dcm-workflow` label.
-
-## Manual Testing
-
-To explore DevTools with all experimental features enabled:
-
-1. [Configure](https://docs.flutter.dev/get-started/install) Dart or Flutter.
-
-2. Start DevTools:
-```
-git clone git@github.com:flutter/devtools.git
-./devtools/tool/update_flutter_sdk.sh
-cd devtools/packages/devtools_app
-../../tool/flutter-sdk/bin/flutter run -d chrome --dart-define=enable_experiments=true
-```
-
-3. Paste URL of your application (for example [Gallery](#connect-to-application)) to the connection textbox.
-
-## third_party dependencies
-
-All content not authored by the Flutter team must go in the third_party
-directory. As an expedient to make the third_party code work well with our build scripts,
-code in third_party should be given a stub pubspec.yaml file so that you can
-reference the resources from the packages directory from
-`packages/devtools_app/web/index.html`
-
+All content not authored by the Flutter team (which includes both sponsored and open-source contributors)
+must go in the `third_party` directory. As an expedient to make the `third_party` code work well with our
+build scripts, code in `third_party` should be given a stub `pubspec.yaml` file so that you can reference
+the resources from the packages directory from `packages/devtools_app/web/index.html`
