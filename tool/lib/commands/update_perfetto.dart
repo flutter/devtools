@@ -63,7 +63,7 @@ class UpdatePerfettoCommand extends Command {
       logStatus(
         'copying content from $buildLocation to $perfettoUiCompiledLibPath',
       );
-      await copyPath(buildLocation, perfettoUiCompiledLibPath);
+      await copyPath(buildLocation, perfettoUiCompiledBuildPath);
     } else {
       logStatus('cloning Perfetto from HEAD and building from source');
       final tempPerfettoClone =
