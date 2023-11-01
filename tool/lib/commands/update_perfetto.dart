@@ -97,17 +97,17 @@ class UpdatePerfettoCommand extends Command {
 
     logStatus('deleting unnecessary js source map files from build');
     final deleteMatchers = [
-      '.js.map',
-      'traceconv.wasm',
-      'traceconv_bundle.js',
-      'catapult_trace_viewer.*',
-      'rec_*.png',
+      RegExp(r'\.js\.map'),
+      RegExp(r'traceconv\.wasm'),
+      RegExp(r'traceconv_bundle\.js'),
+      RegExp(r'catapult_trace_viewer\..*'),
+      RegExp(r'rec_.*\.png'),
     ];
     final libDirectory = Directory(perfettoUiCompiledLib);
     final libFiles = libDirectory.listSync();
     for (final file in libFiles) {
       if (deleteMatchers
-          .any((matcher) => RegExp(r'' + matcher).hasMatch(matcher))) {
+          .any((matcher) => matcher.hasMatch(file.path))) {
         logStatus('deleting ${file.path}');
         file.deleteSync();
       }
