@@ -72,12 +72,17 @@ class BuildReleaseCommand extends Command {
       workingDirectory: repo.devtoolsAppDirectoryPath,
     );
 
-    final canvaskitDir = Directory(
-      path.join(repo.devtoolsAppDirectoryPath, 'build', 'web', 'canvaskit'),
-    );
-    for (final file in canvaskitDir.listSync()) {
-      if (RegExp(r'canvaskit\..*').hasMatch(file.path)) {
-        await processManager.runProcess(CliCommand('chmod 0755 ${file.path}'));
+    // TODO(kenz): investigate if we need to perform a windows equivalent of
+    // `chmod` or if we even need to perform `chmod` for linux / mac anymore.
+    if (!Platform.isWindows) {
+      final canvaskitDir = Directory(
+        path.join(repo.devtoolsAppDirectoryPath, 'build', 'web', 'canvaskit'),
+      );
+      for (final file in canvaskitDir.listSync()) {
+        if (RegExp(r'canvaskit\..*').hasMatch(file.path)) {
+          await processManager
+              .runProcess(CliCommand('chmod 0755 ${file.path}'));
+        }
       }
     }
   }
