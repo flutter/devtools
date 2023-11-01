@@ -53,12 +53,8 @@ class BuildReleaseCommand extends Command {
     }
 
     if (updatePerfetto) {
-      logStatus(
-        'skipping updating the bundled Perfetto assets'
-        '(https://github.com/flutter/devtools/issues/6324)',
-      );
-      // TODO(kenz): call `devtools_tool update-perfetto` once the
-      // tool/update_perfetto.sh script is converted to a Dart script.
+      logStatus('updating the bundled Perfetto assets');
+      await processManager.runProcess(CliCommand.tool('update-perfetto'));
     }
 
     logStatus('building DevTools in release mode');

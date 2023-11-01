@@ -219,3 +219,9 @@ extension CommandExtension on Command {
     print('[$name] $log');
   }
 }
+
+extension JoinExtension on List<String> {
+  String joinWithNewLine() {
+    return '${join('\n')}\n';
+  }
+}
