@@ -5,12 +5,12 @@
 import 'dart:io';
 
 const argNoBuildApp = '--no-build-app';
-const argNoUpdateFlutter = '--no-update-flutter';
+const argUseLocalFlutter = '--use-local-flutter';
 const argUpdatePerfetto = '--update-perfetto';
 
 /// This script builds DevTools in release mode by running the
-/// `./tool/build_release.sh` script and then serves DevTools with a locally
-/// running DevTools server.
+/// `devtools_tool build-release` command and then serves DevTools with a
+/// locally running DevTools server.
 ///
 /// If [argNoBuildApp] is present, the DevTools web app will not be rebuilt.
 ///
@@ -23,12 +23,12 @@ const argUpdatePerfetto = '--update-perfetto';
 /// DevTools build process (e.g. running `devtools_tool build-release`).
 void main(List<String> args) async {
   final shouldUpdatePerfetto = args.contains(argUpdatePerfetto);
-  final noUpdateFlutter = args.contains(argNoUpdateFlutter);
+  final noUpdateFlutter = args.contains(argUseLocalFlutter);
   final noBuildApp = args.contains(argNoBuildApp);
 
   final argsCopy = List.of(args)
     ..remove(argUpdatePerfetto)
-    ..remove(argNoUpdateFlutter)
+    ..remove(argUseLocalFlutter)
     ..remove(argNoBuildApp);
 
   final mainDevToolsDirectory = Directory.current;
@@ -48,12 +48,13 @@ void main(List<String> args) async {
       '${mainDevToolsDirectory.path}/packages/devtools_app/build/web';
 
   if (!noBuildApp) {
-    print('Running the build_release.sh script...');
+    print('Building DevTools in release mode...');
     final buildProcess = await Process.start(
-      './tool/build_release.sh',
+      'devtools_tool',
       [
+        'build-release',
         if (shouldUpdatePerfetto) argUpdatePerfetto,
-        if (noUpdateFlutter) argNoUpdateFlutter,
+        if (noUpdateFlutter) argUseLocalFlutter,
       ],
       workingDirectory: mainDevToolsDirectory.path,
     );
@@ -61,7 +62,7 @@ void main(List<String> args) async {
     final buildProcessExitCode = await buildProcess.exitCode;
     if (buildProcessExitCode == 1) {
       throw Exception(
-        'Something went wrong while running `tool/build_release.sh.',
+        'Something went wrong while running `devtools_tool build-release',
       );
     }
     print('Completed building DevTools: $devToolsBuildLocation');
