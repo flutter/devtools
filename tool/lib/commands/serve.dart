@@ -81,7 +81,7 @@ class ServeCommand extends Command {
     final localDartSdkLocation = Platform.environment['LOCAL_DART_SDK'];
     if (localDartSdkLocation == null) {
       throw Exception('LOCAL_DART_SDK environment variable not set. Please add '
-          'the following to your \'.bash_profile\' or \'.bash_rc\' file:\n'
+          'the following to your \'.bash_profile\' or \'.bashrc\' file:\n'
           'export LOCAL_DART_SDK=<absolute/path/to/my/dart/sdk>');
     }
 
