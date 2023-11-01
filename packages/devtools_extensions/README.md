@@ -113,16 +113,16 @@ In `lib/main.dart`, place a `DevToolsExtension` widget at the root of your app:
 import 'package:devtools_extensions/devtools_extensions.dart';
 
 void main() {
-  runApp(const FooPackageDevToolsExtension());
+  runApp(const FooDevToolsExtension());
 }
 
-class FooPackageDevToolsExtension extends StatelessWidget {
-  const FooPackageDevToolsExtension({super.key});
+class FooDevToolsExtension extends StatelessWidget {
+  const FooDevToolsExtension({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const DevToolsExtension(
-      child: FooDevToolsExtension(),
+      child: Placeholder(),
     );
   }
 }
@@ -159,7 +159,7 @@ file in VS code:
         ...
         {
             "name": "foo_devtools_extension + simulated environment",
-            "program": "foo/extension/foo_devtools_extension/lib/main.dart",
+            "cwd": "packages/foo_devtools_extension",
             "request": "launch",
             "type": "dart",
             "args": [
@@ -185,11 +185,13 @@ real DevTools environment. Build your flutter web app and copy the built assets 
 
 Use the `build_extension` command from `package:devtools_extensions` to help with this step.
 ```sh
-cd your_extension_web_app &&
-flutter pub get &&
-dart run devtools_extensions build_and_copy \
-  --source=. \
-  --dest=path/to/your_pub_package/extension/devtools 
+cd your_extension_web_app
+```
+```sh
+flutter pub get
+```
+```sh
+dart run devtools_extensions build_and_copy --source=. --dest=path/to/your_pub_package/extension/devtools 
 ```
 
 2. Prepare and run a test application that depends on your pub package. You'll need to change the

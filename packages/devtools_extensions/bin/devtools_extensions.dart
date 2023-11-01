@@ -9,5 +9,5 @@ void main(List<String> arguments) async {
   final command = BuildExtensionCommand();
   final runner = CommandRunner('devtools_extensions', command.description)
     ..addCommand(BuildExtensionCommand());
-  await runner.run(arguments);
+  await runner.run(arguments).whenComplete(sharedStdIn.terminate);
 }
