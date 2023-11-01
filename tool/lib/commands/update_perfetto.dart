@@ -106,8 +106,7 @@ class UpdatePerfettoCommand extends Command {
     final libDirectory = Directory(perfettoUiCompiledLib);
     final libFiles = libDirectory.listSync();
     for (final file in libFiles) {
-      if (deleteMatchers
-          .any((matcher) => matcher.hasMatch(file.path))) {
+      if (deleteMatchers.any((matcher) => matcher.hasMatch(file.path))) {
         logStatus('deleting ${file.path}');
         file.deleteSync();
       }
@@ -117,7 +116,7 @@ class UpdatePerfettoCommand extends Command {
       'moving DevTools-Perfetto integration files back from the temp directory',
     );
     Directory(path.join(perfettoUiCompiledLib, 'dist', 'devtools'))
-        .createSync();
+        .createSync(recursive: true);
     await copyPath(tempPerfettoDevTools.path, perfettoDevToolsPath);
 
     logStatus(
