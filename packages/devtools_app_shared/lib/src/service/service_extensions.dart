@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/services.dart';
 
 class ServiceExtension<T> {
   ServiceExtension({
@@ -217,8 +216,10 @@ final trackRebuildWidgets = ToggleableServiceExtension<bool>(
 );
 
 final profilePlatformChannels = ToggleableServiceExtension<bool>(
-  extension:
-      '$flutterExtensionPrefix${ServicesServiceExtensions.profilePlatformChannels.name}',
+  // TODO(kenz): use ${ServicesServiceExtensions.profilePlatformChannels.name}
+  // once this enum value has existed on Flutter stable for a reasonable amount
+  // of time (6 months, or June 2024).
+  extension: '${flutterExtensionPrefix}profilePlatformChannels',
   enabledValue: true,
   disabledValue: false,
 );

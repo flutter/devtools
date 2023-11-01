@@ -200,8 +200,8 @@ source code. Once you have done this, run `pub get`, and run the application.
     * **If you need local or unreleased changes from DevTools**, you'll need to build and run DevTools
     from source. See the DevTools [CONTRIBUTING.md]() for a guide on how to do this.
         > Note: you'll need to build DevTools with the server and the front end to test extensions - see
-        [instructions](https://github.com/flutter/devtools/blob/master/CONTRIBUTING.md#development-devtools-server--devtools-flutter-web-app).
-    * **If not, and if your local Dart or Flutter SDK version is >= `<TODO: insert version>`**,
+        > [instructions](https://github.com/flutter/devtools/blob/master/CONTRIBUTING.md#development-devtools-server--devtools-flutter-web-app).
+    * **If not, and if your local Dart or Flutter SDK version is >= 3.16.0-0.1.pre**,
     you can launch the DevTools instance that was just started by running your app (either from
     a url printed to command line or from the IDE where you ran your test app). You can also run
     `dart devtools` from the command line.

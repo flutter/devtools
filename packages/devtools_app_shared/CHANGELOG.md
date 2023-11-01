@@ -1,4 +1,6 @@
 ## 0.0.7
+* Soften breaking change from 0.0.6 to add the `profilePlatformChannels` service extension,
+improving backwards compatibility for older versions of Flutter.
 * Bump the `devtools_shared` dependency to ^5.0.0
 * Remove public getter `libraryRef`, and public methods `getLibrary` and `retrieveFullValueAsString` from `EvalOnDartLibrary`.
 * Change `toString` output for `UnknownEvalException`, `EvalSentinelException`, and `EvalErrorException`.
