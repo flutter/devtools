@@ -3,7 +3,8 @@ The `config.yaml` file for a DevTools extension must follow the format below.
 ## Required fields
 
 - `name` : the package name that this DevTools extension belongs to. The value of this field
-will be used in the extension page title bar. This name should not contain spaces or special characters.
+will be used in the extension page title bar. This name should contain only lowercase letters
+and underscores (no spaces or special characters like `'` or `.`).
 - `issueTracker`: the url for the extension's issue tracker. When a user clicks the “Report an 
 issue” link in the DevTools UI, they will be directed to this url.
 - `version`: the version of the DevTools extension. This version number should evolve over time 

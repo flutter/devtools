@@ -5,26 +5,6 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "foo_devtools_extension",
-            "cwd": "packages/foo_devtools_extension",
-            "request": "launch",
-            "type": "dart"
-        },
-        {
-            "name": "foo_devtools_extension (profile mode)",
-            "cwd": "packages/foo_devtools_extension",
-            "request": "launch",
-            "type": "dart",
-            "flutterMode": "profile",
-        },
-        {
-            "name": "foo_devtools_extension (release mode)",
-            "cwd": "packages/foo_devtools_extension",
-            "request": "launch",
-            "type": "dart",
-            "flutterMode": "release",
-        },
-        {
             "name": "foo_devtools_extension + simulated environment",
             "cwd": "packages/foo_devtools_extension",
             "request": "launch",
