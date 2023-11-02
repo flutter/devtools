@@ -237,7 +237,7 @@ class VmServiceWrapper extends VmService {
   // Begin Dart IO extension method wrappers. We wrap these methods so that we
   // can override them in tests.
 
-  Future<bool> isSocketProfilingAvailableWrapper(String isolateId) async {
+  Future<bool> isSocketProfilingAvailableWrapper(String isolateId) {
     return isSocketProfilingAvailable(isolateId);
   }
 
