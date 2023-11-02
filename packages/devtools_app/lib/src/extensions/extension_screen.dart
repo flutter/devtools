@@ -55,9 +55,7 @@ class _ExtensionScreenBodyState extends State<_ExtensionScreenBody> {
 
   void _init() {
     ga.screen(
-      gac.DevToolsExtensionEvents.extensionScreenName(
-        widget.extensionConfig.name,
-      ),
+      gac.DevToolsExtensionEvents.extensionScreenName(widget.extensionConfig),
     );
     extensionController =
         createEmbeddedExtensionController(widget.extensionConfig)..init();

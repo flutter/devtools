@@ -21,34 +21,36 @@ enum DevToolsExtensionEvents {
   embeddedExtension;
 
   /// Event sent via [ga.screen] when an extension screen is opened.
-  static String extensionScreenName(String name) => 'extension-$name';
+  static String extensionScreenName(DevToolsExtensionConfig ext) => 'extension-${_extensionName(ext)}';
 
   /// Event sent when a user clicks the "Report an issue" link on an extension
   /// screen.
-  static String extensionFeedback(String name) => 'extensionFeedback-$name';
+  static String extensionFeedback(DevToolsExtensionConfig ext) => 'extensionFeedback-${_extensionName(ext)}';
 
   /// Event sent when an extension is enabled because a user manually enabled
   /// it from the extensions settings menu.
-  static String extensionEnableManual(String name) =>
-      'extensionEnable-manual-$name';
+  static String extensionEnableManual(DevToolsExtensionConfig ext) =>
+      'extensionEnable-manual-${_extensionName(ext)}';
 
   /// Event sent when an extension is enabled because a user answered the
   /// enablement prompt with "Enable".
-  static String extensionEnablePrompt(String name) =>
-      'extensionEnable-prompt-$name';
+  static String extensionEnablePrompt(DevToolsExtensionConfig ext) =>
+      'extensionEnable-prompt-${_extensionName(ext)}';
 
   /// Event sent when an extension is disabled because a user manually disabled
   /// it from the [DisableExtensionDialog] or the main extensions settings menu.
-  static String extensionDisableManual(String name) =>
-      'extensionDisable-manual-$name';
+  static String extensionDisableManual(DevToolsExtensionConfig ext) =>
+      'extensionDisable-manual-${_extensionName(ext)}';
 
   /// Event sent when an extension is disabled because a user answered the
   /// enablement prompt with "No, hide this sceen".
-  static String extensionDisablePrompt(String name) =>
-      'extensionDisable-prompt-$name';
+  static String extensionDisablePrompt(DevToolsExtensionConfig ext) =>
+      'extensionDisable-prompt-${_extensionName(ext)}';
 
   /// Event sent when an extension is force reloaded from the extension screen
   /// context menu.
-  static String extensionForceReload(String name) =>
-      'extensionForceReload-$name';
+  static String extensionForceReload(DevToolsExtensionConfig ext) =>
+      'extensionForceReload-${_extensionName(ext)}';
 }
+
+String _extensionName(DevToolsExtensionConfig ext) => ext.gaName;

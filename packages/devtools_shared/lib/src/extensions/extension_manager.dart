@@ -78,6 +78,8 @@ class ExtensionsManager {
       }
       for (final extension in extensions) {
         final config = extension.config;
+        final isPublic =
+            extension.rootUri.path.contains(path.join('.pub-cache', 'hosted'));
         // This should be relative to the 'extension/devtools/' directory and
         // defaults to 'build';
         final relativeExtensionLocation =
@@ -93,6 +95,7 @@ class ExtensionsManager {
           final extensionConfig = DevToolsExtensionConfig.parse({
             ...config,
             DevToolsExtensionConfig.pathKey: location,
+            DevToolsExtensionConfig.isPublicKey: isPublic,
           });
           devtoolsExtensions.add(extensionConfig);
         } on StateError catch (e) {

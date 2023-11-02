@@ -13,6 +13,7 @@ class DevToolsExtensionConfig implements Comparable {
     required this.issueTrackerLink,
     required this.version,
     required this.materialIconCodePoint,
+    required this.isPublic,
   });
 
   factory DevToolsExtensionConfig.parse(Map<String, Object?> json) {
@@ -33,6 +34,7 @@ class DevToolsExtensionConfig implements Comparable {
           pathKey: final String path,
           issueTrackerKey: final String issueTracker,
           versionKey: final String version,
+          isPublicKey: final bool isPublic,
         }) {
       return DevToolsExtensionConfig._(
         name: name,
@@ -40,6 +42,7 @@ class DevToolsExtensionConfig implements Comparable {
         issueTrackerLink: issueTracker,
         version: version,
         materialIconCodePoint: codePoint,
+        isPublic: isPublic,
       );
     } else {
       const requiredKeys = {nameKey, pathKey, issueTrackerKey, versionKey};
@@ -71,6 +74,7 @@ class DevToolsExtensionConfig implements Comparable {
   static const issueTrackerKey = 'issueTracker';
   static const versionKey = 'version';
   static const materialIconCodePointKey = 'materialIconCodePoint';
+  static const isPublicKey = 'isPublic';
 
   /// The package name that this extension is for.
   final String name;
@@ -104,7 +108,13 @@ class DevToolsExtensionConfig implements Comparable {
   /// See https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/material/icons.dart.
   final int materialIconCodePoint;
 
+  /// Whether this extension is distrubuted in a public package on pub.dev.
+  final bool isPublic;
+
   String get displayName => name.toLowerCase();
+
+  /// The extension name that will be used in analytics.
+  String get gaName => isPublic ? name : 'private';
 
   Map<String, Object?> toJson() => {
         nameKey: name,
@@ -112,6 +122,7 @@ class DevToolsExtensionConfig implements Comparable {
         issueTrackerKey: issueTrackerLink,
         versionKey: version,
         materialIconCodePointKey: materialIconCodePoint,
+        isPublicKey: isPublic,
       };
 
   @override
@@ -132,7 +143,8 @@ class DevToolsExtensionConfig implements Comparable {
         other.path == path &&
         other.issueTrackerLink == issueTrackerLink &&
         other.version == version &&
-        other.materialIconCodePoint == materialIconCodePoint;
+        other.materialIconCodePoint == materialIconCodePoint &&
+        other.isPublic == isPublic;
   }
 
   @override
@@ -142,6 +154,7 @@ class DevToolsExtensionConfig implements Comparable {
         issueTrackerLink,
         version,
         materialIconCodePoint,
+        isPublic,
       );
 }
 
