@@ -364,67 +364,65 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
     return _classList ?? ClassList(classes: []);
   }
 
-  // TODO(kenz): fix up this fake before landing.
+  @override
+  Future<bool> isSocketProfilingAvailableWrapper(String isolateId) {
+    return Future.value(true);
+  }
 
-  // @override
-  // Future<bool> isSocketProfilingAvailable(String isolateId) {
-  //   return Future.value(true);
-  // }
+  @override
+  Future<SocketProfilingState> socketProfilingEnabledWrapper(
+    String isolateId, [
+    bool? enabled,
+  ]) {
+    if (enabled != null) {
+      return Future.value(SocketProfilingState(enabled: enabled));
+    }
+    return Future.value(
+      SocketProfilingState(enabled: socketProfilingEnabledResult),
+    );
+  }
 
-  // @override
-  // Future<SocketProfilingState> socketProfilingEnabled(
-  //   String isolateId, [
-  //   bool? enabled,
-  // ]) {
-  //   if (enabled != null) {
-  //     return Future.value(SocketProfilingState(enabled: enabled));
-  //   }
-  //   return Future.value(
-  //     SocketProfilingState(enabled: socketProfilingEnabledResult),
-  //   );
-  // }
+  @override
+  Future<Success> clearSocketProfileWrapper(String isolateId) async {
+    _socketProfile?.sockets.clear();
+    return Future.value(Success());
+  }
 
-  // @override
-  // Future<Success> clearSocketProfile(String isolateId) async {
-  //   _socketProfile?.sockets.clear();
-  //   return Future.value(Success());
-  // }
+  @override
+  Future<SocketProfile> getSocketProfileWrapper(String isolateId) {
+    return Future.value(_socketProfile ?? SocketProfile(sockets: []));
+  }
 
-  // @override
-  // Future<SocketProfile> getSocketProfile(String isolateId) {
-  //   return Future.value(_socketProfile ?? SocketProfile(sockets: []));
-  // }
+  void restoreFakeSockets() {
+    _socketProfile = SocketProfile(sockets: _startingSockets);
+  }
 
-  // void restoreFakeSockets() {
-  //   _socketProfile = SocketProfile(sockets: _startingSockets);
-  // }
+  @override
+  Future<HttpProfileRequest> getHttpProfileRequestWrapper(
+    String isolateId,
+    String id,
+  ) async {
+    final httpProfile = await getHttpProfile(isolateId);
+    return Future.value(
+      httpProfile.requests.firstWhere((request) => request.id == id),
+    );
+  }
 
-  // @override
-  // Future<bool> isHttpProfilingAvailable(String isolateId) => Future.value(true);
+  @override
+  Future<HttpProfile> getHttpProfileWrapper(
+    String isolateId, {
+    int? updatedSince,
+  }) {
+    return Future.value(
+      _httpProfile ?? HttpProfile(requests: [], timestamp: 0),
+    );
+  }
 
-  // @override
-  // Future<HttpProfileRequest> getHttpProfileRequest(
-  //   String isolateId,
-  //   String id,
-  // ) async {
-  //   final httpProfile = await getHttpProfile(isolateId);
-  //   return Future.value(
-  //     httpProfile.requests.firstWhere((request) => request.id == id),
-  //   );
-  // }
-
-  // @override
-  // Future<HttpProfile> getHttpProfile(String isolateId, {int? updatedSince}) {
-  //   return Future.value(
-  //     _httpProfile ?? HttpProfile(requests: [], timestamp: 0),
-  //   );
-  // }
-
-  // @override
-  // Future<Success> clearHttpProfile(String isolateId) {
-  //   _httpProfile?.requests.clear();
-  //   return Future.value(Success());
-  // }
+  @override
+  Future<Success> clearHttpProfileWrapper(String isolateId) {
+    _httpProfile?.requests.clear();
+    return Future.value(Success());
+  }
 
   void restoreFakeHttpProfileRequests() {
     _httpProfile = HttpProfile(requests: _startingRequests, timestamp: 0);
@@ -433,22 +431,22 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   @override
   Future<Success> clearCpuSamples(String isolateId) => Future.value(Success());
 
-  // @override
-  // Future<bool> isHttpTimelineLoggingAvailable(String isolateId) =>
-  //     Future.value(isHttpProfilingAvailableResult);
+  @override
+  Future<bool> isHttpTimelineLoggingAvailableWrapper(String isolateId) =>
+      Future.value(isHttpProfilingAvailableResult);
 
-  // @override
-  // Future<HttpTimelineLoggingState> httpEnableTimelineLogging(
-  //   String isolateId, [
-  //   bool? enabled,
-  // ]) async {
-  //   if (enabled != null) {
-  //     return Future.value(HttpTimelineLoggingState(enabled: enabled));
-  //   }
-  //   return Future.value(
-  //     HttpTimelineLoggingState(enabled: httpEnableTimelineLoggingResult),
-  //   );
-  // }
+  @override
+  Future<HttpTimelineLoggingState> httpEnableTimelineLoggingWrapper(
+    String isolateId, [
+    bool? enabled,
+  ]) async {
+    if (enabled != null) {
+      return Future.value(HttpTimelineLoggingState(enabled: enabled));
+    }
+    return Future.value(
+      HttpTimelineLoggingState(enabled: httpEnableTimelineLoggingResult),
+    );
+  }
 
   @override
   Future<SourceReport> getSourceReport(

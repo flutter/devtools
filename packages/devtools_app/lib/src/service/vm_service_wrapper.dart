@@ -234,6 +234,59 @@ class VmServiceWrapper extends VmService {
     return fallbackStream;
   }
 
+  // Begin Dart IO extension method wrappers. We wrap these methods so that we
+  // can override them in tests.
+
+  Future<bool> isSocketProfilingAvailableWrapper(String isolateId) async {
+    return isSocketProfilingAvailable(isolateId);
+  }
+
+  Future<SocketProfilingState> socketProfilingEnabledWrapper(
+    String isolateId, [
+    bool? enabled,
+  ]) async {
+    return socketProfilingEnabled(isolateId, enabled);
+  }
+
+  Future<Success> clearSocketProfileWrapper(String isolateId) async {
+    return clearSocketProfile(isolateId);
+  }
+
+  Future<SocketProfile> getSocketProfileWrapper(String isolateId) async {
+    return getSocketProfile(isolateId);
+  }
+
+  Future<HttpProfileRequest> getHttpProfileRequestWrapper(
+    String isolateId,
+    String id,
+  ) async {
+    return getHttpProfileRequest(isolateId, id);
+  }
+
+  Future<HttpProfile> getHttpProfileWrapper(
+    String isolateId, {
+    int? updatedSince,
+  }) async {
+    return getHttpProfile(isolateId, updatedSince: updatedSince);
+  }
+
+  Future<Success> clearHttpProfileWrapper(String isolateId) async {
+    return clearHttpProfile(isolateId);
+  }
+
+  Future<bool> isHttpTimelineLoggingAvailableWrapper(String isolateId) async {
+    return isHttpTimelineLoggingAvailable(isolateId);
+  }
+
+  Future<HttpTimelineLoggingState> httpEnableTimelineLoggingWrapper(
+    String isolateId, [
+    bool? enabled,
+  ]) async {
+    return httpEnableTimelineLogging(isolateId, enabled);
+  }
+
+  // End Dart IO extension method wrappers.
+
   /// Testing only method to indicate that we don't really need to await all
   /// currently pending futures.
   ///

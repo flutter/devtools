@@ -135,7 +135,8 @@ class PerformanceController extends DisposableController
       // Listen for Flutter.Frame events with frame timing data.
       // Listen for Flutter.RebuiltWidgets events.
       autoDisposeStreamSubscription(
-        serviceConnection.serviceManager.service!.onExtensionEventWithHistorySafe
+        serviceConnection
+            .serviceManager.service!.onExtensionEventWithHistorySafe
             .listen((event) {
           if (event.extensionKind == 'Flutter.Frame') {
             final frame = FlutterFrame.parse(event.extensionData!.data);

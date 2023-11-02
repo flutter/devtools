@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:devtools_app_shared/service.dart';
 import 'package:flutter/foundation.dart';
-import 'package:vm_service/vm_service.dart';
 
 import '../../service/service_extensions.dart' as extensions;
 import '../globals.dart';
@@ -17,10 +16,10 @@ Future<void> toggleHttpRequestLogging(bool state) async {
   await serviceConnection.serviceManager.service!
       .forEachIsolate((isolate) async {
     final httpLoggingAvailable = await serviceConnection.serviceManager.service!
-        .isHttpTimelineLoggingAvailable(isolate.id!);
+        .isHttpTimelineLoggingAvailableWrapper(isolate.id!);
     if (httpLoggingAvailable) {
-      final future =
-          serviceConnection.serviceManager.service!.httpEnableTimelineLogging(
+      final future = serviceConnection.serviceManager.service!
+          .httpEnableTimelineLoggingWrapper(
         isolate.id!,
         state,
       );

@@ -57,7 +57,7 @@ class NetworkService {
 
     final requests = <HttpProfileRequest>[];
     await service.forEachIsolate((isolate) async {
-      final request = await service.getHttpProfile(
+      final request = await service.getHttpProfileWrapper(
         isolate.id!,
         updatedSince: networkController.lastRefreshMicros,
       );
@@ -70,7 +70,7 @@ class NetworkService {
     final service = serviceConnection.serviceManager.service;
     if (service == null) return;
     await service.forEachIsolate((isolate) async {
-      final future = service.clearHttpProfile(isolate.id!);
+      final future = service.clearHttpProfileWrapper(isolate.id!);
       // The above call won't complete immediately if the isolate is paused, so
       // give up waiting after 500ms. However, the call will complete eventually
       // if the isolate is eventually resumed.
@@ -85,7 +85,7 @@ class NetworkService {
     if (service == null) return [];
     final sockets = <SocketStatistic>[];
     await service.forEachIsolate((isolate) async {
-      final socketProfile = await service.getSocketProfile(isolate.id!);
+      final socketProfile = await service.getSocketProfileWrapper(isolate.id!);
       sockets.addAll(socketProfile.sockets);
     });
 
@@ -108,9 +108,9 @@ class NetworkService {
     await service.forEachIsolate((isolate) async {
       final isolateId = isolate.id!;
       final socketProfilingAvailable =
-          await service.isSocketProfilingAvailable(isolateId);
+          await service.isSocketProfilingAvailableWrapper(isolateId);
       if (socketProfilingAvailable) {
-        final future = service.clearSocketProfile(isolateId);
+        final future = service.clearSocketProfileWrapper(isolateId);
         // The above call won't complete immediately if the isolate is paused, so
         // give up waiting after 500ms. However, the call will complete eventually
         // if the isolate is eventually resumed.
@@ -128,9 +128,9 @@ class NetworkService {
     await service.forEachIsolate((isolate) async {
       final isolateId = isolate.id!;
       final socketProfilingAvailable =
-          await service.isSocketProfilingAvailable(isolateId);
+          await service.isSocketProfilingAvailableWrapper(isolateId);
       if (socketProfilingAvailable) {
-        final future = service.socketProfilingEnabled(isolateId, state);
+        final future = service.socketProfilingEnabledWrapper(isolateId, state);
         // The above call won't complete immediately if the isolate is paused, so
         // give up waiting after 500ms. However, the call will complete eventually
         // if the isolate is eventually resumed.

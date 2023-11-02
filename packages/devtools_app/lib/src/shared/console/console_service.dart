@@ -266,7 +266,8 @@ class ConsoleService with DisposerMixin {
             .listen(_handleStderrEvent),
       );
       autoDisposeStreamSubscription(
-        serviceConnection.serviceManager.service!.onExtensionEventWithHistorySafe
+        serviceConnection
+            .serviceManager.service!.onExtensionEventWithHistorySafe
             .listen(_handleExtensionEvent),
       );
       _serviceInitialized = true;
