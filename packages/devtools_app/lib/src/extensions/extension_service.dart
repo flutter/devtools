@@ -168,5 +168,12 @@ Future<String?> _connectedAppRootPath() async {
   if (libDirectoryIndex != -1) {
     fileUri = fileUri.substring(0, libDirectoryIndex);
   }
+
+  final libIntegrationTestDirectoryRegExp = RegExp(r'\/integration_test\/[^\/.]*.dart');
+  final libIntegrationTestDirectoryIndex = fileUri.indexOf(libIntegrationTestDirectoryRegExp);
+  if (libIntegrationTestDirectoryIndex != -1) {
+    fileUri = fileUri.substring(0, libIntegrationTestDirectoryIndex);
+  }
+
   return fileUri;
 }
