@@ -162,19 +162,18 @@ Future<String?> _connectedAppRootPath() async {
   // server and having the server look for the package folder that contains the
   // `.dart_tool` directory.
 
-  // Assume that the parent folder of `lib` is the package root.
+  // Assume that the parent folder of `lib` or `integration_test` is the package
+  // root.
   final libDirectoryRegExp = RegExp(r'\/lib\/[^\/.]*.dart');
   final libDirectoryIndex = fileUri.indexOf(libDirectoryRegExp);
+  final integrationTestDirectoryRegExp =
+      RegExp(r'\/integration_test\/[^\/.]*.dart');
+  final integrationTestDirectoryIndex =
+      fileUri.indexOf(integrationTestDirectoryRegExp);
   if (libDirectoryIndex != -1) {
     fileUri = fileUri.substring(0, libDirectoryIndex);
-  }
-
-  final libIntegrationTestDirectoryRegExp =
-      RegExp(r'\/integration_test\/[^\/.]*.dart');
-  final libIntegrationTestDirectoryIndex =
-      fileUri.indexOf(libIntegrationTestDirectoryRegExp);
-  if (libIntegrationTestDirectoryIndex != -1) {
-    fileUri = fileUri.substring(0, libIntegrationTestDirectoryIndex);
+  } else if (integrationTestDirectoryIndex != -1) {
+    fileUri = fileUri.substring(0, integrationTestDirectoryIndex);
   }
 
   return fileUri;
