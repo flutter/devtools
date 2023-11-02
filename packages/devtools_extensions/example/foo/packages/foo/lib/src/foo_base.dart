@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+import 'dart:developer';
 import 'package:flutter/material.dart';
 
 class FooBarBaz extends StatelessWidget {
@@ -33,4 +35,42 @@ class FooBarBaz extends StatelessWidget {
       ),
     );
   }
+}
+
+class FooController {
+  FooController() {
+    if (!_initialized) {
+      initFoo();
+    }
+  }
+
+  static final _things = <int, String>{
+    1: 'apple',
+    2: 'banana',
+  };
+
+  static bool _initialized = false;
+
+  static void initFoo() {
+    registerExtension('ext.foo.getThing', (method, parameters) async {
+      final thingId = parameters['id'] as int?;
+      final thing = _things[thingId] ?? 'unknown thing';
+      final response = {
+        'id': thingId,
+        'value': thing,
+      };
+      return ServiceExtensionResponse.result(json.encode(response));
+    });
+    registerExtension('ext.foo.getAllThings', (method, parameters) async {
+      return ServiceExtensionResponse.result(json.encode(_things));
+    });
+
+    _initialized = true;
+  }
+
+  void addThing(int id, String thing) {
+    _things[id] = thing;
+  }
+
+  int get totalThings => _things.length;
 }
