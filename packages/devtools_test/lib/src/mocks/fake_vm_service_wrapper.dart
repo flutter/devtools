@@ -252,6 +252,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
               'uri': 'package:fake_uri_root/main.dart',
             },
           ),
+          'extensionRPCs': ['ext.dart.io.getHttpProfile'],
         },
       )!,
     );
@@ -402,7 +403,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
     String isolateId,
     String id,
   ) async {
-    final httpProfile = await getHttpProfile(isolateId);
+    final httpProfile = await getHttpProfileWrapper(isolateId);
     return Future.value(
       httpProfile.requests.firstWhere((request) => request.id == id),
     );
