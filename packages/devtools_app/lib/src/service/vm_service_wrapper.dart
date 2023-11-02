@@ -162,7 +162,7 @@ class VmServiceWrapper extends VmService {
     if (cachedObj != null) {
       return Future.value(cachedObj);
     }
-    return getObject(
+    return super.getObject(
       isolateId,
       objectId,
       offset: offset,
@@ -244,44 +244,44 @@ class VmServiceWrapper extends VmService {
   Future<SocketProfilingState> socketProfilingEnabledWrapper(
     String isolateId, [
     bool? enabled,
-  ]) async {
+  ]) {
     return socketProfilingEnabled(isolateId, enabled);
   }
 
-  Future<Success> clearSocketProfileWrapper(String isolateId) async {
+  Future<Success> clearSocketProfileWrapper(String isolateId) {
     return clearSocketProfile(isolateId);
   }
 
-  Future<SocketProfile> getSocketProfileWrapper(String isolateId) async {
+  Future<SocketProfile> getSocketProfileWrapper(String isolateId) {
     return getSocketProfile(isolateId);
   }
 
   Future<HttpProfileRequest> getHttpProfileRequestWrapper(
     String isolateId,
     String id,
-  ) async {
+  ) {
     return getHttpProfileRequest(isolateId, id);
   }
 
   Future<HttpProfile> getHttpProfileWrapper(
     String isolateId, {
     int? updatedSince,
-  }) async {
+  }) {
     return getHttpProfile(isolateId, updatedSince: updatedSince);
   }
 
-  Future<Success> clearHttpProfileWrapper(String isolateId) async {
+  Future<Success> clearHttpProfileWrapper(String isolateId) {
     return clearHttpProfile(isolateId);
   }
 
-  Future<bool> isHttpTimelineLoggingAvailableWrapper(String isolateId) async {
+  Future<bool> isHttpTimelineLoggingAvailableWrapper(String isolateId) {
     return isHttpTimelineLoggingAvailable(isolateId);
   }
 
   Future<HttpTimelineLoggingState> httpEnableTimelineLoggingWrapper(
     String isolateId, [
     bool? enabled,
-  ]) async {
+  ]) {
     return httpEnableTimelineLogging(isolateId, enabled);
   }
 

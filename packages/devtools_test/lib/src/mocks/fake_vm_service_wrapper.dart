@@ -166,7 +166,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
     String isolateId, {
     bool? reset,
     bool? gc,
-  }) async {
+  }) {
     final memberStats = <ClassHeapStats>[];
     for (var data in _allocationData!.data) {
       final stats = ClassHeapStats(
@@ -206,7 +206,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
       },
     };
 
-    return allocationProfile;
+    return Future.value(allocationProfile);
   }
 
   @override
@@ -215,8 +215,8 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
     int? timeOriginMicros,
     int? timeExtentMicros,
     String? classId,
-  }) async {
-    return allocationSamples!;
+  }) {
+    return Future.value(allocationSamples!);
   }
 
   @override
@@ -224,7 +224,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
     String isolateId,
     String classId,
     bool enable,
-  ) async =>
+  ) =>
       Future.value(Success());
 
   @override
@@ -269,16 +269,18 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   }
 
   @override
-  Future<MemoryUsage> getMemoryUsage(String isolateId) async {
+  Future<MemoryUsage> getMemoryUsage(String isolateId) {
     if (_memoryData == null) {
       throw StateError('_memoryData was not provided to FakeServiceManager');
     }
 
     final heapSample = _memoryData!.data.first;
-    return MemoryUsage(
-      externalUsage: heapSample.external,
-      heapCapacity: heapSample.capacity,
-      heapUsage: heapSample.used,
+    return Future.value(
+      MemoryUsage(
+        externalUsage: heapSample.external,
+        heapCapacity: heapSample.capacity,
+        heapUsage: heapSample.used,
+      ),
     );
   }
 
@@ -336,7 +338,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   Future<FakeVM> getVM() => Future.value(FakeVM());
 
   @override
-  Future<Success> setVMTimelineFlags(List<String> recordedStreams) async {
+  Future<Success> setVMTimelineFlags(List<String> recordedStreams) {
     _vmTimelineFlags['recordedStreams'] = recordedStreams;
     return Future.value(Success());
   }
@@ -349,20 +351,20 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   Future<Timeline> getVMTimeline({
     int? timeOriginMicros,
     int? timeExtentMicros,
-  }) async {
+  }) {
     final result = _timelineData;
     if (result == null) {
       throw StateError('timelineData was not provided to FakeServiceManager');
     }
-    return result;
+    return Future.value(result);
   }
 
   @override
   Future<Success> clearVMTimeline() => Future.value(Success());
 
   @override
-  Future<ClassList> getClassList(String isolateId) async {
-    return _classList ?? ClassList(classes: []);
+  Future<ClassList> getClassList(String isolateId) {
+    return Future.value(_classList ?? ClassList(classes: []));
   }
 
   @override
@@ -384,7 +386,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   }
 
   @override
-  Future<Success> clearSocketProfileWrapper(String isolateId) async {
+  Future<Success> clearSocketProfileWrapper(String isolateId) {
     _socketProfile?.sockets.clear();
     return Future.value(Success());
   }
@@ -440,7 +442,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   Future<HttpTimelineLoggingState> httpEnableTimelineLoggingWrapper(
     String isolateId, [
     bool? enabled,
-  ]) async {
+  ]) {
     if (enabled != null) {
       return Future.value(HttpTimelineLoggingState(enabled: enabled));
     }
@@ -460,8 +462,8 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
     bool? reportLines,
     List<String>? libraryFilters,
     List<String>? librariesAlreadyCompiled,
-  }) async {
-    return SourceReport(ranges: [], scripts: []);
+  }) {
+    return Future.value(SourceReport(ranges: [], scripts: []));
   }
 
   @override
@@ -475,7 +477,8 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   final fakeServiceCache = JsonToServiceCache();
 
   @override
-  Future<Timestamp> getVMTimelineMicros() async => Timestamp(timestamp: 0);
+  Future<Timestamp> getVMTimelineMicros() =>
+      Future.value(Timestamp(timestamp: 0));
 
   @override
   Stream<Event> onEvent(String streamName) => const Stream.empty();
