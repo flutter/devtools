@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: avoid_print
+
 import 'dart:async';
 
 import 'package:devtools_app_shared/ui.dart';
@@ -17,7 +19,7 @@ class ServiceExtensionExample extends StatefulWidget {
 }
 
 class _ServiceExtensionExampleState extends State<ServiceExtensionExample> {
-  int selectedId = 0;
+  int selectedId = 1;
 
   void _changeId({required bool increment}) {
     setState(() {
@@ -65,13 +67,13 @@ class TableOfThings extends StatefulWidget {
 }
 
 class _TableOfThingsState extends State<TableOfThings> {
-  final things = <String, String>{};
+  final things = ValueNotifier<Map<String, String>>({});
 
   Future<void> _refreshThings() async {
     try {
       final response = await serviceManager
           .callServiceExtensionOnMainIsolate('ext.foo.getAllThings');
-      print('things: ${response.json}');
+      things.value = response.json?.cast<String, String>() ?? {};
     } catch (e) {
       print('error fetching all things');
     }
@@ -85,33 +87,51 @@ class _TableOfThingsState extends State<TableOfThings> {
 
   @override
   Widget build(BuildContext context) {
-    return Table(
-      border: TableBorder.all(color: Theme.of(context).colorScheme.onSurface),
-      columnWidths: const <int, TableColumnWidth>{
-        0: FlexColumnWidth(),
-        1: FlexColumnWidth(),
-      },
-      defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-      children: <TableRow>[
-        TableRow(
-          children: <Widget>[
-            _GridEntry(
-              text: 'Id',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            _GridEntry(
-              text: 'Thing',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-          ],
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ElevatedButton(
+          onPressed: _refreshThings,
+          child: const Text('Refresh things'),
         ),
-        ...things.entries.map(
-          (entry) => TableRow(
-            children: [
-              _GridEntry(text: entry.key),
-              _GridEntry(text: entry.value),
-            ],
-          ),
+        const SizedBox(height: denseSpacing),
+        ValueListenableBuilder(
+          valueListenable: things,
+          builder: (context, things, _) {
+            return Table(
+              border: TableBorder.all(
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+              columnWidths: const <int, TableColumnWidth>{
+                0: FlexColumnWidth(),
+                1: FlexColumnWidth(),
+              },
+              defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+              children: <TableRow>[
+                TableRow(
+                  children: <Widget>[
+                    _GridEntry(
+                      text: 'Id',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    _GridEntry(
+                      text: 'Thing',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                  ],
+                ),
+                ...things.entries.map(
+                  (entry) => TableRow(
+                    children: [
+                      _GridEntry(text: entry.key),
+                      _GridEntry(text: entry.value),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ],
     );
@@ -159,7 +179,6 @@ class _SelectedThingState extends State<SelectedThing> {
         'ext.foo.getThing',
         args: {'id': id},
       );
-      print('thing: ${response.json}');
       setState(() {
         selectedThing = response.json?['value'] as String? ?? 'unknown';
       });

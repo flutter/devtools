@@ -44,16 +44,16 @@ class FooController {
     }
   }
 
-  static final _things = <int, String>{
-    1: 'apple',
-    2: 'banana',
+  static final _things = <String, String>{
+    '1': 'apple',
+    '2': 'banana',
   };
 
   static bool _initialized = false;
 
   static void initFoo() {
     registerExtension('ext.foo.getThing', (method, parameters) async {
-      final thingId = parameters['id'] as int?;
+      final thingId = parameters['id'];
       final thing = _things[thingId] ?? 'unknown thing';
       final response = {
         'id': thingId,
@@ -69,7 +69,7 @@ class FooController {
   }
 
   void addThing(int id, String thing) {
-    _things[id] = thing;
+    _things['$id'] = thing;
   }
 
   int get totalThings => _things.length;
