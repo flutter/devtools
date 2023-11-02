@@ -28,8 +28,8 @@ void main() {
 
         _logStatus('Building DevTools web app in release mode...');
         // These build arguments match the arguments used in the
-        // tool/build_release.sh script, which is how we build DevTools for
-        // release.
+        // tool/lib/commands/build_release.dart command, which is how we build
+        // DevTools for release.
         await _runProcess('flutter', [
           'build',
           'web',
