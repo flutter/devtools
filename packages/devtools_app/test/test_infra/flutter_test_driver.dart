@@ -411,6 +411,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     final vmServiceLocal = vmService;
     if (vmServiceLocal != null) {
       _debugPrint('Closing VM service');
+      await Future.delayed(const Duration(milliseconds: 500));
       await vmServiceLocal.dispose();
     }
     if (_currentRunningAppId != null) {
