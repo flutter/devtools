@@ -32,14 +32,7 @@ void main() async {
   final vmService = await connect<VmService>(
     uri: Uri.parse(someVmServiceUri),
     finishedCompleter: finishedCompleter,
-    createService: ({
-      // ignore: avoid-dynamic, code needs to match API from VmService.
-      required Stream<dynamic> /*String|List<int>*/ inStream,
-      required void Function(String message) writeMessage,
-      required Uri connectedUri,
-    }) {
-      return VmService(inStream, writeMessage);
-    },
+    serviceFactory: VmService.defaultFactory,
   );
 
   await serviceManager.vmServiceOpened(

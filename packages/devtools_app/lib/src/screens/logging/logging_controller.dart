@@ -164,14 +164,14 @@ class LoggingController extends DisposableController
     final _StdoutEventHandler stdoutHandler =
         _StdoutEventHandler(this, 'stdout');
     autoDisposeStreamSubscription(
-      service.onStdoutEventWithHistory.listen(stdoutHandler.handle),
+      service.onStdoutEventWithHistorySafe.listen(stdoutHandler.handle),
     );
 
     // Log stderr events.
     final _StdoutEventHandler stderrHandler =
         _StdoutEventHandler(this, 'stderr', isError: true);
     autoDisposeStreamSubscription(
-      service.onStderrEventWithHistory.listen(stderrHandler.handle),
+      service.onStderrEventWithHistorySafe.listen(stderrHandler.handle),
     );
 
     // Log GC events.
@@ -179,12 +179,12 @@ class LoggingController extends DisposableController
 
     // Log `dart:developer` `log` events.
     autoDisposeStreamSubscription(
-      service.onLoggingEventWithHistory.listen(_handleDeveloperLogEvent),
+      service.onLoggingEventWithHistorySafe.listen(_handleDeveloperLogEvent),
     );
 
     // Log Flutter extension events.
     autoDisposeStreamSubscription(
-      service.onExtensionEventWithHistory.listen(_handleExtensionEvent),
+      service.onExtensionEventWithHistorySafe.listen(_handleExtensionEvent),
     );
   }
 
