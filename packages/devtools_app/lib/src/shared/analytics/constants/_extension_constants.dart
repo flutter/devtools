@@ -21,34 +21,36 @@ enum DevToolsExtensionEvents {
   embeddedExtension;
 
   /// Event sent via [ga.screen] when an extension screen is opened.
-  static String extensionScreenName(String name) => 'extension-$name';
+  static String extensionScreenName(DevToolsExtensionConfig ext) =>
+      'extension-${ext.analyticsSafeName}';
 
   /// Event sent when a user clicks the "Report an issue" link on an extension
   /// screen.
-  static String extensionFeedback(String name) => 'extensionFeedback-$name';
+  static String extensionFeedback(DevToolsExtensionConfig ext) =>
+      'extensionFeedback-${ext.analyticsSafeName}';
 
   /// Event sent when an extension is enabled because a user manually enabled
   /// it from the extensions settings menu.
-  static String extensionEnableManual(String name) =>
-      'extensionEnable-manual-$name';
+  static String extensionEnableManual(DevToolsExtensionConfig ext) =>
+      'extensionEnable-manual-${ext.analyticsSafeName}';
 
   /// Event sent when an extension is enabled because a user answered the
   /// enablement prompt with "Enable".
-  static String extensionEnablePrompt(String name) =>
-      'extensionEnable-prompt-$name';
+  static String extensionEnablePrompt(DevToolsExtensionConfig ext) =>
+      'extensionEnable-prompt-${ext.analyticsSafeName}';
 
   /// Event sent when an extension is disabled because a user manually disabled
   /// it from the [DisableExtensionDialog] or the main extensions settings menu.
-  static String extensionDisableManual(String name) =>
-      'extensionDisable-manual-$name';
+  static String extensionDisableManual(DevToolsExtensionConfig ext) =>
+      'extensionDisable-manual-${ext.analyticsSafeName}';
 
   /// Event sent when an extension is disabled because a user answered the
   /// enablement prompt with "No, hide this sceen".
-  static String extensionDisablePrompt(String name) =>
-      'extensionDisable-prompt-$name';
+  static String extensionDisablePrompt(DevToolsExtensionConfig ext) =>
+      'extensionDisable-prompt-${ext.analyticsSafeName}';
 
   /// Event sent when an extension is force reloaded from the extension screen
   /// context menu.
-  static String extensionForceReload(String name) =>
-      'extensionForceReload-$name';
+  static String extensionForceReload(DevToolsExtensionConfig ext) =>
+      'extensionForceReload-${ext.analyticsSafeName}';
 }
