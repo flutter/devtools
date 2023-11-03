@@ -258,15 +258,16 @@ class ConsoleService with DisposerMixin {
     if (!_serviceInitialized &&
         serviceConnection.serviceManager.isServiceAvailable) {
       autoDisposeStreamSubscription(
-        serviceConnection.serviceManager.service!.onStdoutEventWithHistory
+        serviceConnection.serviceManager.service!.onStdoutEventWithHistorySafe
             .listen(_handleStdoutEvent),
       );
       autoDisposeStreamSubscription(
-        serviceConnection.serviceManager.service!.onStderrEventWithHistory
+        serviceConnection.serviceManager.service!.onStderrEventWithHistorySafe
             .listen(_handleStderrEvent),
       );
       autoDisposeStreamSubscription(
-        serviceConnection.serviceManager.service!.onExtensionEventWithHistory
+        serviceConnection
+            .serviceManager.service!.onExtensionEventWithHistorySafe
             .listen(_handleExtensionEvent),
       );
       _serviceInitialized = true;

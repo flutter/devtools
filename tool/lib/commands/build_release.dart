@@ -47,6 +47,9 @@ class BuildReleaseCommand extends Command {
     final useLocalFlutter = argResults![_useLocalFlutterFlag];
     final updatePerfetto = argResults![_updatePerfettoFlag];
 
+    final webBuildDir =
+        Directory(path.join(repo.devtoolsAppDirectoryPath, 'build', 'web'));
+
     if (!useLocalFlutter) {
       logStatus('updating tool/flutter-sdk to the latest flutter candidate');
       await processManager.runProcess(CliCommand.tool('update-flutter-sdk'));
@@ -57,11 +60,16 @@ class BuildReleaseCommand extends Command {
       await processManager.runProcess(CliCommand.tool('update-perfetto'));
     }
 
+    logStatus('cleaning project');
+    webBuildDir.deleteSync(recursive: true);
+    await processManager.runProcess(
+      CliCommand.flutter('clean'),
+      workingDirectory: repo.devtoolsAppDirectoryPath,
+    );
+
     logStatus('building DevTools in release mode');
     await processManager.runAll(
       commands: [
-        CliCommand.flutter('clean'),
-        CliCommand('rm -rf ${path.join('build', 'web')}'),
         CliCommand.tool('pub-get --only-main'),
         CliCommand.flutter(
           'build web --web-renderer canvaskit --pwa-strategy=offline-first'
@@ -74,9 +82,7 @@ class BuildReleaseCommand extends Command {
     // TODO(kenz): investigate if we need to perform a windows equivalent of
     // `chmod` or if we even need to perform `chmod` for linux / mac anymore.
     if (!Platform.isWindows) {
-      final canvaskitDir = Directory(
-        path.join(repo.devtoolsAppDirectoryPath, 'build', 'web', 'canvaskit'),
-      );
+      final canvaskitDir = Directory(path.join(webBuildDir.path, 'canvaskit'));
       for (final file in canvaskitDir.listSync()) {
         if (RegExp(r'canvaskit\..*').hasMatch(file.path)) {
           await processManager
