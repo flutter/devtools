@@ -13,7 +13,7 @@ class DevToolsExtensionConfig implements Comparable {
     required this.issueTrackerLink,
     required this.version,
     required this.materialIconCodePoint,
-    required this.isPublic,
+    required this.isPubliclyHosted,
   });
 
   factory DevToolsExtensionConfig.parse(Map<String, Object?> json) {
@@ -34,7 +34,7 @@ class DevToolsExtensionConfig implements Comparable {
           pathKey: final String path,
           issueTrackerKey: final String issueTracker,
           versionKey: final String version,
-          isPublicKey: final bool isPublic,
+          isPubliclyHostedKey: final String isPubliclyHosted,
         }) {
       return DevToolsExtensionConfig._(
         name: name,
@@ -42,10 +42,16 @@ class DevToolsExtensionConfig implements Comparable {
         issueTrackerLink: issueTracker,
         version: version,
         materialIconCodePoint: codePoint,
-        isPublic: isPublic,
+        isPubliclyHosted: bool.parse(isPubliclyHosted),
       );
     } else {
-      const requiredKeys = {nameKey, pathKey, issueTrackerKey, versionKey};
+      const requiredKeys = {
+        nameKey,
+        pathKey,
+        issueTrackerKey,
+        versionKey,
+        isPubliclyHostedKey,
+      };
       final diff = requiredKeys.difference(json.keys.toSet());
       if (diff.isEmpty) {
         // All the required keys are present, but the value types did not match.
@@ -74,7 +80,7 @@ class DevToolsExtensionConfig implements Comparable {
   static const issueTrackerKey = 'issueTracker';
   static const versionKey = 'version';
   static const materialIconCodePointKey = 'materialIconCodePoint';
-  static const isPublicKey = 'isPublic';
+  static const isPubliclyHostedKey = 'isPubliclyHosted';
 
   /// The package name that this extension is for.
   final String name;
@@ -109,12 +115,11 @@ class DevToolsExtensionConfig implements Comparable {
   final int materialIconCodePoint;
 
   /// Whether this extension is distrubuted in a public package on pub.dev.
-  final bool isPublic;
+  final bool isPubliclyHosted;
 
   String get displayName => name.toLowerCase();
 
-  /// The extension name that will be used in analytics.
-  String get gaName => isPublic ? name : 'private';
+  String get analyticsSafeName => isPubliclyHosted ? name : 'private';
 
   Map<String, Object?> toJson() => {
         nameKey: name,
@@ -122,7 +127,7 @@ class DevToolsExtensionConfig implements Comparable {
         issueTrackerKey: issueTrackerLink,
         versionKey: version,
         materialIconCodePointKey: materialIconCodePoint,
-        isPublicKey: isPublic,
+        isPubliclyHostedKey: isPubliclyHosted.toString(),
       };
 
   @override
@@ -144,7 +149,7 @@ class DevToolsExtensionConfig implements Comparable {
         other.issueTrackerLink == issueTrackerLink &&
         other.version == version &&
         other.materialIconCodePoint == materialIconCodePoint &&
-        other.isPublic == isPublic;
+        other.isPubliclyHosted == isPubliclyHosted;
   }
 
   @override
@@ -154,7 +159,7 @@ class DevToolsExtensionConfig implements Comparable {
         issueTrackerLink,
         version,
         materialIconCodePoint,
-        isPublic,
+        isPubliclyHosted,
       );
 }
 

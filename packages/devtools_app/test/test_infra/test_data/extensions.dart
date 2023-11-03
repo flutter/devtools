@@ -11,7 +11,7 @@ final fooExtension = DevToolsExtensionConfig.parse({
   DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
   DevToolsExtensionConfig.versionKey: '1.0.0',
   DevToolsExtensionConfig.pathKey: '/path/to/foo',
-  DevToolsExtensionConfig.isPublicKey: false,
+  DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
 });
 
 final barExtension = DevToolsExtensionConfig.parse({
@@ -20,7 +20,7 @@ final barExtension = DevToolsExtensionConfig.parse({
   DevToolsExtensionConfig.versionKey: '2.0.0',
   DevToolsExtensionConfig.materialIconCodePointKey: 0xe638,
   DevToolsExtensionConfig.pathKey: '/path/to/bar',
-  DevToolsExtensionConfig.isPublicKey: false,
+  DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
 });
 
 final providerExtension = DevToolsExtensionConfig.parse({
@@ -30,5 +30,5 @@ final providerExtension = DevToolsExtensionConfig.parse({
   DevToolsExtensionConfig.versionKey: '3.0.0',
   DevToolsExtensionConfig.materialIconCodePointKey: 0xe50a,
   DevToolsExtensionConfig.pathKey: '/path/to/provider',
-  DevToolsExtensionConfig.isPublicKey: true,
+  DevToolsExtensionConfig.isPubliclyHostedKey: 'true',
 });

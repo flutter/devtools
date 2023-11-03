@@ -63,6 +63,7 @@ final List<DevToolsExtensionConfig> debugExtensions = [
     DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
     DevToolsExtensionConfig.versionKey: '1.0.0',
     DevToolsExtensionConfig.pathKey: '/path/to/foo',
+    DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
   }),
   DevToolsExtensionConfig.parse({
     DevToolsExtensionConfig.nameKey: 'bar',
@@ -70,6 +71,7 @@ final List<DevToolsExtensionConfig> debugExtensions = [
     DevToolsExtensionConfig.versionKey: '2.0.0',
     DevToolsExtensionConfig.materialIconCodePointKey: 0xe638,
     DevToolsExtensionConfig.pathKey: '/path/to/bar',
+    DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
   }),
   DevToolsExtensionConfig.parse({
     DevToolsExtensionConfig.nameKey: 'provider',
@@ -78,6 +80,7 @@ final List<DevToolsExtensionConfig> debugExtensions = [
     DevToolsExtensionConfig.versionKey: '3.0.0',
     DevToolsExtensionConfig.materialIconCodePointKey: 0xe50a,
     DevToolsExtensionConfig.pathKey: '/path/to/provider',
+    DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
   }),
 ];
 

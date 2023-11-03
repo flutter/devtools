@@ -13,9 +13,9 @@ void main() {
       'uses extension name for public package',
       () {
         final public = providerExtension;
-        expect(public.isPublic, true);
+        expect(public.isPubliclyHosted, true);
         expect(public.name, 'provider');
-        expect(public.gaName, 'provider');
+        expect(public.analyticsSafeName, 'provider');
         expect(
           DevToolsExtensionEvents.extensionScreenName(public),
           'extension-provider',
@@ -52,9 +52,9 @@ void main() {
       'does not use extension name for private package',
       () {
         final private = fooExtension;
-        expect(private.isPublic, false);
+        expect(private.isPubliclyHosted, false);
         expect(private.name, 'Foo');
-        expect(private.gaName, 'private');
+        expect(private.analyticsSafeName, 'private');
         expect(
           DevToolsExtensionEvents.extensionScreenName(private),
           'extension-private',
