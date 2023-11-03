@@ -343,6 +343,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       vmService = await vmServiceConnectUriWithFactory<VmServiceWrapper>(
         _vmServiceWsUri.toString(),
         vmServiceFactory: ({
+          // ignore: avoid-dynamic, mirrors types of [VmServiceFactory].
           required Stream<dynamic> /*String|List<int>*/ inStream,
           required void Function(String message) writeMessage,
           Log? log,
