@@ -48,12 +48,12 @@ class ErrorBadgeManager extends DisposableController
 
     // Log Flutter extension events.
     autoDisposeStreamSubscription(
-      service.onExtensionEventWithHistory.listen(_handleExtensionEvent),
+      service.onExtensionEventWithHistorySafe.listen(_handleExtensionEvent),
     );
 
     // Log stderr events.
     autoDisposeStreamSubscription(
-      service.onStderrEventWithHistory.listen(_handleStdErr),
+      service.onStderrEventWithHistorySafe.listen(_handleStdErr),
     );
   }
 

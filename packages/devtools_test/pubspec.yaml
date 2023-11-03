@@ -18,7 +18,7 @@ environment:
 dependencies:
   async: ^2.0.0
   collection: ^1.15.0
-  devtools_shared: ^5.0.0
+  devtools_shared: ^6.0.0
   devtools_app: 2.30.0-dev.0
   devtools_app_shared:
     path: ../devtools_app_shared
@@ -30,7 +30,7 @@ dependencies:
   mockito: ^5.4.1
   path: ^1.8.0
   provider: ^6.0.2
-  vm_service: ^12.0.0
+  vm_service: ^13.0.0
   vm_snapshot_analysis: ^0.7.1
   webkit_inspection_protocol: '>=0.5.0 <2.0.0'
 

@@ -233,7 +233,8 @@ class NetworkController extends DisposableController
     final service = serviceConnection.serviceManager.service!;
     await service.forEachIsolate(
       (isolate) async {
-        final httpFuture = service.httpEnableTimelineLogging(isolate.id!);
+        final httpFuture =
+            service.httpEnableTimelineLoggingWrapper(isolate.id!);
         // The above call won't complete immediately if the isolate is paused,
         // so give up waiting after 500ms.
         final state = await timeout(httpFuture, 500);

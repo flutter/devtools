@@ -9,7 +9,7 @@ the same logic or styling.
 
 Add a dependency to your `pubspec.yaml` file:
 ```yaml
-devtools_app_shared: ^0.0.5
+devtools_app_shared: ^0.0.7
 ```
 
 Import the component library that you need:
@@ -124,14 +124,7 @@ void main() {
   final vmService = await connect<VmService>(
     uri: Uri.parse(vmServiceUri),
     finishedCompleter: finishedCompleter,
-    createService: ({
-      // ignore: avoid-dynamic, code needs to match API from VmService.
-      required Stream<dynamic> /*String|List<int>*/ inStream,
-      required void Function(String message) writeMessage,
-      required Uri connectedUri,
-    }) {
-      return VmService(inStream, writeMessage);
-    },
+    serviceFactory: VmService.defaultFactory,
   );
 
   await serviceManager.vmServiceOpened(

@@ -5,7 +5,9 @@ DevTools extension.
 * Add an example `launch.json` file in the `example/foo` directory.
 * Clean up the package readme to make instructions Windows-compatible.
 * Update the README with instructions for joining the Flutter Discord server.
-* Bump the `devtools_shared` dependency to ^5.0.0
+* Bump `package:devtools_shared` dependency to ^6.0.0
+* Bump `package:devtools_app_shared` dependency to ^0.0.7
+* Bump `package:vm_service` dependency to ^13.0.0.
 
 ## 0.0.9
 * Add a link to the new #devtools-extension-authors Discord channel in the README.md.
