@@ -199,12 +199,46 @@ class ExtensionManager {
     });
   }
 
+  /// Show a notification in DevTools.
+  /// 
+  /// This message will appear as a notification in the lower left corner of
+  /// DevTools and will be automatically dismissed after a short time period
+  /// (7 seconds).
+  /// 
+  /// [message] the content of this notification.
+  /// 
+  /// See also [ShowNotificationExtensionEvent].
   void showNotification(String message) {
     postMessageToDevTools(
       ShowNotificationExtensionEvent(message: message),
     );
   }
 
+  /// Show a banner message in DevTools.
+  /// 
+  /// This message will float at the top of the DevTools on an extension's
+  /// screen until the user dismisses it.
+  /// 
+  /// [key] should be a unique identifier for this particular message. This is
+  /// how DevTools will determine whether this message has already been shown.
+  /// 
+  /// [type] should be one of 'warning' or 'error', which will determine the
+  /// styling of the banner message.
+  /// 
+  /// [message] the content of this banner message.
+  /// 
+  /// [extensionName] must match the 'name' field in your DevTools extension's
+  /// `config.yaml` file. This should also match the name of the extension's
+  /// parent package.
+  /// 
+  /// When [ignoreIfAlreadyDismissed] is true (the default case), this message
+  /// can only be shown and dismissed once. Any subsequent call to show the
+  /// same banner message will be ignored by DevTools. If you intend for a
+  /// banner message to be shown more than once, set this value to true or
+  /// consider using [showNotification] instead, which shows a notification in
+  /// DevTools that automatically dismisses after a short time period.
+  /// 
+  /// See also [ShowBannerMessageExtensionEvent].
   void showBannerMessage({
     required String key,
     required String type,

@@ -6,7 +6,6 @@
     "configurations": [
         {
             "name": "foo_devtools_extension + simulated environment",
-            "cwd": "packages/foo_devtools_extension",
             "request": "launch",
             "type": "dart",
             "args": [
@@ -15,7 +14,6 @@
         },
         {
             "name": "foo_devtools_extension + simulated environment (profile mode)",
-            "cwd": "packages/foo_devtools_extension",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile",
@@ -25,7 +23,6 @@
         },
         {
             "name": "foo_devtools_extension + simulated environment (release mode)",
-            "cwd": "packages/foo_devtools_extension",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release",

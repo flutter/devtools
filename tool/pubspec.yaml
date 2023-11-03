@@ -11,7 +11,7 @@ executables:
 dependencies:
   args: ^2.1.0
   cli_util: ^0.3.3
-  devtools_shared: ^6.0.0
+  devtools_shared: ^6.0.1
   http: ^0.13.3
   io: ^1.0.4
   lints: any

@@ -14,6 +14,7 @@ void main() {
         'issueTracker': 'www.google.com',
         'version': '1.0.0',
         'materialIconCodePoint': '0xf012',
+        'isPubliclyHosted': 'false',
       });
 
       expect(config.name, 'foo');
@@ -30,6 +31,7 @@ void main() {
         'issueTracker': 'www.google.com',
         'version': '1.0.0',
         'materialIconCodePoint': 0xf012,
+        'isPubliclyHosted': 'false',
       });
 
       expect(config.name, 'foo');
@@ -45,6 +47,7 @@ void main() {
         'path': 'path/to/foo/extension',
         'issueTracker': 'www.google.com',
         'version': '1.0.0',
+        'isPubliclyHosted': 'false',
       });
 
       expect(config.name, 'foo');
@@ -72,6 +75,7 @@ void main() {
             'path': 'path/to/foo/extension',
             'issueTracker': 'www.google.com',
             'version': '1.0.0',
+            'isPubliclyHosted': 'false',
           });
         },
         throwsMissingRequiredFieldsError(),
@@ -84,6 +88,7 @@ void main() {
             'name': 'foo',
             'issueTracker': 'www.google.com',
             'version': '1.0.0',
+            'isPubliclyHosted': 'false',
           });
         },
         throwsMissingRequiredFieldsError(),
@@ -96,6 +101,7 @@ void main() {
             'name': 'foo',
             'path': 'path/to/foo/extension',
             'version': '1.0.0',
+            'isPubliclyHosted': 'false',
           });
         },
         throwsMissingRequiredFieldsError(),
@@ -107,6 +113,20 @@ void main() {
           DevToolsExtensionConfig.parse({
             'name': 'foo',
             'path': 'path/to/foo/extension',
+            'issueTracker': 'www.google.com',
+            'isPubliclyHosted': 'false',
+          });
+        },
+        throwsMissingRequiredFieldsError(),
+      );
+
+      // Missing 'isPubliclyHosted'.
+      expect(
+        () {
+          DevToolsExtensionConfig.parse({
+            'name': 'foo',
+            'path': 'path/to/foo/extension',
+            'version': '1.0.0',
             'issueTracker': 'www.google.com',
           });
         },
@@ -132,6 +152,20 @@ void main() {
             'path': 'path/to/foo/extension',
             'issueTracker': 'www.google.com',
             'version': '1.0.0',
+            'isPubliclyHosted': 'false',
+          });
+        },
+        throwsUnexpectedValueTypesError(),
+      );
+
+      expect(
+        () {
+          DevToolsExtensionConfig.parse({
+            'name': 'foo',
+            'path': 'path/to/foo/extension',
+            'issueTracker': 'www.google.com',
+            'version': '1.0.0',
+            'isPubliclyHosted': false,
           });
         },
         throwsUnexpectedValueTypesError(),
