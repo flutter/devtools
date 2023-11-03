@@ -8,6 +8,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_shared/service.dart';
 import 'package:logging/logging.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../../devtools.dart' as devtools show version;
 import '../extensions/extension_service.dart';
@@ -76,7 +77,24 @@ class FrameworkCore {
         final VmServiceWrapper service = await connect<VmServiceWrapper>(
           uri: uri,
           finishedCompleter: finishedCompleter,
-          serviceFactory: VmServiceWrapper.defaultFactory,
+          serviceFactory: ({
+            required Stream<dynamic> /*String|List<int>*/ inStream,
+            required void Function(String message) writeMessage,
+            Log? log,
+            DisposeHandler? disposeHandler,
+            Future? streamClosed,
+            String? wsUri,
+            bool trackFutures = false,
+          }) =>
+              VmServiceWrapper(
+            inStream,
+            writeMessage,
+            log: log,
+            disposeHandler: disposeHandler,
+            streamClosed: streamClosed,
+            wsUri: wsUri,
+            trackFutures: integrationTestMode,
+          ),
         );
 
         await serviceConnection.serviceManager.vmServiceOpened(
