@@ -18,7 +18,7 @@ class FrameworkController {
       StreamController.broadcast();
   final StreamController<ConnectVmEvent> _connectVmController =
       StreamController.broadcast();
-  final StreamController<Uri> _connectedController =
+  final StreamController<String> _connectedController =
       StreamController.broadcast();
   final StreamController _disconnectedController = StreamController.broadcast();
   final StreamController<PageChangeEvent> _pageChangeController =
@@ -49,7 +49,7 @@ class FrameworkController {
   ///
   /// The returned URI value is the VM service protocol URI of the device
   /// connection.
-  Stream<Uri> get onConnected => _connectedController.stream;
+  Stream<String> get onConnected => _connectedController.stream;
 
   /// Notifies when the current page changes.
   Stream<PageChangeEvent> get onPageChange => _pageChangeController.stream;
@@ -67,8 +67,9 @@ class FrameworkController {
       final connectionState =
           serviceConnection.serviceManager.connectedState.value;
       if (connectionState.connected) {
-        _connectedController
-            .add(serviceConnection.serviceManager.service!.connectedUri);
+        _connectedController.add(
+          serviceConnection.serviceManager.service!.wsUri!,
+        );
       } else {
         _disconnectedController.add(null);
       }
