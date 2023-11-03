@@ -61,7 +61,9 @@ class BuildReleaseCommand extends Command {
     }
 
     logStatus('cleaning project');
-    webBuildDir.deleteSync(recursive: true);
+    if (webBuildDir.existsSync()) {
+      webBuildDir.deleteSync(recursive: true);
+    }
     await processManager.runProcess(
       CliCommand.flutter('clean'),
       workingDirectory: repo.devtoolsAppDirectoryPath,

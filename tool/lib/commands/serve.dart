@@ -76,7 +76,8 @@ class ServeCommand extends Command {
     final remainingArguments = List.of(argResults!.arguments)
       ..remove(_useLocalFlutterFlag)
       ..remove(_updatePerfettoFlag)
-      ..remove(_buildAppFlag);
+      ..remove(_buildAppFlag)
+      ..remove('--no-$_buildAppFlag');
 
     final localDartSdkLocation = Platform.environment['LOCAL_DART_SDK'];
     if (localDartSdkLocation == null) {
