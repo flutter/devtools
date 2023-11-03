@@ -10,7 +10,10 @@ To learn more about DevTools, check out the
 
 ## General updates
 
-TODO: Remove this section if there are not any general updates.
+* Enabled DevTools extensions when debugging a Dart entry point that is not
+under `lib` (e.g. a unit test or integration test). Thanks to
+[@bartekpacia](https://github.com/bartekpacia) for this change! -
+[#6644](https://github.com/flutter/devtools/pull/6644)
 
 ## Inspector updates
 
