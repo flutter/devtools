@@ -9,7 +9,7 @@ environment:
 
 dependencies:
   collection: ^1.15.0
-  devtools_shared: ^6.0.0
+  devtools_shared: ^6.0.1
   flutter:
     sdk: flutter
   logging: ^1.1.1

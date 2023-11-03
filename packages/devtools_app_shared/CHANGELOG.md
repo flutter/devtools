@@ -2,7 +2,7 @@
 * Soften breaking change from 0.0.6 to add the `profilePlatformChannels` service extension,
 improving backwards compatibility for older versions of Flutter.
 * Bump `package:vm_service` dependency to ^13.0.0.
-* Bump the `package:devtools_shared` dependency to ^6.0.0.
+* Bump the `package:devtools_shared` dependency to ^6.0.1.
 * Remove public getter `libraryRef`, and public methods `getLibrary` and `retrieveFullValueAsString` from `EvalOnDartLibrary`.
 * Change `toString` output for `UnknownEvalException`, `EvalSentinelException`, and `EvalErrorException`.
 * Remove public getters `flutterVersionSummary`, `frameworkVersionSummary`, and `engineVersionSummary` from `FlutterVersion`.
