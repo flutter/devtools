@@ -86,9 +86,9 @@ class FrameworkCore {
             String? wsUri,
             bool trackFutures = false,
           }) =>
-              VmServiceWrapper(
-            inStream,
-            writeMessage,
+              VmServiceWrapper.defaultFactory(
+            inStream: inStream,
+            writeMessage: writeMessage,
             log: log,
             disposeHandler: disposeHandler,
             streamClosed: streamClosed,

@@ -342,7 +342,24 @@ class FlutterRunTestDriver extends FlutterTestDriver {
 
       vmService = await vmServiceConnectUriWithFactory<VmServiceWrapper>(
         _vmServiceWsUri.toString(),
-        vmServiceFactory: VmServiceWrapper.defaultFactory,
+        vmServiceFactory: ({
+          required Stream<dynamic> /*String|List<int>*/ inStream,
+          required void Function(String message) writeMessage,
+          Log? log,
+          DisposeHandler? disposeHandler,
+          Future? streamClosed,
+          String? wsUri,
+          bool trackFutures = false,
+        }) =>
+            VmServiceWrapper.defaultFactory(
+          inStream: inStream,
+          writeMessage: writeMessage,
+          log: log,
+          disposeHandler: disposeHandler,
+          streamClosed: streamClosed,
+          wsUri: wsUri,
+          trackFutures: true,
+        ),
       );
 
       final vmServiceLocal = vmService!;
