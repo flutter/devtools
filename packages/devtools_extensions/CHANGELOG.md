@@ -1,5 +1,8 @@
 ## 0.0.10
 * Migrate from `dart:html` to `package:web`.
+* Fix some bugs with the `build_and_copy` command for Windows.
+* Add an example `launch.json` file in the `example/foo` directory.
+* Clean up the package readme to make instructions Windows-compatible.
 * Update the README with instructions for joining the Flutter Discord server.
 * Bump the `devtools_shared` dependency to ^5.0.0
 

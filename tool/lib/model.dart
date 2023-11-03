@@ -15,6 +15,10 @@ class DevToolsRepo {
   /// The path to the DevTools 'tool' directory.
   String get toolDirectoryPath => path.join(repoPath, 'tool');
 
+  /// The path to the DevTools 'devtools_app' directory.
+  String get devtoolsAppDirectoryPath =>
+      path.join(repoPath, 'packages', 'devtools_app');
+
   @override
   String toString() => '[DevTools $repoPath]';
 
