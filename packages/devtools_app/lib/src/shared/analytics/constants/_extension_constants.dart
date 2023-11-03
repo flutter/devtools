@@ -21,11 +21,13 @@ enum DevToolsExtensionEvents {
   embeddedExtension;
 
   /// Event sent via [ga.screen] when an extension screen is opened.
-  static String extensionScreenName(DevToolsExtensionConfig ext) => 'extension-${_extensionName(ext)}';
+  static String extensionScreenName(DevToolsExtensionConfig ext) =>
+      'extension-${_extensionName(ext)}';
 
   /// Event sent when a user clicks the "Report an issue" link on an extension
   /// screen.
-  static String extensionFeedback(DevToolsExtensionConfig ext) => 'extensionFeedback-${_extensionName(ext)}';
+  static String extensionFeedback(DevToolsExtensionConfig ext) =>
+      'extensionFeedback-${_extensionName(ext)}';
 
   /// Event sent when an extension is enabled because a user manually enabled
   /// it from the extensions settings menu.
