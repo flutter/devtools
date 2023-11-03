@@ -78,6 +78,8 @@ class ExtensionsManager {
       }
       for (final extension in extensions) {
         final config = extension.config;
+        // TODO(https://github.com/dart-lang/pub/issues/4042): make this check
+        // more robust.
         final isPublic =
             extension.rootUri.path.contains(path.join('.pub-cache', 'hosted'));
         // This should be relative to the 'extension/devtools/' directory and
