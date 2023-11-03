@@ -1,6 +1,8 @@
 ## 0.0.10
 * Add an example of registering a service extension and calling it from the
 DevTools extension.
+* Document the DevTools extension examples.
+* Add documentation to [ExtensionManager] public APIs.
 * Fix some bugs with the `build_and_copy` command for Windows.
 * Add an example `launch.json` file in the `example/foo` directory.
 * Clean up the package readme to make instructions Windows-compatible.

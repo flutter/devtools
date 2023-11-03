@@ -10,6 +10,14 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_extensions/devtools_extensions.dart';
 import 'package:flutter/material.dart';
 
+/// A widget that shows an example of how to call a service extension over the
+/// VM Service protocol.
+/// 
+/// This service extension was registered in the parent package (package:foo)
+/// using [registerExtension] from dart:developer
+/// (https://api.flutter.dev/flutter/dart-developer/registerExtension.html) and
+/// then we use the [serviceManager] to call the extension from this DevTools
+/// extension.
 class ServiceExtensionExample extends StatefulWidget {
   const ServiceExtensionExample({super.key});
 
@@ -69,6 +77,19 @@ class TableOfThings extends StatefulWidget {
 class _TableOfThingsState extends State<TableOfThings> {
   final things = ValueNotifier<Map<String, String>>({});
 
+  /// Here we call the service extension 'ext.foo.getAllThings' on the main
+  /// isolate.
+  /// 
+  /// This service extension was registered in `FooController.initFoo` in
+  /// package:foo (see devtools_extensions/example/foo/packages/foo/lib/src/foo_controller.dart).
+  /// 
+  /// It is important to note that we are calling the service extension on the
+  /// main isolate here using the [serviceManager.callServiceExtensionOnMainIsolate].
+  /// 
+  /// To call a service extension that was registered in a different isolate,
+  /// you can use [serviceManager.service.callServiceExtension], but this call
+  /// MUST include the isolate id of the isolate that the service extension was
+  /// registered in.
   Future<void> _refreshThings() async {
     try {
       final response = await serviceManager
@@ -173,6 +194,18 @@ class SelectedThing extends StatefulWidget {
 class _SelectedThingState extends State<SelectedThing> {
   String selectedThing = 'unknown';
 
+  /// Here we call the service extension 'ext.foo.getThing' on the main isolate.
+  /// 
+  /// This service extension was registered in `FooController.initFoo` in
+  /// package:foo (see devtools_extensions/example/foo/packages/foo/lib/src/foo_controller.dart).
+  /// 
+  /// It is important to note that we are calling the service extension on the
+  /// main isolate here using the [serviceManager.callServiceExtensionOnMainIsolate].
+  /// 
+  /// To call a service extension that was registered in a different isolate,
+  /// you can use [serviceManager.service.callServiceExtension], but this call
+  /// MUST include the isolate id of the isolate that the service extension was
+  /// registered in.
   Future<void> _updateSelectedThing(int id) async {
     try {
       final response = await serviceManager.callServiceExtensionOnMainIsolate(
