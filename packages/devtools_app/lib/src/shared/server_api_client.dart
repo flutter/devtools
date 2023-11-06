@@ -181,8 +181,8 @@ class DevToolsServerConnection {
     completer?.complete(result);
   }
 
-  void _notifyConnected(Uri vmServiceUri) {
-    unawaited(_callMethod('connected', {'uri': vmServiceUri.toString()}));
+  void _notifyConnected(String vmServiceUri) {
+    unawaited(_callMethod('connected', {'uri': vmServiceUri}));
   }
 
   void _notifyCurrentPage(PageChangeEvent page) {

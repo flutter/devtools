@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 
+/// This is an example widget that will be used from `app_that_uses_foo`.
 class FooBarBaz extends StatelessWidget {
   const FooBarBaz({super.key, this.onFoo, this.onBar, this.onBaz});
 

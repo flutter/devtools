@@ -52,7 +52,7 @@ class EmbeddedExtensionHeader extends StatelessWidget {
               url: extension.issueTrackerLink,
               gaScreenName: gac.DevToolsExtensionEvents.extensionScreenId.name,
               gaSelectedItemDescription:
-                  gac.DevToolsExtensionEvents.extensionFeedback(extensionName),
+                  gac.DevToolsExtensionEvents.extensionFeedback(extension),
             ),
             context: context,
           ),
@@ -95,7 +95,7 @@ class EmbeddedExtensionHeader extends StatelessWidget {
                         ga.select(
                           gac.DevToolsExtensionEvents.extensionScreenId.name,
                           gac.DevToolsExtensionEvents.extensionForceReload(
-                            extension.displayName,
+                            extension,
                           ),
                         );
                         onForceReload();
@@ -172,9 +172,7 @@ class DisableExtensionDialog extends StatelessWidget {
           onPressed: () {
             ga.select(
               gac.DevToolsExtensionEvents.extensionScreenId.name,
-              gac.DevToolsExtensionEvents.extensionDisableManual(
-                extension.displayName,
-              ),
+              gac.DevToolsExtensionEvents.extensionDisableManual(extension),
             );
             unawaited(
               extensionService.setExtensionEnabledState(
@@ -205,7 +203,6 @@ class EnableExtensionPrompt extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final extensionName = extension.displayName;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -245,7 +242,7 @@ class EnableExtensionPrompt extends StatelessWidget {
                 label: 'Enable',
                 gaScreen: gac.DevToolsExtensionEvents.extensionScreenId.name,
                 gaSelection: gac.DevToolsExtensionEvents.extensionEnablePrompt(
-                  extensionName,
+                  extension,
                 ),
                 elevated: true,
                 onPressed: () {
@@ -262,7 +259,7 @@ class EnableExtensionPrompt extends StatelessWidget {
                 label: 'No, hide this screen',
                 gaScreen: gac.DevToolsExtensionEvents.extensionScreenId.name,
                 gaSelection: gac.DevToolsExtensionEvents.extensionDisablePrompt(
-                  extensionName,
+                  extension,
                 ),
                 onPressed: () {
                   unawaited(

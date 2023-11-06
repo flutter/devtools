@@ -152,13 +152,13 @@ MockVmServiceWrapper createMockVmServiceWrapperWithDefaults() {
   when(service.onStderrEvent).thenAnswer((_) {
     return const Stream.empty();
   });
-  when(service.onStdoutEventWithHistory).thenAnswer((_) {
+  when(service.onStdoutEventWithHistorySafe).thenAnswer((_) {
     return const Stream.empty();
   });
-  when(service.onStderrEventWithHistory).thenAnswer((_) {
+  when(service.onStderrEventWithHistorySafe).thenAnswer((_) {
     return const Stream.empty();
   });
-  when(service.onExtensionEventWithHistory).thenAnswer((_) {
+  when(service.onExtensionEventWithHistorySafe).thenAnswer((_) {
     return const Stream.empty();
   });
   return service;

@@ -32,7 +32,7 @@ class _EmbeddedExtensionViewState extends State<EmbeddedExtensionView> {
     super.initState();
     ga.impression(
       gac.DevToolsExtensionEvents.extensionScreenName(
-        widget.controller.extensionConfig.name,
+        widget.controller.extensionConfig,
       ),
       gac.DevToolsExtensionEvents.embeddedExtension.name,
     );
