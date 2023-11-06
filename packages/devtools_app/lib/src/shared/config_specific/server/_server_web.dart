@@ -15,6 +15,7 @@ import 'package:devtools_shared/devtools_shared.dart';
 import 'package:logging/logging.dart';
 
 import '../../development_helpers.dart';
+import '../../globals.dart';
 import '../../primitives/utils.dart';
 
 final _log = Logger('_server_web');
@@ -360,6 +361,13 @@ Future<List<DevToolsExtensionConfig>> refreshAvailableExtensions(
                   as List<Object?>)
               .whereNotNull()
               .cast<Map<String, Object?>>();
+
+      final warningMessage =
+          parsedResult[ExtensionsApi.extensionsResultWarningPropertyName];
+      if (warningMessage != null) {
+        _log.warning(warningMessage);
+      }
+
       return extensionsAsJson
           .map((p) => DevToolsExtensionConfig.parse(p))
           .toList();
