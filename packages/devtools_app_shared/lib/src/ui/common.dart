@@ -567,7 +567,7 @@ final class DevToolsToggleButton extends StatelessWidget {
 }
 
 /// A group of buttons that share a common border.
-/// 
+///
 /// This widget ensures the buttons are displayed with proper borders on the
 /// interior and exterior of the group. The attirbutes for each button can be
 /// defined by [ButtonGroupItemData] and included in [items].
