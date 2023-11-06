@@ -146,11 +146,17 @@ for sample usages.
 
 For debugging purposes, you will likely want to use the "simulated DevTools environment". This
 is a simulated environment that allows you to build your extension without having to develop it
-as an embedded iFrame in DevTools. The simulated environment is enabled by an environment
-parameter `use_simulated_environment`.
+as an embedded iFrame in DevTools. Running in your extension this way will wrap your extension
+with an environment that simulates the DevTools / DevTools extension connection.
 
 ![Simulated devtools environment](_readme_images/simulated_devtools_environment.png)
+1. Your DevTools extension.
+2. The VM service URI for a test app that your DevTools extension will interact with. This app
+should depend on your extension’s parent package.
+3. Buttons to perform actions that a user may trigger from DevTools.
+4. Logs showing the messages that will be sent between your extension and DevTools.
 
+The simulated environment is enabled by an environment parameter `use_simulated_environment`.
 To run your extension web app with this flag enabled, add a configuration to your `launch.json`
 file in VS code:
 ```json
