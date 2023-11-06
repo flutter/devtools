@@ -63,7 +63,7 @@ class FooController {
   }
 
   /// Adds a thing to the list of [_things].
-  /// 
+  ///
   /// This method is called from [FooWidget], which is used in
   /// `app_that_uses_foo`.
   void addThing() {
@@ -73,7 +73,7 @@ class FooController {
   }
 
   /// Removes a thing from the list of [_things].
-  /// 
+  ///
   /// This method is called from [FooWidget], which is used in
   /// `app_that_uses_foo`.
   void removeThing() {
@@ -85,7 +85,7 @@ class FooController {
 
   /// Selects a random thing from the list of [_things] and assigns it to
   /// [_favoriteThing].
-  /// 
+  ///
   /// This method is called from [FooWidget], which is used in
   /// `app_that_uses_foo`.
   void selectRandomFavorite() {

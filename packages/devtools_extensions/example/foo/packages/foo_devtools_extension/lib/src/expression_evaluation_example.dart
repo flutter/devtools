@@ -17,7 +17,7 @@ import 'package:flutter/material.dart';
 /// helper class to take a library (e.g. "package:foo/src/foo_controller.dart")
 /// and perform Dart expression evaluations over it
 /// (e.g. "FooController.instance.things.value.toString()").
-/// 
+///
 /// Evaluations can be performed when the app is both paused and unpaused. In
 /// contrast, service extension calls can only be made when the app is unpaused
 /// (see service_extension_example.dart).
@@ -32,7 +32,9 @@ class _EvalExampleState extends State<EvalExample> with AutoDisposeMixin {
   late final EvalOnDartLibrary fooControllerEval;
   late final Disposable evalDisposable;
 
-  var evalResponseText = '--';
+  static const _defaultEvalResponseText = '--';
+
+  var evalResponseText = _defaultEvalResponseText;
 
   @override
   void initState() {
@@ -63,7 +65,7 @@ class _EvalExampleState extends State<EvalExample> with AutoDisposeMixin {
       isAlive: evalDisposable,
     );
     setState(() {
-      evalResponseText = ref.valueAsString ?? '--';
+      evalResponseText = ref.valueAsString ?? _defaultEvalResponseText;
     });
   }
 
@@ -73,7 +75,7 @@ class _EvalExampleState extends State<EvalExample> with AutoDisposeMixin {
       isAlive: evalDisposable,
     );
     setState(() {
-      evalResponseText = ref.valueAsString ?? '--';
+      evalResponseText = ref.valueAsString ?? _defaultEvalResponseText;
     });
   }
 

@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 
 /// This widget shows an example of how you can register a custom event handler
 /// for any type of [DevToolsExtensionEventType].
-/// 
+///
 /// When the DevTools extension receives an event from DevTools, the default
 /// handler for the [DevToolsExtensionEventType] will be called (this is
 /// managed automatically by package:devtools_extensions), and any custom

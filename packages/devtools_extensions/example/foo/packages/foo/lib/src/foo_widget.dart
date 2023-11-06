@@ -40,10 +40,7 @@ class FooWidget extends StatelessWidget {
                 const SizedBox(height: 8.0),
                 ElevatedButton(
                   onPressed: fooController.selectRandomFavorite,
-                  child: Text(
-                    'Select random favorite',
-                    style: textStyle
-                  ),
+                  child: Text('Select random favorite', style: textStyle),
                 ),
                 const SizedBox(height: 32.0),
                 Text('Total things: ${things.length}', style: textStyle),

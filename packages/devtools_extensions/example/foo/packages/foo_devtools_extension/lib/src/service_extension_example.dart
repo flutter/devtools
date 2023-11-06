@@ -18,7 +18,7 @@ import 'package:flutter/material.dart';
 /// (https://api.flutter.dev/flutter/dart-developer/registerExtension.html) and
 /// then we use the [serviceManager] to call the extension from this DevTools
 /// extension.
-/// 
+///
 /// Service extensions can only be called when the app is unpaused. In contrast,
 /// expression evaluations can be called both when the app is paused and
 /// unpaused (see expression_evaluation.dart).

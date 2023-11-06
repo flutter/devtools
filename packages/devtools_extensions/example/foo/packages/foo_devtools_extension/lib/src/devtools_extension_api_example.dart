@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 
 /// This widget shows an example of how you can call public APIs exposed by
 /// [ExtensionManager].
-/// 
+///
 /// * [extensionManager.postMessageToDevTools] - how to post an arbitrary
 ///   message to DevTools, though the use for this is limited to what DevTools
 ///   is setup to handle.
