@@ -8,6 +8,7 @@ import 'package:devtools_extensions/devtools_extensions.dart';
 import 'package:devtools_extensions/src/template/_simulated_devtools_environment/_simulated_devtools_environment.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:foo_devtools_extension/src/devtools_extension_api_example.dart';
 import 'package:integration_test/integration_test.dart';
 
 // To run this test:
@@ -216,8 +217,11 @@ class TestDevToolsExtension extends StatelessWidget {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Test DevTools Extension'),
       ),
-      body: const Center(
-        child: Text('extension content'),
+      body: const Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CallingDevToolsExtensionsAPIsExample(),
+        ],
       ),
     );
   }
