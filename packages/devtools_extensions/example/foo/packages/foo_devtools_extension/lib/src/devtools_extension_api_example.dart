@@ -27,7 +27,7 @@ class CallingDevToolsExtensionsAPIsExample extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '3. Example of calling DevTools extension APIs',
+          '4. Example of calling DevTools extension APIs',
           style: Theme.of(context).textTheme.titleMedium,
         ),
         const PaddedDivider.thin(),

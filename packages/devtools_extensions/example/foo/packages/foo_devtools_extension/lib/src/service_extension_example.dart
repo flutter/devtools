@@ -12,12 +12,16 @@ import 'package:flutter/material.dart';
 
 /// A widget that shows an example of how to call a service extension over the
 /// VM Service protocol.
-/// 
+///
 /// This service extension was registered in the parent package (package:foo)
 /// using [registerExtension] from dart:developer
 /// (https://api.flutter.dev/flutter/dart-developer/registerExtension.html) and
 /// then we use the [serviceManager] to call the extension from this DevTools
 /// extension.
+/// 
+/// Service extensions can only be called when the app is unpaused. In contrast,
+/// expression evaluations can be called both when the app is paused and
+/// unpaused (see expression_evaluation.dart).
 class ServiceExtensionExample extends StatefulWidget {
   const ServiceExtensionExample({super.key});
 
@@ -46,7 +50,7 @@ class _ServiceExtensionExampleState extends State<ServiceExtensionExample> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '1. Example of calling service extensions to fetch data',
+          '1. Example of calling service extensions to fetch data from your package',
           style: Theme.of(context).textTheme.titleMedium,
         ),
         const PaddedDivider.thin(),
@@ -75,17 +79,17 @@ class TableOfThings extends StatefulWidget {
 }
 
 class _TableOfThingsState extends State<TableOfThings> {
-  final things = ValueNotifier<Map<String, String>>({});
+  final things = ValueNotifier<List<String>>([]);
 
   /// Here we call the service extension 'ext.foo.getAllThings' on the main
   /// isolate.
-  /// 
+  ///
   /// This service extension was registered in `FooController.initFoo` in
   /// package:foo (see devtools_extensions/example/foo/packages/foo/lib/src/foo_controller.dart).
-  /// 
+  ///
   /// It is important to note that we are calling the service extension on the
   /// main isolate here using the [serviceManager.callServiceExtensionOnMainIsolate].
-  /// 
+  ///
   /// To call a service extension that was registered in a different isolate,
   /// you can use [serviceManager.service.callServiceExtension], but this call
   /// MUST include the isolate id of the isolate that the service extension was
@@ -94,9 +98,9 @@ class _TableOfThingsState extends State<TableOfThings> {
     try {
       final response = await serviceManager
           .callServiceExtensionOnMainIsolate('ext.foo.getAllThings');
-      things.value = response.json?.cast<String, String>() ?? {};
+      things.value = response.json?['things'].cast<String>() ?? [];
     } catch (e) {
-      print('error fetching all things');
+      print('Error fetching all things: $e');
     }
   }
 
@@ -142,14 +146,13 @@ class _TableOfThingsState extends State<TableOfThings> {
                     ),
                   ],
                 ),
-                ...things.entries.map(
-                  (entry) => TableRow(
+                for (int i = 0; i < things.length; i++)
+                  TableRow(
                     children: [
-                      _GridEntry(text: entry.key),
-                      _GridEntry(text: entry.value),
+                      _GridEntry(text: '$i'),
+                      _GridEntry(text: things[i]),
                     ],
                   ),
-                ),
               ],
             );
           },
@@ -195,13 +198,13 @@ class _SelectedThingState extends State<SelectedThing> {
   String selectedThing = 'unknown';
 
   /// Here we call the service extension 'ext.foo.getThing' on the main isolate.
-  /// 
+  ///
   /// This service extension was registered in `FooController.initFoo` in
   /// package:foo (see devtools_extensions/example/foo/packages/foo/lib/src/foo_controller.dart).
-  /// 
+  ///
   /// It is important to note that we are calling the service extension on the
   /// main isolate here using the [serviceManager.callServiceExtensionOnMainIsolate].
-  /// 
+  ///
   /// To call a service extension that was registered in a different isolate,
   /// you can use [serviceManager.service.callServiceExtension], but this call
   /// MUST include the isolate id of the isolate that the service extension was

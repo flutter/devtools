@@ -50,7 +50,7 @@ class _ListeningForDevToolsEventExampleState
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '2. Example of listening for a DevTools event',
+          '3. Example of listening for a DevTools event',
           style: Theme.of(context).textTheme.titleMedium,
         ),
         const PaddedDivider.thin(),

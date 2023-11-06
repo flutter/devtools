@@ -1,6 +1,6 @@
 ## 0.0.10
-* Add an example of registering a service extension and calling it from the
-DevTools extension.
+* Add an example of performing expression evaluations from a DevTools extension.
+* Add an example of registering a service extension and calling it from a DevTools extension.
 * Document the DevTools extension examples.
 * Add documentation to [ExtensionManager] public APIs.
 * Fix some bugs with the `build_and_copy` command for Windows.
