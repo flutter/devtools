@@ -34,6 +34,12 @@ class UpdatePerfettoCommand extends Command {
 
   @override
   Future run() async {
+    if (Platform.isWindows) {
+      // In tools/install-build-deps in Perfetto:
+      // "Building the UI on Windows is unsupported".
+      throw 'Updating Perfetto is not currently supported on Windows';
+    }
+
     final processManager = ProcessManager();
 
     final perfettoUiCompiledLibPath = pathFromRepoRoot(
@@ -48,8 +54,7 @@ class UpdatePerfettoCommand extends Command {
       'moving DevTools-Perfetto integration files to a temp directory.',
     );
     final tempPerfettoDevTools =
-        Directory(path.join(Directory.systemTemp.path, 'perfetto_devtools'))
-          ..createSync();
+        Directory.systemTemp.createTempSync('perfetto_devtools');
     await copyPath(perfettoDevToolsPath, tempPerfettoDevTools.path);
 
     logStatus('deleting existing Perfetto build');
@@ -67,8 +72,7 @@ class UpdatePerfettoCommand extends Command {
     } else {
       logStatus('cloning Perfetto from HEAD and building from source');
       final tempPerfettoClone =
-          Directory(path.join(Directory.systemTemp.path, 'perfetto_clone'))
-            ..createSync();
+          Directory.systemTemp.createTempSync('perfetto_clone');
       await processManager.runProcess(
         CliCommand.git(
           'clone https://android.googlesource.com/platform/external/perfetto',
