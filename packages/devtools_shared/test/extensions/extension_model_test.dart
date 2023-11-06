@@ -68,6 +68,16 @@ void main() {
         );
       }
 
+      Matcher throwsMissingIsPubliclyHostedError() {
+        return throwsA(
+          isA<StateError>().having(
+            (e) => e.message,
+            'missing isPubliclyHosted key StateError',
+            startsWith('Missing key "isPubliclyHosted"'),
+          ),
+        );
+      }
+
       // Missing 'name'.
       expect(
         () {
@@ -130,7 +140,7 @@ void main() {
             'issueTracker': 'www.google.com',
           });
         },
-        throwsMissingRequiredFieldsError(),
+        throwsMissingIsPubliclyHostedError(),
       );
     });
 

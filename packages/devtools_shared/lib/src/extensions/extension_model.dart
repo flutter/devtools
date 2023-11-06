@@ -45,15 +45,34 @@ class DevToolsExtensionConfig implements Comparable {
         isPubliclyHosted: bool.parse(isPubliclyHosted),
       );
     } else {
-      const requiredKeys = {
+      if (!json.keys.contains(isPubliclyHostedKey)) {
+        throw StateError(
+          'Missing key "$isPubliclyHostedKey" when trying to parse '
+          'DevToolsExtensionConfig object.',
+        );
+      }
+
+      const requiredKeysFromConfigFile = {
         nameKey,
         pathKey,
         issueTrackerKey,
         versionKey,
-        isPubliclyHostedKey,
       };
-      final diff = requiredKeys.difference(json.keys.toSet());
-      if (diff.isEmpty) {
+      // We do not expect the config.yaml file to contain
+      // [isPubliclyHostedKey], as this should be inferred.
+      final jsonKeysFromConfigFile = Set.of(json.keys.toSet())
+        ..remove(isPubliclyHostedKey);
+
+      final diff = requiredKeysFromConfigFile.difference(
+        jsonKeysFromConfigFile,
+      );
+
+      if (diff.isNotEmpty) {
+        throw StateError(
+          'Missing required fields ${diff.toString()} in the extension '
+          'config.yaml.',
+        );
+      } else {
         // All the required keys are present, but the value types did not match.
         final sb = StringBuffer();
         for (final entry in json.entries) {
@@ -65,11 +84,6 @@ class DevToolsExtensionConfig implements Comparable {
           'Unexpected value types in the extension config.yaml. Expected all '
           'values to be of type String, but one or more had a different type:\n'
           '${sb.toString()}',
-        );
-      } else {
-        throw StateError(
-          'Missing required fields ${diff.toString()} in the extension '
-          'config.yaml.',
         );
       }
     }
