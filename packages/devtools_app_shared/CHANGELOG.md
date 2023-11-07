@@ -1,5 +1,5 @@
 ## 0.0.7
-* Bump minimum Dart SDK version to `3.3.0` and minimum Flutter SDK version to `3.17.0-0.0.pre`.
+* Bump minimum Dart SDK version to `3.3.0-91.0.dev` and minimum Flutter SDK version to `3.17.0-0.0.pre`.
 * Bump `package:vm_service` dependency to ^13.0.0.
 * Bump the `package:devtools_shared` dependency to ^6.0.1.
 * Remove public getter `libraryRef`, and public methods `getLibrary` and `retrieveFullValueAsString` from `EvalOnDartLibrary`.
