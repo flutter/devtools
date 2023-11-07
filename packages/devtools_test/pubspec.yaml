@@ -12,8 +12,8 @@ version: 2.30.0-dev.2
 repository: https://github.com/flutter/devtools/tree/master/packages/devtools_test
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
-  flutter: '>=3.0.0'
+  sdk: '>=3.3.0 <4.0.0'
+  flutter: '>=3.17.0-0.0.pre'
 
 dependencies:
   async: ^2.0.0

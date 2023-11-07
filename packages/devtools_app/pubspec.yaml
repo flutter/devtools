@@ -9,8 +9,8 @@ version: 2.30.0-dev.2
 repository: https://github.com/flutter/devtools/tree/master/packages/devtools_app
 
 environment:
-  sdk: ">=3.0.0 <4.0.0"
-  flutter: ">=3.0.0"
+  sdk: '>=3.3.0 <4.0.0'
+  flutter: '>=3.17.0-0.0.pre'
 
 dependencies:
   ansi_up: ^1.0.0
