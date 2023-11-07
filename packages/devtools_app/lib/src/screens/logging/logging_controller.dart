@@ -830,7 +830,7 @@ class NavigationInfo {
 
   String? get routeDescription =>
       // ignore: unnecessary_non_null_assertion, causing error on bots, but not
-      // locally. Need to investigate.
+      // locally. Need to investigate further.
       _route == null ? null : _route!['description'];
 }
 
