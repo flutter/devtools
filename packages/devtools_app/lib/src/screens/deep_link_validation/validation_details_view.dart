@@ -6,6 +6,7 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/common_widgets.dart';
+import '../../shared/table/table.dart';
 import '../../shared/ui/colors.dart';
 import 'deep_link_list_view.dart';
 import 'deep_links_controller.dart';
@@ -155,8 +156,8 @@ class _DomainCheckTable extends StatelessWidget {
             DataColumn(label: Text('Issue type')),
             DataColumn(label: Text('Status')),
           ],
-          dataRowMinHeight: 32,
-          dataRowMaxHeight: 32,
+          dataRowMinHeight: defaultRowHeight,
+          dataRowMaxHeight: defaultRowHeight,
           rows: [
             if (linkData.os.contains(PlatformOS.android))
               DataRow(
@@ -197,7 +198,7 @@ class _DomainCheckTable extends StatelessWidget {
           ],
         ),
         if (linkData.domainErrors.isNotEmpty) ...[
-          Text('How to fix'),
+          const Text('How to fix'),
           Text(
             'Add the new recommended Digital Asset Links JSON file to the failed website domain at the correct location.',
             style: Theme.of(context).subtleTextStyle,
