@@ -128,7 +128,6 @@ class FlutterSdk {
     }
 
     // Look to see if we can find the 'flutter' command in the PATH.
-    // TODO(dantup): This won't work on Windows.
     final whichCommand = Platform.isWindows ? 'where.exe' : 'which';
     final result = Process.runSync(whichCommand, ['flutter']);
     if (result.exitCode == 0) {
