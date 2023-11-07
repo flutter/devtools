@@ -117,7 +117,7 @@ class ExtensionsManager {
     if (parsingErrors.isNotEmpty) {
       throw ExtensionParsingException(
         'Encountered errors while parsing extension config.yaml '
-        'files:\n${parsingErrors.toString()}',
+        'files:\n$parsingErrors',
       );
     }
   }

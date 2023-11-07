@@ -36,11 +36,8 @@ class DevToolsExtensionConfig implements Comparable {
           versionKey: final String version,
           isPubliclyHostedKey: final String isPubliclyHosted,
         }) {
-      final underscoresAndLetters = RegExp(r'[a-z0-9_]*');
-      final completeMatch = underscoresAndLetters
-          .allMatches(name)
-          .any((m) => m.start == 0 && m.end == name.length);
-      if (!completeMatch) {
+      final underscoresAndLetters = RegExp(r'^[a-z0-9_]*$');
+      if (!underscoresAndLetters.hasMatch(name)) {
         throw StateError(
           'The "name" field in the extension config.yaml should only contain '
           'lowercase letters, numbers, and underscores but instead was '

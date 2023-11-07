@@ -219,7 +219,7 @@ void main() {
         throwsInvalidNameError(),
       );
 
-            expect(
+      expect(
         () {
           DevToolsExtensionConfig.parse({
             'name': 'name.with\'special\chars/',

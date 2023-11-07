@@ -15,7 +15,6 @@ import 'package:devtools_shared/devtools_shared.dart';
 import 'package:logging/logging.dart';
 
 import '../../development_helpers.dart';
-import '../../globals.dart';
 import '../../primitives/utils.dart';
 
 final _log = Logger('_server_web');
