@@ -1,4 +1,5 @@
 ## 0.0.10
+* Bump minimum Dart SDK version to `3.3.0` and minimum Flutter SDK version to `3.17.0-0.0.pre`.
 * Add an example of performing expression evaluations from a DevTools extension.
 * Add an example of registering a service extension and calling it from a DevTools extension.
 * Document the DevTools extension examples.
