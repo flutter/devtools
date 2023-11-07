@@ -129,7 +129,8 @@ class FlutterSdk {
 
     // Look to see if we can find the 'flutter' command in the PATH.
     // TODO(dantup): This won't work on Windows.
-    final result = Process.runSync('which', ['flutter']);
+    final whichCommand = Platform.isWindows ? 'where.exe' : 'which';
+    final result = Process.runSync(whichCommand, ['flutter']);
     if (result.exitCode == 0) {
       final sdkPath = result.stdout.toString().split('\n').first.trim();
       // 'flutter/bin'
