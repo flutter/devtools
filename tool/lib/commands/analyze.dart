@@ -20,7 +20,7 @@ class AnalyzeCommand extends Command {
 
   @override
   Future run() async {
-    final sdk = FlutterSdk.getSdk();
+    final sdk = FlutterSdk.current;
     if (sdk == null) {
       print('Unable to locate a Flutter sdk.');
       return 1;

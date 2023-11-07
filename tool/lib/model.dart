@@ -97,10 +97,15 @@ class DevToolsRepo {
 class FlutterSdk {
   FlutterSdk._(this.sdkPath);
 
+  /// The current located Flutter SDK (or `null` if one could not be found).
+  ///
+  /// Tries to locate from the running Dart VM, FLUTTER_ROOT or searching PATH.
+  static final current = _findSdk();
+
   /// Return the Flutter SDK.
   ///
   /// This can return null if the Flutter SDK can't be found.
-  static FlutterSdk? getSdk() {
+  static FlutterSdk? _findSdk() {
     // TODO(dantup): Everywhere that calls this just prints and exits - should
     //  we just make this throw like DevToolsRepo.getInstance();
     // Look for it relative to the current Dart process.
@@ -127,9 +132,18 @@ class FlutterSdk {
       }
     }
 
+    // Next try FLUTTER_ROOT to allow using a custom flutter (eg. from
+    // `tool/flutter-sdk`) when invoking this without needing to override `PATH`
+    // (it's easier to set override an entire env variable than prepend to one
+    // in some places like the `dart.customDevTools` setting in VS Code).
+    final flutterRootEnv = Platform.environment['FLUTTER_ROOT'];
+    if (flutterRootEnv != null && flutterRootEnv.isNotEmpty) {
+      return FlutterSdk._(flutterRootEnv);
+    }
+
     // Look to see if we can find the 'flutter' command in the PATH.
-    // TODO(dantup): This won't work on Windows.
-    final result = Process.runSync('which', ['flutter']);
+    final whichCommand = Platform.isWindows ? 'where.exe' : 'which';
+    final result = Process.runSync(whichCommand, ['flutter']);
     if (result.exitCode == 0) {
       final sdkPath = result.stdout.toString().split('\n').first.trim();
       // 'flutter/bin'
