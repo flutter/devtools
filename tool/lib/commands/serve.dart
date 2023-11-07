@@ -53,6 +53,11 @@ class ServeCommand extends Command {
         help:
             'Whether to build the DevTools app in release mode before starting '
             'the DevTools server.',
+      )
+      ..addFlag(
+        'machine',
+        negatable: false,
+        help: 'Sets output format to JSON for consumption in tools.',
       );
   }
 
