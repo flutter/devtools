@@ -828,10 +828,10 @@ class NavigationInfo {
 
   final Map<String, dynamic>? _route;
 
-  String? get routeDescription =>
-      // ignore: unnecessary_non_null_assertion, causing error on bots, but not
-      // locally. Need to investigate further.
-      _route == null ? null : _route!['description'];
+  String? get routeDescription {
+    final routeLocal = _route;
+    return routeLocal == null ? null : routeLocal['description'];
+  }
 }
 
 class ServiceExtensionStateChangedInfo {
