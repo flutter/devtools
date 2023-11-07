@@ -351,12 +351,21 @@ abstract class _ExtensionsApiHandler {
 
     final rootPath = queryParams[ExtensionsApi.extensionRootPathPropertyName];
 
-    await extensionsManager.serveAvailableExtensions(rootPath);
+    final result = <String, Object?>{};
+    try {
+      await extensionsManager.serveAvailableExtensions(rootPath);
+    } on ExtensionParsingException catch (e) {
+      // For [ExtensionParsingException]s, we should return a success response
+      // with a warning message.
+      result[ExtensionsApi.extensionsResultWarningPropertyName] = e.message;
+    } catch (e) {
+      // For all other exceptions, return an error response.
+      return api.serverError('$e');
+    }
+
     final extensions =
         extensionsManager.devtoolsExtensions.map((p) => p.toJson()).toList();
-    final result = {
-      ExtensionsApi.extensionsResultPropertyName: extensions,
-    };
+    result[ExtensionsApi.extensionsResultPropertyName] = extensions;
     return ServerApi._encodeResponse(result, api: api);
   }
 

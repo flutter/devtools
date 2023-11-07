@@ -18,64 +18,64 @@ const unsupportedMessage =
 bool get isDevToolsServerAvailable => false;
 
 // This is used in g3.
-Future<Object?> request(String url) async {
+Future<Object?> request(String url) {
   throw Exception(unsupportedMessage);
 }
 
-Future<bool> isFirstRun() async {
+Future<bool> isFirstRun() {
   throw Exception(unsupportedMessage);
 }
 
-Future<bool> isAnalyticsEnabled() async {
+Future<bool> isAnalyticsEnabled() {
   throw Exception(unsupportedMessage);
 }
 
-Future<bool> setAnalyticsEnabled([bool value = true]) async {
+Future<bool> setAnalyticsEnabled([bool value = true]) {
   throw Exception(unsupportedMessage);
 }
 
-Future<String> flutterGAClientID() async {
+Future<String> flutterGAClientID() {
   throw Exception(unsupportedMessage);
 }
 
-Future<bool> setActiveSurvey(String value) async {
+Future<bool> setActiveSurvey(String value) {
   throw Exception(unsupportedMessage);
 }
 
-Future<bool> surveyActionTaken() async {
+Future<bool> surveyActionTaken() {
   throw Exception(unsupportedMessage);
 }
 
-Future<void> setSurveyActionTaken() async {
+Future<void> setSurveyActionTaken() {
   throw Exception(unsupportedMessage);
 }
 
-Future<int> surveyShownCount() async {
+Future<int> surveyShownCount() {
   throw Exception(unsupportedMessage);
 }
 
-Future<int> incrementSurveyShownCount() async {
+Future<int> incrementSurveyShownCount() {
   throw Exception(unsupportedMessage);
 }
 
-Future<String> getLastShownReleaseNotesVersion() async {
+Future<String> getLastShownReleaseNotesVersion() {
   throw Exception(unsupportedMessage);
 }
 
-Future<String> setLastShownReleaseNotesVersion(String version) async {
+Future<String> setLastShownReleaseNotesVersion(String version) {
   throw Exception(unsupportedMessage);
 }
 
 // currently unused
-Future<void> resetDevToolsFile() async {
+Future<void> resetDevToolsFile() {
   throw Exception(unsupportedMessage);
 }
 
-Future<DevToolsJsonFile?> requestBaseAppSizeFile(String path) async {
+Future<DevToolsJsonFile?> requestBaseAppSizeFile(String path) {
   throw Exception(unsupportedMessage);
 }
 
-Future<DevToolsJsonFile?> requestTestAppSizeFile(String path) async {
+Future<DevToolsJsonFile?> requestTestAppSizeFile(String path) {
   throw Exception(unsupportedMessage);
 }
 
