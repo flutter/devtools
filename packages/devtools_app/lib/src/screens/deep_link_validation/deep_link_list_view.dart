@@ -100,17 +100,17 @@ class _DeepLinkListViewMainPanel extends StatelessWidget {
                     valueListenable: controller.selectedLink,
                     builder: (context, selectedLink, _) => TabBarView(
                       children: [
-                        ValidationDetailScreen(
+                        ValidationDetailView(
                           linkData: selectedLink!,
                           controller: controller,
                           viewType: TableViewType.domainView,
                         ),
-                        ValidationDetailScreen(
+                        ValidationDetailView(
                           linkData: selectedLink,
                           controller: controller,
                           viewType: TableViewType.pathView,
                         ),
-                        ValidationDetailScreen(
+                        ValidationDetailView(
                           linkData: selectedLink,
                           controller: controller,
                           viewType: TableViewType.singleUrlView,

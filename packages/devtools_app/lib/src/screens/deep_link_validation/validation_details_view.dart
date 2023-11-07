@@ -11,8 +11,8 @@ import 'deep_link_list_view.dart';
 import 'deep_links_controller.dart';
 import 'deep_links_model.dart';
 
-class ValidationDetailScreen extends StatelessWidget {
-  const ValidationDetailScreen({
+class ValidationDetailView extends StatelessWidget {
+  const ValidationDetailView({
     super.key,
     required this.linkData,
     required this.viewType,
