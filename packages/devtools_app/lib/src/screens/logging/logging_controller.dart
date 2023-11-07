@@ -829,6 +829,8 @@ class NavigationInfo {
   final Map<String, dynamic>? _route;
 
   String? get routeDescription =>
+      // ignore: unnecessary_non_null_assertion, causing error on bots, but not
+      // locally. Need to investigate.
       _route == null ? null : _route!['description'];
 }
 

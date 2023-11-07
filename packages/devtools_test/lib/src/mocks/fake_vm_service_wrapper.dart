@@ -32,6 +32,8 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
         allocationSamples = allocationSamples ?? _defaultProfile {
     _reverseResolvedUriMap = <String, String>{};
     if (_resolvedUriMap != null) {
+      // ignore: unnecessary_non_null_assertion, causing error on bots, but not
+      // locally. Need to investigate.
       for (var e in _resolvedUriMap!.entries) {
         _reverseResolvedUriMap![e.value] = e.key;
       }
@@ -127,6 +129,8 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
     return Future.value(
       UriList(
         uris: _resolvedUriMap != null
+            // ignore: unnecessary_non_null_assertion, causing error on bots,
+            // but not locally. Need to investigate.
             ? (uris.map((e) => _resolvedUriMap![e]).toList())
             : null,
       ),
@@ -141,6 +145,8 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   }) {
     return Future.value(
       UriList(
+        // ignore: unnecessary_non_null_assertion, causing error on bots, but
+        // not locally. Need to investigate.
         uris: _reverseResolvedUriMap != null
             ? (uris.map((e) => _reverseResolvedUriMap![e]).toList())
             : null,
@@ -274,6 +280,8 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
       throw StateError('_memoryData was not provided to FakeServiceManager');
     }
 
+    // ignore: unnecessary_non_null_assertion, causing error on bots, but not
+    // locally. Need to investigate.
     final heapSample = _memoryData!.data.first;
     return Future.value(
       MemoryUsage(
