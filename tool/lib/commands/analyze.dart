@@ -32,6 +32,13 @@ class AnalyzeCommand extends Command {
     final packages = repo.getPackages();
 
     log.stdout('Running flutter analyze...');
+    log.stdout('Flutter and Dart SDK versions:');
+    await processManager.runAll(
+      commands: [
+        CliCommand.flutter('--version'),
+        CliCommand('dart --version'),
+      ],
+    );
 
     int failureCount = 0;
 
