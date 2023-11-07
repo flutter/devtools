@@ -31,8 +31,9 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
         cpuSamples = cpuSamples ?? _defaultProfile,
         allocationSamples = allocationSamples ?? _defaultProfile {
     _reverseResolvedUriMap = <String, String>{};
-    if (_resolvedUriMap != null) {
-      for (var e in _resolvedUriMap!.entries) {
+    final resolvedUrlMapLocal = _resolvedUriMap;
+    if (resolvedUrlMapLocal != null) {
+      for (var e in resolvedUrlMapLocal.entries) {
         _reverseResolvedUriMap![e.value] = e.key;
       }
     }
@@ -124,10 +125,11 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
 
   @override
   Future<UriList> lookupPackageUris(String isolateId, List<String> uris) {
+    final resolvedUrlMapLocal = _resolvedUriMap;
     return Future.value(
       UriList(
-        uris: _resolvedUriMap != null
-            ? (uris.map((e) => _resolvedUriMap![e]).toList())
+        uris: resolvedUrlMapLocal != null
+            ? (uris.map((e) => resolvedUrlMapLocal[e]).toList())
             : null,
       ),
     );
@@ -139,10 +141,11 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
     List<String> uris, {
     bool? local,
   }) {
+    final resolvedUrlMapLocal = _resolvedUriMap;
     return Future.value(
       UriList(
-        uris: _reverseResolvedUriMap != null
-            ? (uris.map((e) => _reverseResolvedUriMap![e]).toList())
+        uris: resolvedUrlMapLocal != null
+            ? (uris.map((e) => resolvedUrlMapLocal[e]).toList())
             : null,
       ),
     );
@@ -270,11 +273,12 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
 
   @override
   Future<MemoryUsage> getMemoryUsage(String isolateId) {
-    if (_memoryData == null) {
+    final memoryDataLocal = _memoryData;
+    if (memoryDataLocal == null) {
       throw StateError('_memoryData was not provided to FakeServiceManager');
     }
 
-    final heapSample = _memoryData!.data.first;
+    final heapSample = memoryDataLocal.data.first;
     return Future.value(
       MemoryUsage(
         externalUsage: heapSample.external,
