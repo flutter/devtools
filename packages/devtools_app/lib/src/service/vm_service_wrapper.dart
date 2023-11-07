@@ -114,7 +114,7 @@ class VmServiceWrapper extends VmService {
     String isolateId, {
     bool? reset,
     bool? gc,
-  }) async {
+  }) {
     return callMethod(
       // TODO(bkonyi): add _new and _old to public response.
       '_getAllocationProfile',
@@ -131,7 +131,7 @@ class VmServiceWrapper extends VmService {
     String isolateId,
     int timeOriginMicros,
     int timeExtentMicros,
-  ) async {
+  ) {
     return callMethod(
       'getCpuSamples',
       isolateId: isolateId,
