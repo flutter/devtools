@@ -52,7 +52,7 @@ class _DeepLinkListViewState extends State<DeepLinkListView>
       // If not found, default to 0.
       releaseVariantIndex = max(releaseVariantIndex, 0);
       controller.selectedVariantIndex.value = releaseVariantIndex;
-      controller.updateLinks();
+      controller.validateLinks();
     });
   }
 
@@ -65,7 +65,6 @@ class _DeepLinkListViewState extends State<DeepLinkListView>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _DeepLinkListViewTopPanel(),
-            SizedBox(height: denseSpacing),
             Expanded(child: _DeepLinkListViewMainPanel()),
           ],
         ),
@@ -80,63 +79,59 @@ class _DeepLinkListViewMainPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Provider.of<DeepLinksController>(context);
-    final textTheme = Theme.of(context).textTheme;
 
     return ValueListenableBuilder<DisplayOptions>(
       valueListenable: controller.displayOptionsNotifier,
       builder: (context, displayOptions, _) =>
           ValueListenableBuilder<List<LinkData>?>(
-        valueListenable: controller.linkDatasNotifier,
+        valueListenable: controller.allLinkDatasNotifier,
         builder: (context, linkDatas, _) {
           if (linkDatas == null) {
             return const CenteredCircularProgressIndicator();
           }
+          if (displayOptions.showSplitScreen) {
+            return Row(
+              children: [
+                Expanded(
+                  child: _AllDeepLinkDataTable(controller: controller),
+                ),
+                Expanded(
+                  child: ValueListenableBuilder<LinkData?>(
+                    valueListenable: controller.selectedLink,
+                    builder: (context, selectedLink, _) => TabBarView(
+                      children: [
+                        ValidationDetailScreen(
+                          linkData: selectedLink!,
+                          controller: controller,
+                          viewType: TableViewType.domainView,
+                        ),
+                        ValidationDetailScreen(
+                          linkData: selectedLink,
+                          controller: controller,
+                          viewType: TableViewType.pathView,
+                        ),
+                        ValidationDetailScreen(
+                          linkData: selectedLink,
+                          controller: controller,
+                          viewType: TableViewType.singleUrlView,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            );
+          }
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              AreaPaneHeader(
-                title: Text('Validate and fix', style: textTheme.bodyLarge),
+              _NotificationCardSection(
+                domainErrorCount: displayOptions.domainErrorCount,
+                pathErrorCount: displayOptions.pathErrorCount,
+                controller: controller,
               ),
-              displayOptions.showSplitScreen
-                  ? const SizedBox.shrink()
-                  : _NotificationCardSection(
-                      domainErrorCount: displayOptions.domainErrorCount,
-                      pathErrorCount: displayOptions.pathErrorCount,
-                      controller: controller,
-                    ),
               Expanded(
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: _AllDeepLinkDataTable(controller: controller),
-                    ),
-                    if (displayOptions.showSplitScreen)
-                      Expanded(
-                        child: ValueListenableBuilder<LinkData?>(
-                          valueListenable: controller.selectedLink,
-                          builder: (context, selectedLink, _) => TabBarView(
-                            children: [
-                              ValidationDetailScreen(
-                                linkData: selectedLink!,
-                                controller: controller,
-                                viewType: TableViewType.domainView,
-                              ),
-                              ValidationDetailScreen(
-                                linkData: selectedLink,
-                                controller: controller,
-                                viewType: TableViewType.pathView,
-                              ),
-                              ValidationDetailScreen(
-                                linkData: selectedLink,
-                                controller: controller,
-                                viewType: TableViewType.singleUrlView,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
+                child: _AllDeepLinkDataTable(controller: controller),
               ),
             ],
           );
@@ -190,8 +185,10 @@ class _DataTable extends StatelessWidget {
         selectionNotifier: controller.selectedLink,
         defaultSortColumn: viewType == TableViewType.pathView ? path : domain,
         defaultSortDirection: SortDirection.ascending,
-        onItemSelected: (item) =>
-            controller.updateDisplayOptions(showSplitScreen: true),
+        onItemSelected: (linkdata) {
+          controller.selectLink(linkdata);
+          controller.updateDisplayOptions(showSplitScreen: true);
+        },
       ),
     );
   }
@@ -203,12 +200,15 @@ class _DeepLinkListViewTopPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Provider.of<DeepLinksController>(context);
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(defaultSpacing),
-          child: ValueListenableBuilder(
+    return AreaPaneHeader(
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            'Validate and fix',
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+          ValueListenableBuilder(
             valueListenable: controller.selectedVariantIndex,
             builder: (_, value, __) {
               return _AndroidVariantDropdown(
@@ -221,8 +221,8 @@ class _DeepLinkListViewTopPanel extends StatelessWidget {
               );
             },
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -268,8 +268,7 @@ class _AllDeepLinkDataTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
+    final textTheme = Theme.of(context).textTheme;
     return Column(
       children: <Widget>[
         OutlineDecoration(
@@ -324,7 +323,7 @@ class _AllDeepLinkDataTable extends StatelessWidget {
         ),
         Expanded(
           child: ValueListenableBuilder<List<LinkData>?>(
-            valueListenable: controller.linkDatasNotifier,
+            valueListenable: controller.displayLinkDatasNotifier,
             builder: (context, linkDatas, _) => TabBarView(
               children: [
                 _DataTable(
@@ -380,10 +379,11 @@ class _NotificationCardSection extends StatelessWidget {
                   onPressed: () {
                     // Switch to the domain view. Select the first link with domain error and show the split screen.
                     DefaultTabController.of(context).index = 0;
-                    controller.selectedLink.value = controller
-                        .getLinkDatasByDomain
-                        .where((element) => element.domainError)
-                        .first;
+                    controller.selectLink(
+                      controller.getLinkDatasByDomain
+                          .where((element) => element.domainErrors.isNotEmpty)
+                          .first,
+                    );
                     controller.updateDisplayOptions(showSplitScreen: true);
                   },
                   child: const Text('Fix domain'),
@@ -400,10 +400,11 @@ class _NotificationCardSection extends StatelessWidget {
                   onPressed: () {
                     // Switch to the path view. Select the first link with path error and show the split screen.
                     DefaultTabController.of(context).index = 1;
-                    controller.selectedLink.value = controller
-                        .getLinkDatasByPath
-                        .where((element) => element.pathError)
-                        .first;
+                    controller.selectLink(
+                      controller.getLinkDatasByPath
+                          .where((element) => element.pathError)
+                          .first,
+                    );
                     controller.updateDisplayOptions(showSplitScreen: true);
                   },
                   child: const Text('Fix path'),

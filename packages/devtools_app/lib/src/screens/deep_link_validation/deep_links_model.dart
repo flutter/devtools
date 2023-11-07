@@ -23,6 +23,14 @@ enum PlatformOS {
   final String description;
 }
 
+enum DomainError {
+  existence('Domain doesn\'t exist'),
+  fingerprints('Fingerprints unavailable');
+
+  const DomainError(this.description);
+  final String description;
+}
+
 /// Contains all data relevant to a deep link.
 class LinkData with SearchableDataMixin {
   LinkData({
@@ -30,7 +38,7 @@ class LinkData with SearchableDataMixin {
     required this.path,
     required this.os,
     this.scheme = const <String>['http://', 'https://'],
-    this.domainError = false,
+    this.domainErrors = const <DomainError>[],
     this.pathError = false,
     this.associatedPath = const <String>[],
     this.associatedDomains = const <String>[],
@@ -40,7 +48,7 @@ class LinkData with SearchableDataMixin {
   final String domain;
   final List<PlatformOS> os;
   final List<String> scheme;
-  final bool domainError;
+  final List<DomainError> domainErrors;
   final bool pathError;
 
   final List<String> associatedPath;
@@ -87,7 +95,8 @@ class _ErrorAwareText extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      'This m.shopping.com domain has 1 issue to fix. Fixing this domain will fix ${link.associatedPath.length} associated deep links.',
+                      'This m.shopping.com domain has ${link.domainErrors.length} issue to fix. '
+                      'Fixing this domain will fix ${link.associatedPath.length} associated deep links.',
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.tooltipTextColor,
                         fontSize: defaultFontSize,
@@ -96,7 +105,7 @@ class _ErrorAwareText extends StatelessWidget {
                     TextButton(
                       onPressed: () {
                         controller.updateDisplayOptions(showSplitScreen: true);
-                        controller.selectedLink.value = link;
+                        controller.selectLink(link);
                       },
                       child: Text(
                         'Fix this domain',
@@ -188,7 +197,7 @@ class DomainColumn extends ColumnData<LinkData>
     VoidCallback? onPressed,
   }) {
     return _ErrorAwareText(
-      isError: dataObject.domainError,
+      isError: dataObject.domainErrors.isNotEmpty,
       controller: controller,
       text: dataObject.domain,
       link: dataObject,
@@ -204,8 +213,8 @@ class DomainColumn extends ColumnData<LinkData>
 
     switch (sortingOption) {
       case SortingOption.errorOnTop:
-        if (a.domainError) return 1;
-        if (b.domainError) return -1;
+        if (a.domainErrors.isNotEmpty) return 1;
+        if (b.domainErrors.isNotEmpty) return -1;
         return 0;
       case SortingOption.aToZ:
         return a.domain.compareTo(b.domain);
@@ -439,7 +448,7 @@ class StatusColumn extends ColumnData<LinkData>
 
   @override
   String getValue(LinkData dataObject) {
-    if (dataObject.domainError) {
+    if (dataObject.domainErrors.isNotEmpty) {
       return 'Failed domain checks';
     } else if (dataObject.pathError) {
       return 'Failed path checks';
@@ -489,7 +498,7 @@ class StatusColumn extends ColumnData<LinkData>
     bool isRowSelected = false,
     VoidCallback? onPressed,
   }) {
-    if (dataObject.domainError || dataObject.pathError) {
+    if (dataObject.domainErrors.isNotEmpty || dataObject.pathError) {
       return Text(
         getValue(dataObject),
         overflow: TextOverflow.ellipsis,

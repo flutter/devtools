@@ -80,7 +80,7 @@ void main() {
       (WidgetTester tester) async {
         deepLinksController.selectedProject.value =
             FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
-        deepLinksController.linkDatasNotifier.value = [
+        deepLinksController.allLinkDatasNotifier.value = [
           LinkData(
             domain: 'www.google.com',
             path: '/',

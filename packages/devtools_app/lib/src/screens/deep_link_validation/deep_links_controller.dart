@@ -3,16 +3,18 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:devtools_shared/devtools_deeplink.dart';
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/config_specific/server/server.dart' as server;
 import 'deep_links_model.dart';
-import 'fake_data.dart';
 
+const String _apiKey = 'AIzaSyDVE6FP3GpwxgS4q8rbS7qaf6cAbxc_elc';
 typedef _DomainAndPath = ({String domain, String path});
 
 enum FilterOption {
@@ -66,8 +68,7 @@ class DisplayOptions {
   Set<FilterOption> filters;
 
   DisplayOptions updateFilter(FilterOption option, bool value) {
-
- final Set<FilterOption> newFilter = Set<FilterOption>.from(filters);
+    final Set<FilterOption> newFilter = Set<FilterOption>.from(filters);
 
     if (value) {
       newFilter.add(option);
@@ -115,7 +116,7 @@ class DeepLinksController {
 
   List<LinkData> get getLinkDatasByPath {
     final linkDatasByPath = <String, LinkData>{};
-    for (var linkData in linkDatasNotifier.value!) {
+    for (var linkData in allLinkDatasNotifier.value!) {
       final prevoisRecord = linkDatasByPath[linkData.path];
       linkDatasByPath[linkData.path] = LinkData(
         domain: linkData.domain,
@@ -142,7 +143,7 @@ class DeepLinksController {
   List<LinkData> get getLinkDatasByDomain {
     final linkDatasByDomain = <String, LinkData>{};
 
-    for (var linkData in linkDatasNotifier.value!) {
+    for (var linkData in allLinkDatasNotifier.value!) {
       final prevoisRecord = linkDatasByDomain[linkData.domain];
       linkDatasByDomain[linkData.domain] = LinkData(
         domain: linkData.domain,
@@ -152,7 +153,7 @@ class DeepLinksController {
           ...prevoisRecord?.associatedPath ?? [],
           linkData.path,
         ],
-        domainError: linkData.domainError,
+        domainErrors: linkData.domainErrors,
       );
     }
     return _getFilterredLinks(linkDatasByDomain.values.toList());
@@ -162,77 +163,179 @@ class DeepLinksController {
 
   late final selectedVariantIndex = ValueNotifier<int>(0);
   void _handleSelectedVariantIndexChanged() {
-    linkDatasNotifier.value = null;
+    allLinkDatasNotifier.value = null;
     unawaited(_loadAndroidAppLinks());
   }
 
   Future<void> _loadAndroidAppLinks() async {
-    // if (!_androidAppLinks.containsKey(selectedVariantIndex.value)) {
-    //   final variant =
-    //       selectedProject.value!.androidVariants[selectedVariantIndex.value];
-    //   await ga.timeAsync(
-    //     gac.deeplink,
-    //     gac.AnalyzeFlutterProject.loadAppLinks.name,
-    //     asyncOperation: () async {
-    //       final result = await server.requestAndroidAppLinkSettings(
-    //         selectedProject.value!.path,
-    //         buildVariant: variant,
-    //       );
-    //       _androidAppLinks[selectedVariantIndex.value] = result;
-    //     },
-    //   );
-    // }
-    updateLinks();
+    if (!_androidAppLinks.containsKey(selectedVariantIndex.value)) {
+      final variant =
+          selectedProject.value!.androidVariants[selectedVariantIndex.value];
+      await ga.timeAsync(
+        gac.deeplink,
+        gac.AnalyzeFlutterProject.loadAppLinks.name,
+        asyncOperation: () async {
+          final result = await server.requestAndroidAppLinkSettings(
+            selectedProject.value!.path,
+            buildVariant: variant,
+          );
+          _androidAppLinks[selectedVariantIndex.value] = result;
+        },
+      );
+    }
+    validateLinks();
   }
 
   List<LinkData> get _allLinkDatas {
-    return allLinkDatas;
-    // final appLinks = _androidAppLinks[selectedVariantIndex.value]?.deeplinks;
-    // if (appLinks == null) {
-    //   return const <LinkData>[];
-    // }
-    // final domainPathToScheme = <_DomainAndPath, Set<String>>{};
-    // for (final appLink in appLinks) {
-    //   final schemes = domainPathToScheme.putIfAbsent(
-    //     (domain: appLink.host, path: appLink.path),
-    //     () => <String>{},
-    //   );
-    //   schemes.add(appLink.scheme);
-    // }
-    // return domainPathToScheme.entries
-    //     .map(
-    //       (entry) => LinkData(
-    //         domain: entry.key.domain,
-    //         path: entry.key.path,
-    //         os: [PlatformOS.android],
-    //         scheme: entry.value.toList(),
-    //       ),
-    //     )
-    //     .toList();
+    final appLinks = _androidAppLinks[selectedVariantIndex.value]?.deeplinks;
+    if (appLinks == null) {
+      return const <LinkData>[];
+    }
+    final domainPathToScheme = <_DomainAndPath, Set<String>>{};
+    for (final appLink in appLinks) {
+      final schemes = domainPathToScheme.putIfAbsent(
+        (domain: appLink.host, path: appLink.path),
+        () => <String>{},
+      );
+      schemes.add(appLink.scheme);
+    }
+    return domainPathToScheme.entries
+        .map(
+          (entry) => LinkData(
+            domain: entry.key.domain,
+            path: entry.key.path,
+            os: [PlatformOS.android],
+            scheme: entry.value.toList(),
+          ),
+        )
+        .toList();
   }
 
-  final selectedProject = ValueNotifier<FlutterProject?>(null);
+  final selectedProject = ValueNotifier<FlutterProject?>( null);
   final selectedLink = ValueNotifier<LinkData?>(null);
-  final linkDatasNotifier = ValueNotifier<List<LinkData>?>(null);
+
+  final allLinkDatasNotifier = ValueNotifier<List<LinkData>?>(null);
+  final displayLinkDatasNotifier = ValueNotifier<List<LinkData>?>(null);
+  final generatedAssetLinksForSelectedLink = ValueNotifier<String?>(null);
 
   final displayOptionsNotifier =
       ValueNotifier<DisplayOptions>(DisplayOptions());
 
-  void updateLinks() {
-    linkDatasNotifier.value = _allLinkDatas;
+  Future<void> _generateAssetLinks() async {
+    final applicationId =
+        _androidAppLinks[selectedVariantIndex.value]?.applicationId ?? '';
+
+    final response = await http.post(
+      Uri.parse(
+        'https://deeplinkassistant-pa.googleapis.com/android/generation/v1/assetlinks:generate?key=$_apiKey',
+      ),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(
+        {
+          'package_name': applicationId,
+          'domains': [selectedLink.value!.domain],
+        },
+      ),
+    );
+
+    final Map<String, dynamic> result =
+        json.decode(response.body) as Map<String, dynamic>;
+    if (result['domains'] != null) {
+      final String generatedContent = (((result['domains'] as List<dynamic>)
+          .first) as Map<String, dynamic>)['generatedContent'];
+
+      generatedAssetLinksForSelectedLink.value = generatedContent;
+    }
+  }
+
+  Future<List<LinkData>> _validateAndroidDomain() async {
+    final List<LinkData> linkdatas = _allLinkDatas;
+    final domains = linkdatas
+        .where((linkdata) => linkdata.os.contains(PlatformOS.android))
+        .map((linkdata) => linkdata.domain)
+        .toSet()
+        .toList();
+
+    final applicationId =
+        _androidAppLinks[selectedVariantIndex.value]?.applicationId ?? '';
+
+    final response = await http.post(
+      Uri.parse(
+        'https://deeplinkassistant-pa.googleapis.com/android/validation/v1/domains:batchValidate?key=$_apiKey',
+      ),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'package_name': applicationId,
+        'app_link_domains': domains,
+      }),
+    );
+
+    final Map<String, dynamic> result =
+        json.decode(response.body) as Map<String, dynamic>;
+
+    final Map<String, List<DomainError>> domainErrors = {
+      for (var domain in domains) domain: <DomainError>[],
+    };
+
+    final validationResult = result['validationResult'] as List<dynamic>;
+    for (final Map<String, dynamic> domainResult in validationResult) {
+      final String domainName = domainResult['domainName'];
+      final List<dynamic>? failedChecks = domainResult['failedChecks'];
+      if (failedChecks != null) {
+        for (final Map<String, dynamic> failedCheck in failedChecks) {
+          switch (failedCheck['checkName']) {
+            case 'EXISTENCE':
+              domainErrors[domainName]!.add(DomainError.existence);
+            case 'FINGERPRINT':
+              domainErrors[domainName]!.add(DomainError.fingerprints);
+          }
+        }
+      }
+    }
+
+    return linkdatas.map((linkdata) {
+      if (domainErrors[linkdata.domain]?.isNotEmpty ?? false) {
+        return LinkData(
+          domain: linkdata.domain,
+          domainErrors: domainErrors[linkdata.domain]!,
+          path: linkdata.path,
+          pathError: linkdata.pathError,
+          os: linkdata.os,
+          scheme: linkdata.scheme,
+          associatedDomains: linkdata.associatedDomains,
+          associatedPath: linkdata.associatedPath,
+        );
+      }
+      return linkdata;
+    }).toList();
+  }
+
+  void validateLinks() async {
+    allLinkDatasNotifier.value = await _validateAndroidDomain();
+    displayLinkDatasNotifier.value =
+        _getFilterredLinks(allLinkDatasNotifier.value!);
 
     displayOptionsNotifier.value = displayOptionsNotifier.value.copyWith(
-      domainErrorCount:
-          getLinkDatasByDomain.where((element) => element.domainError).length,
+      domainErrorCount: getLinkDatasByDomain
+          .where((element) => element.domainErrors.isNotEmpty)
+          .length,
       pathErrorCount:
           getLinkDatasByPath.where((element) => element.pathError).length,
     );
   }
 
+  void selectLink(LinkData linkdata) async {
+    selectedLink.value = linkdata;
+    if (linkdata.domainErrors.isNotEmpty) {
+      await _generateAssetLinks();
+    }
+  }
+
   set searchContent(String content) {
     displayOptionsNotifier.value =
         displayOptionsNotifier.value.copyWith(searchContent: content);
-    linkDatasNotifier.value = _getFilterredLinks(_allLinkDatas);
+    displayLinkDatasNotifier.value =
+        _getFilterredLinks(allLinkDatasNotifier.value!);
   }
 
   void updateDisplayOptions({
@@ -254,12 +357,14 @@ class DeepLinksController {
     if (addedFilter != null) {
       displayOptionsNotifier.value =
           displayOptionsNotifier.value.updateFilter(addedFilter, true);
-    }    if (removedFilter != null) {
+    }
+    if (removedFilter != null) {
       displayOptionsNotifier.value =
           displayOptionsNotifier.value.updateFilter(removedFilter, false);
     }
 
-    linkDatasNotifier.value = _getFilterredLinks(_allLinkDatas);
+    displayLinkDatasNotifier.value =
+        _getFilterredLinks(allLinkDatasNotifier.value!);
   }
 
   List<LinkData> _getFilterredLinks(List<LinkData> linkDatas) {
@@ -279,12 +384,12 @@ class DeepLinksController {
         return false;
       }
 
-      if (!((linkData.domainError &&
+      if (!((linkData.domainErrors.isNotEmpty &&
               displayOptions.filters
                   .contains(FilterOption.failedDomainCheck)) ||
           (linkData.pathError &&
               displayOptions.filters.contains(FilterOption.failedPathCheck)) ||
-          (!linkData.domainError &&
+          (!linkData.domainErrors.isNotEmpty &&
               !linkData.pathError &&
               displayOptions.filters.contains(FilterOption.noIssue)))) {
         return false;

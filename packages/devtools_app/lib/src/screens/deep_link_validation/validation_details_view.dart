@@ -5,6 +5,7 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
+import '../../shared/common_widgets.dart';
 import '../../shared/ui/colors.dart';
 import 'deep_link_list_view.dart';
 import 'deep_links_controller.dart';
@@ -64,12 +65,15 @@ class ValidationDetailScreen extends StatelessWidget {
                 ' the manifest and info.plist file, routing issues, URL format, etc.',
                 style: Theme.of(context).subtleTextStyle,
               ),
-              if (viewType != TableViewType.pathView) ...[
+              if (viewType == TableViewType.domainView || viewType == TableViewType.singleUrlView) ...[
                 const SizedBox(height: intermediateSpacing),
                 Text('Domain check', style: textTheme.titleSmall),
-                _DomainCheckTable(linkData: linkData),
+                const SizedBox(height: denseSpacing),
+                _DomainCheckTable(
+                  controller: controller,
+                ),
               ],
-              if (viewType != TableViewType.domainView) ...[
+              if (viewType == TableViewType.pathView || viewType == TableViewType.singleUrlView) ...[
                 const SizedBox(height: intermediateSpacing),
                 Text('Path check (coming soon)', style: textTheme.titleSmall),
                 _PathCheckTable(),
@@ -79,7 +83,7 @@ class ValidationDetailScreen extends StatelessWidget {
                 alignment: Alignment.bottomRight,
                 child: FilledButton(
                   onPressed: () {
-                    controller.updateLinks();
+                    controller.validateLinks();
                   },
                   child: const Text('Recheck all'),
                 ),
@@ -101,7 +105,7 @@ class ValidationDetailScreen extends StatelessWidget {
                               ),
                               child: Row(
                                 children: <Widget>[
-                                  if (linkData.domainError)
+                                  if (linkData.domainErrors.isNotEmpty)
                                     Icon(
                                       Icons.error,
                                       color: colorScheme.error,
@@ -128,61 +132,116 @@ class ValidationDetailScreen extends StatelessWidget {
 
 class _DomainCheckTable extends StatelessWidget {
   const _DomainCheckTable({
-    required this.linkData,
+    required this.controller,
   });
 
-  final LinkData linkData;
+  final DeepLinksController controller;
 
   @override
   Widget build(BuildContext context) {
-    return DataTable(
-      headingRowColor: MaterialStateProperty.all(
-        Theme.of(context).colorScheme.deeplinkTableHeaderColor,
-      ),
-      dataRowColor: MaterialStateProperty.all(
-        Theme.of(context).colorScheme.alternatingBackgroundColor2,
-      ),
-      columns: const [
-        DataColumn(label: Text('OS')),
-        DataColumn(label: Text('Issue type')),
-        DataColumn(label: Text('Status')),
-      ],
-      rows: [
-        if (linkData.os.contains(PlatformOS.android))
-          DataRow(
-            cells: [
-              const DataCell(Text('Android')),
-              const DataCell(Text('Digital assets link file')),
-              DataCell(
-                linkData.domainError
-                    ? Text(
-                        'Check failed',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.error,
-                        ),
-                      )
-                    : Text(
-                        'No issues found',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.green,
-                        ),
-                      ),
-              ),
-            ],
+    final linkData = controller.selectedLink.value!;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        DataTable(
+          headingRowColor: MaterialStateProperty.all(
+            Theme.of(context).colorScheme.deeplinkTableHeaderColor,
           ),
-        if (linkData.os.contains(PlatformOS.ios))
-          DataRow(
-            cells: [
-              const DataCell(Text('iOS')),
-              const DataCell(Text('Apple-App-Site-Association file')),
-              DataCell(
-                Text(
-                  'No issues found',
-                  style: TextStyle(color: Theme.of(context).colorScheme.green),
+          dataRowColor: MaterialStateProperty.all(
+            Theme.of(context).colorScheme.alternatingBackgroundColor2,
+          ),
+          columns: const [
+            DataColumn(label: Text('OS')),
+            DataColumn(label: Text('Issue type')),
+            DataColumn(label: Text('Status')),
+          ],
+          dataRowMinHeight: 32,
+          dataRowMaxHeight: 32,
+          rows: [
+            if (linkData.os.contains(PlatformOS.android))
+              DataRow(
+                cells: [
+                  const DataCell(Text('Android')),
+                  const DataCell(Text('Digital assets link file')),
+                  DataCell(
+                    linkData.domainErrors.isNotEmpty
+                        ? Text(
+                            'Check failed',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.error,
+                            ),
+                          )
+                        : Text(
+                            'No issues found',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.green,
+                            ),
+                          ),
+                  ),
+                ],
+              ),
+            if (linkData.os.contains(PlatformOS.ios))
+              DataRow(
+                cells: [
+                  const DataCell(Text('iOS')),
+                  const DataCell(Text('Apple-App-Site-Association file')),
+                  DataCell(
+                    Text(
+                      'No issues found',
+                      style:
+                          TextStyle(color: Theme.of(context).colorScheme.green),
+                    ),
+                  ),
+                ],
+              ),
+          ],
+        ),
+        if (linkData.domainErrors.isNotEmpty) ...[
+          Text('How to fix'),
+          Text(
+            'Add the new recommended Digital Asset Links JSON file to the failed website domain at the correct location.',
+            style: Theme.of(context).subtleTextStyle,
+          ),
+          Text(
+            'Update and publish recommend Digital Asset Links JSON file below to this location: ',
+            style: Theme.of(context).subtleTextStyle,
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Card(
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(4.0)),
+              ),
+              color: Theme.of(context).colorScheme.outline,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
+                child: SelectionArea(
+                  child: Text(
+                    'https://${linkData.domain}/.well-known/assetlinks.json',
+                    style: Theme.of(context).regularTextStyle.copyWith(
+                          color: Colors.black,
+                          fontWeight: FontWeight.w500,
+                        ),
+                  ),
                 ),
               ),
-            ],
+            ),
           ),
+          Card(
+            child: ValueListenableBuilder(
+              valueListenable: controller.generatedAssetLinksForSelectedLink,
+              builder: (_, String? generatedAssetLinks, __) =>
+                  generatedAssetLinks != null
+                      ? Align(
+                          alignment: Alignment.centerLeft,
+                          child: SelectionArea(
+                            child: Text(generatedAssetLinks),
+                          ),
+                        )
+                      : const CenteredCircularProgressIndicator(),
+            ),
+          ),
+        ],
       ],
     );
   }
