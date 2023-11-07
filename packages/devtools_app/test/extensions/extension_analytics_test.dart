@@ -53,7 +53,7 @@ void main() {
       () {
         final private = fooExtension;
         expect(private.isPubliclyHosted, false);
-        expect(private.name, 'Foo');
+        expect(private.name, 'foo');
         expect(private.analyticsSafeName, 'private');
         expect(
           DevToolsExtensionEvents.extensionScreenName(private),
