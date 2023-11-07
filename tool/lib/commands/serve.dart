@@ -14,6 +14,8 @@ import '../utils.dart';
 const _useLocalFlutterFlag = 'use-local-flutter';
 const _updatePerfettoFlag = 'update-perfetto';
 const _buildAppFlag = 'build-app';
+const _machineFlag = 'machine';
+const _allowEmbeddingFlag = 'allow-embedding';
 
 /// This command builds DevTools in release mode by running the
 /// `devtools_tool build-release` command and then serves DevTools with a
@@ -54,10 +56,15 @@ class ServeCommand extends Command {
             'Whether to build the DevTools app in release mode before starting '
             'the DevTools server.',
       )
+      // Flags defined in the server in DDS.
       ..addFlag(
-        'machine',
+        _machineFlag,
         negatable: false,
         help: 'Sets output format to JSON for consumption in tools.',
+      )
+      ..addFlag(
+        _allowEmbeddingFlag,
+        help: 'Allow embedding DevTools inside an iframe.',
       );
   }
 
