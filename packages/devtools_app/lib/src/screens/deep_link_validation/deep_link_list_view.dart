@@ -13,6 +13,7 @@ import '../../shared/primitives/utils.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
 import '../../shared/ui/colors.dart';
+import '../../shared/ui/tab.dart';
 import '../../shared/utils.dart';
 import 'deep_links_controller.dart';
 import 'deep_links_model.dart';
@@ -183,7 +184,8 @@ class _DataTable extends StatelessWidget {
           ],
         ],
         selectionNotifier: controller.selectedLink,
-        defaultSortColumn: (viewType == TableViewType.pathView ? path : domain) as ColumnData<LinkData>,
+        defaultSortColumn: (viewType == TableViewType.pathView ? path : domain)
+            as ColumnData<LinkData>,
         defaultSortDirection: SortDirection.ascending,
         onItemSelected: (linkdata) {
           controller.selectLink(linkdata!);
@@ -270,6 +272,7 @@ class _AllDeepLinkDataTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    const gaPrefix = 'deepLinkTab';
     return Column(
       children: <Widget>[
         OutlineDecoration(
@@ -304,17 +307,17 @@ class _AllDeepLinkDataTable extends StatelessWidget {
         ),
         TabBar(
           tabs: [
-            Text(
-              'Domain view',
-              style: textTheme.bodyLarge,
+            DevToolsTab.create(
+              tabName: 'Domain view',
+              gaPrefix: gaPrefix,
             ),
-            Text(
-              'Path view',
-              style: textTheme.bodyLarge,
+            DevToolsTab.create(
+              tabName: 'Path view',
+              gaPrefix: gaPrefix,
             ),
-            Text(
-              'Single URL view',
-              style: textTheme.bodyLarge,
+            DevToolsTab.create(
+              tabName: 'Single URL view',
+              gaPrefix: gaPrefix,
             ),
           ],
           tabAlignment: TabAlignment.start,

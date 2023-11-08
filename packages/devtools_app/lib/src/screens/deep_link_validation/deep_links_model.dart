@@ -14,6 +14,7 @@ import 'deep_link_list_view.dart';
 import 'deep_links_controller.dart';
 
 const kDeeplinkTableCellDefaultWidth = 200.0;
+const kToolTipWidth = 344.0;
 
 enum PlatformOS {
   android('Android'),
@@ -90,7 +91,7 @@ class _ErrorAwareText extends StatelessWidget {
             preferBelow: true,
             richMessage: WidgetSpan(
               child: SizedBox(
-                width: 344,
+                width: kToolTipWidth,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
@@ -158,25 +159,8 @@ class DomainColumn extends ColumnData<LinkData>
       children: [
         const Text('Domain'),
         PopupMenuButton<SortingOption>(
-          itemBuilder: (BuildContext context) {
-            return [
-              _buildPopupMenuSortingEntry(
-                controller,
-                SortingOption.errorOnTop,
-                isPath: false,
-              ),
-              _buildPopupMenuSortingEntry(
-                controller,
-                SortingOption.aToZ,
-                isPath: false,
-              ),
-              _buildPopupMenuSortingEntry(
-                controller,
-                SortingOption.zToA,
-                isPath: false,
-              ),
-            ];
-          },
+          itemBuilder: (BuildContext context) =>
+              _buildPopupMenuSortingEntries(controller, isPath: false),
           child: Icon(
             Icons.arrow_drop_down,
             size: actionsIconSize,
@@ -204,24 +188,13 @@ class DomainColumn extends ColumnData<LinkData>
     );
   }
 
-  // Default to show result with error first.
   @override
-  int compare(LinkData a, LinkData b) {
-    final SortingOption? sortingOption =
-        controller.displayOptions.domainSortingOption;
-    if (sortingOption == null) return 0;
-
-    switch (sortingOption) {
-      case SortingOption.errorOnTop:
-        if (a.domainErrors.isNotEmpty) return 1;
-        if (b.domainErrors.isNotEmpty) return -1;
-        return 0;
-      case SortingOption.aToZ:
-        return a.domain.compareTo(b.domain);
-      case SortingOption.zToA:
-        return b.domain.compareTo(a.domain);
-    }
-  }
+  int compare(LinkData a, LinkData b) => _compareLinkData(
+        a,
+        b,
+        sortingOption: controller.displayOptions.domainSortingOption,
+        compareDomain: true,
+      );
 }
 
 class PathColumn extends ColumnData<LinkData>
@@ -244,25 +217,8 @@ class PathColumn extends ColumnData<LinkData>
       children: [
         const Text('Path'),
         PopupMenuButton<SortingOption>(
-          itemBuilder: (BuildContext context) {
-            return [
-              _buildPopupMenuSortingEntry(
-                controller,
-                SortingOption.errorOnTop,
-                isPath: true,
-              ),
-              _buildPopupMenuSortingEntry(
-                controller,
-                SortingOption.aToZ,
-                isPath: true,
-              ),
-              _buildPopupMenuSortingEntry(
-                controller,
-                SortingOption.zToA,
-                isPath: true,
-              ),
-            ];
-          },
+          itemBuilder: (BuildContext context) =>
+              _buildPopupMenuSortingEntries(controller, isPath: true),
           child: Icon(
             Icons.arrow_drop_down,
             size: actionsIconSize,
@@ -290,25 +246,13 @@ class PathColumn extends ColumnData<LinkData>
     );
   }
 
-  // Default to show result with error first.
   @override
-  int compare(LinkData a, LinkData b) {
-    final SortingOption? sortingOption =
-        controller.displayOptions.pathSortingOption;
-
-    if (sortingOption == null) return 0;
-
-    switch (sortingOption) {
-      case SortingOption.errorOnTop:
-        if (a.pathError) return -1;
-        if (b.pathError) return 1;
-        return 0;
-      case SortingOption.aToZ:
-        return a.path.compareTo(b.path);
-      case SortingOption.zToA:
-        return b.path.compareTo(a.path);
-    }
-  }
+  int compare(LinkData a, LinkData b) => _compareLinkData(
+        a,
+        b,
+        sortingOption: controller.displayOptions.pathSortingOption,
+        compareDomain: false,
+      );
 }
 
 class NumberOfAssociatedPathColumn extends ColumnData<LinkData> {
@@ -561,6 +505,29 @@ PopupMenuEntry<FilterOption> _buildPopupMenuFilterEntry(
   );
 }
 
+List<PopupMenuEntry<SortingOption>> _buildPopupMenuSortingEntries(
+  DeepLinksController controller, {
+  required bool isPath,
+}) {
+  return [
+    _buildPopupMenuSortingEntry(
+      controller,
+      SortingOption.errorOnTop,
+      isPath: isPath,
+    ),
+    _buildPopupMenuSortingEntry(
+      controller,
+      SortingOption.aToZ,
+      isPath: isPath,
+    ),
+    _buildPopupMenuSortingEntry(
+      controller,
+      SortingOption.zToA,
+      isPath: isPath,
+    ),
+  ];
+}
+
 PopupMenuEntry<SortingOption> _buildPopupMenuSortingEntry(
   DeepLinksController controller,
   SortingOption sortingOption, {
@@ -585,4 +552,33 @@ class FlutterProject {
   });
   final String path;
   final List<String> androidVariants;
+}
+
+int _compareLinkData(
+  LinkData a,
+  LinkData b, {
+  SortingOption? sortingOption,
+  required bool compareDomain,
+}) {
+  if (sortingOption == null) return 0;
+
+  switch (sortingOption) {
+    case SortingOption.errorOnTop:
+      if (compareDomain) {
+        if (a.domainErrors.isNotEmpty) return 1;
+        if (b.domainErrors.isNotEmpty) return -1;
+      } else {
+        if (a.pathError) return 1;
+        if (b.pathError) return -1;
+      }
+      return 0;
+    case SortingOption.aToZ:
+      if (compareDomain) return a.domain.compareTo(b.domain);
+
+      return a.path.compareTo(b.path);
+    case SortingOption.zToA:
+      if (compareDomain) return b.domain.compareTo(a.domain);
+
+      return b.path.compareTo(a.path);
+  }
 }

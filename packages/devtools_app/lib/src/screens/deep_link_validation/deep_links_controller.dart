@@ -15,12 +15,20 @@ import '../../shared/config_specific/server/server.dart' as server;
 import 'deep_links_model.dart';
 
 const String _apiKey = 'AIzaSyDVE6FP3GpwxgS4q8rbS7qaf6cAbxc_elc';
-
 const String _assetLinksGenerationURL =
     'https://deeplinkassistant-pa.googleapis.com/android/generation/v1/assetlinks:generate?key=$_apiKey';
-
 const String _androidDomainValidationURL =
     'https://deeplinkassistant-pa.googleapis.com/android/validation/v1/domains:batchValidate?key=$_apiKey';
+const postHeader = {'Content-Type': 'application/json'};
+const String _packageNameKey = 'package_name';
+const String _domainsKey = 'domains';
+const String _appLinkDomainsKey = 'app_link_domains';
+const String _validationResultKey = 'validationResult';
+const String _domainNameKey = 'domainName';
+const String _checkNameKey = 'checkName';
+const String _failedChecksKey = 'failedChecks';
+const String _generatedContentKey = 'generatedContent';
+
 typedef _DomainAndPath = ({String domain, String path});
 
 enum FilterOption {
@@ -60,6 +68,7 @@ class DisplayOptions {
       FilterOption.failedPathCheck,
     },
     this.searchContent = '',
+    // Default to show result with error first.
     this.domainSortingOption = SortingOption.errorOnTop,
     this.pathSortingOption = SortingOption.errorOnTop,
   });
@@ -71,7 +80,7 @@ class DisplayOptions {
   SortingOption? domainSortingOption;
   SortingOption? pathSortingOption;
 
-  Set<FilterOption> filters;
+  final Set<FilterOption> filters;
 
   DisplayOptions updateFilter(FilterOption option, bool value) {
     final newFilter = Set<FilterOption>.from(filters);
@@ -233,14 +242,14 @@ class DeepLinksController {
 
     final response = await http.post(
       Uri.parse(_assetLinksGenerationURL),
-      headers: {'Content-Type': 'application/json'},
+      headers: postHeader,
       body: jsonEncode(
         {
-          'package_name': applicationId,
-          'domains': [selectedLink.value!.domain],
+          _packageNameKey: applicationId,
+          _domainsKey: [selectedLink.value!.domain],
           // TODO(hangyujin): The fake fingerprints here is just for testing usage, should remove it later.
           'supplemental_sha256_cert_fingerprints': [
-            '5A:33:EA:64:09:97:F2:F0:24:21:0F:B6:7A:A8:18:1C:18:A9:83:03:20:21:8F:9B:0B:98:BF:43:69:C2:AF:4A'
+            '5A:33:EA:64:09:97:F2:F0:24:21:0F:B6:7A:A8:18:1C:18:A9:83:03:20:21:8F:9B:0B:98:BF:43:69:C2:AF:4A',
           ],
         },
       ),
@@ -248,9 +257,9 @@ class DeepLinksController {
 
     final Map<String, dynamic> result =
         json.decode(response.body) as Map<String, dynamic>;
-    if (result['domains'] != null) {
-      final String generatedContent = (((result['domains'] as List<dynamic>)
-          .first) as Map<String, dynamic>)['generatedContent'];
+    if (result[_domainsKey] != null) {
+      final String generatedContent = (((result[_domainsKey] as List<dynamic>)
+          .first) as Map<String, dynamic>)[_generatedContentKey];
 
       generatedAssetLinksForSelectedLink.value = generatedContent;
     }
@@ -269,10 +278,10 @@ class DeepLinksController {
 
     final response = await http.post(
       Uri.parse(_androidDomainValidationURL),
-      headers: {'Content-Type': 'application/json'},
+      headers: postHeader,
       body: jsonEncode({
-        'package_name': applicationId,
-        'app_link_domains': domains,
+        _packageNameKey: applicationId,
+        _appLinkDomainsKey: domains,
       }),
     );
 
@@ -283,13 +292,13 @@ class DeepLinksController {
       for (var domain in domains) domain: <DomainError>[],
     };
 
-    final validationResult = result['validationResult'] as List<dynamic>;
+    final validationResult = result[_validationResultKey] as List<dynamic>;
     for (final Map<String, dynamic> domainResult in validationResult) {
-      final String domainName = domainResult['domainName'];
-      final List<dynamic>? failedChecks = domainResult['failedChecks'];
+      final String domainName = domainResult[_domainNameKey];
+      final List<dynamic>? failedChecks = domainResult[_failedChecksKey];
       if (failedChecks != null) {
         for (final Map<String, dynamic> failedCheck in failedChecks) {
-          switch (failedCheck['checkName']) {
+          switch (failedCheck[_checkNameKey]) {
             case 'EXISTENCE':
               domainErrors[domainName]!.add(DomainError.existence);
             case 'FINGERPRINT':
