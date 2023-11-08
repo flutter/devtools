@@ -77,6 +77,11 @@ abstract class ExtensionsApi {
   /// receiving a [apiServeAvailableExtensions] request.
   static const extensionsResultPropertyName = 'extensions';
 
+  /// The property name for an optional warning message field in the response
+  /// that the server sends back upon receiving a [apiServeAvailableExtensions]
+  /// request.
+  static const extensionsResultWarningPropertyName = 'warning';
+
   /// Returns and optionally sets the enabled state for a DevTools extension.
   static const apiExtensionEnabledState = '${apiPrefix}extensionEnabledState';
 

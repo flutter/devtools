@@ -7,7 +7,7 @@ import 'package:devtools_shared/src/extensions/extension_model.dart';
 final testExtensions = [fooExtension, barExtension, providerExtension];
 
 final fooExtension = DevToolsExtensionConfig.parse({
-  DevToolsExtensionConfig.nameKey: 'Foo',
+  DevToolsExtensionConfig.nameKey: 'foo',
   DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
   DevToolsExtensionConfig.versionKey: '1.0.0',
   DevToolsExtensionConfig.pathKey: '/path/to/foo',
