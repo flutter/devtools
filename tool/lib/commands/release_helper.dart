@@ -97,7 +97,7 @@ class ReleaseHelperCommand extends Command {
         ]),
       );
 
-      final newVersion = getNewVersionResult;
+      final newVersion = getNewVersionResult.stdout.trim();
 
       final commitMessage = "Prepare for release $newVersion";
 
@@ -122,7 +122,7 @@ class ReleaseHelperCommand extends Command {
         ]),
       );
 
-      print('Your Draft release PR can be found at: $prURL');
+      print('Your Draft release PR can be found at: ${prURL.stdout.trim()}');
       print('DONE');
       print(
         'Build, run and test this release using: `devtools_tool serve`',
@@ -131,7 +131,8 @@ class ReleaseHelperCommand extends Command {
       print(e);
 
       // try to bring the caller back to their original branch
-      await Process.run('git', ['checkout', initialBranch]);
+      await processManager
+          .runProcess(CliCommand.git(['checkout', initialBranch]));
 
       // try to clean up the temporary branch we made
       if (releaseBranch != null) {
