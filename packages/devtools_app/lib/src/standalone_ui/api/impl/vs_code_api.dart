@@ -60,6 +60,14 @@ final class VsCodeApiImpl extends ToolApiImpl implements VsCodeApi {
   }
 
   @override
+  Future<bool> enablePlatformType(String platformType) {
+    return sendRequest(
+      VsCodeApi.jsonEnablePlatformTypeMethod,
+      {VsCodeApi.jsonPlatformTypeParameter: platformType},
+    );
+  }
+
+  @override
   Future<void> openDevToolsPage(String debugSessionId, String page) {
     return sendRequest(
       VsCodeApi.jsonOpenDevToolsPageMethod,
@@ -206,6 +214,7 @@ class VsCodeDevicesEventImpl implements VsCodeDevicesEvent {
   VsCodeDevicesEventImpl({
     required this.selectedDeviceId,
     required this.devices,
+    required this.unsupportedDevices,
   });
 
   VsCodeDevicesEventImpl.fromJson(Map<String, Object?> json)
@@ -216,6 +225,11 @@ class VsCodeDevicesEventImpl implements VsCodeDevicesEvent {
               .map((item) => Map<String, Object?>.from(item))
               .map((map) => VsCodeDeviceImpl.fromJson(map))
               .toList(),
+          unsupportedDevices:
+              (json[VsCodeDevicesEvent.jsonUnsupportedDevicesField] as List?)
+                  ?.map((item) => Map<String, Object?>.from(item))
+                  .map((map) => VsCodeDeviceImpl.fromJson(map))
+                  .toList(),
         );
 
   @override
@@ -224,9 +238,13 @@ class VsCodeDevicesEventImpl implements VsCodeDevicesEvent {
   @override
   final List<VsCodeDevice> devices;
 
+  @override
+  final List<VsCodeDevice>? unsupportedDevices;
+
   Map<String, Object?> toJson() => {
         VsCodeDevicesEvent.jsonSelectedDeviceIdField: selectedDeviceId,
         VsCodeDevicesEvent.jsonDevicesField: devices,
+        VsCodeDevicesEvent.jsonUnsupportedDevicesField: unsupportedDevices,
       };
 }
 

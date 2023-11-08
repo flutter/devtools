@@ -47,6 +47,14 @@ TODO: Remove this section if there are not any general updates.
 
 TODO: Remove this section if there are not any general updates.
 
+## VS Code Sidebar updates
+
+* The Flutter Sidebar provided to VS Code now has the ability to enable new
+  platforms if a device is available for a platform that is not enabled for
+  the current project. This also requires a corresponding Dart extension for
+  VS Code update to appear
+  - [#6688](https://github.com/flutter/devtools/pull/6688)
+
 ## Full commit history
 
 To find a complete list of changes in this release, check out the

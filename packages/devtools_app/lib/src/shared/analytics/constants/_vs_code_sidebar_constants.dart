@@ -10,7 +10,11 @@ enum VsCodeFlutterSidebar {
 
   /// Analytics event that is sent when a device selection occurs from the list
   /// of available devices in the sidebar.
-  changeSelectedDevice;
+  changeSelectedDevice,
+
+  /// Analytics event that is sent when a platform type is selected to be enable
+  /// from the list of devices in the sidebar.
+  enablePlatformType;
 
   static String get id => VsCodeFlutterSidebar.vsCodeFlutterSidebar.name;
 
