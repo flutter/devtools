@@ -40,6 +40,9 @@ jobs:
           BOT: main
         run: ./tool/bots.sh
 
+  # TODO(https://github.com/dart-lang/sdk/issues/53992): we can remove this
+  # once this issue is resolved and the `devtools_tool analyze` check is moved
+  # back into the "main" handler in bots.sh.
   analyze:
     name: analyze
     needs: flutter-prep

@@ -83,6 +83,9 @@ echo `pwd`
 # the "main" bot once this issue is resolved.
 if [ "$BOT" = "analyze" ]; then
 
+    # Get packages
+    devtools_tool pub-get
+
     # Analyze the code
     devtools_tool analyze
 
