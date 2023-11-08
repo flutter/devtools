@@ -153,18 +153,18 @@ class _DataTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ColumnData<LinkData> domain = DomainColumn(controller);
-    final ColumnData<LinkData> path = PathColumn(controller);
+    final domain = DomainColumn(controller);
+    final path = PathColumn(controller);
 
     return Padding(
       padding: const EdgeInsets.only(top: denseSpacing),
-      child: FlatTable(
+      child: FlatTable<LinkData>(
         keyFactory: (node) => ValueKey(node.toString),
         data: linkDatas,
         dataKey: 'deep-links',
         autoScrollContent: true,
         headerColor: Theme.of(context).colorScheme.deeplinkTableHeaderColor,
-        columns: <ColumnData>[
+        columns: <ColumnData<LinkData>>[
           ...(() {
             switch (viewType) {
               case TableViewType.domainView:
@@ -172,7 +172,7 @@ class _DataTable extends StatelessWidget {
               case TableViewType.pathView:
                 return [path, NumberOfAssociatedDomainColumn()];
               case TableViewType.singleUrlView:
-                return [domain, path];
+                return <ColumnData<LinkData>>[domain, path];
             }
           })(),
           SchemeColumn(controller),
@@ -183,10 +183,10 @@ class _DataTable extends StatelessWidget {
           ],
         ],
         selectionNotifier: controller.selectedLink,
-        defaultSortColumn: viewType == TableViewType.pathView ? path : domain,
+        defaultSortColumn: (viewType == TableViewType.pathView ? path : domain) as ColumnData<LinkData>,
         defaultSortDirection: SortDirection.ascending,
         onItemSelected: (linkdata) {
-          controller.selectLink(linkdata);
+          controller.selectLink(linkdata!);
           controller.updateDisplayOptions(showSplitScreen: true);
         },
       ),
@@ -264,6 +264,7 @@ class _AllDeepLinkDataTable extends StatelessWidget {
   const _AllDeepLinkDataTable({
     required this.controller,
   });
+
   final DeepLinksController controller;
 
   @override
@@ -273,15 +274,13 @@ class _AllDeepLinkDataTable extends StatelessWidget {
       children: <Widget>[
         OutlineDecoration(
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: defaultSpacing),
-                  child: Text(
-                    'All deep links',
-                    style: textTheme.bodyLarge,
-                  ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+                child: Text(
+                  'All deep links',
+                  style: textTheme.bodyLarge,
                 ),
               ),
               Padding(
@@ -359,6 +358,7 @@ class _NotificationCardSection extends StatelessWidget {
 
   final int domainErrorCount;
   final int pathErrorCount;
+
   final DeepLinksController controller;
   @override
   Widget build(BuildContext context) {

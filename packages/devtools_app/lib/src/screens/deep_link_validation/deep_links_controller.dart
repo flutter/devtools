@@ -15,6 +15,12 @@ import '../../shared/config_specific/server/server.dart' as server;
 import 'deep_links_model.dart';
 
 const String _apiKey = 'AIzaSyDVE6FP3GpwxgS4q8rbS7qaf6cAbxc_elc';
+
+const String _assetLinksGenerationURL =
+    'https://deeplinkassistant-pa.googleapis.com/android/generation/v1/assetlinks:generate?key=$_apiKey';
+
+const String _androidDomainValidationURL =
+    'https://deeplinkassistant-pa.googleapis.com/android/validation/v1/domains:batchValidate?key=$_apiKey';
 typedef _DomainAndPath = ({String domain, String path});
 
 enum FilterOption {
@@ -68,7 +74,7 @@ class DisplayOptions {
   Set<FilterOption> filters;
 
   DisplayOptions updateFilter(FilterOption option, bool value) {
-    final Set<FilterOption> newFilter = Set<FilterOption>.from(filters);
+    final newFilter = Set<FilterOption>.from(filters);
 
     if (value) {
       newFilter.add(option);
@@ -117,20 +123,20 @@ class DeepLinksController {
   List<LinkData> get getLinkDatasByPath {
     final linkDatasByPath = <String, LinkData>{};
     for (var linkData in allLinkDatasNotifier.value!) {
-      final prevoisRecord = linkDatasByPath[linkData.path];
+      final previousRecord = linkDatasByPath[linkData.path];
       linkDatasByPath[linkData.path] = LinkData(
         domain: linkData.domain,
         path: linkData.path,
         os: [
-          if (prevoisRecord?.os.contains(PlatformOS.android) ??
+          if (previousRecord?.os.contains(PlatformOS.android) ??
               false || linkData.os.contains(PlatformOS.android))
             PlatformOS.android,
-          if (prevoisRecord?.os.contains(PlatformOS.ios) ??
+          if (previousRecord?.os.contains(PlatformOS.ios) ??
               false || linkData.os.contains(PlatformOS.ios))
             PlatformOS.ios,
         ],
         associatedDomains: [
-          ...prevoisRecord?.associatedDomains ?? [],
+          ...previousRecord?.associatedDomains ?? [],
           linkData.domain,
         ],
         pathError: linkData.pathError,
@@ -144,13 +150,13 @@ class DeepLinksController {
     final linkDatasByDomain = <String, LinkData>{};
 
     for (var linkData in allLinkDatasNotifier.value!) {
-      final prevoisRecord = linkDatasByDomain[linkData.domain];
+      final previousRecord = linkDatasByDomain[linkData.domain];
       linkDatasByDomain[linkData.domain] = LinkData(
         domain: linkData.domain,
         path: linkData.path,
         os: linkData.os,
         associatedPath: [
-          ...prevoisRecord?.associatedPath ?? [],
+          ...previousRecord?.associatedPath ?? [],
           linkData.path,
         ],
         domainErrors: linkData.domainErrors,
@@ -211,7 +217,7 @@ class DeepLinksController {
         .toList();
   }
 
-  final selectedProject = ValueNotifier<FlutterProject?>( null);
+  final selectedProject = ValueNotifier<FlutterProject?>(null);
   final selectedLink = ValueNotifier<LinkData?>(null);
 
   final allLinkDatasNotifier = ValueNotifier<List<LinkData>?>(null);
@@ -226,16 +232,16 @@ class DeepLinksController {
         _androidAppLinks[selectedVariantIndex.value]?.applicationId ?? '';
 
     final response = await http.post(
-      Uri.parse(
-        'https://deeplinkassistant-pa.googleapis.com/android/generation/v1/assetlinks:generate?key=$_apiKey',
-      ),
+      Uri.parse(_assetLinksGenerationURL),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode(
         {
           'package_name': applicationId,
           'domains': [selectedLink.value!.domain],
           // TODO(hangyujin): The fake fingerprints here is just for testing usage, should remove it later.
-          'supplemental_sha256_cert_fingerprints': ['5A:33:EA:64:09:97:F2:F0:24:21:0F:B6:7A:A8:18:1C:18:A9:83:03:20:21:8F:9B:0B:98:BF:43:69:C2:AF:4A'],
+          'supplemental_sha256_cert_fingerprints': [
+            '5A:33:EA:64:09:97:F2:F0:24:21:0F:B6:7A:A8:18:1C:18:A9:83:03:20:21:8F:9B:0B:98:BF:43:69:C2:AF:4A'
+          ],
         },
       ),
     );
@@ -262,9 +268,7 @@ class DeepLinksController {
         _androidAppLinks[selectedVariantIndex.value]?.applicationId ?? '';
 
     final response = await http.post(
-      Uri.parse(
-        'https://deeplinkassistant-pa.googleapis.com/android/validation/v1/domains:batchValidate?key=$_apiKey',
-      ),
+      Uri.parse(_androidDomainValidationURL),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'package_name': applicationId,
