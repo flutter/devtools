@@ -40,6 +40,27 @@ jobs:
           BOT: main
         run: ./tool/bots.sh
 
+  analyze:
+    name: analyze
+    needs: flutter-prep
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+    steps:
+      - name: git clone
+        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac
+      - name: Load Cached Flutter SDK
+        uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84
+        with:
+          path: |
+            ./flutter-sdk
+          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
+
+      - name: tool/bots.sh
+        env:
+          BOT: analyze
+        run: ./tool/bots.sh
+
   dcm:
     name: Dart Code Metrics
     needs: flutter-prep
