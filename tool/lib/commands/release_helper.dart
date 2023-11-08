@@ -31,7 +31,7 @@ class ReleaseHelperCommand extends Command {
 
     final useCurrentBranch = argResults!['use-current-branch']!;
     final currentBranchResult = await processManager.runProcess(
-      CliCommand.git('rev-parse --abbrev-ref HEAD'),
+      CliCommand.git(['rev-parse --abbrev-ref HEAD']),
     );
     final initialBranch = currentBranchResult.stdout.trim();
     String? releaseBranch;
@@ -44,7 +44,7 @@ class ReleaseHelperCommand extends Command {
       );
 
       final gitStatusResult = await processManager.runProcess(
-        CliCommand.git('status -s'),
+        CliCommand.git(['status -s']),
       );
       final gitStatus = gitStatusResult.stdout;
       if (gitStatus.isNotEmpty) {
@@ -57,14 +57,16 @@ class ReleaseHelperCommand extends Command {
       if (!useCurrentBranch) {
         print("Preparing the release branch.");
         await processManager.runProcess(
-          CliCommand.git('fetch $remoteUpstream master'),
+          CliCommand.git(['fetch $remoteUpstream master']),
         );
       }
 
       await processManager.runProcess(
         CliCommand.git(
-          'checkout -b $releaseBranch'
-          '${useCurrentBranch ? '' : ' $remoteUpstream/master'}',
+          [
+            'checkout -b $releaseBranch'
+                '${useCurrentBranch ? '' : ' $remoteUpstream/master'}'
+          ],
         ),
       );
 
@@ -101,8 +103,8 @@ class ReleaseHelperCommand extends Command {
 
       await processManager.runAll(
         commands: [
-          CliCommand.gitNoSplit(['commit', '-a', '-m', commitMessage]),
-          CliCommand.git('push -u $remoteUpstream $releaseBranch'),
+          CliCommand.git(['commit', '-a', '-m', commitMessage]),
+          CliCommand.git(['push -u $remoteUpstream $releaseBranch']),
         ],
       );
 

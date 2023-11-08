@@ -23,9 +23,9 @@ abstract class DartSdkHelper {
       workingDirectory: dartSdkLocation,
       additionalErrorMessage: commandDebugMessage,
       commands: [
-        CliCommand.git('fetch origin'),
-        CliCommand.git('rebase-update'),
-        CliCommand.git('checkout origin/main'),
+        CliCommand.git(['fetch origin']),
+        CliCommand.git(['rebase-update']),
+        CliCommand.git(['checkout origin/main']),
       ],
     );
   }
@@ -89,23 +89,15 @@ class CliCommand {
   }
 
   factory CliCommand.git(
-    String args, {
-    bool throwOnException = true,
-  }) {
-    return CliCommand._(
-      exe: 'git',
-      args: args.split(' '),
-      throwOnException: throwOnException,
-    );
-  }
-
-  factory CliCommand.gitNoSplit(
     List<String> args, {
     bool throwOnException = true,
   }) {
     return CliCommand._(
       exe: 'git',
-      args: args,
+      args: args.map((e) => e.split(' ')).reduce((value, element) {
+        value.addAll(element);
+        return value;
+      }),
       throwOnException: throwOnException,
     );
   }
@@ -200,7 +192,7 @@ Future<String> findRemote(
 }) async {
   print('Searching for a remote that points to $remoteId.');
   final remotesResult = await processManager.runProcess(
-    CliCommand.git('remote -v'),
+    CliCommand.git(['remote -v']),
     workingDirectory: workingDirectory,
   );
   final String remotes = remotesResult.stdout;

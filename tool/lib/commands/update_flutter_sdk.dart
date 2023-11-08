@@ -116,11 +116,11 @@ class UpdateFlutterSdkCommand extends Command {
 
       await processManager.runAll(
         commands: [
-          CliCommand.git('stash'),
-          CliCommand.git('fetch upstream'),
-          CliCommand.git('checkout upstream/master'),
-          CliCommand.git('reset --hard upstream/master'),
-          CliCommand.git('checkout $flutterTag -f'),
+          CliCommand.git(['stash']),
+          CliCommand.git(['fetch upstream']),
+          CliCommand.git(['checkout upstream/master']),
+          CliCommand.git(['reset --hard upstream/master']),
+          CliCommand.git(['checkout $flutterTag -f']),
           CliCommand.flutter('--version'),
         ],
         workingDirectory: sdk.sdkPath,
@@ -140,8 +140,8 @@ class UpdateFlutterSdkCommand extends Command {
       log.stdout('"$toolSdkPath" directory already exists');
       await processManager.runAll(
         commands: [
-          CliCommand.git('fetch'),
-          CliCommand.git('checkout $flutterTag -f'),
+          CliCommand.git(['fetch']),
+          CliCommand.git(['checkout $flutterTag -f']),
           CliCommand.flutter('--version'),
         ],
         workingDirectory: toolFlutterSdk.path,
@@ -150,13 +150,13 @@ class UpdateFlutterSdkCommand extends Command {
       log.stdout('"$toolSdkPath" directory does not exist - cloning it now');
       await processManager.runProcess(
         CliCommand.git(
-          'clone https://github.com/flutter/flutter $flutterSdkDirName',
+          ['clone https://github.com/flutter/flutter $flutterSdkDirName'],
         ),
         workingDirectory: repo.toolDirectoryPath,
       );
       await processManager.runAll(
         commands: [
-          CliCommand.git('checkout $flutterTag -f'),
+          CliCommand.git(['checkout $flutterTag -f']),
           CliCommand.flutter('--version'),
         ],
         workingDirectory: toolFlutterSdk.path,

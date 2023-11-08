@@ -50,10 +50,10 @@ class UpdateDartSdkDepsCommand extends Command {
       additionalErrorMessage: DartSdkHelper.commandDebugMessage,
       commands: [
         CliCommand.git(
-          'branch -D devtools-$commit',
+          ['branch -D devtools-$commit'],
           throwOnException: false,
         ),
-        CliCommand.git('new-branch devtools-$commit'),
+        CliCommand.git(['new-branch devtools-$commit']),
       ],
     );
 
@@ -65,7 +65,7 @@ class UpdateDartSdkDepsCommand extends Command {
       workingDirectory: dartSdkLocation,
       additionalErrorMessage: DartSdkHelper.commandDebugMessage,
       commands: [
-        CliCommand.git('add .'),
+        CliCommand.git(['add .']),
         CliCommand.from(
           'git',
           [
@@ -74,7 +74,7 @@ class UpdateDartSdkDepsCommand extends Command {
             'Update DevTools rev to $commit',
           ],
         ),
-        CliCommand.git('cl upload -s -f'),
+        CliCommand.git(['cl upload -s -f']),
       ],
     );
   }
