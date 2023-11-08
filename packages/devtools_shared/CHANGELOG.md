@@ -1,4 +1,5 @@
 # 6.0.1
+* Bump minimum Dart SDK version to `3.3.0-91.0.dev` and minimum Flutter SDK version to `3.17.0-0.0.pre`.
 * Add field `isPublic` to `DevToolsExtensionConfig`.
 * Add validation for `DevToolsExtensionConfig.name` field to ensure it is a valid
 Dart package name.
