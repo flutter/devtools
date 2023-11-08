@@ -99,6 +99,17 @@ class CliCommand {
     );
   }
 
+  factory CliCommand.gitNoSplit(
+    List<String> args, {
+    bool throwOnException = true,
+  }) {
+    return CliCommand._(
+      exe: 'git',
+      args: args,
+      throwOnException: throwOnException,
+    );
+  }
+
   factory CliCommand.tool(
     String args, {
     bool throwOnException = true,
