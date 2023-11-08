@@ -828,10 +828,8 @@ class NavigationInfo {
 
   final Map<String, dynamic>? _route;
 
-  String? get routeDescription {
-    final routeLocal = _route;
-    return routeLocal == null ? null : routeLocal['description'];
-  }
+  String? get routeDescription =>
+      _route == null ? null : _route!['description'];
 }
 
 class ServiceExtensionStateChangedInfo {
