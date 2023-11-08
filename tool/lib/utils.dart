@@ -88,6 +88,13 @@ class CliCommand {
     );
   }
 
+  /// CliCommand helper for running git commands.
+  ///
+  /// Arguments can be passed in as a single string, this helper will split them
+  /// up using their spaces. e.g. CliCommand.git(['checkout test-branch'])
+  ///
+  /// If you don't want the args to be split by their spaces then you can set
+  /// [split] to false.
   factory CliCommand.git(
     List<String> args, {
     bool throwOnException = true,
