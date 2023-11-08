@@ -103,7 +103,7 @@ class ReleaseHelperCommand extends Command {
 
       await processManager.runAll(
         commands: [
-          CliCommand.git(['commit', '-a', '-m', commitMessage]),
+          CliCommand.git(['commit', '-a', '-m', commitMessage], split: false),
           CliCommand.git(['push -u $remoteUpstream $releaseBranch']),
         ],
       );

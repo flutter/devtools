@@ -91,13 +91,17 @@ class CliCommand {
   factory CliCommand.git(
     List<String> args, {
     bool throwOnException = true,
+    bool split = true,
   }) {
-    return CliCommand._(
-      exe: 'git',
-      args: args.map((e) => e.split(' ')).reduce((value, element) {
+    if (split) {
+      args = args.map((e) => e.split(' ')).reduce((value, element) {
         value.addAll(element);
         return value;
-      }),
+      });
+    }
+    return CliCommand._(
+      exe: 'git',
+      args: args,
       throwOnException: throwOnException,
     );
   }
