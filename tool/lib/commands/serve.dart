@@ -95,10 +95,6 @@ class ServeCommand extends Command {
     final devToolsAppBuildMode =
         argResults![BuildCommandArgs.buildMode.flagName];
 
-    print('pub get: $runPubGet');
-
-    print('devToolsAppBuildMode: devToolsAppBuildMode');
-
     final remainingArguments = List.of(argResults!.arguments)
       ..remove(BuildCommandArgs.useLocalFlutter.asArg())
       ..remove(BuildCommandArgs.updatePerfetto.asArg())
