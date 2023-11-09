@@ -79,17 +79,7 @@ devtools_tool generate-code
 pushd $DEVTOOLS_DIR/packages/devtools_app
 echo `pwd`
 
-# TODO(https://github.com/dart-lang/sdk/issues/53992): we can put this back into
-# the "main" bot once this issue is resolved.
-if [ "$BOT" = "analyze" ]; then
-
-    # Get packages
-    devtools_tool pub-get
-
-    # Analyze the code
-    devtools_tool analyze
-
-elif [ "$BOT" = "main" ]; then
+if [ "$BOT" = "main" ]; then
 
     # Verify that dart format has been run.
     echo "Checking formatting..."
@@ -101,6 +91,9 @@ elif [ "$BOT" = "main" ]; then
 
     # Get packages
     devtools_tool pub-get
+
+    # Analyze the code
+    devtools_tool analyze
 
     popd
 
