@@ -4,6 +4,7 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/performance/panes/controls/performance_controls.dart';
+import 'package:devtools_app/src/shared/file_import.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -76,7 +77,7 @@ void main() {
         expect(find.text('Performance Overlay'), findsOneWidget);
         expect(find.text('Enhance Tracing'), findsOneWidget);
         expect(find.text('More debugging options'), findsOneWidget);
-        expect(find.byIcon(Icons.file_download), findsOneWidget);
+        expect(find.byType(OpenSaveButtonGroup), findsOneWidget);
         expect(find.byIcon(Icons.settings_outlined), findsOneWidget);
       },
     );
@@ -99,7 +100,7 @@ void main() {
         expect(find.text('Performance Overlay'), findsNothing);
         expect(find.text('Enhance Tracing'), findsNothing);
         expect(find.text('More debugging options'), findsNothing);
-        expect(find.byIcon(Icons.file_download), findsOneWidget);
+        expect(find.byType(OpenSaveButtonGroup), findsOneWidget);
         expect(find.byIcon(Icons.settings_outlined), findsOneWidget);
       },
     );
@@ -118,7 +119,7 @@ void main() {
         expect(find.text('Performance Overlay'), findsNothing);
         expect(find.text('Enhance Tracing'), findsNothing);
         expect(find.text('More debugging options'), findsNothing);
-        expect(find.byIcon(Icons.file_download), findsNothing);
+        expect(find.byType(OpenSaveButtonGroup), findsNothing);
         expect(find.byIcon(Icons.settings_outlined), findsNothing);
         offlineController.exitOfflineMode();
       },

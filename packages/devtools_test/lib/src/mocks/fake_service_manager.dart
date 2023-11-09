@@ -104,7 +104,9 @@ class FakeServiceManager extends Fake
     this.availableServices = const [],
     this.availableLibraries = const [],
     this.onVmServiceOpened,
-  }) {
+    Map<String, Response>? serviceExtensionResponses,
+  }) : serviceExtensionResponses =
+            serviceExtensionResponses ?? _defaultServiceExtensionResponses {
     this.service = service ?? createFakeService();
     mockConnectedApp(
       connectedApp!,
@@ -148,6 +150,12 @@ class FakeServiceManager extends Fake
   final List<String> availableLibraries;
 
   final Function? onVmServiceOpened;
+
+  final Map<String, Response> serviceExtensionResponses;
+
+  static final _defaultServiceExtensionResponses = <String, Response>{
+    isImpellerEnabled: Response.parse({'enabled': false})!,
+  };
 
   @override
   VmServiceWrapper? service;
@@ -193,6 +201,19 @@ class FakeServiceManager extends Fake
   set isMainIsolatePaused(bool value) {
     final state = isolateManager.mainIsolateState! as MockIsolateState;
     when(state.isPaused).thenReturn(ValueNotifier(value));
+  }
+
+  @override
+  Future<Response> callServiceExtensionOnMainIsolate(
+    String method, {
+    Map<String, dynamic>? args,
+  }) async {
+    if (!serviceExtensionResponses.containsKey(method)) {
+      throw UnimplementedError(
+        'Unimplemented response for service extension: $method',
+      );
+    }
+    return serviceExtensionResponses[method]!;
   }
 
   @override

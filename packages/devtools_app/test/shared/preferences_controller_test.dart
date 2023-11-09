@@ -26,7 +26,6 @@ void main() {
     test('has subcontrollers initialized', () {
       expect(controller.memory, isNotNull);
       expect(controller.inspector, isNotNull);
-      expect(controller.cpuProfiler, isNotNull);
     });
 
     test('has value', () {
@@ -162,57 +161,6 @@ void main() {
       expect(
         controller.androidCollectionEnabled.value,
         originalAndroidCollection,
-      );
-    });
-  });
-
-  group('$CpuProfilerPreferencesController', () {
-    late CpuProfilerPreferencesController controller;
-    late FlutterTestStorage storage;
-
-    setUp(() async {
-      setGlobal(Storage, storage = FlutterTestStorage());
-      controller = CpuProfilerPreferencesController();
-      await controller.init();
-    });
-
-    test('has expected default values', () {
-      expect(controller.displayTreeGuidelines.value, isFalse);
-    });
-
-    test('stores values and reads them on init', () async {
-      storage.values.clear();
-
-      // Remember original values.
-      final displayTreeGuidelines = controller.displayTreeGuidelines.value;
-
-      // Flip the values in controller.
-      controller.displayTreeGuidelines.value = !displayTreeGuidelines;
-
-      // Check the values are stored.
-      expect(storage.values, hasLength(1));
-
-      // Reload the values from storage.
-      await controller.init();
-
-      // Check they did not change back to default.
-      expect(
-        controller.displayTreeGuidelines.value,
-        !displayTreeGuidelines,
-      );
-
-      // Flip the values in storage.
-      for (var key in storage.values.keys) {
-        storage.values[key] = (!(storage.values[key] == 'true')).toString();
-      }
-
-      // Reload the values from storage.
-      await controller.init();
-
-      // Check they flipped values are loaded.
-      expect(
-        controller.displayTreeGuidelines.value,
-        displayTreeGuidelines,
       );
     });
   });

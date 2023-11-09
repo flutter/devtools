@@ -38,7 +38,7 @@ jobs:
         with:
           ref: master
 
-      - uses: dart-lang/setup-dart@8a4b97ea2017cc079571daec46542f76189836b1
+      - uses: dart-lang/setup-dart@b64355ae6ca0b5d484f0106a033dd1388965d06d
 
       - name: setup git config
         run: |
@@ -54,8 +54,8 @@ jobs:
           dart pub get
           popd
 
-          dart pub global activate --source path tool
-          export PATH="$PATH":"$HOME/.pub-cache/bin"
+          # Ensure the devtools_tool command is available
+          export PATH="$PATH":`pwd`/tool/bin
 
           ORIGINAL_VERSION=$(devtools_tool update-version current-version)
 
@@ -122,4 +122,3 @@ jobs:
           GH_TOKEN: ${{ secrets.DEVTOOLS_WORKFLOW_BOT_TOKEN }}
           ORIGINAL_GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           IS_DRAFT: ${{ inputs.draft == true }}
-

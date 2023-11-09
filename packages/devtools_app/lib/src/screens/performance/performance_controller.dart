@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../service/service_registrations.dart' as registrations;
 import '../../shared/diagnostics/inspector_service.dart';
 import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
@@ -98,6 +99,9 @@ class PerformanceController extends DisposableController
   /// in selected timeline event, selected frame, etc.).
   PerformanceData? offlinePerformanceData;
 
+  bool get impellerEnabled => _impellerEnabled;
+  late final bool _impellerEnabled;
+
   final _initialized = Completer<void>();
 
   Future<void> get initialized => _initialized.future;
@@ -115,12 +119,24 @@ class PerformanceController extends DisposableController
     if (!offlineController.offlineMode.value) {
       await serviceConnection.serviceManager.onServiceAvailable;
 
+      if (serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ??
+          false) {
+        final impellerEnabledResponse = await serviceConnection.serviceManager
+            .callServiceExtensionOnMainIsolate(
+          registrations.isImpellerEnabled,
+        );
+        _impellerEnabled = impellerEnabledResponse.json?['enabled'] == true;
+      } else {
+        _impellerEnabled = false;
+      }
+
       enhanceTracingController.init();
 
       // Listen for Flutter.Frame events with frame timing data.
       // Listen for Flutter.RebuiltWidgets events.
       autoDisposeStreamSubscription(
-        serviceConnection.serviceManager.service!.onExtensionEventWithHistory
+        serviceConnection
+            .serviceManager.service!.onExtensionEventWithHistorySafe
             .listen((event) {
           if (event.extensionKind == 'Flutter.Frame') {
             final frame = FlutterFrame.parse(event.extensionData!.data);

@@ -181,8 +181,6 @@ class InspectorTreeController extends DisposableController
     });
   }
 
-  RemoteDiagnosticsNode? subtreeRoot; // Optional.
-
   InspectorTreeNode? get selection => _selection;
   InspectorTreeNode? _selection;
 

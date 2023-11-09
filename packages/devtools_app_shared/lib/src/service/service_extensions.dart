@@ -215,6 +215,15 @@ final trackRebuildWidgets = ToggleableServiceExtension<bool>(
   disabledValue: false,
 );
 
+final profilePlatformChannels = ToggleableServiceExtension<bool>(
+  // TODO(kenz): use ${ServicesServiceExtensions.profilePlatformChannels.name}
+  // once this enum value has existed on Flutter stable for a reasonable amount
+  // of time (6 months, or June 2024).
+  extension: '${flutterExtensionPrefix}profilePlatformChannels',
+  enabledValue: true,
+  disabledValue: false,
+);
+
 // This extensions below should never be displayed as a button so does not need
 // a ServiceExtensionDescription object.
 final String didSendFirstFrameEvent =
@@ -247,6 +256,7 @@ final List<ServiceExtension> _extensionDescriptions = [
   togglePlatformMode,
   toggleSelectWidgetMode,
   trackRebuildWidgets,
+  profilePlatformChannels,
 ];
 
 /// Service extensions that are not safe to call unless a frame has already

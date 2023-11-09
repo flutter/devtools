@@ -240,12 +240,6 @@ const devToolsDependencyPrefixes = [
   'devtools_test: ',
 ];
 
-extension JoinExtension on List<String> {
-  String joinWithNewLine() {
-    return '${join('\n')}\n';
-  }
-}
-
 class ManualUpdateCommand extends Command {
   ManualUpdateCommand() {
     argParser

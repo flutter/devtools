@@ -1,3 +1,25 @@
+## 0.0.7
+* Soften breaking change from 0.0.6 to add the `profilePlatformChannels` service extension,
+improving backwards compatibility for older versions of Flutter.
+* Bump `package:vm_service` dependency to ^13.0.0.
+* Bump the `package:devtools_shared` dependency to ^6.0.1.
+* Remove public getter `libraryRef`, and public methods `getLibrary` and `retrieveFullValueAsString` from `EvalOnDartLibrary`.
+* Change `toString` output for `UnknownEvalException`, `EvalSentinelException`, and `EvalErrorException`.
+* Remove public getters `flutterVersionSummary`, `frameworkVersionSummary`, and `engineVersionSummary` from `FlutterVersion`.
+* Remove public getters `onIsolateCreated` and `onIsolateExited` from `IsolateManager`.
+* Remove public getter `firstFrameReceived` from `ServiceExtensionManager`.
+* Add `RoundedButtonGroup` common widget.
+
+## 0.0.6
+* Add `profilePlatformChannels` to known service extensions.
+* Fix a bug where service extension states were not getting cleared on app disconnect.
+* Add optional parameter `id` to `DisposerMixin.addAutoDisposeListener` and
+`AutoDisposeMixin.addAutoDisposeListener` that allows for tagging a listener
+with a specific id.
+* Add optional parameter `excludeIds` to `DisposerMixin.cancelListeners` and 
+`AutoDisposeMixin.cancelListeners` that allows for excluding listeners with
+a specific id from the cancel operation.
+
 ## 0.0.5
 * Fix bug where registered services were not getting cleared on app disconnect.
 * Fix a bug with the logic to wait for a service extension's availability.

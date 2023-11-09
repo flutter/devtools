@@ -16,7 +16,6 @@ import 'package:path/path.dart' as path;
 import 'package:vm_service/vm_service.dart';
 
 import '../../service/vm_service_wrapper.dart';
-import '../../shared/console/eval/inspector_tree.dart';
 import '../../shared/diagnostics/diagnostics_node.dart';
 import '../../shared/diagnostics/inspector_service.dart';
 import '../../shared/globals.dart';
@@ -62,100 +61,6 @@ Future<String> _retrieveFullStringValue(
           )
           .then((value) => value ?? fallback) ??
       Future.value(fallback);
-}
-
-class LoggingDetailsController {
-  LoggingDetailsController({
-    required this.onShowInspector,
-    required this.onShowDetails,
-    required this.createLoggingTree,
-  });
-
-  static const JsonEncoder jsonEncoder = JsonEncoder.withIndent('  ');
-
-  late LogData data;
-
-  /// Callback to execute to show the inspector.
-  final VoidCallback onShowInspector;
-
-  /// Callback to execute to show the data from the details tree in the view.
-  final OnShowDetails onShowDetails;
-
-  /// Callback to create an inspectorTree for the logging view of the correct
-  /// type.
-  final CreateLoggingTree createLoggingTree;
-
-  InspectorTreeController? tree;
-
-  void setData(LogData data) {
-    this.data = data;
-
-    tree = null;
-
-    if (data.node != null) {
-      tree = createLoggingTree(
-        onSelectionChange: () {
-          final InspectorTreeNode node = tree!.selection!;
-          unawaited(tree!.maybePopulateChildren(node));
-
-          // TODO(jacobr): node.diagnostic.isDiagnosticableValue isn't quite
-          // right.
-          final diagnosticLocal = node.diagnostic!;
-          if (diagnosticLocal.isDiagnosticableValue) {
-            // TODO(jacobr): warn if the selection can't be set as the node is
-            // stale which is likely if this is an old log entry.
-            onShowInspector();
-            unawaited(diagnosticLocal.setSelectionInspector(false));
-          }
-        },
-      );
-
-      final InspectorTreeNode root = tree!.setupInspectorTreeNode(
-        tree!.createNode(),
-        data.node!,
-        expandChildren: true,
-        expandProperties: true,
-      );
-      // No sense in collapsing the root node.
-      root.allowExpandCollapse = false;
-      tree!.root = root;
-      onShowDetails(tree: tree);
-
-      return;
-    }
-
-    // See if we need to asynchronously compute the log entry details.
-    if (data.needsComputing) {
-      onShowDetails(text: '');
-
-      unawaited(
-        data.compute().then((_) {
-          // If we're still displaying the same log entry, then update the UI with
-          // the calculated value.
-          if (this.data == data) {
-            _updateUIFromData();
-          }
-        }),
-      );
-    } else {
-      _updateUIFromData();
-    }
-  }
-
-  void _updateUIFromData() {
-    if (data.details?.startsWith('{') == true &&
-        data.details?.endsWith('}') == true) {
-      try {
-        // If the string decodes properly, then format the json.
-        final result = jsonDecode(data.details!);
-        onShowDetails(text: jsonEncoder.convert(result));
-      } catch (e) {
-        onShowDetails(text: data.details);
-      }
-    } else {
-      onShowDetails(text: data.details);
-    }
-  }
 }
 
 class LoggingController extends DisposableController
@@ -259,14 +164,14 @@ class LoggingController extends DisposableController
     final _StdoutEventHandler stdoutHandler =
         _StdoutEventHandler(this, 'stdout');
     autoDisposeStreamSubscription(
-      service.onStdoutEventWithHistory.listen(stdoutHandler.handle),
+      service.onStdoutEventWithHistorySafe.listen(stdoutHandler.handle),
     );
 
     // Log stderr events.
     final _StdoutEventHandler stderrHandler =
         _StdoutEventHandler(this, 'stderr', isError: true);
     autoDisposeStreamSubscription(
-      service.onStderrEventWithHistory.listen(stderrHandler.handle),
+      service.onStderrEventWithHistorySafe.listen(stderrHandler.handle),
     );
 
     // Log GC events.
@@ -274,12 +179,12 @@ class LoggingController extends DisposableController
 
     // Log `dart:developer` `log` events.
     autoDisposeStreamSubscription(
-      service.onLoggingEventWithHistory.listen(_handleDeveloperLogEvent),
+      service.onLoggingEventWithHistorySafe.listen(_handleDeveloperLogEvent),
     );
 
     // Log Flutter extension events.
     autoDisposeStreamSubscription(
-      service.onExtensionEventWithHistory.listen(_handleExtensionEvent),
+      service.onExtensionEventWithHistorySafe.listen(_handleExtensionEvent),
     );
   }
 
@@ -822,22 +727,6 @@ class LogData with SearchableDataMixin {
     }
   }
 
-  bool matchesFilter(String filter) {
-    if (kind.toLowerCase().contains(filter)) {
-      return true;
-    }
-
-    if (summary != null && summary!.toLowerCase().contains(filter)) {
-      return true;
-    }
-
-    if (_details != null && _details!.toLowerCase().contains(filter)) {
-      return true;
-    }
-
-    return false;
-  }
-
   @override
   bool matchesSearchToken(RegExp regExpSearch) {
     return (summary?.caseInsensitiveContains(regExpSearch) == true) ||
@@ -849,23 +738,19 @@ class LogData with SearchableDataMixin {
 }
 
 class FrameInfo {
-  FrameInfo(this.number, this.elapsedMs, this.startTimeMs);
+  FrameInfo(this.number, this.elapsedMs);
 
   static const String eventName = 'Flutter.Frame';
-
-  static const double kTargetMaxFrameTimeMs = 1000.0 / 60;
 
   static FrameInfo from(Map<String, dynamic> data) {
     return FrameInfo(
       data['number'],
       data['elapsed'] / 1000,
-      data['startTime'] / 1000,
     );
   }
 
   final int? number;
   final num? elapsedMs;
-  final num? startTimeMs;
 
   @override
   String toString() => 'frame $number ${elapsedMs!.toStringAsFixed(1)}ms';

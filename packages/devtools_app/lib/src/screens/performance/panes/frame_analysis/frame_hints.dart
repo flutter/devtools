@@ -370,10 +370,10 @@ class ShaderCompilationHint extends StatelessWidget {
                 LinkTextSpan(
                   link: Link(
                     display: 'Impeller',
-                    url: impellerWikiUrl,
+                    url: impellerDocsUrl,
                     gaScreenName: gac.performance,
                     gaSelectedItemDescription:
-                        gac.PerformanceDocs.impellerWikiLink.name,
+                        gac.PerformanceDocs.impellerDocsLink.name,
                   ),
                   context: context,
                 ),

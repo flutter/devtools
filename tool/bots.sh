@@ -65,21 +65,31 @@ pushd $DEVTOOLS_DIR/tool
 flutter pub get
 popd
 
-# The `devtools_tool` executable should be available after running `flutter pub global activate`
-flutter pub global activate --source path tool
-export PATH="$PATH":"$HOME/.pub-cache/bin"
+# Ensure the devtools_tool command is available
+export PATH="$PATH":"$DEVTOOLS_DIR/tool/bin"
+
 
 # Fetch dependencies
 devtools_tool pub-get --only-main
 
 # Generate code.
-bash tool/generate_code.sh
+devtools_tool generate-code
 
 # Change the CI to the packages/devtools_app directory.
 pushd $DEVTOOLS_DIR/packages/devtools_app
 echo `pwd`
 
-if [ "$BOT" = "main" ]; then
+# TODO(https://github.com/dart-lang/sdk/issues/53992): we can put this back into
+# the "main" bot once this issue is resolved.
+if [ "$BOT" = "analyze" ]; then
+
+    # Get packages
+    devtools_tool pub-get
+
+    # Analyze the code
+    devtools_tool analyze
+
+elif [ "$BOT" = "main" ]; then
 
     # Verify that dart format has been run.
     echo "Checking formatting..."
@@ -91,9 +101,6 @@ if [ "$BOT" = "main" ]; then
 
     # Get packages
     devtools_tool pub-get
-
-    # Analyze the code
-    devtools_tool analyze
 
     popd
 
@@ -176,12 +183,17 @@ elif [ "$BOT" = "integration_dart2js" ]; then
             dart run integration_test/run_tests.dart --test-app-device=chrome --headless --shard="$SHARD"
         elif [ "$DEVICE" = "dart-cli" ]; then
             dart run integration_test/run_tests.dart --test-app-device=cli --headless --shard="$SHARD"
-        fi        
+        fi
     elif [ "$DEVTOOLS_PACKAGE" = "devtools_extensions" ]; then
         pushd $DEVTOOLS_DIR/packages/devtools_extensions
         dart run integration_test/run_tests.dart --headless
         popd
     fi
+
+elif [ "$BOT" = "benchmarks_dart2js" ]; then
+
+    dart run test_benchmarks/web_bundle_size_test.dart
+
 fi
 
 popd

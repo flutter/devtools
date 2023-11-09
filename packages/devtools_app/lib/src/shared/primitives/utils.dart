@@ -33,8 +33,6 @@ bool collectionEquals(e1, e2, {bool ordered = true}) {
 // 2^52 is the max int for dart2js.
 final int maxJsInt = pow(2, 52) as int;
 
-String escape(String? text) => text == null ? '' : htmlEscape.convert(text);
-
 final NumberFormat nf = NumberFormat.decimalPattern();
 
 String percent(double d, {int fractionDigits = 2}) =>
@@ -434,19 +432,6 @@ class JsonUtils {
 
   static int getIntMember(Map<String, Object?> json, String memberName) {
     return json[memberName] as int? ?? -1;
-  }
-
-  static List<String> getValues(Map<String, Object> json, String member) {
-    final values = json[member] as List<Object?>?;
-    if (values == null || values.isEmpty) {
-      return const [];
-    }
-
-    return values.cast();
-  }
-
-  static bool hasJsonData(String? data) {
-    return data != null && data.isNotEmpty && data != 'null';
   }
 }
 
@@ -1127,20 +1112,6 @@ extension ListExtension<T> on List<T> {
         if (i != length - 1) separator,
       ],
     ];
-  }
-
-  Iterable<T> whereFromIndex(
-    bool Function(T element) test, {
-    int startIndex = 0,
-  }) {
-    final whereList = <T>[];
-    for (int i = startIndex; i < length; i++) {
-      final element = this[i];
-      if (test(element)) {
-        whereList.add(element);
-      }
-    }
-    return whereList;
   }
 
   bool containsWhere(bool Function(T element) test) {

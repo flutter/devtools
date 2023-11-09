@@ -53,8 +53,6 @@ class DartIOHttpRequestData extends NetworkRequest {
 
   HttpProfileRequestRef _request;
 
-  bool isOutStanding = false;
-
   final ValueNotifier<int> _updateCount = ValueNotifier<int>(0);
 
   /// A notifier that changes when the request data, or it's response body
@@ -66,8 +64,8 @@ class DartIOHttpRequestData extends NetworkRequest {
     try {
       if (isFetchingFullData) return; // We are already fetching
       isFetchingFullData = true;
-      final updated =
-          await serviceConnection.serviceManager.service!.getHttpProfileRequest(
+      final updated = await serviceConnection.serviceManager.service!
+          .getHttpProfileRequestWrapper(
         _request.isolateId,
         _request.id.toString(),
       );

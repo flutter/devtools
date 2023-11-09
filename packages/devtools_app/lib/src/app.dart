@@ -111,10 +111,15 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         (e) => DevToolsScreen<void>(ExtensionScreen(e)).screen,
       );
 
-  // TODO(dantup): This does not take IDE preference into account, so results
-  //  in Dark mode embedded sidebar in VS Code.
-  bool get isDarkThemeEnabled => _isDarkThemeEnabled;
-  bool _isDarkThemeEnabled = true;
+  bool get isDarkThemeEnabled {
+    // We use user preference when not embedded. When embedded, we always use
+    // the IDE one (since the user can't access the preference, and the
+    // preference may have been set in an external window and differ from the
+    // IDE theme).
+    return ideTheme.embed ? ideTheme.isDarkMode : _isDarkThemeEnabledPreference;
+  }
+
+  bool _isDarkThemeEnabledPreference = true;
 
   bool get denseModeEnabled => _denseModeEnabled;
   bool _denseModeEnabled = false;
@@ -161,10 +166,10 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       },
     );
 
-    _isDarkThemeEnabled = preferences.darkModeTheme.value;
+    _isDarkThemeEnabledPreference = preferences.darkModeTheme.value;
     addAutoDisposeListener(preferences.darkModeTheme, () {
       setState(() {
-        _isDarkThemeEnabled = preferences.darkModeTheme.value;
+        _isDarkThemeEnabledPreference = preferences.darkModeTheme.value;
       });
     });
 
@@ -311,7 +316,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
                   // hot restart service is available for the connected app.
                   const HotRestartButton(),
                 ],
-                ...DevToolsScaffold.defaultActions(isEmbedded: embed),
+                ...DevToolsScaffold.defaultActions(),
               ],
             ),
           );

@@ -136,7 +136,7 @@ class MockDartToolingApi extends DartToolingApiImpl {
   }
 
   /// Simulates executing a VS Code command requested by the embedded panel.
-  Future<Object?> executeCommand(json_rpc_2.Parameters parameters) async {
+  Future<Object?> executeCommand(json_rpc_2.Parameters parameters) {
     final params = parameters.asMap;
     final command = params['command'];
     switch (command) {

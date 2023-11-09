@@ -19,8 +19,8 @@ Make sure:
    c. The local checkout is at `main` branch: `git rebase-update`
 
 2. Your Flutter version is equal to latest candidate release branch:
-    - Run `./tool/update_flutter_sdk.sh --local` from the main devtools directory.
-3. You have goma [configured](http://go/ma-mac-setup).
+    - Run `devtools_tool update-flutter-sdk --local`
+3. You have goma [configured](http://go/ma-mac-setup)
 
 ### Prepare the release
 
@@ -28,8 +28,20 @@ Make sure:
 
 > If you need to install the [Github CLI](https://cli.github.com/manual/installation) you can run: `brew install gh`
 
-> Ensure the `devtools_tool` executable has been globally activated:
-> `flutter pub global activate --source path tool`
+- Ensure that you have access to `devtools_tool` by adding the `tool/bin` folder to your `PATH` environment variable
+  - **MacOS Users**
+    - add the following to your `~/.bashrc` file.
+    - `export PATH=$PATH:<DEVTOOLS_DIR>/tool/bin`
+      > [!NOTE]  
+      > Replace `<DEVTOOLS_DIR>` with the local path to your DevTools
+      > repo path.
+  - **Windows Users**
+    - Open "Edit environment variables for your account" from Control Panel
+    - Locate the `Path` variable and click **Edit**
+    - Click the **New** button and paste in `<DEVTOOLS_DIR>/tool/bin`
+      > [!NOTE]  
+      > Replace `<DEVTOOLS_DIR>` with the local path to your DevTools
+      > repo path.
 
 - Run: `devtools_tool release-helper`
 - This will create a PR for you using the tip of master.
@@ -48,10 +60,9 @@ These packages always have their version numbers updated in lock, so we don't ha
 
 ### Test the release PR
 
-- Build the DevTools binary and run it from your local Dart SDK.
-   - From the main devtools/ directory.
+- Build DevTools in release mode and serve it from a locally running DevTools server instance:
    ```shell
-   dart ./tool/build_e2e.dart
+   devtools_tool serve
    ```
 
 - Launch DevTools and verify that everything generally works.
@@ -95,6 +106,9 @@ Receive an LGTM for the PR, squash and commit.
 
 On each DevTools commit, DevTools is built and uploaded to CIPD. You can check the
 status of the builds on this [dashboard](https://ci.chromium.org/ui/p/dart-internal/builders/flutter/devtools). Within minutes, a build should be uploaded for the commit you just merged and tagged.
+
+> [!NOTE]  
+> If the CIPD build times out, instructions for re-triggering can be found at [go/dart-engprod/release.md](go/dart-engprod/release.md)
 
 ### Update the DevTools hash in the Dart SDK
 

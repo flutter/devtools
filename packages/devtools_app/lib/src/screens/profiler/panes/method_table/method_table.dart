@@ -150,7 +150,6 @@ class _MethodGraphState extends State<_MethodGraph> with AutoDisposeMixin {
                 methodName: selectedNode.name,
                 packageUri: selectedNode.packageUri,
                 sourceLine: selectedNode.sourceLine,
-                isSelected: false,
                 displayInRow: false,
               ),
             ),
@@ -268,7 +267,6 @@ class _MethodColumn extends ColumnData<MethodTableGraphNode>
       methodName: data.name,
       packageUri: data.packageUri,
       sourceLine: data.sourceLine,
-      isSelected: isRowSelected,
     );
   }
 }

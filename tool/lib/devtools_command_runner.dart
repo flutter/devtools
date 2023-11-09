@@ -3,7 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
+import 'package:devtools_tool/commands/build_release.dart';
 import 'package:devtools_tool/commands/fix_goldens.dart';
+import 'package:devtools_tool/commands/generate_code.dart';
+import 'package:devtools_tool/commands/serve.dart';
+import 'package:devtools_tool/commands/sync.dart';
+import 'package:devtools_tool/commands/update_flutter_sdk.dart';
+import 'package:devtools_tool/commands/update_perfetto.dart';
 
 import 'commands/analyze.dart';
 import 'commands/list.dart';
@@ -18,13 +24,19 @@ class DevToolsCommandRunner extends CommandRunner {
   DevToolsCommandRunner()
       : super('devtools_tool', 'A repo management tool for DevTools.') {
     addCommand(AnalyzeCommand());
-    addCommand(RepoCheckCommand());
+    addCommand(BuildReleaseCommand());
+    addCommand(FixGoldensCommand());
+    addCommand(GenerateCodeCommand());
     addCommand(ListCommand());
     addCommand(PubGetCommand());
-    addCommand(RollbackCommand());
-    addCommand(UpdateDartSdkDepsCommand());
     addCommand(ReleaseHelperCommand());
+    addCommand(RepoCheckCommand());
+    addCommand(RollbackCommand());
+    addCommand(ServeCommand());
+    addCommand(SyncCommand());
+    addCommand(UpdateDartSdkDepsCommand());
     addCommand(UpdateDevToolsVersionCommand());
-    addCommand(FixGoldensCommand());
+    addCommand(UpdateFlutterSdkCommand());
+    addCommand(UpdatePerfettoCommand());
   }
 }

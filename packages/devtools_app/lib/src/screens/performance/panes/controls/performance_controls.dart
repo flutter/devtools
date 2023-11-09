@@ -12,7 +12,9 @@ import '../../../../service/service_extensions.dart' as extensions;
 import '../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
+import '../../../../shared/file_import.dart';
 import '../../../../shared/globals.dart';
+import '../../../../shared/screen.dart';
 import '../../panes/timeline_events/timeline_events_controller.dart';
 import '../../performance_controller.dart';
 import 'enhance_tracing/enhance_tracing.dart';
@@ -146,12 +148,9 @@ class _SecondaryPerformanceControls extends StatelessWidget {
           const MoreDebuggingOptionsButton(),
         ],
         const SizedBox(width: denseSpacing),
-        GaDevToolsButton.iconOnly(
-          icon: Icons.file_download,
-          gaScreen: gac.performance,
-          gaSelection: gac.export,
-          tooltip: 'Export data',
-          onPressed: _exportPerformanceData,
+        OpenSaveButtonGroup(
+          screenId: ScreenMetaData.performance.id,
+          onSave: controller.exportData,
         ),
         const SizedBox(width: denseSpacing),
         SettingsOutlinedButton(
@@ -161,13 +160,6 @@ class _SecondaryPerformanceControls extends StatelessWidget {
         ),
       ],
     );
-  }
-
-  void _exportPerformanceData() {
-    ga.select(gac.performance, gac.export);
-    controller.exportData();
-    // TODO(kenz): investigate if we need to do any error handling here. Is the
-    // download always successful?
   }
 
   void _openSettingsDialog(BuildContext context) {
