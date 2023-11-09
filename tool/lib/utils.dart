@@ -101,14 +101,13 @@ class CliCommand {
     bool throwOnException = true,
     bool split = true,
   }) {
-    assert(
-      (cmd != null) || (args != null),
-      'One of `cmd` and `args` must be specified',
-    );
-    assert(
-      (cmd == null) != (args == null),
-      'Only one of `cmd` and `args`, at a time, may be specified',
-    );
+    if ((cmd != null) || (args != null)) {
+      throw ('One of `cmd` and `args` must be specified');
+    }
+
+    if ((cmd == null) != (args == null)) {
+      throw ('Only one of `cmd` and `args`, at a time, may be specified');
+    }
 
     if (cmd != null) {
       args = cmd.split(' ');
