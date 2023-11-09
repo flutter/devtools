@@ -259,13 +259,16 @@ from the branch we just created (e.g. `2.29.1`) onto the `flutter/devtools` prot
    - Ask a member of the DevTools team for review, but **DO NOT** squash and merge yet.
 
 2. Contact a member of the Dash team who has Admin access to the `flutter/devtools` repository settings
-(`who@?`). Ask them to temporarily modify the `flutter/devtools` repository settings to allow merge commits.
-Provide them with a link to your PR for context.
+(@godofredoc or @devoncarew). Ask them to:
+    - temporarily modify the `flutter/devtools` repository settings to "allow merge commits at the repo level
+    and remove `require linear history`". 
+    
+   Provide them with a link to your PR for context.
 
 3. Once merge commits have been enabled for the repository, land your PR by selecting "Create a merge commit" from
 the merge dropdown options at the bottom of the PR.
 
-4. Once you have successfully merged your PR, reach back out to the person that modified the `flutter/devtools`
+4. Once you have successfully merged your PR, reach back out to the person who modified the `flutter/devtools`
 repository settings for you and ask them to revert the settings change.
 
 ### Create the cherry-pick issue in the Dart SDK
