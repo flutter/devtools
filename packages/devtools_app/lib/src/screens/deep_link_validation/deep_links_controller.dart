@@ -258,8 +258,9 @@ class DeepLinksController {
     final Map<String, dynamic> result =
         json.decode(response.body) as Map<String, dynamic>;
     if (result[_domainsKey] != null) {
-      final String generatedContent = (((result[_domainsKey] as List<dynamic>)
-          .first) as Map<String, dynamic>)[_generatedContentKey];
+      final String generatedContent =
+          (result[_domainsKey] as List<Map<String, dynamic>>)
+              .first[_generatedContentKey];
 
       generatedAssetLinksForSelectedLink.value = generatedContent;
     }
@@ -292,10 +293,12 @@ class DeepLinksController {
       for (var domain in domains) domain: <DomainError>[],
     };
 
-    final validationResult = result[_validationResultKey] as List<dynamic>;
+    final validationResult =
+        result[_validationResultKey] as List<Map<String, dynamic>>;
     for (final Map<String, dynamic> domainResult in validationResult) {
       final String domainName = domainResult[_domainNameKey];
-      final List<dynamic>? failedChecks = domainResult[_failedChecksKey];
+      final List<Map<String, dynamic>>? failedChecks =
+          domainResult[_failedChecksKey];
       if (failedChecks != null) {
         for (final Map<String, dynamic> failedCheck in failedChecks) {
           switch (failedCheck[_checkNameKey]) {
