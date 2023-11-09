@@ -47,7 +47,7 @@ void main() {
   group('DeepLinkScreen', () {
     setUp(() {
       screen = DeepLinksScreen();
-      deepLinksController = DeepLinksController();
+      deepLinksController = DeepLinksTestController();
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {
@@ -97,4 +97,9 @@ void main() {
       },
     );
   });
+}
+
+class DeepLinksTestController extends DeepLinksController {
+  @override
+  void validateLinks() async {}
 }
