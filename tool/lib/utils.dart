@@ -105,7 +105,7 @@ class CliCommand {
       throw ('One of `cmd` and `args` must be specified');
     }
 
-    if ((cmd == null) != (args == null)) {
+    if ((cmd != null) && (args != null)) {
       throw ('Only one of `cmd` and `args`, at a time, may be specified');
     }
 
