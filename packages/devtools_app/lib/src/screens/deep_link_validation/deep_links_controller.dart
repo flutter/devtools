@@ -204,7 +204,7 @@ class DeepLinksController extends DisposableController {
         },
       );
     }
-   await validateLinks();
+    await validateLinks();
   }
 
   List<LinkData> get _allLinkDatas {
