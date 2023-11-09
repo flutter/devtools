@@ -259,8 +259,10 @@ class _DomainAssociatedLinksPanel extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text('Associated deep link URL',
-            style: Theme.of(context).textTheme.titleSmall),
+        Text(
+          'Associated deep link URL',
+          style: Theme.of(context).textTheme.titleSmall,
+        ),
         Card(
           color: Theme.of(context).colorScheme.surface,
           shape: const RoundedRectangleBorder(),

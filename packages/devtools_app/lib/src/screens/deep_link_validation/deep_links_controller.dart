@@ -83,7 +83,7 @@ class DisplayOptions {
   final Set<FilterOption> filters;
 
   DisplayOptions updateFilter(FilterOption option, bool value) {
-    final newFilter = Set<FilterOption>.from(filters);
+    final newFilter = Set<FilterOption>.of(filters);
 
     if (value) {
       newFilter.add(option);
