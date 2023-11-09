@@ -24,6 +24,7 @@ enum PlatformOS {
   final String description;
 }
 
+// TODO(hangyujin): Handle more domain error cases.
 enum DomainError {
   existence('Domain doesn\'t exist'),
   fingerprints('Fingerprints unavailable');
