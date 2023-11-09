@@ -123,7 +123,7 @@ class ReleaseHelperCommand extends Command {
       print('Your Draft release PR can be found at: $prURL');
       print('DONE');
       print(
-        'Build, run and test this release using: `dart ./tool/build_e2e.dart`',
+        'Build, run and test this release using: `devtools_tool serve`',
       );
     } catch (e) {
       print(e);

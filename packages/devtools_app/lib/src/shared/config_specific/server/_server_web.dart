@@ -360,6 +360,13 @@ Future<List<DevToolsExtensionConfig>> refreshAvailableExtensions(
                   as List<Object?>)
               .whereNotNull()
               .cast<Map<String, Object?>>();
+
+      final warningMessage =
+          parsedResult[ExtensionsApi.extensionsResultWarningPropertyName];
+      if (warningMessage != null) {
+        _log.warning(warningMessage);
+      }
+
       return extensionsAsJson
           .map((p) => DevToolsExtensionConfig.parse(p))
           .toList();

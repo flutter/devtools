@@ -54,8 +54,9 @@ class UpdateFlutterSdkCommand extends Command {
 
   @override
   String get description =>
-      'Updates the "devtools_rev" hash in the Dart SDK DEPS file with the '
-      'provided commit hash, and creates a Gerrit CL for review';
+      'Updates the the Flutter SDK contained in the \'tool/\' directory to the '
+      'latest Flutter candidate branch. Optionally updates your local checkout '
+      'of the Flutter SDK as well.';
 
   @override
   Future run() async {
@@ -98,7 +99,7 @@ class UpdateFlutterSdkCommand extends Command {
     );
 
     if (updateLocalFlutter) {
-      final sdk = FlutterSdk.getSdk();
+      final sdk = FlutterSdk.current;
       if (sdk == null) {
         print('Unable to locate a Flutter sdk.');
         return 1;

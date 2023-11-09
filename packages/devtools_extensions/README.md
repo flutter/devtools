@@ -105,24 +105,25 @@ flutter create --template app --platforms web foo_devtools_extension
 
 In `foo_devtools_extension/pubspec.yaml`, add a dependency on `devtools_extensions`:
 ```yaml
-devtools_extensions: ^0.0.9
+devtools_extensions: ^0.0.10
 ```
 
 In `lib/main.dart`, place a `DevToolsExtension` widget at the root of your app:
 ```dart
 import 'package:devtools_extensions/devtools_extensions.dart';
+import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const FooPackageDevToolsExtension());
+  runApp(const FooDevToolsExtension());
 }
 
-class FooPackageDevToolsExtension extends StatelessWidget {
-  const FooPackageDevToolsExtension({super.key});
+class FooDevToolsExtension extends StatelessWidget {
+  const FooDevToolsExtension({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const DevToolsExtension(
-      child: FooDevToolsExtension(),
+      child: Placeholder(),
     );
   }
 }
@@ -145,11 +146,17 @@ for sample usages.
 
 For debugging purposes, you will likely want to use the "simulated DevTools environment". This
 is a simulated environment that allows you to build your extension without having to develop it
-as an embedded iFrame in DevTools. The simulated environment is enabled by an environment
-parameter `use_simulated_environment`.
+as an embedded iFrame in DevTools. Running in your extension this way will wrap your extension
+with an environment that simulates the DevTools / DevTools extension connection.
 
 ![Simulated devtools environment](_readme_images/simulated_devtools_environment.png)
+1. Your DevTools extension.
+2. The VM service URI for a test app that your DevTools extension will interact with. This app
+should depend on your extension’s parent package.
+3. Buttons to perform actions that a user may trigger from DevTools.
+4. Logs showing the messages that will be sent between your extension and DevTools.
 
+The simulated environment is enabled by an environment parameter `use_simulated_environment`.
 To run your extension web app with this flag enabled, add a configuration to your `launch.json`
 file in VS code:
 ```json
@@ -159,7 +166,7 @@ file in VS code:
         ...
         {
             "name": "foo_devtools_extension + simulated environment",
-            "program": "foo/extension/foo_devtools_extension/lib/main.dart",
+            "cwd": "packages/foo_devtools_extension",
             "request": "launch",
             "type": "dart",
             "args": [
@@ -183,13 +190,11 @@ To use a real DevTools environment, you will need to perform a series of setup s
 real DevTools environment. Build your flutter web app and copy the built assets from
 `your_extension_web_app/build` to your pub package's `extension/devtools/build` directory.
 
-Use the `build_extension` command from `package:devtools_extensions` to help with this step.
+Use the `build_and_copy` command from `package:devtools_extensions` to help with this step.
 ```sh
-cd your_extension_web_app &&
-flutter pub get &&
-dart run devtools_extensions build_and_copy \
-  --source=. \
-  --dest=path/to/your_pub_package/extension/devtools 
+cd your_extension_web_app;
+flutter pub get;
+dart run devtools_extensions build_and_copy --source=. --dest=../foo/extension/devtools
 ```
 
 2. Prepare and run a test application that depends on your pub package. You'll need to change the
@@ -200,8 +205,8 @@ source code. Once you have done this, run `pub get`, and run the application.
     * **If you need local or unreleased changes from DevTools**, you'll need to build and run DevTools
     from source. See the DevTools [CONTRIBUTING.md]() for a guide on how to do this.
         > Note: you'll need to build DevTools with the server and the front end to test extensions - see
-        [instructions](https://github.com/flutter/devtools/blob/master/CONTRIBUTING.md#development-devtools-server--devtools-flutter-web-app).
-    * **If not, and if your local Dart or Flutter SDK version is >= `<TODO: insert version>`**,
+        > [instructions](https://github.com/flutter/devtools/blob/master/CONTRIBUTING.md#development-devtools-server--devtools-flutter-web-app).
+    * **If not, and if your local Dart or Flutter SDK version is >= 3.16.0-0.1.pre**,
     you can launch the DevTools instance that was just started by running your app (either from
     a url printed to command line or from the IDE where you ran your test app). You can also run
     `dart devtools` from the command line.
@@ -222,11 +227,9 @@ expected content in the `your_package/extension/devtools/` directory (see the
 2. Use the `build_and_copy` command provided by `package:devtools_extensions` to build
 your extension and copy the output to the `extension/devtools` directory:
 ```sh
-cd your_extension_web_app &&
-flutter pub get &&
-dart run devtools_extensions build_and_copy \
-  --source=. \
-  --dest=path/to/your_pub_package/extension/devtools 
+cd your_extension_web_app;
+flutter pub get;
+dart run devtools_extensions build_and_copy --source=. --dest=../foo/extension/devtools
 ```
 
 Then publish your package.
@@ -253,10 +256,8 @@ script to your repo that looks something like this:
 ```sh
 pushd your_extension_web_app
 
-flutter pub get &&
-dart run devtools_extensions build_and_copy \
-  --source=. \
-  --dest=path/to/your_pub_package/extension/devtools 
+flutter pub get
+dart run devtools_extensions build_and_copy --source=. --dest=../foo/extension/devtools
 
 popd
 

@@ -35,12 +35,12 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _counter = 0;
+  late final FooController fooController;
 
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
+  @override
+  void initState() {
+    super.initState();
+    fooController = FooController.instance;
   }
 
   @override
@@ -51,15 +51,8 @@ class _HomePageState extends State<HomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-        child: Column(
-          children: [
-            FooBarBaz(
-              onFoo: _incrementCounter,
-              onBar: _incrementCounter,
-              onBaz: _incrementCounter,
-            ),
-            Text('FooBarBaz count: $_counter'),
-          ],
+        child: FooWidget(
+          fooController: fooController,
         ),
       ),
     );

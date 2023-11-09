@@ -11,7 +11,6 @@ import '../shared/analytics/analytics.dart' as ga;
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
-import '../shared/primitives/utils.dart';
 import '../shared/screen.dart';
 import 'embedded/controller.dart';
 import 'embedded/view.dart';
@@ -22,7 +21,7 @@ class ExtensionScreen extends Screen {
       : super.conditional(
           // TODO(kenz): we may need to ensure this is a unique id.
           id: '${extensionConfig.name}_ext',
-          title: extensionConfig.screenTitle,
+          title: extensionConfig.name,
           icon: extensionConfig.icon,
           // TODO(kenz): support static DevTools extensions.
           requiresConnection: true,
@@ -55,9 +54,7 @@ class _ExtensionScreenBodyState extends State<_ExtensionScreenBody> {
 
   void _init() {
     ga.screen(
-      gac.DevToolsExtensionEvents.extensionScreenName(
-        widget.extensionConfig.name,
-      ),
+      gac.DevToolsExtensionEvents.extensionScreenName(widget.extensionConfig),
     );
     extensionController =
         createEmbeddedExtensionController(widget.extensionConfig)..init();
@@ -137,6 +134,4 @@ extension ExtensionConfigExtension on DevToolsExtensionConfig {
         materialIconCodePoint,
         fontFamily: 'MaterialIcons',
       );
-
-  String get screenTitle => name.toSentenceCase();
 }

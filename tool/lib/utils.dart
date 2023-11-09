@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:args/command_runner.dart';
 import 'package:devtools_tool/model.dart';
 import 'package:io/io.dart';
 import 'package:path/path.dart' as path;
@@ -75,10 +76,13 @@ class CliCommand {
     String args, {
     bool throwOnException = true,
   }) {
+    final sdk = FlutterSdk.current;
+    if (sdk == null) {
+      throw Exception('Unable to locate a Flutter sdk.');
+    }
+
     return CliCommand._(
-      // TODO(dantup): Accept an instance of FlutterSdk instead of relying on
-      //  PATH here?
-      exe: FlutterSdk.flutterExecutableName,
+      exe: sdk.flutterToolPath,
       args: args.split(' '),
       throwOnException: throwOnException,
     );
@@ -124,6 +128,7 @@ extension DevToolsProcessManagerExtension on ProcessManager {
     String? workingDirectory,
     String? additionalErrorMessage = '',
   }) async {
+    print('${workingDirectory ?? ''} > $command');
     final processStdout = StringBuffer();
     final processStderr = StringBuffer();
 
@@ -171,10 +176,10 @@ String pathFromRepoRoot(String pathFromRoot) {
 
 /// Returns the name of the git remote with id [remoteId] in
 /// [workingDirectory].
-/// 
+///
 /// When [workingDirectory] is null, this method will look for the remote in
 /// the current directory.
-/// 
+///
 /// [remoteId] should have the form <organization>/<repository>.git. For
 /// example: 'flutter/flutter.git' or 'flutter/devtools.git'.
 Future<String> findRemote(
@@ -197,9 +202,9 @@ Future<String> findRemote(
 
   try {
     upstreamRemoteResult = remoteRegexpResults.firstWhere(
-      // ignore: prefer_interpolation_to_compose_strings
-      (element) => RegExp(r'' + remoteId + '\$')
-          .hasMatch(element.namedGroup('path')!),
+      (element) =>
+          // ignore: prefer_interpolation_to_compose_strings
+          RegExp(r'' + remoteId + '\$').hasMatch(element.namedGroup('path')!),
     );
   } on StateError {
     throw StateError(
@@ -210,4 +215,16 @@ Future<String> findRemote(
   final remoteUpstream = upstreamRemoteResult.namedGroup('remote')!;
   print('Found upstream remote.');
   return remoteUpstream;
+}
+
+extension CommandExtension on Command {
+  void logStatus(String log) {
+    print('[$name] $log');
+  }
+}
+
+extension JoinExtension on List<String> {
+  String joinWithNewLine() {
+    return '${join('\n')}\n';
+  }
 }

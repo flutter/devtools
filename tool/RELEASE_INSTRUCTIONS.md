@@ -20,7 +20,7 @@ Make sure:
 
 2. Your Flutter version is equal to latest candidate release branch:
     - Run `devtools_tool update-flutter-sdk --local`
-3. You have goma [configured](http://go/ma-mac-setup).
+3. You have goma [configured](http://go/ma-mac-setup)
 
 ### Prepare the release
 
@@ -60,10 +60,9 @@ These packages always have their version numbers updated in lock, so we don't ha
 
 ### Test the release PR
 
-- Build the DevTools binary and run it from your local Dart SDK.
-   - From the main devtools/ directory.
+- Build DevTools in release mode and serve it from a locally running DevTools server instance:
    ```shell
-   dart ./tool/build_e2e.dart
+   devtools_tool serve
    ```
 
 - Launch DevTools and verify that everything generally works.
