@@ -293,12 +293,10 @@ class DeepLinksController {
       for (var domain in domains) domain: <DomainError>[],
     };
 
-    final validationResult =
-        result[_validationResultKey] as List<Map<String, dynamic>>;
+    final validationResult = result[_validationResultKey] as List;
     for (final Map<String, dynamic> domainResult in validationResult) {
       final String domainName = domainResult[_domainNameKey];
-      final List<Map<String, dynamic>>? failedChecks =
-          domainResult[_failedChecksKey];
+      final List? failedChecks = domainResult[_failedChecksKey];
       if (failedChecks != null) {
         for (final Map<String, dynamic> failedCheck in failedChecks) {
           switch (failedCheck[_checkNameKey]) {
