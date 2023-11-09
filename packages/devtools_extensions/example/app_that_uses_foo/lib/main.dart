@@ -35,14 +35,12 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _idCounter = 0;
-
   late final FooController fooController;
 
   @override
   void initState() {
     super.initState();
-    fooController = FooController();
+    fooController = FooController.instance;
   }
 
   @override
@@ -53,24 +51,8 @@ class _HomePageState extends State<HomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-        child: Column(
-          children: [
-            FooBarBaz(
-              onFoo: () => setState(() {
-                fooController.addThing(_idCounter++, 'foo');
-              }),
-              onBar: () => setState(() {
-                fooController.addThing(_idCounter++, 'bar');
-              }),
-              onBaz: () => setState(() {
-                fooController.addThing(_idCounter++, 'baz');
-              }),
-            ),
-            const SizedBox(height: 8.0),
-            Text('FooBarBaz count: $_idCounter'),
-            const SizedBox(height: 8.0),
-            Text('Total things count: ${fooController.totalThings}'),
-          ],
+        child: FooWidget(
+          fooController: fooController,
         ),
       ),
     );

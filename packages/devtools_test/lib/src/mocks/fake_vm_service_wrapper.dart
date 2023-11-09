@@ -32,7 +32,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
         allocationSamples = allocationSamples ?? _defaultProfile {
     _reverseResolvedUriMap = <String, String>{};
     if (_resolvedUriMap != null) {
-      for (var e in _resolvedUriMap!.entries) {
+      for (var e in _resolvedUriMap.entries) {
         _reverseResolvedUriMap![e.value] = e.key;
       }
     }
@@ -127,7 +127,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
     return Future.value(
       UriList(
         uris: _resolvedUriMap != null
-            ? (uris.map((e) => _resolvedUriMap![e]).toList())
+            ? (uris.map((e) => _resolvedUriMap[e]).toList())
             : null,
       ),
     );
@@ -142,7 +142,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
     return Future.value(
       UriList(
         uris: _reverseResolvedUriMap != null
-            ? (uris.map((e) => _reverseResolvedUriMap![e]).toList())
+            ? (uris.map((e) => _reverseResolvedUriMap[e]).toList())
             : null,
       ),
     );
@@ -274,7 +274,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
       throw StateError('_memoryData was not provided to FakeServiceManager');
     }
 
-    final heapSample = _memoryData!.data.first;
+    final heapSample = _memoryData.data.first;
     return Future.value(
       MemoryUsage(
         externalUsage: heapSample.external,

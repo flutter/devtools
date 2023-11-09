@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math';
 
 import 'package:devtools_app_shared/ui.dart';
@@ -13,9 +14,15 @@ import '../../shared/primitives/utils.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
 import '../../shared/ui/colors.dart';
+import '../../shared/ui/tab.dart';
 import '../../shared/utils.dart';
 import 'deep_links_controller.dart';
 import 'deep_links_model.dart';
+import 'validation_details_view.dart';
+
+const _kNotificationCardSize = Size(475, 132);
+const _kSearchFieldFullWidth = 314.0;
+const _kSearchFieldSplitScreenWidth = 280.0;
 
 enum TableViewType {
   domainView,
@@ -47,6 +54,7 @@ class _DeepLinkListViewState extends State<DeepLinkListView>
       // If not found, default to 0.
       releaseVariantIndex = max(releaseVariantIndex, 0);
       controller.selectedVariantIndex.value = releaseVariantIndex;
+      unawaited(controller.validateLinks());
     });
   }
 
@@ -54,13 +62,14 @@ class _DeepLinkListViewState extends State<DeepLinkListView>
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: TableViewType.values.length,
-      child: const Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _DeepLinkListViewTopPanel(),
-          SizedBox(height: denseSpacing),
-          Expanded(child: _DeepLinkListViewMainPanel()),
-        ],
+      child: const RoundedOutlinedBorder(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _DeepLinkListViewTopPanel(),
+            Expanded(child: _DeepLinkListViewMainPanel()),
+          ],
+        ),
       ),
     );
   }
@@ -72,112 +81,64 @@ class _DeepLinkListViewMainPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Provider.of<DeepLinksController>(context);
-    return ValueListenableBuilder<List<LinkData>?>(
-      valueListenable: controller.linkDatasNotifier,
-      builder: (context, linkDatas, _) {
-        if (linkDatas == null) {
-          return const CenteredCircularProgressIndicator();
-        }
-        return Column(
-          children: [
-            AreaPaneHeader(
-              title: Text(
-                'All deep links',
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-              actions: [
-                SizedBox(
-                  width: wideSearchFieldWidth,
-                  child: DevToolsClearableTextField(
-                    labelText: '',
-                    hintText: 'Search a URL, domain or path',
-                    prefixIcon: const Icon(Icons.search),
-                    onChanged: (value) {
-                      controller.searchContent = value;
-                    },
+    // TODO(hangyujin): Use MultiValueListenableBuilder.
+    return ValueListenableBuilder<DisplayOptions>(
+      valueListenable: controller.displayOptionsNotifier,
+      builder: (context, displayOptions, _) =>
+          ValueListenableBuilder<List<LinkData>?>(
+        valueListenable: controller.allLinkDatasNotifier,
+        builder: (context, linkDatas, _) {
+          if (linkDatas == null) {
+            return const CenteredCircularProgressIndicator();
+          }
+          if (displayOptions.showSplitScreen) {
+            return Row(
+              children: [
+                Expanded(
+                  child: _AllDeepLinkDataTable(controller: controller),
+                ),
+                Expanded(
+                  child: ValueListenableBuilder<LinkData?>(
+                    valueListenable: controller.selectedLink,
+                    builder: (context, selectedLink, _) => TabBarView(
+                      children: [
+                        ValidationDetailView(
+                          linkData: selectedLink!,
+                          controller: controller,
+                          viewType: TableViewType.domainView,
+                        ),
+                        ValidationDetailView(
+                          linkData: selectedLink,
+                          controller: controller,
+                          viewType: TableViewType.pathView,
+                        ),
+                        ValidationDetailView(
+                          linkData: selectedLink,
+                          controller: controller,
+                          viewType: TableViewType.singleUrlView,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
-            ),
-            const SizedBox(height: denseSpacing),
-            const TabBar(
-              tabs: [
-                Text('Domain view'),
-                Text('Path view'),
-                Text('Single URL view'),
-              ],
-              tabAlignment: TabAlignment.start,
-              isScrollable: true,
-            ),
-            Expanded(
-              child: ValueListenableBuilder<bool>(
-                valueListenable: controller.showSpitScreenNotifier,
-                builder: (context, showSpitScreen, _) => TabBarView(
-                  children: [
-                    _DataTableWithValidationDetails(
-                      tableView: TableViewType.domainView,
-                      linkDatas: controller.getLinkDatasByDomain,
-                      controller: controller,
-                      showSpitScreen: showSpitScreen,
-                    ),
-                    _DataTableWithValidationDetails(
-                      tableView: TableViewType.pathView,
-                      linkDatas: controller.getLinkDatasByPath,
-                      controller: controller,
-                      showSpitScreen: showSpitScreen,
-                    ),
-                    _DataTableWithValidationDetails(
-                      tableView: TableViewType.singleUrlView,
-                      linkDatas: linkDatas,
-                      controller: controller,
-                      showSpitScreen: showSpitScreen,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-class _DataTableWithValidationDetails extends StatelessWidget {
-  const _DataTableWithValidationDetails({
-    required this.linkDatas,
-    required this.tableView,
-    required this.controller,
-    required this.showSpitScreen,
-  });
-  final List<LinkData> linkDatas;
-  final TableViewType tableView;
-  final DeepLinksController controller;
-  final bool showSpitScreen;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: _DataTable(
-            tableView: tableView,
-            linkDatas: linkDatas,
-            controller: controller,
-          ),
-        ),
-        if (showSpitScreen)
-          Expanded(
-            child: ValueListenableBuilder<LinkData?>(
-              valueListenable: controller.selectedLink,
-              builder: (context, selectedLink, _) => _ValidationDetailScreen(
-                tableView: tableView,
-                linkData: selectedLink!,
+            );
+          }
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _NotificationCardSection(
+                domainErrorCount: displayOptions.domainErrorCount,
+                pathErrorCount: displayOptions.pathErrorCount,
                 controller: controller,
               ),
-            ),
-          ),
-      ],
+              Expanded(
+                child: _AllDeepLinkDataTable(controller: controller),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 }
@@ -185,137 +146,53 @@ class _DataTableWithValidationDetails extends StatelessWidget {
 class _DataTable extends StatelessWidget {
   const _DataTable({
     required this.linkDatas,
-    required this.tableView,
+    required this.viewType,
     required this.controller,
   });
   final List<LinkData> linkDatas;
-  final TableViewType tableView;
+  final TableViewType viewType;
   final DeepLinksController controller;
 
   @override
   Widget build(BuildContext context) {
-    final ColumnData<LinkData> domain = DomainColumn();
-    final ColumnData<LinkData> path = PathColumn();
+    final domain = DomainColumn(controller);
+    final path = PathColumn(controller);
 
-    return FlatTable(
-      keyFactory: (node) => ValueKey(node.toString),
-      data: linkDatas,
-      dataKey: 'deep-links',
-      autoScrollContent: true,
-      columns: <ColumnData>[
-        if (tableView != TableViewType.pathView) domain,
-        if (tableView != TableViewType.domainView) path,
-        SchemeColumn(),
-        OSColumn(),
-        if (!controller.showSpitScreen) ...[
-          StatusColumn(),
-          NavigationColumn(),
-        ],
-      ],
-      selectionNotifier: controller.selectedLink,
-      defaultSortColumn: tableView == TableViewType.pathView ? path : domain,
-      defaultSortDirection: SortDirection.ascending,
-      onItemSelected: (item) => controller.showSpitScreenNotifier.value = true,
-    );
-  }
-}
-
-class _ValidationDetailScreen extends StatelessWidget {
-  const _ValidationDetailScreen({
-    required this.linkData,
-    required this.tableView,
-    required this.controller,
-  });
-
-  final LinkData linkData;
-  final TableViewType tableView;
-  final DeepLinksController controller;
-
-  @override
-  Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: largeSpacing),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text('Selected deep link validation details'),
-              IconButton(
-                onPressed: () =>
-                    controller.showSpitScreenNotifier.value = false,
-                icon: const Icon(Icons.close),
-              ),
-            ],
-          ),
-          Text(
-            'This tool helps you diagnose Universal Links, App Links,'
-            ' and Custom Schemes in your app. Web checks are done for the web association'
-            ' files on your website. App checks are done for the intent filters in'
-            ' the manifest and info.plist file, routing issues, URL format, etc.',
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-          const Text('Domain check'),
-          Expanded(child: _DomainCheckTable(linkData: linkData)),
+      padding: const EdgeInsets.only(top: denseSpacing),
+      child: FlatTable<LinkData>(
+        keyFactory: (node) => ValueKey(node.toString),
+        data: linkDatas,
+        dataKey: 'deep-links',
+        autoScrollContent: true,
+        headerColor: Theme.of(context).colorScheme.deeplinkTableHeaderColor,
+        columns: <ColumnData<LinkData>>[
+          ...(() {
+            switch (viewType) {
+              case TableViewType.domainView:
+                return [domain, NumberOfAssociatedPathColumn()];
+              case TableViewType.pathView:
+                return [path, NumberOfAssociatedDomainColumn()];
+              case TableViewType.singleUrlView:
+                return <ColumnData<LinkData>>[domain, path];
+            }
+          })(),
+          SchemeColumn(controller),
+          OSColumn(controller),
+          if (!controller.displayOptionsNotifier.value.showSplitScreen) ...[
+            StatusColumn(controller, viewType),
+            NavigationColumn(),
+          ],
         ],
+        selectionNotifier: controller.selectedLink,
+        defaultSortColumn: (viewType == TableViewType.pathView ? path : domain)
+            as ColumnData<LinkData>,
+        defaultSortDirection: SortDirection.ascending,
+        onItemSelected: (linkdata) {
+          controller.selectLink(linkdata!);
+          controller.updateDisplayOptions(showSplitScreen: true);
+        },
       ),
-    );
-  }
-}
-
-class _DomainCheckTable extends StatelessWidget {
-  const _DomainCheckTable({
-    required this.linkData,
-  });
-
-  final LinkData linkData;
-
-  @override
-  Widget build(BuildContext context) {
-    return DataTable(
-      columns: const [
-        DataColumn(label: Text('OS')),
-        DataColumn(label: Text('Issue type')),
-        DataColumn(label: Text('Status')),
-      ],
-      rows: [
-        if (linkData.os.contains(PlatformOS.android))
-          DataRow(
-            cells: [
-              const DataCell(Text('Android')),
-              const DataCell(Text('Digital assets link file')),
-              DataCell(
-                linkData.domainError
-                    ? Text(
-                        'Check failed',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.error,
-                        ),
-                      )
-                    : Text(
-                        'No issues found',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.green,
-                        ),
-                      ),
-              ),
-            ],
-          ),
-        if (linkData.os.contains(PlatformOS.ios))
-          DataRow(
-            cells: [
-              const DataCell(Text('iOS')),
-              const DataCell(Text('Apple-App-Site-Association file')),
-              DataCell(
-                Text(
-                  'No issues found',
-                  style: TextStyle(color: Theme.of(context).colorScheme.green),
-                ),
-              ),
-            ],
-          ),
-      ],
     );
   }
 }
@@ -326,12 +203,15 @@ class _DeepLinkListViewTopPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Provider.of<DeepLinksController>(context);
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(defaultSpacing),
-          child: ValueListenableBuilder(
+    return AreaPaneHeader(
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            'Validate and fix',
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+          ValueListenableBuilder(
             valueListenable: controller.selectedVariantIndex,
             builder: (_, value, __) {
               return _AndroidVariantDropdown(
@@ -344,8 +224,8 @@ class _DeepLinkListViewTopPanel extends StatelessWidget {
               );
             },
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -379,6 +259,225 @@ class _AndroidVariantDropdown extends StatelessWidget {
           },
         ),
       ],
+    );
+  }
+}
+
+class _AllDeepLinkDataTable extends StatelessWidget {
+  const _AllDeepLinkDataTable({
+    required this.controller,
+  });
+
+  final DeepLinksController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    const gaPrefix = 'deepLinkTab';
+    return Column(
+      children: <Widget>[
+        OutlineDecoration(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+                child: Text(
+                  'All deep links',
+                  style: textTheme.bodyLarge,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(denseSpacing),
+                child: SizedBox(
+                  width: controller.displayOptions.showSplitScreen
+                      ? _kSearchFieldSplitScreenWidth
+                      : _kSearchFieldFullWidth,
+                  child: DevToolsClearableTextField(
+                    labelText: '',
+                    hintText: 'Search a URL, domain or path',
+                    prefixIcon: const Icon(Icons.search),
+                    onChanged: (value) {
+                      controller.searchContent = value;
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        TabBar(
+          tabs: [
+            DevToolsTab.create(
+              tabName: 'Domain view',
+              gaPrefix: gaPrefix,
+            ),
+            DevToolsTab.create(
+              tabName: 'Path view',
+              gaPrefix: gaPrefix,
+            ),
+            DevToolsTab.create(
+              tabName: 'Single URL view',
+              gaPrefix: gaPrefix,
+            ),
+          ],
+          tabAlignment: TabAlignment.start,
+          isScrollable: true,
+        ),
+        Expanded(
+          child: ValueListenableBuilder<List<LinkData>?>(
+            valueListenable: controller.displayLinkDatasNotifier,
+            builder: (context, linkDatas, _) => TabBarView(
+              children: [
+                _DataTable(
+                  viewType: TableViewType.domainView,
+                  linkDatas: controller.getLinkDatasByDomain,
+                  controller: controller,
+                ),
+                _DataTable(
+                  viewType: TableViewType.pathView,
+                  linkDatas: controller.getLinkDatasByPath,
+                  controller: controller,
+                ),
+                _DataTable(
+                  viewType: TableViewType.singleUrlView,
+                  linkDatas: linkDatas!,
+                  controller: controller,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _NotificationCardSection extends StatelessWidget {
+  const _NotificationCardSection({
+    required this.domainErrorCount,
+    required this.pathErrorCount,
+    required this.controller,
+  });
+
+  final int domainErrorCount;
+  final int pathErrorCount;
+
+  final DeepLinksController controller;
+  @override
+  Widget build(BuildContext context) {
+    if (domainErrorCount == 0 && domainErrorCount == 0) {
+      return const SizedBox.shrink();
+    }
+    return OutlineDecoration(
+      child: Padding(
+        padding: const EdgeInsets.all(defaultSpacing),
+        child: Row(
+          children: [
+            if (domainErrorCount > 0)
+              _NotificationCard(
+                title: '$domainErrorCount domain not verified',
+                description:
+                    'This affects all deep links. Fix issues to make users go directly to your app.',
+                actionButton: TextButton(
+                  onPressed: () {
+                    // Switch to the domain view. Select the first link with domain error and show the split screen.
+                    DefaultTabController.of(context).index = 0;
+                    controller.selectLink(
+                      controller.getLinkDatasByDomain
+                          .where((element) => element.domainErrors.isNotEmpty)
+                          .first,
+                    );
+                    controller.updateDisplayOptions(showSplitScreen: true);
+                  },
+                  child: const Text('Fix domain'),
+                ),
+              ),
+            if (domainErrorCount > 0 && pathErrorCount > 0)
+              const SizedBox(width: defaultSpacing),
+            if (pathErrorCount > 0)
+              _NotificationCard(
+                title: '$pathErrorCount path not working',
+                description:
+                    'Fix these path to make sure users are directed to your app',
+                actionButton: TextButton(
+                  onPressed: () {
+                    // Switch to the path view. Select the first link with path error and show the split screen.
+                    DefaultTabController.of(context).index = 1;
+                    controller.selectLink(
+                      controller.getLinkDatasByPath
+                          .where((element) => element.pathError)
+                          .first,
+                    );
+                    controller.updateDisplayOptions(showSplitScreen: true);
+                  },
+                  child: const Text('Fix path'),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _NotificationCard extends StatelessWidget {
+  const _NotificationCard({
+    required this.title,
+    required this.description,
+    required this.actionButton,
+  });
+
+  final String title;
+  final String description;
+  final Widget actionButton;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    return SizedBox.fromSize(
+      size: _kNotificationCardSize,
+      child: Card(
+        color: colorScheme.surface,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            defaultSpacing,
+            defaultSpacing,
+            defaultSpacing,
+            0,
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.error, color: colorScheme.error),
+              const SizedBox(width: denseSpacing),
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: textTheme.bodyMedium!
+                          .copyWith(color: colorScheme.onSurface),
+                    ),
+                    Text(
+                      description,
+                      style: Theme.of(context).subtleTextStyle,
+                    ),
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.bottomRight,
+                        child: actionButton,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

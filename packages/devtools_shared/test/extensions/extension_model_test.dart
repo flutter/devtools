@@ -68,6 +68,16 @@ void main() {
         );
       }
 
+      Matcher throwsMissingIsPubliclyHostedError() {
+        return throwsA(
+          isA<StateError>().having(
+            (e) => e.message,
+            'missing isPubliclyHosted key StateError',
+            startsWith('Missing key "isPubliclyHosted"'),
+          ),
+        );
+      }
+
       // Missing 'name'.
       expect(
         () {
@@ -130,7 +140,7 @@ void main() {
             'issueTracker': 'www.google.com',
           });
         },
-        throwsMissingRequiredFieldsError(),
+        throwsMissingIsPubliclyHostedError(),
       );
     });
 
@@ -169,6 +179,57 @@ void main() {
           });
         },
         throwsUnexpectedValueTypesError(),
+      );
+    });
+
+    test('parse throws for invalid name', () {
+      Matcher throwsInvalidNameError() {
+        return throwsA(
+          isA<StateError>().having(
+            (e) => e.message,
+            'unexpected value types StateError',
+            startsWith('The "name" field in the extension config.yaml should'),
+          ),
+        );
+      }
+
+      expect(
+        () {
+          DevToolsExtensionConfig.parse({
+            'name': 'name with spaces',
+            'path': 'path/to/foo/extension',
+            'issueTracker': 'www.google.com',
+            'version': '1.0.0',
+            'isPubliclyHosted': 'false',
+          });
+        },
+        throwsInvalidNameError(),
+      );
+
+      expect(
+        () {
+          DevToolsExtensionConfig.parse({
+            'name': 'Name_With_Capital_Letters',
+            'path': 'path/to/foo/extension',
+            'issueTracker': 'www.google.com',
+            'version': '1.0.0',
+            'isPubliclyHosted': 'false',
+          });
+        },
+        throwsInvalidNameError(),
+      );
+
+      expect(
+        () {
+          DevToolsExtensionConfig.parse({
+            'name': 'name.with\'special\chars/',
+            'path': 'path/to/foo/extension',
+            'issueTracker': 'www.google.com',
+            'version': '1.0.0',
+            'isPubliclyHosted': 'false',
+          });
+        },
+        throwsInvalidNameError(),
       );
     });
   });

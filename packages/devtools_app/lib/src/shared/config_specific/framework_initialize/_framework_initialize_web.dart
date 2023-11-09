@@ -94,12 +94,12 @@ class ServerConnectionStorage implements Storage {
   final DevToolsServerConnection connection;
 
   @override
-  Future<String> getValue(String key) async {
+  Future<String> getValue(String key) {
     return connection.getPreferenceValue(key);
   }
 
   @override
-  Future setValue(String key, String value) async {
+  Future<void> setValue(String key, String value) async {
     await connection.setPreferenceValue(key, value);
   }
 }
@@ -111,7 +111,7 @@ class BrowserStorage implements Storage {
   }
 
   @override
-  Future setValue(String key, String value) async {
+  Future<void> setValue(String key, String value) async {
     window.localStorage[key] = value;
   }
 }

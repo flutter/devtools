@@ -12,14 +12,14 @@ import 'package:path/path.dart' as path;
 
 import '../utils.dart';
 
-const _localFlag = 'local';
+const _fromPathFlag = 'from-path';
 const _useCacheFlag = 'use-cache';
 
 /// This command updates the the Flutter SDK contained in the 'tool/' directory
 /// to the latest Flutter candidate branch.
 ///
-/// When the '--local' flag is passed, your local flutter/flutter checkout will
-/// be updated as well.
+/// When the '--from-path' flag is passed, the Flutter SDK that is on PATH (your
+/// local flutter/flutter git checkout) will be updated as well.
 ///
 /// This command will use the Flutter version from the 'flutter-candidate.txt'
 /// file in the repository root, unless the '--no-use-cache' flag is passed,
@@ -30,22 +30,23 @@ const _useCacheFlag = 'use-cache';
 /// time since the GitHub workflow that updates this file runs twice per day.
 ///
 /// To run this script:
-/// `devtools_tool update-flutter-sdk [--local] [--no-use-cache]`
+/// `devtools_tool update-flutter-sdk [--from-path] [--no-use-cache]`
 class UpdateFlutterSdkCommand extends Command {
   UpdateFlutterSdkCommand() {
     argParser
       ..addFlag(
-        _localFlag,
+        _fromPathFlag,
+        abbr: 'p',
         negatable: false,
-        help: 'Update your local checkout of the Flutter SDK',
+        help: 'Update the Flutter SDK that is on PATH (your local '
+            'flutter/flutter git checkout)',
       )
       ..addFlag(
         _useCacheFlag,
         negatable: true,
         defaultsTo: true,
-        help:
-            'Use the cached Flutter version stored in "flutter-candidate.txt" '
-            'instead of the latest version at '
+        help: 'Update the Flutter SDK(s) to the cached Flutter version stored '
+            'in "flutter-candidate.txt" instead of the latest version at '
             '"https://flutter.googlesource.com/mirrors/flutter/"',
       );
   }
@@ -54,12 +55,13 @@ class UpdateFlutterSdkCommand extends Command {
 
   @override
   String get description =>
-      'Updates the "devtools_rev" hash in the Dart SDK DEPS file with the '
-      'provided commit hash, and creates a Gerrit CL for review';
+      'Updates the the Flutter SDK contained in the \'tool/\' directory to the '
+      'latest Flutter candidate branch. Optionally, can also update the Flutter'
+      'SDK that is on PATH (your local flutter/flutter git checkout).';
 
   @override
   Future run() async {
-    final updateLocalFlutter = argResults![_localFlag];
+    final updateFlutterFromPath = argResults![_fromPathFlag];
     final useCachedVersion = argResults![_useCacheFlag];
     final log = Logger.standard();
 
@@ -89,7 +91,8 @@ class UpdateFlutterSdkCommand extends Command {
         workingDirectory: repo.toolDirectoryPath,
       ))
           .stdout
-          .replaceFirst('refs/', '');
+          .replaceFirst('refs/', '')
+          .trim();
     }
 
     log.stdout(
@@ -97,14 +100,14 @@ class UpdateFlutterSdkCommand extends Command {
       '${useCachedVersion ? 'from cache' : 'from upstream'}: $flutterTag ',
     );
 
-    if (updateLocalFlutter) {
-      final sdk = FlutterSdk.getSdk();
+    if (updateFlutterFromPath) {
+      final sdk = FlutterSdk.current;
       if (sdk == null) {
         print('Unable to locate a Flutter sdk.');
         return 1;
       }
 
-      log.stdout('Updating local Flutter checkout...');
+      log.stdout('Updating local flutter/flutter repository...');
 
       // Verify we have an upstream remote to pull from.
       await findRemote(
@@ -124,7 +127,7 @@ class UpdateFlutterSdkCommand extends Command {
         ],
         workingDirectory: sdk.sdkPath,
       );
-      log.stdout('Finished updating local Flutter checkout.');
+      log.stdout('Finished updating local flutter/flutter repository.');
     }
 
     final flutterSdkDirName = 'flutter-sdk';
@@ -132,21 +135,23 @@ class UpdateFlutterSdkCommand extends Command {
       repo.toolDirectoryPath,
       flutterSdkDirName,
     );
-    final toolFlutterSdk = Directory.fromUri(Uri.file(toolSdkPath));
+    final toolFlutterSdkDirectory = Directory(toolSdkPath);
     log.stdout('Updating "$toolSdkPath" to branch $flutterTag');
 
-    if (toolFlutterSdk.existsSync()) {
-      log.stdout('"$toolSdkPath" directory already exists');
+    if (toolFlutterSdkDirectory.existsSync()) {
+      log.stdout(
+        '"$toolSdkPath" directory already exists. Fetching $flutterTag from GitHub.',
+      );
       await processManager.runAll(
         commands: [
           CliCommand.git('fetch'),
           CliCommand.git('checkout $flutterTag -f'),
           CliCommand.flutter('--version'),
         ],
-        workingDirectory: toolFlutterSdk.path,
+        workingDirectory: toolFlutterSdkDirectory.path,
       );
     } else {
-      log.stdout('"$toolSdkPath" directory does not exist - cloning it now');
+      log.stdout('Cloning flutter/flutter into "$toolSdkPath" directory.');
       await processManager.runProcess(
         CliCommand.git(
           'clone https://github.com/flutter/flutter $flutterSdkDirName',
@@ -158,10 +163,9 @@ class UpdateFlutterSdkCommand extends Command {
           CliCommand.git('checkout $flutterTag -f'),
           CliCommand.flutter('--version'),
         ],
-        workingDirectory: toolFlutterSdk.path,
+        workingDirectory: toolFlutterSdkDirectory.path,
       );
     }
-
     log.stdout('Finished updating $toolSdkPath.');
   }
 }
