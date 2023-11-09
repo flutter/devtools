@@ -101,7 +101,7 @@ class CliCommand {
     bool throwOnException = true,
     bool split = true,
   }) {
-    if ((cmd != null) || (args != null)) {
+    if ((cmd == null) && (args == null)) {
       throw ('One of `cmd` and `args` must be specified');
     }
 
