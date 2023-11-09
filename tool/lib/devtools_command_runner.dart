@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
-import 'package:devtools_tool/commands/build_release.dart';
+import 'package:devtools_tool/commands/build.dart';
 import 'package:devtools_tool/commands/fix_goldens.dart';
 import 'package:devtools_tool/commands/generate_code.dart';
 import 'package:devtools_tool/commands/serve.dart';
@@ -24,7 +24,7 @@ class DevToolsCommandRunner extends CommandRunner {
   DevToolsCommandRunner()
       : super('devtools_tool', 'A repo management tool for DevTools.') {
     addCommand(AnalyzeCommand());
-    addCommand(BuildReleaseCommand());
+    addCommand(BuildCommand());
     addCommand(FixGoldensCommand());
     addCommand(GenerateCodeCommand());
     addCommand(ListCommand());

@@ -10,6 +10,7 @@ import 'package:io/io.dart';
 import 'package:path/path.dart' as path;
 
 import '../utils.dart';
+import 'shared.dart';
 
 const _buildFlag = 'build';
 
