@@ -90,7 +90,8 @@ class UpdateFlutterSdkCommand extends Command {
         workingDirectory: repo.toolDirectoryPath,
       ))
           .stdout
-          .replaceFirst('refs/', '');
+          .replaceFirst('refs/', '')
+          .trim();
     }
 
     log.stdout(
@@ -133,35 +134,28 @@ class UpdateFlutterSdkCommand extends Command {
       repo.toolDirectoryPath,
       flutterSdkDirName,
     );
-    final toolFlutterSdk = Directory.fromUri(Uri.file(toolSdkPath));
+    final toolFlutterSdk = Directory(toolSdkPath);
     log.stdout('Updating "$toolSdkPath" to branch $flutterTag');
 
     if (toolFlutterSdk.existsSync()) {
-      log.stdout('"$toolSdkPath" directory already exists');
-      await processManager.runAll(
-        commands: [
-          CliCommand.git('fetch'),
-          CliCommand.git('checkout $flutterTag -f'),
-          CliCommand.flutter('--version'),
-        ],
-        workingDirectory: toolFlutterSdk.path,
-      );
-    } else {
-      log.stdout('"$toolSdkPath" directory does not exist - cloning it now');
-      await processManager.runProcess(
-        CliCommand.git(
-          'clone https://github.com/flutter/flutter $flutterSdkDirName',
-        ),
-        workingDirectory: repo.toolDirectoryPath,
-      );
-      await processManager.runAll(
-        commands: [
-          CliCommand.git('checkout $flutterTag -f'),
-          CliCommand.flutter('--version'),
-        ],
-        workingDirectory: toolFlutterSdk.path,
-      );
+      toolFlutterSdk.deleteSync(recursive: true);
+      log.stdout('Deleting existing "$toolSdkPath" directory');
     }
+    toolFlutterSdk.createSync();
+    log.stdout('Cloning flutter/flutter into "$toolSdkPath" directory.');
+    await processManager.runProcess(
+      CliCommand.git(
+        'clone https://github.com/flutter/flutter $flutterSdkDirName',
+      ),
+      workingDirectory: repo.toolDirectoryPath,
+    );
+    await processManager.runAll(
+      commands: [
+        CliCommand.git('checkout $flutterTag -f'),
+        CliCommand.flutter('--version'),
+      ],
+      workingDirectory: toolFlutterSdk.path,
+    );
 
     log.stdout('Finished updating $toolSdkPath.');
   }

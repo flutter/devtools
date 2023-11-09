@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:args/command_runner.dart';
 import 'package:devtools_tool/model.dart';
 import 'package:io/io.dart';
 import 'package:path/path.dart' as path;
@@ -215,12 +214,6 @@ Future<String> findRemote(
   final remoteUpstream = upstreamRemoteResult.namedGroup('remote')!;
   print('Found upstream remote.');
   return remoteUpstream;
-}
-
-extension CommandExtension on Command {
-  void logStatus(String log) {
-    print('[$name] $log');
-  }
 }
 
 extension JoinExtension on List<String> {
