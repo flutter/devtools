@@ -52,7 +52,7 @@ class FrameworkCore {
     _log.info('DevTools version ${devtools.version}.');
   }
 
-  static bool initializationInProgress = false;
+  static bool vmServiceConnectionInProgress = false;
 
   /// Returns true if we're able to connect to a device and false otherwise.
   static Future<bool> initVmService(
@@ -70,7 +70,7 @@ class FrameworkCore {
     final normalizedUri = normalizeVmServiceUri(serviceUriAsString);
     final Uri? uri = normalizedUri ?? getServiceUriFromQueryString(url);
     if (uri != null) {
-      initializationInProgress = true;
+      vmServiceConnectionInProgress = true;
       final finishedCompleter = Completer<void>();
 
       try {
@@ -111,7 +111,7 @@ class FrameworkCore {
         errorReporter!('Unable to connect to VM service at $uri: $e', e);
         return false;
       } finally {
-        initializationInProgress = false;
+        vmServiceConnectionInProgress = false;
       }
     } else {
       // Don't report an error here because we do not have a URI to connect to.

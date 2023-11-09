@@ -204,7 +204,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     Map<String, String?> args,
     DevToolsNavigationState? state,
   ) {
-    if (FrameworkCore.initializationInProgress) {
+    if (FrameworkCore.vmServiceConnectionInProgress) {
       return const MaterialPage(child: CenteredCircularProgressIndicator());
     }
 

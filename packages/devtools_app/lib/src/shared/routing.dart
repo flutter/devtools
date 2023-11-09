@@ -60,7 +60,9 @@ class DevToolsRouteInformationParser
       // If the uri has been modified and we do not have a vm service uri as a
       // query parameter, ensure we manually disconnect from any previously
       // connected applications.
-      await serviceConnection.serviceManager.manuallyDisconnect();
+      if (serviceConnection.serviceManager.hasConnection) {
+        await serviceConnection.serviceManager.manuallyDisconnect();
+      }
     } else if (_forceVmServiceUri == null) {
       // Otherwise, connect to the vm service from the query parameter before
       // loading the route (but do not do this in a testing environment).
