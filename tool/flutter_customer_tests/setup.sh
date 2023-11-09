@@ -5,5 +5,6 @@
 
 cd tool
 flutter pub get
-dart bin/devtools_tool generate-code --upgrade
+dart bin/devtools_tool.dart pub-get
+dart bin/devtools_tool.dart generate-code --upgrade
 cd ..
