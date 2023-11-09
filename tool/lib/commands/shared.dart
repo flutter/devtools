@@ -14,7 +14,7 @@ extension CommandExtension on Command {
 extension BuildCommandArgsExtension on ArgParser {
   void addBulidModeOption() {
     addOption(
-      BuildCommandArgs.buildMode.name,
+      BuildCommandArgs.buildMode.flagName,
       allowed: ['debug', 'profile', 'release'],
       defaultsTo: 'release',
       help: 'The build mode to use for the DevTools web app. This should only'
