@@ -23,9 +23,9 @@ abstract class DartSdkHelper {
       workingDirectory: dartSdkLocation,
       additionalErrorMessage: commandDebugMessage,
       commands: [
-        CliCommand.git(['fetch origin']),
-        CliCommand.git(['rebase-update']),
-        CliCommand.git(['checkout origin/main']),
+        CliCommand.git(cmd: 'fetch origin'),
+        CliCommand.git(cmd: 'rebase-update'),
+        CliCommand.git(cmd: 'checkout origin/main'),
       ],
     );
   }
@@ -90,22 +90,30 @@ class CliCommand {
 
   /// CliCommand helper for running git commands.
   ///
-  /// Arguments can be passed in as a single string, this helper will split them
-  /// up using their spaces. e.g. CliCommand.git(['checkout test-branch'])
+  /// Arguments can be passed in as a single string using [cmd], this will split
+  /// the string into args using spaces. e.g. CliCommand.git(cmd: 'checkout test-branch')
   ///
-  /// If you don't want the args to be split by their spaces then you can set
-  /// [split] to false.
-  factory CliCommand.git(
-    List<String> args, {
+  /// If you instead want to specify args explicitly, you can use the
+  /// [args] param. e.g. CliCommand.git(args: ['checkout', 'test-branch'])
+  factory CliCommand.git({
+    String? cmd,
+    List<String>? args,
     bool throwOnException = true,
     bool split = true,
   }) {
-    if (split) {
-      args = args.map((e) => e.split(' ')).reduce((value, element) {
-        value.addAll(element);
-        return value;
-      });
+    assert(
+      (cmd != null) || (args != null),
+      'One of `cmd` and `args` must be specified',
+    );
+    assert(
+      (cmd == null) != (args == null),
+      'Only one of `cmd` and `args`, at a time, may be specified',
+    );
+
+    if (cmd != null) {
+      args = cmd.split(' ');
     }
+
     return CliCommand._(
       exe: 'git',
       args: args,
@@ -203,7 +211,7 @@ Future<String> findRemote(
 }) async {
   print('Searching for a remote that points to $remoteId.');
   final remotesResult = await processManager.runProcess(
-    CliCommand.git(['remote -v']),
+    CliCommand.git(cmd: 'remote -v'),
     workingDirectory: workingDirectory,
   );
   final String remotes = remotesResult.stdout;

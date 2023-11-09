@@ -31,7 +31,7 @@ class ReleaseHelperCommand extends Command {
 
     final useCurrentBranch = argResults!['use-current-branch']!;
     final currentBranchResult = await processManager.runProcess(
-      CliCommand.git(['rev-parse --abbrev-ref HEAD']),
+      CliCommand.git(cmd: 'rev-parse --abbrev-ref HEAD'),
     );
     final initialBranch = currentBranchResult.stdout.trim();
     String? releaseBranch;
@@ -44,7 +44,7 @@ class ReleaseHelperCommand extends Command {
       );
 
       final gitStatusResult = await processManager.runProcess(
-        CliCommand.git(['status -s']),
+        CliCommand.git(cmd: 'status -s'),
       );
       final gitStatus = gitStatusResult.stdout;
       if (gitStatus.isNotEmpty) {
@@ -57,16 +57,14 @@ class ReleaseHelperCommand extends Command {
       if (!useCurrentBranch) {
         print("Preparing the release branch.");
         await processManager.runProcess(
-          CliCommand.git(['fetch $remoteUpstream master']),
+          CliCommand.git(cmd: 'fetch $remoteUpstream master'),
         );
       }
 
       await processManager.runProcess(
         CliCommand.git(
-          [
-            'checkout -b $releaseBranch'
-                '${useCurrentBranch ? '' : ' $remoteUpstream/master'}'
-          ],
+          cmd: 'checkout -b $releaseBranch'
+              '${useCurrentBranch ? '' : ' $remoteUpstream/master'}',
         ),
       );
 
@@ -103,8 +101,8 @@ class ReleaseHelperCommand extends Command {
 
       await processManager.runAll(
         commands: [
-          CliCommand.git(['commit', '-a', '-m', commitMessage], split: false),
-          CliCommand.git(['push -u $remoteUpstream $releaseBranch']),
+          CliCommand.git(args: ['commit', '-a', '-m', commitMessage]),
+          CliCommand.git(cmd: 'push -u $remoteUpstream $releaseBranch'),
         ],
       );
 
@@ -131,8 +129,9 @@ class ReleaseHelperCommand extends Command {
       print(e);
 
       // try to bring the caller back to their original branch
-      await processManager
-          .runProcess(CliCommand.git(['checkout', initialBranch]));
+      await processManager.runProcess(
+        CliCommand.git(cmd: 'checkout $initialBranch'),
+      );
 
       // try to clean up the temporary branch we made
       if (releaseBranch != null) {
