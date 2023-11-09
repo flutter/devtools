@@ -79,20 +79,11 @@ class ReleaseHelperCommand extends Command {
       );
 
       print("Setting the release version.");
-      await processManager.runProcess(
-        CliCommand.from('devtools_tool', [
-          'update-version',
-          'auto',
-          '--type',
-          'release',
-        ]),
-      );
+      await processManager
+          .runProcess(CliCommand.tool('update-version auto --type release'));
 
       final getNewVersionResult = await processManager.runProcess(
-        CliCommand.from('devtools_tool', [
-          'update-version',
-          'current-version',
-        ]),
+        CliCommand.tool('update-version current-version'),
       );
 
       final newVersion = getNewVersionResult;
