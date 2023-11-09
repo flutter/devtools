@@ -84,7 +84,7 @@ of launch configurations for running and debugging DevTools:
 
 ### Workflow for making changes
 
-1. Change your local Flutter SDK to the latest flutter candidate branch: `devtools_tool update-flutter-sdk --local`
+1. Change your local Flutter SDK to the latest flutter candidate branch: `devtools_tool update-flutter-sdk --from-path`
 2. Create a branch from your cloned DevTools repo: `git checkout -b myBranch`
 3. Ensure your branch, dependencies, and generated code are up-to-date: `devtools_tool sync`
 4. Implement your changes, and commit to your branch: `git commit -m “description”`
