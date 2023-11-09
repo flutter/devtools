@@ -1,5 +1,10 @@
 # How to release Dart DevTools
 
+> Note: there are parts of this release process that can only be completed by Googlers
+on the Dash team. If you are not a Googler on the Dash team, please reach out on the
+[#hackers-devtools](https://discord.com/channels/608014603317936148/1106667330093723668)
+Discord channel before trying to create a DevTools release.
+
 1. [Release into the Dart SDK master branch](#release-into-the-dart-sdk-master-branch)
 2. [Cherry-pick releases into the Dart SDK stable / beta branches](#cherry-pick-releases)
 
