@@ -18,11 +18,11 @@ import '../utils.dart';
 /// overridden by passing 'debug' or 'profile' as the
 /// [BuildCommandArgs.buildMode] argument.
 ///
-/// If the [BuildCommandArgs.useLocalFlutter] argument is present, the Flutter
-/// SDK will not be updated to the latest Flutter candidate before building
-/// DevTools. Use this flag to save the cost of updating the Flutter SDK when
-/// you already have the proper SDK checked out. This is helpful when developing
-/// with the DevTools server.
+/// If the [BuildCommandArgs.useFlutterFromPath] argument is present, the
+/// Flutter SDK will not be updated to the latest Flutter candidate before
+/// building DevTools. Use this flag to save the cost of updating the Flutter
+/// SDK when you already have the proper SDK checked out. This is helpful when
+/// developing with the DevTools server.
 ///
 /// If the [BuildCommandArgs.updatePerfetto] argument is present, the
 /// precompiled bits for Perfetto will be updated from the
@@ -37,7 +37,7 @@ import '../utils.dart';
 class BuildCommand extends Command {
   BuildCommand() {
     argParser
-      ..addUseLocalFlutterFlag()
+      ..addUseFlutterFromPathFlag()
       ..addUpdatePerfettoFlag()
       ..addPubGetFlag()
       ..addBulidModeOption();
@@ -55,7 +55,7 @@ class BuildCommand extends Command {
     final processManager = ProcessManager();
 
     final useLocalFlutter =
-        argResults![BuildCommandArgs.useLocalFlutter.flagName];
+        argResults![BuildCommandArgs.useFlutterFromPath.flagName];
     final updatePerfetto =
         argResults![BuildCommandArgs.updatePerfetto.flagName];
     final runPubGet = argResults![BuildCommandArgs.pubGet.flagName];

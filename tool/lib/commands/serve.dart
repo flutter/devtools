@@ -26,11 +26,11 @@ const _allowEmbeddingFlag = 'allow-embedding';
 /// to this command. All of the following commands are passed along to the
 /// `devtools_tool build` command.
 ///
-/// If the [BuildCommandArgs.useLocalFlutter] argument is present, the Flutter
-/// SDK will not be updated to the latest Flutter candidate before building
-/// DevTools. Use this flag to save the cost of updating the Flutter SDK when
-/// you already have the proper SDK checked out. This is helpful when developing
-/// with the DevTools server.
+/// If the [BuildCommandArgs.useFlutterFromPath] argument is present, the
+/// Flutter SDK will not be updated to the latest Flutter candidate before
+/// building DevTools. Use this flag to save the cost of updating the Flutter
+/// SDK when you already have the proper SDK checked out. This is helpful when
+/// developing with the DevTools server.
 ///
 /// If the [BuildCommandArgs.updatePerfetto] argument is present, the
 /// precompiled bits for Perfetto will be updated from the
@@ -57,7 +57,7 @@ class ServeCommand extends Command {
             'Whether to build the DevTools web app before starting the DevTools'
             ' server.',
       )
-      ..addUseLocalFlutterFlag()
+      ..addUseFlutterFromPathFlag()
       ..addUpdatePerfettoFlag()
       ..addPubGetFlag()
       ..addBulidModeOption()
@@ -87,8 +87,8 @@ class ServeCommand extends Command {
     final processManager = ProcessManager();
 
     final buildApp = argResults![_buildAppFlag];
-    final useLocalFlutter =
-        argResults![BuildCommandArgs.useLocalFlutter.flagName];
+    final useFlutterFromPath =
+        argResults![BuildCommandArgs.useFlutterFromPath.flagName];
     final updatePerfetto =
         argResults![BuildCommandArgs.updatePerfetto.flagName];
     final runPubGet = argResults![BuildCommandArgs.pubGet.flagName];
@@ -96,7 +96,7 @@ class ServeCommand extends Command {
         argResults![BuildCommandArgs.buildMode.flagName];
 
     final remainingArguments = List.of(argResults!.arguments)
-      ..remove(BuildCommandArgs.useLocalFlutter.asArg())
+      ..remove(BuildCommandArgs.useFlutterFromPath.asArg())
       ..remove(BuildCommandArgs.updatePerfetto.asArg())
       ..remove(valueAsArg(_buildAppFlag))
       ..remove(valueAsArg(_buildAppFlag, negated: true))
@@ -130,7 +130,7 @@ class ServeCommand extends Command {
       final process = await processManager.runProcess(
         CliCommand.tool(
           'build'
-          '${useLocalFlutter ? ' ${BuildCommandArgs.useLocalFlutter.asArg()}' : ''}'
+          '${useFlutterFromPath ? ' ${BuildCommandArgs.useFlutterFromPath.asArg()}' : ''}'
           '${updatePerfetto ? ' ${BuildCommandArgs.updatePerfetto.asArg()}' : ''}'
           ' ${BuildCommandArgs.buildMode.asArg()}=$devToolsAppBuildMode'
           ' ${BuildCommandArgs.pubGet.asArg(negated: !runPubGet)}',

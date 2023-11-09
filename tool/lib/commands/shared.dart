@@ -41,9 +41,9 @@ extension BuildCommandArgsExtension on ArgParser {
     );
   }
 
-  void addUseLocalFlutterFlag() {
+  void addUseFlutterFromPathFlag() {
     addFlag(
-      BuildCommandArgs.useLocalFlutter.flagName,
+      BuildCommandArgs.useFlutterFromPath.flagName,
       negatable: false,
       defaultsTo: false,
       help: 'Whether to use the Flutter SDK on PATH instead of the Flutter SDK '
@@ -55,7 +55,7 @@ extension BuildCommandArgsExtension on ArgParser {
 enum BuildCommandArgs {
   buildMode('build-mode'),
   pubGet('pub-get'),
-  useLocalFlutter('use-local-flutter'),
+  useFlutterFromPath('use-flutter-from-path'),
   updatePerfetto('update-perfetto');
 
   const BuildCommandArgs(this.flagName);
