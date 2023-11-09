@@ -3,11 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
+import 'package:io/io.dart';
+
 import '_build_and_copy.dart';
 
 void main(List<String> arguments) async {
   final command = BuildExtensionCommand();
   final runner = CommandRunner('devtools_extensions', command.description)
     ..addCommand(BuildExtensionCommand());
-  await runner.run(arguments);
+  await runner.run(arguments).whenComplete(sharedStdIn.terminate);
 }

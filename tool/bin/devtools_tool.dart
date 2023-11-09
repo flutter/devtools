@@ -6,11 +6,14 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:devtools_tool/devtools_command_runner.dart';
+import 'package:io/io.dart';
 
 void main(List<String> args) async {
   final runner = DevToolsCommandRunner();
   try {
-    final dynamic result = await runner.run(args);
+    final dynamic result =
+        await runner.run(args).whenComplete(sharedStdIn.terminate);
+
     exit(result is int ? result : 0);
   } catch (e) {
     if (e is UsageException) {

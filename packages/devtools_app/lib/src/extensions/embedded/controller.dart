@@ -6,7 +6,8 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_extensions/api.dart';
 import 'package:devtools_shared/devtools_extensions.dart';
 
-import '_controller_desktop.dart' if (dart.library.html) '_controller_web.dart';
+import '_controller_desktop.dart'
+    if (dart.library.js_interop) '_controller_web.dart';
 
 EmbeddedExtensionControllerImpl createEmbeddedExtensionController(
   DevToolsExtensionConfig config,

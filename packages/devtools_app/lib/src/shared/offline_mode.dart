@@ -13,8 +13,6 @@ import 'globals.dart';
 import 'routing.dart';
 
 class OfflineModeController {
-  bool get isOffline => _offlineMode.value;
-
   ValueListenable<bool> get offlineMode => _offlineMode;
 
   final _offlineMode = ValueNotifier<bool>(false);

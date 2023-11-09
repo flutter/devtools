@@ -101,21 +101,22 @@ Future<void> _inboundReferencesAreListed(_EvalAndBrowseTester tester) async {
   await tester.tapAndPump(find.textContaining('one instance'));
   await tester.tapAndPump(find.text('Any'), duration: longPumpDuration);
 
-  Widget? next = await tester.tapAndPump(
+  Finder? next = await tester.tapAndPump(
     find.textContaining('MyApp, retained size '),
     next: find.text('references'),
   );
   next = await tester.tapAndPump(
-    find.byWidget(next!),
+    next!,
     next: find.textContaining('static ('),
   );
   next = await tester.tapAndPump(
-    find.byWidget(next!),
+    next!,
+    description: 'text containing "static ("',
     next: find.text('inbound'),
   );
   next = await tester.tapAndPump(
-    find.byWidget(next!),
-    next: find.text('Context'),
+    next!,
+    next: find.text('View'),
   );
 }
 
@@ -198,14 +199,16 @@ class _EvalAndBrowseTester {
   /// Taps and settles.
   ///
   /// If [next] is provided, will repeat the tap untill [next] returns results.
-  /// If [next] is not null returns [next].
-  Future<Widget?> tapAndPump(
+  /// Returns [next].
+  Future<Finder?> tapAndPump(
     Finder finder, {
     Duration? duration,
     Finder? next,
+    String? description,
   }) async {
     Future<void> action(int tryNumber) async {
-      logStatus('attempt #$tryNumber, tapping \n[$finder]\n');
+      logStatus('\nattempt #$tryNumber, tapping');
+      logStatus(description ?? finder.toString());
       tryNumber++;
       await tester.tap(finder);
       await tester.pump(duration);
@@ -220,7 +223,7 @@ class _EvalAndBrowseTester {
     for (var tryNumber = 1; tryNumber < 10; tryNumber++) {
       try {
         final items = tester.widgetList(next);
-        if (items.isNotEmpty) return items.first;
+        if (items.isNotEmpty) return next;
         await action(tryNumber);
       } on StateError {
         // tester.widgetList throws StateError if no widgets found.

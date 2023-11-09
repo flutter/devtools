@@ -145,8 +145,8 @@ void main() {
 
           expect(
             find.richTextContaining(
-              'Build was the longest UI phase in this frame. Since "Track Widget '
-              'Builds" was enabled while this frame was drawn, you should be able'
+              'Build was the longest UI phase in this frame. Since "Track widget '
+              'builds" was enabled while this frame was drawn, you should be able'
               ' to see timeline events for each widget built.',
             ),
             findsOneWidget,
@@ -167,7 +167,7 @@ void main() {
           expect(
             find.richTextContaining(
               'Build was the longest UI phase in this frame. Consider enabling '
-              '"Track Widget Builds" from the ',
+              '"Track widget builds" from the ',
             ),
             findsOneWidget,
           );
@@ -196,7 +196,7 @@ void main() {
           expect(
             find.richTextContaining(
               'Layout was the longest UI phase in this frame. Since "Track '
-              'Layouts" was enabled while this frame was drawn, you should be '
+              'layouts" was enabled while this frame was drawn, you should be '
               'able to see timeline events for each render object laid out.',
             ),
             findsOneWidget,
@@ -218,7 +218,7 @@ void main() {
           expect(
             find.richTextContaining(
               'Layout was the longest UI phase in this frame. Consider enabling '
-              '"Track Layouts" from the ',
+              '"Track layouts" from the ',
             ),
             findsOneWidget,
           );
@@ -247,7 +247,7 @@ void main() {
           expect(
             find.richTextContaining(
               'Paint was the longest UI phase in this frame. Since "Track '
-              'Paints" was enabled while this frame was drawn, you should be '
+              'paints" was enabled while this frame was drawn, you should be '
               'able to see timeline events for each render object painted.',
             ),
             findsOneWidget,
@@ -269,7 +269,7 @@ void main() {
           expect(
             find.richTextContaining(
               'Paint was the longest UI phase in this frame. Consider enabling '
-              '"Track Paints" from the ',
+              '"Track paints" from the ',
             ),
             findsOneWidget,
           );

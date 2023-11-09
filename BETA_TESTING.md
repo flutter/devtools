@@ -42,7 +42,7 @@ git checkout master
 git reset --hard origin/master
 
 bash tool/update_flutter_sdk.sh
-bash tool/upgrade.sh
+devtools_tool pub-get --only-main --upgrade
 ```
 
 If some steps failed, remove the directory and redo to [Setup](#setup).

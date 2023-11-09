@@ -17,6 +17,7 @@ import 'package:vm_snapshot_analysis/treemap.dart';
 final screenIds = <String>[
   AppSizeScreen.id,
   DebuggerScreen.id,
+  DeepLinksScreen.id,
   InspectorScreen.id,
   LoggingScreen.id,
   MemoryScreen.id,
@@ -259,11 +260,6 @@ Future<void> loadFonts() async {
 
   await Future.wait(loadFontsFuture);
 }
-
-/// Helper method for finding widgets by type when they have a generic type.
-///
-/// E.g. `find.byType(typeOf<MyTypeWithAGeneric<String>>());`
-Type typeOf<T>() => T;
 
 void verifyIsSearchMatch(
   List<SearchableDataMixin> data,

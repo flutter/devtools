@@ -6,20 +6,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:args/command_runner.dart';
 import 'package:devtools_tool/model.dart';
 import 'package:io/io.dart';
 import 'package:path/path.dart' as path;
-
-String convertProcessOutputToString(List<List<int>> output, String indent) {
-  String result = output.map((codes) => utf8.decode(codes)).join();
-  result = result.trim();
-  result = result
-      .split('\n')
-      .where((line) => line.isNotEmpty)
-      .map((line) => '$indent$line')
-      .join('\n');
-  return result;
-}
 
 abstract class DartSdkHelper {
   static const commandDebugMessage = 'Consider running this command from your'
@@ -33,9 +23,9 @@ abstract class DartSdkHelper {
       workingDirectory: dartSdkLocation,
       additionalErrorMessage: commandDebugMessage,
       commands: [
-        CliCommand('git fetch origin'),
-        CliCommand('git rebase-update'),
-        CliCommand('git checkout origin/main'),
+        CliCommand.git('fetch origin'),
+        CliCommand.git('rebase-update'),
+        CliCommand.git('checkout origin/main'),
       ],
     );
   }
@@ -82,31 +72,73 @@ class CliCommand {
     );
   }
 
+  factory CliCommand.flutter(
+    String args, {
+    bool throwOnException = true,
+  }) {
+    final sdk = FlutterSdk.current;
+    if (sdk == null) {
+      throw Exception('Unable to locate a Flutter sdk.');
+    }
+
+    return CliCommand._(
+      exe: sdk.flutterToolPath,
+      args: args.split(' '),
+      throwOnException: throwOnException,
+    );
+  }
+
+  factory CliCommand.git(
+    String args, {
+    bool throwOnException = true,
+  }) {
+    return CliCommand._(
+      exe: 'git',
+      args: args.split(' '),
+      throwOnException: throwOnException,
+    );
+  }
+
+  factory CliCommand.tool(
+    String args, {
+    bool throwOnException = true,
+  }) {
+    return CliCommand._(
+      exe: Platform.isWindows ? 'devtools_tool.bat' : 'devtools_tool',
+      args: args.split(' '),
+      throwOnException: throwOnException,
+    );
+  }
+
   late final String exe;
   late final List<String> args;
   final bool throwOnException;
+
+  @override
+  String toString() {
+    return [exe, ...args].join(' ');
+  }
 }
 
+typedef DevToolsProcessResult = ({int exitCode, String stdout, String stderr});
+
 extension DevToolsProcessManagerExtension on ProcessManager {
-  Future<String> runProcess(
+  Future<DevToolsProcessResult> runProcess(
     CliCommand command, {
     String? workingDirectory,
     String? additionalErrorMessage = '',
   }) async {
-    String stdout = '';
+    print('${workingDirectory ?? ''} > $command');
+    final processStdout = StringBuffer();
+    final processStderr = StringBuffer();
 
     final process = await spawn(
       command.exe,
       command.args,
       workingDirectory: workingDirectory,
     );
-    unawaited(
-      process.stdout
-          .transform(
-            utf8.decoder,
-          )
-          .forEach((x) => stdout = '$stdout$x'),
-    );
+    process.stdout.transform(utf8.decoder).listen(processStdout.write);
+    process.stderr.transform(utf8.decoder).listen(processStderr.write);
     final code = await process.exitCode;
     if (command.throwOnException && code != 0) {
       throw ProcessException(
@@ -116,7 +148,11 @@ extension DevToolsProcessManagerExtension on ProcessManager {
         code,
       );
     }
-    return stdout;
+    return (
+      exitCode: code,
+      stdout: processStdout.toString(),
+      stderr: processStderr.toString()
+    );
   }
 
   Future<void> runAll({
@@ -135,5 +171,60 @@ extension DevToolsProcessManagerExtension on ProcessManager {
 }
 
 String pathFromRepoRoot(String pathFromRoot) {
-  return path.join(DevToolsRepo.getInstance()!.repoPath, pathFromRoot);
+  return path.join(DevToolsRepo.getInstance().repoPath, pathFromRoot);
+}
+
+/// Returns the name of the git remote with id [remoteId] in
+/// [workingDirectory].
+///
+/// When [workingDirectory] is null, this method will look for the remote in
+/// the current directory.
+///
+/// [remoteId] should have the form <organization>/<repository>.git. For
+/// example: 'flutter/flutter.git' or 'flutter/devtools.git'.
+Future<String> findRemote(
+  ProcessManager processManager, {
+  required String remoteId,
+  String? workingDirectory,
+}) async {
+  print('Searching for a remote that points to $remoteId.');
+  final remotesResult = await processManager.runProcess(
+    CliCommand.git('remote -v'),
+    workingDirectory: workingDirectory,
+  );
+  final String remotes = remotesResult.stdout;
+  final remoteRegexp = RegExp(
+    r'^(?<remote>\S+)\s+(?<path>\S+)\s+\((?<action>\S+)\)',
+    multiLine: true,
+  );
+  final remoteRegexpResults = remoteRegexp.allMatches(remotes);
+  final RegExpMatch upstreamRemoteResult;
+
+  try {
+    upstreamRemoteResult = remoteRegexpResults.firstWhere(
+      (element) =>
+          // ignore: prefer_interpolation_to_compose_strings
+          RegExp(r'' + remoteId + '\$').hasMatch(element.namedGroup('path')!),
+    );
+  } on StateError {
+    throw StateError(
+      "Couldn't find a remote that points to flutter/devtools.git. "
+      "Instead got: \n$remotes",
+    );
+  }
+  final remoteUpstream = upstreamRemoteResult.namedGroup('remote')!;
+  print('Found upstream remote.');
+  return remoteUpstream;
+}
+
+extension CommandExtension on Command {
+  void logStatus(String log) {
+    print('[$name] $log');
+  }
+}
+
+extension JoinExtension on List<String> {
+  String joinWithNewLine() {
+    return '${join('\n')}\n';
+  }
 }

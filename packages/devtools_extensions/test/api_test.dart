@@ -260,7 +260,7 @@ void main() {
       expect(showBannerMessageEvent.extensionName, 'blah');
       expect(showBannerMessageEvent.ignoreIfAlreadyDismissed, false);
     });
-    test('throws for unexpected values', () async {
+    test('throws for unexpected values', () {
       final event1 = DevToolsExtensionEvent.parse({
         'type': 'showBannerMessage',
         'data': {

@@ -15,13 +15,10 @@ import 'vm_developer_tools_controller.dart';
 import 'vm_statistics/vm_statistics_view.dart';
 
 abstract class VMDeveloperView {
-  const VMDeveloperView(
-    this.screenId, {
+  const VMDeveloperView({
     required this.title,
     required this.icon,
   });
-
-  final String screenId;
 
   /// The user-facing name of the page.
   final String title;

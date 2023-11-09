@@ -2,9 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_shared/devtools_extensions.dart';
+
 import '../screen.dart';
 
 part 'constants/_cpu_profiler_constants.dart';
+part 'constants/_deep_links_constants.dart';
 part 'constants/_extension_constants.dart';
 part 'constants/_memory_constants.dart';
 part 'constants/_performance_constants.dart';
@@ -32,6 +35,7 @@ final appSize = ScreenMetaData.appSize.id;
 final vmTools = ScreenMetaData.vmTools.id;
 const console = 'console';
 final simple = ScreenMetaData.simple.id;
+final deeplink = ScreenMetaData.deepLinks.id;
 
 // GA events not associated with a any screen e.g., hotReload, hotRestart, etc
 const devToolsMain = 'main';
@@ -129,7 +133,8 @@ const resume = 'resume';
 const clear = 'clear';
 const record = 'record';
 const stop = 'stop';
-const export = 'export';
+const openFile = 'openFile';
+const saveFile = 'saveFile';
 const expandAll = 'expandAll';
 const collapseAll = 'collapseAll';
 const profileModeDocs = 'profileModeDocs';
@@ -141,6 +146,7 @@ const pageReady = 'pageReady';
 
 /// Documentation actions shared across screens.
 const documentationLink = 'documentationLink';
+const videoTutorialLink = 'videoTutorialLink';
 String topicDocumentationButton(String topic) => '${topic}DocumentationButton';
 String topicDocumentationLink(String topic) => '${topic}DocumentationLink';
 
