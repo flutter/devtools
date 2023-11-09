@@ -6,53 +6,70 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:devtools_tool/model.dart';
+import 'package:devtools_tool/utils.dart';
 import 'package:io/io.dart';
 import 'package:path/path.dart' as path;
 
-import '../utils.dart';
+import 'shared.dart';
 
-const _useLocalFlutterFlag = 'use-local-flutter';
-const _updatePerfettoFlag = 'update-perfetto';
 const _buildAppFlag = 'build-app';
+const _machineFlag = 'machine';
+const _allowEmbeddingFlag = 'allow-embedding';
 
 /// This command builds DevTools in release mode by running the
-/// `devtools_tool build-release` command and then serves DevTools with a
-/// locally running DevTools server.
+/// `devtools_tool build` command and then serves DevTools with a locally
+/// running DevTools server.
 ///
-/// If the [_buildAppFlag] is negated (e.g. --no-build-app), then the DevTools
-/// web app will not be rebuilt before serving.
+/// If the [_buildAppFlag] argument is negated (e.g. --no-build-app), then the
+/// DevTools web app will not be rebuilt before serving. The following arguments
+/// are ignored if '--no-build-app' is present in the list of arguments passed
+/// to this command. All of the following commands are passed along to the
+/// `devtools_tool build` command.
 ///
-/// If [_useLocalFlutterFlag] is present, the Flutter SDK will not be updated to
-/// the latest Flutter candidate. Use this flag to save the cost of updating the
-/// Flutter SDK when you already have the proper SDK checked out.
+/// If the [BuildCommandArgs.useFlutterFromPath] argument is present, the
+/// Flutter SDK will not be updated to the latest Flutter candidate before
+/// building DevTools. Use this flag to save the cost of updating the Flutter
+/// SDK when you already have the proper SDK checked out. This is helpful when
+/// developing with the DevTools server.
 ///
-/// If [_updatePerfettoFlag] is present, the precompiled bits for Perfetto will
-/// be updated from the `devtools_tool update-perfetto` command as part of the
-/// DevTools build process (e.g. running `devtools_tool build-release`).
+/// If the [BuildCommandArgs.updatePerfetto] argument is present, the
+/// precompiled bits for Perfetto will be updated from the
+/// `devtools_tool update-perfetto` command as part of the DevTools build
+/// process.
+///
+/// If [BuildCommandArgs.pubGet] argument is negated (e.g. --no-pub-get), then
+/// `devtools_tool pub-get --only-main` command will not be run before building
+/// the DevTools web app. Use this flag to save the cost of updating pub
+/// packages if your pub cahce does not need to be updated. This is helpful when
+/// developing with the DevTools server.
+///
+/// The [BuildCommandArgs.buildMode] argument specifies the Flutter build mode
+/// that the DevTools web app will be built in ('release', 'profile', 'debug').
+/// This defaults to 'release' if unspecified.
 class ServeCommand extends Command {
   ServeCommand() {
     argParser
-      ..addFlag(
-        _useLocalFlutterFlag,
-        negatable: false,
-        defaultsTo: false,
-        help:
-            'Whether to use the Flutter SDK on PATH instead of the Flutter SDK '
-            'contained in the "tool/flutter-sdk" directory.',
-      )
-      ..addFlag(
-        _updatePerfettoFlag,
-        negatable: false,
-        defaultsTo: false,
-        help: 'Whether to update the Perfetto assets before building DevTools.',
-      )
       ..addFlag(
         _buildAppFlag,
         negatable: true,
         defaultsTo: true,
         help:
-            'Whether to build the DevTools app in release mode before starting '
-            'the DevTools server.',
+            'Whether to build the DevTools web app before starting the DevTools'
+            ' server.',
+      )
+      ..addUseFlutterFromPathFlag()
+      ..addUpdatePerfettoFlag()
+      ..addPubGetFlag()
+      ..addBulidModeOption()
+      // Flags defined in the server in DDS.
+      ..addFlag(
+        _machineFlag,
+        negatable: false,
+        help: 'Sets output format to JSON for consumption in tools.',
+      )
+      ..addFlag(
+        _allowEmbeddingFlag,
+        help: 'Allow embedding DevTools inside an iframe.',
       );
   }
 
@@ -69,15 +86,25 @@ class ServeCommand extends Command {
     final repo = DevToolsRepo.getInstance();
     final processManager = ProcessManager();
 
-    final useLocalFlutter = argResults![_useLocalFlutterFlag];
-    final updatePerfetto = argResults![_updatePerfettoFlag];
     final buildApp = argResults![_buildAppFlag];
+    final useFlutterFromPath =
+        argResults![BuildCommandArgs.useFlutterFromPath.flagName];
+    final updatePerfetto =
+        argResults![BuildCommandArgs.updatePerfetto.flagName];
+    final runPubGet = argResults![BuildCommandArgs.pubGet.flagName];
+    final devToolsAppBuildMode =
+        argResults![BuildCommandArgs.buildMode.flagName];
 
     final remainingArguments = List.of(argResults!.arguments)
-      ..remove(_useLocalFlutterFlag)
-      ..remove(_updatePerfettoFlag)
-      ..remove(_buildAppFlag)
-      ..remove('--no-$_buildAppFlag');
+      ..remove(BuildCommandArgs.useFlutterFromPath.asArg())
+      ..remove(BuildCommandArgs.updatePerfetto.asArg())
+      ..remove(valueAsArg(_buildAppFlag))
+      ..remove(valueAsArg(_buildAppFlag, negated: true))
+      ..remove(BuildCommandArgs.pubGet.asArg())
+      ..remove(BuildCommandArgs.pubGet.asArg(negated: true))
+      ..removeWhere(
+        (element) => element.startsWith(BuildCommandArgs.buildMode.asArg()),
+      );
 
     final localDartSdkLocation = Platform.environment['LOCAL_DART_SDK'];
     if (localDartSdkLocation == null) {
@@ -102,14 +129,16 @@ class ServeCommand extends Command {
     if (buildApp) {
       final process = await processManager.runProcess(
         CliCommand.tool(
-          'build-release'
-          ' ${useLocalFlutter ? '--$_useLocalFlutterFlag' : ''}'
-          ' ${updatePerfetto ? '--$_updatePerfettoFlag' : ''}',
+          'build'
+          '${useFlutterFromPath ? ' ${BuildCommandArgs.useFlutterFromPath.asArg()}' : ''}'
+          '${updatePerfetto ? ' ${BuildCommandArgs.updatePerfetto.asArg()}' : ''}'
+          ' ${BuildCommandArgs.buildMode.asArg()}=$devToolsAppBuildMode'
+          ' ${BuildCommandArgs.pubGet.asArg(negated: !runPubGet)}',
         ),
       );
       if (process.exitCode == 1) {
         throw Exception(
-          'Something went wrong while running `devtools_tool build-release`',
+          'Something went wrong while running `devtools_tool build`',
         );
       }
       logStatus('completed building DevTools: $devToolsBuildLocation');
