@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_deeplink.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
@@ -122,9 +123,15 @@ class DisplayOptions {
   }
 }
 
-class DeepLinksController {
+class DeepLinksController extends DisposableController {
   DeepLinksController() {
     selectedVariantIndex.addListener(_handleSelectedVariantIndexChanged);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    selectedVariantIndex.removeListener(_handleSelectedVariantIndexChanged);
   }
 
   DisplayOptions get displayOptions => displayOptionsNotifier.value;
@@ -178,7 +185,6 @@ class DeepLinksController {
 
   late final selectedVariantIndex = ValueNotifier<int>(0);
   void _handleSelectedVariantIndexChanged() {
-    allLinkDatasNotifier.value = null;
     unawaited(_loadAndroidAppLinks());
   }
 
@@ -198,7 +204,7 @@ class DeepLinksController {
         },
       );
     }
-    validateLinks();
+   await validateLinks();
   }
 
   List<LinkData> get _allLinkDatas {
@@ -326,7 +332,7 @@ class DeepLinksController {
     }).toList();
   }
 
-  void validateLinks() async {
+  Future<void> validateLinks() async {
     allLinkDatasNotifier.value = await _validateAndroidDomain();
     displayLinkDatasNotifier.value =
         _getFilterredLinks(allLinkDatasNotifier.value!);

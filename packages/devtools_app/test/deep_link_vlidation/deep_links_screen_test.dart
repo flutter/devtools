@@ -5,6 +5,7 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/deep_link_validation/deep_link_list_view.dart';
 import 'package:devtools_app/src/screens/deep_link_validation/deep_links_model.dart';
+import 'package:devtools_app/src/screens/deep_link_validation/validation_details_view.dart';
 import 'package:devtools_app/src/shared/directory_picker.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -40,7 +41,7 @@ void main() {
       ),
     );
     deferredLoadingSupportEnabled = true;
-    await tester.pumpAndSettle(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
     expect(find.byType(DeepLinkPage), findsOneWidget);
   }
 
@@ -75,18 +76,11 @@ void main() {
     );
 
     testWidgetsWithWindowSize(
-      'builds deeplink list page',
+      'builds deeplink list page with no links',
       windowSize,
       (WidgetTester tester) async {
         deepLinksController.selectedProject.value =
             FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
-        deepLinksController.allLinkDatasNotifier.value = [
-          LinkData(
-            domain: 'www.google.com',
-            path: '/',
-            os: [PlatformOS.android],
-          ),
-        ];
         await pumpDeepLinkScreen(
           tester,
           controller: deepLinksController,
@@ -94,6 +88,36 @@ void main() {
 
         expect(find.byType(DeepLinkPage), findsOneWidget);
         expect(find.byType(DeepLinkListView), findsOneWidget);
+        expect(find.byType(CenteredCircularProgressIndicator), findsOneWidget);
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'builds deeplink list page with links and split screen',
+      windowSize,
+      (WidgetTester tester) async {
+        final deepLinksController = DeepLinksTestController();
+
+        deepLinksController.selectedProject.value =
+            FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
+        final linkData = LinkData(
+          domain: 'www.google.com',
+          path: '/',
+          os: [PlatformOS.android],
+        );
+        deepLinksController.allLinkDatasNotifier.value = [linkData];
+        deepLinksController.displayOptionsNotifier.value =
+            DisplayOptions(showSplitScreen: true);
+        deepLinksController.selectedLink.value = linkData;
+
+        await pumpDeepLinkScreen(
+          tester,
+          controller: deepLinksController,
+        );
+
+        expect(find.byType(DeepLinkPage), findsOneWidget);
+        expect(find.byType(DeepLinkListView), findsOneWidget);
+        expect(find.byType(ValidationDetailView), findsOneWidget);
       },
     );
   });
@@ -101,5 +125,7 @@ void main() {
 
 class DeepLinksTestController extends DeepLinksController {
   @override
-  void validateLinks() async {}
+  Future<void> validateLinks() async {
+    displayLinkDatasNotifier.value = allLinkDatasNotifier.value;
+  }
 }

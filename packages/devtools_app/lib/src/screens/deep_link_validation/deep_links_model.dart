@@ -130,9 +130,12 @@ class _ErrorAwareText extends StatelessWidget {
             ),
           ),
         const SizedBox(width: denseSpacing),
-        Text(
-          text,
-          overflow: TextOverflow.ellipsis,
+        Flexible(
+          child: 
+          Text(
+            text,
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
       ],
     );
