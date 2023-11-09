@@ -154,7 +154,7 @@ dependency_overrides:
 
 Then you can run DevTools with the server by running the following from the top-level `devtools` directory:
 ```
-dart ./tool/build_e2e.dart
+devtools_tool serve
 ```
 
 ### DevTools + VS Code integration (IDE-embedded DevTools experience)
@@ -169,16 +169,17 @@ command palette (`F1`)) and add the following to your settings:
 
 ```js
 "dart.customDevTools": {
-	"script": "/path/to/devtools/tool/build_e2e.dart",
-	"cwd": "/path/to/devtools",
+	"path": "/path/to/devtools",
 	"env": {
 		"LOCAL_DART_SDK": "/path/to/dart-sdk/sdk"
+		// Path to the version that Flutter DevTools is pinned to.
+        "FLUTTER_ROOT": "C:\\Dev\\Google\\devtools\\tool\\flutter-sdk"
 	}
 },
 ```
 
-This instructs VS Code to run the `tool/build_e2e.dart` script instead of running `dart devtools`.
-You must set the `cwd` and `LOCAL_DART_SDK` env variable correctly for the script to work.
+This instructs VS Code to run the `devtools_tool serve` command instead of running `dart devtools`.
+You must set the `LOCAL_DART_SDK` and `FLUTTER_ROOT` env variables correctly for the script to work.
 
 Next, restart VS Code (or run the **Developer: Reload Window** command from the command palette (`F1`))
 and DevTools will be run from your local source code. After making any code changes to DevTools or the
