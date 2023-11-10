@@ -85,26 +85,24 @@ class ValidationDetailHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return OutlineDecoration(
       showLeft: false,
-      child: SizedBox(
+      child: Container(
         height: actionWidgetSize,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                viewType == TableViewType.domainView
-                    ? 'Selected domain validation details'
-                    : 'Selected Deep link validation details',
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              IconButton(
-                onPressed: () =>
-                    controller.updateDisplayOptions(showSplitScreen: false),
-                icon: const Icon(Icons.close),
-              ),
-            ],
-          ),
+        padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              viewType == TableViewType.domainView
+                  ? 'Selected domain validation details'
+                  : 'Selected Deep link validation details',
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            IconButton(
+              onPressed: () =>
+                  controller.updateDisplayOptions(showSplitScreen: false),
+              icon: const Icon(Icons.close),
+            ),
+          ],
         ),
       ),
     );
@@ -139,7 +137,7 @@ class _DomainCheckTable extends StatelessWidget {
             DataColumn(label: Text('Issue type')),
             DataColumn(label: Text('Status')),
           ],
-          headingRowHeight: defaultRowHeight + densePadding,
+          headingRowHeight: areaPaneHeaderHeight,
           dataRowMinHeight: defaultRowHeight,
           dataRowMaxHeight: defaultRowHeight,
           rows: [
@@ -210,7 +208,8 @@ class _DomainFixPanel extends StatelessWidget {
           children: [
             const Text('How to fix:'),
             Text(
-              'Add the new recommended Digital Asset Links JSON file to the failed website domain at the correct location.\nUpdate and publish recommend Digital Asset Links JSON file below to this location: ',
+              'Add the new recommended Digital Asset Links JSON file to the failed website domain at the correct location.\n'
+              'Update and publish recommend Digital Asset Links JSON file below to this location: ',
               style: Theme.of(context).subtleTextStyle,
             ),
             Align(
@@ -347,7 +346,7 @@ class _PathCheckTable extends StatelessWidget {
         Opacity(
           opacity: 0.5,
           child: DataTable(
-            headingRowHeight: defaultRowHeight + densePadding,
+            headingRowHeight: areaPaneHeaderHeight,
             dataRowMinHeight: defaultRowHeight,
             dataRowMaxHeight: defaultRowHeight,
             headingRowColor: MaterialStateProperty.all(

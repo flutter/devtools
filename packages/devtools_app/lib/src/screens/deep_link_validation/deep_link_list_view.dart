@@ -98,7 +98,7 @@ class _DeepLinkListViewMainPanel extends StatelessWidget {
                   child: _AllDeepLinkDataTable(controller: controller),
                 ),
                 VerticalDivider(
-                  width: 0.0,
+                  width: 1.0,
                   color: Theme.of(context).focusColor,
                 ),
                 Expanded(
