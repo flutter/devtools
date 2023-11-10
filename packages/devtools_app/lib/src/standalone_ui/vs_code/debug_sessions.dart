@@ -7,10 +7,12 @@ import 'dart:async';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
+import '../../extensions/extension_screen.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/constants.dart';
 import '../../shared/feature_flags.dart';
+import '../../shared/globals.dart';
 import '../../shared/screen.dart';
 import '../api/vs_code_api.dart';
 
@@ -152,33 +154,17 @@ class _DevToolsMenu extends StatelessWidget {
         disabledReason = 'Not available when running on the web';
       }
 
-      // Because we flipped the direction so the menu is aligned to the end, we
-      // should revert the text direction back to normal for the label.
-      Widget text = Directionality(
-        textDirection: normalDirection,
-        child: Text(title),
-      );
-
-      if (disabledReason != null) {
-        text = Tooltip(
-          preferBelow: false,
-          message: disabledReason,
-          child: text,
-        );
-      }
-
-      return MenuItemButton(
-        leadingIcon: Icon(screen.icon, size: actionsIconSize),
-        onPressed: disabledReason != null
-            ? null
-            : () {
-                ga.select(
-                  gac.VsCodeFlutterSidebar.id,
-                  gac.VsCodeFlutterSidebar.openDevToolsScreen(screen.id),
-                );
-                unawaited(api.openDevToolsPage(session.id, screen.id));
-              },
-        child: text,
+      return DevToolsScreenMenuItem(
+        title: title,
+        icon: screen.icon!,
+        disabledReason: disabledReason,
+        onPressed: () {
+          ga.select(
+            gac.VsCodeFlutterSidebar.id,
+            gac.VsCodeFlutterSidebar.openDevToolsScreen(screen.id),
+          );
+          unawaited(api.openDevToolsPage(session.id, screen.id));
+        },
       );
     }
 
@@ -190,10 +176,13 @@ class _DevToolsMenu extends StatelessWidget {
         style: const MenuStyle(
           alignment: AlignmentDirectional.bottomStart,
         ),
-        menuChildren: ScreenMetaData.values
-            .where(_shouldIncludeScreen)
-            .map(devToolsButton)
-            .toList(),
+        menuChildren: [
+          ...ScreenMetaData.values
+              .where(_shouldIncludeScreen)
+              .map(devToolsButton)
+              .toList(),
+          const ExtensionScreenMenuItem(),
+        ],
         builder: (context, controller, child) => IconButton(
           onPressed: () {
             if (controller.isOpen) {
@@ -226,5 +215,71 @@ class _DevToolsMenu extends StatelessWidget {
       // library.
       _ => screen.requiresLibrary == null,
     };
+  }
+}
+
+class DevToolsScreenMenuItem extends StatelessWidget {
+  const DevToolsScreenMenuItem({
+    super.key,
+    required this.title,
+    required this.icon,
+    required this.onPressed,
+    this.disabledReason,
+  });
+
+  final String title;
+  final IconData icon;
+  final VoidCallback onPressed;
+  final String? disabledReason;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget text = Text(title);
+    if (disabledReason != null) {
+      text = Tooltip(
+        preferBelow: false,
+        message: disabledReason,
+        child: text,
+      );
+    }
+
+    return MenuItemButton(
+      leadingIcon: Icon(icon, size: actionsIconSize),
+      onPressed: disabledReason != null ? null : onPressed,
+      child: text,
+    );
+  }
+}
+
+class ExtensionScreenMenuItem extends StatelessWidget {
+  const ExtensionScreenMenuItem({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO: we are not getting the proper list of visible extensions here.
+    // More than likely, we will need to as the DevTools server for the list of
+    // available extensions directly based on the debug session's root path.
+    return ValueListenableBuilder(
+      valueListenable: extensionService.visibleExtensions,
+      builder: (context, extensions, _) {
+        return SubmenuButton(
+          menuStyle: const MenuStyle(
+            alignment: Alignment.centerLeft,
+          ),
+          menuChildren: extensions
+              .map(
+                (e) => DevToolsScreenMenuItem(
+                  title: e.name,
+                  icon: e.icon,
+                  // TODO: this should open the extension screen in the browser,
+                  // or if possible, in an embedded iFrame in VS code.
+                  onPressed: () {},
+                ),
+              )
+              .toList(),
+          child: const Text('Extensions'),
+        );
+      },
+    );
   }
 }
