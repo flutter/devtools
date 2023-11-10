@@ -176,7 +176,7 @@ command palette (`F1`)) and add the following to your settings:
 	"env": {
 		"LOCAL_DART_SDK": "/path/to/sdk"
 		// Path to the version that Flutter DevTools is pinned to.
-        "FLUTTER_ROOT": "/path/to/devtools/tool/flutter-sdk"
+		"FLUTTER_ROOT": "/path/to/devtools/tool/flutter-sdk"
 	}
 },
 ```
