@@ -268,9 +268,8 @@ class DeepLinksController extends DisposableController {
     final Map<String, dynamic> result =
         json.decode(response.body) as Map<String, dynamic>;
     if (result[_domainsKey] != null) {
-      final String generatedContent =
-          (result[_domainsKey] as List<Map<String, dynamic>>)
-              .first[_generatedContentKey];
+      final String generatedContent = ((result[_domainsKey] as List).first
+          as Map<String, dynamic>)[_generatedContentKey];
 
       generatedAssetLinksForSelectedLink.value = generatedContent;
     }
