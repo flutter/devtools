@@ -4,14 +4,13 @@
 
 import 'dart:async';
 import 'dart:convert';
-// TODO(jacobr): this should use package:http instead of dart:html.
-// ignore: avoid_web_libraries_in_flutter, as designed
-import 'dart:html';
 
 import 'package:collection/collection.dart';
 import 'package:devtools_shared/devtools_deeplink.dart';
 import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:devtools_shared/devtools_shared.dart';
+import 'package:flutter/foundation.dart';
+import 'package:http/http.dart';
 import 'package:logging/logging.dart';
 
 import '../../development_helpers.dart';
@@ -19,18 +18,19 @@ import '../../primitives/utils.dart';
 
 final _log = Logger('_server_web');
 
-// Code to check if DevTools server is available, will only be true in release
-// mode, debug mode will be set to false.
-bool get isDevToolsServerAvailable => !isDebugBuild();
+// The DevTools server is only available in release mode right now.
+// TODO(kenz): design a way to run the DevTools server and DevTools app together
+// in debug mode.
+bool get isDevToolsServerAvailable => kReleaseMode;
 
 /// Helper to catch any server request which could fail.
 ///
 /// Returns HttpRequest or null (if server failure).
-Future<HttpRequest?> request(String url) async {
-  HttpRequest? response;
+Future<Response?> request(String url) async {
+  Response? response;
 
   try {
-    response = await HttpRequest.request(url, method: 'POST');
+    response = await post(Uri.parse(url));
   } catch (_) {}
 
   return response;
@@ -43,8 +43,8 @@ Future<bool> isFirstRun() async {
 
   if (isDevToolsServerAvailable) {
     final resp = await request(apiGetDevToolsFirstRun);
-    if (resp?.status == HttpStatus.ok) {
-      firstRun = json.decode(resp!.responseText!);
+    if (resp?.statusCode == 200) {
+      firstRun = json.decode(resp!.body);
     } else {
       logWarning(resp, apiGetDevToolsFirstRun);
     }
@@ -59,8 +59,8 @@ Future<bool> isAnalyticsEnabled() async {
   bool enabled = false;
   if (isDevToolsServerAvailable) {
     final resp = await request(apiGetDevToolsEnabled);
-    if (resp?.status == HttpStatus.ok) {
-      enabled = json.decode(resp!.responseText!);
+    if (resp?.statusOk ?? false) {
+      enabled = json.decode(resp!.body);
     } else {
       logWarning(resp, apiGetDevToolsEnabled);
     }
@@ -78,11 +78,11 @@ Future<bool> setAnalyticsEnabled([bool value = true]) async {
       '$apiSetDevToolsEnabled'
       '?$devToolsEnabledPropertyName=$value',
     );
-    if (resp?.status == HttpStatus.ok) {
-      assert(json.decode(resp!.responseText!) == value);
+    if (resp?.statusOk ?? false) {
+      assert(json.decode(resp!.body) == value);
       return true;
     } else {
-      logWarning(resp, apiSetDevToolsEnabled, resp?.responseText);
+      logWarning(resp, apiSetDevToolsEnabled, resp?.body);
     }
   }
   return false;
@@ -103,10 +103,10 @@ Future<bool> _isFlutterGAEnabled() async {
 
   if (isDevToolsServerAvailable) {
     final resp = await request(apiGetFlutterGAEnabled);
-    if (resp?.status == HttpStatus.ok) {
+    if (resp?.statusOk ?? false) {
       // A return value of 'null' implies Flutter tool has never been run so
       // return false for Flutter GA enabled.
-      final responseValue = json.decode(resp!.responseText!);
+      final responseValue = json.decode(resp!.body);
       enabled = responseValue ?? false;
     } else {
       logWarning(resp, apiGetFlutterGAEnabled);
@@ -129,8 +129,8 @@ Future<String> flutterGAClientID() async {
     // is false, we don't want to be the first to create a ~/.flutter file.
     if (await _isFlutterGAEnabled()) {
       final resp = await request(apiGetFlutterGAClientId);
-      if (resp?.status == HttpStatus.ok) {
-        clientId = json.decode(resp!.responseText!);
+      if (resp?.statusOk ?? false) {
+        clientId = json.decode(resp!.body);
         if (clientId.isEmpty) {
           // Requested value of 'null' (Flutter tool never ran). Server request
           // apiGetFlutterGAClientId should not happen because the
@@ -160,7 +160,7 @@ Future<bool> setActiveSurvey(String value) async {
       '$apiSetActiveSurvey'
       '?$activeSurveyName=$value',
     );
-    if (resp?.status == HttpStatus.ok && json.decode(resp!.responseText!)) {
+    if ((resp?.statusOk ?? false) && json.decode(resp!.body)) {
       return true;
     } else {
       logWarning(resp, apiSetActiveSurvey);
@@ -179,8 +179,8 @@ Future<bool> surveyActionTaken() async {
 
   if (isDevToolsServerAvailable) {
     final resp = await request(apiGetSurveyActionTaken);
-    if (resp?.status == HttpStatus.ok) {
-      surveyActionTaken = json.decode(resp!.responseText!);
+    if (resp?.statusOk ?? false) {
+      surveyActionTaken = json.decode(resp!.body);
     } else {
       logWarning(resp, apiGetSurveyActionTaken);
     }
@@ -200,8 +200,8 @@ Future<void> setSurveyActionTaken() async {
       '$apiSetSurveyActionTaken'
       '?$surveyActionTakenPropertyName=true',
     );
-    if (resp?.status != HttpStatus.ok || !json.decode(resp!.responseText!)) {
-      logWarning(resp, apiSetSurveyActionTaken, resp?.responseText);
+    if (resp == null || !resp.statusOk || !json.decode(resp.body)) {
+      logWarning(resp, apiSetSurveyActionTaken, resp?.body);
     }
   }
 }
@@ -216,8 +216,8 @@ Future<int> surveyShownCount() async {
 
   if (isDevToolsServerAvailable) {
     final resp = await request(apiGetSurveyShownCount);
-    if (resp?.status == HttpStatus.ok) {
-      surveyShownCount = json.decode(resp!.responseText!);
+    if (resp?.statusOk ?? false) {
+      surveyShownCount = json.decode(resp!.body);
     } else {
       logWarning(resp, apiGetSurveyShownCount);
     }
@@ -237,8 +237,8 @@ Future<int> incrementSurveyShownCount() async {
 
   if (isDevToolsServerAvailable) {
     final resp = await request(apiIncrementSurveyShownCount);
-    if (resp?.status == HttpStatus.ok) {
-      surveyShownCount = json.decode(resp!.responseText!);
+    if (resp?.statusOk ?? false) {
+      surveyShownCount = json.decode(resp!.body);
     } else {
       logWarning(resp, apiIncrementSurveyShownCount);
     }
@@ -253,8 +253,8 @@ Future<String> getLastShownReleaseNotesVersion() async {
   String version = '';
   if (isDevToolsServerAvailable) {
     final resp = await request(apiGetLastReleaseNotesVersion);
-    if (resp?.status == HttpStatus.ok) {
-      version = json.decode(resp!.responseText!);
+    if (resp?.statusOk ?? false) {
+      version = json.decode(resp!.body);
     } else {
       logWarning(resp, apiGetLastReleaseNotesVersion);
     }
@@ -271,10 +271,8 @@ Future<void> setLastShownReleaseNotesVersion(String version) async {
       '$apiSetLastReleaseNotesVersion'
       '?$lastReleaseNotesVersionPropertyName=$version',
     );
-    if (resp == null ||
-        resp.status != HttpStatus.ok ||
-        !json.decode(resp.responseText!)) {
-      logWarning(resp, apiSetLastReleaseNotesVersion, resp?.responseText);
+    if (resp == null || !resp.statusOk || !json.decode(resp.body)) {
+      logWarning(resp, apiSetLastReleaseNotesVersion, resp?.body);
     }
   }
 }
@@ -285,8 +283,8 @@ Future<void> setLastShownReleaseNotesVersion(String version) async {
 Future<void> resetDevToolsFile() async {
   if (isDevToolsServerAvailable) {
     final resp = await request(apiResetDevTools);
-    if (resp?.status == HttpStatus.ok) {
-      assert(json.decode(resp!.responseText!));
+    if (resp?.statusOk ?? false) {
+      assert(json.decode(resp!.body));
     } else {
       logWarning(resp, apiResetDevTools);
     }
@@ -317,7 +315,7 @@ Future<DevToolsJsonFile?> requestFile({
   if (isDevToolsServerAvailable) {
     final url = Uri(path: api, queryParameters: {fileKey: filePath});
     final resp = await request(url.toString());
-    if (resp?.status == HttpStatus.ok) {
+    if (resp?.statusOk ?? false) {
       return _devToolsJsonFileFromResponse(resp!, filePath);
     } else {
       logWarning(resp, api);
@@ -327,10 +325,10 @@ Future<DevToolsJsonFile?> requestFile({
 }
 
 DevToolsJsonFile _devToolsJsonFileFromResponse(
-  HttpRequest resp,
+  Response resp,
   String filePath,
 ) {
-  final data = json.decode(resp.response);
+  final data = json.decode(resp.body);
   final lastModified = data['lastModifiedTime'];
   final lastModifiedTime =
       lastModified != null ? DateTime.parse(lastModified) : DateTime.now();
@@ -353,8 +351,8 @@ Future<List<DevToolsExtensionConfig>> refreshAvailableExtensions(
       queryParameters: {ExtensionsApi.extensionRootPathPropertyName: rootPath},
     );
     final resp = await request(uri.toString());
-    if (resp?.status == HttpStatus.ok) {
-      final parsedResult = json.decode(resp!.responseText!);
+    if (resp?.statusOk ?? false) {
+      final parsedResult = json.decode(resp!.body);
       final extensionsAsJson =
           (parsedResult[ExtensionsApi.extensionsResultPropertyName]!
                   as List<Object?>)
@@ -403,8 +401,8 @@ Future<ExtensionEnabledState> extensionEnabledState({
       },
     );
     final resp = await request(uri.toString());
-    if (resp?.status == HttpStatus.ok) {
-      final parsedResult = json.decode(resp!.responseText!);
+    if (resp?.statusOk ?? false) {
+      final parsedResult = json.decode(resp!.body);
       return ExtensionEnabledState.from(parsedResult);
     } else {
       logWarning(resp, ExtensionsApi.apiExtensionEnabledState);
@@ -428,8 +426,8 @@ Future<List<String>> requestAndroidBuildVariants(String path) async {
       },
     );
     final resp = await request(uri.toString());
-    if (resp?.status == HttpStatus.ok) {
-      return json.decode(resp!.responseText!);
+    if (resp?.statusOk ?? false) {
+      return json.decode(resp!.body);
     } else {
       logWarning(resp, DeeplinkApi.androidBuildVariants);
     }
@@ -450,8 +448,8 @@ Future<AppLinkSettings> requestAndroidAppLinkSettings(
       },
     );
     final resp = await request(uri.toString());
-    if (resp?.status == HttpStatus.ok) {
-      return AppLinkSettings.fromJson(resp!.responseText!);
+    if (resp?.statusOk ?? false) {
+      return AppLinkSettings.fromJson(resp!.body);
     } else {
       logWarning(resp, DeeplinkApi.androidAppLinkSettings);
     }
@@ -468,8 +466,8 @@ Future<XcodeBuildOptions> requestIosBuildOptions(String path) async {
       },
     );
     final resp = await request(uri.toString());
-    if (resp?.status == HttpStatus.ok) {
-      return XcodeBuildOptions.fromJson(resp!.responseText!);
+    if (resp?.statusOk ?? false) {
+      return XcodeBuildOptions.fromJson(resp!.body);
     } else {
       logWarning(resp, DeeplinkApi.iosBuildOptions);
     }
@@ -492,8 +490,8 @@ Future<UniversalLinkSettings> requestIosUniversalLinkSettings(
       },
     );
     final resp = await request(uri.toString());
-    if (resp?.status == HttpStatus.ok) {
-      return UniversalLinkSettings.fromJson(resp!.responseText!);
+    if (resp?.statusOk ?? false) {
+      return UniversalLinkSettings.fromJson(resp!.body);
     } else {
       logWarning(resp, DeeplinkApi.iosUniversalLinkSettings);
     }
@@ -501,9 +499,13 @@ Future<UniversalLinkSettings> requestIosUniversalLinkSettings(
   return UniversalLinkSettings.empty;
 }
 
-void logWarning(HttpRequest? response, String apiType, [String? respText]) {
+void logWarning(Response? response, String apiType, [String? respText]) {
   _log.warning(
-    'HttpRequest $apiType failed status = ${response?.status}'
+    'HttpRequest $apiType failed status = ${response?.statusCode}'
     '${respText != null ? ', responseText = $respText' : ''}',
   );
+}
+
+extension ResponseExtension on Response {
+  bool get statusOk => statusCode == 200;
 }

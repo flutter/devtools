@@ -41,7 +41,7 @@ dependencies:
   flutter_riverpod: 2.0.0-dev.9
   flutter_web_plugins:
     sdk: flutter
-  http: ^0.13.4
+  http: ^1.1.0
   image: ^3.0.2
   intl: ^0.18.0
   js: ^0.6.1+1

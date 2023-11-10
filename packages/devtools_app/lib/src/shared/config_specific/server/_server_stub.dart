@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be found
 // in the LICENSE file.
 
+// TODO(kenz): delete this file in a follow up PR since we not longer need
+// a conditional import for the server after migrating to `package:http`.
+
 // Avoid unused parameters does not understand conditional imports.
 // ignore_for_file: avoid-unused-parameters
 import 'dart:async';
