@@ -22,9 +22,9 @@ abstract class DartSdkHelper {
       workingDirectory: dartSdkLocation,
       additionalErrorMessage: commandDebugMessage,
       commands: [
-        CliCommand.git('fetch origin'),
-        CliCommand.git('rebase-update'),
-        CliCommand.git('checkout origin/main'),
+        CliCommand.git(cmd: 'fetch origin'),
+        CliCommand.git(cmd: 'rebase-update'),
+        CliCommand.git(cmd: 'checkout origin/main'),
       ],
     );
   }
@@ -87,13 +87,30 @@ class CliCommand {
     );
   }
 
-  factory CliCommand.git(
-    String args, {
+  /// CliCommand helper for running git commands.
+  ///
+  /// Arguments can be passed in as a single string using [cmd], this will split
+  /// the string into args using spaces. e.g. CliCommand.git(cmd: 'checkout test-branch')
+  ///
+  /// If you instead want to specify args explicitly, you can use the
+  /// [args] param. e.g. CliCommand.git(args: ['checkout', 'test-branch'])
+  factory CliCommand.git({
+    String? cmd,
+    List<String>? args,
     bool throwOnException = true,
+    bool split = true,
   }) {
+    if ((cmd == null) == (args == null)) {
+      throw ('Only one of `cmd` and `args` must be specified.');
+    }
+
+    if (cmd != null) {
+      args = cmd.split(' ');
+    }
+
     return CliCommand._(
       exe: 'git',
-      args: args.split(' '),
+      args: args,
       throwOnException: throwOnException,
     );
   }
@@ -188,7 +205,7 @@ Future<String> findRemote(
 }) async {
   print('Searching for a remote that points to $remoteId.');
   final remotesResult = await processManager.runProcess(
-    CliCommand.git('remote -v'),
+    CliCommand.git(cmd: 'remote -v'),
     workingDirectory: workingDirectory,
   );
   final String remotes = remotesResult.stdout;
