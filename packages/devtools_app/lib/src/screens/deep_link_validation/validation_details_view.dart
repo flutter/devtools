@@ -253,7 +253,8 @@ class _DomainFixPanel extends StatelessWidget {
                                   ),
                                 ),
                                 IconButton(
-                                  onPressed: () async => Clipboard.setData(
+                                  onPressed: () async =>
+                                      await Clipboard.setData(
                                     ClipboardData(text: generatedAssetLinks),
                                   ),
                                   icon: const Icon(Icons.copy),
