@@ -7,7 +7,7 @@ import 'dart:convert';
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_deeplink.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 
 import '../../shared/analytics/analytics.dart' as ga;
@@ -241,6 +241,9 @@ class DeepLinksController extends DisposableController {
 
   final displayOptionsNotifier =
       ValueNotifier<DisplayOptions>(DisplayOptions());
+
+  /// The [TextEditingController] for the search text field.
+  final textEditingController = TextEditingController();
 
   Future<void> _generateAssetLinks() async {
     final applicationId =
