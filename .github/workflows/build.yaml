@@ -65,8 +65,9 @@ jobs:
           wget -qO- https://dcm.dev/pgp-key.public | sudo gpg --dearmor -o /usr/share/keyrings/dcm.gpg
           echo 'deb [signed-by=/usr/share/keyrings/dcm.gpg arch=amd64] https://dcm.dev/debian stable main' | sudo tee /etc/apt/sources.list.d/dart_stable.list
           sudo apt-get update
-          sudo apt-get install dcm
+          sudo apt-get install dcm=1.11.0
           sudo chmod +x /usr/bin/dcm
+          echo "$(dcm --version)"
       - name: Setup Dart SDK
         uses: dart-lang/setup-dart@b64355ae6ca0b5d484f0106a033dd1388965d06d
       - name: Run DCM on root
