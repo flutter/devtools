@@ -110,7 +110,7 @@ class ServeCommand extends Command {
     if (localDartSdkLocation == null) {
       throw Exception('LOCAL_DART_SDK environment variable not set. Please add '
           'the following to your \'.bash_profile\' or \'.bashrc\' file:\n'
-          'export LOCAL_DART_SDK=<absolute/path/to/my/dart-sdk/sdk>');
+          'export LOCAL_DART_SDK=<absolute/path/to/my/sdk>');
     }
 
     // Validate the path looks correct in case it was set without the /sdk or
@@ -119,8 +119,7 @@ class ServeCommand extends Command {
     if (!pkgDir.existsSync()) {
       throw Exception(
         'No pkg directory found in LOCAL_DART_SDK at "${pkgDir.path}"\n'
-        'Is LOCAL_DART_SDK set correctly to the dart-sdk${path.separator}sdk '
-        'directory?',
+        'Is LOCAL_DART_SDK set correctly to the "sdk" directory?',
       );
     }
 

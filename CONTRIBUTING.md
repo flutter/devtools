@@ -58,14 +58,17 @@ own Github account, and then clone it using SSH. If you haven't already, you may
 to connect to Github with SSH.
 2. Make sure to [configure Git to keep your fork in sync](https://docs.github.com/en/get-started/quickstart/fork-a-repo#configuring-git-to-sync-your-fork-with-the-upstream-repository)
 with the upstream DevTools repo.
-3. Ensure that you have access to the `devtools_tool` executable by adding the `tool/bin` folder to your `PATH` environment variable:
-	- **MacOS Users**
-		- add the following to your `~/.bashrc` file, replacing `<DEVTOOLS_DIR>` with the local path to your DevTools repo:
+3. Ensure that you have access to the `devtools_tool` executable by:
+	- Running `flutter pub get` on the `tool` directory
+	- Adding the `tool/bin` folder to your `PATH` environment variable:
+	  - **MacOS Users**
+	    - add the following to your `~/.zshrc` file (or `~/.bashrc`, `~/.bash_profile` if you use Bash),
+		replacing `<DEVTOOLS_DIR>` with the local path to your DevTools repo:
 
 			```
 			export PATH=$PATH:<DEVTOOLS_DIR>/tool/bin
 			```
-	- **Windows Users**
+	  - **Windows Users**
 		- Open "Edit environment variables for your account" from Control Panel
 		- Locate the `Path` variable and click **Edit**
 		- Click the **New** button and paste in `<DEVTOOLS_DIR>/tool/bin`, replacing `<DEVTOOLS_DIR>`
@@ -171,7 +174,7 @@ command palette (`F1`)) and add the following to your settings:
 "dart.customDevTools": {
 	"path": "/path/to/devtools",
 	"env": {
-		"LOCAL_DART_SDK": "/path/to/dart-sdk/sdk"
+		"LOCAL_DART_SDK": "/path/to/sdk"
 		// Path to the version that Flutter DevTools is pinned to.
         "FLUTTER_ROOT": "/path/to/devtools/tool/flutter-sdk"
 	}
