@@ -76,7 +76,8 @@ class UpdatePerfettoCommand extends Command {
           Directory.systemTemp.createTempSync('perfetto_clone');
       await processManager.runProcess(
         CliCommand.git(
-          'clone https://android.googlesource.com/platform/external/perfetto',
+          cmd:
+              'clone https://android.googlesource.com/platform/external/perfetto',
         ),
         workingDirectory: tempPerfettoClone.path,
       );
