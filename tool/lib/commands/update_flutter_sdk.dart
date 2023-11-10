@@ -118,11 +118,11 @@ class UpdateFlutterSdkCommand extends Command {
 
       await processManager.runAll(
         commands: [
-          CliCommand.git('stash'),
-          CliCommand.git('fetch upstream'),
-          CliCommand.git('checkout upstream/master'),
-          CliCommand.git('reset --hard upstream/master'),
-          CliCommand.git('checkout $flutterTag -f'),
+          CliCommand.git(cmd: 'stash'),
+          CliCommand.git(cmd: 'fetch upstream'),
+          CliCommand.git(cmd: 'checkout upstream/master'),
+          CliCommand.git(cmd: 'reset --hard upstream/master'),
+          CliCommand.git(cmd: 'checkout $flutterTag -f'),
           CliCommand.flutter('--version'),
         ],
         workingDirectory: sdk.sdkPath,
@@ -144,8 +144,8 @@ class UpdateFlutterSdkCommand extends Command {
       );
       await processManager.runAll(
         commands: [
-          CliCommand.git('fetch'),
-          CliCommand.git('checkout $flutterTag -f'),
+          CliCommand.git(cmd: 'fetch'),
+          CliCommand.git(cmd: 'checkout $flutterTag -f'),
           CliCommand.flutter('--version'),
         ],
         workingDirectory: toolFlutterSdkDirectory.path,
@@ -154,13 +154,13 @@ class UpdateFlutterSdkCommand extends Command {
       log.stdout('Cloning flutter/flutter into "$toolSdkPath" directory.');
       await processManager.runProcess(
         CliCommand.git(
-          'clone https://github.com/flutter/flutter $flutterSdkDirName',
+          cmd: 'clone https://github.com/flutter/flutter $flutterSdkDirName',
         ),
         workingDirectory: repo.toolDirectoryPath,
       );
       await processManager.runAll(
         commands: [
-          CliCommand.git('checkout $flutterTag -f'),
+          CliCommand.git(cmd: 'checkout $flutterTag -f'),
           CliCommand.flutter('--version'),
         ],
         workingDirectory: toolFlutterSdkDirectory.path,
