@@ -24,11 +24,16 @@ xattr -d com.apple.quarantine ~/path/to/chromedriver
 
 ### Updating ChromeDriver
 
-If you update your Chrome version, you may need to update your `chromedriver` executable as well. To do this,
-delete your existing `chromedriver` executable (you can find this by running `which chromedriver`). Then,
-download the proper `chromedriver` version from [here](https://chromedriver.chromium.org/downloads), unzip the
-folder and then copy the `chromedriver` executable to the same location that you just deleted the previous
-executable from.
+If you update your Chrome version (or it updates automatically), you may need to update your `chromedriver`
+executable as well. To do this, delete your existing `chromedriver` executable (you can find this by
+running `which chromedriver`). Then, download the proper `chromedriver` zip file from
+[here](https://googlechromelabs.github.io/chrome-for-testing/#stable) based on your platform, unzip the
+folder, and move the executable to the same location that you just deleted the previous executable from.
+
+If you are on Mac, you will likely need to run this command again on the new executable:
+```
+xattr -d com.apple.quarantine ~/path/to/chromedriver
+```
 
 ## Running a test
 

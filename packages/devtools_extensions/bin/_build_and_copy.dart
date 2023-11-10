@@ -20,14 +20,14 @@ class BuildExtensionCommand extends Command {
   BuildExtensionCommand() {
     argParser
       ..addOption(
-        'source',
+        _sourceKey,
         help: 'The source location for the extension flutter web app (can  be '
             'relative or absolute)',
         valueHelp: 'path/to/foo/packages/foo_devtools_extension',
         mandatory: true,
       )
       ..addOption(
-        'dest',
+        _destinationKey,
         help: 'The destination location for the extension build output (can be '
             'relative or absolute)',
         valueHelp: 'path/to/foo/packages/foo/extension/devtools',
