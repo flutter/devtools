@@ -15,9 +15,9 @@ import 'package:logging/logging.dart';
 import 'package:web/helpers.dart';
 
 import '../../../devtools.dart' as devtools show version;
-import '../config_specific/server/server.dart' as server;
 import '../globals.dart';
 import '../primitives/url_utils.dart';
+import '../server/server.dart' as server;
 import '../utils.dart';
 import 'analytics_common.dart';
 import 'constants.dart' as gac;

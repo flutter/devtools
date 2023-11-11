@@ -12,7 +12,7 @@ import 'package:http/http.dart' as http;
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
-import '../../shared/config_specific/server/server.dart' as server;
+import '../../shared/server/server.dart' as server;
 import 'deep_links_model.dart';
 
 const String _apiKey = 'AIzaSyDVE6FP3GpwxgS4q8rbS7qaf6cAbxc_elc';

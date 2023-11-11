@@ -11,10 +11,10 @@ import 'package:logging/logging.dart';
 import '../shared/notifications.dart';
 import 'analytics/analytics.dart' as ga;
 import 'config_specific/launch_url/launch_url.dart';
-import 'config_specific/server/server.dart' as server;
 import 'development_helpers.dart';
 import 'globals.dart';
 import 'primitives/utils.dart';
+import 'server/server.dart' as server;
 
 final _log = Logger('survey');
 

@@ -6,8 +6,8 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:flutter/foundation.dart';
 
-import '../shared/config_specific/server/server.dart' as server;
 import '../shared/globals.dart';
+import '../shared/server/server.dart' as server;
 
 class ExtensionService extends DisposableController
     with AutoDisposeControllerMixin {
