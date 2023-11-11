@@ -125,7 +125,7 @@ class Devices extends StatelessWidget {
             onPressed: () {
               ga.select(
                 gac.VsCodeFlutterSidebar.id,
-                gac.VsCodeFlutterSidebar.enablePlatformType.name,
+                gac.VsCodeFlutterSidebar.enablePlatformType(platformType),
               );
               unawaited(api.enablePlatformType(platformType));
             },
