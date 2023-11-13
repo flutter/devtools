@@ -114,7 +114,7 @@ Future<void> pumpDevTools(WidgetTester tester) async {
   );
 
   // Wait for preferences to be initialized before continuing.
-  if (!preferences.isInitialized.value) {
+  if (preferences.isInitialized.value == false) {
     final isDoneInitializing = Completer<void>();
     preferences.isInitialized.addListener(() {
       if (preferences.isInitialized.value) {
