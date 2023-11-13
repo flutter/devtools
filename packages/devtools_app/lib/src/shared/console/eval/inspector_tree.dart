@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 /// Inspector specific tree rendering support.
-/// 
+///
 /// This library must not have direct dependencies on web-only libraries.
 ///
 /// This allows tests of the complicated logic in this class to run on the VM.
