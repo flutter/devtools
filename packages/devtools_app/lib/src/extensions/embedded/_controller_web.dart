@@ -10,10 +10,10 @@ import 'package:devtools_extensions/api.dart';
 import 'package:path/path.dart' as path;
 import 'package:web/helpers.dart';
 
-import '../../shared/config_specific/server/server.dart';
 import '../../shared/development_helpers.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
+import '../../shared/server/server.dart';
 import 'controller.dart';
 
 /// Incrementer for the extension iFrame view that will live for the entire

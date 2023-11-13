@@ -7,12 +7,12 @@ import 'dart:convert';
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_deeplink.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
-import '../../shared/config_specific/server/server.dart' as server;
+import '../../shared/server/server.dart' as server;
 import 'deep_links_model.dart';
 
 const String _apiKey = 'AIzaSyDVE6FP3GpwxgS4q8rbS7qaf6cAbxc_elc';
@@ -242,6 +242,9 @@ class DeepLinksController extends DisposableController {
   final displayOptionsNotifier =
       ValueNotifier<DisplayOptions>(DisplayOptions());
 
+  /// The [TextEditingController] for the search text field.
+  final textEditingController = TextEditingController();
+
   Future<void> _generateAssetLinks() async {
     final applicationId =
         _androidAppLinks[selectedVariantIndex.value]?.applicationId ?? '';
@@ -265,9 +268,8 @@ class DeepLinksController extends DisposableController {
     final Map<String, dynamic> result =
         json.decode(response.body) as Map<String, dynamic>;
     if (result[_domainsKey] != null) {
-      final String generatedContent =
-          (result[_domainsKey] as List<Map<String, dynamic>>)
-              .first[_generatedContentKey];
+      final String generatedContent = ((result[_domainsKey] as List).first
+          as Map<String, dynamic>)[_generatedContentKey];
 
       generatedAssetLinksForSelectedLink.value = generatedContent;
     }
