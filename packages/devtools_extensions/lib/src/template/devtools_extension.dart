@@ -18,6 +18,7 @@ import 'package:web/helpers.dart' hide Text;
 
 import '../api/api.dart';
 import '../api/model.dart';
+import '../utils.dart';
 import '_simulated_devtools_environment/_simulated_devtools_environment.dart';
 
 part 'extension_manager.dart';

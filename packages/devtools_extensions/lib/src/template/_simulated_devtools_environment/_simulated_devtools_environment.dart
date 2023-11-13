@@ -8,13 +8,13 @@ import 'dart:js_interop';
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
-import 'package:devtools_app_shared/web_utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:web/helpers.dart' hide Text;
 
 import '../../api/api.dart';
 import '../../api/model.dart';
+import '../../utils.dart';
 import '../devtools_extension.dart';
 
 part '_connect_ui.dart';

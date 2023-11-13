@@ -78,12 +78,9 @@ class ExtensionManager {
   }
 
   void _handleMessage(Event e) {
-    if (e.isMessageEvent) {
-      final messageData = ((e as MessageEvent).data as JSObject).dartify()!;
-      final extensionEvent = DevToolsExtensionEvent.tryParse(messageData);
-      if (extensionEvent != null) {
-        _handleExtensionEvent(extensionEvent, e);
-      }
+    final extensionEvent = tryParseExtensionEvent(e);
+    if (extensionEvent != null) {
+      _handleExtensionEvent(extensionEvent, e as MessageEvent);
     }
   }
 

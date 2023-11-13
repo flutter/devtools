@@ -3,13 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:js';
 import 'dart:js_interop';
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
-import 'package:devtools_app_shared/web_utils.dart';
 import 'package:devtools_extensions/api.dart';
+import 'package:devtools_extensions/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:web/helpers.dart';
 
@@ -170,17 +169,14 @@ class _ExtensionIFrameController extends DisposableController
   }
 
   void _handleMessage(Event e) {
-    if (e.isMessageEvent) {
-      final messageData = ((e as MessageEvent).data as JSObject).dartify()!;
-      final extensionEvent = DevToolsExtensionEvent.tryParse(messageData);
-      if (extensionEvent != null) {
-        onEventReceived(
-          extensionEvent,
-          onUnknownEvent: () => notificationService.push(
-            'Unknown event received from extension: $messageData',
-          ),
-        );
-      }
+    final extensionEvent = tryParseExtensionEvent(e);
+    if (extensionEvent != null) {
+      onEventReceived(
+        extensionEvent,
+        onUnknownEvent: () => notificationService.push(
+          'Unknown event received from extension: $extensionEvent}',
+        ),
+      );
     }
   }
 
