@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:ui' as ui;
 
@@ -111,6 +112,17 @@ Future<void> pumpDevTools(WidgetTester tester) async {
     shouldEnableExperiments: shouldEnableExperiments,
     sampleData: _sampleData,
   );
+
+  // Wait for preferences to be initialized before continuing.
+  if (!preferences.isInitialized.value) {
+    final isDoneInitializing = Completer<void>();
+    preferences.isInitialized.addListener(() {
+      if (preferences.isInitialized.value) {
+        isDoneInitializing.complete();
+      }
+    });
+    await isDoneInitializing.future;
+  }
 
   // Await a delay to ensure the widget tree has loaded.
   await tester.pumpAndSettle(veryLongPumpDuration);

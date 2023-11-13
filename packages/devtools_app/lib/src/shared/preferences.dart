@@ -42,6 +42,8 @@ class PreferencesController extends DisposableController
 
   ExtensionsPreferencesController get devToolsExtensions => _extensions;
   final _extensions = ExtensionsPreferencesController();
+  final _isInitialized = ValueNotifier<bool>(false);
+  ValueListenable<bool> get isInitialized => _isInitialized;
 
   Future<void> init() async {
     // Get the current values and listen for and write back changes.
@@ -74,6 +76,7 @@ class PreferencesController extends DisposableController
     await devToolsExtensions.init();
 
     setGlobal(PreferencesController, this);
+    _isInitialized.value = true;
   }
 
   Future<void> _initVerboseLogging() async {
