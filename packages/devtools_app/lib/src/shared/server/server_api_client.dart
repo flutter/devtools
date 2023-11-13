@@ -10,9 +10,9 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 
-import 'config_specific/notifications/notifications.dart';
-import 'framework_controller.dart';
-import 'globals.dart';
+import '../config_specific/notifications/notifications.dart';
+import '../framework_controller.dart';
+import '../globals.dart';
 
 final _log = Logger('lib/src/shared/server_api_client');
 
