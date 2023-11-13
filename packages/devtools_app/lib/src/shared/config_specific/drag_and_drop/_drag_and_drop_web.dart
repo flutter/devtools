@@ -4,8 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
-// ignore: avoid_web_libraries_in_flutter, as designed
-import 'dart:html';
+import 'package:web/helpers.dart';
 
 import '../../globals.dart';
 import '../../primitives/utils.dart';
@@ -40,11 +39,11 @@ class DragAndDropManagerWeb extends DragAndDropManager {
   }
 
   void _onDragOver(MouseEvent event) {
-    dragOver(event.offset.x as double, event.offset.y as double);
+    dragOver(event.offsetX as double, event.offsetY as double);
 
     // This is necessary to allow us to drop.
     event.preventDefault();
-    event.dataTransfer.dropEffect = 'move';
+    (event as DragEvent).dataTransfer!.dropEffect = 'move';
   }
 
   void _onDragLeave(MouseEvent _) {
@@ -61,28 +60,31 @@ class DragAndDropManagerWeb extends DragAndDropManager {
     // handler, return early.
     if (activeState?.widget.handleDrop == null) return;
 
-    final List<File> files = event.dataTransfer.files!;
+    final FileList files = (event as DragEvent).dataTransfer!.files;
     if (files.length > 1) {
       notificationService.push('You cannot import more than one file.');
       return;
     }
 
-    final droppedFile = files.first;
-    if (droppedFile.type != 'application/json') {
+    final droppedFile = files.item(0);
+    if (droppedFile?.type != 'application/json') {
       notificationService.push(
-        '${droppedFile.type} is not a supported file type. Please import '
+        '${droppedFile?.type} is not a supported file type. Please import '
         'a .json file that was exported from Dart DevTools.',
       );
       return;
     }
 
     final FileReader reader = FileReader();
-    reader.onLoad.listen((_) {
+    (reader as Element).onLoad.listen((event) {
       try {
         final Object json = jsonDecode(reader.result as String);
         final devToolsJsonFile = DevToolsJsonFile(
-          name: droppedFile.name,
-          lastModifiedTime: droppedFile.lastModifiedDate,
+          name: droppedFile!.name,
+          lastModifiedTime: DateTime.fromMillisecondsSinceEpoch(
+            droppedFile.lastModified,
+            isUtc: true,
+          ),
           data: json,
         );
         activeState!.widget.handleDrop!(devToolsJsonFile);
@@ -97,7 +99,7 @@ class DragAndDropManagerWeb extends DragAndDropManager {
     });
 
     try {
-      reader.readAsText(droppedFile);
+      reader.readAsText(droppedFile!);
     } catch (e) {
       notificationService.push('Could not import file: $e');
     }

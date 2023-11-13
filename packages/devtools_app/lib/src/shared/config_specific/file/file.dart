@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '_file_stub.dart'
-    if (dart.library.js_interop) '_file_web.dart'
-    if (dart.library.io) '_file_desktop.dart';
+import '_file_desktop.dart' if (dart.library.js_interop) '_file_web.dart';
 
 abstract class FileIO {
   factory FileIO() {

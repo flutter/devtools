@@ -46,7 +46,7 @@ void main() {
     }) {
       if (web) {
         fakeServiceConnection.serviceManager.availableLibraries
-            .add('dart:html');
+            .add('dart:js_interop');
       }
       mockConnectedApp(
         fakeServiceConnection.serviceManager.connectedApp!,
