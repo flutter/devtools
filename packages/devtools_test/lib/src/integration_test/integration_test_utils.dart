@@ -120,7 +120,6 @@ Future<void> pumpDevTools(WidgetTester tester) async {
       break;
     } on TypeError catch (_) {
       if (DateTime.now().isBefore(timeout)) {
-        print('Preferences not initialized yet, trying again');
         await Future.delayed(const Duration(seconds: 5));
         continue;
       } else {
