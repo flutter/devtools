@@ -113,9 +113,7 @@ Future<void> pumpDevTools(WidgetTester tester) async {
     sampleData: _sampleData,
   );
   final timeout = DateTime.now().add(const Duration(minutes: 3));
-  int tries = 0;
   while (true) {
-    tries++;
     try {
       // If preferences aren't initialized yet then this will throw an error.
       preferences.isInitialized.value;
