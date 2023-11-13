@@ -14,7 +14,10 @@ import 'service_manager.dart';
 final _log = Logger('connected_app');
 
 const flutterLibraryUri = 'package:flutter/src/widgets/binding.dart';
-const dartWebLibraryUri = 'dart:js_interop';
+
+// TODO(kenz): if we want to support debugging dart2wasm web apps, we will need
+// to check for the presence of a different library.
+const dartHtmlLibraryUri = 'dart:html';
 
 // TODO(https://github.com/flutter/devtools/issues/6239): try to remove this.
 @sealed
@@ -81,7 +84,7 @@ class ConnectedApp {
 
   // TODO(kenz): investigate if we can use `libraryUriAvailableNow` instead.
   Future<bool> get isDartWebApp async => _isDartWebApp ??=
-      await serviceManager!.libraryUriAvailable(dartWebLibraryUri);
+      await serviceManager!.libraryUriAvailable(dartHtmlLibraryUri);
 
   bool? get isDartWebAppNow {
     assert(_isDartWebApp != null);
