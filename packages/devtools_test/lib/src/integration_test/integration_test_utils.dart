@@ -112,7 +112,24 @@ Future<void> pumpDevTools(WidgetTester tester) async {
     shouldEnableExperiments: shouldEnableExperiments,
     sampleData: _sampleData,
   );
-
+  final timeout = DateTime.now().add(const Duration(minutes: 3));
+  int tries = 0;
+  while (true) {
+    tries++;
+    try {
+      // If preferences aren't initialized yet then this will throw an error.
+      preferences.isInitialized.value;
+      break;
+    } on TypeError catch (_) {
+      if (DateTime.now().isBefore(timeout)) {
+        print('Preferences not initialized yet, trying again');
+        await Future.delayed(const Duration(seconds: 5));
+        continue;
+      } else {
+        throw 'Timed out waiting for preferences to initialize';
+      }
+    }
+  }
   // Wait for preferences to be initialized before continuing.
   if (preferences.isInitialized.value == false) {
     final isDoneInitializing = Completer<void>();
