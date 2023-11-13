@@ -2,13 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Inspector specific tree rendering support designed to be extendable to work
-/// either directly with dart:html or with Hummingbird.
+/// Inspector specific tree rendering support.
+/// 
+/// This library must not have direct dependencies on web-only libraries.
 ///
-/// This library must not have direct dependencies on dart:html.
-///
-/// This allows tests of the complicated logic in this class to run on the VM
-/// and will help simplify porting this code to work with Hummingbird.
+/// This allows tests of the complicated logic in this class to run on the VM.
 
 library inspector_tree;
 
