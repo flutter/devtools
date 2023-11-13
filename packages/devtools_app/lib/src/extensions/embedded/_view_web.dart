@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:js';
 import 'dart:js_interop';
 
 import 'package:devtools_app_shared/ui.dart';
@@ -170,7 +171,7 @@ class _ExtensionIFrameController extends DisposableController
 
   void _handleMessage(Event e) {
     if (e.isMessageEvent) {
-      final messageData = (e as MessageEvent).data!;
+      final messageData = ((e as MessageEvent).data as JSObject).dartify()!;
       final extensionEvent = DevToolsExtensionEvent.tryParse(messageData);
       if (extensionEvent != null) {
         onEventReceived(
