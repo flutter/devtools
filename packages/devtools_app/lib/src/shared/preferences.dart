@@ -157,7 +157,7 @@ class InspectorPreferencesController extends DisposableController
   String? _mainScriptDir;
 
   Future<void> _updateMainScriptRef() async {
-    print('DAKE pref: _updateMainScriptRef: ${StackTrace.current}');
+    print('DAKE pref:  _updateMainScriptRef: ${StackTrace.current}');
     final rootLibUriString =
         (await serviceConnection.serviceManager.tryToDetectMainRootInfo())
             ?.library;
