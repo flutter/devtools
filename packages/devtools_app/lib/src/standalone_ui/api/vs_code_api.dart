@@ -151,12 +151,23 @@ abstract interface class VsCodeDebugSession {
   /// - WebTest     (webdev test)
   String? get debuggerType;
 
+  /// The full path to the root of this project (the folder that contains the
+  /// `pubspec.yaml`).
+  ///
+  /// This path might not always be available, for example:
+  ///
+  /// - When the version of Dart-Code is from before this field was added
+  /// - When a debug session was an attach and we didn't know the source
+  /// - When the program being run is a lose file without any pubspec
+  String? get projectRootPath;
+
   static const jsonIdField = 'id';
   static const jsonNameField = 'name';
   static const jsonVmServiceUriField = 'vmServiceUri';
   static const jsonFlutterModeField = 'flutterMode';
   static const jsonFlutterDeviceIdField = 'flutterDeviceId';
   static const jsonDebuggerTypeField = 'debuggerType';
+  static const jsonProjectRootPathField = 'projectRootPath';
 }
 
 /// This class defines a device event sent by the Dart/Flutter extensions in VS

@@ -220,6 +220,7 @@ class MockDartToolingApi extends DartToolingApiImpl {
         flutterMode: mode,
         flutterDeviceId: deviceId,
         debuggerType: 'Flutter',
+        projectRootPath: null,
       ),
     );
     _sendDebugSessionsChanged();

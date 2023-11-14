@@ -167,6 +167,7 @@ class VsCodeDebugSessionImpl implements VsCodeDebugSession {
     required this.flutterMode,
     required this.flutterDeviceId,
     required this.debuggerType,
+    required this.projectRootPath,
   });
 
   VsCodeDebugSessionImpl.fromJson(Map<String, Object?> json)
@@ -180,6 +181,8 @@ class VsCodeDebugSessionImpl implements VsCodeDebugSession {
               json[VsCodeDebugSession.jsonFlutterDeviceIdField] as String?,
           debuggerType:
               json[VsCodeDebugSession.jsonDebuggerTypeField] as String?,
+          projectRootPath:
+              json[VsCodeDebugSession.jsonProjectRootPathField] as String?,
         );
 
   @override
@@ -200,6 +203,9 @@ class VsCodeDebugSessionImpl implements VsCodeDebugSession {
   @override
   final String? debuggerType;
 
+  @override
+  final String? projectRootPath;
+
   Map<String, Object?> toJson() => {
         VsCodeDebugSession.jsonIdField: id,
         VsCodeDebugSession.jsonNameField: name,
@@ -207,6 +213,7 @@ class VsCodeDebugSessionImpl implements VsCodeDebugSession {
         VsCodeDebugSession.jsonFlutterModeField: flutterMode,
         VsCodeDebugSession.jsonFlutterDeviceIdField: flutterDeviceId,
         VsCodeDebugSession.jsonDebuggerTypeField: debuggerType,
+        VsCodeDebugSession.jsonProjectRootPathField: projectRootPath,
       };
 }
 
