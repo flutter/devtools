@@ -139,7 +139,8 @@ abstract interface class VsCodeDebugSession {
   /// - WebTest     (webdev test)
   String? get debuggerType;
 
-  /// The full path to the root of this project.
+  /// The full path to the root of this project (the folder that contains the
+  /// `pubspec.yaml`).
   ///
   /// This path might not always be available, for example:
   ///
