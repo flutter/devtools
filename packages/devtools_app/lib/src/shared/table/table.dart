@@ -1028,6 +1028,30 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     return tableWidth;
   }
 
+  double _pinnedDataHeight(BoxConstraints tableConstraints) => min(
+        widget.rowItemExtent! * pinnedData.length,
+        tableConstraints.maxHeight / 2,
+      );
+
+  int _dataRowCount(
+    BoxConstraints tableConstraints,
+    bool showColumnGroupHeader,
+  ) {
+    if (!widget.fillWithEmptyRows) {
+      return _data.length;
+    }
+
+    var maxHeight = tableConstraints.maxHeight;
+    final columnHeadersCount = showColumnGroupHeader ? 2 : 1;
+    maxHeight -= columnHeadersCount * areaPaneHeaderHeight;
+
+    if (pinnedData.isNotEmpty) {
+      maxHeight -= _pinnedDataHeight(tableConstraints);
+    }
+
+    return max(_data.length, maxHeight ~/ widget.rowItemExtent!);
+  }
+
   Widget _buildItem(BuildContext context, int index, {bool isPinned = false}) {
     return widget.rowBuilder(
       context: context,
@@ -1052,6 +1076,9 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     final columnGroups = widget.tableController.columnGroups;
     final includeColumnGroupHeaders =
         widget.tableController.includeColumnGroupHeaders;
+    final showColumnGroupHeader = columnGroups != null &&
+        columnGroups.isNotEmpty &&
+        includeColumnGroupHeaders;
     final tableUiState = widget.tableController.tableUiState;
     final sortColumn =
         widget.tableController.columns[tableUiState.sortColumnIndex];
@@ -1070,9 +1097,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (columnGroups != null &&
-                  columnGroups.isNotEmpty &&
-                  includeColumnGroupHeaders)
+              if (showColumnGroupHeader)
                 TableRow<T>.tableColumnGroupHeader(
                   linkedScrollControllerGroup:
                       _linkedHorizontalScrollControllerGroup,
@@ -1102,10 +1127,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
               ),
               if (pinnedData.isNotEmpty) ...[
                 SizedBox(
-                  height: min(
-                    widget.rowItemExtent! * pinnedData.length,
-                    constraints.maxHeight / 2,
-                  ),
+                  height: _pinnedDataHeight(constraints),
                   child: Scrollbar(
                     thumbVisibility: true,
                     controller: pinnedScrollController,
@@ -1124,35 +1146,28 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
                 const ThickDivider(),
               ],
               Expanded(
-                child: LayoutBuilder(
-                  builder: (context, constraints) => Scrollbar(
-                    thumbVisibility: true,
-                    controller: scrollController,
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.translucent,
-                      onTapDown: (a) => widget.focusNode?.requestFocus(),
-                      child: Focus(
-                        autofocus: true,
-                        onKey: (_, event) => widget.handleKeyEvent != null
-                            ? widget.handleKeyEvent!(
-                                event,
-                                scrollController,
-                                constraints,
-                              )
-                            : KeyEventResult.ignored,
-                        focusNode: widget.focusNode,
-                        child: ListView.builder(
-                          controller: scrollController,
-                          itemCount: widget.fillWithEmptyRows
-                              ? max(
-                                  _data.length,
-                                  constraints.maxHeight ~/
-                                      widget.rowItemExtent!,
-                                )
-                              : _data.length,
-                          itemExtent: widget.rowItemExtent,
-                          itemBuilder: _buildItem,
-                        ),
+                child: Scrollbar(
+                  thumbVisibility: true,
+                  controller: scrollController,
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onTapDown: (a) => widget.focusNode?.requestFocus(),
+                    child: Focus(
+                      autofocus: true,
+                      onKey: (_, event) => widget.handleKeyEvent != null
+                          ? widget.handleKeyEvent!(
+                              event,
+                              scrollController,
+                              constraints,
+                            )
+                          : KeyEventResult.ignored,
+                      focusNode: widget.focusNode,
+                      child: ListView.builder(
+                        controller: scrollController,
+                        itemCount:
+                            _dataRowCount(constraints, showColumnGroupHeader),
+                        itemExtent: widget.rowItemExtent,
+                        itemBuilder: _buildItem,
                       ),
                     ),
                   ),
