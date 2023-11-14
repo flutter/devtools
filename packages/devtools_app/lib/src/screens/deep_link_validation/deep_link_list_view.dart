@@ -23,7 +23,6 @@ import 'validation_details_view.dart';
 const _kNotificationCardSize = Size(475, 132);
 const _kSearchFieldFullWidth = 314.0;
 const _kSearchFieldSplitScreenWidth = 280.0;
-const _kTableFillerRowCount = 30;
 
 enum TableViewType {
   domainView,
@@ -167,7 +166,7 @@ class _DataTable extends StatelessWidget {
         dataKey: 'deep-links',
         autoScrollContent: true,
         headerColor: Theme.of(context).colorScheme.deeplinkTableHeaderColor,
-        fillerRowCount: _kTableFillerRowCount,
+        fillWithEmptyRows: true,
         columns: <ColumnData<LinkData>>[
           ...(() {
             switch (viewType) {

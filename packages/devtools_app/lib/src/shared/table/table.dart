@@ -114,7 +114,7 @@ class FlatTable<T> extends StatefulWidget {
     this.tallHeaders = false,
     this.sizeColumnsToFit = true,
     this.headerColor,
-    this.fillerRowCount = 0,
+    this.fillWithEmptyRows = false,
     ValueNotifier<T?>? selectionNotifier,
   })  : selectionNotifier = selectionNotifier ?? ValueNotifier<T?>(null),
         super(key: key);
@@ -158,8 +158,8 @@ class FlatTable<T> extends StatefulWidget {
   /// If null, defaults to `Theme.of(context).canvasColor`.
   final Color? headerColor;
 
-  /// The number of empty filler rows.
-  final int fillerRowCount;
+  /// Whether to fill the table with empty  rows.
+  final bool fillWithEmptyRows;
 
   /// Data set to show as rows in this table.
   final List<T> data;
@@ -330,7 +330,7 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
           preserveVerticalScrollPosition: widget.preserveVerticalScrollPosition,
           tallHeaders: widget.tallHeaders,
           headerColor: widget.headerColor,
-          fillerRowCount: widget.fillerRowCount,
+          fillWithEmptyRows: widget.fillWithEmptyRows,
         );
     if (widget.sizeColumnsToFit || tableController.columnWidths == null) {
       return LayoutBuilder(
@@ -870,7 +870,7 @@ class _Table<T> extends StatefulWidget {
     this.rowItemExtent,
     this.tallHeaders = false,
     this.headerColor,
-    this.fillerRowCount = 0,
+    this.fillWithEmptyRows = false,
   }) : super(key: key);
 
   final TableControllerBase<T> tableController;
@@ -885,7 +885,7 @@ class _Table<T> extends StatefulWidget {
   final bool preserveVerticalScrollPosition;
   final bool tallHeaders;
   final Color? headerColor;
-  final int fillerRowCount;
+  final bool fillWithEmptyRows;
 
   @override
   _TableState<T> createState() => _TableState<T>();
@@ -1124,27 +1124,35 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
                 const ThickDivider(),
               ],
               Expanded(
-                child: Scrollbar(
-                  thumbVisibility: true,
-                  controller: scrollController,
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.translucent,
-                    onTapDown: (a) => widget.focusNode?.requestFocus(),
-                    child: Focus(
-                      autofocus: true,
-                      onKey: (_, event) => widget.handleKeyEvent != null
-                          ? widget.handleKeyEvent!(
-                              event,
-                              scrollController,
-                              constraints,
-                            )
-                          : KeyEventResult.ignored,
-                      focusNode: widget.focusNode,
-                      child: ListView.builder(
-                        controller: scrollController,
-                        itemCount: _data.length + widget.fillerRowCount,
-                        itemExtent: widget.rowItemExtent,
-                        itemBuilder: _buildItem,
+                child: LayoutBuilder(
+                  builder: (context, constraints) => Scrollbar(
+                    thumbVisibility: true,
+                    controller: scrollController,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.translucent,
+                      onTapDown: (a) => widget.focusNode?.requestFocus(),
+                      child: Focus(
+                        autofocus: true,
+                        onKey: (_, event) => widget.handleKeyEvent != null
+                            ? widget.handleKeyEvent!(
+                                event,
+                                scrollController,
+                                constraints,
+                              )
+                            : KeyEventResult.ignored,
+                        focusNode: widget.focusNode,
+                        child: ListView.builder(
+                          controller: scrollController,
+                          itemCount: widget.fillWithEmptyRows
+                              ? max(
+                                  _data.length,
+                                  constraints.maxHeight ~/
+                                      widget.rowItemExtent!,
+                                )
+                              : _data.length,
+                          itemExtent: widget.rowItemExtent,
+                          itemBuilder: _buildItem,
+                        ),
                       ),
                     ),
                   ),
