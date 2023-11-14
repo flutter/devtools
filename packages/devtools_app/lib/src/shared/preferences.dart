@@ -157,6 +157,7 @@ class InspectorPreferencesController extends DisposableController
   String? _mainScriptDir;
 
   Future<void> _updateMainScriptRef() async {
+    print('DAKE pref: _updateMainScriptRef: ${StackTrace.current}');
     final rootLibUriString =
         (await serviceConnection.serviceManager.tryToDetectMainRootInfo())
             ?.library;
@@ -242,6 +243,7 @@ class InspectorPreferencesController extends DisposableController
   }
 
   void _handleConnectionClosed() {
+    print('DAKE pref: _handleConnectionClosed: ${StackTrace.current}');
     _mainScriptDir = null;
     _customPubRootDirectories.clear();
   }
@@ -330,6 +332,7 @@ class InspectorPreferencesController extends DisposableController
   }
 
   String _customPubRootStorageId() {
+    print('_customPubRootStorageId stack trace: ${StackTrace.current}');
     assert(_mainScriptDir != null);
     final packageId = _mainScriptDir ?? '_fallback';
     return '${_customPubRootDirectoriesStoragePrefix}_$packageId';
