@@ -114,6 +114,7 @@ class FlatTable<T> extends StatefulWidget {
     this.tallHeaders = false,
     this.sizeColumnsToFit = true,
     this.headerColor,
+    this.fillerRowCount = 0,
     ValueNotifier<T?>? selectionNotifier,
   })  : selectionNotifier = selectionNotifier ?? ValueNotifier<T?>(null),
         super(key: key);
@@ -156,6 +157,9 @@ class FlatTable<T> extends StatefulWidget {
   ///
   /// If null, defaults to `Theme.of(context).canvasColor`.
   final Color? headerColor;
+
+  /// The number of empty filler rows.
+  final int fillerRowCount;
 
   /// Data set to show as rows in this table.
   final List<T> data;
@@ -326,6 +330,7 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
           preserveVerticalScrollPosition: widget.preserveVerticalScrollPosition,
           tallHeaders: widget.tallHeaders,
           headerColor: widget.headerColor,
+          fillerRowCount: widget.fillerRowCount,
         );
     if (widget.sizeColumnsToFit || tableController.columnWidths == null) {
       return LayoutBuilder(
@@ -348,6 +353,19 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
   }) {
     final pinnedData = tableController.pinnedData;
     final data = isPinned ? pinnedData : tableController.tableData.value.data;
+    if (index >= data.length) {
+      return TableRow<T>.filler(
+        linkedScrollControllerGroup: linkedScrollControllerGroup,
+        columns: tableController.columns,
+        columnGroups: tableController.columnGroups,
+        columnWidths: columnWidths,
+        backgroundColor: alternatingColorForIndex(
+          index,
+          Theme.of(context).colorScheme,
+        ),
+      );
+    }
+
     final node = data[index];
     return ValueListenableBuilder<T?>(
       valueListenable: widget.selectionNotifier,
@@ -852,6 +870,7 @@ class _Table<T> extends StatefulWidget {
     this.rowItemExtent,
     this.tallHeaders = false,
     this.headerColor,
+    this.fillerRowCount = 0,
   }) : super(key: key);
 
   final TableControllerBase<T> tableController;
@@ -866,6 +885,7 @@ class _Table<T> extends StatefulWidget {
   final bool preserveVerticalScrollPosition;
   final bool tallHeaders;
   final Color? headerColor;
+  final int fillerRowCount;
 
   @override
   _TableState<T> createState() => _TableState<T>();
@@ -1122,7 +1142,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
                       focusNode: widget.focusNode,
                       child: ListView.builder(
                         controller: scrollController,
-                        itemCount: _data.length,
+                        itemCount: _data.length + widget.fillerRowCount,
                         itemExtent: widget.rowItemExtent,
                         itemBuilder: _buildItem,
                       ),
@@ -1197,6 +1217,32 @@ class TableRow<T> extends StatefulWidget {
         onSortChanged = null,
         _rowType = _TableRowType.data,
         tall = false,
+        super(key: key);
+
+  /// Constructs a [TableRow] that is empty
+  const TableRow.filler({
+    Key? key,
+    required this.linkedScrollControllerGroup,
+    required this.columns,
+    required this.columnWidths,
+    this.columnGroups,
+    this.backgroundColor,
+  })  : node = null,
+        isExpanded = false,
+        isExpandable = false,
+        isSelected = false,
+        onPressed = null,
+        expandableColumn = null,
+        isShown = true,
+        sortColumn = null,
+        sortDirection = null,
+        secondarySortColumn = null,
+        onSortChanged = null,
+        searchMatchesNotifier = null,
+        activeSearchMatchNotifier = null,
+        tall = false,
+        displayTreeGuidelines = false,
+        _rowType = _TableRowType.filler,
         super(key: key);
 
   /// Constructs a [TableRow] that presents the column titles instead
@@ -1469,7 +1515,9 @@ class _TableRowState<T> extends State<TableRow<T>>
       Widget? content;
       final theme = Theme.of(context);
       final node = widget.node;
-      if (widget._rowType == _TableRowType.columnHeader) {
+      if (widget._rowType == _TableRowType.filler) {
+        content = const SizedBox.shrink();
+      } else if (widget._rowType == _TableRowType.columnHeader) {
         Widget defaultHeaderRenderer() => _ColumnHeader(
               column: column,
               isSortColumn: column == widget.sortColumn,
@@ -1892,6 +1940,7 @@ enum _TableRowType {
   data,
   columnHeader,
   columnGroupHeader,
+  filler,
 }
 
 enum _TableRowPartDisplayType {
