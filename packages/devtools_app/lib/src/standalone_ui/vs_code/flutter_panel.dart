@@ -75,6 +75,8 @@ class _VsCodeConnectedPanelState extends State<_VsCodeConnectedPanel> {
         stream: widget.api.devicesChanged,
         builder: (context, devicesSnapshot) {
           final devices = devicesSnapshot.data?.devices ?? const [];
+          final unsupportedDevices =
+              devicesSnapshot.data?.unsupportedDevices ?? const [];
           final deviceMap = {for (final device in devices) device.id: device};
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -95,7 +97,8 @@ class _VsCodeConnectedPanelState extends State<_VsCodeConnectedPanel> {
               if (widget.api.capabilities.selectDevice)
                 Devices(
                   widget.api,
-                  devices,
+                  devices: devices,
+                  unsupportedDevices: unsupportedDevices,
                   selectedDeviceId: devicesSnapshot.data?.selectedDeviceId,
                 ),
             ],
