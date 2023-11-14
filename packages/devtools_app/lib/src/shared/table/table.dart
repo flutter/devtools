@@ -1043,7 +1043,9 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
 
     var maxHeight = tableConstraints.maxHeight;
     final columnHeadersCount = showColumnGroupHeader ? 2 : 1;
-    maxHeight -= columnHeadersCount * areaPaneHeaderHeight;
+    maxHeight -= columnHeadersCount *
+        (areaPaneHeaderHeight +
+            (widget.tallHeaders ? scaleByFontFactor(densePadding) : 0.0));
 
     if (pinnedData.isNotEmpty) {
       maxHeight -=
