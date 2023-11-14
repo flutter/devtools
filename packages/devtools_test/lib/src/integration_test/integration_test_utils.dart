@@ -112,33 +112,33 @@ Future<void> pumpDevTools(WidgetTester tester) async {
     shouldEnableExperiments: shouldEnableExperiments,
     sampleData: _sampleData,
   );
-  final timeout = DateTime.now().add(const Duration(minutes: 3));
-  while (true) {
-    try {
-      // If preferences aren't initialized yet then this will throw an error.
-      preferences.isInitialized.value;
-      break;
-    } on TypeError catch (_) {
-      if (DateTime.now().isBefore(timeout)) {
-        await Future.delayed(const Duration(seconds: 5));
-        continue;
-      } else {
-        // TypeError is used as a way to know when global variable is uninitialized.
-        // ignore: avoid-throw-in-catch-block
-        throw 'Timed out waiting for preferences to initialize';
-      }
-    }
-  }
-  // Wait for preferences to be initialized before continuing.
-  if (!preferences.isInitialized.value) {
-    final isDoneInitializing = Completer<void>();
-    preferences.isInitialized.addListener(() {
-      if (preferences.isInitialized.value) {
-        isDoneInitializing.complete();
-      }
-    });
-    await isDoneInitializing.future;
-  }
+  // final timeout = DateTime.now().add(const Duration(minutes: 3));
+  // while (true) {
+  //   try {
+  //     // If preferences aren't initialized yet then this will throw an error.
+  //     preferences.isInitialized.value;
+  //     break;
+  //   } on TypeError catch (_) {
+  //     if (DateTime.now().isBefore(timeout)) {
+  //       await Future.delayed(const Duration(seconds: 5));
+  //       continue;
+  //     } else {
+  //       // TypeError is used as a way to know when global variable is uninitialized.
+  //       // ignore: avoid-throw-in-catch-block
+  //       throw 'Timed out waiting for preferences to initialize';
+  //     }
+  //   }
+  // }
+  // // Wait for preferences to be initialized before continuing.
+  // if (!preferences.isInitialized.value) {
+  //   final isDoneInitializing = Completer<void>();
+  //   preferences.isInitialized.addListener(() {
+  //     if (preferences.isInitialized.value) {
+  //       isDoneInitializing.complete();
+  //     }
+  //   });
+  //   await isDoneInitializing.future;
+  // }
 
   // Await a delay to ensure the widget tree has loaded.
   await tester.pumpAndSettle(veryLongPumpDuration);
