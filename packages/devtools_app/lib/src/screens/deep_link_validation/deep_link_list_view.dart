@@ -170,6 +170,7 @@ class _DataTable extends StatelessWidget {
         dataKey: 'deep-links',
         autoScrollContent: true,
         headerColor: Theme.of(context).colorScheme.deeplinkTableHeaderColor,
+        fillWithEmptyRows: true,
         columns: <ColumnData<LinkData>>[
           ...(() {
             switch (viewType) {
