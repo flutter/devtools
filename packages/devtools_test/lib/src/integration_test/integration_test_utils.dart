@@ -123,7 +123,8 @@ Future<void> pumpDevTools(WidgetTester tester) async {
         await Future.delayed(const Duration(seconds: 5));
         continue;
       } else {
-        // ignore: avoid-throw-in-catch-block thrown error is used as a way to know when global variable is uninitialized.
+        // TypeError is used as a way to know when global variable is uninitialized.
+        // ignore: avoid-throw-in-catch-block
         throw 'Timed out waiting for preferences to initialize';
       }
     }
