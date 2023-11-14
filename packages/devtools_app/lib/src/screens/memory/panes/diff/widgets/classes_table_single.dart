@@ -48,6 +48,7 @@ class _ClassNameColumn extends ColumnData<SingleClassStats>
     BuildContext context,
     SingleClassStats data, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     return HeapClassView(
@@ -96,6 +97,7 @@ class _InstanceColumn extends ColumnData<SingleClassStats>
     BuildContext context,
     SingleClassStats data, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     return HeapInstanceTableCell(

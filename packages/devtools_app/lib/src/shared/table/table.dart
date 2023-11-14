@@ -1149,6 +1149,7 @@ abstract class ColumnRenderer<T> {
     BuildContext context,
     T data, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   });
 }
@@ -1335,6 +1336,8 @@ class _TableRowState<T> extends State<TableRow<T>>
 
   bool isActiveSearchMatch = false;
 
+  bool isHovering = false;
+
   @override
   void initState() {
     super.initState();
@@ -1497,6 +1500,7 @@ class _TableRowState<T> extends State<TableRow<T>>
             context,
             node,
             isRowSelected: widget.isSelected,
+            isRowHovered: isHovered,
             onPressed: onPressed,
           );
         }
@@ -1640,30 +1644,34 @@ class _TableRowState<T> extends State<TableRow<T>>
       }
     }
 
-    final rowContent = Padding(
-      padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        controller: scrollController,
-        itemCount: widget.columns.length + widget.columns.numSpacers,
-        itemBuilder: (context, int i) {
-          final displayTypeForIndex = rowDisplayParts[i];
-          switch (displayTypeForIndex) {
-            case _TableRowPartDisplayType.column:
-              final index = columnIndexMap[i]!;
-              return columnFor(
-                widget.columns[index],
-                widget.columnWidths[index],
-              );
-            case _TableRowPartDisplayType.columnSpacer:
-              return const SizedBox(
-                width: columnSpacing,
-                child: VerticalDivider(width: columnSpacing),
-              );
-            case _TableRowPartDisplayType.columnGroupSpacer:
-              return const _ColumnGroupSpacer();
-          }
-        },
+    final rowContent = MouseRegion(
+      onEnter: (_) => setState(() => isHovering = true),
+      onExit: (_) => setState(() => isHovering = false),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          controller: scrollController,
+          itemCount: widget.columns.length + widget.columns.numSpacers,
+          itemBuilder: (context, int i) {
+            final displayTypeForIndex = rowDisplayParts[i];
+            switch (displayTypeForIndex) {
+              case _TableRowPartDisplayType.column:
+                final index = columnIndexMap[i]!;
+                return columnFor(
+                  widget.columns[index],
+                  widget.columnWidths[index],
+                );
+              case _TableRowPartDisplayType.columnSpacer:
+                return const SizedBox(
+                  width: columnSpacing,
+                  child: VerticalDivider(width: columnSpacing),
+                );
+              case _TableRowPartDisplayType.columnGroupSpacer:
+                return const _ColumnGroupSpacer();
+            }
+          },
+        ),
       ),
     );
     if (widget._rowType == _TableRowType.columnHeader) {

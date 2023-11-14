@@ -45,6 +45,7 @@ class _ObjectColumn extends ColumnData<ObjectStoreEntry>
     // ignore: avoid-dynamic, requires refactor.
     data, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     return VmServiceObjectLink(
