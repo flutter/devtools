@@ -144,11 +144,7 @@ class _ErrorAwareText extends StatelessWidget {
 
 class DomainColumn extends ColumnData<LinkData>
     implements ColumnRenderer<LinkData>, ColumnHeaderRenderer<LinkData> {
-  DomainColumn(this.controller)
-      : super(
-          'Domain',
-          fixedWidthPx: scaleByFontFactor(kDeeplinkTableCellDefaultWidth),
-        );
+  DomainColumn(this.controller) : super.wide('Domain');
 
   DeepLinksController controller;
 
@@ -202,11 +198,7 @@ class DomainColumn extends ColumnData<LinkData>
 
 class PathColumn extends ColumnData<LinkData>
     implements ColumnRenderer<LinkData>, ColumnHeaderRenderer<LinkData> {
-  PathColumn(this.controller)
-      : super(
-          'Path',
-          fixedWidthPx: scaleByFontFactor(kDeeplinkTableCellDefaultWidth),
-        );
+  PathColumn(this.controller) : super.wide('Path');
 
   DeepLinksController controller;
 
@@ -259,11 +251,7 @@ class PathColumn extends ColumnData<LinkData>
 }
 
 class NumberOfAssociatedPathColumn extends ColumnData<LinkData> {
-  NumberOfAssociatedPathColumn()
-      : super(
-          'Number of associated path',
-          fixedWidthPx: scaleByFontFactor(kDeeplinkTableCellDefaultWidth),
-        );
+  NumberOfAssociatedPathColumn() : super.wide('Number of associated path');
 
   @override
   String getValue(LinkData dataObject) =>
@@ -271,11 +259,7 @@ class NumberOfAssociatedPathColumn extends ColumnData<LinkData> {
 }
 
 class NumberOfAssociatedDomainColumn extends ColumnData<LinkData> {
-  NumberOfAssociatedDomainColumn()
-      : super(
-          'Number of associated domain',
-          fixedWidthPx: scaleByFontFactor(kDeeplinkTableCellDefaultWidth),
-        );
+  NumberOfAssociatedDomainColumn() : super.wide('Number of associated domain');
 
   @override
   String getValue(LinkData dataObject) =>
@@ -284,11 +268,7 @@ class NumberOfAssociatedDomainColumn extends ColumnData<LinkData> {
 
 class SchemeColumn extends ColumnData<LinkData>
     implements ColumnRenderer<LinkData>, ColumnHeaderRenderer<LinkData> {
-  SchemeColumn(this.controller)
-      : super(
-          'Scheme',
-          fixedWidthPx: scaleByFontFactor(kDeeplinkTableCellDefaultWidth),
-        );
+  SchemeColumn(this.controller) : super.wide('Scheme');
 
   DeepLinksController controller;
 
@@ -333,11 +313,7 @@ class SchemeColumn extends ColumnData<LinkData>
 
 class OSColumn extends ColumnData<LinkData>
     implements ColumnRenderer<LinkData>, ColumnHeaderRenderer<LinkData> {
-  OSColumn(this.controller)
-      : super(
-          'OS',
-          fixedWidthPx: scaleByFontFactor(kDeeplinkTableCellDefaultWidth),
-        );
+  OSColumn(this.controller) : super.wide('OS');
 
   DeepLinksController controller;
 
@@ -383,11 +359,7 @@ class OSColumn extends ColumnData<LinkData>
 
 class StatusColumn extends ColumnData<LinkData>
     implements ColumnRenderer<LinkData>, ColumnHeaderRenderer<LinkData> {
-  StatusColumn(this.controller, this.viewType)
-      : super(
-          'Status',
-          fixedWidthPx: scaleByFontFactor(kDeeplinkTableCellDefaultWidth),
-        );
+  StatusColumn(this.controller, this.viewType) : super.wide('Status');
 
   DeepLinksController controller;
 

@@ -619,17 +619,6 @@ String formatDateTime(DateTime time) {
   return DateFormat('H:mm:ss.S').format(time);
 }
 
-bool isDebugBuild() {
-  bool debugBuild = false;
-  assert(
-    (() {
-      debugBuild = true;
-      return true;
-    })(),
-  );
-  return debugBuild;
-}
-
 /// Divides [numerator] by [denominator], not returning infinite, NaN, or null
 /// quotients.
 ///

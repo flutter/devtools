@@ -4,12 +4,13 @@
 
 import 'dart:async';
 import 'dart:convert';
-// ignore: avoid_web_libraries_in_flutter, as designed
-import 'dart:html' as html;
+import 'dart:js_interop';
 
 import 'package:devtools_app_shared/utils.dart';
+import 'package:devtools_app_shared/web_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:web/helpers.dart';
 
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
@@ -119,12 +120,12 @@ class _PerfettoViewController extends DisposableController
 
   static const _pollUntilReadyTimeout = Duration(seconds: 10);
 
-  /// The listener that is added to DevTools' [html.window] to receive messages
+  /// The listener that is added to DevTools' [window] to receive messages
   /// from the Perfetto iFrame.
   ///
   /// We need to store this in a variable so that the listener is properly
   /// removed in [dispose].
-  html.EventListener? _handleMessageListener;
+  EventListener? _handleMessageListener;
 
   void init() {
     _perfettoIFrameReady = Completer<void>();
@@ -137,9 +138,9 @@ class _PerfettoViewController extends DisposableController
       }),
     );
 
-    html.window.addEventListener(
+    window.addEventListener(
       'message',
-      _handleMessageListener = _handleMessage,
+      _handleMessageListener = _handleMessage.toJS,
     );
 
     unawaited(_loadStyle(preferences.darkModeTheme.value));
@@ -244,8 +245,8 @@ class _PerfettoViewController extends DisposableController
       ' _perfettoIFrameReady future completed.',
     );
     perfettoController.perfettoIFrame.contentWindow!.postMessage(
-      message,
-      perfettoController.perfettoUrl,
+      message.jsify(),
+      perfettoController.perfettoUrl.toJS,
     );
   }
 
@@ -261,14 +262,15 @@ class _PerfettoViewController extends DisposableController
     _postMessage(message);
   }
 
-  void _handleMessage(html.Event e) {
-    if (e is html.MessageEvent) {
-      if (e.data == EmbeddedPerfettoEvent.pong.event &&
+  void _handleMessage(Event e) {
+    if (e.isMessageEvent) {
+      final messageData = ((e as MessageEvent).data as JSString).toDart;
+      if (messageData == EmbeddedPerfettoEvent.pong.event &&
           !_perfettoHandlerReady.isCompleted) {
         _perfettoHandlerReady.complete();
       }
 
-      if (e.data == EmbeddedPerfettoEvent.devtoolsThemePong.event &&
+      if (messageData == EmbeddedPerfettoEvent.devtoolsThemePong.event &&
           !_devtoolsThemeHandlerReady.isCompleted) {
         _devtoolsThemeHandlerReady.complete();
       }
@@ -315,7 +317,7 @@ class _PerfettoViewController extends DisposableController
 
   @override
   void dispose() {
-    html.window.removeEventListener('message', _handleMessageListener);
+    window.removeEventListener('message', _handleMessageListener);
     _handleMessageListener = null;
     _pollForPerfettoHandlerReady?.cancel();
     _pollForThemeHandlerReady?.cancel();

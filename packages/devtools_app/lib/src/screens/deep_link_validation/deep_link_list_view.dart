@@ -97,6 +97,10 @@ class _DeepLinkListViewMainPanel extends StatelessWidget {
                 Expanded(
                   child: _AllDeepLinkDataTable(controller: controller),
                 ),
+                VerticalDivider(
+                  width: 1.0,
+                  color: Theme.of(context).focusColor,
+                ),
                 Expanded(
                   child: ValueListenableBuilder<LinkData?>(
                     valueListenable: controller.selectedLink,
@@ -277,6 +281,7 @@ class _AllDeepLinkDataTable extends StatelessWidget {
     return Column(
       children: <Widget>[
         OutlineDecoration(
+          showRight: false,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -300,6 +305,7 @@ class _AllDeepLinkDataTable extends StatelessWidget {
                     onChanged: (value) {
                       controller.searchContent = value;
                     },
+                    controller: controller.textEditingController,
                   ),
                 ),
               ),
@@ -390,7 +396,11 @@ class _NotificationCardSection extends StatelessWidget {
                     );
                     controller.updateDisplayOptions(showSplitScreen: true);
                   },
-                  child: const Text('Fix domain'),
+                  child: const Padding(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: intermediateSpacing),
+                    child: Text('Fix domain'),
+                  ),
                 ),
               ),
             if (domainErrorCount > 0 && pathErrorCount > 0)
@@ -411,7 +421,11 @@ class _NotificationCardSection extends StatelessWidget {
                     );
                     controller.updateDisplayOptions(showSplitScreen: true);
                   },
-                  child: const Text('Fix path'),
+                  child: const Padding(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: intermediateSpacing),
+                    child: Text('Fix path'),
+                  ),
                 ),
               ),
           ],
@@ -444,8 +458,8 @@ class _NotificationCard extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(
             defaultSpacing,
             defaultSpacing,
-            defaultSpacing,
-            0,
+            densePadding,
+            denseSpacing,
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,3 +1,7 @@
+## 0.0.11
+* Migrate from `dart:html` to `package:web`.
+* Add `utils.dart` library with helper for message event parsing.
+
 ## 0.0.10
 * Bump minimum Dart SDK version to `3.3.0-91.0.dev` and minimum Flutter SDK version to `3.17.0-0.0.pre`.
 * Add a test target to the `app_that_uses_foo` example that can also be debugged
