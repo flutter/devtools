@@ -123,12 +123,13 @@ Future<void> pumpDevTools(WidgetTester tester) async {
         await Future.delayed(const Duration(seconds: 5));
         continue;
       } else {
+        // ignore: avoid-throw-in-catch-block
         throw 'Timed out waiting for preferences to initialize';
       }
     }
   }
   // Wait for preferences to be initialized before continuing.
-  if (preferences.isInitialized.value == false) {
+  if (!preferences.isInitialized.value) {
     final isDoneInitializing = Completer<void>();
     preferences.isInitialized.addListener(() {
       if (preferences.isInitialized.value) {
