@@ -1046,7 +1046,8 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     maxHeight -= columnHeadersCount * areaPaneHeaderHeight;
 
     if (pinnedData.isNotEmpty) {
-      maxHeight -= _pinnedDataHeight(tableConstraints);
+      maxHeight -=
+          _pinnedDataHeight(tableConstraints) + ThickDivider.thickDividerHeight;
     }
 
     return max(_data.length, maxHeight ~/ widget.rowItemExtent!);
