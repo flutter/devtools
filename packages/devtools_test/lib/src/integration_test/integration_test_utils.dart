@@ -123,9 +123,7 @@ Future<void> pumpDevTools(WidgetTester tester) async {
         await Future.delayed(const Duration(seconds: 5));
         continue;
       } else {
-        // ignore: avoid-throw-in-catch-block since we are using the thrown
-        // error as a way to get around an initialization quirk that leaves the
-        // global as null until initialized.
+        // ignore: avoid-throw-in-catch-block thrown error is used as a way to know when global variable is uninitialized.
         throw 'Timed out waiting for preferences to initialize';
       }
     }
