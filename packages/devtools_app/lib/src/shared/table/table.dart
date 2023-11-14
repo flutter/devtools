@@ -1500,7 +1500,7 @@ class _TableRowState<T> extends State<TableRow<T>>
             context,
             node,
             isRowSelected: widget.isSelected,
-            isRowHovered: isHovered,
+            isRowHovered: isHovering,
             onPressed: onPressed,
           );
         }
