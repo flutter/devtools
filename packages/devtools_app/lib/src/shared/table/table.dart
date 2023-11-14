@@ -158,7 +158,7 @@ class FlatTable<T> extends StatefulWidget {
   /// If null, defaults to `Theme.of(context).canvasColor`.
   final Color? headerColor;
 
-  /// Whether to fill the table with empty  rows.
+  /// Whether to fill the table with empty rows.
   final bool fillWithEmptyRows;
 
   /// Data set to show as rows in this table.
@@ -1227,7 +1227,7 @@ class TableRow<T> extends StatefulWidget {
         tall = false,
         super(key: key);
 
-  /// Constructs a [TableRow] that is empty
+  /// Constructs a [TableRow] that is empty.
   const TableRow.filler({
     Key? key,
     required this.linkedScrollControllerGroup,
