@@ -204,13 +204,15 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     Map<String, String?> args,
     DevToolsNavigationState? state,
   ) {
-    if (FrameworkCore.initializationInProgress) {
+    // `page` will initially be null while the router is set up, then we will
+    // be called again with an empty string for the root.
+    if (FrameworkCore.initializationInProgress || page == null) {
       return const MaterialPage(child: CenteredCircularProgressIndicator());
     }
 
     // Provide the appropriate page route.
     if (pages.containsKey(page)) {
-      Widget widget = pages[page!]!(
+      Widget widget = pages[page]!(
         context,
         page,
         args,
@@ -367,6 +369,9 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   }
 
   Map<String, UrlParametersBuilder> get _standaloneScreens {
+    // TODO(dantup): Standalone screens do not use DevToolsScaffold which means
+    //  they do not currently send an initial "currentPage" event to inform
+    //  the server which page they are rendering.
     return {
       for (final type in StandaloneScreenType.values)
         type.name: (_, __, args, ___) => type.screen,
