@@ -74,6 +74,8 @@ jobs:
 
       - name: Generate Mocks
         run: |
+          export PATH="$PATH":`pwd`/tool/flutter-sdk/bin/
+
           # Fetch dependencies
           ./tool/bin/devtools_tool pub-get --only-main
 
