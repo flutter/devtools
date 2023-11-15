@@ -177,11 +177,6 @@ class _DevToolsMenuState extends State<_DevToolsMenu> {
 
   @override
   Widget build(BuildContext context) {
-    final normalDirection = Directionality.of(context);
-    final reversedDirection = normalDirection == TextDirection.ltr
-        ? TextDirection.rtl
-        : TextDirection.ltr;
-
     Widget devToolsButton(ScreenMetaData screen) {
       final title = screen.title ?? screen.id;
       String? disabledReason;
@@ -209,60 +204,52 @@ class _DevToolsMenuState extends State<_DevToolsMenu> {
       );
     }
 
-    return Directionality(
-      // Reverse the direction so the menu is anchored on the far side and
-      // expands in the opposite direction with the icons on the right.
-      textDirection: reversedDirection,
-      child: MenuAnchor(
-        style: const MenuStyle(
-          alignment: AlignmentDirectional.bottomStart,
-        ),
-        menuChildren: [
-          ...ScreenMetaData.values
-              .where(_shouldIncludeScreen)
-              .map(devToolsButton)
-              .toList(),
-          if (_extensionServiceForSession != null)
-            ValueListenableBuilder(
-              valueListenable: _extensionServiceForSession!.visibleExtensions,
-              builder: (context, extensions, _) {
-                return extensions.isEmpty
-                    ? const SizedBox.shrink()
-                    : ExtensionScreenMenuItem(
-                        extensions: extensions,
-                        onPressed: (e) {
-                          ga.select(
-                            gac.VsCodeFlutterSidebar.id,
-                            gac.VsCodeFlutterSidebar.openDevToolsScreen(
-                              gac.DevToolsExtensionEvents.extensionScreenName(
-                                e,
-                              ),
+    return MenuAnchor(
+      menuChildren: [
+        ...ScreenMetaData.values
+            .where(_shouldIncludeScreen)
+            .map(devToolsButton)
+            .toList(),
+        if (_extensionServiceForSession != null)
+          ValueListenableBuilder(
+            valueListenable: _extensionServiceForSession!.visibleExtensions,
+            builder: (context, extensions, _) {
+              return extensions.isEmpty
+                  ? const SizedBox.shrink()
+                  : ExtensionScreenMenuItem(
+                      extensions: extensions,
+                      onPressed: (e) {
+                        ga.select(
+                          gac.VsCodeFlutterSidebar.id,
+                          gac.VsCodeFlutterSidebar.openDevToolsScreen(
+                            gac.DevToolsExtensionEvents.extensionScreenName(
+                              e,
                             ),
-                          );
-                          unawaited(
-                            widget.api.openDevToolsPage(
-                              widget.session.id,
-                              e.screenId,
-                            ),
-                          );
-                        },
-                      );
-              },
-            ),
-        ],
-        builder: (context, controller, child) => IconButton(
-          onPressed: () {
-            if (controller.isOpen) {
-              controller.close();
-            } else {
-              controller.open();
-            }
-          },
-          tooltip: 'DevTools',
-          icon: Icon(
-            Icons.construction,
-            size: actionsIconSize,
+                          ),
+                        );
+                        unawaited(
+                          widget.api.openDevToolsPage(
+                            widget.session.id,
+                            e.screenId,
+                          ),
+                        );
+                      },
+                    );
+            },
           ),
+      ],
+      builder: (context, controller, child) => IconButton(
+        onPressed: () {
+          if (controller.isOpen) {
+            controller.close();
+          } else {
+            controller.open();
+          }
+        },
+        tooltip: 'DevTools',
+        icon: Icon(
+          Icons.construction,
+          size: actionsIconSize,
         ),
       ),
     );
@@ -325,6 +312,8 @@ class ExtensionScreenMenuItem extends StatelessWidget {
     required this.onPressed,
   });
 
+  static const _submenuOffsetDy = 8.0;
+
   final List<DevToolsExtensionConfig> extensions;
 
   final void Function(DevToolsExtensionConfig) onPressed;
@@ -332,9 +321,7 @@ class ExtensionScreenMenuItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SubmenuButton(
-      menuStyle: const MenuStyle(
-        alignment: Alignment.centerLeft,
-      ),
+      alignmentOffset: const Offset(0.0, _submenuOffsetDy),
       menuChildren: extensions
           .map(
             (e) => DevToolsScreenMenuItem(
