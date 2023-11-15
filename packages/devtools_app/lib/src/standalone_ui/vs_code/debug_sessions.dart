@@ -5,14 +5,15 @@
 import 'dart:async';
 
 import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:flutter/material.dart';
 
 import '../../extensions/extension_screen.dart';
+import '../../extensions/extension_service.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/constants.dart';
 import '../../shared/feature_flags.dart';
-import '../../shared/globals.dart';
 import '../../shared/screen.dart';
 import '../api/vs_code_api.dart';
 
@@ -115,7 +116,7 @@ class DebugSessions extends StatelessWidget {
   }
 }
 
-class _DevToolsMenu extends StatelessWidget {
+class _DevToolsMenu extends StatefulWidget {
   const _DevToolsMenu({
     required this.api,
     required this.session,
@@ -135,6 +136,46 @@ class _DevToolsMenu extends StatelessWidget {
   final bool isWeb;
 
   @override
+  State<_DevToolsMenu> createState() => _DevToolsMenuState();
+}
+
+class _DevToolsMenuState extends State<_DevToolsMenu> {
+  ExtensionService? _extensionServiceForSession;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_initExtensions());
+  }
+
+  Future<void> _initExtensions() async {
+    final sessionRootPath = widget.session.projectRootPath;
+    if (sessionRootPath != null) {
+      setState(() {
+        _extensionServiceForSession =
+            ExtensionService(fixedAppRootPath: sessionRootPath);
+        unawaited(_extensionServiceForSession!.initialize());
+      });
+    }
+  }
+
+  @override
+  void didUpdateWidget(_DevToolsMenu oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.session != widget.session) {
+      _extensionServiceForSession?.dispose();
+      unawaited(_initExtensions());
+    }
+  }
+
+  @override
+  void dispose() {
+    _extensionServiceForSession?.dispose();
+    _extensionServiceForSession = null;
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final normalDirection = Directionality.of(context);
     final reversedDirection = normalDirection == TextDirection.ltr
@@ -144,13 +185,13 @@ class _DevToolsMenu extends StatelessWidget {
     Widget devToolsButton(ScreenMetaData screen) {
       final title = screen.title ?? screen.id;
       String? disabledReason;
-      if (isRelease) {
+      if (widget.isRelease) {
         disabledReason = 'Not available in release mode';
-      } else if (screen.requiresFlutter && !isFlutter) {
+      } else if (screen.requiresFlutter && !widget.isFlutter) {
         disabledReason = 'Only available for Flutter applications';
-      } else if (screen.requiresDebugBuild && !isDebug) {
+      } else if (screen.requiresDebugBuild && !widget.isDebug) {
         disabledReason = 'Only available in debug mode';
-      } else if (screen.requiresDartVm && isWeb) {
+      } else if (screen.requiresDartVm && widget.isWeb) {
         disabledReason = 'Not available when running on the web';
       }
 
@@ -163,7 +204,7 @@ class _DevToolsMenu extends StatelessWidget {
             gac.VsCodeFlutterSidebar.id,
             gac.VsCodeFlutterSidebar.openDevToolsScreen(screen.id),
           );
-          unawaited(api.openDevToolsPage(session.id, screen.id));
+          unawaited(widget.api.openDevToolsPage(widget.session.id, screen.id));
         },
       );
     }
@@ -181,7 +222,15 @@ class _DevToolsMenu extends StatelessWidget {
               .where(_shouldIncludeScreen)
               .map(devToolsButton)
               .toList(),
-          const ExtensionScreenMenuItem(),
+          if (_extensionServiceForSession != null)
+            ValueListenableBuilder(
+              valueListenable: _extensionServiceForSession!.visibleExtensions,
+              builder: (context, extensions, _) {
+                return extensions.isEmpty
+                    ? const SizedBox.shrink()
+                    : ExtensionScreenMenuItem(extensions: extensions);
+              },
+            ),
         ],
         builder: (context, controller, child) => IconButton(
           onPressed: () {
@@ -252,34 +301,28 @@ class DevToolsScreenMenuItem extends StatelessWidget {
 }
 
 class ExtensionScreenMenuItem extends StatelessWidget {
-  const ExtensionScreenMenuItem({super.key});
+  const ExtensionScreenMenuItem({super.key, required this.extensions});
+
+  final List<DevToolsExtensionConfig> extensions;
 
   @override
   Widget build(BuildContext context) {
-    // TODO: we are not getting the proper list of visible extensions here.
-    // More than likely, we will need to as the DevTools server for the list of
-    // available extensions directly based on the debug session's root path.
-    return ValueListenableBuilder(
-      valueListenable: extensionService.visibleExtensions,
-      builder: (context, extensions, _) {
-        return SubmenuButton(
-          menuStyle: const MenuStyle(
-            alignment: Alignment.centerLeft,
-          ),
-          menuChildren: extensions
-              .map(
-                (e) => DevToolsScreenMenuItem(
-                  title: e.name,
-                  icon: e.icon,
-                  // TODO: this should open the extension screen in the browser,
-                  // or if possible, in an embedded iFrame in VS code.
-                  onPressed: () {},
-                ),
-              )
-              .toList(),
-          child: const Text('Extensions'),
-        );
-      },
+    return SubmenuButton(
+      menuStyle: const MenuStyle(
+        alignment: Alignment.centerLeft,
+      ),
+      menuChildren: extensions
+          .map(
+            (e) => DevToolsScreenMenuItem(
+              title: e.name,
+              icon: e.icon,
+              // TODO: this should open the extension screen in the browser,
+              // or if possible, in an embedded iFrame in VS code.
+              onPressed: () {},
+            ),
+          )
+          .toList(),
+      child: const Text('Extensions'),
     );
   }
 }

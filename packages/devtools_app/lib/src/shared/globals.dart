@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app_shared/utils.dart';
+import 'package:flutter/foundation.dart';
 
 import '../extensions/extension_service.dart';
 import '../screens/debugger/breakpoint_manager.dart';
@@ -66,4 +67,13 @@ bool get integrationTestMode => _integrationTestMode;
 bool _integrationTestMode = false;
 void setIntegrationTestMode() {
   _integrationTestMode = true;
+}
+
+/// Whether DevTools is being run as a stager app.
+bool get stagerMode => _stagerMode;
+bool _stagerMode = false;
+void setStagerMode() {
+  if (!kReleaseMode) {
+    _stagerMode = true;
+  }
 }
