@@ -4,9 +4,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# This section must be at the top of each CI script.
-# ---------------- Begin ---------------- #
-
 # Fast fail the script on failures.
 set -ex
 
@@ -23,8 +20,7 @@ function flutter {
         command flutter "$@"
     fi
 }
-
-# ---------------- End ---------------- #
+export -f flutter
 
 # TODO: Also support windows on github actions.
 if [[ $RUNNER_OS == "Windows" ]]; then
