@@ -4,7 +4,7 @@
 
 name: Flutter SDK prep
 env:
-  MOCK_CACHE_KEY: mocks-${{ runner.os }}-${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}-${{GITHUB_SHA}}
+  MOCK_CACHE_KEY: mocks-${{ runner.os }}-${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}-${{env.GITHUB_SHA}}
 on:
   workflow_call:
     inputs:
@@ -18,7 +18,7 @@ on:
         value: ${{ jobs.reusable-flutter-prep.outputs.latest_flutter_candidate }}
       mock_cache_key:
         description: "The key used to cache the mocks"
-        value: ${{MOCK_CACHE_KEY}}
+        value: ${{env.MOCK_CACHE_KEY}}
 
 jobs:
   reusable-flutter-prep:
@@ -97,4 +97,4 @@ jobs:
         with:
           path: |
             ./packages/**mocks**
-          key: ${{MOCK_CACHE_KEY}}
+          key: ${{env.MOCK_CACHE_KEY}}
