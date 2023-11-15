@@ -8,7 +8,7 @@
 set -ex
 
 echo `pwd`
-./setup.sh
+./tool/ci/setup.sh
 
 # Change the CI to the packages/devtools_app directory.
 pushd $DEVTOOLS_DIR/packages/devtools_app
