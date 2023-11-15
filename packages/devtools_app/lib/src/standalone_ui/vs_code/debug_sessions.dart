@@ -145,10 +145,10 @@ class _DevToolsMenuState extends State<_DevToolsMenu> {
   @override
   void initState() {
     super.initState();
-    unawaited(_initExtensions());
+    _initExtensions();
   }
 
-  Future<void> _initExtensions() async {
+  void _initExtensions() {
     final sessionRootPath = widget.session.projectRootPath;
     if (sessionRootPath != null) {
       setState(() {
@@ -164,7 +164,7 @@ class _DevToolsMenuState extends State<_DevToolsMenu> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.session != widget.session) {
       _extensionServiceForSession?.dispose();
-      unawaited(_initExtensions());
+      _initExtensions();
     }
   }
 
