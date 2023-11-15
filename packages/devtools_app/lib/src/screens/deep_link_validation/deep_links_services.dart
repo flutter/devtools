@@ -44,7 +44,7 @@ class DeepLinksServices {
     final Map<String, dynamic> result =
         json.decode(response.body) as Map<String, dynamic>;
 
-    final Map<String, List<DomainError>> domainErrors = {
+    final domainErrors = <String, List<DomainError>>{
       for (var domain in domains) domain: <DomainError>[],
     };
 

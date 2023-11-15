@@ -228,7 +228,7 @@ class DeepLinksController extends DisposableController {
 
   /// The [TextEditingController] for the search text field.
   final textEditingController = TextEditingController();
-  final DeepLinksServices deepLinksServices = DeepLinksServices();
+  final deepLinksServices = DeepLinksServices();
 
   Future<void> _generateAssetLinks() async {
     final applicationId =
@@ -252,7 +252,7 @@ class DeepLinksController extends DisposableController {
     final applicationId =
         _androidAppLinks[selectedVariantIndex.value]?.applicationId ?? '';
 
-    final Map<String, List<DomainError>> domainErrors =
+    final domainErrors =
         await deepLinksServices.validateAndroidDomain(
       domains: domains,
       applicationId: applicationId,
