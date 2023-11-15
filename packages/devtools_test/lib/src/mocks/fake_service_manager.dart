@@ -36,7 +36,6 @@ class FakeServiceConnectionManager extends Fake
       connectedAppInitialized: connectedAppInitialized,
       availableLibraries: availableLibraries,
       availableServices: availableServices,
-      onVmServiceOpened: resolvedUriManager.vmServiceOpened,
     );
     for (var screenId in screenIds) {
       when(errorBadgeManager.erroredItemsForPage(screenId)).thenReturn(
@@ -51,9 +50,6 @@ class FakeServiceConnectionManager extends Fake
   FakeServiceManager get serviceManager =>
       _serviceManager as FakeServiceManager;
   late final ServiceManager<VmServiceWrapper> _serviceManager;
-
-  @override
-  final resolvedUriManager = ResolvedUriManager();
 
   @override
   late final AppState appState =

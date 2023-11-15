@@ -1,4 +1,6 @@
 ## 0.0.8
+* Add `ServiceManager.resolvedUriManager` for looking up package and file uris from
+a VM service connection.
 * Migrate from `dart:html` to `package:web`.
 
 ## 0.0.7
