@@ -10,7 +10,11 @@ enum VsCodeFlutterSidebar {
 
   /// Analytics event that is sent when a device selection occurs from the list
   /// of available devices in the sidebar.
-  changeSelectedDevice;
+  changeSelectedDevice,
+
+  /// Analytics event that is sent when DevTools is opened in the browser
+  /// without a specific page.
+  openDevToolsExternally;
 
   static String get id => VsCodeFlutterSidebar.vsCodeFlutterSidebar.name;
 

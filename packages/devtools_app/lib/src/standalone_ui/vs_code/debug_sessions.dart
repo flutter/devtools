@@ -107,6 +107,7 @@ class DebugSessions extends StatelessWidget {
             isProfile: isProfile,
             isRelease: isRelease,
             isWeb: isWeb,
+            supportsOpenExternal: api.capabilities.openDevToolsExternally,
           ),
       ],
     );
@@ -122,6 +123,7 @@ class _DevToolsMenu extends StatelessWidget {
     required this.isProfile,
     required this.isRelease,
     required this.isWeb,
+    required this.supportsOpenExternal,
   });
 
   final VsCodeApi api;
@@ -131,6 +133,7 @@ class _DevToolsMenu extends StatelessWidget {
   final bool isProfile;
   final bool isRelease;
   final bool isWeb;
+  final bool supportsOpenExternal;
 
   @override
   Widget build(BuildContext context) {
@@ -139,19 +142,13 @@ class _DevToolsMenu extends StatelessWidget {
         ? TextDirection.rtl
         : TextDirection.ltr;
 
-    Widget devToolsButton(ScreenMetaData screen) {
-      final title = screen.title ?? screen.id;
-      String? disabledReason;
-      if (isRelease) {
-        disabledReason = 'Not available in release mode';
-      } else if (screen.requiresFlutter && !isFlutter) {
-        disabledReason = 'Only available for Flutter applications';
-      } else if (screen.requiresDebugBuild && !isDebug) {
-        disabledReason = 'Only available in debug mode';
-      } else if (screen.requiresDartVm && isWeb) {
-        disabledReason = 'Not available when running on the web';
-      }
-
+    Widget devToolsButton(
+      String title, {
+      IconData? icon,
+      String? screenId,
+      String? disabledReason,
+      bool? forceExternal,
+    }) {
       // Because we flipped the direction so the menu is aligned to the end, we
       // should revert the text direction back to normal for the label.
       Widget text = Directionality(
@@ -168,17 +165,46 @@ class _DevToolsMenu extends StatelessWidget {
       }
 
       return MenuItemButton(
-        leadingIcon: Icon(screen.icon, size: actionsIconSize),
+        leadingIcon: Icon(icon, size: actionsIconSize),
         onPressed: disabledReason != null
             ? null
             : () {
                 ga.select(
                   gac.VsCodeFlutterSidebar.id,
-                  gac.VsCodeFlutterSidebar.openDevToolsScreen(screen.id),
+                  screenId != null && forceExternal != true
+                      ? gac.VsCodeFlutterSidebar.openDevToolsScreen(screenId)
+                      : gac.VsCodeFlutterSidebar.openDevToolsExternally.name,
                 );
-                unawaited(api.openDevToolsPage(session.id, screen.id));
+                unawaited(
+                  api.openDevToolsPage(
+                    session.id,
+                    page: screenId,
+                    forceExternal: forceExternal,
+                  ),
+                );
               },
         child: text,
+      );
+    }
+
+    Widget devToolsScreenButton(ScreenMetaData screen) {
+      final title = screen.title ?? screen.id;
+      String? disabledReason;
+      if (isRelease) {
+        disabledReason = 'Not available in release mode';
+      } else if (screen.requiresFlutter && !isFlutter) {
+        disabledReason = 'Only available for Flutter applications';
+      } else if (screen.requiresDebugBuild && !isDebug) {
+        disabledReason = 'Only available in debug mode';
+      } else if (screen.requiresDartVm && isWeb) {
+        disabledReason = 'Not available when running on the web';
+      }
+
+      return devToolsButton(
+        title,
+        icon: screen.icon,
+        screenId: screen.id,
+        disabledReason: disabledReason,
       );
     }
 
@@ -190,10 +216,17 @@ class _DevToolsMenu extends StatelessWidget {
         style: const MenuStyle(
           alignment: AlignmentDirectional.bottomStart,
         ),
-        menuChildren: ScreenMetaData.values
-            .where(_shouldIncludeScreen)
-            .map(devToolsButton)
-            .toList(),
+        menuChildren: [
+          ...ScreenMetaData.values
+              .where(_shouldIncludeScreen)
+              .map(devToolsScreenButton),
+          if (supportsOpenExternal)
+            devToolsButton(
+              'Open in Browser',
+              icon: Icons.open_in_browser,
+              forceExternal: true,
+            ),
+        ],
         builder: (context, controller, child) => IconButton(
           onPressed: () {
             if (controller.isOpen) {
