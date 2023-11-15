@@ -4,19 +4,14 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+# This section must be at the top of each CI script.
+# ---------------- Begin ---------------- #
+
 # Fast fail the script on failures.
 set -ex
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 DEVTOOLS_DIR=$SCRIPT_DIR/../..
-
-# TODO: Also support windows on github actions.
-if [[ $RUNNER_OS == "Windows" ]]; then
-    echo Installing Google Chrome Stable...
-    # Install Chrome via Chocolatey while `addons: chrome` doesn't seem to work on Windows yet
-    # https://travis-ci.community/t/installing-google-chrome-stable-but-i-cant-find-it-anywhere/2118
-    choco install googlechrome --acceptlicense --yes --no-progress --ignore-checksums
-fi
 
 # In GitBash on Windows, we have to call flutter.bat so we alias them in this
 # script to call the correct one based on the OS.
@@ -28,6 +23,16 @@ function flutter {
         command flutter "$@"
     fi
 }
+
+# ---------------- End ---------------- #
+
+# TODO: Also support windows on github actions.
+if [[ $RUNNER_OS == "Windows" ]]; then
+    echo Installing Google Chrome Stable...
+    # Install Chrome via Chocolatey while `addons: chrome` doesn't seem to work on Windows yet
+    # https://travis-ci.community/t/installing-google-chrome-stable-but-i-cant-find-it-anywhere/2118
+    choco install googlechrome --acceptlicense --yes --no-progress --ignore-checksums
+fi
 
 # Make sure Flutter sdk has been provided
 if [ ! -d "./flutter-sdk" ]; then

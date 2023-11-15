@@ -4,11 +4,27 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+# This section must be at the top of each CI script.
+# ---------------- Begin ---------------- #
+
 # Fast fail the script on failures.
 set -ex
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 DEVTOOLS_DIR=$SCRIPT_DIR/../..
+
+# In GitBash on Windows, we have to call flutter.bat so we alias them in this
+# script to call the correct one based on the OS.
+function flutter {
+    # TODO: Also support windows on github actions.
+    if [[ $RUNNER_OS == "Windows" ]]; then
+        command flutter.bat "$@"
+    else
+        command flutter "$@"
+    fi
+}
+
+# ---------------- End ---------------- #
 
 ./tool/ci/setup.sh
 
