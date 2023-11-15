@@ -252,8 +252,7 @@ class DeepLinksController extends DisposableController {
     final applicationId =
         _androidAppLinks[selectedVariantIndex.value]?.applicationId ?? '';
 
-    final domainErrors =
-        await deepLinksServices.validateAndroidDomain(
+    final domainErrors = await deepLinksServices.validateAndroidDomain(
       domains: domains,
       applicationId: applicationId,
     );
