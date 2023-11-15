@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
-import '../../shared/common_widgets.dart';
 import '../../shared/directory_picker.dart';
 import '../../shared/server/server.dart' as server;
 import '../../shared/utils.dart';
