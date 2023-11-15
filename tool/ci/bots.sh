@@ -29,8 +29,6 @@ if [ "$BOT" = "main" ]; then
     # Analyze the code
     devtools_tool analyze
 
-    popd
-
 elif [ "$BOT" = "build_ddc" ]; then
 
     # TODO(https://github.com/flutter/flutter/issues/43538): Remove workaround.
