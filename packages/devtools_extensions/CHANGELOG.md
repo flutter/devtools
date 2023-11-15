@@ -1,4 +1,5 @@
 ## 0.0.11
+* Improve dartdoc for `DevToolsExtension`, `extensionManager`, and `serviceManager`.
 * Migrate from `dart:html` to `package:web`.
 * Add `utils.dart` library with helper for message event parsing.
 
