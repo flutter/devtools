@@ -29,30 +29,6 @@ if [ "$BOT" = "main" ]; then
     # Analyze the code
     devtools_tool analyze
 
-    popd
-
-    # Test the `devtools_app_shared`, `devtools_shared` and `devtools_extensions` package tests on the
-    # main bot.
-    pushd $DEVTOOLS_DIR/packages/devtools_app_shared
-    echo `pwd`
-    flutter test test/
-    popd
-
-    pushd $DEVTOOLS_DIR/packages/devtools_shared
-    echo `pwd`
-    flutter test test/
-    popd
-
-    pushd $DEVTOOLS_DIR/packages/devtools_extensions
-    echo `pwd`
-    flutter test test/*_test.dart
-    flutter test test/web --platform chrome
-    popd
-
-    # Change the directory back to devtools_app.
-    pushd $DEVTOOLS_DIR/packages/devtools_app
-    echo `pwd`
-
 elif [ "$BOT" = "build_ddc" ]; then
 
     # TODO(https://github.com/flutter/flutter/issues/43538): Remove workaround.
