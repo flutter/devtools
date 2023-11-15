@@ -53,8 +53,22 @@ ExtensionManager get extensionManager =>
 /// extensions, etc.
 ServiceManager get serviceManager => globals[ServiceManager] as ServiceManager;
 
-/// A wrapper widget that initializes the [extensionManager] and establishes a
-/// connection with DevTools for this extension to interact over.
+/// A wrapper widget that performs initialization for a DevTools extension.
+/// 
+/// This widget is required to be at the root (or very close to the root) of
+/// your DevTools extension Flutter web app. The content of your DevTools
+/// extension should be defined by [child].
+/// 
+/// This wrapper:
+///  * initializes the [extensionManager] and [serviceManager] globals.
+///  * initializes the [extensionManager] with the VM service connection from
+///    DevTools when[requiresRunningApplication] is true.
+///  * establishes a connection with DevTools for this extension to interact
+///    over.
+/// 
+/// Any use of the [extensionManager], [serviceManager], or [ideTheme] globals
+/// must occur below the [DevToolsExtension] widget in the widget tree (i.e. at
+/// the level of [child] or below).
 class DevToolsExtension extends StatefulWidget {
   const DevToolsExtension({
     super.key,
