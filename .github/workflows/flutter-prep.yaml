@@ -93,4 +93,4 @@ jobs:
         with:
           path: |
             ./packages/**mocks**
-          key: mocks-${{ runner.os }}-${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}-${GITHUB_SHA}
+          key: mocks-${{ runner.os }}-${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}-${{GITHUB_SHA}}
