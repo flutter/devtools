@@ -228,7 +228,25 @@ class _DevToolsMenuState extends State<_DevToolsMenu> {
               builder: (context, extensions, _) {
                 return extensions.isEmpty
                     ? const SizedBox.shrink()
-                    : ExtensionScreenMenuItem(extensions: extensions);
+                    : ExtensionScreenMenuItem(
+                        extensions: extensions,
+                        onPressed: (e) {
+                          ga.select(
+                            gac.VsCodeFlutterSidebar.id,
+                            gac.VsCodeFlutterSidebar.openDevToolsScreen(
+                              gac.DevToolsExtensionEvents.extensionScreenName(
+                                e,
+                              ),
+                            ),
+                          );
+                          unawaited(
+                            widget.api.openDevToolsPage(
+                              widget.session.id,
+                              e.screenId,
+                            ),
+                          );
+                        },
+                      );
               },
             ),
         ],
@@ -301,9 +319,15 @@ class DevToolsScreenMenuItem extends StatelessWidget {
 }
 
 class ExtensionScreenMenuItem extends StatelessWidget {
-  const ExtensionScreenMenuItem({super.key, required this.extensions});
+  const ExtensionScreenMenuItem({
+    super.key,
+    required this.extensions,
+    required this.onPressed,
+  });
 
   final List<DevToolsExtensionConfig> extensions;
+
+  final void Function(DevToolsExtensionConfig) onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -316,9 +340,7 @@ class ExtensionScreenMenuItem extends StatelessWidget {
             (e) => DevToolsScreenMenuItem(
               title: e.name,
               icon: e.icon,
-              // TODO: this should open the extension screen in the browser,
-              // or if possible, in an embedded iFrame in VS code.
-              onPressed: () {},
+              onPressed: () => onPressed(e),
             ),
           )
           .toList(),
