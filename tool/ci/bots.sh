@@ -61,7 +61,8 @@ if [ "$BOT" = "main" ]; then
 
     pushd $DEVTOOLS_DIR/packages/devtools_extensions
     echo `pwd`
-    flutter test test/
+    flutter test test/*_test.dart
+    flutter test test/web --platform chrome
     popd
 
     # Change the directory back to devtools_app.
