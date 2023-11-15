@@ -176,6 +176,9 @@ class FakeServiceManager extends Fake
   final IsolateManager isolateManager = FakeIsolateManager();
 
   @override
+  final ResolvedUriManager resolvedUriManager = ResolvedUriManager();
+
+  @override
   final FakeServiceExtensionManager serviceExtensionManager =
       FakeServiceExtensionManager();
 
@@ -280,6 +283,7 @@ class FakeServiceManager extends Fake
     required Future<void> onClosed,
   }) async {
     onVmServiceOpened?.call();
+    resolvedUriManager.vmServiceOpened(service);
     await initFlagManager();
     return Future.value();
   }
