@@ -10,9 +10,6 @@
 # Fast fail the script on failures.
 set -ex
 
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-DEVTOOLS_DIR=$SCRIPT_DIR/../..
-
 # In GitBash on Windows, we have to call flutter.bat so we alias them in this
 # script to call the correct one based on the OS.
 function flutter {
@@ -26,7 +23,7 @@ function flutter {
 
 # ---------------- End ---------------- #
 
-./tool/ci/setup.sh
+source ./tool/ci/setup.sh
 
 # Change the CI to the packages/devtools_app directory.
 pushd $DEVTOOLS_DIR/packages/devtools_app

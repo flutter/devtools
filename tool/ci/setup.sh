@@ -10,8 +10,8 @@
 # Fast fail the script on failures.
 set -ex
 
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-DEVTOOLS_DIR=$SCRIPT_DIR/../..
+export SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+export DEVTOOLS_DIR=$SCRIPT_DIR/../..
 
 # In GitBash on Windows, we have to call flutter.bat so we alias them in this
 # script to call the correct one based on the OS.
