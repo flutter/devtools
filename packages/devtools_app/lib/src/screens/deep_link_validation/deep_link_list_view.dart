@@ -89,7 +89,19 @@ class _DeepLinkListViewMainPanel extends StatelessWidget {
         valueListenable: controller.allLinkDatasNotifier,
         builder: (context, linkDatas, _) {
           if (linkDatas == null) {
-            return const CenteredCircularProgressIndicator();
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const CenteredCircularProgressIndicator(),
+                  const SizedBox(height: densePadding),
+                  Text(
+                    'Validating deep links...',
+                    style: Theme.of(context).subtleTextStyle,
+                  ),
+                ],
+              ),
+            );
           }
           if (displayOptions.showSplitScreen) {
             return Row(

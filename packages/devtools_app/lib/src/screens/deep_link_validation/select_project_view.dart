@@ -14,6 +14,8 @@ import '../../shared/utils.dart';
 import 'deep_links_controller.dart';
 import 'deep_links_model.dart';
 
+const _kLinearProgressIndicatorWidth = 280.0;
+
 /// A view for selecting a Flutter project.
 class SelectProjectView extends StatefulWidget {
   const SelectProjectView({super.key});
@@ -24,7 +26,6 @@ class SelectProjectView extends StatefulWidget {
 
 class _SelectProjectViewState extends State<SelectProjectView>
     with ProvidedControllerMixin<DeepLinksController, SelectProjectView> {
-  static const _kMessageSize = 24.0;
   bool _retrievingFlutterProject = false;
 
   @override
@@ -82,15 +83,26 @@ class _SelectProjectViewState extends State<SelectProjectView>
 
   @override
   Widget build(BuildContext context) {
-    Widget? child;
     if (_retrievingFlutterProject) {
-      child = const CenteredCircularProgressIndicator(size: _kMessageSize);
-    } else {
-      child = Text(
-        'Pick a flutter project from your local file to check all deep links status',
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          color: Theme.of(context).textTheme.displayLarge!.color,
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Project loading',
+              style: Theme.of(context).regularTextStyle,
+            ),
+            Container(
+              width: _kLinearProgressIndicatorWidth,
+              padding: const EdgeInsets.symmetric(vertical: densePadding),
+              child: const LinearProgressIndicator(),
+            ),
+            Text(
+              'First time loading will take longer time than usual',
+              style: Theme.of(context).subtleTextStyle,
+            ),
+          ],
         ),
       );
     }
@@ -100,7 +112,11 @@ class _SelectProjectViewState extends State<SelectProjectView>
         children: [
           Padding(
             padding: const EdgeInsets.all(defaultSpacing),
-            child: child,
+            child: Text(
+              'Pick a flutter project from your local file to check all deep links status',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
           ),
           DirectoryPicker(
             onDirectoryPicked: _handleDirectoryPicked,
