@@ -74,6 +74,9 @@ jobs:
 
       - name: Generate Mocks
         run: |
+          pushd tool/
+          flutter pub get
+          popd
           export PATH="$PATH":`pwd`/flutter-sdk/bin/cache/dart-sdk/bin/
           echo $PATH
           # Fetch dependencies
