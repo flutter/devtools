@@ -77,11 +77,14 @@ jobs:
           export PATH="$PATH":`pwd`/flutter-sdk/bin/cache/dart-sdk/bin/
           export PATH="$PATH":`pwd`/flutter-sdk/bin/
 
+          pushd tool
           flutter pub get
+          popd
 
           echo $PATH
           # Fetch dependencies
           ./tool/bin/devtools_tool pub-get --only-main
+
 
           # Generate code.
           ./tool/bin/devtools_tool generate-code
