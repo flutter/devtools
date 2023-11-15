@@ -44,6 +44,10 @@ bool get _useSimulatedEnvironment =>
 ///
 /// A couple of use case examples include posting messages to DevTools or
 /// registering an event handler from the extension.
+/// 
+/// [extensionManager] can only be accessed below the [DevToolsExtension] widget
+/// in the widget tree, since it is initialized as part of the
+/// [DevToolsExtension]'s [initState] lifecycle method.
 ExtensionManager get extensionManager =>
     globals[ExtensionManager] as ExtensionManager;
 
@@ -51,6 +55,10 @@ ExtensionManager get extensionManager =>
 ///
 /// This manager provides sub-managers to interact with isolates, service
 /// extensions, etc.
+/// 
+/// [serviceManager] can only be accessed below the [DevToolsExtension] widget
+/// in the widget tree, since it is initialized as part of the
+/// [DevToolsExtension]'s [initState] lifecycle method.
 ServiceManager get serviceManager => globals[ServiceManager] as ServiceManager;
 
 /// A wrapper widget that performs initialization for a DevTools extension.
