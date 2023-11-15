@@ -7,7 +7,9 @@
 # Fast fail the script on failures.
 set -ex
 
-echo `pwd`
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+DEVTOOLS_DIR=$SCRIPT_DIR/../..
+
 ./tool/ci/setup.sh
 
 # Change the CI to the packages/devtools_app directory.
