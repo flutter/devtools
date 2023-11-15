@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@TestOn('browser')
+
 import 'package:devtools_extensions/devtools_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -9,8 +11,8 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('Global managers', () {
     test('accessing early throws error', () {
-      expect(serviceManager, throwsStateError);
-      expect(extensionManager, throwsStateError);
+      expect(() => serviceManager, throwsStateError);
+      expect(() => extensionManager, throwsStateError);
     });
 
     testWidgets('building $DevToolsExtension initializes globals',
