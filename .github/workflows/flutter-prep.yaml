@@ -71,3 +71,17 @@ jobs:
           ./flutter-sdk/bin/flutter config --no-analytics
           ./flutter-sdk/bin/flutter doctor
           ./flutter-sdk/bin/cache/dart-sdk/bin/dart --disable-analytics
+
+      - name: Generate Mocks
+        run: |
+          # Fetch dependencies
+          ./tool/bin/devtools_tool pub-get --only-main
+
+          # Generate code.
+          ./tool/bin/devtools_tool generate-code
+      - name: Cache Mocks
+        uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84
+        with:
+          path: |
+            ./packages/**mocks**
+          key: flutter-sdk-${{ runner.os }}-${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}-${GITHUB_SHA}
