@@ -151,11 +151,9 @@ class _DevToolsMenuState extends State<_DevToolsMenu> {
   void _initExtensions() {
     final sessionRootPath = widget.session.projectRootPath;
     if (sessionRootPath != null) {
-      setState(() {
-        _extensionServiceForSession =
-            ExtensionService(fixedAppRootPath: sessionRootPath);
-        unawaited(_extensionServiceForSession!.initialize());
-      });
+      _extensionServiceForSession =
+          ExtensionService(fixedAppRootPath: sessionRootPath);
+      unawaited(_extensionServiceForSession!.initialize());
     }
   }
 
