@@ -3,8 +3,6 @@
 # found in the LICENSE file.
 
 name: Flutter SDK prep
-env:
-  MOCK_CACHE_KEY: mocks-${{ runner.os }}-${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}-${{env.GITHUB_SHA}}
 on:
   workflow_call:
     inputs:
@@ -18,7 +16,7 @@ on:
         value: ${{ jobs.reusable-flutter-prep.outputs.latest_flutter_candidate }}
       mock_cache_key:
         description: "The key used to cache the mocks"
-        value: ${{env.MOCK_CACHE_KEY}}
+        value: ${{ steps.determine-mocks-cache-id.outputs.mocks_cache_id}}
 
 jobs:
   reusable-flutter-prep:
@@ -75,7 +73,11 @@ jobs:
           ./flutter-sdk/bin/flutter config --no-analytics
           ./flutter-sdk/bin/flutter doctor
           ./flutter-sdk/bin/cache/dart-sdk/bin/dart --disable-analytics
-
+      - name: Determine Mocks Cache Id
+        id: determine-mocks-cache-id
+        run: echo "mocks_cache_id=$MOCKS_CACHE_ID" >> "GITHUB_OUTPUT"
+        env:
+          MOCKS_CACHE_ID: mocks-${{ runner.os }}-${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}-${{env.GITHUB_SHA}}
       - name: Generate Mocks
         run: |
           export PATH="$PATH":`pwd`/flutter-sdk/bin/cache/dart-sdk/bin/
