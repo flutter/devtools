@@ -18,7 +18,8 @@ class Notification {
   late final web_helpers.Notification _impl;
 
   static Future<String> requestPermission() async =>
-      (await web_helpers.Notification.requestPermission().toDart) as String;
+      ((await web_helpers.Notification.requestPermission().toDart) as JSString)
+          .toDart;
 
   void close() {
     _impl.close();
