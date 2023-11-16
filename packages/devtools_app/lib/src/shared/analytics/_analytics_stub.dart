@@ -16,7 +16,7 @@ import 'analytics_common.dart';
 final _log = Logger('_analytics_stub');
 
 /// The IDE that DevTools was launched from.
-/// 
+///
 /// This is just a stub value so that we can access the [ideLaunched] field on
 /// both web and desktop, and manipulate this value for tests running on the VM.
 String ideLaunched = '';

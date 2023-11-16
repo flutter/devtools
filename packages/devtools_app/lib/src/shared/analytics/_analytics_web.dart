@@ -729,7 +729,7 @@ set devtoolsChrome(String newDevtoolsChrome) {
 }
 
 /// The IDE that DevTools was launched from.
-/// 
+///
 /// Defaults to [ideLaunchedCLI] if DevTools was not launched from the IDE.
 String get ideLaunched => _ideLaunched;
 
