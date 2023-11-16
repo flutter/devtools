@@ -23,11 +23,17 @@ class ExportControllerWeb extends ExportController {
     final element = document.createElement('a') as HTMLAnchorElement;
     element.setAttribute(
       'href',
-      URL.createObjectURL(Blob([content.toJS].toJS)),
+      // TODO(srujzs): This is necessary in order to support package:web 0.4.0.
+      // This was not needed with 0.3.0, hence the lint.
+      // ignore: avoid-unnecessary-type-casts
+      URL.createObjectURL(Blob([content.toJS].toJS) as JSObject),
     );
     element.setAttribute('download', fileName);
     element.style.display = 'none';
-    (document.body as HTMLBodyElement).append(element);
+    // TODO(srujzs): This is necessary in order to support package:web 0.4.0.
+    // This was not needed with 0.3.0, hence the lint.
+    // ignore: avoid-unnecessary-type-casts
+    (document.body as HTMLBodyElement).append(element as JSAny);
     element.click();
     element.remove();
   }
