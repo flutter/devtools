@@ -728,6 +728,9 @@ set devtoolsChrome(String newDevtoolsChrome) {
   _devtoolsChrome = newDevtoolsChrome;
 }
 
+/// The IDE that DevTools was launched from.
+/// 
+/// Defaults to [ideLaunchedCLI] if DevTools was not launched from the IDE.
 String get ideLaunched => _ideLaunched;
 
 String get ideLaunchedFeature => _ideLaunchedFeature;

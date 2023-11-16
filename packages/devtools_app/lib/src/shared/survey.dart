@@ -156,7 +156,7 @@ class DevToolsSurvey {
     this.title,
     this.url,
     this.minDevToolsVersion,
-    this.environments,
+    this.devEnvironments,
   );
 
   factory DevToolsSurvey.parse(Map<String, dynamic> json) {
@@ -171,8 +171,8 @@ class DevToolsSurvey {
     final minDevToolsVersion = json[_minDevToolsVersionKey] != null
         ? SemanticVersion.parse(json[_minDevToolsVersionKey])
         : null;
-    final environments =
-        (json[_environmentsKey] as List?)?.cast<String>().toList();
+    final devEnvironments =
+        (json[_devEnvironmentsKey] as List?)?.cast<String>().toList();
     return DevToolsSurvey._(
       id,
       startDate,
@@ -180,7 +180,7 @@ class DevToolsSurvey {
       title,
       surveyUrl,
       minDevToolsVersion,
-      environments,
+      devEnvironments,
     );
   }
 
@@ -190,7 +190,7 @@ class DevToolsSurvey {
   static const _titleKey = 'title';
   static const _urlKey = 'url';
   static const _minDevToolsVersionKey = 'minDevToolsVersion';
-  static const _environmentsKey = 'environments';
+  static const _devEnvironmentsKey = 'devEnvironments';
 
   final String? id;
 
@@ -216,11 +216,11 @@ class DevToolsSurvey {
   /// A list of development environments to show the survey for (e.g. 'VSCode',
   /// 'Android-Studio', 'IntelliJ-IDEA', 'CLI', etc.).
   ///
-  /// If [environments] is null, the survey can be shown to any platform.
+  /// If [devEnvironments] is null, the survey can be shown to any platform.
   ///
   /// The possible values for this list correspond to the possible values of
   /// [_ideLaunched] from [shared/analytics/_analytics_web.dart].
-  final List<String>? environments;
+  final List<String>? devEnvironments;
 }
 
 extension ShowSurveyExtension on DevToolsSurvey {
@@ -237,7 +237,7 @@ extension ShowSurveyExtension on DevToolsSurvey {
           .isSupported(minSupportedVersion: minDevToolsVersion!);
 
   bool get meetsEnvironmentRequirement =>
-      environments == null || environments!.contains(ga.ideLaunched);
+      devEnvironments == null || devEnvironments!.contains(ga.ideLaunched);
 
   bool get shouldShow =>
       meetsDateRequirement &&

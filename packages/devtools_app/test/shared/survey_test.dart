@@ -29,7 +29,7 @@ void main() {
         'startDate': '2020-10-30T09:00:00-07:00',
         'endDate': '2020-11-30T09:00:00-07:00',
         'minDevToolsVersion': '2.29.0',
-        'environments': ['VSCode'],
+        'devEnvironments': ['VSCode'],
       });
       expect(survey.id, equals('2020Q4'));
       expect(survey.startDate, equals(DateTime.utc(2020, 10, 30, 16)));
@@ -43,7 +43,7 @@ void main() {
         'https://google.qualtrics.com/jfe/form/SV_9XDmbo8lhv0VaUl',
       );
       expect(survey.minDevToolsVersion.toString(), '2.29.0');
-      expect(survey.environments, ['VSCode']);
+      expect(survey.devEnvironments, ['VSCode']);
 
       final emptySurvey = DevToolsSurvey.parse({});
       expect(emptySurvey.id, isNull);
@@ -52,7 +52,7 @@ void main() {
       expect(emptySurvey.title, isNull);
       expect(emptySurvey.url, isNull);
       expect(emptySurvey.minDevToolsVersion, isNull);
-      expect(emptySurvey.environments, isNull);
+      expect(emptySurvey.devEnvironments, isNull);
     });
 
     group('should show', () {
@@ -83,7 +83,7 @@ void main() {
           'startDate': '2023-10-30T09:00:00-07:00',
           'endDate': '2023-11-14T09:00:00-07:00',
           'minDevToolsVersion': '2.29.0',
-          'environments': ['VSCode'],
+          'devEnvironments': ['VSCode'],
         });
 
         ideLaunched = 'VSCode';
@@ -116,10 +116,10 @@ void main() {
 
       test('meetsEnvironmentRequirement', () {
         final vsCodeOnlySurvey = DevToolsSurvey.parse({
-          'environments': ['VSCode'],
+          'devEnvironments': ['VSCode'],
         });
         final intelliJSurvey = DevToolsSurvey.parse({
-          'environments': ['Android-Studio', 'IntelliJ-IDEA'],
+          'devEnvironments': ['Android-Studio', 'IntelliJ-IDEA'],
         });
 
         ideLaunched = 'Android-Studio';
