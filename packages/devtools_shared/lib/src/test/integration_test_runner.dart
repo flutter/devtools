@@ -48,7 +48,6 @@ class IntegrationTestRunner with IOMixin {
           // '--profile',
           '--driver=$testDriver',
           '--target=$testTarget',
-          '-j1',
           '-d',
           headless ? 'web-server' : 'chrome',
           for (final arg in dartDefineArgs) '--dart-define=$arg',
