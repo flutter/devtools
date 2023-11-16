@@ -15,6 +15,8 @@ import 'analytics_common.dart';
 
 final _log = Logger('_analytics_stub');
 
+String ideLaunched = '';
+
 Future<void> setAnalyticsEnabled(bool value) async {}
 
 FutureOr<bool> isAnalyticsEnabled() => false;

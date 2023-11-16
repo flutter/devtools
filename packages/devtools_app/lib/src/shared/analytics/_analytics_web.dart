@@ -16,7 +16,6 @@ import 'package:web/helpers.dart';
 
 import '../../../devtools.dart' as devtools show version;
 import '../globals.dart';
-import '../primitives/url_utils.dart';
 import '../server/server.dart' as server;
 import '../utils.dart';
 import 'analytics_common.dart';
@@ -268,7 +267,7 @@ GtagExceptionDevTools _gtagException(
     devtools_platform: devtoolsPlatformType,
     devtools_chrome: devtoolsChrome,
     devtools_version: devtoolsVersion,
-    ide_launched: ideLaunched,
+    ide_launched: _ideLaunched,
     flutter_client_id: flutterClientId,
     is_external_build: isExternalBuild.toString(),
     is_embedded: ideTheme.embed.toString(),
@@ -731,10 +730,6 @@ set devtoolsChrome(String newDevtoolsChrome) {
 
 String get ideLaunched => _ideLaunched;
 
-set ideLaunched(String newIdeLaunched) {
-  _ideLaunched = newIdeLaunched;
-}
-
 String get ideLaunchedFeature => _ideLaunchedFeature;
 
 set ideLaunchedFeature(String newIdeLaunchedFeature) {
@@ -826,11 +821,11 @@ void computeDevToolsCustomGTagsData() {
 
 // Look at the query parameters '&ide=' and record in GA.
 void computeDevToolsQueryParams() {
-  ideLaunched = ideLaunchedCLI; // Default is Command Line launch.
+  _ideLaunched = ideLaunchedCLI; // Default is Command Line launch.
 
   final ideValue = ideFromUrl();
   if (ideValue != null) {
-    ideLaunched = ideValue;
+    _ideLaunched = ideValue;
   }
 
   final ideFeature = lookupFromQueryParams('ideFeature');
@@ -881,15 +876,11 @@ void setupUserApplicationDimensions() {
 
 Map<String, dynamic> generateSurveyQueryParameters() {
   const ideKey = 'IDE';
-  const fromKey = 'From';
+  const versionKey = 'Version';
   const internalKey = 'Internal';
-
-  final internalValue = (!isExternalBuild).toString();
-  final fromPage = extractCurrentPageFromUrl(window.location.toString());
-
   return {
-    ideKey: ideLaunched,
-    fromKey: fromPage,
-    internalKey: internalValue,
+    ideKey: _ideLaunched,
+    versionKey: devtoolsVersion,
+    internalKey: (!isExternalBuild).toString(),
   };
 }

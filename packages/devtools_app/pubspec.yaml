@@ -21,6 +21,7 @@ dependencies:
   # TODO: https://github.com/flutter/devtools/issues/4728 - remove constraint when archive is fixed
   archive: <3.3.3
   async: ^2.0.0
+  clock: ^1.1.1
   codicon: ^1.0.0
   collection: ^1.15.0
   dap: ^1.1.0
