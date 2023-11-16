@@ -29,7 +29,7 @@ class IntegrationTestRunner with IOMixin {
     required String testDriver,
     bool headless = false,
     List<String> dartDefineArgs = const <String>[],
-    bool debugLogging = false,
+    bool debugLogging = true,
   }) async {
     void debugLog(String log) {
       if (debugLogging) print(log);
@@ -48,6 +48,7 @@ class IntegrationTestRunner with IOMixin {
           // '--profile',
           '--driver=$testDriver',
           '--target=$testTarget',
+          '-j1',
           '-d',
           headless ? 'web-server' : 'chrome',
           for (final arg in dartDefineArgs) '--dart-define=$arg',
