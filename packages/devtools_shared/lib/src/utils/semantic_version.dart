@@ -117,8 +117,8 @@ class SemanticVersion with CompareMixin {
 
   bool get isPreRelease => preReleaseMajor != null || preReleaseMinor != null;
 
-  bool isSupported({required SemanticVersion supportedVersion}) =>
-      compareTo(supportedVersion) >= 0;
+  bool isSupported({required SemanticVersion minSupportedVersion}) =>
+      compareTo(minSupportedVersion) >= 0;
 
   @override
   // ignore: avoid-dynamic, necessary here.
