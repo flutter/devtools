@@ -142,51 +142,6 @@ class _DevToolsMenu extends StatelessWidget {
         ? TextDirection.rtl
         : TextDirection.ltr;
 
-    Widget devToolsButton(
-      String title, {
-      IconData? icon,
-      String? screenId,
-      String? disabledReason,
-      bool? forceExternal,
-    }) {
-      // Because we flipped the direction so the menu is aligned to the end, we
-      // should revert the text direction back to normal for the label.
-      Widget text = Directionality(
-        textDirection: normalDirection,
-        child: Text(title),
-      );
-
-      if (disabledReason != null) {
-        text = Tooltip(
-          preferBelow: false,
-          message: disabledReason,
-          child: text,
-        );
-      }
-
-      return MenuItemButton(
-        leadingIcon: Icon(icon, size: actionsIconSize),
-        onPressed: disabledReason != null
-            ? null
-            : () {
-                ga.select(
-                  gac.VsCodeFlutterSidebar.id,
-                  screenId != null && forceExternal != true
-                      ? gac.VsCodeFlutterSidebar.openDevToolsScreen(screenId)
-                      : gac.VsCodeFlutterSidebar.openDevToolsExternally.name,
-                );
-                unawaited(
-                  api.openDevToolsPage(
-                    session.id,
-                    page: screenId,
-                    forceExternal: forceExternal,
-                  ),
-                );
-              },
-        child: text,
-      );
-    }
-
     Widget devToolsScreenButton(ScreenMetaData screen) {
       final title = screen.title ?? screen.id;
       String? disabledReason;
@@ -200,11 +155,21 @@ class _DevToolsMenu extends StatelessWidget {
         disabledReason = 'Not available when running on the web';
       }
 
-      return devToolsButton(
+      return DevToolsMenuItem(
         title,
         icon: screen.icon,
         screenId: screen.id,
         disabledReason: disabledReason,
+        onPressed: () {
+          ga.select(
+            gac.VsCodeFlutterSidebar.id,
+            gac.VsCodeFlutterSidebar.openDevToolsScreen(screen.id),
+          );
+          unawaited(
+            api.openDevToolsPage(session.id, page: screen.id),
+          );
+        },
+        textDirection: normalDirection,
       );
     }
 
@@ -221,10 +186,20 @@ class _DevToolsMenu extends StatelessWidget {
               .where(_shouldIncludeScreen)
               .map(devToolsScreenButton),
           if (supportsOpenExternal)
-            devToolsButton(
+            DevToolsMenuItem(
               'Open in Browser',
               icon: Icons.open_in_browser,
               forceExternal: true,
+              textDirection: normalDirection,
+              onPressed: () {
+                ga.select(
+                  gac.VsCodeFlutterSidebar.id,
+                  gac.VsCodeFlutterSidebar.openDevToolsExternally.name,
+                );
+                unawaited(
+                  api.openDevToolsPage(session.id, forceExternal: true),
+                );
+              },
             ),
         ],
         builder: (context, controller, child) => IconButton(
@@ -259,5 +234,49 @@ class _DevToolsMenu extends StatelessWidget {
       // library.
       _ => screen.requiresLibrary == null,
     };
+  }
+}
+
+class DevToolsMenuItem extends StatelessWidget {
+  const DevToolsMenuItem(
+    this.title, {
+    super.key,
+    this.icon,
+    this.screenId,
+    this.disabledReason,
+    this.forceExternal = false,
+    required this.onPressed,
+    required this.textDirection,
+  });
+
+  final String title;
+  final IconData? icon;
+  final String? screenId;
+  final String? disabledReason;
+  final bool forceExternal;
+  final TextDirection textDirection;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final textDirection = this.textDirection;
+    Widget text = Directionality(
+      textDirection: textDirection,
+      child: Text(title),
+    );
+
+    if (disabledReason != null) {
+      text = Tooltip(
+        preferBelow: false,
+        message: disabledReason,
+        child: text,
+      );
+    }
+
+    return MenuItemButton(
+      leadingIcon: Icon(icon, size: actionsIconSize),
+      onPressed: disabledReason != null ? null : onPressed,
+      child: text,
+    );
   }
 }
