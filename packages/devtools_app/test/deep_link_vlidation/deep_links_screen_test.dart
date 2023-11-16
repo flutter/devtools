@@ -465,7 +465,7 @@ void main() {
         widgetCCenter = tester.getCenter(find.text('www.google.com'));
 
         expect(widgetBCenter.dy < widgetACenter.dy, true);
-     //   expect(widgetBCenter.dy < widgetCCenter.dy, true);
+        expect(widgetBCenter.dy < widgetCCenter.dy, true);
       },
     );
   });
