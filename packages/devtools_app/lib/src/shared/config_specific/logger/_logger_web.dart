@@ -2,19 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: avoid_print
+import 'dart:js_interop';
+
+import 'package:web/helpers.dart';
 
 import 'logger.dart';
 
 void printToConsole(Object message, [LogLevel level = LogLevel.debug]) {
+  final jsMessage = message.jsify();
   switch (level) {
     case LogLevel.debug:
-      print(message);
+      console.log(jsMessage);
       break;
     case LogLevel.warning:
-      print('[WARNING]: $message');
+      console.warn(jsMessage);
       break;
     case LogLevel.error:
-      print('[ERROR]: $message');
+      console.error(jsMessage);
   }
 }

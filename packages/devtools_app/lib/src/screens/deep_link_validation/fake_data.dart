@@ -20,7 +20,7 @@ final allLinkDatas = <LinkData>[
       os: [PlatformOS.android, PlatformOS.ios],
       domain: 'm.shopping.com',
       path: path,
-      domainError: true,
+      domainErrors: [DomainError.existence],
       pathError: path.contains('shoe'),
     ),
   for (var path in paths)

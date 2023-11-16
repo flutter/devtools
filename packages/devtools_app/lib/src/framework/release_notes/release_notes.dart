@@ -10,7 +10,7 @@ import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 
 import '../../../devtools.dart' as devtools;
-import '../../shared/config_specific/server/server.dart' as server;
+import '../../shared/server/server.dart' as server;
 import '../../shared/side_panel.dart';
 
 final _log = Logger('release_notes');

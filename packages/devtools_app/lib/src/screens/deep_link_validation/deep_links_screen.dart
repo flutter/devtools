@@ -13,12 +13,6 @@ import 'deep_links_controller.dart';
 import 'deep_links_model.dart';
 import 'select_project_view.dart';
 
-enum TableViewType {
-  domainView,
-  pathView,
-  singleUrlView,
-}
-
 class DeepLinksScreen extends Screen {
   DeepLinksScreen() : super.fromMetaData(ScreenMetaData.deepLinks);
 

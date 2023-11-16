@@ -2,19 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../shared/globals.dart';
+import 'package:vm_service/vm_service.dart';
 
 /// Manager for handling package Uri lookup and caching.
-class ResolvedUriManager {
+final class ResolvedUriManager {
+  VmService? _service;
+
   _PackagePathMappings? _packagePathMappings;
 
   /// Initializes the [ResolvedUriManager]
-  void vmServiceOpened() {
+  void vmServiceOpened(VmService service) {
+    _service = service;
     _packagePathMappings = _PackagePathMappings();
   }
 
   /// Cleans up the resources of the [ResolvedUriManager]
   void vmServiceClosed() {
+    _service = null;
     _packagePathMappings = null;
   }
 
@@ -27,9 +31,8 @@ class ResolvedUriManager {
   Future<void> fetchPackageUris(String isolateId, List<String> uris) async {
     if (uris.isEmpty) return;
     if (_packagePathMappings != null) {
-      final packageUris = (await serviceConnection.serviceManager.service!
-              .lookupPackageUris(isolateId, uris))
-          .uris;
+      final packageUris =
+          (await _service!.lookupPackageUris(isolateId, uris)).uris;
 
       if (packageUris != null) {
         _packagePathMappings!.addMappings(
@@ -50,9 +53,9 @@ class ResolvedUriManager {
   /// [packageUris] List of uris to fetch full file paths for.
   Future<void> fetchFileUris(String isolateId, List<String> packageUris) async {
     if (_packagePathMappings != null) {
-      final fileUris = (await serviceConnection.serviceManager.service!
-              .lookupResolvedPackageUris(isolateId, packageUris))
-          .uris;
+      final fileUris =
+          (await _service!.lookupResolvedPackageUris(isolateId, packageUris))
+              .uris;
 
       // [_packagePathMappings] could have been set to null during the async gap
       // so check that it is non-null again here.

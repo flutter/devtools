@@ -43,12 +43,20 @@ class DartToolingApiImpl implements DartToolingApi {
     }
     final postMessageController = StreamController();
     postMessageController.stream.listen((message) {
-      _log.info('==> $message');
+      // TODO(dantup): Using fine here doesn't work even though the
+      // `setDevToolsLoggingLevel` call above seems like it should show finest
+      // logs. For now, use info (which always logs) with a condition here
+      // and below.
+      if (_enablePostMessageVerboseLogging) {
+        _log.info('==> $message');
+      }
       postMessage(message, '*');
     });
     final channel = StreamChannel(
       onPostMessage.map((event) {
-        _log.info('<== ${jsonEncode(event.data)}');
+        if (_enablePostMessageVerboseLogging) {
+          _log.info('<== ${jsonEncode(event.data)}');
+        }
         return event.data;
       }),
       postMessageController,

@@ -12,9 +12,7 @@ import '../../globals.dart';
 import '../../primitives/simple_items.dart';
 import '../../primitives/utils.dart';
 import '../../screen.dart';
-import '_export_stub.dart'
-    if (dart.library.js_interop) '_export_web.dart'
-    if (dart.library.io) '_export_desktop.dart';
+import '_export_desktop.dart' if (dart.library.js_interop) '_export_web.dart';
 
 const nonDevToolsFileMessage = 'The imported file is not a Dart DevTools file.'
     ' At this time, DevTools only supports importing files that were originally'

@@ -12,15 +12,21 @@ import '../../shared/analytics/constants.dart' as gac;
 import '../api/vs_code_api.dart';
 
 class Devices extends StatelessWidget {
-  const Devices(
-    this.api,
-    this.devices, {
+  Devices(
+    this.api, {
+    required this.devices,
+    required this.unsupportedDevices,
     required this.selectedDeviceId,
     super.key,
-  });
+  }) : unsupportedDevicePlatformTypes = unsupportedDevices
+            .map((device) => device.platformType)
+            .nonNulls
+            .toSet();
 
   final VsCodeApi api;
   final List<VsCodeDevice> devices;
+  final List<VsCodeDevice> unsupportedDevices;
+  final Set<String> unsupportedDevicePlatformTypes;
   final String? selectedDeviceId;
 
   @override
@@ -44,6 +50,11 @@ class Devices extends StatelessWidget {
                   theme,
                   device,
                   isSelected: device.id == selectedDeviceId,
+                ),
+              for (final platformType in unsupportedDevicePlatformTypes)
+                _createPlatformTypeEnablerRow(
+                  theme,
+                  platformType,
                 ),
             ],
           ),
@@ -87,6 +98,36 @@ class Devices extends StatelessWidget {
                 gac.VsCodeFlutterSidebar.changeSelectedDevice.name,
               );
               unawaited(api.selectDevice(device.id));
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  TableRow _createPlatformTypeEnablerRow(ThemeData theme, String platformType) {
+    final foregroundColor = theme.colorScheme.secondary;
+
+    return TableRow(
+      children: [
+        SizedBox(
+          width: double.infinity,
+          child: TextButton(
+            style: TextButton.styleFrom(
+              alignment: Alignment.centerLeft,
+              shape: const ContinuousRectangleBorder(),
+              textStyle: theme.regularTextStyle,
+            ),
+            child: Text(
+              'Enable $platformType for this project',
+              style: theme.regularTextStyle.copyWith(color: foregroundColor),
+            ),
+            onPressed: () {
+              ga.select(
+                gac.VsCodeFlutterSidebar.id,
+                gac.VsCodeFlutterSidebar.enablePlatformType(platformType),
+              );
+              unawaited(api.enablePlatformType(platformType));
             },
           ),
         ),
