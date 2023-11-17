@@ -39,7 +39,7 @@ class FlutterFrameAnalysisView extends StatelessWidget {
           'No analysis data available for this frame. This means that the '
           'timeline events\nfor this frame occurred too long ago and DevTools '
           'could not access them.\n\nTo avoid this, open the DevTools Performance '
-          'page sooner.',
+          'page earlier.',
           textAlign: TextAlign.center,
         ),
       );
