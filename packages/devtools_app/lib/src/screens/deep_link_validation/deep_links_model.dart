@@ -540,11 +540,11 @@ int _compareLinkData(
   switch (sortingOption) {
     case SortingOption.errorOnTop:
       if (compareDomain) {
-        if (a.domainErrors.isNotEmpty) return 1;
-        if (b.domainErrors.isNotEmpty) return -1;
+        if (a.domainErrors.isNotEmpty) return -1;
+        if (b.domainErrors.isNotEmpty) return 1;
       } else {
-        if (a.pathError) return 1;
-        if (b.pathError) return -1;
+        if (a.pathError) return -1;
+        if (b.pathError) return 1;
       }
       return 0;
     case SortingOption.aToZ:
