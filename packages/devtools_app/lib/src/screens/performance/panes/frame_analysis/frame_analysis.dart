@@ -35,7 +35,12 @@ class FlutterFrameAnalysisView extends StatelessWidget {
     final frameAnalysis = this.frameAnalysis;
     if (frameAnalysis == null) {
       return const Center(
-        child: Text('No analysis data available for this frame.'),
+        child: Text(
+          'No analysis data available for this frame. This means that the '
+          'timeline events for this frame occurred too long ago and DevTools '
+          'could not access them. To avoid this, open the DevTools Performance '
+          'page sooner.',
+        ),
       );
     }
     final rebuilds = rebuildCountModel.rebuildsForFrame(frameAnalysis.frame.id);
