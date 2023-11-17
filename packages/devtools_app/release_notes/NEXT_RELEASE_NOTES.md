@@ -21,7 +21,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## Performance updates
 
-* Add an indicator of the rendering engine to the Flutter Frames chart. - []()
+* Add an indicator of the rendering engine to the Flutter Frames chart. -
+[#6771](https://github.com/flutter/devtools/pull/6771)
 ![Flutter rendering engine text](images/flutter_frames_engine_text.png "Text describing the current flutter rendering engine")
 
 ## CPU profiler updates

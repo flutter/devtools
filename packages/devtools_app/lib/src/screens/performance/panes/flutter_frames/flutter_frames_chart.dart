@@ -173,6 +173,7 @@ class _FlutterFramesChartState extends State<_FlutterFramesChart> {
               frames: widget.frames,
               displayRefreshRate: widget.displayRefreshRate,
               offlineMode: widget.offlineMode,
+              impellerEnabled: widget.impellerEnabled,
             ),
           ),
         ],
@@ -347,7 +348,7 @@ class _FramesChartState extends State<FramesChart> with AutoDisposeMixin {
           right: denseSpacing,
           top: densePadding,
           child: Text(
-            'Engine: ${widget.impellerEnabled ? 'Impeler' : 'Skia'}',
+            'Engine: ${widget.impellerEnabled ? 'Impeller' : 'Skia'}',
             style: themeData.subtleChartTextStyle,
           ),
         ),
@@ -364,6 +365,7 @@ class FramesChartControls extends StatelessWidget {
     required this.frames,
     required this.displayRefreshRate,
     required this.offlineMode,
+    required this.impellerEnabled,
   });
 
   static const _pauseTooltip = 'Pause Flutter frame recording';
@@ -377,6 +379,8 @@ class FramesChartControls extends StatelessWidget {
   final double displayRefreshRate;
 
   final bool offlineMode;
+
+  final bool impellerEnabled;
 
   @override
   Widget build(BuildContext context) {
@@ -406,10 +410,11 @@ class FramesChartControls extends StatelessWidget {
             const LegendEntry('Frame Time (UI)', mainUiColor),
             const LegendEntry('Frame Time (Raster)', mainRasterColor),
             const LegendEntry('Jank (slow frame)', uiJankColor),
-            LegendEntry(
-              'Shader Compilation',
-              shaderCompilationColor.background,
-            ),
+            if (!impellerEnabled)
+              LegendEntry(
+                'Shader Compilation',
+                shaderCompilationColor.background,
+              ),
           ],
         ),
         AverageFPS(
