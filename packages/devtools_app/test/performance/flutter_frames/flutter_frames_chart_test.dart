@@ -89,7 +89,7 @@ void main() {
         expect(find.byType(Legend), findsNothing);
         expect(find.byType(AverageFPS), findsNothing);
         expect(find.byType(FlutterFramesChartItem), findsNothing);
-      expect(find.textContaining('Engine:'), findsNothing);
+        expect(find.textContaining('Engine:'), findsNothing);
       },
     );
 
