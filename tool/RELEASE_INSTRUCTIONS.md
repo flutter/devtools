@@ -1,4 +1,14 @@
-## How to release the next version of DevTools
+# How to release Dart DevTools
+
+> Note: there are parts of this release process that can only be completed by Googlers
+on the Dash team. If you are not a Googler on the Dash team, please reach out on the
+[#hackers-devtools](https://discord.com/channels/608014603317936148/1106667330093723668)
+Discord channel before trying to create a DevTools release.
+
+1. [Release into the Dart SDK master branch](#release-into-the-dart-sdk-master-branch)
+2. [Cherry-pick releases into the Dart SDK stable / beta branches](#cherry-pick-releases)
+
+## Release into the Dart SDK master branch
 
 ### Configure/Refresh environment
 
@@ -168,3 +178,106 @@ have unreleased changes, publish these packages to pub.
 [README.md](https://github.com/flutter/devtools/blob/master/packages/devtools_app/release_notes/README.md)
 to add DevTools release notes to Flutter website and test them in DevTools.
 2. Once release notes are submitted to the Flutter website, send an announcement to g/flutter-internal-announce with a link to the new release notes.
+
+## Cherry-pick releases
+
+### Prepare the release in the `flutter/devtools` repo
+
+1. Find the [DevTools tag](https://github.com/flutter/devtools/tags) that you want to perform the
+cherry-pick release on top of. Then checkout that tag locally. For this example, we'll use `v2.29.0`
+as the base branch and `2.29.1` as the cherry-pick branch.
+   ```
+   git checkout v2.29.0
+   ```
+
+2. Create a new branch for your cherry pick release. 
+   ```
+   git checkout -b 2.29.1
+   ```
+
+3. Cherry pick the commit(s) you want in this cherry-pick release, and bump the DevTools version number:
+   ```
+   git cherry-pick <commit>
+   devtools_tool update-version auto -t patch
+   ```
+
+4. Commit your changes and push to the `upstream` remote.
+   ```
+   git add .
+   git commit -m "Prepare cherry-pick release - DevTools 2.29.1"
+   git push upstream 2.29.1
+   ```
+
+Once you are completely satisfied with your changes, create a tag for this cherry-pick release. This
+tag is purely for the management and health of the `flutter/devtools` repo; it will not be used for the
+remainder of the cherry-pick release process. From the branch your are already on (e.g. `2.29.1`), run
+the following:
+   ```
+   tool/tag_version.sh
+   ```
+
+**To move on to the next step, you will need to take note of two values:**
+1) The name of the DevTools branch you just created (e.g. `2.29.1`)
+2) The commit hash that is at the tip of this branch (see https://github.com/flutter/devtools/branches).
+
+### Manually run the DevTools Builder
+
+Follow the instructions at [go/dart-engprod/devtools.md#cherry-picks](go/dart-engprod/devtools.md#cherry-picks)
+to trigger the DevTools builder.
+
+### Create the cherry-pick CL in the Dart SDK
+
+Checkout the Dart SDK branch you want to perform the cherry-pick on top of (e.g. `stable` or `beta`),
+and create a new branch:
+
+```
+git new-branch --upstream origin/<stable or beta> cherry-pick-devtools
+```
+
+Edit the "devtools_rev" entry in the Dart SDK [DEPS](https://github.com/dart-lang/sdk/blob/main/DEPS#L104) file
+to point to the cherry-pick release hash (the commit at the tip of the cherry-pick branch you created above).
+
+Commit your changes and upload your CL:
+```
+git add .
+git commit -m "Cherry-pick DevTools 2.29.1"
+git cl upload -s
+```
+
+### Create the merge commit in the `flutter/devtools` repo
+
+This step can be performed while you are waiting for the Dart SDK cherry-pick CL to be reviewed. In order
+to ensure that the cherry-picked DevTools commit does not get GC'ed, we need to perform a merge commit
+from the branch we just created (e.g. `2.29.1`) onto the `flutter/devtools` protected branch (`master`).
+
+1. Create a pull request in the GitHub UI from the cherry-pick branch to the `master` branch.
+   - Navigate to https://github.com/flutter/devtools/compare/\<cherry-pick-branch>, where \<cherry-pick-branch>
+      is the branch you pushed up to the `upstream` remote with the cherry-picked commit(s) (e.g. `2.29.1`).
+   - Click "Create pull request"
+   - Resolve any merge conflicts by **accepting whatever is on master**. Once you do this, the PR should show
+    changes in **zero** lines of code.
+   - Ask a member of the DevTools team for review, but **DO NOT** squash and merge yet.
+
+2. Contact a member of the Dash team who has Admin access to the `flutter/devtools` repository settings
+(@godofredoc or @devoncarew). Ask them to:
+    - temporarily modify the `flutter/devtools` repository settings to "allow merge commits at the repo level
+    and remove `require linear history`". 
+    
+   Provide them with a link to your PR for context.
+
+3. Once merge commits have been enabled for the repository, land your PR by selecting "Create a merge commit" from
+the merge dropdown options at the bottom of the PR.
+
+4. Once you have successfully merged your PR, reach back out to the person who modified the `flutter/devtools`
+repository settings for you and ask them to revert the settings change.
+
+### Create the cherry-pick issue in the Dart SDK
+
+Follow the [Request cherry-pick approval](https://github.com/dart-lang/sdk/wiki/Cherry-picks-to-a-release-channel#request-cherry-pick-approval) instructions to create a cherry-pick request against the Dart SDK.
+
+### Additional resources
+- `dart-lang/sdk` cherry-pick [Wiki](https://github.com/dart-lang/sdk/wiki/Cherry-picks-to-a-release-channel)
+- Flutter cherry-pick [Wiki](https://github.com/flutter/flutter/wiki/Flutter-Cherrypick-Process)
+- Example cherry-pick cl: https://dart-review.googlesource.com/c/sdk/+/334940
+- Example cherry-pick issue: https://github.com/dart-lang/sdk/issues/53979
+- Example merge commit on `flutter/devtools`: https://github.com/flutter/devtools/pull/6699
