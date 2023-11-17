@@ -126,6 +126,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
               FlutterFramesChart(
                 controller.flutterFramesController,
                 offlineMode: offlineMode,
+                impellerEnabled: controller.impellerEnabled,
               ),
             const Expanded(child: TabbedPerformanceView()),
           ],
