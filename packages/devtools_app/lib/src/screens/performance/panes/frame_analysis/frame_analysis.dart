@@ -37,9 +37,10 @@ class FlutterFrameAnalysisView extends StatelessWidget {
       return const Center(
         child: Text(
           'No analysis data available for this frame. This means that the '
-          'timeline events for this frame occurred too long ago and DevTools '
-          'could not access them. To avoid this, open the DevTools Performance '
+          'timeline events\nfor this frame occurred too long ago and DevTools '
+          'could not access them.\n\nTo avoid this, open the DevTools Performance '
           'page sooner.',
+          textAlign: TextAlign.center,
         ),
       );
     }
