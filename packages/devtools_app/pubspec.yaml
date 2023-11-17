@@ -30,11 +30,11 @@ dependencies:
   devtools_extensions: ^0.0.10
   devtools_shared: ^6.0.1
   file: ">=6.0.0 <8.0.0"
-  file_selector: ^0.8.0
-  file_selector_linux: ^0.0.2
-  file_selector_macos: ^0.0.2
-  file_selector_web: ^0.8.1
-  file_selector_windows: ^0.0.2
+  file_selector: ^1.0.0
+  file_selector_linux: ^0.9.0
+  file_selector_macos: ^0.9.0
+  file_selector_web: ^0.9.0
+  file_selector_windows: ^0.9.0
   flutter:
     sdk: flutter
   flutter_markdown: ^0.6.8
