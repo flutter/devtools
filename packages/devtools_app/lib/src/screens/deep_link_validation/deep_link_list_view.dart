@@ -436,6 +436,7 @@ class _NotificationCardSection extends StatelessWidget {
   }
 }
 
+@visibleForTesting
 class NotificationCard extends StatelessWidget {
   const NotificationCard({
     super.key,

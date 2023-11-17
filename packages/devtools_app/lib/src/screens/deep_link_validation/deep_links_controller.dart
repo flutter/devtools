@@ -331,6 +331,7 @@ class DeepLinksController extends DisposableController {
         getFilterredLinks(allLinkDatasNotifier.value!);
   }
 
+  @visibleForTesting
   List<LinkData> getFilterredLinks(List<LinkData> linkDatas) {
     final String searchContent = displayOptions.searchContent;
     linkDatas = linkDatas.where((linkData) {
