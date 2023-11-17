@@ -107,6 +107,7 @@ class DebugSessions extends StatelessWidget {
             isProfile: isProfile,
             isRelease: isRelease,
             isWeb: isWeb,
+            supportsOpenExternal: api.capabilities.openDevToolsExternally,
           ),
       ],
     );
@@ -122,6 +123,7 @@ class _DevToolsMenu extends StatelessWidget {
     required this.isProfile,
     required this.isRelease,
     required this.isWeb,
+    required this.supportsOpenExternal,
   });
 
   final VsCodeApi api;
@@ -131,6 +133,7 @@ class _DevToolsMenu extends StatelessWidget {
   final bool isProfile;
   final bool isRelease;
   final bool isWeb;
+  final bool supportsOpenExternal;
 
   @override
   Widget build(BuildContext context) {
@@ -139,7 +142,7 @@ class _DevToolsMenu extends StatelessWidget {
         ? TextDirection.rtl
         : TextDirection.ltr;
 
-    Widget devToolsButton(ScreenMetaData screen) {
+    Widget devToolsScreenButton(ScreenMetaData screen) {
       final title = screen.title ?? screen.id;
       String? disabledReason;
       if (isRelease) {
@@ -152,33 +155,21 @@ class _DevToolsMenu extends StatelessWidget {
         disabledReason = 'Not available when running on the web';
       }
 
-      // Because we flipped the direction so the menu is aligned to the end, we
-      // should revert the text direction back to normal for the label.
-      Widget text = Directionality(
+      return DevToolsMenuItem(
+        title,
+        icon: screen.icon,
+        screenId: screen.id,
+        disabledReason: disabledReason,
+        onPressed: () {
+          ga.select(
+            gac.VsCodeFlutterSidebar.id,
+            gac.VsCodeFlutterSidebar.openDevToolsScreen(screen.id),
+          );
+          unawaited(
+            api.openDevToolsPage(session.id, page: screen.id),
+          );
+        },
         textDirection: normalDirection,
-        child: Text(title),
-      );
-
-      if (disabledReason != null) {
-        text = Tooltip(
-          preferBelow: false,
-          message: disabledReason,
-          child: text,
-        );
-      }
-
-      return MenuItemButton(
-        leadingIcon: Icon(screen.icon, size: actionsIconSize),
-        onPressed: disabledReason != null
-            ? null
-            : () {
-                ga.select(
-                  gac.VsCodeFlutterSidebar.id,
-                  gac.VsCodeFlutterSidebar.openDevToolsScreen(screen.id),
-                );
-                unawaited(api.openDevToolsPage(session.id, screen.id));
-              },
-        child: text,
       );
     }
 
@@ -190,10 +181,27 @@ class _DevToolsMenu extends StatelessWidget {
         style: const MenuStyle(
           alignment: AlignmentDirectional.bottomStart,
         ),
-        menuChildren: ScreenMetaData.values
-            .where(_shouldIncludeScreen)
-            .map(devToolsButton)
-            .toList(),
+        menuChildren: [
+          ...ScreenMetaData.values
+              .where(_shouldIncludeScreen)
+              .map(devToolsScreenButton),
+          if (supportsOpenExternal)
+            DevToolsMenuItem(
+              'Open in Browser',
+              icon: Icons.open_in_browser,
+              forceExternal: true,
+              textDirection: normalDirection,
+              onPressed: () {
+                ga.select(
+                  gac.VsCodeFlutterSidebar.id,
+                  gac.VsCodeFlutterSidebar.openDevToolsExternally.name,
+                );
+                unawaited(
+                  api.openDevToolsPage(session.id, forceExternal: true),
+                );
+              },
+            ),
+        ],
         builder: (context, controller, child) => IconButton(
           onPressed: () {
             if (controller.isOpen) {
@@ -226,5 +234,49 @@ class _DevToolsMenu extends StatelessWidget {
       // library.
       _ => screen.requiresLibrary == null,
     };
+  }
+}
+
+class DevToolsMenuItem extends StatelessWidget {
+  const DevToolsMenuItem(
+    this.title, {
+    super.key,
+    this.icon,
+    this.screenId,
+    this.disabledReason,
+    this.forceExternal = false,
+    required this.onPressed,
+    required this.textDirection,
+  });
+
+  final String title;
+  final IconData? icon;
+  final String? screenId;
+  final String? disabledReason;
+  final bool forceExternal;
+  final TextDirection textDirection;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final textDirection = this.textDirection;
+    Widget text = Directionality(
+      textDirection: textDirection,
+      child: Text(title),
+    );
+
+    if (disabledReason != null) {
+      text = Tooltip(
+        preferBelow: false,
+        message: disabledReason,
+        child: text,
+      );
+    }
+
+    return MenuItemButton(
+      leadingIcon: Icon(icon, size: actionsIconSize),
+      onPressed: disabledReason != null ? null : onPressed,
+      child: text,
+    );
   }
 }

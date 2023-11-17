@@ -54,6 +54,10 @@ TODO: Remove this section if there are not any general updates.
   the current project. This also requires a corresponding Dart extension for
   VS Code update to appear
   - [#6688](https://github.com/flutter/devtools/pull/6688)
+* The DevTools menu in the sidebar now has now has an entry "Open in Browser"
+  that opens DevTools in an external browser window even when VS Code settings
+  are set to usually use embedded DevTools.
+  - [#6736](https://github.com/flutter/devtools/pull/6736)
 
 ## Full commit history
 
