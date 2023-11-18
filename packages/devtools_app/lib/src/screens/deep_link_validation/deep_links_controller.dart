@@ -143,7 +143,7 @@ class DeepLinksController extends DisposableController {
       );
     }
 
-    return _getFilterredLinks(linkDatasByPath.values.toList());
+    return getFilterredLinks(linkDatasByPath.values.toList());
   }
 
   List<LinkData> get getLinkDatasByDomain {
@@ -162,7 +162,7 @@ class DeepLinksController extends DisposableController {
         domainErrors: linkData.domainErrors,
       );
     }
-    return _getFilterredLinks(linkDatasByDomain.values.toList());
+    return getFilterredLinks(linkDatasByDomain.values.toList());
   }
 
   final Map<int, AppLinkSettings> _androidAppLinks = <int, AppLinkSettings>{};
@@ -277,7 +277,7 @@ class DeepLinksController extends DisposableController {
   Future<void> validateLinks() async {
     allLinkDatasNotifier.value = await _validateAndroidDomain();
     displayLinkDatasNotifier.value =
-        _getFilterredLinks(allLinkDatasNotifier.value!);
+        getFilterredLinks(allLinkDatasNotifier.value!);
 
     displayOptionsNotifier.value = displayOptionsNotifier.value.copyWith(
       domainErrorCount: getLinkDatasByDomain
@@ -299,7 +299,7 @@ class DeepLinksController extends DisposableController {
     displayOptionsNotifier.value =
         displayOptionsNotifier.value.copyWith(searchContent: content);
     displayLinkDatasNotifier.value =
-        _getFilterredLinks(allLinkDatasNotifier.value!);
+        getFilterredLinks(allLinkDatasNotifier.value!);
   }
 
   void updateDisplayOptions({
@@ -328,10 +328,11 @@ class DeepLinksController extends DisposableController {
     }
 
     displayLinkDatasNotifier.value =
-        _getFilterredLinks(allLinkDatasNotifier.value!);
+        getFilterredLinks(allLinkDatasNotifier.value!);
   }
 
-  List<LinkData> _getFilterredLinks(List<LinkData> linkDatas) {
+  @visibleForTesting
+  List<LinkData> getFilterredLinks(List<LinkData> linkDatas) {
     final String searchContent = displayOptions.searchContent;
     linkDatas = linkDatas.where((linkData) {
       if (searchContent.isNotEmpty &&

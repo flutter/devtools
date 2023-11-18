@@ -69,7 +69,7 @@ void main() {
         await pumpAnalysisView(tester, null);
 
         expect(
-          find.text('No analysis data available for this frame.'),
+          find.textContaining('No analysis data available for this frame.'),
           findsOneWidget,
         );
         expect(find.byType(FrameHints), findsNothing);
@@ -84,7 +84,7 @@ void main() {
         await pumpAnalysisView(tester, frameAnalysis);
 
         expect(
-          find.text('No analysis data available for this frame.'),
+          find.textContaining('No analysis data available for this frame.'),
           findsNothing,
         );
         expect(find.byType(FrameHints), findsOneWidget);
