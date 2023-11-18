@@ -21,7 +21,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## Performance updates
 
-TODO: Remove this section if there are not any general updates.
+* Improve messaging when we do not have analysis data available for a Flutter
+frame. - [#6768](https://github.com/flutter/devtools/pull/6768)
 
 ## CPU profiler updates
 

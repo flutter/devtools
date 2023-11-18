@@ -183,7 +183,7 @@ class _PerfettoViewController extends DisposableController
       notificationService.push(
         'No timeline events available for the selected frame. Timeline '
         'events occurred too long ago before DevTools could access them. '
-        'To avoid this, open the DevTools Performance page sooner.',
+        'To avoid this, open the DevTools Performance page earlier.',
       );
       return;
     }
