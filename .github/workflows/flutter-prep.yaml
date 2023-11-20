@@ -42,13 +42,13 @@ jobs:
         uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84
         with:
           path: |
-            ./flutter-sdk
+            ./tool/flutter-sdk
           key: flutter-sdk-${{ runner.os }}-${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}
 
       - if: ${{ steps.cache-flutter.outputs.cache-hit != 'true' }}
         name: Clone Flutter SDK if none cached
         run: |
-          git clone https://github.com/flutter/flutter.git ./flutter-sdk
+          git clone https://github.com/flutter/flutter.git ./tool/flutter-sdk
           cd flutter-sdk
           git checkout $LATEST_FLUTTER_CANDIDATE
         env:
@@ -68,6 +68,6 @@ jobs:
 
       - name: Setup Flutter SDK
         run: |
-          ./flutter-sdk/bin/flutter config --no-analytics
-          ./flutter-sdk/bin/flutter doctor
-          ./flutter-sdk/bin/cache/dart-sdk/bin/dart --disable-analytics
+          ./tool/flutter-sdk/bin/flutter config --no-analytics
+          ./tool/flutter-sdk/bin/flutter doctor
+          ./tool/flutter-sdk/bin/cache/dart-sdk/bin/dart --disable-analytics
