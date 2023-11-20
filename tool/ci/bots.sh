@@ -93,11 +93,6 @@ elif [ "$BOT" = "integration_dart2js" ]; then
         dart run integration_test/run_tests.dart --headless
         popd
     fi
-
-elif [ "$BOT" = "benchmarks_dart2js" ]; then
-
-    dart run test_benchmarks/web_bundle_size_test.dart
-
 fi
 
 popd
