@@ -74,9 +74,7 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController
     );
     _initialized = true;
 
-    // TODO(kenz): replace with `createIFrameElement` when we upgrade to
-    // package:web ^0.3.1.
-    _extensionIFrame = createElementTag('iframe') as HTMLIFrameElement
+    _extensionIFrame = createIFrameElement()
       // This url is safe because we built it ourselves and it does not include
       // any user input.
       // ignore: unsafe_html
