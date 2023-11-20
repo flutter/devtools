@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(kenz): remove this once the package:web version has been upgraded.
-// ignore_for_file: avoid-unused-ignores
-
 import 'dart:js_interop';
 
 import 'package:web/helpers.dart' hide NodeGlue;
