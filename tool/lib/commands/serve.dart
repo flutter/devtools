@@ -96,6 +96,7 @@ class ServeCommand extends Command {
 
     final remainingArguments = List.of(argResults!.arguments)
       ..remove(BuildCommandArgs.updateFlutter.asArg())
+      ..remove(BuildCommandArgs.updateFlutter.asArg(negated: true))
       ..remove(BuildCommandArgs.updatePerfetto.asArg())
       ..remove(valueAsArg(_buildAppFlag))
       ..remove(valueAsArg(_buildAppFlag, negated: true))
