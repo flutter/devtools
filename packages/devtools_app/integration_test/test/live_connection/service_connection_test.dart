@@ -26,7 +26,7 @@ void main() {
   late TestApp testApp;
 
   setUpAll(() {
-    print('DAKE: Try print statement  inside test. Does it show up?');
+    print('DAKE: Try print statement inside test. Does it show up?');
     testApp = TestApp.fromEnvironment();
     expect(testApp.vmServiceUri, isNotNull);
   });
