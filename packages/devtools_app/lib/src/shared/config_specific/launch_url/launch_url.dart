@@ -11,14 +11,20 @@ import '_launch_url_desktop.dart'
 Future<void> launchUrl(String url) async {
   final parsedUrl = Uri.tryParse(url);
 
-  if (parsedUrl != null && await url_launcher.canLaunchUrl(parsedUrl)) {
-    await url_launcher.launchUrl(parsedUrl);
-  } else {
-    notificationService.push('Unable to open $url.');
+  try {
+    if (parsedUrl != null && await url_launcher.canLaunchUrl(parsedUrl)) {
+      await url_launcher.launchUrl(parsedUrl);
+    } else {
+      notificationService.push('Unable to open $url.');
+    }
+  } finally {
+    // Always pass the request up to VS Code because we could fail both silently
+    // (the usual behaviour) or with another error like
+    // "Attempted to call Window.open with a null window"
+    // https://github.com/flutter/devtools/issues/6105.
+    //
+    // In the case where we are not in VS Code, there will be nobody listening
+    // to the postMessage this sends.
+    launchUrlVSCode(url);
   }
-
-  // When embedded in VSCode, url_launcher will silently fail, so we send a
-  // command to DartCode to launch the URL. This will do nothing when not
-  // embedded in VSCode.
-  launchUrlVSCode(url);
 }
