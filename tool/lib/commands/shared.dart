@@ -46,8 +46,8 @@ extension BuildCommandArgsExtension on ArgParser {
       BuildCommandArgs.updateFlutter.flagName,
       negatable: true,
       defaultsTo: true,
-      help: 'Whether to update the Flutter SDK before building DevTools '
-          'contained in the "tool/flutter-sdk" directory.',
+      help: 'Whether to update the Flutter SDK contained in the '
+          '"tool/flutter-sdk" directory.',
     );
   }
 }
