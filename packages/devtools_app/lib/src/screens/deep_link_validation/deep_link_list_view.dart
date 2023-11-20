@@ -170,6 +170,7 @@ class _DataTable extends StatelessWidget {
         dataKey: 'deep-links',
         autoScrollContent: true,
         headerColor: Theme.of(context).colorScheme.deeplinkTableHeaderColor,
+        fillWithEmptyRows: true,
         columns: <ColumnData<LinkData>>[
           ...(() {
             switch (viewType) {
@@ -381,7 +382,7 @@ class _NotificationCardSection extends StatelessWidget {
         child: Row(
           children: [
             if (domainErrorCount > 0)
-              _NotificationCard(
+              NotificationCard(
                 title: '$domainErrorCount domain not verified',
                 description:
                     'This affects all deep links. Fix issues to make users go directly to your app.',
@@ -406,7 +407,7 @@ class _NotificationCardSection extends StatelessWidget {
             if (domainErrorCount > 0 && pathErrorCount > 0)
               const SizedBox(width: defaultSpacing),
             if (pathErrorCount > 0)
-              _NotificationCard(
+              NotificationCard(
                 title: '$pathErrorCount path not working',
                 description:
                     'Fix these path to make sure users are directed to your app',
@@ -435,8 +436,10 @@ class _NotificationCardSection extends StatelessWidget {
   }
 }
 
-class _NotificationCard extends StatelessWidget {
-  const _NotificationCard({
+@visibleForTesting
+class NotificationCard extends StatelessWidget {
+  const NotificationCard({
+    super.key,
     required this.title,
     required this.description,
     required this.actionButton,

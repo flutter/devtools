@@ -3,13 +3,14 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-// ignore: avoid_web_libraries_in_flutter, as designed
-import 'dart:html' as html;
+import 'dart:js_interop';
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_extensions/api.dart';
+import 'package:devtools_extensions/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:web/helpers.dart';
 
 import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';
@@ -96,7 +97,7 @@ class _ExtensionIFrameController extends DisposableController
   /// We need to store this in a variable so that the listener is properly
   /// removed in [dispose]. Otherwise, we will end up in a state where we are
   /// leaking listeners when an extension is disabled and re-enabled.
-  html.EventListener? _handleMessageListener;
+  EventListener? _handleMessageListener;
 
   void init() {
     _iFrameReady = Completer<void>();
@@ -108,9 +109,9 @@ class _ExtensionIFrameController extends DisposableController
       }),
     );
 
-    html.window.addEventListener(
+    window.addEventListener(
       'message',
-      _handleMessageListener = _handleMessage,
+      _handleMessageListener = _handleMessage.toJS,
     );
 
     autoDisposeStreamSubscription(
@@ -148,6 +149,12 @@ class _ExtensionIFrameController extends DisposableController
   }
 
   void _postMessage(DevToolsExtensionEvent event) async {
+    // In [integrationTestMode] we are loading a placeholder url
+    // (https://flutter.dev/) in the extension iFrame, so trying to post a
+    // message causes a cross-origin security error. Return early when
+    // [integrationTestMode] is true so that [_postMessage] calls are a no-op.
+    if (integrationTestMode) return;
+
     await _iFrameReady.future;
     final message = event.toJson();
     assert(
@@ -156,22 +163,20 @@ class _ExtensionIFrameController extends DisposableController
       ' _iFrameReady future completed.',
     );
     embeddedExtensionController.extensionIFrame.contentWindow!.postMessage(
-      message,
-      embeddedExtensionController.extensionUrl,
+      message.jsify(),
+      embeddedExtensionController.extensionUrl.toJS,
     );
   }
 
-  void _handleMessage(html.Event e) {
-    if (e is html.MessageEvent) {
-      final extensionEvent = DevToolsExtensionEvent.tryParse(e.data);
-      if (extensionEvent != null) {
-        onEventReceived(
-          extensionEvent,
-          onUnknownEvent: () => notificationService.push(
-            'Unknown event received from extension: ${e.data}',
-          ),
-        );
-      }
+  void _handleMessage(Event e) {
+    final extensionEvent = tryParseExtensionEvent(e);
+    if (extensionEvent != null) {
+      onEventReceived(
+        extensionEvent,
+        onUnknownEvent: () => notificationService.push(
+          'Unknown event received from extension: $extensionEvent}',
+        ),
+      );
     }
   }
 
@@ -205,7 +210,7 @@ class _ExtensionIFrameController extends DisposableController
 
   @override
   void dispose() {
-    html.window.removeEventListener('message', _handleMessageListener);
+    window.removeEventListener('message', _handleMessageListener);
     _handleMessageListener = null;
     _pollForExtensionHandlerReady?.cancel();
     super.dispose();

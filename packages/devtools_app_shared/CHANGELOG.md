@@ -1,3 +1,8 @@
+## 0.0.8
+* Add `ServiceManager.resolvedUriManager` for looking up package and file uris from
+a VM service connection.
+* Migrate from `dart:html` to `package:web`.
+
 ## 0.0.7
 * Bump minimum Dart SDK version to `3.3.0-91.0.dev` and minimum Flutter SDK version to `3.17.0-0.0.pre`.
 * Bump `package:vm_service` dependency to ^13.0.0.

@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore: avoid_web_libraries_in_flutter, as designed
-import 'dart:html' hide Storage;
+import 'dart:js_interop';
 
 import 'package:devtools_app_shared/utils.dart';
+import 'package:devtools_app_shared/web_utils.dart';
+import 'package:web/helpers.dart' hide Storage;
 
 import '../../../service/service_manager.dart';
 import '../../globals.dart';
@@ -15,9 +16,13 @@ import '../../server/server_api_client.dart';
 /// Return the url the application is launched from.
 Future<String> initializePlatform() async {
   // Clear out the unneeded HTML from index.html.
-  for (var element in document.body!.querySelectorAll('.legacy-dart')) {
-    element.remove();
-  }
+  document.body!.querySelectorAll('.legacy-dart').forEach(
+        (Node element) {
+          if (element.parentNode != null) {
+            element.parentNode!.removeChild(element);
+          }
+        }.toJS,
+      );
 
   // Here, we try and initialize the connection between the DevTools web app and
   // its local server. DevTools can be launched without the server however, so
@@ -77,7 +82,10 @@ void _sendKeyPressToParent(KeyboardEvent event) {
     'repeat': event.repeat,
     'shiftKey': event.shiftKey,
   };
-  window.parent?.postMessage({'command': 'keydown', 'data': data}, '*');
+  window.parent?.postMessage(
+    {'command': 'keydown', 'data': data}.jsify(),
+    '*'.toJS,
+  );
 }
 
 class ServerConnectionStorage implements Storage {

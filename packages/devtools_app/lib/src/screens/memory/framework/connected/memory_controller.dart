@@ -57,10 +57,11 @@ class MemoryFeatureControllers {
   }
 }
 
-/// This class contains the business logic for memory screen, for a connected application.
+/// This class contains the business logic for memory screen, for a connected
+/// application.
 ///
-/// This class must not have direct dependencies on dart:html. This allows tests
-/// of the complicated logic in this class to run on the VM.
+/// This class must not have direct dependencies on web-only libraries. This
+/// allows tests of the complicated logic in this class to run on the VM.
 ///
 /// The controller should be recreated for every new connection.
 class MemoryController extends DisposableController

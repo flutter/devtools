@@ -15,6 +15,7 @@ import 'connected_app.dart';
 import 'flutter_version.dart';
 import 'isolate_manager.dart';
 import 'isolate_state.dart';
+import 'resolved_uri_manager.dart';
 import 'service_extension_manager.dart';
 import 'service_extensions.dart';
 import 'service_utils.dart';
@@ -79,6 +80,8 @@ class ServiceManager<T extends VmService> {
   final Map<String, String> _registeredMethodsForService = {};
 
   final isolateManager = IsolateManager();
+
+  final resolvedUriManager = ResolvedUriManager();
 
   /// Proxy to state inside the isolateManager, for code consizeness.
   ///
@@ -223,6 +226,7 @@ class ServiceManager<T extends VmService> {
     // race conditions where managers cannot listen for events soon enough.
     isolateManager.vmServiceOpened(service);
     serviceExtensionManager.vmServiceOpened(service, connectedApp!);
+    resolvedUriManager.vmServiceOpened(service);
 
     await callLifecycleCallbacks(
       ServiceManagerLifecycle.beforeOpenVmService,
@@ -254,6 +258,7 @@ class ServiceManager<T extends VmService> {
       this.service,
     );
 
+    resolvedUriManager.vmServiceClosed();
     serviceExtensionManager.vmServiceClosed();
     isolateManager.handleVmServiceClosed();
     _registeredMethodsForService.clear();

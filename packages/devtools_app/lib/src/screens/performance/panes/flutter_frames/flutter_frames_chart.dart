@@ -33,11 +33,14 @@ class FlutterFramesChart extends StatelessWidget {
     this.framesController, {
     super.key,
     required this.offlineMode,
+    required this.impellerEnabled,
   });
 
   final FlutterFramesController framesController;
 
   final bool offlineMode;
+
+  final bool impellerEnabled;
 
   @override
   Widget build(BuildContext context) {
@@ -57,6 +60,7 @@ class FlutterFramesChart extends StatelessWidget {
           displayRefreshRate: displayRefreshRate,
           isVisible: showChart,
           offlineMode: offlineMode,
+          impellerEnabled: impellerEnabled,
         );
       },
     );
@@ -70,6 +74,7 @@ class _FlutterFramesChart extends StatefulWidget {
     required this.displayRefreshRate,
     required this.isVisible,
     required this.offlineMode,
+    required this.impellerEnabled,
   });
 
   final FlutterFramesController framesController;
@@ -81,6 +86,8 @@ class _FlutterFramesChart extends StatefulWidget {
   final bool isVisible;
 
   final bool offlineMode;
+
+  final bool impellerEnabled;
 
   static double get frameNumberSectionHeight => scaleByFontFactor(20.0);
 
@@ -151,6 +158,7 @@ class _FlutterFramesChartState extends State<_FlutterFramesChart> {
                   frames: widget.frames,
                   displayRefreshRate: widget.displayRefreshRate,
                   constraints: constraints,
+                  impellerEnabled: widget.impellerEnabled,
                 );
               },
             ),
@@ -165,6 +173,7 @@ class _FlutterFramesChartState extends State<_FlutterFramesChart> {
               frames: widget.frames,
               displayRefreshRate: widget.displayRefreshRate,
               offlineMode: widget.offlineMode,
+              impellerEnabled: widget.impellerEnabled,
             ),
           ),
         ],
@@ -181,6 +190,7 @@ class FramesChart extends StatefulWidget {
     required this.frames,
     required this.displayRefreshRate,
     required this.constraints,
+    required this.impellerEnabled,
   });
 
   final FlutterFramesController framesController;
@@ -190,6 +200,8 @@ class FramesChart extends StatefulWidget {
   final double displayRefreshRate;
 
   final BoxConstraints constraints;
+
+  final bool impellerEnabled;
 
   @override
   State<FramesChart> createState() => _FramesChartState();
@@ -332,6 +344,14 @@ class _FramesChartState extends State<FramesChart> with AutoDisposeMixin {
           child: chart,
         ),
         fpsLinePainter,
+        Positioned(
+          right: denseSpacing,
+          top: densePadding,
+          child: Text(
+            'Engine: ${widget.impellerEnabled ? 'Impeller' : 'Skia'}',
+            style: themeData.subtleChartTextStyle,
+          ),
+        ),
       ],
     );
   }
@@ -345,6 +365,7 @@ class FramesChartControls extends StatelessWidget {
     required this.frames,
     required this.displayRefreshRate,
     required this.offlineMode,
+    required this.impellerEnabled,
   });
 
   static const _pauseTooltip = 'Pause Flutter frame recording';
@@ -358,6 +379,8 @@ class FramesChartControls extends StatelessWidget {
   final double displayRefreshRate;
 
   final bool offlineMode;
+
+  final bool impellerEnabled;
 
   @override
   Widget build(BuildContext context) {
@@ -387,10 +410,11 @@ class FramesChartControls extends StatelessWidget {
             const LegendEntry('Frame Time (UI)', mainUiColor),
             const LegendEntry('Frame Time (Raster)', mainRasterColor),
             const LegendEntry('Jank (slow frame)', uiJankColor),
-            LegendEntry(
-              'Shader Compilation',
-              shaderCompilationColor.background,
-            ),
+            if (!impellerEnabled)
+              LegendEntry(
+                'Shader Compilation',
+                shaderCompilationColor.background,
+              ),
           ],
         ),
         AverageFPS(

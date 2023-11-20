@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be found
 // in the LICENSE file.
 
-// ignore: avoid_web_libraries_in_flutter, as designed
-import 'dart:html';
+import 'package:web/helpers.dart';
 
 class HostPlatform {
   HostPlatform._() {

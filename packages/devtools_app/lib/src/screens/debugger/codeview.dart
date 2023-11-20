@@ -1498,16 +1498,18 @@ Future<String?> fetchScriptLocationFullFilePath(
   if (packagePath != null) {
     final isolateId = serviceConnection
         .serviceManager.isolateManager.selectedIsolate.value!.id!;
-    filePath = serviceConnection.resolvedUriManager.lookupFileUri(
+    filePath =
+        serviceConnection.serviceManager.resolvedUriManager.lookupFileUri(
       isolateId,
       packagePath,
     );
     if (filePath == null) {
-      await serviceConnection.resolvedUriManager.fetchFileUris(
+      await serviceConnection.serviceManager.resolvedUriManager.fetchFileUris(
         isolateId,
         [packagePath],
       );
-      filePath = serviceConnection.resolvedUriManager.lookupFileUri(
+      filePath =
+          serviceConnection.serviceManager.resolvedUriManager.lookupFileUri(
         isolateId,
         packagePath,
       );
