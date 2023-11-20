@@ -41,12 +41,12 @@ extension BuildCommandArgsExtension on ArgParser {
     );
   }
 
-  void addUseFlutterFromPathFlag() {
+  void addUpdateFlutterFlag() {
     addFlag(
-      BuildCommandArgs.useFlutterFromPath.flagName,
-      negatable: false,
-      defaultsTo: false,
-      help: 'Whether to use the Flutter SDK on PATH instead of the Flutter SDK '
+      BuildCommandArgs.updateFlutter.flagName,
+      negatable: true,
+      defaultsTo: true,
+      help: 'Whether to update the Flutter SDK before building DevTools '
           'contained in the "tool/flutter-sdk" directory.',
     );
   }
@@ -55,7 +55,7 @@ extension BuildCommandArgsExtension on ArgParser {
 enum BuildCommandArgs {
   buildMode('build-mode'),
   pubGet('pub-get'),
-  useFlutterFromPath('use-flutter-from-path'),
+  updateFlutter('update-flutter'),
   updatePerfetto('update-perfetto');
 
   const BuildCommandArgs(this.flagName);
