@@ -49,14 +49,14 @@ jobs:
         name: Clone Flutter SDK if none cached
         run: |
           git clone https://github.com/flutter/flutter.git ./tool/flutter-sdk
-          cd flutter-sdk
+          cd tool/flutter-sdk
           git checkout $LATEST_FLUTTER_CANDIDATE
         env:
           LATEST_FLUTTER_CANDIDATE: ${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}
 
       - name: Assert that the Latest Flutter Candidate is checked out
         run: |
-          cd flutter-sdk
+          cd tool/flutter-sdk
           HEAD_SHA=$(git rev-parse HEAD)
           LATEST_FLUTTER_CANDIDATE_SHA=$(git rev-list -1 "$LATEST_FLUTTER_CANDIDATE")
           if [ "$HEAD_SHA" != "$LATEST_FLUTTER_CANDIDATE_SHA" ]; then
