@@ -100,7 +100,7 @@ class PerformanceController extends DisposableController
   PerformanceData? offlinePerformanceData;
 
   bool get impellerEnabled => _impellerEnabled;
-  late final bool _impellerEnabled;
+  bool _impellerEnabled = false;
 
   final _initialized = Completer<void>();
 
