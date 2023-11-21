@@ -10,15 +10,6 @@ To learn more about DevTools, check out the
 
 ## General updates
 
-* Added a link to the new "Dive in to DevTools" YouTube
-[video](https://www.youtube.com/watch?v=_EYk-E29edo) in the bottom status bar. This
-video provides a brief tutorial for each DevTools screen.
-[#6554](https://github.com/flutter/devtools/pull/6554)
-
-    ![Link to watch a DevTools tutorial video](images/watch_tutorial_link.png "Link to watch a DevTools tutorial video")
-
-* Added a work around to fix copy button functionality in VSCode. [#6598](https://github.com/flutter/devtools/pull/6598)
-
 * Enabled DevTools extensions when debugging a Dart entry point that is not
 under `lib` (e.g. a unit test or integration test). Thanks to
 [@bartekpacia](https://github.com/bartekpacia) for this change! -
