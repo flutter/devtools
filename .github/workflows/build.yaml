@@ -269,7 +269,7 @@ jobs:
         uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84
         with:
           path: |
-            ./flutter-sdk
+            ./tool/flutter-sdk
           key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
       - name: tool/ci/benchmark_tests.sh
         run: ./tool/ci/benchmark_tests.sh
