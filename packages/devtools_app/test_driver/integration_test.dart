@@ -5,6 +5,7 @@
 // ignore_for_file: avoid_print
 
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
 import 'package:flutter_driver/flutter_driver.dart';
@@ -95,9 +96,9 @@ Future<void> main() async {
   );
 }
 
-double _percentDiff(List<int> goldenBytes, List<int> screenshotBytes) {
+double _percentDiff(Uint8List goldenBytes, List<int> screenshotBytes) {
   final goldenImage = decodeImage(goldenBytes);
-  final screenshotImage = decodeImage(screenshotBytes);
+  final screenshotImage = decodeImage(Uint8List.fromList(screenshotBytes));
   if (goldenImage == null || screenshotImage == null) {
     print('Cannot decode one or both of the golden images.');
     return _defaultDiffPercentage;
