@@ -129,7 +129,7 @@ Future<void> connectToTestApp(WidgetTester tester, TestApp testApp) async {
       matching: find.byType(ElevatedButton),
     ),
   );
-  await tester.pumpAndSettle(safePumpDuration);
+  await tester.pumpAndSettle(longPumpDuration);
 }
 
 Future<void> disconnectFromTestApp(WidgetTester tester) async {
