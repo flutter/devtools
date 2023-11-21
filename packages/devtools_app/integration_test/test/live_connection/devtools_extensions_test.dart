@@ -5,7 +5,6 @@
 // Do not delete these arguments. They are parsed by test runner.
 // test-argument:experimentsOn=true
 
-// import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/extensions/embedded/view.dart';
 import 'package:devtools_app/src/extensions/extension_screen.dart';

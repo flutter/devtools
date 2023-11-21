@@ -20,14 +20,14 @@ class BuildExtensionCommand extends Command {
   BuildExtensionCommand() {
     argParser
       ..addOption(
-        'source',
+        _sourceKey,
         help: 'The source location for the extension flutter web app (can  be '
             'relative or absolute)',
         valueHelp: 'path/to/foo/packages/foo_devtools_extension',
         mandatory: true,
       )
       ..addOption(
-        'dest',
+        _destinationKey,
         help: 'The destination location for the extension build output (can be '
             'relative or absolute)',
         valueHelp: 'path/to/foo/packages/foo/extension/devtools',
@@ -56,7 +56,7 @@ class BuildExtensionCommand extends Command {
     _log('Building the extension Flutter web app...');
     await _runProcess(
       processManager,
-      'flutter',
+      Platform.isWindows ? 'flutter.bat' : 'flutter',
       [
         'build',
         'web',
@@ -69,24 +69,25 @@ class BuildExtensionCommand extends Command {
       workingDirectory: source,
     );
 
-    _log('Setting canvaskit permissions...');
-    await _runProcess(
-      processManager,
-      'chmod',
-      [
-        '0755',
-        // Note: using a wildcard `canvaskit.*` throws.
-        'build/web/canvaskit/canvaskit.js',
-        'build/web/canvaskit/canvaskit.wasm',
-      ],
-      workingDirectory: source,
-    );
+    // TODO(kenz): investigate if we need to perform a windows equivalent of
+    // `chmod` or if we even need to perform `chmod` for linux / mac anymore.
+    if (!Platform.isWindows) {
+      _log('Setting canvaskit permissions...');
+      await _runProcess(
+        processManager,
+        'chmod',
+        [
+          '0755',
+          // Note: using a wildcard `canvaskit.*` throws.
+          'build/web/canvaskit/canvaskit.js',
+          'build/web/canvaskit/canvaskit.wasm',
+        ],
+        workingDirectory: source,
+      );
+    }
 
     _log('Copying built output to the extension destination...');
     await _copyBuildToDestination(source: source, dest: destination);
-
-    // Closes stdin for the entire program.
-    await sharedStdIn.terminate();
   }
 
   Future<void> _copyBuildToDestination({

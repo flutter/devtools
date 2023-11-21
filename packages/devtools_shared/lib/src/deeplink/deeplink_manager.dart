@@ -190,7 +190,6 @@ class DeeplinkManager {
 }
 
 class _FlutterProcessError extends Error {
-  /// Constructs a [GoError]
   _FlutterProcessError(this.message);
 
   /// The error message.

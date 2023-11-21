@@ -9,7 +9,7 @@ import '../../../../../shared/primitives/utils.dart';
 import '../../../performance_controller.dart';
 import '../timeline_events_controller.dart';
 import '_perfetto_controller_desktop.dart'
-    if (dart.library.html) '_perfetto_controller_web.dart';
+    if (dart.library.js_interop) '_perfetto_controller_web.dart';
 import 'perfetto_event_processor.dart';
 
 PerfettoControllerImpl createPerfettoController(

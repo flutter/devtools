@@ -141,10 +141,6 @@ class NotificationService {
   void markComplete(NotificationMessage message) {
     activeMessages.removeWhere((element) => element == message);
   }
-
-  void dispose() {
-    newTasks.dispose();
-  }
 }
 
 class NotificationAction extends StatelessWidget {

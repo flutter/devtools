@@ -4,7 +4,14 @@
 
 import 'package:flutter/material.dart';
 
+import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/screen.dart';
+import '../../shared/utils.dart';
+import 'deep_link_list_view.dart';
+import 'deep_links_controller.dart';
+import 'deep_links_model.dart';
+import 'select_project_view.dart';
 
 class DeepLinksScreen extends Screen {
   DeepLinksScreen() : super.fromMetaData(ScreenMetaData.deepLinks);
@@ -17,8 +24,40 @@ class DeepLinksScreen extends Screen {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text('TODO: build deep link validation tool'),
+    return const DeepLinkPage();
+  }
+}
+
+class DeepLinkPage extends StatefulWidget {
+  const DeepLinkPage({super.key});
+
+  @override
+  State<DeepLinkPage> createState() => _DeepLinkPageState();
+}
+
+class _DeepLinkPageState extends State<DeepLinkPage>
+    with ProvidedControllerMixin<DeepLinksController, DeepLinkPage> {
+  @override
+  void initState() {
+    super.initState();
+    ga.screen(gac.deeplink);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!initController()) return;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: controller.selectedProject,
+      builder: (_, FlutterProject? project, __) {
+        return project == null
+            ? const SelectProjectView()
+            : const DeepLinkListView();
+      },
     );
   }
 }

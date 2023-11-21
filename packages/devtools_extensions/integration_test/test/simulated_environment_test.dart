@@ -8,7 +8,7 @@ import 'package:devtools_extensions/devtools_extensions.dart';
 import 'package:devtools_extensions/src/template/_simulated_devtools_environment/_simulated_devtools_environment.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:foo_devtools_extension/src/foo_devtools_extension.dart';
+import 'package:foo_devtools_extension/src/devtools_extension_api_example.dart';
 import 'package:integration_test/integration_test.dart';
 
 // To run this test:
@@ -24,12 +24,12 @@ void main() {
     runApp(
       const DevToolsExtension(
         requiresRunningApplication: false,
-        child: FooExtensionHomePage(),
+        child: TestDevToolsExtension(),
       ),
     );
     await tester.pump(safePumpDuration);
     expect(find.byType(DevToolsExtension), findsOneWidget);
-    expect(find.byType(FooExtensionHomePage), findsOneWidget);
+    expect(find.byType(TestDevToolsExtension), findsOneWidget);
     expect(find.byType(SimulatedDevToolsWrapper), findsOneWidget);
     expect(find.text('Simulated DevTools Environment'), findsOneWidget);
 
@@ -205,4 +205,24 @@ Future<void> _clearLogs(
 void logStatus(String log) {
   // ignore: avoid_print, intentional print for test output
   print('TEST STATUS: $log');
+}
+
+class TestDevToolsExtension extends StatelessWidget {
+  const TestDevToolsExtension({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: const Text('Test DevTools Extension'),
+      ),
+      body: const Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CallingDevToolsExtensionsAPIsExample(),
+        ],
+      ),
+    );
+  }
 }

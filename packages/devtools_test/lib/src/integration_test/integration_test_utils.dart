@@ -17,6 +17,7 @@ import 'test_data/performance.dart';
 const shortPumpDuration = Duration(seconds: 1);
 const safePumpDuration = Duration(seconds: 3);
 const longPumpDuration = Duration(seconds: 6);
+const veryLongPumpDuration = Duration(seconds: 9);
 
 /// Required to have multiple test cases in a file.
 Future<void> resetHistory() async {
@@ -112,7 +113,7 @@ Future<void> pumpDevTools(WidgetTester tester) async {
   );
 
   // Await a delay to ensure the widget tree has loaded.
-  await tester.pumpAndSettle(longPumpDuration);
+  await tester.pumpAndSettle(veryLongPumpDuration);
   expect(find.byType(DevToolsApp), findsOneWidget);
 }
 
@@ -128,7 +129,7 @@ Future<void> connectToTestApp(WidgetTester tester, TestApp testApp) async {
       matching: find.byType(ElevatedButton),
     ),
   );
-  await tester.pumpAndSettle(safePumpDuration);
+  await tester.pumpAndSettle(longPumpDuration);
 }
 
 Future<void> disconnectFromTestApp(WidgetTester tester) async {

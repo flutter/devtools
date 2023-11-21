@@ -92,7 +92,8 @@ class ShowBannerMessageExtensionEvent extends DevToolsExtensionEvent {
     required String message,
     required String extensionName,
     bool ignoreIfAlreadyDismissed = true,
-  }) : super(
+  })  : assert(bannerMessageType == 'warning' || bannerMessageType == 'error'),
+        super(
           DevToolsExtensionEventType.showBannerMessage,
           data: {
             _idKey: id,

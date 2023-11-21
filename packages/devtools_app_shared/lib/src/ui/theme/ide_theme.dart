@@ -6,7 +6,8 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
-export '_ide_theme_desktop.dart' if (dart.library.html) '_ide_theme_web.dart';
+export '_ide_theme_desktop.dart'
+    if (dart.library.js_interop) '_ide_theme_web.dart';
 
 /// IDE-supplied theming.
 final class IdeTheme {

@@ -252,7 +252,6 @@ class MethodAndSourceDisplay extends StatelessWidget {
     required this.methodName,
     required this.packageUri,
     required this.sourceLine,
-    required this.isSelected,
     this.displayInRow = true,
     super.key,
   });
@@ -264,8 +263,6 @@ class MethodAndSourceDisplay extends StatelessWidget {
   final String packageUri;
 
   final int? sourceLine;
-
-  final bool isSelected;
 
   final bool displayInRow;
 
@@ -280,7 +277,8 @@ class MethodAndSourceDisplay extends StatelessWidget {
 
       final sourceDisplay = '($packageUriWithSourceLine)';
       final script = scriptManager.scriptRefForUri(packageUri);
-      final showSourceAsLink = script != null;
+      final showSourceAsLink =
+          script != null && !offlineController.offlineMode.value;
       if (showSourceAsLink) {
         sourceTextSpans.add(
           VmServiceObjectLink(

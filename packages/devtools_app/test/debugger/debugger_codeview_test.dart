@@ -170,7 +170,7 @@ void main() {
           ),
         );
         // Prefetch File Uris
-        await serviceConnection.resolvedUriManager.fetchFileUris(
+        await serviceConnection.serviceManager.resolvedUriManager.fetchFileUris(
           serviceConnection
               .serviceManager.isolateManager.selectedIsolate.value!.id!,
           [mockScriptRef.uri!],

@@ -40,9 +40,6 @@ class PreferencesController extends DisposableController
   PerformancePreferencesController get performance => _performance;
   final _performance = PerformancePreferencesController();
 
-  CpuProfilerPreferencesController get cpuProfiler => _cpuProfiler;
-  final _cpuProfiler = CpuProfilerPreferencesController();
-
   ExtensionsPreferencesController get devToolsExtensions => _extensions;
   final _extensions = ExtensionsPreferencesController();
 
@@ -74,7 +71,6 @@ class PreferencesController extends DisposableController
     await inspector.init();
     await memory.init();
     await performance.init();
-    await cpuProfiler.init();
     await devToolsExtensions.init();
 
     setGlobal(PreferencesController, this);
@@ -105,7 +101,6 @@ class PreferencesController extends DisposableController
     inspector.dispose();
     memory.dispose();
     performance.dispose();
-    cpuProfiler.dispose();
     devToolsExtensions.dispose();
     super.dispose();
   }
@@ -445,33 +440,6 @@ class MemoryPreferencesController extends DisposableController
     refLimit.value =
         int.tryParse(await storage.getValue(_refLimitStorageId) ?? '') ??
             _defaultRefLimit;
-  }
-}
-
-class CpuProfilerPreferencesController extends DisposableController
-    with AutoDisposeControllerMixin {
-  final displayTreeGuidelines = ValueNotifier<bool>(false);
-
-  static final _displayTreeGuidelinesId = '${gac.cpuProfiler}.'
-      '${gac.CpuProfilerEvents.cpuProfileDisplayTreeGuidelines.name}';
-
-  Future<void> init() async {
-    addAutoDisposeListener(
-      displayTreeGuidelines,
-      () {
-        storage.setValue(
-          _displayTreeGuidelinesId,
-          displayTreeGuidelines.value.toString(),
-        );
-        ga.select(
-          gac.cpuProfiler,
-          gac.CpuProfilerEvents.cpuProfileDisplayTreeGuidelines.name,
-          value: displayTreeGuidelines.value ? 1 : 0,
-        );
-      },
-    );
-    displayTreeGuidelines.value =
-        await storage.getValue(_displayTreeGuidelinesId) == 'true';
   }
 }
 

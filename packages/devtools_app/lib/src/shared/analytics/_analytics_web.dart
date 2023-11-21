@@ -8,16 +8,15 @@ library gtags;
 // ignore_for_file: non_constant_identifier_names
 
 import 'dart:async';
-// ignore: avoid_web_libraries_in_flutter, by design
-import 'dart:html';
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:js/js.dart';
 import 'package:logging/logging.dart';
+import 'package:web/helpers.dart';
 
 import '../../../devtools.dart' as devtools show version;
-import '../config_specific/server/server.dart' as server;
 import '../globals.dart';
+import '../server/server.dart' as server;
 import '../utils.dart';
 import 'analytics_common.dart';
 import 'constants.dart' as gac;
@@ -800,7 +799,7 @@ Future<bool> disableAnalytics() async {
 /// devtoolsChrome.
 void computeDevToolsCustomGTagsData() {
   // Platform
-  final String platform = window.navigator.platform!;
+  final String platform = window.navigator.platform;
   platform.replaceAll(' ', '_');
   devtoolsPlatformType = platform;
 
