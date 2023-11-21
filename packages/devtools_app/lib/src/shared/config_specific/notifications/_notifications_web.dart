@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be found
 // in the LICENSE file.
 
-import 'dart:js_util';
+import 'dart:js_interop';
 
 import 'package:web/helpers.dart' as web_helpers;
 import 'package:web/web.dart';
@@ -17,9 +17,9 @@ class Notification {
 
   late final web_helpers.Notification _impl;
 
-  static Future<String> requestPermission() {
-    return promiseToFuture(web_helpers.Notification.requestPermission());
-  }
+  static Future<String> requestPermission() async =>
+      ((await web_helpers.Notification.requestPermission().toDart) as JSString)
+          .toDart;
 
   void close() {
     _impl.close();

@@ -21,7 +21,7 @@ dependencies:
   path: ^1.8.0
   logging: ^1.1.1
   vm_service: ^13.0.0
-  web: '>=0.3.0 <0.5.0'
+  web: ^0.4.0
 
 dev_dependencies:
   flutter_driver:

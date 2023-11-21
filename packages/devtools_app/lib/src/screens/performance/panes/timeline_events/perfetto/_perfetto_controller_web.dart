@@ -165,9 +165,7 @@ class PerfettoControllerImpl extends PerfettoController {
     );
     _initialized = true;
 
-    // TODO(kenz): replace with `createIFrameElement` when we upgrade to
-    // package:web ^0.3.1.
-    _perfettoIFrame = createElementTag('iframe') as HTMLIFrameElement
+    _perfettoIFrame = createIFrameElement()
       // This url is safe because we built it ourselves and it does not include
       // any user input.
       // ignore: unsafe_html
