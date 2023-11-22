@@ -102,6 +102,10 @@ class UpdateFlutterSdkCommand extends Command {
 
     if (updateFlutterFromPath) {
       final sdk = FlutterSdk.current;
+      if (sdk == null) {
+        print('Unable to locate a Flutter sdk.');
+        return 1;
+      }
 
       log.stdout('Updating local flutter/flutter repository...');
 

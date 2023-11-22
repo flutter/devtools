@@ -31,8 +31,8 @@ if [[ $RUNNER_OS == "Windows" ]]; then
 fi
 
 # Make sure Flutter sdk has been provided
-if [ ! -d "./tool/flutter-sdk" ]; then
-    echo "Expected ./tool/flutter-sdk to exist"
+if [ ! -d "./flutter-sdk" ]; then
+    echo "Expected ./flutter-sdk to exist"
     exit 1;
 fi
 
@@ -40,7 +40,7 @@ fi
 # devtools repo. We don't use the dart script from flutter/bin as that script
 # can and does print 'Waiting for another flutter command...' at inopportune
 # times.
-export PATH=`pwd`/tool/flutter-sdk/bin/cache/dart-sdk/bin:`pwd`/tool/flutter-sdk/bin:`pwd`/bin:$PATH
+export PATH=`pwd`/flutter-sdk/bin/cache/dart-sdk/bin:`pwd`/flutter-sdk/bin:`pwd`/bin:$PATH
 
 # Look up the latest flutter candidate (this is the latest flutter version in g3)
 # TODO(https://github.com/flutter/devtools/issues/4591): re-write this script as a
