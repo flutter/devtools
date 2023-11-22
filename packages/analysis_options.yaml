@@ -126,6 +126,7 @@ linter:
     - unnecessary_const
     - unnecessary_getters_setters
     # - unnecessary_lambdas # https://github.com/dart-lang/linter/issues/498
+    - unnecessary_library_directive
     - unnecessary_new
     - unnecessary_null_aware_assignments
     - unnecessary_null_in_if_null_operators
@@ -138,6 +139,7 @@ linter:
     - use_rethrow_when_possible
     # - use_setters_to_change_properties # not yet tested
     # - use_string_buffers # https://github.com/dart-lang/linter/pull/664
+    - use_string_in_part_of_directives
     # - use_to_and_as_if_applicable # has false positives, so we prefer to catch this by code-review
     - valid_regexps
     # - void_checks # not yet tested
