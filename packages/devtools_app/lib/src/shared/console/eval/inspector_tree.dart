@@ -7,8 +7,7 @@
 /// This library must not have direct dependencies on web-only libraries.
 ///
 /// This allows tests of the complicated logic in this class to run on the VM.
-
-library inspector_tree;
+library;
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/foundation.dart';
