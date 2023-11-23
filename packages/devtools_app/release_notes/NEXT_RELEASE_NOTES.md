@@ -16,8 +16,8 @@ under `lib` (e.g. a unit test or integration test). Thanks to
 [#6644](https://github.com/flutter/devtools/pull/6644)
 
 ## Inspector updates
-
-TODO: Remove this section if there are not any general updates.
+* When done typing in the search field, the next selection is now automatically selected - [#6677](https://github.com/flutter/devtools/pull/6677)
+* When typing in the search field, hitting `Enter` will now select the next search result, hitting `Shift+Enter` will now select the previous result. - [#6677](https://github.com/flutter/devtools/pull/6677)
 
 ## Performance updates
 
