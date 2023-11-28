@@ -4,7 +4,7 @@ For instructions on how to release DevTools, please see
 
 ## Debug Logs
 
-Debug logs found in `Settings > Copy Logs` are saved such that they can be read by (lnav)[https://lnav.org/]
+Debug logs found in `Settings > Copy Logs` are saved such that they can be read by (lnav)[https://lnav.org/].
 
 ### Configuring `lnav` for linux and MacOS
 > For Windows, you will need find a different program to parse and read these logs.
