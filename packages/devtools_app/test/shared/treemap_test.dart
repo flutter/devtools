@@ -2,14 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/charts/treemap.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:vm_snapshot_analysis/treemap.dart';
 
 import '../test_infra/matchers/matchers.dart';
 import '../test_infra/test_data/app_size/apk_analysis.dart';
@@ -132,7 +136,7 @@ void main() {
 
   group('Treemap from small instruction sizes', () {
     setUp(() async {
-      root = await loadSnapshotJsonAsTree(smallInstructionSizes);
+      root = await _loadSnapshotJsonAsTree(smallInstructionSizes);
     });
     testWidgetsWithWindowSize(
       'zooms in down to a node without children',
@@ -167,7 +171,7 @@ void main() {
 
   group('Treemap from instruction sizes', () {
     setUp(() async {
-      root = await loadSnapshotJsonAsTree(instructionSizes);
+      root = await _loadSnapshotJsonAsTree(instructionSizes);
     });
 
     testWidgetsWithWindowSize(
@@ -190,7 +194,7 @@ void main() {
 
   group('Treemap from v8 snapshot', () {
     setUp(() async {
-      root = await loadSnapshotJsonAsTree(newV8);
+      root = await _loadSnapshotJsonAsTree(newV8);
     });
 
     testWidgetsWithWindowSize(
@@ -215,7 +219,7 @@ void main() {
 
   group('Treemap from APK analysis', () {
     setUp(() async {
-      root = await loadSnapshotJsonAsTree(apkAnalysis);
+      root = await _loadSnapshotJsonAsTree(apkAnalysis);
     });
 
     testWidgetsWithWindowSize(
@@ -237,4 +241,45 @@ void main() {
       skip: kIsWeb,
     );
   });
+}
+
+Future<TreemapNode> _loadSnapshotJsonAsTree(String snapshotJson) async {
+  final treemapTestData = jsonDecode(snapshotJson);
+
+  if (treemapTestData is Map<String, dynamic> &&
+      treemapTestData['type'] == 'apk') {
+    return _generateTree(treemapTestData);
+  } else {
+    final processedTestData = treemapFromJson(treemapTestData);
+    processedTestData['n'] = 'Root';
+    return _generateTree(processedTestData);
+  }
+}
+
+/// Builds a tree with [TreemapNode] from [treeJson] which represents
+/// the hierarchical structure of the tree.
+TreemapNode _generateTree(Map<String, dynamic> treeJson) {
+  var treemapNodeName = treeJson['n'];
+  if (treemapNodeName == '') treemapNodeName = 'Unnamed';
+  final rawChildren = treeJson['children'];
+  final treemapNodeChildren = <TreemapNode>[];
+
+  int treemapNodeSize = 0;
+  if (rawChildren != null) {
+    // If not a leaf node, build all children then take the sum of the
+    // children's sizes as its own size.
+    for (var child in rawChildren) {
+      final childTreemapNode = _generateTree(child);
+      treemapNodeChildren.add(childTreemapNode);
+      treemapNodeSize += childTreemapNode.byteSize;
+    }
+    treemapNodeSize = treemapNodeSize;
+  } else {
+    // If a leaf node, just take its own size.
+    // Defaults to 0 if a leaf node has a size of null.
+    treemapNodeSize = treeJson['value'] ?? 0;
+  }
+
+  return TreemapNode(name: treemapNodeName, byteSize: treemapNodeSize)
+    ..addAllChildren(treemapNodeChildren);
 }

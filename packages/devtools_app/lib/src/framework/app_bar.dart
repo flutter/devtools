@@ -33,6 +33,7 @@ class DevToolsAppBar extends StatelessWidget {
     TabBar tabBar;
 
     List<Screen> visibleScreens = screens;
+    print('visibleScreens from appbar: $visibleScreens');
     bool tabsOverflow({bool includeOverflowButtonWidth = false}) {
       return _scaffoldHeaderWidth(
                 screens: visibleScreens,
@@ -59,6 +60,7 @@ class DevToolsAppBar extends StatelessWidget {
       ..insert(0, VerticalLineSpacer(height: defaultToolbarHeight));
 
     final bool hasMultipleTabs = screens.length > 1;
+    print('hasMultipleTabs = $hasMultipleTabs');
     if (hasMultipleTabs) {
       tabBar = TabBar(
         controller: tabController,

@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_shared/service.dart';
@@ -45,6 +46,7 @@ class FrameworkCore {
     setGlobal(BreakpointManager, BreakpointManager());
     setGlobal(EvalService, EvalService());
     setGlobal(ExtensionService, ExtensionService());
+    setGlobal(IdeTheme, getIdeTheme());
   }
 
   static void init() {
