@@ -197,6 +197,7 @@ class _DataTable extends StatelessWidget {
           controller.selectLink(linkdata!);
           controller.updateDisplayOptions(showSplitScreen: true);
         },
+        enableHoverHandling: true,
       ),
     );
   }
