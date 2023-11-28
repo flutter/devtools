@@ -360,23 +360,21 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
               'Widgets in these directories will show up in your summary tree.',
               style: theme.subtleTextStyle,
             ),
-            RichText(
-              text: TextSpan(
-                text: '(e.g. /absolute/path/to/myPackage) ',
-                style: theme.subtleTextStyle,
-                children: [
-                  LinkTextSpan(
-                    context: context,
-                    link: Link(
-                      display: 'Learn more',
-                      url:
-                          'https://docs.flutter.dev/tools/devtools/inspector#package-directories',
-                      gaScreenName: InspectorScreen.id,
-                      gaSelectedItemDescription: gac.documentationLink,
-                    ),
-                  ),
-                ],
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '(e.g. /absolute/path/to/myPackage)',
+                  style: theme.subtleTextStyle,
+                ),
+                MoreInfoLink(
+                  url:
+                      'https://docs.flutter.dev/tools/devtools/inspector#package-directories',
+                  gaScreenName: InspectorScreen.id,
+                  gaSelectedItemDescription:
+                      gac.topicDocumentationLink('package_directories'),
+                ),
+              ],
             ),
             const SizedBox(height: denseSpacing),
             const Expanded(
