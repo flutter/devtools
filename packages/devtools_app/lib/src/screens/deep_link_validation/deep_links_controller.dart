@@ -3,32 +3,16 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_deeplink.dart';
 import 'package:flutter/widgets.dart';
-import 'package:http/http.dart' as http;
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/server/server.dart' as server;
 import 'deep_links_model.dart';
-
-const String _apiKey = 'AIzaSyDVE6FP3GpwxgS4q8rbS7qaf6cAbxc_elc';
-const String _assetLinksGenerationURL =
-    'https://deeplinkassistant-pa.googleapis.com/android/generation/v1/assetlinks:generate?key=$_apiKey';
-const String _androidDomainValidationURL =
-    'https://deeplinkassistant-pa.googleapis.com/android/validation/v1/domains:batchValidate?key=$_apiKey';
-const postHeader = {'Content-Type': 'application/json'};
-const String _packageNameKey = 'package_name';
-const String _domainsKey = 'domains';
-const String _appLinkDomainsKey = 'app_link_domains';
-const String _validationResultKey = 'validationResult';
-const String _domainNameKey = 'domainName';
-const String _checkNameKey = 'checkName';
-const String _failedChecksKey = 'failedChecks';
-const String _generatedContentKey = 'generatedContent';
+import 'deep_links_services.dart';
 
 typedef _DomainAndPath = ({String domain, String path});
 
@@ -159,7 +143,7 @@ class DeepLinksController extends DisposableController {
       );
     }
 
-    return _getFilterredLinks(linkDatasByPath.values.toList());
+    return getFilterredLinks(linkDatasByPath.values.toList());
   }
 
   List<LinkData> get getLinkDatasByDomain {
@@ -178,7 +162,7 @@ class DeepLinksController extends DisposableController {
         domainErrors: linkData.domainErrors,
       );
     }
-    return _getFilterredLinks(linkDatasByDomain.values.toList());
+    return getFilterredLinks(linkDatasByDomain.values.toList());
   }
 
   final Map<int, AppLinkSettings> _androidAppLinks = <int, AppLinkSettings>{};
@@ -244,35 +228,17 @@ class DeepLinksController extends DisposableController {
 
   /// The [TextEditingController] for the search text field.
   final textEditingController = TextEditingController();
+  final deepLinksServices = DeepLinksServices();
 
   Future<void> _generateAssetLinks() async {
     final applicationId =
         _androidAppLinks[selectedVariantIndex.value]?.applicationId ?? '';
 
-    final response = await http.post(
-      Uri.parse(_assetLinksGenerationURL),
-      headers: postHeader,
-      body: jsonEncode(
-        {
-          _packageNameKey: applicationId,
-          _domainsKey: [selectedLink.value!.domain],
-          // TODO(hangyujin): The fake fingerprints here is just for testing usage, should remove it later.
-          // TODO(hangyujin): Handle the error case when user doesn't have play console project set up.
-          'supplemental_sha256_cert_fingerprints': [
-            '5A:33:EA:64:09:97:F2:F0:24:21:0F:B6:7A:A8:18:1C:18:A9:83:03:20:21:8F:9B:0B:98:BF:43:69:C2:AF:4A',
-          ],
-        },
-      ),
+    generatedAssetLinksForSelectedLink.value =
+        await deepLinksServices.generateAssetLinks(
+      domain: selectedLink.value!.domain,
+      applicationId: applicationId,
     );
-
-    final Map<String, dynamic> result =
-        json.decode(response.body) as Map<String, dynamic>;
-    if (result[_domainsKey] != null) {
-      final String generatedContent = ((result[_domainsKey] as List).first
-          as Map<String, dynamic>)[_generatedContentKey];
-
-      generatedAssetLinksForSelectedLink.value = generatedContent;
-    }
   }
 
   Future<List<LinkData>> _validateAndroidDomain() async {
@@ -286,37 +252,10 @@ class DeepLinksController extends DisposableController {
     final applicationId =
         _androidAppLinks[selectedVariantIndex.value]?.applicationId ?? '';
 
-    final response = await http.post(
-      Uri.parse(_androidDomainValidationURL),
-      headers: postHeader,
-      body: jsonEncode({
-        _packageNameKey: applicationId,
-        _appLinkDomainsKey: domains,
-      }),
+    final domainErrors = await deepLinksServices.validateAndroidDomain(
+      domains: domains,
+      applicationId: applicationId,
     );
-
-    final Map<String, dynamic> result =
-        json.decode(response.body) as Map<String, dynamic>;
-
-    final Map<String, List<DomainError>> domainErrors = {
-      for (var domain in domains) domain: <DomainError>[],
-    };
-
-    final validationResult = result[_validationResultKey] as List;
-    for (final Map<String, dynamic> domainResult in validationResult) {
-      final String domainName = domainResult[_domainNameKey];
-      final List? failedChecks = domainResult[_failedChecksKey];
-      if (failedChecks != null) {
-        for (final Map<String, dynamic> failedCheck in failedChecks) {
-          switch (failedCheck[_checkNameKey]) {
-            case 'EXISTENCE':
-              domainErrors[domainName]!.add(DomainError.existence);
-            case 'FINGERPRINT':
-              domainErrors[domainName]!.add(DomainError.fingerprints);
-          }
-        }
-      }
-    }
 
     return linkdatas.map((linkdata) {
       if (domainErrors[linkdata.domain]?.isNotEmpty ?? false) {
@@ -338,7 +277,7 @@ class DeepLinksController extends DisposableController {
   Future<void> validateLinks() async {
     allLinkDatasNotifier.value = await _validateAndroidDomain();
     displayLinkDatasNotifier.value =
-        _getFilterredLinks(allLinkDatasNotifier.value!);
+        getFilterredLinks(allLinkDatasNotifier.value!);
 
     displayOptionsNotifier.value = displayOptionsNotifier.value.copyWith(
       domainErrorCount: getLinkDatasByDomain
@@ -360,7 +299,7 @@ class DeepLinksController extends DisposableController {
     displayOptionsNotifier.value =
         displayOptionsNotifier.value.copyWith(searchContent: content);
     displayLinkDatasNotifier.value =
-        _getFilterredLinks(allLinkDatasNotifier.value!);
+        getFilterredLinks(allLinkDatasNotifier.value!);
   }
 
   void updateDisplayOptions({
@@ -389,10 +328,11 @@ class DeepLinksController extends DisposableController {
     }
 
     displayLinkDatasNotifier.value =
-        _getFilterredLinks(allLinkDatasNotifier.value!);
+        getFilterredLinks(allLinkDatasNotifier.value!);
   }
 
-  List<LinkData> _getFilterredLinks(List<LinkData> linkDatas) {
+  @visibleForTesting
+  List<LinkData> getFilterredLinks(List<LinkData> linkDatas) {
     final String searchContent = displayOptions.searchContent;
     linkDatas = linkDatas.where((linkData) {
       if (searchContent.isNotEmpty &&

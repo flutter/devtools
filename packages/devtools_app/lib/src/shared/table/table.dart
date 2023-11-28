@@ -114,6 +114,7 @@ class FlatTable<T> extends StatefulWidget {
     this.tallHeaders = false,
     this.sizeColumnsToFit = true,
     this.headerColor,
+    this.fillWithEmptyRows = false,
     ValueNotifier<T?>? selectionNotifier,
   })  : selectionNotifier = selectionNotifier ?? ValueNotifier<T?>(null),
         super(key: key);
@@ -156,6 +157,9 @@ class FlatTable<T> extends StatefulWidget {
   ///
   /// If null, defaults to `Theme.of(context).canvasColor`.
   final Color? headerColor;
+
+  /// Whether to fill the table with empty rows.
+  final bool fillWithEmptyRows;
 
   /// Data set to show as rows in this table.
   final List<T> data;
@@ -326,6 +330,7 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
           preserveVerticalScrollPosition: widget.preserveVerticalScrollPosition,
           tallHeaders: widget.tallHeaders,
           headerColor: widget.headerColor,
+          fillWithEmptyRows: widget.fillWithEmptyRows,
         );
     if (widget.sizeColumnsToFit || tableController.columnWidths == null) {
       return LayoutBuilder(
@@ -348,6 +353,19 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
   }) {
     final pinnedData = tableController.pinnedData;
     final data = isPinned ? pinnedData : tableController.tableData.value.data;
+    if (index >= data.length) {
+      return TableRow<T>.filler(
+        linkedScrollControllerGroup: linkedScrollControllerGroup,
+        columns: tableController.columns,
+        columnGroups: tableController.columnGroups,
+        columnWidths: columnWidths,
+        backgroundColor: alternatingColorForIndex(
+          index,
+          Theme.of(context).colorScheme,
+        ),
+      );
+    }
+
     final node = data[index];
     return ValueListenableBuilder<T?>(
       valueListenable: widget.selectionNotifier,
@@ -852,6 +870,7 @@ class _Table<T> extends StatefulWidget {
     this.rowItemExtent,
     this.tallHeaders = false,
     this.headerColor,
+    this.fillWithEmptyRows = false,
   }) : super(key: key);
 
   final TableControllerBase<T> tableController;
@@ -866,6 +885,7 @@ class _Table<T> extends StatefulWidget {
   final bool preserveVerticalScrollPosition;
   final bool tallHeaders;
   final Color? headerColor;
+  final bool fillWithEmptyRows;
 
   @override
   _TableState<T> createState() => _TableState<T>();
@@ -1008,6 +1028,33 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     return tableWidth;
   }
 
+  double _pinnedDataHeight(BoxConstraints tableConstraints) => min(
+        widget.rowItemExtent! * pinnedData.length,
+        tableConstraints.maxHeight / 2,
+      );
+
+  int _dataRowCount(
+    BoxConstraints tableConstraints,
+    bool showColumnGroupHeader,
+  ) {
+    if (!widget.fillWithEmptyRows) {
+      return _data.length;
+    }
+
+    var maxHeight = tableConstraints.maxHeight;
+    final columnHeadersCount = showColumnGroupHeader ? 2 : 1;
+    maxHeight -= columnHeadersCount *
+        (areaPaneHeaderHeight +
+            (widget.tallHeaders ? scaleByFontFactor(densePadding) : 0.0));
+
+    if (pinnedData.isNotEmpty) {
+      maxHeight -=
+          _pinnedDataHeight(tableConstraints) + ThickDivider.thickDividerHeight;
+    }
+
+    return max(_data.length, maxHeight ~/ widget.rowItemExtent!);
+  }
+
   Widget _buildItem(BuildContext context, int index, {bool isPinned = false}) {
     return widget.rowBuilder(
       context: context,
@@ -1032,6 +1079,9 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     final columnGroups = widget.tableController.columnGroups;
     final includeColumnGroupHeaders =
         widget.tableController.includeColumnGroupHeaders;
+    final showColumnGroupHeader = columnGroups != null &&
+        columnGroups.isNotEmpty &&
+        includeColumnGroupHeaders;
     final tableUiState = widget.tableController.tableUiState;
     final sortColumn =
         widget.tableController.columns[tableUiState.sortColumnIndex];
@@ -1050,9 +1100,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (columnGroups != null &&
-                  columnGroups.isNotEmpty &&
-                  includeColumnGroupHeaders)
+              if (showColumnGroupHeader)
                 TableRow<T>.tableColumnGroupHeader(
                   linkedScrollControllerGroup:
                       _linkedHorizontalScrollControllerGroup,
@@ -1082,10 +1130,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
               ),
               if (pinnedData.isNotEmpty) ...[
                 SizedBox(
-                  height: min(
-                    widget.rowItemExtent! * pinnedData.length,
-                    constraints.maxHeight / 2,
-                  ),
+                  height: _pinnedDataHeight(constraints),
                   child: Scrollbar(
                     thumbVisibility: true,
                     controller: pinnedScrollController,
@@ -1122,7 +1167,8 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
                       focusNode: widget.focusNode,
                       child: ListView.builder(
                         controller: scrollController,
-                        itemCount: _data.length,
+                        itemCount:
+                            _dataRowCount(constraints, showColumnGroupHeader),
                         itemExtent: widget.rowItemExtent,
                         itemBuilder: _buildItem,
                       ),
@@ -1198,6 +1244,32 @@ class TableRow<T> extends StatefulWidget {
         onSortChanged = null,
         _rowType = _TableRowType.data,
         tall = false,
+        super(key: key);
+
+  /// Constructs a [TableRow] that is empty.
+  const TableRow.filler({
+    Key? key,
+    required this.linkedScrollControllerGroup,
+    required this.columns,
+    required this.columnWidths,
+    this.columnGroups,
+    this.backgroundColor,
+  })  : node = null,
+        isExpanded = false,
+        isExpandable = false,
+        isSelected = false,
+        onPressed = null,
+        expandableColumn = null,
+        isShown = true,
+        sortColumn = null,
+        sortDirection = null,
+        secondarySortColumn = null,
+        onSortChanged = null,
+        searchMatchesNotifier = null,
+        activeSearchMatchNotifier = null,
+        tall = false,
+        displayTreeGuidelines = false,
+        _rowType = _TableRowType.filler,
         super(key: key);
 
   /// Constructs a [TableRow] that presents the column titles instead
@@ -1472,7 +1544,9 @@ class _TableRowState<T> extends State<TableRow<T>>
       Widget? content;
       final theme = Theme.of(context);
       final node = widget.node;
-      if (widget._rowType == _TableRowType.columnHeader) {
+      if (widget._rowType == _TableRowType.filler) {
+        content = const SizedBox.shrink();
+      } else if (widget._rowType == _TableRowType.columnHeader) {
         Widget defaultHeaderRenderer() => _ColumnHeader(
               column: column,
               isSortColumn: column == widget.sortColumn,
@@ -1900,6 +1974,7 @@ enum _TableRowType {
   data,
   columnHeader,
   columnGroupHeader,
+  filler,
 }
 
 enum _TableRowPartDisplayType {

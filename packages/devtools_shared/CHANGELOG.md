@@ -1,3 +1,6 @@
+# 6.0.2
+* Fix an issue parsing file paths on Windows that could prevent extensions from being detected.
+
 # 6.0.1
 * Bump minimum Dart SDK version to `3.3.0-91.0.dev` and minimum Flutter SDK version to `3.17.0-0.0.pre`.
 * Add field `isPublic` to `DevToolsExtensionConfig`.

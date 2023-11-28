@@ -4,7 +4,6 @@
 
 // Code needs to match API from VmService.
 // ignore_for_file: avoid-dynamic
-library vm_service_wrapper;
 
 import 'dart:async';
 import 'dart:convert';

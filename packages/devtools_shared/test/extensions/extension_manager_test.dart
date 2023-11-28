@@ -44,9 +44,9 @@ void main() {
 
 Directory _createFromDir() {
   final from = Directory('tmp')..createSync();
-  File.fromUri(Uri.parse(p.join(from.path, 'foo.txt')))..createSync();
+  File(p.join(from.path, 'foo.txt'))..createSync();
   final dir = Directory(p.join(from.path, 'bar'))..createSync();
-  File.fromUri(Uri.parse(p.join(dir.path, 'baz.txt')))..createSync();
+  File(p.join(dir.path, 'baz.txt'))..createSync();
   final contents = _contentAsOrderedString(from);
   expect(
     contents,
@@ -65,5 +65,17 @@ Directory _createToDir() {
 String _contentAsOrderedString(Directory dir) {
   final contents = dir.listSync(recursive: true)
     ..sort((a, b) => a.path.compareTo(b.path));
-  return contents.toString();
+  return contents
+      // Always use posix paths so that expectations can be consistent between
+      // Mac/Windows.
+      .map(
+        (e) =>
+            "${e is Directory ? 'Directory' : 'File'}: '${posixPath(e.path)}'",
+      )
+      .toList()
+      .toString();
 }
+
+/// Returns a relative path [input] with posix/forward slashes regardless of
+/// the current platform.
+String posixPath(String input) => p.posix.joinAll(p.split(input));

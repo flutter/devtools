@@ -7,7 +7,7 @@ publish_to: none
 # When publishing new versions of this package be sure to publish a new version
 # of package:devtools as well. package:devtools contains a compiled snapshot of
 # this package.
-version: 2.30.0-dev.8
+version: 2.30.0-dev.14
 
 repository: https://github.com/flutter/devtools/tree/master/packages/devtools_test
 
@@ -19,7 +19,7 @@ dependencies:
   async: ^2.0.0
   collection: ^1.15.0
   devtools_shared: ^6.0.1
-  devtools_app: 2.30.0-dev.8
+  devtools_app: 2.30.0-dev.14
   devtools_app_shared:
     path: ../devtools_app_shared
   flutter:

@@ -28,7 +28,7 @@ class PerformanceControls extends StatelessWidget {
     required this.onClear,
   });
 
-  static const minScreenWidthForTextBeforeScaling = 1020.0;
+  static const minScreenWidthForTextBeforeScaling = 1085.0;
 
   final PerformanceController controller;
 

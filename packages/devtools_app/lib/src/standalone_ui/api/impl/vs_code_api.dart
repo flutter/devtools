@@ -68,12 +68,17 @@ final class VsCodeApiImpl extends ToolApiImpl implements VsCodeApi {
   }
 
   @override
-  Future<void> openDevToolsPage(String debugSessionId, String page) {
+  Future<void> openDevToolsPage(
+    String debugSessionId, {
+    String? page,
+    bool? forceExternal,
+  }) {
     return sendRequest(
       VsCodeApi.jsonOpenDevToolsPageMethod,
       {
         VsCodeApi.jsonDebugSessionIdParameter: debugSessionId,
-        VsCodeApi.jsonOpenPageParameter: page,
+        VsCodeApi.jsonPageParameter: page,
+        VsCodeApi.jsonForceExternalParameter: forceExternal,
       },
     );
   }
@@ -292,6 +297,10 @@ class VsCodeCapabilitiesImpl implements VsCodeCapabilities {
   @override
   bool get openDevToolsPage =>
       _raw?[VsCodeCapabilities.openDevToolsPageField] == true;
+
+  @override
+  bool get openDevToolsExternally =>
+      _raw?[VsCodeCapabilities.openDevToolsExternallyField] == true;
 
   @override
   bool get hotReload => _raw?[VsCodeCapabilities.hotReloadField] == true;
