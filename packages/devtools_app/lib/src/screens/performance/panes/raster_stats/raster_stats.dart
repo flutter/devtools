@@ -435,7 +435,7 @@ class _LayerImageDialog extends StatelessWidget {
 class _CheckerBoardBackgroundPainter extends CustomPainter {
   final _color1 = Colors.white;
   final _color2 = Colors.grey.shade400;
-  final squareSizeLength = 30.0;
+  final squareSizeLength = 20.0;
   @override
   void paint(Canvas canvas, Size size) {
     canvas.clipRect(Rect.fromLTWH(0, 0, size.width, size.height));
