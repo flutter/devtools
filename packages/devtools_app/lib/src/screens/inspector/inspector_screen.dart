@@ -10,6 +10,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
+import '../../../devtools_app.dart';
 import '../../service/service_extension_widgets.dart';
 import '../../service/service_extensions.dart' as extensions;
 import '../../shared/analytics/analytics.dart' as ga;
@@ -368,11 +369,10 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
                   style: theme.subtleTextStyle,
                 ),
                 MoreInfoLink(
-                  url:
-                      'https://docs.flutter.dev/tools/devtools/inspector#package-directories',
+                  url: DocLinks.inspectorPackageDirectories.value,
                   gaScreenName: InspectorScreen.id,
                   gaSelectedItemDescription:
-                      gac.topicDocumentationLink('package_directories'),
+                      gac.InspectorDocs.packageDirectories.name,
                 ),
               ],
             ),
