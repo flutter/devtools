@@ -106,28 +106,17 @@ class _RasterStatsControls extends StatelessWidget {
   }
 }
 
-class _LayerVisualizer extends StatefulWidget {
+class _LayerVisualizer extends StatelessWidget {
   const _LayerVisualizer({required this.rasterStatsController});
 
   final RasterStatsController rasterStatsController;
 
   @override
-  State<_LayerVisualizer> createState() => _LayerVisualizerState();
-}
-
-class _LayerVisualizerState extends State<_LayerVisualizer> {
-  ValueNotifier<Color>? _rasterPreviewBackgroundColor;
-
-  @override
   Widget build(BuildContext context) {
-    _rasterPreviewBackgroundColor ??= ValueNotifier<Color>(
-      _BackgroundColorButton.defaultBackgroundColor(context),
-    );
-
     return MultiValueListenableBuilder(
       listenables: [
-        widget.rasterStatsController.rasterStats,
-        widget.rasterStatsController.loadingSnapshot,
+        rasterStatsController.rasterStats,
+        rasterStatsController.loadingSnapshot,
       ],
       builder: (context, values, _) {
         final rasterStats = values.first as RasterStats?;
@@ -147,17 +136,16 @@ class _LayerVisualizerState extends State<_LayerVisualizer> {
           initialFractions: const [0.5, 0.5],
           children: [
             LayerSnapshotTable(
-              controller: widget.rasterStatsController,
+              controller: rasterStatsController,
               snapshots: rasterStats.layerSnapshots,
             ),
             ValueListenableBuilder<LayerSnapshot?>(
-              valueListenable: widget.rasterStatsController.selectedSnapshot,
+              valueListenable: rasterStatsController.selectedSnapshot,
               builder: (context, snapshot, _) {
                 return LayerImage(
                   snapshot: snapshot,
                   originalFrameSize: rasterStats.originalFrameSize,
                   includeFullScreenButton: true,
-                  rasterPreviewBackgroundColor: _rasterPreviewBackgroundColor!,
                 );
               },
             ),
@@ -265,12 +253,9 @@ class LayerImage extends StatelessWidget {
     Key? key,
     required this.snapshot,
     required this.originalFrameSize,
-    required ValueNotifier<Color> rasterPreviewBackgroundColor,
     this.includeFullScreenButton = false,
-  })  : _rasterPreviewBackgroundColor = rasterPreviewBackgroundColor,
-        super(key: key);
+  }) : super(key: key);
 
-  final ValueNotifier<Color> _rasterPreviewBackgroundColor;
   final LayerSnapshot? snapshot;
 
   final Size? originalFrameSize;
@@ -341,12 +326,8 @@ class LayerImage extends StatelessWidget {
             ? _FullScreenButton(
                 snapshot: snapshot,
                 originalFrameSize: originalFrameSize,
-                rasterPreviewBackgroundColor: _rasterPreviewBackgroundColor,
               )
             : const SizedBox(width: defaultSpacing),
-        _BackgroundColorButton(
-          _rasterPreviewBackgroundColor,
-        ),
       ],
     );
   }
@@ -375,54 +356,13 @@ class LayerImage extends StatelessWidget {
   }
 }
 
-class _BackgroundColorButton extends StatefulWidget {
-  const _BackgroundColorButton(this._rasterPreviewBackgroundColor);
-  final ValueNotifier<Color> _rasterPreviewBackgroundColor;
-  static Color defaultBackgroundColor(BuildContext context) => Colors.grey;
-
-  @override
-  State<_BackgroundColorButton> createState() => _BackgroundColorButtonState();
-}
-
-class _BackgroundColorButtonState extends State<_BackgroundColorButton> {
-  final List<Color> _colors = [Colors.grey, Colors.black, Colors.white];
-
-  int _index = 0;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.only(
-        bottom: denseSpacing,
-        right: denseSpacing,
-      ),
-      alignment: Alignment.bottomRight,
-      child: DevToolsTooltip(
-        message: 'Toggle the layer preview background color.',
-        child: GaDevToolsButton.iconOnly(
-          icon: Icons.brush,
-          outlined: false,
-          gaScreen: gac.performance,
-          gaSelection: gac.PerformanceEvents.fullScreenLayerImage.name,
-          onPressed: () {
-            _index = (_index + 1) % _colors.length;
-            widget._rasterPreviewBackgroundColor.value = _colors[_index];
-          },
-        ),
-      ),
-    );
-  }
-}
-
 class _FullScreenButton extends StatelessWidget {
-  const _FullScreenButton(
-      {Key? key,
-      required this.snapshot,
-      required this.originalFrameSize,
-      required ValueNotifier<Color> rasterPreviewBackgroundColor})
-      : _rasterPreviewBackgroundColor = rasterPreviewBackgroundColor,
-        super(key: key);
-  final ValueNotifier<Color> _rasterPreviewBackgroundColor;
+  const _FullScreenButton({
+    Key? key,
+    required this.snapshot,
+    required this.originalFrameSize,
+  }) : super(key: key);
+
   final LayerSnapshot snapshot;
 
   final Size originalFrameSize;
@@ -447,7 +387,6 @@ class _FullScreenButton extends StatelessWidget {
               builder: (context) => _LayerImageDialog(
                 snapshot: snapshot,
                 originalFrameSize: originalFrameSize,
-                rasterPreviewBackgroundColor: _rasterPreviewBackgroundColor,
               ),
             ),
           );
@@ -462,11 +401,8 @@ class _LayerImageDialog extends StatelessWidget {
     Key? key,
     required this.snapshot,
     required this.originalFrameSize,
-    required ValueNotifier<Color> rasterPreviewBackgroundColor,
-  })  : _rasterPreviewBackgroundColor = rasterPreviewBackgroundColor,
-        super(key: key);
+  }) : super(key: key);
 
-  final ValueNotifier<Color> _rasterPreviewBackgroundColor;
   final LayerSnapshot snapshot;
 
   final Size originalFrameSize;
@@ -487,7 +423,6 @@ class _LayerImageDialog extends StatelessWidget {
         child: LayerImage(
           snapshot: snapshot,
           originalFrameSize: originalFrameSize,
-          rasterPreviewBackgroundColor: _rasterPreviewBackgroundColor,
         ),
       ),
       actions: const [
