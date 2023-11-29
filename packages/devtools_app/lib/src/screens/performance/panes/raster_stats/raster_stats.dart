@@ -297,10 +297,14 @@ class LayerImage extends StatelessWidget {
                 );
                 final scaledSize = _scaledLayerSize(scaleFactor);
                 final scaledOffset = _scaledLayerOffset(scaleFactor);
+                final theme = Theme.of(context);
                 return Stack(
                   children: [
                     CustomPaint(
-                      painter: _CheckerBoardBackgroundPainter(),
+                      painter: _CheckerBoardBackgroundPainter(
+                        theme.colorScheme.background,
+                        theme.colorScheme.outlineVariant,
+                      ),
                       child: Image.memory(snapshot.bytes),
                     ),
                     Positioned(
@@ -433,18 +437,22 @@ class _LayerImageDialog extends StatelessWidget {
 }
 
 class _CheckerBoardBackgroundPainter extends CustomPainter {
-  final _color1 = Colors.white;
-  final _color2 = Colors.grey.shade400;
-  final squareSizeLength = 20.0;
+  _CheckerBoardBackgroundPainter(Color color1, Color color2)
+      : _color1 = color1,
+        _color2 = color2;
+  final Color _color1;
+  final Color _color2;
+  final _squareSizeLength = 20.0;
+
   @override
   void paint(Canvas canvas, Size size) {
     canvas.clipRect(Rect.fromLTWH(0, 0, size.width, size.height));
-    final backgroundPaint = Paint();
-    backgroundPaint.color = _color1;
-    backgroundPaint.style = PaintingStyle.fill;
-    final checkerPaint = Paint();
-    checkerPaint.color = _color2;
-    checkerPaint.style = PaintingStyle.fill;
+    final backgroundPaint = Paint()
+      ..color = _color1
+      ..style = PaintingStyle.fill;
+    final checkerPaint = Paint()
+      ..color = _color2
+      ..style = PaintingStyle.fill;
 
     canvas.drawRect(
       Rect.fromLTWH(0, 0, size.width, size.height),
@@ -453,14 +461,14 @@ class _CheckerBoardBackgroundPainter extends CustomPainter {
 
     bool flipper = true;
 
-    for (var x = 0.0; x < size.width; x += squareSizeLength) {
-      for (var y = 0.0; y < size.width; y += squareSizeLength * 2) {
-        double Y = y;
+    for (var x = 0.0; x < size.width; x += _squareSizeLength) {
+      for (var y = 0.0; y < size.height; y += _squareSizeLength * 2) {
+        double dy = y;
         if (flipper) {
-          Y += squareSizeLength;
+          dy += _squareSizeLength;
         }
         canvas.drawRect(
-          Rect.fromLTWH(x, Y, squareSizeLength, squareSizeLength),
+          Rect.fromLTWH(x, dy, _squareSizeLength, _squareSizeLength),
           checkerPaint,
         );
       }
