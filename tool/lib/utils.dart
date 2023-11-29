@@ -76,10 +76,6 @@ class CliCommand {
     bool throwOnException = true,
   }) {
     final sdk = FlutterSdk.current;
-    if (sdk == null) {
-      throw Exception('Unable to locate a Flutter sdk.');
-    }
-
     return CliCommand._(
       exe: sdk.flutterToolPath,
       args: args.split(' '),
