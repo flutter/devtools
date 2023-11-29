@@ -1203,6 +1203,8 @@ abstract class ColumnRenderer<T> {
   ///
   /// This method can return `null` to indicate that the default rendering
   /// should be used instead.
+  /// `isRowHovered` is only used when `enableHoverHandling` is `true` on the table 
+  /// that this column belongs to.
   Widget? build(
     BuildContext context,
     T data, {
