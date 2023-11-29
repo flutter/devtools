@@ -57,7 +57,7 @@ class ServeCommand extends Command {
             'Whether to build the DevTools web app before starting the DevTools'
             ' server.',
       )
-      ..addUseFlutterFromPathFlag()
+      ..addUpdateFlutterFlag()
       ..addUpdatePerfettoFlag()
       ..addPubGetFlag()
       ..addBulidModeOption()
@@ -87,8 +87,7 @@ class ServeCommand extends Command {
     final processManager = ProcessManager();
 
     final buildApp = argResults![_buildAppFlag];
-    final useFlutterFromPath =
-        argResults![BuildCommandArgs.useFlutterFromPath.flagName];
+    final updateFlutter = argResults![BuildCommandArgs.updateFlutter.flagName];
     final updatePerfetto =
         argResults![BuildCommandArgs.updatePerfetto.flagName];
     final runPubGet = argResults![BuildCommandArgs.pubGet.flagName];
@@ -96,7 +95,8 @@ class ServeCommand extends Command {
         argResults![BuildCommandArgs.buildMode.flagName];
 
     final remainingArguments = List.of(argResults!.arguments)
-      ..remove(BuildCommandArgs.useFlutterFromPath.asArg())
+      ..remove(BuildCommandArgs.updateFlutter.asArg())
+      ..remove(BuildCommandArgs.updateFlutter.asArg(negated: true))
       ..remove(BuildCommandArgs.updatePerfetto.asArg())
       ..remove(valueAsArg(_buildAppFlag))
       ..remove(valueAsArg(_buildAppFlag, negated: true))
@@ -125,11 +125,12 @@ class ServeCommand extends Command {
 
     final devToolsBuildLocation =
         path.join(repo.devtoolsAppDirectoryPath, 'build', 'web');
+
     if (buildApp) {
       final process = await processManager.runProcess(
         CliCommand.tool(
           'build'
-          '${useFlutterFromPath ? ' ${BuildCommandArgs.useFlutterFromPath.asArg()}' : ''}'
+          ' ${BuildCommandArgs.updateFlutter.asArg(negated: !updateFlutter)}'
           '${updatePerfetto ? ' ${BuildCommandArgs.updatePerfetto.asArg()}' : ''}'
           ' ${BuildCommandArgs.buildMode.asArg()}=$devToolsAppBuildMode'
           ' ${BuildCommandArgs.pubGet.asArg(negated: !runPubGet)}',
