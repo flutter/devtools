@@ -250,22 +250,7 @@ mixin SearchControllerMixin<T extends SearchableDataMixin> {
     _searchFieldFocusNode?.dispose();
     _searchTextFieldController = SearchTextEditingController()
       ..text = _searchNotifier.value;
-    _searchFieldFocusNode = FocusNode(
-      debugLabel: 'search-field',
-      onKey: (FocusNode node, RawKeyEvent event) {
-        if (event.logicalKey.keyLabel == 'Enter') {
-          if (event is RawKeyDownEvent) {
-            if (event.isShiftPressed) {
-              previousMatch();
-            } else {
-              nextMatch();
-            }
-            return KeyEventResult.handled;
-          }
-        }
-        return KeyEventResult.ignored;
-      },
-    );
+    _searchFieldFocusNode = FocusNode(debugLabel: 'search-field');
   }
 
   @mustCallSuper
@@ -1056,7 +1041,6 @@ class StatelessSearchField<T extends SearchableDataMixin>
       onChanged: (value) {
         onChanged?.call(value);
         controller.search = value;
-        controller.searchFieldFocusNode.requestFocus();
       },
       onEditingComplete: () {
         controller.searchFieldFocusNode.requestFocus();
