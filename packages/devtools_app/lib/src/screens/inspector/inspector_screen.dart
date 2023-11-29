@@ -10,7 +10,6 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
-import '../../../devtools_app.dart';
 import '../../service/service_extension_widgets.dart';
 import '../../service/service_extensions.dart' as extensions;
 import '../../shared/analytics/analytics.dart' as ga;
@@ -21,6 +20,7 @@ import '../../shared/editable_list.dart';
 import '../../shared/error_badge_manager.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/blocking_action_mixin.dart';
+import '../../shared/primitives/simple_items.dart';
 import '../../shared/screen.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/utils.dart';
@@ -370,9 +370,9 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
                 ),
                 MoreInfoLink(
                   url: DocLinks.inspectorPackageDirectories.value,
-                  gaScreenName: InspectorScreen.id,
+                  gaScreenName: gac.inspector,
                   gaSelectedItemDescription:
-                      gac.InspectorDocs.packageDirectories.name,
+                      gac.InspectorDocs.packageDirectoriesDocs.name,
                 ),
               ],
             ),

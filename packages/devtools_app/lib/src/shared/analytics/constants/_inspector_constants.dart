@@ -6,8 +6,5 @@ part of '../constants.dart';
 
 /// Events for opening documentation for the inspector tab.
 enum InspectorDocs {
-  packageDirectories('Package Directories');
-
-  const InspectorDocs(this.name);
-  final String name;
+  packageDirectoriesDocs;
 }
