@@ -252,10 +252,10 @@ mixin SearchControllerMixin<T extends SearchableDataMixin> {
       ..text = _searchNotifier.value;
     _searchFieldFocusNode = FocusNode(
       debugLabel: 'search-field',
-      onKey: (FocusNode node, RawKeyEvent event) {
+      onKeyEvent: (FocusNode node, KeyEvent event) {
         if (event.logicalKey.keyLabel == 'Enter') {
           if (event is RawKeyDownEvent) {
-            if (event.isShiftPressed) {
+            if (HardwareKeyboard.instance.isShiftPressed) {
               previousMatch();
             } else {
               nextMatch();
