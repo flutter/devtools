@@ -39,7 +39,7 @@ TODO: Remove this section if there are not any general updates.
 
 * Highlight `extension type` as a declaration keyword,
   highlight the `$` in identifier interpolation as part of the interpolation,
-  and properly highlight comments within type arguments.
+  and properly highlight comments within type arguments. - [6837](https://github.com/flutter/devtools/pull/6837)
 
 ## Network profiler updates
 
