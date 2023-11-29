@@ -256,7 +256,7 @@ class _DomainFixPanel extends StatelessWidget {
                                       await Clipboard.setData(
                                     ClipboardData(text: generatedAssetLinks),
                                   ),
-                                  icon: const Icon(Icons.copy),
+                                  icon: const Icon(Icons.copy_rounded),
                                 ),
                               ],
                             )
