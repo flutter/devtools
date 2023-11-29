@@ -7,7 +7,9 @@ import 'dart:async';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../../devtools_app.dart';
+import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/analytics/constants.dart' as gac;
+import '../../shared/common_widgets.dart';
 import '../api/dart_tooling_api.dart';
 import '../api/vs_code_api.dart';
 import 'debug_sessions.dart';
@@ -17,17 +19,28 @@ import 'devices.dart';
 ///
 /// Provides some basic functionality to improve discoverability of features
 /// such as creation of new projects, device selection and DevTools features.
-class VsCodeFlutterPanel extends StatelessWidget {
+class VsCodeFlutterPanel extends StatefulWidget {
   const VsCodeFlutterPanel(this.api, {super.key});
 
   final DartToolingApi api;
+
+  @override
+  State<VsCodeFlutterPanel> createState() => _VsCodeFlutterPanelState();
+}
+
+class _VsCodeFlutterPanelState extends State<VsCodeFlutterPanel> {
+  @override
+  void initState() {
+    super.initState();
+    ga.screen(gac.VsCodeFlutterSidebar.id);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         FutureBuilder(
-          future: api.vsCode,
+          future: widget.api.vsCode,
           builder: (context, snapshot) =>
               switch ((snapshot.connectionState, snapshot.data)) {
             (ConnectionState.done, final vsCodeApi?) =>
