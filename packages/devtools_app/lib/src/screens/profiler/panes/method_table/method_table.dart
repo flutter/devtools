@@ -261,6 +261,7 @@ class _MethodColumn extends ColumnData<MethodTableGraphNode>
     BuildContext context,
     MethodTableGraphNode data, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     return MethodAndSourceDisplay(
