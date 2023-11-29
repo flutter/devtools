@@ -1251,8 +1251,8 @@ class _AutoCompleteSearchFieldState extends State<AutoCompleteSearchField>
   }
 
   KeyEventResult _handleKeyStrokes(FocusNode _, RawKeyEvent event) {
-    if (event is RawKeyDownEvent) {
-      final key = event.data.logicalKey.keyId & LogicalKeyboardKey.valueMask;
+    if (event is KeyDownEvent) {
+      final key = event.logicalKey.keyId & LogicalKeyboardKey.valueMask;
 
       if (key == escape) {
         // TODO(kenz): Enable this once we find a way around the navigation
