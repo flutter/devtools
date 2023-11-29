@@ -37,7 +37,7 @@ import '../utils.dart';
 class BuildCommand extends Command {
   BuildCommand() {
     argParser
-      ..addUseFlutterFromPathFlag()
+      ..addUpdateFlutterFlag()
       ..addUpdatePerfettoFlag()
       ..addPubGetFlag()
       ..addBulidModeOption();
@@ -54,8 +54,7 @@ class BuildCommand extends Command {
     final repo = DevToolsRepo.getInstance();
     final processManager = ProcessManager();
 
-    final useLocalFlutter =
-        argResults![BuildCommandArgs.useFlutterFromPath.flagName];
+    final updateFlutter = argResults![BuildCommandArgs.updateFlutter.flagName];
     final updatePerfetto =
         argResults![BuildCommandArgs.updatePerfetto.flagName];
     final runPubGet = argResults![BuildCommandArgs.pubGet.flagName];
@@ -64,7 +63,7 @@ class BuildCommand extends Command {
     final webBuildDir =
         Directory(path.join(repo.devtoolsAppDirectoryPath, 'build', 'web'));
 
-    if (!useLocalFlutter) {
+    if (updateFlutter) {
       logStatus('updating tool/flutter-sdk to the latest flutter candidate');
       await processManager.runProcess(CliCommand.tool('update-flutter-sdk'));
     }
