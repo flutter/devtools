@@ -49,6 +49,7 @@ class MessageColumn extends ColumnData<LogData>
     BuildContext context,
     LogData data, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     final textStyle = Theme.of(context).fixedFontStyle;

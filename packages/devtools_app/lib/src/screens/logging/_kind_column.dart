@@ -28,6 +28,7 @@ class KindColumn extends ColumnData<LogData>
     BuildContext context,
     LogData item, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     final String kind = item.kind;
