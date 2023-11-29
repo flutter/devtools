@@ -579,20 +579,20 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
 
   /// [FocusNode] for the keyboard listener responsible for handling auto
   /// complete search.
-  FocusNode get rawKeyboardFocusNode => _rawKeyboardFocusNode!;
-  FocusNode? _rawKeyboardFocusNode;
+  FocusNode get keyboardFocusNode => _keyboardFocusNode!;
+  FocusNode? _keyboardFocusNode;
 
   @override
   void initSearch() {
     super.initSearch();
-    _rawKeyboardFocusNode?.dispose();
-    _rawKeyboardFocusNode = FocusNode(debugLabel: 'search-raw-keyboard');
+    _keyboardFocusNode?.dispose();
+    _keyboardFocusNode = FocusNode(debugLabel: 'search-keyboard');
   }
 
   @override
   void disposeSearch() {
-    _rawKeyboardFocusNode?.dispose();
-    _rawKeyboardFocusNode = null;
+    _keyboardFocusNode?.dispose();
+    _keyboardFocusNode = null;
     super.disposeSearch();
   }
 
@@ -1161,7 +1161,7 @@ class AutoCompleteSearchField extends StatefulWidget {
   final bool clearFieldOnEscapeWhenOverlayHidden;
 
   /// Handler called when either [controller.searchFieldFocusNode] or
-  /// [controller.rawKeyboardFocusNode] has lost focus.
+  /// [controller.keyboardFocusNode] has lost focus.
   final VoidCallback? onFocusLost;
 
   @override
@@ -1203,16 +1203,16 @@ class _AutoCompleteSearchFieldState extends State<AutoCompleteSearchField>
       _handleLostFocus,
     );
     addAutoDisposeListener(
-      widget.controller.rawKeyboardFocusNode,
+      widget.controller.keyboardFocusNode,
       _handleLostFocus,
     );
-    widget.controller.rawKeyboardFocusNode.onKey = _handleKeyStrokes;
   }
 
   @override
   Widget build(BuildContext context) {
-    return RawKeyboardListener(
-      focusNode: widget.controller.rawKeyboardFocusNode,
+    return KeyboardListener(
+      onKeyEvent: _handleKeyStrokes,
+      focusNode: widget.controller.keyboardFocusNode,
       child: CompositedTransformTarget(
         link: widget.controller.autoCompleteLayerLink,
         child: StatelessSearchField(
@@ -1239,7 +1239,7 @@ class _AutoCompleteSearchFieldState extends State<AutoCompleteSearchField>
 
   void _handleLostFocus() {
     if (widget.controller.searchFieldFocusNode.hasPrimaryFocus ||
-        widget.controller.rawKeyboardFocusNode.hasPrimaryFocus) {
+        widget.controller.keyboardFocusNode.hasPrimaryFocus) {
       return;
     }
 
@@ -1250,7 +1250,10 @@ class _AutoCompleteSearchFieldState extends State<AutoCompleteSearchField>
     }
   }
 
-  KeyEventResult _handleKeyStrokes(FocusNode _, RawKeyEvent event) {
+  KeyEventResult _handleKeyStrokes(KeyEvent event) {
+    print('event.type = ${event.runtimeType}');
+    print('event is keydown = ${event is KeyDownEvent}');
+    print('event.logicalkey = ${event.logicalKey}');
     if (event is KeyDownEvent) {
       final key = event.logicalKey.keyId & LogicalKeyboardKey.valueMask;
 

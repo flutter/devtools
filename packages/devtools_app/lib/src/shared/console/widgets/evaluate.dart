@@ -206,14 +206,17 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
         Expanded(
           child: Focus(
             onKeyEvent: (_, KeyEvent event) {
-              final keysPressed = HardwareKeyboard.instance.logicalKeysPressed;
-              if (keysPressed.contains(LogicalKeyboardKey.arrowUp)) {
+              print('evaluate logical key = ${event.logicalKey}');
+              if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+                print('up');
                 _historyNavUp();
                 return KeyEventResult.handled;
-              } else if (keysPressed.contains(LogicalKeyboardKey.arrowDown)) {
+              } else if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+                print('down');
                 _historyNavDown();
                 return KeyEventResult.handled;
-              } else if (keysPressed.contains(LogicalKeyboardKey.enter)) {
+              } else if (event.logicalKey == LogicalKeyboardKey.enter) {
+                print('enter');
                 _handleExpressionEval(context);
                 return KeyEventResult.handled;
               }
