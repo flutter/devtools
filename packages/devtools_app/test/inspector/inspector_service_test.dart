@@ -17,6 +17,10 @@ import '../test_infra/flutter_test_driver.dart' show FlutterRunConfiguration;
 import '../test_infra/flutter_test_environment.dart';
 import '../test_infra/matchers/matchers.dart';
 
+// TODO(elliette): Add testing that project directories can be inferred from
+// google3-paths. This will require mocking the main isolate so that we can
+// change the root library during testing instead of using the
+// LiveTestWidgetsFlutterBinding.
 void main() {
   initializeLiveTestWidgetsFlutterBindingWithAssets();
 
@@ -82,6 +86,9 @@ void main() {
           await env.tearDownEnvironment(force: true);
         });
 
+        // TODO(elliette): Figure out why this didn't catch
+        // https://github.com/flutter/devtools/issues/6841 and fix so that it
+        // catches future regressions.
         test('can be inferred', () async {
           await env.setupEnvironment();
           final inspectorServiceLocal = inspectorService!;
