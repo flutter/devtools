@@ -17,7 +17,7 @@ under `lib` (e.g. a unit test or integration test). Thanks to
 
 ## Inspector updates
 
-TODO: Remove this section if there are not any general updates.
+* Added link to package directory documentation, from the inspect settings dialog - [6825](https://github.com/flutter/devtools/pull/6825)
 
 ## Performance updates
 
