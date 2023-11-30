@@ -35,6 +35,7 @@ const _memoryDocUrl =
     'https://docs.flutter.dev/development/tools/devtools/memory';
 const _consoleDocUrl =
     'https://docs.flutter.dev/development/tools/devtools/console';
+const _inspectorDocUrl = 'https://docs.flutter.dev/tools/devtools/inspector';
 
 /// Some links to documentation.
 ///
@@ -45,7 +46,7 @@ enum DocLinks {
   diff(_memoryDocUrl, 'diff-snapshots-tab'),
   trace(_memoryDocUrl, 'trace-instances-tab'),
   console(_consoleDocUrl, null),
-  ;
+  inspectorPackageDirectories(_inspectorDocUrl, 'package-directories');
 
   const DocLinks(this.url, this.hash);
 

@@ -20,6 +20,7 @@ import '../../shared/editable_list.dart';
 import '../../shared/error_badge_manager.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/blocking_action_mixin.dart';
+import '../../shared/primitives/simple_items.dart';
 import '../../shared/screen.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/utils.dart';
@@ -360,9 +361,20 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
               'Widgets in these directories will show up in your summary tree.',
               style: theme.subtleTextStyle,
             ),
-            Text(
-              '(e.g. /absolute/path/to/myPackage)',
-              style: theme.subtleTextStyle,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '(e.g. /absolute/path/to/myPackage)',
+                  style: theme.subtleTextStyle,
+                ),
+                MoreInfoLink(
+                  url: DocLinks.inspectorPackageDirectories.value,
+                  gaScreenName: gac.inspector,
+                  gaSelectedItemDescription:
+                      gac.InspectorDocs.packageDirectoriesDocs.name,
+                ),
+              ],
             ),
             const SizedBox(height: denseSpacing),
             const Expanded(

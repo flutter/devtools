@@ -14,6 +14,7 @@ TODO: Remove this section if there are not any general updates.
 
 ## Inspector updates
 
+* Added link to package directory documentation, from the inspect settings dialog - [6825](https://github.com/flutter/devtools/pull/6825)
 * Fix bug where widgets owned by the Flutter framework were showing up in the widget tree view -
 [6857](https://github.com/flutter/devtools/pull/6857)
 
