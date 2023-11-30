@@ -16,8 +16,8 @@ under `lib` (e.g. a unit test or integration test). Thanks to
 [#6644](https://github.com/flutter/devtools/pull/6644)
 
 ## Inspector updates
-* When done typing in the search field, the next selection is now automatically selected - [#6677](https://github.com/flutter/devtools/pull/6677)
-* When typing in the search field, hitting `Enter` will now select the next search result, hitting `Shift+Enter` will now select the previous result. - [#6677](https://github.com/flutter/devtools/pull/6677)
+
+TODO: Remove this section if there are not any general updates.
 
 ## Performance updates
 
@@ -38,7 +38,9 @@ TODO: Remove this section if there are not any general updates.
 
 ## Debugger updates
 
-TODO: Remove this section if there are not any general updates.
+* Highlight `extension type` as a declaration keyword,
+  highlight the `$` in identifier interpolation as part of the interpolation,
+  and properly highlight comments within type arguments. - [6837](https://github.com/flutter/devtools/pull/6837)
 
 ## Network profiler updates
 
@@ -59,7 +61,7 @@ TODO: Remove this section if there are not any general updates.
   the current project. This also requires a corresponding Dart extension for
   VS Code update to appear
   - [#6688](https://github.com/flutter/devtools/pull/6688)
-* The DevTools menu in the sidebar now has now has an entry "Open in Browser"
+* The DevTools menu in the sidebar now has an entry "Open in Browser"
   that opens DevTools in an external browser window even when VS Code settings
   are set to usually use embedded DevTools.
   - [#6736](https://github.com/flutter/devtools/pull/6736)

@@ -27,8 +27,9 @@
 #            ^ keyword.operator.assignment.dart
 #               ^^ string.interpolated.single.dart
 #                 ^ punctuation.comma.dart
-#                   ^^ string.interpolated.single.dart
-#                     ^ string.interpolated.single.dart variable.parameter.dart
+#                   ^ string.interpolated.single.dart
+#                    ^ string.interpolated.single.dart string.interpolated.expression.dart
+#                     ^ string.interpolated.single.dart string.interpolated.expression.dart variable.parameter.dart
 #                      ^ string.interpolated.single.dart
 #                        ^ punctuation.terminator.dart
 >const list4 = <String>['', '$a'];
@@ -39,8 +40,9 @@
 #                     ^ keyword.operator.comparison.dart
 #                       ^^ string.interpolated.single.dart
 #                         ^ punctuation.comma.dart
-#                           ^^ string.interpolated.single.dart
-#                             ^ string.interpolated.single.dart variable.parameter.dart
+#                           ^ string.interpolated.single.dart
+#                            ^ string.interpolated.single.dart string.interpolated.expression.dart
+#                             ^ string.interpolated.single.dart string.interpolated.expression.dart variable.parameter.dart
 #                              ^ string.interpolated.single.dart
 #                                ^ punctuation.terminator.dart
 >
@@ -60,8 +62,9 @@
 #           ^ keyword.operator.assignment.dart
 #              ^^ string.interpolated.single.dart
 #                ^ punctuation.comma.dart
-#                  ^^ string.interpolated.single.dart
-#                    ^ string.interpolated.single.dart variable.parameter.dart
+#                  ^ string.interpolated.single.dart
+#                   ^ string.interpolated.single.dart string.interpolated.expression.dart
+#                    ^ string.interpolated.single.dart string.interpolated.expression.dart variable.parameter.dart
 #                     ^ string.interpolated.single.dart
 #                       ^ punctuation.terminator.dart
 >const set4 = <String>{'', '$a'};
@@ -72,8 +75,9 @@
 #                    ^ keyword.operator.comparison.dart
 #                      ^^ string.interpolated.single.dart
 #                        ^ punctuation.comma.dart
-#                          ^^ string.interpolated.single.dart
-#                            ^ string.interpolated.single.dart variable.parameter.dart
+#                          ^ string.interpolated.single.dart
+#                           ^ string.interpolated.single.dart string.interpolated.expression.dart
+#                            ^ string.interpolated.single.dart string.interpolated.expression.dart variable.parameter.dart
 #                             ^ string.interpolated.single.dart
 #                               ^ punctuation.terminator.dart
 >
@@ -91,8 +95,9 @@
 #           ^ keyword.operator.assignment.dart
 #              ^^ string.interpolated.single.dart
 #                ^ keyword.operator.ternary.dart
-#                  ^^ string.interpolated.single.dart
-#                    ^ string.interpolated.single.dart variable.parameter.dart
+#                  ^ string.interpolated.single.dart
+#                   ^ string.interpolated.single.dart string.interpolated.expression.dart
+#                    ^ string.interpolated.single.dart string.interpolated.expression.dart variable.parameter.dart
 #                     ^ string.interpolated.single.dart
 #                       ^ punctuation.terminator.dart
 >const map3 = <String, String>{'': '$a'};
@@ -105,7 +110,8 @@
 #                            ^ keyword.operator.comparison.dart
 #                              ^^ string.interpolated.single.dart
 #                                ^ keyword.operator.ternary.dart
-#                                  ^^ string.interpolated.single.dart
-#                                    ^ string.interpolated.single.dart variable.parameter.dart
+#                                  ^ string.interpolated.single.dart
+#                                   ^ string.interpolated.single.dart string.interpolated.expression.dart
+#                                    ^ string.interpolated.single.dart string.interpolated.expression.dart variable.parameter.dart
 #                                     ^ string.interpolated.single.dart
 #                                       ^ punctuation.terminator.dart

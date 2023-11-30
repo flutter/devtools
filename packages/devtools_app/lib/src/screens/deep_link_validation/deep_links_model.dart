@@ -177,6 +177,7 @@ class DomainColumn extends ColumnData<LinkData>
     BuildContext context,
     LinkData dataObject, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     return _ErrorAwareText(
@@ -231,6 +232,7 @@ class PathColumn extends ColumnData<LinkData>
     BuildContext context,
     LinkData dataObject, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     return _ErrorAwareText(
@@ -302,6 +304,7 @@ class SchemeColumn extends ColumnData<LinkData>
     BuildContext context,
     LinkData dataObject, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     return Text(getValue(dataObject));
@@ -347,6 +350,7 @@ class OSColumn extends ColumnData<LinkData>
     BuildContext context,
     LinkData dataObject, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     return Text(getValue(dataObject));
@@ -415,6 +419,7 @@ class StatusColumn extends ColumnData<LinkData>
     BuildContext context,
     LinkData dataObject, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     if (dataObject.domainErrors.isNotEmpty || dataObject.pathError) {
@@ -433,7 +438,6 @@ class StatusColumn extends ColumnData<LinkData>
   }
 }
 
-// TODO: Implement this column.
 class NavigationColumn extends ColumnData<LinkData>
     implements ColumnRenderer<LinkData> {
   NavigationColumn()
@@ -450,9 +454,12 @@ class NavigationColumn extends ColumnData<LinkData>
     BuildContext context,
     LinkData dataObject, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
-    return const Icon(Icons.arrow_forward);
+    return isRowHovered
+        ? const Icon(Icons.arrow_forward)
+        : const SizedBox.shrink();
   }
 }
 
