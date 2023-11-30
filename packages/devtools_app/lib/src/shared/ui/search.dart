@@ -187,9 +187,12 @@ mixin SearchControllerMixin<T extends SearchableDataMixin> {
       activeMatchIndex = 0;
       matchIndex.value = 1; // first item because [matchIndex] us 1-based
     }
+
     _activeSearchMatch.value?.isActiveSearchMatch = false;
-    _activeSearchMatch.value = searchMatches.value[activeMatchIndex]
-      ..isActiveSearchMatch = true;
+    if (searchMatches.value.isNotEmpty) {
+      _activeSearchMatch.value = searchMatches.value[activeMatchIndex]
+        ..isActiveSearchMatch = true;
+    }
     onMatchChanged(activeMatchIndex);
   }
 
@@ -250,7 +253,22 @@ mixin SearchControllerMixin<T extends SearchableDataMixin> {
     _searchFieldFocusNode?.dispose();
     _searchTextFieldController = SearchTextEditingController()
       ..text = _searchNotifier.value;
-    _searchFieldFocusNode = FocusNode(debugLabel: 'search-field');
+    _searchFieldFocusNode = FocusNode(
+      debugLabel: 'search-field',
+      onKey: (FocusNode node, RawKeyEvent event) {
+        if (event.logicalKey.keyLabel == 'Enter') {
+          if (event is RawKeyDownEvent) {
+            if (event.isShiftPressed) {
+              previousMatch();
+            } else {
+              nextMatch();
+            }
+            return KeyEventResult.handled;
+          }
+        }
+        return KeyEventResult.ignored;
+      },
+    );
   }
 
   @mustCallSuper
@@ -1041,6 +1059,7 @@ class StatelessSearchField<T extends SearchableDataMixin>
       onChanged: (value) {
         onChanged?.call(value);
         controller.search = value;
+        controller.searchFieldFocusNode.requestFocus();
       },
       onEditingComplete: () {
         controller.searchFieldFocusNode.requestFocus();
