@@ -83,6 +83,7 @@ We recommend using VS Code for your DevTools development environment because thi
 access to some advanced development and configuration features. When you open DevTools in VS Code,
 open the `devtools/packages` directory in your VS Code workspace. This will give you access to a set
 of launch configurations for running and debugging DevTools:
+
 ![VS Code launch configurations](_markdown_images/vs_code_launch_configurations.png)
 
 ### Workflow for making changes

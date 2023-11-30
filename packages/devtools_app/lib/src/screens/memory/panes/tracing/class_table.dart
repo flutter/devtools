@@ -41,6 +41,7 @@ class _TraceCheckBoxColumn extends ColumnData<TracedClass>
     BuildContext context,
     TracedClass item, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     return Checkbox(
@@ -85,6 +86,7 @@ class _ClassNameColumn extends ColumnData<TracedClass>
     BuildContext context,
     TracedClass data, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     return HeapClassView(

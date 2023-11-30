@@ -1,3 +1,11 @@
 #!/bin/bash -e
+
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-dart run "$SCRIPT_DIR/devtools_tool.dart" "$@"
+
+if [ ! -z "$DEVTOOLS_TOOL_FLUTTER_FROM_PATH" ]
+then
+	echo Running devtools_tool using Dart/Flutter from PATH because DEVTOOLS_TOOL_FLUTTER_FROM_PATH is set
+	dart run "$SCRIPT_DIR/devtools_tool.dart" "$@"
+else
+	"$SCRIPT_DIR/../flutter-sdk/bin/dart" run "$SCRIPT_DIR/devtools_tool.dart" "$@"
+fi

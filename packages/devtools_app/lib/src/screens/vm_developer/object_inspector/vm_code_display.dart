@@ -69,6 +69,7 @@ class _FunctionsColumn extends _CodeColumnData<InliningEntry>
     BuildContext context,
     InliningEntry data, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     return Row(
@@ -177,6 +178,7 @@ class _InstructionColumn extends _CodeColumnData<Instruction>
     BuildContext context,
     Instruction data, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     final theme = Theme.of(context);
@@ -277,6 +279,7 @@ class _DartObjectColumn extends _CodeColumnData<Instruction>
     BuildContext context,
     Instruction data, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     if (data.object == null) return Container();

@@ -68,7 +68,7 @@ T _accessGlobalOrThrow<T>({required String globalName}) {
     throw StateError(
       "'$globalName' has not been initialized yet. You can only access "
       "'$globalName' below the 'DevToolsExtension' widget in the widget "
-      "tree, since it is initialized as part of the the 'DevToolsExtension'"
+      "tree, since it is initialized as part of the 'DevToolsExtension'"
       "state's 'initState' lifecycle method.",
     );
   }
