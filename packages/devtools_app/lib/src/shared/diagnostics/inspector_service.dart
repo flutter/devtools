@@ -27,9 +27,10 @@ import 'object_group_api.dart';
 import 'primitives/instance_ref.dart';
 import 'primitives/source_location.dart';
 
-const inspectorLibraryUri = 'package:flutter/src/widgets/widget_inspector.dart';
-const google3PathSegment = 'google3';
-const thirdPartyPathSegment = 'third_party';
+const _inspectorLibraryUri =
+    'package:flutter/src/widgets/widget_inspector.dart';
+const _google3PathSegment = 'google3';
+const _thirdPartyPathSegment = 'third_party';
 
 abstract class InspectorServiceBase extends DisposableController
     with AutoDisposeControllerMixin {
@@ -185,7 +186,7 @@ class InspectorService extends InspectorServiceBase {
       : super(
           clientInspectorName: 'WidgetInspectorService',
           serviceExtensionPrefix: inspectorExtensionPrefix,
-          inspectorLibraryUri: inspectorLibraryUri,
+          inspectorLibraryUri: _inspectorLibraryUri,
           evalIsolate:
               serviceConnection.serviceManager.isolateManager.mainIsolate,
         ) {
@@ -500,13 +501,7 @@ class InspectorService extends InspectorServiceBase {
     // (e.g. /education), or the top-level directory in third_party (e.g.
     // /third_party/dart):
     if (_isGoogle3Path(parts)) {
-      final strippedParts = _stripGoogle3(parts);
-      final topLevelDirectory = strippedParts.first;
-      if (topLevelDirectory != thirdPartyPathSegment) {
-        pubRootDirectory = '/${strippedParts.first}';
-      } else {
-        pubRootDirectory = '/${strippedParts.sublist(0, 2).join('/')}';
-      }
+      pubRootDirectory = _pubRootDirectoryForGoogle3(parts);
     } else {
       final parts = path.split('/');
 
@@ -530,14 +525,27 @@ class InspectorService extends InspectorServiceBase {
   }
 
   bool _isGoogle3Path(List<String> pathParts) =>
-      pathParts.contains(google3PathSegment);
+      pathParts.contains(_google3PathSegment);
 
   List<String> _stripGoogle3(List<String> pathParts) {
-    final google3Index = pathParts.lastIndexOf(google3PathSegment);
+    final google3Index = pathParts.lastIndexOf(_google3PathSegment);
     if (google3Index != -1 && google3Index + 1 < pathParts.length) {
       return pathParts.sublist(google3Index + 1);
     }
     return pathParts;
+  }
+
+  String? _pubRootDirectoryForGoogle3(List<String> pathParts) {
+    final strippedParts = _stripGoogle3(pathParts);
+    if (strippedParts.isEmpty) return null;
+
+    final topLevelDirectory = strippedParts.first;
+    if (topLevelDirectory == _thirdPartyPathSegment &&
+        strippedParts.length >= 2) {
+      return '/${strippedParts.sublist(0, 2).join('/')}';
+    } else {
+      return '/${strippedParts.first}';
+    }
   }
 
   RemoteDiagnosticsNode? _currentSelection;
