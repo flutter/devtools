@@ -65,6 +65,7 @@ class MethodAndSourceColumn extends TreeColumnData<CpuStackFrame>
     BuildContext context,
     CpuStackFrame data, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     return MethodAndSourceDisplay(

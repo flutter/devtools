@@ -26,6 +26,7 @@ TODO: Remove this section if there are not any general updates.
 ![Flutter rendering engine text](images/flutter_frames_engine_text.png "Text describing the current flutter rendering engine")
 * Improve messaging when we do not have analysis data available for a Flutter
 frame. - [#6768](https://github.com/flutter/devtools/pull/6768)
+* Changed raster layer preview background to a checkerboard. - [#6827](https://github.com/flutter/devtools/pull/6827)
 
 ## CPU profiler updates
 
@@ -37,7 +38,9 @@ TODO: Remove this section if there are not any general updates.
 
 ## Debugger updates
 
-TODO: Remove this section if there are not any general updates.
+* Highlight `extension type` as a declaration keyword,
+  highlight the `$` in identifier interpolation as part of the interpolation,
+  and properly highlight comments within type arguments. - [6837](https://github.com/flutter/devtools/pull/6837)
 
 ## Network profiler updates
 
@@ -58,7 +61,7 @@ TODO: Remove this section if there are not any general updates.
   the current project. This also requires a corresponding Dart extension for
   VS Code update to appear
   - [#6688](https://github.com/flutter/devtools/pull/6688)
-* The DevTools menu in the sidebar now has now has an entry "Open in Browser"
+* The DevTools menu in the sidebar now has an entry "Open in Browser"
   that opens DevTools in an external browser window even when VS Code settings
   are set to usually use embedded DevTools.
   - [#6736](https://github.com/flutter/devtools/pull/6736)
