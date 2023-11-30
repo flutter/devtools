@@ -17,7 +17,8 @@ under `lib` (e.g. a unit test or integration test). Thanks to
 
 ## Inspector updates
 
-TODO: Remove this section if there are not any general updates.
+* Fix bug where widgets owned by the Flutter framework were showing up in the widget tree view. -
+[#6857](https://github.com/flutter/devtools/pull/6857)
 
 ## Performance updates
 
