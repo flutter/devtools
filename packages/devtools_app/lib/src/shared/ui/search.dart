@@ -187,9 +187,12 @@ mixin SearchControllerMixin<T extends SearchableDataMixin> {
       activeMatchIndex = 0;
       matchIndex.value = 1; // first item because [matchIndex] us 1-based
     }
+
     _activeSearchMatch.value?.isActiveSearchMatch = false;
-    _activeSearchMatch.value = searchMatches.value[activeMatchIndex]
-      ..isActiveSearchMatch = true;
+    if (searchMatches.value.isNotEmpty) {
+      _activeSearchMatch.value = searchMatches.value[activeMatchIndex]
+        ..isActiveSearchMatch = true;
+    }
     onMatchChanged(activeMatchIndex);
   }
 
