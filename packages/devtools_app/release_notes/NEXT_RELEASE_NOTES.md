@@ -26,6 +26,7 @@ TODO: Remove this section if there are not any general updates.
 ![Flutter rendering engine text](images/flutter_frames_engine_text.png "Text describing the current flutter rendering engine")
 * Improve messaging when we do not have analysis data available for a Flutter
 frame. - [#6768](https://github.com/flutter/devtools/pull/6768)
+* Changed raster layer preview background to a checkerboard. - [#6827](https://github.com/flutter/devtools/pull/6827)
 
 ## CPU profiler updates
 
