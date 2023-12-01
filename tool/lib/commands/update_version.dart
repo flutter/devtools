@@ -5,7 +5,6 @@
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
-import 'package:devtools_tool/devtools_command_runner.dart';
 import '../utils.dart';
 
 // This script must be executed from the top level devtools/ directory.
