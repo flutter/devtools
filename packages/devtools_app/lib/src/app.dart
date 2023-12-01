@@ -234,7 +234,6 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       return MaterialPage(child: widget);
     }
 
-    print('page not found: $page');
     // Return a page not found.
     return MaterialPage(
       child: DevToolsScaffold.withChild(

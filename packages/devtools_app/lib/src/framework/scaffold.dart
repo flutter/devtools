@@ -116,8 +116,6 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   void initState() {
     super.initState();
 
-    print('DevToolsScaffold.initState: ${widget.screens}');
-
     addAutoDisposeListener(devToolsTitle);
 
     _setupTabController();
