@@ -10,5 +10,5 @@ set -ex
 source ./tool/ci/setup.sh
 
 pushd $DEVTOOLS_DIR/packages/devtools_app
-dart run test_benchmarks/web_bundle_size_test.dart
+flutter test test_benchmarks/
 popd

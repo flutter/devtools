@@ -7,7 +7,7 @@ import 'package:devtools_app/src/screens/memory/panes/control/settings_dialog.da
 import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app_shared/src/ui/dialogs.dart';
-import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
