@@ -58,6 +58,7 @@ class _FieldClassNameColumn extends ColumnData<ProfileRecord>
     BuildContext context,
     ProfileRecord data, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     if (data.isTotal) return null;
@@ -137,6 +138,7 @@ class _FieldInstanceCountColumn extends ColumnData<ProfileRecord>
     BuildContext context,
     ProfileRecord data, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     return ProfileInstanceTableCell(

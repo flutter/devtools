@@ -433,7 +433,14 @@ void main() {
                   spanTester(
                     context,
                     children[i++] as TextSpan,
-                    "'\$",
+                    "'",
+                    stringSyntaxColor,
+                  );
+
+                  spanTester(
+                    context,
+                    children[i++] as TextSpan,
+                    '\$',
                     stringSyntaxColor,
                   );
 

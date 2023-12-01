@@ -17,7 +17,7 @@ void main() {
     setUp(() {
       options = DevToolsOptions();
       tmpDir = Directory.current.createTempSync();
-      tmpUri = Uri.parse(tmpDir.path);
+      tmpUri = Uri.file(tmpDir.path);
     });
 
     tearDown(() {

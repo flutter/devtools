@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@JS()
-library gtags;
-
 // ignore_for_file: non_constant_identifier_names
+
+@JS()
+library;
 
 import 'dart:async';
 

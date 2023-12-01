@@ -4,7 +4,7 @@ publish_to: none
 
 # Note: this version should only be updated by running tools/update_version.dart
 # that updates all versions of devtools packages (devtools_app, devtools_test).
-version: 2.30.0-dev.13
+version: 2.31.0-dev.0
 
 repository: https://github.com/flutter/devtools/tree/master/packages/devtools_app
 
@@ -18,8 +18,6 @@ dependencies:
   # Pin ansicolor to version before pre-NNBD version 1.1.0, should be ^1.0.5
   # See https://github.com/flutter/devtools/issues/2530
   ansicolor: ^2.0.0
-  # TODO: https://github.com/flutter/devtools/issues/4728 - remove constraint when archive is fixed
-  archive: <3.3.3
   async: ^2.0.0
   clock: ^1.1.1
   codicon: ^1.0.0
@@ -43,7 +41,7 @@ dependencies:
   flutter_web_plugins:
     sdk: flutter
   http: ^1.1.0
-  image: ^3.0.2
+  image: ^4.1.3
   intl: ^0.18.0
   js: ^0.6.1+1
   json_rpc_2: ^3.0.2
@@ -73,7 +71,7 @@ dependencies:
 dev_dependencies:
   args: ^2.4.2
   build_runner: ^2.3.3
-  devtools_test: 2.30.0-dev.13
+  devtools_test: 2.31.0-dev.0
   fake_async: ^1.3.1
   flutter_driver:
     sdk: flutter

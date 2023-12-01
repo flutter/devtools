@@ -56,6 +56,7 @@ class _ClassNameColumn extends ColumnData<DiffClassStats>
     BuildContext context,
     DiffClassStats data, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     return HeapClassView(
@@ -140,6 +141,7 @@ class _InstanceColumn extends ColumnData<DiffClassStats>
     BuildContext context,
     DiffClassStats data, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     final objects = _instances(data);

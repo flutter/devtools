@@ -2,5 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-export 'src/api/api.dart';
-export 'src/api/model.dart';
+part of '../constants.dart';
+
+/// Events for opening documentation for the inspector tab.
+enum InspectorDocs {
+  packageDirectoriesDocs;
+}
