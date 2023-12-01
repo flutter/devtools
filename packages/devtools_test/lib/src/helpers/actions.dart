@@ -101,6 +101,7 @@ Future<Finder> findTab(WidgetController controller, IconData icon) async {
   return find.widgetWithIcon(Tab, icon);
 }
 
+// ignore: avoid-dynamic, wrapper around `expect`, which uses dynamic types.
 void _maybeExpect(dynamic actual, dynamic matcher, {bool shouldExpect = true}) {
   if (shouldExpect) {
     expect(actual, matcher);
