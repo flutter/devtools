@@ -54,12 +54,6 @@ Future<void> performTheVersionUpdate({
     File(pathFromRepoRoot('packages/devtools_app/lib/devtools.dart')),
     newVersion,
   );
-
-  await DevToolsCommandRunner().run([
-    'pub-get',
-    '--upgrade',
-    '--only-main',
-  ]);
 }
 
 Future<void> resetReleaseNotes({
