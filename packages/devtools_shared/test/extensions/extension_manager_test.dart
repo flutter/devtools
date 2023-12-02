@@ -44,9 +44,9 @@ void main() {
 
 Directory _createFromDir() {
   final from = Directory('tmp')..createSync();
-  File(p.join(from.path, 'foo.txt'))..createSync();
+  File(p.join(from.path, 'foo.txt')).createSync();
   final dir = Directory(p.join(from.path, 'bar'))..createSync();
-  File(p.join(dir.path, 'baz.txt'))..createSync();
+  File(p.join(dir.path, 'baz.txt')).createSync();
   final contents = _contentAsOrderedString(from);
   expect(
     contents,

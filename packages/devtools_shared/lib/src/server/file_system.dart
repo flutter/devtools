@@ -39,7 +39,7 @@ class LocalFileSystem {
 
   /// Creates the ~/.flutter-devtools directory if it does not already exist.
   static void ensureDevToolsDirectory() {
-    Directory('${devToolsDir()}').createSync();
+    Directory(devToolsDir()).createSync();
   }
 
   /// Returns a DevTools file from the given path.

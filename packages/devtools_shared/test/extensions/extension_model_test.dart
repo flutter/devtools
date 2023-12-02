@@ -222,7 +222,7 @@ void main() {
       expect(
         () {
           DevToolsExtensionConfig.parse({
-            'name': 'name.with\'special\chars/',
+            'name': 'name.with\'specialchars/',
             'path': 'path/to/foo/extension',
             'issueTracker': 'www.google.com',
             'version': '1.0.0',
