@@ -82,6 +82,7 @@ class _SelectProjectViewState extends State<SelectProjectView>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     if (_retrievingFlutterProject) {
       return Center(
         child: Column(
@@ -89,8 +90,8 @@ class _SelectProjectViewState extends State<SelectProjectView>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Project loading',
-              style: Theme.of(context).regularTextStyle,
+              'Project loading...',
+              style: theme.regularTextStyle,
             ),
             Container(
               width: _kLinearProgressIndicatorWidth,
@@ -98,31 +99,29 @@ class _SelectProjectViewState extends State<SelectProjectView>
               child: const LinearProgressIndicator(),
             ),
             Text(
-              'First time loading will take longer time than usual',
-              style: Theme.of(context).subtleTextStyle,
+              'The first load will take longer than usual',
+              style: theme.subtleTextStyle,
             ),
           ],
         ),
       );
     }
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(defaultSpacing),
-            child: Text(
-              'Pick a flutter project from your local file to check all deep links status',
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(defaultSpacing),
+          child: Text(
+            'Pick a local flutter project to check the status of all deep links.',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.titleSmall,
           ),
-          DirectoryPicker(
-            onDirectoryPicked: _handleDirectoryPicked,
-            enabled: !_retrievingFlutterProject,
-          ),
-        ],
-      ),
+        ),
+        DirectoryPicker(
+          onDirectoryPicked: _handleDirectoryPicked,
+          enabled: !_retrievingFlutterProject,
+        ),
+      ],
     );
   }
 }
