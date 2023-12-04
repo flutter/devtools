@@ -30,7 +30,7 @@ abstract class MemoryJson<T> implements DecodeEncode<T> {
     Map<String, dynamic>? argDecodedMap,
   }) {
     final Map<String, dynamic> decodedMap =
-        argDecodedMap == null ? jsonDecode(argJsonString) : argDecodedMap;
+        argDecodedMap ?? jsonDecode(argJsonString);
     Map<String, dynamic> payload = decodedMap[payloadName];
 
     int payloadVersion = payload[jsonVersionField];

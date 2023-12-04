@@ -26,6 +26,8 @@ dependencies:
     sdk: flutter
   flutter_test:
     sdk: flutter
+  integration_test:
+    sdk: flutter
   meta: ^1.9.1
   mockito: ^5.4.1
   path: ^1.8.0
@@ -46,5 +48,4 @@ dependency_overrides:
 
 dev_dependencies:
   build_runner: ^2.3.3
-  integration_test:
-    sdk: flutter
+  flutter_lints: ^2.0.3

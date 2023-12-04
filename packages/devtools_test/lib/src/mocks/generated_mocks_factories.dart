@@ -218,22 +218,22 @@ Future<MockExtensionService> createMockExtensionServiceWithDefaults(
   when(mockExtensionService.availableExtensions)
       .thenReturn(ImmediateValueNotifier(extensions));
 
-  final _stubEnabledStates = <String, ValueNotifier<ExtensionEnabledState>>{};
+  final stubEnabledStates = <String, ValueNotifier<ExtensionEnabledState>>{};
   for (final e in extensions) {
-    _stubEnabledStates[e.displayName] =
+    stubEnabledStates[e.displayName] =
         ValueNotifier<ExtensionEnabledState>(ExtensionEnabledState.none);
     when(mockExtensionService.enabledStateListenable(e.name))
-        .thenReturn(_stubEnabledStates[e.name.toLowerCase()]!);
+        .thenReturn(stubEnabledStates[e.name.toLowerCase()]!);
     when(mockExtensionService.enabledStateListenable(e.name.toLowerCase()))
-        .thenReturn(_stubEnabledStates[e.name.toLowerCase()]!);
+        .thenReturn(stubEnabledStates[e.name.toLowerCase()]!);
     when(mockExtensionService.setExtensionEnabledState(e, enable: true))
         .thenAnswer((_) async {
-      _stubEnabledStates[e.name.toLowerCase()]!.value =
+      stubEnabledStates[e.name.toLowerCase()]!.value =
           ExtensionEnabledState.enabled;
     });
     when(mockExtensionService.setExtensionEnabledState(e, enable: false))
         .thenAnswer((_) async {
-      _stubEnabledStates[e.name.toLowerCase()]!.value =
+      stubEnabledStates[e.name.toLowerCase()]!.value =
           ExtensionEnabledState.disabled;
     });
   }

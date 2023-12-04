@@ -41,10 +41,10 @@ Future<void> addListenerScope({
   required Function callback,
 }) async {
   bool listenerCalled = false;
-  final listenerWrapped = () {
+  void listenerWrapped() {
     listenerCalled = true;
     listener();
-  };
+  }
 
   listenable.addListener(listenerWrapped);
   await callback();
@@ -54,7 +54,10 @@ Future<void> addListenerScope({
 
 /// Returns a future that completes when a listenable has a value that satisfies
 /// [condition].
-Future<T> whenMatches<T>(ValueListenable<T> listenable, bool condition(T)) {
+Future<T> whenMatches<T>(
+  ValueListenable<T> listenable,
+  bool Function(T) condition,
+) {
   final completer = Completer<T>();
   void listener() {
     if (condition(listenable.value)) {
