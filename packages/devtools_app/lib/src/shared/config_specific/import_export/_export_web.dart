@@ -23,11 +23,11 @@ class ExportControllerWeb extends ExportController {
     final element = document.createElement('a') as HTMLAnchorElement;
     element.setAttribute(
       'href',
-      URL.createObjectURL(Blob([content.toJS].toJS)),
+      URL.createObjectURL(Blob([content.toJS].toJS) as JSObject),
     );
     element.setAttribute('download', fileName);
     element.style.display = 'none';
-    (document.body as HTMLBodyElement).append(element);
+    (document.body as HTMLBodyElement).append(element as JSAny);
     element.click();
     element.remove();
   }

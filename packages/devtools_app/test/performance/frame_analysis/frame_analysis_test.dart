@@ -10,6 +10,7 @@ import 'package:devtools_app/src/screens/performance/panes/rebuild_stats/rebuild
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -69,7 +70,7 @@ void main() {
         await pumpAnalysisView(tester, null);
 
         expect(
-          find.text('No analysis data available for this frame.'),
+          find.textContaining('No analysis data available for this frame.'),
           findsOneWidget,
         );
         expect(find.byType(FrameHints), findsNothing);
@@ -84,7 +85,7 @@ void main() {
         await pumpAnalysisView(tester, frameAnalysis);
 
         expect(
-          find.text('No analysis data available for this frame.'),
+          find.textContaining('No analysis data available for this frame.'),
           findsNothing,
         );
         expect(find.byType(FrameHints), findsOneWidget);

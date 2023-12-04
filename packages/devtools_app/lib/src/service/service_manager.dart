@@ -19,7 +19,6 @@ import '../shared/feature_flags.dart';
 import '../shared/globals.dart';
 import '../shared/title.dart';
 import '../shared/utils.dart';
-import 'resolved_uri_manager.dart';
 import 'service_registrations.dart' as registrations;
 import 'timeline_streams.dart';
 import 'vm_flags.dart';
@@ -75,8 +74,6 @@ class ServiceConnectionManager {
 
   final consoleService = ConsoleService();
 
-  final resolvedUriManager = ResolvedUriManager();
-
   InspectorServiceBase? get inspectorService => _inspectorService;
   InspectorServiceBase? _inspectorService;
 
@@ -92,7 +89,6 @@ class ServiceConnectionManager {
 
   Future<void> _beforeOpenVmService(VmServiceWrapper? service) async {
     consoleService.vmServiceOpened(service!);
-    resolvedUriManager.vmServiceOpened();
     await vmFlagManager.vmServiceOpened(service);
     timelineStreamManager.vmServiceOpened(
       service,
@@ -149,7 +145,6 @@ class ServiceConnectionManager {
     generateDevToolsTitle();
     vmFlagManager.vmServiceClosed();
     timelineStreamManager.vmServiceClosed();
-    resolvedUriManager.vmServiceClosed();
     consoleService.handleVmServiceClosed();
     _inspectorService?.onIsolateStopped();
     _inspectorService?.dispose();
@@ -185,8 +180,9 @@ class ServiceConnectionManager {
     if (rootLib == null) return null;
 
     final selectedIsolateRefId = mainIsolateRef.id!;
-    await resolvedUriManager.fetchFileUris(selectedIsolateRefId, [rootLib]);
-    return resolvedUriManager.lookupFileUri(
+    await serviceManager.resolvedUriManager
+        .fetchFileUris(selectedIsolateRefId, [rootLib]);
+    return serviceManager.resolvedUriManager.lookupFileUri(
       selectedIsolateRefId,
       rootLib,
     );

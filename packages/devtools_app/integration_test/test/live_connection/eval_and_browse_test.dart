@@ -10,7 +10,8 @@ import 'package:devtools_app/src/screens/memory/panes/control/primary_controls.d
 import 'package:devtools_app/src/screens/memory/panes/diff/widgets/snapshot_list.dart';
 import 'package:devtools_app/src/screens/memory/shared/primitives/instance_context_menu.dart';
 import 'package:devtools_app/src/shared/console/widgets/console_pane.dart';
-import 'package:devtools_test/devtools_integration_test.dart';
+import 'package:devtools_test/helpers.dart';
+import 'package:devtools_test/integration_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';

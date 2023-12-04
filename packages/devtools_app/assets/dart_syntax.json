@@ -1,6 +1,6 @@
 {
 	"name": "Dart",
-	"version": "1.2.0",
+	"version": "1.2.5",
 	"fileTypes": [
 		"dart"
 	],
@@ -93,15 +93,7 @@
 					"end": "```"
 				},
 				{
-					"match": "(`.*?`)",
-					"captures": {
-						"0": {
-							"name": "variable.other.source.dart"
-						}
-					}
-				},
-				{
-					"match": "(`.*?`)",
+					"match": "(`[^`]+?`)",
 					"captures": {
 						"0": {
 							"name": "variable.other.source.dart"
@@ -302,6 +294,9 @@
 				{
 					"name": "keyword.declaration.dart",
 					"match": "extends"
+				},
+				{
+					"include": "#comments"
 				}
 			]
 		},
@@ -333,7 +328,7 @@
 				},
 				{
 					"name": "keyword.declaration.dart",
-					"match": "(?<!\\$)\\b(abstract|sealed|base|interface|class|enum|extends|extension|external|factory|implements|get(?!\\()|mixin|native|operator|set(?!\\()|typedef|with|covariant)\\b(?!\\$)"
+					"match": "(?<!\\$)\\b(abstract|sealed|base|interface|class|enum|extends|extension type|extension|external|factory|implements|get(?!\\()|mixin|native|operator|set(?!\\()|typedef|with|covariant)\\b(?!\\$)"
 				},
 				{
 					"name": "storage.modifier.dart",
@@ -396,6 +391,7 @@
 		"string-interp": {
 			"patterns": [
 				{
+					"name": "string.interpolated.expression.dart",
 					"match": "\\$([a-zA-Z0-9_]+)",
 					"captures": {
 						"1": {
@@ -409,8 +405,7 @@
 					"end": "\\}",
 					"patterns": [
 						{
-							"include": "#constants-and-special-vars",
-							"name": "variable.parameter.dart"
+							"include": "#constants-and-special-vars"
 						},
 						{
 							"include": "#strings"

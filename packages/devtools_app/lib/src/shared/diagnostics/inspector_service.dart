@@ -27,7 +27,10 @@ import 'object_group_api.dart';
 import 'primitives/instance_ref.dart';
 import 'primitives/source_location.dart';
 
-const inspectorLibraryUri = 'package:flutter/src/widgets/widget_inspector.dart';
+const _inspectorLibraryUri =
+    'package:flutter/src/widgets/widget_inspector.dart';
+const _google3PathSegment = 'google3';
+const _thirdPartyPathSegment = 'third_party';
 
 abstract class InspectorServiceBase extends DisposableController
     with AutoDisposeControllerMixin {
@@ -183,7 +186,7 @@ class InspectorService extends InspectorServiceBase {
       : super(
           clientInspectorName: 'WidgetInspectorService',
           serviceExtensionPrefix: inspectorExtensionPrefix,
-          inspectorLibraryUri: inspectorLibraryUri,
+          inspectorLibraryUri: _inspectorLibraryUri,
           evalIsolate:
               serviceConnection.serviceManager.isolateManager.mainIsolate,
         ) {
@@ -339,9 +342,8 @@ class InspectorService extends InspectorServiceBase {
       final libIndex = parts.lastIndexOf('lib');
       final path = libIndex > 0 ? parts.sublist(0, libIndex) : parts;
       // Special case handling of bazel packages.
-      final google3Index = path.lastIndexOf('google3');
-      if (google3Index != -1 && google3Index + 1 < path.length) {
-        var packageParts = path.sublist(google3Index + 1);
+      if (_isGoogle3Path(path)) {
+        var packageParts = _stripGoogle3(path);
         // A well formed third_party dart package should be in a directory of
         // the form
         // third_party/dart/packageName                    (package:packageName)
@@ -483,58 +485,67 @@ class InspectorService extends InspectorServiceBase {
   }
 
   Future<String?> inferPubRootDirectoryIfNeededHelper() async {
-    final group = createObjectGroup('temp');
-    final root = await group.getRoot(FlutterTreeType.widget);
-
-    if (root == null) {
-      // No need to do anything as there isn't a valid tree (yet?).
-      await group.dispose();
-      return null;
-    }
-    List<RemoteDiagnosticsNode?> children = await root.children ?? [];
-
-    if (children.isEmpty) {
-      children = await group.getChildren(root.valueRef, false, null);
-    }
-
-    if (children.isEmpty) {
-      await group.dispose();
-      return null;
-    }
-    final path = children.first!.creationLocation?.path;
+    final path = await serviceConnection.rootLibraryForMainIsolate();
     if (path == null) {
-      await group.dispose();
       return null;
     }
-    // TODO(jacobr): it would be nice to use Isolate.rootLib similar to how
-    // debugger.dart does but we are currently blocked by the
-    // --track-widget-creation transformer generating absolute paths instead of
-    // package:paths.
-    // Once https://github.com/flutter/flutter/issues/26615 is fixed we will be
-    // able to use package: paths. Temporarily all tools tracking widget
-    // locations will need to support both path formats.
+    // TODO(jacobr): Once https://github.com/flutter/flutter/issues/26615 is
+    // fixed we will be able to use package: paths. Temporarily all tools
+    // tracking widget locations will need to support both path formats.
     // TODO(jacobr): use the list of loaded scripts to determine the appropriate
     // package root directory given that the root script of this project is in
     // this directory rather than guessing based on url structure.
     final parts = path.split('/');
     String? pubRootDirectory;
-    for (int i = parts.length - 1; i >= 0; i--) {
-      final part = parts[i];
-      if (part == 'lib' || part == 'web') {
-        pubRootDirectory = parts.sublist(0, i).join('/');
-        break;
-      }
+    // For google3, we grab the top-level directory in the google3 directory
+    // (e.g. /education), or the top-level directory in third_party (e.g.
+    // /third_party/dart):
+    if (_isGoogle3Path(parts)) {
+      pubRootDirectory = _pubRootDirectoryForGoogle3(parts);
+    } else {
+      final parts = path.split('/');
 
-      if (part == 'packages') {
-        pubRootDirectory = parts.sublist(0, i + 1).join('/');
-        break;
+      for (int i = parts.length - 1; i >= 0; i--) {
+        final part = parts[i];
+        if (part == 'lib' || part == 'web') {
+          pubRootDirectory = parts.sublist(0, i).join('/');
+          break;
+        }
+
+        if (part == 'packages') {
+          pubRootDirectory = parts.sublist(0, i + 1).join('/');
+          break;
+        }
       }
     }
     pubRootDirectory ??= (parts..removeLast()).join('/');
 
     await _addPubRootDirectories([pubRootDirectory]);
-    await group.dispose();
     return pubRootDirectory;
+  }
+
+  bool _isGoogle3Path(List<String> pathParts) =>
+      pathParts.contains(_google3PathSegment);
+
+  List<String> _stripGoogle3(List<String> pathParts) {
+    final google3Index = pathParts.lastIndexOf(_google3PathSegment);
+    if (google3Index != -1 && google3Index + 1 < pathParts.length) {
+      return pathParts.sublist(google3Index + 1);
+    }
+    return pathParts;
+  }
+
+  String? _pubRootDirectoryForGoogle3(List<String> pathParts) {
+    final strippedParts = _stripGoogle3(pathParts);
+    if (strippedParts.isEmpty) return null;
+
+    final topLevelDirectory = strippedParts.first;
+    if (topLevelDirectory == _thirdPartyPathSegment &&
+        strippedParts.length >= 2) {
+      return '/${strippedParts.sublist(0, 2).join('/')}';
+    } else {
+      return '/${strippedParts.first}';
+    }
   }
 
   RemoteDiagnosticsNode? _currentSelection;

@@ -239,19 +239,9 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       child: DevToolsScaffold.withChild(
         key: const Key('not-found'),
         embed: isEmbedded(args),
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text("'$page' not found."),
-              const SizedBox(height: defaultSpacing),
-              ElevatedButton(
-                onPressed: () =>
-                    routerDelegate.navigateHome(clearScreenParam: true),
-                child: const Text('Go to Home screen'),
-              ),
-            ],
-          ),
+        child: PageNotFound(
+          page: page,
+          routerDelegate: routerDelegate,
         ),
       ),
     );
@@ -529,6 +519,36 @@ class _AlternateCheckedModeBanner extends StatelessWidget {
       location: BannerLocation.topStart,
       child: Builder(
         builder: builder,
+      ),
+    );
+  }
+}
+
+class PageNotFound extends StatelessWidget {
+  const PageNotFound({
+    super.key,
+    required this.page,
+    required this.routerDelegate,
+  });
+
+  final String page;
+
+  final DevToolsRouterDelegate routerDelegate;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text("'$page' not found."),
+          const SizedBox(height: defaultSpacing),
+          ElevatedButton(
+            onPressed: () =>
+                routerDelegate.navigateHome(clearScreenParam: true),
+            child: const Text('Go to Home screen'),
+          ),
+        ],
       ),
     );
   }

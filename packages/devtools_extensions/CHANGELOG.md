@@ -1,4 +1,7 @@
 ## 0.0.11
+* Add error messaging when `extensionManager` or `serviceManager` are accessed before they
+are initialized.
+* Improve dartdoc for `DevToolsExtension`, `extensionManager`, and `serviceManager`.
 * Migrate from `dart:html` to `package:web`.
 * Add `utils.dart` library with helper for message event parsing.
 

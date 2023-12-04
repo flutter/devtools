@@ -297,9 +297,16 @@ class LayerImage extends StatelessWidget {
                 );
                 final scaledSize = _scaledLayerSize(scaleFactor);
                 final scaledOffset = _scaledLayerOffset(scaleFactor);
+                final theme = Theme.of(context);
                 return Stack(
                   children: [
-                    Image.memory(snapshot.bytes),
+                    CustomPaint(
+                      painter: _CheckerBoardBackgroundPainter(
+                        theme.colorScheme.background,
+                        theme.colorScheme.outlineVariant,
+                      ),
+                      child: Image.memory(snapshot.bytes),
+                    ),
                     Positioned(
                       left: scaledOffset.dx,
                       top: scaledOffset.dy,
@@ -426,5 +433,52 @@ class _LayerImageDialog extends StatelessWidget {
         DialogCloseButton(),
       ],
     );
+  }
+}
+
+class _CheckerBoardBackgroundPainter extends CustomPainter {
+  _CheckerBoardBackgroundPainter(Color color1, Color color2)
+      : _color1 = color1,
+        _color2 = color2;
+
+  final Color _color1;
+  final Color _color2;
+  final _squareSize = 20.0;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.clipRect(Rect.fromLTWH(0, 0, size.width, size.height));
+    final backgroundPaint = Paint()
+      ..color = _color1
+      ..style = PaintingStyle.fill;
+    final checkerPaint = Paint()
+      ..color = _color2
+      ..style = PaintingStyle.fill;
+
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, size.width, size.height),
+      backgroundPaint,
+    );
+
+    bool flipper = true;
+
+    for (var x = 0.0; x < size.width; x += _squareSize) {
+      for (var y = 0.0; y < size.height; y += _squareSize * 2) {
+        double dy = y;
+        if (flipper) {
+          dy += _squareSize;
+        }
+        canvas.drawRect(
+          Rect.fromLTWH(x, dy, _squareSize, _squareSize),
+          checkerPaint,
+        );
+      }
+      flipper = !flipper;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return false;
   }
 }

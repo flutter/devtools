@@ -61,7 +61,7 @@ class ExtensionsManager {
       try {
         extensions = await findExtensions(
           'devtools',
-          packageConfig: Uri.parse(
+          packageConfig: Uri.file(
             path.join(
               rootPath,
               '.dart_tool',

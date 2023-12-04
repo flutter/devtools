@@ -94,7 +94,7 @@ Widget wrapWithControllers(
   VMDeveloperToolsController? vmDeveloperTools,
   bool includeRouter = true,
 }) {
-  final _providers = [
+  final providers = [
     if (inspector != null)
       Provider<InspectorController>.value(value: inspector),
     if (logging != null) Provider<LoggingController>.value(value: logging),
@@ -116,7 +116,7 @@ Widget wrapWithControllers(
   ];
   final child = wrapWithNotifications(
     MultiProvider(
-      providers: _providers,
+      providers: providers,
       child: widget,
     ),
   );
