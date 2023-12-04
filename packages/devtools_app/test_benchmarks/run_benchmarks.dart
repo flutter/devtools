@@ -19,6 +19,9 @@ Future<void> main() async {
     useCanvasKit: true,
     treeShakeIcons: false,
     headless: false,
+    // Pass an empty initial page so that the benchmark server does not attempt
+    // to load the default page 'index.html', which will show up as "page not
+    // found" in DevTools.
     initialPage: '',
   );
 
