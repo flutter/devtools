@@ -7,17 +7,18 @@ import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'common.dart';
 import 'scroll.dart';
 
 /// A class that automates the DevTools web app.
 class DevToolsAutomater {
   DevToolsAutomater({
-    required this.benchmarkName,
+    required this.benchmark,
     required this.stopWarmingUpCallback,
   });
 
-  /// The name of the current benchmark.
-  final String benchmarkName;
+  /// The current benchmark.
+  final DevToolsBenchmark benchmark;
 
   /// A function to call when warm-up is finished.
   ///
@@ -45,12 +46,10 @@ class DevToolsAutomater {
   Future<void> automateDevToolsGestures() async {
     await warmUp();
 
-    _logStatus('==== Navigate through DevTools tabs ====');
-    await navigateThroughDevToolsScreens(
-      controller,
-      runWithExpectations: false,
-    );
-    _logStatus('==== End of navigate through DevTools tabs ====');
+    switch (benchmark) {
+      case DevToolsBenchmark.navigateThroughOfflineScreens:
+        await _handleNavigateThroughOfflineScreens();
+    }
 
     // At the end of the test, mark as finished.
     finished = true;
@@ -76,6 +75,14 @@ class DevToolsAutomater {
 
     _logStatus('Warm-up finished.');
   }
+
+  Future<void> _handleNavigateThroughOfflineScreens() async {
+    _logStatus('==== Navigate through offline DevTools tabs ====');
+    await navigateThroughDevToolsScreens(
+      controller,
+      runWithExpectations: false,
+    );
+    _logStatus('==== End navigate through offline DevTools tabs ====');
 }
 
 void _logStatus(String log) {

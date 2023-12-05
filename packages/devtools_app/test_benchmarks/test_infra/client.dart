@@ -10,7 +10,9 @@ import 'devtools_recorder.dart';
 typedef RecorderFactory = Recorder Function();
 
 final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
-  devtoolsPageLoadPerf: () => DevToolsRecorder(benchmarkName: devtoolsPageLoadPerf),
+  DevToolsBenchmark.navigateThroughOfflineScreens.id: () => DevToolsRecorder(
+        benchmark: DevToolsBenchmark.navigateThroughOfflineScreens,
+      ),
 };
 
 /// Runs the client of the DevTools web benchmarks.

@@ -4,8 +4,6 @@
 
 const String devtoolsBenchmarkPrefix = 'devtools';
 
-const String devtoolsPageLoadPerf = '${devtoolsBenchmarkPrefix}_page_load_perf';
-
 /// The initial page to load upon opening the DevTools benchmark app or
 /// reloading it in Chrome.
 //
@@ -14,6 +12,8 @@ const String devtoolsPageLoadPerf = '${devtoolsBenchmarkPrefix}_page_load_perf';
 // found" in DevTools.
 const String benchmarkInitialPage = '';
 
-const benchmarkList = <String>[
-  devtoolsPageLoadPerf,
-];
+enum DevToolsBenchmark {
+  navigateThroughOfflineScreens;
+
+  String get id => '${devtoolsBenchmarkPrefix}_$name';
+}
