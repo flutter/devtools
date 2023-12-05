@@ -22,6 +22,8 @@ import 'mocks.dart';
 
 class FakeServiceConnectionManager extends Fake
     implements ServiceConnectionManager {
+  final String? rootLibrary;
+
   FakeServiceConnectionManager({
     VmServiceWrapper? service,
     bool hasConnection = true,
@@ -29,6 +31,7 @@ class FakeServiceConnectionManager extends Fake
     bool hasService = true,
     List<String> availableServices = const [],
     List<String> availableLibraries = const [],
+    this.rootLibrary,
   }) {
     _serviceManager = FakeServiceManager(
       service: service,
@@ -88,6 +91,9 @@ class FakeServiceConnectionManager extends Fake
   }) {
     return Future.value();
   }
+
+  @override
+  Future<String?> rootLibraryForMainIsolate() => Future.value(rootLibrary);
 }
 
 // ignore: subtype_of_sealed_class, fake for testing.
