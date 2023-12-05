@@ -6,6 +6,14 @@ const String devtoolsBenchmarkPrefix = 'devtools';
 
 const String devtoolsPageLoadPerf = '${devtoolsBenchmarkPrefix}_page_load_perf';
 
+/// The initial page to load upon opening the DevTools benchmark app or
+/// reloading it in Chrome.
+//
+// We use an empty initial page so that the benchmark server does not attempt
+// to load the default page 'index.html', which will show up as "page not
+// found" in DevTools.
+const String benchmarkInitialPage = '';
+
 const benchmarkList = <String>[
   devtoolsPageLoadPerf,
 ];
