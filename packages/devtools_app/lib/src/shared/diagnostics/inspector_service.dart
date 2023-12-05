@@ -21,6 +21,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../console/primitives/simple_items.dart';
 import '../globals.dart';
+import '../utils.dart';
 import 'diagnostics_node.dart';
 import 'generic_instance_reference.dart';
 import 'object_group_api.dart';
@@ -29,8 +30,6 @@ import 'primitives/source_location.dart';
 
 const _inspectorLibraryUri =
     'package:flutter/src/widgets/widget_inspector.dart';
-const _google3PathSegment = 'google3';
-const _thirdPartyPathSegment = 'third_party';
 
 abstract class InspectorServiceBase extends DisposableController
     with AutoDisposeControllerMixin {
@@ -342,8 +341,8 @@ class InspectorService extends InspectorServiceBase {
       final libIndex = parts.lastIndexOf('lib');
       final path = libIndex > 0 ? parts.sublist(0, libIndex) : parts;
       // Special case handling of bazel packages.
-      if (_isGoogle3Path(path)) {
-        var packageParts = _stripGoogle3(path);
+      if (isGoogle3Path(path)) {
+        var packageParts = stripGoogle3(path);
         // A well formed third_party dart package should be in a directory of
         // the form
         // third_party/dart/packageName                    (package:packageName)
@@ -464,17 +463,6 @@ class InspectorService extends InspectorServiceBase {
     }
 
     return response as Map<String, dynamic>;
-  }
-
-  bool _isGoogle3Path(List<String> pathParts) =>
-      pathParts.contains(_google3PathSegment);
-
-  List<String> _stripGoogle3(List<String> pathParts) {
-    final google3Index = pathParts.lastIndexOf(_google3PathSegment);
-    if (google3Index != -1 && google3Index + 1 < pathParts.length) {
-      return pathParts.sublist(google3Index + 1);
-    }
-    return pathParts;
   }
 
   RemoteDiagnosticsNode? _currentSelection;

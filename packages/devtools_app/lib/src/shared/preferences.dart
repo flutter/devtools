@@ -17,8 +17,8 @@ import 'config_specific/logger/logger_helpers.dart';
 import 'constants.dart';
 import 'diagnostics/inspector_service.dart';
 import 'globals.dart';
+import 'utils.dart';
 
-const _google3PathSegment = 'google3';
 const _thirdPartyPathSegment = 'third_party';
 
 /// A controller for global application preferences.
@@ -296,7 +296,7 @@ class InspectorPreferencesController extends DisposableController
     // For google3, we grab the top-level directory in the google3 directory
     // (e.g. /education), or the top-level directory in third_party (e.g.
     // /third_party/dart):
-    if (_isGoogle3Path(parts)) {
+    if (isGoogle3Path(parts)) {
       pubRootDirectory = _pubRootDirectoryForGoogle3(parts);
     } else {
       final parts = path.split('/');
@@ -318,21 +318,8 @@ class InspectorPreferencesController extends DisposableController
     return pubRootDirectory;
   }
 
-  // TODO: De-duplicate with inspector_service
-  bool _isGoogle3Path(List<String> pathParts) =>
-      pathParts.contains(_google3PathSegment);
-
-  // TODO: De-duplicate with inspector_service
-  List<String> _stripGoogle3(List<String> pathParts) {
-    final google3Index = pathParts.lastIndexOf(_google3PathSegment);
-    if (google3Index != -1 && google3Index + 1 < pathParts.length) {
-      return pathParts.sublist(google3Index + 1);
-    }
-    return pathParts;
-  }
-
   String? _pubRootDirectoryForGoogle3(List<String> pathParts) {
-    final strippedParts = _stripGoogle3(pathParts);
+    final strippedParts = stripGoogle3(pathParts);
     if (strippedParts.isEmpty) return null;
 
     final topLevelDirectory = strippedParts.first;
