@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// Note: this code was copied from Flutter gallery
+// https://github.com/flutter/gallery/blob/main/test_benchmarks/benchmarks/scroll.dart
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';

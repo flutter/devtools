@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file:avoid_print
-
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
@@ -47,12 +45,12 @@ class DevToolsAutomater {
   Future<void> automateDevToolsGestures() async {
     await warmUp();
 
-    print('==== Navigate through DevTools tabs ====');
+    _logStatus('==== Navigate through DevTools tabs ====');
     await navigateThroughDevToolsScreens(
       controller,
       runWithExpectations: false,
     );
-    print('==== End of navigate through DevTools tabs ====');
+    _logStatus('==== End of navigate through DevTools tabs ====');
 
     // At the end of the test, mark as finished.
     finished = true;
@@ -60,7 +58,7 @@ class DevToolsAutomater {
 
   /// Warm up the animation.
   Future<void> warmUp() async {
-    print('Warming up.');
+    _logStatus('Warming up.');
 
     // Let animation stop.
     await animationStops();
@@ -76,6 +74,11 @@ class DevToolsAutomater {
     // When warm-up finishes, inform the recorder.
     stopWarmingUpCallback();
 
-    print('Warm-up finished.');
+    _logStatus('Warm-up finished.');
   }
+}
+
+void _logStatus(String log) {
+  // ignore: avoid_print, intentional test logging.
+  print(log);
 }

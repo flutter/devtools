@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// Note: this code was copied from Flutter gallery
+// https://github.com/flutter/gallery/blob/main/test_benchmarks/benchmarks/project_root_directory.dart
+
 import 'dart:io';
 import 'package:path/path.dart' as path;
 
