@@ -155,23 +155,23 @@ void main() {
     );
 
     group('Caching custom pub root directories', () {
-      const customPubRootDirectories = [
+      final customPubRootDirectories = [
         'test_dir/fake_app/custom_dir1',
         'test_dir/fake_app/custom_dir2',
       ];
 
       setUp(() async {
-        await storage.setValue(
-          'inspector.customPubRootDirectories_myPackage',
-          jsonEncode(customPubRootDirectories),
-        );
         updateMainIsolateRootLibrary('test_dir/fake_app/lib/main.dart');
+        await controller.handleConnectionToNewService();
+        await controller.addPubRootDirectories(
+          customPubRootDirectories,
+          shouldCache: true,
+        );
       });
 
       test(
         'fetches custom pub root directories from the local cache',
-        () async {
-          await controller.handleConnectionToNewService();
+        () {
           final directories = controller.pubRootDirectories.value;
 
           expect(
@@ -184,9 +184,7 @@ void main() {
       test(
         'custom pub root directories are cached across multiple connections',
         () async {
-          await controller.handleConnectionToNewService();
           var directories = controller.pubRootDirectories.value;
-
           expect(
             directories,
             containsAll(customPubRootDirectories),
@@ -204,8 +202,7 @@ void main() {
 
       test(
         'directories includes inferred directory as well',
-        () async {
-          await controller.handleConnectionToNewService();
+        () {
           final directories = controller.pubRootDirectories.value;
 
           expect(
@@ -218,7 +215,6 @@ void main() {
       test(
         'does not save inferred directory to local cache',
         () async {
-          await controller.handleConnectionToNewService();
           final cachedDirectoriesJson = await storage
               .getValue('inspector.customPubRootDirectories_myPackage');
           final cachedDirectories = List<String>.from(
@@ -226,6 +222,26 @@ void main() {
           );
 
           expect(cachedDirectories, isNot(contains('test_dir/fake_app')));
+        },
+      );
+
+      test(
+        'directories added with "no caching" specified are not cached',
+        () async {
+          await controller.addPubRootDirectories(
+            ['test_dir/fake_app/do_not_cache_dir'],
+          );
+
+          final cachedDirectoriesJson = await storage
+              .getValue('inspector.customPubRootDirectories_myPackage');
+          final cachedDirectories = List<String>.from(
+            jsonDecode(cachedDirectoriesJson!),
+          );
+
+          expect(
+            cachedDirectories,
+            isNot(contains('test_dir/fake_app/do_not_cache_dir')),
+          );
         },
       );
     });
