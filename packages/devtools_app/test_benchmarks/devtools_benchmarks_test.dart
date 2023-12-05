@@ -81,4 +81,6 @@ void main() {
     },
     timeout: Timeout.none,
   );
+
+  // TODO(kenz): add tests that verify performance meets some expected threshold
 }
