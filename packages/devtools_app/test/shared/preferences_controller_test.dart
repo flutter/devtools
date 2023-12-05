@@ -74,16 +74,17 @@ void main() {
     });
   });
 
+  // TODO(https://github.com/flutter/devtools/issues/4342): Add more tests.
   group('$InspectorPreferencesController', () {
+    late InspectorPreferencesController controller;
+    late FlutterTestStorage storage;
+
+    setUp(() {
+      setGlobal(Storage, storage = FlutterTestStorage());
+      controller = InspectorPreferencesController();
+    });
+
     group('hoverEvalMode', () {
-      late InspectorPreferencesController controller;
-      late FlutterTestStorage storage;
-
-      setUp(() {
-        setGlobal(Storage, storage = FlutterTestStorage());
-        controller = InspectorPreferencesController();
-      });
-
       test('default value equals inspector service default value', () async {
         await controller.init();
         expect(
@@ -112,9 +113,44 @@ void main() {
           newHoverModeValue.toString(),
         );
       });
-      // TODO(https://github.com/flutter/devtools/issues/4342): make inspector
-      // preferences testable, then test it
     });
+
+    group(
+      'infers the pub root directory based on the main isolate\'s root library',
+      () {
+        final rootLibToExpectedPubRoot = {
+          'test_dir/fake_app/lib/main.dart': 'test_dir/fake_app',
+          'my_user/google3/dart_apps/test_app/lib/main.dart': '/dart_apps',
+          'my_user/google3/third_party/dart/dart_apps/test_app/lib/main.dart':
+              '/third_party/dart',
+        };
+
+        void updateMainIsolateRootLibrary(String? rootLibrary) {
+          setGlobal(
+            ServiceConnectionManager,
+            FakeServiceConnectionManager(
+              rootLibrary: rootLibrary,
+            ),
+          );
+        }
+
+        for (final MapEntry(
+              key: rootLib,
+              value: expectedPubRoot,
+            ) in rootLibToExpectedPubRoot.entries) {
+          test(
+            '$rootLib -> $expectedPubRoot',
+            () async {
+              updateMainIsolateRootLibrary(rootLib);
+              await controller.handleConnectionToNewService();
+
+              final directories = controller.pubRootDirectories.value;
+              expect(directories, equals([expectedPubRoot]));
+            },
+          );
+        }
+      },
+    );
   });
 
   group('$MemoryPreferencesController', () {

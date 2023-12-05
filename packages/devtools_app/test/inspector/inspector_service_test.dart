@@ -35,9 +35,9 @@ void main() {
     setGlobal(IdeTheme, IdeTheme());
 
     inspectorService = InspectorService();
-    if (env.runConfig.trackWidgetCreation) {
-      await inspectorService!.inferPubRootDirectoryIfNeeded();
-    }
+    // if (env.runConfig.trackWidgetCreation) {
+    //   await inspectorService!.inferPubRootDirectoryIfNeeded();
+    // }
   };
 
   env.beforeEveryTearDown = () async {

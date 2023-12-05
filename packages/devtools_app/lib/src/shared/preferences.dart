@@ -171,7 +171,7 @@ class InspectorPreferencesController extends DisposableController
   Future<void> init() async {
     await _initHoverEvalMode();
     // TODO(jacobr): consider initializing this first as it is not blocking.
-    _initCustomPubRootDirectories();
+    _initPubRootDirectories();
   }
 
   Future<void> _initHoverEvalMode() async {
@@ -194,12 +194,12 @@ class InspectorPreferencesController extends DisposableController
     setHoverEvalMode(hoverEvalModeEnabledValue == 'true');
   }
 
-  void _initCustomPubRootDirectories() {
+  void _initPubRootDirectories() {
     addAutoDisposeListener(
       serviceConnection.serviceManager.connectedState,
       () async {
         if (serviceConnection.serviceManager.connectedState.value.connected) {
-          await _handleConnectionToNewService();
+          await handleConnectionToNewService();
         } else {
           _handleConnectionClosed();
         }
@@ -245,7 +245,8 @@ class InspectorPreferencesController extends DisposableController
     _pubRootDirectories.clear();
   }
 
-  Future<void> _handleConnectionToNewService() async {
+  @visibleForTesting
+  Future<void> handleConnectionToNewService() async {
     await _updateMainScriptRef();
     await _updateHoverEvalMode();
     await loadPubRootDirectories();
