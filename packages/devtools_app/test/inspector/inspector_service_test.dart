@@ -17,10 +17,6 @@ import '../test_infra/flutter_test_driver.dart' show FlutterRunConfiguration;
 import '../test_infra/flutter_test_environment.dart';
 import '../test_infra/matchers/matchers.dart';
 
-// TODO(elliette): Add testing that project directories can be inferred from
-// google3-paths. This will require mocking the main isolate so that we can
-// change the root library during testing instead of using the
-// LiveTestWidgetsFlutterBinding.
 void main() {
   initializeLiveTestWidgetsFlutterBindingWithAssets();
 
@@ -35,9 +31,6 @@ void main() {
     setGlobal(IdeTheme, IdeTheme());
 
     inspectorService = InspectorService();
-    // if (env.runConfig.trackWidgetCreation) {
-    //   await inspectorService!.inferPubRootDirectoryIfNeeded();
-    // }
   };
 
   env.beforeEveryTearDown = () async {
@@ -125,16 +118,17 @@ void main() {
           () async {
             await env.setupEnvironment();
             final inspectorServiceLocal = inspectorService!;
-
             final group = inspectorServiceLocal.createObjectGroup('test-group');
             // These tests are moot if widget creation is not tracked.
             expect(
               await inspectorServiceLocal.isWidgetCreationTracked(),
               isTrue,
             );
-            await inspectorServiceLocal.addPubRootDirectories([]);
+            final rootLibrary =
+                await serviceConnection.rootLibraryForMainIsolate();
+            await inspectorServiceLocal.addPubRootDirectories([rootLibrary!]);
             final List<String> rootDirectories =
-                await inspectorServiceLocal.inferPubRootDirectoryIfNeeded();
+                await inspectorServiceLocal.getPubRootDirectories() ?? [];
             expect(rootDirectories.length, 1);
             expect(rootDirectories.first, endsWith('/fixtures/flutter_app'));
             final originalRootDirectories = rootDirectories.toList();
