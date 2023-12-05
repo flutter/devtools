@@ -86,24 +86,6 @@ void main() {
           await env.tearDownEnvironment(force: true);
         });
 
-        // TODO(elliette): Figure out why this didn't catch
-        // https://github.com/flutter/devtools/issues/6841 and fix so that it
-        // catches future regressions.
-        test('can be inferred', () async {
-          await env.setupEnvironment();
-          final inspectorServiceLocal = inspectorService!;
-
-          final group = inspectorServiceLocal.createObjectGroup('test-group');
-          // These tests are moot if widget creation is not tracked.
-          expect(await inspectorServiceLocal.isWidgetCreationTracked(), isTrue);
-          await inspectorServiceLocal.addPubRootDirectories([]);
-          final List<String> rootDirectories =
-              await inspectorServiceLocal.inferPubRootDirectoryIfNeeded();
-          expect(rootDirectories.length, 1);
-          expect(rootDirectories.first, endsWith('/fixtures/flutter_app'));
-          await group.dispose();
-        });
-
         test('can be added and removed', () async {
           await env.setupEnvironment();
           final inspectorServiceLocal = inspectorService!;
@@ -269,8 +251,7 @@ void main() {
           expect(await inspectorServiceLocal.isWidgetCreationTracked(), isTrue);
           await inspectorServiceLocal.addPubRootDirectories([]);
           final originalRootDirectories =
-              (await inspectorServiceLocal.inferPubRootDirectoryIfNeeded())
-                  .toList();
+              await inspectorServiceLocal.getPubRootDirectories();
           try {
             await inspectorServiceLocal.addPubRootDirectories(
               ['/usr/me/clients/google3/foo/bar/baz/lib/src/bla'],
@@ -379,7 +360,7 @@ void main() {
           } finally {
             // Restore.
             await inspectorServiceLocal
-                .addPubRootDirectories(originalRootDirectories);
+                .addPubRootDirectories(originalRootDirectories ?? []);
 
             await group.dispose();
           }
