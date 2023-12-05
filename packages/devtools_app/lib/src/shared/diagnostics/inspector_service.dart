@@ -122,18 +122,6 @@ abstract class InspectorServiceBase extends DisposableController
 
   bool get hoverEvalModeEnabledByDefault;
 
-  Future<Object> forceRefresh() {
-    final futures = <Future<void>>[];
-    for (InspectorServiceClient client in clients) {
-      try {
-        futures.add(client.onForceRefresh());
-      } catch (e) {
-        log(e.toString());
-      }
-    }
-    return Future.wait(futures);
-  }
-
   Future<bool> invokeBoolServiceMethodNoArgs(String methodName) async {
     return useDaemonApi
         ? await invokeServiceMethodDaemonNoGroupArgs(methodName) == true
@@ -214,7 +202,6 @@ class InspectorService extends InspectorServiceBase {
     );
   }
 
-  ValueListenable<List<String>> get rootDirectories => _rootDirectories;
   final ValueNotifier<List<String>> _rootDirectories = ValueNotifier([]);
 
   @visibleForTesting
@@ -649,40 +636,6 @@ abstract class InspectorObjectGroupBase
     return disposeComplete;
   }
 
-  Future<T?> nullIfDisposed<T>(Future<T> Function() supplier) async {
-    if (disposed) {
-      return null;
-    }
-    return await supplier();
-  }
-
-  T? nullValueIfDisposed<T>(T Function() supplier) {
-    if (disposed) {
-      return null;
-    }
-
-    return supplier();
-  }
-
-  void skipIfDisposed(void Function() runnable) {
-    if (disposed) {
-      return;
-    }
-
-    runnable();
-  }
-
-  Future<RemoteDiagnosticsNode?> invokeServiceMethodReturningNode(
-    String methodName,
-  ) async {
-    if (disposed) return null;
-    return useDaemonApi
-        ? parseDiagnosticsNodeDaemon(invokeServiceMethodDaemon(methodName))
-        : parseDiagnosticsNodeObservatory(
-            invokeServiceMethodObservatory(methodName),
-          );
-  }
-
   Future<RemoteDiagnosticsNode?> invokeServiceMethodReturningNodeInspectorRef(
     String methodName,
     InspectorInstanceRef? ref,
@@ -709,18 +662,6 @@ abstract class InspectorObjectGroupBase
         : parseDiagnosticsNodeObservatory(
             invokeServiceMethodObservatoryWithGroupName1(methodName, arg),
           );
-  }
-
-  Future<void> invokeVoidServiceMethodInspectorRef(
-    String methodName,
-    InspectorInstanceRef ref,
-  ) async {
-    if (disposed) return;
-    if (useDaemonApi) {
-      await invokeServiceMethodDaemonInspectorRef(methodName, ref);
-    } else {
-      await invokeServiceMethodObservatoryInspectorRef(methodName, ref);
-    }
   }
 
   Future<Object?> invokeServiceMethodDaemonArg(
@@ -752,25 +693,6 @@ abstract class InspectorObjectGroupBase
     );
   }
 
-  /// Call a service method passing in an observatory instance reference.
-  ///
-  /// This call is useful when receiving an 'inspect' event from the
-  /// observatory and future use cases such as inspecting a Widget from a
-  /// log window.
-  ///
-  /// This method will always need to use the observatory service as the input
-  /// parameter is an Observatory InstanceRef..
-  Future<InstanceRef?> invokeServiceMethodOnRefObservatory(
-    String methodName,
-    InstanceRef arg,
-  ) {
-    return inspectorLibrary.eval(
-      "${inspectorService.clientInspectorName}.instance.$methodName(arg1, '$groupName')",
-      isAlive: this,
-      scope: {'arg1': arg.id!},
-    );
-  }
-
   Future<void> invokeVoidServiceMethod(String methodName, String arg1) async {
     if (disposed) return;
     if (useDaemonApi) {
@@ -788,14 +710,6 @@ abstract class InspectorObjectGroupBase
       methodName,
       {'objectGroup': objectGroup ?? groupName},
     );
-  }
-
-  /// Invokes a static method on the inspector service passing in the specified
-  /// arguments.
-  ///
-  /// Intent is we could refactor how the API is invoked by only changing this call.
-  Future<InstanceRef?> invokeServiceMethodObservatory(String methodName) {
-    return invokeServiceMethodObservatory1(methodName, groupName);
   }
 
   Future<InstanceRef?> invokeServiceMethodObservatory1(
@@ -950,16 +864,6 @@ abstract class InspectorObjectGroupBase
     );
   }
 
-  Future<InspectorInstanceRef?> fromInstanceRef(InstanceRef instanceRef) async {
-    final inspectorIdRef = await inspectorLibrary.eval(
-      "${inspectorService.clientInspectorName}.instance.toId(obj, '$groupName')",
-      scope: {'obj': instanceRef.id!},
-      isAlive: this,
-    );
-    if (inspectorIdRef is! InstanceRef) return null;
-    return InspectorInstanceRef(inspectorIdRef.valueAsString);
-  }
-
   Future<Instance?> getInstance(FutureOr<InstanceRef?> instanceRef) async {
     if (disposed) {
       return null;
@@ -1043,17 +947,6 @@ abstract class InspectorObjectGroupBase
       }
     }
     return properties;
-  }
-
-  Future<SourcePosition?> getPropertyLocation(
-    InstanceRef instanceRef,
-    String name,
-  ) async {
-    final Instance? instance = await getInstance(instanceRef);
-    if (instance == null || disposed) {
-      return null;
-    }
-    return getPropertyLocationHelper(instance.classRef!, name);
   }
 
   Future<SourcePosition?> getPropertyLocationHelper(
@@ -1205,20 +1098,6 @@ class ObjectGroup extends InspectorObjectGroupBase {
         WidgetInspectorServiceExtensions
             .getRootWidgetSummaryTreeWithPreviews.name,
         {'groupName': groupName},
-      ),
-    );
-  }
-
-  Future<RemoteDiagnosticsNode?> getRootWidgetFullTree() {
-    return invokeServiceMethodReturningNode(
-      WidgetInspectorServiceExtensions.getRootWidget.name,
-    );
-  }
-
-  Future<RemoteDiagnosticsNode?> getSummaryTreeWithoutIds() {
-    return parseDiagnosticsNodeDaemon(
-      invokeServiceMethodDaemon(
-        WidgetInspectorServiceExtensions.getRootWidgetSummaryTree.name,
       ),
     );
   }
@@ -1487,11 +1366,6 @@ class InspectorObjectGroupManager {
 
     _pendingNext = Completer();
     return _pendingNext!.future;
-  }
-
-  ObjectGroup? get current {
-    _current ??= inspectorService.createObjectGroup(debugName);
-    return _current;
   }
 
   ObjectGroup get next {

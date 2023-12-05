@@ -17,7 +17,7 @@
 // ignore_for_file: unused_local_variable
 // ignore_for_file: avoid-throw-in-catch-block
 
-part of http;
+part of 'http.dart';
 
 // TODO(jacobr): cleanup this class with only static members.
 // ignore: avoid_classes_with_only_static_members

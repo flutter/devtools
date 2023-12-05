@@ -60,12 +60,25 @@ final class VsCodeApiImpl extends ToolApiImpl implements VsCodeApi {
   }
 
   @override
-  Future<void> openDevToolsPage(String debugSessionId, String page) {
+  Future<bool> enablePlatformType(String platformType) {
+    return sendRequest(
+      VsCodeApi.jsonEnablePlatformTypeMethod,
+      {VsCodeApi.jsonPlatformTypeParameter: platformType},
+    );
+  }
+
+  @override
+  Future<void> openDevToolsPage(
+    String debugSessionId, {
+    String? page,
+    bool? forceExternal,
+  }) {
     return sendRequest(
       VsCodeApi.jsonOpenDevToolsPageMethod,
       {
         VsCodeApi.jsonDebugSessionIdParameter: debugSessionId,
-        VsCodeApi.jsonOpenPageParameter: page,
+        VsCodeApi.jsonPageParameter: page,
+        VsCodeApi.jsonForceExternalParameter: forceExternal,
       },
     );
   }
@@ -159,6 +172,7 @@ class VsCodeDebugSessionImpl implements VsCodeDebugSession {
     required this.flutterMode,
     required this.flutterDeviceId,
     required this.debuggerType,
+    required this.projectRootPath,
   });
 
   VsCodeDebugSessionImpl.fromJson(Map<String, Object?> json)
@@ -172,6 +186,8 @@ class VsCodeDebugSessionImpl implements VsCodeDebugSession {
               json[VsCodeDebugSession.jsonFlutterDeviceIdField] as String?,
           debuggerType:
               json[VsCodeDebugSession.jsonDebuggerTypeField] as String?,
+          projectRootPath:
+              json[VsCodeDebugSession.jsonProjectRootPathField] as String?,
         );
 
   @override
@@ -192,6 +208,9 @@ class VsCodeDebugSessionImpl implements VsCodeDebugSession {
   @override
   final String? debuggerType;
 
+  @override
+  final String? projectRootPath;
+
   Map<String, Object?> toJson() => {
         VsCodeDebugSession.jsonIdField: id,
         VsCodeDebugSession.jsonNameField: name,
@@ -199,6 +218,7 @@ class VsCodeDebugSessionImpl implements VsCodeDebugSession {
         VsCodeDebugSession.jsonFlutterModeField: flutterMode,
         VsCodeDebugSession.jsonFlutterDeviceIdField: flutterDeviceId,
         VsCodeDebugSession.jsonDebuggerTypeField: debuggerType,
+        VsCodeDebugSession.jsonProjectRootPathField: projectRootPath,
       };
 }
 
@@ -206,6 +226,7 @@ class VsCodeDevicesEventImpl implements VsCodeDevicesEvent {
   VsCodeDevicesEventImpl({
     required this.selectedDeviceId,
     required this.devices,
+    required this.unsupportedDevices,
   });
 
   VsCodeDevicesEventImpl.fromJson(Map<String, Object?> json)
@@ -216,6 +237,11 @@ class VsCodeDevicesEventImpl implements VsCodeDevicesEvent {
               .map((item) => Map<String, Object?>.from(item))
               .map((map) => VsCodeDeviceImpl.fromJson(map))
               .toList(),
+          unsupportedDevices:
+              (json[VsCodeDevicesEvent.jsonUnsupportedDevicesField] as List?)
+                  ?.map((item) => Map<String, Object?>.from(item))
+                  .map((map) => VsCodeDeviceImpl.fromJson(map))
+                  .toList(),
         );
 
   @override
@@ -224,9 +250,13 @@ class VsCodeDevicesEventImpl implements VsCodeDevicesEvent {
   @override
   final List<VsCodeDevice> devices;
 
+  @override
+  final List<VsCodeDevice>? unsupportedDevices;
+
   Map<String, Object?> toJson() => {
         VsCodeDevicesEvent.jsonSelectedDeviceIdField: selectedDeviceId,
         VsCodeDevicesEvent.jsonDevicesField: devices,
+        VsCodeDevicesEvent.jsonUnsupportedDevicesField: unsupportedDevices,
       };
 }
 
@@ -267,6 +297,10 @@ class VsCodeCapabilitiesImpl implements VsCodeCapabilities {
   @override
   bool get openDevToolsPage =>
       _raw?[VsCodeCapabilities.openDevToolsPageField] == true;
+
+  @override
+  bool get openDevToolsExternally =>
+      _raw?[VsCodeCapabilities.openDevToolsExternallyField] == true;
 
   @override
   bool get hotReload => _raw?[VsCodeCapabilities.hotReloadField] == true;

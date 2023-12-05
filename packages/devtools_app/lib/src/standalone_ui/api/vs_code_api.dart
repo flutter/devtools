@@ -47,12 +47,26 @@ abstract interface class VsCodeApi {
   /// Calling this API will update the device for the whole VS Code extension.
   Future<bool> selectDevice(String id);
 
+  /// Enables the selected platform type.
+  ///
+  /// Calling this method may cause a UI prompt in the editor to ask the user to
+  /// confirm they'd like to run `flutter create` to create the required files
+  /// for the project to support this platform type.
+  ///
+  /// This method has no capability because it is only (and always) valid to
+  /// call if some `unsupportedDevices` were provided in a device event.
+  Future<bool> enablePlatformType(String platformType);
+
   /// Opens a specific DevTools [page] for the debug session with ID
   /// [debugSessionId].
   ///
   /// Depending on user settings, this may open embedded (the default) or in an
   /// external browser window.
-  Future<void> openDevToolsPage(String debugSessionId, String page);
+  Future<void> openDevToolsPage(
+    String debugSessionId, {
+    String? page,
+    bool? forceExternal,
+  });
 
   /// Sends a Hot Reload request to the debug session with ID [debugSessionId].
   Future<void> hotReload(String debugSessionId);
@@ -69,6 +83,7 @@ abstract interface class VsCodeApi {
   static const jsonOpenDevToolsPageMethod = 'openDevToolsPage';
   static const jsonHotReloadMethod = 'hotReload';
   static const jsonHotRestartMethod = 'hotRestart';
+  static const jsonEnablePlatformTypeMethod = 'enablePlatformType';
 
   static const jsonDevicesChangedEvent = 'devicesChanged';
   static const jsonDebugSessionsChangedEvent = 'debugSessionsChanged';
@@ -76,8 +91,10 @@ abstract interface class VsCodeApi {
   static const jsonCommandParameter = 'command';
   static const jsonArgumentsParameter = 'arguments';
   static const jsonIdParameter = 'id';
-  static const jsonOpenPageParameter = 'page';
+  static const jsonPageParameter = 'page';
+  static const jsonForceExternalParameter = 'forceExternal';
   static const jsonDebugSessionIdParameter = 'debugSessionId';
+  static const jsonPlatformTypeParameter = 'platformType';
 }
 
 /// This class defines a device exposed by the Dart/Flutter extensions in VS
@@ -139,12 +156,23 @@ abstract interface class VsCodeDebugSession {
   /// - WebTest     (webdev test)
   String? get debuggerType;
 
+  /// The full path to the root of this project (the folder that contains the
+  /// `pubspec.yaml`).
+  ///
+  /// This path might not always be available, for example:
+  ///
+  /// - When the version of Dart-Code is from before this field was added
+  /// - When a debug session was an attach and we didn't know the source
+  /// - When the program being run is a lose file without any pubspec
+  String? get projectRootPath;
+
   static const jsonIdField = 'id';
   static const jsonNameField = 'name';
   static const jsonVmServiceUriField = 'vmServiceUri';
   static const jsonFlutterModeField = 'flutterMode';
   static const jsonFlutterDeviceIdField = 'flutterDeviceId';
   static const jsonDebuggerTypeField = 'debuggerType';
+  static const jsonProjectRootPathField = 'projectRootPath';
 }
 
 /// This class defines a device event sent by the Dart/Flutter extensions in VS
@@ -163,8 +191,19 @@ abstract interface class VsCodeDevicesEvent {
   /// A list of the devices that are available to select.
   List<VsCodeDevice> get devices;
 
+  /// A list of the devices that are unavailable to select because the platform
+  /// is not enabled.
+  ///
+  /// A devices platform type can be enabled by calling the `enablePlatformType`
+  /// method.
+  ///
+  /// This field is nullable because it was not in the initial sidebar API so
+  /// older versions of VS Code might not provide it.
+  List<VsCodeDevice>? get unsupportedDevices;
+
   static const jsonSelectedDeviceIdField = 'selectedDeviceId';
   static const jsonDevicesField = 'devices';
+  static const jsonUnsupportedDevicesField = 'unsupportedDevices';
 }
 
 /// This class defines a debug session event sent by the Dart/Flutter extensions
@@ -199,6 +238,11 @@ abstract interface class VsCodeCapabilities {
   /// DevTools page.
   bool get openDevToolsPage;
 
+  /// Whether the `openDevToolsPage` method can be called without a `page`
+  /// argument and with a 'forceExternal` flag to open DevTools in a browser
+  /// regardless of user settings.
+  bool get openDevToolsExternally;
+
   /// Whether the `hotReload` method is available call to hot reload a specific
   /// debug session.
   bool get hotReload;
@@ -210,6 +254,7 @@ abstract interface class VsCodeCapabilities {
   static const jsonExecuteCommandField = 'executeCommand';
   static const jsonSelectDeviceField = 'selectDevice';
   static const openDevToolsPageField = 'openDevToolsPage';
+  static const openDevToolsExternallyField = 'openDevToolsExternally';
   static const hotReloadField = 'hotReload';
   static const hotRestartField = 'hotRestart';
 }

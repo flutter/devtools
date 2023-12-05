@@ -24,7 +24,7 @@ class FixGoldensCommand extends Command {
   }
   @override
   String get description =>
-      'A command for downloading and applying golden fixes, when they are broken.';
+      'A command for downloading and applying golden fixes when they are broken on the CI.';
 
   @override
   String get name => 'fix-goldens';

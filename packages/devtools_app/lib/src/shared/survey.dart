@@ -14,9 +14,10 @@ import '../../../devtools.dart' as devtools show version;
 import '../shared/notifications.dart';
 import 'analytics/analytics.dart' as ga;
 import 'config_specific/launch_url/launch_url.dart';
-import 'config_specific/server/server.dart' as server;
+import 'development_helpers.dart';
 import 'globals.dart';
 import 'primitives/utils.dart';
+import 'server/server.dart' as server;
 
 final _log = Logger('survey');
 
@@ -116,6 +117,9 @@ class SurveyService {
   @visibleForTesting
   Future<DevToolsSurvey?> fetchSurveyContent() async {
     try {
+      if (debugSurvey) {
+        return debugSurveyMetadata;
+      }
       final response = await get(_metadataUrl);
       if (response.statusCode == 200) {
         final Map<String, dynamic> contents = json.decode(response.body);

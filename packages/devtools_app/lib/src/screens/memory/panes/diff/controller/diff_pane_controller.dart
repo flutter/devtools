@@ -41,10 +41,6 @@ class DiffPaneController extends DisposableController {
   /// informational item.
   bool get hasSnapshots => core.snapshots.value.length > 1;
 
-  // This value should never be reset. It is incremented for every snapshot that
-  // is taken, and is used to assign a unique id to each [SnapshotListItem].
-  int _snapshotId = 0;
-
   Future<void> takeSnapshot() async {
     _isTakingSnapshot.value = true;
     ga.select(
@@ -53,7 +49,6 @@ class DiffPaneController extends DisposableController {
     );
 
     final item = SnapshotInstanceItem(
-      id: _snapshotId++,
       displayNumber: _nextDisplayNumber(),
       isolateName: selectedIsolateName ?? '<isolate-not-detected>',
     );

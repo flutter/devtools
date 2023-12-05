@@ -168,7 +168,6 @@ class _CpuProfilerState extends State<CpuProfiler>
             const SizedBox(width: denseSpacing),
             if (currentTab.key != ProfilerTab.cpuFlameChart.key &&
                 currentTab.key != ProfilerTab.methodTable.key) ...[
-              const DisplayTreeGuidelinesToggle(),
               const SizedBox(width: denseSpacing),
             ],
             UserTagDropdown(widget.controller),
@@ -300,25 +299,13 @@ class _CpuProfilerState extends State<CpuProfiler>
 
   List<Widget> _buildProfilerViews() {
     final bottomUp = KeepAliveWrapper(
-      child: ValueListenableBuilder<bool>(
-        valueListenable: preferences.cpuProfiler.displayTreeGuidelines,
-        builder: (context, displayTreeGuidelines, _) {
-          return CpuBottomUpTable(
-            bottomUpRoots: widget.bottomUpRoots,
-            displayTreeGuidelines: displayTreeGuidelines,
-          );
-        },
+      child: CpuBottomUpTable(
+        bottomUpRoots: widget.bottomUpRoots,
       ),
     );
     final callTree = KeepAliveWrapper(
-      child: ValueListenableBuilder<bool>(
-        valueListenable: preferences.cpuProfiler.displayTreeGuidelines,
-        builder: (context, displayTreeGuidelines, _) {
-          return CpuCallTreeTable(
-            dataRoots: widget.callTreeRoots,
-            displayTreeGuidelines: displayTreeGuidelines,
-          );
-        },
+      child: CpuCallTreeTable(
+        dataRoots: widget.callTreeRoots,
       ),
     );
     final methodTable = KeepAliveWrapper(

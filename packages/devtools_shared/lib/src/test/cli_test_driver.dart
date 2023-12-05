@@ -144,7 +144,7 @@ class CliAppFixture extends AppFixture {
         await _waitForIsolate(serviceConnection, 'PauseStart');
     await serviceConnection.resume(isolate.id!);
 
-    Future<void> _onTeardown() async {
+    Future<void> onTeardown() async {
       await linesSubscription.cancel();
       await lineController.close();
     }
@@ -156,7 +156,7 @@ class CliAppFixture extends AppFixture {
       uri,
       serviceConnection,
       vm.isolates!,
-      _onTeardown,
+      onTeardown,
     );
   }
 

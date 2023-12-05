@@ -15,6 +15,7 @@ enum PerformanceEvents {
   trackUserCreatedWidgetBuilds,
   trackPaints,
   trackLayouts,
+  profilePlatformChannels,
   enhanceTracingButtonSmall,
   disableClipLayers,
   disableOpacityLayers,
@@ -28,7 +29,9 @@ enum PerformanceEvents {
   perfettoScrollToTimeRange,
   perfettoShowHelp,
   performanceSettings,
-  traceCategories;
+  traceCategories,
+  openDataFile,
+  loadDataFromFile;
 
   const PerformanceEvents([this.nameOverride]);
 

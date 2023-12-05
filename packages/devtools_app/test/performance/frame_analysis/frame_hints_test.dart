@@ -8,6 +8,7 @@ import 'package:devtools_app/src/screens/performance/panes/frame_analysis/frame_
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -145,8 +146,8 @@ void main() {
 
           expect(
             find.richTextContaining(
-              'Build was the longest UI phase in this frame. Since "Track Widget '
-              'Builds" was enabled while this frame was drawn, you should be able'
+              'Build was the longest UI phase in this frame. Since "Track widget '
+              'builds" was enabled while this frame was drawn, you should be able'
               ' to see timeline events for each widget built.',
             ),
             findsOneWidget,
@@ -167,7 +168,7 @@ void main() {
           expect(
             find.richTextContaining(
               'Build was the longest UI phase in this frame. Consider enabling '
-              '"Track Widget Builds" from the ',
+              '"Track widget builds" from the ',
             ),
             findsOneWidget,
           );
@@ -196,7 +197,7 @@ void main() {
           expect(
             find.richTextContaining(
               'Layout was the longest UI phase in this frame. Since "Track '
-              'Layouts" was enabled while this frame was drawn, you should be '
+              'layouts" was enabled while this frame was drawn, you should be '
               'able to see timeline events for each render object laid out.',
             ),
             findsOneWidget,
@@ -218,7 +219,7 @@ void main() {
           expect(
             find.richTextContaining(
               'Layout was the longest UI phase in this frame. Consider enabling '
-              '"Track Layouts" from the ',
+              '"Track layouts" from the ',
             ),
             findsOneWidget,
           );
@@ -247,7 +248,7 @@ void main() {
           expect(
             find.richTextContaining(
               'Paint was the longest UI phase in this frame. Since "Track '
-              'Paints" was enabled while this frame was drawn, you should be '
+              'paints" was enabled while this frame was drawn, you should be '
               'able to see timeline events for each render object painted.',
             ),
             findsOneWidget,
@@ -269,7 +270,7 @@ void main() {
           expect(
             find.richTextContaining(
               'Paint was the longest UI phase in this frame. Consider enabling '
-              '"Track Paints" from the ',
+              '"Track paints" from the ',
             ),
             findsOneWidget,
           );

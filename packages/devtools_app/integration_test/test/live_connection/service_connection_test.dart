@@ -11,7 +11,8 @@ import 'package:devtools_app/src/service/service_extensions.dart' as extensions;
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
-import 'package:devtools_test/devtools_integration_test.dart';
+import 'package:devtools_test/helpers.dart';
+import 'package:devtools_test/integration_test.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -52,7 +53,7 @@ void main() {
       // Use a range instead of an exact number because service extension
       // calls are not consistent. This will still catch any spurious calls
       // that are unintentionally added at start up.
-      const Range(40, 60).contains(vmServiceCallCount),
+      const Range(40, 70).contains(vmServiceCallCount),
       isTrue,
       reason: 'Unexpected number of vm service calls upon connection: '
           '$vmServiceCallCount. If this is expected, please update this test '
@@ -67,14 +68,18 @@ void main() {
           // Filter out unawaited streamListen calls.
           .where((call) => call != 'streamListen')
           .toList()
-          .sublist(0, 5),
+          .sublist(0, 6),
       equals([
         'getSupportedProtocols',
         'getVersion',
         'getFlagList',
+        'getDartDevelopmentServiceVersion',
+        'getDartDevelopmentServiceVersion',
         'getVM',
-        'getIsolate',
       ]),
+      reason: 'Unexpected order of vm service calls upon connection. '
+          'Here are the calls for this test run:\n '
+          '${serviceConnection.serviceManager.service!.vmServiceCalls.toString()}',
     );
 
     expect(

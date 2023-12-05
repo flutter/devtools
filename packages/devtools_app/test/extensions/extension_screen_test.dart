@@ -10,6 +10,7 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -38,15 +39,15 @@ void main() {
 
     testWidgets('builds its tab', (WidgetTester tester) async {
       await tester.pumpWidget(wrap(Builder(builder: fooScreen.buildTab)));
-      expect(find.text('Foo'), findsOneWidget);
+      expect(find.text('foo'), findsOneWidget);
       expect(find.byIcon(fooExtension.icon), findsOneWidget);
 
       await tester.pumpWidget(wrap(Builder(builder: barScreen.buildTab)));
-      expect(find.text('Bar'), findsOneWidget);
+      expect(find.text('bar'), findsOneWidget);
       expect(find.byIcon(barExtension.icon), findsOneWidget);
 
       await tester.pumpWidget(wrap(Builder(builder: providerScreen.buildTab)));
-      expect(find.text('Provider'), findsOneWidget);
+      expect(find.text('provider'), findsOneWidget);
       expect(find.byIcon(providerExtension.icon), findsOneWidget);
     });
 

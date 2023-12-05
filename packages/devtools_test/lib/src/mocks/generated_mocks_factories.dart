@@ -152,13 +152,13 @@ MockVmServiceWrapper createMockVmServiceWrapperWithDefaults() {
   when(service.onStderrEvent).thenAnswer((_) {
     return const Stream.empty();
   });
-  when(service.onStdoutEventWithHistory).thenAnswer((_) {
+  when(service.onStdoutEventWithHistorySafe).thenAnswer((_) {
     return const Stream.empty();
   });
-  when(service.onStderrEventWithHistory).thenAnswer((_) {
+  when(service.onStderrEventWithHistorySafe).thenAnswer((_) {
     return const Stream.empty();
   });
-  when(service.onExtensionEventWithHistory).thenAnswer((_) {
+  when(service.onExtensionEventWithHistorySafe).thenAnswer((_) {
     return const Stream.empty();
   });
   return service;
@@ -218,22 +218,22 @@ Future<MockExtensionService> createMockExtensionServiceWithDefaults(
   when(mockExtensionService.availableExtensions)
       .thenReturn(ImmediateValueNotifier(extensions));
 
-  final _stubEnabledStates = <String, ValueNotifier<ExtensionEnabledState>>{};
+  final stubEnabledStates = <String, ValueNotifier<ExtensionEnabledState>>{};
   for (final e in extensions) {
-    _stubEnabledStates[e.displayName] =
+    stubEnabledStates[e.displayName] =
         ValueNotifier<ExtensionEnabledState>(ExtensionEnabledState.none);
     when(mockExtensionService.enabledStateListenable(e.name))
-        .thenReturn(_stubEnabledStates[e.name.toLowerCase()]!);
+        .thenReturn(stubEnabledStates[e.name.toLowerCase()]!);
     when(mockExtensionService.enabledStateListenable(e.name.toLowerCase()))
-        .thenReturn(_stubEnabledStates[e.name.toLowerCase()]!);
+        .thenReturn(stubEnabledStates[e.name.toLowerCase()]!);
     when(mockExtensionService.setExtensionEnabledState(e, enable: true))
         .thenAnswer((_) async {
-      _stubEnabledStates[e.name.toLowerCase()]!.value =
+      stubEnabledStates[e.name.toLowerCase()]!.value =
           ExtensionEnabledState.enabled;
     });
     when(mockExtensionService.setExtensionEnabledState(e, enable: false))
         .thenAnswer((_) async {
-      _stubEnabledStates[e.name.toLowerCase()]!.value =
+      stubEnabledStates[e.name.toLowerCase()]!.value =
           ExtensionEnabledState.disabled;
     });
   }

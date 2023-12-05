@@ -6,6 +6,7 @@ import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:meta/meta.dart';
 
 import 'globals.dart';
+import 'survey.dart';
 
 /// Enable this flag to debug analytics when DevTools is run in debug or profile
 /// mode, otherwise analytics will only be sent in release builds.
@@ -62,6 +63,7 @@ final List<DevToolsExtensionConfig> debugExtensions = [
     DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
     DevToolsExtensionConfig.versionKey: '1.0.0',
     DevToolsExtensionConfig.pathKey: '/path/to/foo',
+    DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
   }),
   DevToolsExtensionConfig.parse({
     DevToolsExtensionConfig.nameKey: 'bar',
@@ -69,6 +71,7 @@ final List<DevToolsExtensionConfig> debugExtensions = [
     DevToolsExtensionConfig.versionKey: '2.0.0',
     DevToolsExtensionConfig.materialIconCodePointKey: 0xe638,
     DevToolsExtensionConfig.pathKey: '/path/to/bar',
+    DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
   }),
   DevToolsExtensionConfig.parse({
     DevToolsExtensionConfig.nameKey: 'provider',
@@ -77,5 +80,31 @@ final List<DevToolsExtensionConfig> debugExtensions = [
     DevToolsExtensionConfig.versionKey: '3.0.0',
     DevToolsExtensionConfig.materialIconCodePointKey: 0xe50a,
     DevToolsExtensionConfig.pathKey: '/path/to/provider',
+    DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
   }),
 ];
+
+/// Enable this flag to debug the DevTools survey logic.
+///
+/// When this flag is true, [debugSurveyMetadata] will be used instead of what
+/// we normally fetch from
+/// 'docs.flutter.dev/f/dart-devtools-survey-metadata.json'.
+bool debugSurvey = false;
+
+/// The survey metadata that will be used instead of the live data from
+/// 'docs.flutter.dev/f/dart-devtools-survey-metadata.json' when [debugSurvey]
+/// is true;
+final debugSurveyMetadata = DevToolsSurvey.parse(
+  {
+    '_comments': [
+      'uniqueId must be updated with each new survey so DevTools knows to re-prompt users.',
+      'title should not exceed 45 characters.',
+      'startDate and endDate should follow ISO 8601 standard with a timezone offset.',
+    ],
+    'uniqueId': '2023-Q4',
+    'title': 'Help improve DevTools! Take our 2023 Q4 survey.',
+    'url': 'https://google.qualtrics.com/jfe/form/SV_2l4XcyscF8mQtDM',
+    'startDate': '2023-09-20T09:00:00-07:00',
+    'endDate': '2023-10-20T09:00:00-07:00',
+  },
+);

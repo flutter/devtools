@@ -7,7 +7,9 @@ import 'package:flutter/material.dart';
 
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
+import '../../../../shared/file_import.dart';
 import '../../../../shared/globals.dart';
+import '../../../../shared/screen.dart';
 import '../../../../shared/ui/vm_flag_widgets.dart';
 import '../../profiler_screen_controller.dart';
 
@@ -107,9 +109,7 @@ class _SecondaryControls extends StatelessWidget {
     required this.profilerBusy,
   });
 
-  static const _secondaryControlsMinScreenWidthForText = 1170.0;
-
-  static const _profilingControlsMinScreenWidthForText = 875.0;
+  static const _profilingControlsMinScreenWidthForText = 930.0;
 
   final ProfilerScreenController controller;
 
@@ -155,15 +155,13 @@ class _SecondaryControls extends StatelessWidget {
               controller.cpuProfilerController.profilePeriodFlag!,
         ),
         const SizedBox(width: denseSpacing),
-        ExportButton(
-          gaScreen: gac.cpuProfiler,
-          onPressed: !profilerBusy &&
+        OpenSaveButtonGroup(
+          screenId: ScreenMetaData.cpuProfiler.id,
+          onSave: !profilerBusy &&
                   controller.cpuProfileData != null &&
                   controller.cpuProfileData?.isEmpty == false
               ? _exportPerformance
               : null,
-          minScreenWidthForTextBeforeScaling:
-              _secondaryControlsMinScreenWidthForText,
         ),
       ],
     );

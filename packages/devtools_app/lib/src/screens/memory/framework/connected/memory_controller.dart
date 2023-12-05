@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
-import 'package:leak_tracker/devtools_integration.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/globals.dart';
@@ -27,23 +26,28 @@ class MemoryFeatureControllers {
     DiffPaneController? diffPaneController,
     ProfilePaneController? profilePaneController,
   ) {
-    diff = diffPaneController ?? DiffPaneController(SnapshotTaker());
+    memoryTimeline = MemoryTimeline();
+    diff =
+        diffPaneController ?? DiffPaneController(SnapshotTaker(memoryTimeline));
     profile = profilePaneController ?? ProfilePaneController();
   }
 
   late DiffPaneController diff;
   late ProfilePaneController profile;
+  late MemoryTimeline memoryTimeline;
   TracingPaneController tracing = TracingPaneController();
 
   void reset() {
     diff.dispose();
-    diff = DiffPaneController(SnapshotTaker());
+    diff = DiffPaneController(SnapshotTaker(memoryTimeline));
 
     profile.dispose();
     profile = ProfilePaneController();
 
     tracing.dispose();
     tracing = TracingPaneController();
+
+    memoryTimeline.reset();
   }
 
   void dispose() {
@@ -53,10 +57,11 @@ class MemoryFeatureControllers {
   }
 }
 
-/// This class contains the business logic for memory screen, for a connected application.
+/// This class contains the business logic for memory screen, for a connected
+/// application.
 ///
-/// This class must not have direct dependencies on dart:html. This allows tests
-/// of the complicated logic in this class to run on the VM.
+/// This class must not have direct dependencies on web-only libraries. This
+/// allows tests of the complicated logic in this class to run on the VM.
 ///
 /// The controller should be recreated for every new connection.
 class MemoryController extends DisposableController
@@ -65,8 +70,6 @@ class MemoryController extends DisposableController
     DiffPaneController? diffPaneController,
     ProfilePaneController? profilePaneController,
   }) {
-    memoryTimeline = MemoryTimeline();
-
     controllers = MemoryFeatureControllers(
       diffPaneController,
       profilePaneController,
@@ -83,11 +86,6 @@ class MemoryController extends DisposableController
   /// DevTools screen changes, so we must store this value in the controller
   /// instead of the widget state.
   int selectedFeatureTabIndex = 0;
-
-  final _shouldShowLeaksTab = ValueNotifier<bool>(false);
-  ValueListenable<bool> get shouldShowLeaksTab => _shouldShowLeaksTab;
-
-  late MemoryTimeline memoryTimeline;
 
   HeapSample? _selectedDartSample;
 
@@ -111,18 +109,10 @@ class MemoryController extends DisposableController
 
   final _refreshCharts = ValueNotifier<int>(0);
 
-  void refreshAllCharts() {
-    _refreshCharts.value++;
-    _updateAndroidChartVisibility();
-  }
-
   /// Default is to display default tick width based on width of chart of the collected
   /// data in the chart.
   final _displayIntervalNotifier =
       ValueNotifier<ChartInterval>(ChartInterval.theDefault);
-
-  ValueListenable<ChartInterval> get displayIntervalNotifier =>
-      _displayIntervalNotifier;
 
   set displayInterval(ChartInterval interval) {
     _displayIntervalNotifier.value = interval;
@@ -166,16 +156,7 @@ class MemoryController extends DisposableController
     // TODO(terry): Need an event on the controller for this too?
   }
 
-  void _refreshShouldShowLeaksTab() {
-    _shouldShowLeaksTab.value = serviceConnection
-        .serviceManager.serviceExtensionManager
-        .hasServiceExtension(memoryLeakTrackingExtensionName)
-        .value;
-  }
-
   void _handleConnectionStart() {
-    _refreshShouldShowLeaksTab();
-
     if (_memoryTracker == null) {
       _memoryTracker = MemoryTracker(this);
       _memoryTracker!.start();
@@ -198,14 +179,14 @@ class MemoryController extends DisposableController
         // TODO(terry): Display events enabled in a settings page for now only these events.
         switch (extensionEventKind) {
           case 'Flutter.ImageSizesForFrame':
-            memoryTimeline.addExtensionEvent(
+            controllers.memoryTimeline.addExtensionEvent(
               event.timestamp,
               event.extensionKind,
               jsonData,
             );
             break;
           case MemoryTimeline.devToolsExtensionEvent:
-            memoryTimeline.addExtensionEvent(
+            controllers.memoryTimeline.addExtensionEvent(
               event.timestamp,
               MemoryTimeline.customDevToolsEvent,
               jsonData,

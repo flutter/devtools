@@ -45,8 +45,9 @@ mixin AutoDisposeMixin<T extends StatefulWidget> on State<T>
   void addAutoDisposeListener(
     Listenable? listenable, [
     VoidCallback? listener,
+    String? id,
   ]) {
-    _delegate.addAutoDisposeListener(listenable, listener ?? _refresh);
+    _delegate.addAutoDisposeListener(listenable, listener ?? _refresh, id);
   }
 
   @override
@@ -79,8 +80,8 @@ mixin AutoDisposeMixin<T extends StatefulWidget> on State<T>
   }
 
   @override
-  void cancelListeners() {
-    _delegate.cancelListeners();
+  void cancelListeners({List<String> excludeIds = const <String>[]}) {
+    _delegate.cancelListeners(excludeIds: excludeIds);
   }
 
   @override
@@ -119,6 +120,10 @@ mixin DisposerMixin {
   final List<Listenable> _listenables = [];
   final List<VoidCallback> _listeners = [];
 
+  /// An [Expando] that tracks listener ids when [addAutoDisposeListener] is
+  /// called with a non-null [id] parameter.
+  final _listenerIdExpando = Expando<String>();
+
   /// Track a stream subscription to be automatically cancelled on dispose.
   void autoDisposeStreamSubscription(StreamSubscription subscription) {
     _subscriptions.add(subscription);
@@ -135,11 +140,16 @@ mixin DisposerMixin {
   void addAutoDisposeListener(
     Listenable? listenable, [
     VoidCallback? listener,
+    String? id,
   ]) {
     if (listenable == null || listener == null) return;
     _listenables.add(listenable);
     _listeners.add(listener);
     listenable.addListener(listener);
+
+    if (id != null) {
+      _listenerIdExpando[listener] = id;
+    }
   }
 
   /// Cancel all stream subscriptions added.
@@ -155,13 +165,25 @@ mixin DisposerMixin {
   /// Cancel all listeners added.
   ///
   /// It is fine to call this method and then add additional listeners.
-  void cancelListeners() {
+  ///
+  /// If [excludeIds] is non-empty, any listeners that have an associated id
+  /// from [_listenersById] will not be cancelled.
+  void cancelListeners({List<String> excludeIds = const <String>[]}) {
     assert(_listenables.length == _listeners.length);
+    final skipCancelIndices = <int>[];
     for (int i = 0; i < _listenables.length; ++i) {
-      _listenables[i].removeListener(_listeners[i]);
+      final listener = _listeners[i];
+      final listenerId = _listenerIdExpando[listener];
+      if (listenerId != null && excludeIds.contains(listenerId)) {
+        skipCancelIndices.add(i);
+        continue;
+      }
+
+      _listenables[i].removeListener(listener);
     }
-    _listenables.clear();
-    _listeners.clear();
+
+    _listenables.removeAllExceptIndices(skipCancelIndices);
+    _listeners.removeAllExceptIndices(skipCancelIndices);
   }
 
   /// Cancels a single listener, if present.
@@ -260,8 +282,9 @@ mixin AutoDisposeControllerMixin on DisposableController
   void addAutoDisposeListener(
     Listenable? listenable, [
     VoidCallback? listener,
+    String? id,
   ]) {
-    _delegate.addAutoDisposeListener(listenable, listener);
+    _delegate.addAutoDisposeListener(listenable, listener, id);
   }
 
   @override
@@ -280,7 +303,7 @@ mixin AutoDisposeControllerMixin on DisposableController
   }
 
   @override
-  void cancelListeners() {
+  void cancelListeners({List<String> excludeIds = const <String>[]}) {
     _delegate.cancelListeners();
   }
 
@@ -310,3 +333,16 @@ mixin AutoDisposeControllerMixin on DisposableController
 
 @visibleForTesting
 class Disposer with DisposerMixin {}
+
+extension _AutoDisposeListExtension<T> on List<T> {
+  /// Reduces the list content to include only elements at [indices].
+  ///
+  /// If any index in [indices] is out of range, an exception will be thrown.
+  void removeAllExceptIndices(List<int> indices) {
+    final tmp = [
+      for (int index in indices) this[index],
+    ];
+    clear();
+    addAll(tmp);
+  }
+}

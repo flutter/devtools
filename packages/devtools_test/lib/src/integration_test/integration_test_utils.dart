@@ -12,11 +12,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
+import '../helpers/utils.dart';
 import 'test_data/performance.dart';
-
-const shortPumpDuration = Duration(seconds: 1);
-const safePumpDuration = Duration(seconds: 3);
-const longPumpDuration = Duration(seconds: 6);
 
 /// Required to have multiple test cases in a file.
 Future<void> resetHistory() async {
@@ -69,36 +66,6 @@ void _verifyFooterColor(WidgetTester tester, Color? expectedColor) {
   );
 }
 
-/// Switches to the DevTools screen with icon [tabIcon] and pumps the tester
-/// to settle the UI.
-Future<void> switchToScreen(
-  WidgetTester tester, {
-  required IconData tabIcon,
-  required String screenId,
-  bool warnIfTapMissed = true,
-}) async {
-  logStatus('switching to $screenId screen (icon $tabIcon)');
-  final tabFinder = await findTab(tester, tabIcon);
-  expect(tabFinder, findsOneWidget);
-
-  await tester.tap(tabFinder, warnIfMissed: warnIfTapMissed);
-  // We use pump here instead of pumpAndSettle because pumpAndSettle will
-  // never complete if there is an animation (e.g. a progress indicator).
-  await tester.pump(safePumpDuration);
-}
-
-/// Finds the tab with [icon] either in the top-level DevTools tab bar or in the
-/// tab overflow menu for tabs that don't fit on screen.
-Future<Finder> findTab(WidgetTester tester, IconData icon) async {
-  // Open the tab overflow menu before looking for the tab.
-  final tabOverflowButtonFinder = find.byType(TabOverflowButton);
-  if (tabOverflowButtonFinder.evaluate().isNotEmpty) {
-    await tester.tap(tabOverflowButtonFinder);
-    await tester.pump(shortPumpDuration);
-  }
-  return find.widgetWithIcon(Tab, icon);
-}
-
 Future<void> pumpDevTools(WidgetTester tester) async {
   // TODO(kenz): how can we share code across integration_test/test and
   // integration_test/test_infra? When trying to import, we get an error:
@@ -112,7 +79,7 @@ Future<void> pumpDevTools(WidgetTester tester) async {
   );
 
   // Await a delay to ensure the widget tree has loaded.
-  await tester.pumpAndSettle(longPumpDuration);
+  await tester.pumpAndSettle(veryLongPumpDuration);
   expect(find.byType(DevToolsApp), findsOneWidget);
 }
 
@@ -128,7 +95,7 @@ Future<void> connectToTestApp(WidgetTester tester, TestApp testApp) async {
       matching: find.byType(ElevatedButton),
     ),
   );
-  await tester.pumpAndSettle(safePumpDuration);
+  await tester.pumpAndSettle(longPumpDuration);
 }
 
 Future<void> disconnectFromTestApp(WidgetTester tester) async {
@@ -141,11 +108,6 @@ Future<void> disconnectFromTestApp(WidgetTester tester) async {
   await tester.pumpAndSettle();
   await tester.tap(find.byType(ConnectToNewAppButton));
   await tester.pump(safePumpDuration);
-}
-
-void logStatus(String log) {
-  // ignore: avoid_print, intentional print for test output
-  print('TEST STATUS: $log');
 }
 
 class TestApp {

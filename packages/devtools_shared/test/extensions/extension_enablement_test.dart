@@ -17,7 +17,7 @@ void main() {
     setUp(() {
       options = DevToolsOptions();
       tmpDir = Directory.current.createTempSync();
-      tmpUri = Uri.parse(tmpDir.path);
+      tmpUri = Uri.file(tmpDir.path);
     });
 
     tearDown(() {
@@ -25,7 +25,7 @@ void main() {
       tmpDir.deleteSync(recursive: true);
     });
 
-    File _optionsFileFromTmp() {
+    File optionsFileFromTmp() {
       final tmpFiles = tmpDir.listSync();
       expect(tmpFiles, isNotEmpty);
       final optionsFile =
@@ -40,7 +40,7 @@ void main() {
         rootUri: tmpUri,
         extensionName: 'foo',
       );
-      final file = _optionsFileFromTmp();
+      final file = optionsFileFromTmp();
       expect(
         file.readAsStringSync(),
         '''
@@ -55,7 +55,7 @@ extensions:
         extensionName: 'foo',
         enable: true,
       );
-      final file = _optionsFileFromTmp();
+      final file = optionsFileFromTmp();
       expect(
         file.readAsStringSync(),
         '''
@@ -75,7 +75,7 @@ extensions:
         extensionName: 'bar',
         enable: false,
       );
-      final file = _optionsFileFromTmp();
+      final file = optionsFileFromTmp();
       expect(
         file.readAsStringSync(),
         '''

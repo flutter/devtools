@@ -2,19 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: avoid_web_libraries_in_flutter, as designed
 import 'dart:async';
-import 'dart:html' as html;
 import 'dart:ui_web' as ui_web;
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_extensions/api.dart';
 import 'package:path/path.dart' as path;
+import 'package:web/helpers.dart';
 
-import '../../shared/config_specific/server/server.dart';
 import '../../shared/development_helpers.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
+import '../../shared/server/server.dart';
 import 'controller.dart';
 
 /// Incrementer for the extension iFrame view that will live for the entire
@@ -44,7 +43,7 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController
     }
 
     final baseUri = path.join(
-      html.window.location.origin,
+      window.location.origin,
       'devtools_extensions',
       extensionConfig.name,
       'index.html',
@@ -58,9 +57,9 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController
     return Uri.parse(baseUri).copyWith(queryParameters: queryParams).toString();
   }
 
-  html.IFrameElement get extensionIFrame => _extensionIFrame;
+  HTMLIFrameElement get extensionIFrame => _extensionIFrame;
 
-  late final html.IFrameElement _extensionIFrame;
+  late final HTMLIFrameElement _extensionIFrame;
 
   final extensionPostEventStream =
       StreamController<DevToolsExtensionEvent>.broadcast();
@@ -75,7 +74,7 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController
     );
     _initialized = true;
 
-    _extensionIFrame = html.IFrameElement()
+    _extensionIFrame = createIFrameElement()
       // This url is safe because we built it ourselves and it does not include
       // any user input.
       // ignore: unsafe_html
