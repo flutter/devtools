@@ -140,16 +140,15 @@ class PreferencesController extends DisposableController
 class InspectorPreferencesController extends DisposableController
     with AutoDisposeControllerMixin {
   ValueListenable<bool> get hoverEvalModeEnabled => _hoverEvalMode;
-  ListValueNotifier<String> get customPubRootDirectories =>
-      _customPubRootDirectories;
-  ValueListenable<bool> get isRefreshingCustomPubRootDirectories =>
-      _customPubRootDirectoriesAreBusy;
+  ListValueNotifier<String> get pubRootDirectories => _pubRootDirectories;
+  ValueListenable<bool> get isRefreshingPubRootDirectories =>
+      _pubRootDirectoriesAreBusy;
   InspectorServiceBase? get _inspectorService =>
       serviceConnection.inspectorService;
 
   final _hoverEvalMode = ValueNotifier<bool>(false);
-  final _customPubRootDirectories = ListValueNotifier<String>([]);
-  final _customPubRootDirectoriesAreBusy = ValueNotifier<bool>(false);
+  final _pubRootDirectories = ListValueNotifier<String>([]);
+  final _pubRootDirectoriesAreBusy = ValueNotifier<bool>(false);
   final _busyCounter = ValueNotifier<int>(0);
   static const _hoverEvalModeStorageId = 'inspector.hoverEvalMode';
   static const _customPubRootDirectoriesStoragePrefix =
@@ -207,7 +206,7 @@ class InspectorPreferencesController extends DisposableController
       },
     );
     addAutoDisposeListener(_busyCounter, () {
-      _customPubRootDirectoriesAreBusy.value = _busyCounter.value != 0;
+      _pubRootDirectoriesAreBusy.value = _busyCounter.value != 0;
     });
     addAutoDisposeListener(
       serviceConnection.serviceManager.isolateManager.mainIsolate,
@@ -243,7 +242,7 @@ class InspectorPreferencesController extends DisposableController
 
   void _handleConnectionClosed() {
     _mainScriptDir = null;
-    _customPubRootDirectories.clear();
+    _pubRootDirectories.clear();
   }
 
   Future<void> _handleConnectionToNewService() async {
@@ -388,12 +387,12 @@ class InspectorPreferencesController extends DisposableController
           await localInspectorService.getPubRootDirectories();
       if (freshPubRootDirectories != null) {
         final newSet = Set<String>.of(freshPubRootDirectories);
-        final oldSet = Set<String>.of(_customPubRootDirectories.value);
+        final oldSet = Set<String>.of(_pubRootDirectories.value);
         final directoriesToAdd = newSet.difference(oldSet);
         final directoriesToRemove = oldSet.difference(newSet);
 
-        _customPubRootDirectories.removeAll(directoriesToRemove);
-        _customPubRootDirectories.addAll(directoriesToAdd);
+        _pubRootDirectories.removeAll(directoriesToRemove);
+        _pubRootDirectories.addAll(directoriesToAdd);
       }
     });
   }
