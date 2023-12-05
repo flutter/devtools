@@ -253,7 +253,7 @@ class InspectorPreferencesController extends DisposableController
   }
 
   Future<void> loadPubRootDirectories() async {
-    await _customPubRootDirectoryBusyTracker(() async {
+    await _pubRootDirectoryBusyTracker(() async {
       await addPubRootDirectories(await _determinePubRootDirectories());
       await _refreshPubRootDirectoriesFromService();
     });
@@ -354,7 +354,7 @@ class InspectorPreferencesController extends DisposableController
     );
 
     if (!serviceConnection.serviceManager.hasConnection) return;
-    await _customPubRootDirectoryBusyTracker(() async {
+    await _pubRootDirectoryBusyTracker(() async {
       final localInspectorService = _inspectorService;
       if (localInspectorService is! InspectorService) return;
 
@@ -370,7 +370,7 @@ class InspectorPreferencesController extends DisposableController
     List<String> pubRootDirectories,
   ) async {
     if (!serviceConnection.serviceManager.hasConnection) return;
-    await _customPubRootDirectoryBusyTracker(() async {
+    await _pubRootDirectoryBusyTracker(() async {
       final localInspectorService = _inspectorService;
       if (localInspectorService is! InspectorService) return;
 
@@ -380,7 +380,7 @@ class InspectorPreferencesController extends DisposableController
   }
 
   Future<void> _refreshPubRootDirectoriesFromService() async {
-    await _customPubRootDirectoryBusyTracker(() async {
+    await _pubRootDirectoryBusyTracker(() async {
       final localInspectorService = _inspectorService;
       if (localInspectorService is! InspectorService) return;
 
@@ -404,7 +404,7 @@ class InspectorPreferencesController extends DisposableController
     return '${_customPubRootDirectoriesStoragePrefix}_$packageId';
   }
 
-  Future<void> _customPubRootDirectoryBusyTracker(
+  Future<void> _pubRootDirectoryBusyTracker(
     Future<void> Function() callback,
   ) async {
     try {
