@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-const String devtoolsBenchmarkPrefix = 'devtools';
-
 /// The initial page to load upon opening the DevTools benchmark app or
 /// reloading it in Chrome.
 //
@@ -11,6 +9,8 @@ const String devtoolsBenchmarkPrefix = 'devtools';
 // to load the default page 'index.html', which will show up as "page not
 // found" in DevTools.
 const String benchmarkInitialPage = '';
+
+const String devtoolsBenchmarkPrefix = 'devtools';
 
 enum DevToolsBenchmark {
   navigateThroughOfflineScreens;

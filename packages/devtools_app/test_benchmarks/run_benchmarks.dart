@@ -22,13 +22,9 @@ Future<void> main() async {
     initialPage: benchmarkInitialPage,
   );
 
-  stdout.writeln('Web benchmark tests finished.');
-
-  stdout.writeln('==== Results ====');
-
-  stdout.writeln(
-    const JsonEncoder.withIndent('  ').convert(taskResult.toJson()),
-  );
-
-  stdout.writeln('==== End of results ====');
+  stdout
+    ..writeln('Web benchmark tests finished.')
+    ..writeln('==== Results ====')
+    ..writeln(const JsonEncoder.withIndent('  ').convert(taskResult.toJson()))
+    ..writeln('==== End of results ====');
 }

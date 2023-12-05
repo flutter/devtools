@@ -39,10 +39,7 @@ Future<void> main() async {
         entryPoint: 'test_benchmarks/test_infra/client.dart',
         useCanvasKit: true,
         treeShakeIcons: false,
-        // Pass an empty initial page so that the benchmark server does not
-        // attempt to load the default page 'index.html', which will show up as
-        // "page not found" in DevTools.
-        initialPage: '',
+        initialPage: benchmarkInitialPage,
       );
 
       stdout.writeln('Web benchmark tests finished.');
