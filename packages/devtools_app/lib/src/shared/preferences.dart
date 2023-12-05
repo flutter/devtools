@@ -264,7 +264,7 @@ class InspectorPreferencesController extends DisposableController
     final inferredDirectory = await _inferPubRootDirectory();
 
     if (inferredDirectory == null) return cachedDirectories;
-    return {...cachedDirectories, inferredDirectory}.toList();
+    return {inferredDirectory, ...cachedDirectories}.toList();
   }
 
   Future<List<String>> _readCachedPubRootDirectories() async {
