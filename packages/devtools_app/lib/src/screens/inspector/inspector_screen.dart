@@ -583,8 +583,12 @@ class PubRootDirectorySection extends StatelessWidget {
             textFieldLabel: 'Enter a new package directory',
             isRefreshing:
                 preferences.inspector.isRefreshingCustomPubRootDirectories,
-            onEntryAdded: (p0) =>
-                unawaited(preferences.inspector.addPubRootDirectories([p0])),
+            onEntryAdded: (p0) => unawaited(
+              preferences.inspector.addPubRootDirectories(
+                [p0],
+                shouldCache: true,
+              ),
+            ),
             onEntryRemoved: (p0) =>
                 unawaited(preferences.inspector.removePubRootDirectories([p0])),
             onRefreshTriggered: () =>

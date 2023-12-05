@@ -331,9 +331,21 @@ class InspectorPreferencesController extends DisposableController
     }
   }
 
-  Future<void> addPubRootDirectories(
+  void _cacheCustomPubRootDirectories(
     List<String> pubRootDirectories,
-  ) async {
+  ) {
+    unawaited(
+      storage.setValue(
+        _customPubRootStorageId(),
+        jsonEncode(pubRootDirectories),
+      ),
+    );
+  }
+
+  Future<void> addPubRootDirectories(
+    List<String> pubRootDirectories, {
+    bool shouldCache = false,
+  }) async {
     // TODO(https://github.com/flutter/devtools/issues/4380):
     // Add validation to EditableList Input.
     // Directories of just / will break the inspector tree local package checks.
@@ -347,6 +359,9 @@ class InspectorPreferencesController extends DisposableController
       if (localInspectorService is! InspectorService) return;
 
       await localInspectorService.addPubRootDirectories(pubRootDirectories);
+      if (shouldCache) {
+        _cacheCustomPubRootDirectories(pubRootDirectories);
+      }
       await _refreshPubRootDirectoriesFromService();
     });
   }
