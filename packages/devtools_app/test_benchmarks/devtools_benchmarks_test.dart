@@ -28,7 +28,7 @@ final valueList = <String>[
 ];
 
 /// Tests that the DevTools web benchmarks are run and reported correctly.
-Future<void> main() async {
+void main() {
   test(
     'Can run a web benchmark',
     () async {

@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'common.dart';
-import 'scroll.dart';
 
 /// A class that automates the DevTools web app.
 class DevToolsAutomater {
@@ -77,7 +78,7 @@ class DevToolsAutomater {
   }
 
   Future<void> _handleNavigateThroughOfflineScreens() async {
-    _logStatus('==== Navigate through offline DevTools tabs ====');
+    _logStatus('Navigate through offline DevTools tabs');
     await navigateThroughDevToolsScreens(
       controller,
       runWithExpectations: false,
@@ -87,5 +88,21 @@ class DevToolsAutomater {
 
 void _logStatus(String log) {
   // ignore: avoid_print, intentional test logging.
-  print(log);
+  print('==== $log ====');
+
+const Duration _animationCheckingInterval = Duration(milliseconds: 50);
+
+Future<void> animationStops() async {
+  if (!WidgetsBinding.instance.hasScheduledFrame) return;
+
+  final Completer stopped = Completer<void>();
+
+  Timer.periodic(_animationCheckingInterval, (timer) {
+    if (!WidgetsBinding.instance.hasScheduledFrame) {
+      stopped.complete();
+      timer.cancel();
+    }
+  });
+
+  await stopped.future;
 }
