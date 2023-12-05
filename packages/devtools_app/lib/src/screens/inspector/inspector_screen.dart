@@ -579,10 +579,9 @@ class PubRootDirectorySection extends StatelessWidget {
           child: EditableList(
             gaScreen: gac.inspector,
             gaRefreshSelection: gac.refreshPubRoots,
-            entries: preferences.inspector.customPubRootDirectories,
+            entries: preferences.inspector.pubRootDirectories,
             textFieldLabel: 'Enter a new package directory',
-            isRefreshing:
-                preferences.inspector.isRefreshingCustomPubRootDirectories,
+            isRefreshing: preferences.inspector.isRefreshingPubRootDirectories,
             onEntryAdded: (p0) => unawaited(
               preferences.inspector.addPubRootDirectories(
                 [p0],
