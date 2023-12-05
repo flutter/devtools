@@ -18,6 +18,9 @@ import 'constants.dart';
 import 'diagnostics/inspector_service.dart';
 import 'globals.dart';
 
+const _google3PathSegment = 'google3';
+const _thirdPartyPathSegment = 'third_party';
+
 /// A controller for global application preferences.
 class PreferencesController extends DisposableController
     with AutoDisposeControllerMixin {
@@ -218,13 +221,13 @@ class InspectorPreferencesController extends DisposableController
           if (debuggerState?.isPaused.value == false) {
             // the isolate is already unpaused, we can try to load
             // the directories
-            unawaited(preferences.inspector.loadCustomPubRootDirectories());
+            unawaited(preferences.inspector.loadPubRootDirectories());
           } else {
             late Function() pausedListener;
 
             pausedListener = () {
               if (debuggerState?.isPaused.value == false) {
-                unawaited(preferences.inspector.loadCustomPubRootDirectories());
+                unawaited(preferences.inspector.loadPubRootDirectories());
 
                 debuggerState?.isPaused.removeListener(pausedListener);
               }
@@ -246,30 +249,99 @@ class InspectorPreferencesController extends DisposableController
   Future<void> _handleConnectionToNewService() async {
     await _updateMainScriptRef();
     await _updateHoverEvalMode();
-
-    final localInspectorService = _inspectorService;
-    if (localInspectorService is InspectorService) {
-      _customPubRootDirectories.clear();
-      await loadCustomPubRootDirectories();
-
-      if (_customPubRootDirectories.value.isEmpty) {
-        // If there are no pub root directories set on the first connection
-        // then try inferring them.
-        await _customPubRootDirectoryBusyTracker(() async {
-          await localInspectorService.inferPubRootDirectoryIfNeeded();
-          await loadCustomPubRootDirectories();
-        });
-      }
-    }
+    await loadPubRootDirectories();
   }
 
-  void _persistCustomPubRootDirectoriesToStorage() {
-    unawaited(
-      storage.setValue(
-        _customPubRootStorageId(),
-        jsonEncode(_customPubRootDirectories.value),
-      ),
+  Future<void> loadPubRootDirectories() async {
+    await _customPubRootDirectoryBusyTracker(() async {
+      await addPubRootDirectories(await _determinePubRootDirectories());
+      await _refreshPubRootDirectoriesFromService();
+    });
+  }
+
+  Future<List<String>> _determinePubRootDirectories() async {
+    final cachedDirectories = await _readCachedPubRootDirectories();
+    final inferredDirectory = await _inferPubRootDirectory();
+
+    if (inferredDirectory == null) return cachedDirectories;
+    return {...cachedDirectories, inferredDirectory}.toList();
+  }
+
+  Future<List<String>> _readCachedPubRootDirectories() async {
+    final cachedDirectoriesJson =
+        await storage.getValue(_customPubRootStorageId());
+    if (cachedDirectoriesJson == null) return <String>[];
+
+    return List<String>.from(
+      jsonDecode(cachedDirectoriesJson),
     );
+  }
+
+  /// As we aren't running from an IDE, we don't know exactly what the pub root
+  /// directories are for the current project so we make a best guess based on
+  /// the root library for the main isolate.
+  Future<String?> _inferPubRootDirectory() async {
+    final path = await serviceConnection.rootLibraryForMainIsolate();
+    if (path == null) {
+      return null;
+    }
+    // TODO(jacobr): Once https://github.com/flutter/flutter/issues/26615 is
+    // fixed we will be able to use package: paths. Temporarily all tools
+    // tracking widget locations will need to support both path formats.
+    // TODO(jacobr): use the list of loaded scripts to determine the appropriate
+    // package root directory given that the root script of this project is in
+    // this directory rather than guessing based on url structure.
+    final parts = path.split('/');
+    String? pubRootDirectory;
+    // For google3, we grab the top-level directory in the google3 directory
+    // (e.g. /education), or the top-level directory in third_party (e.g.
+    // /third_party/dart):
+    if (_isGoogle3Path(parts)) {
+      pubRootDirectory = _pubRootDirectoryForGoogle3(parts);
+    } else {
+      final parts = path.split('/');
+
+      for (int i = parts.length - 1; i >= 0; i--) {
+        final part = parts[i];
+        if (part == 'lib' || part == 'web') {
+          pubRootDirectory = parts.sublist(0, i).join('/');
+          break;
+        }
+
+        if (part == 'packages') {
+          pubRootDirectory = parts.sublist(0, i + 1).join('/');
+          break;
+        }
+      }
+    }
+    pubRootDirectory ??= (parts..removeLast()).join('/');
+    return pubRootDirectory;
+  }
+
+  // TODO: De-duplicate with inspector_service
+  bool _isGoogle3Path(List<String> pathParts) =>
+      pathParts.contains(_google3PathSegment);
+
+  // TODO: De-duplicate with inspector_service
+  List<String> _stripGoogle3(List<String> pathParts) {
+    final google3Index = pathParts.lastIndexOf(_google3PathSegment);
+    if (google3Index != -1 && google3Index + 1 < pathParts.length) {
+      return pathParts.sublist(google3Index + 1);
+    }
+    return pathParts;
+  }
+
+  String? _pubRootDirectoryForGoogle3(List<String> pathParts) {
+    final strippedParts = _stripGoogle3(pathParts);
+    if (strippedParts.isEmpty) return null;
+
+    final topLevelDirectory = strippedParts.first;
+    if (topLevelDirectory == _thirdPartyPathSegment &&
+        strippedParts.length >= 2) {
+      return '/${strippedParts.sublist(0, 2).join('/')}';
+    } else {
+      return '/${strippedParts.first}';
+    }
   }
 
   Future<void> addPubRootDirectories(
@@ -320,8 +392,6 @@ class InspectorPreferencesController extends DisposableController
 
         _customPubRootDirectories.removeAll(directoriesToRemove);
         _customPubRootDirectories.addAll(directoriesToAdd);
-
-        _persistCustomPubRootDirectoriesToStorage();
       }
     });
   }
@@ -330,24 +400,6 @@ class InspectorPreferencesController extends DisposableController
     assert(_mainScriptDir != null);
     final packageId = _mainScriptDir ?? '_fallback';
     return '${_customPubRootDirectoriesStoragePrefix}_$packageId';
-  }
-
-  Future<void> loadCustomPubRootDirectories() async {
-    if (!serviceConnection.serviceManager.hasConnection) return;
-
-    await _customPubRootDirectoryBusyTracker(() async {
-      final storedCustomPubRootDirectories =
-          await storage.getValue(_customPubRootStorageId());
-
-      if (storedCustomPubRootDirectories != null) {
-        await addPubRootDirectories(
-          List<String>.from(
-            jsonDecode(storedCustomPubRootDirectories),
-          ),
-        );
-      }
-      await _refreshPubRootDirectoriesFromService();
-    });
   }
 
   Future<void> _customPubRootDirectoryBusyTracker(

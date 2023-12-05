@@ -466,64 +466,6 @@ class InspectorService extends InspectorServiceBase {
     return response as Map<String, dynamic>;
   }
 
-  /// As we aren't running from an IDE, we don't know exactly what the pub root
-  /// directories are for the current project so we make a best guess if needed
-  /// based on the root directory of the first non artificial widget in the
-  /// tree.
-  Future<List<String>> inferPubRootDirectoryIfNeeded() async {
-    final group = createObjectGroup('temp');
-    List<String> directories = await group.getPubRootDirectories();
-    if (directories.isEmpty) {
-      final directory = await inferPubRootDirectoryIfNeededHelper();
-      if (directory != null) {
-        directories = [directory];
-      }
-    }
-
-    await _onRootDirectoriesChanged(directories);
-    return directories;
-  }
-
-  Future<String?> inferPubRootDirectoryIfNeededHelper() async {
-    final path = await serviceConnection.rootLibraryForMainIsolate();
-    if (path == null) {
-      return null;
-    }
-    // TODO(jacobr): Once https://github.com/flutter/flutter/issues/26615 is
-    // fixed we will be able to use package: paths. Temporarily all tools
-    // tracking widget locations will need to support both path formats.
-    // TODO(jacobr): use the list of loaded scripts to determine the appropriate
-    // package root directory given that the root script of this project is in
-    // this directory rather than guessing based on url structure.
-    final parts = path.split('/');
-    String? pubRootDirectory;
-    // For google3, we grab the top-level directory in the google3 directory
-    // (e.g. /education), or the top-level directory in third_party (e.g.
-    // /third_party/dart):
-    if (_isGoogle3Path(parts)) {
-      pubRootDirectory = _pubRootDirectoryForGoogle3(parts);
-    } else {
-      final parts = path.split('/');
-
-      for (int i = parts.length - 1; i >= 0; i--) {
-        final part = parts[i];
-        if (part == 'lib' || part == 'web') {
-          pubRootDirectory = parts.sublist(0, i).join('/');
-          break;
-        }
-
-        if (part == 'packages') {
-          pubRootDirectory = parts.sublist(0, i + 1).join('/');
-          break;
-        }
-      }
-    }
-    pubRootDirectory ??= (parts..removeLast()).join('/');
-
-    await _addPubRootDirectories([pubRootDirectory]);
-    return pubRootDirectory;
-  }
-
   bool _isGoogle3Path(List<String> pathParts) =>
       pathParts.contains(_google3PathSegment);
 
@@ -533,19 +475,6 @@ class InspectorService extends InspectorServiceBase {
       return pathParts.sublist(google3Index + 1);
     }
     return pathParts;
-  }
-
-  String? _pubRootDirectoryForGoogle3(List<String> pathParts) {
-    final strippedParts = _stripGoogle3(pathParts);
-    if (strippedParts.isEmpty) return null;
-
-    final topLevelDirectory = strippedParts.first;
-    if (topLevelDirectory == _thirdPartyPathSegment &&
-        strippedParts.length >= 2) {
-      return '/${strippedParts.sublist(0, 2).join('/')}';
-    } else {
-      return '/${strippedParts.first}';
-    }
   }
 
   RemoteDiagnosticsNode? _currentSelection;
