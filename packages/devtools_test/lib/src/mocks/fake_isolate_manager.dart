@@ -14,6 +14,12 @@ import 'package:vm_service/vm_service.dart';
 import 'generated.mocks.dart';
 
 base class FakeIsolateManager extends Fake with TestIsolateManager {
+  FakeIsolateManager({
+    this.rootLibrary,
+  });
+
+  String? rootLibrary;
+
   @override
   ValueListenable<IsolateRef?> get selectedIsolate => _selectedIsolate;
   final _selectedIsolate = ValueNotifier(
