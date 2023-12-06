@@ -206,13 +206,16 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
         Expanded(
           child: Focus(
             onKeyEvent: (_, __) {
-              if (HardwareKeyboard.instance.isLogicalKeyPressed(LogicalKeyboardKey.arrowUp)) {
+              if (HardwareKeyboard.instance
+                  .isLogicalKeyPressed(LogicalKeyboardKey.arrowUp)) {
                 _historyNavUp();
                 return KeyEventResult.handled;
-              } else if (HardwareKeyboard.instance.isLogicalKeyPressed(LogicalKeyboardKey.arrowDown)) {
+              } else if (HardwareKeyboard.instance
+                  .isLogicalKeyPressed(LogicalKeyboardKey.arrowDown)) {
                 _historyNavDown();
                 return KeyEventResult.handled;
-              } else if (HardwareKeyboard.instance.isLogicalKeyPressed(LogicalKeyboardKey.enter)) {
+              } else if (HardwareKeyboard.instance
+                  .isLogicalKeyPressed(LogicalKeyboardKey.enter)) {
                 _handleExpressionEval(context);
                 return KeyEventResult.handled;
               }

@@ -740,7 +740,9 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     ScrollController scrollController,
     BoxConstraints constraints,
   ) {
-    if (event is! KeyDownEvent && event is! KeyRepeatEvent) return KeyEventResult.ignored;
+    if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
+      return KeyEventResult.ignored;
+    }
 
     // Exit early if we aren't handling the key
     if (![

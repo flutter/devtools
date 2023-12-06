@@ -961,7 +961,9 @@ class _InspectorTreeState extends State<InspectorTree>
   /// Handle arrow keys for the InspectorTree. Ignore other key events so that
   /// other widgets have a chance to respond to them.
   KeyEventResult _handleKeyEvent(FocusNode _, KeyEvent event) {
-    if (event is! KeyDownEvent && event is! KeyRepeatEvent) return KeyEventResult.ignored;
+    if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
+      return KeyEventResult.ignored;
+    }
 
     final treeControllerLocal = treeController!;
 
