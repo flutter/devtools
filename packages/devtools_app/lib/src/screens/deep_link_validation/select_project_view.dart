@@ -40,7 +40,7 @@ class _SelectProjectViewState extends State<SelectProjectView>
     ga.timeStart(gac.deeplink, gac.AnalyzeFlutterProject.loadVariants.name);
     final List<String> androidVariants =
         await server.requestAndroidBuildVariants(directory);
-    if (!mounted) {
+    if (!context.mounted) {
       ga.cancelTimingOperation(
         gac.deeplink,
         gac.AnalyzeFlutterProject.loadVariants.name,

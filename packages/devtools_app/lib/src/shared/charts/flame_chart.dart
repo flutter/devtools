@@ -454,7 +454,7 @@ abstract class FlameChartState<T extends FlameChart,
 
   KeyEventResult _handleKeyEvent(KeyEvent event) {
     if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
-          return KeyEventResult.ignored;
+      return KeyEventResult.ignored;
     }
     // Only handle down events so logic is not duplicated on key up.
     // TODO(kenz): zoom in/out faster if key is held. It actually zooms slower
@@ -463,7 +463,7 @@ abstract class FlameChartState<T extends FlameChart,
     // Handle zooming / navigation from WASD keys. Use physical keys to match
     // other keyboard mappings like Dvorak, for which these keys would
     // translate to ,AOE keys. See
-    // https://api.flutter.dev/flutter/services/RawKeyEvent/physicalKey.html.
+    // https://api.flutter.dev/flutter/services/KeyEvent/physicalKey.html.
     final eventKey = event.physicalKey;
     if (eventKey == PhysicalKeyboardKey.keyW) {
       unawaited(

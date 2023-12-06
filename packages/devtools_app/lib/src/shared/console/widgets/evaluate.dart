@@ -174,7 +174,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
 
       if (matches.length == 1 && matches.first == parts.activeWord) {
         // It is not useful to show a single autocomplete that is exactly what
-        // the already typed.
+        // they already typed.
         _autoCompleteController
           ..clearSearchAutoComplete()
           ..clearCurrentSuggestion();
@@ -205,17 +205,17 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
         const SizedBox(width: 8.0),
         Expanded(
           child: Focus(
-            onKeyEvent: (_, __) {
-              if (HardwareKeyboard.instance
-                  .isLogicalKeyPressed(LogicalKeyboardKey.arrowUp)) {
+            onKeyEvent: (_, event) {
+              if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
+                return KeyEventResult.ignored;
+              }
+              if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
                 _historyNavUp();
                 return KeyEventResult.handled;
-              } else if (HardwareKeyboard.instance
-                  .isLogicalKeyPressed(LogicalKeyboardKey.arrowDown)) {
+              } else if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
                 _historyNavDown();
                 return KeyEventResult.handled;
-              } else if (HardwareKeyboard.instance
-                  .isLogicalKeyPressed(LogicalKeyboardKey.enter)) {
+              } else if (event.logicalKey == LogicalKeyboardKey.enter) {
                 _handleExpressionEval(context);
                 return KeyEventResult.handled;
               }
