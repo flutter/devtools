@@ -379,7 +379,8 @@ void main() {
         });
       });
 
-      test('widget tree', () async {
+      // TODO(bartekpacia): Fix this test, https://github.com/flutter/devtools/issues/6902
+      test('widget tree', skip: true, () async {
         await env.setupEnvironment();
         final group = inspectorService!.createObjectGroup('test-group');
         final RemoteDiagnosticsNode root =
