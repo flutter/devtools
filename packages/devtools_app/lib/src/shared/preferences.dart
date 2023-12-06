@@ -408,8 +408,9 @@ class InspectorPreferencesController extends DisposableController
         final directoriesToAdd = newSet.difference(oldSet);
         final directoriesToRemove = oldSet.difference(newSet);
 
-        _pubRootDirectories.removeAll(directoriesToRemove);
-        _pubRootDirectories.addAll(directoriesToAdd);
+        _pubRootDirectories
+          ..removeAll(directoriesToRemove)
+          ..addAll(directoriesToAdd);
       }
     });
   }
