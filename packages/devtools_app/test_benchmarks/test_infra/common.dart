@@ -13,7 +13,9 @@ const String benchmarkInitialPage = '';
 const String devtoolsBenchmarkPrefix = 'devtools';
 
 enum DevToolsBenchmark {
-  navigateThroughOfflineScreens;
+  navigateThroughOfflineScreens,
+  offlineCpuProfilerScreen,
+  offlinePerformanceScreen;
 
   String get id => '${devtoolsBenchmarkPrefix}_$name';
 }
