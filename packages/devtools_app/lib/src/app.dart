@@ -70,12 +70,10 @@ class DevToolsApp extends StatefulWidget {
     this.originalScreens,
     this.analyticsController, {
     super.key,
-    this.sampleData = const [],
   });
 
   final List<DevToolsScreen> originalScreens;
   final AnalyticsController analyticsController;
-  final List<DevToolsJsonFile> sampleData;
 
   @override
   State<DevToolsApp> createState() => DevToolsAppState();
