@@ -10,5 +10,5 @@ set -ex
 source ./tool/ci/setup.sh
 
 pushd $DEVTOOLS_DIR/packages/devtools_app
-flutter test test_benchmarks/
+flutter test test/benchmarks/
 popd
