@@ -107,3 +107,15 @@ void _maybeExpect(dynamic actual, dynamic matcher, {bool shouldExpect = true}) {
     expect(actual, matcher);
   }
 }
+
+Future<void> loadSampleData(
+  WidgetController controller,
+  String fileName,
+) async {
+  await controller.tap(find.byType(DropdownButton<DevToolsJsonFile>));
+  await controller.pumpAndSettle();
+  await controller.tap(find.text(fileName).last);
+  await controller.pump(safePumpDuration);
+  await controller.tap(find.text('Load sample data'));
+  await controller.pump(longPumpDuration);
+}
