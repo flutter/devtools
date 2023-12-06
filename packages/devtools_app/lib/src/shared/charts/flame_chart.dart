@@ -453,47 +453,48 @@ abstract class FlameChartState<T extends FlameChart,
   }
 
   KeyEventResult _handleKeyEvent(KeyEvent event) {
+    if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
+          return KeyEventResult.ignored;
+    }
     // Only handle down events so logic is not duplicated on key up.
-    if (event is KeyDownEvent || event is KeyRepeatEvent) {
-      // TODO(kenz): zoom in/out faster if key is held. It actually zooms slower
-      // if the key is held currently.
+    // TODO(kenz): zoom in/out faster if key is held. It actually zooms slower
+    // if the key is held currently.
 
-      // Handle zooming / navigation from WASD keys. Use physical keys to match
-      // other keyboard mappings like Dvorak, for which these keys would
-      // translate to ,AOE keys. See
-      // https://api.flutter.dev/flutter/services/RawKeyEvent/physicalKey.html.
-      final eventKey = event.physicalKey;
-      if (eventKey == PhysicalKeyboardKey.keyW) {
-        unawaited(
-          zoomTo(
-            math.min(
-              maxZoomLevel,
-              currentZoom + keyboardZoomInUnit,
-            ),
+    // Handle zooming / navigation from WASD keys. Use physical keys to match
+    // other keyboard mappings like Dvorak, for which these keys would
+    // translate to ,AOE keys. See
+    // https://api.flutter.dev/flutter/services/RawKeyEvent/physicalKey.html.
+    final eventKey = event.physicalKey;
+    if (eventKey == PhysicalKeyboardKey.keyW) {
+      unawaited(
+        zoomTo(
+          math.min(
+            maxZoomLevel,
+            currentZoom + keyboardZoomInUnit,
           ),
-        );
-        return KeyEventResult.handled;
-      } else if (eventKey == PhysicalKeyboardKey.keyS) {
-        unawaited(
-          zoomTo(
-            math.max(
-              FlameChart.minZoomLevel,
-              currentZoom - keyboardZoomOutUnit,
-            ),
+        ),
+      );
+      return KeyEventResult.handled;
+    } else if (eventKey == PhysicalKeyboardKey.keyS) {
+      unawaited(
+        zoomTo(
+          math.max(
+            FlameChart.minZoomLevel,
+            currentZoom - keyboardZoomOutUnit,
           ),
-        );
-        return KeyEventResult.handled;
-      } else if (eventKey == PhysicalKeyboardKey.keyA) {
-        // `unawaited` does not work for FutureOr
-        // ignore: discarded_futures
-        scrollToX(horizontalControllerGroup.offset - keyboardScrollUnit);
-        return KeyEventResult.handled;
-      } else if (eventKey == PhysicalKeyboardKey.keyD) {
-        // `unawaited` does not work for FutureOr
-        // ignore: discarded_futures
-        scrollToX(horizontalControllerGroup.offset + keyboardScrollUnit);
-        return KeyEventResult.handled;
-      }
+        ),
+      );
+      return KeyEventResult.handled;
+    } else if (eventKey == PhysicalKeyboardKey.keyA) {
+      // `unawaited` does not work for FutureOr
+      // ignore: discarded_futures
+      scrollToX(horizontalControllerGroup.offset - keyboardScrollUnit);
+      return KeyEventResult.handled;
+    } else if (eventKey == PhysicalKeyboardKey.keyD) {
+      // `unawaited` does not work for FutureOr
+      // ignore: discarded_futures
+      scrollToX(horizontalControllerGroup.offset + keyboardScrollUnit);
+      return KeyEventResult.handled;
     }
     return KeyEventResult.ignored;
   }
