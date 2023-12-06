@@ -90,6 +90,7 @@ class DevToolsAutomater {
 void _logStatus(String log) {
   // ignore: avoid_print, intentional test logging.
   print('==== $log ====');
+}
 
 const Duration _animationCheckingInterval = Duration(milliseconds: 50);
 
