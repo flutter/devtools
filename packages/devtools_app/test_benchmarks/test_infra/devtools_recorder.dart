@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/initialization.dart';
-import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:web_benchmarks/client.dart';
 
@@ -40,12 +38,6 @@ class DevToolsRecorder extends WidgetRecorder {
 
   @override
   Future<Profile> run() async {
-    // Set the environment parameters global.
-    setGlobal(
-      DevToolsEnvironmentParameters,
-      ExternalDevToolsEnvironmentParameters(),
-    );
-
     // ignore: invalid_use_of_visible_for_testing_member, valid use for benchmark tests.
     await initializeDevTools();
     return super.run();

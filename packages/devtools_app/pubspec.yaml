@@ -173,5 +173,3 @@ dependency_overrides:
     path: ../devtools_test
   devtools_extensions:
     path: ../devtools_extensions
-  web_benchmarks:
-    path: ../../../packages/packages/web_benchmarks

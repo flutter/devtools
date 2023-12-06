@@ -13,8 +13,7 @@ const String benchmarkInitialPage = '';
 const String devtoolsBenchmarkPrefix = 'devtools';
 
 enum DevToolsBenchmark {
-  navigateThroughOfflineScreens,
-  offlinePerformanceScreen;
+  navigateThroughOfflineScreens;
 
   String get id => '${devtoolsBenchmarkPrefix}_$name';
 }

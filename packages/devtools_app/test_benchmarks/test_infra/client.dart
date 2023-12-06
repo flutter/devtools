@@ -13,9 +13,6 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
   DevToolsBenchmark.navigateThroughOfflineScreens.id: () => DevToolsRecorder(
         benchmark: DevToolsBenchmark.navigateThroughOfflineScreens,
       ),
-  DevToolsBenchmark.offlinePerformanceScreen.id: () => DevToolsRecorder(
-        benchmark: DevToolsBenchmark.offlinePerformanceScreen,
-      ),
 };
 
 /// Runs the client of the DevTools web benchmarks.
