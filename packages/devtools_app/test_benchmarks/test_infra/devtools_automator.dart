@@ -5,7 +5,10 @@
 import 'dart:async';
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/screens/performance/panes/flutter_frames/flutter_frames_chart.dart';
+import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_test/helpers.dart';
+import 'package:devtools_test/test_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -39,7 +42,7 @@ class DevToolsAutomater {
     // the zone set up in `lib/web_benchmarks.dart` in `flutter/flutter`.
     Future<void>.delayed(safePumpDuration, automateDevToolsGestures);
     return DevToolsApp(
-      defaultScreens(),
+      defaultScreens(sampleData: sampleData),
       AnalyticsController(enabled: false, firstRun: false),
     );
   }
@@ -50,6 +53,8 @@ class DevToolsAutomater {
     switch (benchmark) {
       case DevToolsBenchmark.navigateThroughOfflineScreens:
         await _handleNavigateThroughOfflineScreens();
+      case DevToolsBenchmark.offlinePerformanceScreen:
+        await _handleOfflinePerformanceScreen();
     }
 
     // At the end of the test, mark as finished.
@@ -83,12 +88,52 @@ class DevToolsAutomater {
       controller,
       runWithExpectations: false,
     );
-    _logStatus('==== End navigate through offline DevTools tabs ====');
+    _logStatus('End navigate through offline DevTools tabs');
+  }
+
+  Future<void> _handleOfflinePerformanceScreen() async {
+    _logStatus('Loading offline performance data and interacting');
+    await loadSampleData(controller, performanceLargeFileName);
+
+    // Select a handful of frames.
+    final frames = find.byType(FlutterFramesChartItem);
+    for (var i = 0; i < 5; i++) {
+      await controller.tap(frames.at(i));
+      await controller.pump(shortPumpDuration);
+    }
+
+    // Open the Timeline Events tab.
+    await controller.tap(find.widgetWithText(InkWell, 'Timeline Events'));
+    await controller.pump(longPumpDuration);
+
+    // Select more frames.
+    for (var i = 5; i < 10; i++) {
+      await controller.tap(frames.at(i));
+      await controller.pump(shortPumpDuration);
+    }
+
+    // Scroll through the frames chart.
+    final scrollbarFinder = find.descendant(
+      // ignore: invalid_use_of_visible_for_testing_member, valid use for benchmark tests.
+      of: find.byType(FramesChart),
+      matching: find.byType(Scrollbar),
+    );
+    final scrollbar = controller.firstWidget<Scrollbar>(scrollbarFinder);
+    await scrollbar.controller!.animateTo(
+      scrollbar.controller!.position.maxScrollExtent,
+      duration: defaultDuration,
+      curve: defaultCurve,
+    );
+    await controller.pump();
+
+    _logStatus('End loading offline performance data and interacting');
+  }
 }
 
 void _logStatus(String log) {
   // ignore: avoid_print, intentional test logging.
   print('==== $log ====');
+}
 
 const Duration _animationCheckingInterval = Duration(milliseconds: 50);
 
