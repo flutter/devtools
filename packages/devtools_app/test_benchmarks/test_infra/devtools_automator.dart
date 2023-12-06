@@ -84,6 +84,7 @@ class DevToolsAutomater {
       runWithExpectations: false,
     );
     _logStatus('==== End navigate through offline DevTools tabs ====');
+  }
 }
 
 void _logStatus(String log) {
