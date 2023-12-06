@@ -36,7 +36,7 @@ void main() {
 
       final taskResult = await serveWebBenchmark(
         benchmarkAppDirectory: projectRootDirectory(),
-        entryPoint: 'test_benchmarks/test_infra/client.dart',
+        entryPoint: 'test/benchmarks/test_infra/client.dart',
         useCanvasKit: true,
         treeShakeIcons: false,
         initialPage: benchmarkInitialPage,
