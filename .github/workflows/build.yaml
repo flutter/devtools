@@ -257,7 +257,7 @@ jobs:
         run: ./tool/ci/bots.sh
 
   benchmark-performance:
-    name: benchmarks
+    name: benchmark-performance
     needs: flutter-prep
     runs-on: ubuntu-latest
     strategy:
@@ -275,7 +275,7 @@ jobs:
         run: ./tool/ci/benchmark_performance.sh
 
   benchmark-size:
-    name: benchmarks
+    name: benchmark-size
     needs: flutter-prep
     runs-on: ubuntu-latest
     strategy:
