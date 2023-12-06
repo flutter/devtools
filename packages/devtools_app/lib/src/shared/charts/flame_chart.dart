@@ -287,7 +287,7 @@ abstract class FlameChartState<T extends FlameChart,
         child: Focus(
           autofocus: true,
           focusNode: focusNode,
-          onKey: (node, event) => _handleKeyEvent(event),
+          onKeyEvent: (node, event) => _handleKeyEvent(event),
           // Scrollbar needs to wrap [LayoutBuilder] so that the scroll bar is
           // rendered on top of the custom painters defined in [buildCustomPaints]
           child: Scrollbar(
@@ -452,9 +452,9 @@ abstract class FlameChartState<T extends FlameChart,
     );
   }
 
-  KeyEventResult _handleKeyEvent(RawKeyEvent event) {
+  KeyEventResult _handleKeyEvent(KeyEvent event) {
     // Only handle down events so logic is not duplicated on key up.
-    if (event is RawKeyDownEvent) {
+    if (event is KeyDownEvent || event is KeyRepeatEvent) {
       // TODO(kenz): zoom in/out faster if key is held. It actually zooms slower
       // if the key is held currently.
 

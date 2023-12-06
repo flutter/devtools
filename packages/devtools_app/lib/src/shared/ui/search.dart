@@ -1206,12 +1206,12 @@ class _AutoCompleteSearchFieldState extends State<AutoCompleteSearchField>
       widget.controller.rawKeyboardFocusNode,
       _handleLostFocus,
     );
-    widget.controller.rawKeyboardFocusNode.onKey = _handleKeyStrokes;
+    widget.controller.rawKeyboardFocusNode.onKeyEvent = _handleKeyStrokes;
   }
 
   @override
   Widget build(BuildContext context) {
-    return RawKeyboardListener(
+    return KeyboardListener(
       focusNode: widget.controller.rawKeyboardFocusNode,
       child: CompositedTransformTarget(
         link: widget.controller.autoCompleteLayerLink,
@@ -1250,9 +1250,9 @@ class _AutoCompleteSearchFieldState extends State<AutoCompleteSearchField>
     }
   }
 
-  KeyEventResult _handleKeyStrokes(FocusNode _, RawKeyEvent event) {
-    if (event is RawKeyDownEvent) {
-      final key = event.data.logicalKey.keyId & LogicalKeyboardKey.valueMask;
+  KeyEventResult _handleKeyStrokes(FocusNode _, KeyEvent event) {
+    if (event is KeyDownEvent || event is KeyRepeatEvent) {
+      final key = event.logicalKey.keyId & LogicalKeyboardKey.valueMask;
 
       if (key == escape) {
         // TODO(kenz): Enable this once we find a way around the navigation

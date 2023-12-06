@@ -38,7 +38,7 @@ typedef IndexedScrollableWidgetBuilder = Widget Function({
 });
 
 typedef TableKeyEventHandler = KeyEventResult Function(
-  RawKeyEvent event,
+  KeyEvent event,
   ScrollController scrollController,
   BoxConstraints constraints,
 );
@@ -736,11 +736,11 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   }
 
   KeyEventResult _handleKeyEvent(
-    RawKeyEvent event,
+    KeyEvent event,
     ScrollController scrollController,
     BoxConstraints constraints,
   ) {
-    if (event is! RawKeyDownEvent) return KeyEventResult.ignored;
+    if (event is! KeyDownEvent && event is! KeyRepeatEvent) return KeyEventResult.ignored;
 
     // Exit early if we aren't handling the key
     if (![
@@ -1169,7 +1169,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
                     onTapDown: (a) => widget.focusNode?.requestFocus(),
                     child: Focus(
                       autofocus: true,
-                      onKey: (_, event) => widget.handleKeyEvent != null
+                      onKeyEvent: (_, event) => widget.handleKeyEvent != null
                           ? widget.handleKeyEvent!(
                               event,
                               scrollController,
