@@ -260,14 +260,15 @@ class InspectorPreferencesController extends DisposableController
   }
 
   Future<List<String>> _determinePubRootDirectories() async {
-    final cachedDirectories = await _readCachedPubRootDirectories();
+    final cachedDirectories = await readCachedPubRootDirectories();
     final inferredDirectory = await _inferPubRootDirectory();
 
     if (inferredDirectory == null) return cachedDirectories;
     return {inferredDirectory, ...cachedDirectories}.toList();
   }
 
-  Future<List<String>> _readCachedPubRootDirectories() async {
+  @visibleForTesting
+  Future<List<String>> readCachedPubRootDirectories() async {
     final cachedDirectoriesJson =
         await storage.getValue(_customPubRootStorageId());
     if (cachedDirectoriesJson == null) return <String>[];
@@ -331,14 +332,28 @@ class InspectorPreferencesController extends DisposableController
     }
   }
 
-  void _cacheCustomPubRootDirectories(
+  void _cachePubRootDirectories(
     List<String> pubRootDirectories,
-  ) {
-    unawaited(
-      storage.setValue(
-        _customPubRootStorageId(),
-        jsonEncode(pubRootDirectories),
-      ),
+  ) async {
+    final cachedDirectories = await readCachedPubRootDirectories();
+    await storage.setValue(
+      _customPubRootStorageId(),
+      jsonEncode([
+        ...cachedDirectories,
+        ...pubRootDirectories,
+      ]),
+    );
+  }
+
+  Future<void> _uncachePubRootDirectories(
+    List<String> pubRootDirectories,
+  ) async {
+    final directoriesToCache = (await readCachedPubRootDirectories())
+        .where((dir) => !pubRootDirectories.contains(dir))
+        .toList();
+    await storage.setValue(
+      _customPubRootStorageId(),
+      jsonEncode(directoriesToCache),
     );
   }
 
@@ -360,7 +375,7 @@ class InspectorPreferencesController extends DisposableController
 
       await localInspectorService.addPubRootDirectories(pubRootDirectories);
       if (shouldCache) {
-        _cacheCustomPubRootDirectories(pubRootDirectories);
+        _cachePubRootDirectories(pubRootDirectories);
       }
       await _refreshPubRootDirectoriesFromService();
     });
@@ -375,6 +390,7 @@ class InspectorPreferencesController extends DisposableController
       if (localInspectorService is! InspectorService) return;
 
       await localInspectorService.removePubRootDirectories(pubRootDirectories);
+      await _uncachePubRootDirectories(pubRootDirectories);
       await _refreshPubRootDirectoriesFromService();
     });
   }

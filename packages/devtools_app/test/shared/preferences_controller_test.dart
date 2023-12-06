@@ -185,17 +185,71 @@ void main() {
         'custom pub root directories are cached across multiple connections',
         () async {
           var directories = controller.pubRootDirectories.value;
+          var cachedDirectories =
+              await controller.readCachedPubRootDirectories();
+
           expect(
             directories,
+            containsAll(customPubRootDirectories),
+          );
+          expect(
+            cachedDirectories,
             containsAll(customPubRootDirectories),
           );
 
           await controller.handleConnectionToNewService();
           directories = controller.pubRootDirectories.value;
+          cachedDirectories = await controller.readCachedPubRootDirectories();
 
           expect(
             directories,
             containsAll(customPubRootDirectories),
+          );
+          expect(cachedDirectories, containsAll(customPubRootDirectories));
+        },
+      );
+
+      test(
+        'adding more directories to cache doesn\'t overwrite pre-existing values',
+        () async {
+          await controller.addPubRootDirectories(
+            ['test_dir/fake_app/custom_dir3'],
+            shouldCache: true,
+          );
+
+          final cachedDirectories =
+              await controller.readCachedPubRootDirectories();
+
+          expect(
+            cachedDirectories,
+            containsAll([
+              ...customPubRootDirectories,
+              'test_dir/fake_app/custom_dir3',
+            ]),
+          );
+        },
+      );
+
+      test(
+        'removing directories from cache removes the correct values',
+        () async {
+          const notRemoved = 'test_dir/fake_app/custom_dir1';
+          const removed = 'test_dir/fake_app/custom_dir2';
+          var cachedDirectories =
+              await controller.readCachedPubRootDirectories();
+
+          expect(cachedDirectories, containsAll([notRemoved, removed]));
+
+          await controller.removePubRootDirectories([removed]);
+          cachedDirectories = await controller.readCachedPubRootDirectories();
+
+          expect(
+            cachedDirectories,
+            isNot(contains(removed)),
+          );
+          expect(
+            cachedDirectories,
+            contains(notRemoved),
           );
         },
       );
