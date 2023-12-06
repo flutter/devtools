@@ -22,7 +22,6 @@ import 'mocks.dart';
 
 class FakeServiceConnectionManager extends Fake
     implements ServiceConnectionManager {
-  final String? rootLibrary;
 
   FakeServiceConnectionManager({
     VmServiceWrapper? service,
@@ -48,6 +47,7 @@ class FakeServiceConnectionManager extends Fake
           .thenReturn(ValueNotifier<int>(0));
     }
   }
+  final String? rootLibrary;
 
   @override
   FakeServiceManager get serviceManager =>
