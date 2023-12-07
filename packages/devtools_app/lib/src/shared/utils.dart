@@ -214,3 +214,16 @@ String? lookupFromQueryParams(String key) {
   final queryParameters = loadQueryParams();
   return queryParameters[key];
 }
+
+const _google3PathSegment = 'google3';
+
+bool isGoogle3Path(List<String> pathParts) =>
+    pathParts.contains(_google3PathSegment);
+
+List<String> stripGoogle3(List<String> pathParts) {
+  final google3Index = pathParts.lastIndexOf(_google3PathSegment);
+  if (google3Index != -1 && google3Index + 1 < pathParts.length) {
+    return pathParts.sublist(google3Index + 1);
+  }
+  return pathParts;
+}

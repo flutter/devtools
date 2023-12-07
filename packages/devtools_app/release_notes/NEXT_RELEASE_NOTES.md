@@ -14,7 +14,7 @@ TODO: Remove this section if there are not any general updates.
 
 ## Inspector updates
 
-TODO: Remove this section if there are not any general updates.
+* Only cache pub root directories added by the user - [6897](https://github.com/flutter/devtools/pull/6897)
 
 ## Performance updates
 

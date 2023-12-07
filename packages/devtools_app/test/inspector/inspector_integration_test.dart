@@ -37,10 +37,6 @@ void main() {
         isAlive: null,
       );
     }
-
-    if (service is InspectorService) {
-      await service.inferPubRootDirectoryIfNeeded();
-    }
   };
 
   setUp(() async {

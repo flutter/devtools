@@ -29,6 +29,7 @@ class FakeServiceConnectionManager extends Fake
     bool hasService = true,
     List<String> availableServices = const [],
     List<String> availableLibraries = const [],
+    String? rootLibrary,
   }) {
     _serviceManager = FakeServiceManager(
       service: service,
@@ -37,6 +38,7 @@ class FakeServiceConnectionManager extends Fake
       availableLibraries: availableLibraries,
       availableServices: availableServices,
       onVmServiceOpened: resolvedUriManager.vmServiceOpened,
+      rootLibrary: rootLibrary,
     );
     for (var screenId in screenIds) {
       when(errorBadgeManager.erroredItemsForPage(screenId)).thenReturn(
@@ -92,6 +94,13 @@ class FakeServiceConnectionManager extends Fake
   }) {
     return Future.value();
   }
+
+  @override
+  Future<String?> rootLibraryForMainIsolate() {
+    final fakeIsolateManager =
+        _serviceManager.isolateManager as FakeIsolateManager;
+    return Future.value(fakeIsolateManager.rootLibrary);
+  }
 }
 
 // ignore: subtype_of_sealed_class, fake for testing.
@@ -105,8 +114,10 @@ class FakeServiceManager extends Fake
     this.availableLibraries = const [],
     this.onVmServiceOpened,
     Map<String, Response>? serviceExtensionResponses,
-  }) : serviceExtensionResponses =
-            serviceExtensionResponses ?? _defaultServiceExtensionResponses {
+    String? rootLibrary,
+  })  : serviceExtensionResponses =
+            serviceExtensionResponses ?? _defaultServiceExtensionResponses,
+        _isolateManager = FakeIsolateManager(rootLibrary: rootLibrary) {
     this.service = service ?? createFakeService();
     mockConnectedApp(
       connectedApp!,
@@ -153,6 +164,8 @@ class FakeServiceManager extends Fake
 
   final Map<String, Response> serviceExtensionResponses;
 
+  final IsolateManager _isolateManager;
+
   static final _defaultServiceExtensionResponses = <String, Response>{
     isImpellerEnabled: Response.parse({'enabled': false})!,
   };
@@ -177,7 +190,7 @@ class FakeServiceManager extends Fake
   bool connectedAppInitialized;
 
   @override
-  final IsolateManager isolateManager = FakeIsolateManager();
+  IsolateManager get isolateManager => _isolateManager;
 
   @override
   final FakeServiceExtensionManager serviceExtensionManager =
