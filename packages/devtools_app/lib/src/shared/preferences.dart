@@ -272,11 +272,26 @@ class InspectorPreferencesController extends DisposableController
     final cachedDirectoriesJson =
         await storage.getValue(_customPubRootStorageId());
     if (cachedDirectoriesJson == null) return <String>[];
-
-    return List<String>.from(
+    final cachedDirectories = List<String>.from(
       jsonDecode(cachedDirectoriesJson),
     );
+
+    // Remove the Flutter pub root directory if it was accidentally cached.
+    // See:
+    // - https://github.com/flutter/devtools/issues/6882
+    // - https://github.com/flutter/devtools/issues/6841
+    if (cachedDirectories.any(_isFlutterPubRoot)) {
+      final flutterPubRootDirectories =
+          cachedDirectories.where(_isFlutterPubRoot).toList();
+      await removePubRootDirectories(flutterPubRootDirectories);
+      cachedDirectories.removeWhere(_isFlutterPubRoot);
+    }
+
+    return cachedDirectories;
   }
+
+  bool _isFlutterPubRoot(String directory) =>
+      directory.endsWith('packages/flutter');
 
   /// As we aren't running from an IDE, we don't know exactly what the pub root
   /// directories are for the current project so we make a best guess based on
