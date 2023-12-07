@@ -15,10 +15,10 @@ import 'generated.mocks.dart';
 
 base class FakeIsolateManager extends Fake with TestIsolateManager {
   FakeIsolateManager({
-    this.rootLibrary,
+    this.rootLibrary = 'package:my_app/main.dart',
   });
 
-  String? rootLibrary;
+  final String? rootLibrary;
 
   @override
   ValueListenable<IsolateRef?> get selectedIsolate => _selectedIsolate;
@@ -57,7 +57,7 @@ base class FakeIsolateManager extends Fake with TestIsolateManager {
   IsolateState isolateState(IsolateRef? isolate) {
     final state = MockIsolateState();
     final mockIsolate = MockIsolate();
-    final rootLib = LibraryRef(id: '0', uri: 'package:my_app/main.dart');
+    final rootLib = LibraryRef(id: '0', uri: rootLibrary);
     when(mockIsolate.libraries).thenReturn(
       [
         rootLib,
