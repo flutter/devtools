@@ -16,7 +16,7 @@ Future<void> main() async {
 
   final taskResult = await serveWebBenchmark(
     benchmarkAppDirectory: projectRootDirectory(),
-    entryPoint: 'test_benchmarks/test_infra/client.dart',
+    entryPoint: 'benchmark/test_infra/client.dart',
     useCanvasKit: true,
     treeShakeIcons: false,
     initialPage: benchmarkInitialPage,
