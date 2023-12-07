@@ -97,17 +97,26 @@ class DevToolsRepo {
 class FlutterSdk {
   FlutterSdk._(this.sdkPath);
 
-  /// The current located Flutter SDK (or `null` if one could not be found).
+  static FlutterSdk? _current;
+
+  /// The current located Flutter SDK.
   ///
   /// Tries to locate from the running Dart VM. If not found, will print a
   /// warning and use Flutter from PATH.
-  static final current = _findSdk();
+  static FlutterSdk get current {
+    if (_current == null) {
+      throw Exception(
+          'Cannot use FlutterSdk.current before SDK has been selected.'
+          'SDK selection is done by DevToolsCommandRunner.runCommand().');
+    }
+    return _current!;
+  }
 
-  /// Finds the Flutter SDK that contains the Dart VM being used to run this
-  /// script.
+  /// Sets the active Flutter SDK to the one that contains the Dart VM being
+  /// used to run this script.
   ///
   /// Throws if the current VM is not inside a Flutter SDK.
-  static FlutterSdk _findSdk() {
+  static void useFromCurrentVm() {
     // Look for it relative to the current Dart process.
     final dartVmPath = Platform.resolvedExecutable;
     final pathSegments = path.split(dartVmPath);
@@ -132,14 +141,35 @@ class FlutterSdk {
 
       if (expectedSegments.isEmpty) {
         final flutterSdkRoot = path.joinAll(pathSegments);
-        print('Using Flutter SDK from $flutterSdkRoot');
-        return FlutterSdk._(flutterSdkRoot);
+        _current = FlutterSdk._(flutterSdkRoot);
+        return;
       }
     }
 
     throw Exception(
       'Unable to locate the Flutter SDK from the current running Dart VM:\n'
       '${Platform.resolvedExecutable}',
+    );
+  }
+
+  /// Sets the active Flutter SDK to the one found in the `PATH` environment
+  /// variable (by running which/where).
+  ///
+  /// Throws if an SDK is not found on PATH.
+  static void useFromPathEnvironmentVariable() {
+    final whichCommand = Platform.isWindows ? 'where.exe' : 'which';
+    final result = Process.runSync(whichCommand, ['flutter']);
+    if (result.exitCode == 0) {
+      final sdkPath = result.stdout.toString().split('\n').first.trim();
+      // 'flutter/bin'
+      if (path.basename(path.dirname(sdkPath)) == 'bin') {
+        _current = FlutterSdk._(path.dirname(path.dirname(sdkPath)));
+        return;
+      }
+    }
+
+    throw Exception(
+      'Unable to locate the Flutter SDK on PATH',
     );
   }
 
