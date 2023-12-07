@@ -23,7 +23,6 @@ import 'commands/update_dart_sdk_deps.dart';
 import 'commands/update_version.dart';
 
 const _flutterFromPathFlag = 'flutter-from-path';
-const _flutterFromPathAlias = 'from-path';
 
 class DevToolsCommandRunner extends CommandRunner {
   DevToolsCommandRunner()
@@ -46,7 +45,6 @@ class DevToolsCommandRunner extends CommandRunner {
 
     argParser.addFlag(
       _flutterFromPathFlag,
-      aliases: [_flutterFromPathAlias],
       abbr: 'p',
       negatable: false,
       help: 'Use the Flutter SDK on PATH rather than the one being used to run '

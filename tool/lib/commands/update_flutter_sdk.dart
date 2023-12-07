@@ -91,8 +91,8 @@ class UpdateFlutterSdkCommand extends Command {
     );
 
     final sdk = FlutterSdk.current;
-    final flutterSdkDirName = 'flutter-sdk';
-    final toolSdkPath = path.join(repo.toolDirectoryPath, flutterSdkDirName);
+    final flutterSdkDirName = repo.sdkDirectoryName;
+    final toolSdkPath = repo.toolFlutterSdkPath;
     final toolFlutterSdkDirectory = Directory(toolSdkPath);
 
     // Check if the Flutter SDK we're using is not the local tool/flutter-sdk
@@ -100,8 +100,7 @@ class UpdateFlutterSdkCommand extends Command {
     //
     // Check paths case-insensitively because of potential differences like
     // windows drive letters.
-    if (sdk.sdkPath.toLowerCase() !=
-        toolFlutterSdkDirectory.path.toLowerCase()) {
+    if (sdk.sdkPath.toLowerCase() != toolSdkPath.toLowerCase()) {
       log.stdout(
         'Current Flutter SDK is not tool/flutter-sdk, updating repository '
         'at ${sdk.sdkPath}',

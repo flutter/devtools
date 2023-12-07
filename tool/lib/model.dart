@@ -15,6 +15,13 @@ class DevToolsRepo {
   /// The path to the DevTools 'tool' directory.
   String get toolDirectoryPath => path.join(repoPath, 'tool');
 
+  /// The path to the 'tool/flutter-sdk' directory.
+  String get toolFlutterSdkPath =>
+      path.join(toolDirectoryPath, sdkDirectoryName);
+
+  /// The name of the Flutter SDK directory.
+  String get sdkDirectoryName => 'flutter-sdk';
+
   /// The path to the DevTools 'devtools_app' directory.
   String get devtoolsAppDirectoryPath =>
       path.join(repoPath, 'packages', 'devtools_app');
@@ -106,8 +113,9 @@ class FlutterSdk {
   static FlutterSdk get current {
     if (_current == null) {
       throw Exception(
-          'Cannot use FlutterSdk.current before SDK has been selected.'
-          'SDK selection is done by DevToolsCommandRunner.runCommand().');
+        'Cannot use FlutterSdk.current before SDK has been selected.'
+        'SDK selection is done by DevToolsCommandRunner.runCommand().',
+      );
     }
     return _current!;
   }
