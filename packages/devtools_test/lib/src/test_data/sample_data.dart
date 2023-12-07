@@ -26,7 +26,7 @@ final sampleData = <DevToolsJsonFile>[
     data: jsonDecode(jsonEncode(samplePerformanceDataLarge)),
   ),
   DevToolsJsonFile(
-    name: cpuProfileFileName,
+    name: cpuProfilerFileName,
     lastModifiedTime: DateTime.now(),
     data: jsonDecode(jsonEncode(sampleCpuProfilerData)),
   ),

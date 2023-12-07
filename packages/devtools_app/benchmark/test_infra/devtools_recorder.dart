@@ -8,8 +8,8 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:web_benchmarks/client.dart';
 
+import 'automators/devtools_automator.dart';
 import 'common.dart';
-import 'devtools_automator.dart';
 
 /// A recorder that measures frame building durations for the DevTools.
 class DevToolsRecorder extends WidgetRecorder {

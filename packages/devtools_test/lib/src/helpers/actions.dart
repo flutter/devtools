@@ -119,3 +119,18 @@ Future<void> loadSampleData(
   await controller.tap(find.text('Load sample data'));
   await controller.pump(longPumpDuration);
 }
+
+/// Scrolls to the end of the first [Scrollable] descendant of the [T] widget.
+Future<void> scrollToEnd<T>(WidgetController controller) async {
+  final scrollbarFinder = find.descendant(
+    of: find.byType(T),
+    matching: find.byType(Scrollbar),
+  );
+  final scrollbar = controller.firstWidget<Scrollbar>(scrollbarFinder);
+  await scrollbar.controller!.animateTo(
+    scrollbar.controller!.position.maxScrollExtent,
+    duration: const Duration(milliseconds: 500),
+    curve: Curves.easeInOutCubic,
+  );
+  await controller.pump(shortPumpDuration);
+}
