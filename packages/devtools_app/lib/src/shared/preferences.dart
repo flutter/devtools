@@ -332,7 +332,7 @@ class InspectorPreferencesController extends DisposableController
     }
   }
 
-  void _cachePubRootDirectories(
+  Future<void> _cachePubRootDirectories(
     List<String> pubRootDirectories,
   ) async {
     final cachedDirectories = await readCachedPubRootDirectories();
@@ -375,7 +375,7 @@ class InspectorPreferencesController extends DisposableController
 
       await localInspectorService.addPubRootDirectories(pubRootDirectories);
       if (shouldCache) {
-        _cachePubRootDirectories(pubRootDirectories);
+        await _cachePubRootDirectories(pubRootDirectories);
       }
       await _refreshPubRootDirectoriesFromService();
     });
