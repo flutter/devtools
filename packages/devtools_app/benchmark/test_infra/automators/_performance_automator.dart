@@ -19,24 +19,24 @@ class PerformanceScreenAutomator {
     logStatus('Loading offline performance data and interacting');
     await loadSampleData(controller, performanceLargeFileName);
 
-    // Select a handful of frames.
+    logStatus('Select frames with the Frame Analysis tab open');
     final frames = find.byType(FlutterFramesChartItem);
     for (var i = 0; i < 5; i++) {
       await controller.tap(frames.at(i));
       await controller.pump(shortPumpDuration);
     }
 
-    // Open the Timeline Events tab.
+    logStatus('Open the Timeline Events tab');
     await controller.tap(find.widgetWithText(InkWell, 'Timeline Events'));
     await controller.pump(longPumpDuration);
 
-    // Select more frames.
+    logStatus('Select frames with the Timeline Events tab open');
     for (var i = 5; i < 10; i++) {
       await controller.tap(frames.at(i));
       await controller.pump(shortPumpDuration);
     }
 
-    // Scroll through the frames chart.
+    logStatus('Scroll through the frames chart');
     await scrollToEnd<FramesChart>(controller);
 
     logStatus('End loading offline performance data and interacting');

@@ -23,19 +23,26 @@ class CpuProfilerScreenAutomator {
     await loadSampleData(controller, cpuProfilerFileName);
 
     // At this point we are on the 'Bottom Up' tab. Scroll to the end.
+    logStatus('On Bottom Up tab by default. Scrolling through table.');
     await scrollToEnd<CpuBottomUpTable>(controller);
 
     // Switch to all other CPU profiler tabs and scroll to the end.
+    logStatus('Switching to Call Tree tab.');
     await controller.tap(find.widgetWithText(InkWell, 'Call Tree'));
     await controller.pump(shortPumpDuration);
+    logStatus('Scrolling through Call Tree table.');
     await scrollToEnd<CpuCallTreeTable>(controller);
 
+    logStatus('Switching to Method Table tab.');
     await controller.tap(find.widgetWithText(InkWell, 'Method Table'));
     await controller.pump(shortPumpDuration);
+    logStatus('Scrolling through Method Table.');
     await scrollToEnd<MethodTable>(controller);
 
+    logStatus('Switching to CPU Flame Chart tab.');
     await controller.tap(find.widgetWithText(InkWell, 'CPU Flame Chart'));
     await controller.pump(shortPumpDuration);
+    logStatus('Scrolling through CPU Flame Chart.');
     await scrollToEnd<CpuProfileFlameChart>(controller);
 
     logStatus('End loading offline CPU profiler data and interacting');
