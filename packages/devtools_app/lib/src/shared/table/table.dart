@@ -325,18 +325,21 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
 
   @override
   Widget build(BuildContext context) {
-    Widget buildTable(List<double> columnWidths) => _Table<T>(
-          tableController: tableController,
-          columnWidths: columnWidths,
-          autoScrollContent: widget.autoScrollContent,
-          rowBuilder: _buildRow,
-          activeSearchMatchNotifier: widget.activeSearchMatchNotifier,
-          rowItemExtent: defaultRowHeight,
-          preserveVerticalScrollPosition: widget.preserveVerticalScrollPosition,
-          tallHeaders: widget.tallHeaders,
-          headerColor: widget.headerColor,
-          fillWithEmptyRows: widget.fillWithEmptyRows,
-          enableHoverHandling: widget.enableHoverHandling,
+    Widget buildTable(List<double> columnWidths) => SelectionArea(
+          child: _Table<T>(
+            tableController: tableController,
+            columnWidths: columnWidths,
+            autoScrollContent: widget.autoScrollContent,
+            rowBuilder: _buildRow,
+            activeSearchMatchNotifier: widget.activeSearchMatchNotifier,
+            rowItemExtent: defaultRowHeight,
+            preserveVerticalScrollPosition:
+                widget.preserveVerticalScrollPosition,
+            tallHeaders: widget.tallHeaders,
+            headerColor: widget.headerColor,
+            fillWithEmptyRows: widget.fillWithEmptyRows,
+            enableHoverHandling: widget.enableHoverHandling,
+          ),
         );
     if (widget.sizeColumnsToFit || tableController.columnWidths == null) {
       return LayoutBuilder(
@@ -687,17 +690,19 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 
   @override
   Widget build(BuildContext context) {
-    return _Table<T>(
-      tableController: tableController,
-      columnWidths: tableController.columnWidths!,
-      rowBuilder: _buildRow,
-      rowItemExtent: defaultRowHeight,
-      focusNode: _focusNode,
-      handleKeyEvent: _handleKeyEvent,
-      selectionNotifier: widget.selectionNotifier,
-      preserveVerticalScrollPosition: widget.preserveVerticalScrollPosition,
-      tallHeaders: widget.tallHeaders,
-      headerColor: widget.headerColor,
+    return SelectionArea(
+      child: _Table<T>(
+        tableController: tableController,
+        columnWidths: tableController.columnWidths!,
+        rowBuilder: _buildRow,
+        rowItemExtent: defaultRowHeight,
+        focusNode: _focusNode,
+        handleKeyEvent: _handleKeyEvent,
+        selectionNotifier: widget.selectionNotifier,
+        preserveVerticalScrollPosition: widget.preserveVerticalScrollPosition,
+        tallHeaders: widget.tallHeaders,
+        headerColor: widget.headerColor,
+      ),
     );
   }
 
@@ -1600,8 +1605,8 @@ class _TableRowState<T> extends State<TableRow<T>>
         }
         // If ColumnRenderer.build returns null, fall back to the default
         // rendering.
-        content ??= RichText(
-          text: TextSpan(
+        content ??= Text.rich(
+          TextSpan(
             text: column.getDisplayValue(node),
             children: [
               if (column.getCaption(node) != null)
