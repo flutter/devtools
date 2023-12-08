@@ -67,7 +67,7 @@ class BenchmarkArgs {
 
   static const _wasmFlag = 'wasm';
 
-  /// Builds an arg parser for DevTools integration tests.
+  /// Builds an arg parser for DevTools benchmarks.
   static ArgParser _buildArgParser() {
     return ArgParser()
       ..addFlag(
@@ -80,4 +80,3 @@ class BenchmarkArgs {
       );
   }
 }
-
