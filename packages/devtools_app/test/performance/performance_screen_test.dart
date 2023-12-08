@@ -7,7 +7,6 @@ import 'dart:async';
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/performance/panes/controls/performance_controls.dart';
-import 'package:devtools_app/src/screens/performance/panes/flutter_frames/flutter_frames_chart.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/legacy/event_details.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/legacy/timeline_flame_chart.dart';
 import 'package:devtools_app/src/screens/performance/tabbed_performance_view.dart';

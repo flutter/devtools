@@ -6,14 +6,21 @@ import 'dart:convert';
 
 import 'package:devtools_app/devtools_app.dart';
 
-import 'performance.dart';
+import '_performance_data.dart';
+import '_performance_data_large.dart';
 
 const performanceFileName = 'performance_data.json';
+const performanceLargeFileName = 'performance_large_data.json';
 
 final sampleData = <DevToolsJsonFile>[
   DevToolsJsonFile(
     name: performanceFileName,
     lastModifiedTime: DateTime.now(),
     data: jsonDecode(jsonEncode(samplePerformanceData)),
+  ),
+  DevToolsJsonFile(
+    name: performanceLargeFileName,
+    lastModifiedTime: DateTime.now(),
+    data: jsonDecode(jsonEncode(samplePerformanceDataLarge)),
   ),
 ];
