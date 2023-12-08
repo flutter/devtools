@@ -126,7 +126,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         searchPreventClose = false;
       }
     });
-    addAutoDisposeListener(preferences.inspector.customPubRootDirectories, () {
+    addAutoDisposeListener(preferences.inspector.pubRootDirectories, () {
       if (serviceConnection.serviceManager.hasConnection &&
           controller.firstInspectorTreeLoadCompleted) {
         _refreshInspector();
@@ -579,16 +579,19 @@ class PubRootDirectorySection extends StatelessWidget {
           child: EditableList(
             gaScreen: gac.inspector,
             gaRefreshSelection: gac.refreshPubRoots,
-            entries: preferences.inspector.customPubRootDirectories,
+            entries: preferences.inspector.pubRootDirectories,
             textFieldLabel: 'Enter a new package directory',
-            isRefreshing:
-                preferences.inspector.isRefreshingCustomPubRootDirectories,
-            onEntryAdded: (p0) =>
-                unawaited(preferences.inspector.addPubRootDirectories([p0])),
+            isRefreshing: preferences.inspector.isRefreshingPubRootDirectories,
+            onEntryAdded: (p0) => unawaited(
+              preferences.inspector.addPubRootDirectories(
+                [p0],
+                shouldCache: true,
+              ),
+            ),
             onEntryRemoved: (p0) =>
                 unawaited(preferences.inspector.removePubRootDirectories([p0])),
             onRefreshTriggered: () =>
-                unawaited(preferences.inspector.loadCustomPubRootDirectories()),
+                unawaited(preferences.inspector.loadPubRootDirectories()),
           ),
         );
       },

@@ -13,11 +13,11 @@ import 'dart:io';
 /// 
 /// To use:
 /// 
-/// `dart json_to_map.dart ~/Users/me/path/to/my_file.json`
+/// `dart json_to_map.dart ~/path/to/my_file.json`
 /// 
 /// This will generate a file with the same name but with a '.dart' extension
-/// instead of '.json' (e.g. ~/Users/me/path/to/my_file.dart). This will be a
-/// valid dart file with a single [Map] variable [data].
+/// instead of '.json' (e.g. ~/path/to/my_file.dart). This will be a valid dart
+/// file with a single [Map] variable [data].
 void main(List<String> args) {
   if (args.isEmpty) {
     throw Exception('Please pass a file location for the json file.');
@@ -37,7 +37,11 @@ void main(List<String> args) {
 
   final Map<String, Object?> jsonAsMap =
       jsonDecode(jsonFile.readAsStringSync());
-  final jsonFormattedString = JsonEncoder.withIndent('  ').convert(jsonAsMap);
+  var jsonFormattedString = JsonEncoder.withIndent('  ').convert(jsonAsMap);
+
+  // Escape any '$' characters so that Dart does not think we are trying to do
+  // String interpolation.
+  jsonFormattedString = jsonFormattedString.replaceAll('\$', '\\\$');
 
   final dartFile = File('$jsonFileDirectoryPath/$fileNameWithoutExtension.dart')
     ..createSync()

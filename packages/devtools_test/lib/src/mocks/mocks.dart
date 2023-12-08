@@ -28,11 +28,6 @@ class FakeInspectorService extends Fake implements InspectorService {
   }
 
   @override
-  Future<List<String>> inferPubRootDirectoryIfNeeded() async {
-    return ['/some/directory'];
-  }
-
-  @override
   Future<List<String>?> getPubRootDirectories() {
     return Future.value(pubRootDirectories.toList());
   }
