@@ -19,7 +19,7 @@ File? checkFileExists(String path) {
 extension BenchmarkResultsExtension on BenchmarkResults {
   /// Sums this [BenchmarkResults] instance with [other] by adding the values
   /// of each matching benchmark score.
-  /// 
+  ///
   /// Returns a [BenchmarkResults] object with the summed values.
   BenchmarkResults sumWith(
     BenchmarkResults other, {
