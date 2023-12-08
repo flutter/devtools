@@ -38,20 +38,16 @@ void main() {
     timeout: const Timeout(Duration(minutes: 10)),
   );
 
-  test(
-    'Can compare web benchmarks',
-    () {
-      final benchmark1 = BenchmarkResults.parse(testBenchmarkResults1);
-      final benchmark2 = BenchmarkResults.parse(testBenchmarkResults2);
-      final comparison = compareBenchmarks(
-        benchmark1,
-        benchmark2,
-        baselineSource: 'path/to/baseline',
-      );
-      expect(comparison, testBenchmarkComparison);
-    },
-    timeout: const Timeout(Duration(minutes: 10)),
-  );
+  test('Can compare web benchmarks', () {
+    final benchmark1 = BenchmarkResults.parse(testBenchmarkResults1);
+    final benchmark2 = BenchmarkResults.parse(testBenchmarkResults2);
+    final comparison = compareBenchmarks(
+      benchmark1,
+      benchmark2,
+      baselineSource: 'path/to/baseline',
+    );
+    expect(comparison, testBenchmarkComparison);
+  });
 
   // TODO(kenz): add tests that verify performance meets some expected threshold
 }
