@@ -50,7 +50,7 @@ void main(List<String> args) {
   );
 }
 
-void compareBenchmarks(
+Map<String, List<Map<String, dynamic>>> compareBenchmarks(
   BenchmarkResults baseline,
   BenchmarkResults test, {
   required String baselineSource,
@@ -89,12 +89,12 @@ void compareBenchmarks(
   }
   stdout.writeln('Baseline comparison finished.');
 
+  final comparisonAsMap = test.toJsonWithDeltas();
   stdout
     ..writeln('==== Comparison with baseline $baselineSource ====')
-    ..writeln(
-      const JsonEncoder.withIndent('  ').convert(test.toJsonWithDeltas()),
-    )
+    ..writeln(const JsonEncoder.withIndent('  ').convert(comparisonAsMap))
     ..writeln('==== End of baseline comparison ====');
+  return comparisonAsMap;
 }
 
 Expando<double> _benchmarkDeltas = Expando<double>();
