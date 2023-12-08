@@ -35,7 +35,7 @@ class ScriptLocation {
   final SourcePosition? location;
 
   @override
-  bool operator ==(Object? other) {
+  bool operator ==(Object other) {
     return other is ScriptLocation &&
         other.scriptRef == scriptRef &&
         other.location == location;
@@ -107,7 +107,7 @@ abstract class BreakpointAndSourcePosition
   @override
   int get hashCode => breakpoint.hashCode;
   @override
-  bool operator ==(Object? other) {
+  bool operator ==(Object other) {
     return other is BreakpointAndSourcePosition &&
         other.breakpoint == breakpoint;
   }

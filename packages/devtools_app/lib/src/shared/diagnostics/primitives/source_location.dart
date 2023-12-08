@@ -57,8 +57,7 @@ class SourcePosition {
   final int? tokenPos;
 
   @override
-  // ignore: avoid-dynamic, necessary here.
-  bool operator ==(other) {
+  bool operator ==(Object other) {
     return other is SourcePosition &&
         other.line == line &&
         other.column == column &&
