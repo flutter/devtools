@@ -34,9 +34,16 @@ void main() {
     () async {
       await _runBenchmarks();
     },
-    timeout: Timeout.none,
+    timeout: const Timeout(Duration(minutes: 10)),
   );
 
+  test(
+    'Can run web benchmarks with wasm',
+    () async {
+      await _runBenchmarks(useWasm: true);
+    },
+    timeout: const Timeout(Duration(minutes: 15)),
+  );
 
   // TODO(kenz): add tests that verify performance meets some expected threshold
 }
