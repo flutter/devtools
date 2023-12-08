@@ -28,7 +28,7 @@ class CpuMethodTable extends StatelessWidget {
           axis: Axis.horizontal,
           initialFractions: const [0.5, 0.5],
           children: [
-            MethodTable(methodTableController, methods),
+            _MethodTable(methodTableController, methods),
             _MethodGraph(methodTableController),
           ],
         );
@@ -40,9 +40,8 @@ class CpuMethodTable extends StatelessWidget {
 // TODO(kenz): ensure that this table automatically scrolls to the selected
 // node from [MethodTableController].
 /// A table of methods and their timing information for a CPU profile.
-@visibleForTesting
-class MethodTable extends StatelessWidget {
-  const MethodTable(this._methodTableController, this._methods, {super.key});
+class _MethodTable extends StatelessWidget {
+  const _MethodTable(this._methodTableController, this._methods);
 
   static final methodColumn = _MethodColumn();
   static final selfTimeColumn = _SelfTimeColumn();
