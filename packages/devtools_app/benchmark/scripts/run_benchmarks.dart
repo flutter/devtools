@@ -12,6 +12,12 @@ import '../test_infra/common.dart';
 import '../test_infra/project_root_directory.dart';
 
 /// Runs the DevTools web benchmarks and reports the benchmark data.
+/// 
+/// Arguments:
+/// * --browser - runs the benchmark tests in the browser (non-headless mode)
+/// * --wasm - runs the benchmark tests with the dart2wasm compiler
+/// 
+/// See [BenchmarkArgs].
 Future<void> main(List<String> args) async {
   final benchmarkArgs = BenchmarkArgs(args);
 
