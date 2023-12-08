@@ -1171,24 +1171,6 @@ class AutoCompleteSearchField extends StatefulWidget {
 
 class _AutoCompleteSearchFieldState extends State<AutoCompleteSearchField>
     with AutoDisposeMixin {
-  /// Platform independent (Mac or Linux).
-  int get arrowDown =>
-      LogicalKeyboardKey.arrowDown.keyId & LogicalKeyboardKey.valueMask;
-
-  int get arrowUp =>
-      LogicalKeyboardKey.arrowUp.keyId & LogicalKeyboardKey.valueMask;
-
-  int get enter =>
-      LogicalKeyboardKey.enter.keyId & LogicalKeyboardKey.valueMask;
-
-  int get escape =>
-      LogicalKeyboardKey.escape.keyId & LogicalKeyboardKey.valueMask;
-
-  int get tab => LogicalKeyboardKey.tab.keyId & LogicalKeyboardKey.valueMask;
-
-  int get arrowRight =>
-      LogicalKeyboardKey.arrowRight.keyId & LogicalKeyboardKey.valueMask;
-
   HighlightAutoComplete get _highlightDropdown =>
       widget.onHighlightDropdown != null
           ? widget.onHighlightDropdown as HighlightAutoComplete
