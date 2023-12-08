@@ -18,7 +18,7 @@ See the "benchmark-performance" and "benchmark-size" jobs.
 
 To run the performance benchmark tests locally, run:
 ```sh
-dart run run_benchmarks.dart
+dart run benchmark/scripts/run_benchmarks.dart
 ```
 
 To run the test that verifies we can run benchmark tests, run:
