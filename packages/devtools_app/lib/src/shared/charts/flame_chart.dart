@@ -21,6 +21,7 @@ import '../primitives/utils.dart';
 import '../ui/colors.dart';
 import '../ui/search.dart';
 import '../ui/utils.dart';
+import '../utils.dart';
 
 const double rowPadding = 2.0;
 // Flame chart rows contain text so are not readable if they do not scale with
@@ -453,9 +454,7 @@ abstract class FlameChartState<T extends FlameChart,
   }
 
   KeyEventResult _handleKeyEvent(KeyEvent event) {
-    if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
-      return KeyEventResult.ignored;
-    }
+    if (!event.isKeyDownOrRepeat) return KeyEventResult.ignored;
     // Only handle down events so logic is not duplicated on key up.
     // TODO(kenz): zoom in/out faster if key is held. It actually zooms slower
     // if the key is held currently.

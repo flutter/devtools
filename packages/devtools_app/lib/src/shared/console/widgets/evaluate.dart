@@ -17,6 +17,7 @@ import '../../analytics/constants.dart' as gac;
 import '../../globals.dart';
 import '../../ui/search.dart';
 import '../../ui/utils.dart';
+import '../../utils.dart';
 import '../eval/auto_complete.dart';
 import '../eval/eval_service.dart';
 import '../primitives/assignment.dart';
@@ -206,9 +207,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
         Expanded(
           child: Focus(
             onKeyEvent: (_, event) {
-              if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
-                return KeyEventResult.ignored;
-              }
+              if (!event.isKeyDownOrRepeat) return KeyEventResult.ignored;
               if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
                 _historyNavUp();
                 return KeyEventResult.handled;

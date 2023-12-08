@@ -18,6 +18,7 @@ import '../primitives/trees.dart';
 import '../primitives/utils.dart';
 import '../ui/search.dart';
 import '../ui/utils.dart';
+import '../utils.dart';
 import 'column_widths.dart';
 import 'table_controller.dart';
 import 'table_data.dart';
@@ -740,9 +741,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     ScrollController scrollController,
     BoxConstraints constraints,
   ) {
-    if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
-      return KeyEventResult.ignored;
-    }
+    if (!event.isKeyDownOrRepeat) return KeyEventResult.ignored;
 
     // Exit early if we aren't handling the key
     if (![

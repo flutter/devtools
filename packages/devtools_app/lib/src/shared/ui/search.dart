@@ -1251,9 +1251,7 @@ class _AutoCompleteSearchFieldState extends State<AutoCompleteSearchField>
   }
 
   KeyEventResult _handleKeyStrokes(FocusNode _, KeyEvent event) {
-    if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
-      return KeyEventResult.ignored;
-    }
+    if (!event.isKeyDownOrRepeat) return KeyEventResult.ignored;
     final key = event.logicalKey;
 
     if (key == LogicalKeyboardKey.escape) {

@@ -175,7 +175,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
         return KeyboardListener(
           focusNode: widget.keyFocusNode,
           onKeyEvent: (KeyEvent event) {
-            if ((event is KeyDownEvent || event is KeyRepeatEvent) &&
+            if (event.isKeyDownOrRepeat &&
                 event.logicalKey == LogicalKeyboardKey.escape) {
               _hideHover();
             }
