@@ -28,7 +28,7 @@ class PerformanceScreenAutomator {
 
     logStatus('Open the Timeline Events tab');
     await controller.tap(find.widgetWithText(InkWell, 'Timeline Events'));
-    await controller.pump(longPumpDuration);
+    await controller.pump(safePumpDuration);
 
     logStatus('Select frames with the Timeline Events tab open');
     for (var i = 5; i < 10; i++) {
