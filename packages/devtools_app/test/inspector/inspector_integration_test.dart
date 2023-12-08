@@ -143,7 +143,7 @@ void main() {
           ),
         );
 
-        await env.tearDownEnvironment();
+        await env.tearDownEnvironment(force: true);
       },
     );
 
@@ -447,9 +447,7 @@ void main() {
           ),
         );
 
-        print('======== TEARING DOWN ENVIRONMENT.');
-        await env.tearDownEnvironment();
-        print('======== DONE TEARING DOWN ENVIRONMENT.');
+        await env.tearDownEnvironment(force: true);
       },
     );
   });
