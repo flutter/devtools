@@ -1,8 +1,8 @@
 # DevTools benchmark tests
 
 There are two types of benchmarks that we currently support: size and performance.
-- devtools_benchmarks_test.dart (measures DevTools frame times)
-- web_bundle_size_test.dart (measures DevTools release build size)
+1. `devtools_benchmarks_test.dart` - measures DevTools frame times.
+2. `web_bundle_size_test.dart` - measures DevTools release build size.
 
 The benchmark tests are run automatically on the CI.
 See the "benchmark-performance" and "benchmark-size" jobs.
@@ -13,6 +13,8 @@ See the "benchmark-performance" and "benchmark-size" jobs.
 > The performance and size benchmarks cannot be run concurrently
 > (e.g. by running `flutter test benchmark/`). See the [#caveats](#caveats)
 > section below.
+
+All of the commands below should be run from the `packages/devtools_app` directory.
 
 ### Performance benchmarks
 

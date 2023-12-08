@@ -23,7 +23,7 @@ import 'utils.dart';
 Future<void> main(List<String> args) async {
   final benchmarkArgs = BenchmarkArgs(args);
 
-  stdout.writeln('Starting web benchmark tests (run #$i) ...');
+  stdout.writeln('Starting web benchmark tests...');
   final taskResult = await serveWebBenchmark(
     benchmarkAppDirectory: projectRootDirectory(),
     entryPoint: 'benchmark/test_infra/client.dart',
@@ -32,7 +32,7 @@ Future<void> main(List<String> args) async {
     initialPage: benchmarkInitialPage,
     headless: !benchmarkArgs.useBrowser,
   );
-  stdout.writeln('Web benchmark tests finished (run #$i).');
+  stdout.writeln('Web benchmark tests finished.');
 
   final resultsAsMap = taskResult.toJson();
   final resultsAsJsonString =
@@ -121,5 +121,3 @@ class BenchmarkArgs {
       );
   }
 }
-// BenchmarkResults _averageBenchmarkResults(List<BenchmarkResults> results) {
-// }

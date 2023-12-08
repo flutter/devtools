@@ -34,7 +34,7 @@ void main() {
     () async {
       await _runBenchmarks();
     },
-    timeout: Timeout.none,
+    timeout: const Timeout(Duration(minutes: 10)),
   );
 
 
