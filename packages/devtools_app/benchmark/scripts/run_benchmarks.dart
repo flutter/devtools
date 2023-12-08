@@ -36,13 +36,6 @@ Future<void> main(List<String> args) async {
   final resultsAsJsonString =
       const JsonEncoder.withIndent('  ').convert(resultsAsMap);
 
-  if (benchmarkArgs.saveToFileLocation != null) {
-    final location = Uri.parse(benchmarkArgs.saveToFileLocation!);
-    File.fromUri(location)
-      ..createSync()
-      ..writeAsStringSync(resultsAsJsonString);
-  }
-
   stdout
     ..writeln('==== Results ====')
     ..writeln(resultsAsJsonString)
