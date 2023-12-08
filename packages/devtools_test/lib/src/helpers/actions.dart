@@ -110,14 +110,15 @@ void _maybeExpect(dynamic actual, dynamic matcher, {bool shouldExpect = true}) {
 
 Future<void> loadSampleData(
   WidgetController controller,
-  String fileName,
-) async {
+  String fileName, {
+  Duration waitTimeForLoad = longPumpDuration,
+}) async {
   await controller.tap(find.byType(DropdownButton<DevToolsJsonFile>));
   await controller.pumpAndSettle();
   await controller.tap(find.text(fileName).last);
   await controller.pump(safePumpDuration);
   await controller.tap(find.text('Load sample data'));
-  await controller.pump(longPumpDuration);
+  await controller.pump(waitTimeForLoad);
 }
 
 /// Scrolls to the end of the first [Scrollable] descendant of the [T] widget.

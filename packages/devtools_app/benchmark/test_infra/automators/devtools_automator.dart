@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../common.dart';
+import '_cpu_profiler_automator.dart';
 import '_performance_automator.dart';
 
 /// A class that automates the DevTools web app.
@@ -54,6 +55,8 @@ class DevToolsAutomater {
     switch (benchmark) {
       case DevToolsBenchmark.navigateThroughOfflineScreens:
         await _handleNavigateThroughOfflineScreens();
+      case DevToolsBenchmark.offlineCpuProfilerScreen:
+        await CpuProfilerScreenAutomator(controller).run();
       case DevToolsBenchmark.offlinePerformanceScreen:
         await PerformanceScreenAutomator(controller).run();
     }
