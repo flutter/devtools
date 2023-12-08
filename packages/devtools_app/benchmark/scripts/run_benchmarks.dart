@@ -10,8 +10,6 @@ import 'package:web_benchmarks/server.dart';
 
 import '../test_infra/common.dart';
 import '../test_infra/project_root_directory.dart';
-import 'compare_benchmarks.dart';
-import 'utils.dart';
 
 /// Runs the DevTools web benchmarks and reports the benchmark data.
 Future<void> main(List<String> args) async {
