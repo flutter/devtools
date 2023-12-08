@@ -121,6 +121,15 @@ Future<void> loadSampleData(
 }
 
 /// Scrolls to the end of the first [Scrollable] descendant of the [T] widget.
+/// 
+/// For example, if you have some widget in the tree 'Foo' that contains a
+/// [Scrollbar] somewhere in its descendants, calling
+/// `scrollToEnd<Foo>(controller)` would perform the following steps:
+/// 
+/// 1) find the [Scrollbar] widget descending from [Foo].
+/// 2) access the [Scrollbar] widget's [ScrollController].
+/// 3) scroll the scrollable attached to the [ScrollController] to the end of
+///    the [ScrollController]'s scroll extent.
 Future<void> scrollToEnd<T>(WidgetController controller) async {
   final scrollbarFinder = find.descendant(
     of: find.byType(T),
