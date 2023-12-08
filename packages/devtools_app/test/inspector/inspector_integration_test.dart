@@ -447,7 +447,9 @@ void main() {
           ),
         );
 
+        print('======== TEARING DOWN ENVIRONMENT.');
         await env.tearDownEnvironment();
+        print('======== DONE TEARING DOWN ENVIRONMENT.');
       },
     );
   });

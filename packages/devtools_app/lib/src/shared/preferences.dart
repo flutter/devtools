@@ -363,9 +363,11 @@ class InspectorPreferencesController extends DisposableController
   Future<void> _uncachePubRootDirectories(
     List<String> pubRootDirectories,
   ) async {
+    print('========= REQUEST TO UNCACHE $pubRootDirectories');
     final directoriesToCache = (await readCachedPubRootDirectories())
         .where((dir) => !pubRootDirectories.contains(dir))
         .toList();
+    print('========= RE-CACHING $directoriesToCache');
     await storage.setValue(
       _customPubRootStorageId(),
       jsonEncode(directoriesToCache),
