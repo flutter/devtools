@@ -21,7 +21,6 @@ All of the commands below should be run from the `packages/devtools_app` directo
 To run the performance benchmark tests locally, run:
 ```sh
 dart run benchmark/scripts/run_benchmarks.dart
-dart run benchmark/run_benchmarks.dart
 ```
 
 To run the test that verifies we can run benchmark tests, run:
@@ -49,3 +48,17 @@ the other running tests are using.
 The tests are defined by "automators", which live in the `benchmark/test_infra/automators`
 directory. To add a new test or test case, either modify an existing automator or add
 a new one for a new screen. Follow existing examples in that directory for guidance.
+
+## Comparing two benchmark test runs
+
+In order to compare two different benchmark runs, you first need to run the benchmark
+tests and save the results to a file:
+```sh
+dart run benchmark/scripts/run_benchmarks.dart --save-to-file=baseline.json
+dart run benchmark/scripts/run_benchmarks.dart --save-to-file=test.json
+```
+
+Then, to compare the benchmarks and calculate deltas, run:
+```sh
+dart run benchmark/scripts/compare_benchmarks.dart baseline_file.json test_file.json
+```
