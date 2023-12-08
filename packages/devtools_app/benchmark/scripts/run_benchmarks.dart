@@ -15,24 +15,39 @@ import 'utils.dart';
 
 /// Runs the DevTools web benchmarks and reports the benchmark data.
 ///
-/// Arguments:
-/// * --browser - runs the benchmark tests in the browser (non-headless mode)
-/// * --wasm - runs the benchmark tests with the dart2wasm compiler
-///
-/// See [BenchmarkArgs].
+/// To see available arguments, run this script with the `-h` flag.
 Future<void> main(List<String> args) async {
-  final benchmarkArgs = BenchmarkArgs(args);
+  if (args.isNotEmpty && args.first == '-h') {
+    stdout.writeln(BenchmarkArgs._buildArgParser().usage);
+    return;
+  }
 
-  stdout.writeln('Starting web benchmark tests...');
-  final taskResult = await serveWebBenchmark(
-    benchmarkAppDirectory: projectRootDirectory(),
-    entryPoint: 'benchmark/test_infra/client.dart',
-    compilationOptions: CompilationOptions(useWasm: benchmarkArgs.useWasm),
-    treeShakeIcons: false,
-    initialPage: benchmarkInitialPage,
-    headless: !benchmarkArgs.useBrowser,
-  );
-  stdout.writeln('Web benchmark tests finished.');
+  final benchmarkArgs = BenchmarkArgs(args);
+  final benchmarkResults = <BenchmarkResults>[];
+  for (var i = 0; i < benchmarkArgs.averageOf; i++) {
+    stdout.writeln('Starting web benchmark tests (run #$i) ...');
+    benchmarkResults.add(
+      await serveWebBenchmark(
+        benchmarkAppDirectory: projectRootDirectory(),
+        entryPoint: 'benchmark/test_infra/client.dart',
+        compilationOptions: CompilationOptions(useWasm: benchmarkArgs.useWasm),
+        treeShakeIcons: false,
+        initialPage: benchmarkInitialPage,
+        headless: !benchmarkArgs.useBrowser,
+      ),
+    );
+    stdout.writeln('Web benchmark tests finished (run #$i).');
+  }
+
+  late final BenchmarkResults taskResult;
+  if (benchmarkArgs.averageOf == 1) {
+    taskResult = benchmarkResults.first;
+  } else {
+    stdout.writeln(
+      'Taking the average of ${benchmarkResults.length} benchmark runs.',
+    );
+    taskResult = averageBenchmarkResults(benchmarkResults);
+  }
 
   final resultsAsMap = taskResult.toJson();
   final resultsAsJsonString =
@@ -84,6 +99,8 @@ class BenchmarkArgs {
 
   bool get useWasm => argResults[_wasmFlag];
 
+  int get averageOf => int.parse(argResults[_averageOfOption]);
+
   String? get saveToFileLocation => argResults[_saveToFileOption];
 
   String? get baselineLocation => argResults[_baselineOption];
@@ -96,15 +113,19 @@ class BenchmarkArgs {
 
   static const _baselineOption = 'baseline';
 
+  static const _averageOfOption = 'average-of';
+
   /// Builds an arg parser for DevTools benchmarks.
   static ArgParser _buildArgParser() {
     return ArgParser()
       ..addFlag(
         _browserFlag,
+        negatable: false,
         help: 'Runs the benchmark tests in browser mode (not headless mode).',
       )
       ..addFlag(
         _wasmFlag,
+        negatable: false,
         help: 'Runs the benchmark tests with dart2wasm',
       )
       ..addOption(
@@ -118,6 +139,37 @@ class BenchmarkArgs {
             'baseline file should be created by running this script with the '
             '$_saveToFileOption in a separate test run.',
         valueHelp: '/Users/me/Downloads/baseline.json',
+      )
+      ..addOption(
+        _averageOfOption,
+        defaultsTo: '1',
+        help: 'The number of times to run the benchmark. The returned results '
+            'will be the average of all the benchmark runs when this value is '
+            'greater than 1.',
+        valueHelp: '5',
       );
   }
+}
+
+BenchmarkResults averageBenchmarkResults(List<BenchmarkResults> results) {
+  if (results.isEmpty) {
+    throw Exception('Cannot take average of empty list.');
+  }
+
+  var totalSum = results.first;
+  for (int i = 1; i < results.length; i++) {
+    final current = results[i];
+    totalSum = totalSum.sumWith(current);
+  }
+
+  final average = totalSum.toJson();
+  for (final benchmark in totalSum.scores.keys) {
+    final scoresForBenchmark = totalSum.scores[benchmark]!;
+    for (int i = 0; i < scoresForBenchmark.length; i++) {
+      final score = scoresForBenchmark[i];
+      final averageScore = score.value / results.length;
+      average[benchmark]![i][score.metric] = averageScore;
+    }
+  }
+  return BenchmarkResults.parse(average);
 }
