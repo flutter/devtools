@@ -50,7 +50,7 @@ void main(List<String> args) {
   );
 }
 
-Map<String, List<Map<String, dynamic>>> compareBenchmarks(
+Map<String, List<Map<String, Object?>>> compareBenchmarks(
   BenchmarkResults baseline,
   BenchmarkResults test, {
   required String baselineSource,
@@ -104,15 +104,15 @@ extension ScoreDeltaExtension on BenchmarkScore {
 }
 
 extension ResultDeltaExtension on BenchmarkResults {
-  Map<String, List<Map<String, dynamic>>> toJsonWithDeltas() {
-    return scores.map<String, List<Map<String, dynamic>>>(
+  Map<String, List<Map<String, Object?>>> toJsonWithDeltas() {
+    return scores.map<String, List<Map<String, Object?>>>(
       (String benchmarkName, List<BenchmarkScore> scores) {
-        return MapEntry<String, List<Map<String, dynamic>>>(
+        return MapEntry<String, List<Map<String, Object?>>>(
           benchmarkName,
-          scores.map<Map<String, dynamic>>(
+          scores.map<Map<String, Object?>>(
             (BenchmarkScore score) {
               final delta = _benchmarkDeltas[score];
-              return <String, dynamic>{
+              return <String, Object?>{
                 ...score.toJson(),
                 if (delta != null) 'delta': delta,
               };
