@@ -151,6 +151,13 @@ class BenchmarkArgs {
   }
 }
 
+// TODO(kenz): upstream the logic to average benchmarks into the
+// package:web_benchmarks
+
+/// Returns the average of the benchmark results in [results].
+///
+/// Each element in [results] is expected to have identical benchmark names and
+/// metrics; otherwise, an [Exception] will be thrown.
 BenchmarkResults averageBenchmarkResults(List<BenchmarkResults> results) {
   if (results.isEmpty) {
     throw Exception('Cannot take average of empty list.');
@@ -167,8 +174,8 @@ BenchmarkResults averageBenchmarkResults(List<BenchmarkResults> results) {
     final scoresForBenchmark = totalSum.scores[benchmark]!;
     for (int i = 0; i < scoresForBenchmark.length; i++) {
       final score = scoresForBenchmark[i];
-      final averageScore = score.value / results.length;
-      average[benchmark]![i][score.metric] = averageScore;
+      final averageValue = score.value / results.length;
+      average[benchmark]![i]['value'] = averageValue;
     }
   }
   return BenchmarkResults.parse(average);
