@@ -37,7 +37,6 @@ void main() {
     timeout: const Timeout(Duration(minutes: 10)),
   );
 
-
   // TODO(kenz): add tests that verify performance meets some expected threshold
 }
 

@@ -85,7 +85,6 @@ void compareBenchmarks(
 
       // Add the delta to the [testMetric].
       _benchmarkDeltas[score] = (score.value - baselineScore.value).toDouble();
-      // score.deltaFromBaseline = score.value - baselineScore.value;
     }
   }
   stdout.writeln('Baseline comparison finished.');

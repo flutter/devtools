@@ -92,9 +92,9 @@ class BenchmarkArgs {
 
   static const _wasmFlag = 'wasm';
 
-  static const _baselineOption = 'baseline';
-
   static const _saveToFileOption = 'save-to-file';
+
+  static const _baselineOption = 'baseline';
 
   /// Builds an arg parser for DevTools benchmarks.
   static ArgParser _buildArgParser() {
