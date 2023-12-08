@@ -39,4 +39,24 @@ The size benchmark must be ran by itself because it actually modifies the
 `devtools_app/build` folder to create and measure the release build web bundle size.
 If this test is ran while other tests are running, it can affect the measurements
 that the size benchmark test takes, and it can affect the DevTools build that
-the other running tests are using with.
+the other running tests are using.
+
+## Adding a new benchmark test or test case
+
+The tests are defined by "automators", which live in the `benchmark/test_infra/automators`
+directory. To add a new test or test case, either modify an existing automator or add
+a new one for a new screen. Follow existing examples in that directory for guidance.
+
+## Comparing two benchmark test runs
+
+In order to compare two different benchmark runs, you first need to run the benchmark
+tests and save the results to a file:
+```sh
+dart run benchmark/scripts/run_benchmarks.dart --save-to-file=baseline.json
+dart run benchmark/scripts/run_benchmarks.dart --save-to-file=test.json
+```
+
+Then, to compare the benchmarks and calculate deltas, run:
+```sh
+dart run benchmark/scripts/compare_benchmarks.dart baseline_file.json test_file.json
+```

@@ -10,6 +10,8 @@ import 'package:web_benchmarks/server.dart';
 
 import '../test_infra/common.dart';
 import '../test_infra/project_root_directory.dart';
+import 'compare_benchmarks.dart';
+import 'utils.dart';
 
 /// Runs the DevTools web benchmarks and reports the benchmark data.
 ///
@@ -48,6 +50,24 @@ Future<void> main(List<String> args) async {
     ..writeln(resultsAsJsonString)
     ..writeln('==== End of results ====')
     ..writeln();
+
+  final baselineSource = benchmarkArgs.baselineLocation;
+  if (baselineSource != null) {
+    final baselineFile = checkFileExists(baselineSource);
+    if (baselineFile != null) {
+      final baselineResults = BenchmarkResults.parse(
+        jsonDecode(baselineFile.readAsStringSync()),
+      );
+      final testResults = BenchmarkResults.parse(
+        jsonDecode(resultsAsJsonString),
+      );
+      compareBenchmarks(
+        baselineResults,
+        testResults,
+        baselineSource: baselineSource,
+      );
+    }
+  }
 }
 
 class BenchmarkArgs {
@@ -64,9 +84,17 @@ class BenchmarkArgs {
 
   bool get useWasm => argResults[_wasmFlag];
 
+  String? get saveToFileLocation => argResults[_saveToFileOption];
+
+  String? get baselineLocation => argResults[_baselineOption];
+
   static const _browserFlag = 'browser';
 
   static const _wasmFlag = 'wasm';
+
+  static const _baselineOption = 'baseline';
+
+  static const _saveToFileOption = 'save-to-file';
 
   /// Builds an arg parser for DevTools benchmarks.
   static ArgParser _buildArgParser() {
@@ -78,6 +106,20 @@ class BenchmarkArgs {
       ..addFlag(
         _wasmFlag,
         help: 'Runs the benchmark tests with dart2wasm',
+      )
+      ..addOption(
+        _saveToFileOption,
+        help: 'Saves the benchmark results to a JSON file at the given path.',
+        valueHelp: '/Users/me/Downloads/output.json',
+      )
+      ..addOption(
+        _baselineOption,
+        help: 'The baseline benchmark data to compare this test run to. The '
+            'baseline file should be created by running this script with the '
+            '$_saveToFileOption in a separate test run.',
+        valueHelp: '/Users/me/Downloads/baseline.json',
       );
   }
 }
+// BenchmarkResults _averageBenchmarkResults(List<BenchmarkResults> results) {
+// }
