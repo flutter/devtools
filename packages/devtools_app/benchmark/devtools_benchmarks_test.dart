@@ -30,57 +30,59 @@ final valueList = <String>[
 /// Tests that the DevTools web benchmarks are run and reported correctly.
 void main() {
   test(
-    'Can run a web benchmark',
+    'Can run web benchmarks',
     () async {
-      stdout.writeln('Starting web benchmark tests ...');
+      await _runBenchmarks();
+    },
+    timeout: const Timeout(Duration(minutes: 10)),
+  );
 
-      final taskResult = await serveWebBenchmark(
-        benchmarkAppDirectory: projectRootDirectory(),
-        entryPoint: 'benchmark/test_infra/client.dart',
-        useCanvasKit: true,
-        treeShakeIcons: false,
-        initialPage: benchmarkInitialPage,
-      );
+  // TODO(kenz): add tests that verify performance meets some expected threshold
+}
 
-      stdout.writeln('Web benchmark tests finished.');
+Future<void> _runBenchmarks({bool useWasm = false}) async {
+  stdout.writeln('Starting web benchmark tests ...');
+  final taskResult = await serveWebBenchmark(
+    benchmarkAppDirectory: projectRootDirectory(),
+    entryPoint: 'benchmark/test_infra/client.dart',
+    compilationOptions: CompilationOptions(useWasm: useWasm),
+    treeShakeIcons: false,
+    initialPage: benchmarkInitialPage,
+  );
+  stdout.writeln('Web benchmark tests finished.');
 
-      expect(
-        taskResult.scores.keys,
-        hasLength(DevToolsBenchmark.values.length),
-      );
+  expect(
+    taskResult.scores.keys,
+    hasLength(DevToolsBenchmark.values.length),
+  );
 
-      for (final benchmarkName in DevToolsBenchmark.values.map((e) => e.id)) {
-        expect(
-          taskResult.scores[benchmarkName],
-          hasLength(metricList.length * valueList.length + 1),
-        );
+  for (final benchmarkName in DevToolsBenchmark.values.map((e) => e.id)) {
+    expect(
+      taskResult.scores[benchmarkName],
+      hasLength(metricList.length * valueList.length + 1),
+    );
 
-        for (final metricName in metricList) {
-          for (final valueName in valueList) {
-            expect(
-              taskResult.scores[benchmarkName]?.where(
-                (score) => score.metric == '$metricName.$valueName',
-              ),
-              hasLength(1),
-            );
-          }
-        }
-
+    for (final metricName in metricList) {
+      for (final valueName in valueList) {
         expect(
           taskResult.scores[benchmarkName]?.where(
-            (score) => score.metric == 'totalUiFrame.average',
+            (score) => score.metric == '$metricName.$valueName',
           ),
           hasLength(1),
         );
       }
+    }
 
-      expect(
-        const JsonEncoder.withIndent('  ').convert(taskResult.toJson()),
-        isA<String>(),
-      );
-    },
-    timeout: Timeout.none,
+    expect(
+      taskResult.scores[benchmarkName]?.where(
+        (score) => score.metric == 'totalUiFrame.average',
+      ),
+      hasLength(1),
+    );
+  }
+
+  expect(
+    const JsonEncoder.withIndent('  ').convert(taskResult.toJson()),
+    isA<String>(),
   );
-
-  // TODO(kenz): add tests that verify performance meets some expected threshold
 }

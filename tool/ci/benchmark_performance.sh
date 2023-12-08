@@ -10,5 +10,5 @@ set -ex
 source ./tool/ci/setup.sh
 
 pushd $DEVTOOLS_DIR/packages/devtools_app
-flutter test benchmark/devtools_benchmarks_test.dart
+flutter test -j, --concurrency=1 benchmark/devtools_benchmarks_test.dart
 popd

@@ -20,6 +20,7 @@ All of the commands below should be run from the `packages/devtools_app` directo
 
 To run the performance benchmark tests locally, run:
 ```sh
+dart run benchmark/scripts/run_benchmarks.dart
 dart run benchmark/run_benchmarks.dart
 ```
 
