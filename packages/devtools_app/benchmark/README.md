@@ -23,6 +23,15 @@ To run the performance benchmark tests locally, run:
 dart run benchmark/scripts/run_benchmarks.dart
 ```
 
+Provide arguments to the `run_benchmarks.dart` script in order to:
+* compute the average of multiple benchmark runs
+* compute a delta against a prior benchmark run
+* save the benchmark results to a file
+* run the benchmarks in the browser
+* run the benchmarks with the `dart2wasm` compiler
+
+Run `dart run benchmark/scripts/run_benchmarks.dart -h` to see details.
+
 To run the test that verifies we can run benchmark tests, run:
 ```sh
 flutter test benchmark/devtools_benchmarks_test.dart
@@ -51,14 +60,23 @@ a new one for a new screen. Follow existing examples in that directory for guida
 
 ## Comparing two benchmark test runs
 
-In order to compare two different benchmark runs, you first need to run the benchmark
-tests and save the results to a file:
-```sh
-dart run benchmark/scripts/run_benchmarks.dart --save-to-file=baseline.json
-dart run benchmark/scripts/run_benchmarks.dart --save-to-file=test.json
-```
+There are two ways to calculate the delta between two benchmark test runs:
 
-Then, to compare the benchmarks and calculate deltas, run:
-```sh
-dart run benchmark/scripts/compare_benchmarks.dart baseline_file.json test_file.json
-```
+1. Compare two benchmarks from file:
+    * In order to compare two different benchmark runs, you first need to run the
+      benchmark tests and save the results to a file:
+        ```sh
+        dart run benchmark/scripts/run_benchmarks.dart --save-to-file=/Users/me/baseline.json
+        dart run benchmark/scripts/run_benchmarks.dart --save-to-file=/Users/me/test.json
+        ```
+    * Then, to compare the benchmarks and calculate deltas, run:
+        ```sh
+        dart run benchmark/scripts/compare_benchmarks.dart /Users/me/baseline_file.json /Users/me/test_file.json
+        ```
+
+2. Compare a new benchmark run with a benchmark from file:
+    * pass the baseline benchmark file path to the `--baseline` flag when running the
+      `run_benchmarks.dart` script:
+        ```sh
+        dart run benchmark/scripts/run_benchmarks.dart --baseline=/Users/me/baseline_file.json``
+        ```

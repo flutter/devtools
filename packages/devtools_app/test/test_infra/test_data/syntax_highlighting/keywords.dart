@@ -24,7 +24,7 @@ class B extends A {
   set foo(String value) {}
 
   @override
-  bool operator ==(other) {
+  bool operator ==(Object other) {
     return false;
   }
 }

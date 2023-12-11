@@ -191,8 +191,7 @@ class ThreadNameEvent {
   final int? threadId;
 
   @override
-  // ignore: avoid-dynamic, necessary here.
-  bool operator ==(other) {
+  bool operator ==(Object other) {
     return other is ThreadNameEvent &&
         name == other.name &&
         threadId == other.threadId;
