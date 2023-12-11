@@ -7,10 +7,11 @@ import 'dart:async';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../../devtools_app.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
+import '../../shared/globals.dart';
+import '../../shared/preferences.dart';
 import '../../shared/primitives/blocking_action_mixin.dart';
 import '../../shared/ui/tab.dart';
 import 'inspector_controller.dart';
@@ -46,10 +47,12 @@ class InspectorDetails extends StatelessWidget {
       valueListenable: preferences.inspector.defaultInspectorDetailsView,
       builder: (BuildContext context, value, Widget? child) {
         int defaultInspectorViewIndex = 0;
+
         if (preferences.inspector.defaultInspectorDetailsView.value ==
             InspectorDetailsViewOptions.widgetDetailsView) {
           defaultInspectorViewIndex = 1;
         }
+
         return AnalyticsTabbedView(
           tabs: tabs,
           gaScreen: gac.inspector,
