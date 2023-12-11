@@ -82,6 +82,7 @@ void main() {
           LoggingScreen,
           AppSizeScreen,
           // VMDeveloperToolsScreen,
+          DeepLinksScreen,
         ]),
       );
     });
@@ -103,6 +104,7 @@ void main() {
           LoggingScreen,
           // AppSizeScreen,
           // VMDeveloperToolsScreen,
+          // DeepLinksScreen,
         ]),
       );
     });
@@ -126,6 +128,7 @@ void main() {
             LoggingScreen,
             AppSizeScreen,
             // VMDeveloperToolsScreen,
+            DeepLinksScreen,
           ]),
         );
       },
@@ -150,6 +153,7 @@ void main() {
             LoggingScreen,
             AppSizeScreen,
             // VMDeveloperToolsScreen,
+            DeepLinksScreen,
           ]),
         );
       },
@@ -174,6 +178,7 @@ void main() {
             LoggingScreen,
             // AppSizeScreen,
             // VMDeveloperToolsScreen,
+            // DeepLinksScreen,
           ]),
         );
       },
@@ -208,6 +213,7 @@ void main() {
             LoggingScreen,
             AppSizeScreen,
             // VMDeveloperToolsScreen,
+            DeepLinksScreen,
           ]),
         );
       },
@@ -232,6 +238,7 @@ void main() {
           // LoggingScreen,
           // AppSizeScreen,
           // VMDeveloperToolsScreen,
+          // DeepLinksScreen,
         ]),
       );
       offlineController.exitOfflineMode();
@@ -256,6 +263,7 @@ void main() {
             LoggingScreen,
             AppSizeScreen,
             VMDeveloperToolsScreen,
+            DeepLinksScreen,
           ]),
         );
         preferences.toggleVmDeveloperMode(false);
