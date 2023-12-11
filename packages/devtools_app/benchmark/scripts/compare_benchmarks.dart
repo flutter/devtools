@@ -59,6 +59,6 @@ void compareBenchmarks(
   stdout.writeln('Baseline comparison finished.');
   stdout
     ..writeln('==== Comparison with baseline $baselineSource ====')
-    ..writeln(const JsonEncoder.withIndent('  ').convert(delta))
+    ..writeln(const JsonEncoder.withIndent('  ').convert(delta.toJson()))
     ..writeln('==== End of baseline comparison ====');
 }
