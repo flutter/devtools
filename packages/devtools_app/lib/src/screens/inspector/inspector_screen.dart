@@ -357,7 +357,7 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
               gaItem: gac.inspectorHoverEvalMode,
             ),
             const SizedBox(height: denseSpacing),
-            ...dialogSubHeader(theme, 'Default Inspector Details Tab'),
+            ...dialogSubHeader(theme, 'Default Inspector Details View'),
             const InspectorDetailsOption(),
             const SizedBox(height: denseSpacing),
             ...dialogSubHeader(theme, 'Package Directories'),
