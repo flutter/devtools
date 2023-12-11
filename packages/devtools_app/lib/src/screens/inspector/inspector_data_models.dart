@@ -366,11 +366,11 @@ class FlexLayoutProperties extends LayoutProperties {
   static FlexLayoutProperties _buildNode(RemoteDiagnosticsNode node) {
     final Map<String, Object?> renderObjectJson = node.renderObject!.json;
     final properties = (renderObjectJson['properties'] as List<Object?>)
-        .cast<Map<String, String>>();
+        .cast<Map<String, Object?>>();
 
     final data = {
       for (final property in properties)
-        property['name']: property['description'],
+        property['name']: property['description'] as String?,
     };
 
     return FlexLayoutProperties._fromNode(
