@@ -3,19 +3,19 @@
 // found in the LICENSE file.
 
 mixin CompareMixin<T> implements Comparable<T> {
-  bool operator <(other) {
+  bool operator <(T other) {
     return compareTo(other) < 0;
   }
 
-  bool operator >(other) {
+  bool operator >(T other) {
     return compareTo(other) > 0;
   }
 
-  bool operator <=(other) {
+  bool operator <=(T other) {
     return compareTo(other) <= 0;
   }
 
-  bool operator >=(other) {
+  bool operator >=(T other) {
     return compareTo(other) >= 0;
   }
 }
