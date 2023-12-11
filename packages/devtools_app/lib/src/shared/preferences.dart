@@ -154,6 +154,7 @@ class InspectorPreferencesController extends DisposableController
   static const _customPubRootDirectoriesStoragePrefix =
       'inspector.customPubRootDirectories';
   String? _mainScriptDir;
+  bool _checkedFlutterPubRoot = false;
 
   Future<void> _updateMainScriptRef() async {
     final rootLibUriString =
@@ -280,16 +281,14 @@ class InspectorPreferencesController extends DisposableController
     // See:
     // - https://github.com/flutter/devtools/issues/6882
     // - https://github.com/flutter/devtools/issues/6841
-    if (cachedDirectories.any(_isFlutterPubRoot)) {
-      print('==== REMOVING FLUTTER PUB ROOT');
-      try {
-        final flutterPubRootDirectories =
-            cachedDirectories.where(_isFlutterPubRoot).toList();
-        await removePubRootDirectories(flutterPubRootDirectories);
-        cachedDirectories.removeWhere(_isFlutterPubRoot);
-      } catch (e) {
-        print('=== ERROR REMOVING FLUTTER PUB ROOT: $e');
-      }
+    if (!_checkedFlutterPubRoot && cachedDirectories.any(_isFlutterPubRoot)) {
+      // Set [_checkedFlutterPubRoot] to true to avoid an infinite loop on the
+      // next call to [removePubRootDirectories]:
+      _checkedFlutterPubRoot = true;
+      final flutterPubRootDirectories =
+          cachedDirectories.where(_isFlutterPubRoot).toList();
+      await removePubRootDirectories(flutterPubRootDirectories);
+      cachedDirectories.removeWhere(_isFlutterPubRoot);
     }
 
     return cachedDirectories;
