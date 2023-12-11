@@ -14,6 +14,7 @@ const String devtoolsBenchmarkPrefix = 'devtools';
 
 enum DevToolsBenchmark {
   navigateThroughOfflineScreens,
+  offlineCpuProfilerScreen,
   offlinePerformanceScreen;
 
   String get id => '${devtoolsBenchmarkPrefix}_$name';
