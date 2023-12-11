@@ -143,7 +143,7 @@ void main() {
           ),
         );
 
-        await env.tearDownEnvironment(force: true);
+        await env.tearDownEnvironment();
       },
     );
 
@@ -447,7 +447,7 @@ void main() {
           ),
         );
 
-        await env.tearDownEnvironment(force: true);
+        await env.tearDownEnvironment();
       },
     );
   });
