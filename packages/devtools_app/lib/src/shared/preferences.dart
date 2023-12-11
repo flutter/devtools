@@ -137,9 +137,13 @@ class PreferencesController extends DisposableController
   }
 }
 
+enum InspectorDetailsViewOptions { layoutExplorer, widgetDetailsView }
+
 class InspectorPreferencesController extends DisposableController
     with AutoDisposeControllerMixin {
   ValueListenable<bool> get hoverEvalModeEnabled => _hoverEvalMode;
+  ValueListenable<InspectorDetailsViewOptions>
+      get defaultInspectorDetailsView => _defaultInspectorDetailsView;
   ListValueNotifier<String> get pubRootDirectories => _pubRootDirectories;
   ValueListenable<bool> get isRefreshingPubRootDirectories =>
       _pubRootDirectoriesAreBusy;
@@ -150,7 +154,14 @@ class InspectorPreferencesController extends DisposableController
   final _pubRootDirectories = ListValueNotifier<String>([]);
   final _pubRootDirectoriesAreBusy = ValueNotifier<bool>(false);
   final _busyCounter = ValueNotifier<int>(0);
+  final _defaultInspectorDetailsView =
+      ValueNotifier<InspectorDetailsViewOptions>(
+    InspectorDetailsViewOptions.layoutExplorer,
+  );
+
   static const _hoverEvalModeStorageId = 'inspector.hoverEvalMode';
+  static const _defaultInspectorDetailsViewStorageId =
+      'inspector.detailsViewSelection';
   static const _customPubRootDirectoriesStoragePrefix =
       'inspector.customPubRootDirectories';
   String? _mainScriptDir;
@@ -172,6 +183,7 @@ class InspectorPreferencesController extends DisposableController
     await _initHoverEvalMode();
     // TODO(jacobr): consider initializing this first as it is not blocking.
     _initPubRootDirectories();
+    await _initDefaultInspectorDetailsView();
   }
 
   Future<void> _initHoverEvalMode() async {
@@ -192,6 +204,27 @@ class InspectorPreferencesController extends DisposableController
     hoverEvalModeEnabledValue ??=
         (_inspectorService?.hoverEvalModeEnabledByDefault ?? false).toString();
     setHoverEvalMode(hoverEvalModeEnabledValue == 'true');
+  }
+
+  Future<void> _initDefaultInspectorDetailsView() async {
+    await _updateInspectorDetailsViewSelection();
+
+    addAutoDisposeListener(_defaultInspectorDetailsView, () {
+      storage.setValue(
+        _defaultInspectorDetailsViewStorageId,
+        _defaultInspectorDetailsView.value.toString(),
+      );
+    });
+  }
+
+  Future<void> _updateInspectorDetailsViewSelection() async {
+    final inspectorDetailsView =
+        await storage.getValue(_defaultInspectorDetailsViewStorageId);
+
+    if (inspectorDetailsView != null) {
+      _defaultInspectorDetailsView.value = InspectorDetailsViewOptions.values
+          .firstWhere((e) => e.toString() == inspectorDetailsView);
+    }
   }
 
   void _initPubRootDirectories() {
@@ -250,6 +283,7 @@ class InspectorPreferencesController extends DisposableController
     await _updateMainScriptRef();
     await _updateHoverEvalMode();
     await loadPubRootDirectories();
+    await _updateInspectorDetailsViewSelection();
   }
 
   Future<void> loadPubRootDirectories() async {
@@ -435,6 +469,10 @@ class InspectorPreferencesController extends DisposableController
   /// Change the value for the hover eval mode setting.
   void setHoverEvalMode(bool enableHoverEvalMode) {
     _hoverEvalMode.value = enableHoverEvalMode;
+  }
+
+  void setDefaultInspectorDetailsView(InspectorDetailsViewOptions value) {
+    _defaultInspectorDetailsView.value = value;
   }
 }
 

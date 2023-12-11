@@ -19,6 +19,7 @@ import '../../shared/console/eval/inspector_tree.dart';
 import '../../shared/editable_list.dart';
 import '../../shared/error_badge_manager.dart';
 import '../../shared/globals.dart';
+import '../../shared/preferences.dart';
 import '../../shared/primitives/blocking_action_mixin.dart';
 import '../../shared/primitives/simple_items.dart';
 import '../../shared/screen.dart';
@@ -356,6 +357,9 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
               gaItem: gac.inspectorHoverEvalMode,
             ),
             const SizedBox(height: denseSpacing),
+            ...dialogSubHeader(theme, 'Default Inspector Details Tab'),
+            const InspectorDetailsOption(),
+            const SizedBox(height: denseSpacing),
             ...dialogSubHeader(theme, 'Package Directories'),
             Text(
               'Widgets in these directories will show up in your summary tree.',
@@ -562,6 +566,59 @@ class _ErrorNavigatorButton extends StatelessWidget {
         onPressed: onPressed,
       ),
     );
+  }
+}
+
+class InspectorDetailsOption extends StatelessWidget {
+  const InspectorDetailsOption({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: preferences.inspector.defaultInspectorDetailsView,
+      builder: (context, selection, _) {
+        final theme = Theme.of(context);
+        return Column(
+          children: [
+            Text(
+              'Select the tab which opens by default when opening the inspector.',
+              style: theme.subtleTextStyle,
+            ),
+            const SizedBox(
+              height: denseSpacing,
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Radio<InspectorDetailsViewOptions>(
+                  value: InspectorDetailsViewOptions.layoutExplorer,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  groupValue: selection,
+                  onChanged: _onChanged,
+                ),
+                const Text('Layout Explorer'),
+                const SizedBox(
+                  width: denseSpacing,
+                ),
+                Radio<InspectorDetailsViewOptions>(
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  value: InspectorDetailsViewOptions.widgetDetailsView,
+                  groupValue: selection,
+                  onChanged: _onChanged,
+                ),
+                const Text('Widget Details View'),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _onChanged(InspectorDetailsViewOptions? value) {
+    if (value != null) {
+      preferences.inspector.setDefaultInspectorDetailsView(value);
+    }
   }
 }
 
