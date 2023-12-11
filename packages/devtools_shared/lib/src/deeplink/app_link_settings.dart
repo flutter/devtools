@@ -16,6 +16,7 @@ class AppLinkSettings {
     return AppLinkSettings._(
       jsonObject[_kApplicationIdKey] as String,
       (jsonObject[_kDeeplinksKey] as List<dynamic>)
+          .cast<Map<String, dynamic>>()
           .map<AndroidDeeplink>(AndroidDeeplink._fromJsonObject)
           .toList(),
     );
@@ -43,7 +44,7 @@ class AppLinkSettings {
 class AndroidDeeplink {
   AndroidDeeplink._(this.scheme, this.host, this.path);
 
-  factory AndroidDeeplink._fromJsonObject(dynamic json) {
+  factory AndroidDeeplink._fromJsonObject(Map<String, dynamic> json) {
     return AndroidDeeplink._(
       json[_kSchemeKey] as String,
       json[_kHostKey] as String,
