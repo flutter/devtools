@@ -80,7 +80,7 @@ class IsolateStatisticsViewController extends DisposableController
     for (int i = 0; i < counters.length; ++i) {
       // Ignore tags with empty counts.
       if (counters[i] == 0) continue;
-      percentages[names[i] as String] = counters[i].toDouble();
+      percentages[names[i]] = counters[i].toDouble();
       totalTickCount += counters[i];
     }
     _tags = <VMTag>[

@@ -304,6 +304,25 @@ class OfflinePerformanceData extends PerformanceData {
     final selectedFrame =
         frames.firstWhereOrNull((frame) => frame.id == selectedFrameId);
 
+    final Map<String, dynamic> selectedEventJson =
+        json[PerformanceData.selectedEventKey] ?? {};
+    final firstTraceData =
+        selectedEventJson[TimelineEvent.firstTraceKey] as Map?;
+    final OfflineTimelineEvent? selectedEvent = selectedEventJson.isNotEmpty
+        ? OfflineTimelineEvent((firstTraceData ?? {}).cast<String, Object>())
+        : null;
+
+    final displayRefreshRate =
+        json[PerformanceData.displayRefreshRateKey] as num? ??
+            defaultRefreshRate;
+
+    final Map<String, dynamic> rebuildCountModelJson =
+        json[PerformanceData.rebuildCountModelKey] ?? {};
+    final rebuildCountModel = rebuildCountModelJson.isNotEmpty
+        ? RebuildCountModel.parse(rebuildCountModelJson)
+        : null;
+
+>>>>>>> 3922a9e4b (Cast JSON objects to their expected type.)
     return OfflinePerformanceData._(
       traceEvents: json.traceEvents,
       selectedFrame: selectedFrame,
