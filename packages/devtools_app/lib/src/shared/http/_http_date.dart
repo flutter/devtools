@@ -89,7 +89,7 @@ class HttpDate {
       return int.parse(s.substring(0, index));
     }
 
-    var tokens = [];
+    var tokens = <String>[];
     while (!isEnd()) {
       while (!isEnd() && isDelimiter(date[position])) {
         position++;

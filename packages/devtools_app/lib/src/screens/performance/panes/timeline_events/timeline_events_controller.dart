@@ -8,6 +8,7 @@ import 'package:collection/collection.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../shared/analytics/constants.dart' as gac;
@@ -170,7 +171,7 @@ class TimelineEventsController extends PerformanceFeatureController
     _nextPollStartMicros = currentVmTime.timestamp! + 1;
 
     final newThreadNameEvents = <ThreadNameEvent>[];
-    for (final event in timeline.traceEvents ?? []) {
+    for (final event in timeline.traceEvents ?? <vm_service.TimelineEvent>[]) {
       final traceEvent = TraceEvent(event.json!);
       final eventWrapper = TraceEventWrapper(
         traceEvent,
