@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -74,16 +76,26 @@ void main() {
     });
   });
 
+  // TODO(https://github.com/flutter/devtools/issues/4342): Add more tests.
   group('$InspectorPreferencesController', () {
+    late InspectorPreferencesController controller;
+    late FlutterTestStorage storage;
+
+    void updateMainIsolateRootLibrary(String? rootLibrary) {
+      setGlobal(
+        ServiceConnectionManager,
+        FakeServiceConnectionManager(
+          rootLibrary: rootLibrary,
+        ),
+      );
+    }
+
+    setUp(() {
+      setGlobal(Storage, storage = FlutterTestStorage());
+      controller = InspectorPreferencesController();
+    });
+
     group('hoverEvalMode', () {
-      late InspectorPreferencesController controller;
-      late FlutterTestStorage storage;
-
-      setUp(() {
-        setGlobal(Storage, storage = FlutterTestStorage());
-        controller = InspectorPreferencesController();
-      });
-
       test('default value equals inspector service default value', () async {
         await controller.init();
         expect(
@@ -112,8 +124,180 @@ void main() {
           newHoverModeValue.toString(),
         );
       });
-      // TODO(https://github.com/flutter/devtools/issues/4342): make inspector
-      // preferences testable, then test it
+    });
+
+    group(
+      'infers the pub root directory based on the main isolate\'s root library',
+      () {
+        final rootLibToExpectedPubRoot = {
+          'test_dir/fake_app/lib/main.dart': 'test_dir/fake_app',
+          'my_user/google3/dart_apps/test_app/lib/main.dart': '/dart_apps',
+          'my_user/google3/third_party/dart/dart_apps/test_app/lib/main.dart':
+              '/third_party/dart',
+        };
+
+        for (final MapEntry(
+              key: rootLib,
+              value: expectedPubRoot,
+            ) in rootLibToExpectedPubRoot.entries) {
+          test(
+            '$rootLib -> $expectedPubRoot',
+            () async {
+              updateMainIsolateRootLibrary(rootLib);
+              await controller.handleConnectionToNewService();
+              final directories = controller.pubRootDirectories.value;
+
+              expect(directories, equals([expectedPubRoot]));
+            },
+          );
+        }
+      },
+    );
+
+    group('Caching custom pub root directories', () {
+      final customPubRootDirectories = [
+        'test_dir/fake_app/custom_dir1',
+        'test_dir/fake_app/custom_dir2',
+      ];
+
+      setUp(() async {
+        updateMainIsolateRootLibrary('test_dir/fake_app/lib/main.dart');
+        await controller.handleConnectionToNewService();
+        await controller.addPubRootDirectories(
+          customPubRootDirectories,
+          shouldCache: true,
+        );
+      });
+
+      test(
+        'fetches custom pub root directories from the local cache',
+        () {
+          final directories = controller.pubRootDirectories.value;
+
+          expect(
+            directories,
+            containsAll(customPubRootDirectories),
+          );
+        },
+      );
+
+      test(
+        'custom pub root directories are cached across multiple connections',
+        () async {
+          var directories = controller.pubRootDirectories.value;
+          var cachedDirectories =
+              await controller.readCachedPubRootDirectories();
+
+          expect(
+            directories,
+            containsAll(customPubRootDirectories),
+          );
+          expect(
+            cachedDirectories,
+            containsAll(customPubRootDirectories),
+          );
+
+          await controller.handleConnectionToNewService();
+          directories = controller.pubRootDirectories.value;
+          cachedDirectories = await controller.readCachedPubRootDirectories();
+
+          expect(
+            directories,
+            containsAll(customPubRootDirectories),
+          );
+          expect(cachedDirectories, containsAll(customPubRootDirectories));
+        },
+      );
+
+      test(
+        'adding more directories to cache doesn\'t overwrite pre-existing values',
+        () async {
+          await controller.addPubRootDirectories(
+            ['test_dir/fake_app/custom_dir3'],
+            shouldCache: true,
+          );
+
+          final cachedDirectories =
+              await controller.readCachedPubRootDirectories();
+
+          expect(
+            cachedDirectories,
+            containsAll([
+              ...customPubRootDirectories,
+              'test_dir/fake_app/custom_dir3',
+            ]),
+          );
+        },
+      );
+
+      test(
+        'removing directories from cache removes the correct values',
+        () async {
+          const notRemoved = 'test_dir/fake_app/custom_dir1';
+          const removed = 'test_dir/fake_app/custom_dir2';
+          var cachedDirectories =
+              await controller.readCachedPubRootDirectories();
+
+          expect(cachedDirectories, containsAll([notRemoved, removed]));
+
+          await controller.removePubRootDirectories([removed]);
+          cachedDirectories = await controller.readCachedPubRootDirectories();
+
+          expect(
+            cachedDirectories,
+            isNot(contains(removed)),
+          );
+          expect(
+            cachedDirectories,
+            contains(notRemoved),
+          );
+        },
+      );
+
+      test(
+        'directories includes inferred directory as well',
+        () {
+          final directories = controller.pubRootDirectories.value;
+
+          expect(
+            directories,
+            contains('test_dir/fake_app'),
+          );
+        },
+      );
+
+      test(
+        'does not save inferred directory to local cache',
+        () async {
+          final cachedDirectoriesJson = await storage
+              .getValue('inspector.customPubRootDirectories_myPackage');
+          final cachedDirectories = List<String>.from(
+            jsonDecode(cachedDirectoriesJson!),
+          );
+
+          expect(cachedDirectories, isNot(contains('test_dir/fake_app')));
+        },
+      );
+
+      test(
+        'directories added with "no caching" specified are not cached',
+        () async {
+          await controller.addPubRootDirectories(
+            ['test_dir/fake_app/do_not_cache_dir'],
+          );
+
+          final cachedDirectoriesJson = await storage
+              .getValue('inspector.customPubRootDirectories_myPackage');
+          final cachedDirectories = List<String>.from(
+            jsonDecode(cachedDirectoriesJson!),
+          );
+
+          expect(
+            cachedDirectories,
+            isNot(contains('test_dir/fake_app/do_not_cache_dir')),
+          );
+        },
+      );
     });
   });
 

@@ -17,6 +17,7 @@ import '../../analytics/constants.dart' as gac;
 import '../../globals.dart';
 import '../../ui/search.dart';
 import '../../ui/utils.dart';
+import '../../utils.dart';
 import '../eval/auto_complete.dart';
 import '../eval/eval_service.dart';
 import '../primitives/assignment.dart';
@@ -174,7 +175,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
 
       if (matches.length == 1 && matches.first == parts.activeWord) {
         // It is not useful to show a single autocomplete that is exactly what
-        // the already typed.
+        // they already typed.
         _autoCompleteController
           ..clearSearchAutoComplete()
           ..clearCurrentSuggestion();
@@ -205,14 +206,15 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
         const SizedBox(width: 8.0),
         Expanded(
           child: Focus(
-            onKey: (_, RawKeyEvent event) {
-              if (event.isKeyPressed(LogicalKeyboardKey.arrowUp)) {
+            onKeyEvent: (_, event) {
+              if (!event.isKeyDownOrRepeat) return KeyEventResult.ignored;
+              if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
                 _historyNavUp();
                 return KeyEventResult.handled;
-              } else if (event.isKeyPressed(LogicalKeyboardKey.arrowDown)) {
+              } else if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
                 _historyNavDown();
                 return KeyEventResult.handled;
-              } else if (event.isKeyPressed(LogicalKeyboardKey.enter)) {
+              } else if (event.logicalKey == LogicalKeyboardKey.enter) {
                 _handleExpressionEval(context);
                 return KeyEventResult.handled;
               }

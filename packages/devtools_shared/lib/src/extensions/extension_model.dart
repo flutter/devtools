@@ -165,7 +165,7 @@ class DevToolsExtensionConfig implements Comparable {
   }
 
   @override
-  bool operator ==(Object? other) {
+  bool operator ==(Object other) {
     return other is DevToolsExtensionConfig &&
         other.name == name &&
         other.path == path &&

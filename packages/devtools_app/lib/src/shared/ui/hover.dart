@@ -431,6 +431,7 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
         // ignore: use_build_context_synchronously, requires investigation
         return _setHoverCardFromData(
           data,
+          // ignore: use_build_context_synchronously, requires investigation
           context: context,
           event: event,
         );
@@ -440,6 +441,7 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
     // while we wait for it.
     // ignore: use_build_context_synchronously, requires investigation
     spinnerHoverCard = HoverCard.fromHoverEvent(
+      // ignore: use_build_context_synchronously, requires investigation
       context: context,
       contents: const CenteredCircularProgressIndicator(),
       width: HoverCardTooltip.defaultHoverWidth,
@@ -468,6 +470,7 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
     // ignore: use_build_context_synchronously, requires investigation
     return _setHoverCardFromData(
       hoverCardData,
+      // ignore: use_build_context_synchronously, requires investigation
       context: context,
       event: event,
     );

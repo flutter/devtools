@@ -85,12 +85,14 @@ class _LogDetailsState extends State<LogDetails>
         title: _LogDetailsHeader(log: log),
         child: Padding(
           padding: const EdgeInsets.all(denseSpacing),
-          child: SingleChildScrollView(
-            controller: scrollController,
-            child: SelectableText(
-              log?.prettyPrinted() ?? '',
-              textAlign: TextAlign.left,
-              style: theme.fixedFontStyle,
+          child: Scrollbar(
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: SelectableText(
+                log?.prettyPrinted() ?? '',
+                textAlign: TextAlign.left,
+                style: theme.fixedFontStyle,
+              ),
             ),
           ),
         ),

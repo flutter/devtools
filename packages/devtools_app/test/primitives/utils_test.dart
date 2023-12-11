@@ -1458,7 +1458,7 @@ class _SubtractionResult {
   final double? from;
 
   @override
-  bool operator ==(Object? other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }

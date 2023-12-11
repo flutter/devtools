@@ -59,7 +59,7 @@ void main() {
         );
 
         // Record three snapshots.
-        for (var i in Iterable.generate(3)) {
+        for (var i in Iterable<int>.generate(3)) {
           await tester.tap(find.byIcon(Icons.fiber_manual_record).first);
           await tester.pumpAndSettle();
           expect(find.text('selected-isolate-${i + 1}'), findsOneWidget);

@@ -28,11 +28,6 @@ class FakeInspectorService extends Fake implements InspectorService {
   }
 
   @override
-  Future<List<String>> inferPubRootDirectoryIfNeeded() async {
-    return ['/some/directory'];
-  }
-
-  @override
   Future<List<String>?> getPubRootDirectories() {
     return Future.value(pubRootDirectories.toList());
   }
@@ -111,8 +106,8 @@ void mockWebVm(VM vm) {
 void mockConnectedApp(
   ConnectedApp connectedApp, {
   required bool isFlutterApp,
-  required isProfileBuild,
-  required isWebApp,
+  required bool isProfileBuild,
+  required bool isWebApp,
   String os = 'ios',
 }) {
   assert(!(!isFlutterApp && isProfileBuild));

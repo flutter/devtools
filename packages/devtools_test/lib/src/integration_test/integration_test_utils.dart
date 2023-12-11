@@ -13,7 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
 import '../helpers/utils.dart';
-import 'test_data/performance.dart';
+import '../test_data/sample_data.dart';
 
 /// Required to have multiple test cases in a file.
 Future<void> resetHistory() async {
@@ -75,7 +75,7 @@ Future<void> pumpDevTools(WidgetTester tester) async {
     integrationTestMode: true,
     // ignore: avoid_redundant_argument_values, by design
     shouldEnableExperiments: shouldEnableExperiments,
-    sampleData: _sampleData,
+    sampleData: sampleData,
   );
 
   // Await a delay to ensure the widget tree has loaded.
@@ -149,22 +149,3 @@ Future<void> verifyScreenshot(
     },
   );
 }
-
-Future<void> loadSampleData(WidgetTester tester, String fileName) async {
-  await tester.tap(find.byType(DropdownButton<DevToolsJsonFile>));
-  await tester.pumpAndSettle();
-  await tester.tap(find.text(fileName).last);
-  await tester.pump(safePumpDuration);
-  await tester.tap(find.text('Load sample data'));
-  await tester.pump(longPumpDuration);
-}
-
-const performanceFileName = 'performance_data.json';
-
-final _sampleData = <DevToolsJsonFile>[
-  DevToolsJsonFile(
-    name: performanceFileName,
-    lastModifiedTime: DateTime.now(),
-    data: jsonDecode(jsonEncode(samplePerformanceData)),
-  ),
-];

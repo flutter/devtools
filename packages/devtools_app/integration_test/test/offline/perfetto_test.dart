@@ -6,6 +6,7 @@ import 'package:devtools_app/src/screens/performance/panes/flutter_frames/flutte
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/perfetto/_perfetto_web.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:devtools_test/integration_test.dart';
+import 'package:devtools_test/test_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';

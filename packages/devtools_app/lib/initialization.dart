@@ -49,7 +49,6 @@ void runDevTools({
         child: DevToolsApp(
           screens ?? defaultScreens(sampleData: sampleData),
           await analyticsController,
-          sampleData: sampleData,
         ),
       ),
     );
