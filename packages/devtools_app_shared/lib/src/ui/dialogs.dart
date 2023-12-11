@@ -231,7 +231,7 @@ final class DialogCancelButton extends StatelessWidget {
 final class DialogApplyButton extends StatelessWidget {
   const DialogApplyButton({super.key, required this.onPressed});
 
-  final Function onPressed;
+  final void Function() onPressed;
 
   @override
   Widget build(BuildContext context) {
