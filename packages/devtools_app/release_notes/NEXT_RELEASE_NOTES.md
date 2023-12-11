@@ -10,7 +10,7 @@ To learn more about DevTools, check out the
 
 ## General updates
 
-TODO: Remove this section if there are not any general updates.
+* Added a new feature for deep link validation, supporting deep link web checks on Android. - [#6935](https://github.com/flutter/devtools/pull/6935)
 
 ## Inspector updates
 
