@@ -9,7 +9,7 @@ import 'package:http/http.dart' as http;
 
 import 'deep_links_model.dart';
 
-const String _apiKey = 'AIzaSyDVE6FP3GpwxgS4q8rbS7qaf6cAbxc_elc';
+const String _apiKey = 'AIzaSyCf_2E9N2AUZR-YSnZTQ72YbCNhKIskIsw';
 const String _assetLinksGenerationURL =
     'https://deeplinkassistant-pa.googleapis.com/android/generation/v1/assetlinks:generate?key=$_apiKey';
 const String _androidDomainValidationURL =
