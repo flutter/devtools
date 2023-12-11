@@ -103,6 +103,9 @@ void main() {
           await tester.enterText(objects.textField, 'someValue.');
           await tester.pumpAndSettle();
           await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+
+          expect(objects.searchTextEditingController.suggestionText, 'bar');
+
           await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
 
           expect(objects.searchTextEditingController.text, 'someValue.');
