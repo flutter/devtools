@@ -45,8 +45,9 @@ class VmServiceTrafficLogger {
 
     String? details = m['method'];
     if (details == null) {
-      if (m['result'] != null) {
-        details = m['result']['type'];
+      final Map? result = m['result'];
+      if (result != null) {
+        details = result['type'];
       } else {
         final Map? error = m['error'];
         details = error == null ? '' : '$error';
@@ -63,8 +64,9 @@ class VmServiceTrafficLogger {
       final Map p = m['params'];
       streamId = p['streamId'];
 
-      if (p['event'] != null) {
-        kind = p['event']['extensionKind'] ?? p['event']['kind'];
+      final Map? event = m['event'];
+      if (event != null) {
+        kind = event['extensionKind'] ?? event['kind'];
       }
     }
 
