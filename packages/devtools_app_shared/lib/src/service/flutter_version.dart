@@ -58,8 +58,7 @@ final class FlutterVersion extends SemanticVersion {
   final SemanticVersion? dartSdkVersion;
 
   @override
-  // ignore: avoid-dynamic, necessary here.
-  bool operator ==(other) {
+  bool operator ==(Object other) {
     if (other is! FlutterVersion) return false;
     return version == other.version &&
         channel == other.channel &&
