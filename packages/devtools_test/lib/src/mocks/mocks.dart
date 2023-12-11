@@ -106,8 +106,8 @@ void mockWebVm(VM vm) {
 void mockConnectedApp(
   ConnectedApp connectedApp, {
   required bool isFlutterApp,
-  required isProfileBuild,
-  required isWebApp,
+  required bool isProfileBuild,
+  required bool isWebApp,
   String os = 'ios',
 }) {
   assert(!(!isFlutterApp && isProfileBuild));
