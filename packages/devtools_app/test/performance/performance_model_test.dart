@@ -217,7 +217,7 @@ void main() {
 
       final expectedFirstTraceJson = Map.of(vsyncEvent.beginTraceEventJson);
       (expectedFirstTraceJson[TraceEvent.argsKey] as Map)
-          .addAll({TraceEvent.typeKey: TimelineEventType.ui});
+          .addAll(<String, dynamic>{TraceEvent.typeKey: TimelineEventType.ui});
       expectedFirstTraceJson.addAll(
         {TraceEvent.durationKey: vsyncEvent.time.duration.inMicroseconds},
       );
