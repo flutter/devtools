@@ -281,9 +281,9 @@ class InspectorPreferencesController extends DisposableController
     // - https://github.com/flutter/devtools/issues/6882
     // - https://github.com/flutter/devtools/issues/6841
     if (cachedDirectories.any(_isFlutterPubRoot)) {
-      final flutterPubRootDirectories =
-          cachedDirectories.where(_isFlutterPubRoot).toList();
-      await removePubRootDirectories(flutterPubRootDirectories);
+      // final flutterPubRootDirectories =
+      //     cachedDirectories.where(_isFlutterPubRoot).toList();
+      // await removePubRootDirectories(flutterPubRootDirectories);
       cachedDirectories.removeWhere(_isFlutterPubRoot);
     }
 
