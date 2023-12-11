@@ -37,8 +37,10 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
       }
     }
 
-    for (final flag in flags ?? []) {
-      unawaited(setFlag(flag.flagName, flag.value));
+    if (flags != null) {
+      for (final flag in flags) {
+        unawaited(setFlag(flag.flagName, flag.value));
+      }
     }
   }
 
