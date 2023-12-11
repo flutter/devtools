@@ -56,7 +56,7 @@ enum ScrollKind {
 ///
 /// This table will automatically refresh search matches on the
 /// [searchController] after sort operations that are triggered from the table.
-class SearchableFlatTable<T extends SearchableDataMixin> extends FlatTable {
+class SearchableFlatTable<T extends SearchableDataMixin> extends FlatTable<T> {
   SearchableFlatTable({
     super.key,
     required SearchControllerMixin<T> searchController,
