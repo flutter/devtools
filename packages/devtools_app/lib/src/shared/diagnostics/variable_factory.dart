@@ -334,7 +334,7 @@ List<DartObjectNode> createVariablesForMap(
   IsolateRef? isolateRef,
 ) {
   final variables = <DartObjectNode>[];
-  final associations = instance.associations ?? [];
+  final associations = instance.associations ?? <MapAssociation>[];
 
   // If the key type for the provided associations is not primitive, we want to
   // allow for users to drill down into the key object's properties. If we're
