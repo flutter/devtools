@@ -156,7 +156,7 @@ class FakeServiceManager extends Fake
 
   final List<String> availableLibraries;
 
-  final Function? onVmServiceOpened;
+  final void Function()? onVmServiceOpened;
 
   final Map<String, Response> serviceExtensionResponses;
 

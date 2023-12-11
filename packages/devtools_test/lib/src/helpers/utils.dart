@@ -37,8 +37,8 @@ final screenIds = <String>[
 /// Tests that `listener` has actually been invoked.
 Future<void> addListenerScope({
   required Listenable listenable,
-  required Function listener,
-  required Function callback,
+  required void Function() listener,
+  required Future<void> Function() callback,
 }) async {
   bool listenerCalled = false;
   void listenerWrapped() {
