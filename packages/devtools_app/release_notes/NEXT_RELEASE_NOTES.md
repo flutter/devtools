@@ -44,7 +44,7 @@ TODO: Remove this section if there are not any general updates.
 
 ## Logging updates
 
-TODO: Remove this section if there are not any general updates.
+* Added scrollbar to details pane. - [#6917](https://github.com/flutter/devtools/pull/6917)
 
 ## App size tool updates
 
