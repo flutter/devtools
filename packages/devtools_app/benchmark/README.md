@@ -29,6 +29,7 @@ Provide arguments to the `run_benchmarks.dart` script in order to:
 * save the benchmark results to a file
 * run the benchmarks in the browser
 * run the benchmarks with the `dart2wasm` compiler
+* run the benchmarks with the `skwasm` web renderer
 
 Run `dart run benchmark/scripts/run_benchmarks.dart -h` to see details.
 

@@ -30,7 +30,12 @@ Future<void> main(List<String> args) async {
       await serveWebBenchmark(
         benchmarkAppDirectory: projectRootDirectory(),
         entryPoint: 'benchmark/test_infra/client.dart',
-        compilationOptions: CompilationOptions(useWasm: benchmarkArgs.useWasm),
+        compilationOptions: CompilationOptions(
+          useWasm: benchmarkArgs.useWasm,
+          renderer: benchmarkArgs.useSkwasm
+              ? WebRenderer.skwasm
+              : WebRenderer.canvaskit,
+        ),
         treeShakeIcons: false,
         initialPage: benchmarkInitialPage,
         headless: !benchmarkArgs.useBrowser,
@@ -99,6 +104,8 @@ class BenchmarkArgs {
 
   bool get useWasm => argResults[_wasmFlag];
 
+  bool get useSkwasm => argResults[_skwasmFlag];
+
   int get averageOf => int.parse(argResults[_averageOfOption]);
 
   String? get saveToFileLocation => argResults[_saveToFileOption];
@@ -108,6 +115,8 @@ class BenchmarkArgs {
   static const _browserFlag = 'browser';
 
   static const _wasmFlag = 'wasm';
+
+  static const _skwasmFlag = 'skwasm';
 
   static const _saveToFileOption = 'save-to-file';
 
@@ -127,6 +136,12 @@ class BenchmarkArgs {
         _wasmFlag,
         negatable: false,
         help: 'Runs the benchmark tests with dart2wasm',
+      )
+      ..addFlag(
+        _skwasmFlag,
+        negatable: false,
+        help:
+            'Runs the benchmark tests with the skwasm renderer instead of canvaskit.',
       )
       ..addOption(
         _saveToFileOption,
