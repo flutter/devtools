@@ -13,25 +13,41 @@ class NetworkService {
 
   final NetworkController networkController;
 
-  /// Updates the last refresh time to the current time.
+  /// Updates the last Socket data refresh time to the current time.
   ///
   /// If [alreadyRecordingHttp] is true it's unclear when the last refresh time
   /// would have occurred, so the refresh time is not updated. Otherwise,
-  /// [NetworkController.lastRefreshMicros] is updated to the current
+  /// [NetworkController.lastSocketDataRefreshMicros] is updated to the current
   /// timeline timestamp.
   ///
-  /// Returns the current timestamp.
-  Future<int> updateLastRefreshTime({bool alreadyRecordingHttp = false}) async {
+  /// Returns the current timeline timestamp.
+  Future<int> updateLastSocketDataRefreshTime({
+    bool alreadyRecordingHttp = false,
+  }) async {
     // Set the current timeline time as the time of the last refresh.
     final timestampObj =
         await serviceConnection.serviceManager.service!.getVMTimelineMicros();
 
     final timestamp = timestampObj.timestamp!;
     if (!alreadyRecordingHttp) {
-      // Only include HTTP requests issued after the current time.
-      networkController.lastRefreshMicros = timestamp;
+      // Only include Socket requests issued after the current time.
+      networkController.lastSocketDataRefreshMicros = timestamp;
     }
     return timestamp;
+  }
+
+  /// Updates the last HTTP data refresh time to the current time.
+  ///
+  /// If [alreadyRecordingHttp] is true it's unclear when the last refresh time
+  /// would have occurred, so the refresh time is not updated. Otherwise,
+  /// [NetworkController.lastHttpDataRefreshTime] is updated to the current
+  /// time.
+  Future<void> updateLastHttpDataRefreshTime({
+    bool alreadyRecordingHttp = false,
+  }) async {
+    if (!alreadyRecordingHttp) {
+      networkController.lastHttpDataRefreshTime = DateTime.now();
+    }
   }
 
   /// Force refreshes the HTTP requests logged to the timeline as well as any
@@ -41,10 +57,11 @@ class NetworkService {
     final timestampObj =
         await serviceConnection.serviceManager.service!.getVMTimelineMicros();
     final timestamp = timestampObj.timestamp!;
-    final sockets = await _refreshSockets(timestamp);
+    final sockets = await _refreshSockets();
+    networkController.lastSocketDataRefreshMicros = timestamp;
     List<HttpProfileRequest>? httpRequests;
     httpRequests = await _refreshHttpProfile();
-    networkController.lastRefreshMicros = timestamp;
+    networkController.lastHttpDataRefreshTime = DateTime.now();
     networkController.processNetworkTraffic(
       sockets: sockets,
       httpRequests: httpRequests,
@@ -59,7 +76,7 @@ class NetworkService {
     await service.forEachIsolate((isolate) async {
       final request = await service.getHttpProfileWrapper(
         isolate.id!,
-        updatedSince: networkController.lastRefreshMicros,
+        updatedSince: networkController.lastHttpDataRefreshTime,
       );
       requests.addAll(request.requests);
     });
@@ -80,7 +97,7 @@ class NetworkService {
     });
   }
 
-  Future<List<SocketStatistic>> _refreshSockets(int lastRefreshMicros) async {
+  Future<List<SocketStatistic>> _refreshSockets() async {
     final service = serviceConnection.serviceManager.service;
     if (service == null) return [];
     final sockets = <SocketStatistic>[];
@@ -94,10 +111,14 @@ class NetworkService {
     return sockets
         .where(
           (element) =>
-              element.startTime > lastRefreshMicros ||
-              (element.endTime ?? 0) > lastRefreshMicros ||
-              (element.lastReadTime ?? 0) > lastRefreshMicros ||
-              (element.lastWriteTime ?? 0) > lastRefreshMicros,
+              element.startTime >
+                  networkController.lastSocketDataRefreshMicros ||
+              (element.endTime ?? 0) >
+                  networkController.lastSocketDataRefreshMicros ||
+              (element.lastReadTime ?? 0) >
+                  networkController.lastSocketDataRefreshMicros ||
+              (element.lastWriteTime ?? 0) >
+                  networkController.lastSocketDataRefreshMicros,
         )
         .toList();
   }
@@ -142,7 +163,8 @@ class NetworkService {
   }
 
   Future<void> clearData() async {
-    await updateLastRefreshTime();
+    await updateLastSocketDataRefreshTime();
+    await updateLastHttpDataRefreshTime();
     await _clearSocketProfile();
     await _clearHttpProfile();
   }

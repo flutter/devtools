@@ -114,8 +114,12 @@ class NetworkController extends DisposableController
   /// timeline events.
   late int _timelineMicrosOffset;
 
-  /// The last timestamp at which HTTP and Socket information was refreshed.
-  int lastRefreshMicros = 0;
+  /// The last time at which HTTP information was refreshed.
+  DateTime lastHttpDataRefreshTime = DateTime.fromMicrosecondsSinceEpoch(0);
+
+  /// The last timestamp at which Socket information was refreshed. This
+  /// timestamp is on the monotonic clock used by the timeline.
+  int lastSocketDataRefreshMicros = 0;
 
   Timer? _pollingTimer;
 
@@ -123,13 +127,10 @@ class NetworkController extends DisposableController
   bool get isPolling => _pollingTimer != null;
 
   void _processHttpProfileRequests({
-    required int timelineMicrosOffset,
     required List<HttpProfileRequest> newOrUpdatedHttpRequests,
     required CurrentNetworkRequests currentRequests,
   }) {
-    for (final request in newOrUpdatedHttpRequests) {
-      currentRequests.updateOrAdd(request, timelineMicrosOffset);
-    }
+    newOrUpdatedHttpRequests.forEach(currentRequests.updateOrAdd);
   }
 
   @visibleForTesting
@@ -150,7 +151,6 @@ class NetworkController extends DisposableController
     }
 
     _processHttpProfileRequests(
-      timelineMicrosOffset: timelineMicrosOffset,
       newOrUpdatedHttpRequests: httpRequests!,
       currentRequests: currentRequests,
     );
@@ -204,7 +204,10 @@ class NetworkController extends DisposableController
     // Cancel existing polling timer before starting recording.
     _updatePollingState(false);
 
-    final timestamp = await _networkService.updateLastRefreshTime(
+    await _networkService.updateLastHttpDataRefreshTime(
+      alreadyRecordingHttp: alreadyRecordingHttp,
+    );
+    final timestamp = await _networkService.updateLastSocketDataRefreshTime(
       alreadyRecordingHttp: alreadyRecordingHttp,
     );
 
@@ -356,10 +359,8 @@ class CurrentNetworkRequests {
   ///
   void updateOrAdd(
     HttpProfileRequest request,
-    int timelineMicrosOffset,
   ) {
     final wrapped = DartIOHttpRequestData(
-      timelineMicrosOffset,
       request,
       requestFullDataFromVmService: false,
     );
