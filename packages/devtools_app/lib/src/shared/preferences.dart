@@ -248,6 +248,7 @@ class InspectorPreferencesController extends DisposableController
 
   @visibleForTesting
   Future<void> handleConnectionToNewService() async {
+    _checkedFlutterPubRoot = false;
     await _updateMainScriptRef();
     await _updateHoverEvalMode();
     await loadPubRootDirectories();
