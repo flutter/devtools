@@ -6,10 +6,10 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/shared/config_specific/framework_initialize/_framework_initialize_desktop.dart';
 import 'package:devtools_app/src/shared/primitives/message_bus.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
-import '../test_infra/flutter_test_storage.dart';
 
 import 'flutter_test_driver.dart';
 
@@ -127,7 +127,7 @@ class FlutterTestEnvironment {
           ExternalDevToolsEnvironmentParameters(),
         );
         setGlobal(IdeTheme, IdeTheme());
-        setGlobal(Storage, FlutterTestStorage());
+        setGlobal(Storage, FlutterDesktopStorage());
         setGlobal(ServiceConnectionManager, ServiceConnectionManager());
         setGlobal(OfflineModeController, OfflineModeController());
         setGlobal(NotificationService, NotificationService());
