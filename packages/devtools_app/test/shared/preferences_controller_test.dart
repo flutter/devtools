@@ -270,11 +270,8 @@ void main() {
       test(
         'does not save inferred directory to local cache',
         () async {
-          final cachedDirectoriesJson = await storage
-              .getValue('inspector.customPubRootDirectories_myPackage');
-          final cachedDirectories = List<String>.from(
-            jsonDecode(cachedDirectoriesJson!),
-          );
+          final cachedDirectories =
+              await controller.readCachedPubRootDirectories();
 
           expect(cachedDirectories, isNot(contains('test_dir/fake_app')));
         },
@@ -286,12 +283,8 @@ void main() {
           await controller.addPubRootDirectories(
             ['test_dir/fake_app/do_not_cache_dir'],
           );
-
-          final cachedDirectoriesJson = await storage
-              .getValue('inspector.customPubRootDirectories_myPackage');
-          final cachedDirectories = List<String>.from(
-            jsonDecode(cachedDirectoriesJson!),
-          );
+          final cachedDirectories =
+              await controller.readCachedPubRootDirectories();
 
           expect(
             cachedDirectories,
@@ -300,6 +293,78 @@ void main() {
         },
       );
     });
+
+    test('Flutter pub root is removed from cache on app connection', () async {
+      updateMainIsolateRootLibrary('test_dir/fake_app/lib/main.dart');
+      await storage.setValue(
+        'inspector.customPubRootDirectories_myPackage',
+        jsonEncode(
+          [
+            'flutter_dir/flutter/packages/flutter',
+            'test_dir/fake_app/custom_dir1',
+          ],
+        ),
+      );
+      await controller.handleConnectionToNewService();
+      final cachedDirectories = await controller.readCachedPubRootDirectories();
+
+      expect(
+        cachedDirectories,
+        isNot(contains('flutter_dir/flutter/packages/flutter')),
+      );
+      expect(
+        cachedDirectories,
+        contains('test_dir/fake_app/custom_dir1'),
+      );
+    });
+
+    test(
+      'Flutter pub root is removed from cache across multiple app connections',
+      () async {
+        updateMainIsolateRootLibrary('test_dir/fake_app/lib/main.dart');
+        await storage.setValue(
+          'inspector.customPubRootDirectories_myPackage',
+          jsonEncode(
+            [
+              'flutter_dir/flutter/packages/flutter',
+              'test_dir/fake_app/custom_dir1',
+            ],
+          ),
+        );
+        await controller.handleConnectionToNewService();
+        var cachedDirectories = await controller.readCachedPubRootDirectories();
+
+        expect(
+          cachedDirectories,
+          isNot(contains('flutter_dir/flutter/packages/flutter')),
+        );
+        expect(
+          cachedDirectories,
+          contains('test_dir/fake_app/custom_dir1'),
+        );
+
+        await storage.setValue(
+          'inspector.customPubRootDirectories_myPackage',
+          jsonEncode(
+            [
+              'flutter_dir/flutter/packages/flutter',
+              'test_dir/fake_app/custom_dir2',
+            ],
+          ),
+        );
+        await controller.handleConnectionToNewService();
+        cachedDirectories = await controller.readCachedPubRootDirectories();
+
+        expect(
+          cachedDirectories,
+          isNot(contains('flutter_dir/flutter/packages/flutter')),
+        );
+        expect(
+          cachedDirectories,
+          contains('test_dir/fake_app/custom_dir2'),
+        );
+      },
+    );
   });
 
   group('$MemoryPreferencesController', () {

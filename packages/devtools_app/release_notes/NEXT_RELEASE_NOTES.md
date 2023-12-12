@@ -15,6 +15,7 @@ TODO: Remove this section if there are not any general updates.
 ## Inspector updates
 
 * Only cache pub root directories added by the user - [6897](https://github.com/flutter/devtools/pull/6897)
+* Remove Flutter pub root if it was accidently cached - [6911](https://github.com/flutter/devtools/pull/6911)
 
 ## Performance updates
 

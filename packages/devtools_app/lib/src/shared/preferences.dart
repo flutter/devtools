@@ -159,6 +159,7 @@ class InspectorPreferencesController extends DisposableController
   static const _customPubRootDirectoriesStoragePrefix =
       'inspector.customPubRootDirectories';
   String? _mainScriptDir;
+  bool _checkedFlutterPubRoot = false;
 
   Future<void> _updateMainScriptRef() async {
     final rootLibUriString =
@@ -252,6 +253,7 @@ class InspectorPreferencesController extends DisposableController
 
   @visibleForTesting
   Future<void> handleConnectionToNewService() async {
+    _checkedFlutterPubRoot = false;
     await _updateMainScriptRef();
     await _updateHoverEvalMode();
     await loadPubRootDirectories();
@@ -277,11 +279,29 @@ class InspectorPreferencesController extends DisposableController
     final cachedDirectoriesJson =
         await storage.getValue(_customPubRootStorageId());
     if (cachedDirectoriesJson == null) return <String>[];
-
-    return List<String>.from(
+    final cachedDirectories = List<String>.from(
       jsonDecode(cachedDirectoriesJson),
     );
+
+    // Remove the Flutter pub root directory if it was accidentally cached.
+    // See:
+    // - https://github.com/flutter/devtools/issues/6882
+    // - https://github.com/flutter/devtools/issues/6841
+    if (!_checkedFlutterPubRoot && cachedDirectories.any(_isFlutterPubRoot)) {
+      // Set [_checkedFlutterPubRoot] to true to avoid an infinite loop on the
+      // next call to [removePubRootDirectories]:
+      _checkedFlutterPubRoot = true;
+      final flutterPubRootDirectories =
+          cachedDirectories.where(_isFlutterPubRoot).toList();
+      await removePubRootDirectories(flutterPubRootDirectories);
+      cachedDirectories.removeWhere(_isFlutterPubRoot);
+    }
+
+    return cachedDirectories;
   }
+
+  bool _isFlutterPubRoot(String directory) =>
+      directory.endsWith('packages/flutter');
 
   /// As we aren't running from an IDE, we don't know exactly what the pub root
   /// directories are for the current project so we make a best guess based on
