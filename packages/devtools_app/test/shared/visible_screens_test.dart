@@ -81,8 +81,8 @@ void main() {
           NetworkScreen,
           LoggingScreen,
           AppSizeScreen,
-          // VMDeveloperToolsScreen,
           DeepLinksScreen,
+          // VMDeveloperToolsScreen,
         ]),
       );
     });
@@ -103,8 +103,8 @@ void main() {
           // NetworkScreen,
           LoggingScreen,
           // AppSizeScreen,
-          // VMDeveloperToolsScreen,
           // DeepLinksScreen,
+          // VMDeveloperToolsScreen,
         ]),
       );
     });
@@ -127,8 +127,8 @@ void main() {
             NetworkScreen,
             LoggingScreen,
             AppSizeScreen,
-            // VMDeveloperToolsScreen,
             DeepLinksScreen,
+            // VMDeveloperToolsScreen,
           ]),
         );
       },
@@ -152,8 +152,8 @@ void main() {
             NetworkScreen,
             LoggingScreen,
             AppSizeScreen,
-            // VMDeveloperToolsScreen,
             DeepLinksScreen,
+            // VMDeveloperToolsScreen,
           ]),
         );
       },
@@ -177,8 +177,8 @@ void main() {
             // NetworkScreen,
             LoggingScreen,
             // AppSizeScreen,
-            // VMDeveloperToolsScreen,
             // DeepLinksScreen,
+            // VMDeveloperToolsScreen,
           ]),
         );
       },
@@ -212,8 +212,8 @@ void main() {
             NetworkScreen,
             LoggingScreen,
             AppSizeScreen,
-            // VMDeveloperToolsScreen,
             DeepLinksScreen,
+            // VMDeveloperToolsScreen,
           ]),
         );
       },
@@ -237,8 +237,8 @@ void main() {
           // NetworkScreen,
           // LoggingScreen,
           // AppSizeScreen,
-          // VMDeveloperToolsScreen,
           // DeepLinksScreen,
+          // VMDeveloperToolsScreen,
         ]),
       );
       offlineController.exitOfflineMode();
@@ -262,8 +262,8 @@ void main() {
             NetworkScreen,
             LoggingScreen,
             AppSizeScreen,
-            VMDeveloperToolsScreen,
             DeepLinksScreen,
+            VMDeveloperToolsScreen,
           ]),
         );
         preferences.toggleVmDeveloperMode(false);
