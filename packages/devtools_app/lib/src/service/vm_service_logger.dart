@@ -45,11 +45,11 @@ class VmServiceTrafficLogger {
 
     String? details = m['method'];
     if (details == null) {
-      final Map? result = m['result'];
+      final Map<String, dynamic>? result = m['result'];
       if (result != null) {
         details = result['type'];
       } else {
-        final Map? error = m['error'];
+        final Map<String, dynamic>? error = m['error'];
         details = error == null ? '' : '$error';
       }
     } else if (details == 'streamNotify') {
