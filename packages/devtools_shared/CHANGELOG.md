@@ -1,3 +1,6 @@
+# 6.0.3
+* Fix an issue parsing file paths on Mac that could prevent extensions from being detected.
+
 # 6.0.2
 * Fix an issue parsing file paths on Windows that could prevent extensions from being detected.
 
