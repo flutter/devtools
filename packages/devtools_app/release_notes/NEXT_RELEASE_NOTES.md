@@ -18,6 +18,7 @@ To learn more about DevTools, check out the
 * Fix bug where widgets owned by the Flutter framework were showing up in the widget tree view -
 [6857](https://github.com/flutter/devtools/pull/6857)
 * Only cache pub root directories added by the user - [6897](https://github.com/flutter/devtools/pull/6897)
+* Remove Flutter pub root if it was accidently cached - [6911](https://github.com/flutter/devtools/pull/6911)
 
 ## Performance updates
 
