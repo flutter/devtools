@@ -34,7 +34,9 @@ jobs:
       - name: Get Latest Flutter Candidate
         id: flutter-candidate
         run: |
-          LATEST_FLUTTER_CANDIDATE=$(./tool/latest_flutter_candidate.sh)
+          LATEST_FLUTTER_CANDIDATE="3.18.0-6.0.pre"
+          # TODO(https://github.com/flutter/devtools/issues/6963): re-enable.
+          # LATEST_FLUTTER_CANDIDATE=$(./tool/latest_flutter_candidate.sh)
           echo "FLUTTER_CANDIDATE=$LATEST_FLUTTER_CANDIDATE" >> $GITHUB_OUTPUT
 
       - name: Load Cached Flutter SDK
@@ -66,8 +68,8 @@ jobs:
         env:
           LATEST_FLUTTER_CANDIDATE: ${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}
 
-      # - name: Setup Flutter SDK
-      #   run: |
-      #     ./tool/flutter-sdk/bin/flutter config --disable-analytics
-      #     ./tool/flutter-sdk/bin/cache/dart-sdk/bin/dart --disable-analytics
-      #     ./tool/flutter-sdk/bin/flutter doctor
+      - name: Setup Flutter SDK
+        run: |
+          ./tool/flutter-sdk/bin/flutter config --disable-analytics
+          ./tool/flutter-sdk/bin/cache/dart-sdk/bin/dart --disable-analytics
+          ./tool/flutter-sdk/bin/flutter doctor
