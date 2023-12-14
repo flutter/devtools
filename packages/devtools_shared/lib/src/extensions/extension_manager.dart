@@ -62,15 +62,18 @@ class ExtensionsManager {
     if (rootPath != null) {
       late final List<Extension> extensions;
       try {
+        final packageConfigPath = path.join(
+          rootPath,
+          '.dart_tool',
+          'package_config.json',
+        );
+        // Only use [Uri.file] for windows platforms (https://github.com/dart-lang/tools/issues/220).
+        final packageConfigUri = Platform.isWindows
+            ? Uri.file(packageConfigPath)
+            : Uri.parse(packageConfigPath);
         extensions = await findExtensions(
           'devtools',
-          packageConfig: Uri.parse(
-            path.join(
-              rootPath,
-              '.dart_tool',
-              'package_config.json',
-            ),
-          ),
+          packageConfig: packageConfigUri,
         );
       } catch (e) {
         print('[ERROR] `findExtensions` failed: $e');

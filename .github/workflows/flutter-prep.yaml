@@ -88,6 +88,6 @@ jobs:
 
       - name: Setup Flutter SDK
         run: |
-          ./flutter-sdk/bin/flutter config --no-analytics
-          ./flutter-sdk/bin/flutter doctor
+          ./flutter-sdk/bin/flutter config --disable-analytics
           ./flutter-sdk/bin/cache/dart-sdk/bin/dart --disable-analytics
+          ./flutter-sdk/bin/flutter doctor
