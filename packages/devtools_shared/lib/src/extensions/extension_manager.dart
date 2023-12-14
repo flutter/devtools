@@ -56,6 +56,14 @@ class ExtensionsManager {
   /// assets will be copied to the `build/devtools_extensions` directory that
   /// DevTools server is serving.
   Future<void> serveAvailableExtensions(String? rootPathFileUri) async {
+    if (rootPathFileUri != null && !rootPathFileUri.startsWith('file://')) {
+      throw ArgumentError.value(
+        rootPathFileUri,
+        'rootPathFileUri',
+        'must be a file:// URI String',
+      );
+    }
+
     devtoolsExtensions.clear();
     final parsingErrors = StringBuffer();
 
@@ -65,7 +73,7 @@ class ExtensionsManager {
         extensions = await findExtensions(
           'devtools',
           packageConfig: Uri.parse(
-            path.join(
+            path.posix.join(
               rootPathFileUri,
               '.dart_tool',
               'package_config.json',
