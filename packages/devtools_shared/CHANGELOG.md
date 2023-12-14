@@ -1,3 +1,6 @@
+# 7.0.0-wip
+* Bump `package:vm_service` dependency to ^14.0.0.
+
 # 6.0.3
 * `CompareMixin` is now generic, implementing `Comparable<T>` instead of
   `Comparable<dynamic>`, and it's operators each therefore accept a `T`
