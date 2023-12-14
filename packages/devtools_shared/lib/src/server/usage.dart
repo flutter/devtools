@@ -32,7 +32,7 @@ class FlutterUsage {
   String get clientId => _analytics.clientId;
 }
 
-// Access the DevTools on disk store (~/.devtools/.devtools).
+// Access the DevTools on disk store (~/.flutter-devtools/.devtools).
 class DevToolsUsage {
   DevToolsUsage() {
     LocalFileSystem.maybeMoveLegacyDevToolsStore();
@@ -103,7 +103,6 @@ class DevToolsUsage {
 
   set analyticsEnabled(bool value) {
     properties['analyticsEnabled'] = value;
-    return properties['analyticsEnabled'];
   }
 
   bool surveyNameExists(String surveyName) => properties[surveyName] != null;
@@ -234,7 +233,7 @@ class IOPersistentProperties extends PersistentProperties {
     }
 
     try {
-      _file.writeAsStringSync(_jsonEncoder.convert(_map) + '\n');
+      _file.writeAsStringSync('${_jsonEncoder.convert(_map)}\n');
     } catch (_) {}
   }
 

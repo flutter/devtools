@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../shared/analytics/analytics.dart' as ga;
@@ -10,7 +11,6 @@ import '../../../../../shared/globals.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/table/table_data.dart';
-import '../../../../../shared/utils.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/primitives/simple_elements.dart';
 import '../../../shared/widgets/class_filter.dart';
@@ -48,13 +48,14 @@ class _ClassNameColumn extends ColumnData<SingleClassStats>
     BuildContext context,
     SingleClassStats data, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     return HeapClassView(
       theClass: data.heapClass,
       showCopyButton: isRowSelected,
       copyGaItem: gac.MemoryEvent.diffClassSingleCopy,
-      rootPackage: serviceManager.rootInfoNow().package,
+      rootPackage: serviceConnection.serviceManager.rootInfoNow().package,
     );
   }
 
@@ -96,6 +97,7 @@ class _InstanceColumn extends ColumnData<SingleClassStats>
     BuildContext context,
     SingleClassStats data, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     return HeapInstanceTableCell(
@@ -103,7 +105,6 @@ class _InstanceColumn extends ColumnData<SingleClassStats>
       classData.heap,
       data.heapClass,
       isSelected: isRowSelected,
-      gaContext: gac.MemoryAreas.snapshotSingle,
     );
   }
 }

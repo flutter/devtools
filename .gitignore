@@ -23,7 +23,11 @@ flutter_export_environment.sh
 Podfile
 Podfile.lock
 **/generated/not_namespaced_r_class_sources/
-**/build/
+**/devtools_app/build/
+**/devtools_app_shared/build/
+**/devtools_extensions/build/
+**/devtools_shared/build/
+**/devtools_test/build/
 packages/devtools_test/lib/src/mocks/generated.mocks.dart
 **/*.stager_app.dart
 **/test/**/failures/

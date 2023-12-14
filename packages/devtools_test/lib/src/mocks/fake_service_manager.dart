@@ -6,27 +6,39 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../utils.dart';
+import '../helpers/utils.dart';
 import 'fake_isolate_manager.dart';
 import 'fake_service_extension_manager.dart';
 import 'fake_vm_service_wrapper.dart';
 import 'generated.mocks.dart';
 import 'mocks.dart';
 
-class FakeServiceManager extends Fake implements ServiceConnectionManager {
-  FakeServiceManager({
+class FakeServiceConnectionManager extends Fake
+    implements ServiceConnectionManager {
+  FakeServiceConnectionManager({
     VmServiceWrapper? service,
-    this.hasConnection = true,
-    this.connectedAppInitialized = true,
-    this.hasService = true,
-    this.availableServices = const [],
-    this.availableLibraries = const [],
-  }) : service = service ?? createFakeService() {
+    bool hasConnection = true,
+    bool connectedAppInitialized = true,
+    bool hasService = true,
+    List<String> availableServices = const [],
+    List<String> availableLibraries = const [],
+    String? rootLibrary,
+  }) {
+    _serviceManager = FakeServiceManager(
+      service: service,
+      hasConnection: hasConnection,
+      connectedAppInitialized: connectedAppInitialized,
+      availableLibraries: availableLibraries,
+      availableServices: availableServices,
+      rootLibrary: rootLibrary,
+    );
     for (var screenId in screenIds) {
       when(errorBadgeManager.erroredItemsForPage(screenId)).thenReturn(
         FixedValueListenable(LinkedHashMap<String, DevToolsError>()),
@@ -34,19 +46,84 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
       when(errorBadgeManager.errorCountNotifier(screenId))
           .thenReturn(ValueNotifier<int>(0));
     }
-    when(connectedApp!.isFlutterAppNow).thenReturn(false);
-    when(connectedApp!.isDebugFlutterAppNow).thenReturn(false);
-
-    when(vm.operatingSystem).thenReturn('macos');
-
-    unawaited(vmServiceOpened(this.service!, onClosed: Future.value()));
   }
 
-  Completer<void> flagsInitialized = Completer();
+  @override
+  FakeServiceManager get serviceManager =>
+      _serviceManager as FakeServiceManager;
+  late final ServiceManager<VmServiceWrapper> _serviceManager;
 
-  Future<void> initFlagManager() async {
-    await _flagManager.vmServiceOpened(service!);
-    flagsInitialized.complete();
+  @override
+  late final AppState appState =
+      AppState(serviceManager.isolateManager.selectedIsolate);
+
+  @override
+  final ConsoleService consoleService = ConsoleService();
+
+  @override
+  final errorBadgeManager = MockErrorBadgeManager();
+
+  @override
+  final InspectorService inspectorService = FakeInspectorService();
+
+  @override
+  final TimelineStreamManager timelineStreamManager = TimelineStreamManager();
+
+  @override
+  VmFlagManager get vmFlagManager => FakeServiceManager._flagManager;
+
+  @override
+  Future<double> get queryDisplayRefreshRate => Future.value(60.0);
+
+  @override
+  Future<Response> get rasterCacheMetrics => Future.value(
+        Response.parse({
+          'layerBytes': 0,
+          'pictureBytes': 0,
+        })!,
+      );
+
+  @override
+  Future<void> sendDwdsEvent({
+    required String screen,
+    required String action,
+  }) {
+    return Future.value();
+  }
+
+  @override
+  Future<String?> rootLibraryForMainIsolate() {
+    final fakeIsolateManager =
+        _serviceManager.isolateManager as FakeIsolateManager;
+    return Future.value(fakeIsolateManager.rootLibrary);
+  }
+}
+
+// ignore: subtype_of_sealed_class, fake for testing.
+class FakeServiceManager extends Fake
+    implements ServiceManager<VmServiceWrapper> {
+  FakeServiceManager({
+    VmServiceWrapper? service,
+    this.hasConnection = true,
+    this.connectedAppInitialized = true,
+    this.availableServices = const [],
+    this.availableLibraries = const [],
+    this.onVmServiceOpened,
+    Map<String, Response>? serviceExtensionResponses,
+    String? rootLibrary,
+  })  : serviceExtensionResponses =
+            serviceExtensionResponses ?? _defaultServiceExtensionResponses,
+        _isolateManager = FakeIsolateManager(rootLibrary: rootLibrary) {
+    this.service = service ?? createFakeService();
+    mockConnectedApp(
+      connectedApp!,
+      isFlutterApp: true,
+      isProfileBuild: false,
+      isWebApp: false,
+    );
+
+    when(vm.operatingSystem).thenReturn('macos');
+    unawaited(vmServiceOpened(this.service!, onClosed: Future.value()));
   }
 
   static FakeVmServiceWrapper createFakeService({
@@ -59,6 +136,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
     CpuSamples? allocationSamples,
     Map<String, String>? resolvedUriMap,
     ClassList? classList,
+    List<({String flagName, String value})>? vmFlags,
   }) =>
       FakeVmServiceWrapper(
         _flagManager,
@@ -71,16 +149,54 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
         allocationSamples,
         resolvedUriMap,
         classList,
+        vmFlags,
       );
 
   final List<String> availableServices;
 
   final List<String> availableLibraries;
 
-  final MockVM _mockVM = MockVM();
+  final void Function()? onVmServiceOpened;
+
+  final Map<String, Response> serviceExtensionResponses;
+
+  final IsolateManager _isolateManager;
+
+  static final _defaultServiceExtensionResponses = <String, Response>{
+    isImpellerEnabled: Response.parse({'enabled': false})!,
+  };
 
   @override
-  final resolvedUriManager = ResolvedUriManager();
+  VmServiceWrapper? service;
+
+  @override
+  VM get vm => _mockVM;
+  final _mockVM = MockVM();
+
+  @override
+  Future<VmService> onServiceAvailable = Future.value(MockVmService());
+
+  @override
+  bool get isServiceAvailable => hasConnection;
+
+  @override
+  bool hasConnection;
+
+  @override
+  bool connectedAppInitialized;
+
+  @override
+  IsolateManager get isolateManager => _isolateManager;
+
+  @override
+  final ResolvedUriManager resolvedUriManager = ResolvedUriManager();
+
+  @override
+  final FakeServiceExtensionManager serviceExtensionManager =
+      FakeServiceExtensionManager();
+
+  @override
+  ConnectedApp? connectedApp = MockConnectedApp();
 
   @override
   RootInfo rootInfoNow() => RootInfo('package:myPackage/myPackage.dart');
@@ -100,73 +216,17 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   }
 
   @override
-  VmServiceWrapper? service;
-
-  @override
-  Future<VmService> onServiceAvailable = Future.value(MockVmService());
-
-  @override
-  bool get isServiceAvailable => hasConnection;
-
-  @override
-  ConnectedApp? connectedApp = MockConnectedApp();
-
-  @override
-  late final AppState appState = AppState(isolateManager.selectedIsolate);
-
-  @override
-  final ConsoleService consoleService = ConsoleService();
-
-  @override
-  Stream<VmServiceWrapper> get onConnectionClosed => const Stream.empty();
-
-  @override
-  Stream<VmServiceWrapper> get onConnectionAvailable => Stream.value(service!);
-
-  @override
-  Future<double> get queryDisplayRefreshRate => Future.value(60.0);
-
-  @override
-  bool hasConnection;
-
-  @override
-  bool hasService;
-
-  @override
-  bool connectedAppInitialized;
-
-  @override
-  final IsolateManager isolateManager = FakeIsolateManager();
-
-  @override
-  final errorBadgeManager = MockErrorBadgeManager();
-
-  @override
-  final InspectorService inspectorService = FakeInspectorService();
-
-  @override
-  final TimelineStreamManager timelineStreamManager = TimelineStreamManager();
-
-  @override
-  VM get vm => _mockVM;
-
-  // TODO(jacobr): the fact that this has to be a static final is ugly.
-  static final VmFlagManager _flagManager = VmFlagManager();
-
-  @override
-  VmFlagManager get vmFlagManager => _flagManager;
-
-  @override
-  final FakeServiceExtensionManager serviceExtensionManager =
-      FakeServiceExtensionManager();
-
-  @override
-  Future<Response> get rasterCacheMetrics => Future.value(
-        Response.parse({
-          'layerBytes': 0,
-          'pictureBytes': 0,
-        }),
+  Future<Response> callServiceExtensionOnMainIsolate(
+    String method, {
+    Map<String, dynamic>? args,
+  }) async {
+    if (!serviceExtensionResponses.containsKey(method)) {
+      throw UnimplementedError(
+        'Unimplemented response for service extension: $method',
       );
+    }
+    return serviceExtensionResponses[method]!;
+  }
 
   @override
   ValueListenable<bool> registeredServiceListenable(String name) {
@@ -183,33 +243,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   }
 
   @override
-  Future<Response> get flutterVersion {
-    return Future.value(
-      Response.parse({
-        'type': 'Success',
-        'frameworkVersion': '2.10.0',
-        'channel': 'unknown',
-        'repositoryUrl': 'unknown source',
-        'frameworkRevision': '74432fa91c8ffbc555ffc2701309e8729380a012',
-        'frameworkCommitDate': '2020-05-14 13:05:34 -0700',
-        'engineRevision': 'ae2222f47e788070c09020311b573542b9706a78',
-        'dartSdkVersion': '2.9.0 (build 2.9.0-8.0.dev d6fed1f624)',
-        'frameworkRevisionShort': '74432fa91c',
-        'engineRevisionShort': 'ae2222f47e',
-      }),
-    );
-  }
-
-  @override
-  Future<void> sendDwdsEvent({
-    required String screen,
-    required String action,
-  }) {
-    return Future.value();
-  }
-
-  @override
-  void manuallyDisconnect() {
+  Future<void> manuallyDisconnect() async {
     changeState(false, manual: true);
   }
 
@@ -229,12 +263,41 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   ValueListenable<bool> get deviceBusy => ValueNotifier(false);
 
   @override
+  Future<Response> get flutterVersion {
+    return Future.value(
+      Response.parse({
+        'type': 'Success',
+        'frameworkVersion': '2.10.0',
+        'channel': 'unknown',
+        'repositoryUrl': 'unknown source',
+        'frameworkRevision': '74432fa91c8ffbc555ffc2701309e8729380a012',
+        'frameworkCommitDate': '2020-05-14 13:05:34 -0700',
+        'engineRevision': 'ae2222f47e788070c09020311b573542b9706a78',
+        'dartSdkVersion': '2.9.0 (build 2.9.0-8.0.dev d6fed1f624)',
+        'frameworkRevisionShort': '74432fa91c',
+        'engineRevisionShort': 'ae2222f47e',
+      })!,
+    );
+  }
+
+  // TODO(jacobr): the fact that this has to be a static final is ugly.
+  static final VmFlagManager _flagManager = VmFlagManager();
+
+  Completer<void> flagsInitialized = Completer();
+
+  Future<void> initFlagManager() async {
+    await _flagManager.vmServiceOpened(service!);
+    flagsInitialized.complete();
+  }
+
+  @override
   Future<void> vmServiceOpened(
     VmServiceWrapper service, {
     required Future<void> onClosed,
-  }) {
-    resolvedUriManager.vmServiceOpened();
-    initFlagManager();
+  }) async {
+    onVmServiceOpened?.call();
+    resolvedUriManager.vmServiceOpened(service);
+    await initFlagManager();
     return Future.value();
   }
 }

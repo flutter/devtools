@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# TODO(kenz): delete this script once we can confirm it is not used in the
+# Dart SDK or in infra tooling.
+
 # Copyright 2019 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -26,7 +29,7 @@ else
   PATH="$FLUTTER_DIR/bin":$PATH
 
   # Make sure the flutter sdk is on the correct branch.
-  ./update_flutter_sdk.sh
+  devtools_tool update-flutter-sdk
 fi
 
 popd
@@ -38,8 +41,16 @@ echo "Flutter Path: $(which flutter)"
 echo "Flutter Version: $(flutter --version)"
 
 if [[ $1 = "--update-perfetto" ]]; then
-  $TOOL_DIR/update_perfetto.sh
+  devtools_tool update-perfetto
 fi
+
+pushd $DEVTOOLS_DIR/packages/devtools_shared
+flutter pub get
+popd
+
+pushd $DEVTOOLS_DIR/packages/devtools_extensions
+flutter pub get
+popd
 
 pushd $DEVTOOLS_DIR/packages/devtools_app
 
@@ -47,10 +58,6 @@ flutter clean
 rm -rf build/web
 
 flutter pub get
-
-# Build a profile build rather than a release build to avoid minification
-# as code size doesn't matter very much for us as minification makes some
-# crashes harder to debug. For example, https://github.com/flutter/devtools/issues/2125
 
 flutter build web \
   --web-renderer canvaskit \

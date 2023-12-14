@@ -41,19 +41,19 @@
             "name": "memory/default",
             "request": "launch",
             "type": "dart",
-            "program": "test/test_infra/scenes/memory/default.stager_app.dart",
+            "program": "test/test_infra/scenes/memory/default.stager_app.g.dart",
         },
         {
             "name": "memory/diff_snapshot",
             "request": "launch",
             "type": "dart",
-            "program": "test/test_infra/scenes/memory/diff_snapshot.stager_app.dart",
+            "program": "test/test_infra/scenes/memory/diff_snapshot.stager_app.g.dart",
         },
         {
             "name": "performance/default",
             "request": "launch",
             "type": "dart",
-            "program": "test/test_infra/scenes/performance/default.stager_app.dart",
+            "program": "test/test_infra/scenes/performance/default.stager_app.g.dart",
         },
         {
             "name": "attach",

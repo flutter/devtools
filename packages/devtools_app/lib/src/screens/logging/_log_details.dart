@@ -4,11 +4,11 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/common_widgets.dart';
 import '../../shared/console/console.dart';
-import '../../shared/theme.dart';
 import 'logging_controller.dart';
 
 class LogDetails extends StatefulWidget {
@@ -85,12 +85,14 @@ class _LogDetailsState extends State<LogDetails>
         title: _LogDetailsHeader(log: log),
         child: Padding(
           padding: const EdgeInsets.all(denseSpacing),
-          child: SingleChildScrollView(
-            controller: scrollController,
-            child: SelectableText(
-              log?.prettyPrinted() ?? '',
-              textAlign: TextAlign.left,
-              style: theme.fixedFontStyle,
+          child: Scrollbar(
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: SelectableText(
+                log?.prettyPrinted() ?? '',
+                textAlign: TextAlign.left,
+                style: theme.fixedFontStyle,
+              ),
             ),
           ),
         ),

@@ -4,8 +4,10 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profiler_controller.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_test_utils.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
@@ -13,14 +15,18 @@ import 'package:vm_service/vm_service.dart';
 import '../test_infra/test_data/cpu_profiler/cpu_profile.dart';
 
 void main() {
-  final ServiceConnectionManager fakeServiceManager = FakeServiceManager(
-    service: FakeServiceManager.createFakeService(
-      cpuSamples: CpuSamples.parse(goldenCpuSamplesJson),
-      resolvedUriMap: goldenResolvedUriMap,
-    ),
-  );
-  final app = fakeServiceManager.connectedApp!;
-  when(app.isFlutterAppNow).thenReturn(true);
+  late ServiceConnectionManager fakeServiceManager;
+
+  setUp(() {
+    fakeServiceManager = FakeServiceConnectionManager(
+      service: FakeServiceManager.createFakeService(
+        cpuSamples: CpuSamples.parse(goldenCpuSamplesJson),
+        resolvedUriMap: goldenResolvedUriMap,
+      ),
+    );
+    final app = fakeServiceManager.serviceManager.connectedApp!;
+    when(app.isFlutterAppNow).thenReturn(true);
+  });
 
   group('CpuProfileController', () {
     late CpuProfilerController controller;
@@ -78,8 +84,9 @@ void main() {
         processId: 'test',
       );
       expect(
-        controller.dataNotifier.value,
-        isNot(equals(CpuProfilerController.baseStateCpuProfileData)),
+        controller.dataNotifier.value !=
+            CpuProfilerController.baseStateCpuProfileData,
+        isTrue,
       );
       expect(controller.profilerBusyStatus.value, CpuProfilerBusyStatus.none);
 

@@ -4,7 +4,7 @@
 
 // This code was pulled from dart:io.
 
-part of http;
+part of 'http.dart';
 
 class HttpException {
   const HttpException(this.message, {this.uri});

@@ -28,28 +28,32 @@ class VmClassDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ObjectInspectorCodeView(
-      codeViewController: controller.codeViewController,
-      script: clazz.scriptRef!,
-      object: clazz.ref,
-      child: Row(
-        children: [
+    final child = Row(
+      children: [
+        Flexible(
+          child: VmObjectDisplayBasicLayout(
+            controller: controller,
+            object: clazz,
+            generalDataRows: _classDataRows(clazz),
+          ),
+        ),
+        if (displayClassInstances)
           Flexible(
-            child: VmObjectDisplayBasicLayout(
-              controller: controller,
-              object: clazz,
-              generalDataRows: _classDataRows(clazz),
+            child: ClassInstancesWidget(
+              instances: clazz.instances,
             ),
           ),
-          if (displayClassInstances)
-            Flexible(
-              child: ClassInstancesWidget(
-                instances: clazz.instances,
-              ),
-            ),
-        ],
-      ),
+      ],
     );
+    if (clazz.scriptRef != null) {
+      return ObjectInspectorCodeView(
+        codeViewController: controller.codeViewController,
+        script: clazz.scriptRef!,
+        object: clazz.ref,
+        child: child,
+      );
+    }
+    return child;
   }
 
   // TODO(mtaylee): Delete 'Currently allocated instances' row when

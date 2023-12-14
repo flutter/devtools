@@ -7,7 +7,10 @@ import 'dart:convert';
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/network/network_request_inspector.dart';
 import 'package:devtools_app/src/screens/network/network_request_inspector_views.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
@@ -18,7 +21,7 @@ import '../test_infra/utils/test_utils.dart';
 void main() {
   group('NetworkRequestInspector', () {
     late NetworkController controller;
-    late FakeServiceManager fakeServiceManager;
+    late FakeServiceConnectionManager fakeServiceConnection;
     final HttpProfileRequest? httpRequest =
         HttpProfileRequest.parse(httpPostJson);
     String clipboardContents = '';
@@ -31,7 +34,7 @@ void main() {
       );
       setGlobal(PreferencesController, PreferencesController());
       clipboardContents = '';
-      fakeServiceManager = FakeServiceManager(
+      fakeServiceConnection = FakeServiceConnectionManager(
         service: FakeServiceManager.createFakeService(
           httpProfile: HttpProfile(
             requests: [
@@ -41,7 +44,7 @@ void main() {
           ),
         ),
       );
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(ServiceConnectionManager, fakeServiceConnection);
       setGlobal(NotificationService, NotificationService());
       controller = NetworkController();
       setupClipboardCopyListener(

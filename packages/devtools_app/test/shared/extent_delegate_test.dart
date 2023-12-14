@@ -13,6 +13,7 @@ import '../test_infra/utils/extent_delegate_utils.dart';
 import '../test_infra/utils/rendering_tester.dart';
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
   group('RenderSliverFixedExtentDelgate', () {
     group('extentDelegate', () {
       test('itemExtent', () {

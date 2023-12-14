@@ -35,12 +35,16 @@ class RasterStatsController extends PerformanceFeatureController {
     clearData();
     _loadingSnapshot.value = true;
     try {
-      final response = await serviceManager.renderFrameWithRasterStats;
+      final response = await serviceConnection.renderFrameWithRasterStats;
       final json = response?.json ?? <String, Object?>{};
       final rasterStats = RasterStats.parse(json);
       setData(rasterStats);
     } catch (e, st) {
       _log.shout('Error collecting raster stats: $e', e, st);
+      notificationService.pushError(
+        'Error collecting raster stats: $e',
+        stackTrace: st.toString(),
+      );
       clearData();
     } finally {
       _loadingSnapshot.value = false;

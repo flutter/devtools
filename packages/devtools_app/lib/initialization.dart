@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
@@ -12,9 +13,7 @@ import 'src/screens/debugger/syntax_highlighter.dart';
 import 'src/screens/provider/riverpod_error_logger_observer.dart';
 import 'src/shared/analytics/analytics_controller.dart';
 import 'src/shared/config_specific/framework_initialize/framework_initialize.dart';
-import 'src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'src/shared/config_specific/logger/logger_helpers.dart';
-import 'src/shared/config_specific/url/url.dart';
 import 'src/shared/feature_flags.dart';
 import 'src/shared/globals.dart';
 import 'src/shared/preferences.dart';
@@ -35,31 +34,10 @@ void runDevTools({
   List<DevToolsScreen>? screens,
 }) {
   setupErrorHandling(() async {
-    screens ??= defaultScreens(sampleData: sampleData);
-
-    initDevToolsLogging();
-
-    // Before switching to URL path strategy, check if this URL is in the legacy
-    // fragment format and redirect if necessary.
-    if (_handleLegacyUrl()) return;
-
-    usePathUrlStrategy();
-
-    _maybeInitForIntegrationTestMode(
+    await initializeDevTools(
       integrationTestMode: integrationTestMode,
-      enableExperiments: shouldEnableExperiments,
+      shouldEnableExperiments: shouldEnableExperiments,
     );
-
-    // Initialize the framework before we do anything else, otherwise the
-    // StorageController won't be initialized and preferences won't be loaded.
-    await initializeFramework();
-
-    setGlobal(IdeTheme, getIdeTheme());
-
-    final preferences = PreferencesController();
-    // Wait for preferences to load before rendering the app to avoid a flash of
-    // content with the incorrect theme.
-    await preferences.init();
 
     // Load the Dart syntax highlighting grammar.
     await SyntaxHighlighter.initialize();
@@ -69,13 +47,40 @@ void runDevTools({
       ProviderScope(
         observers: const [ErrorLoggerObserver()],
         child: DevToolsApp(
-          screens!,
+          screens ?? defaultScreens(sampleData: sampleData),
           await analyticsController,
-          sampleData: sampleData,
         ),
       ),
     );
   });
+}
+
+@visibleForTesting
+Future<void> initializeDevTools({
+  bool integrationTestMode = false,
+  bool shouldEnableExperiments = false,
+}) async {
+  initDevToolsLogging();
+
+  // Before switching to URL path strategy, check if this URL is in the legacy
+  // fragment format and redirect if necessary.
+  if (_handleLegacyUrl()) return;
+
+  usePathUrlStrategy();
+
+  _maybeInitForIntegrationTestMode(
+    integrationTestMode: integrationTestMode,
+    enableExperiments: shouldEnableExperiments,
+  );
+
+  // Initialize the framework before we do anything else, otherwise the
+  // StorageController won't be initialized and preferences won't be loaded.
+  await initializeFramework();
+
+  final preferences = PreferencesController();
+  // Wait for preferences to load before rendering the app to avoid a flash of
+  // content with the incorrect theme.
+  await preferences.init();
 }
 
 /// Initializes some DevTools global fields for our Flutter integration tests.

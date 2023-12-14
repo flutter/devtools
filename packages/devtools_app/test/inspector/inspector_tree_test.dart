@@ -4,7 +4,10 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_breadcrumbs.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart' hide Fake;
 import 'package:mockito/mockito.dart';
@@ -12,12 +15,12 @@ import 'package:mockito/mockito.dart';
 import 'utils/inspector_tree.dart';
 
 void main() {
-  late FakeServiceManager fakeServiceManager;
+  late FakeServiceConnectionManager fakeServiceConnection;
   late InspectorController inspectorController;
 
   setUp(() {
-    fakeServiceManager = FakeServiceManager();
-    final app = fakeServiceManager.connectedApp!;
+    fakeServiceConnection = FakeServiceConnectionManager();
+    final app = fakeServiceConnection.serviceManager.connectedApp!;
     when(app.isFlutterAppNow).thenReturn(true);
     when(app.isProfileBuildNow).thenReturn(false);
 
@@ -25,13 +28,13 @@ void main() {
       DevToolsEnvironmentParameters,
       ExternalDevToolsEnvironmentParameters(),
     );
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
+    setGlobal(ServiceConnectionManager, fakeServiceConnection);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(NotificationService, NotificationService());
     setGlobal(BreakpointManager, BreakpointManager());
     mockConnectedApp(
-      fakeServiceManager.connectedApp!,
+      fakeServiceConnection.serviceManager.connectedApp!,
       isFlutterApp: true,
       isProfileBuild: false,
       isWebApp: false,
@@ -72,8 +75,6 @@ void main() {
       (WidgetTester tester) async {
         final treeController = InspectorTreeController()
           ..config = InspectorTreeConfig(
-            summaryTree: false,
-            treeType: FlutterTreeType.widget,
             onNodeAdded: (_, __) {},
             onClientActiveChange: (_) {},
           );

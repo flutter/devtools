@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:devtools_app/src/shared/memory/adapted_heap_data.dart';
+import 'package:vm_service/vm_service.dart';
 
 const _dataDir = 'test/test_infra/test_data/memory/heap/';
 
@@ -20,8 +23,7 @@ class GoldenHeapTest {
   /// Loads the heap data from a file.
   ///
   /// Format is format used by [NativeRuntime.writeHeapSnapshotToFile].
-  Future<AdaptedHeapData> loadHeap() =>
-      AdaptedHeapData.fromFile('$_dataDir$fileName', isolateId: 'test');
+  Future<AdaptedHeapData> loadHeap() => heapFromFile('$_dataDir$fileName');
 }
 
 List<GoldenHeapTest> goldenHeapTests = <GoldenHeapTest>[
@@ -42,3 +44,13 @@ List<GoldenHeapTest> goldenHeapTests = <GoldenHeapTest>[
     appClassName: 'MyApp',
   ),
 ];
+
+Future<AdaptedHeapData> heapFromFile(
+  String fileName,
+) async {
+  final file = File(fileName);
+  final bytes = await file.readAsBytes();
+  final data = bytes.buffer.asByteData();
+  final graph = HeapSnapshotGraph.fromChunks([data]);
+  return AdaptedHeapData.fromHeapSnapshot(graph);
+}

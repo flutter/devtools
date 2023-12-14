@@ -4,12 +4,13 @@
 
 import 'dart:math' as math;
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
+import 'package:pointer_interceptor/pointer_interceptor.dart';
 
 import '../shared/common_widgets.dart';
 import '../shared/primitives/utils.dart';
 import '../shared/screen.dart';
-import '../shared/theme.dart';
 
 class DevToolsAppBar extends StatelessWidget {
   const DevToolsAppBar({
@@ -82,9 +83,7 @@ class DevToolsAppBar extends StatelessWidget {
         // have added a spacer element to [actionsWithSpacer] above, which
         // should be excluded from the width calculation.
         actionWidgetSize * ((actions ?? []).length) +
-            (actionsWithSpacer.safeFirst is VerticalLineSpacer
-                ? VerticalLineSpacer.totalWidth
-                : 0.0),
+            VerticalLineSpacer.totalWidth,
       );
 
       flexibleSpace = Align(
@@ -140,7 +139,7 @@ class DevToolsAppBar extends StatelessWidget {
       (prev, screen) => prev + screen.approximateTabWidth(textTheme),
     );
     final actionsWidth = (actions?.length ?? 0) * actionWidgetSize;
-    return tabsWidth + actionsWidth;
+    return tabsWidth + VerticalLineSpacer.totalWidth + actionsWidth;
   }
 }
 
@@ -196,17 +195,19 @@ class TabOverflowButton extends StatelessWidget {
         );
       }
       children.add(
-        SizedBox(
-          // Match the height of the main tab bar.
-          height: defaultToolbarHeight,
-          child: MenuItemButton(
-            style: const ButtonStyle().copyWith(
-              textStyle: MaterialStateProperty.resolveWith<TextStyle>((_) {
-                return theme.textTheme.titleSmall!;
-              }),
+        PointerInterceptor(
+          child: SizedBox(
+            // Match the height of the main tab bar.
+            height: defaultToolbarHeight,
+            child: MenuItemButton(
+              style: const ButtonStyle().copyWith(
+                textStyle: MaterialStateProperty.resolveWith<TextStyle>((_) {
+                  return theme.textTheme.titleSmall!;
+                }),
+              ),
+              onPressed: () => onItemSelected(i),
+              child: tab,
             ),
-            onPressed: () => onItemSelected(i),
-            child: tab,
           ),
         ),
       );

@@ -4,16 +4,15 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
 import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
 import '../shared/notifications.dart';
-import '../shared/primitives/auto_dispose.dart';
 import '../shared/primitives/utils.dart';
-import '../shared/theme.dart';
-import '../shared/utils.dart';
 
 double get _notificationHeight => scaleByFontFactor(175.0);
 final _notificationWidth = _notificationHeight * goldenRatio;
@@ -265,7 +264,6 @@ class _NotificationState extends State<_Notification>
                           Flexible(
                             child: _NotificationMessage(
                               widget: widget,
-                              context: context,
                             ),
                           ),
                           _DismissAction(
@@ -277,7 +275,6 @@ class _NotificationState extends State<_Notification>
                       )
                     : _NotificationMessage(
                         widget: widget,
-                        context: context,
                       ),
                 const SizedBox(height: defaultSpacing),
                 _NotificationActions(widget: widget),
@@ -314,11 +311,9 @@ class _DismissAction extends StatelessWidget {
 class _NotificationMessage extends StatelessWidget {
   const _NotificationMessage({
     required this.widget,
-    required this.context,
   });
 
   final _Notification widget;
-  final BuildContext context;
 
   @override
   Widget build(BuildContext context) {

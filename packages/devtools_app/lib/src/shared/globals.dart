@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/utils.dart';
+
+import '../extensions/extension_service.dart';
 import '../screens/debugger/breakpoint_manager.dart';
 import '../service/service_manager.dart';
 import '../shared/banner_messages.dart';
 import '../shared/notifications.dart';
-import 'config_specific/ide_theme/ide_theme.dart';
 import 'console/eval/eval_service.dart';
 import 'environment_parameters/environment_parameters_base.dart';
 import 'framework_controller.dart';
@@ -22,9 +24,7 @@ bool get isExternalBuild => _isExternalBuild;
 bool _isExternalBuild = true;
 void setInternalBuild() => _isExternalBuild = false;
 
-final Map<Type, Object> globals = <Type, Object>{};
-
-ServiceConnectionManager get serviceManager =>
+ServiceConnectionManager get serviceConnection =>
     globals[ServiceConnectionManager] as ServiceConnectionManager;
 
 ScriptManager get scriptManager => globals[ScriptManager] as ScriptManager;
@@ -47,8 +47,6 @@ DevToolsEnvironmentParameters get devToolsExtensionPoints =>
 OfflineModeController get offlineController =>
     globals[OfflineModeController] as OfflineModeController;
 
-IdeTheme get ideTheme => globals[IdeTheme] as IdeTheme;
-
 NotificationService get notificationService =>
     globals[NotificationService] as NotificationService;
 
@@ -60,9 +58,8 @@ BreakpointManager get breakpointManager =>
 
 EvalService get evalService => globals[EvalService] as EvalService;
 
-void setGlobal(Type clazz, Object instance) {
-  globals[clazz] = instance;
-}
+ExtensionService get extensionService =>
+    globals[ExtensionService] as ExtensionService;
 
 /// Whether DevTools is being run in integration test mode.
 bool get integrationTestMode => _integrationTestMode;

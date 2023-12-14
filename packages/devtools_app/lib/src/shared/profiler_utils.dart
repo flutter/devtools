@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../screens/debugger/codeview_controller.dart';
@@ -11,7 +12,6 @@ import 'globals.dart';
 import 'primitives/trees.dart';
 import 'primitives/utils.dart';
 import 'routing.dart';
-import 'theme.dart';
 
 mixin ProfilableDataMixin<T extends TreeNode<T>> on TreeNode<T> {
   ProfileMetaData get profileMetaData;
@@ -252,7 +252,6 @@ class MethodAndSourceDisplay extends StatelessWidget {
     required this.methodName,
     required this.packageUri,
     required this.sourceLine,
-    required this.isSelected,
     this.displayInRow = true,
     super.key,
   });
@@ -264,8 +263,6 @@ class MethodAndSourceDisplay extends StatelessWidget {
   final String packageUri;
 
   final int? sourceLine;
-
-  final bool isSelected;
 
   final bool displayInRow;
 
@@ -280,7 +277,8 @@ class MethodAndSourceDisplay extends StatelessWidget {
 
       final sourceDisplay = '($packageUriWithSourceLine)';
       final script = scriptManager.scriptRefForUri(packageUri);
-      final showSourceAsLink = script != null;
+      final showSourceAsLink =
+          script != null && !offlineController.offlineMode.value;
       if (showSourceAsLink) {
         sourceTextSpans.add(
           VmServiceObjectLink(

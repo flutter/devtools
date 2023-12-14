@@ -5,19 +5,21 @@
 import 'package:devtools_app/src/framework/scaffold.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/banner_messages.dart';
-import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  late FakeServiceManager fakeServiceManager;
+  late FakeServiceConnectionManager fakeServiceConnection;
 
   setUp(() {
-    fakeServiceManager = FakeServiceManager();
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
+    fakeServiceConnection = FakeServiceConnectionManager();
+    setGlobal(ServiceConnectionManager, fakeServiceConnection);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());
     setGlobal(BannerMessagesController, BannerMessagesController());
@@ -137,6 +139,29 @@ void main() {
       await pumpTestFrame(tester);
       expect(find.byKey(k1), findsNothing);
     });
+
+    testWidgets(
+      'dismissed messages can be re-added when ignoreIfAlreadyDismissed is false',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(buildBannerMessages());
+        expect(find.byKey(k1), findsNothing);
+        bannerMessages.addMessage(testMessage1);
+        await pumpTestFrame(tester);
+        expect(find.byKey(k1), findsOneWidget);
+
+        await tester.tap(find.byType(IconButton));
+        await pumpTestFrame(tester);
+        expect(find.byKey(k1), findsNothing);
+
+        // Verify message can be re-added with ignoreIfAlreadyDismissed = false.
+        bannerMessages.addMessage(
+          testMessage1,
+          ignoreIfAlreadyDismissed: false,
+        );
+        await pumpTestFrame(tester);
+        expect(find.byKey(k1), findsOneWidget);
+      },
+    );
   });
 }
 

@@ -4,7 +4,11 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/performance/panes/controls/performance_controls.dart';
+import 'package:devtools_app/src/shared/file_import.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -24,11 +28,14 @@ void main() {
   });
 
   group('$PerformanceControls', () {
-    late MockServiceConnectionManager mockServiceManager;
+    late MockServiceConnectionManager mockServiceConnection;
+    late MockServiceManager mockServiceManager;
     late MockPerformanceController mockPerformanceController;
 
     setUp(() {
-      mockServiceManager = MockServiceConnectionManager();
+      mockServiceConnection = createMockServiceConnectionWithDefaults();
+      mockServiceManager =
+          mockServiceConnection.serviceManager as MockServiceManager;
       when(mockServiceManager.serviceExtensionManager)
           .thenReturn(FakeServiceExtensionManager());
       final connectedApp = MockConnectedApp();
@@ -39,7 +46,7 @@ void main() {
         isWebApp: false,
       );
       when(mockServiceManager.connectedApp).thenReturn(connectedApp);
-      setGlobal(ServiceConnectionManager, mockServiceManager);
+      setGlobal(ServiceConnectionManager, mockServiceConnection);
       mockPerformanceController = createMockPerformanceControllerWithDefaults();
     });
 
@@ -71,7 +78,7 @@ void main() {
         expect(find.text('Performance Overlay'), findsOneWidget);
         expect(find.text('Enhance Tracing'), findsOneWidget);
         expect(find.text('More debugging options'), findsOneWidget);
-        expect(find.byIcon(Icons.file_download), findsOneWidget);
+        expect(find.byType(OpenSaveButtonGroup), findsOneWidget);
         expect(find.byIcon(Icons.settings_outlined), findsOneWidget);
       },
     );
@@ -94,7 +101,7 @@ void main() {
         expect(find.text('Performance Overlay'), findsNothing);
         expect(find.text('Enhance Tracing'), findsNothing);
         expect(find.text('More debugging options'), findsNothing);
-        expect(find.byIcon(Icons.file_download), findsOneWidget);
+        expect(find.byType(OpenSaveButtonGroup), findsOneWidget);
         expect(find.byIcon(Icons.settings_outlined), findsOneWidget);
       },
     );
@@ -104,7 +111,7 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         offlineController.enterOfflineMode(
-          offlineApp: serviceManager.connectedApp!,
+          offlineApp: serviceConnection.serviceManager.connectedApp!,
         );
         await pumpControls(tester);
         expect(find.byType(ExitOfflineButton), findsOneWidget);
@@ -113,7 +120,7 @@ void main() {
         expect(find.text('Performance Overlay'), findsNothing);
         expect(find.text('Enhance Tracing'), findsNothing);
         expect(find.text('More debugging options'), findsNothing);
-        expect(find.byIcon(Icons.file_download), findsNothing);
+        expect(find.byType(OpenSaveButtonGroup), findsNothing);
         expect(find.byIcon(Icons.settings_outlined), findsNothing);
         offlineController.exitOfflineMode();
       },

@@ -4,10 +4,11 @@
 
 import 'dart:math';
 
+import 'package:devtools_app_shared/ui.dart';
+
 import '../common_widgets.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
-import '../theme.dart';
 import 'table_controller.dart';
 import 'table_data.dart';
 

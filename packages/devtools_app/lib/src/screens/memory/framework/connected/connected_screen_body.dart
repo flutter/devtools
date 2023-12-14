@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../shared/banner_messages.dart';
 import '../../../../shared/http/http_service.dart' as http_service;
-import '../../../../shared/primitives/auto_dispose.dart';
 import '../../../../shared/screen.dart';
-import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../panes/chart/chart_pane.dart';
 import '../../panes/chart/chart_pane_controller.dart';

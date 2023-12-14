@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 
@@ -15,8 +17,9 @@ import 'config_specific/logger/logger_helpers.dart';
 import 'constants.dart';
 import 'diagnostics/inspector_service.dart';
 import 'globals.dart';
-import 'primitives/auto_dispose.dart';
-import 'primitives/utils.dart';
+import 'utils.dart';
+
+const _thirdPartyPathSegment = 'third_party';
 
 /// A controller for global application preferences.
 class PreferencesController extends DisposableController
@@ -40,13 +43,15 @@ class PreferencesController extends DisposableController
   PerformancePreferencesController get performance => _performance;
   final _performance = PerformancePreferencesController();
 
-  CpuProfilerPreferencesController get cpuProfiler => _cpuProfiler;
-  final _cpuProfiler = CpuProfilerPreferencesController();
+  ExtensionsPreferencesController get devToolsExtensions => _extensions;
+  final _extensions = ExtensionsPreferencesController();
 
   Future<void> init() async {
     // Get the current values and listen for and write back changes.
     String? value = await storage.getValue('ui.darkMode');
-    final useDarkMode = value == null || value == 'true';
+
+    final useDarkMode =
+        (value == null && useDarkThemeAsDefault) || value == 'true';
     toggleDarkModeTheme(useDarkMode);
     addAutoDisposeListener(darkModeTheme, () {
       storage.setValue('ui.darkMode', '${darkModeTheme.value}');
@@ -69,7 +74,7 @@ class PreferencesController extends DisposableController
     await inspector.init();
     await memory.init();
     await performance.init();
-    await cpuProfiler.init();
+    await devToolsExtensions.init();
 
     setGlobal(PreferencesController, this);
   }
@@ -99,7 +104,7 @@ class PreferencesController extends DisposableController
     inspector.dispose();
     memory.dispose();
     performance.dispose();
-    cpuProfiler.dispose();
+    devToolsExtensions.dispose();
     super.dispose();
   }
 
@@ -135,25 +140,26 @@ class PreferencesController extends DisposableController
 class InspectorPreferencesController extends DisposableController
     with AutoDisposeControllerMixin {
   ValueListenable<bool> get hoverEvalModeEnabled => _hoverEvalMode;
-  ListValueNotifier<String> get customPubRootDirectories =>
-      _customPubRootDirectories;
-  ValueListenable<bool> get isRefreshingCustomPubRootDirectories =>
-      _customPubRootDirectoriesAreBusy;
+  ListValueNotifier<String> get pubRootDirectories => _pubRootDirectories;
+  ValueListenable<bool> get isRefreshingPubRootDirectories =>
+      _pubRootDirectoriesAreBusy;
   InspectorServiceBase? get _inspectorService =>
-      serviceManager.inspectorService;
+      serviceConnection.inspectorService;
 
   final _hoverEvalMode = ValueNotifier<bool>(false);
-  final _customPubRootDirectories = ListValueNotifier<String>([]);
-  final _customPubRootDirectoriesAreBusy = ValueNotifier<bool>(false);
+  final _pubRootDirectories = ListValueNotifier<String>([]);
+  final _pubRootDirectoriesAreBusy = ValueNotifier<bool>(false);
   final _busyCounter = ValueNotifier<int>(0);
   static const _hoverEvalModeStorageId = 'inspector.hoverEvalMode';
   static const _customPubRootDirectoriesStoragePrefix =
       'inspector.customPubRootDirectories';
   String? _mainScriptDir;
+  bool _checkedFlutterPubRoot = false;
 
   Future<void> _updateMainScriptRef() async {
     final rootLibUriString =
-        (await serviceManager.tryToDetectMainRootInfo())?.library;
+        (await serviceConnection.serviceManager.tryToDetectMainRootInfo())
+            ?.library;
     final rootLibUri = Uri.parse(rootLibUriString ?? '');
     final directorySegments =
         rootLibUri.pathSegments.sublist(0, rootLibUri.pathSegments.length - 1);
@@ -166,7 +172,7 @@ class InspectorPreferencesController extends DisposableController
   Future<void> init() async {
     await _initHoverEvalMode();
     // TODO(jacobr): consider initializing this first as it is not blocking.
-    _initCustomPubRootDirectories();
+    _initPubRootDirectories();
   }
 
   Future<void> _initHoverEvalMode() async {
@@ -189,34 +195,39 @@ class InspectorPreferencesController extends DisposableController
     setHoverEvalMode(hoverEvalModeEnabledValue == 'true');
   }
 
-  void _initCustomPubRootDirectories() {
-    autoDisposeStreamSubscription(
-      serviceManager.onConnectionAvailable
-          .listen(_handleConnectionToNewService),
-    );
-    autoDisposeStreamSubscription(
-      serviceManager.onConnectionClosed.listen(_handleConnectionClosed),
+  void _initPubRootDirectories() {
+    addAutoDisposeListener(
+      serviceConnection.serviceManager.connectedState,
+      () async {
+        if (serviceConnection.serviceManager.connectedState.value.connected) {
+          await handleConnectionToNewService();
+        } else {
+          _handleConnectionClosed();
+        }
+      },
     );
     addAutoDisposeListener(_busyCounter, () {
-      _customPubRootDirectoriesAreBusy.value = _busyCounter.value != 0;
+      _pubRootDirectoriesAreBusy.value = _busyCounter.value != 0;
     });
     addAutoDisposeListener(
-      serviceManager.isolateManager.mainIsolate,
+      serviceConnection.serviceManager.isolateManager.mainIsolate,
       () {
         if (_mainScriptDir != null &&
-            serviceManager.isolateManager.mainIsolate.value != null) {
-          final debuggerState = serviceManager.isolateManager.mainIsolateState;
+            serviceConnection.serviceManager.isolateManager.mainIsolate.value !=
+                null) {
+          final debuggerState =
+              serviceConnection.serviceManager.isolateManager.mainIsolateState;
 
           if (debuggerState?.isPaused.value == false) {
             // the isolate is already unpaused, we can try to load
             // the directories
-            unawaited(preferences.inspector.loadCustomPubRootDirectories());
+            unawaited(preferences.inspector.loadPubRootDirectories());
           } else {
             late Function() pausedListener;
 
             pausedListener = () {
               if (debuggerState?.isPaused.value == false) {
-                unawaited(preferences.inspector.loadCustomPubRootDirectories());
+                unawaited(preferences.inspector.loadPubRootDirectories());
 
                 debuggerState?.isPaused.removeListener(pausedListener);
               }
@@ -230,43 +241,146 @@ class InspectorPreferencesController extends DisposableController
     );
   }
 
-  void _handleConnectionClosed(Object? _) {
+  void _handleConnectionClosed() {
     _mainScriptDir = null;
-    _customPubRootDirectories.clear();
+    _pubRootDirectories.clear();
   }
 
-  Future<void> _handleConnectionToNewService(VmServiceWrapper _) async {
+  @visibleForTesting
+  Future<void> handleConnectionToNewService() async {
+    _checkedFlutterPubRoot = false;
     await _updateMainScriptRef();
     await _updateHoverEvalMode();
+    await loadPubRootDirectories();
+  }
 
-    final localInspectorService = _inspectorService;
-    if (localInspectorService is InspectorService) {
-      _customPubRootDirectories.clear();
-      await loadCustomPubRootDirectories();
+  Future<void> loadPubRootDirectories() async {
+    await _pubRootDirectoryBusyTracker(() async {
+      await addPubRootDirectories(await _determinePubRootDirectories());
+      await _refreshPubRootDirectoriesFromService();
+    });
+  }
 
-      if (_customPubRootDirectories.value.isEmpty) {
-        // If there are no pub root directories set on the first connection
-        // then try inferring them.
-        await _customPubRootDirectoryBusyTracker(() async {
-          await localInspectorService.inferPubRootDirectoryIfNeeded();
-          await loadCustomPubRootDirectories();
-        });
+  Future<List<String>> _determinePubRootDirectories() async {
+    final cachedDirectories = await readCachedPubRootDirectories();
+    final inferredDirectory = await _inferPubRootDirectory();
+
+    if (inferredDirectory == null) return cachedDirectories;
+    return {inferredDirectory, ...cachedDirectories}.toList();
+  }
+
+  @visibleForTesting
+  Future<List<String>> readCachedPubRootDirectories() async {
+    final cachedDirectoriesJson =
+        await storage.getValue(_customPubRootStorageId());
+    if (cachedDirectoriesJson == null) return <String>[];
+    final cachedDirectories = List<String>.from(
+      jsonDecode(cachedDirectoriesJson),
+    );
+
+    // Remove the Flutter pub root directory if it was accidentally cached.
+    // See:
+    // - https://github.com/flutter/devtools/issues/6882
+    // - https://github.com/flutter/devtools/issues/6841
+    if (!_checkedFlutterPubRoot && cachedDirectories.any(_isFlutterPubRoot)) {
+      // Set [_checkedFlutterPubRoot] to true to avoid an infinite loop on the
+      // next call to [removePubRootDirectories]:
+      _checkedFlutterPubRoot = true;
+      final flutterPubRootDirectories =
+          cachedDirectories.where(_isFlutterPubRoot).toList();
+      await removePubRootDirectories(flutterPubRootDirectories);
+      cachedDirectories.removeWhere(_isFlutterPubRoot);
+    }
+
+    return cachedDirectories;
+  }
+
+  bool _isFlutterPubRoot(String directory) =>
+      directory.endsWith('packages/flutter');
+
+  /// As we aren't running from an IDE, we don't know exactly what the pub root
+  /// directories are for the current project so we make a best guess based on
+  /// the root library for the main isolate.
+  Future<String?> _inferPubRootDirectory() async {
+    final path = await serviceConnection.rootLibraryForMainIsolate();
+    if (path == null) {
+      return null;
+    }
+    // TODO(jacobr): Once https://github.com/flutter/flutter/issues/26615 is
+    // fixed we will be able to use package: paths. Temporarily all tools
+    // tracking widget locations will need to support both path formats.
+    // TODO(jacobr): use the list of loaded scripts to determine the appropriate
+    // package root directory given that the root script of this project is in
+    // this directory rather than guessing based on url structure.
+    final parts = path.split('/');
+    String? pubRootDirectory;
+    // For google3, we grab the top-level directory in the google3 directory
+    // (e.g. /education), or the top-level directory in third_party (e.g.
+    // /third_party/dart):
+    if (isGoogle3Path(parts)) {
+      pubRootDirectory = _pubRootDirectoryForGoogle3(parts);
+    } else {
+      final parts = path.split('/');
+
+      for (int i = parts.length - 1; i >= 0; i--) {
+        final part = parts[i];
+        if (part == 'lib' || part == 'web') {
+          pubRootDirectory = parts.sublist(0, i).join('/');
+          break;
+        }
+
+        if (part == 'packages') {
+          pubRootDirectory = parts.sublist(0, i + 1).join('/');
+          break;
+        }
       }
+    }
+    pubRootDirectory ??= (parts..removeLast()).join('/');
+    return pubRootDirectory;
+  }
+
+  String? _pubRootDirectoryForGoogle3(List<String> pathParts) {
+    final strippedParts = stripGoogle3(pathParts);
+    if (strippedParts.isEmpty) return null;
+
+    final topLevelDirectory = strippedParts.first;
+    if (topLevelDirectory == _thirdPartyPathSegment &&
+        strippedParts.length >= 2) {
+      return '/${strippedParts.sublist(0, 2).join('/')}';
+    } else {
+      return '/${strippedParts.first}';
     }
   }
 
-  void _persistCustomPubRootDirectoriesToStorage() {
-    unawaited(
-      storage.setValue(
-        _customPubRootStorageId(),
-        jsonEncode(_customPubRootDirectories.value),
-      ),
+  Future<void> _cachePubRootDirectories(
+    List<String> pubRootDirectories,
+  ) async {
+    final cachedDirectories = await readCachedPubRootDirectories();
+    await storage.setValue(
+      _customPubRootStorageId(),
+      jsonEncode([
+        ...cachedDirectories,
+        ...pubRootDirectories,
+      ]),
+    );
+  }
+
+  Future<void> _uncachePubRootDirectories(
+    List<String> pubRootDirectories,
+  ) async {
+    final directoriesToCache = (await readCachedPubRootDirectories())
+        .where((dir) => !pubRootDirectories.contains(dir))
+        .toList();
+    await storage.setValue(
+      _customPubRootStorageId(),
+      jsonEncode(directoriesToCache),
     );
   }
 
   Future<void> addPubRootDirectories(
-    List<String> pubRootDirectories,
-  ) async {
+    List<String> pubRootDirectories, {
+    bool shouldCache = false,
+  }) async {
     // TODO(https://github.com/flutter/devtools/issues/4380):
     // Add validation to EditableList Input.
     // Directories of just / will break the inspector tree local package checks.
@@ -274,12 +388,15 @@ class InspectorPreferencesController extends DisposableController
       (element) => RegExp('^[/\\s]*\$').firstMatch(element) != null,
     );
 
-    if (!serviceManager.hasConnection) return;
-    await _customPubRootDirectoryBusyTracker(() async {
+    if (!serviceConnection.serviceManager.hasConnection) return;
+    await _pubRootDirectoryBusyTracker(() async {
       final localInspectorService = _inspectorService;
       if (localInspectorService is! InspectorService) return;
 
       await localInspectorService.addPubRootDirectories(pubRootDirectories);
+      if (shouldCache) {
+        await _cachePubRootDirectories(pubRootDirectories);
+      }
       await _refreshPubRootDirectoriesFromService();
     });
   }
@@ -287,18 +404,19 @@ class InspectorPreferencesController extends DisposableController
   Future<void> removePubRootDirectories(
     List<String> pubRootDirectories,
   ) async {
-    if (!serviceManager.hasConnection) return;
-    await _customPubRootDirectoryBusyTracker(() async {
+    if (!serviceConnection.serviceManager.hasConnection) return;
+    await _pubRootDirectoryBusyTracker(() async {
       final localInspectorService = _inspectorService;
       if (localInspectorService is! InspectorService) return;
 
       await localInspectorService.removePubRootDirectories(pubRootDirectories);
+      await _uncachePubRootDirectories(pubRootDirectories);
       await _refreshPubRootDirectoriesFromService();
     });
   }
 
   Future<void> _refreshPubRootDirectoriesFromService() async {
-    await _customPubRootDirectoryBusyTracker(() async {
+    await _pubRootDirectoryBusyTracker(() async {
       final localInspectorService = _inspectorService;
       if (localInspectorService is! InspectorService) return;
 
@@ -306,14 +424,13 @@ class InspectorPreferencesController extends DisposableController
           await localInspectorService.getPubRootDirectories();
       if (freshPubRootDirectories != null) {
         final newSet = Set<String>.of(freshPubRootDirectories);
-        final oldSet = Set<String>.of(_customPubRootDirectories.value);
+        final oldSet = Set<String>.of(_pubRootDirectories.value);
         final directoriesToAdd = newSet.difference(oldSet);
         final directoriesToRemove = oldSet.difference(newSet);
 
-        _customPubRootDirectories.removeAll(directoriesToRemove);
-        _customPubRootDirectories.addAll(directoriesToAdd);
-
-        _persistCustomPubRootDirectoriesToStorage();
+        _pubRootDirectories
+          ..removeAll(directoriesToRemove)
+          ..addAll(directoriesToAdd);
       }
     });
   }
@@ -324,25 +441,7 @@ class InspectorPreferencesController extends DisposableController
     return '${_customPubRootDirectoriesStoragePrefix}_$packageId';
   }
 
-  Future<void> loadCustomPubRootDirectories() async {
-    if (!serviceManager.hasConnection) return;
-
-    await _customPubRootDirectoryBusyTracker(() async {
-      final storedCustomPubRootDirectories =
-          await storage.getValue(_customPubRootStorageId());
-
-      if (storedCustomPubRootDirectories != null) {
-        await addPubRootDirectories(
-          List<String>.from(
-            jsonDecode(storedCustomPubRootDirectories),
-          ),
-        );
-      }
-      await _refreshPubRootDirectoriesFromService();
-    });
-  }
-
-  Future<void> _customPubRootDirectoryBusyTracker(
+  Future<void> _pubRootDirectoryBusyTracker(
     Future<void> Function() callback,
   ) async {
     try {
@@ -435,33 +534,6 @@ class MemoryPreferencesController extends DisposableController
   }
 }
 
-class CpuProfilerPreferencesController extends DisposableController
-    with AutoDisposeControllerMixin {
-  final displayTreeGuidelines = ValueNotifier<bool>(false);
-
-  static final _displayTreeGuidelinesId = '${gac.cpuProfiler}.'
-      '${gac.CpuProfilerEvents.cpuProfileDisplayTreeGuidelines.name}';
-
-  Future<void> init() async {
-    addAutoDisposeListener(
-      displayTreeGuidelines,
-      () {
-        storage.setValue(
-          _displayTreeGuidelinesId,
-          displayTreeGuidelines.value.toString(),
-        );
-        ga.select(
-          gac.cpuProfiler,
-          gac.CpuProfilerEvents.cpuProfileDisplayTreeGuidelines.name,
-          value: displayTreeGuidelines.value ? 1 : 0,
-        );
-      },
-    );
-    displayTreeGuidelines.value =
-        await storage.getValue(_displayTreeGuidelinesId) == 'true';
-  }
-}
-
 class PerformancePreferencesController extends DisposableController
     with AutoDisposeControllerMixin {
   final showFlutterFramesChart = ValueNotifier<bool>(true);
@@ -486,5 +558,34 @@ class PerformancePreferencesController extends DisposableController
     );
     showFlutterFramesChart.value =
         await storage.getValue(_showFlutterFramesChartId) != 'false';
+  }
+}
+
+class ExtensionsPreferencesController extends DisposableController
+    with AutoDisposeControllerMixin {
+  final showOnlyEnabledExtensions = ValueNotifier<bool>(false);
+
+  static final _showOnlyEnabledExtensionsId =
+      '${gac.DevToolsExtensionEvents.extensionScreenId}.'
+      '${gac.DevToolsExtensionEvents.showOnlyEnabledExtensionsSetting.name}';
+
+  Future<void> init() async {
+    addAutoDisposeListener(
+      showOnlyEnabledExtensions,
+      () {
+        storage.setValue(
+          _showOnlyEnabledExtensionsId,
+          showOnlyEnabledExtensions.value.toString(),
+        );
+        ga.select(
+          gac.DevToolsExtensionEvents.extensionScreenId.name,
+          gac.DevToolsExtensionEvents.showOnlyEnabledExtensionsSetting.name,
+          value: showOnlyEnabledExtensions.value ? 1 : 0,
+        );
+      },
+    );
+    // Default the value to false if it is not set.
+    showOnlyEnabledExtensions.value =
+        await storage.getValue(_showOnlyEnabledExtensionsId) == 'true';
   }
 }

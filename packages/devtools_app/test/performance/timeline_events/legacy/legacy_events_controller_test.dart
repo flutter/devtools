@@ -5,7 +5,10 @@
 import 'dart:async';
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart' hide TimelineEvent;
@@ -13,7 +16,8 @@ import 'package:vm_service/vm_service.dart' hide TimelineEvent;
 import '../../../test_infra/test_data/performance.dart';
 
 void main() {
-  final ServiceConnectionManager fakeServiceManager = FakeServiceManager(
+  final ServiceConnectionManager fakeServiceManager =
+      FakeServiceConnectionManager(
     service: FakeServiceManager.createFakeService(
       timelineData: Timeline.parse(testTimelineJson)!,
     ),
@@ -23,11 +27,11 @@ void main() {
     late TimelineEventsController eventsController;
 
     setUp(() {
-      when(fakeServiceManager.connectedApp!.isProfileBuild)
+      when(fakeServiceManager.serviceManager.connectedApp!.isProfileBuild)
           .thenAnswer((realInvocation) => Future.value(false));
       final initializedCompleter = Completer<bool>();
       initializedCompleter.complete(true);
-      when(fakeServiceManager.connectedApp!.initialized)
+      when(fakeServiceManager.serviceManager.connectedApp!.initialized)
           .thenReturn(initializedCompleter);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(IdeTheme, IdeTheme());

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: avoid_print
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -142,7 +144,7 @@ class CliAppFixture extends AppFixture {
         await _waitForIsolate(serviceConnection, 'PauseStart');
     await serviceConnection.resume(isolate.id!);
 
-    Future<void> _onTeardown() async {
+    Future<void> onTeardown() async {
       await linesSubscription.cancel();
       await lineController.close();
     }
@@ -154,7 +156,7 @@ class CliAppFixture extends AppFixture {
       uri,
       serviceConnection,
       vm.isolates!,
-      _onTeardown,
+      onTeardown,
     );
   }
 

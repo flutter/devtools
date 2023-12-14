@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -16,7 +18,6 @@ import '../../../../../shared/file_import.dart';
 import '../../../../../shared/primitives/auto_dispose.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
-import '../../../../../shared/theme.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/item_controller.dart';
 
@@ -368,10 +369,14 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
   Widget build(BuildContext context) {
     final core = widget.controller.core;
 
-    return DualValueListenableBuilder<List<SnapshotItem>, int>(
-      firstListenable: core.snapshots,
-      secondListenable: core.selectedSnapshotIndex,
-      builder: (_, snapshots, selectedIndex, __) {
+    return MultiValueListenableBuilder(
+      listenables: [
+        core.snapshots,
+        core.selectedSnapshotIndex,
+      ],
+      builder: (_, values, __) {
+        final snapshots = values.first as List<SnapshotItem>;
+        final selectedIndex = values.second as int;
         return ListView.builder(
           controller: _scrollController,
           itemCount: snapshots.length,

@@ -5,7 +5,6 @@
 // Avoid unused parameters does not play well with conditional imports.
 // ignore_for_file: avoid-unused-parameters
 // ignore_for_file: avoid-redundant-async
-library _analytics_stub;
 
 import 'dart:async';
 
@@ -14,6 +13,12 @@ import 'package:logging/logging.dart';
 import 'analytics_common.dart';
 
 final _log = Logger('_analytics_stub');
+
+/// The IDE that DevTools was launched from.
+///
+/// This is just a stub value so that we can access the [ideLaunched] field on
+/// both web and desktop, and manipulate this value for tests running on the VM.
+String ideLaunched = '';
 
 Future<void> setAnalyticsEnabled(bool value) async {}
 
@@ -79,6 +84,18 @@ void select(
     'selectedItem:$selectedItem, '
     'value:$value, '
     'nonInteraction:$nonInteraction)',
+  );
+}
+
+void impression(
+  String screenName,
+  String item, {
+  ScreenAnalyticsMetrics Function()? screenMetricsProvider,
+}) {
+  _log.fine(
+    'Event: impression('
+    'screenName:$screenName, '
+    'item:$item)',
   );
 }
 

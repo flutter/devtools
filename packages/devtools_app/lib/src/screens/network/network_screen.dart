@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -11,16 +13,14 @@ import 'package:provider/provider.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
+import '../../shared/config_specific/copy_to_clipboard/copy_to_clipboard.dart';
 import '../../shared/globals.dart';
 import '../../shared/http/curl_command.dart';
 import '../../shared/http/http_request_data.dart';
-import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/screen.dart';
-import '../../shared/split.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
-import '../../shared/theme.dart';
 import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/utils.dart';
@@ -29,13 +29,7 @@ import 'network_model.dart';
 import 'network_request_inspector.dart';
 
 class NetworkScreen extends Screen {
-  NetworkScreen()
-      : super.conditional(
-          id: id,
-          requiresDartVm: true,
-          title: ScreenMetaData.network.title,
-          icon: ScreenMetaData.network.icon,
-        );
+  NetworkScreen() : super.fromMetaData(ScreenMetaData.network);
 
   static final id = ScreenMetaData.network.id;
 
@@ -48,12 +42,15 @@ class NetworkScreen extends Screen {
   @override
   Widget buildStatus(BuildContext context) {
     final networkController = Provider.of<NetworkController>(context);
-    final color = Theme.of(context).textTheme.bodyMedium!.color!;
-
-    return DualValueListenableBuilder<NetworkRequests, List<NetworkRequest>>(
-      firstListenable: networkController.requests,
-      secondListenable: networkController.filteredData,
-      builder: (context, networkRequests, filteredRequests, child) {
+    final color = Theme.of(context).colorScheme.onPrimary;
+    return MultiValueListenableBuilder(
+      listenables: [
+        networkController.requests,
+        networkController.filteredData,
+      ],
+      builder: (context, values, child) {
+        final networkRequests = values.first as NetworkRequests;
+        final filteredRequests = values.second as List<NetworkRequest>;
         final filteredCount = filteredRequests.length;
         final totalCount = networkRequests.requests.length;
         return Row(
@@ -129,11 +126,15 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
 
     cancelListeners();
 
-    addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
-      if (serviceManager.isolateManager.mainIsolate.value != null) {
-        unawaited(controller.startRecording());
-      }
-    });
+    addAutoDisposeListener(
+      serviceConnection.serviceManager.isolateManager.mainIsolate,
+      () {
+        if (serviceConnection.serviceManager.isolateManager.mainIsolate.value !=
+            null) {
+          unawaited(controller.startRecording());
+        }
+      },
+    );
   }
 
   @override
@@ -248,7 +249,7 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
           searchFieldWidth: wideSearchFieldWidth,
         ),
         const SizedBox(width: denseSpacing),
-        FilterButton(
+        DevToolsFilterButton(
           onPressed: _showFilterDialog,
           isFilterActive: _filteredRequests.length != _requests.requests.length,
         ),
@@ -378,6 +379,7 @@ class UriColumn extends ColumnData<NetworkRequest>
     BuildContext context,
     NetworkRequest data, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     final value = getDisplayValue(data);
@@ -459,6 +461,7 @@ class ActionsColumn extends ColumnData<NetworkRequest>
     BuildContext context,
     NetworkRequest data, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     final options = _buildOptions(data);
@@ -501,6 +504,7 @@ class StatusColumn extends ColumnData<NetworkRequest>
     BuildContext context,
     NetworkRequest data, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     final theme = Theme.of(context);

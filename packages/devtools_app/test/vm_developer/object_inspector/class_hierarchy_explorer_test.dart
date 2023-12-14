@@ -4,7 +4,10 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_developer_common_widgets.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
@@ -101,7 +104,7 @@ void main() {
     (tester) async {
       final controller = objectInspectorViewController.classHierarchyController;
       await tester.pumpWidget(
-        wrap(
+        wrapSimple(
           ClassHierarchyExplorer(
             controller: objectInspectorViewController,
           ),

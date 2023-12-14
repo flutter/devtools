@@ -7,11 +7,12 @@ import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/charts/chart.dart';
 import 'package:devtools_app/src/shared/charts/chart_controller.dart';
 import 'package:devtools_app/src/shared/charts/chart_trace.dart';
-import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/primitives/utils.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -22,14 +23,14 @@ void main() {
   const windowSize = Size(2225.0, 1000.0);
 
   setUp(() {
-    setGlobal(ServiceConnectionManager, FakeServiceManager());
+    setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
     setGlobal(IdeTheme, IdeTheme());
   });
 
   group(
     'Chart Timeseries',
     () {
-      late MemoryJson memoryJson;
+      late MemoryJson<HeapSample> memoryJson;
       bool memoryJasonInitialized = false;
 
       void loadData() {
@@ -574,7 +575,7 @@ void main() {
           } else if (event.isEventAllocationAccumulator) {
             final monitorType = event.allocationAccumulator;
             final rawData = Data(datum.timestamp, visibleMonitorEvent);
-            if (monitorType.isEmpty) continue;
+            if (monitorType!.isEmpty) continue;
             if (monitorType.isStart) {
               addDataToTrace(controller, monitorTraceIndex, rawData);
             } else if (monitorType.isReset) {

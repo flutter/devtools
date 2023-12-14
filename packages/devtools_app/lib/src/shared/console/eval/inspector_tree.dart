@@ -2,22 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Inspector specific tree rendering support designed to be extendable to work
-/// either directly with dart:html or with Hummingbird.
+/// Inspector specific tree rendering support.
 ///
-/// This library must not have direct dependencies on dart:html.
+/// This library must not have direct dependencies on web-only libraries.
 ///
-/// This allows tests of the complicated logic in this class to run on the VM
-/// and will help simplify porting this code to work with Hummingbird.
+/// This allows tests of the complicated logic in this class to run on the VM.
+library;
 
-library inspector_tree;
-
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../diagnostics/diagnostics_node.dart';
 import '../../ui/search.dart';
 import '../../utils.dart';
-import '../primitives/simple_items.dart';
 
 /// Split text into two groups, word characters at the start of a string and all
 /// other characters.
@@ -97,8 +94,6 @@ class InspectorTreeNode {
 
   Iterable<InspectorTreeNode> get children => _children;
 
-  bool get isCreatedByLocalProject => _diagnostic!.isCreatedByLocalProject;
-
   bool get isProperty {
     final diagnosticLocal = diagnostic;
     return diagnosticLocal == null || diagnosticLocal.isProperty;
@@ -165,8 +160,6 @@ class InspectorTreeNode {
   int? _childrenCount;
 
   int get subtreeSize => childrenCount + 1;
-
-  bool get isLeaf => _children.isEmpty;
 
   // TODO(jacobr): move getRowIndex to the InspectorTree class.
   int getRowIndex(InspectorTreeNode node) {
@@ -293,35 +286,19 @@ typedef NodeAddedCallback = void Function(
 
 class InspectorTreeConfig {
   InspectorTreeConfig({
-    required this.summaryTree,
-    required this.treeType,
     this.onNodeAdded,
     this.onClientActiveChange,
     this.onSelectionChange,
     this.onExpand,
-    this.onHover,
   });
 
-  final bool summaryTree;
-  final FlutterTreeType treeType;
   final NodeAddedCallback? onNodeAdded;
   final VoidCallback? onSelectionChange;
   final void Function(bool added)? onClientActiveChange;
   final TreeEventCallback? onExpand;
-  final TreeEventCallback? onHover;
 }
 
 enum SearchTargetType {
   widget,
   // TODO(https://github.com/flutter/devtools/issues/3489) implement other search scopes: details, all etc
-}
-
-extension SearchTargetTypeExtension on SearchTargetType {
-  String get name {
-    switch (this) {
-      case SearchTargetType.widget:
-      default:
-        return 'Widget';
-    }
-  }
 }

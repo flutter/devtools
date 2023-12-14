@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/service_extensions.dart' as extensions;
+import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
 import '../shared/analytics/constants.dart' as gac;
-import '../shared/theme.dart';
+import '../shared/constants.dart';
 
 class RegisteredServiceDescription extends RegisteredService {
   const RegisteredServiceDescription._({
@@ -26,12 +28,9 @@ class RegisteredServiceDescription extends RegisteredService {
 ///
 /// We call this service to perform hot reload.
 final hotReload = RegisteredServiceDescription._(
-  service: 'reloadSources',
+  service: extensions.hotReloadServiceName,
   title: 'Hot Reload',
-  icon: Icon(
-    Icons.electric_bolt_outlined,
-    size: actionsIconSize,
-  ),
+  icon: Icon(hotReloadIcon, size: actionsIconSize),
   gaScreenName: gac.devToolsMain,
   gaItem: gac.hotReload,
 );
@@ -40,23 +39,11 @@ final hotReload = RegisteredServiceDescription._(
 ///
 /// We call this service to perform a hot restart.
 final hotRestart = RegisteredServiceDescription._(
-  service: 'hotRestart',
+  service: extensions.hotRestartServiceName,
   title: 'Hot Restart',
-  icon: Icon(
-    Icons.settings_backup_restore_outlined,
-    size: actionsIconSize,
-  ),
+  icon: Icon(hotRestartIcon, size: actionsIconSize),
   gaScreenName: gac.devToolsMain,
   gaItem: gac.hotRestart,
-);
-
-/// Flutter version service registered by Flutter Tools.
-///
-/// We call this service to get version information about the Flutter framework,
-/// the Flutter engine, and the Dart sdk.
-const flutterVersion = RegisteredService(
-  service: 'flutterVersion',
-  title: 'Flutter Version',
 );
 
 RegisteredService get flutterMemoryInfo => flutterMemory;
@@ -71,3 +58,7 @@ const renderFrameWithRasterStats = '_flutter.renderFrameWithRasterStats';
 
 /// Dwds listens to events for recording end-to-end analytics.
 const dwdsSendEvent = 'ext.dwds.sendEvent';
+
+/// Service extension that returns whether or not the Impeller rendering engine
+/// is being used (if false, the app is using SKIA).
+const isImpellerEnabled = 'ext.ui.window.impellerEnabled';

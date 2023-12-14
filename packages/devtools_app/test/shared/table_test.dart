@@ -2,17 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/primitives/trees.dart';
-import 'package:devtools_app/src/shared/primitives/utils.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/table/column_widths.dart';
 import 'package:devtools_app/src/shared/table/table.dart';
 import 'package:devtools_app/src/shared/table/table_controller.dart';
 import 'package:devtools_app/src/shared/table/table_data.dart';
-import 'package:devtools_app/src/shared/utils.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart' hide TableRow;
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -46,7 +44,7 @@ class _NonSortableFlatNumColumn extends ColumnData<TestData> {
 
 void main() {
   setUp(() {
-    setGlobal(ServiceConnectionManager, FakeServiceManager());
+    setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
     setGlobal(IdeTheme, IdeTheme());
     TableUiStateStore.clear();
   });
@@ -221,7 +219,7 @@ void main() {
         defaultSortDirection: SortDirection.ascending,
       );
       await tester.pumpWidget(wrap(table));
-      final FlatTableState state = tester.state(find.byWidget(table));
+      final FlatTableState<TestData> state = tester.state(find.byWidget(table));
       final data = state.tableController.tableData.value.data;
       expect(data[0].name, equals('Bar'));
       expect(data[1].name, equals('Baz'));
@@ -247,7 +245,7 @@ void main() {
         defaultSortDirection: SortDirection.ascending,
       );
       await tester.pumpWidget(wrap(table));
-      final FlatTableState state = tester.state(find.byWidget(table));
+      final FlatTableState<TestData> state = tester.state(find.byWidget(table));
       {
         final data = state.tableController.tableData.value.data;
         expect(data[0].name, equals('Bar'));
@@ -314,7 +312,8 @@ void main() {
           defaultSortDirection: SortDirection.ascending,
         );
         await tester.pumpWidget(wrap(table));
-        final FlatTableState state = tester.state(find.byWidget(table));
+        final FlatTableState<TestData> state =
+            tester.state(find.byWidget(table));
         {
           final data = state.tableController.tableData.value.data;
           expect(data[0].name, equals('Bar'));
@@ -390,7 +389,8 @@ void main() {
           secondarySortColumn: flatNameColumn,
         );
         await tester.pumpWidget(wrap(table));
-        final FlatTableState state = tester.state(find.byWidget(table));
+        final FlatTableState<TestData> state =
+            tester.state(find.byWidget(table));
         {
           final data = state.tableController.tableData.value.data;
           expect(data[0].name, equals('Foo'));
@@ -1208,7 +1208,7 @@ void main() {
         defaultSortDirection: SortDirection.ascending,
       );
       await tester.pumpWidget(wrap(table));
-      final TreeTableState state = tester.state(find.byWidget(table));
+      final TreeTableState<TestData> state = tester.state(find.byWidget(table));
       final tree = state.tableController.dataRoots[0];
       expect(tree.children[0].name, equals('Bar'));
       expect(tree.children[0].children[0].name, equals('Baz'));
@@ -1234,7 +1234,7 @@ void main() {
         defaultSortDirection: SortDirection.ascending,
       );
       await tester.pumpWidget(wrap(table));
-      final TreeTableState state = tester.state(find.byWidget(table));
+      final TreeTableState<TestData> state = tester.state(find.byWidget(table));
       expect(state.tableController.columnWidths![0], equals(400));
       expect(state.tableController.columnWidths![1], equals(81));
       final tree = state.tableController.dataRoots[0];

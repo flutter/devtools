@@ -2,16 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../shared/common_widgets.dart';
-import '../../../../shared/primitives/auto_dispose.dart';
 import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/profiler_utils.dart';
-import '../../../../shared/split.dart';
 import '../../../../shared/table/table.dart';
 import '../../../../shared/table/table_data.dart';
-import '../../../../shared/theme.dart';
 import 'method_table_controller.dart';
 import 'method_table_model.dart';
 
@@ -30,7 +28,7 @@ class CpuMethodTable extends StatelessWidget {
           axis: Axis.horizontal,
           initialFractions: const [0.5, 0.5],
           children: [
-            _MethodTable(methodTableController, methods),
+            MethodTable(methodTableController, methods),
             _MethodGraph(methodTableController),
           ],
         );
@@ -42,8 +40,9 @@ class CpuMethodTable extends StatelessWidget {
 // TODO(kenz): ensure that this table automatically scrolls to the selected
 // node from [MethodTableController].
 /// A table of methods and their timing information for a CPU profile.
-class _MethodTable extends StatelessWidget {
-  const _MethodTable(this._methodTableController, this._methods);
+@visibleForTesting
+class MethodTable extends StatelessWidget {
+  const MethodTable(this._methodTableController, this._methods, {super.key});
 
   static final methodColumn = _MethodColumn();
   static final selfTimeColumn = _SelfTimeColumn();
@@ -152,7 +151,6 @@ class _MethodGraphState extends State<_MethodGraph> with AutoDisposeMixin {
                 methodName: selectedNode.name,
                 packageUri: selectedNode.packageUri,
                 sourceLine: selectedNode.sourceLine,
-                isSelected: false,
                 displayInRow: false,
               ),
             ),
@@ -264,13 +262,13 @@ class _MethodColumn extends ColumnData<MethodTableGraphNode>
     BuildContext context,
     MethodTableGraphNode data, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     return MethodAndSourceDisplay(
       methodName: data.name,
       packageUri: data.packageUri,
       sourceLine: data.sourceLine,
-      isSelected: isRowSelected,
     );
   }
 }

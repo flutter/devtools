@@ -1,45 +1,64 @@
 This is draft for future release notes, that are going to land on
-[the Flutter website](https://docs.flutter.dev/development/tools/devtools/release-notes).
+[the Flutter website](https://docs.flutter.dev/tools/devtools/release-notes).
 
-# DevTools 2.26.0 release notes
+# DevTools 2.31.0 release notes
 
-Dart & Flutter DevTools - A Suite of Performance Tools for Dart and Flutter
+The 2.31.0 release of the Dart and Flutter DevTools
+includes the following changes among other general improvements.
+To learn more about DevTools, check out the
+[DevTools overview](https://docs.flutter.dev/tools/devtools/overview).
 
 ## General updates
-* Added a new "Home" screen in DevTools that either shows the "Connect" dialog or
-a summary of your connected app, depending on the connection status in DevTools. Keep an
-eye on this screen for cool new features in the future. This change also enables support
-for static tooling (tools that don't require a connected app) in DevTools - [#6010](https://github.com/flutter/devtools/pull/6010)
-![home screen](images/home_screen.png "DevTools home screen")
-* Added an action to the main toolbar for loading offline data into DevTools - [#6003](https://github.com/flutter/devtools/pull/6003)
-![load data action](images/load_data.png "Load data action")
-* Fixed overlay notifications so that they cover the area that their background blocks - [#5975](https://github.com/flutter/devtools/pull/5975)
+
+* Added a new feature for deep link validation, supporting deep link web checks on Android. - [#6935](https://github.com/flutter/devtools/pull/6935)
 
 ## Inspector updates
-TODO: Remove this section if there are not any general updates.
+
+* Added link to package directory documentation, from the inspect settings dialog - [6825](https://github.com/flutter/devtools/pull/6825)
+* Fix bug where widgets owned by the Flutter framework were showing up in the widget tree view -
+[6857](https://github.com/flutter/devtools/pull/6857)
+* Only cache pub root directories added by the user - [6897](https://github.com/flutter/devtools/pull/6897)
+* Remove Flutter pub root if it was accidently cached - [6911](https://github.com/flutter/devtools/pull/6911)
 
 ## Performance updates
-TODO: Remove this section if there are not any general updates.
+
+* Changed raster layer preview background to a checkerboard. - [#6827](https://github.com/flutter/devtools/pull/6827)
 
 ## CPU profiler updates
+
 TODO: Remove this section if there are not any general updates.
 
 ## Memory updates
-* Added a context menu to rename or delete a heap snapshot from the list - [#5997](https://github.com/flutter/devtools/pull/5997)
-* Warn users when HTTP logging may be affecting their app's memory consumption - [#5998](https://github.com/flutter/devtools/pull/5998)
 
-## Debugger updates
-* Improvements to text selection and copy behavior in the codeview, console, and variables window. - [#6020](https://github.com/flutter/devtools/pull/6020)
-
-## Network profiler updates
-* Added a selector to customize the display type of text and json responses (thanks to @hhacker1999!) - [#5816](https://github.com/flutter/devtools/pull/5816)
-
-## Logging updates
 TODO: Remove this section if there are not any general updates.
 
+## Debugger updates
+
+* Highlight `extension type` as a declaration keyword,
+  highlight the `$` in identifier interpolation as part of the interpolation,
+  and properly highlight comments within type arguments. - [6837](https://github.com/flutter/devtools/pull/6837)
+
+## Network profiler updates
+
+TODO: Remove this section if there are not any general updates.
+
+## Logging updates
+
+* Added scrollbar to details pane. - [#6917](https://github.com/flutter/devtools/pull/6917)
+
 ## App size tool updates
+
+TODO: Remove this section if there are not any general updates.
+
+## VS Code Sidebar updates
+
+TODO: Remove this section if there are not any general updates.
+
+## DevTools Extension updates
+
 TODO: Remove this section if there are not any general updates.
 
 ## Full commit history
-More details about changes and fixes are available from the
-[DevTools git log.](https://github.com/flutter/devtools/commits/master).
+
+To find a complete list of changes in this release, check out the
+[DevTools git log](https://github.com/flutter/devtools/tree/v2.31.0).

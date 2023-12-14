@@ -20,6 +20,7 @@ import 'vm_object_model.dart';
 import 'vm_object_pool_display.dart';
 import 'vm_script_display.dart';
 import 'vm_simple_list_display.dart';
+import 'vm_unknown_object_display.dart';
 
 /// Displays the VM information for the currently selected object in the
 /// program explorer.
@@ -70,6 +71,10 @@ class ObjectViewport extends StatelessWidget {
     if (object.obj is Instance) {
       final instance = object.obj as Instance;
       return 'Instance of ${instance.classRef!.name}';
+    }
+
+    if (object is UnknownObject) {
+      return 'Instance of VM type ${object.name}';
     }
 
     return '${object.obj.type} ${object.name ?? ''}'.trim();
@@ -136,6 +141,12 @@ class ObjectViewport extends StatelessWidget {
       return VmSimpleListDisplay(
         controller: controller,
         vmObject: obj,
+      );
+    }
+    if (obj is UnknownObject) {
+      return VmUnknownObjectDisplay(
+        controller: controller,
+        object: obj,
       );
     }
     return const SizedBox.shrink();

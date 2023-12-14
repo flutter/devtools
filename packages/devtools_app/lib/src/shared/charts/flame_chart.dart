@@ -6,19 +6,18 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../common_widgets.dart';
-import '../dialogs.dart';
-import '../primitives/auto_dispose.dart';
 import '../primitives/extent_delegate_list.dart';
 import '../primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
-import '../theme.dart';
 import '../ui/colors.dart';
 import '../ui/search.dart';
 import '../ui/utils.dart';
@@ -289,7 +288,7 @@ abstract class FlameChartState<T extends FlameChart,
         child: Focus(
           autofocus: true,
           focusNode: focusNode,
-          onKey: (node, event) => _handleKeyEvent(event),
+          onKeyEvent: (node, event) => _handleKeyEvent(event),
           // Scrollbar needs to wrap [LayoutBuilder] so that the scroll bar is
           // rendered on top of the custom painters defined in [buildCustomPaints]
           child: Scrollbar(
@@ -454,48 +453,47 @@ abstract class FlameChartState<T extends FlameChart,
     );
   }
 
-  KeyEventResult _handleKeyEvent(RawKeyEvent event) {
+  KeyEventResult _handleKeyEvent(KeyEvent event) {
+    if (!event.isKeyDownOrRepeat) return KeyEventResult.ignored;
     // Only handle down events so logic is not duplicated on key up.
-    if (event is RawKeyDownEvent) {
-      // TODO(kenz): zoom in/out faster if key is held. It actually zooms slower
-      // if the key is held currently.
+    // TODO(kenz): zoom in/out faster if key is held. It actually zooms slower
+    // if the key is held currently.
 
-      // Handle zooming / navigation from WASD keys. Use physical keys to match
-      // other keyboard mappings like Dvorak, for which these keys would
-      // translate to ,AOE keys. See
-      // https://api.flutter.dev/flutter/services/RawKeyEvent/physicalKey.html.
-      final eventKey = event.physicalKey;
-      if (eventKey == PhysicalKeyboardKey.keyW) {
-        unawaited(
-          zoomTo(
-            math.min(
-              maxZoomLevel,
-              currentZoom + keyboardZoomInUnit,
-            ),
+    // Handle zooming / navigation from WASD keys. Use physical keys to match
+    // other keyboard mappings like Dvorak, for which these keys would
+    // translate to ,AOE keys. See
+    // https://api.flutter.dev/flutter/services/KeyEvent/physicalKey.html.
+    final eventKey = event.physicalKey;
+    if (eventKey == PhysicalKeyboardKey.keyW) {
+      unawaited(
+        zoomTo(
+          math.min(
+            maxZoomLevel,
+            currentZoom + keyboardZoomInUnit,
           ),
-        );
-        return KeyEventResult.handled;
-      } else if (eventKey == PhysicalKeyboardKey.keyS) {
-        unawaited(
-          zoomTo(
-            math.max(
-              FlameChart.minZoomLevel,
-              currentZoom - keyboardZoomOutUnit,
-            ),
+        ),
+      );
+      return KeyEventResult.handled;
+    } else if (eventKey == PhysicalKeyboardKey.keyS) {
+      unawaited(
+        zoomTo(
+          math.max(
+            FlameChart.minZoomLevel,
+            currentZoom - keyboardZoomOutUnit,
           ),
-        );
-        return KeyEventResult.handled;
-      } else if (eventKey == PhysicalKeyboardKey.keyA) {
-        // `unawaited` does not work for FutureOr
-        // ignore: discarded_futures
-        scrollToX(horizontalControllerGroup.offset - keyboardScrollUnit);
-        return KeyEventResult.handled;
-      } else if (eventKey == PhysicalKeyboardKey.keyD) {
-        // `unawaited` does not work for FutureOr
-        // ignore: discarded_futures
-        scrollToX(horizontalControllerGroup.offset + keyboardScrollUnit);
-        return KeyEventResult.handled;
-      }
+        ),
+      );
+      return KeyEventResult.handled;
+    } else if (eventKey == PhysicalKeyboardKey.keyA) {
+      // `unawaited` does not work for FutureOr
+      // ignore: discarded_futures
+      scrollToX(horizontalControllerGroup.offset - keyboardScrollUnit);
+      return KeyEventResult.handled;
+    } else if (eventKey == PhysicalKeyboardKey.keyD) {
+      // `unawaited` does not work for FutureOr
+      // ignore: discarded_futures
+      scrollToX(horizontalControllerGroup.offset + keyboardScrollUnit);
+      return KeyEventResult.handled;
     }
     return KeyEventResult.ignored;
   }
@@ -1388,7 +1386,7 @@ class TimelineGridPainter extends FlameChartPainter {
       text: TextSpan(
         text: timestampText,
         style: TextStyle(
-          color: colorScheme.chartTextColor,
+          color: colorScheme.contrastTextColor,
           fontSize: defaultFontSize,
         ),
       ),
@@ -1445,8 +1443,7 @@ class TimelineGridPainter extends FlameChartPainter {
   bool shouldRepaint(CustomPainter oldDelegate) => this != oldDelegate;
 
   @override
-  // ignore: avoid-dynamic, necessary here.
-  bool operator ==(other) {
+  bool operator ==(Object other) {
     if (other is! TimelineGridPainter) return false;
     return zoom == other.zoom &&
         constraints == other.constraints &&

@@ -6,8 +6,9 @@
 // other libraries in this package.
 // Utils, that do not have dependencies, should go to primitives/utils.dart.
 
-import 'dart:async';
-
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -19,25 +20,8 @@ import '../../devtools.dart' as devtools;
 import 'common_widgets.dart';
 import 'connected_app.dart';
 import 'globals.dart';
-import 'theme.dart';
 
 final _log = Logger('lib/src/shared/utils');
-
-/// Attempts to copy a String of `data` to the clipboard.
-///
-/// Shows a `successMessage` [Notification] on the passed in `context`.
-Future<void> copyToClipboard(
-  String data,
-  String? successMessage,
-) async {
-  await Clipboard.setData(
-    ClipboardData(
-      text: data,
-    ),
-  );
-
-  if (successMessage != null) notificationService.push(successMessage);
-}
 
 /// Logging to debug console only in debug runs.
 void debugLogger(String message) {
@@ -47,10 +31,6 @@ void debugLogger(String message) {
       return true;
     }(),
   );
-}
-
-double scaleByFontFactor(double original) {
-  return (original * ideTheme.fontSizeFactor).roundToDouble();
 }
 
 bool isDense() {
@@ -95,8 +75,9 @@ List<ConnectionDescription> generateDeviceDescription(
   final flutterVersion = connectedApp.flutterVersionNow;
 
   ConnectionDescription? vmServiceConnection;
-  if (includeVmServiceConnection && serviceManager.service != null) {
-    final description = serviceManager.service!.connectedUri.toString();
+  if (includeVmServiceConnection &&
+      serviceConnection.serviceManager.service != null) {
+    final description = serviceConnection.serviceManager.service!.wsUri!;
     vmServiceConnection = ConnectionDescription(
       title: 'VM Service Connection',
       description: description,
@@ -133,13 +114,15 @@ List<ConnectionDescription> generateDeviceDescription(
 
 /// This method should be public, because it is used by g3 specific code.
 List<String> issueLinkDetails() {
+  final ide = ideFromUrl();
   final issueDescriptionItems = [
     '<-- Please describe your problem here. Be sure to include repro steps. -->',
     '___', // This will create a separator in the rendered markdown.
     '**DevTools version**: ${devtools.version}',
+    if (ide != null) '**IDE**: $ide',
   ];
-  final vm = serviceManager.vm;
-  final connectedApp = serviceManager.connectedApp;
+  final vm = serviceConnection.serviceManager.vm;
+  final connectedApp = serviceConnection.serviceManager.connectedApp;
   if (vm != null && connectedApp != null) {
     final descriptionEntries = generateDeviceDescription(
       vm,
@@ -221,4 +204,32 @@ class ConnectionDescription {
   final String description;
 
   final List<Widget> actions;
+}
+
+String? ideFromUrl() {
+  return lookupFromQueryParams('ide');
+}
+
+String? lookupFromQueryParams(String key) {
+  final queryParameters = loadQueryParams();
+  return queryParameters[key];
+}
+
+const _google3PathSegment = 'google3';
+
+bool isGoogle3Path(List<String> pathParts) =>
+    pathParts.contains(_google3PathSegment);
+
+List<String> stripGoogle3(List<String> pathParts) {
+  final google3Index = pathParts.lastIndexOf(_google3PathSegment);
+  if (google3Index != -1 && google3Index + 1 < pathParts.length) {
+    return pathParts.sublist(google3Index + 1);
+  }
+  return pathParts;
+}
+
+/// An extension on [KeyEvent] to make it simpler to determine if it is a key
+/// down event.
+extension IsKeyType on KeyEvent {
+  bool get isKeyDownOrRepeat => this is KeyDownEvent || this is KeyRepeatEvent;
 }

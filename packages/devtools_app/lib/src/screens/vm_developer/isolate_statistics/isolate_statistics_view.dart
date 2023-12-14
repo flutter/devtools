@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:vm_service/vm_service.dart';
@@ -9,10 +11,8 @@ import 'package:vm_service/vm_service.dart';
 import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/common_widgets.dart';
 import '../../../shared/primitives/utils.dart';
-import '../../../shared/split.dart';
 import '../../../shared/table/table.dart';
 import '../../../shared/table/table_data.dart';
-import '../../../shared/theme.dart';
 import '../../profiler/profiler_status.dart';
 import '../vm_developer_common_widgets.dart';
 import '../vm_developer_tools_screen.dart';
@@ -24,7 +24,6 @@ import 'isolate_statistics_view_controller.dart';
 class IsolateStatisticsView extends VMDeveloperView {
   const IsolateStatisticsView()
       : super(
-          id,
           title: 'Isolates',
           icon: Icons.bar_chart,
         );
@@ -154,6 +153,7 @@ class GeneralIsolateStatisticsWidget extends StatelessWidget {
       showBottom: false,
       child: VMInfoCard(
         title: 'General',
+        roundedTopBorder: false,
         rowKeyValues: [
           selectableTextBuilderMapEntry('Name', isolate?.name),
           selectableTextBuilderMapEntry('Started at', _startTime(isolate)),
@@ -190,6 +190,7 @@ class IsolateMemoryStatisticsWidget extends StatelessWidget {
       showBottom: false,
       child: VMInfoCard(
         title: 'Memory',
+        roundedTopBorder: false,
         rowKeyValues: [
           selectableTextBuilderMapEntry(
             'Dart Heap',
@@ -235,6 +236,7 @@ class TagStatisticsWidget extends StatelessWidget {
       showBottom: false,
       child: VMInfoCard(
         title: 'Execution Time',
+        roundedTopBorder: false,
         table: Flexible(
           child: controller.cpuProfilerController.profilerEnabled
               ? FlatTable<VMTag>(
@@ -308,36 +310,46 @@ class _StackTraceViewerFrameColumn extends ColumnData<String> {
 // TODO(bkonyi): merge with debugger stack trace viewer.
 /// A simple table to display a stack trace, sorted by frame number.
 class StackTraceViewerWidget extends StatelessWidget {
-  const StackTraceViewerWidget({super.key, required this.stackTrace});
+  const StackTraceViewerWidget({
+    super.key,
+    required this.stackTrace,
+  });
 
   static final frame = _StackTraceViewerFrameColumn();
 
-  final InstanceRef? stackTrace;
+  final ValueListenable<InstanceRef?> stackTrace;
 
   @override
   Widget build(BuildContext context) {
-    final List<String>? lines = stackTrace?.allocationLocation?.valueAsString
-        ?.split('\n')
-        .where((e) => e.isNotEmpty)
-        .toList();
-    return VMInfoList(
-      title: 'Allocation Location',
-      table: lines == null
-          ? const Expanded(
-              child: Center(
-                child: Text('No port selected'),
-              ),
-            )
-          : Flexible(
-              child: FlatTable<String>(
-                keyFactory: (String s) => ValueKey<String>(s),
-                data: lines,
-                dataKey: 'stack-trace-viewer',
-                columns: [frame],
-                defaultSortColumn: frame,
-                defaultSortDirection: SortDirection.ascending,
-              ),
-            ),
+    return ValueListenableBuilder<InstanceRef?>(
+      valueListenable: stackTrace,
+      builder: (context, stackTrace, _) {
+        final List<String>? lines = stackTrace
+            ?.allocationLocation?.valueAsString
+            ?.split('\n')
+            .where((e) => e.isNotEmpty)
+            .toList();
+        return VMInfoList(
+          title: 'Allocation Location',
+          roundedTopBorder: false,
+          table: lines == null
+              ? const Expanded(
+                  child: Center(
+                    child: Text('No port selected'),
+                  ),
+                )
+              : Flexible(
+                  child: FlatTable<String>(
+                    keyFactory: (String s) => ValueKey<String>(s),
+                    data: lines,
+                    dataKey: 'stack-trace-viewer',
+                    columns: [frame],
+                    defaultSortColumn: frame,
+                    defaultSortDirection: SortDirection.ascending,
+                  ),
+                ),
+        );
+      },
     );
   }
 }
@@ -379,6 +391,7 @@ class _IsolatePortsWidgetState extends State<IsolatePortsWidget> {
               children: [
                 AreaPaneHeader(
                   includeTopBorder: false,
+                  roundedTopBorder: false,
                   title: Text(
                     'Open Ports (${ports.length})',
                   ),
@@ -400,7 +413,7 @@ class _IsolatePortsWidgetState extends State<IsolatePortsWidget> {
           ),
           OutlineDecoration.onlyLeft(
             child: StackTraceViewerWidget(
-              stackTrace: selectedPort.value,
+              stackTrace: selectedPort,
             ),
           ),
         ],
@@ -434,6 +447,7 @@ class ServiceExtensionsWidget extends StatelessWidget {
       showLeft: false,
       child: VMInfoCard(
         title: 'Service Extensions (${extensions.length})',
+        roundedTopBorder: false,
         table: Flexible(
           child: FlatTable<String>(
             keyFactory: (String extension) => ValueKey<String>(extension),

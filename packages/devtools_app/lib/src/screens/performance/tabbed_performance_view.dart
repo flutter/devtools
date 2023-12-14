@@ -5,13 +5,13 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
 import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
-import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/ui/tab.dart';
 import '../../shared/utils.dart';
 import 'panes/flutter_frames/flutter_frame_model.dart';
@@ -59,7 +59,8 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
   @override
   Widget build(BuildContext context) {
     final isOffline = offlineController.offlineMode.value;
-    final isFlutterApp = serviceManager.connectedApp!.isFlutterAppNow!;
+    final isFlutterApp =
+        serviceConnection.serviceManager.connectedApp!.isFlutterAppNow!;
 
     var showFrameAnalysis = isFlutterApp;
     var showRasterStats = isFlutterApp;
@@ -124,7 +125,7 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
     required bool showRebuildStats,
   }) {
     if (showFrameAnalysis || showRasterStats || showRebuildStats) {
-      assert(serviceManager.connectedApp!.isFlutterAppNow!);
+      assert(serviceConnection.serviceManager.connectedApp!.isFlutterAppNow!);
     }
     return [
       if (showFrameAnalysis)
@@ -151,6 +152,7 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
             child: Center(
               child: RasterStatsView(
                 rasterStatsController: controller.rasterStatsController,
+                impellerEnabled: controller.impellerEnabled,
               ),
             ),
           ),

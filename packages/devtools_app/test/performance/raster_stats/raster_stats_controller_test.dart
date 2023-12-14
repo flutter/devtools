@@ -4,6 +4,8 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/performance/panes/raster_stats/raster_stats_model.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -14,19 +16,20 @@ import '../../test_infra/test_data/performance_raster_stats.dart';
 void main() {
   group('$RasterStatsController', () {
     late RasterStatsController controller;
-    late MockServiceConnectionManager mockServiceManager;
+    late MockServiceConnectionManager mockServiceConnection;
 
     setUp(() {
-      mockServiceManager = MockServiceConnectionManager();
-      when(mockServiceManager.renderFrameWithRasterStats).thenAnswer(
+      mockServiceConnection = createMockServiceConnectionWithDefaults();
+      when(mockServiceConnection.renderFrameWithRasterStats).thenAnswer(
         (_) => Future.value(Response.parse(rasterStatsFromServiceJson)),
       );
       setGlobal(
         DevToolsEnvironmentParameters,
         ExternalDevToolsEnvironmentParameters(),
       );
-      setGlobal(ServiceConnectionManager, mockServiceManager);
+      setGlobal(ServiceConnectionManager, mockServiceConnection);
       setGlobal(IdeTheme, IdeTheme());
+      setGlobal(NotificationService, NotificationService());
 
       controller =
           RasterStatsController(createMockPerformanceControllerWithDefaults());
@@ -52,7 +55,7 @@ void main() {
         var rasterStats = controller.rasterStats.value;
         expect(rasterStats, isNull);
 
-        when(mockServiceManager.renderFrameWithRasterStats)
+        when(mockServiceConnection.renderFrameWithRasterStats)
             .thenAnswer((_) => throw Exception('something went wrong'));
         await controller.collectRasterStats();
 

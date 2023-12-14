@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-library inspector_tree;
-
 import 'dart:async';
 import 'dart:collection';
 import 'dart:math';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -24,9 +24,7 @@ import '../../shared/diagnostics/diagnostics_node.dart';
 import '../../shared/diagnostics_text_styles.dart';
 import '../../shared/error_badge_manager.dart';
 import '../../shared/globals.dart';
-import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/utils.dart';
-import '../../shared/theme.dart';
 import '../../shared/ui/colors.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/ui/utils.dart';
@@ -180,8 +178,6 @@ class InspectorTreeController extends DisposableController
       );
     });
   }
-
-  RemoteDiagnosticsNode? subtreeRoot; // Optional.
 
   InspectorTreeNode? get selection => _selection;
   InspectorTreeNode? _selection;
@@ -671,7 +667,7 @@ class InspectorTreeController extends DisposableController
     int debugStatsSearchOps = 0;
     final debugStatsWidgets = _searchableCachedRows.length;
 
-    final inspectorService = serviceManager.inspectorService;
+    final inspectorService = serviceConnection.inspectorService;
     if (search.isEmpty ||
         inspectorService == null ||
         inspectorService.isDisposed) {
@@ -798,9 +794,10 @@ class _InspectorTreeState extends State<InspectorTree>
     }
     _focusNode = FocusNode(debugLabel: 'inspector-tree');
     autoDisposeFocusNode(_focusNode);
-    final mainIsolateState = serviceManager.isolateManager.mainIsolateState;
+    final mainIsolateState =
+        serviceConnection.serviceManager.isolateManager.mainIsolateState;
     if (mainIsolateState != null) {
-      callOnceWhenReady(
+      callOnceWhenReady<bool>(
         trigger: mainIsolateState.isPaused,
         callback: _bindToController,
         readyWhen: (triggerValue) => !triggerValue,
@@ -963,8 +960,8 @@ class _InspectorTreeState extends State<InspectorTree>
 
   /// Handle arrow keys for the InspectorTree. Ignore other key events so that
   /// other widgets have a chance to respond to them.
-  KeyEventResult _handleKeyEvent(FocusNode _, RawKeyEvent event) {
-    if (event is! RawKeyDownEvent) return KeyEventResult.ignored;
+  KeyEventResult _handleKeyEvent(FocusNode _, KeyEvent event) {
+    if (!event.isKeyDownOrRepeat) return KeyEventResult.ignored;
 
     final treeControllerLocal = treeController!;
 
@@ -1013,7 +1010,7 @@ class _InspectorTreeState extends State<InspectorTree>
       if (screenId != null) {
         ga.timeEnd(screenId, gac.pageReady);
         unawaited(
-          serviceManager.sendDwdsEvent(
+          serviceConnection.sendDwdsEvent(
             screen: screenId,
             action: gac.pageReady,
           ),
@@ -1042,7 +1039,7 @@ class _InspectorTreeState extends State<InspectorTree>
               child: GestureDetector(
                 onTap: _focusNode.requestFocus,
                 child: Focus(
-                  onKey: _handleKeyEvent,
+                  onKeyEvent: _handleKeyEvent,
                   autofocus: widget.isSummaryTree,
                   focusNode: _focusNode,
                   child: OffsetScrollbar(

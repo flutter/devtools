@@ -27,18 +27,77 @@ jobs:
       fail-fast: false
     steps:
       - name: git clone
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
+        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac
       - name: Load Cached Flutter SDK
-        uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
+        uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84
         with:
           path: |
-            ./flutter-sdk
+            ./tool/flutter-sdk
           key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
 
-      - name: tool/bots.sh
+      - name: tool/ci/bots.sh
         env:
           BOT: main
-        run: ./tool/bots.sh
+        run: ./tool/ci/bots.sh
+
+  dcm:
+    name: Dart Code Metrics
+    needs: flutter-prep
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    steps:
+      - name: Clone Flutter DevTools
+        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac
+        with:
+          ref: "${{ github.event.pull_request.head.sha }}"
+      - name: Load Cached Flutter SDK
+        uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84
+        with:
+          path: |
+            ./tool/flutter-sdk
+          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
+      - name: Run tool/ci/bots.sh
+        run: ./tool/ci/bots.sh
+      - name: Install DCM
+        run: |
+          sudo apt-get update
+          wget -qO- https://dcm.dev/pgp-key.public | sudo gpg --dearmor -o /usr/share/keyrings/dcm.gpg
+          echo 'deb [signed-by=/usr/share/keyrings/dcm.gpg arch=amd64] https://dcm.dev/debian stable main' | sudo tee /etc/apt/sources.list.d/dart_stable.list
+          sudo apt-get update
+          sudo apt-get install dcm=1.11.0-1
+          sudo chmod +x /usr/bin/dcm
+          echo "$(dcm --version)"
+      - name: Setup Dart SDK
+        uses: dart-lang/setup-dart@b64355ae6ca0b5d484f0106a033dd1388965d06d
+      - name: Run DCM on root
+        run: |
+          dcm analyze packages/devtools_app packages/devtools_shared packages/devtools_test
+
+  test-packages:
+    name: ${{ matrix.package }} test
+    needs: flutter-prep
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - devtools_app_shared
+          - devtools_extensions
+          - devtools_shared
+    steps:
+      - name: git clone
+        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac
+      - name: Load Cached Flutter SDK
+        uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84
+        with:
+          path: |
+            ./tool/flutter-sdk
+          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
+      - name: tool/ci/package_tests.sh
+        env:
+          PACKAGE: ${{ matrix.package }}
+        run: ./tool/ci/package_tests.sh
 
   test:
     name: ${{ matrix.bot }}
@@ -54,18 +113,18 @@ jobs:
           - test_dart2js
     steps:
       - name: git clone
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
+        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac
       - name: Load Cached Flutter SDK
-        uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
+        uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84
         with:
           path: |
-            ./flutter-sdk
+            ./tool/flutter-sdk
           key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
-      - name: tool/bots.sh
+      - name: tool/ci/bots.sh
         env:
           BOT: ${{ matrix.bot }}
           PLATFORM: vm
-        run: ./tool/bots.sh
+        run: ./tool/ci/bots.sh
 
   macos-test:
     needs: flutter-prep
@@ -81,63 +140,160 @@ jobs:
 
     steps:
       - name: git clone
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
+        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac
       - name: Load Cached Flutter SDK
-        uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
+        uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84
         with:
           path: |
-            ./flutter-sdk
+            ./tool/flutter-sdk
           key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
-      - name: tool/bots.sh
+      - name: tool/ci/bots.sh
         env:
           BOT: ${{ matrix.bot }}
           PLATFORM: vm
           ONLY_GOLDEN: ${{ matrix.only_golden }}
-        run: ./tool/bots.sh
+        run: ./tool/ci/bots.sh
 
       - name: Upload Golden Failure Artifacts
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce
+        uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32
         if: failure()
         with:
           name: golden_image_failures.${{ matrix.bot }}
           path: packages/devtools_app/test/**/failures/*.png
+      - name: Notify of Quick Fix
+        if: failure()
+        env:
+          WORKFLOW_ID: ${{ github.run_id }}
+        run: |
+          echo "::notice title=To Quickly Fix Goldens:: Run \`devtools_tool fix-goldens --run-id=$WORKFLOW_ID\` on your local branch."
 
-  integration-test:
-    name: integration-test ${{ matrix.bot }} - ${{ matrix.device }}
+  devtools-app-integration-test:
+    name: devtools_app integration-test ${{ matrix.bot }} - ${{ matrix.device }} - shard ${{ matrix.shard }}
     needs: flutter-prep
     runs-on: macos-latest
     strategy:
       fail-fast: false
       matrix:
-        bot:
-          # Consider running integration tests in ddc mode, too.
-          - dart2js
-        device:
-          - flutter
-          - flutter-web
-          - dart-cli
+        # Consider running integration tests in ddc mode, too.
+        bot: [integration_dart2js]
+        device: [flutter, flutter-web, dart-cli]
+        # Option 1/1 will run all tests for a device in a single shard.
+        # Option 1/2 and 2/2 should be enabled to run tests for a device in 2 shards.
+        shard: [1/1, 1/2, 2/2, 1/3, 2/3, 3/3]
+        exclude:
+          # The 'flutter' device should be ran in three shards.
+          - device: flutter
+            shard: 1/1
+          - device: flutter
+            shard: 1/2
+          - device: flutter
+            shard: 2/2
+          # The 'flutter-web' device should be ran in two shards.
+          - device: flutter-web
+            shard: 1/1
+          - device: flutter-web
+            shard: 1/3
+          - device: flutter-web
+            shard: 2/3
+          - device: flutter-web
+            shard: 3/3
+          # The 'dart-cli' device can be ran in a single shard.
+          - device: dart-cli
+            shard: 1/2
+          - device: dart-cli
+            shard: 2/2
+          - device: dart-cli
+            shard: 1/3
+          - device: dart-cli
+            shard: 2/3
+          - device: dart-cli
+            shard: 3/3
     steps:
       - name: git clone
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
+        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac
       - name: Load Cached Flutter SDK
-        uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
+        uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84
         with:
           path: |
-            ./flutter-sdk
+            ./tool/flutter-sdk
           key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
-      - name: tool/bots.sh
+      - name: tool/ci/bots.sh
         env:
           BOT: ${{ matrix.bot }}
           DEVICE: ${{ matrix.device }}
-        run: ./tool/bots.sh
+          SHARD: ${{ matrix.shard }}
+          DEVTOOLS_PACKAGE: devtools_app
+        run: ./tool/ci/bots.sh
 
       - name: Upload Golden Failure Artifacts
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce
+        uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32
         if: failure()
         with:
           name: golden_image_failures.${{ matrix.bot }}
           path: packages/devtools_app/integration_test/**/failures/*.png
-# TODO(https://github.com/flutter/devtools/issues/1715): add a windows compatible version of tool/bots.sh
+
+  devtools-extensions-integration-test:
+    name: devtools_extensions integration-test ${{ matrix.bot }}
+    needs: flutter-prep
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Consider running integration tests in ddc mode, too.
+        bot: [integration_dart2js]
+    steps:
+      - name: git clone
+        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac
+      - name: Load Cached Flutter SDK
+        uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84
+        with:
+          path: |
+            ./tool/flutter-sdk
+          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
+      - name: tool/ci/bots.sh
+        env:
+          BOT: ${{ matrix.bot }}
+          DEVTOOLS_PACKAGE: devtools_extensions
+        run: ./tool/ci/bots.sh
+
+  benchmark-performance:
+    name: benchmark-performance
+    needs: flutter-prep
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    steps:
+      - name: git clone
+        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac
+      - name: Load Cached Flutter SDK
+        uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84
+        with:
+          path: |
+            ./tool/flutter-sdk
+          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
+      - name: tool/ci/benchmark_performance.sh
+        run: ./tool/ci/benchmark_performance.sh
+
+  benchmark-size:
+    name: benchmark-size
+    needs: flutter-prep
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    steps:
+      - name: git clone
+        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac
+      - name: Load Cached Flutter SDK
+        uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84
+        with:
+          path: |
+            ./tool/flutter-sdk
+          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
+      - name: tool/ci/benchmark_size.sh
+        run: ./tool/ci/benchmark_size.sh
+
+
+# TODO(https://github.com/flutter/devtools/issues/1715): add a windows compatible version of tool/ci/bots.sh
 # and run it from this job.
 #  windows-test:
 #    name: windows ${{ matrix.bot }}
@@ -149,13 +305,13 @@ jobs:
 #          - test_dart2js
 #    steps:
 #      - name: git clone
-#        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
+#        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac
 #
-#      - name: tool/bots.sh
+#      - name: tool/ci/bots.sh
 #        env:
 #          BOT: ${{ matrix.bot }}
 #          PLATFORM: vm
-#        run: ./tool/bots.sh
+#        run: ./tool/ci/bots.sh
 
 # TODO(https://github.com/flutter/devtools/issues/1987): rewrite integration tests.
 #  integration:
@@ -169,11 +325,11 @@ jobs:
 #          - integration_dart2js
 #    steps:
 #      - name: git clone
-#        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
-#      - name: tool/bots.sh
+#        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac
+#      - name: tool/ci/bots.sh
 #        env:
 #          BOT: ${{ matrix.bot }}
-#        run: ./tool/bots.sh
+#        run: ./tool/ci/bots.sh
 
 # TODO(https://github.com/flutter/devtools/issues/2437):
 # PLATFORM=chrome is going away. We need to move these tests to run with

@@ -6,9 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 import '../../primitives/utils.dart';
-import '_drag_and_drop_stub.dart'
-    if (dart.library.html) '_drag_and_drop_web.dart'
-    if (dart.library.io) '_drag_and_drop_desktop.dart';
+import '_drag_and_drop_desktop.dart'
+    if (dart.library.js_interop) '_drag_and_drop_web.dart';
 
 abstract class DragAndDropManager {
   factory DragAndDropManager(int viewId) => createDragAndDropManager(viewId);

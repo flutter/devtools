@@ -5,16 +5,17 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';
-import '../../shared/dialogs.dart';
 import '../../shared/globals.dart';
 import '../../shared/screen.dart';
-import '../../shared/split.dart';
+import 'instance_viewer/eval.dart';
 import 'instance_viewer/instance_details.dart';
 import 'instance_viewer/instance_providers.dart';
 import 'instance_viewer/instance_viewer.dart';
@@ -46,14 +47,7 @@ final _selectedProviderNode = AutoDisposeProvider<ProviderNode?>((ref) {
 final _showInternals = StateProvider<bool>((ref) => false);
 
 class ProviderScreen extends Screen {
-  ProviderScreen()
-      : super.conditional(
-          id: id,
-          requiresLibrary: 'package:provider/',
-          title: ScreenMetaData.provider.title,
-          icon: ScreenMetaData.provider.icon,
-          requiresDebugBuild: true,
-        );
+  ProviderScreen() : super.fromMetaData(ScreenMetaData.provider);
 
   static final id = ScreenMetaData.provider.id;
 
@@ -70,11 +64,21 @@ class ProviderScreenWrapper extends StatefulWidget {
   State<ProviderScreenWrapper> createState() => _ProviderScreenWrapperState();
 }
 
-class _ProviderScreenWrapperState extends State<ProviderScreenWrapper> {
+class _ProviderScreenWrapperState extends State<ProviderScreenWrapper>
+    with AutoDisposeMixin {
   @override
   void initState() {
     super.initState();
     ga.screen(ProviderScreen.id);
+
+    cancelListeners();
+    addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
+      if (serviceConnection.serviceManager.connectedState.value.connected) {
+        setServiceConnectionForProviderScreen(
+          serviceConnection.serviceManager.service!,
+        );
+      }
+    });
   }
 
   @override

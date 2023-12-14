@@ -7,9 +7,10 @@ import 'dart:convert';
 
 import 'package:devtools_app/src/screens/logging/logging_controller.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/primitives/message_bus.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -42,7 +43,7 @@ void main() {
     setUp(() {
       setGlobal(
         ServiceConnectionManager,
-        FakeServiceManager(),
+        FakeServiceConnectionManager(),
       );
 
       controller = LoggingController();

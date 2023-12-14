@@ -3,8 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/screens/vm_developer/object_inspector/inbound_references_tree.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_developer_common_widgets.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -19,7 +23,7 @@ void main() {
 
   late TestObjectInspectorViewController testObjectInspectorViewController;
 
-  late FakeServiceManager fakeServiceManager;
+  late FakeServiceConnectionManager fakeServiceConnection;
 
   late InstanceRef requestedSize;
 
@@ -27,13 +31,13 @@ void main() {
 
   final retainingPathNotifier = ValueNotifier<RetainingPath?>(null);
 
-  final inboundRefsNotifier = ValueNotifier<InboundReferences?>(null);
+  final inboundRefsNotifier = ListValueNotifier<InboundReferencesTreeNode>([]);
 
   setUp(() {
-    fakeServiceManager = FakeServiceManager();
+    fakeServiceConnection = FakeServiceConnectionManager();
 
     setUpMockScriptManager();
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
+    setGlobal(ServiceConnectionManager, fakeServiceConnection);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(
       DevToolsEnvironmentParameters,
@@ -75,12 +79,32 @@ void main() {
       retainingPathNotifier.value = testRetainingPath;
     });
 
-    when(mockClassObject.inboundReferences).thenReturn(inboundRefsNotifier);
+    when(mockClassObject.inboundReferencesTree).thenReturn(inboundRefsNotifier);
 
     // Intentionally unawaited.
     // ignore: discarded_futures
     when(mockClassObject.requestInboundsRefs()).thenAnswer((_) async {
-      inboundRefsNotifier.value = testInboundRefs;
+      inboundRefsNotifier.clear();
+      inboundRefsNotifier.addAll(
+        InboundReferencesTreeNode.buildTreeRoots(testInboundRefs),
+      );
+    });
+
+    // Intentionally unawaited.
+    // ignore: discarded_futures
+    when(mockClassObject.expandInboundRef(any)).thenAnswer((_) async {
+      for (final entry in inboundRefsNotifier.value) {
+        entry.addAllChildren(
+          InboundReferencesTreeNode.buildTreeRoots(
+            TestInboundReferences(
+              references: [
+                InboundReference(source: testFunction),
+              ],
+            ),
+          ),
+        );
+      }
+      inboundRefsNotifier.notifyListeners();
     });
   });
 
@@ -223,15 +247,16 @@ void main() {
   );
 
   testWidgetsWithWindowSize(
-    'test InboundReferencesWidget with null data',
+    'test $InboundReferencesTree with null data',
     windowSize,
     (WidgetTester tester) async {
-      inboundRefsNotifier.value = null;
+      inboundRefsNotifier.clear();
 
       await tester.pumpWidget(
         wrap(
-          InboundReferencesWidget(
-            inboundReferences: mockClassObject.inboundReferences,
+          InboundReferencesTree(
+            controller: testObjectInspectorViewController,
+            object: mockClassObject,
             onExpanded: (bool _) {},
           ),
         ),
@@ -243,45 +268,74 @@ void main() {
 
       await tester.pump();
 
-      expect(find.byType(CenteredCircularProgressIndicator), findsOneWidget);
+      expect(
+        find.text('There are no inbound references for this object'),
+        findsOneWidget,
+      );
     },
   );
 
   testWidgetsWithWindowSize(
-    'test InboundReferencesWidget with data',
+    'test $InboundReferencesTree with data',
     windowSize,
     (WidgetTester tester) async {
       await tester.pumpWidget(
         wrap(
-          InboundReferencesWidget(
-            inboundReferences: mockClassObject.inboundReferences,
+          InboundReferencesTree(
+            controller: testObjectInspectorViewController,
+            object: mockClassObject,
             onExpanded: (bool _) => mockClassObject.requestInboundsRefs(),
           ),
         ),
       );
 
       await tester.tap(find.text('Inbound References'));
+      await tester.pumpAndSettle();
 
+      expect(
+        find.text('Referenced by '),
+        findsNWidgets(5),
+      );
+
+      // Covers:
+      //   - Referenced by fooParentField in Record
+      //   - Referenced by element 1 of Record
+      expect(
+        find.text('fooParentField in ', findRichText: true),
+        findsOneWidget,
+      );
+      expect(find.text('element 1 of '), findsOneWidget);
+      expect(
+        find.text('Record', findRichText: true),
+        findsNWidgets(2),
+      );
+
+      // Covers:
+      //   - Referenced by fooField
+      //   - Referenced by fooSuperClass
+      //   - Referenced by fooFunction
+      expect(
+        find.text('fooField', findRichText: true),
+        findsOneWidget,
+      );
+      expect(
+        find.text('fooSuperClass', findRichText: true),
+        findsOneWidget,
+      );
+      expect(
+        find.text('fooFunction', findRichText: true),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.byIcon(Icons.keyboard_arrow_down).first);
       await tester.pumpAndSettle();
       expect(
-        find.text('Referenced by fooFunction'),
-        findsOneWidget,
+        find.text('Referenced by '),
+        findsNWidgets(6),
       );
       expect(
-        find.text('Referenced by fooParentField of fooType fooField of fooLib'),
-        findsOneWidget,
-      );
-      expect(
-        find.text('Referenced by fooParentField of fooRecord'),
-        findsOneWidget,
-      );
-      expect(
-        find.text('Referenced by \$1 of fooRecord'),
-        findsOneWidget,
-      );
-      expect(
-        find.text('Referenced by element [1] of fooSuperClass'),
-        findsOneWidget,
+        find.text('fooFunction', findRichText: true),
+        findsNWidgets(2),
       );
     },
   );

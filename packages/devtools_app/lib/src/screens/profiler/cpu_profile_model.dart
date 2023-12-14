@@ -356,14 +356,6 @@ class CpuProfileData {
   }
 
   /// Generate a cpu profile from [originalData] where each sample contains the
-  /// vmTag [tag].
-  ///
-  /// [originalData] does not need to be [processed] to run this operation.
-  factory CpuProfileData.fromVMTag(CpuProfileData originalData, String tag) {
-    return CpuProfileData._fromTag(originalData, tag, CpuProfilerTagType.vm);
-  }
-
-  /// Generate a cpu profile from [originalData] where each sample contains the
   /// userTag [tag].
   ///
   /// [originalData] does not need to be [processed] to run this operation.
@@ -621,7 +613,7 @@ class CpuProfileData {
       final resolvedUrl =
           stackFrameJson[CpuProfileData.resolvedUrlKey] as String?;
       if (resolvedUrl != null && resolvedUrl.isNotEmpty) {
-        final packageUri = serviceManager.resolvedUriManager
+        final packageUri = serviceConnection.serviceManager.resolvedUriManager
             .lookupPackageUri(isolateId, resolvedUrl);
         if (packageUri != null) {
           stackFrameJson[CpuProfileData.resolvedPackageUriKey] = packageUri;
@@ -632,14 +624,14 @@ class CpuProfileData {
       }
     }
 
-    await serviceManager.resolvedUriManager.fetchPackageUris(
+    await serviceConnection.serviceManager.resolvedUriManager.fetchPackageUris(
       isolateId,
       urisWithoutPackageUri.toList(),
     );
 
     for (var stackFrameJson in stackFramesWaitingOnPackageUri) {
       final resolvedUri = stackFrameJson[CpuProfileData.resolvedUrlKey];
-      final packageUri = serviceManager.resolvedUriManager
+      final packageUri = serviceConnection.serviceManager.resolvedUriManager
           .lookupPackageUri(isolateId, resolvedUri);
       if (packageUri != null) {
         stackFrameJson[CpuProfileData.resolvedPackageUriKey] = packageUri;

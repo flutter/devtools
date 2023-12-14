@@ -2,127 +2,226 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-library service_extensions;
-
-import 'package:flutter/foundation.dart';
+import 'package:devtools_app_shared/service_extensions.dart' as extensions;
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
 
 import '../shared/analytics/constants.dart' as gac;
 
-const _dartIOExtensionPrefix = 'ext.dart.io.';
-const _flutterExtensionPrefix = 'ext.flutter.';
-const inspectorExtensionPrefix = 'ext.flutter.inspector';
+/// Interface that service extension objects used in DevTools must implement.
+abstract class ServiceExtensionInterface {
+  String get title;
 
-// Each service extension needs to be added to [_extensionDescriptions].
-class ToggleableServiceExtensionDescription<T>
-    extends ServiceExtensionDescription {
-  ToggleableServiceExtensionDescription._({
-    super.iconAsset,
-    super.iconData,
-    required super.extension,
-    required super.title,
-    required T enabledValue,
-    required T disabledValue,
-    required super.gaScreenName,
-    required super.gaItem,
-    required super.tooltip,
-    super.description,
-    super.documentationUrl,
-    super.gaDocsItem,
-    super.shouldCallOnAllIsolates = false,
-    this.inverted = false,
-  }) : super(values: [enabledValue, disabledValue]);
+  String? get iconAsset;
 
-  static const enabledValueIndex = 0;
+  IconData? get iconData;
 
-  static const disabledValueIndex = 1;
+  List<String> get displayValues;
 
-  T get enabledValue => values[enabledValueIndex];
+  /// Analytics screen (screen name where item lives).
+  String? get gaScreenName;
 
-  T get disabledValue => values[disabledValueIndex];
+  String? get gaItem;
 
-  /// Whether this service extension will be inverted where it is exposed in
-  /// DevTools.
-  ///
-  /// For example, when [inverted] is true, a service extension may have a value
-  /// of 'false' in the framework, but will have a perceived value of 'true' in
-  /// DevTools, where the language describing the service extension toggle will
-  /// also be inverted.
-  final bool inverted;
+  String get tooltip;
+
+  String? get description;
+
+  String? get documentationUrl;
+
+  String? get gaDocsItem;
+
+  String get gaItemTooltipLink;
 }
 
-class ServiceExtensionDescription<T> {
-  ServiceExtensionDescription({
+/// A subclass of [extensions.ToggleableServiceExtension] that includes metadata
+/// for displaying and interacting with a toggleable service extension in the
+/// DevTools UI.
+class ToggleableServiceExtensionDescription<T> extends extensions
+    .ToggleableServiceExtension implements ServiceExtensionInterface {
+  ToggleableServiceExtensionDescription._({
+    required super.extension,
+    required super.enabledValue,
+    required super.disabledValue,
+    required this.title,
+    required this.gaScreenName,
+    required this.gaItem,
+    required this.tooltip,
+    super.shouldCallOnAllIsolates = false,
+    super.inverted = false,
+    this.description,
+    this.documentationUrl,
+    this.gaDocsItem,
+    this.iconAsset,
+    this.iconData,
+  })  : displayValues =
+            [enabledValue, disabledValue].map((v) => v.toString()).toList(),
+        assert((iconAsset == null) != (iconData == null)),
+        assert((documentationUrl == null) == (gaDocsItem == null));
+
+  factory ToggleableServiceExtensionDescription.from(
+    extensions.ToggleableServiceExtension<T> extension, {
+    required String title,
+    required String? gaScreenName,
+    required String? gaItem,
+    required String tooltip,
+    String? description,
+    String? documentationUrl,
+    String? gaDocsItem,
+    String? iconAsset,
+    IconData? iconData,
+  }) {
+    return ToggleableServiceExtensionDescription._(
+      extension: extension.extension,
+      enabledValue: extension.enabledValue,
+      disabledValue: extension.disabledValue,
+      shouldCallOnAllIsolates: extension.shouldCallOnAllIsolates,
+      inverted: extension.inverted,
+      title: title,
+      gaScreenName: gaScreenName,
+      gaItem: gaItem,
+      tooltip: tooltip,
+      description: description,
+      documentationUrl: documentationUrl,
+      gaDocsItem: gaDocsItem,
+      iconAsset: iconAsset,
+      iconData: iconData,
+    );
+  }
+
+  @override
+  final String title;
+
+  @override
+  final String? iconAsset;
+
+  @override
+  final IconData? iconData;
+
+  @override
+  final List<String> displayValues;
+
+  @override
+  final String? gaScreenName;
+
+  @override
+  final String? gaItem;
+
+  @override
+  final String tooltip;
+
+  @override
+  final String? description;
+
+  @override
+  final String? documentationUrl;
+
+  @override
+  final String? gaDocsItem;
+
+  @override
+  String get gaItemTooltipLink => '${gaItem}TooltipLink';
+}
+
+/// A subclass of [extensions.ServiceExtension] that includes metadata for
+/// displaying and interacting with a service extension in the DevTools UI.
+class ServiceExtensionDescription<T> extends extensions.ServiceExtension<T>
+    implements ServiceExtensionInterface {
+  ServiceExtensionDescription._({
+    required super.extension,
+    required super.values,
+    super.shouldCallOnAllIsolates = false,
     this.iconAsset,
     this.iconData,
     List<String>? displayValues,
-    required this.extension,
     required this.title,
-    required this.values,
     required this.gaScreenName,
     required this.gaItem,
     required this.tooltip,
     this.description,
     this.documentationUrl,
     this.gaDocsItem,
-    this.shouldCallOnAllIsolates = false,
   })  : displayValues =
             displayValues ?? values.map((v) => v.toString()).toList(),
         assert((iconAsset == null) != (iconData == null)),
         assert((documentationUrl == null) == (gaDocsItem == null));
 
-  final String extension;
+  factory ServiceExtensionDescription.from(
+    extensions.ServiceExtension<T> extension, {
+    required String title,
+    required String? gaScreenName,
+    required String? gaItem,
+    required String tooltip,
+    String? description,
+    String? documentationUrl,
+    String? gaDocsItem,
+    String? iconAsset,
+    IconData? iconData,
+    List<String>? displayValues,
+  }) {
+    return ServiceExtensionDescription._(
+      extension: extension.extension,
+      values: extension.values,
+      shouldCallOnAllIsolates: extension.shouldCallOnAllIsolates,
+      title: title,
+      gaScreenName: gaScreenName,
+      gaItem: gaItem,
+      tooltip: tooltip,
+      description: description,
+      documentationUrl: documentationUrl,
+      gaDocsItem: gaDocsItem,
+      iconAsset: iconAsset,
+      iconData: iconData,
+      displayValues: displayValues,
+    );
+  }
 
+  @override
   final String title;
 
+  @override
   final String? iconAsset;
 
+  @override
   final IconData? iconData;
 
-  final List<T> values;
-
+  @override
   final List<String> displayValues;
 
-  /// Analytics screen (screen name where item lives).
+  @override
   final String? gaScreenName;
 
-  /// Analytics item name (toggleable item's name).
+  @override
   final String? gaItem;
 
-  String get gaItemTooltipLink => '${gaItem}TooltipLink';
-
-  final bool shouldCallOnAllIsolates;
-
+  @override
   final String tooltip;
 
+  @override
   final String? description;
 
+  @override
   final String? documentationUrl;
 
+  @override
   final String? gaDocsItem;
+
+  @override
+  String get gaItemTooltipLink => '${gaItem}TooltipLink';
 }
 
-final debugAllowBanner = ToggleableServiceExtensionDescription<bool>._(
-  extension:
-      '$_flutterExtensionPrefix${WidgetsServiceExtensions.debugAllowBanner.name}',
+final debugAllowBanner = ToggleableServiceExtensionDescription<bool>.from(
+  extensions.debugAllowBanner,
   title: 'Debug Banner',
   iconAsset: 'icons/debug_banner@2x.png',
-  enabledValue: true,
-  disabledValue: false,
   gaScreenName: gac.inspector,
   gaItem: gac.debugBanner,
   tooltip: 'Toggle Debug Banner',
 );
 
-final invertOversizedImages = ToggleableServiceExtensionDescription<bool>._(
-  extension:
-      '$_flutterExtensionPrefix${RenderingServiceExtensions.invertOversizedImages.name}',
+final invertOversizedImages = ToggleableServiceExtensionDescription<bool>.from(
+  extensions.invertOversizedImages,
   title: 'Highlight Oversized Images',
   iconAsset: 'icons/images-white.png',
-  enabledValue: true,
-  disabledValue: false,
   gaScreenName: gac.inspector,
   gaItem: gac.highlightOversizedImages,
   tooltip:
@@ -132,13 +231,10 @@ final invertOversizedImages = ToggleableServiceExtensionDescription<bool>._(
   gaDocsItem: gac.highlightOversizedImagesDocs,
 );
 
-final debugPaint = ToggleableServiceExtensionDescription<bool>._(
-  extension:
-      '$_flutterExtensionPrefix${RenderingServiceExtensions.debugPaint.name}',
+final debugPaint = ToggleableServiceExtensionDescription<bool>.from(
+  extensions.debugPaint,
   title: 'Show Guidelines',
   iconAsset: 'icons/guidelines-white.png',
-  enabledValue: true,
-  disabledValue: false,
   gaScreenName: gac.inspector,
   gaItem: gac.debugPaint,
   tooltip: 'Overlay guidelines to assist with fixing layout issues.',
@@ -147,13 +243,10 @@ final debugPaint = ToggleableServiceExtensionDescription<bool>._(
   gaDocsItem: gac.debugPaintDocs,
 );
 
-final debugPaintBaselines = ToggleableServiceExtensionDescription<bool>._(
-  extension:
-      '$_flutterExtensionPrefix${RenderingServiceExtensions.debugPaintBaselinesEnabled.name}',
+final debugPaintBaselines = ToggleableServiceExtensionDescription<bool>.from(
+  extensions.debugPaintBaselines,
   title: 'Show Baselines',
   iconAsset: 'icons/baselines-white.png',
-  enabledValue: true,
-  disabledValue: false,
   gaScreenName: gac.inspector,
   gaItem: gac.paintBaseline,
   tooltip:
@@ -163,13 +256,10 @@ final debugPaintBaselines = ToggleableServiceExtensionDescription<bool>._(
   gaDocsItem: gac.paintBaselineDocs,
 );
 
-final performanceOverlay = ToggleableServiceExtensionDescription<bool>._(
-  extension:
-      '$_flutterExtensionPrefix${WidgetsServiceExtensions.showPerformanceOverlay.name}',
+final performanceOverlay = ToggleableServiceExtensionDescription<bool>.from(
+  extensions.performanceOverlay,
   title: 'Performance Overlay',
   iconAsset: 'icons/performance-white.png',
-  enabledValue: true,
-  disabledValue: false,
   gaScreenName: gac.performance,
   gaItem: gac.PerformanceEvents.performanceOverlay.name,
   tooltip: 'Overlay a performance chart on your app.',
@@ -178,13 +268,10 @@ final performanceOverlay = ToggleableServiceExtensionDescription<bool>._(
   gaDocsItem: gac.PerformanceDocs.performanceOverlayDocs.name,
 );
 
-final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
-  extension:
-      '$_flutterExtensionPrefix${WidgetsServiceExtensions.profileWidgetBuilds.name}',
-  title: 'Track Widget Builds',
+final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>.from(
+  extensions.profileWidgetBuilds,
+  title: 'Track widget builds',
   iconAsset: 'icons/trackwidget-white.png',
-  enabledValue: true,
-  disabledValue: false,
   gaScreenName: gac.performance,
   gaItem: gac.PerformanceEvents.trackRebuilds.name,
   description: 'Adds an event to the timeline for every Widget built.',
@@ -194,13 +281,11 @@ final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
   gaDocsItem: gac.PerformanceDocs.trackWidgetBuildsDocs.name,
 );
 
-final profileUserWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
-  extension:
-      '$_flutterExtensionPrefix${WidgetsServiceExtensions.profileUserWidgetBuilds.name}',
-  title: 'Track User-Created Widget Builds',
+final profileUserWidgetBuilds =
+    ToggleableServiceExtensionDescription<bool>.from(
+  extensions.profileUserWidgetBuilds,
+  title: 'Track user-created widget builds',
   iconAsset: 'icons/trackwidget-white.png',
-  enabledValue: true,
-  disabledValue: false,
   gaScreenName: gac.performance,
   gaItem: gac.PerformanceEvents.trackUserCreatedWidgetBuilds.name,
   description:
@@ -208,13 +293,11 @@ final profileUserWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
   tooltip: '',
 );
 
-final profileRenderObjectPaints = ToggleableServiceExtensionDescription<bool>._(
-  extension:
-      '$_flutterExtensionPrefix${RenderingServiceExtensions.profileRenderObjectPaints.name}',
-  title: 'Track Paints',
+final profileRenderObjectPaints =
+    ToggleableServiceExtensionDescription<bool>.from(
+  extensions.profileRenderObjectPaints,
+  title: 'Track paints',
   iconData: Icons.format_paint,
-  enabledValue: true,
-  disabledValue: false,
   gaScreenName: gac.performance,
   gaItem: gac.PerformanceEvents.trackPaints.name,
   description: 'Adds an event to the timeline for every RenderObject painted.',
@@ -225,13 +308,10 @@ final profileRenderObjectPaints = ToggleableServiceExtensionDescription<bool>._(
 );
 
 final profileRenderObjectLayouts =
-    ToggleableServiceExtensionDescription<bool>._(
-  extension:
-      '$_flutterExtensionPrefix${RenderingServiceExtensions.profileRenderObjectLayouts.name}',
-  title: 'Track Layouts',
+    ToggleableServiceExtensionDescription<bool>.from(
+  extensions.profileRenderObjectLayouts,
+  title: 'Track layouts',
   iconData: Icons.auto_awesome_mosaic,
-  enabledValue: true,
-  disabledValue: false,
   gaScreenName: gac.performance,
   gaItem: gac.PerformanceEvents.trackLayouts.name,
   description: 'Adds an event to the timeline for every RenderObject layout.',
@@ -241,13 +321,10 @@ final profileRenderObjectLayouts =
   gaDocsItem: gac.PerformanceDocs.trackLayoutsDocs.name,
 );
 
-final repaintRainbow = ToggleableServiceExtensionDescription<bool>._(
-  extension:
-      '$_flutterExtensionPrefix${RenderingServiceExtensions.repaintRainbow.name}',
+final repaintRainbow = ToggleableServiceExtensionDescription<bool>.from(
+  extensions.repaintRainbow,
   title: 'Highlight Repaints',
   iconAsset: 'icons/repaints-white.png',
-  enabledValue: true,
-  disabledValue: false,
   gaScreenName: gac.inspector,
   gaItem: gac.repaintRainbow,
   tooltip:
@@ -257,13 +334,10 @@ final repaintRainbow = ToggleableServiceExtensionDescription<bool>._(
   gaDocsItem: gac.repaintRainbowDocs,
 );
 
-final slowAnimations = ToggleableServiceExtensionDescription<num>._(
-  extension:
-      '$_flutterExtensionPrefix${SchedulerServiceExtensions.timeDilation.name}',
+final slowAnimations = ToggleableServiceExtensionDescription<num>.from(
+  extensions.slowAnimations,
   title: 'Slow Animations',
   iconAsset: 'icons/slow-white.png',
-  enabledValue: 5.0,
-  disabledValue: 1.0,
   gaScreenName: gac.inspector,
   gaItem: gac.slowAnimation,
   tooltip: 'Run animations 5 times slower to help fine-tune them.',
@@ -272,12 +346,10 @@ final slowAnimations = ToggleableServiceExtensionDescription<num>._(
   gaDocsItem: gac.slowAnimationDocs,
 );
 
-final togglePlatformMode = ServiceExtensionDescription<String>(
-  extension:
-      '$_flutterExtensionPrefix${FoundationServiceExtensions.platformOverride.name}',
+final togglePlatformMode = ServiceExtensionDescription<String>.from(
+  extensions.togglePlatformMode,
   title: 'Override target platform',
   iconAsset: 'icons/phone@2x.png',
-  values: ['iOS', 'android', 'fuchsia', 'macOS', 'linux'],
   displayValues: [
     'Platform: iOS',
     'Platform: Android',
@@ -290,14 +362,10 @@ final togglePlatformMode = ServiceExtensionDescription<String>(
   tooltip: 'Override Target Platform',
 );
 
-final disableClipLayers = ToggleableServiceExtensionDescription<bool>._(
-  extension:
-      '$_flutterExtensionPrefix${RenderingServiceExtensions.debugDisableClipLayers.name}',
-  inverted: true,
+final disableClipLayers = ToggleableServiceExtensionDescription<bool>.from(
+  extensions.disableClipLayers,
   title: 'Render Clip layers',
   iconData: Icons.cut_outlined,
-  enabledValue: true,
-  disabledValue: false,
   gaScreenName: gac.performance,
   gaItem: gac.PerformanceEvents.disableClipLayers.name,
   description: 'Render all clipping effects during paint.',
@@ -309,14 +377,10 @@ disabled, try to reduce the use of clipping effects in your app.''',
   gaDocsItem: gac.PerformanceDocs.disableClipLayersDocs.name,
 );
 
-final disableOpacityLayers = ToggleableServiceExtensionDescription<bool>._(
-  extension:
-      '$_flutterExtensionPrefix${RenderingServiceExtensions.debugDisableOpacityLayers.name}',
-  inverted: true,
+final disableOpacityLayers = ToggleableServiceExtensionDescription<bool>.from(
+  extensions.disableOpacityLayers,
   title: 'Render Opacity layers',
   iconData: Icons.opacity,
-  enabledValue: true,
-  disabledValue: false,
   gaScreenName: gac.performance,
   gaItem: gac.PerformanceEvents.disableOpacityLayers.name,
   description: 'Render all opacity effects during paint.',
@@ -329,14 +393,10 @@ option disabled, try to reduce the use of opacity effects in your app.''',
 );
 
 final disablePhysicalShapeLayers =
-    ToggleableServiceExtensionDescription<bool>._(
-  extension:
-      '$_flutterExtensionPrefix${RenderingServiceExtensions.debugDisablePhysicalShapeLayers.name}',
-  inverted: true,
+    ToggleableServiceExtensionDescription<bool>.from(
+  extensions.disablePhysicalShapeLayers,
   title: 'Render Physical Shape layers',
   iconData: Icons.format_shapes,
-  enabledValue: true,
-  disabledValue: false,
   gaScreenName: gac.performance,
   gaItem: gac.PerformanceEvents.disablePhysicalShapeLayers.name,
   description: 'Render all physical modeling effects during paint.',
@@ -349,42 +409,34 @@ use of physical modeling effects in your app.''',
   gaDocsItem: gac.PerformanceDocs.disablePhysicalShapeLayersDocs.name,
 );
 
-final httpEnableTimelineLogging = ToggleableServiceExtensionDescription<bool>._(
-  extension: '${_dartIOExtensionPrefix}httpEnableTimelineLogging',
+final httpEnableTimelineLogging =
+    ToggleableServiceExtensionDescription<bool>.from(
+  extensions.httpEnableTimelineLogging,
   title: 'Whether HTTP timeline logging is enabled',
   iconData: Icons.http,
-  enabledValue: true,
-  disabledValue: false,
   gaScreenName: null,
   gaItem: null,
-  shouldCallOnAllIsolates: true,
   tooltip: 'Toggle HTTP timeline logging',
 );
 
-final socketProfiling = ToggleableServiceExtensionDescription<bool>._(
-  extension: '${_dartIOExtensionPrefix}socketProfilingEnabled',
+final socketProfiling = ToggleableServiceExtensionDescription<bool>.from(
+  extensions.socketProfiling,
   title: 'Whether socket profiling is enabled',
   iconData: Icons.outlet_outlined,
-  enabledValue: true,
-  disabledValue: false,
   gaScreenName: null,
   gaItem: null,
-  shouldCallOnAllIsolates: true,
   tooltip: 'Toggle socket profiling',
 );
 
 // Legacy extension to show the inspector and enable inspector select mode.
 final toggleOnDeviceWidgetInspector =
-    ToggleableServiceExtensionDescription<bool>._(
-  extension:
-      '$inspectorExtensionPrefix.${WidgetInspectorServiceExtensions.show.name}',
+    ToggleableServiceExtensionDescription<bool>.from(
+  extensions.toggleOnDeviceWidgetInspector,
   // Technically this enables the on-device widget inspector but for older
   // versions of package:flutter it makes sense to describe this extension as
   // toggling widget select mode as it is the only way to toggle that mode.
   title: 'Select Widget Mode',
   iconAsset: 'icons/widget-select-white.png',
-  enabledValue: true,
-  disabledValue: false,
   gaScreenName: gac.inspector,
   gaItem: gac.showOnDeviceInspector,
   tooltip: 'Toggle select widget mode',
@@ -395,12 +447,10 @@ final toggleOnDeviceWidgetInspector =
 // the only extension available, and [toggleSelectWidgetMode] is not.
 /// Toggle whether interacting with the device selects widgets or triggers
 /// normal interactions.
-final toggleSelectWidgetMode = ToggleableServiceExtensionDescription<bool>._(
-  extension: '$inspectorExtensionPrefix.selectMode',
+final toggleSelectWidgetMode = ToggleableServiceExtensionDescription<bool>.from(
+  extensions.toggleSelectWidgetMode,
   title: 'Select widget mode',
   iconAsset: 'icons/widget-select-white.png',
-  enabledValue: true,
-  disabledValue: false,
   gaScreenName: gac.inspector,
   gaItem: gac.selectWidgetMode,
   tooltip: 'Toggle select widget mode',
@@ -416,103 +466,48 @@ final toggleSelectWidgetMode = ToggleableServiceExtensionDescription<bool>._(
 /// When available, the inspector overlay can be enabled at any time as it will
 /// not interfere with user interaction with the app unless inspector select
 /// mode is triggered.
-final enableOnDeviceInspector = ToggleableServiceExtensionDescription<bool>._(
-  extension: '$inspectorExtensionPrefix.enable',
+final enableOnDeviceInspector =
+    ToggleableServiceExtensionDescription<bool>.from(
+  extensions.enableOnDeviceInspector,
   title: 'Enable on-device inspector',
   iconAsset: 'icons/general/locate@2x.png',
-  enabledValue: true,
-  disabledValue: false,
   gaScreenName: gac.inspector,
   gaItem: gac.enableOnDeviceInspector,
   tooltip: 'Toggle on-device inspector',
 );
 
-final structuredErrors = ToggleableServiceExtensionDescription<bool>._(
-  extension:
-      '$inspectorExtensionPrefix.${WidgetInspectorServiceExtensions.structuredErrors.name}',
+final structuredErrors = ToggleableServiceExtensionDescription<bool>.from(
+  extensions.structuredErrors,
   title: 'Show structured errors',
   iconAsset: 'icons/perf/RedExcl@2x.png',
-  enabledValue: true,
-  disabledValue: false,
   gaScreenName: gac.logging,
   gaItem: gac.structuredErrors,
   tooltip: 'Toggle showing structured errors for Flutter framework issues',
 );
 
-final trackRebuildWidgets = ToggleableServiceExtensionDescription<bool>._(
-  extension:
-      '$inspectorExtensionPrefix.${WidgetInspectorServiceExtensions.trackRebuildDirtyWidgets.name}',
+final trackRebuildWidgets = ToggleableServiceExtensionDescription<bool>.from(
+  extensions.trackRebuildWidgets,
   title: 'Track widget build counts',
   iconAsset: 'icons/inspector/diagram@2x.png',
-  enabledValue: true,
-  disabledValue: false,
   description: 'Tells you what has been rebuilt in your app\'s current screen.',
   tooltip: 'Show widget rebuild counts since the last reload',
   gaScreenName: gac.inspector,
   gaItem: gac.trackRebuildWidgets,
 );
 
-// This extensions below should never be displayed as a button so does not need
-// a ServiceExtensionDescription object.
-final String didSendFirstFrameEvent =
-    '$_flutterExtensionPrefix${WidgetsServiceExtensions.didSendFirstFrameEvent.name}';
-
-final List<ServiceExtensionDescription> _extensionDescriptions = [
-  debugPaint,
-  debugPaintBaselines,
-  repaintRainbow,
-  performanceOverlay,
-  debugAllowBanner,
-  profileWidgetBuilds,
-  toggleOnDeviceWidgetInspector,
-  toggleSelectWidgetMode,
-  enableOnDeviceInspector,
-  togglePlatformMode,
-  slowAnimations,
-  structuredErrors,
-  httpEnableTimelineLogging,
-  socketProfiling,
-  invertOversizedImages,
-  trackRebuildWidgets,
-  disableClipLayers,
-  disableOpacityLayers,
-  disablePhysicalShapeLayers,
-];
-
-final serviceExtensionsAllowlist = <String, ServiceExtensionDescription>{
-  for (var extension in _extensionDescriptions) extension.extension: extension,
-};
-
-/// Service extensions that are not safe to call unless a frame has already
-/// been rendered.
-///
-/// Flutter can sometimes crash if these extensions are called before the first
-/// frame is done rendering. We are intentionally conservative about which
-/// extensions are safe to run before the first frame as there is little harm
-/// in setting these extensions after one frame has rendered without the
-/// extension set.
-final Set<String> _unsafeBeforeFirstFrameFlutterExtensions =
-    <ServiceExtensionDescription>[
-  debugPaint,
-  debugPaintBaselines,
-  repaintRainbow,
-  performanceOverlay,
-  debugAllowBanner,
-  toggleOnDeviceWidgetInspector,
-  toggleSelectWidgetMode,
-  enableOnDeviceInspector,
-  togglePlatformMode,
-  slowAnimations,
-].map((extension) => extension.extension).toSet();
-
-bool isUnsafeBeforeFirstFlutterFrame(String? extensionName) {
-  return _unsafeBeforeFirstFrameFlutterExtensions.contains(extensionName);
-}
-
-bool isFlutterExtension(String extensionName) {
-  return extensionName.startsWith(_flutterExtensionPrefix);
-}
-
-bool isDartIoExtension(String extensionName) {
-  return extensionName.startsWith(_dartIOExtensionPrefix);
-}
+final profilePlatformChannels =
+    ToggleableServiceExtensionDescription<bool>.from(
+  extensions.profilePlatformChannels,
+  title: 'Track platform channels',
+  iconAsset: 'icons/trackwidget-white.png',
+  gaScreenName: gac.performance,
+  gaItem: gac.PerformanceEvents.profilePlatformChannels.name,
+  description:
+      'Adds an event to the timeline for platform channel messages (useful for '
+      'apps with plugins). Also periodically prints platform channel '
+      'statistics to console.',
+  tooltip: '',
+  documentationUrl:
+      'https://docs.flutter.dev/platform-integration/platform-channels',
+  gaDocsItem: gac.PerformanceDocs.platformChannelsDocs.name,
+);

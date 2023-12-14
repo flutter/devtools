@@ -4,7 +4,10 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/performance/panes/raster_stats/raster_stats.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
@@ -17,11 +20,11 @@ void main() {
     late RasterStatsController controller;
 
     setUp(() async {
-      final mockServiceManager = MockServiceConnectionManager();
-      when(mockServiceManager.renderFrameWithRasterStats).thenAnswer(
+      final mockServiceConnection = createMockServiceConnectionWithDefaults();
+      when(mockServiceConnection.renderFrameWithRasterStats).thenAnswer(
         (_) => Future.value(Response.parse(rasterStatsFromServiceJson)),
       );
-      setGlobal(ServiceConnectionManager, mockServiceManager);
+      setGlobal(ServiceConnectionManager, mockServiceConnection);
       setGlobal(OfflineModeController, OfflineModeController());
       setGlobal(IdeTheme, IdeTheme());
 
@@ -30,11 +33,15 @@ void main() {
       await controller.collectRasterStats();
     });
 
-    Future<void> pumpRenderingLayerVisualizer(WidgetTester tester) async {
+    Future<void> pumpRasterStatsView(
+      WidgetTester tester, {
+      bool impellerEnabled = false,
+    }) async {
       await tester.pumpWidget(
         wrap(
           RasterStatsView(
             rasterStatsController: controller,
+            impellerEnabled: impellerEnabled,
           ),
         ),
       );
@@ -43,7 +50,7 @@ void main() {
 
     testWidgets('renders in empty state', (WidgetTester tester) async {
       controller.clearData();
-      await pumpRenderingLayerVisualizer(tester);
+      await pumpRasterStatsView(tester);
 
       expect(find.byType(LayerSnapshotTable), findsNothing);
       expect(find.byType(LayerImage), findsNothing);
@@ -56,7 +63,7 @@ void main() {
     });
 
     testWidgets('renders with data', (tester) async {
-      await pumpRenderingLayerVisualizer(tester);
+      await pumpRasterStatsView(tester);
 
       expect(find.byType(LayerSnapshotTable), findsOneWidget);
       expect(find.richText('Layer'), findsOneWidget);
@@ -77,8 +84,23 @@ void main() {
       );
     });
 
+    testWidgets('renders for Impeller', (WidgetTester tester) async {
+      controller.clearData();
+      await pumpRasterStatsView(tester, impellerEnabled: true);
+
+      expect(find.byType(LayerSnapshotTable), findsNothing);
+      expect(find.byType(LayerImage), findsNothing);
+      expect(
+        find.richTextContaining(
+          'The Raster Stats tool is not currently available for the '
+          'Impeller backend.',
+        ),
+        findsOneWidget,
+      );
+    });
+
     testWidgets('can change layer selection', (tester) async {
-      await pumpRenderingLayerVisualizer(tester);
+      await pumpRasterStatsView(tester);
 
       final rasterStats = controller.rasterStats.value!;
       final layers = rasterStats.layerSnapshots;

@@ -3,7 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math' as math;
 
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -11,16 +15,14 @@ import 'package:logging/logging.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 
 import '../shared/analytics/analytics.dart' as ga;
+import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
+import '../shared/constants.dart';
 import '../shared/globals.dart';
-import '../shared/primitives/auto_dispose.dart';
 import '../shared/primitives/message_bus.dart';
 import '../shared/primitives/utils.dart';
-import '../shared/theme.dart';
+import '../shared/ui/colors.dart';
 import '../shared/ui/hover.dart';
-import '../shared/ui/label.dart';
-import '../shared/utils.dart';
-import 'service_extension_manager.dart';
 import 'service_extensions.dart';
 import 'service_registrations.dart';
 
@@ -58,7 +60,10 @@ class ServiceExtensionButtonGroup extends StatefulWidget {
 }
 
 class _ServiceExtensionButtonGroupState
-    extends State<ServiceExtensionButtonGroup> with AutoDisposeMixin {
+    extends State<ServiceExtensionButtonGroup>
+    with
+        AutoDisposeMixin<ServiceExtensionButtonGroup>,
+        MainIsolateChangeMixin<ServiceExtensionButtonGroup> {
   late List<ExtensionState> _extensionStates;
 
   @override
@@ -70,6 +75,9 @@ class _ServiceExtensionButtonGroupState
     _initExtensionState();
   }
 
+  @override
+  void _onMainIsolateChanged() => _initExtensionState();
+
   void _initExtensionState() {
     _extensionStates = [for (var e in widget.extensions) ExtensionState(e)];
 
@@ -78,17 +86,18 @@ class _ServiceExtensionButtonGroupState
       // VMServiceManager.
       final extensionName = extension.description.extension;
       // Update the button state to match the latest state on the VM.
-      final state = serviceManager.serviceExtensionManager
+      final state = serviceConnection.serviceManager.serviceExtensionManager
           .getServiceExtensionState(extensionName);
       extension.isSelected = state.value.enabled;
-
       addAutoDisposeListener(state, () {
         setState(() {
           extension.isSelected = state.value.enabled;
         });
       });
+
       // Track whether the extension is actually exposed by the VM.
-      final listenable = serviceManager.serviceExtensionManager
+      final listenable = serviceConnection
+          .serviceManager.serviceExtensionManager
           .hasServiceExtension(extensionName);
       extension.isAvailable = listenable.value;
       addAutoDisposeListener(
@@ -146,7 +155,8 @@ class _ServiceExtensionButtonGroupState
         final wasSelected = extensionState.isSelected;
 
         unawaited(
-          serviceManager.serviceExtensionManager.setServiceExtensionState(
+          serviceConnection.serviceManager.serviceExtensionManager
+              .setServiceExtensionState(
             extensionState.description.extension,
             enabled: !wasSelected,
             value: wasSelected
@@ -183,9 +193,10 @@ class ServiceExtensionButton extends StatelessWidget {
       child: Container(
         height: defaultButtonHeight,
         padding: EdgeInsets.symmetric(
-          horizontal: includeText(context, minScreenWidthForTextBeforeScaling)
-              ? defaultSpacing
-              : 0.0,
+          horizontal:
+              isScreenWiderThan(context, minScreenWidthForTextBeforeScaling)
+                  ? defaultSpacing
+                  : 0.0,
         ),
         child: ImageIconLabel(
           ServiceExtensionIcon(extensionState: extensionState),
@@ -197,35 +208,63 @@ class ServiceExtensionButton extends StatelessWidget {
   }
 }
 
-/// Button that performs a hot reload on the [serviceManager].
+/// Button that performs a hot reload on the [serviceConnection].
 class HotReloadButton extends StatelessWidget {
-  const HotReloadButton({super.key});
+  const HotReloadButton({super.key, this.callOnVmServiceDirectly = false});
+
+  /// Whether to initiate hot reload via [VmService.reloadSources] instead of by
+  /// calling a registered service from Flutter.
+  final bool callOnVmServiceDirectly;
+
+  static const _hotReloadTooltip = 'Hot reload';
 
   @override
   Widget build(BuildContext context) {
     // TODO(devoncarew): Show as disabled when reload service calls are in progress.
-
-    return DevToolsTooltip(
-      message: 'Hot reload',
-      child: _RegisteredServiceExtensionButton._(
-        serviceDescription: hotReload,
-        action: () {
-          // The future is returned.
-          // ignore: discarded_futures
-          return serviceManager.runDeviceBusyTask(
-            // The future is returned.
-            // ignore: discarded_futures
-            _wrapReloadCall('reload', serviceManager.performHotReload),
+    return callOnVmServiceDirectly
+        // We cannot use a [_RegisteredServiceExtensionButton] here because
+        // there is no hot reload service extension when we are calling hot
+        // reload directly on the VM service (e.g. for Dart CLI apps).
+        ? _HotReloadScaffoldAction()
+        : DevToolsTooltip(
+            message: _hotReloadTooltip,
+            child: _RegisteredServiceExtensionButton._(
+              serviceDescription: hotReload,
+              action: _callHotReload,
+              completedText: 'Hot reload completed.',
+              describeError: (error) => 'Unable to hot reload the app: $error',
+            ),
           );
-        },
-        completedText: 'Hot reload completed.',
-        describeError: (error) => 'Unable to hot reload the app: $error',
-      ),
-    );
   }
 }
 
-/// Button that performs a hot restart on the [serviceManager].
+class _HotReloadScaffoldAction extends ScaffoldAction {
+  _HotReloadScaffoldAction({Color? color})
+      : super(
+          icon: hotReloadIcon,
+          tooltip: HotReloadButton._hotReloadTooltip,
+          color: color,
+          onPressed: (context) {
+            ga.select(gac.devToolsMain, gac.hotReload);
+            _callHotReload();
+          },
+        );
+}
+
+Future<void> _callHotReload() {
+  // The future is returned.
+  // ignore: discarded_futures
+  return serviceConnection.serviceManager.runDeviceBusyTask(
+    // The future is returned.
+    // ignore: discarded_futures
+    _wrapReloadCall(
+      'reload',
+      serviceConnection.serviceManager.performHotReload,
+    ),
+  );
+}
+
+/// Button that performs a hot restart on the [serviceConnection].
 class HotRestartButton extends StatelessWidget {
   const HotRestartButton({super.key});
 
@@ -240,10 +279,13 @@ class HotRestartButton extends StatelessWidget {
         action: () {
           // The future is returned.
           // ignore: discarded_futures
-          return serviceManager.runDeviceBusyTask(
+          return serviceConnection.serviceManager.runDeviceBusyTask(
             // The future is returned.
             // ignore: discarded_futures
-            _wrapReloadCall('restart', serviceManager.performHotRestart),
+            _wrapReloadCall(
+              'restart',
+              serviceConnection.serviceManager.performHotRestart,
+            ),
           );
         },
         completedText: 'Hot restart completed.',
@@ -307,7 +349,7 @@ class _RegisteredServiceExtensionButtonState
     super.initState();
 
     // Only show the button if the device supports the given service.
-    final serviceRegisteredListenable = serviceManager
+    final serviceRegisteredListenable = serviceConnection.serviceManager
         .registeredServiceListenable(widget.serviceDescription.service);
     addAutoDisposeListener(serviceRegisteredListenable, () {
       final registered = serviceRegisteredListenable.value;
@@ -319,7 +361,7 @@ class _RegisteredServiceExtensionButtonState
 
   @override
   Widget build(BuildContext context) {
-    if (_hidden) return const SizedBox();
+    if (_hidden) return const SizedBox.shrink();
 
     return InkWell(
       onTap: () => unawaited(
@@ -383,25 +425,31 @@ class _ServiceExtensionToggle extends ServiceExtensionWidget {
 }
 
 class _ServiceExtensionToggleState extends State<_ServiceExtensionToggle>
-    with ServiceExtensionMixin, AutoDisposeMixin {
+    with
+        ServiceExtensionMixin,
+        AutoDisposeMixin<_ServiceExtensionToggle>,
+        MainIsolateChangeMixin<_ServiceExtensionToggle> {
   bool value = false;
 
   @override
   void initState() {
     super.initState();
-    final state = serviceManager.serviceExtensionManager
-        .getServiceExtensionState(widget.service.extension);
+    _initExtensionState();
+  }
 
+  @override
+  void _onMainIsolateChanged() => _initExtensionState();
+
+  void _initExtensionState() {
+    final state = serviceConnection.serviceManager.serviceExtensionManager
+        .getServiceExtensionState(widget.service.extension);
     value = state.value.enabled;
 
-    addAutoDisposeListener(
-      state,
-      () {
-        setState(() {
-          value = state.value.enabled;
-        });
-      },
-    );
+    addAutoDisposeListener(state, () {
+      setState(() {
+        value = state.value.enabled;
+      });
+    });
   }
 
   @override
@@ -431,7 +479,8 @@ class _ServiceExtensionToggleState extends State<_ServiceExtensionToggle>
 
     unawaited(
       invokeAndCatchErrors(() async {
-        await serviceManager.serviceExtensionManager.setServiceExtensionState(
+        await serviceConnection.serviceManager.serviceExtensionManager
+            .setServiceExtensionState(
           widget.service.extension,
           enabled: value,
           value: value
@@ -475,7 +524,10 @@ class ServiceExtensionCheckbox extends ServiceExtensionWidget {
 }
 
 class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
-    with ServiceExtensionMixin, AutoDisposeMixin {
+    with
+        ServiceExtensionMixin,
+        AutoDisposeMixin<ServiceExtensionCheckbox>,
+        MainIsolateChangeMixin<ServiceExtensionCheckbox> {
   /// Whether this checkbox value is set to true.
   ///
   /// This notifier listens to extension state changes from the service manager
@@ -488,21 +540,27 @@ class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
   @override
   void initState() {
     super.initState();
+    _initExtensionState();
+  }
 
-    if (serviceManager.serviceExtensionManager
+  @override
+  void _onMainIsolateChanged() => _initExtensionState();
+
+  void _initExtensionState() {
+    if (serviceConnection.serviceManager.serviceExtensionManager
         .isServiceExtensionAvailable(widget.serviceExtension.extension)) {
-      final state = serviceManager.serviceExtensionManager
+      final state = serviceConnection.serviceManager.serviceExtensionManager
           .getServiceExtensionState(widget.serviceExtension.extension);
       _setValueFromState(state.value);
     }
 
     unawaited(
-      serviceManager.serviceExtensionManager
+      serviceConnection.serviceManager.serviceExtensionManager
           .waitForServiceExtensionAvailable(widget.serviceExtension.extension)
           .then((isServiceAvailable) {
         if (isServiceAvailable) {
           extensionAvailable.value = true;
-          final state = serviceManager.serviceExtensionManager
+          final state = serviceConnection.serviceManager.serviceExtensionManager
               .getServiceExtensionState(widget.serviceExtension.extension);
           _setValueFromState(state.value);
           addAutoDisposeListener(state, () {
@@ -559,7 +617,8 @@ class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
       invokeAndCatchErrors(() async {
         var enabled = value == true;
         if (widget.serviceExtension.inverted) enabled = !enabled;
-        await serviceManager.serviceExtensionManager.setServiceExtensionState(
+        await serviceConnection.serviceManager.serviceExtensionManager
+            .setServiceExtensionState(
           widget.serviceExtension.extension,
           enabled: enabled,
           value: enabled
@@ -628,7 +687,10 @@ class ServiceExtensionCheckboxGroupButton extends StatefulWidget {
 }
 
 class _ServiceExtensionCheckboxGroupButtonState
-    extends State<ServiceExtensionCheckboxGroupButton> with AutoDisposeMixin {
+    extends State<ServiceExtensionCheckboxGroupButton>
+    with
+        AutoDisposeMixin<ServiceExtensionCheckboxGroupButton>,
+        MainIsolateChangeMixin<ServiceExtensionCheckboxGroupButton> {
   static const _hoverYOffset = 10.0;
 
   /// Whether this button should have the enabled state, which makes the
@@ -645,10 +707,17 @@ class _ServiceExtensionCheckboxGroupButtonState
   @override
   void initState() {
     super.initState();
+    _initExtensionState();
+  }
+
+  @override
+  void _onMainIsolateChanged() => _initExtensionState();
+
+  void _initExtensionState() {
     _extensionStates = List.filled(widget.extensions.length, false);
     for (int i = 0; i < widget.extensions.length; i++) {
       final extension = widget.extensions[i];
-      final state = serviceManager.serviceExtensionManager
+      final state = serviceConnection.serviceManager.serviceExtensionManager
           .getServiceExtensionState(extension.extension);
       _extensionStates[i] = state.value.enabled;
       // Listen for extension state changes so that we can update the value of
@@ -661,6 +730,7 @@ class _ServiceExtensionCheckboxGroupButtonState
     _enabled.value = _isEnabled();
 
     if (widget.forceShowOverlayController != null) {
+      cancelStreamSubscriptions();
       autoDisposeStreamSubscription(
         widget.forceShowOverlayController!.stream.listen(
           (_) => _insertOverlay(context),
@@ -710,7 +780,11 @@ class _ServiceExtensionCheckboxGroupButtonState
   /// The overlay will appear directly below the button, and will be dismissed
   /// if there is a click outside of the list of toggles.
   void _insertOverlay(BuildContext context) {
-    final offset = _calculateOverlayPosition(widget.overlayWidth, context);
+    final width = math.min(
+      widget.overlayWidth,
+      MediaQuery.of(context).size.width - 2 * denseSpacing,
+    );
+    final offset = _calculateOverlayPosition(width, context);
     _overlay?.remove();
     Overlay.of(context).insert(
       _overlay = OverlayEntry(
@@ -730,7 +804,7 @@ class _ServiceExtensionCheckboxGroupButtonState
                     child: _ServiceExtensionCheckboxGroupOverlay(
                       description: widget.overlayDescription,
                       extensions: widget.extensions,
-                      width: widget.overlayWidth,
+                      width: width,
                       customExtensionUi: widget.customExtensionUi,
                     ),
                   ),
@@ -748,7 +822,7 @@ class _ServiceExtensionCheckboxGroupButtonState
         Overlay.of(context).context.findRenderObject() as RenderBox;
     final box = context.findRenderObject() as RenderBox;
 
-    final maxX = overlayBox.size.width - width;
+    final maxX = overlayBox.size.width - width - denseSpacing;
     final maxY = overlayBox.size.height;
 
     final offset = box.localToGlobal(
@@ -757,7 +831,7 @@ class _ServiceExtensionCheckboxGroupButtonState
     );
 
     return Offset(
-      offset.dx.clamp(0.0, maxX),
+      offset.dx.clamp(denseSpacing, maxX),
       offset.dy.clamp(0.0, maxY),
     );
   }
@@ -817,10 +891,9 @@ class _ServiceExtensionCheckboxGroupOverlay extends StatelessWidget {
             color: theme.colorScheme.defaultBackgroundColor,
             border: Border.all(
               color: theme.focusColor,
-              width: hoverCardBorderWidth,
+              width: hoverCardBorderSize,
             ),
-            borderRadius:
-                const BorderRadius.all(Radius.circular(defaultBorderRadius)),
+            borderRadius: defaultBorderRadius,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -938,10 +1011,9 @@ class ServiceExtensionTooltip extends StatelessWidget {
         color: colorScheme.surface,
         border: Border.all(
           color: focusColor,
-          width: hoverCardBorderWidth,
+          width: hoverCardBorderSize,
         ),
-        borderRadius:
-            const BorderRadius.all(Radius.circular(defaultBorderRadius)),
+        borderRadius: defaultBorderRadius,
       ),
       textStyle: theme.regularTextStyle.copyWith(color: colorScheme.onSurface),
       child: child,
@@ -1027,6 +1099,28 @@ class ServiceExtensionIcon extends StatelessWidget {
   }
 }
 
+mixin MainIsolateChangeMixin<T extends StatefulWidget>
+    on State<T>, AutoDisposeMixin<T> {
+  static const _mainIsolateListenerId = 'mainIsolateListener';
+
+  @override
+  void initState() {
+    super.initState();
+    addAutoDisposeListener(
+      serviceConnection.serviceManager.isolateManager.mainIsolate,
+      () {
+        setState(() {
+          cancelListeners(excludeIds: [_mainIsolateListenerId]);
+          _onMainIsolateChanged();
+        });
+      },
+      _mainIsolateListenerId,
+    );
+  }
+
+  void _onMainIsolateChanged();
+}
+
 // TODO(jacobr): port these classes to Flutter.
 /*
 /// Dropdown selector that calls a service extension.
@@ -1044,9 +1138,9 @@ class ServiceExtensionSelector {
     final extensionName = extensionDescription.extension;
 
     // Disable selector for unavailable service extensions.
-    selector.disabled = !serviceManager.serviceExtensionManager
+    selector.disabled = !serviceManager.manager.serviceExtensionManager
         .isServiceExtensionAvailable(extensionName);
-    serviceManager.serviceExtensionManager.hasServiceExtension(
+    serviceManager.manager.serviceExtensionManager.hasServiceExtension(
         extensionName, (available) => selector.disabled = !available);
 
     addOptions();
@@ -1067,7 +1161,7 @@ class ServiceExtensionSelector {
     final extensionValue = extensionDescription
         .values[extensionDescription.displayValues.indexOf(selector.value)];
 
-    serviceManager.serviceExtensionManager.setServiceExtensionState(
+    serviceManager.manager.serviceExtensionManager.setServiceExtensionState(
       extensionDescription.extension,
       true,
       extensionValue,
@@ -1082,7 +1176,7 @@ class ServiceExtensionSelector {
 
   void updateState() {
     // Select option whose state is already enabled.
-    serviceManager.serviceExtensionManager
+    serviceManager.manager.serviceExtensionManager
         .getServiceExtensionState(extensionDescription.extension, (state) {
       updateSelection(state);
     });
@@ -1112,7 +1206,7 @@ class TogglePlatformSelector extends ServiceExtensionSelector {
   @override
   void updateState() {
     // Select option whose state is already enabled.
-    serviceManager.serviceExtensionManager
+    serviceManager.manager.serviceExtensionManager
         .getServiceExtensionState(extensionDescription.extension, (state) {
       if (state.value == fuchsia.toLowerCase()) {
         selector.option(extensionDescription.displayValues

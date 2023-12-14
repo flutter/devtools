@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../common_widgets.dart';
-import '../dialogs.dart';
-import '../primitives/auto_dispose.dart';
 import '../primitives/utils.dart';
-import '../theme.dart';
 
 // TODO(kenz): consider breaking this up for flat data filtering and tree data
 // filtering.
@@ -128,13 +128,11 @@ class FilterDialog<T> extends StatefulWidget {
     required this.controller,
     this.includeQueryFilter = true,
     this.queryInstructions,
-    double? dialogWidth,
   })  : assert(
           !includeQueryFilter ||
               (queryInstructions != null &&
                   controller._queryFilterArgs.isNotEmpty),
         ),
-        dialogWidth = dialogWidth ?? defaultDialogWidth,
         toggleFilterValuesAtOpen = List.generate(
           controller.activeFilter.value.toggleFilters.length,
           (index) =>
@@ -146,8 +144,6 @@ class FilterDialog<T> extends StatefulWidget {
   final String? queryInstructions;
 
   final bool includeQueryFilter;
-
-  final double dialogWidth;
 
   final List<bool> toggleFilterValuesAtOpen;
 
@@ -376,8 +372,6 @@ class QueryFilterArgument {
   List<String> values;
 
   bool isNegative;
-
-  bool get isNotEmpty => values.isNotEmpty;
 
   String get display => values.isNotEmpty
       ? '${isNegative ? negativePrefix : ''}${keys.first}:${values.join(valueSeparator)}'
