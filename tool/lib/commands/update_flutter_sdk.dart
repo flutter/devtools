@@ -8,11 +8,10 @@ import 'package:args/command_runner.dart';
 import 'package:cli_util/cli_logging.dart';
 import 'package:devtools_tool/model.dart';
 import 'package:io/io.dart';
-import 'package:path/path.dart' as path;
 
 import '../utils.dart';
 
-const _fromPathFlag = 'from-path';
+const _updateOnPath = 'update-on-path';
 const _useCacheFlag = 'use-cache';
 
 /// This command updates the the Flutter SDK contained in the 'tool/' directory
@@ -35,10 +34,9 @@ class UpdateFlutterSdkCommand extends Command {
   UpdateFlutterSdkCommand() {
     argParser
       ..addFlag(
-        _fromPathFlag,
-        abbr: 'p',
+        _updateOnPath,
         negatable: false,
-        help: 'Update the Flutter SDK that is on PATH (your local '
+        help: 'Also update the Flutter SDK that is on PATH (your local '
             'flutter/flutter git checkout)',
       )
       ..addFlag(
@@ -61,7 +59,7 @@ class UpdateFlutterSdkCommand extends Command {
 
   @override
   Future run() async {
-    final updateFlutterFromPath = argResults![_fromPathFlag];
+    final updateOnPath = argResults![_updateOnPath];
     final useCachedVersion = argResults![_useCacheFlag];
     final log = Logger.standard();
 
@@ -100,16 +98,20 @@ class UpdateFlutterSdkCommand extends Command {
       '${useCachedVersion ? 'from cache' : 'from upstream'}: $flutterTag ',
     );
 
-    if (updateFlutterFromPath) {
-      final sdk = FlutterSdk.current;
+    final flutterSdkDirName = repo.sdkDirectoryName;
+    final toolSdkPath = repo.toolFlutterSdkPath;
 
-      log.stdout('Updating local flutter/flutter repository...');
+    // If the flag was set, update the SDK on PATH in addition to the
+    // tool/flutter-sdk copy.
+    if (updateOnPath) {
+      final pathSdk = FlutterSdk.findFromPathEnvironmentVariable();
+      log.stdout('Updating Flutter from PATH at ${pathSdk.sdkPath}');
 
       // Verify we have an upstream remote to pull from.
       await findRemote(
         processManager,
         remoteId: 'flutter/flutter.git',
-        workingDirectory: sdk.sdkPath,
+        workingDirectory: pathSdk.sdkPath,
       );
 
       await processManager.runAll(
@@ -121,33 +123,24 @@ class UpdateFlutterSdkCommand extends Command {
           CliCommand.git(cmd: 'checkout $flutterTag -f'),
           CliCommand.flutter('--version'),
         ],
-        workingDirectory: sdk.sdkPath,
+        workingDirectory: pathSdk.sdkPath,
       );
-      log.stdout('Finished updating local flutter/flutter repository.');
+      log.stdout('Finished updating Flutter from PATH at ${pathSdk.sdkPath}');
     }
 
-    final flutterSdkDirName = 'flutter-sdk';
-    final toolSdkPath = path.join(
-      repo.toolDirectoryPath,
-      flutterSdkDirName,
-    );
-    final toolFlutterSdkDirectory = Directory(toolSdkPath);
-    log.stdout('Updating "$toolSdkPath" to branch $flutterTag');
-
-    if (toolFlutterSdkDirectory.existsSync()) {
-      log.stdout(
-        '"$toolSdkPath" directory already exists. Fetching $flutterTag from GitHub.',
-      );
+    // Next, update (or clone) the tool/flutter-sdk copy.
+    if (Directory(toolSdkPath).existsSync()) {
+      log.stdout('Updating Flutter at $toolSdkPath');
       await processManager.runAll(
         commands: [
           CliCommand.git(cmd: 'fetch'),
           CliCommand.git(cmd: 'checkout $flutterTag -f'),
           CliCommand.flutter('--version'),
         ],
-        workingDirectory: toolFlutterSdkDirectory.path,
+        workingDirectory: toolSdkPath,
       );
     } else {
-      log.stdout('Cloning flutter/flutter into "$toolSdkPath" directory.');
+      log.stdout('Cloning Flutter into $toolSdkPath');
       await processManager.runProcess(
         CliCommand.git(
           cmd: 'clone https://github.com/flutter/flutter $flutterSdkDirName',
@@ -159,9 +152,9 @@ class UpdateFlutterSdkCommand extends Command {
           CliCommand.git(cmd: 'checkout $flutterTag -f'),
           CliCommand.flutter('--version'),
         ],
-        workingDirectory: toolFlutterSdkDirectory.path,
+        workingDirectory: toolSdkPath,
       );
     }
-    log.stdout('Finished updating $toolSdkPath.');
+    log.stdout('Finished updating Flutter at $toolSdkPath.');
   }
 }
