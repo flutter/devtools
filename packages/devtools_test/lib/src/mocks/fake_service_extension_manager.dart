@@ -104,17 +104,11 @@ base class FakeServiceExtensionManager extends Fake
   }
 
   Object? _getExtensionValueFromJson(String name, String valueFromJson) {
-    final expectedValueType =
-        serviceExtensionsAllowlist[name]!.values.first.runtimeType;
-    switch (expectedValueType) {
-      case bool:
-        return valueFromJson == 'true' ? true : false;
-      case int:
-      case double:
-        return num.parse(valueFromJson);
-      default:
-        return valueFromJson;
-    }
+    return switch (serviceExtensionsAllowlist[name]!.values.first) {
+      bool() => valueFromJson == 'true' ? true : false,
+      num() => num.parse(valueFromJson),
+      _ => valueFromJson,
+    };
   }
 
   Future<void> _onFrameEventReceived() async {
