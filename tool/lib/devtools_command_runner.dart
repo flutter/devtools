@@ -47,8 +47,9 @@ class DevToolsCommandRunner extends CommandRunner {
       _flutterFromPathFlag,
       abbr: 'p',
       negatable: false,
-      help: 'Use the Flutter SDK on PATH rather than the one being used to run '
-          'devtools_tool (usually tool/flutter-sdk)',
+      help: 'Use the Flutter SDK on PATH for any `flutter`, `dart` and '
+          '`devtools_tool` commands spawned by this process, instead of the '
+          'Flutter SDK from tool/flutter-sdk which is used by default.',
     );
   }
 

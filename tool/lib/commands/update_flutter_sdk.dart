@@ -101,11 +101,8 @@ class UpdateFlutterSdkCommand extends Command {
     final flutterSdkDirName = repo.sdkDirectoryName;
     final toolSdkPath = repo.toolFlutterSdkPath;
 
-    // Check if the Flutter SDK we're using is not the local tool/flutter-sdk
-    // one and if so update that too.
-    //
-    // Check paths case-insensitively because of potential differences like
-    // windows drive letters.
+    // If the flag was set, update the SDK on PATH in addition to the
+    // tool/flutter-sdk copy.
     if (updateOnPath) {
       final pathSdk = FlutterSdk.findFromPathEnvironmentVariable();
       log.stdout('Updating Flutter from PATH at ${pathSdk.sdkPath}');
