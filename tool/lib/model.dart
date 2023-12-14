@@ -125,6 +125,22 @@ class FlutterSdk {
   ///
   /// Throws if the current VM is not inside a Flutter SDK.
   static void useFromCurrentVm() {
+    _current = findFromCurrentVm();
+  }
+
+  /// Sets the active Flutter SDK to the one found in the `PATH` environment
+  /// variable (by running which/where).
+  ///
+  /// Throws if an SDK is not found on PATH.
+  static void useFromPathEnvironmentVariable() {
+    _current = findFromPathEnvironmentVariable();
+  }
+
+  /// Finds the Flutter SDK that contains the Dart VM being used to run this
+  /// script.
+  ///
+  /// Throws if the current VM is not inside a Flutter SDK.
+  static FlutterSdk findFromCurrentVm() {
     // Look for it relative to the current Dart process.
     final dartVmPath = Platform.resolvedExecutable;
     final pathSegments = path.split(dartVmPath);
@@ -149,8 +165,7 @@ class FlutterSdk {
 
       if (expectedSegments.isEmpty) {
         final flutterSdkRoot = path.joinAll(pathSegments);
-        _current = FlutterSdk._(flutterSdkRoot);
-        return;
+        return FlutterSdk._(flutterSdkRoot);
       }
     }
 
@@ -160,19 +175,18 @@ class FlutterSdk {
     );
   }
 
-  /// Sets the active Flutter SDK to the one found in the `PATH` environment
-  /// variable (by running which/where).
+  /// Finds a Flutter SDK in the `PATH` environment variable
+  /// (by running which/where).
   ///
   /// Throws if an SDK is not found on PATH.
-  static void useFromPathEnvironmentVariable() {
+  static FlutterSdk findFromPathEnvironmentVariable() {
     final whichCommand = Platform.isWindows ? 'where.exe' : 'which';
     final result = Process.runSync(whichCommand, ['flutter']);
     if (result.exitCode == 0) {
       final sdkPath = result.stdout.toString().split('\n').first.trim();
       // 'flutter/bin'
       if (path.basename(path.dirname(sdkPath)) == 'bin') {
-        _current = FlutterSdk._(path.dirname(path.dirname(sdkPath)));
-        return;
+        return FlutterSdk._(path.dirname(path.dirname(sdkPath)));
       }
     }
 
