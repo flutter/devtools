@@ -4,7 +4,7 @@
   argument.
 * `SemanticVersion` now mixes in `CompareMixin<SemanticVersion>`, and it's
   `compareTo` method therefore now accepts a `SemanticVersion`.
-* Fix an issue parsing file paths on Mac that could prevent extensions from being detected.
+* Fix an issue parsing file paths that could prevent extensions from being detected.
 
 # 6.0.2
 * Fix an issue parsing file paths on Windows that could prevent extensions from being detected.

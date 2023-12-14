@@ -44,33 +44,41 @@ class ExtensionsManager {
   /// [serveAvailableExtensions] is called.
   final devtoolsExtensions = <DevToolsExtensionConfig>[];
 
-  /// Serves any available DevTools extensions for the given [rootPath], where
-  /// [rootPath] is the root for a Dart or Flutter project containing the
-  /// `.dart_tool/` directory.
+  /// Serves any available DevTools extensions for the given [rootPathFileUri],
+  /// where [rootPathFileUri] is the root for a Dart or Flutter project
+  /// containing the `.dart_tool/` directory.
+  ///
+  /// [rootPathFileUri] is expected to be a file uri (e.g. starting with
+  /// 'file://').
   ///
   /// This method first looks up the available extensions using
   /// package:extension_discovery, and the available extension's
   /// assets will be copied to the `build/devtools_extensions` directory that
   /// DevTools server is serving.
-  Future<void> serveAvailableExtensions(String? rootPath) async {
+  Future<void> serveAvailableExtensions(String? rootPathFileUri) async {
+    if (rootPathFileUri != null && !rootPathFileUri.startsWith('file://')) {
+      throw ArgumentError.value(
+        rootPathFileUri,
+        'rootPathFileUri',
+        'must be a file:// URI String',
+      );
+    }
+
     devtoolsExtensions.clear();
     final parsingErrors = StringBuffer();
 
-    if (rootPath != null) {
+    if (rootPathFileUri != null) {
       late final List<Extension> extensions;
       try {
-        final packageConfigPath = path.join(
-          rootPath,
-          '.dart_tool',
-          'package_config.json',
-        );
-        // Only use [Uri.file] for windows platforms (https://github.com/dart-lang/tools/issues/220).
-        final packageConfigUri = Platform.isWindows
-            ? Uri.file(packageConfigPath)
-            : Uri.parse(packageConfigPath);
         extensions = await findExtensions(
           'devtools',
-          packageConfig: packageConfigUri,
+          packageConfig: Uri.parse(
+            path.posix.join(
+              rootPathFileUri,
+              '.dart_tool',
+              'package_config.json',
+            ),
+          ),
         );
       } catch (e) {
         extensions = <Extension>[];
