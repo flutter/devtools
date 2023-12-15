@@ -67,7 +67,7 @@ class DiffPaneController extends DisposableController {
     );
     final files = await importRawFilesFromPicker();
 
-    /// TODO: do in parallel
+    final loaders = files.map((file) {});
     for (final file in files) {
       print(file.name);
       final bytes = await file.readAsBytes();
