@@ -75,7 +75,7 @@ class _ListControlPane extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
-      valueListenable: controller.isTakingSnapshot,
+      valueListenable: controller.isAddingSnapshot,
       builder: (_, isProcessing, __) {
         final clearAllEnabled = !isProcessing && controller.hasSnapshots;
         return Row(
@@ -83,16 +83,16 @@ class _ListControlPane extends StatelessWidget {
             ToolbarAction(
               icon: iconToTakeSnapshot,
               tooltip: 'Take heap snapshot for the selected isolate',
-              onPressed: controller.isTakingSnapshot.value
+              onPressed: controller.isAddingSnapshot.value
                   ? null
                   : () => unawaited(_takeSnapshot(context)),
             ),
             ToolbarAction(
               icon: Icons.file_open,
               tooltip: 'Import snapshots.',
-              onPressed: controller.isTakingSnapshot.value
+              onPressed: controller.isAddingSnapshot.value
                   ? null
-                  : () => unawaited(controller.openSnapshots()),
+                  : () => unawaited(controller.importSnapshots()),
             ),
             ToolbarAction(
               icon: Icons.block,

@@ -23,7 +23,7 @@ class SnapshotControlPane extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
-      valueListenable: controller.isTakingSnapshot,
+      valueListenable: controller.isAddingSnapshot,
       builder: (_, isProcessing, __) {
         final current = controller.core.selectedItem as SnapshotInstanceItem;
         final heapIsReady = !isProcessing && current.heap != null;

@@ -31,7 +31,7 @@ class DiffPaneController extends DisposableController {
   final SnapshotTaker snapshotTaker;
 
   /// If true, a snapshot is being taken.
-  ValueListenable<bool> get isTakingSnapshot => _isAddingSnapshot;
+  ValueListenable<bool> get isAddingSnapshot => _isAddingSnapshot;
   final _isAddingSnapshot = ValueNotifier<bool>(false);
 
   final retainingPathController = RetainingPathController();
@@ -54,15 +54,31 @@ class DiffPaneController extends DisposableController {
       isolateName: selectedIsolateName ?? '<isolate-not-detected>',
     );
 
+    _isAddingSnapshot.value = true;
     await _addSnapshot(snapshotTaker, item);
+    _isAddingSnapshot.value = false;
+    derived._updateValues();
+  }
+
+  Future<void> importSnapshots() async {
+    ga.select(
+      gac.memory,
+      gac.importFile,
+    );
+    final files = await importRawFilesFromPicker();
+
+    /// TODO: do in parallel
+    for (final file in files) {
+      print(file.name);
+      final bytes = await file.readAsBytes();
+      final heapData = AdaptedHeapData.fromBytes(bytes);
+    }
   }
 
   Future<void> _addSnapshot(
     SnapshotTaker snapshotTaker,
     SnapshotInstanceItem item,
   ) async {
-    _isAddingSnapshot.value = true;
-
     final snapshots = core._snapshots;
     snapshots.add(item);
 
@@ -75,8 +91,6 @@ class DiffPaneController extends DisposableController {
     } finally {
       final newElementIndex = snapshots.value.length - 1;
       core._selectedSnapshotIndex.value = newElementIndex;
-      _isAddingSnapshot.value = false;
-      derived._updateValues();
     }
   }
 
@@ -115,21 +129,6 @@ class DiffPaneController extends DisposableController {
   void setSnapshotIndex(int index) {
     core._selectedSnapshotIndex.value = index;
     derived._updateValues();
-  }
-
-  Future<void> openSnapshots() async {
-    ga.select(
-      gac.memory,
-      gac.importFile,
-    );
-    final files = await importRawFilesFromPicker();
-
-    /// TODO: do in parallel
-    for (final file in files) {
-      print(file.name);
-      final bytes = await file.readAsBytes();
-      final heapData = AdaptedHeapData.fromBytes(bytes);
-    }
   }
 
   void setDiffing(
