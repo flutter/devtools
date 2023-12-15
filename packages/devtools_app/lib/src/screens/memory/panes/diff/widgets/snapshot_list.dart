@@ -15,7 +15,6 @@ import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/dialogs.dart';
 import '../../../../../shared/file_import.dart';
-import '../../../../../shared/primitives/auto_dispose.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
 import '../controller/diff_pane_controller.dart';
