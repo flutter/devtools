@@ -1041,6 +1041,7 @@ class StatelessSearchField<T extends SearchableDataMixin>
       onChanged: (value) {
         onChanged?.call(value);
         controller.search = value;
+        controller.searchFieldFocusNode.requestFocus();
       },
       onEditingComplete: () {
         controller.searchFieldFocusNode.requestFocus();
