@@ -89,7 +89,7 @@ class _ListControlPane extends StatelessWidget {
             ),
             ToolbarAction(
               icon: Icons.file_open,
-              tooltip: 'Open stored snapshots.',
+              tooltip: 'Import snapshots.',
               onPressed: controller.isTakingSnapshot.value
                   ? null
                   : () => unawaited(controller.openSnapshots()),
