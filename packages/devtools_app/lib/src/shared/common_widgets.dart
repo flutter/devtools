@@ -2079,11 +2079,12 @@ class VerticalLineSpacer extends StatelessWidget {
   }
 }
 
-class ToCsvButton extends StatelessWidget {
-  const ToCsvButton({
+class DownloadButton extends StatelessWidget {
+  const DownloadButton({
     Key? key,
     this.onPressed,
-    this.tooltip = 'Download data in CSV format',
+    this.tooltip = 'Download data',
+    this.label = 'Download',
     required this.minScreenWidthForTextBeforeScaling,
     required this.gaScreen,
     required this.gaSelection,
@@ -2091,6 +2092,7 @@ class ToCsvButton extends StatelessWidget {
 
   final VoidCallback? onPressed;
   final String? tooltip;
+  final String label;
   final double minScreenWidthForTextBeforeScaling;
   final String gaScreen;
   final String gaSelection;
@@ -2098,7 +2100,7 @@ class ToCsvButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GaDevToolsButton(
-      label: 'CSV',
+      label: label,
       icon: Icons.file_download,
       tooltip: tooltip,
       gaScreen: gaScreen,
