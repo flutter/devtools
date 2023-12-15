@@ -14,6 +14,7 @@ import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/config_specific/import_export/import_export.dart';
 import '../../../../../shared/file_import.dart';
 import '../../../../../shared/globals.dart';
+import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../../shared/memory/class_name.dart';
 import '../../../shared/heap/class_filter.dart';
 import '../../../shared/heap/heap.dart';
@@ -30,8 +31,8 @@ class DiffPaneController extends DisposableController {
   final SnapshotTaker snapshotTaker;
 
   /// If true, a snapshot is being taken.
-  ValueListenable<bool> get isTakingSnapshot => _isTakingSnapshot;
-  final _isTakingSnapshot = ValueNotifier<bool>(false);
+  ValueListenable<bool> get isTakingSnapshot => _isAddingSnapshot;
+  final _isAddingSnapshot = ValueNotifier<bool>(false);
 
   final retainingPathController = RetainingPathController();
 
@@ -43,7 +44,6 @@ class DiffPaneController extends DisposableController {
   bool get hasSnapshots => core.snapshots.value.length > 1;
 
   Future<void> takeSnapshot() async {
-    _isTakingSnapshot.value = true;
     ga.select(
       gac.memory,
       gac.MemoryEvent.diffTakeSnapshotControlPane,
@@ -53,6 +53,15 @@ class DiffPaneController extends DisposableController {
       displayNumber: _nextDisplayNumber(),
       isolateName: selectedIsolateName ?? '<isolate-not-detected>',
     );
+
+    await _addSnapshot(snapshotTaker, item);
+  }
+
+  Future<void> _addSnapshot(
+    SnapshotTaker snapshotTaker,
+    SnapshotInstanceItem item,
+  ) async {
+    _isAddingSnapshot.value = true;
 
     final snapshots = core._snapshots;
     snapshots.add(item);
@@ -66,7 +75,7 @@ class DiffPaneController extends DisposableController {
     } finally {
       final newElementIndex = snapshots.value.length - 1;
       core._selectedSnapshotIndex.value = newElementIndex;
-      _isTakingSnapshot.value = false;
+      _isAddingSnapshot.value = false;
       derived._updateValues();
     }
   }
@@ -115,7 +124,12 @@ class DiffPaneController extends DisposableController {
     );
     final files = await importRawFilesFromPicker();
 
-    print(files.length);
+    /// TODO: do in parallel
+    for (final file in files) {
+      print(file.name);
+      final bytes = await file.readAsBytes();
+      final heapData = AdaptedHeapData.fromBytes(bytes);
+    }
   }
 
   void setDiffing(
