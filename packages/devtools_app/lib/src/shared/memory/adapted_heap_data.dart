@@ -72,6 +72,14 @@ class AdaptedHeapData {
     return AdaptedHeapData(objects);
   }
 
+  static Future<AdaptedHeapData> fromBytes(
+    Uint8List bytes,
+  ) {
+    final data = bytes.buffer.asByteData();
+    final graph = HeapSnapshotGraph.fromChunks([data]);
+    return fromHeapSnapshot(graph);
+  }
+
   /// Default value for rootIndex is taken from the doc:
   /// https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/heap_snapshot.md#object-ids
   static const int _defaultRootIndex = 1;
