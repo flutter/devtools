@@ -325,21 +325,18 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
 
   @override
   Widget build(BuildContext context) {
-    Widget buildTable(List<double> columnWidths) => SelectionArea(
-          child: _Table<T>(
-            tableController: tableController,
-            columnWidths: columnWidths,
-            autoScrollContent: widget.autoScrollContent,
-            rowBuilder: _buildRow,
-            activeSearchMatchNotifier: widget.activeSearchMatchNotifier,
-            rowItemExtent: defaultRowHeight,
-            preserveVerticalScrollPosition:
-                widget.preserveVerticalScrollPosition,
-            tallHeaders: widget.tallHeaders,
-            headerColor: widget.headerColor,
-            fillWithEmptyRows: widget.fillWithEmptyRows,
-            enableHoverHandling: widget.enableHoverHandling,
-          ),
+    Widget buildTable(List<double> columnWidths) => _Table<T>(
+          tableController: tableController,
+          columnWidths: columnWidths,
+          autoScrollContent: widget.autoScrollContent,
+          rowBuilder: _buildRow,
+          activeSearchMatchNotifier: widget.activeSearchMatchNotifier,
+          rowItemExtent: defaultRowHeight,
+          preserveVerticalScrollPosition: widget.preserveVerticalScrollPosition,
+          tallHeaders: widget.tallHeaders,
+          headerColor: widget.headerColor,
+          fillWithEmptyRows: widget.fillWithEmptyRows,
+          enableHoverHandling: widget.enableHoverHandling,
         );
     if (widget.sizeColumnsToFit || tableController.columnWidths == null) {
       return LayoutBuilder(
@@ -690,19 +687,17 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 
   @override
   Widget build(BuildContext context) {
-    return SelectionArea(
-      child: _Table<T>(
-        tableController: tableController,
-        columnWidths: tableController.columnWidths!,
-        rowBuilder: _buildRow,
-        rowItemExtent: defaultRowHeight,
-        focusNode: _focusNode,
-        handleKeyEvent: _handleKeyEvent,
-        selectionNotifier: widget.selectionNotifier,
-        preserveVerticalScrollPosition: widget.preserveVerticalScrollPosition,
-        tallHeaders: widget.tallHeaders,
-        headerColor: widget.headerColor,
-      ),
+    return _Table<T>(
+      tableController: tableController,
+      columnWidths: tableController.columnWidths!,
+      rowBuilder: _buildRow,
+      rowItemExtent: defaultRowHeight,
+      focusNode: _focusNode,
+      handleKeyEvent: _handleKeyEvent,
+      selectionNotifier: widget.selectionNotifier,
+      preserveVerticalScrollPosition: widget.preserveVerticalScrollPosition,
+      tallHeaders: widget.tallHeaders,
+      headerColor: widget.headerColor,
     );
   }
 
@@ -1109,18 +1104,34 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     // TODO(kenz): add horizontal scrollbar.
     return LayoutBuilder(
       builder: (context, constraints) {
-        return SizedBox(
-          width: max(
-            constraints.widthConstraints().maxWidth,
-            tableWidth,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (showColumnGroupHeader)
-                TableRow<T>.tableColumnGroupHeader(
+        return SelectionArea(
+          child: SizedBox(
+            width: max(
+              constraints.widthConstraints().maxWidth,
+              tableWidth,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (showColumnGroupHeader)
+                  TableRow<T>.tableColumnGroupHeader(
+                    linkedScrollControllerGroup:
+                        _linkedHorizontalScrollControllerGroup,
+                    columnGroups: columnGroups,
+                    columnWidths: widget.columnWidths,
+                    sortColumn: sortColumn,
+                    sortDirection: tableUiState.sortDirection,
+                    secondarySortColumn:
+                        widget.tableController.secondarySortColumn,
+                    onSortChanged: widget.tableController.sortDataAndNotify,
+                    tall: widget.tallHeaders,
+                    backgroundColor: widget.headerColor,
+                  ),
+                TableRow<T>.tableColumnHeader(
+                  key: const Key('Table header'),
                   linkedScrollControllerGroup:
                       _linkedHorizontalScrollControllerGroup,
+                  columns: widget.tableController.columns,
                   columnGroups: columnGroups,
                   columnWidths: widget.columnWidths,
                   sortColumn: sortColumn,
@@ -1131,69 +1142,56 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
                   tall: widget.tallHeaders,
                   backgroundColor: widget.headerColor,
                 ),
-              TableRow<T>.tableColumnHeader(
-                key: const Key('Table header'),
-                linkedScrollControllerGroup:
-                    _linkedHorizontalScrollControllerGroup,
-                columns: widget.tableController.columns,
-                columnGroups: columnGroups,
-                columnWidths: widget.columnWidths,
-                sortColumn: sortColumn,
-                sortDirection: tableUiState.sortDirection,
-                secondarySortColumn: widget.tableController.secondarySortColumn,
-                onSortChanged: widget.tableController.sortDataAndNotify,
-                tall: widget.tallHeaders,
-                backgroundColor: widget.headerColor,
-              ),
-              if (pinnedData.isNotEmpty) ...[
-                SizedBox(
-                  height: _pinnedDataHeight(constraints),
+                if (pinnedData.isNotEmpty) ...[
+                  SizedBox(
+                    height: _pinnedDataHeight(constraints),
+                    child: Scrollbar(
+                      thumbVisibility: true,
+                      controller: pinnedScrollController,
+                      child: ListView.builder(
+                        controller: pinnedScrollController,
+                        itemCount: pinnedData.length,
+                        itemExtent: widget.rowItemExtent,
+                        itemBuilder: (context, index) => _buildItem(
+                          context,
+                          index,
+                          isPinned: true,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const ThickDivider(),
+                ],
+                Expanded(
                   child: Scrollbar(
                     thumbVisibility: true,
-                    controller: pinnedScrollController,
-                    child: ListView.builder(
-                      controller: pinnedScrollController,
-                      itemCount: pinnedData.length,
-                      itemExtent: widget.rowItemExtent,
-                      itemBuilder: (context, index) => _buildItem(
-                        context,
-                        index,
-                        isPinned: true,
+                    controller: scrollController,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.translucent,
+                      onTapDown: (a) => widget.focusNode?.requestFocus(),
+                      child: Focus(
+                        autofocus: true,
+                        onKey: (_, event) => widget.handleKeyEvent != null
+                            ? widget.handleKeyEvent!(
+                                event,
+                                scrollController,
+                                constraints,
+                              )
+                            : KeyEventResult.ignored,
+                        focusNode: widget.focusNode,
+                        child: ListView.builder(
+                          controller: scrollController,
+                          itemCount:
+                              _dataRowCount(constraints, showColumnGroupHeader),
+                          itemExtent: widget.rowItemExtent,
+                          itemBuilder: _buildItem,
+                        ),
                       ),
                     ),
                   ),
                 ),
-                const ThickDivider(),
               ],
-              Expanded(
-                child: Scrollbar(
-                  thumbVisibility: true,
-                  controller: scrollController,
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.translucent,
-                    onTapDown: (a) => widget.focusNode?.requestFocus(),
-                    child: Focus(
-                      autofocus: true,
-                      onKey: (_, event) => widget.handleKeyEvent != null
-                          ? widget.handleKeyEvent!(
-                              event,
-                              scrollController,
-                              constraints,
-                            )
-                          : KeyEventResult.ignored,
-                      focusNode: widget.focusNode,
-                      child: ListView.builder(
-                        controller: scrollController,
-                        itemCount:
-                            _dataRowCount(constraints, showColumnGroupHeader),
-                        itemExtent: widget.rowItemExtent,
-                        itemBuilder: _buildItem,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
         );
       },
