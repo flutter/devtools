@@ -985,11 +985,6 @@ extension ProfileDataRanges on SourceReport {
       ProfileReport._fromJson(script, json!);
 }
 
-class ProfileReportMetaData {
-  const ProfileReportMetaData._({required this.sampleCount});
-  final int sampleCount;
-}
-
 /// Profiling information for a given line in a [Script].
 class ProfileReportEntry {
   const ProfileReportEntry({
@@ -1010,27 +1005,25 @@ class ProfileReportEntry {
 
 /// Profiling information for a range of token positions in a [Script].
 class ProfileReportRange {
-  ProfileReportRange._fromJson(Script script, Map<String, dynamic> json)
-      : metadata = ProfileReportMetaData._(
-          sampleCount: json[_kProfileKey][_kMetadataKey][_kSampleCountKey],
-        ),
-        inclusiveTicks = json[_kProfileKey][_kInclusiveTicksKey].cast<int>(),
-        exclusiveTicks = json[_kProfileKey][_kExclusiveTicksKey].cast<int>(),
-        lines = json[_kProfileKey][_kPositionsKey]
-            .map<int>(
-              // It's possible to get a synthetic token position which will
-              // either be a negative value or a String (e.g., 'ParallelMove'
-              // or 'NoSource'). We'll just use -1 as a placeholder since we
-              // won't display anything for these tokens anyway.
-              (e) => e is int
-                  ? script.getLineNumberFromTokenPos(e) ?? _kNoSourcePosition
-                  : _kNoSourcePosition,
-            )
-            .toList() {
+  ProfileReportRange._fromJson(Script script, _ProfileReportRangeJson json) {
+    final sampleCount = json.metadata[_kSampleCountKey] as int;
+    final inclusiveTicks = json.inclusiveTicks;
+    final exclusiveTicks = json.exclusiveTicks;
+    final lines = json.positions
+        .map<int>(
+          // It's possible to get a synthetic token position which will either
+          // be a negative value or a String (e.g., 'ParallelMove' or
+          // 'NoSource'). We'll just use -1 as a placeholder since we won't
+          // display anything for these tokens anyway.
+          (e) => e is int
+              ? script.getLineNumberFromTokenPos(e) ?? _kNoSourcePosition
+              : _kNoSourcePosition,
+        )
+        .toList();
     for (int i = 0; i < lines.length; ++i) {
       final line = lines[i];
       entries[line] = ProfileReportEntry(
-        sampleCount: metadata.sampleCount,
+        sampleCount: sampleCount,
         line: line,
         inclusive: inclusiveTicks[i],
         exclusive: exclusiveTicks[i],
@@ -1038,19 +1031,29 @@ class ProfileReportRange {
     }
   }
 
+  static const _kSampleCountKey = 'sampleCount';
+  static const _kNoSourcePosition = -1;
+
+  final entries = <int, ProfileReportEntry>{};
+}
+
+/// An extension type for the unstructured data in the 'ranges' data of the
+/// profiling information used in [ProfileReport].
+extension type _ProfileReportRangeJson(Map<String, dynamic> json) {
+  Map<String, Object?> get _profile => json[_kProfileKey];
+  Map<String, Object?> get metadata =>
+      (_profile[_kMetadataKey] as Map).cast<String, Object?>();
+  List<int> get inclusiveTicks =>
+      (_profile[_kInclusiveTicksKey] as List).cast<int>();
+  List<int> get exclusiveTicks =>
+      (_profile[_kExclusiveTicksKey] as List).cast<int>();
+  List<Object?> get positions => _profile[_kPositionsKey] as List;
+
   static const _kProfileKey = 'profile';
   static const _kMetadataKey = 'metadata';
-  static const _kSampleCountKey = 'sampleCount';
   static const _kInclusiveTicksKey = 'inclusiveTicks';
   static const _kExclusiveTicksKey = 'exclusiveTicks';
   static const _kPositionsKey = 'positions';
-  static const _kNoSourcePosition = -1;
-
-  final ProfileReportMetaData metadata;
-  final entries = <int, ProfileReportEntry>{};
-  List<int> inclusiveTicks;
-  List<int> exclusiveTicks;
-  List<int> lines;
 }
 
 /// A representation of the `_Profile` [SourceReport], which contains profiling
@@ -1061,7 +1064,10 @@ class ProfileReport {
             .cast<Map<String, dynamic>>()
             .where((e) => e.containsKey('profile'))
             .map<ProfileReportRange>(
-              (e) => ProfileReportRange._fromJson(script, e),
+              (e) => ProfileReportRange._fromJson(
+                script,
+                _ProfileReportRangeJson(e),
+              ),
             )
             .toList();
 
