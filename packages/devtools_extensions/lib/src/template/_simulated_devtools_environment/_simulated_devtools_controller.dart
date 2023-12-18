@@ -66,13 +66,9 @@ class SimulatedDevToolsController extends DisposableController
     // persists on hot restart.
 
     // TODO(kenz): add some validation and error handling if [uri] is bad input.
-    final normalizedUri =
-        uri != null ? normalizeVmServiceUri(uri).toString() : null;
     final event = DevToolsExtensionEvent(
       DevToolsExtensionEventType.vmServiceConnection,
-      data: {
-        ExtensionEventParameters.vmServiceConnectionUri: normalizedUri,
-      },
+      data: {ExtensionEventParameters.vmServiceConnectionUri: uri},
     );
     _postMessageToExtension(event);
   }
