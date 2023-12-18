@@ -64,6 +64,14 @@ class LinkData with SearchableDataMixin {
 
   @override
   String toString() => 'LinkData($domain $path)';
+
+  @override
+  int get hashCode => Object.hash(domain, path);
+
+  @override
+  bool operator ==(Object other) {
+    return other is LinkData && other.domain == domain && other.path == path;
+  }
 }
 
 class _ErrorAwareText extends StatelessWidget {
@@ -90,6 +98,7 @@ class _ErrorAwareText extends StatelessWidget {
               right: defaultSpacing,
             ),
             preferBelow: true,
+            enableTapToDismiss: false,
             richMessage: WidgetSpan(
               child: SizedBox(
                 width: kToolTipWidth,

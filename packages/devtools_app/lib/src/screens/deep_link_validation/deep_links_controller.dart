@@ -127,6 +127,7 @@ class DeepLinksController extends DisposableController {
       linkDatasByPath[linkData.path] = LinkData(
         domain: linkData.domain,
         path: linkData.path,
+        scheme: linkData.scheme,
         os: [
           if (previousRecord?.os.contains(PlatformOS.android) ??
               false || linkData.os.contains(PlatformOS.android))
@@ -154,6 +155,7 @@ class DeepLinksController extends DisposableController {
       linkDatasByDomain[linkData.domain] = LinkData(
         domain: linkData.domain,
         path: linkData.path,
+        scheme: linkData.scheme,
         os: linkData.os,
         associatedPath: [
           ...previousRecord?.associatedPath ?? [],
