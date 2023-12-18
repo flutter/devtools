@@ -284,25 +284,25 @@ class AllocationMemoryJson extends MemoryJson<ClassHeapStats> {
     assert(oldVersion == 1);
     final updatedPayload = Map<String, dynamic>.of(payload);
     updatedPayload['version'] = version;
-    final oldData = payload['data'];
+    final oldData = payload['data'] as List;
     updatedPayload['data'] = [
-      for (final data in oldData)
+      for (final data in oldData.map((e) => _OldData(e)))
         {
           'type': 'ClassHeapStats',
           'class': <String, dynamic>{
             'type': '@Class',
-            ...data['class'],
+            ...data.class_,
           },
-          'bytesCurrent': data['bytesCurrent'],
-          'accumulatedSize': data['bytesDelta'],
-          'instancesCurrent': data['instancesCurrent'],
-          'instancesAccumulated': data['instancesDelta'],
+          'bytesCurrent': data.bytesCurrent,
+          'accumulatedSize': data.bytesDelta,
+          'instancesCurrent': data.instancesCurrent,
+          'instancesAccumulated': data.instancesDelta,
           // new and old space data is just reported as a list of ints
           '_new': <int>[
             // # of instances in new space.
-            data['instancesCurrent'],
+            data.instancesCurrent,
             // shallow memory consumption in new space.
-            data['bytesCurrent'],
+            data.bytesCurrent,
             // external memory consumption.
             0,
           ],
@@ -340,4 +340,16 @@ class AllocationMemoryJson extends MemoryJson<ClassHeapStats> {
       '"${MemoryJson.jsonVersionField}": $allocationFormatVersion, '
       '"${MemoryJson.jsonDevToolsScreenField}": "${MemoryJson.devToolsScreenValueMemory}", '
       '"${MemoryJson.jsonDataField}": [\n';
+}
+
+extension type _OldData(Map<String, dynamic> data) {
+  Map<String, dynamic> get class_ => data['class'];
+
+  int get bytesCurrent => data['bytesCurrent'];
+
+  int get bytesDelta => data['bytesDelta'];
+
+  int get instancesCurrent => data['instancesCurrent'];
+
+  int get instancesDelta => data['instancesDelta'];
 }
