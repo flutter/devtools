@@ -12,7 +12,7 @@ Stream<PostMessageEvent> get onPostMessage {
   return window.onMessage.map(
     (message) => PostMessageEvent(
       origin: message.origin,
-      data: message.data,
+      data: message.data.dartify(),
     ),
   );
 }
