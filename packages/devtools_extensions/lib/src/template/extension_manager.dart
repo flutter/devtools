@@ -163,7 +163,7 @@ class ExtensionManager {
     try {
       final finishedCompleter = Completer<void>();
       final vmService = await connect<VmService>(
-        uri: Uri.parse(vmServiceUri),
+        uri: normalizeVmServiceUri(vmServiceUri) ?? Uri.parse(vmServiceUri),
         finishedCompleter: finishedCompleter,
         serviceFactory: VmService.defaultFactory,
       );
