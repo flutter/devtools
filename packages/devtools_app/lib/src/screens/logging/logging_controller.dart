@@ -305,7 +305,7 @@ class LoggingController extends DisposableController
   void _handleGCEvent(Event e) {
     final HeapSpace newSpace = HeapSpace.parse(e.json!['new'])!;
     final HeapSpace oldSpace = HeapSpace.parse(e.json!['old'])!;
-    final isolateRef = e.json!['isolate'] as Map;
+    final isolateRef = (e.json!['isolate'] as Map).cast<String, Object?>();
 
     final int usedBytes = newSpace.used! + oldSpace.used!;
     final int capacityBytes = newSpace.capacity! + oldSpace.capacity!;
@@ -338,14 +338,14 @@ class LoggingController extends DisposableController
     if (loggerName == null || loggerName.isEmpty) {
       loggerName = 'log';
     }
-    final int? level = logRecord.level;
-    final InstanceRef messageRef = InstanceRef.parse(logRecord.message)!;
+    final level = logRecord.level;
+    final messageRef = InstanceRef.parse(logRecord.message)!;
     String? summary = _valueAsString(messageRef);
     if (messageRef.valueAsStringIsTruncated == true) {
       summary = '${summary!}...';
     }
-    final InstanceRef? error = InstanceRef.parse(logRecord.error);
-    final InstanceRef? stackTrace = InstanceRef.parse(logRecord.stackTrace);
+    final error = InstanceRef.parse(logRecord.error);
+    final stackTrace = InstanceRef.parse(logRecord.stackTrace);
 
     final String? details = summary;
     Future<String> Function()? detailsComputer;
