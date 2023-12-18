@@ -27,8 +27,10 @@ class SurveyService {
 
   static const _maxShowSurveyCount = 5;
 
-  static final _metadataUrl =
-      Uri.https('docs.flutter.dev', '/f/dart-devtools-survey-metadata.json');
+  static final _metadataUrl = Uri.https(
+    'storage.googleapis.com',
+    'flutter-uxr/surveys/devtools-survey-metadata.json',
+  );
 
   /// Duration for which we should show the survey notification.
   ///
