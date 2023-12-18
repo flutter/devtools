@@ -130,7 +130,6 @@ class _InitializerState extends State<Initializer>
     }
 
     final connected = await FrameworkCore.initVmService(
-      '',
       serviceUriAsString: widget.url!,
       errorReporter: errorReporter,
       logException: logException,
