@@ -1006,7 +1006,6 @@ class ProfileReportEntry {
 /// Profiling information for a range of token positions in a [Script].
 class ProfileReportRange {
   ProfileReportRange._fromJson(Script script, _ProfileReportRangeJson json) {
-    final sampleCount = json.metadata[_kSampleCountKey] as int;
     final inclusiveTicks = json.inclusiveTicks;
     final exclusiveTicks = json.exclusiveTicks;
     final lines = json.positions
@@ -1026,7 +1025,7 @@ class ProfileReportRange {
       // `ProfileReportEntry`. No bug.
       // ignore: avoid-collection-methods-with-unrelated-types
       entries[line] = ProfileReportEntry(
-        sampleCount: sampleCount,
+        sampleCount: json.sampleCount,
         line: line,
         inclusive: inclusiveTicks[i],
         exclusive: exclusiveTicks[i],
@@ -1034,7 +1033,6 @@ class ProfileReportRange {
     }
   }
 
-  static const _kSampleCountKey = 'sampleCount';
   static const _kNoSourcePosition = -1;
 
   final entries = <int, ProfileReportEntry>{};
@@ -1046,6 +1044,7 @@ extension type _ProfileReportRangeJson(Map<String, dynamic> json) {
   Map<String, Object?> get _profile => json[_kProfileKey];
   Map<String, Object?> get metadata =>
       (_profile[_kMetadataKey] as Map).cast<String, Object?>();
+  int get sampleCount => metadata[_kSampleCountKey] as int;
   List<int> get inclusiveTicks =>
       (_profile[_kInclusiveTicksKey] as List).cast<int>();
   List<int> get exclusiveTicks =>
@@ -1054,6 +1053,7 @@ extension type _ProfileReportRangeJson(Map<String, dynamic> json) {
 
   static const _kProfileKey = 'profile';
   static const _kMetadataKey = 'metadata';
+  static const _kSampleCountKey = 'sampleCount';
   static const _kInclusiveTicksKey = 'inclusiveTicks';
   static const _kExclusiveTicksKey = 'exclusiveTicks';
   static const _kPositionsKey = 'positions';
