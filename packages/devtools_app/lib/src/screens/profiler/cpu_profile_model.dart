@@ -569,7 +569,7 @@ class CpuProfileData {
       if (tree.frameId == kRootId) {
         continue;
       }
-      (traceObject[_traceEventsKey]! as List<Object?>).add({
+      (traceObject[CpuProfileData._traceEventsKey]! as List<Object?>).add({
         'ph': 'P', // kind = sample event
         'name': '', // Blank to keep about:tracing happy
         'pid': cpuSamples.pid,
