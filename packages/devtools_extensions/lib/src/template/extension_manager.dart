@@ -162,8 +162,13 @@ class ExtensionManager {
 
     try {
       final finishedCompleter = Completer<void>();
+      final normalizedUri = normalizeVmServiceUri(vmServiceUri);
+      if (normalizedUri == null) {
+        throw Exception('unable to normalize uri because it is not absolute');
+      }
+
       final vmService = await connect<VmService>(
-        uri: Uri.parse(vmServiceUri),
+        uri: normalizedUri,
         finishedCompleter: finishedCompleter,
         serviceFactory: VmService.defaultFactory,
       );

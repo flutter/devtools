@@ -14,6 +14,7 @@ To learn more about DevTools, check out the
 
 ## Inspector updates
 
+* When done typing in the search field, the next selection is now automatically selected - [#6677](https://github.com/flutter/devtools/pull/6677)
 * Added link to package directory documentation, from the inspect settings dialog - [6825](https://github.com/flutter/devtools/pull/6825)
 * Fix bug where widgets owned by the Flutter framework were showing up in the widget tree view -
 [6857](https://github.com/flutter/devtools/pull/6857)
@@ -52,11 +53,11 @@ TODO: Remove this section if there are not any general updates.
 
 ## VS Code Sidebar updates
 
-TODO: Remove this section if there are not any general updates.
+* Fixed an issue that prevented the VS code sidebar from loading in recent beta/master builds. - [#6984](https://github.com/flutter/devtools/pull/6984)
 
 ## DevTools Extension updates
 
-TODO: Remove this section if there are not any general updates.
+* Fixed a bug preventing Dart server apps from connecting to DevTools extensions. - [#6982](https://github.com/flutter/devtools/pull/6982)
 
 ## Full commit history
 

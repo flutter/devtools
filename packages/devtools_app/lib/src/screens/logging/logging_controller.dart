@@ -205,12 +205,12 @@ class LoggingController extends DisposableController
       return;
     }
 
-    if (e.extensionKind == FrameInfo.eventName) {
-      final FrameInfo frame = FrameInfo.from(e.extensionData!.data);
+    if (e.extensionKind == _FrameInfo.eventName) {
+      final _FrameInfo frame = _FrameInfo(e.extensionData!.data);
 
       final String frameId = '#${frame.number}';
       final String frameInfoText =
-          '$frameId ${frame.elapsedMs!.toStringAsFixed(1).padLeft(4)}ms ';
+          '$frameId ${frame.elapsedMs.toStringAsFixed(1).padLeft(4)}ms ';
 
       log(
         LogData(
@@ -220,14 +220,14 @@ class LoggingController extends DisposableController
           summary: frameInfoText,
         ),
       );
-    } else if (e.extensionKind == ImageSizesForFrame.eventName) {
-      final images = ImageSizesForFrame.from(e.extensionData!.data);
+    } else if (e.extensionKind == _ImageSizesForFrame.eventName) {
+      final images = _ImageSizesForFrame.from(e.extensionData!.data);
 
       for (final image in images) {
         log(
           LogData(
             e.extensionKind!.toLowerCase(),
-            jsonEncode(image.rawJson),
+            jsonEncode(image.json),
             e.timestamp,
             summary: image.summary,
           ),
@@ -305,7 +305,7 @@ class LoggingController extends DisposableController
   void _handleGCEvent(Event e) {
     final HeapSpace newSpace = HeapSpace.parse(e.json!['new'])!;
     final HeapSpace oldSpace = HeapSpace.parse(e.json!['old'])!;
-    final isolateRef = e.json!['isolate'];
+    final isolateRef = (e.json!['isolate'] as Map).cast<String, Object?>();
 
     final int usedBytes = newSpace.used! + oldSpace.used!;
     final int capacityBytes = newSpace.capacity! + oldSpace.capacity!;
@@ -314,7 +314,8 @@ class LoggingController extends DisposableController
 
     final String summary = '${isolateRef['name']} • '
         '${e.json!['reason']} collection in $time ms • '
-        '${printMB(usedBytes, includeUnit: true)} used of ${printMB(capacityBytes, includeUnit: true)}';
+        '${printMB(usedBytes, includeUnit: true)} used of '
+        '${printMB(capacityBytes, includeUnit: true)}';
 
     final event = <String, Object>{
       'reason': e.json!['reason'],
@@ -330,21 +331,21 @@ class LoggingController extends DisposableController
   void _handleDeveloperLogEvent(Event e) {
     final VmServiceWrapper? service = serviceConnection.serviceManager.service;
 
-    final logRecord = e.json!['logRecord'];
+    final logRecord = _LogRecord(e.json!['logRecord']);
 
     String? loggerName =
-        _valueAsString(InstanceRef.parse(logRecord['loggerName']));
+        _valueAsString(InstanceRef.parse(logRecord.loggerName));
     if (loggerName == null || loggerName.isEmpty) {
       loggerName = 'log';
     }
-    final int? level = logRecord['level'];
-    final InstanceRef messageRef = InstanceRef.parse(logRecord['message'])!;
+    final level = logRecord.level;
+    final messageRef = InstanceRef.parse(logRecord.message)!;
     String? summary = _valueAsString(messageRef);
     if (messageRef.valueAsStringIsTruncated == true) {
       summary = '${summary!}...';
     }
-    final InstanceRef? error = InstanceRef.parse(logRecord['error']);
-    final InstanceRef? stackTrace = InstanceRef.parse(logRecord['stackTrace']);
+    final error = InstanceRef.parse(logRecord.error);
+    final stackTrace = InstanceRef.parse(logRecord.stackTrace);
 
     final String? details = summary;
     Future<String> Function()? detailsComputer;
@@ -585,6 +586,18 @@ class LoggingController extends DisposableController
   }
 }
 
+extension type _LogRecord(Map<String, dynamic> json) {
+  int? get level => json['level'];
+
+  Map<String, Object?> get loggerName => json['loggerName'];
+
+  Map<String, Object?> get message => json['message'];
+
+  Map<String, Object?> get error => json['error'];
+
+  Map<String, Object?> get stackTrace => json['stackTrace'];
+}
+
 /// Receive and log stdout / stderr events from the VM.
 ///
 /// This class buffers the events for up to 1ms. This is in order to combine a
@@ -737,36 +750,17 @@ class LogData with SearchableDataMixin {
   String toString() => 'LogData($kind, $timestamp)';
 }
 
-class FrameInfo {
-  FrameInfo(this.number, this.elapsedMs);
-
+extension type _FrameInfo(Map<String, dynamic> _json) {
   static const String eventName = 'Flutter.Frame';
 
-  static FrameInfo from(Map<String, dynamic> data) {
-    return FrameInfo(
-      data['number'],
-      data['elapsed'] / 1000,
-    );
-  }
-
-  final int? number;
-  final num? elapsedMs;
-
-  @override
-  String toString() => 'frame $number ${elapsedMs!.toStringAsFixed(1)}ms';
+  int? get number => _json['number'];
+  num get elapsedMs => (_json['elapsed'] as num) / 1000;
 }
 
-class ImageSizesForFrame {
-  ImageSizesForFrame(
-    this.source,
-    this.displaySize,
-    this.imageSize,
-    this.rawJson,
-  );
-
+extension type _ImageSizesForFrame(Map<String, dynamic> json) {
   static const String eventName = 'Flutter.ImageSizesForFrame';
 
-  static List<ImageSizesForFrame> from(Map<String, dynamic> data) {
+  static List<_ImageSizesForFrame> from(Map<String, dynamic> data) {
     //     "packages/flutter_gallery_assets/assets/icons/material/2.0x/material.png": {
     //       "source": "packages/flutter_gallery_assets/assets/icons/material/2.0x/material.png",
     //       "displaySize": {
@@ -781,40 +775,37 @@ class ImageSizesForFrame {
     //       "decodedSizeInBytes": 87381
     //     }
 
-    return data.values.map((entry) {
-      return ImageSizesForFrame(
-        entry['source'],
-        entry['displaySize'],
-        entry['imageSize'],
-        entry,
-      );
-    }).toList();
+    return data.values.map((entry_) => _ImageSizesForFrame(entry_)).toList();
   }
 
-  final String? source;
-  final Map<String, Object?>? displaySize;
-  final Map<String, Object?>? imageSize;
-  final Map<String, Object?>? rawJson;
+  String get source => json['source'];
+
+  _ImageSize get displaySize => _ImageSize(json['displaySize']);
+
+  _ImageSize get imageSize => _ImageSize(json['imageSize']);
+
+  int? get displaySizeInBytes => json['displaySizeInBytes'];
+
+  int? get decodedSizeInBytes => json['decodedSizeInBytes'];
 
   String get summary {
-    final file = path.basename(source!);
-
-    final int? displaySizeInBytes = rawJson!['displaySizeInBytes'] as int?;
-    final int? decodedSizeInBytes = rawJson!['decodedSizeInBytes'] as int?;
+    final file = path.basename(source);
 
     final double expansion =
         math.sqrt(decodedSizeInBytes ?? 0) / math.sqrt(displaySizeInBytes ?? 1);
 
     return 'Image $file • displayed at '
-        '${(displaySize!['width'] as double).round()}x${(displaySize!['height'] as double).round()}'
+        '${displaySize.width.round()}x${displaySize.height.round()}'
         ' • created at '
-        '${(imageSize!['width'] as double).round()}x${(imageSize!['height'] as double).round()}'
+        '${imageSize.width.round()}x${imageSize.height.round()}'
         ' • ${expansion.toStringAsFixed(1)}x';
   }
+}
 
-  @override
-  String toString() =>
-      '$source ${displaySize!['width']}x${displaySize!['height']}';
+extension type _ImageSize(Map<String, dynamic> json) {
+  double get width => json['width'];
+
+  double get height => json['height'];
 }
 
 class NavigationInfo {
