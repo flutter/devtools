@@ -763,7 +763,8 @@ extension type _CpuProfileDataJson(Map<String, dynamic> json) {
   int? get sampleCount => json[CpuProfileData._sampleCountKey];
   int? get samplePeriod => json[CpuProfileData._samplePeriodKey];
   int? get stackDepth => json[CpuProfileData._stackDepthKey];
-  Map<String, Object?>? get stackFrames => json[CpuProfileData._stackFramesKey];
+  Map<String, Object?>? get stackFrames =>
+      (json[CpuProfileData._stackFramesKey] as Map?)?.cast<String, Object?>();
   List<CpuSampleEvent>? get traceEvents =>
       (json[CpuProfileData._traceEventsKey] as List?)
           ?.cast<Map>()
