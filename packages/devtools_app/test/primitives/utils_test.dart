@@ -677,26 +677,6 @@ void main() {
       );
     });
 
-    test('getServiceUriFromQueryString', () {
-      expect(
-        getServiceUriFromQueryString(
-          'http://localhost:123/?uri=http://localhost:456',
-        ).toString(),
-        equals('http://localhost:456'),
-      );
-      expect(
-        getServiceUriFromQueryString('http://localhost:123/?port=789')
-            .toString(),
-        equals('ws://localhost:789/ws'),
-      );
-      expect(
-        getServiceUriFromQueryString(
-          'http://localhost:123/?port=789&token=kjy78',
-        ).toString(),
-        equals('ws://localhost:789/kjy78/ws'),
-      );
-    });
-
     group('safeDivide', () {
       test('divides a finite result correctly', () {
         expect(safeDivide(2.0, 1.0), 2.0);

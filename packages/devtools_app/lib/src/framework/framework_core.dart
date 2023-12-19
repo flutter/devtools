@@ -23,7 +23,6 @@ import '../shared/globals.dart';
 import '../shared/notifications.dart';
 import '../shared/offline_mode.dart';
 import '../shared/primitives/message_bus.dart';
-import '../shared/primitives/utils.dart';
 import '../shared/scripts/script_manager.dart';
 import '../shared/survey.dart';
 
@@ -57,8 +56,7 @@ class FrameworkCore {
   static bool initializationInProgress = false;
 
   /// Returns true if we're able to connect to a device and false otherwise.
-  static Future<bool> initVmService(
-    String url, {
+  static Future<bool> initVmService({
     required String serviceUriAsString,
     ErrorReporter? errorReporter = _defaultErrorReporter,
     bool logException = true,
@@ -69,8 +67,7 @@ class FrameworkCore {
       return true;
     }
 
-    final normalizedUri = normalizeVmServiceUri(serviceUriAsString);
-    final Uri? uri = normalizedUri ?? getServiceUriFromQueryString(url);
+    final uri = normalizeVmServiceUri(serviceUriAsString);
     if (uri != null) {
       initializationInProgress = true;
       final finishedCompleter = Completer<void>();
