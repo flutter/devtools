@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:math';
-import 'dart:ui';
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
