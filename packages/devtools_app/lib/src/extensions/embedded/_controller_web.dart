@@ -43,8 +43,12 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController
       return 'https://flutter.dev/';
     }
 
+    final basePath = devtoolsAssetsBasePath(
+      origin: html.window.location.origin,
+      path: html.window.location.pathname ?? '',
+    );
     final baseUri = path.join(
-      html.window.location.origin,
+      basePath,
       'devtools_extensions',
       extensionConfig.name,
       'index.html',

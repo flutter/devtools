@@ -47,3 +47,12 @@ TODO: Remove this section if there are not any general updates.
 ## VS Code Sidebar updates
 
 TODO: Remove this section if there are not any general updates.
+
+## DevTools Extension updates
+
+* Fixed a couple bugs preventing Dart server apps from connecting to DevTools extensions. - [#6982](https://github.com/flutter/devtools/pull/6982), [#6993](https://github.com/flutter/devtools/pull/6993)
+
+## Full commit history
+
+To find a complete list of changes in this release, check out the
+[DevTools git log](https://github.com/flutter/devtools/tree/v2.28.5).

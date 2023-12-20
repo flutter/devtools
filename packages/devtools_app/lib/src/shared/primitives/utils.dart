@@ -1330,3 +1330,23 @@ Map<K, R> subtractMaps<K, F, S, R>({
   }
   return result;
 }
+
+/// Returns the url (as a string) where the DevTools assets are served.
+///
+/// For Flutter apps and when DevTools is served via the `dart devtools`
+/// command, this url should be equivalent to [html.window.location.origin].
+/// However, when DevTools is served directly from DDS via the --observe flag,
+/// the authentication token and 'devtools/' path part are also required.
+///
+/// Examples:
+/// * 'http://127.0.0.1:61962/mb9Sw4gCYvU=/devtools/performance'
+///     ==> 'http://127.0.0.1:61962/mb9Sw4gCYvU=/devtools'
+/// * 'http://127.0.0.1:61962/performance' ==> 'http://127.0.0.1:61962'
+String devtoolsAssetsBasePath({required String origin, required String path}) {
+  const separator = '/';
+  final pathParts = path.split(separator);
+  // The last path part is the DevTools page (e.g. 'performance' or 'snapshot'),
+  // which is not part of the hosted asset path.
+  pathParts.removeLast();
+  return '$origin${pathParts.join(separator)}';
+}
