@@ -361,7 +361,7 @@ extension type _PerformanceDataJson(Map<String, Object?> json) {
     return raw.isNotEmpty ? RasterStats.parse(raw) : null;
   }
 
-  int get selectedFrameId => json[PerformanceData.selectedFrameIdKey] as int;
+  int? get selectedFrameId => json[PerformanceData.selectedFrameIdKey] as int?;
 
   List<FlutterFrame> get frames =>
       (json[PerformanceData.flutterFramesKey] as List? ?? [])
