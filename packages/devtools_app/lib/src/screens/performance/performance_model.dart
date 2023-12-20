@@ -351,8 +351,8 @@ extension type _PerformanceDataJson(Map<String, Object?> json) {
 
   CpuProfileData? get cpuProfile {
     final raw =
-        (json[PerformanceData.cpuProfileKey] as Map).cast<String, Object>();
-    return raw.isNotEmpty ? CpuProfileData.parse(raw) : null;
+        (json[PerformanceData.cpuProfileKey] as Map?)?.cast<String, Object>();
+    return raw == null || raw.isEmpty ? null : CpuProfileData.parse(raw);
   }
 
   RasterStats? get rasterStats {
