@@ -57,7 +57,7 @@ TODO: Remove this section if there are not any general updates.
 
 ## DevTools Extension updates
 
-* Fixed a bug preventing Dart server apps from connecting to DevTools extensions. - [#6982](https://github.com/flutter/devtools/pull/6982), []()
+* Fixed a couple bugs preventing Dart server apps from connecting to DevTools extensions. - [#6982](https://github.com/flutter/devtools/pull/6982), [#6993](https://github.com/flutter/devtools/pull/6993)
 
 ## Full commit history
 
