@@ -53,7 +53,7 @@ Future<void> forEachIsolateHelper(
   Future<void> Function(IsolateRef) callback,
 ) async {
   final vm = await vmService.getVM();
-  final futures = <Future>[];
+  final futures = <Future<void>>[];
   for (final isolate in vm.isolates ?? []) {
     futures.add(callback(isolate));
   }
