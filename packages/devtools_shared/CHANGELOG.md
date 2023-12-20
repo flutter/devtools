@@ -1,31 +1,11 @@
-# 6.0.3
-* `CompareMixin` is now generic, implementing `Comparable<T>` instead of
-  `Comparable<dynamic>`, and it's operators each therefore accept a `T`
-  argument.
-* `SemanticVersion` now mixes in `CompareMixin<SemanticVersion>`, and it's
-  `compareTo` method therefore now accepts a `SemanticVersion`.
+# 4.2.0
+
 * Fix an issue parsing file paths that could prevent extensions from being detected.
-
-# 6.0.2
-* Fix an issue parsing file paths on Windows that could prevent extensions from being detected.
-
-# 6.0.1
-* Bump minimum Dart SDK version to `3.3.0-91.0.dev` and minimum Flutter SDK version to `3.17.0-0.0.pre`.
-* Add field `isPublic` to `DevToolsExtensionConfig`.
-* Add validation for `DevToolsExtensionConfig.name` field to ensure it is a valid
-Dart package name.
-* Pass warnings and errors for DevTools extension APIs from the DevTools server to
-DevTools app.
-
-# 6.0.0
-* Bump `package:vm_service` dependency to ^13.0.0.
-* Remove `ServiceCreator` typedef and replace usages with `VmServiceFactory` typedef from `package:vm_service`.
-
-# 5.0.0
-* Split deeplink exports into `devtools_deeplink_io.dart` and `devtools_deeplink.dart`.
-* Bump `package:vm_service` to ^12.0.0.
 * Adds `DeeplinkApi.androidAppLinkSettings`, `DeeplinkApi.iosBuildOptions`, and
   `DeeplinkApi.iosUniversalLinkSettings` endpoints to ServerApi.
+
+# 4.1.0
+
 * Add shared integration test utilities to `package:devtools_shared`. These test
 utilities are exported as part of the existing `devtools_test_utils.dart` library.
 
