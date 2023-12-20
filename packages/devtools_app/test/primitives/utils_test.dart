@@ -1441,7 +1441,10 @@ void main() {
     // This is how a DevTools url will be structured when served from DevTools
     // server (e.g. from Flutter tools and from the `dart devtools` command).
     expect(
-      devtoolsAssetsBasePath(origin: 'http://127.0.0.1:61962', path: '/performance'),
+      devtoolsAssetsBasePath(
+        origin: 'http://127.0.0.1:61962',
+        path: '/performance',
+      ),
       equals('http://127.0.0.1:61962'),
     );
   });
