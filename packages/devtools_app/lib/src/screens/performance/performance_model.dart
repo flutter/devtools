@@ -357,8 +357,8 @@ extension type _PerformanceDataJson(Map<String, Object?> json) {
 
   RasterStats? get rasterStats {
     final raw =
-        (json[PerformanceData.rasterStatsKey] as Map).cast<String, Object>();
-    return raw.isNotEmpty ? RasterStats.parse(raw) : null;
+        (json[PerformanceData.rasterStatsKey] as Map?)?.cast<String, Object>();
+    return raw == null || raw.isEmpty ? null : RasterStats.parse(raw);
   }
 
   int? get selectedFrameId => json[PerformanceData.selectedFrameIdKey] as int?;
