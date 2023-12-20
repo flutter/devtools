@@ -133,8 +133,10 @@ class DevToolsUsage {
     };
   }
 
+  /// The active survey in [properties], as a [_ActiveSurveyJson].
   _ActiveSurveyJson get _activeSurveyFromProperties => _ActiveSurveyJson(
-      (properties[activeSurvey!] as Map).cast<String, Object?>());
+        (properties[activeSurvey!] as Map).cast<String, Object?>(),
+      );
 
   int get surveyShownCount {
     assert(activeSurvey != null);
