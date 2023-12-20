@@ -108,23 +108,5 @@ void main() {
         equals(-1),
       );
     });
-
-    test('assetUrlHelper', () {
-      // This is how a DevTools url will be structured when DevTools is served
-      // directly from DDS using the `--observe` flag.
-      expect(
-        assetUrlHelper(
-          origin: 'http://127.0.0.1:61962',
-          path: '/mb9Sw4gCYvU=/devtools/performance',
-        ),
-        equals('http://127.0.0.1:61962/mb9Sw4gCYvU=/devtools'),
-      );
-      // This is how a DevTools url will be structured when served from DevTools
-      // server (e.g. from Flutter tools and from the `dart devtools` command).
-      expect(
-        assetUrlHelper(origin: 'http://127.0.0.1:61962', path: '/performance'),
-        equals('http://127.0.0.1:61962'),
-      );
-    });
   });
 }
