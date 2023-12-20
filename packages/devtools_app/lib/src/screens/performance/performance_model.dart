@@ -710,8 +710,8 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
   Map<String, dynamic> get json {
     final modifiedTrace = {...beginTraceEventJson}
       ..putIfAbsent(TraceEvent.durationKey, () => time.duration.inMicroseconds);
-    (modifiedTrace[TraceEvent.argsKey] as Map)
-        .addAll({TraceEvent.typeKey: type.toString()});
+    (modifiedTrace[TraceEvent.argsKey] as Map)[TraceEvent.typeKey] =
+        type.toString();
     return {firstTraceKey: modifiedTrace};
   }
 
