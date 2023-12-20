@@ -46,15 +46,17 @@ class DevToolsUsage {
   static const storeName = '.devtools';
 
   /// The activeSurvey is the property name of a top-level property
-  /// existing or created in the file ~/.devtools
+  /// existing or created in the file '~/.devtools'.
+  ///
   /// If the property doesn't exist it is created with default survey values:
   ///
-  ///   properties[activeSurvey]['surveyActionTaken'] = false;
-  ///   properties[activeSurvey]['surveyShownCount'] = 0;
+  ///     properties[activeSurvey]['surveyActionTaken'] = false;
+  ///     properties[activeSurvey]['surveyShownCount'] = 0;
   ///
-  /// It is a requirement that the API apiSetActiveSurvey must be called before
-  /// calling any survey method on DevToolsUsage (addSurvey, rewriteActiveSurvey,
-  /// surveyShownCount, incrementSurveyShownCount, or surveyActionTaken).
+  /// It is a requirement that the API `apiSetActiveSurvey` must be called
+  /// before calling any survey method on `DevToolsUsage` (`addSurvey`,
+  /// `rewriteActiveSurvey`, `surveyShownCount`, `incrementSurveyShownCount`, or
+  /// `surveyActionTaken`).
   String? _activeSurvey;
 
   late IOPersistentProperties properties;
@@ -82,8 +84,7 @@ class DevToolsUsage {
     // the analytics dialog again.
     properties.remove('firstRun');
 
-    properties['isFirstRun'] = properties['isFirstRun'] == null;
-    return properties['isFirstRun'];
+    return properties['isFirstRun'] = properties['isFirstRun'] == null;
   }
 
   bool get analyticsEnabled {
@@ -95,10 +96,8 @@ class DevToolsUsage {
       properties.remove('enabled');
     }
 
-    if (properties['analyticsEnabled'] == null) {
-      properties['analyticsEnabled'] = false;
-    }
-    return properties['analyticsEnabled'];
+    return properties['analyticsEnabled'] =
+        properties['analyticsEnabled'] == true;
   }
 
   set analyticsEnabled(bool value) {
@@ -134,41 +133,51 @@ class DevToolsUsage {
     };
   }
 
+  _ActiveSurveyJson get _activeSurveyFromProperties => _ActiveSurveyJson(
+      (properties[activeSurvey!] as Map).cast<String, Object?>());
+
   int get surveyShownCount {
     assert(activeSurvey != null);
-    final prop = properties[activeSurvey!];
-    if (prop[_surveyShownCount] == null) {
-      rewriteActiveSurvey(prop[_surveyActionTaken], 0);
+    final prop = _activeSurveyFromProperties;
+    if (prop.surveyShownCount == null) {
+      rewriteActiveSurvey(prop.surveyActionTaken, 0);
     }
-    return properties[activeSurvey!][_surveyShownCount];
+    return _activeSurveyFromProperties.surveyShownCount!;
   }
 
   void incrementSurveyShownCount() {
     assert(activeSurvey != null);
     surveyShownCount; // Ensure surveyShownCount has been initialized.
-    final prop = properties[activeSurvey!];
-    rewriteActiveSurvey(prop[_surveyActionTaken], prop[_surveyShownCount] + 1);
+    final prop = _activeSurveyFromProperties;
+    rewriteActiveSurvey(
+      prop.surveyActionTaken,
+      prop.surveyShownCount! + 1,
+    );
   }
 
   bool get surveyActionTaken {
-    assert(activeSurvey != null);
-    return properties[activeSurvey!][_surveyActionTaken] == true;
+    return _activeSurveyFromProperties.surveyActionTaken;
   }
 
   set surveyActionTaken(bool value) {
-    assert(activeSurvey != null);
-    final prop = properties[activeSurvey!];
-    rewriteActiveSurvey(value, prop[_surveyShownCount]);
+    rewriteActiveSurvey(
+      value,
+      _activeSurveyFromProperties.surveyShownCount!,
+    );
   }
 
   String get lastReleaseNotesVersion {
-    final version = properties['lastReleaseNotesVersion'] ??= '';
-    return version;
+    return (properties['lastReleaseNotesVersion'] ??= '') as String;
   }
 
   set lastReleaseNotesVersion(String value) {
     properties['lastReleaseNotesVersion'] = value;
   }
+}
+
+extension type _ActiveSurveyJson(Map<String, Object?> json) {
+  bool get surveyActionTaken => json[DevToolsUsage._surveyActionTaken] as bool;
+  int? get surveyShownCount => json[DevToolsUsage._surveyShownCount] as int?;
 }
 
 abstract class PersistentProperties {
@@ -214,15 +223,14 @@ class IOPersistentProperties extends PersistentProperties {
 
   late File _file;
 
-  late Map _map;
+  late Map<String, Object?> _map;
 
   @override
   // ignore: avoid-dynamic, necessary here.
   dynamic operator [](String key) => _map[key];
 
   @override
-  // ignore: avoid-dynamic, necessary here.
-  void operator []=(String key, dynamic value) {
+  void operator []=(String key, Object? value) {
     if (value == null && !_map.containsKey(key)) return;
     if (_map[key] == value) return;
 
@@ -242,7 +250,7 @@ class IOPersistentProperties extends PersistentProperties {
     try {
       String contents = _file.readAsStringSync();
       if (contents.isEmpty) contents = '{}';
-      _map = jsonDecode(contents);
+      _map = (jsonDecode(contents) as Map).cast<String, Object>();
     } catch (_) {
       _map = {};
     }
