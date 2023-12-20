@@ -120,7 +120,7 @@ class PerfettoControllerImpl extends PerfettoController {
     }
     final basePath = devtoolsAssetsBasePath(
       origin: html.window.location.origin,
-      path: html.window.location.pathname  ?? '',
+      path: html.window.location.pathname ?? '',
     );
     final indexFilePath = ui_web.assetManager
         .getAssetUrl(devToolsExtensionPoints.perfettoIndexLocation);
