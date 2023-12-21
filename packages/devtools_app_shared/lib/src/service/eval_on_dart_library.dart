@@ -102,7 +102,7 @@ class EvalOnDartLibrary extends DisposableController
 
   late Completer<LibraryRef> _libraryRef;
 
-  Completer? allPendingRequestsDone;
+  Completer<void>? allPendingRequestsDone;
 
   Isolate? get isolate => _isolate;
   Isolate? _isolate;
@@ -596,7 +596,7 @@ class EvalOnDartLibrary extends DisposableController
         return response.future;
       }
 
-      final Future previousDone = allPendingRequestsDone!.future;
+      final Future<void> previousDone = allPendingRequestsDone!.future;
       allPendingRequestsDone = response;
       // Schedule this request only after the previous request completes.
       try {

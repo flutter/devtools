@@ -101,7 +101,7 @@ const Duration _animationCheckingInterval = Duration(milliseconds: 50);
 Future<void> animationStops() async {
   if (!WidgetsBinding.instance.hasScheduledFrame) return;
 
-  final Completer stopped = Completer<void>();
+  final stopped = Completer<void>();
 
   Timer.periodic(_animationCheckingInterval, (timer) {
     if (!WidgetsBinding.instance.hasScheduledFrame) {

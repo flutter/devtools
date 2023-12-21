@@ -438,7 +438,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
 ///
 /// [C] corresponds to the type of the screen's controller, which is created by
 /// [createController] or provided by [controllerProvider].
-class DevToolsScreen<C> {
+class DevToolsScreen<C extends Object?> {
   const DevToolsScreen(
     this.screen, {
     this.createController,
