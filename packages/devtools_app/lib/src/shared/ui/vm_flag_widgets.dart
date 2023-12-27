@@ -19,6 +19,7 @@ import '../primitives/utils.dart';
 import '../table/table.dart';
 import '../table/table_data.dart';
 import 'drop_down_button.dart';
+import 'hover.dart';
 
 /// DropdownButton that controls the value of the 'profile_period' vm flag.
 ///
@@ -90,7 +91,19 @@ class CpuSamplingRateDropdown extends StatelessWidget {
     return (
       item: DropdownMenuItem<String>(
         value: samplingRate.value,
-        child: Text(samplingRate.display),
+        child: HoverCardTooltip.sync(
+          generateHoverCardData: (_) => HoverCardData(
+            width: scaleByFontFactor(300),
+            contents: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('One sample every ${samplingRate.value} microseconds.'),
+              ],
+            ),
+          ),
+          child: Text(samplingRate.display),
+          enabled: () => true,
+        ),
       ),
       gaId: samplingRate.displayShort,
     );
