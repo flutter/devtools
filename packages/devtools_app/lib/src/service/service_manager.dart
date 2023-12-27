@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/utils.dart';
-import 'package:dtd/dtd.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
@@ -77,9 +76,6 @@ class ServiceConnectionManager {
 
   InspectorServiceBase? get inspectorService => _inspectorService;
   InspectorServiceBase? _inspectorService;
-
-  DTDConnection? get dtdConnection => _dtdConnection;
-  DTDConnection? _dtdConnection;
 
   ErrorBadgeManager get errorBadgeManager => _errorBadgeManager;
   final _errorBadgeManager = ErrorBadgeManager();
