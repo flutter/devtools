@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
+import 'package:dtd/dtd_file_system_extension.dart' as dtd;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -262,6 +263,8 @@ class _ConnectDialogState extends State<ConnectDialog>
           ),
           const Padding(padding: EdgeInsets.only(top: 20.0)),
           connectorInput,
+          const SizedBox(height: denseRowSpacing),
+          FileTest(),
         ],
       ),
     );
@@ -401,6 +404,83 @@ class _SampleDataDropDownButtonState extends State<SampleDataDropDownButton> {
     return DropdownMenuItem<DevToolsJsonFile>(
       value: file,
       child: Text(file.path),
+    );
+  }
+}
+
+class FileTest extends StatefulWidget {
+  @override
+  State<FileTest> createState() => _FileTestState();
+}
+
+class _FileTestState extends State<FileTest> {
+  final file = Uri.parse('/tmp/test_file.txt');
+  final inputController = TextEditingController();
+  dtd.UriList? tmpDirResponse;
+
+  String fileContents = '';
+  @override
+  void initState() {
+    inputController.addListener(() async {
+      await dtdManager.connection.value
+          ?.writeFileAsString(file, inputController.text);
+    });
+    unawaited(dtdManager.connection.value
+        ?.listDirectories(Uri.parse('/tmp'))
+        .then((value) {
+      setState(() {
+        tmpDirResponse = value;
+      });
+    }));
+
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: dtdManager.connection,
+      builder: (context, _, __) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const PaddedDivider(),
+            Text('Write the following contents to $file: '),
+            const SizedBox(height: defaultSpacing),
+            TextField(
+              controller: inputController,
+            ),
+            const SizedBox(height: defaultSpacing),
+            const PaddedDivider(),
+            TextButton(
+              onPressed: () async {
+                if (dtdManager.connection.value == null) {
+                  return;
+                }
+                final response =
+                    await dtdManager.connection.value!.readFileAsString(file);
+                setState(() {
+                  fileContents = response.content!;
+                });
+              },
+              child: Text('Press to read $file'),
+            ),
+            const SizedBox(height: defaultSpacing),
+            Text(
+              'The contents of $file are: ',
+            ),
+            Text(fileContents),
+            const SizedBox(height: defaultSpacing),
+            const PaddedDivider(),
+            const Text(
+              'The contents of the /tmp directory are: ',
+            ),
+            const SizedBox(height: defaultSpacing),
+            Text(tmpDirResponse?.uris?.join('\n') ?? ''),
+          ],
+        );
+      },
     );
   }
 }
