@@ -11,6 +11,7 @@ To learn more about DevTools, check out the
 ## General updates
 
 * Added a new feature for deep link validation, supporting deep link web checks on Android. - [#6935](https://github.com/flutter/devtools/pull/6935)
+* Added the basic plumbing to allow connections to a Dart Tooling Daemon. - [#7009](https://github.com/flutter/devtools/pull/7009)
 
 ## Inspector updates
 

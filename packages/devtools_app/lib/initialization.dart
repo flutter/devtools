@@ -77,6 +77,8 @@ Future<void> initializeDevTools({
   // StorageController won't be initialized and preferences won't be loaded.
   await initializeFramework();
 
+  await _initDTDConnection();
+
   final preferences = PreferencesController();
   // Wait for preferences to load before rendering the app to avoid a flash of
   // content with the incorrect theme.
@@ -97,6 +99,14 @@ void _maybeInitForIntegrationTestMode({
   setIntegrationTestMode();
   if (enableExperiments) {
     setEnableExperiments();
+  }
+}
+
+Future<void> _initDTDConnection() async {
+  final queryParams = loadQueryParams();
+  final dtdUri = queryParams['dtdUri'];
+  if (dtdUri != null) {
+    await dtdManager.connect(Uri.parse(dtdUri));
   }
 }
 
