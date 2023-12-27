@@ -27,7 +27,7 @@ To learn more about DevTools, check out the
 
 ## CPU profiler updates
 
-TODO: Remove this section if there are not any general updates.
+* Added hover cards to CPU profiler sampling rate selections. - [#7010](https://github.com/flutter/devtools/pull/7010)
 
 ## Memory updates
 
