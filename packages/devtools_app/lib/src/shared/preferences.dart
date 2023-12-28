@@ -152,8 +152,8 @@ enum InspectorDetailsViewType {
 class InspectorPreferencesController extends DisposableController
     with AutoDisposeControllerMixin {
   ValueListenable<bool> get hoverEvalModeEnabled => _hoverEvalMode;
-  ValueListenable<InspectorDetailsViewType> get defaultInspectorDetailsView =>
-      _defaultInspectorDetailsView;
+  ValueListenable<InspectorDetailsViewType> get defaultDetailsView =>
+      _defaultDetailsView;
   ListValueNotifier<String> get pubRootDirectories => _pubRootDirectories;
   ValueListenable<bool> get isRefreshingPubRootDirectories =>
       _pubRootDirectoriesAreBusy;
@@ -164,12 +164,12 @@ class InspectorPreferencesController extends DisposableController
   final _pubRootDirectories = ListValueNotifier<String>([]);
   final _pubRootDirectoriesAreBusy = ValueNotifier<bool>(false);
   final _busyCounter = ValueNotifier<int>(0);
-  final _defaultInspectorDetailsView = ValueNotifier<InspectorDetailsViewType>(
+  final _defaultDetailsView = ValueNotifier<InspectorDetailsViewType>(
     InspectorDetailsViewType.layoutExplorer,
   );
 
   static const _hoverEvalModeStorageId = 'inspector.hoverEvalMode';
-  static const _defaultInspectorDetailsViewStorageId =
+  static const _defaultDetailsViewStorageId =
       'inspector.defaultDetailsViewType';
   static const _customPubRootDirectoriesStoragePrefix =
       'inspector.customPubRootDirectories';
@@ -219,20 +219,20 @@ class InspectorPreferencesController extends DisposableController
   Future<void> _initDefaultInspectorDetailsView() async {
     await _updateInspectorDetailsViewSelection();
 
-    addAutoDisposeListener(_defaultInspectorDetailsView, () {
+    addAutoDisposeListener(_defaultDetailsView, () {
       storage.setValue(
-        _defaultInspectorDetailsViewStorageId,
-        _defaultInspectorDetailsView.value.name.toString(),
+        _defaultDetailsViewStorageId,
+        _defaultDetailsView.value.name.toString(),
       );
     });
   }
 
   Future<void> _updateInspectorDetailsViewSelection() async {
     final inspectorDetailsView =
-        await storage.getValue(_defaultInspectorDetailsViewStorageId);
+        await storage.getValue(_defaultDetailsViewStorageId);
 
     if (inspectorDetailsView != null) {
-      _defaultInspectorDetailsView.value = InspectorDetailsViewType.values
+      _defaultDetailsView.value = InspectorDetailsViewType.values
           .firstWhere((e) => e.name.toString() == inspectorDetailsView);
     }
   }
@@ -501,7 +501,7 @@ class InspectorPreferencesController extends DisposableController
   }
 
   void setDefaultInspectorDetailsView(InspectorDetailsViewType value) {
-    _defaultInspectorDetailsView.value = value;
+    _defaultDetailsView.value = value;
   }
 }
 

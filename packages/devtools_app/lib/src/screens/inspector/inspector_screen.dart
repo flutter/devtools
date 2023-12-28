@@ -357,8 +357,7 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
               gaItem: gac.inspectorHoverEvalMode,
             ),
             const SizedBox(height: denseSpacing),
-            ...dialogSubHeader(theme, 'Default Inspector Details View'),
-            const InspectorDetailsOption(),
+            const InspectorDefaultDetailsViewOption(),
             const SizedBox(height: denseSpacing),
             ...dialogSubHeader(theme, 'Package Directories'),
             Text(
@@ -569,20 +568,20 @@ class _ErrorNavigatorButton extends StatelessWidget {
   }
 }
 
-class InspectorDetailsOption extends StatelessWidget {
-  const InspectorDetailsOption({super.key});
+class InspectorDefaultDetailsViewOption extends StatelessWidget {
+  const InspectorDefaultDetailsViewOption({super.key});
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: preferences.inspector.defaultInspectorDetailsView,
+      valueListenable: preferences.inspector.defaultDetailsView,
       builder: (context, selection, _) {
         final theme = Theme.of(context);
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Select the tab which opens by default when opening the inspector.',
+              'Select the default tab for the inspector.',
               style: theme.subtleTextStyle,
             ),
             const SizedBox(height: denseSpacing),

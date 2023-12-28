@@ -44,11 +44,11 @@ class InspectorDetails extends StatelessWidget {
       ),
     ];
     return ValueListenableBuilder(
-      valueListenable: preferences.inspector.defaultInspectorDetailsView,
+      valueListenable: preferences.inspector.defaultDetailsView,
       builder: (BuildContext context, value, Widget? child) {
         int defaultInspectorViewIndex = 0;
 
-        if (preferences.inspector.defaultInspectorDetailsView.value ==
+        if (preferences.inspector.defaultDetailsView.value ==
             InspectorDetailsViewType.widgetDetailsView) {
           defaultInspectorViewIndex = 1;
         }
