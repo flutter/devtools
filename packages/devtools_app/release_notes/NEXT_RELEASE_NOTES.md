@@ -10,14 +10,18 @@ To learn more about DevTools, check out the
 
 ## General updates
 
-* Made table text selectable [6919](https://github.com/flutter/devtools/pull/6919)
+* Added a new feature for deep link validation, supporting deep link web checks on Android. - [#6935](https://github.com/flutter/devtools/pull/6935)
+* Added the basic plumbing to allow connections to a Dart Tooling Daemon. - [#7009](https://github.com/flutter/devtools/pull/7009)
+* Made table text selectable [#6919](https://github.com/flutter/devtools/pull/6919)
 
 ## Inspector updates
 
-* Added link to package directory documentation, from the inspect settings dialog - [#6825](https://github.com/flutter/devtools/pull/6825)
+* When done typing in the search field, the next selection is now automatically selected - [#6677](https://github.com/flutter/devtools/pull/6677)
+* Added link to package directory documentation, from the inspect settings dialog - [6825](https://github.com/flutter/devtools/pull/6825)
 * Fix bug where widgets owned by the Flutter framework were showing up in the widget tree view -
 [6857](https://github.com/flutter/devtools/pull/6857)
 * Only cache pub root directories added by the user - [6897](https://github.com/flutter/devtools/pull/6897)
+* Remove Flutter pub root if it was accidently cached - [6911](https://github.com/flutter/devtools/pull/6911)
 
 ## Performance updates
 
@@ -43,7 +47,7 @@ TODO: Remove this section if there are not any general updates.
 
 ## Logging updates
 
-TODO: Remove this section if there are not any general updates.
+* Added scrollbar to details pane. - [#6917](https://github.com/flutter/devtools/pull/6917)
 
 ## App size tool updates
 
@@ -51,11 +55,11 @@ TODO: Remove this section if there are not any general updates.
 
 ## VS Code Sidebar updates
 
-TODO: Remove this section if there are not any general updates.
+* Fixed an issue that prevented the VS code sidebar from loading in recent beta/master builds. - [#6984](https://github.com/flutter/devtools/pull/6984)
 
 ## DevTools Extension updates
 
-TODO: Remove this section if there are not any general updates.
+* Fixed a couple bugs preventing Dart server apps from connecting to DevTools extensions. - [#6982](https://github.com/flutter/devtools/pull/6982), [#6993](https://github.com/flutter/devtools/pull/6993)
 
 ## Full commit history
 

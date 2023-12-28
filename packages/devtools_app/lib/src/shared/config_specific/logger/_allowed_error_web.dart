@@ -17,6 +17,9 @@ Future<T> allowedError<T>(Future<T> future, {bool logError = true}) {
       console.log(errorLines.skip(1).join('\n').toJS);
       console.groupEnd();
     }
+    // TODO(srawlins): This is an illegal return value (`null`) for all `T`.
+    // This function must return an actual `T`.
+    // ignore: null_argument_to_non_null_type
     return Future<T>.value();
   });
 }

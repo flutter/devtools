@@ -298,10 +298,8 @@ class _ConnectDialogState extends State<ConnectDialog>
     // intuitive that we don't want to just cancel the route change or
     // notification if we are already on a different screen.
     final routerDelegate = DevToolsRouterDelegate.of(context);
-    final connected = await FrameworkCore.initVmService(
-      '',
-      serviceUriAsString: uri,
-    );
+    final connected =
+        await FrameworkCore.initVmService(serviceUriAsString: uri);
     if (connected) {
       final connectedUri =
           Uri.parse(serviceConnection.serviceManager.service!.wsUri!);

@@ -677,26 +677,6 @@ void main() {
       );
     });
 
-    test('getServiceUriFromQueryString', () {
-      expect(
-        getServiceUriFromQueryString(
-          'http://localhost:123/?uri=http://localhost:456',
-        ).toString(),
-        equals('http://localhost:456'),
-      );
-      expect(
-        getServiceUriFromQueryString('http://localhost:123/?port=789')
-            .toString(),
-        equals('ws://localhost:789/ws'),
-      );
-      expect(
-        getServiceUriFromQueryString(
-          'http://localhost:123/?port=789&token=kjy78',
-        ).toString(),
-        equals('ws://localhost:789/kjy78/ws'),
-      );
-    });
-
     group('safeDivide', () {
       test('divides a finite result correctly', () {
         expect(safeDivide(2.0, 1.0), 2.0);
@@ -1447,6 +1427,27 @@ void main() {
       expect(['A', 'B', 'C'].joinWithTrailing(':'), equals('A:B:C:'));
     });
   });
+
+  test('devtoolsAssetsBasePath', () {
+    // This is how a DevTools url will be structured when DevTools is served
+    // directly from DDS using the `--observe` flag.
+    expect(
+      devtoolsAssetsBasePath(
+        origin: 'http://127.0.0.1:61962',
+        path: '/mb9Sw4gCYvU=/devtools/performance',
+      ),
+      equals('http://127.0.0.1:61962/mb9Sw4gCYvU=/devtools'),
+    );
+    // This is how a DevTools url will be structured when served from DevTools
+    // server (e.g. from Flutter tools and from the `dart devtools` command).
+    expect(
+      devtoolsAssetsBasePath(
+        origin: 'http://127.0.0.1:61962',
+        path: '/performance',
+      ),
+      equals('http://127.0.0.1:61962'),
+    );
+  });
 }
 
 class _SubtractionResult {
@@ -1458,7 +1459,7 @@ class _SubtractionResult {
   final double? from;
 
   @override
-  bool operator ==(Object? other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }

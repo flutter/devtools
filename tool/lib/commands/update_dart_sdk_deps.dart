@@ -65,7 +65,7 @@ class UpdateDartSdkDepsCommand extends Command {
       workingDirectory: dartSdkLocation,
       additionalErrorMessage: DartSdkHelper.commandDebugMessage,
       commands: [
-        CliCommand.git(cmd: 'add .'),
+        CliCommand.git(cmd: 'add DEPS'),
         CliCommand.from(
           'git',
           [

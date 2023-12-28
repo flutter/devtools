@@ -12,6 +12,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as path;
 
+const skipForCustomerTestsTag = 'skip-for-flutter-customer-tests';
+
 const shortPumpDuration = Duration(seconds: 1);
 const safePumpDuration = Duration(seconds: 3);
 const longPumpDuration = Duration(seconds: 6);
@@ -37,8 +39,8 @@ final screenIds = <String>[
 /// Tests that `listener` has actually been invoked.
 Future<void> addListenerScope({
   required Listenable listenable,
-  required Function listener,
-  required Function callback,
+  required void Function() listener,
+  required Future<void> Function() callback,
 }) async {
   bool listenerCalled = false;
   void listenerWrapped() {

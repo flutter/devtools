@@ -13,4 +13,4 @@ flutter test test/
 
 cd ../devtools_app
 flutter pub get
-flutter test test/
+flutter test --exclude-tags=skip-for-flutter-customer-tests test/

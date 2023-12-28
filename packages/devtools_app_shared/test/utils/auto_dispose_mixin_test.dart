@@ -16,7 +16,7 @@ class AutoDisposeContoller extends DisposableController
 class AutoDisposedWidget extends StatefulWidget {
   const AutoDisposedWidget(this.stream, {Key? key}) : super(key: key);
 
-  final Stream stream;
+  final Stream<Object?> stream;
 
   @override
   State<AutoDisposedWidget> createState() => _AutoDisposedWidgetState();

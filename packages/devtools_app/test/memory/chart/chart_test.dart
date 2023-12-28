@@ -30,7 +30,7 @@ void main() {
   group(
     'Chart Timeseries',
     () {
-      late MemoryJson memoryJson;
+      late MemoryJson<HeapSample> memoryJson;
       bool memoryJasonInitialized = false;
 
       void loadData() {
@@ -575,7 +575,7 @@ void main() {
           } else if (event.isEventAllocationAccumulator) {
             final monitorType = event.allocationAccumulator;
             final rawData = Data(datum.timestamp, visibleMonitorEvent);
-            if (monitorType.isEmpty) continue;
+            if (monitorType!.isEmpty) continue;
             if (monitorType.isStart) {
               addDataToTrace(controller, monitorTraceIndex, rawData);
             } else if (monitorType.isReset) {
