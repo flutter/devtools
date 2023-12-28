@@ -215,10 +215,9 @@ void main() {
       expect(offlineData.selectedFrameId, equals(1));
       expect(offlineData.selectedEvent, isA<OfflineTimelineEvent>());
 
-      final expectedFirstTraceJson =
-          Map<String, dynamic>.from(vsyncEvent.beginTraceEventJson);
-      expectedFirstTraceJson[TraceEvent.argsKey]
-          .addAll({TraceEvent.typeKey: TimelineEventType.ui});
+      final expectedFirstTraceJson = Map.of(vsyncEvent.beginTraceEventJson);
+      (expectedFirstTraceJson[TraceEvent.argsKey] as Map)
+          .addAll(<String, dynamic>{TraceEvent.typeKey: TimelineEventType.ui});
       expectedFirstTraceJson.addAll(
         {TraceEvent.durationKey: vsyncEvent.time.duration.inMicroseconds},
       );

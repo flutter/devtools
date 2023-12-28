@@ -325,7 +325,10 @@ Future<void> _addValueItems(
   }
 }
 
-Future<void> _addInspectorItems(variable, IsolateRef? isolateRef) async {
+Future<void> _addInspectorItems(
+  DartObjectNode variable,
+  IsolateRef? isolateRef,
+) async {
   final inspectorService = serviceConnection.inspectorService;
   if (inspectorService != null) {
     final tasks = <Future>[];

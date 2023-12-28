@@ -365,33 +365,28 @@ class FlexLayoutProperties extends LayoutProperties {
 
   static FlexLayoutProperties _buildNode(RemoteDiagnosticsNode node) {
     final Map<String, Object?> renderObjectJson = node.renderObject!.json;
-    final properties = renderObjectJson['properties'] as List<Object?>;
+    final properties = (renderObjectJson['properties'] as List<Object?>)
+        .cast<Map<String, Object?>>();
 
-    // ignore: prefer_for_elements_to_map_fromiterable, requires refactoring
-    final data = Map<String, Object?>.fromIterable(
-      properties,
-      key: (property) => property['name'],
-      value: (property) => property['description'],
-    );
+    final data = {
+      for (final property in properties)
+        property['name']: property['description'] as String?,
+    };
 
     return FlexLayoutProperties._fromNode(
       node,
-      direction: _directionUtils.enumEntry(data['direction'] as String?) ??
-          Axis.vertical,
-      mainAxisAlignment: _mainAxisAlignmentUtils
-          .enumEntry(data['mainAxisAlignment'] as String?),
-      mainAxisSize:
-          _mainAxisSizeUtils.enumEntry(data['mainAxisSize'] as String?),
-      crossAxisAlignment: _crossAxisAlignmentUtils
-          .enumEntry(data['crossAxisAlignment'] as String?),
-      textDirection:
-          _textDirectionUtils.enumEntry(data['textDirection'] as String?) ??
-              TextDirection.ltr,
-      verticalDirection: _verticalDirectionUtils
-              .enumEntry(data['verticalDirection'] as String?) ??
-          VerticalDirection.down,
-      textBaseline:
-          _textBaselineUtils.enumEntry(data['textBaseline'] as String?),
+      direction: _directionUtils.enumEntry(data['direction']) ?? Axis.vertical,
+      mainAxisAlignment:
+          _mainAxisAlignmentUtils.enumEntry(data['mainAxisAlignment']),
+      mainAxisSize: _mainAxisSizeUtils.enumEntry(data['mainAxisSize']),
+      crossAxisAlignment:
+          _crossAxisAlignmentUtils.enumEntry(data['crossAxisAlignment']),
+      textDirection: _textDirectionUtils.enumEntry(data['textDirection']) ??
+          TextDirection.ltr,
+      verticalDirection:
+          _verticalDirectionUtils.enumEntry(data['verticalDirection']) ??
+              VerticalDirection.down,
+      textBaseline: _textBaselineUtils.enumEntry(data['textBaseline']),
     );
   }
 

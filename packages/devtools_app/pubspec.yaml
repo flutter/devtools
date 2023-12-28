@@ -9,8 +9,8 @@ version: 2.31.0-dev.0
 repository: https://github.com/flutter/devtools/tree/master/packages/devtools_app
 
 environment:
-  sdk: '>=3.3.0-91.0.dev <4.0.0'
-  flutter: '>=3.17.0-0.0.pre'
+  sdk: ">=3.3.0-91.0.dev <4.0.0"
+  flutter: ">=3.17.0-0.0.pre"
 
 dependencies:
   ansi_up: ^1.0.0
@@ -27,6 +27,7 @@ dependencies:
   devtools_app_shared: ^0.0.7
   devtools_extensions: ^0.0.10
   devtools_shared: ^6.0.1
+  dtd: ^0.0.3
   file: ">=6.0.0 <8.0.0"
   file_selector: ^1.0.0
   flutter:
@@ -79,7 +80,7 @@ dev_dependencies:
   mockito: ^5.4.1
   stager: ^1.0.1
   test: ^1.21.1
-  web_benchmarks: ^0.1.0+10
+  web_benchmarks: ^1.1.0
   webkit_inspection_protocol: ">=0.5.0 <2.0.0"
 
 flutter:

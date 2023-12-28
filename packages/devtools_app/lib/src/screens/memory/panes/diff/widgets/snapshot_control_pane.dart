@@ -38,7 +38,9 @@ class SnapshotControlPane extends StatelessWidget {
                     controller: controller,
                   ),
                   const SizedBox(width: defaultSpacing),
-                  ToCsvButton(
+                  DownloadButton(
+                    tooltip: 'Download data in CSV format',
+                    label: 'CSV',
                     minScreenWidthForTextBeforeScaling:
                         memoryControlsMinVerboseWidth,
                     gaScreen: gac.memory,

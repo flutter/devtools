@@ -119,7 +119,8 @@ class ProgramExplorerController extends DisposableController
     ScriptRef? script,
     List<VMServiceObjectNode> nodes,
   ) async {
-    bool searchCondition(node) => node.script?.uri == script!.uri;
+    bool searchCondition(VMServiceObjectNode node) =>
+        node.script?.uri == script!.uri;
     for (final node in nodes) {
       final result = node.firstChildWithCondition(searchCondition);
       if (result != null) {

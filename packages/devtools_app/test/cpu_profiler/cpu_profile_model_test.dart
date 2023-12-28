@@ -135,17 +135,17 @@ void main() {
       'to json defaults packageUri to resolvedUrl',
       () {
         const id = '140357727781376-12';
-        final profileData = Map<String, dynamic>.from(goldenCpuProfileDataJson);
-        profileData['stackFrames'] = Map<String, Map<String, String?>>.from(
-          {id: goldenCpuProfileStackFrames[id]},
-        );
-        profileData['stackFrames'][id]
-            .remove(CpuProfileData.resolvedPackageUriKey);
+
+        final profileData = Map.of(goldenCpuProfileDataJson);
+        final stackFrame = goldenCpuProfileStackFrames[id] as Map;
+        final stackFrameData = {id: stackFrame};
+        profileData['stackFrames'] = stackFrameData;
+        stackFrameData[id]!.remove(CpuProfileData.resolvedPackageUriKey);
 
         final parsedProfileData = CpuProfileData.parse(profileData);
 
         final jsonPackageUri = parsedProfileData.stackFrames[id]!.packageUri;
-        expect(jsonPackageUri, goldenCpuProfileStackFrames[id]!['resolvedUrl']);
+        expect(jsonPackageUri, stackFrame['resolvedUrl']);
       },
     );
 

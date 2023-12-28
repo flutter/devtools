@@ -172,7 +172,7 @@ class EventSample {
 
   EventSample.snapshotEvent(
     this.timestamp, {
-    snapshotAuto = false,
+    bool snapshotAuto = false,
     ExtensionEvents? events,
   })  : isEventGC = false,
         isEventSnapshot = !snapshotAuto,
