@@ -18,6 +18,7 @@ import '../primitives/trees.dart';
 import '../primitives/utils.dart';
 import '../ui/search.dart';
 import '../ui/utils.dart';
+import '../utils.dart';
 import 'column_widths.dart';
 import 'table_controller.dart';
 import 'table_data.dart';
@@ -38,7 +39,7 @@ typedef IndexedScrollableWidgetBuilder = Widget Function({
 });
 
 typedef TableKeyEventHandler = KeyEventResult Function(
-  RawKeyEvent event,
+  KeyEvent event,
   ScrollController scrollController,
   BoxConstraints constraints,
 );
@@ -56,7 +57,7 @@ enum ScrollKind {
 ///
 /// This table will automatically refresh search matches on the
 /// [searchController] after sort operations that are triggered from the table.
-class SearchableFlatTable<T extends SearchableDataMixin> extends FlatTable {
+class SearchableFlatTable<T extends SearchableDataMixin> extends FlatTable<T> {
   SearchableFlatTable({
     super.key,
     required SearchControllerMixin<T> searchController,
@@ -736,11 +737,11 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   }
 
   KeyEventResult _handleKeyEvent(
-    RawKeyEvent event,
+    KeyEvent event,
     ScrollController scrollController,
     BoxConstraints constraints,
   ) {
-    if (event is! RawKeyDownEvent) return KeyEventResult.ignored;
+    if (!event.isKeyDownOrRepeat) return KeyEventResult.ignored;
 
     // Exit early if we aren't handling the key
     if (![
@@ -1171,7 +1172,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
                       onTapDown: (a) => widget.focusNode?.requestFocus(),
                       child: Focus(
                         autofocus: true,
-                        onKey: (_, event) => widget.handleKeyEvent != null
+                        onKeyEvent: (_, event) => widget.handleKeyEvent != null
                             ? widget.handleKeyEvent!(
                                 event,
                                 scrollController,
