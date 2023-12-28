@@ -137,13 +137,23 @@ class PreferencesController extends DisposableController
   }
 }
 
-enum InspectorDetailsViewOptions { layoutExplorer, widgetDetailsView }
+enum InspectorDetailsViewType {
+  layoutExplorer(nameOverride: 'Layout Explorer'),
+  widgetDetailsView(nameOverride: 'Widget Details View');
+
+  const InspectorDetailsViewType({String? nameOverride})
+      : _nameOverride = nameOverride;
+
+  final String? _nameOverride;
+
+  String get key => _nameOverride ?? name;
+}
 
 class InspectorPreferencesController extends DisposableController
     with AutoDisposeControllerMixin {
   ValueListenable<bool> get hoverEvalModeEnabled => _hoverEvalMode;
-  ValueListenable<InspectorDetailsViewOptions>
-      get defaultInspectorDetailsView => _defaultInspectorDetailsView;
+  ValueListenable<InspectorDetailsViewType> get defaultInspectorDetailsView =>
+      _defaultInspectorDetailsView;
   ListValueNotifier<String> get pubRootDirectories => _pubRootDirectories;
   ValueListenable<bool> get isRefreshingPubRootDirectories =>
       _pubRootDirectoriesAreBusy;
@@ -154,14 +164,13 @@ class InspectorPreferencesController extends DisposableController
   final _pubRootDirectories = ListValueNotifier<String>([]);
   final _pubRootDirectoriesAreBusy = ValueNotifier<bool>(false);
   final _busyCounter = ValueNotifier<int>(0);
-  final _defaultInspectorDetailsView =
-      ValueNotifier<InspectorDetailsViewOptions>(
-    InspectorDetailsViewOptions.layoutExplorer,
+  final _defaultInspectorDetailsView = ValueNotifier<InspectorDetailsViewType>(
+    InspectorDetailsViewType.layoutExplorer,
   );
 
   static const _hoverEvalModeStorageId = 'inspector.hoverEvalMode';
   static const _defaultInspectorDetailsViewStorageId =
-      'inspector.detailsViewSelection';
+      'inspector.defaultDetailsViewType';
   static const _customPubRootDirectoriesStoragePrefix =
       'inspector.customPubRootDirectories';
   String? _mainScriptDir;
@@ -213,7 +222,7 @@ class InspectorPreferencesController extends DisposableController
     addAutoDisposeListener(_defaultInspectorDetailsView, () {
       storage.setValue(
         _defaultInspectorDetailsViewStorageId,
-        _defaultInspectorDetailsView.value.toString(),
+        _defaultInspectorDetailsView.value.name.toString(),
       );
     });
   }
@@ -223,8 +232,8 @@ class InspectorPreferencesController extends DisposableController
         await storage.getValue(_defaultInspectorDetailsViewStorageId);
 
     if (inspectorDetailsView != null) {
-      _defaultInspectorDetailsView.value = InspectorDetailsViewOptions.values
-          .firstWhere((e) => e.toString() == inspectorDetailsView);
+      _defaultInspectorDetailsView.value = InspectorDetailsViewType.values
+          .firstWhere((e) => e.name.toString() == inspectorDetailsView);
     }
   }
 
@@ -491,7 +500,7 @@ class InspectorPreferencesController extends DisposableController
     _hoverEvalMode.value = enableHoverEvalMode;
   }
 
-  void setDefaultInspectorDetailsView(InspectorDetailsViewOptions value) {
+  void setDefaultInspectorDetailsView(InspectorDetailsViewType value) {
     _defaultInspectorDetailsView.value = value;
   }
 }

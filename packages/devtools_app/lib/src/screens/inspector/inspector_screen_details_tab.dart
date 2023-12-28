@@ -32,12 +32,12 @@ class InspectorDetails extends StatelessWidget {
   Widget build(BuildContext context) {
     final tabs = [
       (
-        tab: _buildTab(tabName: 'Layout Explorer'),
+        tab: _buildTab(tabName: InspectorDetailsViewType.layoutExplorer.key),
         tabView: LayoutExplorerTab(controller: controller),
       ),
       (
         tab: _buildTab(
-          tabName: 'Widget Details Tree',
+          tabName: InspectorDetailsViewType.widgetDetailsView.key,
           trailing: InspectorExpandCollapseButtons(controller: controller),
         ),
         tabView: detailsTree,
@@ -49,7 +49,7 @@ class InspectorDetails extends StatelessWidget {
         int defaultInspectorViewIndex = 0;
 
         if (preferences.inspector.defaultInspectorDetailsView.value ==
-            InspectorDetailsViewOptions.widgetDetailsView) {
+            InspectorDetailsViewType.widgetDetailsView) {
           defaultInspectorViewIndex = 1;
         }
 

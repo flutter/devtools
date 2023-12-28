@@ -579,34 +579,31 @@ class InspectorDetailsOption extends StatelessWidget {
       builder: (context, selection, _) {
         final theme = Theme.of(context);
         return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Select the tab which opens by default when opening the inspector.',
               style: theme.subtleTextStyle,
             ),
-            const SizedBox(
-              height: denseSpacing,
-            ),
+            const SizedBox(height: denseSpacing),
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Radio<InspectorDetailsViewOptions>(
-                  value: InspectorDetailsViewOptions.layoutExplorer,
+                Radio<InspectorDetailsViewType>(
+                  value: InspectorDetailsViewType.layoutExplorer,
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   groupValue: selection,
                   onChanged: _onChanged,
                 ),
-                const Text('Layout Explorer'),
-                const SizedBox(
-                  width: denseSpacing,
-                ),
-                Radio<InspectorDetailsViewOptions>(
+                Text(InspectorDetailsViewType.layoutExplorer.key),
+                const SizedBox(width: denseSpacing),
+                Radio<InspectorDetailsViewType>(
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  value: InspectorDetailsViewOptions.widgetDetailsView,
+                  value: InspectorDetailsViewType.widgetDetailsView,
                   groupValue: selection,
                   onChanged: _onChanged,
                 ),
-                const Text('Widget Details View'),
+                Text(InspectorDetailsViewType.widgetDetailsView.key),
               ],
             ),
           ],
@@ -615,9 +612,16 @@ class InspectorDetailsOption extends StatelessWidget {
     );
   }
 
-  void _onChanged(InspectorDetailsViewOptions? value) {
+  void _onChanged(InspectorDetailsViewType? value) {
     if (value != null) {
       preferences.inspector.setDefaultInspectorDetailsView(value);
+      final item = value.name == InspectorDetailsViewType.layoutExplorer.name
+          ? gac.defaultDetailsViewToLayoutExplorer
+          : gac.defaultDetailsViewToWidgetDetails;
+      ga.select(
+        gac.inspector,
+        item,
+      );
     }
   }
 }
