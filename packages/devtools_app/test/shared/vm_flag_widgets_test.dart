@@ -217,7 +217,7 @@ void main() {
       await tester.pumpWidget(wrap(const VMFlagsDialog()));
       expect(find.richText('VM Flags'), findsOneWidget);
       expect(find.richText('flag 1 name'), findsOneWidget);
-      final RichText commentText = tester.firstWidget<RichText>(
+      final Text commentText = tester.firstWidget<Text>(
         findSubstring('flag 1 comment'),
       );
       expect(commentText, isNotNull);
