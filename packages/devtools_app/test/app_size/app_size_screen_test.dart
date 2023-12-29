@@ -577,7 +577,7 @@ void main() {
         expect(deferredMenuItemFinder, findsOneWidget);
 
         // Select the main unit.
-        await tester.tap(find.text('Main', findRichText: true).hitTestable());
+        await tester.tap(find.richText('Main').hitTestable());
         await tester.pumpAndSettle();
 
         // Verify the main unit is shown for entire app.
