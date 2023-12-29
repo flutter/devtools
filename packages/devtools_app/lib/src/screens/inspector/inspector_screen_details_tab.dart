@@ -37,7 +37,7 @@ class InspectorDetails extends StatelessWidget {
       ),
       (
         tab: _buildTab(
-          tabName: InspectorDetailsViewType.widgetDetailsView.key,
+          tabName: InspectorDetailsViewType.widgetDetailsTree.key,
           trailing: InspectorExpandCollapseButtons(controller: controller),
         ),
         tabView: detailsTree,
@@ -49,7 +49,7 @@ class InspectorDetails extends StatelessWidget {
         int defaultInspectorViewIndex = 0;
 
         if (preferences.inspector.defaultDetailsView.value ==
-            InspectorDetailsViewType.widgetDetailsView) {
+            InspectorDetailsViewType.widgetDetailsTree) {
           defaultInspectorViewIndex = 1;
         }
 

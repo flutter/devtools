@@ -598,11 +598,11 @@ class InspectorDefaultDetailsViewOption extends StatelessWidget {
                 const SizedBox(width: denseSpacing),
                 Radio<InspectorDetailsViewType>(
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  value: InspectorDetailsViewType.widgetDetailsView,
+                  value: InspectorDetailsViewType.widgetDetailsTree,
                   groupValue: selection,
                   onChanged: _onChanged,
                 ),
-                Text(InspectorDetailsViewType.widgetDetailsView.key),
+                Text(InspectorDetailsViewType.widgetDetailsTree.key),
               ],
             ),
           ],

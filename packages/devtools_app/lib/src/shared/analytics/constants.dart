@@ -79,7 +79,7 @@ const refreshPubRoots = 'refreshPubRoots';
 final defaultDetailsViewToLayoutExplorer =
     InspectorDetailsViewType.layoutExplorer.name;
 final defaultDetailsViewToWidgetDetails =
-    InspectorDetailsViewType.widgetDetailsView.name;
+    InspectorDetailsViewType.widgetDetailsTree.name;
 
 enum HomeScreenEvents {
   connectToApp,

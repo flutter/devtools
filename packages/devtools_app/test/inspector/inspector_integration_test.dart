@@ -90,7 +90,11 @@ void main() {
         );
 
         // Select the details tree.
-        await tester.tap(find.text('Widget Details Tree'));
+        await tester.tap(
+          find.text(
+            InspectorDetailsViewType.widgetDetailsTree.key,
+          ),
+        );
         await tester.pumpAndSettle(inspectorChangeSettleTime);
         await expectLater(
           find.byType(InspectorScreenBody),

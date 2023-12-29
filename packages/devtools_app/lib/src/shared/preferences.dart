@@ -139,7 +139,7 @@ class PreferencesController extends DisposableController
 
 enum InspectorDetailsViewType {
   layoutExplorer(nameOverride: 'Layout Explorer'),
-  widgetDetailsView(nameOverride: 'Widget Details View');
+  widgetDetailsTree(nameOverride: 'Widget Details Tree');
 
   const InspectorDetailsViewType({String? nameOverride})
       : _nameOverride = nameOverride;
