@@ -67,7 +67,7 @@ class CpuSamplingRateDropdown extends StatelessWidget {
             screenId,
           );
         }
-        final provider = Provider.of<HoverCardController>(context);
+
         return AnalyticsDropDownButton(
           key: CpuSamplingRateDropdown.dropdownKey,
           gaScreen: screenId,
