@@ -67,7 +67,6 @@ class CpuSamplingRateDropdown extends StatelessWidget {
             screenId,
           );
         }
-
         return AnalyticsDropDownButton(
           key: CpuSamplingRateDropdown.dropdownKey,
           gaScreen: screenId,
