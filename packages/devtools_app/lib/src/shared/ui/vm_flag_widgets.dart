@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../screens/profiler/cpu_profile_service.dart';
@@ -20,7 +19,6 @@ import '../primitives/utils.dart';
 import '../table/table.dart';
 import '../table/table_data.dart';
 import 'drop_down_button.dart';
-import 'hover.dart';
 
 /// DropdownButton that controls the value of the 'profile_period' vm flag.
 ///
