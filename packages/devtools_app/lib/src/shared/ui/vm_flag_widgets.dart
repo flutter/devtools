@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../screens/profiler/cpu_profile_service.dart';
@@ -66,6 +67,7 @@ class CpuSamplingRateDropdown extends StatelessWidget {
             screenId,
           );
         }
+        final provider = Provider.of<HoverCardController>(context);
         return AnalyticsDropDownButton(
           key: CpuSamplingRateDropdown.dropdownKey,
           gaScreen: screenId,
@@ -91,18 +93,9 @@ class CpuSamplingRateDropdown extends StatelessWidget {
     return (
       item: DropdownMenuItem<String>(
         value: samplingRate.value,
-        child: HoverCardTooltip.sync(
-          generateHoverCardData: (_) => HoverCardData(
-            width: scaleByFontFactor(300),
-            contents: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('One sample every ${samplingRate.value} microseconds.'),
-              ],
-            ),
-          ),
+        child: DevToolsTooltip(
+          message: 'One sample every ${samplingRate.value} microseconds.',
           child: Text(samplingRate.display),
-          enabled: () => true,
         ),
       ),
       gaId: samplingRate.displayShort,
