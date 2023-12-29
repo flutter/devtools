@@ -751,6 +751,6 @@ Finder _findDropdownButton<T>() {
 Finder _findMenuItemWithText<T>(String text) {
   return find.descendant(
     of: find.byType(DropdownMenuItem<T>),
-    matching: find.text(text).first,
+    matching: find.richText(text).hitTestable(),
   );
 }
