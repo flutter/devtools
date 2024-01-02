@@ -70,11 +70,14 @@ can run: `brew install gh`
       > Replace `<DEVTOOLS_DIR>` with the local path to your DevTools
       > repo path.
 
-2. Run: `devtools_tool release-helper` to:
+2. Run `devtools_tool release-helper` in order to:
+
 - create new branch and check out locally
 - create a PR using the tip of master.
 - update your local version of flutter to the Latest flutter candidate
     - This is to facilitate testing in the next steps
+ 
+NOTE: Run the script from `/devtools/tool` while [the issue](https://github.com/dart-lang/sdk/issues/54493) is not adderessed.
 
 #### Verify the version changes for the Release PR
 
@@ -93,13 +96,13 @@ bumps.
 
 ### Test the release PR
 
-- Build DevTools in release mode and serve it from a locally running DevTools
+1. Build DevTools in release mode and serve it from a locally running DevTools
 server instance:
    ```shell
    devtools_tool serve
    ```
 
-- Launch DevTools and verify that everything generally works.
+2. Launch DevTools and verify that everything generally works.
    - open the page in a browser (http://localhost:53432)
    - `flutter run` an application
    - connect to the running app from DevTools
@@ -113,7 +116,7 @@ server instance:
          - the bug fixes,
       - use this commit hash for the following steps.
 
-- Once the build is in good shape,
+3. Once the build is in good shape,
    - revert any local changes.
       ```shell
       git checkout . && \
