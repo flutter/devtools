@@ -90,7 +90,10 @@ class CpuSamplingRateDropdown extends StatelessWidget {
     return (
       item: DropdownMenuItem<String>(
         value: samplingRate.value,
-        child: Text(samplingRate.display),
+        child: DevToolsTooltip(
+          message: 'One sample every ${samplingRate.value} microseconds.',
+          child: Text(samplingRate.display),
+        ),
       ),
       gaId: samplingRate.displayShort,
     );

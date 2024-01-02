@@ -166,7 +166,8 @@ class HttpRequestView extends StatelessWidget {
           String() => requestContentType.contains('json'),
           _ => throw StateError(
               "Expected 'content-type' to be a List or String, but got: "
-              '$requestContentType'),
+              '$requestContentType',
+            ),
         };
 
         Widget child;

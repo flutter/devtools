@@ -1,3 +1,6 @@
+## 0.0.12
+* Fix a bug preventing Dart server apps from connecting to DevTools extensions.
+
 ## 0.0.11
 * Add error messaging when `extensionManager` or `serviceManager` are accessed before they
 are initialized.
