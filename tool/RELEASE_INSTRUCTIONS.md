@@ -42,8 +42,8 @@ Make sure:
 
    c. The local checkout is at `main` branch: `git rebase-update`
 
-2. Your Flutter version is equal to latest candidate release branch:
-    - Run `devtools_tool update-flutter-sdk --from-path`
+2. Your Flutter version in `tool/flutter-sdk` is equal to latest candidate release branch:
+    - Run `devtools_tool update-flutter-sdk`
 3. You have goma [configured](http://go/ma-mac-setup)
 
 ### Prepare the release
