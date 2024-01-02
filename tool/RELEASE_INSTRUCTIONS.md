@@ -54,7 +54,7 @@ Make sure:
 > If you need to install the [Github CLI](https://cli.github.com/manual/installation) you
 can run: `brew install gh`
 
-- Ensure that you have access to `devtools_tool` by adding the `tool/bin` folder to your
+1. Ensure that you have access to `devtools_tool` by adding the `tool/bin` folder to your
 `PATH` environment variable
   - **MacOS Users**
     - add the following to your `~/.bashrc` file.
@@ -70,10 +70,10 @@ can run: `brew install gh`
       > Replace `<DEVTOOLS_DIR>` with the local path to your DevTools
       > repo path.
 
-- Run: `devtools_tool release-helper`
-- This will create a PR for you using the tip of master.
-- The branch for that PR will be checked out locally for you.
-- It will also update your local version of flutter to the Latest flutter candidate
+2. Run: `devtools_tool release-helper` to:
+- create new branch and check out locally
+- create a PR using the tip of master.
+- update your local version of flutter to the Latest flutter candidate
     - This is to facilitate testing in the next steps
 
 #### Verify the version changes for the Release PR
