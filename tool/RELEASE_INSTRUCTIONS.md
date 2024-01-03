@@ -73,7 +73,7 @@ can run: `brew install gh`
 2. Run `devtools_tool release-helper` in order to:
 
    - create new branch and check out locally
-   - create a PR using the tip of master.
+   - create a PR using the tip of master
    - update your local version of flutter to the Latest flutter candidate
        - This is to facilitate testing in the next steps
     
