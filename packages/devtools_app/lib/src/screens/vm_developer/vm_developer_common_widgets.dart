@@ -1000,8 +1000,8 @@ class _ObjectInspectorCodeViewState extends State<ObjectInspectorCodeView> {
             // although showing a "No Source Available" message is another
             // option.
             final owner = obj.owner;
-            if (location.line == null && obj.owner is ClassRef) {
-              location = owner!.location;
+            if (location.line == null && owner is ClassRef) {
+              location = owner.location;
             }
           } else if (obj is FieldRef) {
             location = obj.location!;
@@ -1046,9 +1046,7 @@ class _ObjectInspectorCodeViewState extends State<ObjectInspectorCodeView> {
                     codeViewController: widget.codeViewController,
                     scriptRef: widget.script,
                     parsedScript: currentParsedScript,
-                    enableFileExplorer: false,
                     enableHistory: false,
-                    enableSearch: false,
                     lineRange: lineRange,
                     onSelected: breakpointManager.toggleBreakpoint,
                   ),

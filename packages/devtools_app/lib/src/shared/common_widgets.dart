@@ -705,25 +705,6 @@ class BlankHeader extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => Size.zero;
 }
 
-/// Button to export data.
-///
-/// * `minScreenWidthForTextBeforeScaling`: The minimum width the button can be before the text is
-///    omitted.
-/// * `onPressed`: The callback to be called upon pressing the button.
-class ExportButton extends GaDevToolsButton {
-  ExportButton({
-    required super.gaScreen,
-    super.key,
-    super.onPressed,
-    super.minScreenWidthForTextBeforeScaling,
-    super.tooltip = 'Export data',
-  }) : super(
-          icon: Icons.file_download,
-          label: 'Export',
-          gaSelection: gac.export,
-        );
-}
-
 /// Button to open related information / documentation.
 ///
 /// [tooltip] specifies the hover text for the button.
@@ -848,6 +829,7 @@ class DevToolsClearableTextField extends StatelessWidget {
     required this.labelText,
     TextEditingController? controller,
     this.hintText,
+    this.prefixIcon,
     this.onChanged,
     this.autofocus = false,
   })  : controller = controller ?? TextEditingController(),
@@ -855,6 +837,7 @@ class DevToolsClearableTextField extends StatelessWidget {
 
   final TextEditingController controller;
   final String? hintText;
+  final Widget? prefixIcon;
   final String labelText;
   final Function(String)? onChanged;
   final bool autofocus;
@@ -874,6 +857,7 @@ class DevToolsClearableTextField extends StatelessWidget {
         border: const OutlineInputBorder(),
         labelText: labelText,
         hintText: hintText,
+        prefixIcon: prefixIcon,
         suffixIcon: IconButton(
           tooltip: 'Clear',
           icon: const Icon(Icons.clear),
@@ -1697,34 +1681,8 @@ class CheckboxSetting extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
-    Widget textContent = RichText(
-      overflow: TextOverflow.visible,
-      text: TextSpan(
-        text: title,
-        style: enabled ? theme.regularTextStyle : theme.subtleTextStyle,
-      ),
-    );
-
-    if (description != null) {
-      textContent = Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          textContent,
-          Expanded(
-            child: RichText(
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              text: TextSpan(
-                text: ' • $description',
-                style: theme.subtleTextStyle,
-              ),
-            ),
-          ),
-        ],
-      );
-    }
-    final content = Row(
+    Widget checkboxAndTitle = Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         NotifierCheckbox(
           notifier: notifier,
@@ -1743,17 +1701,57 @@ class CheckboxSetting extends StatelessWidget {
           checkboxKey: checkboxKey,
         ),
         Flexible(
-          child: textContent,
+          child: RichText(
+            overflow: TextOverflow.visible,
+            maxLines: 2,
+            text: TextSpan(
+              text: title,
+              style: enabled ? theme.regularTextStyle : theme.subtleTextStyle,
+            ),
+          ),
         ),
       ],
     );
-    if (tooltip != null && tooltip!.isNotEmpty) {
-      return DevToolsTooltip(
-        message: tooltip,
-        child: content,
-      );
+    if (description == null) {
+      checkboxAndTitle = Expanded(child: checkboxAndTitle);
     }
-    return content;
+    return maybeWrapWithTooltip(
+      tooltip: tooltip,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          checkboxAndTitle,
+          if (description != null) ...[
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(top: denseSpacing),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    RichText(
+                      text: TextSpan(
+                        text: ' • ',
+                        style: theme.subtleTextStyle,
+                      ),
+                    ),
+                    Flexible(
+                      child: RichText(
+                        maxLines: 4,
+                        overflow: TextOverflow.ellipsis,
+                        text: TextSpan(
+                          text: description,
+                          style: theme.subtleTextStyle,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
   }
 }
 
@@ -2081,11 +2079,12 @@ class VerticalLineSpacer extends StatelessWidget {
   }
 }
 
-class ToCsvButton extends StatelessWidget {
-  const ToCsvButton({
+class DownloadButton extends StatelessWidget {
+  const DownloadButton({
     Key? key,
     this.onPressed,
-    this.tooltip = 'Download data in CSV format',
+    this.tooltip = 'Download data',
+    this.label = 'Download',
     required this.minScreenWidthForTextBeforeScaling,
     required this.gaScreen,
     required this.gaSelection,
@@ -2093,6 +2092,7 @@ class ToCsvButton extends StatelessWidget {
 
   final VoidCallback? onPressed;
   final String? tooltip;
+  final String label;
   final double minScreenWidthForTextBeforeScaling;
   final String gaScreen;
   final String gaSelection;
@@ -2100,7 +2100,7 @@ class ToCsvButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GaDevToolsButton(
-      label: 'CSV',
+      label: label,
       icon: Icons.file_download,
       tooltip: tooltip,
       gaScreen: gaScreen,

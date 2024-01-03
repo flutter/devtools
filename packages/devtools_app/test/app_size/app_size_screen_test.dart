@@ -11,6 +11,7 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_test_utils.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -248,7 +249,7 @@ void main() {
         expect(find.byType(AnalysisView), findsOneWidget);
         expect(
           find.text(
-            'Dart AOT snapshot: lib/src/app_size/stub_data/new_v8.dart - 7/28/2020 1:29 PM',
+            'Dart AOT snapshot: lib/src/app_size/stub_data/new_v8.dart - 7/28/2020 1:29 PM',
           ),
           findsOneWidget,
         );
@@ -359,9 +360,10 @@ void main() {
         expect(find.text('No File Selected'), findsNothing);
 
         expect(find.byType(DiffView), findsOneWidget);
+
         expect(
           find.text(
-            'Diffing Dart AOT snapshots: lib/src/app_size/stub_data/old_v8.dart - 7/28/2020 1:29 PM (OLD)    vs    (NEW) lib/src/app_size/stub_data/new_v8.dart - 7/28/2020 1:29 PM',
+            'Diffing Dart AOT snapshots: lib/src/app_size/stub_data/old_v8.dart - 7/28/2020 1:29 PM (OLD)    vs    (NEW) lib/src/app_size/stub_data/new_v8.dart - 7/28/2020 1:29 PM',
           ),
           findsOneWidget,
         );
@@ -575,7 +577,7 @@ void main() {
         expect(deferredMenuItemFinder, findsOneWidget);
 
         // Select the main unit.
-        await tester.tap(find.text('Main').hitTestable());
+        await tester.tap(find.richText('Main').hitTestable());
         await tester.pumpAndSettle();
 
         // Verify the main unit is shown for entire app.
@@ -749,6 +751,6 @@ Finder _findDropdownButton<T>() {
 Finder _findMenuItemWithText<T>(String text) {
   return find.descendant(
     of: find.byType(DropdownMenuItem<T>),
-    matching: find.text(text).first,
+    matching: find.richText(text).hitTestable(),
   );
 }

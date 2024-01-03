@@ -9,11 +9,15 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';
+import '../../shared/config_specific/import_export/import_export.dart';
+import '../../shared/file_import.dart';
 import '../../shared/globals.dart';
 import '../../shared/screen.dart';
 import '../../shared/utils.dart';
@@ -35,6 +39,12 @@ class PerformanceScreen extends Screen {
 
   @override
   Widget build(BuildContext context) {
+    final connected = serviceConnection.serviceManager.hasConnection &&
+        serviceConnection.serviceManager.connectedAppInitialized;
+    if (!connected && !offlineController.offlineMode.value) {
+      return const DisconnectedPerformanceScreenBody();
+    }
+
     if (serviceConnection.serviceManager.connectedApp?.isDartWebAppNow ??
         false) {
       return const WebPerformanceScreenBody();
@@ -116,6 +126,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
               FlutterFramesChart(
                 controller.flutterFramesController,
                 offlineMode: offlineMode,
+                impellerEnabled: controller.impellerEnabled,
               ),
             const Expanded(child: TabbedPerformanceView()),
           ],
@@ -143,6 +154,28 @@ class WebPerformanceScreenBody extends StatelessWidget {
             ),
           );
         }
+      },
+    );
+  }
+}
+
+class DisconnectedPerformanceScreenBody extends StatelessWidget {
+  const DisconnectedPerformanceScreenBody({super.key});
+
+  static const importInstructions =
+      'Open a performance data file that was previously saved from DevTools.';
+
+  @override
+  Widget build(BuildContext context) {
+    return FileImportContainer(
+      instructions: importInstructions,
+      actionText: 'Load data',
+      gaScreen: gac.appSize,
+      gaSelectionImport: gac.PerformanceEvents.openDataFile.name,
+      gaSelectionAction: gac.PerformanceEvents.loadDataFromFile.name,
+      onAction: (jsonFile) {
+        Provider.of<ImportController>(context, listen: false)
+            .importData(jsonFile, expectedScreenId: PerformanceScreen.id);
       },
     );
   }

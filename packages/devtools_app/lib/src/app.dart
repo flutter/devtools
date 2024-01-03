@@ -70,12 +70,10 @@ class DevToolsApp extends StatefulWidget {
     this.originalScreens,
     this.analyticsController, {
     super.key,
-    this.sampleData = const [],
   });
 
   final List<DevToolsScreen> originalScreens;
   final AnalyticsController analyticsController;
-  final List<DevToolsJsonFile> sampleData;
 
   @override
   State<DevToolsApp> createState() => DevToolsAppState();
@@ -204,13 +202,15 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     Map<String, String?> args,
     DevToolsNavigationState? state,
   ) {
-    if (FrameworkCore.initializationInProgress) {
+    // `page` will initially be null while the router is set up, then we will
+    // be called again with an empty string for the root.
+    if (FrameworkCore.initializationInProgress || page == null) {
       return const MaterialPage(child: CenteredCircularProgressIndicator());
     }
 
     // Provide the appropriate page route.
     if (pages.containsKey(page)) {
-      Widget widget = pages[page!]!(
+      Widget widget = pages[page]!(
         context,
         page,
         args,
@@ -237,19 +237,9 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       child: DevToolsScaffold.withChild(
         key: const Key('not-found'),
         embed: isEmbedded(args),
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text("'$page' not found."),
-              const SizedBox(height: defaultSpacing),
-              ElevatedButton(
-                onPressed: () =>
-                    routerDelegate.navigateHome(clearScreenParam: true),
-                child: const Text('Go to Home screen'),
-              ),
-            ],
-          ),
+        child: PageNotFound(
+          page: page,
+          routerDelegate: routerDelegate,
         ),
       ),
     );
@@ -316,7 +306,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
                   // hot restart service is available for the connected app.
                   const HotRestartButton(),
                 ],
-                ...DevToolsScaffold.defaultActions(isEmbedded: embed),
+                ...DevToolsScaffold.defaultActions(),
               ],
             ),
           );
@@ -367,6 +357,9 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   }
 
   Map<String, UrlParametersBuilder> get _standaloneScreens {
+    // TODO(dantup): Standalone screens do not use DevToolsScaffold which means
+    //  they do not currently send an initial "currentPage" event to inform
+    //  the server which page they are rendering.
     return {
       for (final type in StandaloneScreenType.values)
         type.name: (_, __, args, ___) => type.screen,
@@ -445,7 +438,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
 ///
 /// [C] corresponds to the type of the screen's controller, which is created by
 /// [createController] or provided by [controllerProvider].
-class DevToolsScreen<C> {
+class DevToolsScreen<C extends Object?> {
   const DevToolsScreen(
     this.screen, {
     this.createController,
@@ -524,6 +517,36 @@ class _AlternateCheckedModeBanner extends StatelessWidget {
       location: BannerLocation.topStart,
       child: Builder(
         builder: builder,
+      ),
+    );
+  }
+}
+
+class PageNotFound extends StatelessWidget {
+  const PageNotFound({
+    super.key,
+    required this.page,
+    required this.routerDelegate,
+  });
+
+  final String page;
+
+  final DevToolsRouterDelegate routerDelegate;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text("'$page' not found."),
+          const SizedBox(height: defaultSpacing),
+          ElevatedButton(
+            onPressed: () =>
+                routerDelegate.navigateHome(clearScreenParam: true),
+            child: const Text('Go to Home screen'),
+          ),
+        ],
       ),
     );
   }

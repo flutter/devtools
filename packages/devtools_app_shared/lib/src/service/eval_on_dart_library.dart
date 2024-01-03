@@ -17,7 +17,6 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../utils/auto_dispose.dart';
 import 'service_manager.dart';
-import 'service_utils.dart';
 
 final _log = Logger('eval_on_dart_library');
 
@@ -102,9 +101,8 @@ class EvalOnDartLibrary extends DisposableController
   int _currentRequestId = 0;
 
   late Completer<LibraryRef> _libraryRef;
-  Future<LibraryRef> get libraryRef => _libraryRef.future;
 
-  Completer? allPendingRequestsDone;
+  Completer<void>? allPendingRequestsDone;
 
   Isolate? get isolate => _isolate;
   Isolate? _isolate;
@@ -290,10 +288,6 @@ class EvalOnDartLibrary extends DisposableController
     }
 
     return value;
-  }
-
-  Future<Library?> getLibrary(LibraryRef instance, Disposable isAlive) {
-    return getObjHelper(instance, isAlive);
   }
 
   Future<Class?> getClass(ClassRef instance, Disposable isAlive) {
@@ -602,7 +596,7 @@ class EvalOnDartLibrary extends DisposableController
         return response.future;
       }
 
-      final Future previousDone = allPendingRequestsDone!.future;
+      final Future<void> previousDone = allPendingRequestsDone!.future;
       allPendingRequestsDone = response;
       // Schedule this request only after the previous request completes.
       try {
@@ -633,10 +627,6 @@ class EvalOnDartLibrary extends DisposableController
       return value;
     });
   }
-
-  Future<String?> retrieveFullValueAsString(InstanceRef stringRef) {
-    return service.retrieveFullStringValue(_isolateRef!.id!, stringRef);
-  }
 }
 
 final class LibraryNotFound implements Exception {
@@ -644,7 +634,10 @@ final class LibraryNotFound implements Exception {
 
   final String name;
 
-  String get message => 'Library matchining $name not found';
+  String get message => 'Library matching $name not found';
+
+  @override
+  String toString() => message;
 }
 
 final class FutureFailedException implements Exception {
@@ -675,7 +668,7 @@ final class UnknownEvalException implements Exception {
 
   @override
   String toString() {
-    return 'Unknown error during the evaluation of `$expression`: $exception';
+    return 'Unknown error during the evaluation of `$expression`: $exception for scope: $scope';
   }
 }
 
@@ -702,7 +695,7 @@ final class EvalSentinelException extends SentinelException {
 
   @override
   String toString() {
-    return 'Evaluation `$expression` returned the Sentinel $sentinel';
+    return 'Evaluation `$expression` returned the Sentinel $sentinel for scope: $scope';
   }
 }
 
@@ -719,6 +712,6 @@ final class EvalErrorException implements Exception {
 
   @override
   String toString() {
-    return 'Evaluation `$expression` failed with $errorRef';
+    return 'Evaluation `$expression` failed with $errorRef for scope: $scope';
   }
 }

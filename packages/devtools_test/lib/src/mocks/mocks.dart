@@ -106,8 +106,8 @@ void mockWebVm(VM vm) {
 void mockConnectedApp(
   ConnectedApp connectedApp, {
   required bool isFlutterApp,
-  required isProfileBuild,
-  required isWebApp,
+  required bool isProfileBuild,
+  required bool isWebApp,
   String os = 'ios',
 }) {
   assert(!(!isFlutterApp && isProfileBuild));
@@ -275,17 +275,6 @@ const profilerEntries = <int, ProfileReportEntry>{
 
 final mockParsedScript = ParsedScript(
   script: mockScript!,
-  highlighter: mockSyntaxHighlighter,
-  executableLines: executableLines,
-  sourceReport: ProcessedSourceReport(
-    coverageHitLines: coverageHitLines,
-    coverageMissedLines: coverageMissLines,
-    profilerEntries: profilerEntries,
-  ),
-);
-
-final mockLargeParsedScript = ParsedScript(
-  script: mockLargeScript!,
   highlighter: mockSyntaxHighlighter,
   executableLines: executableLines,
   sourceReport: ProcessedSourceReport(

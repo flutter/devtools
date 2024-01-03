@@ -12,8 +12,7 @@
 /// with some refactors to make the code more of a controller than a combination
 /// of view and controller. View specific portions of InspectorPanel.java have
 /// been moved to inspector.dart.
-
-library inspector_controller;
+library;
 
 import 'dart:async';
 
@@ -59,10 +58,7 @@ class InspectorController extends DisposableController
     _refreshRateLimiter = RateLimiter(refreshFramesPerSecond, refresh);
 
     inspectorTree.config = InspectorTreeConfig(
-      summaryTree: isSummaryTree,
-      treeType: treeType,
       onNodeAdded: _onNodeAdded,
-      onHover: highlightShowNode,
       onSelectionChange: selectionChanged,
       onExpand: _onExpand,
       onClientActiveChange: _onClientChange,
@@ -497,10 +493,6 @@ class InspectorController extends DisposableController
   ) {
     this.subtreeRoot = subtreeRoot;
     details?.setSubtreeRoot(subtreeRoot, subtreeSelection);
-  }
-
-  InspectorInstanceRef? getSubtreeRootValue() {
-    return subtreeRoot?.valueRef;
   }
 
   void setSubtreeRoot(

@@ -19,7 +19,7 @@ const _argCommit = 'commit';
 /// automatically built and uploaded to CIPD on each DevTools commit.
 ///
 /// To run this script:
-/// `dart run tool/bin/devtools_tool.dart update-sdk-deps -c <commit-hash>`
+/// `devtools_tool update-sdk-deps -c <commit-hash>`
 class UpdateDartSdkDepsCommand extends Command {
   UpdateDartSdkDepsCommand() {
     argParser.addOption(
@@ -49,11 +49,11 @@ class UpdateDartSdkDepsCommand extends Command {
       workingDirectory: dartSdkLocation,
       additionalErrorMessage: DartSdkHelper.commandDebugMessage,
       commands: [
-        CliCommand(
-          'git branch -D devtools-$commit',
+        CliCommand.git(
+          cmd: 'branch -D devtools-$commit',
           throwOnException: false,
         ),
-        CliCommand('git new-branch devtools-$commit'),
+        CliCommand.git(cmd: 'new-branch devtools-$commit'),
       ],
     );
 
@@ -65,7 +65,7 @@ class UpdateDartSdkDepsCommand extends Command {
       workingDirectory: dartSdkLocation,
       additionalErrorMessage: DartSdkHelper.commandDebugMessage,
       commands: [
-        CliCommand('git add .'),
+        CliCommand.git(cmd: 'add DEPS'),
         CliCommand.from(
           'git',
           [
@@ -74,14 +74,9 @@ class UpdateDartSdkDepsCommand extends Command {
             'Update DevTools rev to $commit',
           ],
         ),
-        // TODO(kenz): is there a way to automatically close the file that pops up
-        // with the commit description?
-        CliCommand('git cl upload -s'),
+        CliCommand.git(cmd: 'cl upload -s -f'),
       ],
     );
-
-    // Closes stdin for the entire program.
-    await sharedStdIn.terminate();
   }
 
   void _writeToDepsFile(String commit, String localDartSdkLocation) {

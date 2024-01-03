@@ -9,8 +9,7 @@
 /// to handle the actual platform specific icon rendering.
 /// The benefit of this approach is that icons can be const objects and tests
 /// of code that uses icons can run on the Dart VM.
-
-library icons;
+library;
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';

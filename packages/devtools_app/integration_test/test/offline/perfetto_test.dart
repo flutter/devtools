@@ -4,10 +4,15 @@
 
 import 'package:devtools_app/src/screens/performance/panes/flutter_frames/flutter_frames_chart.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/perfetto/_perfetto_web.dart';
-import 'package:devtools_test/devtools_integration_test.dart';
+import 'package:devtools_test/helpers.dart';
+import 'package:devtools_test/integration_test.dart';
+import 'package:devtools_test/test_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+
+// To run:
+// dart run integration_test/run_tests.dart --target=integration_test/test/offline/perfetto_test.dart
 
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();

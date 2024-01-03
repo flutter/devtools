@@ -5,7 +5,6 @@
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
-import 'package:devtools_tool/devtools_command_runner.dart';
 import '../utils.dart';
 
 // This script must be executed from the top level devtools/ directory.
@@ -54,12 +53,6 @@ Future<void> performTheVersionUpdate({
     File(pathFromRepoRoot('packages/devtools_app/lib/devtools.dart')),
     newVersion,
   );
-
-  await DevToolsCommandRunner().run([
-    'pub-get',
-    '--upgrade',
-    '--only-main',
-  ]);
 }
 
 Future<void> resetReleaseNotes({
@@ -239,12 +232,6 @@ const devToolsDependencyPrefixes = [
   'devtools_app: ',
   'devtools_test: ',
 ];
-
-extension JoinExtension on List<String> {
-  String joinWithNewLine() {
-    return '${join('\n')}\n';
-  }
-}
 
 class ManualUpdateCommand extends Command {
   ManualUpdateCommand() {

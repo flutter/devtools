@@ -49,13 +49,9 @@ class PerformanceData {
 
   static const selectedEventKey = 'selectedEvent';
 
-  static const timelineModeKey = 'timelineMode';
-
   static const uiKey = 'UI';
 
   static const rasterKey = 'Raster';
-
-  static const gcKey = 'GC';
 
   static const unknownKey = 'Unknown';
 
@@ -124,10 +120,6 @@ class PerformanceData {
     assert(event.isWellFormedDeep);
     timelineEvents.add(event);
     _endTimestampMicros = math.max(_endTimestampMicros, event.maxEndMicros);
-  }
-
-  bool hasCpuProfileData() {
-    return cpuProfileData != null && cpuProfileData!.stackFrames.isNotEmpty;
   }
 
   void clear() {
@@ -293,89 +285,40 @@ class TimelineRowData {
 
 class OfflinePerformanceData extends PerformanceData {
   OfflinePerformanceData._({
-    required List<Map<String, dynamic>>? traceEvents,
-    required List<FlutterFrame>? frames,
-    FlutterFrame? selectedFrame,
-    required int? selectedFrameId,
-    required TimelineEvent? selectedEvent,
-    required double? displayRefreshRate,
-    required CpuProfileData? cpuProfileData,
-    required RasterStats? rasterStats,
-    required RebuildCountModel? rebuildCountModel,
-  })  : _selectedFrameId = selectedFrameId,
-        super(
-          traceEvents: traceEvents,
-          frames: frames,
-          selectedFrame: selectedFrame,
-          selectedEvent: selectedEvent,
-          displayRefreshRate: displayRefreshRate,
-          cpuProfileData: cpuProfileData,
-          rasterStats: rasterStats,
-          rebuildCountModel: rebuildCountModel,
-        );
+    required super.traceEvents,
+    required super.frames,
+    required super.selectedFrame,
+    required this.selectedFrameId,
+    required super.selectedEvent,
+    required super.displayRefreshRate,
+    required super.cpuProfileData,
+    required super.rasterStats,
+    required super.rebuildCountModel,
+  });
 
-  static OfflinePerformanceData parse(Map<String, dynamic> json) {
-    final List<Map<String, dynamic>> traceEvents =
-        (json[PerformanceData.traceEventsKey] ?? [])
-            .cast<Map<String, dynamic>>();
+  static OfflinePerformanceData parse(Map<String, Object?> json_) {
+    final json = _PerformanceDataJson(json_);
 
-    final Map<String, dynamic> cpuProfileJson =
-        json[PerformanceData.cpuProfileKey] ?? <String, Object>{};
-    final CpuProfileData? cpuProfileData =
-        cpuProfileJson.isNotEmpty ? CpuProfileData.parse(cpuProfileJson) : null;
-
-    final Map<String, dynamic> rasterStatsJson =
-        json[PerformanceData.rasterStatsKey] ?? <String, Object>{};
-    final RasterStats? rasterStats =
-        rasterStatsJson.isNotEmpty ? RasterStats.parse(rasterStatsJson) : null;
-
-    final int? selectedFrameId = json[PerformanceData.selectedFrameIdKey];
-
-    final List<Map<String, dynamic>> framesJson =
-        ((json[PerformanceData.flutterFramesKey] as List?)?.cast<Object>() ??
-                [])
-            .map((f) => f as Map<String, dynamic>)
-            .toList();
-    final frames = framesJson
-        .map((Map<String, dynamic> f) => FlutterFrame.parse(f))
-        .toList();
+    final selectedFrameId = json.selectedFrameId;
+    final frames = json.frames;
     final selectedFrame =
         frames.firstWhereOrNull((frame) => frame.id == selectedFrameId);
 
-    final Map<String, dynamic> selectedEventJson =
-        json[PerformanceData.selectedEventKey] ?? {};
-    final OfflineTimelineEvent? selectedEvent = selectedEventJson.isNotEmpty
-        ? OfflineTimelineEvent(
-            (selectedEventJson[TimelineEvent.firstTraceKey] ?? {})
-                .cast<String, Object>(),
-          )
-        : null;
-
-    final displayRefreshRate =
-        json[PerformanceData.displayRefreshRateKey] ?? defaultRefreshRate;
-
-    final Map<String, dynamic> rebuildCountModelJson =
-        json[PerformanceData.rebuildCountModelKey] ?? {};
-    final rebuildCountModel = rebuildCountModelJson.isNotEmpty
-        ? RebuildCountModel.parse(rebuildCountModelJson)
-        : null;
-
     return OfflinePerformanceData._(
-      traceEvents: traceEvents,
+      traceEvents: json.traceEvents,
       selectedFrame: selectedFrame,
       selectedFrameId: selectedFrameId,
       frames: frames,
-      selectedEvent: selectedEvent,
-      displayRefreshRate: displayRefreshRate.toDouble(),
-      cpuProfileData: cpuProfileData,
-      rasterStats: rasterStats,
-      rebuildCountModel: rebuildCountModel,
+      selectedEvent: json.selectedEvent,
+      displayRefreshRate: json.displayRefreshRate,
+      cpuProfileData: json.cpuProfile,
+      rasterStats: json.rasterStats,
+      rebuildCountModel: json.rebuildCountModel,
     );
   }
 
   @override
-  int? get selectedFrameId => _selectedFrameId;
-  final int? _selectedFrameId;
+  final int? selectedFrameId;
 
   /// Creates a new instance of [OfflinePerformanceData] with references to the
   /// same objects contained in this instance.
@@ -399,6 +342,56 @@ class OfflinePerformanceData extends PerformanceData {
   }
 }
 
+extension type _PerformanceDataJson(Map<String, Object?> json) {
+  List<Map<String, Object?>> get traceEvents =>
+      (json[PerformanceData.traceEventsKey] as List? ?? [])
+          .cast<Map>()
+          .map((e) => e.cast<String, Object?>())
+          .toList();
+
+  CpuProfileData? get cpuProfile {
+    final raw =
+        (json[PerformanceData.cpuProfileKey] as Map?)?.cast<String, Object>();
+    return raw == null || raw.isEmpty ? null : CpuProfileData.parse(raw);
+  }
+
+  RasterStats? get rasterStats {
+    final raw =
+        (json[PerformanceData.rasterStatsKey] as Map?)?.cast<String, Object>();
+    return raw == null || raw.isEmpty ? null : RasterStats.parse(raw);
+  }
+
+  int? get selectedFrameId => json[PerformanceData.selectedFrameIdKey] as int?;
+
+  List<FlutterFrame> get frames =>
+      (json[PerformanceData.flutterFramesKey] as List? ?? [])
+          .cast<Map>()
+          .map((f) => f.cast<String, dynamic>())
+          .map((f) => FlutterFrame.parse(f))
+          .toList();
+
+  OfflineTimelineEvent? get selectedEvent {
+    final raw = (json[PerformanceData.selectedEventKey] as Map? ?? {})
+        .cast<String, dynamic>();
+
+    if (raw.isEmpty) return null;
+
+    return OfflineTimelineEvent(
+      (raw[TimelineEvent.firstTraceKey] as Map? ?? {}).cast<String, Object>(),
+    );
+  }
+
+  double get displayRefreshRate =>
+      (json[PerformanceData.displayRefreshRateKey] as num?)?.toDouble() ??
+      defaultRefreshRate;
+
+  RebuildCountModel? get rebuildCountModel {
+    final raw = (json[PerformanceData.rebuildCountModelKey] as Map? ?? {})
+        .cast<String, dynamic>();
+    return raw.isNotEmpty ? RebuildCountModel.parse(raw) : null;
+  }
+}
+
 /// Wrapper class for [TimelineEvent] that only includes information we need for
 /// importing and exporting snapshots.
 ///
@@ -418,13 +411,13 @@ class OfflineTimelineEvent extends TimelineEvent {
           ),
         ) {
     time.end = Duration(
-      microseconds: firstTrace[TraceEvent.timestampKey] +
-          firstTrace[TraceEvent.durationKey],
+      microseconds: (firstTrace[TraceEvent.timestampKey] as int) +
+          (firstTrace[TraceEvent.durationKey] as int),
     );
+    final typeArg =
+        (firstTrace[TraceEvent.argsKey] as Map)[TraceEvent.typeKey].toString();
     type = TimelineEventType.values.firstWhere(
-      (t) =>
-          t.toString() ==
-          firstTrace[TraceEvent.argsKey][TraceEvent.typeKey].toString(),
+      (t) => t.toString() == typeArg,
       orElse: () => TimelineEventType.other,
     );
   }
@@ -475,10 +468,6 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
   }
 
   static const firstTraceKey = 'firstTrace';
-  static const eventNameKey = 'name';
-  static const eventTypeKey = 'type';
-  static const eventStartTimeKey = 'startMicros';
-  static const eventDurationKey = 'durationMicros';
 
   /// Trace events associated with this [TimelineEvent].
   ///
@@ -708,10 +697,6 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
     }
   }
 
-  void formatFromRoot(StringBuffer buf, String indent) {
-    root.format(buf, indent);
-  }
-
   void writeTraceToBuffer(StringBuffer buf) {
     buf.writeln(beginTraceEventJson);
     for (TimelineEvent child in children) {
@@ -723,13 +708,10 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
   }
 
   Map<String, dynamic> get json {
-    final modifiedTrace = Map.from(beginTraceEventJson);
-    modifiedTrace[TraceEvent.argsKey]
-        .addAll({TraceEvent.typeKey: type.toString()});
-    if (!modifiedTrace.containsKey(TraceEvent.durationKey)) {
-      modifiedTrace
-          .addAll({TraceEvent.durationKey: time.duration.inMicroseconds});
-    }
+    final modifiedTrace = {...beginTraceEventJson}
+      ..putIfAbsent(TraceEvent.durationKey, () => time.duration.inMicroseconds);
+    (modifiedTrace[TraceEvent.argsKey] as Map)[TraceEvent.typeKey] =
+        type.toString();
     return {firstTraceKey: modifiedTrace};
   }
 

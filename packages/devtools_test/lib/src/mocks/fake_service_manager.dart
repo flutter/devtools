@@ -13,7 +13,7 @@ import 'package:flutter/foundation.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../utils.dart';
+import '../helpers/utils.dart';
 import 'fake_isolate_manager.dart';
 import 'fake_service_extension_manager.dart';
 import 'fake_vm_service_wrapper.dart';
@@ -37,7 +37,6 @@ class FakeServiceConnectionManager extends Fake
       connectedAppInitialized: connectedAppInitialized,
       availableLibraries: availableLibraries,
       availableServices: availableServices,
-      onVmServiceOpened: resolvedUriManager.vmServiceOpened,
       rootLibrary: rootLibrary,
     );
     for (var screenId in screenIds) {
@@ -53,9 +52,6 @@ class FakeServiceConnectionManager extends Fake
   FakeServiceManager get serviceManager =>
       _serviceManager as FakeServiceManager;
   late final ServiceManager<VmServiceWrapper> _serviceManager;
-
-  @override
-  final resolvedUriManager = ResolvedUriManager();
 
   @override
   late final AppState appState =
@@ -84,7 +80,7 @@ class FakeServiceConnectionManager extends Fake
         Response.parse({
           'layerBytes': 0,
           'pictureBytes': 0,
-        }),
+        })!,
       );
 
   @override
@@ -160,7 +156,7 @@ class FakeServiceManager extends Fake
 
   final List<String> availableLibraries;
 
-  final Function? onVmServiceOpened;
+  final void Function()? onVmServiceOpened;
 
   final Map<String, Response> serviceExtensionResponses;
 
@@ -191,6 +187,9 @@ class FakeServiceManager extends Fake
 
   @override
   IsolateManager get isolateManager => _isolateManager;
+
+  @override
+  final ResolvedUriManager resolvedUriManager = ResolvedUriManager();
 
   @override
   final FakeServiceExtensionManager serviceExtensionManager =
@@ -277,7 +276,7 @@ class FakeServiceManager extends Fake
         'dartSdkVersion': '2.9.0 (build 2.9.0-8.0.dev d6fed1f624)',
         'frameworkRevisionShort': '74432fa91c',
         'engineRevisionShort': 'ae2222f47e',
-      }),
+      })!,
     );
   }
 
@@ -297,6 +296,7 @@ class FakeServiceManager extends Fake
     required Future<void> onClosed,
   }) async {
     onVmServiceOpened?.call();
+    resolvedUriManager.vmServiceOpened(service);
     await initFlagManager();
     return Future.value();
   }

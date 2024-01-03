@@ -35,7 +35,7 @@ void main() {
     });
 
     test('value returns ImmutableList', () {
-      expect(notifier.value, isA<ImmutableList>());
+      expect(notifier.value, isA<ImmutableList<Object?>>());
     });
 
     test('notifies on add', () {

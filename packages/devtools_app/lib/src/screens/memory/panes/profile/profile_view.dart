@@ -58,6 +58,7 @@ class _FieldClassNameColumn extends ColumnData<ProfileRecord>
     BuildContext context,
     ProfileRecord data, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     if (data.isTotal) return null;
@@ -137,6 +138,7 @@ class _FieldInstanceCountColumn extends ColumnData<ProfileRecord>
     BuildContext context,
     ProfileRecord data, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     return ProfileInstanceTableCell(
@@ -643,11 +645,12 @@ class _ExportAllocationProfileButton extends StatelessWidget {
     return ValueListenableBuilder<AdaptedProfile?>(
       valueListenable: allocationProfileController.currentAllocationProfile,
       builder: (context, currentAllocationProfile, _) {
-        return ToCsvButton(
+        return DownloadButton(
           gaScreen: gac.memory,
           gaSelection: gac.MemoryEvent.profileDownloadCsv,
           minScreenWidthForTextBeforeScaling: memoryControlsMinVerboseWidth,
           tooltip: 'Download allocation profile data in CSV format',
+          label: 'CSV',
           onPressed: currentAllocationProfile == null
               ? null
               : () => allocationProfileController

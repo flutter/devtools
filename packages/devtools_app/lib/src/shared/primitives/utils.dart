@@ -33,8 +33,6 @@ bool collectionEquals(e1, e2, {bool ordered = true}) {
 // 2^52 is the max int for dart2js.
 final int maxJsInt = pow(2, 52) as int;
 
-String escape(String? text) => text == null ? '' : htmlEscape.convert(text);
-
 final NumberFormat nf = NumberFormat.decimalPattern();
 
 String percent(double d, {int fractionDigits = 2}) =>
@@ -435,19 +433,6 @@ class JsonUtils {
   static int getIntMember(Map<String, Object?> json, String memberName) {
     return json[memberName] as int? ?? -1;
   }
-
-  static List<String> getValues(Map<String, Object> json, String member) {
-    final values = json[member] as List<Object?>?;
-    if (values == null || values.isEmpty) {
-      return const [];
-    }
-
-    return values.cast();
-  }
-
-  static bool hasJsonData(String? data) {
-    return data != null && data.isNotEmpty && data != 'null';
-  }
 }
 
 /// Add pretty print for a JSON payload.
@@ -620,8 +605,7 @@ class TimeRange {
   }
 
   @override
-  // ignore: avoid-dynamic, necessary here.
-  bool operator ==(other) {
+  bool operator ==(Object other) {
     if (other is! TimeRange) return false;
     return start == other.start && end == other.end;
   }
@@ -632,17 +616,6 @@ class TimeRange {
 
 String formatDateTime(DateTime time) {
   return DateFormat('H:mm:ss.S').format(time);
-}
-
-bool isDebugBuild() {
-  bool debugBuild = false;
-  assert(
-    (() {
-      debugBuild = true;
-      return true;
-    })(),
-  );
-  return debugBuild;
 }
 
 /// Divides [numerator] by [denominator], not returning infinite, NaN, or null
@@ -775,8 +748,7 @@ class Range {
   String toString() => 'Range($begin, $end)';
 
   @override
-  // ignore: avoid-dynamic, necessary here.
-  bool operator ==(other) {
+  bool operator ==(Object other) {
     if (other is! Range) return false;
     return begin == other.begin && end == other.end;
   }
@@ -805,8 +777,7 @@ class LineRange {
   String toString() => 'LineRange($begin, $end)';
 
   @override
-  // ignore: avoid-dynamic, necessary here.
-  bool operator ==(other) {
+  bool operator ==(Object other) {
     if (other is! LineRange) return false;
     return begin == other.begin && end == other.end;
   }
@@ -1129,20 +1100,6 @@ extension ListExtension<T> on List<T> {
     ];
   }
 
-  Iterable<T> whereFromIndex(
-    bool Function(T element) test, {
-    int startIndex = 0,
-  }) {
-    final whereList = <T>[];
-    for (int i = startIndex; i < length; i++) {
-      final element = this[i];
-      if (test(element)) {
-        whereList.add(element);
-      }
-    }
-    return whereList;
-  }
-
   bool containsWhere(bool Function(T element) test) {
     for (var e in this) {
       if (test(e)) {
@@ -1195,49 +1152,6 @@ Map<String, String> devToolsQueryParams(String url) {
   final modifiedUrl = simplifyDevToolsUrl(url);
   final uri = Uri.parse(modifiedUrl);
   return uri.queryParameters;
-}
-
-/// Gets a VM Service URI from a query string.
-///
-/// We read from the 'uri' value if it exists; otherwise we create a uri from
-/// the from 'port' and 'token' values.
-Uri? getServiceUriFromQueryString(String? location) {
-  if (location == null) {
-    return null;
-  }
-
-  final queryParams = Uri.parse(location).queryParameters;
-
-  // First try to use uri.
-  if (queryParams['uri'] != null) {
-    final uri = Uri.tryParse(queryParams['uri']!);
-
-    // Lots of things are considered valid URIs (including empty strings
-    // and single letters) since they can be relative, so we need to do some
-    // extra checks.
-    if (uri != null &&
-        uri.isAbsolute &&
-        (uri.isScheme('ws') ||
-            uri.isScheme('wss') ||
-            uri.isScheme('http') ||
-            uri.isScheme('https') ||
-            uri.isScheme('sse') ||
-            uri.isScheme('sses'))) {
-      return uri;
-    }
-  }
-
-  // Otherwise try 'port', 'token', and 'host'.
-  final port = int.tryParse(queryParams['port'] ?? '');
-  final token = queryParams['token'];
-  final host = queryParams['host'] ?? 'localhost';
-  if (port != null) {
-    return token == null
-        ? Uri.parse('ws://$host:$port/ws')
-        : Uri.parse('ws://$host:$port/$token/ws');
-  }
-
-  return null;
 }
 
 double safePositiveDouble(double value) {

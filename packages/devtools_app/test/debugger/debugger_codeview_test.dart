@@ -9,6 +9,7 @@ import 'package:devtools_app/src/shared/diagnostics/primitives/source_location.d
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -170,7 +171,7 @@ void main() {
           ),
         );
         // Prefetch File Uris
-        await serviceConnection.resolvedUriManager.fetchFileUris(
+        await serviceConnection.serviceManager.resolvedUriManager.fetchFileUris(
           serviceConnection
               .serviceManager.isolateManager.selectedIsolate.value!.id!,
           [mockScriptRef.uri!],

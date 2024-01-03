@@ -10,6 +10,7 @@ import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -216,7 +217,7 @@ void main() {
       await tester.pumpWidget(wrap(const VMFlagsDialog()));
       expect(find.richText('VM Flags'), findsOneWidget);
       expect(find.richText('flag 1 name'), findsOneWidget);
-      final RichText commentText = tester.firstWidget<RichText>(
+      final Text commentText = tester.firstWidget<Text>(
         findSubstring('flag 1 comment'),
       );
       expect(commentText, isNotNull);

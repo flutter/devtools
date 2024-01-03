@@ -172,10 +172,11 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
         // showing and hiding the chart.
         if (!showChart) return const SizedBox.shrink();
 
-        return RawKeyboardListener(
+        return KeyboardListener(
           focusNode: widget.keyFocusNode,
-          onKey: (RawKeyEvent event) {
-            if (event.isKeyPressed(LogicalKeyboardKey.escape)) {
+          onKeyEvent: (KeyEvent event) {
+            if (event.isKeyDownOrRepeat &&
+                event.logicalKey == LogicalKeyboardKey.escape) {
               _hideHover();
             }
           },

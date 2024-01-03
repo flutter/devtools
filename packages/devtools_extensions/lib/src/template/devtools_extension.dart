@@ -3,8 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-// ignore: avoid_web_libraries_in_flutter, as designed
-import 'dart:html' as html;
+import 'dart:js_interop';
 
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
@@ -14,10 +13,12 @@ import 'package:devtools_shared/service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:vm_service/vm_service.dart';
+import 'package:vm_service/vm_service.dart' hide Event;
+import 'package:web/helpers.dart' hide Text;
 
 import '../api/api.dart';
 import '../api/model.dart';
+import '../utils.dart';
 import '_simulated_devtools_environment/_simulated_devtools_environment.dart';
 
 part 'extension_manager.dart';
@@ -44,17 +45,53 @@ bool get _useSimulatedEnvironment =>
 ///
 /// A couple of use case examples include posting messages to DevTools or
 /// registering an event handler from the extension.
+///
+/// [extensionManager] can only be accessed below the [DevToolsExtension] widget
+/// in the widget tree, since it is initialized as part of the
+/// [DevToolsExtension]'s [initState] lifecycle method.
 ExtensionManager get extensionManager =>
-    globals[ExtensionManager] as ExtensionManager;
+    _accessGlobalOrThrow<ExtensionManager>(globalName: 'extensionManager');
 
 /// A manager for interacting with the connected vm service, if present.
 ///
 /// This manager provides sub-managers to interact with isolates, service
 /// extensions, etc.
-ServiceManager get serviceManager => globals[ServiceManager] as ServiceManager;
+///
+/// [serviceManager] can only be accessed below the [DevToolsExtension] widget
+/// in the widget tree, since it is initialized as part of the
+/// [DevToolsExtension]'s [initState] lifecycle method.
+ServiceManager get serviceManager =>
+    _accessGlobalOrThrow<ServiceManager>(globalName: 'serviceManager');
 
-/// A wrapper widget that initializes the [extensionManager] and establishes a
-/// connection with DevTools for this extension to interact over.
+T _accessGlobalOrThrow<T>({required String globalName}) {
+  final manager = globals[T] as T?;
+  if (manager == null) {
+    throw StateError(
+      "'$globalName' has not been initialized yet. You can only access "
+      "'$globalName' below the 'DevToolsExtension' widget in the widget "
+      "tree, since it is initialized as part of the 'DevToolsExtension'"
+      "state's 'initState' lifecycle method.",
+    );
+  }
+  return manager;
+}
+
+/// A wrapper widget that performs initialization for a DevTools extension.
+///
+/// This widget is required to be at the root (or very close to the root) of
+/// your DevTools extension Flutter web app. The content of your DevTools
+/// extension should be defined by [child].
+///
+/// This wrapper:
+///  * initializes the [extensionManager] and [serviceManager] globals.
+///  * initializes the [extensionManager] with the VM service connection from
+///    DevTools when[requiresRunningApplication] is true.
+///  * establishes a connection with DevTools for this extension to interact
+///    over.
+///
+/// Any use of the [extensionManager], [serviceManager], or [ideTheme] globals
+/// must occur below the [DevToolsExtension] widget in the widget tree (i.e. at
+/// the level of [child] or below).
 class DevToolsExtension extends StatefulWidget {
   const DevToolsExtension({
     super.key,

@@ -64,7 +64,7 @@ class DevToolsRouteInformationParser
     } else if (_forceVmServiceUri == null) {
       // Otherwise, connect to the vm service from the query parameter before
       // loading the route (but do not do this in a testing environment).
-      await FrameworkCore.initVmService('', serviceUriAsString: uriFromParams);
+      await FrameworkCore.initVmService(serviceUriAsString: uriFromParams);
     }
 
     // routeInformation.path comes from the address bar and (when not empty) is
@@ -332,9 +332,6 @@ class DevToolsNavigationState {
           _kKind: kind,
           ...state,
         };
-
-  factory DevToolsNavigationState.fromJson(Map<String, dynamic> json) =>
-      DevToolsNavigationState._(json.cast<String, String?>());
 
   DevToolsNavigationState._(this._state) : kind = _state[_kKind]!;
 

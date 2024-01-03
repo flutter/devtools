@@ -3,11 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-// ignore: avoid_web_libraries_in_flutter, as designed
-import 'dart:html' as html;
 import 'dart:ui_web' as ui_web;
 
 import 'package:flutter/foundation.dart';
+import 'package:web/helpers.dart';
 
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/primitives/trace_event.dart';
@@ -119,8 +118,8 @@ class PerfettoControllerImpl extends PerfettoController {
       return _debugPerfettoUrl;
     }
     final basePath = devtoolsAssetsBasePath(
-      origin: html.window.location.origin,
-      path: html.window.location.pathname ?? '',
+      origin: window.location.origin,
+      path: window.location.pathname,
     );
     final indexFilePath = ui_web.assetManager
         .getAssetUrl(devToolsExtensionPoints.perfettoIndexLocation);
@@ -128,9 +127,9 @@ class PerfettoControllerImpl extends PerfettoController {
     return '$baseUrl$_embeddedModeQuery';
   }
 
-  html.IFrameElement get perfettoIFrame => _perfettoIFrame;
+  HTMLIFrameElement get perfettoIFrame => _perfettoIFrame;
 
-  late final html.IFrameElement _perfettoIFrame;
+  late final HTMLIFrameElement _perfettoIFrame;
 
   /// The set of trace events that should be shown in the Perfetto trace viewer.
   ///
@@ -165,7 +164,7 @@ class PerfettoControllerImpl extends PerfettoController {
     );
     _initialized = true;
 
-    _perfettoIFrame = html.IFrameElement()
+    _perfettoIFrame = createIFrameElement()
       // This url is safe because we built it ourselves and it does not include
       // any user input.
       // ignore: unsafe_html

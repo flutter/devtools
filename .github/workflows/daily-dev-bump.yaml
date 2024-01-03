@@ -28,7 +28,10 @@ env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
+  flutter-prep:
+    uses: ./.github/workflows/flutter-prep.yaml
   bump-version:
+    needs: flutter-prep
     if: ${{ github.repository == 'flutter/devtools' }}
     name: Bump Version
     runs-on: ubuntu-latest
@@ -38,7 +41,13 @@ jobs:
         with:
           ref: master
 
-      - uses: dart-lang/setup-dart@8a4b97ea2017cc079571daec46542f76189836b1
+      - uses: dart-lang/setup-dart@b64355ae6ca0b5d484f0106a033dd1388965d06d
+      - name: Load Cached Flutter SDK
+        uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84
+        with:
+          path: |
+            ./tool/flutter-sdk
+          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
 
       - name: setup git config
         run: |
@@ -54,8 +63,8 @@ jobs:
           dart pub get
           popd
 
-          dart pub global activate --source path tool
-          export PATH="$PATH":"$HOME/.pub-cache/bin"
+          # Ensure the devtools_tool command is available
+          export PATH="$PATH":`pwd`/tool/bin
 
           ORIGINAL_VERSION=$(devtools_tool update-version current-version)
 
@@ -122,4 +131,3 @@ jobs:
           GH_TOKEN: ${{ secrets.DEVTOOLS_WORKFLOW_BOT_TOKEN }}
           ORIGINAL_GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           IS_DRAFT: ${{ inputs.draft == true }}
-

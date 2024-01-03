@@ -8,7 +8,7 @@ import 'package:devtools_app/src/shared/utils.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_test_utils.dart';
-import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -674,26 +674,6 @@ void main() {
           'key': 'value.json',
           'key2': '123',
         }),
-      );
-    });
-
-    test('getServiceUriFromQueryString', () {
-      expect(
-        getServiceUriFromQueryString(
-          'http://localhost:123/?uri=http://localhost:456',
-        ).toString(),
-        equals('http://localhost:456'),
-      );
-      expect(
-        getServiceUriFromQueryString('http://localhost:123/?port=789')
-            .toString(),
-        equals('ws://localhost:789/ws'),
-      );
-      expect(
-        getServiceUriFromQueryString(
-          'http://localhost:123/?port=789&token=kjy78',
-        ).toString(),
-        equals('ws://localhost:789/kjy78/ws'),
       );
     });
 
@@ -1479,7 +1459,7 @@ class _SubtractionResult {
   final double? from;
 
   @override
-  bool operator ==(Object? other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }

@@ -42,8 +42,7 @@ class NetworkScreen extends Screen {
   @override
   Widget buildStatus(BuildContext context) {
     final networkController = Provider.of<NetworkController>(context);
-    final color = Theme.of(context).textTheme.bodyMedium!.color!;
-
+    final color = Theme.of(context).colorScheme.onPrimary;
     return MultiValueListenableBuilder(
       listenables: [
         networkController.requests,
@@ -380,6 +379,7 @@ class UriColumn extends ColumnData<NetworkRequest>
     BuildContext context,
     NetworkRequest data, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     final value = getDisplayValue(data);
@@ -461,6 +461,7 @@ class ActionsColumn extends ColumnData<NetworkRequest>
     BuildContext context,
     NetworkRequest data, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     final options = _buildOptions(data);
@@ -503,6 +504,7 @@ class StatusColumn extends ColumnData<NetworkRequest>
     BuildContext context,
     NetworkRequest data, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     final theme = Theme.of(context);

@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file handles json object.
+// ignore_for_file: avoid-dynamic
+
 import 'dart:convert';
 
 /// The app link related settings of a Android build of a Flutter project.
@@ -12,8 +15,10 @@ class AppLinkSettings {
     final jsonObject = jsonDecode(json);
     return AppLinkSettings._(
       jsonObject[_kApplicationIdKey] as String,
-      jsonObject[_kDeeplinksKey]
-          .map<AndroidDeeplink>(AndroidDeeplink._fromJsonObject),
+      (jsonObject[_kDeeplinksKey] as List<dynamic>)
+          .cast<Map<String, dynamic>>()
+          .map<AndroidDeeplink>(AndroidDeeplink._fromJsonObject)
+          .toList(),
     );
   }
 
@@ -39,11 +44,11 @@ class AppLinkSettings {
 class AndroidDeeplink {
   AndroidDeeplink._(this.scheme, this.host, this.path);
 
-  factory AndroidDeeplink._fromJsonObject(Map<String, Object?> object) {
+  factory AndroidDeeplink._fromJsonObject(Map<String, dynamic> json) {
     return AndroidDeeplink._(
-      object[_kSchemeKey] as String,
-      object[_kHostKey] as String,
-      object[_kPathKey] as String,
+      json[_kSchemeKey] as String,
+      json[_kHostKey] as String,
+      json[_kPathKey] as String,
     );
   }
 

@@ -16,7 +16,7 @@ class AutoDisposeContoller extends DisposableController
 class AutoDisposedWidget extends StatefulWidget {
   const AutoDisposedWidget(this.stream, {Key? key}) : super(key: key);
 
-  final Stream stream;
+  final Stream<Object?> stream;
 
   @override
   State<AutoDisposedWidget> createState() => _AutoDisposedWidgetState();
@@ -151,6 +151,53 @@ void main() {
       notifier.value = 21;
       expect(values.length, equals(3));
       expect(values.last, equals(19));
+    });
+
+    test('cancels listeners with excludeIds', () {
+      final disposer = Disposer();
+      final notifier = ValueNotifier<int>(42);
+
+      final values1 = <int>[];
+      void listener1() {
+        values1.add(notifier.value);
+      }
+
+      final values2 = <int>[];
+      void listener2() {
+        values2.add(notifier.value);
+      }
+
+      disposer.addAutoDisposeListener(notifier, listener1);
+      disposer.addAutoDisposeListener(notifier, listener2, 'id-2');
+      expect(notifier.hasListeners, isTrue);
+      notifier.value = 13;
+      expect(values1.length, equals(1));
+      expect(values1.last, equals(13));
+      expect(values2.length, equals(1));
+      expect(values2.last, equals(13));
+
+      disposer.cancelListeners(excludeIds: ['id-2']);
+      notifier.value = 15;
+      // Verify the first listener was cancelled and did not fire.
+      expect(values1.length, equals(1));
+      expect(values1.last, equals(13));
+
+      // Verify the second listener was not cancelled and did fire.
+      expect(values2.length, equals(2));
+      expect(values2.last, equals(15));
+
+      expect(notifier.hasListeners, isTrue);
+
+      // Cancel all listeners.
+      disposer.cancelListeners();
+      expect(notifier.hasListeners, isFalse);
+      notifier.value = 19;
+
+      // Verify neither listeners fire.
+      expect(values1.length, equals(1));
+      expect(values1.last, equals(13));
+      expect(values2.length, equals(2));
+      expect(values2.last, equals(15));
     });
 
     group('callOnceWhenReady', () {

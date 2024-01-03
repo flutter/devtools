@@ -54,8 +54,6 @@ class CodeView extends StatefulWidget {
     this.lineRange,
     this.initialPosition,
     this.onSelected,
-    this.enableFileExplorer = true,
-    this.enableSearch = true,
     this.enableHistory = true,
   }) : super(key: key);
 
@@ -78,8 +76,6 @@ class CodeView extends StatefulWidget {
   // the script's source in its entirety, with lines outside of the range being
   // rendered as if they have been greyed out.
   final LineRange? lineRange;
-  final bool enableFileExplorer;
-  final bool enableSearch;
   final bool enableHistory;
 
   final void Function(ScriptRef scriptRef, int line)? onSelected;
@@ -1502,16 +1498,18 @@ Future<String?> fetchScriptLocationFullFilePath(
   if (packagePath != null) {
     final isolateId = serviceConnection
         .serviceManager.isolateManager.selectedIsolate.value!.id!;
-    filePath = serviceConnection.resolvedUriManager.lookupFileUri(
+    filePath =
+        serviceConnection.serviceManager.resolvedUriManager.lookupFileUri(
       isolateId,
       packagePath,
     );
     if (filePath == null) {
-      await serviceConnection.resolvedUriManager.fetchFileUris(
+      await serviceConnection.serviceManager.resolvedUriManager.fetchFileUris(
         isolateId,
         [packagePath],
       );
-      filePath = serviceConnection.resolvedUriManager.lookupFileUri(
+      filePath =
+          serviceConnection.serviceManager.resolvedUriManager.lookupFileUri(
         isolateId,
         packagePath,
       );

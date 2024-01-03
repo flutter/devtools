@@ -100,7 +100,7 @@ class PerformanceController extends DisposableController
   PerformanceData? offlinePerformanceData;
 
   bool get impellerEnabled => _impellerEnabled;
-  late final bool _impellerEnabled;
+  bool _impellerEnabled = false;
 
   final _initialized = Completer<void>();
 
@@ -135,7 +135,8 @@ class PerformanceController extends DisposableController
       // Listen for Flutter.Frame events with frame timing data.
       // Listen for Flutter.RebuiltWidgets events.
       autoDisposeStreamSubscription(
-        serviceConnection.serviceManager.service!.onExtensionEventWithHistory
+        serviceConnection
+            .serviceManager.service!.onExtensionEventWithHistorySafe
             .listen((event) {
           if (event.extensionKind == 'Flutter.Frame') {
             final frame = FlutterFrame.parse(event.extensionData!.data);

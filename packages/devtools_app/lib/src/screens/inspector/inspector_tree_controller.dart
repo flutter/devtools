@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-library inspector_tree;
-
 import 'dart:async';
 import 'dart:collection';
 import 'dart:math';
@@ -180,8 +178,6 @@ class InspectorTreeController extends DisposableController
       );
     });
   }
-
-  RemoteDiagnosticsNode? subtreeRoot; // Optional.
 
   InspectorTreeNode? get selection => _selection;
   InspectorTreeNode? _selection;
@@ -964,8 +960,8 @@ class _InspectorTreeState extends State<InspectorTree>
 
   /// Handle arrow keys for the InspectorTree. Ignore other key events so that
   /// other widgets have a chance to respond to them.
-  KeyEventResult _handleKeyEvent(FocusNode _, RawKeyEvent event) {
-    if (event is! RawKeyDownEvent) return KeyEventResult.ignored;
+  KeyEventResult _handleKeyEvent(FocusNode _, KeyEvent event) {
+    if (!event.isKeyDownOrRepeat) return KeyEventResult.ignored;
 
     final treeControllerLocal = treeController!;
 
@@ -1043,7 +1039,7 @@ class _InspectorTreeState extends State<InspectorTree>
               child: GestureDetector(
                 onTap: _focusNode.requestFocus,
                 child: Focus(
-                  onKey: _handleKeyEvent,
+                  onKeyEvent: _handleKeyEvent,
                   autofocus: widget.isSummaryTree,
                   focusNode: _focusNode,
                   child: OffsetScrollbar(

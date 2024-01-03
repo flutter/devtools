@@ -37,6 +37,7 @@ enum ScreenMetaData {
     title: 'Performance',
     icon: Octicons.pulse,
     worksOffline: true,
+    requiresConnection: false,
     tutorialVideoTimestamp: '?t=261',
   ),
   cpuProfiler(
@@ -45,6 +46,7 @@ enum ScreenMetaData {
     icon: Octicons.dashboard,
     requiresDartVm: true,
     worksOffline: true,
+    requiresConnection: false,
     tutorialVideoTimestamp: '?t=340',
   ),
   memory(
@@ -296,8 +298,6 @@ abstract class Screen {
   /// If the screen does not have a custom documentation page, this property
   /// should return `null`.
   String? get docPageId => null;
-
-  int get badgeCount => 0;
 
   double approximateTabWidth(
     TextTheme textTheme, {

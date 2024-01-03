@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-library service_extensions;
-
 import 'package:devtools_app_shared/service_extensions.dart' as extensions;
 import 'package:flutter/material.dart';
 
@@ -38,7 +36,7 @@ abstract class ServiceExtensionInterface {
 /// A subclass of [extensions.ToggleableServiceExtension] that includes metadata
 /// for displaying and interacting with a toggleable service extension in the
 /// DevTools UI.
-class ToggleableServiceExtensionDescription<T> extends extensions
+class ToggleableServiceExtensionDescription<T extends Object> extends extensions
     .ToggleableServiceExtension implements ServiceExtensionInterface {
   ToggleableServiceExtensionDescription._({
     required super.extension,
@@ -272,7 +270,7 @@ final performanceOverlay = ToggleableServiceExtensionDescription<bool>.from(
 
 final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>.from(
   extensions.profileWidgetBuilds,
-  title: 'Track Widget Builds',
+  title: 'Track widget builds',
   iconAsset: 'icons/trackwidget-white.png',
   gaScreenName: gac.performance,
   gaItem: gac.PerformanceEvents.trackRebuilds.name,
@@ -286,7 +284,7 @@ final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>.from(
 final profileUserWidgetBuilds =
     ToggleableServiceExtensionDescription<bool>.from(
   extensions.profileUserWidgetBuilds,
-  title: 'Track User-Created Widget Builds',
+  title: 'Track user-created widget builds',
   iconAsset: 'icons/trackwidget-white.png',
   gaScreenName: gac.performance,
   gaItem: gac.PerformanceEvents.trackUserCreatedWidgetBuilds.name,
@@ -298,7 +296,7 @@ final profileUserWidgetBuilds =
 final profileRenderObjectPaints =
     ToggleableServiceExtensionDescription<bool>.from(
   extensions.profileRenderObjectPaints,
-  title: 'Track Paints',
+  title: 'Track paints',
   iconData: Icons.format_paint,
   gaScreenName: gac.performance,
   gaItem: gac.PerformanceEvents.trackPaints.name,
@@ -312,7 +310,7 @@ final profileRenderObjectPaints =
 final profileRenderObjectLayouts =
     ToggleableServiceExtensionDescription<bool>.from(
   extensions.profileRenderObjectLayouts,
-  title: 'Track Layouts',
+  title: 'Track layouts',
   iconData: Icons.auto_awesome_mosaic,
   gaScreenName: gac.performance,
   gaItem: gac.PerformanceEvents.trackLayouts.name,
@@ -495,4 +493,21 @@ final trackRebuildWidgets = ToggleableServiceExtensionDescription<bool>.from(
   tooltip: 'Show widget rebuild counts since the last reload',
   gaScreenName: gac.inspector,
   gaItem: gac.trackRebuildWidgets,
+);
+
+final profilePlatformChannels =
+    ToggleableServiceExtensionDescription<bool>.from(
+  extensions.profilePlatformChannels,
+  title: 'Track platform channels',
+  iconAsset: 'icons/trackwidget-white.png',
+  gaScreenName: gac.performance,
+  gaItem: gac.PerformanceEvents.profilePlatformChannels.name,
+  description:
+      'Adds an event to the timeline for platform channel messages (useful for '
+      'apps with plugins). Also periodically prints platform channel '
+      'statistics to console.',
+  tooltip: '',
+  documentationUrl:
+      'https://docs.flutter.dev/platform-integration/platform-channels',
+  gaDocsItem: gac.PerformanceDocs.platformChannelsDocs.name,
 );

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
@@ -110,16 +108,6 @@ abstract class TreeColumnData<T extends TreeNode<T>> extends ColumnData<T> {
   TreeColumnData(String title) : super.wide(title);
 
   static double get treeToggleWidth => scaleByFontFactor(14.0);
-
-  final StreamController<T> nodeExpandedController =
-      StreamController<T>.broadcast();
-
-  Stream<T> get onNodeExpanded => nodeExpandedController.stream;
-
-  final StreamController<T> nodeCollapsedController =
-      StreamController<T>.broadcast();
-
-  Stream<T> get onNodeCollapsed => nodeCollapsedController.stream;
 
   @override
   double getNodeIndentPx(T dataObject) {

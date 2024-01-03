@@ -4,14 +4,13 @@
 
 // ignore_for_file: avoid_print
 
-library matchers;
-
 import 'dart:io' as io;
 
 import 'package:devtools_app/src/shared/diagnostics/diagnostics_node.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import '_golden_matcher_io.dart'
-    if (dart.library.html) '_golden_matcher_web.dart' as golden_matcher;
+    if (dart.library.js_interop) '_golden_matcher_web.dart' as golden_matcher;
 
 RemoteDiagnosticsNode? findNodeMatching(
   RemoteDiagnosticsNode node,

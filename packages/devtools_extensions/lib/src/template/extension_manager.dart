@@ -39,13 +39,13 @@ class ExtensionManager {
   ///
   /// We need to store this in a variable so that the listener is properly
   /// removed in [dispose].
-  html.EventListener? _handleMessageListener;
+  EventListener? _handleMessageListener;
 
   // ignore: unused_element, false positive due to part files
   void _init({required bool connectToVmService}) {
-    html.window.addEventListener(
+    window.addEventListener(
       'message',
-      _handleMessageListener = _handleMessage,
+      _handleMessageListener = _handleMessage.toJS,
     );
 
     // TODO(kenz): handle the ide theme that may be part of the query params.
@@ -73,22 +73,20 @@ class ExtensionManager {
   // ignore: unused_element, false positive due to part files
   void _dispose() {
     _registeredEventHandlers.clear();
-    html.window.removeEventListener('message', _handleMessageListener);
+    window.removeEventListener('message', _handleMessageListener);
     _handleMessageListener = null;
   }
 
-  void _handleMessage(html.Event e) {
-    if (e is html.MessageEvent) {
-      final extensionEvent = DevToolsExtensionEvent.tryParse(e.data);
-      if (extensionEvent != null) {
-        _handleExtensionEvent(extensionEvent, e);
-      }
+  void _handleMessage(Event e) {
+    final extensionEvent = tryParseExtensionEvent(e);
+    if (extensionEvent != null) {
+      _handleExtensionEvent(extensionEvent, e as MessageEvent);
     }
   }
 
   void _handleExtensionEvent(
     DevToolsExtensionEvent extensionEvent,
-    html.MessageEvent e,
+    MessageEvent e,
   ) {
     // Ignore events that come from the [ExtensionManager] itself.
     if (extensionEvent.source == '$ExtensionManager') return;
@@ -118,7 +116,7 @@ class ExtensionManager {
         _setThemeForValue(value);
         break;
       case DevToolsExtensionEventType.forceReload:
-        html.window.location.reload();
+        window.location.reload();
       default:
         _log.warning(
           'Unrecognized event received by extension: '
@@ -139,14 +137,13 @@ class ExtensionManager {
     DevToolsExtensionEvent event, {
     String? targetOrigin,
   }) {
-    final postWindow =
-        _useSimulatedEnvironment ? html.window : html.window.parent;
+    final postWindow = _useSimulatedEnvironment ? window : window.parent;
     postWindow?.postMessage(
       {
         ...event.toJson(),
         DevToolsExtensionEvent.sourceKey: '$ExtensionManager',
-      },
-      targetOrigin ?? html.window.origin!,
+      }.jsify(),
+      (targetOrigin ?? window.origin).toJS,
     );
   }
 
@@ -173,18 +170,7 @@ class ExtensionManager {
       final vmService = await connect<VmService>(
         uri: normalizedUri,
         finishedCompleter: finishedCompleter,
-        createService: ({
-          // ignore: avoid-dynamic, code needs to match API from VmService.
-          required Stream<dynamic> /*String|List<int>*/ inStream,
-          required void Function(String message) writeMessage,
-          required Uri connectedUri,
-        }) {
-          return VmService(
-            inStream,
-            writeMessage,
-            wsUri: connectedUri.toString(),
-          );
-        },
+        serviceFactory: VmService.defaultFactory,
       );
       await serviceManager.vmServiceOpened(
         vmService,
@@ -215,19 +201,53 @@ class ExtensionManager {
     });
   }
 
-  void showNotification(String message) async {
+  /// Show a notification in DevTools.
+  ///
+  /// This message will appear as a notification in the lower left corner of
+  /// DevTools and will be automatically dismissed after a short time period
+  /// (7 seconds).
+  ///
+  /// [message] the content of this notification.
+  ///
+  /// See also [ShowNotificationExtensionEvent].
+  void showNotification(String message) {
     postMessageToDevTools(
       ShowNotificationExtensionEvent(message: message),
     );
   }
 
+  /// Show a banner message in DevTools.
+  ///
+  /// This message will float at the top of the DevTools on an extension's
+  /// screen until the user dismisses it.
+  ///
+  /// [key] should be a unique identifier for this particular message. This is
+  /// how DevTools will determine whether this message has already been shown.
+  ///
+  /// [type] should be one of 'warning' or 'error', which will determine the
+  /// styling of the banner message.
+  ///
+  /// [message] the content of this banner message.
+  ///
+  /// [extensionName] must match the 'name' field in your DevTools extension's
+  /// `config.yaml` file. This should also match the name of the extension's
+  /// parent package.
+  ///
+  /// When [ignoreIfAlreadyDismissed] is true (the default case), this message
+  /// can only be shown and dismissed once. Any subsequent call to show the
+  /// same banner message will be ignored by DevTools. If you intend for a
+  /// banner message to be shown more than once, set this value to true or
+  /// consider using [showNotification] instead, which shows a notification in
+  /// DevTools that automatically dismisses after a short time period.
+  ///
+  /// See also [ShowBannerMessageExtensionEvent].
   void showBannerMessage({
     required String key,
     required String type,
     required String message,
     required String extensionName,
     bool ignoreIfAlreadyDismissed = true,
-  }) async {
+  }) {
     postMessageToDevTools(
       ShowBannerMessageExtensionEvent(
         id: key,
@@ -246,10 +266,10 @@ class ExtensionManager {
     } else {
       newQueryParams[key] = value;
     }
-    final newUri = Uri.parse(html.window.location.toString())
+    final newUri = Uri.parse(window.location.toString())
         .replace(queryParameters: newQueryParams);
-    html.window.history.replaceState(
-      html.window.history.state,
+    window.history.replaceState(
+      window.history.state,
       '',
       newUri.toString(),
     );

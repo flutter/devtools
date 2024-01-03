@@ -1,11 +1,32 @@
-# 4.2.0
-
+# 6.0.3
+* `CompareMixin` is now generic, implementing `Comparable<T>` instead of
+  `Comparable<dynamic>`, and it's operators each therefore accept a `T`
+  argument.
+* `SemanticVersion` now mixes in `CompareMixin<SemanticVersion>`, and it's
+  `compareTo` method therefore now accepts a `SemanticVersion`.
 * Fix an issue parsing file paths that could prevent extensions from being detected.
+* Bump `package:vm_service` dependency to `>=13.0.0 <15.0.0`.
+
+# 6.0.2
+* Fix an issue parsing file paths on Windows that could prevent extensions from being detected.
+
+# 6.0.1
+* Bump minimum Dart SDK version to `3.3.0-91.0.dev` and minimum Flutter SDK version to `3.17.0-0.0.pre`.
+* Add field `isPublic` to `DevToolsExtensionConfig`.
+* Add validation for `DevToolsExtensionConfig.name` field to ensure it is a valid
+Dart package name.
+* Pass warnings and errors for DevTools extension APIs from the DevTools server to
+DevTools app.
+
+# 6.0.0
+* Bump `package:vm_service` dependency to ^13.0.0.
+* Remove `ServiceCreator` typedef and replace usages with `VmServiceFactory` typedef from `package:vm_service`.
+
+# 5.0.0
+* Split deeplink exports into `devtools_deeplink_io.dart` and `devtools_deeplink.dart`.
+* Bump `package:vm_service` to ^12.0.0.
 * Adds `DeeplinkApi.androidAppLinkSettings`, `DeeplinkApi.iosBuildOptions`, and
   `DeeplinkApi.iosUniversalLinkSettings` endpoints to ServerApi.
-
-# 4.1.0
-
 * Add shared integration test utilities to `package:devtools_shared`. These test
 utilities are exported as part of the existing `devtools_test_utils.dart` library.
 
@@ -14,7 +35,6 @@ utilities are exported as part of the existing `devtools_test_utils.dart` librar
 to be based on the values of its fields.
 
 # 4.0.0
-
 * Bump `package:extension_discovery` version to ^2.0.0
 * Adds a `DeeplinkApi.androidBuildVariants` endpoint to ServerApi.
 * **BREAKING CHANGE**:
@@ -23,11 +43,9 @@ to be based on the values of its fields.
   - Adds a new required named parameter `deeplinkManager` to `ServerApi.handle`.
 
 # 3.0.1
-
 * Bump `package:extension_discovery` version to ^1.0.1
 
 # 3.0.0
-
 * Separate extension-related libraries into those that require `dart:io` (exported as
 `devtools_extensions_io.dart`) and those that do not (exported as `devtools_extensions.dart`).
 

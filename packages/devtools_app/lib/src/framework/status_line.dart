@@ -45,23 +45,27 @@ class StatusLine extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final color = isConnected ? theme.colorScheme.onPrimary : null;
     final height = statusLineHeight + padding.top + padding.bottom;
     return ValueListenableBuilder<bool>(
       valueListenable: currentScreen.showIsolateSelector,
       builder: (context, showIsolateSelector, _) {
-        return Container(
-          decoration: BoxDecoration(
-            color: isConnected ? theme.colorScheme.primary : null,
-            border: Border(
-              top: Divider.createBorderSide(context, width: 1.0),
+        return DefaultTextStyle.merge(
+          style: TextStyle(color: color),
+          child: Container(
+            decoration: BoxDecoration(
+              color: isConnected ? theme.colorScheme.primary : null,
+              border: Border(
+                top: Divider.createBorderSide(context, width: 1.0),
+              ),
             ),
-          ),
-          padding: EdgeInsets.only(left: padding.left, right: padding.right),
-          height: height,
-          alignment: Alignment.centerLeft,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: _getStatusItems(context, showIsolateSelector),
+            padding: EdgeInsets.only(left: padding.left, right: padding.right),
+            height: height,
+            alignment: Alignment.centerLeft,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: _getStatusItems(context, showIsolateSelector),
+            ),
           ),
         );
       },
@@ -109,10 +113,7 @@ class StatusLine extends StatelessWidget {
         BulletSpacer(color: color),
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
-          children: DevToolsScaffold.defaultActions(
-            color: color,
-            isEmbedded: isEmbedded,
-          ),
+          children: DevToolsScaffold.defaultActions(color: color),
         ),
       ],
     ];

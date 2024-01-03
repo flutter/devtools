@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 
 class ServiceExtension<T> {
   ServiceExtension({
@@ -20,7 +21,7 @@ class ServiceExtension<T> {
   final bool shouldCallOnAllIsolates;
 }
 
-class ToggleableServiceExtension<T> extends ServiceExtension {
+class ToggleableServiceExtension<T extends Object> extends ServiceExtension<T> {
   ToggleableServiceExtension({
     required super.extension,
     required T enabledValue,
@@ -215,16 +216,23 @@ final trackRebuildWidgets = ToggleableServiceExtension<bool>(
   disabledValue: false,
 );
 
+final profilePlatformChannels = ToggleableServiceExtension<bool>(
+  extension:
+      '$flutterExtensionPrefix${ServicesServiceExtensions.profilePlatformChannels.name}',
+  enabledValue: true,
+  disabledValue: false,
+);
+
 // This extensions below should never be displayed as a button so does not need
 // a ServiceExtensionDescription object.
 final String didSendFirstFrameEvent =
     '$flutterExtensionPrefix${WidgetsServiceExtensions.didSendFirstFrameEvent.name}';
 
-final serviceExtensionsAllowlist = <String, ServiceExtension>{
+final serviceExtensionsAllowlist = <String, ServiceExtension<Object>>{
   for (var extension in _extensionDescriptions) extension.extension: extension,
 };
 
-final List<ServiceExtension> _extensionDescriptions = [
+final List<ServiceExtension<Object>> _extensionDescriptions = [
   debugAllowBanner,
   debugPaint,
   debugPaintBaselines,
@@ -247,6 +255,7 @@ final List<ServiceExtension> _extensionDescriptions = [
   togglePlatformMode,
   toggleSelectWidgetMode,
   trackRebuildWidgets,
+  profilePlatformChannels,
 ];
 
 /// Service extensions that are not safe to call unless a frame has already
@@ -257,7 +266,8 @@ final List<ServiceExtension> _extensionDescriptions = [
 /// extensions are safe to run before the first frame as there is little harm
 /// in setting these extensions after one frame has rendered without the
 /// extension set.
-final Set<String> _unsafeBeforeFirstFrameFlutterExtensions = <ServiceExtension>[
+final Set<String> _unsafeBeforeFirstFrameFlutterExtensions =
+    <ServiceExtension<Object>>[
   debugPaint,
   debugPaintBaselines,
   repaintRainbow,

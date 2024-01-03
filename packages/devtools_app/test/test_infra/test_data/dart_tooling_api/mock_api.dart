@@ -66,6 +66,7 @@ class MockDartToolingApi extends DartToolingApiImpl {
         'executeCommand': true,
         'selectDevice': true,
         'openDevToolsPage': true,
+        'openDevToolsExternally': true,
         'hotReload': true,
         'hotRestart': true,
       };
@@ -73,6 +74,7 @@ class MockDartToolingApi extends DartToolingApiImpl {
     server.registerMethod('vsCode.initialize', initialize);
     server.registerMethod('vsCode.executeCommand', executeCommand);
     server.registerMethod('vsCode.selectDevice', selectDevice);
+    server.registerMethod('vsCode.enablePlatformType', enablePlatformType);
     server.registerMethod('vsCode.openDevToolsPage', noOpHandler);
     server.registerMethod('vsCode.hotReload', noOpHandler);
     server.registerMethod('vsCode.hotRestart', noOpHandler);
@@ -113,10 +115,35 @@ class MockDartToolingApi extends DartToolingApiImpl {
       platform: 'web-javascript',
       platformType: 'web',
     ),
+    VsCodeDeviceImpl(
+      id: 'web-server',
+      name: 'Web Server',
+      category: 'web',
+      emulator: false,
+      emulatorId: null,
+      ephemeral: true,
+      platform: 'web-javascript',
+      platformType: 'web',
+    ),
   ];
+
+  /// The current set of enabled platform types.
+  ///
+  /// Defauls are set in [connectDevices].
+  final _enabledPlatformTypes = <String>{};
 
   /// The current set of devices being presented to the embedded panel.
   final _devices = <VsCodeDevice>[];
+
+  /// The current set of devices whose platform types are enabled.
+  List<VsCodeDevice> get _enabledDevices => _devices
+      .where((device) => _enabledPlatformTypes.contains(device.platformType))
+      .toList();
+
+  /// The current set of devices whose platform types are not enabled.
+  List<VsCodeDevice> get _disabledDevices => _devices
+      .where((device) => !_enabledPlatformTypes.contains(device.platformType))
+      .toList();
 
   /// The current set of debug sessions that are running.
   final _debugSessions = <VsCodeDebugSession>[];
@@ -136,7 +163,7 @@ class MockDartToolingApi extends DartToolingApiImpl {
   }
 
   /// Simulates executing a VS Code command requested by the embedded panel.
-  Future<Object?> executeCommand(json_rpc_2.Parameters parameters) async {
+  Future<Object?> executeCommand(json_rpc_2.Parameters parameters) {
     final params = parameters.asMap;
     final command = params['command'];
     switch (command) {
@@ -154,6 +181,18 @@ class MockDartToolingApi extends DartToolingApiImpl {
     return true;
   }
 
+  /// Simulates a request to enable a platform type to allow additional devices
+  /// to be used.
+  Future<bool> enablePlatformType(json_rpc_2.Parameters parameters) async {
+    final params = parameters.asMap;
+    _enabledPlatformTypes.add(params['platformType'] as String);
+    // Add some delay because the real impl will need to prompt + run
+    // `flutter create`.
+    await Future.delayed(const Duration(seconds: 1));
+    _sendDevicesChanged();
+    return true;
+  }
+
   /// A no-op handler for method handlers that don't require an implementation
   /// but need to exist so that the request/response is successful.
   void noOpHandler(json_rpc_2.Parameters _) {}
@@ -164,7 +203,10 @@ class MockDartToolingApi extends DartToolingApiImpl {
     _devices
       ..clear()
       ..addAll(_mockDevices);
-    _selectedDeviceId = _devices.lastOrNull?.id;
+    _enabledPlatformTypes
+      ..clear()
+      ..addAll(['macos', 'android']);
+    _selectedDeviceId = _enabledDevices.lastOrNull?.id;
     _sendDevicesChanged();
   }
 
@@ -179,6 +221,7 @@ class MockDartToolingApi extends DartToolingApiImpl {
         flutterMode: mode,
         flutterDeviceId: deviceId,
         debuggerType: 'Flutter',
+        projectRootPath: null,
       ),
     );
     _sendDebugSessionsChanged();
@@ -202,7 +245,8 @@ class MockDartToolingApi extends DartToolingApiImpl {
     server.sendNotification(
       '${VsCodeApi.jsonApiName}.${VsCodeApi.jsonDevicesChangedEvent}',
       VsCodeDevicesEventImpl(
-        devices: _devices,
+        devices: _enabledDevices,
+        unsupportedDevices: _disabledDevices,
         selectedDeviceId: _selectedDeviceId,
       ).toJson(),
     );

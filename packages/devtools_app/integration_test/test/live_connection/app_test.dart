@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_test/devtools_integration_test.dart';
-import 'package:flutter/material.dart';
+import 'package:devtools_test/helpers.dart';
+import 'package:devtools_test/integration_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
@@ -33,41 +33,6 @@ void main() {
     await tester.pumpAndSettle(shortPumpDuration);
 
     logStatus('verify that we can load each DevTools screen');
-    final availableScreenIds = <String>[];
-    for (final screen in devtoolsScreens!) {
-      if (shouldShowScreen(screen.screen)) {
-        availableScreenIds.add(screen.screen.screenId);
-      }
-    }
-    final tabs = tester.widgetList<Tab>(
-      find.descendant(
-        of: find.byType(DevToolsAppBar),
-        matching: find.byType(Tab),
-      ),
-    );
-
-    var numTabs = tabs.length;
-    if (numTabs < availableScreenIds.length) {
-      final tabOverflowMenuFinder = find.descendant(
-        of: find.byType(TabOverflowButton),
-        matching: find.byType(MenuAnchor),
-      );
-      expect(tabOverflowMenuFinder, findsOneWidget);
-      final menuChildren =
-          tester.widget<MenuAnchor>(tabOverflowMenuFinder).menuChildren;
-      numTabs += menuChildren.length;
-    }
-
-    expect(numTabs, availableScreenIds.length);
-
-    final screens = (ScreenMetaData.values.toList()
-      ..removeWhere((data) => !availableScreenIds.contains(data.id)));
-    for (final screen in screens) {
-      await switchToScreen(
-        tester,
-        tabIcon: screen.icon!,
-        screenId: screen.id,
-      );
-    }
+    await navigateThroughDevToolsScreens(tester);
   });
 }

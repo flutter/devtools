@@ -55,6 +55,7 @@ class _DartObjectColumn extends _ObjectPoolColumnData
     BuildContext context,
     ObjectPoolEntry data, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     if (data.value is int) return Text(data.value.toString());

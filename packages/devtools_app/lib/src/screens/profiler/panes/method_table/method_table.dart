@@ -28,7 +28,7 @@ class CpuMethodTable extends StatelessWidget {
           axis: Axis.horizontal,
           initialFractions: const [0.5, 0.5],
           children: [
-            _MethodTable(methodTableController, methods),
+            MethodTable(methodTableController, methods),
             _MethodGraph(methodTableController),
           ],
         );
@@ -40,8 +40,9 @@ class CpuMethodTable extends StatelessWidget {
 // TODO(kenz): ensure that this table automatically scrolls to the selected
 // node from [MethodTableController].
 /// A table of methods and their timing information for a CPU profile.
-class _MethodTable extends StatelessWidget {
-  const _MethodTable(this._methodTableController, this._methods);
+@visibleForTesting
+class MethodTable extends StatelessWidget {
+  const MethodTable(this._methodTableController, this._methods, {super.key});
 
   static final methodColumn = _MethodColumn();
   static final selfTimeColumn = _SelfTimeColumn();
@@ -150,7 +151,6 @@ class _MethodGraphState extends State<_MethodGraph> with AutoDisposeMixin {
                 methodName: selectedNode.name,
                 packageUri: selectedNode.packageUri,
                 sourceLine: selectedNode.sourceLine,
-                isSelected: false,
                 displayInRow: false,
               ),
             ),
@@ -262,13 +262,13 @@ class _MethodColumn extends ColumnData<MethodTableGraphNode>
     BuildContext context,
     MethodTableGraphNode data, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     return MethodAndSourceDisplay(
       methodName: data.name,
       packageUri: data.packageUri,
       sourceLine: data.sourceLine,
-      isSelected: isRowSelected,
     );
   }
 }
