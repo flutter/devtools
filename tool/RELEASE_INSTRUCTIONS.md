@@ -42,8 +42,8 @@ Make sure:
 
    c. The local checkout is at `main` branch: `git rebase-update`
 
-2. Your Flutter version in `tool/flutter-sdk` is equal to latest candidate release branch:
-    - Run `devtools_tool update-flutter-sdk`
+2. Your Flutter SDK in `tool/flutter-sdk` and the one on PATH are updated to the latest candidate release branch:
+    - Run `devtools_tool update-flutter-sdk --update-on-path`
 3. You have goma [configured](http://go/ma-mac-setup)
 
 ### Prepare the release
@@ -72,9 +72,9 @@ can run: `brew install gh`
 
 2. Run `devtools_tool release-helper` in order to:
 
-   - create new branch and check out locally
-   - create a PR using the tip of master
-   - update your local version of flutter to the Latest flutter candidate
+   - create a new branch using the tip of master and check out locally
+   - create a PR for the branch
+   - update your local version of flutter to the latest flutter candidate
        - This is to facilitate testing in the next steps
     
    NOTE: Run the script from `/devtools/tool` while [the issue](https://github.com/dart-lang/sdk/issues/54493) is not adderessed.
