@@ -580,11 +580,14 @@ class LoggingController extends DisposableController
     super.filterData(filter);
 
     bool filterCallback(LogData log) {
-      for (final toggleFilter in filter.toggleFilters) {
-        if (toggleFilter.enabled.value && !toggleFilter.includeCallback(log)) {
-          return false;
-        }
-      }
+      final filteredOutByToggleFilters = filter.toggleFilters.any(
+        (toggleFilter) =>
+            toggleFilter.enabled.value && !toggleFilter.includeCallback(log),
+      );
+      if (filteredOutByToggleFilters) return false;
+
+      // TODO(kenz): clean up query filters by allowing general matching for
+      // any query filter argument.
 
       final queryFilter = filter.queryFilter;
       if (!queryFilter.isEmpty) {
