@@ -10,7 +10,8 @@ To learn more about DevTools, check out the
 
 ## General updates
 
-TODO: Remove this section if there are not any general updates.
+* Added support for filtering with regular expressions in the Logging, Network, and CPU profiler
+pages - (#7027)[https://github.com/flutter/devtools/pull/7027]
 
 ## Inspector updates
 
@@ -30,7 +31,7 @@ TODO: Remove this section if there are not any general updates.
 
 ## Debugger updates
 
-* Highlight `extension type` as a declaration keyword,
+* Highlighted `extension type` as a declaration keyword,
   highlight the `$` in identifier interpolation as part of the interpolation,
   and properly highlight comments within type arguments. - [#6837](https://github.com/flutter/devtools/pull/6837)
 
