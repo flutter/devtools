@@ -56,10 +56,19 @@ class NetworkController extends DisposableController
   static const typeFilterId = 'network-type-filter';
 
   @override
-  Map<String, QueryFilterArgument> createQueryFilterArgs() => {
-        methodFilterId: QueryFilterArgument(keys: ['method', 'm']),
-        statusFilterId: QueryFilterArgument(keys: ['status', 's']),
-        typeFilterId: QueryFilterArgument(keys: ['type', 't']),
+  Map<String, QueryFilterArgument<NetworkRequest>> createQueryFilterArgs() => {
+        methodFilterId: QueryFilterArgument<NetworkRequest>(
+          keys: ['method', 'm'],
+          dataValueProvider: (request) => request.method,
+        ),
+        statusFilterId: QueryFilterArgument<NetworkRequest>(
+          keys: ['status', 's'],
+          dataValueProvider: (request) => request.status,
+        ),
+        typeFilterId: QueryFilterArgument<NetworkRequest>(
+          keys: ['type', 't'],
+          dataValueProvider: (request) => request.type,
+        ),
       };
 
   /// Notifies that new Network requests have been processed.
@@ -291,23 +300,13 @@ class NetworkController extends DisposableController
       ..clear()
       ..addAll(
         _requests.value.requests.where((NetworkRequest r) {
-          final methodArg = queryFilter.filterArguments[methodFilterId];
-          if (methodArg != null && !methodArg.matchesValue(r.method)) {
-            return false;
-          }
+          final filteredOutByQueryFilterArgument = queryFilter
+              .filterArguments.values
+              .any((argument) => !argument.matchesValue(r));
+          if (filteredOutByQueryFilterArgument) return false;
 
-          final statusArg = queryFilter.filterArguments[statusFilterId];
-          if (statusArg != null && !statusArg.matchesValue(r.status)) {
-            return false;
-          }
-
-          final typeArg = queryFilter.filterArguments[typeFilterId];
-          if (typeArg != null && !typeArg.matchesValue(r.type)) {
-            return false;
-          }
-
-          if (queryFilter.substrings.isNotEmpty) {
-            for (final substring in queryFilter.substrings) {
+          if (queryFilter.substringExpressions.isNotEmpty) {
+            for (final substring in queryFilter.substringExpressions) {
               bool matches(String? stringToMatch) {
                 if (stringToMatch?.caseInsensitiveContains(substring) == true) {
                   _checkForError(r);

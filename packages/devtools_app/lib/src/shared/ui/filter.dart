@@ -76,6 +76,7 @@ mixin FilterControllerMixin<T> on DisposableController
     return queryFilterActive || toggleFilterActive;
   }
 
+  // TODO(kenz): de-dupe the filtering logic in overrides of this method.
   // TODO(kenz): refactor this so that `filterData` returns the filtered data
   // and does not have side effects other than filtering data. Add a
   // `onFilterApplied` method here that can be overridden to apply those
@@ -280,14 +281,14 @@ class ToggleFilter<T> {
 class QueryFilter {
   const QueryFilter._({
     this.filterArguments = const <String, QueryFilterArgument>{},
-    this.substrings = const [],
+    this.substringExpressions = const [],
     this.isEmpty = false,
   });
 
   factory QueryFilter.empty({required Map<String, QueryFilterArgument> args}) {
     return QueryFilter._(
       filterArguments: args,
-      substrings: <String>[],
+      substringExpressions: <RegExp>[],
       isEmpty: true,
     );
   }
@@ -306,7 +307,7 @@ class QueryFilter {
     }
 
     final partsBySpace = query.split(' ');
-    final substrings = <String>[];
+    final substringExpressions = <RegExp>[];
     for (final part in partsBySpace) {
       final querySeparatorIndex = part.indexOf(':');
       if (querySeparatorIndex != -1) {
@@ -316,12 +317,15 @@ class QueryFilter {
             if (arg.matchesKey(part)) {
               arg.isNegative =
                   part.startsWith(QueryFilterArgument.negativePrefix);
-              arg.values = value.split(QueryFilterArgument.valueSeparator);
+              arg.values = value
+                  .split(QueryFilterArgument.valueSeparator)
+                  .map((v) => RegExp(v, caseSensitive: false))
+                  .toList();
             }
           }
         }
       } else {
-        substrings.add(part);
+        substringExpressions.add(RegExp(part, caseSensitive: false));
       }
     }
 
@@ -332,33 +336,34 @@ class QueryFilter {
         break;
       }
     }
-    if (!validArgumentFilter && substrings.isEmpty) {
+    if (!validArgumentFilter && substringExpressions.isEmpty) {
       return QueryFilter.empty(args: args);
     }
 
     return QueryFilter._(
       filterArguments: args,
-      substrings: substrings,
+      substringExpressions: substringExpressions,
     );
   }
 
   final Map<String, QueryFilterArgument> filterArguments;
 
-  final List<String> substrings;
+  final List<RegExp> substringExpressions;
 
   final bool isEmpty;
 
   String get query => isEmpty
       ? ''
       : [
-          ...substrings,
+          ...substringExpressions.map((regexp) => regexp.pattern),
           for (final arg in filterArguments.values) arg.display,
         ].join(' ').trim();
 }
 
-class QueryFilterArgument {
+class QueryFilterArgument<T> {
   QueryFilterArgument({
     required this.keys,
+    required this.dataValueProvider,
     this.values = const [],
     this.isNegative = false,
   });
@@ -369,12 +374,15 @@ class QueryFilterArgument {
 
   final List<String> keys;
 
-  List<String> values;
+  final String? Function(T data) dataValueProvider;
+
+  List<RegExp> values;
 
   bool isNegative;
 
   String get display => values.isNotEmpty
-      ? '${isNegative ? negativePrefix : ''}${keys.first}:${values.join(valueSeparator)}'
+      ? '${isNegative ? negativePrefix : ''}${keys.first}:'
+          '${values.map((v) => v.pattern).join(valueSeparator)}'
       : '';
 
   bool matchesKey(String query) {
@@ -384,11 +392,12 @@ class QueryFilterArgument {
     return false;
   }
 
-  bool matchesValue(String? dataValue, {bool substringMatch = false}) {
+  bool matchesValue(T data, {bool substringMatch = false}) {
     // If there are no specified filter values, consider [dataValue] to match
     // this filter.
     if (values.isEmpty) return true;
 
+    final dataValue = dataValueProvider(data);
     if (dataValue == null) {
       return isNegative;
     }

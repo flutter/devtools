@@ -136,8 +136,11 @@ class LoggingController extends DisposableController
   static const kindFilterId = 'logging-kind-filter';
 
   @override
-  Map<String, QueryFilterArgument> createQueryFilterArgs() => {
-        kindFilterId: QueryFilterArgument(keys: ['kind', 'k']),
+  Map<String, QueryFilterArgument<LogData>> createQueryFilterArgs() => {
+        kindFilterId: QueryFilterArgument<LogData>(
+          keys: ['kind', 'k'],
+          dataValueProvider: (log) => log.kind,
+        ),
       };
 
   final StreamController<String> _logStatusController =
@@ -586,22 +589,15 @@ class LoggingController extends DisposableController
       );
       if (filteredOutByToggleFilters) return false;
 
-      // TODO(kenz): clean up query filters by allowing general matching for
-      // any query filter argument.
-
       final queryFilter = filter.queryFilter;
       if (!queryFilter.isEmpty) {
-        final kindArg = queryFilter.filterArguments[kindFilterId];
-        if (kindArg != null &&
-            !kindArg.matchesValue(
-              log.kind,
-              substringMatch: true,
-            )) {
-          return false;
-        }
+        final filteredOutByQueryFilterArgument = queryFilter
+            .filterArguments.values
+            .any((argument) => !argument.matchesValue(log));
+        if (filteredOutByQueryFilterArgument) return false;
 
-        if (filter.queryFilter.substrings.isNotEmpty) {
-          for (final substring in filter.queryFilter.substrings) {
+        if (filter.queryFilter.substringExpressions.isNotEmpty) {
+          for (final substring in filter.queryFilter.substringExpressions) {
             final matchesKind = log.kind.caseInsensitiveContains(substring);
             if (matchesKind) return true;
 
