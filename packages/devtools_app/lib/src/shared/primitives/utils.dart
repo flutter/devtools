@@ -1063,9 +1063,10 @@ extension StringExtension on String {
 
   /// Whether [other] is a case insensitive match for this String.
   ///
-  /// If [pattern] is a [RegExp], this method will return true iff this String
-  /// is a complete [RegExp] match, meaning that the regular expression finds a
-  /// match with starting index 0 and ending index [this.length].
+  /// If [pattern] is a [RegExp], this method will return true if and only if
+  /// this String is a complete [RegExp] match, meaning that the regular
+  /// expression finds a match with starting index 0 and ending index
+  /// [this.length].
   bool caseInsensitiveEquals(Pattern? pattern) {
     if (pattern is RegExp) {
       assert(!pattern.isCaseSensitive);

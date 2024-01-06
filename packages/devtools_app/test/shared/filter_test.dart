@@ -48,6 +48,8 @@ void main() {
       for (final toggleFilter in controller.activeFilter.value.toggleFilters) {
         toggleFilter.enabled.value = false;
       }
+      expect(controller.useRegExp.value, isFalse);
+
       controller.setActiveFilter();
       expect(
         controller.filteredData.value.toString(),
@@ -113,11 +115,13 @@ void main() {
       );
     });
 
-    test('filterData applies regular expression query filters', () {
+    test('filterData applies regexp query filters when enabled', () {
       // Disable all toggle filters.
       for (final toggleFilter in controller.activeFilter.value.toggleFilters) {
         toggleFilter.enabled.value = false;
       }
+      controller.useRegExp.value = true;
+
       controller.setActiveFilter();
       expect(
         controller.filteredData.value.toString(),
@@ -139,7 +143,6 @@ void main() {
           '[4-Shepherd-dog, 5-Basset Hound-dog, 6-Husky-dog]',
         ),
       );
-
       // Regexp substring match.
       controller.setActiveFilter(query: '.*bar');
       expect(
@@ -148,6 +151,22 @@ void main() {
           '[1-FooBar-foobar, 2-Bar-foobar, 9-Meal bar-food]',
         ),
       );
+
+      // Disable regexp filters and verify filter behavior changes.
+      controller.useRegExp.value = false;
+
+      // Regexp filter argument match.
+      controller.setActiveFilter(query: 'cat:foo.*');
+      expect(controller.filteredData.value, isEmpty);
+      controller.setActiveFilter(query: '-cat:foo.*');
+      expect(
+        controller.filteredData.value.toString(),
+        _sampleData.toString(),
+      );
+
+      // Regexp substring match.
+      controller.setActiveFilter(query: '.*bar');
+      expect(controller.filteredData.value, isEmpty);
     });
 
     test('isFilterActive', () {
@@ -183,6 +202,12 @@ void main() {
       // Only query filter active and no toggle filters.
       controller.setActiveFilter(query: 'Ba cat:foobar');
       expect(controller.activeFilterTag(), 'ba cat:foobar');
+
+      // Query filter with regular expressions enabled.
+      controller.useRegExp.value = true;
+      controller.setActiveFilter(query: 'Ba cat:foobar');
+      expect(controller.activeFilterTag(), 'ba cat:foobar-#-regexp');
+      controller.useRegExp.value = false;
 
       // Only toggle filter active and no query filters.
       controller.toggleFilters[0].enabled.value = true;
@@ -263,6 +288,7 @@ class _TestController extends DisposableController
         categoryFilterId: QueryFilterArgument<_TestDataClass>(
           keys: ['cat', 'c'],
           dataValueProvider: (data) => data.category,
+          substringMatch: false,
         ),
       };
 

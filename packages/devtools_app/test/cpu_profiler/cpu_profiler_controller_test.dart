@@ -51,6 +51,7 @@ void main() {
       setGlobal(OfflineModeController, OfflineModeController());
       setGlobal(PreferencesController, PreferencesController());
       controller = CpuProfilerController();
+      controller.useRegExp.value = false;
     });
 
     Future<void> pullProfileAndSelectFrame() async {
@@ -178,6 +179,64 @@ void main() {
       await shortDelay();
       filteredData = controller.dataNotifier.value!;
       expect(filteredData.stackFrames.values.length, equals(9));
+    });
+
+    test('filters data by regexp query filter', () async {
+      // [startMicros] and [extentMicros] are arbitrary for testing.
+      await controller.pullAndProcessProfile(
+        startMicros: 0,
+        extentMicros: 100,
+        processId: 'test',
+      );
+      final originalData = controller.cpuProfileStore.lookupProfile(
+        label: CpuProfilerController.userTagNone,
+      )!;
+      expect(
+        originalData.functionProfile.stackFrames.values.length,
+        equals(17),
+      );
+      controller.useRegExp.value = true;
+
+      // At this point, data is filtered by the default toggle filter values.
+      var filteredData = controller.dataNotifier.value!;
+      expect(filteredData.stackFrames.values.length, equals(12));
+
+      // [CpuProfilerController.filterData], which is triggered by the call to
+      // [setActiveFilter] via a listener callback, calls an unawaited future.
+      // We await a short delay here and below to ensure that that future
+      // completes.
+      controller.setActiveFilter(query: 'render');
+      await shortDelay();
+      filteredData = controller.dataNotifier.value!;
+      expect(filteredData.stackFrames.values.length, equals(9));
+
+      controller.setActiveFilter(query: 'render.*parent');
+      await shortDelay();
+      filteredData = controller.dataNotifier.value!;
+      expect(filteredData.stackFrames.values.length, equals(2));
+
+      controller.setActiveFilter(query: 'render.*paint');
+      await shortDelay();
+      filteredData = controller.dataNotifier.value!;
+      expect(filteredData.stackFrames.values.length, equals(6));
+
+      // Disable regexp filters and verify filter behavior changes.
+      controller.useRegExp.value = false;
+
+      controller.setActiveFilter(query: 'render');
+      await shortDelay();
+      filteredData = controller.dataNotifier.value!;
+      expect(filteredData.stackFrames.values.length, equals(9));
+
+      controller.setActiveFilter(query: 'render.*parent');
+      await shortDelay();
+      filteredData = controller.dataNotifier.value!;
+      expect(filteredData.stackFrames.values, isEmpty);
+
+      controller.setActiveFilter(query: 'render.*paint');
+      await shortDelay();
+      filteredData = controller.dataNotifier.value!;
+      expect(filteredData.stackFrames.values, isEmpty);
     });
 
     test('selectCpuStackFrame', () async {

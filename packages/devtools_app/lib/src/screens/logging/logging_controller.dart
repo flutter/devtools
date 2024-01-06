@@ -140,6 +140,7 @@ class LoggingController extends DisposableController
         kindFilterId: QueryFilterArgument<LogData>(
           keys: ['kind', 'k'],
           dataValueProvider: (log) => log.kind,
+          substringMatch: true,
         ),
       };
 

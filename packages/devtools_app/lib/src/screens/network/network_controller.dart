@@ -60,14 +60,17 @@ class NetworkController extends DisposableController
         methodFilterId: QueryFilterArgument<NetworkRequest>(
           keys: ['method', 'm'],
           dataValueProvider: (request) => request.method,
+          substringMatch: false,
         ),
         statusFilterId: QueryFilterArgument<NetworkRequest>(
           keys: ['status', 's'],
           dataValueProvider: (request) => request.status,
+          substringMatch: false,
         ),
         typeFilterId: QueryFilterArgument<NetworkRequest>(
           keys: ['type', 't'],
           dataValueProvider: (request) => request.type,
+          substringMatch: false,
         ),
       };
 

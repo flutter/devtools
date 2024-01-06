@@ -162,6 +162,7 @@ class CpuProfilerController extends DisposableController
         uriFilterId: QueryFilterArgument<CpuStackFrame>(
           keys: ['uri', 'u'],
           dataValueProvider: (stackFrame) => stackFrame.packageUri,
+          substringMatch: true,
         ),
       };
 
