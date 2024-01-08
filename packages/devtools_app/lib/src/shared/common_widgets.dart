@@ -832,6 +832,7 @@ class DevToolsClearableTextField extends StatelessWidget {
     TextEditingController? controller,
     this.hintText,
     this.prefixIcon,
+    this.additionalSuffixActions = const <Widget>[],
     this.onChanged,
     this.onSubmitted,
     this.autofocus = false,
@@ -841,10 +842,13 @@ class DevToolsClearableTextField extends StatelessWidget {
   final TextEditingController controller;
   final String? hintText;
   final Widget? prefixIcon;
+  final List<Widget> additionalSuffixActions;
   final String labelText;
   final Function(String)? onChanged;
   final Function(String)? onSubmitted;
   final bool autofocus;
+
+  static const _contentVerticalPadding = 6.0;
 
   @override
   Widget build(BuildContext context) {
@@ -858,7 +862,13 @@ class DevToolsClearableTextField extends StatelessWidget {
         onSubmitted: onSubmitted,
         style: theme.regularTextStyle,
         decoration: InputDecoration(
-          contentPadding: const EdgeInsets.all(denseSpacing),
+          isDense: true,
+          contentPadding: const EdgeInsets.only(
+            top: _contentVerticalPadding,
+            bottom: _contentVerticalPadding,
+            left: denseSpacing,
+            right: densePadding,
+          ),
           constraints: BoxConstraints(
             minHeight: defaultTextFieldHeight,
             maxHeight: defaultTextFieldHeight,
@@ -869,18 +879,21 @@ class DevToolsClearableTextField extends StatelessWidget {
           hintText: hintText,
           hintStyle: theme.subtleTextStyle,
           prefixIcon: prefixIcon,
-          suffixIcon: IconButton(
-            tooltip: 'Clear',
-            icon: Icon(
-              Icons.clear,
-              size: defaultIconSize,
+          suffix: SizedBox(
+            height: inputDecorationElementHeight,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                clearInputButton(
+                  () {
+                    controller.clear();
+                    onChanged?.call('');
+                  },
+                ),
+                ...additionalSuffixActions,
+              ],
             ),
-            onPressed: () {
-              controller.clear();
-              onChanged?.call('');
-            },
           ),
-          isDense: true,
         ),
       ),
     );
@@ -888,24 +901,34 @@ class DevToolsClearableTextField extends StatelessWidget {
 }
 
 Widget clearInputButton(VoidCallback onPressed) {
-  return inputDecorationSuffixButton(Icons.clear, onPressed);
+  return inputDecorationSuffixButton(
+    icon: Icons.clear,
+    onPressed: onPressed,
+    tooltip: 'Clear',
+  );
 }
 
 Widget closeSearchDropdownButton(VoidCallback? onPressed) {
-  return inputDecorationSuffixButton(Icons.close, onPressed);
+  return inputDecorationSuffixButton(icon: Icons.close, onPressed: onPressed);
 }
 
-Widget inputDecorationSuffixButton(IconData icon, VoidCallback? onPressed) {
-  return Container(
-    padding: const EdgeInsets.symmetric(horizontal: densePadding),
-    height: inputDecorationElementHeight,
-    width: defaultIconSize + denseSpacing,
-    child: IconButton(
-      padding: const EdgeInsets.all(0.0),
-      onPressed: onPressed,
-      iconSize: defaultIconSize,
-      splashRadius: defaultIconSize,
-      icon: Icon(icon),
+Widget inputDecorationSuffixButton({
+  required IconData icon,
+  required VoidCallback? onPressed,
+  String? tooltip,
+}) {
+  return maybeWrapWithTooltip(
+    tooltip: tooltip,
+    child: SizedBox(
+      height: inputDecorationElementHeight,
+      width: inputDecorationElementHeight + denseSpacing,
+      child: IconButton(
+        padding: EdgeInsets.zero,
+        onPressed: onPressed,
+        iconSize: defaultIconSize,
+        splashRadius: defaultIconSize,
+        icon: Icon(icon),
+      ),
     ),
   );
 }
