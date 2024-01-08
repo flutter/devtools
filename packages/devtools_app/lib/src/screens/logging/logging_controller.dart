@@ -63,6 +63,19 @@ Future<String> _retrieveFullStringValue(
       Future.value(fallback);
 }
 
+const _gcLogKind = 'gc';
+const _flutterFirstFrameKind = 'Flutter.FirstFrame';
+const _flutterFrameworkInitializationKind = 'Flutter.FrameworkInitialization';
+const _verboseFlutterFrameworkLogKinds = [
+  _flutterFirstFrameKind,
+  _flutterFrameworkInitializationKind,
+  _FrameInfo.eventName,
+  _ImageSizesForFrame.eventName,
+];
+const _verboseFlutterServiceLogKinds = [
+  ServiceExtensionStateChangedInfo.eventName,
+];
+
 class LoggingController extends DisposableController
     with
         SearchControllerMixin<LogData>,
@@ -92,6 +105,33 @@ class LoggingController extends DisposableController
     _handleBusEvents();
     subscribeToFilterChanges();
   }
+
+  /// The toggle filters available for the Logging screen.
+  @override
+  List<ToggleFilter<LogData>> createToggleFilters() => [
+        if (serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ??
+            true) ...[
+          ToggleFilter<LogData>(
+            name: 'Hide verbose Flutter framework logs (initialization, frame '
+                'times, image sizes)',
+            includeCallback: (log) => !_verboseFlutterFrameworkLogKinds
+                .any((kind) => kind.caseInsensitiveEquals(log.kind)),
+            enabledByDefault: true,
+          ),
+          ToggleFilter<LogData>(
+            name: 'Hide verbose Flutter service logs (service extension state '
+                'changes)',
+            includeCallback: (log) => !_verboseFlutterServiceLogKinds
+                .any((kind) => kind.caseInsensitiveEquals(log.kind)),
+            enabledByDefault: true,
+          ),
+        ],
+        ToggleFilter<LogData>(
+          name: 'Hide garbage collection logs',
+          includeCallback: (log) => !log.kind.caseInsensitiveEquals(_gcLogKind),
+          enabledByDefault: true,
+        ),
+      ];
 
   static const kindFilterId = 'logging-kind-filter';
 
@@ -188,22 +228,12 @@ class LoggingController extends DisposableController
     );
   }
 
-  void _handleExtensionEvent(Event e) async {
+  void _handleExtensionEvent(Event e) {
     // Events to show without a summary in the table.
     const Set<String> untitledEvents = {
-      'Flutter.FirstFrame',
-      'Flutter.FrameworkInitialization',
+      _flutterFirstFrameKind,
+      _flutterFrameworkInitializationKind,
     };
-
-    // TODO(jacobr): make the list of filtered events configurable.
-    const Set<String> filteredEvents = {
-      // Suppress these events by default as they just add noise to the log
-      ServiceExtensionStateChangedInfo.eventName,
-    };
-
-    if (filteredEvents.contains(e.extensionKind)) {
-      return;
-    }
 
     if (e.extensionKind == _FrameInfo.eventName) {
       final _FrameInfo frame = _FrameInfo(e.extensionData!.data);
@@ -548,40 +578,52 @@ class LoggingController extends DisposableController
   @override
   void filterData(Filter<LogData> filter) {
     super.filterData(filter);
-    final queryFilter = filter.queryFilter;
-    if (queryFilter.isEmpty) {
-      filteredData
-        ..clear()
-        ..addAll(data);
-      return;
+
+    bool filterCallback(LogData log) {
+      final filteredOutByToggleFilters = filter.toggleFilters.any(
+        (toggleFilter) =>
+            toggleFilter.enabled.value && !toggleFilter.includeCallback(log),
+      );
+      if (filteredOutByToggleFilters) return false;
+
+      // TODO(kenz): clean up query filters by allowing general matching for
+      // any query filter argument.
+
+      final queryFilter = filter.queryFilter;
+      if (!queryFilter.isEmpty) {
+        final kindArg = queryFilter.filterArguments[kindFilterId];
+        if (kindArg != null &&
+            !kindArg.matchesValue(
+              log.kind,
+              substringMatch: true,
+            )) {
+          return false;
+        }
+
+        if (filter.queryFilter.substrings.isNotEmpty) {
+          for (final substring in filter.queryFilter.substrings) {
+            final matchesKind = log.kind.caseInsensitiveContains(substring);
+            if (matchesKind) return true;
+
+            final matchesSummary = log.summary != null &&
+                log.summary!.caseInsensitiveContains(substring);
+            if (matchesSummary) return true;
+
+            final matchesDetails = log.details != null &&
+                log.details!.caseInsensitiveContains(substring);
+            if (matchesDetails) return true;
+          }
+          return false;
+        }
+      }
+
+      return true;
     }
+
     filteredData
       ..clear()
       ..addAll(
-        data.where((log) {
-          final kindArg = filter.queryFilter.filterArguments[kindFilterId];
-          if (kindArg != null &&
-              !kindArg.matchesValue(log.kind.toLowerCase())) {
-            return false;
-          }
-
-          if (filter.queryFilter.substrings.isNotEmpty) {
-            for (final substring in filter.queryFilter.substrings) {
-              final matchesKind = log.kind.caseInsensitiveContains(substring);
-              if (matchesKind) return true;
-
-              final matchesSummary = log.summary != null &&
-                  log.summary!.caseInsensitiveContains(substring);
-              if (matchesSummary) return true;
-
-              final matchesDetails = log.details != null &&
-                  log.summary!.caseInsensitiveContains(substring);
-              if (matchesDetails) return true;
-            }
-            return false;
-          }
-          return true;
-        }).toList(),
+        data.where(filterCallback).toList(),
       );
   }
 }
@@ -742,7 +784,8 @@ class LogData with SearchableDataMixin {
 
   @override
   bool matchesSearchToken(RegExp regExpSearch) {
-    return (summary?.caseInsensitiveContains(regExpSearch) == true) ||
+    return kind.caseInsensitiveContains(regExpSearch) ||
+        (summary?.caseInsensitiveContains(regExpSearch) == true) ||
         (details?.caseInsensitiveContains(regExpSearch) == true);
   }
 
