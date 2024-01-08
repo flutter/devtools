@@ -256,9 +256,11 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
                   );
                 },
                 // Disable ligatures, so the suggestions of the auto complete work correcly.
-                style: Theme.of(context)
-                    .fixedFontStyle
-                    .copyWith(fontFeatures: [const FontFeature.disable('liga')]),
+                style: Theme.of(context).fixedFontStyle.copyWith(
+                  fontFeatures: [
+                    const FontFeature.disable('liga'),
+                  ],
+                ),
               ),
             ),
           ),

@@ -13,7 +13,6 @@ import '../../shared/common_widgets.dart';
 import '../../shared/http/http.dart';
 import '../../shared/http/http_request_data.dart';
 import '../../shared/primitives/utils.dart';
-import '../../shared/table/table.dart';
 import '../../shared/ui/colors.dart';
 import 'network_controller.dart';
 import 'network_model.dart';

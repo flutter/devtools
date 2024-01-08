@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../shared/common_widgets.dart';
-import '../../shared/table/table.dart';
 import '../../shared/ui/colors.dart';
 import 'deep_link_list_view.dart';
 import 'deep_links_controller.dart';

@@ -32,11 +32,10 @@ class PerformanceSettingsDialog extends StatelessWidget {
             const SizedBox(height: denseSpacing),
           ],
           CheckboxSetting(
-            notifier:
-                controller.timelineEventsController.useLegacyTraceViewer,
+            notifier: controller.timelineEventsController.useLegacyTraceViewer,
             title: 'Use legacy trace viewer',
-            onChanged: controller
-                .timelineEventsController.toggleUseLegacyTraceViewer,
+            onChanged:
+                controller.timelineEventsController.toggleUseLegacyTraceViewer,
           ),
         ],
       ),

@@ -302,7 +302,6 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           ),
       ],
     );
-    final theme = Theme.of(context);
 
     return Provider<ImportController>.value(
       value: _importController,
