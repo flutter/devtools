@@ -249,6 +249,7 @@ class DeleteControl extends StatelessWidget {
   Widget build(BuildContext context) {
     return ToolbarAction(
       icon: Icons.delete,
+      size: defaultIconSize,
       tooltip: tooltip,
       onPressed: onPressed,
       key: buttonKey,

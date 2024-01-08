@@ -573,7 +573,8 @@ class Badge extends StatelessWidget {
 
     // These constants are sized to give 1 digit badges a circular look.
     const badgeCornerRadius = 12.0;
-    const badgePadding = 6.0;
+    const verticalBadgePadding = 1.0;
+    const horizontalBadgePadding = 6.0;
 
     return Container(
       decoration: BoxDecoration(
@@ -581,8 +582,8 @@ class Badge extends StatelessWidget {
         borderRadius: BorderRadius.circular(badgeCornerRadius),
       ),
       padding: const EdgeInsets.symmetric(
-        vertical: borderPadding,
-        horizontal: badgePadding,
+        vertical: verticalBadgePadding,
+        horizontal: horizontalBadgePadding,
       ),
       child: Text(
         text,
@@ -1612,7 +1613,7 @@ class CopyToClipboardControl extends StatelessWidget {
               copyToClipboard(dataProvider!() ?? '', successMessage),
             );
           };
-
+    final size = this.size ?? defaultIconSize;
     return SizedBox(
       height: size,
       child: ToolbarAction(

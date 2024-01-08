@@ -362,12 +362,12 @@ class DevToolsButton extends StatelessWidget {
           child: outlined
               ? IconButton.outlined(
                   onPressed: onPressed,
-                  iconSize: actionsIconSize,
+                  iconSize: defaultIconSize,
                   icon: Icon(icon),
                 )
               : IconButton(
                   onPressed: onPressed,
-                  iconSize: actionsIconSize,
+                  iconSize: defaultIconSize,
                   icon: Icon(
                     icon,
                   ),

@@ -22,11 +22,13 @@ class ConsolePaneHeader extends AreaPaneHeader {
           roundedTopBorder: true,
           actions: [
             const ConsoleHelpLink(),
+            const SizedBox(width: densePadding),
             CopyToClipboardControl(
               dataProvider: () =>
                   serviceConnection.consoleService.stdio.value.join('\n'),
               buttonKey: ConsolePane.copyToClipboardButtonKey,
             ),
+            const SizedBox(width: densePadding),
             DeleteControl(
               buttonKey: ConsolePane.clearStdioButtonKey,
               tooltip: 'Clear console output',

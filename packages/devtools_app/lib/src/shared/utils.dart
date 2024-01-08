@@ -85,7 +85,6 @@ List<ConnectionDescription> generateDeviceDescription(
       actions: [
         CopyToClipboardControl(
           dataProvider: () => description,
-          size: defaultIconSize,
         ),
       ],
     );
