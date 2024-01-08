@@ -32,7 +32,7 @@ class ValidationDetailView extends StatelessWidget {
         ValidationDetailHeader(viewType: viewType, controller: controller),
         Padding(
           padding: const EdgeInsets.symmetric(
-            horizontal: largeSpacing,
+            horizontal: extraLargeSpacing,
             vertical: defaultSpacing,
           ),
           child: Column(
@@ -53,7 +53,7 @@ class ValidationDetailView extends StatelessWidget {
               if (viewType == TableViewType.pathView ||
                   viewType == TableViewType.singleUrlView)
                 _PathCheckTable(),
-              const SizedBox(height: largeSpacing),
+              const SizedBox(height: extraLargeSpacing),
               Align(
                 alignment: Alignment.bottomRight,
                 child: FilledButton(
@@ -137,7 +137,7 @@ class _DomainCheckTable extends StatelessWidget {
             DataColumn(label: Text('Issue type')),
             DataColumn(label: Text('Status')),
           ],
-          headingRowHeight: areaPaneHeaderHeight,
+          headingRowHeight: defaultHeaderHeight,
           dataRowMinHeight: defaultRowHeight,
           dataRowMaxHeight: defaultRowHeight,
           rows: [
@@ -346,7 +346,7 @@ class _PathCheckTable extends StatelessWidget {
         Opacity(
           opacity: 0.5,
           child: DataTable(
-            headingRowHeight: areaPaneHeaderHeight,
+            headingRowHeight: defaultHeaderHeight,
             dataRowMinHeight: defaultRowHeight,
             dataRowMaxHeight: defaultRowHeight,
             headingRowColor: MaterialStateProperty.all(

@@ -68,7 +68,7 @@ class VMInfoCard extends StatelessWidget implements PreferredSizeWidget {
       return Size.infinite;
     }
     return Size.fromHeight(
-      areaPaneHeaderHeight +
+      defaultHeaderHeight +
           (rowKeyValues?.length ?? 0) * defaultRowHeight +
           defaultSpacing,
     );
@@ -650,7 +650,7 @@ class InboundReferenceWidget extends StatelessWidget {
       ),
     );
     return DefaultTextStyle(
-      style: theme.fixedFontStyle,
+      style: theme.regularTextStyle,
       child: Row(
         children: rowContent,
       ),
@@ -738,9 +738,9 @@ class VmServiceObjectLink extends StatelessWidget {
 
     final TextStyle style;
     if (isServiceObject) {
-      style = theme.fixedFontLinkStyle;
+      style = theme.linkTextStyle;
     } else {
-      style = theme.fixedFontStyle;
+      style = theme.regularTextStyle;
     }
     return TextSpan(
       text: text,
@@ -759,14 +759,9 @@ class VmServiceObjectLink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return RichText(
       maxLines: 1,
       text: TextSpan(
-        style: theme.linkTextStyle.apply(
-          fontFamily: theme.fixedFontStyle.fontFamily,
-          overflow: TextOverflow.ellipsis,
-        ),
         children: [buildTextSpan(context)],
       ),
     );

@@ -33,6 +33,7 @@ void debugLogger(String message) {
   );
 }
 
+// TODO(kenz): remove concept of dense mode. Use dense values by default.
 bool isDense() {
   return preferences.denseModeEnabled.value || isEmbedded();
 }

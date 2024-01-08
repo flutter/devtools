@@ -32,7 +32,7 @@ void main() {
         // Build our app and trigger a frame.
         await tester.pumpWidget(wrap(const HomeScreenBody()));
         expect(find.byType(ConnectionSection), findsOneWidget);
-        expect(find.byType(ConnectDialog), findsOneWidget);
+        expect(find.byType(ConnectInput), findsOneWidget);
         expect(find.byType(ConnectToNewAppButton), findsNothing);
         expect(find.byType(ViewVmFlagsButton), findsNothing);
         expect(find.byType(SampleDataDropDownButton), findsNothing);
@@ -99,7 +99,7 @@ void main() {
         // Build our app and trigger a frame.
         await tester.pumpWidget(wrap(const HomeScreenBody()));
         expect(find.byType(ConnectionSection), findsOneWidget);
-        expect(find.byType(ConnectDialog), findsNothing);
+        expect(find.byType(ConnectInput), findsNothing);
         expect(find.byType(ConnectToNewAppButton), findsOneWidget);
         expect(find.byType(ViewVmFlagsButton), findsOneWidget);
         expect(find.byType(SampleDataDropDownButton), findsNothing);

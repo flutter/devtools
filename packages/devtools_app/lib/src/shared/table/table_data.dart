@@ -97,7 +97,7 @@ abstract class ColumnData<T> {
   }) {
     final theme = Theme.of(context);
     final textColor = getTextColor(dataObject) ?? theme.colorScheme.onSurface;
-    return theme.fixedFontStyle.copyWith(color: textColor);
+    return theme.regularTextStyleWithColor(textColor);
   }
 
   @override
@@ -202,7 +202,7 @@ abstract class TimeAndPercentageColumn<T> extends ColumnData<T> {
           fixedWidthPx: scaleByFontFactor(columnWidth),
         );
 
-  static const _defaultTimeColumnWidth = 165.0;
+  static const _defaultTimeColumnWidth = 120.0;
 
   Duration Function(T)? timeProvider;
 

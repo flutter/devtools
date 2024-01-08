@@ -52,13 +52,11 @@ class MessageColumn extends ColumnData<LogData>
     bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
-    final textStyle = Theme.of(context).fixedFontStyle;
     if (data.kind == 'flutter.frame') {
       const Color color = Color.fromARGB(0xff, 0x00, 0x91, 0xea);
       final Text text = Text(
         getDisplayValue(data),
         overflow: TextOverflow.ellipsis,
-        style: textStyle,
       );
 
       double frameLength = 0.0;
@@ -88,7 +86,7 @@ class MessageColumn extends ColumnData<LogData>
             // TODO(helin24): Recompute summary length considering ansi codes.
             //  The current summary is generally the first 200 chars of details.
             getDisplayValue(data),
-            textStyle,
+            Theme.of(context).regularTextStyle,
           ),
         ),
         overflow: TextOverflow.ellipsis,

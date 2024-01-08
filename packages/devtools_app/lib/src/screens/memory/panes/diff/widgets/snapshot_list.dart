@@ -15,7 +15,6 @@ import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/dialogs.dart';
 import '../../../../../shared/primitives/utils.dart';
-import '../../../../../shared/table/table.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/item_controller.dart';
 
@@ -284,7 +283,7 @@ class _EditableSnapshotNameState extends State<_EditableSnapshotName>
       autofocus: true,
       showCursor: widget.editMode,
       enabled: widget.editMode,
-      style: Theme.of(context).textTheme.bodyMedium,
+      style: Theme.of(context).regularTextStyle,
       decoration: const InputDecoration(
         isDense: true,
         border: InputBorder.none,

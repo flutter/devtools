@@ -357,15 +357,11 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
             ),
             const SizedBox(height: denseSpacing),
             ...dialogSubHeader(theme, 'Package Directories'),
-            Text(
-              'Widgets in these directories will show up in your summary tree.',
-              style: theme.subtleTextStyle,
-            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '(e.g. /absolute/path/to/myPackage)',
+                  'Widgets in these directories will show up in your summary tree.',
                   style: theme.subtleTextStyle,
                 ),
                 MoreInfoLink(
@@ -375,6 +371,10 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
                       gac.InspectorDocs.packageDirectoriesDocs.name,
                 ),
               ],
+            ),
+            Text(
+              '(e.g. /absolute/path/to/myPackage)',
+              style: theme.subtleTextStyle,
             ),
             const SizedBox(height: denseSpacing),
             const Expanded(
@@ -416,9 +416,12 @@ class InspectorSummaryTreeControls extends StatelessWidget {
           context,
           Row(
             children: <Widget>[
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: denseSpacing),
-                child: Text('Widget Tree'),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
+                child: Text(
+                  'Widget Tree',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
               ),
               ...!isSearchVisible
                   ? [
@@ -453,7 +456,7 @@ class InspectorSummaryTreeControls extends StatelessWidget {
 
   Container _controlsContainer(BuildContext context, Widget child) {
     return Container(
-      height: defaultHeaderHeight(isDense: isDense()),
+      height: defaultHeaderHeight,
       decoration: BoxDecoration(
         border: Border(
           bottom: defaultBorderSide(Theme.of(context)),

@@ -170,14 +170,15 @@ class BannerMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Card(
       color: messageType == BannerMessageType.error
           ? colorScheme.errorContainer
           : colorScheme.warningContainer,
       margin: const EdgeInsets.only(bottom: intermediateSpacing),
       child: Padding(
-        padding: const EdgeInsets.all(defaultSpacing),
+        padding: const EdgeInsets.all(densePadding),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -199,7 +200,7 @@ class BannerMessage extends StatelessWidget {
                 Expanded(
                   child: RichText(
                     text: TextSpan(
-                      style: TextStyle(
+                      style: theme.regularTextStyle.copyWith(
                         color: messageType == BannerMessageType.error
                             ? colorScheme.onErrorContainer
                             : colorScheme.onWarningContainer,

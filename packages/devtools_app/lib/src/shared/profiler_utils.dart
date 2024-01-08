@@ -268,7 +268,7 @@ class MethodAndSourceDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fontStyle = Theme.of(context).fixedFontStyle;
+    final fontStyle = Theme.of(context).regularTextStyle;
     final sourceTextSpans = <TextSpan>[];
     final packageUriWithSourceLine = uriWithSourceLine(packageUri, sourceLine);
 

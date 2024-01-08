@@ -116,7 +116,11 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
     Widget textField(TextEditingController controller) => Padding(
           padding: EdgeInsets.only(left: textFieldLeftPadding),
           child: TextField(
-            decoration: dialogTextFieldDecoration,
+            style: Theme.of(context).regularTextStyle,
+            decoration: const InputDecoration(
+              contentPadding: EdgeInsets.all(denseSpacing),
+              border: OutlineInputBorder(),
+            ),
             keyboardType: TextInputType.multiline,
             maxLines: null,
             controller: controller,
