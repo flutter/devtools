@@ -443,7 +443,7 @@ class QueryFilterArgument<T> {
     var matches = false;
     for (final value in values) {
       matches = substringMatch
-          ? dataValue.caseInsensitiveContains(value, )
+          ? dataValue.caseInsensitiveContains(value)
           : dataValue.caseInsensitiveEquals(value);
       if (matches) break;
     }
