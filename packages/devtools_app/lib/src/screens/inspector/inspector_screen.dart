@@ -334,7 +334,7 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final dialogHeight = scaleByFontFactor(600.0);
+    final dialogHeight = scaleByFontFactor(500.0);
     return DevToolsDialog(
       title: const DialogTitleText('Flutter Inspector Settings'),
       content: SizedBox(
@@ -580,10 +580,7 @@ class InspectorDefaultDetailsViewOption extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Select the default tab for the inspector.',
-              style: theme.subtleTextStyle,
-            ),
+            const Text('Select the default tab for the inspector.'),
             const SizedBox(height: denseSpacing),
             Row(
               mainAxisSize: MainAxisSize.min,
