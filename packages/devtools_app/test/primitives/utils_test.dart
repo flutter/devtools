@@ -1264,6 +1264,24 @@ void main() {
         expect(str.caseInsensitiveEquals(null), isFalse);
         expect(''.caseInsensitiveEquals(''), isTrue);
         expect(''.caseInsensitiveEquals(null), isFalse);
+
+        // Complete match.
+        expect(
+          str.caseInsensitiveEquals(RegExp('h.*o.*', caseSensitive: false)),
+          isTrue,
+        );
+        // Incomplete match.
+        expect(
+          str.caseInsensitiveEquals(RegExp('h.*o', caseSensitive: false)),
+          isFalse,
+        );
+        // No match.
+        expect(
+          str.caseInsensitiveEquals(
+            RegExp('hello.* this does not match', caseSensitive: false),
+          ),
+          isFalse,
+        );
       });
 
       test('caseInsensitiveAllMatches', () {

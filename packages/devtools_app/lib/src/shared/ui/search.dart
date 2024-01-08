@@ -1403,12 +1403,12 @@ class SearchNavigationControls extends StatelessWidget {
                   ),
                 ),
                 inputDecorationSuffixButton(
-                  Icons.keyboard_arrow_up,
-                  numMatches > 1 ? controller.previousMatch : null,
+                  icon: Icons.keyboard_arrow_up,
+                  onPressed: numMatches > 1 ? controller.previousMatch : null,
                 ),
                 inputDecorationSuffixButton(
-                  Icons.keyboard_arrow_down,
-                  numMatches > 1 ? controller.nextMatch : null,
+                  icon: Icons.keyboard_arrow_down,
+                  onPressed: numMatches > 1 ? controller.nextMatch : null,
                 ),
                 if (onClose != null) closeSearchDropdownButton(onClose),
               ],
