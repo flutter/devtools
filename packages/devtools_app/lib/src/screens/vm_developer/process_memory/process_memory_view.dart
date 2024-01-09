@@ -19,15 +19,15 @@ import 'process_memory_view_controller.dart';
 
 /// Displays a breakdown of the target application's overall memory footprint.
 /// This allows for developers to determine:
-/// 
+///
 ///  - The total resident set size (RSS)
 ///  - How much memory can be attributed to each isolate group's heap,
 ///    including system isolate groups like the vm-service and kernel-service
 ///  - How much memory can be attributed to developer tooling functionality
 ///    (e.g., CPU profiler buffer size, size of all recorded timeline events)
-/// 
+///
 /// This view provides both a tree table and a tree map to explore the
-/// process's memory footprint. 
+/// process's memory footprint.
 class VMProcessMemoryView extends VMDeveloperView {
   const VMProcessMemoryView()
       : super(
