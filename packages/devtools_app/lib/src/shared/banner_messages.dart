@@ -178,7 +178,10 @@ class BannerMessage extends StatelessWidget {
           : colorScheme.warningContainer,
       margin: const EdgeInsets.only(bottom: intermediateSpacing),
       child: Padding(
-        padding: const EdgeInsets.all(densePadding),
+        padding: const EdgeInsets.symmetric(
+          vertical: densePadding,
+          horizontal: denseSpacing,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -192,6 +195,7 @@ class BannerMessage extends StatelessWidget {
                     messageType == BannerMessageType.error
                         ? Icons.error_outline
                         : Icons.warning_amber_outlined,
+                    size: actionsIconSize,
                     color: messageType == BannerMessageType.error
                         ? colorScheme.onErrorContainer
                         : colorScheme.onWarningContainer,
@@ -213,6 +217,7 @@ class BannerMessage extends StatelessWidget {
                 IconButton(
                   icon: Icon(
                     Icons.close,
+                    size: actionsIconSize,
                     color: messageType == BannerMessageType.error
                         ? colorScheme.onErrorContainer
                         : colorScheme.onWarningContainer,
