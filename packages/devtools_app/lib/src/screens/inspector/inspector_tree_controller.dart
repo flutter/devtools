@@ -1147,8 +1147,11 @@ class _RowPainter extends CustomPainter {
     // If this row is itself connected to a parent then draw the L shaped line
     // to make that connection.
     if (row.lineToParent) {
-      currentX = _controller.getDepthIndent(row.depth - 1) - inspectorColumnWidth * 0.5;
-      final double width = showExpandCollapse ? inspectorColumnWidth * 0.5 : inspectorColumnWidth;
+      currentX = _controller.getDepthIndent(row.depth - 1) -
+          inspectorColumnWidth * 0.5;
+      final double width = showExpandCollapse
+          ? inspectorColumnWidth * 0.5
+          : inspectorColumnWidth;
       canvas.drawLine(
         Offset(currentX, 0.0),
         Offset(currentX, inspectorRowHeight * 0.5),
@@ -1210,7 +1213,8 @@ class InspectorRowContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double currentX = controller.getDepthIndent(row.depth) - inspectorColumnWidth;
+    final double currentX =
+        controller.getDepthIndent(row.depth) - inspectorColumnWidth;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
