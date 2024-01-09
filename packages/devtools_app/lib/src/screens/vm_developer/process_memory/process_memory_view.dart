@@ -57,7 +57,6 @@ enum ProcessMemoryTab {
   }
 }
 
-/// Displays general information about the state of the Dart VM.
 class VMProcessMemoryViewBody extends StatefulWidget {
   VMProcessMemoryViewBody({super.key})
       : tabs = [
