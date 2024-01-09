@@ -80,13 +80,16 @@ class _ListControlPane extends StatelessWidget {
           children: [
             ToolbarAction(
               icon: iconToTakeSnapshot,
+              size: defaultIconSize,
               tooltip: 'Take heap snapshot for the selected isolate',
               onPressed: controller.isTakingSnapshot.value
                   ? null
                   : () => unawaited(_takeSnapshot(context)),
             ),
+            const SizedBox(width: densePadding),
             ToolbarAction(
               icon: Icons.block,
+              size: defaultIconSize,
               tooltip: 'Clear all snapshots',
               onPressed: clearAllEnabled
                   ? () {

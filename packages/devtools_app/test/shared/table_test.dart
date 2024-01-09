@@ -497,7 +497,7 @@ void main() {
         expect(columnWidths.length, equals(3));
         expect(columnWidths[0], equals(300.0));
         expect(columnWidths[1], equals(400.0));
-        expect(columnWidths[2], equals(36.0));
+        expect(columnWidths[2], equals(52.0));
       }
 
       // TODO(jacobr): add a golden image test.
@@ -623,9 +623,9 @@ void main() {
               state.tableController.computeColumnWidthsSizeToFit(1000.0);
           expect(columnWidths.length, equals(4));
           expect(columnWidths[0], equals(300.0)); // Fixed width column.
-          expect(columnWidths[1], equals(110.0)); // Min width wide column
+          expect(columnWidths[1], equals(120.0)); // Min width wide column
           expect(columnWidths[2], equals(400.0)); // Fixed width column.
-          expect(columnWidths[3], equals(110.0)); // Variable width wide column.
+          expect(columnWidths[3], equals(120.0)); // Variable width wide column.
         }
 
         await tester.pumpWidget(
@@ -685,13 +685,13 @@ void main() {
               state.tableController.computeColumnWidthsSizeToFit(1501.0);
           expect(columnWidths.length, equals(5));
           expect(columnWidths[0], equals(300.0)); // Fixed width column.
-          expect(columnWidths[1], equals(235.0)); // Min width wide column
+          expect(columnWidths[1], equals(243.0)); // Min width wide column
           expect(
             columnWidths[2],
-            equals(235.0),
+            equals(243.0),
           ); // Very wide min width wide column
           expect(columnWidths[3], equals(400.0)); // Fixed width column.
-          expect(columnWidths[4], equals(235.0)); // Variable width wide column.
+          expect(columnWidths[4], equals(243.0)); // Variable width wide column.
         }
 
         await tester.pumpWidget(
@@ -711,13 +711,13 @@ void main() {
               state.tableController.computeColumnWidthsSizeToFit(1200.0);
           expect(columnWidths.length, equals(5));
           expect(columnWidths[0], equals(300.0)); // Fixed width column.
-          expect(columnWidths[1], equals(122.0)); // Min width wide column
+          expect(columnWidths[1], equals(134.0)); // Min width wide column
           expect(
             columnWidths[2],
             equals(160.0),
           ); // Very wide min width wide column
           expect(columnWidths[3], equals(400.0)); // Fixed width column.
-          expect(columnWidths[4], equals(122.0)); // Variable width wide column.
+          expect(columnWidths[4], equals(134.0)); // Variable width wide column.
         }
 
         await tester.pumpWidget(

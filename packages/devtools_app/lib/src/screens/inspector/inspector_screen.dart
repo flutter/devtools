@@ -360,9 +360,11 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Widgets in these directories will show up in your summary tree.',
-                  style: theme.subtleTextStyle,
+                Expanded(
+                  child: Text(
+                    'Widgets in these directories will show up in your summary tree.',
+                    style: theme.subtleTextStyle,
+                  ),
                 ),
                 MoreInfoLink(
                   url: DocLinks.inspectorPackageDirectories.value,

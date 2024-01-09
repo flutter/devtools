@@ -120,8 +120,7 @@ ThemeData _baseTheme({
       linearMinHeight: defaultLinearProgressIndicatorHeight,
     ),
     textTheme: theme.textTheme.copyWith(
-      bodyMedium:
-          theme.textTheme.bodyMedium!.copyWith(fontSize: defaultFontSize),
+      bodyMedium: theme.regularTextStyle,
       titleSmall:
           theme.textTheme.titleSmall!.copyWith(fontSize: defaultFontSize),
     ),
@@ -357,7 +356,10 @@ extension ThemeDataExtension on ThemeData {
   bool get isDarkTheme => brightness == Brightness.dark;
 
   TextStyle get regularTextStyle => fixBlurryText(
-        textTheme.bodyMedium!.copyWith(color: colorScheme.onSurface),
+        textTheme.bodyMedium!.copyWith(
+          color: colorScheme.onSurface,
+          fontSize: defaultFontSize,
+        ),
       );
 
   TextStyle regularTextStyleWithColor(Color? color) =>
