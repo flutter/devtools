@@ -98,8 +98,7 @@ class BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
       );
     }
     return Container(
-      margin: const EdgeInsets.all(margin),
-      padding: const EdgeInsets.only(bottom: margin, right: margin),
+      margin: const EdgeInsets.all(denseSpacing),
       child: AnimatedBuilder(
         animation: changeController,
         builder: (context, _) {

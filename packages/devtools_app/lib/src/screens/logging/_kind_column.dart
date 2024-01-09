@@ -46,9 +46,7 @@ class KindColumn extends ColumnData<LogData>
     }
 
     // Use a font color that contrasts with the colored backgrounds.
-    final textStyle = Theme.of(context).fixedFontStyle.copyWith(
-          color: Colors.white,
-        );
+    final textStyle = Theme.of(context).regularTextStyleWithColor(Colors.white);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 3.0),

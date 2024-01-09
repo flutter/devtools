@@ -68,7 +68,7 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: rowHeight,
+      height: inspectorRowHeight,
       child: InspectorRowContent(
         row: widget.row,
         error: widget.error,
@@ -258,7 +258,7 @@ class InspectorTreeController extends DisposableController
   }
 
   double getRowOffset(int index) {
-    return (getCachedRow(index)?.depth ?? 0) * columnWidth;
+    return (getCachedRow(index)?.depth ?? 0) * inspectorColumnWidth;
   }
 
   List<InspectorTreeNode> getPathFromSelectedRowToRoot() {
@@ -350,11 +350,11 @@ class InspectorTreeController extends DisposableController
   double get horizontalPadding => 10.0;
 
   double getDepthIndent(int depth) {
-    return (depth + 1) * columnWidth + horizontalPadding;
+    return (depth + 1) * inspectorColumnWidth + horizontalPadding;
   }
 
   double rowYTop(int index) {
-    return rowHeight * index;
+    return inspectorRowHeight * index;
   }
 
   void nodeChanged(InspectorTreeNode node) {
@@ -405,7 +405,7 @@ class InspectorTreeController extends DisposableController
 
   int get numRows => root?.subtreeSize ?? 0;
 
-  int getRowIndex(double y) => max(0, y ~/ rowHeight);
+  int getRowIndex(double y) => max(0, y ~/ inspectorRowHeight);
 
   InspectorTreeRow? getRowForNode(InspectorTreeNode node) {
     final rootLocal = root;
@@ -463,7 +463,7 @@ class InspectorTreeController extends DisposableController
       getDepthIndent(row.depth),
       rowYTop(row.index),
       approximateNodeWidth,
-      rowHeight,
+      inspectorRowHeight,
     );
   }
 
@@ -947,7 +947,7 @@ class _InspectorTreeState extends State<InspectorTree>
     required double initialX,
     int padCount = _scrollPadCount,
   }) {
-    return initialX - columnWidth * padCount;
+    return initialX - inspectorColumnWidth * padCount;
   }
 
   /// Pad [initialY] so that a row would be placed in the vertical center of
@@ -955,7 +955,7 @@ class _InspectorTreeState extends State<InspectorTree>
   double _padTargetY({
     required double initialY,
   }) {
-    return initialY - (safeViewportHeight / 2) + rowHeight / 2;
+    return initialY - (safeViewportHeight / 2) + inspectorRowHeight / 2;
   }
 
   /// Handle arrow keys for the InspectorTree. Ignore other key events so that
@@ -1049,11 +1049,11 @@ class _InspectorTreeState extends State<InspectorTree>
                     offsetController: _scrollControllerX,
                     offsetControllerViewportDimension: viewportWidth,
                     child: ListView.custom(
-                      itemExtent: rowHeight,
+                      itemExtent: inspectorRowHeight,
                       childrenDelegate: SliverChildBuilderDelegate(
                         (context, index) {
                           if (index == treeControllerLocal.numRows) {
-                            return SizedBox(height: rowHeight);
+                            return SizedBox(height: inspectorRowHeight);
                           }
                           final InspectorTreeRow row =
                               treeControllerLocal.getCachedRow(index)!;
@@ -1135,28 +1135,31 @@ class _RowPainter extends CustomPainter {
     final InspectorTreeNode node = row.node;
     final bool showExpandCollapse = node.showExpandCollapse;
     for (int tick in row.ticks) {
-      currentX = _controller.getDepthIndent(tick) - columnWidth * 0.5;
+      currentX = _controller.getDepthIndent(tick) - inspectorColumnWidth * 0.5;
       // Draw a vertical line for each tick identifying a connection between
       // an ancestor of this node and some other node in the tree.
       canvas.drawLine(
         Offset(currentX, 0.0),
-        Offset(currentX, rowHeight),
+        Offset(currentX, inspectorRowHeight),
         paint,
       );
     }
     // If this row is itself connected to a parent then draw the L shaped line
     // to make that connection.
     if (row.lineToParent) {
-      currentX = _controller.getDepthIndent(row.depth - 1) - columnWidth * 0.5;
-      final double width = showExpandCollapse ? columnWidth * 0.5 : columnWidth;
+      currentX = _controller.getDepthIndent(row.depth - 1) -
+          inspectorColumnWidth * 0.5;
+      final double width = showExpandCollapse
+          ? inspectorColumnWidth * 0.5
+          : inspectorColumnWidth;
       canvas.drawLine(
         Offset(currentX, 0.0),
-        Offset(currentX, rowHeight * 0.5),
+        Offset(currentX, inspectorRowHeight * 0.5),
         paint,
       );
       canvas.drawLine(
-        Offset(currentX, rowHeight * 0.5),
-        Offset(currentX + width, rowHeight * 0.5),
+        Offset(currentX, inspectorRowHeight * 0.5),
+        Offset(currentX + width, inspectorRowHeight * 0.5),
         paint,
       );
     }
@@ -1210,7 +1213,8 @@ class InspectorRowContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double currentX = controller.getDepthIndent(row.depth) - columnWidth;
+    final double currentX =
+        controller.getDepthIndent(row.depth) - inspectorColumnWidth;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -1260,7 +1264,7 @@ class InspectorRowContent extends StatelessWidget {
                         controller.requestFocus();
                       },
                       child: SizedBox(
-                        height: rowHeight,
+                        height: inspectorRowHeight,
                         child: DiagnosticsNodeDescription(
                           node.diagnostic,
                           isSelected: row.isSelected,
@@ -1294,7 +1298,7 @@ class InspectorRowContent extends StatelessWidget {
 
     return CustomPaint(
       painter: _RowPainter(row, controller, colorScheme),
-      size: Size(currentX, rowHeight),
+      size: Size(currentX, inspectorRowHeight),
       child: Align(
         alignment: Alignment.topLeft,
         child: AnimatedBuilder(

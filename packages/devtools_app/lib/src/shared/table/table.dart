@@ -26,9 +26,6 @@ import 'table_data.dart';
 // TODO(devoncarew): We need to render the selected row with a different
 // background color.
 
-/// The height for rows in the table.
-double get defaultRowHeight => scaleByFontFactor(32.0);
-
 typedef IndexedScrollableWidgetBuilder = Widget Function({
   required BuildContext context,
   required LinkedScrollControllerGroup linkedScrollControllerGroup,
@@ -1056,7 +1053,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     var maxHeight = tableConstraints.maxHeight;
     final columnHeadersCount = showColumnGroupHeader ? 2 : 1;
     maxHeight -= columnHeadersCount *
-        (areaPaneHeaderHeight +
+        (defaultHeaderHeight +
             (widget.tallHeaders ? scaleByFontFactor(densePadding) : 0.0));
 
     if (pinnedData.isNotEmpty) {
@@ -1480,7 +1477,7 @@ class _TableRowState<T> extends State<TableRow<T>>
     final box = SizedBox(
       height: widget._rowType == _TableRowType.data
           ? defaultRowHeight
-          : areaPaneHeaderHeight +
+          : defaultHeaderHeight +
               (widget.tall ? scaleByFontFactor(densePadding) : 0.0),
       child: Material(
         color: _searchAwareBackgroundColor(),
@@ -1693,7 +1690,10 @@ class _TableRowState<T> extends State<TableRow<T>>
           child: content,
         );
       }
-      return content;
+      return DefaultTextStyle(
+        style: theme.regularTextStyle,
+        child: content,
+      );
     }
 
     if (widget._rowType == _TableRowType.columnGroupHeader) {

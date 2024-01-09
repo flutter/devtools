@@ -505,9 +505,7 @@ class _TreemapState extends State<Treemap> {
             border: Border.all(color: Colors.black87),
           ),
           child: buildNameAndSizeText(
-            textColor:
-                (Theme.of(context).textTheme.bodyMedium ?? const TextStyle())
-                    .color,
+            textColor: Theme.of(context).colorScheme.onSurface,
             oneLine: true,
           ),
         ),

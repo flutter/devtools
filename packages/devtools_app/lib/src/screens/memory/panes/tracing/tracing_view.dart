@@ -130,10 +130,18 @@ class _ProfileHelpLink extends StatelessWidget {
       gaScreen: gac.memory,
       gaSelection: gac.topicDocumentationButton(_documentationTopic),
       dialogTitle: 'Memory Allocation Tracing Help',
-      child: Column(
+      actions: [
+        MoreInfoLink(
+          url: DocLinks.trace.value,
+          gaScreenName: gac.memory,
+          gaSelectedItemDescription:
+              gac.topicDocumentationLink(_documentationTopic),
+        ),
+      ],
+      child: const Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          const Text(
+          Text(
             'The allocation tracing tab allows for toggling allocation\n'
             'tracing for specific types, which records the locations of\n'
             'allocations of instances of traced types within the\n'
@@ -144,14 +152,8 @@ class _ProfileHelpLink extends StatelessWidget {
             'list, displaying a condensed view of locations where objects\n'
             'were allocated.',
           ),
-          const SizedBox(height: denseSpacing),
-          const ClassTypeLegend(),
-          MoreInfoLink(
-            url: DocLinks.trace.value,
-            gaScreenName: gac.memory,
-            gaSelectedItemDescription:
-                gac.topicDocumentationLink(_documentationTopic),
-          ),
+          SizedBox(height: denseSpacing),
+          ClassTypeLegend(),
         ],
       ),
     );

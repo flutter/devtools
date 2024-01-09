@@ -200,13 +200,9 @@ class _VMFlagsDialogState extends State<VMFlagsDialog> with AutoDisposeMixin {
           SizedBox(
             width: defaultSearchFieldWidth,
             height: defaultTextFieldHeight,
-            child: TextField(
+            child: DevToolsClearableTextField(
               controller: filterController,
-              decoration: const InputDecoration(
-                isDense: true,
-                border: OutlineInputBorder(),
-                labelText: 'Filter',
-              ),
+              labelText: 'Filter',
             ),
           ),
         ],
@@ -283,7 +279,8 @@ class _ValueColumn extends ColumnData<_DialogFlag> {
   _ValueColumn()
       : super(
           'Value',
-          fixedWidthPx: scaleByFontFactor(160),
+          fixedWidthPx: scaleByFontFactor(100),
+          headerAlignment: TextAlign.right,
           alignment: ColumnAlignment.right,
         );
 

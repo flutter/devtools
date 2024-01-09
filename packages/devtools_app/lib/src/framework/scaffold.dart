@@ -302,7 +302,6 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           ),
       ],
     );
-    final theme = Theme.of(context);
 
     return Provider<ImportController>.value(
       value: _importController,
@@ -341,9 +340,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
                       ? Split(
                           axis: Axis.vertical,
                           splitters: [
-                            ConsolePaneHeader(
-                              backgroundColor: theme.colorScheme.surface,
-                            ),
+                            ConsolePaneHeader(),
                           ],
                           initialFractions: const [0.8, 0.2],
                           children: [

@@ -146,7 +146,10 @@ class _MethodGraphState extends State<_MethodGraph> with AutoDisposeMixin {
           DevToolsTooltip(
             message: selectedNodeDisplay,
             child: Padding(
-              padding: const EdgeInsets.all(denseSpacing),
+              padding: const EdgeInsets.symmetric(
+                horizontal: denseSpacing,
+                vertical: densePadding,
+              ),
               child: MethodAndSourceDisplay(
                 methodName: selectedNode.name,
                 packageUri: selectedNode.packageUri,
@@ -273,8 +276,8 @@ class _MethodColumn extends ColumnData<MethodTableGraphNode>
   }
 }
 
-const _totalAndSelfColumnWidth = 75.0;
-const _callGraphColumnWidth = 80.0;
+const _totalAndSelfColumnWidth = 60.0;
+const _callGraphColumnWidth = 70.0;
 
 class _SelfTimeColumn extends TimeAndPercentageColumn<MethodTableGraphNode> {
   _SelfTimeColumn({String? titleTooltip})

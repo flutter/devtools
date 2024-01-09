@@ -453,7 +453,7 @@ class DevToolsSwitch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: defaultSwitchHeight,
+      height: defaultButtonHeight,
       padding: padding,
       child: FittedBox(
         fit: BoxFit.fill,
@@ -573,7 +573,8 @@ class Badge extends StatelessWidget {
 
     // These constants are sized to give 1 digit badges a circular look.
     const badgeCornerRadius = 12.0;
-    const badgePadding = 6.0;
+    const verticalBadgePadding = 1.0;
+    const horizontalBadgePadding = 6.0;
 
     return Container(
       decoration: BoxDecoration(
@@ -581,8 +582,8 @@ class Badge extends StatelessWidget {
         borderRadius: BorderRadius.circular(badgeCornerRadius),
       ),
       padding: const EdgeInsets.symmetric(
-        vertical: borderPadding,
-        horizontal: badgePadding,
+        vertical: verticalBadgePadding,
+        horizontal: horizontalBadgePadding,
       ),
       child: Text(
         text,
@@ -777,12 +778,14 @@ class RoundedDropDownButton<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bgColor = Theme.of(context).colorScheme.backgroundColorSelected;
+    final theme = Theme.of(context);
+    final bgColor = theme.colorScheme.backgroundColorSelected;
 
     Radius selectRadius(bool show) {
       return show ? defaultRadius : Radius.zero;
     }
 
+    final style = this.style ?? theme.regularTextStyle;
     final showTopLeft = roundedCornerOptions?.showTopLeft ?? true;
     final showTopRight = roundedCornerOptions?.showTopRight ?? true;
     final showBottomLeft = roundedCornerOptions?.showBottomLeft ?? true;
@@ -832,6 +835,7 @@ class DevToolsClearableTextField extends StatelessWidget {
     this.prefixIcon,
     this.additionalSuffixActions = const <Widget>[],
     this.onChanged,
+    this.onSubmitted,
     this.autofocus = false,
   })  : controller = controller ?? TextEditingController(),
         super(key: key);
@@ -842,45 +846,54 @@ class DevToolsClearableTextField extends StatelessWidget {
   final List<Widget> additionalSuffixActions;
   final String labelText;
   final Function(String)? onChanged;
+  final Function(String)? onSubmitted;
   final bool autofocus;
 
   static const _contentVerticalPadding = 6.0;
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
-      autofocus: autofocus,
-      controller: controller,
-      onChanged: onChanged,
-      decoration: InputDecoration(
-        isDense: true,
-        contentPadding: const EdgeInsets.only(
-          top: _contentVerticalPadding,
-          bottom: _contentVerticalPadding,
-          left: denseSpacing,
-          right: densePadding,
-        ),
-        constraints: BoxConstraints(
-          minHeight: defaultTextFieldHeight,
-          maxHeight: defaultTextFieldHeight,
-        ),
-        border: const OutlineInputBorder(),
-        labelText: labelText,
-        hintText: hintText,
-        prefixIcon: prefixIcon,
-        suffix: SizedBox(
-          height: inputDecorationElementHeight,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              clearInputButton(
-                () {
-                  controller.clear();
-                  onChanged?.call('');
-                },
-              ),
-              ...additionalSuffixActions,
-            ],
+    final theme = Theme.of(context);
+    return SizedBox(
+      height: defaultTextFieldHeight,
+      child: TextField(
+        autofocus: autofocus,
+        controller: controller,
+        onChanged: onChanged,
+        onSubmitted: onSubmitted,
+        style: theme.regularTextStyle,
+        decoration: InputDecoration(
+          isDense: true,
+          contentPadding: const EdgeInsets.only(
+            top: _contentVerticalPadding,
+            bottom: _contentVerticalPadding,
+            left: denseSpacing,
+            right: densePadding,
+          ),
+          constraints: BoxConstraints(
+            minHeight: defaultTextFieldHeight,
+            maxHeight: defaultTextFieldHeight,
+          ),
+          border: const OutlineInputBorder(),
+          labelText: labelText,
+          labelStyle: theme.subtleTextStyle,
+          hintText: hintText,
+          hintStyle: theme.subtleTextStyle,
+          prefixIcon: prefixIcon,
+          suffix: SizedBox(
+            height: inputDecorationElementHeight,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                clearInputButton(
+                  () {
+                    controller.clear();
+                    onChanged?.call('');
+                  },
+                ),
+                ...additionalSuffixActions,
+              ],
+            ),
           ),
         ),
       ),
@@ -995,6 +1008,7 @@ class LeftBorder extends StatelessWidget {
 /// Makes for nice-looking rectangles.
 final goldenRatio = 1 + sqrt(5) / 2;
 
+/// A centered text widget with the default DevTools text style applied.
 class CenteredMessage extends StatelessWidget {
   const CenteredMessage(this.message, {super.key});
 
@@ -1003,7 +1017,11 @@ class CenteredMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Text(message),
+      child: Text(
+        message,
+        textAlign: TextAlign.center,
+        style: Theme.of(context).regularTextStyle,
+      ),
     );
   }
 }
@@ -1595,7 +1613,7 @@ class CopyToClipboardControl extends StatelessWidget {
               copyToClipboard(dataProvider!() ?? '', successMessage),
             );
           };
-
+    final size = this.size ?? defaultIconSize;
     return SizedBox(
       height: size,
       child: ToolbarAction(
@@ -1729,7 +1747,7 @@ class CheckboxSetting extends StatelessWidget {
         Flexible(
           child: RichText(
             overflow: TextOverflow.visible,
-            maxLines: 2,
+            maxLines: 3,
             text: TextSpan(
               text: title,
               style: enabled ? theme.regularTextStyle : theme.subtleTextStyle,
@@ -2014,6 +2032,7 @@ class HelpButtonWithDialog extends StatelessWidget {
     required this.gaSelection,
     required this.dialogTitle,
     required this.child,
+    this.actions = const <Widget>[],
     this.outlined = true,
   });
 
@@ -2024,6 +2043,8 @@ class HelpButtonWithDialog extends StatelessWidget {
   final String dialogTitle;
 
   final Widget child;
+
+  final List<Widget> actions;
 
   final bool outlined;
 
@@ -2039,8 +2060,11 @@ class HelpButtonWithDialog extends StatelessWidget {
               title: DialogTitleText(dialogTitle),
               includeDivider: false,
               content: child,
-              actions: const [
-                DialogCloseButton(),
+              actionsAlignment:
+                  actions.isNotEmpty ? MainAxisAlignment.spaceBetween : null,
+              actions: [
+                ...actions,
+                const DialogCloseButton(),
               ],
             ),
           ),
@@ -2064,18 +2088,15 @@ class BulletSpacer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-
-    final textStyle = theme.textTheme.bodyMedium;
-    final mutedColor = textStyle?.color?.withAlpha(0x90);
-
+    final theme = Theme.of(context);
+    final mutedColor = theme.colorScheme.onSurface.withAlpha(0x90);
     return Container(
       width: width,
       height: actionWidgetSize,
       alignment: Alignment.center,
       child: Text(
         '•',
-        style: textStyle?.copyWith(color: color ?? mutedColor),
+        style: theme.regularTextStyle.copyWith(color: color ?? mutedColor),
       ),
     );
   }
