@@ -1124,6 +1124,16 @@ extension ListExtension<T> on List<T> {
   T get second => this[1];
 
   T get third => this[2];
+
+  List<int> allIndicesWhere(bool Function(T element) test) {
+    final indices = <int>[];
+    for (var i = 0; i < length; i++) {
+      if (test(this[i])) {
+        indices.add(i);
+      }
+    }
+    return indices;
+  }
 }
 
 extension SetExtension<T> on Set<T> {

@@ -910,6 +910,14 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
 
   late List<T> _data;
 
+  /// An adjusted copy of [widget.columnWidths] where any variable width columns
+  /// may be increased so that the sum of all column widths equals the available
+  /// screen space.
+  ///
+  /// This must be calculated where we have access to the Flutter view
+  /// constraints (e.g. the [LayoutBuilder] below).
+  late List<double> _adjustedColumnWidths;
+
   @override
   void initState() {
     super.initState();
@@ -925,6 +933,8 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     scrollController = widget.tableController.verticalScrollController!;
 
     pinnedScrollController = ScrollController();
+
+    _adjustedColumnWidths = List.of(widget.columnWidths);
   }
 
   @override
@@ -940,6 +950,8 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
       cancelListeners();
       _initDataAndAddListeners();
     }
+
+    _adjustedColumnWidths = List.of(widget.columnWidths);
   }
 
   void _initDataAndAddListeners() {
@@ -1025,8 +1037,8 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     super.dispose();
   }
 
-  /// The width of all columns in the table, with additional padding.
-  double get tableWidth {
+  /// The width of all columns in the table with additional padding.
+  double get _tableWidthForOriginalColumns {
     var tableWidth = 2 * defaultSpacing;
     final numColumnGroupSpacers =
         widget.tableController.columnGroups?.numSpacers ?? 0;
@@ -1038,6 +1050,30 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
       tableWidth += columnWidth;
     }
     return tableWidth;
+  }
+
+  /// Modifies [_adjustedColumnWidths] so that any available view space greater
+  /// than [_tableWidthForOriginalColumns] is added to the widths of variable
+  /// width columns.
+  void _adjustColumnWidthsForViewSize(double viewWidth) {
+    final extraSpace = viewWidth - _tableWidthForOriginalColumns;
+    if (extraSpace <= 0) {
+      _adjustedColumnWidths = List.of(widget.columnWidths);
+      return;
+    }
+
+    _adjustedColumnWidths.clear();
+    final variableWidthColumnIndices = widget.tableController.columns
+        .allIndicesWhere((c) => c.fixedWidthPx == null);
+    for (int i = 0; i < widget.columnWidths.length; i++) {
+      final originalWidth = widget.columnWidths[i];
+      if (variableWidthColumnIndices.contains(i)) {
+        final extraWidth = extraSpace / variableWidthColumnIndices.length;
+        _adjustedColumnWidths.add(originalWidth + extraWidth);
+      } else {
+        _adjustedColumnWidths.add(originalWidth);
+      }
+    }
   }
 
   double _pinnedDataHeight(BoxConstraints tableConstraints) => min(
@@ -1072,7 +1108,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
       context: context,
       linkedScrollControllerGroup: _linkedHorizontalScrollControllerGroup,
       index: index,
-      columnWidths: widget.columnWidths,
+      columnWidths: _adjustedColumnWidths,
       isPinned: isPinned,
       enableHoverHandling: widget.enableHoverHandling,
     );
@@ -1105,12 +1141,11 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     // TODO(kenz): add horizontal scrollbar.
     return LayoutBuilder(
       builder: (context, constraints) {
+        final viewWidth = constraints.widthConstraints().maxWidth;
+        _adjustColumnWidthsForViewSize(viewWidth);
         return SelectionArea(
           child: SizedBox(
-            width: max(
-              constraints.widthConstraints().maxWidth,
-              tableWidth,
-            ),
+            width: max(viewWidth, _tableWidthForOriginalColumns),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -1119,7 +1154,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
                     linkedScrollControllerGroup:
                         _linkedHorizontalScrollControllerGroup,
                     columnGroups: columnGroups,
-                    columnWidths: widget.columnWidths,
+                    columnWidths: _adjustedColumnWidths,
                     sortColumn: sortColumn,
                     sortDirection: tableUiState.sortDirection,
                     secondarySortColumn:
@@ -1134,7 +1169,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
                       _linkedHorizontalScrollControllerGroup,
                   columns: widget.tableController.columns,
                   columnGroups: columnGroups,
-                  columnWidths: widget.columnWidths,
+                  columnWidths: _adjustedColumnWidths,
                   sortColumn: sortColumn,
                   sortDirection: tableUiState.sortDirection,
                   secondarySortColumn:

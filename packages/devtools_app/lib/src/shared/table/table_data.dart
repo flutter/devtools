@@ -22,8 +22,8 @@ import '../primitives/utils.dart';
 abstract class ColumnData<T> {
   ColumnData(
     this.title, {
-    this.titleTooltip,
     required double this.fixedWidthPx,
+    this.titleTooltip,
     this.alignment = ColumnAlignment.left,
     this.headerAlignment = TextAlign.left,
   }) : minWidthPx = null;
@@ -43,6 +43,7 @@ abstract class ColumnData<T> {
   /// Width of the column expressed as a fixed number of pixels.
   final double? fixedWidthPx;
 
+  /// The minimum width that should be used for a variable width column.
   final double? minWidthPx;
 
   /// How much to indent the data object by.
