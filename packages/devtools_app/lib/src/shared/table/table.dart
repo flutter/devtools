@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:collection/collection.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
@@ -1122,9 +1121,9 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
     for (int i = 0; i < widget.columnWidths.length; i++) {
       final originalWidth = widget.columnWidths[i];
       final isVariableWidthColumn = variableWidthColumnIndices.contains(i);
-      adjustedColumnWidths.add(isVariableWidthColumn
-          ? adjustedColumnWidthsByIndex[i]!
-          : originalWidth);
+      adjustedColumnWidths.add(
+        isVariableWidthColumn ? adjustedColumnWidthsByIndex[i]! : originalWidth,
+      );
     }
   }
 
