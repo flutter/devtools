@@ -531,12 +531,12 @@ void main() {
               expect(columnWidths.length, 3);
               expect(columnWidths[0], 300.0); // Fixed width column.
               expect(columnWidths[1], 400.0); // Fixed width column.
-              expect(columnWidths[2], 3236.0); // Variable width column.
+              expect(columnWidths[2], 3252.0); // Variable width column.
 
               expect(adjustedColumnWidths.length, 3);
               expect(adjustedColumnWidths[0], 300.0);
               expect(adjustedColumnWidths[1], 400.0);
-              expect(adjustedColumnWidths[2], 3236.0);
+              expect(adjustedColumnWidths[2], 3252.0);
             }
 
             viewSize.value = const Size(800.0, 200.0);
@@ -549,12 +549,12 @@ void main() {
               expect(columnWidths.length, 3);
               expect(columnWidths[0], 300.0);
               expect(columnWidths[1], 400.0);
-              expect(columnWidths[2], 36.0);
+              expect(columnWidths[2], 52.0);
 
               expect(adjustedColumnWidths.length, 3);
               expect(adjustedColumnWidths[0], 300.0);
               expect(adjustedColumnWidths[1], 400.0);
-              expect(adjustedColumnWidths[2], 36.0);
+              expect(adjustedColumnWidths[2], 52.0);
             }
 
             viewSize.value = const Size(200.0, 200.0);
@@ -602,15 +602,15 @@ void main() {
               final adjustedColumnWidths = tableState.adjustedColumnWidths;
               expect(columnWidths.length, 4);
               expect(columnWidths[0], 300.0); // Fixed width column.
-              expect(columnWidths[1], 1610.0); // Min width wide column
+              expect(columnWidths[1], 1620.0); // Min width wide column
               expect(columnWidths[2], 400.0); // Fixed width column.
-              expect(columnWidths[3], 1610.0); // Variable width wide column.
+              expect(columnWidths[3], 1620.0); // Variable width wide column.
 
               expect(adjustedColumnWidths.length, 4);
               expect(adjustedColumnWidths[0], 300.0);
-              expect(adjustedColumnWidths[1], 1610.0);
+              expect(adjustedColumnWidths[1], 1620.0);
               expect(adjustedColumnWidths[2], 400.0);
-              expect(adjustedColumnWidths[3], 1610.0);
+              expect(adjustedColumnWidths[3], 1620.0);
             }
 
             viewSize.value = const Size(1000.0, 200.0);
@@ -622,15 +622,15 @@ void main() {
               final adjustedColumnWidths = tableState.adjustedColumnWidths;
               expect(columnWidths.length, 4);
               expect(columnWidths[0], 300.0); // Fixed width column.
-              expect(columnWidths[1], 110.0); // Min width wide column
+              expect(columnWidths[1], 120.0); // Min width wide column
               expect(columnWidths[2], 400.0); // Fixed width column.
-              expect(columnWidths[3], 110.0); // Variable width wide column.
+              expect(columnWidths[3], 120.0); // Variable width wide column.
 
               expect(adjustedColumnWidths.length, 4);
               expect(adjustedColumnWidths[0], 300.0);
-              expect(adjustedColumnWidths[1], 110.0);
+              expect(adjustedColumnWidths[1], 120.0);
               expect(adjustedColumnWidths[2], 400.0);
-              expect(adjustedColumnWidths[3], 110.0);
+              expect(adjustedColumnWidths[3], 120.0);
             }
 
             viewSize.value = const Size(200.0, 200.0);
@@ -681,18 +681,18 @@ void main() {
               final adjustedColumnWidths = tableState.adjustedColumnWidths;
               expect(columnWidths.length, 5);
               expect(columnWidths[0], 300.0); // Fixed width column
-              expect(columnWidths[1], 1068.0); // Min width wide column
+              expect(columnWidths[1], 1076.0); // Min width wide column
               // Very wide min width wide column
-              expect(columnWidths[2], 1068.0);
+              expect(columnWidths[2], 1076.0);
               expect(columnWidths[3], 400.0); // Fixed width column.
-              expect(columnWidths[4], 1068.0); // Variable width wide column.
+              expect(columnWidths[4], 1076.0); // Variable width wide column.
 
               expect(adjustedColumnWidths.length, 5);
               expect(adjustedColumnWidths[0], 300.0);
-              expect(adjustedColumnWidths[1], 1068.0);
-              expect(adjustedColumnWidths[2], 1068.0);
+              expect(adjustedColumnWidths[1], 1076.0);
+              expect(adjustedColumnWidths[2], 1076.0);
               expect(adjustedColumnWidths[3], 400.0);
-              expect(adjustedColumnWidths[4], 1068.0);
+              expect(adjustedColumnWidths[4], 1076.0);
             }
 
             viewSize.value = const Size(1501.0, 200.0);
@@ -704,18 +704,18 @@ void main() {
               final adjustedColumnWidths = tableState.adjustedColumnWidths;
               expect(columnWidths.length, 5);
               expect(columnWidths[0], 300.0); // Fixed width column
-              expect(columnWidths[1], 235.0); // Min width wide column
+              expect(columnWidths[1], 243.0); // Min width wide column
               // Very wide min width wide column
-              expect(columnWidths[2], 235.0);
+              expect(columnWidths[2], 243.0);
               expect(columnWidths[3], 400.0); // Fixed width column.
-              expect(columnWidths[4], 235.0); // Variable width wide column.
+              expect(columnWidths[4], 243.0); // Variable width wide column.
 
               expect(adjustedColumnWidths.length, 5);
               expect(adjustedColumnWidths[0], 300.0);
-              expect(adjustedColumnWidths[1], 235.0);
-              expect(adjustedColumnWidths[2], 235.0);
+              expect(adjustedColumnWidths[1], 243.0);
+              expect(adjustedColumnWidths[2], 243.0);
               expect(adjustedColumnWidths[3], 400.0);
-              expect(adjustedColumnWidths[4], 235.0);
+              expect(adjustedColumnWidths[4], 243.0);
             }
 
             viewSize.value = const Size(1200.0, 200.0);
@@ -727,18 +727,18 @@ void main() {
               final adjustedColumnWidths = tableState.adjustedColumnWidths;
               expect(columnWidths.length, 5);
               expect(columnWidths[0], 300.0); // Fixed width column
-              expect(columnWidths[1], 122.0); // Min width wide column
+              expect(columnWidths[1], 134.0); // Min width wide column
               // Very wide min width wide column
               expect(columnWidths[2], 160.0);
               expect(columnWidths[3], 400.0); // Fixed width column.
-              expect(columnWidths[4], 122.0); // Variable width wide column.
+              expect(columnWidths[4], 134.0); // Variable width wide column.
 
               expect(adjustedColumnWidths.length, 5);
               expect(adjustedColumnWidths[0], 300.0);
-              expect(adjustedColumnWidths[1], 122.0);
+              expect(adjustedColumnWidths[1], 134.0);
               expect(adjustedColumnWidths[2], 160.0);
               expect(adjustedColumnWidths[3], 400.0);
-              expect(adjustedColumnWidths[4], 122.0);
+              expect(adjustedColumnWidths[4], 134.0);
             }
 
             viewSize.value = const Size(1000.0, 200.0);
@@ -798,7 +798,7 @@ void main() {
               expect(adjustedColumnWidths.length, 3);
               expect(adjustedColumnWidths[0], 300.0);
               expect(adjustedColumnWidths[1], 400.0);
-              expect(adjustedColumnWidths[2], 3236.0);
+              expect(adjustedColumnWidths[2], 3252.0);
             }
 
             viewSize.value = const Size(800.0, 200.0);
@@ -870,9 +870,9 @@ void main() {
 
               expect(adjustedColumnWidths.length, 4);
               expect(adjustedColumnWidths[0], 300.0);
-              expect(adjustedColumnWidths[1], 1610.0);
+              expect(adjustedColumnWidths[1], 1620.0);
               expect(adjustedColumnWidths[2], 400.0);
-              expect(adjustedColumnWidths[3], 1610.0);
+              expect(adjustedColumnWidths[3], 1620.0);
             }
 
             viewSize.value = const Size(1000.0, 200.0);
@@ -950,8 +950,8 @@ void main() {
 
               expect(adjustedColumnWidths.length, 5);
               expect(adjustedColumnWidths[0], 300.0);
-              expect(adjustedColumnWidths[1], 1002.0);
-              expect(adjustedColumnWidths[2], 1002.0);
+              expect(adjustedColumnWidths[1], 1014.0);
+              expect(adjustedColumnWidths[2], 1014.0);
               expect(adjustedColumnWidths[3], 400.0);
               expect(adjustedColumnWidths[4], 1200.0);
             }
@@ -1453,56 +1453,61 @@ void main() {
       expect(tree.children[2].name, 'Qux');
     });
 
-    testWidgets('sorts data by column', (WidgetTester tester) async {
-      final table = TreeTable<TestData>(
-        columns: [
-          _NumberColumn(),
-          treeColumn,
-        ],
-        dataRoots: [tree1],
-        dataKey: 'test-data',
-        treeColumn: treeColumn,
-        keyFactory: (d) => Key(d.name),
-        defaultSortColumn: treeColumn,
-        defaultSortDirection: SortDirection.ascending,
-      );
-      await tester.pumpWidget(wrap(table));
-      final TreeTableState<TestData> state = tester.state(find.byWidget(table));
-      expect(state.tableController.columnWidths![0], 400);
-      expect(state.tableController.columnWidths![1], 81);
-      final tree = state.tableController.dataRoots[0];
-      expect(tree.children[0].name, 'Bar');
-      expect(tree.children[0].children[0].name, 'Baz');
-      expect(tree.children[0].children[1].name, 'Crackle');
-      expect(tree.children[0].children[2].name, 'Pop');
-      expect(tree.children[0].children[4].name, 'Snap');
-      expect(tree.children[1].name, 'Baz');
-      expect(tree.children[2].name, 'Qux');
+    testWidgetsWithWindowSize(
+      'sorts data by column',
+      windowSize,
+      (WidgetTester tester) async {
+        final table = TreeTable<TestData>(
+          columns: [
+            _NumberColumn(),
+            treeColumn,
+          ],
+          dataRoots: [tree1],
+          dataKey: 'test-data',
+          treeColumn: treeColumn,
+          keyFactory: (d) => Key(d.name),
+          defaultSortColumn: treeColumn,
+          defaultSortDirection: SortDirection.ascending,
+        );
+        await tester.pumpWidget(wrap(table));
+        final TreeTableState<TestData> state =
+            tester.state(find.byWidget(table));
+        expect(state.tableController.columnWidths![0], 400);
+        expect(state.tableController.columnWidths![1], 1242.0);
+        final tree = state.tableController.dataRoots[0];
+        expect(tree.children[0].name, 'Bar');
+        expect(tree.children[0].children[0].name, 'Baz');
+        expect(tree.children[0].children[1].name, 'Crackle');
+        expect(tree.children[0].children[2].name, 'Pop');
+        expect(tree.children[0].children[4].name, 'Snap');
+        expect(tree.children[1].name, 'Baz');
+        expect(tree.children[2].name, 'Qux');
 
-      // Reverse the sort direction.
-      await tester.tap(find.text('Name'));
-      await tester.pumpAndSettle();
-      expect(tree.children[2].name, 'Bar');
-      expect(tree.children[2].children[4].name, 'Baz');
-      expect(tree.children[2].children[3].name, 'Crackle');
-      expect(tree.children[2].children[2].name, 'Pop');
-      expect(tree.children[2].children[1].name, 'Qux');
-      expect(tree.children[2].children[0].name, 'Snap');
-      expect(tree.children[1].name, 'Baz');
-      expect(tree.children[0].name, 'Qux');
+        // Reverse the sort direction.
+        await tester.tap(find.text('Name'));
+        await tester.pumpAndSettle();
+        expect(tree.children[2].name, 'Bar');
+        expect(tree.children[2].children[4].name, 'Baz');
+        expect(tree.children[2].children[3].name, 'Crackle');
+        expect(tree.children[2].children[2].name, 'Pop');
+        expect(tree.children[2].children[1].name, 'Qux');
+        expect(tree.children[2].children[0].name, 'Snap');
+        expect(tree.children[1].name, 'Baz');
+        expect(tree.children[0].name, 'Qux');
 
-      // Change the sort column.
-      await tester.tap(find.text('Number'));
-      await tester.pumpAndSettle();
-      expect(tree.children[0].name, 'Bar');
-      expect(tree.children[0].children[0].name, 'Baz');
-      expect(tree.children[0].children[1].name, 'Qux');
-      expect(tree.children[0].children[2].name, 'Snap');
-      expect(tree.children[0].children[3].name, 'Pop');
-      expect(tree.children[0].children[4].name, 'Crackle');
-      expect(tree.children[1].name, 'Qux');
-      expect(tree.children[2].name, 'Baz');
-    });
+        // Change the sort column.
+        await tester.tap(find.text('Number'));
+        await tester.pumpAndSettle();
+        expect(tree.children[0].name, 'Bar');
+        expect(tree.children[0].children[0].name, 'Baz');
+        expect(tree.children[0].children[1].name, 'Qux');
+        expect(tree.children[0].children[2].name, 'Snap');
+        expect(tree.children[0].children[3].name, 'Pop');
+        expect(tree.children[0].children[4].name, 'Crackle');
+        expect(tree.children[1].name, 'Qux');
+        expect(tree.children[2].name, 'Baz');
+      },
+    );
 
     group('keyboard navigation', () {
       late TestData data;
