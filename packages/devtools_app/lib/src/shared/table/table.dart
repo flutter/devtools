@@ -323,7 +323,7 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
 
   @override
   Widget build(BuildContext context) {
-    Widget buildTable(List<double> columnWidths) => _Table<T>(
+    Widget buildTable(List<double> columnWidths) => DevToolsTable<T>(
           tableController: tableController,
           columnWidths: columnWidths,
           autoScrollContent: widget.autoScrollContent,
@@ -685,7 +685,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 
   @override
   Widget build(BuildContext context) {
-    return _Table<T>(
+    return DevToolsTable<T>(
       tableController: tableController,
       columnWidths: tableController.columnWidths!,
       rowBuilder: _buildRow,
@@ -862,8 +862,9 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 
 // TODO(kenz): https://github.com/flutter/devtools/issues/1522. The table code
 // needs to be refactored to support flexible column widths.
-class _Table<T> extends StatefulWidget {
-  const _Table({
+@visibleForTesting
+class DevToolsTable<T> extends StatefulWidget {
+  const DevToolsTable({
     Key? key,
     required this.tableController,
     required this.columnWidths,
@@ -897,15 +898,26 @@ class _Table<T> extends StatefulWidget {
   final bool enableHoverHandling;
 
   @override
-  _TableState<T> createState() => _TableState<T>();
+  DevToolsTableState<T> createState() => DevToolsTableState<T>();
 }
 
-class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
+@visibleForTesting
+class DevToolsTableState<T> extends State<DevToolsTable<T>>
+    with AutoDisposeMixin {
   late LinkedScrollControllerGroup _linkedHorizontalScrollControllerGroup;
   late ScrollController scrollController;
   late ScrollController pinnedScrollController;
 
   late List<T> _data;
+
+  /// An adjusted copy of [widget.columnWidths] where any variable width columns
+  /// may be increased so that the sum of all column widths equals the available
+  /// screen space.
+  ///
+  /// This must be calculated where we have access to the Flutter view
+  /// constraints (e.g. the [LayoutBuilder] below).
+  @visibleForTesting
+  late List<double> adjustedColumnWidths;
 
   @override
   void initState() {
@@ -922,10 +934,12 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     scrollController = widget.tableController.verticalScrollController!;
 
     pinnedScrollController = ScrollController();
+
+    adjustedColumnWidths = List.of(widget.columnWidths);
   }
 
   @override
-  void didUpdateWidget(covariant _Table<T> oldWidget) {
+  void didUpdateWidget(covariant DevToolsTable<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     final notifiersChanged = widget.tableController.tableData !=
@@ -937,6 +951,8 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
       cancelListeners();
       _initDataAndAddListeners();
     }
+
+    adjustedColumnWidths = List.of(widget.columnWidths);
   }
 
   void _initDataAndAddListeners() {
@@ -1022,8 +1038,8 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     super.dispose();
   }
 
-  /// The width of all columns in the table, with additional padding.
-  double get tableWidth {
+  /// The width of all columns in the table with additional padding.
+  double get _tableWidthForOriginalColumns {
     var tableWidth = 2 * defaultSpacing;
     final numColumnGroupSpacers =
         widget.tableController.columnGroups?.numSpacers ?? 0;
@@ -1035,6 +1051,80 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
       tableWidth += columnWidth;
     }
     return tableWidth;
+  }
+
+  /// Modifies [adjustedColumnWidths] so that any available view space greater
+  /// than [_tableWidthForOriginalColumns] is distributed evenly across variable
+  /// width columns.
+  void _adjustColumnWidthsForViewSize(double viewWidth) {
+    final extraSpace = viewWidth - _tableWidthForOriginalColumns;
+    if (extraSpace <= 0) {
+      adjustedColumnWidths = List.of(widget.columnWidths);
+      return;
+    }
+
+    final adjustedColumnWidthsByIndex = <int, double>{};
+
+    /// Helper method to evenly distribute [space] among the columns at
+    /// [columnIndices].
+    ///
+    /// This method stores the adjusted width values in
+    /// [adjustedColumnWidthsByIndex].
+    void evenlyDistributeColumnSizes(List<int> columnIndices, double space) {
+      final targetSize = space / columnIndices.length;
+
+      var largestColumnIndex = -1;
+      var largestColumnWidth = 0.0;
+      for (final index in columnIndices) {
+        final columnWidth = widget.columnWidths[index];
+        if (columnWidth >= largestColumnWidth) {
+          largestColumnIndex = index;
+          largestColumnWidth = columnWidth;
+        }
+      }
+      if (targetSize < largestColumnWidth) {
+        // We do not have enough extra space to evenly distribute to all
+        // columns. Remove the largest column and recurse.
+        adjustedColumnWidthsByIndex[largestColumnIndex] = largestColumnWidth;
+        final newColumnIndices = List.of(columnIndices)
+          ..remove(largestColumnIndex);
+        return evenlyDistributeColumnSizes(
+          newColumnIndices,
+          space - largestColumnWidth,
+        );
+      }
+
+      for (int i = 0; i < columnIndices.length; i++) {
+        final columnIndex = columnIndices[i];
+        adjustedColumnWidthsByIndex[columnIndex] = targetSize;
+      }
+    }
+
+    final variableWidthColumnIndices = <int>[];
+    var sumVariableWidthColumnSizes = 0.0;
+    for (int i = 0; i < widget.tableController.columns.length; i++) {
+      final column = widget.tableController.columns[i];
+      if (column.fixedWidthPx == null) {
+        variableWidthColumnIndices.add(i);
+        sumVariableWidthColumnSizes += widget.columnWidths[i];
+      }
+    }
+    final totalVariableWidthColumnSpace =
+        sumVariableWidthColumnSizes + extraSpace;
+
+    evenlyDistributeColumnSizes(
+      variableWidthColumnIndices,
+      totalVariableWidthColumnSpace,
+    );
+
+    adjustedColumnWidths.clear();
+    for (int i = 0; i < widget.columnWidths.length; i++) {
+      final originalWidth = widget.columnWidths[i];
+      final isVariableWidthColumn = variableWidthColumnIndices.contains(i);
+      adjustedColumnWidths.add(
+        isVariableWidthColumn ? adjustedColumnWidthsByIndex[i]! : originalWidth,
+      );
+    }
   }
 
   double _pinnedDataHeight(BoxConstraints tableConstraints) => min(
@@ -1069,7 +1159,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
       context: context,
       linkedScrollControllerGroup: _linkedHorizontalScrollControllerGroup,
       index: index,
-      columnWidths: widget.columnWidths,
+      columnWidths: adjustedColumnWidths,
       isPinned: isPinned,
       enableHoverHandling: widget.enableHoverHandling,
     );
@@ -1102,12 +1192,11 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     // TODO(kenz): add horizontal scrollbar.
     return LayoutBuilder(
       builder: (context, constraints) {
+        final viewWidth = constraints.maxWidth;
+        _adjustColumnWidthsForViewSize(viewWidth);
         return SelectionArea(
           child: SizedBox(
-            width: max(
-              constraints.widthConstraints().maxWidth,
-              tableWidth,
-            ),
+            width: max(viewWidth, _tableWidthForOriginalColumns),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -1116,7 +1205,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
                     linkedScrollControllerGroup:
                         _linkedHorizontalScrollControllerGroup,
                     columnGroups: columnGroups,
-                    columnWidths: widget.columnWidths,
+                    columnWidths: adjustedColumnWidths,
                     sortColumn: sortColumn,
                     sortDirection: tableUiState.sortDirection,
                     secondarySortColumn:
@@ -1131,7 +1220,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
                       _linkedHorizontalScrollControllerGroup,
                   columns: widget.tableController.columns,
                   columnGroups: columnGroups,
-                  columnWidths: widget.columnWidths,
+                  columnWidths: adjustedColumnWidths,
                   sortColumn: sortColumn,
                   sortDirection: tableUiState.sortDirection,
                   secondarySortColumn:

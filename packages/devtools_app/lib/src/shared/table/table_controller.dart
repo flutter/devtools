@@ -1,5 +1,7 @@
 import 'dart:collection';
+import 'dart:math';
 
+import 'package:collection/collection.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -132,7 +134,7 @@ class FlatTableController<T> extends TableControllerBase<T> {
     }
 
     if (!sizeColumnsToFit) {
-      columnWidths = computeColumnWidthsSizeToContent(data);
+      columnWidths = computeColumnWidthsSizeToContent();
     }
     _tableData.value = TableData<T>(
       data: data,
@@ -164,6 +166,8 @@ class TreeTableController<T extends TreeNode<T>>
 
   late List<T> dataRoots;
 
+  late int maxTableDepth;
+
   @override
   void setData(List<T> data, String key) {
     dataRoots = data;
@@ -172,6 +176,12 @@ class TreeTableController<T extends TreeNode<T>>
         root.expand();
       }
     }
+    // TODO(kenz): instead of using the maxiumum tree depth, consider using the
+    // maximum depth of expanded nodes.
+    maxTableDepth = dataRoots.map((root) => root.depth).fold(
+          0,
+          (currentMaxDepth, nextDepth) => max(currentMaxDepth, nextDepth),
+        );
 
     // Look up the UI state for [key], and sort accordingly.
     final uiState = _tableUiStateForKey(key);
@@ -215,7 +225,7 @@ class TreeTableController<T extends TreeNode<T>>
 
   void setDataAndNotify({String? dataKey}) {
     final dataFlatList = buildFlatList(dataRoots);
-    columnWidths = computeColumnWidths(dataFlatList);
+    columnWidths = computeColumnWidths(maxTableDepth);
 
     _tableData.value = TableData<T>(
       data: dataFlatList,

@@ -1170,6 +1170,13 @@ void main() {
           isFalse,
         );
       });
+
+      test('allIndicesWhere', () {
+        final list = [1, 2, 1, 2, 3, 4];
+        expect(list.allIndicesWhere((element) => element.isEven), [1, 3, 5]);
+        expect(list.allIndicesWhere((element) => element.isOdd), [0, 2, 4]);
+        expect(list.allIndicesWhere((element) => element + 2 == 3), [0, 2]);
+      });
     });
 
     group('SetExtension', () {

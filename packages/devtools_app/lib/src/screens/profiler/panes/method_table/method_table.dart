@@ -13,6 +13,8 @@ import '../../../../shared/table/table_data.dart';
 import 'method_table_controller.dart';
 import 'method_table_model.dart';
 
+final _methodColumnMinWidth = scaleByFontFactor(800.0);
+
 /// Widget that displays a method table for a CPU profile.
 class CpuMethodTable extends StatelessWidget {
   const CpuMethodTable({super.key, required this.methodTableController});
@@ -246,7 +248,11 @@ class _CalleesTable extends StatelessWidget {
 
 class _MethodColumn extends ColumnData<MethodTableGraphNode>
     implements ColumnRenderer<MethodTableGraphNode> {
-  _MethodColumn() : super.wide('Method');
+  _MethodColumn()
+      : super.wide(
+          'Method',
+          minWidthPx: _methodColumnMinWidth,
+        );
 
   @override
   bool get supportsSorting => true;
