@@ -116,7 +116,7 @@ class ConnectionSection extends StatelessWidget {
         child: const ConnectedAppSummary(narrowView: false),
       );
     }
-    return const ConnectDialog();
+    return const ConnectInput();
   }
 }
 
@@ -145,7 +145,7 @@ class LandingScreenSection extends StatelessWidget {
             Expanded(
               child: Text(
                 title,
-                style: textTheme.titleLarge,
+                style: textTheme.titleMedium,
               ),
             ),
             ...actions,
@@ -159,15 +159,14 @@ class LandingScreenSection extends StatelessWidget {
   }
 }
 
-class ConnectDialog extends StatefulWidget {
-  const ConnectDialog({Key? key}) : super(key: key);
+class ConnectInput extends StatefulWidget {
+  const ConnectInput({Key? key}) : super(key: key);
 
   @override
-  State<ConnectDialog> createState() => _ConnectDialogState();
+  State<ConnectInput> createState() => _ConnectInputState();
 }
 
-class _ConnectDialogState extends State<ConnectDialog>
-    with BlockingActionMixin {
+class _ConnectInputState extends State<ConnectInput> with BlockingActionMixin {
   late final TextEditingController connectDialogController;
 
   SharedPreferences? _debugSharedPreferences;
@@ -211,32 +210,26 @@ class _ConnectDialogState extends State<ConnectDialog>
         Row(
           children: [
             SizedBox(
+              height: defaultTextFieldHeight,
               width: scaleByFontFactor(350.0),
-              child: TextField(
+              child: DevToolsClearableTextField(
+                labelText: 'VM service URL',
                 onSubmitted:
                     actionInProgress ? null : (str) => unawaited(_connect()),
                 autofocus: true,
-                decoration: const InputDecoration(
-                  isDense: true,
-                  border: OutlineInputBorder(),
-                  enabledBorder: OutlineInputBorder(
-                    // TODO(jacobr): we need to use themed colors everywhere instead
-                    // of hard coding material colors.
-                    borderSide: BorderSide(width: 0.5, color: Colors.grey),
-                  ),
-                ),
                 controller: connectDialogController,
               ),
             ),
             const SizedBox(width: defaultSpacing),
-            ElevatedButton(
+            DevToolsButton(
               onPressed: actionInProgress ? null : () => unawaited(_connect()),
-              child: const Text('Connect'),
+              elevated: true,
+              label: 'Connect',
             ),
           ],
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          padding: const EdgeInsets.symmetric(vertical: densePadding),
           child: Text(
             '(e.g., http://127.0.0.1:12345/auth_code=...)',
             textAlign: TextAlign.start,
@@ -253,14 +246,14 @@ class _ConnectDialogState extends State<ConnectDialog>
         children: [
           Text(
             'Connect to a Running App',
-            style: textTheme.titleMedium,
+            style: textTheme.titleSmall,
           ),
           const SizedBox(height: denseRowSpacing),
           Text(
             'Enter a URL to a running Dart or Flutter application',
             style: textTheme.bodySmall,
           ),
-          const Padding(padding: EdgeInsets.only(top: 20.0)),
+          const SizedBox(height: denseSpacing),
           connectorInput,
         ],
       ),

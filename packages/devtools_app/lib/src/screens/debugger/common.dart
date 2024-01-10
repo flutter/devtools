@@ -5,8 +5,6 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../shared/utils.dart';
-
 /// Create a header area for a debugger component.
 ///
 /// Either one of [text] or [child] must be supplied.
@@ -15,14 +13,11 @@ Widget debuggerSectionTitle(ThemeData theme, {String? text, Widget? child}) {
   assert(text == null || child == null);
 
   return OutlineDecoration.onlyBottom(
-    child: SizedBox(
-      height: defaultHeaderHeight(isDense: isDense()),
-      child: Container(
-        padding: const EdgeInsets.only(left: defaultSpacing),
-        alignment: Alignment.centerLeft,
-        height: areaPaneHeaderHeight,
-        child: child ?? Text(text!, style: theme.textTheme.titleSmall),
-      ),
+    child: Container(
+      padding: const EdgeInsets.only(left: defaultSpacing),
+      alignment: Alignment.centerLeft,
+      height: defaultHeaderHeight,
+      child: child ?? Text(text!, style: theme.textTheme.titleSmall),
     ),
   );
 }

@@ -75,25 +75,19 @@ class CircleIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      // Subtract 1 for a little bit of fixed padding
-      // around the icon relative to the default size.
-      // TODO(jacobr): consider switching this to padding.
-      width: defaultIconSize - 1,
-      height: defaultIconSize - 1,
+      width: defaultIconSize,
+      height: defaultIconSize,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: color,
       ),
       alignment: Alignment.center,
-      child: Padding(
-        padding: const EdgeInsets.only(top: 1),
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: scaleByFontFactor(9.0),
-            color: textColor,
-          ),
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontSize: scaleByFontFactor(9.0),
+          color: textColor,
         ),
       ),
     );

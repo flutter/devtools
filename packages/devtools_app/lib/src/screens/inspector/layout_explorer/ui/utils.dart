@@ -217,8 +217,8 @@ class WidgetVisualizer extends StatelessWidget {
                                 child: Center(
                                   child: Text(
                                     title,
-                                    style: TextStyle(
-                                      color: colorScheme.widgetNameColor,
+                                    style: theme.regularTextStyleWithColor(
+                                      colorScheme.widgetNameColor,
                                     ),
                                     overflow: TextOverflow.ellipsis,
                                   ),

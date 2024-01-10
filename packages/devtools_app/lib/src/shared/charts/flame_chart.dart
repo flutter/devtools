@@ -873,7 +873,7 @@ class FlameChartNodeWidget extends StatelessWidget {
         searchMatch: node.data.isSearchMatch,
         activeSearchMatch: node.data.isActiveSearchMatch,
         zoom: FlameChartUtils.zoomForNode(node, zoom),
-        colorScheme: Theme.of(context).colorScheme,
+        theme: Theme.of(context),
       ),
     );
   }
@@ -1067,7 +1067,7 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
     required bool searchMatch,
     required bool activeSearchMatch,
     required double zoom,
-    required ColorScheme colorScheme,
+    required ThemeData theme,
   }) {
     // This math.max call prevents using a rect with negative width for
     // small events that have padding.
@@ -1094,19 +1094,19 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
         selected: selected,
         searchMatch: searchMatch,
         activeSearchMatch: activeSearchMatch,
-        colorScheme: colorScheme,
+        colorScheme: theme.colorScheme,
       ),
       child: zoomedWidth >= _minWidthForText
           ? Text(
               text,
               textAlign: TextAlign.left,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: _textColor(
+              style: theme.regularTextStyleWithColor(
+                _textColor(
                   selected: selected,
                   searchMatch: searchMatch,
                   activeSearchMatch: activeSearchMatch,
-                  colorScheme: colorScheme,
+                  colorScheme: theme.colorScheme,
                 ),
               ),
             )
@@ -1478,7 +1478,7 @@ class FlameChartHelpButton extends StatelessWidget {
 
   /// A fixed width for the first column in the help dialog to ensure that the
   /// subsections are aligned.
-  double get firstColumnWidth => scaleByFontFactor(190.0);
+  double get firstColumnWidth => scaleByFontFactor(120.0);
 
   @override
   Widget build(BuildContext context) {

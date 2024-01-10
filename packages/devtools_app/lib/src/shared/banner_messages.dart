@@ -170,14 +170,18 @@ class BannerMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Card(
       color: messageType == BannerMessageType.error
           ? colorScheme.errorContainer
           : colorScheme.warningContainer,
       margin: const EdgeInsets.only(bottom: intermediateSpacing),
       child: Padding(
-        padding: const EdgeInsets.all(defaultSpacing),
+        padding: const EdgeInsets.symmetric(
+          vertical: densePadding,
+          horizontal: denseSpacing,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -191,6 +195,7 @@ class BannerMessage extends StatelessWidget {
                     messageType == BannerMessageType.error
                         ? Icons.error_outline
                         : Icons.warning_amber_outlined,
+                    size: actionsIconSize,
                     color: messageType == BannerMessageType.error
                         ? colorScheme.onErrorContainer
                         : colorScheme.onWarningContainer,
@@ -199,7 +204,7 @@ class BannerMessage extends StatelessWidget {
                 Expanded(
                   child: RichText(
                     text: TextSpan(
-                      style: TextStyle(
+                      style: theme.regularTextStyle.copyWith(
                         color: messageType == BannerMessageType.error
                             ? colorScheme.onErrorContainer
                             : colorScheme.onWarningContainer,
@@ -212,6 +217,7 @@ class BannerMessage extends StatelessWidget {
                 IconButton(
                   icon: Icon(
                     Icons.close,
+                    size: actionsIconSize,
                     color: messageType == BannerMessageType.error
                         ? colorScheme.onErrorContainer
                         : colorScheme.onWarningContainer,

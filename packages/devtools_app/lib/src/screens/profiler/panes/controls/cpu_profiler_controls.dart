@@ -71,7 +71,6 @@ class UserTagDropdown extends StatelessWidget {
               builder: (context, vmDeveloperModeEnabled, _) {
                 return RoundedDropDownButton<String>(
                   isDense: true,
-                  style: Theme.of(context).textTheme.bodyMedium,
                   value: userTag,
                   items: [
                     _buildMenuItem(
@@ -158,7 +157,6 @@ class ModeDropdown extends StatelessWidget {
             message: tooltip,
             child: RoundedDropDownButton<CpuProfilerViewType>(
               isDense: true,
-              style: Theme.of(context).textTheme.bodyMedium,
               value: viewType,
               items: [
                 _buildMenuItem(

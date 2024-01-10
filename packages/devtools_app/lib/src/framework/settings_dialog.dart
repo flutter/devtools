@@ -94,6 +94,8 @@ class SettingsDialog extends StatelessWidget {
 class _VerboseLoggingSetting extends StatelessWidget {
   const _VerboseLoggingSetting();
 
+  static const _minScreenWidthForTextBeforeScaling = 500.0;
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -114,6 +116,8 @@ class _VerboseLoggingSetting extends StatelessWidget {
               icon: Icons.copy_outlined,
               gaScreen: gac.settingsDialog,
               gaSelection: gac.copyLogs,
+              minScreenWidthForTextBeforeScaling:
+                  _minScreenWidthForTextBeforeScaling,
               onPressed: () async => await copyToClipboard(
                 LogStorage.root.toString(),
                 'Successfully copied logs',
@@ -124,6 +128,8 @@ class _VerboseLoggingSetting extends StatelessWidget {
               label: 'Clear logs',
               gaScreen: gac.settingsDialog,
               gaSelection: gac.clearLogs,
+              minScreenWidthForTextBeforeScaling:
+                  _minScreenWidthForTextBeforeScaling,
               onPressed: LogStorage.root.clear,
             ),
           ],
@@ -132,12 +138,13 @@ class _VerboseLoggingSetting extends StatelessWidget {
         const Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Spacer(),
             Icon(Icons.warning),
             SizedBox(width: defaultSpacing),
-            Text(
-              'Logs may contain sensitive information.\n'
-              'Always check their contents before sharing.',
+            Flexible(
+              child: Text(
+                'Logs may contain sensitive information.\n'
+                'Always check their contents before sharing.',
+              ),
             ),
           ],
         ),

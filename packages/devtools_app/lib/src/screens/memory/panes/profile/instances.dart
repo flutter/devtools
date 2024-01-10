@@ -92,9 +92,7 @@ class _StoreAsOneVariableMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     return MenuItemButton(
       onPressed: sampler.oneLiveToConsole,
-      child: const Text(
-        'Store one instance as a console variable',
-      ),
+      child: const Text('Store one instance as a console variable'),
     );
   }
 }
