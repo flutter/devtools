@@ -903,7 +903,8 @@ class DevToolsTable<T> extends StatefulWidget {
 }
 
 @visibleForTesting
-class DevToolsTableState<T> extends State<DevToolsTable<T>> with AutoDisposeMixin {
+class DevToolsTableState<T> extends State<DevToolsTable<T>>
+    with AutoDisposeMixin {
   late LinkedScrollControllerGroup _linkedHorizontalScrollControllerGroup;
   late ScrollController scrollController;
   late ScrollController pinnedScrollController;
