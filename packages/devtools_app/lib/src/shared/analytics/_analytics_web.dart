@@ -12,7 +12,7 @@ import 'dart:async';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:js/js.dart';
 import 'package:logging/logging.dart';
-import 'package:web/helpers.dart';
+import 'package:web/web.dart';
 
 import '../../../devtools.dart' as devtools show version;
 import '../globals.dart';

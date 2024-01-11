@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:ui_web' as ui_web;
 
 import 'package:flutter/foundation.dart';
-import 'package:web/helpers.dart';
+import 'package:web/web.dart';
 
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/primitives/trace_event.dart';
