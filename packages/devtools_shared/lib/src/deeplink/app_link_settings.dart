@@ -42,19 +42,23 @@ class AppLinkSettings {
 /// The deeplink is defined in intent filters of AndroidManifest.xml in the
 /// Android sub-project.
 class AndroidDeeplink {
-  AndroidDeeplink._(this.scheme, this.host, this.path);
+  AndroidDeeplink._(this.scheme, this.host, this.path, this.intentFilterChecks);
 
   factory AndroidDeeplink._fromJsonObject(Map<String, dynamic> json) {
     return AndroidDeeplink._(
       json[_kSchemeKey] as String,
       json[_kHostKey] as String,
       json[_kPathKey] as String,
+      IntentFilterChecks._fromJsonObject(
+        json[_kIntentFilterChecksKey] as Map<String, dynamic>,
+      ),
     );
   }
 
   static const _kSchemeKey = 'scheme';
   static const _kHostKey = 'host';
   static const _kPathKey = 'path';
+  static const _kIntentFilterChecksKey = 'intentFilterCheck';
 
   /// The scheme section of the deeplink.
   final String scheme;
@@ -64,4 +68,38 @@ class AndroidDeeplink {
 
   /// The path pattern section of the deeplink.
   final String path;
+
+  final IntentFilterChecks intentFilterChecks;
+}
+
+/// A deep link in a Android build of a Flutter project.
+///
+/// The deeplink is defined in intent filters of AndroidManifest.xml in the
+/// Android sub-project.
+class IntentFilterChecks {
+  IntentFilterChecks._(
+    this.hasAutoVerify,
+    this.hasActionView,
+    this.hasDefaultCategory,
+    this.hasBrowsableCategory,
+  );
+
+  factory IntentFilterChecks._fromJsonObject(Map<String, dynamic> json) {
+    return IntentFilterChecks._(
+      json[_kHasAutoVerifyKey] as bool,
+      json[_kHasActionViewKey] as bool,
+      json[_kHasDefaultCategoryKey] as bool,
+      json[_kHasBrowsableCategoryKey] as bool,
+    );
+  }
+
+  static const _kHasAutoVerifyKey = 'hasAutoVerify';
+  static const _kHasActionViewKey = 'hasActionView';
+  static const _kHasDefaultCategoryKey = 'hasDefaultCategory';
+  static const _kHasBrowsableCategoryKey = 'hasBrowsableCategory';
+
+  final bool hasAutoVerify;
+  final bool hasActionView;
+  final bool hasDefaultCategory;
+  final bool hasBrowsableCategory;
 }
