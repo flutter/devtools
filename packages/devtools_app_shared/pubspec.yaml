@@ -16,7 +16,7 @@ dependencies:
   meta: ^1.9.1
   pointer_interceptor: ^0.9.3+3
   vm_service: ^13.0.0
-  web: ^0.4.0
+  web: ^0.4.1
 
 dev_dependencies:
   flutter_lints: ^2.0.3

@@ -4,7 +4,7 @@
 
 import 'dart:js_interop';
 
-import 'package:web/helpers.dart';
+import 'package:web/web.dart';
 
 extension MessageExtension on Event {
   bool get isMessageEvent =>
