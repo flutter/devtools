@@ -161,7 +161,9 @@ class _TreemapState extends State<Treemap> {
     final isHorizontalRectangle = width > height;
 
     final totalByteSize = computeByteSizeForNodes(nodes: children);
-    if (children.isEmpty) {
+    // If there's no children or the children have a size of zero, there's
+    // nothing to display.
+    if (children.isEmpty || totalByteSize == 0) {
       return [];
     }
 

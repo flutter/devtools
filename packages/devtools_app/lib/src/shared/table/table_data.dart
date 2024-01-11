@@ -261,3 +261,87 @@ abstract class TimeAndPercentageColumn<T> extends ColumnData<T> {
   String _percentDisplay(T dataObject) =>
       percent(percentAsDoubleProvider(dataObject));
 }
+
+/// Column that, for each row, shows a memory value and the percentage that the
+/// memory value is of the total memory for this data set.
+///
+/// Both memory and percentage are provided through callbacks [sizeProvider] and
+/// [percentAsDoubleProvider], respectively.
+///
+/// When [percentageOnly] is true, the memory value will be omitted, and only the
+/// percentage will be displayed.
+abstract class SizeAndPercentageColumn<T> extends ColumnData<T> {
+  SizeAndPercentageColumn({
+    required String title,
+    required this.percentAsDoubleProvider,
+    this.sizeProvider,
+    this.tooltipProvider,
+    this.richTooltipProvider,
+    this.secondaryCompare,
+    this.percentageOnly = false,
+    double columnWidth = _defaultMemoryColumnWidth,
+    super.titleTooltip,
+  }) : super(
+          title,
+          fixedWidthPx: scaleByFontFactor(columnWidth),
+        );
+
+  static const _defaultMemoryColumnWidth =
+      TimeAndPercentageColumn._defaultTimeColumnWidth;
+
+  int Function(T)? sizeProvider;
+
+  double Function(T) percentAsDoubleProvider;
+
+  String Function(T)? tooltipProvider;
+
+  RichTooltipBuilder<T>? richTooltipProvider;
+
+  Comparable Function(T)? secondaryCompare;
+
+  final bool percentageOnly;
+
+  @override
+  bool get numeric => true;
+
+  @override
+  int compare(T a, T b) {
+    final int result = super.compare(a, b);
+    if (result == 0 && secondaryCompare != null) {
+      return secondaryCompare!(a).compareTo(secondaryCompare!(b));
+    }
+    return result;
+  }
+
+  @override
+  double getValue(T dataObject) => percentageOnly
+      ? percentAsDoubleProvider(dataObject)
+      : sizeProvider!(dataObject).toDouble();
+
+  @override
+  String getDisplayValue(T dataObject) {
+    if (percentageOnly) return _percentDisplay(dataObject);
+    return _memoryAndPercentage(dataObject);
+  }
+
+  @override
+  String getTooltip(T dataObject) {
+    if (tooltipProvider != null) {
+      return tooltipProvider!(dataObject);
+    }
+    if (percentageOnly && sizeProvider != null) {
+      return _memoryAndPercentage(dataObject);
+    }
+    return '';
+  }
+
+  @override
+  InlineSpan? getRichTooltip(T dataObject, BuildContext context) =>
+      richTooltipProvider?.call(dataObject, context);
+
+  String _memoryAndPercentage(T dataObject) =>
+      '${prettyPrintBytes(sizeProvider!(dataObject), includeUnit: true)} (${_percentDisplay(dataObject)})';
+
+  String _percentDisplay(T dataObject) =>
+      percent(percentAsDoubleProvider(dataObject));
+}
