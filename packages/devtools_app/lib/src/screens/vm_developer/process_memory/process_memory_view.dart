@@ -18,6 +18,7 @@ import 'process_memory_tree_columns.dart';
 import 'process_memory_view_controller.dart';
 
 /// Displays a breakdown of the target application's overall memory footprint.
+///
 /// This allows for developers to determine:
 ///
 ///  - The total resident set size (RSS)
@@ -34,6 +35,7 @@ class VMProcessMemoryView extends VMDeveloperView {
           title: 'Process Memory',
           icon: Icons.memory,
         );
+
   static const id = 'vm-process-memory';
 
   @override
@@ -104,15 +106,15 @@ class _VMProcessMemoryViewBodyState extends State<VMProcessMemoryViewBody>
 
   void _initTabController() {
     if (_tabControllerInitialized) {
-      _tabController.removeListener(_onTabChanged);
-      _tabController.dispose();
+      _tabController
+        ..removeListener(_onTabChanged)
+        ..dispose();
     }
 
     _tabController = TabController(
       length: widget.tabs.length,
       vsync: this,
-    );
-    _tabController.addListener(_onTabChanged);
+    )..addListener(_onTabChanged);
     _tabControllerInitialized = true;
   }
 

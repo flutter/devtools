@@ -20,11 +20,11 @@ class DescriptionColumn extends ColumnData<TreemapNode> {
   String getValue(TreemapNode dataObject) => dataObject.caption ?? '';
 }
 
-class MemoryColumn extends MemoryAndPercentageColumn<TreemapNode> {
+class MemoryColumn extends SizeAndPercentageColumn<TreemapNode> {
   MemoryColumn({required VMProcessMemoryViewController controller})
       : super(
           title: 'Memory Usage',
-          memoryProvider: (node) => node.byteSize,
+          sizeProvider: (node) => node.byteSize,
           percentAsDoubleProvider: (node) =>
               node.byteSize / controller.treeRoot.value!.byteSize,
         );

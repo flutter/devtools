@@ -264,16 +264,16 @@ abstract class TimeAndPercentageColumn<T> extends ColumnData<T> {
 /// Column that, for each row, shows a memory value and the percentage that the
 /// memory value is of the total memory for this data set.
 ///
-/// Both memory and percentage are provided through callbacks [memoryProvider] and
+/// Both memory and percentage are provided through callbacks [sizeProvider] and
 /// [percentAsDoubleProvider], respectively.
 ///
 /// When [percentageOnly] is true, the memory value will be omitted, and only the
 /// percentage will be displayed.
-abstract class MemoryAndPercentageColumn<T> extends ColumnData<T> {
-  MemoryAndPercentageColumn({
+abstract class SizeAndPercentageColumn<T> extends ColumnData<T> {
+  SizeAndPercentageColumn({
     required String title,
     required this.percentAsDoubleProvider,
-    this.memoryProvider,
+    this.sizeProvider,
     this.tooltipProvider,
     this.richTooltipProvider,
     this.secondaryCompare,
@@ -288,7 +288,7 @@ abstract class MemoryAndPercentageColumn<T> extends ColumnData<T> {
   static const _defaultMemoryColumnWidth =
       TimeAndPercentageColumn._defaultTimeColumnWidth;
 
-  int Function(T)? memoryProvider;
+  int Function(T)? sizeProvider;
 
   double Function(T) percentAsDoubleProvider;
 
@@ -315,7 +315,7 @@ abstract class MemoryAndPercentageColumn<T> extends ColumnData<T> {
   @override
   double getValue(T dataObject) => percentageOnly
       ? percentAsDoubleProvider(dataObject)
-      : memoryProvider!(dataObject).toDouble();
+      : sizeProvider!(dataObject).toDouble();
 
   @override
   String getDisplayValue(T dataObject) {
@@ -328,7 +328,7 @@ abstract class MemoryAndPercentageColumn<T> extends ColumnData<T> {
     if (tooltipProvider != null) {
       return tooltipProvider!(dataObject);
     }
-    if (percentageOnly && memoryProvider != null) {
+    if (percentageOnly && sizeProvider != null) {
       return _memoryAndPercentage(dataObject);
     }
     return '';
@@ -339,7 +339,7 @@ abstract class MemoryAndPercentageColumn<T> extends ColumnData<T> {
       richTooltipProvider?.call(dataObject, context);
 
   String _memoryAndPercentage(T dataObject) =>
-      '${prettyPrintBytes(memoryProvider!(dataObject), includeUnit: true)} (${_percentDisplay(dataObject)})';
+      '${prettyPrintBytes(sizeProvider!(dataObject), includeUnit: true)} (${_percentDisplay(dataObject)})';
 
   String _percentDisplay(T dataObject) =>
       percent(percentAsDoubleProvider(dataObject));
