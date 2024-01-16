@@ -10,11 +10,11 @@ import 'dart:io';
 
 /// Generates a dart file with a [Map] variable 'data' that contains the JSON
 /// data contained in the given json file (first argument).
-/// 
+///
 /// To use:
-/// 
+///
 /// `dart json_to_map.dart ~/path/to/my_file.json`
-/// 
+///
 /// This will generate a file with the same name but with a '.dart' extension
 /// instead of '.json' (e.g. ~/path/to/my_file.dart). This will be a valid dart
 /// file with a single [Map] variable [data].
