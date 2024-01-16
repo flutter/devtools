@@ -189,7 +189,7 @@ class FlatTable<T> extends StatefulWidget {
 
   /// Determines how elements that request to be pinned are displayed.
   ///
-  /// Defaults to [FlatTablePinBehavior.none], which disables pinnning.
+  /// Defaults to [FlatTablePinBehavior.none], which disables pinning.
   final FlatTablePinBehavior pinBehavior;
 
   /// The default sort column for this table.

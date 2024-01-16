@@ -41,7 +41,7 @@ class FlatTableController<T> extends TableControllerBase<T> {
 
   /// Determines how elements that request to be pinned are displayed.
   ///
-  /// Defaults to [FlatTablePinBehavior.none], which disables pinnning.
+  /// Defaults to [FlatTablePinBehavior.none], which disables pinning.
   FlatTablePinBehavior pinBehavior;
 
   /// Whether the columns for this table should be sized so that the entire
@@ -176,7 +176,7 @@ class TreeTableController<T extends TreeNode<T>>
         root.expand();
       }
     }
-    // TODO(kenz): instead of using the maxiumum tree depth, consider using the
+    // TODO(kenz): instead of using the maximum tree depth, consider using the
     // maximum depth of expanded nodes.
     maxTableDepth = dataRoots.map((root) => root.depth).fold(
           0,
