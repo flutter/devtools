@@ -32,7 +32,7 @@ Press the Snapshot button to collect information about all objects in the Dart V
 
 <img src="readme_images/snapshot.png" />
 
-When complete a Heat Map will appear.  Turn off the Heat Map swtich:
+When complete a Heat Map will appear.  Turn off the Heat Map switch:
 
 <img src="readme_images/heatmap_off.png" />
 
@@ -44,7 +44,7 @@ Press the Analyze button to analyze the current Snapshot
 
 <img src="readme_images/analyze.png" />
 
-After the snashot analysis a child row inside of > Analysis will be added titled "Snapshot ..." with the timetime stamp of the snapshot e.g., "Snapshot Jun 09 12:23:44".
+After the snapshot analysis a child row inside of > Analysis will be added titled "Snapshot ..." with the timestamp of the snapshot e.g., "Snapshot Jun 09 12:23:44".
 
 <img src="readme_images/analysis_1.png" />
 
