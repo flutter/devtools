@@ -158,7 +158,7 @@ To trace allocations for a class:
 2. Interact with your app to trigger an allocation of the class.
 
 3. Click 'Refresh' above to view the tree of collected stack traces of
-constructor calls for the seleted class. 
+constructor calls for the selected class. 
 ''';
 
 class _TracingTreeHeader extends StatelessWidget {
