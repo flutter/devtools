@@ -5,6 +5,7 @@
 * Bump `package:web` to `^0.4.1`.
 * Fix `README.md` instructions for adding a `.pubignore` file.
 * Make Simulated DevTools Environment Panel collapsible.
+* Bump `package:vm_service` dependency to ^14.0.0.
 
 ## 0.0.12
 * Fix a bug preventing Dart server apps from connecting to DevTools extensions.

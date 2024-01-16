@@ -15,21 +15,21 @@ class NetworkService {
 
   /// Updates the last Socket data refresh time to the current time.
   ///
-  /// If [alreadyRecordingHttp] is true it's unclear when the last refresh time
-  /// would have occurred, so the refresh time is not updated. Otherwise,
-  /// [NetworkController.lastSocketDataRefreshMicros] is updated to the current
-  /// timeline timestamp.
+  /// If [alreadyRecordingSocketData] is true, it's unclear when the last
+  /// refresh time would have occurred, so the refresh time is not updated.
+  /// Otherwise, [NetworkController.lastSocketDataRefreshMicros] is updated to
+  /// the current timeline timestamp.
   ///
   /// Returns the current timeline timestamp.
   Future<int> updateLastSocketDataRefreshTime({
-    bool alreadyRecordingHttp = false,
+    bool alreadyRecordingSocketData = false,
   }) async {
     // Set the current timeline time as the time of the last refresh.
     final timestampObj =
         await serviceConnection.serviceManager.service!.getVMTimelineMicros();
 
     final timestamp = timestampObj.timestamp!;
-    if (!alreadyRecordingHttp) {
+    if (!alreadyRecordingSocketData) {
       // Only include Socket requests issued after the current time.
       networkController.lastSocketDataRefreshMicros = timestamp;
     }

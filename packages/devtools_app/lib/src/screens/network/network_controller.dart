@@ -117,8 +117,9 @@ class NetworkController extends DisposableController
   /// The last time at which HTTP information was refreshed.
   DateTime lastHttpDataRefreshTime = DateTime.fromMicrosecondsSinceEpoch(0);
 
-  /// The last timestamp at which Socket information was refreshed. This
-  /// timestamp is on the monotonic clock used by the timeline.
+  /// The last timestamp at which Socket information was refreshed.
+  ///
+  /// This timestamp is on the monotonic clock used by the timeline.
   int lastSocketDataRefreshMicros = 0;
 
   Timer? _pollingTimer;
@@ -190,7 +191,10 @@ class NetworkController extends DisposableController
   }
 
   Future<void> startRecording() async {
-    await _startRecording(alreadyRecordingHttp: await recordingHttpTraffic());
+    await _startRecording(
+      alreadyRecordingHttp: await recordingHttpTraffic(),
+      alreadyRecordingSocketData: await recordingSocketTraffic(),
+    );
   }
 
   /// Enables network traffic recording on all isolates and starts polling for
@@ -200,6 +204,7 @@ class NetworkController extends DisposableController
   /// be the beginning of the process (time 0).
   Future<void> _startRecording({
     bool alreadyRecordingHttp = false,
+    bool alreadyRecordingSocketData = false,
   }) async {
     // Cancel existing polling timer before starting recording.
     _updatePollingState(false);
@@ -208,7 +213,7 @@ class NetworkController extends DisposableController
       alreadyRecordingHttp: alreadyRecordingHttp,
     );
     final timestamp = await _networkService.updateLastSocketDataRefreshTime(
-      alreadyRecordingHttp: alreadyRecordingHttp,
+      alreadyRecordingSocketData: alreadyRecordingSocketData,
     );
 
     // Determine the offset that we'll use to calculate the approximate
@@ -253,6 +258,23 @@ class NetworkController extends DisposableController
         // The above call won't complete immediately if the isolate is paused,
         // so give up waiting after 500ms.
         final state = await timeout(httpFuture, 500);
+        if (state?.enabled != true) {
+          enabled = false;
+        }
+      },
+    );
+    return enabled;
+  }
+
+  Future<bool> recordingSocketTraffic() async {
+    bool enabled = true;
+    final service = serviceConnection.serviceManager.service!;
+    await service.forEachIsolate(
+      (isolate) async {
+        final socketFuture = service.socketProfilingEnabled(isolate.id!);
+        // The above call won't complete immediately if the isolate is paused,
+        // so give up waiting after 500ms.
+        final state = await timeout(socketFuture, 500);
         if (state?.enabled != true) {
           enabled = false;
         }
@@ -357,9 +379,7 @@ class CurrentNetworkRequests {
   /// Update or add the [request] to the [requests] depending on whether or not
   /// its [request.id] already exists in the list.
   ///
-  void updateOrAdd(
-    HttpProfileRequest request,
-  ) {
+  void updateOrAdd(HttpProfileRequest request) {
     final wrapped = DartIOHttpRequestData(
       request,
       requestFullDataFromVmService: false,
