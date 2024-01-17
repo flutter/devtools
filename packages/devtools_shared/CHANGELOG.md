@@ -1,5 +1,6 @@
 # 6.0.4-wip
-* Add explanatory comment to `devtools_options.yaml` file by default.
+* Add a description and link to documentation to the `devtools_options.yaml` file that
+is created in a user's project.
 
 # 6.0.3
 * `CompareMixin` is now generic, implementing `Comparable<T>` instead of
