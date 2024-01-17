@@ -11,7 +11,7 @@ To learn more about DevTools, check out the
 ## General updates
 
 * Improved overall usability by making the DevTools UI more dense. This
-significantly improves the user experience when using DevTools embedded
+significantly improves the user experience when using DevTools embedded in
 an IDE. (#7030)[https://github.com/flutter/devtools/pull/7030]
 * Added support for filtering with regular expressions in the Logging, Network, and CPU profiler
 pages - (#7027)[https://github.com/flutter/devtools/pull/7027]
