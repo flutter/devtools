@@ -154,8 +154,9 @@ class _DevToolsMenuState extends State<_DevToolsMenu> {
   void _initExtensions() {
     final sessionRootPath = widget.session.projectRootPath;
     if (sessionRootPath != null) {
+      final fileUri = Uri.file(sessionRootPath);
       _extensionServiceForSession =
-          ExtensionService(fixedAppRootPath: sessionRootPath);
+          ExtensionService(fixedAppRootPath: fileUri.toString());
       unawaited(_extensionServiceForSession!.initialize());
     }
   }
@@ -200,7 +201,12 @@ class _DevToolsMenuState extends State<_DevToolsMenu> {
             gac.VsCodeFlutterSidebar.id,
             gac.VsCodeFlutterSidebar.openDevToolsScreen(screen.id),
           );
-          unawaited(widget.api.openDevToolsPage(widget.session.id, screen.id));
+          unawaited(
+            widget.api.openDevToolsPage(
+              widget.session.id,
+              page: screen.id,
+            ),
+          );
         },
       );
     }
@@ -231,7 +237,7 @@ class _DevToolsMenuState extends State<_DevToolsMenu> {
                         unawaited(
                           widget.api.openDevToolsPage(
                             widget.session.id,
-                            e.screenId,
+                            page: e.screenId,
                           ),
                         );
                       },
@@ -273,6 +279,7 @@ class _DevToolsMenuState extends State<_DevToolsMenu> {
   }
 }
 
+/// A context menu item for an individual DevTools screen.
 class DevToolsScreenMenuItem extends StatelessWidget {
   const DevToolsScreenMenuItem({
     super.key,
@@ -306,6 +313,8 @@ class DevToolsScreenMenuItem extends StatelessWidget {
   }
 }
 
+/// A context menu submenu button that contains the list of available extension
+/// screens.
 class ExtensionScreenMenuItem extends StatelessWidget {
   const ExtensionScreenMenuItem({
     super.key,
