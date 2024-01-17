@@ -10,6 +10,7 @@ import 'dart:io';
 
 import 'package:shelf/shelf.dart' as shelf;
 
+import '../../devtools_shared.dart';
 import '../deeplink/deeplink_manager.dart';
 import '../devtools_api.dart';
 import '../extensions/extension_enablement.dart';
@@ -36,6 +37,7 @@ class ServerApi {
     required ExtensionsManager extensionsManager,
     required DeeplinkManager deeplinkManager,
     ServerApi? api,
+    Function()? dtdUri,
   }) {
     api ??= ServerApi();
     final queryParams = request.requestedUri.queryParameters;
@@ -252,7 +254,12 @@ class ServerApi {
           queryParams,
           deeplinkManager,
         );
-
+      case DtdApi.apiGetDtdUri:
+        return api.setCompleted(
+          json.encode({
+            DtdApi.uriPropertyName: dtdUri == null ? null : dtdUri(),
+          }),
+        );
       default:
         return api.notImplemented();
     }

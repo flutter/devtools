@@ -22,6 +22,7 @@ part '_deep_links_api.dart';
 part '_extensions_api.dart';
 part '_release_notes_api.dart';
 part '_survey_api.dart';
+part '_dtd_api.dart';
 
 final _log = Logger('_server_web');
 
