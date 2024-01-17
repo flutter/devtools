@@ -6,6 +6,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
+import 'package:logging/logging.dart';
 
 import 'src/app.dart';
 import 'src/framework/app_error_handling.dart';
@@ -20,6 +21,8 @@ import 'src/shared/preferences.dart';
 import 'src/shared/primitives/url_utils.dart';
 import 'src/shared/primitives/utils.dart';
 import 'src/shared/server/server.dart' as server;
+
+final _log = Logger('initializtion');
 
 /// Handles necessary initialization then runs DevTools.
 ///
@@ -79,8 +82,6 @@ Future<void> initializeDevTools({
   await initializeFramework();
   await _initDTDConnection();
 
-  await _initDTDConnection();
-
   final preferences = PreferencesController();
   // Wait for preferences to load before rendering the app to avoid a flash of
   // content with the incorrect theme.
@@ -111,6 +112,8 @@ Future<void> _initDTDConnection() async {
 
     if (dtdUri != null) {
       await dtdManager.connect(dtdUri);
+    } else {
+      _log.info('No DTD uri provided from the server during initialization.');
     }
   } catch (e, st) {
     // Dtd failing to connect does not interfere with devtools starting up so
