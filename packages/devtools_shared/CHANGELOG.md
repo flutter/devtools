@@ -1,3 +1,6 @@
+# 6.0.4-wip
+* Add explanatory comment to `devtools_options.yaml` file by default.
+
 # 6.0.3
 * `CompareMixin` is now generic, implementing `Comparable<T>` instead of
   `Comparable<dynamic>`, and it's operators each therefore accept a `T`
