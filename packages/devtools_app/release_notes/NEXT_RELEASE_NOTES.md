@@ -60,7 +60,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## DevTools Extension updates
 
-* Added an explanatory comment to the `devtools_options.yaml` file on its initial creation. - [#7052](https://github.com/flutter/devtools/pull/7052)
+* Added a description and link to documentation to the `devtools_options.yaml` file
+that is created in a user's project. - [#7052](https://github.com/flutter/devtools/pull/7052)
 
 ## Full commit history
 
