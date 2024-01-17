@@ -216,7 +216,7 @@ class NetworkController extends DisposableController
     // Cancel existing polling timer before starting recording.
     _updatePollingState(false);
 
-    await _networkService.updateLastHttpDataRefreshTime(
+    _networkService.updateLastHttpDataRefreshTime(
       alreadyRecordingHttp: alreadyRecordingHttp,
     );
     final timestamp = await _networkService.updateLastSocketDataRefreshTime(

@@ -42,7 +42,7 @@ class NetworkService {
   /// would have occurred, so the refresh time is not updated. Otherwise,
   /// [NetworkController.lastHttpDataRefreshTime] is updated to the current
   /// time.
-  Future<void> updateLastHttpDataRefreshTime({
+  void updateLastHttpDataRefreshTime({
     bool alreadyRecordingHttp = false,
   }) async {
     if (!alreadyRecordingHttp) {
@@ -164,7 +164,7 @@ class NetworkService {
 
   Future<void> clearData() async {
     await updateLastSocketDataRefreshTime();
-    await updateLastHttpDataRefreshTime();
+    updateLastHttpDataRefreshTime();
     await _clearSocketProfile();
     await _clearHttpProfile();
   }
