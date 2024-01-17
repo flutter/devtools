@@ -18,6 +18,15 @@ class DevToolsOptions {
   static const _extensionsKey = 'extensions';
 
   static const _defaultOptions = '''
+# This file stores per-project (or optionally, per user) settings for Dart &
+# Flutter DevTools (e.g. DevTools extension enabled states, etc.).
+#
+# If this file is checked into source control, the options here will be applied
+# for anyone who pulls your source code and contributes to your project. If this
+# file is omitted from source control (e.g. adding an entry to your `.gitignore`
+# file), then the `devtools_options.yaml` file will be configured per user,
+# since each user or contributor to your project will be able to have their own
+# copy of the file.
 $_extensionsKey:
 ''';
 
