@@ -215,19 +215,16 @@ class LoggingSettingsDialog extends StatelessWidget {
     final theme = Theme.of(context);
     return DevToolsDialog(
       title: const DialogTitleText('Logging Settings'),
-      content: SizedBox(
-        width: defaultDialogWidth,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ...dialogSubHeader(
-              theme,
-              'General',
-            ),
-            const StructuredErrorsToggle(),
-          ],
-        ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ...dialogSubHeader(
+            theme,
+            'General',
+          ),
+          const StructuredErrorsToggle(),
+        ],
       ),
       actions: const [
         DialogCloseButton(),

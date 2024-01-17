@@ -27,9 +27,15 @@ class InstanceViewWithContextMenu extends StatelessWidget {
     const menuButtonWidth = ContextMenuButton.defaultWidth;
 
     return Row(
+      mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        Text(nf.format(count)),
+        Expanded(
+          child: Text(
+            nf.format(count),
+            textAlign: TextAlign.end,
+          ),
+        ),
         if (shouldShowMenu)
           ContextMenuButton(
             // ignore: avoid_redundant_argument_values, ensures consistency with [SizedBox] below.

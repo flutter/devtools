@@ -32,8 +32,6 @@ class _IntervalDropdownState extends State<IntervalDropdown>
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-
     final displayTypes =
         ChartInterval.values.map<DropdownMenuItem<ChartInterval>>(
       (
@@ -48,7 +46,6 @@ class _IntervalDropdownState extends State<IntervalDropdown>
 
     return RoundedDropDownButton<ChartInterval>(
       isDense: true,
-      style: textTheme.bodyMedium,
       value: controller.displayInterval,
       onChanged: (ChartInterval? newValue) {
         final value = newValue!;

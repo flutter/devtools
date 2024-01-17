@@ -11,7 +11,6 @@ import 'package:flutter/scheduler.dart';
 
 import '../primitives/enum_utils.dart';
 import '../primitives/utils.dart';
-import '../table/table.dart';
 
 /// Returns a [TextSpan] that only includes the first [length] characters of
 /// [span].

@@ -82,6 +82,8 @@ Future<void> initializeDevTools({
   await initializeFramework();
   await _initDTDConnection();
 
+  await _initDTDConnection();
+
   final preferences = PreferencesController();
   // Wait for preferences to load before rendering the app to avoid a flash of
   // content with the incorrect theme.

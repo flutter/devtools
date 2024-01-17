@@ -20,7 +20,7 @@ class Settings extends StatefulWidget {
   final RestfulAPI restfulRoot;
 
   @override
-  SettingsState createState() {
+  State<Settings> createState() {
     state = SettingsState();
     return state;
   }

@@ -1,29 +1,28 @@
 This is draft for future release notes, that are going to land on
 [the Flutter website](https://docs.flutter.dev/tools/devtools/release-notes).
 
-# DevTools 2.31.0 release notes
+# DevTools 2.32.0 release notes
 
-The 2.31.0 release of the Dart and Flutter DevTools
+The 2.32.0 release of the Dart and Flutter DevTools
 includes the following changes among other general improvements.
 To learn more about DevTools, check out the
 [DevTools overview](https://docs.flutter.dev/tools/devtools/overview).
 
 ## General updates
 
-* Added a new feature for deep link validation, supporting deep link web checks on Android. - [#6935](https://github.com/flutter/devtools/pull/6935)
+* Improved overall usability by making the DevTools UI more dense. This
+significantly improves the user experience when using DevTools embedded
+an IDE. (#7030)[https://github.com/flutter/devtools/pull/7030]
+* Added support for filtering with regular expressions in the Logging, Network, and CPU profiler
+pages - (#7027)[https://github.com/flutter/devtools/pull/7027]
 
 ## Inspector updates
 
-* When done typing in the search field, the next selection is now automatically selected - [#6677](https://github.com/flutter/devtools/pull/6677)
-* Added link to package directory documentation, from the inspect settings dialog - [6825](https://github.com/flutter/devtools/pull/6825)
-* Fix bug where widgets owned by the Flutter framework were showing up in the widget tree view -
-[6857](https://github.com/flutter/devtools/pull/6857)
-* Only cache pub root directories added by the user - [6897](https://github.com/flutter/devtools/pull/6897)
-* Remove Flutter pub root if it was accidently cached - [6911](https://github.com/flutter/devtools/pull/6911)
+TODO: Remove this section if there are not any general updates.
 
 ## Performance updates
 
-* Changed raster layer preview background to a checkerboard. - [#6827](https://github.com/flutter/devtools/pull/6827)
+TODO: Remove this section if there are not any general updates.
 
 ## CPU profiler updates
 
@@ -35,15 +34,19 @@ TODO: Remove this section if there are not any general updates.
 
 ## Debugger updates
 
-* Highlight `extension type` as a declaration keyword,
+* Highlighted `extension type` as a declaration keyword,
   highlight the `$` in identifier interpolation as part of the interpolation,
-  and properly highlight comments within type arguments. - [6837](https://github.com/flutter/devtools/pull/6837)
+  and properly highlight comments within type arguments. - [#6837](https://github.com/flutter/devtools/pull/6837)
 
 ## Network profiler updates
 
 TODO: Remove this section if there are not any general updates.
 
 ## Logging updates
+
+* Added toggle filters to filter out noisy Flutter and Dart logs - [#7026](https://github.com/flutter/devtools/pull/7026)
+
+    ![Logging view filters](images/logging_toggle_filters.png "Toggle filters for logging screen")
 
 * Added scrollbar to details pane. - [#6917](https://github.com/flutter/devtools/pull/6917)
 

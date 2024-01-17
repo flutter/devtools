@@ -1170,6 +1170,13 @@ void main() {
           isFalse,
         );
       });
+
+      test('allIndicesWhere', () {
+        final list = [1, 2, 1, 2, 3, 4];
+        expect(list.allIndicesWhere((element) => element.isEven), [1, 3, 5]);
+        expect(list.allIndicesWhere((element) => element.isOdd), [0, 2, 4]);
+        expect(list.allIndicesWhere((element) => element + 2 == 3), [0, 2]);
+      });
     });
 
     group('SetExtension', () {
@@ -1264,6 +1271,24 @@ void main() {
         expect(str.caseInsensitiveEquals(null), isFalse);
         expect(''.caseInsensitiveEquals(''), isTrue);
         expect(''.caseInsensitiveEquals(null), isFalse);
+
+        // Complete match.
+        expect(
+          str.caseInsensitiveEquals(RegExp('h.*o.*', caseSensitive: false)),
+          isTrue,
+        );
+        // Incomplete match.
+        expect(
+          str.caseInsensitiveEquals(RegExp('h.*o', caseSensitive: false)),
+          isFalse,
+        );
+        // No match.
+        expect(
+          str.caseInsensitiveEquals(
+            RegExp('hello.* this does not match', caseSensitive: false),
+          ),
+          isFalse,
+        );
       });
 
       test('caseInsensitiveAllMatches', () {

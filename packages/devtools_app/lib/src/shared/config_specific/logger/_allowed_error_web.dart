@@ -4,7 +4,7 @@
 
 import 'dart:js_interop';
 
-import 'package:web/helpers.dart';
+import 'package:web/web.dart';
 
 /// Catch and print errors from the given future. These errors are part of
 /// normal operation for an app, and don't need to be reported to analytics

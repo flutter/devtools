@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 // The members for this class were generated from the data at
-// https://github.com/microsoft/vscode-codicons/blob/master/src/template/mapping.json.
+// https://github.com/microsoft/vscode-codicons/blob/main/src/template/mapping.json.
 
 class Codicons {
   static const IconData add = IconData(60000, fontFamily: 'Codicon');

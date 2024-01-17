@@ -100,9 +100,9 @@ class TimelineEventsTabControls extends StatelessWidget {
             if (!offlineController.offlineMode.value) ...[
               // TODO(kenz): add a switch to enable the CPU profiler once the
               // tracing format supports it (when we switch to protozero).
-              const SizedBox(width: denseSpacing),
+              const SizedBox(width: densePadding),
               TraceCategoriesButton(controller: controller),
-              const SizedBox(width: denseSpacing),
+              const SizedBox(width: densePadding),
               RefreshTimelineEventsButton(controller: controller),
             ],
           ],

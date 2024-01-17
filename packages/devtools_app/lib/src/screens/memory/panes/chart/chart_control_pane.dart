@@ -142,16 +142,20 @@ class _ChartHelpLink extends StatelessWidget {
       gaScreen: gac.memory,
       gaSelection: gac.topicDocumentationButton(_documentationTopic),
       dialogTitle: 'Memory Chart Help',
-      child: Column(
+      actions: [
+        MoreInfoLink(
+          url: DocLinks.chart.value,
+          gaScreenName: '',
+          gaSelectedItemDescription:
+              gac.topicDocumentationLink(_documentationTopic),
+        ),
+      ],
+      child: const Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          const Text('Memory chart shows trace\n'
-              'of application memory usage.'),
-          MoreInfoLink(
-            url: DocLinks.chart.value,
-            gaScreenName: '',
-            gaSelectedItemDescription:
-                gac.topicDocumentationLink(_documentationTopic),
+          Text(
+            'The memory chart shows live and historical\n'
+            ' memory usage statistics for your application.',
           ),
         ],
       ),

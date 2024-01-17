@@ -5,6 +5,7 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/widgets.dart';
 
+import '../../../../../../shared/common_widgets.dart';
 import '../../../../shared/heap/heap.dart';
 import '../../controller/class_data.dart';
 import 'path.dart';
@@ -30,8 +31,8 @@ class HeapClassDetails extends StatelessWidget {
   Widget build(BuildContext context) {
     final theEntries = entries;
     if (theEntries == null) {
-      return const Center(
-        child: Text('Click a table row to see retaining paths here.'),
+      return const CenteredMessage(
+        'Click a table row to see retaining paths here.',
       );
     }
 
@@ -46,10 +47,8 @@ class HeapClassDetails extends StatelessWidget {
       valueListenable: selection,
       builder: (_, selection, __) {
         if (selection == null) {
-          return const Center(
-            child: Text(
-              'Click a table row to see the detailed path.',
-            ),
+          return const CenteredMessage(
+            'Click a table row to see the detailed path.',
           );
         }
 

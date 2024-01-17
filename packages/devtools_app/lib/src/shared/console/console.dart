@@ -189,7 +189,7 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
               parent: RangeMaintainingScrollPhysics(),
             ),
             separatorBuilder: (_, __) {
-              return const Divider();
+              return const PaddedDivider.noPadding();
             },
             itemBuilder: (context, index) {
               if (index == _currentLines.length && widget.footer != null) {
@@ -203,7 +203,7 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
                     // codes.
                     children: processAnsiTerminalCodes(
                       line.text,
-                      theme.fixedFontStyle,
+                      theme.regularTextStyle,
                     ),
                   ),
                 );
@@ -249,6 +249,7 @@ class DeleteControl extends StatelessWidget {
   Widget build(BuildContext context) {
     return ToolbarAction(
       icon: Icons.delete,
+      size: defaultIconSize,
       tooltip: tooltip,
       onPressed: onPressed,
       key: buttonKey,

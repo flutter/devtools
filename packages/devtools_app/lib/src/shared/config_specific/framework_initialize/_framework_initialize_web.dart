@@ -6,7 +6,7 @@ import 'dart:js_interop';
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_app_shared/web_utils.dart';
-import 'package:web/helpers.dart' hide Storage;
+import 'package:web/web.dart' hide Storage;
 
 import '../../../service/service_manager.dart';
 import '../../globals.dart';

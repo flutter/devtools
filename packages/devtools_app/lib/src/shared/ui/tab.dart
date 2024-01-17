@@ -6,7 +6,6 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../analytics/analytics.dart' as ga;
-import '../utils.dart';
 
 double get _tabHeight => scaleByFontFactor(46.0);
 double get _textAndIconTabHeight => scaleByFontFactor(72.0);
@@ -182,7 +181,7 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
   Widget build(BuildContext context) {
     final tabBar = OutlineDecoration.onlyBottom(
       child: SizedBox(
-        height: defaultHeaderHeight(isDense: isDense()),
+        height: defaultHeaderHeight,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [

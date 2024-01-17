@@ -216,10 +216,7 @@ class _InitializerState extends State<Initializer>
                   child: const Text(connectToNewAppText),
                 )
               else
-                Text(
-                  'Run a new debug session to reconnect',
-                  style: theme.textTheme.bodyMedium,
-                ),
+                const Text('Run a new debug session to reconnect'),
               const Spacer(),
               if (offlineController.offlineDataJson.isNotEmpty)
                 ElevatedButton(

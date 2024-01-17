@@ -161,7 +161,9 @@ class _TreemapState extends State<Treemap> {
     final isHorizontalRectangle = width > height;
 
     final totalByteSize = computeByteSizeForNodes(nodes: children);
-    if (children.isEmpty) {
+    // If there's no children or the children have a size of zero, there's
+    // nothing to display.
+    if (children.isEmpty || totalByteSize == 0) {
       return [];
     }
 
@@ -505,9 +507,7 @@ class _TreemapState extends State<Treemap> {
             border: Border.all(color: Colors.black87),
           ),
           child: buildNameAndSizeText(
-            textColor:
-                (Theme.of(context).textTheme.bodyMedium ?? const TextStyle())
-                    .color,
+            textColor: Theme.of(context).colorScheme.onSurface,
             oneLine: true,
           ),
         ),

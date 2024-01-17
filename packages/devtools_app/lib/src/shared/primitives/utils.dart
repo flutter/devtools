@@ -1061,9 +1061,21 @@ extension StringExtension on String {
     return true;
   }
 
-  /// Whether [other] is a case insensitive match for this String
-  bool caseInsensitiveEquals(String? other) {
-    return toLowerCase() == other?.toLowerCase();
+  /// Whether [other] is a case insensitive match for this String.
+  ///
+  /// If [pattern] is a [RegExp], this method will return true if and only if
+  /// this String is a complete [RegExp] match, meaning that the regular
+  /// expression finds a match with starting index 0 and ending index
+  /// [this.length].
+  bool caseInsensitiveEquals(Pattern? pattern) {
+    if (pattern is RegExp) {
+      assert(!pattern.isCaseSensitive);
+      final completeMatch = pattern
+          .allMatches(this)
+          .firstWhereOrNull((match) => match.start == 0 && match.end == length);
+      return completeMatch != null;
+    }
+    return toLowerCase() == pattern.toString().toLowerCase();
   }
 
   /// Find all case insensitive matches of query in this String
@@ -1112,6 +1124,16 @@ extension ListExtension<T> on List<T> {
   T get second => this[1];
 
   T get third => this[2];
+
+  List<int> allIndicesWhere(bool Function(T element) test) {
+    final indices = <int>[];
+    for (var i = 0; i < length; i++) {
+      if (test(this[i])) {
+        indices.add(i);
+      }
+    }
+    return indices;
+  }
 }
 
 extension SetExtension<T> on Set<T> {
