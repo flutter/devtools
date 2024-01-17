@@ -44,6 +44,8 @@ void main() {
       expect(
         file.readAsStringSync(),
         '''
+description: This file stores settings for Dart & Flutter DevTools.
+documentation: https://docs.flutter.dev/tools/devtools/extensions#devtools_options.yaml.
 extensions:
 ''',
       );
@@ -59,6 +61,8 @@ extensions:
       expect(
         file.readAsStringSync(),
         '''
+description: This file stores settings for Dart & Flutter DevTools.
+documentation: https://docs.flutter.dev/tools/devtools/extensions#devtools_options.yaml.
 extensions:
   - foo: true''',
       );
@@ -79,6 +83,8 @@ extensions:
       expect(
         file.readAsStringSync(),
         '''
+description: This file stores settings for Dart & Flutter DevTools.
+documentation: https://docs.flutter.dev/tools/devtools/extensions#devtools_options.yaml.
 extensions:
   - foo: true
   - bar: false''',
