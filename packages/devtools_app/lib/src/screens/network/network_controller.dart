@@ -36,6 +36,11 @@ enum NetworkResponseViewType {
   }
 }
 
+enum _NetworkTrafficType {
+  http,
+  socket,
+}
+
 class NetworkController extends DisposableController
     with
         SearchControllerMixin<NetworkRequest>,
@@ -192,8 +197,10 @@ class NetworkController extends DisposableController
 
   Future<void> startRecording() async {
     await _startRecording(
-      alreadyRecordingHttp: await recordingHttpTraffic(),
-      alreadyRecordingSocketData: await recordingSocketTraffic(),
+      alreadyRecordingHttp:
+          await _recordingNetworkTraffic(type: _NetworkTrafficType.http),
+      alreadyRecordingSocketData:
+          await _recordingNetworkTraffic(type: _NetworkTrafficType.socket),
     );
   }
 
@@ -248,33 +255,22 @@ class NetworkController extends DisposableController
     _recordingNotifier.value = state;
   }
 
-  Future<bool> recordingHttpTraffic() async {
+  Future<bool> _recordingNetworkTraffic({
+    required _NetworkTrafficType type,
+  }) async {
     bool enabled = true;
     final service = serviceConnection.serviceManager.service!;
     await service.forEachIsolate(
       (isolate) async {
-        final httpFuture =
-            service.httpEnableTimelineLoggingWrapper(isolate.id!);
+        final future = switch (type) {
+          _NetworkTrafficType.http =>
+            service.httpEnableTimelineLoggingWrapper(isolate.id!),
+          _NetworkTrafficType.socket =>
+            service.socketProfilingEnabled(isolate.id!),
+        };
         // The above call won't complete immediately if the isolate is paused,
         // so give up waiting after 500ms.
-        final state = await timeout(httpFuture, 500);
-        if (state?.enabled != true) {
-          enabled = false;
-        }
-      },
-    );
-    return enabled;
-  }
-
-  Future<bool> recordingSocketTraffic() async {
-    bool enabled = true;
-    final service = serviceConnection.serviceManager.service!;
-    await service.forEachIsolate(
-      (isolate) async {
-        final socketFuture = service.socketProfilingEnabled(isolate.id!);
-        // The above call won't complete immediately if the isolate is paused,
-        // so give up waiting after 500ms.
-        final state = await timeout(socketFuture, 500);
+        final state = await timeout(future, 500);
         if (state?.enabled != true) {
           enabled = false;
         }
