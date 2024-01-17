@@ -13,7 +13,7 @@ import 'package:flutter/foundation.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../utils.dart';
+import '../helpers/utils.dart';
 import 'fake_isolate_manager.dart';
 import 'fake_service_extension_manager.dart';
 import 'fake_vm_service_wrapper.dart';
@@ -29,6 +29,7 @@ class FakeServiceConnectionManager extends Fake
     bool hasService = true,
     List<String> availableServices = const [],
     List<String> availableLibraries = const [],
+    String? rootLibrary,
   }) {
     _serviceManager = FakeServiceManager(
       service: service,
@@ -36,6 +37,7 @@ class FakeServiceConnectionManager extends Fake
       connectedAppInitialized: connectedAppInitialized,
       availableLibraries: availableLibraries,
       availableServices: availableServices,
+      rootLibrary: rootLibrary,
     );
     for (var screenId in screenIds) {
       when(errorBadgeManager.erroredItemsForPage(screenId)).thenReturn(
@@ -78,7 +80,7 @@ class FakeServiceConnectionManager extends Fake
         Response.parse({
           'layerBytes': 0,
           'pictureBytes': 0,
-        }),
+        })!,
       );
 
   @override
@@ -87,6 +89,13 @@ class FakeServiceConnectionManager extends Fake
     required String action,
   }) {
     return Future.value();
+  }
+
+  @override
+  Future<String?> rootLibraryForMainIsolate() {
+    final fakeIsolateManager =
+        _serviceManager.isolateManager as FakeIsolateManager;
+    return Future.value(fakeIsolateManager.rootLibrary);
   }
 }
 
@@ -101,8 +110,10 @@ class FakeServiceManager extends Fake
     this.availableLibraries = const [],
     this.onVmServiceOpened,
     Map<String, Response>? serviceExtensionResponses,
-  }) : serviceExtensionResponses =
-            serviceExtensionResponses ?? _defaultServiceExtensionResponses {
+    String? rootLibrary,
+  })  : serviceExtensionResponses =
+            serviceExtensionResponses ?? _defaultServiceExtensionResponses,
+        _isolateManager = FakeIsolateManager(rootLibrary: rootLibrary) {
     this.service = service ?? createFakeService();
     mockConnectedApp(
       connectedApp!,
@@ -145,9 +156,11 @@ class FakeServiceManager extends Fake
 
   final List<String> availableLibraries;
 
-  final Function? onVmServiceOpened;
+  final void Function()? onVmServiceOpened;
 
   final Map<String, Response> serviceExtensionResponses;
+
+  final IsolateManager _isolateManager;
 
   static final _defaultServiceExtensionResponses = <String, Response>{
     isImpellerEnabled: Response.parse({'enabled': false})!,
@@ -173,7 +186,7 @@ class FakeServiceManager extends Fake
   bool connectedAppInitialized;
 
   @override
-  final IsolateManager isolateManager = FakeIsolateManager();
+  IsolateManager get isolateManager => _isolateManager;
 
   @override
   final ResolvedUriManager resolvedUriManager = ResolvedUriManager();
@@ -263,7 +276,7 @@ class FakeServiceManager extends Fake
         'dartSdkVersion': '2.9.0 (build 2.9.0-8.0.dev d6fed1f624)',
         'frameworkRevisionShort': '74432fa91c',
         'engineRevisionShort': 'ae2222f47e',
-      }),
+      })!,
     );
   }
 

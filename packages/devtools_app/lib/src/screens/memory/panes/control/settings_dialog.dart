@@ -53,9 +53,11 @@ class MemorySettingsDialog extends StatelessWidget {
                 ),
                 const SizedBox(width: defaultSpacing),
                 SizedBox(
+                  height: defaultTextFieldHeight,
                   width: defaultTextFieldNumberWidth,
                   child: TextField(
-                    decoration: dialogTextFieldDecoration,
+                    style: theme.regularTextStyle,
+                    decoration: singleLineDialogTextFieldDecoration,
                     controller: TextEditingController(
                       text: preferences.memory.refLimit.value.toString(),
                     ),

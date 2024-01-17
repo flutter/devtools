@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-library service_extensions;
-
 import 'package:devtools_app_shared/service_extensions.dart' as extensions;
 import 'package:flutter/material.dart';
 
@@ -38,7 +36,7 @@ abstract class ServiceExtensionInterface {
 /// A subclass of [extensions.ToggleableServiceExtension] that includes metadata
 /// for displaying and interacting with a toggleable service extension in the
 /// DevTools UI.
-class ToggleableServiceExtensionDescription<T> extends extensions
+class ToggleableServiceExtensionDescription<T extends Object> extends extensions
     .ToggleableServiceExtension implements ServiceExtensionInterface {
   ToggleableServiceExtensionDescription._({
     required super.extension,

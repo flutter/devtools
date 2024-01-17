@@ -11,6 +11,7 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_test_utils.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -576,7 +577,7 @@ void main() {
         expect(deferredMenuItemFinder, findsOneWidget);
 
         // Select the main unit.
-        await tester.tap(find.text('Main').hitTestable());
+        await tester.tap(find.richText('Main').hitTestable());
         await tester.pumpAndSettle();
 
         // Verify the main unit is shown for entire app.
@@ -750,6 +751,6 @@ Finder _findDropdownButton<T>() {
 Finder _findMenuItemWithText<T>(String text) {
   return find.descendant(
     of: find.byType(DropdownMenuItem<T>),
-    matching: find.text(text).first,
+    matching: find.richText(text).hitTestable(),
   );
 }

@@ -64,7 +64,6 @@ class AnalyticsDropDownButton<T> extends StatelessWidget {
         child: RoundedDropDownButton<T>(
           isDense: isDense,
           isExpanded: isExpanded,
-          style: Theme.of(context).textTheme.bodyMedium,
           value: value,
           items: items?.map((e) => e.item).toList(),
           onChanged: _onChanged,

@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 
 import '../extensions/extension_service.dart';
 import '../screens/debugger/breakpoint_manager.dart';
+import '../service/dtd_manager.dart';
 import '../service/service_manager.dart';
 import '../shared/banner_messages.dart';
 import '../shared/notifications.dart';
@@ -38,6 +39,8 @@ FrameworkController get frameworkController =>
 Storage get storage => globals[Storage] as Storage;
 
 SurveyService get surveyService => globals[SurveyService] as SurveyService;
+
+DTDManager get dtdManager => globals[DTDManager] as DTDManager;
 
 PreferencesController get preferences =>
     globals[PreferencesController] as PreferencesController;

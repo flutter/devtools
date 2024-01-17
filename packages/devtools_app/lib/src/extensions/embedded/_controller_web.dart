@@ -8,7 +8,7 @@ import 'dart:ui_web' as ui_web;
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_extensions/api.dart';
 import 'package:path/path.dart' as path;
-import 'package:web/helpers.dart';
+import 'package:web/web.dart';
 
 import '../../shared/development_helpers.dart';
 import '../../shared/globals.dart';
@@ -42,8 +42,12 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController
       return 'https://flutter.dev/';
     }
 
+    final basePath = devtoolsAssetsBasePath(
+      origin: window.location.origin,
+      path: window.location.pathname,
+    );
     final baseUri = path.join(
-      window.location.origin,
+      basePath,
       'devtools_extensions',
       extensionConfig.name,
       'index.html',
@@ -74,9 +78,7 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController
     );
     _initialized = true;
 
-    // TODO(kenz): replace with `createIFrameElement` when we upgrade to
-    // package:web ^0.3.1.
-    _extensionIFrame = createElementTag('iframe') as HTMLIFrameElement
+    _extensionIFrame = createIFrameElement()
       // This url is safe because we built it ourselves and it does not include
       // any user input.
       // ignore: unsafe_html

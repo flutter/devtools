@@ -10,7 +10,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_app_shared/web_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:web/helpers.dart';
+import 'package:web/web.dart';
 
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
@@ -183,7 +183,7 @@ class _PerfettoViewController extends DisposableController
       notificationService.push(
         'No timeline events available for the selected frame. Timeline '
         'events occurred too long ago before DevTools could access them. '
-        'To avoid this, open the DevTools Performance page sooner.',
+        'To avoid this, open the DevTools Performance page earlier.',
       );
       return;
     }

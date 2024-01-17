@@ -62,7 +62,7 @@ abstract class FeatureFlags {
   /// DevTools screen and the standalone tool for IDE embedding.
   ///
   /// https://github.com/flutter/devtools/issues/6013
-  static bool deepLinkValidation = false;
+  static bool deepLinkValidation = true;
 
   /// Flag to enable DevTools extensions.
   ///

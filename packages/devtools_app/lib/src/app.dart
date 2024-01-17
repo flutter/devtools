@@ -70,12 +70,10 @@ class DevToolsApp extends StatefulWidget {
     this.originalScreens,
     this.analyticsController, {
     super.key,
-    this.sampleData = const [],
   });
 
   final List<DevToolsScreen> originalScreens;
   final AnalyticsController analyticsController;
-  final List<DevToolsJsonFile> sampleData;
 
   @override
   State<DevToolsApp> createState() => DevToolsAppState();
@@ -239,19 +237,9 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       child: DevToolsScaffold.withChild(
         key: const Key('not-found'),
         embed: isEmbedded(args),
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text("'$page' not found."),
-              const SizedBox(height: defaultSpacing),
-              ElevatedButton(
-                onPressed: () =>
-                    routerDelegate.navigateHome(clearScreenParam: true),
-                child: const Text('Go to Home screen'),
-              ),
-            ],
-          ),
+        child: PageNotFound(
+          page: page,
+          routerDelegate: routerDelegate,
         ),
       ),
     );
@@ -450,7 +438,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
 ///
 /// [C] corresponds to the type of the screen's controller, which is created by
 /// [createController] or provided by [controllerProvider].
-class DevToolsScreen<C> {
+class DevToolsScreen<C extends Object?> {
   const DevToolsScreen(
     this.screen, {
     this.createController,
@@ -529,6 +517,36 @@ class _AlternateCheckedModeBanner extends StatelessWidget {
       location: BannerLocation.topStart,
       child: Builder(
         builder: builder,
+      ),
+    );
+  }
+}
+
+class PageNotFound extends StatelessWidget {
+  const PageNotFound({
+    super.key,
+    required this.page,
+    required this.routerDelegate,
+  });
+
+  final String page;
+
+  final DevToolsRouterDelegate routerDelegate;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text("'$page' not found."),
+          const SizedBox(height: defaultSpacing),
+          ElevatedButton(
+            onPressed: () =>
+                routerDelegate.navigateHome(clearScreenParam: true),
+            child: const Text('Go to Home screen'),
+          ),
+        ],
       ),
     );
   }

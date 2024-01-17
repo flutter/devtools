@@ -6,7 +6,7 @@ import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/memory/framework/connected/memory_tabs.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/diff_pane.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/widgets/snapshot_list.dart';
-import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -59,7 +59,7 @@ void main() {
         );
 
         // Record three snapshots.
-        for (var i in Iterable.generate(3)) {
+        for (var i in Iterable<int>.generate(3)) {
           await tester.tap(find.byIcon(Icons.fiber_manual_record).first);
           await tester.pumpAndSettle();
           expect(find.text('selected-isolate-${i + 1}'), findsOneWidget);

@@ -139,8 +139,8 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
                         controller.enhanceTracingController,
                     rebuildCountModel: controller.data!.rebuildCountModel,
                   )
-                : const Center(
-                    child: Text('Select a frame above to view analysis data.'),
+                : const CenteredMessage(
+                    'Select a frame above to view analysis data.',
                   ),
           ),
           featureController: null,

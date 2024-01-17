@@ -32,7 +32,7 @@ jobs:
         uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84
         with:
           path: |
-            ./flutter-sdk
+            ./tool/flutter-sdk
           key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
 
       - name: tool/ci/bots.sh
@@ -55,7 +55,7 @@ jobs:
         uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84
         with:
           path: |
-            ./flutter-sdk
+            ./tool/flutter-sdk
           key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
       - name: Run tool/ci/bots.sh
         run: ./tool/ci/bots.sh
@@ -65,7 +65,7 @@ jobs:
           wget -qO- https://dcm.dev/pgp-key.public | sudo gpg --dearmor -o /usr/share/keyrings/dcm.gpg
           echo 'deb [signed-by=/usr/share/keyrings/dcm.gpg arch=amd64] https://dcm.dev/debian stable main' | sudo tee /etc/apt/sources.list.d/dart_stable.list
           sudo apt-get update
-          sudo apt-get install dcm=1.11.0-1 
+          sudo apt-get install dcm=1.11.0-1
           sudo chmod +x /usr/bin/dcm
           echo "$(dcm --version)"
       - name: Setup Dart SDK
@@ -92,7 +92,7 @@ jobs:
         uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84
         with:
           path: |
-            ./flutter-sdk
+            ./tool/flutter-sdk
           key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
       - name: tool/ci/package_tests.sh
         env:
@@ -111,7 +111,6 @@ jobs:
           - build_dart2js
           - test_ddc
           - test_dart2js
-          - benchmarks_dart2js
     steps:
       - name: git clone
         uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac
@@ -119,7 +118,7 @@ jobs:
         uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84
         with:
           path: |
-            ./flutter-sdk
+            ./tool/flutter-sdk
           key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
       - name: tool/ci/bots.sh
         env:
@@ -146,7 +145,7 @@ jobs:
         uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84
         with:
           path: |
-            ./flutter-sdk
+            ./tool/flutter-sdk
           key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
       - name: tool/ci/bots.sh
         env:
@@ -216,7 +215,7 @@ jobs:
         uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84
         with:
           path: |
-            ./flutter-sdk
+            ./tool/flutter-sdk
           key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
       - name: tool/ci/bots.sh
         env:
@@ -249,13 +248,50 @@ jobs:
         uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84
         with:
           path: |
-            ./flutter-sdk
+            ./tool/flutter-sdk
           key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
       - name: tool/ci/bots.sh
         env:
           BOT: ${{ matrix.bot }}
           DEVTOOLS_PACKAGE: devtools_extensions
         run: ./tool/ci/bots.sh
+
+  benchmark-performance:
+    name: benchmark-performance
+    needs: flutter-prep
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    steps:
+      - name: git clone
+        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac
+      - name: Load Cached Flutter SDK
+        uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84
+        with:
+          path: |
+            ./tool/flutter-sdk
+          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
+      - name: tool/ci/benchmark_performance.sh
+        run: ./tool/ci/benchmark_performance.sh
+
+  benchmark-size:
+    name: benchmark-size
+    needs: flutter-prep
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    steps:
+      - name: git clone
+        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac
+      - name: Load Cached Flutter SDK
+        uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84
+        with:
+          path: |
+            ./tool/flutter-sdk
+          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
+      - name: tool/ci/benchmark_size.sh
+        run: ./tool/ci/benchmark_size.sh
+
 
 # TODO(https://github.com/flutter/devtools/issues/1715): add a windows compatible version of tool/ci/bots.sh
 # and run it from this job.

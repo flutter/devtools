@@ -168,16 +168,17 @@ class CpuProfileData {
     _cpuProfileRoot = CpuStackFrame.root(profileMetaData);
   }
 
-  factory CpuProfileData.parse(Map<String, dynamic> json) {
+  factory CpuProfileData.parse(Map<String, dynamic> json_) {
+    final json = _CpuProfileDataJson(json_);
     final profileMetaData = CpuProfileMetaData(
-      sampleCount: json[sampleCountKey] ?? 0,
-      samplePeriod: json[samplePeriodKey] ?? 0,
-      stackDepth: json[stackDepthKey] ?? 0,
-      time: (json[timeOriginKey] != null && json[timeExtentKey] != null)
+      sampleCount: json.sampleCount ?? 0,
+      samplePeriod: json.samplePeriod ?? 0,
+      stackDepth: json.stackDepth ?? 0,
+      time: (json.timeOriginMicros != null && json.timeExtentMicros != null)
           ? (TimeRange()
-            ..start = Duration(microseconds: json[timeOriginKey])
+            ..start = Duration(microseconds: json.timeOriginMicros!)
             ..end = Duration(
-              microseconds: json[timeOriginKey] + json[timeExtentKey],
+              microseconds: json.timeOriginMicros! + json.timeExtentMicros!,
             ))
           : null,
     );
@@ -185,7 +186,7 @@ class CpuProfileData {
     // Initialize all stack frames.
     final stackFrames = <String, CpuStackFrame>{};
     final Map<String, Object?> stackFramesJson =
-        jsonDecode(jsonEncode(json[stackFramesKey] ?? <String, Object?>{}));
+        jsonDecode(jsonEncode(json.stackFrames ?? <String, Object?>{}));
     for (final entry in stackFramesJson.entries) {
       final stackFrameJson = entry.value as Map<String, Object?>;
       final resolvedUrl = (stackFrameJson[resolvedUrlKey] as String?) ?? '';
@@ -211,12 +212,7 @@ class CpuProfileData {
     }
 
     // Initialize all CPU samples.
-    final stackTraceEvents =
-        (json[traceEventsKey] ?? []).cast<Map<String, dynamic>>();
-    final samples = stackTraceEvents
-        .map((trace) => CpuSampleEvent.parse(trace))
-        .toList()
-        .cast<CpuSampleEvent>();
+    final samples = json.traceEvents ?? [];
 
     return CpuProfileData._(
       stackFrames: stackFrames,
@@ -550,12 +546,12 @@ class CpuProfileData {
     // final output from this method.
     const int kRootId = 0;
     final traceObject = <String, Object?>{
-      CpuProfileData.sampleCountKey: cpuSamples.sampleCount,
-      CpuProfileData.samplePeriodKey: cpuSamples.samplePeriod,
-      CpuProfileData.stackDepthKey: cpuSamples.maxStackDepth,
-      CpuProfileData.timeOriginKey: cpuSamples.timeOriginMicros,
-      CpuProfileData.timeExtentKey: cpuSamples.timeExtentMicros,
-      CpuProfileData.stackFramesKey: cpuSamples.generateStackFramesJson(
+      CpuProfileData._sampleCountKey: cpuSamples.sampleCount,
+      CpuProfileData._samplePeriodKey: cpuSamples.samplePeriod,
+      CpuProfileData._stackDepthKey: cpuSamples.maxStackDepth,
+      CpuProfileData._timeOriginKey: cpuSamples.timeOriginMicros,
+      CpuProfileData._timeExtentKey: cpuSamples.timeExtentMicros,
+      CpuProfileData._stackFramesKey: cpuSamples.generateStackFramesJson(
         isolateId: isolateId,
         // We want to ensure that if [kRootId] ever changes, this change is
         // propagated to [cpuSamples.generateStackFramesJson].
@@ -563,7 +559,7 @@ class CpuProfileData {
         kRootId: kRootId,
         buildCodeTree: buildCodeTree,
       ),
-      CpuProfileData.traceEventsKey: [],
+      CpuProfileData._traceEventsKey: [],
     };
 
     // Build the trace events.
@@ -573,7 +569,7 @@ class CpuProfileData {
       if (tree.frameId == kRootId) {
         continue;
       }
-      (traceObject[CpuProfileData.traceEventsKey]! as List<Object?>).add({
+      (traceObject[CpuProfileData._traceEventsKey]! as List<Object?>).add({
         'ph': 'P', // kind = sample event
         'name': '', // Blank to keep about:tracing happy
         'pid': cpuSamples.pid,
@@ -604,7 +600,7 @@ class CpuProfileData {
     String isolateId,
     Map<String, dynamic> traceObject,
   ) async {
-    final stackFrames = traceObject[CpuProfileData.stackFramesKey]
+    final stackFrames = traceObject[CpuProfileData._stackFramesKey]
         .values
         .cast<Map<String, dynamic>>();
     final stackFramesWaitingOnPackageUri = <Map<String, dynamic>>[];
@@ -651,13 +647,13 @@ class CpuProfileData {
   static const resolvedUrlKey = 'resolvedUrl';
   static const resolvedPackageUriKey = 'packageUri';
   static const sourceLineKey = 'sourceLine';
-  static const stackFramesKey = 'stackFrames';
-  static const traceEventsKey = 'traceEvents';
-  static const sampleCountKey = 'sampleCount';
-  static const stackDepthKey = 'stackDepth';
-  static const samplePeriodKey = 'samplePeriod';
-  static const timeOriginKey = 'timeOriginMicros';
-  static const timeExtentKey = 'timeExtentMicros';
+  static const _stackFramesKey = 'stackFrames';
+  static const _traceEventsKey = 'traceEvents';
+  static const _sampleCountKey = 'sampleCount';
+  static const _stackDepthKey = 'stackDepth';
+  static const _samplePeriodKey = 'samplePeriod';
+  static const _timeOriginKey = 'timeOriginMicros';
+  static const _timeExtentKey = 'timeExtentMicros';
   static const userTagKey = 'userTag';
   static const vmTagKey = 'vmTag';
 
@@ -738,15 +734,15 @@ class CpuProfileData {
 
   Map<String, Object?> get toJson => {
         'type': '_CpuProfileTimeline',
-        samplePeriodKey: profileMetaData.samplePeriod,
-        sampleCountKey: profileMetaData.sampleCount,
-        stackDepthKey: profileMetaData.stackDepth,
+        _samplePeriodKey: profileMetaData.samplePeriod,
+        _sampleCountKey: profileMetaData.sampleCount,
+        _stackDepthKey: profileMetaData.stackDepth,
         if (profileMetaData.time?.start != null)
-          timeOriginKey: profileMetaData.time!.start!.inMicroseconds,
+          _timeOriginKey: profileMetaData.time!.start!.inMicroseconds,
         if (profileMetaData.time?.duration != null)
-          timeExtentKey: profileMetaData.time!.duration.inMicroseconds,
-        stackFramesKey: stackFramesJson,
-        traceEventsKey: cpuSamples.map((sample) => sample.toJson).toList(),
+          _timeExtentKey: profileMetaData.time!.duration.inMicroseconds,
+        _stackFramesKey: stackFramesJson,
+        _traceEventsKey: cpuSamples.map((sample) => sample.toJson).toList(),
       };
 
   bool get isEmpty => profileMetaData.sampleCount == 0;
@@ -759,6 +755,23 @@ class CpuProfileData {
     }
     return framesJson;
   }
+}
+
+extension type _CpuProfileDataJson(Map<String, dynamic> json) {
+  int? get timeOriginMicros => json[CpuProfileData._timeOriginKey];
+  int? get timeExtentMicros => json[CpuProfileData._timeExtentKey];
+  int? get sampleCount => json[CpuProfileData._sampleCountKey];
+  int? get samplePeriod => json[CpuProfileData._samplePeriodKey];
+  int? get stackDepth => json[CpuProfileData._stackDepthKey];
+  Map<String, Object?>? get stackFrames =>
+      (json[CpuProfileData._stackFramesKey] as Map?)?.cast<String, Object?>();
+  List<CpuSampleEvent>? get traceEvents =>
+      (json[CpuProfileData._traceEventsKey] as List?)
+          ?.cast<Map>()
+          .map((trace) => trace.cast<String, Object?>())
+          .map((trace) => CpuSampleEvent.parse(trace))
+          .toList()
+          .cast<CpuSampleEvent>();
 }
 
 class CpuProfileMetaData extends ProfileMetaData {

@@ -14,7 +14,7 @@ import 'performance_controls.dart';
 class MoreDebuggingOptionsButton extends StatelessWidget {
   const MoreDebuggingOptionsButton({Key? key}) : super(key: key);
 
-  static const _width = 720.0;
+  static const _width = 620.0;
 
   @override
   Widget build(BuildContext context) {

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:codicon/codicon.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 
@@ -30,6 +31,8 @@ mixin FilterControllerMixin<T> on DisposableController
 
   final filteredData = ListValueNotifier<T>([]);
 
+  final useRegExp = ValueNotifier<bool>(false);
+
   // TODO(kenz): replace [Filter] class with a record when available.
   ValueListenable<Filter<T>> get activeFilter => _activeFilter;
 
@@ -46,7 +49,11 @@ mixin FilterControllerMixin<T> on DisposableController
   }) {
     _activeFilter.value = Filter(
       queryFilter: query != null
-          ? QueryFilter.parse(query, args: _queryFilterArgs)
+          ? QueryFilter.parse(
+              query,
+              args: _queryFilterArgs,
+              useRegExp: useRegExp.value,
+            )
           : QueryFilter.empty(args: _queryFilterArgs),
       toggleFilters: toggleFilters ?? _toggleFilters,
     );
@@ -76,6 +83,7 @@ mixin FilterControllerMixin<T> on DisposableController
     return queryFilterActive || toggleFilterActive;
   }
 
+  // TODO(kenz): de-dupe the filtering logic in overrides of this method.
   // TODO(kenz): refactor this so that `filterData` returns the filtered data
   // and does not have side effects other than filtering data. Add a
   // `onFilterApplied` method here that can be overridden to apply those
@@ -96,9 +104,11 @@ mixin FilterControllerMixin<T> on DisposableController
     }
     final toggleFilterTag = suffixList.join(',');
     final queryFilterTag = activeFilter.queryFilter.query.toLowerCase();
-    return [toggleFilterTag, queryFilterTag]
-        .where((e) => e.isNotEmpty)
-        .join(filterTagSeparator);
+    return [
+      toggleFilterTag,
+      queryFilterTag,
+      if (queryFilterTag.isNotEmpty && useRegExp.value) 'regexp',
+    ].where((e) => e.isNotEmpty).join(filterTagSeparator);
   }
 
   void _resetToDefaultFilter() {
@@ -154,6 +164,8 @@ class FilterDialog<T> extends StatefulWidget {
 class _FilterDialogState<T> extends State<FilterDialog<T>>
     with AutoDisposeMixin {
   late final TextEditingController queryTextFieldController;
+  late bool useRegExp;
+  late bool pendingUseRegExp;
 
   @override
   void initState() {
@@ -161,6 +173,11 @@ class _FilterDialogState<T> extends State<FilterDialog<T>>
     queryTextFieldController = TextEditingController(
       text: widget.controller.activeFilter.value.queryFilter.query,
     );
+    useRegExp = widget.controller.useRegExp.value;
+    addAutoDisposeListener(widget.controller.useRegExp, () {
+      useRegExp = widget.controller.useRegExp.value;
+    });
+    pendingUseRegExp = useRegExp;
   }
 
   @override
@@ -185,6 +202,17 @@ class _FilterDialogState<T> extends State<FilterDialog<T>>
               autofocus: true,
               labelText: 'Filter Query',
               controller: queryTextFieldController,
+              additionalSuffixActions: [
+                DevToolsToggleButton(
+                  icon: Codicons.regex,
+                  message: 'Use regular expressions',
+                  outlined: false,
+                  isSelected: pendingUseRegExp,
+                  onPressed: () => setState(() {
+                    pendingUseRegExp = !pendingUseRegExp;
+                  }),
+                ),
+              ],
             ),
             const SizedBox(height: defaultSpacing),
             if (widget.queryInstructions != null) ...[
@@ -201,12 +229,14 @@ class _FilterDialogState<T> extends State<FilterDialog<T>>
   }
 
   void _applyFilterChanges() {
-    widget.controller.setActiveFilter(
-      query: widget.includeQueryFilter
-          ? queryTextFieldController.value.text
-          : null,
-      toggleFilters: widget.controller._toggleFilters,
-    );
+    widget.controller
+      ..useRegExp.value = pendingUseRegExp
+      ..setActiveFilter(
+        query: widget.includeQueryFilter
+            ? queryTextFieldController.value.text
+            : null,
+        toggleFilters: widget.controller._toggleFilters,
+      );
   }
 
   void _resetFilters() {
@@ -280,14 +310,14 @@ class ToggleFilter<T> {
 class QueryFilter {
   const QueryFilter._({
     this.filterArguments = const <String, QueryFilterArgument>{},
-    this.substrings = const [],
+    this.substringExpressions = const <Pattern>[],
     this.isEmpty = false,
   });
 
   factory QueryFilter.empty({required Map<String, QueryFilterArgument> args}) {
     return QueryFilter._(
       filterArguments: args,
-      substrings: <String>[],
+      substringExpressions: <Pattern>[],
       isEmpty: true,
     );
   }
@@ -295,6 +325,7 @@ class QueryFilter {
   factory QueryFilter.parse(
     String query, {
     required Map<String, QueryFilterArgument> args,
+    required bool useRegExp,
   }) {
     if (query.isEmpty) {
       return QueryFilter.empty(args: args);
@@ -306,7 +337,7 @@ class QueryFilter {
     }
 
     final partsBySpace = query.split(' ');
-    final substrings = <String>[];
+    final substringExpressions = <Pattern>[];
     for (final part in partsBySpace) {
       final querySeparatorIndex = part.indexOf(':');
       if (querySeparatorIndex != -1) {
@@ -316,12 +347,19 @@ class QueryFilter {
             if (arg.matchesKey(part)) {
               arg.isNegative =
                   part.startsWith(QueryFilterArgument.negativePrefix);
-              arg.values = value.split(QueryFilterArgument.valueSeparator);
+              final valueStrings =
+                  value.split(QueryFilterArgument.valueSeparator);
+              arg.values = useRegExp
+                  ? valueStrings
+                      .map((v) => RegExp(v, caseSensitive: false))
+                      .toList()
+                  : valueStrings;
             }
           }
         }
       } else {
-        substrings.add(part);
+        substringExpressions
+            .add(useRegExp ? RegExp(part, caseSensitive: false) : part);
       }
     }
 
@@ -332,33 +370,35 @@ class QueryFilter {
         break;
       }
     }
-    if (!validArgumentFilter && substrings.isEmpty) {
+    if (!validArgumentFilter && substringExpressions.isEmpty) {
       return QueryFilter.empty(args: args);
     }
 
     return QueryFilter._(
       filterArguments: args,
-      substrings: substrings,
+      substringExpressions: substringExpressions,
     );
   }
 
   final Map<String, QueryFilterArgument> filterArguments;
 
-  final List<String> substrings;
+  final List<Pattern> substringExpressions;
 
   final bool isEmpty;
 
   String get query => isEmpty
       ? ''
       : [
-          ...substrings,
+          ...substringExpressions.toStringList(),
           for (final arg in filterArguments.values) arg.display,
         ].join(' ').trim();
 }
 
-class QueryFilterArgument {
+class QueryFilterArgument<T> {
   QueryFilterArgument({
     required this.keys,
+    required this.dataValueProvider,
+    required this.substringMatch,
     this.values = const [],
     this.isNegative = false,
   });
@@ -369,13 +409,19 @@ class QueryFilterArgument {
 
   final List<String> keys;
 
-  List<String> values;
+  final String? Function(T data) dataValueProvider;
+
+  final bool substringMatch;
+
+  List<Pattern> values;
 
   bool isNegative;
 
-  String get display => values.isNotEmpty
-      ? '${isNegative ? negativePrefix : ''}${keys.first}:${values.join(valueSeparator)}'
-      : '';
+  String get display {
+    if (values.isEmpty) return '';
+    return '${isNegative ? negativePrefix : ''}${keys.first}:'
+        '${values.toStringList().join(valueSeparator)}';
+  }
 
   bool matchesKey(String query) {
     for (final key in keys) {
@@ -384,11 +430,12 @@ class QueryFilterArgument {
     return false;
   }
 
-  bool matchesValue(String? dataValue, {bool substringMatch = false}) {
+  bool matchesValue(T data) {
     // If there are no specified filter values, consider [dataValue] to match
     // this filter.
     if (values.isEmpty) return true;
 
+    final dataValue = dataValueProvider(data);
     if (dataValue == null) {
       return isNegative;
     }
@@ -406,5 +453,13 @@ class QueryFilterArgument {
   void reset() {
     values = [];
     isNegative = false;
+  }
+}
+
+extension PatternListExtension on List<Pattern> {
+  List<String> toStringList() {
+    return safeFirst is RegExp
+        ? cast<RegExp>().map((v) => v.pattern).toList()
+        : cast<String>();
   }
 }

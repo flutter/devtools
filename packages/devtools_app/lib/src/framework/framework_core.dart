@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_shared/service.dart';
@@ -13,6 +14,7 @@ import 'package:vm_service/vm_service.dart';
 import '../../devtools.dart' as devtools show version;
 import '../extensions/extension_service.dart';
 import '../screens/debugger/breakpoint_manager.dart';
+import '../service/dtd_manager.dart';
 import '../service/service_manager.dart';
 import '../service/vm_service_wrapper.dart';
 import '../shared/banner_messages.dart';
@@ -22,7 +24,6 @@ import '../shared/globals.dart';
 import '../shared/notifications.dart';
 import '../shared/offline_mode.dart';
 import '../shared/primitives/message_bus.dart';
-import '../shared/primitives/utils.dart';
 import '../shared/scripts/script_manager.dart';
 import '../shared/survey.dart';
 
@@ -45,6 +46,8 @@ class FrameworkCore {
     setGlobal(BreakpointManager, BreakpointManager());
     setGlobal(EvalService, EvalService());
     setGlobal(ExtensionService, ExtensionService());
+    setGlobal(IdeTheme, getIdeTheme());
+    setGlobal(DTDManager, DTDManager());
   }
 
   static void init() {
@@ -55,8 +58,7 @@ class FrameworkCore {
   static bool initializationInProgress = false;
 
   /// Returns true if we're able to connect to a device and false otherwise.
-  static Future<bool> initVmService(
-    String url, {
+  static Future<bool> initVmService({
     required String serviceUriAsString,
     ErrorReporter? errorReporter = _defaultErrorReporter,
     bool logException = true,
@@ -67,8 +69,7 @@ class FrameworkCore {
       return true;
     }
 
-    final normalizedUri = normalizeVmServiceUri(serviceUriAsString);
-    final Uri? uri = normalizedUri ?? getServiceUriFromQueryString(url);
+    final uri = normalizeVmServiceUri(serviceUriAsString);
     if (uri != null) {
       initializationInProgress = true;
       final finishedCompleter = Completer<void>();

@@ -44,6 +44,14 @@ TODO: Remove this section if there are not any general updates.
 
 TODO: Remove this section if there are not any general updates.
 
+## VS Code Sidebar updates
+
+TODO: Remove this section if there are not any general updates.
+
+## DevTools Extension updates
+
+TODO: Remove this section if there are not any general updates.
+
 ## Full commit history
 
 To find a complete list of changes in this release, check out the

@@ -21,13 +21,15 @@ import 'package:vm_service/vm_service.dart';
 
 import '../console/primitives/simple_items.dart';
 import '../globals.dart';
+import '../utils.dart';
 import 'diagnostics_node.dart';
 import 'generic_instance_reference.dart';
 import 'object_group_api.dart';
 import 'primitives/instance_ref.dart';
 import 'primitives/source_location.dart';
 
-const inspectorLibraryUri = 'package:flutter/src/widgets/widget_inspector.dart';
+const _inspectorLibraryUri =
+    'package:flutter/src/widgets/widget_inspector.dart';
 
 abstract class InspectorServiceBase extends DisposableController
     with AutoDisposeControllerMixin {
@@ -183,7 +185,7 @@ class InspectorService extends InspectorServiceBase {
       : super(
           clientInspectorName: 'WidgetInspectorService',
           serviceExtensionPrefix: inspectorExtensionPrefix,
-          inspectorLibraryUri: inspectorLibraryUri,
+          inspectorLibraryUri: _inspectorLibraryUri,
           evalIsolate:
               serviceConnection.serviceManager.isolateManager.mainIsolate,
         ) {
@@ -339,9 +341,8 @@ class InspectorService extends InspectorServiceBase {
       final libIndex = parts.lastIndexOf('lib');
       final path = libIndex > 0 ? parts.sublist(0, libIndex) : parts;
       // Special case handling of bazel packages.
-      final google3Index = path.lastIndexOf('google3');
-      if (google3Index != -1 && google3Index + 1 < path.length) {
-        var packageParts = path.sublist(google3Index + 1);
+      if (isGoogle3Path(path)) {
+        var packageParts = stripGoogle3(path);
         // A well formed third_party dart package should be in a directory of
         // the form
         // third_party/dart/packageName                    (package:packageName)
@@ -462,79 +463,6 @@ class InspectorService extends InspectorServiceBase {
     }
 
     return response as Map<String, dynamic>;
-  }
-
-  /// As we aren't running from an IDE, we don't know exactly what the pub root
-  /// directories are for the current project so we make a best guess if needed
-  /// based on the root directory of the first non artificial widget in the
-  /// tree.
-  Future<List<String>> inferPubRootDirectoryIfNeeded() async {
-    final group = createObjectGroup('temp');
-    List<String> directories = await group.getPubRootDirectories();
-    if (directories.isEmpty) {
-      final directory = await inferPubRootDirectoryIfNeededHelper();
-      if (directory != null) {
-        directories = [directory];
-      }
-    }
-
-    await _onRootDirectoriesChanged(directories);
-    return directories;
-  }
-
-  Future<String?> inferPubRootDirectoryIfNeededHelper() async {
-    final group = createObjectGroup('temp');
-    final root = await group.getRoot(FlutterTreeType.widget);
-
-    if (root == null) {
-      // No need to do anything as there isn't a valid tree (yet?).
-      await group.dispose();
-      return null;
-    }
-    List<RemoteDiagnosticsNode?> children = await root.children ?? [];
-
-    if (children.isEmpty) {
-      children = await group.getChildren(root.valueRef, false, null);
-    }
-
-    if (children.isEmpty) {
-      await group.dispose();
-      return null;
-    }
-    final path = children.first!.creationLocation?.path;
-    if (path == null) {
-      await group.dispose();
-      return null;
-    }
-    // TODO(jacobr): it would be nice to use Isolate.rootLib similar to how
-    // debugger.dart does but we are currently blocked by the
-    // --track-widget-creation transformer generating absolute paths instead of
-    // package:paths.
-    // Once https://github.com/flutter/flutter/issues/26615 is fixed we will be
-    // able to use package: paths. Temporarily all tools tracking widget
-    // locations will need to support both path formats.
-    // TODO(jacobr): use the list of loaded scripts to determine the appropriate
-    // package root directory given that the root script of this project is in
-    // this directory rather than guessing based on url structure.
-    final parts = path.split('/');
-    String? pubRootDirectory;
-    for (int i = parts.length - 1; i >= 0; i--) {
-      final part = parts[i];
-      if (part == 'lib' || part == 'web') {
-        pubRootDirectory = parts.sublist(0, i).join('/');
-        break;
-      }
-
-      if (part == 'packages') {
-        pubRootDirectory = parts.sublist(0, i + 1).join('/');
-        break;
-      }
-    }
-    pubRootDirectory ??= (parts..removeLast()).join('/');
-
-    await _addPubRootDirectories([pubRootDirectory]);
-    await group.dispose();
-    return pubRootDirectory;
   }
 
   RemoteDiagnosticsNode? _currentSelection;

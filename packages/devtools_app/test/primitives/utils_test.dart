@@ -8,7 +8,7 @@ import 'package:devtools_app/src/shared/utils.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_test_utils.dart';
-import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -677,26 +677,6 @@ void main() {
       );
     });
 
-    test('getServiceUriFromQueryString', () {
-      expect(
-        getServiceUriFromQueryString(
-          'http://localhost:123/?uri=http://localhost:456',
-        ).toString(),
-        equals('http://localhost:456'),
-      );
-      expect(
-        getServiceUriFromQueryString('http://localhost:123/?port=789')
-            .toString(),
-        equals('ws://localhost:789/ws'),
-      );
-      expect(
-        getServiceUriFromQueryString(
-          'http://localhost:123/?port=789&token=kjy78',
-        ).toString(),
-        equals('ws://localhost:789/kjy78/ws'),
-      );
-    });
-
     group('safeDivide', () {
       test('divides a finite result correctly', () {
         expect(safeDivide(2.0, 1.0), 2.0);
@@ -1190,6 +1170,13 @@ void main() {
           isFalse,
         );
       });
+
+      test('allIndicesWhere', () {
+        final list = [1, 2, 1, 2, 3, 4];
+        expect(list.allIndicesWhere((element) => element.isEven), [1, 3, 5]);
+        expect(list.allIndicesWhere((element) => element.isOdd), [0, 2, 4]);
+        expect(list.allIndicesWhere((element) => element + 2 == 3), [0, 2]);
+      });
     });
 
     group('SetExtension', () {
@@ -1284,6 +1271,24 @@ void main() {
         expect(str.caseInsensitiveEquals(null), isFalse);
         expect(''.caseInsensitiveEquals(''), isTrue);
         expect(''.caseInsensitiveEquals(null), isFalse);
+
+        // Complete match.
+        expect(
+          str.caseInsensitiveEquals(RegExp('h.*o.*', caseSensitive: false)),
+          isTrue,
+        );
+        // Incomplete match.
+        expect(
+          str.caseInsensitiveEquals(RegExp('h.*o', caseSensitive: false)),
+          isFalse,
+        );
+        // No match.
+        expect(
+          str.caseInsensitiveEquals(
+            RegExp('hello.* this does not match', caseSensitive: false),
+          ),
+          isFalse,
+        );
       });
 
       test('caseInsensitiveAllMatches', () {
@@ -1447,6 +1452,27 @@ void main() {
       expect(['A', 'B', 'C'].joinWithTrailing(':'), equals('A:B:C:'));
     });
   });
+
+  test('devtoolsAssetsBasePath', () {
+    // This is how a DevTools url will be structured when DevTools is served
+    // directly from DDS using the `--observe` flag.
+    expect(
+      devtoolsAssetsBasePath(
+        origin: 'http://127.0.0.1:61962',
+        path: '/mb9Sw4gCYvU=/devtools/performance',
+      ),
+      equals('http://127.0.0.1:61962/mb9Sw4gCYvU=/devtools'),
+    );
+    // This is how a DevTools url will be structured when served from DevTools
+    // server (e.g. from Flutter tools and from the `dart devtools` command).
+    expect(
+      devtoolsAssetsBasePath(
+        origin: 'http://127.0.0.1:61962',
+        path: '/performance',
+      ),
+      equals('http://127.0.0.1:61962'),
+    );
+  });
 }
 
 class _SubtractionResult {
@@ -1458,7 +1484,7 @@ class _SubtractionResult {
   final double? from;
 
   @override
-  bool operator ==(Object? other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }

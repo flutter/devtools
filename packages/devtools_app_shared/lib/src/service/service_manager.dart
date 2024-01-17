@@ -457,7 +457,7 @@ class ConnectedState {
   final bool userInitiatedConnectionState;
 
   @override
-  bool operator ==(Object? other) {
+  bool operator ==(Object other) {
     return other is ConnectedState &&
         other.connected == connected &&
         other.userInitiatedConnectionState == userInitiatedConnectionState;

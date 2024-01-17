@@ -54,7 +54,10 @@ final class DevToolsDialog extends StatelessWidget {
           contentPadding,
           contentPadding,
         ),
-        content: content,
+        content: DefaultTextStyle(
+          style: Theme.of(context).regularTextStyle,
+          child: content,
+        ),
         actions: actions,
         actionsAlignment: actionsAlignment,
         buttonPadding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
@@ -71,20 +74,22 @@ final class DialogTitleText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) =>
-      Text(text, style: Theme.of(context).textTheme.titleLarge);
+      Text(text, style: Theme.of(context).textTheme.titleMedium);
 }
 
 List<Widget> dialogSubHeader(ThemeData theme, String titleText) {
   return [
-    Text(titleText, style: theme.textTheme.titleMedium),
+    Text(titleText, style: theme.textTheme.titleSmall),
     const PaddedDivider(padding: EdgeInsets.only(bottom: denseRowSpacing)),
   ];
 }
 
-final dialogTextFieldDecoration = InputDecoration(
-  border: OutlineInputBorder(
-    borderRadius: defaultBorderRadius,
+final singleLineDialogTextFieldDecoration = InputDecoration(
+  constraints: BoxConstraints(
+    minHeight: defaultTextFieldHeight,
+    maxHeight: defaultTextFieldHeight,
   ),
+  border: const OutlineInputBorder(),
 );
 
 /// A standardized dialog with help text and buttons `Reset to default`,
@@ -231,7 +236,7 @@ final class DialogCancelButton extends StatelessWidget {
 final class DialogApplyButton extends StatelessWidget {
   const DialogApplyButton({super.key, required this.onPressed});
 
-  final Function onPressed;
+  final void Function() onPressed;
 
   @override
   Widget build(BuildContext context) {

@@ -4,10 +4,13 @@
 
 import 'dart:convert';
 
+import 'package:clock/clock.dart';
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart';
 import 'package:logging/logging.dart';
 
+import '../../../devtools.dart' as devtools show version;
 import '../shared/notifications.dart';
 import 'analytics/analytics.dart' as ga;
 import 'config_specific/launch_url/launch_url.dart';
@@ -25,8 +28,10 @@ class SurveyService {
 
   static const _maxShowSurveyCount = 5;
 
-  static final _metadataUrl =
-      Uri.https('docs.flutter.dev', '/f/dart-devtools-survey-metadata.json');
+  static final _metadataUrl = Uri.https(
+    'storage.googleapis.com',
+    'flutter-uxr/surveys/devtools-survey-metadata.json',
+  );
 
   /// Duration for which we should show the survey notification.
   ///
@@ -41,7 +46,7 @@ class SurveyService {
     // If the server is unavailable we don't need to do anything survey related.
     if (!server.isDevToolsServerAvailable) return null;
 
-    _cachedSurvey ??= await _fetchSurveyContent();
+    _cachedSurvey ??= await fetchSurveyContent();
     if (_cachedSurvey?.id != null) {
       await server.setActiveSurvey(_cachedSurvey!.id!);
     }
@@ -108,15 +113,11 @@ class SurveyService {
     final surveyActionTaken = await server.surveyActionTaken();
     if (surveyActionTaken) return false;
 
-    final currentTimeMs = DateTime.now().millisecondsSinceEpoch;
-    final activeSurveyRange = Range(
-      _cachedSurvey!.startDate!.millisecondsSinceEpoch,
-      _cachedSurvey!.endDate!.millisecondsSinceEpoch,
-    );
-    return activeSurveyRange.contains(currentTimeMs);
+    return _cachedSurvey!.shouldShow;
   }
 
-  Future<DevToolsSurvey?> _fetchSurveyContent() async {
+  @visibleForTesting
+  Future<DevToolsSurvey?> fetchSurveyContent() async {
     try {
       if (debugSurvey) {
         return debugSurveyMetadata;
@@ -156,18 +157,42 @@ class DevToolsSurvey {
     this.endDate,
     this.title,
     this.url,
+    this.minDevToolsVersion,
+    this.devEnvironments,
   );
 
   factory DevToolsSurvey.parse(Map<String, dynamic> json) {
-    final id = json['uniqueId'];
-    final startDate =
-        json['startDate'] != null ? DateTime.parse(json['startDate']) : null;
+    final id = json[_uniqueIdKey];
+    final startDate = json[_startDateKey] != null
+        ? DateTime.parse(json[_startDateKey])
+        : null;
     final endDate =
-        json['startDate'] != null ? DateTime.parse(json['endDate']) : null;
-    final title = json['title'];
-    final surveyUrl = json['url'];
-    return DevToolsSurvey._(id, startDate, endDate, title, surveyUrl);
+        json[_endDateKey] != null ? DateTime.parse(json[_endDateKey]) : null;
+    final title = json[_titleKey];
+    final surveyUrl = json[_urlKey];
+    final minDevToolsVersion = json[_minDevToolsVersionKey] != null
+        ? SemanticVersion.parse(json[_minDevToolsVersionKey])
+        : null;
+    final devEnvironments =
+        (json[_devEnvironmentsKey] as List?)?.cast<String>().toList();
+    return DevToolsSurvey._(
+      id,
+      startDate,
+      endDate,
+      title,
+      surveyUrl,
+      minDevToolsVersion,
+      devEnvironments,
+    );
   }
+
+  static const _uniqueIdKey = 'uniqueId';
+  static const _startDateKey = 'startDate';
+  static const _endDateKey = 'endDate';
+  static const _titleKey = 'title';
+  static const _urlKey = 'url';
+  static const _minDevToolsVersionKey = 'minDevToolsVersion';
+  static const _devEnvironmentsKey = 'devEnvironments';
 
   final String? id;
 
@@ -177,5 +202,47 @@ class DevToolsSurvey {
 
   final String? title;
 
+  /// The url for the survey that the user will open in a browser when they
+  /// respond to the survey prompt.
   final String? url;
+
+  /// The minimum DevTools version that this survey should is for.
+  ///
+  /// If the current version of DevTools is older than [minDevToolsVersion], the
+  /// survey prompt in DevTools will not be shown.
+  ///
+  /// If [minDevToolsVersion] is null, the survey will be shown for any version
+  /// of DevTools as long as all the other requirements are satisfied.
+  final SemanticVersion? minDevToolsVersion;
+
+  /// A list of development environments to show the survey for (e.g. 'VSCode',
+  /// 'Android-Studio', 'IntelliJ-IDEA', 'CLI', etc.).
+  ///
+  /// If [devEnvironments] is null, the survey can be shown to any platform.
+  ///
+  /// The possible values for this list correspond to the possible values of
+  /// [_ideLaunched] from [shared/analytics/_analytics_web.dart].
+  final List<String>? devEnvironments;
+}
+
+extension ShowSurveyExtension on DevToolsSurvey {
+  bool get meetsDateRequirement => (startDate == null || endDate == null)
+      ? false
+      : Range(
+          startDate!.millisecondsSinceEpoch,
+          endDate!.millisecondsSinceEpoch,
+        ).contains(clock.now().millisecondsSinceEpoch);
+
+  bool get meetsMinVersionRequirement =>
+      minDevToolsVersion == null ||
+      SemanticVersion.parse(devtools.version)
+          .isSupported(minSupportedVersion: minDevToolsVersion!);
+
+  bool get meetsEnvironmentRequirement =>
+      devEnvironments == null || devEnvironments!.contains(ga.ideLaunched);
+
+  bool get shouldShow =>
+      meetsDateRequirement &&
+      meetsMinVersionRequirement &&
+      meetsEnvironmentRequirement;
 }

@@ -14,7 +14,7 @@ class Logger extends StatefulWidget {
   final Logging _logging = Logging.logging;
 
   @override
-  LoggerState createState() => LoggerState(_logging);
+  State<Logger> createState() => LoggerState(_logging);
 }
 
 class LoggerState extends State<Logger> {

@@ -7,12 +7,13 @@ import 'package:flutter/material.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
-import '../../shared/common_widgets.dart';
 import '../../shared/directory_picker.dart';
 import '../../shared/server/server.dart' as server;
 import '../../shared/utils.dart';
 import 'deep_links_controller.dart';
 import 'deep_links_model.dart';
+
+const _kLinearProgressIndicatorWidth = 280.0;
 
 /// A view for selecting a Flutter project.
 class SelectProjectView extends StatefulWidget {
@@ -24,7 +25,6 @@ class SelectProjectView extends StatefulWidget {
 
 class _SelectProjectViewState extends State<SelectProjectView>
     with ProvidedControllerMixin<DeepLinksController, SelectProjectView> {
-  static const _kMessageSize = 24.0;
   bool _retrievingFlutterProject = false;
 
   @override
@@ -40,7 +40,7 @@ class _SelectProjectViewState extends State<SelectProjectView>
     ga.timeStart(gac.deeplink, gac.AnalyzeFlutterProject.loadVariants.name);
     final List<String> androidVariants =
         await server.requestAndroidBuildVariants(directory);
-    if (!context.mounted) {
+    if (!mounted) {
       ga.cancelTimingOperation(
         gac.deeplink,
         gac.AnalyzeFlutterProject.loadVariants.name,
@@ -82,32 +82,46 @@ class _SelectProjectViewState extends State<SelectProjectView>
 
   @override
   Widget build(BuildContext context) {
-    Widget? child;
+    final theme = Theme.of(context);
     if (_retrievingFlutterProject) {
-      child = const CenteredCircularProgressIndicator(size: _kMessageSize);
-    } else {
-      child = Text(
-        'Pick a flutter project from your local file to check all deep links status',
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          color: Theme.of(context).textTheme.displayLarge!.color,
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Project loading...',
+              style: theme.regularTextStyle,
+            ),
+            Container(
+              width: _kLinearProgressIndicatorWidth,
+              padding: const EdgeInsets.symmetric(vertical: densePadding),
+              child: const LinearProgressIndicator(),
+            ),
+            Text(
+              'The first load will take longer than usual',
+              style: theme.subtleTextStyle,
+            ),
+          ],
         ),
       );
     }
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(defaultSpacing),
-            child: child,
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(defaultSpacing),
+          child: Text(
+            'Pick a local flutter project to check the status of all deep links.',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.titleSmall,
           ),
-          DirectoryPicker(
-            onDirectoryPicked: _handleDirectoryPicked,
-            enabled: !_retrievingFlutterProject,
-          ),
-        ],
-      ),
+        ),
+        DirectoryPicker(
+          onDirectoryPicked: _handleDirectoryPicked,
+          enabled: !_retrievingFlutterProject,
+        ),
+      ],
     );
   }
 }

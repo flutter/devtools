@@ -89,7 +89,17 @@ class _DeepLinkListViewMainPanel extends StatelessWidget {
         valueListenable: controller.allLinkDatasNotifier,
         builder: (context, linkDatas, _) {
           if (linkDatas == null) {
-            return const CenteredCircularProgressIndicator();
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const CenteredCircularProgressIndicator(),
+                const SizedBox(height: densePadding),
+                Text(
+                  'Validating deep links...',
+                  style: Theme.of(context).subtleTextStyle,
+                ),
+              ],
+            );
           }
           if (displayOptions.showSplitScreen) {
             return Row(
@@ -197,6 +207,7 @@ class _DataTable extends StatelessWidget {
           controller.selectLink(linkdata!);
           controller.updateDisplayOptions(showSplitScreen: true);
         },
+        enableHoverHandling: true,
       ),
     );
   }
@@ -382,7 +393,7 @@ class _NotificationCardSection extends StatelessWidget {
         child: Row(
           children: [
             if (domainErrorCount > 0)
-              _NotificationCard(
+              NotificationCard(
                 title: '$domainErrorCount domain not verified',
                 description:
                     'This affects all deep links. Fix issues to make users go directly to your app.',
@@ -407,7 +418,7 @@ class _NotificationCardSection extends StatelessWidget {
             if (domainErrorCount > 0 && pathErrorCount > 0)
               const SizedBox(width: defaultSpacing),
             if (pathErrorCount > 0)
-              _NotificationCard(
+              NotificationCard(
                 title: '$pathErrorCount path not working',
                 description:
                     'Fix these path to make sure users are directed to your app',
@@ -436,8 +447,10 @@ class _NotificationCardSection extends StatelessWidget {
   }
 }
 
-class _NotificationCard extends StatelessWidget {
-  const _NotificationCard({
+@visibleForTesting
+class NotificationCard extends StatelessWidget {
+  const NotificationCard({
+    super.key,
     required this.title,
     required this.description,
     required this.actionButton,
@@ -449,8 +462,8 @@ class _NotificationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return SizedBox.fromSize(
       size: _kNotificationCardSize,
       child: Card(
@@ -471,14 +484,10 @@ class _NotificationCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      title,
-                      style: textTheme.bodyMedium!
-                          .copyWith(color: colorScheme.onSurface),
-                    ),
+                    Text(title),
                     Text(
                       description,
-                      style: Theme.of(context).subtleTextStyle,
+                      style: theme.subtleTextStyle,
                     ),
                     Expanded(
                       child: Align(

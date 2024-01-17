@@ -239,6 +239,7 @@ class _BreakpointsWindowActions extends StatelessWidget {
               message: 'Remove all breakpoints',
               child: ToolbarAction(
                 icon: Icons.delete,
+                size: defaultIconSize,
                 onPressed: breakpoints.isNotEmpty
                     ? () => unawaited(breakpointManager.clearBreakpoints())
                     : null,

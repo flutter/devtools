@@ -110,6 +110,7 @@ class DebugSessions extends StatelessWidget {
             isProfile: isProfile,
             isRelease: isRelease,
             isWeb: isWeb,
+            supportsOpenExternal: api.capabilities.openDevToolsExternally,
           ),
       ],
     );
@@ -125,6 +126,7 @@ class _DevToolsMenu extends StatefulWidget {
     required this.isProfile,
     required this.isRelease,
     required this.isWeb,
+    required this.supportsOpenExternal,
   });
 
   final VsCodeApi api;
@@ -134,6 +136,7 @@ class _DevToolsMenu extends StatefulWidget {
   final bool isProfile;
   final bool isRelease;
   final bool isWeb;
+  final bool supportsOpenExternal;
 
   @override
   State<_DevToolsMenu> createState() => _DevToolsMenuState();

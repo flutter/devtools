@@ -10,6 +10,7 @@ import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
@@ -32,6 +33,7 @@ void debugLogger(String message) {
   );
 }
 
+// TODO(kenz): remove concept of dense mode. Use dense values by default.
 bool isDense() {
   return preferences.denseModeEnabled.value || isEmbedded();
 }
@@ -83,7 +85,6 @@ List<ConnectionDescription> generateDeviceDescription(
       actions: [
         CopyToClipboardControl(
           dataProvider: () => description,
-          size: defaultIconSize,
         ),
       ],
     );
@@ -212,4 +213,23 @@ String? ideFromUrl() {
 String? lookupFromQueryParams(String key) {
   final queryParameters = loadQueryParams();
   return queryParameters[key];
+}
+
+const _google3PathSegment = 'google3';
+
+bool isGoogle3Path(List<String> pathParts) =>
+    pathParts.contains(_google3PathSegment);
+
+List<String> stripGoogle3(List<String> pathParts) {
+  final google3Index = pathParts.lastIndexOf(_google3PathSegment);
+  if (google3Index != -1 && google3Index + 1 < pathParts.length) {
+    return pathParts.sublist(google3Index + 1);
+  }
+  return pathParts;
+}
+
+/// An extension on [KeyEvent] to make it simpler to determine if it is a key
+/// down event.
+extension IsKeyType on KeyEvent {
+  bool get isKeyDownOrRepeat => this is KeyDownEvent || this is KeyRepeatEvent;
 }

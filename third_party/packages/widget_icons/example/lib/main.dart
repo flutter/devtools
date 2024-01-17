@@ -10,7 +10,7 @@ void main() {
 }
 
 class HomePage extends StatelessWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -196,10 +196,10 @@ class IconContainer extends StatelessWidget {
   final String name;
 
   const IconContainer({
-    Key? key,
+    super.key,
     required this.icon,
     required this.name,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

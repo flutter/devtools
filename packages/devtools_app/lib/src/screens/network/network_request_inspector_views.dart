@@ -13,7 +13,6 @@ import '../../shared/common_widgets.dart';
 import '../../shared/http/http.dart';
 import '../../shared/http/http_request_data.dart';
 import '../../shared/primitives/utils.dart';
-import '../../shared/table/table.dart';
 import '../../shared/ui/colors.dart';
 import 'network_controller.dart';
 import 'network_model.dart';
@@ -161,9 +160,14 @@ class HttpRequestView extends StatelessWidget {
           );
         }
 
-        final isJson = requestContentType is List
-            ? requestContentType.any((element) => element.contains('json'))
-            : requestContentType.contains('json');
+        final isJson = switch (requestContentType) {
+          List() => requestContentType.any((e) => e.contains('json')),
+          String() => requestContentType.contains('json'),
+          _ => throw StateError(
+              "Expected 'content-type' to be a List or String, but got: "
+              '$requestContentType',
+            ),
+        };
 
         Widget child;
         child = isJson

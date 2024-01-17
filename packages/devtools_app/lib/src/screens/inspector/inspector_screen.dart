@@ -20,6 +20,7 @@ import '../../shared/editable_list.dart';
 import '../../shared/error_badge_manager.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/blocking_action_mixin.dart';
+import '../../shared/primitives/simple_items.dart';
 import '../../shared/screen.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/utils.dart';
@@ -125,7 +126,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         searchPreventClose = false;
       }
     });
-    addAutoDisposeListener(preferences.inspector.customPubRootDirectories, () {
+    addAutoDisposeListener(preferences.inspector.pubRootDirectories, () {
       if (serviceConnection.serviceManager.hasConnection &&
           controller.firstInspectorTreeLoadCompleted) {
         _refreshInspector();
@@ -356,9 +357,22 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
             ),
             const SizedBox(height: denseSpacing),
             ...dialogSubHeader(theme, 'Package Directories'),
-            Text(
-              'Widgets in these directories will show up in your summary tree.',
-              style: theme.subtleTextStyle,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    'Widgets in these directories will show up in your summary tree.',
+                    style: theme.subtleTextStyle,
+                  ),
+                ),
+                MoreInfoLink(
+                  url: DocLinks.inspectorPackageDirectories.value,
+                  gaScreenName: gac.inspector,
+                  gaSelectedItemDescription:
+                      gac.InspectorDocs.packageDirectoriesDocs.name,
+                ),
+              ],
             ),
             Text(
               '(e.g. /absolute/path/to/myPackage)',
@@ -404,9 +418,12 @@ class InspectorSummaryTreeControls extends StatelessWidget {
           context,
           Row(
             children: <Widget>[
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: denseSpacing),
-                child: Text('Widget Tree'),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
+                child: Text(
+                  'Widget Tree',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
               ),
               ...!isSearchVisible
                   ? [
@@ -441,7 +458,7 @@ class InspectorSummaryTreeControls extends StatelessWidget {
 
   Container _controlsContainer(BuildContext context, Widget child) {
     return Container(
-      height: defaultHeaderHeight(isDense: isDense()),
+      height: defaultHeaderHeight,
       decoration: BoxDecoration(
         border: Border(
           bottom: defaultBorderSide(Theme.of(context)),
@@ -567,16 +584,19 @@ class PubRootDirectorySection extends StatelessWidget {
           child: EditableList(
             gaScreen: gac.inspector,
             gaRefreshSelection: gac.refreshPubRoots,
-            entries: preferences.inspector.customPubRootDirectories,
+            entries: preferences.inspector.pubRootDirectories,
             textFieldLabel: 'Enter a new package directory',
-            isRefreshing:
-                preferences.inspector.isRefreshingCustomPubRootDirectories,
-            onEntryAdded: (p0) =>
-                unawaited(preferences.inspector.addPubRootDirectories([p0])),
+            isRefreshing: preferences.inspector.isRefreshingPubRootDirectories,
+            onEntryAdded: (p0) => unawaited(
+              preferences.inspector.addPubRootDirectories(
+                [p0],
+                shouldCache: true,
+              ),
+            ),
             onEntryRemoved: (p0) =>
                 unawaited(preferences.inspector.removePubRootDirectories([p0])),
             onRefreshTriggered: () =>
-                unawaited(preferences.inspector.loadCustomPubRootDirectories()),
+                unawaited(preferences.inspector.loadPubRootDirectories()),
           ),
         );
       },

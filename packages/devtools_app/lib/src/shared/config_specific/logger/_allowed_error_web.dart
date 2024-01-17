@@ -4,7 +4,7 @@
 
 import 'dart:js_interop';
 
-import 'package:web/helpers.dart';
+import 'package:web/web.dart';
 
 /// Catch and print errors from the given future. These errors are part of
 /// normal operation for an app, and don't need to be reported to analytics
@@ -17,6 +17,9 @@ Future<T> allowedError<T>(Future<T> future, {bool logError = true}) {
       console.log(errorLines.skip(1).join('\n').toJS);
       console.groupEnd();
     }
+    // TODO(srawlins): This is an illegal return value (`null`) for all `T`.
+    // This function must return an actual `T`.
+    // ignore: null_argument_to_non_null_type
     return Future<T>.value();
   });
 }

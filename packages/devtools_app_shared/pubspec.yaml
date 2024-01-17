@@ -1,6 +1,6 @@
 name: devtools_app_shared
 description: Package of Dart & Flutter structures shared between devtools_app and devtools extensions.
-version: 0.0.7
+version: 0.0.9-wip
 repository: https://github.com/flutter/devtools/tree/master/packages/devtools_extensions
 
 environment:
@@ -16,7 +16,7 @@ dependencies:
   meta: ^1.9.1
   pointer_interceptor: ^0.9.3+3
   vm_service: ^13.0.0
-  web: '>=0.3.0 <0.5.0'
+  web: ^0.4.1
 
 dev_dependencies:
   flutter_lints: ^2.0.3

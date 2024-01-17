@@ -8,9 +8,6 @@ import 'package:flutter/material.dart';
 
 import '../utils/utils.dart';
 import 'theme/theme.dart';
-import 'ui_utils.dart';
-
-double get areaPaneHeaderHeight => scaleByFontFactor(36.0);
 
 /// Create a bordered, fixed-height header area with a title and optional child
 /// on the right-hand side.
@@ -104,9 +101,7 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
   @override
   Size get preferredSize {
     return Size.fromHeight(
-      tall
-          ? areaPaneHeaderHeight + 2 * densePadding
-          : defaultHeaderHeight(isDense: dense),
+      tall ? defaultHeaderHeight + 2 * densePadding : defaultHeaderHeight,
     );
   }
 }
@@ -278,6 +273,8 @@ final class PaddedDivider extends StatelessWidget {
   const PaddedDivider.thin({super.key})
       : padding = const EdgeInsets.only(bottom: 4.0);
 
+  const PaddedDivider.noPadding({super.key}) : padding = EdgeInsets.zero;
+
   PaddedDivider.vertical({super.key, double padding = densePadding})
       : padding = EdgeInsets.symmetric(vertical: padding);
 
@@ -352,6 +349,8 @@ class DevToolsButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var tooltip = this.tooltip;
+
     if (label == null) {
       return SizedBox(
         // This is required to force the button size.
@@ -359,15 +358,16 @@ class DevToolsButton extends StatelessWidget {
         width: defaultButtonHeight,
         child: maybeWrapWithTooltip(
           tooltip: tooltip,
+          tooltipPadding: tooltipPadding,
           child: outlined
               ? IconButton.outlined(
                   onPressed: onPressed,
-                  iconSize: actionsIconSize,
+                  iconSize: defaultIconSize,
                   icon: Icon(icon),
                 )
               : IconButton(
                   onPressed: onPressed,
-                  iconSize: actionsIconSize,
+                  iconSize: defaultIconSize,
                   icon: Icon(
                     icon,
                   ),
@@ -387,13 +387,26 @@ class DevToolsButton extends StatelessWidget {
       minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
       color: textColor,
     );
+
+    // If we hid the label due to a small screen width and the button does not
+    // have a tooltip, use the label as a tooltip.
+    final labelHidden =
+        !isScreenWiderThan(context, minScreenWidthForTextBeforeScaling);
+    if (labelHidden && tooltip == null) {
+      tooltip = label;
+    }
+
     if (elevated) {
-      return maybeWrapWithTooltip(
-        tooltip: tooltip,
-        tooltipPadding: tooltipPadding,
-        child: ElevatedButton(
-          onPressed: onPressed,
-          child: iconLabel,
+      return SizedBox(
+        // This is required to force the button size.
+        height: defaultButtonHeight,
+        child: maybeWrapWithTooltip(
+          tooltip: tooltip,
+          tooltipPadding: tooltipPadding,
+          child: ElevatedButton(
+            onPressed: onPressed,
+            child: iconLabel,
+          ),
         ),
       );
     }
@@ -485,6 +498,7 @@ final class DevToolsToggleButtonGroup extends StatelessWidget {
     required this.onPressed,
     this.fillColor,
     this.selectedColor,
+    this.borderColor,
   }) : super(key: key);
 
   final List<Widget> children;
@@ -497,6 +511,8 @@ final class DevToolsToggleButtonGroup extends StatelessWidget {
 
   final Color? selectedColor;
 
+  final Color? borderColor;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -506,6 +522,7 @@ final class DevToolsToggleButtonGroup extends StatelessWidget {
         borderRadius: defaultBorderRadius,
         fillColor: fillColor,
         selectedColor: selectedColor,
+        borderColor: borderColor,
         textStyle: theme.textTheme.bodyMedium,
         constraints: BoxConstraints(
           minWidth: defaultButtonHeight,
@@ -548,6 +565,9 @@ final class DevToolsToggleButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DevToolsToggleButtonGroup(
+      borderColor: outlined || isSelected
+          ? Theme.of(context).focusColor
+          : Colors.transparent,
       selectedStates: [isSelected],
       onPressed: (_) => onPressed(),
       children: [
@@ -769,11 +789,11 @@ final class MaterialIconLabel extends StatelessWidget {
             isScreenWiderThan(context, minScreenWidthForTextBeforeScaling))
           Padding(
             padding: EdgeInsets.only(
-              left: iconData != null ? denseSpacing : 0.0,
+              left: iconData != null ? densePadding : 0.0,
             ),
             child: Text(
               label!,
-              style: TextStyle(color: color),
+              style: Theme.of(context).regularTextStyleWithColor(color),
             ),
           ),
       ],

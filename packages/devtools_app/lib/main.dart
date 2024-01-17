@@ -25,7 +25,7 @@ void externalRunDevTools({
   bool shouldEnableExperiments = false,
   List<DevToolsJsonFile> sampleData = const [],
 }) {
-  // Set the extension points global.
+  // Set the environment parameters global.
   setGlobal(
     DevToolsEnvironmentParameters,
     ExternalDevToolsEnvironmentParameters(),

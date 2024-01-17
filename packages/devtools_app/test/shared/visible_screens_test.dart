@@ -81,6 +81,7 @@ void main() {
           NetworkScreen,
           LoggingScreen,
           AppSizeScreen,
+          DeepLinksScreen,
           // VMDeveloperToolsScreen,
         ]),
       );
@@ -102,6 +103,7 @@ void main() {
           // NetworkScreen,
           LoggingScreen,
           // AppSizeScreen,
+          // DeepLinksScreen,
           // VMDeveloperToolsScreen,
         ]),
       );
@@ -125,6 +127,7 @@ void main() {
             NetworkScreen,
             LoggingScreen,
             AppSizeScreen,
+            DeepLinksScreen,
             // VMDeveloperToolsScreen,
           ]),
         );
@@ -149,6 +152,7 @@ void main() {
             NetworkScreen,
             LoggingScreen,
             AppSizeScreen,
+            DeepLinksScreen,
             // VMDeveloperToolsScreen,
           ]),
         );
@@ -173,6 +177,7 @@ void main() {
             // NetworkScreen,
             LoggingScreen,
             // AppSizeScreen,
+            // DeepLinksScreen,
             // VMDeveloperToolsScreen,
           ]),
         );
@@ -207,6 +212,7 @@ void main() {
             NetworkScreen,
             LoggingScreen,
             AppSizeScreen,
+            DeepLinksScreen,
             // VMDeveloperToolsScreen,
           ]),
         );
@@ -231,6 +237,7 @@ void main() {
           // NetworkScreen,
           // LoggingScreen,
           // AppSizeScreen,
+          // DeepLinksScreen,
           // VMDeveloperToolsScreen,
         ]),
       );
@@ -255,6 +262,7 @@ void main() {
             NetworkScreen,
             LoggingScreen,
             AppSizeScreen,
+            DeepLinksScreen,
             VMDeveloperToolsScreen,
           ]),
         );

@@ -12,6 +12,7 @@ part 'constants/_extension_constants.dart';
 part 'constants/_memory_constants.dart';
 part 'constants/_performance_constants.dart';
 part 'constants/_vs_code_sidebar_constants.dart';
+part 'constants/_inspector_constants.dart';
 
 // Type of events (event_category):
 const screenViewEvent = 'screen'; // Active screen (tab selected).
@@ -101,6 +102,7 @@ const analyzeDiff = 'analyzeDiff';
 // VM Tools UX Actions:
 const refreshIsolateStatistics = 'refreshIsolateStatistics';
 const refreshVmStatistics = 'refreshVmStatistics';
+const refreshProcessMemoryStatistics = 'refreshProcessMemoryStatistics';
 const requestSize = 'requestSize';
 
 // Settings actions:

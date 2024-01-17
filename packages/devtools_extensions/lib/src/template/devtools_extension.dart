@@ -8,12 +8,13 @@ import 'dart:js_interop';
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_shared/service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart' hide Event;
-import 'package:web/helpers.dart' hide Text;
+import 'package:web/web.dart' hide Text;
 
 import '../api/api.dart';
 import '../api/model.dart';
@@ -68,7 +69,7 @@ T _accessGlobalOrThrow<T>({required String globalName}) {
     throw StateError(
       "'$globalName' has not been initialized yet. You can only access "
       "'$globalName' below the 'DevToolsExtension' widget in the widget "
-      "tree, since it is initialized as part of the the 'DevToolsExtension'"
+      "tree, since it is initialized as part of the 'DevToolsExtension'"
       "state's 'initState' lifecycle method.",
     );
   }

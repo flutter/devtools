@@ -58,13 +58,11 @@ class MethodAndSourceColumn extends TreeColumnData<CpuStackFrame>
   bool get supportsSorting => true;
 
   @override
-  String getTooltip(CpuStackFrame dataObject) => '';
-
-  @override
   Widget? build(
     BuildContext context,
     CpuStackFrame data, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     return MethodAndSourceDisplay(

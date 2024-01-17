@@ -1,19 +1,20 @@
 This is draft for future release notes, that are going to land on
 [the Flutter website](https://docs.flutter.dev/tools/devtools/release-notes).
 
-# DevTools 2.30.0 release notes
+# DevTools 2.32.0 release notes
 
-The 2.30.0 release of the Dart and Flutter DevTools
+The 2.32.0 release of the Dart and Flutter DevTools
 includes the following changes among other general improvements.
 To learn more about DevTools, check out the
 [DevTools overview](https://docs.flutter.dev/tools/devtools/overview).
 
 ## General updates
 
-* Enabled DevTools extensions when debugging a Dart entry point that is not
-under `lib` (e.g. a unit test or integration test). Thanks to
-[@bartekpacia](https://github.com/bartekpacia) for this change! -
-[#6644](https://github.com/flutter/devtools/pull/6644)
+* Improved overall usability by making the DevTools UI more dense. This
+significantly improves the user experience when using DevTools embedded
+an IDE. (#7030)[https://github.com/flutter/devtools/pull/7030]
+* Added support for filtering with regular expressions in the Logging, Network, and CPU profiler
+pages - (#7027)[https://github.com/flutter/devtools/pull/7027]
 
 ## Inspector updates
 
@@ -33,7 +34,9 @@ TODO: Remove this section if there are not any general updates.
 
 ## Debugger updates
 
-TODO: Remove this section if there are not any general updates.
+* Highlighted `extension type` as a declaration keyword,
+  highlight the `$` in identifier interpolation as part of the interpolation,
+  and properly highlight comments within type arguments. - [#6837](https://github.com/flutter/devtools/pull/6837)
 
 ## Network profiler updates
 
@@ -41,7 +44,11 @@ TODO: Remove this section if there are not any general updates.
 
 ## Logging updates
 
-TODO: Remove this section if there are not any general updates.
+* Added toggle filters to filter out noisy Flutter and Dart logs - [#7026](https://github.com/flutter/devtools/pull/7026)
+
+    ![Logging view filters](images/logging_toggle_filters.png "Toggle filters for logging screen")
+
+* Added scrollbar to details pane. - [#6917](https://github.com/flutter/devtools/pull/6917)
 
 ## App size tool updates
 
@@ -49,13 +56,13 @@ TODO: Remove this section if there are not any general updates.
 
 ## VS Code Sidebar updates
 
-* The Flutter Sidebar provided to VS Code now has the ability to enable new
-  platforms if a device is available for a platform that is not enabled for
-  the current project. This also requires a corresponding Dart extension for
-  VS Code update to appear
-  - [#6688](https://github.com/flutter/devtools/pull/6688)
+* Fixed an issue that prevented the VS code sidebar from loading in recent beta/master builds. - [#6984](https://github.com/flutter/devtools/pull/6984)
+
+## DevTools Extension updates
+
+* Fixed a couple bugs preventing Dart server apps from connecting to DevTools extensions. - [#6982](https://github.com/flutter/devtools/pull/6982), [#6993](https://github.com/flutter/devtools/pull/6993)
 
 ## Full commit history
 
 To find a complete list of changes in this release, check out the
-[DevTools git log](https://github.com/flutter/devtools/tree/v2.30.0).
+[DevTools git log](https://github.com/flutter/devtools/tree/v2.31.0).

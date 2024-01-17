@@ -82,7 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-Map<String, Function> navigateCallbacks = {};
+Map<String, void Function()> navigateCallbacks = {};
 
 // Hook to navigate to a specific screen.
 void navigateToScreen(String title) {

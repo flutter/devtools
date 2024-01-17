@@ -76,10 +76,6 @@ class CliCommand {
     bool throwOnException = true,
   }) {
     final sdk = FlutterSdk.current;
-    if (sdk == null) {
-      throw Exception('Unable to locate a Flutter sdk.');
-    }
-
     return CliCommand._(
       exe: sdk.flutterToolPath,
       args: args.split(' '),
@@ -120,8 +116,16 @@ class CliCommand {
     bool throwOnException = true,
   }) {
     return CliCommand._(
-      exe: Platform.isWindows ? 'devtools_tool.bat' : 'devtools_tool',
-      args: args.split(' '),
+      // We must use the Dart VM from FlutterSdk.current here to ensure we
+      // consistently use the selected version for child invocations. We do
+      // not need to pass the --flutter-from-path flag down because using the
+      // tool will automatically select the one that's running the VM and we'll
+      // have selected that here.
+      exe: FlutterSdk.current.dartToolPath,
+      args: [
+        Platform.script.toFilePath(),
+        ...args.split(' '),
+      ],
       throwOnException: throwOnException,
     );
   }

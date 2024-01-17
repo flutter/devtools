@@ -159,7 +159,11 @@ class CpuProfilerController extends DisposableController
 
   @override
   Map<String, QueryFilterArgument> createQueryFilterArgs() => {
-        uriFilterId: QueryFilterArgument(keys: ['uri', 'u']),
+        uriFilterId: QueryFilterArgument<CpuStackFrame>(
+          keys: ['uri', 'u'],
+          dataValueProvider: (stackFrame) => stackFrame.packageUri,
+          substringMatch: true,
+        ),
       };
 
   int selectedProfilerTabIndex = 0;
@@ -680,17 +684,13 @@ class CpuProfilerController extends DisposableController
 
       final queryFilter = filter.queryFilter;
       if (!queryFilter.isEmpty) {
-        final uriArg = queryFilter.filterArguments[uriFilterId];
-        if (uriArg != null &&
-            !uriArg.matchesValue(
-              stackFrame.packageUri,
-              substringMatch: true,
-            )) {
-          return false;
-        }
+        final filteredOutByQueryFilterArgument = queryFilter
+            .filterArguments.values
+            .any((argument) => !argument.matchesValue(stackFrame));
+        if (filteredOutByQueryFilterArgument) return false;
 
-        if (queryFilter.substrings.isNotEmpty) {
-          for (final substring in queryFilter.substrings) {
+        if (queryFilter.substringExpressions.isNotEmpty) {
+          for (final substring in queryFilter.substringExpressions) {
             bool matches(String? stringToMatch) {
               return stringToMatch?.caseInsensitiveContains(substring) ?? false;
             }

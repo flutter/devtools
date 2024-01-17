@@ -245,7 +245,7 @@ when you publish your package. To do so, add the following to a `.pubignore` fil
 `extension/devtools/` directory:
 
 ```
-!./build
+!build
 ```
 
 This will ensure that, even if the `extension/devtools/build` directory has been been git

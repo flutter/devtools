@@ -6,12 +6,11 @@ import 'dart:async';
 import 'dart:ui_web' as ui_web;
 
 import 'package:flutter/foundation.dart';
-import 'package:web/helpers.dart';
+import 'package:web/web.dart';
 
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/primitives/trace_event.dart';
 import '../../../../../shared/primitives/utils.dart';
-import '../../../performance_utils.dart';
 import 'perfetto_controller.dart';
 
 /// Flag to enable embedding an instance of the Perfetto UI running on
@@ -118,7 +117,7 @@ class PerfettoControllerImpl extends PerfettoController {
     if (_debugUseLocalPerfetto) {
       return _debugPerfettoUrl;
     }
-    final basePath = assetUrlHelper(
+    final basePath = devtoolsAssetsBasePath(
       origin: window.location.origin,
       path: window.location.pathname,
     );
@@ -165,9 +164,7 @@ class PerfettoControllerImpl extends PerfettoController {
     );
     _initialized = true;
 
-    // TODO(kenz): replace with `createIFrameElement` when we upgrade to
-    // package:web ^0.3.1.
-    _perfettoIFrame = createElementTag('iframe') as HTMLIFrameElement
+    _perfettoIFrame = createIFrameElement()
       // This url is safe because we built it ourselves and it does not include
       // any user input.
       // ignore: unsafe_html

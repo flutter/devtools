@@ -4,13 +4,13 @@ publish_to: none
 
 # Note: this version should only be updated by running tools/update_version.dart
 # that updates all versions of devtools packages (devtools_app, devtools_test).
-version: 2.30.0-dev.9
+version: 2.32.0-dev.1
 
 repository: https://github.com/flutter/devtools/tree/master/packages/devtools_app
 
 environment:
-  sdk: '>=3.3.0-91.0.dev <4.0.0'
-  flutter: '>=3.17.0-0.0.pre'
+  sdk: ">=3.3.0-91.0.dev <4.0.0"
+  flutter: ">=3.17.0-0.0.pre"
 
 dependencies:
   ansi_up: ^1.0.0
@@ -18,9 +18,8 @@ dependencies:
   # Pin ansicolor to version before pre-NNBD version 1.1.0, should be ^1.0.5
   # See https://github.com/flutter/devtools/issues/2530
   ansicolor: ^2.0.0
-  # TODO: https://github.com/flutter/devtools/issues/4728 - remove constraint when archive is fixed
-  archive: <3.3.3
   async: ^2.0.0
+  clock: ^1.1.1
   codicon: ^1.0.0
   collection: ^1.15.0
   dap: ^1.1.0
@@ -28,12 +27,9 @@ dependencies:
   devtools_app_shared: ^0.0.7
   devtools_extensions: ^0.0.10
   devtools_shared: ^6.0.1
+  dtd: ^0.0.3
   file: ">=6.0.0 <8.0.0"
-  file_selector: ^0.8.0
-  file_selector_linux: ^0.0.2
-  file_selector_macos: ^0.0.2
-  file_selector_web: ^0.8.1
-  file_selector_windows: ^0.0.2
+  file_selector: ^1.0.0
   flutter:
     sdk: flutter
   flutter_markdown: ^0.6.8
@@ -42,7 +38,7 @@ dependencies:
   flutter_web_plugins:
     sdk: flutter
   http: ^1.1.0
-  image: ^3.0.2
+  image: ^4.1.3
   intl: ^0.18.0
   js: ^0.6.1+1
   json_rpc_2: ^3.0.2
@@ -65,14 +61,14 @@ dependencies:
   vm_service: ^13.0.0
   # TODO https://github.com/dart-lang/sdk/issues/52853 - unpin this version
   vm_snapshot_analysis: 0.7.2
-  web: '>=0.3.0 <0.5.0'
+  web: ^0.4.1
   web_socket_channel: ^2.1.0
   # widget_icons: ^0.0.1
 
 dev_dependencies:
   args: ^2.4.2
   build_runner: ^2.3.3
-  devtools_test: 2.30.0-dev.9
+  devtools_test: 2.32.0-dev.1
   fake_async: ^1.3.1
   flutter_driver:
     sdk: flutter
@@ -84,6 +80,7 @@ dev_dependencies:
   mockito: ^5.4.1
   stager: ^1.0.1
   test: ^1.21.1
+  web_benchmarks: ^1.1.0
   webkit_inspection_protocol: ">=0.5.0 <2.0.0"
 
 flutter:

@@ -1,3 +1,15 @@
+# 6.0.3
+* `CompareMixin` is now generic, implementing `Comparable<T>` instead of
+  `Comparable<dynamic>`, and it's operators each therefore accept a `T`
+  argument.
+* `SemanticVersion` now mixes in `CompareMixin<SemanticVersion>`, and it's
+  `compareTo` method therefore now accepts a `SemanticVersion`.
+* Fix an issue parsing file paths that could prevent extensions from being detected.
+* Bump `package:vm_service` dependency to `>=13.0.0 <15.0.0`.
+
+# 6.0.2
+* Fix an issue parsing file paths on Windows that could prevent extensions from being detected.
+
 # 6.0.1
 * Bump minimum Dart SDK version to `3.3.0-91.0.dev` and minimum Flutter SDK version to `3.17.0-0.0.pre`.
 * Add field `isPublic` to `DevToolsExtensionConfig`.

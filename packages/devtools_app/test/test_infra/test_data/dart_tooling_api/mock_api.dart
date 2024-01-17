@@ -66,6 +66,7 @@ class MockDartToolingApi extends DartToolingApiImpl {
         'executeCommand': true,
         'selectDevice': true,
         'openDevToolsPage': true,
+        'openDevToolsExternally': true,
         'hotReload': true,
         'hotRestart': true,
       };

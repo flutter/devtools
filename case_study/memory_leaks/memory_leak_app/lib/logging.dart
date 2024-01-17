@@ -110,11 +110,11 @@ class TimeModel {
 
   void _updateLog() {
     now = DateTime.now();
-    final _year = now.year;
+    final year = now.year;
 
     /// Due to a bug, need to verify the date has the current year before
     /// returning a date and time.
-    if (_year < 2019) {
+    if (year < 2019) {
       return;
     }
 

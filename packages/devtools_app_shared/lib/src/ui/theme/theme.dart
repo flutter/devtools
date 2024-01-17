@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 
 import '../ui_utils.dart';
@@ -90,6 +88,7 @@ ThemeData _baseTheme({
         minimumSize: Size(buttonMinWidth, defaultButtonHeight),
         fixedSize: Size.fromHeight(defaultButtonHeight),
         foregroundColor: theme.colorScheme.onSurface,
+        padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
       ),
     ),
     textButtonTheme: TextButtonThemeData(
@@ -105,10 +104,25 @@ ThemeData _baseTheme({
         fixedSize: Size.fromHeight(defaultButtonHeight),
         backgroundColor: theme.colorScheme.primary,
         foregroundColor: theme.colorScheme.onPrimary,
+        padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
       ),
+    ),
+    menuButtonTheme: MenuButtonThemeData(
+      style: ButtonStyle(
+        textStyle: MaterialStatePropertyAll<TextStyle>(theme.regularTextStyle),
+        fixedSize: const MaterialStatePropertyAll<Size>(Size.fromHeight(24.0)),
+      ),
+    ),
+    dropdownMenuTheme: DropdownMenuThemeData(
+      textStyle: theme.regularTextStyle,
     ),
     progressIndicatorTheme: ProgressIndicatorThemeData(
       linearMinHeight: defaultLinearProgressIndicatorHeight,
+    ),
+    textTheme: theme.textTheme.copyWith(
+      bodyMedium: theme.regularTextStyle,
+      titleSmall:
+          theme.textTheme.titleSmall!.copyWith(fontSize: defaultFontSize),
     ),
   );
 }
@@ -225,50 +239,49 @@ bool isValidLightColor(Color? color) {
 
 // Size constants:
 double get defaultToolbarHeight => scaleByFontFactor(32.0);
-double defaultHeaderHeight({bool isDense = false}) =>
-    isDense ? scaleByFontFactor(34.0) : scaleByFontFactor(38.0);
-double get defaultButtonHeight => scaleByFontFactor(32.0);
-double get defaultSwitchHeight => scaleByFontFactor(26.0);
+double get defaultHeaderHeight => scaleByFontFactor(28.0);
+double get defaultButtonHeight => scaleByFontFactor(26.0);
+double get defaultRowHeight => scaleByFontFactor(24.0);
 double get defaultLinearProgressIndicatorHeight => scaleByFontFactor(4.0);
-double get buttonMinWidth => scaleByFontFactor(36.0);
+double get buttonMinWidth => scaleByFontFactor(26.0);
 
-const defaultIconSizeBeforeScaling = 16.0;
-const defaultActionsIconSizeBeforeScaling = 20.0;
+const defaultIconSizeBeforeScaling = 14.0;
+const defaultActionsIconSizeBeforeScaling = 18.0;
 double get defaultIconSize => scaleByFontFactor(defaultIconSizeBeforeScaling);
 double get actionsIconSize =>
     scaleByFontFactor(defaultActionsIconSizeBeforeScaling);
 double get tooltipIconSize => scaleByFontFactor(12.0);
 double get tableIconSize => scaleByFontFactor(12.0);
-double get defaultListItemHeight => scaleByFontFactor(28.0);
+double get defaultListItemHeight => scaleByFontFactor(24.0);
 double get defaultDialogWidth => scaleByFontFactor(700.0);
 
 const extraWideSearchFieldWidth = 600.0;
 const wideSearchFieldWidth = 400.0;
 const defaultSearchFieldWidth = 200.0;
 
-double get defaultTextFieldHeight => scaleByFontFactor(32.0);
+double get defaultTextFieldHeight => scaleByFontFactor(26.0);
 double get defaultTextFieldNumberWidth => scaleByFontFactor(100.0);
 
 // TODO(jacobr) define a more sophisticated formula for chart height.
 // The chart height does need to increase somewhat to leave room for the legend
 // and tick marks but does not need to scale linearly with the font factor.
-double get defaultChartHeight => scaleByFontFactor(120.0);
+double get defaultChartHeight => scaleByFontFactor(110.0);
 
 double get actionWidgetSize => scaleByFontFactor(48.0);
 
-double get statusLineHeight => scaleByFontFactor(24.0);
+double get statusLineHeight => scaleByFontFactor(20.0);
 
 double get inputDecorationElementHeight => scaleByFontFactor(20.0);
 
 // Padding / spacing constants:
-const largeSpacing = 32.0;
-const defaultSpacing = 16.0;
-const intermediateSpacing = 12.0;
+const extraLargeSpacing = 32.0;
+const largeSpacing = 16.0;
+const defaultSpacing = 12.0;
+const intermediateSpacing = 10.0;
 const denseSpacing = 8.0;
-const denseModeDenseSpacing = 2.0;
 
 const defaultTabBarPadding = 14.0;
-const tabBarSpacing = 14.0;
+const tabBarSpacing = 8.0;
 const denseRowSpacing = 6.0;
 
 const hoverCardBorderSize = 2.0;
@@ -293,7 +306,7 @@ const defaultTabBarViewPhysics = NeverScrollableScrollPhysics();
 // Font size constants:
 
 double get defaultFontSize => scaleByFontFactor(unscaledDefaultFontSize);
-const unscaledDefaultFontSize = 14.0;
+const unscaledDefaultFontSize = 12.0;
 
 double get smallFontSize => scaleByFontFactor(unscaledSmallFontSize);
 const unscaledSmallFontSize = 10.0;
@@ -343,20 +356,20 @@ extension ThemeDataExtension on ThemeData {
   bool get isDarkTheme => brightness == Brightness.dark;
 
   TextStyle get regularTextStyle => fixBlurryText(
-        TextStyle(
+        textTheme.bodyMedium!.copyWith(
           color: colorScheme.onSurface,
           fontSize: defaultFontSize,
         ),
       );
 
+  TextStyle regularTextStyleWithColor(Color? color) =>
+      regularTextStyle.copyWith(color: color);
+
   TextStyle get boldTextStyle =>
       regularTextStyle.copyWith(fontWeight: FontWeight.bold);
 
-  TextStyle get subtleTextStyle => fixBlurryText(
-        TextStyle(
-          color: colorScheme.subtleTextColor,
-        ),
-      );
+  TextStyle get subtleTextStyle =>
+      regularTextStyle.copyWith(color: colorScheme.subtleTextColor);
 
   TextStyle get fixedFontStyle => fixBlurryText(
         textTheme.bodyMedium!.copyWith(

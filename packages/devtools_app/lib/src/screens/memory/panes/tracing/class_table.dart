@@ -18,7 +18,7 @@ import 'tracing_pane_controller.dart';
 
 /// The default width for columns containing *mostly* numeric data (e.g.,
 /// instances, memory).
-const _defaultNumberFieldWidth = 80.0;
+const _defaultNumberFieldWidth = 70.0;
 
 class _TraceCheckBoxColumn extends ColumnData<TracedClass>
     implements ColumnRenderer<TracedClass> {
@@ -27,7 +27,7 @@ class _TraceCheckBoxColumn extends ColumnData<TracedClass>
           'Trace',
           titleTooltip:
               'Enable or disable allocation tracing for a specific type',
-          fixedWidthPx: scaleByFontFactor(55.0),
+          fixedWidthPx: scaleByFontFactor(40.0),
           alignment: ColumnAlignment.left,
         );
 
@@ -41,6 +41,7 @@ class _TraceCheckBoxColumn extends ColumnData<TracedClass>
     BuildContext context,
     TracedClass item, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     return Checkbox(
@@ -85,6 +86,7 @@ class _ClassNameColumn extends ColumnData<TracedClass>
     BuildContext context,
     TracedClass data, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     return HeapClassView(

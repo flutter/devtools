@@ -13,6 +13,8 @@ import '../../../../shared/table/table_data.dart';
 import 'method_table_controller.dart';
 import 'method_table_model.dart';
 
+final _methodColumnMinWidth = scaleByFontFactor(800.0);
+
 /// Widget that displays a method table for a CPU profile.
 class CpuMethodTable extends StatelessWidget {
   const CpuMethodTable({super.key, required this.methodTableController});
@@ -28,7 +30,7 @@ class CpuMethodTable extends StatelessWidget {
           axis: Axis.horizontal,
           initialFractions: const [0.5, 0.5],
           children: [
-            _MethodTable(methodTableController, methods),
+            MethodTable(methodTableController, methods),
             _MethodGraph(methodTableController),
           ],
         );
@@ -40,8 +42,9 @@ class CpuMethodTable extends StatelessWidget {
 // TODO(kenz): ensure that this table automatically scrolls to the selected
 // node from [MethodTableController].
 /// A table of methods and their timing information for a CPU profile.
-class _MethodTable extends StatelessWidget {
-  const _MethodTable(this._methodTableController, this._methods);
+@visibleForTesting
+class MethodTable extends StatelessWidget {
+  const MethodTable(this._methodTableController, this._methods, {super.key});
 
   static final methodColumn = _MethodColumn();
   static final selfTimeColumn = _SelfTimeColumn();
@@ -145,7 +148,10 @@ class _MethodGraphState extends State<_MethodGraph> with AutoDisposeMixin {
           DevToolsTooltip(
             message: selectedNodeDisplay,
             child: Padding(
-              padding: const EdgeInsets.all(denseSpacing),
+              padding: const EdgeInsets.symmetric(
+                horizontal: denseSpacing,
+                vertical: densePadding,
+              ),
               child: MethodAndSourceDisplay(
                 methodName: selectedNode.name,
                 packageUri: selectedNode.packageUri,
@@ -242,7 +248,11 @@ class _CalleesTable extends StatelessWidget {
 
 class _MethodColumn extends ColumnData<MethodTableGraphNode>
     implements ColumnRenderer<MethodTableGraphNode> {
-  _MethodColumn() : super.wide('Method');
+  _MethodColumn()
+      : super.wide(
+          'Method',
+          minWidthPx: _methodColumnMinWidth,
+        );
 
   @override
   bool get supportsSorting => true;
@@ -261,6 +271,7 @@ class _MethodColumn extends ColumnData<MethodTableGraphNode>
     BuildContext context,
     MethodTableGraphNode data, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     return MethodAndSourceDisplay(
@@ -271,8 +282,8 @@ class _MethodColumn extends ColumnData<MethodTableGraphNode>
   }
 }
 
-const _totalAndSelfColumnWidth = 75.0;
-const _callGraphColumnWidth = 80.0;
+const _totalAndSelfColumnWidth = 60.0;
+const _callGraphColumnWidth = 70.0;
 
 class _SelfTimeColumn extends TimeAndPercentageColumn<MethodTableGraphNode> {
   _SelfTimeColumn({String? titleTooltip})

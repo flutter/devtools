@@ -31,7 +31,6 @@ class _DirectoryPickerState extends State<DirectoryPicker> {
 
   @override
   Widget build(BuildContext context) {
-    final rowHeight = defaultButtonHeight;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -41,7 +40,7 @@ class _DirectoryPickerState extends State<DirectoryPicker> {
           fit: FlexFit.tight,
           child: RoundedOutlinedBorder(
             child: Container(
-              height: rowHeight,
+              height: defaultTextFieldHeight,
               padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
               child: TextField(
                 controller: controller,
@@ -50,11 +49,10 @@ class _DirectoryPickerState extends State<DirectoryPicker> {
                   widget.onDirectoryPicked(path.trim());
                 },
                 decoration: const InputDecoration(
+                  isDense: true,
                   hintText: 'Enter path to a Flutter project here',
                 ),
-                style: TextStyle(
-                  color: Theme.of(context).textTheme.displayLarge!.color,
-                ),
+                style: Theme.of(context).regularTextStyle,
                 textAlign: TextAlign.left,
               ),
             ),

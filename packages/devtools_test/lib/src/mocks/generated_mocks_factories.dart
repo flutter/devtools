@@ -218,12 +218,12 @@ Future<MockExtensionService> createMockExtensionServiceWithDefaults(
   when(mockExtensionService.availableExtensions)
       .thenReturn(ImmediateValueNotifier(extensions));
 
-  final _stubEnabledStates = <String, ValueNotifier<ExtensionEnabledState>>{};
+  final stubEnabledStates = <String, ValueNotifier<ExtensionEnabledState>>{};
 
-  void _computeVisibleExtensions() {
+  void computeVisibleExtensions() {
     final visible = <DevToolsExtensionConfig>[];
     for (final e in extensions) {
-      final state = _stubEnabledStates[e.name.toLowerCase()]!.value;
+      final state = stubEnabledStates[e.name.toLowerCase()]!.value;
       if (state != ExtensionEnabledState.disabled) {
         visible.add(e);
       }
@@ -233,24 +233,24 @@ Future<MockExtensionService> createMockExtensionServiceWithDefaults(
   }
 
   for (final e in extensions) {
-    _stubEnabledStates[e.displayName] =
+    stubEnabledStates[e.displayName] =
         ValueNotifier<ExtensionEnabledState>(ExtensionEnabledState.none);
     when(mockExtensionService.enabledStateListenable(e.name))
-        .thenReturn(_stubEnabledStates[e.displayName]!);
+        .thenReturn(stubEnabledStates[e.displayName]!);
     when(mockExtensionService.enabledStateListenable(e.name.toLowerCase()))
-        .thenReturn(_stubEnabledStates[e.displayName]!);
+        .thenReturn(stubEnabledStates[e.displayName]!);
     when(mockExtensionService.setExtensionEnabledState(e, enable: true))
         .thenAnswer((_) async {
-      _stubEnabledStates[e.displayName]!.value = ExtensionEnabledState.enabled;
-      _computeVisibleExtensions();
+      stubEnabledStates[e.displayName]!.value = ExtensionEnabledState.enabled;
+      computeVisibleExtensions();
     });
     when(mockExtensionService.setExtensionEnabledState(e, enable: false))
         .thenAnswer((_) async {
-      _stubEnabledStates[e.name.toLowerCase()]!.value =
+      stubEnabledStates[e.name.toLowerCase()]!.value =
           ExtensionEnabledState.disabled;
-      _computeVisibleExtensions();
+      computeVisibleExtensions();
     });
   }
-  _computeVisibleExtensions();
+  computeVisibleExtensions();
   return mockExtensionService;
 }

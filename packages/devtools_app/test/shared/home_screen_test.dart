@@ -7,6 +7,7 @@ import 'package:devtools_app/src/shared/ui/vm_flag_widgets.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -31,7 +32,7 @@ void main() {
         // Build our app and trigger a frame.
         await tester.pumpWidget(wrap(const HomeScreenBody()));
         expect(find.byType(ConnectionSection), findsOneWidget);
-        expect(find.byType(ConnectDialog), findsOneWidget);
+        expect(find.byType(ConnectInput), findsOneWidget);
         expect(find.byType(ConnectToNewAppButton), findsNothing);
         expect(find.byType(ViewVmFlagsButton), findsNothing);
         expect(find.byType(SampleDataDropDownButton), findsNothing);
@@ -98,7 +99,7 @@ void main() {
         // Build our app and trigger a frame.
         await tester.pumpWidget(wrap(const HomeScreenBody()));
         expect(find.byType(ConnectionSection), findsOneWidget);
-        expect(find.byType(ConnectDialog), findsNothing);
+        expect(find.byType(ConnectInput), findsNothing);
         expect(find.byType(ConnectToNewAppButton), findsOneWidget);
         expect(find.byType(ViewVmFlagsButton), findsOneWidget);
         expect(find.byType(SampleDataDropDownButton), findsNothing);

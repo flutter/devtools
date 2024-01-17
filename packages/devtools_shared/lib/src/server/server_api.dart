@@ -304,10 +304,10 @@ class ServerApi {
   shelf.Response logScreenView() => notImplemented();
 
   /// Return the value of the property.
-  shelf.Response getCompleted(String value) => shelf.Response.ok('$value');
+  shelf.Response getCompleted(String value) => shelf.Response.ok(value);
 
   /// Return the value of the property after the property value has been set.
-  shelf.Response setCompleted(String value) => shelf.Response.ok('$value');
+  shelf.Response setCompleted(String value) => shelf.Response.ok(value);
 
   /// A [shelf.Response] for API calls that encountered a request problem e.g.,
   /// setActiveSurvey not called.

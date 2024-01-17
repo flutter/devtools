@@ -109,7 +109,7 @@ class _SecondaryControls extends StatelessWidget {
     required this.profilerBusy,
   });
 
-  static const _profilingControlsMinScreenWidthForText = 875.0;
+  static const _profilingControlsMinScreenWidthForText = 930.0;
 
   final ProfilerScreenController controller;
 

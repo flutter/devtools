@@ -3,8 +3,7 @@
 // found in the LICENSE file.
 
 /// A few utilities related to evaluating dart code
-
-library eval;
+library;
 
 import 'dart:async';
 
