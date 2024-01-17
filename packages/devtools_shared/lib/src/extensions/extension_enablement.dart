@@ -19,7 +19,7 @@ class DevToolsOptions {
   static const _documentationKey = 'documentation';
   static const _defaultOptions = '''
 $_descriptionKey: This file stores settings for Dart & Flutter DevTools.
-$_documentationKey: https://docs.flutter.dev/tools/devtools/extensions#devtools_options.yaml.
+$_documentationKey: https://docs.flutter.dev/tools/devtools/extensions#devtools_optionsyaml.
 $_extensionsKey:
 ''';
 

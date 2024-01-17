@@ -45,7 +45,7 @@ void main() {
         file.readAsStringSync(),
         '''
 description: This file stores settings for Dart & Flutter DevTools.
-documentation: https://docs.flutter.dev/tools/devtools/extensions#devtools_options.yaml.
+documentation: https://docs.flutter.dev/tools/devtools/extensions#devtools_optionsyaml.
 extensions:
 ''',
       );
@@ -62,7 +62,7 @@ extensions:
         file.readAsStringSync(),
         '''
 description: This file stores settings for Dart & Flutter DevTools.
-documentation: https://docs.flutter.dev/tools/devtools/extensions#devtools_options.yaml.
+documentation: https://docs.flutter.dev/tools/devtools/extensions#devtools_optionsyaml.
 extensions:
   - foo: true''',
       );
@@ -84,7 +84,7 @@ extensions:
         file.readAsStringSync(),
         '''
 description: This file stores settings for Dart & Flutter DevTools.
-documentation: https://docs.flutter.dev/tools/devtools/extensions#devtools_options.yaml.
+documentation: https://docs.flutter.dev/tools/devtools/extensions#devtools_optionsyaml.
 extensions:
   - foo: true
   - bar: false''',
