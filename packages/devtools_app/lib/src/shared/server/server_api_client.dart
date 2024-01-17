@@ -171,10 +171,6 @@ class DevToolsServerConnection {
       case 'ping':
         ping();
         return;
-      // case 'setDtdUri':
-      //   final String dtdUri = params['uri']!;
-      //   unawaited(dtdManager.connect(Uri.parse(dtdUri)));
-      //   return;
       default:
         _log.info('Unknown request $method from server');
     }

@@ -6,7 +6,6 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
-import 'package:logging/logging.dart';
 
 import 'src/app.dart';
 import 'src/framework/app_error_handling.dart';
@@ -21,8 +20,6 @@ import 'src/shared/preferences.dart';
 import 'src/shared/primitives/url_utils.dart';
 import 'src/shared/primitives/utils.dart';
 import 'src/shared/server/server.dart' as server;
-
-final _log = Logger('initialization');
 
 /// Handles necessary initialization then runs DevTools.
 ///
