@@ -246,13 +246,15 @@ class _DevToolsMenuState extends State<_DevToolsMenu> {
           ),
       ],
       builder: (context, controller, child) => IconButton(
-        onPressed: () {
-          if (controller.isOpen) {
-            controller.close();
-          } else {
-            controller.open();
-          }
-        },
+        onPressed: widget.isRelease
+            ? null
+            : () {
+                if (controller.isOpen) {
+                  controller.close();
+                } else {
+                  controller.open();
+                }
+              },
         tooltip: 'DevTools',
         icon: Icon(
           Icons.construction,

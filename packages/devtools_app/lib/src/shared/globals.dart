@@ -72,6 +72,13 @@ void setIntegrationTestMode() {
   _integrationTestMode = true;
 }
 
+/// Whether DevTools is being run in a test environment.
+bool get testMode => _integrationTestMode;
+bool _testMode = false;
+void setTestMode() {
+  _testMode = true;
+}
+
 /// Whether DevTools is being run as a stager app.
 bool get stagerMode => _stagerMode;
 bool _stagerMode = false;

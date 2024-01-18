@@ -98,3 +98,4 @@ export 'src/shared/ui/hover.dart';
 export 'src/shared/ui/icons.dart';
 export 'src/shared/ui/search.dart';
 export 'src/shared/utils.dart';
+export 'src/standalone_ui/api/vs_code_api.dart';

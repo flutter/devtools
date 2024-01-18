@@ -219,7 +219,7 @@ Color alternatingColorForIndex(int index, ColorScheme colorScheme) {
 /// A value of 0.5 would result in all colours being considered light/dark, and
 /// a value of 0.12 allowing around only the 12% darkest/lightest colours by
 /// Flutter's luminance calculation.
-/// 12% was chosen becaues VS Code's default light background color is #f3f3f3
+/// 12% was chosen because VS Code's default light background color is #f3f3f3
 /// which is a little under 11%.
 const _lightDarkLuminanceThreshold = 0.12;
 

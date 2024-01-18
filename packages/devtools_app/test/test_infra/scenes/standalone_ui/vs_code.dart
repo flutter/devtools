@@ -12,7 +12,7 @@ import 'package:stager/stager.dart';
 import '../../../test_infra/test_data/dart_tooling_api/mock_api.dart';
 import 'vs_code_mock_editor.dart';
 
-final _api = MockDartToolingApi();
+final _api = FakeDartToolingApi();
 
 /// To run, use the "standalone_ui/vs_code" launch configuration with the
 /// `devtools/packages/` folder open in VS Code, or run:
