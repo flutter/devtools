@@ -345,9 +345,11 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     assert(selection.node == _data[selection.nodeIndex!]);
 
     if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
-      _moveSelection(TreeTableScrollKind.down, scrollController, constraints.maxHeight);
+      _moveSelection(
+          TreeTableScrollKind.down, scrollController, constraints.maxHeight);
     } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
-      _moveSelection(TreeTableScrollKind.up, scrollController, constraints.maxHeight);
+      _moveSelection(
+          TreeTableScrollKind.up, scrollController, constraints.maxHeight);
     } else if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
       // On left arrow collapse the row if it is expanded. If it is not, move
       // selection to its parent.
