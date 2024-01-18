@@ -34,10 +34,7 @@ TODO: Remove this section if there are not any general updates.
 
 ## Network profiler updates
 
-* The network profiler now only supports apps running on versions of
-  Dart/Flutter that implement version 4.0 of the [dart:io VM Service Protocol
-  Extensions](https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/service_extension.md). -
-[#6953](https://github.com/flutter/devtools/pull/6953)
+TODO: Remove this section if there are not any general updates.
 
 ## Logging updates
 
