@@ -1,3 +1,6 @@
+# 6.0.4
+* Add `apiGetDtdUri` to the server api.
+
 # 6.0.3
 * `CompareMixin` is now generic, implementing `Comparable<T>` instead of
   `Comparable<dynamic>`, and it's operators each therefore accept a `T`

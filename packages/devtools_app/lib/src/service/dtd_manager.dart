@@ -4,9 +4,12 @@
 
 import 'package:dtd/dtd.dart';
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 
 import '../framework/app_error_handling.dart';
 import '../shared/globals.dart';
+
+final _log = Logger('dtd_manager');
 
 /// Manages a connection to the Dart Tooling Daemon.
 class DTDManager {
@@ -23,6 +26,7 @@ class DTDManager {
 
     try {
       _connection.value = await DartToolingDaemon.connect(uri);
+      _log.info('Successfully connected to DTD at: $uri');
     } catch (e, st) {
       notificationService.pushError(
         'Failed to connect to the Dart Tooling Daemon',
