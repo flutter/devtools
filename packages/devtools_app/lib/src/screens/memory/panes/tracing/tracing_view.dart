@@ -49,33 +49,24 @@ class TracingPaneState extends State<TracingPane> {
           controller: widget.controller,
         ),
         Expanded(
-          child: isProfileMode
-              ? OutlineDecoration.onlyTop(
-                  child: const Center(
-                    child: Text(
-                      'Allocation tracing is temporary disabled in profile mode.\n'
-                      'Run the application in debug mode to trace allocations.',
-                    ),
-                  ),
-                )
-              : OutlineDecoration.onlyTop(
-                  child: Split(
-                    axis: Axis.horizontal,
-                    initialFractions: const [0.25, 0.75],
-                    children: [
-                      OutlineDecoration.onlyRight(
-                        child: AllocationTracingTable(
-                          controller: widget.controller,
-                        ),
-                      ),
-                      OutlineDecoration.onlyLeft(
-                        child: AllocationTracingTree(
-                          controller: widget.controller,
-                        ),
-                      ),
-                    ],
+          child: OutlineDecoration.onlyTop(
+            child: Split(
+              axis: Axis.horizontal,
+              initialFractions: const [0.25, 0.75],
+              children: [
+                OutlineDecoration.onlyRight(
+                  child: AllocationTracingTable(
+                    controller: widget.controller,
                   ),
                 ),
+                OutlineDecoration.onlyLeft(
+                  child: AllocationTracingTree(
+                    controller: widget.controller,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ],
     );
