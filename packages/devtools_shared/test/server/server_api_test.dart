@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:devtools_shared/devtools_shared.dart';
@@ -149,6 +150,30 @@ void main() {
     expect(await response.readAsString(), someMessage);
     expect(fakeManager.receivedConfiguration, configuration);
     expect(fakeManager.receivedTarget, target);
+  });
+
+  test('handle apiGetDtdUri', () async {
+    const dtdUri = 'ws://dtd:uri';
+    final request = Request(
+      'get',
+      Uri(
+        scheme: 'https',
+        host: 'localhost',
+        path: DtdApi.apiGetDtdUri,
+      ),
+    );
+    final fakeManager = FakeDeeplinkManager();
+    final response = await ServerApi.handle(
+      request,
+      extensionsManager: ExtensionsManager(buildDir: '/'),
+      deeplinkManager: fakeManager,
+      dtdUri: () => dtdUri,
+    );
+    expect(response.statusCode, HttpStatus.ok);
+    expect(
+      await response.readAsString(),
+      jsonEncode({DtdApi.uriPropertyName: dtdUri}),
+    );
   });
 }
 

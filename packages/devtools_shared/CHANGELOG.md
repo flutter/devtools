@@ -1,4 +1,5 @@
-# 6.0.4-wip
+# 6.0.4
+* Add `apiGetDtdUri` to the server api.
 * Add a description and link to documentation to the `devtools_options.yaml` file that
 is created in a user's project.
 
