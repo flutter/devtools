@@ -73,7 +73,7 @@ void setIntegrationTestMode() {
 }
 
 /// Whether DevTools is being run in a test environment.
-bool get testMode => _integrationTestMode;
+bool get testMode => _testMode;
 bool _testMode = false;
 void setTestMode() {
   _testMode = true;

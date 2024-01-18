@@ -5,12 +5,12 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/constants.dart';
 import 'package:devtools_app/src/standalone_ui/api/impl/vs_code_api.dart';
-import 'package:devtools_app/src/standalone_ui/api/vs_code_api.dart';
 import 'package:devtools_app/src/standalone_ui/vs_code/debug_sessions.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:devtools_test/helpers.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -170,6 +170,40 @@ void main() {
             devtoolsButtonEnabled: test.devtoolsButtonEnabled,
           );
         }
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'DevTools dropdown contains extensions submenu',
+      windowSize,
+      (tester) async {
+        await pumpDebugSessions(tester);
+        await tester.pump(const Duration(milliseconds: 500));
+
+        // Index 0 so that we are checking a debug desktop session, where the
+        // DevTools button is enabled.
+        final devtoolsButtonFinder =
+            iconButtonFinder(Icons.construction, index: 0);
+        expect(devtoolsButtonFinder, findsOneWidget);
+        await tester.tap(devtoolsButtonFinder);
+        await tester.pumpAndSettle();
+
+        final extensionsSubmenuButtonFinder = find.text('Extensions');
+        expect(extensionsSubmenuButtonFinder, findsOneWidget);
+
+        // We should not see the extensions in the dropdown menu at this point.
+        expect(find.text('bar'), findsNothing);
+        expect(find.text('foo'), findsNothing);
+        expect(find.text('provider'), findsNothing);
+
+        final hoverLocation = tester.getCenter(extensionsSubmenuButtonFinder);
+        await tester.startGesture(hoverLocation, kind: PointerDeviceKind.mouse);
+        await tester.pumpAndSettle();
+
+        // We should now see the extensions in the dropdown menu.
+        expect(find.text('bar'), findsOneWidget);
+        expect(find.text('foo'), findsOneWidget);
+        expect(find.text('provider'), findsOneWidget);
       },
     );
   });
