@@ -10,7 +10,6 @@ import 'dart:io';
 
 import 'package:shelf/shelf.dart' as shelf;
 
-import '../../devtools_shared.dart';
 import '../deeplink/deeplink_manager.dart';
 import '../devtools_api.dart';
 import '../extensions/extension_enablement.dart';
@@ -257,7 +256,7 @@ class ServerApi {
       case DtdApi.apiGetDtdUri:
         return api.setCompleted(
           json.encode({
-            DtdApi.uriPropertyName: dtdUri == null ? null : dtdUri(),
+            DtdApi.uriPropertyName: dtdUri?.call(),
           }),
         );
       default:
