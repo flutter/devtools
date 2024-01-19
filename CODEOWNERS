@@ -34,7 +34,4 @@ packages/devtools_extensions/    @kenzieschmoll
 # No owners to prevent version update spam
 packages/devtools_app/lib/devtools.dart
 packages/devtools_app/pubspec.yaml
-packages/devtools_app_shared/pubspec.yaml
-packages/devtools_extensions/pubspec.yaml
-packages/devtools_shared/pubspec.yaml
 packages/devtools_test/pubspec.yaml
