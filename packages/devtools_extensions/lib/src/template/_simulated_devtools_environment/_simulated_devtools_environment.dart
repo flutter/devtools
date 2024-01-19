@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:js_interop';
+import 'dart:math' as math;
 
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
@@ -74,73 +75,107 @@ class SimulatedDevToolsWrapperState extends State<SimulatedDevToolsWrapper>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Split(
-      axis: Axis.horizontal,
-      initialFractions: const [0.8, 0.2],
-      minSizes: const [
-        100.0,
-        _VmServiceConnection._totalControlsWidth + 2 * defaultSpacing,
-      ],
-      children: [
-        OutlineDecoration.onlyRight(
-          child: Padding(
-            padding: const EdgeInsets.all(defaultSpacing),
-            child: widget.child,
-          ),
-        ),
-        OutlineDecoration.onlyLeft(
-          child: Padding(
-            padding: const EdgeInsets.all(defaultSpacing),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Simulated DevTools Environment',
-                  style: theme.textTheme.titleMedium,
-                ),
-                const PaddedDivider(),
-                _VmServiceConnection(
-                  connected: connected,
-                  simController: simController,
-                ),
-                const SizedBox(height: denseSpacing),
-                _SimulatedApi(
-                  simController: simController,
-                  requiresRunningApplication: widget.requiresRunningApplication,
-                  connectedToApplication: connected,
-                ),
-                const PaddedDivider(),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Logs:',
-                            style: theme.textTheme.titleMedium,
-                          ),
-                          DevToolsButton.iconOnly(
-                            icon: Icons.clear,
-                            outlined: false,
-                            tooltip: 'Clear logs',
-                            onPressed: () => simController.messageLogs.clear(),
-                          ),
-                        ],
-                      ),
-                      const PaddedDivider.thin(),
-                      Expanded(
-                        child: _LogMessages(simController: simController),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final availableWidth = constraints.maxWidth;
+        const environmentPanelMinWidth =
+            _VmServiceConnection._totalControlsWidth + 2 * defaultSpacing;
+
+        final environmentPanelFraction =
+            environmentPanelMinWidth / availableWidth;
+        final childFraction = 1 - environmentPanelFraction;
+
+        return Split(
+          axis: Axis.horizontal,
+          initialFractions: [childFraction, environmentPanelFraction],
+          minSizes: const [
+            100.0,
+            0.0,
+          ],
+          children: [
+            OutlineDecoration.onlyRight(
+              child: Padding(
+                padding: const EdgeInsets.all(defaultSpacing),
+                child: widget.child,
+              ),
             ),
-          ),
-        ),
-      ],
+            LayoutBuilder(
+              builder: (context, environmentPanelConstraints) {
+                final availableEnvironmentPanelWidth =
+                    environmentPanelConstraints.maxWidth;
+                final environmentPanelWidth = math.max(
+                  environmentPanelMinWidth,
+                  availableEnvironmentPanelWidth,
+                );
+
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: SizedBox(
+                    width: environmentPanelWidth,
+                    child: OutlineDecoration.onlyLeft(
+                      child: Padding(
+                        padding: const EdgeInsets.all(defaultSpacing),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Simulated DevTools Environment',
+                              style: theme.textTheme.titleMedium,
+                            ),
+                            const PaddedDivider(),
+                            _VmServiceConnection(
+                              connected: connected,
+                              simController: simController,
+                            ),
+                            const SizedBox(height: denseSpacing),
+                            _SimulatedApi(
+                              simController: simController,
+                              requiresRunningApplication:
+                                  widget.requiresRunningApplication,
+                              connectedToApplication: connected,
+                            ),
+                            const PaddedDivider(),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        'Logs:',
+                                        style: theme.textTheme.titleMedium,
+                                      ),
+                                      DevToolsButton.iconOnly(
+                                        icon: Icons.clear,
+                                        outlined: false,
+                                        tooltip: 'Clear logs',
+                                        onPressed: () =>
+                                            simController.messageLogs.clear(),
+                                      ),
+                                    ],
+                                  ),
+                                  const PaddedDivider.thin(),
+                                  Expanded(
+                                    child: _LogMessages(
+                                      simController: simController,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
