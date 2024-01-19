@@ -11,7 +11,7 @@ To learn more about DevTools, check out the
 ## General updates
 
 * Improved overall usability by making the DevTools UI more dense. This
-significantly improves the user experience when using DevTools embedded
+significantly improves the user experience when using DevTools embedded in
 an IDE. (#7030)[https://github.com/flutter/devtools/pull/7030]
 * Added support for filtering with regular expressions in the Logging, Network, and CPU profiler
 pages - (#7027)[https://github.com/flutter/devtools/pull/7027]
@@ -61,7 +61,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## DevTools Extension updates
 
-* Fixed a couple bugs preventing Dart server apps from connecting to DevTools extensions. - [#6982](https://github.com/flutter/devtools/pull/6982), [#6993](https://github.com/flutter/devtools/pull/6993)
+* Added a description and link to documentation to the `devtools_options.yaml` file
+that is created in a user's project. - [#7052](https://github.com/flutter/devtools/pull/7052)
 
 ## Full commit history
 
