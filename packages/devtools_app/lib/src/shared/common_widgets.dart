@@ -1163,7 +1163,7 @@ class Breadcrumb extends StatelessWidget {
     final textPainter = TextPainter(
       text: TextSpan(
         text: text,
-        style: TextStyle(
+        style: theme.regularTextStyle.copyWith(
           color: theme.colorScheme.contrastTextColor,
           decoration: TextDecoration.underline,
         ),

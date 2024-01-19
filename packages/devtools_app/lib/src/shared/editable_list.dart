@@ -167,6 +167,7 @@ class EditableListActionBar extends StatelessWidget {
               },
             ),
           ),
+          const SizedBox(width: densePadding),
           TextButton(
             onPressed: () {
               _addNewItem();
@@ -175,6 +176,7 @@ class EditableListActionBar extends StatelessWidget {
               'Add',
             ), // TODO:(https://github.com/flutter/devtools/issues/4381)
           ),
+          const SizedBox(width: densePadding),
           isRefreshing?.value ?? false
               ? SizedBox(
                   width: defaultTextFieldHeight,
