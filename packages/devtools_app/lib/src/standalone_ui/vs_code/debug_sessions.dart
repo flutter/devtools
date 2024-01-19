@@ -217,6 +217,23 @@ class _DevToolsMenuState extends State<_DevToolsMenu> {
             .where(_shouldIncludeScreen)
             .map(devToolsButton)
             .toList(),
+        if (widget.supportsOpenExternal)
+          DevToolsScreenMenuItem(
+            title: 'Open in Browser',
+            icon: Icons.open_in_browser,
+            onPressed: () {
+              ga.select(
+                gac.VsCodeFlutterSidebar.id,
+                gac.VsCodeFlutterSidebar.openDevToolsExternally.name,
+              );
+              unawaited(
+                widget.api.openDevToolsPage(
+                  widget.session.id,
+                  forceExternal: true,
+                ),
+              );
+            },
+          ),
         if (_extensionServiceForSession != null)
           ValueListenableBuilder(
             valueListenable: _extensionServiceForSession!.visibleExtensions,
