@@ -58,6 +58,8 @@ TODO: Remove this section if there are not any general updates.
 ## VS Code Sidebar updates
 
 * Fixed an issue that prevented the VS code sidebar from loading in recent beta/master builds. - [#6984](https://github.com/flutter/devtools/pull/6984)
+* Show DevTools extensions as an option from the debug sessions DevTools dropdown, when
+available. [#6709](https://github.com/flutter/devtools/pull/6709)
 
 ## DevTools Extension updates
 

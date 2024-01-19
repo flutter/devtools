@@ -11,6 +11,19 @@ import '../shared/server/server.dart' as server;
 
 class ExtensionService extends DisposableController
     with AutoDisposeControllerMixin {
+  ExtensionService({this.fixedAppRootPath});
+
+  /// The fixed (unchanging) root path for the application this
+  /// [ExtensionService] will manage DevTools extensions for.
+  ///
+  /// When null, the root path will instead be calculated from the
+  /// [serviceManager]'s currently connected app. See [_initRootPath].
+  final String? fixedAppRootPath;
+
+  /// The root path for the Dart / Flutter application this [ExtensionService]
+  /// will manage DevTools extensions for.
+  String? _rootPath;
+
   /// All the DevTools extensions that are available for the connected
   /// application, regardless of whether they have been enabled or disabled
   /// by the user.
@@ -45,31 +58,43 @@ class ExtensionService extends DisposableController
       <String, ValueNotifier<ExtensionEnabledState>>{};
 
   Future<void> initialize() async {
+    await _initRootPath();
     await _maybeRefreshExtensions();
-    addAutoDisposeListener(
-      serviceConnection.serviceManager.connectedState,
-      () async {
-        if (serviceConnection.serviceManager.connectedState.value.connected) {
-          await _maybeRefreshExtensions();
-        } else {
-          _reset();
-        }
-      },
-    );
 
-    // TODO(https://github.com/flutter/flutter/issues/134470): refresh on
-    // hot reload and hot restart events instead.
-    addAutoDisposeListener(
-      serviceConnection.serviceManager.isolateManager.mainIsolate,
-      () async {
-        if (serviceConnection.serviceManager.isolateManager.mainIsolate.value !=
-            null) {
-          await _maybeRefreshExtensions();
-        } else {
-          _reset();
-        }
-      },
-    );
+    cancelListeners();
+
+    // We only need to add VM service manager related listeners when we are
+    // interacting with the currently connected app (i.e. when
+    // [fixedAppRootPath] is null).
+    if (fixedAppRootPath == null) {
+      addAutoDisposeListener(
+        serviceConnection.serviceManager.connectedState,
+        () async {
+          if (serviceConnection.serviceManager.connectedState.value.connected) {
+            await _initRootPath();
+            await _maybeRefreshExtensions();
+          } else {
+            _reset();
+          }
+        },
+      );
+
+      // TODO(https://github.com/flutter/flutter/issues/134470): refresh on
+      // hot reload and hot restart events instead.
+      addAutoDisposeListener(
+        serviceConnection.serviceManager.isolateManager.mainIsolate,
+        () async {
+          if (serviceConnection
+                  .serviceManager.isolateManager.mainIsolate.value !=
+              null) {
+            await _initRootPath();
+            await _maybeRefreshExtensions();
+          } else {
+            _reset();
+          }
+        },
+      );
+    }
 
     addAutoDisposeListener(
       preferences.devToolsExtensions.showOnlyEnabledExtensions,
@@ -83,21 +108,23 @@ class ExtensionService extends DisposableController
     // .dart_tool/package_config.json file for changes.
   }
 
+  Future<void> _initRootPath() async {
+    _rootPath = fixedAppRootPath ?? await _connectedAppRootPath();
+  }
+
   Future<void> _maybeRefreshExtensions() async {
-    final appRootPath = await _connectedAppRootPath();
-    if (appRootPath == null) return;
+    if (_rootPath == null) return;
 
     _refreshInProgress.value = true;
     _availableExtensions.value =
-        await server.refreshAvailableExtensions(appRootPath)
+        await server.refreshAvailableExtensions(_rootPath!)
           ..sort();
     await _refreshExtensionEnabledStates();
     _refreshInProgress.value = false;
   }
 
   Future<void> _refreshExtensionEnabledStates() async {
-    final appRootPath = await _connectedAppRootPath();
-    if (appRootPath == null) return;
+    if (_rootPath == null) return;
 
     final onlyIncludeEnabled =
         preferences.devToolsExtensions.showOnlyEnabledExtensions.value;
@@ -105,7 +132,7 @@ class ExtensionService extends DisposableController
     final visible = <DevToolsExtensionConfig>[];
     for (final extension in _availableExtensions.value) {
       final stateFromOptionsFile = await server.extensionEnabledState(
-        rootPath: appRootPath,
+        rootPath: _rootPath!,
         extensionName: extension.name,
       );
       final stateNotifier = _extensionEnabledStates.putIfAbsent(
@@ -133,18 +160,18 @@ class ExtensionService extends DisposableController
     DevToolsExtensionConfig extension, {
     required bool enable,
   }) async {
-    final appRootPath = await _connectedAppRootPath();
-    if (appRootPath != null) {
-      await server.extensionEnabledState(
-        rootPath: appRootPath,
-        extensionName: extension.name,
-        enable: enable,
-      );
-      await _refreshExtensionEnabledStates();
-    }
+    if (_rootPath == null) return;
+
+    await server.extensionEnabledState(
+      rootPath: _rootPath!,
+      extensionName: extension.name,
+      enable: enable,
+    );
+    await _refreshExtensionEnabledStates();
   }
 
   void _reset() {
+    _rootPath = null;
     _availableExtensions.value = [];
     _visibleExtensions.value = [];
     _extensionEnabledStates.clear();

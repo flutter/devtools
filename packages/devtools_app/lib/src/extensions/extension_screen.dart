@@ -20,7 +20,7 @@ class ExtensionScreen extends Screen {
   ExtensionScreen(this.extensionConfig)
       : super.conditional(
           // TODO(kenz): we may need to ensure this is a unique id.
-          id: '${extensionConfig.name}_ext',
+          id: extensionConfig.screenId,
           title: extensionConfig.name,
           icon: extensionConfig.icon,
           // TODO(kenz): support static DevTools extensions.
@@ -134,4 +134,6 @@ extension ExtensionConfigExtension on DevToolsExtensionConfig {
         materialIconCodePoint,
         fontFamily: 'MaterialIcons',
       );
+
+  String get screenId => '${name}_ext';
 }
