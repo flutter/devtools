@@ -71,10 +71,7 @@ class ReleaseHelperCommand extends Command {
       print("Ensuring ./tool packages are ready.");
       Directory.current = pathFromRepoRoot("tool");
       await processManager.runProcess(
-        CliCommand.from(
-          'dart',
-          ['pub', 'get'],
-        ),
+        CliCommand.dart('pub get'),
         workingDirectory: pathFromRepoRoot("tool"),
       );
 
