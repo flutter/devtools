@@ -61,6 +61,14 @@ class DevToolsTab extends Tab {
   final String gaId;
 
   final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTextStyle(
+      style: Theme.of(context).textTheme.titleSmall!,
+      child: super.build(context),
+    );
+  }
 }
 
 /// A combined [TabBar] and [TabBarView] implementation that tracks tab changes

@@ -38,7 +38,6 @@ double get heightOnlyIndicatorSize => scaleByFontFactor(72.0);
 double get minWidthToDisplayWidthInsideArrow => scaleByFontFactor(200.0);
 double get minHeightToDisplayHeightInsideArrow => scaleByFontFactor(200.0);
 
-const largeTextScaleFactor = 1.2;
 const smallTextScaleFactor = 0.8;
 
 /// Height for limiting asset image (selected one in the drop down).

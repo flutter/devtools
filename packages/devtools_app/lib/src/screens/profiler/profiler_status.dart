@@ -5,6 +5,7 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
+import '../../../devtools_app.dart';
 import 'cpu_profiler_controller.dart';
 
 class CpuProfilerDisabled extends StatelessWidget {
@@ -14,19 +15,22 @@ class CpuProfilerDisabled extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          const Text('CPU profiler is disabled.'),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ElevatedButton(
-              onPressed: controller.enableCpuProfiler,
-              child: const Text('Enable profiler'),
+    return DefaultTextStyle(
+      style: Theme.of(context).regularTextStyle,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            const Text('CPU profiler is disabled.'),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ElevatedButton(
+                onPressed: controller.enableCpuProfiler,
+                child: const Text('Enable profiler'),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -37,21 +41,24 @@ class EmptyAppStartUpProfile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            'There are no app start up samples available.',
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: denseSpacing),
-          Text(
-            'To avoid this, try to open the DevTools CPU profiler '
-            'sooner after starting your app.',
-            textAlign: TextAlign.center,
-          ),
-        ],
+    return DefaultTextStyle(
+      style: Theme.of(context).regularTextStyle,
+      child: const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'There are no app start up samples available.',
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: denseSpacing),
+            Text(
+              'To avoid this, try to open the DevTools CPU profiler '
+              'sooner after starting your app.',
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -62,9 +69,7 @@ class EmptyProfileView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text('No CPU samples recorded.'),
-    );
+    return const CenteredMessage('No CPU samples recorded.');
   }
 }
 
@@ -81,20 +86,23 @@ class ProfileRecordingInstructions extends StatelessWidget {
         Text(' to end the recording.'),
       ],
     );
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text('Click the record button '),
-              Icon(Icons.fiber_manual_record),
-              Text(' to start recording CPU samples.'),
-            ],
-          ),
-          stopRow,
-        ],
+    return DefaultTextStyle(
+      style: Theme.of(context).regularTextStyle,
+      child: const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('Click the record button '),
+                Icon(Icons.fiber_manual_record),
+                Text(' to start recording CPU samples.'),
+              ],
+            ),
+            stopRow,
+          ],
+        ),
       ),
     );
   }

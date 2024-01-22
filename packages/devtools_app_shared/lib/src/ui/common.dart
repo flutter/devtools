@@ -523,7 +523,7 @@ final class DevToolsToggleButtonGroup extends StatelessWidget {
         fillColor: fillColor,
         selectedColor: selectedColor,
         borderColor: borderColor,
-        textStyle: theme.textTheme.bodyMedium,
+        textStyle: theme.textTheme.bodySmall,
         constraints: BoxConstraints(
           minWidth: defaultButtonHeight,
           minHeight: defaultButtonHeight,
