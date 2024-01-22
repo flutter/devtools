@@ -146,7 +146,7 @@ class ServeCommand extends Command {
 
     logStatus('running pub get for DDS in the local dart sdk');
     await processManager.runProcess(
-      CliCommand.from('dart', ['pub', 'get']),
+      CliCommand.dart('pub get'),
       workingDirectory: path.join(localDartSdkLocation, 'pkg', 'dds'),
     );
 
@@ -161,8 +161,7 @@ class ServeCommand extends Command {
 
     // This call will not exit until explicitly terminated by the user.
     await processManager.runProcess(
-      CliCommand.from(
-        'dart',
+      CliCommand.dart(
         [
           serveLocalScriptPath,
           '--devtools-build=$devToolsBuildLocation',
@@ -170,7 +169,7 @@ class ServeCommand extends Command {
           // to pass `--machine` (etc.) so that this script can behave the same as
           // the "dart devtools" command for testing local DevTools/server changes.
           ...remainingArguments,
-        ],
+        ].join(' '),
       ),
       workingDirectory: localDartSdkLocation,
     );
