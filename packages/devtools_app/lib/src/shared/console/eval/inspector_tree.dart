@@ -35,13 +35,21 @@ double get inspectorRowHeight => scaleByFontFactor(16.0);
 /// tree ui node class but we choose to instead make it widget inspector
 /// specific as that is the only case we care about.
 // TODO(kenz): extend TreeNode class to share tree logic.
-class InspectorTreeNode {
+class InspectorTreeNode { 
   InspectorTreeNode({
     InspectorTreeNode? parent,
     bool expandChildren = true,
-  })  : _children = <InspectorTreeNode>[],
+    this.key,
+  })  : 
+        _children = <InspectorTreeNode>[],
         _parent = parent,
         _isExpanded = expandChildren;
+
+  final Key? key;
+
+  bool keyContainsSearch(String search) {
+    return key != null && key!.toString().contains(search);
+  }
 
   bool get showLinesToChildren {
     return _children.length > 1 && !_children.last.isProperty;
