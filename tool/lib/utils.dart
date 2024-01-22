@@ -75,9 +75,19 @@ class CliCommand {
     String args, {
     bool throwOnException = true,
   }) {
-    final sdk = FlutterSdk.current;
     return CliCommand._(
-      exe: sdk.flutterToolPath,
+      exe: FlutterSdk.current.flutterExePath,
+      args: args.split(' '),
+      throwOnException: throwOnException,
+    );
+  }
+
+  factory CliCommand.dart(
+    String args, {
+    bool throwOnException = true,
+  }) {
+    return CliCommand._(
+      exe: FlutterSdk.current.dartExePath,
       args: args.split(' '),
       throwOnException: throwOnException,
     );
@@ -121,7 +131,7 @@ class CliCommand {
       // not need to pass the --flutter-from-path flag down because using the
       // tool will automatically select the one that's running the VM and we'll
       // have selected that here.
-      exe: FlutterSdk.current.dartToolPath,
+      exe: FlutterSdk.current.dartExePath,
       args: [
         Platform.script.toFilePath(),
         ...args.split(' '),
