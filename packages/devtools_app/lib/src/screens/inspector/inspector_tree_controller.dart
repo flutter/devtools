@@ -691,6 +691,7 @@ class InspectorTreeController extends DisposableController
       final diagnostic = row!.node.diagnostic;
       if (diagnostic == null) continue;
 
+      // Widget search by widget key
       if (row.node.keyContainsSearch(search)) {
         matches.add(row);
         continue;
