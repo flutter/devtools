@@ -1143,7 +1143,7 @@ class Breadcrumb extends StatelessWidget {
     required this.onPressed,
   });
 
-  static const height = 28.0;
+  static const height = 24.0;
 
   static const caretWidth = 4.0;
 
