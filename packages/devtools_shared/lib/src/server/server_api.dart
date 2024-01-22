@@ -80,14 +80,14 @@ class ServerApi {
         return api.getCompleted(json.encode(true));
       case apiGetDevToolsFirstRun:
         // Has DevTools been run first time? To bring up analytics dialog.
-        final bool isFirstRun =
+        final isFirstRun =
             _devToolsUsage.isFirstRun && analytics.shouldShowMessage;
         return api.getCompleted(
           json.encode(isFirstRun),
         );
       case apiGetDevToolsEnabled:
         // Is DevTools Analytics collection enabled?
-        final bool isEnabled =
+        final isEnabled =
             _devToolsUsage.analyticsEnabled && analytics.telemetryEnabled;
         return api.getCompleted(
           json.encode(isEnabled),
@@ -95,7 +95,7 @@ class ServerApi {
       case apiSetDevToolsEnabled:
         // Enable or disable DevTools analytics collection.
         if (queryParams.containsKey(devToolsEnabledPropertyName)) {
-          final bool analyticsEnabled =
+          final analyticsEnabled =
               json.decode(queryParams[devToolsEnabledPropertyName]!);
 
           _devToolsUsage.analyticsEnabled = analyticsEnabled;
