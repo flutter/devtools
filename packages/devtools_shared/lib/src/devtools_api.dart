@@ -14,6 +14,8 @@ const apiResetDevTools = '${apiPrefix}resetDevTools';
 const apiGetDevToolsFirstRun = '${apiPrefix}getDevToolsFirstRun';
 const apiGetDevToolsEnabled = '${apiPrefix}getDevToolsEnabled';
 const apiSetDevToolsEnabled = '${apiPrefix}setDevToolsEnabled';
+const apiGetConsentMessage = '${apiPrefix}getConsentMessage';
+const apiSetConsentMessageAsShown = '${apiPrefix}setConsentMessageAsShown';
 
 /// Property name to apiSetDevToolsEnabled the DevToolsEnabled is the name used
 /// in queryParameter:

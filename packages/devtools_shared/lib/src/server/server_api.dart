@@ -9,6 +9,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:shelf/shelf.dart' as shelf;
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../deeplink/deeplink_manager.dart';
 import '../devtools_api.dart';
@@ -16,6 +17,17 @@ import '../extensions/extension_enablement.dart';
 import '../extensions/extension_manager.dart';
 import 'file_system.dart';
 import 'usage.dart';
+
+// TODO: confirm how to get additional parameters; switch away
+// from development constructor too
+final Analytics analytics = Analytics.development(
+  tool: DashTool.devtools,
+  dartVersion: 'TBD',
+  clientIde: 'TBD',
+  enabledFeatures: 'feature1-feature2',
+  flutterChannel: 'TBD',
+  flutterVersion: 'TBD',
+);
 
 /// The DevTools server API.
 ///
@@ -68,23 +80,35 @@ class ServerApi {
         return api.getCompleted(json.encode(true));
       case apiGetDevToolsFirstRun:
         // Has DevTools been run first time? To bring up analytics dialog.
+        final bool isFirstRun =
+            _devToolsUsage.isFirstRun && analytics.shouldShowMessage;
         return api.getCompleted(
-          json.encode(_devToolsUsage.isFirstRun),
+          json.encode(isFirstRun),
         );
       case apiGetDevToolsEnabled:
         // Is DevTools Analytics collection enabled?
+        final bool isEnabled =
+            _devToolsUsage.analyticsEnabled && analytics.telemetryEnabled;
         return api.getCompleted(
-          json.encode(_devToolsUsage.analyticsEnabled),
+          json.encode(isEnabled),
         );
       case apiSetDevToolsEnabled:
         // Enable or disable DevTools analytics collection.
         if (queryParams.containsKey(devToolsEnabledPropertyName)) {
-          _devToolsUsage.analyticsEnabled =
+          final bool analyticsEnabled =
               json.decode(queryParams[devToolsEnabledPropertyName]!);
+
+          _devToolsUsage.analyticsEnabled = analyticsEnabled;
+          analytics.setTelemetry(analyticsEnabled);
         }
         return api.setCompleted(
           json.encode(_devToolsUsage.analyticsEnabled),
         );
+      case apiGetConsentMessage:
+        return api.getCompleted(analytics.getConsentMessage);
+      case apiSetConsentMessageAsShown:
+        analytics.clientShowedMessage();
+        return api.setCompleted(json.encode(true));
 
       // ----- DevTools survey store. -----
 
