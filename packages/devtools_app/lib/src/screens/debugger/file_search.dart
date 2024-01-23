@@ -396,7 +396,7 @@ class FileSearchResults {
       return copyWith();
     }
 
-    final topMatches = [];
+    final topMatches = <List<ScriptRef>>[];
     int matchesLeft = numOfMatchesToShow;
     for (final matches in [
       _exactFileNameMatches,

@@ -40,7 +40,7 @@ class DevtoolsManager {
       waitForConnection
           ? tabInstance.onEvent
               .firstWhere((msg) => msg.event == 'app.devToolsReady')
-          : Future.value(),
+          : Future<void>.value(),
       tabInstance.getBrowserChannel(),
     ]);
   }

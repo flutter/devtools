@@ -246,7 +246,7 @@ void main() {
           'isRedirect': false,
           'persistentConnection': true,
           'reasonPhrase': 'OK',
-          'redirects': [],
+          'redirects': <Object?>[],
           'statusCode': 200,
         }),
         isTrue,
@@ -273,7 +273,7 @@ void main() {
           'isRedirect': false,
           'persistentConnection': true,
           'reasonPhrase': 'Created',
-          'redirects': [],
+          'redirects': <Object?>[],
           'statusCode': 201,
         }),
         isTrue,
@@ -293,7 +293,7 @@ void main() {
           'isRedirect': false,
           'persistentConnection': true,
           'reasonPhrase': 'OK',
-          'redirects': [],
+          'redirects': <Object?>[],
           'statusCode': 200,
         }),
         isTrue,
@@ -312,7 +312,7 @@ void main() {
           'isRedirect': false,
           'persistentConnection': true,
           'reasonPhrase': 'OK',
-          'redirects': [],
+          'redirects': <Object?>[],
           'statusCode': 200,
         }),
         isTrue,
@@ -332,7 +332,7 @@ void main() {
           'isRedirect': false,
           'persistentConnection': true,
           'reasonPhrase': 'Switching Protocols',
-          'redirects': [],
+          'redirects': <Object?>[],
           'statusCode': 101,
         }),
         isTrue,
@@ -358,19 +358,19 @@ void main() {
       expect(httpGetWithError.requestHeaders, isNull);
       expect(
         collectionEquals(httpPost.requestHeaders, {
-          'transfer-encoding': [],
+          'transfer-encoding': <Object?>[],
         }),
         isTrue,
       );
       expect(
         collectionEquals(httpPut.requestHeaders, {
-          'transfer-encoding': [],
+          'transfer-encoding': <Object?>[],
         }),
         isTrue,
       );
       expect(
         collectionEquals(httpPatch.requestHeaders, {
-          'transfer-encoding': [],
+          'transfer-encoding': <Object?>[],
         }),
         isTrue,
       );

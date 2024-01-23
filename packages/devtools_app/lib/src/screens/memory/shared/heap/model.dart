@@ -91,7 +91,7 @@ class ClassOnlyHeapPath {
     return data.join().trim();
   }
 
-  late final _listEquality = const ListEquality().equals;
+  late final _listEquality = const ListEquality<HeapClassName>().equals;
 
   @override
   bool operator ==(Object other) {

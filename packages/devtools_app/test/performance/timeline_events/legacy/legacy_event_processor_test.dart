@@ -135,7 +135,7 @@ void main() {
         'pid': 94955,
         'ts': 118039650802,
         'ph': 'B',
-        'args': {},
+        'args': <Object?, Object?>{},
       });
       final animatorBeginFrameEvent = testTraceEventWrapper({
         'name': 'Animator::BeginFrame',
@@ -144,7 +144,7 @@ void main() {
         'pid': 94955,
         'ts': 118039650802,
         'ph': 'B',
-        'args': {},
+        'args': <Object?, Object?>{},
       });
       traceEvents = [
         vsyncEvent,

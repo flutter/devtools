@@ -41,7 +41,7 @@ Future<T> _connectWithSse<T extends VmService>({
   );
   serviceCompleter.complete(service);
 
-  unawaited(stream.drain().catchError(onError));
+  unawaited(stream.drain<void>().catchError(onError));
   return serviceCompleter.future;
 }
 

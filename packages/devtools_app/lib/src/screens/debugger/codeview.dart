@@ -863,7 +863,7 @@ class Gutter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bpLineSet = Set.from(breakpoints.map((bp) => bp.line));
+    final bpLineSet = Set.of(breakpoints.map((bp) => bp.line));
     final theme = Theme.of(context);
     final coverageLines =
         sourceReport.coverageHitLines.union(sourceReport.coverageMissedLines);
