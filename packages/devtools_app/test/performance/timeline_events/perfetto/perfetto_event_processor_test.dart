@@ -158,7 +158,7 @@ final _frameIdentifierEvents = [
     'pid': 94955,
     'ts': 200,
     'ph': 'E',
-    'args': <Object?, Object?>{},
+    'args': <String, Object?>{},
   }),
   testTraceEventWrapper({
     'name': 'Animator::BeginFrame',
@@ -176,7 +176,7 @@ final _frameIdentifierEvents = [
     'pid': 94955,
     'ts': 400,
     'ph': 'E',
-    'args': <Object?, Object?>{},
+    'args': <String, Object?>{},
   }),
   testTraceEventWrapper({
     'name': 'Animator::BeginFrame',
@@ -194,7 +194,7 @@ final _frameIdentifierEvents = [
     'pid': 94955,
     'ts': 600,
     'ph': 'E',
-    'args': <Object?, Object?>{},
+    'args': <String, Object?>{},
   }),
   testTraceEventWrapper({
     'name': 'GPURasterizer::Draw',
@@ -215,7 +215,7 @@ final _frameIdentifierEvents = [
     'pid': 94955,
     'ts': 250,
     'ph': 'E',
-    'args': <Object?, Object?>{},
+    'args': <String, Object?>{},
   }),
   testTraceEventWrapper({
     'name': 'GPURasterizer::Draw',
@@ -236,7 +236,7 @@ final _frameIdentifierEvents = [
     'pid': 94955,
     'ts': 450,
     'ph': 'E',
-    'args': <Object?, Object?>{},
+    'args': <String, Object?>{},
   }),
   testTraceEventWrapper({
     'name': 'GPURasterizer::Draw',
@@ -257,6 +257,6 @@ final _frameIdentifierEvents = [
     'pid': 94955,
     'ts': 650,
     'ph': 'E',
-    'args': <Object?, Object?>{},
+    'args': <String, Object?>{},
   }),
 ];
