@@ -5,7 +5,7 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../../devtools_app.dart';
+import '../../shared/common_widgets.dart';
 import 'cpu_profiler_controller.dart';
 
 class CpuProfilerDisabled extends StatelessWidget {
