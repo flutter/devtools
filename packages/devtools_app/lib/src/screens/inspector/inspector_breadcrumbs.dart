@@ -5,10 +5,10 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
+import '../../shared/common_widgets.dart';
 import '../../shared/console/eval/inspector_tree.dart';
 import '../../shared/diagnostics_text_styles.dart';
 import '../../shared/primitives/utils.dart';
-import '../../shared/utils.dart';
 
 class InspectorBreadcrumbNavigator extends StatelessWidget {
   const InspectorBreadcrumbNavigator({
@@ -33,7 +33,7 @@ class InspectorBreadcrumbNavigator extends StatelessWidget {
 
     final breadcrumbs = _generateBreadcrumbs(items);
     return SizedBox(
-      height: isDense() ? 24 : 28,
+      height: Breadcrumb.height,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 6),
         child: Row(
