@@ -77,7 +77,7 @@ class DevToolsTab extends Tab {
 /// When using this widget, ensure that the [AnalyticsTabbedView] is not being
 /// rebuilt unnecessarily, as each call to [initState] and [didUpdateWidget]
 /// will send an event to analytics for the default selected tab.
-class AnalyticsTabbedView<T> extends StatefulWidget {
+class AnalyticsTabbedView extends StatefulWidget {
   AnalyticsTabbedView({
     Key? key,
     required this.tabs,
