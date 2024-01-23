@@ -786,10 +786,10 @@ mixin SearchableMixin<T> {
 }
 
 /// Callback when item in the drop-down list is selected.
-typedef SelectAutoComplete = Function(String selection);
+typedef SelectAutoComplete = void Function(String selection);
 
 /// Callback to handle highlighting item in the drop-down list.
-typedef HighlightAutoComplete = Function(
+typedef HighlightAutoComplete = void Function(
   AutoCompleteSearchControllerMixin controller,
   bool directionDown,
 );

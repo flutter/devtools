@@ -665,7 +665,7 @@ abstract class ScaffoldAction extends StatelessWidget {
 
   final String tooltip;
 
-  final Function(BuildContext) onPressed;
+  final void Function(BuildContext) onPressed;
 
   final Color? color;
 
@@ -845,8 +845,8 @@ class DevToolsClearableTextField extends StatelessWidget {
   final Widget? prefixIcon;
   final List<Widget> additionalSuffixActions;
   final String labelText;
-  final Function(String)? onChanged;
-  final Function(String)? onSubmitted;
+  final void Function(String)? onChanged;
+  final void Function(String)? onSubmitted;
   final bool autofocus;
 
   static const _contentVerticalPadding = 6.0;

@@ -171,7 +171,7 @@ class _TracingTreeHeader extends StatelessWidget {
   }) : super(key: key);
 
   final TracingPaneController controller;
-  final Function(VoidCallback) updateTreeStateCallback;
+  final void Function(VoidCallback) updateTreeStateCallback;
   final TabController tabController;
   final List<DevToolsTab> tabs;
 

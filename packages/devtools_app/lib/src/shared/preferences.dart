@@ -223,7 +223,7 @@ class InspectorPreferencesController extends DisposableController
             // the directories
             unawaited(preferences.inspector.loadPubRootDirectories());
           } else {
-            late Function() pausedListener;
+            late void Function() pausedListener;
 
             pausedListener = () {
               if (debuggerState?.isPaused.value == false) {

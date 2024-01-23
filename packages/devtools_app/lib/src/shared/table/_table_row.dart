@@ -253,7 +253,7 @@ class _TableRowState<T> extends State<TableRow<T>>
     final node = widget.node;
     final widgetOnPressed = widget.onPressed;
 
-    Function()? onPressed;
+    void Function()? onPressed;
     if (node != null && widgetOnPressed != null) {
       onPressed = () => widgetOnPressed(node);
     }
