@@ -45,7 +45,7 @@ class DartToolingApiImpl implements DartToolingApi {
     if (_enablePostMessageVerboseLogging) {
       setDevToolsLoggingLevel(verboseLoggingLevel);
     }
-    final postMessageController = StreamController();
+    final postMessageController = StreamController<Object?>();
     postMessageController.stream.listen((message) {
       // TODO(dantup): Using fine here doesn't work even though the
       // `setDevToolsLoggingLevel` call above seems like it should show finest

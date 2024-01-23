@@ -124,7 +124,7 @@ void main() {
     });
 
     test('starts empty', () {
-      expect(evalHistory.evalHistory, []);
+      expect(evalHistory.evalHistory, <Object?>[]);
       expect(evalHistory.currentText, null);
       expect(evalHistory.canNavigateDown, false);
       expect(evalHistory.canNavigateUp, false);

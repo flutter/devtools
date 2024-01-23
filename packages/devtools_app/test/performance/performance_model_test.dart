@@ -47,12 +47,12 @@ void main() {
         performanceData.toJson(),
         equals({
           PerformanceData.selectedFrameIdKey: null,
-          PerformanceData.flutterFramesKey: [],
+          PerformanceData.flutterFramesKey: <Object?>[],
           PerformanceData.displayRefreshRateKey: 60,
-          PerformanceData.traceEventsKey: [],
-          PerformanceData.selectedEventKey: {},
-          PerformanceData.cpuProfileKey: {},
-          PerformanceData.rasterStatsKey: {},
+          PerformanceData.traceEventsKey: <Object?>[],
+          PerformanceData.selectedEventKey: <Object?, Object?>{},
+          PerformanceData.cpuProfileKey: <Object?, Object?>{},
+          PerformanceData.rasterStatsKey: <Object?, Object?>{},
           PerformanceData.rebuildCountModelKey: null,
         }),
       );
