@@ -78,29 +78,28 @@ class ProfileRecordingInstructions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const stopRow = Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text('Click the stop button '),
-        Icon(Icons.stop),
-        Text(' to end the recording.'),
-      ],
-    );
     return DefaultTextStyle(
       style: Theme.of(context).regularTextStyle,
-      child: const Center(
+      child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Click the record button '),
-                Icon(Icons.fiber_manual_record),
-                Text(' to start recording CPU samples.'),
+                const Text('Click the record button '),
+                Icon(Icons.fiber_manual_record, size: defaultIconSize),
+                const Text(' to start recording CPU samples.'),
               ],
             ),
-            stopRow,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text('Click the stop button '),
+                Icon(Icons.stop, size: defaultIconSize),
+                const Text(' to end the recording.'),
+              ],
+            ),
           ],
         ),
       ),
