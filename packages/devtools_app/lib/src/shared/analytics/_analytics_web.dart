@@ -795,6 +795,10 @@ Future<bool> disableAnalytics() async {
   return await setAnalyticsEnabled(false);
 }
 
+Future<String?> getConsentMessage() async {
+  return await server.getConsentMessage();
+}
+
 /// Computes the DevTools application. Fills in the devtoolsPlatformType and
 /// devtoolsChrome.
 void computeDevToolsCustomGTagsData() {

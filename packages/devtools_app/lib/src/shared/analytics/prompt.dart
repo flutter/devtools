@@ -5,10 +5,8 @@
 import 'dart:async';
 
 import 'package:devtools_app_shared/ui.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-import '../config_specific/launch_url/launch_url.dart';
 import '../utils.dart';
 import 'analytics_controller.dart';
 
@@ -35,13 +33,16 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
+
     return ValueListenableBuilder<bool>(
       valueListenable: controller.shouldPrompt,
       builder: (context, showPrompt, child) {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (showPrompt) child!,
+            // TODO: remove this before merging in; used to demo new functionality
+            // if (showPrompt) child!,
+            if (true) child!,
             Expanded(child: widget.child),
           ],
         );
@@ -89,34 +90,9 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt>
   }
 
   Widget _analyticsDescription(TextTheme textTheme) {
-    return RichText(
-      text: TextSpan(
-        children: [
-          TextSpan(
-            text: 'DevTools reports feature usage statistics and basic '
-                'crash reports to Google in order to help Google improve '
-                'the tool over time. See Google\'s ',
-            style: textTheme.titleMedium,
-          ),
-          TextSpan(
-            text: 'privacy policy',
-            style:
-                textTheme.titleMedium?.copyWith(color: const Color(0xFF54C1EF)),
-            recognizer: TapGestureRecognizer()
-              ..onTap = () {
-                unawaited(
-                  launchUrl(
-                    'https://www.google.com/intl/en/policies/privacy',
-                  ),
-                );
-              },
-          ),
-          TextSpan(
-            text: '.',
-            style: textTheme.titleMedium,
-          ),
-        ],
-      ),
+    return SelectableText(
+      controller.getConsentMessage()!,
+      style: textTheme.titleMedium,
     );
   }
 

@@ -21,6 +21,7 @@ class AnalyticsController {
     this.onEnableAnalytics,
     this.onDisableAnalytics,
     this.onSetupAnalytics,
+    this.consentMessage,
   })  : analyticsEnabled = ValueNotifier<bool>(enabled),
         _shouldPrompt = ValueNotifier<bool>(firstRun && !enabled) {
     if (_shouldPrompt.value) {
@@ -45,6 +46,8 @@ class AnalyticsController {
 
   final VoidCallback? onSetupAnalytics;
 
+  final String? consentMessage;
+
   Future<void> toggleAnalyticsEnabled(bool? enable) async {
     if (enable == true) {
       analyticsEnabled.value = true;
@@ -62,6 +65,11 @@ class AnalyticsController {
       }
     }
   }
+
+  /// Returns the consent message for package:unified_analytics from
+  /// the server. After showing message, the [consentMessageShown] method
+  /// should be called to onboard the user to analytics collection.
+  String? getConsentMessage() => consentMessage;
 
   void setUpAnalytics() {
     if (_analyticsInitialized) return;

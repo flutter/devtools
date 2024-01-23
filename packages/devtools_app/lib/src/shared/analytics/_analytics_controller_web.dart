@@ -33,6 +33,7 @@ Future<AnalyticsController> get devToolsAnalyticsController async {
         ga.initializeGA();
         ga.jsHookupListenerForGA();
       },
+      consentMessage: await ga.getConsentMessage(),
     ),
   );
   return _controllerCompleter!.future;
