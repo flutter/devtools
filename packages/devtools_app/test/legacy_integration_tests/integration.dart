@@ -385,7 +385,7 @@ class WebBuildFixture {
       }),
     );
 
-    await buildFinished.future.catchError((e) {
+    await buildFinished.future.catchError((Object? e) {
       fail('Build failed: $e');
     });
 

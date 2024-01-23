@@ -87,9 +87,9 @@ Future<T> connect<T extends VmService>({
 }) {
   final connectedCompleter = Completer<T>();
 
-  void onError(error) {
+  void onError(Object? error) {
     if (!connectedCompleter.isCompleted) {
-      connectedCompleter.completeError(error);
+      connectedCompleter.completeError(error!);
     }
   }
 
