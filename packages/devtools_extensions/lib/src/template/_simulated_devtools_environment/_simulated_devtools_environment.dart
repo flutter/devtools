@@ -49,6 +49,8 @@ class SimulatedDevToolsWrapperState extends State<SimulatedDevToolsWrapper>
     with AutoDisposeMixin {
   late final SimulatedDevToolsController simController;
 
+  late final ScrollController scrollController;
+
   late ConnectedState connectionState;
 
   bool get connected => connectionState.connected;
@@ -57,6 +59,8 @@ class SimulatedDevToolsWrapperState extends State<SimulatedDevToolsWrapper>
   void initState() {
     super.initState();
     simController = SimulatedDevToolsController()..init();
+
+    scrollController = ScrollController();
 
     connectionState = serviceManager.connectedState.value;
     addAutoDisposeListener(serviceManager.connectedState, () {
@@ -69,6 +73,7 @@ class SimulatedDevToolsWrapperState extends State<SimulatedDevToolsWrapper>
   @override
   void dispose() {
     simController.dispose();
+    scrollController.dispose();
     super.dispose();
   }
 
@@ -108,10 +113,69 @@ class SimulatedDevToolsWrapperState extends State<SimulatedDevToolsWrapper>
                   availableEnvironmentPanelWidth,
                 );
 
+                return Scrollbar(
+                  controller: scrollController,
+                  thumbVisibility: true,
+                  child: SingleChildScrollView(
+                    controller: scrollController,
+                    scrollDirection: Axis.horizontal,
+                    child: SizedBox(
+                      width: environmentPanelWidth,
+                      child: OutlineDecoration.onlyLeft(
+                        child: Padding(
+                          padding: const EdgeInsets.all(defaultSpacing),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Simulated DevTools Environment',
+                                style: theme.textTheme.titleMedium,
+                              ),
+                              const PaddedDivider(),
                               VmServiceConnection(
                                 connected: connected,
                                 simController: simController,
                               ),
+                              const SizedBox(height: denseSpacing),
+                              _SimulatedApi(
+                                simController: simController,
+                                requiresRunningApplication:
+                                    widget.requiresRunningApplication,
+                                connectedToApplication: connected,
+                              ),
+                              const PaddedDivider(),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          'Logs:',
+                                          style: theme.textTheme.titleMedium,
+                                        ),
+                                        DevToolsButton.iconOnly(
+                                          icon: Icons.clear,
+                                          outlined: false,
+                                          tooltip: 'Clear logs',
+                                          onPressed: () =>
+                                              simController.messageLogs.clear(),
+                                        ),
+                                      ],
+                                    ),
+                                    const PaddedDivider.thin(),
+                                    Expanded(
+                                      child: _LogMessages(
+                                        simController: simController,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
