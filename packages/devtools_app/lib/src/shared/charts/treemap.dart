@@ -831,13 +831,12 @@ class PositionedCell extends Positioned {
     super.key,
     required this.rect,
     required this.node,
-    required child,
+    required super.child,
   }) : super(
           left: rect.left,
           top: rect.top,
           width: rect.width,
           height: rect.height,
-          child: child,
         );
 
   final Rect rect;

@@ -10,7 +10,7 @@ import '../../service/vm_service_wrapper.dart';
 import '../primitives/trees.dart';
 
 class DapObjectNode extends TreeNode<DapObjectNode> {
-  DapObjectNode({required this.variable, required service})
+  DapObjectNode({required this.variable, required VmServiceWrapper service})
       : _service = service;
 
   final dap.Variable variable;

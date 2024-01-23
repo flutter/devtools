@@ -192,7 +192,8 @@ class _FieldDartHeapSizeColumn extends _FieldSizeColumn {
 }
 
 class _FieldSizeColumn extends ColumnData<ProfileRecord> {
-  factory _FieldSizeColumn({required heap}) => _FieldSizeColumn._(
+  factory _FieldSizeColumn({required HeapGeneration heap}) =>
+      _FieldSizeColumn._(
         title: 'Total Size',
         titleTooltip: "The sum of the type's total shallow memory "
             'consumption in the Dart heap and associated external (e.g., '
