@@ -81,7 +81,7 @@ class ServerApi {
       case apiGetDevToolsFirstRun:
         // Has DevTools been run first time? To bring up analytics dialog.
         final isFirstRun =
-            _devToolsUsage.isFirstRun && analytics.shouldShowMessage;
+            _devToolsUsage.isFirstRun || analytics.shouldShowMessage;
         return api.getCompleted(
           json.encode(isFirstRun),
         );

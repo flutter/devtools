@@ -34,6 +34,9 @@ Future<AnalyticsController> get devToolsAnalyticsController async {
         ga.jsHookupListenerForGA();
       },
       consentMessage: await ga.getConsentMessage(),
+      confirmConsentMessageShown: () {
+        ga.confirmConsentMessageShown();
+      },
     ),
   );
   return _controllerCompleter!.future;

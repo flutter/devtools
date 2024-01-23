@@ -40,9 +40,7 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt>
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // TODO: remove this before merging in; used to demo new functionality
-            // if (showPrompt) child!,
-            if (true) child!,
+            if (showPrompt && controller.consentMessage != null) child!,
             Expanded(child: widget.child),
           ],
         );
@@ -91,7 +89,7 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt>
 
   Widget _analyticsDescription(TextTheme textTheme) {
     return SelectableText(
-      controller.getConsentMessage()!,
+      controller.consentMessage!,
       style: textTheme.titleMedium,
     );
   }
@@ -104,6 +102,7 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt>
           onPressed: () {
             // This will also hide the prompt.
             unawaited(controller.toggleAnalyticsEnabled(false));
+            unawaited(controller.confirmConsentMessageShown());
           },
           style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
           child: const Text('No thanks.'),
@@ -114,6 +113,7 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt>
         ElevatedButton(
           onPressed: () {
             unawaited(controller.toggleAnalyticsEnabled(true));
+            unawaited(controller.confirmConsentMessageShown());
             controller.hidePrompt();
           },
           child: const Text('Sounds good!'),

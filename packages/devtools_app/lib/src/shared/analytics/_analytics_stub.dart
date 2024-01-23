@@ -34,6 +34,8 @@ Future<void> disableAnalytics() async {}
 
 Future<String> getConsentMessage() async => 'stubbed consent message';
 
+Future<void> confirmConsentMessageShown() async {}
+
 void screen(
   String screenName, [
   int value = 0,

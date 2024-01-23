@@ -799,6 +799,10 @@ Future<String?> getConsentMessage() async {
   return await server.getConsentMessage();
 }
 
+Future<bool> confirmConsentMessageShown() async {
+  return await server.confirmConsentMessageShown();
+}
+
 /// Computes the DevTools application. Fills in the devtoolsPlatformType and
 /// devtoolsChrome.
 void computeDevToolsCustomGTagsData() {
