@@ -968,15 +968,10 @@ extension CpuSamplesPrivateView on CpuSamples {
   }
 
   List<ProfileCode> get codes {
-    var codesFromExpando = _expando[this];
-    if (codesFromExpando == null) {
-      codesFromExpando = json![_kCodesKey]
-          .cast<Map<String, dynamic>>()
-          .map<ProfileCode>((e) => ProfileCode.parse(e)!)
-          .toList();
-      _expando[this] = codesFromExpando;
-    }
-    return codesFromExpando!;
+    return _expando[this] ??= (json![_kCodesKey] as List)
+        .cast<Map<String, dynamic>>()
+        .map<ProfileCode>((e) => ProfileCode.parse(e)!)
+        .toList();
   }
 }
 
