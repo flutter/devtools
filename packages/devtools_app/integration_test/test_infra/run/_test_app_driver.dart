@@ -360,7 +360,7 @@ abstract class IntegrationTestApp with IOMixin {
         logMessage('<timed out>');
         throw '$message';
       },
-    ).catchError((error) {
+    ).catchError((Object? error) {
       throw '$error\nReceived:\n${messages.toString()}';
     }).whenComplete(() => sub.cancel());
   }
