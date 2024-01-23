@@ -128,13 +128,13 @@ class ServeCommand extends Command {
 
     if (buildApp) {
       final process = await processManager.runProcess(
-        CliCommand.tool(
-          'build'
-          ' ${BuildCommandArgs.updateFlutter.asArg(negated: !updateFlutter)}'
-          '${updatePerfetto ? ' ${BuildCommandArgs.updatePerfetto.asArg()}' : ''}'
-          ' ${BuildCommandArgs.buildMode.asArg()}=$devToolsAppBuildMode'
-          ' ${BuildCommandArgs.pubGet.asArg(negated: !runPubGet)}',
-        ),
+        CliCommand.tool([
+          'build',
+          BuildCommandArgs.updateFlutter.asArg(negated: !updateFlutter),
+          if (updatePerfetto) BuildCommandArgs.updatePerfetto.asArg(),
+          '${BuildCommandArgs.buildMode.asArg()}=$devToolsAppBuildMode',
+          BuildCommandArgs.pubGet.asArg(negated: !runPubGet),
+        ]),
       );
       if (process.exitCode == 1) {
         throw Exception(
@@ -146,7 +146,7 @@ class ServeCommand extends Command {
 
     logStatus('running pub get for DDS in the local dart sdk');
     await processManager.runProcess(
-      CliCommand.dart('pub get'),
+      CliCommand.dart('pub get'.split(' ')),
       workingDirectory: path.join(localDartSdkLocation, 'pkg', 'dds'),
     );
 
@@ -169,7 +169,7 @@ class ServeCommand extends Command {
           // to pass `--machine` (etc.) so that this script can behave the same as
           // the "dart devtools" command for testing local DevTools/server changes.
           ...remainingArguments,
-        ].join(' '),
+        ],
       ),
       workingDirectory: localDartSdkLocation,
     );

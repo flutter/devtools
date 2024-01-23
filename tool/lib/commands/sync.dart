@@ -19,10 +19,10 @@ class SyncCommand extends Command {
   Future run() async {
     final processManager = ProcessManager();
     await processManager.runProcess(
-      CliCommand.git(cmd: 'pull upstream master'),
+      CliCommand.git('pull upstream master'.split(' ')),
     );
     await processManager.runProcess(
-      CliCommand.tool('generate-code --upgrade'),
+      CliCommand.tool('generate-code --upgrade'.split(' ')),
     );
   }
 }

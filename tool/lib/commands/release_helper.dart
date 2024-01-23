@@ -31,7 +31,7 @@ class ReleaseHelperCommand extends Command {
 
     final useCurrentBranch = argResults!['use-current-branch']!;
     final currentBranchResult = await processManager.runProcess(
-      CliCommand.git(cmd: 'rev-parse --abbrev-ref HEAD'),
+      CliCommand.git('rev-parse --abbrev-ref HEAD'.split(' ')),
     );
     final initialBranch = currentBranchResult.stdout.trim();
     String? releaseBranch;
@@ -44,7 +44,7 @@ class ReleaseHelperCommand extends Command {
       );
 
       final gitStatusResult = await processManager.runProcess(
-        CliCommand.git(cmd: 'status -s'),
+        CliCommand.git('status -s'.split(' ')),
       );
       final gitStatus = gitStatusResult.stdout;
       if (gitStatus.isNotEmpty) {
@@ -57,30 +57,35 @@ class ReleaseHelperCommand extends Command {
       if (!useCurrentBranch) {
         print("Preparing the release branch.");
         await processManager.runProcess(
-          CliCommand.git(cmd: 'fetch $remoteUpstream master'),
+          CliCommand.git('fetch $remoteUpstream master'.split(' ')),
         );
       }
 
       await processManager.runProcess(
         CliCommand.git(
-          cmd: 'checkout -b $releaseBranch'
-              '${useCurrentBranch ? '' : ' $remoteUpstream/master'}',
+          [
+            'checkout',
+            '-b',
+            releaseBranch,
+            if (useCurrentBranch) 'remoteUpstream/master',
+          ],
         ),
       );
 
       print("Ensuring ./tool packages are ready.");
       Directory.current = pathFromRepoRoot("tool");
       await processManager.runProcess(
-        CliCommand.dart('pub get'),
+        CliCommand.dart('pub get'.split(' ')),
         workingDirectory: pathFromRepoRoot("tool"),
       );
 
       print("Setting the release version.");
-      await processManager
-          .runProcess(CliCommand.tool('update-version auto --type release'));
+      await processManager.runProcess(
+        CliCommand.tool('update-version auto --type release'.split(' ')),
+      );
 
       final getNewVersionResult = await processManager.runProcess(
-        CliCommand.tool('update-version current-version'),
+        CliCommand.tool('update-version current-version'.split(' ')),
       );
 
       final newVersion = getNewVersionResult.stdout.trim();
@@ -89,23 +94,26 @@ class ReleaseHelperCommand extends Command {
 
       await processManager.runAll(
         commands: [
-          CliCommand.git(args: ['commit', '-a', '-m', commitMessage]),
-          CliCommand.git(cmd: 'push -u $remoteUpstream $releaseBranch'),
+          CliCommand.git(['commit', '-a', '-m', commitMessage]),
+          CliCommand.git(['push', '-u', remoteUpstream, releaseBranch]),
         ],
       );
 
       print('Creating the PR.');
       final prURL = await processManager.runProcess(
-        CliCommand.from('gh', [
-          'pr',
-          'create',
-          '--repo',
-          'flutter/devtools',
-          '--draft',
-          '--title',
-          commitMessage,
-          '--fill',
-        ]),
+        CliCommand(
+          'gh',
+          [
+            'pr',
+            'create',
+            '--repo',
+            'flutter/devtools',
+            '--draft',
+            '--title',
+            commitMessage,
+            '--fill',
+          ],
+        ),
       );
 
       print('Your Draft release PR can be found at: ${prURL.stdout.trim()}');
@@ -118,7 +126,7 @@ class ReleaseHelperCommand extends Command {
 
       // try to bring the caller back to their original branch
       await processManager.runProcess(
-        CliCommand.git(cmd: 'checkout $initialBranch'),
+        CliCommand.git(['checkout', initialBranch]),
       );
 
       // try to clean up the temporary branch we made

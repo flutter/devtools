@@ -76,8 +76,8 @@ class UpdatePerfettoCommand extends Command {
           Directory.systemTemp.createTempSync('perfetto_clone');
       await processManager.runProcess(
         CliCommand.git(
-          cmd:
-              'clone https://android.googlesource.com/platform/external/perfetto',
+          'clone https://android.googlesource.com/platform/external/perfetto'
+              .split(' '),
         ),
         workingDirectory: tempPerfettoClone.path,
       );
@@ -85,8 +85,8 @@ class UpdatePerfettoCommand extends Command {
       logStatus('installing build deps and building the Perfetto UI');
       await processManager.runAll(
         commands: [
-          CliCommand('${path.join('tools', 'install-build-deps')} --ui'),
-          CliCommand(path.join('ui', 'build')),
+          CliCommand(path.join('tools', 'install-build-deps'), ['--ui']),
+          CliCommand(path.join('ui', 'build'), []),
         ],
         workingDirectory: path.join(tempPerfettoClone.path, 'perfetto'),
       );

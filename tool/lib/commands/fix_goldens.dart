@@ -41,7 +41,7 @@ class FixGoldensCommand extends Command {
     try {
       print('Downloading the artifacts to ${tmpDownloadDir.path}');
       await processManager.runProcess(
-        CliCommand.from(
+        CliCommand(
           'gh',
           [
             'run',

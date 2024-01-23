@@ -22,9 +22,9 @@ abstract class DartSdkHelper {
       workingDirectory: dartSdkLocation,
       additionalErrorMessage: commandDebugMessage,
       commands: [
-        CliCommand.git(cmd: 'fetch origin'),
-        CliCommand.git(cmd: 'rebase-update'),
-        CliCommand.git(cmd: 'checkout origin/main'),
+        CliCommand.git('fetch origin'.split(' ')),
+        CliCommand.git('rebase-update'.split(' ')),
+        CliCommand.git('checkout origin/main'.split(' ')),
       ],
     );
   }
@@ -54,66 +54,41 @@ class CliCommand {
   }
 
   CliCommand(
-    String command, {
+    this.exe,
+    // Args is mandatory to make it clearer to the caller that they should
+    // not be passing a full exe+args into the first string argument, because
+    // this can lead to bugs if paths have spaces and everything is not escaped.
+    this.args, {
     this.throwOnException = true,
-  })  : exe = command.split(' ').first,
-        args = command.split(' ').sublist(1);
+  });
 
-  factory CliCommand.from(
-    String exe,
+  factory CliCommand.flutter(
     List<String> args, {
     bool throwOnException = true,
   }) {
     return CliCommand._(
-      exe: exe,
+      exe: FlutterSdk.current.flutterExePath,
       args: args,
       throwOnException: throwOnException,
     );
   }
 
-  factory CliCommand.flutter(
-    String args, {
-    bool throwOnException = true,
-  }) {
-    return CliCommand._(
-      exe: FlutterSdk.current.flutterExePath,
-      args: args.split(' '),
-      throwOnException: throwOnException,
-    );
-  }
-
   factory CliCommand.dart(
-    String args, {
+    List<String> args, {
     bool throwOnException = true,
   }) {
     return CliCommand._(
       exe: FlutterSdk.current.dartExePath,
-      args: args.split(' '),
+      args: args,
       throwOnException: throwOnException,
     );
   }
 
   /// CliCommand helper for running git commands.
-  ///
-  /// Arguments can be passed in as a single string using [cmd], this will split
-  /// the string into args using spaces. e.g. CliCommand.git(cmd: 'checkout test-branch')
-  ///
-  /// If you instead want to specify args explicitly, you can use the
-  /// [args] param. e.g. CliCommand.git(args: ['checkout', 'test-branch'])
-  factory CliCommand.git({
-    String? cmd,
-    List<String>? args,
+  factory CliCommand.git(
+    List<String> args, {
     bool throwOnException = true,
-    bool split = true,
   }) {
-    if ((cmd == null) == (args == null)) {
-      throw ('Only one of `cmd` and `args` must be specified.');
-    }
-
-    if (cmd != null) {
-      args = cmd.split(' ');
-    }
-
     return CliCommand._(
       exe: 'git',
       args: args,
@@ -122,7 +97,7 @@ class CliCommand {
   }
 
   factory CliCommand.tool(
-    String args, {
+    List<String> args, {
     bool throwOnException = true,
   }) {
     return CliCommand._(
@@ -134,7 +109,7 @@ class CliCommand {
       exe: FlutterSdk.current.dartExePath,
       args: [
         Platform.script.toFilePath(),
-        ...args.split(' '),
+        ...args,
       ],
       throwOnException: throwOnException,
     );
@@ -219,7 +194,7 @@ Future<String> findRemote(
 }) async {
   print('Searching for a remote that points to $remoteId.');
   final remotesResult = await processManager.runProcess(
-    CliCommand.git(cmd: 'remote -v'),
+    CliCommand.git('remote -v'.split(' ')),
     workingDirectory: workingDirectory,
   );
   final String remotes = remotesResult.stdout;

@@ -38,7 +38,7 @@ class AnalyzeCommand extends Command {
 
       final process = await processManager.runProcess(
         CliCommand.dart(
-          'analyze --fatal-infos',
+          'analyze --fatal-infos'.split(' '),
           // Run all so we can see the full set of results instead of stopping
           // on the first error.
           throwOnException: false,
