@@ -203,20 +203,25 @@ Future<void> _testCollapseEnvironmentPanel(
   final divider = find.byKey(split.dividerKey(0));
   final environmentPanel = split.children[1];
 
-  final RenderBox environmentPanelRenderBox =
-      tester.renderObject(find.byWidget(environmentPanel));
-  final double environmentPanelRenderBoxWidth =
-      environmentPanelRenderBox.size.width;
+  final environmentPanelSizedBox = find.descendant(
+    of: find.byWidget(environmentPanel),
+    matching: find.byType(SizedBox),
+  );
 
-  // The full width of the [environmentPanel] plus the left and right padding.
-  final double dragDistance =
-      environmentPanelRenderBoxWidth + (2 * defaultSpacing);
+  final double environmentPanelSizedBoxWidth =
+      tester.firstWidget<SizedBox>(environmentPanelSizedBox).width!;
 
-  // Drag the divider to the right by the [dragDistance].
+  // Check that the [environmentPanelSizedBoxWidth] is the expected width.
+  expect(
+    environmentPanelSizedBoxWidth,
+    VmServiceConnection.totalControlsWidth + 2 * defaultSpacing,
+  );
+
+  // Drag the divider to the right by [environmentPanelSizedBoxWidth].
   await tester.drag(
     divider,
     Offset(
-      dragDistance,
+      environmentPanelSizedBoxWidth,
       0,
     ),
   );
@@ -234,13 +239,13 @@ Future<void> _testCollapseEnvironmentPanel(
   // not overlap it.
   expect(simulatedDevToolsWrapperOverlapsEnvironmentPanel, isFalse);
 
-  // Drag the divider to the left by the [dragDistance].
+  // Drag the divider to the left by [environmentPanelSizedBoxWidth].
   //
   // This is to bring the 'Clear logs' button into view so it can be tapped.
   await tester.drag(
     divider,
     Offset(
-      -dragDistance,
+      -environmentPanelSizedBoxWidth,
       0,
     ),
   );
