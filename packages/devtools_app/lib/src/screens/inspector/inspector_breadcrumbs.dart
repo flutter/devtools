@@ -23,7 +23,7 @@ class InspectorBreadcrumbNavigator extends StatelessWidget {
   static const _maxNumberOfBreadcrumbs = 5;
 
   final List<InspectorTreeNode> items;
-  final Function(InspectorTreeNode?) onTap;
+  final void Function(InspectorTreeNode?) onTap;
 
   @override
   Widget build(BuildContext context) {

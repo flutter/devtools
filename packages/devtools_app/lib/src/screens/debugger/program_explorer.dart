@@ -299,8 +299,8 @@ class _FileExplorer extends StatefulWidget {
   });
 
   final ProgramExplorerController controller;
-  final Function(VMServiceObjectNode) onItemSelected;
-  final Function(VMServiceObjectNode) onItemExpanded;
+  final void Function(VMServiceObjectNode) onItemSelected;
+  final void Function(VMServiceObjectNode) onItemExpanded;
 
   @override
   State<_FileExplorer> createState() => _FileExplorerState();
@@ -378,8 +378,8 @@ class _ProgramOutlineView extends StatelessWidget {
   });
 
   final ProgramExplorerController controller;
-  final Function(VMServiceObjectNode) onItemSelected;
-  final Function(VMServiceObjectNode) onItemExpanded;
+  final void Function(VMServiceObjectNode) onItemSelected;
+  final void Function(VMServiceObjectNode) onItemExpanded;
 
   @override
   Widget build(BuildContext context) {

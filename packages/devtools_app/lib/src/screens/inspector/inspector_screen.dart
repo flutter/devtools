@@ -490,7 +490,7 @@ class ErrorNavigator extends StatelessWidget {
 
   final int? errorIndex;
 
-  final Function(int) onSelectError;
+  final void Function(int) onSelectError;
 
   @override
   Widget build(BuildContext context) {
