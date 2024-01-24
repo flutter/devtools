@@ -117,9 +117,9 @@ class UpdateFlutterSdkCommand extends Command {
       await processManager.runAll(
         commands: [
           CliCommand.git(['stash']),
-          CliCommand.git('fetch upstream'.split(' ')),
-          CliCommand.git('checkout upstream/master'.split(' ')),
-          CliCommand.git('reset --hard upstream/master'.split(' ')),
+          CliCommand.git(['fetch', 'upstream']),
+          CliCommand.git(['checkout', 'upstream/master']),
+          CliCommand.git(['reset', '--hard', 'upstream/master']),
           CliCommand.git(['checkout', flutterTag, '-f']),
           CliCommand.flutter(['--version']),
         ],

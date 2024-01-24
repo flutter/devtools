@@ -146,7 +146,7 @@ class ServeCommand extends Command {
 
     logStatus('running pub get for DDS in the local dart sdk');
     await processManager.runProcess(
-      CliCommand.dart('pub get'.split(' ')),
+      CliCommand.dart(['pub', 'get']),
       workingDirectory: path.join(localDartSdkLocation, 'pkg', 'dds'),
     );
 

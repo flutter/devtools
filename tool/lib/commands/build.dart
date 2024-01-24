@@ -85,7 +85,7 @@ class BuildCommand extends Command {
     logStatus('building DevTools in release mode');
     await processManager.runAll(
       commands: [
-        if (runPubGet) CliCommand.tool('pub-get --only-main'.split(' ')),
+        if (runPubGet) CliCommand.tool(['pub-get', '--only-main']),
         CliCommand.flutter(
           [
             'build',

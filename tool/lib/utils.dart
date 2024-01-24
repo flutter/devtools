@@ -22,9 +22,9 @@ abstract class DartSdkHelper {
       workingDirectory: dartSdkLocation,
       additionalErrorMessage: commandDebugMessage,
       commands: [
-        CliCommand.git('fetch origin'.split(' ')),
-        CliCommand.git('rebase-update'.split(' ')),
-        CliCommand.git('checkout origin/main'.split(' ')),
+        CliCommand.git(['fetch', 'origin']),
+        CliCommand.git(['rebase-update']),
+        CliCommand.git(['checkout', 'origin/main']),
       ],
     );
   }
@@ -41,18 +41,6 @@ String localDartSdkLocation() {
 }
 
 class CliCommand {
-  CliCommand._({
-    String? command,
-    String? exe,
-    List<String>? args,
-    this.throwOnException = true,
-  }) {
-    assert((command == null) != ((exe == null) && (args == null)));
-    final commandElements = command?.split(' ');
-    this.exe = exe ?? commandElements!.first;
-    this.args = args ?? commandElements!.sublist(1);
-  }
-
   CliCommand(
     this.exe,
     // Args is mandatory to make it clearer to the caller that they should
@@ -66,9 +54,9 @@ class CliCommand {
     List<String> args, {
     bool throwOnException = true,
   }) {
-    return CliCommand._(
-      exe: FlutterSdk.current.flutterExePath,
-      args: args,
+    return CliCommand(
+      FlutterSdk.current.flutterExePath,
+      args,
       throwOnException: throwOnException,
     );
   }
@@ -77,9 +65,9 @@ class CliCommand {
     List<String> args, {
     bool throwOnException = true,
   }) {
-    return CliCommand._(
-      exe: FlutterSdk.current.dartExePath,
-      args: args,
+    return CliCommand(
+      FlutterSdk.current.dartExePath,
+      args,
       throwOnException: throwOnException,
     );
   }
@@ -89,9 +77,9 @@ class CliCommand {
     List<String> args, {
     bool throwOnException = true,
   }) {
-    return CliCommand._(
-      exe: 'git',
-      args: args,
+    return CliCommand(
+      'git',
+      args,
       throwOnException: throwOnException,
     );
   }
@@ -100,14 +88,14 @@ class CliCommand {
     List<String> args, {
     bool throwOnException = true,
   }) {
-    return CliCommand._(
+    return CliCommand(
       // We must use the Dart VM from FlutterSdk.current here to ensure we
       // consistently use the selected version for child invocations. We do
       // not need to pass the --flutter-from-path flag down because using the
       // tool will automatically select the one that's running the VM and we'll
       // have selected that here.
-      exe: FlutterSdk.current.dartExePath,
-      args: [
+      FlutterSdk.current.dartExePath,
+      [
         Platform.script.toFilePath(),
         ...args,
       ],
@@ -194,7 +182,7 @@ Future<String> findRemote(
 }) async {
   print('Searching for a remote that points to $remoteId.');
   final remotesResult = await processManager.runProcess(
-    CliCommand.git('remote -v'.split(' ')),
+    CliCommand.git(['remote', '-v']),
     workingDirectory: workingDirectory,
   );
   final String remotes = remotesResult.stdout;

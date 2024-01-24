@@ -31,7 +31,7 @@ class ReleaseHelperCommand extends Command {
 
     final useCurrentBranch = argResults!['use-current-branch']!;
     final currentBranchResult = await processManager.runProcess(
-      CliCommand.git('rev-parse --abbrev-ref HEAD'.split(' ')),
+      CliCommand.git(['rev-parse', '--abbrev-ref', 'HEAD']),
     );
     final initialBranch = currentBranchResult.stdout.trim();
     String? releaseBranch;
@@ -44,7 +44,7 @@ class ReleaseHelperCommand extends Command {
       );
 
       final gitStatusResult = await processManager.runProcess(
-        CliCommand.git('status -s'.split(' ')),
+        CliCommand.git(['status', '-s']),
       );
       final gitStatus = gitStatusResult.stdout;
       if (gitStatus.isNotEmpty) {
@@ -57,7 +57,7 @@ class ReleaseHelperCommand extends Command {
       if (!useCurrentBranch) {
         print("Preparing the release branch.");
         await processManager.runProcess(
-          CliCommand.git('fetch $remoteUpstream master'.split(' ')),
+          CliCommand.git(['fetch', remoteUpstream, 'master']),
         );
       }
 
@@ -67,7 +67,7 @@ class ReleaseHelperCommand extends Command {
             'checkout',
             '-b',
             releaseBranch,
-            if (useCurrentBranch) 'remoteUpstream/master',
+            if (useCurrentBranch) '$remoteUpstream/master',
           ],
         ),
       );
@@ -75,17 +75,17 @@ class ReleaseHelperCommand extends Command {
       print("Ensuring ./tool packages are ready.");
       Directory.current = pathFromRepoRoot("tool");
       await processManager.runProcess(
-        CliCommand.dart('pub get'.split(' ')),
+        CliCommand.dart(['pub', 'get']),
         workingDirectory: pathFromRepoRoot("tool"),
       );
 
       print("Setting the release version.");
       await processManager.runProcess(
-        CliCommand.tool('update-version auto --type release'.split(' ')),
+        CliCommand.tool(['update-version', 'auto', '--type', 'release']),
       );
 
       final getNewVersionResult = await processManager.runProcess(
-        CliCommand.tool('update-version current-version'.split(' ')),
+        CliCommand.tool(['update-version', 'current-version']),
       );
 
       final newVersion = getNewVersionResult.stdout.trim();
