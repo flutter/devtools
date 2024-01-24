@@ -1,4 +1,4 @@
-## 0.0.9-wip
+## 0.0.9
 * Bump `package:web` to `^0.4.1`.
 * Densify overall UI.
 * Add public members: `PaddedDivider.noPadding`, `singleLineDialogTextFieldDecoration`, `extraLargeSpacing`, `regularTextStyleWithColor`.
