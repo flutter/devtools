@@ -232,12 +232,12 @@ Future<void> _testCollapseEnvironmentPanel(
   final Rect environmentPanelRect =
       tester.getRect(find.byWidget(environmentPanel));
 
-  final bool simulatedDevToolsWrapperOverlapsEnvironmentPanel =
-      simulatedDevToolsWrapperRect.overlaps(environmentPanelRect);
-
-  // The environment panel is collapsed so the [SimulatedDevToolsWrapper] should
-  // not overlap it.
-  expect(simulatedDevToolsWrapperOverlapsEnvironmentPanel, isFalse);
+  // Verify that the environment panel is off screen to the right of the
+  // simulated devtools wrapper.
+  expect(
+    simulatedDevToolsWrapperRect.right,
+    lessThanOrEqualTo(environmentPanelRect.left.ceil()),
+  );
 
   // Drag the divider to the left by [environmentPanelSizedBoxWidth].
   //
