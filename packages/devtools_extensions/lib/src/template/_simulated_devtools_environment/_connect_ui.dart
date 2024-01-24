@@ -4,14 +4,18 @@
 
 part of '_simulated_devtools_environment.dart';
 
-class _VmServiceConnection extends StatelessWidget {
-  const _VmServiceConnection({
+@visibleForTesting
+class VmServiceConnection extends StatelessWidget {
+  const VmServiceConnection({
+    super.key,
     required this.simController,
     required this.connected,
   });
 
-  static const _totalControlsHeight = 45.0;
-  static const _totalControlsWidth = 415.0;
+  @visibleForTesting
+  static const totalControlsHeight = 45.0;
+  @visibleForTesting
+  static const totalControlsWidth = 415.0;
 
   final SimulatedDevToolsController simController;
   final bool connected;
@@ -19,7 +23,7 @@ class _VmServiceConnection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: _totalControlsHeight,
+      height: totalControlsHeight,
       child: connected
           ? _ConnectedVmServiceDisplay(simController: simController)
           : _DisconnectedVmServiceDisplay(simController: simController),

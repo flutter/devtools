@@ -66,6 +66,7 @@ available. [#6709](https://github.com/flutter/devtools/pull/6709)
 
 * Added a description and link to documentation to the `devtools_options.yaml` file
 that is created in a user's project. - [#7052](https://github.com/flutter/devtools/pull/7052)
+* Updated the Simulated DevTools Environment Panel to be collapsible. - [#7062](https://github.com/flutter/devtools/pull/7062)
 
 ## Full commit history
 
