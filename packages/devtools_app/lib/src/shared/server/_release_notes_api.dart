@@ -29,7 +29,7 @@ Future<void> setLastShownReleaseNotesVersion(String version) async {
       '$apiSetLastReleaseNotesVersion'
       '?$lastReleaseNotesVersionPropertyName=$version',
     );
-    if (resp == null || !resp.statusOk || !json.decode(resp.body)) {
+    if (resp == null || !resp.statusOk || !(json.decode(resp.body) as bool)) {
       logWarning(resp, apiSetLastReleaseNotesVersion, resp?.body);
     }
   }

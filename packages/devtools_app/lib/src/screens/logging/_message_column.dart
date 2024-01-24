@@ -61,7 +61,7 @@ class MessageColumn extends ColumnData<LogData>
 
       double frameLength = 0.0;
       try {
-        final int micros = jsonDecode(data.details!)['elapsed'];
+        final int micros = (jsonDecode(data.details!) as Map)['elapsed'];
         frameLength = micros * 3.0 / 1000.0;
       } catch (e) {
         // ignore
