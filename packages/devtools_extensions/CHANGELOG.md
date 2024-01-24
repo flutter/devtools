@@ -1,4 +1,4 @@
-## 0.0.13-wip
+## 0.0.13
 * Bump `package:web` to `^0.4.1`.
 * Fix `README.md` instructions for adding a `.pubignore` file.
 * Make Simulated DevTools Environment Panel collapsible.
