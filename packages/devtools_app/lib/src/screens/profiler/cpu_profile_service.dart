@@ -49,7 +49,8 @@ extension CpuProfilerExtension on VmService {
       for (int i = 0; i < samples.length; ++i) {
         final cpuSample = samples[i];
         final rawSample = rawSamples[i];
-        cpuSample.setCodeStack(rawSample[kCodeStack].cast<int>());
+        final codeStack = rawSample[kCodeStack] as List;
+        cpuSample.setCodeStack(codeStack.cast<int>());
       }
     }
 

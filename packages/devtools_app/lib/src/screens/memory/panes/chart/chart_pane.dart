@@ -590,7 +590,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     } else if (event[eventName] == devToolsEvent &&
         event.containsKey(customEvent)) {
       final custom = event[customEvent] as Map<dynamic, dynamic>;
-      final data = custom[customEventData];
+      final data = custom[customEventData] as Map<dynamic, dynamic>;
       for (var key in data.keys) {
         output.write('$key=');
         output.writeln(_longValueToShort(data[key]));

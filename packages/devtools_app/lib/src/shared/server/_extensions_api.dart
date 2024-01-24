@@ -17,7 +17,7 @@ Future<List<DevToolsExtensionConfig>> refreshAvailableExtensions(
     );
     final resp = await request(uri.toString());
     if (resp?.statusOk ?? false) {
-      final parsedResult = json.decode(resp!.body);
+      final parsedResult = json.decode(resp!.body) as Map;
       final extensionsAsJson =
           (parsedResult[ExtensionsApi.extensionsResultPropertyName]!
                   as List<Object?>)

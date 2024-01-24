@@ -202,8 +202,8 @@ class ServiceConnectionManager {
         await serviceManager.callServiceExtensionOnMainIsolate(
       registrations.flutterListViews,
     );
-    final List<Map<String, Object?>> views =
-        flutterViewListResponse.json!['views'].cast<Map<String, Object?>>();
+    final views = (flutterViewListResponse.json!['views'] as List)
+        .cast<Map<String, Object?>>();
 
     // Each isolate should only have one FlutterView.
     final flutterView = views.firstWhereOrNull(
