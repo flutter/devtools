@@ -9,12 +9,13 @@ import 'dart:convert';
 
 /// The app link related settings of a Android build of a Flutter project.
 class AppLinkSettings {
-  const AppLinkSettings._(this.applicationId, this.deeplinks);
+  const AppLinkSettings._(this.applicationId, this.deeplinkingFlagEnabled, this.deeplinks);
 
   factory AppLinkSettings.fromJson(String json) {
     final jsonObject = jsonDecode(json);
     return AppLinkSettings._(
       jsonObject[_kApplicationIdKey] as String,
+      jsonObject[_kDeeplinkingFlagEnabledKey] as bool,
       (jsonObject[_kDeeplinksKey] as List<dynamic>)
           .cast<Map<String, dynamic>>()
           .map<AndroidDeeplink>(AndroidDeeplink._fromJsonObject)
@@ -23,13 +24,17 @@ class AppLinkSettings {
   }
 
   /// Used when the the server can't retrieve app link settings.
-  static const empty = AppLinkSettings._('', <AndroidDeeplink>[]);
+  static const empty = AppLinkSettings._('', false, <AndroidDeeplink>[]);
 
   static const _kApplicationIdKey = 'applicationId';
+  static const _kDeeplinkingFlagEnabledKey = 'deeplinkingFlagEnabled';
   static const _kDeeplinksKey = 'deeplinks';
 
   /// The application id of the Android build of this Flutter project.
   final String applicationId;
+
+  /// The flag to enable deep linking.
+  final bool deeplinkingFlagEnabled;
 
   /// The supported deep link of the Android build of this Flutter project.
   ///
