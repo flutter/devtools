@@ -12,7 +12,9 @@ class VmServiceConnection extends StatelessWidget {
     required this.connected,
   });
 
+  @visibleForTesting
   static const totalControlsHeight = 45.0;
+  @visibleForTesting
   static const totalControlsWidth = 415.0;
 
   final SimulatedDevToolsController simController;
