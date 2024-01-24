@@ -1899,13 +1899,13 @@ class _BlinkingIconState extends State<BlinkingIcon> {
 /// A widget that listens for changes to multiple different [ValueListenable]s
 /// and rebuilds for change notifications from any of them.
 ///
-/// The current value of each [ValueListenable] is provided by the [values]
+/// The current value of each [ValueListenable] is provided by the `values`
 /// parameter in [builder], where the index of each value in the list is equal
 /// to the index of its parent [ValueListenable] in [listenables].
 ///
 /// This widget is preferred over nesting many [ValueListenableBuilder]s in a
 /// single build method.
-class MultiValueListenableBuilder<T, U> extends StatefulWidget {
+class MultiValueListenableBuilder extends StatefulWidget {
   const MultiValueListenableBuilder({
     super.key,
     required this.listenables,
@@ -1924,12 +1924,12 @@ class MultiValueListenableBuilder<T, U> extends StatefulWidget {
   final Widget? child;
 
   @override
-  State<MultiValueListenableBuilder<T, U>> createState() =>
-      _MultiValueListenableBuilderState<T, U>();
+  State<MultiValueListenableBuilder> createState() =>
+      _MultiValueListenableBuilderState();
 }
 
-class _MultiValueListenableBuilderState<T, U>
-    extends State<MultiValueListenableBuilder<T, U>> with AutoDisposeMixin {
+class _MultiValueListenableBuilderState
+    extends State<MultiValueListenableBuilder> with AutoDisposeMixin {
   @override
   void initState() {
     super.initState();
