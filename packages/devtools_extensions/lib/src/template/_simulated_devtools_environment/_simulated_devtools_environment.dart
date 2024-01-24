@@ -93,10 +93,7 @@ class SimulatedDevToolsWrapperState extends State<SimulatedDevToolsWrapper>
         return Split(
           axis: Axis.horizontal,
           initialFractions: [childFraction, environmentPanelFraction],
-          minSizes: const [
-            100.0,
-            0.0,
-          ],
+          minSizes: const [100.0, 0.0],
           children: [
             OutlineDecoration.onlyRight(
               child: Padding(
@@ -137,6 +134,8 @@ class SimulatedDevToolsWrapperState extends State<SimulatedDevToolsWrapper>
                                 simController: simController,
                               ),
                               const SizedBox(height: denseSpacing),
+                              // TODO(kenz): figure out how to simulate the DTD
+                              // connection. This may be non-trivial.
                               _SimulatedApi(
                                 simController: simController,
                                 requiresRunningApplication:
