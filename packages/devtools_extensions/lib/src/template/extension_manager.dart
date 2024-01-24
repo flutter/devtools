@@ -68,6 +68,11 @@ class ExtensionManager {
         unawaited(_connectToVmService(vmServiceUri));
       }
     }
+
+    final dtdUri = queryParams['dtdUri'];
+    if (dtdUri != null) {
+      unawaited(dtdManager.connect(Uri.parse(dtdUri)));
+    }
   }
 
   // ignore: unused_element, false positive due to part files
