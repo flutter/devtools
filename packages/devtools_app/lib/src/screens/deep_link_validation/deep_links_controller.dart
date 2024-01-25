@@ -227,9 +227,7 @@ class DeepLinksController extends DisposableController {
   }
 
   final selectedProject = ValueNotifier<FlutterProject?>(null);
-
   final selectedLink = ValueNotifier<LinkData?>(null);
-
   final pagePhase = ValueNotifier<PagePhase>(PagePhase.emptyState);
 
   List<LinkData>? allValidatedLinkDatas;
