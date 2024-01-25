@@ -110,13 +110,14 @@ void main() {
       'builds deeplink list page with no links',
       windowSize,
       (WidgetTester tester) async {
-        deepLinksController.selectedProject =
+        deepLinksController.selectedProject.value =
             FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
         await pumpDeepLinkScreen(
           tester,
           controller: deepLinksController,
         );
 
+        expect(deepLinksController.pagePhase.value, PagePhase.linksLoading);
         expect(find.byType(DeepLinkPage), findsOneWidget);
         expect(find.byType(DeepLinkListView), findsOneWidget);
         expect(find.byType(CenteredCircularProgressIndicator), findsOneWidget);
@@ -129,16 +130,16 @@ void main() {
       (WidgetTester tester) async {
         final deepLinksController = DeepLinksTestController();
 
-        deepLinksController.selectedProject =
+        deepLinksController.selectedProject.value =
             FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
 
         deepLinksController.allValidatedLinkDatas = linkDatas;
-
         await pumpDeepLinkScreen(
           tester,
           controller: deepLinksController,
         );
 
+        expect(deepLinksController.pagePhase.value, PagePhase.linksValidated);
         expect(find.byType(DeepLinkPage), findsOneWidget);
         expect(find.byType(DeepLinkListView), findsOneWidget);
         expect(find.byType(ValidationDetailView), findsNothing);
@@ -151,7 +152,7 @@ void main() {
       (WidgetTester tester) async {
         final deepLinksController = DeepLinksTestController();
 
-        deepLinksController.selectedProject =
+        deepLinksController.selectedProject.value =
             FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
 
         deepLinksController.allValidatedLinkDatas = linkDatas;
@@ -177,7 +178,7 @@ void main() {
       (WidgetTester tester) async {
         final deepLinksController = DeepLinksTestController();
 
-        deepLinksController.selectedProject =
+        deepLinksController.selectedProject.value =
             FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
 
         deepLinksController.allValidatedLinkDatas = [domainErrorlinkData];
@@ -198,7 +199,7 @@ void main() {
       (WidgetTester tester) async {
         final deepLinksController = DeepLinksTestController();
 
-        deepLinksController.selectedProject =
+        deepLinksController.selectedProject.value =
             FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
 
         deepLinksController.allValidatedLinkDatas = [domainErrorlinkData];
@@ -223,7 +224,7 @@ void main() {
       (WidgetTester tester) async {
         final deepLinksController = DeepLinksTestController();
 
-        deepLinksController.selectedProject =
+        deepLinksController.selectedProject.value =
             FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
 
         deepLinksController.allValidatedLinkDatas = linkDatas;
@@ -253,7 +254,7 @@ void main() {
       (WidgetTester tester) async {
         final deepLinksController = DeepLinksTestController();
 
-        deepLinksController.selectedProject =
+        deepLinksController.selectedProject.value =
             FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
 
         final linkDatas = [
@@ -329,7 +330,7 @@ void main() {
       (WidgetTester tester) async {
         final deepLinksController = DeepLinksTestController();
 
-        deepLinksController.selectedProject =
+        deepLinksController.selectedProject.value =
             FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
 
         final linkDatas = [
@@ -414,7 +415,7 @@ void main() {
           ),
         ];
 
-        deepLinksController.selectedProject =
+        deepLinksController.selectedProject.value =
             FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
         deepLinksController.allValidatedLinkDatas = linkDatas;
 
@@ -483,6 +484,7 @@ class DeepLinksTestController extends DeepLinksController {
       pathErrorCount:
           getLinkDatasByPath.where((element) => element.pathError).length,
     );
+    pagePhase.value = PagePhase.linksValidated;
   }
 
   @override

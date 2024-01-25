@@ -18,8 +18,8 @@ typedef _DomainAndPath = ({String domain, String path});
 
 enum PagePhase {
   emptyState,
-  projectSelected,
   linksLoading,
+  noLinks, // No links to validate
   linksValidating,
   linksValidated,
   errorPage,
@@ -185,13 +185,13 @@ class DeepLinksController extends DisposableController {
     pagePhase.value = PagePhase.linksLoading;
     if (!_androidAppLinks.containsKey(selectedVariantIndex.value)) {
       final variant =
-          selectedProject!.androidVariants[selectedVariantIndex.value];
+          selectedProject.value!.androidVariants[selectedVariantIndex.value];
       await ga.timeAsync(
         gac.deeplink,
         gac.AnalyzeFlutterProject.loadAppLinks.name,
         asyncOperation: () async {
           final result = await server.requestAndroidAppLinkSettings(
-            selectedProject!.path,
+            selectedProject.value!.path,
             buildVariant: variant,
           );
           _androidAppLinks[selectedVariantIndex.value] = result;
@@ -226,7 +226,7 @@ class DeepLinksController extends DisposableController {
         .toList();
   }
 
-  FlutterProject? selectedProject;
+  final selectedProject = ValueNotifier<FlutterProject?>(null);
 
   final selectedLink = ValueNotifier<LinkData?>(null);
 
@@ -256,6 +256,10 @@ class DeepLinksController extends DisposableController {
 
   Future<List<LinkData>> _validateAndroidDomain() async {
     final List<LinkData> linkdatas = _allRawLinkDatas;
+    if (linkdatas.isEmpty) {
+      pagePhase.value = PagePhase.noLinks;
+      return const <LinkData>[];
+    }
     final domains = linkdatas
         .where((linkdata) => linkdata.os.contains(PlatformOS.android))
         .map((linkdata) => linkdata.domain)
@@ -298,7 +302,9 @@ class DeepLinksController extends DisposableController {
   Future<void> validateLinks() async {
     pagePhase.value = PagePhase.linksValidating;
     allValidatedLinkDatas = await _validateAndroidDomain();
-    pagePhase.value = PagePhase.linksValidated;
+    if (pagePhase.value == PagePhase.linksValidating) {
+      pagePhase.value = PagePhase.linksValidated;
+    }
     displayLinkDatasNotifier.value = getFilterredLinks(allValidatedLinkDatas!);
 
     displayOptionsNotifier.value = displayOptionsNotifier.value.copyWith(

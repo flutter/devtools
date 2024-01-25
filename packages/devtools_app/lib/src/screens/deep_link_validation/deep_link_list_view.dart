@@ -41,19 +41,19 @@ class DeepLinkListView extends StatefulWidget {
 class _DeepLinkListViewState extends State<DeepLinkListView>
     with ProvidedControllerMixin<DeepLinksController, DeepLinkListView> {
   List<String> get androidVariants =>
-      controller.selectedProject!.androidVariants;
+      controller.selectedProject.value!.androidVariants;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     initController();
     callWhenControllerReady((_) {
-      int releaseVariantIndex = controller.selectedProject!.androidVariants
+      int releaseVariantIndex = controller
+          .selectedProject.value!.androidVariants
           .indexWhere((variant) => variant.toLowerCase().contains('release'));
       // If not found, default to 0.
       releaseVariantIndex = max(releaseVariantIndex, 0);
       controller.selectedVariantIndex.value = releaseVariantIndex;
-      //unawaited(controller.validateLinks());
     });
   }
 
@@ -80,84 +80,100 @@ class _DeepLinkListViewMainPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Provider.of<DeepLinksController>(context);
-    // TODO(hangyujin): Use MultiValueListenableBuilder.
+
     return ValueListenableBuilder<PagePhase>(
       valueListenable: controller.pagePhase,
       builder: (context, pagePhase, _) {
-        if (pagePhase == PagePhase.linksLoading ||
-            pagePhase == PagePhase.linksValidating) {
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+        switch (pagePhase) {
+          case PagePhase.emptyState:
+          case PagePhase.linksLoading:
+          case PagePhase.linksValidating:
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const CenteredCircularProgressIndicator(),
+                const SizedBox(height: densePadding),
+                Text(
+                  pagePhase == PagePhase.linksLoading
+                      ? 'Loading deep links...'
+                      : 'Validating deep links...',
+                  style: Theme.of(context).subtleTextStyle,
+                ),
+              ],
+            );
+          case PagePhase.linksValidated:
+            return const _VerifiedDeepLinksView();
+          case PagePhase.noLinks:
+            // TODO(hangyujin): This is just a place holder to add UI.
+            return const Text('Your flutter project has no Links to verify.');
+
+          case PagePhase.errorPage:
+            // TODO(hangyujin): This is just a place holder to add Error handling.
+            return const Text('Error');
+        }
+      },
+    );
+  }
+}
+
+class _VerifiedDeepLinksView extends StatelessWidget {
+  const _VerifiedDeepLinksView();
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = Provider.of<DeepLinksController>(context);
+    return ValueListenableBuilder<DisplayOptions>(
+      valueListenable: controller.displayOptionsNotifier,
+      builder: (context, displayOptions, _) {
+        if (displayOptions.showSplitScreen) {
+          return Row(
             children: [
-              const CenteredCircularProgressIndicator(),
-              const SizedBox(height: densePadding),
-              Text(
-                pagePhase == PagePhase.linksLoading
-                    ? 'Loading deep links...'
-                    : 'Validating deep links...',
-                style: Theme.of(context).subtleTextStyle,
+              Expanded(
+                child: _AllDeepLinkDataTable(controller: controller),
+              ),
+              VerticalDivider(
+                width: 1.0,
+                color: Theme.of(context).focusColor,
+              ),
+              Expanded(
+                child: ValueListenableBuilder<LinkData?>(
+                  valueListenable: controller.selectedLink,
+                  builder: (context, selectedLink, _) => TabBarView(
+                    children: [
+                      ValidationDetailView(
+                        linkData: selectedLink!,
+                        controller: controller,
+                        viewType: TableViewType.domainView,
+                      ),
+                      ValidationDetailView(
+                        linkData: selectedLink,
+                        controller: controller,
+                        viewType: TableViewType.pathView,
+                      ),
+                      ValidationDetailView(
+                        linkData: selectedLink,
+                        controller: controller,
+                        viewType: TableViewType.singleUrlView,
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
           );
         }
-        // TODO(hangyujin): Add Error handling.
-        if (pagePhase == PagePhase.errorPage) {
-          return const  Text('error');
-        }
-        return ValueListenableBuilder<DisplayOptions>(
-          valueListenable: controller.displayOptionsNotifier,
-          builder: (context, displayOptions, _) {
-            if (displayOptions.showSplitScreen) {
-              return Row(
-                children: [
-                  Expanded(
-                    child: _AllDeepLinkDataTable(controller: controller),
-                  ),
-                  VerticalDivider(
-                    width: 1.0,
-                    color: Theme.of(context).focusColor,
-                  ),
-                  Expanded(
-                    child: ValueListenableBuilder<LinkData?>(
-                      valueListenable: controller.selectedLink,
-                      builder: (context, selectedLink, _) => TabBarView(
-                        children: [
-                          ValidationDetailView(
-                            linkData: selectedLink!,
-                            controller: controller,
-                            viewType: TableViewType.domainView,
-                          ),
-                          ValidationDetailView(
-                            linkData: selectedLink,
-                            controller: controller,
-                            viewType: TableViewType.pathView,
-                          ),
-                          ValidationDetailView(
-                            linkData: selectedLink,
-                            controller: controller,
-                            viewType: TableViewType.singleUrlView,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            }
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _NotificationCardSection(
-                  domainErrorCount: displayOptions.domainErrorCount,
-                  pathErrorCount: displayOptions.pathErrorCount,
-                  controller: controller,
-                ),
-                Expanded(
-                  child: _AllDeepLinkDataTable(controller: controller),
-                ),
-              ],
-            );
-          },
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _NotificationCardSection(
+              domainErrorCount: displayOptions.domainErrorCount,
+              pathErrorCount: displayOptions.pathErrorCount,
+              controller: controller,
+            ),
+            Expanded(
+              child: _AllDeepLinkDataTable(controller: controller),
+            ),
+          ],
         );
       },
     );
@@ -238,7 +254,8 @@ class _DeepLinkListViewTopPanel extends StatelessWidget {
             valueListenable: controller.selectedVariantIndex,
             builder: (_, value, __) {
               return _AndroidVariantDropdown(
-                androidVariants: controller.selectedProject!.androidVariants,
+                androidVariants:
+                    controller.selectedProject.value!.androidVariants,
                 index: value,
                 onVariantIndexSelected: (index) {
                   controller.selectedVariantIndex.value = index;

@@ -72,9 +72,8 @@ class _SelectProjectViewState extends State<SelectProjectView>
         gac.deeplink,
         gac.AnalyzeFlutterProject.flutterProjectSelected.name,
       );
-      controller.selectedProject =
+      controller.selectedProject.value =
           FlutterProject(path: directory, androidVariants: androidVariants);
-      controller.pagePhase.value = PagePhase.projectSelected;
     }
     setState(() {
       _retrievingFlutterProject = false;
