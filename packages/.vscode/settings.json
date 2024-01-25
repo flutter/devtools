@@ -2,4 +2,7 @@
     // Set current working directory to devtools_app.
     "terminal.integrated.cwd": "devtools_app",
     "dart.showTodos": false,
+    "cSpell.words": [
+        "unawaited"
+    ],
 }

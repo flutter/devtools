@@ -89,7 +89,7 @@ class _ListControlPane extends StatelessWidget {
             ),
             const SizedBox(width: densePadding),
             ToolbarAction(
-              icon: Icons.file_open,
+              icon: Icons.file_upload,
               tooltip: 'Import snapshots.',
               onPressed: controller.isAddingSnapshot.value
                   ? null
