@@ -59,30 +59,45 @@ class _SnapshotItemContent extends StatelessWidget {
       builder: (_, item, __) {
         if (item is SnapshotDocItem) {
           return Padding(
-            padding: const EdgeInsets.all(defaultSpacing),
+            padding: const EdgeInsets.all(denseSpacing),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
-                  child: ListView(
+                  child: Row(
                     children: [
-                      SizedBox(
-                        height: 450,
+                      Expanded(
                         child: Markdown(
                           data: _snapshotDocumentation,
+                          styleSheet: MarkdownStyleSheet(
+                            p: Theme.of(context).regularTextStyle,
+                          ),
                           onTapLink: (text, url, title) =>
                               unawaited(launchUrl(url!)),
                         ),
                       ),
-                      const ClassTypeLegend(),
+                      const SizedBox(width: densePadding),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.only(
+                              top: defaultSpacing,
+                              right: denseSpacing,
+                            ),
+                            child: ClassTypeLegend(),
+                          ),
+                          MoreInfoLink(
+                            url: DocLinks.diff.value,
+                            gaScreenName: gac.memory,
+                            gaSelectedItemDescription:
+                                gac.topicDocumentationLink(_documentationTopic),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
-                ),
-                MoreInfoLink(
-                  url: DocLinks.diff.value,
-                  gaScreenName: gac.memory,
-                  gaSelectedItemDescription:
-                      gac.topicDocumentationLink(_documentationTopic),
                 ),
               ],
             ),
@@ -121,7 +136,7 @@ class SnapshotInstanceItemPane extends StatelessWidget {
   }
 }
 
-/// `\v` adds vertical space
+// `\v` adds vertical space
 const _snapshotDocumentation = '''
 Find unexpected memory usage by comparing two heap snapshots:
 

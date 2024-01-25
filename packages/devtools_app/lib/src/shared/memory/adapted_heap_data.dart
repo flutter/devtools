@@ -62,7 +62,7 @@ class AdaptedHeapData {
     HeapSnapshotGraph graph,
   ) async {
     final objects = <AdaptedHeapObject>[];
-    for (final i in Iterable.generate(graph.objects.length)) {
+    for (final i in Iterable<int>.generate(graph.objects.length)) {
       if (_uiReleaser.step()) await _uiReleaser.releaseUi();
       final object =
           AdaptedHeapObject.fromHeapSnapshotObject(graph.objects[i], i);
@@ -101,9 +101,9 @@ class AdaptedHeapData {
 
   String snapshotName = '';
 
-  /// Heap objects by identityHashCode.
-  late final _objectsByCode = <IdentityHashCode, int>{
-    for (var i in Iterable.generate(objects.length)) objects[i].code: i,
+  /// Heap objects by `identityHashCode`.
+  late final _objectsByCode = <IdentityHashCode, int?>{
+    for (var i in Iterable<int>.generate(objects.length)) objects[i].code: i,
   };
 
   int? objectIndexByIdentityHashCode(IdentityHashCode code) =>

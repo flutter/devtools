@@ -118,7 +118,7 @@ void main() {
                 (_) => throw Exception(
                   'The FutureFailedException was not thrown as expected.',
                 ),
-                onError: (err) => err,
+                onError: (Object? err) => err,
               );
 
           expect(

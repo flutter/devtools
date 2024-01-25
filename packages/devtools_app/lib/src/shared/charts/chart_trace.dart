@@ -292,60 +292,57 @@ enum ChartSymbol {
 double log10(num x) => log(x) / ln10;
 
 class AxisScale {
-  AxisScale(this.minPoint, this.maxPoint, this.maxTicks) {
-    _calculate();
+  factory AxisScale(double minPoint, double maxPoint, double maxTicks) {
+    final range = _niceNum(maxPoint, false);
+    final double tickSpacing;
+    final double exponent;
+    final double fraction;
+    if (range != 0) {
+      tickSpacing = range / (maxTicks - 1);
+      (:exponent, :fraction) = _exponentFraction(range);
+    } else {
+      tickSpacing = 1;
+      exponent = 0;
+      fraction = 0;
+    }
+    return AxisScale._(
+      minPoint: minPoint,
+      maxPoint: maxPoint,
+      maxTicks: maxTicks,
+      tickSpacing: tickSpacing,
+      labelUnitExponent: exponent,
+      labelTicks: fraction,
+    );
   }
+
+  AxisScale._({
+    required this.minPoint,
+    required this.maxPoint,
+    required this.maxTicks,
+    required this.tickSpacing,
+    required this.labelUnitExponent,
+    required this.labelTicks,
+  });
 
   final double minPoint, maxPoint;
 
   final double maxTicks;
 
-  double? get tickSpacing => _tickSpacing;
+  final double tickSpacing;
 
-  double? _tickSpacing;
-
-  double? get computedMin => _computedMin;
-  double? get computedMax => _computedMax;
-
-  double? _computedMin, _computedMax;
-
-  late double _range;
-
-  /// Unit for the label (exponent) e.g., 6 = 10^6
-  late double labelUnitExponent;
+  /// Unit for the label (exponent) e.g., 6 = 10^6.
+  final double labelUnitExponent;
 
   /// Number of labels.
-  late double labelTicks;
+  final double labelTicks;
 
-  void _calculate() {
-    _range = _niceNum(maxPoint, false);
-    if (_range != 0) {
-      _tickSpacing = _range / (maxTicks - 1);
-      _computedMin = _calculateMin();
-      _computedMax = _calculateMax();
-      final exponentFraction = _exponentFraction(_range);
-      labelUnitExponent = exponentFraction['exponent'];
-      labelTicks = exponentFraction['fraction'].roundToDouble();
-    } else {
-      _tickSpacing = 1;
-      _computedMin = 0;
-      _computedMax = 0;
-      labelUnitExponent = 0;
-      labelTicks = 0;
-    }
-  }
-
-  double _calculateMin() => (minPoint / _tickSpacing!).floor() * _tickSpacing!;
-
-  double _calculateMax() => (maxPoint / _tickSpacing!).ceil() * _tickSpacing!;
-
-  Map _exponentFraction(double range) {
-    if (range == 0) return {};
+  static ({double exponent, double fraction}) _exponentFraction(double range) {
+    assert(range != 0);
 
     final exponent = log10(range).floor().toDouble();
     final fraction = range / pow(10, exponent);
 
-    return {'exponent': exponent, 'fraction': fraction};
+    return (exponent: exponent, fraction: fraction.roundToDouble());
   }
 
   /// Produce a whole number for the Y-axis scale and its unit using
@@ -360,37 +357,28 @@ class AxisScale {
   ///    10K, 20K, 30K, 40K, 50K
   /// This allows new data points >30K to be plotted w/o having to
   /// re-layout new Y-axis scale.
-  double _niceNum(double range, bool round) {
+  static double _niceNum(double range, bool round) {
     if (range == 0) return 0;
 
-    double exponent; // exponent of range
-    double fraction; // fractional part of range
-    late double niceFraction; // nice, rounded fraction
-
-    exponent = log10(range).floor().toDouble();
-    fraction = range / pow(10, exponent);
-
-    if (round) {
-      niceFraction = fraction.roundToDouble();
-    } else {
-      if (fraction <= 1) {
-        niceFraction = 1;
-      } else if (fraction <= 2) {
-        niceFraction = 2;
-      } else if (fraction <= 3) {
-        niceFraction = 3;
-      } else if (fraction <= 5) {
-        niceFraction = 5;
-      } else if (fraction <= 7) {
-        niceFraction = 7;
-      } else if (fraction <= 10) {
-        niceFraction = 10;
-      }
-    }
+    // Exponent of range.
+    final exponent = log10(range).floor().toDouble();
+    // Fractional part of range.
+    final fraction = range / pow(10, exponent);
+    // Nice, rounded fraction.
+    final niceFraction = round
+        ? fraction.roundToDouble()
+        : switch (fraction) {
+            <= 1 => 1.0,
+            <= 2 => 2.0,
+            <= 3 => 3.0,
+            <= 5 => 5.0,
+            <= 7 => 7.0,
+            _ => 10.0,
+          };
 
     return niceFraction * pow(10, exponent);
   }
 
   double tickFromValue(double value) =>
-      (value / tickSpacing!).truncateToDouble();
+      (value / tickSpacing).truncateToDouble();
 }

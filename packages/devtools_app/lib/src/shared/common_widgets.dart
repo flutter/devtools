@@ -453,7 +453,7 @@ class DevToolsSwitch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: defaultSwitchHeight,
+      height: defaultButtonHeight,
       padding: padding,
       child: FittedBox(
         fit: BoxFit.fill,
@@ -573,7 +573,8 @@ class Badge extends StatelessWidget {
 
     // These constants are sized to give 1 digit badges a circular look.
     const badgeCornerRadius = 12.0;
-    const badgePadding = 6.0;
+    const verticalBadgePadding = 1.0;
+    const horizontalBadgePadding = 6.0;
 
     return Container(
       decoration: BoxDecoration(
@@ -581,8 +582,8 @@ class Badge extends StatelessWidget {
         borderRadius: BorderRadius.circular(badgeCornerRadius),
       ),
       padding: const EdgeInsets.symmetric(
-        vertical: borderPadding,
-        horizontal: badgePadding,
+        vertical: verticalBadgePadding,
+        horizontal: horizontalBadgePadding,
       ),
       child: Text(
         text,
@@ -664,7 +665,7 @@ abstract class ScaffoldAction extends StatelessWidget {
 
   final String tooltip;
 
-  final Function(BuildContext) onPressed;
+  final void Function(BuildContext) onPressed;
 
   final Color? color;
 
@@ -777,12 +778,14 @@ class RoundedDropDownButton<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bgColor = Theme.of(context).colorScheme.backgroundColorSelected;
+    final theme = Theme.of(context);
+    final bgColor = theme.colorScheme.backgroundColorSelected;
 
     Radius selectRadius(bool show) {
       return show ? defaultRadius : Radius.zero;
     }
 
+    final style = this.style ?? theme.regularTextStyle;
     final showTopLeft = roundedCornerOptions?.showTopLeft ?? true;
     final showTopRight = roundedCornerOptions?.showTopRight ?? true;
     final showBottomLeft = roundedCornerOptions?.showBottomLeft ?? true;
@@ -830,7 +833,9 @@ class DevToolsClearableTextField extends StatelessWidget {
     TextEditingController? controller,
     this.hintText,
     this.prefixIcon,
+    this.additionalSuffixActions = const <Widget>[],
     this.onChanged,
+    this.onSubmitted,
     this.autofocus = false,
   })  : controller = controller ?? TextEditingController(),
         super(key: key);
@@ -838,59 +843,93 @@ class DevToolsClearableTextField extends StatelessWidget {
   final TextEditingController controller;
   final String? hintText;
   final Widget? prefixIcon;
+  final List<Widget> additionalSuffixActions;
   final String labelText;
-  final Function(String)? onChanged;
+  final void Function(String)? onChanged;
+  final void Function(String)? onSubmitted;
   final bool autofocus;
+
+  static const _contentVerticalPadding = 6.0;
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
-      autofocus: autofocus,
-      controller: controller,
-      onChanged: onChanged,
-      decoration: InputDecoration(
-        contentPadding: const EdgeInsets.all(denseSpacing),
-        constraints: BoxConstraints(
-          minHeight: defaultTextFieldHeight,
-          maxHeight: defaultTextFieldHeight,
+    final theme = Theme.of(context);
+    return SizedBox(
+      height: defaultTextFieldHeight,
+      child: TextField(
+        autofocus: autofocus,
+        controller: controller,
+        onChanged: onChanged,
+        onSubmitted: onSubmitted,
+        style: theme.regularTextStyle,
+        decoration: InputDecoration(
+          isDense: true,
+          contentPadding: const EdgeInsets.only(
+            top: _contentVerticalPadding,
+            bottom: _contentVerticalPadding,
+            left: denseSpacing,
+            right: densePadding,
+          ),
+          constraints: BoxConstraints(
+            minHeight: defaultTextFieldHeight,
+            maxHeight: defaultTextFieldHeight,
+          ),
+          border: const OutlineInputBorder(),
+          labelText: labelText,
+          labelStyle: theme.subtleTextStyle,
+          hintText: hintText,
+          hintStyle: theme.subtleTextStyle,
+          prefixIcon: prefixIcon,
+          suffix: SizedBox(
+            height: inputDecorationElementHeight,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                clearInputButton(
+                  () {
+                    controller.clear();
+                    onChanged?.call('');
+                  },
+                ),
+                ...additionalSuffixActions,
+              ],
+            ),
+          ),
         ),
-        border: const OutlineInputBorder(),
-        labelText: labelText,
-        hintText: hintText,
-        prefixIcon: prefixIcon,
-        suffixIcon: IconButton(
-          tooltip: 'Clear',
-          icon: const Icon(Icons.clear),
-          onPressed: () {
-            controller.clear();
-            onChanged?.call('');
-          },
-        ),
-        isDense: true,
       ),
     );
   }
 }
 
 Widget clearInputButton(VoidCallback onPressed) {
-  return inputDecorationSuffixButton(Icons.clear, onPressed);
+  return inputDecorationSuffixButton(
+    icon: Icons.clear,
+    onPressed: onPressed,
+    tooltip: 'Clear',
+  );
 }
 
 Widget closeSearchDropdownButton(VoidCallback? onPressed) {
-  return inputDecorationSuffixButton(Icons.close, onPressed);
+  return inputDecorationSuffixButton(icon: Icons.close, onPressed: onPressed);
 }
 
-Widget inputDecorationSuffixButton(IconData icon, VoidCallback? onPressed) {
-  return Container(
-    padding: const EdgeInsets.symmetric(horizontal: densePadding),
-    height: inputDecorationElementHeight,
-    width: defaultIconSize + denseSpacing,
-    child: IconButton(
-      padding: const EdgeInsets.all(0.0),
-      onPressed: onPressed,
-      iconSize: defaultIconSize,
-      splashRadius: defaultIconSize,
-      icon: Icon(icon),
+Widget inputDecorationSuffixButton({
+  required IconData icon,
+  required VoidCallback? onPressed,
+  String? tooltip,
+}) {
+  return maybeWrapWithTooltip(
+    tooltip: tooltip,
+    child: SizedBox(
+      height: inputDecorationElementHeight,
+      width: inputDecorationElementHeight + denseSpacing,
+      child: IconButton(
+        padding: EdgeInsets.zero,
+        onPressed: onPressed,
+        iconSize: defaultIconSize,
+        splashRadius: defaultIconSize,
+        icon: Icon(icon),
+      ),
     ),
   );
 }
@@ -969,6 +1008,7 @@ class LeftBorder extends StatelessWidget {
 /// Makes for nice-looking rectangles.
 final goldenRatio = 1 + sqrt(5) / 2;
 
+/// A centered text widget with the default DevTools text style applied.
 class CenteredMessage extends StatelessWidget {
   const CenteredMessage(this.message, {super.key});
 
@@ -977,7 +1017,11 @@ class CenteredMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Text(message),
+      child: Text(
+        message,
+        textAlign: TextAlign.center,
+        style: Theme.of(context).regularTextStyle,
+      ),
     );
   }
 }
@@ -1099,7 +1143,7 @@ class Breadcrumb extends StatelessWidget {
     required this.onPressed,
   });
 
-  static const height = 28.0;
+  static const height = 24.0;
 
   static const caretWidth = 4.0;
 
@@ -1119,7 +1163,7 @@ class Breadcrumb extends StatelessWidget {
     final textPainter = TextPainter(
       text: TextSpan(
         text: text,
-        style: TextStyle(
+        style: theme.regularTextStyle.copyWith(
           color: theme.colorScheme.contrastTextColor,
           decoration: TextDecoration.underline,
         ),
@@ -1569,7 +1613,7 @@ class CopyToClipboardControl extends StatelessWidget {
               copyToClipboard(dataProvider!() ?? '', successMessage),
             );
           };
-
+    final size = this.size ?? defaultIconSize;
     return SizedBox(
       height: size,
       child: ToolbarAction(
@@ -1703,7 +1747,7 @@ class CheckboxSetting extends StatelessWidget {
         Flexible(
           child: RichText(
             overflow: TextOverflow.visible,
-            maxLines: 2,
+            maxLines: 3,
             text: TextSpan(
               text: title,
               style: enabled ? theme.regularTextStyle : theme.subtleTextStyle,
@@ -1855,13 +1899,13 @@ class _BlinkingIconState extends State<BlinkingIcon> {
 /// A widget that listens for changes to multiple different [ValueListenable]s
 /// and rebuilds for change notifications from any of them.
 ///
-/// The current value of each [ValueListenable] is provided by the [values]
+/// The current value of each [ValueListenable] is provided by the `values`
 /// parameter in [builder], where the index of each value in the list is equal
 /// to the index of its parent [ValueListenable] in [listenables].
 ///
 /// This widget is preferred over nesting many [ValueListenableBuilder]s in a
 /// single build method.
-class MultiValueListenableBuilder<T, U> extends StatefulWidget {
+class MultiValueListenableBuilder extends StatefulWidget {
   const MultiValueListenableBuilder({
     super.key,
     required this.listenables,
@@ -1880,12 +1924,12 @@ class MultiValueListenableBuilder<T, U> extends StatefulWidget {
   final Widget? child;
 
   @override
-  State<MultiValueListenableBuilder<T, U>> createState() =>
-      _MultiValueListenableBuilderState<T, U>();
+  State<MultiValueListenableBuilder> createState() =>
+      _MultiValueListenableBuilderState();
 }
 
-class _MultiValueListenableBuilderState<T, U>
-    extends State<MultiValueListenableBuilder<T, U>> with AutoDisposeMixin {
+class _MultiValueListenableBuilderState
+    extends State<MultiValueListenableBuilder> with AutoDisposeMixin {
   @override
   void initState() {
     super.initState();
@@ -1988,6 +2032,7 @@ class HelpButtonWithDialog extends StatelessWidget {
     required this.gaSelection,
     required this.dialogTitle,
     required this.child,
+    this.actions = const <Widget>[],
     this.outlined = true,
   });
 
@@ -1998,6 +2043,8 @@ class HelpButtonWithDialog extends StatelessWidget {
   final String dialogTitle;
 
   final Widget child;
+
+  final List<Widget> actions;
 
   final bool outlined;
 
@@ -2013,8 +2060,11 @@ class HelpButtonWithDialog extends StatelessWidget {
               title: DialogTitleText(dialogTitle),
               includeDivider: false,
               content: child,
-              actions: const [
-                DialogCloseButton(),
+              actionsAlignment:
+                  actions.isNotEmpty ? MainAxisAlignment.spaceBetween : null,
+              actions: [
+                ...actions,
+                const DialogCloseButton(),
               ],
             ),
           ),
@@ -2038,18 +2088,15 @@ class BulletSpacer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-
-    final textStyle = theme.textTheme.bodyMedium;
-    final mutedColor = textStyle?.color?.withAlpha(0x90);
-
+    final theme = Theme.of(context);
+    final mutedColor = theme.colorScheme.onSurface.withAlpha(0x90);
     return Container(
       width: width,
       height: actionWidgetSize,
       alignment: Alignment.center,
       child: Text(
         '•',
-        style: textStyle?.copyWith(color: color ?? mutedColor),
+        style: theme.regularTextStyle.copyWith(color: color ?? mutedColor),
       ),
     );
   }

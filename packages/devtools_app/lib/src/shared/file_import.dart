@@ -347,7 +347,7 @@ class DualFileImportContainer extends StatefulWidget {
   /// The title of the action button.
   final String actionText;
 
-  final Function(
+  final void Function(
     DevToolsJsonFile firstImportedFile,
     DevToolsJsonFile secondImportedFile,
     void Function(String error) onError,

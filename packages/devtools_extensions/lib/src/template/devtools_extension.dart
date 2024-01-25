@@ -14,7 +14,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart' hide Event;
-import 'package:web/helpers.dart' hide Text;
+import 'package:web/web.dart' hide Text;
 
 import '../api/api.dart';
 import '../api/model.dart';

@@ -36,6 +36,7 @@ class ServerApi {
     required ExtensionsManager extensionsManager,
     required DeeplinkManager deeplinkManager,
     ServerApi? api,
+    String? Function()? dtdUri,
   }) {
     api ??= ServerApi();
     final queryParams = request.requestedUri.queryParameters;
@@ -252,7 +253,12 @@ class ServerApi {
           queryParams,
           deeplinkManager,
         );
-
+      case DtdApi.apiGetDtdUri:
+        return api.setCompleted(
+          json.encode({
+            DtdApi.uriPropertyName: dtdUri?.call(),
+          }),
+        );
       default:
         return api.notImplemented();
     }

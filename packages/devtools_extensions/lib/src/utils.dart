@@ -5,7 +5,7 @@
 import 'dart:js_interop';
 
 import 'package:devtools_app_shared/web_utils.dart';
-import 'package:web/helpers.dart';
+import 'package:web/web.dart';
 
 import '../api.dart';
 

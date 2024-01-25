@@ -566,8 +566,8 @@ class ChartPainter extends CustomPainter {
     int timestamp,
     double xTickCoord,
     Paint axis, {
-    shortTick = true,
-    displayTime = false,
+    bool shortTick = true,
+    bool displayTime = false,
   }) {
     if (displayTime) {
       // Draw vertical tick (short or long).

@@ -20,7 +20,6 @@ class AnalyzeCommand extends Command {
 
   @override
   Future run() async {
-    final sdk = FlutterSdk.current;
     final log = Logger.standard();
     final repo = DevToolsRepo.getInstance();
     final processManager = ProcessManager();
@@ -38,8 +37,7 @@ class AnalyzeCommand extends Command {
       final progress = log.progress('  ${p.relativePath}');
 
       final process = await processManager.runProcess(
-        CliCommand.from(
-          sdk.dartToolPath,
+        CliCommand.dart(
           ['analyze', '--fatal-infos'],
           // Run all so we can see the full set of results instead of stopping
           // on the first error.

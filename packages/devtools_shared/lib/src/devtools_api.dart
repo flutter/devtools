@@ -62,6 +62,11 @@ const baseAppSizeFilePropertyName = 'appSizeBase';
 
 const testAppSizeFilePropertyName = 'appSizeTest';
 
+abstract class DtdApi {
+  static const apiGetDtdUri = '${apiPrefix}getDtdUri';
+  static const uriPropertyName = 'dtdUri';
+}
+
 abstract class ExtensionsApi {
   /// Serves any available extensions and returns a list of their configurations
   /// to DevTools.

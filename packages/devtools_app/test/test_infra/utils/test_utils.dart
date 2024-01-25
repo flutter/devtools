@@ -27,7 +27,7 @@ TraceEventWrapper testTraceEventWrapper(Map<String, dynamic> json) {
 /// [clipboardContentsCallback]  when Clipboard.setData is triggered, the text
 /// contents will be passed to [clipboardContentsCallback]
 void setupClipboardCopyListener({
-  required Function(String?) clipboardContentsCallback,
+  required void Function(String?) clipboardContentsCallback,
 }) {
   // This intercepts the Clipboard.setData SystemChannel message,
   // and stores the contents that were (attempted) to be copied.
@@ -37,7 +37,7 @@ void setupClipboardCopyListener({
     (MethodCall call) {
       switch (call.method) {
         case 'Clipboard.setData':
-          clipboardContentsCallback(call.arguments['text']);
+          clipboardContentsCallback((call.arguments as Map)['text']);
           break;
         case 'Clipboard.getData':
           return Future.value(<String, Object?>{});

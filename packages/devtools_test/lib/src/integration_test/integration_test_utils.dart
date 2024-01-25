@@ -26,14 +26,14 @@ Future<void> pumpAndConnectDevTools(
   TestApp testApp,
 ) async {
   await pumpDevTools(tester);
-  expect(find.byType(ConnectDialog), findsOneWidget);
+  expect(find.byType(ConnectInput), findsOneWidget);
   expect(find.byType(ConnectedAppSummary), findsNothing);
   expect(find.text('No client connection'), findsOneWidget);
   _verifyFooterColor(tester, null);
 
   logStatus('verify that we can connect to an app');
   await connectToTestApp(tester, testApp);
-  expect(find.byType(ConnectDialog), findsNothing);
+  expect(find.byType(ConnectInput), findsNothing);
   expect(find.byType(ConnectedAppSummary), findsOneWidget);
   expect(find.text('No client connection'), findsNothing);
   _verifyFooterColor(tester, darkColorScheme.primary);
@@ -123,8 +123,7 @@ class TestApp {
 
   factory TestApp.fromEnvironment() {
     const testArgs = String.fromEnvironment('test_args');
-    final Map<String, Object> argsMap =
-        jsonDecode(testArgs).cast<String, Object>();
+    final argsMap = (jsonDecode(testArgs) as Map).cast<String, Object>();
     return TestApp.parse(argsMap);
   }
 

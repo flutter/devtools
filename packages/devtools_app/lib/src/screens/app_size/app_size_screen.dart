@@ -535,7 +535,7 @@ class _AppSizeView extends StatelessWidget {
 
   final TreemapNode treemapRoot;
 
-  final Function(TreemapNode?) onRootChangedCallback;
+  final void Function(TreemapNode?) onRootChangedCallback;
 
   final Widget analysisTable;
 

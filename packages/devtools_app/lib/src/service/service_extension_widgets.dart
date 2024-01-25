@@ -600,11 +600,15 @@ class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
               ),
             ),
             if (docsUrl != null)
-              MoreInfoLink(
-                url: docsUrl,
-                gaScreenName: widget.serviceExtension.gaScreenName!,
-                gaSelectedItemDescription: widget.serviceExtension.gaDocsItem!,
-                padding: const EdgeInsets.symmetric(vertical: denseSpacing),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
+                child: MoreInfoLink(
+                  url: docsUrl,
+                  gaScreenName: widget.serviceExtension.gaScreenName!,
+                  gaSelectedItemDescription:
+                      widget.serviceExtension.gaDocsItem!,
+                  padding: const EdgeInsets.symmetric(vertical: denseSpacing),
+                ),
               ),
           ],
         );
@@ -679,7 +683,7 @@ class ServiceExtensionCheckboxGroupButton extends StatefulWidget {
 
   final double overlayWidth;
 
-  static const _defaultWidth = 700.0;
+  static const _defaultWidth = 600.0;
 
   @override
   State<ServiceExtensionCheckboxGroupButton> createState() =>

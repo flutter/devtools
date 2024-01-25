@@ -20,7 +20,7 @@ import '../test_infra/utils/debugger_utils.dart';
 import '../test_infra/utils/test_utils.dart';
 
 void main() {
-  const windowSize = Size(2500.0, 1500.0);
+  const windowSize = Size(2500.0, 1200.0);
 
   late FakeServiceConnectionManager fakeServiceConnection;
   late MockScriptManager scriptManager;

@@ -142,7 +142,7 @@ AdaptedHeapData _createHeap(Map<String, int> classToInstanceCount) {
 
   // Create objects.
   for (var entry in classToInstanceCount.entries) {
-    for (var _ in Iterable.generate(entry.value)) {
+    for (var _ in Iterable<void>.generate(entry.value)) {
       objects.add(_createObject(entry.key));
       leafCount++;
       final objectIndex = leafCount;

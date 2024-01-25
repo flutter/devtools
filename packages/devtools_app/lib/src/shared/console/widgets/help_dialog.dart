@@ -70,6 +70,7 @@ class ConsoleHelpLink extends StatelessWidget {
   Widget build(BuildContext context) {
     return ToolbarAction(
       icon: Icons.help_outline,
+      size: defaultIconSize,
       tooltip: 'Console Help',
       onPressed: () {
         unawaited(
