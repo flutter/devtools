@@ -3,7 +3,10 @@
     "terminal.integrated.cwd": "devtools_app",
     "dart.showTodos": false,
     "cSpell.words": [
+        "discoverability",
         "gcing",
+        "kenz",
+        "peterdjlee",
         "unawaited"
     ],
 }

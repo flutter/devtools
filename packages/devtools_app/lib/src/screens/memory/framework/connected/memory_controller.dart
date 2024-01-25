@@ -210,7 +210,7 @@ class MemoryController extends DisposableController
 
     // TODO(terry): Used to detect stream being closed from the
     // memoryController dispose method.  Needed when a HOT RELOAD
-    // will call dispose however, spinup (initState) doesn't seem
+    // will call dispose however, initState doesn't seem
     // to happen David is working on scaffolding.
     _memoryTrackerController.stream.listen(
       (_) {},
