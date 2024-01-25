@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/constants.dart';
 import 'package:devtools_app/src/standalone_ui/api/impl/vs_code_api.dart';
@@ -266,6 +268,7 @@ VsCodeDebugSession generateDebugSession({
     flutterMode: flutterMode,
     flutterDeviceId: deviceId,
     debuggerType: debuggerType,
-    projectRootPath: '/mock/root/path',
+    projectRootPath:
+        Platform.isWindows ? r'C:\mock\root\path' : '/mock/root/path',
   );
 }

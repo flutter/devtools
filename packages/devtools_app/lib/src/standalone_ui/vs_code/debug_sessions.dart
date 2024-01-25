@@ -154,9 +154,17 @@ class _DevToolsMenuState extends State<_DevToolsMenu> {
   void _initExtensions() {
     final sessionRootPath = widget.session.projectRootPath;
     if (sessionRootPath != null) {
-      final fileUri = Uri.file(sessionRootPath);
-      _extensionServiceForSession =
-          ExtensionService(fixedAppRootPath: fileUri.toString());
+      // This file path might be a Windows path but because this code runs in
+      // the web, Uri.file() will not handle it correctly.
+      //
+      // Since all paths are absolute, assume that if the path does not start
+      // with '/' that it's Windows, and parse with Windows semantics.
+      final fileUri = Uri.file(
+        sessionRootPath,
+        windows: !sessionRootPath.startsWith('/'),
+      );
+      assert(fileUri.isScheme('file'));
+      _extensionServiceForSession = ExtensionService(fixedAppRoot: fileUri);
       unawaited(_extensionServiceForSession!.initialize());
     }
   }
