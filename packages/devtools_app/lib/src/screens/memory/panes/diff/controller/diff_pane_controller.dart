@@ -51,7 +51,7 @@ class DiffPaneController extends DisposableController {
 
     final item = SnapshotInstanceItem(
       displayNumber: _nextDisplayNumber(),
-      isolateName: selectedIsolateName ?? '<isolate-not-detected>',
+      autoName: selectedIsolateName ?? '<isolate-not-detected>',
     );
 
     _isAddingSnapshot.value = true;
@@ -67,12 +67,14 @@ class DiffPaneController extends DisposableController {
     );
     final files = await importRawFilesFromPicker();
 
-    final loaders = files.map((file) {});
+    //final loaders = files.map((file) {});
+    _isAddingSnapshot.value = true;
     for (final file in files) {
-      print(file.name);
-      final bytes = await file.readAsBytes();
-      final heapData = AdaptedHeapData.fromBytes(bytes);
+      final item = SnapshotInstanceItem(autoName: file.name);
+      await _addSnapshot(SnapshotTakerFromFile(file), item);
+      derived._updateValues();
     }
+    _isAddingSnapshot.value = false;
   }
 
   Future<void> _addSnapshot(
@@ -105,7 +107,7 @@ class DiffPaneController extends DisposableController {
   }
 
   int _nextDisplayNumber() {
-    final numbers = core._snapshots.value.map((e) => e.displayNumber);
+    final numbers = core._snapshots.value.map((e) => e.displayNumber ?? 0);
     assert(numbers.isNotEmpty);
     return numbers.max + 1;
   }

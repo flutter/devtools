@@ -27,8 +27,8 @@ class MemoryFeatureControllers {
     ProfilePaneController? profilePaneController,
   ) {
     memoryTimeline = MemoryTimeline();
-    diff =
-        diffPaneController ?? DiffPaneController(SnapshotTaker(memoryTimeline));
+    diff = diffPaneController ??
+        DiffPaneController(SnapshotTakerRuntime(memoryTimeline));
     profile = profilePaneController ?? ProfilePaneController();
   }
 
@@ -39,7 +39,7 @@ class MemoryFeatureControllers {
 
   void reset() {
     diff.dispose();
-    diff = DiffPaneController(SnapshotTaker(memoryTimeline));
+    diff = DiffPaneController(SnapshotTakerRuntime(memoryTimeline));
 
     profile.dispose();
     profile = ProfilePaneController();
@@ -290,7 +290,7 @@ class MemoryController extends DisposableController
     }
   }
 
-  /// Detect stale isolates (sentinaled), may happen after a hot restart.
+  /// Detect stale isolates (sentineled), may happen after a hot restart.
   Future<bool> isIsolateLive(String isolateId) async {
     try {
       final service = serviceConnection.serviceManager.service!;
