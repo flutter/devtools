@@ -201,6 +201,7 @@ class DeepLinksController extends DisposableController {
     await validateLinks();
   }
 
+// Get all unverified link data.
   List<LinkData> get _allRawLinkDatas {
     final appLinks = _androidAppLinks[selectedVariantIndex.value]?.deeplinks;
     if (appLinks == null) {
