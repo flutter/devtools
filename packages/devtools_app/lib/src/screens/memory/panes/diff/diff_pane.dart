@@ -156,9 +156,10 @@ Find unexpected memory usage by comparing two heap snapshots:
 
     a. To view current memory allocation click the ● button
 
-    b. Click the ![import]($uploadImageUrl) button to import a snapshot taken with
+    b. To import a snapshot taken with
     [auto-snapshotting](https://github.com/dart-lang/leak_tracker/blob/main/doc/USAGE.md) or
-    [`writeHeapSnapshotToFile`](https://api.flutter.dev/flutter/dart-developer/NativeRuntime/writeHeapSnapshotToFile.html)
+    [writeHeapSnapshotToFile](https://api.flutter.dev/flutter/dart-developer/NativeRuntime/writeHeapSnapshotToFile.html)
+    click the ![import]($uploadImageUrl) button
 
 \v
 
