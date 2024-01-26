@@ -144,6 +144,17 @@ class DiffPaneController extends DisposableController {
     derived._updateValues();
   }
 
+  void exportCurrentItem() {
+    final item = core.selectedItem as SnapshotInstanceItem;
+    ExportController().downloadFile(
+      'hello',
+      fileName: ExportController.generateFileName(
+        type: ExportFileType.json,
+        prefix: item.name,
+      ),
+    );
+  }
+
   void downloadCurrentItemToCsv() {
     final classes = derived.heapClasses.value!;
     final item = core.selectedItem as SnapshotInstanceItem;

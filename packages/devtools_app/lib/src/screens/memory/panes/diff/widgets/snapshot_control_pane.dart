@@ -47,6 +47,17 @@ class SnapshotControlPane extends StatelessWidget {
                     gaSelection: gac.MemoryEvent.diffSnapshotDownloadCsv,
                     onPressed: controller.downloadCurrentItemToCsv,
                   ),
+                  const SizedBox(width: defaultSpacing),
+                  DownloadButton(
+                    tooltip:
+                        'Export snapshot to analyze later in DevTools and other tools',
+                    label: 'Export',
+                    minScreenWidthForTextBeforeScaling:
+                        memoryControlsMinVerboseWidth,
+                    gaScreen: gac.memory,
+                    gaSelection: gac.MemoryEvent.diffSnapshotExport,
+                    onPressed: controller.exportCurrentItem,
+                  ),
                 ],
               ),
               Expanded(
