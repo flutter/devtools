@@ -84,7 +84,7 @@ class AdaptedHeapData {
 
   static final _uiReleaser = UiReleaser();
 
-  HeapSnapshotGraph _graph;
+  final HeapSnapshotGraph _graph;
 
   /// Default value for rootIndex is taken from the doc:
   /// https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/heap_snapshot.md#object-ids
