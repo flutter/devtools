@@ -33,6 +33,7 @@ TODO: Remove this section if there are not any general updates.
 ## Memory updates
 
 * Allocation tracing is now supported for Flutter profile builds and Dart AOT compiled applications. - [#7058](https://github.com/flutter/devtools/pull/7058)
+* Support import of memory snapshots. - [#6974](https://github.com/flutter/devtools/pull/6974)
 
 ## Debugger updates
 
