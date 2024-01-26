@@ -66,14 +66,15 @@ class DiffPaneController extends DisposableController {
       gac.importFile,
     );
     final files = await importRawFilesFromPicker();
+    if (files.isEmpty) return;
 
-    //final loaders = files.map((file) {});
     _isAddingSnapshot.value = true;
-    for (final file in files) {
+    final importers = files.map((file) async {
       final item = SnapshotInstanceItem(autoName: file.name);
       await _addSnapshot(SnapshotTakerFromFile(file), item);
-      derived._updateValues();
-    }
+    });
+    await Future.wait(importers);
+    derived._updateValues();
     _isAddingSnapshot.value = false;
   }
 
