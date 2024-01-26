@@ -36,11 +36,19 @@ extension IsolatePrivateViewExtension on Isolate {
   int get dartHeapSize => newSpaceUsage + oldSpaceUsage;
   int get dartHeapCapacity => newSpaceCapacity + oldSpaceCapacity;
 
-  int get newSpaceUsage => json!['_heaps']['new']['used'];
-  int get oldSpaceUsage => json!['_heaps']['old']['used'];
+  int get newSpaceUsage => _newHeap['used'] as int;
+  int get oldSpaceUsage => _oldHeap['used'] as int;
 
-  int get newSpaceCapacity => json!['_heaps']['new']['capacity'];
-  int get oldSpaceCapacity => json!['_heaps']['old']['capacity'];
+  int get newSpaceCapacity => _newHeap['capacity'] as int;
+  int get oldSpaceCapacity => _oldHeap['capacity'] as int;
+
+  Map<String, Object?> get _newHeap =>
+      (_heaps['new'] as Map).cast<String, Object?>();
+  Map<String, Object?> get _oldHeap =>
+      (_heaps['old'] as Map).cast<String, Object?>();
+
+  Map<String, Object?> get _heaps =>
+      (json!['_heaps'] as Map).cast<String, Object?>();
 }
 
 /// An extension on [Class] which allows for access to VM internal fields.
@@ -56,7 +64,10 @@ extension InboundReferenceExtension on InboundReferences {
   static const _parentWordOffsetKey = '_parentWordOffset';
 
   int? parentWordOffset(int inboundReferenceIndex) {
-    return json![_referencesKey]?[inboundReferenceIndex]?[_parentWordOffsetKey];
+    final references = (json![_referencesKey] as List?)?.cast<Object?>();
+    final inboundReference =
+        (references?[inboundReferenceIndex] as Map?)?.cast<String, Object?>();
+    return inboundReference?[_parentWordOffsetKey] as int?;
   }
 }
 
@@ -89,10 +100,10 @@ extension ClassHeapStatsPrivateViewExtension on ClassHeapStats {
   static const _oldSpaceKey = '_old';
 
   HeapStats get newSpace => json!.containsKey(_newSpaceKey)
-      ? HeapStats.parse(json![_newSpaceKey].cast<int>())
+      ? HeapStats.parse((json![_newSpaceKey] as List).cast<int>())
       : const HeapStats.empty();
   HeapStats get oldSpace => json!.containsKey(_oldSpaceKey)
-      ? HeapStats.parse(json![_oldSpaceKey].cast<int>())
+      ? HeapStats.parse((json![_oldSpaceKey] as List).cast<int>())
       : const HeapStats.empty();
 }
 
@@ -105,11 +116,18 @@ class GCStats {
     required this.averageCollectionTime,
   });
 
-  GCStats.parse({required this.heap, required Map<String, dynamic> json})
-      : usage = json[usedKey],
-        capacity = json[capacityKey],
-        collections = json[collectionsKey] {
-    averageCollectionTime = json[timeKey] * 1000 / collections;
+  factory GCStats.parse({
+    required String heap,
+    required Map<String, dynamic> json,
+  }) {
+    final collections = json[collectionsKey] as int;
+    return GCStats(
+      heap: heap,
+      usage: json[usedKey],
+      capacity: json[capacityKey],
+      collections: collections,
+      averageCollectionTime: (json[timeKey] as num) * 1000 / collections,
+    );
   }
 
   static const usedKey = 'used';
@@ -121,7 +139,7 @@ class GCStats {
   final int usage;
   final int capacity;
   final int collections;
-  late final double averageCollectionTime;
+  final double averageCollectionTime;
 }
 
 extension AllocationProfilePrivateViewExtension on AllocationProfile {
@@ -131,13 +149,16 @@ extension AllocationProfilePrivateViewExtension on AllocationProfile {
 
   GCStats get newSpaceGCStats => GCStats.parse(
         heap: HeapGeneration.newSpace.toString(),
-        json: json![heapsKey][newSpaceKey],
+        json: (_heaps[newSpaceKey] as Map).cast<String, Object?>(),
       );
 
   GCStats get oldSpaceGCStats => GCStats.parse(
         heap: HeapGeneration.oldSpace.toString(),
-        json: json![heapsKey][oldSpaceKey],
+        json: (_heaps[oldSpaceKey] as Map).cast<String, Object?>(),
       );
+
+  Map<String, Object?> get _heaps =>
+      (json![heapsKey] as Map).cast<String, Object?>();
 
   GCStats get totalGCStats {
     final newSpace = newSpaceGCStats;
@@ -436,7 +457,7 @@ class Instruction {
       return;
     }
     final rawObject = data[3] as Map<String, dynamic>;
-    object = rawObject['type'].contains('Instance')
+    object = (rawObject['type'] as List).contains('Instance')
         ? InstanceRef.parse(rawObject)
         : createServiceObject(data[3], const <String>[]) as Response?;
   }
@@ -509,7 +530,9 @@ extension FunctionPrivateViewExtension on Func {
   String? get vmName => json!['_vmName'];
 
   Future<Instance?> get icDataArray async {
-    final String? icDataArrayId = json![_icDataArrayKey]?['id'];
+    final icDataArray =
+        (json![_icDataArrayKey] as Map?)?.cast<String, Object?>();
+    final icDataArrayId = icDataArray?['id'] as String?;
     if (icDataArrayId != null) {
       final service = serviceConnection.serviceManager.service!;
       final isolate =
@@ -616,7 +639,7 @@ class InliningData {
 
   factory InliningData.parse(Map<String, dynamic> json) {
     final startAddress = int.parse(json[kStartAddressKey], radix: 16);
-    final intervals = json[kInlinedIntervals] as List;
+    final intervals = (json[kInlinedIntervals] as List).cast<List>();
     final functions = (json[kInlinedFunctions] as List)
         .cast<Map<String, dynamic>>()
         .map<FuncRef>((e) => FuncRef.parse(e)!)
@@ -793,8 +816,10 @@ extension FieldPrivateViewExtension on Field {
       final isolate =
           serviceConnection.serviceManager.isolateManager.selectedIsolate.value;
 
-      return await service.getObject(isolate!.id!, json![_guardClassKey]['id'])
-          as Class;
+      return await service.getObject(
+        isolate!.id!,
+        guardClassData['id'] as String,
+      ) as Class;
     }
 
     return null;
@@ -816,11 +841,14 @@ extension FieldPrivateViewExtension on Field {
     String? guardClassType;
 
     if (json![_guardClassKey] is Map) {
-      guardClassType = json![_guardClassKey]['type'];
+      guardClassType = guardClassData['type'] as String?;
     }
 
     return guardClassType == '@Class' || guardClassType == 'Class';
   }
+
+  Map<String, Object?> get guardClassData =>
+      (json![_guardClassKey] as Map).cast<String, Object?>();
 }
 
 /// The kinds of Guard Class that determine whether a Field object has
