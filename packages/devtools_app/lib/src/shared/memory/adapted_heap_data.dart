@@ -7,6 +7,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../primitives/utils.dart';
 import 'adapted_heap_object.dart';
+import 'mock_heap_snapshot_graph.dart';
 import 'simple_items.dart';
 
 @immutable
@@ -47,16 +48,17 @@ typedef HeapDataCallback = AdaptedHeapData Function();
 /// Contains information from [HeapSnapshotGraph],
 /// needed for memory screen.
 class AdaptedHeapData {
+  @visibleForTesting
   AdaptedHeapData(
     this.objects, {
     this.rootIndex = _defaultRootIndex,
     DateTime? created,
+    HeapSnapshotGraph? graph,
   })  : assert(objects.isNotEmpty),
-        assert(objects.length > rootIndex) {
+        assert(objects.length > rootIndex),
+        _graph = graph ?? MockHeapSnapshotGraph() {
     this.created = created ?? DateTime.now();
   }
-
-  static final _uiReleaser = UiReleaser();
 
   static Future<AdaptedHeapData> fromHeapSnapshot(
     HeapSnapshotGraph graph,
@@ -69,7 +71,7 @@ class AdaptedHeapData {
       objects.add(object);
     }
 
-    return AdaptedHeapData(objects);
+    return AdaptedHeapData(objects, graph: graph);
   }
 
   static Future<AdaptedHeapData> fromBytes(
@@ -79,6 +81,10 @@ class AdaptedHeapData {
     final graph = HeapSnapshotGraph.fromChunks([data]);
     return fromHeapSnapshot(graph);
   }
+
+  static final _uiReleaser = UiReleaser();
+
+  HeapSnapshotGraph _graph;
 
   /// Default value for rootIndex is taken from the doc:
   /// https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/heap_snapshot.md#object-ids
