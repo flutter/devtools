@@ -4,6 +4,7 @@
     "dart.showTodos": false,
     "cSpell.words": [
         "autofocus",
+        "Diagnosticable",
         "discoverability",
         "gcing",
         "kenz",
@@ -12,6 +13,7 @@
         "Schyler",
         "snapshotting",
         "unawaited",
-        "unfocus"
+        "unfocus",
+        "writeln"
     ],
 }
