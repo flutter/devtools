@@ -68,7 +68,9 @@ class _SnapshotItemContent extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Markdown(
-                          data: _snapshotDocumentation,
+                          data: _snapshotDocumentation(
+                            Theme.of(context).isDarkTheme,
+                          ),
                           styleSheet: MarkdownStyleSheet(
                             p: Theme.of(context).regularTextStyle,
                           ),
@@ -136,8 +138,12 @@ class SnapshotInstanceItemPane extends StatelessWidget {
   }
 }
 
-// `\v` adds vertical space
-const _snapshotDocumentation = '''
+String _snapshotDocumentation(bool isDark) {
+  final filePostfix = isDark ? 'dark' : 'light';
+  final uploadImageUrl = 'assets/img/doc/upload_$filePostfix.png';
+
+  // `\v` adds vertical space
+  return '''
 Find unexpected memory usage by comparing two heap snapshots:
 
 \v
@@ -146,9 +152,17 @@ Find unexpected memory usage by comparing two heap snapshots:
 
 \v
 
-2. Take a **heap snapshot** to view current memory allocation:
+2. Use one of the following ways to get a **heap snapshot**:
 
-    a. In the Snapshots panel, click the ● button
+    a. To view current memory allocation click the ● button
+
+    b. Click the ![import]($uploadImageUrl) button to import a snapshot taken with
+    [auto-snapshotting](https://github.com/dart-lang/leak_tracker/blob/main/doc/USAGE.md) or
+    [`writeHeapSnapshotToFile`](https://api.flutter.dev/flutter/dart-developer/NativeRuntime/writeHeapSnapshotToFile.html)
+
+\v
+
+3. Review the snapshot:
 
     b. If you want to refine results, use the **Filter** button
 
@@ -158,13 +172,13 @@ Find unexpected memory usage by comparing two heap snapshots:
 
 \v
 
-3. Check the **diff** between snapshots to detect allocation issues:
+4. Check the **diff** between snapshots to detect allocation issues:
 
-    a. Take a **snapshot**
+    a. Get a **snapshot**
 
     b. Execute the feature in your application
 
-    c. Take a second snapshot. If you are experiencing DevTools crashes due to size of snapshots,
+    c. Get a second snapshot. If you are experiencing DevTools crashes due to size of snapshots,
        switch to the [desktop version](https://github.com/flutter/devtools/blob/master/BETA_TESTING.md).
 
     d. While viewing the second snapshot, click **Diff with:** and select the first snapshot from the drop-down menu;
@@ -174,3 +188,4 @@ Find unexpected memory usage by comparing two heap snapshots:
 
     f. Select a class from the diff to view its retaining paths, and see which objects hold the references to those instances
 ''';
+}
