@@ -175,18 +175,15 @@ Find unexpected memory usage by comparing two heap snapshots:
 
 4. Check the **diff** between snapshots to detect allocation issues:
 
-    a. Get a **snapshot**
-
-    b. Execute the feature in your application
-
-    c. Get a second snapshot. If you are experiencing DevTools crashes due to size of snapshots,
+    a. Get **snapshots** before and after a feature execution.
+       If you are experiencing DevTools crashes due to size of snapshots,
        switch to the [desktop version](https://github.com/flutter/devtools/blob/master/BETA_TESTING.md).
 
-    d. While viewing the second snapshot, click **Diff with:** and select the first snapshot from the drop-down menu;
+    b. While viewing the second snapshot, click **Diff with:** and select the first snapshot from the drop-down menu;
     the results area will display the diff
 
-    e. Use the **Filter** button to refine the diff results, if needed
+    c. Use the **Filter** button to refine the diff results, if needed
 
-    f. Select a class from the diff to view its retaining paths, and see which objects hold the references to those instances
+    d. Select a class from the diff to view its retaining paths, and see which objects hold the references to those instances
 ''';
 }
