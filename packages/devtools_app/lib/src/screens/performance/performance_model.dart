@@ -366,14 +366,12 @@ extension type _PerformanceDataJson(Map<String, Object?> json) {
   List<FlutterFrame> get frames =>
       (json[PerformanceData.flutterFramesKey] as List? ?? [])
           .cast<Map>()
-          // ignore: avoid-dynamic, json uses dynamic
           .map((f) => f.cast<String, dynamic>())
           .map((f) => FlutterFrame.parse(f))
           .toList();
 
   OfflineTimelineEvent? get selectedEvent {
     final raw = (json[PerformanceData.selectedEventKey] as Map? ?? {})
-        // ignore: avoid-dynamic, json uses dynamic
         .cast<String, dynamic>();
 
     if (raw.isEmpty) return null;
@@ -389,7 +387,6 @@ extension type _PerformanceDataJson(Map<String, Object?> json) {
 
   RebuildCountModel? get rebuildCountModel {
     final raw = (json[PerformanceData.rebuildCountModelKey] as Map? ?? {})
-        // ignore: avoid-dynamic, json uses dynamic
         .cast<String, dynamic>();
     return raw.isNotEmpty ? RebuildCountModel.parse(raw) : null;
   }

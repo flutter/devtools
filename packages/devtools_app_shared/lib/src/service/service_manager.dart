@@ -145,7 +145,7 @@ class ServiceManager<T extends VmService> {
     String name, {
     String? isolateId,
     Map<String, dynamic>? args,
-  }) async {
+  }) {
     final registeredMethod = _registeredMethodsForService[name];
     if (registeredMethod == null) {
       throw Exception('There is no registered method for service "$name"');
