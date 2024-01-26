@@ -14,7 +14,6 @@ import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/config_specific/import_export/import_export.dart';
 import '../../../../../shared/file_import.dart';
 import '../../../../../shared/globals.dart';
-import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../../shared/memory/class_name.dart';
 import '../../../shared/heap/class_filter.dart';
 import '../../../shared/heap/heap.dart';
@@ -60,6 +59,9 @@ class DiffPaneController extends DisposableController {
     derived._updateValues();
   }
 
+  /// Imports snapshots from files.
+  ///
+  /// Opens file selector and loads snapshots from the selected files.
   Future<void> importSnapshots() async {
     ga.select(
       gac.memory,

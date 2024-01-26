@@ -3,10 +3,13 @@
     "terminal.integrated.cwd": "devtools_app",
     "dart.showTodos": false,
     "cSpell.words": [
+        "autofocus",
         "discoverability",
         "gcing",
         "kenz",
+        "listenables",
         "peterdjlee",
-        "unawaited"
+        "unawaited",
+        "unfocus"
     ],
 }
