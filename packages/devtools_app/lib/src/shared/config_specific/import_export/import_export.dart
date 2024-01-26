@@ -159,8 +159,10 @@ abstract class ExportController {
     if (activeScreenId == ScreenMetaData.performance.id) {
       final activeScreen =
           (contents[activeScreenId] as Map).cast<String, Object?>();
-      final traceEvents =
-          List.of((activeScreen[traceEventsFieldName] as List).cast<Object?>());
+      final traceEvents = [
+        for (final event in activeScreen[traceEventsFieldName] as List)
+          (event as Map).cast<String, Object?>(),
+      ];
       contents[traceEventsFieldName] = traceEvents;
       activeScreen.remove(traceEventsFieldName);
     }
