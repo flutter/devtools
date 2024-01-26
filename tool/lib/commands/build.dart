@@ -65,12 +65,12 @@ class BuildCommand extends Command {
 
     if (updateFlutter) {
       logStatus('updating tool/flutter-sdk to the latest flutter candidate');
-      await processManager.runProcess(CliCommand.tool('update-flutter-sdk'));
+      await processManager.runProcess(CliCommand.tool(['update-flutter-sdk']));
     }
 
     if (updatePerfetto) {
       logStatus('updating the bundled Perfetto assets');
-      await processManager.runProcess(CliCommand.tool('update-perfetto'));
+      await processManager.runProcess(CliCommand.tool(['update-perfetto']));
     }
 
     logStatus('cleaning project');
@@ -78,14 +78,14 @@ class BuildCommand extends Command {
       webBuildDir.deleteSync(recursive: true);
     }
     await processManager.runProcess(
-      CliCommand.flutter('clean'),
+      CliCommand.flutter(['clean']),
       workingDirectory: repo.devtoolsAppDirectoryPath,
     );
 
     logStatus('building DevTools in release mode');
     await processManager.runAll(
       commands: [
-        if (runPubGet) CliCommand.tool('pub-get --only-main'),
+        if (runPubGet) CliCommand.tool(['pub-get', '--only-main']),
         CliCommand.flutter(
           [
             'build',
@@ -95,7 +95,7 @@ class BuildCommand extends Command {
             '--pwa-strategy=offline-first',
             if (buildMode != 'debug') '--$buildMode',
             '--no-tree-shake-icons',
-          ].join(' '),
+          ],
         ),
       ],
       workingDirectory: repo.devtoolsAppDirectoryPath,
@@ -108,7 +108,7 @@ class BuildCommand extends Command {
       for (final file in canvaskitDir.listSync()) {
         if (RegExp(r'canvaskit\..*').hasMatch(file.path)) {
           await processManager
-              .runProcess(CliCommand('chmod 0755 ${file.path}'));
+              .runProcess(CliCommand('chmod', ['0755', file.path]));
         }
       }
     }

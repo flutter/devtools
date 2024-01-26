@@ -37,7 +37,7 @@ void setupClipboardCopyListener({
     (MethodCall call) {
       switch (call.method) {
         case 'Clipboard.setData':
-          clipboardContentsCallback(call.arguments['text']);
+          clipboardContentsCallback((call.arguments as Map)['text']);
           break;
         case 'Clipboard.getData':
           return Future.value(<String, Object?>{});

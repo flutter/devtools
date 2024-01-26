@@ -12,10 +12,11 @@ To learn more about DevTools, check out the
 
 * Improved overall usability by making the DevTools UI more dense. This
 significantly improves the user experience when using DevTools embedded in
-an IDE. (#7030)[https://github.com/flutter/devtools/pull/7030]
+an IDE. - [#7030](https://github.com/flutter/devtools/pull/7030)
+* Removed the "Dense mode" setting. - [#7086](https://github.com/flutter/devtools/pull/7086)
 * Added support for filtering with regular expressions in the Logging, Network, and CPU profiler
-pages - (#7027)[https://github.com/flutter/devtools/pull/7027]
-* Add a DevTools server interaction for getting the DTD uri. - (#7054)[https://github.com/flutter/devtools/pull/7054]
+pages - [#7027](https://github.com/flutter/devtools/pull/7027)
+* Add a DevTools server interaction for getting the DTD uri. - [#7054](https://github.com/flutter/devtools/pull/7054)
 
 ## Inspector updates
 
@@ -65,6 +66,7 @@ available. [#6709](https://github.com/flutter/devtools/pull/6709)
 
 * Added a description and link to documentation to the `devtools_options.yaml` file
 that is created in a user's project. - [#7052](https://github.com/flutter/devtools/pull/7052)
+* Updated the Simulated DevTools Environment Panel to be collapsible. - [#7062](https://github.com/flutter/devtools/pull/7062)
 
 ## Full commit history
 

@@ -1,4 +1,4 @@
-## 0.0.9-wip
+## 0.0.9
 * Bump `package:web` to `^0.4.1`.
 * Densify overall UI.
 * Add public members: `PaddedDivider.noPadding`, `singleLineDialogTextFieldDecoration`, `extraLargeSpacing`, `regularTextStyleWithColor`.
@@ -8,6 +8,9 @@
 hitting a narrow screen threshold, specified by `minScreenWidthForTextBeforeScaling`.
 * Add an optional parameter `borderColor` to `DevToolsToggleButtonGroup`.
 * Add a strict type on `DialogApplyButton.onPressed` and `ToggleableServiceExtension`.
+* Change default styling of `regularTextStyle` to inherit from `TextTheme.bodySmall`.
+* Change default styling of `TextTheme.bodySmall`, `TextTheme.bodyMedium`,
+`TextTheme.titleSmall` in the base theme.
 
 ## 0.0.8
 * Add `ServiceManager.resolvedUriManager` for looking up package and file uris from
