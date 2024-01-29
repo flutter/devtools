@@ -101,7 +101,7 @@ class _DeepLinkListViewMainPanel extends StatelessWidget {
               ],
             );
           case PagePhase.linksValidated:
-            return const _VerifiedDeepLinksView();
+            return const _ValidatedDeepLinksView();
           case PagePhase.noLinks:
             // TODO(hangyujin): This is just a place holder to add UI.
             return const Text('Your flutter project has no Links to verify.');
@@ -115,8 +115,8 @@ class _DeepLinkListViewMainPanel extends StatelessWidget {
   }
 }
 
-class _VerifiedDeepLinksView extends StatelessWidget {
-  const _VerifiedDeepLinksView();
+class _ValidatedDeepLinksView extends StatelessWidget {
+  const _ValidatedDeepLinksView();
 
   @override
   Widget build(BuildContext context) {

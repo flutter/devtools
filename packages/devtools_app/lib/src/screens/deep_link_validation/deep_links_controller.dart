@@ -16,12 +16,19 @@ import 'deep_links_services.dart';
 
 typedef _DomainAndPath = ({String domain, String path});
 
+/// The phase of the deep link page.
 enum PagePhase {
+  // The empty state.
   emptyState,
+  // Loading links from the flutter project.
   linksLoading,
-  noLinks, // No links to validate
+  // Loading completed but no link to validate
+  noLinks,
+  // Validating links.
   linksValidating,
+  // Links are validated.
   linksValidated,
+  // Error page.
   errorPage,
 }
 
@@ -201,7 +208,7 @@ class DeepLinksController extends DisposableController {
     await validateLinks();
   }
 
-// Get all unverified link data.
+  /// Get all unverified link data.
   List<LinkData> get _allRawLinkDatas {
     final appLinks = _androidAppLinks[selectedVariantIndex.value]?.deeplinks;
     if (appLinks == null) {
