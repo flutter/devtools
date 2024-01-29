@@ -50,7 +50,7 @@ class DiffPaneController extends DisposableController {
 
     final item = SnapshotInstanceItem(
       displayNumber: _nextDisplayNumber(),
-      autoName: selectedIsolateName ?? '<isolate-not-detected>',
+      defaultName: selectedIsolateName ?? '<isolate-not-detected>',
     );
 
     _isAddingSnapshot.value = true;
@@ -72,7 +72,7 @@ class DiffPaneController extends DisposableController {
 
     _isAddingSnapshot.value = true;
     final importers = files.map((file) async {
-      final item = SnapshotInstanceItem(autoName: file.name);
+      final item = SnapshotInstanceItem(defaultName: file.name);
       await _addSnapshot(SnapshotTakerFromFile(file), item);
     });
     await Future.wait(importers);

@@ -30,13 +30,13 @@ class SnapshotDocItem extends SnapshotItem {
 class SnapshotInstanceItem extends SnapshotItem {
   SnapshotInstanceItem({
     this.displayNumber,
-    required this.autoName,
+    required this.defaultName,
   }) {
     _isProcessing.value = true;
   }
 
   /// Automatically assigned name like isolate name or file name.
-  final String autoName;
+  final String defaultName;
 
   AdaptedHeap? heap;
 
@@ -55,7 +55,7 @@ class SnapshotInstanceItem extends SnapshotItem {
 
   String get name =>
       nameOverride ??
-      '$autoName${displayNumber == null ? '' : '-$displayNumber'}';
+      '$defaultName${displayNumber == null ? '' : '-$displayNumber'}';
 
   String? nameOverride;
 
