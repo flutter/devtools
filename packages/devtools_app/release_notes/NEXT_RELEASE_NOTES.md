@@ -32,8 +32,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## Memory updates
 
-* Allocation tracing is now supported for Flutter profile builds and Dart AOT compiled applications. - [#7058](https://github.com/flutter/devtools/pull/7058)
-* Support import of memory snapshots. - [#6974](https://github.com/flutter/devtools/pull/6974)
+* Supported allocation tracing for Flutter profile builds and Dart AOT compiled applications. - [#7058](https://github.com/flutter/devtools/pull/7058)
+* Supported import of memory snapshots. - [#6974](https://github.com/flutter/devtools/pull/6974)
 
 ## Debugger updates
 
@@ -60,7 +60,7 @@ TODO: Remove this section if there are not any general updates.
 ## VS Code Sidebar updates
 
 * Fixed an issue that prevented the VS code sidebar from loading in recent beta/master builds. - [#6984](https://github.com/flutter/devtools/pull/6984)
-* Show DevTools extensions as an option from the debug sessions DevTools dropdown, when
+* Showed DevTools extensions as an option from the debug sessions DevTools dropdown, when
 available. [#6709](https://github.com/flutter/devtools/pull/6709)
 
 ## DevTools Extension updates

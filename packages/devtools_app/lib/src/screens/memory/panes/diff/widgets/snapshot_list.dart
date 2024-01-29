@@ -287,6 +287,7 @@ class _EditableSnapshotNameState extends State<_EditableSnapshotName>
 
   @override
   Widget build(BuildContext context) {
+    // TODO(polina-c): start using ellipsis when it is available, https://github.com/flutter/devtools/issues/7130
     return TextField(
       controller: textEditingController,
       focusNode: textFieldFocusNode,
