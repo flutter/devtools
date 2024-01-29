@@ -6,6 +6,9 @@ part of 'devtools_extension.dart';
 
 final _log = Logger('devtools_extensions/extension_manager');
 
+const _vmServiceQueryParameter = 'uri';
+const _dtdQueryParameter = 'dtdUri';
+
 class ExtensionManager {
   final _registeredEventHandlers =
       <DevToolsExtensionEventType, ExtensionEventHandler>{};
@@ -53,7 +56,7 @@ class ExtensionManager {
     final themeValue = queryParams[ExtensionEventParameters.theme];
     _setThemeForValue(themeValue);
 
-    final vmServiceUri = queryParams['uri'];
+    final vmServiceUri = queryParams[_vmServiceQueryParameter];
     if (connectToVmService) {
       if (vmServiceUri == null) {
         // Request the vm service uri for the connected app. DevTools will
@@ -69,9 +72,9 @@ class ExtensionManager {
       }
     }
 
-    final dtdUri = queryParams['dtdUri'];
+    final dtdUri = queryParams[_dtdQueryParameter];
     if (dtdUri != null) {
-      unawaited(dtdManager.connect(Uri.parse(dtdUri)));
+      unawaited(_connectToDtd(dtdUri));
     }
   }
 
@@ -159,8 +162,8 @@ class ExtensionManager {
       if (serviceManager.hasConnection) {
         await serviceManager.manuallyDisconnect();
       }
-      if (loadQueryParams().containsKey('uri')) {
-        _updateQueryParameter('uri', null);
+      if (loadQueryParams().containsKey(_vmServiceQueryParameter)) {
+        _updateQueryParameter(_vmServiceQueryParameter, null);
       }
       return;
     }
@@ -181,10 +184,40 @@ class ExtensionManager {
         vmService,
         onClosed: finishedCompleter.future,
       );
-      _updateQueryParameter('uri', serviceManager.service!.wsUri!);
+      _updateQueryParameter(
+        _vmServiceQueryParameter,
+        serviceManager.service!.wsUri!,
+      );
     } catch (e) {
       final errorMessage =
           'Unable to connect extension to VM service at $vmServiceUri: $e';
+      showNotification('Error: $errorMessage');
+      _log.shout(errorMessage);
+    }
+  }
+
+  Future<void> _connectToDtd(String? dtdUri) async {
+    // TODO(kenz): investigate. this is weird but `dtdUri` != null even
+    // when the `toString()` representation is 'null'.
+    if (dtdUri == null || dtdUri == 'null') {
+      if (dtdManager.hasConnection) {
+        await dtdManager.disconnect();
+      }
+      if (loadQueryParams().containsKey(_dtdQueryParameter)) {
+        _updateQueryParameter(_dtdQueryParameter, null);
+      }
+      return;
+    }
+
+    try {
+      await dtdManager.connect(Uri.parse(dtdUri));
+      _updateQueryParameter(
+        _dtdQueryParameter,
+        dtdManager.uri.toString(),
+      );
+    } catch (e) {
+      final errorMessage =
+          'Unable to connect extension to the Dart Tooling Daemon at $dtdUri: $e';
       showNotification('Error: $errorMessage');
       _log.shout(errorMessage);
     }
