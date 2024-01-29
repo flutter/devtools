@@ -21,7 +21,7 @@ Future<List<DevToolsExtensionConfig>> refreshAvailableExtensions(
       final extensionsAsJson =
           (parsedResult[ExtensionsApi.extensionsResultPropertyName]!
                   as List<Object?>)
-              .whereNotNull()
+              .nonNulls
               .cast<Map<String, Object?>>();
 
       final warningMessage =

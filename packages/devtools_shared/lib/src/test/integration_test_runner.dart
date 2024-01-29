@@ -8,7 +8,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
 import 'chrome_driver.dart';
