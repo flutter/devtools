@@ -78,7 +78,7 @@ Future<bool> confirmConsentMessageShown() async {
       return true;
     }
   }
-  
+
   return false;
 }
 
