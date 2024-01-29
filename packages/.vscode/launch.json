@@ -89,5 +89,14 @@
             "type": "dart",
             "request": "attach",
         },
+        {
+            "name": "foo_devtools_extension example + simulated environment",
+            "request": "launch",
+            "type": "dart",
+            "program": "devtools_extensions/example/foo/packages/foo_devtools_extension/lib/main.dart",
+            "args": [
+                "--dart-define=use_simulated_environment=true"
+            ],
+        },
     ]
 }
