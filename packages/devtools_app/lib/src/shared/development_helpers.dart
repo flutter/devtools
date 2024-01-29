@@ -27,14 +27,14 @@ const _debugDevToolsExtensions = false;
 
 List<DevToolsExtensionConfig> debugHandleRefreshAvailableExtensions(
   // ignore: avoid-unused-parameters, false positive due to conditional imports
-  String rootPath,
+  Uri appRoot,
 ) {
   return debugExtensions;
 }
 
 ExtensionEnabledState debugHandleExtensionEnabledState({
   // ignore: avoid-unused-parameters, false positive due to conditional imports
-  required String rootPath,
+  required Uri appRoot,
   required String extensionName,
   bool? enable,
 }) {
