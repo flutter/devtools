@@ -83,7 +83,7 @@ class ServiceManager<T extends VmService> {
 
   final resolvedUriManager = ResolvedUriManager();
 
-  /// Proxy to state inside the isolateManager, for code consizeness.
+  /// Proxy to state inside the isolateManager, for code conciseness.
   ///
   /// Defaults to false if there is no main isolate.
   bool get isMainIsolatePaused =>
