@@ -342,9 +342,7 @@ class _PathCheckTable extends StatelessWidget {
           'Path check (coming soon)',
           style: Theme.of(context).textTheme.titleSmall,
         ),
-        Opacity(
-          opacity: 0.5,
-          child: DataTable(
+DataTable(
             headingRowHeight: defaultHeaderHeight,
             dataRowMinHeight: defaultRowHeight,
             dataRowMaxHeight: defaultRowHeight,
@@ -389,7 +387,7 @@ class _PathCheckTable extends StatelessWidget {
                 ],
               ),
             ],
-          ),
+          
         ),
       ],
     );
