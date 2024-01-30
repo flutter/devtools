@@ -169,13 +169,11 @@ void main() {
       );
       test(
         'returns privates only from library',
-        skip: true,
         () async {
           await runMethodAndWaitForPause(
             'AnotherClass().pauseWithScopedVariablesMethod()',
           );
           expect(
-            collectionEquals(
               await autoCompleteResultsFor(
                 EditingParts(
                   activeWord: '_',
@@ -184,14 +182,13 @@ void main() {
                 ),
                 evalService,
               ),
+            unorderedEquals(
               [
                 '_privateField2',
                 '_privateField1',
                 '_PrivateClass',
               ],
-              ordered: false,
             ),
-            isTrue,
           );
         },
         timeout: const Timeout.factor(8),
