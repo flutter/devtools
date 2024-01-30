@@ -8,10 +8,10 @@ import 'package:devtools_app/src/screens/vm_developer/object_inspector/object_in
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/object_viewport.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_object_model.dart';
 import 'package:devtools_app/src/shared/diagnostics/primitives/source_location.dart';
-import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/primitives/listenable.dart';
 import 'package:devtools_app/src/shared/primitives/utils.dart';
 import 'package:devtools_app/src/shared/scripts/script_manager.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mockito/mockito.dart';

@@ -4,13 +4,12 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/globals.dart';
-import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/trees.dart';
-import '../../shared/primitives/utils.dart';
 import '../vm_developer/vm_service_private_extensions.dart';
 import 'program_explorer_model.dart';
 
@@ -72,9 +71,10 @@ class ProgramExplorerController extends DisposableController
     }
     _initializing = true;
 
-    final isolate = serviceManager.isolateManager.selectedIsolate.value;
+    final isolate =
+        serviceConnection.serviceManager.isolateManager.selectedIsolate.value;
     final libraries = isolate != null
-        ? serviceManager.isolateManager
+        ? serviceConnection.serviceManager.isolateManager
             .isolateState(isolate)
             .isolateNow!
             .libraries!
@@ -119,7 +119,8 @@ class ProgramExplorerController extends DisposableController
     ScriptRef? script,
     List<VMServiceObjectNode> nodes,
   ) async {
-    bool searchCondition(node) => node.script?.uri == script!.uri;
+    bool searchCondition(VMServiceObjectNode node) =>
+        node.script?.uri == script!.uri;
     for (final node in nodes) {
       final result = node.firstChildWithCondition(searchCondition);
       if (result != null) {
@@ -249,8 +250,9 @@ class ProgramExplorerController extends DisposableController
   /// immediately returns.
   Future<void> populateNode(VMServiceObjectNode node) async {
     final object = node.object;
-    final service = serviceManager.service;
-    final isolateId = serviceManager.isolateManager.selectedIsolate.value!.id;
+    final service = serviceConnection.serviceManager.service;
+    final isolateId = serviceConnection
+        .serviceManager.isolateManager.selectedIsolate.value!.id;
 
     Future<List<Obj>> getObjects(Iterable<ObjRef> objs) {
       return Future.wait(
@@ -330,8 +332,9 @@ class ProgramExplorerController extends DisposableController
   /// Searches and returns the script or library node in the FileExplorer
   /// which is the source location of the target [object].
   Future<VMServiceObjectNode> searchFileExplorer(ObjRef object) async {
-    final service = serviceManager.service!;
-    final isolateId = serviceManager.isolateManager.selectedIsolate.value!.id!;
+    final service = serviceConnection.serviceManager.service!;
+    final isolateId = serviceConnection
+        .serviceManager.isolateManager.selectedIsolate.value!.id!;
 
     // If `object` is a library, it will always be a root node and is simple to
     // find.

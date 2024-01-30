@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import '../config_specific/server/server.dart' as server;
+import '../server/server.dart' as server;
 import 'analytics.dart' as ga;
 import 'analytics_controller.dart';
 

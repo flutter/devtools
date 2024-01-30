@@ -35,8 +35,6 @@ class TraceEvent {
   static const durationBeginPhase = 'B';
   static const durationEndPhase = 'E';
   static const durationCompletePhase = 'X';
-  static const flowStartPhase = 's';
-  static const flowEndPhase = 'f';
   static const metadataEventPhase = 'M';
 
   static const gcCategory = 'GC';
@@ -107,10 +105,6 @@ class TraceEvent {
 
   set type(TimelineEventType t) => _type = t;
 
-  bool get isUiEvent => type == TimelineEventType.ui;
-
-  bool get isRasterEvent => type == TimelineEventType.raster;
-
   TraceEvent copy({
     String? name,
     String? category,
@@ -150,8 +144,6 @@ class TraceEventWrapper implements Comparable<TraceEventWrapper> {
   final int wrapperId;
 
   Map<String, dynamic> get json => event.json;
-
-  bool processed = false;
 
   bool get isShaderEvent => event.args!['devtoolsTag'] == 'shaders';
 
@@ -199,8 +191,7 @@ class ThreadNameEvent {
   final int? threadId;
 
   @override
-  // ignore: avoid-dynamic, necessary here.
-  bool operator ==(other) {
+  bool operator ==(Object other) {
     return other is ThreadNameEvent &&
         name == other.name &&
         threadId == other.threadId;

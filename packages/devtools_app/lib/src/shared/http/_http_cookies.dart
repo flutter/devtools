@@ -20,7 +20,7 @@
 // ignore_for_file: unused_element
 // ignore_for_file: unused_local_variable
 
-part of http;
+part of 'http.dart';
 
 class Cookie {
   String? _name;

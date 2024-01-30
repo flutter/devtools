@@ -7,9 +7,10 @@ import 'dart:convert';
 
 import 'package:devtools_app/src/screens/logging/logging_controller.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/primitives/message_bus.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -39,10 +40,14 @@ void main() {
       );
     }
 
+    void addLogWithKind(String kind) {
+      controller.log(LogData(kind, jsonEncode({'foo': 'test_data'}), 0));
+    }
+
     setUp(() {
       setGlobal(
         ServiceConnectionManager,
-        FakeServiceManager(),
+        FakeServiceConnectionManager(),
       );
 
       controller = LoggingController();
@@ -51,7 +56,7 @@ void main() {
     test('initial state', () {
       expect(controller.data, isEmpty);
       expect(controller.filteredData.value, isEmpty);
-      expect(controller.activeFilter.value.isEmpty, isTrue);
+      expect(controller.activeFilter.value.isEmpty, isFalse);
     });
 
     test('receives data', () {
@@ -81,6 +86,8 @@ void main() {
       addStdoutData('abc');
       addStdoutData('def');
       addStdoutData('abc ghi');
+      addLogWithKind('Flutter.Navigation');
+      addLogWithKind('Flutter.Error');
       addGcData('gc1');
       addGcData('gc2');
 
@@ -88,11 +95,12 @@ void main() {
       expect(controller.matchesForSearch('abc').length, equals(2));
       expect(controller.matchesForSearch('ghi').length, equals(1));
       expect(controller.matchesForSearch('abcd').length, equals(0));
+      expect(controller.matchesForSearch('Flutter*').length, equals(2));
       expect(controller.matchesForSearch('').length, equals(0));
 
       // Search by event kind.
       expect(controller.matchesForSearch('stdout').length, equals(3));
-      expect(controller.matchesForSearch('gc').length, equals(2));
+      expect(controller.matchesForSearch('flutter.*').length, equals(2));
 
       // Search with incorrect case.
       expect(controller.matchesForSearch('STDOUT').length, equals(3));
@@ -102,6 +110,8 @@ void main() {
       addStdoutData('abc');
       addStdoutData('def');
       addStdoutData('abc ghi');
+      addLogWithKind('Flutter.Navigation');
+      addLogWithKind('Flutter.Error');
       addGcData('gc1');
       addGcData('gc2');
 
@@ -111,7 +121,7 @@ void main() {
       expect(matches.length, equals(2));
       verifyIsSearchMatch(controller.filteredData.value, matches);
 
-      controller.search = 'gc';
+      controller.search = 'Flutter.';
       matches = controller.searchMatches.value;
       expect(matches.length, equals(2));
       verifyIsSearchMatch(controller.filteredData.value, matches);
@@ -121,47 +131,80 @@ void main() {
       addStdoutData('abc');
       addStdoutData('def');
       addStdoutData('abc ghi');
+      addLogWithKind('Flutter.Navigation');
+      addLogWithKind('Flutter.Error');
+
+      // The following logs should all be filtered by default.
       addGcData('gc1');
       addGcData('gc2');
+      addLogWithKind('Flutter.FirstFrame');
+      addLogWithKind('Flutter.FrameworkInitialization');
+      addLogWithKind('Flutter.Frame');
+      addLogWithKind('Flutter.ImageSizesForFrame');
+      addLogWithKind('Flutter.ServiceExtensionStateChanged');
 
-      expect(controller.data, hasLength(5));
+      // At this point data is filtered by the default toggle filter values.
+      expect(controller.data, hasLength(12));
       expect(controller.filteredData.value, hasLength(5));
 
+      // Test query filters assuming default toggle filters are all enabled.
+      for (final filter in controller.activeFilter.value.toggleFilters) {
+        filter.enabled.value = true;
+      }
+
       controller.setActiveFilter(query: 'abc');
-      expect(controller.data, hasLength(5));
+      expect(controller.data, hasLength(12));
       expect(controller.filteredData.value, hasLength(2));
 
       controller.setActiveFilter(query: 'def');
-      expect(controller.data, hasLength(5));
+      expect(controller.data, hasLength(12));
       expect(controller.filteredData.value, hasLength(1));
 
-      controller.setActiveFilter(query: 'k:stdout abc def');
-      expect(controller.data, hasLength(5));
+      controller.setActiveFilter(query: 'abc def');
+      expect(controller.data, hasLength(12));
       expect(controller.filteredData.value, hasLength(3));
 
-      controller.setActiveFilter(query: 'kind:gc');
-      expect(controller.data, hasLength(5));
+      controller.setActiveFilter(query: 'k:stdout');
+      expect(controller.data, hasLength(12));
+      expect(controller.filteredData.value, hasLength(3));
+
+      controller.setActiveFilter(query: '-k:stdout');
+      expect(controller.data, hasLength(12));
       expect(controller.filteredData.value, hasLength(2));
 
       controller.setActiveFilter(query: 'k:stdout abc');
-      expect(controller.data, hasLength(5));
+      expect(controller.data, hasLength(12));
       expect(controller.filteredData.value, hasLength(2));
 
-      controller.setActiveFilter(query: '-k:gc');
-      expect(controller.data, hasLength(5));
-      expect(controller.filteredData.value, hasLength(3));
-
-      controller.setActiveFilter(query: '-k:gc,stdout');
-      expect(controller.data, hasLength(5));
-      expect(controller.filteredData.value, hasLength(0));
-
-      controller.setActiveFilter(query: 'k:gc,stdout,stdin,flutter.frame');
-      expect(controller.data, hasLength(5));
-      expect(controller.filteredData.value, hasLength(5));
+      controller.setActiveFilter(query: 'k:stdout,flutter.navigation');
+      expect(controller.data, hasLength(12));
+      expect(controller.filteredData.value, hasLength(4));
 
       controller.setActiveFilter();
-      expect(controller.data, hasLength(5));
+      expect(controller.data, hasLength(12));
       expect(controller.filteredData.value, hasLength(5));
+
+      // Test toggle filters.
+      final verboseFlutterFrameworkFilter =
+          controller.activeFilter.value.toggleFilters[0];
+      final verboseFlutterServiceFilter =
+          controller.activeFilter.value.toggleFilters[1];
+      final gcFilter = controller.activeFilter.value.toggleFilters[2];
+
+      verboseFlutterFrameworkFilter.enabled.value = false;
+      controller.setActiveFilter();
+      expect(controller.data, hasLength(12));
+      expect(controller.filteredData.value, hasLength(9));
+
+      verboseFlutterServiceFilter.enabled.value = false;
+      controller.setActiveFilter();
+      expect(controller.data, hasLength(12));
+      expect(controller.filteredData.value, hasLength(10));
+
+      gcFilter.enabled.value = false;
+      controller.setActiveFilter();
+      expect(controller.data, hasLength(12));
+      expect(controller.filteredData.value, hasLength(12));
     });
   });
 

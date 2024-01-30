@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/shared/eval_on_dart_library.dart';
 import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../test_infra/flutter_test_driver.dart';
@@ -30,7 +31,11 @@ void main() {
       'getHashCode',
       () async {
         await env.setupEnvironment();
-        final eval = EvalOnDartLibrary('dart:core', serviceManager.service!);
+        final eval = EvalOnDartLibrary(
+          'dart:core',
+          serviceConnection.serviceManager.service!,
+          serviceManager: serviceConnection.serviceManager,
+        );
 
         final instance = await eval.safeEval('42', isAlive: isAlive);
 
@@ -44,13 +49,14 @@ void main() {
 
     group('asyncEval', () {
       test(
-        'supports expresions that do not start with the await keyword',
+        'supports expressions that do not start with the await keyword',
         () async {
           await env.setupEnvironment();
 
           final eval = EvalOnDartLibrary(
             'dart:core',
-            serviceManager.service!,
+            serviceConnection.serviceManager.service!,
+            serviceManager: serviceConnection.serviceManager,
           );
 
           final instance = (await eval.asyncEval('42', isAlive: isAlive))!;
@@ -67,12 +73,14 @@ void main() {
         'returns the result of the future completion',
         () async {
           await env.setupEnvironment();
-          final mainIsolate = serviceManager.isolateManager.mainIsolate;
+          final mainIsolate =
+              serviceConnection.serviceManager.isolateManager.mainIsolate;
           expect(mainIsolate, isNotNull);
 
           final eval = EvalOnDartLibrary(
             'dart:core',
-            serviceManager.service!,
+            serviceConnection.serviceManager.service!,
+            serviceManager: serviceConnection.serviceManager,
             isolate: mainIsolate,
           );
 
@@ -85,6 +93,9 @@ void main() {
           expect(instance.valueAsString, '42');
         },
         timeout: const Timeout.factor(2),
+        // TODO(https://github.com/flutter/devtools/issues/6998): if this flake
+        // is addressed, we can unskip this for the Flutter customer tests.
+        tags: skipForCustomerTestsTag,
       );
 
       test(
@@ -94,7 +105,8 @@ void main() {
 
           final eval = EvalOnDartLibrary(
             'dart:core',
-            serviceManager.service!,
+            serviceConnection.serviceManager.service!,
+            serviceManager: serviceConnection.serviceManager,
           );
 
           final instance = await eval
@@ -106,7 +118,7 @@ void main() {
                 (_) => throw Exception(
                   'The FutureFailedException was not thrown as expected.',
                 ),
-                onError: (err) => err,
+                onError: (Object? err) => err,
               );
 
           expect(

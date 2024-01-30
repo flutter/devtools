@@ -33,7 +33,6 @@ class ProfileInstanceTableCell extends StatelessWidget {
   Widget build(BuildContext context) {
     return InstanceViewWithContextMenu(
       count: count,
-      gaContext: gaContext,
       menuBuilder: _shouldShowMenu ? _buildHeapInstancesMenu : null,
     );
   }
@@ -56,7 +55,7 @@ class _StoreAllAsVariableMenu extends StatelessWidget {
     const menuText = 'Store all class instances';
 
     MenuItemButton item(
-      title, {
+      String title, {
       required bool subclasses,
       required bool implementers,
     }) =>
@@ -93,9 +92,7 @@ class _StoreAsOneVariableMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     return MenuItemButton(
       onPressed: sampler.oneLiveToConsole,
-      child: const Text(
-        'Store one instance as a console variable',
-      ),
+      child: const Text('Store one instance as a console variable'),
     );
   }
 }

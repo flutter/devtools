@@ -2,34 +2,34 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/screens/debugger/debugger_screen.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/notifications.dart';
-import 'package:devtools_app/src/shared/scripts/script_manager.dart';
+import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
 void main() {
-  final fakeServiceManager = FakeServiceManager();
+  final fakeServiceConnection = FakeServiceConnectionManager();
   final debuggerController = createMockDebuggerControllerWithDefaults();
   final scriptManager = MockScriptManager();
 
-  when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
-  when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
-  setGlobal(ServiceConnectionManager, fakeServiceManager);
+  when(fakeServiceConnection.serviceManager.connectedApp!.isProfileBuildNow)
+      .thenReturn(false);
+  when(fakeServiceConnection.serviceManager.connectedApp!.isDartWebAppNow)
+      .thenReturn(false);
+  setGlobal(ServiceConnectionManager, fakeServiceConnection);
   setGlobal(IdeTheme, IdeTheme());
   setGlobal(ScriptManager, scriptManager);
   setGlobal(NotificationService, NotificationService());
-  fakeServiceManager.consoleService.ensureServiceInitialized();
+  fakeServiceConnection.consoleService.ensureServiceInitialized();
 
   setUp(() {
-    fakeServiceManager.isMainIsolatePaused = true;
-    (fakeServiceManager.isolateManager as FakeIsolateManager)
+    fakeServiceConnection.serviceManager.isMainIsolatePaused = true;
+    (fakeServiceConnection.serviceManager.isolateManager as FakeIsolateManager)
         .setMainIsolatePausedState(true);
   });
 
@@ -90,8 +90,8 @@ void main() {
   });
 
   testWidgets('are hidden when app is not paused', (WidgetTester tester) async {
-    fakeServiceManager.isMainIsolatePaused = false;
-    (fakeServiceManager.isolateManager as FakeIsolateManager)
+    fakeServiceConnection.serviceManager.isMainIsolatePaused = false;
+    (fakeServiceConnection.serviceManager.isolateManager as FakeIsolateManager)
         .setMainIsolatePausedState(false);
     await pumpControls(tester);
     final animatedOpacityFinder = find.byType(AnimatedOpacity);

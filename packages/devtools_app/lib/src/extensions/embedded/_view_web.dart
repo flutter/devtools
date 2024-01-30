@@ -3,14 +3,18 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-// ignore: avoid_web_libraries_in_flutter, as designed
-import 'dart:html' as html;
+import 'dart:js_interop';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_extensions/api.dart';
+import 'package:devtools_extensions/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:web/web.dart';
 
+import '../../shared/banner_messages.dart';
+import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
-import '../../shared/primitives/auto_dispose.dart';
 import '_controller_web.dart';
 import 'controller.dart';
 
@@ -23,7 +27,8 @@ class EmbeddedExtension extends StatefulWidget {
   State<EmbeddedExtension> createState() => _EmbeddedExtensionState();
 }
 
-class _EmbeddedExtensionState extends State<EmbeddedExtension> {
+class _EmbeddedExtensionState extends State<EmbeddedExtension>
+    with AutoDisposeMixin {
   late final EmbeddedExtensionControllerImpl _embeddedExtensionController;
   late final _ExtensionIFrameController iFrameController;
 
@@ -37,18 +42,33 @@ class _EmbeddedExtensionState extends State<EmbeddedExtension> {
   }
 
   @override
+  void dispose() {
+    iFrameController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Container(
       color: Theme.of(context).scaffoldBackgroundColor,
-      child: HtmlElementView(
-        viewType: _embeddedExtensionController.viewId,
+      child: ValueListenableBuilder<bool>(
+        valueListenable: extensionService.refreshInProgress,
+        builder: (context, refreshing, _) {
+          if (refreshing) {
+            return const CenteredCircularProgressIndicator();
+          }
+          return HtmlElementView(
+            viewType: _embeddedExtensionController.viewId,
+          );
+        },
       ),
     );
   }
 }
 
 class _ExtensionIFrameController extends DisposableController
-    with AutoDisposeControllerMixin {
+    with AutoDisposeControllerMixin
+    implements DevToolsExtensionHostInterface {
   _ExtensionIFrameController(this.embeddedExtensionController);
 
   final EmbeddedExtensionControllerImpl embeddedExtensionController;
@@ -71,8 +91,17 @@ class _ExtensionIFrameController extends DisposableController
 
   static const _pollUntilReadyTimeout = Duration(seconds: 10);
 
+  /// The listener that is added to DevTools' [html.window] to receive messages
+  /// from the extension.
+  ///
+  /// We need to store this in a variable so that the listener is properly
+  /// removed in [dispose]. Otherwise, we will end up in a state where we are
+  /// leaking listeners when an extension is disabled and re-enabled.
+  EventListener? _handleMessageListener;
+
   void init() {
     _iFrameReady = Completer<void>();
+    _extensionHandlerReady = Completer<void>();
 
     unawaited(
       embeddedExtensionController.extensionIFrame.onLoad.first.then((_) {
@@ -80,14 +109,23 @@ class _ExtensionIFrameController extends DisposableController
       }),
     );
 
-    html.window.addEventListener('message', _handleMessage);
+    window.addEventListener(
+      'message',
+      _handleMessageListener = _handleMessage.toJS,
+    );
 
     autoDisposeStreamSubscription(
       embeddedExtensionController.extensionPostEventStream.stream
           .listen((event) async {
         final ready = await _pingExtensionUntilReady();
         if (ready) {
-          _postMessage(event);
+          switch (event.type) {
+            case DevToolsExtensionEventType.forceReload:
+              forceReload();
+              break;
+            default:
+              _postMessage(event);
+          }
         } else {
           // TODO(kenz): we may want to give the user a way to retry the failed
           // request or show a more permanent error UI where we guide them to
@@ -100,9 +138,23 @@ class _ExtensionIFrameController extends DisposableController
         }
       }),
     );
+
+    addAutoDisposeListener(preferences.darkModeTheme, () {
+      updateTheme(
+        theme: preferences.darkModeTheme.value
+            ? ExtensionEventParameters.themeValueDark
+            : ExtensionEventParameters.themeValueLight,
+      );
+    });
   }
 
   void _postMessage(DevToolsExtensionEvent event) async {
+    // In [integrationTestMode] we are loading a placeholder url
+    // (https://flutter.dev/) in the extension iFrame, so trying to post a
+    // message causes a cross-origin security error. Return early when
+    // [integrationTestMode] is true so that [_postMessage] calls are a no-op.
+    if (integrationTestMode) return;
+
     await _iFrameReady.future;
     final message = event.toJson();
     assert(
@@ -111,39 +163,20 @@ class _ExtensionIFrameController extends DisposableController
       ' _iFrameReady future completed.',
     );
     embeddedExtensionController.extensionIFrame.contentWindow!.postMessage(
-      message,
-      embeddedExtensionController.extensionUrl,
+      message.jsify(),
+      embeddedExtensionController.extensionUrl.toJS,
     );
   }
 
-  void _handleMessage(html.Event e) {
-    if (e is html.MessageEvent) {
-      final extensionEvent = DevToolsExtensionEvent.tryParse(e.data);
-      if (extensionEvent != null) {
-        switch (extensionEvent.type) {
-          case DevToolsExtensionEventType.ping:
-          // Ignore. DevTools should not receive/handle ping events.
-          case DevToolsExtensionEventType.pong:
-            if (!_extensionHandlerReady.isCompleted) {
-              _extensionHandlerReady.complete();
-            }
-            break;
-          case DevToolsExtensionEventType.vmServiceConnection:
-            final service = serviceManager.service;
-            if (service == null) break;
-            _postMessage(
-              DevToolsExtensionEvent(
-                DevToolsExtensionEventType.vmServiceConnection,
-                data: {'uri': service.connectedUri.toString()},
-              ),
-            );
-            break;
-          default:
-            notificationService.push(
-              'Unknown event received from extension: ${e.data}',
-            );
-        }
-      }
+  void _handleMessage(Event e) {
+    final extensionEvent = tryParseExtensionEvent(e);
+    if (extensionEvent != null) {
+      onEventReceived(
+        extensionEvent,
+        onUnknownEvent: () => notificationService.push(
+          'Unknown event received from extension: $extensionEvent}',
+        ),
+      );
     }
   }
 
@@ -160,7 +193,7 @@ class _ExtensionIFrameController extends DisposableController
         // Once the extension UI is ready, the extension will receive this
         // [DevToolsExtensionEventType.ping] message and return a
         // [DevToolsExtensionEventType.pong] message, handled in [_handleMessage].
-        _postMessage(DevToolsExtensionEvent.ping);
+        ping();
       });
 
       await _extensionHandlerReady.future.timeout(
@@ -177,8 +210,106 @@ class _ExtensionIFrameController extends DisposableController
 
   @override
   void dispose() {
-    html.window.removeEventListener('message', _handleMessage);
+    window.removeEventListener('message', _handleMessageListener);
+    _handleMessageListener = null;
     _pollForExtensionHandlerReady?.cancel();
     super.dispose();
+  }
+
+  @override
+  void ping() {
+    _postMessage(DevToolsExtensionEvent(DevToolsExtensionEventType.ping));
+  }
+
+  @override
+  void updateVmServiceConnection({required String? uri}) {
+    _postMessage(
+      DevToolsExtensionEvent(
+        DevToolsExtensionEventType.vmServiceConnection,
+        data: {ExtensionEventParameters.vmServiceConnectionUri: uri},
+      ),
+    );
+  }
+
+  @override
+  void updateTheme({required String theme}) {
+    assert(
+      theme == ExtensionEventParameters.themeValueLight ||
+          theme == ExtensionEventParameters.themeValueDark,
+    );
+    _postMessage(
+      DevToolsExtensionEvent(
+        DevToolsExtensionEventType.themeUpdate,
+        data: {ExtensionEventParameters.theme: theme},
+      ),
+    );
+  }
+
+  @override
+  void forceReload() {
+    _postMessage(
+      DevToolsExtensionEvent(DevToolsExtensionEventType.forceReload),
+    );
+  }
+
+  @override
+  void onEventReceived(
+    DevToolsExtensionEvent event, {
+    void Function()? onUnknownEvent,
+  }) {
+    // Ignore events that are not supported for the Extension => DevTools
+    // direction.
+    if (!event.type.supportedForDirection(ExtensionEventDirection.toDevTools)) {
+      return;
+    }
+
+    switch (event.type) {
+      case DevToolsExtensionEventType.pong:
+        if (!_extensionHandlerReady.isCompleted) {
+          _extensionHandlerReady.complete();
+        }
+        break;
+      case DevToolsExtensionEventType.vmServiceConnection:
+        final service = serviceConnection.serviceManager.service;
+        updateVmServiceConnection(uri: service?.wsUri);
+        break;
+      case DevToolsExtensionEventType.showNotification:
+        _handleShowNotification(event);
+      case DevToolsExtensionEventType.showBannerMessage:
+        _handleShowBannerMessage(event);
+      default:
+        onUnknownEvent?.call();
+    }
+  }
+
+  void _handleShowNotification(DevToolsExtensionEvent event) {
+    final showNotificationEvent = ShowNotificationExtensionEvent.from(event);
+    notificationService.push(showNotificationEvent.message);
+  }
+
+  void _handleShowBannerMessage(DevToolsExtensionEvent event) {
+    final showBannerMessageEvent = ShowBannerMessageExtensionEvent.from(event);
+    final bannerMessageType =
+        BannerMessageType.parse(showBannerMessageEvent.bannerMessageType) ??
+            BannerMessageType.warning;
+    final bannerMessage = BannerMessage(
+      messageType: bannerMessageType,
+      key: Key(
+        'ExtensionBannerMessage - ${showBannerMessageEvent.extensionName} - '
+        '${showBannerMessageEvent.messageId}',
+      ),
+      screenId: '${showBannerMessageEvent.extensionName}_ext',
+      textSpans: [
+        TextSpan(
+          text: showBannerMessageEvent.message,
+          style: TextStyle(fontSize: defaultFontSize),
+        ),
+      ],
+    );
+    bannerMessages.addMessage(
+      bannerMessage,
+      callInPostFrameCallback: false,
+      ignoreIfAlreadyDismissed: showBannerMessageEvent.ignoreIfAlreadyDismissed,
+    );
   }
 }

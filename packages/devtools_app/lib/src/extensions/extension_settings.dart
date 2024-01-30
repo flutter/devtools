@@ -4,16 +4,14 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:flutter/material.dart';
 
 import '../shared/analytics/analytics.dart' as ga;
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
-import '../shared/dialogs.dart';
 import '../shared/globals.dart';
-import '../shared/theme.dart';
-import '../shared/utils.dart';
 
 /// A [ScaffoldAction] that, when clicked, will open a dialog menu for
 /// managing DevTools extension states.
@@ -56,14 +54,22 @@ class ExtensionSettingsDialog extends StatelessWidget {
               'extensions will be available in a separate DevTools tab.',
             ),
             const SizedBox(height: defaultSpacing),
+            CheckboxSetting(
+              notifier:
+                  preferences.devToolsExtensions.showOnlyEnabledExtensions,
+              title: 'Only show screens for enabled extensions',
+              tooltip:
+                  'Only show top-level DevTools tabs for extensions that are '
+                  'enabled\n(i.e. do not show tabs for extensions that have no '
+                  'preference set).',
+            ),
+            const PaddedDivider(),
             Expanded(
               child: availableExtensions.isEmpty
                   ? Center(
                       child: Text(
                         'No extensions available.',
-                        style: theme.textTheme.bodyLarge!.copyWith(
-                          color: theme.colorScheme.subtleTextColor,
-                        ),
+                        style: theme.subtleTextStyle,
                       ),
                     )
                   : _ExtensionsList(extensions: availableExtensions),
@@ -133,8 +139,8 @@ class ExtensionSetting extends StatelessWidget {
             state == ExtensionEnabledState.enabled,
         onPressed: () {
           ga.select(
-            gac.extensionSettingsId,
-            gac.extensionEnable(extension.name.toLowerCase()),
+            gac.DevToolsExtensionEvents.extensionSettingsId.name,
+            gac.DevToolsExtensionEvents.extensionEnableManual(extension),
           );
           unawaited(
             extensionService.setExtensionEnabledState(
@@ -150,8 +156,8 @@ class ExtensionSetting extends StatelessWidget {
             state == ExtensionEnabledState.disabled,
         onPressed: () {
           ga.select(
-            gac.extensionSettingsId,
-            gac.extensionDisable(extension.name.toLowerCase()),
+            gac.DevToolsExtensionEvents.extensionSettingsId.name,
+            gac.DevToolsExtensionEvents.extensionDisableManual(extension),
           );
           unawaited(
             extensionService.setExtensionEnabledState(

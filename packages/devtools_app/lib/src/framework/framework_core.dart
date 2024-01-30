@@ -4,12 +4,17 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_shared/service.dart';
 import 'package:logging/logging.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../../devtools.dart' as devtools show version;
 import '../extensions/extension_service.dart';
 import '../screens/debugger/breakpoint_manager.dart';
+import '../service/dtd_manager.dart';
 import '../service/service_manager.dart';
 import '../service/vm_service_wrapper.dart';
 import '../shared/banner_messages.dart';
@@ -19,7 +24,6 @@ import '../shared/globals.dart';
 import '../shared/notifications.dart';
 import '../shared/offline_mode.dart';
 import '../shared/primitives/message_bus.dart';
-import '../shared/primitives/utils.dart';
 import '../shared/scripts/script_manager.dart';
 import '../shared/survey.dart';
 
@@ -42,6 +46,8 @@ class FrameworkCore {
     setGlobal(BreakpointManager, BreakpointManager());
     setGlobal(EvalService, EvalService());
     setGlobal(ExtensionService, ExtensionService());
+    setGlobal(IdeTheme, getIdeTheme());
+    setGlobal(DTDManager, DTDManager());
   }
 
   static void init() {
@@ -49,42 +55,51 @@ class FrameworkCore {
     _log.info('DevTools version ${devtools.version}.');
   }
 
+  static bool initializationInProgress = false;
+
   /// Returns true if we're able to connect to a device and false otherwise.
-  static Future<bool> initVmService(
-    String url, {
-    Uri? explicitUri,
-    required ErrorReporter errorReporter,
+  static Future<bool> initVmService({
+    required String serviceUriAsString,
+    ErrorReporter? errorReporter = _defaultErrorReporter,
     bool logException = true,
   }) async {
-    if (serviceManager.hasConnection) {
+    if (serviceConnection.serviceManager.hasConnection) {
       // TODO(https://github.com/flutter/devtools/issues/1568): why do we call
       // this multiple times?
       return true;
     }
 
-    final Uri? uri = explicitUri ?? getServiceUriFromQueryString(url);
+    final uri = normalizeVmServiceUri(serviceUriAsString);
     if (uri != null) {
+      initializationInProgress = true;
       final finishedCompleter = Completer<void>();
 
       try {
         final VmServiceWrapper service = await connect<VmServiceWrapper>(
           uri: uri,
           finishedCompleter: finishedCompleter,
-          createService: ({
-            // ignore: avoid-dynamic, code needs to match API from VmService.
+          serviceFactory: ({
+            // ignore: avoid-dynamic, mirrors types of [VmServiceFactory].
             required Stream<dynamic> /*String|List<int>*/ inStream,
             required void Function(String message) writeMessage,
-            required Uri connectedUri,
+            Log? log,
+            DisposeHandler? disposeHandler,
+            Future? streamClosed,
+            String? wsUri,
+            bool trackFutures = false,
           }) =>
-              VmServiceWrapper.fromNewVmService(
+              VmServiceWrapper.defaultFactory(
             inStream: inStream,
             writeMessage: writeMessage,
-            connectedUri: connectedUri,
+            log: log,
+            disposeHandler: disposeHandler,
+            streamClosed: streamClosed,
+            wsUri: wsUri,
             trackFutures: integrationTestMode,
           ),
         );
 
-        await serviceManager.vmServiceOpened(
+        await serviceConnection.serviceManager.vmServiceOpened(
           service,
           onClosed: finishedCompleter.future,
         );
@@ -94,12 +109,21 @@ class FrameworkCore {
         if (logException) {
           _log.shout(e, e, st);
         }
-        errorReporter('Unable to connect to VM service at $uri: $e', e);
+        errorReporter!('Unable to connect to VM service at $uri: $e', e);
         return false;
+      } finally {
+        initializationInProgress = false;
       }
     } else {
       // Don't report an error here because we do not have a URI to connect to.
       return false;
     }
+  }
+
+  static void _defaultErrorReporter(String title, Object error) {
+    notificationService.pushError(
+      '$title, $error',
+      isReportable: false,
+    );
   }
 }

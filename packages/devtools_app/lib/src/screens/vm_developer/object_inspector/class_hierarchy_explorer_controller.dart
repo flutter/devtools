@@ -17,18 +17,20 @@ class ClassHierarchyExplorerController {
 
   Future<void> refresh() async {
     _selectedIsolateClassHierarchy.value = <ClassHierarchyNode>[];
-    final service = serviceManager.service!;
-    final isolate = serviceManager.isolateManager.selectedIsolate.value;
+    final service = serviceConnection.serviceManager.service!;
+    final isolate =
+        serviceConnection.serviceManager.isolateManager.selectedIsolate.value;
     if (isolate == null) {
       return;
     }
     final isolateId = isolate.id!;
     final classList = await service.getClassList(isolateId);
     // TODO(bkonyi): we should cache the class list like we do the script list
-    final classes = await Future.wait([
+    final classes = (await Future.wait([
       for (final cls in classList.classes!)
         service.getObject(isolateId, cls.id!).then((e) => e as Class),
-    ]);
+    ]))
+        .cast<Class>();
 
     buildHierarchy(classes);
   }

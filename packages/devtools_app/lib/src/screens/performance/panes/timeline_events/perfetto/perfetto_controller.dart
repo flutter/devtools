@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../../../../../shared/primitives/auto_dispose.dart';
+import 'package:devtools_app_shared/utils.dart';
+
 import '../../../../../shared/primitives/trace_event.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../performance_controller.dart';
 import '../timeline_events_controller.dart';
 import '_perfetto_controller_desktop.dart'
-    if (dart.library.html) '_perfetto_controller_web.dart';
+    if (dart.library.js_interop) '_perfetto_controller_web.dart';
 import 'perfetto_event_processor.dart';
 
 PerfettoControllerImpl createPerfettoController(

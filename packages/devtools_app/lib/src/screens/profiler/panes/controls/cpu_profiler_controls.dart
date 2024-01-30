@@ -4,41 +4,18 @@
 
 import 'dart:developer';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
-import '../../../../shared/theme.dart';
 import '../../../../shared/ui/filter.dart';
-import '../../../../shared/utils.dart';
 import '../../cpu_profile_model.dart';
 import '../../cpu_profiler_controller.dart';
 import '../../profiler_screen_controller.dart';
 
 final profilerScreenSearchFieldKey =
     GlobalKey(debugLabel: 'ProfilerScreenSearchFieldKey');
-
-class DisplayTreeGuidelinesToggle extends StatelessWidget {
-  const DisplayTreeGuidelinesToggle({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: preferences.cpuProfiler.displayTreeGuidelines,
-      builder: (context, displayTreeGuidelines, _) {
-        return ToggleButton(
-          onPressed: () {
-            preferences.cpuProfiler.displayTreeGuidelines.value =
-                !displayTreeGuidelines;
-          },
-          isSelected: displayTreeGuidelines,
-          message: 'Display guidelines',
-          icon: Icons.stacked_bar_chart,
-        );
-      },
-    );
-  }
-}
 
 class CpuProfileFilterDialog extends StatelessWidget {
   const CpuProfileFilterDialog({required this.controller, Key? key})
@@ -57,14 +34,11 @@ Example queries:
     '.toString -uri:flutter'
 ''';
 
-  double get _filterDialogWidth => scaleByFontFactor(400.0);
-
   final CpuProfilerController controller;
 
   @override
   Widget build(BuildContext context) {
     return FilterDialog<CpuStackFrame>(
-      dialogWidth: _filterDialogWidth,
       controller: controller,
       queryInstructions: filterQueryInstructions,
     );
@@ -97,7 +71,6 @@ class UserTagDropdown extends StatelessWidget {
               builder: (context, vmDeveloperModeEnabled, _) {
                 return RoundedDropDownButton<String>(
                   isDense: true,
-                  style: Theme.of(context).textTheme.bodyMedium,
                   value: userTag,
                   items: [
                     _buildMenuItem(
@@ -184,7 +157,6 @@ class ModeDropdown extends StatelessWidget {
             message: tooltip,
             child: RoundedDropDownButton<CpuProfilerViewType>(
               isDense: true,
-              style: Theme.of(context).textTheme.bodyMedium,
               value: viewType,
               items: [
                 _buildMenuItem(

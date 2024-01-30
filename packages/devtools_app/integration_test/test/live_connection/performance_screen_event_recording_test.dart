@@ -4,7 +4,8 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/timeline_events_view.dart';
-import 'package:devtools_test/devtools_integration_test.dart';
+import 'package:devtools_test/helpers.dart';
+import 'package:devtools_test/integration_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -28,7 +29,11 @@ void main() {
         'Open the Performance screen and switch to the Timeline Events tab',
       );
 
-      await switchToScreen(tester, ScreenMetaData.performance);
+      await switchToScreen(
+        tester,
+        tabIcon: ScreenMetaData.performance.icon!,
+        screenId: ScreenMetaData.performance.id,
+      );
       await tester.pump(safePumpDuration);
 
       await tester.tap(find.widgetWithText(InkWell, 'Timeline Events'));

@@ -5,12 +5,12 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart' hide VmService;
 
 import '../../../service/vm_service_wrapper.dart';
 import '../../../shared/globals.dart';
-import '../../../shared/primitives/auto_dispose.dart';
 import '../../profiler/cpu_profiler_controller.dart';
 import '../vm_service_private_extensions.dart';
 
@@ -23,7 +23,8 @@ class IsolateStatisticsViewController extends DisposableController
       () => unawaited(refresh()),
     );
 
-    final isolateListenable = serviceManager.isolateManager.selectedIsolate;
+    final isolateListenable =
+        serviceConnection.serviceManager.isolateManager.selectedIsolate;
     addAutoDisposeListener(isolateListenable, () {
       final isolate = isolateListenable.value;
       if (isolate != null) {
@@ -38,7 +39,7 @@ class IsolateStatisticsViewController extends DisposableController
 
   final cpuProfilerController = CpuProfilerController();
 
-  VmServiceWrapper get _service => serviceManager.service!;
+  VmServiceWrapper get _service => serviceConnection.serviceManager.service!;
 
   Isolate? get isolate => _isolate;
   Isolate? _isolate;
@@ -72,8 +73,8 @@ class IsolateStatisticsViewController extends DisposableController
     // given tag's scope in the VM. These raw counts are reported here and
     // need to be processed.
     final tagCounters = isolate.tagCounters;
-    final names = tagCounters['names'];
-    final List<int> counters = tagCounters['counters'].cast<int>();
+    final names = tagCounters['names'] as List;
+    final counters = (tagCounters['counters'] as List).cast<int>();
     final percentages = <String, double>{};
     int totalTickCount = 0;
     for (int i = 0; i < counters.length; ++i) {

@@ -53,11 +53,6 @@ abstract class FeatureFlags {
   /// https://github.com/flutter/devtools/issues/4564.
   static bool widgetRebuildstats = enableExperiments;
 
-  /// Flag to enable VS code sidebar tooling GUIs powered by DevTools.
-  ///
-  /// https://github.com/flutter/devtools/issues/5868.
-  static bool vsCodeSidebarTooling = enableExperiments;
-
   /// Flag to enable analysis of snapshots in disconnected mode.
   ///
   /// https://github.com/flutter/devtools/issues/5606
@@ -67,12 +62,13 @@ abstract class FeatureFlags {
   /// DevTools screen and the standalone tool for IDE embedding.
   ///
   /// https://github.com/flutter/devtools/issues/6013
-  static bool deepLinkValidation = enableExperiments;
+  static bool deepLinkValidation = true;
 
   /// Flag to enable DevTools extensions.
   ///
-  /// https://github.com/flutter/devtools/issues/1632
-  static bool devToolsExtensions = enableExperiments;
+  /// TODO(https://github.com/flutter/devtools/issues/6443): remove this flag
+  /// once extension support is added in g3.
+  static bool devToolsExtensions = isExternalBuild;
 
   /// Flag to enable debugging via DAP.
   ///

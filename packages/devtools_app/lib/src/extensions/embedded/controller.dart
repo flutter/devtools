@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_extensions/api.dart';
 import 'package:devtools_shared/devtools_extensions.dart';
 
-import '../../shared/primitives/auto_dispose.dart';
-import '_controller_desktop.dart' if (dart.library.html) '_controller_web.dart';
+import '_controller_desktop.dart'
+    if (dart.library.js_interop) '_controller_web.dart';
 
 EmbeddedExtensionControllerImpl createEmbeddedExtensionController(
   DevToolsExtensionConfig config,
@@ -21,5 +22,8 @@ abstract class EmbeddedExtensionController extends DisposableController {
 
   void init() {}
 
-  void postMessage(DevToolsExtensionEventType type, String message) {}
+  void postMessage(
+    DevToolsExtensionEventType type, {
+    Map<String, String> data = const <String, String>{},
+  }) {}
 }

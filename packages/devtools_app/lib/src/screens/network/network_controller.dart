@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -11,7 +12,6 @@ import '../../shared/config_specific/logger/allowed_error.dart';
 import '../../shared/globals.dart';
 import '../../shared/http/http_request_data.dart';
 import '../../shared/http/http_service.dart' as http_service;
-import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
@@ -56,10 +56,22 @@ class NetworkController extends DisposableController
   static const typeFilterId = 'network-type-filter';
 
   @override
-  Map<String, QueryFilterArgument> createQueryFilterArgs() => {
-        methodFilterId: QueryFilterArgument(keys: ['method', 'm']),
-        statusFilterId: QueryFilterArgument(keys: ['status', 's']),
-        typeFilterId: QueryFilterArgument(keys: ['type', 't']),
+  Map<String, QueryFilterArgument<NetworkRequest>> createQueryFilterArgs() => {
+        methodFilterId: QueryFilterArgument<NetworkRequest>(
+          keys: ['method', 'm'],
+          dataValueProvider: (request) => request.method,
+          substringMatch: false,
+        ),
+        statusFilterId: QueryFilterArgument<NetworkRequest>(
+          keys: ['status', 's'],
+          dataValueProvider: (request) => request.status,
+          substringMatch: false,
+        ),
+        typeFilterId: QueryFilterArgument<NetworkRequest>(
+          keys: ['type', 't'],
+          dataValueProvider: (request) => request.type,
+          substringMatch: false,
+        ),
       };
 
   /// Notifies that new Network requests have been processed.
@@ -126,7 +138,6 @@ class NetworkController extends DisposableController
     List<HttpProfileRequest>? httpRequests,
     int timelineMicrosOffset, {
     required CurrentNetworkRequests currentRequests,
-    required List<DartIOHttpRequestData> invalidRequests,
   }) {
     currentRequests.updateWebSocketRequests(sockets, timelineMicrosOffset);
 
@@ -146,7 +157,6 @@ class NetworkController extends DisposableController
 
     return NetworkRequests(
       requests: currentRequests.requests,
-      invalidHttpRequests: invalidRequests,
     );
   }
 
@@ -160,7 +170,6 @@ class NetworkController extends DisposableController
       httpRequests,
       _timelineMicrosOffset,
       currentRequests: _currentNetworkRequests,
-      invalidRequests: [],
     );
     _filterAndRefreshSearchMatches();
     _updateSelection();
@@ -208,7 +217,8 @@ class NetworkController extends DisposableController
     // fewer flags risks breaking functionality on the timeline view that
     // assumes that all flags are set.
     await allowedError(
-      serviceManager.service!.setVMTimelineFlags(['GC', 'Dart', 'Embedder']),
+      serviceConnection.serviceManager.service!
+          .setVMTimelineFlags(['GC', 'Dart', 'Embedder']),
     );
 
     // TODO(kenz): only call these if http logging and socket profiling are not
@@ -232,10 +242,11 @@ class NetworkController extends DisposableController
 
   Future<bool> recordingHttpTraffic() async {
     bool enabled = true;
-    final service = serviceManager.service!;
+    final service = serviceConnection.serviceManager.service!;
     await service.forEachIsolate(
       (isolate) async {
-        final httpFuture = service.httpEnableTimelineLogging(isolate.id!);
+        final httpFuture =
+            service.httpEnableTimelineLoggingWrapper(isolate.id!);
         // The above call won't complete immediately if the isolate is paused,
         // so give up waiting after 500ms.
         final state = await timeout(httpFuture, 500);
@@ -279,7 +290,7 @@ class NetworkController extends DisposableController
   @override
   void filterData(Filter<NetworkRequest> filter) {
     super.filterData(filter);
-    serviceManager.errorBadgeManager.clearErrors(NetworkScreen.id);
+    serviceConnection.errorBadgeManager.clearErrors(NetworkScreen.id);
     final queryFilter = filter.queryFilter;
     if (queryFilter.isEmpty) {
       _requests.value.requests.forEach(_checkForError);
@@ -292,23 +303,13 @@ class NetworkController extends DisposableController
       ..clear()
       ..addAll(
         _requests.value.requests.where((NetworkRequest r) {
-          final methodArg = queryFilter.filterArguments[methodFilterId];
-          if (methodArg != null && !methodArg.matchesValue(r.method)) {
-            return false;
-          }
+          final filteredOutByQueryFilterArgument = queryFilter
+              .filterArguments.values
+              .any((argument) => !argument.matchesValue(r));
+          if (filteredOutByQueryFilterArgument) return false;
 
-          final statusArg = queryFilter.filterArguments[statusFilterId];
-          if (statusArg != null && !statusArg.matchesValue(r.status)) {
-            return false;
-          }
-
-          final typeArg = queryFilter.filterArguments[typeFilterId];
-          if (typeArg != null && !typeArg.matchesValue(r.type)) {
-            return false;
-          }
-
-          if (queryFilter.substrings.isNotEmpty) {
-            for (final substring in queryFilter.substrings) {
+          if (queryFilter.substringExpressions.isNotEmpty) {
+            for (final substring in queryFilter.substringExpressions) {
               bool matches(String? stringToMatch) {
                 if (stringToMatch?.caseInsensitiveContains(substring) == true) {
                   _checkForError(r);
@@ -332,7 +333,7 @@ class NetworkController extends DisposableController
 
   void _checkForError(NetworkRequest r) {
     if (r.didFail) {
-      serviceManager.errorBadgeManager.incrementBadgeCount(NetworkScreen.id);
+      serviceConnection.errorBadgeManager.incrementBadgeCount(NetworkScreen.id);
     }
   }
 }

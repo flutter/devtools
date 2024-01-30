@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/analytics/constants.dart' as gac;
-import '../../shared/common_widgets.dart';
 import '../../shared/http/http_request_data.dart';
 import '../../shared/ui/tab.dart';
 import 'network_controller.dart';
@@ -21,19 +21,6 @@ class NetworkRequestInspector extends StatelessWidget {
   static const _requestTabTitle = 'Request';
   static const _responseTabTitle = 'Response';
   static const _cookiesTabTitle = 'Cookies';
-
-  // TODO(kenz): remove these keys and use a text finder to lookup widgets in test.
-
-  @visibleForTesting
-  static const overviewTabKey = Key(_overviewTabTitle);
-  @visibleForTesting
-  static const headersTabKey = Key(_headersTabTitle);
-  @visibleForTesting
-  static const responseTabKey = Key(_responseTabTitle);
-  @visibleForTesting
-  static const cookiesTabKey = Key(_cookiesTabTitle);
-  @visibleForTesting
-  static const noRequestSelectedKey = Key('No Request Selected');
 
   final NetworkController controller;
 
@@ -55,8 +42,7 @@ class NetworkRequestInspector extends StatelessWidget {
               ? Center(
                   child: Text(
                     'No request selected',
-                    key: NetworkRequestInspector.noRequestSelectedKey,
-                    style: Theme.of(context).textTheme.titleLarge,
+                    style: Theme.of(context).regularTextStyle,
                   ),
                 )
               : AnalyticsTabbedView(
@@ -119,9 +105,7 @@ class NetworkRequestInspector extends StatelessWidget {
             ),
           if (data.hasCookies)
             (
-              tab: _buildTab(
-                tabName: NetworkRequestInspector._cookiesTabTitle,
-              ),
+              tab: _buildTab(tabName: NetworkRequestInspector._cookiesTabTitle),
               tabView: HttpRequestCookiesView(data),
             ),
         ],

@@ -26,7 +26,7 @@ import 'package:vm_service/vm_service_io.dart';
 // Set this to true for debugging to get JSON written to stdout.
 const bool _printDebugOutputToStdOut = false;
 const Duration defaultTimeout = Duration(seconds: 40);
-const Duration appStartTimeout = Duration(seconds: 120);
+const Duration appStartTimeout = Duration(seconds: 240);
 const Duration quitTimeout = Duration(seconds: 10);
 
 abstract class FlutterTestDriver {
@@ -340,10 +340,27 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       _vmServiceWsUri =
           convertToWebSocketUrl(serviceProtocolUrl: _vmServiceWsUri);
 
-      vmService = VmServiceWrapper(
-        await vmServiceConnectUri(_vmServiceWsUri.toString()),
-        _vmServiceWsUri,
-        trackFutures: true,
+      vmService = await vmServiceConnectUriWithFactory<VmServiceWrapper>(
+        _vmServiceWsUri.toString(),
+        vmServiceFactory: ({
+          // ignore: avoid-dynamic, mirrors types of [VmServiceFactory].
+          required Stream<dynamic> /*String|List<int>*/ inStream,
+          required void Function(String message) writeMessage,
+          Log? log,
+          DisposeHandler? disposeHandler,
+          Future? streamClosed,
+          String? wsUri,
+          bool trackFutures = false,
+        }) =>
+            VmServiceWrapper.defaultFactory(
+          inStream: inStream,
+          writeMessage: writeMessage,
+          log: log,
+          disposeHandler: disposeHandler,
+          streamClosed: streamClosed,
+          wsUri: wsUri,
+          trackFutures: true,
+        ),
       );
 
       final vmServiceLocal = vmService!;
@@ -412,6 +429,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     final vmServiceLocal = vmService;
     if (vmServiceLocal != null) {
       _debugPrint('Closing VM service');
+      await Future.delayed(const Duration(milliseconds: 500));
       await vmServiceLocal.dispose();
     }
     if (_currentRunningAppId != null) {

@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../shared/common_widgets.dart';
-import '../../../../shared/dialogs.dart';
 import '../../../../shared/globals.dart';
-import '../../../../shared/theme.dart';
 
 /// The dialog keys for testing purposes.
 @visibleForTesting
@@ -54,9 +53,11 @@ class MemorySettingsDialog extends StatelessWidget {
                 ),
                 const SizedBox(width: defaultSpacing),
                 SizedBox(
+                  height: defaultTextFieldHeight,
                   width: defaultTextFieldNumberWidth,
                   child: TextField(
-                    decoration: dialogTextFieldDecoration,
+                    style: theme.regularTextStyle,
+                    decoration: singleLineDialogTextFieldDecoration,
                     controller: TextEditingController(
                       text: preferences.memory.refLimit.value.toString(),
                     ),

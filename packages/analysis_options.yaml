@@ -7,8 +7,6 @@ analyzer:
   errors:
     # treat missing required parameters as a warning (not a hint)
     missing_required_param: warning
-    # treat missing returns as a warning (not a hint)
-    missing_return: warning
   exclude:
     - build/**
     - '**.freezed.dart'
@@ -26,7 +24,6 @@ linter:
     - always_declare_return_types
     # - always_put_control_body_on_new_line
     # - always_put_required_named_parameters_first # we prefer having parameters in the same order as fields https://github.com/flutter/flutter/issues/10219
-    - always_require_non_null_named_parameters
     # - always_specify_types
     - annotate_overrides
     # - avoid_annotating_with_dynamic # conflicts with always_specify_types
@@ -43,6 +40,7 @@ linter:
     # - avoid_js_rounded_ints # only useful when targeting JS runtime
     - avoid_null_checks_in_equality_operators
     # - avoid_positional_boolean_parameters # not yet tested
+    - avoid_print
     # - avoid_private_typedef_functions # we prefer having typedef (discussion in https://github.com/flutter/flutter/pull/16356)
     - avoid_redundant_argument_values
     - avoid_relative_lib_imports
@@ -125,6 +123,7 @@ linter:
     - unnecessary_const
     - unnecessary_getters_setters
     # - unnecessary_lambdas # https://github.com/dart-lang/linter/issues/498
+    - unnecessary_library_directive
     - unnecessary_new
     - unnecessary_null_aware_assignments
     - unnecessary_null_in_if_null_operators
@@ -137,6 +136,7 @@ linter:
     - use_rethrow_when_possible
     # - use_setters_to_change_properties # not yet tested
     # - use_string_buffers # https://github.com/dart-lang/linter/pull/664
+    - use_string_in_part_of_directives
     # - use_to_and_as_if_applicable # has false positives, so we prefer to catch this by code-review
     - valid_regexps
     # - void_checks # not yet tested
@@ -218,7 +218,6 @@ dart_code_metrics:
     #    allowed-duplicated-chains: 2
     # - prefer-static-class
     - prefer-trailing-comma
-    - tag-name
     - always-remove-listener
     # - avoid-border-all Micro-optimization to avoid a const constructor.
     # - avoid-returning-widgets  This one is nice but has a lot of false positives.

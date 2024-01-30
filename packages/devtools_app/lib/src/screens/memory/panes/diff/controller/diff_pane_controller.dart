@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../../shared/analytics/analytics.dart' as ga;
@@ -13,8 +14,6 @@ import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/config_specific/import_export/import_export.dart';
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/memory/class_name.dart';
-import '../../../../../shared/primitives/auto_dispose.dart';
-import '../../../../../shared/primitives/utils.dart';
 import '../../../shared/heap/class_filter.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
@@ -42,10 +41,6 @@ class DiffPaneController extends DisposableController {
   /// informational item.
   bool get hasSnapshots => core.snapshots.value.length > 1;
 
-  // This value should never be reset. It is incremented for every snapshot that
-  // is taken, and is used to assign a unique id to each [SnapshotListItem].
-  int _snapshotId = 0;
-
   Future<void> takeSnapshot() async {
     _isTakingSnapshot.value = true;
     ga.select(
@@ -54,7 +49,6 @@ class DiffPaneController extends DisposableController {
     );
 
     final item = SnapshotInstanceItem(
-      id: _snapshotId++,
       displayNumber: _nextDisplayNumber(),
       isolateName: selectedIsolateName ?? '<isolate-not-detected>',
     );
@@ -145,7 +139,8 @@ class DiffPaneController extends DisposableController {
 /// Widgets should not update the fields directly, they should use
 /// [DiffPaneController] or [DerivedData] for this.
 class CoreData {
-  late final rootPackage = serviceManager.rootInfoNow().package;
+  late final rootPackage =
+      serviceConnection.serviceManager.rootInfoNow().package;
 
   /// The list contains one item that show information and all others
   /// are snapshots.

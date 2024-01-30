@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
+import 'package:devtools_shared/devtools_test_utils.dart';
 
-import 'test_infra/run/_chrome_driver.dart';
 import 'test_infra/run/_in_file_args.dart';
+import 'test_infra/run/_utils.dart';
 import 'test_infra/run/run_test.dart';
 
 // To run integration tests, run the following from `devtools_app/`:
@@ -15,58 +15,44 @@ import 'test_infra/run/run_test.dart';
 // the above command with the '-h' flag.
 
 const _testDirectory = 'integration_test/test';
-const _testSuffix = '_test.dart';
 const _offlineIndicator = 'integration_test/test/offline';
 
+/// The set of test that should be skipped for all devices.
+///
+/// This list should be empty most of the time, but may contain a broken test
+/// while a fix being worked on.
+///
+/// Format: `'my_example_test.dart'`.
+const _skipTests = <String>[
+  // https://github.com/flutter/devtools/issues/6592
+  'eval_and_browse_test.dart',
+];
+
 void main(List<String> args) async {
-  final testRunnerArgs = TestRunnerArgs(args, verifyValidTarget: false);
-  if (testRunnerArgs.help) {
-    testRunnerArgs.printHelp();
-    return;
-  }
+  final testRunnerArgs = DevToolsAppTestRunnerArgs(
+    args,
+    verifyValidTarget: false,
+  );
 
-  Exception? exception;
-  final chromedriver = ChromeDriver();
-
-  try {
-    // Start chrome driver before running the flutter integration test.
-    await chromedriver.start();
-
-    if (testRunnerArgs.testTarget != null) {
-      // TODO(kenz): add support for specifying a directory as the target instead
-      // of a single file.
-      await _runTest(testRunnerArgs);
-    } else {
-      // Run all tests since a target test was not provided.
-      final testDirectory = Directory(_testDirectory);
-      final testFiles = testDirectory
-          .listSync(recursive: true)
-          .where((testFile) => testFile.path.endsWith(_testSuffix));
-
-      for (final testFile in testFiles) {
-        final testTarget = testFile.path;
-        final newArgsWithTarget = TestRunnerArgs([
-          ...args,
-          '--${TestRunnerArgs.testTargetArg}=$testTarget',
-        ]);
-        await _runTest(newArgsWithTarget);
-      }
-    }
-  } on Exception catch (e) {
-    exception = e;
-  } finally {
-    await chromedriver.stop();
-  }
-
-  if (exception != null) {
-    throw exception;
-  }
+  await runOneOrManyTests<DevToolsAppTestRunnerArgs>(
+    testDirectoryPath: _testDirectory,
+    testRunnerArgs: testRunnerArgs,
+    runTest: _runTest,
+    newArgsGenerator: (args) => DevToolsAppTestRunnerArgs(args),
+    testIsSupported: (testFile) =>
+        testRunnerArgs.testAppDevice.supportsTest(testFile.path),
+    debugLogging: debugTestScript,
+  );
 }
 
 Future<void> _runTest(
-  TestRunnerArgs testRunnerArgs,
+  DevToolsAppTestRunnerArgs testRunnerArgs,
 ) async {
   final testTarget = testRunnerArgs.testTarget!;
+
+  final shouldSkip = _skipTests.any((t) => testTarget.endsWith(t));
+  if (shouldSkip) return;
+
   if (!testRunnerArgs.testAppDevice.supportsTest(testTarget)) {
     // Skip test, since it is not supported for device.
     return;

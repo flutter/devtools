@@ -79,6 +79,12 @@
             "program": "devtools_app/test/test_infra/fixtures/memory_app/lib/main.dart",
         },
         {
+            "name": "standalone_ui/vs_code",
+            "request": "launch",
+            "type": "dart",
+            "program": "devtools_app/test/test_infra/scenes/standalone_ui/vs_code.stager_app.g.dart",
+        },
+        {
             "name": "attach",
             "type": "dart",
             "request": "attach",

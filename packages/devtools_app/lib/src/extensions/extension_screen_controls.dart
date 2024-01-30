@@ -4,91 +4,115 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:flutter/material.dart';
+import 'package:pointer_interceptor/pointer_interceptor.dart';
 
+import '../shared/analytics/analytics.dart' as ga;
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
-import '../shared/dialogs.dart';
 import '../shared/globals.dart';
 import '../shared/routing.dart';
-import '../shared/theme.dart';
 
 class EmbeddedExtensionHeader extends StatelessWidget {
-  const EmbeddedExtensionHeader({super.key, required this.extension});
+  const EmbeddedExtensionHeader({
+    super.key,
+    required this.extension,
+    required this.onForceReload,
+  });
 
   final DevToolsExtensionConfig extension;
+
+  final VoidCallback onForceReload;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final extensionName = extension.displayName;
-    return AreaPaneHeader(
-      title: RichText(
-        text: TextSpan(
-          text: 'package:$extensionName extension',
-          style: theme.regularTextStyle.copyWith(fontWeight: FontWeight.bold),
-          children: [
-            TextSpan(
-              text: ' (v${extension.version})',
-              style: theme.subtleTextStyle,
-            ),
-          ],
+    return Row(
+      children: [
+        RichText(
+          text: TextSpan(
+            text: 'package:$extensionName extension',
+            style: theme.regularTextStyle.copyWith(fontWeight: FontWeight.bold),
+            children: [
+              TextSpan(
+                text: ' (v${extension.version})',
+                style: theme.subtleTextStyle,
+              ),
+            ],
+          ),
         ),
-      ),
-      includeTopBorder: false,
-      roundedTopBorder: false,
-      rightPadding: defaultSpacing,
-      actions: [
+        const Spacer(),
         RichText(
           text: LinkTextSpan(
             link: Link(
               display: 'Report an issue',
               url: extension.issueTrackerLink,
-              gaScreenName: gac.extensionScreenId,
-              gaSelectedItemDescription: gac.extensionFeedback(extensionName),
+              gaScreenName: gac.DevToolsExtensionEvents.extensionScreenId.name,
+              gaSelectedItemDescription:
+                  gac.DevToolsExtensionEvents.extensionFeedback(extension),
             ),
             context: context,
           ),
         ),
+        const SizedBox(width: denseSpacing),
         ValueListenableBuilder<ExtensionEnabledState>(
           valueListenable:
               extensionService.enabledStateListenable(extension.displayName),
           builder: (context, activationState, _) {
             if (activationState == ExtensionEnabledState.enabled) {
-              return Padding(
-                padding: const EdgeInsets.only(left: denseSpacing),
-                child: DisableExtensionButton(extension: extension),
+              return ContextMenuButton(
+                iconSize: defaultIconSize,
+                buttonWidth: buttonMinWidth,
+                menuChildren: <Widget>[
+                  PointerInterceptor(
+                    child: MenuItemButton(
+                      onPressed: () {
+                        // Do not send analytics here because the user must
+                        // confirm that they want to disable the extension from
+                        // the [DisableExtensionDialog]. Analytics will be sent
+                        // there if they confirm that they'd like to disable the
+                        // extension.
+                        unawaited(
+                          showDialog(
+                            context: context,
+                            builder: (_) =>
+                                DisableExtensionDialog(extension: extension),
+                          ),
+                        );
+                      },
+                      child: const MaterialIconLabel(
+                        label: 'Disable extension',
+                        iconData: Icons.extension_off_outlined,
+                      ),
+                    ),
+                  ),
+                  PointerInterceptor(
+                    child: MenuItemButton(
+                      onPressed: () {
+                        ga.select(
+                          gac.DevToolsExtensionEvents.extensionScreenId.name,
+                          gac.DevToolsExtensionEvents.extensionForceReload(
+                            extension,
+                          ),
+                        );
+                        onForceReload();
+                      },
+                      child: const MaterialIconLabel(
+                        label: 'Force reload extension',
+                        iconData: Icons.refresh,
+                      ),
+                    ),
+                  ),
+                ],
               );
             }
             return const SizedBox.shrink();
           },
         ),
       ],
-    );
-  }
-}
-
-@visibleForTesting
-class DisableExtensionButton extends StatelessWidget {
-  const DisableExtensionButton({super.key, required this.extension});
-
-  final DevToolsExtensionConfig extension;
-
-  @override
-  Widget build(BuildContext context) {
-    return DevToolsButton.iconOnly(
-      icon: Icons.extension_off_outlined,
-      outlined: false,
-      tooltip: 'Disable extension',
-      gaScreen: gac.extensionScreenId,
-      gaSelection: gac.extensionDisable(extension.displayName),
-      onPressed: () => unawaited(
-        showDialog(
-          context: context,
-          builder: (_) => DisableExtensionDialog(extension: extension),
-        ),
-      ),
     );
   }
 }
@@ -146,6 +170,10 @@ class DisableExtensionDialog extends StatelessWidget {
       actions: [
         DialogTextButton(
           onPressed: () {
+            ga.select(
+              gac.DevToolsExtensionEvents.extensionScreenId.name,
+              gac.DevToolsExtensionEvents.extensionDisableManual(extension),
+            );
             unawaited(
               extensionService.setExtensionEnabledState(
                 extension,
@@ -175,12 +203,12 @@ class EnableExtensionPrompt extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final extensionName = extension.displayName;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           RichText(
+            textAlign: TextAlign.center,
             text: TextSpan(
               text: 'The ',
               style: theme.regularTextStyle,
@@ -191,7 +219,17 @@ class EnableExtensionPrompt extends StatelessWidget {
                 ),
                 const TextSpan(
                   text: ' extension has not been enabled. Do you want to enable'
-                      ' this extension?',
+                      ' this extension?\nYou can always change this setting '
+                      'later from the DevTools Extensions ',
+                ),
+                WidgetSpan(
+                  child: Icon(
+                    Icons.extension_outlined,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+                const TextSpan(
+                  text: ' menu. ',
                 ),
               ],
             ),
@@ -200,11 +238,13 @@ class EnableExtensionPrompt extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              DevToolsButton(
+              GaDevToolsButton(
                 label: 'Enable',
-                gaScreen: gac.extensionScreenId,
-                gaSelection: gac.extensionEnable(extensionName),
-                elevatedButton: true,
+                gaScreen: gac.DevToolsExtensionEvents.extensionScreenId.name,
+                gaSelection: gac.DevToolsExtensionEvents.extensionEnablePrompt(
+                  extension,
+                ),
+                elevated: true,
                 onPressed: () {
                   unawaited(
                     extensionService.setExtensionEnabledState(
@@ -215,10 +255,12 @@ class EnableExtensionPrompt extends StatelessWidget {
                 },
               ),
               const SizedBox(width: defaultSpacing),
-              DevToolsButton(
+              GaDevToolsButton(
                 label: 'No, hide this screen',
-                gaScreen: gac.extensionScreenId,
-                gaSelection: gac.extensionDisable(extensionName),
+                gaScreen: gac.DevToolsExtensionEvents.extensionScreenId.name,
+                gaSelection: gac.DevToolsExtensionEvents.extensionDisablePrompt(
+                  extension,
+                ),
                 onPressed: () {
                   unawaited(
                     extensionService.setExtensionEnabledState(

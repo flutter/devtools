@@ -4,14 +4,13 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/simple_items.dart';
-import '../../../../shared/split.dart';
-import '../../../../shared/theme.dart';
 import '../../shared/widgets/shared_memory_widgets.dart';
 import 'class_table.dart';
 import 'tracing_pane_controller.dart';
@@ -40,7 +39,8 @@ class TracingPaneState extends State<TracingPane> {
   @override
   Widget build(BuildContext context) {
     final isProfileMode =
-        serviceManager.connectedApp?.isProfileBuildNow ?? false;
+        serviceConnection.serviceManager.connectedApp?.isProfileBuildNow ??
+            false;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -49,33 +49,24 @@ class TracingPaneState extends State<TracingPane> {
           controller: widget.controller,
         ),
         Expanded(
-          child: isProfileMode
-              ? OutlineDecoration.onlyTop(
-                  child: const Center(
-                    child: Text(
-                      'Allocation tracing is temporary disabled in profile mode.\n'
-                      'Run the application in debug mode to trace allocations.',
-                    ),
-                  ),
-                )
-              : OutlineDecoration.onlyTop(
-                  child: Split(
-                    axis: Axis.horizontal,
-                    initialFractions: const [0.25, 0.75],
-                    children: [
-                      OutlineDecoration.onlyRight(
-                        child: AllocationTracingTable(
-                          controller: widget.controller,
-                        ),
-                      ),
-                      OutlineDecoration.onlyLeft(
-                        child: AllocationTracingTree(
-                          controller: widget.controller,
-                        ),
-                      ),
-                    ],
+          child: OutlineDecoration.onlyTop(
+            child: Split(
+              axis: Axis.horizontal,
+              initialFractions: const [0.25, 0.75],
+              children: [
+                OutlineDecoration.onlyRight(
+                  child: AllocationTracingTable(
+                    controller: widget.controller,
                   ),
                 ),
+                OutlineDecoration.onlyLeft(
+                  child: AllocationTracingTree(
+                    controller: widget.controller,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ],
     );
@@ -130,10 +121,18 @@ class _ProfileHelpLink extends StatelessWidget {
       gaScreen: gac.memory,
       gaSelection: gac.topicDocumentationButton(_documentationTopic),
       dialogTitle: 'Memory Allocation Tracing Help',
-      child: Column(
+      actions: [
+        MoreInfoLink(
+          url: DocLinks.trace.value,
+          gaScreenName: gac.memory,
+          gaSelectedItemDescription:
+              gac.topicDocumentationLink(_documentationTopic),
+        ),
+      ],
+      child: const Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          const Text(
+          Text(
             'The allocation tracing tab allows for toggling allocation\n'
             'tracing for specific types, which records the locations of\n'
             'allocations of instances of traced types within the\n'
@@ -144,14 +143,8 @@ class _ProfileHelpLink extends StatelessWidget {
             'list, displaying a condensed view of locations where objects\n'
             'were allocated.',
           ),
-          const SizedBox(height: denseSpacing),
-          const ClassTypeLegend(),
-          MoreInfoLink(
-            url: DocLinks.trace.value,
-            gaScreenName: gac.memory,
-            gaSelectedItemDescription:
-                gac.topicDocumentationLink(_documentationTopic),
-          ),
+          SizedBox(height: denseSpacing),
+          ClassTypeLegend(),
         ],
       ),
     );

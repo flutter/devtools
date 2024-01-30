@@ -21,7 +21,8 @@ class ClassFilterData {
 
   final ValueListenable<ClassFilter> filter;
   final ApplyFilterCallback onChanged;
-  late final String? rootPackage = serviceManager.rootInfoNow().package;
+  late final String? rootPackage =
+      serviceConnection.serviceManager.rootInfoNow().package;
 }
 
 /// What should be done to apply new filter to a set of data.
@@ -36,7 +37,7 @@ enum FilteringTask {
   reuse,
 }
 
-typedef ApplyFilterCallback = Function(ClassFilter);
+typedef ApplyFilterCallback = void Function(ClassFilter);
 
 @immutable
 class ClassFilter {

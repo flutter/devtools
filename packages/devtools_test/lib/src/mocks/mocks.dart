@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mockito/mockito.dart';
@@ -24,11 +25,6 @@ class FakeInspectorService extends Fake implements InspectorService {
   @override
   Future<bool> isWidgetTreeReady() async {
     return false;
-  }
-
-  @override
-  Future<List<String>> inferPubRootDirectoryIfNeeded() async {
-    return ['/some/directory'];
   }
 
   @override
@@ -110,8 +106,8 @@ void mockWebVm(VM vm) {
 void mockConnectedApp(
   ConnectedApp connectedApp, {
   required bool isFlutterApp,
-  required isProfileBuild,
-  required isWebApp,
+  required bool isProfileBuild,
+  required bool isWebApp,
   String os = 'ios',
 }) {
   assert(!(!isFlutterApp && isProfileBuild));
@@ -279,17 +275,6 @@ const profilerEntries = <int, ProfileReportEntry>{
 
 final mockParsedScript = ParsedScript(
   script: mockScript!,
-  highlighter: mockSyntaxHighlighter,
-  executableLines: executableLines,
-  sourceReport: ProcessedSourceReport(
-    coverageHitLines: coverageHitLines,
-    coverageMissedLines: coverageMissLines,
-    profilerEntries: profilerEntries,
-  ),
-);
-
-final mockLargeParsedScript = ParsedScript(
-  script: mockLargeScript!,
   highlighter: mockSyntaxHighlighter,
   executableLines: executableLines,
   sourceReport: ProcessedSourceReport(

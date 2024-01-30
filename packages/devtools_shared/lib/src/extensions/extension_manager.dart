@@ -2,6 +2,8 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+// ignore_for_file: avoid_print
+
 import 'dart:io';
 
 import 'package:extension_discovery/extension_discovery.dart';
@@ -12,10 +14,6 @@ import 'extension_model.dart';
 /// Location where DevTools extension assets will be served, relative to where
 /// DevTools assets are served (build/).
 const extensionRequestPath = 'devtools_extensions';
-
-/// The location for the DevTools extension, relative to the parent package's
-/// root.
-const extensionLocation = 'extension/devtools';
 
 /// The default location for the DevTools extension, relative to
 /// `<parent_package_root>/extension/devtools/`.
@@ -46,66 +44,76 @@ class ExtensionsManager {
   /// [serveAvailableExtensions] is called.
   final devtoolsExtensions = <DevToolsExtensionConfig>[];
 
-  /// Serves any available DevTools extensions for the given [rootPath], where
-  /// [rootPath] is the root for a Dart or Flutter project containing the
-  /// `.dart_tool/` directory.
+  /// Serves any available DevTools extensions for the given [rootPathFileUri],
+  /// where [rootPathFileUri] is the root for a Dart or Flutter project
+  /// containing the `.dart_tool/` directory.
+  ///
+  /// [rootPathFileUri] is expected to be a file uri (e.g. starting with
+  /// 'file://').
   ///
   /// This method first looks up the available extensions using
   /// package:extension_discovery, and the available extension's
   /// assets will be copied to the `build/devtools_extensions` directory that
   /// DevTools server is serving.
-  Future<void> serveAvailableExtensions(String? rootPath) async {
-    devtoolsExtensions.clear();
+  Future<void> serveAvailableExtensions(String? rootPathFileUri) async {
+    if (rootPathFileUri != null && !rootPathFileUri.startsWith('file://')) {
+      throw ArgumentError.value(
+        rootPathFileUri,
+        'rootPathFileUri',
+        'must be a file:// URI String',
+      );
+    }
 
-    if (rootPath != null) {
+    devtoolsExtensions.clear();
+    final parsingErrors = StringBuffer();
+
+    if (rootPathFileUri != null) {
       late final List<Extension> extensions;
       try {
         extensions = await findExtensions(
           'devtools',
           packageConfig: Uri.parse(
-            path.join(
-              rootPath,
+            path.posix.join(
+              rootPathFileUri,
               '.dart_tool',
               'package_config.json',
             ),
           ),
         );
       } catch (e) {
-        print('[ERROR] `findExtensions` failed: $e');
         extensions = <Extension>[];
+        rethrow;
       }
 
       for (final extension in extensions) {
         final config = extension.config;
-        if (config is Map) {
-          // Fail gracefully. Invalid content in the extension's config.json.
-          print(
-            '[WARNING] invalid config.json content for ${extension.package}:\n'
-            '$config',
-          );
-          continue;
-        }
-        final configAsMap = config as Map<String, Object?>;
+        // TODO(https://github.com/dart-lang/pub/issues/4042): make this check
+        // more robust.
+        final isPubliclyHosted = (extension.rootUri.path.contains('pub.dev') ||
+                extension.rootUri.path.contains('pub.flutter-io.cn'))
+            .toString();
 
         // This should be relative to the 'extension/devtools/' directory and
         // defaults to 'build';
         final relativeExtensionLocation =
-            configAsMap['buildLocation'] as String? ?? 'build';
+            config['buildLocation'] as String? ?? 'build';
 
         final location = path.join(
           extension.rootUri.toFilePath(),
-          extensionLocation,
+          'extension',
+          'devtools',
           relativeExtensionLocation,
         );
 
         try {
-          final pluginConfig = DevToolsExtensionConfig.parse({
-            ...configAsMap,
+          final extensionConfig = DevToolsExtensionConfig.parse({
+            ...config,
             DevToolsExtensionConfig.pathKey: location,
+            DevToolsExtensionConfig.isPubliclyHostedKey: isPubliclyHosted,
           });
-          devtoolsExtensions.add(pluginConfig);
+          devtoolsExtensions.add(extensionConfig);
         } on StateError catch (e) {
-          print(e.message);
+          parsingErrors.writeln(e.message);
           continue;
         }
       }
@@ -116,6 +124,13 @@ class ExtensionsManager {
       for (final extension in devtoolsExtensions)
         _moveToServedExtensionsDir(extension.name, extension.path),
     ]);
+
+    if (parsingErrors.isNotEmpty) {
+      throw ExtensionParsingException(
+        'Encountered errors while parsing extension config.yaml '
+        'files:\n$parsingErrors',
+      );
+    }
   }
 
   void _resetServedPluginsDir() {
@@ -175,4 +190,10 @@ Future<void> copyPath(String from, String to) async {
       await Link(copyTo).create(await file.target(), recursive: true);
     }
   }
+}
+
+/// Exception type for errors encountered while parsing DevTools extension
+/// config.yaml files.
+class ExtensionParsingException extends FormatException {
+  const ExtensionParsingException(super.message);
 }

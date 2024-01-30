@@ -2,15 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../shared/charts/chart_controller.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
-import '../../../../shared/primitives/auto_dispose.dart';
 import '../../../../shared/primitives/utils.dart';
-import '../../../../shared/theme.dart';
+import '../../../../shared/ui/colors.dart';
 import '../../../../shared/utils.dart';
 import '../../framework/connected/memory_controller.dart';
 import '../../shared/primitives/painting.dart';
@@ -142,7 +143,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
   }
 
   void _updateListeningState() async {
-    await serviceManager.onServiceAvailable;
+    await serviceConnection.serviceManager.onServiceAvailable;
 
     if (!controller.hasStarted) {
       controller.startTimeline();
@@ -171,10 +172,11 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
         // showing and hiding the chart.
         if (!showChart) return const SizedBox.shrink();
 
-        return RawKeyboardListener(
+        return KeyboardListener(
           focusNode: widget.keyFocusNode,
-          onKey: (RawKeyEvent event) {
-            if (event.isKeyPressed(LogicalKeyboardKey.escape)) {
+          onKeyEvent: (KeyEvent event) {
+            if (event.isKeyDownOrRepeat &&
+                event.logicalKey == LogicalKeyboardKey.escape) {
               _hideHover();
             }
           },
@@ -587,11 +589,11 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
       }
     } else if (event[eventName] == devToolsEvent &&
         event.containsKey(customEvent)) {
-      final custom = event[customEvent] as Map<dynamic, dynamic>;
-      final data = custom[customEventData];
+      final custom = event[customEvent] as Map<Object?, Object?>;
+      final data = custom[customEventData] as Map<Object?, Object?>;
       for (var key in data.keys) {
         output.write('$key=');
-        output.writeln(_longValueToShort(data[key]));
+        output.writeln(_longValueToShort(data[key] as String));
       }
     } else {
       output.writeln('Unknown Event ${event[eventName]}');

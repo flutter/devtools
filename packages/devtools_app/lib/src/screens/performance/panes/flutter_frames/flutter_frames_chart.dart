@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../framework/scaffold.dart';
@@ -14,13 +16,10 @@ import '../../../../shared/analytics/metrics.dart';
 import '../../../../shared/banner_messages.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
-import '../../../../shared/primitives/auto_dispose.dart';
 import '../../../../shared/primitives/utils.dart';
-import '../../../../shared/theme.dart';
 import '../../../../shared/ui/colors.dart';
 import '../../../../shared/ui/hover.dart';
 import '../../../../shared/ui/utils.dart';
-import '../../../../shared/utils.dart';
 import '../../performance_screen.dart';
 import '../../performance_utils.dart';
 import 'flutter_frame_model.dart';
@@ -34,11 +33,14 @@ class FlutterFramesChart extends StatelessWidget {
     this.framesController, {
     super.key,
     required this.offlineMode,
+    required this.impellerEnabled,
   });
 
   final FlutterFramesController framesController;
 
   final bool offlineMode;
+
+  final bool impellerEnabled;
 
   @override
   Widget build(BuildContext context) {
@@ -58,6 +60,7 @@ class FlutterFramesChart extends StatelessWidget {
           displayRefreshRate: displayRefreshRate,
           isVisible: showChart,
           offlineMode: offlineMode,
+          impellerEnabled: impellerEnabled,
         );
       },
     );
@@ -71,6 +74,7 @@ class _FlutterFramesChart extends StatefulWidget {
     required this.displayRefreshRate,
     required this.isVisible,
     required this.offlineMode,
+    required this.impellerEnabled,
   });
 
   final FlutterFramesController framesController;
@@ -82,6 +86,8 @@ class _FlutterFramesChart extends StatefulWidget {
   final bool isVisible;
 
   final bool offlineMode;
+
+  final bool impellerEnabled;
 
   static double get frameNumberSectionHeight => scaleByFontFactor(20.0);
 
@@ -152,6 +158,7 @@ class _FlutterFramesChartState extends State<_FlutterFramesChart> {
                   frames: widget.frames,
                   displayRefreshRate: widget.displayRefreshRate,
                   constraints: constraints,
+                  impellerEnabled: widget.impellerEnabled,
                 );
               },
             ),
@@ -166,6 +173,7 @@ class _FlutterFramesChartState extends State<_FlutterFramesChart> {
               frames: widget.frames,
               displayRefreshRate: widget.displayRefreshRate,
               offlineMode: widget.offlineMode,
+              impellerEnabled: widget.impellerEnabled,
             ),
           ),
         ],
@@ -182,6 +190,7 @@ class FramesChart extends StatefulWidget {
     required this.frames,
     required this.displayRefreshRate,
     required this.constraints,
+    required this.impellerEnabled,
   });
 
   final FlutterFramesController framesController;
@@ -191,6 +200,8 @@ class FramesChart extends StatefulWidget {
   final double displayRefreshRate;
 
   final BoxConstraints constraints;
+
+  final bool impellerEnabled;
 
   @override
   State<FramesChart> createState() => _FramesChartState();
@@ -333,6 +344,14 @@ class _FramesChartState extends State<FramesChart> with AutoDisposeMixin {
           child: chart,
         ),
         fpsLinePainter,
+        Positioned(
+          right: denseSpacing,
+          top: densePadding,
+          child: Text(
+            'Engine: ${widget.impellerEnabled ? 'Impeller' : 'Skia'}',
+            style: themeData.subtleChartTextStyle,
+          ),
+        ),
       ],
     );
   }
@@ -346,6 +365,7 @@ class FramesChartControls extends StatelessWidget {
     required this.frames,
     required this.displayRefreshRate,
     required this.offlineMode,
+    required this.impellerEnabled,
   });
 
   static const _pauseTooltip = 'Pause Flutter frame recording';
@@ -359,6 +379,8 @@ class FramesChartControls extends StatelessWidget {
   final double displayRefreshRate;
 
   final bool offlineMode;
+
+  final bool impellerEnabled;
 
   @override
   Widget build(BuildContext context) {
@@ -388,10 +410,11 @@ class FramesChartControls extends StatelessWidget {
             const LegendEntry('Frame Time (UI)', mainUiColor),
             const LegendEntry('Frame Time (Raster)', mainRasterColor),
             const LegendEntry('Jank (slow frame)', uiJankColor),
-            LegendEntry(
-              'Shader Compilation',
-              shaderCompilationColor.background,
-            ),
+            if (!impellerEnabled)
+              LegendEntry(
+                'Shader Compilation',
+                shaderCompilationColor.background,
+              ),
           ],
         ),
         AverageFPS(
@@ -613,14 +636,15 @@ class FlutterFrameTooltip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textStyle = Theme.of(context).regularTextStyle;
     return HoverCardTooltip.sync(
       enabled: () => true,
-      generateHoverCardData: (_) => _buildCardData(),
+      generateHoverCardData: (_) => _buildCardData(textStyle),
       child: child,
     );
   }
 
-  HoverCardData _buildCardData() {
+  HoverCardData _buildCardData(TextStyle textStyle) {
     final uiText = 'UI: ${durationText(
       frame.buildTime,
       unit: DurationDisplayUnit.milliseconds,
@@ -640,41 +664,48 @@ class FlutterFrameTooltip extends StatelessWidget {
         : '';
     return HoverCardData(
       position: HoverCardPosition.element,
-      width: _calculateTooltipWidth([uiText, rasterText, shaderText]),
+      width: _calculateTooltipWidth(
+        [uiText, rasterText, shaderText],
+        textStyle,
+      ),
       contents: Material(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(uiText),
-            const SizedBox(height: densePadding),
-            Text(rasterText),
-            if (hasShaderJank)
-              Row(
-                children: [
-                  const Icon(
-                    Icons.subdirectory_arrow_right,
-                    size: defaultIconSizeBeforeScaling,
-                  ),
-                  Text(shaderText),
-                  MoreInfoLink(
-                    url: preCompileShadersDocsUrl,
-                    gaScreenName: gac.performance,
-                    gaSelectedItemDescription: gac
-                        .PerformanceDocs.shaderCompilationDocsTooltipLink.name,
-                  ),
-                ],
-              ),
-          ],
+        child: DefaultTextStyle(
+          style: textStyle,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(uiText),
+              const SizedBox(height: densePadding),
+              Text(rasterText),
+              if (hasShaderJank)
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.subdirectory_arrow_right,
+                      size: defaultIconSizeBeforeScaling,
+                    ),
+                    Text(shaderText),
+                    MoreInfoLink(
+                      url: preCompileShadersDocsUrl,
+                      gaScreenName: gac.performance,
+                      gaSelectedItemDescription: gac.PerformanceDocs
+                          .shaderCompilationDocsTooltipLink.name,
+                    ),
+                  ],
+                ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  double _calculateTooltipWidth(List<String> lines) {
+  double _calculateTooltipWidth(List<String> lines, TextStyle style) {
     var maxWidth = 0.0;
     for (final line in lines) {
-      final lineWidth = calculateTextSpanWidth(TextSpan(text: line));
+      final lineWidth =
+          calculateTextSpanWidth(TextSpan(text: line, style: style));
       maxWidth = math.max(maxWidth, lineWidth);
     }
     // Add (2 * denseSpacing) for the card padding, and add

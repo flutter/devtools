@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/globals.dart';
-import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/search.dart';
 import 'codeview_controller.dart';
@@ -396,7 +396,7 @@ class FileSearchResults {
       return copyWith();
     }
 
-    final topMatches = [];
+    final topMatches = <List<ScriptRef>>[];
     int matchesLeft = numOfMatchesToShow;
     for (final matches in [
       _exactFileNameMatches,

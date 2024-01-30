@@ -8,6 +8,8 @@ import 'dart:io';
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/config_specific/framework_initialize/_framework_initialize_desktop.dart';
 import 'package:devtools_app/src/shared/primitives/message_bus.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 
 import 'flutter_test_driver.dart';
 
@@ -140,14 +142,15 @@ class FlutterTestEnvironment {
         setGlobal(MessageBus, MessageBus());
         setGlobal(ScriptManager, ScriptManager());
         setGlobal(BreakpointManager, BreakpointManager());
+        setGlobal(ExtensionService, ExtensionService());
 
         // Clear out VM service calls from the test driver.
         // ignore: invalid_use_of_visible_for_testing_member
         _service.clearVmServiceCalls();
 
-        await serviceManager.vmServiceOpened(
+        await serviceConnection.serviceManager.vmServiceOpened(
           _service,
-          onClosed: Completer().future,
+          onClosed: Completer<void>().future,
         );
         await _preferencesController!.init();
 
@@ -176,7 +179,7 @@ class FlutterTestEnvironment {
 
     if (_beforeFinalTearDown != null) await _beforeFinalTearDown!();
 
-    serviceManager.manuallyDisconnect();
+    await serviceConnection.serviceManager.manuallyDisconnect();
 
     await _service.allFuturesCompleted.timeout(
       const Duration(seconds: 20),

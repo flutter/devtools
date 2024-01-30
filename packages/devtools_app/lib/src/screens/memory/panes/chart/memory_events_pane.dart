@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
@@ -9,9 +11,6 @@ import '../../../../shared/charts/chart.dart';
 import '../../../../shared/charts/chart_controller.dart';
 import '../../../../shared/charts/chart_trace.dart' as trace;
 import '../../../../shared/charts/chart_trace.dart' show ChartType;
-import '../../../../shared/primitives/auto_dispose.dart';
-import '../../../../shared/primitives/utils.dart';
-import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../framework/connected/memory_controller.dart';
 import '../../shared/primitives/memory_timeline.dart';
@@ -55,9 +54,10 @@ class EventChartController extends ChartController {
   @override
   void setupData() {
     final chartDataLength = timestampsLength;
-    final dataLength = _memoryController.memoryTimeline.data.length;
+    final dataLength = _memoryController.controllers.memoryTimeline.data.length;
 
-    final dataRange = _memoryController.memoryTimeline.data.getRange(
+    final dataRange =
+        _memoryController.controllers.memoryTimeline.data.getRange(
       chartDataLength,
       dataLength,
     );
@@ -185,7 +185,7 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
   /// VM's GCs are displayed in a smaller glyph and closer to the heap graph.
   static const visibleVmEvent = 0.4;
 
-  MemoryTimeline get _memoryTimeline => controller.memoryTimeline;
+  MemoryTimeline get _memoryTimeline => controller.controllers.memoryTimeline;
 
   @override
   void initState() {

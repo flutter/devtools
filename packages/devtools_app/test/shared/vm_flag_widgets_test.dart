@@ -4,12 +4,13 @@
 
 import 'package:collection/collection.dart';
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/service/service_registrations.dart'
-    as registrations;
-import 'package:devtools_app/src/service/vm_flags.dart' as vm_flags;
 import 'package:devtools_app/src/shared/ui/drop_down_button.dart';
 import 'package:devtools_app/src/shared/ui/vm_flag_widgets.dart';
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -18,24 +19,24 @@ import 'package:vm_service/vm_service.dart';
 
 void main() {
   group('Profile Granularity Dropdown', () {
-    late FakeServiceManager fakeServiceManager;
+    late FakeServiceConnectionManager fakeServiceConnection;
     late CpuSamplingRateDropdown dropdown;
 
     setUp(() async {
-      fakeServiceManager = FakeServiceManager();
+      fakeServiceConnection = FakeServiceConnectionManager();
       setGlobal(
         DevToolsEnvironmentParameters,
         ExternalDevToolsEnvironmentParameters(),
       );
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(ServiceConnectionManager, fakeServiceConnection);
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(NotificationService, NotificationService());
       setGlobal(BannerMessagesController, BannerMessagesController());
-      await fakeServiceManager.flagsInitialized.future;
+      await fakeServiceConnection.serviceManager.flagsInitialized.future;
       dropdown = CpuSamplingRateDropdown(
         screenId: ProfilerScreen.id,
         profilePeriodFlagNotifier:
-            fakeServiceManager.vmFlagManager.flag(vm_flags.profilePeriod)!,
+            fakeServiceConnection.vmFlagManager.flag(profilePeriod)!,
       );
     });
 
@@ -87,7 +88,7 @@ void main() {
       expect(dropdownButton.value, equals(CpuSamplingRate.medium.value));
 
       var profilePeriodFlag =
-          (await getProfileGranularityFlag(fakeServiceManager))!;
+          (await getProfileGranularityFlag(fakeServiceConnection))!;
       expect(
         profilePeriodFlag.valueAsString,
         equals(CpuSamplingRate.medium.value),
@@ -103,8 +104,8 @@ void main() {
       expect(dropdownButton.value, equals(CpuSamplingRate.high.value));
 
       profilePeriodFlag =
-          (await getProfileGranularityFlag(fakeServiceManager))!;
-      expect(profilePeriodFlag.name, equals(vm_flags.profilePeriod));
+          (await getProfileGranularityFlag(fakeServiceConnection))!;
+      expect(profilePeriodFlag.name, equals(profilePeriod));
       expect(
         profilePeriodFlag.valueAsString,
         equals(CpuSamplingRate.high.value),
@@ -125,8 +126,8 @@ void main() {
       expect(dropdownButton.value, equals(CpuSamplingRate.low.value));
 
       profilePeriodFlag =
-          (await getProfileGranularityFlag(fakeServiceManager))!;
-      expect(profilePeriodFlag.name, equals(vm_flags.profilePeriod));
+          (await getProfileGranularityFlag(fakeServiceConnection))!;
+      expect(profilePeriodFlag.name, equals(profilePeriod));
       expect(
         profilePeriodFlag.valueAsString,
         equals(CpuSamplingRate.low.value),
@@ -151,10 +152,8 @@ void main() {
           tester.widget(dropdownButtonFinder);
       expect(dropdownButton.value, equals(CpuSamplingRate.medium.value));
 
-      await serviceManager.service!.setFlag(
-        vm_flags.profilePeriod,
-        newFlagValue,
-      );
+      await serviceConnection.serviceManager.service!
+          .setFlag(profilePeriod, newFlagValue);
       await tester.pumpAndSettle();
       dropdownButton = tester.widget(dropdownButtonFinder);
       expect(dropdownButton.value, equals(expectedFlagValue));
@@ -185,23 +184,22 @@ void main() {
   });
 
   group('VMFlagsDialog', () {
-    late FakeServiceManager fakeServiceManager;
+    late FakeServiceConnectionManager fakeServiceConnection;
 
     void initServiceManager({
       bool flutterVersionServiceAvailable = true,
     }) {
       final availableServices = [
-        if (flutterVersionServiceAvailable)
-          registrations.flutterVersion.service,
+        if (flutterVersionServiceAvailable) flutterVersionService.service,
       ];
-      fakeServiceManager = FakeServiceManager(
+      fakeServiceConnection = FakeServiceConnectionManager(
         availableServices: availableServices,
       );
-      when(fakeServiceManager.vm.version).thenReturn('1.9.1');
-      final app = fakeServiceManager.connectedApp!;
+      when(fakeServiceConnection.serviceManager.vm.version).thenReturn('1.9.1');
+      final app = fakeServiceConnection.serviceManager.connectedApp!;
       when(app.isDartWebAppNow).thenReturn(false);
       when(app.isRunningOnDartVM).thenReturn(true);
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(ServiceConnectionManager, fakeServiceConnection);
     }
 
     setUp(() {
@@ -210,7 +208,7 @@ void main() {
 
     testWidgets('builds dialog', (WidgetTester tester) async {
       mockConnectedApp(
-        fakeServiceManager.connectedApp!,
+        fakeServiceConnection.serviceManager.connectedApp!,
         isFlutterApp: true,
         isProfileBuild: false,
         isWebApp: false,
@@ -219,7 +217,7 @@ void main() {
       await tester.pumpWidget(wrap(const VMFlagsDialog()));
       expect(find.richText('VM Flags'), findsOneWidget);
       expect(find.richText('flag 1 name'), findsOneWidget);
-      final RichText commentText = tester.firstWidget<RichText>(
+      final Text commentText = tester.firstWidget<Text>(
         findSubstring('flag 1 comment'),
       );
       expect(commentText, isNotNull);
@@ -232,10 +230,11 @@ BannerMessagesController bannerMessagesController(BuildContext context) {
 }
 
 Future<Flag?> getProfileGranularityFlag(
-  FakeServiceManager serviceManager,
+  FakeServiceConnectionManager serviceManager,
 ) async {
-  final flagList = (await serviceManager.service!.getFlagList()).flags!;
+  final flagList =
+      (await serviceManager.serviceManager.service!.getFlagList()).flags!;
   return flagList.firstWhereOrNull(
-    (flag) => flag.name == vm_flags.profilePeriod,
+    (flag) => flag.name == profilePeriod,
   );
 }

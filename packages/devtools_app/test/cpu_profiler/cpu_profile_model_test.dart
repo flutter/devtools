@@ -4,8 +4,8 @@
 
 import 'package:devtools_app/src/screens/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/primitives/utils.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
@@ -20,7 +20,7 @@ void main() {
     setUp(() {
       setGlobal(
         ServiceConnectionManager,
-        FakeServiceManager(
+        FakeServiceConnectionManager(
           service: FakeServiceManager.createFakeService(
             resolvedUriMap: goldenResolvedUriMap,
           ),
@@ -28,17 +28,20 @@ void main() {
       );
     });
 
-    test('empty frame regression test', () {
-      final cpuProfileEmptyData =
-          CpuProfileData.parse(cpuProfileResponseEmptyJson);
-      expect(
-        cpuProfileEmptyData.profileMetaData.time!.end!.inMilliseconds,
-        47377796,
-      );
-      final filtered =
-          CpuProfileData.filterFrom(cpuProfileEmptyData, (_) => true);
-      expect(filtered.profileMetaData.time!.end!.inMilliseconds, 0);
-    });
+    test(
+      'empty frame regression test',
+      () {
+        final cpuProfileEmptyData =
+            CpuProfileData.parse(cpuProfileResponseEmptyJson);
+        expect(
+          cpuProfileEmptyData.profileMetaData.time!.end!.inMilliseconds,
+          47377796,
+        );
+        final filtered =
+            CpuProfileData.filterFrom(cpuProfileEmptyData, (_) => true);
+        expect(filtered.profileMetaData.time!.end!.inMilliseconds, 0);
+      },
+    );
 
     test('init from parse', () {
       expect(
@@ -112,37 +115,46 @@ void main() {
       expect(cpuProfileData.toJson, equals(goldenCpuProfileDataJson));
     });
 
-    test('converts golden samples to golden cpu profile data', () async {
-      final generatedCpuProfileData =
-          await CpuProfileData.generateFromCpuSamples(
-        isolateId: goldenSamplesIsolate,
-        cpuSamples: CpuSamples.parse(goldenCpuSamplesJson)!,
-      );
+    test(
+      'converts golden samples to golden cpu profile data',
+      () async {
+        final generatedCpuProfileData =
+            await CpuProfileData.generateFromCpuSamples(
+          isolateId: goldenSamplesIsolate,
+          cpuSamples: CpuSamples.parse(goldenCpuSamplesJson)!,
+        );
 
-      expect(generatedCpuProfileData.toJson, equals(goldenCpuProfileDataJson));
-    });
+        expect(
+          generatedCpuProfileData.toJson,
+          equals(goldenCpuProfileDataJson),
+        );
+      },
+    );
 
-    test('to json defaults packageUri to resolvedUrl', () {
-      const id = '140357727781376-12';
-      final profileData = Map<String, dynamic>.from(goldenCpuProfileDataJson);
-      profileData['stackFrames'] = Map<String, Map<String, String?>>.from(
-        {id: goldenCpuProfileStackFrames[id]},
-      );
-      profileData['stackFrames'][id]
-          .remove(CpuProfileData.resolvedPackageUriKey);
+    test(
+      'to json defaults packageUri to resolvedUrl',
+      () {
+        const id = '140357727781376-12';
 
-      final parsedProfileData = CpuProfileData.parse(profileData);
+        final profileData = Map.of(goldenCpuProfileDataJson);
+        final stackFrame = goldenCpuProfileStackFrames[id] as Map;
+        final stackFrameData = {id: stackFrame};
+        profileData['stackFrames'] = stackFrameData;
+        stackFrameData[id]!.remove(CpuProfileData.resolvedPackageUriKey);
 
-      final jsonPackageUri = parsedProfileData.stackFrames[id]!.packageUri;
-      expect(jsonPackageUri, goldenCpuProfileStackFrames[id]!['resolvedUrl']);
-    });
+        final parsedProfileData = CpuProfileData.parse(profileData);
+
+        final jsonPackageUri = parsedProfileData.stackFrames[id]!.packageUri;
+        expect(jsonPackageUri, stackFrame['resolvedUrl']);
+      },
+    );
 
     test('generateFromCpuSamples handles duplicate resolvedUrls', () async {
       const resolvedUrl = 'the/resolved/Url';
       const packageUri = 'the/package/Uri';
       setGlobal(
         ServiceConnectionManager,
-        FakeServiceManager(
+        FakeServiceConnectionManager(
           service: FakeServiceManager.createFakeService(
             resolvedUriMap: {resolvedUrl: packageUri},
           ),

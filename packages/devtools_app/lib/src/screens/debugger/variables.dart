@@ -27,7 +27,7 @@ class Variables extends StatelessWidget {
     // on stepping.
     if (FeatureFlags.dapDebugging) {
       return TreeView<DapObjectNode>(
-        dataRootsListenable: serviceManager.appState.dapVariables,
+        dataRootsListenable: serviceConnection.appState.dapVariables,
         dataDisplayProvider: (variable, onPressed) {
           return DapDisplayProvider(node: variable, onTap: onPressed);
         },
@@ -35,7 +35,7 @@ class Variables extends StatelessWidget {
       );
     } else {
       return TreeView<DartObjectNode>(
-        dataRootsListenable: serviceManager.appState.variables,
+        dataRootsListenable: serviceConnection.appState.variables,
         dataDisplayProvider: (variable, onPressed) => DisplayProvider(
           variable: variable,
           onTap: onPressed,

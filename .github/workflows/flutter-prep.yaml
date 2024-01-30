@@ -10,12 +10,6 @@ on:
       os-name:
         description: 'The OS to run against, either "macos" or "ubuntu". If neither is provided, will run against both.'
         type: string
-      needs-checkout-merge:
-        description: "Whether the PR should be merged during the checkout step. Necessary for pull_request_target workflows."
-        type: boolean
-      requires-label:
-        description: "Specifies the label required for the workflow to run. If not provided, the workflow will always run."
-        type: string
 
     outputs:
       latest_flutter_candidate:
@@ -24,8 +18,6 @@ on:
 
 jobs:
   reusable-flutter-prep:
-    # Note: Do not delete the following check. This is needed for the DCM workflow.
-    if: inputs.requires-label == '' || contains(github.event.pull_request.labels.*.name, inputs.requires-label)
     name: ${{ matrix.os }} Flutter Prep
     outputs:
       latest_flutter_candidate: ${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}
@@ -36,20 +28,8 @@ jobs:
     steps:
       # TODO(https://github.com/flutter/devtools/issues/5729) Consider caching DevTools so that we
       # don't check it out again is subsequent workflows.
-
-      # Merge in the PR branch during checkout using the PR's sha. This is necessary for pull_request_target
-      # workflows. See: https://github.com/actions/checkout/issues/518
-      - name: Checkout PR branch for DevTools
-        if: ${{ inputs.needs-checkout-merge == true }}
-        id: checkout-pr-branch
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
-        with:
-          ref: "${{ github.event.pull_request.head.sha }}"
-
-      # Otherwise use the default checkout action.
       - name: Checkout DevTools (default)
-        if: steps.checkout-pr-branch.outcome == 'skipped'
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
+        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac
 
       - name: Get Latest Flutter Candidate
         id: flutter-candidate
@@ -59,24 +39,24 @@ jobs:
 
       - name: Load Cached Flutter SDK
         id: cache-flutter
-        uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
+        uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84
         with:
           path: |
-            ./flutter-sdk
+            ./tool/flutter-sdk
           key: flutter-sdk-${{ runner.os }}-${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}
 
       - if: ${{ steps.cache-flutter.outputs.cache-hit != 'true' }}
         name: Clone Flutter SDK if none cached
         run: |
-          git clone https://github.com/flutter/flutter.git ./flutter-sdk
-          cd flutter-sdk
+          git clone https://github.com/flutter/flutter.git ./tool/flutter-sdk
+          cd tool/flutter-sdk
           git checkout $LATEST_FLUTTER_CANDIDATE
         env:
           LATEST_FLUTTER_CANDIDATE: ${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}
 
       - name: Assert that the Latest Flutter Candidate is checked out
         run: |
-          cd flutter-sdk
+          cd tool/flutter-sdk
           HEAD_SHA=$(git rev-parse HEAD)
           LATEST_FLUTTER_CANDIDATE_SHA=$(git rev-list -1 "$LATEST_FLUTTER_CANDIDATE")
           if [ "$HEAD_SHA" != "$LATEST_FLUTTER_CANDIDATE_SHA" ]; then
@@ -88,6 +68,6 @@ jobs:
 
       - name: Setup Flutter SDK
         run: |
-          ./flutter-sdk/bin/flutter config --no-analytics
-          ./flutter-sdk/bin/flutter doctor
-          ./flutter-sdk/bin/cache/dart-sdk/bin/dart --disable-analytics
+          ./tool/flutter-sdk/bin/flutter config --disable-analytics
+          ./tool/flutter-sdk/bin/cache/dart-sdk/bin/dart --disable-analytics
+          ./tool/flutter-sdk/bin/flutter doctor

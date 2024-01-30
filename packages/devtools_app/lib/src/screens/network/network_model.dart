@@ -4,7 +4,6 @@
 
 import 'package:vm_service/vm_service.dart';
 
-import '../../shared/http/http_request_data.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/search.dart';
 
@@ -62,7 +61,7 @@ abstract class NetworkRequest with SearchableDataMixin {
   String toString() => '$method $uri';
 
   @override
-  bool operator ==(Object? other) {
+  bool operator ==(Object other) {
     return other is NetworkRequest &&
         runtimeType == other.runtimeType &&
         startTimestamp == other.startTimestamp &&
@@ -175,7 +174,7 @@ class WebSocket extends NetworkRequest {
   bool get inProgress => false;
 
   @override
-  bool operator ==(Object? other) => other is WebSocket && id == other.id;
+  bool operator ==(Object other) => other is WebSocket && id == other.id;
 
   @override
   int get hashCode => id.hashCode;
@@ -185,21 +184,10 @@ class WebSocket extends NetworkRequest {
 class NetworkRequests {
   NetworkRequests({
     this.requests = const [],
-    this.invalidHttpRequests = const [],
   });
 
   /// A list of network requests.
   ///
   /// Individual requests in this list can be either completed or in-progress.
   List<NetworkRequest> requests;
-
-  /// A list of invalid HTTP requests received.
-  ///
-  /// These are requests that have completed but do not contain all the required
-  /// information to display normally in the UI.
-  List<DartIOHttpRequestData> invalidHttpRequests;
-
-  void clear() {
-    requests.clear();
-  }
 }

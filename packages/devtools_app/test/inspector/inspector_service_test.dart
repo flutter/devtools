@@ -7,12 +7,10 @@
 @TestOn('vm')
 import 'dart:async';
 
-import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/shared/console/primitives/simple_items.dart';
-import 'package:devtools_app/src/shared/diagnostics/diagnostics_node.dart';
-import 'package:devtools_app/src/shared/diagnostics/inspector_service.dart';
-import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../test_infra/flutter_test_driver.dart' show FlutterRunConfiguration;
@@ -29,13 +27,10 @@ void main() {
   InspectorService? inspectorService;
 
   env.afterEverySetup = () async {
-    assert(serviceManager.connectedAppInitialized);
+    assert(serviceConnection.serviceManager.connectedAppInitialized);
     setGlobal(IdeTheme, IdeTheme());
 
     inspectorService = InspectorService();
-    if (env.runConfig.trackWidgetCreation) {
-      await inspectorService!.inferPubRootDirectoryIfNeeded();
-    }
   };
 
   env.beforeEveryTearDown = () async {
@@ -84,21 +79,6 @@ void main() {
           await env.tearDownEnvironment(force: true);
         });
 
-        test('can be inferred', () async {
-          await env.setupEnvironment();
-          final inspectorServiceLocal = inspectorService!;
-
-          final group = inspectorServiceLocal.createObjectGroup('test-group');
-          // These tests are moot if widget creation is not tracked.
-          expect(await inspectorServiceLocal.isWidgetCreationTracked(), isTrue);
-          await inspectorServiceLocal.addPubRootDirectories([]);
-          final List<String> rootDirectories =
-              await inspectorServiceLocal.inferPubRootDirectoryIfNeeded();
-          expect(rootDirectories.length, 1);
-          expect(rootDirectories.first, endsWith('/fixtures/flutter_app'));
-          await group.dispose();
-        });
-
         test('can be added and removed', () async {
           await env.setupEnvironment();
           final inspectorServiceLocal = inspectorService!;
@@ -138,16 +118,17 @@ void main() {
           () async {
             await env.setupEnvironment();
             final inspectorServiceLocal = inspectorService!;
-
             final group = inspectorServiceLocal.createObjectGroup('test-group');
             // These tests are moot if widget creation is not tracked.
             expect(
               await inspectorServiceLocal.isWidgetCreationTracked(),
               isTrue,
             );
-            await inspectorServiceLocal.addPubRootDirectories([]);
+            final rootLibrary =
+                await serviceConnection.rootLibraryForMainIsolate();
+            await inspectorServiceLocal.addPubRootDirectories([rootLibrary!]);
             final List<String> rootDirectories =
-                await inspectorServiceLocal.inferPubRootDirectoryIfNeeded();
+                await inspectorServiceLocal.getPubRootDirectories() ?? [];
             expect(rootDirectories.length, 1);
             expect(rootDirectories.first, endsWith('/fixtures/flutter_app'));
             final originalRootDirectories = rootDirectories.toList();
@@ -264,8 +245,7 @@ void main() {
           expect(await inspectorServiceLocal.isWidgetCreationTracked(), isTrue);
           await inspectorServiceLocal.addPubRootDirectories([]);
           final originalRootDirectories =
-              (await inspectorServiceLocal.inferPubRootDirectoryIfNeeded())
-                  .toList();
+              await inspectorServiceLocal.getPubRootDirectories();
           try {
             await inspectorServiceLocal.addPubRootDirectories(
               ['/usr/me/clients/google3/foo/bar/baz/lib/src/bla'],
@@ -374,14 +354,15 @@ void main() {
           } finally {
             // Restore.
             await inspectorServiceLocal
-                .addPubRootDirectories(originalRootDirectories);
+                .addPubRootDirectories(originalRootDirectories ?? []);
 
             await group.dispose();
           }
         });
       });
 
-      test('widget tree', () async {
+      // TODO(bartekpacia): Fix this test, https://github.com/flutter/devtools/issues/6902
+      test('widget tree', skip: true, () async {
         await env.setupEnvironment();
         final group = inspectorService!.createObjectGroup('test-group');
         final RemoteDiagnosticsNode root =

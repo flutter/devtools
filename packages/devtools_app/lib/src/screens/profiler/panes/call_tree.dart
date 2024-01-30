@@ -14,7 +14,6 @@ import 'cpu_profile_columns.dart';
 class CpuCallTreeTable extends StatelessWidget {
   const CpuCallTreeTable({
     required this.dataRoots,
-    required this.displayTreeGuidelines,
     super.key,
   });
 
@@ -40,8 +39,6 @@ class CpuCallTreeTable extends StatelessWidget {
 
   final List<CpuStackFrame> dataRoots;
 
-  final bool displayTreeGuidelines;
-
   @override
   Widget build(BuildContext context) {
     return TreeTable<CpuStackFrame>(
@@ -51,7 +48,7 @@ class CpuCallTreeTable extends StatelessWidget {
       columns: columns,
       treeColumn: methodColumn,
       defaultSortColumn: totalTimeColumn,
-      displayTreeGuidelines: displayTreeGuidelines,
+      displayTreeGuidelines: true,
       defaultSortDirection: SortDirection.descending,
     );
   }

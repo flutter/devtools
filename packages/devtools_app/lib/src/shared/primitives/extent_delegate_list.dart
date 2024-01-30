@@ -173,7 +173,7 @@ class ExtentDelegateListView extends CustomPointerScrollView {
     required this.childrenDelegate,
     required this.extentDelegate,
     int? semanticChildCount,
-    Function(PointerSignalEvent event)? customPointerSignalHandler,
+    void Function(PointerSignalEvent event)? customPointerSignalHandler,
   }) : super(
           key: key,
           scrollDirection: scrollDirection,

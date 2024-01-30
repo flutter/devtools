@@ -13,6 +13,7 @@ class DevToolsExtensionConfig implements Comparable {
     required this.issueTrackerLink,
     required this.version,
     required this.materialIconCodePoint,
+    required this.isPubliclyHosted,
   });
 
   factory DevToolsExtensionConfig.parse(Map<String, Object?> json) {
@@ -33,18 +34,54 @@ class DevToolsExtensionConfig implements Comparable {
           pathKey: final String path,
           issueTrackerKey: final String issueTracker,
           versionKey: final String version,
+          isPubliclyHostedKey: final String isPubliclyHosted,
         }) {
+      final underscoresAndLetters = RegExp(r'^[a-z0-9_]*$');
+      if (!underscoresAndLetters.hasMatch(name)) {
+        throw StateError(
+          'The "name" field in the extension config.yaml should only contain '
+          'lowercase letters, numbers, and underscores but instead was '
+          '"$name". This should be a valid Dart package name that matches the '
+          'package name this extension belongs to.',
+        );
+      }
       return DevToolsExtensionConfig._(
         name: name,
         path: path,
         issueTrackerLink: issueTracker,
         version: version,
         materialIconCodePoint: codePoint,
+        isPubliclyHosted: bool.parse(isPubliclyHosted),
       );
     } else {
-      const requiredKeys = {nameKey, pathKey, issueTrackerKey, versionKey};
-      final diff = requiredKeys.difference(json.keys.toSet());
-      if (diff.isEmpty) {
+      if (!json.keys.contains(isPubliclyHostedKey)) {
+        throw StateError(
+          'Missing key "$isPubliclyHostedKey" when trying to parse '
+          'DevToolsExtensionConfig object.',
+        );
+      }
+
+      const requiredKeysFromConfigFile = {
+        nameKey,
+        pathKey,
+        issueTrackerKey,
+        versionKey,
+      };
+      // We do not expect the config.yaml file to contain
+      // [isPubliclyHostedKey], as this should be inferred.
+      final jsonKeysFromConfigFile = Set.of(json.keys.toSet())
+        ..remove(isPubliclyHostedKey);
+
+      final diff = requiredKeysFromConfigFile.difference(
+        jsonKeysFromConfigFile,
+      );
+
+      if (diff.isNotEmpty) {
+        throw StateError(
+          'Missing required fields ${diff.toString()} in the extension '
+          'config.yaml.',
+        );
+      } else {
         // All the required keys are present, but the value types did not match.
         final sb = StringBuffer();
         for (final entry in json.entries) {
@@ -53,14 +90,9 @@ class DevToolsExtensionConfig implements Comparable {
           );
         }
         throw StateError(
-          'Unexpected value types in the extension config.json. Expected all '
+          'Unexpected value types in the extension config.yaml. Expected all '
           'values to be of type String, but one or more had a different type:\n'
           '${sb.toString()}',
-        );
-      } else {
-        throw StateError(
-          'Missing required fields ${diff.toString()} in the extension '
-          'config.json.',
         );
       }
     }
@@ -71,6 +103,7 @@ class DevToolsExtensionConfig implements Comparable {
   static const issueTrackerKey = 'issueTracker';
   static const versionKey = 'version';
   static const materialIconCodePointKey = 'materialIconCodePoint';
+  static const isPubliclyHostedKey = 'isPubliclyHosted';
 
   /// The package name that this extension is for.
   final String name;
@@ -101,9 +134,15 @@ class DevToolsExtensionConfig implements Comparable {
   /// [IconData] class for displaying in DevTools.
   ///
   /// This code point should be part of the 'MaterialIcons' font family.
+  /// See https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/material/icons.dart.
   final int materialIconCodePoint;
 
+  /// Whether this extension is distrubuted in a public package on pub.dev.
+  final bool isPubliclyHosted;
+
   String get displayName => name.toLowerCase();
+
+  String get analyticsSafeName => isPubliclyHosted ? name : 'private';
 
   Map<String, Object?> toJson() => {
         nameKey: name,
@@ -111,6 +150,7 @@ class DevToolsExtensionConfig implements Comparable {
         issueTrackerKey: issueTrackerLink,
         versionKey: version,
         materialIconCodePointKey: materialIconCodePoint,
+        isPubliclyHostedKey: isPubliclyHosted.toString(),
       };
 
   @override
@@ -123,6 +163,27 @@ class DevToolsExtensionConfig implements Comparable {
     }
     return compare;
   }
+
+  @override
+  bool operator ==(Object other) {
+    return other is DevToolsExtensionConfig &&
+        other.name == name &&
+        other.path == path &&
+        other.issueTrackerLink == issueTrackerLink &&
+        other.version == version &&
+        other.materialIconCodePoint == materialIconCodePoint &&
+        other.isPubliclyHosted == isPubliclyHosted;
+  }
+
+  @override
+  int get hashCode => Object.hash(
+        name,
+        path,
+        issueTrackerLink,
+        version,
+        materialIconCodePoint,
+        isPubliclyHosted,
+      );
 }
 
 /// Describes the enablement state of a DevTools extension.

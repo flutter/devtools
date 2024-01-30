@@ -2,12 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/utils.dart';
+import 'package:flutter/foundation.dart';
+
 import '../extensions/extension_service.dart';
 import '../screens/debugger/breakpoint_manager.dart';
+import '../service/dtd_manager.dart';
 import '../service/service_manager.dart';
 import '../shared/banner_messages.dart';
 import '../shared/notifications.dart';
-import 'config_specific/ide_theme/ide_theme.dart';
 import 'console/eval/eval_service.dart';
 import 'environment_parameters/environment_parameters_base.dart';
 import 'framework_controller.dart';
@@ -23,9 +26,7 @@ bool get isExternalBuild => _isExternalBuild;
 bool _isExternalBuild = true;
 void setInternalBuild() => _isExternalBuild = false;
 
-final Map<Type, Object> globals = <Type, Object>{};
-
-ServiceConnectionManager get serviceManager =>
+ServiceConnectionManager get serviceConnection =>
     globals[ServiceConnectionManager] as ServiceConnectionManager;
 
 ScriptManager get scriptManager => globals[ScriptManager] as ScriptManager;
@@ -39,6 +40,8 @@ Storage get storage => globals[Storage] as Storage;
 
 SurveyService get surveyService => globals[SurveyService] as SurveyService;
 
+DTDManager get dtdManager => globals[DTDManager] as DTDManager;
+
 PreferencesController get preferences =>
     globals[PreferencesController] as PreferencesController;
 
@@ -47,8 +50,6 @@ DevToolsEnvironmentParameters get devToolsExtensionPoints =>
 
 OfflineModeController get offlineController =>
     globals[OfflineModeController] as OfflineModeController;
-
-IdeTheme get ideTheme => globals[IdeTheme] as IdeTheme;
 
 NotificationService get notificationService =>
     globals[NotificationService] as NotificationService;
@@ -64,13 +65,25 @@ EvalService get evalService => globals[EvalService] as EvalService;
 ExtensionService get extensionService =>
     globals[ExtensionService] as ExtensionService;
 
-void setGlobal(Type clazz, Object instance) {
-  globals[clazz] = instance;
-}
-
 /// Whether DevTools is being run in integration test mode.
 bool get integrationTestMode => _integrationTestMode;
 bool _integrationTestMode = false;
 void setIntegrationTestMode() {
   _integrationTestMode = true;
+}
+
+/// Whether DevTools is being run in a test environment.
+bool get testMode => _testMode;
+bool _testMode = false;
+void setTestMode() {
+  _testMode = true;
+}
+
+/// Whether DevTools is being run as a stager app.
+bool get stagerMode => _stagerMode;
+bool _stagerMode = false;
+void setStagerMode() {
+  if (!kReleaseMode) {
+    _stagerMode = true;
+  }
 }

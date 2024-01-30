@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../shared/analytics/analytics.dart' as ga;
@@ -12,14 +13,12 @@ import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/table/table.dart';
 import '../../../../shared/table/table_controller.dart';
 import '../../../../shared/table/table_data.dart';
-import '../../../../shared/theme.dart';
-import '../../../../shared/utils.dart';
 import '../../shared/widgets/shared_memory_widgets.dart';
 import 'tracing_pane_controller.dart';
 
 /// The default width for columns containing *mostly* numeric data (e.g.,
 /// instances, memory).
-const _defaultNumberFieldWidth = 80.0;
+const _defaultNumberFieldWidth = 70.0;
 
 class _TraceCheckBoxColumn extends ColumnData<TracedClass>
     implements ColumnRenderer<TracedClass> {
@@ -28,7 +27,7 @@ class _TraceCheckBoxColumn extends ColumnData<TracedClass>
           'Trace',
           titleTooltip:
               'Enable or disable allocation tracing for a specific type',
-          fixedWidthPx: scaleByFontFactor(55.0),
+          fixedWidthPx: scaleByFontFactor(40.0),
           alignment: ColumnAlignment.left,
         );
 
@@ -42,6 +41,7 @@ class _TraceCheckBoxColumn extends ColumnData<TracedClass>
     BuildContext context,
     TracedClass item, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     return Checkbox(
@@ -86,13 +86,14 @@ class _ClassNameColumn extends ColumnData<TracedClass>
     BuildContext context,
     TracedClass data, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     return HeapClassView(
       theClass: data.name,
       showCopyButton: isRowSelected,
       copyGaItem: gac.MemoryEvent.diffClassSingleCopy,
-      rootPackage: serviceManager.rootInfoNow().package,
+      rootPackage: serviceConnection.serviceManager.rootInfoNow().package,
     );
   }
 }

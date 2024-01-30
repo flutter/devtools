@@ -5,8 +5,8 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/debugger/call_stack.dart';
 import 'package:devtools_app/src/screens/debugger/codeview.dart';
-import 'package:devtools_test/devtools_integration_test.dart';
-import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
+import 'package:devtools_test/integration_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -29,7 +29,11 @@ void main() {
 
   testWidgets('Debugger panel', (tester) async {
     await pumpAndConnectDevTools(tester, testApp);
-    await switchToScreen(tester, ScreenMetaData.debugger);
+    await switchToScreen(
+      tester,
+      tabIcon: ScreenMetaData.debugger.icon!,
+      screenId: ScreenMetaData.debugger.id,
+    );
     await tester.pump(safePumpDuration);
 
     logStatus('looking for the main.dart file');
@@ -101,7 +105,7 @@ void main() {
 
     // Tap on the gutter for the line to set a breakpoint:
     await tester.tap(gutter30Finder);
-    await tester.pumpAndSettle(safePumpDuration);
+    await tester.pumpAndSettle(longPumpDuration);
 
     logStatus('pausing at breakpoint');
 

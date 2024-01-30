@@ -2,26 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@JS()
-library gtags;
-
 // ignore_for_file: non_constant_identifier_names
 
-import 'dart:async';
-// ignore: avoid_web_libraries_in_flutter, by design
-import 'dart:html';
+@JS()
+library;
 
+import 'dart:async';
+
+import 'package:devtools_app_shared/ui.dart';
 import 'package:js/js.dart';
 import 'package:logging/logging.dart';
+import 'package:web/web.dart';
 
 import '../../../devtools.dart' as devtools show version;
-import '../config_specific/server/server.dart' as server;
-import '../config_specific/url/url.dart';
 import '../globals.dart';
-import '../primitives/url_utils.dart';
-import '../ui/gtags.dart';
+import '../server/server.dart' as server;
+import '../utils.dart';
 import 'analytics_common.dart';
 import 'constants.dart' as gac;
+import 'gtags.dart';
 import 'metrics.dart';
 
 // Dimensions1 AppType values:
@@ -41,7 +40,6 @@ const String devToolsChromeOS = 'CrOS'; // Chrome OS
 // Dimension6 devToolsVersion
 
 // Dimension7 ideLaunched
-const String ideLaunchedQuery = 'ide'; // '&ide=' query parameter
 const String ideLaunchedCLI = 'CLI'; // Command Line Interface
 
 final _log = Logger('_analytics_web');
@@ -81,6 +79,18 @@ class GtagEventDevTools extends GtagEvent {
     String? is_external_build, // dimension9 External build or google3
     String? is_embedded, // dimension10 Whether devtools is embedded
     String? g3_username, // dimension11 g3 username (null for external users)
+
+    // dimension12 IDE feature that launched Devtools
+    // The following is a non-exhaustive list of possible values for this dimension:
+    // "command" - VS Code command palette
+    // "sidebarContent" - the content of the sidebar (e.g. the DevTools dropdown for a debug session)
+    // "sidebarTitle" - the DevTools action in the sidebar title
+    // "touchbar" - MacOS touchbar button
+    // "launchConfiguration" - configured explicitly in launch configuration
+    // "onDebugAutomatic" - configured to always run on debug session start
+    // "onDebugPrompt" - user responded to prompt when running a debug session
+    // "languageStatus" - launched from the language status popout
+    String? ide_launched_feature,
 
     // Performance screen metrics. See [PerformanceScreenMetrics].
     int? ui_duration_micros, // metric1
@@ -142,6 +152,8 @@ class GtagEventDevTools extends GtagEvent {
 
   external String? get g3_username;
 
+  external String? get ide_launched_feature;
+
   // Custom metrics:
   external int? get ui_duration_micros;
 
@@ -195,6 +207,7 @@ GtagEventDevTools _gtagEvent({
     is_external_build: isExternalBuild.toString(),
     is_embedded: ideTheme.embed.toString(),
     g3_username: devToolsExtensionPoints.username(),
+    ide_launched_feature: ideLaunchedFeature,
     // [PerformanceScreenMetrics]
     ui_duration_micros: screenMetrics is PerformanceScreenMetrics
         ? screenMetrics.uiDuration?.inMicroseconds
@@ -254,11 +267,12 @@ GtagExceptionDevTools _gtagException(
     devtools_platform: devtoolsPlatformType,
     devtools_chrome: devtoolsChrome,
     devtools_version: devtoolsVersion,
-    ide_launched: ideLaunched,
+    ide_launched: _ideLaunched,
     flutter_client_id: flutterClientId,
     is_external_build: isExternalBuild.toString(),
     is_embedded: ideTheme.embed.toString(),
     g3_username: devToolsExtensionPoints.username(),
+    ide_launched_feature: ideLaunchedFeature,
     // [PerformanceScreenMetrics]
     ui_duration_micros: screenMetrics is PerformanceScreenMetrics
         ? screenMetrics.uiDuration?.inMicroseconds
@@ -324,6 +338,18 @@ class GtagExceptionDevTools extends GtagException {
     String? is_embedded, // dimension10 Whether devtools is embedded
     String? g3_username, // dimension11 g3 username (null for external users)
 
+    // dimension12 IDE feature that launched Devtools
+    // The following is a non-exhaustive list of possible values for this dimension:
+    // "command" - VS Code command palette
+    // "sidebarContent" - the content of the sidebar (e.g. the DevTools dropdown for a debug session)
+    // "sidebarTitle" - the DevTools action in the sidebar title
+    // "touchbar" - MacOS touchbar button
+    // "launchConfiguration" - configured explicitly in launch configuration
+    // "onDebugAutomatic" - configured to always run on debug session start
+    // "onDebugPrompt" - user responded to prompt when running a debug session
+    // "languageStatus" - launched from the language status popout
+    String? ide_launched_feature,
+
     // Performance screen metrics. See [PerformanceScreenMetrics].
     int? ui_duration_micros, // metric1
     int? raster_duration_micros, // metric2
@@ -370,6 +396,8 @@ class GtagExceptionDevTools extends GtagException {
   external String? get is_embedded;
 
   external String? get g3_username;
+
+  external String? get ide_launched_feature;
 
   // Custom metrics:
   external int? get ui_duration_micros;
@@ -572,6 +600,7 @@ void _timing(
   );
 }
 
+/// Sends an analytics event to signal that something in DevTools was selected.
 void select(
   String screenName,
   String selectedItem, {
@@ -593,6 +622,32 @@ void select(
       event_label: selectedItem,
       value: value,
       non_interaction: nonInteraction,
+      send_to: gaDevToolsPropertyId(),
+      screenMetrics:
+          screenMetricsProvider != null ? screenMetricsProvider() : null,
+    ),
+  );
+}
+
+/// Sends an analytics event to signal that something in DevTools was viewed.
+///
+/// Impression events should not signal user interaction like [select].
+void impression(
+  String screenName,
+  String item, {
+  ScreenAnalyticsMetrics Function()? screenMetricsProvider,
+}) {
+  _log.fine(
+    'Event: impression('
+    'screenName:$screenName, '
+    'item:$item)',
+  );
+  GTag.event(
+    screenName,
+    gaEventProvider: () => _gtagEvent(
+      event_category: gac.impressionEvent,
+      event_label: item,
+      non_interaction: true,
       send_to: gaDevToolsPropertyId(),
       screenMetrics:
           screenMetricsProvider != null ? screenMetricsProvider() : null,
@@ -638,6 +693,9 @@ const String devtoolsVersion = devtools.version; //dimension6 n.n.n
 
 String _ideLaunched = ''; // dimension7 IDE launched DevTools (VSCode, CLI, ...)
 
+// dimension12 IDE feature that launched DevTools
+String _ideLaunchedFeature = '';
+
 String _flutterClientId = ''; // dimension8 Flutter tool clientId.
 
 String get userAppType => _userAppType;
@@ -670,10 +728,15 @@ set devtoolsChrome(String newDevtoolsChrome) {
   _devtoolsChrome = newDevtoolsChrome;
 }
 
+/// The IDE that DevTools was launched from.
+///
+/// Defaults to [ideLaunchedCLI] if DevTools was not launched from the IDE.
 String get ideLaunched => _ideLaunched;
 
-set ideLaunched(String newIdeLaunched) {
-  _ideLaunched = newIdeLaunched;
+String get ideLaunchedFeature => _ideLaunchedFeature;
+
+set ideLaunchedFeature(String newIdeLaunchedFeature) {
+  _ideLaunchedFeature = newIdeLaunchedFeature;
 }
 
 String get flutterClientId => _flutterClientId;
@@ -692,14 +755,15 @@ bool _userApplicationDimensionsComputed = false;
 void _computeUserApplicationCustomGTagData() {
   if (_userApplicationDimensionsComputed) return;
 
-  final connectedApp = serviceManager.connectedApp!;
+  final connectedApp = serviceConnection.serviceManager.connectedApp!;
   assert(connectedApp.isFlutterAppNow != null);
   assert(connectedApp.isDartWebAppNow != null);
   assert(connectedApp.isProfileBuildNow != null);
 
   const unknownOS = 'unknown';
   if (connectedApp.isFlutterAppNow!) {
-    userPlatformType = serviceManager.vm?.operatingSystem ?? unknownOS;
+    userPlatformType =
+        serviceConnection.serviceManager.vm?.operatingSystem ?? unknownOS;
   }
   if (connectedApp.isFlutterWebAppNow) {
     userAppType = appTypeFlutterWeb;
@@ -735,7 +799,7 @@ Future<bool> disableAnalytics() async {
 /// devtoolsChrome.
 void computeDevToolsCustomGTagsData() {
   // Platform
-  final String platform = window.navigator.platform!;
+  final String platform = window.navigator.platform;
   platform.replaceAll(' ', '_');
   devtoolsPlatformType = platform;
 
@@ -760,12 +824,16 @@ void computeDevToolsCustomGTagsData() {
 
 // Look at the query parameters '&ide=' and record in GA.
 void computeDevToolsQueryParams() {
-  ideLaunched = ideLaunchedCLI; // Default is Command Line launch.
+  _ideLaunched = ideLaunchedCLI; // Default is Command Line launch.
 
-  final queryParameters = loadQueryParams();
-  final ideValue = queryParameters[ideLaunchedQuery];
+  final ideValue = ideFromUrl();
   if (ideValue != null) {
-    ideLaunched = ideValue;
+    _ideLaunched = ideValue;
+  }
+
+  final ideFeature = lookupFromQueryParams('ideFeature');
+  if (ideFeature != null) {
+    ideLaunchedFeature = ideFeature;
   }
 }
 
@@ -800,7 +868,7 @@ Future<void> setupDimensions() async {
 }
 
 void setupUserApplicationDimensions() {
-  if (serviceManager.connectedApp != null &&
+  if (serviceConnection.serviceManager.connectedApp != null &&
       !_userApplicationDimensionsComputed &&
       !_computingUserApplicationDimensions) {
     _computingUserApplicationDimensions = true;
@@ -811,15 +879,11 @@ void setupUserApplicationDimensions() {
 
 Map<String, dynamic> generateSurveyQueryParameters() {
   const ideKey = 'IDE';
-  const fromKey = 'From';
+  const versionKey = 'Version';
   const internalKey = 'Internal';
-
-  final internalValue = (!isExternalBuild).toString();
-  final fromPage = extractCurrentPageFromUrl(window.location.toString());
-
   return {
-    ideKey: ideLaunched,
-    fromKey: fromPage,
-    internalKey: internalValue,
+    ideKey: _ideLaunched,
+    versionKey: devtoolsVersion,
+    internalKey: (!isExternalBuild).toString(),
   };
 }

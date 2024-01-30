@@ -39,7 +39,7 @@ class LocalFileSystem {
 
   /// Creates the ~/.flutter-devtools directory if it does not already exist.
   static void ensureDevToolsDirectory() {
-    Directory('${devToolsDir()}').createSync();
+    Directory(devToolsDir()).createSync();
   }
 
   /// Returns a DevTools file from the given path.
@@ -71,7 +71,7 @@ class LocalFileSystem {
     if (!fileName.endsWith('.json')) return null;
 
     final content = file.readAsStringSync();
-    final json = jsonDecode(content);
+    final json = jsonDecode(content) as Map;
     json['lastModifiedTime'] = file.lastModifiedSync().toString();
     return jsonEncode(json);
   }

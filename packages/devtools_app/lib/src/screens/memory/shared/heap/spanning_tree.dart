@@ -25,7 +25,7 @@ Future<void> calculateHeap(AdaptedHeapData heap) async {
 
 Future<void> _setInboundRefs(AdaptedHeapData heap) async {
   int totalDartSize = 0;
-  for (final from in Iterable.generate(heap.objects.length)) {
+  for (final from in Iterable<int>.generate(heap.objects.length)) {
     totalDartSize += heap.objects[from].shallowSize;
     if (_uiReleaser.step()) await _uiReleaser.releaseUi();
     for (final to in heap.objects[from].outRefs) {

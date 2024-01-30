@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -14,8 +15,6 @@ import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/table/table.dart';
 import '../../../../shared/table/table_controller.dart';
 import '../../../../shared/table/table_data.dart';
-import '../../../../shared/theme.dart';
-import '../../../../shared/utils.dart';
 import '../../../vm_developer/vm_service_private_extensions.dart';
 import '../../shared/heap/class_filter.dart';
 import '../../shared/primitives/simple_elements.dart';
@@ -30,7 +29,7 @@ import 'profile_pane_controller.dart';
 
 /// The default width for columns containing *mostly* numeric data (e.g.,
 /// instances, memory).
-const _defaultNumberFieldWidth = 90.0;
+const _defaultNumberFieldWidth = 80.0;
 
 class _FieldClassNameColumn extends ColumnData<ProfileRecord>
     implements
@@ -59,6 +58,7 @@ class _FieldClassNameColumn extends ColumnData<ProfileRecord>
     BuildContext context,
     ProfileRecord data, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     if (data.isTotal) return null;
@@ -67,7 +67,7 @@ class _FieldClassNameColumn extends ColumnData<ProfileRecord>
       theClass: data.heapClass,
       showCopyButton: isRowSelected,
       copyGaItem: gac.MemoryEvent.diffClassSingleCopy,
-      rootPackage: serviceManager.rootInfoNow().package,
+      rootPackage: serviceConnection.serviceManager.rootInfoNow().package,
     );
   }
 
@@ -138,6 +138,7 @@ class _FieldInstanceCountColumn extends ColumnData<ProfileRecord>
     BuildContext context,
     ProfileRecord data, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     return ProfileInstanceTableCell(
@@ -191,7 +192,8 @@ class _FieldDartHeapSizeColumn extends _FieldSizeColumn {
 }
 
 class _FieldSizeColumn extends ColumnData<ProfileRecord> {
-  factory _FieldSizeColumn({required heap}) => _FieldSizeColumn._(
+  factory _FieldSizeColumn({required HeapGeneration heap}) =>
+      _FieldSizeColumn._(
         title: 'Total Size',
         titleTooltip: "The sum of the type's total shallow memory "
             'consumption in the Dart heap and associated external (e.g., '
@@ -485,7 +487,7 @@ class AllocationProfileTableViewState
                   // and columns) and one data row. We add a slight padding to
                   // ensure the underlying scrollable area has enough space to not
                   // display a scroll bar.
-                  height: defaultRowHeight + areaPaneHeaderHeight * 2 + 1,
+                  height: defaultRowHeight + defaultHeaderHeight * 2 + 1,
                   child: _GCStatsTable(
                     controller: widget.controller,
                   ),
@@ -644,11 +646,12 @@ class _ExportAllocationProfileButton extends StatelessWidget {
     return ValueListenableBuilder<AdaptedProfile?>(
       valueListenable: allocationProfileController.currentAllocationProfile,
       builder: (context, currentAllocationProfile, _) {
-        return ToCsvButton(
+        return DownloadButton(
           gaScreen: gac.memory,
           gaSelection: gac.MemoryEvent.profileDownloadCsv,
           minScreenWidthForTextBeforeScaling: memoryControlsMinVerboseWidth,
           tooltip: 'Download allocation profile data in CSV format',
+          label: 'CSV',
           onPressed: currentAllocationProfile == null
               ? null
               : () => allocationProfileController
@@ -672,7 +675,7 @@ class _RefreshOnGCToggleButton extends StatelessWidget {
     return ValueListenableBuilder<bool>(
       valueListenable: allocationProfileController.refreshOnGc,
       builder: (context, refreshOnGc, _) {
-        return ToggleButton(
+        return DevToolsToggleButton(
           message: 'Auto-refresh on garbage collection',
           label: 'Refresh on GC',
           icon: Icons.autorenew_outlined,
@@ -701,20 +704,24 @@ class _ProfileHelpLink extends StatelessWidget {
       gaScreen: gac.memory,
       gaSelection: gac.topicDocumentationButton(_documentationTopic),
       dialogTitle: 'Memory Allocation Profile Help',
-      child: Column(
+      actions: [
+        MoreInfoLink(
+          url: DocLinks.profile.value,
+          gaScreenName: '',
+          gaSelectedItemDescription:
+              gac.topicDocumentationLink(_documentationTopic),
+        ),
+      ],
+      child: const Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          const Text('The allocation profile tab displays information about\n'
-              'allocated objects in the Dart heap of the selected\n'
-              'isolate.'),
-          const SizedBox(height: denseSpacing),
-          const ClassTypeLegend(),
-          MoreInfoLink(
-            url: DocLinks.profile.value,
-            gaScreenName: '',
-            gaSelectedItemDescription:
-                gac.topicDocumentationLink(_documentationTopic),
+          Text(
+            'The allocation profile tab displays information about\n'
+            'allocated objects in the Dart heap of the selected\n'
+            'isolate.',
           ),
+          SizedBox(height: denseSpacing),
+          ClassTypeLegend(),
         ],
       ),
     );

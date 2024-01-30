@@ -4,13 +4,14 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../service/service_registrations.dart' as registrations;
 import '../../shared/diagnostics/inspector_service.dart';
 import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
 import '../../shared/offline_mode.dart';
-import '../../shared/primitives/auto_dispose.dart';
 import 'panes/controls/enhance_tracing/enhance_tracing_controller.dart';
 import 'panes/flutter_frames/flutter_frame_model.dart';
 import 'panes/flutter_frames/flutter_frames_controller.dart';
@@ -41,7 +42,8 @@ class PerformanceController extends DisposableController
       rasterStatsController,
     ];
 
-    if (serviceManager.connectedApp?.isDartWebAppNow ?? false) {
+    if (serviceConnection.serviceManager.connectedApp?.isDartWebAppNow ??
+        false) {
       // Do not perform initialization for web apps.
       return;
     }
@@ -97,6 +99,9 @@ class PerformanceController extends DisposableController
   /// in selected timeline event, selected frame, etc.).
   PerformanceData? offlinePerformanceData;
 
+  bool get impellerEnabled => _impellerEnabled;
+  bool _impellerEnabled = false;
+
   final _initialized = Completer<void>();
 
   Future<void> get initialized => _initialized.future;
@@ -112,14 +117,27 @@ class PerformanceController extends DisposableController
 
     await _applyToFeatureControllersAsync((c) => c.init());
     if (!offlineController.offlineMode.value) {
-      await serviceManager.onServiceAvailable;
+      await serviceConnection.serviceManager.onServiceAvailable;
+
+      if (serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ??
+          false) {
+        final impellerEnabledResponse = await serviceConnection.serviceManager
+            .callServiceExtensionOnMainIsolate(
+          registrations.isImpellerEnabled,
+        );
+        _impellerEnabled = impellerEnabledResponse.json?['enabled'] == true;
+      } else {
+        _impellerEnabled = false;
+      }
 
       enhanceTracingController.init();
 
       // Listen for Flutter.Frame events with frame timing data.
       // Listen for Flutter.RebuiltWidgets events.
       autoDisposeStreamSubscription(
-        serviceManager.service!.onExtensionEventWithHistory.listen((event) {
+        serviceConnection
+            .serviceManager.service!.onExtensionEventWithHistorySafe
+            .listen((event) {
           if (event.extensionKind == 'Flutter.Frame') {
             final frame = FlutterFrame.parse(event.extensionData!.data);
             enhanceTracingController.assignStateForFrame(frame);
@@ -175,7 +193,7 @@ class PerformanceController extends DisposableController
     // include locations that have not yet been sent with an event.
     _fetchMissingLocationsStarted = true;
     final inspectorService =
-        serviceManager.inspectorService! as InspectorService;
+        serviceConnection.inspectorService! as InspectorService;
     final expectedIsolate = _currentRebuildWidgetsIsolate;
     final json = await inspectorService.widgetLocationIdMap();
     // Don't apply the json if the isolate has been restarted
@@ -242,12 +260,12 @@ class PerformanceController extends DisposableController
   /// Clears the timeline data currently stored by the controller as well the
   /// VM timeline if a connected app is present.
   Future<void> clearData() async {
-    if (serviceManager.connectedAppInitialized) {
-      await serviceManager.service!.clearVMTimeline();
+    if (serviceConnection.serviceManager.connectedAppInitialized) {
+      await serviceConnection.serviceManager.service!.clearVMTimeline();
     }
     offlinePerformanceData = null;
     data?.clear();
-    serviceManager.errorBadgeManager.clearErrors(PerformanceScreen.id);
+    serviceConnection.errorBadgeManager.clearErrors(PerformanceScreen.id);
     await _applyToFeatureControllersAsync((c) => c.clearData());
   }
 

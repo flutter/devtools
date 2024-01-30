@@ -4,7 +4,6 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../shared/analytics/constants.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/primitives/utils.dart';
 
@@ -15,13 +14,11 @@ class InstanceViewWithContextMenu extends StatelessWidget {
   const InstanceViewWithContextMenu({
     super.key,
     required this.count,
-    required this.gaContext,
     required this.menuBuilder,
   }) : assert(count >= 0);
 
   final int count;
   final MenuBuilder? menuBuilder;
-  final MemoryAreas gaContext;
 
   @override
   Widget build(BuildContext context) {
@@ -30,9 +27,15 @@ class InstanceViewWithContextMenu extends StatelessWidget {
     const menuButtonWidth = ContextMenuButton.defaultWidth;
 
     return Row(
+      mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        Text(nf.format(count)),
+        Expanded(
+          child: Text(
+            nf.format(count),
+            textAlign: TextAlign.end,
+          ),
+        ),
         if (shouldShowMenu)
           ContextMenuButton(
             // ignore: avoid_redundant_argument_values, ensures consistency with [SizedBox] below.

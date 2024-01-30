@@ -4,12 +4,12 @@
 
 import 'dart:ui';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/diagnostics/diagnostics_node.dart';
 import '../../../../shared/primitives/utils.dart';
-import '../../../../shared/theme.dart';
 import '../../inspector_data_models.dart';
 import 'overflow_indicator_painter.dart';
 import 'theme.dart';
@@ -217,8 +217,8 @@ class WidgetVisualizer extends StatelessWidget {
                                 child: Center(
                                   child: Text(
                                     title,
-                                    style: TextStyle(
-                                      color: colorScheme.widgetNameColor,
+                                    style: theme.regularTextStyleWithColor(
+                                      colorScheme.widgetNameColor,
                                     ),
                                     overflow: TextOverflow.ellipsis,
                                   ),

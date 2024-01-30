@@ -5,11 +5,15 @@
 import 'dart:async';
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart' hide TimelineEvent;
 
+import 'fake_isolate_manager.dart';
+import 'fake_service_extension_manager.dart';
 import 'generated.mocks.dart';
 
 MockPerformanceController createMockPerformanceControllerWithDefaults() {
@@ -148,21 +152,45 @@ MockVmServiceWrapper createMockVmServiceWrapperWithDefaults() {
   when(service.onStderrEvent).thenAnswer((_) {
     return const Stream.empty();
   });
-  when(service.onStdoutEventWithHistory).thenAnswer((_) {
+  when(service.onStdoutEventWithHistorySafe).thenAnswer((_) {
     return const Stream.empty();
   });
-  when(service.onStderrEventWithHistory).thenAnswer((_) {
+  when(service.onStderrEventWithHistorySafe).thenAnswer((_) {
     return const Stream.empty();
   });
-  when(service.onExtensionEventWithHistory).thenAnswer((_) {
+  when(service.onExtensionEventWithHistorySafe).thenAnswer((_) {
     return const Stream.empty();
   });
   return service;
 }
 
+MockServiceConnectionManager createMockServiceConnectionWithDefaults() {
+  final mockServiceConnection = MockServiceConnectionManager();
+  final mockServiceManager = _createMockServiceManagerWithDefaults();
+  when(mockServiceConnection.serviceManager).thenReturn(mockServiceManager);
+
+  return mockServiceConnection;
+}
+
+MockServiceManager<VmServiceWrapper> _createMockServiceManagerWithDefaults() {
+  final mockServiceManager = MockServiceManager<VmServiceWrapper>();
+
+  final fakeIsolateManager = FakeIsolateManager();
+  provideDummy<IsolateManager>(fakeIsolateManager);
+
+  final fakeServiceExtensionManager = FakeServiceExtensionManager();
+  provideDummy<ServiceExtensionManager>(fakeServiceExtensionManager);
+
+  when(mockServiceManager.isolateManager).thenReturn(fakeIsolateManager);
+  when(mockServiceManager.serviceExtensionManager)
+      .thenReturn(fakeServiceExtensionManager);
+  return mockServiceManager;
+}
+
 MockLoggingController createMockLoggingControllerWithDefaults({
   List<LogData> data = const [],
 }) {
+  provideDummy<ListValueNotifier<LogData>>(ListValueNotifier<LogData>(data));
   final mockLoggingController = MockLoggingController();
   when(mockLoggingController.data).thenReturn(data);
   when(mockLoggingController.filteredData)
@@ -190,24 +218,39 @@ Future<MockExtensionService> createMockExtensionServiceWithDefaults(
   when(mockExtensionService.availableExtensions)
       .thenReturn(ImmediateValueNotifier(extensions));
 
-  final _stubEnabledStates = <String, ValueNotifier<ExtensionEnabledState>>{};
+  final stubEnabledStates = <String, ValueNotifier<ExtensionEnabledState>>{};
+
+  void computeVisibleExtensions() {
+    final visible = <DevToolsExtensionConfig>[];
+    for (final e in extensions) {
+      final state = stubEnabledStates[e.name.toLowerCase()]!.value;
+      if (state != ExtensionEnabledState.disabled) {
+        visible.add(e);
+      }
+    }
+    when(mockExtensionService.visibleExtensions)
+        .thenReturn(ValueNotifier(visible));
+  }
+
   for (final e in extensions) {
-    _stubEnabledStates[e.name.toLowerCase()] =
+    stubEnabledStates[e.displayName] =
         ValueNotifier<ExtensionEnabledState>(ExtensionEnabledState.none);
     when(mockExtensionService.enabledStateListenable(e.name))
-        .thenReturn(_stubEnabledStates[e.name.toLowerCase()]!);
+        .thenReturn(stubEnabledStates[e.displayName]!);
     when(mockExtensionService.enabledStateListenable(e.name.toLowerCase()))
-        .thenReturn(_stubEnabledStates[e.name.toLowerCase()]!);
+        .thenReturn(stubEnabledStates[e.displayName]!);
     when(mockExtensionService.setExtensionEnabledState(e, enable: true))
         .thenAnswer((_) async {
-      _stubEnabledStates[e.name.toLowerCase()]!.value =
-          ExtensionEnabledState.enabled;
+      stubEnabledStates[e.displayName]!.value = ExtensionEnabledState.enabled;
+      computeVisibleExtensions();
     });
     when(mockExtensionService.setExtensionEnabledState(e, enable: false))
         .thenAnswer((_) async {
-      _stubEnabledStates[e.name.toLowerCase()]!.value =
+      stubEnabledStates[e.name.toLowerCase()]!.value =
           ExtensionEnabledState.disabled;
+      computeVisibleExtensions();
     });
   }
+  computeVisibleExtensions();
   return mockExtensionService;
 }

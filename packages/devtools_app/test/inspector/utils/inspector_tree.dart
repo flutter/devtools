@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -14,8 +14,6 @@ InspectorTreeController inspectorTreeControllerFromNode(
 ) {
   final controller = InspectorTreeController()
     ..config = InspectorTreeConfig(
-      summaryTree: false,
-      treeType: FlutterTreeType.widget,
       onNodeAdded: (_, __) {},
       onClientActiveChange: (_) {},
     );

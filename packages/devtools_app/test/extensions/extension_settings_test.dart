@@ -4,8 +4,11 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/extensions/extension_settings.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -18,6 +21,7 @@ void main() {
   group('$ExtensionSettingsDialog', () {
     setUp(() async {
       dialog = const ExtensionSettingsDialog();
+      setGlobal(PreferencesController, PreferencesController());
       setGlobal(
         ExtensionService,
         await createMockExtensionServiceWithDefaults(testExtensions),
@@ -32,7 +36,7 @@ void main() {
           ExtensionService,
           await createMockExtensionServiceWithDefaults([]),
         );
-        await tester.pumpWidget(wrap(dialog));
+        await tester.pumpWidget(wrapSimple(dialog));
         expect(find.text('DevTools Extensions'), findsOneWidget);
         expect(
           find.textContaining('Extensions are provided by the pub packages'),
@@ -47,7 +51,7 @@ void main() {
     testWidgets(
       'builds dialog with available extensions',
       (WidgetTester tester) async {
-        await tester.pumpWidget(wrap(dialog));
+        await tester.pumpWidget(wrapSimple(dialog));
         expect(find.text('DevTools Extensions'), findsOneWidget);
         expect(
           find.textContaining('Extensions are provided by the pub packages'),
@@ -68,7 +72,7 @@ void main() {
     testWidgets(
       'pressing toggle buttons makes calls to the $ExtensionService',
       (WidgetTester tester) async {
-        await tester.pumpWidget(wrap(dialog));
+        await tester.pumpWidget(wrapSimple(dialog));
 
         expect(
           extensionService.enabledStateListenable(barExtension.name).value,
@@ -139,7 +143,7 @@ void main() {
           ExtensionEnabledState.disabled,
         );
 
-        await tester.pumpWidget(wrap(dialog));
+        await tester.pumpWidget(wrapSimple(dialog));
         await expectLater(
           find.byWidget(dialog),
           matchesDevToolsGolden(
@@ -152,7 +156,7 @@ void main() {
     testWidgets(
       'toggle buttons update for changes to value notifiers',
       (WidgetTester tester) async {
-        await tester.pumpWidget(wrap(dialog));
+        await tester.pumpWidget(wrapSimple(dialog));
         await expectLater(
           find.byWidget(dialog),
           matchesDevToolsGolden(
@@ -173,7 +177,7 @@ void main() {
           enable: false,
         );
 
-        await tester.pumpWidget(wrap(dialog));
+        await tester.pumpWidget(wrapSimple(dialog));
         await expectLater(
           find.byWidget(dialog),
           matchesDevToolsGolden(

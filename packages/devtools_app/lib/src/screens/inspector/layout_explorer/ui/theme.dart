@@ -2,12 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../shared/theme.dart';
-import '../../../../shared/utils.dart';
-
-const margin = 8.0;
+const margin = 6.0;
 
 double get arrowHeadSize => scaleByFontFactor(8.0);
 double get arrowMargin => scaleByFontFactor(4.0);
@@ -40,13 +38,10 @@ double get heightOnlyIndicatorSize => scaleByFontFactor(72.0);
 double get minWidthToDisplayWidthInsideArrow => scaleByFontFactor(200.0);
 double get minHeightToDisplayHeightInsideArrow => scaleByFontFactor(200.0);
 
-const largeTextScaleFactor = 1.2;
 const smallTextScaleFactor = 0.8;
 
 /// Height for limiting asset image (selected one in the drop down).
 double get axisAlignmentAssetImageHeight => scaleByFontFactor(24.0);
-
-double get dropdownMaxSize => scaleByFontFactor(220.0);
 
 double get minHeightToAllowTruncating => scaleByFontFactor(375.0);
 double get minWidthToAllowTruncating => scaleByFontFactor(375.0);
@@ -119,10 +114,11 @@ const negativeSpaceDarkAssetName =
 const negativeSpaceLightAssetName =
     'assets/img/layout_explorer/negative_space_light.png';
 
-const dimensionIndicatorTextStyle = TextStyle(
+final dimensionIndicatorTextStyle = TextStyle(
   height: 1.0,
   letterSpacing: 1.1,
   color: emphasizedTextColor,
+  fontSize: defaultFontSize,
 );
 
 TextStyle overflowingDimensionIndicatorTextStyle(ColorScheme colorScheme) =>

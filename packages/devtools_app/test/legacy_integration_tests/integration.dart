@@ -40,7 +40,7 @@ class DevtoolsManager {
       waitForConnection
           ? tabInstance.onEvent
               .firstWhere((msg) => msg.event == 'app.devToolsReady')
-          : Future.value(),
+          : Future<void>.value(),
       tabInstance.getBrowserChannel(),
     ]);
   }
@@ -385,7 +385,7 @@ class WebBuildFixture {
       }),
     );
 
-    await buildFinished.future.catchError((e) {
+    await buildFinished.future.catchError((Object? e) {
       fail('Build failed: $e');
     });
 

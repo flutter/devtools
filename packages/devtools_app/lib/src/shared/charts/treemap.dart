@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -9,7 +11,6 @@ import 'package:logging/logging.dart';
 import '../common_widgets.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
-import '../theme.dart';
 import '../ui/colors.dart';
 
 enum PivotType { pivotByMiddle, pivotBySize }
@@ -160,7 +161,9 @@ class _TreemapState extends State<Treemap> {
     final isHorizontalRectangle = width > height;
 
     final totalByteSize = computeByteSizeForNodes(nodes: children);
-    if (children.isEmpty) {
+    // If there's no children or the children have a size of zero, there's
+    // nothing to display.
+    if (children.isEmpty || totalByteSize == 0) {
       return [];
     }
 
@@ -366,7 +369,7 @@ class _TreemapState extends State<Treemap> {
       return buildSubTreemaps();
     } else {
       // If constructed with Treemap.fromRoot
-      return buildTreemap(context);
+      return buildTreemap();
     }
   }
 
@@ -374,6 +377,7 @@ class _TreemapState extends State<Treemap> {
     assert(widget.nodes != null && widget.nodes!.isNotEmpty);
     return LayoutBuilder(
       builder: (context, constraints) {
+        final defaultTextStyle = Theme.of(context).regularTextStyle;
         // TODO(peterdjlee): Investigate why exception is thrown without this check
         //                   and if there are any other cases.
         if (constraints.maxHeight == 0 || constraints.maxWidth == 0) {
@@ -390,12 +394,14 @@ class _TreemapState extends State<Treemap> {
           // If this is the second to the last level, paint all cells in the last level
           // instead of creating widgets to improve performance.
 
-          final tooltipMessage = hoveredNode?.displayText();
           return DevToolsTooltip(
             // A key is required to force a rebuild of the tooltips for each cell.
             // Use tooltipMessage as the key to prevent rebuilds within a cell.
-            key: Key(tooltipMessage?.toPlainText() ?? ''),
-            richMessage: tooltipMessage ?? const TextSpan(text: ''),
+            key: Key(hoveredNode?.displayText() ?? ''),
+            richMessage: hoveredNode?.displayTextSpan(
+                  defaultTextStyle: defaultTextStyle,
+                ) ??
+                const TextSpan(text: ''),
             waitDuration: tooltipWaitLong,
             child: MouseRegion(
               onHover: (event) => _onHover(event, positionedChildren),
@@ -405,7 +411,10 @@ class _TreemapState extends State<Treemap> {
                   widget.onRootChangedCallback(hoveredNode);
                 },
                 child: CustomPaint(
-                  painter: MultiCellPainter(nodes: positionedChildren),
+                  painter: MultiCellPainter(
+                    nodes: positionedChildren,
+                    defaultTextStyle: defaultTextStyle,
+                  ),
                   size: Size(constraints.maxWidth, constraints.maxHeight),
                 ),
               ),
@@ -430,24 +439,28 @@ class _TreemapState extends State<Treemap> {
   /// |                          |
   /// ----------------------------
   /// ```
-  Widget buildTreemap(BuildContext context) {
+  Widget buildTreemap() {
     assert(widget.rootNode != null);
     if (widget.rootNode!.children.isNotEmpty) {
       return Padding(
         padding: const EdgeInsets.all(1.0),
-        child: buildTreemapFromNodes(context),
+        child: buildTreemapFromNodes(),
       );
     } else {
       // If given a root node but its children are empty, draw itself.
-      return buildTreemapFromRoot(context);
+      return buildTreemapFromRoot();
     }
   }
 
-  Widget buildTreemapFromNodes(BuildContext context) {
+  Widget buildTreemapFromNodes() {
     return Column(
       children: [
         if (widget.height > Treemap.minHeightToDisplayTitleText)
-          buildTitleText(context),
+          _TitleBar(
+            rootNode: widget.rootNode!,
+            isOutermostLevel: widget.isOutermostLevel,
+            onRootChangedCallback: widget.onRootChangedCallback,
+          ),
         Expanded(
           child: Treemap.fromNodes(
             nodes: widget.rootNode!.children,
@@ -461,108 +474,30 @@ class _TreemapState extends State<Treemap> {
     );
   }
 
-  Column buildTreemapFromRoot(BuildContext context) {
+  Column buildTreemapFromRoot() {
+    final rootNode = widget.rootNode!;
+    final child = _TreeMapCell(
+      treeMapHeight: widget.height,
+      node: rootNode,
+    );
     return Column(
       children: [
-        if (widget.isOutermostLevel) buildTitleText(context),
+        if (widget.isOutermostLevel)
+          _TitleBar(
+            rootNode: widget.rootNode!,
+            isOutermostLevel: widget.isOutermostLevel,
+            onRootChangedCallback: widget.onRootChangedCallback,
+          ),
         Expanded(
           child: widget.isOutermostLevel
-              ? buildCell()
-              : buildSelectable(child: buildCell()),
+              ? child
+              : _SelectableTreemapNode(
+                  node: rootNode,
+                  onRootChangedCallback: widget.onRootChangedCallback,
+                  child: child,
+                ),
         ),
       ],
-    );
-  }
-
-  Container buildCell() {
-    return Container(
-      decoration: BoxDecoration(
-        color: widget.rootNode!.displayColor,
-        border: Border.all(color: Colors.black87),
-      ),
-      child: Center(
-        child: widget.height > Treemap.minHeightToDisplayCellText
-            ? buildNameAndSizeText(
-                textColor:
-                    widget.rootNode!.showDiff ? Colors.white : Colors.black,
-                oneLine: false,
-              )
-            : const SizedBox(),
-      ),
-    );
-  }
-
-  Widget buildTitleText(BuildContext context) {
-    if (widget.isOutermostLevel) {
-      return buildBreadcrumbNavigator();
-    } else {
-      return buildSelectable(
-        child: Container(
-          height: Treemap.treeMapHeaderHeight,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.black87),
-          ),
-          child: buildNameAndSizeText(
-            textColor:
-                (Theme.of(context).textTheme.bodyMedium ?? const TextStyle())
-                    .color,
-            oneLine: true,
-          ),
-        ),
-      );
-    }
-  }
-
-  RichText buildNameAndSizeText({
-    required bool oneLine,
-    required Color? textColor,
-  }) {
-    return RichText(
-      text: widget.rootNode!.displayText(oneLine: oneLine, color: textColor),
-      selectionColor: textColor,
-      textAlign: TextAlign.center,
-      overflow: TextOverflow.ellipsis,
-    );
-  }
-
-  Widget buildBreadcrumbNavigator() {
-    final pathFromRoot = widget.rootNode!.pathFromRoot();
-    return Padding(
-      padding: const EdgeInsets.only(bottom: denseRowSpacing),
-      child: BreadcrumbNavigator.builder(
-        itemCount: pathFromRoot.length,
-        builder: (context, index) {
-          final node = pathFromRoot[index];
-          return Breadcrumb(
-            text: index < pathFromRoot.length - 1
-                ? node.name
-                : node.displayText().toPlainText(),
-            isRoot: index == 0,
-            onPressed: () => widget.onRootChangedCallback(node),
-          );
-        },
-      ),
-    );
-  }
-
-  /// Builds a selectable container with [child] as its child.
-  ///
-  /// Selecting this widget will trigger a re-root of the tree
-  /// to the associated [TreemapNode].
-  ///
-  /// The default value for newRoot is [widget.rootNode].
-  Widget buildSelectable({required Widget child, TreemapNode? newRoot}) {
-    newRoot ??= widget.rootNode;
-    return DevToolsTooltip(
-      message: widget.rootNode!.displayText().toPlainText(),
-      waitDuration: tooltipWaitLong,
-      child: InkWell(
-        onTap: () {
-          widget.onRootChangedCallback(newRoot);
-        },
-        child: child,
-      ),
     );
   }
 
@@ -587,6 +522,160 @@ class _TreemapState extends State<Treemap> {
         });
       }
     }
+  }
+}
+
+class _TreeMapCell extends StatelessWidget {
+  const _TreeMapCell({
+    required this.treeMapHeight,
+    required this.node,
+  });
+
+  final double treeMapHeight;
+  final TreemapNode node;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: node.displayColor,
+        border: Border.all(color: Colors.black87),
+      ),
+      child: Center(
+        child: treeMapHeight > Treemap.minHeightToDisplayCellText
+            ? _NameAndSizeText(
+                node: node,
+                color: node.showDiff ? Colors.white : Colors.black,
+                singleLine: false,
+              )
+            : const SizedBox(),
+      ),
+    );
+  }
+}
+
+class _TitleBar extends StatelessWidget {
+  const _TitleBar({
+    required this.rootNode,
+    required this.onRootChangedCallback,
+    required this.isOutermostLevel,
+  });
+
+  final TreemapNode rootNode;
+  final void Function(TreemapNode? node) onRootChangedCallback;
+  final bool isOutermostLevel;
+
+  @override
+  Widget build(BuildContext context) {
+    if (isOutermostLevel) {
+      return _BreadcrumbNavigator(
+        pathFromRoot: rootNode.pathFromRoot(),
+        onRootChangedCallback: onRootChangedCallback,
+      );
+    } else {
+      return _SelectableTreemapNode(
+        node: rootNode,
+        onRootChangedCallback: onRootChangedCallback,
+        child: Container(
+          height: Treemap.treeMapHeaderHeight,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.black87),
+          ),
+          child: _NameAndSizeText(
+            node: rootNode,
+            color: Theme.of(context).colorScheme.onSurface,
+            singleLine: true,
+          ),
+        ),
+      );
+    }
+  }
+}
+
+class _NameAndSizeText extends StatelessWidget {
+  const _NameAndSizeText({
+    required this.node,
+    required this.color,
+    required this.singleLine,
+  });
+
+  final TreemapNode node;
+  final Color color;
+  final bool singleLine;
+
+  @override
+  Widget build(BuildContext context) {
+    return RichText(
+      text: node.displayTextSpan(
+        singleLine: singleLine,
+        color: color,
+        defaultTextStyle: Theme.of(context).regularTextStyle,
+      ),
+      selectionColor: color,
+      textAlign: TextAlign.center,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+}
+
+class _BreadcrumbNavigator extends StatelessWidget {
+  const _BreadcrumbNavigator({
+    required this.pathFromRoot,
+    required this.onRootChangedCallback,
+  });
+
+  final List<TreemapNode> pathFromRoot;
+  final void Function(TreemapNode? node) onRootChangedCallback;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: denseRowSpacing),
+      child: BreadcrumbNavigator.builder(
+        itemCount: pathFromRoot.length,
+        builder: (context, index) {
+          final node = pathFromRoot[index];
+          return Breadcrumb(
+            text: index < pathFromRoot.length - 1
+                ? node.name
+                : node.displayText(),
+            isRoot: index == 0,
+            onPressed: () => onRootChangedCallback(node),
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// A selectable container with [child] as its child.
+///
+/// Selecting this widget will trigger a re-root of the tree
+/// to [node].
+class _SelectableTreemapNode extends StatelessWidget {
+  const _SelectableTreemapNode({
+    required this.node,
+    required this.onRootChangedCallback,
+    required this.child,
+  });
+
+  final TreemapNode node;
+  final void Function(TreemapNode? node) onRootChangedCallback;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return DevToolsTooltip(
+      message: node.displayText(),
+      waitDuration: tooltipWaitLong,
+      child: InkWell(
+        onTap: () {
+          onRootChangedCallback(node);
+        },
+        child: child,
+      ),
+    );
   }
 }
 
@@ -617,10 +706,8 @@ class TreemapNode extends TreeNode<TreemapNode> {
     return byteSize < 0 ? treemapDecreaseColor : treemapIncreaseColor;
   }
 
-  TextSpan displayText({Color? color, bool oneLine = true}) {
+  String displayText({bool singleLine = true, bool includeCaption = true}) {
     var displayName = name;
-    final textColor = color ?? (showDiff ? Colors.white : Colors.black);
-
     // Trim beginning of the name of [this] if it starts with its parent's name.
     // If the parent node and the child node's name are exactly the same,
     // do not trim in order to avoid empty names.
@@ -635,18 +722,35 @@ class TreemapNode extends TreeNode<TreemapNode> {
       }
     }
 
-    final separator = oneLine ? ' ' : '\n';
+    final separator = singleLine ? ' ' : '\n';
+    displayName = '$displayName$separator[${prettyByteSize()}]';
+    if (includeCaption && caption != null) {
+      displayName = '$displayName$separator$caption';
+    }
 
+    return displayName;
+  }
+
+  TextSpan displayTextSpan({
+    required TextStyle defaultTextStyle,
+    Color? color,
+    bool singleLine = true,
+  }) {
+    final textColor = color ?? (showDiff ? Colors.white : Colors.black);
+    final separator = singleLine ? ' ' : '\n';
     return TextSpan(
-      text: '$displayName$separator[${prettyByteSize()}]',
+      text: displayText(includeCaption: false, singleLine: singleLine),
+      style: defaultTextStyle.copyWith(color: textColor),
       children: [
         if (caption != null)
           TextSpan(
             text: '$separator$caption',
-            style: TextStyle(fontStyle: FontStyle.italic, color: textColor),
+            style: defaultTextStyle.copyWith(
+              fontStyle: FontStyle.italic,
+              color: textColor,
+            ),
           ),
       ],
-      style: TextStyle(color: textColor),
     );
   }
 
@@ -727,13 +831,12 @@ class PositionedCell extends Positioned {
     super.key,
     required this.rect,
     required this.node,
-    required child,
+    required super.child,
   }) : super(
           left: rect.left,
           top: rect.top,
           width: rect.width,
           height: rect.height,
-          child: child,
         );
 
   final Rect rect;
@@ -742,9 +845,10 @@ class PositionedCell extends Positioned {
 }
 
 class MultiCellPainter extends CustomPainter {
-  const MultiCellPainter({required this.nodes});
+  const MultiCellPainter({required this.nodes, required this.defaultTextStyle});
 
   final List<PositionedCell> nodes;
+  final TextStyle defaultTextStyle;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -779,7 +883,10 @@ class MultiCellPainter extends CustomPainter {
     if (positionedCell.width! > Treemap.minWidthToDisplayCellText &&
         positionedCell.height! > Treemap.minHeightToDisplayCellText) {
       final textPainter = TextPainter(
-        text: node.displayText(oneLine: false),
+        text: node.displayTextSpan(
+          defaultTextStyle: defaultTextStyle,
+          singleLine: false,
+        ),
         textDirection: TextDirection.ltr,
         textAlign: TextAlign.center,
         ellipsis: '...',

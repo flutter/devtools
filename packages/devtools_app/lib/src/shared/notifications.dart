@@ -50,7 +50,7 @@ class NotificationService {
   /// [NotificationMessage.defaultDuration].
   bool push(
     String message, {
-    isDismissible = false,
+    bool isDismissible = false,
   }) =>
       pushNotification(
         NotificationMessage(
@@ -67,8 +67,9 @@ class NotificationService {
   /// dismissed after [NotificationMessage.defaultDuration].
   bool pushError(
     String errorMessage, {
-    isDismissible = true,
-    isReportable = true,
+    String? stackTrace,
+    bool isDismissible = true,
+    bool isReportable = true,
   }) {
     final reportErrorAction = NotificationAction(
       'Report error',
@@ -78,6 +79,7 @@ class NotificationService {
             devToolsExtensionPoints
                 .issueTrackerLink(
                   issueTitle: 'Reporting error: $errorMessage',
+                  additionalInfo: 'Stack trace:\n$stackTrace',
                 )
                 .url,
           ),
@@ -138,10 +140,6 @@ class NotificationService {
   /// with the same text, do not get rejected.
   void markComplete(NotificationMessage message) {
     activeMessages.removeWhere((element) => element == message);
-  }
-
-  void dispose() {
-    newTasks.dispose();
   }
 }
 

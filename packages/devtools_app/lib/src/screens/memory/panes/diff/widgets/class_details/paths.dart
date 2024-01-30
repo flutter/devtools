@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../../../../shared/analytics/analytics.dart' as ga;
@@ -9,7 +10,6 @@ import '../../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../../shared/primitives/utils.dart';
 import '../../../../../../shared/table/table.dart';
 import '../../../../../../shared/table/table_data.dart';
-import '../../../../../../shared/utils.dart';
 import '../../../../shared/heap/heap.dart';
 import '../../../../shared/primitives/simple_elements.dart';
 
@@ -39,7 +39,7 @@ class _InstanceColumn extends ColumnData<StatsByPathEntry> {
           isDiff ? 'Instance\nDelta' : 'Instances',
           titleTooltip: 'Number of instances of the class\n'
               'retained by the path.',
-          fixedWidthPx: scaleByFontFactor(85.0),
+          fixedWidthPx: scaleByFontFactor(80.0),
           alignment: ColumnAlignment.right,
         );
 
@@ -55,7 +55,7 @@ class _ShallowSizeColumn extends ColumnData<StatsByPathEntry> {
       : super(
           isDiff ? 'Shallow\nSize Delta' : 'Shallow\nDart Size',
           titleTooltip: SizeType.shallow.description,
-          fixedWidthPx: scaleByFontFactor(85.0),
+          fixedWidthPx: scaleByFontFactor(80.0),
           alignment: ColumnAlignment.right,
         );
 
@@ -78,7 +78,7 @@ class _RetainedSizeColumn extends ColumnData<StatsByPathEntry> {
       : super(
           isDiff ? 'Retained\nSize Delta' : 'Retained\nDart Size',
           titleTooltip: SizeType.retained.description,
-          fixedWidthPx: scaleByFontFactor(85.0),
+          fixedWidthPx: scaleByFontFactor(80.0),
           alignment: ColumnAlignment.right,
         );
 

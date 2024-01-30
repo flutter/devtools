@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -14,9 +16,6 @@ import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
-import '../../shared/split.dart';
-import '../../shared/table/table.dart';
-import '../../shared/theme.dart';
 import '../../shared/tree.dart';
 import '../debugger/codeview.dart';
 import '../debugger/codeview_controller.dart';
@@ -68,7 +67,7 @@ class VMInfoCard extends StatelessWidget implements PreferredSizeWidget {
       return Size.infinite;
     }
     return Size.fromHeight(
-      areaPaneHeaderHeight +
+      defaultHeaderHeight +
           (rowKeyValues?.length ?? 0) * defaultRowHeight +
           defaultSpacing,
     );
@@ -221,7 +220,7 @@ class RequestableSizeWidget extends StatelessWidget {
         } else {
           final size = sizeProvider();
           return size == null
-              ? DevToolsButton(
+              ? GaDevToolsButton(
                   icon: Icons.call_made,
                   label: 'Request',
                   outlined: false,
@@ -478,7 +477,7 @@ class _RetainingObjectDescription extends StatelessWidget {
   });
 
   final RetainingObject object;
-  final Function(ObjRef? obj) onTap;
+  final void Function(ObjRef? obj) onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -650,7 +649,7 @@ class InboundReferenceWidget extends StatelessWidget {
       ),
     );
     return DefaultTextStyle(
-      style: theme.fixedFontStyle,
+      style: theme.regularTextStyle,
       child: Row(
         children: rowContent,
       ),
@@ -738,9 +737,9 @@ class VmServiceObjectLink extends StatelessWidget {
 
     final TextStyle style;
     if (isServiceObject) {
-      style = theme.fixedFontLinkStyle;
+      style = theme.linkTextStyle;
     } else {
-      style = theme.fixedFontStyle;
+      style = theme.regularTextStyle;
     }
     return TextSpan(
       text: text,
@@ -759,14 +758,9 @@ class VmServiceObjectLink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return RichText(
       maxLines: 1,
       text: TextSpan(
-        style: theme.linkTextStyle.apply(
-          fontFamily: theme.fixedFontStyle.fontFamily,
-          overflow: TextOverflow.ellipsis,
-        ),
         children: [buildTextSpan(context)],
       ),
     );
@@ -1000,8 +994,8 @@ class _ObjectInspectorCodeViewState extends State<ObjectInspectorCodeView> {
             // although showing a "No Source Available" message is another
             // option.
             final owner = obj.owner;
-            if (location.line == null && obj.owner is ClassRef) {
-              location = owner!.location;
+            if (location.line == null && owner is ClassRef) {
+              location = owner.location;
             }
           } else if (obj is FieldRef) {
             location = obj.location!;
@@ -1046,9 +1040,7 @@ class _ObjectInspectorCodeViewState extends State<ObjectInspectorCodeView> {
                     codeViewController: widget.codeViewController,
                     scriptRef: widget.script,
                     parsedScript: currentParsedScript,
-                    enableFileExplorer: false,
                     enableHistory: false,
-                    enableSearch: false,
                     lineRange: lineRange,
                     onSelected: breakpointManager.toggleBreakpoint,
                   ),

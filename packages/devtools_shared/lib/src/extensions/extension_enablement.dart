@@ -14,10 +14,12 @@ import 'extension_model.dart';
 /// Manages the `devtools_options.yaml` file and allows read / write access.
 class DevToolsOptions {
   static const optionsFileName = 'devtools_options.yaml';
-
   static const _extensionsKey = 'extensions';
-
+  static const _descriptionKey = 'description';
+  static const _documentationKey = 'documentation';
   static const _defaultOptions = '''
+$_descriptionKey: This file stores settings for Dart & Flutter DevTools.
+$_documentationKey: https://docs.flutter.dev/tools/devtools/extensions#configure-extension-enablement-states
 $_extensionsKey:
 ''';
 
@@ -117,6 +119,7 @@ $_extensionsKey:
   File? _lookupOptionsFile(Uri rootUri) {
     final rootDir = Directory.fromUri(rootUri);
     if (!rootDir.existsSync()) {
+      // ignore: avoid_print, intentional print for server-side logs.
       print('Directory does not exist at path: ${rootUri.toString()}');
       return null;
     }

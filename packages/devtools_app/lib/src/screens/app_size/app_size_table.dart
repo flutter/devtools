@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/charts/treemap.dart';
@@ -9,7 +10,6 @@ import '../../shared/primitives/utils.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
 import '../../shared/ui/colors.dart';
-import '../../shared/utils.dart';
 import 'app_size_controller.dart';
 
 class AppSizeAnalysisTable extends StatelessWidget {
@@ -90,8 +90,7 @@ class _NameColumn extends TreeColumnData<TreemapNode> {
   bool get supportsSorting => true;
 
   @override
-  String getTooltip(TreemapNode dataObject) =>
-      dataObject.displayText().toPlainText();
+  String getTooltip(TreemapNode dataObject) => dataObject.displayText();
 
   @override
   double getNodeIndentPx(TreemapNode dataObject) {

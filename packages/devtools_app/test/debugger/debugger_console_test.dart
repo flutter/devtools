@@ -5,7 +5,10 @@
 import 'package:ansicolor/ansicolor.dart';
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/console/widgets/console_pane.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -14,14 +17,16 @@ import 'package:mockito/mockito.dart';
 import '../test_infra/utils/test_utils.dart';
 
 void main() {
-  final fakeServiceManager = FakeServiceManager();
+  final fakeServiceConnection = FakeServiceConnectionManager();
   final debuggerController = createMockDebuggerControllerWithDefaults();
 
   const windowSize = Size(4000.0, 4000.0);
 
-  when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
-  when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
-  setGlobal(ServiceConnectionManager, fakeServiceManager);
+  when(fakeServiceConnection.serviceManager.connectedApp!.isProfileBuildNow)
+      .thenReturn(false);
+  when(fakeServiceConnection.serviceManager.connectedApp!.isDartWebAppNow)
+      .thenReturn(false);
+  setGlobal(ServiceConnectionManager, fakeServiceConnection);
   setGlobal(IdeTheme, IdeTheme());
   setGlobal(ScriptManager, MockScriptManager());
   setGlobal(NotificationService, NotificationService());
@@ -31,8 +36,8 @@ void main() {
     ExternalDevToolsEnvironmentParameters(),
   );
   setGlobal(PreferencesController, PreferencesController());
-  fakeServiceManager.consoleService.ensureServiceInitialized();
-  when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
+  fakeServiceConnection.consoleService.ensureServiceInitialized();
+  when(fakeServiceConnection.errorBadgeManager.errorCountNotifier('debugger'))
       .thenReturn(ValueNotifier<int>(0));
 
   Future<void> pumpConsole(
@@ -57,7 +62,7 @@ void main() {
 
     void appendStdioLines() {
       for (var line in stdio) {
-        serviceManager.consoleService.appendStdio('$line\n');
+        serviceConnection.consoleService.appendStdio('$line\n');
       }
     }
 
@@ -65,8 +70,8 @@ void main() {
       'Tapping the Console Clear button clears stdio.',
       windowSize,
       (WidgetTester tester) async {
-        serviceManager.consoleService.clearStdio();
-        serviceManager.consoleService.appendStdio(_ansiCodesOutput());
+        serviceConnection.consoleService.clearStdio();
+        serviceConnection.consoleService.appendStdio(_ansiCodesOutput());
 
         await pumpConsole(tester, debuggerController);
 
@@ -75,7 +80,7 @@ void main() {
 
         await tester.tap(clearButton);
 
-        expect(serviceManager.consoleService.stdio.value, isEmpty);
+        expect(serviceConnection.consoleService.stdio.value, isEmpty);
       },
     );
 

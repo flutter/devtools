@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../service/service_extension_widgets.dart';
@@ -9,7 +10,6 @@ import '../../../../service/service_extensions.dart' as extensions;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/feature_flags.dart';
 import '../../../../shared/globals.dart';
-import '../../../../shared/theme.dart';
 import '../controls/enhance_tracing/enhance_tracing_controller.dart';
 import '../rebuild_stats/rebuild_stats.dart';
 import '../rebuild_stats/rebuild_stats_model.dart';
@@ -35,8 +35,11 @@ class FlutterFrameAnalysisView extends StatelessWidget {
   Widget build(BuildContext context) {
     final frameAnalysis = this.frameAnalysis;
     if (frameAnalysis == null) {
-      return const Center(
-        child: Text('No analysis data available for this frame.'),
+      return const CenteredMessage(
+        'No analysis data available for this frame. This means that the '
+        'timeline events\nfor this frame occurred too long ago and DevTools '
+        'could not access them.\n\nTo avoid this, open the DevTools Performance '
+        'page earlier.',
       );
     }
     final rebuilds = rebuildCountModel.rebuildsForFrame(frameAnalysis.frame.id);
@@ -92,8 +95,9 @@ class FlutterFrameAnalysisView extends StatelessWidget {
           if (FeatureFlags.widgetRebuildstats) ...[
             if (rebuilds == null || rebuilds.isEmpty)
               ValueListenableBuilder<bool>(
-                valueListenable:
-                    serviceManager.serviceExtensionManager.hasServiceExtension(
+                valueListenable: serviceConnection
+                    .serviceManager.serviceExtensionManager
+                    .hasServiceExtension(
                   extensions.trackRebuildWidgets.extension,
                 ),
                 builder: (context, hasExtension, _) {

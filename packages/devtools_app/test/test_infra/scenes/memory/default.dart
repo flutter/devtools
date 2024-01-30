@@ -10,8 +10,11 @@ import 'package:devtools_app/src/screens/memory/shared/heap/model.dart';
 import 'package:devtools_app/src/shared/memory/adapted_heap_data.dart';
 import 'package:devtools_app/src/shared/memory/adapted_heap_object.dart';
 import 'package:devtools_app/src/shared/memory/class_name.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -26,7 +29,7 @@ import '../../../test_infra/test_data/memory_allocation.dart';
 /// flutter run -t test/test_infra/scenes/memory/default.stager_app.g.dart -d macos
 class MemoryDefaultScene extends Scene {
   late MemoryController controller;
-  late FakeServiceManager fakeServiceManager;
+  late FakeServiceConnectionManager fakeServiceConnection;
 
   @override
   Widget build(BuildContext context) {
@@ -57,22 +60,23 @@ class MemoryDefaultScene extends Scene {
     final allocationJson =
         AllocationMemoryJson.decode(argJsonString: testAllocationData);
 
-    fakeServiceManager = FakeServiceManager(
+    fakeServiceConnection = FakeServiceConnectionManager(
       service: FakeServiceManager.createFakeService(
         memoryData: memoryJson,
         allocationData: allocationJson,
         classList: classList,
       ),
     );
-    final app = fakeServiceManager.connectedApp!;
+    final app = fakeServiceConnection.serviceManager.connectedApp!;
     mockConnectedApp(
       app,
       isFlutterApp: true,
       isProfileBuild: true,
       isWebApp: false,
     );
-    when(fakeServiceManager.vm.operatingSystem).thenReturn('ios');
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
+    when(fakeServiceConnection.serviceManager.vm.operatingSystem)
+        .thenReturn('ios');
+    setGlobal(ServiceConnectionManager, fakeServiceConnection);
 
     final showAllFilter = ClassFilter(
       filterType: ClassFilterType.showAll,
@@ -90,8 +94,8 @@ class MemoryDefaultScene extends Scene {
       profilePaneController: profileController,
     )
       ..offline = true
-      ..memoryTimeline.offlineData.clear()
-      ..memoryTimeline.offlineData.addAll(memoryJson.data);
+      ..controllers.memoryTimeline.offlineData.clear()
+      ..controllers.memoryTimeline.offlineData.addAll(memoryJson.data);
   }
 
   @override
@@ -138,7 +142,7 @@ AdaptedHeapData _createHeap(Map<String, int> classToInstanceCount) {
 
   // Create objects.
   for (var entry in classToInstanceCount.entries) {
-    for (var _ in Iterable.generate(entry.value)) {
+    for (var _ in Iterable<void>.generate(entry.value)) {
       objects.add(_createObject(entry.key));
       leafCount++;
       final objectIndex = leafCount;
@@ -149,7 +153,6 @@ AdaptedHeapData _createHeap(Map<String, int> classToInstanceCount) {
   return AdaptedHeapData(
     objects,
     rootIndex: rootIndex,
-    isolateId: '',
   );
 }
 
@@ -158,7 +161,7 @@ var _nextCode = 1;
 AdaptedHeapObject _createObject(String className) => AdaptedHeapObject(
       code: _nextCode++,
       outRefs: {},
-      heapClass: HeapClassName(
+      heapClass: HeapClassName.fromPath(
         className: className,
         library: 'my_lib',
       ),

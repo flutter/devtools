@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../shared/common_widgets.dart';
-import '../../../../shared/theme.dart';
-import '../../../../shared/utils.dart';
+import '../../../../shared/ui/colors.dart';
 import '../../shared/primitives/painting.dart';
 import 'chart_pane_controller.dart';
 import 'memory_android_chart.dart';

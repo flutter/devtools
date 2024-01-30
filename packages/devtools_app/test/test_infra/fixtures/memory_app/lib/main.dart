@@ -87,40 +87,36 @@ class _MyGarbage {
       mapSimpleKey = null;
       mapSimpleValue = null;
       map = null;
-      // record = null;
+      record = null;
     } else {
       _MyGarbage createInstance({String? note}) =>
           _MyGarbage(_level + 1, note ?? _note);
 
       childClass = createInstance();
 
-      childList = Iterable.generate(_width, (_) => createInstance()).toList();
+      childList = List.generate(_width, (_) => createInstance());
 
-      mapSimpleKey = Map.fromIterable(
-        Iterable.generate(_width),
-        value: (_) => createInstance(),
-      );
+      mapSimpleKey = {
+        for (var index = 0; index < _width; index++) index: createInstance(),
+      };
 
-      mapSimpleValue = Map.fromIterable(
-        Iterable.generate(_width),
-        key: (_) => createInstance(),
-      );
+      mapSimpleValue = {
+        for (var index = 0; index < _width; index++) createInstance(): index,
+      };
 
-      map = Map.fromIterable(
-        Iterable.generate(_width),
-        key: (_) => createInstance(),
-        value: (_) => createInstance(),
-      );
+      map = {
+        for (var _ in Iterable<void>.generate(_width))
+          createInstance(): createInstance(),
+      };
 
-      final _closureMember = createInstance(note: 'closure');
+      final closureMember = createInstance(note: 'closure');
       closure = () {
-        if (identityHashCode(_closureMember) < 0) {
+        if (identityHashCode(closureMember) < 0) {
           // We need this block to show compiler [_closureMember] is in use.
         }
       };
 
-      // TODO(polina-c): uncomment after figuring out how to enable records in dart format
-      // record = ('foo', count: 100, garbage: createInstance(note: 'record'));
+      record = ('foo', count: 100, garbage: createInstance(note: 'record'));
     }
   }
 
@@ -135,12 +131,11 @@ class _MyGarbage {
   final Map mapSimple = Map.fromIterable(Iterable.generate(_width));
   final Map mapEmpty = {};
   final Map mapOfNulls = {null: null};
-  final listOfInt = Iterable.generate(300).toList();
+  final listOfInt = List.generate(300, (i) => i);
   late final Map<dynamic, _MyGarbage>? mapSimpleKey;
   late final Map<_MyGarbage, dynamic>? mapSimpleValue;
   late final Map<_MyGarbage, _MyGarbage>? map;
   late final void Function() closure;
 
-  // TODO(polina-c): uncomment after figuring out how to enable records in dart format
-  // late final (String, {int count, _MyGarbage garbage})? record;
+  late final (String, {int count, _MyGarbage garbage})? record;
 }

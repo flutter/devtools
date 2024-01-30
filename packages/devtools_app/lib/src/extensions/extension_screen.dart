@@ -2,14 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_extensions/api.dart';
 import 'package:devtools_shared/devtools_extensions.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../shared/analytics/analytics.dart' as ga;
+import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
-import '../shared/primitives/listenable.dart';
-import '../shared/primitives/utils.dart';
 import '../shared/screen.dart';
 import 'embedded/controller.dart';
 import 'embedded/view.dart';
@@ -19,18 +20,14 @@ class ExtensionScreen extends Screen {
   ExtensionScreen(this.extensionConfig)
       : super.conditional(
           // TODO(kenz): we may need to ensure this is a unique id.
-          id: '${extensionConfig.name}_ext',
-          title: extensionConfig.name.toSentenceCase(),
+          id: extensionConfig.screenId,
+          title: extensionConfig.name,
           icon: extensionConfig.icon,
           // TODO(kenz): support static DevTools extensions.
           requiresConnection: true,
         );
 
   final DevToolsExtensionConfig extensionConfig;
-
-  @override
-  ValueListenable<bool> get showIsolateSelector =>
-      const FixedValueListenable<bool>(true);
 
   @override
   Widget build(BuildContext context) =>
@@ -43,15 +40,22 @@ class _ExtensionScreenBody extends StatefulWidget {
   final DevToolsExtensionConfig extensionConfig;
 
   @override
-  State<_ExtensionScreenBody> createState() => __ExtensionScreenBodyState();
+  State<_ExtensionScreenBody> createState() => _ExtensionScreenBodyState();
 }
 
-class __ExtensionScreenBodyState extends State<_ExtensionScreenBody> {
+class _ExtensionScreenBodyState extends State<_ExtensionScreenBody> {
   EmbeddedExtensionController? extensionController;
 
   @override
   void initState() {
     super.initState();
+    _init();
+  }
+
+  void _init() {
+    ga.screen(
+      gac.DevToolsExtensionEvents.extensionScreenName(widget.extensionConfig),
+    );
     extensionController =
         createEmbeddedExtensionController(widget.extensionConfig)..init();
   }
@@ -67,8 +71,7 @@ class __ExtensionScreenBodyState extends State<_ExtensionScreenBody> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.extensionConfig != widget.extensionConfig) {
       extensionController?.dispose();
-      extensionController =
-          createEmbeddedExtensionController(widget.extensionConfig)..init();
+      _init();
     }
   }
 
@@ -94,32 +97,34 @@ class ExtensionView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RoundedOutlinedBorder(
-      clip: true,
-      child: Column(
-        children: [
-          EmbeddedExtensionHeader(extension: extension),
-          Expanded(
-            child: ValueListenableBuilder<ExtensionEnabledState>(
-              valueListenable: extensionService.enabledStateListenable(
-                extension.name,
-              ),
-              builder: (context, activationState, _) {
-                if (activationState == ExtensionEnabledState.enabled) {
-                  return KeepAliveWrapper(
-                    child: Center(
-                      child: EmbeddedExtensionView(controller: controller),
-                    ),
-                  );
-                }
-                return EnableExtensionPrompt(
-                  extension: controller.extensionConfig,
-                );
-              },
+    return Column(
+      children: [
+        EmbeddedExtensionHeader(
+          extension: extension,
+          onForceReload: () =>
+              controller.postMessage(DevToolsExtensionEventType.forceReload),
+        ),
+        const SizedBox(height: intermediateSpacing),
+        Expanded(
+          child: ValueListenableBuilder<ExtensionEnabledState>(
+            valueListenable: extensionService.enabledStateListenable(
+              extension.name,
             ),
+            builder: (context, activationState, _) {
+              if (activationState == ExtensionEnabledState.enabled) {
+                return KeepAliveWrapper(
+                  child: Center(
+                    child: EmbeddedExtensionView(controller: controller),
+                  ),
+                );
+              }
+              return EnableExtensionPrompt(
+                extension: controller.extensionConfig,
+              );
+            },
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -129,4 +134,6 @@ extension ExtensionConfigExtension on DevToolsExtensionConfig {
         materialIconCodePoint,
         fontFamily: 'MaterialIcons',
       );
+
+  String get screenId => '${name}_ext';
 }

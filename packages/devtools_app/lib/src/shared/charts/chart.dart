@@ -5,12 +5,12 @@
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
-import '../primitives/auto_dispose.dart';
 import '../primitives/utils.dart';
-import '../theme.dart';
 import 'chart_controller.dart';
 import 'chart_trace.dart';
 
@@ -566,8 +566,8 @@ class ChartPainter extends CustomPainter {
     int timestamp,
     double xTickCoord,
     Paint axis, {
-    shortTick = true,
-    displayTime = false,
+    bool shortTick = true,
+    bool displayTime = false,
   }) {
     if (displayTime) {
       // Draw vertical tick (short or long).
@@ -599,7 +599,7 @@ class ChartPainter extends CustomPainter {
       //              should have PaintCharacteristics.
       style: TextStyle(
         color: Colors.grey[600],
-        fontSize: chartTextFontSize,
+        fontSize: unscaledSmallFontSize,
       ),
       text: textValue,
     );
@@ -784,4 +784,10 @@ class ChartPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(ChartPainter oldDelegate) => chartController.isDirty;
+}
+
+extension ChartColorExtension on ColorScheme {
+  // Bar color for current selection (hover).
+  Color get hoverSelectionBarColor =>
+      isLight ? Colors.lime[600]! : Colors.yellowAccent;
 }

@@ -5,21 +5,21 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../service/vm_service_wrapper.dart';
 import '../../shared/diagnostics/primitives/source_location.dart';
 import '../../shared/globals.dart';
-import '../../shared/primitives/auto_dispose.dart';
 import 'debugger_model.dart';
 
-class BreakpointManager extends Disposer {
+class BreakpointManager with DisposerMixin {
   BreakpointManager({this.initialSwitchToIsolate = true});
 
   final bool initialSwitchToIsolate;
 
-  VmServiceWrapper get _service => serviceManager.service!;
+  VmServiceWrapper get _service => serviceConnection.serviceManager.service!;
 
   final _breakPositionsMap = <String, List<SourcePosition>>{};
 
@@ -36,14 +36,22 @@ class BreakpointManager extends Disposer {
   String get _isolateRefId => _isolateRef?.id ?? '';
 
   void initialize() {
-    final isolate = serviceManager.isolateManager.selectedIsolate.value;
+    final isolate =
+        serviceConnection.serviceManager.isolateManager.selectedIsolate.value;
     if (initialSwitchToIsolate && isolate != null) {
-      switchToIsolate(serviceManager.isolateManager.selectedIsolate.value);
+      switchToIsolate(
+        serviceConnection.serviceManager.isolateManager.selectedIsolate.value,
+      );
     }
 
-    addAutoDisposeListener(serviceManager.isolateManager.selectedIsolate, () {
-      switchToIsolate(serviceManager.isolateManager.selectedIsolate.value);
-    });
+    addAutoDisposeListener(
+      serviceConnection.serviceManager.isolateManager.selectedIsolate,
+      () {
+        switchToIsolate(
+          serviceConnection.serviceManager.isolateManager.selectedIsolate.value,
+        );
+      },
+    );
     autoDisposeStreamSubscription(
       _service.onDebugEvent.listen(_handleDebugEvent),
     );
@@ -102,7 +110,8 @@ class BreakpointManager extends Disposer {
       _service.removeBreakpoint(_isolateRefId, breakpoint.id!);
 
   Future<void> toggleBreakpoint(ScriptRef script, int line) async {
-    final selectedIsolate = serviceManager.isolateManager.selectedIsolate.value;
+    final selectedIsolate =
+        serviceConnection.serviceManager.isolateManager.selectedIsolate.value;
     if (selectedIsolate == null) {
       // Can't toggle breakpoints if we don't have an isolate.
       return;

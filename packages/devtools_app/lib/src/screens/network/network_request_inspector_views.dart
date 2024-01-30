@@ -4,6 +4,7 @@
 
 import 'dart:convert';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as image;
@@ -12,8 +13,6 @@ import '../../shared/common_widgets.dart';
 import '../../shared/http/http.dart';
 import '../../shared/http/http_request_data.dart';
 import '../../shared/primitives/utils.dart';
-import '../../shared/table/table.dart';
-import '../../shared/theme.dart';
 import '../../shared/ui/colors.dart';
 import 'network_controller.dart';
 import 'network_model.dart';
@@ -70,7 +69,11 @@ class HttpRequestHeadersView extends StatelessWidget {
               'General',
               [
                 for (final entry in general.entries)
-                  _Row(entry: entry, constraints: constraints),
+                  _Row(
+                    entry: entry,
+                    constraints: constraints,
+                    isErrorValue: data.didFail && entry.key == 'statusCode',
+                  ),
               ],
               key: generalKey,
             ),
@@ -103,10 +106,12 @@ class _Row extends StatelessWidget {
   const _Row({
     required this.entry,
     required this.constraints,
+    this.isErrorValue = false,
   });
 
   final MapEntry<String, Object?> entry;
   final BoxConstraints constraints;
+  final bool isErrorValue;
 
   @override
   Widget build(BuildContext context) {
@@ -122,6 +127,9 @@ class _Row extends StatelessWidget {
           ),
           Expanded(
             child: SelectableText(
+              style: isErrorValue
+                  ? TextStyle(color: Theme.of(context).colorScheme.error)
+                  : null,
               '${entry.value}',
               minLines: 1,
             ),
@@ -152,15 +160,21 @@ class HttpRequestView extends StatelessWidget {
           );
         }
 
-        final isJson = requestContentType is List
-            ? requestContentType.any((element) => element.contains('json'))
-            : requestContentType.contains('json');
+        final isJson = switch (requestContentType) {
+          List() =>
+            requestContentType.any((e) => (e as String).contains('json')),
+          String() => requestContentType.contains('json'),
+          _ => throw StateError(
+              "Expected 'content-type' to be a List or String, but got: "
+              '$requestContentType',
+            ),
+        };
 
         Widget child;
         child = isJson
             ? JsonViewer(encodedJson: data.requestBody!)
-            : Text(
-                data.requestBody!,
+            : TextViewer(
+                text: data.requestBody!,
                 style: theme.fixedFontStyle,
               );
         return Padding(
@@ -356,8 +370,8 @@ class HttpTextResponseViewer extends StatelessWidget {
 
         return switch (currentLocalResponseType) {
           NetworkResponseViewType.json => JsonViewer(encodedJson: responseBody),
-          NetworkResponseViewType.text => Text(
-              responseBody,
+          NetworkResponseViewType.text => TextViewer(
+              text: responseBody,
               style: textStyle,
             ),
           _ => const SizedBox(),
@@ -654,7 +668,12 @@ class NetworkRequestOverviewView extends StatelessWidget {
       _buildRow(
         context: context,
         title: 'Status',
-        child: _valueText(data.status ?? '--'),
+        child: _valueText(
+          data.status ?? '--',
+          data.didFail
+              ? TextStyle(color: Theme.of(context).colorScheme.error)
+              : null,
+        ),
       ),
       const SizedBox(height: defaultSpacing),
       if (data.port != null) ...[
@@ -897,8 +916,9 @@ class NetworkRequestOverviewView extends StatelessWidget {
     );
   }
 
-  Widget _valueText(String value) {
+  Widget _valueText(String value, [TextStyle? style]) {
     return SelectableText(
+      style: style,
       value,
       minLines: 1,
     );

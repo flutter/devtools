@@ -8,14 +8,12 @@ import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/ui/tab.dart';
 import '../../panes/diff/diff_pane.dart';
-import '../../panes/leaks/leaks_pane.dart';
 import '../../panes/profile/profile_view.dart';
 import '../../panes/tracing/tracing_view.dart';
 import 'memory_controller.dart';
 
 @visibleForTesting
 class MemoryScreenKeys {
-  static const leaksTab = Key('Leaks Tab');
   static const dartHeapTableProfileTab = Key('Dart Heap Profile Tab');
   static const dartHeapAllocationTracingTab =
       Key('Dart Heap Allocation Tracing Tab');
@@ -34,17 +32,12 @@ class MemoryTabView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: controller.shouldShowLeaksTab,
-      builder: (context, showLeaksTab, _) {
-        return AnalyticsTabbedView(
-          tabs: _generateTabRecords(),
-          initialSelectedIndex: controller.selectedFeatureTabIndex,
-          gaScreen: gac.memory,
-          onTabChanged: (int index) {
-            controller.selectedFeatureTabIndex = index;
-          },
-        );
+    return AnalyticsTabbedView(
+      tabs: _generateTabRecords(),
+      initialSelectedIndex: controller.selectedFeatureTabIndex,
+      gaScreen: gac.memory,
+      onTabChanged: (int index) {
+        controller.selectedFeatureTabIndex = index;
       },
     );
   }
@@ -85,15 +78,6 @@ class MemoryTabView extends StatelessWidget {
           child: TracingPane(controller: controller.controllers.tracing),
         ),
       ),
-      if (controller.shouldShowLeaksTab.value)
-        (
-          tab: DevToolsTab.create(
-            key: MemoryScreenKeys.leaksTab,
-            gaPrefix: _gaPrefix,
-            tabName: 'Detect Leaks',
-          ),
-          tabView: const KeepAliveWrapper(child: LeaksPane()),
-        ),
     ];
   }
 }

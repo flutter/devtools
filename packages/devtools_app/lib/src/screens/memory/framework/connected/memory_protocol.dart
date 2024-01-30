@@ -47,14 +47,14 @@ class MemoryTracker {
   }
 
   void _updateLiveDataPolling() {
-    if (serviceManager.service == null) {
+    if (serviceConnection.serviceManager.service == null) {
       // A service of null implies we're disconnected - signal paused.
       memoryController.pauseLiveFeed();
     }
 
     _pollingTimer ??= Timer(MemoryTimeline.updateDelay, _pollMemory);
-    _gcStreamListener ??=
-        serviceManager.service?.onGCEvent.listen(_handleGCEvent);
+    _gcStreamListener ??= serviceConnection.serviceManager.service?.onGCEvent
+        .listen(_handleGCEvent);
   }
 
   void stop() {
@@ -87,7 +87,7 @@ class MemoryTracker {
   void _pollMemory() async {
     _pollingTimer = null;
 
-    if (!serviceManager.hasConnection ||
+    if (!serviceConnection.serviceManager.hasConnection ||
         memoryController.memoryTracker == null) {
       _log.info('VM service connection and/or MemoryTracker lost.');
       return;
@@ -95,17 +95,18 @@ class MemoryTracker {
 
     final isolateMemory = <IsolateRef, MemoryUsage>{};
     for (IsolateRef isolateRef
-        in serviceManager.isolateManager.isolates.value) {
+        in serviceConnection.serviceManager.isolateManager.isolates.value) {
       if (await memoryController.isIsolateLive(isolateRef.id!)) {
-        isolateMemory[isolateRef] =
-            await serviceManager.service!.getMemoryUsage(isolateRef.id!);
+        isolateMemory[isolateRef] = await serviceConnection
+            .serviceManager.service!
+            .getMemoryUsage(isolateRef.id!);
       }
     }
 
     // Polls for current Android meminfo using:
     //    > adb shell dumpsys meminfo -d <package_name>
-    adbMemoryInfo = serviceManager.hasConnection &&
-            serviceManager.vm!.operatingSystem == 'android' &&
+    adbMemoryInfo = serviceConnection.serviceManager.hasConnection &&
+            serviceConnection.serviceManager.vm!.operatingSystem == 'android' &&
             memoryController.isAndroidChartVisibleNotifier.value
         ? await _fetchAdbInfo()
         : AdbMemoryInfo.empty();
@@ -114,7 +115,7 @@ class MemoryTracker {
     rasterCache = await _fetchRasterCacheInfo();
 
     // Polls for current RSS size.
-    final vm = await serviceManager.service!.getVM();
+    final vm = await serviceConnection.serviceManager.service!.getVM();
     _update(vm, isolateMemory);
 
     // TODO(terry): Is there a better way to detect an integration test running?
@@ -144,7 +145,7 @@ class MemoryTracker {
   ///
   /// Returns engine's rasterCache estimates or null.
   Future<RasterCache?> _fetchRasterCacheInfo() async {
-    final response = await serviceManager.rasterCacheMetrics;
+    final response = await serviceConnection.rasterCacheMetrics;
     if (response == null) return null;
     final rasterCache = RasterCache.parse(response.json);
     return rasterCache;
@@ -152,7 +153,7 @@ class MemoryTracker {
 
   /// Fetch ADB meminfo, ADB returns values in KB convert to total bytes.
   Future<AdbMemoryInfo> _fetchAdbInfo() async => AdbMemoryInfo.fromJsonInKB(
-        (await serviceManager.adbMemoryInfo).json!,
+        (await serviceConnection.adbMemoryInfo).json!,
       );
 
   /// Returns the MemoryUsage of a particular isolate.
@@ -199,7 +200,7 @@ class MemoryTracker {
     // Removes any isolate that is a sentinel.
     isolateHeaps.removeWhere((key, value) => keysToRemove.contains(key));
 
-    final memoryTimeline = memoryController.memoryTimeline;
+    final memoryTimeline = memoryController.controllers.memoryTimeline;
 
     int time = DateTime.now().millisecondsSinceEpoch;
     if (memoryTimeline.data.isNotEmpty) {

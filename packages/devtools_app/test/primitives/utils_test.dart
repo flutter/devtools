@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:collection/collection.dart';
-import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/primitives/utils.dart';
 import 'package:devtools_app/src/shared/utils.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_test_utils.dart';
-import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -677,45 +677,6 @@ void main() {
       );
     });
 
-    test('getServiceUriFromQueryString', () {
-      expect(
-        getServiceUriFromQueryString(
-          'http://localhost:123/?uri=http://localhost:456',
-        ).toString(),
-        equals('http://localhost:456'),
-      );
-      expect(
-        getServiceUriFromQueryString('http://localhost:123/?port=789')
-            .toString(),
-        equals('ws://localhost:789/ws'),
-      );
-      expect(
-        getServiceUriFromQueryString(
-          'http://localhost:123/?port=789&token=kjy78',
-        ).toString(),
-        equals('ws://localhost:789/kjy78/ws'),
-      );
-    });
-
-    group('pluralize', () {
-      test('zero', () {
-        expect(pluralize('cat', 0), 'cats');
-      });
-
-      test('one', () {
-        expect(pluralize('cat', 1), 'cat');
-      });
-
-      test('many', () {
-        expect(pluralize('cat', 2), 'cats');
-      });
-
-      test('irregular plurals', () {
-        expect(pluralize('index', 1, plural: 'indices'), 'index');
-        expect(pluralize('index', 2, plural: 'indices'), 'indices');
-      });
-    });
-
     group('safeDivide', () {
       test('divides a finite result correctly', () {
         expect(safeDivide(2.0, 1.0), 2.0);
@@ -1182,75 +1143,6 @@ void main() {
       }
     });
 
-    group('parseCssHexColor', () {
-      test('parses 6 digit hex colors', () {
-        expect(parseCssHexColor('#000000'), equals(Colors.black));
-        expect(parseCssHexColor('000000'), equals(Colors.black));
-        expect(parseCssHexColor('#ffffff'), equals(Colors.white));
-        expect(parseCssHexColor('ffffff'), equals(Colors.white));
-        expect(parseCssHexColor('#ff0000'), equals(const Color(0xFFFF0000)));
-        expect(parseCssHexColor('ff0000'), equals(const Color(0xFFFF0000)));
-      });
-      test('parses 3 digit hex colors', () {
-        expect(parseCssHexColor('#000'), equals(Colors.black));
-        expect(parseCssHexColor('000'), equals(Colors.black));
-        expect(parseCssHexColor('#fff'), equals(Colors.white));
-        expect(parseCssHexColor('fff'), equals(Colors.white));
-        expect(parseCssHexColor('#f30'), equals(const Color(0xFFFF3300)));
-        expect(parseCssHexColor('f30'), equals(const Color(0xFFFF3300)));
-      });
-      test('parses 8 digit hex colors', () {
-        expect(parseCssHexColor('#000000ff'), equals(Colors.black));
-        expect(parseCssHexColor('000000ff'), equals(Colors.black));
-        expect(
-          parseCssHexColor('#00000000'),
-          equals(Colors.black.withAlpha(0)),
-        );
-        expect(parseCssHexColor('00000000'), equals(Colors.black.withAlpha(0)));
-        expect(parseCssHexColor('#ffffffff'), equals(Colors.white));
-        expect(parseCssHexColor('ffffffff'), equals(Colors.white));
-        expect(
-          parseCssHexColor('#ffffff00'),
-          equals(Colors.white.withAlpha(0)),
-        );
-        expect(parseCssHexColor('ffffff00'), equals(Colors.white.withAlpha(0)));
-        expect(
-          parseCssHexColor('#ff0000bb'),
-          equals(const Color(0x00ff0000).withAlpha(0xbb)),
-        );
-        expect(
-          parseCssHexColor('ff0000bb'),
-          equals(const Color(0x00ff0000).withAlpha(0xbb)),
-        );
-      });
-      test('parses 4 digit hex colors', () {
-        expect(parseCssHexColor('#000f'), equals(Colors.black));
-        expect(parseCssHexColor('000f'), equals(Colors.black));
-        expect(parseCssHexColor('#0000'), equals(Colors.black.withAlpha(0)));
-        expect(parseCssHexColor('0000'), equals(Colors.black.withAlpha(0)));
-        expect(parseCssHexColor('#ffff'), equals(Colors.white));
-        expect(parseCssHexColor('ffff'), equals(Colors.white));
-        expect(parseCssHexColor('#fff0'), equals(Colors.white.withAlpha(0)));
-        expect(parseCssHexColor('ffffff00'), equals(Colors.white.withAlpha(0)));
-        expect(
-          parseCssHexColor('#f00b'),
-          equals(const Color(0x00ff0000).withAlpha(0xbb)),
-        );
-        expect(
-          parseCssHexColor('f00b'),
-          equals(const Color(0x00ff0000).withAlpha(0xbb)),
-        );
-      });
-    });
-
-    group('toCssHexColor', () {
-      test('generates correct 8 digit CSS colors', () {
-        expect(toCssHexColor(Colors.black), equals('#000000ff'));
-        expect(toCssHexColor(Colors.white), equals('#ffffffff'));
-        expect(toCssHexColor(const Color(0xFFAABBCC)), equals('#aabbccff'));
-      });
-    });
-
     group('ListExtension', () {
       test('joinWith generates correct list', () {
         expect([1, 2, 3, 4].joinWith(0), equals([1, 0, 2, 0, 3, 0, 4]));
@@ -1278,6 +1170,13 @@ void main() {
           isFalse,
         );
       });
+
+      test('allIndicesWhere', () {
+        final list = [1, 2, 1, 2, 3, 4];
+        expect(list.allIndicesWhere((element) => element.isEven), [1, 3, 5]);
+        expect(list.allIndicesWhere((element) => element.isOdd), [0, 2, 4]);
+        expect(list.allIndicesWhere((element) => element + 2 == 3), [0, 2]);
+      });
     });
 
     group('SetExtension', () {
@@ -1300,245 +1199,6 @@ void main() {
           otherSet.containsWhere((element) => element.endsWith('ba')),
           isFalse,
         );
-      });
-    });
-
-    group('ListValueNotifier', () {
-      late ListValueNotifier<int> notifier;
-
-      bool didNotify = false;
-
-      void setUpWithInitialValue(List<int> value) {
-        didNotify = false;
-        notifier = ListValueNotifier<int>(value);
-        notifier.addListener(() {
-          didNotify = true;
-        });
-        expect(didNotify, isFalse);
-        expect(notifier.value, equals(value));
-      }
-
-      setUp(() {
-        setUpWithInitialValue([]);
-      });
-
-      test('does not respect changes to the initial list', () {
-        final initialList = [1, 2, 3];
-        setUpWithInitialValue(initialList);
-
-        initialList.add(4);
-        notifier.add(5);
-        expect(notifier.value, equals([1, 2, 3, 5]));
-      });
-
-      test('value returns ImmutableList', () {
-        expect(notifier.value, isA<ImmutableList>());
-      });
-
-      test('notifies on add', () {
-        notifier.add(1);
-        expect(didNotify, isTrue);
-        expect(notifier.value, equals([1]));
-      });
-
-      test('notifies on replace', () {
-        final initialList = [1, 2, 3, 4, 5];
-        setUpWithInitialValue(initialList);
-        final result = notifier.replace(3, -1);
-        expect(result, true);
-        expect(didNotify, isTrue);
-        expect(notifier.value, equals([1, 2, -1, 4, 5]));
-      });
-
-      test('does not notify on invalid replace', () {
-        final initialList = [1, 2, 3, 4, 5];
-        setUpWithInitialValue(initialList);
-        final result = notifier.replace(6, -1);
-        expect(result, false);
-        expect(didNotify, isFalse);
-        expect(notifier.value, equals([1, 2, 3, 4, 5]));
-      });
-
-      test('notifies on addAll', () {
-        notifier.addAll([1, 2]);
-        expect(didNotify, isTrue);
-        expect(notifier.value, equals([1, 2]));
-      });
-
-      test('notifies on clear', () {
-        setUpWithInitialValue([1, 2, 3]);
-        notifier.clear();
-        expect(didNotify, isTrue);
-        expect(notifier.value, equals([]));
-      });
-
-      test('notifies on trim to sublist with start only', () {
-        setUpWithInitialValue([1, 2, 3]);
-        notifier.trimToSublist(1);
-        expect(didNotify, isTrue);
-        expect(notifier.value, equals([2, 3]));
-      });
-
-      test('notifies on trim to sublist', () {
-        setUpWithInitialValue([1, 2, 3]);
-        notifier.trimToSublist(1, 2);
-        expect(didNotify, isTrue);
-        expect(notifier.value, equals([2]));
-      });
-
-      test('notifies on last', () {
-        setUpWithInitialValue([1, 2, 3]);
-        notifier.last = 4;
-        expect(didNotify, isTrue);
-        expect(notifier.value, equals([1, 2, 4]));
-      });
-
-      test('notifies on remove', () {
-        setUpWithInitialValue([1, 2, 3]);
-        notifier.remove(2);
-        expect(didNotify, isTrue);
-        expect(notifier.value, equals([1, 3]));
-      });
-
-      test('notifies on removeAll', () {
-        setUpWithInitialValue([1, 2, 3, 4]);
-        notifier.removeAll([1, 3]);
-        expect(didNotify, isTrue);
-        expect(notifier.value, equals([2, 4]));
-      });
-
-      test('notifies on removeRange', () {
-        setUpWithInitialValue([1, 2, 3, 4]);
-        notifier.removeRange(1, 3);
-        expect(didNotify, isTrue);
-        expect(notifier.value, equals([1, 4]));
-      });
-
-      test('notifies on removeAt', () {
-        setUpWithInitialValue([1, 2, 3, 4]);
-        notifier.removeAt(1);
-        expect(didNotify, isTrue);
-        expect(notifier.value, equals([1, 3, 4]));
-      });
-
-      test('does not notify on remove of missing element', () {
-        setUpWithInitialValue([1, 2, 3]);
-        notifier.remove(0);
-        expect(didNotify, isFalse);
-        expect(notifier.value, equals([1, 2, 3]));
-      });
-    });
-
-    group('ImmutableList', () {
-      late List<int> rawList;
-      late ImmutableList<int> immutableList;
-
-      setUp(() {
-        rawList = [1, 2, 3];
-        immutableList = ImmutableList(rawList);
-      });
-
-      test('initializes length', () {
-        expect(rawList.length, equals(3));
-        expect(immutableList.length, equals(3));
-      });
-
-      test('[]', () {
-        expect(rawList[0], equals(1));
-        expect(rawList[1], equals(2));
-        expect(rawList[2], equals(3));
-        expect(immutableList[0], equals(1));
-        expect(immutableList[1], equals(2));
-        expect(immutableList[2], equals(3));
-
-        rawList.add(4);
-
-        // Accessing an index < the original length should not throw.
-        expect(immutableList[0], equals(1));
-        expect(immutableList[1], equals(2));
-        expect(immutableList[2], equals(3));
-
-        // Throws because the index is out of range of the immutable list.
-        expect(() => immutableList[3], throwsException);
-        expect(rawList[3], equals(4));
-      });
-
-      test('throws on []=', () {
-        expect(() => immutableList[0] = 5, throwsException);
-      });
-
-      test('throws on add', () {
-        expect(() => immutableList.add(4), throwsException);
-      });
-
-      test('throws on addAll', () {
-        expect(() => immutableList.addAll([4, 5, 6]), throwsException);
-      });
-
-      test('throws on remove', () {
-        expect(() => immutableList.remove(1), throwsException);
-      });
-
-      test('throws on removeAt', () {
-        expect(() => immutableList.removeAt(1), throwsException);
-      });
-
-      test('throws on removeLast', () {
-        expect(() => immutableList.removeLast(), throwsException);
-      });
-
-      test('throws on removeRange', () {
-        expect(() => immutableList.removeRange(1, 2), throwsException);
-      });
-
-      test('throws on removeWhere', () {
-        expect(
-          () => immutableList.removeWhere((int n) => n == 1),
-          throwsException,
-        );
-      });
-
-      test('throws on retainWhere', () {
-        expect(
-          () => immutableList.retainWhere((int n) => n == 1),
-          throwsException,
-        );
-      });
-
-      test('throws on insert', () {
-        expect(() => immutableList.insert(1, 5), throwsException);
-      });
-
-      test('throws on insertAll', () {
-        expect(() => immutableList.insertAll(1, [4, 5, 6]), throwsException);
-      });
-
-      test('throws on clear', () {
-        expect(() => immutableList.clear(), throwsException);
-      });
-
-      test('throws on fillRange', () {
-        expect(() => immutableList.fillRange(0, 1, 5), throwsException);
-      });
-
-      test('throws on setRange', () {
-        expect(() => immutableList.setRange(0, 1, [5]), throwsException);
-      });
-
-      test('throws on replaceRange', () {
-        expect(() => immutableList.setRange(0, 1, [5]), throwsException);
-      });
-
-      test('throws on setAll', () {
-        expect(() => immutableList.setAll(1, [5]), throwsException);
-      });
-
-      test('throws on sort', () {
-        expect(() => immutableList.sort(), throwsException);
-      });
-
-      test('throws on shuffle', () {
-        expect(() => immutableList.shuffle(), throwsException);
       });
     });
 
@@ -1611,6 +1271,24 @@ void main() {
         expect(str.caseInsensitiveEquals(null), isFalse);
         expect(''.caseInsensitiveEquals(''), isTrue);
         expect(''.caseInsensitiveEquals(null), isFalse);
+
+        // Complete match.
+        expect(
+          str.caseInsensitiveEquals(RegExp('h.*o.*', caseSensitive: false)),
+          isTrue,
+        );
+        // Incomplete match.
+        expect(
+          str.caseInsensitiveEquals(RegExp('h.*o', caseSensitive: false)),
+          isFalse,
+        );
+        // No match.
+        expect(
+          str.caseInsensitiveEquals(
+            RegExp('hello.* this does not match', caseSensitive: false),
+          ),
+          isFalse,
+        );
       });
 
       test('caseInsensitiveAllMatches', () {
@@ -1670,7 +1348,7 @@ void main() {
                 value: controller,
                 child: Builder(
                   builder: (context) {
-                    return wrap(
+                    return wrapSimple(
                       const TestStatefulWidget(),
                     );
                   },
@@ -1708,7 +1386,10 @@ void main() {
           subtractor: elementSubtractor,
         );
 
-        expect(const SetEquality().equals(result.keys.toSet(), {1, 2}), true);
+        expect(
+          const SetEquality<int>().equals(result.keys.toSet(), {1, 2}),
+          true,
+        );
         expect(
           result[1],
           equals(_SubtractionResult(subtract: 'subtract', from: 1.0)),
@@ -1733,7 +1414,7 @@ void main() {
           subtractor: elementSubtractor,
         );
 
-        expect(const SetEquality().equals(result.keys.toSet(), {1}), true);
+        expect(const SetEquality<int>().equals(result.keys.toSet(), {1}), true);
         expect(
           result[1],
           equals(_SubtractionResult(subtract: null, from: 1.0)),
@@ -1754,13 +1435,46 @@ void main() {
           subtractor: elementSubtractor,
         );
 
-        expect(const SetEquality().equals(result.keys.toSet(), {1}), true);
+        expect(const SetEquality<int>().equals(result.keys.toSet(), {1}), true);
         expect(
           result[1],
           equals(_SubtractionResult(subtract: 'subtract', from: null)),
         );
       });
     });
+  });
+
+  group('joinWithTrailing', () {
+    test('joins no items', () {
+      expect(<String>[].joinWithTrailing(':'), equals(''));
+    });
+    test(' joins 1 item', () {
+      expect(['A'].joinWithTrailing(':'), equals('A:'));
+    });
+    test(' joins multiple items', () {
+      expect(['A', 'B', 'C'].joinWithTrailing(':'), equals('A:B:C:'));
+    });
+  });
+
+  test('devtoolsAssetsBasePath', () {
+    // This is how a DevTools url will be structured when DevTools is served
+    // directly from DDS using the `--observe` flag.
+    expect(
+      devtoolsAssetsBasePath(
+        origin: 'http://127.0.0.1:61962',
+        path: '/mb9Sw4gCYvU=/devtools/performance',
+      ),
+      equals('http://127.0.0.1:61962/mb9Sw4gCYvU=/devtools'),
+    );
+    // This is how a DevTools url will be structured when served from DevTools
+    // server (e.g. from Flutter tools and from the `dart devtools` command).
+    expect(
+      devtoolsAssetsBasePath(
+        origin: 'http://127.0.0.1:61962',
+        path: '/performance',
+      ),
+      equals('http://127.0.0.1:61962'),
+    );
   });
 }
 
@@ -1773,7 +1487,7 @@ class _SubtractionResult {
   final double? from;
 
   @override
-  bool operator ==(Object? other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }

@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_snapshot_analysis/precompiler_trace.dart';
@@ -13,15 +15,11 @@ import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/charts/treemap.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/config_specific/drag_and_drop/drag_and_drop.dart';
-import '../../shared/config_specific/server/server.dart' as server;
-import '../../shared/config_specific/url/url.dart';
 import '../../shared/file_import.dart';
 import '../../shared/globals.dart';
-import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/screen.dart';
-import '../../shared/split.dart';
-import '../../shared/theme.dart';
+import '../../shared/server/server.dart' as server;
 import '../../shared/ui/tab.dart';
 import '../../shared/utils.dart';
 import 'app_size_controller.dart';
@@ -32,14 +30,7 @@ const initialFractionForTreemap = 0.67;
 const initialFractionForTreeTable = 0.33;
 
 class AppSizeScreen extends Screen {
-  AppSizeScreen()
-      : super.conditional(
-          id: id,
-          requiresConnection: false,
-          requiresDartVm: true,
-          title: ScreenMetaData.appSize.title,
-          icon: ScreenMetaData.appSize.icon,
-        );
+  AppSizeScreen() : super.fromMetaData(ScreenMetaData.appSize);
 
   static const analysisTabKey = Key('Analysis Tab');
   static const diffTabKey = Key('Diff Tab');
@@ -544,7 +535,7 @@ class _AppSizeView extends StatelessWidget {
 
   final TreemapNode treemapRoot;
 
-  final Function(TreemapNode?) onRootChangedCallback;
+  final void Function(TreemapNode?) onRootChangedCallback;
 
   final Widget analysisTable;
 

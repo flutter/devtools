@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -17,24 +19,18 @@ import '../shared/config_specific/import_export/import_export.dart';
 import '../shared/connection_info.dart';
 import '../shared/feature_flags.dart';
 import '../shared/globals.dart';
-import '../shared/primitives/auto_dispose.dart';
 import '../shared/primitives/blocking_action_mixin.dart';
 import '../shared/primitives/utils.dart';
 import '../shared/routing.dart';
 import '../shared/screen.dart';
-import '../shared/theme.dart';
 import '../shared/title.dart';
-import '../shared/ui/label.dart';
 import '../shared/ui/vm_flag_widgets.dart';
-import '../shared/utils.dart';
 import 'framework_core.dart';
 
 class HomeScreen extends Screen {
   HomeScreen({this.sampleData = const []})
-      : super.conditional(
-          id: id,
-          requiresConnection: false,
-          icon: ScreenMetaData.home.icon,
+      : super.fromMetaData(
+          ScreenMetaData.home,
           titleGenerator: () => devToolsTitle.value,
         );
 
@@ -63,13 +59,13 @@ class _HomeScreenBodyState extends State<HomeScreenBody> with AutoDisposeMixin {
     super.initState();
     ga.screen(gac.home);
 
-    addAutoDisposeListener(serviceManager.connectedState);
+    addAutoDisposeListener(serviceConnection.serviceManager.connectedState);
   }
 
   @override
   Widget build(BuildContext context) {
-    final connected =
-        serviceManager.hasConnection && serviceManager.connectedAppInitialized;
+    final connected = serviceConnection.serviceManager.hasConnection &&
+        serviceConnection.serviceManager.connectedAppInitialized;
     return Scrollbar(
       child: ListView(
         children: [
@@ -120,7 +116,7 @@ class ConnectionSection extends StatelessWidget {
         child: const ConnectedAppSummary(narrowView: false),
       );
     }
-    return const ConnectDialog();
+    return const ConnectInput();
   }
 }
 
@@ -149,7 +145,7 @@ class LandingScreenSection extends StatelessWidget {
             Expanded(
               child: Text(
                 title,
-                style: textTheme.titleLarge,
+                style: textTheme.titleMedium,
               ),
             ),
             ...actions,
@@ -163,15 +159,14 @@ class LandingScreenSection extends StatelessWidget {
   }
 }
 
-class ConnectDialog extends StatefulWidget {
-  const ConnectDialog({Key? key}) : super(key: key);
+class ConnectInput extends StatefulWidget {
+  const ConnectInput({Key? key}) : super(key: key);
 
   @override
-  State<ConnectDialog> createState() => _ConnectDialogState();
+  State<ConnectInput> createState() => _ConnectInputState();
 }
 
-class _ConnectDialogState extends State<ConnectDialog>
-    with BlockingActionMixin {
+class _ConnectInputState extends State<ConnectInput> with BlockingActionMixin {
   late final TextEditingController connectDialogController;
 
   SharedPreferences? _debugSharedPreferences;
@@ -215,32 +210,26 @@ class _ConnectDialogState extends State<ConnectDialog>
         Row(
           children: [
             SizedBox(
+              height: defaultTextFieldHeight,
               width: scaleByFontFactor(350.0),
-              child: TextField(
+              child: DevToolsClearableTextField(
+                labelText: 'VM service URL',
                 onSubmitted:
                     actionInProgress ? null : (str) => unawaited(_connect()),
                 autofocus: true,
-                decoration: const InputDecoration(
-                  isDense: true,
-                  border: OutlineInputBorder(),
-                  enabledBorder: OutlineInputBorder(
-                    // TODO(jacobr): we need to use themed colors everywhere instead
-                    // of hard coding material colors.
-                    borderSide: BorderSide(width: 0.5, color: Colors.grey),
-                  ),
-                ),
                 controller: connectDialogController,
               ),
             ),
             const SizedBox(width: defaultSpacing),
-            ElevatedButton(
+            DevToolsButton(
               onPressed: actionInProgress ? null : () => unawaited(_connect()),
-              child: const Text('Connect'),
+              elevated: true,
+              label: 'Connect',
             ),
           ],
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          padding: const EdgeInsets.symmetric(vertical: densePadding),
           child: Text(
             '(e.g., http://127.0.0.1:12345/auth_code=...)',
             textAlign: TextAlign.start,
@@ -257,14 +246,14 @@ class _ConnectDialogState extends State<ConnectDialog>
         children: [
           Text(
             'Connect to a Running App',
-            style: textTheme.titleMedium,
+            style: textTheme.titleSmall,
           ),
           const SizedBox(height: denseRowSpacing),
           Text(
             'Enter a URL to a running Dart or Flutter application',
             style: textTheme.bodySmall,
           ),
-          const Padding(padding: EdgeInsets.only(top: 20.0)),
+          const SizedBox(height: denseSpacing),
           connectorInput,
         ],
       ),
@@ -281,20 +270,20 @@ class _ConnectDialogState extends State<ConnectDialog>
       gac.home,
       gac.HomeScreenEvents.connectToApp.name,
     );
-    if (connectDialogController.text.isEmpty) {
+
+    final uri = connectDialogController.text;
+    if (uri.isEmpty) {
       notificationService.push('Please enter a VM Service URL.');
       return;
     }
 
     assert(() {
       if (_debugSharedPreferences != null) {
-        _debugSharedPreferences!
-            .setString(_vmServiceUriKey, connectDialogController.text);
+        _debugSharedPreferences!.setString(_vmServiceUriKey, uri);
       }
       return true;
     }());
 
-    final uri = normalizeVmServiceUri(connectDialogController.text);
     // Cache the routerDelegate and notifications providers before the async
     // gap as the landing screen may not be displayed by the time the async gap
     // is complete but we still want to show notifications and change the route.
@@ -302,22 +291,15 @@ class _ConnectDialogState extends State<ConnectDialog>
     // intuitive that we don't want to just cancel the route change or
     // notification if we are already on a different screen.
     final routerDelegate = DevToolsRouterDelegate.of(context);
-    final connected = await FrameworkCore.initVmService(
-      '',
-      explicitUri: uri,
-      errorReporter: (message, error) {
-        notificationService.pushError(
-          '$message $error',
-          isReportable: false,
-        );
-      },
-    );
+    final connected =
+        await FrameworkCore.initVmService(serviceUriAsString: uri);
     if (connected) {
-      final connectedUri = serviceManager.service!.connectedUri;
+      final connectedUri =
+          Uri.parse(serviceConnection.serviceManager.service!.wsUri!);
       routerDelegate.updateArgsIfChanged({'uri': '$connectedUri'});
       final shortUri = connectedUri.replace(path: '');
       notificationService.push('Successfully connected to $shortUri.');
-    } else if (uri == null) {
+    } else if (normalizeVmServiceUri(uri) == null) {
       notificationService.push(
         'Failed to connect to the VM Service at "${connectDialogController.text}".\n'
         'The link was not valid.',

@@ -4,6 +4,8 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/perfetto/perfetto_event_processor.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -30,7 +32,7 @@ void main() {
 
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(OfflineModeController, OfflineModeController());
-    setGlobal(ServiceConnectionManager, FakeServiceManager());
+    setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
   });
 
   group('$PerfettoEventProcessor', () {
@@ -156,7 +158,7 @@ final _frameIdentifierEvents = [
     'pid': 94955,
     'ts': 200,
     'ph': 'E',
-    'args': {},
+    'args': <String, Object?>{},
   }),
   testTraceEventWrapper({
     'name': 'Animator::BeginFrame',
@@ -174,7 +176,7 @@ final _frameIdentifierEvents = [
     'pid': 94955,
     'ts': 400,
     'ph': 'E',
-    'args': {},
+    'args': <String, Object?>{},
   }),
   testTraceEventWrapper({
     'name': 'Animator::BeginFrame',
@@ -192,7 +194,7 @@ final _frameIdentifierEvents = [
     'pid': 94955,
     'ts': 600,
     'ph': 'E',
-    'args': {},
+    'args': <String, Object?>{},
   }),
   testTraceEventWrapper({
     'name': 'GPURasterizer::Draw',
@@ -213,7 +215,7 @@ final _frameIdentifierEvents = [
     'pid': 94955,
     'ts': 250,
     'ph': 'E',
-    'args': {},
+    'args': <String, Object?>{},
   }),
   testTraceEventWrapper({
     'name': 'GPURasterizer::Draw',
@@ -234,7 +236,7 @@ final _frameIdentifierEvents = [
     'pid': 94955,
     'ts': 450,
     'ph': 'E',
-    'args': {},
+    'args': <String, Object?>{},
   }),
   testTraceEventWrapper({
     'name': 'GPURasterizer::Draw',
@@ -255,6 +257,6 @@ final _frameIdentifierEvents = [
     'pid': 94955,
     'ts': 650,
     'ph': 'E',
-    'args': {},
+    'args': <String, Object?>{},
   }),
 ];

@@ -4,8 +4,9 @@
 
 import 'dart:async';
 import 'dart:math';
-import 'dart:ui';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:vm_service/vm_service.dart';
@@ -13,10 +14,9 @@ import 'package:vm_service/vm_service.dart';
 import '../../analytics/analytics.dart' as ga;
 import '../../analytics/constants.dart' as gac;
 import '../../globals.dart';
-import '../../primitives/auto_dispose.dart';
-import '../../theme.dart';
 import '../../ui/search.dart';
 import '../../ui/utils.dart';
+import '../../utils.dart';
 import '../eval/auto_complete.dart';
 import '../eval/eval_service.dart';
 import '../primitives/assignment.dart';
@@ -36,6 +36,8 @@ class ExpressionEvalField extends StatefulWidget {
             getAutoCompleteResults ?? autoCompleteResultsFor;
 
   final AutoCompleteResultsFunction getAutoCompleteResults;
+
+  static const _evalFieldHeight = 32.0;
 
   @override
   ExpressionEvalFieldState createState() => ExpressionEvalFieldState();
@@ -64,7 +66,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
   void initState() {
     super.initState();
 
-    serviceManager.consoleService.ensureServiceInitialized();
+    serviceConnection.consoleService.ensureServiceInitialized();
 
     addAutoDisposeListener(_autoCompleteController.searchNotifier, () {
       _autoCompleteController.handleAutoCompleteOverlay(
@@ -174,7 +176,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
 
       if (matches.length == 1 && matches.first == parts.activeWord) {
         // It is not useful to show a single autocomplete that is exactly what
-        // the already typed.
+        // they already typed.
         _autoCompleteController
           ..clearSearchAutoComplete()
           ..clearCurrentSuggestion();
@@ -202,55 +204,64 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
     return Row(
       children: [
         const Text('>'),
-        const SizedBox(width: 8.0),
+        const SizedBox(width: denseSpacing),
         Expanded(
           child: Focus(
-            onKey: (_, RawKeyEvent event) {
-              if (event.isKeyPressed(LogicalKeyboardKey.arrowUp)) {
+            onKeyEvent: (_, event) {
+              if (!event.isKeyDownOrRepeat) return KeyEventResult.ignored;
+              if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
                 _historyNavUp();
                 return KeyEventResult.handled;
-              } else if (event.isKeyPressed(LogicalKeyboardKey.arrowDown)) {
+              } else if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
                 _historyNavDown();
                 return KeyEventResult.handled;
-              } else if (event.isKeyPressed(LogicalKeyboardKey.enter)) {
+              } else if (event.logicalKey == LogicalKeyboardKey.enter) {
                 _handleExpressionEval(context);
                 return KeyEventResult.handled;
               }
 
               return KeyEventResult.ignored;
             },
-            child: AutoCompleteSearchField(
-              controller: _autoCompleteController,
-              searchFieldEnabled: true,
-              shouldRequestFocus: false,
-              clearFieldOnEscapeWhenOverlayHidden: true,
-              onSelection: _onSelection,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.all(denseSpacing),
-                border: OutlineInputBorder(),
-                focusedBorder: OutlineInputBorder(borderSide: BorderSide.none),
-                enabledBorder: OutlineInputBorder(borderSide: BorderSide.none),
-                labelText: 'Eval. Enter "?" for help.',
+            child: SizedBox(
+              height: ExpressionEvalField._evalFieldHeight,
+              child: AutoCompleteSearchField(
+                controller: _autoCompleteController,
+                searchFieldEnabled: true,
+                shouldRequestFocus: false,
+                clearFieldOnEscapeWhenOverlayHidden: true,
+                onSelection: _onSelection,
+                decoration: InputDecoration(
+                  contentPadding: const EdgeInsets.all(denseSpacing),
+                  border: const OutlineInputBorder(),
+                  focusedBorder:
+                      const OutlineInputBorder(borderSide: BorderSide.none),
+                  enabledBorder:
+                      const OutlineInputBorder(borderSide: BorderSide.none),
+                  labelText: 'Eval. Enter "?" for help.',
+                  labelStyle: Theme.of(context).subtleTextStyle,
+                ),
+                overlayXPositionBuilder:
+                    (String inputValue, TextStyle? inputStyle) {
+                  // X-coordinate is equivalent to the width of the input text
+                  // up to the last "." or the insertion point (cursor):
+                  final indexOfDot = inputValue.lastIndexOf('.');
+                  final textSegment = indexOfDot != -1
+                      ? inputValue.substring(0, indexOfDot + 1)
+                      : inputValue;
+                  return calculateTextSpanWidth(
+                    TextSpan(
+                      text: textSegment,
+                      style: inputStyle,
+                    ),
+                  );
+                },
+                // Disable ligatures, so the suggestions of the auto complete work correcly.
+                style: Theme.of(context).fixedFontStyle.copyWith(
+                  fontFeatures: [
+                    const FontFeature.disable('liga'),
+                  ],
+                ),
               ),
-              overlayXPositionBuilder:
-                  (String inputValue, TextStyle? inputStyle) {
-                // X-coordinate is equivalent to the width of the input text
-                // up to the last "." or the insertion point (cursor):
-                final indexOfDot = inputValue.lastIndexOf('.');
-                final textSegment = indexOfDot != -1
-                    ? inputValue.substring(0, indexOfDot + 1)
-                    : inputValue;
-                return calculateTextSpanWidth(
-                  TextSpan(
-                    text: textSegment,
-                    style: inputStyle,
-                  ),
-                );
-              },
-              // Disable ligatures, so the suggestions of the auto complete work correcly.
-              style: Theme.of(context)
-                  .fixedFontStyle
-                  .copyWith(fontFeatures: [const FontFeature.disable('liga')]),
             ),
           ),
         ),
@@ -323,14 +334,15 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
       return;
     }
 
-    serviceManager.consoleService.appendStdio('> $expressionText\n');
+    serviceConnection.consoleService.appendStdio('> $expressionText\n');
     setState(() {
       historyPosition = -1;
-      serviceManager.appState.evalHistory.pushEvalHistory(expressionText);
+      serviceConnection.appState.evalHistory.pushEvalHistory(expressionText);
     });
 
     try {
-      final isolateRef = serviceManager.isolateManager.selectedIsolate.value;
+      final isolateRef =
+          serviceConnection.serviceManager.isolateManager.selectedIsolate.value;
 
       // Response is either a ErrorRef, InstanceRef, or Sentinel.
       final Response response;
@@ -371,7 +383,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
   }
 
   void _emitToConsole(String text) {
-    serviceManager.consoleService.appendStdio(
+    serviceConnection.consoleService.appendStdio(
       '  ${text.replaceAll('\n', '\n  ')}\n',
     );
   }
@@ -380,7 +392,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
     InstanceRef ref,
     IsolateRef? isolate,
   ) {
-    serviceManager.consoleService.appendInstanceRef(
+    serviceConnection.consoleService.appendInstanceRef(
       value: ref,
       diagnostic: null,
       isolateRef: isolate,
@@ -394,7 +406,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
     super.dispose();
   }
 
-  EvalHistory get _evalHistory => serviceManager.appState.evalHistory;
+  EvalHistory get _evalHistory => serviceConnection.appState.evalHistory;
 
   void _historyNavUp() {
     if (!_evalHistory.canNavigateUp) {
@@ -436,8 +448,8 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
     if (assignment == null) return false;
     const kSuccess = true;
 
-    final variable =
-        serviceManager.consoleService.itemAt(assignment.consoleItemIndex + 1);
+    final variable = serviceConnection.consoleService
+        .itemAt(assignment.consoleItemIndex + 1);
     final value = variable?.value;
     if (value is! InstanceRef) {
       _emitToConsole(
@@ -446,9 +458,10 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
       return kSuccess;
     }
 
-    final isolateId = serviceManager.isolateManager.selectedIsolate.value?.id;
-    final isolateName =
-        serviceManager.isolateManager.selectedIsolate.value?.name;
+    final isolateId = serviceConnection
+        .serviceManager.isolateManager.selectedIsolate.value?.id;
+    final isolateName = serviceConnection
+        .serviceManager.isolateManager.selectedIsolate.value?.name;
 
     if (isolateId == null || isolateName == null) {
       _emitToConsole(

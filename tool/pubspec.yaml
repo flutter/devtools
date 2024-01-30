@@ -1,17 +1,21 @@
-name: devtools_repo
+name: devtools_tool
 description: A repo management tool for DevTools.
+publish_to: none
 
 environment:
-  sdk: '>=2.12.0 <4.0.0'
+  sdk: ^3.2.0
+
+executables:
+  devtools_tool: devtools_tool
 
 dependencies:
-  args: ^2.1.0
-  cli_util: ^0.3.3
-  devtools_shared: ^2.18.0
-  http: ^0.13.3
-  lints: any
-  path: ^1.8.0
+  args: ^2.4.2
+  cli_util: ^0.4.1
+  io: ^1.0.4
+  path: ^1.9.0
+  yaml: ^3.1.2
 
 dependency_overrides:
   devtools_shared:
     path: ../packages/devtools_shared
+  lints: ^3.0.0

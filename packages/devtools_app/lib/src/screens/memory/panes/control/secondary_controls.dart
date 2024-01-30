@@ -4,11 +4,11 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
-import '../../../../shared/theme.dart';
 import '../../framework/connected/memory_controller.dart';
 import '../../shared/primitives/simple_elements.dart';
 import 'settings_dialog.dart';
@@ -27,7 +27,7 @@ class SecondaryControls extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        DevToolsButton(
+        GaDevToolsButton(
           onPressed: controller.isGcing ? null : _gc,
           icon: Icons.delete,
           label: 'GC',
@@ -57,7 +57,7 @@ class SecondaryControls extends StatelessWidget {
   }
 
   Future<void> _gc() async {
-    controller.memoryTimeline.addGCEvent();
+    controller.controllers.memoryTimeline.addGCEvent();
     await controller.gc();
   }
 }

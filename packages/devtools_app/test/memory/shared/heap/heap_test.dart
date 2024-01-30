@@ -24,9 +24,9 @@ class _ClassSizeTest {
   final int expectedClassARetainedSize;
 }
 
-final _root = HeapClassName(className: 'Root', library: 'l');
-final _classA = HeapClassName(className: 'A', library: 'l');
-final _classB = HeapClassName(className: 'B', library: 'l');
+final _root = HeapClassName.fromPath(className: 'Root', library: 'l');
+final _classA = HeapClassName.fromPath(className: 'A', library: 'l');
+final _classB = HeapClassName.fromPath(className: 'B', library: 'l');
 
 final _classSizeTests = <_ClassSizeTest>[
   _ClassSizeTest(
@@ -39,7 +39,6 @@ final _classSizeTests = <_ClassSizeTest>[
         _createOneByteObject(3, [], _classA),
       ],
       rootIndex: 0,
-      isolateId: '',
     ),
     expectedClassARetainedSize: 3,
   ),
@@ -53,7 +52,6 @@ final _classSizeTests = <_ClassSizeTest>[
         _createOneByteObject(3, [], _classA),
       ],
       rootIndex: 0,
-      isolateId: '',
     ),
     expectedClassARetainedSize: 3,
   ),
@@ -67,7 +65,6 @@ final _classSizeTests = <_ClassSizeTest>[
         _createOneByteObject(3, [1, 2], _classA),
       ],
       rootIndex: 0,
-      isolateId: '',
     ),
     expectedClassARetainedSize: 3,
   ),
@@ -82,7 +79,6 @@ final _classSizeTests = <_ClassSizeTest>[
         _createOneByteObject(4, [], _classB),
       ],
       rootIndex: 0,
-      isolateId: '',
     ),
     expectedClassARetainedSize: 4,
   ),

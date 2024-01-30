@@ -36,11 +36,19 @@ extension IsolatePrivateViewExtension on Isolate {
   int get dartHeapSize => newSpaceUsage + oldSpaceUsage;
   int get dartHeapCapacity => newSpaceCapacity + oldSpaceCapacity;
 
-  int get newSpaceUsage => json!['_heaps']['new']['used'];
-  int get oldSpaceUsage => json!['_heaps']['old']['used'];
+  int get newSpaceUsage => _newHeap['used'] as int;
+  int get oldSpaceUsage => _oldHeap['used'] as int;
 
-  int get newSpaceCapacity => json!['_heaps']['new']['capacity'];
-  int get oldSpaceCapacity => json!['_heaps']['old']['capacity'];
+  int get newSpaceCapacity => _newHeap['capacity'] as int;
+  int get oldSpaceCapacity => _oldHeap['capacity'] as int;
+
+  Map<String, Object?> get _newHeap =>
+      (_heaps['new'] as Map).cast<String, Object?>();
+  Map<String, Object?> get _oldHeap =>
+      (_heaps['old'] as Map).cast<String, Object?>();
+
+  Map<String, Object?> get _heaps =>
+      (json!['_heaps'] as Map).cast<String, Object?>();
 }
 
 /// An extension on [Class] which allows for access to VM internal fields.
@@ -56,7 +64,10 @@ extension InboundReferenceExtension on InboundReferences {
   static const _parentWordOffsetKey = '_parentWordOffset';
 
   int? parentWordOffset(int inboundReferenceIndex) {
-    return json![_referencesKey]?[inboundReferenceIndex]?[_parentWordOffsetKey];
+    final references = (json![_referencesKey] as List?)?.cast<Object?>();
+    final inboundReference =
+        (references?[inboundReferenceIndex] as Map?)?.cast<String, Object?>();
+    return inboundReference?[_parentWordOffsetKey] as int?;
   }
 }
 
@@ -89,10 +100,10 @@ extension ClassHeapStatsPrivateViewExtension on ClassHeapStats {
   static const _oldSpaceKey = '_old';
 
   HeapStats get newSpace => json!.containsKey(_newSpaceKey)
-      ? HeapStats.parse(json![_newSpaceKey].cast<int>())
+      ? HeapStats.parse((json![_newSpaceKey] as List).cast<int>())
       : const HeapStats.empty();
   HeapStats get oldSpace => json!.containsKey(_oldSpaceKey)
-      ? HeapStats.parse(json![_oldSpaceKey].cast<int>())
+      ? HeapStats.parse((json![_oldSpaceKey] as List).cast<int>())
       : const HeapStats.empty();
 }
 
@@ -105,11 +116,18 @@ class GCStats {
     required this.averageCollectionTime,
   });
 
-  GCStats.parse({required this.heap, required Map<String, dynamic> json})
-      : usage = json[usedKey],
-        capacity = json[capacityKey],
-        collections = json[collectionsKey] {
-    averageCollectionTime = json[timeKey] * 1000 / collections;
+  factory GCStats.parse({
+    required String heap,
+    required Map<String, dynamic> json,
+  }) {
+    final collections = json[collectionsKey] as int;
+    return GCStats(
+      heap: heap,
+      usage: json[usedKey],
+      capacity: json[capacityKey],
+      collections: collections,
+      averageCollectionTime: (json[timeKey] as num) * 1000 / collections,
+    );
   }
 
   static const usedKey = 'used';
@@ -121,7 +139,7 @@ class GCStats {
   final int usage;
   final int capacity;
   final int collections;
-  late final double averageCollectionTime;
+  final double averageCollectionTime;
 }
 
 extension AllocationProfilePrivateViewExtension on AllocationProfile {
@@ -131,13 +149,16 @@ extension AllocationProfilePrivateViewExtension on AllocationProfile {
 
   GCStats get newSpaceGCStats => GCStats.parse(
         heap: HeapGeneration.newSpace.toString(),
-        json: json![heapsKey][newSpaceKey],
+        json: (_heaps[newSpaceKey] as Map).cast<String, Object?>(),
       );
 
   GCStats get oldSpaceGCStats => GCStats.parse(
         heap: HeapGeneration.oldSpace.toString(),
-        json: json![heapsKey][oldSpaceKey],
+        json: (_heaps[oldSpaceKey] as Map).cast<String, Object?>(),
       );
+
+  Map<String, Object?> get _heaps =>
+      (json![heapsKey] as Map).cast<String, Object?>();
 
   GCStats get totalGCStats {
     final newSpace = newSpaceGCStats;
@@ -436,7 +457,7 @@ class Instruction {
       return;
     }
     final rawObject = data[3] as Map<String, dynamic>;
-    object = rawObject['type'].contains('Instance')
+    object = (rawObject['type'] as List).contains('Instance')
         ? InstanceRef.parse(rawObject)
         : createServiceObject(data[3], const <String>[]) as Response?;
   }
@@ -509,10 +530,13 @@ extension FunctionPrivateViewExtension on Func {
   String? get vmName => json!['_vmName'];
 
   Future<Instance?> get icDataArray async {
-    final String? icDataArrayId = json![_icDataArrayKey]?['id'];
+    final icDataArray =
+        (json![_icDataArrayKey] as Map?)?.cast<String, Object?>();
+    final icDataArrayId = icDataArray?['id'] as String?;
     if (icDataArrayId != null) {
-      final service = serviceManager.service!;
-      final isolate = serviceManager.isolateManager.selectedIsolate.value;
+      final service = serviceConnection.serviceManager.service!;
+      final isolate =
+          serviceConnection.serviceManager.isolateManager.selectedIsolate.value;
 
       return await service.getObject(isolate!.id!, icDataArrayId) as Instance;
     } else {
@@ -615,7 +639,7 @@ class InliningData {
 
   factory InliningData.parse(Map<String, dynamic> json) {
     final startAddress = int.parse(json[kStartAddressKey], radix: 16);
-    final intervals = json[kInlinedIntervals] as List;
+    final intervals = (json[kInlinedIntervals] as List).cast<List>();
     final functions = (json[kInlinedFunctions] as List)
         .cast<Map<String, dynamic>>()
         .map<FuncRef>((e) => FuncRef.parse(e)!)
@@ -788,11 +812,14 @@ extension FieldPrivateViewExtension on Field {
 
   Future<Class?> get guardClass async {
     if (_guardClassIsClass()) {
-      final service = serviceManager.service!;
-      final isolate = serviceManager.isolateManager.selectedIsolate.value;
+      final service = serviceConnection.serviceManager.service!;
+      final isolate =
+          serviceConnection.serviceManager.isolateManager.selectedIsolate.value;
 
-      return await service.getObject(isolate!.id!, json![_guardClassKey]['id'])
-          as Class;
+      return await service.getObject(
+        isolate!.id!,
+        guardClassData['id'] as String,
+      ) as Class;
     }
 
     return null;
@@ -814,11 +841,14 @@ extension FieldPrivateViewExtension on Field {
     String? guardClassType;
 
     if (json![_guardClassKey] is Map) {
-      guardClassType = json![_guardClassKey]['type'];
+      guardClassType = guardClassData['type'] as String?;
     }
 
     return guardClassType == '@Class' || guardClassType == 'Class';
   }
+
+  Map<String, Object?> get guardClassData =>
+      (json![_guardClassKey] as Map).cast<String, Object?>();
 }
 
 /// The kinds of Guard Class that determine whether a Field object has
@@ -966,26 +996,16 @@ extension CpuSamplesPrivateView on CpuSamples {
   }
 
   List<ProfileCode> get codes {
-    var codesFromExpando = _expando[this];
-    if (codesFromExpando == null) {
-      codesFromExpando = json![_kCodesKey]
-          .cast<Map<String, dynamic>>()
-          .map<ProfileCode>((e) => ProfileCode.parse(e)!)
-          .toList();
-      _expando[this] = codesFromExpando;
-    }
-    return codesFromExpando!;
+    return _expando[this] ??= (json![_kCodesKey] as List)
+        .cast<Map<String, dynamic>>()
+        .map<ProfileCode>((e) => ProfileCode.parse(e)!)
+        .toList();
   }
 }
 
 extension ProfileDataRanges on SourceReport {
   ProfileReport asProfileReport(Script script) =>
       ProfileReport._fromJson(script, json!);
-}
-
-class ProfileReportMetaData {
-  const ProfileReportMetaData._({required this.sampleCount});
-  final int sampleCount;
 }
 
 /// Profiling information for a given line in a [Script].
@@ -1008,27 +1028,27 @@ class ProfileReportEntry {
 
 /// Profiling information for a range of token positions in a [Script].
 class ProfileReportRange {
-  ProfileReportRange._fromJson(Script script, Map<String, dynamic> json)
-      : metadata = ProfileReportMetaData._(
-          sampleCount: json[_kProfileKey][_kMetadataKey][_kSampleCountKey],
-        ),
-        inclusiveTicks = json[_kProfileKey][_kInclusiveTicksKey].cast<int>(),
-        exclusiveTicks = json[_kProfileKey][_kExclusiveTicksKey].cast<int>(),
-        lines = json[_kProfileKey][_kPositionsKey]
-            .map<int>(
-              // It's possible to get a synthetic token position which will
-              // either be a negative value or a String (e.g., 'ParallelMove'
-              // or 'NoSource'). We'll just use -1 as a placeholder since we
-              // won't display anything for these tokens anyway.
-              (e) => e is int
-                  ? script.getLineNumberFromTokenPos(e) ?? _kNoSourcePosition
-                  : _kNoSourcePosition,
-            )
-            .toList() {
+  ProfileReportRange._fromJson(Script script, _ProfileReportRangeJson json) {
+    final inclusiveTicks = json.inclusiveTicks;
+    final exclusiveTicks = json.exclusiveTicks;
+    final lines = json.positions
+        .map<int>(
+          // It's possible to get a synthetic token position which will either
+          // be a negative value or a String (e.g., 'ParallelMove' or
+          // 'NoSource'). We'll just use -1 as a placeholder since we won't
+          // display anything for these tokens anyway.
+          (e) => e is int
+              ? script.getLineNumberFromTokenPos(e) ?? _kNoSourcePosition
+              : _kNoSourcePosition,
+        )
+        .toList();
     for (int i = 0; i < lines.length; ++i) {
       final line = lines[i];
+      // In a `Map<int, ProfileReportEntry>`, we're mapping an `int` to a
+      // `ProfileReportEntry`. No bug.
+      // ignore: avoid-collection-methods-with-unrelated-types
       entries[line] = ProfileReportEntry(
-        sampleCount: metadata.sampleCount,
+        sampleCount: json.sampleCount,
         line: line,
         inclusive: inclusiveTicks[i],
         exclusive: exclusiveTicks[i],
@@ -1036,19 +1056,30 @@ class ProfileReportRange {
     }
   }
 
+  static const _kNoSourcePosition = -1;
+
+  final entries = <int, ProfileReportEntry>{};
+}
+
+/// An extension type for the unstructured data in the 'ranges' data of the
+/// profiling information used in [ProfileReport].
+extension type _ProfileReportRangeJson(Map<String, dynamic> json) {
+  Map<String, Object?> get _profile => json[_kProfileKey];
+  Map<String, Object?> get metadata =>
+      (_profile[_kMetadataKey] as Map).cast<String, Object?>();
+  int get sampleCount => metadata[_kSampleCountKey] as int;
+  List<int> get inclusiveTicks =>
+      (_profile[_kInclusiveTicksKey] as List).cast<int>();
+  List<int> get exclusiveTicks =>
+      (_profile[_kExclusiveTicksKey] as List).cast<int>();
+  List<Object?> get positions => _profile[_kPositionsKey] as List;
+
   static const _kProfileKey = 'profile';
   static const _kMetadataKey = 'metadata';
   static const _kSampleCountKey = 'sampleCount';
   static const _kInclusiveTicksKey = 'inclusiveTicks';
   static const _kExclusiveTicksKey = 'exclusiveTicks';
   static const _kPositionsKey = 'positions';
-  static const _kNoSourcePosition = -1;
-
-  final ProfileReportMetaData metadata;
-  final entries = <int, ProfileReportEntry>{};
-  List<int> inclusiveTicks;
-  List<int> exclusiveTicks;
-  List<int> lines;
 }
 
 /// A representation of the `_Profile` [SourceReport], which contains profiling
@@ -1059,7 +1090,10 @@ class ProfileReport {
             .cast<Map<String, dynamic>>()
             .where((e) => e.containsKey('profile'))
             .map<ProfileReportRange>(
-              (e) => ProfileReportRange._fromJson(script, e),
+              (e) => ProfileReportRange._fromJson(
+                script,
+                _ProfileReportRangeJson(e),
+              ),
             )
             .toList();
 

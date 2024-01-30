@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore: avoid_web_libraries_in_flutter, as designed
-import 'dart:html';
+import 'dart:js_interop';
+
+import 'package:web/web.dart' hide NodeGlue;
 
 import 'import_export.dart';
 
@@ -19,11 +20,14 @@ class ExportControllerWeb extends ExportController {
     required String content,
     required String fileName,
   }) {
-    final element = document.createElement('a');
-    element.setAttribute('href', Url.createObjectUrl(Blob([content])));
+    final element = document.createElement('a') as HTMLAnchorElement;
+    element.setAttribute(
+      'href',
+      URL.createObjectURL(Blob([content.toJS].toJS) as JSObject),
+    );
     element.setAttribute('download', fileName);
     element.style.display = 'none';
-    document.body!.append(element);
+    (document.body as HTMLBodyElement).append(element as JSAny);
     element.click();
     element.remove();
   }

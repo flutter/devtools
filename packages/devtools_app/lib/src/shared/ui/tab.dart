@@ -2,12 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../analytics/analytics.dart' as ga;
-import '../common_widgets.dart';
-import '../theme.dart';
-import '../utils.dart';
 
 double get _tabHeight => scaleByFontFactor(46.0);
 double get _textAndIconTabHeight => scaleByFontFactor(72.0);
@@ -63,6 +61,14 @@ class DevToolsTab extends Tab {
   final String gaId;
 
   final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTextStyle(
+      style: Theme.of(context).textTheme.titleSmall!,
+      child: super.build(context),
+    );
+  }
 }
 
 /// A combined [TabBar] and [TabBarView] implementation that tracks tab changes
@@ -71,7 +77,7 @@ class DevToolsTab extends Tab {
 /// When using this widget, ensure that the [AnalyticsTabbedView] is not being
 /// rebuilt unnecessarily, as each call to [initState] and [didUpdateWidget]
 /// will send an event to analytics for the default selected tab.
-class AnalyticsTabbedView<T> extends StatefulWidget {
+class AnalyticsTabbedView extends StatefulWidget {
   AnalyticsTabbedView({
     Key? key,
     required this.tabs,

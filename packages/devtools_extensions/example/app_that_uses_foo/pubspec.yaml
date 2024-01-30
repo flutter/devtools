@@ -1,0 +1,23 @@
+name: app_that_uses_foo
+description: A Flutter app that uses package:foo (which contains a DevTools extension)
+publish_to: 'none'
+
+version: 1.0.0
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: '>=3.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  foo:
+    path: ../foo/packages/foo
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.3
+
+flutter:
+  uses-material-design: true

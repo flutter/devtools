@@ -7,15 +7,13 @@ import 'dart:ui' as ui;
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/main.dart' as app;
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
-import 'test_data/performance.dart';
-
-const shortPumpDuration = Duration(seconds: 1);
-const safePumpDuration = Duration(seconds: 3);
-const longPumpDuration = Duration(seconds: 6);
+import '../helpers/utils.dart';
+import '../test_data/sample_data.dart';
 
 /// Required to have multiple test cases in a file.
 Future<void> resetHistory() async {
@@ -28,14 +26,14 @@ Future<void> pumpAndConnectDevTools(
   TestApp testApp,
 ) async {
   await pumpDevTools(tester);
-  expect(find.byType(ConnectDialog), findsOneWidget);
+  expect(find.byType(ConnectInput), findsOneWidget);
   expect(find.byType(ConnectedAppSummary), findsNothing);
   expect(find.text('No client connection'), findsOneWidget);
   _verifyFooterColor(tester, null);
 
   logStatus('verify that we can connect to an app');
   await connectToTestApp(tester, testApp);
-  expect(find.byType(ConnectDialog), findsNothing);
+  expect(find.byType(ConnectInput), findsNothing);
   expect(find.byType(ConnectedAppSummary), findsOneWidget);
   expect(find.text('No client connection'), findsNothing);
   _verifyFooterColor(tester, darkColorScheme.primary);
@@ -68,25 +66,6 @@ void _verifyFooterColor(WidgetTester tester, Color? expectedColor) {
   );
 }
 
-Future<void> switchToScreen(WidgetTester tester, ScreenMetaData screen) async {
-  logStatus('switching to ${screen.name} screen (icon ${screen.icon})');
-  final tabFinder = find.widgetWithIcon(Tab, screen.icon!);
-
-  // If we cannot find the tab, try opening the tab overflow menu, if present.
-  if (tabFinder.evaluate().isEmpty) {
-    final tabOverflowButtonFinder = find.byType(TabOverflowButton);
-    if (tabOverflowButtonFinder.evaluate().isNotEmpty) {
-      await tester.tap(tabOverflowButtonFinder);
-      await tester.pump(shortPumpDuration);
-    }
-  }
-
-  await tester.tap(tabFinder);
-  // We use pump here instead of pumpAndSettle because pumpAndSettle will
-  // never complete if there is an animation (e.g. a progress indicator).
-  await tester.pump(safePumpDuration);
-}
-
 Future<void> pumpDevTools(WidgetTester tester) async {
   // TODO(kenz): how can we share code across integration_test/test and
   // integration_test/test_infra? When trying to import, we get an error:
@@ -96,11 +75,11 @@ Future<void> pumpDevTools(WidgetTester tester) async {
     integrationTestMode: true,
     // ignore: avoid_redundant_argument_values, by design
     shouldEnableExperiments: shouldEnableExperiments,
-    sampleData: _sampleData,
+    sampleData: sampleData,
   );
 
   // Await a delay to ensure the widget tree has loaded.
-  await tester.pumpAndSettle(longPumpDuration);
+  await tester.pumpAndSettle(veryLongPumpDuration);
   expect(find.byType(DevToolsApp), findsOneWidget);
 }
 
@@ -116,7 +95,7 @@ Future<void> connectToTestApp(WidgetTester tester, TestApp testApp) async {
       matching: find.byType(ElevatedButton),
     ),
   );
-  await tester.pumpAndSettle(safePumpDuration);
+  await tester.pumpAndSettle(longPumpDuration);
 }
 
 Future<void> disconnectFromTestApp(WidgetTester tester) async {
@@ -129,10 +108,6 @@ Future<void> disconnectFromTestApp(WidgetTester tester) async {
   await tester.pumpAndSettle();
   await tester.tap(find.byType(ConnectToNewAppButton));
   await tester.pump(safePumpDuration);
-}
-
-void logStatus(String log) {
-  print('TEST STATUS: $log');
 }
 
 class TestApp {
@@ -148,8 +123,7 @@ class TestApp {
 
   factory TestApp.fromEnvironment() {
     const testArgs = String.fromEnvironment('test_args');
-    final Map<String, Object> argsMap =
-        jsonDecode(testArgs).cast<String, Object>();
+    final argsMap = (jsonDecode(testArgs) as Map).cast<String, Object>();
     return TestApp.parse(argsMap);
   }
 
@@ -174,22 +148,3 @@ Future<void> verifyScreenshot(
     },
   );
 }
-
-Future<void> loadSampleData(WidgetTester tester, String fileName) async {
-  await tester.tap(find.byType(DropdownButton<DevToolsJsonFile>));
-  await tester.pumpAndSettle();
-  await tester.tap(find.text(fileName).last);
-  await tester.pump(safePumpDuration);
-  await tester.tap(find.text('Load sample data'));
-  await tester.pump(longPumpDuration);
-}
-
-const performanceFileName = 'performance_data.json';
-
-final _sampleData = <DevToolsJsonFile>[
-  DevToolsJsonFile(
-    name: performanceFileName,
-    lastModifiedTime: DateTime.now(),
-    data: jsonDecode(jsonEncode(samplePerformanceData)),
-  ),
-];

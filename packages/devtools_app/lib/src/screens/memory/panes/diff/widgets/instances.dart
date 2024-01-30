@@ -4,7 +4,6 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../../shared/analytics/constants.dart';
 import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../../shared/memory/class_name.dart';
 import '../../../shared/heap/heap.dart';
@@ -22,7 +21,6 @@ class HeapInstanceTableCell extends StatelessWidget {
     HeapClassName heapClass, {
     super.key,
     required bool isSelected,
-    required this.gaContext,
     this.liveItemsEnabled = true,
   })  : _sampleObtainer = _shouldShowMenu(isSelected, objects)
             ? HeapClassSampler(heapClass, objects, heap())
@@ -34,7 +32,6 @@ class HeapInstanceTableCell extends StatelessWidget {
 
   final HeapClassSampler? _sampleObtainer;
 
-  final MemoryAreas gaContext;
   final int _count;
   final bool liveItemsEnabled;
 
@@ -42,7 +39,6 @@ class HeapInstanceTableCell extends StatelessWidget {
   Widget build(BuildContext context) {
     return InstanceViewWithContextMenu(
       count: _count,
-      gaContext: gaContext,
       menuBuilder: () => _buildHeapInstancesMenu(
         sampler: _sampleObtainer,
         liveItemsEnabled: liveItemsEnabled,
@@ -81,7 +77,7 @@ class _StoreAllAsVariableMenu extends StatelessWidget {
     }
 
     MenuItemButton item(
-      title, {
+      String title, {
       required bool subclasses,
       required bool implementers,
     }) =>
@@ -131,15 +127,11 @@ class _StoreAsOneVariableMenu extends StatelessWidget {
       menuChildren: <Widget>[
         MenuItemButton(
           onPressed: sampler.oneStaticToConsole,
-          child: const Text(
-            'Any',
-          ),
+          child: const Text('Any'),
         ),
         MenuItemButton(
           onPressed: liveItemsEnabled ? sampler.oneLiveStaticToConsole : null,
-          child: const Text(
-            'Any, not garbage collected',
-          ),
+          child: const Text('Any, not garbage collected'),
         ),
       ],
       child: const Text(menuText),

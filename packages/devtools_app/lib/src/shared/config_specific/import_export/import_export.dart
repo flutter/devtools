@@ -2,26 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
+import 'package:devtools_app_shared/service.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../devtools.dart';
-import '../../analytics/analytics.dart' as ga;
-import '../../analytics/constants.dart' as gac;
-import '../../common_widgets.dart';
-import '../../connected_app.dart';
-import '../../file_import.dart';
 import '../../globals.dart';
 import '../../primitives/simple_items.dart';
 import '../../primitives/utils.dart';
 import '../../screen.dart';
-import '_export_stub.dart'
-    if (dart.library.html) '_export_web.dart'
-    if (dart.library.io) '_export_desktop.dart';
+import '_export_desktop.dart' if (dart.library.js_interop) '_export_web.dart';
 
 const nonDevToolsFileMessage = 'The imported file is not a Dart DevTools file.'
     ' At this time, DevTools only supports importing files that were originally'
@@ -42,7 +33,6 @@ enum DevToolsExportKeys {
   activeScreenId,
 }
 
-// TODO(kenz): we should support a file picker import for desktop.
 class ImportController {
   ImportController(
     this._pushSnapshotScreenForImport,
@@ -55,7 +45,7 @@ class ImportController {
   DateTime? previousImportTime;
 
   // TODO(kenz): improve error handling here or in snapshot_screen.dart.
-  void importData(DevToolsJsonFile jsonFile) {
+  void importData(DevToolsJsonFile jsonFile, {String? expectedScreenId}) {
     final json = jsonFile.data;
 
     // Do not allow two different imports within 500 ms of each other. This is a
@@ -81,6 +71,14 @@ class ImportController {
     // TODO(kenz): support imports for more than one screen at a time.
     final activeScreenId =
         devToolsSnapshot[DevToolsExportKeys.activeScreenId.name];
+    if (expectedScreenId != null && activeScreenId != expectedScreenId) {
+      notificationService.push(
+        'Expected a data file for screen \'$expectedScreenId\' but received one'
+        ' for screen \'$activeScreenId\'. Please open a file for screen \'$expectedScreenId\'.',
+      );
+      return;
+    }
+
     final connectedApp =
         (devToolsSnapshot[DevToolsExportKeys.connectedApp.name] ??
                 <String, Object>{})
@@ -161,8 +159,8 @@ abstract class ExportController {
     final contents = {
       DevToolsExportKeys.devToolsSnapshot.name: true,
       DevToolsExportKeys.devToolsVersion.name: version,
-      DevToolsExportKeys.connectedApp.name:
-          connectedApp?.toJson() ?? serviceManager.connectedApp!.toJson(),
+      DevToolsExportKeys.connectedApp.name: connectedApp?.toJson() ??
+          serviceConnection.serviceManager.connectedApp!.toJson(),
       ...offlineScreenData,
     };
     final activeScreenId = contents[DevToolsExportKeys.activeScreenId.name];
@@ -183,31 +181,5 @@ abstract class ExportController {
   String encode(Map<String, dynamic> offlineScreenData) {
     final data = generateDataForExport(offlineScreenData: offlineScreenData);
     return jsonEncode(data);
-  }
-}
-
-class ImportToolbarAction extends ScaffoldAction {
-  ImportToolbarAction({super.key, Color? color})
-      : super(
-          icon: Icons.upload_rounded,
-          tooltip: 'Load data for viewing in DevTools.',
-          color: color,
-          onPressed: (context) => unawaited(_importFile(context)),
-        );
-
-  static Future<void> _importFile(BuildContext context) async {
-    ga.select(
-      gac.devToolsMain,
-      gac.importFile,
-    );
-    final DevToolsJsonFile? importedFile = await importFileFromPicker(
-      acceptedTypes: ['json'],
-    );
-
-    if (importedFile != null) {
-      // ignore: use_build_context_synchronously, by design
-      Provider.of<ImportController>(context, listen: false)
-          .importData(importedFile);
-    }
   }
 }

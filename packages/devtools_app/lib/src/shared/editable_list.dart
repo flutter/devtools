@@ -4,13 +4,13 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'common_widgets.dart';
-import 'primitives/utils.dart';
-import 'theme.dart';
-import 'utils.dart';
+import 'config_specific/copy_to_clipboard/copy_to_clipboard.dart';
 
 /// A widget that displays the contents of [entries].
 ///
@@ -25,8 +25,8 @@ class EditableList extends StatefulWidget {
     required this.gaRefreshSelection,
     this.isRefreshing,
     this.onRefreshTriggered,
-    Function(String)? onEntryAdded,
-    Function(String)? onEntryRemoved,
+    void Function(String)? onEntryAdded,
+    void Function(String)? onEntryRemoved,
   })  : onEntryAdded = onEntryAdded ?? ((entry) => entries.add(entry)),
         onEntryRemoved = onEntryRemoved ?? ((entry) => entries.remove(entry));
 
@@ -48,16 +48,16 @@ class EditableList extends StatefulWidget {
   /// Triggered when an entry is added, using the interface.
   ///
   /// When not overridden, the default behaviour adds the entry to [entries]
-  late final Function(String) onEntryAdded;
+  late final void Function(String) onEntryAdded;
 
   /// Triggered when an entry is removed, using the interface.
   ///
   /// When not overridden, the default behaviour removes the entry
   /// from [entries].
-  late final Function(String) onEntryRemoved;
+  late final void Function(String) onEntryRemoved;
 
   /// Triggered when the refresh is triggered, using the interface.
-  final Function()? onRefreshTriggered;
+  final void Function()? onRefreshTriggered;
 
   final String gaScreen;
 
@@ -105,7 +105,7 @@ class _EditableListState extends State<EditableList> {
               gaScreen: widget.gaScreen,
               gaRefreshSelection: widget.gaRefreshSelection,
             ),
-            const SizedBox(height: denseSpacing),
+            const SizedBox(height: defaultSpacing),
             Expanded(
               child: _EditableListContentView(
                 entries: widget.entries,
@@ -137,8 +137,8 @@ class EditableListActionBar extends StatelessWidget {
   final TextEditingController textFieldController;
   final ValueListenable<bool>? isRefreshing;
   final String textFieldLabel;
-  final Function(String) onEntryAdded;
-  final Function()? onRefresh;
+  final void Function(String) onEntryAdded;
+  final void Function()? onRefresh;
   final String gaScreen;
   final String gaRefreshSelection;
 
@@ -159,22 +159,15 @@ class EditableListActionBar extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: SizedBox(
-              height: defaultTextFieldHeight,
-              child: TextField(
-                focusNode: textFieldFocusNode,
-                controller: textFieldController,
-                decoration: InputDecoration(
-                  contentPadding: const EdgeInsets.all(denseSpacing),
-                  border: const OutlineInputBorder(),
-                  labelText: textFieldLabel,
-                ),
-                onSubmitted: (value) {
-                  _addNewItem();
-                },
-              ),
+            child: DevToolsClearableTextField(
+              controller: textFieldController,
+              labelText: textFieldLabel,
+              onSubmitted: (value) {
+                _addNewItem();
+              },
             ),
           ),
+          const SizedBox(width: densePadding),
           TextButton(
             onPressed: () {
               _addNewItem();
@@ -183,6 +176,7 @@ class EditableListActionBar extends StatelessWidget {
               'Add',
             ), // TODO:(https://github.com/flutter/devtools/issues/4381)
           ),
+          const SizedBox(width: densePadding),
           isRefreshing?.value ?? false
               ? SizedBox(
                   width: defaultTextFieldHeight,
@@ -212,7 +206,7 @@ class _EditableListContentView extends StatelessWidget {
   }) : super(key: key);
 
   final ListValueNotifier<String> entries;
-  final Function(String) onEntryRemoved;
+  final void Function(String) onEntryRemoved;
   final ScrollController _listContentScrollController = ScrollController();
 
   @override
@@ -243,33 +237,27 @@ class EditableListRow extends StatelessWidget {
   }) : super(key: key);
 
   final String entry;
-  final Function(String) onEntryRemoved;
+  final void Function(String) onEntryRemoved;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: densePadding,
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(entry),
-          ),
-          EditableListCopyDirectoryButton(
-            value: entry,
-          ),
-          const SizedBox(width: denseSpacing),
-          EditableListRemoveDirectoryButton(
-            onPressed: () {
-              onEntryRemoved(
-                entry,
-              );
-            },
-          ),
-          const SizedBox(width: denseRowSpacing),
-        ],
-      ),
+    return Row(
+      children: [
+        Expanded(
+          child: Text(entry),
+        ),
+        EditableListCopyDirectoryButton(
+          value: entry,
+        ),
+        const SizedBox(width: denseSpacing),
+        EditableListRemoveDirectoryButton(
+          onPressed: () {
+            onEntryRemoved(
+              entry,
+            );
+          },
+        ),
+      ],
     );
   }
 }
@@ -285,15 +273,12 @@ class EditableListCopyDirectoryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      key: key,
-      padding: EdgeInsets.zero,
+    return DevToolsButton.iconOnly(
+      icon: Icons.copy_outlined,
+      outlined: false,
       onPressed: () {
         unawaited(copyToClipboard(value, 'Copied to clipboard.'));
       },
-      iconSize: defaultIconSize,
-      splashRadius: defaultIconSize,
-      icon: const Icon(Icons.copy_outlined),
     );
   }
 }
@@ -306,13 +291,10 @@ class EditableListRemoveDirectoryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      key: key,
-      padding: EdgeInsets.zero,
+    return DevToolsButton.iconOnly(
+      icon: Icons.delete,
+      outlined: false,
       onPressed: onPressed,
-      iconSize: defaultIconSize,
-      splashRadius: defaultIconSize,
-      icon: const Icon(Icons.delete),
     );
   }
 }

@@ -4,16 +4,16 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../../service/service_extension_manager.dart';
 import '../../../../../service/service_extension_widgets.dart';
 import '../../../../../service/service_extensions.dart' as extensions;
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/globals.dart';
-import '../../../../../shared/primitives/auto_dispose.dart';
 import '../../../../../shared/primitives/utils.dart';
-import '../../../../../shared/theme.dart';
 import '../performance_controls.dart';
 import 'enhance_tracing_controller.dart';
 
@@ -150,13 +150,14 @@ class _TrackWidgetBuildsSettingState extends State<TrackWidgetBuildsSetting>
       final extension = _trackWidgetBuildsExtensions[type]!;
 
       unawaited(
-        serviceManager.serviceExtensionManager
+        serviceConnection.serviceManager.serviceExtensionManager
             .waitForServiceExtensionAvailable(extension.extension)
             .then((isServiceAvailable) {
           if (isServiceAvailable) {
             _trackingAvailable.value = true;
 
-            final state = serviceManager.serviceExtensionManager
+            final state = serviceConnection
+                .serviceManager.serviceExtensionManager
                 .getServiceExtensionState(extension.extension);
 
             _updateForServiceExtensionState(state.value, type);
@@ -173,7 +174,7 @@ class _TrackWidgetBuildsSettingState extends State<TrackWidgetBuildsSetting>
     ServiceExtensionState newState,
     TrackWidgetBuildsScope type,
   ) async {
-    final otherState = serviceManager.serviceExtensionManager
+    final otherState = serviceConnection.serviceManager.serviceExtensionManager
         .getServiceExtensionState(type.opposite.extensionForScope.extension)
         .value
         .enabled;
@@ -196,7 +197,8 @@ class _TrackWidgetBuildsSettingState extends State<TrackWidgetBuildsSetting>
       // If both the debug setting for tracking all widgets and tracking only
       // user-created widgets are true, default to tracking only user-created
       // widgets. Disable the service extension for tracking all widgets.
-      await serviceManager.serviceExtensionManager.setServiceExtensionState(
+      await serviceConnection.serviceManager.serviceExtensionManager
+          .setServiceExtensionState(
         extensions.profileWidgetBuilds.extension,
         enabled: false,
         value: extensions.profileWidgetBuilds.disabledValue,
@@ -283,11 +285,14 @@ class TrackWidgetBuildsCheckbox extends StatelessWidget {
           ),
         ),
         if (docsUrl != null)
-          MoreInfoLink(
-            url: docsUrl,
-            gaScreenName: extension.gaScreenName!,
-            gaSelectedItemDescription: extension.gaDocsItem!,
-            padding: const EdgeInsets.symmetric(vertical: denseSpacing),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
+            child: MoreInfoLink(
+              url: docsUrl,
+              gaScreenName: extension.gaScreenName!,
+              gaSelectedItemDescription: extension.gaDocsItem!,
+              padding: const EdgeInsets.symmetric(vertical: denseSpacing),
+            ),
           ),
       ],
     );
@@ -300,7 +305,8 @@ class TrackWidgetBuildsCheckbox extends StatelessWidget {
     if (enabled) {
       // Default to tracking only user-created widgets.
       final extension = extensions.profileUserWidgetBuilds;
-      await serviceManager.serviceExtensionManager.setServiceExtensionState(
+      await serviceConnection.serviceManager.serviceExtensionManager
+          .setServiceExtensionState(
         extension.extension,
         enabled: true,
         value: extension.enabledValue,
@@ -308,7 +314,8 @@ class TrackWidgetBuildsCheckbox extends StatelessWidget {
     } else {
       await Future.wait([
         for (final extension in trackingExtensions)
-          serviceManager.serviceExtensionManager.setServiceExtensionState(
+          serviceConnection.serviceManager.serviceExtensionManager
+              .setServiceExtensionState(
             extension.extension,
             enabled: false,
             value: extension.disabledValue,
@@ -372,12 +379,14 @@ class TrackWidgetBuildsScopeSelector extends StatelessWidget {
     final opposite = type.opposite.extensionForScope;
     await Future.wait(
       [
-        serviceManager.serviceExtensionManager.setServiceExtensionState(
+        serviceConnection.serviceManager.serviceExtensionManager
+            .setServiceExtensionState(
           opposite.extension,
           enabled: false,
           value: opposite.disabledValue,
         ),
-        serviceManager.serviceExtensionManager.setServiceExtensionState(
+        serviceConnection.serviceManager.serviceExtensionManager
+            .setServiceExtensionState(
           extension.extension,
           enabled: true,
           value: extension.enabledValue,

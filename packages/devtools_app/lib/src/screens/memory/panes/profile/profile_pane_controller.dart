@@ -4,12 +4,12 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/config_specific/import_export/import_export.dart';
 import '../../../../shared/globals.dart';
-import '../../../../shared/primitives/auto_dispose.dart';
 import '../../shared/heap/class_filter.dart';
 import 'model.dart';
 
@@ -35,7 +35,8 @@ class ProfilePaneController extends DisposableController
   ValueListenable<ClassFilter> get classFilter => _classFilter;
   final _classFilter = ValueNotifier(ClassFilter.empty());
 
-  late final _rootPackage = serviceManager.rootInfoNow().package;
+  late final _rootPackage =
+      serviceConnection.serviceManager.rootInfoNow().package;
 
   bool _initialized = false;
 
@@ -45,15 +46,18 @@ class ProfilePaneController extends DisposableController
     }
 
     autoDisposeStreamSubscription(
-      serviceManager.service!.onGCEvent.listen((event) {
+      serviceConnection.serviceManager.service!.onGCEvent.listen((event) {
         if (refreshOnGc.value) {
           unawaited(refresh());
         }
       }),
     );
-    addAutoDisposeListener(serviceManager.isolateManager.selectedIsolate, () {
-      unawaited(refresh());
-    });
+    addAutoDisposeListener(
+      serviceConnection.serviceManager.isolateManager.selectedIsolate,
+      () {
+        unawaited(refresh());
+      },
+    );
     unawaited(refresh());
     _initialized = true;
   }
@@ -84,11 +88,12 @@ class ProfilePaneController extends DisposableController
   /// Clear the current allocation profile and request an updated version from
   /// the VM service.
   Future<void> refresh() async {
-    final service = serviceManager.service;
+    final service = serviceConnection.serviceManager.service;
     if (service == null) return;
     _currentAllocationProfile.value = null;
 
-    final isolate = serviceManager.isolateManager.selectedIsolate.value;
+    final isolate =
+        serviceConnection.serviceManager.isolateManager.selectedIsolate.value;
     if (isolate == null) return;
 
     final allocationProfile = await service.getAllocationProfile(isolate.id!);

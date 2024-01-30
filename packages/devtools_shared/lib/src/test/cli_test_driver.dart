@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: avoid_print
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -142,7 +144,7 @@ class CliAppFixture extends AppFixture {
         await _waitForIsolate(serviceConnection, 'PauseStart');
     await serviceConnection.resume(isolate.id!);
 
-    Future<void> _onTeardown() async {
+    Future<void> onTeardown() async {
       await linesSubscription.cancel();
       await lineController.close();
     }
@@ -154,7 +156,7 @@ class CliAppFixture extends AppFixture {
       uri,
       serviceConnection,
       vm.isolates!,
-      _onTeardown,
+      onTeardown,
     );
   }
 
@@ -174,7 +176,7 @@ class CliAppFixture extends AppFixture {
               // for an isolate that hasn't started yet. We can just ignore these
               // as on the next trip around the Isolate will be returned.
               // https://github.com/dart-lang/sdk/issues/33747
-              .catchError((error) {
+              .catchError((Object error) {
             print('getIsolate(${ref.id}) failed, skipping\n$error');
             return Future<Isolate>.value(Isolate(id: skipId));
           }),

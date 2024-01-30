@@ -4,16 +4,14 @@
 
 // Do not delete these arguments. They are parsed by test runner.
 // test-argument:appPath="test/test_infra/fixtures/memory_app"
-// test-argument:experimentsOn=true
-
-// ignore_for_file: avoid_print
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/memory/panes/control/primary_controls.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/widgets/snapshot_list.dart';
 import 'package:devtools_app/src/screens/memory/shared/primitives/instance_context_menu.dart';
 import 'package:devtools_app/src/shared/console/widgets/console_pane.dart';
-import 'package:devtools_test/devtools_integration_test.dart';
+import 'package:devtools_test/helpers.dart';
+import 'package:devtools_test/integration_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -42,14 +40,22 @@ void main() {
     final evalTester = _EvalAndBrowseTester(tester);
     await evalTester.prepareMemoryUI();
 
+    logStatus('test basic evaluation');
     await _testBasicEval(evalTester);
+
+    logStatus('test variable assignment');
     await _testAssignment(evalTester);
 
+    logStatus('test dump one instance to console');
     await _profileOneInstance(evalTester);
+
+    logStatus('test dump all instances to console');
     await _profileAllInstances(evalTester);
 
+    logStatus('test take a snapshot');
     await evalTester.switchToSnapshotsAndTakeOne();
 
+    logStatus('test inbound references are listed on console instance');
     await _inboundReferencesAreListed(evalTester);
   });
 }
@@ -96,21 +102,22 @@ Future<void> _inboundReferencesAreListed(_EvalAndBrowseTester tester) async {
   await tester.tapAndPump(find.textContaining('one instance'));
   await tester.tapAndPump(find.text('Any'), duration: longPumpDuration);
 
-  Widget? next = await tester.tapAndPump(
+  Finder? next = await tester.tapAndPump(
     find.textContaining('MyApp, retained size '),
     next: find.text('references'),
   );
   next = await tester.tapAndPump(
-    find.byWidget(next!),
+    next!,
     next: find.textContaining('static ('),
   );
   next = await tester.tapAndPump(
-    find.byWidget(next!),
+    next!,
+    description: 'text containing "static ("',
     next: find.text('inbound'),
   );
   next = await tester.tapAndPump(
-    find.byWidget(next!),
-    next: find.text('Context'),
+    next!,
+    next: find.text('View'),
   );
 }
 
@@ -126,17 +133,7 @@ class _EvalAndBrowseTester {
     await tester.pump(safePumpDuration);
     await _pressEnter();
 
-    try {
-      expect(expectedResponse, findsOneWidget);
-    } catch (e) {
-      const goldenName = 'debug_golden.png';
-      // In case of unexpected response take golden for troubleshooting.
-      logStatus('Unexpected response. Taking $goldenName.\n$e');
-      await expectLater(
-        find.byType(ConsolePane),
-        matchesGoldenFile(goldenName),
-      );
-    }
+    expect(expectedResponse, findsOneWidget);
   }
 
   Future<void> _pressEnter() async {
@@ -154,7 +151,11 @@ class _EvalAndBrowseTester {
   /// visible on the screen for testing.
   Future<void> prepareMemoryUI() async {
     // Open memory screen.
-    await switchToScreen(tester, ScreenMetaData.memory);
+    await switchToScreen(
+      tester,
+      tabIcon: ScreenMetaData.memory.icon!,
+      screenId: ScreenMetaData.memory.id,
+    );
 
     // Close warning and chart to get screen space.
     await tapAndPump(
@@ -199,14 +200,16 @@ class _EvalAndBrowseTester {
   /// Taps and settles.
   ///
   /// If [next] is provided, will repeat the tap untill [next] returns results.
-  /// If [next] is not null returns [next].
-  Future<Widget?> tapAndPump(
+  /// Returns [next].
+  Future<Finder?> tapAndPump(
     Finder finder, {
     Duration? duration,
     Finder? next,
+    String? description,
   }) async {
     Future<void> action(int tryNumber) async {
-      logStatus('attempt #$tryNumber, tapping \n[$finder]\n');
+      logStatus('\nattempt #$tryNumber, tapping');
+      logStatus(description ?? finder.toString());
       tryNumber++;
       await tester.tap(finder);
       await tester.pump(duration);
@@ -221,7 +224,7 @@ class _EvalAndBrowseTester {
     for (var tryNumber = 1; tryNumber < 10; tryNumber++) {
       try {
         final items = tester.widgetList(next);
-        if (items.isNotEmpty) return items.first;
+        if (items.isNotEmpty) return next;
         await action(tryNumber);
       } on StateError {
         // tester.widgetList throws StateError if no widgets found.

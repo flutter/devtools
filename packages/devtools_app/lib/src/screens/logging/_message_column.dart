@@ -4,12 +4,12 @@
 
 import 'dart:convert';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/primitives/utils.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
-import '../../shared/theme.dart';
 import 'logging_controller.dart';
 
 @visibleForTesting
@@ -49,20 +49,19 @@ class MessageColumn extends ColumnData<LogData>
     BuildContext context,
     LogData data, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
-    final textStyle = Theme.of(context).fixedFontStyle;
     if (data.kind == 'flutter.frame') {
       const Color color = Color.fromARGB(0xff, 0x00, 0x91, 0xea);
       final Text text = Text(
         getDisplayValue(data),
         overflow: TextOverflow.ellipsis,
-        style: textStyle,
       );
 
       double frameLength = 0.0;
       try {
-        final int micros = jsonDecode(data.details!)['elapsed'];
+        final int micros = (jsonDecode(data.details!) as Map)['elapsed'];
         frameLength = micros * 3.0 / 1000.0;
       } catch (e) {
         // ignore
@@ -87,7 +86,7 @@ class MessageColumn extends ColumnData<LogData>
             // TODO(helin24): Recompute summary length considering ansi codes.
             //  The current summary is generally the first 200 chars of details.
             getDisplayValue(data),
-            textStyle,
+            Theme.of(context).regularTextStyle,
           ),
         ),
         overflow: TextOverflow.ellipsis,

@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:collection/collection.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
-import '../primitives/auto_dispose.dart';
 import '../primitives/utils.dart';
 import 'chart_trace.dart';
 
@@ -322,7 +322,7 @@ class ChartController extends DisposableController
     buildLabelTimestamps(refresh: true);
   }
 
-  void buildLabelTimestamps({refresh = false}) {
+  void buildLabelTimestamps({bool refresh = false}) {
     if (isLabelsShared || timestamps.isEmpty) return;
 
     if (refresh) {

@@ -10,7 +10,7 @@ import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 
 import '../../../devtools.dart' as devtools;
-import '../../shared/config_specific/server/server.dart' as server;
+import '../../shared/server/server.dart' as server;
 import '../../shared/side_panel.dart';
 
 final _log = Logger('release_notes');
@@ -95,6 +95,7 @@ class ReleaseNotesController extends SidePanelController {
           String releaseNotesMarkdown = await http.read(
             Uri.parse(_debugReleaseNotesUrl ?? _releaseNotesUrl(versionString)),
           );
+
           // This is a workaround so that the images in release notes will appear.
           // The {{site.url}} syntax is best practices for the flutter website
           // repo, where these release notes are hosted, so we are performing this

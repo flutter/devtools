@@ -22,7 +22,7 @@ class RollbackCommand extends Command {
 
   @override
   Future run() async {
-    final repo = DevToolsRepo.getInstance()!;
+    final repo = DevToolsRepo.getInstance();
     print('DevTools repo at ${repo.repoPath}.');
 
     final tempDir =
@@ -37,9 +37,12 @@ class RollbackCommand extends Command {
     final client = io.HttpClient();
     final version = argResults!['to-version'];
     print('downloading tarball to ${tarball.path}');
-    final tarballRequest = await client.getUrl(Uri.http(
+    final tarballRequest = await client.getUrl(
+      Uri.http(
         'storage.googleapis.com',
-        'pub-packages/packages/devtools-$version.tar.gz'));
+        'pub-packages/packages/devtools-$version.tar.gz',
+      ),
+    );
     final tarballResponse = await tarballRequest.close();
     await tarballResponse.pipe(tarball.openWrite());
     print('Tarball written; unzipping.');

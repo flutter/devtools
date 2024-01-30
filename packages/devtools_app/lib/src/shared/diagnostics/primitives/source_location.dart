@@ -9,7 +9,6 @@ import '../../primitives/utils.dart';
 class _JsonFields {
   static const String file = 'file';
   static const String line = 'line';
-  static const String name = 'name';
   static const String column = 'column';
 }
 
@@ -27,7 +26,7 @@ class InspectorSourceLocation {
   String? getFile() {
     final fileName = path;
     if (fileName == null) {
-      return parent != null ? parent!.getFile() : null;
+      return parent?.getFile();
     }
 
     return fileName;
@@ -35,29 +34,13 @@ class InspectorSourceLocation {
 
   int getLine() => JsonUtils.getIntMember(json, _JsonFields.line);
 
-  String? getName() => JsonUtils.getStringMember(json, _JsonFields.name);
-
   int getColumn() => JsonUtils.getIntMember(json, _JsonFields.column);
-
-  SourcePosition? getXSourcePosition() {
-    final file = getFile();
-    if (file == null) {
-      return null;
-    }
-    final int line = getLine();
-    final int column = getColumn();
-    if (line < 0 || column < 0) {
-      return null;
-    }
-    return SourcePosition(file: file, line: line - 1, column: column - 1);
-  }
 }
 
 class SourcePosition {
   const SourcePosition({
     required this.line,
     required this.column,
-    this.file,
     this.tokenPos,
   });
 
@@ -69,14 +52,12 @@ class SourcePosition {
     );
   }
 
-  final String? file;
   final int? line;
   final int? column;
   final int? tokenPos;
 
   @override
-  // ignore: avoid-dynamic, necessary here.
-  bool operator ==(other) {
+  bool operator ==(Object other) {
     return other is SourcePosition &&
         other.line == line &&
         other.column == column &&

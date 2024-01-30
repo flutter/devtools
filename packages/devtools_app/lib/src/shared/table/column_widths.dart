@@ -4,10 +4,10 @@
 
 import 'dart:math';
 
-import '../common_widgets.dart';
+import 'package:devtools_app_shared/ui.dart';
+
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
-import '../theme.dart';
 import 'table_controller.dart';
 import 'table_data.dart';
 
@@ -19,42 +19,25 @@ const columnGroupSpacing = 4.0;
 const columnGroupSpacingWithPadding = columnGroupSpacing + 2 * defaultSpacing;
 const columnSpacing = defaultSpacing;
 
+/// The minimum width that can be used for variable width columns.
+final defaultVariableWidthColumnSize = scaleByFontFactor(1200.0);
+
 extension FlatColumnWidthExtension<T> on FlatTableController<T> {
   /// Calculates [FlatTable] column widths when the columns should be sized as
-  /// either 1) the [fixedWidthPx] specified by the column, or 2) the size of
-  /// the column's widest content.
+  /// either 1) the [fixedWidthPx] specified by the column, or
+  /// 2) [defaultVariableWidthColumnSize], the minimum width that can be used
+  /// for variable width columns.
   ///
   /// If the sum of the column widths exceeds the available screen space, the
   /// table will scroll horizontally.
-  List<double> computeColumnWidthsSizeToContent(List<T> data) {
-    final widths = <double>[];
-    for (var column in columns) {
-      var width = column.fixedWidthPx;
-      if (width == null) {
-        // Note: this is assuming that we're always using a monospace font in
-        // our tree tables. This will almost certainly cause overflows if we
-        // try to use non-monospace fonts.
-        //
-        // `characterWidth` was determined through trial and error to roughly
-        // approximate the width of a single character.
-        final characterWidth = assumedMonospaceCharacterWidth;
-        double longestWidth = 0;
-        for (var node in data) {
-          final width = column.getDisplayValue(node).length * characterWidth;
-          if (width > longestWidth) {
-            longestWidth = width;
-          }
-        }
-        // Ensure we account for the [minWidthPx] value and that we always
-        // display the full column title.
-        width = max(
-          max(longestWidth, column.minWidthPx ?? 0),
-          column.title.length * characterWidth,
-        );
-      }
-      widths.add(width);
-    }
-    return widths;
+  List<double> computeColumnWidthsSizeToContent() {
+    return columns
+        .map(
+          (c) =>
+              c.fixedWidthPx ??
+              (c.minWidthPx ?? defaultVariableWidthColumnSize),
+        )
+        .toList();
   }
 
   /// Calculates [FlatTable] column widths such that they will take up the
@@ -150,38 +133,23 @@ extension FlatColumnWidthExtension<T> on FlatTableController<T> {
 
 extension TreeColumnWidthExtension<T extends TreeNode<T>>
     on TreeTableController<T> {
-  List<double> computeColumnWidths(List<T> flattenedList) {
-    final widths = <double>[];
-    for (var column in columns) {
-      double width;
-      if (column.fixedWidthPx != null) {
-        width = column.fixedWidthPx!;
-      } else {
-        // Note: this is assuming that we're always using a monospace font in
-        // our tree tables. This will almost certainly cause overflows if we
-        // try to use non-monospace fonts.
-        //
-        // `characterWidth` was determined through trial and error to roughly
-        // approximate the width of a single character.
-        final characterWidth = assumedMonospaceCharacterWidth;
-        double longestWidth = 0;
-        for (var node in flattenedList) {
-          final width = column.getNodeIndentPx(node) +
-              (column.getDisplayValue(node).length * characterWidth);
-          if (width > longestWidth) {
-            longestWidth = width;
-          }
-        }
-        // Add two characters to account for expansion caret and ensure we
-        // always display the full column title.
-        width = max(
-              max(longestWidth, column.minWidthPx ?? 0),
-              column.title.length * characterWidth,
-            ) +
-            characterWidth * 2;
-      }
-      widths.add(width);
-    }
-    return widths;
+  /// Calculates [TreeTable] column widths.
+  ///
+  /// Non-tree columns will be sized with their specified [fixedWidthPx]. The
+  /// tree column width will include space for the max indentation of the fully
+  /// expanded tree and [defaultVariableWidthColumnSize] for displaying the
+  /// tree column content.
+  ///
+  /// If the sum of the column widths exceeds the available screen space, the
+  /// table will scroll horizontally.
+  List<double> computeColumnWidths(int maxTableDepth) {
+    return columns
+        .map(
+          (c) =>
+              c.fixedWidthPx ??
+              maxTableDepth * TreeColumnData.treeToggleWidth +
+                  defaultVariableWidthColumnSize,
+        )
+        .toList();
   }
 }

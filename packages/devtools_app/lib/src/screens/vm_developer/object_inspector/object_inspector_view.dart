@@ -4,12 +4,12 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/common_widgets.dart';
-import '../../../shared/split.dart';
 import '../../../shared/ui/drop_down_button.dart';
 import '../../debugger/program_explorer.dart';
 import '../../debugger/program_explorer_model.dart';
@@ -25,7 +25,6 @@ import 'object_viewport.dart';
 class ObjectInspectorView extends VMDeveloperView {
   ObjectInspectorView()
       : super(
-          id,
           title: 'Objects',
           icon: Icons.data_object_outlined,
         );

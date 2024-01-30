@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: avoid_classes_with_only_static_members
+// ignore_for_file: avoid_classes_with_only_static_members, avoid_print
 
 import 'dart:async';
 import 'dart:convert';
@@ -10,6 +10,7 @@ import 'dart:io';
 
 import 'package:shelf/shelf.dart' as shelf;
 
+import '../deeplink/deeplink_manager.dart';
 import '../devtools_api.dart';
 import '../extensions/extension_enablement.dart';
 import '../extensions/extension_manager.dart';
@@ -31,10 +32,12 @@ class ServerApi {
   ///
   /// To override an API call, pass in a subclass of [ServerApi].
   static FutureOr<shelf.Response> handle(
-    shelf.Request request,
-    ExtensionsManager extensionsManager, [
+    shelf.Request request, {
+    required ExtensionsManager extensionsManager,
+    required DeeplinkManager deeplinkManager,
     ServerApi? api,
-  ]) {
+    String? Function()? dtdUri,
+  }) {
     api ??= ServerApi();
     final queryParams = request.requestedUri.queryParameters;
     // TODO(kenz): break this switch statement up so that it uses helper methods
@@ -221,6 +224,41 @@ class ServerApi {
           queryParams,
         );
 
+      // ----- deeplink api. -----
+
+      case DeeplinkApi.androidBuildVariants:
+        return _DeeplinkApiHandler.handleAndroidBuildVariants(
+          api,
+          queryParams,
+          deeplinkManager,
+        );
+
+      case DeeplinkApi.androidAppLinkSettings:
+        return _DeeplinkApiHandler.handleAndroidAppLinkSettings(
+          api,
+          queryParams,
+          deeplinkManager,
+        );
+
+      case DeeplinkApi.iosBuildOptions:
+        return _DeeplinkApiHandler.handleIosBuildOptions(
+          api,
+          queryParams,
+          deeplinkManager,
+        );
+
+      case DeeplinkApi.iosUniversalLinkSettings:
+        return _DeeplinkApiHandler.handleIosUniversalLinkSettings(
+          api,
+          queryParams,
+          deeplinkManager,
+        );
+      case DtdApi.apiGetDtdUri:
+        return api.setCompleted(
+          json.encode({
+            DtdApi.uriPropertyName: dtdUri?.call(),
+          }),
+        );
       default:
         return api.notImplemented();
     }
@@ -272,10 +310,10 @@ class ServerApi {
   shelf.Response logScreenView() => notImplemented();
 
   /// Return the value of the property.
-  shelf.Response getCompleted(String value) => shelf.Response.ok('$value');
+  shelf.Response getCompleted(String value) => shelf.Response.ok(value);
 
   /// Return the value of the property after the property value has been set.
-  shelf.Response setCompleted(String value) => shelf.Response.ok('$value');
+  shelf.Response setCompleted(String value) => shelf.Response.ok(value);
 
   /// A [shelf.Response] for API calls that encountered a request problem e.g.,
   /// setActiveSurvey not called.
@@ -284,6 +322,15 @@ class ServerApi {
   shelf.Response badRequest([String? logError]) {
     if (logError != null) print(logError);
     return shelf.Response(HttpStatus.badRequest);
+  }
+
+  /// A [shelf.Response] for API calls that encountered a server error e.g.,
+  /// setActiveSurvey not called.
+  ///
+  /// This is a 500 Internal Server Error response.
+  shelf.Response serverError([String? logError]) {
+    if (logError != null) print(logError);
+    return shelf.Response(HttpStatus.internalServerError);
   }
 
   /// A [shelf.Response] for API calls that have not been implemented in this
@@ -310,12 +357,21 @@ abstract class _ExtensionsApiHandler {
 
     final rootPath = queryParams[ExtensionsApi.extensionRootPathPropertyName];
 
-    await extensionsManager.serveAvailableExtensions(rootPath);
+    final result = <String, Object?>{};
+    try {
+      await extensionsManager.serveAvailableExtensions(rootPath);
+    } on ExtensionParsingException catch (e) {
+      // For [ExtensionParsingException]s, we should return a success response
+      // with a warning message.
+      result[ExtensionsApi.extensionsResultWarningPropertyName] = e.message;
+    } catch (e) {
+      // For all other exceptions, return an error response.
+      return api.serverError('$e');
+    }
+
     final extensions =
         extensionsManager.devtoolsExtensions.map((p) => p.toJson()).toList();
-    final result = {
-      ExtensionsApi.extensionsResultPropertyName: extensions,
-    };
+    result[ExtensionsApi.extensionsResultPropertyName] = extensions;
     return ServerApi._encodeResponse(result, api: api);
   }
 
@@ -353,5 +409,108 @@ abstract class _ExtensionsApiHandler {
       extensionName: extensionName,
     );
     return ServerApi._encodeResponse(activationState.name, api: api);
+  }
+}
+
+abstract class _DeeplinkApiHandler {
+  static Future<shelf.Response> handleAndroidBuildVariants(
+    ServerApi api,
+    Map<String, String> queryParams,
+    DeeplinkManager deeplinkManager,
+  ) async {
+    final missingRequiredParams = ServerApi._checkRequiredParameters(
+      [DeeplinkApi.deeplinkRootPathPropertyName],
+      queryParams: queryParams,
+      api: api,
+      requestName: DeeplinkApi.androidBuildVariants,
+    );
+    if (missingRequiredParams != null) return missingRequiredParams;
+
+    final rootPath = queryParams[DeeplinkApi.deeplinkRootPathPropertyName]!;
+    final result =
+        await deeplinkManager.getAndroidBuildVariants(rootPath: rootPath);
+    return _resultOutputOrError(api, result);
+  }
+
+  static Future<shelf.Response> handleAndroidAppLinkSettings(
+    ServerApi api,
+    Map<String, String> queryParams,
+    DeeplinkManager deeplinkManager,
+  ) async {
+    final missingRequiredParams = ServerApi._checkRequiredParameters(
+      [
+        DeeplinkApi.deeplinkRootPathPropertyName,
+        DeeplinkApi.androidBuildVariantPropertyName,
+      ],
+      queryParams: queryParams,
+      api: api,
+      requestName: DeeplinkApi.androidBuildVariants,
+    );
+    if (missingRequiredParams != null) return missingRequiredParams;
+
+    final rootPath = queryParams[DeeplinkApi.deeplinkRootPathPropertyName]!;
+    final buildVariant =
+        queryParams[DeeplinkApi.androidBuildVariantPropertyName]!;
+    final result = await deeplinkManager.getAndroidAppLinkSettings(
+      rootPath: rootPath,
+      buildVariant: buildVariant,
+    );
+    return _resultOutputOrError(api, result);
+  }
+
+  static Future<shelf.Response> handleIosBuildOptions(
+    ServerApi api,
+    Map<String, String> queryParams,
+    DeeplinkManager deeplinkManager,
+  ) async {
+    final missingRequiredParams = ServerApi._checkRequiredParameters(
+      [DeeplinkApi.deeplinkRootPathPropertyName],
+      queryParams: queryParams,
+      api: api,
+      requestName: DeeplinkApi.iosBuildOptions,
+    );
+    if (missingRequiredParams != null) return missingRequiredParams;
+
+    final rootPath = queryParams[DeeplinkApi.deeplinkRootPathPropertyName]!;
+    final result = await deeplinkManager.getIosBuildOptions(rootPath: rootPath);
+    return _resultOutputOrError(api, result);
+  }
+
+  static Future<shelf.Response> handleIosUniversalLinkSettings(
+    ServerApi api,
+    Map<String, String> queryParams,
+    DeeplinkManager deeplinkManager,
+  ) async {
+    final missingRequiredParams = ServerApi._checkRequiredParameters(
+      [
+        DeeplinkApi.deeplinkRootPathPropertyName,
+        DeeplinkApi.xcodeConfigurationPropertyName,
+        DeeplinkApi.xcodeTargetPropertyName,
+      ],
+      queryParams: queryParams,
+      api: api,
+      requestName: DeeplinkApi.iosUniversalLinkSettings,
+    );
+    if (missingRequiredParams != null) return missingRequiredParams;
+
+    final result = await deeplinkManager.getIosUniversalLinkSettings(
+      rootPath: queryParams[DeeplinkApi.deeplinkRootPathPropertyName]!,
+      configuration: queryParams[DeeplinkApi.xcodeConfigurationPropertyName]!,
+      target: queryParams[DeeplinkApi.xcodeTargetPropertyName]!,
+    );
+    return _resultOutputOrError(api, result);
+  }
+
+  static shelf.Response _resultOutputOrError(
+    ServerApi api,
+    Map<String, Object?> result,
+  ) {
+    final error = result[DeeplinkManager.kErrorField] as String?;
+    if (error != null) {
+      return api.serverError(error);
+    }
+    return api.getCompleted(
+      result[DeeplinkManager.kOutputJsonField]! as String,
+    );
   }
 }

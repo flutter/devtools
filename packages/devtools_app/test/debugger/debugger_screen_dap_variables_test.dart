@@ -6,13 +6,16 @@ import 'package:dap/dap.dart' as dap;
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/diagnostics/dap_object_node.dart';
 import 'package:devtools_app/src/shared/feature_flags.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 void main() {
-  late FakeServiceManager fakeServiceManager;
+  late FakeServiceConnectionManager fakeServiceConnection;
   late MockDebuggerController debuggerController;
   late MockScriptManager scriptManager;
   late MockVmServiceWrapper vmService;
@@ -22,16 +25,16 @@ void main() {
   setUp(() {
     FeatureFlags.dapDebugging = true;
     vmService = createMockVmServiceWrapperWithDefaults();
-    fakeServiceManager = FakeServiceManager(service: vmService);
+    fakeServiceConnection = FakeServiceConnectionManager(service: vmService);
     scriptManager = MockScriptManager();
 
     mockConnectedApp(
-      fakeServiceManager.connectedApp!,
+      fakeServiceConnection.serviceManager.connectedApp!,
       isProfileBuild: false,
       isFlutterApp: true,
       isWebApp: false,
     );
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
+    setGlobal(ServiceConnectionManager, fakeServiceConnection);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(ScriptManager, scriptManager);
     setGlobal(NotificationService, NotificationService());
@@ -41,14 +44,14 @@ void main() {
       ExternalDevToolsEnvironmentParameters(),
     );
     setGlobal(PreferencesController, PreferencesController());
-    fakeServiceManager.consoleService.ensureServiceInitialized();
-    when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
+    fakeServiceConnection.consoleService.ensureServiceInitialized();
+    when(fakeServiceConnection.errorBadgeManager.errorCountNotifier('debugger'))
         .thenReturn(ValueNotifier<int>(0));
     debuggerController = createMockDebuggerControllerWithDefaults();
   });
 
   tearDown(() {
-    fakeServiceManager.appState.setDapVariables(
+    fakeServiceConnection.appState.setDapVariables(
       [],
     );
   });
@@ -59,7 +62,7 @@ void main() {
   ) async {
     await tester.pumpWidget(
       wrapWithControllers(
-        const DebuggerScreenBody(),
+        const DebuggerWindows(),
         debugger: controller,
       ),
     );
@@ -78,7 +81,7 @@ void main() {
         ),
       );
 
-      fakeServiceManager.appState.setDapVariables(
+      fakeServiceConnection.appState.setDapVariables(
         [node],
       );
       await pumpDebuggerScreen(tester, debuggerController);
@@ -120,7 +123,7 @@ void main() {
       );
       await node.fetchChildren();
 
-      fakeServiceManager.appState.setDapVariables(
+      fakeServiceConnection.appState.setDapVariables(
         [node],
       );
       await pumpDebuggerScreen(tester, debuggerController);

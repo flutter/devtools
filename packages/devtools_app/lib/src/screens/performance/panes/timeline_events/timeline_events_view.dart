@@ -4,17 +4,16 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/charts/flame_chart.dart';
 import '../../../../shared/common_widgets.dart';
-import '../../../../shared/dialogs.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/http/http_service.dart' as http_service;
-import '../../../../shared/primitives/auto_dispose.dart';
 import '../../../../shared/primitives/utils.dart';
-import '../../../../shared/theme.dart';
 import '../../../../shared/ui/search.dart';
 import 'legacy/legacy_events_controller.dart';
 import 'legacy/timeline_flame_chart.dart';
@@ -101,9 +100,9 @@ class TimelineEventsTabControls extends StatelessWidget {
             if (!offlineController.offlineMode.value) ...[
               // TODO(kenz): add a switch to enable the CPU profiler once the
               // tracing format supports it (when we switch to protozero).
-              const SizedBox(width: denseSpacing),
+              const SizedBox(width: densePadding),
               TraceCategoriesButton(controller: controller),
-              const SizedBox(width: denseSpacing),
+              const SizedBox(width: densePadding),
               RefreshTimelineEventsButton(controller: controller),
             ],
           ],
@@ -123,7 +122,7 @@ class TraceCategoriesButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DevToolsButton.iconOnly(
+    return GaDevToolsButton.iconOnly(
       icon: Icons.checklist_outlined,
       outlined: false,
       tooltip: 'Trace categories',
@@ -264,8 +263,8 @@ class _TraceCategoriesDialogState extends State<TraceCategoriesDialog>
     required bool advanced,
   }) {
     final streams = advanced
-        ? serviceManager.timelineStreamManager.advancedStreams
-        : serviceManager.timelineStreamManager.basicStreams;
+        ? serviceConnection.timelineStreamManager.advancedStreams
+        : serviceConnection.timelineStreamManager.basicStreams;
     final settings = streams
         .map(
           (stream) => CheckboxSetting(
@@ -273,7 +272,7 @@ class _TraceCategoriesDialogState extends State<TraceCategoriesDialog>
             description: stream.description,
             notifier: stream.recorded as ValueNotifier<bool?>,
             onChanged: (newValue) => unawaited(
-              serviceManager.timelineStreamManager.updateTimelineStream(
+              serviceConnection.timelineStreamManager.updateTimelineStream(
                 stream,
                 newValue ?? false,
               ),

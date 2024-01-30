@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
-import '../../../../shared/primitives/auto_dispose.dart';
 import '../../../../shared/primitives/simple_items.dart';
-import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../framework/connected/memory_controller.dart';
 import '../../shared/primitives/simple_elements.dart';
@@ -54,7 +54,7 @@ class _ChartControlPaneState extends State<ChartControlPane>
   void _clearTimeline() {
     ga.select(gac.memory, gac.clear);
 
-    controller.memoryTimeline.reset();
+    controller.controllers.memoryTimeline.reset();
 
     // Remove history of all plotted data in all charts.
     widget.chartController.resetAll();
@@ -116,7 +116,7 @@ class _LegendButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
       valueListenable: chartController.legendVisibleNotifier,
-      builder: (_, legendVisible, __) => DevToolsButton(
+      builder: (_, legendVisible, __) => GaDevToolsButton(
         onPressed: chartController.toggleLegendVisibility,
         gaScreen: gac.memory,
         gaSelection: legendVisible
@@ -142,16 +142,20 @@ class _ChartHelpLink extends StatelessWidget {
       gaScreen: gac.memory,
       gaSelection: gac.topicDocumentationButton(_documentationTopic),
       dialogTitle: 'Memory Chart Help',
-      child: Column(
+      actions: [
+        MoreInfoLink(
+          url: DocLinks.chart.value,
+          gaScreenName: '',
+          gaSelectedItemDescription:
+              gac.topicDocumentationLink(_documentationTopic),
+        ),
+      ],
+      child: const Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          const Text('Memory chart shows trace\n'
-              'of application memory usage.'),
-          MoreInfoLink(
-            url: DocLinks.chart.value,
-            gaScreenName: '',
-            gaSelectedItemDescription:
-                gac.topicDocumentationLink(_documentationTopic),
+          Text(
+            'The memory chart shows live and historical\n'
+            ' memory usage statistics for your application.',
           ),
         ],
       ),

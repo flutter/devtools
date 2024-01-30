@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -51,7 +49,6 @@ typedef HeapDataCallback = AdaptedHeapData Function();
 class AdaptedHeapData {
   AdaptedHeapData(
     this.objects, {
-    required this.isolateId,
     this.rootIndex = _defaultRootIndex,
     DateTime? created,
   })  : assert(objects.isNotEmpty),
@@ -62,30 +59,17 @@ class AdaptedHeapData {
   static final _uiReleaser = UiReleaser();
 
   static Future<AdaptedHeapData> fromHeapSnapshot(
-    HeapSnapshotGraph graph, {
-    required String isolateId,
-  }) async {
+    HeapSnapshotGraph graph,
+  ) async {
     final objects = <AdaptedHeapObject>[];
-    for (final i in Iterable.generate(graph.objects.length)) {
+    for (final i in Iterable<int>.generate(graph.objects.length)) {
       if (_uiReleaser.step()) await _uiReleaser.releaseUi();
       final object =
           AdaptedHeapObject.fromHeapSnapshotObject(graph.objects[i], i);
       objects.add(object);
     }
 
-    return AdaptedHeapData(objects, isolateId: isolateId);
-  }
-
-  @visibleForTesting
-  static Future<AdaptedHeapData> fromFile(
-    String fileName, {
-    String isolateId = '',
-  }) async {
-    final file = File(fileName);
-    final bytes = await file.readAsBytes();
-    final data = bytes.buffer.asByteData();
-    final graph = HeapSnapshotGraph.fromChunks([data]);
-    return AdaptedHeapData.fromHeapSnapshot(graph, isolateId: isolateId);
+    return AdaptedHeapData(objects);
   }
 
   /// Default value for rootIndex is taken from the doc:
@@ -98,8 +82,6 @@ class AdaptedHeapData {
 
   final List<AdaptedHeapObject> objects;
 
-  final String isolateId;
-
   /// Total size of all objects in the heap.
   ///
   /// Should be set externally.
@@ -111,9 +93,9 @@ class AdaptedHeapData {
 
   String snapshotName = '';
 
-  /// Heap objects by identityHashCode.
-  late final _objectsByCode = <IdentityHashCode, int>{
-    for (var i in Iterable.generate(objects.length)) objects[i].code: i,
+  /// Heap objects by `identityHashCode`.
+  late final _objectsByCode = <IdentityHashCode, int?>{
+    for (var i in Iterable<int>.generate(objects.length)) objects[i].code: i,
   };
 
   int? objectIndexByIdentityHashCode(IdentityHashCode code) =>

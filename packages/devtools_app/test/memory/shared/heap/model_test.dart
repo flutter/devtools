@@ -73,6 +73,6 @@ AdaptedHeapObject _objectForClass(String lib, String theClass) =>
     AdaptedHeapObject(
       code: 1,
       outRefs: {},
-      heapClass: HeapClassName(className: theClass, library: lib),
+      heapClass: HeapClassName.fromPath(className: theClass, library: lib),
       shallowSize: 1,
     );

@@ -5,7 +5,7 @@
 import 'dart:io';
 
 import 'package:devtools_shared/devtools_extensions.dart';
-import 'package:devtools_shared/src/extensions/extension_enablement.dart';
+import 'package:devtools_shared/devtools_extensions_io.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -17,7 +17,7 @@ void main() {
     setUp(() {
       options = DevToolsOptions();
       tmpDir = Directory.current.createTempSync();
-      tmpUri = Uri.parse(tmpDir.path);
+      tmpUri = Uri.file(tmpDir.path);
     });
 
     tearDown(() {
@@ -25,7 +25,7 @@ void main() {
       tmpDir.deleteSync(recursive: true);
     });
 
-    File _optionsFileFromTmp() {
+    File optionsFileFromTmp() {
       final tmpFiles = tmpDir.listSync();
       expect(tmpFiles, isNotEmpty);
       final optionsFile =
@@ -40,10 +40,12 @@ void main() {
         rootUri: tmpUri,
         extensionName: 'foo',
       );
-      final file = _optionsFileFromTmp();
+      final file = optionsFileFromTmp();
       expect(
         file.readAsStringSync(),
         '''
+description: This file stores settings for Dart & Flutter DevTools.
+documentation: https://docs.flutter.dev/tools/devtools/extensions#configure-extension-enablement-states
 extensions:
 ''',
       );
@@ -55,10 +57,12 @@ extensions:
         extensionName: 'foo',
         enable: true,
       );
-      final file = _optionsFileFromTmp();
+      final file = optionsFileFromTmp();
       expect(
         file.readAsStringSync(),
         '''
+description: This file stores settings for Dart & Flutter DevTools.
+documentation: https://docs.flutter.dev/tools/devtools/extensions#configure-extension-enablement-states
 extensions:
   - foo: true''',
       );
@@ -75,10 +79,12 @@ extensions:
         extensionName: 'bar',
         enable: false,
       );
-      final file = _optionsFileFromTmp();
+      final file = optionsFileFromTmp();
       expect(
         file.readAsStringSync(),
         '''
+description: This file stores settings for Dart & Flutter DevTools.
+documentation: https://docs.flutter.dev/tools/devtools/extensions#configure-extension-enablement-states
 extensions:
   - foo: true
   - bar: false''',

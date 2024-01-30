@@ -4,11 +4,11 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/common_widgets.dart';
 import '../../shared/console/console.dart';
-import '../../shared/theme.dart';
 import 'logging_controller.dart';
 
 class LogDetails extends StatefulWidget {
@@ -52,23 +52,18 @@ class _LogDetailsState extends State<LogDetails>
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: _buildContent(context, widget.log),
-    );
-  }
-
-  Widget _buildContent(BuildContext context, LogData? log) {
+    final log = widget.log;
     // TODO(#1370): Handle showing flutter errors in a structured manner.
     return Stack(
       children: [
-        _buildSimpleLog(context, log),
+        _buildSimpleLog(log),
         if (log != null && log.needsComputing)
           const CenteredCircularProgressIndicator(),
       ],
     );
   }
 
-  Widget _buildSimpleLog(BuildContext context, LogData? log) {
+  Widget _buildSimpleLog(LogData? log) {
     final details = log?.details;
     if (details != _lastDetails) {
       if (scrollController.hasClients) {
@@ -78,19 +73,19 @@ class _LogDetailsState extends State<LogDetails>
       _lastDetails = details;
     }
 
-    final theme = Theme.of(context);
     return RoundedOutlinedBorder(
       clip: true,
       child: ConsoleFrame(
         title: _LogDetailsHeader(log: log),
         child: Padding(
           padding: const EdgeInsets.all(denseSpacing),
-          child: SingleChildScrollView(
-            controller: scrollController,
-            child: SelectableText(
-              log?.prettyPrinted() ?? '',
-              textAlign: TextAlign.left,
-              style: theme.fixedFontStyle,
+          child: Scrollbar(
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: SelectableText(
+                log?.prettyPrinted() ?? '',
+                textAlign: TextAlign.left,
+              ),
             ),
           ),
         ),
