@@ -1,11 +1,11 @@
 ## 0.0.14-wip
 * Add a global `dtdManager` for interacting with the Dart Tooling Daemon.
+* Bump `package:vm_service` dependency to ^14.0.0.
 
 ## 0.0.13
 * Bump `package:web` to `^0.4.1`.
 * Fix `README.md` instructions for adding a `.pubignore` file.
 * Make Simulated DevTools Environment Panel collapsible.
-* Bump `package:vm_service` dependency to ^14.0.0.
 
 ## 0.0.12
 * Fix a bug preventing Dart server apps from connecting to DevTools extensions.

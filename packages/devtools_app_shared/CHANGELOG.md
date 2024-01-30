@@ -1,6 +1,7 @@
 ## 0.0.10-wip
 * Add `DTDManager` class and export from `service.dart`.
 * Add `showDevToolsDialog` helper method.
+* Bump `package:vm_service` dependency to ^14.0.0.
 
 ## 0.0.9
 * Bump `package:web` to `^0.4.1`.
@@ -15,7 +16,6 @@ hitting a narrow screen threshold, specified by `minScreenWidthForTextBeforeScal
 * Change default styling of `regularTextStyle` to inherit from `TextTheme.bodySmall`.
 * Change default styling of `TextTheme.bodySmall`, `TextTheme.bodyMedium`,
 `TextTheme.titleSmall` in the base theme.
-* Bump `package:vm_service` dependency to ^14.0.0.
 
 ## 0.0.8
 * Add `ServiceManager.resolvedUriManager` for looking up package and file uris from
