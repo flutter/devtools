@@ -47,6 +47,16 @@ enum SortingOption {
   final String description;
 }
 
+enum PathError {
+  intentFilterActionView('The intent filter must have a <action android:name="android.intent.action.VIEW" />'),
+  intentFilterBrowsable('The intent filter must have a <category android:name="android.intent.category.BROWSABLE" />'),
+  intentFilterDefault('The intent filter must have a <category android:name="android.intent.category.DEFAULT" />'),
+  intentFilterAutoVerify('The intent filter must have android:autoVerify="true"'),
+  pathFormat('path must starts with “/” or “.*”');
+  const PathError(this.description);
+  final String description;
+}
+
 class DisplayOptions {
   DisplayOptions({
     this.domainErrorCount = 0,
@@ -136,6 +146,7 @@ class DeepLinksController extends DisposableController {
       linkDatasByPath[linkData.path] = LinkData(
         domain: linkData.domain,
         path: linkData.path,
+        intentFilterChecks: linkData.intentFilterChecks,
         os: [
           if (previousRecord?.os.contains(PlatformOS.android) ??
               false || linkData.os.contains(PlatformOS.android))
@@ -163,6 +174,7 @@ class DeepLinksController extends DisposableController {
       linkDatasByDomain[linkData.domain] = LinkData(
         domain: linkData.domain,
         path: linkData.path,
+        intentFilterChecks: linkData.intentFilterChecks,
         os: linkData.os,
         associatedPath: [
           ...previousRecord?.associatedPath ?? [],
@@ -208,18 +220,25 @@ class DeepLinksController extends DisposableController {
       return const <LinkData>[];
     }
     final domainPathToScheme = <_DomainAndPath, Set<String>>{};
+    final domainPathToIntentFilterChecks =
+        <_DomainAndPath, IntentFilterChecks>{};
     for (final appLink in appLinks) {
       final schemes = domainPathToScheme.putIfAbsent(
         (domain: appLink.host, path: appLink.path),
         () => <String>{},
       );
       schemes.add(appLink.scheme);
+      domainPathToIntentFilterChecks[(
+        domain: appLink.host,
+        path: appLink.path
+      )] = appLink.intentFilterChecks;
     }
     return domainPathToScheme.entries
         .map(
           (entry) => LinkData(
             domain: entry.key.domain,
             path: entry.key.path,
+            intentFilterChecks: domainPathToIntentFilterChecks[entry.key]!,
             os: [PlatformOS.android],
             scheme: entry.value.toList(),
           ),
@@ -288,6 +307,7 @@ class DeepLinksController extends DisposableController {
           domainErrors: domainErrors[linkdata.domain]!,
           path: linkdata.path,
           pathError: linkdata.pathError,
+          intentFilterChecks: linkdata.intentFilterChecks,
           os: linkdata.os,
           scheme: linkdata.scheme,
           associatedDomains: linkdata.associatedDomains,

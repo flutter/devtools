@@ -46,12 +46,12 @@ class ValidationDetailView extends StatelessWidget {
               ),
               if (viewType == TableViewType.domainView ||
                   viewType == TableViewType.singleUrlView)
-                _DomainCheckTable(
-                  controller: controller,
-                ),
+                _DomainCheckTable(controller: controller),
               if (viewType == TableViewType.pathView ||
                   viewType == TableViewType.singleUrlView)
-                _PathCheckTable(),
+                _PathCheckTable(
+                  controller: controller,
+                ),
               const SizedBox(height: extraLargeSpacing),
               Align(
                 alignment: Alignment.bottomRight,
@@ -324,8 +324,17 @@ class _DomainAssociatedLinksPanel extends StatelessWidget {
 }
 
 class _PathCheckTable extends StatelessWidget {
+  const _PathCheckTable({
+    required this.controller,
+  });
+
+  final DeepLinksController controller;
+
   @override
   Widget build(BuildContext context) {
+
+  
+    final linkData = controller.selectedLink.value!;
     final notAvailableCell = DataCell(
       Text(
         'Not available',
@@ -339,56 +348,47 @@ class _PathCheckTable extends StatelessWidget {
       children: [
         const SizedBox(height: intermediateSpacing),
         Text(
-          'Path check (coming soon)',
+          'Path check',
           style: Theme.of(context).textTheme.titleSmall,
         ),
-DataTable(
-            headingRowHeight: defaultHeaderHeight,
-            dataRowMinHeight: defaultRowHeight,
-            dataRowMaxHeight: defaultRowHeight,
-            headingRowColor: MaterialStateProperty.all(
-              Theme.of(context).colorScheme.deeplinkTableHeaderColor,
+        DataTable(
+          headingRowHeight: defaultHeaderHeight,
+          dataRowMinHeight: defaultRowHeight,
+          dataRowMaxHeight: defaultRowHeight,
+          headingRowColor: MaterialStateProperty.all(
+            Theme.of(context).colorScheme.deeplinkTableHeaderColor,
+          ),
+          dataRowColor: MaterialStateProperty.all(
+            Theme.of(context).colorScheme.alternatingBackgroundColor2,
+          ),
+          columns: const [
+            DataColumn(label: Text('OS')),
+            DataColumn(label: Text('Issue type')),
+            DataColumn(label: Text('Status')),
+          ],
+          rows: [
+            DataRow(
+              cells: [
+                const DataCell(Text('Android')),
+                const DataCell(Text('Intent filter')),
+                notAvailableCell,
+              ],
             ),
-            dataRowColor: MaterialStateProperty.all(
-              Theme.of(context).colorScheme.alternatingBackgroundColor2,
+
+            DataRow(
+              cells: [
+                const DataCell(Text('Android')),
+                const DataCell(Text('URL format')),
+                notAvailableCell,
+              ],
             ),
-            columns: const [
-              DataColumn(label: Text('OS')),
-              DataColumn(label: Text('Issue type')),
-              DataColumn(label: Text('Status')),
-            ],
-            rows: [
-              DataRow(
-                cells: [
-                  const DataCell(Text('Android')),
-                  const DataCell(Text('Intent filter')),
-                  notAvailableCell,
-                ],
-              ),
-              DataRow(
-                cells: [
-                  const DataCell(Text('iOS')),
-                  const DataCell(Text('Associated domain')),
-                  notAvailableCell,
-                ],
-              ),
-              DataRow(
-                cells: [
-                  const DataCell(Text('Android, iOS')),
-                  const DataCell(Text('URL format')),
-                  notAvailableCell,
-                ],
-              ),
-              DataRow(
-                cells: [
-                  const DataCell(Text('Android, iOS')),
-                  const DataCell(Text('Routing')),
-                  notAvailableCell,
-                ],
-              ),
-            ],
-          
+
+          ],
         ),
+        if(!linkData.intentFilterChecks.hasActionView)
+        Text('Has Action view'),
+
+
       ],
     );
   }

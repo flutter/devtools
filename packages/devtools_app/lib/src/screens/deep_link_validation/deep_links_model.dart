@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_shared/devtools_deeplink.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/primitives/utils.dart';
@@ -39,6 +40,7 @@ class LinkData with SearchableDataMixin {
     required this.domain,
     required this.path,
     required this.os,
+    required this.intentFilterChecks,
     this.scheme = const <String>['http://', 'https://'],
     this.domainErrors = const <DomainError>[],
     this.pathError = false,
@@ -55,6 +57,8 @@ class LinkData with SearchableDataMixin {
 
   final List<String> associatedPath;
   final List<String> associatedDomains;
+  IntentFilterChecks intentFilterChecks;
+
 
   @override
   bool matchesSearchToken(RegExp regExpSearch) {
