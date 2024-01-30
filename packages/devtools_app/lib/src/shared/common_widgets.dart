@@ -295,34 +295,17 @@ class SettingsOutlinedButton extends GaDevToolsButton {
   }) : super(outlined: true, icon: Icons.settings_outlined);
 }
 
-class HelpButton extends StatelessWidget {
-  const HelpButton({
+class HelpButton extends GaDevToolsButton {
+  HelpButton({
     super.key,
-    required this.gaScreen,
-    required this.gaSelection,
-    required this.onPressed,
-    this.outlined = true,
-  });
-
-  final VoidCallback onPressed;
-
-  final String gaScreen;
-
-  final String gaSelection;
-
-  final bool outlined;
-
-  @override
-  Widget build(BuildContext context) {
-    return GaDevToolsButton(
-      icon: Icons.help_outline,
-      onPressed: onPressed,
-      tooltip: 'Help',
-      gaScreen: gaScreen,
-      gaSelection: gaSelection,
-      outlined: outlined,
-    );
-  }
+    required super.gaScreen,
+    required super.gaSelection,
+    required super.onPressed,
+    super.outlined = true,
+  }) : super(
+          icon: Icons.help_outline,
+          tooltip: 'Help',
+        );
 }
 
 class ExpandAllButton extends StatelessWidget {
@@ -2052,22 +2035,11 @@ class HelpButtonWithDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return HelpButton(
       onPressed: () {
-        ga.select(gaScreen, gaSelection);
-        unawaited(
-          showDialog(
-            context: context,
-            builder: (context) => DevToolsDialog(
-              title: DialogTitleText(dialogTitle),
-              includeDivider: false,
-              content: child,
-              actionsAlignment:
-                  actions.isNotEmpty ? MainAxisAlignment.spaceBetween : null,
-              actions: [
-                ...actions,
-                const DialogCloseButton(),
-              ],
-            ),
-          ),
+        showDevToolsDialog(
+          context: context,
+          title: dialogTitle,
+          content: child,
+          actions: actions,
         );
       },
       gaScreen: gaScreen,

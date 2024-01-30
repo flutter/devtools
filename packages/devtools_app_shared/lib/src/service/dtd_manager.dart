@@ -6,9 +6,6 @@ import 'package:dtd/dtd.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 
-import '../framework/app_error_handling.dart';
-import '../shared/globals.dart';
-
 final _log = Logger('dtd_manager');
 
 /// Manages a connection to the Dart Tooling Daemon.
@@ -17,26 +14,29 @@ class DTDManager {
   final ValueNotifier<DTDConnection?> _connection =
       ValueNotifier<DTDConnection?>(null);
 
+  /// Whether the [DTDManager] is connected to a running instance of the DTD.
+  bool get hasConnection => connection.value != null;
+
+  /// The URI of the current DTD connection.
+  Uri? get uri => _uri;
+  Uri? _uri;
+
   /// Sets the Dart Tooling Daemon connection to point to [uri].
   ///
   /// Before connecting to [uri], if a current connection exists, then
   /// [disconnect] is called to close it.
-  Future<void> connect(Uri uri) async {
+  Future<void> connect(
+    Uri uri, {
+    void Function(Object, StackTrace?)? onError,
+  }) async {
     await disconnect();
 
     try {
       _connection.value = await DartToolingDaemon.connect(uri);
+      _uri = uri;
       _log.info('Successfully connected to DTD at: $uri');
     } catch (e, st) {
-      notificationService.pushError(
-        'Failed to connect to the Dart Tooling Daemon',
-        isReportable: false,
-      );
-      reportError(
-        e,
-        errorType: 'Dart Tooling Daemon connection failed.',
-        stack: st,
-      );
+      onError?.call(e, st);
     }
   }
 
@@ -47,5 +47,6 @@ class DTDManager {
     }
 
     _connection.value = null;
+    _uri = null;
   }
 }

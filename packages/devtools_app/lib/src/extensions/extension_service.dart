@@ -11,18 +11,18 @@ import '../shared/server/server.dart' as server;
 
 class ExtensionService extends DisposableController
     with AutoDisposeControllerMixin {
-  ExtensionService({this.fixedAppRootPath});
+  ExtensionService({this.fixedAppRoot});
 
-  /// The fixed (unchanging) root path for the application this
+  /// The fixed (unchanging) root file:// URI for the application this
   /// [ExtensionService] will manage DevTools extensions for.
   ///
-  /// When null, the root path will instead be calculated from the
-  /// [serviceManager]'s currently connected app. See [_initRootPath].
-  final String? fixedAppRootPath;
+  /// When null, the root will be calculated from the [serviceManager]'s
+  /// currently connected app. See [_initAppRoot].
+  final Uri? fixedAppRoot;
 
-  /// The root path for the Dart / Flutter application this [ExtensionService]
-  /// will manage DevTools extensions for.
-  String? _rootPath;
+  /// The root file:// URI for the Dart / Flutter application this
+  /// [ExtensionService] will manage DevTools extensions for.
+  Uri? _appRoot;
 
   /// All the DevTools extensions that are available for the connected
   /// application, regardless of whether they have been enabled or disabled
@@ -58,20 +58,20 @@ class ExtensionService extends DisposableController
       <String, ValueNotifier<ExtensionEnabledState>>{};
 
   Future<void> initialize() async {
-    await _initRootPath();
+    await _initAppRoot();
     await _maybeRefreshExtensions();
 
     cancelListeners();
 
     // We only need to add VM service manager related listeners when we are
     // interacting with the currently connected app (i.e. when
-    // [fixedAppRootPath] is null).
-    if (fixedAppRootPath == null) {
+    // [fixedAppRootUri] is null).
+    if (fixedAppRoot == null) {
       addAutoDisposeListener(
         serviceConnection.serviceManager.connectedState,
         () async {
           if (serviceConnection.serviceManager.connectedState.value.connected) {
-            await _initRootPath();
+            await _initAppRoot();
             await _maybeRefreshExtensions();
           } else {
             _reset();
@@ -87,7 +87,7 @@ class ExtensionService extends DisposableController
           if (serviceConnection
                   .serviceManager.isolateManager.mainIsolate.value !=
               null) {
-            await _initRootPath();
+            await _initAppRoot();
             await _maybeRefreshExtensions();
           } else {
             _reset();
@@ -108,23 +108,23 @@ class ExtensionService extends DisposableController
     // .dart_tool/package_config.json file for changes.
   }
 
-  Future<void> _initRootPath() async {
-    _rootPath = fixedAppRootPath ?? await _connectedAppRootPath();
+  Future<void> _initAppRoot() async {
+    _appRoot = fixedAppRoot ?? await _connectedAppRoot();
   }
 
   Future<void> _maybeRefreshExtensions() async {
-    if (_rootPath == null) return;
+    if (_appRoot == null) return;
 
     _refreshInProgress.value = true;
     _availableExtensions.value =
-        await server.refreshAvailableExtensions(_rootPath!)
+        await server.refreshAvailableExtensions(_appRoot!)
           ..sort();
     await _refreshExtensionEnabledStates();
     _refreshInProgress.value = false;
   }
 
   Future<void> _refreshExtensionEnabledStates() async {
-    if (_rootPath == null) return;
+    if (_appRoot == null) return;
 
     final onlyIncludeEnabled =
         preferences.devToolsExtensions.showOnlyEnabledExtensions.value;
@@ -132,7 +132,7 @@ class ExtensionService extends DisposableController
     final visible = <DevToolsExtensionConfig>[];
     for (final extension in _availableExtensions.value) {
       final stateFromOptionsFile = await server.extensionEnabledState(
-        rootPath: _rootPath!,
+        appRoot: _appRoot!,
         extensionName: extension.name,
       );
       final stateNotifier = _extensionEnabledStates.putIfAbsent(
@@ -160,10 +160,10 @@ class ExtensionService extends DisposableController
     DevToolsExtensionConfig extension, {
     required bool enable,
   }) async {
-    if (_rootPath == null) return;
+    if (_appRoot == null) return;
 
     await server.extensionEnabledState(
-      rootPath: _rootPath!,
+      appRoot: _appRoot!,
       extensionName: extension.name,
       enable: enable,
     );
@@ -171,7 +171,7 @@ class ExtensionService extends DisposableController
   }
 
   void _reset() {
-    _rootPath = null;
+    _appRoot = null;
     _availableExtensions.value = [];
     _visibleExtensions.value = [];
     _extensionEnabledStates.clear();
@@ -181,9 +181,9 @@ class ExtensionService extends DisposableController
 
 // TODO(kenz): consider caching this for the duration of the VM service
 // connection.
-Future<String?> _connectedAppRootPath() async {
-  var fileUri = await serviceConnection.rootLibraryForMainIsolate();
-  if (fileUri == null) return null;
+Future<Uri?> _connectedAppRoot() async {
+  var fileUriString = await serviceConnection.rootLibraryForMainIsolate();
+  if (fileUriString == null) return null;
 
   // TODO(kenz): for robustness, consider sending the root library uri to the
   // server and having the server look for the package folder that contains the
@@ -191,10 +191,10 @@ Future<String?> _connectedAppRootPath() async {
 
   final directoryRegExp =
       RegExp(r'\/(lib|integration_test|test|bin)\/[^\/.]*.dart');
-  final directoryIndex = fileUri.indexOf(directoryRegExp);
+  final directoryIndex = fileUriString.indexOf(directoryRegExp);
   if (directoryIndex != -1) {
-    fileUri = fileUri.substring(0, directoryIndex);
+    fileUriString = fileUriString.substring(0, directoryIndex);
   }
 
-  return fileUri;
+  return Uri.parse(fileUriString);
 }

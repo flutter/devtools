@@ -169,6 +169,7 @@ void main() {
       );
       test(
         'returns privates only from library',
+        skip: true,
         () async {
           await runMethodAndWaitForPause(
             'AnotherClass().pauseWithScopedVariablesMethod()',

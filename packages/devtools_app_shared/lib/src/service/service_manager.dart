@@ -145,6 +145,7 @@ class ServiceManager<T extends VmService> {
     String name, {
     String? isolateId,
     Map<String, dynamic>? args,
+    // ignore: avoid-redundant-async, for some reasons tests fail without `async
   }) async {
     final registeredMethod = _registeredMethodsForService[name];
     if (registeredMethod == null) {
