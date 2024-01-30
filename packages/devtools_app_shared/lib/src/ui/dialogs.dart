@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 
@@ -264,4 +266,28 @@ final class DialogTextButton extends StatelessWidget {
       child: child,
     );
   }
+}
+
+void showDevToolsDialog({
+  required BuildContext context,
+  required String title,
+  required Widget content,
+  List<Widget> actions = const <Widget>[],
+}) {
+  unawaited(
+    showDialog(
+      context: context,
+      builder: (context) => DevToolsDialog(
+        title: DialogTitleText(title),
+        includeDivider: false,
+        content: content,
+        actionsAlignment:
+            actions.isNotEmpty ? MainAxisAlignment.spaceBetween : null,
+        actions: [
+          ...actions,
+          const DialogCloseButton(),
+        ],
+      ),
+    ),
+  );
 }
