@@ -1,3 +1,6 @@
+## 0.0.14-wip
+* Add a global `dtdManager` for interacting with the Dart Tooling Daemon.
+
 ## 0.0.13
 * Bump `package:web` to `^0.4.1`.
 * Fix `README.md` instructions for adding a `.pubignore` file.
