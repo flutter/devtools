@@ -27,7 +27,7 @@ class DTDConnectionDisplay extends StatelessWidget {
     return _UriConnectionDisplay(
       simController: simController,
       connected: connected,
-      connectedLabel: 'DTD connection: ',
+      connectedLabel: 'Dart Tooling Daemon connection: ',
       disconnectedLabel: 'Dart Tooling Daemon Connection',
       disconnectedHint: '(e.g., ws://127.0.0.1:57624)',
       // TODO(kenz): this needs handling for bad input.
