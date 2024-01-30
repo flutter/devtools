@@ -8,12 +8,14 @@ part of 'server.dart';
 /// serve their assets on the server, and return the list of available
 /// extensions here.
 Future<List<DevToolsExtensionConfig>> refreshAvailableExtensions(
-  String rootPath,
+  Uri appRoot,
 ) async {
   if (isDevToolsServerAvailable) {
     final uri = Uri(
       path: ExtensionsApi.apiServeAvailableExtensions,
-      queryParameters: {ExtensionsApi.extensionRootPathPropertyName: rootPath},
+      queryParameters: {
+        ExtensionsApi.extensionRootPathPropertyName: appRoot.toString(),
+      },
     );
     final resp = await request(uri.toString());
     if (resp?.statusOk ?? false) {
@@ -21,7 +23,7 @@ Future<List<DevToolsExtensionConfig>> refreshAvailableExtensions(
       final extensionsAsJson =
           (parsedResult[ExtensionsApi.extensionsResultPropertyName]!
                   as List<Object?>)
-              .whereNotNull()
+              .nonNulls
               .cast<Map<String, Object?>>();
 
       final warningMessage =
@@ -38,7 +40,7 @@ Future<List<DevToolsExtensionConfig>> refreshAvailableExtensions(
       return [];
     }
   } else if (debugDevToolsExtensions) {
-    return debugHandleRefreshAvailableExtensions(rootPath);
+    return debugHandleRefreshAvailableExtensions(appRoot);
   }
   return [];
 }
@@ -51,7 +53,7 @@ Future<List<DevToolsExtensionConfig>> refreshAvailableExtensions(
 /// to the value set forth by [enable] and then return the value that is saved
 /// to disk.
 Future<ExtensionEnabledState> extensionEnabledState({
-  required String rootPath,
+  required Uri appRoot,
   required String extensionName,
   bool? enable,
 }) async {
@@ -59,7 +61,7 @@ Future<ExtensionEnabledState> extensionEnabledState({
     final uri = Uri(
       path: ExtensionsApi.apiExtensionEnabledState,
       queryParameters: {
-        ExtensionsApi.extensionRootPathPropertyName: rootPath,
+        ExtensionsApi.extensionRootPathPropertyName: appRoot.toString(),
         ExtensionsApi.extensionNamePropertyName: extensionName,
         if (enable != null)
           ExtensionsApi.enabledStatePropertyName: enable.toString(),
@@ -74,7 +76,7 @@ Future<ExtensionEnabledState> extensionEnabledState({
     }
   } else if (debugDevToolsExtensions) {
     return debugHandleExtensionEnabledState(
-      rootPath: rootPath,
+      appRoot: appRoot,
       extensionName: extensionName,
       enable: enable,
     );

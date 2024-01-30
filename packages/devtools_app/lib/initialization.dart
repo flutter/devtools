@@ -111,7 +111,20 @@ Future<void> _initDTDConnection() async {
     final dtdUri = await server.getDtdUri();
 
     if (dtdUri != null) {
-      await dtdManager.connect(dtdUri);
+      await dtdManager.connect(
+        dtdUri,
+        onError: (e, st) {
+          notificationService.pushError(
+            'Failed to connect to the Dart Tooling Daemon',
+            isReportable: false,
+          );
+          reportError(
+            e,
+            errorType: 'Dart Tooling Daemon connection failed.',
+            stack: st,
+          );
+        },
+      );
     } else {
       _log.info('No DTD uri provided from the server during initialization.');
     }

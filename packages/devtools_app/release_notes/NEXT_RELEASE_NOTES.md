@@ -68,6 +68,10 @@ available. [#6709](https://github.com/flutter/devtools/pull/6709)
 * Added a description and link to documentation to the `devtools_options.yaml` file
 that is created in a user's project. - [#7052](https://github.com/flutter/devtools/pull/7052)
 * Updated the Simulated DevTools Environment Panel to be collapsible. - [#7062](https://github.com/flutter/devtools/pull/7062)
+* Integrated DevTools extensions with the new Dart Tooling Daemon. This will allow
+DevTools extensions to access public methods registered by other DTD clients (e.g. an 
+IDE), as well as access a minimal file system API for interacting with the development
+project. - [#7108](https://github.com/flutter/devtools/pull/7108)
 
 ## Full commit history
 

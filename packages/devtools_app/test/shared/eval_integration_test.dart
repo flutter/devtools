@@ -49,7 +49,7 @@ void main() {
 
     group('asyncEval', () {
       test(
-        'supports expresions that do not start with the await keyword',
+        'supports expressions that do not start with the await keyword',
         () async {
           await env.setupEnvironment();
 
