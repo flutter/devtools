@@ -71,6 +71,10 @@ that is created in a user's project. - [#7052](https://github.com/flutter/devtoo
 DevTools extensions to access public methods registered by other DTD clients (e.g. an 
 IDE), as well as access a minimal file system API for interacting with the development
 project. - [#7108](https://github.com/flutter/devtools/pull/7108)
+* Added support for connecting to the Dart Tooling Daemon from the 
+simulated DevTools environment. - [#7133](https://github.com/flutter/devtools/pull/7133)
+* Added help buttons to the VM Service and DTD connection text fields in the
+simulated DevTools environment. - [#7133](https://github.com/flutter/devtools/pull/7133)
 
 ## Full commit history
 
