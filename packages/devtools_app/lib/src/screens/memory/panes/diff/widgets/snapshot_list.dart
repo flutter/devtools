@@ -82,11 +82,6 @@ class _ListControlPane extends StatelessWidget {
         ),
         const SizedBox(width: densePadding),
         ToolbarAction(
-          icon: Icons.file_upload,
-          tooltip: 'Import snapshot(s) from disk',
-          onPressed: () => unawaited(controller.importSnapshots()),
-        ),
-        ToolbarAction(
           icon: Icons.block,
           size: defaultIconSize,
           tooltip: 'Clear all snapshots',
@@ -99,6 +94,12 @@ class _ListControlPane extends StatelessWidget {
                   controller.clearSnapshots();
                 }
               : null,
+        ),
+        const Spacer(),
+        ToolbarAction(
+          icon: Icons.file_upload,
+          tooltip: 'Import snapshot(s) from disk',
+          onPressed: () => unawaited(controller.importSnapshots()),
         ),
       ],
     );
