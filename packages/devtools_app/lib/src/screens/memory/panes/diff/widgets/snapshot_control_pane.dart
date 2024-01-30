@@ -22,44 +22,39 @@ class SnapshotControlPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: controller.isAddingSnapshot,
-      builder: (_, isProcessing, __) {
-        final current = controller.core.selectedItem as SnapshotInstanceItem;
-        final heapIsReady = !isProcessing && current.heap != null;
-        if (heapIsReady) {
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    final current = controller.core.selectedItem as SnapshotInstanceItem;
+    final heapIsReady = current.heap != null;
+    if (heapIsReady) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
             children: [
-              Row(
-                children: [
-                  _DiffDropdown(
-                    current: current,
-                    controller: controller,
-                  ),
-                  const SizedBox(width: defaultSpacing),
-                  DownloadButton(
-                    tooltip: 'Download data in CSV format',
-                    label: 'CSV',
-                    minScreenWidthForTextBeforeScaling:
-                        memoryControlsMinVerboseWidth,
-                    gaScreen: gac.memory,
-                    gaSelection: gac.MemoryEvent.diffSnapshotDownloadCsv,
-                    onPressed: controller.downloadCurrentItemToCsv,
-                  ),
-                ],
+              _DiffDropdown(
+                current: current,
+                controller: controller,
               ),
-              Expanded(
-                child: _SnapshotSizeView(
-                  footprint: current.heap!.footprint,
-                ),
+              const SizedBox(width: defaultSpacing),
+              DownloadButton(
+                tooltip: 'Download data in CSV format',
+                label: 'CSV',
+                minScreenWidthForTextBeforeScaling:
+                    memoryControlsMinVerboseWidth,
+                gaScreen: gac.memory,
+                gaSelection: gac.MemoryEvent.diffSnapshotDownloadCsv,
+                onPressed: controller.downloadCurrentItemToCsv,
               ),
             ],
-          );
-        }
-        return const SizedBox.shrink();
-      },
-    );
+          ),
+          Expanded(
+            child: _SnapshotSizeView(
+              footprint: current.heap!.footprint,
+            ),
+          ),
+        ],
+      );
+    }
+    return const SizedBox.shrink();
   }
 }
 

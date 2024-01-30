@@ -10,6 +10,7 @@ import '../../../../../shared/primitives/utils.dart';
 import '../../../shared/heap/heap.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/heap_diff.dart';
+import '../controller/item_controller.dart';
 import 'class_details/class_details.dart';
 import 'classes_table_diff.dart';
 import 'classes_table_single.dart';
@@ -35,7 +36,8 @@ class SnapshotView extends StatelessWidget {
 
         final classes = controller.derived.heapClasses.value;
         if (classes == null) {
-          return controller.isAddingSnapshot.value
+          final current = controller.core.selectedItem as SnapshotInstanceItem;
+          return current.isProcessing.value
               ? const SizedBox.shrink()
               : const Center(child: Text('Could not take snapshot.'));
         }

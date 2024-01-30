@@ -72,45 +72,35 @@ class _ListControlPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: controller.isAddingSnapshot,
-      builder: (_, isProcessing, __) {
-        final clearAllEnabled = !isProcessing && controller.hasSnapshots;
-        return Row(
-          children: [
-            ToolbarAction(
-              icon: iconToTakeSnapshot,
-              size: defaultIconSize,
-              tooltip: 'Take heap snapshot for the selected isolate',
-              onPressed: controller.isAddingSnapshot.value
-                  ? null
-                  : () => unawaited(_takeSnapshot(context)),
-            ),
-            const SizedBox(width: densePadding),
-            ToolbarAction(
-              icon: Icons.file_upload,
-              tooltip: 'Import snapshots.',
-              onPressed: controller.isAddingSnapshot.value
-                  ? null
-                  : () => unawaited(controller.importSnapshots()),
-            ),
-            ToolbarAction(
-              icon: Icons.block,
-              size: defaultIconSize,
-              tooltip: 'Clear all snapshots',
-              onPressed: clearAllEnabled
-                  ? () {
-                      ga.select(
-                        gac.memory,
-                        gac.MemoryEvent.diffClearSnapshots,
-                      );
-                      controller.clearSnapshots();
-                    }
-                  : null,
-            ),
-          ],
-        );
-      },
+    return Row(
+      children: [
+        ToolbarAction(
+          icon: iconToTakeSnapshot,
+          size: defaultIconSize,
+          tooltip: 'Take heap snapshot for the selected isolate',
+          onPressed: () => unawaited(_takeSnapshot(context)),
+        ),
+        const SizedBox(width: densePadding),
+        ToolbarAction(
+          icon: Icons.file_upload,
+          tooltip: 'Import snapshot(s) from disk',
+          onPressed: () => unawaited(controller.importSnapshots()),
+        ),
+        ToolbarAction(
+          icon: Icons.block,
+          size: defaultIconSize,
+          tooltip: 'Clear all snapshots',
+          onPressed: controller.hasSnapshots
+              ? () {
+                  ga.select(
+                    gac.memory,
+                    gac.MemoryEvent.diffClearSnapshots,
+                  );
+                  controller.clearSnapshots();
+                }
+              : null,
+        ),
+      ],
     );
   }
 }
