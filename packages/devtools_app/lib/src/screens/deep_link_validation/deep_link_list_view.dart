@@ -313,6 +313,7 @@ class _AllDeepLinkDataTable extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     const gaPrefix = 'deepLinkTab';
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         OutlineDecoration(
           showRight: false,
