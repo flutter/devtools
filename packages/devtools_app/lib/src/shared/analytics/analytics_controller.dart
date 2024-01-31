@@ -24,7 +24,8 @@ class AnalyticsController {
     this.onSetupAnalytics,
     AsyncAnalyticsCallback? confirmConsentMessageShown,
   })  : analyticsEnabled = ValueNotifier<bool>(enabled),
-        _shouldPrompt = ValueNotifier<bool>(firstRun),
+        _shouldPrompt =
+            ValueNotifier<bool>(firstRun && consentMessage.isNotEmpty),
         _confirmConsentMessageShown = confirmConsentMessageShown {
     if (_shouldPrompt.value) {
       unawaited(toggleAnalyticsEnabled(true));
