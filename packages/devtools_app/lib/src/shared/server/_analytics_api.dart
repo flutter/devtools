@@ -57,7 +57,7 @@ Future<bool> setAnalyticsEnabled([bool value = true]) async {
 }
 
 /// Fetch the consent message for package:unified_analytics.
-Future<String> getConsentMessage() async {
+Future<String> fetchAnalyticsConsentMessage() async {
   String? consentMessage = '';
   if (isDevToolsServerAvailable) {
     final resp = await request(apiGetConsentMessage);

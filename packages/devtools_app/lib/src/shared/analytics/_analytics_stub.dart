@@ -32,7 +32,7 @@ Future<void> enableAnalytics() async {}
 
 Future<void> disableAnalytics() async {}
 
-Future<String> getConsentMessage() async => 'stubbed consent message';
+Future<String> fetchAnalyticsConsentMessage() async => 'stubbed consent message';
 
 Future<void> confirmConsentMessageShown() async {}
 

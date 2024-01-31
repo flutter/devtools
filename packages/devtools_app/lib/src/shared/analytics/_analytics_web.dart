@@ -795,8 +795,8 @@ Future<bool> disableAnalytics() async {
   return await setAnalyticsEnabled(false);
 }
 
-Future<String> getConsentMessage() async {
-  return await server.getConsentMessage();
+Future<String> fetchAnalyticsConsentMessage() async {
+  return await server.fetchAnalyticsConsentMessage();
 }
 
 Future<void> confirmConsentMessageShown() async {
