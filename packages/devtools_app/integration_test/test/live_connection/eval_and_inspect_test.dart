@@ -35,7 +35,7 @@ void main() {
     await resetHistory();
   });
 
-  testWidgets('eval and browse in inspector window', (tester) async {
+  testWidgets('eval with scope in inspector window', (tester) async {
     await pumpAndConnectDevTools(tester, testApp);
 
     final evalTester = EvalTester(tester);
