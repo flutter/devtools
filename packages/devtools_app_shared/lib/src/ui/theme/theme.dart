@@ -120,9 +120,9 @@ ThemeData _baseTheme({
       linearMinHeight: defaultLinearProgressIndicatorHeight,
     ),
     textTheme: theme.textTheme.copyWith(
+      bodySmall: theme.regularTextStyle,
       bodyMedium: theme.regularTextStyle,
-      titleSmall:
-          theme.textTheme.titleSmall!.copyWith(fontSize: defaultFontSize),
+      titleSmall: theme.regularTextStyle.copyWith(fontWeight: FontWeight.w400),
     ),
   );
 }
@@ -356,7 +356,7 @@ extension ThemeDataExtension on ThemeData {
   bool get isDarkTheme => brightness == Brightness.dark;
 
   TextStyle get regularTextStyle => fixBlurryText(
-        textTheme.bodyMedium!.copyWith(
+        textTheme.bodySmall!.copyWith(
           color: colorScheme.onSurface,
           fontSize: defaultFontSize,
         ),
@@ -372,9 +372,8 @@ extension ThemeDataExtension on ThemeData {
       regularTextStyle.copyWith(color: colorScheme.subtleTextColor);
 
   TextStyle get fixedFontStyle => fixBlurryText(
-        textTheme.bodyMedium!.copyWith(
+        regularTextStyle.copyWith(
           fontFamily: 'RobotoMono',
-          color: colorScheme.onSurface,
           // Slightly smaller for fixes font text since it will appear larger
           // to begin with.
           fontSize: defaultFontSize - 1,

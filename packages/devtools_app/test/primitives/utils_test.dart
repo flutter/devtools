@@ -1386,7 +1386,10 @@ void main() {
           subtractor: elementSubtractor,
         );
 
-        expect(const SetEquality().equals(result.keys.toSet(), {1, 2}), true);
+        expect(
+          const SetEquality<int>().equals(result.keys.toSet(), {1, 2}),
+          true,
+        );
         expect(
           result[1],
           equals(_SubtractionResult(subtract: 'subtract', from: 1.0)),
@@ -1411,7 +1414,7 @@ void main() {
           subtractor: elementSubtractor,
         );
 
-        expect(const SetEquality().equals(result.keys.toSet(), {1}), true);
+        expect(const SetEquality<int>().equals(result.keys.toSet(), {1}), true);
         expect(
           result[1],
           equals(_SubtractionResult(subtract: null, from: 1.0)),
@@ -1432,7 +1435,7 @@ void main() {
           subtractor: elementSubtractor,
         );
 
-        expect(const SetEquality().equals(result.keys.toSet(), {1}), true);
+        expect(const SetEquality<int>().equals(result.keys.toSet(), {1}), true);
         expect(
           result[1],
           equals(_SubtractionResult(subtract: 'subtract', from: null)),
@@ -1443,7 +1446,7 @@ void main() {
 
   group('joinWithTrailing', () {
     test('joins no items', () {
-      expect([].joinWithTrailing(':'), equals(''));
+      expect(<String>[].joinWithTrailing(':'), equals(''));
     });
     test(' joins 1 item', () {
       expect(['A'].joinWithTrailing(':'), equals('A:'));

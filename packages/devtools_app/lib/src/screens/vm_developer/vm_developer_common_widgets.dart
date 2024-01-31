@@ -477,7 +477,7 @@ class _RetainingObjectDescription extends StatelessWidget {
   });
 
   final RetainingObject object;
-  final Function(ObjRef? obj) onTap;
+  final void Function(ObjRef? obj) onTap;
 
   @override
   Widget build(BuildContext context) {

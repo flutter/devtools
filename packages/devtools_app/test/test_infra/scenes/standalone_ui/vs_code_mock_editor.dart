@@ -41,7 +41,7 @@ class _VsCodeFlutterPanelMockEditorState
 
   /// The last [maxLogEvents] communication messages sent between the panel
   /// and the "host IDE".
-  final logRing = DoubleLinkedQueue();
+  final logRing = DoubleLinkedQueue<String>();
 
   /// A stream that emits each time the log is updated to allow the log widget
   /// to be rebuilt.

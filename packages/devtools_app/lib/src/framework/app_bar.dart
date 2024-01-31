@@ -159,7 +159,7 @@ class TabOverflowButton extends StatelessWidget {
 
   bool get overflowTabSelected => selectedIndex >= 0;
 
-  final Function(int) onItemSelected;
+  final void Function(int) onItemSelected;
 
   @override
   Widget build(BuildContext context) {

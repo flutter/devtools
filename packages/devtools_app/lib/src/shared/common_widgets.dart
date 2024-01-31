@@ -295,34 +295,17 @@ class SettingsOutlinedButton extends GaDevToolsButton {
   }) : super(outlined: true, icon: Icons.settings_outlined);
 }
 
-class HelpButton extends StatelessWidget {
-  const HelpButton({
+class HelpButton extends GaDevToolsButton {
+  HelpButton({
     super.key,
-    required this.gaScreen,
-    required this.gaSelection,
-    required this.onPressed,
-    this.outlined = true,
-  });
-
-  final VoidCallback onPressed;
-
-  final String gaScreen;
-
-  final String gaSelection;
-
-  final bool outlined;
-
-  @override
-  Widget build(BuildContext context) {
-    return GaDevToolsButton(
-      icon: Icons.help_outline,
-      onPressed: onPressed,
-      tooltip: 'Help',
-      gaScreen: gaScreen,
-      gaSelection: gaSelection,
-      outlined: outlined,
-    );
-  }
+    required super.gaScreen,
+    required super.gaSelection,
+    required super.onPressed,
+    super.outlined = true,
+  }) : super(
+          icon: Icons.help_outline,
+          tooltip: 'Help',
+        );
 }
 
 class ExpandAllButton extends StatelessWidget {
@@ -665,7 +648,7 @@ abstract class ScaffoldAction extends StatelessWidget {
 
   final String tooltip;
 
-  final Function(BuildContext) onPressed;
+  final void Function(BuildContext) onPressed;
 
   final Color? color;
 
@@ -845,8 +828,8 @@ class DevToolsClearableTextField extends StatelessWidget {
   final Widget? prefixIcon;
   final List<Widget> additionalSuffixActions;
   final String labelText;
-  final Function(String)? onChanged;
-  final Function(String)? onSubmitted;
+  final void Function(String)? onChanged;
+  final void Function(String)? onSubmitted;
   final bool autofocus;
 
   static const _contentVerticalPadding = 6.0;
@@ -1143,7 +1126,7 @@ class Breadcrumb extends StatelessWidget {
     required this.onPressed,
   });
 
-  static const height = 28.0;
+  static const height = 24.0;
 
   static const caretWidth = 4.0;
 
@@ -1899,13 +1882,13 @@ class _BlinkingIconState extends State<BlinkingIcon> {
 /// A widget that listens for changes to multiple different [ValueListenable]s
 /// and rebuilds for change notifications from any of them.
 ///
-/// The current value of each [ValueListenable] is provided by the [values]
+/// The current value of each [ValueListenable] is provided by the `values`
 /// parameter in [builder], where the index of each value in the list is equal
 /// to the index of its parent [ValueListenable] in [listenables].
 ///
 /// This widget is preferred over nesting many [ValueListenableBuilder]s in a
 /// single build method.
-class MultiValueListenableBuilder<T, U> extends StatefulWidget {
+class MultiValueListenableBuilder extends StatefulWidget {
   const MultiValueListenableBuilder({
     super.key,
     required this.listenables,
@@ -1924,12 +1907,12 @@ class MultiValueListenableBuilder<T, U> extends StatefulWidget {
   final Widget? child;
 
   @override
-  State<MultiValueListenableBuilder<T, U>> createState() =>
-      _MultiValueListenableBuilderState<T, U>();
+  State<MultiValueListenableBuilder> createState() =>
+      _MultiValueListenableBuilderState();
 }
 
-class _MultiValueListenableBuilderState<T, U>
-    extends State<MultiValueListenableBuilder<T, U>> with AutoDisposeMixin {
+class _MultiValueListenableBuilderState
+    extends State<MultiValueListenableBuilder> with AutoDisposeMixin {
   @override
   void initState() {
     super.initState();
@@ -2052,22 +2035,11 @@ class HelpButtonWithDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return HelpButton(
       onPressed: () {
-        ga.select(gaScreen, gaSelection);
-        unawaited(
-          showDialog(
-            context: context,
-            builder: (context) => DevToolsDialog(
-              title: DialogTitleText(dialogTitle),
-              includeDivider: false,
-              content: child,
-              actionsAlignment:
-                  actions.isNotEmpty ? MainAxisAlignment.spaceBetween : null,
-              actions: [
-                ...actions,
-                const DialogCloseButton(),
-              ],
-            ),
-          ),
+        showDevToolsDialog(
+          context: context,
+          title: dialogTitle,
+          content: child,
+          actions: actions,
         );
       },
       gaScreen: gaScreen,

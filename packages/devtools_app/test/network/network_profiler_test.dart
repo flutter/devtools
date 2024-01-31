@@ -8,6 +8,7 @@ import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/network/network_request_inspector.dart';
 import 'package:devtools_app/src/screens/network/network_request_inspector_views.dart';
 import 'package:devtools_app/src/shared/http/http.dart';
+import 'package:devtools_app/src/shared/ui/tab.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -117,10 +118,7 @@ void main() {
     void expectNoSelection() {
       expect(find.byType(NetworkRequestsTable), findsOneWidget);
       expect(find.byType(NetworkRequestInspector), findsOneWidget);
-      expect(
-        find.byKey(NetworkRequestInspector.noRequestSelectedKey),
-        findsOneWidget,
-      );
+      expect(find.text('No request selected'), findsOneWidget);
       expect(controller.selectedRequest.value, isNull);
     }
 
@@ -137,7 +135,12 @@ void main() {
 
         Future<void> validateHeadersTab(DartIOHttpRequestData data) async {
           // Switch to headers tab.
-          await tester.tap(find.byKey(NetworkRequestInspector.headersTabKey));
+          await tester.tap(
+            find.descendant(
+              of: find.byType(DevToolsTab),
+              matching: find.text('Headers'),
+            ),
+          );
           await tester.pumpAndSettle();
 
           expect(find.byType(NetworkRequestOverviewView), findsNothing);
@@ -175,8 +178,12 @@ void main() {
         Future<void> validateResponseTab(DartIOHttpRequestData data) async {
           if (data.responseBody != null) {
             // Switch to response tab.
-            await tester
-                .tap(find.byKey(NetworkRequestInspector.responseTabKey));
+            await tester.tap(
+              find.descendant(
+                of: find.byType(DevToolsTab),
+                matching: find.text('Response'),
+              ),
+            );
             await tester.pumpAndSettle();
 
             expect(find.byType(HttpResponseTrailingDropDown), findsOneWidget);
@@ -190,7 +197,12 @@ void main() {
 
         Future<void> validateOverviewTab() async {
           // Switch to overview tab.
-          await tester.tap(find.byKey(NetworkRequestInspector.overviewTabKey));
+          await tester.tap(
+            find.descendant(
+              of: find.byType(DevToolsTab),
+              matching: find.text('Overview'),
+            ),
+          );
           await tester.pumpAndSettle();
 
           expect(find.byType(NetworkRequestOverviewView), findsOneWidget);
@@ -206,7 +218,12 @@ void main() {
 
           if (hasCookies) {
             // Switch to cookies tab.
-            await tester.tap(find.byKey(NetworkRequestInspector.cookiesTabKey));
+            await tester.tap(
+              find.descendant(
+                of: find.byType(DevToolsTab),
+                matching: find.text('Cookies'),
+              ),
+            );
             await tester.pumpAndSettle();
 
             expect(find.byType(NetworkRequestOverviewView), findsNothing);
@@ -249,7 +266,10 @@ void main() {
             // The cookies tab shouldn't be displayed if there are no cookies
             // associated with the request.
             expect(
-              find.byKey(NetworkRequestInspector.cookiesTabKey),
+              find.descendant(
+                of: find.byType(DevToolsTab),
+                matching: find.text('Cookies'),
+              ),
               findsNothing,
             );
           }
@@ -258,10 +278,7 @@ void main() {
         for (final request in controller.requests.value.requests) {
           controller.selectedRequest.value = request;
           await tester.pumpAndSettle();
-          expect(
-            find.byKey(NetworkRequestInspector.noRequestSelectedKey),
-            findsNothing,
-          );
+          expect(find.text('No request selected'), findsNothing);
 
           final selection = controller.selectedRequest.value!;
           if (selection is DartIOHttpRequestData) {
@@ -303,10 +320,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(controller.selectedRequest.value, isNotNull);
-        expect(
-          find.byKey(NetworkRequestInspector.noRequestSelectedKey),
-          findsNothing,
-        );
+        expect(find.text('No request selected'), findsNothing);
       },
     );
 

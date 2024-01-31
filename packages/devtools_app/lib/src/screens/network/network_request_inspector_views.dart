@@ -161,7 +161,8 @@ class HttpRequestView extends StatelessWidget {
         }
 
         final isJson = switch (requestContentType) {
-          List() => requestContentType.any((e) => e.contains('json')),
+          List() =>
+            requestContentType.any((e) => (e as String).contains('json')),
           String() => requestContentType.contains('json'),
           _ => throw StateError(
               "Expected 'content-type' to be a List or String, but got: "

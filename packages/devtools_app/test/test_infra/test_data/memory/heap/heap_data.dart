@@ -5,7 +5,6 @@
 import 'dart:io';
 
 import 'package:devtools_app/src/shared/memory/adapted_heap_data.dart';
-import 'package:vm_service/vm_service.dart';
 
 const _dataDir = 'test/test_infra/test_data/memory/heap/';
 
@@ -50,7 +49,5 @@ Future<AdaptedHeapData> heapFromFile(
 ) async {
   final file = File(fileName);
   final bytes = await file.readAsBytes();
-  final data = bytes.buffer.asByteData();
-  final graph = HeapSnapshotGraph.fromChunks([data]);
-  return AdaptedHeapData.fromHeapSnapshot(graph);
+  return AdaptedHeapData.fromBytes(bytes);
 }

@@ -188,10 +188,10 @@ class TestFlutterApp extends IntegrationTestApp {
   Map<String, Object?>? _parseFlutterResponse(String line) {
     if (line.startsWith('[') && line.endsWith(']')) {
       try {
-        final Map<String, Object?>? resp = json.decode(line)[0];
-        return resp;
+        return (json.decode(line) as List)[0];
       } catch (e) {
-        // Not valid JSON, so likely some other output that was surrounded by [brackets]
+        // Not valid JSON, so likely some other output that was surrounded by
+        // [brackets].
         return null;
       }
     }
@@ -360,7 +360,7 @@ abstract class IntegrationTestApp with IOMixin {
         logMessage('<timed out>');
         throw '$message';
       },
-    ).catchError((error) {
+    ).catchError((Object? error) {
       throw '$error\nReceived:\n${messages.toString()}';
     }).whenComplete(() => sub.cancel());
   }

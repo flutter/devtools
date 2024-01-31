@@ -55,7 +55,7 @@ class _StoreAllAsVariableMenu extends StatelessWidget {
     const menuText = 'Store all class instances';
 
     MenuItemButton item(
-      title, {
+      String title, {
       required bool subclasses,
       required bool implementers,
     }) =>

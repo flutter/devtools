@@ -131,14 +131,10 @@ Receive an LGTM for the PR, squash and commit.
 1. Checkout the commit from which you want to release DevTools
    - This is likely the commit, on `master`, for the PR you just landed
    - You can run `git log -v` to see the commits.
-2. Run the `tag_version.sh` script
+2. Run `devtools_tool tag-version`
    - this creates a tag on the `flutter/devtools` repo for this release.
    - This script will automatically determine the version from
    `packages/devtools/pubspec.yaml` so there is no need to manually enter the version.
-
-   ```shell
-   tool/tag_version.sh;
-   ```
 
 ### Wait for the binary to be uploaded CIPD
 
@@ -304,11 +300,10 @@ Once your cherry pick has been approved and merged, create a tag for this cherry
 release. This will ensure that we have a tag we can branch from if we need to
 create another DevTools cherry-pick release from the tip of the one we just created. 
 
-Check out the cherry-pick branch you created earlier, and run the `tag_version.sh`
-script:
+Check out the cherry-pick branch you created earlier, and create a git tag:
 ```sh
 git checkout upstream/2.29.1
-tool/tag_version.sh
+devtools_tool tag-version
 ```
 
 ### Create the merge commit in the `flutter/devtools` repo

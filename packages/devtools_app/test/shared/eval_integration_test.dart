@@ -49,7 +49,7 @@ void main() {
 
     group('asyncEval', () {
       test(
-        'supports expresions that do not start with the await keyword',
+        'supports expressions that do not start with the await keyword',
         () async {
           await env.setupEnvironment();
 
@@ -118,7 +118,7 @@ void main() {
                 (_) => throw Exception(
                   'The FutureFailedException was not thrown as expected.',
                 ),
-                onError: (err) => err,
+                onError: (Object? err) => err,
               );
 
           expect(

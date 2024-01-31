@@ -53,14 +53,6 @@ class SettingsDialog extends StatelessWidget {
               gaItem: gac.darkTheme,
             ),
           ),
-          Flexible(
-            child: CheckboxSetting(
-              title: 'Use dense mode',
-              notifier: preferences.denseModeEnabled,
-              onChanged: preferences.toggleDenseMode,
-              gaItem: gac.denseMode,
-            ),
-          ),
           if (isExternalBuild && isDevToolsServerAvailable)
             Flexible(
               child: CheckboxSetting(

@@ -77,7 +77,7 @@ class _StoreAllAsVariableMenu extends StatelessWidget {
     }
 
     MenuItemButton item(
-      title, {
+      String title, {
       required bool subclasses,
       required bool implementers,
     }) =>

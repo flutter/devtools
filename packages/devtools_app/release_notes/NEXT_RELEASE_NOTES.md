@@ -12,10 +12,11 @@ To learn more about DevTools, check out the
 
 * Improved overall usability by making the DevTools UI more dense. This
 significantly improves the user experience when using DevTools embedded in
-an IDE. (#7030)[https://github.com/flutter/devtools/pull/7030]
+an IDE. - [#7030](https://github.com/flutter/devtools/pull/7030)
+* Removed the "Dense mode" setting. - [#7086](https://github.com/flutter/devtools/pull/7086)
 * Added support for filtering with regular expressions in the Logging, Network, and CPU profiler
-pages - (#7027)[https://github.com/flutter/devtools/pull/7027]
-* Add a DevTools server interaction for getting the DTD uri. - (#7054)[https://github.com/flutter/devtools/pull/7054]
+pages - [#7027](https://github.com/flutter/devtools/pull/7027)
+* Add a DevTools server interaction for getting the DTD uri. - [#7054](https://github.com/flutter/devtools/pull/7054)
 
 ## Inspector updates
 
@@ -31,7 +32,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## Memory updates
 
-* Allocation tracing is now supported for Flutter profile builds and Dart AOT compiled applications. - [#7058](https://github.com/flutter/devtools/pull/7058)
+* Supported allocation tracing for Flutter profile builds and Dart AOT compiled applications. - [#7058](https://github.com/flutter/devtools/pull/7058)
+* Supported import of memory snapshots. - [#6974](https://github.com/flutter/devtools/pull/6974)
 
 ## Debugger updates
 
@@ -58,13 +60,18 @@ TODO: Remove this section if there are not any general updates.
 ## VS Code Sidebar updates
 
 * Fixed an issue that prevented the VS code sidebar from loading in recent beta/master builds. - [#6984](https://github.com/flutter/devtools/pull/6984)
-* Show DevTools extensions as an option from the debug sessions DevTools dropdown, when
+* Showed DevTools extensions as an option from the debug sessions DevTools dropdown, when
 available. [#6709](https://github.com/flutter/devtools/pull/6709)
 
 ## DevTools Extension updates
 
 * Added a description and link to documentation to the `devtools_options.yaml` file
 that is created in a user's project. - [#7052](https://github.com/flutter/devtools/pull/7052)
+* Updated the Simulated DevTools Environment Panel to be collapsible. - [#7062](https://github.com/flutter/devtools/pull/7062)
+* Integrated DevTools extensions with the new Dart Tooling Daemon. This will allow
+DevTools extensions to access public methods registered by other DTD clients (e.g. an 
+IDE), as well as access a minimal file system API for interacting with the development
+project. - [#7108](https://github.com/flutter/devtools/pull/7108)
 
 ## Full commit history
 

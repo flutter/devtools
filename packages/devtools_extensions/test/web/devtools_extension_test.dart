@@ -13,6 +13,7 @@ void main() {
     test('accessing early throws error', () {
       expect(() => serviceManager, throwsStateError);
       expect(() => extensionManager, throwsStateError);
+      expect(() => dtdManager, throwsStateError);
     });
 
     testWidgets(
@@ -21,6 +22,7 @@ void main() {
         await tester.pumpWidget(const DevToolsExtension(child: SizedBox()));
         expect(serviceManager, isNotNull);
         expect(extensionManager, isNotNull);
+        expect(dtdManager, isNotNull);
       },
     );
   });

@@ -51,8 +51,8 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
     'timeOriginMicros': 47377796685,
     'timeExtentMicros': 3000,
     'pid': 54321,
-    'functions': [],
-    'samples': [],
+    'functions': <Object?>[],
+    'samples': <Object?>[],
   })!;
 
   CpuSamples cpuSamples;
