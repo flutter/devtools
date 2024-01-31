@@ -96,7 +96,7 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt>
   Widget _analyticsDescription(TextTheme textTheme) {
     return SelectableText(
       controller.consentMessage,
-      style: textTheme.titleMedium,
+      style: Theme.of(context).regularTextStyle,
     );
   }
 
