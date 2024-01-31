@@ -71,15 +71,10 @@ Future<String?> getConsentMessage() async {
 
 /// Confirm with package:unified_analytics that the consent message
 /// has been shown to the user.
-Future<bool> confirmConsentMessageShown() async {
+Future<void> confirmConsentMessageShown() async {
   if (isDevToolsServerAvailable) {
-    final resp = await request(apiSetConsentMessageAsShown);
-    if (resp?.statusOk ?? false) {
-      return true;
-    }
+    await request(apiSetConsentMessageAsShown);
   }
-
-  return false;
 }
 
 // TODO(terry): Move to an API scheme similar to the VM service extension where

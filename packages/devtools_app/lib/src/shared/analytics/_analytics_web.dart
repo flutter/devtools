@@ -799,7 +799,7 @@ Future<String?> getConsentMessage() async {
   return await server.getConsentMessage();
 }
 
-Future<bool> confirmConsentMessageShown() async {
+Future<void> confirmConsentMessageShown() async {
   return await server.confirmConsentMessageShown();
 }
 
