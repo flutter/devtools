@@ -439,6 +439,7 @@ enum TestAppDevice {
     TestAppDevice.cli: [
       'debugger_panel_test.dart',
       'eval_and_browse_test.dart',
+      'eval_and_inspect_test.dart',
       'perfetto_test.dart',
       'performance_screen_event_recording_test.dart',
       'service_connection_test.dart',
