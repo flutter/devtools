@@ -83,7 +83,7 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt>
               const Padding(
                 padding: EdgeInsets.only(top: defaultSpacing),
               ),
-              _analyticsDescription(textTheme),
+              _analyticsDescription(),
               const SizedBox(height: denseRowSpacing),
               _actionButtons(),
             ],
@@ -93,7 +93,7 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt>
     );
   }
 
-  Widget _analyticsDescription(TextTheme textTheme) {
+  Widget _analyticsDescription() {
     return SelectableText(
       controller.consentMessage,
       style: Theme.of(context).regularTextStyle,
