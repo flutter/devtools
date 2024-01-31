@@ -112,8 +112,6 @@ void main() {
     group('childrenRenderProperties tests', () {
       const maxMainAxisDimension = 500.0;
 
-      // This is a false positive.
-      // ignore: avoid-unused-parameters
       double maxSizeAvailable(Axis axis) => maxMainAxisDimension;
 
       List<RenderProperties> childrenRenderProperties(
