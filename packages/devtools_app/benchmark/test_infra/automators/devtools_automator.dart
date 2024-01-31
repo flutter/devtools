@@ -45,7 +45,11 @@ class DevToolsAutomater {
     Future<void>.delayed(safePumpDuration, automateDevToolsGestures);
     return DevToolsApp(
       defaultScreens(sampleData: sampleData),
-      AnalyticsController(enabled: false, firstRun: false),
+      AnalyticsController(
+        enabled: false,
+        firstRun: false,
+        consentMessage: 'fake message',
+      ),
     );
   }
 

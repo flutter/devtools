@@ -49,6 +49,7 @@ void main() {
             onEnableAnalytics: () {
               didCallEnableAnalytics = true;
             },
+            consentMessage: 'fake message',
           );
         });
 
@@ -91,6 +92,7 @@ void main() {
             onEnableAnalytics: () {
               didCallEnableAnalytics = true;
             },
+            consentMessage: 'fake message',
           );
         });
 
@@ -133,8 +135,11 @@ void main() {
             const AnalyticsPrompt(
               child: Text('Child Text'),
             ),
-            controllerToUse:
-                AnalyticsController(enabled: true, firstRun: false),
+            controllerToUse: AnalyticsController(
+              enabled: true,
+              firstRun: false,
+              consentMessage: 'fake message',
+            ),
           );
           await tester.pumpWidget(wrap(prompt));
           await tester.pump();
@@ -152,6 +157,7 @@ void main() {
             onEnableAnalytics: () {
               didCallEnableAnalytics = true;
             },
+            consentMessage: 'fake message',
           );
         });
 
@@ -290,6 +296,7 @@ void main() {
             onEnableAnalytics: () {
               didCallEnableAnalytics = true;
             },
+            consentMessage: 'fake message',
           );
         });
 
@@ -332,8 +339,11 @@ void main() {
             const AnalyticsPrompt(
               child: Text('Child Text'),
             ),
-            controllerToUse:
-                AnalyticsController(enabled: false, firstRun: false),
+            controllerToUse: AnalyticsController(
+              enabled: false,
+              firstRun: false,
+              consentMessage: 'fake message',
+            ),
           );
           await tester.pumpWidget(wrap(prompt));
           await tester.pump();

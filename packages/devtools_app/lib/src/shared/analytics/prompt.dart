@@ -37,18 +37,16 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt>
     return ValueListenableBuilder<bool>(
       valueListenable: controller.shouldPrompt,
       builder: (context, showPrompt, child) {
-        final showBanner = showPrompt && controller.consentMessage != null;
-
         // Confirm with package:unified_analytics that the consent
         // message has been shown so that devtools can be onboarded
         // into the config file
         // ~/.dart-tool/dart-flutter-telemetry.config
-        if (showBanner) unawaited(controller.confirmConsentMessageShown());
+        if (showPrompt) unawaited(controller.confirmConsentMessageShown());
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (showBanner) child!,
+            if (showPrompt) child!,
             Expanded(child: widget.child),
           ],
         );
@@ -97,7 +95,7 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt>
 
   Widget _analyticsDescription(TextTheme textTheme) {
     return SelectableText(
-      controller.consentMessage!,
+      controller.consentMessage,
       style: textTheme.titleMedium,
     );
   }

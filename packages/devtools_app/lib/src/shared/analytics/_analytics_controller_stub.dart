@@ -7,5 +7,8 @@ import 'dart:async';
 import 'analytics_controller.dart';
 
 FutureOr<AnalyticsController> get devToolsAnalyticsController => _controller;
-AnalyticsController _controller =
-    AnalyticsController(enabled: false, firstRun: false);
+AnalyticsController _controller = AnalyticsController(
+  enabled: false,
+  firstRun: false,
+  consentMessage: 'fake message',
+);

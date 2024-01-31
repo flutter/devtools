@@ -18,10 +18,10 @@ class AnalyticsController {
   AnalyticsController({
     required bool enabled,
     required bool firstRun,
+    required this.consentMessage,
     this.onEnableAnalytics,
     this.onDisableAnalytics,
     this.onSetupAnalytics,
-    this.consentMessage,
     AsyncAnalyticsCallback? confirmConsentMessageShown,
   })  : analyticsEnabled = ValueNotifier<bool>(enabled),
         _shouldPrompt = ValueNotifier<bool>(firstRun),
@@ -55,7 +55,7 @@ class AnalyticsController {
 
   final VoidCallback? onSetupAnalytics;
 
-  final String? consentMessage;
+  final String consentMessage;
 
   Future<void> toggleAnalyticsEnabled(bool? enable) async {
     if (enable == true) {
