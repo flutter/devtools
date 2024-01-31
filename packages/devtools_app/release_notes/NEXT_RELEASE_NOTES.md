@@ -17,6 +17,7 @@ an IDE. - [#7030](https://github.com/flutter/devtools/pull/7030)
 * Added support for filtering with regular expressions in the Logging, Network, and CPU profiler
 pages - [#7027](https://github.com/flutter/devtools/pull/7027)
 * Add a DevTools server interaction for getting the DTD uri. - [#7054](https://github.com/flutter/devtools/pull/7054)
+* Enabled expression evaluation with scope for the web, allowing evaluation of inspected widgets. - [#7144](https://github.com/flutter/devtools/pull/7144)
 
 ## Inspector updates
 

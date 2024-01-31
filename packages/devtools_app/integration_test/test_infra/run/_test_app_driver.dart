@@ -430,8 +430,10 @@ enum TestAppDevice {
   static final _unsupportedTestsForDevice = <TestAppDevice, List<String>>{
     TestAppDevice.flutterTester: [],
     TestAppDevice.flutterChrome: [
-      // TODO(https://github.com/flutter/devtools/issues/5874): Remove once supported on web.
       'eval_and_browse_test.dart',
+      // TODO(https://github.com/flutter/devtools/issues/7145): Figure out why
+      // this fails on bots but passes locally and enable.
+      'eval_and_inspect_test.dart',
       'perfetto_test.dart',
       'performance_screen_event_recording_test.dart',
       'service_connection_test.dart',
