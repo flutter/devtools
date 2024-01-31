@@ -81,19 +81,24 @@ class _ListControlPane extends StatelessWidget {
           onPressed: () => unawaited(_takeSnapshot(context)),
         ),
         const SizedBox(width: densePadding),
-        ToolbarAction(
-          icon: Icons.block,
-          size: defaultIconSize,
-          tooltip: 'Clear all snapshots',
-          onPressed: controller.hasSnapshots
-              ? () {
-                  ga.select(
-                    gac.memory,
-                    gac.MemoryEvent.diffClearSnapshots,
-                  );
-                  controller.clearSnapshots();
-                }
-              : null,
+        ValueListenableBuilder(
+          valueListenable: controller.core.snapshots,
+          builder: (context, snapshots, _) {
+            return ToolbarAction(
+              icon: Icons.delete,
+              size: defaultIconSize,
+              tooltip: 'Delete all snapshots',
+              onPressed: controller.hasSnapshots
+                  ? () {
+                      ga.select(
+                        gac.memory,
+                        gac.MemoryEvent.diffClearSnapshots,
+                      );
+                      controller.clearSnapshots();
+                    }
+                  : null,
+            );
+          },
         ),
         const Spacer(),
         ToolbarAction(
