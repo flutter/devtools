@@ -26,8 +26,9 @@ bool debugTestReleaseNotes = false;
 // https://flutter-docs-prod--pr8928-dt-notes-links-b0b33er1.web.app/tools/devtools/release-notes/release-notes-2.24.0-src.md.
 const String? _debugReleaseNotesUrl = null;
 
-const String _unsupportedPathSyntax = '{{site.url}}';
 const Key releaseNotesKey = Key('release_notes');
+const String _unsupportedPathSyntax = '{{site.url}}';
+const String _releaseNotesPath = '/f/devtools-releases.json';
 final Uri _flutterDocsSite = Uri.https('docs.flutter.dev');
 
 class ReleaseNotesViewer extends SidePanelViewer {
@@ -78,9 +79,7 @@ class ReleaseNotesController extends SidePanelController {
     if (_debugReleaseNotesUrl case final debugUrl?) {
       // Specially handle the case where a debug release notes URL is specified.
       final debugUri = Uri.parse(debugUrl);
-      final releaseNotesMarkdown = await http.read(
-        debugUri,
-      );
+      final releaseNotesMarkdown = await http.read(debugUri);
 
       // Update image links to use debug/testing URL.
       markdown.value = releaseNotesMarkdown.replaceAll(
@@ -110,10 +109,9 @@ class ReleaseNotesController extends SidePanelController {
 
     final Map<String, Object?> releaseIndex;
     try {
-      final releaseIndexUrl =
-          _flutterDocsSite.replace(path: '/f/devtools-releases.json');
-      releaseIndex =
-          jsonDecode(await http.read(releaseIndexUrl)) as Map<String, Object?>;
+      final releaseIndexUrl = _flutterDocsSite.replace(path: _releaseNotesPath);
+      final releaseIndexString = await http.read(releaseIndexUrl);
+      releaseIndex = jsonDecode(releaseIndexString) as Map<String, Object?>;
     } catch (e) {
       _emptyAndClose(e.toString());
       return;
