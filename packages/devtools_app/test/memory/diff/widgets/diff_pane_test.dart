@@ -109,7 +109,7 @@ void main() {
         expect(snapshots.value.length, equals(1 + 3 - 1 + 1));
 
         // Clear all
-        await tester.tap(find.byTooltip('Clear all snapshots'));
+        await tester.tap(find.byTooltip('Delete all snapshots'));
         await tester.pumpAndSettle();
         await expectLater(
           find.byType(DiffPane),

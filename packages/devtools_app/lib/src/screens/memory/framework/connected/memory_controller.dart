@@ -27,8 +27,8 @@ class MemoryFeatureControllers {
     ProfilePaneController? profilePaneController,
   ) {
     memoryTimeline = MemoryTimeline();
-    diff =
-        diffPaneController ?? DiffPaneController(SnapshotTaker(memoryTimeline));
+    diff = diffPaneController ??
+        DiffPaneController(SnapshotTakerRuntime(memoryTimeline));
     profile = profilePaneController ?? ProfilePaneController();
   }
 
@@ -39,7 +39,7 @@ class MemoryFeatureControllers {
 
   void reset() {
     diff.dispose();
-    diff = DiffPaneController(SnapshotTaker(memoryTimeline));
+    diff = DiffPaneController(SnapshotTakerRuntime(memoryTimeline));
 
     profile.dispose();
     profile = ProfilePaneController();
@@ -210,7 +210,7 @@ class MemoryController extends DisposableController
 
     // TODO(terry): Used to detect stream being closed from the
     // memoryController dispose method.  Needed when a HOT RELOAD
-    // will call dispose however, spinup (initState) doesn't seem
+    // will call dispose however, initState doesn't seem
     // to happen David is working on scaffolding.
     _memoryTrackerController.stream.listen(
       (_) {},
@@ -290,7 +290,7 @@ class MemoryController extends DisposableController
     }
   }
 
-  /// Detect stale isolates (sentinaled), may happen after a hot restart.
+  /// Detect stale isolates (sentineled), may happen after a hot restart.
   Future<bool> isIsolateLive(String isolateId) async {
     try {
       final service = serviceConnection.serviceManager.service!;
