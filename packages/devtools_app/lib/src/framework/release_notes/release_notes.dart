@@ -113,6 +113,7 @@ class ReleaseNotesController extends SidePanelController {
       final releaseIndexString = await http.read(releaseIndexUrl);
       releaseIndex = jsonDecode(releaseIndexString) as Map<String, Object?>;
     } catch (e) {
+      // This can occur if the file can't be retrieved or if its not a JSON map.
       _emptyAndClose(e.toString());
       return;
     }
@@ -149,8 +150,12 @@ class ReleaseNotesController extends SidePanelController {
             _flutterDocsSite.replace(path: releaseNotePath),
           );
         } catch (_) {
+          // This can very infrequently fail due to CDN or caching issues,
+          // or if the upstream file has an incorrect link.
+          _log.info('Failed to retrieve release notes for v$releaseToCheck, '
+              'despite indication it is live at $releaseNotePath.');
           // If we couldn't retrieve this page, keep going to
-          // try with the earlier patch versions.
+          // try with earlier patch versions.
           continue;
         }
 
