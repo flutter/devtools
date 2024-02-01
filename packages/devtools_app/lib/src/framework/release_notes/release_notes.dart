@@ -26,10 +26,10 @@ bool debugTestReleaseNotes = false;
 // https://flutter-docs-prod--pr8928-dt-notes-links-b0b33er1.web.app/tools/devtools/release-notes/release-notes-2.24.0-src.md.
 const String? _debugReleaseNotesUrl = null;
 
-const Key releaseNotesKey = Key('release_notes');
-const String _unsupportedPathSyntax = '{{site.url}}';
-const String _releaseNotesPath = '/f/devtools-releases.json';
-final Uri _flutterDocsSite = Uri.https('docs.flutter.dev');
+const releaseNotesKey = Key('release_notes');
+const _unsupportedPathSyntax = '{{site.url}}';
+const _releaseNotesPath = '/f/devtools-releases.json';
+final _flutterDocsSite = Uri.https('docs.flutter.dev');
 
 class ReleaseNotesViewer extends SidePanelViewer {
   const ReleaseNotesViewer({
