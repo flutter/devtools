@@ -451,7 +451,7 @@ class _NotificationCardSection extends StatelessWidget {
                     DefaultTabController.of(context).index = 1;
                     controller.selectLink(
                       controller.getLinkDatasByPath
-                          .where((element) => element.pathError)
+                          .where((element) => element.pathErrors.isNotEmpty)
                           .first,
                     );
                     controller.updateDisplayOptions(showSplitScreen: true);

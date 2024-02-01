@@ -332,64 +332,111 @@ class _PathCheckTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-  
     final linkData = controller.selectedLink.value!;
-    final notAvailableCell = DataCell(
-      Text(
-        'Not available',
-        style: TextStyle(
-          color: Theme.of(context).colorScheme.deeplinkUnavailableColor,
-        ),
+    final intentFilterErrorCount = intentFilterErrors
+        .where((error) => linkData.pathErrors.contains(error))
+        .toList()
+        .length;
+    return ListTileTheme(
+      dense: true,
+      minVerticalPadding: 0,
+      contentPadding: EdgeInsets.zero,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SizedBox(height: intermediateSpacing),
+          Text(
+            'Path check',
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          const SizedBox(height: intermediateSpacing),
+          ListTile(
+            tileColor: Theme.of(context).colorScheme.deeplinkTableHeaderColor,
+            title: const Row(
+              children: [
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text('OS'),
+                ),
+                Expanded(
+                  child: Text('Issue type'),
+                ),
+                Expanded(
+                  child: Text(
+                    'Status',
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1.0),
+          ExpansionTile(
+            backgroundColor:
+                Theme.of(context).colorScheme.alternatingBackgroundColor2,
+            collapsedBackgroundColor:
+                Theme.of(context).colorScheme.alternatingBackgroundColor2,
+            title: Row(
+              children: [
+                const SizedBox(width: 12),
+                const Expanded(child: Text('Android')),
+                const Expanded(child: Text('IntentFiler')),
+                Expanded(
+                  child: intentFilterErrorCount > 0
+                      ? Text(
+                          '$intentFilterErrorCount Check failed',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                        )
+                      : Text(
+                          'No issues found',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.green,
+                          ),
+                        ),
+                ),
+              ],
+            ),
+            children: <Widget>[
+              for (final error in intentFilterErrors)
+                if (linkData.pathErrors.contains(error))
+                  Text(error.description),
+            ],
+          ),
+          const Divider(height: 1.0),
+          ExpansionTile(
+            backgroundColor:
+                Theme.of(context).colorScheme.alternatingBackgroundColor2,
+            collapsedBackgroundColor:
+                Theme.of(context).colorScheme.alternatingBackgroundColor2,
+            title: Row(
+              children: [
+                const SizedBox(width: 12),
+                const Expanded(child: Text('Android')),
+                const Expanded(child: Text('URL format')),
+                Expanded(
+                  child: linkData.pathErrors.contains(PathError.pathFormat)
+                      ? Text(
+                          'Check failed',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                        )
+                      : Text(
+                          'No issues found',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.green,
+                          ),
+                        ),
+                ),
+              ],
+            ),
+            children: <Widget>[
+              Text(PathError.pathFormat.description),
+            ],
+          ),
+        ],
       ),
-    );
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: intermediateSpacing),
-        Text(
-          'Path check',
-          style: Theme.of(context).textTheme.titleSmall,
-        ),
-        DataTable(
-          headingRowHeight: defaultHeaderHeight,
-          dataRowMinHeight: defaultRowHeight,
-          dataRowMaxHeight: defaultRowHeight,
-          headingRowColor: MaterialStateProperty.all(
-            Theme.of(context).colorScheme.deeplinkTableHeaderColor,
-          ),
-          dataRowColor: MaterialStateProperty.all(
-            Theme.of(context).colorScheme.alternatingBackgroundColor2,
-          ),
-          columns: const [
-            DataColumn(label: Text('OS')),
-            DataColumn(label: Text('Issue type')),
-            DataColumn(label: Text('Status')),
-          ],
-          rows: [
-            DataRow(
-              cells: [
-                const DataCell(Text('Android')),
-                const DataCell(Text('Intent filter')),
-                notAvailableCell,
-              ],
-            ),
-
-            DataRow(
-              cells: [
-                const DataCell(Text('Android')),
-                const DataCell(Text('URL format')),
-                notAvailableCell,
-              ],
-            ),
-
-          ],
-        ),
-        if(!linkData.intentFilterChecks.hasActionView)
-        Text('Has Action view'),
-
-
-      ],
     );
   }
 }
