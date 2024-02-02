@@ -249,7 +249,6 @@ DartIOHttpRequestData _testDartIOHttpRequestData({
       method: method,
       uri: uri,
       requestBody: requestBody,
-      responseBody: null,
       events: [],
       startTime: DateTime.fromMicrosecondsSinceEpoch(0),
       endTime: DateTime.fromMicrosecondsSinceEpoch(0),

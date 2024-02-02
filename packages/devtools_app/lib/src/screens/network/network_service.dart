@@ -44,7 +44,7 @@ class NetworkService {
   /// time.
   void updateLastHttpDataRefreshTime({
     bool alreadyRecordingHttp = false,
-  }) async {
+  }) {
     if (!alreadyRecordingHttp) {
       networkController.lastHttpDataRefreshTime = DateTime.now();
     }
