@@ -58,7 +58,8 @@ void main() {
           windowSize,
           (WidgetTester tester) async {
             expect(controller.analyticsEnabled.value, isTrue);
-            expect(didCallEnableAnalytics, isFalse);
+            expect(didCallEnableAnalytics, isTrue,
+                reason: 'Analytics is enabled on first run');
             final prompt = wrapWithAnalytics(
               const AnalyticsPrompt(
                 child: Text('Child Text'),
