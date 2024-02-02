@@ -2,10 +2,26 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-class FlexSplitColumn extends StatelessWidget {
+import 'split.dart';
+
+/// A widget that takes a list of [children] and lays them out in a column where
+/// each child has a flexible height.
+/// 
+/// Each child in [children] must have an accompanying header in [header]. Since
+/// each header must be a [PreferredSizeWidget], it is common to use the shared
+/// widgets [AreaPaneHeader] or [BlankHeader] for the column [headers].
+/// 
+/// The user can customize the amount of space allocated to each child by
+/// clicking and dragging the [header]s that separate the children.
+///
+/// [initialFractions] defines how much space to give each child when building
+/// this widget.
+/// 
+/// [minSizes] defines the minimum size that each child can be set to when
+/// adjusting the sizes of the children.
+final class FlexSplitColumn extends StatelessWidget {
   FlexSplitColumn({
     Key? key,
     required this.totalHeight,
