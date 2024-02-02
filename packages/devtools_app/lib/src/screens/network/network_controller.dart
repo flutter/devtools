@@ -266,7 +266,7 @@ class NetworkController extends DisposableController
           _NetworkTrafficType.http =>
             service.httpEnableTimelineLoggingWrapper(isolate.id!),
           _NetworkTrafficType.socket =>
-            service.socketProfilingEnabled(isolate.id!),
+            service.socketProfilingEnabledWrapper(isolate.id!),
         };
         // The above call won't complete immediately if the isolate is paused,
         // so give up waiting after 500ms.
