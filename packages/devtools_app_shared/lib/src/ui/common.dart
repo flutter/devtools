@@ -110,7 +110,7 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
 ///
 /// Acts as an empty header widget with zero size that is compatible with
 /// interfaces that expect a [PreferredSizeWidget].
-class BlankHeader extends StatelessWidget implements PreferredSizeWidget {
+final class BlankHeader extends StatelessWidget implements PreferredSizeWidget {
   const BlankHeader({super.key});
 
   @override
