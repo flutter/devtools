@@ -786,8 +786,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
     }
     final duration = Duration(
       microseconds: data.endTimestamp!.microsecondsSinceEpoch -
-          data.instantEvents.last.timestampMicros -
-          data.timelineMicrosecondsSinceEpoch(0),
+          data.instantEvents.last.timestamp.microsecondsSinceEpoch,
     );
     timingWidgets.add(
       _buildTimingRow(nextColor(), 'Response', duration),
