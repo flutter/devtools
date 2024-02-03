@@ -11,6 +11,7 @@ import '../../shared/ui/colors.dart';
 import 'deep_link_list_view.dart';
 import 'deep_links_controller.dart';
 import 'deep_links_model.dart';
+import 'deep_links_services.dart';
 
 class ValidationDetailView extends StatelessWidget {
   const ValidationDetailView({
@@ -148,7 +149,8 @@ class _DomainCheckTable extends StatelessWidget {
                   DataCell(
                     linkData.domainErrors.isNotEmpty
                         ? Text(
-                            'Check failed',
+                            '${linkData.domainErrors.length} '
+                            'Check${linkData.domainErrors.length > 1 ? 's' : ''} failed',
                             style: TextStyle(
                               color: Theme.of(context).colorScheme.error,
                             ),
@@ -205,6 +207,32 @@ class _DomainFixPanel extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            for (final domainError in linkData.domainErrors)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.error,
+                        color: Theme.of(context).colorScheme.error,
+                        size: defaultIconSize,
+                      ),
+                      const SizedBox(width: denseSpacing),
+                      Text(domainError.description),
+                    ],
+                  ),
+                  Padding(
+                    padding:
+                        EdgeInsets.only(left: defaultIconSize + denseSpacing),
+                    child: Text(
+                      domainError.fixDetails,
+                      style: Theme.of(context).subtleTextStyle,
+                    ),
+                  ),
+                ],
+              ),
+            const Divider(height: denseSpacing),
             const Text('How to fix:'),
             Text(
               'Add the new recommended Digital Asset Links JSON file to the failed website domain at the correct location.\n'
@@ -239,26 +267,39 @@ class _DomainFixPanel extends StatelessWidget {
                 child: ValueListenableBuilder(
                   valueListenable:
                       controller.generatedAssetLinksForSelectedLink,
-                  builder: (_, String? generatedAssetLinks, __) =>
+                  builder: (
+                    _,
+                    GenerateAssetLinksResult? generatedAssetLinks,
+                    __,
+                  ) =>
                       generatedAssetLinks != null
-                          ? Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Flexible(
-                                  child: SelectionArea(
-                                    child: Text(generatedAssetLinks),
-                                  ),
-                                ),
-                                IconButton(
-                                  onPressed: () async =>
-                                      await Clipboard.setData(
-                                    ClipboardData(text: generatedAssetLinks),
-                                  ),
-                                  icon: const Icon(Icons.copy_rounded),
-                                ),
-                              ],
-                            )
+                          ? generatedAssetLinks.errorCode.isNotEmpty
+                              ? Text('Content generation failed. '
+                                  'Cannot find supplemental_sha256_cert_fingerprints corresponding to this application id :'
+                                  '`${controller.applicationId}` from Play Developer Console.')
+                              : Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Flexible(
+                                      child: SelectionArea(
+                                        child: Text(generatedAssetLinks
+                                            .generatedString),
+                                      ),
+                                    ),
+                                    IconButton(
+                                      onPressed: () async =>
+                                          await Clipboard.setData(
+                                        ClipboardData(
+                                          text: generatedAssetLinks
+                                              .generatedString,
+                                        ),
+                                      ),
+                                      icon: const Icon(Icons.copy_rounded),
+                                    ),
+                                  ],
+                                )
                           : const CenteredCircularProgressIndicator(),
                 ),
               ),

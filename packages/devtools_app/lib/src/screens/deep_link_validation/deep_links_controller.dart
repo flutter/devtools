@@ -135,6 +135,7 @@ class DeepLinksController extends DisposableController {
   }
 
   DisplayOptions get displayOptions => displayOptionsNotifier.value;
+  String get applicationId => _androidAppLinks[selectedVariantIndex.value]?.applicationId ?? '';
 
   List<LinkData> get getLinkDatasByPath {
     final linkDatasByPath = <String, LinkData>{};
@@ -240,7 +241,7 @@ class DeepLinksController extends DisposableController {
 
   List<LinkData>? allValidatedLinkDatas;
   final displayLinkDatasNotifier = ValueNotifier<List<LinkData>?>(null);
-  final generatedAssetLinksForSelectedLink = ValueNotifier<String?>(null);
+  final generatedAssetLinksForSelectedLink = ValueNotifier<GenerateAssetLinksResult?>(null);
 
   final displayOptionsNotifier =
       ValueNotifier<DisplayOptions>(DisplayOptions());
@@ -250,9 +251,6 @@ class DeepLinksController extends DisposableController {
   final deepLinksServices = DeepLinksServices();
 
   Future<void> _generateAssetLinks() async {
-    final applicationId =
-        _androidAppLinks[selectedVariantIndex.value]?.applicationId ?? '';
-
     generatedAssetLinksForSelectedLink.value =
         await deepLinksServices.generateAssetLinks(
       domain: selectedLink.value!.domain,
@@ -271,9 +269,6 @@ class DeepLinksController extends DisposableController {
         .map((linkdata) => linkdata.domain)
         .toSet()
         .toList();
-
-    final applicationId =
-        _androidAppLinks[selectedVariantIndex.value]?.applicationId ?? '';
 
     late final Map<String, List<DomainError>> domainErrors;
 
