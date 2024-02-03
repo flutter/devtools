@@ -40,8 +40,9 @@ class GenerateAssetLinksResult {
   String errorCode;
   String generatedString;
 
-  GenerateAssetLinksResult(this.errorCode,this.generatedString);
+  GenerateAssetLinksResult(this.errorCode, this.generatedString);
 }
+
 class DeepLinksServices {
   Future<Map<String, List<DomainError>>> validateAndroidDomain({
     required List<String> domains,

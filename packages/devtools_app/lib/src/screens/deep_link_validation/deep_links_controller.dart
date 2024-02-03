@@ -135,7 +135,8 @@ class DeepLinksController extends DisposableController {
   }
 
   DisplayOptions get displayOptions => displayOptionsNotifier.value;
-  String get applicationId => _androidAppLinks[selectedVariantIndex.value]?.applicationId ?? '';
+  String get applicationId =>
+      _androidAppLinks[selectedVariantIndex.value]?.applicationId ?? '';
 
   List<LinkData> get getLinkDatasByPath {
     final linkDatasByPath = <String, LinkData>{};
@@ -241,7 +242,8 @@ class DeepLinksController extends DisposableController {
 
   List<LinkData>? allValidatedLinkDatas;
   final displayLinkDatasNotifier = ValueNotifier<List<LinkData>?>(null);
-  final generatedAssetLinksForSelectedLink = ValueNotifier<GenerateAssetLinksResult?>(null);
+  final generatedAssetLinksForSelectedLink =
+      ValueNotifier<GenerateAssetLinksResult?>(null);
 
   final displayOptionsNotifier =
       ValueNotifier<DisplayOptions>(DisplayOptions());

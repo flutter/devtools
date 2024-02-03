@@ -274,7 +274,7 @@ class _DomainFixPanel extends StatelessWidget {
                   ) =>
                       generatedAssetLinks != null
                           ? generatedAssetLinks.errorCode.isNotEmpty
-                              ? Text('Content generation failed. '
+                              ? Text('Content generation failed.\n'
                                   'Cannot find supplemental_sha256_cert_fingerprints corresponding to this application id :'
                                   '`${controller.applicationId}` from Play Developer Console.')
                               : Row(
