@@ -30,7 +30,7 @@ const _debugServerFlag = 'debug-server';
 /// If the [_debugServerFlag] argument is present, the DevTools server will be
 /// started with the `--observe` flag. This will allow you to debug and profile
 /// the server with a local VM service connection. By default, this will set
-/// `--pause-osolates-on-start` and `--pause-isolates-on-unhandled-exception`
+/// `--pause-isolates-on-start` and `--pause-isolates-on-unhandled-exceptions`
 /// for the DevTools server VM service connection.
 ///
 /// If the [BuildCommandArgs.useFlutterFromPath] argument is present, the
