@@ -14,6 +14,7 @@ import 'shared.dart';
 
 const _buildAppFlag = 'build-app';
 const _machineFlag = 'machine';
+const _dtdUriFlag = 'dtd-uri';
 const _allowEmbeddingFlag = 'allow-embedding';
 
 /// This command builds DevTools in release mode by running the
@@ -66,6 +67,10 @@ class ServeCommand extends Command {
         _machineFlag,
         negatable: false,
         help: 'Sets output format to JSON for consumption in tools.',
+      )
+      ..addOption(
+        _dtdUriFlag,
+        help: 'Sets the dtd uri when starting the devtools server',
       )
       ..addFlag(
         _allowEmbeddingFlag,
