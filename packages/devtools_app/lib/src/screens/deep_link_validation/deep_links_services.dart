@@ -25,7 +25,7 @@ const String _checkNameKey = 'checkName';
 const String _failedChecksKey = 'failedChecks';
 const String _generatedContentKey = 'generatedContent';
 
-const Map<String, DomainError> checkNametoDomainError = {
+const Map<String, DomainError> checkNameToDomainError = {
   'EXISTENCE': DomainError.existence,
   'APP_IDENTIFIER': DomainError.appIdentifier,
   'FINGERPRINT': DomainError.fingerprints,
@@ -70,8 +70,9 @@ class DeepLinksServices {
       if (failedChecks != null) {
         for (final Map<String, dynamic> failedCheck in failedChecks) {
           final checkName = failedCheck[_checkNameKey];
-          if (checkNametoDomainError[checkName] != null) {
-            domainErrors[domainName]!.add(checkNametoDomainError[checkName]!);
+          final domainError = checkNameToDomainError[checkName];
+          if (domainError != null) {
+            domainErrors[domainName]!.add(domainError);
           }
         }
       }

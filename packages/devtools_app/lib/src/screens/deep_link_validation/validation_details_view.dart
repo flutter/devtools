@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -150,7 +151,7 @@ class _DomainCheckTable extends StatelessWidget {
                     linkData.domainErrors.isNotEmpty
                         ? Text(
                             '${linkData.domainErrors.length} '
-                            'Check${linkData.domainErrors.length > 1 ? 's' : ''} failed',
+                            '${pluralize('Check', linkData.domainErrors.length)} failed',
                             style: TextStyle(
                               color: Theme.of(context).colorScheme.error,
                             ),
