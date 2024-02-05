@@ -40,10 +40,10 @@ class ValidationDetailView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'This tool assistants helps you diagnose App Links in your app. '
-                'Web check are done for the web association'
+                'This tool helps you diagnose issues with App Links in your application.'
+                'Web checks are done for the web association'
                 ' file on your website. App checks are done for the intent filters in'
-                ' the manifest and info.plist file, routing issues, URL format, etc.',
+                ' the manifest and info.plist files, routing issues, URL format, etc.',
                 style: Theme.of(context).subtleTextStyle,
               ),
               if (viewType == TableViewType.domainView ||

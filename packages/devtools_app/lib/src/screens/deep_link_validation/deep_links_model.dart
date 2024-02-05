@@ -77,7 +77,7 @@ enum DomainError {
   ),
 
   // Asset link file should be accessible with no redirects.
-  nonRedirtect(
+  nonRedirect(
     'Domain non-redirect failed',
     'This test checks that your domain is accessible without '
         'redirects. This domain must be directly accessible '

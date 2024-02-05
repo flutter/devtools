@@ -23,7 +23,7 @@ const domainErrorsThatCanBeFixedByGeneratedJson = {
 };
 const domainErrorsThatCanNotBeFixedByGeneratedJson = {
   DomainError.httpsAccessibility,
-  DomainError.nonRedirtect,
+  DomainError.nonRedirect,
   DomainError.hostForm,
 };
 

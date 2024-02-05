@@ -31,7 +31,7 @@ const Map<String, DomainError> checkNameToDomainError = {
   'FINGERPRINT': DomainError.fingerprints,
   'CONTENT_TYPE': DomainError.contentType,
   'HTTPS_ACCESSIBILITY': DomainError.httpsAccessibility,
-  'NON_REDIRECT': DomainError.nonRedirtect,
+  'NON_REDIRECT': DomainError.nonRedirect,
   'HOST_FORMED_PROPERLY': DomainError.hostForm,
   'OTHER_CHECKS': DomainError.other,
 };
