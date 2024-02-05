@@ -178,7 +178,7 @@ class ServeCommand extends Command {
         [
           if (debugServer) ...[
             'run',
-            '--observe',
+            '--observe=0',
           ],
           serveLocalScriptPath,
           '--devtools-build=$devToolsBuildLocation',
