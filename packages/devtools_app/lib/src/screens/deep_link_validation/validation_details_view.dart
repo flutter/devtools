@@ -220,40 +220,7 @@ class _DomainFixPanel extends StatelessWidget {
                   domainErrorsThatCanBeFixedByGeneratedJson.contains(error),
             ))
               _GenerateAssetLinksPanel(controller: controller),
-            ExpansionTile(
-              title: Text(
-                'More failure details',
-                style: Theme.of(context).regularTextStyle,
-              ),
-              children: [
-                for (final domainError in linkData.domainErrors)
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.error,
-                            color: Theme.of(context).colorScheme.error,
-                            size: defaultIconSize,
-                          ),
-                          const SizedBox(width: denseSpacing),
-                          Text(domainError.title),
-                        ],
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(
-                          left: defaultIconSize + denseSpacing,
-                        ),
-                        child: Text(
-                          domainError.explanation,
-                          style: Theme.of(context).subtleTextStyle,
-                        ),
-                      ),
-                    ],
-                  ),
-              ],
-            ),
+            _FailureDetails(linkData: linkData),
           ],
         ),
       ),
@@ -341,6 +308,52 @@ class _GenerateAssetLinksPanel extends StatelessWidget {
             ),
           ),
         ),
+      ],
+    );
+  }
+}
+
+class _FailureDetails extends StatelessWidget {
+  const _FailureDetails({
+    required this.linkData,
+  });
+
+  final LinkData linkData;
+
+  @override
+  Widget build(BuildContext context) {
+    return ExpansionTile(
+      title: Text(
+        'More failure details',
+        style: Theme.of(context).regularTextStyle,
+      ),
+      children: [
+        for (final domainError in linkData.domainErrors)
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.error,
+                    color: Theme.of(context).colorScheme.error,
+                    size: defaultIconSize,
+                  ),
+                  const SizedBox(width: denseSpacing),
+                  Text(domainError.title),
+                ],
+              ),
+              Padding(
+                padding: EdgeInsets.only(
+                  left: defaultIconSize + denseSpacing,
+                ),
+                child: Text(
+                  domainError.explanation,
+                  style: Theme.of(context).subtleTextStyle,
+                ),
+              ),
+            ],
+          ),
       ],
     );
   }
