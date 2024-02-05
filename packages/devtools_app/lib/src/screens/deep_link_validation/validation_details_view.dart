@@ -243,9 +243,10 @@ class _DomainFixPanel extends StatelessWidget {
                       ),
                       Padding(
                         padding: EdgeInsets.only(
-                            left: defaultIconSize + denseSpacing),
+                          left: defaultIconSize + denseSpacing,
+                        ),
                         child: Text(
-                          domainError.fixDetails,
+                          domainError.explanation,
                           style: Theme.of(context).subtleTextStyle,
                         ),
                       ),
