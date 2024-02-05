@@ -77,11 +77,7 @@ class DeepLinksServices {
         {
           _packageNameKey: applicationId,
           _domainsKey: [domain],
-          // TODO(hangyujin): The fake fingerprints here is just for testing usage, should remove it later.
           // TODO(hangyujin): Handle the error case when user doesn't have play console project set up.
-          'supplemental_sha256_cert_fingerprints': [
-            '5A:33:EA:64:09:97:F2:F0:24:21:0F:B6:7A:A8:18:1C:18:A9:83:03:20:21:8F:9B:0B:98:BF:43:69:C2:AF:4A',
-          ],
         },
       ),
     );

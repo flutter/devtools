@@ -85,7 +85,9 @@ class ReleaseHelperCommand extends Command {
       );
 
       final getNewVersionResult = await processManager.runProcess(
-        CliCommand.tool(['update-version', 'current-version']),
+        CliCommand.tool(
+          ['update-version', 'current-version', '|', 'tail', '-1'],
+        ),
       );
 
       final newVersion = getNewVersionResult.stdout.trim();

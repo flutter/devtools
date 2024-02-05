@@ -416,10 +416,14 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   @override
   Future<HttpProfile> getHttpProfileWrapper(
     String isolateId, {
-    int? updatedSince,
+    DateTime? updatedSince,
   }) {
     return Future.value(
-      _httpProfile ?? HttpProfile(requests: [], timestamp: 0),
+      _httpProfile ??
+          HttpProfile(
+            requests: [],
+            timestamp: DateTime.fromMicrosecondsSinceEpoch(0),
+          ),
     );
   }
 
@@ -430,7 +434,10 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   }
 
   void restoreFakeHttpProfileRequests() {
-    _httpProfile = HttpProfile(requests: _startingRequests, timestamp: 0);
+    _httpProfile = HttpProfile(
+      requests: _startingRequests,
+      timestamp: DateTime.fromMicrosecondsSinceEpoch(0),
+    );
   }
 
   @override
