@@ -133,13 +133,13 @@ class ServeCommand extends Command {
 
     if (buildApp) {
       final process = await processManager.runProcess(
-        CliCommand.tool(
-          'build'
-          ' ${BuildCommandArgs.updateFlutter.asArg(negated: !updateFlutter)}'
-          '${updatePerfetto ? ' ${BuildCommandArgs.updatePerfetto.asArg()}' : ''}'
-          ' ${BuildCommandArgs.buildMode.asArg()}=$devToolsAppBuildMode'
-          ' ${BuildCommandArgs.pubGet.asArg(negated: !runPubGet)}',
-        ),
+        CliCommand.tool([
+          'build',
+          BuildCommandArgs.updateFlutter.asArg(negated: !updateFlutter),
+          if (updatePerfetto) BuildCommandArgs.updatePerfetto.asArg(),
+          '${BuildCommandArgs.buildMode.asArg()}=$devToolsAppBuildMode',
+          BuildCommandArgs.pubGet.asArg(negated: !runPubGet),
+        ]),
       );
       if (process.exitCode == 1) {
         throw Exception(
@@ -151,7 +151,7 @@ class ServeCommand extends Command {
 
     logStatus('running pub get for DDS in the local dart sdk');
     await processManager.runProcess(
-      CliCommand.from('dart', ['pub', 'get']),
+      CliCommand.dart(['pub', 'get']),
       workingDirectory: path.join(localDartSdkLocation, 'pkg', 'dds'),
     );
 
@@ -166,8 +166,7 @@ class ServeCommand extends Command {
 
     // This call will not exit until explicitly terminated by the user.
     await processManager.runProcess(
-      CliCommand.from(
-        'dart',
+      CliCommand.dart(
         [
           serveLocalScriptPath,
           '--devtools-build=$devToolsBuildLocation',

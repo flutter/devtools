@@ -63,6 +63,23 @@ ExtensionManager get extensionManager =>
 ServiceManager get serviceManager =>
     _accessGlobalOrThrow<ServiceManager>(globalName: 'serviceManager');
 
+/// A manager for interacting with the Dart Tooling Daemon, if available.
+///
+/// This manager stores the current [DTDConnection], which provides access to
+/// public methods registered by other DTD clients (for example, the IDE), as
+/// well as a minimal file sytsem API for reading, writing, and listing
+/// directories within the user's project.
+///
+/// [dtdManager] can only be accessed below the [DevToolsExtension] widget
+/// in the widget tree, since it is initialized as part of the
+/// [DevToolsExtension]'s [initState] lifecycle method.
+///
+/// DevTools extensions should not manually call [dtdManager.connect] or
+/// [dtdManager.disconnect], since this lifecycle is already handled by the
+/// [DevToolsExtension] widget.
+DTDManager get dtdManager =>
+    _accessGlobalOrThrow<DTDManager>(globalName: 'dtdManager');
+
 T _accessGlobalOrThrow<T>({required String globalName}) {
   final manager = globals[T] as T?;
   if (manager == null) {
@@ -134,22 +151,25 @@ class _DevToolsExtensionState extends State<DevToolsExtension>
   void _initGlobals() {
     setGlobal(ExtensionManager, ExtensionManager());
     setGlobal(ServiceManager, ServiceManager());
+    setGlobal(DTDManager, DTDManager());
     // TODO(kenz): pull the IDE theme from the url query params.
     setGlobal(IdeTheme, IdeTheme());
   }
 
-  void _shutdown() {
+  Future<void> _shutdown() async {
     (globals[ExtensionManager] as ExtensionManager?)?._dispose();
     removeGlobal(ExtensionManager);
     removeGlobal(ServiceManager);
     removeGlobal(IdeTheme);
+    await (globals[DTDManager] as DTDManager?)?.disconnect();
+    removeGlobal(DTDManager);
   }
 
   @override
-  void dispose() {
+  Future<void> dispose() async {
     // TODO(https://github.com/flutter/flutter/issues/10437): dispose is never
     // called on hot restart, so these resources leak for local development.
-    _shutdown();
+    unawaited(_shutdown());
     super.dispose();
   }
 

@@ -67,7 +67,7 @@ class ClassFilterDialog extends StatefulWidget {
   });
 
   final ClassFilter classFilter;
-  final Function(ClassFilter filter) onChanged;
+  final void Function(ClassFilter filter) onChanged;
   final String rootPackage;
 
   @override

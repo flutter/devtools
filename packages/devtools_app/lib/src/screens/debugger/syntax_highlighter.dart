@@ -16,11 +16,11 @@ import 'span_parser.dart';
 final _log = Logger('syntax_highlighter');
 
 class SyntaxHighlighter {
-  SyntaxHighlighter({source}) : source = source ?? '';
+  SyntaxHighlighter({String? source}) : source = source ?? '';
 
   SyntaxHighlighter.withGrammar({
     Grammar? grammar,
-    source,
+    String? source,
   }) : source = source ?? '' {
     _grammar = grammar;
   }

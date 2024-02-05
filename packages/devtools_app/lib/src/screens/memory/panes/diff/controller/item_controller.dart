@@ -9,10 +9,8 @@ import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../shared/heap/heap.dart';
 
 abstract class SnapshotItem extends DisposableController {
-  /// Number, that if shown in name, should be unique in the list.
-  ///
-  /// If the number is not expected to be shown in UI, it should be 0.
-  int get displayNumber;
+  /// Number to show with auto-generated names that may be non unique, like isolate name.
+  int? get displayNumber;
 
   ValueListenable<bool> get isProcessing => _isProcessing;
   final _isProcessing = ValueNotifier<bool>(false);
@@ -23,7 +21,7 @@ abstract class SnapshotItem extends DisposableController {
 
 class SnapshotDocItem extends SnapshotItem {
   @override
-  int get displayNumber => 0;
+  int? get displayNumber => null;
 
   @override
   bool get hasData => false;
@@ -31,13 +29,14 @@ class SnapshotDocItem extends SnapshotItem {
 
 class SnapshotInstanceItem extends SnapshotItem {
   SnapshotInstanceItem({
-    required this.displayNumber,
-    required this.isolateName,
+    this.displayNumber,
+    required this.defaultName,
   }) {
     _isProcessing.value = true;
   }
 
-  final String isolateName;
+  /// Automatically assigned name like isolate name or file name.
+  final String defaultName;
 
   AdaptedHeap? heap;
 
@@ -52,9 +51,11 @@ class SnapshotInstanceItem extends SnapshotItem {
   }
 
   @override
-  final int displayNumber;
+  final int? displayNumber;
 
-  String get name => nameOverride ?? '$isolateName-$displayNumber';
+  String get name =>
+      nameOverride ??
+      '$defaultName${displayNumber == null ? '' : '-$displayNumber'}';
 
   String? nameOverride;
 

@@ -219,23 +219,38 @@ Future<MockExtensionService> createMockExtensionServiceWithDefaults(
       .thenReturn(ImmediateValueNotifier(extensions));
 
   final stubEnabledStates = <String, ValueNotifier<ExtensionEnabledState>>{};
+
+  void computeVisibleExtensions() {
+    final visible = <DevToolsExtensionConfig>[];
+    for (final e in extensions) {
+      final state = stubEnabledStates[e.name.toLowerCase()]!.value;
+      if (state != ExtensionEnabledState.disabled) {
+        visible.add(e);
+      }
+    }
+    when(mockExtensionService.visibleExtensions)
+        .thenReturn(ValueNotifier(visible));
+  }
+
   for (final e in extensions) {
     stubEnabledStates[e.displayName] =
         ValueNotifier<ExtensionEnabledState>(ExtensionEnabledState.none);
     when(mockExtensionService.enabledStateListenable(e.name))
-        .thenReturn(stubEnabledStates[e.name.toLowerCase()]!);
+        .thenReturn(stubEnabledStates[e.displayName]!);
     when(mockExtensionService.enabledStateListenable(e.name.toLowerCase()))
-        .thenReturn(stubEnabledStates[e.name.toLowerCase()]!);
+        .thenReturn(stubEnabledStates[e.displayName]!);
     when(mockExtensionService.setExtensionEnabledState(e, enable: true))
         .thenAnswer((_) async {
-      stubEnabledStates[e.name.toLowerCase()]!.value =
-          ExtensionEnabledState.enabled;
+      stubEnabledStates[e.displayName]!.value = ExtensionEnabledState.enabled;
+      computeVisibleExtensions();
     });
     when(mockExtensionService.setExtensionEnabledState(e, enable: false))
         .thenAnswer((_) async {
       stubEnabledStates[e.name.toLowerCase()]!.value =
           ExtensionEnabledState.disabled;
+      computeVisibleExtensions();
     });
   }
+  computeVisibleExtensions();
   return mockExtensionService;
 }

@@ -294,10 +294,7 @@ class FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
               padding: const EdgeInsets.all(4.0),
               child: Text(
                 'Total Flex Factor: ${propertiesLocal.totalFlex.toInt()}',
-                textScaler: const TextScaler.linear(largeTextScaleFactor),
-                style: theme.boldTextStyle.copyWith(
-                  color: emphasizedTextColor,
-                ),
+                style: theme.regularTextStyleWithColor(emphasizedTextColor),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -333,7 +330,6 @@ class FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
                       propertiesLocal.verticalDirectionDescription,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
-                      textScaler: const TextScaler.linear(largeTextScaleFactor),
                       style: theme.regularTextStyleWithColor(
                         verticalTextColor(colorScheme),
                       ),
@@ -368,7 +364,6 @@ class FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
                     propertiesLocal.horizontalDirectionDescription,
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.center,
-                    textScaler: const TextScaler.linear(largeTextScaleFactor),
                     style: theme.regularTextStyleWithColor(
                       horizontalTextColor(colorScheme),
                     ),

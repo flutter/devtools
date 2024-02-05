@@ -161,7 +161,8 @@ class HttpRequestView extends StatelessWidget {
         }
 
         final isJson = switch (requestContentType) {
-          List() => requestContentType.any((e) => e.contains('json')),
+          List() =>
+            requestContentType.any((e) => (e as String).contains('json')),
           String() => requestContentType.contains('json'),
           _ => throw StateError(
               "Expected 'content-type' to be a List or String, but got: "
@@ -785,8 +786,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
     }
     final duration = Duration(
       microseconds: data.endTimestamp!.microsecondsSinceEpoch -
-          data.instantEvents.last.timestampMicros -
-          data.timelineMicrosecondsSinceEpoch(0),
+          data.instantEvents.last.timestamp.microsecondsSinceEpoch,
     );
     timingWidgets.add(
       _buildTimingRow(nextColor(), 'Response', duration),

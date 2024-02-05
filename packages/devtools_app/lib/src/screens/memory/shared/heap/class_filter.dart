@@ -37,7 +37,7 @@ enum FilteringTask {
   reuse,
 }
 
-typedef ApplyFilterCallback = Function(ClassFilter);
+typedef ApplyFilterCallback = void Function(ClassFilter);
 
 @immutable
 class ClassFilter {

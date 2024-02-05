@@ -122,7 +122,7 @@ class TimelineFlameChart extends FlameChart<PerformanceData, TimelineEvent> {
     required ValueListenable<TimelineEvent?> selectionNotifier,
     required ValueListenable<List<TimelineEvent>> searchMatchesNotifier,
     required ValueListenable<TimelineEvent?> activeSearchMatchNotifier,
-    required Function(TimelineEvent event) onDataSelected,
+    required void Function(TimelineEvent event) onDataSelected,
   }) : super(
           data,
           time: data.time,

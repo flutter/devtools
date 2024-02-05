@@ -171,7 +171,7 @@ void main() {
       'Syntax Highlighting (${useDarkTheme ? 'Dark' : 'Light'} Theme)',
       () {
         Widget buildSyntaxHighlightingTestContext(
-          Function(BuildContext) callback,
+          void Function(BuildContext) callback,
         ) {
           return MaterialApp.router(
             theme: themeFor(
@@ -324,8 +324,6 @@ void main() {
                   );
 
                   expect(children[18].toPlainText(), '\n');
-
-                  return Container();
                 },
               ),
             );
@@ -556,7 +554,6 @@ void main() {
                         color: colorCallback(Theme.of(context).colorScheme),
                       ),
                     );
-                    return Container();
                   },
                 ),
               );

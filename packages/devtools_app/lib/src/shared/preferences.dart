@@ -32,8 +32,6 @@ class PreferencesController extends DisposableController
       ValueNotifier<bool>(Logger.root.level == verboseLoggingLevel);
   static const _verboseLoggingStorageId = 'verboseLogging';
 
-  final denseModeEnabled = ValueNotifier<bool>(false);
-
   InspectorPreferencesController get inspector => _inspector;
   final _inspector = InspectorPreferencesController();
 
@@ -61,12 +59,6 @@ class PreferencesController extends DisposableController
     toggleVmDeveloperMode(value == 'true');
     addAutoDisposeListener(vmDeveloperModeEnabled, () {
       storage.setValue('ui.vmDeveloperMode', '${vmDeveloperModeEnabled.value}');
-    });
-
-    value = await storage.getValue('ui.denseMode');
-    toggleDenseMode(value == 'true');
-    addAutoDisposeListener(denseModeEnabled, () {
-      storage.setValue('ui.denseMode', '${denseModeEnabled.value}');
     });
 
     await _initVerboseLogging();
@@ -126,13 +118,6 @@ class PreferencesController extends DisposableController
   void toggleVerboseLogging(bool? enableVerboseLogging) {
     if (enableVerboseLogging != null) {
       verboseLoggingEnabled.value = enableVerboseLogging;
-    }
-  }
-
-  /// Change the value for the dense mode setting.
-  void toggleDenseMode(bool? enableDenseMode) {
-    if (enableDenseMode != null) {
-      denseModeEnabled.value = enableDenseMode;
     }
   }
 }
@@ -223,7 +208,7 @@ class InspectorPreferencesController extends DisposableController
             // the directories
             unawaited(preferences.inspector.loadPubRootDirectories());
           } else {
-            late Function() pausedListener;
+            late void Function() pausedListener;
 
             pausedListener = () {
               if (debuggerState?.isPaused.value == false) {

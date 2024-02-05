@@ -548,7 +548,7 @@ abstract class InspectorObjectGroupBase
             WidgetInspectorServiceExtensions.disposeGroup.name,
             groupName,
           )
-        : Future.value();
+        : Future<void>.value();
     disposed = true;
     return disposeComplete;
   }

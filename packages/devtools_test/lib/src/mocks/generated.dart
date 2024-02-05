@@ -50,5 +50,6 @@ import 'package:vm_service/vm_service.dart';
   MockSpec<IsolateState>(),
   MockSpec<Obj>(),
   MockSpec<VM>(),
+  MockSpec<VsCodeApi>(),
 ])
 void main() {}

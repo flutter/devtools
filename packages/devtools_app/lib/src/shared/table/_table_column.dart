@@ -53,7 +53,7 @@ class _ColumnHeader<T> extends StatelessWidget {
 
   final SortDirection sortDirection;
 
-  final Function(
+  final void Function(
     ColumnData<T> column,
     SortDirection direction, {
     ColumnData<T>? secondarySortColumn,

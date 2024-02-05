@@ -23,7 +23,7 @@ import 'simple_items.dart';
 
 final _log = Logger('utils');
 
-bool collectionEquals(e1, e2, {bool ordered = true}) {
+bool collectionEquals(Object? e1, Object? e2, {bool ordered = true}) {
   if (ordered) {
     return const DeepCollectionEquality().equals(e1, e2);
   }

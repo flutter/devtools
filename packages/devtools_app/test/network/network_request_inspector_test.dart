@@ -40,7 +40,7 @@ void main() {
             requests: [
               httpRequest!,
             ],
-            timestamp: 0,
+            timestamp: DateTime.fromMicrosecondsSinceEpoch(0),
           ),
         ),
       );
