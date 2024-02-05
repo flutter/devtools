@@ -26,7 +26,7 @@ class DartIOHttpInstantEvent {
   String get name => _event.event;
 
   /// The time the instant event was recorded.
-  int get timestampMicros => _event.timestamp;
+  DateTime get timestamp => _event.timestamp;
 
   /// The amount of time since the last instant event completed.
   TimeRange? get timeRange => _timeRange;
@@ -38,10 +38,9 @@ class DartIOHttpInstantEvent {
 /// An abstraction of an HTTP request made through dart:io.
 class DartIOHttpRequestData extends NetworkRequest {
   DartIOHttpRequestData(
-    int timelineMicrosBase,
     this._request, {
     bool requestFullDataFromVmService = true,
-  }) : super(timelineMicrosBase) {
+  }) {
     if (requestFullDataFromVmService && _request.isResponseComplete) {
       unawaited(getFullRequestData());
     }
@@ -89,17 +88,14 @@ class DartIOHttpRequestData extends NetworkRequest {
 
   bool get _hasError => _request.request?.hasError ?? false;
 
-  int? get _endTime =>
+  DateTime? get _endTime =>
       _hasError ? _request.endTime : _request.response?.endTime;
 
   @override
   Duration? get duration {
     if (inProgress || !isValid) return null;
     // Timestamps are in microseconds
-    final range = TimeRange()
-      ..start = Duration(microseconds: _request.startTime)
-      ..end = Duration(microseconds: _endTime!);
-    return range.duration;
+    return _endTime!.difference(_request.startTime);
   }
 
   /// Whether the request is safe to display in the UI.
@@ -189,10 +185,8 @@ class DartIOHttpRequestData extends NetworkRequest {
   /// All instant events logged to the timeline for this HTTP request.
   List<DartIOHttpInstantEvent> get instantEvents {
     if (_instantEvents == null) {
-      _instantEvents = [
-        for (final event in _request.request?.events ?? [])
-          DartIOHttpInstantEvent._(event),
-      ];
+      _instantEvents =
+          _request.events.map((e) => DartIOHttpInstantEvent._(e)).toList();
       _recalculateInstantEventTimes();
     }
     return _instantEvents!;
@@ -245,19 +239,10 @@ class DartIOHttpRequestData extends NetworkRequest {
   }
 
   @override
-  DateTime? get endTimestamp {
-    final endTime = _endTime;
-    return endTime == null
-        ? null
-        : DateTime.fromMicrosecondsSinceEpoch(
-            timelineMicrosecondsSinceEpoch(endTime),
-          );
-  }
+  DateTime? get endTimestamp => _endTime;
 
   @override
-  DateTime get startTimestamp => DateTime.fromMicrosecondsSinceEpoch(
-        timelineMicrosecondsSinceEpoch(_request.startTime),
-      );
+  DateTime get startTimestamp => _request.startTime;
 
   @override
   String? get status =>
@@ -310,12 +295,12 @@ class DartIOHttpRequestData extends NetworkRequest {
   String? _requestBody;
 
   void _recalculateInstantEventTimes() {
-    int lastTime = _request.startTime;
+    DateTime lastTime = _request.startTime;
     for (final instant in instantEvents) {
-      final instantTime = instant.timestampMicros;
+      final instantTime = instant.timestamp;
       instant._timeRange = TimeRange()
-        ..start = Duration(microseconds: lastTime)
-        ..end = Duration(microseconds: instantTime);
+        ..start = Duration(microseconds: lastTime.microsecondsSinceEpoch)
+        ..end = Duration(microseconds: instantTime.microsecondsSinceEpoch);
       lastTime = instantTime;
     }
   }
