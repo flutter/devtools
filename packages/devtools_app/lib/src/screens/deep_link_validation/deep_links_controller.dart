@@ -21,6 +21,11 @@ const domainErrorsThatCanBeFixedByGeneratedJson = {
   DomainError.fingerprints,
   DomainError.contentType,
 };
+const domainErrorsThatCanNotBeFixedByGeneratedJson = {
+  DomainError.httpsAccessibility,
+  DomainError.nonRedirtect,
+  DomainError.hostForm,
+};
 
 /// The phase of the deep link page.
 enum PagePhase {
@@ -293,10 +298,11 @@ class DeepLinksController extends DisposableController {
     }
 
     return linkdatas.map((linkdata) {
-      if (domainErrors[linkdata.domain]?.isNotEmpty ?? false) {
+      final errors = domainErrors[linkdata.domain];
+      if (errors != null && errors.isNotEmpty) {
         return LinkData(
           domain: linkdata.domain,
-          domainErrors: domainErrors[linkdata.domain]!,
+          domainErrors: errors,
           path: linkdata.path,
           pathError: linkdata.pathError,
           os: linkdata.os,

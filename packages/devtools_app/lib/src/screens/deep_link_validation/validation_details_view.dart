@@ -209,37 +209,50 @@ class _DomainFixPanel extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Text('How to fix:'),
+            for (final error in domainErrorsThatCanNotBeFixedByGeneratedJson)
+              if (linkData.domainErrors.contains(error))
+                Text(
+                  '• ${error.fixDetails}',
+                  style: Theme.of(context).subtleTextStyle,
+                ),
             if (linkData.domainErrors.any(
               (error) =>
                   domainErrorsThatCanBeFixedByGeneratedJson.contains(error),
             ))
               _GenerateAssetLinksPanel(controller: controller),
-            const Text('Failure Details'),
-            for (final domainError in linkData.domainErrors)
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+            ExpansionTile(
+              title: Text(
+                'More failure details',
+                style: Theme.of(context).regularTextStyle,
+              ),
+              children: [
+                for (final domainError in linkData.domainErrors)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(
-                        Icons.error,
-                        color: Theme.of(context).colorScheme.error,
-                        size: defaultIconSize,
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.error,
+                            color: Theme.of(context).colorScheme.error,
+                            size: defaultIconSize,
+                          ),
+                          const SizedBox(width: denseSpacing),
+                          Text(domainError.title),
+                        ],
                       ),
-                      const SizedBox(width: denseSpacing),
-                      Text(domainError.title),
+                      Padding(
+                        padding: EdgeInsets.only(
+                            left: defaultIconSize + denseSpacing),
+                        child: Text(
+                          domainError.fixDetails,
+                          style: Theme.of(context).subtleTextStyle,
+                        ),
+                      ),
                     ],
                   ),
-                  Padding(
-                    padding:
-                        EdgeInsets.only(left: defaultIconSize + denseSpacing),
-                    child: Text(
-                      domainError.fixDetails,
-                      style: Theme.of(context).subtleTextStyle,
-                    ),
-                  ),
-                ],
-              ),
+              ],
+            ),
           ],
         ),
       ),
@@ -257,6 +270,7 @@ class _GenerateAssetLinksPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           '• Add the new recommended Digital Asset Links JSON file to the failed website domain at the correct location.\n'
