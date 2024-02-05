@@ -255,9 +255,7 @@ class ServerApi {
         );
       case DtdApi.apiGetDtdUri:
         return api.setCompleted(
-          json.encode({
-            DtdApi.uriPropertyName: dtdUri,
-          }),
+          json.encode({DtdApi.uriPropertyName: dtdUri}),
         );
       default:
         return api.notImplemented();
