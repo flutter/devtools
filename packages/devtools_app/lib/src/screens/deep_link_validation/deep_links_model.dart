@@ -77,8 +77,8 @@ enum DomainError {
   // category is Android validation API failures.
   other('Check failed', '');
 
-  const DomainError(this.description, this.fixDetails);
-  final String description;
+  const DomainError(this.title, this.fixDetails);
+  final String title;
   final String fixDetails;
 }
 

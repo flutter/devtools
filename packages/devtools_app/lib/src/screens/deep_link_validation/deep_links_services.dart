@@ -37,10 +37,9 @@ const Map<String, DomainError> checkNametoDomainError = {
 };
 
 class GenerateAssetLinksResult {
+  GenerateAssetLinksResult(this.errorCode, this.generatedString);
   String errorCode;
   String generatedString;
-
-  GenerateAssetLinksResult(this.errorCode, this.generatedString);
 }
 
 class DeepLinksServices {
@@ -96,7 +95,7 @@ class DeepLinksServices {
     );
     final Map<String, dynamic> result =
         json.decode(response.body) as Map<String, dynamic>;
-    String errorCode = result[_errorCodeKey] ?? '';
+    final String errorCode = result[_errorCodeKey] ?? '';
     String generatedContent = '';
 
     if (result[_domainsKey] != null) {

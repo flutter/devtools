@@ -15,6 +15,12 @@ import 'deep_links_model.dart';
 import 'deep_links_services.dart';
 
 typedef _DomainAndPath = ({String domain, String path});
+const domainErrorsThatCanBeFixedByGeneratedJson = {
+  DomainError.existence,
+  DomainError.appIdentifier,
+  DomainError.fingerprints,
+  DomainError.contentType,
+};
 
 /// The phase of the deep link page.
 enum PagePhase {
@@ -253,6 +259,7 @@ class DeepLinksController extends DisposableController {
   final deepLinksServices = DeepLinksServices();
 
   Future<void> _generateAssetLinks() async {
+    generatedAssetLinksForSelectedLink.value = null;
     generatedAssetLinksForSelectedLink.value =
         await deepLinksServices.generateAssetLinks(
       domain: selectedLink.value!.domain,

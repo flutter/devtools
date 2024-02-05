@@ -39,8 +39,8 @@ class ValidationDetailView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'This tool assistants helps you diagnose Universal Links, App Links,'
-                ' and Custom Schemes in your app. Web check are done for the web association'
+                'This tool assistants helps you diagnose App Links in your app. '
+                'Web check are done for the web association'
                 ' file on your website. App checks are done for the intent filters in'
                 ' the manifest and info.plist file, routing issues, URL format, etc.',
                 style: Theme.of(context).subtleTextStyle,
@@ -123,7 +123,7 @@ class _DomainCheckTable extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: intermediateSpacing),
-        Text('Domain check', style: Theme.of(context).textTheme.titleSmall),
+        Text('Web check', style: Theme.of(context).textTheme.titleSmall),
         const SizedBox(height: denseSpacing),
         DataTable(
           headingRowColor: MaterialStateProperty.all(
@@ -207,6 +207,13 @@ class _DomainFixPanel extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            const Text('How to fix:'),
+            if (linkData.domainErrors.any(
+              (error) =>
+                  domainErrorsThatCanBeFixedByGeneratedJson.contains(error),
+            ))
+              _GenerateAssetLinksPanel(controller: controller),
+            const Text('Failure Details'),
             for (final domainError in linkData.domainErrors)
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -219,7 +226,7 @@ class _DomainFixPanel extends StatelessWidget {
                         size: defaultIconSize,
                       ),
                       const SizedBox(width: denseSpacing),
-                      Text(domainError.description),
+                      Text(domainError.title),
                     ],
                   ),
                   Padding(
@@ -232,81 +239,93 @@ class _DomainFixPanel extends StatelessWidget {
                   ),
                 ],
               ),
-            const Divider(height: denseSpacing),
-            const Text('How to fix:'),
-            Text(
-              'Add the new recommended Digital Asset Links JSON file to the failed website domain at the correct location.\n'
-              'Update and publish recommend Digital Asset Links JSON file below to this location: ',
-              style: Theme.of(context).subtleTextStyle,
-            ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Card(
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(4.0)),
-                ),
-                color: Theme.of(context).colorScheme.outline,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
-                  child: SelectionArea(
-                    child: Text(
-                      'https://${linkData.domain}/.well-known/assetlinks.json',
-                      style: Theme.of(context).regularTextStyle.copyWith(
-                            color: Colors.black,
-                            fontWeight: FontWeight.w500,
-                          ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            Card(
-              color: Theme.of(context).colorScheme.surface,
-              child: Padding(
-                padding: const EdgeInsets.all(denseSpacing),
-                child: ValueListenableBuilder(
-                  valueListenable:
-                      controller.generatedAssetLinksForSelectedLink,
-                  builder: (
-                    _,
-                    GenerateAssetLinksResult? generatedAssetLinks,
-                    __,
-                  ) =>
-                      generatedAssetLinks != null
-                          ? generatedAssetLinks.errorCode.isNotEmpty
-                              ? Text('Content generation failed.\n'
-                                  'Cannot find supplemental_sha256_cert_fingerprints corresponding to this application id :'
-                                  '`${controller.applicationId}` from Play Developer Console.')
-                              : Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Flexible(
-                                      child: SelectionArea(
-                                        child: Text(generatedAssetLinks
-                                            .generatedString),
-                                      ),
-                                    ),
-                                    IconButton(
-                                      onPressed: () async =>
-                                          await Clipboard.setData(
-                                        ClipboardData(
-                                          text: generatedAssetLinks
-                                              .generatedString,
-                                        ),
-                                      ),
-                                      icon: const Icon(Icons.copy_rounded),
-                                    ),
-                                  ],
-                                )
-                          : const CenteredCircularProgressIndicator(),
-                ),
-              ),
-            ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _GenerateAssetLinksPanel extends StatelessWidget {
+  const _GenerateAssetLinksPanel({
+    required this.controller,
+  });
+
+  final DeepLinksController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          '• Add the new recommended Digital Asset Links JSON file to the failed website domain at the correct location.\n'
+          'Update and publish recommend Digital Asset Links JSON file below to this location: ',
+          style: Theme.of(context).subtleTextStyle,
+        ),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: Card(
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(4.0)),
+            ),
+            color: Theme.of(context).colorScheme.outline,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
+              child: SelectionArea(
+                child: Text(
+                  'https://${controller.selectedLink.value!.domain}/.well-known/assetlinks.json',
+                  style: Theme.of(context).regularTextStyle.copyWith(
+                        color: Colors.black,
+                        fontWeight: FontWeight.w500,
+                      ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        Card(
+          color: Theme.of(context).colorScheme.surface,
+          child: Padding(
+            padding: const EdgeInsets.all(denseSpacing),
+            child: ValueListenableBuilder(
+              valueListenable: controller.generatedAssetLinksForSelectedLink,
+              builder: (
+                _,
+                GenerateAssetLinksResult? generatedAssetLinks,
+                __,
+              ) =>
+                  generatedAssetLinks != null
+                      ? generatedAssetLinks.errorCode.isNotEmpty
+                          ? Text('Content generation failed.\n'
+                              'Cannot find supplemental_sha256_cert_fingerprints corresponding to this application id :'
+                              '`${controller.applicationId}` from Play Developer Console.')
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Flexible(
+                                  child: SelectionArea(
+                                    child: Text(
+                                      generatedAssetLinks.generatedString,
+                                    ),
+                                  ),
+                                ),
+                                IconButton(
+                                  onPressed: () async =>
+                                      await Clipboard.setData(
+                                    ClipboardData(
+                                      text: generatedAssetLinks.generatedString,
+                                    ),
+                                  ),
+                                  icon: const Icon(Icons.copy_rounded),
+                                ),
+                              ],
+                            )
+                      : const CenteredCircularProgressIndicator(),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
