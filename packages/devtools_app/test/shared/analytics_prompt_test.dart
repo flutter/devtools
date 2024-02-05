@@ -18,6 +18,7 @@ void main() {
   late AnalyticsController controller;
 
   late bool didCallEnableAnalytics;
+  late bool didMarkConsentMessageAsShown;
 
   Widget wrapWithAnalytics(
     Widget child, {
@@ -36,6 +37,7 @@ void main() {
   group('AnalyticsPrompt', () {
     setUp(() {
       didCallEnableAnalytics = false;
+      didMarkConsentMessageAsShown = false;
       setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
       setGlobal(IdeTheme, IdeTheme());
     });
@@ -50,6 +52,9 @@ void main() {
               didCallEnableAnalytics = true;
             },
             consentMessage: 'fake message',
+            confirmConsentMessageShown: () {
+              didMarkConsentMessageAsShown = true;
+            },
           );
         });
 
@@ -58,8 +63,12 @@ void main() {
           windowSize,
           (WidgetTester tester) async {
             expect(controller.analyticsEnabled.value, isTrue);
-            expect(didCallEnableAnalytics, isTrue,
-                reason: 'Analytics is enabled on first run');
+            expect(
+              didCallEnableAnalytics,
+              isTrue,
+              reason: 'Analytics is enabled on first run',
+            );
+            expect(didMarkConsentMessageAsShown, isFalse);
             final prompt = wrapWithAnalytics(
               const AnalyticsPrompt(
                 child: Text('Child Text'),
@@ -69,10 +78,16 @@ void main() {
             await tester.pump();
             expect(
               find.text('Send usage statistics for DevTools?'),
-              findsNothing,
+              findsOne,
+              reason: 'The consent message should be shown on first run',
             );
             expect(controller.analyticsEnabled.value, isTrue);
-            expect(didCallEnableAnalytics, isFalse);
+            expect(
+              didMarkConsentMessageAsShown,
+              isTrue,
+              reason:
+                  'The consent message should be marked as shown after displaying',
+            );
           },
         );
 
