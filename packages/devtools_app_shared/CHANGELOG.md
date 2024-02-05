@@ -1,6 +1,7 @@
 ## 0.0.10-wip
 * Add `DTDManager` class and export from `service.dart`.
 * Add `showDevToolsDialog` helper method.
+* Add `FlexSplitColumn` and `BlankHeader` common widgets.
 * Bump `package:vm_service` dependency to ^14.0.0.
 
 ## 0.0.9

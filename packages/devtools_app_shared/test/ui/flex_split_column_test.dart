@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/shared/flex_split_column.dart';
-import 'package:devtools_app/src/shared/primitives/utils.dart';
+import 'package:collection/collection.dart';
+import 'package:devtools_app_shared/src/ui/flex_split_column.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -45,7 +45,7 @@ void main() {
         totalHeight,
       );
       expect(
-        collectionEquals(
+        const DeepCollectionEquality().equals(
           adjustedFractions,
           [
             0.2857142857142857,
@@ -65,7 +65,8 @@ void main() {
         headers,
       );
       expect(
-        collectionEquals(adjustedFractions, [60.0, 10.0, 10.0, 10.0]),
+        const DeepCollectionEquality()
+            .equals(adjustedFractions, [60.0, 10.0, 10.0, 10.0]),
         isTrue,
       );
     });
