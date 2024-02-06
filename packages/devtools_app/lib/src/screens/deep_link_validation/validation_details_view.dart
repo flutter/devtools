@@ -2,12 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../shared/common_widgets.dart';
+import '../../shared/config_specific/launch_url/launch_url.dart';
 import '../../shared/ui/colors.dart';
 import 'deep_link_list_view.dart';
 import 'deep_links_controller.dart';
@@ -55,13 +58,14 @@ class ValidationDetailView extends StatelessWidget {
                   viewType == TableViewType.singleUrlView)
                 _PathCheckTable(),
               const SizedBox(height: extraLargeSpacing),
-              Align(
-                alignment: Alignment.bottomRight,
-                child: FilledButton(
-                  onPressed: () async => await controller.validateLinks(),
-                  child: const Text('Recheck all'),
+              if (linkData.domainErrors.isNotEmpty)
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: FilledButton(
+                    onPressed: () async => await controller.validateLinks(),
+                    child: const Text('Recheck all'),
+                  ),
                 ),
-              ),
               if (viewType == TableViewType.domainView)
                 _DomainAssociatedLinksPanel(controller: controller),
             ],
@@ -208,19 +212,30 @@ class _DomainFixPanel extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('How to fix:'),
-            for (final error in domainErrorsThatCanNotBeFixedByGeneratedJson)
-              if (linkData.domainErrors.contains(error))
-                Text(
-                  '• ${error.fixDetails}',
-                  style: Theme.of(context).subtleTextStyle,
-                ),
+            _FailureDetails(linkData: linkData),
             if (linkData.domainErrors.any(
               (error) =>
                   domainErrorsThatCanBeFixedByGeneratedJson.contains(error),
             ))
               _GenerateAssetLinksPanel(controller: controller),
-            _FailureDetails(linkData: linkData),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                onPressed: () {
+                  unawaited(
+                    launchUrl(
+                      'https://developer.android.com/training/app-links/verify-android-applinks',
+                    ),
+                  );
+                },
+                style: const ButtonStyle().copyWith(
+                  textStyle: MaterialStateProperty.resolveWith<TextStyle>((_) {
+                    return Theme.of(context).textTheme.bodySmall!;
+                  }),
+                ),
+                child: const Text('View developer guide'),
+              ),
+            ),
           ],
         ),
       ),
@@ -237,78 +252,99 @@ class _GenerateAssetLinksPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '• Add the new recommended Digital Asset Links JSON file to the failed website domain at the correct location.\n'
-          'Update and publish recommend Digital Asset Links JSON file below to this location: ',
-          style: Theme.of(context).subtleTextStyle,
-        ),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: Card(
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(4.0)),
+    return ValueListenableBuilder(
+      valueListenable: controller.generatedAssetLinksForSelectedLink,
+      builder: (
+        _,
+        GenerateAssetLinksResult? generatedAssetLinks,
+        __,
+      ) {
+        if (generatedAssetLinks != null &&
+            generatedAssetLinks.errorCode.isNotEmpty) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Recommended Asset Links Json file :'),
+              const SizedBox(height: denseSpacing),
+              Text(
+                'Not able to generate assetlinks.json, because the app ${controller.applicationId} is not uploaded to Google Play.',
+                style: Theme.of(context).subtleTextStyle,
+              ),
+            ],
+          );
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Divider(),
+            Text(
+              'Recommended Asset Links Json file :',
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
-            color: Theme.of(context).colorScheme.outline,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
-              child: SelectionArea(
-                child: Text(
-                  'https://${controller.selectedLink.value!.domain}/.well-known/assetlinks.json',
-                  style: Theme.of(context).regularTextStyle.copyWith(
-                        color: Colors.black,
-                        fontWeight: FontWeight.w500,
-                      ),
+            const SizedBox(height: denseSpacing),
+            Card(
+              color: Theme.of(context).colorScheme.alternatingBackgroundColor1,
+              surfaceTintColor: Colors.transparent,
+              elevation: 0.0,
+              child: Padding(
+                padding: const EdgeInsets.all(denseSpacing),
+                child: generatedAssetLinks != null
+                    ? Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Flexible(
+                            child: SelectionArea(
+                              child: Text(
+                                generatedAssetLinks.generatedString,
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () async => await Clipboard.setData(
+                              ClipboardData(
+                                text: generatedAssetLinks.generatedString,
+                              ),
+                            ),
+                            icon: const Icon(Icons.copy_rounded),
+                          ),
+                        ],
+                      )
+                    : const CenteredCircularProgressIndicator(),
+              ),
+            ),
+            const SizedBox(height: denseSpacing),
+            Text(
+              'Update and publish this new recommended Digital Asset Links JSON file below at this location:',
+              style: Theme.of(context).subtleTextStyle,
+            ),
+            const SizedBox(height: denseSpacing),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Card(
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(4.0)),
+                ),
+                color: Theme.of(context).colorScheme.outline,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
+                  child: SelectionArea(
+                    child: Text(
+                      'https://${controller.selectedLink.value!.domain}/.well-known/assetlinks.json',
+                      style: Theme.of(context).regularTextStyle.copyWith(
+                            color: Colors.black,
+                            fontWeight: FontWeight.w500,
+                          ),
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
-        ),
-        Card(
-          color: Theme.of(context).colorScheme.surface,
-          child: Padding(
-            padding: const EdgeInsets.all(denseSpacing),
-            child: ValueListenableBuilder(
-              valueListenable: controller.generatedAssetLinksForSelectedLink,
-              builder: (
-                _,
-                GenerateAssetLinksResult? generatedAssetLinks,
-                __,
-              ) =>
-                  generatedAssetLinks != null
-                      ? generatedAssetLinks.errorCode.isNotEmpty
-                          ? Text('Content generation failed.\n'
-                              'Cannot find supplemental_sha256_cert_fingerprints corresponding to this application id :'
-                              '`${controller.applicationId}` from Play Developer Console.')
-                          : Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Flexible(
-                                  child: SelectionArea(
-                                    child: Text(
-                                      generatedAssetLinks.generatedString,
-                                    ),
-                                  ),
-                                ),
-                                IconButton(
-                                  onPressed: () async =>
-                                      await Clipboard.setData(
-                                    ClipboardData(
-                                      text: generatedAssetLinks.generatedString,
-                                    ),
-                                  ),
-                                  icon: const Icon(Icons.copy_rounded),
-                                ),
-                              ],
-                            )
-                      : const CenteredCircularProgressIndicator(),
-            ),
-          ),
-        ),
-      ],
+            const SizedBox(height: denseSpacing),
+          ],
+        );
+      },
     );
   }
 }
@@ -322,16 +358,15 @@ class _FailureDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ExpansionTile(
-      title: Text(
-        'More failure details',
-        style: Theme.of(context).regularTextStyle,
-      ),
+    final errorCount = linkData.domainErrors.length;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for (final domainError in linkData.domainErrors)
+        for (var i = 0; i < errorCount; i++)
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const SizedBox(height: densePadding),
               Row(
                 children: [
                   Icon(
@@ -340,15 +375,17 @@ class _FailureDetails extends StatelessWidget {
                     size: defaultIconSize,
                   ),
                   const SizedBox(width: denseSpacing),
-                  Text(domainError.title),
+                  Text('Issue ${i + 1} :${linkData.domainErrors[i].title}'),
                 ],
               ),
+              const SizedBox(height: densePadding),
               Padding(
                 padding: EdgeInsets.only(
                   left: defaultIconSize + denseSpacing,
                 ),
                 child: Text(
-                  domainError.explanation,
+                  linkData.domainErrors[i].explanation +
+                      linkData.domainErrors[i].fixDetails,
                   style: Theme.of(context).subtleTextStyle,
                 ),
               ),

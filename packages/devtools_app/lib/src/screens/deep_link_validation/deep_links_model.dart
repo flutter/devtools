@@ -33,7 +33,7 @@ enum DomainError {
         'domain name, exists under your domain.',
     'Add a Digital Asset Links JSON file to all of the '
         'failed website domains at the following location: '
-        'https://[domain.name]/.well-known/assetlinks.json',
+        'https://[domain.name]/.well-known/assetlinks.json. See the following recommended asset link json file. ',
   ),
   // Asset link file should define a link to this app.
   appIdentifier(
@@ -44,7 +44,7 @@ enum DomainError {
     'Ensure your Digital Asset Links JSON file declares the '
         'correct package name with the "android_app" namespace for '
         'all of the failed website domains. Also, confirm that the '
-        'app is available in the Google Play store.',
+        'app is available in the Google Play store. See the following recommended asset link json file. ',
   ),
   // Asset link file should contain the correct fingerprint.
   fingerprints(
@@ -55,7 +55,7 @@ enum DomainError {
     'Add sha256_cert_fingerprints to the Digital Asset Links JSON '
         'file for all of the failed website domains. If the fingerprint '
         'has already been added, make sure it\'s correct and that the '
-        '"android_app" namespace is declared on it.',
+        '"android_app" namespace is declared on it. See the following recommended asset link json file. ',
   ),
   // Asset link file should be served with the correct content type.
   contentType(
@@ -63,7 +63,7 @@ enum DomainError {
     'This test checks your Digital Asset Links JSON file for content type '
         'validation, which defines the format of the JSON file. This allows '
         'the mobile device to verify ownership of the app.',
-    'Ensure the content-type is "application/json" for all of the failed website domains',
+    'Ensure the content-type is "application/json" for all of the failed website domains. See the following recommended asset link json file. ',
   ),
   // Asset link file should be accessible via https.
   httpsAccessibility(
