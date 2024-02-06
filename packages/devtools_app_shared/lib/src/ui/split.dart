@@ -17,6 +17,9 @@ import '../utils/utils.dart';
 ///
 /// [initialFractions] defines how much space to give each child when building
 /// this widget.
+/// 
+/// [minSizes] defines the minimum size that each child can be set to when
+/// adjusting the sizes of the children.
 final class Split extends StatefulWidget {
   /// Builds a split oriented along [axis].
   Split({

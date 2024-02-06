@@ -17,7 +17,6 @@ import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
 import '../../shared/diagnostics/primitives/source_location.dart';
-import '../../shared/flex_split_column.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/listenable.dart';
 import '../../shared/primitives/utils.dart';
