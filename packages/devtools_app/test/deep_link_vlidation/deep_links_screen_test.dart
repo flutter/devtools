@@ -5,6 +5,7 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/deep_link_validation/deep_link_list_view.dart';
 import 'package:devtools_app/src/screens/deep_link_validation/deep_links_model.dart';
+import 'package:devtools_app/src/screens/deep_link_validation/deep_links_services.dart';
 import 'package:devtools_app/src/screens/deep_link_validation/validation_details_view.dart';
 import 'package:devtools_app/src/shared/directory_picker.dart';
 import 'package:devtools_app_shared/ui.dart';
@@ -491,7 +492,10 @@ class DeepLinksTestController extends DeepLinksController {
   void selectLink(LinkData linkdata) async {
     selectedLink.value = linkdata;
     if (linkdata.domainErrors.isNotEmpty) {
-      generatedAssetLinksForSelectedLink.value = 'fake generated content';
+      generatedAssetLinksForSelectedLink.value = GenerateAssetLinksResult(
+        '',
+        'fake generated content',
+      );
     }
   }
 }
