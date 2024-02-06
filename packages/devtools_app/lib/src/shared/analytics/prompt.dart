@@ -99,6 +99,19 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt>
     final consentMessageRegExpResults =
         parseAnalyticsConsentMessage(controller.consentMessage);
 
+    if (consentMessageRegExpResults == null) {
+      return RichText(
+        text: TextSpan(
+          children: [
+            TextSpan(
+              text: controller.consentMessage,
+              style: textTheme.titleMedium,
+            ),
+          ],
+        ),
+      );
+    }
+
     return RichText(
       text: TextSpan(
         children: [
@@ -159,14 +172,26 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt>
 /// `package:unified_analytics` so that the URL can be
 /// separated from the block of text so that we can have a
 /// hyperlink in the displayed consent message.
-List<String> parseAnalyticsConsentMessage(String consentMessage) {
+List<String>? parseAnalyticsConsentMessage(String consentMessage) {
   final results = <String>[];
   final RegExp pattern =
       RegExp(r'^([\S\s]*)(https?:\/\/[^\s]+)(\)\.)$', multiLine: true);
 
-  pattern.allMatches(consentMessage).first.groups([1, 2, 3]).forEach((element) {
+  final matches = pattern.allMatches(consentMessage);
+  if (matches.isEmpty) {
+    return null;
+  }
+
+  matches.first.groups([1, 2, 3]).forEach((element) {
     results.add(element!);
   });
+
+  // There should be 3 groups returned if correctly parsed, one
+  // for most of the text, one for the URL, and one for what comes
+  // after the URL
+  if (results.length != 3) {
+    return null;
+  }
 
   return results;
 }
