@@ -11,6 +11,7 @@ import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
+import 'package:unified_analytics/src/constants.dart' as unified_analytics;
 
 const windowSize = Size(2000.0, 1000.0);
 
@@ -33,6 +34,13 @@ void main() {
       child: child,
     );
   }
+
+  test('Unit test parseAnalyticsConsentMessage with consent message', () {
+    final result = parseAnalyticsConsentMessage(unified_analytics.kToolsMessage);
+    
+    expect(result, isNotEmpty);
+    expect(result, hasLength(3));
+  });
 
   group('AnalyticsPrompt', () {
     setUp(() {
