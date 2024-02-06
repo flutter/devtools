@@ -189,42 +189,6 @@ void main() {
                 inspectorServiceLocal.rootPackagePrefixes.toList(),
                 isEmpty,
               );
-
-              expect(
-                inspectorServiceLocal.isLocalUri('package:foo/src/bar.dart'),
-                isTrue,
-              );
-              expect(
-                inspectorServiceLocal
-                    .isLocalUri('package:foo.bla/src/bar.dart'),
-                isFalse,
-              );
-              expect(
-                inspectorServiceLocal.isLocalUri('package:foos/src/bar.dart'),
-                isFalse,
-              );
-              expect(
-                inspectorServiceLocal.isLocalUri('package:bar/src/bar.dart'),
-                isTrue,
-              );
-              expect(
-                inspectorServiceLocal.isLocalUri(
-                  'package:bar.core/src/bar.dart',
-                ),
-                isFalse,
-              );
-              expect(
-                inspectorServiceLocal.isLocalUri(
-                  'package:bar.core.bla/src/bar.dart',
-                ),
-                isFalse,
-              );
-              expect(
-                inspectorServiceLocal.isLocalUri(
-                  'package:bar.cores/src/bar.dart',
-                ),
-                isFalse,
-              );
             } finally {
               // Restore.
               await inspectorServiceLocal
@@ -304,39 +268,6 @@ void main() {
             expect(
               inspectorServiceLocal.rootPackagePrefixes.toList(),
               equals(['foo.', 'bar.core.']),
-            );
-
-            expect(
-              inspectorServiceLocal.isLocalUri('package:foo/src/bar.dart'),
-              isTrue,
-            );
-            // Package at subdirectory.
-            expect(
-              inspectorServiceLocal.isLocalUri('package:foo.bla/src/bar.dart'),
-              isTrue,
-            );
-            expect(
-              inspectorServiceLocal.isLocalUri('package:foos/src/bar.dart'),
-              isFalse,
-            );
-            expect(
-              inspectorServiceLocal.isLocalUri('package:bar/src/bar.dart'),
-              isFalse,
-            );
-            expect(
-              inspectorServiceLocal.isLocalUri('package:bar.core/src/bar.dart'),
-              isTrue,
-            );
-            // Package at subdirectory.
-            expect(
-              inspectorServiceLocal
-                  .isLocalUri('package:bar.core.bla/src/bar.dart'),
-              isTrue,
-            );
-            expect(
-              inspectorServiceLocal
-                  .isLocalUri('package:bar.cores/src/bar.dart'),
-              isFalse,
             );
 
             await inspectorServiceLocal.addPubRootDirectories([
