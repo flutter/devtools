@@ -99,6 +99,8 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt>
     final consentMessageRegExpResults =
         parseAnalyticsConsentMessage(controller.consentMessage);
 
+    // When failing to parse the consent message, fallback to
+    // displaying the consent message in its regular form
     if (consentMessageRegExpResults == null) {
       return RichText(
         text: TextSpan(

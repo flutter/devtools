@@ -795,10 +795,15 @@ Future<bool> disableAnalytics() async {
   return await setAnalyticsEnabled(false);
 }
 
+/// Fetch the legal consent message for telemetry collection for
+/// package:unified_analyitcs from the server
 Future<String> fetchAnalyticsConsentMessage() async {
   return await server.fetchAnalyticsConsentMessage();
 }
 
+/// Communicates with the server to confirm with package:unified_analyitcs
+/// that the consent message has successfully been shown and to allow events
+/// to be recorded if the user has decided to remain opted in.
 Future<void> markConsentMessageAsShown() async {
   return await server.markConsentMessageAsShown();
 }
