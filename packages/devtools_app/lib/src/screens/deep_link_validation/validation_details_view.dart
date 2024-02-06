@@ -124,18 +124,19 @@ class _DomainCheckTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final linkData = controller.selectedLink.value!;
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: intermediateSpacing),
-        Text('Web check', style: Theme.of(context).textTheme.titleSmall),
+        Text('Web check', style: theme.textTheme.titleSmall),
         const SizedBox(height: denseSpacing),
         DataTable(
           headingRowColor: MaterialStateProperty.all(
-            Theme.of(context).colorScheme.deeplinkTableHeaderColor,
+            theme.colorScheme.deeplinkTableHeaderColor,
           ),
           dataRowColor: MaterialStateProperty.all(
-            Theme.of(context).colorScheme.alternatingBackgroundColor2,
+            theme.colorScheme.alternatingBackgroundColor2,
           ),
           columns: const [
             DataColumn(label: Text('OS')),
@@ -157,13 +158,13 @@ class _DomainCheckTable extends StatelessWidget {
                             '${linkData.domainErrors.length} '
                             '${pluralize('Check', linkData.domainErrors.length)} failed',
                             style: TextStyle(
-                              color: Theme.of(context).colorScheme.error,
+                              color: theme.colorScheme.error,
                             ),
                           )
                         : Text(
                             'No issues found',
                             style: TextStyle(
-                              color: Theme.of(context).colorScheme.green,
+                              color: theme.colorScheme.green,
                             ),
                           ),
                   ),
@@ -177,8 +178,7 @@ class _DomainCheckTable extends StatelessWidget {
                   DataCell(
                     Text(
                       'No issues found',
-                      style:
-                          TextStyle(color: Theme.of(context).colorScheme.green),
+                      style: TextStyle(color: theme.colorScheme.green),
                     ),
                   ),
                 ],
@@ -252,6 +252,7 @@ class _GenerateAssetLinksPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return ValueListenableBuilder(
       valueListenable: controller.generatedAssetLinksForSelectedLink,
       builder: (
@@ -268,7 +269,7 @@ class _GenerateAssetLinksPanel extends StatelessWidget {
               const SizedBox(height: denseSpacing),
               Text(
                 'Not able to generate assetlinks.json, because the app ${controller.applicationId} is not uploaded to Google Play.',
-                style: Theme.of(context).subtleTextStyle,
+                style: theme.subtleTextStyle,
               ),
             ],
           );
@@ -280,11 +281,11 @@ class _GenerateAssetLinksPanel extends StatelessWidget {
             const Divider(),
             Text(
               'Recommended Asset Links Json file :',
-              style: Theme.of(context).textTheme.bodyMedium,
+              style: theme.textTheme.bodyMedium,
             ),
             const SizedBox(height: denseSpacing),
             Card(
-              color: Theme.of(context).colorScheme.alternatingBackgroundColor1,
+              color: theme.colorScheme.alternatingBackgroundColor1,
               surfaceTintColor: Colors.transparent,
               elevation: 0.0,
               child: Padding(
@@ -317,7 +318,7 @@ class _GenerateAssetLinksPanel extends StatelessWidget {
             const SizedBox(height: denseSpacing),
             Text(
               'Update and publish this new recommended Digital Asset Links JSON file below at this location:',
-              style: Theme.of(context).subtleTextStyle,
+              style: theme.subtleTextStyle,
             ),
             const SizedBox(height: denseSpacing),
             Align(
@@ -326,16 +327,16 @@ class _GenerateAssetLinksPanel extends StatelessWidget {
                 shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.all(Radius.circular(4.0)),
                 ),
-                color: Theme.of(context).colorScheme.outline,
+                color: theme.colorScheme.outline,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
                   child: SelectionArea(
                     child: Text(
                       'https://${controller.selectedLink.value!.domain}/.well-known/assetlinks.json',
-                      style: Theme.of(context).regularTextStyle.copyWith(
-                            color: Colors.black,
-                            fontWeight: FontWeight.w500,
-                          ),
+                      style: theme.regularTextStyle.copyWith(
+                        color: Colors.black,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
                 ),
@@ -405,16 +406,17 @@ class _DomainAssociatedLinksPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final linkData = controller.selectedLink.value!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
           'Associated deep link URL',
-          style: Theme.of(context).textTheme.titleSmall,
+          style: theme.textTheme.titleSmall,
         ),
         Card(
-          color: Theme.of(context).colorScheme.surface,
+          color: theme.colorScheme.surface,
           shape: const RoundedRectangleBorder(),
           child: Padding(
             padding: const EdgeInsets.all(denseSpacing),
@@ -431,7 +433,7 @@ class _DomainAssociatedLinksPanel extends StatelessWidget {
                           if (linkData.domainErrors.isNotEmpty)
                             Icon(
                               Icons.error,
-                              color: Theme.of(context).colorScheme.error,
+                              color: theme.colorScheme.error,
                               size: defaultIconSize,
                             ),
                           const SizedBox(width: denseSpacing),
@@ -452,11 +454,12 @@ class _DomainAssociatedLinksPanel extends StatelessWidget {
 class _PathCheckTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final notAvailableCell = DataCell(
       Text(
         'Not available',
         style: TextStyle(
-          color: Theme.of(context).colorScheme.deeplinkUnavailableColor,
+          color: theme.colorScheme.deeplinkUnavailableColor,
         ),
       ),
     );
@@ -466,7 +469,7 @@ class _PathCheckTable extends StatelessWidget {
         const SizedBox(height: intermediateSpacing),
         Text(
           'Path check (coming soon)',
-          style: Theme.of(context).textTheme.titleSmall,
+          style: theme.textTheme.titleSmall,
         ),
         Opacity(
           opacity: 0.5,
@@ -475,10 +478,10 @@ class _PathCheckTable extends StatelessWidget {
             dataRowMinHeight: defaultRowHeight,
             dataRowMaxHeight: defaultRowHeight,
             headingRowColor: MaterialStateProperty.all(
-              Theme.of(context).colorScheme.deeplinkTableHeaderColor,
+              theme.colorScheme.deeplinkTableHeaderColor,
             ),
             dataRowColor: MaterialStateProperty.all(
-              Theme.of(context).colorScheme.alternatingBackgroundColor2,
+              theme.colorScheme.alternatingBackgroundColor2,
             ),
             columns: const [
               DataColumn(label: Text('OS')),
