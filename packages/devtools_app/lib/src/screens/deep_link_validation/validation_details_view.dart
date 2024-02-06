@@ -260,89 +260,86 @@ class _GenerateAssetLinksPanel extends StatelessWidget {
         GenerateAssetLinksResult? generatedAssetLinks,
         __,
       ) {
-        if (generatedAssetLinks != null &&
-            generatedAssetLinks.errorCode.isNotEmpty) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Recommended Asset Links Json file :'),
-              const SizedBox(height: denseSpacing),
-              Text(
-                'Not able to generate assetlinks.json, because the app ${controller.applicationId} is not uploaded to Google Play.',
-                style: theme.subtleTextStyle,
-              ),
-            ],
-          );
-        }
-
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Divider(),
-            Text(
-              'Recommended Asset Links Json file :',
-              style: theme.textTheme.bodyMedium,
-            ),
+            const Text('Recommended Asset Links Json file :'),
             const SizedBox(height: denseSpacing),
-            Card(
-              color: theme.colorScheme.alternatingBackgroundColor1,
-              surfaceTintColor: Colors.transparent,
-              elevation: 0.0,
-              child: Padding(
-                padding: const EdgeInsets.all(denseSpacing),
-                child: generatedAssetLinks != null
-                    ? Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Flexible(
+            (generatedAssetLinks != null &&
+                    generatedAssetLinks.errorCode.isNotEmpty)
+                ? Text(
+                    'Not able to generate assetlinks.json, because the app ${controller.applicationId} is not uploaded to Google Play.',
+                    style: theme.subtleTextStyle,
+                  )
+                : Column(
+                    children: [
+                      Card(
+                        color: theme.colorScheme.alternatingBackgroundColor1,
+                        surfaceTintColor: Colors.transparent,
+                        elevation: 0.0,
+                        child: Padding(
+                          padding: const EdgeInsets.all(denseSpacing),
+                          child: generatedAssetLinks != null
+                              ? Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Flexible(
+                                      child: SelectionArea(
+                                        child: Text(
+                                          generatedAssetLinks.generatedString,
+                                        ),
+                                      ),
+                                    ),
+                                    IconButton(
+                                      onPressed: () async =>
+                                          await Clipboard.setData(
+                                        ClipboardData(
+                                          text: generatedAssetLinks
+                                              .generatedString,
+                                        ),
+                                      ),
+                                      icon: const Icon(Icons.copy_rounded),
+                                    ),
+                                  ],
+                                )
+                              : const CenteredCircularProgressIndicator(),
+                        ),
+                      ),
+                      const SizedBox(height: denseSpacing),
+                      Text(
+                        'Update and publish this new recommended Digital Asset Links JSON file below at this location:',
+                        style: theme.subtleTextStyle,
+                      ),
+                      const SizedBox(height: denseSpacing),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Card(
+                          shape: const RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(4.0)),
+                          ),
+                          color: theme.colorScheme.outline,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: denseSpacing),
                             child: SelectionArea(
                               child: Text(
-                                generatedAssetLinks.generatedString,
+                                'https://${controller.selectedLink.value!.domain}/.well-known/assetlinks.json',
+                                style: theme.regularTextStyle.copyWith(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
                             ),
                           ),
-                          IconButton(
-                            onPressed: () async => await Clipboard.setData(
-                              ClipboardData(
-                                text: generatedAssetLinks.generatedString,
-                              ),
-                            ),
-                            icon: const Icon(Icons.copy_rounded),
-                          ),
-                        ],
-                      )
-                    : const CenteredCircularProgressIndicator(),
-              ),
-            ),
-            const SizedBox(height: denseSpacing),
-            Text(
-              'Update and publish this new recommended Digital Asset Links JSON file below at this location:',
-              style: theme.subtleTextStyle,
-            ),
-            const SizedBox(height: denseSpacing),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Card(
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(4.0)),
-                ),
-                color: theme.colorScheme.outline,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
-                  child: SelectionArea(
-                    child: Text(
-                      'https://${controller.selectedLink.value!.domain}/.well-known/assetlinks.json',
-                      style: theme.regularTextStyle.copyWith(
-                        color: Colors.black,
-                        fontWeight: FontWeight.w500,
+                        ),
                       ),
-                    ),
+                      const SizedBox(height: denseSpacing),
+                    ],
                   ),
-                ),
-              ),
-            ),
-            const SizedBox(height: denseSpacing),
           ],
         );
       },
@@ -376,7 +373,7 @@ class _FailureDetails extends StatelessWidget {
                     size: defaultIconSize,
                   ),
                   const SizedBox(width: denseSpacing),
-                  Text('Issue ${i + 1} :${linkData.domainErrors[i].title}'),
+                  Text('Issue ${i + 1} : ${linkData.domainErrors[i].title}'),
                 ],
               ),
               const SizedBox(height: densePadding),
