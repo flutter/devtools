@@ -81,7 +81,7 @@ class ServerApi {
       case apiGetDevToolsFirstRun:
         // Has DevTools been run first time? To bring up analytics dialog.
         //
-        // Additionally if package:unified_analytics will show a message if it
+        // Additionally, package:unified_analytics will show a message if it
         // is the first run with the package or the consent message version has
         // been updated
         final isFirstRun =
