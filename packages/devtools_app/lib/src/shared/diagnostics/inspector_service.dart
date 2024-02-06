@@ -204,10 +204,6 @@ class InspectorService extends InspectorServiceBase {
   final ValueNotifier<List<String>> _rootDirectories = ValueNotifier([]);
 
   @visibleForTesting
-  Set<String> get rootPackages => _rootPackages;
-  late Set<String> _rootPackages;
-
-  @visibleForTesting
   List<String> get rootPackagePrefixes => _rootPackagePrefixes;
   late List<String> _rootPackagePrefixes;
 

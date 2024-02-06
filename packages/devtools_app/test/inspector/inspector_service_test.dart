@@ -170,20 +170,12 @@ void main() {
               );
 
               expect(
-                inspectorServiceLocal.rootPackages.toList(),
-                equals(['flutter_app']),
-              );
-              expect(
                 inspectorServiceLocal.rootPackagePrefixes.toList(),
                 isEmpty,
               );
 
               await inspectorServiceLocal.addPubRootDirectories(
                 ['/usr/jacobr/foo/lib', '/usr/jacobr/bar/lib/bla'],
-              );
-              expect(
-                inspectorServiceLocal.rootPackages.toList(),
-                equals(['foo', 'bar']),
               );
               expect(
                 inspectorServiceLocal.rootPackagePrefixes.toList(),
@@ -215,10 +207,6 @@ void main() {
               ['/usr/me/clients/google3/foo/bar/baz/lib/src/bla'],
             );
             expect(
-              inspectorServiceLocal.rootPackages.toList(),
-              equals(['foo.bar.baz']),
-            );
-            expect(
               inspectorServiceLocal.rootPackagePrefixes.toList(),
               equals(['foo.bar.baz.']),
             );
@@ -227,12 +215,6 @@ void main() {
               '/usr/me/clients/google3/foo/bar/baz/lib/src/bla',
               '/usr/me/clients/google3/foo/core/lib',
             ]);
-            expect(
-              inspectorServiceLocal.rootPackages.toList(),
-              equals(
-                ['foo.bar.baz', 'foo.core'],
-              ),
-            );
             expect(
               inspectorServiceLocal.rootPackagePrefixes.toList(),
               equals(
@@ -246,12 +228,6 @@ void main() {
               '/usr/me/clients/google3/foo/core/',
             ]);
             expect(
-              inspectorServiceLocal.rootPackages.toList(),
-              equals(
-                ['foo.bar.baz', 'foo.core'],
-              ),
-            );
-            expect(
               inspectorServiceLocal.rootPackagePrefixes.toList(),
               equals(
                 ['foo.bar.baz.', 'foo.core.'],
@@ -262,10 +238,6 @@ void main() {
               '/usr/me/clients/google3/third_party/dart_src/bar/core/lib',
             ]);
             expect(
-              inspectorServiceLocal.rootPackages.toList(),
-              equals(['foo', 'bar.core']),
-            );
-            expect(
               inspectorServiceLocal.rootPackagePrefixes.toList(),
               equals(['foo.', 'bar.core.']),
             );
@@ -274,10 +246,6 @@ void main() {
               '/usr/me/clients/google3/third_party/dart/foo',
               '/usr/me/clients/google3/third_party/dart_src/bar/core',
             ]);
-            expect(
-              inspectorServiceLocal.rootPackages.toList(),
-              equals(['foo', 'bar.core']),
-            );
             expect(
               inspectorServiceLocal.rootPackagePrefixes.toList(),
               equals(['foo.', 'bar.core.']),
