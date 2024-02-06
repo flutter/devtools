@@ -43,7 +43,7 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt>
         // message has been shown so that devtools can be onboarded
         // into the config file
         // ~/.dart-tool/dart-flutter-telemetry.config
-        if (showPrompt) unawaited(controller.confirmConsentMessageShown());
+        if (showPrompt) unawaited(controller.markConsentMessageAsShown());
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,

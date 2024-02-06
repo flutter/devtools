@@ -22,11 +22,11 @@ class AnalyticsController {
     this.onEnableAnalytics,
     this.onDisableAnalytics,
     this.onSetupAnalytics,
-    AsyncAnalyticsCallback? confirmConsentMessageShown,
+    AsyncAnalyticsCallback? markConsentMessageAsShown,
   })  : analyticsEnabled = ValueNotifier<bool>(enabled),
         _shouldPrompt =
             ValueNotifier<bool>(firstRun && consentMessage.isNotEmpty),
-        _confirmConsentMessageShown = confirmConsentMessageShown {
+        _markConsentMessageAsShown = markConsentMessageAsShown {
     if (_shouldPrompt.value) {
       unawaited(toggleAnalyticsEnabled(true));
     }
@@ -47,10 +47,10 @@ class AnalyticsController {
 
   final AsyncAnalyticsCallback? onDisableAnalytics;
 
-  final AsyncAnalyticsCallback? _confirmConsentMessageShown;
-  Future<void> confirmConsentMessageShown() async {
-    if (_confirmConsentMessageShown != null) {
-      await _confirmConsentMessageShown();
+  final AsyncAnalyticsCallback? _markConsentMessageAsShown;
+  Future<void> markConsentMessageAsShown() async {
+    if (_markConsentMessageAsShown != null) {
+      await _markConsentMessageAsShown();
     }
   }
 

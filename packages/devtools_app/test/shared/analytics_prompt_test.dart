@@ -62,7 +62,7 @@ void main() {
               didCallEnableAnalytics = true;
             },
             consentMessage: 'fake message',
-            confirmConsentMessageShown: () {
+            markConsentMessageAsShown: () {
               didMarkConsentMessageAsShown = true;
             },
           );

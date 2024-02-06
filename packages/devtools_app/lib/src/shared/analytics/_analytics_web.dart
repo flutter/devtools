@@ -799,8 +799,8 @@ Future<String> fetchAnalyticsConsentMessage() async {
   return await server.fetchAnalyticsConsentMessage();
 }
 
-Future<void> confirmConsentMessageShown() async {
-  return await server.confirmConsentMessageShown();
+Future<void> markConsentMessageAsShown() async {
+  return await server.markConsentMessageAsShown();
 }
 
 /// Computes the DevTools application. Fills in the devtoolsPlatformType and

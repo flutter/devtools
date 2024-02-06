@@ -71,7 +71,7 @@ Future<String> fetchAnalyticsConsentMessage() async {
 
 /// Confirm with package:unified_analytics that the consent message
 /// has been shown to the user.
-Future<void> confirmConsentMessageShown() async {
+Future<void> markConsentMessageAsShown() async {
   if (isDevToolsServerAvailable) {
     await request(apiAnalyticsConsentMessageShown);
   }
