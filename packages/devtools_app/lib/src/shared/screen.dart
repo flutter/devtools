@@ -296,7 +296,7 @@ abstract class Screen {
   /// The documentation URL to use for this screen.
   /// 
   /// If this returns a null value, [docPageId] will be used to create a
-  /// documenation URL.
+  /// documentation URL.
   String? get docsUrl => null;
 
   /// The id to use to create a documentation URL for this screen.
