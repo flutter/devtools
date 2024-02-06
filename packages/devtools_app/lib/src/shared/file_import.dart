@@ -271,7 +271,17 @@ Future<DevToolsJsonFile?> importFileFromPicker({
   final acceptedTypeGroups = [XTypeGroup(extensions: acceptedTypes)];
   final file = await openFile(acceptedTypeGroups: acceptedTypeGroups);
   if (file == null) return null;
+  return await _toDevToolsFile(file);
+}
 
+Future<List<XFile>> importRawFilesFromPicker({
+  List<String>? acceptedTypes,
+}) async {
+  final acceptedTypeGroups = [XTypeGroup(extensions: acceptedTypes)];
+  return await openFiles(acceptedTypeGroups: acceptedTypeGroups);
+}
+
+Future<DevToolsJsonFile> _toDevToolsFile(XFile file) async {
   final data = jsonDecode(await file.readAsString());
   final lastModifiedTime = await file.lastModified();
   // TODO(kenz): this will need to be modified if we need to support other file
@@ -337,7 +347,7 @@ class DualFileImportContainer extends StatefulWidget {
   /// The title of the action button.
   final String actionText;
 
-  final Function(
+  final void Function(
     DevToolsJsonFile firstImportedFile,
     DevToolsJsonFile secondImportedFile,
     void Function(String error) onError,

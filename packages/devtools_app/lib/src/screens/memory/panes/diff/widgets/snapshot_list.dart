@@ -15,7 +15,6 @@ import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/dialogs.dart';
 import '../../../../../shared/primitives/utils.dart';
-import '../../../../../shared/table/table.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/item_controller.dart';
 
@@ -73,23 +72,23 @@ class _ListControlPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: controller.isTakingSnapshot,
-      builder: (_, isProcessing, __) {
-        final clearAllEnabled = !isProcessing && controller.hasSnapshots;
-        return Row(
-          children: [
-            ToolbarAction(
-              icon: iconToTakeSnapshot,
-              tooltip: 'Take heap snapshot for the selected isolate',
-              onPressed: controller.isTakingSnapshot.value
-                  ? null
-                  : () => unawaited(_takeSnapshot(context)),
-            ),
-            ToolbarAction(
-              icon: Icons.block,
-              tooltip: 'Clear all snapshots',
-              onPressed: clearAllEnabled
+    return Row(
+      children: [
+        ToolbarAction(
+          icon: iconToTakeSnapshot,
+          size: defaultIconSize,
+          tooltip: 'Take heap snapshot for the selected isolate',
+          onPressed: () => unawaited(_takeSnapshot(context)),
+        ),
+        const SizedBox(width: densePadding),
+        ValueListenableBuilder(
+          valueListenable: controller.core.snapshots,
+          builder: (context, snapshots, _) {
+            return ToolbarAction(
+              icon: Icons.delete,
+              size: defaultIconSize,
+              tooltip: 'Delete all snapshots',
+              onPressed: controller.hasSnapshots
                   ? () {
                       ga.select(
                         gac.memory,
@@ -98,10 +97,16 @@ class _ListControlPane extends StatelessWidget {
                       controller.clearSnapshots();
                     }
                   : null,
-            ),
-          ],
-        );
-      },
+            );
+          },
+        ),
+        const Spacer(),
+        ToolbarAction(
+          icon: Icons.file_upload,
+          tooltip: 'Import snapshot(s) from disk',
+          onPressed: () => unawaited(controller.importSnapshots()),
+        ),
+      ],
     );
   }
 }
@@ -278,13 +283,14 @@ class _EditableSnapshotNameState extends State<_EditableSnapshotName>
 
   @override
   Widget build(BuildContext context) {
+    // TODO(polina-c): start using ellipsis when it is available, https://github.com/flutter/devtools/issues/7130
     return TextField(
       controller: textEditingController,
       focusNode: textFieldFocusNode,
       autofocus: true,
       showCursor: widget.editMode,
       enabled: widget.editMode,
-      style: Theme.of(context).textTheme.bodyMedium,
+      style: Theme.of(context).regularTextStyle,
       decoration: const InputDecoration(
         isDense: true,
         border: InputBorder.none,

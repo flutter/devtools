@@ -10,7 +10,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_extensions/api.dart';
 import 'package:devtools_extensions/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:web/helpers.dart';
+import 'package:web/web.dart';
 
 import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';

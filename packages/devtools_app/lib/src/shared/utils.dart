@@ -33,10 +33,6 @@ void debugLogger(String message) {
   );
 }
 
-bool isDense() {
-  return preferences.denseModeEnabled.value || isEmbedded();
-}
-
 bool isEmbedded() => ideTheme.embed;
 
 extension VmExtension on VM {
@@ -84,7 +80,6 @@ List<ConnectionDescription> generateDeviceDescription(
       actions: [
         CopyToClipboardControl(
           dataProvider: () => description,
-          size: defaultIconSize,
         ),
       ],
     );

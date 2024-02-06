@@ -731,7 +731,7 @@ void main() {
               activeSearchMatch: false,
               hovered: hovered,
               zoom: zoom,
-              colorScheme: Theme.of(context).colorScheme,
+              theme: Theme.of(context),
             ),
           ),
         ),
@@ -756,7 +756,7 @@ void main() {
                     activeSearchMatch: false,
                     hovered: hovered,
                     zoom: defaultZoom,
-                    colorScheme: Theme.of(context).colorScheme,
+                    theme: Theme.of(context),
                   );
                 },
               ),

@@ -636,14 +636,15 @@ class FlutterFrameTooltip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textStyle = Theme.of(context).regularTextStyle;
     return HoverCardTooltip.sync(
       enabled: () => true,
-      generateHoverCardData: (_) => _buildCardData(),
+      generateHoverCardData: (_) => _buildCardData(textStyle),
       child: child,
     );
   }
 
-  HoverCardData _buildCardData() {
+  HoverCardData _buildCardData(TextStyle textStyle) {
     final uiText = 'UI: ${durationText(
       frame.buildTime,
       unit: DurationDisplayUnit.milliseconds,
@@ -663,41 +664,48 @@ class FlutterFrameTooltip extends StatelessWidget {
         : '';
     return HoverCardData(
       position: HoverCardPosition.element,
-      width: _calculateTooltipWidth([uiText, rasterText, shaderText]),
+      width: _calculateTooltipWidth(
+        [uiText, rasterText, shaderText],
+        textStyle,
+      ),
       contents: Material(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(uiText),
-            const SizedBox(height: densePadding),
-            Text(rasterText),
-            if (hasShaderJank)
-              Row(
-                children: [
-                  const Icon(
-                    Icons.subdirectory_arrow_right,
-                    size: defaultIconSizeBeforeScaling,
-                  ),
-                  Text(shaderText),
-                  MoreInfoLink(
-                    url: preCompileShadersDocsUrl,
-                    gaScreenName: gac.performance,
-                    gaSelectedItemDescription: gac
-                        .PerformanceDocs.shaderCompilationDocsTooltipLink.name,
-                  ),
-                ],
-              ),
-          ],
+        child: DefaultTextStyle(
+          style: textStyle,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(uiText),
+              const SizedBox(height: densePadding),
+              Text(rasterText),
+              if (hasShaderJank)
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.subdirectory_arrow_right,
+                      size: defaultIconSizeBeforeScaling,
+                    ),
+                    Text(shaderText),
+                    MoreInfoLink(
+                      url: preCompileShadersDocsUrl,
+                      gaScreenName: gac.performance,
+                      gaSelectedItemDescription: gac.PerformanceDocs
+                          .shaderCompilationDocsTooltipLink.name,
+                    ),
+                  ],
+                ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  double _calculateTooltipWidth(List<String> lines) {
+  double _calculateTooltipWidth(List<String> lines, TextStyle style) {
     var maxWidth = 0.0;
     for (final line in lines) {
-      final lineWidth = calculateTextSpanWidth(TextSpan(text: line));
+      final lineWidth =
+          calculateTextSpanWidth(TextSpan(text: line, style: style));
       maxWidth = math.max(maxWidth, lineWidth);
     }
     // Add (2 * denseSpacing) for the card padding, and add

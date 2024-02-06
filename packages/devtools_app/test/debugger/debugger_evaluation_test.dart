@@ -173,24 +173,24 @@ void main() {
           await runMethodAndWaitForPause(
             'AnotherClass().pauseWithScopedVariablesMethod()',
           );
-          expect(
-            collectionEquals(
-              await autoCompleteResultsFor(
-                EditingParts(
-                  activeWord: '_',
-                  leftSide: '',
-                  rightSide: '',
-                ),
-                evalService,
+          await expectLater(
+            autoCompleteResultsFor(
+              EditingParts(
+                activeWord: '_',
+                leftSide: '',
+                rightSide: '',
               ),
-              [
-                '_privateField2',
-                '_privateField1',
-                '_PrivateClass',
-              ],
-              ordered: false,
+              evalService,
             ),
-            isTrue,
+            completion(
+              unorderedEquals(
+                [
+                  '_privateField2',
+                  '_privateField1',
+                  '_PrivateClass',
+                ],
+              ),
+            ),
           );
         },
         timeout: const Timeout.factor(8),

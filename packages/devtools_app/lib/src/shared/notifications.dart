@@ -50,7 +50,7 @@ class NotificationService {
   /// [NotificationMessage.defaultDuration].
   bool push(
     String message, {
-    isDismissible = false,
+    bool isDismissible = false,
   }) =>
       pushNotification(
         NotificationMessage(
@@ -68,8 +68,8 @@ class NotificationService {
   bool pushError(
     String errorMessage, {
     String? stackTrace,
-    isDismissible = true,
-    isReportable = true,
+    bool isDismissible = true,
+    bool isReportable = true,
   }) {
     final reportErrorAction = NotificationAction(
       'Report error',

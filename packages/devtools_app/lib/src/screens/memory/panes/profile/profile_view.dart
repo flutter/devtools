@@ -29,7 +29,7 @@ import 'profile_pane_controller.dart';
 
 /// The default width for columns containing *mostly* numeric data (e.g.,
 /// instances, memory).
-const _defaultNumberFieldWidth = 90.0;
+const _defaultNumberFieldWidth = 80.0;
 
 class _FieldClassNameColumn extends ColumnData<ProfileRecord>
     implements
@@ -192,7 +192,8 @@ class _FieldDartHeapSizeColumn extends _FieldSizeColumn {
 }
 
 class _FieldSizeColumn extends ColumnData<ProfileRecord> {
-  factory _FieldSizeColumn({required heap}) => _FieldSizeColumn._(
+  factory _FieldSizeColumn({required HeapGeneration heap}) =>
+      _FieldSizeColumn._(
         title: 'Total Size',
         titleTooltip: "The sum of the type's total shallow memory "
             'consumption in the Dart heap and associated external (e.g., '
@@ -486,7 +487,7 @@ class AllocationProfileTableViewState
                   // and columns) and one data row. We add a slight padding to
                   // ensure the underlying scrollable area has enough space to not
                   // display a scroll bar.
-                  height: defaultRowHeight + areaPaneHeaderHeight * 2 + 1,
+                  height: defaultRowHeight + defaultHeaderHeight * 2 + 1,
                   child: _GCStatsTable(
                     controller: widget.controller,
                   ),
@@ -703,20 +704,24 @@ class _ProfileHelpLink extends StatelessWidget {
       gaScreen: gac.memory,
       gaSelection: gac.topicDocumentationButton(_documentationTopic),
       dialogTitle: 'Memory Allocation Profile Help',
-      child: Column(
+      actions: [
+        MoreInfoLink(
+          url: DocLinks.profile.value,
+          gaScreenName: '',
+          gaSelectedItemDescription:
+              gac.topicDocumentationLink(_documentationTopic),
+        ),
+      ],
+      child: const Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          const Text('The allocation profile tab displays information about\n'
-              'allocated objects in the Dart heap of the selected\n'
-              'isolate.'),
-          const SizedBox(height: denseSpacing),
-          const ClassTypeLegend(),
-          MoreInfoLink(
-            url: DocLinks.profile.value,
-            gaScreenName: '',
-            gaSelectedItemDescription:
-                gac.topicDocumentationLink(_documentationTopic),
+          Text(
+            'The allocation profile tab displays information about\n'
+            'allocated objects in the Dart heap of the selected\n'
+            'isolate.',
           ),
+          SizedBox(height: denseSpacing),
+          ClassTypeLegend(),
         ],
       ),
     );

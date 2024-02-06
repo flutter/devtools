@@ -46,7 +46,7 @@ class AdaptedHeap {
     assert(data.allFieldsCalculated);
 
     final result = <HeapClassName, SingleClassStats>{};
-    for (var i in Iterable.generate(data.objects.length)) {
+    for (var i in Iterable<int>.generate(data.objects.length)) {
       if (_uiReleaser.step()) await _uiReleaser.releaseUi();
       final object = data.objects[i];
       final className = object.heapClass;

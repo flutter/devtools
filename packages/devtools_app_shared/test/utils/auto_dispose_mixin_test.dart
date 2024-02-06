@@ -45,17 +45,17 @@ void main() {
   group('Disposer', () {
     test('disposes streams', () {
       final disposer = Disposer();
-      final controller1 = StreamController(sync: true);
-      final controller2 = StreamController(sync: true);
+      final controller1 = StreamController<void>(sync: true);
+      final controller2 = StreamController<void>(sync: true);
       var c1Events = 0;
       var c2Events = 0;
       disposer.autoDisposeStreamSubscription(
-        controller1.stream.listen((data) {
+        controller1.stream.listen((_) {
           c1Events++;
         }),
       );
       disposer.autoDisposeStreamSubscription(
-        controller2.stream.listen((data) {
+        controller2.stream.listen((_) {
           c2Events++;
         }),
       );
@@ -324,7 +324,7 @@ void main() {
   testWidgets('Test stream auto dispose', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     final key = GlobalKey();
-    final controller = StreamController();
+    final controller = StreamController<void>();
     await tester.pumpWidget(AutoDisposedWidget(controller.stream, key: key));
 
     final state = key.currentState as _AutoDisposedWidgetState;

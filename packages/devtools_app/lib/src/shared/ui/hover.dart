@@ -506,7 +506,7 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
   }
 
   Completer _timeoutCompleter(int timeout) {
-    final completer = Completer();
+    final completer = Completer<void>();
     Timer(Duration(milliseconds: timeout), () {
       completer.complete();
     });

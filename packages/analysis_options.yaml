@@ -7,8 +7,6 @@ analyzer:
   errors:
     # treat missing required parameters as a warning (not a hint)
     missing_required_param: warning
-    # treat missing returns as a warning (not a hint)
-    missing_return: warning
   exclude:
     - build/**
     - '**.freezed.dart'
@@ -220,12 +218,11 @@ dart_code_metrics:
     #    allowed-duplicated-chains: 2
     # - prefer-static-class
     - prefer-trailing-comma
-    - tag-name
     - always-remove-listener
     # - avoid-border-all Micro-optimization to avoid a const constructor.
     # - avoid-returning-widgets  This one is nice but has a lot of false positives.
     - avoid-shrink-wrap-in-lists
-    - avoid-unnecessary-setstate
+    # - avoid-unnecessary-setstate It is unclear why to "Avoid calling sync methods that call 'setState'."
     - avoid-expanded-as-spacer
     - avoid-wrapping-in-padding
     - check-for-equals-in-render-object-setters

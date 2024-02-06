@@ -23,3 +23,10 @@ Follow [Flutter repo naming rules for typedefs and function variables](https://g
 ## Overriding equality
 
 Use [boilerplaite](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#common-boilerplates-for-operator--and-hashcode).
+
+## Text styles
+
+The default text style for DevTools is `Theme.of(context).regularTextStyle`. The default
+value for `Theme.of(context).bodyMedium` is equivalent to `Theme.of(context).regularTextStyle`.
+
+When creating a `Text` widget, this is the default style that will be applied.

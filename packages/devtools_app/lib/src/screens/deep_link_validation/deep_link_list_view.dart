@@ -485,8 +485,8 @@ class NotificationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return SizedBox.fromSize(
       size: _kNotificationCardSize,
       child: Card(
@@ -507,14 +507,10 @@ class NotificationCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      title,
-                      style: textTheme.bodyMedium!
-                          .copyWith(color: colorScheme.onSurface),
-                    ),
+                    Text(title),
                     Text(
                       description,
-                      style: Theme.of(context).subtleTextStyle,
+                      style: theme.subtleTextStyle,
                     ),
                     Expanded(
                       child: Align(

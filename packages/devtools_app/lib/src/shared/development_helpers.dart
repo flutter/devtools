@@ -21,19 +21,20 @@ bool debugAnalytics = false;
 ///
 /// This flag should never be checked in with a value of true - this is covered
 /// by a test.
-final debugDevToolsExtensions = _debugDevToolsExtensions || integrationTestMode;
+final debugDevToolsExtensions =
+    _debugDevToolsExtensions || integrationTestMode || testMode || stagerMode;
 const _debugDevToolsExtensions = false;
 
 List<DevToolsExtensionConfig> debugHandleRefreshAvailableExtensions(
   // ignore: avoid-unused-parameters, false positive due to conditional imports
-  String rootPath,
+  Uri appRoot,
 ) {
   return debugExtensions;
 }
 
 ExtensionEnabledState debugHandleExtensionEnabledState({
   // ignore: avoid-unused-parameters, false positive due to conditional imports
-  required String rootPath,
+  required Uri appRoot,
   required String extensionName,
   bool? enable,
 }) {

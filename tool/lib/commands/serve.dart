@@ -15,6 +15,7 @@ import 'shared.dart';
 const _buildAppFlag = 'build-app';
 const _machineFlag = 'machine';
 const _allowEmbeddingFlag = 'allow-embedding';
+const _debugServerFlag = 'debug-server';
 
 /// This command builds DevTools in release mode by running the
 /// `devtools_tool build` command and then serves DevTools with a locally
@@ -25,6 +26,12 @@ const _allowEmbeddingFlag = 'allow-embedding';
 /// are ignored if '--no-build-app' is present in the list of arguments passed
 /// to this command. All of the following commands are passed along to the
 /// `devtools_tool build` command.
+///
+/// If the [_debugServerFlag] argument is present, the DevTools server will be
+/// started with the `--observe` flag. This will allow you to debug and profile
+/// the server with a local VM service connection. By default, this will set
+/// `--pause-isolates-on-start` and `--pause-isolates-on-unhandled-exceptions`
+/// for the DevTools server VM service connection.
 ///
 /// If the [BuildCommandArgs.useFlutterFromPath] argument is present, the
 /// Flutter SDK will not be updated to the latest Flutter candidate before
@@ -57,6 +64,12 @@ class ServeCommand extends Command {
             'Whether to build the DevTools web app before starting the DevTools'
             ' server.',
       )
+      ..addFlag(
+        _debugServerFlag,
+        negatable: false,
+        defaultsTo: false,
+        help: 'Enable debugging for the DevTools server.',
+      )
       ..addUpdateFlutterFlag()
       ..addUpdatePerfettoFlag()
       ..addPubGetFlag()
@@ -87,6 +100,7 @@ class ServeCommand extends Command {
     final processManager = ProcessManager();
 
     final buildApp = argResults![_buildAppFlag];
+    final debugServer = argResults![_debugServerFlag];
     final updateFlutter = argResults![BuildCommandArgs.updateFlutter.flagName];
     final updatePerfetto =
         argResults![BuildCommandArgs.updatePerfetto.flagName];
@@ -100,6 +114,7 @@ class ServeCommand extends Command {
       ..remove(BuildCommandArgs.updatePerfetto.asArg())
       ..remove(valueAsArg(_buildAppFlag))
       ..remove(valueAsArg(_buildAppFlag, negated: true))
+      ..remove(valueAsArg(_debugServerFlag))
       ..remove(BuildCommandArgs.pubGet.asArg())
       ..remove(BuildCommandArgs.pubGet.asArg(negated: true))
       ..removeWhere(
@@ -128,13 +143,13 @@ class ServeCommand extends Command {
 
     if (buildApp) {
       final process = await processManager.runProcess(
-        CliCommand.tool(
-          'build'
-          ' ${BuildCommandArgs.updateFlutter.asArg(negated: !updateFlutter)}'
-          '${updatePerfetto ? ' ${BuildCommandArgs.updatePerfetto.asArg()}' : ''}'
-          ' ${BuildCommandArgs.buildMode.asArg()}=$devToolsAppBuildMode'
-          ' ${BuildCommandArgs.pubGet.asArg(negated: !runPubGet)}',
-        ),
+        CliCommand.tool([
+          'build',
+          BuildCommandArgs.updateFlutter.asArg(negated: !updateFlutter),
+          if (updatePerfetto) BuildCommandArgs.updatePerfetto.asArg(),
+          '${BuildCommandArgs.buildMode.asArg()}=$devToolsAppBuildMode',
+          BuildCommandArgs.pubGet.asArg(negated: !runPubGet),
+        ]),
       );
       if (process.exitCode == 1) {
         throw Exception(
@@ -146,7 +161,7 @@ class ServeCommand extends Command {
 
     logStatus('running pub get for DDS in the local dart sdk');
     await processManager.runProcess(
-      CliCommand.from('dart', ['pub', 'get']),
+      CliCommand.dart(['pub', 'get']),
       workingDirectory: path.join(localDartSdkLocation, 'pkg', 'dds'),
     );
 
@@ -161,9 +176,12 @@ class ServeCommand extends Command {
 
     // This call will not exit until explicitly terminated by the user.
     await processManager.runProcess(
-      CliCommand.from(
-        'dart',
+      CliCommand.dart(
         [
+          if (debugServer) ...[
+            'run',
+            '--observe=0',
+          ],
           serveLocalScriptPath,
           '--devtools-build=$devToolsBuildLocation',
           // Pass any args that were provided to our script along. This allows IDEs

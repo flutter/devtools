@@ -131,7 +131,7 @@ void main() {
 
     group('starting scroll position', () {
       const totalNumFrames = 50;
-      const totalFramesInView = 14;
+      const totalFramesInView = 15;
 
       setUp(() {
         var number = 0;

@@ -67,7 +67,7 @@ class ClassFilterDialog extends StatefulWidget {
   });
 
   final ClassFilter classFilter;
-  final Function(ClassFilter filter) onChanged;
+  final void Function(ClassFilter filter) onChanged;
   final String rootPackage;
 
   @override
@@ -116,7 +116,11 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
     Widget textField(TextEditingController controller) => Padding(
           padding: EdgeInsets.only(left: textFieldLeftPadding),
           child: TextField(
-            decoration: dialogTextFieldDecoration,
+            style: Theme.of(context).regularTextStyle,
+            decoration: const InputDecoration(
+              contentPadding: EdgeInsets.all(denseSpacing),
+              border: OutlineInputBorder(),
+            ),
             keyboardType: TextInputType.multiline,
             maxLines: null,
             controller: controller,

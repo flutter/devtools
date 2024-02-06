@@ -121,7 +121,6 @@ class StatusLine extends StatelessWidget {
 
   Widget buildConnectionStatus(BuildContext context, MediaSize screenWidth) {
     final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
     const noConnectionMsg = 'No client connection';
     return ValueListenableBuilder<ConnectedState>(
       valueListenable: serviceConnection.serviceManager.connectedState,
@@ -139,7 +138,7 @@ class StatusLine extends StatelessWidget {
 
           final color = isConnected
               ? theme.colorScheme.onPrimary
-              : textTheme.bodyMedium!.color;
+              : theme.regularTextStyle.color;
 
           return Row(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -164,9 +163,9 @@ class StatusLine extends StatelessWidget {
                 child: Text(
                   description,
                   style: isConnected
-                      ? textTheme.bodyMedium!
+                      ? theme.regularTextStyle
                           .copyWith(color: theme.colorScheme.onPrimary)
-                      : textTheme.bodyMedium,
+                      : theme.regularTextStyle,
                   overflow: TextOverflow.clip,
                 ),
               ),
@@ -186,7 +185,7 @@ class StatusLine extends StatelessWidget {
             )
           : Text(
               noConnectionMsg,
-              style: textTheme.bodyMedium,
+              style: theme.regularTextStyle,
             ),
     );
   }
@@ -316,7 +315,6 @@ class IsolateOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
     return Row(
       children: [
         Icon(
@@ -328,7 +326,7 @@ class IsolateOption extends StatelessWidget {
         const SizedBox(width: denseSpacing),
         Text(
           ref == null ? 'isolate' : _isolateName(ref!),
-          style: textTheme.bodyMedium!.copyWith(color: color),
+          style: Theme.of(context).regularTextStyle.copyWith(color: color),
         ),
       ],
     );

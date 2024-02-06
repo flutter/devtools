@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:collection/collection.dart';
 import 'package:devtools_shared/devtools_deeplink.dart';
 import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:devtools_shared/devtools_shared.dart';
@@ -22,6 +21,7 @@ part '_deep_links_api.dart';
 part '_extensions_api.dart';
 part '_release_notes_api.dart';
 part '_survey_api.dart';
+part '_dtd_api.dart';
 
 final _log = Logger('_server_web');
 
@@ -78,7 +78,7 @@ DevToolsJsonFile _devToolsJsonFileFromResponse(
   Response resp,
   String filePath,
 ) {
-  final data = json.decode(resp.body);
+  final data = json.decode(resp.body) as Map;
   final lastModified = data['lastModifiedTime'];
   final lastModifiedTime =
       lastModified != null ? DateTime.parse(lastModified) : DateTime.now();

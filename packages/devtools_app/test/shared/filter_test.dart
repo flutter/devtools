@@ -23,7 +23,7 @@ void main() {
 
     setUp(() {
       controller = _TestController(_sampleData);
-      expect(controller.data.length, equals(7));
+      expect(controller.data.length, _sampleData.length);
       expect(controller.filteredData.value, isEmpty);
       verifyBaseFilterState();
     });
@@ -37,7 +37,9 @@ void main() {
 
       expect(
         controller.filteredData.value.toString(),
-        equals('[1-FooBar-foobar, 3-Baz-foobar, 5-Basset Hound-dog]'),
+        equals(
+          '[1-FooBar-foobar, 3-Baz-foobar, 5-Basset Hound-dog, 7-Shepherd\'s pie-food, 9-Meal bar-food]',
+        ),
       );
     });
 
@@ -46,6 +48,8 @@ void main() {
       for (final toggleFilter in controller.activeFilter.value.toggleFilters) {
         toggleFilter.enabled.value = false;
       }
+      expect(controller.useRegExp.value, isFalse);
+
       controller.setActiveFilter();
       expect(
         controller.filteredData.value.toString(),
@@ -57,7 +61,7 @@ void main() {
       expect(
         controller.filteredData.value.toString(),
         equals(
-          '[1-FooBar-foobar, 2-Bar-foobar, 3-Baz-foobar, 5-Basset Hound-dog]',
+          '[1-FooBar-foobar, 2-Bar-foobar, 3-Baz-foobar, 5-Basset Hound-dog, 9-Meal bar-food]',
         ),
       );
 
@@ -88,7 +92,7 @@ void main() {
       expect(
         controller.filteredData.value.toString(),
         equals(
-          '[1-FooBar-foobar, 2-Bar-foobar, 4-Shepherd-dog, 5-Basset Hound-dog]',
+          '[1-FooBar-foobar, 2-Bar-foobar, 4-Shepherd-dog, 5-Basset Hound-dog, 7-Shepherd\'s pie-food, 8-Orange-food]',
         ),
       );
 
@@ -109,6 +113,60 @@ void main() {
         controller.filteredData.value.toString(),
         equals('[]'),
       );
+    });
+
+    test('filterData applies regexp query filters when enabled', () {
+      // Disable all toggle filters.
+      for (final toggleFilter in controller.activeFilter.value.toggleFilters) {
+        toggleFilter.enabled.value = false;
+      }
+      controller.useRegExp.value = true;
+
+      controller.setActiveFilter();
+      expect(
+        controller.filteredData.value.toString(),
+        _sampleData.toString(),
+      );
+
+      // Regexp filter argument match.
+      controller.setActiveFilter(query: 'cat:foo.*');
+      expect(
+        controller.filteredData.value.toString(),
+        equals(
+          '[0-Foo-foobar, 1-FooBar-foobar, 2-Bar-foobar, 3-Baz-foobar, 7-Shepherd\'s pie-food, 8-Orange-food, 9-Meal bar-food]',
+        ),
+      );
+      controller.setActiveFilter(query: '-cat:foo.*');
+      expect(
+        controller.filteredData.value.toString(),
+        equals(
+          '[4-Shepherd-dog, 5-Basset Hound-dog, 6-Husky-dog]',
+        ),
+      );
+      // Regexp substring match.
+      controller.setActiveFilter(query: '.*bar');
+      expect(
+        controller.filteredData.value.toString(),
+        equals(
+          '[1-FooBar-foobar, 2-Bar-foobar, 9-Meal bar-food]',
+        ),
+      );
+
+      // Disable regexp filters and verify filter behavior changes.
+      controller.useRegExp.value = false;
+
+      // Regexp filter argument match.
+      controller.setActiveFilter(query: 'cat:foo.*');
+      expect(controller.filteredData.value, isEmpty);
+      controller.setActiveFilter(query: '-cat:foo.*');
+      expect(
+        controller.filteredData.value.toString(),
+        _sampleData.toString(),
+      );
+
+      // Regexp substring match.
+      controller.setActiveFilter(query: '.*bar');
+      expect(controller.filteredData.value, isEmpty);
     });
 
     test('isFilterActive', () {
@@ -144,6 +202,12 @@ void main() {
       // Only query filter active and no toggle filters.
       controller.setActiveFilter(query: 'Ba cat:foobar');
       expect(controller.activeFilterTag(), 'ba cat:foobar');
+
+      // Query filter with regular expressions enabled.
+      controller.useRegExp.value = true;
+      controller.setActiveFilter(query: 'Ba cat:foobar');
+      expect(controller.activeFilterTag(), 'ba cat:foobar-#-regexp');
+      controller.useRegExp.value = false;
 
       // Only toggle filter active and no query filters.
       controller.toggleFilters[0].enabled.value = true;
@@ -221,7 +285,11 @@ class _TestController extends DisposableController
 
   @override
   Map<String, QueryFilterArgument> createQueryFilterArgs() => {
-        categoryFilterId: QueryFilterArgument(keys: ['cat', 'c']),
+        categoryFilterId: QueryFilterArgument<_TestDataClass>(
+          keys: ['cat', 'c'],
+          dataValueProvider: (data) => data.category,
+          substringMatch: false,
+        ),
       };
 
   @override
@@ -235,26 +303,23 @@ class _TestController extends DisposableController
     }
     bool filterCallback(_TestDataClass element) {
       // First filter by the toggle filters.
-      final toggleFilters = filter.toggleFilters;
-      for (final toggleFilter in toggleFilters) {
-        if (toggleFilter.enabled.value) {
-          if (!toggleFilter.includeCallback(element)) return false;
-        }
-      }
+      final filteredOutByToggleFilters = filter.toggleFilters.any(
+        (toggleFilter) =>
+            toggleFilter.enabled.value &&
+            !toggleFilter.includeCallback(element),
+      );
+      if (filteredOutByToggleFilters) return false;
 
       final queryFilter = filter.queryFilter;
       if (!queryFilter.isEmpty) {
-        // Match the query argument to [_TestDataClass.category].
-        final categoryArg =
-            filter.queryFilter.filterArguments[categoryFilterId];
-        if (categoryArg != null &&
-            !categoryArg.matchesValue(element.category)) {
-          return false;
-        }
+        final filteredOutByQueryFilterArgument = queryFilter
+            .filterArguments.values
+            .any((argument) => !argument.matchesValue(element));
+        if (filteredOutByQueryFilterArgument) return false;
 
         // Match substrings to [_TestDataClass.label].
-        if (queryFilter.substrings.isNotEmpty) {
-          for (final substring in queryFilter.substrings) {
+        if (queryFilter.substringExpressions.isNotEmpty) {
+          for (final substring in queryFilter.substringExpressions) {
             bool matches(String? stringToMatch) {
               if (stringToMatch?.caseInsensitiveContains(substring) == true) {
                 return true;
@@ -298,4 +363,7 @@ const _sampleData = [
   _TestDataClass(4, 'Shepherd', 'dog'),
   _TestDataClass(5, 'Basset Hound', 'dog'),
   _TestDataClass(6, 'Husky', 'dog'),
+  _TestDataClass(7, 'Shepherd\'s pie', 'food'),
+  _TestDataClass(8, 'Orange', 'food'),
+  _TestDataClass(9, 'Meal bar', 'food'),
 ];

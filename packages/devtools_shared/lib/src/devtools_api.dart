@@ -62,6 +62,11 @@ const baseAppSizeFilePropertyName = 'appSizeBase';
 
 const testAppSizeFilePropertyName = 'appSizeTest';
 
+abstract class DtdApi {
+  static const apiGetDtdUri = '${apiPrefix}getDtdUri';
+  static const uriPropertyName = 'dtdUri';
+}
+
 abstract class ExtensionsApi {
   /// Serves any available extensions and returns a list of their configurations
   /// to DevTools.
@@ -71,6 +76,8 @@ abstract class ExtensionsApi {
   /// The property name for the query parameter passed along with
   /// extension-related requests to the server that describes the package root
   /// for the app whose extensions are being queried.
+  ///
+  /// This field is a file:// URI string and NOT a path.
   static const extensionRootPathPropertyName = 'rootPath';
 
   /// The property name for the response that the server sends back upon

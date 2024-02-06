@@ -4,7 +4,7 @@
 
 import 'dart:js_interop';
 
-import 'package:web/helpers.dart' hide NodeGlue;
+import 'package:web/web.dart' hide NodeGlue;
 
 import 'import_export.dart';
 

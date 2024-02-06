@@ -285,11 +285,14 @@ class TrackWidgetBuildsCheckbox extends StatelessWidget {
           ),
         ),
         if (docsUrl != null)
-          MoreInfoLink(
-            url: docsUrl,
-            gaScreenName: extension.gaScreenName!,
-            gaSelectedItemDescription: extension.gaDocsItem!,
-            padding: const EdgeInsets.symmetric(vertical: denseSpacing),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
+            child: MoreInfoLink(
+              url: docsUrl,
+              gaScreenName: extension.gaScreenName!,
+              gaSelectedItemDescription: extension.gaDocsItem!,
+              padding: const EdgeInsets.symmetric(vertical: denseSpacing),
+            ),
           ),
       ],
     );

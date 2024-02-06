@@ -17,8 +17,8 @@ import 'package:stream_channel/stream_channel.dart';
 /// events in a similar way to the IDE would. It is used by
 /// [VsCodeFlutterPanelMock] which provides a UI onto this functionality and a
 /// log of recent requests.
-class MockDartToolingApi extends DartToolingApiImpl {
-  factory MockDartToolingApi() {
+class FakeDartToolingApi extends DartToolingApiImpl {
+  factory FakeDartToolingApi() {
     // Set up channels where we can act as the server in-process without really
     // going over postMessage or a WebSocket (since in the mock environment we
     // can't do either).
@@ -48,14 +48,14 @@ class MockDartToolingApi extends DartToolingApiImpl {
     final serverPeer = json_rpc_2.Peer(serverChannel);
     unawaited(serverPeer.listen());
 
-    return MockDartToolingApi._(
+    return FakeDartToolingApi._(
       client: clientPeer,
       server: serverPeer,
       log: log.stream,
     );
   }
 
-  MockDartToolingApi._({
+  FakeDartToolingApi._({
     required this.client,
     required this.server,
     required this.log,
@@ -83,53 +83,9 @@ class MockDartToolingApi extends DartToolingApiImpl {
   final json_rpc_2.Peer client;
   final json_rpc_2.Peer server;
 
-  /// A set of mock devices that can be presented for testing.
-  final _mockDevices = <VsCodeDevice>[
-    VsCodeDeviceImpl(
-      id: 'myMac',
-      name: 'Mac',
-      category: 'desktop',
-      emulator: false,
-      emulatorId: null,
-      ephemeral: false,
-      platform: 'darwin-x64',
-      platformType: 'macos',
-    ),
-    VsCodeDeviceImpl(
-      id: 'myPhone',
-      name: 'My Android Phone',
-      category: 'mobile',
-      emulator: false,
-      emulatorId: null,
-      ephemeral: true,
-      platform: 'android-x64',
-      platformType: 'android',
-    ),
-    VsCodeDeviceImpl(
-      id: 'chrome',
-      name: 'Chrome',
-      category: 'web',
-      emulator: false,
-      emulatorId: null,
-      ephemeral: true,
-      platform: 'web-javascript',
-      platformType: 'web',
-    ),
-    VsCodeDeviceImpl(
-      id: 'web-server',
-      name: 'Web Server',
-      category: 'web',
-      emulator: false,
-      emulatorId: null,
-      ephemeral: true,
-      platform: 'web-javascript',
-      platformType: 'web',
-    ),
-  ];
-
   /// The current set of enabled platform types.
   ///
-  /// Defauls are set in [connectDevices].
+  /// Defaults are set in [connectDevices].
   final _enabledPlatformTypes = <String>{};
 
   /// The current set of devices being presented to the embedded panel.
@@ -202,7 +158,7 @@ class MockDartToolingApi extends DartToolingApiImpl {
   void connectDevices() {
     _devices
       ..clear()
-      ..addAll(_mockDevices);
+      ..addAll(stubbedDevices);
     _enabledPlatformTypes
       ..clear()
       ..addAll(['macos', 'android']);
@@ -211,17 +167,29 @@ class MockDartToolingApi extends DartToolingApiImpl {
   }
 
   /// Simulates starting a debug session.
-  void startSession(String mode, String deviceId) {
+  ///
+  /// [debuggerType] should match one of the available values for [VsCodeDebugSession.debuggerType].
+  ///
+  /// [deviceId] can be any id for a flutter device. This should be null if [debuggerType]
+  /// is not 'Flutter'.
+  ///
+  /// [flutterMode] should match one of the available values for [VsCodeDebugSession.flutterMode].
+  /// This should be null if [debuggerType] is not 'Flutter'.
+  void startSession({
+    required String debuggerType,
+    required String deviceId,
+    String? flutterMode,
+  }) {
     final sessionNum = _nextDebugSessionNumber++;
     _debugSessions.add(
       VsCodeDebugSessionImpl(
         id: 'debug-$sessionNum',
-        name: 'Session $sessionNum',
+        name: 'Session $sessionNum ($deviceId)',
         vmServiceUri: 'ws://127.0.0.1:1234/ws',
-        flutterMode: mode,
+        flutterMode: flutterMode,
         flutterDeviceId: deviceId,
-        debuggerType: 'Flutter',
-        projectRootPath: null,
+        debuggerType: debuggerType,
+        projectRootPath: '/mock/root/path',
       ),
     );
     _sendDebugSessionsChanged();
@@ -261,3 +229,47 @@ class MockDartToolingApi extends DartToolingApiImpl {
     );
   }
 }
+
+/// A set of mock devices that can be presented for testing.
+final stubbedDevices = <VsCodeDevice>[
+  VsCodeDeviceImpl(
+    id: 'macos',
+    name: 'Mac',
+    category: 'desktop',
+    emulator: false,
+    emulatorId: null,
+    ephemeral: false,
+    platform: 'darwin-x64',
+    platformType: 'macos',
+  ),
+  VsCodeDeviceImpl(
+    id: 'myPhone',
+    name: 'My Android Phone',
+    category: 'mobile',
+    emulator: false,
+    emulatorId: null,
+    ephemeral: true,
+    platform: 'android-x64',
+    platformType: 'android',
+  ),
+  VsCodeDeviceImpl(
+    id: 'chrome',
+    name: 'Chrome',
+    category: 'web',
+    emulator: false,
+    emulatorId: null,
+    ephemeral: true,
+    platform: 'web-javascript',
+    platformType: 'web',
+  ),
+  VsCodeDeviceImpl(
+    id: 'web-server',
+    name: 'Web Server',
+    category: 'web',
+    emulator: false,
+    emulatorId: null,
+    ephemeral: true,
+    platform: 'web-javascript',
+    platformType: 'web',
+  ),
+];
