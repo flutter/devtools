@@ -294,7 +294,7 @@ abstract class Screen {
       const FixedValueListenable<bool>(false);
 
   /// The documentation URL to use for this screen.
-  /// 
+  ///
   /// If this returns a null value, [docPageId] will be used to create a
   /// documentation URL.
   String? get docsUrl => null;
@@ -303,7 +303,7 @@ abstract class Screen {
   ///
   /// If the screen does not have a custom documentation page, this property
   /// should return `null`.
-  /// 
+  ///
   /// If [docsUrl] returns a non-null value, [docsUrl] will be used instead of
   /// creating a documentation url using [docPageId].
   String? get docPageId => null;
