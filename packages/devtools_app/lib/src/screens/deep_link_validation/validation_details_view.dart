@@ -324,7 +324,8 @@ class _GenerateAssetLinksPanel extends StatelessWidget {
                           color: theme.colorScheme.outline,
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: denseSpacing),
+                              horizontal: denseSpacing,
+                            ),
                             child: SelectionArea(
                               child: Text(
                                 'https://${controller.selectedLink.value!.domain}/.well-known/assetlinks.json',
