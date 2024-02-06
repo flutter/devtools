@@ -167,7 +167,7 @@ void main() {
       request,
       extensionsManager: ExtensionsManager(buildDir: '/'),
       deeplinkManager: fakeManager,
-      dtdUri: () => dtdUri,
+      dtdUri: dtdUri,
     );
     expect(response.statusCode, HttpStatus.ok);
     expect(
