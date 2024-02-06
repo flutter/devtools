@@ -182,19 +182,21 @@ class ExtensionService extends DisposableController
 // TODO(kenz): consider caching this for the duration of the VM service
 // connection.
 Future<Uri?> _connectedAppRoot() async {
-  var fileUriString = await serviceConnection.rootLibraryForMainIsolate();
+  final fileUriString = await serviceConnection.rootLibraryForMainIsolate();
   if (fileUriString == null) return null;
+  return Uri.parse(rootFromFileUriString(fileUriString));
+}
 
+@visibleForTesting
+String rootFromFileUriString(String fileUriString) {
   // TODO(kenz): for robustness, consider sending the root library uri to the
   // server and having the server look for the package folder that contains the
   // `.dart_tool` directory.
-
   final directoryRegExp =
-      RegExp(r'\/(lib|integration_test|test|bin)\/[^\/.]*.dart');
+      RegExp(r'\/(lib|bin|integration_test|test|benchmark)\/.+\.dart');
   final directoryIndex = fileUriString.indexOf(directoryRegExp);
   if (directoryIndex != -1) {
     fileUriString = fileUriString.substring(0, directoryIndex);
   }
-
-  return Uri.parse(fileUriString);
+  return fileUriString;
 }
