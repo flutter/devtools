@@ -215,7 +215,8 @@ class DocumentationLink extends StatelessWidget {
       icon: Icons.library_books_outlined,
       link: Link(
         display: screenWidth <= MediaSize.xs ? 'Docs' : 'Read docs',
-        url: 'https://docs.flutter.dev/tools/devtools/$docPageId',
+        url: screen.docsUrl ??
+            'https://docs.flutter.dev/tools/devtools/$docPageId',
         gaScreenName: screen.screenId,
         gaSelectedItemDescription: gac.documentationLink,
       ),

@@ -293,10 +293,19 @@ abstract class Screen {
   ValueListenable<bool> get showIsolateSelector =>
       const FixedValueListenable<bool>(false);
 
-  /// The id to use to synthesize a help URL.
+  /// The documentation URL to use for this screen.
+  /// 
+  /// If this returns a null value, [docPageId] will be used to create a
+  /// documenation URL.
+  String? get docsUrl => null;
+
+  /// The id to use to create a documentation URL for this screen.
   ///
   /// If the screen does not have a custom documentation page, this property
   /// should return `null`.
+  /// 
+  /// If [docsUrl] returns a non-null value, [docsUrl] will be used instead of
+  /// creating a documentation url using [docPageId].
   String? get docPageId => null;
 
   double approximateTabWidth(
