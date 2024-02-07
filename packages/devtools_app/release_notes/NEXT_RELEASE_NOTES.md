@@ -38,7 +38,12 @@ TODO: Remove this section if there are not any general updates.
 
 ## Debugger updates
 
-TODO: Remove this section if there are not any general updates.
+* Fixed off by one error causing profiler hits to be rendered on the wrong
+lines. - [#7178](https://github.com/flutter/devtools/pull/7178)
+* Improved contrast of line numbers when displaying code coverage hits in dark
+mode. - [#7178](https://github.com/flutter/devtools/pull/7178)
+* Improved contrast of profiling details when displaying profiler hits in dark
+mode. - [#7178](https://github.com/flutter/devtools/pull/7178)
 
 ## Network profiler updates
 
