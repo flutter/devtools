@@ -21,6 +21,8 @@ import 'usage.dart';
 ///
 /// This defines endpoints that serve all requests that come in over api/.
 class ServerApi {
+  static const logsKey = 'logs';
+  static const errorKey = 'error';
   static const errorNoActiveSurvey = 'ERROR: setActiveSurvey not called.';
 
   /// Determines whether or not [request] is an API call.
@@ -273,7 +275,7 @@ class ServerApi {
     Map<String, Object?> result,
     List<String> logs,
   ) {
-    result['logs'] = logs;
+    result[logsKey] = logs;
     return result;
   }
 
@@ -337,8 +339,8 @@ class ServerApi {
       HttpStatus.internalServerError,
       body: error != null || logs != null
           ? <String, Object?>{
-              if (error != null) 'error': error,
-              if (logs != null) 'logs': logs,
+              if (error != null) errorKey: error,
+              if (logs != null) logsKey: logs,
             }
           : null,
     );
