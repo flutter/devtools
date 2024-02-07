@@ -13,7 +13,6 @@ Future<Uri?> getDtdUri() async {
       final parsedResult = json.decode(resp!.body) as Map;
       final uriString = parsedResult[DtdApi.uriPropertyName] as String?;
       return uriString != null ? Uri.parse(uriString) : null;
-
     }
   }
   return null;
