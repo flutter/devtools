@@ -11,10 +11,8 @@ Future<Uri?> getDtdUri() async {
     final resp = await request(uri.toString());
     if (resp?.statusOk ?? false) {
       final parsedResult = json.decode(resp!.body) as Map;
-
-      final uriString = parsedResult[DtdApi.uriPropertyName];
-
-      return Uri.parse(uriString);
+      final uriString = parsedResult[DtdApi.uriPropertyName] as String?;
+      return uriString != null ?  Uri.parse(uriString) : null;
     }
   }
   return null;
