@@ -27,6 +27,11 @@ Future<List<DevToolsExtensionConfig>> refreshAvailableExtensions(
               .nonNulls
               .cast<Map<String, Object?>>();
 
+      final logs = (parsedResult['logs'] as List).cast<String>();
+      for (final log in logs) {
+        _log.fine('[from devtools_server] $log');
+      }
+
       final warningMessage =
           parsedResult[ExtensionsApi.extensionsResultWarningPropertyName];
       if (warningMessage != null) {
