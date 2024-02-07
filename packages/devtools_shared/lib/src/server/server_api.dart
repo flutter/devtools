@@ -8,7 +8,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:logging/logging.dart';
 import 'package:shelf/shelf.dart' as shelf;
 
 import '../deeplink/deeplink_manager.dart';
