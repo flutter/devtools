@@ -79,7 +79,7 @@ Future<ExtensionEnabledState> extensionEnabledState({
     if (resp?.statusOk ?? false) {
       final parsedResult = json.decode(resp!.body);
       final state = ExtensionEnabledState.from(parsedResult);
-      _log.fine('returning $state');
+      _log.fine('returning state for $extensionName: $state');
       return state;
     } else {
       logWarning(resp, ExtensionsApi.apiExtensionEnabledState);
