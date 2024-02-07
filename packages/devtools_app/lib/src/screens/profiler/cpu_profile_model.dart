@@ -598,11 +598,10 @@ class CpuProfileData {
   /// [traceObject] A map where the cpu profile data for each frame is stored.
   static Future<void> _addPackageUrisToTraceObject(
     String isolateId,
-    Map<String, dynamic> traceObject,
+    Map<String, Object?> traceObject,
   ) async {
-    final stackFrames = traceObject[CpuProfileData._stackFramesKey]
-        .values
-        .cast<Map<String, dynamic>>();
+    final stackFrameMap = traceObject[CpuProfileData._stackFramesKey] as Map;
+    final stackFrames = stackFrameMap.values.cast<Map<String, dynamic>>();
     final stackFramesWaitingOnPackageUri = <Map<String, dynamic>>[];
     final urisWithoutPackageUri = <String>{};
     for (final stackFrameJson in stackFrames) {
@@ -811,12 +810,10 @@ class CpuSampleEvent extends TraceEvent {
 
   factory CpuSampleEvent.parse(Map<String, dynamic> traceJson) {
     final leafId = traceJson[CpuProfileData.stackFrameIdKey];
-    final userTag = traceJson[TraceEvent.argsKey] != null
-        ? traceJson[TraceEvent.argsKey][CpuProfileData.userTagKey]
-        : null;
-    final vmTag = traceJson[TraceEvent.argsKey] != null
-        ? traceJson[TraceEvent.argsKey][CpuProfileData.vmTagKey]
-        : null;
+    final args =
+        (traceJson[TraceEvent.argsKey] as Map?)?.cast<String, Object?>();
+    final userTag = args?[CpuProfileData.userTagKey] as String?;
+    final vmTag = args?[CpuProfileData.vmTagKey] as String?;
     return CpuSampleEvent(
       leafId: leafId,
       userTag: userTag,
