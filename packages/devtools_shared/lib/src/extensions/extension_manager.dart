@@ -7,7 +7,6 @@
 import 'dart:io';
 
 import 'package:extension_discovery/extension_discovery.dart';
-import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
 import 'extension_model.dart';
