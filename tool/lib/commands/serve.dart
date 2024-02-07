@@ -96,6 +96,12 @@ class ServeCommand extends Command {
 
   @override
   Future run() async {
+    logStatus(
+      'WARNING: if you have local changes in packages/devtools_shared, you will'
+      ' need to add a path dependency override in sdk/pkg/dds/pubspec.yaml in'
+      ' order for these changes to be picked up.',
+    );
+
     final repo = DevToolsRepo.getInstance();
     final processManager = ProcessManager();
 
