@@ -1099,22 +1099,21 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
           if (widget.showProfileInformation && index == 0) {
             return SizedBox(height: CodeView.rowHeight);
           }
-          final lineNum = index - profileInformationHeaderOffset + 1;
+          final dataIndex = index - profileInformationHeaderOffset;
+          final lineNum = dataIndex + 1;
           final isPausedLine = pausedLine == lineNum;
           return ValueListenableBuilder<int>(
             valueListenable: widget.codeViewController.focusLine,
             builder: (context, focusLine, _) {
               final isFocusedLine = focusLine == lineNum;
               return LineItem(
-                lineContents:
-                    widget.lines[index - profileInformationHeaderOffset],
+                lineContents: widget.lines[dataIndex],
                 pausedFrame: isPausedLine ? pausedFrame : null,
                 focused: isPausedLine || isFocusedLine,
                 searchMatches: _searchMatchesForLine(
-                  index - profileInformationHeaderOffset,
+                  dataIndex,
                 ),
-                activeSearchMatch: activeSearch?.position.line ==
-                        (index - profileInformationHeaderOffset)
+                activeSearchMatch: activeSearch?.position.line == dataIndex
                     ? activeSearch
                     : null,
               );
