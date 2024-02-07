@@ -352,13 +352,13 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
                 final pausedFrame =
                     frame?.scriptRef == scriptRef ? frame : null;
 
-                return Row(
-                  children: [
-                    ValueListenableBuilder<bool>(
-                      valueListenable:
-                          widget.codeViewController.showProfileInformation,
-                      builder: (context, showProfileInformation, _) {
-                        return Gutters(
+                return ValueListenableBuilder<bool>(
+                  valueListenable:
+                      widget.codeViewController.showProfileInformation,
+                  builder: (context, showProfileInformation, _) {
+                    return Row(
+                      children: [
+                        Gutters(
                           scriptRef: script,
                           gutterController: gutterController,
                           profileController: profileController,
@@ -370,49 +370,53 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
                           pausedFrame: pausedFrame,
                           parsedScript: parsedScript,
                           showProfileInformation: showProfileInformation,
-                        );
-                      },
-                    ),
-                    Expanded(
-                      child: LayoutBuilder(
-                        builder: (context, constraints) {
-                          final double fileWidth = calculateTextSpanWidth(
-                            findLongestTextSpan(lines),
-                          );
+                        ),
+                        Expanded(
+                          child: LayoutBuilder(
+                            builder: (context, constraints) {
+                              final double fileWidth = calculateTextSpanWidth(
+                                findLongestTextSpan(lines),
+                              );
 
-                          return Scrollbar(
-                            key:
-                                CodeView.debuggerCodeViewHorizontalScrollbarKey,
-                            thumbVisibility: true,
-                            controller: horizontalController,
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              controller: horizontalController,
-                              child: SizedBox(
-                                height: constraints.maxHeight,
-                                width: math.max(
-                                  constraints.maxWidth,
-                                  fileWidth,
+                              return Scrollbar(
+                                key: CodeView
+                                    .debuggerCodeViewHorizontalScrollbarKey,
+                                thumbVisibility: true,
+                                controller: horizontalController,
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  controller: horizontalController,
+                                  child: SizedBox(
+                                    height: constraints.maxHeight,
+                                    width: math.max(
+                                      constraints.maxWidth,
+                                      fileWidth,
+                                    ),
+                                    child: Lines(
+                                      height: constraints.maxHeight,
+                                      codeViewController:
+                                          widget.codeViewController,
+                                      scrollController: textController,
+                                      lines: lines,
+                                      selectedFrameNotifier: widget
+                                          .debuggerController
+                                          ?.selectedStackFrame,
+                                      searchMatchesNotifier: widget
+                                          .codeViewController.searchMatches,
+                                      activeSearchMatchNotifier: widget
+                                          .codeViewController.activeSearchMatch,
+                                      showProfileInformation:
+                                          showProfileInformation,
+                                    ),
+                                  ),
                                 ),
-                                child: Lines(
-                                  height: constraints.maxHeight,
-                                  codeViewController: widget.codeViewController,
-                                  scrollController: textController,
-                                  lines: lines,
-                                  selectedFrameNotifier: widget
-                                      .debuggerController?.selectedStackFrame,
-                                  searchMatchesNotifier:
-                                      widget.codeViewController.searchMatches,
-                                  activeSearchMatchNotifier: widget
-                                      .codeViewController.activeSearchMatch,
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 );
               },
             ),
@@ -707,7 +711,11 @@ class ProfilePercentageItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textStyle = theme.regularTextStyleWithColor(
+      colorScheme.coverageAndPerformanceTextColor,
+    );
     Color? color;
     if (percentage > 5) {
       color = colorScheme.performanceHighImpactColor;
@@ -726,6 +734,7 @@ class ProfilePercentageItem extends StatelessWidget {
         child: Text(
           '${percentage.toStringAsFixed(2)} %',
           textAlign: TextAlign.end,
+          style: textStyle,
         ),
       ),
     );
@@ -804,12 +813,12 @@ class Gutters extends StatelessWidget {
               // Disable dots for possible breakpoint locations.
               allowInteraction: !(debuggerController?.isSystemIsolate ?? false),
               showCodeCoverage: showCodeCoverage,
+              showProfileInformation: showProfileInformation,
             );
           },
         ),
-        const SizedBox(width: denseSpacing),
         !showProfileInformation
-            ? const SizedBox()
+            ? const SizedBox(width: denseSpacing)
             : Padding(
                 padding: const EdgeInsets.only(right: denseSpacing),
                 child: ProfileInformationGutter(
@@ -846,6 +855,7 @@ class Gutter extends StatelessWidget {
     required this.allowInteraction,
     required this.sourceReport,
     required this.showCodeCoverage,
+    required this.showProfileInformation,
   });
 
   final double gutterWidth;
@@ -859,6 +869,7 @@ class Gutter extends StatelessWidget {
   final IntCallback onPressed;
   final bool allowInteraction;
   final bool showCodeCoverage;
+  final bool showProfileInformation;
 
   @override
   Widget build(BuildContext context) {
@@ -866,6 +877,12 @@ class Gutter extends StatelessWidget {
     final theme = Theme.of(context);
     final coverageLines =
         sourceReport.coverageHitLines.union(sourceReport.coverageMissedLines);
+    // Used to account for the presence of `_ProfileInformationGutterHeader` at
+    // the top of the profiler gutter columns. Everything needs to be shifted
+    // down a single line so profiling information for line 1 isn't hidden by
+    // the header.
+    final profileInformationHeaderOffset = showProfileInformation ? 1 : 0;
+
     return Container(
       width: gutterWidth,
       decoration: BoxDecoration(
@@ -875,9 +892,13 @@ class Gutter extends StatelessWidget {
         controller: scrollController,
         physics: const ClampingScrollPhysics(),
         itemExtent: CodeView.rowHeight,
-        itemCount: lineCount,
+        itemCount: lineCount + profileInformationHeaderOffset,
         itemBuilder: (context, index) {
-          final lineNum = lineOffset + index + 1;
+          if (showProfileInformation && index == 0) {
+            return SizedBox(height: CodeView.rowHeight);
+          }
+          final lineNum =
+              lineOffset - profileInformationHeaderOffset + index + 1;
           bool? coverageHit;
           if (showCodeCoverage && coverageLines.contains(lineNum)) {
             coverageHit = sourceReport.coverageHitLines.contains(lineNum);
@@ -934,11 +955,15 @@ class GutterItem extends StatelessWidget {
     final bpBoxSize = breakpointRadius * 2;
     final executionPointIndent = scaleByFontFactor(10.0);
     Color? color;
+    TextStyle? coverageTextStyleOverride;
     final hasCoverage = coverageHit;
-    if (hasCoverage != null && isExecutable) {
+    if (hasCoverage != null) {
       color = hasCoverage
           ? theme.colorScheme.coverageHitColor
           : theme.colorScheme.coverageMissColor;
+      coverageTextStyleOverride = theme.regularTextStyleWithColor(
+        theme.colorScheme.coverageAndPerformanceTextColor,
+      );
     }
     return InkWell(
       onTap: onPressed,
@@ -967,7 +992,11 @@ class GutterItem extends StatelessWidget {
                   ),
                 ),
               ),
-            Text('$lineNumber', textAlign: TextAlign.end),
+            Text(
+              '$lineNumber',
+              textAlign: TextAlign.end,
+              style: coverageTextStyleOverride,
+            ),
             Container(
               padding: EdgeInsets.only(left: executionPointIndent),
               alignment: Alignment.centerLeft,
@@ -999,6 +1028,7 @@ class Lines extends StatefulWidget {
     required this.searchMatchesNotifier,
     required this.activeSearchMatchNotifier,
     required this.selectedFrameNotifier,
+    required this.showProfileInformation,
   }) : super(key: key);
 
   final double height;
@@ -1008,6 +1038,7 @@ class Lines extends StatefulWidget {
   final ValueListenable<List<SourceToken>> searchMatchesNotifier;
   final ValueListenable<SourceToken?> activeSearchMatchNotifier;
   final ValueListenable<StackFrameAndSourcePosition?>? selectedFrameNotifier;
+  final bool showProfileInformation;
 
   @override
   State<Lines> createState() => _LinesState();
@@ -1051,27 +1082,41 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
   Widget build(BuildContext context) {
     final pausedFrame = widget.selectedFrameNotifier?.value;
     final pausedLine = pausedFrame?.line;
+    // Used to account for the presence of `_ProfileInformationGutterHeader` at
+    // the top of the profiler gutter columns. Everything needs to be shifted
+    // down a single line so profiling information for line 1 isn't hidden by
+    // the header.
+    final profileInformationHeaderOffset =
+        widget.showProfileInformation ? 1 : 0;
 
     return SelectionArea(
       child: ListView.builder(
         controller: widget.scrollController,
         physics: const ClampingScrollPhysics(),
         itemExtent: CodeView.rowHeight,
-        itemCount: widget.lines.length,
+        itemCount: widget.lines.length + profileInformationHeaderOffset,
         itemBuilder: (context, index) {
-          final lineNum = index + 1;
+          if (widget.showProfileInformation && index == 0) {
+            return SizedBox(height: CodeView.rowHeight);
+          }
+          final lineNum = index - profileInformationHeaderOffset + 1;
           final isPausedLine = pausedLine == lineNum;
           return ValueListenableBuilder<int>(
             valueListenable: widget.codeViewController.focusLine,
             builder: (context, focusLine, _) {
               final isFocusedLine = focusLine == lineNum;
               return LineItem(
-                lineContents: widget.lines[index],
+                lineContents:
+                    widget.lines[index - profileInformationHeaderOffset],
                 pausedFrame: isPausedLine ? pausedFrame : null,
                 focused: isPausedLine || isFocusedLine,
-                searchMatches: _searchMatchesForLine(index),
-                activeSearchMatch:
-                    activeSearch?.position.line == index ? activeSearch : null,
+                searchMatches: _searchMatchesForLine(
+                  index - profileInformationHeaderOffset,
+                ),
+                activeSearchMatch: activeSearch?.position.line ==
+                        (index - profileInformationHeaderOffset)
+                    ? activeSearch
+                    : null,
               );
             },
           );
@@ -1630,4 +1675,8 @@ extension CodeViewColorScheme on ColorScheme {
 
   Color get coverageHitColor => performanceLowImpactColor;
   Color get coverageMissColor => performanceHighImpactColor;
+
+  // The default text color for dark mode is difficult to read when drawn on
+  // top of the profiler and coverage gutter items.
+  Color get coverageAndPerformanceTextColor => lightColorScheme.onSurface;
 }
