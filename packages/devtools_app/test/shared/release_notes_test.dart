@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -10,6 +12,7 @@ void main() {
   group('$ReleaseNotesController', () {
     late ReleaseNotesController controller;
     setUp(() {
+      setGlobal(IdeTheme, IdeTheme());
       debugTestReleaseNotes = true;
       controller = ReleaseNotesController();
     });

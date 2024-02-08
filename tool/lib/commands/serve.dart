@@ -15,6 +15,7 @@ import 'shared.dart';
 const _buildAppFlag = 'build-app';
 const _machineFlag = 'machine';
 const _allowEmbeddingFlag = 'allow-embedding';
+const _debugServerFlag = 'debug-server';
 
 /// This command builds DevTools in release mode by running the
 /// `devtools_tool build` command and then serves DevTools with a locally
@@ -25,6 +26,12 @@ const _allowEmbeddingFlag = 'allow-embedding';
 /// are ignored if '--no-build-app' is present in the list of arguments passed
 /// to this command. All of the following commands are passed along to the
 /// `devtools_tool build` command.
+///
+/// If the [_debugServerFlag] argument is present, the DevTools server will be
+/// started with the `--observe` flag. This will allow you to debug and profile
+/// the server with a local VM service connection. By default, this will set
+/// `--pause-isolates-on-start` and `--pause-isolates-on-unhandled-exceptions`
+/// for the DevTools server VM service connection.
 ///
 /// If the [BuildCommandArgs.useFlutterFromPath] argument is present, the
 /// Flutter SDK will not be updated to the latest Flutter candidate before
@@ -57,6 +64,12 @@ class ServeCommand extends Command {
             'Whether to build the DevTools web app before starting the DevTools'
             ' server.',
       )
+      ..addFlag(
+        _debugServerFlag,
+        negatable: false,
+        defaultsTo: false,
+        help: 'Enable debugging for the DevTools server.',
+      )
       ..addUpdateFlutterFlag()
       ..addUpdatePerfettoFlag()
       ..addPubGetFlag()
@@ -83,10 +96,17 @@ class ServeCommand extends Command {
 
   @override
   Future run() async {
+    logStatus(
+      'WARNING: if you have local changes in packages/devtools_shared, you will'
+      ' need to add a path dependency override in sdk/pkg/dds/pubspec.yaml in'
+      ' order for these changes to be picked up.',
+    );
+
     final repo = DevToolsRepo.getInstance();
     final processManager = ProcessManager();
 
     final buildApp = argResults![_buildAppFlag];
+    final debugServer = argResults![_debugServerFlag];
     final updateFlutter = argResults![BuildCommandArgs.updateFlutter.flagName];
     final updatePerfetto =
         argResults![BuildCommandArgs.updatePerfetto.flagName];
@@ -100,6 +120,7 @@ class ServeCommand extends Command {
       ..remove(BuildCommandArgs.updatePerfetto.asArg())
       ..remove(valueAsArg(_buildAppFlag))
       ..remove(valueAsArg(_buildAppFlag, negated: true))
+      ..remove(valueAsArg(_debugServerFlag))
       ..remove(BuildCommandArgs.pubGet.asArg())
       ..remove(BuildCommandArgs.pubGet.asArg(negated: true))
       ..removeWhere(
@@ -163,6 +184,10 @@ class ServeCommand extends Command {
     await processManager.runProcess(
       CliCommand.dart(
         [
+          if (debugServer) ...[
+            'run',
+            '--observe=0',
+          ],
           serveLocalScriptPath,
           '--devtools-build=$devToolsBuildLocation',
           // Pass any args that were provided to our script along. This allows IDEs

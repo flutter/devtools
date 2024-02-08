@@ -50,7 +50,7 @@ Future<bool> setAnalyticsEnabled([bool value = true]) async {
       assert(json.decode(resp!.body) == value);
       return true;
     } else {
-      logWarning(resp, apiSetDevToolsEnabled, resp?.body);
+      logWarning(resp, apiSetDevToolsEnabled);
     }
   }
   return false;

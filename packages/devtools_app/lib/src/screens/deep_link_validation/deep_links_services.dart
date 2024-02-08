@@ -24,8 +24,23 @@ const String _domainNameKey = 'domainName';
 const String _checkNameKey = 'checkName';
 const String _failedChecksKey = 'failedChecks';
 const String _generatedContentKey = 'generatedContent';
-const String _existenceCheckKey = 'EXISTENCE';
-const String _fingerPrintChecktKey = 'FINGERPRINT';
+
+const Map<String, DomainError> checkNameToDomainError = {
+  'EXISTENCE': DomainError.existence,
+  'APP_IDENTIFIER': DomainError.appIdentifier,
+  'FINGERPRINT': DomainError.fingerprints,
+  'CONTENT_TYPE': DomainError.contentType,
+  'HTTPS_ACCESSIBILITY': DomainError.httpsAccessibility,
+  'NON_REDIRECT': DomainError.nonRedirect,
+  'HOST_FORMED_PROPERLY': DomainError.hostForm,
+  'OTHER_CHECKS': DomainError.other,
+};
+
+class GenerateAssetLinksResult {
+  GenerateAssetLinksResult(this.errorCode, this.generatedString);
+  String errorCode;
+  String generatedString;
+}
 
 class DeepLinksServices {
   Future<Map<String, List<DomainError>>> validateAndroidDomain({
@@ -54,11 +69,10 @@ class DeepLinksServices {
       final List? failedChecks = domainResult[_failedChecksKey];
       if (failedChecks != null) {
         for (final Map<String, dynamic> failedCheck in failedChecks) {
-          switch (failedCheck[_checkNameKey]) {
-            case _existenceCheckKey:
-              domainErrors[domainName]!.add(DomainError.existence);
-            case _fingerPrintChecktKey:
-              domainErrors[domainName]!.add(DomainError.fingerprints);
+          final checkName = failedCheck[_checkNameKey];
+          final domainError = checkNameToDomainError[checkName];
+          if (domainError != null) {
+            domainErrors[domainName]!.add(domainError);
           }
         }
       }
@@ -66,7 +80,7 @@ class DeepLinksServices {
     return domainErrors;
   }
 
-  Future<String> generateAssetLinks({
+  Future<GenerateAssetLinksResult> generateAssetLinks({
     required String applicationId,
     required String domain,
   }) async {
@@ -77,22 +91,19 @@ class DeepLinksServices {
         {
           _packageNameKey: applicationId,
           _domainsKey: [domain],
-          // TODO(hangyujin): Handle the error case when user doesn't have play console project set up.
         },
       ),
     );
     final Map<String, dynamic> result =
         json.decode(response.body) as Map<String, dynamic>;
+    final String errorCode = result[_errorCodeKey] ?? '';
+    String generatedContent = '';
 
-    if (result[_errorCodeKey] != null) {
-      return 'Content generation failed.\n Reason: ${result[_errorCodeKey]}';
-    }
     if (result[_domainsKey] != null) {
-      final String generatedContent = (((result[_domainsKey] as List).first)
+      generatedContent = (((result[_domainsKey] as List).first)
           as Map<String, dynamic>)[_generatedContentKey];
-
-      return generatedContent;
     }
-    return '';
+
+    return GenerateAssetLinksResult(errorCode, generatedContent);
   }
 }
