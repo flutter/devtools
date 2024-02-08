@@ -498,7 +498,7 @@ class _MultilineMatcher extends GrammarMatcher {
   }
 
   void _skipLine(LineScanner scanner) {
-    scanner.scan(RegExp('.*\n'));
+    scanner.scan(RegExp('.*\r?\n'));
   }
 
   @override
