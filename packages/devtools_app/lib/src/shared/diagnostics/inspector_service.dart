@@ -322,7 +322,7 @@ class InspectorService extends InspectorServiceBase {
     return false;
   }
 
-  Future<void> _onRootDirectoriesChanged(List<String> directories) async {
+  void _onRootDirectoriesChanged(List<String> directories) {
     _rootDirectories.value = directories;
     _rootPackagePrefixes = [];
     for (var directory in directories) {
@@ -356,15 +356,14 @@ class InspectorService extends InspectorServiceBase {
     }
   }
 
-
   Future<void> addPubRootDirectories(List<String> rootDirectories) async {
     await _addPubRootDirectories(rootDirectories);
-    await _onRootDirectoriesChanged(rootDirectories);
+    _onRootDirectoriesChanged(rootDirectories);
   }
 
   Future<void> removePubRootDirectories(List<String> rootDirectories) async {
     await _removePubRootDirectories(rootDirectories);
-    await _onRootDirectoriesChanged(rootDirectories);
+    _onRootDirectoriesChanged(rootDirectories);
   }
 
   Future<void> _addPubRootDirectories(List<String> pubDirectories) {
