@@ -87,13 +87,14 @@ class ImportController {
   }
 }
 
-extension type _DevToolsSnapshot(Map<String, dynamic> json) {
-  Map<String, Object> get connectedApp {
+extension type _DevToolsSnapshot(Map<String, Object?> json) {
+  Map<String, Object?> get connectedApp {
     final connectedApp = json[DevToolsExportKeys.connectedApp.name] as Map?;
-    return connectedApp == null ? {} : connectedApp.cast<String, Object>();
+    return connectedApp == null ? {} : connectedApp.cast<String, Object?>();
   }
 
-  String get activeScreenId => json[DevToolsExportKeys.activeScreenId.name];
+  String get activeScreenId =>
+      json[DevToolsExportKeys.activeScreenId.name] as String;
 }
 
 enum ExportFileType {

@@ -601,8 +601,8 @@ class CpuProfileData {
     Map<String, Object?> traceObject,
   ) async {
     final stackFrameMap = traceObject[CpuProfileData._stackFramesKey] as Map;
-    final stackFrames = stackFrameMap.values.cast<Map<String, dynamic>>();
-    final stackFramesWaitingOnPackageUri = <Map<String, dynamic>>[];
+    final stackFrames = stackFrameMap.values.cast<Map<String, Object?>>();
+    final stackFramesWaitingOnPackageUri = <Map<String, Object?>>[];
     final urisWithoutPackageUri = <String>{};
     for (final stackFrameJson in stackFrames) {
       final resolvedUrl =
@@ -625,7 +625,8 @@ class CpuProfileData {
     );
 
     for (var stackFrameJson in stackFramesWaitingOnPackageUri) {
-      final resolvedUri = stackFrameJson[CpuProfileData.resolvedUrlKey];
+      final resolvedUri =
+          stackFrameJson[CpuProfileData.resolvedUrlKey] as String;
       final packageUri = serviceConnection.serviceManager.resolvedUriManager
           .lookupPackageUri(isolateId, resolvedUri);
       if (packageUri != null) {
