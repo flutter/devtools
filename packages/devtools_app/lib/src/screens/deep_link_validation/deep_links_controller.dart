@@ -15,6 +15,17 @@ import 'deep_links_model.dart';
 import 'deep_links_services.dart';
 
 typedef _DomainAndPath = ({String domain, String path});
+const domainErrorsThatCanBeFixedByGeneratedJson = {
+  DomainError.existence,
+  DomainError.appIdentifier,
+  DomainError.fingerprints,
+  DomainError.contentType,
+};
+const domainErrorsThatCanNotBeFixedByGeneratedJson = {
+  DomainError.httpsAccessibility,
+  DomainError.nonRedirect,
+  DomainError.hostForm,
+};
 
 /// The phase of the deep link page.
 enum PagePhase {
@@ -135,6 +146,8 @@ class DeepLinksController extends DisposableController {
   }
 
   DisplayOptions get displayOptions => displayOptionsNotifier.value;
+  String get applicationId =>
+      _androidAppLinks[selectedVariantIndex.value]?.applicationId ?? '';
 
   List<LinkData> get getLinkDatasByPath {
     final linkDatasByPath = <String, LinkData>{};
@@ -240,7 +253,8 @@ class DeepLinksController extends DisposableController {
 
   List<LinkData>? allValidatedLinkDatas;
   final displayLinkDatasNotifier = ValueNotifier<List<LinkData>?>(null);
-  final generatedAssetLinksForSelectedLink = ValueNotifier<String?>(null);
+  final generatedAssetLinksForSelectedLink =
+      ValueNotifier<GenerateAssetLinksResult?>(null);
 
   final displayOptionsNotifier =
       ValueNotifier<DisplayOptions>(DisplayOptions());
@@ -250,9 +264,7 @@ class DeepLinksController extends DisposableController {
   final deepLinksServices = DeepLinksServices();
 
   Future<void> _generateAssetLinks() async {
-    final applicationId =
-        _androidAppLinks[selectedVariantIndex.value]?.applicationId ?? '';
-
+    generatedAssetLinksForSelectedLink.value = null;
     generatedAssetLinksForSelectedLink.value =
         await deepLinksServices.generateAssetLinks(
       domain: selectedLink.value!.domain,
@@ -272,9 +284,6 @@ class DeepLinksController extends DisposableController {
         .toSet()
         .toList();
 
-    final applicationId =
-        _androidAppLinks[selectedVariantIndex.value]?.applicationId ?? '';
-
     late final Map<String, List<DomainError>> domainErrors;
 
     try {
@@ -289,10 +298,11 @@ class DeepLinksController extends DisposableController {
     }
 
     return linkdatas.map((linkdata) {
-      if (domainErrors[linkdata.domain]?.isNotEmpty ?? false) {
+      final errors = domainErrors[linkdata.domain];
+      if (errors != null && errors.isNotEmpty) {
         return LinkData(
           domain: linkdata.domain,
-          domainErrors: domainErrors[linkdata.domain]!,
+          domainErrors: errors,
           path: linkdata.path,
           pathError: linkdata.pathError,
           os: linkdata.os,

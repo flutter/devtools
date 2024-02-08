@@ -16,7 +16,7 @@ an IDE. - [#7030](https://github.com/flutter/devtools/pull/7030)
 * Removed the "Dense mode" setting. - [#7086](https://github.com/flutter/devtools/pull/7086)
 * Added support for filtering with regular expressions in the Logging, Network, and CPU profiler
 pages - [#7027](https://github.com/flutter/devtools/pull/7027)
-* Add a DevTools server interaction for getting the DTD uri. - [#7054](https://github.com/flutter/devtools/pull/7054)
+* Add a DevTools server interaction for getting the DTD uri. - [#7054](https://github.com/flutter/devtools/pull/7054), [#7164](https://github.com/flutter/devtools/pull/7164)
 * Enabled expression evaluation with scope for the web, allowing evaluation of inspected widgets. - [#7144](https://github.com/flutter/devtools/pull/7144)
 * Update `package:vm_service` constraint to `^14.0.0`. - [#6953](https://github.com/flutter/devtools/pull/6953)
 * Added `--dtd-uri` flag to `devtools_tool serve`. - [#7191](https://github.com/flutter/devtools/pull/7191)
@@ -39,7 +39,7 @@ TODO: Remove this section if there are not any general updates.
 
 ## Debugger updates
 
-TODO: Remove this section if there are not any general updates.
+* Fixed syntax highlighting for comments when the source file uses `\r\n` line endings [#7190](https://github.com/flutter/devtools/pull/7190)
 
 ## Network profiler updates
 
@@ -55,11 +55,12 @@ TODO: Remove this section if there are not any general updates.
 
 ## VS Code Sidebar updates
 
-TODO: Remove this section if there are not any general updates.
+* Do not show DevTools release notes in the Flutter sidebar. - [#7166](https://github.com/flutter/devtools/pull/7166)
 
 ## DevTools Extension updates
 
-TODO: Remove this section if there are not any general updates.
+* Fixed an issue with not detecting extensions for test files in
+subdirectories. - [#7174](https://github.com/flutter/devtools/pull/7174)
 
 ## Full commit history
 

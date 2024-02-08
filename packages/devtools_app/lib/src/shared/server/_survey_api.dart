@@ -59,7 +59,7 @@ Future<void> setSurveyActionTaken() async {
       '?$surveyActionTakenPropertyName=true',
     );
     if (resp == null || !resp.statusOk || !(json.decode(resp.body) as bool)) {
-      logWarning(resp, apiSetSurveyActionTaken, resp?.body);
+      logWarning(resp, apiSetSurveyActionTaken);
     }
   }
 }

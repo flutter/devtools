@@ -46,8 +46,6 @@ class ImportController {
 
   // TODO(kenz): improve error handling here or in snapshot_screen.dart.
   void importData(DevToolsJsonFile jsonFile, {String? expectedScreenId}) {
-    final json = jsonFile.data;
-
     // Do not allow two different imports within 500 ms of each other. This is a
     // workaround for the fact that we get two drop events for the same file.
     final now = DateTime.now();
@@ -60,6 +58,7 @@ class ImportController {
     }
     previousImportTime = now;
 
+    final json = jsonFile.data;
     final isDevToolsSnapshot = json is Map<String, dynamic> &&
         json[DevToolsExportKeys.devToolsSnapshot.name] == true;
     if (!isDevToolsSnapshot) {
@@ -97,18 +96,7 @@ enum ExportFileType {
   yaml;
 
   @override
-  String toString() {
-    switch (this) {
-      case json:
-        return 'json';
-      case csv:
-        return 'csv';
-      case yaml:
-        return 'yaml';
-      default:
-        throw UnimplementedError('Unable to convert $this to a string');
-    }
-  }
+  String toString() => name;
 }
 
 abstract class ExportController {
@@ -169,11 +157,14 @@ abstract class ExportController {
     // with other trace viewers (catapult, perfetto, chrome://tracing), which
     // require a top level field named "traceEvents".
     if (activeScreenId == ScreenMetaData.performance.id) {
-      final traceEvents = List<Map<String, dynamic>>.from(
-        contents[activeScreenId][traceEventsFieldName],
-      );
+      final activeScreen =
+          (contents[activeScreenId] as Map).cast<String, Object?>();
+      final traceEvents = [
+        for (final event in activeScreen[traceEventsFieldName] as List)
+          (event as Map).cast<String, Object?>(),
+      ];
       contents[traceEventsFieldName] = traceEvents;
-      contents[activeScreenId].remove(traceEventsFieldName);
+      activeScreen.remove(traceEventsFieldName);
     }
     return contents;
   }
