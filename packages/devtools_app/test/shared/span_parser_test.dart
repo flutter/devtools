@@ -49,19 +49,34 @@ void main() {
     /// Expects parsing [content] using produces the output in [goldenFile].
     void expectSpansMatchGolden(
       String content,
-      List<ScopeSpan> spans,
       File goldenFile,
     ) {
-      if (!goldenFile.existsSync() && !updateGoldens) {
+      if (updateGoldens) {
+        final spans = SpanParser.parse(grammar, content);
+        final actual = _buildGoldenText(content, spans);
+        goldenFile.writeAsStringSync(actual);
+        return;
+      }
+
+      if (!goldenFile.existsSync()) {
         fail('Missing golden file: ${goldenFile.path}');
       }
 
-      final actual = _buildGoldenText(content, spans);
-      if (updateGoldens) {
-        goldenFile.writeAsStringSync(actual);
-      } else {
-        final expected = goldenFile.readAsStringSync();
-        expect(_normalize(actual), _normalize(expected));
+      // Test input content with both line ending kinds.
+      for (final eol in ['\n', '\r\n']) {
+        /// Normalizes newlines to the set we're comparing.
+        String normalize(String code) =>
+            code.replaceAll('\r', '').replaceAll('\n', eol);
+
+        content = normalize(content);
+        final spans = SpanParser.parse(grammar, content);
+        final actual = _buildGoldenText(content, spans);
+        final expected = normalize(goldenFile.readAsStringSync());
+        expect(
+          actual,
+          expected,
+          reason: 'Content should match when using eol=${jsonEncode(eol)}',
+        );
       }
     }
 
@@ -74,11 +89,10 @@ void main() {
     // the 'end' pattern in the case that EOF has been reached.
     test('handles EOF gracefully', () {
       final goldenFile = goldenFileFor('handles_eof_gracefully');
-      final spans = SpanParser.parse(grammar, missingEnd);
-      expectSpansMatchGolden(missingEnd, spans, goldenFile);
+      expectSpansMatchGolden(missingEnd, goldenFile);
 
       // Check the span ends where expected.
-      final span = spans.single;
+      final span = SpanParser.parse(grammar, missingEnd).single;
       expect(span.scopes, ['comment.block.documentation.dart']);
       expect(span.line, 1);
       expect(span.column, 1);
@@ -87,8 +101,7 @@ void main() {
 
     test('handles malformed input', () {
       final goldenFile = goldenFileFor('open_code_block');
-      final spans = SpanParser.parse(grammar, openCodeBlock);
-      expectSpansMatchGolden(openCodeBlock, spans, goldenFile);
+      expectSpansMatchGolden(openCodeBlock, goldenFile);
     });
 
     group('golden', () {
@@ -106,9 +119,7 @@ void main() {
         final goldenFile = goldenFileFor(path.basename(testFile.path));
         test(path.basename(testFile.path), () {
           final content = testFile.readAsStringSync();
-          final spans = SpanParser.parse(grammar, content);
-
-          expectSpansMatchGolden(content, spans, goldenFile);
+          expectSpansMatchGolden(content, goldenFile);
         });
       }
     });
@@ -119,15 +130,23 @@ String _buildGoldenText(String content, List<ScopeSpan> spans) {
   final buffer = StringBuffer();
   final spansByLine = groupBy(spans, (ScopeSpan s) => s.line - 1);
 
-  final lines = content.trim().split('\n');
+  final lines = content.split('\n');
   for (var i = 0; i < lines.length; i++) {
-    final line = lines[i];
-    // We need the line length to wrap. If this isn't the last line, account for
-    // the \n we split by.
-    final newlineLength = (i == lines.length - 1) ? 0 : 1;
-    final lineLengthWithNewline = line.length + newlineLength;
+    // We only output characters for the line, excluding any newlines on the
+    // end.
+    final line = lines[i].trimRight();
+    // Track what the eol was (restore the newline, subtract any untrimmed
+    // part). This may end up as `\r\n` or `\n` depending on whether Windows
+    // and the git autocrlf setting.
+    final eol = '${lines[i]}\n'.substring(line.length);
+    final lineLengthWithNewline = line.length + eol.length;
 
-    buffer.writeln('>$line');
+    // If this is the last line and it's blank, skip it.
+    if (i == lines.length - 1 && line.isEmpty) {
+      break;
+    }
+
+    buffer.write('>$line$eol');
     final lineSpans = spansByLine[i];
     if (lineSpans != null) {
       for (final span in lineSpans) {
@@ -162,7 +181,7 @@ String _buildGoldenText(String content, List<ScopeSpan> spans) {
 
         // If this span just covers the trailing newline, skip it
         // as it doesn't produce any useful output.
-        if (col == line.length) {
+        if (col >= line.length) {
           continue;
         }
 
@@ -170,13 +189,11 @@ String _buildGoldenText(String content, List<ScopeSpan> spans) {
         buffer.write(' ' * col);
         buffer.write('^' * length);
         buffer.write(' ');
-        buffer.writeln(span.scopes.join(' '));
+        buffer.write(span.scopes.join(' '));
+        buffer.write(eol);
       }
     }
   }
 
   return buffer.toString();
 }
-
-/// Normalises newlines in code for comparing.
-String _normalize(String code) => code.replaceAll('\r', '');
