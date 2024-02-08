@@ -183,7 +183,7 @@ class ObjectSetStats with Sealable {
       shallowSize == 0 && retainedSize == 0 && instanceCount == 0;
 
   void countInstance(
-    AdaptedHeapObject object, {
+    MockAdaptedHeapObject object, {
     required bool excludeFromRetained,
   }) {
     assert(!isSealed);
@@ -193,7 +193,7 @@ class ObjectSetStats with Sealable {
   }
 
   void uncountInstance(
-    AdaptedHeapObject object, {
+    MockAdaptedHeapObject object, {
     required bool excludeFromRetained,
   }) {
     assert(!isSealed);
@@ -207,7 +207,7 @@ class ObjectSetStats with Sealable {
 class ObjectSet extends ObjectSetStats {
   static ObjectSet empty = ObjectSet()..seal();
 
-  final objectsByCodes = <IdentityHashCode, AdaptedHeapObject>{};
+  final objectsByCodes = <IdentityHashCode, MockAdaptedHeapObject>{};
 
   /// Subset of objects that are excluded from the retained size
   /// calculation for this set.
@@ -220,7 +220,7 @@ class ObjectSet extends ObjectSetStats {
 
   @override
   void countInstance(
-    AdaptedHeapObject object, {
+    MockAdaptedHeapObject object, {
     required bool excludeFromRetained,
   }) {
     if (objectsByCodes.containsKey(object.code)) return;
@@ -231,7 +231,7 @@ class ObjectSet extends ObjectSetStats {
 
   @override
   void uncountInstance(
-    AdaptedHeapObject object, {
+    MockAdaptedHeapObject object, {
     required bool excludeFromRetained,
   }) {
     throw AssertionError('uncountInstance is not valid for $ObjectSet');

@@ -72,7 +72,7 @@ void main() {
 }
 
 Future<SingleClassStats> _createClassStats(
-  Set<AdaptedHeapObject> instances,
+  Set<MockAdaptedHeapObject> instances,
 ) async {
   final indexes =
       Iterable<int>.generate(instances.length).map((i) => i + 1).toSet();
@@ -100,12 +100,12 @@ Future<SingleClassStats> _createClassStats(
   return result;
 }
 
-AdaptedHeapObject _createObject(
+MockAdaptedHeapObject _createObject(
   HeapClassName className,
   int code,
   Set<int> references,
 ) =>
-    AdaptedHeapObject(
+    MockAdaptedHeapObject(
       code: code,
       outRefs: references,
       heapClass: className,
@@ -115,7 +115,7 @@ AdaptedHeapObject _createObject(
 Future<AdaptedHeap> _createSimplestHeap() async => await AdaptedHeap.create(
       AdaptedHeapData(
         [
-          AdaptedHeapObject(
+          MockAdaptedHeapObject(
             code: 0,
             outRefs: {},
             heapClass:

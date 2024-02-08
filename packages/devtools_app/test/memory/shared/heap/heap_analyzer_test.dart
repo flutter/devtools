@@ -224,11 +224,11 @@ class _SizeTest {
   final int unreachableSize;
 }
 
-AdaptedHeapObject _createOneByteObject(
+MockAdaptedHeapObject _createOneByteObject(
   int codeAndIndex,
   List<int> references,
 ) =>
-    AdaptedHeapObject(
+    MockAdaptedHeapObject(
       code: codeAndIndex,
       outRefs: references.toSet(),
       heapClass: HeapClassName.fromPath(
@@ -238,11 +238,11 @@ AdaptedHeapObject _createOneByteObject(
       shallowSize: 1,
     );
 
-AdaptedHeapObject _createOneByteWeakObject(
+MockAdaptedHeapObject _createOneByteWeakObject(
   int codeAndIndex,
   List<int> references,
 ) {
-  final result = AdaptedHeapObject(
+  final result = MockAdaptedHeapObject(
     code: codeAndIndex,
     outRefs: references.toSet(),
     heapClass: HeapClassName.fromPath(
@@ -255,7 +255,7 @@ AdaptedHeapObject _createOneByteWeakObject(
   return result;
 }
 
-AdaptedHeapData _heapData(List<AdaptedHeapObject> objects) {
+AdaptedHeapData _heapData(List<MockAdaptedHeapObject> objects) {
   return AdaptedHeapData(objects, rootIndex: 0);
 }
 

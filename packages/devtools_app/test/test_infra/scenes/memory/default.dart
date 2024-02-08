@@ -137,7 +137,7 @@ final _simpleHeapTests = <AdaptedHeapData>[
 
 AdaptedHeapData _createHeap(Map<String, int> classToInstanceCount) {
   const rootIndex = 0;
-  final objects = <AdaptedHeapObject>[_createObject('root')];
+  final objects = <MockAdaptedHeapObject>[_createObject('root')];
   var leafCount = 0;
 
   // Create objects.
@@ -158,7 +158,7 @@ AdaptedHeapData _createHeap(Map<String, int> classToInstanceCount) {
 
 var _nextCode = 1;
 
-AdaptedHeapObject _createObject(String className) => AdaptedHeapObject(
+MockAdaptedHeapObject _createObject(String className) => MockAdaptedHeapObject(
       code: _nextCode++,
       outRefs: {},
       heapClass: HeapClassName.fromPath(

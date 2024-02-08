@@ -12,8 +12,8 @@ final _uiReleaser = UiReleaser();
 ///
 /// * Sets the field retainer and retainedSize for each object in the [heap], that
 /// has retaining path to the root.
-/// * Populates [AdaptedHeapObject.inRefs].
-/// * Sets [AdaptedHeapObject.totalDartSize].
+/// * Populates [MockAdaptedHeapObject.inRefs].
+/// * Sets [MockAdaptedHeapObject.totalDartSize].
 /// * Sets [AdaptedHeapData.allFieldsCalculated] to true.
 Future<void> calculateHeap(AdaptedHeapData heap) async {
   assert(!heap.allFieldsCalculated);
@@ -77,7 +77,7 @@ Future<void> _setRetainers(AdaptedHeapData heap) async {
 
 /// Assuming the [object] is leaf, initializes its retained size
 /// and adds the size to all its retainers.
-void _propagateSize(AdaptedHeapObject object, AdaptedHeapData heap) {
+void _propagateSize(MockAdaptedHeapObject object, AdaptedHeapData heap) {
   assert(object.retainer != null);
   assert(object.retainedSize == object.shallowSize);
   final addedSize = object.shallowSize;
@@ -91,7 +91,7 @@ void _propagateSize(AdaptedHeapObject object, AdaptedHeapData heap) {
   }
 }
 
-bool _isRetainer(AdaptedHeapObject object) {
+bool _isRetainer(MockAdaptedHeapObject object) {
   if (object.heapClass.isWeakEntry) return false;
   return object.outRefs.isNotEmpty;
 }

@@ -69,8 +69,8 @@ void main() {
   });
 }
 
-AdaptedHeapObject _objectForClass(String lib, String theClass) =>
-    AdaptedHeapObject(
+MockAdaptedHeapObject _objectForClass(String lib, String theClass) =>
+    MockAdaptedHeapObject(
       code: 1,
       outRefs: {},
       heapClass: HeapClassName.fromPath(className: theClass, library: lib),

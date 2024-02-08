@@ -9,19 +9,19 @@ import 'simple_items.dart';
 
 /// Contains information from [HeapSnapshotObject] needed for
 /// memory analysis on memory screen.
-class AdaptedHeapObject {
-  AdaptedHeapObject({
+class MockAdaptedHeapObject {
+  MockAdaptedHeapObject({
     required this.code,
     required this.outRefs,
     required this.heapClass,
     required this.shallowSize,
   });
 
-  factory AdaptedHeapObject.fromHeapSnapshotObject(
+  factory MockAdaptedHeapObject.fromHeapSnapshotObject(
     HeapSnapshotObject object,
     int index,
   ) {
-    return AdaptedHeapObject(
+    return MockAdaptedHeapObject(
       code: object.identityHashCode,
       outRefs: Set.of(object.references.where((i) => i != index)),
       heapClass: HeapClassName.fromHeapSnapshotClass(object.klass),

@@ -106,12 +106,12 @@ void main() {
   });
 }
 
-AdaptedHeapObject _createOneByteObject(
+MockAdaptedHeapObject _createOneByteObject(
   int codeAndIndex,
   List<int> references,
   HeapClassName theClass,
 ) =>
-    AdaptedHeapObject(
+    MockAdaptedHeapObject(
       code: codeAndIndex,
       outRefs: references.toSet(),
       heapClass: theClass,

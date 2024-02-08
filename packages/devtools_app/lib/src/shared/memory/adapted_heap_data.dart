@@ -18,7 +18,7 @@ class HeapObjectSelection {
 
   /// If object is null, it exists in live app, but is not
   /// located in heap.
-  final AdaptedHeapObject? object;
+  final MockAdaptedHeapObject? object;
 
   Iterable<int>? _refs(RefDirection direction) {
     switch (direction) {
@@ -63,11 +63,11 @@ class AdaptedHeapData {
   static Future<AdaptedHeapData> fromHeapSnapshot(
     HeapSnapshotGraph graph,
   ) async {
-    final objects = <AdaptedHeapObject>[];
+    final objects = <MockAdaptedHeapObject>[];
     for (final i in Iterable<int>.generate(graph.objects.length)) {
       if (_uiReleaser.step()) await _uiReleaser.releaseUi();
       final object =
-          AdaptedHeapObject.fromHeapSnapshotObject(graph.objects[i], i);
+          MockAdaptedHeapObject.fromHeapSnapshotObject(graph.objects[i], i);
       objects.add(object);
     }
 
@@ -92,9 +92,9 @@ class AdaptedHeapData {
 
   final int rootIndex;
 
-  AdaptedHeapObject get root => objects[rootIndex];
+  MockAdaptedHeapObject get root => objects[rootIndex];
 
-  final List<AdaptedHeapObject> objects;
+  final List<MockAdaptedHeapObject> objects;
 
   /// Total size of all objects in the heap.
   ///
@@ -120,7 +120,7 @@ class AdaptedHeapData {
 
     if (objects[objectIndex].retainer == null) return null;
 
-    final result = <AdaptedHeapObject>[];
+    final result = <MockAdaptedHeapObject>[];
 
     while (objectIndex >= 0) {
       final object = objects[objectIndex];
@@ -140,7 +140,7 @@ class AdaptedHeapData {
 /// Sequence of ids of objects in the heap.
 class HeapPath {
   HeapPath(this.objects);
-  final List<AdaptedHeapObject> objects;
+  final List<MockAdaptedHeapObject> objects;
   late final bool isRetainedBySameClass = () {
     if (objects.length < 2) return false;
     final theClass = objects.last.heapClass;

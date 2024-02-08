@@ -176,7 +176,7 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
   }
 
   Future<InstanceRef?> findObject(
-    AdaptedHeapObject object,
+    MockAdaptedHeapObject object,
     IsolateRef isolateRef,
   ) async {
     final isolateId = isolateRef.id!;
