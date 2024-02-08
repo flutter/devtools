@@ -668,7 +668,7 @@ void main() {
       );
       expect(
         devToolsQueryParams(
-          'http://localhost:9101/#/appsize?key=value.json&key2=123',
+          'http://localhost:9101/#/app-size?key=value.json&key2=123',
         ),
         equals({
           'key': 'value.json',
