@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../foo.dart';
+import 'foo_controller.dart';
 
 /// This is an example widget that will be used from `app_that_uses_foo`.
 class FooWidget extends StatelessWidget {
