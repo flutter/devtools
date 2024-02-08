@@ -34,7 +34,7 @@ dev_dependencies:
   integration_test:
     sdk: flutter
   foo_devtools_extension:
-    path: example/foo/packages/foo_devtools_extension
+    path: example/packages_with_extensions/foo/packages/foo_devtools_extension
 
 flutter:
   uses-material-design: true
