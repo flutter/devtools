@@ -76,18 +76,11 @@ class PreferencesController extends DisposableController
         await storage.getValue(_verboseLoggingStorageId);
 
     toggleVerboseLogging(verboseLoggingEnabledValue == 'true');
-
     addAutoDisposeListener(verboseLoggingEnabled, () {
       storage.setValue(
         'verboseLogging',
         verboseLoggingEnabled.value.toString(),
       );
-
-      if (verboseLoggingEnabled.value) {
-        setDevToolsLoggingLevel(verboseLoggingLevel);
-      } else {
-        setDevToolsLoggingLevel(basicLoggingLevel);
-      }
     });
   }
 
@@ -118,6 +111,11 @@ class PreferencesController extends DisposableController
   void toggleVerboseLogging(bool? enableVerboseLogging) {
     if (enableVerboseLogging != null) {
       verboseLoggingEnabled.value = enableVerboseLogging;
+      if (enableVerboseLogging) {
+        setDevToolsLoggingLevel(verboseLoggingLevel);
+      } else {
+        setDevToolsLoggingLevel(basicLoggingLevel);
+      }
     }
   }
 }
