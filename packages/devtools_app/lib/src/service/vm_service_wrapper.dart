@@ -264,7 +264,7 @@ class VmServiceWrapper extends VmService {
 
   Future<HttpProfile> getHttpProfileWrapper(
     String isolateId, {
-    int? updatedSince,
+    DateTime? updatedSince,
   }) {
     return getHttpProfile(isolateId, updatedSince: updatedSince);
   }

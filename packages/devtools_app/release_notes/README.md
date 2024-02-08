@@ -26,7 +26,7 @@ to match the structure of the Flutter website.
 
   - The [NEXT_RELEASE_NOTES.md](NEXT_RELEASE_NOTES.md) file contains
     the running release notes for the current version.
-  - See an example [PR](https://github.com/flutter/website/pull/6791) for
+  - See an example [PR](https://github.com/flutter/website/pull/10113) for
     an example of how to add those to the Flutter website.
   - Make sure to update all image links with the `site_url`
     - e.g. `{{site.url}}/tools/devtools/release-notes/images-<VERSION>/<IMAGE_FILE>`

@@ -83,7 +83,7 @@ class ServiceManager<T extends VmService> {
 
   final resolvedUriManager = ResolvedUriManager();
 
-  /// Proxy to state inside the isolateManager, for code consizeness.
+  /// Proxy to state inside the isolateManager, for code conciseness.
   ///
   /// Defaults to false if there is no main isolate.
   bool get isMainIsolatePaused =>
@@ -145,7 +145,8 @@ class ServiceManager<T extends VmService> {
     String name, {
     String? isolateId,
     Map<String, dynamic>? args,
-  }) {
+    // ignore: avoid-redundant-async, for some reasons tests fail without `async
+  }) async {
     final registeredMethod = _registeredMethodsForService[name];
     if (registeredMethod == null) {
       throw Exception('There is no registered method for service "$name"');

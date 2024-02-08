@@ -5,6 +5,7 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/deep_link_validation/deep_link_list_view.dart';
 import 'package:devtools_app/src/screens/deep_link_validation/deep_links_model.dart';
+import 'package:devtools_app/src/screens/deep_link_validation/deep_links_services.dart';
 import 'package:devtools_app/src/screens/deep_link_validation/validation_details_view.dart';
 import 'package:devtools_app/src/shared/directory_picker.dart';
 import 'package:devtools_app_shared/ui.dart';
@@ -117,6 +118,7 @@ void main() {
           controller: deepLinksController,
         );
 
+        expect(deepLinksController.pagePhase.value, PagePhase.linksLoading);
         expect(find.byType(DeepLinkPage), findsOneWidget);
         expect(find.byType(DeepLinkListView), findsOneWidget);
         expect(find.byType(CenteredCircularProgressIndicator), findsOneWidget);
@@ -132,13 +134,13 @@ void main() {
         deepLinksController.selectedProject.value =
             FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
 
-        deepLinksController.allLinkDatasNotifier.value = linkDatas;
-
+        deepLinksController.allValidatedLinkDatas = linkDatas;
         await pumpDeepLinkScreen(
           tester,
           controller: deepLinksController,
         );
 
+        expect(deepLinksController.pagePhase.value, PagePhase.linksValidated);
         expect(find.byType(DeepLinkPage), findsOneWidget);
         expect(find.byType(DeepLinkListView), findsOneWidget);
         expect(find.byType(ValidationDetailView), findsNothing);
@@ -154,7 +156,7 @@ void main() {
         deepLinksController.selectedProject.value =
             FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
 
-        deepLinksController.allLinkDatasNotifier.value = linkDatas;
+        deepLinksController.allValidatedLinkDatas = linkDatas;
 
         deepLinksController.displayOptionsNotifier.value =
             DisplayOptions(showSplitScreen: true);
@@ -180,7 +182,7 @@ void main() {
         deepLinksController.selectedProject.value =
             FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
 
-        deepLinksController.allLinkDatasNotifier.value = [domainErrorlinkData];
+        deepLinksController.allValidatedLinkDatas = [domainErrorlinkData];
         await pumpDeepLinkScreen(
           tester,
           controller: deepLinksController,
@@ -201,7 +203,7 @@ void main() {
         deepLinksController.selectedProject.value =
             FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
 
-        deepLinksController.allLinkDatasNotifier.value = [domainErrorlinkData];
+        deepLinksController.allValidatedLinkDatas = [domainErrorlinkData];
         await pumpDeepLinkScreen(
           tester,
           controller: deepLinksController,
@@ -226,7 +228,7 @@ void main() {
         deepLinksController.selectedProject.value =
             FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
 
-        deepLinksController.allLinkDatasNotifier.value = linkDatas;
+        deepLinksController.allValidatedLinkDatas = linkDatas;
 
         await pumpDeepLinkScreen(
           tester,
@@ -274,7 +276,7 @@ void main() {
           ),
         ];
 
-        deepLinksController.allLinkDatasNotifier.value = linkDatas;
+        deepLinksController.allValidatedLinkDatas = linkDatas;
 
         await pumpDeepLinkScreen(
           tester,
@@ -352,7 +354,7 @@ void main() {
           ),
         ];
 
-        deepLinksController.allLinkDatasNotifier.value = linkDatas;
+        deepLinksController.allValidatedLinkDatas = linkDatas;
 
         await pumpDeepLinkScreen(
           tester,
@@ -416,7 +418,7 @@ void main() {
 
         deepLinksController.selectedProject.value =
             FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
-        deepLinksController.allLinkDatasNotifier.value = linkDatas;
+        deepLinksController.allValidatedLinkDatas = linkDatas;
 
         await pumpDeepLinkScreen(
           tester,
@@ -473,9 +475,8 @@ void main() {
 class DeepLinksTestController extends DeepLinksController {
   @override
   Future<void> validateLinks() async {
-    if (allLinkDatasNotifier.value == null) return;
-    displayLinkDatasNotifier.value =
-        getFilterredLinks(allLinkDatasNotifier.value!);
+    if (allValidatedLinkDatas == null) return;
+    displayLinkDatasNotifier.value = getFilterredLinks(allValidatedLinkDatas!);
 
     displayOptionsNotifier.value = displayOptionsNotifier.value.copyWith(
       domainErrorCount: getLinkDatasByDomain
@@ -484,13 +485,17 @@ class DeepLinksTestController extends DeepLinksController {
       pathErrorCount:
           getLinkDatasByPath.where((element) => element.pathError).length,
     );
+    pagePhase.value = PagePhase.linksValidated;
   }
 
   @override
   void selectLink(LinkData linkdata) async {
     selectedLink.value = linkdata;
     if (linkdata.domainErrors.isNotEmpty) {
-      generatedAssetLinksForSelectedLink.value = 'fake generated content';
+      generatedAssetLinksForSelectedLink.value = GenerateAssetLinksResult(
+        '',
+        'fake generated content',
+      );
     }
   }
 }

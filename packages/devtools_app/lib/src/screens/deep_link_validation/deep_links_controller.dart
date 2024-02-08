@@ -15,6 +15,33 @@ import 'deep_links_model.dart';
 import 'deep_links_services.dart';
 
 typedef _DomainAndPath = ({String domain, String path});
+const domainErrorsThatCanBeFixedByGeneratedJson = {
+  DomainError.existence,
+  DomainError.appIdentifier,
+  DomainError.fingerprints,
+  DomainError.contentType,
+};
+const domainErrorsThatCanNotBeFixedByGeneratedJson = {
+  DomainError.httpsAccessibility,
+  DomainError.nonRedirect,
+  DomainError.hostForm,
+};
+
+/// The phase of the deep link page.
+enum PagePhase {
+  // The empty state.
+  emptyState,
+  // Loading links from the flutter project.
+  linksLoading,
+  // Loading completed but no link to validate
+  noLinks,
+  // Validating links.
+  linksValidating,
+  // Links are validated.
+  linksValidated,
+  // Error page.
+  errorPage,
+}
 
 enum FilterOption {
   http('http://, https://'),
@@ -119,10 +146,12 @@ class DeepLinksController extends DisposableController {
   }
 
   DisplayOptions get displayOptions => displayOptionsNotifier.value;
+  String get applicationId =>
+      _androidAppLinks[selectedVariantIndex.value]?.applicationId ?? '';
 
   List<LinkData> get getLinkDatasByPath {
     final linkDatasByPath = <String, LinkData>{};
-    for (var linkData in allLinkDatasNotifier.value!) {
+    for (var linkData in allValidatedLinkDatas!) {
       final previousRecord = linkDatasByPath[linkData.path];
       linkDatasByPath[linkData.path] = LinkData(
         domain: linkData.domain,
@@ -149,7 +178,7 @@ class DeepLinksController extends DisposableController {
   List<LinkData> get getLinkDatasByDomain {
     final linkDatasByDomain = <String, LinkData>{};
 
-    for (var linkData in allLinkDatasNotifier.value!) {
+    for (var linkData in allValidatedLinkDatas!) {
       final previousRecord = linkDatasByDomain[linkData.domain];
       linkDatasByDomain[linkData.domain] = LinkData(
         domain: linkData.domain,
@@ -173,6 +202,7 @@ class DeepLinksController extends DisposableController {
   }
 
   Future<void> _loadAndroidAppLinks() async {
+    pagePhase.value = PagePhase.linksLoading;
     if (!_androidAppLinks.containsKey(selectedVariantIndex.value)) {
       final variant =
           selectedProject.value!.androidVariants[selectedVariantIndex.value];
@@ -191,7 +221,8 @@ class DeepLinksController extends DisposableController {
     await validateLinks();
   }
 
-  List<LinkData> get _allLinkDatas {
+  /// Get all unverified link data.
+  List<LinkData> get _allRawLinkDatas {
     final appLinks = _androidAppLinks[selectedVariantIndex.value]?.deeplinks;
     if (appLinks == null) {
       return const <LinkData>[];
@@ -218,10 +249,12 @@ class DeepLinksController extends DisposableController {
 
   final selectedProject = ValueNotifier<FlutterProject?>(null);
   final selectedLink = ValueNotifier<LinkData?>(null);
+  final pagePhase = ValueNotifier<PagePhase>(PagePhase.emptyState);
 
-  final allLinkDatasNotifier = ValueNotifier<List<LinkData>?>(null);
+  List<LinkData>? allValidatedLinkDatas;
   final displayLinkDatasNotifier = ValueNotifier<List<LinkData>?>(null);
-  final generatedAssetLinksForSelectedLink = ValueNotifier<String?>(null);
+  final generatedAssetLinksForSelectedLink =
+      ValueNotifier<GenerateAssetLinksResult?>(null);
 
   final displayOptionsNotifier =
       ValueNotifier<DisplayOptions>(DisplayOptions());
@@ -231,9 +264,7 @@ class DeepLinksController extends DisposableController {
   final deepLinksServices = DeepLinksServices();
 
   Future<void> _generateAssetLinks() async {
-    final applicationId =
-        _androidAppLinks[selectedVariantIndex.value]?.applicationId ?? '';
-
+    generatedAssetLinksForSelectedLink.value = null;
     generatedAssetLinksForSelectedLink.value =
         await deepLinksServices.generateAssetLinks(
       domain: selectedLink.value!.domain,
@@ -242,26 +273,36 @@ class DeepLinksController extends DisposableController {
   }
 
   Future<List<LinkData>> _validateAndroidDomain() async {
-    final List<LinkData> linkdatas = _allLinkDatas;
+    final List<LinkData> linkdatas = _allRawLinkDatas;
+    if (linkdatas.isEmpty) {
+      pagePhase.value = PagePhase.noLinks;
+      return const <LinkData>[];
+    }
     final domains = linkdatas
         .where((linkdata) => linkdata.os.contains(PlatformOS.android))
         .map((linkdata) => linkdata.domain)
         .toSet()
         .toList();
 
-    final applicationId =
-        _androidAppLinks[selectedVariantIndex.value]?.applicationId ?? '';
+    late final Map<String, List<DomainError>> domainErrors;
 
-    final domainErrors = await deepLinksServices.validateAndroidDomain(
-      domains: domains,
-      applicationId: applicationId,
-    );
+    try {
+      domainErrors = await deepLinksServices.validateAndroidDomain(
+        domains: domains,
+        applicationId: applicationId,
+      );
+    } catch (e) {
+      //TODO(hangyujin): Add more error handling for cases like RPC error and invalid json.
+      pagePhase.value = PagePhase.errorPage;
+      return linkdatas;
+    }
 
     return linkdatas.map((linkdata) {
-      if (domainErrors[linkdata.domain]?.isNotEmpty ?? false) {
+      final errors = domainErrors[linkdata.domain];
+      if (errors != null && errors.isNotEmpty) {
         return LinkData(
           domain: linkdata.domain,
-          domainErrors: domainErrors[linkdata.domain]!,
+          domainErrors: errors,
           path: linkdata.path,
           pathError: linkdata.pathError,
           os: linkdata.os,
@@ -275,9 +316,12 @@ class DeepLinksController extends DisposableController {
   }
 
   Future<void> validateLinks() async {
-    allLinkDatasNotifier.value = await _validateAndroidDomain();
-    displayLinkDatasNotifier.value =
-        getFilterredLinks(allLinkDatasNotifier.value!);
+    pagePhase.value = PagePhase.linksValidating;
+    allValidatedLinkDatas = await _validateAndroidDomain();
+    if (pagePhase.value == PagePhase.linksValidating) {
+      pagePhase.value = PagePhase.linksValidated;
+    }
+    displayLinkDatasNotifier.value = getFilterredLinks(allValidatedLinkDatas!);
 
     displayOptionsNotifier.value = displayOptionsNotifier.value.copyWith(
       domainErrorCount: getLinkDatasByDomain
@@ -298,8 +342,7 @@ class DeepLinksController extends DisposableController {
   set searchContent(String content) {
     displayOptionsNotifier.value =
         displayOptionsNotifier.value.copyWith(searchContent: content);
-    displayLinkDatasNotifier.value =
-        getFilterredLinks(allLinkDatasNotifier.value!);
+    displayLinkDatasNotifier.value = getFilterredLinks(allValidatedLinkDatas!);
   }
 
   void updateDisplayOptions({
@@ -327,8 +370,7 @@ class DeepLinksController extends DisposableController {
           displayOptionsNotifier.value.updateFilter(removedFilter, false);
     }
 
-    displayLinkDatasNotifier.value =
-        getFilterredLinks(allLinkDatasNotifier.value!);
+    displayLinkDatasNotifier.value = getFilterredLinks(allValidatedLinkDatas!);
   }
 
   @visibleForTesting

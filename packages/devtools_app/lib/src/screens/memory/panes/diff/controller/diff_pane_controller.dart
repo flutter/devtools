@@ -29,10 +29,6 @@ class DiffPaneController extends DisposableController {
 
   final SnapshotTaker snapshotTaker;
 
-  /// If true, a snapshot is being taken.
-  ValueListenable<bool> get isAddingSnapshot => _isAddingSnapshot;
-  final _isAddingSnapshot = ValueNotifier<bool>(false);
-
   final retainingPathController = RetainingPathController();
 
   final core = CoreData();
@@ -50,12 +46,10 @@ class DiffPaneController extends DisposableController {
 
     final item = SnapshotInstanceItem(
       displayNumber: _nextDisplayNumber(),
-      autoName: selectedIsolateName ?? '<isolate-not-detected>',
+      defaultName: selectedIsolateName ?? '<isolate-not-detected>',
     );
 
-    _isAddingSnapshot.value = true;
     await _addSnapshot(snapshotTaker, item);
-    _isAddingSnapshot.value = false;
     derived._updateValues();
   }
 
@@ -70,14 +64,12 @@ class DiffPaneController extends DisposableController {
     final files = await importRawFilesFromPicker();
     if (files.isEmpty) return;
 
-    _isAddingSnapshot.value = true;
     final importers = files.map((file) async {
-      final item = SnapshotInstanceItem(autoName: file.name);
+      final item = SnapshotInstanceItem(defaultName: file.name);
       await _addSnapshot(SnapshotTakerFromFile(file), item);
     });
     await Future.wait(importers);
     derived._updateValues();
-    _isAddingSnapshot.value = false;
   }
 
   Future<void> _addSnapshot(

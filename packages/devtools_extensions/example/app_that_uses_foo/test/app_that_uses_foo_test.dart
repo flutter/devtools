@@ -12,7 +12,7 @@ import 'package:foo/foo.dart';
 // To test this, run the following command and copy the VM service URI to
 // connect to DevTools:
 //
-// flutter run test/app_that_uses_foo_test.dart --start-paused
+// flutter run test/app_that_uses_foo_test.dart --start-paused -d flutter-tester
 
 void main() {
   testWidgets('Builds $MyAppThatUsesFoo', (tester) async {

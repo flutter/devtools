@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:collection/collection.dart';
 import 'package:devtools_shared/devtools_deeplink.dart';
 import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:devtools_shared/devtools_shared.dart';
@@ -24,7 +23,7 @@ part '_release_notes_api.dart';
 part '_survey_api.dart';
 part '_dtd_api.dart';
 
-final _log = Logger('_server_web');
+final _log = Logger('devtools_server_client');
 
 // The DevTools server is only available in release mode right now.
 // TODO(kenz): design a way to run the DevTools server and DevTools app together
@@ -90,7 +89,8 @@ DevToolsJsonFile _devToolsJsonFileFromResponse(
   );
 }
 
-void logWarning(Response? response, String apiType, [String? respText]) {
+void logWarning(Response? response, String apiType) {
+  final respText = response?.body;
   _log.warning(
     'HttpRequest $apiType failed status = ${response?.statusCode}'
     '${respText != null ? ', responseText = $respText' : ''}',

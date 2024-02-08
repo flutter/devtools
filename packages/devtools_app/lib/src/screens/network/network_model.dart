@@ -8,10 +8,6 @@ import '../../shared/primitives/utils.dart';
 import '../../shared/ui/search.dart';
 
 abstract class NetworkRequest with SearchableDataMixin {
-  NetworkRequest(this._timelineMicrosBase);
-
-  final int _timelineMicrosBase;
-
   String get method;
 
   String get uri;
@@ -46,10 +42,6 @@ abstract class NetworkRequest with SearchableDataMixin {
           )
         : 'Pending';
     return 'Duration: $text';
-  }
-
-  int timelineMicrosecondsSinceEpoch(int micros) {
-    return _timelineMicrosBase + micros;
   }
 
   @override
@@ -90,9 +82,16 @@ abstract class NetworkRequest with SearchableDataMixin {
 }
 
 class WebSocket extends NetworkRequest {
-  WebSocket(this._socket, int timelineMicrosBase) : super(timelineMicrosBase);
+  WebSocket(this._socket, this._timelineMicrosBase);
+
+  final int _timelineMicrosBase;
 
   final SocketStatistic _socket;
+
+  int timelineMicrosecondsSinceEpoch(int micros) {
+    return _timelineMicrosBase + micros;
+  }
+
   @override
   String get id => _socket.id;
 

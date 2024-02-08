@@ -57,6 +57,7 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController
       ExtensionEventParameters.theme: preferences.darkModeTheme.value
           ? ExtensionEventParameters.themeValueDark
           : ExtensionEventParameters.themeValueLight,
+      if (dtdManager.uri != null) 'dtdUri': dtdManager.uri.toString(),
     };
     return Uri.parse(baseUri).copyWith(queryParameters: queryParams).toString();
   }
