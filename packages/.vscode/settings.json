@@ -2,18 +2,4 @@
     // Set current working directory to devtools_app.
     "terminal.integrated.cwd": "devtools_app",
     "dart.showTodos": false,
-    "cSpell.words": [
-        "autofocus",
-        "Diagnosticable",
-        "discoverability",
-        "gcing",
-        "kenz",
-        "listenables",
-        "peterdjlee",
-        "Schyler",
-        "snapshotting",
-        "unawaited",
-        "unfocus",
-        "writeln"
-    ],
 }
