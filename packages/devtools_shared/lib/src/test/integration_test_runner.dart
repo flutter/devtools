@@ -213,7 +213,7 @@ class IntegrationTestRunnerArgs {
   /// Sharding information for this test run.
   ({int shardNumber, int totalShards})? get shard {
     final shardValue = argResults[_shardArg];
-    if (shardValue != null) {
+    if (shardValue is String) {
       final shardParts = shardValue.split('/');
       if (shardParts.length == 2) {
         final shardNumber = int.tryParse(shardParts[0]);
