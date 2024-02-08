@@ -12,7 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
   foo:
-    path: ../foo/packages/foo
+    path: ../packages_with_extensions/foo/packages/foo
 
 dev_dependencies:
   flutter_test:
