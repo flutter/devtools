@@ -37,11 +37,11 @@ class FooController {
   ///
   /// To see an example of how these service extensions are called from a
   /// DevTools extension, see the [TableOfThings] and [SelectedThing] widgets
-  /// from devtools_extensions/example/foo/packages/foo_devtools_extension/lib/src/service_extension_example.dart.
+  /// from devtools_extensions/example/packages_with_extensions/foo/packages/foo_devtools_extension/lib/src/service_extension_example.dart.
   ///
   /// Service extensions cannot be called while an isolate is paused. If you
   /// need to fetch data when an isolate is paused, use [EvalOnDartLibrary]
-  /// (see devtools_extensions/example/foo/packages/foo_devtools_extension/lib/src/eval_on_dart_library_example.dart).
+  /// (see devtools_extensions/example/packages_with_extensions/foo/packages/foo_devtools_extension/lib/src/eval_on_dart_library_example.dart).
   void initFoo() {
     if (!_initialized) {
       registerExtension('ext.foo.getThing', (method, parameters) async {

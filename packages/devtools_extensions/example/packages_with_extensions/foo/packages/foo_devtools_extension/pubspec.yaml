@@ -10,9 +10,9 @@ environment:
 
 dependencies:
   devtools_app_shared:
-    path: ../../../../../devtools_app_shared
+    path: ../../../../../../devtools_app_shared
   devtools_extensions:
-    path: ../../../../../devtools_extensions 
+    path: ../../../../../../devtools_extensions 
   flutter:
     sdk: flutter
 
@@ -21,8 +21,8 @@ flutter:
 
 dependency_overrides:
   devtools_app_shared:
-    path: ../../../../../devtools_app_shared
+    path: ../../../../../../devtools_app_shared
   devtools_extensions:
-    path: ../../../../../devtools_extensions 
+    path: ../../../../../../devtools_extensions 
   devtools_shared:
-    path: ../../../../../devtools_shared
+    path: ../../../../../../devtools_shared
