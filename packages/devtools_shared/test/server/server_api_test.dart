@@ -11,6 +11,7 @@ import 'package:devtools_shared/src/extensions/extension_manager.dart';
 import 'package:devtools_shared/src/server/server_api.dart';
 import 'package:shelf/shelf.dart';
 import 'package:test/test.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 void main() {
   test('handle deeplink api ${DeeplinkApi.androidBuildVariants}', () async {
@@ -34,6 +35,7 @@ void main() {
       request,
       extensionsManager: ExtensionsManager(buildDir: '/'),
       deeplinkManager: fakeManager,
+      analytics: NoOpAnalytics(),
     );
     expect(response.statusCode, HttpStatus.ok);
     expect(await response.readAsString(), '["debug", "release]');
@@ -55,6 +57,7 @@ void main() {
         request,
         extensionsManager: ExtensionsManager(buildDir: '/'),
         deeplinkManager: FakeDeeplinkManager(),
+        analytics: NoOpAnalytics(),
       );
       expect(response.statusCode, HttpStatus.badRequest);
     },
@@ -84,6 +87,7 @@ void main() {
       request,
       extensionsManager: ExtensionsManager(buildDir: '/'),
       deeplinkManager: fakeManager,
+      analytics: NoOpAnalytics(),
     );
     expect(response.statusCode, HttpStatus.ok);
     expect(await response.readAsString(), someMessage);
@@ -113,6 +117,7 @@ void main() {
       request,
       extensionsManager: ExtensionsManager(buildDir: '/'),
       deeplinkManager: fakeManager,
+      analytics: NoOpAnalytics(),
     );
     expect(response.statusCode, HttpStatus.ok);
     expect(await response.readAsString(), someMessage);
@@ -145,6 +150,7 @@ void main() {
       request,
       extensionsManager: ExtensionsManager(buildDir: '/'),
       deeplinkManager: fakeManager,
+      analytics: NoOpAnalytics(),
     );
     expect(response.statusCode, HttpStatus.ok);
     expect(await response.readAsString(), someMessage);
@@ -168,6 +174,7 @@ void main() {
       extensionsManager: ExtensionsManager(buildDir: '/'),
       deeplinkManager: fakeManager,
       dtdUri: () => dtdUri,
+      analytics: NoOpAnalytics(),
     );
     expect(response.statusCode, HttpStatus.ok);
     expect(

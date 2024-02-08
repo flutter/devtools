@@ -18,17 +18,6 @@ import '../extensions/extension_manager.dart';
 import 'file_system.dart';
 import 'usage.dart';
 
-// TODO: confirm how to get additional parameters; switch away
-// from development constructor too
-final Analytics analytics = Analytics.development(
-  tool: DashTool.devtools,
-  dartVersion: 'TBD',
-  clientIde: 'TBD',
-  enabledFeatures: 'feature1-feature2',
-  flutterChannel: 'TBD',
-  flutterVersion: 'TBD',
-);
-
 /// The DevTools server API.
 ///
 /// This defines endpoints that serve all requests that come in over api/.
@@ -47,6 +36,7 @@ class ServerApi {
     shelf.Request request, {
     required ExtensionsManager extensionsManager,
     required DeeplinkManager deeplinkManager,
+    required Analytics analytics,
     ServerApi? api,
     String? Function()? dtdUri,
   }) {
