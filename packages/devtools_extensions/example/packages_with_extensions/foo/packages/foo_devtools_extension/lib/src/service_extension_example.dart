@@ -85,7 +85,7 @@ class _TableOfThingsState extends State<TableOfThings> {
   /// isolate.
   ///
   /// This service extension was registered in `FooController.initFoo` in
-  /// package:foo (see devtools_extensions/example/foo/packages/foo/lib/src/foo_controller.dart).
+  /// package:foo (see devtools_extensions/example/packages_with_extensions/foo/packages/foo/lib/src/foo_controller.dart).
   ///
   /// It is important to note that we are calling the service extension on the
   /// main isolate here using the [serviceManager.callServiceExtensionOnMainIsolate].
@@ -200,7 +200,7 @@ class _SelectedThingState extends State<SelectedThing> {
   /// Here we call the service extension 'ext.foo.getThing' on the main isolate.
   ///
   /// This service extension was registered in `FooController.initFoo` in
-  /// package:foo (see devtools_extensions/example/foo/packages/foo/lib/src/foo_controller.dart).
+  /// package:foo (see devtools_extensions/example/packages_with_extensions/foo/packages/foo/lib/src/foo_controller.dart).
   ///
   /// It is important to note that we are calling the service extension on the
   /// main isolate here using the [serviceManager.callServiceExtensionOnMainIsolate].
