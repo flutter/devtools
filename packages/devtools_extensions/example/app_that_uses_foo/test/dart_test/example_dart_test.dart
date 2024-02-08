@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:test/test.dart';
 import 'package:dart_foo/dart_foo.dart';
+import 'package:test/test.dart';
 
 // This test can be run to verify that the `package:foo` DevTools extension
 // loads properly when debugging a Dart test target with DevTools.
@@ -17,9 +17,10 @@ import 'package:dart_foo/dart_foo.dart';
 // dart run test/dart_test/example_dart_test.dart --start-paused
 
 void main() {
-  test('a simple dart test', (tester) async {
+  test('a simple dart test', () {
     final dartFoo = DartFoo();
-    expect(1+1, 2);
-    expect(1+2, 3);
+    dartFoo.foo();
+    expect(1 + 1, 2);
+    expect(1 + 2, 3);
   });
 }
