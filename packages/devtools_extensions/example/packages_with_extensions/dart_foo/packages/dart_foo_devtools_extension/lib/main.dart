@@ -16,7 +16,8 @@ class DartFooDevToolsExtension extends StatelessWidget {
   Widget build(BuildContext context) {
     return const DevToolsExtension(
       child: Center(
-        child: Text('''
+        child: Text(
+          '''
 This is a basic example to show an extension provided by a pure Dart
 package ("package:dart_foo"). For a more interesting example of things
 you can do with a DevTools extension, see the example for "package:foo"
