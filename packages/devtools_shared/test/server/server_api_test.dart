@@ -173,7 +173,6 @@ void main() {
       request,
       extensionsManager: ExtensionsManager(buildDir: '/'),
       deeplinkManager: fakeManager,
-      dtdUri: () => dtdUri,
       analytics: NoOpAnalytics(),
     );
     expect(response.statusCode, HttpStatus.ok);

@@ -104,7 +104,7 @@ class ServerApi {
         return api.getCompleted(analytics.getConsentMessage);
       case apiAnalyticsConsentMessageShown:
         analytics.clientShowedMessage();
-        return api.setCompleted(json.encode(true));
+        return api.getCompleted(json.encode(true));
 
       // ----- DevTools survey store. -----
 
