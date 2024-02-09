@@ -35,19 +35,21 @@ class BreakpointManager with DisposerMixin {
 
   String get _isolateRefId => _isolateRef?.id ?? '';
 
-  void initialize() {
+  final _previousIsolateBreakpoints = <BreakpointAndSourcePosition>[];
+
+  Future<void> initialize() async {
     final isolate =
         serviceConnection.serviceManager.isolateManager.selectedIsolate.value;
     if (initialSwitchToIsolate && isolate != null) {
-      switchToIsolate(
+      await switchToIsolate(
         serviceConnection.serviceManager.isolateManager.selectedIsolate.value,
       );
     }
 
     addAutoDisposeListener(
       serviceConnection.serviceManager.isolateManager.selectedIsolate,
-      () {
-        switchToIsolate(
+      () async {
+        await switchToIsolate(
           serviceConnection.serviceManager.isolateManager.selectedIsolate.value,
         );
       },
@@ -55,39 +57,21 @@ class BreakpointManager with DisposerMixin {
     autoDisposeStreamSubscription(
       _service.onDebugEvent.listen(_handleDebugEvent),
     );
-    autoDisposeStreamSubscription(
-      _service.onIsolateEvent.listen(_handleIsolateEvent),
-    );
   }
 
-  void switchToIsolate(IsolateRef? isolateRef) async {
+  Future<void> switchToIsolate(IsolateRef? isolateRef) async {
     _isolateRef = isolateRef;
 
     if (isolateRef == null) {
+      _previousIsolateBreakpoints
+        ..clear()
+        ..addAll(_breakpointsWithLocation.value);
       _breakpoints.value.clear();
       _breakpointsWithLocation.value.clear();
       return;
     }
 
-    final isolate = await _service.getIsolate(_isolateRefId);
-    if (isolate.id != _isolateRefId) {
-      // Current request is obsolete.
-      return;
-    }
-
-    _breakpoints.value = isolate.breakpoints ?? [];
-
-    // Build _breakpointsWithLocation from _breakpoints.
-    // ignore: unawaited_futures
-    Future.wait(
-      _breakpoints.value.map(breakpointManager.createBreakpointWithLocation),
-    ).then((list) {
-      if (isolate.id != _isolateRefId) {
-        // Current request is obsolete.
-        return;
-      }
-      _breakpointsWithLocation.value = list.toList()..sort();
-    });
+    await _updateBpsAfterIsolateReload();
   }
 
   void clearCache() {
@@ -138,40 +122,24 @@ class BreakpointManager with DisposerMixin {
     }
   }
 
-  void _updateAfterIsolateReload(
-    Event _,
-  ) async {
+  Future<List<Breakpoint>> _updateBpsAfterIsolateReload() async {
+    if (_isolateRef == null) return [];
     // TODO(devoncarew): We need to coordinate this with other debugger clients
     // as well as pause before re-setting the breakpoints.
     // Refresh the list of scripts.
-    final previousScriptRefs = scriptManager.sortedScripts.value;
-    final currentScriptRefs =
-        await scriptManager.retrieveAndSortScripts(_isolateRef!);
-    final removedScripts = Set<ScriptRef>.of(previousScriptRefs)
-        .difference(Set<ScriptRef>.of(currentScriptRefs));
-    final addedScripts = Set<ScriptRef>.of(currentScriptRefs)
-        .difference(Set<ScriptRef>.of(previousScriptRefs));
-    final breakpointsToRemove = <BreakpointAndSourcePosition>[];
-
-    // Find all breakpoints set in files where we have newer versions of those
-    // files.
-    for (final scriptRef in removedScripts) {
-      for (final bp in breakpointsWithLocation.value) {
-        if (bp.scriptRef == scriptRef) {
-          breakpointsToRemove.add(bp);
-        }
+    final scripts = await scriptManager.retrieveAndSortScripts(_isolateRef!);
+    final scriptUriToRef = <String, ScriptRef>{};
+    for (final script in scripts) {
+      final uri = script.uri;
+      if (uri != null) {
+        scriptUriToRef[uri] = script;
       }
     }
 
-    await Future.wait([
-      // Remove the breakpoints.
-      for (final bp in breakpointsToRemove) removeBreakpoint(bp.breakpoint),
-      // Add them back to the newer versions of those scripts.
-      for (final scriptRef in addedScripts) ...[
-        for (final bp in breakpointsToRemove)
-          if (scriptRef.uri == bp.scriptUri)
-            addBreakpoint(scriptRef.id!, bp.line!),
-      ],
+    return Future.wait([
+      for (final bp in _previousIsolateBreakpoints)
+        if (scriptUriToRef[bp.scriptUri]?.id != null && bp.line != null)
+          addBreakpoint(scriptUriToRef[bp.scriptUri]!.id!, bp.line!),
     ]);
   }
 
@@ -229,17 +197,7 @@ class BreakpointManager with DisposerMixin {
     }
   }
 
-  void _handleIsolateEvent(Event event) {
-    final eventId = event.isolate?.id;
-    if (eventId != _isolateRefId) return;
-    switch (event.kind) {
-      case EventKind.kIsolateReload:
-        _updateAfterIsolateReload(event);
-        break;
-    }
-  }
-
-  void _handleDebugEvent(Event event) {
+  Future<void> _handleDebugEvent(Event event) async {
     if (event.isolate!.id != _isolateRefId) return;
 
     switch (event.kind) {
@@ -249,16 +207,15 @@ class BreakpointManager with DisposerMixin {
         final breakpoint = event.breakpoint!;
         _breakpoints.value = [..._breakpoints.value, breakpoint];
 
-        unawaited(
-          breakpointManager.createBreakpointWithLocation(breakpoint).then((bp) {
-            final list = [
-              ..._breakpointsWithLocation.value,
-              bp,
-            ]..sort();
-
-            _breakpointsWithLocation.value = list;
-          }),
-        );
+        await breakpointManager
+            .createBreakpointWithLocation(breakpoint)
+            .then((bp) {
+          final list = [
+            ..._breakpointsWithLocation.value,
+            bp,
+          ]..sort();
+          _breakpointsWithLocation.value = list;
+        });
 
         break;
       case EventKind.kBreakpointResolved:
@@ -269,17 +226,17 @@ class BreakpointManager with DisposerMixin {
           breakpoint,
         ];
 
-        unawaited(
-          breakpointManager.createBreakpointWithLocation(breakpoint).then((bp) {
-            final list = _breakpointsWithLocation.value.toList();
-            // Remote the bp with the older, unresolved information from the list.
-            list.removeWhere((breakpoint) => bp.breakpoint.id == bp.id);
-            // Add the bp with the newer, resolved information.
-            list.add(bp);
-            list.sort();
-            _breakpointsWithLocation.value = list;
-          }),
-        );
+        await breakpointManager
+            .createBreakpointWithLocation(breakpoint)
+            .then((bp) {
+          final list = _breakpointsWithLocation.value;
+          // Remote the bp with the older, unresolved information from the list.
+          list.removeWhere((breakpoint) => breakpoint.id == bp.id);
+          // Add the bp with the newer, resolved information.
+          list.add(bp);
+          list.sort();
+          _breakpointsWithLocation.value = list;
+        });
 
         break;
 
