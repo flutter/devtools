@@ -19,7 +19,6 @@ pages - [#7027](https://github.com/flutter/devtools/pull/7027)
 * Add a DevTools server interaction for getting the DTD uri. - [#7054](https://github.com/flutter/devtools/pull/7054), [#7164](https://github.com/flutter/devtools/pull/7164)
 * Enabled expression evaluation with scope for the web, allowing evaluation of inspected widgets. - [#7144](https://github.com/flutter/devtools/pull/7144)
 * Update `package:vm_service` constraint to `^14.0.0`. - [#6953](https://github.com/flutter/devtools/pull/6953)
-* Added `--dtd-uri` flag to `devtools_tool serve`. - [#7191](https://github.com/flutter/devtools/pull/7191)
 
 ## Inspector updates
 
