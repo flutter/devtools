@@ -7,6 +7,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../screens/memory/shared/primitives/memory_timeline.dart';
 import '../../../screens/memory/shared/primitives/memory_utils.dart';
+import 'heap_graph_mock.dart';
 
 abstract class HeapGraphFactory {
   Future<HeapSnapshotGraph?> get();
@@ -25,8 +26,8 @@ class HeapGraphFactoryRuntime extends HeapGraphFactory {
   }
 }
 
-class HeapGraphFactoryFromFile implements HeapGraphFactory {
-  HeapGraphFactoryFromFile(this._file);
+class HeapGraphFactoryFile implements HeapGraphFactory {
+  HeapGraphFactoryFile(this._file);
 
   final XFile _file;
 
@@ -35,5 +36,14 @@ class HeapGraphFactoryFromFile implements HeapGraphFactory {
     final bytes = await _file.readAsBytes();
     final data = bytes.buffer.asByteData();
     return HeapSnapshotGraph.fromChunks([data]);
+  }
+}
+
+class HeapGraphFactoryMock implements HeapGraphFactory {
+  HeapGraphFactoryMock();
+
+  @override
+  Future<HeapSnapshotGraph?> get() async {
+    return HeapSnapshotGraphMock();
   }
 }
