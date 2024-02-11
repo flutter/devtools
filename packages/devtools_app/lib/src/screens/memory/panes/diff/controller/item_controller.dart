@@ -6,7 +6,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../../shared/memory/adapted_heap_data.dart';
-import '../../../../../shared/memory/new/heap_objects.dart';
+import '../../../../../shared/memory/new/heap_api.dart';
 import '../../../shared/heap/heap.dart';
 
 abstract class SnapshotItem extends DisposableController {

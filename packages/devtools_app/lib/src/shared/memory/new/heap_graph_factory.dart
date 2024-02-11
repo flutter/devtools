@@ -8,12 +8,12 @@ import 'package:vm_service/vm_service.dart';
 import '../../../screens/memory/shared/primitives/memory_timeline.dart';
 import '../../../screens/memory/shared/primitives/memory_utils.dart';
 
-abstract class HeapGraphGetter {
+abstract class HeapGraphFactory {
   Future<HeapSnapshotGraph?> get();
 }
 
-class HeapGraphGetterRuntime extends HeapGraphGetter {
-  HeapGraphGetterRuntime(this._timeline);
+class HeapGraphFactoryRuntime extends HeapGraphFactory {
+  HeapGraphFactoryRuntime(this._timeline);
 
   final MemoryTimeline? _timeline;
 
@@ -25,8 +25,8 @@ class HeapGraphGetterRuntime extends HeapGraphGetter {
   }
 }
 
-class HeapGraphGetterFromFile implements HeapGraphGetter {
-  HeapGraphGetterFromFile(this._file);
+class HeapGraphFactoryFromFile implements HeapGraphFactory {
+  HeapGraphFactoryFromFile(this._file);
 
   final XFile _file;
 
