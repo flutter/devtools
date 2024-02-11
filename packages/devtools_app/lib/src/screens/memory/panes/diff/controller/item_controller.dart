@@ -38,14 +38,14 @@ class SnapshotInstanceItem extends SnapshotItem {
   /// Automatically assigned name like isolate name or file name.
   final String defaultName;
 
-  AdaptedHeap? heap;
+  AdaptedHeap? heap_;
 
   /// This method is expected to be called once when heap is actually received.
   Future<void> initializeHeapData(AdaptedHeapData? data) async {
-    assert(heap == null);
+    assert(heap_ == null);
     if (data != null) {
       data.snapshotName = name;
-      heap = await AdaptedHeap.create(data);
+      heap_ = await AdaptedHeap.create(data);
     }
     _isProcessing.value = false;
   }
@@ -62,7 +62,7 @@ class SnapshotInstanceItem extends SnapshotItem {
   final diffWith = ValueNotifier<SnapshotInstanceItem?>(null);
 
   @override
-  bool get hasData => heap != null;
+  bool get hasData => heap_ != null;
 
-  int? get totalSize => heap?.data.totalReachableSize;
+  int? get totalSize => heap_?.data.totalReachableSize;
 }

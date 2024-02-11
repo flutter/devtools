@@ -209,7 +209,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     );
 
     classesTableSingle = ClassesTableSingleData(
-      heap: () => (_core.selectedItem as SnapshotInstanceItem).heap!.data,
+      heap: () => (_core.selectedItem as SnapshotInstanceItem).heap_!.data,
       totalHeapSize: () =>
           (_core.selectedItem as SnapshotInstanceItem).totalSize!,
       filterData: classFilterData,
@@ -319,11 +319,11 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   HeapClasses? _snapshotClassesAfterDiffing() {
     final theItem = _core.selectedItem;
     if (theItem is! SnapshotInstanceItem) return null;
-    final heap = theItem.heap;
+    final heap = theItem.heap_;
     if (heap == null) return null;
     final itemToDiffWith = theItem.diffWith.value;
     if (itemToDiffWith == null) return heap.classes;
-    return _diffStore.compare(heap, itemToDiffWith.heap!);
+    return _diffStore.compare(heap, itemToDiffWith.heap_!);
   }
 
   void _updateClasses({
