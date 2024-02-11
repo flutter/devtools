@@ -5,26 +5,21 @@
 import 'dart:convert';
 
 /// The Xcode build options of a iOS build of a Flutter project.
-class XcodeBuildOptions {
-  const XcodeBuildOptions._(this.configurations, this.targets);
-
-  factory XcodeBuildOptions.fromJson(String json) {
-    final jsonObject = jsonDecode(json);
-    return XcodeBuildOptions._(
-      jsonObject[_kConfigurationsKey].cast<String>() as List<String>,
-      jsonObject[_kTargetsKey].cast<String>() as List<String>,
-    );
-  }
+extension type const XcodeBuildOptions._(Map<String, Object?> _json) {
+  factory XcodeBuildOptions.fromJson(String json) =>
+      XcodeBuildOptions._(jsonDecode(json));
 
   /// Used when the the server can't retrieve ios build options.
-  static const empty = XcodeBuildOptions._(<String>[], <String>[]);
+  static const empty =
+      XcodeBuildOptions._({_kConfigurationsKey: [], _kTargetsKey: []});
 
   static const _kConfigurationsKey = 'configurations';
   static const _kTargetsKey = 'targets';
 
   /// The available configurations for iOS build of this Flutter project.
-  final List<String> configurations;
+  List<String> get configurations =>
+      (_json[_kConfigurationsKey] as List).cast<String>();
 
   /// The available targets for iOS build of this Flutter project.
-  final List<String> targets;
+  List<String> get targets => (_json[_kTargetsKey] as List).cast<String>();
 }
