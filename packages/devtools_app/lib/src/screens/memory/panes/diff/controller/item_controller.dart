@@ -7,6 +7,8 @@ import 'package:flutter/foundation.dart';
 
 import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../../shared/memory/new/heap_api.dart';
+import '../../../../../shared/memory/new/heap_data.dart';
+import '../../../../../shared/memory/new/heap_graph_loader.dart';
 import '../../../shared/heap/heap.dart';
 
 abstract class SnapshotItem extends DisposableController {
@@ -26,6 +28,35 @@ class SnapshotDocItem extends SnapshotItem {
 
   @override
   bool get hasData => false;
+}
+
+class SnapshotGraphItem extends SnapshotItem {
+  SnapshotGraphItem({
+    this.displayNumber,
+    required this.defaultName,
+  }) {
+    _isProcessing.value = true;
+  }
+
+  Heap? _heap;
+
+  /// Automatically assigned name like isolate name or file name.
+  final String defaultName;
+
+  @override
+  final int? displayNumber;
+
+  @override
+  bool get hasData => _heap != null;
+
+  Future<void> setHeap(HeapGraphLoader loader) async {
+    assert(_heap == null);
+    final graph = await loader.load();
+    if (graph != null) {
+      _heap = Heap(await calculateHeapData(graph));
+    }
+    _isProcessing.value = false;
+  }
 }
 
 class SnapshotInstanceItem extends SnapshotItem {

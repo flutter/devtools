@@ -9,41 +9,41 @@ import '../../../screens/memory/shared/primitives/memory_timeline.dart';
 import '../../../screens/memory/shared/primitives/memory_utils.dart';
 import 'heap_graph_mock.dart';
 
-abstract class HeapGraphFactory {
-  Future<HeapSnapshotGraph?> get();
+abstract class HeapGraphLoader {
+  Future<HeapSnapshotGraph?> load();
 }
 
-class HeapGraphFactoryRuntime extends HeapGraphFactory {
-  HeapGraphFactoryRuntime(this._timeline);
+class HeapGraphLoaderRuntime extends HeapGraphLoader {
+  HeapGraphLoaderRuntime(this._timeline);
 
   final MemoryTimeline? _timeline;
 
   @override
-  Future<HeapSnapshotGraph?> get() async {
+  Future<HeapSnapshotGraph?> load() async {
     final snapshot = await snapshotMemoryInSelectedIsolate();
     _timeline?.addSnapshotEvent();
     return snapshot;
   }
 }
 
-class HeapGraphFactoryFile implements HeapGraphFactory {
-  HeapGraphFactoryFile(this._file);
+class HeapGraphLoaderFile implements HeapGraphLoader {
+  HeapGraphLoaderFile(this._file);
 
   final XFile _file;
 
   @override
-  Future<HeapSnapshotGraph?> get() async {
+  Future<HeapSnapshotGraph?> load() async {
     final bytes = await _file.readAsBytes();
     final data = bytes.buffer.asByteData();
     return HeapSnapshotGraph.fromChunks([data]);
   }
 }
 
-class HeapGraphFactoryMock implements HeapGraphFactory {
-  HeapGraphFactoryMock();
+class HeapGraphLoaderMock implements HeapGraphLoader {
+  HeapGraphLoaderMock();
 
   @override
-  Future<HeapSnapshotGraph?> get() async {
+  Future<HeapSnapshotGraph?> load() async {
     return HeapSnapshotGraphMock();
   }
 }
