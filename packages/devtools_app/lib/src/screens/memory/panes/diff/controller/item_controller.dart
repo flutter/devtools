@@ -6,6 +6,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../../shared/memory/adapted_heap_data.dart';
+import '../../../../../shared/memory/new/heap_objects.dart';
 import '../../../shared/heap/heap.dart';
 
 abstract class SnapshotItem extends DisposableController {
@@ -39,6 +40,7 @@ class SnapshotInstanceItem extends SnapshotItem {
   final String defaultName;
 
   AdaptedHeap? heap_;
+  Heap? heap;
 
   /// This method is expected to be called once when heap is actually received.
   Future<void> initializeHeapData(AdaptedHeapData? data) async {

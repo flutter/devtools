@@ -6,7 +6,7 @@ import 'dart:typed_data';
 
 import 'package:vm_service/vm_service.dart';
 
-import '../primitives/utils.dart';
+import '../../primitives/utils.dart';
 
 class HeapData {
   HeapData._(
