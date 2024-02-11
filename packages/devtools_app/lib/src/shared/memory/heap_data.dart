@@ -84,7 +84,7 @@ Future<HeapData> calculateHeapData(
 }
 
 /// Assuming the object is leaf, initializes its retained size
-/// and adds the size to all its shortest retainers.
+/// and adds the size to each shortest retainer.
 void _propagateSize(
   HeapSnapshotGraph graph,
   Uint32List sizes,
