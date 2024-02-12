@@ -198,6 +198,21 @@ class SnapshotListTitle extends StatelessWidget {
               : const SizedBox(width: menuButtonWidth),
         ),
       ]);
+    } else if (theItem is SnapshotGraphItem) {
+      leading = Expanded(
+        child: ValueListenableBuilder(
+          valueListenable: editIndex,
+          builder: (context, editIndex, _) {
+            return _EditableSnapshotName(
+              item: theItem,
+              editMode: index == editIndex,
+              onEditingComplete: onEditingComplete,
+            );
+          },
+        ),
+      );
+    } else {
+      throw StateError('Unknown item type: $theItem');
     }
 
     return ValueListenableBuilder<bool>(
