@@ -73,12 +73,17 @@ class BreakpointManager with DisposerMixin {
     final breakpointsForIsolate =
         await _getBreakpointsForIsolate(_isolateRefId);
     if (breakpointsForIsolate.isNotEmpty) {
-      await _establishBreakpointsForIsolate(
+      // If the isolate already has breakpoints, then update them:
+      await _updateBreakpoints(
         breakpoints: breakpointsForIsolate,
         isolateId: _isolateRefId,
       );
     } else {
-      await _reestablishBreakpointsForIsolate(isolateRef);
+      // Otherwise, re-establish the breakpoints from the previous isolate:
+      await _setUpBreakpoints(
+        breakpoints: _previousIsolateBreakpoints,
+        isolateRef: isolateRef,
+      );
     }
   }
 
@@ -185,7 +190,7 @@ class BreakpointManager with DisposerMixin {
     return isolate.breakpoints ?? [];
   }
 
-  Future<void> _establishBreakpointsForIsolate({
+  Future<void> _updateBreakpoints({
     required List<Breakpoint> breakpoints,
     required String isolateId,
   }) async {
@@ -202,15 +207,16 @@ class BreakpointManager with DisposerMixin {
     });
   }
 
-  Future<void> _reestablishBreakpointsForIsolate(
-    IsolateRef isolateRef,
-  ) async {
+  Future<void> _setUpBreakpoints({
+    required List<BreakpointAndSourcePosition> breakpoints,
+    required IsolateRef isolateRef,
+  }) async {
     final scriptUriToRef = await _scriptRefsForBreakpoints(
-      oldBreakpoints: _previousIsolateBreakpoints,
+      breakpoints: breakpoints,
       isolateRef: isolateRef,
     );
 
-    for (final breakpoint in _previousIsolateBreakpoints) {
+    for (final breakpoint in breakpoints) {
       final newScriptRef = scriptUriToRef[breakpoint.scriptUri];
       final breakpointLine = breakpoint.line;
 
@@ -221,10 +227,10 @@ class BreakpointManager with DisposerMixin {
   }
 
   Future<Map<String, ScriptRef>> _scriptRefsForBreakpoints({
-    required List<BreakpointAndSourcePosition> oldBreakpoints,
+    required List<BreakpointAndSourcePosition> breakpoints,
     required IsolateRef isolateRef,
   }) async {
-    final bpScriptUris = oldBreakpoints.fold(
+    final bpScriptUris = breakpoints.fold(
       <String>{},
       (scriptSet, breakpoint) {
         final scriptUri = breakpoint.scriptUri;
