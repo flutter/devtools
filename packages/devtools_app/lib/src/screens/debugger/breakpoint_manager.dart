@@ -57,21 +57,19 @@ class BreakpointManager with DisposerMixin {
     autoDisposeStreamSubscription(
       _service.onDebugEvent.listen(_handleDebugEvent),
     );
+    autoDisposeStreamSubscription(
+      _service.onIsolateEvent.listen(_handleIsolateEvent),
+    );
   }
 
   Future<void> switchToIsolate(IsolateRef? isolateRef) async {
     _isolateRef = isolateRef;
 
     if (isolateRef == null) {
-      _previousIsolateBreakpoints
-        ..clear()
-        ..addAll(_breakpointsWithLocation.value);
-      _breakpoints.value.clear();
-      _breakpointsWithLocation.value.clear();
-      return;
+      _saveAndClearCurrentBreakpoints();
+    } else {
+      await _reestablishBreakpointsForNewIsolate(isolateRef);
     }
-
-    await _updateBpsAfterIsolateReload();
   }
 
   void clearCache() {
@@ -122,25 +120,95 @@ class BreakpointManager with DisposerMixin {
     }
   }
 
-  Future<List<Breakpoint>> _updateBpsAfterIsolateReload() async {
-    if (_isolateRef == null) return [];
+  void _saveAndClearCurrentBreakpoints() {
+    _previousIsolateBreakpoints
+      ..clear()
+      ..addAll(_breakpointsWithLocation.value);
+    _breakpoints.value.clear();
+    _breakpointsWithLocation.value.clear();
+  }
+
+  void _updateAfterIsolateReload(
+    Event _,
+  ) async {
     // TODO(devoncarew): We need to coordinate this with other debugger clients
     // as well as pause before re-setting the breakpoints.
     // Refresh the list of scripts.
-    final scripts = await scriptManager.retrieveAndSortScripts(_isolateRef!);
-    final scriptUriToRef = <String, ScriptRef>{};
-    for (final script in scripts) {
-      final uri = script.uri;
-      if (uri != null) {
-        scriptUriToRef[uri] = script;
+    final previousScriptRefs = scriptManager.sortedScripts.value;
+    final currentScriptRefs =
+        await scriptManager.retrieveAndSortScripts(_isolateRef!);
+    final removedScripts = Set<ScriptRef>.of(previousScriptRefs)
+        .difference(Set<ScriptRef>.of(currentScriptRefs));
+    final addedScripts = Set<ScriptRef>.of(currentScriptRefs)
+        .difference(Set<ScriptRef>.of(previousScriptRefs));
+    final breakpointsToRemove = <BreakpointAndSourcePosition>[];
+
+    // Find all breakpoints set in files where we have newer versions of those
+    // files.
+    for (final scriptRef in removedScripts) {
+      for (final bp in breakpointsWithLocation.value) {
+        if (bp.scriptRef == scriptRef) {
+          breakpointsToRemove.add(bp);
+        }
       }
     }
 
-    return Future.wait([
-      for (final bp in _previousIsolateBreakpoints)
-        if (scriptUriToRef[bp.scriptUri]?.id != null && bp.line != null)
-          addBreakpoint(scriptUriToRef[bp.scriptUri]!.id!, bp.line!),
+    await Future.wait([
+      // Remove the breakpoints.
+      for (final bp in breakpointsToRemove) removeBreakpoint(bp.breakpoint),
+      // Add them back to the newer versions of those scripts.
+      for (final scriptRef in addedScripts) ...[
+        for (final bp in breakpointsToRemove)
+          if (scriptRef.uri == bp.scriptUri)
+            addBreakpoint(scriptRef.id!, bp.line!),
+      ],
     ]);
+  }
+
+  Future<void> _reestablishBreakpointsForNewIsolate(
+    IsolateRef isolateRef,
+  ) async {
+    final scriptUriToRef = await _getNewScriptRefsForOldBreakpoints(
+      oldBreakpoints: _previousIsolateBreakpoints,
+      isolateRef: isolateRef,
+    );
+
+    for (final breakpoint in _previousIsolateBreakpoints) {
+      final newScriptRef = scriptUriToRef[breakpoint.scriptUri];
+      final breakpointLine = breakpoint.line;
+
+      if (newScriptRef?.id != null && breakpointLine != null) {
+        await addBreakpoint(newScriptRef!.id!, breakpointLine);
+      }
+    }
+  }
+
+  Future<Map<String, ScriptRef>> _getNewScriptRefsForOldBreakpoints({
+    required List<BreakpointAndSourcePosition> oldBreakpoints,
+    required IsolateRef isolateRef,
+  }) async {
+    final bpScriptUris = oldBreakpoints.fold(
+      <String>{},
+      (scriptSet, breakpoint) {
+        final scriptUri = breakpoint.scriptUri;
+        if (scriptUri != null) {
+          scriptSet.add(scriptUri);
+        }
+        return scriptSet;
+      },
+    );
+
+    final newScripts = await scriptManager.retrieveAndSortScripts(isolateRef);
+    final scriptUriToRef =
+        newScripts.fold(<String, ScriptRef>{}, (scriptMap, script) {
+      final scriptUri = script.uri;
+      if (scriptUri != null && bpScriptUris.contains(scriptUri)) {
+        scriptMap[scriptUri] = script;
+      }
+      return scriptMap;
+    });
+
+    return scriptUriToRef;
   }
 
   /// Return the list of valid positions for breakpoints for a given script.
@@ -194,6 +262,16 @@ class BreakpointManager with DisposerMixin {
       });
     } else {
       return BreakpointAndSourcePosition.create(breakpoint);
+    }
+  }
+
+  void _handleIsolateEvent(Event event) {
+    final eventId = event.isolate?.id;
+    if (eventId != _isolateRefId) return;
+    switch (event.kind) {
+      case EventKind.kIsolateReload:
+        _updateAfterIsolateReload(event);
+        break;
     }
   }
 
