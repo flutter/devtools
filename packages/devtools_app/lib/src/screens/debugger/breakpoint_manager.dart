@@ -205,7 +205,7 @@ class BreakpointManager with DisposerMixin {
   Future<void> _reestablishBreakpointsForIsolate(
     IsolateRef isolateRef,
   ) async {
-    final scriptUriToRef = await _getNewScriptRefsForOldBreakpoints(
+    final scriptUriToRef = await _scriptRefsForBreakpoints(
       oldBreakpoints: _previousIsolateBreakpoints,
       isolateRef: isolateRef,
     );
@@ -220,7 +220,7 @@ class BreakpointManager with DisposerMixin {
     }
   }
 
-  Future<Map<String, ScriptRef>> _getNewScriptRefsForOldBreakpoints({
+  Future<Map<String, ScriptRef>> _scriptRefsForBreakpoints({
     required List<BreakpointAndSourcePosition> oldBreakpoints,
     required IsolateRef isolateRef,
   }) async {
