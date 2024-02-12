@@ -15,6 +15,7 @@ import '../../../../../shared/config_specific/import_export/import_export.dart';
 import '../../../../../shared/file_import.dart';
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/memory/class_name.dart';
+import '../../../../../shared/memory/new/heap_graph_loader.dart';
 import '../../../shared/heap/class_filter.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
@@ -25,9 +26,13 @@ import 'item_controller.dart';
 import 'utils.dart';
 
 class DiffPaneController extends DisposableController {
-  DiffPaneController(this.snapshotTaker);
+  DiffPaneController(
+    this.snapshotTaker, {
+    this.heapGraphLoader = const HeapGraphLoaderMock(),
+  });
 
   final SnapshotTaker snapshotTaker;
+  final HeapGraphLoader heapGraphLoader;
 
   final retainingPathController = RetainingPathController();
 
@@ -44,12 +49,12 @@ class DiffPaneController extends DisposableController {
       gac.MemoryEvent.diffTakeSnapshotControlPane,
     );
 
-    final item = SnapshotInstanceItem(
+    final item = SnapshotGraphItem(
       displayNumber: _nextDisplayNumber(),
       defaultName: selectedIsolateName ?? '<isolate-not-detected>',
     );
 
-    await _addSnapshot(snapshotTaker, item);
+    await _addSnapshot(heapGraphLoader, item);
     derived._updateValues();
   }
 
@@ -66,13 +71,31 @@ class DiffPaneController extends DisposableController {
 
     final importers = files.map((file) async {
       final item = SnapshotInstanceItem(defaultName: file.name);
-      await _addSnapshot(SnapshotTakerFromFile(file), item);
+      await _addSnapshot_(SnapshotTakerFromFile(file), item);
     });
     await Future.wait(importers);
     derived._updateValues();
   }
 
   Future<void> _addSnapshot(
+    HeapGraphLoader loader,
+    SnapshotGraphItem item,
+  ) async {
+    final snapshots = core._snapshots;
+    snapshots.add(item);
+
+    try {
+      await item.setHeap(loader);
+    } catch (e) {
+      snapshots.remove(item);
+      rethrow;
+    } finally {
+      final newElementIndex = snapshots.value.length - 1;
+      core._selectedSnapshotIndex.value = newElementIndex;
+    }
+  }
+
+  Future<void> _addSnapshot_(
     SnapshotTaker snapshotTaker,
     SnapshotInstanceItem item,
   ) async {

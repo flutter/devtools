@@ -40,7 +40,7 @@ class HeapGraphLoaderFile implements HeapGraphLoader {
 }
 
 class HeapGraphLoaderMock implements HeapGraphLoader {
-  HeapGraphLoaderMock();
+  const HeapGraphLoaderMock();
 
   @override
   Future<HeapSnapshotGraph?> load() async {
