@@ -262,7 +262,7 @@ abstract class FlutterTestDriver {
   Map<String, Object?>? _parseFlutterResponse(String line) {
     if (line.startsWith('[') && line.endsWith(']')) {
       try {
-        final Map<String, dynamic>? resp = json.decode(line)[0];
+        final Map<String, dynamic>? resp = (json.decode(line) as List)[0];
         lastResponse = line;
         return resp;
       } catch (e) {
@@ -323,7 +323,8 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     // script).
     final Map<String, dynamic> connected =
         await waitFor(event: 'daemon.connected');
-    procPid = connected['params']['pid'];
+    final Map<String, dynamic> params = connected['params'];
+    procPid = params['pid'];
 
     // Set this up now, but we don't wait it yet. We want to make sure we don't
     // miss it while waiting for debugPort below.
@@ -333,7 +334,8 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     if (runConfig.withDebugger) {
       final Map<String, dynamic> debugPort =
           await waitFor(event: 'app.debugPort', timeout: appStartTimeout);
-      final String wsUriString = debugPort['params']['wsUri'];
+      final Map<String, dynamic> params = debugPort['params'];
+      final String wsUriString = params['wsUri'];
       _vmServiceWsUri = Uri.parse(wsUriString);
 
       // Map to WS URI.
@@ -395,7 +397,8 @@ class FlutterRunTestDriver extends FlutterTestDriver {
 
     // Now await the started event; if it had already happened the future will
     // have already completed.
-    _currentRunningAppId = (await started)['params']['appId'];
+    final Map<String, dynamic> startedParams = (await started)['params'];
+    _currentRunningAppId = startedParams['appId'];
   }
 
   Future<void> hotRestart({bool pause = false}) =>

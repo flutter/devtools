@@ -5,14 +5,18 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 
 import '../../../devtools.dart' as devtools;
+import '../../shared/primitives/url_utils.dart';
 import '../../shared/server/server.dart' as server;
 import '../../shared/side_panel.dart';
+import '../../shared/utils.dart';
+import '../../standalone_ui/standalone_screen.dart';
 
 final _log = Logger('release_notes');
 
@@ -57,6 +61,15 @@ class ReleaseNotesController extends SidePanelController {
   }
 
   void _maybeShowReleaseNotes() async {
+    final currentUrl = getWebUrl();
+    final currentPage =
+        currentUrl != null ? extractCurrentPageFromUrl(currentUrl) : null;
+    if (isEmbedded() &&
+        currentPage == StandaloneScreenType.vsCodeFlutterPanel.name) {
+      // Do not show release notes in the Flutter sidebar.
+      return;
+    }
+
     SemanticVersion previousVersion = SemanticVersion();
     if (server.isDevToolsServerAvailable) {
       final lastReleaseNotesShownVersion =

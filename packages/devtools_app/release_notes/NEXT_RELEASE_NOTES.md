@@ -1,9 +1,9 @@
 This is draft for future release notes, that are going to land on
 [the Flutter website](https://docs.flutter.dev/tools/devtools/release-notes).
 
-# DevTools 2.32.0 release notes
+# DevTools 2.33.0 release notes
 
-The 2.32.0 release of the Dart and Flutter DevTools
+The 2.33.0 release of the Dart and Flutter DevTools
 includes the following changes among other general improvements.
 To learn more about DevTools, check out the
 [DevTools overview](https://docs.flutter.dev/tools/devtools/overview).
@@ -16,7 +16,9 @@ an IDE. - [#7030](https://github.com/flutter/devtools/pull/7030)
 * Removed the "Dense mode" setting. - [#7086](https://github.com/flutter/devtools/pull/7086)
 * Added support for filtering with regular expressions in the Logging, Network, and CPU profiler
 pages - [#7027](https://github.com/flutter/devtools/pull/7027)
-* Add a DevTools server interaction for getting the DTD uri. - [#7054](https://github.com/flutter/devtools/pull/7054)
+* Add a DevTools server interaction for getting the DTD uri. - [#7054](https://github.com/flutter/devtools/pull/7054), [#7164](https://github.com/flutter/devtools/pull/7164)
+* Enabled expression evaluation with scope for the web, allowing evaluation of inspected widgets. - [#7144](https://github.com/flutter/devtools/pull/7144)
+* Update `package:vm_service` constraint to `^14.0.0`. - [#6953](https://github.com/flutter/devtools/pull/6953)
 
 ## Inspector updates
 
@@ -32,14 +34,11 @@ TODO: Remove this section if there are not any general updates.
 
 ## Memory updates
 
-* Supported allocation tracing for Flutter profile builds and Dart AOT compiled applications. - [#7058](https://github.com/flutter/devtools/pull/7058)
-* Supported import of memory snapshots. - [#6974](https://github.com/flutter/devtools/pull/6974)
+TODO: Remove this section if there are not any general updates.
 
 ## Debugger updates
 
-* Highlighted `extension type` as a declaration keyword,
-  highlight the `$` in identifier interpolation as part of the interpolation,
-  and properly highlight comments within type arguments. - [#6837](https://github.com/flutter/devtools/pull/6837)
+* Fixed syntax highlighting for comments when the source file uses `\r\n` line endings [#7190](https://github.com/flutter/devtools/pull/7190)
 
 ## Network profiler updates
 
@@ -47,11 +46,7 @@ TODO: Remove this section if there are not any general updates.
 
 ## Logging updates
 
-* Added toggle filters to filter out noisy Flutter and Dart logs - [#7026](https://github.com/flutter/devtools/pull/7026)
-
-    ![Logging view filters](images/logging_toggle_filters.png "Toggle filters for logging screen")
-
-* Added scrollbar to details pane. - [#6917](https://github.com/flutter/devtools/pull/6917)
+TODO: Remove this section if there are not any general updates.
 
 ## App size tool updates
 
@@ -59,21 +54,15 @@ TODO: Remove this section if there are not any general updates.
 
 ## VS Code Sidebar updates
 
-* Fixed an issue that prevented the VS code sidebar from loading in recent beta/master builds. - [#6984](https://github.com/flutter/devtools/pull/6984)
-* Showed DevTools extensions as an option from the debug sessions DevTools dropdown, when
-available. [#6709](https://github.com/flutter/devtools/pull/6709)
+* Do not show DevTools release notes in the Flutter sidebar. - [#7166](https://github.com/flutter/devtools/pull/7166)
 
 ## DevTools Extension updates
 
-* Added a description and link to documentation to the `devtools_options.yaml` file
-that is created in a user's project. - [#7052](https://github.com/flutter/devtools/pull/7052)
-* Updated the Simulated DevTools Environment Panel to be collapsible. - [#7062](https://github.com/flutter/devtools/pull/7062)
-* Integrated DevTools extensions with the new Dart Tooling Daemon. This will allow
-DevTools extensions to access public methods registered by other DTD clients (e.g. an 
-IDE), as well as access a minimal file system API for interacting with the development
-project. - [#7108](https://github.com/flutter/devtools/pull/7108)
+* Fixed an issue with not detecting extensions for test files in
+subdirectories. - [#7174](https://github.com/flutter/devtools/pull/7174)
+* Add an example of creating an extension for a pure Dart package. - [#7196](https://github.com/flutter/devtools/pull/7196)
 
 ## Full commit history
 
 To find a complete list of changes in this release, check out the
-[DevTools git log](https://github.com/flutter/devtools/tree/v2.31.0).
+[DevTools git log](https://github.com/flutter/devtools/tree/v2.33.0).
