@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
@@ -27,11 +28,12 @@ bool debugTestReleaseNotes = false;
 // from the flutter/website PR, which has a GitHub action that automatically
 // stages commits to firebase. Example:
 // https://flutter-docs-prod--pr8928-dt-notes-links-b0b33er1.web.app/tools/devtools/release-notes/release-notes-2.24.0-src.md.
-String? _debugReleaseNotesUrl;
-
-const _flutterDocsSite = 'https://docs.flutter.dev';
+const String? _debugReleaseNotesUrl = null;
 
 const releaseNotesKey = Key('release_notes');
+const _unsupportedPathSyntax = '{{site.url}}';
+const _releaseNotesPath = '/f/devtools-releases.json';
+final _flutterDocsSite = Uri.https('docs.flutter.dev');
 
 class ReleaseNotesViewer extends SidePanelViewer {
   const ReleaseNotesViewer({
@@ -50,7 +52,9 @@ class ReleaseNotesController extends SidePanelController {
     _init();
   }
 
-  static const _unsupportedPathSyntax = '{{site.url}}';
+  @visibleForTesting
+  static Uri get releaseIndexUrl =>
+      _flutterDocsSite.replace(path: _releaseNotesPath);
 
   void _init() {
     if (debugTestReleaseNotes ||
@@ -89,6 +93,21 @@ class ReleaseNotesController extends SidePanelController {
   Future<void> _fetchAndShowReleaseNotes({
     SemanticVersion? versionFloor,
   }) async {
+    if (_debugReleaseNotesUrl case final debugUrl?) {
+      // Specially handle the case where a debug release notes URL is specified.
+      final debugUri = Uri.parse(debugUrl);
+      final releaseNotesMarkdown = await http.read(debugUri);
+
+      // Update image links to use debug/testing URL.
+      markdown.value = releaseNotesMarkdown.replaceAll(
+        _unsupportedPathSyntax,
+        debugUri.replace(path: '').toString(),
+      );
+
+      toggleVisibility(true);
+      return;
+    }
+
     versionFloor ??= SemanticVersion();
 
     // Parse the current version instead of using [devtools.version] directly to
@@ -96,59 +115,114 @@ class ReleaseNotesController extends SidePanelController {
     // Release notes will be hosted on the Flutter website with a version number
     // that does not contain any build metadata.
     final parsedVersion = SemanticVersion.parse(devtools.version);
-    var notesVersion = latestVersionToCheckForReleaseNotes(parsedVersion);
-    try {
-      // Try all patch versions for this major.minor combination until we find
-      // release notes (e.g. 2.11.4 -> 2.11.3 -> 2.11.2 -> ...).
-      final attemptedVersions = <String>[];
-      var attempts = notesVersion.patch;
-      while (attempts >= 0 && notesVersion > versionFloor) {
-        final versionString = notesVersion.toString();
+    final notesVersion = latestVersionToCheckForReleaseNotes(parsedVersion);
+
+    if (notesVersion <= versionFloor) {
+      // If the current version is equal to or below the version floor,
+      // no need to show the release notes.
+      _emptyAndClose();
+      return;
+    }
+
+    final releases = await retrieveReleasesFromIndex();
+    if (releases == null) {
+      return;
+    }
+
+    // If the version floor has the same major and minor version,
+    // don't check below its patch version.
+    final int minimumPatch;
+    if (versionFloor.major == notesVersion.major &&
+        versionFloor.minor == notesVersion.minor) {
+      minimumPatch = versionFloor.patch;
+    } else {
+      minimumPatch = 0;
+    }
+
+    final majorMinor = '${notesVersion.major}.${notesVersion.minor}';
+    var patchToCheck = notesVersion.patch;
+
+    // Try each patch version in this major.minor combination until we find
+    // release notes (e.g. 2.11.4 -> 2.11.3 -> 2.11.2 -> ...).
+    while (patchToCheck >= minimumPatch) {
+      final releaseToCheck = '$majorMinor.$patchToCheck';
+      if (releases[releaseToCheck] case final String releaseNotePath) {
+        final String releaseNotesMarkdown;
         try {
-          String releaseNotesMarkdown = await http.read(
-            Uri.parse(_debugReleaseNotesUrl ?? _releaseNotesUrl(versionString)),
+          releaseNotesMarkdown = await http.read(
+            _flutterDocsSite.replace(path: releaseNotePath),
           );
-
-          // This is a workaround so that the images in release notes will appear.
-          // The {{site.url}} syntax is best practices for the flutter website
-          // repo, where these release notes are hosted, so we are performing this
-          // workaround on our end to ensure the images render properly.
-          releaseNotesMarkdown = releaseNotesMarkdown.replaceAll(
-            _unsupportedPathSyntax,
-            _flutterDocsSite,
-          );
-
-          markdown.value = releaseNotesMarkdown;
-          toggleVisibility(true);
-          if (_debugReleaseNotesUrl == null &&
-              server.isDevToolsServerAvailable) {
-            // Only set the last release notes version if we are using a real
-            // url and not [_debugReleaseNotesUrl].
-            unawaited(
-              server.setLastShownReleaseNotesVersion(versionString),
-            );
-          }
-          return;
-        } catch (e) {
-          attempts--;
-          attemptedVersions.add(versionString);
-          if (attempts < 0) {
-            // ignore: avoid-throw-in-catch-block, false positive
-            throw Exception(
-              'Could not find release notes for DevTools versions '
-              '${attemptedVersions.join(', ')}.'
-              '\n$e',
-            );
-          }
-          notesVersion = notesVersion.downgrade(downgradePatch: true);
+        } catch (_) {
+          // This can very infrequently fail due to CDN or caching issues,
+          // or if the upstream file has an incorrect link.
+          _log.info('Failed to retrieve release notes for v$releaseToCheck, '
+              'despite indication it is live at $releaseNotePath.');
+          // If we couldn't retrieve this page, keep going to
+          // try with earlier patch versions.
+          continue;
         }
+
+        // Replace the {{site.url}} template syntax that the
+        // Flutter docs website uses to specify site URLs.
+        markdown.value = releaseNotesMarkdown.replaceAll(
+          _unsupportedPathSyntax,
+          _flutterDocsSite.toString(),
+        );
+
+        toggleVisibility(true);
+        if (server.isDevToolsServerAvailable) {
+          // Only set the last release notes version
+          // if we are not debugging.
+          unawaited(
+            server.setLastShownReleaseNotesVersion(releaseToCheck),
+          );
+        }
+        return;
       }
+
+      patchToCheck -= 1;
+    }
+
+    _emptyAndClose(
+      'Could not find release notes for DevTools version $notesVersion.',
+    );
+    return;
+  }
+
+  /// Retrieve and parse the release note index from the
+  /// Flutter website at [_flutterDocsSite]/[_releaseNotesPath].
+  ///
+  /// Calls [_emptyAndClose] and returns `null` if
+  /// the retrieval or parsing fails.
+  @visibleForTesting
+  Future<Map<String, Object?>?> retrieveReleasesFromIndex() async {
+    final Map<String, Object?> releaseIndex;
+    try {
+      final releaseIndexString = await http.read(releaseIndexUrl);
+      releaseIndex = jsonDecode(releaseIndexString) as Map<String, Object?>;
     } catch (e) {
-      // Fail gracefully if we cannot find release notes for the current
-      // version of DevTools.
-      markdown.value = null;
-      toggleVisibility(false);
-      _log.warning('Warning: $e');
+      // This can occur if the file can't be retrieved or if its not a JSON map.
+      _emptyAndClose(e.toString());
+      return null;
+    }
+
+    final releases = releaseIndex['releases'];
+    if (releases is! Map<String, Object?>) {
+      _emptyAndClose(
+        'The DevTools release index file was incorrectly formatted.',
+      );
+      return null;
+    }
+    return releaseIndex;
+  }
+
+  /// Set the release notes viewer as having no contents, hidden,
+  /// and optionally log the specified [message].
+  void _emptyAndClose([String? message]) {
+    markdown.value = null;
+    toggleVisibility(false);
+    if (message != null) {
+      _log.warning('Warning: $message');
     }
   }
 
@@ -178,10 +252,5 @@ class ReleaseNotesController extends SidePanelController {
       await _fetchAndShowReleaseNotes();
     }
     toggleVisibility(true);
-  }
-
-  String _releaseNotesUrl(String currentVersion) {
-    return '$_flutterDocsSite/development/tools/devtools/release-notes/'
-        'release-notes-$currentVersion-src.md';
   }
 }
