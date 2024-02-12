@@ -52,6 +52,10 @@ class ReleaseNotesController extends SidePanelController {
     _init();
   }
 
+  @visibleForTesting
+  static Uri get releaseIndexUrl =>
+      _flutterDocsSite.replace(path: _releaseNotesPath);
+
   void _init() {
     if (debugTestReleaseNotes ||
         _debugReleaseNotesUrl != null ||
@@ -120,22 +124,8 @@ class ReleaseNotesController extends SidePanelController {
       return;
     }
 
-    final Map<String, Object?> releaseIndex;
-    try {
-      final releaseIndexUrl = _flutterDocsSite.replace(path: _releaseNotesPath);
-      final releaseIndexString = await http.read(releaseIndexUrl);
-      releaseIndex = jsonDecode(releaseIndexString) as Map<String, Object?>;
-    } catch (e) {
-      // This can occur if the file can't be retrieved or if its not a JSON map.
-      _emptyAndClose(e.toString());
-      return;
-    }
-
-    final releases = releaseIndex['releases'];
-    if (releases is! Map<String, Object?>) {
-      _emptyAndClose(
-        'The DevTools release index file was incorrectly formatted.',
-      );
+    final releases = await retrieveReleasesFromIndex();
+    if (releases == null) {
       return;
     }
 
@@ -197,6 +187,33 @@ class ReleaseNotesController extends SidePanelController {
       'Could not find release notes for DevTools version $notesVersion.',
     );
     return;
+  }
+
+  /// Retrieve and parse the release note index from the
+  /// Flutter website at [_flutterDocsSite]/[_releaseNotesPath].
+  ///
+  /// Calls [_emptyAndClose] and returns `null` if
+  /// the retrieval or parsing fails.
+  @visibleForTesting
+  Future<Map<String, Object?>?> retrieveReleasesFromIndex() async {
+    final Map<String, Object?> releaseIndex;
+    try {
+      final releaseIndexString = await http.read(releaseIndexUrl);
+      releaseIndex = jsonDecode(releaseIndexString) as Map<String, Object?>;
+    } catch (e) {
+      // This can occur if the file can't be retrieved or if its not a JSON map.
+      _emptyAndClose(e.toString());
+      return null;
+    }
+
+    final releases = releaseIndex['releases'];
+    if (releases is! Map<String, Object?>) {
+      _emptyAndClose(
+        'The DevTools release index file was incorrectly formatted.',
+      );
+      return null;
+    }
+    return releaseIndex;
   }
 
   /// Set the release notes viewer as having no contents, hidden,
