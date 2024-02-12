@@ -67,8 +67,18 @@ class BreakpointManager with DisposerMixin {
 
     if (isolateRef == null) {
       _saveAndClearCurrentBreakpoints();
+      return;
+    }
+
+    final breakpointsForIsolate =
+        await _getBreakpointsForIsolate(_isolateRefId);
+    if (breakpointsForIsolate.isNotEmpty) {
+      await _establishBreakpointsForIsolate(
+        breakpoints: breakpointsForIsolate,
+        isolateId: _isolateRefId,
+      );
     } else {
-      await _reestablishBreakpointsForNewIsolate(isolateRef);
+      await _reestablishBreakpointsForIsolate(isolateRef);
     }
   }
 
@@ -165,7 +175,34 @@ class BreakpointManager with DisposerMixin {
     ]);
   }
 
-  Future<void> _reestablishBreakpointsForNewIsolate(
+  Future<List<Breakpoint>> _getBreakpointsForIsolate(String isolateId) async {
+    final isolate = await _service.getIsolate(isolateId);
+    if (isolate.id != _isolateRefId) {
+      // Current request is obsolete.
+      return [];
+    }
+
+    return isolate.breakpoints ?? [];
+  }
+
+  Future<void> _establishBreakpointsForIsolate({
+    required List<Breakpoint> breakpoints,
+    required String isolateId,
+  }) async {
+    _breakpoints.value = breakpoints;
+    // Build _breakpointsWithLocation from _breakpoints.
+    await Future.wait(
+      _breakpoints.value.map(breakpointManager.createBreakpointWithLocation),
+    ).then((list) {
+      if (isolateId != _isolateRefId) {
+        // Current request is obsolete.
+        return;
+      }
+      _breakpointsWithLocation.value = list.toList()..sort();
+    });
+  }
+
+  Future<void> _reestablishBreakpointsForIsolate(
     IsolateRef isolateRef,
   ) async {
     final scriptUriToRef = await _getNewScriptRefsForOldBreakpoints(
@@ -308,7 +345,7 @@ class BreakpointManager with DisposerMixin {
             .createBreakpointWithLocation(breakpoint)
             .then((bp) {
           final list = _breakpointsWithLocation.value;
-          // Remote the bp with the older, unresolved information from the list.
+          // Remove the bp with the older, unresolved information from the list.
           list.removeWhere((breakpoint) => breakpoint.id == bp.id);
           // Add the bp with the newer, resolved information.
           list.add(bp);
