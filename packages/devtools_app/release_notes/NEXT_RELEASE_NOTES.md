@@ -44,6 +44,7 @@ lines. - [#7178](https://github.com/flutter/devtools/pull/7178)
 mode. - [#7178](https://github.com/flutter/devtools/pull/7178)
 * Improved contrast of profiling details when displaying profiler hits in dark
 mode. - [#7178](https://github.com/flutter/devtools/pull/7178)
+* Fixed syntax highlighting for comments when the source file uses `\r\n` line endings [#7190](https://github.com/flutter/devtools/pull/7190)
 
 ## Network profiler updates
 
@@ -63,7 +64,9 @@ TODO: Remove this section if there are not any general updates.
 
 ## DevTools Extension updates
 
-TODO: Remove this section if there are not any general updates.
+* Fixed an issue with not detecting extensions for test files in
+subdirectories. - [#7174](https://github.com/flutter/devtools/pull/7174)
+* Add an example of creating an extension for a pure Dart package. - [#7196](https://github.com/flutter/devtools/pull/7196)
 
 ## Full commit history
 

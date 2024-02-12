@@ -5,9 +5,12 @@
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 
 import '../shared/globals.dart';
 import '../shared/server/server.dart' as server;
+
+final _log = Logger('ExtensionService');
 
 class ExtensionService extends DisposableController
     with AutoDisposeControllerMixin {
@@ -71,9 +74,13 @@ class ExtensionService extends DisposableController
         serviceConnection.serviceManager.connectedState,
         () async {
           if (serviceConnection.serviceManager.connectedState.value.connected) {
+            _log.fine(
+              'established new app connection. Initializing and refreshing.',
+            );
             await _initAppRoot();
             await _maybeRefreshExtensions();
           } else {
+            _log.fine('app disconnected. Initializing and refreshing.');
             _reset();
           }
         },
@@ -87,6 +94,7 @@ class ExtensionService extends DisposableController
           if (serviceConnection
                   .serviceManager.isolateManager.mainIsolate.value !=
               null) {
+            _log.fine('main isolate changed. Initializing and refreshing.');
             await _initAppRoot();
             await _maybeRefreshExtensions();
           } else {
@@ -148,6 +156,11 @@ class ExtensionService extends DisposableController
         visible.add(extension);
       }
     }
+
+    _log.fine(
+      'visible extensions after refreshing - ${visible.map((e) => e.name).toList()}',
+    );
+
     // [_visibleExtensions] should be set last so that all extension states in
     // [_extensionEnabledStates] are updated by the time we notify listeners of
     // [visibleExtensions]. It is not necessary to sort [visible] because
@@ -182,19 +195,23 @@ class ExtensionService extends DisposableController
 // TODO(kenz): consider caching this for the duration of the VM service
 // connection.
 Future<Uri?> _connectedAppRoot() async {
-  var fileUriString = await serviceConnection.rootLibraryForMainIsolate();
+  final fileUriString = await serviceConnection.rootLibraryForMainIsolate();
+  _log.fine('fetching rootLibraryForMainIsolate: $fileUriString');
   if (fileUriString == null) return null;
+  return Uri.parse(rootFromFileUriString(fileUriString));
+}
 
+@visibleForTesting
+String rootFromFileUriString(String fileUriString) {
   // TODO(kenz): for robustness, consider sending the root library uri to the
   // server and having the server look for the package folder that contains the
   // `.dart_tool` directory.
-
   final directoryRegExp =
-      RegExp(r'\/(lib|integration_test|test|bin)\/[^\/.]*.dart');
+      RegExp(r'\/(lib|bin|integration_test|test|benchmark)\/.+\.dart');
   final directoryIndex = fileUriString.indexOf(directoryRegExp);
   if (directoryIndex != -1) {
     fileUriString = fileUriString.substring(0, directoryIndex);
   }
-
-  return Uri.parse(fileUriString);
+  _log.fine('calculating rootFromFileUriString: $fileUriString');
+  return fileUriString;
 }

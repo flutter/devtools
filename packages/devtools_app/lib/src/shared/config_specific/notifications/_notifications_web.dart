@@ -17,6 +17,9 @@ class Notification {
   late final web.Notification _impl;
 
   static Future<String> requestPermission() async =>
+      // TODO(srujzs): This was needed in 0.4.0 as generics were not available.
+      // This is no longer true 0.5.0 onwards.
+      // ignore: unnecessary_cast
       ((await web.Notification.requestPermission().toDart) as JSString).toDart;
 
   void close() {

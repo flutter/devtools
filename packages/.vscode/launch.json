@@ -85,6 +85,36 @@
             "program": "devtools_app/test/test_infra/scenes/standalone_ui/vs_code.stager_app.g.dart",
         },
         {
+            "name": "devtools_extensions: foo + sim",
+            "request": "launch",
+            "type": "dart",
+            "program": "devtools_extensions/example/packages_with_extensions/foo/packages/foo_devtools_extension/lib/main.dart",
+            "args": [
+                "--dart-define=use_simulated_environment=true"
+            ],
+        },
+        {
+            "name": "devtools_extensions: dart_foo + sim",
+            "request": "launch",
+            "type": "dart",
+            "program": "devtools_extensions/example/packages_with_extensions/dart_foo/packages/dart_foo_devtools_extension/lib/main.dart",
+            "args": [
+                "--dart-define=use_simulated_environment=true"
+            ],
+        },
+        {
+            "name": "devtools_extensions: app_that_uses_foo",
+            "request": "launch",
+            "type": "dart",
+            "program": "devtools_extensions/example/app_that_uses_foo/lib/main.dart",
+        },
+        {
+            "name": "devtools_extensions: app_that_uses_foo - bin",
+            "request": "launch",
+            "type": "dart",
+            "program": "devtools_extensions/example/app_that_uses_foo/bin/script.dart",
+        },
+        {
             "name": "attach",
             "type": "dart",
             "request": "attach",

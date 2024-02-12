@@ -10,6 +10,7 @@ part of 'server.dart';
 Future<List<DevToolsExtensionConfig>> refreshAvailableExtensions(
   Uri appRoot,
 ) async {
+  _log.fine('refreshAvailableExtensions for ${appRoot.toString()}');
   if (isDevToolsServerAvailable) {
     final uri = Uri(
       path: ExtensionsApi.apiServeAvailableExtensions,
@@ -26,11 +27,20 @@ Future<List<DevToolsExtensionConfig>> refreshAvailableExtensions(
               .nonNulls
               .cast<Map<String, Object?>>();
 
+      final logs = (parsedResult['logs'] as List?)?.cast<String>() ?? [];
+      for (final log in logs) {
+        _log.fine('[from devtools_server] $log');
+      }
+
       final warningMessage =
           parsedResult[ExtensionsApi.extensionsResultWarningPropertyName];
       if (warningMessage != null) {
         _log.warning(warningMessage);
       }
+
+      _log.fine(
+        'extensions returned from the server: ${extensionsAsJson.toString()}',
+      );
 
       return extensionsAsJson
           .map((p) => DevToolsExtensionConfig.parse(p))
@@ -57,6 +67,9 @@ Future<ExtensionEnabledState> extensionEnabledState({
   required String extensionName,
   bool? enable,
 }) async {
+  _log.fine(
+    '${enable != null ? 'setting' : 'getting'} extensionEnabledState for $extensionName',
+  );
   if (isDevToolsServerAvailable) {
     final uri = Uri(
       path: ExtensionsApi.apiExtensionEnabledState,
@@ -70,7 +83,9 @@ Future<ExtensionEnabledState> extensionEnabledState({
     final resp = await request(uri.toString());
     if (resp?.statusOk ?? false) {
       final parsedResult = json.decode(resp!.body);
-      return ExtensionEnabledState.from(parsedResult);
+      final state = ExtensionEnabledState.from(parsedResult);
+      _log.fine('returning state for $extensionName: $state');
+      return state;
     } else {
       logWarning(resp, ExtensionsApi.apiExtensionEnabledState);
     }
