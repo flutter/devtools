@@ -36,7 +36,7 @@ class SnapshotDocItem extends SnapshotItem {
   bool get hasData => false;
 }
 
-class SnapshotGraphItem extends SnapshotItem {
+class SnapshotGraphItem extends SnapshotItem implements SnapshotInstanceItem {
   SnapshotGraphItem({
     this.displayNumber,
     required this.defaultName,
@@ -55,7 +55,7 @@ class SnapshotGraphItem extends SnapshotItem {
   @override
   bool get hasData => _heap != null;
 
-  Future<void> setHeap(HeapGraphLoader loader) async {
+  Future<void> loadHeap(HeapGraphLoader loader) async {
     assert(_heap == null);
     final graph = await loader.load();
     if (graph != null) {
@@ -63,6 +63,34 @@ class SnapshotGraphItem extends SnapshotItem {
     }
     _isProcessing.value = false;
   }
+
+  @override
+  Heap? heap;
+
+  @override
+  AdaptedHeap? heap_;
+
+  @override
+  String? nameOverride;
+
+  @override
+  // TODO: implement diffWith
+  ValueNotifier<SnapshotInstanceItem?> get diffWith =>
+      throw UnimplementedError();
+
+  @override
+  Future<void> initializeHeapData(AdaptedHeapData? data) {
+    // TODO: implement initializeHeapData
+    throw UnimplementedError();
+  }
+
+  @override
+  // TODO: implement name
+  String get name => throw UnimplementedError();
+
+  @override
+  // TODO: implement totalSize
+  int? get totalSize => throw UnimplementedError();
 }
 
 class SnapshotInstanceItem extends SnapshotItem {

@@ -85,7 +85,7 @@ class DiffPaneController extends DisposableController {
     snapshots.add(item);
 
     try {
-      await item.setHeap(loader);
+      await item.loadHeap(loader);
     } catch (e) {
       snapshots.remove(item);
       rethrow;
