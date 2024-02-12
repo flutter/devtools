@@ -20,6 +20,12 @@ abstract class SnapshotItem extends DisposableController {
 
   /// If true, the item contains data, that can be compared and analyzed.
   bool get hasData;
+
+  @override
+  void dispose() {
+    _isProcessing.dispose();
+    super.dispose();
+  }
 }
 
 class SnapshotDocItem extends SnapshotItem {
