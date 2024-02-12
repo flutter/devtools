@@ -1,3 +1,4 @@
 This file is not for merge.
 
 1. Show size in list of snapshots.
+2. Reimplement _assertIntegrity

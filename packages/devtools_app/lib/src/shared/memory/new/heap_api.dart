@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../../../screens/memory/shared/heap/heap.dart';
 import 'heap_data.dart';
 
 /// API for working with heap data.
@@ -9,6 +10,8 @@ class Heap {
   Heap(this.data);
 
   final HeapData data;
+
+  HeapClasses<ClassStats>? get classes => null;
 }
 
 /// API for working with a heap object.

@@ -6,6 +6,7 @@ import 'dart:typed_data';
 
 import 'package:vm_service/vm_service.dart';
 
+import '../../../screens/memory/shared/heap/heap.dart';
 import '../../primitives/utils.dart';
 
 class HeapData {
@@ -13,6 +14,7 @@ class HeapData {
     this.graph, {
     this.shortestRetainers,
     this.retainedSizes,
+    this.classStats,
   });
 
   /// Value for rootIndex is taken from the doc:
@@ -27,6 +29,8 @@ class HeapData {
   final Uint32List? shortestRetainers;
 
   final Uint32List? retainedSizes;
+
+  final SingleClassStats? classStats;
 }
 
 final UiReleaser _uiReleaser = UiReleaser();
@@ -35,12 +39,18 @@ Future<HeapData> calculateHeapData(
   HeapSnapshotGraph graph, {
   bool shortestRetainers = true,
   bool retainedSizes = true,
+  bool classStatistics = true,
 }) async {
   if (!shortestRetainers && !retainedSizes) {
     return HeapData._(graph);
   }
 
-  final weakClasses = _WeakClasses(graph);
+  final classes = _Classes(
+    graph,
+    calculateClassStats: classStatistics,
+    calculateWeakClasses: shortestRetainers || retainedSizes,
+  );
+
   final Uint32List retainers = Uint32List(graph.objects.length);
   final Uint32List? sizes =
       retainedSizes ? null : Uint32List(graph.objects.length);
@@ -67,7 +77,7 @@ Future<HeapData> calculateHeapData(
 
         if (sizes != null) _propagateSize(graph, sizes, retainers, child);
 
-        if (weakClasses.isRetainer(child)) {
+        if (classes.isRetainer(child)) {
           nextCut.add(child);
         }
       }
@@ -100,8 +110,12 @@ void _propagateSize(
   }
 }
 
-class _WeakClasses {
-  _WeakClasses(this.graph) {
+class _Classes {
+  _Classes(
+    this.graph, {
+    required bool calculateWeakClasses,
+    required bool calculateClassStats,
+  }) {
     final weakClassesToFind = <String, String>{
       '_WeakProperty': 'dart:core',
       '_WeakReferenceImpl': 'dart:core',
@@ -123,6 +137,8 @@ class _WeakClasses {
   final HeapSnapshotGraph graph;
 
   final _weakClasses = <int>{};
+
+  final ClassStats? classStats = null;
 
   bool isRetainer(int objectIndex) {
     final object = graph.objects[objectIndex];

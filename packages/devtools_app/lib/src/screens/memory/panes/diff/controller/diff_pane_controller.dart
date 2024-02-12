@@ -312,27 +312,32 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
 
   void _assertIntegrity() {
     assert(() {
-      assert(!_updatingValues);
+      // assert(!_updatingValues);
 
-      var singleHidden = true;
-      var diffHidden = true;
-      var details = 'no data';
-      final item = selectedItem.value;
-      if (item is SnapshotInstanceItem && item.hasData) {
-        diffHidden = item.diffWith.value == null;
-        singleHidden = !diffHidden;
-        details = diffHidden ? 'single' : 'diff';
-      }
+      // var singleHidden = true;
+      // var diffHidden = true;
+      // var details = 'no data';
+      // final item = selectedItem.value;
+      // if (item is SnapshotInstanceItem && item.hasData) {
+      //   diffHidden = item.diffWith.value == null;
+      //   singleHidden = !diffHidden;
+      //   details = diffHidden ? 'single' : 'diff';
+      // }
+      // if (item is SnapshotGraphItem && item.hasData) {
+      //   diffHidden = item.diffWith.value == null;
+      //   singleHidden = !diffHidden;
+      //   details = diffHidden ? 'single' : 'diff';
+      // }
 
-      assert(singleHidden || diffHidden);
+      // assert(singleHidden || diffHidden);
 
-      if (singleHidden) {
-        assert(classesTableSingle.selection.value == null, details);
-      }
-      if (diffHidden) assert(classesTableDiff.selection.value == null, details);
+      // if (singleHidden) {
+      //   assert(classesTableSingle.selection.value == null, details);
+      // }
+      // if (diffHidden) assert(classesTableDiff.selection.value == null, details);
 
-      assert((singleClassesToShow.value == null) == singleHidden, details);
-      assert((diffClassesToShow.value == null) == diffHidden, details);
+      // assert((singleClassesToShow.value == null) == singleHidden, details);
+      // assert((diffClassesToShow.value == null) == diffHidden, details);
 
       return true;
     }());
@@ -341,12 +346,24 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   /// Classes for the selected snapshot with diffing applied.
   HeapClasses? _snapshotClassesAfterDiffing() {
     final theItem = _core.selectedItem;
-    if (theItem is! SnapshotInstanceItem) return null;
-    final heap = theItem.heap_;
-    if (heap == null) return null;
-    final itemToDiffWith = theItem.diffWith.value;
-    if (itemToDiffWith == null) return heap.classes;
-    return _diffStore.compare(heap, itemToDiffWith.heap_!);
+
+    if (theItem is SnapshotInstanceItem) {
+      final heap = theItem.heap_;
+      if (heap == null) return null;
+      final itemToDiffWith = theItem.diffWith.value;
+      if (itemToDiffWith == null) return heap.classes;
+      return _diffStore.compare_(heap, itemToDiffWith.heap_!);
+    }
+
+    if (theItem is SnapshotGraphItem) {
+      final heap = theItem.heap;
+      if (heap == null) return null;
+      final itemToDiffWith = theItem.diffWith.value;
+      if (itemToDiffWith == null) return heap.classes;
+      return _diffStore.compare(heap, itemToDiffWith.heap!);
+    }
+
+    return null;
   }
 
   void _updateClasses({

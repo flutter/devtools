@@ -9,6 +9,7 @@ import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/analytics/metrics.dart';
 import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../../shared/memory/class_name.dart';
+import '../../../../../shared/memory/new/heap_api.dart';
 import '../../../../../shared/memory/simple_items.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../shared/heap/heap.dart';
@@ -20,9 +21,13 @@ class HeapDiffStore {
 
   final _store = <_HeapCouple, DiffHeapClasses>{};
 
-  DiffHeapClasses compare(AdaptedHeap heap1, AdaptedHeap heap2) {
+  DiffHeapClasses compare_(AdaptedHeap heap1, AdaptedHeap heap2) {
     final couple = _HeapCouple(heap1, heap2);
     return _store.putIfAbsent(couple, () => _calculateDiffGaWrapper(couple));
+  }
+
+  DiffHeapClasses compare(Heap heap1, Heap heap2) {
+    throw UnimplementedError();
   }
 }
 

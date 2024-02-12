@@ -74,9 +74,7 @@ class SnapshotGraphItem extends SnapshotItem implements SnapshotInstanceItem {
   String? nameOverride;
 
   @override
-  // TODO: implement diffWith
-  ValueNotifier<SnapshotInstanceItem?> get diffWith =>
-      throw UnimplementedError();
+  final diffWith = ValueNotifier<SnapshotGraphItem?>(null);
 
   @override
   Future<void> initializeHeapData(AdaptedHeapData? data) {
@@ -85,12 +83,13 @@ class SnapshotGraphItem extends SnapshotItem implements SnapshotInstanceItem {
   }
 
   @override
-  // TODO: implement name
-  String get name => throw UnimplementedError();
+  String get name =>
+      nameOverride ??
+      '$defaultName${displayNumber == null ? '' : '-$displayNumber'}';
 
   @override
   // TODO: implement totalSize
-  int? get totalSize => throw UnimplementedError();
+  int? get totalSize => 0;
 }
 
 class SnapshotInstanceItem extends SnapshotItem {

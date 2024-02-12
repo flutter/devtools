@@ -21,9 +21,9 @@ void main() {
 
       final store = HeapDiffStore();
 
-      final couple1 = identityHashCode(store.compare(heap1, heap2));
-      final couple2 = identityHashCode(store.compare(heap1, heap2));
-      final couple3 = identityHashCode(store.compare(heap2, heap1));
+      final couple1 = identityHashCode(store.compare_(heap1, heap2));
+      final couple2 = identityHashCode(store.compare_(heap1, heap2));
+      final couple3 = identityHashCode(store.compare_(heap2, heap1));
 
       expect(couple1, couple2);
       expect(couple1, couple3);
