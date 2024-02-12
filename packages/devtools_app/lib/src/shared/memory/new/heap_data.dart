@@ -8,13 +8,14 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../screens/memory/shared/heap/heap.dart';
 import '../../primitives/utils.dart';
+import '../class_name.dart';
 
 class HeapData {
   HeapData._(
     this.graph, {
     this.shortestRetainers,
     this.retainedSizes,
-    this.classStats,
+    this.classData,
   });
 
   /// Value for rootIndex is taken from the doc:
@@ -30,7 +31,7 @@ class HeapData {
 
   final Uint32List? retainedSizes;
 
-  final SingleClassStats? classStats;
+  final HeapClassData? classData;
 }
 
 final UiReleaser _uiReleaser = UiReleaser();
@@ -45,10 +46,10 @@ Future<HeapData> calculateHeapData(
     return HeapData._(graph);
   }
 
-  final classes = _Classes(
+  final classes = HeapClassData._(
     graph,
     calculateClassStats: classStatistics,
-    calculateWeakClasses: shortestRetainers || retainedSizes,
+    findWeakClasses: shortestRetainers || retainedSizes,
   );
 
   final Uint32List retainers = Uint32List(graph.objects.length);
@@ -110,36 +111,65 @@ void _propagateSize(
   }
 }
 
-class _Classes {
-  _Classes(
+class HeapClassData {
+  HeapClassData._(
     this.graph, {
-    required bool calculateWeakClasses,
+    required bool findWeakClasses,
     required bool calculateClassStats,
   }) {
-    final weakClassesToFind = <String, String>{
+    late final weakClassesToFind = <String, String>{
       '_WeakProperty': 'dart:core',
       '_WeakReferenceImpl': 'dart:core',
       'FinalizerEntry': 'dart:_internal',
     };
 
+    late final classCounts = {
+      for (var heapClass in graph.classes)
+        HeapClassName.fromHeapSnapshotClass(heapClass): 0,
+    };
+
+    // .generate(
+    //     graph.classes.length,
+    //     (index) => HeapClass(graph.classes[index].name),
+    //     growable: false,
+    //   );
+
+    if (calculateClassStats) {
+      classes = List<HeapClass>.generate(
+        graph.classes.length,
+        (index) => HeapClass(graph.classes[index].name),
+        growable: false,
+      );
+    }
+
     for (final theClass in graph.classes) {
-      if (weakClassesToFind.containsKey(theClass.name) &&
-          weakClassesToFind[theClass.name] == theClass.libraryName) {
-        _weakClasses.add(theClass.classId);
-        weakClassesToFind.remove(theClass.name);
-        if (weakClassesToFind.isEmpty) {
-          break;
+      if (!findWeakClasses && !calculateClassStats) break;
+
+      if (findWeakClasses) {
+        if (weakClassesToFind.containsKey(theClass.name) &&
+            weakClassesToFind[theClass.name] == theClass.libraryName) {
+          _weakClasses.add(theClass.classId);
+          weakClassesToFind.remove(theClass.name);
+          if (weakClassesToFind.isEmpty) {
+            findWeakClasses = false;
+          }
         }
       }
+
+      if (calculateClassStats) {}
     }
   }
 
   final HeapSnapshotGraph graph;
 
-  final _weakClasses = <int>{};
+  /// Set of class ids that are not holding their references form garbage collection.
+  late final _weakClasses = <int>{};
 
-  final ClassStats? classStats = null;
+  late final Int32List _objectsByClass = Int32List(graph.objects.length);
 
+  late final List<HeapClass> classes;
+
+  /// Returns true if the object is a retainer, where [objectIndex] is index in [graph].
   bool isRetainer(int objectIndex) {
     final object = graph.objects[objectIndex];
     if (object.references.isEmpty) return false;
@@ -147,4 +177,9 @@ class _Classes {
     if (_weakClasses.contains(classId)) return true;
     return false;
   }
+}
+
+class HeapClass {
+  late int startIndex;
+  int objectCount = 0;
 }
