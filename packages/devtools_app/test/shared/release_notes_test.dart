@@ -7,6 +7,8 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 
 void main() {
   group('$ReleaseNotesController', () {
@@ -28,5 +30,81 @@ void main() {
       );
       expect(version.toString(), '2.24.1');
     });
+
+    test('Fails gracefully when index is unavailable', () async {
+      await http.runWithClient(
+        () async {
+          final response = await controller.retrieveReleasesFromIndex();
+          expect(response, isNull);
+        },
+        () => MockClient((request) async {
+          expect(request.method, equalsIgnoringCase('GET'));
+          expect(request.url, equals(ReleaseNotesController.releaseIndexUrl));
+          // Respond with a valid release index to test the http error handling,
+          // not the parsing of the returned body.
+          return http.Response(_validReleaseTestIndex, 404);
+        }),
+      );
+    });
+
+    test('Fails gracefully when index is formatted incorrectly', () async {
+      await http.runWithClient(
+        () async {
+          final response = await controller.retrieveReleasesFromIndex();
+          expect(response, isNull);
+        },
+        () => MockClient((request) async {
+          expect(request.method, equalsIgnoringCase('GET'));
+          expect(request.url, equals(ReleaseNotesController.releaseIndexUrl));
+          return http.Response(_invalidReleaseTestIndex, 200);
+        }),
+      );
+    });
+
+    test('Parses expected index format correctly', () async {
+      await http.runWithClient(
+        () async {
+          final response = await controller.retrieveReleasesFromIndex();
+          expect(response!.keys, hasLength(2));
+          expect(response['latest'], equals('2.32.0'));
+          expect(
+            response['releases'],
+            equals({
+              '2.32.0':
+                  '/tools/devtools/release-notes/release-notes-2.32.0-src.md',
+              '2.31.0':
+                  '/tools/devtools/release-notes/release-notes-2.31.0-src.md',
+            }),
+          );
+        },
+        () => MockClient((request) async {
+          expect(request.method, equalsIgnoringCase('GET'));
+          expect(request.url, equals(ReleaseNotesController.releaseIndexUrl));
+          return http.Response(_validReleaseTestIndex, 200);
+        }),
+      );
+    });
   });
 }
+
+/// An invalid release index due to the `releases` field being `release`.
+const _invalidReleaseTestIndex = '''
+{
+  "latest": "2.32.0",
+  "release": {
+    "2.32.0": "/tools/devtools/release-notes/release-notes-2.32.0-src.md",
+    "2.31.0": "/tools/devtools/release-notes/release-notes-2.31.0-src.md"
+  }
+}
+''';
+
+/// A correctly formatted release index file.
+const _validReleaseTestIndex = '''
+{
+  "latest": "2.32.0",
+  "releases": {
+    "2.32.0": "/tools/devtools/release-notes/release-notes-2.32.0-src.md",
+    "2.31.0": "/tools/devtools/release-notes/release-notes-2.31.0-src.md"
+  }
+}
+''';
