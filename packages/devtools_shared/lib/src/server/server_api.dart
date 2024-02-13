@@ -9,6 +9,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:shelf/shelf.dart' as shelf;
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../deeplink/deeplink_manager.dart';
 import '../devtools_api.dart';
@@ -37,6 +38,7 @@ class ServerApi {
     shelf.Request request, {
     required ExtensionsManager extensionsManager,
     required DeeplinkManager deeplinkManager,
+    required Analytics analytics,
     ServerApi? api,
     String? dtdUri,
   }) {
@@ -70,23 +72,39 @@ class ServerApi {
         return api.getCompleted(json.encode(true));
       case apiGetDevToolsFirstRun:
         // Has DevTools been run first time? To bring up analytics dialog.
+        //
+        // Additionally, package:unified_analytics will show a message if it
+        // is the first run with the package or the consent message version has
+        // been updated
+        final isFirstRun =
+            _devToolsUsage.isFirstRun || analytics.shouldShowMessage;
         return api.getCompleted(
-          json.encode(_devToolsUsage.isFirstRun),
+          json.encode(isFirstRun),
         );
       case apiGetDevToolsEnabled:
         // Is DevTools Analytics collection enabled?
+        final isEnabled =
+            _devToolsUsage.analyticsEnabled && analytics.telemetryEnabled;
         return api.getCompleted(
-          json.encode(_devToolsUsage.analyticsEnabled),
+          json.encode(isEnabled),
         );
       case apiSetDevToolsEnabled:
         // Enable or disable DevTools analytics collection.
         if (queryParams.containsKey(devToolsEnabledPropertyName)) {
-          _devToolsUsage.analyticsEnabled =
+          final analyticsEnabled =
               json.decode(queryParams[devToolsEnabledPropertyName]!);
+
+          _devToolsUsage.analyticsEnabled = analyticsEnabled;
+          analytics.setTelemetry(analyticsEnabled);
         }
         return api.getCompleted(
           json.encode(_devToolsUsage.analyticsEnabled),
         );
+      case apiGetConsentMessage:
+        return api.getCompleted(analytics.getConsentMessage);
+      case apiMarkConsentMessageAsShown:
+        analytics.clientShowedMessage();
+        return api.getCompleted(json.encode(true));
 
       // ----- DevTools survey store. -----
 
