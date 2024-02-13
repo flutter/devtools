@@ -87,10 +87,13 @@ class BreakpointManager with DisposerMixin {
     }
   }
 
-  void clearCache() {
+  void clearCache({required bool isServiceShutdown}) {
     _breakPositionsMap.clear();
     _breakpoints.value = [];
     _breakpointsWithLocation.value = [];
+    if (isServiceShutdown) {
+      _previousIsolateBreakpoints.clear();
+    }
   }
 
   Future<void> clearBreakpoints() async {
@@ -136,9 +139,11 @@ class BreakpointManager with DisposerMixin {
   }
 
   void _saveAndClearCurrentBreakpoints() {
-    _previousIsolateBreakpoints
-      ..clear()
-      ..addAll(_breakpointsWithLocation.value);
+    if (breakpointsWithLocation.value.isNotEmpty) {
+      _previousIsolateBreakpoints
+        ..clear()
+        ..addAll(_breakpointsWithLocation.value);
+    }
     _breakpoints.value.clear();
     _breakpointsWithLocation.value.clear();
   }
@@ -186,6 +191,12 @@ class BreakpointManager with DisposerMixin {
       // Current request is obsolete.
       return [];
     }
+
+    // Ignore attempts from DWDS to re-establish breakpoints because DevTools is
+    // now in charge of re-establishing breakpoints:
+    final connectedToDwds =
+        serviceConnection.serviceManager.connectedApp?.isDartWebAppNow ?? false;
+    if (connectedToDwds) return [];
 
     return isolate.breakpoints ?? [];
   }
@@ -326,6 +337,9 @@ class BreakpointManager with DisposerMixin {
       // that knows how to notify when performing a list edit operation.
       case EventKind.kBreakpointAdded:
         final breakpoint = event.breakpoint!;
+        final isDuplicate =
+            _breakpoints.value.any((bp) => bp.id == breakpoint.id);
+        if (isDuplicate) break;
         _breakpoints.value = [..._breakpoints.value, breakpoint];
 
         await breakpointManager
@@ -362,6 +376,13 @@ class BreakpointManager with DisposerMixin {
         break;
 
       case EventKind.kBreakpointRemoved:
+        // Ignore any breakpoints removed during a hot restart, because the VM
+        // service removes them before resuming the isolate and then performing
+        // the restart:
+        final hotRestartInProgress = serviceConnection
+            .serviceManager.isolateManager.hotRestartInProgress;
+        if (hotRestartInProgress) break;
+
         final breakpoint = event.breakpoint;
 
         _breakpoints.value = [

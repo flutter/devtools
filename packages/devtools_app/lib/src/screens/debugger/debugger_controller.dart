@@ -82,7 +82,7 @@ class DebuggerController extends DisposableController
 
   /// Method to call after the vm service shuts down.
   void _onServiceShutdown() {
-    _clearCaches();
+    _clearCaches(isServiceShutdown: true);
 
     _hasTruncatedFrames.value = false;
     unawaited(_getStackOperation?.cancel());
@@ -484,9 +484,9 @@ class DebuggerController extends DisposableController
     await _populateFrameInfo(stackInfo.frames, truncated: stackInfo.truncated);
   }
 
-  void _clearCaches() {
+  void _clearCaches({bool isServiceShutdown = false}) {
     _lastEvent = null;
-    breakpointManager.clearCache();
+    breakpointManager.clearCache(isServiceShutdown: isServiceShutdown);
   }
 
   Future<void> _populateScripts(Isolate isolate) async {

@@ -50,6 +50,8 @@ final class IsolateManager with DisposerMixin {
 
   final _isolateRunnableCompleters = <String?, Completer<void>>{};
 
+  bool hotRestartInProgress = false;
+
   Future<void> init(List<IsolateRef> isolates) async {
     await initIsolates(isolates);
   }
@@ -132,6 +134,9 @@ final class IsolateManager with DisposerMixin {
         () => Completer<void>(),
       );
       isolateRunnable.complete();
+      if (hotRestartInProgress) {
+        hotRestartInProgress = false;
+      }
     } else if (event.kind == EventKind.kIsolateStart &&
         !event.isolate!.isSystemIsolate!) {
       await _registerIsolate(event.isolate!);
