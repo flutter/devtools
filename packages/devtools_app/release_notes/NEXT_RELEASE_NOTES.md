@@ -39,6 +39,7 @@ TODO: Remove this section if there are not any general updates.
 ## Debugger updates
 
 * Fixed syntax highlighting for comments when the source file uses `\r\n` line endings [#7190](https://github.com/flutter/devtools/pull/7190)
+* Re-establish breakpoints after a hot-restart. - [#7205](https://github.com/flutter/devtools/pull/7205)
 
 ## Network profiler updates
 
