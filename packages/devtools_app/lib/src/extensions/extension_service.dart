@@ -117,6 +117,12 @@ class ExtensionService extends DisposableController
     // .dart_tool/package_config.json file for changes.
   }
 
+  @override
+  void dispose() {
+    _reset();
+    super.dispose();
+  }
+
   Future<void> _initAppRoot() async {
     _appRoot = fixedAppRoot ?? await _connectedAppRoot();
   }
