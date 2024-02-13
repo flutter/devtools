@@ -197,9 +197,15 @@ class ExtensionService extends DisposableController
 // connection.
 Future<Uri?> _connectedAppRoot() async {
   String? fileUriString;
-  if (serviceConnection.serviceManager.serviceExtensionManager
+
+  // Whether the connected app is a test process spawned by package:test. We
+  // can assume this is true if the [testTargetLibraryExtension] is a registered
+  // service extension on the main isolate.
+  final isTestTarget = serviceConnection.serviceManager.serviceExtensionManager
       .hasServiceExtension(testTargetLibraryExtension)
-      .value) {
+      .value;
+
+  if (isTestTarget) {
     final result = await serviceConnection.serviceManager
         .callServiceExtensionOnMainIsolate(testTargetLibraryExtension);
     fileUriString = result.json?['value'];
