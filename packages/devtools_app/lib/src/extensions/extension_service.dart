@@ -197,21 +197,22 @@ class ExtensionService extends DisposableController
 // connection.
 Future<Uri?> _connectedAppRoot() async {
   String? fileUriString;
-  // await Future.delayed(const Duration(seconds: 4));
   if (serviceConnection.serviceManager.serviceExtensionManager
-      .hasServiceExtension('ext.test.testTargetPackageRoot')
+      .hasServiceExtension(testTargetLibraryExtension)
       .value) {
-    print('found it!');
     final result = await serviceConnection.serviceManager
-        .callServiceExtensionOnMainIsolate(testTargetPackageRootExtension);
+        .callServiceExtensionOnMainIsolate(testTargetLibraryExtension);
     fileUriString = result.json?['value'];
-    print('from test: $fileUriString');
-  } else {
-    print('no service extension available');
+    _log.fine(
+      'fetched library from $testTargetLibraryExtension: $fileUriString',
+    );
   }
 
-  fileUriString ??= await serviceConnection.rootLibraryForMainIsolate();
-  _log.fine('fetching rootLibraryForMainIsolate: $fileUriString');
+  if (fileUriString == null) {
+    fileUriString = await serviceConnection.rootLibraryForMainIsolate();
+    _log.fine('fetched rootLibraryForMainIsolate: $fileUriString');
+  }
+
   if (fileUriString == null) return null;
   return Uri.parse(rootFromFileUriString(fileUriString));
 }

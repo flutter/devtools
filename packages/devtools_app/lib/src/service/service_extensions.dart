@@ -512,4 +512,4 @@ final profilePlatformChannels =
   gaDocsItem: gac.PerformanceDocs.platformChannelsDocs.name,
 );
 
-const testTargetPackageRootExtension = 'ext.test.testTargetPackageRoot';
+const testTargetLibraryExtension = 'ext.test.testTargetLibrary';
