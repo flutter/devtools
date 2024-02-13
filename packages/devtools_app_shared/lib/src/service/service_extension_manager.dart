@@ -70,18 +70,18 @@ final class ServiceExtensionManager with DisposerMixin {
         await _onFrameEventReceived();
         break;
       case 'Flutter.ServiceExtensionStateChanged':
-        final name = event.json!['extensionData']['extension'].toString();
-        final encodedValue = event.json!['extensionData']['value'].toString();
+        final name = event.rawExtensionData['extension'].toString();
+        final encodedValue = event.rawExtensionData['value'].toString();
         await _updateServiceExtensionForStateChange(name, encodedValue);
         break;
       case 'HttpTimelineLoggingStateChange':
         final name = extensions.httpEnableTimelineLogging.extension;
-        final encodedValue = event.json!['extensionData']['enabled'].toString();
+        final encodedValue = event.rawExtensionData['enabled'].toString();
         await _updateServiceExtensionForStateChange(name, encodedValue);
         break;
       case 'SocketProfilingStateChange':
         final name = extensions.socketProfiling.extension;
-        final encodedValue = event.json!['extensionData']['enabled'].toString();
+        final encodedValue = event.rawExtensionData['enabled'].toString();
         await _updateServiceExtensionForStateChange(name, encodedValue);
     }
   }
@@ -617,3 +617,9 @@ class ServiceExtensionState {
 
 @visibleForTesting
 base mixin TestServiceExtensionManager implements ServiceExtensionManager {}
+
+extension on Event {
+  Map<String, Object?> get rawExtensionData =>
+      ((json as Map<String, Object?>)['extensionData'] as Map)
+          .cast<String, Object?>();
+}

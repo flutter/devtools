@@ -66,10 +66,9 @@ class ImportController {
       return;
     }
 
-    final devToolsSnapshot = json;
+    final devToolsSnapshot = _DevToolsSnapshot(json);
     // TODO(kenz): support imports for more than one screen at a time.
-    final activeScreenId =
-        devToolsSnapshot[DevToolsExportKeys.activeScreenId.name];
+    final activeScreenId = devToolsSnapshot.activeScreenId;
     if (expectedScreenId != null && activeScreenId != expectedScreenId) {
       notificationService.push(
         'Expected a data file for screen \'$expectedScreenId\' but received one'
@@ -79,15 +78,23 @@ class ImportController {
     }
 
     final connectedApp =
-        (devToolsSnapshot[DevToolsExportKeys.connectedApp.name] ??
-                <String, Object>{})
-            .cast<String, Object>();
+        OfflineConnectedApp.parse(devToolsSnapshot.connectedApp);
     offlineController
-      ..enterOfflineMode(offlineApp: OfflineConnectedApp.parse(connectedApp))
-      ..offlineDataJson = devToolsSnapshot;
+      ..enterOfflineMode(offlineApp: connectedApp)
+      ..offlineDataJson = devToolsSnapshot.json;
     notificationService.push(attemptingToImportMessage(activeScreenId));
     _pushSnapshotScreenForImport(activeScreenId);
   }
+}
+
+extension type _DevToolsSnapshot(Map<String, Object?> json) {
+  Map<String, Object?> get connectedApp {
+    final connectedApp = json[DevToolsExportKeys.connectedApp.name] as Map?;
+    return connectedApp == null ? {} : connectedApp.cast<String, Object?>();
+  }
+
+  String get activeScreenId =>
+      json[DevToolsExportKeys.activeScreenId.name] as String;
 }
 
 enum ExportFileType {

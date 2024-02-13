@@ -5,10 +5,9 @@
 import 'dart:async';
 
 import 'package:devtools_app_shared/ui.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-import '../config_specific/launch_url/launch_url.dart';
+import '../common_widgets.dart';
 import '../utils.dart';
 import 'analytics_controller.dart';
 
@@ -35,9 +34,15 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
+
     return ValueListenableBuilder<bool>(
       valueListenable: controller.shouldPrompt,
       builder: (context, showPrompt, child) {
+        // Mark the consent message as shown for unified_analytics so that devtools
+        // can be onboarded into the config file
+        // ~/.dart-tool/dart-flutter-telemetry.config
+        if (showPrompt) unawaited(controller.markConsentMessageAsShown());
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -89,30 +94,42 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt>
   }
 
   Widget _analyticsDescription(TextTheme textTheme) {
+    final consentMessageRegExpResults =
+        parseAnalyticsConsentMessage(controller.consentMessage);
+
+    // When failing to parse the consent message, fallback to
+    // displaying the consent message in its regular form
+    if (consentMessageRegExpResults == null) {
+      return RichText(
+        text: TextSpan(
+          children: [
+            TextSpan(
+              text: controller.consentMessage,
+              style: textTheme.titleMedium,
+            ),
+          ],
+        ),
+      );
+    }
+
     return RichText(
       text: TextSpan(
         children: [
           TextSpan(
-            text: 'DevTools reports feature usage statistics and basic '
-                'crash reports to Google in order to help Google improve '
-                'the tool over time. See Google\'s ',
+            text: consentMessageRegExpResults[0],
             style: textTheme.titleMedium,
           ),
-          TextSpan(
-            text: 'privacy policy',
+          LinkTextSpan(
+            link: Link(
+              display: consentMessageRegExpResults[1],
+              url: consentMessageRegExpResults[1],
+            ),
+            context: context,
             style:
                 textTheme.titleMedium?.copyWith(color: const Color(0xFF54C1EF)),
-            recognizer: TapGestureRecognizer()
-              ..onTap = () {
-                unawaited(
-                  launchUrl(
-                    'https://www.google.com/intl/en/policies/privacy',
-                  ),
-                );
-              },
           ),
           TextSpan(
-            text: '.',
+            text: consentMessageRegExpResults[2],
             style: textTheme.titleMedium,
           ),
         ],
@@ -145,4 +162,32 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt>
       ],
     );
   }
+}
+
+/// This method helps to parse the consent message from
+/// `package:unified_analytics` so that the URL can be
+/// separated from the block of text so that we can have a
+/// hyperlink in the displayed consent message.
+List<String>? parseAnalyticsConsentMessage(String consentMessage) {
+  final results = <String>[];
+  final RegExp pattern =
+      RegExp(r'^([\S\s]*)(https?:\/\/[^\s]+)(\)\.)$', multiLine: true);
+
+  final matches = pattern.allMatches(consentMessage);
+  if (matches.isEmpty) {
+    return null;
+  }
+
+  matches.first.groups([1, 2, 3]).forEach((element) {
+    results.add(element!);
+  });
+
+  // There should be 3 groups returned if correctly parsed, one
+  // for most of the text, one for the URL, and one for what comes
+  // after the URL
+  if (results.length != 3) {
+    return null;
+  }
+
+  return results;
 }

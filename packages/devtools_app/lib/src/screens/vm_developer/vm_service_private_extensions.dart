@@ -31,7 +31,7 @@ extension VMPrivateViewExtension on VM {
 
 /// An extension on [Isolate] which allows for access to VM internal fields.
 extension IsolatePrivateViewExtension on Isolate {
-  Map<String, dynamic> get tagCounters => json!['_tagCounters'];
+  Map<String, dynamic>? get tagCounters => json!['_tagCounters'];
 
   int get dartHeapSize => newSpaceUsage + oldSpaceUsage;
   int get dartHeapCapacity => newSpaceCapacity + oldSpaceCapacity;
