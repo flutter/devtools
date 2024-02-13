@@ -7,6 +7,7 @@ import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 
+import '../../devtools_app.dart';
 import '../shared/globals.dart';
 import '../shared/server/server.dart' as server;
 
@@ -195,7 +196,21 @@ class ExtensionService extends DisposableController
 // TODO(kenz): consider caching this for the duration of the VM service
 // connection.
 Future<Uri?> _connectedAppRoot() async {
-  final fileUriString = await serviceConnection.rootLibraryForMainIsolate();
+  String? fileUriString;
+  // await Future.delayed(const Duration(seconds: 4));
+  if (serviceConnection.serviceManager.serviceExtensionManager
+      .hasServiceExtension('ext.test.testTargetPackageRoot')
+      .value) {
+    print('found it!');
+    final result = await serviceConnection.serviceManager
+        .callServiceExtensionOnMainIsolate(testTargetPackageRootExtension);
+    fileUriString = result.json?['value'];
+    print('from test: $fileUriString');
+  } else {
+    print('no service extension available');
+  }
+
+  fileUriString ??= await serviceConnection.rootLibraryForMainIsolate();
   _log.fine('fetching rootLibraryForMainIsolate: $fileUriString');
   if (fileUriString == null) return null;
   return Uri.parse(rootFromFileUriString(fileUriString));
