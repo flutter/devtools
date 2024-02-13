@@ -294,7 +294,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
                     ),
                   // This button will hide itself based on whether the
                   // hot restart service is available for the connected app.
-                  const HotRestartButton(),
+                  const HotRestartButton(key: Key('Hot Restart Button')),
                 ],
                 ...DevToolsScaffold.defaultActions(),
               ],
