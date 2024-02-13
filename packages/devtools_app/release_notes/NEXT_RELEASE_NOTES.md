@@ -58,8 +58,9 @@ TODO: Remove this section if there are not any general updates.
 
 ## DevTools Extension updates
 
-* Fixed an issue with not detecting extensions for test files in
-subdirectories. - [#7174](https://github.com/flutter/devtools/pull/7174)
+* Fixed a couple issues causing extensions to be undetected for test
+targets. - [#7174](https://github.com/flutter/devtools/pull/7174),
+[#7206](https://github.com/flutter/devtools/pull/7206)
 * Add an example of creating an extension for a pure Dart package. - [#7196](https://github.com/flutter/devtools/pull/7196)
 
 ## Full commit history
