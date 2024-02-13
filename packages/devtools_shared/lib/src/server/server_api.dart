@@ -356,10 +356,10 @@ class ServerApi {
     return shelf.Response(
       HttpStatus.internalServerError,
       body: error != null || logs != null
-          ? <String, Object?>{
+          ? jsonEncode(<String, Object?>{
               if (error != null) errorKey: error,
               if (logs != null) logsKey: logs,
-            }
+            })
           : null,
     );
   }
