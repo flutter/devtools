@@ -5,10 +5,9 @@
 import 'dart:async';
 
 import 'package:devtools_app_shared/ui.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-import '../config_specific/launch_url/launch_url.dart';
+import '../common_widgets.dart';
 import '../utils.dart';
 import 'analytics_controller.dart';
 
@@ -120,18 +119,14 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt>
             text: consentMessageRegExpResults[0],
             style: textTheme.titleMedium,
           ),
-          TextSpan(
-            text: consentMessageRegExpResults[1],
+          LinkTextSpan(
+            link: Link(
+              display: consentMessageRegExpResults[1],
+              url: consentMessageRegExpResults[1],
+            ),
+            context: context,
             style:
                 textTheme.titleMedium?.copyWith(color: const Color(0xFF54C1EF)),
-            recognizer: TapGestureRecognizer()
-              ..onTap = () {
-                unawaited(
-                  launchUrl(
-                    consentMessageRegExpResults[1],
-                  ),
-                );
-              },
           ),
           TextSpan(
             text: consentMessageRegExpResults[2],

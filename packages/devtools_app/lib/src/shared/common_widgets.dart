@@ -1443,7 +1443,9 @@ class LinkIconLabel extends StatelessWidget {
 
   void _onLinkTap() {
     unawaited(launchUrl(link.url));
-    ga.select(link.gaScreenName, link.gaSelectedItemDescription);
+    if (link.gaScreenName != null && link.gaSelectedItemDescription != null) {
+      ga.select(link.gaScreenName!, link.gaSelectedItemDescription!);
+    }
   }
 }
 
@@ -1457,10 +1459,13 @@ class LinkTextSpan extends TextSpan {
           style: style ?? Theme.of(context).linkTextStyle,
           recognizer: TapGestureRecognizer()
             ..onTap = () async {
-              ga.select(
-                link.gaScreenName,
-                link.gaSelectedItemDescription,
-              );
+              if (link.gaScreenName != null &&
+                  link.gaSelectedItemDescription != null) {
+                ga.select(
+                  link.gaScreenName!,
+                  link.gaSelectedItemDescription!,
+                );
+              }
               await launchUrl(link.url);
             },
         );
@@ -1470,17 +1475,17 @@ class Link {
   const Link({
     required this.display,
     required this.url,
-    required this.gaScreenName,
-    required this.gaSelectedItemDescription,
+    this.gaScreenName,
+    this.gaSelectedItemDescription,
   });
 
   final String display;
 
   final String url;
 
-  final String gaScreenName;
+  final String? gaScreenName;
 
-  final String gaSelectedItemDescription;
+  final String? gaSelectedItemDescription;
 }
 
 class Legend extends StatelessWidget {
