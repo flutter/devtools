@@ -123,7 +123,7 @@ class HeapClassData {
       'FinalizerEntry': 'dart:_internal',
     };
 
-    late final classCounts = {
+    late final Map<HeapClassName, int> classCounts = {
       for (var heapClass in graph.classes)
         HeapClassName.fromHeapSnapshotClass(heapClass): 0,
     };
