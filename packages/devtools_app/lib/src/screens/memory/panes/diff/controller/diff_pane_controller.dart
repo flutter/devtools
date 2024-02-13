@@ -12,6 +12,7 @@ import 'package:flutter/foundation.dart';
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/config_specific/import_export/import_export.dart';
+import '../../../../../shared/file_import.dart';
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/memory/class_name.dart';
 import '../../../shared/heap/class_filter.dart';
@@ -28,10 +29,6 @@ class DiffPaneController extends DisposableController {
 
   final SnapshotTaker snapshotTaker;
 
-  /// If true, a snapshot is being taken.
-  ValueListenable<bool> get isTakingSnapshot => _isTakingSnapshot;
-  final _isTakingSnapshot = ValueNotifier<bool>(false);
-
   final retainingPathController = RetainingPathController();
 
   final core = CoreData();
@@ -42,7 +39,6 @@ class DiffPaneController extends DisposableController {
   bool get hasSnapshots => core.snapshots.value.length > 1;
 
   Future<void> takeSnapshot() async {
-    _isTakingSnapshot.value = true;
     ga.select(
       gac.memory,
       gac.MemoryEvent.diffTakeSnapshotControlPane,
@@ -50,9 +46,36 @@ class DiffPaneController extends DisposableController {
 
     final item = SnapshotInstanceItem(
       displayNumber: _nextDisplayNumber(),
-      isolateName: selectedIsolateName ?? '<isolate-not-detected>',
+      defaultName: selectedIsolateName ?? '<isolate-not-detected>',
     );
 
+    await _addSnapshot(snapshotTaker, item);
+    derived._updateValues();
+  }
+
+  /// Imports snapshots from files.
+  ///
+  /// Opens file selector and loads snapshots from the selected files.
+  Future<void> importSnapshots() async {
+    ga.select(
+      gac.memory,
+      gac.importFile,
+    );
+    final files = await importRawFilesFromPicker();
+    if (files.isEmpty) return;
+
+    final importers = files.map((file) async {
+      final item = SnapshotInstanceItem(defaultName: file.name);
+      await _addSnapshot(SnapshotTakerFromFile(file), item);
+    });
+    await Future.wait(importers);
+    derived._updateValues();
+  }
+
+  Future<void> _addSnapshot(
+    SnapshotTaker snapshotTaker,
+    SnapshotInstanceItem item,
+  ) async {
     final snapshots = core._snapshots;
     snapshots.add(item);
 
@@ -65,8 +88,6 @@ class DiffPaneController extends DisposableController {
     } finally {
       final newElementIndex = snapshots.value.length - 1;
       core._selectedSnapshotIndex.value = newElementIndex;
-      _isTakingSnapshot.value = false;
-      derived._updateValues();
     }
   }
 
@@ -81,7 +102,7 @@ class DiffPaneController extends DisposableController {
   }
 
   int _nextDisplayNumber() {
-    final numbers = core._snapshots.value.map((e) => e.displayNumber);
+    final numbers = core._snapshots.value.map((e) => e.displayNumber ?? 0);
     assert(numbers.isNotEmpty);
     return numbers.max + 1;
   }

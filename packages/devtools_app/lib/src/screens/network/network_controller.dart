@@ -36,6 +36,11 @@ enum NetworkResponseViewType {
   }
 }
 
+enum _NetworkTrafficType {
+  http,
+  socket,
+}
+
 class NetworkController extends DisposableController
     with
         SearchControllerMixin<NetworkRequest>,
@@ -114,8 +119,13 @@ class NetworkController extends DisposableController
   /// timeline events.
   late int _timelineMicrosOffset;
 
-  /// The last timestamp at which HTTP and Socket information was refreshed.
-  int lastRefreshMicros = 0;
+  /// The last time at which HTTP information was refreshed.
+  DateTime lastHttpDataRefreshTime = DateTime.fromMicrosecondsSinceEpoch(0);
+
+  /// The last timestamp at which Socket information was refreshed.
+  ///
+  /// This timestamp is on the monotonic clock used by the timeline.
+  int lastSocketDataRefreshMicros = 0;
 
   Timer? _pollingTimer;
 
@@ -123,13 +133,10 @@ class NetworkController extends DisposableController
   bool get isPolling => _pollingTimer != null;
 
   void _processHttpProfileRequests({
-    required int timelineMicrosOffset,
     required List<HttpProfileRequest> newOrUpdatedHttpRequests,
     required CurrentNetworkRequests currentRequests,
   }) {
-    for (final request in newOrUpdatedHttpRequests) {
-      currentRequests.updateOrAdd(request, timelineMicrosOffset);
-    }
+    newOrUpdatedHttpRequests.forEach(currentRequests.updateOrAdd);
   }
 
   @visibleForTesting
@@ -150,7 +157,6 @@ class NetworkController extends DisposableController
     }
 
     _processHttpProfileRequests(
-      timelineMicrosOffset: timelineMicrosOffset,
       newOrUpdatedHttpRequests: httpRequests!,
       currentRequests: currentRequests,
     );
@@ -190,7 +196,12 @@ class NetworkController extends DisposableController
   }
 
   Future<void> startRecording() async {
-    await _startRecording(alreadyRecordingHttp: await recordingHttpTraffic());
+    await _startRecording(
+      alreadyRecordingHttp:
+          await _recordingNetworkTraffic(type: _NetworkTrafficType.http),
+      alreadyRecordingSocketData:
+          await _recordingNetworkTraffic(type: _NetworkTrafficType.socket),
+    );
   }
 
   /// Enables network traffic recording on all isolates and starts polling for
@@ -200,12 +211,16 @@ class NetworkController extends DisposableController
   /// be the beginning of the process (time 0).
   Future<void> _startRecording({
     bool alreadyRecordingHttp = false,
+    bool alreadyRecordingSocketData = false,
   }) async {
     // Cancel existing polling timer before starting recording.
     _updatePollingState(false);
 
-    final timestamp = await _networkService.updateLastRefreshTime(
+    _networkService.updateLastHttpDataRefreshTime(
       alreadyRecordingHttp: alreadyRecordingHttp,
+    );
+    final timestamp = await _networkService.updateLastSocketDataRefreshTime(
+      alreadyRecordingSocketData: alreadyRecordingSocketData,
     );
 
     // Determine the offset that we'll use to calculate the approximate
@@ -240,16 +255,22 @@ class NetworkController extends DisposableController
     _recordingNotifier.value = state;
   }
 
-  Future<bool> recordingHttpTraffic() async {
+  Future<bool> _recordingNetworkTraffic({
+    required _NetworkTrafficType type,
+  }) async {
     bool enabled = true;
     final service = serviceConnection.serviceManager.service!;
     await service.forEachIsolate(
       (isolate) async {
-        final httpFuture =
-            service.httpEnableTimelineLoggingWrapper(isolate.id!);
+        final future = switch (type) {
+          _NetworkTrafficType.http =>
+            service.httpEnableTimelineLoggingWrapper(isolate.id!),
+          _NetworkTrafficType.socket =>
+            service.socketProfilingEnabledWrapper(isolate.id!),
+        };
         // The above call won't complete immediately if the isolate is paused,
         // so give up waiting after 500ms.
-        final state = await timeout(httpFuture, 500);
+        final state = await timeout(future, 500);
         if (state?.enabled != true) {
           enabled = false;
         }
@@ -354,12 +375,8 @@ class CurrentNetworkRequests {
   /// Update or add the [request] to the [requests] depending on whether or not
   /// its [request.id] already exists in the list.
   ///
-  void updateOrAdd(
-    HttpProfileRequest request,
-    int timelineMicrosOffset,
-  ) {
+  void updateOrAdd(HttpProfileRequest request) {
     final wrapped = DartIOHttpRequestData(
-      timelineMicrosOffset,
       request,
       requestFullDataFromVmService: false,
     );

@@ -1,3 +1,9 @@
+# 6.0.5
+* Remove the `ServerApi.setCompleted` method that was a duplicate of `ServerApi.getCompleted`.
+* Add the ability to send debug logs in DevTools server request responses. 
+* Add an optional positional parameter `logs` to the `ServerApi.serverError` method.
+* Include debug logs with the `ExtensionsApi.apiServeAvailableExtensions` API response.
+
 # 6.0.4
 * Add `apiGetDtdUri` to the server api.
 * Add a description and link to documentation to the `devtools_options.yaml` file that

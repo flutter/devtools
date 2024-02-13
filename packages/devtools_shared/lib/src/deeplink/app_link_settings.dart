@@ -12,7 +12,11 @@ class AppLinkSettings {
   const AppLinkSettings._(this.applicationId, this.deeplinkingFlagEnabled, this.deeplinks);
 
   factory AppLinkSettings.fromJson(String json) {
-    final jsonObject = jsonDecode(json);
+    final jsonObject = jsonDecode(json) as Map;
+    final {
+      _kApplicationIdKey: String applicationId,
+      _kDeeplinksKey: List<Object?> deepLinks,
+    } = jsonObject;
     return AppLinkSettings._(
       jsonObject[_kApplicationIdKey] as String,
       jsonObject[_kDeeplinkingFlagEnabledKey] as bool,

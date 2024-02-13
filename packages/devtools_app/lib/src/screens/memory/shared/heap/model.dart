@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:collection/collection.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/analytics/analytics.dart' as ga;
@@ -23,7 +24,7 @@ class ClassOnlyHeapPath {
 
   String toShortString({String? delimiter, bool inverted = false}) => _asString(
         data: classes.map((e) => e.className).toList(),
-        delimiter: _delimeter(
+        delimiter: _delimiter(
           delimiter: delimiter,
           inverted: inverted,
           isLong: false,
@@ -58,7 +59,7 @@ class ClassOnlyHeapPath {
 
     return _asString(
       data: data,
-      delimiter: _delimeter(
+      delimiter: _delimiter(
         delimiter: delimiter,
         inverted: inverted,
         isLong: true,
@@ -67,7 +68,7 @@ class ClassOnlyHeapPath {
     );
   }
 
-  static String _delimeter({
+  static String _delimiter({
     required String? delimiter,
     required bool inverted,
     required bool isLong,
@@ -105,18 +106,35 @@ class ClassOnlyHeapPath {
   late final int hashCode = Object.hashAll(classes);
 }
 
+abstract class SnapshotTaker {
+  Future<AdaptedHeapData?> take();
+}
+
 /// This class is needed to make the snapshot taking operation mockable.
-class SnapshotTaker {
-  SnapshotTaker(this._timeline);
+class SnapshotTakerRuntime extends SnapshotTaker {
+  SnapshotTakerRuntime(this._timeline);
 
   final MemoryTimeline? _timeline;
 
+  @override
   Future<AdaptedHeapData?> take() async {
     final snapshot = await snapshotMemoryInSelectedIsolate();
     _timeline?.addSnapshotEvent();
     if (snapshot == null) return null;
     final result = await _adaptSnapshotGaWrapper(snapshot);
     return result;
+  }
+}
+
+class SnapshotTakerFromFile implements SnapshotTaker {
+  SnapshotTakerFromFile(this._file);
+
+  final XFile _file;
+
+  @override
+  Future<AdaptedHeapData?> take() async {
+    final bytes = await _file.readAsBytes();
+    return AdaptedHeapData.fromBytes(bytes);
   }
 }
 

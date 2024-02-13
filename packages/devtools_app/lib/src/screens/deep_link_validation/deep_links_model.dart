@@ -25,13 +25,82 @@ enum PlatformOS {
   final String description;
 }
 
-// TODO(hangyujin): Handle more domain error cases.
 enum DomainError {
-  existence('Domain doesn\'t exist'),
-  fingerprints('Fingerprints unavailable');
+  // Existence of an asset link file.
+  existence(
+    'Digital Asset Links JSON file existence failed',
+    'This test checks whether the assetlinks.json file, '
+        'which is used to verify the association between the app and the '
+        'domain name, exists under your domain.',
+    'Add a Digital Asset Links JSON file to all of the '
+        'failed website domains at the following location: '
+        'https://[domain.name]/.well-known/assetlinks.json. See the following recommended asset link json file. ',
+  ),
+  // Asset link file should define a link to this app.
+  appIdentifier(
+    'Package name failed',
+    'The test checks your Digital Asset Links JSON file '
+        'for package name validation, which the mobile device '
+        'uses to verify ownership of the app.',
+    'Ensure your Digital Asset Links JSON file declares the '
+        'correct package name with the "android_app" namespace for '
+        'all of the failed website domains. Also, confirm that the '
+        'app is available in the Google Play store. See the following recommended asset link json file. ',
+  ),
+  // Asset link file should contain the correct fingerprint.
+  fingerprints(
+    'Fingerprint validation failed',
+    'This test checks your Digital Asset Links JSON file for '
+        'sha256 fingerprint validation, which the mobile device uses '
+        'to verify ownership of the app.',
+    'Add sha256_cert_fingerprints to the Digital Asset Links JSON '
+        'file for all of the failed website domains. If the fingerprint '
+        'has already been added, make sure it\'s correct and that the '
+        '"android_app" namespace is declared on it. See the following recommended asset link json file. ',
+  ),
+  // Asset link file should be served with the correct content type.
+  contentType(
+    'JSON content type failed',
+    'This test checks your Digital Asset Links JSON file for content type '
+        'validation, which defines the format of the JSON file. This allows '
+        'the mobile device to verify ownership of the app.',
+    'Ensure the content-type is "application/json" for all of the failed website domains. See the following recommended asset link json file. ',
+  ),
+  // Asset link file should be accessible via https.
+  httpsAccessibility(
+    'HTTPS accessibility failed',
+    'This test tries to access your Digital Asset Links '
+        'JSON file over an HTTPS connection, which must be '
+        'accessible to verify ownership of the app.',
+    'Ensure your Digital Asset Links JSON file is accessible '
+        'over an HTTPS connection for all of the failed website domains (even if '
+        'the app\'s intent filter declares HTTP as the data scheme).',
+  ),
 
-  const DomainError(this.description);
-  final String description;
+  // Asset link file should be accessible with no redirects.
+  nonRedirect(
+    'Domain non-redirect failed',
+    'This test checks that your domain is accessible without '
+        'redirects. This domain must be directly accessible '
+        'to verify ownership of the app.',
+    'Ensure your domain is accessible without any redirects ',
+  ),
+
+  // Asset link domain should be valid/not malformed.
+  hostForm(
+    'Host attribute formed properly failed',
+    'This test checks that your android:host attribute has a valid domain URL pattern.',
+    'Make sure the host is a properly formed web address such '
+        'as google.com or www.google.com, without "http://" or "https://".',
+  ),
+  // Issues that are not covered by other checks. An example that may be in this
+  // category is Android validation API failures.
+  other('Check failed', '', '');
+
+  const DomainError(this.title, this.explanation, this.fixDetails);
+  final String title;
+  final String explanation;
+  final String fixDetails;
 }
 
 enum PathError {
