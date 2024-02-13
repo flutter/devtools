@@ -1167,7 +1167,7 @@ String simplifyDevToolsUrl(String url) {
   // http://localhost:123/#/page-id?key=value
   // Since we just want the query params, we will modify the url to have an
   // easy-to-parse form.
-  return url.replaceFirst(RegExp(r'#\/(\w*)[?]'), '?');
+  return url.replaceFirst(RegExp(r'#\/([\w\-]*)[?]'), '?');
 }
 
 Map<String, String> devToolsQueryParams(String url) {
