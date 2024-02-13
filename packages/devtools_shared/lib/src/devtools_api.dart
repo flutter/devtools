@@ -17,7 +17,7 @@ const apiSetDevToolsEnabled = '${apiPrefix}setDevToolsEnabled';
 
 /// package:unified_analytics properties APIs:
 const apiGetConsentMessage = '${apiPrefix}getConsentMessage';
-const apiAnalyticsConsentMessageShown = '${apiPrefix}setConsentMessageAsShown';
+const apiMarkConsentMessageAsShown = '${apiPrefix}markConsentMessageAsShown';
 
 /// Property name to apiSetDevToolsEnabled the DevToolsEnabled is the name used
 /// in queryParameter:

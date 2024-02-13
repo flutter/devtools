@@ -73,7 +73,7 @@ Future<String> fetchAnalyticsConsentMessage() async {
 /// has been shown to the user.
 Future<void> markConsentMessageAsShown() async {
   if (isDevToolsServerAvailable) {
-    await request(apiAnalyticsConsentMessageShown);
+    await request(apiMarkConsentMessageAsShown);
   }
 }
 

@@ -102,7 +102,7 @@ class ServerApi {
         );
       case apiGetConsentMessage:
         return api.getCompleted(analytics.getConsentMessage);
-      case apiAnalyticsConsentMessageShown:
+      case apiMarkConsentMessageAsShown:
         analytics.clientShowedMessage();
         return api.getCompleted(json.encode(true));
 

@@ -39,9 +39,8 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt>
     return ValueListenableBuilder<bool>(
       valueListenable: controller.shouldPrompt,
       builder: (context, showPrompt, child) {
-        // Confirm with package:unified_analytics that the consent
-        // message has been shown so that devtools can be onboarded
-        // into the config file
+        // Mark the consent message as shown for unified_analytics so that devtools
+        // can be onboarded into the config file
         // ~/.dart-tool/dart-flutter-telemetry.config
         if (showPrompt) unawaited(controller.markConsentMessageAsShown());
 

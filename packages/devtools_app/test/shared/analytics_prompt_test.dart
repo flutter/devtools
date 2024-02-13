@@ -68,7 +68,7 @@ void main() {
         });
 
         testWidgetsWithWindowSize(
-          'does not display prompt or call enable analytics',
+          'displays the prompt and calls enable analytics',
           windowSize,
           (WidgetTester tester) async {
             expect(controller.analyticsEnabled.value, isTrue);

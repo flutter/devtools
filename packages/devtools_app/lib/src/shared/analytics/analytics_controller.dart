@@ -47,15 +47,15 @@ class AnalyticsController {
 
   final AsyncAnalyticsCallback? onDisableAnalytics;
 
+  /// Method to call to confirm with package:unified_analytics the user has
+  /// seen the consent message.
   final AsyncAnalyticsCallback? _markConsentMessageAsShown;
-  Future<void> markConsentMessageAsShown() async {
-    if (_markConsentMessageAsShown != null) {
-      await _markConsentMessageAsShown();
-    }
-  }
+  Future<void> markConsentMessageAsShown() async =>
+      await _markConsentMessageAsShown?.call();
 
   final VoidCallback? onSetupAnalytics;
 
+  /// Consent message for package:unified_analytics to be shown on first run.
   final String consentMessage;
 
   Future<void> toggleAnalyticsEnabled(bool? enable) async {
