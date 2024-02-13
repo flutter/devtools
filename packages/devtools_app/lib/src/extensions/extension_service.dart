@@ -7,7 +7,7 @@ import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 
-import '../../devtools_app.dart';
+import '../service/service_extensions.dart';
 import '../shared/globals.dart';
 import '../shared/server/server.dart' as server;
 
