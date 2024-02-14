@@ -3,6 +3,13 @@
 * Add the ability to send debug logs in DevTools server request responses. 
 * Add an optional positional parameter `logs` to the `ServerApi.serverError` method.
 * Include debug logs with the `ExtensionsApi.apiServeAvailableExtensions` API response.
+* Add parameter to `ServerApi.handle` to accept an instance of `Analytics` from 
+  `package:unified_analytics`.
+* Devtools server API `apiGetConsentMessage` added to fetch the consent message from
+  `package:unified_analytics`.
+* Devtools server API `apiMarkConsentMessageAsShown` added to mark the consent message for
+  `package:unified_analytics` as shown to enable telemetry.
+
 
 # 6.0.4
 * Add `apiGetDtdUri` to the server api.
