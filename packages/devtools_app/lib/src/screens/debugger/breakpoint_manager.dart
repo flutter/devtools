@@ -144,8 +144,8 @@ class BreakpointManager with DisposerMixin {
         ..clear()
         ..addAll(_breakpointsWithLocation.value);
     }
-    _breakpoints.value.clear();
-    _breakpointsWithLocation.value.clear();
+    _breakpoints.value = [];
+    _breakpointsWithLocation.value = [];
   }
 
   void _updateAfterIsolateReload(
@@ -231,8 +231,9 @@ class BreakpointManager with DisposerMixin {
       final newScriptRef = scriptUriToRef[breakpoint.scriptUri];
       final breakpointLine = breakpoint.line;
 
-      if (newScriptRef?.id != null && breakpointLine != null) {
-        await addBreakpoint(newScriptRef!.id!, breakpointLine);
+      final scriptId = newScriptRef?.id;
+      if (scriptId != null && breakpointLine != null) {
+        await addBreakpoint(scriptId, breakpointLine);
       }
     }
   }
@@ -378,7 +379,9 @@ class BreakpointManager with DisposerMixin {
       case EventKind.kBreakpointRemoved:
         // Ignore any breakpoints removed during a hot restart, because the VM
         // service removes them before resuming the isolate and then performing
-        // the restart:
+        // the restart. Note we only track hot restarts triggered by DevTools,
+        // if a hot-restart was triggered by another client we won't know.
+        // See https://github.com/flutter/flutter/issues/134470
         final hotRestartInProgress = serviceConnection
             .serviceManager.isolateManager.hotRestartInProgress;
         if (hotRestartInProgress) break;

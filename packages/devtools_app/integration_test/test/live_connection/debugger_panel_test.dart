@@ -6,6 +6,7 @@ import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/debugger/breakpoints.dart';
 import 'package:devtools_app/src/screens/debugger/call_stack.dart';
 import 'package:devtools_app/src/screens/debugger/codeview.dart';
+import 'package:devtools_app/src/service/service_extension_widgets.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:devtools_test/integration_test.dart';
 import 'package:flutter/material.dart';
@@ -92,7 +93,7 @@ void main() {
 
     logStatus('performing a hot restart');
 
-    await tester.tap(find.byKey(const Key('Hot Restart Button')));
+    await tester.tap(find.byType(HotRestartButton));
     await tester.pumpAndSettle(longPumpDuration);
 
     logStatus('Navigating to line 30...');
