@@ -9,7 +9,11 @@ import 'dart:convert';
 
 /// The app link related settings of a Android build of a Flutter project.
 class AppLinkSettings {
-  const AppLinkSettings._(this.applicationId, this.deeplinkingFlagEnabled, this.deeplinks);
+  const AppLinkSettings._(
+    this.applicationId,
+    this.deeplinkingFlagEnabled,
+    this.deeplinks,
+  );
 
   factory AppLinkSettings.fromJson(String json) {
     final jsonObject = jsonDecode(json) as Map;
@@ -79,12 +83,13 @@ class AndroidDeeplink {
   /// The path pattern section of the deeplink.
   final String path;
 
+  /// The intent filter checks section of the deeplink.
   final IntentFilterChecks intentFilterChecks;
 }
 
-/// A deep link in a Android build of a Flutter project.
+/// Intent filter checks for a deep link.
 ///
-/// The deeplink is defined in intent filters of AndroidManifest.xml in the
+/// The intent filters are from AndroidManifest.xml in the
 /// Android sub-project.
 class IntentFilterChecks {
   IntentFilterChecks._(

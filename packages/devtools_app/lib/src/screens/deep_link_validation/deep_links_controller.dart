@@ -156,7 +156,6 @@ class DeepLinksController extends DisposableController {
       linkDatasByPath[linkData.path] = LinkData(
         domain: linkData.domain,
         path: linkData.path,
-        intentFilterChecks: linkData.intentFilterChecks,
         os: [
           if (previousRecord?.os.contains(PlatformOS.android) ??
               false || linkData.os.contains(PlatformOS.android))
@@ -184,7 +183,6 @@ class DeepLinksController extends DisposableController {
       linkDatasByDomain[linkData.domain] = LinkData(
         domain: linkData.domain,
         path: linkData.path,
-        intentFilterChecks: linkData.intentFilterChecks,
         os: linkData.os,
         associatedPath: [
           ...previousRecord?.associatedPath ?? [],
@@ -225,9 +223,30 @@ class DeepLinksController extends DisposableController {
         },
       );
     }
-    if (pagePhase.value != PagePhase.errorPage) {
-      await validateLinks();
+    if (pagePhase.value == PagePhase.errorPage) {
+      return;
     }
+    await validateLinks();
+  }
+
+  List<PathError> _getPathErrorsFromIntentFilterChecks(
+    IntentFilterChecks intentFilterChecks,
+  ) {
+    final pathErrors = <PathError>[];
+    if (!intentFilterChecks.hasActionView) {
+      pathErrors.add(PathError.intentFilterActionView);
+    }
+    if (!intentFilterChecks.hasBrowsableCategory) {
+      pathErrors.add(PathError.intentFilterBrowsable);
+    }
+    if (!intentFilterChecks.hasDefaultCategory) {
+      pathErrors.add(PathError.intentFilterDefault);
+    }
+    if (!intentFilterChecks.hasAutoVerify) {
+      pathErrors.add(PathError.intentFilterAutoVerify);
+    }
+
+    return pathErrors;
   }
 
   /// Get all unverified link data.
@@ -236,31 +255,36 @@ class DeepLinksController extends DisposableController {
     if (appLinks == null) {
       return const <LinkData>[];
     }
-    final domainPathToScheme = <_DomainAndPath, Set<String>>{};
-    final domainPathToIntentFilterChecks =
-        <_DomainAndPath, IntentFilterChecks>{};
+
+    final domainPathToLinkData = <_DomainAndPath, LinkData>{};
+
     for (final appLink in appLinks) {
-      final schemes = domainPathToScheme.putIfAbsent(
-        (domain: appLink.host, path: appLink.path),
-        () => <String>{},
-      );
-      schemes.add(appLink.scheme);
-      domainPathToIntentFilterChecks[(
-        domain: appLink.host,
-        path: appLink.path
-      )] = appLink.intentFilterChecks;
+      final domainAndPath = (domain: appLink.host, path: appLink.path);
+
+      if (domainPathToLinkData[domainAndPath] == null) {
+        domainPathToLinkData[domainAndPath] = LinkData(
+          domain: appLink.host,
+          path: appLink.path,
+          pathErrors:
+              _getPathErrorsFromIntentFilterChecks(appLink.intentFilterChecks),
+          os: [PlatformOS.android],
+          scheme: [appLink.scheme],
+        );
+      } else {
+        final linkData = domainPathToLinkData[domainAndPath]!;
+        if (!linkData.scheme.contains(appLink.scheme)) {
+          linkData.scheme.add(appLink.scheme);
+        }
+        final pathErrors = {
+          ...linkData.pathErrors,
+          ..._getPathErrorsFromIntentFilterChecks(appLink.intentFilterChecks),
+        }.toList();
+
+        linkData.pathErrors = pathErrors;
+      }
     }
-    return domainPathToScheme.entries
-        .map(
-          (entry) => LinkData(
-            domain: entry.key.domain,
-            path: entry.key.path,
-            intentFilterChecks: domainPathToIntentFilterChecks[entry.key]!,
-            os: [PlatformOS.android],
-            scheme: entry.value.toList(),
-          ),
-        )
-        .toList();
+
+    return domainPathToLinkData.values.toList();
   }
 
   final selectedProject = ValueNotifier<FlutterProject?>(null);
@@ -318,7 +342,6 @@ class DeepLinksController extends DisposableController {
           domainErrors: errors,
           path: linkdata.path,
           pathErrors: linkdata.pathErrors,
-          intentFilterChecks: linkdata.intentFilterChecks,
           os: linkdata.os,
           scheme: linkdata.scheme,
           associatedDomains: linkdata.associatedDomains,
@@ -331,19 +354,8 @@ class DeepLinksController extends DisposableController {
 
   Future<List<LinkData>> _validateAndroidPath(List<LinkData> linkdatas) async {
     return linkdatas.map((linkdata) {
-      final List<PathError> pathErrors = <PathError>[];
-      if (!linkdata.intentFilterChecks.hasActionView) {
-        pathErrors.add(PathError.intentFilterActionView);
-      }
-      if (!linkdata.intentFilterChecks.hasBrowsableCategory) {
-        pathErrors.add(PathError.intentFilterBrowsable);
-      }
-      if (!linkdata.intentFilterChecks.hasDefaultCategory) {
-        pathErrors.add(PathError.intentFilterDefault);
-      }
-      if (!linkdata.intentFilterChecks.hasAutoVerify) {
-        pathErrors.add(PathError.intentFilterAutoVerify);
-      }
+      final List<PathError> pathErrors = linkdata.pathErrors;
+
       if (!(linkdata.path.startsWith('/') || linkdata.path == '.*')) {
         pathErrors.add(PathError.pathFormat);
       }
@@ -353,7 +365,6 @@ class DeepLinksController extends DisposableController {
         domainErrors: linkdata.domainErrors,
         path: linkdata.path,
         pathErrors: pathErrors,
-        intentFilterChecks: linkdata.intentFilterChecks,
         os: linkdata.os,
         scheme: linkdata.scheme,
         associatedDomains: linkdata.associatedDomains,
@@ -371,13 +382,18 @@ class DeepLinksController extends DisposableController {
     pagePhase.value = PagePhase.linksValidating;
 
     linkdata = await _validateAndroidDomain(linkdata);
+    if (pagePhase.value == PagePhase.errorPage) {
+      return;
+    }
     linkdata = await _validateAndroidPath(linkdata);
 
+    if (pagePhase.value == PagePhase.errorPage) {
+      return;
+    }
     allValidatedLinkDatas = linkdata;
 
-    if (pagePhase.value == PagePhase.linksValidating) {
-      pagePhase.value = PagePhase.linksValidated;
-    }
+    pagePhase.value = PagePhase.linksValidated;
+
     displayLinkDatasNotifier.value = getFilterredLinks(allValidatedLinkDatas!);
 
     displayOptionsNotifier.value = displayOptionsNotifier.value.copyWith(

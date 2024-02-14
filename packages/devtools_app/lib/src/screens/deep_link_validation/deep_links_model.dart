@@ -135,7 +135,6 @@ class LinkData with SearchableDataMixin {
     required this.domain,
     required this.path,
     required this.os,
-    required this.intentFilterChecks,
     this.scheme = const <String>['http://', 'https://'],
     this.domainErrors = const <DomainError>[],
     this.pathErrors = const <PathError>[],
@@ -148,11 +147,10 @@ class LinkData with SearchableDataMixin {
   final List<PlatformOS> os;
   final List<String> scheme;
   final List<DomainError> domainErrors;
-  final List<PathError> pathErrors;
+  List<PathError> pathErrors;
 
   final List<String> associatedPath;
   final List<String> associatedDomains;
-  IntentFilterChecks intentFilterChecks;
 
   @override
   bool matchesSearchToken(RegExp regExpSearch) {
