@@ -16,11 +16,12 @@ class AppLinkSettings {
     final {
       _kApplicationIdKey: String applicationId,
       _kDeeplinksKey: List<Object?> deepLinks,
+      _kDeeplinkingFlagEnabledKey: bool deeplinkingFlagEnabled,
     } = jsonObject;
     return AppLinkSettings._(
-      jsonObject[_kApplicationIdKey] as String,
-      jsonObject[_kDeeplinkingFlagEnabledKey] as bool,
-      (jsonObject[_kDeeplinksKey] as List<dynamic>)
+      applicationId,
+      deeplinkingFlagEnabled,
+      deepLinks
           .cast<Map<String, dynamic>>()
           .map<AndroidDeeplink>(AndroidDeeplink._fromJsonObject)
           .toList(),
