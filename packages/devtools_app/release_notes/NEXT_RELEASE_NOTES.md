@@ -46,6 +46,7 @@ mode. - [#7178](https://github.com/flutter/devtools/pull/7178)
 * Improved contrast of profiling details when displaying profiler hits in dark
 mode. - [#7178](https://github.com/flutter/devtools/pull/7178)
 * Fixed syntax highlighting for comments when the source file uses `\r\n` line endings [#7190](https://github.com/flutter/devtools/pull/7190)
+* Re-establish breakpoints after a hot-restart. - [#7205](https://github.com/flutter/devtools/pull/7205)
 
 ## Network profiler updates
 
