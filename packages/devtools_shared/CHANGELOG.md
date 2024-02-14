@@ -5,6 +5,10 @@
 * Include debug logs with the `ExtensionsApi.apiServeAvailableExtensions` API response.
 * Add parameter to `ServerApi.handle` to accept an instance of `Analytics` from 
   `package:unified_analytics`.
+* Devtools server API `apiGetConsentMessage` added to fetch the consent message from
+  `package:unified_analytics`.
+* Devtools server API `apiMarkConsentMessageAsShown` added to mark the consent message for
+  `package:unified_analytics` as shown to enable telemetry.
 
 
 # 6.0.4
