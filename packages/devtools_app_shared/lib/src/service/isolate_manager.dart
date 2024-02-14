@@ -50,6 +50,8 @@ final class IsolateManager with DisposerMixin {
 
   final _isolateRunnableCompleters = <String?, Completer<void>>{};
 
+  // TODO(https://github.com/flutter/flutter/issues/134470): Track hot-restarts
+  // triggered by other clients.
   bool hotRestartInProgress = false;
 
   Future<void> init(List<IsolateRef> isolates) async {
