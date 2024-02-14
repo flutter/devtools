@@ -123,24 +123,10 @@ class HeapClassData {
       'FinalizerEntry': 'dart:_internal',
     };
 
-    late final Map<HeapClassName, int> classCounts = {
+    classes = {
       for (var heapClass in graph.classes)
-        HeapClassName.fromHeapSnapshotClass(heapClass): 0,
+        HeapClassName.fromHeapSnapshotClass(heapClass): [],
     };
-
-    // .generate(
-    //     graph.classes.length,
-    //     (index) => HeapClass(graph.classes[index].name),
-    //     growable: false,
-    //   );
-
-    if (calculateClassStats) {
-      classes = List<HeapClass>.generate(
-        graph.classes.length,
-        (index) => HeapClass(graph.classes[index].name),
-        growable: false,
-      );
-    }
 
     for (final theClass in graph.classes) {
       if (!findWeakClasses && !calculateClassStats) break;
@@ -156,7 +142,11 @@ class HeapClassData {
         }
       }
 
-      if (calculateClassStats) {}
+      if (calculateClassStats) {
+        final className = HeapClassName.fromHeapSnapshotClass(theClass);
+        classes.putIfAbsent(className, () => []);
+        classes[className]
+      }
     }
   }
 
@@ -165,9 +155,7 @@ class HeapClassData {
   /// Set of class ids that are not holding their references form garbage collection.
   late final _weakClasses = <int>{};
 
-  late final Int32List _objectsByClass = Int32List(graph.objects.length);
-
-  late final List<HeapClass> classes;
+  late final Map<HeapClassName, List<int>> classes;
 
   /// Returns true if the object is a retainer, where [objectIndex] is index in [graph].
   bool isRetainer(int objectIndex) {
