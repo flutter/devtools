@@ -470,8 +470,8 @@ class DeepLinksController extends DisposableController {
                   .contains(FilterOption.failedDomainCheck)) ||
           (linkData.pathErrors.isNotEmpty &&
               displayOptions.filters.contains(FilterOption.failedPathCheck)) ||
-          (!linkData.domainErrors.isNotEmpty &&
-              !linkData.pathErrors.isNotEmpty &&
+          (linkData.domainErrors.isEmpty &&
+              linkData.pathErrors.isEmpty &&
               displayOptions.filters.contains(FilterOption.noIssue)))) {
         return false;
       }
