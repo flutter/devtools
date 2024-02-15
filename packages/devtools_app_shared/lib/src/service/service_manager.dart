@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:core';
 
+import 'package:dds_service_extensions/dds_service_extensions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
@@ -229,6 +230,8 @@ class ServiceManager<T extends VmService> {
     serviceExtensionManager.vmServiceOpened(service, connectedApp!);
     resolvedUriManager.vmServiceOpened(service);
 
+    await _configureIsolateSettings();
+
     await callLifecycleCallbacks(
       ServiceManagerLifecycle.beforeOpenVmService,
       service,
@@ -267,6 +270,18 @@ class ServiceManager<T extends VmService> {
     setDeviceBusy(false);
 
     _connectedState.value = connectionState;
+  }
+
+  Future<void> _configureIsolateSettings() async {
+    try {
+      await service.setFlag('pause_isolates_on_start', 'true');
+      await service.requirePermissionToResume(
+        onPauseReload: true,
+        onPauseStart: true,
+      );
+    } catch (error) {
+      _log.warning('$error');
+    }
   }
 
   /// Initializes the service manager for [service], including setting up other

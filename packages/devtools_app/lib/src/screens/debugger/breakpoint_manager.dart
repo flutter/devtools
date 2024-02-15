@@ -9,9 +9,9 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../service/vm_service_wrapper.dart';
+import '../../../devtools_app.dart';
+import '../../framework/app_error_handling.dart' as error_handler;
 import '../../shared/diagnostics/primitives/source_location.dart';
-import '../../shared/globals.dart';
 import 'debugger_model.dart';
 
 class BreakpointManager with DisposerMixin {
@@ -84,6 +84,11 @@ class BreakpointManager with DisposerMixin {
         breakpoints: _previousIsolateBreakpoints,
         isolateRef: isolateRef,
       );
+    }
+
+    final isolateId = isolateRef.id;
+    if (isolateId != null) {
+      await _resumeIsolate(isolateId);
     }
   }
 
@@ -264,6 +269,14 @@ class BreakpointManager with DisposerMixin {
     });
 
     return scriptUriToRef;
+  }
+
+  Future<void> _resumeIsolate(String isolateId) async {
+    try {
+      await _service.resume(isolateId);
+    } catch (error) {
+      error_handler.reportError(error);
+    }
   }
 
   /// Return the list of valid positions for breakpoints for a given script.
