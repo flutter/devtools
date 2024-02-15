@@ -52,7 +52,7 @@ class DeepLinksServices {
       for (var domain in domains) domain: <DomainError>[],
     };
 
-// The request can take 1000 domains at most, make a few calls in serial with a batch of _domainBatchSize.
+    // The request can take 1000 domains at most, make a few calls in serial with a batch of _domainBatchSize.
     final List<List<String>> domainsBybatch = List.generate(
       (domains.length / _domainBatchSize).ceil(),
       (index) => domains.sublist(
