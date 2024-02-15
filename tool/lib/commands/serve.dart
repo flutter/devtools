@@ -13,10 +13,14 @@ import 'package:path/path.dart' as path;
 import 'shared.dart';
 
 const _buildAppFlag = 'build-app';
+const _debugServerFlag = 'debug-server';
+
+// TODO: The following section of args are here just to pass the arg through to
+// devtools server. Consider using AllowAnythingParser instead of manually
+// passing these args through.
 const _machineFlag = 'machine';
 const _dtdUriFlag = 'dtd-uri';
 const _allowEmbeddingFlag = 'allow-embedding';
-const _debugServerFlag = 'debug-server';
 
 /// This command builds DevTools in release mode by running the
 /// `devtools_tool build` command and then serves DevTools with a locally
@@ -119,6 +123,7 @@ class ServeCommand extends Command {
     final devToolsAppBuildMode =
         argResults![BuildCommandArgs.buildMode.flagName];
 
+    // Any flag that we aren't removing here is intended to be passed through.
     final remainingArguments = List.of(argResults!.arguments)
       ..remove(BuildCommandArgs.updateFlutter.asArg())
       ..remove(BuildCommandArgs.updateFlutter.asArg(negated: true))
