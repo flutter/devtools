@@ -232,21 +232,13 @@ class DeepLinksController extends DisposableController {
   List<PathError> _getPathErrorsFromIntentFilterChecks(
     IntentFilterChecks intentFilterChecks,
   ) {
-    final pathErrors = <PathError>[];
-    if (!intentFilterChecks.hasActionView) {
-      pathErrors.add(PathError.intentFilterActionView);
-    }
-    if (!intentFilterChecks.hasBrowsableCategory) {
-      pathErrors.add(PathError.intentFilterBrowsable);
-    }
-    if (!intentFilterChecks.hasDefaultCategory) {
-      pathErrors.add(PathError.intentFilterDefault);
-    }
-    if (!intentFilterChecks.hasAutoVerify) {
-      pathErrors.add(PathError.intentFilterAutoVerify);
-    }
-
-    return pathErrors;
+    return [
+      if (!intentFilterChecks.hasActionView) PathError.intentFilterActionView,
+      if (!intentFilterChecks.hasBrowsableCategory)
+        PathError.intentFilterBrowsable,
+      if (!intentFilterChecks.hasDefaultCategory) PathError.intentFilterDefault,
+      if (!intentFilterChecks.hasAutoVerify) PathError.intentFilterAutoVerify,
+    ];
   }
 
   /// Get all unverified link data.
@@ -255,9 +247,7 @@ class DeepLinksController extends DisposableController {
     if (appLinks == null) {
       return const <LinkData>[];
     }
-
     final domainPathToLinkData = <_DomainAndPath, LinkData>{};
-
     for (final appLink in appLinks) {
       final domainAndPath = (domain: appLink.host, path: appLink.path);
 
@@ -352,25 +342,13 @@ class DeepLinksController extends DisposableController {
     }).toList();
   }
 
-  Future<List<LinkData>> _validateAndroidPath(List<LinkData> linkdatas) async {
-    return linkdatas.map((linkdata) {
-      final List<PathError> pathErrors = linkdata.pathErrors;
-
-      if (!(linkdata.path.startsWith('/') || linkdata.path == '.*')) {
-        pathErrors.add(PathError.pathFormat);
+  Future<List<LinkData>> _validatePath(List<LinkData> linkdatas) async {
+    for (final linkData in linkdatas) {
+      if (!(linkData.path.startsWith('/') || linkData.path == '.*')) {
+        linkData.pathErrors.add(PathError.pathFormat);
       }
-
-      return LinkData(
-        domain: linkdata.domain,
-        domainErrors: linkdata.domainErrors,
-        path: linkdata.path,
-        pathErrors: pathErrors,
-        os: linkdata.os,
-        scheme: linkdata.scheme,
-        associatedDomains: linkdata.associatedDomains,
-        associatedPath: linkdata.associatedPath,
-      );
-    }).toList();
+    }
+    return linkdatas;
   }
 
   Future<void> validateLinks() async {
@@ -385,7 +363,7 @@ class DeepLinksController extends DisposableController {
     if (pagePhase.value == PagePhase.errorPage) {
       return;
     }
-    linkdata = await _validateAndroidPath(linkdata);
+    linkdata = await _validatePath(linkdata);
 
     if (pagePhase.value == PagePhase.errorPage) {
       return;
