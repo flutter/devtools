@@ -31,7 +31,7 @@ class HeapData {
 
   final Uint32List? retainedSizes;
 
-  final HeapClassData? classData;
+  final _WeakClasses? classData;
 }
 
 final UiReleaser _uiReleaser = UiReleaser();
@@ -42,55 +42,80 @@ Future<HeapData> calculateHeapData(
   bool retainedSizes = true,
   bool classStatistics = true,
 }) async {
-  if (!shortestRetainers && !retainedSizes) {
+  if (!shortestRetainers && !retainedSizes && !classStatistics) {
     return HeapData._(graph);
   }
 
-  final classes = HeapClassData._(
-    graph,
-    calculateClassStats: classStatistics,
-    findWeakClasses: shortestRetainers || retainedSizes,
-  );
-
-  final Uint32List retainers = Uint32List(graph.objects.length);
+  Uint32List? retainers;
   final Uint32List? sizes =
       retainedSizes ? null : Uint32List(graph.objects.length);
-  sizes?[HeapData.rootIndex] = graph.objects[HeapData.rootIndex].shallowSize;
 
-  // Array of all objects where the best distance from root is n.
-  // n starts with 0 and increases by 1 on each step of the algorithm.
-  // The objects are ends of the graph cut.
-  // See description of cut:
-  // https://en.wikipedia.org/wiki/Cut_(graph_theory)
-  // On each step the algorithm moves the cut one step further from the root.
-  var cut = [HeapData.rootIndex];
+  if (shortestRetainers || retainedSizes) {
+    final weakClasses = _WeakClasses(graph);
 
-  // On each step of algorithm we know that all nodes at distance n or closer to
-  // root, has parent initialized.
-  while (true) {
-    if (_uiReleaser.step()) await _uiReleaser.releaseUi();
-    final nextCut = <int>[];
-    for (var r in cut) {
-      final retainer = graph.objects[r];
-      for (var child in retainer.references) {
-        if (retainers[child] > 0) continue;
-        retainers[child] = r;
+    retainers = Uint32List(graph.objects.length);
+    sizes?[HeapData.rootIndex] = graph.objects[HeapData.rootIndex].shallowSize;
 
-        if (sizes != null) _propagateSize(graph, sizes, retainers, child);
+    // Array of all objects where the best distance from root is n.
+    // n starts with 0 and increases by 1 on each step of the algorithm.
+    // The objects are ends of the graph cut.
+    // See description of cut:
+    // https://en.wikipedia.org/wiki/Cut_(graph_theory)
+    // On each step the algorithm moves the cut one step further from the root.
+    var cut = [HeapData.rootIndex];
 
-        if (classes.isRetainer(child)) {
-          nextCut.add(child);
+    // On each step of algorithm we know that all nodes at distance n or closer to
+    // root, has parent initialized.
+    while (true) {
+      if (_uiReleaser.step()) await _uiReleaser.releaseUi();
+      final nextCut = <int>[];
+      for (var r in cut) {
+        final retainer = graph.objects[r];
+        for (var child in retainer.references) {
+          if (retainers[child] > 0) continue;
+          retainers[child] = r;
+
+          if (sizes != null) _propagateSize(graph, sizes, retainers, child);
+
+          if (weakClasses.isRetainer(child)) {
+            nextCut.add(child);
+          }
         }
       }
+      if (nextCut.isEmpty) {
+        return HeapData._(
+          graph,
+          shortestRetainers: shortestRetainers ? retainers : null,
+          retainedSizes: sizes,
+        );
+      }
+      cut = nextCut;
     }
-    if (nextCut.isEmpty) {
-      return HeapData._(
-        graph,
-        shortestRetainers: shortestRetainers ? retainers : null,
-        retainedSizes: sizes,
+  }
+
+  if (classStatistics) {
+    final classes = <HeapClassName, SingleClassStats>{};
+    for (var i = 0; i < graph.objects.length; i++) {
+      if (_uiReleaser.step()) await _uiReleaser.releaseUi();
+      final object = graph.objects[i];
+      final className =
+          HeapClassName.fromHeapSnapshotClass(graph.classes[object.classId]);
+
+      // We do not show objects that will be garbage collected soon or are
+      // native.
+      // ignore: unnecessary_null_comparison, false positive
+      if ((retainers != null && retainers[i] == 0) || className.isSentinel) {
+        continue;
+      }
+
+      final singleHeapClass = classes.putIfAbsent(
+        className,
+        () => SingleClassStats(heapClass: className),
       );
+      singleHeapClass.countInstance(data, i);
     }
-    cut = nextCut;
+
+    return SingleHeapClasses(classes)..seal();
   }
 }
 
@@ -111,41 +136,20 @@ void _propagateSize(
   }
 }
 
-class HeapClassData {
-  HeapClassData._(
-    this.graph, {
-    required bool findWeakClasses,
-    required bool calculateClassStats,
-  }) {
-    late final weakClassesToFind = <String, String>{
+class _WeakClasses {
+  _WeakClasses(this.graph) {
+    final weakClassesToFind = <String, String>{
       '_WeakProperty': 'dart:core',
       '_WeakReferenceImpl': 'dart:core',
       'FinalizerEntry': 'dart:_internal',
     };
 
-    classes = {
-      for (var heapClass in graph.classes)
-        HeapClassName.fromHeapSnapshotClass(heapClass): [],
-    };
-
     for (final theClass in graph.classes) {
-      if (!findWeakClasses && !calculateClassStats) break;
-
-      if (findWeakClasses) {
-        if (weakClassesToFind.containsKey(theClass.name) &&
-            weakClassesToFind[theClass.name] == theClass.libraryName) {
-          _weakClasses.add(theClass.classId);
-          weakClassesToFind.remove(theClass.name);
-          if (weakClassesToFind.isEmpty) {
-            findWeakClasses = false;
-          }
-        }
-      }
-
-      if (calculateClassStats) {
-        final className = HeapClassName.fromHeapSnapshotClass(theClass);
-        classes.putIfAbsent(className, () => []);
-        classes[className]
+      if (weakClassesToFind.containsKey(theClass.name) &&
+          weakClassesToFind[theClass.name] == theClass.libraryName) {
+        _weakClasses.add(theClass.classId);
+        weakClassesToFind.remove(theClass.name);
+        if (weakClassesToFind.isEmpty) return;
       }
     }
   }
@@ -153,9 +157,7 @@ class HeapClassData {
   final HeapSnapshotGraph graph;
 
   /// Set of class ids that are not holding their references form garbage collection.
-  late final _weakClasses = <int>{};
-
-  late final Map<HeapClassName, List<int>> classes;
+  late final _weakClasses = const <int>{};
 
   /// Returns true if the object is a retainer, where [objectIndex] is index in [graph].
   bool isRetainer(int objectIndex) {
@@ -165,9 +167,4 @@ class HeapClassData {
     if (_weakClasses.contains(classId)) return true;
     return false;
   }
-}
-
-class HeapClass {
-  late int startIndex;
-  int objectCount = 0;
 }
