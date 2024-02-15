@@ -15,9 +15,8 @@ import 'shared.dart';
 const _buildAppFlag = 'build-app';
 const _debugServerFlag = 'debug-server';
 
-// TODO(https://github.com/flutter/devtools/issues/7232): The following section of args are here just to pass the arg through to
-// devtools server. Consider using AllowAnythingParser instead of manually
-// passing these args through.
+// TODO(https://github.com/flutter/devtools/issues/7232): Consider using
+// AllowAnythingParser instead of manually passing these args through.
 const _machineFlag = 'machine';
 const _dtdUriFlag = 'dtd-uri';
 const _allowEmbeddingFlag = 'allow-embedding';
