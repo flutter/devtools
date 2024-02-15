@@ -24,6 +24,26 @@ Follow [Flutter repo naming rules for typedefs and function variables](https://g
 
 Use [boilerplaite](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#common-boilerplates-for-operator--and-hashcode).
 
+## URIs and File Paths
+
+Care should be taken when using file paths to ensure compatibility with both
+Windows and POSIX style paths. File URIs should generally be preferred and only
+converted to paths when required to interact with the file system.
+
+`String` variables that hold paths or URIs should be named explicitly with a
+`Path` or `Uri` suffix, such as `appRootPath` or `appRootUri`.
+
+Additionally:
+
+- `Uri.parse()` should not be used for converting file paths to URIs, instead
+  `Uri.file()` should be used
+- `Uri.path` shoudl not be used for extracting a file path from a URI, instead
+  `uri.toFilePath()` should be used
+- In code compiled to run in the browser, `Uri.file()` and `uri.toFilePath()`
+  will assume POSIX-style paths even on Windows, so care should be taken to
+  handle these correctly (if possible, avoid converting between URIs and file
+  paths in code running in a browser)
+
 ## Text styles
 
 The default text style for DevTools is `Theme.of(context).regularTextStyle`. The default
