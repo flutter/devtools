@@ -463,6 +463,12 @@ class _PathCheckTable extends StatelessWidget {
         .where((error) => linkData.pathErrors.contains(error))
         .toList()
         .length;
+    final noIssueText = Text(
+      'No issues found',
+      style: TextStyle(
+        color: Theme.of(context).colorScheme.green,
+      ),
+    );
     return ListTileTheme(
       dense: true,
       minVerticalPadding: 0,
@@ -480,7 +486,7 @@ class _PathCheckTable extends StatelessWidget {
             tileColor: Theme.of(context).colorScheme.deeplinkTableHeaderColor,
             title: const Row(
               children: [
-                SizedBox(width: 12),
+                SizedBox(width: defaultSpacing),
                 Expanded(
                   child: Text('OS'),
                 ),
@@ -503,7 +509,7 @@ class _PathCheckTable extends StatelessWidget {
                 Theme.of(context).colorScheme.alternatingBackgroundColor2,
             title: Row(
               children: [
-                const SizedBox(width: 12),
+                const SizedBox(width: defaultSpacing),
                 const Expanded(child: Text('Android')),
                 const Expanded(child: Text('IntentFiler')),
                 Expanded(
@@ -514,12 +520,7 @@ class _PathCheckTable extends StatelessWidget {
                             color: Theme.of(context).colorScheme.error,
                           ),
                         )
-                      : Text(
-                          'No issues found',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.green,
-                          ),
-                        ),
+                      : noIssueText,
                 ),
               ],
             ),
@@ -537,7 +538,7 @@ class _PathCheckTable extends StatelessWidget {
                 Theme.of(context).colorScheme.alternatingBackgroundColor2,
             title: Row(
               children: [
-                const SizedBox(width: 12),
+                const SizedBox(width: defaultSpacing),
                 const Expanded(child: Text('Android')),
                 const Expanded(child: Text('URL format')),
                 Expanded(
@@ -548,12 +549,7 @@ class _PathCheckTable extends StatelessWidget {
                             color: Theme.of(context).colorScheme.error,
                           ),
                         )
-                      : Text(
-                          'No issues found',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.green,
-                          ),
-                        ),
+                      : noIssueText,
                 ),
               ],
             ),
