@@ -103,19 +103,25 @@ enum DomainError {
   final String fixDetails;
 }
 
+/// There are currently two types of path errors, errors from intent filters and path format errors.
 enum PathError {
+  // Intent filter should have action tag.
   intentFilterActionView(
     'The intent filter must have a <action android:name="android.intent.action.VIEW" />',
   ),
+  // Intent filter should have browsable tag.
   intentFilterBrowsable(
     'The intent filter must have a <category android:name="android.intent.category.BROWSABLE" />',
   ),
+  // Intent filter should have default tag.
   intentFilterDefault(
     'The intent filter must have a <category android:name="android.intent.category.DEFAULT" />',
   ),
+  // Intent filter should have autoVerify tag.
   intentFilterAutoVerify(
     'The intent filter must have android:autoVerify="true"',
   ),
+  // Path has format.
   pathFormat('path must starts with “/” or “.*”');
 
   const PathError(this.description);
