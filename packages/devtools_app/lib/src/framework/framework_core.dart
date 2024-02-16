@@ -103,7 +103,7 @@ class FrameworkCore {
           service,
           onClosed: finishedCompleter.future,
         );
-        breakpointManager.initialize();
+        await breakpointManager.initialize();
         return true;
       } catch (e, st) {
         if (logException) {

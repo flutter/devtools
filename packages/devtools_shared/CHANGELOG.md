@@ -1,3 +1,16 @@
+# 7.0.0
+* **Breaking change:** remove the `ServerApi.setCompleted` method that was a
+duplicate of `ServerApi.getCompleted`.
+* **Breaking change:** add required parameter `analytics` to `ServerApi.handle`, which accepts
+an instance of `Analytics` from `package:unified_analytics`.
+* Add the ability to send debug logs in DevTools server request responses. 
+* Add an optional positional parameter `logs` to the `ServerApi.serverError` method.
+* Include debug logs with the `ExtensionsApi.apiServeAvailableExtensions` API response.
+* Devtools server API `apiGetConsentMessage` added to fetch the consent message from
+  `package:unified_analytics`.
+* Devtools server API `apiMarkConsentMessageAsShown` added to mark the consent message for
+  `package:unified_analytics` as shown to enable telemetry.
+
 # 6.0.4
 * Add `apiGetDtdUri` to the server api.
 * Add a description and link to documentation to the `devtools_options.yaml` file that

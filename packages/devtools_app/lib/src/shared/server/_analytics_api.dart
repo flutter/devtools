@@ -50,10 +50,31 @@ Future<bool> setAnalyticsEnabled([bool value = true]) async {
       assert(json.decode(resp!.body) == value);
       return true;
     } else {
-      logWarning(resp, apiSetDevToolsEnabled, resp?.body);
+      logWarning(resp, apiSetDevToolsEnabled);
     }
   }
   return false;
+}
+
+/// Fetch the consent message for package:unified_analytics.
+Future<String> fetchAnalyticsConsentMessage() async {
+  String? consentMessage = '';
+  if (isDevToolsServerAvailable) {
+    final resp = await request(apiGetConsentMessage);
+    if (resp?.statusOk ?? false) {
+      consentMessage = resp!.body;
+    }
+  }
+
+  return consentMessage;
+}
+
+/// Confirm with package:unified_analytics that the consent message
+/// has been shown to the user.
+Future<void> markConsentMessageAsShown() async {
+  if (isDevToolsServerAvailable) {
+    await request(apiMarkConsentMessageAsShown);
+  }
 }
 
 // TODO(terry): Move to an API scheme similar to the VM service extension where

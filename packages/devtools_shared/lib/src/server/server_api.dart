@@ -9,6 +9,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:shelf/shelf.dart' as shelf;
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../deeplink/deeplink_manager.dart';
 import '../devtools_api.dart';
@@ -21,6 +22,8 @@ import 'usage.dart';
 ///
 /// This defines endpoints that serve all requests that come in over api/.
 class ServerApi {
+  static const logsKey = 'logs';
+  static const errorKey = 'error';
   static const errorNoActiveSurvey = 'ERROR: setActiveSurvey not called.';
 
   /// Determines whether or not [request] is an API call.
@@ -35,8 +38,9 @@ class ServerApi {
     shelf.Request request, {
     required ExtensionsManager extensionsManager,
     required DeeplinkManager deeplinkManager,
+    required Analytics analytics,
     ServerApi? api,
-    String? Function()? dtdUri,
+    String? dtdUri,
   }) {
     api ??= ServerApi();
     final queryParams = request.requestedUri.queryParameters;
@@ -68,23 +72,39 @@ class ServerApi {
         return api.getCompleted(json.encode(true));
       case apiGetDevToolsFirstRun:
         // Has DevTools been run first time? To bring up analytics dialog.
+        //
+        // Additionally, package:unified_analytics will show a message if it
+        // is the first run with the package or the consent message version has
+        // been updated
+        final isFirstRun =
+            _devToolsUsage.isFirstRun || analytics.shouldShowMessage;
         return api.getCompleted(
-          json.encode(_devToolsUsage.isFirstRun),
+          json.encode(isFirstRun),
         );
       case apiGetDevToolsEnabled:
         // Is DevTools Analytics collection enabled?
+        final isEnabled =
+            _devToolsUsage.analyticsEnabled && analytics.telemetryEnabled;
         return api.getCompleted(
-          json.encode(_devToolsUsage.analyticsEnabled),
+          json.encode(isEnabled),
         );
       case apiSetDevToolsEnabled:
         // Enable or disable DevTools analytics collection.
         if (queryParams.containsKey(devToolsEnabledPropertyName)) {
-          _devToolsUsage.analyticsEnabled =
+          final analyticsEnabled =
               json.decode(queryParams[devToolsEnabledPropertyName]!);
+
+          _devToolsUsage.analyticsEnabled = analyticsEnabled;
+          analytics.setTelemetry(analyticsEnabled);
         }
-        return api.setCompleted(
+        return api.getCompleted(
           json.encode(_devToolsUsage.analyticsEnabled),
         );
+      case apiGetConsentMessage:
+        return api.getCompleted(analytics.getConsentMessage);
+      case apiMarkConsentMessageAsShown:
+        analytics.clientShowedMessage();
+        return api.getCompleted(json.encode(true));
 
       // ----- DevTools survey store. -----
 
@@ -134,7 +154,7 @@ class ServerApi {
           _devToolsUsage.surveyActionTaken =
               json.decode(queryParams[surveyActionTakenPropertyName]!);
         }
-        return api.setCompleted(
+        return api.getCompleted(
           json.encode(_devToolsUsage.surveyActionTaken),
         );
       case apiGetSurveyShownCount:
@@ -254,10 +274,8 @@ class ServerApi {
           deeplinkManager,
         );
       case DtdApi.apiGetDtdUri:
-        return api.setCompleted(
-          json.encode({
-            DtdApi.uriPropertyName: dtdUri?.call(),
-          }),
+        return api.getCompleted(
+          json.encode({DtdApi.uriPropertyName: dtdUri}),
         );
       default:
         return api.notImplemented();
@@ -269,6 +287,14 @@ class ServerApi {
     required ServerApi api,
   }) {
     return api.getCompleted(json.encode(object));
+  }
+
+  static Map<String, Object?> _wrapWithLogs(
+    Map<String, Object?> result,
+    List<String> logs,
+  ) {
+    result[logsKey] = logs;
+    return result;
   }
 
   static shelf.Response? _checkRequiredParameters(
@@ -312,9 +338,6 @@ class ServerApi {
   /// Return the value of the property.
   shelf.Response getCompleted(String value) => shelf.Response.ok(value);
 
-  /// Return the value of the property after the property value has been set.
-  shelf.Response setCompleted(String value) => shelf.Response.ok(value);
-
   /// A [shelf.Response] for API calls that encountered a request problem e.g.,
   /// setActiveSurvey not called.
   ///
@@ -328,9 +351,17 @@ class ServerApi {
   /// setActiveSurvey not called.
   ///
   /// This is a 500 Internal Server Error response.
-  shelf.Response serverError([String? logError]) {
-    if (logError != null) print(logError);
-    return shelf.Response(HttpStatus.internalServerError);
+  shelf.Response serverError([String? error, List<String>? logs]) {
+    if (error != null) print(error);
+    return shelf.Response(
+      HttpStatus.internalServerError,
+      body: error != null || logs != null
+          ? jsonEncode(<String, Object?>{
+              if (error != null) errorKey: error,
+              if (logs != null) logsKey: logs,
+            })
+          : null,
+    );
   }
 
   /// A [shelf.Response] for API calls that have not been implemented in this
@@ -355,24 +386,27 @@ abstract class _ExtensionsApiHandler {
     );
     if (missingRequiredParams != null) return missingRequiredParams;
 
+    final logs = <String>[];
     final rootPath = queryParams[ExtensionsApi.extensionRootPathPropertyName];
-
     final result = <String, Object?>{};
     try {
-      await extensionsManager.serveAvailableExtensions(rootPath);
+      await extensionsManager.serveAvailableExtensions(rootPath, logs);
     } on ExtensionParsingException catch (e) {
       // For [ExtensionParsingException]s, we should return a success response
       // with a warning message.
       result[ExtensionsApi.extensionsResultWarningPropertyName] = e.message;
     } catch (e) {
       // For all other exceptions, return an error response.
-      return api.serverError('$e');
+      return api.serverError('$e', logs);
     }
 
     final extensions =
         extensionsManager.devtoolsExtensions.map((p) => p.toJson()).toList();
     result[ExtensionsApi.extensionsResultPropertyName] = extensions;
-    return ServerApi._encodeResponse(result, api: api);
+    return ServerApi._encodeResponse(
+      ServerApi._wrapWithLogs(result, logs),
+      api: api,
+    );
   }
 
   static shelf.Response handleExtensionEnabledState(
