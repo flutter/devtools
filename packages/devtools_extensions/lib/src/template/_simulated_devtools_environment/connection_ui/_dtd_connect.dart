@@ -58,7 +58,7 @@ class DTDConnectionDisplay extends StatelessWidget {
 class DtdHelp extends StatelessWidget {
   const DtdHelp({super.key});
 
-  static const dtdStartCommand = 'dart tooling-daemon --disable-secrets';
+  static const dtdStartCommand = 'dart tooling-daemon --unrestricted';
 
   @override
   Widget build(BuildContext context) {
@@ -112,7 +112,7 @@ class DtdHelp extends StatelessWidget {
               children: [
                 TextSpan(
                   text: ' "The Dart Tooling Daemon is listening on '
-                      '127.0.0.1:49390". ',
+                      'ws://127.0.0.1:62630/". ',
                   style: theme.boldTextStyle,
                 ),
                 const TextSpan(
@@ -128,6 +128,37 @@ class DtdHelp extends StatelessWidget {
             ' by DevTools, so your extension will inherit the existing DTD'
             ' connection from DevTools.',
             style: theme.subtleTextStyle,
+          ),
+          const SizedBox(height: defaultSpacing),
+          RichText(
+            text: TextSpan(
+              text: 'WARNING: if you are using DTD\'s file system APIs (',
+              style: theme.regularTextStyle.copyWith(
+                color: theme.colorScheme.tertiary,
+              ),
+              children: [
+                TextSpan(
+                  text: 'readFileAsString, writeFileAsString, listDirectories',
+                  style: theme.fixedFontStyle.copyWith(
+                    color: theme.colorScheme.tertiary,
+                  ),
+                ),
+                TextSpan(
+                  text:
+                      '), these will be more restricted in a real environment. '
+                      'In the simulated environment, your extension can access '
+                      'the entire file system; in a real environment, your '
+                      'extension will only have access to files within the '
+                      'user\'s project, which are determined by the workspace '
+                      'directores in the IDE, or, if DevTools was launched from '
+                      'the command line, then the project directories will be '
+                      'determined by the project root of the connected app.',
+                  style: theme.regularTextStyle.copyWith(
+                    color: theme.colorScheme.tertiary,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
