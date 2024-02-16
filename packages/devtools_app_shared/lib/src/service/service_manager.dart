@@ -433,7 +433,12 @@ class ServiceManager<T extends VmService> {
 
   /// This can throw an [RPCError].
   Future<void> performHotRestart() async {
-    await callServiceOnMainIsolate(hotRestartServiceName);
+    isolateManager.hotRestartInProgress = true;
+    try {
+      await callServiceOnMainIsolate(hotRestartServiceName);
+    } catch (_) {
+      isolateManager.hotRestartInProgress = false;
+    }
   }
 }
 

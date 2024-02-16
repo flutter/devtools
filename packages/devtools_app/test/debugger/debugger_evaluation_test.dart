@@ -169,6 +169,9 @@ void main() {
       );
       test(
         'returns privates only from library',
+        // TODO(https://github.com/flutter/devtools/issues/7099): unskip once
+        // this test flake is fixed.
+        skip: true,
         () async {
           await runMethodAndWaitForPause(
             'AnotherClass().pauseWithScopedVariablesMethod()',

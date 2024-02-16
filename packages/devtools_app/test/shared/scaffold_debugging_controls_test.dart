@@ -82,7 +82,11 @@ void main() {
             screens: const [_screen1, _screen2],
           ),
           debugger: mockDebuggerController,
-          analytics: AnalyticsController(enabled: false, firstRun: false),
+          analytics: AnalyticsController(
+            enabled: false,
+            firstRun: false,
+            consentMessage: 'fake message',
+          ),
           releaseNotes: ReleaseNotesController(),
         ),
       );

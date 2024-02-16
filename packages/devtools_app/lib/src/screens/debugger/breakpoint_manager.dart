@@ -35,19 +35,21 @@ class BreakpointManager with DisposerMixin {
 
   String get _isolateRefId => _isolateRef?.id ?? '';
 
-  void initialize() {
+  final _previousIsolateBreakpoints = <BreakpointAndSourcePosition>[];
+
+  Future<void> initialize() async {
     final isolate =
         serviceConnection.serviceManager.isolateManager.selectedIsolate.value;
     if (initialSwitchToIsolate && isolate != null) {
-      switchToIsolate(
+      await switchToIsolate(
         serviceConnection.serviceManager.isolateManager.selectedIsolate.value,
       );
     }
 
     addAutoDisposeListener(
       serviceConnection.serviceManager.isolateManager.selectedIsolate,
-      () {
-        switchToIsolate(
+      () async {
+        await switchToIsolate(
           serviceConnection.serviceManager.isolateManager.selectedIsolate.value,
         );
       },
@@ -60,40 +62,38 @@ class BreakpointManager with DisposerMixin {
     );
   }
 
-  void switchToIsolate(IsolateRef? isolateRef) async {
+  Future<void> switchToIsolate(IsolateRef? isolateRef) async {
     _isolateRef = isolateRef;
 
     if (isolateRef == null) {
-      _breakpoints.value.clear();
-      _breakpointsWithLocation.value.clear();
+      _saveAndClearCurrentBreakpoints();
       return;
     }
 
-    final isolate = await _service.getIsolate(_isolateRefId);
-    if (isolate.id != _isolateRefId) {
-      // Current request is obsolete.
-      return;
+    final breakpointsForIsolate =
+        await _getBreakpointsForIsolate(_isolateRefId);
+    if (breakpointsForIsolate.isNotEmpty) {
+      // If the isolate already has breakpoints, then update them:
+      await _updateBreakpoints(
+        breakpoints: breakpointsForIsolate,
+        isolateId: _isolateRefId,
+      );
+    } else {
+      // Otherwise, re-establish the breakpoints from the previous isolate:
+      await _setUpBreakpoints(
+        breakpoints: _previousIsolateBreakpoints,
+        isolateRef: isolateRef,
+      );
     }
-
-    _breakpoints.value = isolate.breakpoints ?? [];
-
-    // Build _breakpointsWithLocation from _breakpoints.
-    // ignore: unawaited_futures
-    Future.wait(
-      _breakpoints.value.map(breakpointManager.createBreakpointWithLocation),
-    ).then((list) {
-      if (isolate.id != _isolateRefId) {
-        // Current request is obsolete.
-        return;
-      }
-      _breakpointsWithLocation.value = list.toList()..sort();
-    });
   }
 
-  void clearCache() {
+  void clearCache({required bool isServiceShutdown}) {
     _breakPositionsMap.clear();
     _breakpoints.value = [];
     _breakpointsWithLocation.value = [];
+    if (isServiceShutdown) {
+      _previousIsolateBreakpoints.clear();
+    }
   }
 
   Future<void> clearBreakpoints() async {
@@ -138,6 +138,16 @@ class BreakpointManager with DisposerMixin {
     }
   }
 
+  void _saveAndClearCurrentBreakpoints() {
+    if (breakpointsWithLocation.value.isNotEmpty) {
+      _previousIsolateBreakpoints
+        ..clear()
+        ..addAll(_breakpointsWithLocation.value);
+    }
+    _breakpoints.value = [];
+    _breakpointsWithLocation.value = [];
+  }
+
   void _updateAfterIsolateReload(
     Event _,
   ) async {
@@ -173,6 +183,87 @@ class BreakpointManager with DisposerMixin {
             addBreakpoint(scriptRef.id!, bp.line!),
       ],
     ]);
+  }
+
+  Future<List<Breakpoint>> _getBreakpointsForIsolate(String isolateId) async {
+    final isolate = await _service.getIsolate(isolateId);
+    if (isolate.id != _isolateRefId) {
+      // Current request is obsolete.
+      return [];
+    }
+
+    // Ignore attempts from DWDS to re-establish breakpoints because DevTools is
+    // now in charge of re-establishing breakpoints:
+    final connectedToDwds =
+        serviceConnection.serviceManager.connectedApp?.isDartWebAppNow ?? false;
+    if (connectedToDwds) return [];
+
+    return isolate.breakpoints ?? [];
+  }
+
+  Future<void> _updateBreakpoints({
+    required List<Breakpoint> breakpoints,
+    required String isolateId,
+  }) async {
+    _breakpoints.value = breakpoints;
+    // Build _breakpointsWithLocation from _breakpoints.
+    await Future.wait(
+      _breakpoints.value.map(breakpointManager.createBreakpointWithLocation),
+    ).then((list) {
+      if (isolateId != _isolateRefId) {
+        // Current request is obsolete.
+        return;
+      }
+      _breakpointsWithLocation.value = list.toList()..sort();
+    });
+  }
+
+  Future<void> _setUpBreakpoints({
+    required List<BreakpointAndSourcePosition> breakpoints,
+    required IsolateRef isolateRef,
+  }) async {
+    final scriptUriToRef = await _scriptRefsForBreakpoints(
+      breakpoints: breakpoints,
+      isolateRef: isolateRef,
+    );
+
+    for (final breakpoint in breakpoints) {
+      final newScriptRef = scriptUriToRef[breakpoint.scriptUri];
+      final breakpointLine = breakpoint.line;
+
+      final scriptId = newScriptRef?.id;
+      if (scriptId != null && breakpointLine != null) {
+        await addBreakpoint(scriptId, breakpointLine);
+      }
+    }
+  }
+
+  Future<Map<String, ScriptRef>> _scriptRefsForBreakpoints({
+    required List<BreakpointAndSourcePosition> breakpoints,
+    required IsolateRef isolateRef,
+  }) async {
+    final bpScriptUris = breakpoints.fold(
+      <String>{},
+      (scriptSet, breakpoint) {
+        final scriptUri = breakpoint.scriptUri;
+        if (scriptUri != null) {
+          scriptSet.add(scriptUri);
+        }
+        return scriptSet;
+      },
+    );
+
+    final newScripts = await scriptManager.retrieveAndSortScripts(isolateRef);
+    final scriptUriToRef =
+        newScripts.fold(<String, ScriptRef>{}, (scriptMap, script) {
+      final scriptUri = script.uri;
+      if (scriptUri != null && bpScriptUris.contains(scriptUri)) {
+        scriptMap[scriptUri] = script;
+      }
+      return scriptMap;
+    });
+
+    return scriptUriToRef;
   }
 
   /// Return the list of valid positions for breakpoints for a given script.
@@ -239,7 +330,7 @@ class BreakpointManager with DisposerMixin {
     }
   }
 
-  void _handleDebugEvent(Event event) {
+  Future<void> _handleDebugEvent(Event event) async {
     if (event.isolate!.id != _isolateRefId) return;
 
     switch (event.kind) {
@@ -247,18 +338,20 @@ class BreakpointManager with DisposerMixin {
       // that knows how to notify when performing a list edit operation.
       case EventKind.kBreakpointAdded:
         final breakpoint = event.breakpoint!;
+        final isDuplicate =
+            _breakpoints.value.any((bp) => bp.id == breakpoint.id);
+        if (isDuplicate) break;
         _breakpoints.value = [..._breakpoints.value, breakpoint];
 
-        unawaited(
-          breakpointManager.createBreakpointWithLocation(breakpoint).then((bp) {
-            final list = [
-              ..._breakpointsWithLocation.value,
-              bp,
-            ]..sort();
-
-            _breakpointsWithLocation.value = list;
-          }),
-        );
+        await breakpointManager
+            .createBreakpointWithLocation(breakpoint)
+            .then((bp) {
+          final list = [
+            ..._breakpointsWithLocation.value,
+            bp,
+          ]..sort();
+          _breakpointsWithLocation.value = list;
+        });
 
         break;
       case EventKind.kBreakpointResolved:
@@ -269,21 +362,30 @@ class BreakpointManager with DisposerMixin {
           breakpoint,
         ];
 
-        unawaited(
-          breakpointManager.createBreakpointWithLocation(breakpoint).then((bp) {
-            final list = _breakpointsWithLocation.value.toList();
-            // Remote the bp with the older, unresolved information from the list.
-            list.removeWhere((breakpoint) => bp.breakpoint.id == bp.id);
-            // Add the bp with the newer, resolved information.
-            list.add(bp);
-            list.sort();
-            _breakpointsWithLocation.value = list;
-          }),
-        );
+        await breakpointManager
+            .createBreakpointWithLocation(breakpoint)
+            .then((bp) {
+          final list = _breakpointsWithLocation.value;
+          // Remove the bp with the older, unresolved information from the list.
+          list.removeWhere((breakpoint) => breakpoint.id == bp.id);
+          // Add the bp with the newer, resolved information.
+          list.add(bp);
+          list.sort();
+          _breakpointsWithLocation.value = list;
+        });
 
         break;
 
       case EventKind.kBreakpointRemoved:
+        // Ignore any breakpoints removed during a hot restart, because the VM
+        // service removes them before resuming the isolate and then performing
+        // the restart. Note we only track hot restarts triggered by DevTools,
+        // if a hot-restart was triggered by another client we won't know.
+        // See https://github.com/flutter/flutter/issues/134470
+        final hotRestartInProgress = serviceConnection
+            .serviceManager.isolateManager.hotRestartInProgress;
+        if (hotRestartInProgress) break;
+
         final breakpoint = event.breakpoint;
 
         _breakpoints.value = [
