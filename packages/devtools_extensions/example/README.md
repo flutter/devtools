@@ -7,15 +7,14 @@ end-to-end example is made up of three components:
 
 ## Parent package
 
-This is the Dart package that provides a DevTools extension to end-user
-applications. There are multiple extension-providing pacakges in the
-`example` directory.
+This is the Dart package that provides a DevTools extension for end-user
+applications to use in DevTools. There are multiple extension-providing pacakges
+in the `example` directory.
 
-- `package:foo` from `packages_with_extensions/foo/packages/foo`, which is a
-package that can be used for Flutter apps
+- `package:foo` from `packages_with_extensions/foo/packages/foo`: a package for Flutter apps
 
-- `package:dart_foo` from `packages_with_extensions/dart_foo/packages/dart_foo`,
-which is a pure Dart package that can be used for Dart or Flutter apps
+- `package:dart_foo` from `packages_with_extensions/dart_foo/packages/dart_foo`: a
+pure Dart package for Dart or Flutter apps
 
 <!-- TODO(kenz): build this example. -->
 <!-- - `package:standalone_tool` from `packages_with_extensions/dart_foo/packages/stanalone_tool`, which is a package that is strictly meant to provide a tool
