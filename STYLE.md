@@ -37,7 +37,7 @@ Additionally:
 
 - `Uri.parse()` should not be used for converting file paths to URIs, instead
   `Uri.file()` should be used
-- `Uri.path` shoudl not be used for extracting a file path from a URI, instead
+- `Uri.path` should not be used for extracting a file path from a URI, instead
   `uri.toFilePath()` should be used
 - In code compiled to run in the browser, `Uri.file()` and `uri.toFilePath()`
   will assume POSIX-style paths even on Windows, so care should be taken to
