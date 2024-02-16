@@ -24,6 +24,7 @@ const String _domainNameKey = 'domainName';
 const String _checkNameKey = 'checkName';
 const String _failedChecksKey = 'failedChecks';
 const String _generatedContentKey = 'generatedContent';
+const int _domainBatchSize = 500;
 
 const Map<String, DomainError> checkNameToDomainError = {
   'EXISTENCE': DomainError.existence,
@@ -47,36 +48,50 @@ class DeepLinksServices {
     required List<String> domains,
     required String applicationId,
   }) async {
-    final response = await http.post(
-      Uri.parse(_androidDomainValidationURL),
-      headers: postHeader,
-      body: jsonEncode({
-        _packageNameKey: applicationId,
-        _appLinkDomainsKey: domains,
-      }),
-    );
-
-    final Map<String, dynamic> result =
-        json.decode(response.body) as Map<String, dynamic>;
-
     final domainErrors = <String, List<DomainError>>{
       for (var domain in domains) domain: <DomainError>[],
     };
 
-    final validationResult = result[_validationResultKey] as List;
-    for (final Map<String, dynamic> domainResult in validationResult) {
-      final String domainName = domainResult[_domainNameKey];
-      final List? failedChecks = domainResult[_failedChecksKey];
-      if (failedChecks != null) {
-        for (final Map<String, dynamic> failedCheck in failedChecks) {
-          final checkName = failedCheck[_checkNameKey];
-          final domainError = checkNameToDomainError[checkName];
-          if (domainError != null) {
-            domainErrors[domainName]!.add(domainError);
+    // The request can take 1000 domains at most, make a few calls in serial with a batch of _domainBatchSize.
+    final List<List<String>> domainsBybatch = List.generate(
+      (domains.length / _domainBatchSize).ceil(),
+      (index) => domains.sublist(
+        index * _domainBatchSize,
+        (index + 1) * _domainBatchSize > domains.length
+            ? domains.length
+            : (index + 1) * _domainBatchSize,
+      ),
+    );
+
+    for (final domainList in domainsBybatch) {
+      final response = await http.post(
+        Uri.parse(_androidDomainValidationURL),
+        headers: postHeader,
+        body: jsonEncode({
+          _packageNameKey: applicationId,
+          _appLinkDomainsKey: domainList,
+        }),
+      );
+
+      final Map<String, dynamic> result =
+          json.decode(response.body) as Map<String, dynamic>;
+
+      final validationResult = result[_validationResultKey] as List;
+      for (final Map<String, dynamic> domainResult in validationResult) {
+        final String domainName = domainResult[_domainNameKey];
+        final List? failedChecks = domainResult[_failedChecksKey];
+        if (failedChecks != null) {
+          for (final Map<String, dynamic> failedCheck in failedChecks) {
+            final checkName = failedCheck[_checkNameKey];
+            final domainError = checkNameToDomainError[checkName];
+            if (domainError != null) {
+              domainErrors[domainName]!.add(domainError);
+            }
           }
         }
       }
     }
+
     return domainErrors;
   }
 
