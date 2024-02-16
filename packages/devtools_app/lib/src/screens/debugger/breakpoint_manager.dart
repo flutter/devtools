@@ -9,9 +9,10 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../devtools_app.dart';
-import '../../framework/app_error_handling.dart' as error_handler;
+import '../../framework/app_error_handling.dart';
+import '../../service/vm_service_wrapper.dart';
 import '../../shared/diagnostics/primitives/source_location.dart';
+import '../../shared/globals.dart';
 import 'debugger_model.dart';
 
 class BreakpointManager with DisposerMixin {
@@ -275,7 +276,7 @@ class BreakpointManager with DisposerMixin {
     try {
       await _service.resume(isolateId);
     } catch (error) {
-      error_handler.reportError(error);
+      reportError(error);
     }
   }
 

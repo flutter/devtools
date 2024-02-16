@@ -273,14 +273,16 @@ class ServiceManager<T extends VmService> {
   }
 
   Future<void> _configureIsolateSettings() async {
-    try {
-      await service.setFlag('pause_isolates_on_start', 'true');
-      await service.requirePermissionToResume(
-        onPauseReload: true,
-        onPauseStart: true,
-      );
-    } catch (error) {
-      _log.warning('$error');
+    if (service != null) {
+      try {
+        await service.setFlag('pause_isolates_on_start', 'true');
+        await service.requirePermissionToResume(
+          onPauseReload: true,
+          onPauseStart: true,
+        );
+      } catch (error) {
+        _log.warning('$error');
+      }
     }
   }
 
