@@ -7,10 +7,10 @@ end-to-end example is made up of three components:
 applications
 
     - `package:foo` from `packages_with_extensions/foo/packages/foo`, which is a
-  package that can be used in a Flutter app
+  package that can be used for Flutter apps
 
     - `package:dart_foo` from `packages_with_extensions/dart_foo/packages/dart_foo`,
-  which is a pure Dart package that can be used in a Dart or Flutter app
+  which is a pure Dart package that can be used for Dart or Flutter apps
 
     <!-- TODO(kenz): build this example. -->
     <!-- - `package:standalone_tool` from `packages_with_extensions/dart_foo/packages/stanalone_tool`, which is a package that is strictly meant to provide a tool
