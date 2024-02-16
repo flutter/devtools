@@ -277,7 +277,6 @@ class ServiceManager<T extends VmService> {
       try {
         await service.setFlag('pause_isolates_on_start', 'true');
         await service.requirePermissionToResume(
-          onPauseReload: true,
           onPauseStart: true,
         );
       } catch (error) {
