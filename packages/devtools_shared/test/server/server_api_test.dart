@@ -35,7 +35,7 @@ void main() {
       request,
       extensionsManager: ExtensionsManager(buildDir: '/'),
       deeplinkManager: fakeManager,
-      analytics: NoOpAnalytics(),
+      analytics: const NoOpAnalytics(),
     );
     expect(response.statusCode, HttpStatus.ok);
     expect(await response.readAsString(), '["debug", "release]');
@@ -57,7 +57,7 @@ void main() {
         request,
         extensionsManager: ExtensionsManager(buildDir: '/'),
         deeplinkManager: FakeDeeplinkManager(),
-        analytics: NoOpAnalytics(),
+        analytics: const NoOpAnalytics(),
       );
       expect(response.statusCode, HttpStatus.badRequest);
     },
@@ -87,7 +87,7 @@ void main() {
       request,
       extensionsManager: ExtensionsManager(buildDir: '/'),
       deeplinkManager: fakeManager,
-      analytics: NoOpAnalytics(),
+      analytics: const NoOpAnalytics(),
     );
     expect(response.statusCode, HttpStatus.ok);
     expect(await response.readAsString(), someMessage);
@@ -117,7 +117,7 @@ void main() {
       request,
       extensionsManager: ExtensionsManager(buildDir: '/'),
       deeplinkManager: fakeManager,
-      analytics: NoOpAnalytics(),
+      analytics: const NoOpAnalytics(),
     );
     expect(response.statusCode, HttpStatus.ok);
     expect(await response.readAsString(), someMessage);
@@ -150,7 +150,7 @@ void main() {
       request,
       extensionsManager: ExtensionsManager(buildDir: '/'),
       deeplinkManager: fakeManager,
-      analytics: NoOpAnalytics(),
+      analytics: const NoOpAnalytics(),
     );
     expect(response.statusCode, HttpStatus.ok);
     expect(await response.readAsString(), someMessage);
@@ -174,7 +174,7 @@ void main() {
       extensionsManager: ExtensionsManager(buildDir: '/'),
       deeplinkManager: fakeManager,
       dtdUri: dtdUri,
-      analytics: NoOpAnalytics(),
+      analytics: const NoOpAnalytics(),
     );
     expect(response.statusCode, HttpStatus.ok);
     expect(
