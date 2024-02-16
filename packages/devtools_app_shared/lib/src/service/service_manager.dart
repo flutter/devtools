@@ -33,6 +33,13 @@ enum ServiceManagerLifecycle {
   /// connection to a [VmService].
   afterOpenVmService,
 
+  /// Lifecycle phase that occurs after the service manager sets the connection
+  /// state, which is the last step in establishing the [VmService] connection.
+  /// 
+  /// This lifecycle method can be used to register a callback that should be
+  /// called after the value of [ServiceManager.connectedState] has been set.
+  afterConnectedStateSet,
+
   /// Lifecycle phase that occurs before the service manager closes the
   /// connection to a [VmService].
   beforeCloseVmService,
@@ -241,8 +248,14 @@ class ServiceManager<T extends VmService> {
 
     await connectedApp!.initializeValues();
 
-    // This needs to be the last call in this method.
+    // These two executions (setting [_connectedState.value] and calling the
+    // [ServiceManagerLifecycle.afterConnectedStateSet]) need to be the last
+    // calls in this method.
     _connectedState.value = const ConnectedState(true);
+    await callLifecycleCallbacks(
+      ServiceManagerLifecycle.afterConnectedStateSet,
+      service,
+    );
   }
 
   /// Shuts down the service manager's current vm service connection.

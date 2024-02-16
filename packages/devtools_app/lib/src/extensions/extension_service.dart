@@ -7,6 +7,7 @@ import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 
+import '../service/service_extensions.dart';
 import '../shared/globals.dart';
 import '../shared/server/server.dart' as server;
 
@@ -116,6 +117,12 @@ class ExtensionService extends DisposableController
     // .dart_tool/package_config.json file for changes.
   }
 
+  @override
+  void dispose() {
+    _reset();
+    super.dispose();
+  }
+
   Future<void> _initAppRoot() async {
     _appRoot = fixedAppRoot ?? await _connectedAppRoot();
   }
@@ -195,8 +202,29 @@ class ExtensionService extends DisposableController
 // TODO(kenz): consider caching this for the duration of the VM service
 // connection.
 Future<Uri?> _connectedAppRoot() async {
-  final fileUriString = await serviceConnection.rootLibraryForMainIsolate();
-  _log.fine('fetching rootLibraryForMainIsolate: $fileUriString');
+  String? fileUriString;
+
+  // Whether the connected app is a test process spawned by package:test. We
+  // can assume this is true if the [testTargetLibraryExtension] is a registered
+  // service extension on the main isolate.
+  final isTestTarget = serviceConnection.serviceManager.serviceExtensionManager
+      .hasServiceExtension(testTargetLibraryExtension)
+      .value;
+
+  if (isTestTarget) {
+    final result = await serviceConnection.serviceManager
+        .callServiceExtensionOnMainIsolate(testTargetLibraryExtension);
+    fileUriString = result.json?['value'];
+    _log.fine(
+      'fetched library from $testTargetLibraryExtension: $fileUriString',
+    );
+  }
+
+  if (fileUriString == null) {
+    fileUriString = await serviceConnection.rootLibraryForMainIsolate();
+    _log.fine('fetched rootLibraryForMainIsolate: $fileUriString');
+  }
+
   if (fileUriString == null) return null;
   return Uri.parse(rootFromFileUriString(fileUriString));
 }

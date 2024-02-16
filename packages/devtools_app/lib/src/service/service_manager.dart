@@ -51,6 +51,10 @@ class ServiceConnectionManager {
         _afterOpenVmService,
       )
       ..registerLifecycleCallback(
+        ServiceManagerLifecycle.afterConnectedStateSet,
+        _afterConnectedStateSet,
+      )
+      ..registerLifecycleCallback(
         ServiceManagerLifecycle.beforeCloseVmService,
         _beforeCloseVmService,
       )
@@ -117,9 +121,6 @@ class ServiceConnectionManager {
 
     // Set up analytics dimensions for the connected app.
     ga.setupUserApplicationDimensions();
-    if (FeatureFlags.devToolsExtensions) {
-      await extensionService.initialize();
-    }
 
     _inspectorService = devToolsExtensionPoints.inspectorServiceProvider();
 
@@ -128,6 +129,15 @@ class ServiceConnectionManager {
 
     if (debugLogServiceProtocolEvents) {
       serviceTrafficLogger = VmServiceTrafficLogger(service!);
+    }
+  }
+
+  Future<void> _afterConnectedStateSet(VmServiceWrapper? service) async {
+    // TODO(kenz): this may need to change when static extensions are supported
+    // because we will need to initialize the extension service before we have a
+    // connected app.
+    if (FeatureFlags.devToolsExtensions) {
+      await extensionService.initialize();
     }
   }
 
@@ -152,6 +162,12 @@ class ServiceConnectionManager {
     serviceTrafficLogger?.dispose();
     preferences.vmDeveloperModeEnabled
         .removeListener(_handleVmDeveloperModeChanged);
+    // TODO(kenz): this may need to change when static extensions are supported
+    // because we will not need to dispose the extension service on app
+    // disconnect.
+    if (FeatureFlags.devToolsExtensions) {
+      extensionService.dispose();
+    }
   }
 
   Future<void> _handleVmDeveloperModeChanged() async {

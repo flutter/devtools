@@ -93,7 +93,7 @@ void logWarning(Response? response, String apiType) {
   final respText = response?.body;
   _log.warning(
     'HttpRequest $apiType failed status = ${response?.statusCode}'
-    '${respText != null ? ', responseText = $respText' : ''}',
+    '${respText.isNullOrEmpty ? '' : ', responseText = $respText'}',
   );
 }
 
