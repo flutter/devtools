@@ -68,18 +68,26 @@ class NotificationService {
   bool pushError(
     String errorMessage, {
     String? stackTrace,
+    String? reportExplanation,
     bool isDismissible = true,
     bool isReportable = true,
   }) {
     final reportErrorAction = NotificationAction(
       'Report error',
       () {
+        final additionalInfoParts = [
+          if (reportExplanation != null) 'Explanation:\n$reportExplanation',
+          if (stackTrace != null) 'Stack trace:\n$stackTrace',
+        ];
+        final additionalInfo = additionalInfoParts.isNotEmpty
+            ? additionalInfoParts.join('\n\n')
+            : null;
         unawaited(
           launchUrl(
             devToolsExtensionPoints
                 .issueTrackerLink(
                   issueTitle: 'Reporting error: $errorMessage',
-                  additionalInfo: 'Stack trace:\n$stackTrace',
+                  additionalInfo: additionalInfo,
                 )
                 .url,
           ),

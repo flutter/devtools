@@ -234,7 +234,8 @@ flutter pub get;
 dart run devtools_extensions build_and_copy --source=. --dest=../foo/extension/devtools
 ```
 
-Then publish your package.
+Then publish your package. When running `pub publish`, you will see a warning if you
+do not have the `config.yaml` file and a non-empty `build` directory as required.
 
 ### What if I don't want the `extension/devtools/build/` contents checked into source control?
 

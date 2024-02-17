@@ -18,11 +18,15 @@ class AnalyticsController {
   AnalyticsController({
     required bool enabled,
     required bool firstRun,
+    required this.consentMessage,
     this.onEnableAnalytics,
     this.onDisableAnalytics,
     this.onSetupAnalytics,
+    AsyncAnalyticsCallback? markConsentMessageAsShown,
   })  : analyticsEnabled = ValueNotifier<bool>(enabled),
-        _shouldPrompt = ValueNotifier<bool>(firstRun && !enabled) {
+        _shouldPrompt =
+            ValueNotifier<bool>(firstRun && consentMessage.isNotEmpty),
+        _markConsentMessageAsShown = markConsentMessageAsShown {
     if (_shouldPrompt.value) {
       unawaited(toggleAnalyticsEnabled(true));
     }
@@ -43,7 +47,16 @@ class AnalyticsController {
 
   final AsyncAnalyticsCallback? onDisableAnalytics;
 
+  /// Method to call to confirm with package:unified_analytics the user has
+  /// seen the consent message.
+  final AsyncAnalyticsCallback? _markConsentMessageAsShown;
+  Future<void> markConsentMessageAsShown() async =>
+      await _markConsentMessageAsShown?.call();
+
   final VoidCallback? onSetupAnalytics;
+
+  /// Consent message for package:unified_analytics to be shown on first run.
+  final String consentMessage;
 
   Future<void> toggleAnalyticsEnabled(bool? enable) async {
     if (enable == true) {

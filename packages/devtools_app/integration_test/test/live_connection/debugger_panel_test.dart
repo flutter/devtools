@@ -3,8 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/screens/debugger/breakpoints.dart';
 import 'package:devtools_app/src/screens/debugger/call_stack.dart';
 import 'package:devtools_app/src/screens/debugger/codeview.dart';
+import 'package:devtools_app/src/service/service_extension_widgets.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:devtools_test/integration_test.dart';
 import 'package:flutter/material.dart';
@@ -59,27 +61,44 @@ void main() {
       isTrue,
     );
 
-    logStatus('opening the "more" menu');
+    logStatus('Navigating to line 57...');
 
-    final moreMenuFinder = find.byType(PopupMenuButton<ScriptPopupMenuOption>);
-    expect(moreMenuFinder, findsOneWidget);
-    await tester.tap(moreMenuFinder);
-    await tester.pumpAndSettle(safePumpDuration);
+    await goToLine(tester, lineNumber: 57);
 
-    logStatus('selecting the go-to-line menu option');
+    logStatus('looking for line 57');
 
-    final goToLineOptionFinder = find.textContaining('Go to line number');
-    expect(goToLineOptionFinder, findsOneWidget);
-    await tester.tap(goToLineOptionFinder);
-    await tester.pumpAndSettle(safePumpDuration);
+    // Look for the line 57 gutter item:
+    final gutter57Finder = findGutterItemWithText('57');
+    expect(gutter57Finder, findsOneWidget);
 
-    logStatus('entering line number in the go-to-line dialog');
+    // Look for the line 57 line item:
+    final line57Finder = findLineItemWithText("print('Hello!');");
+    expect(line57Finder, findsOneWidget);
 
-    final goToLineInputFinder = find.widgetWithText(TextField, 'Line Number');
-    expect(goToLineInputFinder, findsOneWidget);
-    await tester.enterText(goToLineInputFinder, '30');
-    await tester.testTextInput.receiveAction(TextInputAction.done);
-    await tester.pumpAndSettle(safePumpDuration);
+    // Verify that the gutter item and line item are aligned:
+    expect(
+      areHorizontallyAligned(
+        gutter57Finder,
+        line57Finder,
+        tester: tester,
+      ),
+      isTrue,
+    );
+
+    logStatus('setting a breakpoint');
+
+    // Tap on the gutter for the line to set a breakpoint:
+    await tester.tap(gutter57Finder);
+    await tester.pumpAndSettle(longPumpDuration);
+
+    logStatus('performing a hot restart');
+
+    await tester.tap(find.byType(HotRestartButton));
+    await tester.pumpAndSettle(longPumpDuration);
+
+    logStatus('Navigating to line 30...');
+
+    await goToLine(tester, lineNumber: 30);
 
     logStatus('looking for line 30');
 
@@ -106,6 +125,11 @@ void main() {
     // Tap on the gutter for the line to set a breakpoint:
     await tester.tap(gutter30Finder);
     await tester.pumpAndSettle(longPumpDuration);
+
+    logStatus('verifying breakpoints');
+
+    final bpSetBeforeRestart = findBreakpointWithText('main.dart:57');
+    expect(bpSetBeforeRestart, findsOneWidget);
 
     logStatus('pausing at breakpoint');
 
@@ -170,6 +194,30 @@ bool areHorizontallyAligned(
   return widgetACenter.dy == widgetBCenter.dy;
 }
 
+Future<void> goToLine(WidgetTester tester, {required int lineNumber}) async {
+  logStatus('opening the "more" menu');
+
+  final moreMenuFinder = find.byType(PopupMenuButton<ScriptPopupMenuOption>);
+  expect(moreMenuFinder, findsOneWidget);
+  await tester.tap(moreMenuFinder);
+  await tester.pumpAndSettle(safePumpDuration);
+
+  logStatus('selecting the go-to-line menu option');
+
+  final goToLineOptionFinder = find.textContaining('Go to line number');
+  expect(goToLineOptionFinder, findsOneWidget);
+  await tester.tap(goToLineOptionFinder);
+  await tester.pumpAndSettle(safePumpDuration);
+
+  logStatus('entering line number $lineNumber in the go-to-line dialog');
+
+  final goToLineInputFinder = find.widgetWithText(TextField, 'Line Number');
+  expect(goToLineInputFinder, findsOneWidget);
+  await tester.enterText(goToLineInputFinder, '$lineNumber');
+  await tester.testTextInput.receiveAction(TextInputAction.done);
+  await tester.pumpAndSettle(safePumpDuration);
+}
+
 T getWidgetFromFinder<T>(Finder finder) =>
     finder.first.evaluate().first.widget as T;
 
@@ -190,5 +238,10 @@ bool isLineFocused(Finder lineItemFinder) {
 
 Finder findStackFrameWithText(String text) => find.descendant(
       of: find.byType(CallStack),
+      matching: find.richTextContaining(text),
+    );
+
+Finder findBreakpointWithText(String text) => find.descendant(
+      of: find.byType(Breakpoints),
       matching: find.richTextContaining(text),
     );
