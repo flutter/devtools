@@ -5,3 +5,4 @@ This file is not for merge.
 - Reimplement _assertIntegrity
 - Show external properties
 - Figure out Sentinel vs external
+- Remove non-needed public API in HeapClassName

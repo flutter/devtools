@@ -1,4 +1,4 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -24,37 +24,35 @@ Function _listEquality = const ListEquality().equals;
 class RetainingPath {
   RetainingPath._(this.path);
 
-  final List<HeapClassName> path;
-
-  static final _instances = <RetainingPath>{};
-
-  static RetainingPath forObject(
+  factory RetainingPath.forObject(
     HeapData heap,
     Uint32List shortestRetainers,
     int objectId,
   ) {
-    final growableClasses = <HeapClassName>[];
+    final path = <HeapClassName>[];
 
     while (shortestRetainers[objectId] > 0) {
       objectId = shortestRetainers[objectId];
       final classId = heap.graph.objects[objectId].classId;
       final className =
           HeapClassName.fromHeapSnapshotClass(heap.graph.classes[classId]);
-      growableClasses.add(className);
+      path.add(className);
     }
 
-    final newTempInstance = RetainingPath._(growableClasses);
-    final existingInstance = _instances.lookup(newTempInstance);
+    return RetainingPath.fromPath(path);
+  }
 
-    if (existingInstance != null) {
-      return existingInstance;
-    }
+  factory RetainingPath.fromPath(List<HeapClassName> path) {
+    final existingInstance = _instances.lookup(RetainingPath._(path));
+    if (existingInstance != null) return existingInstance;
 
-    final newInstance =
-        RetainingPath._(List.unmodifiable(newTempInstance.path));
-
+    final newInstance = RetainingPath._(List.unmodifiable(path));
     return newInstance;
   }
+
+  final List<HeapClassName> path;
+
+  static final _instances = <RetainingPath>{};
 
   @override
   bool operator ==(Object other) {
