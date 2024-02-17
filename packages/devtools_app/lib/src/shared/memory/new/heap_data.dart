@@ -107,7 +107,7 @@ Future<HeapData> calculateHeapData(
 
   return HeapData._(
     graph,
-    shortestRetainers: retainingPaths ? retainers : null,
+    //shortestRetainers: retainingPaths ? retainers : null,
     retainedSizes: sizes,
   );
 }

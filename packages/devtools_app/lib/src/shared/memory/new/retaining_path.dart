@@ -4,8 +4,12 @@
 
 import 'dart:typed_data';
 
+import 'package:collection/collection.dart';
+
 import '../class_name.dart';
 import 'heap_data.dart';
+
+Function _listEquality = const ListEquality().equals;
 
 /// A retaining path from the root to an object.
 ///
@@ -29,17 +33,10 @@ class RetainingPath {
     Uint32List shortestRetainers,
     int objectId,
   ) {
-    final retainers = heap.shortestRetainers;
-    if (retainers == null) {
-      throw StateError(
-        'Shortest retainers should be calculated to obtain retaining path.',
-      );
-    }
-
     final growableClasses = <HeapClassName>[];
 
-    while (retainers[objectId] > 0) {
-      objectId = retainers[objectId];
+    while (shortestRetainers[objectId] > 0) {
+      objectId = shortestRetainers[objectId];
       final classId = heap.graph.objects[objectId].classId;
       final className =
           HeapClassName.fromHeapSnapshotClass(heap.graph.classes[classId]);
@@ -47,8 +44,16 @@ class RetainingPath {
     }
 
     final newTempInstance = RetainingPath._(growableClasses);
+    final existingInstance = _instances.lookup(newTempInstance);
 
-    return RetainingPath._([]);
+    if (existingInstance != null) {
+      return existingInstance;
+    }
+
+    final newInstance =
+        RetainingPath._(List.unmodifiable(newTempInstance.path));
+
+    return newInstance;
   }
 
   @override
@@ -56,9 +61,9 @@ class RetainingPath {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is HeapClassName && other.fullName == fullName;
+    return other is RetainingPath && _listEquality(other.path, path);
   }
 
   @override
-  late final hashCode = fullName.hashCode;
+  late final hashCode = path.hashCode;
 }

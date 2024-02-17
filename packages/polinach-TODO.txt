@@ -1,5 +1,7 @@
 This file is not for merge.
 
-- Separate spanning tree algorythm to test it separately
+- Separate spanning tree algorithm to test it separately
 - Show size in list of snapshots.
 - Reimplement _assertIntegrity
+- Show external properties
+- Figure out Sentinel vs external
