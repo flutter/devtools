@@ -13,9 +13,7 @@ import '../class_name.dart';
 class HeapData {
   HeapData._(
     this.graph, {
-    this.shortestRetainers,
     this.retainedSizes,
-    this.classData,
   });
 
   /// Value for rootIndex is taken from the doc:
@@ -24,25 +22,18 @@ class HeapData {
 
   final HeapSnapshotGraph graph;
 
-  /// Each cell contains index of referrer for shortest retaining path from the root to the object.
-  ///
-  /// If 0, there is no retaining path from root.
-  final Uint32List? shortestRetainers;
-
   final Uint32List? retainedSizes;
-
-  final _WeakClasses? classData;
 }
 
 final UiReleaser _uiReleaser = UiReleaser();
 
 Future<HeapData> calculateHeapData(
   HeapSnapshotGraph graph, {
-  bool shortestRetainers = true,
+  bool retainingPaths = true,
   bool retainedSizes = true,
   bool classStatistics = true,
 }) async {
-  if (!shortestRetainers && !retainedSizes && !classStatistics) {
+  if (!retainingPaths && !retainedSizes && !classStatistics) {
     return HeapData._(graph);
   }
 
@@ -50,7 +41,7 @@ Future<HeapData> calculateHeapData(
   final Uint32List? sizes =
       retainedSizes ? null : Uint32List(graph.objects.length);
 
-  if (shortestRetainers || retainedSizes) {
+  if (retainingPaths || retainedSizes) {
     final weakClasses = _WeakClasses(graph);
 
     retainers = Uint32List(graph.objects.length);
@@ -82,41 +73,43 @@ Future<HeapData> calculateHeapData(
           }
         }
       }
-      if (nextCut.isEmpty) {
-        return HeapData._(
-          graph,
-          shortestRetainers: shortestRetainers ? retainers : null,
-          retainedSizes: sizes,
-        );
-      }
+      if (nextCut.isEmpty) break;
       cut = nextCut;
     }
   }
 
-  if (classStatistics) {
-    final classes = <HeapClassName, SingleClassStats>{};
-    for (var i = 0; i < graph.objects.length; i++) {
-      if (_uiReleaser.step()) await _uiReleaser.releaseUi();
-      final object = graph.objects[i];
-      final className =
-          HeapClassName.fromHeapSnapshotClass(graph.classes[object.classId]);
+  // Complexity of this part is O(n)*O(p) where
+  // n is number of objects and p is length of retaining path.
+  // if (classStatistics) {
+  //   final classes = <HeapClassName, SingleClassStats>{};
+  //   for (var i = 0; i < graph.objects.length; i++) {
+  //     if (_uiReleaser.step()) await _uiReleaser.releaseUi();
+  //     final object = graph.objects[i];
+  //     final className =
+  //         HeapClassName.fromHeapSnapshotClass(graph.classes[object.classId]);
 
-      // We do not show objects that will be garbage collected soon or are
-      // native.
-      // ignore: unnecessary_null_comparison, false positive
-      if ((retainers != null && retainers[i] == 0) || className.isSentinel) {
-        continue;
-      }
+  //     // We do not show objects that will be garbage collected soon or are
+  //     // native.
+  //     // ignore: unnecessary_null_comparison, false positive
+  //     if ((retainers != null && retainers[i] == 0) || className.isSentinel) {
+  //       continue;
+  //     }
 
-      final singleHeapClass = classes.putIfAbsent(
-        className,
-        () => SingleClassStats(heapClass: className),
-      );
-      singleHeapClass.countInstance(data, i);
-    }
+  //     final singleHeapClass = classes.putIfAbsent(
+  //       className,
+  //       () => SingleClassStats(heapClass: className),
+  //     );
+  //     singleHeapClass.countInstance(data, i);
+  //   }
 
-    return SingleHeapClasses(classes)..seal();
-  }
+  //   return SingleHeapClasses(classes)..seal();
+  // }
+
+  return HeapData._(
+    graph,
+    shortestRetainers: retainingPaths ? retainers : null,
+    retainedSizes: sizes,
+  );
 }
 
 /// Assuming the object is leaf, initializes its retained size

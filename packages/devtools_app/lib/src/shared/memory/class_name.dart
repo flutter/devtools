@@ -71,6 +71,9 @@ enum ClassType {
       CircleIcon(color: color, text: label, textColor: Colors.white);
 }
 
+/// Fully qualified Class name.
+///
+/// Equal class names are not stored twice in memory.
 class HeapClassName {
   HeapClassName._({required String? library, required this.className})
       : library = _normalizeLibrary(library);

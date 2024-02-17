@@ -1,4 +1,5 @@
 This file is not for merge.
 
-1. Show size in list of snapshots.
-2. Reimplement _assertIntegrity
+- Separate spanning tree algorythm to test it separately
+- Show size in list of snapshots.
+- Reimplement _assertIntegrity

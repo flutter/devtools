@@ -153,25 +153,6 @@ class SingleClassStats extends ClassStats {
     );
     objectsForPath.countInstance(object, excludeFromRetained: false);
   }
-
-  void countInstance(AdaptedHeapData data, int objectIndex) {
-    assert(!isSealed);
-    final object = data.objects[objectIndex];
-    assert(object.heapClass.fullName == heapClass.fullName);
-
-    final path = data.retainingPath(objectIndex);
-    objects.countInstance(
-      object,
-      excludeFromRetained: path?.isRetainedBySameClass ?? false,
-    );
-
-    if (path == null) return;
-    final objectsForPath = statsByPath.putIfAbsent(
-      ClassOnlyHeapPath(path),
-      () => ObjectSet(),
-    );
-    objectsForPath.countInstance(object, excludeFromRetained: false);
-  }
 }
 
 /// Statistical size-information about objects.
