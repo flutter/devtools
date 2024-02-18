@@ -4,6 +4,10 @@
 
 // import 'package:vm_service/vm_service.dart';
 
+import 'dart:typed_data';
+
+import 'package:vm_service/vm_service.dart';
+
 import '../../../screens/memory/shared/heap/heap.dart';
 import '../class_name.dart';
 import 'heap_data.dart';
@@ -36,59 +40,75 @@ class ObjectSetStats {
   int shallowSize = 0;
   int retainedSize = 0;
 
+  /// True if the object set is empty.
+  ///
+  /// When count is zero, size still can be non-zero, because size
+  /// of added and size of removed items may be different.
   bool get isZero =>
       shallowSize == 0 && retainedSize == 0 && instanceCount == 0;
 
   void countInstance(
     HeapSnapshotGraph graph,
-    int index, {
+    int index,
+    List<int>? retainedSizes, {
     required bool excludeFromRetained,
   }) {
-    if (!excludeFromRetained) retainedSize += object.retainedSize!;
-    shallowSize += object.shallowSize;
+    if (!excludeFromRetained) {
+      retainedSize += retainedSizes?[index] ?? 0;
+    }
+    shallowSize += graph.objects[index].shallowSize;
     instanceCount++;
   }
 
   void uncountInstance(
-    MockAdaptedHeapObject object, {
+    HeapSnapshotGraph graph,
+    int index,
+    List<int>? retainedSizes, {
     required bool excludeFromRetained,
   }) {
-    assert(!isSealed);
-    if (!excludeFromRetained) retainedSize -= object.retainedSize!;
-    shallowSize -= object.shallowSize;
+    if (!excludeFromRetained) retainedSize -= retainedSizes?[index] ?? 0;
+    shallowSize -= graph.objects[index].shallowSize;
     instanceCount--;
   }
 }
 
 /// Statistical and detailed size-information about objects.
 class ObjectSet extends ObjectSetStats {
-  static ObjectSet empty = ObjectSet()..seal();
+  static ObjectSet empty = ObjectSet();
 
-  final objectsByCodes = <IdentityHashCode, MockAdaptedHeapObject>{};
+  final objects = <int>[];
 
   /// Subset of objects that are excluded from the retained size
   /// calculation for this set.
   ///
   /// See [countInstance].
-  final objectsExcludedFromRetainedSize = <IdentityHashCode>{};
+  final objectsExcludedFromRetainedSize = <int>{};
 
   @override
-  bool get isZero => objectsByCodes.isEmpty;
+  bool get isZero => objects.isEmpty;
 
   @override
   void countInstance(
-    MockAdaptedHeapObject object, {
+    HeapSnapshotGraph graph,
+    int index,
+    List<int>? retainedSizes, {
     required bool excludeFromRetained,
   }) {
-    if (objectsByCodes.containsKey(object.code)) return;
-    super.countInstance(object, excludeFromRetained: excludeFromRetained);
-    objectsByCodes[object.code] = object;
-    if (excludeFromRetained) objectsExcludedFromRetainedSize.add(object.code);
+    super.countInstance(
+      graph,
+      index,
+      retainedSizes,
+      excludeFromRetained: excludeFromRetained,
+    );
+    objects.add(index);
+    if (excludeFromRetained) objectsExcludedFromRetainedSize.add(index);
   }
 
   @override
   void uncountInstance(
-    MockAdaptedHeapObject object, {
+    HeapSnapshotGraph graph,
+    int index,
+    List<int>? retainedSizes, {
     required bool excludeFromRetained,
   }) {
     throw AssertionError('uncountInstance is not valid for $ObjectSet');
