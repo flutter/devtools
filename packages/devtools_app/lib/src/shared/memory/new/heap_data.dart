@@ -78,37 +78,38 @@ Future<HeapData> calculateHeapData(
     }
   }
 
+  Map<HeapClassName, SingleClassStats_>? classes;
+
   // Complexity of this part is O(n)*O(p) where
   // n is number of objects and p is length of retaining path.
-  // if (classStatistics) {
-  //   final classes = <HeapClassName, SingleClassStats>{};
-  //   for (var i = 0; i < graph.objects.length; i++) {
-  //     if (_uiReleaser.step()) await _uiReleaser.releaseUi();
-  //     final object = graph.objects[i];
-  //     final className =
-  //         HeapClassName.fromHeapSnapshotClass(graph.classes[object.classId]);
+  if (classStatistics) {
+    classes = <HeapClassName, SingleClassStats_>{};
 
-  //     // We do not show objects that will be garbage collected soon or are
-  //     // native.
-  //     // ignore: unnecessary_null_comparison, false positive
-  //     if ((retainers != null && retainers[i] == 0) || className.isSentinel) {
-  //       continue;
-  //     }
+    for (var i = 0; i < graph.objects.length; i++) {
+      if (_uiReleaser.step()) await _uiReleaser.releaseUi();
+      final object = graph.objects[i];
+      final className =
+          HeapClassName.fromHeapSnapshotClass(graph.classes[object.classId]);
 
-  //     final singleHeapClass = classes.putIfAbsent(
-  //       className,
-  //       () => SingleClassStats(heapClass: className),
-  //     );
-  //     singleHeapClass.countInstance(data, i);
-  //   }
+      // We do not show objects that will be garbage collected soon.
+      // ignore: unnecessary_null_comparison, false positive
+      if (retainers != null && retainers[i] == 0) {
+        continue;
+      }
 
-  //   return SingleHeapClasses(classes)..seal();
-  // }
+      final classStats = classes.putIfAbsent(
+        className,
+        () => SingleClassStats_(heapClass: className),
+      );
+      //classStats.countInstance(data, i);
+    }
+  }
 
   return HeapData._(
     graph,
+    //classes
     //shortestRetainers: retainingPaths ? retainers : null,
-    retainedSizes: sizes,
+    // retainedSizes: sizes,
   );
 }
 

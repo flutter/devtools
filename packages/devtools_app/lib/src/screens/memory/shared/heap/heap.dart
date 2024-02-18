@@ -45,7 +45,7 @@ class AdaptedHeap {
   Future<SingleHeapClasses> _heapStatistics() async {
     assert(data.allFieldsCalculated);
 
-    final result = <HeapClassName, SingleClassStats>{};
+    final result = <HeapClassName, SingleClassStats_>{};
     for (var i in Iterable<int>.generate(data.objects.length)) {
       if (_uiReleaser.step()) await _uiReleaser.releaseUi();
       final object = data.objects[i];
@@ -57,7 +57,7 @@ class AdaptedHeap {
 
       final singleHeapClass = result.putIfAbsent(
         className,
-        () => SingleClassStats(heapClass: className),
+        () => SingleClassStats_(heapClass: className),
       );
       singleHeapClass.countInstance(data, i);
     }
@@ -66,11 +66,11 @@ class AdaptedHeap {
   }
 }
 
-abstract class HeapClasses<T extends ClassStats> with Sealable {
+abstract class HeapClasses<T extends ClassStats_> with Sealable {
   List<T> get classStatsList;
 }
 
-mixin FilterableHeapClasses<T extends ClassStats> on HeapClasses<T> {
+mixin FilterableHeapClasses<T extends ClassStats_> on HeapClasses<T> {
   ClassFilter? _appliedFilter;
   List<T>? _filtered;
 
@@ -90,13 +90,13 @@ mixin FilterableHeapClasses<T extends ClassStats> on HeapClasses<T> {
 }
 
 /// Set of heap class statistical information for single heap (not comparison between two heaps).
-class SingleHeapClasses extends HeapClasses<SingleClassStats>
-    with FilterableHeapClasses<SingleClassStats> {
+class SingleHeapClasses extends HeapClasses<SingleClassStats_>
+    with FilterableHeapClasses<SingleClassStats_> {
   SingleHeapClasses(this.classesByName);
 
   /// Maps full class name to class.
-  final Map<HeapClassName, SingleClassStats> classesByName;
-  late final List<SingleClassStats> classes =
+  final Map<HeapClassName, SingleClassStats_> classesByName;
+  late final List<SingleClassStats_> classes =
       classesByName.values.toList(growable: false);
 
   @override
@@ -108,14 +108,14 @@ class SingleHeapClasses extends HeapClasses<SingleClassStats>
   }
 
   @override
-  List<SingleClassStats> get classStatsList => classes;
+  List<SingleClassStats_> get classStatsList => classes;
 }
 
 typedef StatsByPath = Map<ClassOnlyHeapPath, ObjectSetStats>;
 typedef StatsByPathEntry = MapEntry<ClassOnlyHeapPath, ObjectSetStats>;
 
-abstract class ClassStats with Sealable {
-  ClassStats({required this.statsByPath, required this.heapClass});
+abstract class ClassStats_ with Sealable {
+  ClassStats_({required this.statsByPath, required this.heapClass});
 
   final StatsByPath statsByPath;
   late final List<StatsByPathEntry> statsByPathEntries = _getEntries();
@@ -128,8 +128,8 @@ abstract class ClassStats with Sealable {
 }
 
 /// Statistics for a class about a single heap.
-class SingleClassStats extends ClassStats {
-  SingleClassStats({required super.heapClass})
+class SingleClassStats_ extends ClassStats_ {
+  SingleClassStats_({required super.heapClass})
       : objects = ObjectSet(),
         super(statsByPath: <ClassOnlyHeapPath, ObjectSetStats>{});
 

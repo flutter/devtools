@@ -47,6 +47,7 @@ class SnapshotGraphItem extends SnapshotItem implements SnapshotInstanceItem {
   Heap? _heap;
 
   /// Automatically assigned name like isolate name or file name.
+  @override
   final String defaultName;
 
   @override

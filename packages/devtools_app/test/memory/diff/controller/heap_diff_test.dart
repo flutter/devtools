@@ -71,7 +71,7 @@ void main() {
   });
 }
 
-Future<SingleClassStats> _createClassStats(
+Future<SingleClassStats_> _createClassStats(
   Set<MockAdaptedHeapObject> instances,
 ) async {
   final indexes =
@@ -92,7 +92,7 @@ Future<SingleClassStats> _createClassStats(
   );
   await calculateHeap(heap);
 
-  final result = SingleClassStats(heapClass: instances.first.heapClass);
+  final result = SingleClassStats_(heapClass: instances.first.heapClass);
   for (var index in indexes) {
     result.countInstance(heap, index);
   }

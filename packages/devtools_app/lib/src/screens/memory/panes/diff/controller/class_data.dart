@@ -35,7 +35,7 @@ class ClassesTableSingleData {
   final ClassFilterData filterData;
 
   /// Selected class.
-  final selection = ValueNotifier<SingleClassStats?>(null);
+  final selection = ValueNotifier<SingleClassStats_?>(null);
 }
 
 class ClassesTableDiffData {

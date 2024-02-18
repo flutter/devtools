@@ -277,9 +277,9 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   final _diffClassesToShow = ValueNotifier<List<DiffClassStats>?>(null);
 
   /// Classes to show for currently selected item, if the item is not diffed.
-  ValueListenable<List<SingleClassStats>?> get singleClassesToShow =>
+  ValueListenable<List<SingleClassStats_>?> get singleClassesToShow =>
       _singleClassesToShow;
-  final _singleClassesToShow = ValueNotifier<List<SingleClassStats>?>(null);
+  final _singleClassesToShow = ValueNotifier<List<SingleClassStats_>?>(null);
 
   /// List of retaining paths to show for the selected class.
   final pathEntries = ValueNotifier<List<StatsByPathEntry>?>(null);
@@ -394,7 +394,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   }
 
   /// Returns [classStats] if it matches the current filter.
-  T? _filter<T extends ClassStats>(T? classStats) {
+  T? _filter<T extends ClassStats_>(T? classStats) {
     if (classStats == null) return null;
     if (_core.classFilter.value.apply(
       classStats.heapClass,
@@ -471,9 +471,9 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     final classes = heapClasses.value;
     if (classes == null) return;
 
-    SingleClassStats singleWithMaxRetainedSize(
-      SingleClassStats a,
-      SingleClassStats b,
+    SingleClassStats_ singleWithMaxRetainedSize(
+      SingleClassStats_ a,
+      SingleClassStats_ b,
     ) =>
         a.objects.retainedSize > b.objects.retainedSize ? a : b;
 
@@ -484,7 +484,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
         a.total.delta.retainedSize > b.total.delta.retainedSize ? a : b;
 
     // Get class with max retained size.
-    final ClassStats theClass;
+    final ClassStats_ theClass;
     if (classes is SingleHeapClasses) {
       final classStatsList = classes.filtered(
         _core.classFilter.value,

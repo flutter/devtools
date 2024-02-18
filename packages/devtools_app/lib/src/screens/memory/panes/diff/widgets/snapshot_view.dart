@@ -28,7 +28,7 @@ class SnapshotView extends StatelessWidget {
         controller.derived.diffClassesToShow,
       ],
       builder: (_, values, __) {
-        final singleClasses = values.first as List<SingleClassStats>?;
+        final singleClasses = values.first as List<SingleClassStats_>?;
         final diffClasses = values.second as List<DiffClassStats>?;
         if (controller.derived.updatingValues) {
           return const Center(child: Text('Calculating...'));

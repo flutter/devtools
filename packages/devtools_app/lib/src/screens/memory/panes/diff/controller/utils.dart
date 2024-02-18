@@ -4,7 +4,7 @@
 
 import '../../../shared/heap/heap.dart';
 
-String classesToCsv(Iterable<ClassStats> classes) {
+String classesToCsv(Iterable<ClassStats_> classes) {
   final csvBuffer = StringBuffer();
 
   // Write the headers first.

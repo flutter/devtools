@@ -11,7 +11,7 @@ class Heap {
 
   final HeapData data;
 
-  HeapClasses<ClassStats>? get classes => null;
+  HeapClasses<ClassStats_>? get classes => null;
 }
 
 /// API for working with a heap object.

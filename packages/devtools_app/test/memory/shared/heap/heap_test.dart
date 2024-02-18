@@ -91,9 +91,9 @@ void main() {
     }
   });
 
-  test('$SingleClassStats does not double-count self-referenced classes.', () {
+  test('$SingleClassStats_ does not double-count self-referenced classes.', () {
     for (final t in _classSizeTests) {
-      final classes = SingleClassStats(heapClass: _classA);
+      final classes = SingleClassStats_(heapClass: _classA);
       for (final o in t.heap.objects) {
         if (o.heapClass == _classA) classes.countInstance(t.heap, o.code);
       }

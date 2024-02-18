@@ -93,8 +93,8 @@ class DiffHeapClasses extends HeapClasses<DiffClassStats>
   DiffHeapClasses._(_HeapCouple couple)
       : before = couple.older.data,
         after = couple.younger.data {
-    classesByName = subtractMaps<HeapClassName, SingleClassStats,
-        SingleClassStats, DiffClassStats>(
+    classesByName = subtractMaps<HeapClassName, SingleClassStats_,
+        SingleClassStats_, DiffClassStats>(
       from: couple.younger.classes.classesByName,
       substract: couple.older.classes.classesByName,
       subtractor: ({subtract, from}) =>
@@ -122,7 +122,7 @@ class DiffHeapClasses extends HeapClasses<DiffClassStats>
 }
 
 /// Comparison between two heaps for a class.
-class DiffClassStats extends ClassStats {
+class DiffClassStats extends ClassStats_ {
   DiffClassStats._({
     required super.statsByPath,
     required super.heapClass,
@@ -132,8 +132,8 @@ class DiffClassStats extends ClassStats {
   final ObjectSetDiff total;
 
   static DiffClassStats? diff({
-    required SingleClassStats? before,
-    required SingleClassStats? after,
+    required SingleClassStats_? before,
+    required SingleClassStats_? after,
   }) {
     if (before == null && after == null) return null;
 

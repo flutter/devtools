@@ -21,10 +21,10 @@ Function _listEquality = const ListEquality().equals;
 /// about concrete instances and fields.
 /// To get more detailed information about the retaining path,
 /// use [`leak_tracker/formattedRetainingPath`](https://github.com/dart-lang/leak_tracker/blob/f5620600a5ce1c44f65ddaa02001e200b096e14c/pkgs/leak_tracker/lib/src/leak_tracking/helpers.dart#L58).
-class RetainingPath {
-  RetainingPath._(this.path);
+class PathFromRoot {
+  PathFromRoot._(this.path);
 
-  factory RetainingPath.forObject(
+  factory PathFromRoot.forObject(
     HeapData heap,
     Uint32List shortestRetainers,
     int objectId,
@@ -39,27 +39,27 @@ class RetainingPath {
       path.add(className);
     }
 
-    return RetainingPath.fromPath(path);
+    return PathFromRoot.fromPath(path);
   }
 
-  factory RetainingPath.fromPath(List<HeapClassName> path) {
-    final existingInstance = _instances.lookup(RetainingPath._(path));
+  factory PathFromRoot.fromPath(List<HeapClassName> path) {
+    final existingInstance = _instances.lookup(PathFromRoot._(path));
     if (existingInstance != null) return existingInstance;
 
-    final newInstance = RetainingPath._(List.unmodifiable(path));
+    final newInstance = PathFromRoot._(List.unmodifiable(path));
     return newInstance;
   }
 
   final List<HeapClassName> path;
 
-  static final _instances = <RetainingPath>{};
+  static final _instances = <PathFromRoot>{};
 
   @override
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is RetainingPath && _listEquality(other.path, path);
+    return other is PathFromRoot && _listEquality(other.path, path);
   }
 
   @override

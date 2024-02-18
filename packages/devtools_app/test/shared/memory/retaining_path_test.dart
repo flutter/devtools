@@ -8,15 +8,15 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('RetainingPath equality', () {
-    final path1 = RetainingPath.fromPath([
+    final path1 = PathFromRoot.fromPath([
       HeapClassName.fromPath(library: 'Class1', className: 'lib'),
       HeapClassName.fromPath(library: 'Class2', className: 'lib'),
     ]);
-    final path2 = RetainingPath.fromPath([
+    final path2 = PathFromRoot.fromPath([
       HeapClassName.fromPath(library: 'Class1', className: 'lib'),
       HeapClassName.fromPath(library: 'Class2', className: 'lib'),
     ]);
-    final path3 = RetainingPath.fromPath([
+    final path3 = PathFromRoot.fromPath([
       HeapClassName.fromPath(library: 'Class1', className: 'lib'),
       HeapClassName.fromPath(library: 'Class2', className: 'lib_modified'),
     ]);
