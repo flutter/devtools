@@ -9,6 +9,7 @@ import 'package:vm_service/vm_service.dart';
 import '../../../screens/memory/shared/heap/heap.dart';
 import '../../primitives/utils.dart';
 import '../class_name.dart';
+import 'classes.dart';
 
 class HeapData {
   HeapData._(
@@ -78,12 +79,12 @@ Future<HeapData> calculateHeapData(
     }
   }
 
-  Map<HeapClassName, SingleClassStats_>? classes;
+  Map<HeapClassName, SingleClassStats>? classes;
 
   // Complexity of this part is O(n)*O(p) where
   // n is number of objects and p is length of retaining path.
   if (classStatistics) {
-    classes = <HeapClassName, SingleClassStats_>{};
+    classes = <HeapClassName, SingleClassStats>{};
 
     for (var i = 0; i < graph.objects.length; i++) {
       if (_uiReleaser.step()) await _uiReleaser.releaseUi();
@@ -99,7 +100,7 @@ Future<HeapData> calculateHeapData(
 
       final classStats = classes.putIfAbsent(
         className,
-        () => SingleClassStats_(heapClass: className),
+        () => SingleClassStats(heapClass: className),
       );
       //classStats.countInstance(data, i);
     }

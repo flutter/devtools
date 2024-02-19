@@ -13,9 +13,6 @@ import '../class_name.dart';
 import 'heap_data.dart';
 import 'retaining_path.dart';
 
-typedef StatsByPath = Map<PathFromRoot, ObjectSetStats>;
-typedef StatsByPathEntry = MapEntry<PathFromRoot, ObjectSetStats>;
-
 /// Statistical size-information about objects.
 class ObjectSetStats {
   static ObjectSetStats? subtract({
@@ -116,17 +113,27 @@ class ObjectSet extends ObjectSetStats {
 }
 
 abstract class ClassStats {
-  ClassStats({required this.statsByPath, required this.heapClass});
+  ClassStats({required this.heapClass});
 
-  final StatsByPath statsByPath;
-  late final List<StatsByPathEntry> statsByPathEntries = _getEntries();
-  List<StatsByPathEntry> _getEntries() {
-    return statsByPath.entries.toList(growable: false);
-  }
-
+  final Map<PathFromRoot, ObjectSetStats> statsByPath = {};
   final HeapClassName heapClass;
 }
 
-class SingleClassStats extends ClassStats_ {
-  SingleClassStats({required super.statsByPath, required super.heapClass});
+class SingleClassStats extends ClassStats {
+  SingleClassStats({required super.heapClass});
+  final ObjectSet objects = ObjectSet();
+
+  void countInstance(
+    HeapSnapshotGraph graph,
+    int index,
+    List<int>? retainedSizes, {
+    required bool excludeFromRetained,
+  }) {
+    objects.countInstance(
+      graph,
+      index,
+      retainedSizes,
+      excludeFromRetained: excludeFromRetained, // ????
+    );
+  }
 }

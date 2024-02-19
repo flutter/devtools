@@ -7,3 +7,4 @@ This file is not for merge.
 - Figure out Sentinel vs external
 - Remove non-needed public API in HeapClassName
 - Fix circular references
+- Index library names
