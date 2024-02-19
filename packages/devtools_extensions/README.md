@@ -1,10 +1,9 @@
 # Dart & Flutter DevTools Extensions
 
 Extend Dart & Flutter's developer tool suite,
-[Dart DevTools](https://docs.flutter.dev/tools/devtools/overview), with a custom tool for
-your package. DevTools' extension framework allows you to build a tool for your Dart package
+[Dart DevTools](https://docs.flutter.dev/tools/devtools/overview), with your own custom tool. DevTools' extension framework allows you to build tools
 that can leverage existing frameworks and utilities from DevTools (VM service connection, theming,
-shared widgets, utilities, etc.). When an app is connected to DevTools that depends on your
+shared widgets, utilities, etc.). A DevTools extension can be integrated with existing packages or an entirely standalone tool as its own package. When an app is connected to DevTools that depends on your
 package, your extension will show up in its own DevTools tab:
 
 ![Example devtools extension](_readme_images/example_devtools_extension.png)
@@ -14,68 +13,18 @@ Follow the instructions below to get started, and use the
 for reference.
 
 # Table of contents
-1. [Setup your package to provide a DevTools extension](#setup-your-package-to-provide-a-DevTools-extension)
-2. [Create a DevTools extension](#create-a-devtools-extension)
+1. [Create a DevTools extension](#create-a-devtools-extension)
     - [Where to put your source code](#where-to-put-your-source-code)
     - [Development](#create-the-extension-web-app)
     - [Debugging](#debug-the-extension-web-app)
+2. [Setup your package to provide a DevTools extension](#setup-your-package-to-provide-a-DevTools-extension)
 3. [Publish your package with a DevTools extension](#publish-your-package-with-a-DevTools-extension)
 4. [Resources and support](#resources-and-support)
 
-## Setup your package to provide a DevTools extension
+## Create a DevTools extension
 
 DevTools extensions must be written as Flutter web apps. This is because DevTools embeds
 extensions in an iFrame to display them dynamically in DevTools.
-
-To add an extension to your Dart package, add a top-level `extension` directory:
-```
-foo
-  extension/
-  lib/
-  ...
-```
-
-Under this directory, create the following structure:
-```
-extension
-  devtools/
-    build/
-    config.yaml
-```
-
-The `config.yaml` file contains metadata that DevTools needs to load the extension.
-
-```yaml
-name: foo
-issueTracker: <link_to_your_issue_tracker.com>
-version: 0.0.1
-materialIconCodePoint: '0xe0b1'
-```
-
-Copy the `config.yaml` file content above and paste it into the `config.yaml` file you just 
-created in your package. For each key, fill in the appropriate value for your package. 
-* `name`: the package name that this DevTools extension belongs to. The value of this field 
-will be used in the extension page title bar. **(required)**
-* `issueTracker`: the url for your issue tracker. When a user clicks the “Report an issue” 
-link in the DevTools UI, they will be directed to this url. **(required)**
-* `version`: the version of your DevTools extension. This version number should evolve over 
-time as you ship new features for your extension. The value of this field will be used in the 
-extension page title bar. **(required)**
-
-  ![Extension title bar components](_readme_images/extension_title_bar.png)
-
-* `materialIconCodePoint`: corresponds to the codepoint value of an icon from
-[material/icons.dart](https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/material/icons.dart).
-This icon will be used for the extension’s tab in the top-level DevTools tab bar. **(required)**
-
-  ![Extension tab icon](_readme_images/extension_tab_icon.png)
-
-For the most up-to-date documentation on the `config.yaml` spec, see
-[extension_config_spec.md](https://github.com/flutter/devtools/blob/master/packages/devtools_extensions/extension_config_spec.md)
-
-Now it is time to build your extension.
-
-## Create a DevTools extension
 
 ### Where to put your source code
 
@@ -217,6 +166,54 @@ run `pub get` on the test app, and run the application.
 in the DevTools app bar for your extension. The enabled or disabled state of your extension is
 managed by DevTools, which is exposed from an "Extensions" menu in DevTools, available from the
 action buttons in the upper right corner of the screen.
+
+## Setup your package to provide a DevTools extension
+
+To add an extension to your Dart package, add a top-level `extension` directory:
+```
+foo
+  extension/
+  lib/
+  ...
+```
+
+Under this directory, create the following structure:
+```
+extension
+  devtools/
+    build/
+    config.yaml
+```
+
+The `config.yaml` file contains metadata that DevTools needs to load the extension.
+
+```yaml
+name: foo
+issueTracker: <link_to_your_issue_tracker.com>
+version: 0.0.1
+materialIconCodePoint: '0xe0b1'
+```
+
+Copy the `config.yaml` file content above and paste it into the `config.yaml` file you just 
+created in your package. For each key, fill in the appropriate value for your package. 
+* `name`: the package name that this DevTools extension belongs to. The value of this field 
+will be used in the extension page title bar. **(required)**
+* `issueTracker`: the url for your issue tracker. When a user clicks the “Report an issue” 
+link in the DevTools UI, they will be directed to this url. **(required)**
+* `version`: the version of your DevTools extension. This version number should evolve over 
+time as you ship new features for your extension. The value of this field will be used in the 
+extension page title bar. **(required)**
+
+  ![Extension title bar components](_readme_images/extension_title_bar.png)
+
+* `materialIconCodePoint`: corresponds to the codepoint value of an icon from
+[material/icons.dart](https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/material/icons.dart).
+This icon will be used for the extension’s tab in the top-level DevTools tab bar. **(required)**
+
+  ![Extension tab icon](_readme_images/extension_tab_icon.png)
+
+For the most up-to-date documentation on the `config.yaml` spec, see
+[extension_config_spec.md](https://github.com/flutter/devtools/blob/master/packages/devtools_extensions/extension_config_spec.md)
 
 ## Publish your package with a DevTools extension
 
