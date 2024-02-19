@@ -2,15 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// import 'package:vm_service/vm_service.dart';
-
-import 'dart:typed_data';
-
 import 'package:vm_service/vm_service.dart';
 
-import '../../../screens/memory/shared/heap/heap.dart';
 import '../class_name.dart';
-import 'heap_data.dart';
 import 'retaining_path.dart';
 
 /// Statistical size-information about objects.
@@ -143,5 +137,18 @@ class SingleClassStats extends ClassStats {
       retainedSizes,
       excludeFromRetained: excludeFromRetained,
     );
+
+    if (path != null) {
+      statsByPath.putIfAbsent(
+        path,
+        () => ObjectSetStats(),
+      );
+      statsByPath[path]!.countInstance(
+        graph,
+        index,
+        retainedSizes,
+        excludeFromRetained: excludeFromRetained,
+      );
+    }
   }
 }
