@@ -3,7 +3,10 @@
 Extend Dart & Flutter's developer tool suite,
 [Dart DevTools](https://docs.flutter.dev/tools/devtools/overview), with your own custom tool. DevTools' extension framework allows you to build tools
 that can leverage existing frameworks and utilities from DevTools (VM service connection, theming,
-shared widgets, utilities, etc.). A DevTools extension can be integrated with existing packages or an entirely standalone tool as its own package. When an app is connected to DevTools that depends on your
+shared widgets, utilities, etc.). You can add a DevTools extension to an existing pub package, or you can create a new package that provides a DevTools extension only. In both these scenarios, the user must list a dependency on the package providing the DevTools extension in order to see the developer tool in DevTools.
+
+
+When an app is connected to DevTools that depends on your
 package, your extension will show up in its own DevTools tab:
 
 ![Example devtools extension](_readme_images/example_devtools_extension.png)
