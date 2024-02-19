@@ -10,6 +10,7 @@ import '../../../screens/memory/shared/heap/heap.dart';
 import '../../primitives/utils.dart';
 import '../class_name.dart';
 import 'classes.dart';
+import 'retaining_path.dart';
 
 class HeapData {
   HeapData._(
@@ -28,21 +29,28 @@ class HeapData {
 
 final UiReleaser _uiReleaser = UiReleaser();
 
+///
+///
+/// The flags may be not needed for the features,
+/// but they may be needed to research how much CPU and memory
+/// each part consumes.
 Future<HeapData> calculateHeapData(
   HeapSnapshotGraph graph, {
-  bool retainingPaths = true,
-  bool retainedSizes = true,
-  bool classStatistics = true,
+  bool calculateRetainingPaths = true,
+  bool calculateRetainedSizes = true,
+  bool calculateClassStatistics = true,
 }) async {
-  if (!retainingPaths && !retainedSizes && !classStatistics) {
+  if (!calculateRetainingPaths &&
+      !calculateRetainedSizes &&
+      !calculateClassStatistics) {
     return HeapData._(graph);
   }
 
   Uint32List? retainers;
   final Uint32List? sizes =
-      retainedSizes ? null : Uint32List(graph.objects.length);
+      calculateRetainedSizes ? null : Uint32List(graph.objects.length);
 
-  if (retainingPaths || retainedSizes) {
+  if (calculateRetainingPaths || calculateRetainedSizes) {
     final weakClasses = _WeakClasses(graph);
 
     retainers = Uint32List(graph.objects.length);
@@ -80,11 +88,13 @@ Future<HeapData> calculateHeapData(
   }
 
   Map<HeapClassName, SingleClassStats>? classes;
+  Map<(PathFromRoot, HeapClassName), bool>? pathContainsClass;
 
   // Complexity of this part is O(n)*O(p) where
   // n is number of objects and p is length of retaining path.
-  if (classStatistics) {
+  if (calculateClassStatistics) {
     classes = <HeapClassName, SingleClassStats>{};
+    if (calculateRetainedSizes) pathContainsClass = {};
 
     for (var i = 0; i < graph.objects.length; i++) {
       if (_uiReleaser.step()) await _uiReleaser.releaseUi();
@@ -102,7 +112,8 @@ Future<HeapData> calculateHeapData(
         className,
         () => SingleClassStats(heapClass: className),
       );
-      //classStats.countInstance(data, i);
+
+      classStats.countInstance(graph, i, retainers, sizes, pathContainsClass);
     }
   }
 

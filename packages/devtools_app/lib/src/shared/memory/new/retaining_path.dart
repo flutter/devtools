@@ -2,14 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
+import 'package:flutter/material.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../class_name.dart';
-import 'heap_data.dart';
 
 Function _listEquality = const ListEquality().equals;
+
+typedef PathContainsClass = Map<(PathFromRoot, HeapClassName), bool>;
 
 /// A retaining path from the root to an object.
 ///
@@ -22,20 +26,32 @@ Function _listEquality = const ListEquality().equals;
 /// To get more detailed information about the retaining path,
 /// use [`leak_tracker/formattedRetainingPath`](https://github.com/dart-lang/leak_tracker/blob/f5620600a5ce1c44f65ddaa02001e200b096e14c/pkgs/leak_tracker/lib/src/leak_tracking/helpers.dart#L58).
 class PathFromRoot {
-  PathFromRoot._(this.path);
+  PathFromRoot._(this.path)
+      : hashCode = path.isEmpty ? _hashOfEmptyPath : Object.hashAll(path),
+        classes = calculateSetOfClasses ? path.toSet() : const {};
+
+  const PathFromRoot._empty()
+      : path = const [],
+        classes = const {},
+        hashCode = _hashOfEmptyPath;
 
   factory PathFromRoot.forObject(
-    HeapData heap,
+    HeapSnapshotGraph graph,
     Uint32List shortestRetainers,
     int objectId,
   ) {
+    var nextObjectId = shortestRetainers[objectId];
+    if (nextObjectId == 0) {
+      return const PathFromRoot._empty();
+    }
+
     final path = <HeapClassName>[];
 
-    while (shortestRetainers[objectId] > 0) {
-      objectId = shortestRetainers[objectId];
-      final classId = heap.graph.objects[objectId].classId;
+    while (shortestRetainers[nextObjectId] > 0) {
+      nextObjectId = shortestRetainers[nextObjectId];
+      final classId = graph.objects[nextObjectId].classId;
       final className =
-          HeapClassName.fromHeapSnapshotClass(heap.graph.classes[classId]);
+          HeapClassName.fromHeapSnapshotClass(graph.classes[classId]);
       path.add(className);
     }
 
@@ -43,16 +59,26 @@ class PathFromRoot {
   }
 
   factory PathFromRoot.fromPath(List<HeapClassName> path) {
-    final existingInstance = _instances.lookup(PathFromRoot._(path));
+    final existingInstance = instances.lookup(PathFromRoot._(path));
     if (existingInstance != null) return existingInstance;
 
     final newInstance = PathFromRoot._(List.unmodifiable(path));
+
+    instances.add(newInstance);
     return newInstance;
   }
 
-  final List<HeapClassName> path;
+  @visibleForTesting
+  static Set<PathFromRoot> get instances => _instances ??= <PathFromRoot>{};
+  static Set<PathFromRoot>? _instances;
 
-  static final _instances = <PathFromRoot>{};
+  /// If false, the [classes] is always empty.
+  static bool calculateSetOfClasses = true;
+
+  static const _hashOfEmptyPath = 0;
+
+  final List<HeapClassName> path;
+  final Set<HeapClassName> classes;
 
   @override
   bool operator ==(Object other) {
@@ -63,5 +89,10 @@ class PathFromRoot {
   }
 
   @override
-  late final hashCode = path.hashCode;
+  final int hashCode;
+
+  @visibleForTesting
+  static void disposeSingletons() {
+    _instances = null;
+  }
 }

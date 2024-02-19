@@ -126,9 +126,18 @@ class SingleClassStats extends ClassStats {
   void countInstance(
     HeapSnapshotGraph graph,
     int index,
-    List<int>? retainedSizes, {
-    required bool excludeFromRetained,
-  }) {
+    List<int>? retainers,
+    List<int>? retainedSizes,
+    Map<(PathFromRoot, HeapClassName), bool>? pathContainsClass,
+  ) {
+    final PathFromRoot? path;
+    if (retainers)
+      path = PathFromRoot.forObject(
+        graph,
+        retainers,
+        index,
+      );
+
     objects.countInstance(
       graph,
       index,
