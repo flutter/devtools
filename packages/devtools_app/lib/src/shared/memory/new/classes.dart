@@ -128,21 +128,20 @@ class SingleClassStats extends ClassStats {
     int index,
     List<int>? retainers,
     List<int>? retainedSizes,
-    Map<(PathFromRoot, HeapClassName), bool>? pathContainsClass,
   ) {
-    final PathFromRoot? path;
-    if (retainers)
-      path = PathFromRoot.forObject(
-        graph,
-        retainers,
-        index,
-      );
+    final PathFromRoot? path = retainers == null
+        ? null
+        : PathFromRoot.forObject(graph, retainers, index);
+
+    final bool excludeFromRetained = path != null &&
+        retainedSizes != null &&
+        path.classes.contains(heapClass);
 
     objects.countInstance(
       graph,
       index,
       retainedSizes,
-      excludeFromRetained: excludeFromRetained, // ????
+      excludeFromRetained: excludeFromRetained,
     );
   }
 }

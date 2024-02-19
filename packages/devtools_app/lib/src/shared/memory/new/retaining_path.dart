@@ -37,7 +37,7 @@ class PathFromRoot {
 
   factory PathFromRoot.forObject(
     HeapSnapshotGraph graph,
-    Uint32List shortestRetainers,
+    List<int> shortestRetainers,
     int objectId,
   ) {
     var nextObjectId = shortestRetainers[objectId];
