@@ -661,7 +661,7 @@ void main() {
         }),
       );
       expect(
-        devToolsQueryParams('http://localhost:123/#/?key=value.json&key2=123'),
+        devToolsQueryParams('http://localhost:123/?key=value.json&key2=123'),
         equals({
           'key': 'value.json',
           'key2': '123',
@@ -670,7 +670,7 @@ void main() {
       for (final meta in ScreenMetaData.values) {
         expect(
           devToolsQueryParams(
-            'http://localhost:9101/#/${meta.id}?key=value.json&key2=123',
+            'http://localhost:9101/${meta.id}?key=value.json&key2=123',
           ),
           equals({
             'key': 'value.json',
