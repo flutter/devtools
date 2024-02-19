@@ -68,7 +68,8 @@ TODO: Remove this section if there are not any general updates.
 
 * Fixed an issue with not detecting extensions for test files in
 subdirectories. - [#7174](https://github.com/flutter/devtools/pull/7174)
-* Add an example of creating an extension for a pure Dart package. - [#7196](https://github.com/flutter/devtools/pull/7196)
+* Added an example of creating an extension for a pure Dart package. - [#7196](https://github.com/flutter/devtools/pull/7196)
+* Updated the `example/README.md` with more complete documentation. - [#7237](https://github.com/flutter/devtools/pull/7237)
 
 ## Full commit history
 

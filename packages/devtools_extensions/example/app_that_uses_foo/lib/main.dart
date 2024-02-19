@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:dart_foo/dart_foo.dart';
 import 'package:flutter/material.dart';
 import 'package:foo/foo.dart';
 
@@ -36,11 +37,13 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late final FooController fooController;
+  late final dartFoo = DartFoo();
 
   @override
   void initState() {
     super.initState();
     fooController = FooController.instance;
+    dartFoo.foo();
   }
 
   @override
