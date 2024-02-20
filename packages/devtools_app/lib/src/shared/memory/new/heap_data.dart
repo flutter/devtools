@@ -6,17 +6,12 @@ import 'dart:typed_data';
 
 import 'package:vm_service/vm_service.dart';
 
-import '../../../screens/memory/shared/heap/heap.dart';
 import '../../primitives/utils.dart';
 import '../class_name.dart';
 import 'classes.dart';
-import 'retaining_path.dart';
 
 class HeapData {
-  HeapData._(
-    this.graph, {
-    this.retainedSizes,
-  });
+  HeapData._(this.graph, {this.classes});
 
   /// Value for rootIndex is taken from the doc:
   /// https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/heap_snapshot.md#object-ids
@@ -24,7 +19,7 @@ class HeapData {
 
   final HeapSnapshotGraph graph;
 
-  final Uint32List? retainedSizes;
+  Map<HeapClassName, SingleClassStats>? classes;
 }
 
 final UiReleaser _uiReleaser = UiReleaser();
@@ -88,13 +83,11 @@ Future<HeapData> calculateHeapData(
   }
 
   Map<HeapClassName, SingleClassStats>? classes;
-  Map<(PathFromRoot, HeapClassName), bool>? pathContainsClass;
 
   // Complexity of this part is O(n)*O(p) where
   // n is number of objects and p is length of retaining path.
   if (calculateClassStatistics) {
     classes = <HeapClassName, SingleClassStats>{};
-    if (calculateRetainedSizes) pathContainsClass = {};
 
     for (var i = 0; i < graph.objects.length; i++) {
       if (_uiReleaser.step()) await _uiReleaser.releaseUi();
@@ -108,21 +101,20 @@ Future<HeapData> calculateHeapData(
         continue;
       }
 
+      // Verify assumption that all sentinel objects have zero size.
+      // The code does not rely on it, it is just a check.
+      assert(!className.isSentinel || object.shallowSize == 0);
+
       final classStats = classes.putIfAbsent(
         className,
         () => SingleClassStats(heapClass: className),
       );
 
-      classStats.countInstance(graph, i, retainers, sizes, pathContainsClass);
+      classStats.countInstance(graph, i, retainers, sizes);
     }
   }
 
-  return HeapData._(
-    graph,
-    //classes
-    //shortestRetainers: retainingPaths ? retainers : null,
-    // retainedSizes: sizes,
-  );
+  return HeapData._(graph, classes: classes);
 }
 
 /// Assuming the object is leaf, initializes its retained size
