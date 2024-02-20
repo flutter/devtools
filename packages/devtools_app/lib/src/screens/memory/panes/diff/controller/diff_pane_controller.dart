@@ -27,12 +27,11 @@ import 'utils.dart';
 
 class DiffPaneController extends DisposableController {
   DiffPaneController(
-    this.snapshotTaker, {
-    this.heapGraphLoader = const HeapGraphLoaderMock(),
-  });
+    SnapshotTaker snapshotTaker, {
+    HeapGraphLoader heapGraphLoader = const HeapGraphLoaderMock(),
+  }) : _heapGraphLoader = heapGraphLoader;
 
-  final SnapshotTaker snapshotTaker;
-  final HeapGraphLoader heapGraphLoader;
+  final HeapGraphLoader _heapGraphLoader;
 
   final retainingPathController = RetainingPathController();
 
@@ -54,7 +53,7 @@ class DiffPaneController extends DisposableController {
       defaultName: selectedIsolateName ?? '<isolate-not-detected>',
     );
 
-    await _addSnapshot(heapGraphLoader, item);
+    await _addSnapshot(_heapGraphLoader, item);
     derived._updateValues();
   }
 

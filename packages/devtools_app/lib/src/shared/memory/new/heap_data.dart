@@ -35,11 +35,7 @@ Future<HeapData> calculateHeapData(
   bool calculateRetainedSizes = true,
   bool calculateClassStatistics = true,
 }) async {
-  if (!calculateRetainingPaths &&
-      !calculateRetainedSizes &&
-      !calculateClassStatistics) {
-    return HeapData._(graph);
-  }
+  if (!calculateClassStatistics) return HeapData._(graph);
 
   Uint32List? retainers;
   final Uint32List? sizes =
