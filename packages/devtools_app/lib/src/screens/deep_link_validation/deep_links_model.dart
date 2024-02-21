@@ -159,6 +159,7 @@ class _ErrorAwareText extends StatelessWidget {
               right: defaultSpacing,
             ),
             preferBelow: true,
+            enableTapToDismiss: false,
             richMessage: WidgetSpan(
               child: SizedBox(
                 width: kToolTipWidth,
