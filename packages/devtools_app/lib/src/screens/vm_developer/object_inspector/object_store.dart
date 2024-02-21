@@ -49,7 +49,10 @@ class _ObjectColumn extends ColumnData<ObjectStoreEntry>
     VoidCallback? onPressed,
   }) {
     return VmServiceObjectLink(
-      object: data.value,
+      // TODO(srawlins): What type is `data` at runtime? If cast to `int`, no
+      // tests fail, but that can't be right...
+      // ignore: avoid-dynamic
+      object: (data as dynamic).value,
       onTap: onTap,
     );
   }
