@@ -3,7 +3,7 @@
 ## Run this example
 
 1. Start app_that_uses_foo on any platform
-2. Open DevTools connected to app_that_uses_foo
+2. Open DevTools in release mode connected to app_that_uses_foo
 3. Find there is the custom tab 'Foo' in DevTools
 
 ## Example structure
