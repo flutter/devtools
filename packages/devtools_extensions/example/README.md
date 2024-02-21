@@ -3,7 +3,10 @@
 ## Run this example
 
 1. Start app_that_uses_foo on any platform
-2. Open DevTools in release mode connected to app_that_uses_foo
+2. Open DevTools with one of the following ways:
+  - button 'DevTools' on Flutter panel in VS Code
+  - menu {} > Dart DevTools at the bottom of VS Code
+  - with command `devtools_tool serve .` in `packages/devtools_app` of DevTools repo
 3. Find there is a custom tab with name 'Foo' in DevTools
 
 ## Example structure
