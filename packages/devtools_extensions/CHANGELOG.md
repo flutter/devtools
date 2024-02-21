@@ -1,5 +1,9 @@
 ## 0.0.14-wip
 * Add a global `dtdManager` for interacting with the Dart Tooling Daemon.
+* Add support for connecting to the Dart Tooling Daemon from the 
+simulated DevTools environment.
+* Add help buttons to the VM Service and DTD connection text fields in the
+simulated DevTools environment.
 * Bump `package:vm_service` dependency to ^14.0.0.
 * Refactor `example` directory to support more package examples.
 * Add an example of providing an extension from a pure Dart package.

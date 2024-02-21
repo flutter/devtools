@@ -66,6 +66,10 @@ TODO: Remove this section if there are not any general updates.
 
 ## DevTools Extension updates
 
+* Added support for connecting to the Dart Tooling Daemon from the 
+simulated DevTools environment. - [#7133](https://github.com/flutter/devtools/pull/7133)
+* Added help buttons to the VM Service and DTD connection text fields in the
+simulated DevTools environment. - [#7133](https://github.com/flutter/devtools/pull/7133)
 * Fixed an issue with not detecting extensions for test files in
 subdirectories. - [#7174](https://github.com/flutter/devtools/pull/7174)
 * Added an example of creating an extension for a pure Dart package. - [#7196](https://github.com/flutter/devtools/pull/7196)
