@@ -10,11 +10,12 @@ import '../../../screens/memory/shared/primitives/memory_utils.dart';
 import 'heap_graph_mock.dart';
 
 abstract class HeapGraphLoader {
+  const HeapGraphLoader();
   Future<HeapSnapshotGraph?> load();
 }
 
 class HeapGraphLoaderRuntime extends HeapGraphLoader {
-  HeapGraphLoaderRuntime(this._timeline);
+  const HeapGraphLoaderRuntime(this._timeline);
 
   final MemoryTimeline? _timeline;
 
