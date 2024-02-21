@@ -2,10 +2,13 @@
 
 Extend Dart & Flutter's developer tool suite,
 [Dart DevTools](https://docs.flutter.dev/tools/devtools/overview), with a custom tool for
-your package. DevTools' extension framework allows you to build a tool for your Dart package
-that can leverage existing frameworks and utilities from DevTools (VM service connection, theming,
-shared widgets, utilities, etc.). When an app is connected to DevTools that depends on your
-package, your extension will show up in its own DevTools tab:
+your package.
+
+DevTools' extension framework allows you to add your custom tab to the DevTools application
+by creating a Dart package
+that leverage frameworks and utilities from DevTools (like VM service connection, theming,
+shared widgets, utilities, etc.). When an app, that depends on your
+package,  is connected to DevTools, your extension will show up in its own DevTools tab:
 
 ![Example devtools extension](_readme_images/example_devtools_extension.png)
 
@@ -52,14 +55,14 @@ version: 0.0.1
 materialIconCodePoint: '0xe0b1'
 ```
 
-Copy the `config.yaml` file content above and paste it into the `config.yaml` file you just 
-created in your package. For each key, fill in the appropriate value for your package. 
-* `name`: the package name that this DevTools extension belongs to. The value of this field 
+Copy the `config.yaml` file content above and paste it into the `config.yaml` file you just
+created in your package. For each key, fill in the appropriate value for your package.
+* `name`: the package name that this DevTools extension belongs to. The value of this field
 will be used in the extension page title bar. **(required)**
-* `issueTracker`: the url for your issue tracker. When a user clicks the “Report an issue” 
+* `issueTracker`: the url for your issue tracker. When a user clicks the “Report an issue”
 link in the DevTools UI, they will be directed to this url. **(required)**
-* `version`: the version of your DevTools extension. This version number should evolve over 
-time as you ship new features for your extension. The value of this field will be used in the 
+* `version`: the version of your DevTools extension. This version number should evolve over
+time as you ship new features for your extension. The value of this field will be used in the
 extension page title bar. **(required)**
 
   ![Extension title bar components](_readme_images/extension_title_bar.png)

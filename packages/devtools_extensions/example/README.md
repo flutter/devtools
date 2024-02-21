@@ -1,4 +1,13 @@
 # DevTools extension examples
+
+## Run this example
+
+1. Start app_that_uses_foo on any platform
+2. Open DevTools connected to app_that_uses_foo
+3. Find there is the custom tab 'Foo' in DevTools
+
+## Example structure
+
 This directory contains end-to-end examples of DevTools extensions. Each
 end-to-end example is made up of three components:
 1. **Parent package**: Dart package that provides the extension
@@ -110,13 +119,13 @@ command provided by `package:devtools_extensions`.
     flutter pub get &&
     dart run devtools_extensions build_and_copy \
         --source=. \
-        --dest=../foo/extension/devtools 
+        --dest=../foo/extension/devtools
     ```
 ## Learn how to configure your extension's `config.yaml` file
 
 In these examples, you will also learn how to properly configure your extension's
 `config.yaml` file. DevTools reads this file in order to embed your extension in its
-own tab. This file must be configured as shown. 
+own tab. This file must be configured as shown.
 
 ```yaml
 name: foo
