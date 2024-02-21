@@ -43,6 +43,13 @@
             ],
         },
         {
+            "name": "devtools + release",
+            "request": "launch",
+            "type": "dart",
+            "program": "devtools_app/lib/main.dart",
+            "flutterMode": "release",
+        },
+        {
             "name": "memory/default",
             "request": "launch",
             "type": "dart",
