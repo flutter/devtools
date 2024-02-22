@@ -294,11 +294,7 @@ class _GenerateAssetLinksPanel extends StatelessWidget {
                                         ),
                                       ),
                                     ),
-                                    IconButton(
-                                      onPressed: () async =>
-                                          await copyToClipboard(generatedAssetLinks.generatedString, null),
-                                      icon: const Icon(Icons.copy_rounded),
-                                    ),
+                                    CopyToClipboardControl(dataProvider:() => generatedAssetLinks.generatedString),
                                   ],
                                 )
                               : const CenteredCircularProgressIndicator(),
