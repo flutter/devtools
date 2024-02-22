@@ -27,7 +27,7 @@ dependencies:
   devtools_app_shared: ^0.0.7
   devtools_extensions: ^0.0.10
   devtools_shared: ^6.0.1
-  dtd: ^0.0.3
+  dtd: ^1.0.0
   file: ">=6.0.0 <8.0.0"
   file_selector: ^1.0.0
   flutter:
