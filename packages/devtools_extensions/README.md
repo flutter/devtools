@@ -21,7 +21,7 @@ for reference.
 
 # Table of contents
 1. [Setup your package hierarchy](#setup-your-package-hierarchy)
-1. [Create a DevTools extension](#create-a-devtools-extension)
+2. [Create a DevTools extension](#create-a-devtools-extension)
     - [Where to put your source code](#where-to-put-your-source-code)
     - [Development](#create-the-extension-web-app)
     - [Debugging](#debug-the-extension-web-app)
