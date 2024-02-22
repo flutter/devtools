@@ -9,6 +9,8 @@ simulated DevTools environment.
 * Add an example of providing an extension from a pure Dart package.
 * Update the `example/README.md`.
 * Add a `devtools_extensions validate` for validating extension requirements.
+* Update the `README.md` to make it clear that you can build a DevTools
+extension as a standalone tool.
 
 ## 0.0.13
 * Bump `package:web` to `^0.4.1`.
