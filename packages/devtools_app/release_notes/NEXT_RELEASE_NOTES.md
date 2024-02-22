@@ -74,6 +74,7 @@ simulated DevTools environment. - [#7133](https://github.com/flutter/devtools/pu
 subdirectories. - [#7174](https://github.com/flutter/devtools/pull/7174)
 * Added an example of creating an extension for a pure Dart package. - [#7196](https://github.com/flutter/devtools/pull/7196)
 * Updated the `example/README.md` with more complete documentation. - [#7237](https://github.com/flutter/devtools/pull/7237)
+* Added a `devtools_extensions validate` command to validate extension requirements during development. - [#7257](https://github.com/flutter/devtools/pull/7257)
 
 ## Full commit history
 
