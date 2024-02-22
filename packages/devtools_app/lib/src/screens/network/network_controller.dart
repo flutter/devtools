@@ -8,6 +8,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../../devtools_app.dart';
 import '../../shared/config_specific/logger/allowed_error.dart';
 import '../../shared/globals.dart';
 import '../../shared/http/http_request_data.dart';
@@ -127,7 +128,7 @@ class NetworkController extends DisposableController
   /// This timestamp is on the monotonic clock used by the timeline.
   int lastSocketDataRefreshMicros = 0;
 
-  Timer? _pollingTimer;
+  DebounceTimer? _pollingTimer;
 
   @visibleForTesting
   bool get isPolling => _pollingTimer != null;
@@ -137,6 +138,7 @@ class NetworkController extends DisposableController
     required CurrentNetworkRequests currentRequests,
   }) {
     newOrUpdatedHttpRequests.forEach(currentRequests.updateOrAdd);
+    _filterAndRefreshSearchMatches();
   }
 
   @visibleForTesting
@@ -171,6 +173,8 @@ class NetworkController extends DisposableController
     required List<HttpProfileRequest>? httpRequests,
   }) {
     // Trigger refresh.
+    // we reassign this every time which seems a bit inneficient
+    // perhaps the list could be modified directly
     _requests.value = processNetworkTrafficHelper(
       sockets,
       httpRequests,
@@ -183,11 +187,11 @@ class NetworkController extends DisposableController
 
   void _updatePollingState(bool recording) {
     if (recording) {
-      _pollingTimer ??= Timer.periodic(
+      _pollingTimer ??= DebounceTimer.periodic(
         // TODO(kenz): look into improving performance by caching more data.
         // Polling less frequently helps performance.
         const Duration(milliseconds: 2000),
-        (_) => unawaited(_networkService.refreshNetworkData()),
+        (_) async => _networkService.refreshNetworkData(),
       );
     } else {
       _pollingTimer?.cancel();
@@ -381,7 +385,6 @@ class CurrentNetworkRequests {
       requestFullDataFromVmService: false,
     );
     if (!_requestsById.containsKey(request.id)) {
-      wrapped.requestUpdatedNotifier.addListener(() => onRequestDataChange());
       _requestsById[wrapped.id] = wrapped;
     } else {
       // If we override an entry that is not a DartIOHttpRequestData then that means
@@ -410,8 +413,8 @@ class CurrentNetworkRequests {
       // already have, so we remove the current web sockets and replace them with
       // updated data.
       _requestsById[webSocket.id] = webSocket;
-      onRequestDataChange();
     }
+    onRequestDataChange();
   }
 
   void clear() {

@@ -6,6 +6,8 @@
 // other libraries in this package.
 // Utils, that do not have dependencies, should go to primitives/utils.dart.
 
+import 'dart:async';
+
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -227,4 +229,32 @@ List<String> stripGoogle3(List<String> pathParts) {
 /// down event.
 extension IsKeyType on KeyEvent {
   bool get isKeyDownOrRepeat => this is KeyDownEvent || this is KeyRepeatEvent;
+}
+
+class DebounceTimer {
+  DebounceTimer.periodic(
+    Duration duration,
+    FutureOr<void> Function(Timer timer) callback,
+  ) {
+    _timer = Timer.periodic(duration, (timer) async {
+      // If the callback is still running, then don't run again.
+      if (_isRunning) {
+        return;
+      }
+
+      try {
+        _isRunning = true;
+        await callback(timer);
+      } finally {
+        _isRunning = false;
+      }
+    });
+  }
+
+  late Timer _timer;
+  bool _isRunning = false;
+
+  void cancel() {
+    _timer.cancel();
+  }
 }
