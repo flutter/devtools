@@ -198,6 +198,16 @@ flutter pub get;
 dart run devtools_extensions build_and_copy --source=. --dest=../foo/extension/devtools
 ```
 
+To ensure that your extension is setup properly for loading in DevTools, run the
+`validate` command from `package:devtools_extensions`. The `--package` argument
+should point to the root of the Dart package that this extension will be published
+with.
+```sh
+cd your_extension_web_app;
+flutter pub get;
+dart run devtools_extensions validate --package=../foo
+```
+
 2. Prepare and run a test application that depends on your pub package. You'll need to change the
 `pubspec.yaml` dependency to be a [path](https://dart.dev/tools/pub/dependencies#path-packages)
 dependency that points to your local pub package source code. Once you have done this,
