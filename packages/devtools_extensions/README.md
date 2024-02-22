@@ -7,7 +7,7 @@ and utilities from DevTools (VM service connection, theming, shared widgets, uti
 
 You can add a DevTools extension to an existing pub package, or you can create a new package
 that provides a DevTools extension only. In both these scenarios, the end-user must list a
-dependency on the package providing the DevTools extension in order to see the developer tool
+dependency on the package providing the DevTools extension in order to see the extension
 in DevTools.
 
 When an app that depends on your package is connected to DevTools, your extension will
