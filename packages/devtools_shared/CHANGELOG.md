@@ -1,3 +1,6 @@
+# 7.0.1-wip
+* Refactor yaml extension methods.
+
 # 7.0.0
 * **Breaking change:** remove the `ServerApi.setCompleted` method that was a
 duplicate of `ServerApi.getCompleted`.
