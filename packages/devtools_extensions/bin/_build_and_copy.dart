@@ -116,8 +116,7 @@ class BuildExtensionCommand extends Command {
     );
   }
 
-  // ignore: avoid_print, logging command output.
-  void _log(String message) => print('[$name] $message');
+  void _log(String message) => stdout.writeln('[$name] $message');
 
   Future<void> _runProcess(
     ProcessManager processManager,
