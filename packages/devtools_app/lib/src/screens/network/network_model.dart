@@ -185,5 +185,3 @@ class WebSocket extends NetworkRequest {
   @override
   int get hashCode => id.hashCode;
 }
-
-/// Contains all state relevant to completed and in-progress network requests.
