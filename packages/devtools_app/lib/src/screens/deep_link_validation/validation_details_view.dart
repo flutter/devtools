@@ -294,7 +294,10 @@ class _GenerateAssetLinksPanel extends StatelessWidget {
                                         ),
                                       ),
                                     ),
-                                    CopyToClipboardControl(dataProvider:() => generatedAssetLinks.generatedString),
+                                    CopyToClipboardControl(
+                                      dataProvider: () =>
+                                          generatedAssetLinks.generatedString,
+                                    ),
                                   ],
                                 )
                               : const CenteredCircularProgressIndicator(),
