@@ -7,11 +7,9 @@ import 'dart:async';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../shared/common_widgets.dart';
 import '../../shared/config_specific/launch_url/launch_url.dart';
-import '../../shared/config_specific/copy_to_clipboard/copy_to_clipboard.dart';
 import '../../shared/ui/colors.dart';
 import 'deep_link_list_view.dart';
 import 'deep_links_controller.dart';
