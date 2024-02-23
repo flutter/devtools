@@ -8,7 +8,6 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../devtools_app.dart';
 import '../../shared/config_specific/logger/allowed_error.dart';
 import '../../shared/globals.dart';
 import '../../shared/http/http_request_data.dart';
@@ -16,6 +15,7 @@ import '../../shared/http/http_service.dart' as http_service;
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
+import '../../shared/utils.dart';
 import 'network_model.dart';
 import 'network_screen.dart';
 import 'network_service.dart';
@@ -429,5 +429,6 @@ class CurrentNetworkRequests extends ValueNotifier<List<NetworkRequest>> {
   void clear() {
     _requestsById.clear();
     value = [];
+    notifyListeners();
   }
 }

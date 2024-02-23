@@ -110,7 +110,7 @@ void main() {
       await tester.pump(const Duration(seconds: 2));
       expect(find.byType(CircularProgressIndicator), findsNothing);
 
-      expect(controller.requests.value.requests, isNotEmpty);
+      expect(controller.requests.value, isNotEmpty);
     }
 
     // We should see the list of requests and the inspector, but have no
@@ -275,7 +275,7 @@ void main() {
           }
         }
 
-        for (final request in controller.requests.value.requests) {
+        for (final request in controller.requests.value) {
           controller.selectedRequest.value = request;
           await tester.pumpAndSettle();
           expect(find.text('No request selected'), findsNothing);
