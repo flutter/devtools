@@ -6,7 +6,7 @@
 2. Open DevTools with one of the following ways:
   - button 'DevTools' on Flutter panel in VS Code
   - menu {} > Dart DevTools at the bottom of VS Code
-  - with command `devtools_tool serve .` in `packages/devtools_app` of DevTools repo
+  - (for DevTools developers) with command `devtools_tool serve .` in `packages/devtools_app` of DevTools repo
 3. Find there is a custom tab with name 'Foo' in DevTools
 
 ## Example structure
@@ -63,12 +63,24 @@ This Flutter app depends on `package:foo` and `package:dart_foo`. When debugging
 `app_that_uses_foo`, or one if its `bin/` or `test/` libraries, the provided
 DevTools extensions will load in their own tab in DevTools.
 
-- `flutter run` the `app_that_uses_foo` app and open DevTools to see both the
-`package:foo` and `package:dart_foo` extensions in DevTools connected to a
-Flutter app.
+To see both the `package:foo` and `package:dart_foo` extensions in DevTools for the app:
 
-- Run `dart run --observe bin/script.dart` and open DevTools to see the
-`package_dart_foo` extension in DevTools connected to a Dart CLI app.
+    In VS Code:
+    1. Start app_that_uses_foo on any platform by pressing F5
+    2. Open DevTools with one of the following ways:
+    - button 'DevTools' on Flutter panel in VS Code
+    - menu {} > Dart DevTools at the bottom of VS Code
+
+    In CLI:
+    1. Start app with 'flutter run'
+    2. Open DevTools with one of the following ways:
+    - `dart devtools`
+    - (for DevTools developers) with command `devtools_tool serve .` in `packages/devtools_app` of DevTools repo
+
+To see the `package_dart_foo` extension in DevTools
+
+1. Run `dart run --observe bin/script.dart`
+2. Open DevTools.
 
 <!-- TODO(kenz): uncomment once https://github.com/flutter/devtools/issues/7183 is resolved. -->
 <!-- - Run `dart test test/nested/simple_test.dart --pause-after-load` and open
