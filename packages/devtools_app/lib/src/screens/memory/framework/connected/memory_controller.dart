@@ -43,7 +43,10 @@ class MemoryFeatureControllers {
 
   void reset() {
     diff.dispose();
-    diff = DiffPaneController(SnapshotTakerRuntime(memoryTimeline));
+    diff = DiffPaneController(
+      SnapshotTakerRuntime(memoryTimeline),
+      heapGraphLoader: HeapGraphLoaderRuntime(memoryTimeline),
+    );
 
     profile.dispose();
     profile = ProfilePaneController();
