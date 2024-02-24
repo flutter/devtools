@@ -1295,7 +1295,7 @@ class _CpuProfileTimelineTree {
   }
 }
 
-extension CpuSamplesExtension on vm_service.CpuSamples {
+extension on vm_service.CpuSamples {
   Map<String, dynamic> generateStackFramesJson({
     required String isolateId,
     int kRootId = 0,

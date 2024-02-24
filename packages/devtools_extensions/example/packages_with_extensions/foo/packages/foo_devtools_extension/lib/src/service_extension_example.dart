@@ -98,7 +98,8 @@ class _TableOfThingsState extends State<TableOfThings> {
     try {
       final response = await serviceManager
           .callServiceExtensionOnMainIsolate('ext.foo.getAllThings');
-      things.value = response.json?['things'].cast<String>() ?? [];
+      final responseThings = response.json?['things'] as List<String>?;
+      things.value = responseThings ?? <String>[];
     } catch (e) {
       print('Error fetching all things: $e');
     }
