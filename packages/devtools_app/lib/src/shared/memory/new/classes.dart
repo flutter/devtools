@@ -106,6 +106,10 @@ class ObjectSet extends ObjectSetStats {
   }
 }
 
+abstract class HeapClasses<T extends ClassStats> {
+  List<T> get classStatsList;
+}
+
 abstract class ClassStats {
   ClassStats({required this.heapClass});
 

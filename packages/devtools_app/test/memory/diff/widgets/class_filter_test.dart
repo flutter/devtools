@@ -65,7 +65,7 @@ void main() {
           ? scene.diffController.core.snapshots.value[1] as SnapshotInstanceItem
           : null;
 
-      scene.diffController.setDiffing(
+      scene.diffController.setDiffing_(
         scene.diffController.derived.selectedItem.value as SnapshotInstanceItem,
         diffWith,
       );

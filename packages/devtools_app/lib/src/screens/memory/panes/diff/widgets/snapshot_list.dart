@@ -240,7 +240,7 @@ class _EditableSnapshotName extends StatefulWidget {
     required this.onEditingComplete,
   });
 
-  final SnapshotInstanceItem item;
+  final RenamableItem item;
 
   final bool editMode;
 

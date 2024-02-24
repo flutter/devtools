@@ -6,7 +6,6 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../../shared/memory/adapted_heap_data.dart';
-import '../../../../../shared/memory/new/heap_api.dart';
 import '../../../../../shared/memory/new/heap_data.dart';
 import '../../../../../shared/memory/new/heap_graph_loader.dart';
 import '../../../shared/heap/heap.dart';
@@ -36,7 +35,7 @@ class SnapshotDocItem extends SnapshotItem {
   bool get hasData => false;
 }
 
-class SnapshotGraphItem extends SnapshotItem implements SnapshotInstanceItem {
+class SnapshotGraphItem extends SnapshotItem implements RenamableItem {
   SnapshotGraphItem({
     this.displayNumber,
     required this.defaultName,
@@ -44,10 +43,10 @@ class SnapshotGraphItem extends SnapshotItem implements SnapshotInstanceItem {
     _isProcessing.value = true;
   }
 
-  Heap? _heap;
+  HeapData? get heap => _heap;
+  HeapData? _heap;
 
   /// Automatically assigned name like isolate name or file name.
-  @override
   final String defaultName;
 
   @override
@@ -60,40 +59,32 @@ class SnapshotGraphItem extends SnapshotItem implements SnapshotInstanceItem {
     assert(_heap == null);
     final graph = await loader.load();
     if (graph != null) {
-      _heap = Heap(await calculateHeapData(graph));
+      _heap = await calculateHeapData(graph);
     }
     _isProcessing.value = false;
   }
 
   @override
-  Heap? heap;
-
-  @override
-  AdaptedHeap? heap_;
-
-  @override
   String? nameOverride;
 
-  @override
   final diffWith = ValueNotifier<SnapshotGraphItem?>(null);
-
-  @override
-  Future<void> initializeHeapData(AdaptedHeapData? data) {
-    // TODO: implement initializeHeapData
-    throw UnimplementedError();
-  }
 
   @override
   String get name =>
       nameOverride ??
       '$defaultName${displayNumber == null ? '' : '-$displayNumber'}';
 
-  @override
   // TODO: implement totalSize
   int? get totalSize => 0;
 }
 
-class SnapshotInstanceItem extends SnapshotItem {
+abstract class RenamableItem {
+  String get name;
+
+  String? nameOverride;
+}
+
+class SnapshotInstanceItem extends SnapshotItem implements RenamableItem {
   SnapshotInstanceItem({
     this.displayNumber,
     required this.defaultName,
@@ -105,7 +96,6 @@ class SnapshotInstanceItem extends SnapshotItem {
   final String defaultName;
 
   AdaptedHeap? heap_;
-  Heap? heap;
 
   /// This method is expected to be called once when heap is actually received.
   Future<void> initializeHeapData(AdaptedHeapData? data) async {
@@ -120,10 +110,12 @@ class SnapshotInstanceItem extends SnapshotItem {
   @override
   final int? displayNumber;
 
+  @override
   String get name =>
       nameOverride ??
       '$defaultName${displayNumber == null ? '' : '-$displayNumber'}';
 
+  @override
   String? nameOverride;
 
   final diffWith = ValueNotifier<SnapshotInstanceItem?>(null);

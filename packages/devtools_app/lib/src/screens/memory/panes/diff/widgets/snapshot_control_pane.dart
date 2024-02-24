@@ -22,7 +22,7 @@ class SnapshotControlPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final current = controller.core.selectedItem as SnapshotInstanceItem;
+    final current = controller.core.selectedItem as SnapshotGraphItem;
     final heapIsReady = current.heap_ != null;
     if (heapIsReady) {
       return Row(
@@ -72,16 +72,16 @@ class _DiffDropdown extends StatelessWidget {
     }
   }
 
-  final SnapshotInstanceItem current;
+  final SnapshotGraphItem current;
   final DiffPaneController controller;
 
-  List<DropdownMenuItem<SnapshotInstanceItem>> items() =>
+  List<DropdownMenuItem<SnapshotGraphItem>> items() =>
       controller.core.snapshots.value
           .where((item) => item.hasData)
-          .cast<SnapshotInstanceItem>()
+          .cast<SnapshotGraphItem>()
           .map(
         (item) {
-          return DropdownMenuItem<SnapshotInstanceItem>(
+          return DropdownMenuItem<SnapshotGraphItem>(
             value: item,
             child: Text(item == current ? '-' : item.name),
           );
@@ -90,17 +90,17 @@ class _DiffDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<SnapshotInstanceItem?>(
+    return ValueListenableBuilder<SnapshotGraphItem?>(
       valueListenable: current.diffWith,
       builder: (_, diffWith, __) => Row(
         children: [
           const Text('Diff with:'),
           const SizedBox(width: defaultSpacing),
-          RoundedDropDownButton<SnapshotInstanceItem>(
+          RoundedDropDownButton<SnapshotGraphItem>(
             isDense: true,
             value: current.diffWith.value ?? current,
-            onChanged: (SnapshotInstanceItem? value) {
-              late SnapshotInstanceItem? newDiffWith;
+            onChanged: (SnapshotGraphItem? value) {
+              late SnapshotGraphItem? newDiffWith;
               if ((value ?? current) == current) {
                 ga.select(
                   gac.memory,

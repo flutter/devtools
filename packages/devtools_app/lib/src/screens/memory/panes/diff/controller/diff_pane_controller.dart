@@ -140,7 +140,7 @@ class DiffPaneController extends DisposableController {
     core._snapshots.removeAt(index);
     // We change the selectedIndex, because:
     // 1. It is convenient UX
-    // 2. Otherwise the content will not be re-rendered.
+    // 2. Without it the content will not be re-rendered.
     core._selectedSnapshotIndex.value = max(index - 1, 0);
     derived._updateValues();
   }
@@ -150,9 +150,17 @@ class DiffPaneController extends DisposableController {
     derived._updateValues();
   }
 
-  void setDiffing(
+  void setDiffing_(
     SnapshotInstanceItem diffItem,
     SnapshotInstanceItem? withItem,
+  ) {
+    diffItem.diffWith.value = withItem;
+    derived._updateValues();
+  }
+
+  void setDiffing(
+    SnapshotGraphItem diffItem,
+    SnapshotGraphItem? withItem,
   ) {
     diffItem.diffWith.value = withItem;
     derived._updateValues();
@@ -264,7 +272,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   late final ValueNotifier<SnapshotItem> _selectedItem;
 
   /// Classes to show.
-  final heapClasses = ValueNotifier<HeapClasses?>(null);
+  final heapClasses = ValueNotifier<HeapClasses_?>(null);
 
   late final ClassesTableSingleData classesTableSingle;
 
@@ -343,7 +351,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   }
 
   /// Classes for the selected snapshot with diffing applied.
-  HeapClasses? _snapshotClassesAfterDiffing() {
+  HeapClasses_? _snapshotClassesAfterDiffing() {
     final theItem = _core.selectedItem;
 
     if (theItem is SnapshotInstanceItem) {
@@ -366,7 +374,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   }
 
   void _updateClasses({
-    required HeapClasses? classes,
+    required HeapClasses_? classes,
     required HeapClassName? className,
   }) {
     final filter = _core.classFilter.value;

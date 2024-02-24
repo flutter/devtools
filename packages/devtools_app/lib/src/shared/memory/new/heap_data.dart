@@ -19,7 +19,7 @@ class HeapData {
 
   final HeapSnapshotGraph graph;
 
-  Map<HeapClassName, SingleClassStats>? classes;
+  List<SingleClassStats>? classes;
 }
 
 final UiReleaser _uiReleaser = UiReleaser();
@@ -110,7 +110,7 @@ Future<HeapData> calculateHeapData(
     }
   }
 
-  return HeapData._(graph, classes: classes);
+  return HeapData._(graph, classes: classes?.values.toList());
 }
 
 /// Assuming the object is leaf, initializes its retained size

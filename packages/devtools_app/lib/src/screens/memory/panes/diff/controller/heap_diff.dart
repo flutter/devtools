@@ -9,7 +9,7 @@ import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/analytics/metrics.dart';
 import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../../shared/memory/class_name.dart';
-import '../../../../../shared/memory/new/heap_api.dart';
+import '../../../../../shared/memory/new/heap_data.dart';
 import '../../../../../shared/memory/simple_items.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../shared/heap/heap.dart';
@@ -26,7 +26,7 @@ class HeapDiffStore {
     return _store.putIfAbsent(couple, () => _calculateDiffGaWrapper(couple));
   }
 
-  DiffHeapClasses compare(Heap heap1, Heap heap2) {
+  DiffHeapClasses compare(HeapData heap1, HeapData heap2) {
     throw UnimplementedError();
   }
 }
@@ -88,7 +88,7 @@ class _HeapCouple {
 }
 
 /// List of classes with per-class comparison between two heaps.
-class DiffHeapClasses extends HeapClasses<DiffClassStats>
+class DiffHeapClasses extends HeapClasses_<DiffClassStats>
     with FilterableHeapClasses<DiffClassStats> {
   DiffHeapClasses._(_HeapCouple couple)
       : before = couple.older.data,
