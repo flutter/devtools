@@ -240,9 +240,8 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     );
 
     classesTableSingle = ClassesTableSingleData(
-      heap: () => (_core.selectedItem as SnapshotInstanceItem).heap_!.data,
-      totalHeapSize: () =>
-          (_core.selectedItem as SnapshotInstanceItem).totalSize!,
+      heap: () => (_core.selectedItem as SnapshotGraphItem).heap!,
+      totalHeapSize: () => (_core.selectedItem as SnapshotGraphItem).totalSize!,
       filterData: classFilterData,
     );
 

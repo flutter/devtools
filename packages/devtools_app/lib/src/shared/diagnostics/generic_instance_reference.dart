@@ -44,7 +44,7 @@ class GenericInstanceRef {
 
   final Object? value;
 
-  final HeapObjectSelection? heapSelection;
+  final HeapObjectSelection_? heapSelection;
 
   InstanceRef? get instanceRef =>
       value is InstanceRef ? value as InstanceRef? : null;
@@ -62,7 +62,7 @@ class ObjectReferences extends GenericInstanceRef {
     required this.refNodeType,
     required IsolateRef super.isolateRef,
     required super.value,
-    required HeapObjectSelection super.heapSelection,
+    required HeapObjectSelection_ super.heapSelection,
   }) {
     if (refNodeType.isLive) assert(value != null);
   }
@@ -70,7 +70,7 @@ class ObjectReferences extends GenericInstanceRef {
   ObjectReferences.copyWith(
     ObjectReferences ref, {
     RefNodeType? refNodeType,
-    HeapObjectSelection? heapSelection,
+    HeapObjectSelection_? heapSelection,
   })  : refNodeType = refNodeType ?? ref.refNodeType,
         super(
           isolateRef: ref.isolateRef,
@@ -81,7 +81,7 @@ class ObjectReferences extends GenericInstanceRef {
   final RefNodeType refNodeType;
 
   @override
-  HeapObjectSelection get heapSelection => super.heapSelection!;
+  HeapObjectSelection_ get heapSelection => super.heapSelection!;
 
   @override
   IsolateRef get isolateRef => super.isolateRef!;

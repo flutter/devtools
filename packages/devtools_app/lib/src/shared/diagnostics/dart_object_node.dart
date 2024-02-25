@@ -50,7 +50,7 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     bool artificialName = false,
     bool artificialValue = false,
     RemoteDiagnosticsNode? diagnostic,
-    HeapObjectSelection? heapSelection,
+    HeapObjectSelection_? heapSelection,
     required IsolateRef? isolateRef,
   }) {
     name = name ?? '';

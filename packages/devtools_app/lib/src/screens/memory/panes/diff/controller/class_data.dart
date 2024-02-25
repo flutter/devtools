@@ -52,10 +52,10 @@ class ClassesTableDiffData {
   // to subscribe for the changes, for performance reasons.
 
   /// Function to get selected first heap to diff.
-  final HeapDataCallback before;
+  final HeapDataCallback_ before;
 
   /// Function to get selected second heap to diff.
-  final HeapDataCallback after;
+  final HeapDataCallback_ after;
 
   /// Current class filter data.
   final ClassFilterData filterData;

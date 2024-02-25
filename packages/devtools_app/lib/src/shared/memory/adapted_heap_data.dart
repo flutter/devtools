@@ -8,11 +8,48 @@ import 'package:vm_service/vm_service.dart';
 import '../primitives/utils.dart';
 import 'adapted_heap_object.dart';
 import 'mock_heap_snapshot_graph.dart';
+import 'new/heap_data.dart';
 import 'simple_items.dart';
 
 @immutable
 class HeapObjectSelection {
   const HeapObjectSelection(this.heap, {required this.object});
+
+  final HeapData heap;
+
+  /// If object is null, it exists in live app, but is not
+  /// located in heap.
+  final int? object;
+
+  Iterable<int>? _refs(RefDirection direction) {
+    throw UnimplementedError();
+    // switch (direction) {
+    //   case RefDirection.inbound:
+    //     return object?.inRefs;
+    //   case RefDirection.outbound:
+    //     return object?.outRefs;
+    // }
+  }
+
+  List<HeapObjectSelection> references(RefDirection direction) =>
+      throw UnimplementedError();
+  // (_refs(direction) ?? [])
+  //     .map((i) => HeapObjectSelection_(heap, object: heap.objects[i]))
+  //     .toList();
+
+  int? countOfReferences(RefDirection? direction) =>
+      direction == null ? null : _refs(direction)?.length;
+
+  HeapObjectSelection withoutObject() {
+    throw UnimplementedError();
+    // if (object == null) return this;
+    // return HeapObjectSelection_(heap, object: null);
+  }
+}
+
+@immutable
+class HeapObjectSelection_ {
+  const HeapObjectSelection_(this.heap, {required this.object});
 
   final AdaptedHeapData heap;
 
@@ -29,21 +66,22 @@ class HeapObjectSelection {
     }
   }
 
-  List<HeapObjectSelection> references(RefDirection direction) =>
+  List<HeapObjectSelection_> references(RefDirection direction) =>
       (_refs(direction) ?? [])
-          .map((i) => HeapObjectSelection(heap, object: heap.objects[i]))
+          .map((i) => HeapObjectSelection_(heap, object: heap.objects[i]))
           .toList();
 
   int? countOfReferences(RefDirection? direction) =>
       direction == null ? null : _refs(direction)?.length;
 
-  HeapObjectSelection withoutObject() {
+  HeapObjectSelection_ withoutObject() {
     if (object == null) return this;
-    return HeapObjectSelection(heap, object: null);
+    return HeapObjectSelection_(heap, object: null);
   }
 }
 
-typedef HeapDataCallback = AdaptedHeapData Function();
+typedef HeapDataCallback_ = AdaptedHeapData Function();
+typedef HeapDataCallback = HeapData Function();
 
 /// Contains information from [HeapSnapshotGraph],
 /// needed for memory screen.

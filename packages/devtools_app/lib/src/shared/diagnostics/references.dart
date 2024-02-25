@@ -30,8 +30,8 @@ void addReferencesRoot(DartObjectNode variable, GenericInstanceRef ref) {
   );
 }
 
-HeapObjectSelection _refreshStaticSelection(
-  HeapObjectSelection selection,
+HeapObjectSelection_ _refreshStaticSelection(
+  HeapObjectSelection_ selection,
   InstanceRef? liveObject,
 ) {
   if (selection.object != null) return selection;
@@ -43,7 +43,7 @@ HeapObjectSelection _refreshStaticSelection(
   final index = selection.heap.objectIndexByIdentityHashCode(code);
   if (index == null) return selection.withoutObject();
 
-  return HeapObjectSelection(
+  return HeapObjectSelection_(
     selection.heap,
     object: selection.heap.objects[index],
   );
@@ -220,7 +220,7 @@ Future<void> _addOutboundLiveReferences({
   required DartObjectNode variable,
   required Instance value,
   required IsolateRef isolateRef,
-  required HeapObjectSelection heapSelection,
+  required HeapObjectSelection_ heapSelection,
 }) async {
   switch (value.kind) {
     case InstanceKind.kMap:
@@ -279,7 +279,7 @@ void _addLiveReferenceToNode(
   IsolateRef isolateRef,
   Object? instance,
   RefNodeType refNodeType,
-  HeapObjectSelection heapSelection, {
+  HeapObjectSelection_ heapSelection, {
   String namePrefix = '',
 }) {
   if (instance is! ObjRef) {
@@ -318,7 +318,7 @@ void _addLiveReferenceToNode(
 List<DartObjectNode> _createLiveOutboundReferencesForMap(
   Instance instance,
   IsolateRef isolateRef,
-  HeapObjectSelection heapSelection,
+  HeapObjectSelection_ heapSelection,
 ) {
   final variables = <DartObjectNode>[];
   final associations = instance.associations ?? [];
@@ -351,7 +351,7 @@ List<DartObjectNode> _createLiveOutboundReferencesForMap(
 List<DartObjectNode> _createLiveOutboundReferencesForList(
   Instance instance,
   IsolateRef isolateRef,
-  HeapObjectSelection heapSelection,
+  HeapObjectSelection_ heapSelection,
 ) {
   final variables = <DartObjectNode>[];
   final elements = instance.elements ?? [];
@@ -372,7 +372,7 @@ List<DartObjectNode> _createLiveOutboundReferencesForList(
 Future<List<DartObjectNode>> _createLiveOutboundReferencesForClosure(
   Instance instance,
   IsolateRef isolateRef,
-  HeapObjectSelection heapSelection,
+  HeapObjectSelection_ heapSelection,
 ) async {
   final variables = <DartObjectNode>[];
   final contextRef = instance.closureContext;
@@ -410,7 +410,7 @@ Future<List<DartObjectNode>> _createLiveOutboundReferencesForClosure(
 List<DartObjectNode> _createLiveOutboundReferencesForRecord(
   Instance instance,
   IsolateRef isolateRef,
-  HeapObjectSelection heapSelection,
+  HeapObjectSelection_ heapSelection,
 ) {
   final variables = <DartObjectNode>[];
   final fields = RecordFields(instance.fields);
@@ -445,7 +445,7 @@ List<DartObjectNode> _createLiveOutboundReferencesForRecord(
 List<DartObjectNode> _createLiveOutboundReferencesForFields(
   Instance instance,
   IsolateRef isolateRef,
-  HeapObjectSelection heapSelection,
+  HeapObjectSelection_ heapSelection,
 ) {
   final variables = <DartObjectNode>[];
 

@@ -27,7 +27,7 @@ class ProfileInstanceTableCell extends StatelessWidget {
   final int count;
   final bool _shouldShowMenu;
   final HeapClassName heapClass;
-  late final ClassSampler _sampler = ClassSampler(heapClass);
+  late final ClassSampler_ _sampler = ClassSampler_(heapClass);
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +48,7 @@ class ProfileInstanceTableCell extends StatelessWidget {
 class _StoreAllAsVariableMenu extends StatelessWidget {
   const _StoreAllAsVariableMenu(this.sampler);
 
-  final ClassSampler sampler;
+  final ClassSampler_ sampler;
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +86,7 @@ class _StoreAllAsVariableMenu extends StatelessWidget {
 class _StoreAsOneVariableMenu extends StatelessWidget {
   const _StoreAsOneVariableMenu(this.sampler);
 
-  final ClassSampler sampler;
+  final ClassSampler_ sampler;
 
   @override
   Widget build(BuildContext context) {

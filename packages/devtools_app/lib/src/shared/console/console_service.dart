@@ -77,7 +77,7 @@ class ConsoleService with DisposerMixin {
   void appendBrowsableInstance({
     required InstanceRef? instanceRef,
     required IsolateRef? isolateRef,
-    required HeapObjectSelection? heapSelection,
+    required HeapObjectSelection_? heapSelection,
   }) async {
     if (instanceRef == null) {
       final object = heapSelection?.object;
@@ -109,7 +109,7 @@ class ConsoleService with DisposerMixin {
     required IsolateRef? isolateRef,
     bool forceScrollIntoView = false,
     bool expandAll = false,
-    HeapObjectSelection? heapSelection,
+    HeapObjectSelection_? heapSelection,
   }) async {
     _stdioTrailingNewline = false;
     final variable = DartObjectNode.fromValue(
