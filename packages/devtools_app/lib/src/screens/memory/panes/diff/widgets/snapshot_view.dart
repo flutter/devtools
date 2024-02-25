@@ -24,7 +24,7 @@ class SnapshotView extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiValueListenableBuilder(
       listenables: [
-        controller.derived.singleClassesToShow,
+        controller.derived.singleClassesToShow_,
         controller.derived.diffClassesToShow,
       ],
       builder: (_, values, __) {
@@ -34,7 +34,7 @@ class SnapshotView extends StatelessWidget {
           return const Center(child: Text('Calculating...'));
         }
 
-        final classes = controller.derived.heapClasses.value;
+        final classes = controller.derived.heapClasses_.value;
         if (classes == null) {
           final current = controller.core.selectedItem as SnapshotInstanceItem;
           return current.isProcessing.value

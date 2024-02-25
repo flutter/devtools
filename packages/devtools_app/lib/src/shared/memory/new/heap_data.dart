@@ -8,10 +8,11 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../primitives/utils.dart';
 import '../class_name.dart';
+import '../simple_items.dart';
 import 'classes.dart';
 
 class HeapData {
-  HeapData._(this.graph, {this.classes});
+  HeapData._(this.graph, this.classes, this.footprint);
 
   /// Value for rootIndex is taken from the doc:
   /// https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/heap_snapshot.md#object-ids
@@ -19,7 +20,9 @@ class HeapData {
 
   final HeapSnapshotGraph graph;
 
-  List<SingleClassStats>? classes;
+  final ClassDataList? classes;
+
+  final MemoryFootprint? footprint;
 }
 
 final UiReleaser _uiReleaser = UiReleaser();
@@ -33,9 +36,9 @@ Future<HeapData> calculateHeapData(
   HeapSnapshotGraph graph, {
   bool calculateRetainingPaths = true,
   bool calculateRetainedSizes = true,
-  bool calculateClassStatistics = true,
+  bool calculateClassData = true,
 }) async {
-  if (!calculateClassStatistics) return HeapData._(graph);
+  if (!calculateClassData) return HeapData._(graph, null, null);
 
   Uint32List? retainers;
   final Uint32List? sizes =
@@ -78,12 +81,12 @@ Future<HeapData> calculateHeapData(
     }
   }
 
-  Map<HeapClassName, SingleClassStats>? classes;
+  ClassDataList? classDataList;
 
   // Complexity of this part is O(n)*O(p) where
   // n is number of objects and p is length of retaining path.
-  if (calculateClassStatistics) {
-    classes = <HeapClassName, SingleClassStats>{};
+  if (calculateClassData) {
+    final classes = <HeapClassName, SingleClassData>{};
 
     for (var i = 0; i < graph.objects.length; i++) {
       if (_uiReleaser.step()) await _uiReleaser.releaseUi();
@@ -103,14 +106,16 @@ Future<HeapData> calculateHeapData(
 
       final classStats = classes.putIfAbsent(
         className,
-        () => SingleClassStats(heapClass: className),
+        () => SingleClassData(heapClass: className),
       );
 
       classStats.countInstance(graph, i, retainers, sizes);
     }
+
+    classDataList = ClassDataList(classes.values.toList());
   }
 
-  return HeapData._(graph, classes: classes?.values.toList());
+  return HeapData._(graph, classDataList, null);
 }
 
 /// Assuming the object is leaf, initializes its retained size

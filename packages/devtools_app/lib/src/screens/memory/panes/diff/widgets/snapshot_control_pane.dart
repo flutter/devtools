@@ -23,7 +23,7 @@ class SnapshotControlPane extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final current = controller.core.selectedItem as SnapshotGraphItem;
-    final heapIsReady = current.heap_ != null;
+    final heapIsReady = current.heap != null;
     if (heapIsReady) {
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -46,11 +46,12 @@ class SnapshotControlPane extends StatelessWidget {
               ),
             ],
           ),
-          Expanded(
-            child: _SnapshotSizeView(
-              footprint: current.heap_!.footprint,
+          if (current.heap!.footprint != null)
+            Expanded(
+              child: _SnapshotSizeView(
+                footprint: current.heap!.footprint!,
+              ),
             ),
-          ),
         ],
       );
     }

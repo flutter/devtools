@@ -106,19 +106,21 @@ class ObjectSet extends ObjectSetStats {
   }
 }
 
-abstract class HeapClasses<T extends ClassStats> {
-  List<T> get classStatsList;
+class ClassDataList<T extends ClassData> {
+  ClassDataList(this.list);
+
+  final List<T> list;
 }
 
-abstract class ClassStats {
-  ClassStats({required this.heapClass});
+abstract class ClassData {
+  ClassData({required this.heapClass});
 
-  final Map<PathFromRoot, ObjectSetStats> statsByPath = {};
+  final Map<PathFromRoot, ObjectSetStats> byPath = {};
   final HeapClassName heapClass;
 }
 
-class SingleClassStats extends ClassStats {
-  SingleClassStats({required super.heapClass});
+class SingleClassData extends ClassData {
+  SingleClassData({required super.heapClass});
   final ObjectSet objects = ObjectSet();
 
   void countInstance(
@@ -143,11 +145,11 @@ class SingleClassStats extends ClassStats {
     );
 
     if (path != null) {
-      statsByPath.putIfAbsent(
+      byPath.putIfAbsent(
         path,
         () => ObjectSetStats(),
       );
-      statsByPath[path]!.countInstance(
+      byPath[path]!.countInstance(
         graph,
         index,
         retainedSizes,

@@ -15,6 +15,7 @@ import '../../../../../shared/config_specific/import_export/import_export.dart';
 import '../../../../../shared/file_import.dart';
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/memory/class_name.dart';
+import '../../../../../shared/memory/new/classes.dart';
 import '../../../../../shared/memory/new/heap_graph_loader.dart';
 import '../../../shared/heap/class_filter.dart';
 import '../../../shared/heap/heap.dart';
@@ -178,7 +179,7 @@ class DiffPaneController extends DisposableController {
   }
 
   void downloadCurrentItemToCsv() {
-    final classes = derived.heapClasses.value!;
+    final classes = derived.heapClasses_.value!;
     final item = core.selectedItem as SnapshotInstanceItem;
     final diffWith = item.diffWith.value;
 
@@ -247,8 +248,8 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
 
     classesTableDiff = ClassesTableDiffData(
       filterData: classFilterData,
-      before: () => (heapClasses.value as DiffHeapClasses).before,
-      after: () => (heapClasses.value as DiffHeapClasses).after,
+      before: () => (heapClasses_.value as DiffHeapClasses).before,
+      after: () => (heapClasses_.value as DiffHeapClasses).after,
     );
 
     addAutoDisposeListener(
@@ -272,7 +273,8 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   late final ValueNotifier<SnapshotItem> _selectedItem;
 
   /// Classes to show.
-  final heapClasses = ValueNotifier<HeapClasses_?>(null);
+  final heapClasses_ = ValueNotifier<HeapClasses_?>(null);
+  final heapClasses = ValueNotifier<ClassDataList?>(null);
 
   late final ClassesTableSingleData classesTableSingle;
 
@@ -284,9 +286,15 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   final _diffClassesToShow = ValueNotifier<List<DiffClassStats>?>(null);
 
   /// Classes to show for currently selected item, if the item is not diffed.
-  ValueListenable<List<SingleClassStats_>?> get singleClassesToShow =>
+  ValueListenable<List<SingleClassStats_>?> get singleClassesToShow_ =>
+      _singleClassesToShow_;
+  final _singleClassesToShow_ = ValueNotifier<List<SingleClassStats_>?>(null);
+
+  /// Classes to show for currently selected item, if the item is not diffed.
+  ValueListenable<ClassDataList<SingleClassData>?> get singleClassesToShow =>
       _singleClassesToShow;
-  final _singleClassesToShow = ValueNotifier<List<SingleClassStats_>?>(null);
+  final _singleClassesToShow =
+      ValueNotifier<ClassDataList<SingleClassData>?>(null);
 
   /// List of retaining paths to show for the selected class.
   final pathEntries = ValueNotifier<List<StatsByPathEntry>?>(null);
@@ -351,7 +359,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   }
 
   /// Classes for the selected snapshot with diffing applied.
-  HeapClasses_? _snapshotClassesAfterDiffing() {
+  HeapClasses_? _snapshotClassesAfterDiffing_() {
     final theItem = _core.selectedItem;
 
     if (theItem is SnapshotInstanceItem) {
@@ -362,36 +370,46 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
       return _diffStore.compare_(heap, itemToDiffWith.heap_!);
     }
 
+    return null;
+  }
+
+  /// Classes for the selected snapshot with diffing applied.
+  ClassDataList? _snapshotClassesAfterDiffing() {
+    final theItem = _core.selectedItem;
+
     if (theItem is SnapshotGraphItem) {
       final heap = theItem.heap;
       if (heap == null) return null;
       final itemToDiffWith = theItem.diffWith.value;
       if (itemToDiffWith == null) return heap.classes;
-      return _diffStore.compare(heap, itemToDiffWith.heap!);
+      return null;
+      //_diffStore.compare(heap, itemToDiffWith.heap!);
     }
 
     return null;
   }
 
-  void _updateClasses({
-    required HeapClasses_? classes,
+  void _updateClasses_({
+    required ClassDataList? classes,
     required HeapClassName? className,
   }) {
     final filter = _core.classFilter.value;
-    if (classes is SingleHeapClasses) {
-      _singleClassesToShow.value = classes.filtered(filter, _core.rootPackage);
+    if (classes is ClassDataList<SingleClassData>) {
+      _singleClassesToShow.value =
+          classes; //.filtered(filter, _core.rootPackage);
       _diffClassesToShow.value = null;
-      classesTableSingle.selection.value =
-          _filter(classes.classesByName[className]);
+      // classesTableSingle.selection.value =
+      //     _filter(classes.classesByName[className]);
       classesTableDiff.selection.value = null;
     } else if (classes is DiffHeapClasses) {
-      _singleClassesToShow.value = null;
-      _diffClassesToShow.value = classes.filtered(filter, _core.rootPackage);
-      classesTableSingle.selection.value = null;
-      classesTableDiff.selection.value =
-          _filter(classes.classesByName[className]);
+      // _singleClassesToShow_.value = null;
+      // _diffClassesToShow.value = classes.filtered(filter, _core.rootPackage);
+      // classesTableSingle.selection.value = null;
+      // classesTableDiff.selection.value =
+      //     _filter(classes.classesByName[className]);
     } else if (classes == null) {
       _singleClassesToShow.value = null;
+      _singleClassesToShow_.value = null;
       _diffClassesToShow.value = null;
       classesTableSingle.selection.value = null;
       classesTableDiff.selection.value = null;
@@ -422,8 +440,8 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     // Set class to show.
     final classes = _snapshotClassesAfterDiffing();
     heapClasses.value = classes;
-    _selectClassAndPath();
-    _updateClasses(
+    //_selectClassAndPath();
+    _updateClasses_(
       classes: classes,
       className: _core.className,
     );
@@ -475,7 +493,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     if (_core.className != null) return;
     assert(_core.path == null);
 
-    final classes = heapClasses.value;
+    final classes = heapClasses_.value;
     if (classes == null) return;
 
     SingleClassStats_ singleWithMaxRetainedSize(
