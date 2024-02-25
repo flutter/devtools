@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../../screens/memory/shared/heap/class_filter.dart';
 import '../class_name.dart';
 import 'retaining_path.dart';
 
@@ -106,11 +108,41 @@ class ObjectSet extends ObjectSetStats {
   }
 }
 
-// Dow e need this wrapper?
+@immutable
 class ClassDataList<T extends ClassData> {
-  ClassDataList(this.list);
+  const ClassDataList(this._originalList)
+      : _appliedFilter = null,
+        _filtered = null;
 
-  final List<T> list;
+  const ClassDataList._filtered({
+    required List<T> original,
+    required ClassFilter appliedFilter,
+    required List<T> filtered,
+  })  : _originalList = original,
+        _appliedFilter = appliedFilter,
+        _filtered = filtered;
+
+  List<T> get list => _filtered ?? _originalList;
+
+  final List<T> _originalList;
+  final ClassFilter? _appliedFilter;
+  final List<T>? _filtered;
+
+  ClassDataList<T> filtered(ClassFilter newFilter, String? rootPackage) {
+    final filtered = ClassFilter.filter(
+      oldFilter: _appliedFilter,
+      oldFiltered: _filtered,
+      newFilter: newFilter,
+      original: _originalList,
+      extractClass: (s) => s.heapClass,
+      rootPackage: rootPackage,
+    );
+    return ClassDataList._filtered(
+      original: _originalList,
+      appliedFilter: newFilter,
+      filtered: filtered,
+    );
+  }
 }
 
 abstract class ClassData {

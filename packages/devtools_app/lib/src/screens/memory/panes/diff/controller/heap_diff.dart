@@ -89,7 +89,7 @@ class _HeapCouple {
 
 /// List of classes with per-class comparison between two heaps.
 class DiffHeapClasses extends HeapClasses_<DiffClassStats>
-    with FilterableHeapClasses<DiffClassStats> {
+    with FilterableHeapClasses_<DiffClassStats> {
   DiffHeapClasses._(_HeapCouple couple)
       : before = couple.older.data,
         after = couple.younger.data {

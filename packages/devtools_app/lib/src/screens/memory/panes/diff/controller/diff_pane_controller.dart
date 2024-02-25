@@ -388,14 +388,17 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     return null;
   }
 
-  void _updateClasses_({
+  void _updateClasses({
     required ClassDataList? classes,
     required HeapClassName? className,
   }) {
-    final filter = _core.classFilter.value;
+    if (classes != null) {
+      final filter = _core.classFilter.value;
+      classes = classes.filtered(filter, _core.rootPackage);
+    }
+
     if (classes is ClassDataList<SingleClassData>) {
-      _singleClassesToShow.value =
-          classes; //.filtered(filter, _core.rootPackage);
+      _singleClassesToShow.value = classes;
       _diffClassesToShow.value = null;
       // classesTableSingle.selection.value =
       //     _filter(classes.classesByName[className]);
@@ -440,7 +443,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     final classes = _snapshotClassesAfterDiffing();
     heapClasses.value = classes;
     //_selectClassAndPath();
-    _updateClasses_(
+    _updateClasses(
       classes: classes,
       className: _core.className,
     );
