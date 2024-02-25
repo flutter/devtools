@@ -35,8 +35,8 @@ class SnapshotDocItem extends SnapshotItem {
   bool get hasData => false;
 }
 
-class SnapshotGraphItem extends SnapshotItem implements RenamableItem {
-  SnapshotGraphItem({
+class SnapshotDataItem extends SnapshotItem implements RenamableItem {
+  SnapshotDataItem({
     this.displayNumber,
     required this.defaultName,
   }) {
@@ -67,7 +67,7 @@ class SnapshotGraphItem extends SnapshotItem implements RenamableItem {
   @override
   String? nameOverride;
 
-  final diffWith = ValueNotifier<SnapshotGraphItem?>(null);
+  final diffWith = ValueNotifier<SnapshotDataItem?>(null);
 
   @override
   String get name =>

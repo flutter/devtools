@@ -155,7 +155,7 @@ class SnapshotListTitle extends StatelessWidget {
         size: defaultIconSize,
         color: theme.colorScheme.onSurface,
       );
-    } else if (theItem is SnapshotInstanceItem) {
+    } else if (theItem is SnapshotDataItem) {
       leading = Expanded(
         child: ValueListenableBuilder(
           valueListenable: editIndex,
@@ -198,19 +198,6 @@ class SnapshotListTitle extends StatelessWidget {
               : const SizedBox(width: menuButtonWidth),
         ),
       ]);
-    } else if (theItem is SnapshotGraphItem) {
-      leading = Expanded(
-        child: ValueListenableBuilder(
-          valueListenable: editIndex,
-          builder: (context, editIndex, _) {
-            return _EditableSnapshotName(
-              item: theItem,
-              editMode: index == editIndex,
-              onEditingComplete: onEditingComplete,
-            );
-          },
-        ),
-      );
     } else {
       throw StateError('Unknown item type: $theItem');
     }

@@ -49,7 +49,7 @@ class DiffPaneController extends DisposableController {
       gac.MemoryEvent.diffTakeSnapshotControlPane,
     );
 
-    final item = SnapshotGraphItem(
+    final item = SnapshotDataItem(
       displayNumber: _nextDisplayNumber(),
       defaultName: selectedIsolateName ?? '<isolate-not-detected>',
     );
@@ -79,7 +79,7 @@ class DiffPaneController extends DisposableController {
 
   Future<void> _addSnapshot(
     HeapGraphLoader loader,
-    SnapshotGraphItem item,
+    SnapshotDataItem item,
   ) async {
     final snapshots = core._snapshots;
     snapshots.add(item);
@@ -160,8 +160,8 @@ class DiffPaneController extends DisposableController {
   }
 
   void setDiffing(
-    SnapshotGraphItem diffItem,
-    SnapshotGraphItem? withItem,
+    SnapshotDataItem diffItem,
+    SnapshotDataItem? withItem,
   ) {
     diffItem.diffWith.value = withItem;
     derived._updateValues();
@@ -240,8 +240,8 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     );
 
     classesTableSingle = ClassesTableSingleData(
-      heap: () => (_core.selectedItem as SnapshotGraphItem).heap!,
-      totalHeapSize: () => (_core.selectedItem as SnapshotGraphItem).totalSize!,
+      heap: () => (_core.selectedItem as SnapshotDataItem).heap!,
+      totalHeapSize: () => (_core.selectedItem as SnapshotDataItem).totalSize!,
       filterData: classFilterData,
     );
 
@@ -376,7 +376,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   ClassDataList? _snapshotClassesAfterDiffing() {
     final theItem = _core.selectedItem;
 
-    if (theItem is SnapshotGraphItem) {
+    if (theItem is SnapshotDataItem) {
       final heap = theItem.heap;
       if (heap == null) return null;
       final itemToDiffWith = theItem.diffWith.value;
