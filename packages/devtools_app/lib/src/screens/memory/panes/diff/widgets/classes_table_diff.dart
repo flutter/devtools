@@ -9,6 +9,7 @@ import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/globals.dart';
+import '../../../../../shared/memory/new/classes.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/table/table_data.dart';
@@ -112,7 +113,7 @@ class _InstanceColumn extends ColumnData<DiffClassStats>
   int getValue(DiffClassStats dataObject) =>
       _instances(dataObject).instanceCount;
 
-  ObjectSetStats _instances(DiffClassStats classStats) {
+  ObjectSetStats_ _instances(DiffClassStats classStats) {
     switch (dataPart) {
       case _DataPart.created:
         return classStats.total.created;
@@ -144,29 +145,30 @@ class _InstanceColumn extends ColumnData<DiffClassStats>
     bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
-    final objects = _instances(data);
+    return Placeholder();
+    // final objects = _instances(data);
 
-    if (dataPart == _DataPart.delta) {
-      assert(objects is! ObjectSet);
-      return null;
-    }
+    // if (dataPart == _DataPart.delta) {
+    //   assert(objects is! ObjectSet);
+    //   return null;
+    // }
 
-    final heapCallback =
-        dataPart == _DataPart.deleted ? diffData.before : diffData.after;
+    // final heapCallback =
+    //     dataPart == _DataPart.deleted ? diffData.before : diffData.after;
 
-    if (objects is! ObjectSet) {
-      throw StateError(
-        'All columns except ${_DataPart.delta} should have objects available.',
-      );
-    }
+    // if (objects is! ObjectSet) {
+    //   throw StateError(
+    //     'All columns except ${_DataPart.delta} should have objects available.',
+    //   );
+    // }
 
-    return HeapInstanceTableCell(
-      objects,
-      heapCallback,
-      data.heapClass,
-      isSelected: isRowSelected,
-      liveItemsEnabled: dataPart != _DataPart.deleted,
-    );
+    // return HeapInstanceTableCell(
+    //   objects,
+    //   heapCallback,
+    //   data.heapClass,
+    //   isSelected: isRowSelected,
+    //   liveItemsEnabled: dataPart != _DataPart.deleted,
+    // );
   }
 }
 

@@ -129,7 +129,7 @@ class DiffClassStats extends ClassStats_ {
     required this.total,
   });
 
-  final ObjectSetDiff total;
+  final ObjectSetDiff_ total;
 
   static DiffClassStats? diff({
     required SingleClassStats_? before,
@@ -141,16 +141,16 @@ class DiffClassStats extends ClassStats_ {
 
     final result = DiffClassStats._(
       heapClass: heapClass,
-      total: ObjectSetDiff(
+      total: ObjectSetDiff_(
         setBefore: before?.objects,
         setAfter: after?.objects,
       ),
-      statsByPath: subtractMaps<ClassOnlyHeapPath, ObjectSetStats,
-          ObjectSetStats, ObjectSetStats>(
+      statsByPath: subtractMaps<ClassOnlyHeapPath, ObjectSetStats_,
+          ObjectSetStats_, ObjectSetStats_>(
         from: after?.statsByPath,
         substract: before?.statsByPath,
         subtractor: ({subtract, from}) =>
-            ObjectSetStats.subtract(subtract: subtract, from: from),
+            ObjectSetStats_.subtract(subtract: subtract, from: from),
       ),
     );
 
@@ -162,10 +162,10 @@ class DiffClassStats extends ClassStats_ {
 }
 
 /// Comparison between two sets of objects.
-class ObjectSetDiff {
-  ObjectSetDiff({ObjectSet? setBefore, ObjectSet? setAfter}) {
-    setBefore ??= ObjectSet.empty;
-    setAfter ??= ObjectSet.empty;
+class ObjectSetDiff_ {
+  ObjectSetDiff_({ObjectSet_? setBefore, ObjectSet_? setAfter}) {
+    setBefore ??= ObjectSet_.empty;
+    setAfter ??= ObjectSet_.empty;
 
     final allCodes = _unionCodes(setBefore, setAfter);
 
@@ -213,17 +213,17 @@ class ObjectSetDiff {
     );
   }
 
-  static Set<IdentityHashCode> _unionCodes(ObjectSet set1, ObjectSet set2) {
+  static Set<IdentityHashCode> _unionCodes(ObjectSet_ set1, ObjectSet_ set2) {
     final codesBefore = set1.objectsByCodes.keys.toSet();
     final codesAfter = set2.objectsByCodes.keys.toSet();
 
     return codesBefore.union(codesAfter);
   }
 
-  final created = ObjectSet();
-  final deleted = ObjectSet();
-  final persisted = ObjectSet();
-  final delta = ObjectSetStats();
+  final created = ObjectSet_();
+  final deleted = ObjectSet_();
+  final persisted = ObjectSet_();
+  final delta = ObjectSetStats_();
 
   bool get isZero => delta.isZero;
 }

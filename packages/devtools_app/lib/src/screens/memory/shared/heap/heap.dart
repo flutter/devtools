@@ -111,8 +111,8 @@ class SingleHeapClasses extends HeapClasses_<SingleClassStats_>
   List<SingleClassStats_> get classStatsList => classes;
 }
 
-typedef StatsByPath = Map<ClassOnlyHeapPath, ObjectSetStats>;
-typedef StatsByPathEntry = MapEntry<ClassOnlyHeapPath, ObjectSetStats>;
+typedef StatsByPath = Map<ClassOnlyHeapPath, ObjectSetStats_>;
+typedef StatsByPathEntry = MapEntry<ClassOnlyHeapPath, ObjectSetStats_>;
 
 abstract class ClassStats_ with Sealable {
   ClassStats_({required this.statsByPath, required this.heapClass});
@@ -130,10 +130,10 @@ abstract class ClassStats_ with Sealable {
 /// Statistics for a class about a single heap.
 class SingleClassStats_ extends ClassStats_ {
   SingleClassStats_({required super.heapClass})
-      : objects = ObjectSet(),
-        super(statsByPath: <ClassOnlyHeapPath, ObjectSetStats>{});
+      : objects = ObjectSet_(),
+        super(statsByPath: <ClassOnlyHeapPath, ObjectSetStats_>{});
 
-  final ObjectSet objects;
+  final ObjectSet_ objects;
 
   void countInstance(AdaptedHeapData data, int objectIndex) {
     assert(!isSealed);
@@ -149,22 +149,22 @@ class SingleClassStats_ extends ClassStats_ {
     if (path == null) return;
     final objectsForPath = statsByPath.putIfAbsent(
       ClassOnlyHeapPath(path),
-      () => ObjectSet(),
+      () => ObjectSet_(),
     );
     objectsForPath.countInstance(object, excludeFromRetained: false);
   }
 }
 
 /// Statistical size-information about objects.
-class ObjectSetStats with Sealable {
-  static ObjectSetStats? subtract({
-    required ObjectSetStats? subtract,
-    required ObjectSetStats? from,
+class ObjectSetStats_ with Sealable {
+  static ObjectSetStats_? subtract({
+    required ObjectSetStats_? subtract,
+    required ObjectSetStats_? from,
   }) {
     from ??= _empty;
     subtract ??= _empty;
 
-    final result = ObjectSetStats()
+    final result = ObjectSetStats_()
       ..instanceCount = from.instanceCount - subtract.instanceCount
       ..shallowSize = from.shallowSize - subtract.shallowSize
       ..retainedSize = from.retainedSize - subtract.retainedSize;
@@ -173,7 +173,7 @@ class ObjectSetStats with Sealable {
     return result;
   }
 
-  static final _empty = ObjectSetStats()..seal();
+  static final _empty = ObjectSetStats_()..seal();
 
   int instanceCount = 0;
   int shallowSize = 0;
@@ -204,8 +204,8 @@ class ObjectSetStats with Sealable {
 }
 
 /// Statistical and detailed size-information about objects.
-class ObjectSet extends ObjectSetStats {
-  static ObjectSet empty = ObjectSet()..seal();
+class ObjectSet_ extends ObjectSetStats_ {
+  static ObjectSet_ empty = ObjectSet_()..seal();
 
   final objectsByCodes = <IdentityHashCode, MockAdaptedHeapObject>{};
 
@@ -234,6 +234,6 @@ class ObjectSet extends ObjectSetStats {
     MockAdaptedHeapObject object, {
     required bool excludeFromRetained,
   }) {
-    throw AssertionError('uncountInstance is not valid for $ObjectSet');
+    throw AssertionError('uncountInstance is not valid for $ObjectSet_');
   }
 }

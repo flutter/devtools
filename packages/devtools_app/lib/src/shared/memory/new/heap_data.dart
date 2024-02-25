@@ -112,7 +112,7 @@ Future<HeapData> calculateHeapData(
       classStats.countInstance(graph, i, retainers, sizes);
     }
 
-    classDataList = ClassDataList(classes.values.toList());
+    classDataList = ClassDataList<SingleClassData>(classes.values.toList());
   }
 
   return HeapData._(graph, classDataList, null);

@@ -10,6 +10,7 @@ import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/globals.dart';
 import '../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../shared/memory/class_name.dart';
+import '../../../../shared/memory/new/classes.dart';
 import '../../../../shared/vm_utils.dart';
 import 'heap.dart';
 
@@ -25,8 +26,8 @@ class ClassSampler {
     this.heapClass, {
     ObjectSet? objects,
     AdaptedHeapData? heap,
-  })  : assert(objects?.objectsByCodes.isNotEmpty ?? true),
-        assert((objects == null) == (heap == null)),
+  }) : // assert(objects?.objectsByCodes.isNotEmpty ?? true),
+        //      assert((objects == null) == (heap == null)),
         _objects = objects == null ? null : _HeapObjects(objects, heap!);
 
   final HeapClassName heapClass;
@@ -155,52 +156,52 @@ class HeapClassSampler extends ClassSampler {
   ) : super(heapClass, heap: heap, objects: objects);
 
   Future<void> oneLiveStaticToConsole() async {
-    final selection = _objects!;
+    // final selection = _objects!;
 
-    ga.select(gac.memory, gac.MemoryEvent.dropOneLiveVariable);
-    final instances = (await _liveInstances())?.instances;
+    // ga.select(gac.memory, gac.MemoryEvent.dropOneLiveVariable);
+    // final instances = (await _liveInstances())?.instances;
 
-    final instanceRef = instances?.firstWhereOrNull(
-      (objRef) =>
-          objRef is InstanceRef &&
-          selection.objects.objectsByCodes.containsKey(objRef.identityHashCode),
-    ) as InstanceRef?;
+    // final instanceRef = instances?.firstWhereOrNull(
+    //   (objRef) =>
+    //       objRef is InstanceRef &&
+    //       selection.objects.objectsByCodes.containsKey(objRef.identityHashCode),
+    // ) as InstanceRef?;
 
-    if (instanceRef == null) {
-      serviceConnection.consoleService.appendStdio(
-        'Unable to select instance that exist in snapshot and still alive in application.\n'
-        'You may want to increase "${preferences.memory.refLimitTitle}" in memory settings.',
-      );
-      return;
-    }
+    // if (instanceRef == null) {
+    //   serviceConnection.consoleService.appendStdio(
+    //     'Unable to select instance that exist in snapshot and still alive in application.\n'
+    //     'You may want to increase "${preferences.memory.refLimitTitle}" in memory settings.',
+    //   );
+    //   return;
+    // }
 
-    final heapObject =
-        selection.objects.objectsByCodes[instanceRef.identityHashCode!]!;
+    // final heapObject =
+    //     selection.objects.objectsByCodes[instanceRef.identityHashCode!]!;
 
-    final heapSelection =
-        HeapObjectSelection(selection.heap, object: heapObject);
+    // final heapSelection =
+    //     HeapObjectSelection(selection.heap, object: heapObject);
 
-    // drop to console
-    serviceConnection.consoleService.appendBrowsableInstance(
-      instanceRef: instanceRef,
-      isolateRef: _mainIsolateRef,
-      heapSelection: heapSelection,
-    );
+    // // drop to console
+    // serviceConnection.consoleService.appendBrowsableInstance(
+    //   instanceRef: instanceRef,
+    //   isolateRef: _mainIsolateRef,
+    //   heapSelection: heapSelection,
+    // );
   }
 
   void oneStaticToConsole() {
-    final selection = _objects!;
-    ga.select(gac.memory, gac.MemoryEvent.dropOneStaticVariable);
+    // final selection = _objects!;
+    // ga.select(gac.memory, gac.MemoryEvent.dropOneStaticVariable);
 
-    final heapObject = selection.objects.objectsByCodes.values.first;
-    final heapSelection =
-        HeapObjectSelection(selection.heap, object: heapObject);
+    // final heapObject = selection.objects.objectsByCodes.values.first;
+    // final heapSelection =
+    //     HeapObjectSelection(selection.heap, object: heapObject);
 
-    // drop to console
-    serviceConnection.consoleService.appendBrowsableInstance(
-      instanceRef: null,
-      isolateRef: _mainIsolateRef,
-      heapSelection: heapSelection,
-    );
+    // // drop to console
+    // serviceConnection.consoleService.appendBrowsableInstance(
+    //   instanceRef: null,
+    //   isolateRef: _mainIsolateRef,
+    //   heapSelection: heapSelection,
+    // );
   }
 }

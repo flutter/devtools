@@ -6,6 +6,7 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../shared/common_widgets.dart';
+import '../../../../../shared/memory/new/classes.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../shared/heap/heap.dart';
 import '../controller/diff_pane_controller.dart';
@@ -24,19 +25,19 @@ class SnapshotView extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiValueListenableBuilder(
       listenables: [
-        controller.derived.singleClassesToShow_,
+        controller.derived.singleClassesToShow,
         controller.derived.diffClassesToShow,
       ],
       builder: (_, values, __) {
-        final singleClasses = values.first as List<SingleClassStats_>?;
+        final singleClasses = values.first as ClassDataList<SingleClassData>?;
         final diffClasses = values.second as List<DiffClassStats>?;
         if (controller.derived.updatingValues) {
           return const Center(child: Text('Calculating...'));
         }
 
-        final classes = controller.derived.heapClasses_.value;
+        final classes = controller.derived.heapClasses.value;
         if (classes == null) {
-          final current = controller.core.selectedItem as SnapshotInstanceItem;
+          final current = controller.core.selectedItem as SnapshotGraphItem;
           return current.isProcessing.value
               ? const SizedBox.shrink()
               : const Center(child: Text('Could not take snapshot.'));

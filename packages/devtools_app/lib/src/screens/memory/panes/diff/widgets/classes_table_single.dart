@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/globals.dart';
+import '../../../../../shared/memory/new/classes.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/table/table_data.dart';
@@ -18,10 +19,10 @@ import '../../../shared/widgets/shared_memory_widgets.dart';
 import '../controller/class_data.dart';
 import 'instances.dart';
 
-class _ClassNameColumn extends ColumnData<SingleClassStats_>
+class _ClassNameColumn extends ColumnData<SingleClassData>
     implements
-        ColumnRenderer<SingleClassStats_>,
-        ColumnHeaderRenderer<SingleClassStats_> {
+        ColumnRenderer<SingleClassData>,
+        ColumnHeaderRenderer<SingleClassData> {
   _ClassNameColumn(this.data)
       : super(
           'Class',
@@ -33,7 +34,7 @@ class _ClassNameColumn extends ColumnData<SingleClassStats_>
   final ClassesTableSingleData data;
 
   @override
-  String? getValue(SingleClassStats_ dataObject) =>
+  String? getValue(SingleClassData dataObject) =>
       dataObject.heapClass.className;
 
   @override
@@ -41,12 +42,12 @@ class _ClassNameColumn extends ColumnData<SingleClassStats_>
 
   @override
   // We are removing the tooltip, because it is provided by [HeapClassView].
-  String getTooltip(SingleClassStats_ classStats) => '';
+  String getTooltip(SingleClassData classStats) => '';
 
   @override
   Widget build(
     BuildContext context,
-    SingleClassStats_ data, {
+    SingleClassData data, {
     bool isRowSelected = false,
     bool isRowHovered = false,
     VoidCallback? onPressed,
@@ -74,8 +75,8 @@ class _ClassNameColumn extends ColumnData<SingleClassStats_>
   }
 }
 
-class _InstanceColumn extends ColumnData<SingleClassStats_>
-    implements ColumnRenderer<SingleClassStats_> {
+class _InstanceColumn extends ColumnData<SingleClassData>
+    implements ColumnRenderer<SingleClassData> {
   _InstanceColumn(this.classData)
       : super(
           'Instances',
@@ -87,8 +88,7 @@ class _InstanceColumn extends ColumnData<SingleClassStats_>
   final ClassesTableSingleData classData;
 
   @override
-  int getValue(SingleClassStats_ dataObject) =>
-      dataObject.objects.instanceCount;
+  int getValue(SingleClassData dataObject) => dataObject.objects.instanceCount;
 
   @override
   bool get numeric => true;
@@ -96,7 +96,7 @@ class _InstanceColumn extends ColumnData<SingleClassStats_>
   @override
   Widget? build(
     BuildContext context,
-    SingleClassStats_ data, {
+    SingleClassData data, {
     bool isRowSelected = false,
     bool isRowHovered = false,
     VoidCallback? onPressed,
@@ -110,7 +110,7 @@ class _InstanceColumn extends ColumnData<SingleClassStats_>
   }
 }
 
-class _ShallowSizeColumn extends ColumnData<SingleClassStats_> {
+class _ShallowSizeColumn extends ColumnData<SingleClassData> {
   _ShallowSizeColumn()
       : super(
           'Shallow Dart Size',
@@ -120,20 +120,20 @@ class _ShallowSizeColumn extends ColumnData<SingleClassStats_> {
         );
 
   @override
-  int getValue(SingleClassStats_ classStats) => classStats.objects.shallowSize;
+  int getValue(SingleClassData classStats) => classStats.objects.shallowSize;
 
   @override
   bool get numeric => true;
 
   @override
-  String getDisplayValue(SingleClassStats_ classStats) => prettyPrintBytes(
+  String getDisplayValue(SingleClassData classStats) => prettyPrintBytes(
         getValue(classStats),
         includeUnit: true,
         kbFractionDigits: 1,
       )!;
 }
 
-class _RetainedSizeColumn extends ColumnData<SingleClassStats_> {
+class _RetainedSizeColumn extends ColumnData<SingleClassData> {
   _RetainedSizeColumn(this.classData)
       : super(
           'Retained Dart Size',
@@ -145,13 +145,13 @@ class _RetainedSizeColumn extends ColumnData<SingleClassStats_> {
   final ClassesTableSingleData classData;
 
   @override
-  int getValue(SingleClassStats_ dataObject) => dataObject.objects.retainedSize;
+  int getValue(SingleClassData dataObject) => dataObject.objects.retainedSize;
 
   @override
   bool get numeric => true;
 
   @override
-  String getDisplayValue(SingleClassStats_ dataObject) {
+  String getDisplayValue(SingleClassData dataObject) {
     final value = getValue(dataObject);
 
     final bytes = prettyPrintRetainedSize(value)!;
@@ -170,7 +170,7 @@ class _ClassesTableSingleColumns {
 
   final ClassesTableSingleData classData;
 
-  late final columnList = <ColumnData<SingleClassStats_>>[
+  late final columnList = <ColumnData<SingleClassData>>[
     _ClassNameColumn(classData),
     _InstanceColumn(classData),
     _ShallowSizeColumn(),
@@ -185,7 +185,7 @@ class ClassesTableSingle extends StatelessWidget {
     required this.classesData,
   }) : _columns = _ClassesTableSingleColumns(classesData);
 
-  final List<SingleClassStats_> classes;
+  final ClassDataList<SingleClassData> classes;
 
   final ClassesTableSingleData classesData;
 
@@ -197,12 +197,12 @@ class ClassesTableSingle extends StatelessWidget {
     // no matter what the data passed to it is.
     const dataKey = 'ClassesTableSingle';
 
-    return FlatTable<SingleClassStats_>(
+    return FlatTable<SingleClassData>(
       columns: _columns.columnList,
-      data: classes,
+      data: classes.list,
       dataKey: dataKey,
       keyFactory: (e) => Key(e.heapClass.fullName),
-      selectionNotifier: classesData.selection,
+      // selectionNotifier: classesData.selection,
       onItemSelected: (_) => ga.select(
         gac.memory,
         gac.MemoryEvent.diffClassSingleSelect,
