@@ -82,17 +82,19 @@ Future<HeapData> calculateHeapData(
   }
 
   ClassDataList? classDataList;
+  MemoryFootprint? footprint;
 
   // Complexity of this part is O(n)*O(p) where
   // n is number of objects and p is length of retaining path.
   if (calculateClassData) {
     final classes = <HeapClassName, SingleClassData>{};
+    int dartSize = 0;
+    int reachableSize = 0;
 
     for (var i = 0; i < graph.objects.length; i++) {
       if (_uiReleaser.step()) await _uiReleaser.releaseUi();
       final object = graph.objects[i];
-      final className =
-          HeapClassName.fromHeapSnapshotClass(graph.classes[object.classId]);
+      dartSize += object.shallowSize;
 
       // We do not show objects that will be garbage collected soon.
       // ignore: unnecessary_null_comparison, false positive
@@ -100,10 +102,16 @@ Future<HeapData> calculateHeapData(
         continue;
       }
 
-      // Verify assumption that all sentinel objects have zero size.
-      // The code does not rely on it, it is just a check.
-      assert(!className.isSentinel || object.shallowSize == 0);
+      final className =
+          HeapClassName.fromHeapSnapshotClass(graph.classes[object.classId]);
 
+      // Ignore sentinels, because their size is not known.
+      if (className.isSentinel) {
+        assert(object.shallowSize == 0);
+        continue;
+      }
+
+      reachableSize += object.shallowSize;
       final classStats = classes.putIfAbsent(
         className,
         () => SingleClassData(heapClass: className),
@@ -112,10 +120,11 @@ Future<HeapData> calculateHeapData(
       classStats.countInstance(graph, i, retainers, sizes);
     }
 
+    footprint = MemoryFootprint(dart: dartSize, reachable: reachableSize);
     classDataList = ClassDataList<SingleClassData>(classes.values.toList());
   }
 
-  return HeapData._(graph, classDataList, null);
+  return HeapData._(graph, classDataList, footprint);
 }
 
 /// Assuming the object is leaf, initializes its retained size
