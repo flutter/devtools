@@ -442,7 +442,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     // Set class to show.
     final classes = _snapshotClassesAfterDiffing();
     heapClasses.value = classes;
-    //_selectClassAndPath();
+    _selectClassAndPath();
     _updateClasses(
       classes: classes,
       className: _core.className,
@@ -495,7 +495,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     if (_core.className != null) return;
     assert(_core.path == null);
 
-    final classes = heapClasses_.value;
+    final classes = heapClasses.value;
     if (classes == null) return;
 
     SingleClassStats_ singleWithMaxRetainedSize(
@@ -510,36 +510,36 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     ) =>
         a.total.delta.retainedSize > b.total.delta.retainedSize ? a : b;
 
-    // Get class with max retained size.
-    final ClassStats_ theClass;
-    if (classes is SingleHeapClasses) {
-      final classStatsList = classes.filtered(
-        _core.classFilter.value,
-        _core.rootPackage,
-      );
+    // // Get class with max retained size.
+    // final ClassStats_ theClass;
+    // if (classes is SingleHeapClasses) {
+    //   final classStatsList = classes.filtered(
+    //     _core.classFilter.value,
+    //     _core.rootPackage,
+    //   );
 
-      if (classStatsList.isEmpty) return;
-      theClass = classStatsList.reduce(singleWithMaxRetainedSize);
-    } else if (classes is DiffHeapClasses) {
-      final classStatsList = classes.filtered(
-        _core.classFilter.value,
-        _core.rootPackage,
-      );
+    //   if (classStatsList.isEmpty) return;
+    //   theClass = classStatsList.reduce(singleWithMaxRetainedSize);
+    // } else if (classes is DiffHeapClasses) {
+    //   final classStatsList = classes.filtered(
+    //     _core.classFilter.value,
+    //     _core.rootPackage,
+    //   );
 
-      if (classStatsList.isEmpty) return;
-      theClass = classStatsList.reduce(diffWithMaxRetainedSize);
-    } else {
-      throw StateError('Unexpected type ${classes.runtimeType}');
-    }
-    _core.className = theClass.heapClass;
+    //   if (classStatsList.isEmpty) return;
+    //   theClass = classStatsList.reduce(diffWithMaxRetainedSize);
+    // } else {
+    //   throw StateError('Unexpected type ${classes.runtimeType}');
+    // }
+    // _core.className = theClass.heapClass;
 
-    assert(theClass.statsByPathEntries.isNotEmpty);
+    // assert(theClass.statsByPathEntries.isNotEmpty);
 
-    // Get path with max retained size.
-    final path = theClass.statsByPathEntries.reduce((v, e) {
-      if (v.value.retainedSize > e.value.retainedSize) return v;
-      return e;
-    });
-    _core.path = path.key;
+    // // Get path with max retained size.
+    // final path = theClass.statsByPathEntries.reduce((v, e) {
+    //   if (v.value.retainedSize > e.value.retainedSize) return v;
+    //   return e;
+    // });
+    // _core.path = path.key;
   }
 }

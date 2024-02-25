@@ -143,6 +143,11 @@ class ClassDataList<T extends ClassData> {
       filtered: filtered,
     );
   }
+
+  T withMaxRetainedSize() {
+    /// ???
+    throw UnimplementedError();
+  }
 }
 
 abstract class ClassData {

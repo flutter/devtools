@@ -42,7 +42,7 @@ Future<HeapData> calculateHeapData(
 
   Uint32List? retainers;
   final Uint32List? sizes =
-      calculateRetainedSizes ? null : Uint32List(graph.objects.length);
+      calculateRetainedSizes ? Uint32List(graph.objects.length) : null;
 
   if (calculateRetainingPaths || calculateRetainedSizes) {
     final weakClasses = _WeakClasses(graph);
