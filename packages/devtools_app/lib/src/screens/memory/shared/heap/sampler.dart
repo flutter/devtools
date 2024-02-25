@@ -161,8 +161,8 @@ class ClassSampler {
     this.heapClass, {
     ObjectSet? objects,
     HeapData? heap,
-  }) : // assert(objects?.objectsByCodes.isNotEmpty ?? true),
-        //      assert((objects == null) == (heap == null)),
+  })  : assert(objects?.objects.isNotEmpty ?? true),
+        assert((objects == null) == (heap == null)),
         _objects = objects == null ? null : _HeapObjects(objects, heap!);
 
   final HeapClassName heapClass;
