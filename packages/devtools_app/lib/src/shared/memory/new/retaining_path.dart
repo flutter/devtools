@@ -111,7 +111,6 @@ class PathFromRoot {
           isLong: false,
         ),
         inverted: inverted,
-        skipObject: true,
       );
 
   String toLongString({
@@ -165,10 +164,8 @@ class PathFromRoot {
     required List<String> data,
     required String delimiter,
     required bool inverted,
-    bool skipObject = false,
   }) {
     data = data.joinWith(delimiter).toList();
-    if (skipObject) data.removeAt(data.length - 1);
     if (inverted) data = data.reversed.toList();
     return data.join().trim();
   }
