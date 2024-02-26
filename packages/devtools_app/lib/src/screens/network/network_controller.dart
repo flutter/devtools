@@ -49,8 +49,13 @@ class NetworkController extends DisposableController
         AutoDisposeControllerMixin {
   NetworkController() {
     _networkService = NetworkService(this);
-    _currentNetworkRequests = CurrentNetworkRequests(
-      onRequestDataChange: _filterAndRefreshSearchMatches,
+    _currentNetworkRequests = CurrentNetworkRequests();
+    addAutoDisposeListener(
+      _currentNetworkRequests,
+      () {
+        print('_currentNetworkRequests.listener');
+        _filterAndRefreshSearchMatches();
+      },
     );
     subscribeToFilterChanges();
   }
@@ -131,14 +136,6 @@ class NetworkController extends DisposableController
   @visibleForTesting
   bool get isPolling => _pollingTimer != null;
 
-  void _processHttpProfileRequests({
-    required List<HttpProfileRequest> newOrUpdatedHttpRequests,
-    required CurrentNetworkRequests currentRequests,
-  }) {
-    currentRequests.updateOrAdd(newOrUpdatedHttpRequests);
-    _filterAndRefreshSearchMatches();
-  }
-
   @visibleForTesting
   void processNetworkTrafficHelper(
     List<SocketStatistic> sockets,
@@ -146,7 +143,11 @@ class NetworkController extends DisposableController
     int timelineMicrosOffset, {
     required CurrentNetworkRequests currentRequests,
   }) {
-    currentRequests.updateWebSocketRequests(sockets, timelineMicrosOffset);
+    currentRequests.updateOrAddAll(
+      requests: httpRequests!,
+      sockets: sockets,
+      timelineMicrosOffset: timelineMicrosOffset,
+    );
 
     // If we have updated data for the selected web socket, we need to update
     // the value.
@@ -155,11 +156,6 @@ class NetworkController extends DisposableController
       selectedRequest.value =
           currentRequests.getRequest(currentSelectedRequestId);
     }
-
-    _processHttpProfileRequests(
-      newOrUpdatedHttpRequests: httpRequests!,
-      currentRequests: currentRequests,
-    );
   }
 
   void processNetworkTraffic({
@@ -358,29 +354,42 @@ class NetworkController extends DisposableController
 /// Class for managing the set of all current websocket requests, and
 /// http profile requests.
 class CurrentNetworkRequests extends ValueNotifier<List<NetworkRequest>> {
-  CurrentNetworkRequests({required this.onRequestDataChange}) : super([]);
+  CurrentNetworkRequests() : super([]);
 
   ValueListenable<List<NetworkRequest>> get requests =>
       this; // todo: remove this and just let callers use .value
   final _requestsById = <String, NetworkRequest>{};
 
-  /// Triggered whenever the request's data changes on its own.
-  VoidCallback onRequestDataChange;
-
   NetworkRequest? getRequest(String id) => _requestsById[id];
+
+  /// Update or add all [requests] and [sockets] to the current requests.
+  ///
+  /// If the entry already exists then it will be modified in place, otherwise
+  /// a new [HttpProfileRequest] will be added to the end of the requests lists.
+  ///
+  /// [notifyListeners] will only be called once all [requests] and [sockets]
+  /// have be updated or added.
+  void updateOrAddAll({
+    required List<HttpProfileRequest> requests,
+    required List<SocketStatistic> sockets,
+    required int timelineMicrosOffset,
+  }) {
+    _updateOrAddRequests(requests);
+    _updateWebSocketRequests(sockets, timelineMicrosOffset);
+    notifyListeners();
+  }
 
   /// Update or add the [request] to the [requests] depending on whether or not
   /// its [request.id] already exists in the list.
   ///
-  void updateOrAdd(List<HttpProfileRequest> requests) {
+  void _updateOrAddRequests(List<HttpProfileRequest> requests) {
     for (int i = 0; i < requests.length; i++) {
       final request = requests[i];
-      _updateOrAdd(request);
+      _updateOrAddRequest(request);
     }
-    notifyListeners();
   }
 
-  void _updateOrAdd(HttpProfileRequest request) {
+  void _updateOrAddRequest(HttpProfileRequest request) {
     final wrapped = DartIOHttpRequestData(
       request,
       requestFullDataFromVmService: false,
@@ -397,7 +406,7 @@ class CurrentNetworkRequests extends ValueNotifier<List<NetworkRequest>> {
     }
   }
 
-  void updateWebSocketRequests(
+  void _updateWebSocketRequests(
     List<SocketStatistic> sockets,
     int timelineMicrosOffset,
   ) {
@@ -422,8 +431,6 @@ class CurrentNetworkRequests extends ValueNotifier<List<NetworkRequest>> {
         _requestsById[webSocket.id] = webSocket;
       }
     }
-    notifyListeners();
-    onRequestDataChange();
   }
 
   void clear() {

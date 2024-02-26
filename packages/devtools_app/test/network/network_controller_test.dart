@@ -250,4 +250,148 @@ void main() {
       expect(controller.filteredData.value, hasLength(2));
     });
   });
+
+  group('CurrentNetworkRequests', () {
+    late CurrentNetworkRequests currentNetworkRequests;
+    late int notifyCount;
+    void notifyCountIncrement() => notifyCount++;
+    setUp(() {
+      currentNetworkRequests = CurrentNetworkRequests();
+      notifyCount = 0;
+      currentNetworkRequests.addListener(notifyCountIncrement);
+    });
+
+    tearDown(() {
+      currentNetworkRequests.removeListener(notifyCountIncrement);
+    });
+
+    group('http', () {
+      final startTime = DateTime(2021).millisecondsSinceEpoch;
+      final endTime = startTime + 1000;
+      final httpBaseObject = {
+        'id': '1',
+        'isolateId': '2',
+        'method': 'method1',
+        'uri': 'http://test.com',
+        'events': [],
+        'startTime': startTime,
+      };
+
+      final socketStatObject = {
+        'id': '20',
+        'startTime': startTime,
+        'lastReadTime': 25,
+        'lastWriteTime': 30,
+        'address': '0.0.0.0',
+        'port': 1234,
+        'socketType': 'ws',
+        'readBytes': 20,
+        'writeBytes': 40,
+      };
+
+      final request1Pending = HttpProfileRequest.parse(httpBaseObject)!;
+      final request1Done = HttpProfileRequest.parse({
+        ...httpBaseObject,
+        'endTime': endTime,
+      })!;
+      final request2Pending = HttpProfileRequest.parse({
+        ...httpBaseObject,
+        'id': '2',
+      })!;
+      final request2Done = HttpProfileRequest.parse({
+        ...httpBaseObject,
+        'id': '2',
+        'endTime': endTime,
+      })!;
+
+      final socketStats1Pending = SocketStatistic.parse({...socketStatObject})!;
+      final socketStats1Done = SocketStatistic.parse({
+        ...socketStatObject,
+        ...{'endtime': endTime},
+      })!;
+
+      final socketStats2Pending =
+          SocketStatistic.parse({...socketStatObject, 'id': '21'})!;
+
+      test('adding multiple http requests notifies listeners only once', () {
+        final reqs = [request1Pending, request2Pending];
+        currentNetworkRequests.updateOrAddAll(
+          requests: reqs,
+          sockets: [],
+          timelineMicrosOffset: 0,
+        );
+        expect(notifyCount, 1);
+
+        expect(
+          currentNetworkRequests.value.map((e) => e.id),
+          reqs.map((e) => e.id),
+        );
+
+        currentNetworkRequests.updateOrAddAll(
+          requests: [request1Done],
+          sockets: [],
+          timelineMicrosOffset: 0,
+        );
+        expect(notifyCount, 2);
+        expect(
+          currentNetworkRequests.value.map((e) => e.id),
+          reqs.map((e) => e.id),
+        );
+      });
+
+      test('adding multiple socket requests notifies listeners only once', () {
+        final sockets = [
+          socketStats1Pending,
+          socketStats2Pending,
+        ];
+        currentNetworkRequests.updateOrAddAll(
+          requests: [],
+          sockets: sockets,
+          timelineMicrosOffset: 0,
+        );
+        expect(notifyCount, 1);
+        expect(
+          currentNetworkRequests.value.map((e) => e.id),
+          sockets.map((e) => e.id),
+        );
+
+        currentNetworkRequests.updateOrAddAll(
+          requests: [],
+          sockets: [socketStats1Done],
+          timelineMicrosOffset: 0,
+        );
+        expect(notifyCount, 2);
+        expect(
+          currentNetworkRequests.value.map((e) => e.id),
+          sockets.map((e) => e.id),
+        );
+      });
+
+      test('adding socket and http requests notifies listeners only once', () {
+        final reqs = [request1Pending, request2Pending];
+        final sockets = [socketStats1Pending, socketStats2Pending];
+        currentNetworkRequests.updateOrAddAll(
+          requests: reqs,
+          sockets: sockets,
+          timelineMicrosOffset: 0,
+        );
+        expect(notifyCount, 1);
+        expect(
+          currentNetworkRequests.value.map((e) => e.id),
+          [...reqs.map((e) => e.id), ...sockets.map((e) => e.id)],
+        );
+
+        currentNetworkRequests.updateOrAddAll(
+          requests: [request1Done],
+          sockets: [socketStats1Done],
+          timelineMicrosOffset: 0,
+        );
+        expect(notifyCount, 2);
+        expect(
+          currentNetworkRequests.value.map((e) => e.id),
+          [...reqs.map((e) => e.id), ...sockets.map((e) => e.id)],
+        );
+      });
+    });
+  });
 }
