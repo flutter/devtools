@@ -1479,6 +1479,80 @@ void main() {
       equals('http://127.0.0.1:61962'),
     );
   });
+
+  group('file uri helpers', () {
+    test('rootFromFileUriString', () {
+      // Dart file under 'lib'
+      expect(
+        packageRootFromFileUriString(
+          'file:///Users/me/foo/my_app_root/lib/main.dart',
+        ),
+        equals('file:///Users/me/foo/my_app_root'),
+      );
+      expect(
+        packageRootFromFileUriString(
+          'file:///Users/me/foo/my_app_root/lib/sub/main.dart',
+        ),
+        equals('file:///Users/me/foo/my_app_root'),
+      );
+
+      // Dart file under 'bin'
+      expect(
+        packageRootFromFileUriString(
+          'file:///Users/me/foo/my_app_root/bin/script.dart',
+        ),
+        equals('file:///Users/me/foo/my_app_root'),
+      );
+      expect(
+        packageRootFromFileUriString(
+          'file:///Users/me/foo/my_app_root/bin/sub/script.dart',
+        ),
+        equals('file:///Users/me/foo/my_app_root'),
+      );
+
+      // Dart file under 'test'
+      expect(
+        packageRootFromFileUriString(
+          'file:///Users/me/foo/my_app_root/test/some_test.dart',
+        ),
+        equals('file:///Users/me/foo/my_app_root'),
+      );
+      expect(
+        packageRootFromFileUriString(
+          'file:///Users/me/foo/my_app_root/test/sub/some_test.dart',
+        ),
+        equals('file:///Users/me/foo/my_app_root'),
+      );
+
+      // Dart file under 'integration_test'
+      expect(
+        packageRootFromFileUriString(
+          'file:///Users/me/foo/my_app_root/integration_test/some_test.dart',
+        ),
+        equals('file:///Users/me/foo/my_app_root'),
+      );
+      expect(
+        packageRootFromFileUriString(
+          'file:///Users/me/foo/my_app_root/integration_test/sub/some_test.dart',
+        ),
+        equals('file:///Users/me/foo/my_app_root'),
+      );
+
+      // Dart file under 'benchmark'
+      expect(
+        packageRootFromFileUriString(
+          'file:///Users/me/foo/my_app_root/benchmark/some_test.dart',
+        ),
+        equals('file:///Users/me/foo/my_app_root'),
+      );
+      expect(
+        packageRootFromFileUriString(
+          'file:///Users/me/foo/my_app_root/benchmark/sub/some_test.dart',
+        ),
+        equals('file:///Users/me/foo/my_app_root'),
+      );
+    });
+  });
 }
 
 class _SubtractionResult {
