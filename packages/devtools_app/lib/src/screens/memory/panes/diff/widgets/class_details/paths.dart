@@ -172,7 +172,7 @@ class RetainingPathTable extends StatelessWidget {
       dataKey: dataKey,
       columns: columns.columnList,
       data: _data,
-      keyFactory: (e) => Key(e.path.toLongString()),
+      keyFactory: (e) => ValueKey(e.path),
       selectionNotifier: selection,
       onItemSelected: (_) => ga.select(
         gac.memory,
@@ -218,7 +218,7 @@ class RetainingPathTable extends StatelessWidget {
 //       dataKey: dataKey,
 //       columns: columns.columnList,
 //       data: entries,
-//       keyFactory: (e) => Key(e.path.toLongString()),
+//       keyFactory: (e) => ValueKey(e.path),
 //       selectionNotifier: selection,
 //       onItemSelected: (_) => ga.select(
 //         gac.memory,

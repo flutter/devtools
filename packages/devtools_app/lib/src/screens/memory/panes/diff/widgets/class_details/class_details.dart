@@ -52,6 +52,7 @@ class HeapClassDetails extends StatelessWidget {
         }
 
         return RetainingPathView(
+          className: theData.heapClass,
           path: pathData.path,
           controller: pathController,
         );

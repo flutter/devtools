@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import '../../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../../shared/common_widgets.dart';
+import '../../../../../../shared/memory/class_name.dart';
 import '../../../../../../shared/memory/new/retaining_path.dart';
 import '../../../../../../shared/primitives/utils.dart';
 import '../../../../shared/heap/model.dart';
@@ -18,8 +19,10 @@ class RetainingPathView extends StatelessWidget {
     super.key,
     required this.path,
     required this.controller,
+    required this.className,
   });
 
+  final HeapClassName className;
   final PathFromRoot path;
   final RetainingPathController controller;
 
@@ -32,6 +35,7 @@ class RetainingPathView extends StatelessWidget {
         children: [
           const SizedBox(height: densePadding),
           _PathControlPane(
+            className: className,
             controller: controller,
             path: path,
           ),
@@ -51,14 +55,19 @@ class RetainingPathView extends StatelessWidget {
 }
 
 class _PathControlPane extends StatelessWidget {
-  const _PathControlPane({required this.controller, required this.path});
+  const _PathControlPane({
+    required this.controller,
+    required this.path,
+    required this.className,
+  });
 
+  final HeapClassName className;
   final PathFromRoot path;
   final RetainingPathController controller;
 
   @override
   Widget build(BuildContext context) {
-    final titleText = 'Retaining path for ${path.classes.last.className}';
+    final titleText = 'Retaining path for $className';
     return Row(
       children: [
         Expanded(
