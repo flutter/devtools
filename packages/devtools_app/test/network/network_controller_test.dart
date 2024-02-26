@@ -313,61 +313,9 @@ void main() {
       final socketStats2Pending =
           SocketStatistic.parse({...socketStatObject, 'id': '21'})!;
 
-      test('adding multiple http requests notifies listeners only once', () {
-        final reqs = [request1Pending, request2Pending];
-        currentNetworkRequests.updateOrAddAll(
-          requests: reqs,
-          sockets: [],
-          timelineMicrosOffset: 0,
-        );
-        expect(notifyCount, 1);
-
-        expect(
-          currentNetworkRequests.value.map((e) => e.id),
-          reqs.map((e) => e.id),
-        );
-
-        currentNetworkRequests.updateOrAddAll(
-          requests: [request1Done],
-          sockets: [],
-          timelineMicrosOffset: 0,
-        );
-        expect(notifyCount, 2);
-        expect(
-          currentNetworkRequests.value.map((e) => e.id),
-          reqs.map((e) => e.id),
-        );
-      });
-
-      test('adding multiple socket requests notifies listeners only once', () {
-        final sockets = [
-          socketStats1Pending,
-          socketStats2Pending,
-        ];
-        currentNetworkRequests.updateOrAddAll(
-          requests: [],
-          sockets: sockets,
-          timelineMicrosOffset: 0,
-        );
-        expect(notifyCount, 1);
-        expect(
-          currentNetworkRequests.value.map((e) => e.id),
-          sockets.map((e) => e.id),
-        );
-
-        currentNetworkRequests.updateOrAddAll(
-          requests: [],
-          sockets: [socketStats1Done],
-          timelineMicrosOffset: 0,
-        );
-        expect(notifyCount, 2);
-        expect(
-          currentNetworkRequests.value.map((e) => e.id),
-          sockets.map((e) => e.id),
-        );
-      });
-
-      test('adding socket and http requests notifies listeners only once', () {
+      test(
+          'adding multiple socket and http requests notifies listeners only once',
+          () {
         final reqs = [request1Pending, request2Pending];
         final sockets = [socketStats1Pending, socketStats2Pending];
         currentNetworkRequests.updateOrAddAll(

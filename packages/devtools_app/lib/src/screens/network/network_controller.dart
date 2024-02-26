@@ -52,10 +52,7 @@ class NetworkController extends DisposableController
     _currentNetworkRequests = CurrentNetworkRequests();
     addAutoDisposeListener(
       _currentNetworkRequests,
-      () {
-        print('_currentNetworkRequests.listener');
-        _filterAndRefreshSearchMatches();
-      },
+      _filterAndRefreshSearchMatches,
     );
     subscribeToFilterChanges();
   }

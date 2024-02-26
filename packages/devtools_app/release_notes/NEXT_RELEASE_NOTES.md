@@ -50,7 +50,8 @@ mode. - [#7178](https://github.com/flutter/devtools/pull/7178)
 
 ## Network profiler updates
 
-TODO: Remove this section if there are not any general updates.
+* Improved Network profiler performance. [#7266](https://github.com/flutter/devtools/pull/7266)
+* Fixed a bug where selected pending requests weren't refreshing the tab once updated. [#7266](https://github.com/flutter/devtools/pull/7266)
 
 ## Logging updates
 
