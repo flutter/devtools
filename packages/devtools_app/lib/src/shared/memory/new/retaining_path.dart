@@ -18,6 +18,18 @@ bool Function(List<dynamic>? list1, List<dynamic>? list2) _listEquality =
 
 typedef PathContainsClass = Map<(PathFromRoot, HeapClassName), bool>;
 
+@visibleForTesting
+class DebugRetainingPathUsage {
+  /// Path is expected to be constructed for each object.
+  int constructed = 0;
+
+  /// Only unique paths are stored.
+  int stored = 0;
+
+  /// Only displayed paths are stringified.
+  int stringified = 0;
+}
+
 /// A retaining path from the root to an object.
 ///
 /// This class is used to represent the shortest retaining path from the root to an object.
@@ -31,7 +43,11 @@ typedef PathContainsClass = Map<(PathFromRoot, HeapClassName), bool>;
 /// use [`leak_tracker/formattedRetainingPath`](https://github.com/dart-lang/leak_tracker/blob/f5620600a5ce1c44f65ddaa02001e200b096e14c/pkgs/leak_tracker/lib/src/leak_tracking/helpers.dart#L58).
 class PathFromRoot {
   PathFromRoot._(this.path)
-      : hashCode = path.isEmpty ? _hashOfEmptyPath : Object.hashAll(path),
+      : assert(() {
+          usage.constructed++;
+          return true;
+        }()),
+        hashCode = path.isEmpty ? _hashOfEmptyPath : Object.hashAll(path),
         classes = calculateSetOfClasses ? path.toSet() : const {};
 
   const PathFromRoot._empty()
@@ -63,19 +79,29 @@ class PathFromRoot {
   }
 
   factory PathFromRoot.fromPath(List<HeapClassName> path) {
+    if (path.isEmpty) return empty;
     final existingInstance = instances.lookup(PathFromRoot._(path));
     if (existingInstance != null) return existingInstance;
 
     final newInstance = PathFromRoot._(List.unmodifiable(path));
 
     instances.add(newInstance);
+    assert(() {
+      assert(instances.length == usage.stored);
+      usage.stored++;
+      return true;
+    }());
     return newInstance;
   }
 
   @visibleForTesting
   static Set<PathFromRoot> get instances => _instances ??= <PathFromRoot>{};
   static Set<PathFromRoot>? _instances;
-  static PathFromRoot empty = PathFromRoot._empty();
+
+  @visibleForTesting
+  static DebugRetainingPathUsage usage = DebugRetainingPathUsage();
+
+  static PathFromRoot empty = const PathFromRoot._empty();
 
   /// If false, the [classes] is always empty.
   ///
@@ -165,6 +191,10 @@ class PathFromRoot {
     required String delimiter,
     required bool inverted,
   }) {
+    assert(() {
+      usage.stringified++;
+      return true;
+    }());
     data = data.joinWith(delimiter).toList();
     if (inverted) data = data.reversed.toList();
     return data.join().trim();
