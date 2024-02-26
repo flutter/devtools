@@ -264,7 +264,6 @@ class ServerApi {
           {DtdApi.uriPropertyName: dtdUri},
           api: api,
         );
-        );
       default:
         return api.notImplemented();
     }
