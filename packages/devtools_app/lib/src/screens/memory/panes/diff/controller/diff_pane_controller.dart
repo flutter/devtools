@@ -415,6 +415,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
       classesTableSingle.selection.value =
           classes.list.singleWhereOrNull((d) => d.heapClass == className);
       classesTableDiff.selection.value = null;
+      classData.value = classesTableSingle.selection.value;
     } else if (classes is DiffHeapClasses) {
       // _singleClassesToShow_.value = null;
       // _diffClassesToShow.value = classes.filtered(filter, _core.rootPackage);
