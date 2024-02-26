@@ -1482,7 +1482,8 @@ void main() {
       // Dart file under 'lib'
       expect(
         packageRootFromFileUriString(
-            'file:///Users/me/foo/my_app_root/lib/main.dart'),
+          'file:///Users/me/foo/my_app_root/lib/main.dart',
+        ),
         equals('file:///Users/me/foo/my_app_root'),
       );
       expect(
