@@ -202,7 +202,7 @@ class ClassesTableSingle extends StatelessWidget {
       data: classes.list,
       dataKey: dataKey,
       keyFactory: (e) => Key(e.heapClass.fullName),
-      // selectionNotifier: classesData.selection,
+      selectionNotifier: classesData.selection,
       onItemSelected: (_) => ga.select(
         gac.memory,
         gac.MemoryEvent.diffClassSingleSelect,

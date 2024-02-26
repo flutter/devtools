@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import '../../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../../shared/common_widgets.dart';
+import '../../../../../../shared/memory/new/retaining_path.dart';
 import '../../../../../../shared/primitives/utils.dart';
 import '../../../../shared/heap/model.dart';
 import '../../controller/class_data.dart';
@@ -19,7 +20,7 @@ class RetainingPathView extends StatelessWidget {
     required this.controller,
   });
 
-  final ClassOnlyHeapPath path;
+  final PathFromRoot path;
   final RetainingPathController controller;
 
   @override
@@ -52,7 +53,7 @@ class RetainingPathView extends StatelessWidget {
 class _PathControlPane extends StatelessWidget {
   const _PathControlPane({required this.controller, required this.path});
 
-  final ClassOnlyHeapPath path;
+  final PathFromRoot path;
   final RetainingPathController controller;
 
   @override
@@ -119,7 +120,7 @@ class _PathControlPane extends StatelessWidget {
 class _PathView extends StatelessWidget {
   const _PathView({required this.path, required this.controller});
 
-  final ClassOnlyHeapPath path;
+  final PathFromRoot path;
   final RetainingPathController controller;
 
   @override

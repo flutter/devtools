@@ -17,10 +17,12 @@ import '../../../../../shared/globals.dart';
 import '../../../../../shared/memory/class_name.dart';
 import '../../../../../shared/memory/new/classes.dart';
 import '../../../../../shared/memory/new/heap_graph_loader.dart';
+import '../../../../../shared/memory/new/retaining_path.dart';
 import '../../../shared/heap/class_filter.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
 import '../../../shared/primitives/memory_utils.dart';
+import '../widgets/class_details/paths.dart';
 import 'class_data.dart';
 import 'heap_diff.dart';
 import 'item_controller.dart';
@@ -221,7 +223,10 @@ class CoreData {
   HeapClassName? className;
 
   /// Selected retaining path (cross-snapshot).
-  ClassOnlyHeapPath? path;
+  ClassOnlyHeapPath? path_;
+
+  /// Selected retaining path (cross-snapshot).
+  PathFromRoot? path;
 
   /// Current class filter.
   ValueListenable<ClassFilter> get classFilter => _classFilter;
@@ -260,8 +265,8 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
       () => _setClassIfNotNull(classesTableDiff.selection.value?.heapClass),
     );
     addAutoDisposeListener(
-      selectedPathEntry,
-      () => _setPathIfNotNull(selectedPathEntry.value?.key),
+      selectedPath,
+      () => _setPathIfNotNull(selectedPath.value?.path),
     );
   }
 
@@ -295,11 +300,11 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   final _singleClassesToShow =
       ValueNotifier<ClassDataList<SingleClassData>?>(null);
 
-  /// List of retaining paths to show for the selected class.
-  final pathEntries = ValueNotifier<List<StatsByPathEntry>?>(null);
+  /// Data to show for the selected class.
+  final classData = ValueNotifier<ClassData?>(null);
 
   /// Selected retaining path record in a concrete snapshot, to take signal from the table widget.
-  final selectedPathEntry = ValueNotifier<StatsByPathEntry?>(null);
+  final selectedPath = ValueNotifier<PathData?>(null);
 
   /// Storage for already calculated diffs between snapshots.
   late final _diffStore = HeapDiffStore();
@@ -318,7 +323,14 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   }
 
   /// Updates cross-snapshot path if the argument is not null.
-  void _setPathIfNotNull(ClassOnlyHeapPath? path) {
+  void _setPathIfNotNull_(ClassOnlyHeapPath? path) {
+    if (path == null || path == _core.path_) return;
+    _core.path_ = path;
+    _updateValues();
+  }
+
+  /// Updates cross-snapshot path if the argument is not null.
+  void _setPathIfNotNull(PathFromRoot? path) {
     if (path == null || path == _core.path) return;
     _core.path = path;
     _updateValues();
@@ -447,23 +459,18 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
       classes: classes,
       className: _core.className,
     );
-    // Set paths to show.
-    final theClass =
-        classesTableSingle.selection.value ?? classesTableDiff.selection.value;
-    final thePathEntries = pathEntries.value = theClass?.statsByPathEntries;
-    final paths = theClass?.statsByPath;
-    StatsByPathEntry? thePathEntry;
-    if (_core.path != null && paths != null && thePathEntries != null) {
-      final pathStats = paths[_core.path];
-      if (pathStats != null) {
-        thePathEntry =
-            thePathEntries.firstWhereOrNull((e) => e.key == _core.path);
-      }
+
+    final theClassData = classData.value;
+    final thePath = _core.path;
+    if (theClassData != null && thePath != null) {
+      selectedPath.value = PathData(theClassData, thePath);
+    } else {
+      selectedPath.value = null;
     }
-    selectedPathEntry.value = thePathEntry;
 
     // Set current snapshot.
     _selectedItem.value = _core.selectedItem;
+
     _endUpdatingValues();
   }
 
@@ -498,48 +505,9 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     final classes = heapClasses.value;
     if (classes == null) return;
 
-    SingleClassStats_ singleWithMaxRetainedSize(
-      SingleClassStats_ a,
-      SingleClassStats_ b,
-    ) =>
-        a.objects.retainedSize > b.objects.retainedSize ? a : b;
+    final theClass = classes.withMaxRetainedSize;
 
-    DiffClassStats diffWithMaxRetainedSize(
-      DiffClassStats a,
-      DiffClassStats b,
-    ) =>
-        a.total.delta.retainedSize > b.total.delta.retainedSize ? a : b;
-
-    // // Get class with max retained size.
-    // final ClassStats_ theClass;
-    // if (classes is SingleHeapClasses) {
-    //   final classStatsList = classes.filtered(
-    //     _core.classFilter.value,
-    //     _core.rootPackage,
-    //   );
-
-    //   if (classStatsList.isEmpty) return;
-    //   theClass = classStatsList.reduce(singleWithMaxRetainedSize);
-    // } else if (classes is DiffHeapClasses) {
-    //   final classStatsList = classes.filtered(
-    //     _core.classFilter.value,
-    //     _core.rootPackage,
-    //   );
-
-    //   if (classStatsList.isEmpty) return;
-    //   theClass = classStatsList.reduce(diffWithMaxRetainedSize);
-    // } else {
-    //   throw StateError('Unexpected type ${classes.runtimeType}');
-    // }
-    // _core.className = theClass.heapClass;
-
-    // assert(theClass.statsByPathEntries.isNotEmpty);
-
-    // // Get path with max retained size.
-    // final path = theClass.statsByPathEntries.reduce((v, e) {
-    //   if (v.value.retainedSize > e.value.retainedSize) return v;
-    //   return e;
-    // });
-    // _core.path = path.key;
+    _core.className = theClass.heapClass;
+    _core.path = theClass.pathWithMaxRetainedSize;
   }
 }

@@ -95,4 +95,14 @@ class PathFromRoot {
   static void disposeSingletons() {
     _instances = null;
   }
+
+  String toShortString({String? delimiter, bool inverted = false}) =>
+      'short sting';
+
+  String toLongString({
+    String? delimiter,
+    bool inverted = false,
+    bool hideStandard = false,
+  }) =>
+      'long sting';
 }

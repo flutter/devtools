@@ -61,14 +61,13 @@ class SnapshotView extends StatelessWidget {
           throw StateError('singleClasses or diffClasses should not be null.');
         }
 
-        final pathTable = ValueListenableBuilder<List<StatsByPathEntry>?>(
-          valueListenable: controller.derived.pathEntries,
-          builder: (_, entries, __) => HeapClassDetails(
-            entries: entries,
-            selection: controller.derived.selectedPathEntry,
+        final pathTable = ValueListenableBuilder<ClassData?>(
+          valueListenable: controller.derived.classData,
+          builder: (_, classData, __) => HeapClassDetails(
+            classData: classData,
+            pathSelection: controller.derived.selectedPath,
             isDiff: classes is DiffHeapClasses,
             pathController: controller.retainingPathController,
-            className: controller.core.className?.className,
           ),
         );
 

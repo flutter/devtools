@@ -110,11 +110,11 @@ class ObjectSet extends ObjectSetStats {
 
 @immutable
 class ClassDataList<T extends ClassData> {
-  const ClassDataList(this._originalList)
+  ClassDataList(this._originalList)
       : _appliedFilter = null,
         _filtered = null;
 
-  const ClassDataList._filtered({
+  ClassDataList._filtered({
     required List<T> original,
     required ClassFilter appliedFilter,
     required List<T> filtered,
@@ -144,22 +144,34 @@ class ClassDataList<T extends ClassData> {
     );
   }
 
-  T withMaxRetainedSize() {
-    /// ???
-    throw UnimplementedError();
-  }
+  late final T withMaxRetainedSize = () {
+    return list.reduce(
+      (a, b) => a.objects.retainedSize > b.objects.retainedSize ? a : b,
+    );
+  }();
 }
 
 abstract class ClassData {
   ClassData({required this.heapClass});
 
+  ObjectSetStats get objects;
   final Map<PathFromRoot, ObjectSetStats> byPath = {};
   final HeapClassName heapClass;
+
+  late final PathFromRoot pathWithMaxRetainedSize = () {
+    assert(byPath.isNotEmpty);
+    return byPath.keys.reduce(
+      (a, b) => byPath[a]!.retainedSize > byPath[b]!.retainedSize ? a : b,
+    );
+  }();
 }
 
 class SingleClassData extends ClassData {
   SingleClassData({required super.heapClass});
-  final ObjectSet objects = ObjectSet();
+  final ObjectSet _objects = ObjectSet();
+
+  @override
+  ObjectSet get objects => _objects;
 
   void countInstance(
     HeapSnapshotGraph graph,
@@ -175,7 +187,7 @@ class SingleClassData extends ClassData {
         retainedSizes != null &&
         path.classes.contains(heapClass);
 
-    objects.countInstance(
+    _objects.countInstance(
       graph,
       index,
       retainedSizes,
