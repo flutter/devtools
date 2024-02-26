@@ -266,10 +266,10 @@ void main() {
     });
 
     group('http', () {
-      final startTime = DateTime(2021).millisecondsSinceEpoch;
-      final endTime = startTime + 1000;
+      final startTime = DateTime(2021).microsecondsSinceEpoch;
+      final endTime = startTime + 1000000;
       final httpBaseObject = {
-        'id': '1',
+        'id': '101',
         'isolateId': '2',
         'method': 'method1',
         'uri': 'http://test.com',
@@ -278,7 +278,7 @@ void main() {
       };
 
       final socketStatObject = {
-        'id': '20',
+        'id': '21',
         'startTime': startTime,
         'lastReadTime': 25,
         'lastWriteTime': 30,
@@ -293,25 +293,26 @@ void main() {
       final request1Done = HttpProfileRequest.parse({
         ...httpBaseObject,
         'endTime': endTime,
+        'response': {
+          'startTime': startTime,
+          'endTime': endTime,
+          'redirects': [],
+          'statusCode': 200,
+        },
       })!;
       final request2Pending = HttpProfileRequest.parse({
         ...httpBaseObject,
-        'id': '2',
-      })!;
-      final request2Done = HttpProfileRequest.parse({
-        ...httpBaseObject,
-        'id': '2',
-        'endTime': endTime,
+        'id': '102',
       })!;
 
       final socketStats1Pending = SocketStatistic.parse({...socketStatObject})!;
       final socketStats1Done = SocketStatistic.parse({
         ...socketStatObject,
-        ...{'endtime': endTime},
+        'endTime': endTime,
       })!;
 
       final socketStats2Pending =
-          SocketStatistic.parse({...socketStatObject, 'id': '21'})!;
+          SocketStatistic.parse({...socketStatObject, 'id': '22'})!;
 
       test(
           'adding multiple socket and http requests notifies listeners only once',
@@ -324,9 +325,17 @@ void main() {
           timelineMicrosOffset: 0,
         );
         expect(notifyCount, 1);
+
+        // Check that all requests ids are present and that there are no
+        // endtimes
         expect(
-          currentNetworkRequests.value.map((e) => e.id),
-          [...reqs.map((e) => e.id), ...sockets.map((e) => e.id)],
+          currentNetworkRequests.value.map((e) => [e.id, e.endTimestamp]),
+          [
+            ['101', null],
+            ['102', null],
+            ['21', null],
+            ['22', null],
+          ],
         );
 
         currentNetworkRequests.updateOrAddAll(
@@ -335,10 +344,17 @@ void main() {
           timelineMicrosOffset: 0,
         );
         expect(notifyCount, 2);
+        // Check that all requests ids are present and that the endtimes have
+        // been updated accordingly
         expect(
-          currentNetworkRequests.value.map((e) => e.id),
-          [...reqs.map((e) => e.id), ...sockets.map((e) => e.id)],
-        );
+            currentNetworkRequests.value
+                .map((e) => [e.id, e.endTimestamp?.microsecondsSinceEpoch]),
+            [
+              ['101', endTime],
+              ['102', null],
+              ['21', endTime],
+              ['22', null],
+            ]);
       });
     });
   });
