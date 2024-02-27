@@ -11,6 +11,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../primitives/utils.dart';
 import '../class_name.dart';
+import 'simple_items.dart';
 
 // ignore: avoid-dynamic, defined in package:collection
 bool Function(List<dynamic>? list1, List<dynamic>? list2) _listEquality =
@@ -50,6 +51,7 @@ class PathFromRoot {
         hashCode = path.isEmpty ? _hashOfEmptyPath : Object.hashAll(path),
         classes = calculateSetOfClasses ? path.toSet() : const {};
 
+  /// For objects directly referenced from root.
   const PathFromRoot._empty()
       : path = const [],
         classes = const {},
@@ -61,15 +63,17 @@ class PathFromRoot {
     int objectId,
   ) {
     var nextObjectId = shortestRetainers[objectId];
-    if (nextObjectId == 0) {
+    if (nextObjectId == heapRootIndex) {
       return empty;
     }
 
+    final rootClassId = graph.objects[heapRootIndex].classId;
     final path = <HeapClassName>[];
 
-    while (shortestRetainers[nextObjectId] > 0) {
+    while (shortestRetainers[nextObjectId] != heapRootIndex) {
       nextObjectId = shortestRetainers[nextObjectId];
       final classId = graph.objects[nextObjectId].classId;
+      assert(classId != rootClassId);
       final className =
           HeapClassName.fromHeapSnapshotClass(graph.classes[classId]);
       path.add(className);
@@ -87,8 +91,8 @@ class PathFromRoot {
 
     instances.add(newInstance);
     assert(() {
-      assert(instances.length == usage.stored);
       usage.stored++;
+      assert(instances.length == usage.stored);
       return true;
     }());
     return newInstance;
@@ -110,7 +114,12 @@ class PathFromRoot {
 
   static const _hashOfEmptyPath = 0;
 
+  /// The retaining path.
+  ///
+  /// Does not include both the root and the object itself.
+  /// Starts from the immediate retainer of the object.
   final List<HeapClassName> path;
+
   final Set<HeapClassName> classes;
 
   @override
@@ -129,15 +138,17 @@ class PathFromRoot {
     _instances = null;
   }
 
-  String toShortString({String? delimiter, bool inverted = false}) => _asString(
-        data: path.map((e) => e.className).toList(),
-        delimiter: _delimiter(
-          delimiter: delimiter,
-          inverted: inverted,
-          isLong: false,
-        ),
+  String toShortString({String? delimiter, bool inverted = false}) {
+    return _asString(
+      data: path.map((e) => e.className).toList(),
+      delimiter: _delimiter(
+        delimiter: delimiter,
         inverted: inverted,
-      );
+        isLong: false,
+      ),
+      inverted: inverted,
+    );
+  }
 
   String toLongString({
     String? delimiter,
@@ -181,9 +192,9 @@ class PathFromRoot {
   }) {
     if (delimiter != null) return delimiter;
     if (isLong) {
-      return inverted ? '\n← ' : '\n→ ';
+      return inverted ? '\n→ ' : '\n← ';
     }
-    return inverted ? ' ← ' : ' → ';
+    return inverted ? ' → ' : ' ← ';
   }
 
   static String _asString({
@@ -195,8 +206,14 @@ class PathFromRoot {
       usage.stringified++;
       return true;
     }());
-    data = data.joinWith(delimiter).toList();
+    // Trailing separator is here to show object is referenced by root.
+    data = data.joinWith(
+      delimiter,
+      includeTrailing: true,
+      includeLeading: data.isNotEmpty,
+    );
     if (inverted) data = data.reversed.toList();
-    return data.join().trim();
+    final result = data.join().trim();
+    return result;
   }
 }

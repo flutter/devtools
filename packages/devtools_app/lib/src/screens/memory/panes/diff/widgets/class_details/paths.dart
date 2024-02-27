@@ -12,7 +12,6 @@ import '../../../../../../shared/memory/new/retaining_path.dart';
 import '../../../../../../shared/primitives/utils.dart';
 import '../../../../../../shared/table/table.dart';
 import '../../../../../../shared/table/table_data.dart';
-import '../../../../shared/heap/heap.dart';
 import '../../../../shared/primitives/simple_elements.dart';
 
 class _RetainingPathColumn extends ColumnData<PathData> {

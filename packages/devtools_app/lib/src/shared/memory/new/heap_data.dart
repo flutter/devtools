@@ -4,19 +4,17 @@
 
 import 'dart:typed_data';
 
+import 'package:devtools_app/src/shared/memory/new/retainers.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../primitives/utils.dart';
 import '../class_name.dart';
 import '../simple_items.dart';
 import 'classes.dart';
+import 'simple_items.dart';
 
 class HeapData {
   HeapData._(this.graph, this.classes, this.footprint);
-
-  /// Value for rootIndex is taken from the doc:
-  /// https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/heap_snapshot.md#object-ids
-  static const int rootIndex = 1;
 
   final HeapSnapshotGraph graph;
 
@@ -40,45 +38,23 @@ Future<HeapData> calculateHeapData(
 }) async {
   if (!calculateClassData) return HeapData._(graph, null, null);
 
-  Uint32List? retainers;
-  final Uint32List? sizes =
-      calculateRetainedSizes ? Uint32List(graph.objects.length) : null;
+  List<int>? retainers;
+  List<int>? retainedSizes;
 
   if (calculateRetainingPaths || calculateRetainedSizes) {
     final weakClasses = _WeakClasses(graph);
 
-    retainers = Uint32List(graph.objects.length);
-    sizes?[HeapData.rootIndex] = graph.objects[HeapData.rootIndex].shallowSize;
+    final result = findShortestRetainers(
+      graph.objects.length,
+      heapRootIndex,
+      weakClasses.isRetainer,
+      (int index) => graph.objects[index].references,
+      (int index) => graph.objects[index].shallowSize,
+      calculateSizes: calculateRetainedSizes,
+    );
 
-    // Array of all objects where the best distance from root is n.
-    // n starts with 0 and increases by 1 on each step of the algorithm.
-    // The objects are ends of the graph cut.
-    // See description of cut:
-    // https://en.wikipedia.org/wiki/Cut_(graph_theory)
-    // On each step the algorithm moves the cut one step further from the root.
-    var cut = [HeapData.rootIndex];
-
-    // On each step of algorithm we know that all nodes at distance n or closer to
-    // root, has parent initialized.
-    while (true) {
-      if (_uiReleaser.step()) await _uiReleaser.releaseUi();
-      final nextCut = <int>[];
-      for (var r in cut) {
-        final retainer = graph.objects[r];
-        for (var child in retainer.references) {
-          if (retainers[child] > 0) continue;
-          retainers[child] = r;
-
-          if (sizes != null) _propagateSize(graph, sizes, retainers, child);
-
-          if (weakClasses.isRetainer(child)) {
-            nextCut.add(child);
-          }
-        }
-      }
-      if (nextCut.isEmpty) break;
-      cut = nextCut;
-    }
+    if (calculateRetainingPaths) retainers = result.retainers;
+    if (calculateRetainedSizes) retainedSizes = result.retainedSizes;
   }
 
   ClassDataList? classDataList;
@@ -117,31 +93,20 @@ Future<HeapData> calculateHeapData(
         () => SingleClassData(heapClass: className),
       );
 
-      classStats.countInstance(graph, i, retainers, sizes);
+      classStats.countInstance(graph, i, retainers, retainedSizes);
     }
 
     footprint = MemoryFootprint(dart: dartSize, reachable: reachableSize);
     classDataList = ClassDataList<SingleClassData>(classes.values.toList());
+
+    // Check that retained size of root is the entire reachable heap.
+    assert(
+      retainedSizes == null ||
+          retainedSizes[heapRootIndex] == footprint.reachable,
+    );
   }
 
   return HeapData._(graph, classDataList, footprint);
-}
-
-/// Assuming the object is leaf, initializes its retained size
-/// and adds the size to each shortest retainer.
-void _propagateSize(
-  HeapSnapshotGraph graph,
-  Uint32List sizes,
-  Uint32List retainers,
-  int index,
-) {
-  final addedSize = graph.objects[index].shallowSize;
-  sizes[index] = addedSize;
-
-  while (retainers[index] > 0) {
-    index = retainers[index];
-    sizes[index] += addedSize;
-  }
 }
 
 class _WeakClasses {
