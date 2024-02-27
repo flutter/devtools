@@ -4,23 +4,25 @@
 
 import 'dart:typed_data';
 
-import 'package:devtools_app/src/shared/memory/new/retainers.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../primitives/utils.dart';
 import '../class_name.dart';
 import '../simple_items.dart';
 import 'classes.dart';
+import 'retainers.dart';
 import 'simple_items.dart';
 
 class HeapData {
-  HeapData._(this.graph, this.classes, this.footprint);
+  HeapData._(this.graph, this.classes, this.footprint, this.created);
 
   final HeapSnapshotGraph graph;
 
-  final ClassDataList? classes;
+  final ClassDataList<SingleClassData>? classes;
 
   final MemoryFootprint? footprint;
+
+  final DateTime created;
 }
 
 final UiReleaser _uiReleaser = UiReleaser();
@@ -31,12 +33,13 @@ final UiReleaser _uiReleaser = UiReleaser();
 /// but they may be needed to research how much CPU and memory
 /// each part consumes.
 Future<HeapData> calculateHeapData(
-  HeapSnapshotGraph graph, {
+  HeapSnapshotGraph graph,
+  DateTime created, {
   bool calculateRetainingPaths = true,
   bool calculateRetainedSizes = true,
   bool calculateClassData = true,
 }) async {
-  if (!calculateClassData) return HeapData._(graph, null, null);
+  if (!calculateClassData) return HeapData._(graph, null, null, created);
 
   List<int>? retainers;
   List<int>? retainedSizes;
@@ -57,7 +60,7 @@ Future<HeapData> calculateHeapData(
     if (calculateRetainedSizes) retainedSizes = result.retainedSizes;
   }
 
-  ClassDataList? classDataList;
+  ClassDataList<SingleClassData>? classDataList;
   MemoryFootprint? footprint;
 
   // Complexity of this part is O(n)*O(p) where
@@ -106,7 +109,7 @@ Future<HeapData> calculateHeapData(
     );
   }
 
-  return HeapData._(graph, classDataList, footprint);
+  return HeapData._(graph, classDataList, footprint, created);
 }
 
 class _WeakClasses {

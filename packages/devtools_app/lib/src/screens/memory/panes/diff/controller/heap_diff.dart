@@ -7,39 +7,31 @@ import 'package:flutter/foundation.dart';
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/analytics/metrics.dart';
-import '../../../../../shared/memory/adapted_heap_data.dart';
-import '../../../../../shared/memory/class_name.dart';
 import '../../../../../shared/memory/new/heap_data.dart';
-import '../../../../../shared/memory/simple_items.dart';
-import '../../../../../shared/primitives/utils.dart';
-import '../../../shared/heap/heap.dart';
-import '../../../shared/heap/model.dart';
+import '../../../../../shared/memory/new/heap_diff_data.dart';
 
 /// Stores already calculated comparisons for heap couples.
 class HeapDiffStore {
   HeapDiffStore();
 
-  final _store = <_HeapCouple, DiffHeapClasses>{};
+  final _store = <_HeapCouple, HeapDiffData>{};
 
-  DiffHeapClasses compare_(AdaptedHeap heap1, AdaptedHeap heap2) {
+  HeapDiffData compare(HeapData heap1, HeapData heap2) {
     final couple = _HeapCouple(heap1, heap2);
     return _store.putIfAbsent(couple, () => _calculateDiffGaWrapper(couple));
   }
-
-  DiffHeapClasses compare(HeapData heap1, HeapData heap2) {
-    throw UnimplementedError();
-  }
 }
 
-DiffHeapClasses _calculateDiffGaWrapper(_HeapCouple couple) {
-  late final DiffHeapClasses result;
+HeapDiffData _calculateDiffGaWrapper(_HeapCouple couple) {
+  late final HeapDiffData result;
   ga.timeSync(
     gac.memory,
     gac.MemoryTime.calculateDiff,
-    syncOperation: () => result = DiffHeapClasses._(couple),
+    syncOperation: () =>
+        result = calculateHeapDiffData(couple.before, couple.after),
     screenMetricsProvider: () => MemoryScreenMetrics(
-      heapDiffObjectsBefore: couple.older.data.objects.length,
-      heapDiffObjectsAfter: couple.younger.data.objects.length,
+      heapDiffObjectsBefore: couple.before.graph.objects.length,
+      heapDiffObjectsAfter: couple.after.graph.objects.length,
     ),
   );
   return result;
@@ -47,29 +39,21 @@ DiffHeapClasses _calculateDiffGaWrapper(_HeapCouple couple) {
 
 @immutable
 class _HeapCouple {
-  _HeapCouple(AdaptedHeap heap1, AdaptedHeap heap2) {
-    older = _older(heap1, heap2);
-    younger = older == heap1 ? heap2 : heap1;
+  _HeapCouple(HeapData heap1, HeapData heap2) {
+    before = _older(heap1, heap2);
+    after = before == heap1 ? heap2 : heap1;
   }
 
-  late final AdaptedHeap older;
-  late final AdaptedHeap younger;
+  late final HeapData before;
+  late final HeapData after;
 
   /// Tries to declare earliest heap in a deterministic way.
-  ///
-  /// If the earliest heap cannot be identified, returns the first argument.
-  static AdaptedHeap _older(AdaptedHeap heap1, AdaptedHeap heap2) {
-    assert(heap1.data != heap2.data);
-    if (heap1.data.created.isBefore(heap2.data.created)) return heap1;
-    if (heap2.data.created.isBefore(heap1.data.created)) return heap2;
+  static HeapData _older(HeapData heap1, HeapData heap2) {
+    assert(heap1.graph != heap2.graph);
+    if (heap1.created.isBefore(heap2.created)) return heap1;
+    if (heap2.created.isBefore(heap1.created)) return heap2;
     if (identityHashCode(heap1) < identityHashCode(heap2)) return heap1;
     if (identityHashCode(heap2) < identityHashCode(heap1)) return heap2;
-    if (identityHashCode(heap1.data) < identityHashCode(heap2.data)) {
-      return heap1;
-    }
-    if (identityHashCode(heap2.data) < identityHashCode(heap1.data)) {
-      return heap2;
-    }
     return heap1;
   }
 
@@ -79,151 +63,10 @@ class _HeapCouple {
       return false;
     }
     return other is _HeapCouple &&
-        other.older == older &&
-        other.younger == younger;
+        other.before == before &&
+        other.after == after;
   }
 
   @override
-  int get hashCode => Object.hash(older, younger);
-}
-
-/// List of classes with per-class comparison between two heaps.
-class DiffHeapClasses extends HeapClasses_<DiffClassStats>
-    with FilterableHeapClasses_<DiffClassStats> {
-  DiffHeapClasses._(_HeapCouple couple)
-      : before = couple.older.data,
-        after = couple.younger.data {
-    classesByName = subtractMaps<HeapClassName, SingleClassStats_,
-        SingleClassStats_, DiffClassStats>(
-      from: couple.younger.classes.classesByName,
-      substract: couple.older.classes.classesByName,
-      subtractor: ({subtract, from}) =>
-          DiffClassStats.diff(before: subtract, after: from),
-    );
-  }
-
-  /// Maps full class name to class.
-  late final Map<HeapClassName, DiffClassStats> classesByName;
-  late final List<DiffClassStats> classes =
-      classesByName.values.toList(growable: false);
-  final AdaptedHeapData before;
-  final AdaptedHeapData after;
-
-  @override
-  void seal() {
-    super.seal();
-    for (var c in classes) {
-      c.seal();
-    }
-  }
-
-  @override
-  List<DiffClassStats> get classStatsList => classes;
-}
-
-/// Comparison between two heaps for a class.
-class DiffClassStats extends ClassStats_ {
-  DiffClassStats._({
-    required super.statsByPath,
-    required super.heapClass,
-    required this.total,
-  });
-
-  final ObjectSetDiff_ total;
-
-  static DiffClassStats? diff({
-    required SingleClassStats_? before,
-    required SingleClassStats_? after,
-  }) {
-    if (before == null && after == null) return null;
-
-    final heapClass = (before?.heapClass ?? after?.heapClass)!;
-
-    final result = DiffClassStats._(
-      heapClass: heapClass,
-      total: ObjectSetDiff_(
-        setBefore: before?.objects,
-        setAfter: after?.objects,
-      ),
-      statsByPath: subtractMaps<ClassOnlyHeapPath, ObjectSetStats_,
-          ObjectSetStats_, ObjectSetStats_>(
-        from: after?.statsByPath,
-        substract: before?.statsByPath,
-        subtractor: ({subtract, from}) =>
-            ObjectSetStats_.subtract(subtract: subtract, from: from),
-      ),
-    );
-
-    if (result.isZero()) return null;
-    return result..seal();
-  }
-
-  bool isZero() => total.isZero;
-}
-
-/// Comparison between two sets of objects.
-class ObjectSetDiff_ {
-  ObjectSetDiff_({ObjectSet_? setBefore, ObjectSet_? setAfter}) {
-    setBefore ??= ObjectSet_.empty;
-    setAfter ??= ObjectSet_.empty;
-
-    final allCodes = _unionCodes(setBefore, setAfter);
-
-    for (var code in allCodes) {
-      final before = setBefore.objectsByCodes[code];
-      final after = setAfter.objectsByCodes[code];
-
-      if (before != null && after != null) {
-        // When an object exists both before and after
-        // the state 'after' is more interesting for user
-        // about the retained size.
-        final excludeFromRetained =
-            setAfter.objectsExcludedFromRetainedSize.contains(after.code);
-        persisted.countInstance(
-          after,
-          excludeFromRetained: excludeFromRetained,
-        );
-        continue;
-      }
-
-      if (before != null) {
-        final excludeFromRetained =
-            setBefore.objectsExcludedFromRetainedSize.contains(before.code);
-        deleted.countInstance(before, excludeFromRetained: excludeFromRetained);
-        delta.uncountInstance(before, excludeFromRetained: excludeFromRetained);
-        continue;
-      }
-
-      if (after != null) {
-        final excludeFromRetained =
-            setAfter.objectsExcludedFromRetainedSize.contains(after.code);
-        created.countInstance(after, excludeFromRetained: excludeFromRetained);
-        delta.countInstance(after, excludeFromRetained: excludeFromRetained);
-        continue;
-      }
-
-      assert(false);
-    }
-    created.seal();
-    deleted.seal();
-    persisted.seal();
-    delta.seal();
-    assert(
-      delta.instanceCount == created.instanceCount - deleted.instanceCount,
-    );
-  }
-
-  static Set<IdentityHashCode> _unionCodes(ObjectSet_ set1, ObjectSet_ set2) {
-    final codesBefore = set1.objectsByCodes.keys.toSet();
-    final codesAfter = set2.objectsByCodes.keys.toSet();
-
-    return codesBefore.union(codesAfter);
-  }
-
-  final created = ObjectSet_();
-  final deleted = ObjectSet_();
-  final persisted = ObjectSet_();
-  final delta = ObjectSetStats_();
-
-  bool get isZero => delta.isZero;
+  int get hashCode => Object.hash(before.graph, after.graph);
 }

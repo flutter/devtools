@@ -11,7 +11,7 @@ import 'heap_graph_mock.dart';
 
 abstract class HeapGraphLoader {
   const HeapGraphLoader();
-  Future<HeapSnapshotGraph?> load();
+  Future<(HeapSnapshotGraph?, DateTime)> load();
 }
 
 class HeapGraphLoaderRuntime extends HeapGraphLoader {
@@ -20,10 +20,10 @@ class HeapGraphLoaderRuntime extends HeapGraphLoader {
   final MemoryTimeline? _timeline;
 
   @override
-  Future<HeapSnapshotGraph?> load() async {
+  Future<(HeapSnapshotGraph?, DateTime)> load() async {
     final snapshot = await snapshotMemoryInSelectedIsolate();
     _timeline?.addSnapshotEvent();
-    return snapshot;
+    return (snapshot, DateTime.now());
   }
 }
 
@@ -33,10 +33,13 @@ class HeapGraphLoaderFile implements HeapGraphLoader {
   final XFile _file;
 
   @override
-  Future<HeapSnapshotGraph?> load() async {
+  Future<(HeapSnapshotGraph?, DateTime)> load() async {
     final bytes = await _file.readAsBytes();
     final data = bytes.buffer.asByteData();
-    return HeapSnapshotGraph.fromChunks([data]);
+    return (
+      HeapSnapshotGraph.fromChunks([data]),
+      await _file.lastModified(),
+    );
   }
 }
 
@@ -44,7 +47,7 @@ class HeapGraphLoaderMock implements HeapGraphLoader {
   const HeapGraphLoaderMock();
 
   @override
-  Future<HeapSnapshotGraph?> load() async {
-    return HeapSnapshotGraphMock();
+  Future<(HeapSnapshotGraph?, DateTime)> load() async {
+    return (HeapSnapshotGraphMock(), DateTime.now());
   }
 }

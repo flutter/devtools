@@ -25,6 +25,7 @@ import '../../../shared/primitives/memory_utils.dart';
 import '../widgets/class_details/paths.dart';
 import 'class_data.dart';
 import 'heap_diff.dart';
+import 'heap_diff_.dart';
 import 'item_controller.dart';
 import 'utils.dart';
 
@@ -307,6 +308,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   final selectedPath = ValueNotifier<PathData?>(null);
 
   /// Storage for already calculated diffs between snapshots.
+  late final _diffStore_ = HeapDiffStore_();
   late final _diffStore = HeapDiffStore();
 
   void applyFilter(ClassFilter filter) {
@@ -378,7 +380,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
       if (heap == null) return null;
       final itemToDiffWith = theItem.diffWith.value;
       if (itemToDiffWith == null) return heap.classes;
-      return _diffStore.compare_(heap, itemToDiffWith.heap_!);
+      return _diffStore_.compare_(heap, itemToDiffWith.heap_!);
     }
 
     return null;
@@ -393,8 +395,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
       if (heap == null) return null;
       final itemToDiffWith = theItem.diffWith.value;
       if (itemToDiffWith == null) return heap.classes;
-      return null;
-      //_diffStore.compare(heap, itemToDiffWith.heap!);
+      return _diffStore.compare(heap, itemToDiffWith.heap!).classes;
     }
 
     return null;

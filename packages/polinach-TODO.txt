@@ -9,3 +9,4 @@ This file is not for merge.
 - Fix circular references
 - Index library names
 - Calculate memory footprint
+- Clean up diff store when snapshot is deleted
