@@ -17,6 +17,7 @@ import '../shared/diagnostics/inspector_service.dart';
 import '../shared/error_badge_manager.dart';
 import '../shared/feature_flags.dart';
 import '../shared/globals.dart';
+import '../shared/primitives/utils.dart';
 import '../shared/title.dart';
 import '../shared/utils.dart';
 import 'service_registrations.dart' as registrations;
@@ -166,6 +167,8 @@ class ServiceConnectionManager {
     await serviceManager.isolateManager.init(isolates);
   }
 
+  // TODO(kenz): consider caching this value for the duration of the VM service
+  // connection.
   Future<String?> rootLibraryForMainIsolate() async {
     final mainIsolateRef = await whenValueNonNull(
       serviceManager.isolateManager.mainIsolate,
@@ -182,10 +185,23 @@ class ServiceConnectionManager {
     final selectedIsolateRefId = mainIsolateRef.id!;
     await serviceManager.resolvedUriManager
         .fetchFileUris(selectedIsolateRefId, [rootLib]);
-    return serviceManager.resolvedUriManager.lookupFileUri(
+    final fileUriString = serviceManager.resolvedUriManager.lookupFileUri(
       selectedIsolateRefId,
       rootLib,
     );
+    _log.fine('rootLibraryForMainIsolate: $fileUriString');
+    return fileUriString;
+  }
+
+  // TODO(kenz): consider caching this value for the duration of the VM service
+  // connection.
+  Future<String?> rootPackageDirectoryForMainIsolate() async {
+    final fileUriString = await serviceConnection.rootLibraryForMainIsolate();
+    final packageUriString = fileUriString != null
+        ? packageRootFromFileUriString(fileUriString)
+        : null;
+    _log.fine('rootPackageDirectoryForMainIsolate: $packageUriString');
+    return packageUriString;
   }
 
   Future<Response> get adbMemoryInfo async {

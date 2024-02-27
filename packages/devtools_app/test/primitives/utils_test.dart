@@ -4,6 +4,7 @@
 
 import 'package:collection/collection.dart';
 import 'package:devtools_app/src/shared/primitives/utils.dart';
+import 'package:devtools_app/src/shared/screen.dart';
 import 'package:devtools_app/src/shared/utils.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -660,21 +661,23 @@ void main() {
         }),
       );
       expect(
-        devToolsQueryParams('http://localhost:123/#/?key=value.json&key2=123'),
+        devToolsQueryParams('http://localhost:123/?key=value.json&key2=123'),
         equals({
           'key': 'value.json',
           'key2': '123',
         }),
       );
-      expect(
-        devToolsQueryParams(
-          'http://localhost:9101/#/appsize?key=value.json&key2=123',
-        ),
-        equals({
-          'key': 'value.json',
-          'key2': '123',
-        }),
-      );
+      for (final meta in ScreenMetaData.values) {
+        expect(
+          devToolsQueryParams(
+            'http://localhost:9101/${meta.id}?key=value.json&key2=123',
+          ),
+          equals({
+            'key': 'value.json',
+            'key2': '123',
+          }),
+        );
+      }
     });
 
     group('safeDivide', () {
@@ -1475,6 +1478,80 @@ void main() {
       ),
       equals('http://127.0.0.1:61962'),
     );
+  });
+
+  group('file uri helpers', () {
+    test('rootFromFileUriString', () {
+      // Dart file under 'lib'
+      expect(
+        packageRootFromFileUriString(
+          'file:///Users/me/foo/my_app_root/lib/main.dart',
+        ),
+        equals('file:///Users/me/foo/my_app_root'),
+      );
+      expect(
+        packageRootFromFileUriString(
+          'file:///Users/me/foo/my_app_root/lib/sub/main.dart',
+        ),
+        equals('file:///Users/me/foo/my_app_root'),
+      );
+
+      // Dart file under 'bin'
+      expect(
+        packageRootFromFileUriString(
+          'file:///Users/me/foo/my_app_root/bin/script.dart',
+        ),
+        equals('file:///Users/me/foo/my_app_root'),
+      );
+      expect(
+        packageRootFromFileUriString(
+          'file:///Users/me/foo/my_app_root/bin/sub/script.dart',
+        ),
+        equals('file:///Users/me/foo/my_app_root'),
+      );
+
+      // Dart file under 'test'
+      expect(
+        packageRootFromFileUriString(
+          'file:///Users/me/foo/my_app_root/test/some_test.dart',
+        ),
+        equals('file:///Users/me/foo/my_app_root'),
+      );
+      expect(
+        packageRootFromFileUriString(
+          'file:///Users/me/foo/my_app_root/test/sub/some_test.dart',
+        ),
+        equals('file:///Users/me/foo/my_app_root'),
+      );
+
+      // Dart file under 'integration_test'
+      expect(
+        packageRootFromFileUriString(
+          'file:///Users/me/foo/my_app_root/integration_test/some_test.dart',
+        ),
+        equals('file:///Users/me/foo/my_app_root'),
+      );
+      expect(
+        packageRootFromFileUriString(
+          'file:///Users/me/foo/my_app_root/integration_test/sub/some_test.dart',
+        ),
+        equals('file:///Users/me/foo/my_app_root'),
+      );
+
+      // Dart file under 'benchmark'
+      expect(
+        packageRootFromFileUriString(
+          'file:///Users/me/foo/my_app_root/benchmark/some_test.dart',
+        ),
+        equals('file:///Users/me/foo/my_app_root'),
+      );
+      expect(
+        packageRootFromFileUriString(
+          'file:///Users/me/foo/my_app_root/benchmark/sub/some_test.dart',
+        ),
+        equals('file:///Users/me/foo/my_app_root'),
+      );
+    });
   });
 }
 
