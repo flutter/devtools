@@ -86,11 +86,11 @@ class ReleaseHelperCommand extends Command {
 
       final getNewVersionResult = await processManager.runProcess(
         CliCommand.tool(
-          ['update-version', 'current-version', '|', 'tail', '-n1'],
+          ['update-version', 'current-version'],
         ),
       );
 
-      final newVersion = getNewVersionResult.stdout.trim();
+      final newVersion = getNewVersionResult.stdout.split('\n').last.trim();
 
       final commitMessage = "Prepare for release $newVersion";
 
