@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: avoid_classes_with_only_static_members, defining APIs.
+
 /// All server APIs prefix:
 const apiPrefix = 'api/';
 
@@ -71,6 +73,16 @@ abstract class DtdApi {
   static const apiSetDtdWorkspaceRoots = '${apiPrefix}setDtdWorkspaceRoots';
   static const uriPropertyName = 'dtdUri';
   static const workspaceRootsPropertyName = 'dtdWorkspaceRoots';
+  static const workspaceRootsValueEmpty = 'empty';
+
+  static String encodeWorkspaceRoots(List<String> roots) {
+    return roots.isEmpty ? DtdApi.workspaceRootsValueEmpty : roots.join(',');
+  }
+
+  static List<String> decodeWorkspaceRoots(String roots) {
+    if (roots == DtdApi.workspaceRootsValueEmpty) return [];
+    return roots.split(',');
+  }
 }
 
 abstract class ExtensionsApi {

@@ -372,6 +372,9 @@ class ServerApi {
   shelf.Response notImplemented() => shelf.Response(HttpStatus.noContent);
 }
 
+// TODO(kenz): refactor this code using part files to put each feature set in
+// its own file. This will make this file easier to manage.
+
 abstract class _ExtensionsApiHandler {
   static Future<shelf.Response> handleServeAvailableExtensions(
     ServerApi api,

@@ -22,7 +22,10 @@ Future<void> setDtdWorkspaceRoots(List<String> rootFilePaths) async {
   if (isDevToolsServerAvailable) {
     final uri = Uri(
       path: DtdApi.apiSetDtdWorkspaceRoots,
-      queryParameters: {DtdApi.workspaceRootsPropertyName: rootFilePaths},
+      queryParameters: {
+        DtdApi.workspaceRootsPropertyName:
+            DtdApi.encodeWorkspaceRoots(rootFilePaths),
+      },
     );
     final resp = await request(uri.toString());
 

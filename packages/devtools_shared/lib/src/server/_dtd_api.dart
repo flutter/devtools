@@ -44,34 +44,16 @@ abstract class _DtdApiHandler {
     );
     if (missingRequiredParams != null) return missingRequiredParams;
 
-    final roots = (queryParams[DtdApi.apiSetDtdWorkspaceRoots]! as List<String>)
-        .map((r) => Uri.file(r))
-        .toList();
+    final roots = DtdApi.decodeWorkspaceRoots(
+      queryParams[DtdApi.workspaceRootsPropertyName]!,
+    ).map((r) => Uri.parse(r)).toList();
     try {
       final dtdConnection = await DartToolingDaemon.connect(Uri.parse(uri));
       await dtdConnection.setIDEWorkspaceRoots(secret, roots);
-
-      final newRoots = await dtdConnection.getIDEWorkspaceRoots();
-      final newRootsAsStrings =
-          newRoots.ideWorkspaceRoots.map((uri) => uri.toString()).toList();
-      print('newRoots: $newRootsAsStrings');
+      await dtdConnection.close();
       return api.success();
     } catch (e) {
       return api.serverError('$e');
     }
   }
 }
-
-// /// A data object representing a Dart Tooling Daemon instance.
-// class DtdMetadata {
-//   const DtdMetadata({this.uri, this.secret});
-
-//   /// The URI for the Dart Tooling Daemon that DevTools is connected to.
-//   final String? uri;
-
-//   /// The secret for the Dart Tooling Daemon's trusted client when DTD was
-//   /// started by the DevTools server.
-//   ///
-//   /// This will be null if DTD was started by another client (e.g. the IDE).
-//   final String? secret;
-// }
