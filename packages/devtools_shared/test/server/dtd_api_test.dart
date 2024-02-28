@@ -17,7 +17,7 @@ import '../fakes.dart';
 
 void main() {
   group('$DtdApi', () {
-    test('handle ${DtdApi.apiGetDtdUri}', () async {
+    test('handle ${DtdApi.apiGetDtdUri} succeeds', () async {
       const dtdUri = 'ws://dtd:uri';
       final request = Request(
         'get',
@@ -41,7 +41,7 @@ void main() {
       );
     });
 
-    test('handle ${DtdApi.apiSetDtdWorkspaceRoots}', () async {
+    test('handle ${DtdApi.apiSetDtdWorkspaceRoots} succeeds', () async {
       final dtd = await _startDtd();
       final request = Request(
         'get',
@@ -68,6 +68,70 @@ void main() {
       dtd.dtdProcess?.kill();
       await dtd.dtdProcess?.exitCode;
     });
+
+    test(
+      'handle ${DtdApi.apiSetDtdWorkspaceRoots} returns error when DTD is not available',
+      () async {
+        final request = Request(
+          'get',
+          Uri(
+            scheme: 'https',
+            host: 'localhost',
+            path: DtdApi.apiSetDtdWorkspaceRoots,
+            queryParameters: {
+              DtdApi.workspaceRootsPropertyName:
+                  'file:///Users/me/package_root_1,file:///Users/me/package_root_2',
+            },
+          ),
+        );
+        final response = await ServerApi.handle(
+          request,
+          extensionsManager: ExtensionsManager(buildDir: '/'),
+          deeplinkManager: FakeDeeplinkManager(),
+          dtd: (uri: null, secret: null),
+          analytics: const NoOpAnalytics(),
+        );
+        expect(response.statusCode, HttpStatus.internalServerError);
+        expect(
+          await response.readAsString(),
+          contains('Cannot set workspace roots because DTD is not available.'),
+        );
+      },
+    );
+
+    test(
+      'handle ${DtdApi.apiSetDtdWorkspaceRoots} returns forbidden response '
+      'when DevTools server is not the trusted client',
+      () async {
+        const dtdUri = 'ws://dtd:uri';
+        final request = Request(
+          'get',
+          Uri(
+            scheme: 'https',
+            host: 'localhost',
+            path: DtdApi.apiSetDtdWorkspaceRoots,
+            queryParameters: {
+              DtdApi.workspaceRootsPropertyName:
+                  'file:///Users/me/package_root_1,file:///Users/me/package_root_2',
+            },
+          ),
+        );
+        final response = await ServerApi.handle(
+          request,
+          extensionsManager: ExtensionsManager(buildDir: '/'),
+          deeplinkManager: FakeDeeplinkManager(),
+          dtd: (uri: dtdUri, secret: null),
+          analytics: const NoOpAnalytics(),
+        );
+        expect(response.statusCode, HttpStatus.forbidden);
+        expect(
+          await response.readAsString(),
+          contains(
+            'Cannot set workspace roots because DevTools server is not the trusted client for DTD.',
+          ),
+        );
+      },
+    );
 
     test('can encode and decode workspace roots', () {
       var roots = [
