@@ -12,6 +12,8 @@ import 'package:shelf/shelf.dart';
 import 'package:test/test.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
+import '../fakes.dart';
+
 void main() {
   // TODO(kenz): refactor this to put each feature set into their own test file.
   // This should be paried with the refactor to put all the server handlers for
