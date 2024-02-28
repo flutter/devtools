@@ -151,7 +151,8 @@ class SimulatedDevToolsWrapperState extends State<SimulatedDevToolsWrapper>
                               DTDConnectionDisplay(
                                 simController: simController,
                                 connected: dtdConnected,
-                                onConnectionChange: widget.onDtdConnectionChange,
+                                onConnectionChange:
+                                    widget.onDtdConnectionChange,
                               ),
                               _SimulatedApi(
                                 simController: simController,
