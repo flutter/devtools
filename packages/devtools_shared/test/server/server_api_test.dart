@@ -13,6 +13,9 @@ import 'package:test/test.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 void main() {
+  // TODO(kenz): refactor this to put each feature set into their own test file.
+  // This should be paried with the refactor to put all the server handlers for
+  // each feature into their own file.
   test('handle deeplink api ${DeeplinkApi.androidBuildVariants}', () async {
     const expectedRootPath = '/abc';
     final request = Request(
