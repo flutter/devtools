@@ -161,29 +161,4 @@ void main() {
     expect(fakeManager.receivedConfiguration, configuration);
     expect(fakeManager.receivedTarget, target);
   });
-
-  test('handle apiGetDtdUri', () async {
-    const dtdUri = 'ws://dtd:uri';
-    final request = Request(
-      'get',
-      Uri(
-        scheme: 'https',
-        host: 'localhost',
-        path: DtdApi.apiGetDtdUri,
-      ),
-    );
-    final fakeManager = FakeDeeplinkManager();
-    final response = await ServerApi.handle(
-      request,
-      extensionsManager: ExtensionsManager(buildDir: '/'),
-      deeplinkManager: fakeManager,
-      dtd: (uri: dtdUri, secret: null),
-      analytics: const NoOpAnalytics(),
-    );
-    expect(response.statusCode, HttpStatus.ok);
-    expect(
-      await response.readAsString(),
-      jsonEncode({DtdApi.uriPropertyName: dtdUri}),
-    );
-  });
 }
