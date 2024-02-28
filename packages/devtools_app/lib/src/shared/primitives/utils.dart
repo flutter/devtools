@@ -1167,7 +1167,7 @@ String simplifyDevToolsUrl(String url) {
   // http://localhost:123/#/page-id?key=value
   // Since we just want the query params, we will modify the url to have an
   // easy-to-parse form.
-  return url.replaceFirst(RegExp(r'#\/(\w*)[?]'), '?');
+  return url.replaceFirst(RegExp(r'#\/([\w\-]*)[?]'), '?');
 }
 
 Map<String, String> devToolsQueryParams(String url) {
@@ -1245,6 +1245,20 @@ Iterable<T> removeNullValues<T>(Iterable<T?> values) {
 /// Returns the file name from a URI or path string, by splitting the [uri] at
 /// the directory separators '/', and returning the last element.
 String? fileNameFromUri(String? uri) => uri?.split('/').last;
+
+String packageRootFromFileUriString(String fileUriString) {
+  // TODO(kenz): for robustness, consider sending the root library uri to the
+  // server and having the server look for the package folder that contains the
+  // `.dart_tool` directory.
+  final directoryRegExp =
+      RegExp(r'\/(lib|bin|integration_test|test|benchmark)\/.+\.dart');
+  final directoryIndex = fileUriString.indexOf(directoryRegExp);
+  if (directoryIndex != -1) {
+    fileUriString = fileUriString.substring(0, directoryIndex);
+  }
+  _log.fine('calculated rootFromFileUriString: $fileUriString');
+  return fileUriString;
+}
 
 /// Calculates subtraction of two maps.
 ///
