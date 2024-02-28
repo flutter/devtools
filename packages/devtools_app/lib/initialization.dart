@@ -109,6 +109,7 @@ Future<void> _initDTDConnection() async {
   try {
     // Get the dtdUri from the devtools server
     final dtdUri = await server.getDtdUri();
+    print('dtdUri: $dtdUri');
 
     if (dtdUri != null) {
       await dtdManager.connect(

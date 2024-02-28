@@ -18,6 +18,7 @@ import '../shared/error_badge_manager.dart';
 import '../shared/feature_flags.dart';
 import '../shared/globals.dart';
 import '../shared/primitives/utils.dart';
+import '../shared/server/server.dart' as server;
 import '../shared/title.dart';
 import '../shared/utils.dart';
 import 'service_registrations.dart' as registrations;
@@ -130,6 +131,8 @@ class ServiceConnectionManager {
     if (debugLogServiceProtocolEvents) {
       serviceTrafficLogger = VmServiceTrafficLogger(service!);
     }
+
+    await _maybeSetDtdWorkspaceRoots();
   }
 
   void _beforeCloseVmService(VmServiceWrapper? service) {
@@ -142,7 +145,7 @@ class ServiceConnectionManager {
     offlineController.previousConnectedApp = previousConnectedApp;
   }
 
-  void _afterCloseVmService(VmServiceWrapper? service) {
+  Future<void> _afterCloseVmService(VmServiceWrapper? service) async {
     generateDevToolsTitle();
     vmFlagManager.vmServiceClosed();
     timelineStreamManager.vmServiceClosed();
@@ -153,6 +156,7 @@ class ServiceConnectionManager {
     serviceTrafficLogger?.dispose();
     preferences.vmDeveloperModeEnabled
         .removeListener(_handleVmDeveloperModeChanged);
+    await _maybeSetDtdWorkspaceRoots();
   }
 
   Future<void> _handleVmDeveloperModeChanged() async {
@@ -316,5 +320,17 @@ class ServiceConnectionManager {
         },
       },
     );
+  }
+
+  Future<void> _maybeSetDtdWorkspaceRoots() async {
+    final roots = <String>[];
+    if (serviceManager.hasConnection) {
+      final packageUriForConnectedApp =
+          await rootPackageDirectoryForMainIsolate();
+      if (packageUriForConnectedApp != null) {
+        roots.add(packageUriForConnectedApp);
+      }
+    }
+    await server.setDtdWorkspaceRoots(roots);
   }
 }

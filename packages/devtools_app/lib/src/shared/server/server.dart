@@ -100,4 +100,6 @@ void logWarning(Response? response, String apiType) {
 
 extension ResponseExtension on Response {
   bool get statusOk => statusCode == 200;
+  bool get statusForbidden => statusCode == 403;
+  bool get statusError => statusCode == 500;
 }

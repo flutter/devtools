@@ -68,7 +68,9 @@ const testAppSizeFilePropertyName = 'appSizeTest';
 
 abstract class DtdApi {
   static const apiGetDtdUri = '${apiPrefix}getDtdUri';
+  static const apiSetDtdWorkspaceRoots = '${apiPrefix}setDtdWorkspaceRoots';
   static const uriPropertyName = 'dtdUri';
+  static const workspaceRootsPropertyName = 'dtdWorkspaceRoots';
 }
 
 abstract class ExtensionsApi {

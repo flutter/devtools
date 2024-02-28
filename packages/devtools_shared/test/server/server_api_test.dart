@@ -173,7 +173,7 @@ void main() {
       request,
       extensionsManager: ExtensionsManager(buildDir: '/'),
       deeplinkManager: fakeManager,
-      dtdUri: dtdUri,
+      dtd: (uri: dtdUri, secret: null),
       analytics: const NoOpAnalytics(),
     );
     expect(response.statusCode, HttpStatus.ok);

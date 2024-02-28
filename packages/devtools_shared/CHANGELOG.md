@@ -2,6 +2,7 @@
 * Refactor yaml extension methods.
 * **Breaking change:** rename `ServerApi.getCompleted` to `ServerApi.success` and make the
 `value` parameter optional.
+* **Breaking change:** 
 
 # 7.0.0
 * **Breaking change:** remove the `ServerApi.setCompleted` method that was a

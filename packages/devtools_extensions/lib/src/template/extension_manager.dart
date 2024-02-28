@@ -45,7 +45,7 @@ class ExtensionManager {
   EventListener? _handleMessageListener;
 
   // ignore: unused_element, false positive due to part files
-  void _init({required bool connectToVmService}) {
+  Future<void> _init({required bool connectToVmService}) async {
     window.addEventListener(
       'message',
       _handleMessageListener = _handleMessage.toJS,
@@ -55,6 +55,11 @@ class ExtensionManager {
     final queryParams = loadQueryParams();
     final themeValue = queryParams[ExtensionEventParameters.theme];
     _setThemeForValue(themeValue);
+
+    final dtdUri = queryParams[_dtdQueryParameter];
+    if (dtdUri != null) {
+      await _connectToDtd(dtdUri);
+    }
 
     final vmServiceUri = queryParams[_vmServiceQueryParameter];
     if (connectToVmService) {
@@ -70,11 +75,6 @@ class ExtensionManager {
       } else {
         unawaited(_connectToVmService(vmServiceUri));
       }
-    }
-
-    final dtdUri = queryParams[_dtdQueryParameter];
-    if (dtdUri != null) {
-      unawaited(_connectToDtd(dtdUri));
     }
   }
 

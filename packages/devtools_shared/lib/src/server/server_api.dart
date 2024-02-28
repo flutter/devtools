@@ -8,6 +8,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:dtd/dtd.dart';
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -17,6 +18,8 @@ import '../extensions/extension_enablement.dart';
 import '../extensions/extension_manager.dart';
 import 'file_system.dart';
 import 'usage.dart';
+
+part '_dtd_api.dart';
 
 /// The DevTools server API.
 ///
@@ -40,7 +43,7 @@ class ServerApi {
     required DeeplinkManager deeplinkManager,
     required Analytics analytics,
     ServerApi? api,
-    String? dtdUri,
+    ({String? uri, String? secret})? dtd,
   }) {
     api ??= ServerApi();
     final queryParams = request.requestedUri.queryParameters;
@@ -260,9 +263,12 @@ class ServerApi {
           deeplinkManager,
         );
       case DtdApi.apiGetDtdUri:
-        return _encodeResponse(
-          {DtdApi.uriPropertyName: dtdUri},
-          api: api,
+        return _DtdApiHandler.handleGetDtdUri(api, dtd);
+      case DtdApi.apiSetDtdWorkspaceRoots:
+        return _DtdApiHandler.handleSetDtdWorkspaceRoots(
+          api,
+          queryParams,
+          dtd,
         );
       default:
         return api.notImplemented();
@@ -326,6 +332,11 @@ class ServerApi {
   ///
   /// The response optionally contains a single String [value].
   shelf.Response success([String? value]) => shelf.Response.ok(value);
+
+  /// A [shelf.Response] for API calls that are forbidden for the current state
+  /// of the server.
+  shelf.Response forbidden([String? reason]) =>
+      shelf.Response.forbidden(reason);
 
   /// A [shelf.Response] for API calls that encountered a request problem e.g.,
   /// setActiveSurvey not called.

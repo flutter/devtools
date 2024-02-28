@@ -17,3 +17,20 @@ Future<Uri?> getDtdUri() async {
   }
   return null;
 }
+
+Future<void> setDtdWorkspaceRoots(List<String> rootFilePaths) async {
+  if (isDevToolsServerAvailable) {
+    final uri = Uri(
+      path: DtdApi.apiSetDtdWorkspaceRoots,
+      queryParameters: {DtdApi.workspaceRootsPropertyName: rootFilePaths},
+    );
+    final resp = await request(uri.toString());
+
+    // If this response succeeds, do nothing. Otherwise, perform some logging.
+    if (resp?.statusForbidden ?? false) {
+      _log.fine(resp!.body);
+    } else if (resp?.statusError ?? false) {
+      _log.warning(resp!.body);
+    }
+  }
+}
