@@ -319,17 +319,6 @@ class DiffClassData extends ClassData {
   // TODO: implement objects
   ObjectSetStats get objects => throw UnimplementedError();
 
-  static Map<int, int> _toCodeToIdMap(
-    SingleClassData? classes,
-    HeapSnapshotGraph? graph,
-  ) {
-    if (classes == null || graph == null) return const {};
-
-    return {
-      for (var id in classes.objects.objects) graph.objects[id].hashCode: id,
-    };
-  }
-
   static DiffClassData? diff({
     SingleClassData? before,
     HeapSnapshotGraph? graphBefore,
