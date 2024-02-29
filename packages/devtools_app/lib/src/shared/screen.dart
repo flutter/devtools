@@ -160,7 +160,6 @@ abstract class Screen {
     this.requiresDebugBuild = false,
     this.requiresVmDeveloperMode = false,
     this.worksOffline = false,
-    this.shouldShowForFlutterVersion,
     this.showFloatingDebuggerControls = true,
   }) : assert((title == null) || (titleGenerator == null));
 
@@ -188,7 +187,6 @@ abstract class Screen {
           requiresDebugBuild: requiresDebugBuild,
           requiresVmDeveloperMode: requiresVmDeveloperMode,
           worksOffline: worksOffline,
-          shouldShowForFlutterVersion: shouldShowForFlutterVersion,
           showFloatingDebuggerControls: showFloatingDebuggerControls,
           title: title,
           titleGenerator: titleGenerator,
@@ -279,11 +277,6 @@ abstract class Screen {
 
   /// Whether this screen works offline and should show in offline mode even if conditions are not met.
   final bool worksOffline;
-
-  /// A callback that will determine whether or not this screen should be
-  /// available for a given flutter version.
-  final bool Function(FlutterVersion? currentFlutterVersion)?
-      shouldShowForFlutterVersion;
 
   /// Whether this screen should display the isolate selector in the status
   /// line.
@@ -454,16 +447,6 @@ bool shouldShowScreen(Screen screen) {
   if (screen.requiresVmDeveloperMode) {
     if (!preferences.vmDeveloperModeEnabled.value) {
       _log.finest('screen requires vm developer mode: returning false');
-      return false;
-    }
-  }
-  if (screen.shouldShowForFlutterVersion != null) {
-    if (serviceConnection.serviceManager.connectedApp!.isFlutterAppNow ==
-            true &&
-        !screen.shouldShowForFlutterVersion!(
-          serviceConnection.serviceManager.connectedApp!.flutterVersionNow,
-        )) {
-      _log.finest('screen has flutter version restraints: returning false');
       return false;
     }
   }

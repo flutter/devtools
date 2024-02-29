@@ -195,7 +195,7 @@ class ConnectedApp {
         isDartWebAppKey: isDartWebAppNow,
         isRunningOnDartVMKey: isRunningOnDartVM,
         operatingSystemKey: operatingSystem,
-        if (flutterVersionNow != null)
+        if (flutterVersionNow != null && !flutterVersionNow!.unknown)
           flutterVersionKey: flutterVersionNow!.version,
       };
 }

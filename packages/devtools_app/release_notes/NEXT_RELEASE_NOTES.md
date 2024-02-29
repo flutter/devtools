@@ -10,7 +10,8 @@ To learn more about DevTools, check out the
 
 ## General updates
 
-TODO: Remove this section if there are not any general updates.
+* Fixed an issue preventing DevTools from connecting to Flutter apps that are not
+launched from Flutter Tools. - [#6848](https://github.com/flutter/devtools/issues/6848)
 
 ## Inspector updates
 

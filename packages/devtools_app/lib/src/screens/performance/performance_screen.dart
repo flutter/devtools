@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
-import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:provider/provider.dart';
@@ -74,18 +73,6 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    maybePushUnsupportedFlutterVersionWarning(
-      PerformanceScreen.id,
-      supportedFlutterVersion: SemanticVersion(
-        major: 2,
-        minor: 3,
-        // Specifying patch makes the version number more readable.
-        // ignore: avoid_redundant_argument_values
-        patch: 0,
-        preReleaseMajor: 16,
-        preReleaseMinor: 0,
-      ),
-    );
     maybePushDebugModePerformanceMessage(context, PerformanceScreen.id);
 
     if (!initController()) return;

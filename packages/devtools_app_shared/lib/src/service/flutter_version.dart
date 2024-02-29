@@ -69,6 +69,15 @@ final class FlutterVersion extends SemanticVersion {
 
   final SemanticVersion? dartSdkVersion;
 
+  bool get unknown =>
+      version == null &&
+      channel == null &&
+      repositoryUrl == null &&
+      frameworkRevision == null &&
+      frameworkCommitDate == null &&
+      engineRevision == null &&
+      dartSdkVersion == null;
+
   @override
   bool operator ==(Object other) {
     if (other is! FlutterVersion) return false;
