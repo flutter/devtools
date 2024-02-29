@@ -1381,7 +1381,7 @@ void main() {
             _SubtractionResult(subtract: subtract, from: from);
 
         final result = subtractMaps<int, double, String, _SubtractionResult>(
-          substract: subtract,
+          subtract: subtract,
           from: from,
           subtractor: elementSubtractor,
         );
@@ -1409,7 +1409,7 @@ void main() {
             _SubtractionResult(subtract: subtract, from: from);
 
         final result = subtractMaps<int, double, String, _SubtractionResult>(
-          substract: null,
+          subtract: null,
           from: from,
           subtractor: elementSubtractor,
         );
@@ -1430,7 +1430,7 @@ void main() {
             _SubtractionResult(subtract: subtract, from: from);
 
         final result = subtractMaps<int, double, String, _SubtractionResult>(
-          substract: subtract,
+          subtract: subtract,
           from: null,
           subtractor: elementSubtractor,
         );

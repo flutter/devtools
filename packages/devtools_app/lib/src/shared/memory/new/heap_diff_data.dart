@@ -8,9 +8,9 @@ import 'classes.dart';
 import 'heap_data.dart';
 
 class HeapDiffData {
-  HeapDiffData._();
+  HeapDiffData._(this.classes);
 
-  ClassDataList<DiffClassData>? classes;
+  final ClassDataList<DiffClassData> classes;
 }
 
 HeapDiffData calculateHeapDiffData(
@@ -20,12 +20,14 @@ HeapDiffData calculateHeapDiffData(
   final classesByName = subtractMaps<HeapClassName, SingleClassData,
       SingleClassData, DiffClassData>(
     from: before.classes!.asMap(),
-    substract: after.classes!.asMap(),
+    subtract: after.classes!.asMap(),
     subtractor: ({subtract, from}) =>
-        DiffClassData.diff(before: subtract, after: from),
+        DiffClassData.compare(before: subtract, after: from),
   );
 
-  return HeapDiffData._();
+  return HeapDiffData._(
+    ClassDataList<DiffClassData>(classesByName.values.toList(growable: false)),
+  );
 }
 
 /// List of classes with per-class comparison between two heaps.

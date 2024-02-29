@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../screens/memory/shared/heap/class_filter.dart';
+import '../../primitives/utils.dart';
 import '../class_name.dart';
 import 'heap_data.dart';
 import 'retaining_path.dart';
@@ -112,11 +113,12 @@ class ObjectSet extends ObjectSetStats {
 /// Comparison between two sets of objects.
 class ObjectSetDiff {
   ObjectSetDiff({
-    ObjectSet? setBefore,
-    ObjectSet? setAfter,
-    HeapData? dataBefore,
-    HeapData? dataAfter,
-  }) {
+    required ObjectSet? setBefore,
+    required ObjectSet? setAfter,
+    required HeapData? dataBefore,
+    required HeapData? dataAfter,
+  })  : assert((setBefore == null) == (dataBefore == null)),
+        assert((setAfter == null) == (dataAfter == null)) {
     final mapBefore = _toCodeToIndexMap(setBefore, dataBefore);
     final mapAfter = _toCodeToIndexMap(setAfter, dataAfter);
 
@@ -251,7 +253,8 @@ abstract class ClassData {
   ClassData({required this.heapClass});
 
   ObjectSetStats get objects;
-  final Map<PathFromRoot, ObjectSetStats> byPath = {};
+  Map<PathFromRoot, ObjectSetStats> get byPath;
+
   final HeapClassName heapClass;
 
   late final PathFromRoot pathWithMaxRetainedSize = () {
@@ -264,10 +267,12 @@ abstract class ClassData {
 
 class SingleClassData extends ClassData {
   SingleClassData({required super.heapClass});
-  final ObjectSet _objects = ObjectSet();
 
   @override
-  ObjectSet get objects => _objects;
+  final ObjectSet objects = ObjectSet();
+
+  @override
+  final Map<PathFromRoot, ObjectSetStats> byPath = {};
 
   void countInstance(
     HeapSnapshotGraph graph,
@@ -283,7 +288,7 @@ class SingleClassData extends ClassData {
         retainedSizes != null &&
         path.classes.contains(heapClass);
 
-    _objects.countInstance(
+    objects.countInstance(
       graph,
       index,
       retainedSizes,
@@ -306,48 +311,49 @@ class SingleClassData extends ClassData {
 }
 
 class DiffClassData extends ClassData {
-  DiffClassData({
-    required this.before,
-    required this.after,
-  })  : assert(before.heapClass == after.heapClass),
-        super(heapClass: before.heapClass);
+  DiffClassData._(HeapClassName heapClass, this.diff, this.byPath)
+      : super(heapClass: heapClass);
 
-  final SingleClassData before;
-  final SingleClassData after;
+  final ObjectSetDiff diff;
 
   @override
-  // TODO: implement objects
-  ObjectSetStats get objects => throw UnimplementedError();
+  ObjectSetStats get objects => diff.delta;
 
-  static DiffClassData? diff({
+  @override
+  final Map<PathFromRoot, ObjectSetStats> byPath;
+
+  static DiffClassData? compare({
     SingleClassData? before,
-    HeapSnapshotGraph? graphBefore,
+    HeapData? dataBefore,
     SingleClassData? after,
-    HeapSnapshotGraph? graphAfter,
+    HeapData? dataAfter,
   }) {
     if (before == null && after == null) return null;
     final heapClass = (before?.heapClass ?? after?.heapClass)!;
 
-    // final result = DiffClassStats._(
-    //   heapClass: heapClass,
-    //   total: ObjectSetDiff_(
-    //     setBefore: before?.objects,
-    //     setAfter: after?.objects,
-    //   ),
-    //   statsByPath: subtractMaps<ClassOnlyHeapPath, ObjectSetStats_,
-    //       ObjectSetStats_, ObjectSetStats_>(
-    //     from: after?.statsByPath,
-    //     substract: before?.statsByPath,
-    //     subtractor: ({subtract, from}) =>
-    //         ObjectSetStats_.subtract(subtract: subtract, from: from),
-    //   ),
-    // );
+    final result = DiffClassData._(
+      heapClass,
+      ObjectSetDiff(
+        setBefore: before?.objects,
+        setAfter: after?.objects,
+        dataBefore: dataBefore,
+        dataAfter: dataAfter,
+      ),
+      // PathFromRoot, ObjectSetStats
+      subtractMaps<PathFromRoot, ObjectSetStats, ObjectSetStats,
+          ObjectSetStats>(
+        from: after?.byPath,
+        subtract: before?.byPath,
+        subtractor: ({subtract, from}) =>
+            ObjectSetStats.subtract(subtract: subtract, from: from),
+      ),
+    );
 
-    // if (result.isZero()) return null;
-    // return result..seal();
+    if (result.isZero()) return null;
+    return result;
   }
 
-  //bool isZero() => total.isZero;
+  bool isZero() => diff.isZero;
 }
 
 // ///////////////////
