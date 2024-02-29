@@ -2,8 +2,9 @@
 * Refactor yaml extension methods.
 * **Breaking change:** rename `ServerApi.getCompleted` to `ServerApi.success` and make the
 `value` parameter optional.
-* **Breaking change:** remove the `String dtdUri` parameter from `ServerApi.handle` and replace
-it with a record parameter `({String? uri, String? secret})? dtd`.
+* **Breaking change:** remove the `String? dtdUri` parameter from `ServerApi.handle` and replace
+it with a parameter `DTDConnectionInfo? dtd`.
+* Introduce a new typedef `DTDConnectionInfo`.
 
 # 7.0.0
 * **Breaking change:** remove the `ServerApi.setCompleted` method that was a

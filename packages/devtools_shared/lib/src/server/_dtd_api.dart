@@ -9,7 +9,7 @@ part of 'server_api.dart';
 abstract class _DtdApiHandler {
   static shelf.Response handleGetDtdUri(
     ServerApi api,
-    ({String? uri, String? secret})? dtd,
+    DTDConnectionInfo? dtd,
   ) {
     return ServerApi._encodeResponse(
       {DtdApi.uriPropertyName: dtd?.uri},
@@ -20,7 +20,7 @@ abstract class _DtdApiHandler {
   static Future<shelf.Response> handleSetDtdWorkspaceRoots(
     ServerApi api,
     Map<String, String> queryParams,
-    ({String? uri, String? secret})? dtd,
+    DTDConnectionInfo? dtd,
   ) async {
     final uri = dtd?.uri;
     final secret = dtd?.secret;
@@ -47,13 +47,16 @@ abstract class _DtdApiHandler {
     final roots = DtdApi.decodeWorkspaceRoots(
       queryParams[DtdApi.workspaceRootsPropertyName]!,
     ).map((r) => Uri.parse(r)).toList();
+
+    DTDConnection? dtdConnection;
     try {
-      final dtdConnection = await DartToolingDaemon.connect(Uri.parse(uri));
+      dtdConnection = await DartToolingDaemon.connect(Uri.parse(uri));
       await dtdConnection.setIDEWorkspaceRoots(secret, roots);
-      await dtdConnection.close();
       return api.success();
     } catch (e) {
       return api.serverError('$e');
+    } finally {
+      await dtdConnection?.close();
     }
   }
 }

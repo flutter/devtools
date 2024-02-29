@@ -21,6 +21,9 @@ import 'usage.dart';
 
 part '_dtd_api.dart';
 
+/// Describes an instance of the Dart Tooling Daemon.
+typedef DTDConnectionInfo = ({String? uri, String? secret});
+
 /// The DevTools server API.
 ///
 /// This defines endpoints that serve all requests that come in over api/.
@@ -43,7 +46,7 @@ class ServerApi {
     required DeeplinkManager deeplinkManager,
     required Analytics analytics,
     ServerApi? api,
-    ({String? uri, String? secret})? dtd,
+    DTDConnectionInfo? dtd,
   }) {
     api ??= ServerApi();
     final queryParams = request.requestedUri.queryParameters;
