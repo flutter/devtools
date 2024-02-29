@@ -4,6 +4,7 @@
 
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../primitives/utils.dart';
@@ -13,14 +14,23 @@ import 'classes.dart';
 import 'retainers.dart';
 import 'simple_items.dart';
 
+@immutable
 class HeapData {
-  HeapData._(this.graph, this.classes, this.footprint, this.created);
+  const HeapData._(
+    this.graph,
+    this.classes,
+    this.footprint, {
+    required this.created,
+    required this.retainedSizes,
+  });
 
   final HeapSnapshotGraph graph;
 
   final ClassDataList<SingleClassData>? classes;
 
   final MemoryFootprint? footprint;
+
+  final List<int>? retainedSizes;
 
   final DateTime created;
 }
@@ -39,7 +49,15 @@ Future<HeapData> calculateHeapData(
   bool calculateRetainedSizes = true,
   bool calculateClassData = true,
 }) async {
-  if (!calculateClassData) return HeapData._(graph, null, null, created);
+  if (!calculateClassData) {
+    return HeapData._(
+      graph,
+      null,
+      null,
+      created: created,
+      retainedSizes: null,
+    );
+  }
 
   List<int>? retainers;
   List<int>? retainedSizes;
@@ -109,7 +127,13 @@ Future<HeapData> calculateHeapData(
     );
   }
 
-  return HeapData._(graph, classDataList, footprint, created);
+  return HeapData._(
+    graph,
+    classDataList,
+    footprint,
+    created: created,
+    retainedSizes: retainedSizes,
+  );
 }
 
 class _WeakClasses {

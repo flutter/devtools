@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
@@ -163,7 +164,12 @@ class DiffClassStats extends ClassStats_ {
 
 /// Comparison between two sets of objects.
 class ObjectSetDiff_ {
-  ObjectSetDiff_({ObjectSet_? setBefore, ObjectSet_? setAfter}) {
+  ObjectSetDiff_({
+    ObjectSet_? setBefore,
+    HeapSnapshotGraph? graphBefore,
+    ObjectSet_? setAfter,
+    HeapSnapshotGraph? graphAfter,
+  }) {
     setBefore ??= ObjectSet_.empty;
     setAfter ??= ObjectSet_.empty;
 
@@ -220,9 +226,18 @@ class ObjectSetDiff_ {
     return codesBefore.union(codesAfter);
   }
 
+  /// Objects created after first snapshot.
   final created = ObjectSet_();
+
+  /// Objects deleted after first snapshot.
   final deleted = ObjectSet_();
+
+  /// Objects persisted after first snapshot till second snapshot.
+  ///
+  /// Ids of the objects correspond to the second snapshot.
   final persisted = ObjectSet_();
+
+  /// Statistical delta between created and deleted objects.
   final delta = ObjectSetStats_();
 
   bool get isZero => delta.isZero;

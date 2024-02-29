@@ -7,6 +7,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../screens/memory/shared/heap/class_filter.dart';
 import '../class_name.dart';
+import 'heap_data.dart';
 import 'retaining_path.dart';
 
 /// Statistical size-information about objects.
@@ -108,6 +109,98 @@ class ObjectSet extends ObjectSetStats {
   }
 }
 
+/// Comparison between two sets of objects.
+class ObjectSetDiff {
+  ObjectSetDiff({
+    ObjectSet? setBefore,
+    ObjectSet? setAfter,
+    HeapData? dataBefore,
+    HeapData? dataAfter,
+  }) {
+    final mapBefore = _toCodeToIndexMap(setBefore, dataBefore);
+    final mapAfter = _toCodeToIndexMap(setAfter, dataAfter);
+
+    final allCodes = mapBefore.keys.toSet().union(mapAfter.keys.toSet());
+
+    for (var code in allCodes) {
+      final before = mapBefore[code];
+      final after = mapAfter[code];
+
+      if (before != null && after != null) {
+        _countInstance(persisted, after, dataAfter!, setAfter!);
+        continue;
+      }
+
+      if (before != null) {
+        _countInstance(deleted, before, dataBefore!, setBefore!);
+        _uncountInstance(delta, before, dataBefore, setBefore);
+        continue;
+      }
+
+      if (after != null) {
+        _countInstance(created, after, dataAfter!, setAfter!);
+        _countInstance(delta, after, dataAfter, setAfter);
+        continue;
+      }
+
+      assert(false);
+    }
+
+    assert(
+      delta.instanceCount == created.instanceCount - deleted.instanceCount,
+    );
+  }
+
+  static void _countInstance(
+    ObjectSetStats setToAlter,
+    int index,
+    HeapData data,
+    ObjectSet originalSet,
+  ) {
+    final excludeFromRetained =
+        originalSet.objectsExcludedFromRetainedSize.contains(index);
+    setToAlter.countInstance(
+      data.graph,
+      index,
+      data.retainedSizes,
+      excludeFromRetained: excludeFromRetained,
+    );
+  }
+
+  static void _uncountInstance(
+    ObjectSetStats setToAlter,
+    int index,
+    HeapData data,
+    ObjectSet originalSet,
+  ) {
+    final excludeFromRetained =
+        originalSet.objectsExcludedFromRetainedSize.contains(index);
+    setToAlter.uncountInstance(
+      data.graph,
+      index,
+      data.retainedSizes,
+      excludeFromRetained: excludeFromRetained,
+    );
+  }
+
+  static Map<int, int> _toCodeToIndexMap(
+    ObjectSet? ids,
+    HeapData? data,
+  ) {
+    if (ids == null || data == null) return const {};
+    return {
+      for (var id in ids.objects) data.graph.objects[id].hashCode: id,
+    };
+  }
+
+  final created = ObjectSet();
+  final deleted = ObjectSet();
+  final persisted = ObjectSet();
+  final delta = ObjectSetStats();
+
+  bool get isZero => delta.isZero;
+}
+
 @immutable
 class ClassDataList<T extends ClassData> {
   ClassDataList(this._originalList)
@@ -127,6 +220,9 @@ class ClassDataList<T extends ClassData> {
   final List<T> _originalList;
   final ClassFilter? _appliedFilter;
   final List<T>? _filtered;
+
+  Map<HeapClassName, T> asMap() =>
+      {for (var c in _originalList) c.heapClass: c};
 
   ClassDataList<T> filtered(ClassFilter newFilter, String? rootPackage) {
     final filtered = ClassFilter.filter(
@@ -222,6 +318,47 @@ class DiffClassData extends ClassData {
   @override
   // TODO: implement objects
   ObjectSetStats get objects => throw UnimplementedError();
+
+  static Map<int, int> _toCodeToIdMap(
+    SingleClassData? classes,
+    HeapSnapshotGraph? graph,
+  ) {
+    if (classes == null || graph == null) return const {};
+
+    return {
+      for (var id in classes.objects.objects) graph.objects[id].hashCode: id,
+    };
+  }
+
+  static DiffClassData? diff({
+    SingleClassData? before,
+    HeapSnapshotGraph? graphBefore,
+    SingleClassData? after,
+    HeapSnapshotGraph? graphAfter,
+  }) {
+    if (before == null && after == null) return null;
+    final heapClass = (before?.heapClass ?? after?.heapClass)!;
+
+    // final result = DiffClassStats._(
+    //   heapClass: heapClass,
+    //   total: ObjectSetDiff_(
+    //     setBefore: before?.objects,
+    //     setAfter: after?.objects,
+    //   ),
+    //   statsByPath: subtractMaps<ClassOnlyHeapPath, ObjectSetStats_,
+    //       ObjectSetStats_, ObjectSetStats_>(
+    //     from: after?.statsByPath,
+    //     substract: before?.statsByPath,
+    //     subtractor: ({subtract, from}) =>
+    //         ObjectSetStats_.subtract(subtract: subtract, from: from),
+    //   ),
+    // );
+
+    // if (result.isZero()) return null;
+    // return result..seal();
+  }
+
+  //bool isZero() => total.isZero;
 }
 
 // ///////////////////
