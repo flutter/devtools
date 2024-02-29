@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/utils.dart';
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
@@ -17,7 +18,6 @@ import '../shared/diagnostics/inspector_service.dart';
 import '../shared/error_badge_manager.dart';
 import '../shared/feature_flags.dart';
 import '../shared/globals.dart';
-import '../shared/primitives/utils.dart';
 import '../shared/server/server.dart' as server;
 import '../shared/title.dart';
 import '../shared/utils.dart';
@@ -132,7 +132,12 @@ class ServiceConnectionManager {
       serviceTrafficLogger = VmServiceTrafficLogger(service!);
     }
 
-    await _maybeSetDtdWorkspaceRoots();
+    unawaited(
+      server.notifyForVmServiceConnection(
+        vmServiceUri: service!.wsUri!,
+        connected: true,
+      ),
+    );
   }
 
   void _beforeCloseVmService(VmServiceWrapper? service) {
@@ -143,9 +148,18 @@ class ServiceConnectionManager {
         ? OfflineConnectedApp.parse(serviceManager.connectedApp!.toJson())
         : null;
     offlineController.previousConnectedApp = previousConnectedApp;
+
+    // This must be called before we close the VM service so that
+    // [service.wsUri] is not null.
+    unawaited(
+      server.notifyForVmServiceConnection(
+        vmServiceUri: service!.wsUri!,
+        connected: false,
+      ),
+    );
   }
 
-  Future<void> _afterCloseVmService(VmServiceWrapper? service) async {
+  void _afterCloseVmService(VmServiceWrapper? service) {
     generateDevToolsTitle();
     vmFlagManager.vmServiceClosed();
     timelineStreamManager.vmServiceClosed();
@@ -156,7 +170,6 @@ class ServiceConnectionManager {
     serviceTrafficLogger?.dispose();
     preferences.vmDeveloperModeEnabled
         .removeListener(_handleVmDeveloperModeChanged);
-    await _maybeSetDtdWorkspaceRoots();
   }
 
   Future<void> _handleVmDeveloperModeChanged() async {
@@ -320,17 +333,5 @@ class ServiceConnectionManager {
         },
       },
     );
-  }
-
-  Future<void> _maybeSetDtdWorkspaceRoots() async {
-    final roots = <String>[];
-    if (serviceManager.hasConnection) {
-      final packageUriForConnectedApp =
-          await rootPackageDirectoryForMainIsolate();
-      if (packageUriForConnectedApp != null) {
-        roots.add(packageUriForConnectedApp);
-      }
-    }
-    await server.setDtdWorkspaceRoots(roots);
   }
 }

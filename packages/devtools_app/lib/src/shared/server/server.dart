@@ -75,6 +75,26 @@ Future<DevToolsJsonFile?> requestFile({
   return null;
 }
 
+Future<void> notifyForVmServiceConnection({
+  required String vmServiceUri,
+  required bool connected,
+}) async {
+  if (isDevToolsServerAvailable) {
+    final uri = Uri(
+      path: apiNotifyForVmServiceConnection,
+      queryParameters: {
+        apiParameterValueKey: vmServiceUri,
+        apiParameterVmServiceConnected: connected.toString(),
+      },
+    );
+    final resp = await request(uri.toString());
+    final statusOk = resp?.statusOk ?? false;
+    if (!statusOk) {
+      logWarning(resp, apiNotifyForVmServiceConnection);
+    }
+  }
+}
+
 DevToolsJsonFile _devToolsJsonFileFromResponse(
   Response resp,
   String filePath,

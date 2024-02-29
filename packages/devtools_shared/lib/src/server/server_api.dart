@@ -8,18 +8,25 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:dtd/dtd.dart';
+import 'package:meta/meta.dart';
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:unified_analytics/unified_analytics.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../deeplink/deeplink_manager.dart';
 import '../devtools_api.dart';
 import '../extensions/extension_enablement.dart';
 import '../extensions/extension_manager.dart';
+import '../service/service.dart';
+import '../service_utils.dart';
+import '../utils/file_utils.dart';
 import 'file_system.dart';
 import 'usage.dart';
 
-part '_dtd_api.dart';
+part 'handlers/_dtd.dart';
+part 'handlers/_general.dart';
 
 /// Describes an instance of the Dart Tooling Daemon.
 typedef DTDConnectionInfo = ({String? uri, String? secret});
@@ -53,6 +60,12 @@ class ServerApi {
     // TODO(kenz): break this switch statement up so that it uses helper methods
     // for each case. Also use [_checkRequiredParameters] helper.
     switch (request.url.path) {
+      case apiNotifyForVmServiceConnection:
+        return Handler.handleNotifyForVmServiceConnection(
+          api,
+          queryParams,
+          dtd,
+        );
       // ----- Flutter Tool GA store. -----
       case apiGetFlutterGAEnabled:
         // Is Analytics collection enabled?
@@ -267,12 +280,6 @@ class ServerApi {
         );
       case DtdApi.apiGetDtdUri:
         return _DtdApiHandler.handleGetDtdUri(api, dtd);
-      case DtdApi.apiSetDtdWorkspaceRoots:
-        return _DtdApiHandler.handleSetDtdWorkspaceRoots(
-          api,
-          queryParams,
-          dtd,
-        );
       default:
         return api.notImplemented();
     }
@@ -345,9 +352,9 @@ class ServerApi {
   /// setActiveSurvey not called.
   ///
   /// This is a 400 Bad Request response.
-  shelf.Response badRequest([String? logError]) {
-    if (logError != null) print(logError);
-    return shelf.Response(HttpStatus.badRequest);
+  shelf.Response badRequest([String? error]) {
+    if (error != null) print(error);
+    return shelf.Response(HttpStatus.badRequest, body: error);
   }
 
   /// A [shelf.Response] for API calls that encountered a server error e.g.,
