@@ -180,7 +180,7 @@ class ConnectedApp {
             'Timed out trying to fetch flutter version from '
             '`ConnectedApp.initializeValues`.',
           );
-          return Future<FlutterVersion?>.value();
+          return Future<FlutterVersion?>.value(FlutterVersion.unknown());
         },
       );
       flutterVersionServiceListenable.removeListener(listener);

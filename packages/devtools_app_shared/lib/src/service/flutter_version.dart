@@ -43,6 +43,18 @@ final class FlutterVersion extends SemanticVersion {
     );
   }
 
+  factory FlutterVersion.unknown() {
+    return FlutterVersion._(
+      version: null,
+      channel: null,
+      repositoryUrl: null,
+      frameworkRevision: null,
+      frameworkCommitDate: null,
+      engineRevision: null,
+      dartSdkVersion: null,
+    );
+  }
+
   final String? version;
 
   final String? channel;
