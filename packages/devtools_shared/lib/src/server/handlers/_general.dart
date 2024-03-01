@@ -189,7 +189,7 @@ extension on VmService {
   /// Assumes an isolate is the main isolate if it meets any of the criteria in
   /// the following order:
   ///
-  /// 1. The isolate is the main Flutter isolate?
+  /// 1. The isolate is the main Flutter isolate.
   /// 2. The isolate has ':main(' in its name.
   /// 3. The isolate is the first in the list of isolates on the VM.
   Future<Isolate> get _detectMainIsolate async {
