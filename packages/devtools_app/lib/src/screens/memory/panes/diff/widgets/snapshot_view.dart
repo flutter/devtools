@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/memory/new/classes.dart';
 import '../../../../../shared/primitives/utils.dart';
-import '../../../shared/heap/heap.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/heap_diff_.dart';
 import '../controller/item_controller.dart';
@@ -26,7 +25,7 @@ class SnapshotView extends StatelessWidget {
     return MultiValueListenableBuilder(
       listenables: [
         controller.derived.singleClassesToShow,
-        controller.derived.diffClassesToShow,
+        controller.derived.diffClassesToShow_,
       ],
       builder: (_, values, __) {
         final singleClasses = values.first as ClassDataList<SingleClassData>?;
@@ -54,7 +53,7 @@ class SnapshotView extends StatelessWidget {
           );
         } else if (diffClasses != null) {
           classTable = ClassesTableDiff(
-            classes: controller.derived.diffClassesToShow.value!,
+            classes: controller.derived.diffClassesToShow.value!.list,
             diffData: controller.derived.classesTableDiff,
           );
         } else {
@@ -66,7 +65,7 @@ class SnapshotView extends StatelessWidget {
           builder: (_, classData, __) => HeapClassDetails(
             classData: classData,
             pathSelection: controller.derived.selectedPath,
-            isDiff: classes is DiffHeapClasses,
+            isDiff: classes is ClassDataList<DiffClassData>,
             pathController: controller.retainingPathController,
           ),
         );

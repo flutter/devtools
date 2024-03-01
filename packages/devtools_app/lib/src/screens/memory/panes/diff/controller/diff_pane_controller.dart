@@ -286,9 +286,13 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   late final ClassesTableDiffData classesTableDiff;
 
   /// Classes to show for currently selected item, if the item is diffed.
-  ValueListenable<List<DiffClassStats>?> get diffClassesToShow =>
+  ValueListenable<List<DiffClassStats>?> get diffClassesToShow_ =>
+      _diffClassesToShow_;
+  final _diffClassesToShow_ = ValueNotifier<List<DiffClassStats>?>(null);
+
+  ValueListenable<ClassDataList<DiffClassData>?> get diffClassesToShow =>
       _diffClassesToShow;
-  final _diffClassesToShow = ValueNotifier<List<DiffClassStats>?>(null);
+  final _diffClassesToShow = ValueNotifier<ClassDataList<DiffClassData>?>(null);
 
   /// Classes to show for currently selected item, if the item is not diffed.
   ValueListenable<List<SingleClassStats_>?> get singleClassesToShow_ =>
@@ -412,21 +416,21 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
 
     if (classes is ClassDataList<SingleClassData>) {
       _singleClassesToShow.value = classes;
-      _diffClassesToShow.value = null;
+      _diffClassesToShow_.value = null;
       classesTableSingle.selection.value =
           classes.list.singleWhereOrNull((d) => d.heapClass == className);
       classesTableDiff.selection.value = null;
       classData.value = classesTableSingle.selection.value;
-    } else if (classes is DiffHeapClasses) {
-      // _singleClassesToShow_.value = null;
-      // _diffClassesToShow.value = classes.filtered(filter, _core.rootPackage);
-      // classesTableSingle.selection.value = null;
-      // classesTableDiff.selection.value =
-      //     _filter(classes.classesByName[className]);
+    } else if (classes is ClassDataList<DiffClassData>) {
+      _singleClassesToShow.value = null;
+      _diffClassesToShow.value = classes;
+      classesTableSingle.selection.value = null;
+      classesTableDiff.selection.value =
+          classes.list.singleWhereOrNull((d) => d.heapClass == className);
     } else if (classes == null) {
       _singleClassesToShow.value = null;
       _singleClassesToShow_.value = null;
-      _diffClassesToShow.value = null;
+      _diffClassesToShow_.value = null;
       classesTableSingle.selection.value = null;
       classesTableDiff.selection.value = null;
     } else {
@@ -452,28 +456,29 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   /// Updates fields in this instance based on the values in [core].
   void _updateValues() {
     _startUpdatingValues();
+    try {
+      // Set class to show.
+      final classes = _snapshotClassesAfterDiffing();
+      heapClasses.value = classes;
+      _selectClassAndPath();
+      _updateClasses(
+        classes: classes,
+        className: _core.className,
+      );
 
-    // Set class to show.
-    final classes = _snapshotClassesAfterDiffing();
-    heapClasses.value = classes;
-    _selectClassAndPath();
-    _updateClasses(
-      classes: classes,
-      className: _core.className,
-    );
+      final theClassData = classData.value;
+      final thePath = _core.path;
+      if (theClassData != null && thePath != null) {
+        selectedPath.value = PathData(theClassData, thePath);
+      } else {
+        selectedPath.value = null;
+      }
 
-    final theClassData = classData.value;
-    final thePath = _core.path;
-    if (theClassData != null && thePath != null) {
-      selectedPath.value = PathData(theClassData, thePath);
-    } else {
-      selectedPath.value = null;
+      // Set current snapshot.
+      _selectedItem.value = _core.selectedItem;
+    } finally {
+      _endUpdatingValues();
     }
-
-    // Set current snapshot.
-    _selectedItem.value = _core.selectedItem;
-
-    _endUpdatingValues();
   }
 
   void _startUpdatingValues() {

@@ -323,10 +323,10 @@ class DiffClassData extends ClassData {
   final Map<PathFromRoot, ObjectSetStats> byPath;
 
   static DiffClassData? compare({
-    SingleClassData? before,
-    HeapData? dataBefore,
-    SingleClassData? after,
-    HeapData? dataAfter,
+    required SingleClassData? before,
+    required HeapData? dataBefore,
+    required SingleClassData? after,
+    required HeapData? dataAfter,
   }) {
     if (before == null && after == null) return null;
     final heapClass = (before?.heapClass ?? after?.heapClass)!;

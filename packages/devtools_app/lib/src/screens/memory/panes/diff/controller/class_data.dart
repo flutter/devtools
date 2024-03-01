@@ -62,5 +62,5 @@ class ClassesTableDiffData {
   final ClassFilterData filterData;
 
   /// Selected class.
-  final selection = ValueNotifier<DiffClassStats?>(null);
+  final selection = ValueNotifier<DiffClassData?>(null);
 }

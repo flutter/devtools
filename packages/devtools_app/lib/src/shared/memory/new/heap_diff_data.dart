@@ -19,10 +19,14 @@ HeapDiffData calculateHeapDiffData(
 ) {
   final classesByName = subtractMaps<HeapClassName, SingleClassData,
       SingleClassData, DiffClassData>(
-    from: before.classes!.asMap(),
-    subtract: after.classes!.asMap(),
-    subtractor: ({subtract, from}) =>
-        DiffClassData.compare(before: subtract, after: from),
+    from: after.classes!.asMap(),
+    subtract: before.classes!.asMap(),
+    subtractor: ({subtract, from}) => DiffClassData.compare(
+      before: subtract,
+      after: from,
+      dataBefore: before,
+      dataAfter: after,
+    ),
   );
 
   return HeapDiffData._(
