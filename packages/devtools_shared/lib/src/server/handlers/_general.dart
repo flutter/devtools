@@ -17,7 +17,7 @@ abstract class Handler {
   ///
   /// If the Dart Tooling Daemon was not started by DevTools, this map will
   /// never be used.
-  static const _packageRootsForVmServiceConnections = <String, Uri>{};
+  static final _packageRootsForVmServiceConnections = <String, Uri>{};
 
   static Future<shelf.Response> handleNotifyForVmServiceConnection(
     ServerApi api,
@@ -42,8 +42,6 @@ abstract class Handler {
       return api.success();
     }
 
-    late Uri rootFromVmService;
-    final vmServiceUriAsString = queryParams[apiParameterValueKey]!;
     final connectedAsString = queryParams[apiParameterVmServiceConnected]!;
     late bool connected;
     try {
@@ -54,33 +52,74 @@ abstract class Handler {
       );
     }
 
+    final vmServiceUriAsString = queryParams[apiParameterValueKey]!;
+    final vmServiceUri = normalizeVmServiceUri(vmServiceUriAsString);
+    if (vmServiceUri == null) {
+      return api.badRequest(
+        'Cannot normalize VM service URI: $vmServiceUriAsString',
+      );
+    }
+
+    final detectRootResponse = await detectRootPackageForVmService(
+      vmServiceUriAsString: vmServiceUriAsString,
+      vmServiceUri: vmServiceUri,
+      connected: connected,
+      api: api,
+    );
+    if (detectRootResponse.success) {
+      final rootUri = detectRootResponse.uri;
+      if (rootUri == null) {
+        return api.success();
+      }
+      return updateDtdWorkspaceRoots(
+        dtd!,
+        rootFromVmService: rootUri,
+        connected: connected,
+        api: api,
+      );
+    } else {
+      return api.serverError(detectRootResponse.message);
+    }
+  }
+
+  @visibleForTesting
+  static Future<DetectRootPackageResponse> detectRootPackageForVmService({
+    required String vmServiceUriAsString,
+    required Uri vmServiceUri,
+    required bool connected,
+    required ServerApi api,
+  }) async {
+    late Uri rootPackageUri;
     if (connected) {
+      // TODO(kenz): should we first try to lookup the root from
+      // [_packageRootsForVmServiceConnections]? Could the root library of the
+      // main isolate change during the lifetime of a VM service instance?
+
       VmService? vmService;
       try {
-        final vmServiceUri = normalizeVmServiceUri(vmServiceUriAsString);
-        if (vmServiceUri == null) {
-          return api.badRequest(
-            'Cannot normalize VM service URI: $vmServiceUriAsString',
-          );
-        }
-        final finishedCompleter = Completer<void>();
         vmService = await connect<VmService>(
           uri: vmServiceUri,
-          finishedCompleter: finishedCompleter,
+          finishedCompleter: Completer<void>(),
           serviceFactory: VmService.defaultFactory,
         );
+
         final root = await vmService.rootPackageDirectoryForMainIsolate;
         if (root == null) {
-          return api.serverError(
-            'No root library found for main isolate ($vmServiceUriAsString).',
+          return (
+            success: false,
+            message: 'No root library found for main isolate '
+                '($vmServiceUriAsString).',
+            uri: null,
           );
         }
-        rootFromVmService = Uri.parse(root);
+        rootPackageUri = Uri.parse(root);
         _packageRootsForVmServiceConnections[vmServiceUriAsString] =
-            rootFromVmService;
+            rootPackageUri;
       } catch (e) {
-        return api.serverError(
-          'Error detecting project roots ($vmServiceUriAsString)\n$e',
+        return (
+          success: false,
+          message: 'Error detecting project roots ($vmServiceUriAsString)\n$e',
+          uri: null,
         );
       } finally {
         vmService = null;
@@ -90,17 +129,11 @@ abstract class Handler {
           _packageRootsForVmServiceConnections[vmServiceUriAsString];
       if (cachedRootForVmService == null) {
         // If there is no root to remove, there is nothing for us to do.
-        return api.success();
+        return (success: true, message: null, uri: null);
       }
-      rootFromVmService = cachedRootForVmService;
+      rootPackageUri = cachedRootForVmService;
     }
-
-    return updateDtdWorkspaceRoots(
-      dtd!,
-      rootFromVmService: rootFromVmService,
-      connected: connected,
-      api: api,
-    );
+    return (success: true, message: null, uri: rootPackageUri);
   }
 
   @visibleForTesting
@@ -187,3 +220,5 @@ extension on VmService {
     return mainIsolate;
   }
 }
+
+typedef DetectRootPackageResponse = ({bool success, String? message, Uri? uri});

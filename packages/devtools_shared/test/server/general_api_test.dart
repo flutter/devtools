@@ -6,7 +6,7 @@ import 'dart:io';
 
 import 'package:devtools_shared/devtools_server.dart';
 import 'package:devtools_shared/devtools_shared.dart';
-import 'package:devtools_shared/src/devtools_api.dart';
+import 'package:devtools_shared/devtools_test_utils.dart';
 import 'package:devtools_shared/src/extensions/extension_manager.dart';
 import 'package:devtools_shared/src/server/server_api.dart' as server;
 import 'package:dtd/dtd.dart';
@@ -194,7 +194,81 @@ void main() {
       });
     });
 
-    // TODO(kenz): find a way to test the functionality of connecting to a real
-    // VM service here to get the root library.
+    group('detectRootPackageForVmService', () {
+      TestDartApp? app;
+      String? vmServiceUriString;
+
+      setUp(() async {
+        app = TestDartApp();
+        vmServiceUriString = await app!.start();
+        // Await a short delay to give the VM a chance to initialize.
+        await delay(duration: const Duration(seconds: 1));
+        expect(vmServiceUriString, isNotEmpty);
+      });
+
+      tearDown(() async {
+        await app?.kill();
+        app = null;
+        vmServiceUriString = null;
+      });
+
+      test('succeeds for a connect event', () async {
+        final vmServiceUri = normalizeVmServiceUri(vmServiceUriString!);
+        expect(vmServiceUri, isNotNull);
+        final response = await server.Handler.detectRootPackageForVmService(
+          vmServiceUriAsString: vmServiceUriString!,
+          vmServiceUri: vmServiceUri!,
+          connected: true,
+          api: ServerApi(),
+        );
+        expect(response.success, true);
+        expect(response.message, isNull);
+        expect(response.uri, isNotNull);
+        expect(response.uri!.toString(), endsWith(app!.directory.path));
+      });
+
+      test('succeeds for a disconnect event when cache is empty', () async {
+        final response = await server.Handler.detectRootPackageForVmService(
+          vmServiceUriAsString: vmServiceUriString!,
+          vmServiceUri: Uri.parse('ws://127.0.0.1:63555/fake-uri=/ws'),
+          connected: false,
+          api: ServerApi(),
+        );
+        expect(response, (success: true, message: null, uri: null));
+      });
+
+      test(
+        'succeeds for a disconnect event when cache contains entry for VM service',
+        () async {
+          final vmServiceUri = normalizeVmServiceUri(vmServiceUriString!);
+          expect(vmServiceUri, isNotNull);
+          final response = await server.Handler.detectRootPackageForVmService(
+            vmServiceUriAsString: vmServiceUriString!,
+            vmServiceUri: vmServiceUri!,
+            connected: true,
+            api: ServerApi(),
+          );
+          expect(response.success, true);
+          expect(response.message, isNull);
+          expect(response.uri, isNotNull);
+          expect(response.uri!.toString(), endsWith(app!.directory.path));
+
+          final disconnectResponse =
+              await server.Handler.detectRootPackageForVmService(
+            vmServiceUriAsString: vmServiceUriString!,
+            vmServiceUri: vmServiceUri,
+            connected: false,
+            api: ServerApi(),
+          );
+          expect(disconnectResponse.success, true);
+          expect(disconnectResponse.message, isNull);
+          expect(disconnectResponse.uri, isNotNull);
+          expect(
+            disconnectResponse.uri!.toString(),
+            endsWith(app!.directory.path),
+          );
+        },
+      );
+    });
   });
 }

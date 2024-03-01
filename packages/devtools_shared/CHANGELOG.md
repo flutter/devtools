@@ -5,6 +5,8 @@
 * **Breaking change:** remove the `String? dtdUri` parameter from `ServerApi.handle` and replace
 it with a parameter `DTDConnectionInfo? dtd`.
 * Introduce a new typedef `DTDConnectionInfo`.
+* Add a new API `apiNotifyForVmServiceConnection` that DevTools will call when a
+VM service connection is connected or disconnected from the client.
 
 # 7.0.0
 * **Breaking change:** remove the `ServerApi.setCompleted` method that was a
