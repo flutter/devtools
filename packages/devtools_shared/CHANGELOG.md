@@ -6,7 +6,6 @@ it with a parameter `DTDConnectionInfo? dtd`.
 * Introduce a new typedef `DTDConnectionInfo`.
 * Add a new API `apiNotifyForVmServiceConnection` that DevTools will call when a
 VM service connection is connected or disconnected from the client.
-* Refactor yaml extension methods.
 * Add a helper method `packageRootFromFileUriString`.
 * Refactor yaml extension methods.
 
