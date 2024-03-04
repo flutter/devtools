@@ -37,7 +37,6 @@ Future<Response?> request(String url) async {
   Response? response;
 
   try {
-    _log.fine('requesting $url');
     response = await post(Uri.parse(url));
   } catch (_) {}
 

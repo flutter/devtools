@@ -49,6 +49,8 @@ class FixGoldensCommand extends Command {
             runId,
             '-p',
             '*golden_image_failures*',
+            '-R',
+            'github.com/flutter/devtools',
             '-D',
             tmpDownloadDir.path,
           ],

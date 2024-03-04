@@ -183,7 +183,12 @@ you may need to hard reload and clear your browser cache.
 ### Publish DevTools pub packages
 
 If `package:devtools_app_shared`, `package:devtools_extensions`, or
-`package:devtools_shared` have unreleased changes, publish these packages to pub.
+`package:devtools_shared` have unreleased changes, these packages may need to be
+published to pub.
+
+**Before publishing these packages, please message the DevTools Team chat room to ask if there
+are any reasons why we should wait.** Since these packages follow their own release schedules,
+it is possible that there are changes that are not ready to publish.
 
 From the respective `devtools/packages/devtools_*` directories, run:
    ```shell

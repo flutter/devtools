@@ -25,8 +25,11 @@ import '../utils/file_utils.dart';
 import 'file_system.dart';
 import 'usage.dart';
 
+// TODO(kenz): consider using Dart augmentation libraries instead of part files
+// if there is a clear benefit.
+part 'handlers/_deeplink.dart';
+part 'handlers/_devtools_extensions.dart';
 part 'handlers/_dtd.dart';
-part 'handlers/_general.dart';
 
 /// Describes an instance of the Dart Tooling Daemon.
 typedef DTDConnectionInfo = ({String? uri, String? secret});
@@ -58,7 +61,8 @@ class ServerApi {
     api ??= ServerApi();
     final queryParams = request.requestedUri.queryParameters;
     // TODO(kenz): break this switch statement up so that it uses helper methods
-    // for each case. Also use [_checkRequiredParameters] helper.
+    // for each case. Also use [_checkRequiredParameters] and [_encodeResponse]
+    // helpers.
     switch (request.url.path) {
       case apiNotifyForVmServiceConnection:
         return Handler.handleNotifyForVmServiceConnection(
@@ -69,25 +73,25 @@ class ServerApi {
       // ----- Flutter Tool GA store. -----
       case apiGetFlutterGAEnabled:
         // Is Analytics collection enabled?
-        return _encodeResponse(
-          FlutterUsage.doesStoreExist ? _usage!.enabled : '',
-          api: api,
+        return api.getCompleted(
+          json.encode(FlutterUsage.doesStoreExist ? _usage!.enabled : ''),
         );
       case apiGetFlutterGAClientId:
         // Flutter Tool GA clientId - ONLY get Flutter's clientId if enabled is
         // true.
         return (FlutterUsage.doesStoreExist)
-            ? _encodeResponse(
-                _usage!.enabled ? _usage!.clientId : '',
-                api: api,
+            ? api.getCompleted(
+                json.encode(_usage!.enabled ? _usage!.clientId : ''),
               )
-            : _encodeResponse('', api: api);
+            : api.getCompleted(
+                json.encode(''),
+              );
 
       // ----- DevTools GA store. -----
 
       case apiResetDevTools:
         _devToolsUsage.reset();
-        return _encodeResponse(true, api: api);
+        return api.getCompleted(json.encode(true));
       case apiGetDevToolsFirstRun:
         // Has DevTools been run first time? To bring up analytics dialog.
         //
@@ -96,12 +100,16 @@ class ServerApi {
         // been updated
         final isFirstRun =
             _devToolsUsage.isFirstRun || analytics.shouldShowMessage;
-        return _encodeResponse(isFirstRun, api: api);
+        return api.getCompleted(
+          json.encode(isFirstRun),
+        );
       case apiGetDevToolsEnabled:
         // Is DevTools Analytics collection enabled?
         final isEnabled =
             _devToolsUsage.analyticsEnabled && analytics.telemetryEnabled;
-        return _encodeResponse(isEnabled, api: api);
+        return api.getCompleted(
+          json.encode(isEnabled),
+        );
       case apiSetDevToolsEnabled:
         // Enable or disable DevTools analytics collection.
         if (queryParams.containsKey(devToolsEnabledPropertyName)) {
@@ -111,12 +119,14 @@ class ServerApi {
           _devToolsUsage.analyticsEnabled = analyticsEnabled;
           analytics.setTelemetry(analyticsEnabled);
         }
-        return _encodeResponse(_devToolsUsage.analyticsEnabled, api: api);
+        return api.getCompleted(
+          json.encode(_devToolsUsage.analyticsEnabled),
+        );
       case apiGetConsentMessage:
-        return api.success(analytics.getConsentMessage);
+        return api.getCompleted(analytics.getConsentMessage);
       case apiMarkConsentMessageAsShown:
         analytics.clientShowedMessage();
-        return _encodeResponse(true, api: api);
+        return api.getCompleted(json.encode(true));
 
       // ----- DevTools survey store. -----
 
@@ -135,7 +145,8 @@ class ServerApi {
           _devToolsUsage.activeSurvey = theSurveyName;
           result = true;
         }
-        return _encodeResponse(result, api: api);
+
+        return api.getCompleted(json.encode(result));
       case apiGetSurveyActionTaken:
         // Request setActiveSurvey has not been requested.
         if (_devToolsUsage.activeSurvey == null) {
@@ -145,7 +156,9 @@ class ServerApi {
           );
         }
         // SurveyActionTaken has the survey been acted upon (taken or dismissed)
-        return _encodeResponse(_devToolsUsage.surveyActionTaken, api: api);
+        return api.getCompleted(
+          json.encode(_devToolsUsage.surveyActionTaken),
+        );
       // TODO(terry): remove the query param logic for this request.
       // setSurveyActionTaken should only be called with the value of true, so
       // we can remove the extra complexity.
@@ -163,7 +176,9 @@ class ServerApi {
           _devToolsUsage.surveyActionTaken =
               json.decode(queryParams[surveyActionTakenPropertyName]!);
         }
-        return _encodeResponse(_devToolsUsage.surveyActionTaken, api: api);
+        return api.getCompleted(
+          json.encode(_devToolsUsage.surveyActionTaken),
+        );
       case apiGetSurveyShownCount:
         // Request setActiveSurvey has not been requested.
         if (_devToolsUsage.activeSurvey == null) {
@@ -173,7 +188,9 @@ class ServerApi {
           );
         }
         // SurveyShownCount how many times have we asked to take survey.
-        return _encodeResponse(_devToolsUsage.surveyShownCount, api: api);
+        return api.getCompleted(
+          json.encode(_devToolsUsage.surveyShownCount),
+        );
       case apiIncrementSurveyShownCount:
         // Request setActiveSurvey has not been requested.
         if (_devToolsUsage.activeSurvey == null) {
@@ -184,23 +201,23 @@ class ServerApi {
         }
         // Increment the SurveyShownCount, we've asked about the survey.
         _devToolsUsage.incrementSurveyShownCount();
-        return _encodeResponse(_devToolsUsage.surveyShownCount, api: api);
+        return api.getCompleted(
+          json.encode(_devToolsUsage.surveyShownCount),
+        );
 
       // ----- Release notes api. -----
 
       case apiGetLastReleaseNotesVersion:
-        return _encodeResponse(
-          _devToolsUsage.lastReleaseNotesVersion,
-          api: api,
+        return api.getCompleted(
+          json.encode(_devToolsUsage.lastReleaseNotesVersion),
         );
       case apiSetLastReleaseNotesVersion:
         if (queryParams.containsKey(lastReleaseNotesVersionPropertyName)) {
           _devToolsUsage.lastReleaseNotesVersion =
               queryParams[lastReleaseNotesVersionPropertyName]!;
         }
-        return _encodeResponse(
-          _devToolsUsage.lastReleaseNotesVersion,
-          api: api,
+        return api.getCompleted(
+          json.encode(_devToolsUsage.lastReleaseNotesVersion),
         );
 
       // ----- App size api. -----
@@ -212,7 +229,7 @@ class ServerApi {
           if (fileJson == null) {
             return api.badRequest('No JSON file available at $filePath.');
           }
-          return api.success(fileJson);
+          return api.getCompleted(fileJson);
         }
         return api.badRequest(
           'Request for base app size file does not '
@@ -226,7 +243,7 @@ class ServerApi {
           if (fileJson == null) {
             return api.badRequest('No JSON file available at $filePath.');
           }
-          return api.success(fileJson);
+          return api.getCompleted(fileJson);
         }
         return api.badRequest(
           'Request for test app size file does not '
@@ -289,7 +306,7 @@ class ServerApi {
     Object? object, {
     required ServerApi api,
   }) {
-    return api.success(json.encode(object));
+    return api.getCompleted(json.encode(object));
   }
 
   static Map<String, Object?> _wrapWithLogs(
@@ -338,10 +355,8 @@ class ServerApi {
   /// without any need to involve the server.
   shelf.Response logScreenView() => notImplemented();
 
-  /// A [shelf.Response] for API calls that succeeded.
-  ///
-  /// The response optionally contains a single String [value].
-  shelf.Response success([String? value]) => shelf.Response.ok(value);
+  /// Return the value of the property.
+  shelf.Response getCompleted(String value) => shelf.Response.ok(value);
 
   /// A [shelf.Response] for API calls that are forbidden for the current state
   /// of the server.
@@ -380,184 +395,4 @@ class ServerApi {
   /// This is a no-op 204 No Content response because returning 404 Not Found
   /// creates unnecessary noise in the console.
   shelf.Response notImplemented() => shelf.Response(HttpStatus.noContent);
-}
-
-// TODO(kenz): refactor this code using part files to put each feature set in
-// its own file. This will make this file easier to manage.
-
-abstract class _ExtensionsApiHandler {
-  static Future<shelf.Response> handleServeAvailableExtensions(
-    ServerApi api,
-    Map<String, String> queryParams,
-    ExtensionsManager extensionsManager,
-  ) async {
-    final missingRequiredParams = ServerApi._checkRequiredParameters(
-      [ExtensionsApi.extensionRootPathPropertyName],
-      queryParams: queryParams,
-      api: api,
-      requestName: ExtensionsApi.apiServeAvailableExtensions,
-    );
-    if (missingRequiredParams != null) return missingRequiredParams;
-
-    final logs = <String>[];
-    final rootPath = queryParams[ExtensionsApi.extensionRootPathPropertyName];
-    final result = <String, Object?>{};
-    try {
-      await extensionsManager.serveAvailableExtensions(rootPath, logs);
-    } on ExtensionParsingException catch (e) {
-      // For [ExtensionParsingException]s, we should return a success response
-      // with a warning message.
-      result[ExtensionsApi.extensionsResultWarningPropertyName] = e.message;
-    } catch (e) {
-      // For all other exceptions, return an error response.
-      return api.serverError('$e', logs);
-    }
-
-    final extensions =
-        extensionsManager.devtoolsExtensions.map((p) => p.toJson()).toList();
-    result[ExtensionsApi.extensionsResultPropertyName] = extensions;
-    return ServerApi._encodeResponse(
-      ServerApi._wrapWithLogs(result, logs),
-      api: api,
-    );
-  }
-
-  static shelf.Response handleExtensionEnabledState(
-    ServerApi api,
-    Map<String, String> queryParams,
-  ) {
-    final missingRequiredParams = ServerApi._checkRequiredParameters(
-      [
-        ExtensionsApi.extensionRootPathPropertyName,
-        ExtensionsApi.extensionNamePropertyName,
-      ],
-      queryParams: queryParams,
-      api: api,
-      requestName: ExtensionsApi.apiExtensionEnabledState,
-    );
-    if (missingRequiredParams != null) return missingRequiredParams;
-
-    final rootPath = queryParams[ExtensionsApi.extensionRootPathPropertyName]!;
-    final rootUri = Uri.parse(rootPath);
-    final extensionName = queryParams[ExtensionsApi.extensionNamePropertyName]!;
-
-    final activate = queryParams[ExtensionsApi.enabledStatePropertyName];
-    if (activate != null) {
-      final newState = ServerApi._devToolsOptions.setExtensionEnabledState(
-        rootUri: rootUri,
-        extensionName: extensionName,
-        enable: bool.parse(activate),
-      );
-      return ServerApi._encodeResponse(newState.name, api: api);
-    }
-    final activationState =
-        ServerApi._devToolsOptions.lookupExtensionEnabledState(
-      rootUri: rootUri,
-      extensionName: extensionName,
-    );
-    return ServerApi._encodeResponse(activationState.name, api: api);
-  }
-}
-
-abstract class _DeeplinkApiHandler {
-  static Future<shelf.Response> handleAndroidBuildVariants(
-    ServerApi api,
-    Map<String, String> queryParams,
-    DeeplinkManager deeplinkManager,
-  ) async {
-    final missingRequiredParams = ServerApi._checkRequiredParameters(
-      [DeeplinkApi.deeplinkRootPathPropertyName],
-      queryParams: queryParams,
-      api: api,
-      requestName: DeeplinkApi.androidBuildVariants,
-    );
-    if (missingRequiredParams != null) return missingRequiredParams;
-
-    final rootPath = queryParams[DeeplinkApi.deeplinkRootPathPropertyName]!;
-    final result =
-        await deeplinkManager.getAndroidBuildVariants(rootPath: rootPath);
-    return _resultOutputOrError(api, result);
-  }
-
-  static Future<shelf.Response> handleAndroidAppLinkSettings(
-    ServerApi api,
-    Map<String, String> queryParams,
-    DeeplinkManager deeplinkManager,
-  ) async {
-    final missingRequiredParams = ServerApi._checkRequiredParameters(
-      [
-        DeeplinkApi.deeplinkRootPathPropertyName,
-        DeeplinkApi.androidBuildVariantPropertyName,
-      ],
-      queryParams: queryParams,
-      api: api,
-      requestName: DeeplinkApi.androidBuildVariants,
-    );
-    if (missingRequiredParams != null) return missingRequiredParams;
-
-    final rootPath = queryParams[DeeplinkApi.deeplinkRootPathPropertyName]!;
-    final buildVariant =
-        queryParams[DeeplinkApi.androidBuildVariantPropertyName]!;
-    final result = await deeplinkManager.getAndroidAppLinkSettings(
-      rootPath: rootPath,
-      buildVariant: buildVariant,
-    );
-    return _resultOutputOrError(api, result);
-  }
-
-  static Future<shelf.Response> handleIosBuildOptions(
-    ServerApi api,
-    Map<String, String> queryParams,
-    DeeplinkManager deeplinkManager,
-  ) async {
-    final missingRequiredParams = ServerApi._checkRequiredParameters(
-      [DeeplinkApi.deeplinkRootPathPropertyName],
-      queryParams: queryParams,
-      api: api,
-      requestName: DeeplinkApi.iosBuildOptions,
-    );
-    if (missingRequiredParams != null) return missingRequiredParams;
-
-    final rootPath = queryParams[DeeplinkApi.deeplinkRootPathPropertyName]!;
-    final result = await deeplinkManager.getIosBuildOptions(rootPath: rootPath);
-    return _resultOutputOrError(api, result);
-  }
-
-  static Future<shelf.Response> handleIosUniversalLinkSettings(
-    ServerApi api,
-    Map<String, String> queryParams,
-    DeeplinkManager deeplinkManager,
-  ) async {
-    final missingRequiredParams = ServerApi._checkRequiredParameters(
-      [
-        DeeplinkApi.deeplinkRootPathPropertyName,
-        DeeplinkApi.xcodeConfigurationPropertyName,
-        DeeplinkApi.xcodeTargetPropertyName,
-      ],
-      queryParams: queryParams,
-      api: api,
-      requestName: DeeplinkApi.iosUniversalLinkSettings,
-    );
-    if (missingRequiredParams != null) return missingRequiredParams;
-
-    final result = await deeplinkManager.getIosUniversalLinkSettings(
-      rootPath: queryParams[DeeplinkApi.deeplinkRootPathPropertyName]!,
-      configuration: queryParams[DeeplinkApi.xcodeConfigurationPropertyName]!,
-      target: queryParams[DeeplinkApi.xcodeTargetPropertyName]!,
-    );
-    return _resultOutputOrError(api, result);
-  }
-
-  static shelf.Response _resultOutputOrError(
-    ServerApi api,
-    Map<String, Object?> result,
-  ) {
-    final error = result[DeeplinkManager.kErrorField] as String?;
-    if (error != null) {
-      return api.serverError(error);
-    }
-    return api.success(
-      result[DeeplinkManager.kOutputJsonField]! as String,
-    );
-  }
 }
