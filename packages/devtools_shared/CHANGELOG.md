@@ -8,6 +8,7 @@ it with a parameter `DTDConnectionInfo? dtd`.
 VM service connection is connected or disconnected from the client.
 * Refactor yaml extension methods.
 * Add a helper method `packageRootFromFileUriString`.
+* Refactor yaml extension methods.
 
 # 7.0.0
 * **Breaking change:** remove the `ServerApi.setCompleted` method that was a

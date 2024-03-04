@@ -103,7 +103,7 @@ abstract class _DeeplinkApiHandler {
     if (error != null) {
       return api.serverError(error);
     }
-    return api.getCompleted(
+    return api.success(
       result[DeeplinkManager.kOutputJsonField]! as String,
     );
   }

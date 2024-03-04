@@ -62,8 +62,7 @@ class ServerApi {
     api ??= ServerApi();
     final queryParams = request.requestedUri.queryParameters;
     // TODO(kenz): break this switch statement up so that it uses helper methods
-    // for each case. Also use [_checkRequiredParameters] and [_encodeResponse]
-    // helpers.
+    // for each case. Also use [_checkRequiredParameters] helper.
     switch (request.url.path) {
       case apiNotifyForVmServiceConnection:
         return Handler.handleNotifyForVmServiceConnection(
@@ -74,25 +73,25 @@ class ServerApi {
       // ----- Flutter Tool GA store. -----
       case apiGetFlutterGAEnabled:
         // Is Analytics collection enabled?
-        return api.getCompleted(
-          json.encode(FlutterUsage.doesStoreExist ? _usage!.enabled : ''),
+        return _encodeResponse(
+          FlutterUsage.doesStoreExist ? _usage!.enabled : '',
+          api: api,
         );
       case apiGetFlutterGAClientId:
         // Flutter Tool GA clientId - ONLY get Flutter's clientId if enabled is
         // true.
         return (FlutterUsage.doesStoreExist)
-            ? api.getCompleted(
-                json.encode(_usage!.enabled ? _usage!.clientId : ''),
+            ? _encodeResponse(
+                _usage!.enabled ? _usage!.clientId : '',
+                api: api,
               )
-            : api.getCompleted(
-                json.encode(''),
-              );
+            : _encodeResponse('', api: api);
 
       // ----- DevTools GA store. -----
 
       case apiResetDevTools:
         _devToolsUsage.reset();
-        return api.getCompleted(json.encode(true));
+        return _encodeResponse(true, api: api);
       case apiGetDevToolsFirstRun:
         // Has DevTools been run first time? To bring up analytics dialog.
         //
@@ -101,16 +100,12 @@ class ServerApi {
         // been updated
         final isFirstRun =
             _devToolsUsage.isFirstRun || analytics.shouldShowMessage;
-        return api.getCompleted(
-          json.encode(isFirstRun),
-        );
+        return _encodeResponse(isFirstRun, api: api);
       case apiGetDevToolsEnabled:
         // Is DevTools Analytics collection enabled?
         final isEnabled =
             _devToolsUsage.analyticsEnabled && analytics.telemetryEnabled;
-        return api.getCompleted(
-          json.encode(isEnabled),
-        );
+        return _encodeResponse(isEnabled, api: api);
       case apiSetDevToolsEnabled:
         // Enable or disable DevTools analytics collection.
         if (queryParams.containsKey(devToolsEnabledPropertyName)) {
@@ -120,14 +115,12 @@ class ServerApi {
           _devToolsUsage.analyticsEnabled = analyticsEnabled;
           analytics.setTelemetry(analyticsEnabled);
         }
-        return api.getCompleted(
-          json.encode(_devToolsUsage.analyticsEnabled),
-        );
+        return _encodeResponse(_devToolsUsage.analyticsEnabled, api: api);
       case apiGetConsentMessage:
-        return api.getCompleted(analytics.getConsentMessage);
+        return api.success(analytics.getConsentMessage);
       case apiMarkConsentMessageAsShown:
         analytics.clientShowedMessage();
-        return api.getCompleted(json.encode(true));
+        return _encodeResponse(true, api: api);
 
       // ----- DevTools survey store. -----
 
@@ -146,8 +139,7 @@ class ServerApi {
           _devToolsUsage.activeSurvey = theSurveyName;
           result = true;
         }
-
-        return api.getCompleted(json.encode(result));
+        return _encodeResponse(result, api: api);
       case apiGetSurveyActionTaken:
         // Request setActiveSurvey has not been requested.
         if (_devToolsUsage.activeSurvey == null) {
@@ -157,9 +149,7 @@ class ServerApi {
           );
         }
         // SurveyActionTaken has the survey been acted upon (taken or dismissed)
-        return api.getCompleted(
-          json.encode(_devToolsUsage.surveyActionTaken),
-        );
+        return _encodeResponse(_devToolsUsage.surveyActionTaken, api: api);
       // TODO(terry): remove the query param logic for this request.
       // setSurveyActionTaken should only be called with the value of true, so
       // we can remove the extra complexity.
@@ -177,9 +167,7 @@ class ServerApi {
           _devToolsUsage.surveyActionTaken =
               json.decode(queryParams[surveyActionTakenPropertyName]!);
         }
-        return api.getCompleted(
-          json.encode(_devToolsUsage.surveyActionTaken),
-        );
+        return _encodeResponse(_devToolsUsage.surveyActionTaken, api: api);
       case apiGetSurveyShownCount:
         // Request setActiveSurvey has not been requested.
         if (_devToolsUsage.activeSurvey == null) {
@@ -189,9 +177,7 @@ class ServerApi {
           );
         }
         // SurveyShownCount how many times have we asked to take survey.
-        return api.getCompleted(
-          json.encode(_devToolsUsage.surveyShownCount),
-        );
+        return _encodeResponse(_devToolsUsage.surveyShownCount, api: api);
       case apiIncrementSurveyShownCount:
         // Request setActiveSurvey has not been requested.
         if (_devToolsUsage.activeSurvey == null) {
@@ -202,23 +188,23 @@ class ServerApi {
         }
         // Increment the SurveyShownCount, we've asked about the survey.
         _devToolsUsage.incrementSurveyShownCount();
-        return api.getCompleted(
-          json.encode(_devToolsUsage.surveyShownCount),
-        );
+        return _encodeResponse(_devToolsUsage.surveyShownCount, api: api);
 
       // ----- Release notes api. -----
 
       case apiGetLastReleaseNotesVersion:
-        return api.getCompleted(
-          json.encode(_devToolsUsage.lastReleaseNotesVersion),
+        return _encodeResponse(
+          _devToolsUsage.lastReleaseNotesVersion,
+          api: api,
         );
       case apiSetLastReleaseNotesVersion:
         if (queryParams.containsKey(lastReleaseNotesVersionPropertyName)) {
           _devToolsUsage.lastReleaseNotesVersion =
               queryParams[lastReleaseNotesVersionPropertyName]!;
         }
-        return api.getCompleted(
-          json.encode(_devToolsUsage.lastReleaseNotesVersion),
+        return _encodeResponse(
+          _devToolsUsage.lastReleaseNotesVersion,
+          api: api,
         );
 
       // ----- App size api. -----
@@ -230,7 +216,7 @@ class ServerApi {
           if (fileJson == null) {
             return api.badRequest('No JSON file available at $filePath.');
           }
-          return api.getCompleted(fileJson);
+          return api.success(fileJson);
         }
         return api.badRequest(
           'Request for base app size file does not '
@@ -244,7 +230,7 @@ class ServerApi {
           if (fileJson == null) {
             return api.badRequest('No JSON file available at $filePath.');
           }
-          return api.getCompleted(fileJson);
+          return api.success(fileJson);
         }
         return api.badRequest(
           'Request for test app size file does not '
@@ -307,7 +293,7 @@ class ServerApi {
     Object? object, {
     required ServerApi api,
   }) {
-    return api.getCompleted(json.encode(object));
+    return api.success(json.encode(object));
   }
 
   static Map<String, Object?> _wrapWithLogs(
@@ -356,8 +342,10 @@ class ServerApi {
   /// without any need to involve the server.
   shelf.Response logScreenView() => notImplemented();
 
-  /// Return the value of the property.
-  shelf.Response getCompleted(String value) => shelf.Response.ok(value);
+  /// A [shelf.Response] for API calls that succeeded.
+  ///
+  /// The response optionally contains a single String [value].
+  shelf.Response success([String? value]) => shelf.Response.ok(value);
 
   /// A [shelf.Response] for API calls that are forbidden for the current state
   /// of the server.
