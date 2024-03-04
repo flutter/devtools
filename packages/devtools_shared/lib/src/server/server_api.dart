@@ -30,6 +30,7 @@ import 'usage.dart';
 part 'handlers/_deeplink.dart';
 part 'handlers/_devtools_extensions.dart';
 part 'handlers/_dtd.dart';
+part 'handlers/_general.dart';
 
 /// Describes an instance of the Dart Tooling Daemon.
 typedef DTDConnectionInfo = ({String? uri, String? secret});

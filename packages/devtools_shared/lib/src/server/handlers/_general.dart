@@ -83,7 +83,7 @@ abstract class Handler {
   }
 
   @visibleForTesting
-  static Future<_DetectRootPackageResponse> detectRootPackageForVmService({
+  static Future<DetectRootPackageResponse> detectRootPackageForVmService({
     required String vmServiceUriAsString,
     required Uri vmServiceUri,
     required bool connected,
@@ -221,7 +221,8 @@ extension on VmService {
   }
 }
 
-typedef _DetectRootPackageResponse = ({
+@visibleForTesting
+typedef DetectRootPackageResponse = ({
   bool success,
   String? message,
   Uri? uri,
