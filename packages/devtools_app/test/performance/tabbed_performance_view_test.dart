@@ -5,6 +5,7 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/performance/panes/frame_analysis/frame_analysis.dart';
 import 'package:devtools_app/src/screens/performance/panes/raster_stats/raster_stats.dart';
+import 'package:devtools_app/src/screens/performance/panes/timeline_events/perfetto/perfetto.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/timeline_events_view.dart';
 import 'package:devtools_app/src/screens/performance/tabbed_performance_view.dart';
 import 'package:devtools_app/src/shared/charts/flame_chart.dart';
@@ -67,15 +68,11 @@ void main() {
       controller = createMockPerformanceControllerWithDefaults();
       mockTimelineEventsController = MockTimelineEventsController();
       when(mockTimelineEventsController.data).thenReturn(controller.data);
-      when(mockTimelineEventsController.useLegacyTraceViewer)
-          .thenReturn(ValueNotifier<bool>(true));
       when(mockTimelineEventsController.status).thenReturn(
         const FixedValueListenable<EventsControllerStatus>(
           EventsControllerStatus.ready,
         ),
       );
-      when(mockTimelineEventsController.legacyController)
-          .thenReturn(LegacyTimelineEventsController(controller));
       when(controller.timelineEventsController)
           .thenReturn(mockTimelineEventsController);
       when(mockTimelineEventsController.isActiveFeature).thenReturn(false);
@@ -215,11 +212,8 @@ void main() {
           expect(find.byType(TraceCategoriesButton), findsOneWidget);
           expect(find.byType(RefreshTimelineEventsButton), findsOneWidget);
           expect(find.byType(FlameChartHelpButton), findsOneWidget);
-          expect(
-            find.byType(SearchField<LegacyTimelineEventsController>),
-            findsOneWidget,
-          );
           expect(find.byType(TimelineEventsTabView), findsOneWidget);
+          expect(find.byType(EmbeddedPerfetto), findsOneWidget);
         });
       },
     );

@@ -19,7 +19,6 @@ import 'generated.mocks.dart';
 MockPerformanceController createMockPerformanceControllerWithDefaults() {
   final controller = MockPerformanceController();
   final timelineEventsController = MockTimelineEventsController();
-  final legacyTimelineEventsController = MockLegacyTimelineEventsController();
   final flutterFramesController = MockFlutterFramesController();
   when(controller.data).thenReturn(PerformanceData());
   when(controller.enhanceTracingController)
@@ -44,20 +43,9 @@ MockPerformanceController createMockPerformanceControllerWithDefaults() {
   // Stubs for Timeline Events feature.
   when(controller.timelineEventsController)
       .thenReturn(timelineEventsController);
-  when(timelineEventsController.useLegacyTraceViewer)
-      .thenReturn(ValueNotifier<bool>(true));
-  when(timelineEventsController.legacyController)
-      .thenReturn(legacyTimelineEventsController);
   when(timelineEventsController.status).thenReturn(
     ValueNotifier<EventsControllerStatus>(EventsControllerStatus.empty),
   );
-  when(legacyTimelineEventsController.searchMatches)
-      .thenReturn(const FixedValueListenable<List<TimelineEvent>>([]));
-  when(legacyTimelineEventsController.searchInProgressNotifier)
-      .thenReturn(const FixedValueListenable<bool>(false));
-  when(legacyTimelineEventsController.matchIndex)
-      .thenReturn(ValueNotifier<int>(0));
-
   return controller;
 }
 
