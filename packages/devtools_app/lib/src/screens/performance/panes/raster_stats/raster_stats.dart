@@ -302,7 +302,7 @@ class LayerImage extends StatelessWidget {
                   children: [
                     CustomPaint(
                       painter: _CheckerBoardBackgroundPainter(
-                        theme.colorScheme.background,
+                        theme.colorScheme.surface,
                         theme.colorScheme.outlineVariant,
                       ),
                       child: Image.memory(snapshot.bytes),
