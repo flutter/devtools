@@ -19,9 +19,9 @@ const domainErrorsThatCanBeFixedByGeneratedJson = {
   DomainError.existence,
   DomainError.appIdentifier,
   DomainError.fingerprints,
-  DomainError.contentType,
 };
 const domainErrorsThatCanNotBeFixedByGeneratedJson = {
+  DomainError.contentType,
   DomainError.httpsAccessibility,
   DomainError.nonRedirect,
   DomainError.hostForm,
