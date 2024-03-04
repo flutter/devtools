@@ -1,6 +1,8 @@
-# 7.0.1-wip
-* Refactor yaml extension methods.
+# 8.0.0
+* **Breaking change:** rename `ServerApi.getCompleted` to `ServerApi.success` and make the
+`value` parameter optional.
 * Add a helper method `packageRootFromFileUriString`.
+* Refactor yaml extension methods.
 
 # 7.0.0
 * **Breaking change:** remove the `ServerApi.setCompleted` method that was a
