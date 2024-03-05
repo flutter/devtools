@@ -13,37 +13,37 @@ import 'simple_items.dart';
 
 @immutable
 class HeapObject {
-  const HeapObject(this.heap, {required this.object});
+  const HeapObject(this.graph, {required this.object});
 
-  final HeapData heap;
+  final HeapSnapshotGraph graph;
 
   /// If object is null, it exists in live app, but is not
   /// located in heap.
   final int? object;
 
   Iterable<int>? _refs(RefDirection direction) {
-    throw UnimplementedError();
-    // switch (direction) {
-    //   case RefDirection.inbound:
-    //     return object?.inRefs;
-    //   case RefDirection.outbound:
-    //     return object?.outRefs;
-    // }
+    final theObject = object;
+    if (theObject == null) return null;
+
+    switch (direction) {
+      case RefDirection.inbound:
+        return graph.objects[theObject].referrers;
+      case RefDirection.outbound:
+        return graph.objects[theObject].references;
+    }
   }
 
   List<HeapObject> references(RefDirection direction) =>
-      throw UnimplementedError();
-  // (_refs(direction) ?? [])
-  //     .map((i) => HeapObjectSelection_(heap, object: heap.objects[i]))
-  //     .toList();
+      (_refs(direction) ?? [])
+          .map((i) => HeapObject(graph, object: i))
+          .toList();
 
   int? countOfReferences(RefDirection? direction) =>
       direction == null ? null : _refs(direction)?.length;
 
   HeapObject withoutObject() {
-    throw UnimplementedError();
-    // if (object == null) return this;
-    // return HeapObjectSelection_(heap, object: null);
+    if (object == null) return this;
+    return HeapObject(graph, object: null);
   }
 }
 
