@@ -34,9 +34,11 @@ class NetworkRequestInspector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    int selectedRequestBuildCount = 0;
     return ValueListenableBuilder<NetworkRequest?>(
       valueListenable: controller.selectedRequest,
       builder: (context, data, _) {
+        selectedRequestBuildCount++;
         return RoundedOutlinedBorder(
           child: (data == null)
               ? Center(
@@ -48,7 +50,9 @@ class NetworkRequestInspector extends StatelessWidget {
               : ListenableBuilder(
                   listenable: data,
                   builder: (context, _) {
+                    selectedRequestBuildCount++;
                     return AnalyticsTabbedView(
+                      analyticsSessionIdentifier: data.id,
                       tabs: _generateTabs(data),
                       gaScreen: gac.network,
                     );

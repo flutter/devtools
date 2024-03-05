@@ -231,7 +231,14 @@ extension IsKeyType on KeyEvent {
   bool get isKeyDownOrRepeat => this is KeyDownEvent || this is KeyRepeatEvent;
 }
 
+/// A helper class for [Timer] functionality, where the callbacks are debounced.
 class DebounceTimer {
+  /// A periodic timer that ensures [callback] is only called at most once
+  /// per [duration].
+  ///
+  /// [callback] is triggered once immediately, and then every [duration] the
+  /// timer checks to see if the previous [callback] call has finished running.
+  /// If it has finished, then then next call to [callback] will begin.
   DebounceTimer.periodic(
     Duration duration,
     FutureOr<void> Function(Timer timer) callback,

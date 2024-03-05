@@ -10,6 +10,12 @@ import '../analytics/analytics.dart' as ga;
 double get _tabHeight => scaleByFontFactor(46.0);
 double get _textAndIconTabHeight => scaleByFontFactor(72.0);
 
+enum AnalyticsSendSettings {
+  sendAll,
+  skipForWidgetRebuilds,
+  skipAll,
+}
+
 class DevToolsTab extends Tab {
   /// Creates a material design [TabBar] tab styled for DevTools.
   ///
@@ -80,6 +86,7 @@ class DevToolsTab extends Tab {
 class AnalyticsTabbedView extends StatefulWidget {
   AnalyticsTabbedView({
     Key? key,
+    this.analyticsSessionIdentifier,
     required this.tabs,
     required this.gaScreen,
     this.sendAnalytics = true,
@@ -99,6 +106,16 @@ class AnalyticsTabbedView extends StatefulWidget {
 
   final int? initialSelectedIndex;
 
+  /// A value that represents the data object being presented by
+  /// [AnalyticsTabbedView].
+  ///
+  /// This value should represent a unique identifier for the data object being
+  /// represented in the view.
+  ///
+  /// This value ensures that calls to [didUpdateWidget] don't retrigger
+  /// analytics events when the data in the view is just being refreshed.
+  final String? analyticsSessionIdentifier;
+
   /// Whether to send analytics events to GA.
   ///
   /// Only set this to false if [AnalyticsTabbedView] is being used for
@@ -117,7 +134,7 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
 
   int _currentTabControllerIndex = 0;
 
-  void _initTabController() {
+  void _initTabController({required bool isNewSession}) {
     _tabController?.removeListener(_onTabChanged);
     _tabController?.dispose();
 
@@ -137,8 +154,9 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
       ..index = _currentTabControllerIndex
       ..addListener(_onTabChanged);
 
-    // Record a selection for the visible tab.
-    if (widget.sendAnalytics) {
+    // Record a selection for the visible tab, if this is a new session being
+    // initialized.
+    if (widget.sendAnalytics && isNewSession) {
       ga.select(
         widget.gaScreen,
         widget.tabs[_currentTabControllerIndex].tab.gaId,
@@ -166,7 +184,7 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
   @override
   void initState() {
     super.initState();
-    _initTabController();
+    _initTabController(isNewSession: true);
   }
 
   @override
@@ -174,7 +192,10 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
     super.didUpdateWidget(oldWidget);
     if (oldWidget.tabs != widget.tabs ||
         oldWidget.gaScreen != widget.gaScreen) {
-      _initTabController();
+      final isNewSession = oldWidget.analyticsSessionIdentifier !=
+              widget.analyticsSessionIdentifier &&
+          widget.analyticsSessionIdentifier != null;
+      _initTabController(isNewSession: isNewSession);
     }
   }
 

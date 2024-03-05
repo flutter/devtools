@@ -160,7 +160,6 @@ class NetworkController extends DisposableController
     required List<HttpProfileRequest>? httpRequests,
   }) {
     // Trigger refresh.
-    // we reassign this every time which
     processNetworkTrafficHelper(
       sockets,
       httpRequests,
@@ -353,9 +352,11 @@ class NetworkController extends DisposableController
 class CurrentNetworkRequests extends ValueNotifier<List<NetworkRequest>> {
   CurrentNetworkRequests() : super([]);
 
-  ValueListenable<List<NetworkRequest>> get requests =>
-      this; // todo: remove this and just let callers use .value
   final _requestsById = <String, NetworkRequest>{};
+  @override
+  set value(List<NetworkRequest> newValue) {
+    throw ("Not supported");
+  }
 
   NetworkRequest? getRequest(String id) => _requestsById[id];
 
