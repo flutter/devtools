@@ -31,7 +31,7 @@ TODO: Remove this section if there are not any general updates.
 
 ## Debugger updates
 
-TODO: Remove this section if there are not any general updates.
+* During a hot-restart, `pause_isolates_on_start` and only `resume` the app once breakpoints are set. - [#7234](https://github.com/flutter/devtools/pull/7234)
 
 ## Network profiler updates
 
