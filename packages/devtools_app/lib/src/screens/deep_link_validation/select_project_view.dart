@@ -86,8 +86,8 @@ class _SelectProjectViewState extends State<SelectProjectView>
 
   Future<void> _getPackageDirectoryForMainIsolate() async {
     final path = Uri.parse(
-            await serviceConnection.rootPackageDirectoryForMainIsolate() ?? '')
-        .toFilePath();
+      await serviceConnection.rootPackageDirectoryForMainIsolate() ?? '',
+    ).toFilePath();
 
     setState(() {
       packageDirectoryForMainIsolate = path;
