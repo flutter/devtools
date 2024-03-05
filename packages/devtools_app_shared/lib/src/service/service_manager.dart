@@ -275,8 +275,9 @@ class ServiceManager<T extends VmService> {
   Future<void> _configureIsolateSettings() async {
     if (service != null) {
       try {
-        await service!.setFlag('pause_isolates_on_start', 'true');
-        await service.requirePermissionToResume(
+        final vmService = service!
+        await vmService.setFlag('pause_isolates_on_start', 'true');
+        await vmService.requirePermissionToResume(
           onPauseStart: true,
         );
       } catch (error) {
