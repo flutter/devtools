@@ -11,7 +11,6 @@ import '../../../../../../shared/common_widgets.dart';
 import '../../../../../../shared/memory/class_name.dart';
 import '../../../../../../shared/memory/new/retaining_path.dart';
 import '../../../../../../shared/primitives/utils.dart';
-import '../../../../shared/heap/model.dart';
 import '../../controller/class_data.dart';
 
 class RetainingPathView extends StatelessWidget {
@@ -84,7 +83,7 @@ class _PathControlPane extends StatelessWidget {
         CopyToClipboardControl(
           dataProvider: () => path.toLongString(delimiter: '\n'),
           // We do not give success message because it pops up directly on
-          // top of the path widget, that makes the widget anavailable
+          // top of the path widget, that makes the widget unavailable
           // while message is here.
           successMessage: null,
           gaScreen: gac.memory,

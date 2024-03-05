@@ -13,12 +13,10 @@ import '../../../../../shared/memory/new/classes.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/table/table_data.dart';
-import '../../../shared/heap/heap.dart';
 import '../../../shared/primitives/simple_elements.dart';
 import '../../../shared/widgets/class_filter.dart';
 import '../../../shared/widgets/shared_memory_widgets.dart';
 import '../controller/class_data.dart';
-import '../controller/heap_diff_.dart';
 import 'instances.dart';
 
 enum _DataPart {
