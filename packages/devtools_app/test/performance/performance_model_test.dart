@@ -324,14 +324,6 @@ void main() {
       expect(goldenAsyncTimelineEvent.maxEndMicros, equals(193938740983));
     });
 
-    test('displayDepth', () {
-      expect(goldenAsyncTimelineEvent.displayDepth, equals(6));
-      expect(asyncEventB.displayDepth, equals(3));
-      expect(asyncEventC.displayDepth, equals(2));
-      expect(asyncEventD.displayDepth, equals(1));
-      expect(asyncEventWithDeepOverlap.displayDepth, equals(5));
-    });
-
     test('couldBeParentOf', () {
       expect(asyncEventA.couldBeParentOf(asyncEventB1), isFalse);
       expect(asyncEventB.couldBeParentOf(asyncEventB1), isTrue);

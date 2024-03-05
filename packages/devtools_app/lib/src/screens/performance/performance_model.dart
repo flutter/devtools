@@ -286,12 +286,6 @@ class OfflineTimelineEvent extends TimelineEvent {
       );
 
   @override
-  List<List<TimelineEvent>> _calculateDisplayRows() => throw UnimplementedError(
-        'This method should never be called for an '
-        'instance of OfflineTimelineEvent',
-      );
-
-  @override
   OfflineTimelineEvent shallowCopy() {
     throw UnimplementedError(
       'This method is not implemented. Implement if you '
@@ -301,10 +295,7 @@ class OfflineTimelineEvent extends TimelineEvent {
 }
 
 abstract class TimelineEvent extends TreeNode<TimelineEvent>
-    with
-        SearchableDataMixin,
-        TreeDataSearchStateMixin<TimelineEvent>,
-        FlameChartDataMixin {
+    with SearchableDataMixin, TreeDataSearchStateMixin<TimelineEvent> {
   TimelineEvent(TraceEventWrapper firstTraceEvent)
       : traceEvents = [firstTraceEvent],
         type = firstTraceEvent.event.type {
@@ -367,9 +358,6 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
 
   int? get threadId => traceEvents.first.event.threadId;
 
-  @override
-  String get tooltip => '$name - ${durationText(time.duration)}';
-
   bool _isWellFormedDeep(TimelineEvent event) {
     return !subtreeHasNodeWithCondition((e) => !e.isWellFormed);
   }
@@ -383,55 +371,6 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
   /// Whether [this] event could be the parent of [e] based on criteria such as
   /// timestamps and event ids.
   bool couldBeParentOf(TimelineEvent e);
-
-  /// Tracks the start row for the lowest visual child in the display for this
-  /// TimelineEvent.
-  int _lowestDisplayChildRow = 1;
-
-  /// The child that is nearest the bottom of the visualization for this
-  /// TimelineEvent.
-  TimelineEvent get lowestDisplayChild => _lowestDisplayChild;
-  late TimelineEvent _lowestDisplayChild;
-
-  int get displayDepth => displayRows.length;
-
-  late List<List<TimelineEvent>> displayRows = _calculateDisplayRows();
-
-  List<List<TimelineEvent>> _calculateDisplayRows();
-
-  void _expandDisplayRows({
-    required List<List<TimelineEvent>> rows,
-    required int newRowLength,
-  }) {
-    final currentLength = rows.length;
-    for (int i = currentLength; i < newRowLength; i++) {
-      rows.add([]);
-    }
-  }
-
-  void _mergeChildDisplayRows({
-    required int mergeStartLevel,
-    required TimelineEvent child,
-    required List<List<TimelineEvent>> rows,
-  }) {
-    assert(
-      mergeStartLevel <= rows.length,
-      'mergeStartLevel $mergeStartLevel is greater than _displayRows.length'
-      ' ${rows.length}',
-    );
-    final childDisplayRows = child.displayRows;
-    _expandDisplayRows(
-      rows: rows,
-      newRowLength: mergeStartLevel + childDisplayRows.length,
-    );
-    for (int i = 0; i < childDisplayRows.length; i++) {
-      rows[mergeStartLevel + i].addAll(childDisplayRows[i]);
-    }
-    if (mergeStartLevel >= _lowestDisplayChildRow) {
-      _lowestDisplayChildRow = mergeStartLevel;
-      _lowestDisplayChild = child;
-    }
-  }
 
   void addEndEvent(TraceEventWrapper eventWrapper) {
     time.end = Duration(microseconds: eventWrapper.event.timestampMicros!);
@@ -640,22 +579,6 @@ class SyncTimelineEvent extends TimelineEvent {
   int get maxEndMicros => time.end!.inMicroseconds;
 
   @override
-  List<List<TimelineEvent>> _calculateDisplayRows() {
-    final rows = <List<TimelineEvent>>[];
-    _expandDisplayRows(rows: rows, newRowLength: depth);
-
-    rows[0].add(this);
-    for (final child in children) {
-      _mergeChildDisplayRows(
-        mergeStartLevel: 1,
-        child: child,
-        rows: rows,
-      );
-    }
-    return rows;
-  }
-
-  @override
   bool couldBeParentOf(TimelineEvent e) {
     // TODO(kenz): consider caching start and end times in the [TimeRange] class
     // since these can be looked up many times for a single [TimeRange] object.
@@ -734,82 +657,6 @@ class AsyncTimelineEvent extends TimelineEvent {
       maxEnd = math.max(maxEnd, child._calculateMaxEndMicros());
     }
     return _maxEndMicros = maxEnd;
-  }
-
-  @override
-  List<List<TimelineEvent>> _calculateDisplayRows() {
-    final rows = <List<TimelineEvent>>[];
-    _expandDisplayRows(rows: rows, newRowLength: 1);
-
-    const currentRow = 0;
-    rows[currentRow].add(this);
-
-    const mainChildRow = currentRow + 1;
-    for (int i = 0; i < children.length; i++) {
-      final AsyncTimelineEvent child = children[i] as AsyncTimelineEvent;
-      if (i == 0 ||
-          _eventFitsAtDisplayRow(
-            event: child,
-            displayRow: mainChildRow,
-            currentLargestRowIndex: rows.length,
-            rows: rows,
-          )) {
-        _mergeChildDisplayRows(
-          mergeStartLevel: mainChildRow,
-          child: child,
-          rows: rows,
-        );
-      } else {
-        // If [child] does not fit on the target row, add it below the current
-        // deepest display row.
-        _mergeChildDisplayRows(
-          mergeStartLevel: rows.length,
-          child: child,
-          rows: rows,
-        );
-      }
-    }
-    return rows;
-  }
-
-  bool _eventFitsAtDisplayRow({
-    required AsyncTimelineEvent event,
-    required int displayRow,
-    required int currentLargestRowIndex,
-    required List<List<TimelineEvent>> rows,
-  }) {
-    final maxLevelToVerify =
-        math.min(event.displayDepth, currentLargestRowIndex - displayRow);
-    for (int level = 0; level < maxLevelToVerify; level++) {
-      final lastEventAtLevel = rows[displayRow + level].safeLast;
-      final firstNewEventAtLevel = event.displayRows[level].safeFirst;
-      if (lastEventAtLevel != null && firstNewEventAtLevel != null) {
-        // Events overlap one another, so [event] does not fit at [displayRow].
-        if (lastEventAtLevel.time.overlaps(firstNewEventAtLevel.time)) {
-          return false;
-        }
-
-        // [firstNewEventAtLevel] ends before [lastEventAtLevel] begins, so
-        // [event] does not fit at [displayRow].
-        if (firstNewEventAtLevel.time.end! < lastEventAtLevel.time.start!) {
-          return false;
-        }
-
-        final lastEventParent = lastEventAtLevel.parent;
-        final firstNewEventParent = firstNewEventAtLevel.parent;
-        // If the two events are non-overlapping siblings and their parent ends
-        // before [lastEventAtLevel], drawing a subsequent guideline from
-        // [lastEventParent] to [firstNewEventAtLevel] would overlap
-        // [lastEventAtLevel], so we cannot place [event] on this row.
-        if (lastEventParent != null &&
-            firstNewEventParent != null &&
-            lastEventParent == firstNewEventParent &&
-            lastEventAtLevel.time.end! >= lastEventParent.time.end!) {
-          return false;
-        }
-      }
-    }
-    return true;
   }
 
   @override
