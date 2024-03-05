@@ -93,7 +93,7 @@ List<ConnectionDescription> generateDeviceDescription(
     ),
     if (vmServiceConnection != null) vmServiceConnection,
     ConnectionDescription(title: 'Dart Version', description: version),
-    if (flutterVersion != null) ...{
+    if (flutterVersion != null && !flutterVersion.unknown) ...{
       ConnectionDescription(
         title: 'Flutter Version',
         description: '${flutterVersion.version} / ${flutterVersion.channel}',
