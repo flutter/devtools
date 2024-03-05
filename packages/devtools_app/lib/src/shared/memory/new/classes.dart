@@ -328,6 +328,9 @@ class DiffClassData extends ClassData {
     required SingleClassData? after,
     required HeapData? dataAfter,
   }) {
+    assert((before == null) == (dataBefore == null));
+    assert((before == null) == (dataAfter == null));
+
     if (before == null && after == null) return null;
     final heapClass = (before?.heapClass ?? after?.heapClass)!;
 
