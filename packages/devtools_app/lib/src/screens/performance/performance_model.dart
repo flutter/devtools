@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:collection';
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
@@ -20,7 +19,6 @@ import 'panes/flutter_frames/flutter_frame_model.dart';
 import 'panes/raster_stats/raster_stats_model.dart';
 import 'panes/rebuild_stats/rebuild_stats_model.dart';
 import 'panes/timeline_events/timeline_event_processor.dart';
-import 'performance_utils.dart';
 
 class PerformanceData {
   PerformanceData({
@@ -63,9 +61,6 @@ class PerformanceData {
 
   final List<TimelineEvent> timelineEvents;
 
-  final SplayTreeMap<String, TimelineEventGroup> eventGroups =
-      SplayTreeMap(PerformanceUtils.eventGroupComparator);
-
   /// List that will store trace events in the order we process them.
   ///
   /// These events are scrubbed so that bad data from the engine does not hinder
@@ -101,21 +96,6 @@ class PerformanceData {
   int get endTimestampMicros => _endTimestampMicros;
   int _endTimestampMicros = -1;
 
-  void initializeEventGroups(
-    Map<int, String> threadNamesById, {
-    int startIndex = 0,
-  }) {
-    for (int i = startIndex; i < timelineEvents.length; i++) {
-      final event = timelineEvents[i];
-      eventGroups
-          .putIfAbsent(
-            PerformanceUtils.computeEventGroupKey(event, threadNamesById),
-            () => TimelineEventGroup(),
-          )
-          .addEventAtCalculatedRow(event);
-    }
-  }
-
   void addTimelineEvent(TimelineEvent event) {
     assert(event.isWellFormedDeep);
     timelineEvents.add(event);
@@ -128,7 +108,6 @@ class PerformanceData {
     cpuProfileData = null;
     rasterStats = null;
     timelineEvents.clear();
-    eventGroups.clear();
     time = TimeRange();
     _endTimestampMicros = -1;
     frames.clear();
@@ -146,141 +125,6 @@ class PerformanceData {
         rasterStatsKey: rasterStats?.json ?? <String, dynamic>{},
         rebuildCountModelKey: rebuildCountModel.toJson(),
       };
-}
-
-// TODO(kenz): add tests for this class.
-class TimelineEventGroup {
-  /// At each index in the list, this stores row data for the row at index.
-  ///
-  /// We store data by row within the group in order to display events with
-  /// overlapping timestamps in the flame chart UI. This allows us to reuse
-  /// space where possible and avoid collisions.  We will draw overlapping
-  /// events on a new flame chart row.
-  ///
-  /// If we have events A, B, C, and D, where all belong in a single
-  /// [TimelineEventGroup] but some overlap, the UI will look
-  /// like this:
-  ///
-  ///    [timeline_event_A]    [timeline_event_C]    <-- row 0
-  ///               [timeline_event_B]               <-- row 1
-  ///                            [timeline_event_D]  <-- row 2
-  ///
-  /// The contents of [eventsByRow] would look like this:
-  /// [
-  ///   [timeline_event_A, timeline_event_C],
-  ///   [timeline_event_B],
-  ///   [timeline_event_D],
-  /// ]
-  final rows = <TimelineRowData>[];
-
-  final rowIndexForEvent = <TimelineEvent, int>{};
-
-  late int earliestTimestampMicros;
-
-  late int latestTimestampMicros;
-
-  bool _timestampsInitialized = false;
-
-  List<TimelineEvent> get sortedEventRoots =>
-      _sortedEventRoots ??= List<TimelineEvent>.of(rowIndexForEvent.keys)
-          .where((event) => event.isRoot)
-          .toList()
-        ..sort(
-          (a, b) => a.time.start!.inMicroseconds
-              .compareTo(b.time.start!.inMicroseconds),
-        );
-  List<TimelineEvent>? _sortedEventRoots;
-
-  int get displayDepth => rows.length;
-
-  // TODO(kenz): prevent guideline "elbows" from overlapping other events.
-  void addEventAtCalculatedRow(TimelineEvent event, {int displayRow = 0}) {
-    final currentLargestRowIndex = rows.length;
-    while (displayRow < currentLargestRowIndex) {
-      // Ensure that [event] and its children do not overlap with events at all
-      // current offsets.
-      final eventFitsAtDisplayRow = _eventFitsAtDisplayRow(
-        event,
-        displayRow,
-        currentLargestRowIndex,
-      );
-      if (eventFitsAtDisplayRow) break;
-      displayRow++;
-    }
-    _addEventAtDisplayRow(event, row: displayRow);
-  }
-
-  bool _eventFitsAtDisplayRow(
-    TimelineEvent event,
-    int displayRow,
-    int currentLargestRowIndex,
-  ) {
-    final maxLevelToVerify =
-        math.min(event.displayDepth, currentLargestRowIndex - displayRow);
-    for (int level = 0; level < maxLevelToVerify; level++) {
-      final lastEventAtLevel = displayRow + level < rows.length
-          ? rows[displayRow + level].lastEvent
-          : null;
-      final firstNewEventAtLevel = event.displayRows[level].safeFirst;
-      if (lastEventAtLevel != null && firstNewEventAtLevel != null) {
-        // Events overlap one another, so [event] does not fit at [displayRow].
-        if (lastEventAtLevel.time.overlaps(firstNewEventAtLevel.time)) {
-          return false;
-        }
-
-        // [firstNewEventAtLevel] ends before [lastEventAtLevel] begins, so
-        // [event] does not fit at [displayRow].
-        if (firstNewEventAtLevel.time.end! < lastEventAtLevel.time.start!) {
-          return false;
-        }
-      }
-    }
-    return true;
-  }
-
-  void _addEventAtDisplayRow(TimelineEvent event, {required int row}) {
-    if (row + event.displayDepth >= rows.length) {
-      for (int i = rows.length; i < row + event.displayDepth; i++) {
-        rows.add(TimelineRowData());
-      }
-    }
-
-    for (int i = 0; i < event.displayDepth; i++) {
-      final displayRow = event.displayRows[i];
-      for (var e in displayRow) {
-        final timeStart = e.time.start!.inMicroseconds;
-        final timeEnd = e.time.end!.inMicroseconds;
-        earliestTimestampMicros = _timestampsInitialized
-            ? math.min(timeStart, earliestTimestampMicros)
-            : timeEnd;
-        latestTimestampMicros = _timestampsInitialized
-            ? math.max(timeEnd, latestTimestampMicros)
-            : timeEnd;
-        _timestampsInitialized = true;
-
-        rows[row + i].events.add(e);
-        rowIndexForEvent[e] = row + i;
-        if (e.time.end! >
-            (rows[row + i].lastEvent?.time.end ?? const Duration())) {
-          rows[row + i].lastEvent = e;
-        }
-      }
-    }
-  }
-}
-
-class TimelineRowData {
-  /// Timeline events that will be displayed in this row in a visualization of a
-  /// [TimelineEventGroup].
-  final List<TimelineEvent> events = [];
-
-  /// The last event for this row, where last means the event has the latest end
-  /// time in the row.
-  ///
-  /// The most recently added event for the row is not guaranteed to be the last
-  /// event for the row, which is why we cannot just call [events.last] to get
-  /// [lastEvent].
-  TimelineEvent? lastEvent;
 }
 
 class OfflinePerformanceData extends PerformanceData {
@@ -496,8 +340,6 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
   set frameId(int? id) => _frameId = id;
 
   String? get name => traceEvents.first.event.name;
-
-  String? get groupKey => traceEvents.first.event.args!['filterKey'] as String?;
 
   Map<String, dynamic> get beginTraceEventJson => traceEvents.first.json;
 
