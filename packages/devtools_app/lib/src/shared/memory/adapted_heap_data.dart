@@ -7,15 +7,16 @@ import 'package:vm_service/vm_service.dart';
 
 import '../primitives/utils.dart';
 import 'adapted_heap_object.dart';
+import 'class_name.dart';
 import 'mock_heap_snapshot_graph.dart';
 import 'new/heap_data.dart';
 import 'simple_items.dart';
 
 @immutable
 class HeapObject {
-  const HeapObject(this.graph, {required this.object});
+  const HeapObject(this.heap, {required this.object});
 
-  final HeapSnapshotGraph graph;
+  final HeapData heap;
 
   /// If object is null, it exists in live app, but is not
   /// located in heap.
@@ -27,24 +28,35 @@ class HeapObject {
 
     switch (direction) {
       case RefDirection.inbound:
-        return graph.objects[theObject].referrers;
+        return heap.graph.objects[theObject].referrers;
       case RefDirection.outbound:
-        return graph.objects[theObject].references;
+        return heap.graph.objects[theObject].references;
     }
   }
 
   List<HeapObject> references(RefDirection direction) =>
-      (_refs(direction) ?? [])
-          .map((i) => HeapObject(graph, object: i))
-          .toList();
+      (_refs(direction) ?? []).map((i) => HeapObject(heap, object: i)).toList();
 
   int? countOfReferences(RefDirection? direction) =>
       direction == null ? null : _refs(direction)?.length;
 
   HeapObject withoutObject() {
     if (object == null) return this;
-    return HeapObject(graph, object: null);
+    return HeapObject(heap, object: null);
   }
+
+  HeapClassName? get className {
+    final theObjectId = object;
+    if (theObjectId == null) return null;
+    final theClass =
+        heap.graph.classes[heap.graph.objects[theObjectId].classId];
+    return HeapClassName.fromHeapSnapshotClass(theClass);
+  }
+
+  int? get code =>
+      object == null ? null : heap.graph.objects[object!].identityHashCode;
+
+  int? get retainedSize => object == null ? null : heap.retainedSizes?[object!];
 }
 
 @immutable

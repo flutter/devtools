@@ -50,21 +50,21 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     bool artificialName = false,
     bool artificialValue = false,
     RemoteDiagnosticsNode? diagnostic,
-    HeapObjectSelection_? heapSelection,
+    HeapObject? heapSelection,
     required IsolateRef? isolateRef,
   }) {
     name = name ?? '';
 
-    final String? text;
-    final heapObject = heapSelection?.object;
-    if (heapObject == null) {
+    String? text;
+    final heapClass = heapSelection?.className;
+    if (heapClass == null) {
       text = null;
     } else {
-      final className = heapObject.heapClass.className;
-      final size = prettyPrintRetainedSize(
-        heapObject.retainedSize,
-      );
-      text = '$className, retained size $size';
+      text = heapClass.className;
+      final size = prettyPrintRetainedSize(heapSelection?.retainedSize);
+      if (size != null) {
+        text = 'text, retained size $size';
+      }
     }
 
     return DartObjectNode._(

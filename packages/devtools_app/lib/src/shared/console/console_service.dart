@@ -77,18 +77,17 @@ class ConsoleService with DisposerMixin {
   void appendBrowsableInstance({
     required InstanceRef? instanceRef,
     required IsolateRef? isolateRef,
-    required HeapObjectSelection_? heapSelection,
+    required HeapObject? heapSelection,
   }) async {
     if (instanceRef == null) {
-      final object = heapSelection?.object;
-      if (object == null || isolateRef == null) {
+      if (heapSelection?.object == null || isolateRef == null) {
         serviceConnection.consoleService.appendStdio(
           'Not enough information to browse the instance.',
         );
         return;
       }
 
-      instanceRef = await evalService.findObject(object, isolateRef);
+      instanceRef = await evalService.findObject(heapSelection!, isolateRef);
     }
 
     // If instanceRef is null at this point, user will see static references.
@@ -109,7 +108,7 @@ class ConsoleService with DisposerMixin {
     required IsolateRef? isolateRef,
     bool forceScrollIntoView = false,
     bool expandAll = false,
-    HeapObjectSelection_? heapSelection,
+    HeapObject? heapSelection,
   }) async {
     _stdioTrailingNewline = false;
     final variable = DartObjectNode.fromValue(
