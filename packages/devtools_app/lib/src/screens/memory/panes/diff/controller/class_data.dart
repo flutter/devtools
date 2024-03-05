@@ -7,9 +7,7 @@ import 'package:flutter/foundation.dart';
 import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../../shared/memory/new/classes.dart';
 import '../../../shared/heap/class_filter.dart';
-import '../../../shared/heap/heap.dart';
 import '../../../shared/primitives/simple_elements.dart';
-import 'heap_diff_.dart';
 
 class RetainingPathController {
   final hideStandard = ValueNotifier<bool>(true);

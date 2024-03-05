@@ -26,7 +26,6 @@ import '../../../shared/primitives/memory_utils.dart';
 import '../widgets/class_details/paths.dart';
 import 'class_data.dart';
 import 'heap_diff.dart';
-import 'heap_diff_.dart';
 import 'item_controller.dart';
 import 'utils.dart';
 
@@ -309,7 +308,6 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   final selectedPath = ValueNotifier<PathData?>(null);
 
   /// Storage for already calculated diffs between snapshots.
-  late final _diffStore_ = HeapDiffStore_();
   late final _diffStore = HeapDiffStore();
 
   void applyFilter(ClassFilter filter) {
@@ -322,13 +320,6 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   void _setClassIfNotNull(HeapClassName? theClass) {
     if (theClass == null || theClass == _core.className) return;
     _core.className = theClass;
-    _updateValues();
-  }
-
-  /// Updates cross-snapshot path if the argument is not null.
-  void _setPathIfNotNull_(ClassOnlyHeapPath? path) {
-    if (path == null || path == _core.path_) return;
-    _core.path_ = path;
     _updateValues();
   }
 
