@@ -50,41 +50,41 @@ void main() {
           .thenReturn(false);
     });
 
-    // test('can setOfflineData', () async {
-    //   // Ensure we are starting in an empty state.
-    //   expect(eventsController.allTraceEvents, isEmpty);
-    //   expect(eventsController.data!.timelineEvents, isEmpty);
-    //   expect(eventsController.legacyController.processor.uiThreadId, isNull);
-    //   expect(
-    //     eventsController.legacyController.processor.rasterThreadId,
-    //     isNull,
-    //   );
+    test('can setOfflineData', () async {
+      // Ensure we are starting in an empty state.
+      expect(eventsController.allTraceEvents, isEmpty);
+      expect(eventsController.data!.timelineEvents, isEmpty);
+      expect(eventsController.perfettoController.processor.uiThreadId, isNull);
+      expect(
+        eventsController.perfettoController.processor.rasterThreadId,
+        isNull,
+      );
 
-    //   offlineController.enterOfflineMode(
-    //     offlineApp: serviceConnection.serviceManager.connectedApp!,
-    //   );
-    //   final traceEvents = [...goldenUiTraceEvents, ...goldenRasterTraceEvents]
-    //       .map((e) => e.json)
-    //       .toList()
-    //       .cast<Map<String, dynamic>>();
-    //   // TODO(kenz): add some frames for these timeline events to the offline
-    //   // data and verify we correctly assign the events to their frames.
-    //   final offlineData = PerformanceData(traceEvents: traceEvents);
-    //   await eventsController.setOfflineData(offlineData);
+      offlineController.enterOfflineMode(
+        offlineApp: serviceConnection.serviceManager.connectedApp!,
+      );
+      final traceEvents = [...goldenUiTraceEvents, ...goldenRasterTraceEvents]
+          .map((e) => e.json)
+          .toList()
+          .cast<Map<String, dynamic>>();
+      // TODO(kenz): add some frames for these timeline events to the offline
+      // data and verify we correctly assign the events to their frames.
+      final offlineData = PerformanceData(traceEvents: traceEvents);
+      await eventsController.setOfflineData(offlineData);
 
-    //   expect(
-    //     eventsController.allTraceEvents.length,
-    //     equals(traceEvents.length),
-    //   );
-    //   expect(eventsController.data!.timelineEvents.length, equals(2));
-    //   expect(
-    //     eventsController.legacyController.processor.uiThreadId,
-    //     equals(testUiThreadId),
-    //   );
-    //   expect(
-    //     eventsController.legacyController.processor.rasterThreadId,
-    //     equals(testRasterThreadId),
-    //   );
-    // });
+      expect(
+        eventsController.allTraceEvents.length,
+        equals(traceEvents.length),
+      );
+      expect(eventsController.data!.timelineEvents.length, equals(2));
+      expect(
+        eventsController.perfettoController.processor.uiThreadId,
+        equals(testUiThreadId),
+      );
+      expect(
+        eventsController.perfettoController.processor.rasterThreadId,
+        equals(testRasterThreadId),
+      );
+    });
   });
 }

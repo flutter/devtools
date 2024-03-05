@@ -64,7 +64,6 @@ class TimelineEventsController extends PerformanceFeatureController
   /// events, to their thread ids.
   final threadNamesById = <int, String>{};
 
-
   /// Whether the recorded timeline data is currently being processed.
   ValueListenable<EventsControllerStatus> get status => _status;
   final _status =

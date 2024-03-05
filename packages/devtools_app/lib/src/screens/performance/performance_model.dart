@@ -8,7 +8,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../service/service_manager.dart';
-import '../../shared/charts/flame_chart.dart';
 import '../../shared/primitives/simple_items.dart';
 import '../../shared/primitives/trace_event.dart';
 import '../../shared/primitives/trees.dart';

@@ -211,7 +211,6 @@ void main() {
 
           expect(find.byType(TraceCategoriesButton), findsOneWidget);
           expect(find.byType(RefreshTimelineEventsButton), findsOneWidget);
-          expect(find.byType(FlameChartHelpButton), findsOneWidget);
           expect(find.byType(TimelineEventsTabView), findsOneWidget);
           expect(find.byType(EmbeddedPerfetto), findsOneWidget);
         });
