@@ -12,8 +12,8 @@ import 'new/heap_data.dart';
 import 'simple_items.dart';
 
 @immutable
-class HeapObjectSelection {
-  const HeapObjectSelection(this.heap, {required this.object});
+class HeapObject {
+  const HeapObject(this.heap, {required this.object});
 
   final HeapData heap;
 
@@ -31,7 +31,7 @@ class HeapObjectSelection {
     // }
   }
 
-  List<HeapObjectSelection> references(RefDirection direction) =>
+  List<HeapObject> references(RefDirection direction) =>
       throw UnimplementedError();
   // (_refs(direction) ?? [])
   //     .map((i) => HeapObjectSelection_(heap, object: heap.objects[i]))
@@ -40,7 +40,7 @@ class HeapObjectSelection {
   int? countOfReferences(RefDirection? direction) =>
       direction == null ? null : _refs(direction)?.length;
 
-  HeapObjectSelection withoutObject() {
+  HeapObject withoutObject() {
     throw UnimplementedError();
     // if (object == null) return this;
     // return HeapObjectSelection_(heap, object: null);
