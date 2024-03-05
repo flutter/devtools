@@ -285,19 +285,9 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
 
   late final ClassesTableDiffData classesTableDiff;
 
-  /// Classes to show for currently selected item, if the item is diffed.
-  ValueListenable<List<DiffClassStats>?> get diffClassesToShow_ =>
-      _diffClassesToShow_;
-  final _diffClassesToShow_ = ValueNotifier<List<DiffClassStats>?>(null);
-
   ValueListenable<ClassDataList<DiffClassData>?> get diffClassesToShow =>
       _diffClassesToShow;
   final _diffClassesToShow = ValueNotifier<ClassDataList<DiffClassData>?>(null);
-
-  /// Classes to show for currently selected item, if the item is not diffed.
-  ValueListenable<List<SingleClassStats_>?> get singleClassesToShow_ =>
-      _singleClassesToShow_;
-  final _singleClassesToShow_ = ValueNotifier<List<SingleClassStats_>?>(null);
 
   /// Classes to show for currently selected item, if the item is not diffed.
   ValueListenable<ClassDataList<SingleClassData>?> get singleClassesToShow =>
@@ -416,7 +406,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
 
     if (classes is ClassDataList<SingleClassData>) {
       _singleClassesToShow.value = classes;
-      _diffClassesToShow_.value = null;
+      _diffClassesToShow.value = null;
       classesTableSingle.selection.value =
           classes.list.singleWhereOrNull((d) => d.heapClass == className);
       classesTableDiff.selection.value = null;
@@ -429,8 +419,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
           classes.list.singleWhereOrNull((d) => d.heapClass == className);
     } else if (classes == null) {
       _singleClassesToShow.value = null;
-      _singleClassesToShow_.value = null;
-      _diffClassesToShow_.value = null;
+      _diffClassesToShow.value = null;
       classesTableSingle.selection.value = null;
       classesTableDiff.selection.value = null;
     } else {
@@ -438,17 +427,17 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     }
   }
 
-  /// Returns [classStats] if it matches the current filter.
-  T? _filter<T extends ClassStats_>(T? classStats) {
-    if (classStats == null) return null;
-    if (_core.classFilter.value.apply(
-      classStats.heapClass,
-      _core.rootPackage,
-    )) {
-      return classStats;
-    }
-    return null;
-  }
+  // /// Returns [classStats] if it matches the current filter.
+  // T? _filter<T extends ClassStats_>(T? classStats) {
+  //   if (classStats == null) return null;
+  //   if (_core.classFilter.value.apply(
+  //     classStats.heapClass,
+  //     _core.rootPackage,
+  //   )) {
+  //     return classStats;
+  //   }
+  //   return null;
+  // }
 
   bool get updatingValues => _updatingValues;
   bool _updatingValues = false;
