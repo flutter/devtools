@@ -469,6 +469,7 @@ final class DevToolsTooltip extends StatelessWidget {
     required this.child,
     this.waitDuration = tooltipWait,
     this.preferBelow = false,
+    this.enableTapToDismiss = true,
     this.padding = const EdgeInsets.all(defaultSpacing),
     this.decoration,
     this.textStyle,
@@ -480,6 +481,7 @@ final class DevToolsTooltip extends StatelessWidget {
   final Widget child;
   final Duration waitDuration;
   final bool preferBelow;
+  final bool enableTapToDismiss;
   final EdgeInsetsGeometry? padding;
   final Decoration? decoration;
   final TextStyle? textStyle;
@@ -498,6 +500,7 @@ final class DevToolsTooltip extends StatelessWidget {
       richMessage: richMessage,
       waitDuration: waitDuration,
       preferBelow: preferBelow,
+      enableTapToDismiss: enableTapToDismiss,
       padding: padding,
       textStyle: style,
       decoration: decoration,

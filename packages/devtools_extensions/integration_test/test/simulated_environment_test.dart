@@ -214,7 +214,7 @@ Future<void> _testCollapseEnvironmentPanel(
   // Check that the [environmentPanelSizedBoxWidth] is the expected width.
   expect(
     environmentPanelSizedBoxWidth,
-    VmServiceConnection.totalControlsWidth + 2 * defaultSpacing,
+    VmServiceConnectionDisplay.totalControlsWidth + 2 * defaultSpacing,
   );
 
   // Drag the divider to the right by [environmentPanelSizedBoxWidth].

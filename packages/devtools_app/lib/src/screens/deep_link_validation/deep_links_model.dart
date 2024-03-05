@@ -63,7 +63,7 @@ enum DomainError {
     'This test checks your Digital Asset Links JSON file for content type '
         'validation, which defines the format of the JSON file. This allows '
         'the mobile device to verify ownership of the app.',
-    'Ensure the content-type is "application/json" for all of the failed website domains. See the following recommended asset link json file. ',
+    'Ensure the content-type is "application/json" for all of the failed website domains.',
   ),
   // Asset link file should be accessible via https.
   httpsAccessibility(
@@ -159,6 +159,7 @@ class _ErrorAwareText extends StatelessWidget {
               right: defaultSpacing,
             ),
             preferBelow: true,
+            enableTapToDismiss: false,
             richMessage: WidgetSpan(
               child: SizedBox(
                 width: kToolTipWidth,

@@ -1,4 +1,4 @@
-## 0.0.10-wip
+## 0.0.10
 * Add `DTDManager` class and export from `service.dart`.
 * Add `showDevToolsDialog` helper method.
 * Add `FlexSplitColumn` and `BlankHeader` common widgets.

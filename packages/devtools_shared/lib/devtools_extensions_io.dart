@@ -4,3 +4,4 @@
 
 export 'src/extensions/extension_enablement.dart';
 export 'src/extensions/extension_manager.dart';
+export 'src/extensions/yaml_utils.dart';

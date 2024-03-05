@@ -197,6 +197,7 @@ class _DevToolsExtensionState extends State<DevToolsExtension>
         body: _useSimulatedEnvironment
             ? SimulatedDevToolsWrapper(
                 requiresRunningApplication: widget.requiresRunningApplication,
+                onDtdConnectionChange: extensionManager._connectToDtd,
                 child: child,
               )
             : child,

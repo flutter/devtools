@@ -102,7 +102,7 @@ class BuildExtensionCommand extends Command {
     if (destinationDirectory.existsSync()) {
       destinationDirectory.deleteSync(recursive: true);
     }
-    Directory(destinationBuildPath)..createSync(recursive: true);
+    Directory(destinationBuildPath).createSync(recursive: true);
 
     await copyPath(
       sourceBuildPath,
@@ -116,7 +116,7 @@ class BuildExtensionCommand extends Command {
     );
   }
 
-  void _log(String message) => print('[$name] $message');
+  void _log(String message) => stdout.writeln('[$name] $message');
 
   Future<void> _runProcess(
     ProcessManager processManager,
