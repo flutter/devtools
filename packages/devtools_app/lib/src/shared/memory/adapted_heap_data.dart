@@ -80,7 +80,6 @@ class HeapObjectSelection_ {
   }
 }
 
-typedef HeapDataCallback_ = AdaptedHeapData Function();
 typedef HeapDataCallback = HeapData Function();
 
 /// Contains information from [HeapSnapshotGraph],

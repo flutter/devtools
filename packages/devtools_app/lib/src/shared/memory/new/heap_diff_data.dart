@@ -2,13 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import '../../primitives/utils.dart';
 import '../class_name.dart';
 import 'classes.dart';
 import 'heap_data.dart';
 
+@immutable
 class HeapDiffData {
-  HeapDiffData._(this.classes);
+  const HeapDiffData._(this.classes,
+      {required this.before, required this.after});
+
+  final HeapData before;
+  final HeapData after;
 
   final ClassDataList<DiffClassData> classes;
 }
@@ -31,6 +38,8 @@ HeapDiffData calculateHeapDiffData(
 
   return HeapDiffData._(
     ClassDataList<DiffClassData>(classesByName.values.toList(growable: false)),
+    before: before,
+    after: after,
   );
 }
 

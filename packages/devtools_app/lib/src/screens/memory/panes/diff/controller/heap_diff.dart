@@ -16,7 +16,8 @@ class HeapDiffStore {
 
   final _store = <_HeapCouple, HeapDiffData>{};
 
-  HeapDiffData compare(HeapData heap1, HeapData heap2) {
+  HeapDiffData? compare(HeapData? heap1, HeapData? heap2) {
+    if (heap1 == null || heap2 == null) return null;
     final couple = _HeapCouple(heap1, heap2);
     return _store.putIfAbsent(couple, () => _calculateDiffGaWrapper(couple));
   }

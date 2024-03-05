@@ -41,8 +41,8 @@ class ClassesTableSingleData {
 
 class ClassesTableDiffData {
   ClassesTableDiffData({
-    required this.before,
-    required this.after,
+    required this.heapBefore,
+    required this.heapAfter,
     required this.filterData,
   });
 
@@ -53,10 +53,10 @@ class ClassesTableDiffData {
   // to subscribe for the changes, for performance reasons.
 
   /// Function to get selected first heap to diff.
-  final HeapDataCallback_ before;
+  final HeapDataCallback heapBefore;
 
   /// Function to get selected second heap to diff.
-  final HeapDataCallback_ after;
+  final HeapDataCallback heapAfter;
 
   /// Current class filter data.
   final ClassFilterData filterData;

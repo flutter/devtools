@@ -145,30 +145,30 @@ class _InstanceColumn extends ColumnData<DiffClassData>
     bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
-    return Placeholder();
-    // final objects = _instances(data);
+    final objects = _instances(data);
 
-    // if (dataPart == _DataPart.delta) {
-    //   assert(objects is! ObjectSet);
-    //   return null;
-    // }
+    if (dataPart == _DataPart.delta) {
+      assert(objects is! ObjectSet);
+      return null;
+    }
 
-    // final heapCallback =
-    //     dataPart == _DataPart.deleted ? diffData.before : diffData.after;
+    final heapCallback = dataPart == _DataPart.deleted
+        ? diffData.heapBefore
+        : diffData.heapAfter;
 
-    // if (objects is! ObjectSet) {
-    //   throw StateError(
-    //     'All columns except ${_DataPart.delta} should have objects available.',
-    //   );
-    // }
+    if (objects is! ObjectSet) {
+      throw StateError(
+        'All columns except ${_DataPart.delta} should have objects available.',
+      );
+    }
 
-    // return HeapInstanceTableCell(
-    //   objects,
-    //   heapCallback,
-    //   data.heapClass,
-    //   isSelected: isRowSelected,
-    //   liveItemsEnabled: dataPart != _DataPart.deleted,
-    // );
+    return HeapInstanceTableCell(
+      objects,
+      heapCallback,
+      data.heapClass,
+      isSelected: isRowSelected,
+      liveItemsEnabled: dataPart != _DataPart.deleted,
+    );
   }
 }
 

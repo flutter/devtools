@@ -16,6 +16,7 @@ import '../../../../../shared/file_import.dart';
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/memory/class_name.dart';
 import '../../../../../shared/memory/new/classes.dart';
+import '../../../../../shared/memory/new/heap_diff_data.dart';
 import '../../../../../shared/memory/new/heap_graph_loader.dart';
 import '../../../../../shared/memory/new/retaining_path.dart';
 import '../../../shared/heap/class_filter.dart';
@@ -220,6 +221,12 @@ class CoreData {
   SnapshotItem get selectedItem =>
       _snapshots.value[_selectedSnapshotIndex.value];
 
+  SnapshotDataItem? get selectedDataItem {
+    final theItem = selectedItem;
+    if (theItem is SnapshotDataItem) return theItem;
+    return null;
+  }
+
   /// Full name for the selected class (cross-snapshot).
   HeapClassName? className;
 
@@ -247,14 +254,14 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
 
     classesTableSingle = ClassesTableSingleData(
       heap: () => (_core.selectedItem as SnapshotDataItem).heap!,
-      totalHeapSize: () => (_core.selectedItem as SnapshotDataItem).totalSize!,
       filterData: classFilterData,
+      totalHeapSize: () => (_core.selectedItem as SnapshotDataItem).totalSize!,
     );
 
     classesTableDiff = ClassesTableDiffData(
+      heapBefore: () => _currentDiff()!.before,
+      heapAfter: () => _currentDiff()!.after,
       filterData: classFilterData,
-      before: () => (heapClasses_.value as DiffHeapClasses).before,
-      after: () => (heapClasses_.value as DiffHeapClasses).after,
     );
 
     addAutoDisposeListener(
@@ -366,33 +373,14 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   }
 
   /// Classes for the selected snapshot with diffing applied.
-  HeapClasses_? _snapshotClassesAfterDiffing_() {
-    final theItem = _core.selectedItem;
-
-    if (theItem is SnapshotInstanceItem) {
-      final heap = theItem.heap_;
-      if (heap == null) return null;
-      final itemToDiffWith = theItem.diffWith.value;
-      if (itemToDiffWith == null) return heap.classes;
-      return _diffStore_.compare_(heap, itemToDiffWith.heap_!);
-    }
-
-    return null;
+  ClassDataList? _snapshotClassesAfterDiffing() {
+    return _currentDiff()?.classes ?? _core.selectedDataItem?.heap?.classes;
   }
 
-  /// Classes for the selected snapshot with diffing applied.
-  ClassDataList? _snapshotClassesAfterDiffing() {
-    final theItem = _core.selectedItem;
-
-    if (theItem is SnapshotDataItem) {
-      final heap = theItem.heap;
-      if (heap == null) return null;
-      final itemToDiffWith = theItem.diffWith.value;
-      if (itemToDiffWith == null) return heap.classes;
-      return _diffStore.compare(heap, itemToDiffWith.heap!).classes;
-    }
-
-    return null;
+  HeapDiffData? _currentDiff() {
+    final theItem = _core.selectedDataItem;
+    final itemToDiffWith = theItem?.diffWith.value;
+    return _diffStore.compare(theItem?.heap, itemToDiffWith?.heap);
   }
 
   void _updateClasses({
