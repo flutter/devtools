@@ -2,12 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/directory_picker.dart';
+import '../../shared/globals.dart';
 import '../../shared/server/server.dart' as server;
 import '../../shared/utils.dart';
 import 'deep_links_controller.dart';
@@ -26,6 +29,7 @@ class SelectProjectView extends StatefulWidget {
 class _SelectProjectViewState extends State<SelectProjectView>
     with ProvidedControllerMixin<DeepLinksController, SelectProjectView> {
   bool _retrievingFlutterProject = false;
+  String? packageDirectoryForMainIsolate;
 
   @override
   void didChangeDependencies() {
@@ -80,9 +84,31 @@ class _SelectProjectViewState extends State<SelectProjectView>
     });
   }
 
+  Future<void> _getPackageDirectoryForMainIsolate() async {
+    final path = Uri.parse(
+            await serviceConnection.rootPackageDirectoryForMainIsolate() ?? '')
+        .toFilePath();
+
+    setState(() {
+      packageDirectoryForMainIsolate = path;
+    });
+
+    _handleDirectoryPicked(path);
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    if (packageDirectoryForMainIsolate == null) {
+      unawaited(_getPackageDirectoryForMainIsolate());
+      // return Center(
+      //   child: Text(
+      //     'Loading MainIsolate...',
+      //     style: theme.regularTextStyle,
+      //   ),
+      // );
+    }
+
     if (_retrievingFlutterProject) {
       return Center(
         child: Column(
