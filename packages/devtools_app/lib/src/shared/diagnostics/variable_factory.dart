@@ -479,7 +479,7 @@ List<DartObjectNode> createVariablesForSets(
 List<DartObjectNode> createVariablesForList(
   Instance instance,
   IsolateRef? isolateRef,
-  HeapObjectSelection_? heapSelection,
+  HeapObject? heapSelection,
 ) {
   final variables = <DartObjectNode>[];
   final elements = instance.elements ?? [];

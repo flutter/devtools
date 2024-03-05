@@ -183,7 +183,7 @@ void _addChildrenToInstanceVariable({
   required DartObjectNode variable,
   required Instance value,
   required IsolateRef? isolateRef,
-  required HeapObjectSelection_? heapSelection,
+  required HeapObject? heapSelection,
   Set<String>? existingNames,
 }) {
   switch (value.kind) {
