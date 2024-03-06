@@ -5,8 +5,8 @@ Dependencies that create loops (inversions) are marked with `!`.
 
 ```mermaid
 flowchart TD;
-heap_diff.dart-->heap_diff_data.dart;
 heap_diff_data.dart-->classes_diff.dart;
+heap_diff_store.dart-->heap_diff_data.dart;
 ```
 
 ### Inversions
