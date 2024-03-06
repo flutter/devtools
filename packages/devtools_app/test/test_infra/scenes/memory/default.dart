@@ -3,13 +3,9 @@
 // in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/screens/memory/panes/diff/controller/diff_pane_controller.dart';
-import 'package:devtools_app/src/screens/memory/panes/profile/profile_pane_controller.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/class_filter.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/model.dart';
-import 'package:devtools_app/src/shared/memory/heap_object.dart';
 import 'package:devtools_app/src/shared/memory/adapted_heap_object.dart';
-import 'package:devtools_app/src/shared/memory/class_name.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
@@ -22,7 +18,6 @@ import 'package:stager/stager.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../test_infra/test_data/memory.dart';
-import '../../../test_infra/test_data/memory/heap/heap_data.dart';
 import '../../../test_infra/test_data/memory_allocation.dart';
 
 /// To run:

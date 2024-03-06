@@ -4,16 +4,19 @@
 
 import 'package:meta/meta.dart';
 
-import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/memory/class_name.dart';
 import '../../../../../shared/memory/classes.dart';
-import 'classes_diff.dart';
 import '../../../../../shared/memory/heap_data.dart';
+import '../../../../../shared/primitives/utils.dart';
+import 'classes_diff.dart';
 
 @immutable
 class HeapDiffData {
-  const HeapDiffData._(this.classes,
-      {required this.before, required this.after});
+  const HeapDiffData._(
+    this.classes, {
+    required this.before,
+    required this.after,
+  });
 
   final HeapData before;
   final HeapData after;

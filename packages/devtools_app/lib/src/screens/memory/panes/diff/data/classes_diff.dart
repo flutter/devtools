@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/memory/class_name.dart';
 import '../../../../../shared/memory/classes.dart';
 import '../../../../../shared/memory/heap_data.dart';
 import '../../../../../shared/memory/retaining_path.dart';
+import '../../../../../shared/primitives/utils.dart';
 
 /// Comparison between two sets of objects.
 class ObjectSetDiff {

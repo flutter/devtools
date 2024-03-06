@@ -16,17 +16,16 @@ import '../../../../../shared/file_import.dart';
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/memory/class_name.dart';
 import '../../../../../shared/memory/classes.dart';
-import '../data/classes_diff.dart';
-import '../data/heap_diff_data.dart';
 import '../../../../../shared/memory/heap_graph_loader.dart';
 import '../../../../../shared/memory/retaining_path.dart';
 import '../../../shared/heap/class_filter.dart';
-
 import '../../../shared/primitives/memory_utils.dart';
-import 'class.dart';
-import '../data/heap_diff_store.dart';
-import 'item_controller.dart';
+import '../data/classes_diff.dart';
 import '../data/csv.dart';
+import '../data/heap_diff_data.dart';
+import '../data/heap_diff_store.dart';
+import 'class.dart';
+import 'item_controller.dart';
 
 class DiffPaneController extends DisposableController {
   DiffPaneController(this._heapGraphLoader);
