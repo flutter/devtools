@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../primitives/utils.dart';
-import 'adapted_heap_object.dart';
 import 'class_name.dart';
 import 'mock_heap_snapshot_graph.dart';
 import 'new/heap_data.dart';
@@ -60,23 +59,3 @@ class HeapObject {
 }
 
 typedef HeapDataCallback = HeapData Function();
-
-/// Sequence of ids of objects in the heap.
-class HeapPath {
-  HeapPath(this.objects);
-  final List<MockAdaptedHeapObject> objects;
-  late final bool isRetainedBySameClass = () {
-    if (objects.length < 2) return false;
-    final theClass = objects.last.heapClass;
-    return objects
-        .take(objects.length - 1)
-        .any((object) => object.heapClass == theClass);
-  }();
-
-  /// Retaining path for the object in string format.
-  String shortPath() => '/${objects.map((o) => o.shortName).join('/')}/';
-
-  /// Retaining path for the object as an array of the retaining objects.
-  List<String> detailedPath() =>
-      objects.map((o) => o.name).toList(growable: false);
-}

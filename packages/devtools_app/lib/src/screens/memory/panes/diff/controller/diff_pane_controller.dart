@@ -21,7 +21,6 @@ import '../../../../../shared/memory/new/heap_graph_loader.dart';
 import '../../../../../shared/memory/new/retaining_path.dart';
 import '../../../shared/heap/class_filter.dart';
 
-import '../../../shared/heap/model.dart';
 import '../../../shared/primitives/memory_utils.dart';
 import '../widgets/class_details/paths.dart';
 import 'class_data.dart';
@@ -200,9 +199,6 @@ class CoreData {
 
   /// Full name for the selected class (cross-snapshot).
   HeapClassName? className;
-
-  /// Selected retaining path (cross-snapshot).
-  ClassOnlyHeapPath? path_;
 
   /// Selected retaining path (cross-snapshot).
   PathFromRoot? path;
