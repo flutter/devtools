@@ -46,7 +46,7 @@ class DiffSnapshotScene extends Scene {
     );
     setGlobal(ServiceConnectionManager, fakeServiceConnection);
 
-    diffController = DiffPaneController(_TestSnapshotTaker());
+    diffController = DiffPaneController();
     setClassFilterToShowAll();
 
     await diffController.takeSnapshot();

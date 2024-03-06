@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../../shared/memory/new/heap_data.dart';
 import '../../../../../shared/memory/new/heap_graph_loader.dart';
-import '../../../shared/heap/heap.dart';
 
 abstract class SnapshotItem extends DisposableController {
   /// Number to show with auto-generated names that may be non unique, like isolate name.
@@ -81,46 +80,4 @@ abstract class RenamableItem {
   String get name;
 
   String? nameOverride;
-}
-
-class SnapshotInstanceItem extends SnapshotItem implements RenamableItem {
-  SnapshotInstanceItem({
-    this.displayNumber,
-    required this.defaultName,
-  }) {
-    _isProcessing.value = true;
-  }
-
-  /// Automatically assigned name like isolate name or file name.
-  final String defaultName;
-
-  AdaptedHeap? heap_;
-
-  /// This method is expected to be called once when heap is actually received.
-  Future<void> initializeHeapData(AdaptedHeapData? data) async {
-    assert(heap_ == null);
-    if (data != null) {
-      data.snapshotName = name;
-      heap_ = await AdaptedHeap.create(data);
-    }
-    _isProcessing.value = false;
-  }
-
-  @override
-  final int? displayNumber;
-
-  @override
-  String get name =>
-      nameOverride ??
-      '$defaultName${displayNumber == null ? '' : '-$displayNumber'}';
-
-  @override
-  String? nameOverride;
-
-  final diffWith = ValueNotifier<SnapshotInstanceItem?>(null);
-
-  @override
-  bool get hasData => heap_ != null;
-
-  int? get totalSize => heap_?.data.totalReachableSize;
 }

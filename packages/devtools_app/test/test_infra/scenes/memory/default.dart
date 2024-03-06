@@ -84,18 +84,20 @@ class MemoryDefaultScene extends Scene {
       only: '',
     );
 
-    final diffController = DiffPaneController(_TestSnapshotTaker())
-      ..derived.applyFilter(showAllFilter);
+    throw UnimplementedError('Implement the rest of the setup');
 
-    final profileController = ProfilePaneController()..setFilter(showAllFilter);
+    // final diffController = DiffPaneController(_TestSnapshotTaker())
+    //   ..derived.applyFilter(showAllFilter);
 
-    controller = MemoryController(
-      diffPaneController: diffController,
-      profilePaneController: profileController,
-    )
-      ..offline = true
-      ..controllers.memoryTimeline.offlineData.clear()
-      ..controllers.memoryTimeline.offlineData.addAll(memoryJson.data);
+    // final profileController = ProfilePaneController()..setFilter(showAllFilter);
+
+    // controller = MemoryController(
+    //   diffPaneController: diffController,
+    //   profilePaneController: profileController,
+    // )
+    //   ..offline = true
+    //   ..controllers.memoryTimeline.offlineData.clear()
+    //   ..controllers.memoryTimeline.offlineData.addAll(memoryJson.data);
   }
 
   @override
@@ -104,66 +106,66 @@ class MemoryDefaultScene extends Scene {
   void tearDown() {}
 }
 
-/// Provides test snapshots. First time returns null.
-class _TestSnapshotTaker implements SnapshotTaker {
-  bool firstTime = true;
-  int index = -1;
+// /// Provides test snapshots. First time returns null.
+// class _TestSnapshotTaker implements SnapshotTaker {
+//   bool firstTime = true;
+//   int index = -1;
 
-  @override
-  Future<AdaptedHeapData?> take() async {
-    // This delay is needed for UI to start showing the progress indicator.
-    await Future.delayed(const Duration(milliseconds: 100));
+//   @override
+//   Future<AdaptedHeapData?> take() async {
+//     // This delay is needed for UI to start showing the progress indicator.
+//     await Future.delayed(const Duration(milliseconds: 100));
 
-    // Return null if it is the first time to test cover the edge case.
-    if (firstTime) {
-      firstTime = false;
-      return null;
-    }
+//     // Return null if it is the first time to test cover the edge case.
+//     if (firstTime) {
+//       firstTime = false;
+//       return null;
+//     }
 
-    index = (index + 1) % (_simpleHeapTests.length + goldenHeapTests.length);
+//     index = (index + 1) % (_simpleHeapTests.length + goldenHeapTests.length);
 
-    // Return simple test.
-    if (index < _simpleHeapTests.length) return _simpleHeapTests[index];
+//     // Return simple test.
+//     if (index < _simpleHeapTests.length) return _simpleHeapTests[index];
 
-    return await goldenHeapTests[index - _simpleHeapTests.length].loadHeap();
-  }
-}
+//     return await goldenHeapTests[index - _simpleHeapTests.length].loadHeap();
+//   }
+// }
 
-final _simpleHeapTests = <AdaptedHeapData>[
-  _createHeap({'A': 1, 'B': 2}),
-  _createHeap({'B': 1, 'C': 2, 'D': 3}),
-  _createHeap({'B': 1, 'C': 2, 'D': 3}),
-];
+// final _simpleHeapTests = <AdaptedHeapData>[
+//   _createHeap({'A': 1, 'B': 2}),
+//   _createHeap({'B': 1, 'C': 2, 'D': 3}),
+//   _createHeap({'B': 1, 'C': 2, 'D': 3}),
+// ];
 
-AdaptedHeapData _createHeap(Map<String, int> classToInstanceCount) {
-  const rootIndex = 0;
-  final objects = <MockAdaptedHeapObject>[_createObject('root')];
-  var leafCount = 0;
+// AdaptedHeapData _createHeap(Map<String, int> classToInstanceCount) {
+//   const rootIndex = 0;
+//   final objects = <MockAdaptedHeapObject>[_createObject('root')];
+//   var leafCount = 0;
 
-  // Create objects.
-  for (var entry in classToInstanceCount.entries) {
-    for (var _ in Iterable<void>.generate(entry.value)) {
-      objects.add(_createObject(entry.key));
-      leafCount++;
-      final objectIndex = leafCount;
-      objects[rootIndex].outRefs.add(objectIndex);
-    }
-  }
+//   // Create objects.
+//   for (var entry in classToInstanceCount.entries) {
+//     for (var _ in Iterable<void>.generate(entry.value)) {
+//       objects.add(_createObject(entry.key));
+//       leafCount++;
+//       final objectIndex = leafCount;
+//       objects[rootIndex].outRefs.add(objectIndex);
+//     }
+//   }
 
-  return AdaptedHeapData(
-    objects,
-    rootIndex: rootIndex,
-  );
-}
+//   return AdaptedHeapData(
+//     objects,
+//     rootIndex: rootIndex,
+//   );
+// }
 
-var _nextCode = 1;
+// var _nextCode = 1;
 
-MockAdaptedHeapObject _createObject(String className) => MockAdaptedHeapObject(
-      code: _nextCode++,
-      outRefs: {},
-      heapClass: HeapClassName.fromPath(
-        className: className,
-        library: 'my_lib',
-      ),
-      shallowSize: 80, // 10 bytes
-    );
+// MockAdaptedHeapObject _createObject(String className) => MockAdaptedHeapObject(
+//       code: _nextCode++,
+//       outRefs: {},
+//       heapClass: HeapClassName.fromPath(
+//         className: className,
+//         library: 'my_lib',
+//       ),
+//       shallowSize: 80, // 10 bytes
+//     );

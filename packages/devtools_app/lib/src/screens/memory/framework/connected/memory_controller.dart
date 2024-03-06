@@ -30,7 +30,6 @@ class MemoryFeatureControllers {
     memoryTimeline = MemoryTimeline();
     diff = diffPaneController ??
         DiffPaneController(
-          SnapshotTakerRuntime(memoryTimeline),
           heapGraphLoader: HeapGraphLoaderRuntime(memoryTimeline),
         );
     profile = profilePaneController ?? ProfilePaneController();
@@ -44,7 +43,6 @@ class MemoryFeatureControllers {
   void reset() {
     diff.dispose();
     diff = DiffPaneController(
-      SnapshotTakerRuntime(memoryTimeline),
       heapGraphLoader: HeapGraphLoaderRuntime(memoryTimeline),
     );
 

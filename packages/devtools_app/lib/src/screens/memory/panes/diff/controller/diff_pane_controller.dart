@@ -20,7 +20,7 @@ import '../../../../../shared/memory/new/heap_diff_data.dart';
 import '../../../../../shared/memory/new/heap_graph_loader.dart';
 import '../../../../../shared/memory/new/retaining_path.dart';
 import '../../../shared/heap/class_filter.dart';
-import '../../../shared/heap/heap.dart';
+
 import '../../../shared/heap/model.dart';
 import '../../../shared/primitives/memory_utils.dart';
 import '../widgets/class_details/paths.dart';
@@ -30,8 +30,7 @@ import 'item_controller.dart';
 import 'utils.dart';
 
 class DiffPaneController extends DisposableController {
-  DiffPaneController(
-    SnapshotTaker snapshotTaker, {
+  DiffPaneController({
     HeapGraphLoader heapGraphLoader = const HeapGraphLoaderMock(),
   }) : _heapGraphLoader = heapGraphLoader;
 
@@ -73,8 +72,8 @@ class DiffPaneController extends DisposableController {
     if (files.isEmpty) return;
 
     final importers = files.map((file) async {
-      final item = SnapshotInstanceItem(defaultName: file.name);
-      await _addSnapshot_(SnapshotTakerFromFile(file), item);
+      final item = SnapshotDataItem(defaultName: file.name);
+      await _addSnapshot(HeapGraphLoaderFile(file), item);
     });
     await Future.wait(importers);
     derived._updateValues();
@@ -89,25 +88,6 @@ class DiffPaneController extends DisposableController {
 
     try {
       await item.loadHeap(loader);
-    } catch (e) {
-      snapshots.remove(item);
-      rethrow;
-    } finally {
-      final newElementIndex = snapshots.value.length - 1;
-      core._selectedSnapshotIndex.value = newElementIndex;
-    }
-  }
-
-  Future<void> _addSnapshot_(
-    SnapshotTaker snapshotTaker,
-    SnapshotInstanceItem item,
-  ) async {
-    final snapshots = core._snapshots;
-    snapshots.add(item);
-
-    try {
-      final heapData = await snapshotTaker.take();
-      await item.initializeHeapData(heapData);
     } catch (e) {
       snapshots.remove(item);
       rethrow;
@@ -154,14 +134,6 @@ class DiffPaneController extends DisposableController {
     derived._updateValues();
   }
 
-  void setDiffing_(
-    SnapshotInstanceItem diffItem,
-    SnapshotInstanceItem? withItem,
-  ) {
-    diffItem.diffWith.value = withItem;
-    derived._updateValues();
-  }
-
   void setDiffing(
     SnapshotDataItem diffItem,
     SnapshotDataItem? withItem,
@@ -171,7 +143,7 @@ class DiffPaneController extends DisposableController {
   }
 
   void exportCurrentItem() {
-    final item = core.selectedItem as SnapshotInstanceItem;
+    final item = core.selectedDataItem!;
     ExportController().downloadFile(
       'hello',
       fileName: ExportController.generateFileName(
@@ -182,15 +154,15 @@ class DiffPaneController extends DisposableController {
   }
 
   void downloadCurrentItemToCsv() {
-    final classes = derived.heapClasses_.value!;
-    final item = core.selectedItem as SnapshotInstanceItem;
+    final classes = derived.heapClasses.value!;
+    final item = core.selectedDataItem!;
     final diffWith = item.diffWith.value;
 
     late String filePrefix;
     filePrefix = diffWith == null ? item.name : '${item.name}-${diffWith.name}';
 
     ExportController().downloadFile(
-      classesToCsv(classes.classStatsList),
+      classesToCsv(classes.list),
       type: ExportFileType.csv,
       fileName: ExportController.generateFileName(
         type: ExportFileType.csv,
@@ -284,7 +256,6 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   late final ValueNotifier<SnapshotItem> _selectedItem;
 
   /// Classes to show.
-  final heapClasses_ = ValueNotifier<HeapClasses_?>(null);
   final heapClasses = ValueNotifier<ClassDataList?>(null);
 
   late final ClassesTableSingleData classesTableSingle;
