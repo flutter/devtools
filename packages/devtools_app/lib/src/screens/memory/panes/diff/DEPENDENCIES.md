@@ -6,15 +6,14 @@ Dependencies that create loops (inversions) are marked with `!`.
 ```mermaid
 flowchart TD;
 controller-->data;
-controller-->widgets;
 diff_pane.dart-->controller;
 diff_pane.dart-->widgets;
-widgets--!-->controller;
+widgets-->controller;
 widgets-->data;
 ```
 
 ### Inversions
-In this folder: 1
+In this folder: 0
 
-Including sub-folders: 1
+Including sub-folders: 0
 
