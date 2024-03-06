@@ -22,16 +22,13 @@ import '../../shared/primitives/memory_timeline.dart';
 import 'memory_protocol.dart';
 
 class MemoryFeatureControllers {
-  /// [diffPaneController] is passed for testability.
+  /// Controllers are passed for testability.
   MemoryFeatureControllers(
     DiffPaneController? diffPaneController,
     ProfilePaneController? profilePaneController,
   ) {
     memoryTimeline = MemoryTimeline();
-    diff = diffPaneController ??
-        DiffPaneController(
-          heapGraphLoader: HeapGraphLoaderRuntime(memoryTimeline),
-        );
+    diff = diffPaneController ?? _createDiffController();
     profile = profilePaneController ?? ProfilePaneController();
   }
 
@@ -40,11 +37,12 @@ class MemoryFeatureControllers {
   late MemoryTimeline memoryTimeline;
   TracingPaneController tracing = TracingPaneController();
 
+  DiffPaneController _createDiffController() =>
+      DiffPaneController(HeapGraphLoaderRuntime(memoryTimeline));
+
   void reset() {
     diff.dispose();
-    diff = DiffPaneController(
-      heapGraphLoader: HeapGraphLoaderRuntime(memoryTimeline),
-    );
+    diff = _createDiffController();
 
     profile.dispose();
     profile = ProfilePaneController();

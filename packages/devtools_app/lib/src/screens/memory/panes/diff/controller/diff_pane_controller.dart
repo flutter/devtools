@@ -29,9 +29,7 @@ import 'item_controller.dart';
 import 'utils.dart';
 
 class DiffPaneController extends DisposableController {
-  DiffPaneController({
-    HeapGraphLoader heapGraphLoader = const HeapGraphLoaderMock(),
-  }) : _heapGraphLoader = heapGraphLoader;
+  DiffPaneController(this._heapGraphLoader);
 
   final HeapGraphLoader _heapGraphLoader;
 

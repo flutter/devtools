@@ -7,7 +7,6 @@ import 'package:vm_service/vm_service.dart';
 
 import '../primitives/utils.dart';
 import 'class_name.dart';
-import 'mock_heap_snapshot_graph.dart';
 import 'new/heap_data.dart';
 import 'simple_items.dart';
 

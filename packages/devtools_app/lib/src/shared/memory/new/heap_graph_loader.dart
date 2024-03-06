@@ -7,7 +7,6 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../screens/memory/shared/primitives/memory_timeline.dart';
 import '../../../screens/memory/shared/primitives/memory_utils.dart';
-import 'heap_graph_mock.dart';
 
 abstract class HeapGraphLoader {
   const HeapGraphLoader();
@@ -40,14 +39,5 @@ class HeapGraphLoaderFile implements HeapGraphLoader {
       HeapSnapshotGraph.fromChunks([data]),
       await _file.lastModified(),
     );
-  }
-}
-
-class HeapGraphLoaderMock implements HeapGraphLoader {
-  const HeapGraphLoaderMock();
-
-  @override
-  Future<(HeapSnapshotGraph?, DateTime)> load() async {
-    return (HeapSnapshotGraphMock(), DateTime.now());
   }
 }
