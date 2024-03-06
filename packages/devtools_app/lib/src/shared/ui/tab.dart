@@ -10,12 +10,6 @@ import '../analytics/analytics.dart' as ga;
 double get _tabHeight => scaleByFontFactor(46.0);
 double get _textAndIconTabHeight => scaleByFontFactor(72.0);
 
-enum AnalyticsSendSettings {
-  sendAll,
-  skipForWidgetRebuilds,
-  skipAll,
-}
-
 class DevToolsTab extends Tab {
   /// Creates a material design [TabBar] tab styled for DevTools.
   ///
@@ -80,18 +74,22 @@ class DevToolsTab extends Tab {
 /// A combined [TabBar] and [TabBarView] implementation that tracks tab changes
 /// to our analytics.
 ///
-/// When using this widget, ensure that the [AnalyticsTabbedView] is not being
-/// rebuilt unnecessarily, as each call to [initState] and [didUpdateWidget]
-/// will send an event to analytics for the default selected tab.
+/// To avoid unnecessary analytics events, ensure [analyticsSessionIdentifier] represents
+/// the object being shown in the [AnalyticsTabbedView]. If the data in that
+/// object is being updated then it is expected that the
+/// [analyticsSessionIdentifier] remains the same. If a new object is being
+/// shown, it is expected that the [analyticsSessionIdentifier] has a unique
+/// value. This ensures that data being refreshed, or widget tree rebuilds don't
+/// send spurious analytics events.
 class AnalyticsTabbedView extends StatefulWidget {
   AnalyticsTabbedView({
     Key? key,
-    this.analyticsSessionIdentifier,
     required this.tabs,
     required this.gaScreen,
     this.sendAnalytics = true,
     this.onTabChanged,
     this.initialSelectedIndex,
+    this.analyticsSessionIdentifier,
   })  : trailingWidgets = List.generate(
           tabs.length,
           (index) => tabs[index].tab.trailing ?? const SizedBox(),
@@ -109,11 +107,13 @@ class AnalyticsTabbedView extends StatefulWidget {
   /// A value that represents the data object being presented by
   /// [AnalyticsTabbedView].
   ///
-  /// This value should represent a unique identifier for the data object being
-  /// represented in the view.
-  ///
-  /// This value ensures that calls to [didUpdateWidget] don't retrigger
-  /// analytics events when the data in the view is just being refreshed.
+  /// This value should represent the object being shown in the
+  /// [AnalyticsTabbedView]. If the data in that object is being updated then it
+  /// is expected that the [analyticsSessionIdentifier] remains the same. If a
+  /// new object is being shown, it is expected that the
+  /// [analyticsSessionIdentifier] has a unique value. This ensures that data
+  /// being refreshed, or widget tree rebuilds don't send spurious analytics
+  /// events.
   final String? analyticsSessionIdentifier;
 
   /// Whether to send analytics events to GA.

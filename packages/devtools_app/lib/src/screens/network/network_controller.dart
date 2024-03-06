@@ -353,10 +353,6 @@ class CurrentNetworkRequests extends ValueNotifier<List<NetworkRequest>> {
   CurrentNetworkRequests() : super([]);
 
   final _requestsById = <String, NetworkRequest>{};
-  @override
-  set value(List<NetworkRequest> newValue) {
-    throw ("Not supported");
-  }
 
   NetworkRequest? getRequest(String id) => _requestsById[id];
 
