@@ -54,9 +54,9 @@ void main() {
       // Ensure we are starting in an empty state.
       expect(eventsController.allTraceEvents, isEmpty);
       expect(eventsController.data!.timelineEvents, isEmpty);
-      expect(eventsController.legacyController.processor.uiThreadId, isNull);
+      expect(eventsController.perfettoController.processor.uiThreadId, isNull);
       expect(
-        eventsController.legacyController.processor.rasterThreadId,
+        eventsController.perfettoController.processor.rasterThreadId,
         isNull,
       );
 
@@ -78,11 +78,11 @@ void main() {
       );
       expect(eventsController.data!.timelineEvents.length, equals(2));
       expect(
-        eventsController.legacyController.processor.uiThreadId,
+        eventsController.perfettoController.processor.uiThreadId,
         equals(testUiThreadId),
       );
       expect(
-        eventsController.legacyController.processor.rasterThreadId,
+        eventsController.perfettoController.processor.rasterThreadId,
         equals(testRasterThreadId),
       );
     });

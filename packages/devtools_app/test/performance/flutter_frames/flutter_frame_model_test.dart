@@ -47,41 +47,5 @@ void main() {
         isFalse,
       );
     });
-
-    test(
-      'UI event flow sets frame.timeFromEventFlows end time if it completes after raster event flow',
-      () {
-        final uiEvent = goldenUiTimelineEvent.deepCopy()
-          ..time = (TimeRange()
-            ..start = const Duration(microseconds: 5000)
-            ..end = const Duration(microseconds: 8000));
-        final rasterEvent = goldenRasterTimelineEvent.deepCopy()
-          ..time = (TimeRange()
-            ..start = const Duration(microseconds: 6000)
-            ..end = const Duration(microseconds: 7000));
-
-        final frame = FlutterFrame.parse({
-          'number': 1,
-          'startTime': 100,
-          'elapsed': 200,
-          'build': 40,
-          'raster': 50,
-          'vsyncOverhead': 10,
-        });
-        frame.setEventFlow(rasterEvent, type: TimelineEventType.raster);
-        expect(frame.timeFromEventFlows.start, isNull);
-        expect(frame.timeFromEventFlows.end, isNull);
-
-        frame.setEventFlow(uiEvent, type: TimelineEventType.ui);
-        expect(
-          frame.timeFromEventFlows.start,
-          equals(const Duration(microseconds: 5000)),
-        );
-        expect(
-          frame.timeFromEventFlows.end,
-          equals(const Duration(microseconds: 8000)),
-        );
-      },
-    );
   });
 }
