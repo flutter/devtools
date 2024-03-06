@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../../../../../shared/common_widgets.dart';
 import '../../../../../../shared/memory/classes.dart';
-import '../../controller/class.dart';
+import '../../controller/class_data.dart';
 import 'path.dart';
 import 'paths.dart';
 

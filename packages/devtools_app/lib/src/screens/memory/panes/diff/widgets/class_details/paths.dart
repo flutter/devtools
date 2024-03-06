@@ -12,7 +12,7 @@ import '../../../../../../shared/primitives/utils.dart';
 import '../../../../../../shared/table/table.dart';
 import '../../../../../../shared/table/table_data.dart';
 import '../../../../shared/primitives/simple_elements.dart';
-import '../../controller/class.dart';
+import '../../controller/class_data.dart';
 
 class _RetainingPathColumn extends ColumnData<PathData> {
   _RetainingPathColumn(String className)

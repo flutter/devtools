@@ -24,7 +24,7 @@ import '../data/classes_diff.dart';
 import '../data/csv.dart';
 import '../data/heap_diff_data.dart';
 import '../data/heap_diff_store.dart';
-import 'class.dart';
+import 'class_data.dart';
 import 'item_controller.dart';
 
 class DiffPaneController extends DisposableController {

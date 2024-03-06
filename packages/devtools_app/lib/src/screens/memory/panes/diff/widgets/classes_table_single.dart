@@ -15,7 +15,7 @@ import '../../../../../shared/table/table_data.dart';
 import '../../../shared/primitives/simple_elements.dart';
 import '../../../shared/widgets/class_filter.dart';
 import '../../../shared/widgets/shared_memory_widgets.dart';
-import '../controller/class.dart';
+import '../controller/class_data.dart';
 import 'instances.dart';
 
 class _ClassNameColumn extends ColumnData<SingleClassData>
