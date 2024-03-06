@@ -36,7 +36,6 @@ class AnalyzeCommand extends Command {
     final processManager = ProcessManager();
     final packages = repo.getPackages();
     final fatalInfos = argResults![_fatalInfosArg] as bool;
-    final fatalInfosFlag = '--${fatalInfos ? '' : 'no-'}fatal-infos';
 
     log.stdout('Running flutter analyze...');
 
@@ -51,7 +50,7 @@ class AnalyzeCommand extends Command {
 
       final process = await processManager.runProcess(
         CliCommand.dart(
-          ['analyze', fatalInfosFlag],
+          ['analyze', if (fatalInfos) '--fatal-infos'],
           // Run all so we can see the full set of results instead of stopping
           // on the first error.
           throwOnException: false,
