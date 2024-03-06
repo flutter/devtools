@@ -13,6 +13,7 @@ import '../../../../../../shared/primitives/utils.dart';
 import '../../../../../../shared/table/table.dart';
 import '../../../../../../shared/table/table_data.dart';
 import '../../../../shared/primitives/simple_elements.dart';
+import '../../controller/class.dart';
 
 class _RetainingPathColumn extends ColumnData<PathData> {
   _RetainingPathColumn(String className)
@@ -112,28 +113,6 @@ class _RetainingPathTableColumns {
     _ShallowSizeColumn(isDiff),
     retainedSizeColumn,
   ];
-}
-
-class PathData {
-  PathData(this.classData, this.path);
-
-  final ClassData classData;
-  final PathFromRoot path;
-
-  ObjectSetStats get objects => classData.byPath[path]!;
-
-  @override
-  bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
-    return other is PathData &&
-        other.classData.heapClass == classData.heapClass &&
-        other.path == path;
-  }
-
-  @override
-  int get hashCode => Object.hash(classData.heapClass, path);
 }
 
 class RetainingPathTable extends StatelessWidget {

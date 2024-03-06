@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../../../../shared/memory/heap_object.dart';
 import '../../../../../shared/memory/classes.dart';
+import '../../../../../shared/memory/retaining_path.dart';
 import '../../../shared/heap/class_filter.dart';
 import '../../../shared/primitives/simple_elements.dart';
 import '../data/classes_diff.dart';
@@ -62,4 +63,26 @@ class ClassesTableDiffData {
 
   /// Selected class.
   final selection = ValueNotifier<DiffClassData?>(null);
+}
+
+class PathData {
+  PathData(this.classData, this.path);
+
+  final ClassData classData;
+  final PathFromRoot path;
+
+  ObjectSetStats get objects => classData.byPath[path]!;
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is PathData &&
+        other.classData.heapClass == classData.heapClass &&
+        other.path == path;
+  }
+
+  @override
+  int get hashCode => Object.hash(classData.heapClass, path);
 }
