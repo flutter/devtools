@@ -5,9 +5,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../screens/memory/shared/heap/class_filter.dart';
-import '../../primitives/utils.dart';
-import '../class_name.dart';
+import '../../screens/memory/shared/heap/class_filter.dart';
+import '../primitives/utils.dart';
+import 'class_name.dart';
 import 'heap_data.dart';
 import 'retaining_path.dart';
 

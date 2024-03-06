@@ -6,7 +6,7 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../../../../shared/common_widgets.dart';
-import '../../../../../../shared/memory/new/classes.dart';
+import '../../../../../../shared/memory/classes.dart';
 import '../../controller/class.dart';
 import 'path.dart';
 import 'paths.dart';

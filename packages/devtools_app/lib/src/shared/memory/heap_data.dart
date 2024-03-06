@@ -7,9 +7,9 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../primitives/utils.dart';
-import '../class_name.dart';
-import '../simple_items.dart';
+import '../primitives/utils.dart';
+import 'class_name.dart';
+import 'simple_items.dart';
 import 'classes.dart';
 import 'retainers.dart';
 

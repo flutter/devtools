@@ -6,9 +6,9 @@ import 'package:meta/meta.dart';
 
 import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/memory/class_name.dart';
-import '../../../../../shared/memory/new/classes.dart';
+import '../../../../../shared/memory/classes.dart';
 import 'classes_diff.dart';
-import '../../../../../shared/memory/new/heap_data.dart';
+import '../../../../../shared/memory/heap_data.dart';
 
 @immutable
 class HeapDiffData {

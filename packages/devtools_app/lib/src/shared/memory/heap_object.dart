@@ -7,7 +7,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../primitives/utils.dart';
 import 'class_name.dart';
-import 'new/heap_data.dart';
+import 'heap_data.dart';
 import 'simple_items.dart';
 
 @immutable

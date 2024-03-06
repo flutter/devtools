@@ -9,8 +9,8 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../primitives/utils.dart';
-import '../class_name.dart';
+import '../primitives/utils.dart';
+import 'class_name.dart';
 
 // ignore: avoid-dynamic, defined in package:collection
 bool Function(List<dynamic>? list1, List<dynamic>? list2) _listEquality =

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/shared/memory/class_name.dart';
-import 'package:devtools_app/src/shared/memory/new/retaining_path.dart';
+import 'package:devtools_app/src/shared/memory/retaining_path.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

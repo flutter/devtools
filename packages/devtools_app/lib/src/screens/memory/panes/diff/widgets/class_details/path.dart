@@ -9,7 +9,7 @@ import '../../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../../shared/common_widgets.dart';
 import '../../../../../../shared/memory/class_name.dart';
-import '../../../../../../shared/memory/new/retaining_path.dart';
+import '../../../../../../shared/memory/retaining_path.dart';
 import '../../../../../../shared/primitives/utils.dart';
 import '../../controller/class.dart';
 

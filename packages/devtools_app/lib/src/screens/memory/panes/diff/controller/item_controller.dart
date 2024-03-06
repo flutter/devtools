@@ -6,8 +6,8 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../../shared/memory/heap_object.dart';
-import '../../../../../shared/memory/new/heap_data.dart';
-import '../../../../../shared/memory/new/heap_graph_loader.dart';
+import '../../../../../shared/memory/heap_data.dart';
+import '../../../../../shared/memory/heap_graph_loader.dart';
 
 abstract class SnapshotItem extends DisposableController {
   /// Number to show with auto-generated names that may be non unique, like isolate name.

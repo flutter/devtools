@@ -7,7 +7,7 @@ import 'package:flutter/foundation.dart';
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/analytics/metrics.dart';
-import '../../../../../shared/memory/new/heap_data.dart';
+import '../../../../../shared/memory/heap_data.dart';
 import 'heap_diff_data.dart';
 
 /// Stores already calculated comparisons for heap couples.

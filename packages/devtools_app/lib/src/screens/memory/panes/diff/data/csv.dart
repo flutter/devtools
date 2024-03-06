@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../../../../../shared/memory/new/classes.dart';
+import '../../../../../shared/memory/classes.dart';
 
 String classesToCsv(Iterable<ClassData> classes) {
   final csvBuffer = StringBuffer();

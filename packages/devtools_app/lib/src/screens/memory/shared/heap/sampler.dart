@@ -8,8 +8,8 @@ import '../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/globals.dart';
 import '../../../../shared/memory/class_name.dart';
-import '../../../../shared/memory/new/classes.dart';
-import '../../../../shared/memory/new/heap_data.dart';
+import '../../../../shared/memory/classes.dart';
+import '../../../../shared/memory/heap_data.dart';
 import '../../../../shared/vm_utils.dart';
 
 class _HeapObjects {

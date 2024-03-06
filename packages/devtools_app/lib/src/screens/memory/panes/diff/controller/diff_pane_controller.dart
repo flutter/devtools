@@ -15,11 +15,11 @@ import '../../../../../shared/config_specific/import_export/import_export.dart';
 import '../../../../../shared/file_import.dart';
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/memory/class_name.dart';
-import '../../../../../shared/memory/new/classes.dart';
+import '../../../../../shared/memory/classes.dart';
 import '../data/classes_diff.dart';
 import '../data/heap_diff_data.dart';
-import '../../../../../shared/memory/new/heap_graph_loader.dart';
-import '../../../../../shared/memory/new/retaining_path.dart';
+import '../../../../../shared/memory/heap_graph_loader.dart';
+import '../../../../../shared/memory/retaining_path.dart';
 import '../../../shared/heap/class_filter.dart';
 
 import '../../../shared/primitives/memory_utils.dart';

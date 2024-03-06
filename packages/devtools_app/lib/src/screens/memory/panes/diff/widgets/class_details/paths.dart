@@ -7,8 +7,8 @@ import 'package:flutter/widgets.dart';
 
 import '../../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../../shared/analytics/constants.dart' as gac;
-import '../../../../../../shared/memory/new/classes.dart';
-import '../../../../../../shared/memory/new/retaining_path.dart';
+import '../../../../../../shared/memory/classes.dart';
+import '../../../../../../shared/memory/retaining_path.dart';
 import '../../../../../../shared/primitives/utils.dart';
 import '../../../../../../shared/table/table.dart';
 import '../../../../../../shared/table/table_data.dart';

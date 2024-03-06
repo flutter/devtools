@@ -11,7 +11,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/globals.dart';
 import '../../../../shared/memory/class_name.dart';
-import '../../../../shared/memory/new/heap_graph_loader.dart';
+import '../../../../shared/memory/heap_graph_loader.dart';
 import '../../../../shared/utils.dart';
 import '../../panes/chart/primitives.dart';
 import '../../panes/diff/controller/diff_pane_controller.dart';

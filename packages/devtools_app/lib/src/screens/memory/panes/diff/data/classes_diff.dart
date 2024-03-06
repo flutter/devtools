@@ -8,9 +8,9 @@ import 'package:vm_service/vm_service.dart';
 import '../../../shared/heap/class_filter.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/memory/class_name.dart';
-import '../../../../../shared/memory/new/classes.dart';
-import '../../../../../shared/memory/new/heap_data.dart';
-import '../../../../../shared/memory/new/retaining_path.dart';
+import '../../../../../shared/memory/classes.dart';
+import '../../../../../shared/memory/heap_data.dart';
+import '../../../../../shared/memory/retaining_path.dart';
 
 /// Comparison between two sets of objects.
 class ObjectSetDiff {

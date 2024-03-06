@@ -5,8 +5,8 @@
 import 'package:file_selector/file_selector.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../screens/memory/shared/primitives/memory_timeline.dart';
-import '../../../screens/memory/shared/primitives/memory_utils.dart';
+import '../../screens/memory/shared/primitives/memory_timeline.dart';
+import '../../screens/memory/shared/primitives/memory_utils.dart';
 
 abstract class HeapGraphLoader {
   const HeapGraphLoader();

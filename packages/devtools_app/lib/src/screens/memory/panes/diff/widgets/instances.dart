@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../shared/memory/heap_object.dart';
 import '../../../../../shared/memory/class_name.dart';
-import '../../../../../shared/memory/new/classes.dart';
+import '../../../../../shared/memory/classes.dart';
 import '../../../shared/heap/sampler.dart';
 import '../../../shared/primitives/instance_context_menu.dart';
 
