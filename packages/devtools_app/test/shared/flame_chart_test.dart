@@ -25,19 +25,19 @@ void main() {
   setGlobal(IdeTheme, IdeTheme());
 
   const narrowNodeKey = Key('narrow node');
-  final narrowNode = FlameChartNode<TimelineEvent>(
+  final narrowNode = FlameChartNode<CpuStackFrame>(
     key: narrowNodeKey,
     text: 'Narrow test node',
     rect: Rect.fromLTWH(23.0, 0.0, 21.9, chartRowHeight),
     colorPair: ThemedColorPair.from(
       const ColorPair(background: Colors.blue, foreground: Colors.white),
     ),
-    data: goldenAsyncTimelineEvent,
+    data: stackFrameA,
     onSelected: (_) {},
   )..sectionIndex = 0;
 
   const Key testNodeKey = Key('test node');
-  final testNode = FlameChartNode<TimelineEvent>(
+  final testNode = FlameChartNode<CpuStackFrame>(
     key: testNodeKey,
     text: 'Test node 1',
     // 30.0 is the minimum node width for text.
@@ -45,40 +45,40 @@ void main() {
     colorPair: ThemedColorPair.from(
       const ColorPair(background: Colors.blue, foreground: Colors.white),
     ),
-    data: goldenAsyncTimelineEvent,
+    data: stackFrameA,
     onSelected: (_) {},
   )..sectionIndex = 0;
 
-  final testNode2 = FlameChartNode<TimelineEvent>(
+  final testNode2 = FlameChartNode<CpuStackFrame>(
     key: narrowNodeKey,
     text: 'Test node 2',
     rect: Rect.fromLTWH(120.0, 0.0, 50.0, chartRowHeight),
     colorPair: ThemedColorPair.from(
       const ColorPair(background: Colors.blue, foreground: Colors.white),
     ),
-    data: goldenAsyncTimelineEvent,
+    data: stackFrameA,
     onSelected: (_) {},
   )..sectionIndex = 0;
 
-  final testNode3 = FlameChartNode<TimelineEvent>(
+  final testNode3 = FlameChartNode<CpuStackFrame>(
     key: narrowNodeKey,
     text: 'Test node 3',
     rect: Rect.fromLTWH(180.0, 0.0, 50.0, chartRowHeight),
     colorPair: ThemedColorPair.from(
       const ColorPair(background: Colors.blue, foreground: Colors.white),
     ),
-    data: goldenAsyncTimelineEvent,
+    data: stackFrameA,
     onSelected: (_) {},
   )..sectionIndex = 0;
 
-  final testNode4 = FlameChartNode<TimelineEvent>(
+  final testNode4 = FlameChartNode<CpuStackFrame>(
     key: narrowNodeKey,
     text: 'Test node 4',
     rect: Rect.fromLTWH(240.0, 0.0, 300.0, chartRowHeight),
     colorPair: ThemedColorPair.from(
       const ColorPair(background: Colors.blue, foreground: Colors.white),
     ),
-    data: goldenAsyncTimelineEvent,
+    data: stackFrameA,
     onSelected: (_) {},
   )..sectionIndex = 0;
 
@@ -90,14 +90,14 @@ void main() {
   ];
 
   const noWidthNodeKey = Key('no-width node');
-  final negativeWidthNode = FlameChartNode<TimelineEvent>(
+  final negativeWidthNode = FlameChartNode<CpuStackFrame>(
     key: noWidthNodeKey,
     text: 'No-width node',
     rect: Rect.fromLTWH(1.0, 0.0, -0.1, chartRowHeight),
     colorPair: ThemedColorPair.from(
       const ColorPair(background: Colors.blue, foreground: Colors.white),
     ),
-    data: goldenAsyncTimelineEvent,
+    data: stackFrameA,
     onSelected: (_) {},
   )..sectionIndex = 0;
 
@@ -643,13 +643,13 @@ void main() {
   group('ScrollingFlameChartRow', () {
     late ScrollingFlameChartRow currentRow;
     final linkedScrollControllerGroup = LinkedScrollControllerGroup();
-    final testRow = ScrollingFlameChartRow<TimelineEvent>(
+    final testRow = ScrollingFlameChartRow<CpuStackFrame>(
       linkedScrollControllerGroup: linkedScrollControllerGroup,
       nodes: testNodes,
       width: 680.0, // 680.0 fits all test nodes and sideInsets of 70.0.
       startInset: sideInset,
-      hoveredNotifier: ValueNotifier<TimelineEvent?>(null),
-      selectionNotifier: ValueNotifier<TimelineEvent?>(null),
+      hoveredNotifier: ValueNotifier<CpuStackFrame?>(null),
+      selectionNotifier: ValueNotifier<CpuStackFrame?>(null),
       searchMatchesNotifier: null,
       activeSearchMatchNotifier: null,
       backgroundColor: Colors.transparent,
