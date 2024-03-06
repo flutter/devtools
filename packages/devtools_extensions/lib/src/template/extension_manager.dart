@@ -186,7 +186,7 @@ class ExtensionManager {
       );
       _updateQueryParameter(
         _vmServiceQueryParameter,
-        serviceManager.service!.wsUri!,
+        serviceManager.serviceUri!,
       );
     } catch (e) {
       final errorMessage =

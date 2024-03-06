@@ -134,7 +134,7 @@ class ServiceConnectionManager {
 
     unawaited(
       server.notifyForVmServiceConnection(
-        vmServiceUri: service!.wsUri!,
+        vmServiceUri: serviceManager.serviceUri!,
         connected: true,
       ),
     );
@@ -150,10 +150,10 @@ class ServiceConnectionManager {
     offlineController.previousConnectedApp = previousConnectedApp;
 
     // This must be called before we close the VM service so that
-    // [service.wsUri] is not null.
+    // [serviceManager.serviceUri] is not null.
     unawaited(
       server.notifyForVmServiceConnection(
-        vmServiceUri: service!.wsUri!,
+        vmServiceUri: serviceManager.serviceUri!,
         connected: false,
       ),
     );

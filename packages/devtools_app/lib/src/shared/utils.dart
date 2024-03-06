@@ -73,7 +73,7 @@ List<ConnectionDescription> generateDeviceDescription(
   ConnectionDescription? vmServiceConnection;
   if (includeVmServiceConnection &&
       serviceConnection.serviceManager.service != null) {
-    final description = serviceConnection.serviceManager.service!.wsUri!;
+    final description = serviceConnection.serviceManager.serviceUri!;
     vmServiceConnection = ConnectionDescription(
       title: 'VM Service Connection',
       description: description,
