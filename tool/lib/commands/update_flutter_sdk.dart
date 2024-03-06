@@ -59,8 +59,8 @@ class UpdateFlutterSdkCommand extends Command {
 
   @override
   Future run() async {
-    final updateOnPath = argResults![_updateOnPath];
-    final useCachedVersion = argResults![_useCacheFlag];
+    final updateOnPath = argResults![_updateOnPath] as bool;
+    final useCachedVersion = argResults![_useCacheFlag] as bool;
     final log = Logger.standard();
 
     // TODO(kenz): we can remove this if we can rewrite the
