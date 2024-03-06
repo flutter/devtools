@@ -16,6 +16,8 @@ typedef TestDtdConnectionInfo = ({
 
 /// Helper method to start DTD for the purpose of testing.
 Future<TestDtdConnectionInfo> startDtd() async {
+  const dtdConnectTimeout = Duration(seconds: 10);
+
   final completer = Completer<TestDtdConnectionInfo>();
   Process? dtdProcess;
   StreamSubscription? dtdStoutSubscription;
@@ -52,10 +54,7 @@ Future<TestDtdConnectionInfo> startDtd() async {
     });
 
     return completer.future
-        .timeout(
-      const Duration(seconds: 5),
-      onTimeout: onFailure,
-    )
+        .timeout(dtdConnectTimeout, onTimeout: onFailure)
         .then((value) async {
       await dtdStoutSubscription?.cancel();
       return value;

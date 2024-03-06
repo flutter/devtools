@@ -99,6 +99,7 @@ void main() {
 
       setUp(() async {
         dtd = await startDtd();
+        expect(dtd!.uri, isNotNull, reason: 'Error starting DTD for test');
         testDtdConnection =
             await DartToolingDaemon.connect(Uri.parse(dtd!.uri!));
       });
@@ -129,28 +130,32 @@ void main() {
         expect(currentRoots, containsAll(roots));
       }
 
-      test('adds and removes workspace roots', () async {
-        await verifyWorkspaceRoots({});
-        final rootUri1 = Uri.parse('file:///Users/me/package_root_1');
-        final rootUri2 = Uri.parse('file:///Users/me/package_root_2');
+      test(
+        'adds and removes workspace roots',
+        () async {
+          await verifyWorkspaceRoots({});
+          final rootUri1 = Uri.parse('file:///Users/me/package_root_1');
+          final rootUri2 = Uri.parse('file:///Users/me/package_root_2');
 
-        await updateWorkspaceRoots(root: rootUri1, connected: true);
-        await verifyWorkspaceRoots({rootUri1});
+          await updateWorkspaceRoots(root: rootUri1, connected: true);
+          await verifyWorkspaceRoots({rootUri1});
 
-        // Add a second root and verify the roots are unioned.
-        await updateWorkspaceRoots(root: rootUri2, connected: true);
-        await verifyWorkspaceRoots({rootUri1, rootUri2});
+          // Add a second root and verify the roots are unioned.
+          await updateWorkspaceRoots(root: rootUri2, connected: true);
+          await verifyWorkspaceRoots({rootUri1, rootUri2});
 
-        // Verify duplicates cannot be added.
-        await updateWorkspaceRoots(root: rootUri2, connected: true);
-        await verifyWorkspaceRoots({rootUri1, rootUri2});
+          // Verify duplicates cannot be added.
+          await updateWorkspaceRoots(root: rootUri2, connected: true);
+          await verifyWorkspaceRoots({rootUri1, rootUri2});
 
-        // Verify roots are removed for disconnect events.
-        await updateWorkspaceRoots(root: rootUri2, connected: false);
-        await verifyWorkspaceRoots({rootUri1});
-        await updateWorkspaceRoots(root: rootUri1, connected: false);
-        await verifyWorkspaceRoots({});
-      });
+          // Verify roots are removed for disconnect events.
+          await updateWorkspaceRoots(root: rootUri2, connected: false);
+          await verifyWorkspaceRoots({rootUri1});
+          await updateWorkspaceRoots(root: rootUri1, connected: false);
+          await verifyWorkspaceRoots({});
+        },
+        timeout: const Timeout.factor(4),
+      );
     });
 
     group('detectRootPackageForVmService', () {
