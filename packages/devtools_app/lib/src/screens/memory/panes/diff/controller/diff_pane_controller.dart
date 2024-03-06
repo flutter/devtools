@@ -23,7 +23,6 @@ import '../../../../../shared/memory/retaining_path.dart';
 import '../../../shared/heap/class_filter.dart';
 
 import '../../../shared/primitives/memory_utils.dart';
-import '../widgets/class_details/paths.dart';
 import 'class.dart';
 import '../data/heap_diff.dart';
 import 'item_controller.dart';

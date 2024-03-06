@@ -3,9 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:vm_service/vm_service.dart';
 
-import '../primitives/utils.dart';
 import 'class_name.dart';
 import 'heap_data.dart';
 import 'simple_items.dart';

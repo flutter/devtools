@@ -11,7 +11,6 @@ import 'package:vm_service/vm_service.dart';
 import '../../../service/vm_service_wrapper.dart';
 import '../../globals.dart';
 import '../../memory/heap_object.dart';
-import '../../memory/class_name.dart';
 import '../../vm_utils.dart';
 import '../primitives/scope.dart';
 

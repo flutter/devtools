@@ -122,8 +122,6 @@ class ClassSampler {
       return;
     }
 
-    final selection = _objects;
-
     throw UnimplementedError();
 
     // // drop to console
