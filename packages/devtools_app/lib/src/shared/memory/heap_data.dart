@@ -2,16 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
-
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../primitives/utils.dart';
 import 'class_name.dart';
-import 'simple_items.dart';
 import 'classes.dart';
 import 'retainers.dart';
+import 'simple_items.dart';
 
 /// Value for rootIndex is taken from the doc:
 /// https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/heap_snapshot.md#object-ids
@@ -129,7 +127,13 @@ Future<HeapData> calculateHeapData(
         () => SingleClassData(heapClass: className),
       );
 
-      classStats.countInstance(graph, i, retainers, retainedSizes);
+      classStats.countInstance(
+        graph,
+        index: i,
+        retainers: retainers,
+        retainedSizes: retainedSizes,
+        heapRootIndex: heapRootIndex,
+      );
     }
 
     footprint = MemoryFootprint(dart: dartSize, reachable: reachableSize);

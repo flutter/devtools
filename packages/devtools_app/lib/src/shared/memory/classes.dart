@@ -6,9 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../screens/memory/shared/heap/class_filter.dart';
-import '../primitives/utils.dart';
 import 'class_name.dart';
-import 'heap_data.dart';
 import 'retaining_path.dart';
 
 /// Statistical size-information about objects.
@@ -182,11 +180,12 @@ class SingleClassData extends ClassData {
   final Map<PathFromRoot, ObjectSetStats> byPath = {};
 
   void countInstance(
-    HeapSnapshotGraph graph,
-    int index,
-    List<int>? retainers,
-    List<int>? retainedSizes,
-  ) {
+    HeapSnapshotGraph graph, {
+    required int index,
+    required List<int>? retainers,
+    required List<int>? retainedSizes,
+    required int heapRootIndex,
+  }) {
     final PathFromRoot? path = retainers == null
         ? null
         : PathFromRoot.forObject(
