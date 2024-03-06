@@ -280,7 +280,7 @@ class _NetworkProfilerBody extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
-      child: Split(
+      child: SplitPane(
         initialFractions: const [0.5, 0.5],
         minSizes: const [200, 200],
         axis: Axis.horizontal,
