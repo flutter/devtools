@@ -5,12 +5,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../screens/memory/shared/heap/class_filter.dart';
-import '../../primitives/utils.dart';
-import '../class_name.dart';
-import 'classes.dart';
-import 'heap_data.dart';
-import 'retaining_path.dart';
+import '../../../shared/heap/class_filter.dart';
+import '../../../../../shared/primitives/utils.dart';
+import '../../../../../shared/memory/class_name.dart';
+import '../../../../../shared/memory/new/classes.dart';
+import '../../../../../shared/memory/new/heap_data.dart';
+import '../../../../../shared/memory/new/retaining_path.dart';
 
 /// Comparison between two sets of objects.
 class ObjectSetDiff {

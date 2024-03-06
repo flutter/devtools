@@ -189,7 +189,12 @@ class SingleClassData extends ClassData {
   ) {
     final PathFromRoot? path = retainers == null
         ? null
-        : PathFromRoot.forObject(graph, retainers, index);
+        : PathFromRoot.forObject(
+            graph,
+            shortestRetainers: retainers,
+            objectId: index,
+            heapRootIndex: heapRootIndex,
+          );
 
     final bool excludeFromRetained = path != null &&
         retainedSizes != null &&
