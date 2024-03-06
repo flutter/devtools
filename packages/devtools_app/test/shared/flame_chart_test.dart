@@ -17,7 +17,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 import '../test_infra/test_data/cpu_profiler/cpu_profile.dart';
-import '../test_infra/test_data/performance.dart';
 
 void main() {
   const defaultZoom = 1.0;
