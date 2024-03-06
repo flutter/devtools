@@ -25,7 +25,7 @@ abstract class Handler {
     DTDConnectionInfo? dtd,
   ) async {
     final missingRequiredParams = ServerApi._checkRequiredParameters(
-      [apiParameterValueKey, apiParameterVmServiceConnected],
+      const [apiParameterValueKey, apiParameterVmServiceConnected],
       queryParams: queryParams,
       api: api,
       requestName: apiNotifyForVmServiceConnection,
@@ -122,6 +122,7 @@ abstract class Handler {
           uri: null,
         );
       } finally {
+        await vmService?.dispose();
         vmService = null;
       }
     } else {
