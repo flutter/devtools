@@ -24,7 +24,7 @@ import '../../../shared/heap/class_filter.dart';
 
 import '../../../shared/primitives/memory_utils.dart';
 import 'class.dart';
-import '../data/heap_diff.dart';
+import '../data/heap_diff_store.dart';
 import 'item_controller.dart';
 import '../data/csv.dart';
 
