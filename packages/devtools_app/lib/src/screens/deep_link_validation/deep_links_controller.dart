@@ -216,7 +216,7 @@ class DeepLinksController extends DisposableController {
               selectedProject.value!.path,
               buildVariant: variant,
             );
-          } catch (e) {
+          } catch (_) {
             pagePhase.value = PagePhase.errorPage;
           }
           _androidAppLinks[selectedVariantIndex.value] = result;
@@ -229,16 +229,16 @@ class DeepLinksController extends DisposableController {
     await validateLinks();
   }
 
-  List<PathError> _getPathErrorsFromIntentFilterChecks(
+  Set<PathError> _getPathErrorsFromIntentFilterChecks(
     IntentFilterChecks intentFilterChecks,
   ) {
-    return [
+    return {
       if (!intentFilterChecks.hasActionView) PathError.intentFilterActionView,
       if (!intentFilterChecks.hasBrowsableCategory)
         PathError.intentFilterBrowsable,
       if (!intentFilterChecks.hasDefaultCategory) PathError.intentFilterDefault,
       if (!intentFilterChecks.hasAutoVerify) PathError.intentFilterAutoVerify,
-    ];
+    };
   }
 
   /// Get all unverified link data.
@@ -268,7 +268,7 @@ class DeepLinksController extends DisposableController {
         final pathErrors = {
           ...linkData.pathErrors,
           ..._getPathErrorsFromIntentFilterChecks(appLink.intentFilterChecks),
-        }.toList();
+        };
 
         linkData.pathErrors = pathErrors;
       }

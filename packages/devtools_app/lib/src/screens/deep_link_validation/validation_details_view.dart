@@ -54,9 +54,7 @@ class ValidationDetailView extends StatelessWidget {
                 _DomainCheckTable(controller: controller),
               if (viewType == TableViewType.pathView ||
                   viewType == TableViewType.singleUrlView)
-                _PathCheckTable(
-                  controller: controller,
-                ),
+                _PathCheckTable(controller: controller),
               const SizedBox(height: extraLargeSpacing),
               if (linkData.domainErrors.isNotEmpty)
                 Align(
@@ -450,15 +448,14 @@ class _DomainAssociatedLinksPanel extends StatelessWidget {
 }
 
 class _PathCheckTable extends StatelessWidget {
-  const _PathCheckTable({
-    required this.controller,
-  });
+  const _PathCheckTable({required this.controller});
 
   final DeepLinksController controller;
 
   @override
   Widget build(BuildContext context) {
     final linkData = controller.selectedLink.value!;
+    final theme=Theme.of(context);
     final intentFilterErrorCount = intentFilterErrors
         .where((error) => linkData.pathErrors.contains(error))
         .toList()
@@ -466,7 +463,7 @@ class _PathCheckTable extends StatelessWidget {
     final noIssueText = Text(
       'No issues found',
       style: TextStyle(
-        color: Theme.of(context).colorScheme.green,
+        color: theme.colorScheme.green,
       ),
     );
     return ListTileTheme(
@@ -479,11 +476,11 @@ class _PathCheckTable extends StatelessWidget {
           const SizedBox(height: intermediateSpacing),
           Text(
             'Path check',
-            style: Theme.of(context).textTheme.titleSmall,
+            style: theme.textTheme.titleSmall,
           ),
           const SizedBox(height: intermediateSpacing),
           ListTile(
-            tileColor: Theme.of(context).colorScheme.deeplinkTableHeaderColor,
+            tileColor: theme.colorScheme.deeplinkTableHeaderColor,
             title: const Row(
               children: [
                 SizedBox(width: defaultSpacing),
@@ -504,9 +501,9 @@ class _PathCheckTable extends StatelessWidget {
           const Divider(height: 1.0),
           ExpansionTile(
             backgroundColor:
-                Theme.of(context).colorScheme.alternatingBackgroundColor2,
+                theme.colorScheme.alternatingBackgroundColor2,
             collapsedBackgroundColor:
-                Theme.of(context).colorScheme.alternatingBackgroundColor2,
+                theme.colorScheme.alternatingBackgroundColor2,
             title: Row(
               children: [
                 const SizedBox(width: defaultSpacing),
@@ -517,7 +514,7 @@ class _PathCheckTable extends StatelessWidget {
                       ? Text(
                           '$intentFilterErrorCount Check failed',
                           style: TextStyle(
-                            color: Theme.of(context).colorScheme.error,
+                            color: theme.colorScheme.error,
                           ),
                         )
                       : noIssueText,
@@ -533,9 +530,9 @@ class _PathCheckTable extends StatelessWidget {
           const Divider(height: 1.0),
           ExpansionTile(
             backgroundColor:
-                Theme.of(context).colorScheme.alternatingBackgroundColor2,
+                theme.colorScheme.alternatingBackgroundColor2,
             collapsedBackgroundColor:
-                Theme.of(context).colorScheme.alternatingBackgroundColor2,
+                theme.colorScheme.alternatingBackgroundColor2,
             title: Row(
               children: [
                 const SizedBox(width: defaultSpacing),
@@ -546,7 +543,7 @@ class _PathCheckTable extends StatelessWidget {
                       ? Text(
                           'Check failed',
                           style: TextStyle(
-                            color: Theme.of(context).colorScheme.error,
+                            color: theme.colorScheme.error,
                           ),
                         )
                       : noIssueText,

@@ -42,7 +42,7 @@ class AppLinkSettings {
   /// The application id of the Android build of this Flutter project.
   final String applicationId;
 
-  /// The flag to enable deep linking.
+  /// The flag in android manifest to enable deep linking. The flag is set by user.
   final bool deeplinkingFlagEnabled;
 
   /// The supported deep link of the Android build of this Flutter project.

@@ -142,7 +142,7 @@ class LinkData with SearchableDataMixin {
     required this.os,
     this.scheme = const <String>['http://', 'https://'],
     this.domainErrors = const <DomainError>[],
-    this.pathErrors = const <PathError>[],
+    this.pathErrors = const <PathError>{},
     this.associatedPath = const <String>[],
     this.associatedDomains = const <String>[],
   });
@@ -152,7 +152,7 @@ class LinkData with SearchableDataMixin {
   final List<PlatformOS> os;
   final List<String> scheme;
   final List<DomainError> domainErrors;
-  List<PathError> pathErrors;
+  Set<PathError> pathErrors;
 
   final List<String> associatedPath;
   final List<String> associatedDomains;
