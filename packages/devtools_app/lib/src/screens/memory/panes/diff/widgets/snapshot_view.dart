@@ -34,7 +34,7 @@ class SnapshotView extends StatelessWidget {
           return const Center(child: Text('Calculating...'));
         }
 
-        final classes = controller.derived.heapClasses.value;
+        final classes = controller.derived.classesBeforeFiltering.value;
         if (classes == null) {
           final current = controller.core.selectedItem as SnapshotDataItem;
           return current.isProcessing.value

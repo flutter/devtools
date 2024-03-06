@@ -150,7 +150,7 @@ class DiffPaneController extends DisposableController {
   }
 
   void downloadCurrentItemToCsv() {
-    final classes = derived.heapClasses.value!;
+    final classes = derived.classesBeforeFiltering.value!;
     final item = core.selectedDataItem!;
     final diffWith = item.diffWith.value;
 
@@ -249,7 +249,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   late final ValueNotifier<SnapshotItem> _selectedItem;
 
   /// Classes to show.
-  final heapClasses = ValueNotifier<ClassDataList?>(null);
+  final classesBeforeFiltering = ValueNotifier<ClassDataList?>(null);
 
   late final ClassesTableSingleData classesTableSingle;
 
@@ -273,7 +273,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   final selectedPath = ValueNotifier<PathData?>(null);
 
   /// Storage for already calculated diffs between snapshots.
-  late final _diffStore = HeapDiffStore();
+  final _diffStore = HeapDiffStore();
 
   void applyFilter(ClassFilter filter) {
     if (filter.equals(_core.classFilter.value)) return;
@@ -339,28 +339,38 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     return _diffStore.compare(theItem?.heap, itemToDiffWith?.heap);
   }
 
-  void _updateClasses({
-    required ClassDataList? classes,
-    required HeapClassName? className,
-  }) {
-    if (classes != null) {
-      final filter = _core.classFilter.value;
-      classes = classes.filtered(filter, _core.rootPackage);
-    }
+  void _updatePathTableData() {
+    final theClassData = classData.value;
 
+    // pathData = theClassData?.byPath.keys
+    //     .map((path) => PathData(theClassData, path))
+    //     .toList();
+
+    final thePath = _core.path;
+    if (theClassData != null && thePath != null) {
+      selectedPath.value = PathData(theClassData, thePath);
+    } else {
+      selectedPath.value = null;
+    }
+  }
+
+  void _updateClassTableData({
+    required ClassDataList? classes,
+    required HeapClassName? selectedClassName,
+  }) {
     if (classes is ClassDataList<SingleClassData>) {
       _singleClassesToShow.value = classes;
       _diffClassesToShow.value = null;
-      classesTableSingle.selection.value =
-          classes.list.singleWhereOrNull((d) => d.className == className);
+      classesTableSingle.selection.value = classes.list
+          .singleWhereOrNull((d) => d.className == selectedClassName);
       classesTableDiff.selection.value = null;
       classData.value = classesTableSingle.selection.value;
     } else if (classes is ClassDataList<DiffClassData>) {
       _singleClassesToShow.value = null;
       _diffClassesToShow.value = classes;
       classesTableSingle.selection.value = null;
-      classesTableDiff.selection.value =
-          classes.list.singleWhereOrNull((d) => d.className == className);
+      classesTableDiff.selection.value = classes.list
+          .singleWhereOrNull((d) => d.className == selectedClassName);
     } else if (classes == null) {
       _singleClassesToShow.value = null;
       _diffClassesToShow.value = null;
@@ -392,23 +402,21 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     _startUpdatingValues();
     try {
       // Set class to show.
-      final classes = _snapshotClassesAfterDiffing();
-      heapClasses.value = classes;
-      _selectClassAndPath();
-      _updateClasses(
+      ClassDataList<ClassData>? classes = _snapshotClassesAfterDiffing();
+      classesBeforeFiltering.value = classes;
+
+      // Apply filter.
+      classes = classes?.filtered(_core.classFilter.value, _core.rootPackage);
+
+      _updateClassAndPathSelection(classes);
+
+      _updateClassTableData(
         classes: classes,
-        className: _core.className,
+        selectedClassName: _core.className,
       );
 
-      final theClassData = classData.value;
-      final thePath = _core.path;
-      if (theClassData != null && thePath != null) {
-        selectedPath.value = PathData(theClassData, thePath);
-      } else {
-        selectedPath.value = null;
-      }
+      _updatePathTableData();
 
-      // Set current snapshot.
       _selectedItem.value = _core.selectedItem;
     } finally {
       _endUpdatingValues();
@@ -439,17 +447,15 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   }
 
   /// Set selection of a class and path.
-  void _selectClassAndPath() {
-    final classes = heapClasses.value;
-
+  void _updateClassAndPathSelection(ClassDataList<ClassData>? filteredClasses) {
     // If there are no classes, do not change previous selection.
-    if (classes == null || classes.list.isEmpty) return;
+    if (filteredClasses == null || filteredClasses.list.isEmpty) return;
 
     // Try to preserve existing selection.
-    ClassData? classData = classes.byName(_core.className);
+    ClassData? classData = filteredClasses.byName(_core.className);
 
     // If the class is not found, select the class with the maximum retained size.
-    classData ??= classes.withMaxRetainedSize();
+    classData ??= filteredClasses.withMaxRetainedSize();
 
     _core.className = classData.className;
 
