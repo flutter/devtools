@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import 'split.dart';
+import 'split_pane.dart';
 
 /// A widget that takes a list of [children] and lays them out in a column where
 /// each child has a flexible height.

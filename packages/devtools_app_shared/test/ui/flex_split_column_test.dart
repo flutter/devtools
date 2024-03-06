@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('FlexSplitColumn', () {
-    // The UI of the FlexSplitColumn widget is well tested in [SplitPane_test.dart].
+    // The UI of the FlexSplitColumn widget is well tested in [split_pane_test.dart].
     // These tests test the data transformations that take place upon
     // constructing [FlexSplitColumn].
 
