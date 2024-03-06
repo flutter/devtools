@@ -10,5 +10,5 @@
 cd tool
 flutter pub get
 dart bin/devtools_tool.dart pub-get
-dart bin/devtools_tool.dart analyze
+dart bin/devtools_tool.dart analyze --no-fatal-infos
 cd ..

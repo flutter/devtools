@@ -54,11 +54,13 @@ class BuildCommand extends Command {
     final repo = DevToolsRepo.getInstance();
     final processManager = ProcessManager();
 
-    final updateFlutter = argResults![BuildCommandArgs.updateFlutter.flagName];
+    final updateFlutter =
+        argResults![BuildCommandArgs.updateFlutter.flagName] as bool;
     final updatePerfetto =
-        argResults![BuildCommandArgs.updatePerfetto.flagName];
-    final runPubGet = argResults![BuildCommandArgs.pubGet.flagName];
-    final buildMode = argResults![BuildCommandArgs.buildMode.flagName];
+        argResults![BuildCommandArgs.updatePerfetto.flagName] as bool;
+    final runPubGet = argResults![BuildCommandArgs.pubGet.flagName] as bool;
+    final buildMode =
+        argResults![BuildCommandArgs.buildMode.flagName] as String;
 
     final webBuildDir =
         Directory(path.join(repo.devtoolsAppDirectoryPath, 'build', 'web'));
