@@ -8,7 +8,7 @@ import 'dart:math';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../devtools_app.dart';
-import '../memory/adapted_heap_data.dart';
+import '../memory/heap_object.dart';
 import '../memory/class_name.dart';
 import 'dart_object_node.dart';
 import 'generic_instance_reference.dart';

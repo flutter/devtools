@@ -23,10 +23,10 @@ import '../../../shared/heap/class_filter.dart';
 
 import '../../../shared/primitives/memory_utils.dart';
 import '../widgets/class_details/paths.dart';
-import 'class_data.dart';
-import 'heap_diff.dart';
+import 'class.dart';
+import '../data/heap_diff.dart';
 import 'item_controller.dart';
-import 'utils.dart';
+import '../data/csv.dart';
 
 class DiffPaneController extends DisposableController {
   DiffPaneController(this._heapGraphLoader);

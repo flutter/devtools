@@ -4,7 +4,7 @@
 
 import 'package:vm_service/vm_service.dart';
 
-import '../memory/adapted_heap_data.dart';
+import '../memory/heap_object.dart';
 import '../memory/simple_items.dart';
 import '../vm_utils.dart';
 import 'diagnostics_node.dart';

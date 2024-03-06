@@ -4,7 +4,7 @@
 
 import 'dart:io';
 
-import 'package:devtools_app/src/shared/memory/adapted_heap_data.dart';
+import 'package:devtools_app/src/shared/memory/heap_object.dart';
 
 const _dataDir = 'test/test_infra/test_data/memory/heap/';
 

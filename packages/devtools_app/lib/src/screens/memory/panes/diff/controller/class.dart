@@ -4,7 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 
-import '../../../../../shared/memory/adapted_heap_data.dart';
+import '../../../../../shared/memory/heap_object.dart';
 import '../../../../../shared/memory/new/classes.dart';
 import '../../../shared/heap/class_filter.dart';
 import '../../../shared/primitives/simple_elements.dart';

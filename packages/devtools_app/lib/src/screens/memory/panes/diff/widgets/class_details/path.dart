@@ -11,7 +11,7 @@ import '../../../../../../shared/common_widgets.dart';
 import '../../../../../../shared/memory/class_name.dart';
 import '../../../../../../shared/memory/new/retaining_path.dart';
 import '../../../../../../shared/primitives/utils.dart';
-import '../../controller/class_data.dart';
+import '../../controller/class.dart';
 
 class RetainingPathView extends StatelessWidget {
   const RetainingPathView({

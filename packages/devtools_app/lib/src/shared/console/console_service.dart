@@ -15,7 +15,7 @@ import '../diagnostics/generic_instance_reference.dart';
 import '../diagnostics/inspector_service.dart';
 import '../diagnostics/tree_builder.dart';
 import '../globals.dart';
-import '../memory/adapted_heap_data.dart';
+import '../memory/heap_object.dart';
 import '../primitives/utils.dart';
 
 /// A line in the console.

@@ -8,9 +8,6 @@ enum RefDirection {
   outbound,
 }
 
-/// Result of invocation of [identityHashCode].
-typedef IdentityHashCode = int;
-
 class MemoryFootprint {
   MemoryFootprint({
     required this.dart,

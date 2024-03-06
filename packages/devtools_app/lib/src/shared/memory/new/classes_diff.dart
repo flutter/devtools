@@ -2,49 +2,163 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
+import 'package:vm_service/vm_service.dart';
 
+import '../../../screens/memory/shared/heap/class_filter.dart';
 import '../../primitives/utils.dart';
 import '../class_name.dart';
 import 'classes.dart';
-import 'classes_diff.dart';
 import 'heap_data.dart';
+import 'retaining_path.dart';
 
-@immutable
-class HeapDiffData {
-  const HeapDiffData._(this.classes,
-      {required this.before, required this.after});
+/// Comparison between two sets of objects.
+class ObjectSetDiff {
+  ObjectSetDiff({
+    required ObjectSet? setBefore,
+    required ObjectSet? setAfter,
+    required HeapData? dataBefore,
+    required HeapData? dataAfter,
+  })  : assert((setBefore == null) == (dataBefore == null)),
+        assert((setAfter == null) == (dataAfter == null)) {
+    final mapBefore = _toCodeToIndexMap(setBefore, dataBefore);
+    final mapAfter = _toCodeToIndexMap(setAfter, dataAfter);
 
-  final HeapData before;
-  final HeapData after;
+    final allCodes = mapBefore.keys.toSet().union(mapAfter.keys.toSet());
 
-  final ClassDataList<DiffClassData> classes;
+    for (var code in allCodes) {
+      final before = mapBefore[code];
+      final after = mapAfter[code];
+
+      if (before != null && after != null) {
+        _countInstance(persisted, after, dataAfter!, setAfter!);
+        continue;
+      }
+
+      if (before != null) {
+        _countInstance(deleted, before, dataBefore!, setBefore!);
+        _uncountInstance(delta, before, dataBefore, setBefore);
+        continue;
+      }
+
+      if (after != null) {
+        _countInstance(created, after, dataAfter!, setAfter!);
+        _countInstance(delta, after, dataAfter, setAfter);
+        continue;
+      }
+
+      assert(false);
+    }
+
+    assert(
+      delta.instanceCount == created.instanceCount - deleted.instanceCount,
+    );
+  }
+
+  static void _countInstance(
+    ObjectSetStats setToAlter,
+    int index,
+    HeapData data,
+    ObjectSet originalSet,
+  ) {
+    final excludeFromRetained =
+        originalSet.objectsExcludedFromRetainedSize.contains(index);
+    setToAlter.countInstance(
+      data.graph,
+      index,
+      data.retainedSizes,
+      excludeFromRetained: excludeFromRetained,
+    );
+  }
+
+  static void _uncountInstance(
+    ObjectSetStats setToAlter,
+    int index,
+    HeapData data,
+    ObjectSet originalSet,
+  ) {
+    final excludeFromRetained =
+        originalSet.objectsExcludedFromRetainedSize.contains(index);
+    setToAlter.uncountInstance(
+      data.graph,
+      index,
+      data.retainedSizes,
+      excludeFromRetained: excludeFromRetained,
+    );
+  }
+
+  static Map<int, int> _toCodeToIndexMap(
+    ObjectSet? ids,
+    HeapData? data,
+  ) {
+    if (ids == null || data == null) return const {};
+    return {
+      for (var id in ids.objects) data.graph.objects[id].hashCode: id,
+    };
+  }
+
+  final created = ObjectSet();
+  final deleted = ObjectSet();
+  final persisted = ObjectSet();
+  final delta = ObjectSetStats();
+
+  bool get isZero => delta.isZero;
 }
 
-HeapDiffData calculateHeapDiffData(
-  HeapData before,
-  HeapData after,
-) {
-  final classesByName = subtractMaps<HeapClassName, SingleClassData,
-      SingleClassData, DiffClassData>(
-    from: after.classes!.asMap(),
-    subtract: before.classes!.asMap(),
-    subtractor: ({subtract, from}) => DiffClassData.compare(
-      before: subtract,
-      after: from,
-      dataBefore: before,
-      dataAfter: after,
-    ),
-  );
+class DiffClassData extends ClassData {
+  DiffClassData._(HeapClassName heapClass, this.diff, this.byPath)
+      : super(heapClass: heapClass);
 
-  return HeapDiffData._(
-    ClassDataList<DiffClassData>(classesByName.values.toList(growable: false)),
-    before: before,
-    after: after,
-  );
+  final ObjectSetDiff diff;
+
+  @override
+  ObjectSetStats get objects => diff.delta;
+
+  @override
+  final Map<PathFromRoot, ObjectSetStats> byPath;
+
+  static DiffClassData? compare({
+    required SingleClassData? before,
+    required HeapData? dataBefore,
+    required SingleClassData? after,
+    required HeapData? dataAfter,
+  }) {
+    assert((before == null) == (dataBefore == null));
+    assert((before == null) == (dataAfter == null));
+
+    if (before == null && after == null) return null;
+    final heapClass = (before?.heapClass ?? after?.heapClass)!;
+
+    final result = DiffClassData._(
+      heapClass,
+      ObjectSetDiff(
+        setBefore: before?.objects,
+        setAfter: after?.objects,
+        dataBefore: dataBefore,
+        dataAfter: dataAfter,
+      ),
+      // PathFromRoot, ObjectSetStats
+      subtractMaps<PathFromRoot, ObjectSetStats, ObjectSetStats,
+          ObjectSetStats>(
+        from: after?.byPath,
+        subtract: before?.byPath,
+        subtractor: ({subtract, from}) =>
+            ObjectSetStats.subtract(subtract: subtract, from: from),
+      ),
+    );
+
+    if (result.isZero()) return null;
+    return result;
+  }
+
+  bool isZero() => diff.isZero;
 }
 
-/// List of classes with per-class comparison between two heaps.
+// ///////////////////
+// ///
+// ///
+
+// /// List of classes with per-class comparison between two heaps.
 // class DiffHeapClasses extends HeapClasses_<DiffClassStats>
 //     with FilterableHeapClasses_<DiffClassStats> {
 //   DiffHeapClasses._(_HeapCouple couple)
