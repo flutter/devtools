@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -122,6 +123,7 @@ class ClassDataList<T extends ClassData> {
         _appliedFilter = appliedFilter,
         _filtered = filtered;
 
+  /// The list of classes after filtering.
   List<T> get list => _filtered ?? _originalList;
 
   final List<T> _originalList;
@@ -129,7 +131,7 @@ class ClassDataList<T extends ClassData> {
   final List<T>? _filtered;
 
   Map<HeapClassName, T> asMap() =>
-      {for (var c in _originalList) c.heapClass: c};
+      {for (var c in _originalList) c.className: c};
 
   ClassDataList<T> filtered(ClassFilter newFilter, String? rootPackage) {
     final filtered = ClassFilter.filter(
@@ -137,7 +139,7 @@ class ClassDataList<T extends ClassData> {
       oldFiltered: _filtered,
       newFilter: newFilter,
       original: _originalList,
-      extractClass: (s) => s.heapClass,
+      extractClass: (s) => s.className,
       rootPackage: rootPackage,
     );
     return ClassDataList._filtered(
@@ -147,20 +149,31 @@ class ClassDataList<T extends ClassData> {
     );
   }
 
-  late final T withMaxRetainedSize = () {
+  T withMaxRetainedSize() {
     return list.reduce(
       (a, b) => a.objects.retainedSize > b.objects.retainedSize ? a : b,
     );
-  }();
+  }
+
+  /// Returns class data if [className] is presented in the [list].
+  ClassData? byName(HeapClassName? className) {
+    if (className == null) return null;
+    return list.firstWhereOrNull((c) => c.className == className);
+  }
 }
 
 abstract class ClassData {
-  ClassData({required this.heapClass});
+  ClassData({required this.className});
 
   ObjectSetStats get objects;
   Map<PathFromRoot, ObjectSetStats> get byPath;
 
-  final HeapClassName heapClass;
+  final HeapClassName className;
+
+  bool contains(PathFromRoot? path) {
+    if (path == null) return false;
+    return byPath.containsKey(path);
+  }
 
   late final PathFromRoot pathWithMaxRetainedSize = () {
     assert(byPath.isNotEmpty);
@@ -171,7 +184,7 @@ abstract class ClassData {
 }
 
 class SingleClassData extends ClassData {
-  SingleClassData({required super.heapClass});
+  SingleClassData({required super.className});
 
   @override
   final ObjectSet objects = ObjectSet();
@@ -197,7 +210,7 @@ class SingleClassData extends ClassData {
 
     final bool excludeFromRetained = path != null &&
         retainedSizes != null &&
-        path.classes.contains(heapClass);
+        path.classes.contains(className);
 
     objects.countInstance(
       graph,

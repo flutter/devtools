@@ -79,10 +79,10 @@ class PathData {
       return false;
     }
     return other is PathData &&
-        other.classData.heapClass == classData.heapClass &&
+        other.classData.className == classData.className &&
         other.path == path;
   }
 
   @override
-  int get hashCode => Object.hash(classData.heapClass, path);
+  int get hashCode => Object.hash(classData.className, path);
 }

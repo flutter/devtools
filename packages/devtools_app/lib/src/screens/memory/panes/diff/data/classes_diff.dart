@@ -102,7 +102,7 @@ class ObjectSetDiff {
 
 class DiffClassData extends ClassData {
   DiffClassData._(HeapClassName heapClass, this.diff, this.byPath)
-      : super(heapClass: heapClass);
+      : super(className: heapClass);
 
   final ObjectSetDiff diff;
 
@@ -119,7 +119,7 @@ class DiffClassData extends ClassData {
     required HeapData dataAfter,
   }) {
     if (before == null && after == null) return null;
-    final heapClass = (before?.heapClass ?? after?.heapClass)!;
+    final heapClass = (before?.className ?? after?.className)!;
 
     final result = DiffClassData._(
       heapClass,

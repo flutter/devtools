@@ -42,7 +42,7 @@ class _ClassNameColumn extends ColumnData<DiffClassData>
   final ClassesTableDiffData diffData;
 
   @override
-  String? getValue(DiffClassData dataObject) => dataObject.heapClass.className;
+  String? getValue(DiffClassData dataObject) => dataObject.className.className;
 
   @override
   bool get supportsSorting => true;
@@ -60,7 +60,7 @@ class _ClassNameColumn extends ColumnData<DiffClassData>
     VoidCallback? onPressed,
   }) {
     return HeapClassView(
-      theClass: data.heapClass,
+      theClass: data.className,
       showCopyButton: isRowSelected,
       copyGaItem: gac.MemoryEvent.diffClassDiffCopy,
       rootPackage: serviceConnection.serviceManager.rootInfoNow().package,
@@ -164,7 +164,7 @@ class _InstanceColumn extends ColumnData<DiffClassData>
     return HeapInstanceTableCell(
       objects,
       heapCallback,
-      data.heapClass,
+      data.className,
       isSelected: isRowSelected,
       liveItemsEnabled: dataPart != _DataPart.deleted,
     );
@@ -348,7 +348,7 @@ class ClassesTableDiff extends StatelessWidget {
           columnGroups: _columnGroups(),
           data: classes,
           dataKey: dataKey,
-          keyFactory: (e) => Key(e.heapClass.fullName),
+          keyFactory: (e) => Key(e.className.fullName),
           selectionNotifier: diffData.selection,
           onItemSelected: (_) => ga.select(
             gac.memory,

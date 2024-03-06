@@ -34,7 +34,7 @@ class _ClassNameColumn extends ColumnData<SingleClassData>
 
   @override
   String? getValue(SingleClassData dataObject) =>
-      dataObject.heapClass.className;
+      dataObject.className.className;
 
   @override
   bool get supportsSorting => true;
@@ -52,7 +52,7 @@ class _ClassNameColumn extends ColumnData<SingleClassData>
     VoidCallback? onPressed,
   }) {
     return HeapClassView(
-      theClass: data.heapClass,
+      theClass: data.className,
       showCopyButton: isRowSelected,
       copyGaItem: gac.MemoryEvent.diffClassSingleCopy,
       rootPackage: serviceConnection.serviceManager.rootInfoNow().package,
@@ -103,7 +103,7 @@ class _InstanceColumn extends ColumnData<SingleClassData>
     return HeapInstanceTableCell(
       data.objects,
       classData.heap,
-      data.heapClass,
+      data.className,
       isSelected: isRowSelected,
     );
   }
@@ -200,7 +200,7 @@ class ClassesTableSingle extends StatelessWidget {
       columns: _columns.columnList,
       data: classes.list,
       dataKey: dataKey,
-      keyFactory: (e) => Key(e.heapClass.fullName),
+      keyFactory: (e) => Key(e.className.fullName),
       selectionNotifier: classesData.selection,
       onItemSelected: (_) => ga.select(
         gac.memory,

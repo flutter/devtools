@@ -143,8 +143,8 @@ class RetainingPathTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dataKey =
-        'RetainingPathTable-$isDiff-${classData.heapClass.fullName}';
-    final columns = _columns(dataKey, isDiff, classData.heapClass.shortName);
+        'RetainingPathTable-$isDiff-${classData.className.fullName}';
+    final columns = _columns(dataKey, isDiff, classData.className.shortName);
     return FlatTable<PathData>(
       dataKey: dataKey,
       columns: columns.columnList,

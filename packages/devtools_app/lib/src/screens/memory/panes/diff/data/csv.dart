@@ -24,8 +24,8 @@ String classesToCsv(Iterable<ClassData> classes) {
     for (var pathStats in classData.byPath.entries) {
       csvBuffer.writeln(
         [
-          classData.heapClass.className,
-          classData.heapClass.library,
+          classData.className.className,
+          classData.className.library,
           pathStats.value.instanceCount,
           pathStats.value.shallowSize,
           pathStats.value.retainedSize,

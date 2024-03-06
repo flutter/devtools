@@ -124,7 +124,7 @@ Future<HeapData> calculateHeapData(
       reachableSize += object.shallowSize;
       final classStats = classes.putIfAbsent(
         className,
-        () => SingleClassData(heapClass: className),
+        () => SingleClassData(className: className),
       );
 
       classStats.countInstance(

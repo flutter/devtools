@@ -230,11 +230,11 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
 
     addAutoDisposeListener(
       classesTableSingle.selection,
-      () => _setClassIfNotNull(classesTableSingle.selection.value?.heapClass),
+      () => _setClassIfNotNull(classesTableSingle.selection.value?.className),
     );
     addAutoDisposeListener(
       classesTableDiff.selection,
-      () => _setClassIfNotNull(classesTableDiff.selection.value?.heapClass),
+      () => _setClassIfNotNull(classesTableDiff.selection.value?.className),
     );
     addAutoDisposeListener(
       selectedPath,
@@ -352,7 +352,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
       _singleClassesToShow.value = classes;
       _diffClassesToShow.value = null;
       classesTableSingle.selection.value =
-          classes.list.singleWhereOrNull((d) => d.heapClass == className);
+          classes.list.singleWhereOrNull((d) => d.className == className);
       classesTableDiff.selection.value = null;
       classData.value = classesTableSingle.selection.value;
     } else if (classes is ClassDataList<DiffClassData>) {
@@ -360,7 +360,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
       _diffClassesToShow.value = classes;
       classesTableSingle.selection.value = null;
       classesTableDiff.selection.value =
-          classes.list.singleWhereOrNull((d) => d.heapClass == className);
+          classes.list.singleWhereOrNull((d) => d.className == className);
     } else if (classes == null) {
       _singleClassesToShow.value = null;
       _diffClassesToShow.value = null;
@@ -438,17 +438,23 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     _assertIntegrity();
   }
 
-  /// Set initial selection of class and path, for discoverability of detailed view.
+  /// Set selection of a class and path.
   void _selectClassAndPath() {
-    if (_core.className != null) return;
-    assert(_core.path == null);
-
     final classes = heapClasses.value;
-    if (classes == null) return;
 
-    final theClass = classes.withMaxRetainedSize;
+    // If there are no classes, do not change previous selection.
+    if (classes == null || classes.list.isEmpty) return;
 
-    _core.className = theClass.heapClass;
-    _core.path = theClass.pathWithMaxRetainedSize;
+    // Try to preserve existing selection.
+    ClassData? classData = classes.byName(_core.className);
+
+    // If the class is not found, select the class with the maximum retained size.
+    classData ??= classes.withMaxRetainedSize();
+
+    _core.className = classData.className;
+
+    if (!classData.contains(_core.path)) {
+      _core.path = classData.pathWithMaxRetainedSize;
+    }
   }
 }
