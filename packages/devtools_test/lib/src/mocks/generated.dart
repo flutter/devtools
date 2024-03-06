@@ -22,7 +22,6 @@ import 'package:vm_service/vm_service.dart';
   MockSpec<PerformanceController>(),
   MockSpec<FlutterFramesController>(),
   MockSpec<TimelineEventsController>(),
-  MockSpec<LegacyTimelineEventsController>(),
   MockSpec<LoggingController>(),
   MockSpec<RasterStatsController>(),
   MockSpec<ProgramExplorerController>(),

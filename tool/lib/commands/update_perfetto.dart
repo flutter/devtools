@@ -63,7 +63,7 @@ class UpdatePerfettoCommand extends Command {
     existingBuild.deleteSync(recursive: true);
 
     logStatus('updating Perfetto build');
-    final buildLocation = argResults![_buildFlag];
+    final buildLocation = argResults![_buildFlag] as String?;
     if (buildLocation != null) {
       logStatus('using Perfetto build from $buildLocation');
       logStatus(
