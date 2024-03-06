@@ -1,3 +1,7 @@
+## 0.0.11-wip
+* Remove deprecated `background` and `onBackground` values for `lightColorScheme`
+and `darkColorScheme`.
+
 ## 0.0.10
 * Add `DTDManager` class and export from `service.dart`.
 * Add `showDevToolsDialog` helper method.
