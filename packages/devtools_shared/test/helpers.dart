@@ -16,15 +16,20 @@ typedef TestDtdConnectionInfo = ({
 
 /// Helper method to start DTD for the purpose of testing.
 Future<TestDtdConnectionInfo> startDtd() async {
-  final completer =
-      Completer<({String? uri, String? secret, Process? dtdProcess})>();
+  final completer = Completer<TestDtdConnectionInfo>();
   Process? dtdProcess;
+  StreamSubscription? dtdStoutSubscription;
+
+  TestDtdConnectionInfo onFailure() =>
+      (uri: null, secret: null, dtdProcess: dtdProcess);
+
   try {
     dtdProcess = await Process.start(
       Platform.resolvedExecutable,
       ['tooling-daemon', '--machine'],
     );
-    dtdProcess.stdout.listen((List<int> data) {
+
+    dtdStoutSubscription = dtdProcess.stdout.listen((List<int> data) {
       try {
         final decoded = utf8.decode(data);
         final json = jsonDecode(decoded) as Map<String, Object?>;
@@ -39,19 +44,25 @@ Future<TestDtdConnectionInfo> startDtd() async {
             (uri: uri, secret: secret, dtdProcess: dtdProcess),
           );
         } else {
-          completer.complete((uri: null, secret: null, dtdProcess: dtdProcess));
+          completer.complete(onFailure());
         }
       } catch (e) {
-        completer.complete((uri: null, secret: null, dtdProcess: dtdProcess));
+        completer.complete(onFailure());
       }
     });
 
-    return completer.future.timeout(
+    return completer.future
+        .timeout(
       const Duration(seconds: 5),
-      onTimeout: () => (uri: null, secret: null, dtdProcess: dtdProcess),
-    );
+      onTimeout: onFailure,
+    )
+        .then((value) async {
+      await dtdStoutSubscription?.cancel();
+      return value;
+    });
   } catch (e) {
-    return (uri: null, secret: null, dtdProcess: dtdProcess);
+    await dtdStoutSubscription?.cancel();
+    return onFailure();
   }
 }
 
