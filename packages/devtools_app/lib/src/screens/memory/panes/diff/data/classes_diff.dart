@@ -89,7 +89,7 @@ class ObjectSetDiff {
   ) {
     if (ids == null || data == null) return const {};
     return {
-      for (var id in ids.objects) data.graph.objects[id].hashCode: id,
+      for (var id in ids.objects) data.graph.objects[id].identityHashCode: id,
     };
   }
 
