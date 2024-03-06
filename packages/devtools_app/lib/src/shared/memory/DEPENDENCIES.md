@@ -5,7 +5,6 @@ Dependencies that create loops (inversions) are marked with `!`.
 
 ```mermaid
 flowchart TD;
-classes.dart--!-->heap_data.dart;
 classes.dart-->class_name.dart;
 classes.dart-->retaining_path.dart;
 heap_data.dart-->class_name.dart;
@@ -19,7 +18,7 @@ retaining_path.dart-->class_name.dart;
 ```
 
 ### Inversions
-In this folder: 1
+In this folder: 0
 
-Including sub-folders: 1
+Including sub-folders: 0
 
