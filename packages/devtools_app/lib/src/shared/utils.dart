@@ -243,25 +243,40 @@ class DebounceTimer {
     Duration duration,
     FutureOr<void> Function(Timer timer) callback,
   ) {
-    _timer = Timer.periodic(duration, (timer) async {
-      // If the callback is still running, then don't run again.
-      if (_isRunning) {
-        return;
-      }
+    // Start a timer with no duration so that the callback will be triggered
+    // immediately.
+    _timer = Timer(const Duration(), () async {
+      await callback(_timer);
 
-      try {
-        _isRunning = true;
-        await callback(timer);
-      } finally {
-        _isRunning = false;
-      }
+      // If the timer was cancelled during the initial callback then don't start
+      // the periodic timer.
+      if (_isCancelled) return;
+
+      // Now a periodic timer is used to repeatedly trigger the callback after
+      // the duration.
+      _timer = Timer.periodic(duration, (timer) async {
+        // If the previous callback is still running, then don't trigger another
+        // callback. (debounce)
+        if (_isRunning) {
+          return;
+        }
+
+        try {
+          _isRunning = true;
+          await callback(timer);
+        } finally {
+          _isRunning = false;
+        }
+      });
     });
   }
 
   late Timer _timer;
+  bool _isCancelled = false;
   bool _isRunning = false;
 
   void cancel() {
+    _isCancelled = true;
     _timer.cancel();
   }
 }
