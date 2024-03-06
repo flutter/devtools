@@ -200,7 +200,7 @@ class CoreData {
   /// Selected retaining path (cross-snapshot).
   PathFromRoot? path;
 
-  /// Current class filter.
+  /// Current class filter (cross-snapshot).
   ValueListenable<ClassFilter> get classFilter => _classFilter;
   final _classFilter = ValueNotifier(ClassFilter.empty());
 }
@@ -255,15 +255,16 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
 
   late final ClassesTableDiffData classesTableDiff;
 
-  ValueListenable<ClassDataList<DiffClassData>?> get diffClassesToShow =>
-      _diffClassesToShow;
-  final _diffClassesToShow = ValueNotifier<ClassDataList<DiffClassData>?>(null);
-
   /// Classes to show for currently selected item, if the item is not diffed.
   ValueListenable<ClassDataList<SingleClassData>?> get singleClassesToShow =>
       _singleClassesToShow;
   final _singleClassesToShow =
       ValueNotifier<ClassDataList<SingleClassData>?>(null);
+
+  /// Classes to show for currently selected item, if the item is diffed.
+  ValueListenable<ClassDataList<DiffClassData>?> get diffClassesToShow =>
+      _diffClassesToShow;
+  final _diffClassesToShow = ValueNotifier<ClassDataList<DiffClassData>?>(null);
 
   /// Data to show for the selected class.
   final classData = ValueNotifier<ClassData?>(null);
