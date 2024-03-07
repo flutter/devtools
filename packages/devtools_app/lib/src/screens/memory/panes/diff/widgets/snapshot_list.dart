@@ -414,7 +414,7 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
                     }
                     widget.controller.deleteCurrentSnapshot();
                   },
-                  onExport: () {},
+                  onExport: widget.controller.exportCurrentItem,
                 ),
               ),
             );

@@ -139,7 +139,7 @@ class DiffPaneController extends DisposableController {
   void exportCurrentItem() {
     final item = core.selectedDataItem!;
     ExportController().downloadFile(
-      'hello',
+      'TODO: save real content after upgrading vm_service package, https://github.com/flutter/devtools/pull/7331',
       fileName: ExportController.generateFileName(
         type: ExportFileType.json,
         prefix: item.name,
