@@ -60,17 +60,19 @@ void main() {
       expect(initialTrace, isNotEmpty);
       expect(initialTrackDescriptors, isNotEmpty);
 
+      logStatus('Verify Flutter frames have been assigned timeline events');
+      _verifyFlutterFramesHaveTimelineEvents(performanceController);
+
       logStatus(
         'toggling the Performance Overlay to trigger new Flutter frames',
       );
       final performanceOverlayFinder = find.text('Performance Overlay');
       expect(performanceOverlayFinder, findsOneWidget);
       await tester.tap(performanceOverlayFinder);
-      await tester.pump(safePumpDuration);
+      await tester.pump(veryLongPumpDuration);
 
       logStatus('Refreshing the timeline to load new events');
-      await tester.tap(find.byType(RefreshTimelineEventsButton));
-      await tester.pump(longPumpDuration);
+      await _refreshTimeline(tester);
 
       logStatus('Verifying that we have not recorded new events');
       final refreshedTrace = List.of(
@@ -79,6 +81,38 @@ void main() {
         growable: false,
       );
       expect(refreshedTrace.length, greaterThan(initialTrace.length));
+
+      logStatus('Verify new Flutter frames have been assigned timeline events');
+      // Refresh the timeilne one more time to ensure we have collected all
+      // timeline events in the VM's buffer.
+      await _refreshTimeline(tester);
+      _verifyFlutterFramesHaveTimelineEvents(performanceController);
+      await tester.pump(veryLongPumpDuration);
     },
   );
+}
+
+Future<void> _refreshTimeline(WidgetTester tester) async {
+  await tester.tap(find.byType(RefreshTimelineEventsButton));
+  await tester.pump(longPumpDuration);
+}
+
+void _verifyFlutterFramesHaveTimelineEvents(
+  PerformanceController performanceController,
+) {
+  final flutterFrames =
+      performanceController.flutterFramesController.flutterFrames.value;
+  expect(flutterFrames, isNotEmpty);
+  for (final frame in flutterFrames) {
+    expect(
+      frame.timelineEventData.uiEvent,
+      isNotNull,
+      reason: 'Expected a non-null UI event for frame ${frame.id}.',
+    );
+    expect(
+      frame.timelineEventData.rasterEvent,
+      isNotNull,
+      reason: 'Expected a non-null Raster event for frame ${frame.id}.',
+    );
+  }
 }
