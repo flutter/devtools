@@ -40,7 +40,7 @@ HeapObject _refreshStaticSelection(
   final code = liveObject.identityHashCode;
   if (code == null) return selection.withoutObject();
 
-  final index = selection.heap.objectIndexByIdentityHashCode(code);
+  final index = selection.heap.indexByCode[code];
   if (index == null) return selection;
 
   return HeapObject(

@@ -111,11 +111,11 @@ class ObjectSet extends ObjectSetStats {
 
 @immutable
 class ClassDataList<T extends ClassData> {
-  ClassDataList(this._originalList)
+  const ClassDataList(this._originalList)
       : _appliedFilter = null,
         _filtered = null;
 
-  ClassDataList._filtered({
+  const ClassDataList._filtered({
     required List<T> original,
     required ClassFilter appliedFilter,
     required List<T> filtered,

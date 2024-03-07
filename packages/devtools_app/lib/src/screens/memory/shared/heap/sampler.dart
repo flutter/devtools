@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/analytics/analytics.dart' as ga;
@@ -10,6 +11,7 @@ import '../../../../shared/globals.dart';
 import '../../../../shared/memory/class_name.dart';
 import '../../../../shared/memory/classes.dart';
 import '../../../../shared/memory/heap_data.dart';
+import '../../../../shared/memory/heap_object.dart';
 import '../../../../shared/vm_utils.dart';
 
 class _HeapObjects {
@@ -17,6 +19,15 @@ class _HeapObjects {
 
   final ObjectSet objects;
   final HeapData heap;
+
+  /// A set of identity hash codes for the objects in the heap.
+  ///
+  /// CPU and memory heavy to calculate,
+  /// so avoid calling this member unless necessary.
+  late final Set<int> codes = objects.objects
+      .map((index) => heap.graph.objects[index].identityHashCode)
+      .where((code) => code > 0)
+      .toSet();
 }
 
 class LiveClassSampler {
@@ -122,13 +133,14 @@ class LiveClassSampler {
       return;
     }
 
+    final selection = _objects;
+
     // drop to console
     serviceConnection.consoleService.appendBrowsableInstance(
       instanceRef: list,
       isolateRef: _mainIsolateRef,
-      heapSelection: selection == null
-          ? null
-          : HeapObjectSelection(selection.heap, object: null),
+      heapSelection:
+          selection == null ? null : HeapObject(selection.heap, object: null),
     );
   }
 
@@ -152,52 +164,50 @@ class SnapshotClassSampler extends LiveClassSampler {
   ) : super(heapClass, heap: heap, objects: objects);
 
   Future<void> oneLiveStaticToConsole() async {
-    // final selection = _objects!;
+    ga.select(gac.memory, gac.MemoryEvent.dropOneLiveVariable);
 
-    // ga.select(gac.memory, gac.MemoryEvent.dropOneLiveVariable);
-    // final instances = (await _liveInstances())?.instances;
+    final heapObjects = _objects!;
+    final instances = (await _liveInstances())?.instances;
 
-    // final instanceRef = instances?.firstWhereOrNull(
-    //   (objRef) =>
-    //       objRef is InstanceRef &&
-    //       selection.objects.objectsByCodes.containsKey(objRef.identityHashCode),
-    // ) as InstanceRef?;
+    final instanceRef = instances?.firstWhereOrNull(
+      (objRef) =>
+          objRef is InstanceRef &&
+          heapObjects.codes.contains(objRef.identityHashCode),
+    ) as InstanceRef?;
 
-    // if (instanceRef == null) {
-    //   serviceConnection.consoleService.appendStdio(
-    //     'Unable to select instance that exist in snapshot and still alive in application.\n'
-    //     'You may want to increase "${preferences.memory.refLimitTitle}" in memory settings.',
-    //   );
-    //   return;
-    // }
+    if (instanceRef == null) {
+      serviceConnection.consoleService.appendStdio(
+        'Unable to select instance that exist in snapshot and still alive in application.\n'
+        'You may want to increase "${preferences.memory.refLimitTitle}" in memory settings.',
+      );
+      return;
+    }
 
-    // final heapObject =
-    //     selection.objects.objectsByCodes[instanceRef.identityHashCode!]!;
+    final heapSelection = HeapObject(
+      heapObjects.heap,
+      object: heapObjects.heap.indexByCode[instanceRef.identityHashCode!],
+    );
 
-    // final heapSelection =
-    //     HeapObjectSelection(selection.heap, object: heapObject);
-
-    // // drop to console
-    // serviceConnection.consoleService.appendBrowsableInstance(
-    //   instanceRef: instanceRef,
-    //   isolateRef: _mainIsolateRef,
-    //   heapSelection: heapSelection,
-    // );
+    // drop to console
+    serviceConnection.consoleService.appendBrowsableInstance(
+      instanceRef: instanceRef,
+      isolateRef: _mainIsolateRef,
+      heapSelection: heapSelection,
+    );
   }
 
   void oneStaticToConsole() {
-    // final selection = _objects!;
-    // ga.select(gac.memory, gac.MemoryEvent.dropOneStaticVariable);
+    final heapObjects = _objects!;
+    ga.select(gac.memory, gac.MemoryEvent.dropOneStaticVariable);
 
-    // final heapObject = selection.objects.objectsByCodes.values.first;
-    // final heapSelection =
-    //     HeapObjectSelection(selection.heap, object: heapObject);
+    final index = heapObjects.objects.objects.first;
+    final heapObject = HeapObject(heapObjects.heap, object: index);
 
-    // // drop to console
-    // serviceConnection.consoleService.appendBrowsableInstance(
-    //   instanceRef: null,
-    //   isolateRef: _mainIsolateRef,
-    //   heapSelection: heapSelection,
-    // );
+    // drop to console
+    serviceConnection.consoleService.appendBrowsableInstance(
+      instanceRef: null,
+      isolateRef: _mainIsolateRef,
+      heapSelection: heapObject,
+    );
   }
 }

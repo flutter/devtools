@@ -17,7 +17,7 @@ const int heapRootIndex = 1;
 
 @immutable
 class HeapData {
-  const HeapData._(
+  HeapData._(
     this.graph,
     this.classes,
     this.footprint, {
@@ -35,17 +35,14 @@ class HeapData {
 
   final DateTime created;
 
-  /// Returns the object with the given identityHashCode.
+  /// Object index with the given identityHashCode.
   ///
-  /// It is full scan of the objects, so it is slow.
-  /// But it is ok, because it is use only for eval.
-  ///
-  /// We do not pre-index hash codes to save memory.
-  int? objectIndexByIdentityHashCode(int code) {
-    final result = graph.objects.indexWhere((o) => o.identityHashCode == code);
-    if (result == -1) return null;
-    return result;
-  }
+  /// This field is calculated only for console evaluations
+  late final Map<int, int> indexByCode = {
+    for (var i = 0; i < graph.objects.length; i++)
+      if (graph.objects[i].identityHashCode > 0)
+        graph.objects[i].identityHashCode: i,
+  };
 }
 
 final UiReleaser _uiReleaser = UiReleaser();
