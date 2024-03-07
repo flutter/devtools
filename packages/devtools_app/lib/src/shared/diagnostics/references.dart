@@ -34,7 +34,7 @@ HeapObject _refreshStaticSelection(
   HeapObject selection,
   InstanceRef? liveObject,
 ) {
-  if (selection.object != null) return selection;
+  if (selection.index != null) return selection;
   if (liveObject == null) return selection.withoutObject();
 
   final code = liveObject.identityHashCode;
@@ -45,7 +45,7 @@ HeapObject _refreshStaticSelection(
 
   return HeapObject(
     selection.heap,
-    object: index,
+    index: index,
   );
 }
 
@@ -74,7 +74,7 @@ Future<void> addChildReferences(
               heapSelection: selection,
             ),
           ),
-        if (selection.object != null)
+        if (selection.index != null)
           DartObjectNode.references(
             'static (objects alive at the time of snapshot)',
             ObjectReferences.copyWith(
@@ -86,7 +86,7 @@ Future<void> addChildReferences(
       ]);
       return;
     case RefNodeType.staticRefRoot:
-      if (ref.heapSelection.object == null) return;
+      if (ref.heapSelection.index == null) return;
       variable.addAllChildren([
         DartObjectNode.references(
           'inbound',

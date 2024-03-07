@@ -10,16 +10,16 @@ import 'simple_items.dart';
 
 @immutable
 class HeapObject {
-  const HeapObject(this.heap, {required this.object});
+  const HeapObject(this.heap, {required this.index});
 
   final HeapData heap;
 
   /// If object is null, it exists in live app, but is not
   /// located in heap.
-  final int? object;
+  final int? index;
 
   Iterable<int>? _refs(RefDirection direction) {
-    final theObject = object;
+    final theObject = index;
     if (theObject == null) return null;
 
     switch (direction) {
@@ -31,28 +31,27 @@ class HeapObject {
   }
 
   List<HeapObject> references(RefDirection direction) =>
-      (_refs(direction) ?? []).map((i) => HeapObject(heap, object: i)).toList();
+      (_refs(direction) ?? []).map((i) => HeapObject(heap, index: i)).toList();
 
   int? countOfReferences(RefDirection? direction) =>
       direction == null ? null : _refs(direction)?.length;
 
   HeapObject withoutObject() {
-    if (object == null) return this;
-    return HeapObject(heap, object: null);
+    if (index == null) return this;
+    return HeapObject(heap, index: null);
   }
 
   HeapClassName? get className {
-    final theObjectId = object;
-    if (theObjectId == null) return null;
-    final theClass =
-        heap.graph.classes[heap.graph.objects[theObjectId].classId];
+    final theIndex = index;
+    if (theIndex == null) return null;
+    final theClass = heap.graph.classes[heap.graph.objects[theIndex].classId];
     return HeapClassName.fromHeapSnapshotClass(theClass);
   }
 
   int? get code =>
-      object == null ? null : heap.graph.objects[object!].identityHashCode;
+      index == null ? null : heap.graph.objects[index!].identityHashCode;
 
-  int? get retainedSize => object == null ? null : heap.retainedSizes?[object!];
+  int? get retainedSize => index == null ? null : heap.retainedSizes?[index!];
 }
 
 typedef HeapDataCallback = HeapData Function();

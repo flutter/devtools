@@ -140,7 +140,7 @@ class LiveClassSampler {
       instanceRef: list,
       isolateRef: _mainIsolateRef,
       heapSelection:
-          selection == null ? null : HeapObject(selection.heap, object: null),
+          selection == null ? null : HeapObject(selection.heap, index: null),
     );
   }
 
@@ -185,7 +185,7 @@ class SnapshotClassSampler extends LiveClassSampler {
 
     final heapSelection = HeapObject(
       heapObjects.heap,
-      object: heapObjects.heap.indexByCode[instanceRef.identityHashCode!],
+      index: heapObjects.heap.indexByCode[instanceRef.identityHashCode!],
     );
 
     // drop to console
@@ -201,7 +201,7 @@ class SnapshotClassSampler extends LiveClassSampler {
     ga.select(gac.memory, gac.MemoryEvent.dropOneStaticVariable);
 
     final index = heapObjects.objects.objects.first;
-    final heapObject = HeapObject(heapObjects.heap, object: index);
+    final heapObject = HeapObject(heapObjects.heap, index: index);
 
     // drop to console
     serviceConnection.consoleService.appendBrowsableInstance(

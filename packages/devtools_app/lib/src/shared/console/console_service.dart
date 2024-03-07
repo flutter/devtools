@@ -80,7 +80,7 @@ class ConsoleService with DisposerMixin {
     required HeapObject? heapSelection,
   }) async {
     if (instanceRef == null) {
-      if (heapSelection?.object == null || isolateRef == null) {
+      if (heapSelection?.index == null || isolateRef == null) {
         serviceConnection.consoleService.appendStdio(
           'Not enough information to browse the instance.',
         );

@@ -63,7 +63,7 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
       text = heapClass.className;
       final size = prettyPrintRetainedSize(heapSelection?.retainedSize);
       if (size != null) {
-        text = 'text, retained size $size';
+        text = '$text, retained size $size';
       }
     }
 
