@@ -120,7 +120,7 @@ class FlutterFramesController extends PerformanceFeatureController {
     }
   }
 
-  void assignEventToFrame(int? frameNumber, FlutterTimelineEvent event, ) {
+  void assignEventToFrame(int? frameNumber, FlutterTimelineEvent event) {
     assert(frameNumber != null && hasUnassignedFlutterFrame(frameNumber));
     final frame = _unassignedFlutterFrames[frameNumber]!;
     frame.setEventFlow(event);

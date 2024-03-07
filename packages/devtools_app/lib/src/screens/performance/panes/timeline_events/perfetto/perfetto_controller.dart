@@ -34,7 +34,7 @@ abstract class PerfettoController extends DisposableController {
 
   /// Responsible for processing Perfetto events when loading a trace that was
   /// collected from a Flutter app.
-  /// 
+  ///
   /// For non-flutter apps, this processor will not be used.
   late final FlutterTimelineEventProcessor processor;
 

@@ -139,7 +139,7 @@ const debugTimers = !kReleaseMode && false;
 
 /// Debug helper to run a synchronous [callback] and print the time it took to
 /// run to stdout.
-/// 
+///
 /// This will only time the operation when [debugTimers] is true.
 void debugTimeSync(
   void Function() callback, {
@@ -157,7 +157,7 @@ void debugTimeSync(
 
 /// Debug helper to run an asynchronous [callback] and print the time it took to
 /// run to stdout.
-/// 
+///
 /// This will only time the operation when [debugTimers] is true.
 FutureOr<void> debugTimeAsync(
   FutureOr<void> Function() callback, {

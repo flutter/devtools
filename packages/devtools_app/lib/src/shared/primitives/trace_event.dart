@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 /// A single trace event that follows the Chrome Trace Event Format.
-/// 
+///
 /// See Chrome Trace Event Format documentation:
 /// https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
 class ChromeTraceEvent {

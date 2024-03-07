@@ -129,11 +129,10 @@ class PerfettoTrackEvent extends _PerfettoTracePacket
       '[name: $name, ts: $timestampMicros, trackId: $trackId, type: $type]';
 }
 
-
 int _tracePacketCreationId = 0;
 
 /// A shared subclass for events received in a Perfetto [Trace].
-/// 
+///
 /// This class manages creating a [_creationId] for each event, which will be
 /// used to break a tie in sorting algorithms.
 abstract class _PerfettoTracePacket {
@@ -157,9 +156,6 @@ enum PerfettoEventType {
   final String _protoName;
 }
 
-const String rasterEventName = 'Rasterizer::DoDraw';
-const String uiEventName = 'Animator::BeginFrame';
-
 extension FrameIdentifierExtension on PerfettoTrackEvent {
   /// Returns the flutter frame number for this track event, or null if it does
   /// not exist.
@@ -172,12 +168,13 @@ extension FrameIdentifierExtension on PerfettoTrackEvent {
   /// Whether this track event is contains the flutter frame identifier for the
   /// UI track in its arguments.
   bool get isUiFrameIdentifier =>
-      flutterFrameNumber != null && name == uiEventName;
+      flutterFrameNumber != null && name == FlutterTimelineEvent.uiEventName;
 
   /// Whether this track event contains the flutter frame identifier for the
   /// Raster track in its arguments.
   bool get isRasterFrameIdentifier =>
-      flutterFrameNumber != null && name == rasterEventName;
+      flutterFrameNumber != null &&
+      name == FlutterTimelineEvent.rasterEventName;
 
   // Whether this track event is related to Shader compilation.
   bool get isShaderEvent =>

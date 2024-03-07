@@ -159,8 +159,8 @@ void main() {
       expect(offlineData.selectedEvent, isA<OfflineTimelineEvent>());
 
       final expectedFirstTraceJson = Map.of(vsyncEvent.beginTraceEventJson);
-      (expectedFirstTraceJson[ChromeTraceEvent.argsKey] as Map)
-          .addAll(<String, dynamic>{ChromeTraceEvent.typeKey: TimelineEventType.ui});
+      (expectedFirstTraceJson[ChromeTraceEvent.argsKey] as Map).addAll(
+          <String, dynamic>{ChromeTraceEvent.typeKey: TimelineEventType.ui});
       expectedFirstTraceJson.addAll(
         {ChromeTraceEvent.durationKey: vsyncEvent.time.duration.inMicroseconds},
       );

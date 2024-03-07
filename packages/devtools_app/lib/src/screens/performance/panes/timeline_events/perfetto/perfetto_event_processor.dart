@@ -120,11 +120,11 @@ class FlutterTimelineEventProcessor {
     // Fallback to checking the event name if we don't have a value for
     // [_uiTrackId] or [_rasterTrackId].
     if (_uiTrackId != null && event.trackId == _uiTrackId ||
-        event.name == uiEventName) {
+        event.name == FlutterTimelineEvent.uiEventName) {
       return TimelineEventType.ui;
     }
     if (_rasterTrackId == null && event.trackId == _rasterTrackId ||
-        event.name == rasterEventName) {
+        event.name == FlutterTimelineEvent.rasterEventName) {
       return TimelineEventType.raster;
     }
     return TimelineEventType.other;

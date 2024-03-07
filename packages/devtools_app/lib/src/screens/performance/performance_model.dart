@@ -108,13 +108,15 @@ extension type _PerformanceDataJson(Map<String, Object?> json) {
   }
 }
 
-class FlutterTimelineEvent extends TreeNode<FlutterTimelineEvent>
- {
+class FlutterTimelineEvent extends TreeNode<FlutterTimelineEvent> {
   FlutterTimelineEvent(PerfettoTrackEvent firstTrackEvent)
       : trackEvents = [firstTrackEvent],
         type = firstTrackEvent.timelineEventType {
     time.start = Duration(microseconds: firstTrackEvent.timestampMicros);
   }
+
+  static const rasterEventName = 'Rasterizer::DoDraw';
+  static const uiEventName = 'Animator::BeginFrame';
 
   /// Perfetto track events associated with this [FlutterTimelineEvent].
   final List<PerfettoTrackEvent> trackEvents;
