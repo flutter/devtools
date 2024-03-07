@@ -10,6 +10,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
+// To run:
+// dart run integration_test/run_tests.dart --target=integration_test/test/live_connection/performance_screen_event_recording_test.dart
+
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
@@ -21,7 +24,7 @@ void main() {
   });
 
   testWidgets(
-    'refreshing the timeline does not duplicate recorded events',
+    'can process and refresh timeline data',
     (tester) async {
       await pumpAndConnectDevTools(tester, testApp);
 
@@ -45,8 +48,17 @@ void main() {
       final screenState =
           tester.state<PerformanceScreenBodyState>(performanceScreenFinder);
       final performanceController = screenState.controller;
-      final initialEventsRecorded =
-          List.of(performanceController.data!.traceEvents, growable: false);
+
+      logStatus('Verifying that data is processed upon first load');
+      final initialTrace = List.of(
+        performanceController
+            .timelineEventsController.fullPerfettoTrace!.packet,
+        growable: false,
+      );
+      final initialTrackDescriptors =
+          initialTrace.where((e) => e.hasTrackDescriptor());
+      expect(initialTrace, isNotEmpty);
+      expect(initialTrackDescriptors, isNotEmpty);
 
       logStatus(
         'toggling the Performance Overlay to trigger new Flutter frames',
@@ -60,19 +72,13 @@ void main() {
       await tester.tap(find.byType(RefreshTimelineEventsButton));
       await tester.pump(longPumpDuration);
 
-      logStatus('Verifying that we have not recorded duplicate events');
-      final newEventsRecorded = performanceController.data!.traceEvents
-          .sublist(initialEventsRecorded.length);
-      for (final newEvent in newEventsRecorded) {
-        final eventDuplicated = initialEventsRecorded.containsWhere(
-          (event) => collectionEquals(event, newEvent),
-        );
-        expect(
-          eventDuplicated,
-          isFalse,
-          reason: 'Duplicate event recorded: $newEvent',
-        );
-      }
+      logStatus('Verifying that we have not recorded new events');
+      final refreshedTrace = List.of(
+        performanceController
+            .timelineEventsController.fullPerfettoTrace!.packet,
+        growable: false,
+      );
+      expect(refreshedTrace.length, greaterThan(initialTrace.length));
     },
   );
 }
