@@ -1,4 +1,4 @@
-## 0.0.11
+## 0.1.0
 * Remove deprecated `background` and `onBackground` values for `lightColorScheme`
 and `darkColorScheme`.
 * Rename `Split` to `SplitPane`.
