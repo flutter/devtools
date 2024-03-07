@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/screens/performance/panes/timeline_events/perfetto/tracing/event_processor.dart';
+import 'package:devtools_app/src/screens/performance/panes/timeline_events/perfetto/perfetto_event_processor.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';

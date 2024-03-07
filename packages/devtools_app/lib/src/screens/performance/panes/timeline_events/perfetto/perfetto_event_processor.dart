@@ -7,11 +7,11 @@ import 'dart:math';
 import 'package:fixnum/fixnum.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../../../../../shared/primitives/utils.dart';
-import '../../../../performance_controller.dart';
-import '../../../../performance_model.dart';
-import '../../timeline_events_controller.dart';
-import 'model.dart';
+import '../../../../../shared/primitives/utils.dart';
+import '../../../performance_controller.dart';
+import '../../../performance_model.dart';
+import '../timeline_events_controller.dart';
+import 'tracing/model.dart';
 
 class FlutterTimelineEventProcessor {
   FlutterTimelineEventProcessor(this.performanceController);
