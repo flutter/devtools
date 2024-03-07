@@ -33,8 +33,7 @@ class _ClassNameColumn extends ColumnData<SingleClassData>
   final ClassesTableSingleData data;
 
   @override
-  String? getValue(SingleClassData dataObject) =>
-      dataObject.className.className;
+  String? getValue(SingleClassData data) => data.className.className;
 
   @override
   bool get supportsSorting => true;
@@ -87,7 +86,7 @@ class _InstanceColumn extends ColumnData<SingleClassData>
   final ClassesTableSingleData classData;
 
   @override
-  int getValue(SingleClassData dataObject) => dataObject.objects.instanceCount;
+  int getValue(SingleClassData data) => data.objects.instanceCount;
 
   @override
   bool get numeric => true;
@@ -144,14 +143,14 @@ class _RetainedSizeColumn extends ColumnData<SingleClassData> {
   final ClassesTableSingleData classData;
 
   @override
-  int getValue(SingleClassData dataObject) => dataObject.objects.retainedSize;
+  int getValue(SingleClassData data) => data.objects.retainedSize;
 
   @override
   bool get numeric => true;
 
   @override
-  String getDisplayValue(SingleClassData dataObject) {
-    final value = getValue(dataObject);
+  String getDisplayValue(SingleClassData data) {
+    final value = getValue(data);
 
     final bytes = prettyPrintRetainedSize(value)!;
 

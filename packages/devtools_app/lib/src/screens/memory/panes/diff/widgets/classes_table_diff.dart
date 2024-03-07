@@ -42,14 +42,14 @@ class _ClassNameColumn extends ColumnData<DiffClassData>
   final ClassesTableDiffData diffData;
 
   @override
-  String? getValue(DiffClassData dataObject) => dataObject.className.className;
+  String? getValue(DiffClassData data) => data.className.className;
 
   @override
   bool get supportsSorting => true;
 
   @override
-  // We are removing the tooltip, because it is provided by [HeapClassView].
-  String getTooltip(DiffClassData dataObject) => '';
+  // Tooltip is removed, because it is provided by [HeapClassView].
+  String getTooltip(DiffClassData data) => '';
 
   @override
   Widget build(
@@ -109,8 +109,7 @@ class _InstanceColumn extends ColumnData<DiffClassData>
   }
 
   @override
-  int getValue(DiffClassData dataObject) =>
-      _instances(dataObject).instanceCount;
+  int getValue(DiffClassData data) => _instances(data).instanceCount;
 
   ObjectSetStats _instances(DiffClassData classData) {
     switch (dataPart) {
@@ -126,9 +125,9 @@ class _InstanceColumn extends ColumnData<DiffClassData>
   }
 
   @override
-  String getDisplayValue(DiffClassData dataObject) {
+  String getDisplayValue(DiffClassData data) {
     // Add leading sign for delta values.
-    final value = getValue(dataObject);
+    final value = getValue(data);
     if (dataPart != _DataPart.delta || value <= 0) return value.toString();
     return '+$value';
   }
