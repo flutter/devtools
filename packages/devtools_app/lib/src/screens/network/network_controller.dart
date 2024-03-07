@@ -176,7 +176,7 @@ class NetworkController extends DisposableController
         // TODO(kenz): look into improving performance by caching more data.
         // Polling less frequently helps performance.
         const Duration(milliseconds: 2000),
-        (_) async => await _networkService.refreshNetworkData(),
+        _networkService.refreshNetworkData,
       );
     } else {
       _pollingTimer?.cancel();

@@ -9,7 +9,7 @@ void main() {
         int callbackCounter = 0;
         DebounceTimer.periodic(
           const Duration(seconds: 1),
-          (_) async {
+          () async {
             callbackCounter++;
             await Future<void>.delayed(const Duration(seconds: 60));
           },
@@ -24,7 +24,7 @@ void main() {
         int callbackCounter = 0;
         DebounceTimer.periodic(
           const Duration(seconds: 1),
-          (_) async {
+          () async {
             callbackCounter++;
             await Future<void>.delayed(const Duration(seconds: 30));
           },
@@ -39,7 +39,7 @@ void main() {
         int callbackCounter = 0;
         DebounceTimer.periodic(
           const Duration(seconds: 1),
-          (_) async {
+          () async {
             callbackCounter++;
             await Future<void>.delayed(
               const Duration(milliseconds: 1),
@@ -58,7 +58,7 @@ void main() {
           int callbackCounter = 0;
           final timer = DebounceTimer.periodic(
             const Duration(seconds: 1),
-            (_) async {
+            () async {
               callbackCounter++;
               await Future<void>.delayed(
                 const Duration(milliseconds: 1),
@@ -83,7 +83,7 @@ void main() {
           int callbackCounter = 0;
           final timer = DebounceTimer.periodic(
             const Duration(seconds: 1),
-            (_) async {
+            () async {
               callbackCounter++;
               await Future<void>.delayed(
                 const Duration(milliseconds: 1),
