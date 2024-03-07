@@ -371,11 +371,13 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
       classesTableSingle.selection.value = null;
       classesTableDiff.selection.value = classes.list
           .singleWhereOrNull((d) => d.className == selectedClassName);
+      classData.value = classesTableDiff.selection.value;
     } else if (classes == null) {
       _singleClassesToShow.value = null;
       _diffClassesToShow.value = null;
       classesTableSingle.selection.value = null;
       classesTableDiff.selection.value = null;
+      classData.value = null;
     } else {
       throw StateError('Unexpected type: ${classes.runtimeType}.');
     }
