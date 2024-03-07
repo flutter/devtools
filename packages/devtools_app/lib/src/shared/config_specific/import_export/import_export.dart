@@ -77,6 +77,18 @@ class ImportController {
       return;
     }
 
+    if (activeScreenId == ScreenMetaData.performance.id) {
+      if (devToolsSnapshot.json.containsKey('traceEvents')) {
+        notificationService.push(
+          'It looks like you are trying to load data that was saved from an '
+          'old version of DevTools. This data uses a legacy format that is no '
+          'longer supported. To load this file in DevTools, you will need to '
+          'downgrade your Flutter version to < 3.22.',
+        );
+        return;
+      }
+    }
+
     final connectedApp =
         OfflineConnectedApp.parse(devToolsSnapshot.connectedApp);
     offlineController
@@ -158,21 +170,8 @@ abstract class ExportController {
           serviceConnection.serviceManager.connectedApp!.toJson(),
       ...offlineScreenData,
     };
-    final activeScreenId = contents[DevToolsExportKeys.activeScreenId.name];
-
-    // This is a workaround to guarantee that DevTools exports are compatible
-    // with other trace viewers (catapult, perfetto, chrome://tracing), which
-    // require a top level field named "traceEvents".
-    if (activeScreenId == ScreenMetaData.performance.id) {
-      final activeScreen =
-          (contents[activeScreenId] as Map).cast<String, Object?>();
-      final traceEvents = [
-        for (final event in activeScreen[traceEventsFieldName] as List)
-          (event as Map).cast<String, Object?>(),
-      ];
-      contents[traceEventsFieldName] = traceEvents;
-      activeScreen.remove(traceEventsFieldName);
-    }
+    // TODO(kenz): ensure that performance page exports can be loaded properly
+    // into the Perfetto UI (ui.perfetto.dev).
     return contents;
   }
 

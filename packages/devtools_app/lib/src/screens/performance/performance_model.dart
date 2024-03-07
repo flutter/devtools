@@ -76,8 +76,11 @@ class OfflinePerformanceData {
 }
 
 extension type _PerformanceDataJson(Map<String, Object?> json) {
-  Uint8List? get traceBinary =>
-      json[OfflinePerformanceData.traceBinaryKey] as Uint8List?;
+  Uint8List? get traceBinary {
+    final value =
+        (json[OfflinePerformanceData.traceBinaryKey] as List?)?.cast<int>();
+    return value == null ? null : Uint8List.fromList(value);
+  }
 
   RasterStats? get rasterStats {
     final raw = (json[OfflinePerformanceData.rasterStatsKey] as Map?)
