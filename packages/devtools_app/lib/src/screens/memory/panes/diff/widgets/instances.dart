@@ -23,14 +23,14 @@ class HeapInstanceTableCell extends StatelessWidget {
     required bool isSelected,
     this.liveItemsEnabled = true,
   })  : _sampleObtainer = _shouldShowMenu(isSelected, objects)
-            ? HeapClassSampler(heapClass, objects, heap())
+            ? SnapshotClassSampler(heapClass, objects, heap())
             : null,
         _count = objects.instanceCount;
 
   static bool _shouldShowMenu(bool isSelected, ObjectSet objects) =>
       isSelected && objects.instanceCount > 0;
 
-  final HeapClassSampler? _sampleObtainer;
+  final SnapshotClassSampler? _sampleObtainer;
 
   final int _count;
   final bool liveItemsEnabled;
@@ -48,7 +48,7 @@ class HeapInstanceTableCell extends StatelessWidget {
 }
 
 List<Widget> _buildHeapInstancesMenu({
-  required HeapClassSampler? sampler,
+  required SnapshotClassSampler? sampler,
   required bool liveItemsEnabled,
 }) {
   if (sampler == null) return [];
@@ -64,7 +64,7 @@ class _StoreAllAsVariableMenu extends StatelessWidget {
     required this.liveItemsEnabled,
   });
 
-  final HeapClassSampler sampler;
+  final SnapshotClassSampler sampler;
   final bool liveItemsEnabled;
 
   @override
@@ -111,7 +111,7 @@ class _StoreAsOneVariableMenu extends StatelessWidget {
     required this.liveItemsEnabled,
   });
 
-  final HeapClassSampler sampler;
+  final SnapshotClassSampler sampler;
   final bool liveItemsEnabled;
 
   @override

@@ -19,8 +19,8 @@ class _HeapObjects {
   final HeapData heap;
 }
 
-class ClassSampler {
-  ClassSampler(
+class LiveClassSampler {
+  LiveClassSampler(
     this.heapClass, {
     ObjectSet? objects,
     HeapData? heap,
@@ -146,8 +146,8 @@ class ClassSampler {
   }
 }
 
-class HeapClassSampler extends ClassSampler {
-  HeapClassSampler(
+class SnapshotClassSampler extends LiveClassSampler {
+  SnapshotClassSampler(
     HeapClassName heapClass,
     ObjectSet objects,
     HeapData heap,

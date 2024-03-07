@@ -400,7 +400,6 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
 
   /// Updates fields in this instance based on the values in [core].
   void _updateValues() {
-    print('Updating values');
     _startUpdatingValues();
     try {
       // Set class to show.
