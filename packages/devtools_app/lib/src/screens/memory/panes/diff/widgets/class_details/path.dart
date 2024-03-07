@@ -66,7 +66,7 @@ class _PathControlPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final titleText = 'Retaining path for $className';
+    final titleText = 'Retaining path for ${className.className}';
     return Row(
       children: [
         Expanded(
