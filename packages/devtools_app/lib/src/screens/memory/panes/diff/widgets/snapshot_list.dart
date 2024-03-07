@@ -122,6 +122,7 @@ class SnapshotListTitle extends StatelessWidget {
     required this.onEdit,
     required this.onEditingComplete,
     required this.onDelete,
+    required this.onExport,
   }) : super(key: key);
 
   final SnapshotItem item;
@@ -141,6 +142,9 @@ class SnapshotListTitle extends StatelessWidget {
 
   /// Called when the 'Delete' context menu item is selected.
   final VoidCallback onDelete;
+
+  /// Called when the 'Export' context menu item is selected.
+  final VoidCallback onExport;
 
   @override
   Widget build(BuildContext context) {
@@ -192,6 +196,10 @@ class SnapshotListTitle extends StatelessWidget {
                     MenuItemButton(
                       onPressed: onDelete,
                       child: const Text('Delete'),
+                    ),
+                    MenuItemButton(
+                      onPressed: onExport,
+                      child: const Text('Export'),
                     ),
                   ],
                 )
@@ -404,9 +412,9 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
                     if (_editIndex.value == index) {
                       _editIndex.value = null;
                     }
-                    final item = widget.controller.core.snapshots.value[index];
-                    widget.controller.deleteSnapshot(item);
+                    widget.controller.deleteCurrentSnapshot();
                   },
+                  onExport: () {},
                 ),
               ),
             );
