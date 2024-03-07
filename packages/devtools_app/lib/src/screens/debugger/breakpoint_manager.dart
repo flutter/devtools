@@ -9,7 +9,6 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../framework/app_error_handling.dart';
 import '../../service/vm_service_wrapper.dart';
 import '../../shared/diagnostics/primitives/source_location.dart';
 import '../../shared/globals.dart';
@@ -87,10 +86,10 @@ class BreakpointManager with DisposerMixin {
       );
     }
 
-    final isolateId = isolateRef.id;
-    if (isolateId != null) {
-      await _resumeIsolate(isolateId);
-    }
+    // If the flag pause-breakpoints-on-start was successfully set, then the
+    // isolate should be paused. If that's the case, then resume it:
+    await serviceConnection.serviceManager.isolateManager
+        .resumeIsolateIfPaused(isolateRef);
   }
 
   void clearCache({required bool isServiceShutdown}) {
@@ -270,14 +269,6 @@ class BreakpointManager with DisposerMixin {
     });
 
     return scriptUriToRef;
-  }
-
-  Future<void> _resumeIsolate(String isolateId) async {
-    try {
-      await _service.resume(isolateId);
-    } catch (error) {
-      reportError(error);
-    }
   }
 
   /// Return the list of valid positions for breakpoints for a given script.
