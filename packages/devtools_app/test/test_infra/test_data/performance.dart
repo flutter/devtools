@@ -729,7 +729,7 @@ final endShaderJankGrandchildTrace = testTraceEventWrapper({
 // Mark: AsyncTimelineData
 final asyncEventWithInstantChildren = AsyncTimelineEvent(
   TraceEventWrapper(
-    TraceEvent(
+    ChromeTraceEvent(
       jsonDecode(
         jsonEncode({
           'name': 'PipelineItem',
@@ -751,7 +751,7 @@ final asyncEventWithInstantChildren = AsyncTimelineEvent(
 )
   ..addEndEvent(
     TraceEventWrapper(
-      TraceEvent(
+      ChromeTraceEvent(
         jsonDecode(
           jsonEncode({
             'name': 'PipelineItem',
@@ -778,7 +778,7 @@ final asyncEventWithInstantChildren = AsyncTimelineEvent(
 
 final instantAsync1 = AsyncTimelineEvent(
   TraceEventWrapper(
-    TraceEvent(
+    ChromeTraceEvent(
       jsonDecode(
         jsonEncode({
           'name': 'Connection established',
@@ -800,7 +800,7 @@ final instantAsync1 = AsyncTimelineEvent(
 
 final instantAsync2 = AsyncTimelineEvent(
   TraceEventWrapper(
-    TraceEvent(
+    ChromeTraceEvent(
       jsonDecode(
         jsonEncode({
           'name': 'Connection established',
@@ -822,7 +822,7 @@ final instantAsync2 = AsyncTimelineEvent(
 
 final instantAsync3 = AsyncTimelineEvent(
   TraceEventWrapper(
-    TraceEvent(
+    ChromeTraceEvent(
       jsonDecode(
         jsonEncode({
           'name': 'Connection established',

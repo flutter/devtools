@@ -123,7 +123,7 @@ void main() {
 
       // TODO(kenz): add some timeline events for these frames to the offline
       // data and verify we correctly assign the events to their frames.
-      final offlineData = PerformanceData(
+      final offlineData = OfflinePerformanceData(
         frames: [testFrame0, testFrame1],
         selectedFrame: testFrame0,
         displayRefreshRate: 120.0,

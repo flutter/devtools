@@ -16,11 +16,11 @@ import '../test_infra/test_data/performance_raster_stats.dart';
 import '../test_infra/utils/test_utils.dart';
 
 void main() {
-  group('PerformanceData', () {
-    late PerformanceData performanceData;
+  group('$OfflinePerformanceData', () {
+    late OfflinePerformanceData performanceData;
 
     setUp(() {
-      performanceData = PerformanceData(
+      performanceData = OfflinePerformanceData(
         displayRefreshRate: 60.0,
         timelineEvents: [
           goldenAsyncTimelineEvent,
@@ -32,13 +32,10 @@ void main() {
     });
 
     test('init', () {
-      expect(performanceData.traceEvents, isEmpty);
       expect(performanceData.frames, isEmpty);
       expect(performanceData.selectedFrame, isNull);
       expect(performanceData.selectedFrameId, isNull);
-      expect(performanceData.selectedEvent, isNull);
       expect(performanceData.displayRefreshRate, 60.0);
-      expect(performanceData.cpuProfileData, isNull);
       expect(performanceData.rasterStats, isNull);
     });
 
@@ -46,18 +43,15 @@ void main() {
       expect(
         performanceData.toJson(),
         equals({
-          PerformanceData.selectedFrameIdKey: null,
-          PerformanceData.flutterFramesKey: <Object?>[],
-          PerformanceData.displayRefreshRateKey: 60,
-          PerformanceData.traceEventsKey: <Object?>[],
-          PerformanceData.selectedEventKey: <Object?, Object?>{},
-          PerformanceData.cpuProfileKey: <Object?, Object?>{},
-          PerformanceData.rasterStatsKey: <Object?, Object?>{},
-          PerformanceData.rebuildCountModelKey: null,
+          OfflinePerformanceData.selectedFrameIdKey: null,
+          OfflinePerformanceData.flutterFramesKey: <Object?>[],
+          OfflinePerformanceData.displayRefreshRateKey: 60,
+          OfflinePerformanceData.rasterStatsKey: <Object?, Object?>{},
+          OfflinePerformanceData.rebuildCountModelKey: null,
         }),
       );
 
-      performanceData = PerformanceData(
+      performanceData = OfflinePerformanceData(
         frames: [testFrame0, testFrame1],
         displayRefreshRate: 60,
         traceEvents: [
@@ -71,8 +65,8 @@ void main() {
       expect(
         performanceData.toJson(),
         equals({
-          PerformanceData.selectedFrameIdKey: null,
-          PerformanceData.flutterFramesKey: [
+          OfflinePerformanceData.selectedFrameIdKey: null,
+          OfflinePerformanceData.flutterFramesKey: [
             {
               'number': 0,
               'startTime': 10000,
@@ -90,20 +84,20 @@ void main() {
               'vsyncOverhead': 1000,
             },
           ],
-          PerformanceData.displayRefreshRateKey: 60,
-          PerformanceData.traceEventsKey: [
+          OfflinePerformanceData.displayRefreshRateKey: 60,
+          OfflinePerformanceData.traceEventsKey: [
             {'name': 'FakeTraceEvent'},
           ],
-          PerformanceData.selectedEventKey: vsyncEvent.json,
-          PerformanceData.cpuProfileKey: goldenCpuProfileDataJson,
-          PerformanceData.rasterStatsKey: rasterStatsFromDevToolsJson,
-          PerformanceData.rebuildCountModelKey: rebuildCountModelJson,
+          OfflinePerformanceData.selectedEventKey: vsyncEvent.json,
+          OfflinePerformanceData.cpuProfileKey: goldenCpuProfileDataJson,
+          OfflinePerformanceData.rasterStatsKey: rasterStatsFromDevToolsJson,
+          OfflinePerformanceData.rebuildCountModelKey: rebuildCountModelJson,
         }),
       );
     });
 
     test('clear', () {
-      performanceData = PerformanceData(
+      performanceData = OfflinePerformanceData(
         displayRefreshRate: 120,
         timelineEvents: [
           goldenAsyncTimelineEvent,
@@ -165,10 +159,10 @@ void main() {
       expect(offlineData.selectedEvent, isA<OfflineTimelineEvent>());
 
       final expectedFirstTraceJson = Map.of(vsyncEvent.beginTraceEventJson);
-      (expectedFirstTraceJson[TraceEvent.argsKey] as Map)
-          .addAll(<String, dynamic>{TraceEvent.typeKey: TimelineEventType.ui});
+      (expectedFirstTraceJson[ChromeTraceEvent.argsKey] as Map)
+          .addAll(<String, dynamic>{ChromeTraceEvent.typeKey: TimelineEventType.ui});
       expectedFirstTraceJson.addAll(
-        {TraceEvent.durationKey: vsyncEvent.time.duration.inMicroseconds},
+        {ChromeTraceEvent.durationKey: vsyncEvent.time.duration.inMicroseconds},
       );
       expect(
         offlineData.selectedEvent!.json,

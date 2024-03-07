@@ -20,7 +20,6 @@ MockPerformanceController createMockPerformanceControllerWithDefaults() {
   final controller = MockPerformanceController();
   final timelineEventsController = MockTimelineEventsController();
   final flutterFramesController = MockFlutterFramesController();
-  when(controller.data).thenReturn(PerformanceData());
   when(controller.enhanceTracingController)
       .thenReturn(EnhanceTracingController());
   when(controller.offlinePerformanceData).thenReturn(null);
