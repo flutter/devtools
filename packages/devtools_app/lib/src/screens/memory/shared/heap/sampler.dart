@@ -122,16 +122,14 @@ class LiveClassSampler {
       return;
     }
 
-    throw UnimplementedError();
-
-    // // drop to console
-    // serviceConnection.consoleService.appendBrowsableInstance(
-    //   instanceRef: list,
-    //   isolateRef: _mainIsolateRef,
-    //   heapSelection: selection == null
-    //       ? null
-    //       : HeapObjectSelection(selection.heap, object: null),
-    // );
+    // drop to console
+    serviceConnection.consoleService.appendBrowsableInstance(
+      instanceRef: list,
+      isolateRef: _mainIsolateRef,
+      heapSelection: selection == null
+          ? null
+          : HeapObjectSelection(selection.heap, object: null),
+    );
   }
 
   Future<void> oneLiveToConsole() async {
