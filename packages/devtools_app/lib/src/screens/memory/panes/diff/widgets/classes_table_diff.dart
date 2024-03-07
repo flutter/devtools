@@ -196,37 +196,37 @@ class _SizeColumn extends ColumnData<DiffClassData> {
   }
 
   @override
-  int getValue(DiffClassData classStats) {
+  int getValue(DiffClassData data) {
     switch (sizeType) {
       case SizeType.shallow:
         switch (dataPart) {
           case _DataPart.created:
-            return classStats.diff.created.shallowSize;
+            return data.diff.created.shallowSize;
           case _DataPart.deleted:
-            return classStats.diff.deleted.shallowSize;
+            return data.diff.deleted.shallowSize;
           case _DataPart.delta:
-            return classStats.diff.delta.shallowSize;
+            return data.diff.delta.shallowSize;
           case _DataPart.persisted:
-            return classStats.diff.persisted.shallowSize;
+            return data.diff.persisted.shallowSize;
         }
       case SizeType.retained:
         switch (dataPart) {
           case _DataPart.created:
-            return classStats.diff.created.retainedSize;
+            return data.diff.created.retainedSize;
           case _DataPart.deleted:
-            return classStats.diff.deleted.retainedSize;
+            return data.diff.deleted.retainedSize;
           case _DataPart.delta:
-            return classStats.diff.delta.retainedSize;
+            return data.diff.delta.retainedSize;
           case _DataPart.persisted:
-            return classStats.diff.persisted.retainedSize;
+            return data.diff.persisted.retainedSize;
         }
     }
   }
 
   @override
-  String getDisplayValue(DiffClassData classStats) {
+  String getDisplayValue(DiffClassData data) {
     // Add leading sign for delta values.
-    final value = getValue(classStats);
+    final value = getValue(data);
     final asSize = prettyPrintRetainedSize(value)!;
     if (dataPart != _DataPart.delta || value <= 0) return asSize;
     return '+$asSize';

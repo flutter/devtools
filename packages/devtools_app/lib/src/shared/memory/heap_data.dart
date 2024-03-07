@@ -119,12 +119,12 @@ Future<HeapData> calculateHeapData(
       }
 
       reachableSize += object.shallowSize;
-      final classStats = classes.putIfAbsent(
+      final data = classes.putIfAbsent(
         className,
         () => SingleClassData(className: className),
       );
 
-      classStats.countInstance(
+      data.countInstance(
         graph,
         index: i,
         retainers: retainers,

@@ -381,18 +381,6 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     }
   }
 
-  // /// Returns [classStats] if it matches the current filter.
-  // T? _filter<T extends ClassStats_>(T? classStats) {
-  //   if (classStats == null) return null;
-  //   if (_core.classFilter.value.apply(
-  //     classStats.heapClass,
-  //     _core.rootPackage,
-  //   )) {
-  //     return classStats;
-  //   }
-  //   return null;
-  // }
-
   bool get updatingValues => _updatingValues;
   bool _updatingValues = false;
 

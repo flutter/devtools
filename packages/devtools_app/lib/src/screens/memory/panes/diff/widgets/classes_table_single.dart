@@ -41,7 +41,7 @@ class _ClassNameColumn extends ColumnData<SingleClassData>
 
   @override
   // We are removing the tooltip, because it is provided by [HeapClassView].
-  String getTooltip(SingleClassData classStats) => '';
+  String getTooltip(SingleClassData data) => '';
 
   @override
   Widget build(
@@ -119,14 +119,14 @@ class _ShallowSizeColumn extends ColumnData<SingleClassData> {
         );
 
   @override
-  int getValue(SingleClassData classStats) => classStats.objects.shallowSize;
+  int getValue(SingleClassData data) => data.objects.shallowSize;
 
   @override
   bool get numeric => true;
 
   @override
-  String getDisplayValue(SingleClassData classStats) => prettyPrintBytes(
-        getValue(classStats),
+  String getDisplayValue(SingleClassData data) => prettyPrintBytes(
+        getValue(data),
         includeUnit: true,
         kbFractionDigits: 1,
       )!;
