@@ -131,6 +131,13 @@ class ServiceManager<T extends VmService> {
     _deviceBusy.value = isBusy;
   }
 
+  /// Whether the flag pause_isolates_on_start was set by either the user or
+  /// another debugging client.
+  bool get pauseIsolatesOnStartExternallySet =>
+      _pauseIsolatesOnStartExternallySet;
+
+  bool _pauseIsolatesOnStartExternallySet = false;
+
   /// Set the device as busy during the duration of the given async task.
   Future<V> runDeviceBusyTask<V>(Future<V> task) async {
     try {
@@ -273,16 +280,41 @@ class ServiceManager<T extends VmService> {
   }
 
   Future<void> _configureIsolateSettings() async {
-    if (service != null) {
-      try {
-        final vmService = service!;
-        await vmService.setFlag('pause_isolates_on_start', 'true');
-        await vmService.requirePermissionToResume(
-          onPauseStart: true,
-        );
-      } catch (error) {
-        _log.warning('$error');
-      }
+    await _setPauseIsolatesOnStart();
+  }
+
+  Future<void> _setPauseIsolatesOnStart() async {
+    _pauseIsolatesOnStartExternallySet = await _isPauseIsolatesOnStartSet();
+
+    if (service == null) return;
+    final vmService = service!;
+
+    try {
+      await vmService.setFlag('pause_isolates_on_start', 'true');
+      await vmService.requirePermissionToResume(
+        onPauseStart: true,
+      );
+    } catch (error) {
+      _log.warning('$error');
+    }
+  }
+
+  Future<bool> _isPauseIsolatesOnStartSet() async {
+    if (service == null) return false;
+    final vmService = service!;
+
+    try {
+      final flagList = await vmService.getFlagList();
+      if (flagList.flags == null) return false;
+      final flags = flagList.flags!;
+      return flags.any(
+        (flag) =>
+            flag.name == 'pause_isolates_on_start' &&
+            flag.valueAsString == 'true',
+      );
+    } catch (error) {
+      _log.warning('$error');
+      return false;
     }
   }
 
