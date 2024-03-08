@@ -73,14 +73,21 @@ class PerfettoTrackEvent extends _PerfettoTracePacket
     // divide by 1000 to get the value in microseconds. Even though
     // [trace.timestamp] is an [Int64], it is still safe to call `toInt()`
     // here because 2^52 (max JavaScript integer) nanoseconds would be
-    // around 100 days, so it is impossible for protos sent by the VM
+    // around 100 days, so it is improbable for protos sent by the VM
     // Service to contain values larger than 2^52 nanoseconds.
     final timestampMicros = tracePacket.timestamp.toInt() ~/ 1000;
     return PerfettoTrackEvent._(tracePacket.trackEvent, timestampMicros);
   }
 
+  static const _devtoolsTagArg = 'devtoolsTag';
+  static const _frameNumberArg = 'frame_number';
+  static const _shadersArg = 'shaders';
+
+  /// The raw [TrackEvent] data from a Perfetto trace.
   final TrackEvent event;
 
+  /// The timestamp in microseconds of the [TracePacket] that this event was
+  /// received in.
   final int timestampMicros;
 
   String get name => event.name;
@@ -102,7 +109,12 @@ class PerfettoTrackEvent extends _PerfettoTracePacket
 
   List<String> get categories => event.categories;
 
+  /// The id of the Perfetto track that this event is included in.
   Int64 get trackId => event.trackUuid;
+
+  /// Describes the type of this track event as defined by the Perfetto tracing
+  /// API (slice begin, slice end, or instant).
+  PerfettoEventType? get type => PerfettoEventType.from(event.type);
 
   /// The inferred [TimelineEventType] for this track event, as defined by
   /// values that are relevant for Flutter timeline events in DevTools
@@ -112,55 +124,10 @@ class PerfettoTrackEvent extends _PerfettoTracePacket
   /// [TimelineEventType.other].
   TimelineEventType? timelineEventType;
 
-  /// Describes the type of this track event as defined by the Perfetto tracing
-  /// API (slice begin, slice end, or instant).
-  PerfettoEventType? get type => PerfettoEventType.from(event.type);
-
-  @override
-  int compareTo(PerfettoTrackEvent other) {
-    // Order events based on their timestamps. If the events share a timestamp,
-    // order them in the order we received them.
-    final compare = timestampMicros.compareTo(other.timestampMicros);
-    return compare != 0 ? compare : _creationId.compareTo(other._creationId);
-  }
-
-  @override
-  String toString() =>
-      '[name: $name, ts: $timestampMicros, trackId: $trackId, type: $type]';
-}
-
-int _tracePacketCreationId = 0;
-
-/// A shared subclass for events received in a Perfetto [Trace].
-///
-/// This class manages creating a [_creationId] for each event, which will be
-/// used to break a tie in sorting algorithms.
-abstract class _PerfettoTracePacket {
-  _PerfettoTracePacket() : _creationId = _tracePacketCreationId++;
-  final int _creationId;
-}
-
-enum PerfettoEventType {
-  sliceBegin('TYPE_SLICE_BEGIN'),
-  sliceEnd('TYPE_SLICE_END'),
-  instant('TYPE_INSTANT');
-
-  const PerfettoEventType(this._protoName);
-
-  static PerfettoEventType? from(TrackEvent_Type trackEventType) {
-    return PerfettoEventType.values.firstWhereOrNull(
-      (element) => element._protoName == trackEventType.name,
-    );
-  }
-
-  final String _protoName;
-}
-
-extension FrameIdentifierExtension on PerfettoTrackEvent {
   /// Returns the flutter frame number for this track event, or null if it does
   /// not exist.
   int? get flutterFrameNumber {
-    final frameNumber = args[TrackEventArguments.frameNumber] as String?;
+    final frameNumber = args[_frameNumberArg] as String?;
     if (frameNumber == null) return null;
     return int.tryParse(frameNumber);
   }
@@ -178,11 +145,48 @@ extension FrameIdentifierExtension on PerfettoTrackEvent {
 
   // Whether this track event is related to Shader compilation.
   bool get isShaderEvent =>
-      args[TrackEventArguments.devtoolsTag] == TrackEventArguments.shaders;
+      args[_devtoolsTagArg] == _shadersArg;
+
+  @override
+  int compareTo(PerfettoTrackEvent other) {
+    // Order events based on their timestamps. If the events share a timestamp,
+    // order them in the order we received them.
+    final compare = timestampMicros.compareTo(other.timestampMicros);
+    return compare != 0 ? compare : _creationId.compareTo(other._creationId);
+  }
+
+  @override
+  String toString() =>
+      '[name: $name, ts: $timestampMicros, trackId: $trackId, type: $type]';
 }
 
-abstract class TrackEventArguments {
-  static const devtoolsTag = 'devtoolsTag';
-  static const frameNumber = 'frame_number';
-  static const shaders = 'shaders';
+/// A shared subclass for events received in a Perfetto [Trace].
+///
+/// This class manages creating a [_creationId] for each event, which will be
+/// used to break a tie in sorting algorithms.
+abstract class _PerfettoTracePacket {
+  _PerfettoTracePacket() : _creationId = _tracePacketCreationId++;
+
+  /// Creation id counter that will be incremented for each call to the
+  /// [_PerfettoTracePacket] constructor.
+  static int _tracePacketCreationId = 0;
+
+  /// Creation id for a single [_PerfettoTracePacket] object.
+  final int _creationId;
+}
+
+enum PerfettoEventType {
+  sliceBegin('TYPE_SLICE_BEGIN'),
+  sliceEnd('TYPE_SLICE_END'),
+  instant('TYPE_INSTANT');
+
+  const PerfettoEventType(this._protoName);
+
+  static PerfettoEventType? from(TrackEvent_Type trackEventType) {
+    return PerfettoEventType.values.firstWhereOrNull(
+      (element) => element._protoName == trackEventType.name,
+    );
+  }
+
+  final String _protoName;
 }

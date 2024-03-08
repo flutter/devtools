@@ -152,6 +152,9 @@ class TimelineEventsController extends PerformanceFeatureController
       ),
     );
 
+    // TODO(https://github.com/flutter/devtools/issues/7334): toggle whether we
+    // call getPerfettoVMTimelineWithCpuSamples and getPerfettoVMTimeline based
+    // on the value of a user setting.
     late PerfettoTimeline rawPerfettoTimeline;
     await debugTimeAsync(
       () async => rawPerfettoTimeline =
@@ -160,13 +163,6 @@ class TimelineEventsController extends PerformanceFeatureController
         timeExtentMicros: currentVmTime.timestamp! - _nextPollStartMicros,
       ),
       debugName: 'VmService.getPerfettoVMTimelineWithCpuSamples',
-    );
-    await debugTimeAsync(
-      () async => rawPerfettoTimeline = await service.getPerfettoVMTimeline(
-        timeOriginMicros: _nextPollStartMicros,
-        timeExtentMicros: currentVmTime.timestamp! - _nextPollStartMicros,
-      ),
-      debugName: 'VmService.getPerfettoVMTimeline',
     );
     _nextPollStartMicros = currentVmTime.timestamp! + 1;
 
@@ -179,7 +175,8 @@ class TimelineEventsController extends PerformanceFeatureController
   }
 
   void _updatePerfettoTrace(Uint8List traceBinary, {bool logWarning = true}) {
-    _prepareTraceForProcessing(traceBinary, logWarning: logWarning);
+    final decodedTrace =
+        _prepareForTraceProcessing(traceBinary, logWarning: logWarning);
 
     if (fullPerfettoTrace == null) {
       debugTraceCallback(
@@ -187,7 +184,7 @@ class TimelineEventsController extends PerformanceFeatureController
           '[_updatePerfettoTrace] setting initial perfetto trace',
         ),
       );
-      fullPerfettoTrace = _traceFromBinary(traceBinary);
+      fullPerfettoTrace = decodedTrace ?? _traceFromBinary(traceBinary);
     } else {
       debugTraceCallback(
         () => _log.info(
@@ -201,7 +198,7 @@ class TimelineEventsController extends PerformanceFeatureController
     }
   }
 
-  void _prepareTraceForProcessing(
+  Trace? _prepareForTraceProcessing(
     Uint8List traceBinary, {
     bool logWarning = true,
   }) {
@@ -210,7 +207,7 @@ class TimelineEventsController extends PerformanceFeatureController
         () => _log
             .info('[_prepareTraceForProcessing] not a flutter app, returning.'),
       );
-      return;
+      return null;
     }
 
     final trace = _traceFromBinary(traceBinary);
@@ -230,6 +227,7 @@ class TimelineEventsController extends PerformanceFeatureController
       }
     }
     updateTrackIds(newTrackDescriptors, logWarning: logWarning);
+    return trace;
   }
 
   void updateTrackIds(
@@ -312,6 +310,7 @@ class TimelineEventsController extends PerformanceFeatureController
       screenMetricsProvider: () =>
           PerformanceScreenMetrics(traceEventCount: eventCount),
     );
+    _unprocessedTrackEvents.clear();
   }
 
   Future<void> loadPerfettoTrace() async {
@@ -358,7 +357,7 @@ class TimelineEventsController extends PerformanceFeatureController
           // If we still have not processed the timeline events for this frame,
           // try forcing a refresh. Only do this if it is possible to fetch the
           // timeline data for the [frame] we are trying to scroll to.
-          await _workTracker.track(() async => await forceRefresh());
+          await _workTracker.track(forceRefresh);
 
           // TODO(kenz): it would be best if we can avoid making subsequent
           // calls to [forceRefresh] when we hit this case.
