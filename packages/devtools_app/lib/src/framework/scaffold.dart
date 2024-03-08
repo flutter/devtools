@@ -337,7 +337,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
                 child: Padding(
                   padding: widget.appPadding,
                   child: showConsole
-                      ? Split(
+                      ? SplitPane(
                           axis: Axis.vertical,
                           splitters: [
                             ConsolePaneHeader(),

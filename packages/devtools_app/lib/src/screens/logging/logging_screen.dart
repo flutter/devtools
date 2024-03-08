@@ -168,7 +168,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
 
   // TODO(kenz): replace with helper widget.
   Widget _buildLoggingBody() {
-    return Split(
+    return SplitPane(
       axis: Axis.vertical,
       initialFractions: const [0.72, 0.28],
       // TODO(kenz): refactor so that the LogDetails header can be the splitter.
