@@ -68,10 +68,10 @@ void main() {
 
       // Load the network request.
       await controller.networkService.refreshNetworkData();
-      expect(requestsNotifier.value.requests.length, equals(1));
+      expect(requestsNotifier.value.length, equals(1));
 
       // Select the request in the network request list.
-      final networkRequest = requestsNotifier.value.requests.first;
+      final networkRequest = requestsNotifier.value.first;
       controller.selectedRequest.value = networkRequest;
       await tester.pumpAndSettle();
       await tester.tap(find.text('Request'));
@@ -110,10 +110,10 @@ void main() {
 
       // Load the network request.
       await controller.networkService.refreshNetworkData();
-      expect(requestsNotifier.value.requests.length, equals(1));
+      expect(requestsNotifier.value.length, equals(1));
 
       // Select the request in the network request list.
-      final networkRequest = requestsNotifier.value.requests.first;
+      final networkRequest = requestsNotifier.value.first;
       controller.selectedRequest.value = networkRequest;
       await tester.pumpAndSettle();
       await tester.tap(find.text('Response'));

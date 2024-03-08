@@ -49,10 +49,10 @@ class NetworkScreen extends Screen {
         networkController.filteredData,
       ],
       builder: (context, values, child) {
-        final networkRequests = values.first as NetworkRequests;
+        final networkRequests = values.first as List<NetworkRequest>;
         final filteredRequests = values.second as List<NetworkRequest>;
         final filteredCount = filteredRequests.length;
-        final totalCount = networkRequests.requests.length;
+        final totalCount = networkRequests.length;
         return Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -178,7 +178,7 @@ class _NetworkProfilerControls extends StatefulWidget {
 
 class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
     with AutoDisposeMixin {
-  late NetworkRequests _requests;
+  late List<NetworkRequest> _requests;
 
   late List<NetworkRequest> _filteredRequests;
 
@@ -251,7 +251,7 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
         const SizedBox(width: denseSpacing),
         DevToolsFilterButton(
           onPressed: _showFilterDialog,
-          isFilterActive: _filteredRequests.length != _requests.requests.length,
+          isFilterActive: _filteredRequests.length != _requests.length,
         ),
       ],
     );
