@@ -556,7 +556,7 @@ class _AppSizeView extends StatelessWidget {
               includeTopBorder: false,
             ),
             Expanded(
-              child: Split(
+              child: SplitPane(
                 axis: Axis.vertical,
                 initialFractions: const [
                   initialFractionForTreemap,

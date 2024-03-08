@@ -151,8 +151,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       screenId: InspectorScreen.id,
     );
 
-    final splitAxis = Split.axisFor(context, 0.85);
-    final widgetTrees = Split(
+    final splitAxis = SplitPane.axisFor(context, 0.85);
+    final widgetTrees = SplitPane(
       axis: splitAxis,
       initialFractions: const [0.33, 0.67],
       children: [

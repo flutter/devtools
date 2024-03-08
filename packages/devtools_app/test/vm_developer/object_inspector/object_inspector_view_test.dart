@@ -72,7 +72,7 @@ void main() {
           ),
         ),
       );
-      expect(find.byType(Split), findsNWidgets(2));
+      expect(find.byType(SplitPane), findsNWidgets(2));
       expect(find.byType(ProgramExplorer), findsOneWidget);
       expect(find.byType(ObjectViewport), findsOneWidget);
       expect(find.text('Program Explorer'), findsOneWidget);

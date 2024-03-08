@@ -5,18 +5,18 @@
 import 'package:devtools_app_shared/ui.dart' as devtools_shared_ui;
 import 'package:flutter/material.dart';
 
-/// Example of using the [Split] widget from
+/// Example of using the [SplitPane] widget from
 /// 'package:devtools_app_shared/ui.dart' with two children laid across a
 /// horizontal axis.
 ///
-/// This example does not specify the [Split.splitters] parameter, so a
+/// This example does not specify the [SplitPane.splitters] parameter, so a
 /// default splitter is used.
 class SplitExample extends StatelessWidget {
   const SplitExample({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return devtools_shared_ui.Split(
+    return devtools_shared_ui.SplitPane(
       axis: Axis.horizontal,
       initialFractions: const [0.3, 0.7],
       minSizes: const [50.0, 100.0],
@@ -28,7 +28,7 @@ class SplitExample extends StatelessWidget {
   }
 }
 
-/// Example of using the [Split] widget from
+/// Example of using the [SplitPane] widget from
 /// 'package:devtools_app_shared/ui.dart' with three children laid across a
 /// vertical axis.
 ///
@@ -38,7 +38,7 @@ class MultiSplitExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return devtools_shared_ui.Split(
+    return devtools_shared_ui.SplitPane(
       axis: Axis.vertical,
       initialFractions: const [0.3, 0.3, 0.4],
       minSizes: const [50.0, 50.0, 100.0],
