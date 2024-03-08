@@ -242,39 +242,35 @@ class DebounceTimer {
   DebounceTimer.periodic(
     Duration duration,
     Future<void> Function() callback,
-  ) {
-    unawaited(
-      callback().then((_) {
-        // If the timer was cancelled during the initial callback then don't start
-        // the periodic timer.
-        if (_isCancelled) return;
+  ) : _callback = callback {
+    // Start running the first call to the callback.
+    _runCallback();
 
-        // Now a periodic timer is used to repeatedly trigger the callback after
-        // the duration.
-        _timer = Timer.periodic(duration, (timer) async {
-          // If the previous callback is still running, then don't trigger another
-          // callback. (debounce)
-          if (_isRunning) {
-            return;
-          }
-
-          try {
-            _isRunning = true;
-            await callback();
-          } finally {
-            _isRunning = false;
-          }
-        });
-      }),
-    );
+    // Start periodic timer so that the callback will be periodically triggered
+    // after the first callback.
+    _timer = Timer.periodic(duration, (_) => _runCallback());
   }
 
-  late Timer? _timer;
-  bool _isCancelled = false;
+  void _runCallback() async {
+    // If the previous callback is still running, then don't trigger another
+    // callback. (debounce)
+    if (_isRunning) {
+      return;
+    }
+
+    try {
+      _isRunning = true;
+      await _callback();
+    } finally {
+      _isRunning = false;
+    }
+  }
+
+  late final Timer _timer;
+  final Future<void> Function() _callback;
   bool _isRunning = false;
 
   void cancel() {
-    _isCancelled = true;
-    _timer?.cancel();
+    _timer.cancel();
   }
 }

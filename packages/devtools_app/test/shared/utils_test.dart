@@ -23,13 +23,13 @@ void main() {
       fakeAsync((async) {
         int callbackCounter = 0;
         DebounceTimer.periodic(
-          const Duration(seconds: 1),
+          const Duration(milliseconds: 500),
           () async {
             callbackCounter++;
             await Future<void>.delayed(const Duration(seconds: 30));
           },
         );
-        async.elapse(const Duration(seconds: 40));
+        async.elapse(const Duration(seconds: 31));
         expect(callbackCounter, 2);
       });
     });
