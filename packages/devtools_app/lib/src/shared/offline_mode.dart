@@ -43,6 +43,9 @@ class OfflineModeController {
   }
 }
 
+///
+///
+/// offlineController.shouldLoadOfflineData(ProfilerScreen.id)
 mixin OfflineScreenControllerMixin<T> on AutoDisposeControllerMixin {
   final _exportController = ExportController();
 
