@@ -43,9 +43,12 @@ class OfflineModeController {
   }
 }
 
+/// This mixin is used to add offline mode functionality to a screen.
 ///
-///
-/// offlineController.shouldLoadOfflineData(ProfilerScreen.id)
+/// For offline mode, the screen controller should mix-in this mixing,
+/// implement its abstract methods, and verify the value of the
+/// global `offlineController.shouldLoadOfflineData(...)`
+/// in the controller constructor to detect if the mode is offline.
 mixin OfflineScreenControllerMixin<T> on AutoDisposeControllerMixin {
   final _exportController = ExportController();
 
