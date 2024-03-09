@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import '../../../shared/analytics/analytics.dart' as ga;
 import '../../../shared/primitives/listenable.dart';
 import '../../../shared/screen.dart';
-import 'connected/connected_screen_body.dart';
+import 'connected/screen_body.dart';
 
 class MemoryScreen extends Screen {
   MemoryScreen() : super.fromMetaData(ScreenMetaData.memory);
