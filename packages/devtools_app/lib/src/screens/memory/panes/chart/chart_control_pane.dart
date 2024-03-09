@@ -11,7 +11,7 @@ import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/primitives/simple_items.dart';
 import '../../../../shared/utils.dart';
-import '../../framework/connected/memory_controller.dart';
+import '../../framework/memory_controller.dart';
 import '../../shared/primitives/simple_elements.dart';
 import 'chart_pane_controller.dart';
 import 'interval_dropdown.dart';

@@ -9,16 +9,16 @@ import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../../shared/globals.dart';
-import '../../../../shared/memory/class_name.dart';
-import '../../../../shared/utils.dart';
-import '../../panes/chart/primitives.dart';
-import '../../panes/diff/controller/diff_pane_controller.dart';
-import '../../panes/profile/profile_pane_controller.dart';
-import '../../panes/tracing/tracing_pane_controller.dart';
-import '../../shared/heap/model.dart';
-import '../../shared/primitives/memory_timeline.dart';
-import 'memory_protocol.dart';
+import '../../../shared/globals.dart';
+import '../../../shared/memory/class_name.dart';
+import '../../../shared/utils.dart';
+import '../panes/chart/primitives.dart';
+import '../panes/diff/controller/diff_pane_controller.dart';
+import '../panes/profile/profile_pane_controller.dart';
+import '../panes/tracing/tracing_pane_controller.dart';
+import '../shared/heap/model.dart';
+import '../shared/primitives/memory_timeline.dart';
+import 'connected/memory_protocol.dart';
 
 class MemoryFeatureControllers {
   /// [diffPaneController] is passed for testability.

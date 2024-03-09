@@ -29,7 +29,7 @@ import 'screens/inspector/inspector_screen.dart';
 import 'screens/inspector/inspector_tree_controller.dart';
 import 'screens/logging/logging_controller.dart';
 import 'screens/logging/logging_screen.dart';
-import 'screens/memory/framework/connected/memory_controller.dart';
+import 'screens/memory/framework/memory_controller.dart';
 import 'screens/memory/framework/memory_screen.dart';
 import 'screens/memory/framework/static/static_screen_body.dart';
 import 'screens/network/network_controller.dart';

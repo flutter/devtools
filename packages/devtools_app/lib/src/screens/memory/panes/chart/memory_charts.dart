@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../shared/charts/chart_trace.dart';
 import '../../../../shared/primitives/utils.dart';
-import '../../framework/connected/memory_controller.dart';
+import '../../framework/memory_controller.dart';
 import 'memory_android_chart.dart';
 import 'memory_events_pane.dart';
 import 'memory_vm_chart.dart';

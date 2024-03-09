@@ -12,7 +12,7 @@ import 'package:vm_service/vm_service.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/utils.dart';
 import '../../shared/primitives/memory_timeline.dart';
-import 'memory_controller.dart';
+import '../memory_controller.dart';
 
 final _log = Logger('memory_protocol');
 

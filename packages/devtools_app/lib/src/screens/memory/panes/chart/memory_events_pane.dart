@@ -12,7 +12,7 @@ import '../../../../shared/charts/chart_controller.dart';
 import '../../../../shared/charts/chart_trace.dart' as trace;
 import '../../../../shared/charts/chart_trace.dart' show ChartType;
 import '../../../../shared/utils.dart';
-import '../../framework/connected/memory_controller.dart';
+import '../../framework/memory_controller.dart';
 import '../../shared/primitives/memory_timeline.dart';
 
 // TODO(terry): Consider custom painter?
