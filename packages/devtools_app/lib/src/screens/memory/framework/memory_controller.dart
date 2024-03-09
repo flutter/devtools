@@ -11,6 +11,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../shared/globals.dart';
 import '../../../shared/memory/class_name.dart';
+import '../../../shared/offline_mode.dart';
 import '../../../shared/utils.dart';
 import '../panes/chart/primitives.dart';
 import '../panes/diff/controller/diff_pane_controller.dart';
@@ -19,6 +20,7 @@ import '../panes/tracing/tracing_pane_controller.dart';
 import '../shared/heap/model.dart';
 import '../shared/primitives/memory_timeline.dart';
 import 'connected/memory_protocol.dart';
+import 'offline/screen_data.dart';
 
 class MemoryFeatureControllers {
   /// [diffPaneController] is passed for testability.
@@ -65,7 +67,9 @@ class MemoryFeatureControllers {
 ///
 /// The controller should be recreated for every new connection.
 class MemoryController extends DisposableController
-    with AutoDisposeControllerMixin {
+    with
+        AutoDisposeControllerMixin,
+        OfflineScreenControllerMixin<MemoryScreenOfflineData> {
   MemoryController({
     DiffPaneController? diffPaneController,
     ProfilePaneController? profilePaneController,
@@ -315,5 +319,17 @@ class MemoryController extends DisposableController
     _memoryTracker?.dispose();
     controllers.dispose();
     HeapClassName.dispose();
+  }
+
+  @override
+  FutureOr<void> processOfflineData(MemoryScreenOfflineData offlineData) {
+    // TODO: implement processOfflineData
+    throw UnimplementedError();
+  }
+
+  @override
+  OfflineScreenData screenDataForExport() {
+    // TODO: implement screenDataForExport
+    throw UnimplementedError();
   }
 }
