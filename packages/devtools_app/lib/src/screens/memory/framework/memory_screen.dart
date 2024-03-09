@@ -8,7 +8,10 @@ import 'package:flutter/material.dart';
 import '../../../shared/analytics/analytics.dart' as ga;
 import '../../../shared/primitives/listenable.dart';
 import '../../../shared/screen.dart';
+import '../../../shared/utils.dart';
 import 'connected/screen_body.dart';
+import 'memory_controller.dart';
+import 'offline/screen_body.dart';
 
 class MemoryScreen extends Screen {
   MemoryScreen() : super.fromMetaData(ScreenMetaData.memory);
@@ -23,7 +26,9 @@ class MemoryScreen extends Screen {
   String get docPageId => id;
 
   @override
-  Widget build(BuildContext context) => const MemoryBody();
+  Widget build(BuildContext context) {
+    return const MemoryBody();
+  }
 
   // TODO(polina-c): when embedded and VSCode console features are implemented,
   // should be in native console in VSCode
@@ -38,7 +43,8 @@ class MemoryBody extends StatefulWidget {
   MemoryBodyState createState() => MemoryBodyState();
 }
 
-class MemoryBodyState extends State<MemoryBody> {
+class MemoryBodyState extends State<MemoryBody>
+    with ProvidedControllerMixin<MemoryController, MemoryBody> {
   @override
   void initState() {
     super.initState();
@@ -47,7 +53,10 @@ class MemoryBodyState extends State<MemoryBody> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO(polina-c): load static body if not connected.
-    return const ConnectedMemoryBody();
+    if (controller.isOffline) {
+      return const OfflineMemoryBody();
+    } else {
+      return const ConnectedMemoryBody();
+    }
   }
 }

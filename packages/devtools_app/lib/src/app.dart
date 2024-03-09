@@ -338,7 +338,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
             embed: embed,
             child: MultiProvider(
               providers: _providedControllers(),
-              child: const StaticMemoryBody(),
+              child: const OfflineMemoryBody(),
             ),
           );
         },

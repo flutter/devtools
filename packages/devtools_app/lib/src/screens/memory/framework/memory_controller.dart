@@ -12,6 +12,7 @@ import 'package:vm_service/vm_service.dart';
 import '../../../shared/globals.dart';
 import '../../../shared/memory/class_name.dart';
 import '../../../shared/offline_mode.dart';
+import '../../../shared/screen.dart';
 import '../../../shared/utils.dart';
 import '../panes/chart/primitives.dart';
 import '../panes/diff/controller/diff_pane_controller.dart';
@@ -74,14 +75,39 @@ class MemoryController extends DisposableController
     DiffPaneController? diffPaneController,
     ProfilePaneController? profilePaneController,
   }) {
-    controllers = MemoryFeatureControllers(
-      diffPaneController,
-      profilePaneController,
+    isOffline =
+        offlineController.shouldLoadOfflineData(ScreenMetaData.memory.id);
+    if (!isOffline) {
+      _controllers = MemoryFeatureControllers(
+        diffPaneController,
+        profilePaneController,
+      );
+    }
+  }
+
+  late final bool isOffline;
+
+  @override
+  FutureOr<void> processOfflineData(MemoryScreenOfflineData offlineData) {
+    offlineData = offlineData;
+  }
+
+  @override
+  OfflineScreenData screenDataForExport() {
+    return OfflineScreenData(
+      screenId: ScreenMetaData.memory.id,
+      data: {
+        '$MemoryScreenOfflineData': MemoryScreenOfflineData(),
+      },
     );
   }
 
   /// Sub-controllers of memory controller.
-  late final MemoryFeatureControllers controllers;
+  MemoryFeatureControllers get controllers => _controllers!;
+  MemoryFeatureControllers? _controllers;
+
+  MemoryScreenOfflineData get offlineData => _offlineData!;
+  MemoryScreenOfflineData? _offlineData;
 
   /// Index of the selected feature tab.
   ///
@@ -319,17 +345,5 @@ class MemoryController extends DisposableController
     _memoryTracker?.dispose();
     controllers.dispose();
     HeapClassName.dispose();
-  }
-
-  @override
-  FutureOr<void> processOfflineData(MemoryScreenOfflineData offlineData) {
-    // TODO: implement processOfflineData
-    throw UnimplementedError();
-  }
-
-  @override
-  OfflineScreenData screenDataForExport() {
-    // TODO: implement screenDataForExport
-    throw UnimplementedError();
   }
 }

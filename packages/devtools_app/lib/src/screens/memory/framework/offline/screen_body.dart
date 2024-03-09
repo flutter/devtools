@@ -4,11 +4,13 @@
 
 import 'package:flutter/material.dart';
 
-class StaticMemoryBody extends StatelessWidget {
-  const StaticMemoryBody({super.key});
+class OfflineMemoryBody extends StatelessWidget {
+  const OfflineMemoryBody({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const Text('static memory screen body will be here.');
+    return const Text(
+      'Connect to application to access memory debugging features.',
+    );
   }
 }
