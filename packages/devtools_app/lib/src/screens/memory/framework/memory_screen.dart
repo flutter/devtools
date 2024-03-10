@@ -52,6 +52,12 @@ class MemoryBodyState extends State<MemoryBody>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    initController();
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (controller.isOffline) {
       return const OfflineMemoryBody();
