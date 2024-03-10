@@ -104,7 +104,7 @@ class SimulatedDevToolsWrapperState extends State<SimulatedDevToolsWrapper>
             environmentPanelMinWidth / availableWidth;
         final childFraction = 1 - environmentPanelFraction;
 
-        return Split(
+        return SplitPane(
           axis: Axis.horizontal,
           initialFractions: [childFraction, environmentPanelFraction],
           minSizes: const [100.0, 0.0],
@@ -151,7 +151,8 @@ class SimulatedDevToolsWrapperState extends State<SimulatedDevToolsWrapper>
                               DTDConnectionDisplay(
                                 simController: simController,
                                 connected: dtdConnected,
-                                onConnectionChange: widget.onDtdConnectionChange,
+                                onConnectionChange:
+                                    widget.onDtdConnectionChange,
                               ),
                               _SimulatedApi(
                                 simController: simController,

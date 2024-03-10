@@ -20,9 +20,9 @@ import '../utils/utils.dart';
 ///
 /// [minSizes] defines the minimum size that each child can be set to when
 /// adjusting the sizes of the children.
-final class Split extends StatefulWidget {
+final class SplitPane extends StatefulWidget {
   /// Builds a split oriented along [axis].
-  Split({
+  SplitPane({
     Key? key,
     required this.axis,
     required this.children,
@@ -85,10 +85,10 @@ final class Split extends StatefulWidget {
   }
 
   @override
-  State<StatefulWidget> createState() => _SplitState();
+  State<StatefulWidget> createState() => _SplitPaneState();
 }
 
-final class _SplitState extends State<Split> {
+final class _SplitPaneState extends State<SplitPane> {
   late final List<double> fractions;
 
   bool get isHorizontal => widget.axis == Axis.horizontal;

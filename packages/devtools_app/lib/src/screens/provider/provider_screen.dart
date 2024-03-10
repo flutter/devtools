@@ -92,7 +92,7 @@ class ProviderScreenBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final splitAxis = Split.axisFor(context, 0.85);
+    final splitAxis = SplitPane.axisFor(context, 0.85);
 
     // A provider will automatically be selected as soon as one is detected
     final selectedProviderId = ref.watch(selectedProviderIdProvider);
@@ -104,7 +104,7 @@ class ProviderScreenBody extends ConsumerWidget {
       if (hasError) showProviderErrorBanner();
     });
 
-    return Split(
+    return SplitPane(
       axis: splitAxis,
       initialFractions: const [0.33, 0.67],
       children: [
