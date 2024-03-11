@@ -10,7 +10,7 @@ class OfflineMemoryBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Text(
-      'Connect to application to access memory debugging features.',
+      'Connect to an application to access memory debugging features.',
     );
   }
 }
