@@ -4,9 +4,10 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_deeplink.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
@@ -248,6 +249,7 @@ class DeepLinksController extends DisposableController {
   }
 
   final selectedProject = ValueNotifier<FlutterProject?>(null);
+  final localFingerprint = ValueNotifier<String?>(null);
   final selectedLink = ValueNotifier<LinkData?>(null);
   final pagePhase = ValueNotifier<PagePhase>(PagePhase.emptyState);
 
@@ -263,12 +265,40 @@ class DeepLinksController extends DisposableController {
   final textEditingController = TextEditingController();
   final deepLinksServices = DeepLinksServices();
 
+  void addLocalFingerprint(BuildContext context, String fingerprint) async {
+    bool isValidHexCode(String input) {
+      final RegExp pattern =
+          RegExp(r'^([0-9a-f]{2}:)+[0-9a-f]{2}$', caseSensitive: false);
+      return pattern.hasMatch(input);
+    }
+
+    if (!isValidHexCode(fingerprint)) {
+      await showDialog(
+        context: context,
+        builder: (_) {
+          return const AlertDialog(
+            title: Text('This is not a valid fingerprint'),
+            content: Text(
+              'It should be the same encoding and format as in the assetlinks.json',
+            ),
+            actions: [
+              DialogCloseButton(),
+            ],
+          );
+        },
+      );
+    } else {
+      localFingerprint.value = fingerprint;
+    }
+  }
+
   Future<void> _generateAssetLinks() async {
     generatedAssetLinksForSelectedLink.value = null;
     generatedAssetLinksForSelectedLink.value =
         await deepLinksServices.generateAssetLinks(
       domain: selectedLink.value!.domain,
       applicationId: applicationId,
+      localFingerprint: localFingerprint.value,
     );
   }
 
@@ -290,6 +320,7 @@ class DeepLinksController extends DisposableController {
       domainErrors = await deepLinksServices.validateAndroidDomain(
         domains: domains,
         applicationId: applicationId,
+        localFingerprint: localFingerprint.value,
       );
     } catch (e) {
       //TODO(hangyujin): Add more error handling for cases like RPC error and invalid json.

@@ -187,6 +187,58 @@ class _DomainCheckTable extends StatelessWidget {
         ),
         if (linkData.domainErrors.isNotEmpty)
           _DomainFixPanel(controller: controller),
+        _LocalFingerprint(controller: controller),
+      ],
+    );
+  }
+}
+
+class _LocalFingerprint extends StatelessWidget {
+  const _LocalFingerprint({
+    required this.controller,
+  });
+
+  final DeepLinksController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: intermediateSpacing),
+        Text(
+          'Add a local fingerprint',
+          style: theme.textTheme.titleSmall,
+        ),
+        const SizedBox(height: intermediateSpacing),
+        Text(
+          'Fingerprints will be obtained from Play Developer Console, but you can '
+          'optionally provide an additional fingerprint.',
+          style: Theme.of(context).subtleTextStyle,
+        ),
+        const SizedBox(height: intermediateSpacing),
+        TextField(
+          onSubmitted: (fingerprint) =>
+              controller.addLocalFingerprint(context, fingerprint),
+        ),
+        const SizedBox(height: intermediateSpacing),
+        ValueListenableBuilder<String?>(
+          valueListenable: controller.localFingerprint,
+          builder: (context, fingerprint, _) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Your locally added fingerprint: ',
+                  style: theme.textTheme.titleSmall,
+                ),
+                const SizedBox(height: intermediateSpacing),
+                Text(fingerprint??'', style: theme.textTheme.bodySmall),
+              ],
+            );
+          },
+        ),
       ],
     );
   }
