@@ -50,7 +50,7 @@ class TracingPaneState extends State<TracingPane> {
         ),
         Expanded(
           child: OutlineDecoration.onlyTop(
-            child: Split(
+            child: SplitPane(
               axis: Axis.horizontal,
               initialFractions: const [0.25, 0.75],
               children: [

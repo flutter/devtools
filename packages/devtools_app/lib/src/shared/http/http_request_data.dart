@@ -52,11 +52,6 @@ class DartIOHttpRequestData extends NetworkRequest {
 
   HttpProfileRequestRef _request;
 
-  final ValueNotifier<int> _updateCount = ValueNotifier<int>(0);
-
-  /// A notifier that changes when the request data, or it's response body
-  /// changes.
-  ValueListenable<void> get requestUpdatedNotifier => _updateCount;
   bool isFetchingFullData = false;
 
   Future<void> getFullRequestData() async {
@@ -69,10 +64,10 @@ class DartIOHttpRequestData extends NetworkRequest {
         _request.id.toString(),
       );
       _request = updated;
-      _updateCount.value++;
       final fullRequest = _request as HttpProfileRequest;
       _responseBody = utf8.decode(fullRequest.responseBody!);
       _requestBody = utf8.decode(fullRequest.requestBody!);
+      notifyListeners();
     } finally {
       isFetchingFullData = false;
     }
@@ -235,7 +230,7 @@ class DartIOHttpRequestData extends NetworkRequest {
   /// Merges the information from another [HttpRequestData] into this instance.
   void merge(DartIOHttpRequestData data) {
     _request = data._request;
-    _updateCount.value++;
+    notifyListeners();
   }
 
   @override

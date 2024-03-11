@@ -27,7 +27,7 @@ class DiffPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Split(
+    return SplitPane(
       axis: Axis.horizontal,
       initialFractions: const [0.1, 0.9],
       minSizes: const [80, 80],

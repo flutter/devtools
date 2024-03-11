@@ -1,6 +1,9 @@
+## 0.0.15-wip
+* Bump `devtools_app_shared` to ^0.1.0
+
 ## 0.0.14
 * Add a global `dtdManager` for interacting with the Dart Tooling Daemon.
-* Add support for connecting to the Dart Tooling Daemon from the 
+* Add support for connecting to the Dart Tooling Daemon from the
 simulated DevTools environment.
 * Add help buttons to the VM Service and DTD connection text fields in the
 simulated DevTools environment.
