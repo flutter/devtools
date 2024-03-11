@@ -376,7 +376,7 @@ abstract class FlutterFrame4 {
     ..setEventFlow(rasterEvent);
 
   /// A frame with extra timeline events for the purpose of testing.
-  /// 
+  ///
   /// Some events included in [uiEventWithExtras] and [rasterEventWithExtras]
   /// are not part of the original trace from with [FlutterFrame4] was formed.
   static final frameWithExtras = FlutterFrame.parse(_frameJson)
@@ -449,8 +449,8 @@ abstract class FlutterFrame4 {
                 buildChild1Event, // Extra, not part of original trace.
                 buildChild2Event, // Extra, not part of original trace.
 
-                  renderBoxIntrinsics, // Extra, not part of original trace.
-                  renderFlexIntrinsics, // Extra, not part of original trace.
+                renderBoxIntrinsics, // Extra, not part of original trace.
+                renderFlexIntrinsics, // Extra, not part of original trace.
               ],
             ),
         ),

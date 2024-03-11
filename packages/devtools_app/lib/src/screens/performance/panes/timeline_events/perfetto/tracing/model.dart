@@ -144,8 +144,7 @@ class PerfettoTrackEvent extends _PerfettoTracePacket
       name == FlutterTimelineEvent.rasterEventName;
 
   // Whether this track event is related to Shader compilation.
-  bool get isShaderEvent =>
-      args[devtoolsTagArg] == shadersArg;
+  bool get isShaderEvent => args[devtoolsTagArg] == shadersArg;
 
   @override
   int compareTo(PerfettoTrackEvent other) {

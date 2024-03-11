@@ -12,7 +12,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
-
 void main() {
   group('$RasterStatsController', () {
     late RasterStatsController controller;
