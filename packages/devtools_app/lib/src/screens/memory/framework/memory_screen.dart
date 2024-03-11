@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../devtools_app.dart';
 import '../../../shared/analytics/analytics.dart' as ga;
 import '../../../shared/primitives/listenable.dart';
 import '../../../shared/screen.dart';
@@ -59,7 +60,8 @@ class MemoryBodyState extends State<MemoryBody>
 
   @override
   Widget build(BuildContext context) {
-    if (controller.isOffline) {
+    if (controller.isOffline ||
+        !serviceConnection.serviceManager.hasConnection) {
       return const OfflineMemoryBody();
     } else {
       return const ConnectedMemoryBody();

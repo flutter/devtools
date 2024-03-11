@@ -53,6 +53,8 @@ enum ScreenMetaData {
     'memory',
     title: 'Memory',
     icon: Octicons.package,
+    worksOffline: true,
+    requiresConnection: false,
     requiresDartVm: true,
     tutorialVideoTimestamp: '?t=420',
   ),
