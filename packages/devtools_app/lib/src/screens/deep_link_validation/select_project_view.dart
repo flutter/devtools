@@ -37,6 +37,13 @@ class _SelectProjectViewState extends State<SelectProjectView>
     if (!initController()) return;
   }
 
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_getPackageDirectoryForMainIsolate());
+
+  }
+
   void _handleDirectoryPicked(String directory) async {
     setState(() {
       _retrievingFlutterProject = true;
@@ -99,15 +106,6 @@ class _SelectProjectViewState extends State<SelectProjectView>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    if (packageDirectoryForMainIsolate == null) {
-      unawaited(_getPackageDirectoryForMainIsolate());
-      // return Center(
-      //   child: Text(
-      //     'Loading MainIsolate...',
-      //     style: theme.regularTextStyle,
-      //   ),
-      // );
-    }
 
     if (_retrievingFlutterProject) {
       return Center(
@@ -135,6 +133,8 @@ class _SelectProjectViewState extends State<SelectProjectView>
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
+        Text(packageDirectoryForMainIsolate ??
+            'packageDirectoryForMainIsolate is null'),
         Padding(
           padding: const EdgeInsets.all(defaultSpacing),
           child: Text(
