@@ -41,7 +41,6 @@ class _SelectProjectViewState extends State<SelectProjectView>
   void initState() {
     super.initState();
     unawaited(_getPackageDirectoryForMainIsolate());
-
   }
 
   void _handleDirectoryPicked(String directory) async {
@@ -106,7 +105,6 @@ class _SelectProjectViewState extends State<SelectProjectView>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
     if (_retrievingFlutterProject) {
       return Center(
         child: Column(
@@ -133,8 +131,6 @@ class _SelectProjectViewState extends State<SelectProjectView>
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text(packageDirectoryForMainIsolate ??
-            'packageDirectoryForMainIsolate is null'),
         Padding(
           padding: const EdgeInsets.all(defaultSpacing),
           child: Text(
