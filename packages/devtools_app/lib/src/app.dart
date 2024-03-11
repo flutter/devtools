@@ -566,7 +566,7 @@ List<DevToolsScreen> defaultScreens({
     DevToolsScreen<MemoryController>(
       MemoryScreen(),
       createController: (_) => MemoryController(),
-      supportsOffline: true, // FeatureFlags.memoryAnalysis,
+      supportsOffline: FeatureFlags.memoryAnalysis,
     ),
     DevToolsScreen<DebuggerController>(
       DebuggerScreen(),
