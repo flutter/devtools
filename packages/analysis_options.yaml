@@ -15,8 +15,6 @@ analyzer:
     - build/**
     - '**.freezed.dart'
     - flutter-sdk/
-    # Formatting this file makes it difficult to read.
-    - test/test_data/test_infra/performance/_perfetto_events_raw.dart
 
 linter:
   rules:
