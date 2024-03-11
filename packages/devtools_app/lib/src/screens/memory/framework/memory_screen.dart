@@ -7,11 +7,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../devtools_app.dart';
 import '../../../shared/analytics/analytics.dart' as ga;
-import '../../../shared/primitives/listenable.dart';
-import '../../../shared/screen.dart';
-import '../../../shared/utils.dart';
 import 'connected/screen_body.dart';
-import 'memory_controller.dart';
 import 'offline/screen_body.dart';
 
 class MemoryScreen extends Screen {
