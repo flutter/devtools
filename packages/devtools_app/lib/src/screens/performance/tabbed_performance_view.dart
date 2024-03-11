@@ -74,7 +74,7 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
           showRasterStats && hasOfflineData && offlineData.rasterStats != null;
       showRebuildStats = showRebuildStats &&
           hasOfflineData &&
-          offlineData.rebuildCountModel.isNotEmpty;
+          offlineData.rebuildCountModel != null;
     }
 
     final tabsAndControllers = _generateTabs(

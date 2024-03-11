@@ -9,7 +9,6 @@ import 'package:intl/intl.dart';
 
 import '../../../../devtools.dart';
 import '../../globals.dart';
-import '../../primitives/simple_items.dart';
 import '../../primitives/utils.dart';
 import '../../screen.dart';
 import '_export_desktop.dart' if (dart.library.js_interop) '_export_web.dart';

@@ -24,8 +24,8 @@ class FrameAnalysis {
   /// children of the "Layout" event.
   ///
   /// Example:
-  /// [-----Build----][-----------------Layout-----------------]
-  ///                       [--Build--]     [----Build----]
+  /// [-----BUILD----][-----------------LAYOUT (root)-----------------]
+  ///                       [--BUILD--]     [----BUILD----]
   late FramePhase buildPhase = _generateBuildPhase();
 
   FramePhase _generateBuildPhase() {
@@ -50,8 +50,8 @@ class FrameAnalysis {
   /// in the Layout event, outside of the Build events.
   ///
   /// Example:
-  /// [-----------------Layout-----------------]
-  ///    [--Build--]     [----Build----]
+  /// [-----------------LAYOUT (root)-----------------]
+  ///    [--BUILD--]     [----BUILD----]
   late FramePhase layoutPhase = _generateLayoutPhase();
 
   FramePhase _generateLayoutPhase() {

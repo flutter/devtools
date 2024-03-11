@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
 
-import 'package:dds_service_extensions/dds_service_extensions.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:flutter/foundation.dart';
@@ -158,7 +157,7 @@ class TimelineEventsController extends PerformanceFeatureController
     late PerfettoTimeline rawPerfettoTimeline;
     await debugTimeAsync(
       () async => rawPerfettoTimeline =
-          await service.getPerfettoVMTimelineWithCpuSamples(
+          await service.getPerfettoVMTimelineWithCpuSamplesWrapper(
         timeOriginMicros: _nextPollStartMicros,
         timeExtentMicros: currentVmTime.timestamp! - _nextPollStartMicros,
       ),
@@ -393,9 +392,9 @@ class TimelineEventsController extends PerformanceFeatureController
 
   void _maybeAddEventToUnassignedFrame(FlutterTimelineEvent event) {
     final frameNumber = event.flutterFrameNumber;
-    if (event.isUiEvent || event.isRasterEvent) {
+    if (frameNumber != null && event.isUiEvent || event.isRasterEvent) {
       if (performanceController.flutterFramesController
-          .hasUnassignedFlutterFrame(frameNumber)) {
+          .hasUnassignedFlutterFrame(frameNumber!)) {
         firstWellFormedFlutterFrameId = math.min(
           firstWellFormedFlutterFrameId ?? frameNumber,
           frameNumber,

@@ -7,11 +7,11 @@ import 'package:devtools_app/src/screens/performance/panes/raster_stats/raster_s
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/test_data.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../test_infra/test_data/performance_raster_stats.dart';
 
 void main() {
   group('$RasterStatsController', () {
@@ -85,7 +85,7 @@ void main() {
       // Ensure we are starting in a null state.
       expect(controller.rasterStats.value, isNull);
 
-      final offlineData = PerformanceData(rasterStats: rasterStats);
+      final offlineData = OfflinePerformanceData(rasterStats: rasterStats);
       await controller.setOfflineData(offlineData);
 
       expect(controller.rasterStats.value, isNotNull);

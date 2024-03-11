@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
-
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../service/service_manager.dart';
 import '../../shared/primitives/trees.dart';
@@ -20,10 +19,9 @@ class OfflinePerformanceData {
     this.frames = const <FlutterFrame>[],
     this.selectedFrame,
     this.rasterStats,
-    RebuildCountModel? rebuildCountModel,
+    this.rebuildCountModel,
     double? displayRefreshRate,
-  })  : rebuildCountModel = rebuildCountModel ?? RebuildCountModel(),
-        displayRefreshRate = displayRefreshRate ?? defaultRefreshRate;
+  }) : displayRefreshRate = displayRefreshRate ?? defaultRefreshRate;
 
   factory OfflinePerformanceData.parse(Map<String, Object?> json_) {
     final json = _PerformanceDataJson(json_);
@@ -54,7 +52,7 @@ class OfflinePerformanceData {
 
   final RasterStats? rasterStats;
 
-  final RebuildCountModel rebuildCountModel;
+  final RebuildCountModel? rebuildCountModel;
 
   final double displayRefreshRate;
 
@@ -67,11 +65,11 @@ class OfflinePerformanceData {
 
   Map<String, dynamic> toJson() => {
         traceBinaryKey: perfettoTraceBinary,
-        selectedFrameIdKey: selectedFrame?.id,
         flutterFramesKey: frames.map((frame) => frame.json).toList(),
+        selectedFrameIdKey: selectedFrame?.id,
         displayRefreshRateKey: displayRefreshRate,
-        rasterStatsKey: rasterStats?.json ?? <String, dynamic>{},
-        rebuildCountModelKey: rebuildCountModel.toJson(),
+        rasterStatsKey: rasterStats?.json,
+        rebuildCountModelKey: rebuildCountModel?.toJson(),
       };
 }
 
@@ -83,9 +81,9 @@ extension type _PerformanceDataJson(Map<String, Object?> json) {
   }
 
   RasterStats? get rasterStats {
-    final raw = (json[OfflinePerformanceData.rasterStatsKey] as Map?)
-        ?.cast<String, Object>();
-    return raw == null || raw.isEmpty ? null : RasterStats.parse(raw);
+    final raw = (json[OfflinePerformanceData.rasterStatsKey] as Map? ?? {})
+        .cast<String, Object>();
+    return raw.isNotEmpty ? RasterStats.parse(raw) : null;
   }
 
   int? get selectedFrameId =>
@@ -130,7 +128,7 @@ class FlutterTimelineEvent extends TreeNode<FlutterTimelineEvent> {
 
   String? get name => trackEvents.first.name;
 
-  int get flutterFrameNumber => trackEvents.first.flutterFrameNumber!;
+  int? get flutterFrameNumber => trackEvents.first.flutterFrameNumber;
 
   bool get isUiEvent => type == TimelineEventType.ui;
   bool get isRasterEvent => type == TimelineEventType.raster;
@@ -155,6 +153,16 @@ class FlutterTimelineEvent extends TreeNode<FlutterTimelineEvent> {
       ..time = (TimeRange()
         ..start = time.start
         ..end = time.end);
+    return copy;
+  }
+
+  @visibleForTesting
+  FlutterTimelineEvent deepCopy() {
+    final copy = shallowCopy();
+    copy.parent = parent;
+    for (FlutterTimelineEvent child in children) {
+      copy.addChild(child.deepCopy());
+    }
     return copy;
   }
 

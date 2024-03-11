@@ -79,9 +79,9 @@ class PerfettoTrackEvent extends _PerfettoTracePacket
     return PerfettoTrackEvent._(tracePacket.trackEvent, timestampMicros);
   }
 
-  static const _devtoolsTagArg = 'devtoolsTag';
-  static const _frameNumberArg = 'frame_number';
-  static const _shadersArg = 'shaders';
+  static const devtoolsTagArg = 'devtoolsTag';
+  static const frameNumberArg = 'frame_number';
+  static const shadersArg = 'shaders';
 
   /// The raw [TrackEvent] data from a Perfetto trace.
   final TrackEvent event;
@@ -127,7 +127,7 @@ class PerfettoTrackEvent extends _PerfettoTracePacket
   /// Returns the flutter frame number for this track event, or null if it does
   /// not exist.
   int? get flutterFrameNumber {
-    final frameNumber = args[_frameNumberArg] as String?;
+    final frameNumber = args[frameNumberArg] as String?;
     if (frameNumber == null) return null;
     return int.tryParse(frameNumber);
   }
@@ -145,7 +145,7 @@ class PerfettoTrackEvent extends _PerfettoTracePacket
 
   // Whether this track event is related to Shader compilation.
   bool get isShaderEvent =>
-      args[_devtoolsTagArg] == _shadersArg;
+      args[devtoolsTagArg] == shadersArg;
 
   @override
   int compareTo(PerfettoTrackEvent other) {

@@ -21,15 +21,17 @@ class FlutterTimelineEventProcessor {
   TimelineEventsController get eventsController =>
       performanceController.timelineEventsController;
 
-  Int64? _uiTrackId;
-  Int64? _rasterTrackId;
+  @visibleForTesting
+  Int64? uiTrackId;
+
+  @visibleForTesting
+  Int64? rasterTrackId;
 
   /// The Flutter frame range that we have processed track events for.
   Range? get frameRangeFromTimelineEvents =>
       _startFrameId == null || _endFrameId == null
           ? null
           : Range(_startFrameId!, _endFrameId!);
-
   int? _startFrameId;
   int? _endFrameId;
 
@@ -78,13 +80,11 @@ class FlutterTimelineEventProcessor {
     final current = currentTimelineEventsByTrackId[trackId];
     final timelineEvent = FlutterTimelineEvent(event);
     if (current != null) {
-      // print('adding child ${timelineEvent.name} to ${current.name}');
       current.addChild(timelineEvent);
       currentTimelineEventsByTrackId[trackId] = timelineEvent;
     } else if (event.isUiFrameIdentifier || event.isRasterFrameIdentifier) {
       // We only care about process events that are associated with a Flutter
       // frame.
-      // print('setting current for $trackId to ${timelineEvent.name}');
       currentTimelineEventsByTrackId[trackId] = timelineEvent;
     }
   }
@@ -94,14 +94,12 @@ class FlutterTimelineEventProcessor {
     var current = currentTimelineEventsByTrackId[trackId];
     if (current == null) return;
 
-    // print('ending ${current.name}');
     current.addEndTrackEvent(event);
 
     // Since this event is complete, move back up the tree to the nearest
     // incomplete event.
     while (current!.parent != null &&
         current.parent!.time.end?.inMicroseconds != null) {
-      // print('moving current up to ${current.parent!.name}');
       current = current.parent;
     }
     currentTimelineEventsByTrackId[trackId] = current.parent;
@@ -109,9 +107,6 @@ class FlutterTimelineEventProcessor {
     // If we have reached a null parent, this event is fully formed - add it to
     // the timeline and try to assign it to a Flutter frame.
     if (current.parent == null) {
-      // print(
-      //     'adding timeline event with flutter frame number ${current.flutterFrameNumber}');
-      // print(current.toString());
       eventsController.addTimelineEvent(current);
     }
   }
@@ -119,11 +114,11 @@ class FlutterTimelineEventProcessor {
   TimelineEventType _inferTrackType(PerfettoTrackEvent event) {
     // Fallback to checking the event name if we don't have a value for
     // [_uiTrackId] or [_rasterTrackId].
-    if (_uiTrackId != null && event.trackId == _uiTrackId ||
+    if (uiTrackId != null && event.trackId == uiTrackId ||
         event.name == FlutterTimelineEvent.uiEventName) {
       return TimelineEventType.ui;
     }
-    if (_rasterTrackId == null && event.trackId == _rasterTrackId ||
+    if (rasterTrackId != null && event.trackId == rasterTrackId ||
         event.name == FlutterTimelineEvent.rasterEventName) {
       return TimelineEventType.raster;
     }
@@ -143,8 +138,8 @@ class FlutterTimelineEventProcessor {
   /// Sets the UI and Raster track ids for the event processor if they are not
   /// already set.
   void primeTrackIds({required Int64? ui, required Int64? raster}) {
-    _uiTrackId ??= ui;
-    _rasterTrackId ??= raster;
+    uiTrackId ??= ui;
+    rasterTrackId ??= raster;
   }
 
   void clear() {
@@ -155,7 +150,7 @@ class FlutterTimelineEventProcessor {
 
   void dispose() {
     clear();
-    _uiTrackId = null;
-    _rasterTrackId = null;
+    uiTrackId = null;
+    rasterTrackId = null;
   }
 }

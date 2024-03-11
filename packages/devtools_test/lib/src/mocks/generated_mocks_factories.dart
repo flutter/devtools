@@ -33,7 +33,7 @@ MockPerformanceController createMockPerformanceControllerWithDefaults() {
   when(flutterFramesController.recordingFrames)
       .thenReturn(const FixedValueListenable<bool>(true));
   when(flutterFramesController.displayRefreshRate)
-      .thenReturn(ValueNotifier<double>(60.0));
+      .thenReturn(ValueNotifier<double>(defaultRefreshRate));
 
   // Stubs for Raster Stats feature.
   when(controller.rasterStatsController)
@@ -45,6 +45,10 @@ MockPerformanceController createMockPerformanceControllerWithDefaults() {
   when(timelineEventsController.status).thenReturn(
     ValueNotifier<EventsControllerStatus>(EventsControllerStatus.empty),
   );
+
+  // Stubs for Rebuild Count feature
+  when(controller.rebuildCountModel).thenReturn(RebuildCountModel());
+
   return controller;
 }
 

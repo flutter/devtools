@@ -127,7 +127,7 @@ class FakeServiceManager extends Fake
   }
 
   static FakeVmServiceWrapper createFakeService({
-    Timeline? timelineData,
+    PerfettoTimeline? timelineData,
     SocketProfile? socketProfile,
     HttpProfile? httpProfile,
     SamplesMemoryJson? memoryData,
