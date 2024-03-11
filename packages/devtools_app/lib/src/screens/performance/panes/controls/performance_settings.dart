@@ -29,14 +29,7 @@ class PerformanceSettingsDialog extends StatelessWidget {
             FlutterSettings(
               flutterFramesController: controller.flutterFramesController,
             ),
-            const SizedBox(height: denseSpacing),
           ],
-          CheckboxSetting(
-            notifier: controller.timelineEventsController.useLegacyTraceViewer,
-            title: 'Use legacy trace viewer',
-            onChanged:
-                controller.timelineEventsController.toggleUseLegacyTraceViewer,
-          ),
         ],
       ),
       actions: const [

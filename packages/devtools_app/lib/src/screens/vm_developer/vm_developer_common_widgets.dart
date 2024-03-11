@@ -1022,7 +1022,7 @@ class _ObjectInspectorCodeViewState extends State<ObjectInspectorCodeView> {
           }
         }
 
-        return Split(
+        return SplitPane(
           axis: Axis.vertical,
           initialFractions: const [0.5, 0.5],
           children: [

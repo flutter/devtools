@@ -35,7 +35,7 @@ class GenerateCodeCommand extends Command {
     final repo = DevToolsRepo.getInstance();
     final processManager = ProcessManager();
 
-    final upgrade = argResults![_upgradeFlag];
+    final upgrade = argResults![_upgradeFlag] as bool;
     if (upgrade) {
       await processManager.runProcess(
         CliCommand.tool(['pub-get', '--only-main', '--upgrade']),

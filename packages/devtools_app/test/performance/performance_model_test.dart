@@ -140,57 +140,6 @@ void main() {
       expect(performanceData.cpuProfileData, isNull);
       expect(performanceData.rasterStats, isNull);
     });
-
-    test('initializeEventGroups', () {
-      expect(performanceData.eventGroups, isEmpty);
-      performanceData.initializeEventGroups(threadNamesById);
-      expect(
-        performanceData
-            .eventGroups[PerformanceData.uiKey]!.rows[0].events.length,
-        equals(1),
-      );
-      expect(
-        performanceData
-            .eventGroups[PerformanceData.rasterKey]!.rows[0].events.length,
-        equals(1),
-      );
-      expect(
-        performanceData
-            .eventGroups[PerformanceData.unknownKey]!.rows[0].events.length,
-        equals(1),
-      );
-      expect(
-        performanceData.eventGroups['A']!.rows[0].events.length,
-        equals(1),
-      );
-
-      performanceData.addTimelineEvent(rasterTimelineEventWithSubtleShaderJank);
-      performanceData.initializeEventGroups(threadNamesById, startIndex: 4);
-      expect(
-        performanceData
-            .eventGroups[PerformanceData.uiKey]!.rows[0].events.length,
-        equals(1),
-      );
-      expect(
-        performanceData
-            .eventGroups[PerformanceData.rasterKey]!.rows[0].events.length,
-        equals(1),
-      );
-      expect(
-        performanceData
-            .eventGroups[PerformanceData.rasterKey]!.rows[2].events.length,
-        equals(1),
-      );
-      expect(
-        performanceData
-            .eventGroups[PerformanceData.unknownKey]!.rows[0].events.length,
-        equals(1),
-      );
-      expect(
-        performanceData.eventGroups['A']!.rows[0].events.length,
-        equals(1),
-      );
-    });
   });
 
   group('OfflinePerformanceData', () {
@@ -373,14 +322,6 @@ void main() {
 
     test('maxEndMicros', () {
       expect(goldenAsyncTimelineEvent.maxEndMicros, equals(193938740983));
-    });
-
-    test('displayDepth', () {
-      expect(goldenAsyncTimelineEvent.displayDepth, equals(6));
-      expect(asyncEventB.displayDepth, equals(3));
-      expect(asyncEventC.displayDepth, equals(2));
-      expect(asyncEventD.displayDepth, equals(1));
-      expect(asyncEventWithDeepOverlap.displayDepth, equals(5));
     });
 
     test('couldBeParentOf', () {

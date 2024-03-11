@@ -18,7 +18,7 @@ void main() {
   group('Split', () {
     group('builds horizontal layout', () {
       testWidgets('with 25% space to first child', (WidgetTester tester) async {
-        final split = buildSplit(
+        final split = buildSplitPane(
           Axis.horizontal,
           initialFractions: [0.25, 0.75],
         );
@@ -41,7 +41,7 @@ void main() {
       });
 
       testWidgets('with 50% space to first child', (WidgetTester tester) async {
-        final split = buildSplit(
+        final split = buildSplitPane(
           Axis.horizontal,
           initialFractions: [0.5, 0.5],
         );
@@ -61,7 +61,7 @@ void main() {
       });
 
       testWidgets('with 75% space to first child', (WidgetTester tester) async {
-        final split = buildSplit(
+        final split = buildSplitPane(
           Axis.horizontal,
           initialFractions: [0.75, 0.25],
         );
@@ -81,7 +81,8 @@ void main() {
       });
 
       testWidgets('with 0% space to first child', (WidgetTester tester) async {
-        final split = buildSplit(Axis.horizontal, initialFractions: [0.0, 1.0]);
+        final split =
+            buildSplitPane(Axis.horizontal, initialFractions: [0.0, 1.0]);
         await tester.pumpWidget(wrap(split));
         expect(find.byKey(_k1), findsOneWidget);
         expect(find.byKey(_k2), findsOneWidget);
@@ -103,7 +104,7 @@ void main() {
       testWidgets(
         'with 100% space to first child',
         (WidgetTester tester) async {
-          final split = buildSplit(
+          final split = buildSplitPane(
             Axis.horizontal,
             initialFractions: [1.0, 0.0],
           );
@@ -127,7 +128,7 @@ void main() {
       );
 
       testWidgets('with n children', (WidgetTester tester) async {
-        final split = buildSplit(
+        final split = buildSplitPane(
           Axis.horizontal,
           children: [_w1, _w2, _w3],
           initialFractions: [0.2, 0.4, 0.4],
@@ -148,7 +149,7 @@ void main() {
       });
 
       testWidgets('with custom splitters', (WidgetTester tester) async {
-        final split = buildSplit(
+        final split = buildSplitPane(
           Axis.horizontal,
           children: [_w1, _w2, _w3],
           initialFractions: [0.2, 0.4, 0.4],
@@ -173,7 +174,7 @@ void main() {
         'with initialFraction rounding errors',
         (WidgetTester tester) async {
           const oneThird = 0.333333;
-          final split = buildSplit(
+          final split = buildSplitPane(
             Axis.horizontal,
             children: [_w1, _w2, _w3],
             initialFractions: [oneThird, oneThird, oneThird],
@@ -197,7 +198,8 @@ void main() {
 
     group('builds vertical layout', () {
       testWidgets('with 25% space to first child', (WidgetTester tester) async {
-        final split = buildSplit(Axis.vertical, initialFractions: [0.25, 0.75]);
+        final split =
+            buildSplitPane(Axis.vertical, initialFractions: [0.25, 0.75]);
         await tester.pumpWidget(wrap(split));
         expect(find.byKey(_k1), findsOneWidget);
         expect(find.byKey(_k2), findsOneWidget);
@@ -217,7 +219,8 @@ void main() {
       });
 
       testWidgets('with 50% space to first child', (WidgetTester tester) async {
-        final split = buildSplit(Axis.vertical, initialFractions: [0.5, 0.5]);
+        final split =
+            buildSplitPane(Axis.vertical, initialFractions: [0.5, 0.5]);
         await tester.pumpWidget(wrap(split));
         expectEqualSizes(
           tester.element(find.byKey(_k1)).size!,
@@ -230,7 +233,8 @@ void main() {
       });
 
       testWidgets('with 75% space to first child', (WidgetTester tester) async {
-        final split = buildSplit(Axis.vertical, initialFractions: [0.75, 0.25]);
+        final split =
+            buildSplitPane(Axis.vertical, initialFractions: [0.75, 0.25]);
         await tester.pumpWidget(wrap(split));
         expectEqualSizes(
           tester.element(find.byKey(_k1)).size!,
@@ -243,7 +247,8 @@ void main() {
       });
 
       testWidgets('with 0% space to first child', (WidgetTester tester) async {
-        final split = buildSplit(Axis.vertical, initialFractions: [0.0, 1.0]);
+        final split =
+            buildSplitPane(Axis.vertical, initialFractions: [0.0, 1.0]);
         await tester.pumpWidget(wrap(split));
         expect(find.byKey(_k1), findsOneWidget);
         expect(find.byKey(_k2), findsOneWidget);
@@ -265,7 +270,8 @@ void main() {
       testWidgets(
         'with 100% space to first child',
         (WidgetTester tester) async {
-          final split = buildSplit(Axis.vertical, initialFractions: [1.0, 0.0]);
+          final split =
+              buildSplitPane(Axis.vertical, initialFractions: [1.0, 0.0]);
           await tester.pumpWidget(wrap(split));
           expect(find.byKey(_k1), findsOneWidget);
           expect(find.byKey(_k2), findsOneWidget);
@@ -286,7 +292,7 @@ void main() {
       );
 
       testWidgets('with n children', (WidgetTester tester) async {
-        final split = buildSplit(
+        final split = buildSplitPane(
           Axis.vertical,
           children: [_w1, _w2, _w3],
           initialFractions: [0.2, 0.4, 0.4],
@@ -307,7 +313,7 @@ void main() {
       });
 
       testWidgets('with custom splitters', (WidgetTester tester) async {
-        final split = buildSplit(
+        final split = buildSplitPane(
           Axis.vertical,
           children: [_w1, _w2, _w3],
           initialFractions: [0.2, 0.4, 0.4],
@@ -332,7 +338,7 @@ void main() {
         'with initialFraction rounding errors',
         (WidgetTester tester) async {
           const oneThird = 0.333333;
-          final split = buildSplit(
+          final split = buildSplitPane(
             Axis.vertical,
             children: [_w1, _w2, _w3],
             initialFractions: [oneThird, oneThird, oneThird],
@@ -356,7 +362,8 @@ void main() {
 
     group('drags properly', () {
       testWidgets('with horizontal layout', (WidgetTester tester) async {
-        final split = buildSplit(Axis.horizontal, initialFractions: [0.5, 0.5]);
+        final split =
+            buildSplitPane(Axis.horizontal, initialFractions: [0.5, 0.5]);
         await tester.pumpWidget(wrap(split));
 
         // We start at 0.5 size.
@@ -461,7 +468,8 @@ void main() {
       });
 
       testWidgets('with vertical layout', (WidgetTester tester) async {
-        final split = buildSplit(Axis.vertical, initialFractions: [0.5, 0.5]);
+        final split =
+            buildSplitPane(Axis.vertical, initialFractions: [0.5, 0.5]);
         await tester.pumpWidget(wrap(split));
 
         // We start at 0.5 size.
@@ -566,7 +574,7 @@ void main() {
       });
 
       testWidgets('with n children', (WidgetTester tester) async {
-        final split = buildSplit(
+        final split = buildSplitPane(
           Axis.horizontal,
           children: [_w1, _w2, _w3],
           initialFractions: [0.2, 0.4, 0.4],
@@ -722,7 +730,7 @@ void main() {
       });
 
       testWidgets('with minSizes', (WidgetTester tester) async {
-        final split = buildSplit(
+        final split = buildSplitPane(
           Axis.horizontal,
           initialFractions: [0.5, 0.5],
           minSizes: [100.0, 100.0],
@@ -801,7 +809,8 @@ void main() {
 
     group('resizes contents', () {
       testWidgets('in a horizontal layout', (WidgetTester tester) async {
-        final split = buildSplit(Axis.horizontal, initialFractions: [0.0, 1.0]);
+        final split =
+            buildSplitPane(Axis.horizontal, initialFractions: [0.0, 1.0]);
         await tester.pumpWidget(
           wrap(
             Center(
@@ -838,7 +847,7 @@ void main() {
       testWidgets(
         'in a horizontal layout with n children',
         (WidgetTester tester) async {
-          final split = buildSplit(
+          final split = buildSplitPane(
             Axis.horizontal,
             children: [_w1, _w2, _w3],
             initialFractions: [0.2, 0.4, 0.4],
@@ -888,7 +897,7 @@ void main() {
       testWidgets(
         'with violated minsize constraints',
         (WidgetTester tester) async {
-          final split = buildSplit(
+          final split = buildSplitPane(
             Axis.horizontal,
             children: [_w1, _w2, _w3],
             initialFractions: [0.1, 0.7, 0.2],
@@ -966,7 +975,7 @@ void main() {
       testWidgets(
         'with impossible minsize constraints',
         (WidgetTester tester) async {
-          final split = buildSplit(
+          final split = buildSplitPane(
             Axis.horizontal,
             children: [_w1, _w2, _w3],
             initialFractions: [0.2, 0.4, 0.4],
@@ -1057,7 +1066,8 @@ void main() {
       );
 
       testWidgets('in a vertical layout', (WidgetTester tester) async {
-        final split = buildSplit(Axis.vertical, initialFractions: [0.0, 1.0]);
+        final split =
+            buildSplitPane(Axis.vertical, initialFractions: [0.0, 1.0]);
         await tester.pumpWidget(
           wrap(
             Center(
@@ -1094,7 +1104,7 @@ void main() {
       testWidgets(
         'in a vertical layout with n children',
         (WidgetTester tester) async {
-          final split = buildSplit(
+          final split = buildSplitPane(
             Axis.vertical,
             children: [_w1, _w2, _w3],
             initialFractions: [0.2, 0.4, 0.4],
@@ -1151,7 +1161,7 @@ void main() {
             wrap(
               Builder(
                 builder: (context) {
-                  expectLater(Split.axisFor(context, 1.0), Axis.horizontal);
+                  expectLater(SplitPane.axisFor(context, 1.0), Axis.horizontal);
                   return Container();
                 },
               ),
@@ -1167,7 +1177,7 @@ void main() {
             wrap(
               Builder(
                 builder: (context) {
-                  expectLater(Split.axisFor(context, 1.0), Axis.vertical);
+                  expectLater(SplitPane.axisFor(context, 1.0), Axis.vertical);
                   return Container();
                 },
               ),
@@ -1194,7 +1204,7 @@ const _largeSplitter = PreferredSize(
   child: SizedBox(height: 40, width: 40),
 );
 
-Split buildSplit(
+SplitPane buildSplitPane(
   Axis axis, {
   required List<double> initialFractions,
   List<Widget>? children,
@@ -1202,7 +1212,7 @@ Split buildSplit(
   List<PreferredSizeWidget>? splitters,
 }) {
   children ??= const [_w1, _w2];
-  return Split(
+  return SplitPane(
     axis: axis,
     initialFractions: initialFractions,
     minSizes: minSizes,

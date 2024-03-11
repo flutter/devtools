@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/utils.dart';
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
@@ -17,7 +18,6 @@ import '../shared/diagnostics/inspector_service.dart';
 import '../shared/error_badge_manager.dart';
 import '../shared/feature_flags.dart';
 import '../shared/globals.dart';
-import '../shared/primitives/utils.dart';
 import '../shared/title.dart';
 import '../shared/utils.dart';
 import 'service_registrations.dart' as registrations;
