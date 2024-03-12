@@ -48,14 +48,15 @@ class OfflineModeController {
 /// For offline mode, the screen controller should add this mixin,
 /// implement its abstract methods.
 ///
-/// To detect if the app is in offline mode, check `offlineController.offlineMode.value`.
+/// To detect if the DevTools is in offline mode, check `offlineController.offlineMode.value`.
 ///
-/// To detect if offline data are available check the value of the
+/// To detect if offline data is available check the value of the
 /// global `offlineController.shouldLoadOfflineData(...)`
 /// in the controller constructor.
 ///
 /// To make sure the screen loads without connection
-/// set `requiresConnection` to false in `ScreenMetaData`.
+/// set `requiresConnection` to false and `worksOffline` to true
+/// in `ScreenMetaData`.
 mixin OfflineScreenControllerMixin<T> on AutoDisposeControllerMixin {
   final _exportController = ExportController();
 
