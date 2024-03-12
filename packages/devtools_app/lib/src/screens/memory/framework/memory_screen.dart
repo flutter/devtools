@@ -54,13 +54,19 @@ class MemoryBodyState extends State<MemoryBody>
     ga.screen(MemoryScreen.id);
   }
 
+  ValueListenable<MemoryControllerInitialization>? _initialization;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!initController()) return;
-    addAutoDisposeListener(controller.initialization);
-    setState(() {});
+    _initialization?.removeListener(onUpdateInitialization);
+    _initialization = controller.initialization;
+    addAutoDisposeListener(_initialization, onUpdateInitialization);
+    onUpdateInitialization();
   }
+
+  void onUpdateInitialization() => setState(() {});
 
   @override
   Widget build(BuildContext context) {
