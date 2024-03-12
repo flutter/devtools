@@ -447,18 +447,7 @@ class _PathCheckTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final linkData = controller.selectedLink.value!;
-    final theme=Theme.of(context);
-    final intentFilterErrorCount = intentFilterErrors
-        .where((error) => linkData.pathErrors.contains(error))
-        .toList()
-        .length;
-    final noIssueText = Text(
-      'No issues found',
-      style: TextStyle(
-        color: theme.colorScheme.green,
-      ),
-    );
+    final theme = Theme.of(context);
     return ListTileTheme(
       dense: true,
       minVerticalPadding: 0,
@@ -492,62 +481,114 @@ class _PathCheckTable extends StatelessWidget {
             ),
           ),
           const Divider(height: 1.0),
-          ExpansionTile(
-            backgroundColor:
-                theme.colorScheme.alternatingBackgroundColor2,
-            collapsedBackgroundColor:
-                theme.colorScheme.alternatingBackgroundColor2,
-            title: Row(
-              children: [
-                const SizedBox(width: defaultSpacing),
-                const Expanded(child: Text('Android')),
-                const Expanded(child: Text('IntentFiler')),
-                Expanded(
-                  child: intentFilterErrorCount > 0
-                      ? Text(
-                          '$intentFilterErrorCount Check failed',
-                          style: TextStyle(
-                            color: theme.colorScheme.error,
-                          ),
-                        )
-                      : noIssueText,
-                ),
-              ],
-            ),
-            children: <Widget>[
-              for (final error in intentFilterErrors)
-                if (linkData.pathErrors.contains(error))
-                  Text(error.description),
-            ],
-          ),
+          _IntentFilterCheck(controller: controller),
           const Divider(height: 1.0),
-          ExpansionTile(
-            backgroundColor:
-                theme.colorScheme.alternatingBackgroundColor2,
-            collapsedBackgroundColor:
-                theme.colorScheme.alternatingBackgroundColor2,
-            title: Row(
-              children: [
-                const SizedBox(width: defaultSpacing),
-                const Expanded(child: Text('Android')),
-                const Expanded(child: Text('URL format')),
-                Expanded(
-                  child: linkData.pathErrors.contains(PathError.pathFormat)
-                      ? Text(
-                          'Check failed',
-                          style: TextStyle(
-                            color: theme.colorScheme.error,
-                          ),
-                        )
-                      : noIssueText,
-                ),
-              ],
-            ),
-            children: <Widget>[
-              Text(PathError.pathFormat.description),
-            ],
-          ),
+          _PathFormatCheck(controller: controller),
         ],
+      ),
+    );
+  }
+}
+
+class _IntentFilterCheck extends StatelessWidget {
+  const _IntentFilterCheck({required this.controller});
+
+  final DeepLinksController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final linkData = controller.selectedLink.value!;
+    final theme = Theme.of(context);
+    final intentFilterErrorCount = intentFilterErrors
+        .where((error) => linkData.pathErrors.contains(error))
+        .toList()
+        .length;
+
+    return _PathCheckExpansionTile(
+      checkName: 'IntentFiler',
+      status: intentFilterErrorCount > 0
+          ? Text(
+              '$intentFilterErrorCount Check failed',
+              style: TextStyle(
+                color: theme.colorScheme.error,
+              ),
+            )
+          : const _NoIssueText(),
+      children: <Widget>[
+        for (final error in intentFilterErrors)
+          if (linkData.pathErrors.contains(error)) Text(error.description),
+      ],
+    );
+  }
+}
+
+class _PathFormatCheck extends StatelessWidget {
+  const _PathFormatCheck({required this.controller});
+
+  final DeepLinksController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final linkData = controller.selectedLink.value!;
+    final theme = Theme.of(context);
+
+    return _PathCheckExpansionTile(
+      checkName: 'URL format',
+      status: linkData.pathErrors.contains(PathError.pathFormat)
+          ? Text(
+              'Check failed',
+              style: TextStyle(
+                color: theme.colorScheme.error,
+              ),
+            )
+          : const _NoIssueText(),
+      children: <Widget>[
+        Text(PathError.pathFormat.description),
+      ],
+    );
+  }
+}
+
+class _PathCheckExpansionTile extends StatelessWidget {
+  const _PathCheckExpansionTile({
+    required this.checkName,
+    required this.status,
+    required this.children,
+  });
+
+  final String checkName;
+  final Widget status;
+  final List<Widget> children;
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return ExpansionTile(
+      backgroundColor: theme.colorScheme.alternatingBackgroundColor2,
+      collapsedBackgroundColor: theme.colorScheme.alternatingBackgroundColor2,
+      title: Row(
+        children: [
+          const SizedBox(width: defaultSpacing),
+          const Expanded(child: Text('Android')),
+          Expanded(child: Text(checkName)),
+          Expanded(child: status),
+        ],
+      ),
+      children: <Widget>[
+        Text(PathError.pathFormat.description),
+      ],
+    );
+  }
+}
+
+class _NoIssueText extends StatelessWidget {
+  const _NoIssueText();
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      'No issues found',
+      style: TextStyle(
+        color: Theme.of(context).colorScheme.green,
       ),
     );
   }
