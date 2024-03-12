@@ -1739,27 +1739,26 @@ class CheckboxSetting extends StatelessWidget {
           if (description != null) ...[
             Expanded(
               child: Row(
-                  children: [
-                    RichText(
+                children: [
+                  RichText(
+                    text: TextSpan(
+                      text: ' • ',
+                      style: theme.subtleTextStyle,
+                    ),
+                  ),
+                  Flexible(
+                    child: RichText(
+                      maxLines: 4,
+                      overflow: TextOverflow.ellipsis,
                       text: TextSpan(
-                        text: ' • ',
+                        text: description,
                         style: theme.subtleTextStyle,
                       ),
                     ),
-                    Flexible(
-                      child: RichText(
-                        maxLines: 4,
-                        overflow: TextOverflow.ellipsis,
-                        text: TextSpan(
-                          text: description,
-                          style: theme.subtleTextStyle,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            // ),
+            ),
           ],
         ],
       ),
