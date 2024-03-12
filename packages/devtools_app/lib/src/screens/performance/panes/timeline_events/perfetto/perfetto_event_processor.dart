@@ -104,7 +104,8 @@ class FlutterTimelineEventProcessor {
         'SLICE_BEGIN: setting current to new event (${timelineEvent.name}), type: ${timelineEvent.type}',
       );
       debugTraceCallback(
-        () => _log.info('Event tree start: ${timelineEvent.name}, trackId: $trackId'),
+        () => _log
+            .info('Event tree start: ${timelineEvent.name}, trackId: $trackId'),
       );
     }
   }
@@ -145,13 +146,22 @@ class FlutterTimelineEventProcessor {
   }
 
   TimelineEventType _inferTrackType(PerfettoTrackEvent event) {
+    // Whether the UI and Raster events are expected to come on a single track.
+    // This is expected when DevTools is connected to a flutter-tester device.
+    final singleTrackType = uiTrackId != null &&
+        rasterTrackId != null &&
+        uiTrackId == rasterTrackId;
+
     // Fallback to checking the event name if we don't have a value for
-    // [_uiTrackId] or [_rasterTrackId].
-    if ((uiTrackId != null && event.trackId == uiTrackId) ||
+    // [_uiTrackId] or [_rasterTrackId], or if we expect the events to come on
+    // a single track [singleTrackType].
+    if ((!singleTrackType && uiTrackId != null && event.trackId == uiTrackId) ||
         event.name == FlutterTimelineEvent.uiEventName) {
       return TimelineEventType.ui;
     }
-    if ((rasterTrackId != null && event.trackId == rasterTrackId) ||
+    if ((!singleTrackType &&
+            rasterTrackId != null &&
+            event.trackId == rasterTrackId) ||
         event.name == FlutterTimelineEvent.rasterEventName) {
       return TimelineEventType.raster;
     }
@@ -173,10 +183,12 @@ class FlutterTimelineEventProcessor {
   void primeTrackIds(
       {required Int64? ui, required Int64? raster, String? logs}) {
     debugProcessingLog.writeln('primeTrackIds pre-logs: $logs');
-    debugProcessingLog.writeln('inside primeTrackIds: ui - $ui, raster = $raster');
+    debugProcessingLog
+        .writeln('inside primeTrackIds: ui - $ui, raster = $raster');
     uiTrackId ??= ui;
     rasterTrackId ??= raster;
-    debugProcessingLog.writeln('after primeTrackIds: ui - $uiTrackId, raster = $rasterTrackId');
+    debugProcessingLog.writeln(
+        'after primeTrackIds: ui - $uiTrackId, raster = $rasterTrackId');
   }
 
   void clear() {

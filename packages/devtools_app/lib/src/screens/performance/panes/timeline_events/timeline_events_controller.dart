@@ -425,7 +425,7 @@ class TimelineEventsController extends PerformanceFeatureController
   void _maybeAddEventToUnassignedFrame(FlutterTimelineEvent event, {StringBuffer? logs}) {
     final frameNumber = event.flutterFrameNumber;
     logs?.writeln('${event.name}, ${event.type}, $frameNumber, isUi: ${event.isUiEvent}, isRaster: ${event.isRasterEvent}');
-    if (frameNumber != null && event.isUiEvent || event.isRasterEvent) {
+    if (frameNumber != null && (event.isUiEvent || event.isRasterEvent)) {
       if (performanceController.flutterFramesController
           .hasUnassignedFlutterFrame(frameNumber!)) {
         firstWellFormedFlutterFrameId = math.min(
