@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_deeplink.dart';
 import 'package:flutter/material.dart';
