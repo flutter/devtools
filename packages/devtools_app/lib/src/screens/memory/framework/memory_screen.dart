@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../shared/analytics/analytics.dart' as ga;
+import '../../../shared/globals.dart';
 import '../../../shared/primitives/listenable.dart';
 import '../../../shared/screen.dart';
 import '../../../shared/utils.dart';
@@ -57,15 +58,20 @@ class MemoryBodyState extends State<MemoryBody>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (initController()) setState(() {});
+    if (!initController()) return;
+    addAutoDisposeListener(controller.initialization);
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    if (controller.isOffline) {
-      return const OfflineMemoryBody();
-    } else {
-      return const ConnectedMemoryBody();
+    switch (controller.initialization.value) {
+      case MemoryControllerInitialization.offline:
+        return const OfflineMemoryBody();
+      case MemoryControllerInitialization.connected:
+        return const ConnectedMemoryBody();
+      case MemoryControllerInitialization.initializing:
+        return const Center(child: Text('Initializing...'));
     }
   }
 }
