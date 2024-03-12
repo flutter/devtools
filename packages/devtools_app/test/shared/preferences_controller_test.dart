@@ -116,10 +116,10 @@ void main() {
       'infers the pub root directory based on the main isolate\'s root library',
       () {
         final rootLibToExpectedPubRoot = {
-          'test_dir/fake_app/lib/main.dart': 'test_dir/fake_app',
-          'my_user/google3/dart_apps/test_app/lib/main.dart': '/dart_apps',
+          'test_dir/fake_app/lib/main.dart': 'test_dir/fake_app/',
+          'my_user/google3/dart_apps/test_app/lib/main.dart': '/dart_apps/',
           'my_user/google3/third_party/dart/dart_apps/test_app/lib/main.dart':
-              '/third_party/dart',
+              '/third_party/dart/',
         };
 
         for (final MapEntry(
@@ -247,7 +247,7 @@ void main() {
 
           expect(
             directories,
-            contains('test_dir/fake_app'),
+            contains('test_dir/fake_app/'),
           );
         },
       );
@@ -258,7 +258,7 @@ void main() {
           final cachedDirectories =
               await controller.readCachedPubRootDirectories();
 
-          expect(cachedDirectories, isNot(contains('test_dir/fake_app')));
+          expect(cachedDirectories, isNot(contains('test_dir/fake_app/')));
         },
       );
 

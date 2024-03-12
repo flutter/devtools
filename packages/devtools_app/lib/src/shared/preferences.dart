@@ -319,6 +319,11 @@ class InspectorPreferencesController extends DisposableController
       }
     }
     pubRootDirectory ??= (parts..removeLast()).join('/');
+    // Make sure the root directory ends with /, otherwise we will patch with
+    // other directories that start the same.
+    pubRootDirectory = pubRootDirectory.endsWith('/')
+        ? pubRootDirectory
+        : '$pubRootDirectory/';
     return pubRootDirectory;
   }
 
