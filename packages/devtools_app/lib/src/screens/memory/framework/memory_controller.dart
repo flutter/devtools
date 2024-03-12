@@ -90,10 +90,10 @@ class MemoryController extends DisposableController
         offlineController.offlineMode.value ||
             !serviceConnection.serviceManager.hasConnection;
 
-    _mayBeInitialize(isOffline: isMemoryOffline());
+    _maybeInitialize(isOffline: isMemoryOffline());
 
     addAutoDisposeListener(offlineController.offlineMode, () {
-      _mayBeInitialize(isOffline: isMemoryOffline());
+      _maybeInitialize(isOffline: isMemoryOffline());
     });
   }
 
@@ -102,7 +102,7 @@ class MemoryController extends DisposableController
   final ValueNotifier<MemoryControllerInitialization> _initialization =
       ValueNotifier(MemoryControllerInitialization.initializing);
 
-  void _mayBeInitialize({
+  void _maybeInitialize({
     DiffPaneController? diffPaneController,
     ProfilePaneController? profilePaneController,
     required bool isOffline,
