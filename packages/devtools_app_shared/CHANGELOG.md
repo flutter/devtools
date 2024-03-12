@@ -2,6 +2,7 @@
 * Remove deprecated `background` and `onBackground` values for `lightColorScheme`
 and `darkColorScheme`.
 * Rename `Split` to `SplitPane`.
+* Add `ServiceManager.serviceUri` field to store the connected VM service URI.
 
 ## 0.0.10
 * Add `DTDManager` class and export from `service.dart`.

@@ -115,6 +115,7 @@ class FakeServiceManager extends Fake
             serviceExtensionResponses ?? _defaultServiceExtensionResponses,
         _isolateManager = FakeIsolateManager(rootLibrary: rootLibrary) {
     this.service = service ?? createFakeService();
+    serviceUri = this.service!.wsUri;
     mockConnectedApp(
       connectedApp!,
       isFlutterApp: true,
@@ -168,6 +169,9 @@ class FakeServiceManager extends Fake
 
   @override
   VmServiceWrapper? service;
+
+  @override
+  String? serviceUri;
 
   @override
   VM get vm => _mockVM;
