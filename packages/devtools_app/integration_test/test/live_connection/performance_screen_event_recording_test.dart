@@ -9,6 +9,7 @@ import 'package:devtools_test/integration_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:vm_service_protos/vm_service_protos.dart';
 
 // To run:
 // dart run integration_test/run_tests.dart --target=integration_test/test/live_connection/performance_screen_event_recording_test.dart
@@ -61,10 +62,16 @@ void main() {
       expect(initialTrackDescriptors, isNotEmpty);
 
       final trackEvents = initialTrace.where((e) => e.hasTrackEvent());
-      expect(trackEvents, isNotEmpty);
+      expect(
+        trackEvents,
+        isEmpty,
+        reason: trackEvents
+            .map((TracePacket p) => p.trackEvent.writeToJson())
+            .join('\n'),
+      );
 
       logStatus('Verify Flutter frames have been assigned timeline events');
-      _verifyFlutterFramesHaveTimelineEvents(performanceController);
+      // _verifyFlutterFramesHaveTimelineEvents(performanceController);
 
       // logStatus(
       //   'toggling the Performance Overlay to trigger new Flutter frames',

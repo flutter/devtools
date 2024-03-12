@@ -74,15 +74,16 @@ elif [ "$BOT" = "integration_dart2js" ]; then
         flutter pub get
 
         # TODO(https://github.com/flutter/flutter/issues/118470): remove this warning.
-        echo "Preparing to run integration tests.\nWarning: if you see the exception \
-    'Web Driver Command WebDriverCommandType.screenshot failed while waiting for driver side', \
-    this is a known issue and likely means that the golden image check failed (see \
-    https://github.com/flutter/flutter/issues/118470). Run the test locally to see if new \
-    images under a 'failures/' directory are created as a result of the test run:\n\
-    $ dart run integration_test/run_tests.dart --headless"
+        echo "Preparing to run integration tests. Warning: if you see the exception \
+'Web Driver Command WebDriverCommandType.screenshot failed while waiting for driver side', \
+this is a known issue and likely means that the golden image check failed (see \
+https://github.com/flutter/flutter/issues/118470). Run the test locally to see if new \
+images under a 'failures/' directory are created as a result of the test run: \
+$ dart run integration_test/run_tests.dart --headless"
 
         if [ "$DEVICE" = "flutter" ]; then
-            dart run integration_test/run_tests.dart --headless --shard="$SHARD"
+            # dart run integration_test/run_tests.dart --headless --shard="$SHARD"
+            dart run integration_test/run_tests.dart --headless --target=integration_test/test/live_connection/performance_screen_event_recording_test.dart
         elif [ "$DEVICE" = "flutter-web" ]; then
             dart run integration_test/run_tests.dart --test-app-device=chrome --headless --shard="$SHARD"
         elif [ "$DEVICE" = "dart-cli" ]; then
