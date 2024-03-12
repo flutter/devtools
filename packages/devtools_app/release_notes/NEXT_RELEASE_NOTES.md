@@ -10,19 +10,20 @@ To learn more about DevTools, check out the
 
 ## General updates
 
-* Fixed an issue preventing DevTools from connecting to Flutter apps that are not
-launched from Flutter Tools. - [#6848](https://github.com/flutter/devtools/issues/6848)
+- Fixed an issue preventing DevTools from connecting to Flutter apps that are not
+  launched from Flutter Tools. - [#6848](https://github.com/flutter/devtools/issues/6848)
 
 ## Inspector updates
 
-TODO: Remove this section if there are not any general updates.
+- Fixes an edge case where widgets from other packages could show up in the inspector
+  tree. - [#7353](https://github.com/flutter/devtools/pull/7353)
 
 ## Performance updates
 
-* Removed the legacy trace viewer. The legacy trace viwer was replaced with the
-embedded Perfetto trace viewer in DevTools version 2.21.1, but was available
-behind a setting to ensure a smooth rollout. This release of DevTools removes
-the legacy trace viewer entirely. - [#7316](https://github.com/flutter/devtools/pull/7316)
+- Removed the legacy trace viewer. The legacy trace viwer was replaced with the
+  embedded Perfetto trace viewer in DevTools version 2.21.1, but was available
+  behind a setting to ensure a smooth rollout. This release of DevTools removes
+  the legacy trace viewer entirely. - [#7316](https://github.com/flutter/devtools/pull/7316)
 
 ## CPU profiler updates
 
@@ -38,8 +39,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## Network profiler updates
 
-* Improved Network profiler performance. [#7266](https://github.com/flutter/devtools/pull/7266)
-* Fixed a bug where selected pending requests weren't refreshing the tab once updated. [#7266](https://github.com/flutter/devtools/pull/7266)
+- Improved Network profiler performance. [#7266](https://github.com/flutter/devtools/pull/7266)
+- Fixed a bug where selected pending requests weren't refreshing the tab once updated. [#7266](https://github.com/flutter/devtools/pull/7266)
 
 ## Logging updates
 
