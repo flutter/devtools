@@ -7,7 +7,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../shared/analytics/analytics.dart' as ga;
-import '../../../shared/globals.dart';
 import '../../../shared/primitives/listenable.dart';
 import '../../../shared/screen.dart';
 import '../../../shared/utils.dart';
@@ -52,7 +51,6 @@ class MemoryBodyState extends State<MemoryBody>
   @override
   void initState() {
     super.initState();
-    addAutoDisposeListener(offlineController.offlineMode);
     ga.screen(MemoryScreen.id);
   }
 

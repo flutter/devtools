@@ -67,6 +67,8 @@ class MemoryFeatureControllers {
 /// allows tests of the complicated logic in this class to run on the VM.
 ///
 /// The controller should be recreated for every new connection.
+///
+/// Parameters are needed for testing.
 class MemoryController extends DisposableController
     with
         AutoDisposeControllerMixin,
@@ -80,10 +82,7 @@ class MemoryController extends DisposableController
         offlineController.offlineMode.value ||
             !serviceConnection.serviceManager.hasConnection;
     if (this.isOffline) {
-      if (offlineController.shouldLoadOfflineData(ScreenMetaData.memory.id)) {
-        _offlineData =
-            offlineController.offlineDataJson[ScreenMetaData.memory.id];
-      }
+      _maybeLoadOfflineData();
     } else {
       _controllers = MemoryFeatureControllers(
         diffPaneController,
@@ -106,6 +105,17 @@ class MemoryController extends DisposableController
       data: {
         '$MemoryScreenOfflineData': MemoryScreenOfflineData(),
       },
+    );
+  }
+
+  void _maybeLoadOfflineData() {
+    if (!offlineController.shouldLoadOfflineData(ScreenMetaData.memory.id)) {
+      return;
+    }
+
+    _offlineData = MemoryScreenOfflineData.fromJson(
+      (offlineController.offlineDataJson[ScreenMetaData.memory.id]
+          as Map<String, dynamic>)['$MemoryScreenOfflineData'],
     );
   }
 
