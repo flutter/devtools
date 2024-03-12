@@ -75,8 +75,11 @@ class MemoryController extends DisposableController
     DiffPaneController? diffPaneController,
     ProfilePaneController? profilePaneController,
   }) {
-    isOffline =
-        offlineController.shouldLoadOfflineData(ScreenMetaData.memory.id);
+    isOffline = offlineController.offlineMode.value ||
+        !serviceConnection.serviceManager.hasConnection;
+    if (offlineController.shouldLoadOfflineData(ScreenMetaData.memory.id)) {
+      offlineData = offlineController.offlineDataJson[ScreenMetaData.memory.id];
+    }
     if (!isOffline) {
       _controllers = MemoryFeatureControllers(
         diffPaneController,
