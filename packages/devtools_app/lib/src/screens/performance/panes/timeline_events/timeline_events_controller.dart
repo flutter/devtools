@@ -49,6 +49,12 @@ class TimelineEventsController extends PerformanceFeatureController
     });
   }
 
+  static const uiThreadSuffix = '.ui';
+  static const rasterThreadSuffix = '.raster';
+  static const gpuThreadSuffix = '.gpu';
+  static const platformThreadSuffix = '.platform';
+  static const flutterTestThreadSuffix = '.flutter.test..platform';
+
   /// Controller that contains business logic for the Perfetto trace viewer.
   late final PerfettoController perfettoController;
 
@@ -235,15 +241,20 @@ class TimelineEventsController extends PerformanceFeatureController
   }) {
     if (!_isFlutterAppHelper()) return;
 
+    final buffer = StringBuffer();
+
     Int64? uiTrackId;
     Int64? rasterTrackId;
+    Int64? flutterTestTrackId;
     for (final track in trackDescriptorEvents) {
       final name = track.name;
       final id = track.id;
+      buffer.writeln('$name, id: $id');
       // Android: "1.ui (12652)"
       // iOS: "io.flutter.1.ui (12652)"
       // MacOS, Linux, Windows, Dream (g3): "io.flutter.ui (225695)"
-      if (name.contains('.ui')) {
+      if (name.contains(uiThreadSuffix)) {
+        buffer.writeln('setting uiTrackId to $id');
         uiTrackId = id;
       }
 
@@ -253,19 +264,38 @@ class TimelineEventsController extends PerformanceFeatureController
       // MacOS: Does not exist
       // Also look for .gpu here for older versions of Flutter.
       // TODO(kenz): remove check for .gpu name in April 2021.
-      if (name.contains('.raster') || name.contains('.gpu')) {
+      if (name.contains(rasterThreadSuffix) || name.contains(gpuThreadSuffix)) {
+        buffer.writeln('setting raster to $id');
         rasterTrackId = id;
       }
 
       // Android: "1.platform (22585)"
       // iOS: "io.flutter.1.platform (22585)"
       // MacOS, Linux, Windows, Dream (g3): "io.flutter.platform (22596)"
-      if (name.contains('.platform')) {
+      // DO NOT include Flutter test thread "io.flutter.test..platform"
+      if (name.contains(platformThreadSuffix) &&
+          !name.contains(flutterTestThreadSuffix)) {
         // MacOS and Flutter apps with platform views do not have a .gpu
         // thread. In these cases, the "Raster" events will come on the
         // .platform thread instead.
         rasterTrackId ??= id;
       }
+
+      if (name.contains(flutterTestThreadSuffix)) {
+        buffer.writeln('setting flutterTestTrackId to $id');
+        flutterTestTrackId = id;
+      }
+    }
+
+    if (flutterTestTrackId != null &&
+        uiTrackId == null &&
+        rasterTrackId == null) {
+      // If the connected app is a Flutter tester device, the UI and Raster
+      // events will come on the same thread / track.
+      buffer.writeln(
+          'setting ui and raster to flutter test track id $flutterTestTrackId');
+      uiTrackId = flutterTestTrackId;
+      rasterTrackId = flutterTestTrackId;
     }
 
     if (logWarning && (uiTrackId == null || rasterTrackId == null)) {
@@ -274,9 +304,11 @@ class TimelineEventsController extends PerformanceFeatureController
         '${trackDescriptorEvents.map((e) => e.name)}',
       );
     }
+    print('calling primetrack ids');
     perfettoController.processor.primeTrackIds(
       ui: uiTrackId,
       raster: rasterTrackId,
+      logs: buffer.toString(),
     );
   }
 

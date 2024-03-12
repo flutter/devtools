@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/timeline_events_view.dart';
 import 'package:devtools_test/helpers.dart';
@@ -41,7 +43,7 @@ void main() {
       await tester.pump(safePumpDuration);
 
       await tester.tap(find.widgetWithText(InkWell, 'Timeline Events'));
-      await tester.pumpAndSettle(longPumpDuration);
+      await tester.pumpAndSettle(veryLongPumpDuration);
 
       // Find the [PerformanceController] to access its data.
       final performanceScreenFinder = find.byType(PerformanceScreenBody);
@@ -64,14 +66,33 @@ void main() {
       final trackEvents = initialTrace.where((e) => e.hasTrackEvent());
       expect(
         trackEvents,
-        isEmpty,
+        isNotEmpty,
         reason: trackEvents
-            .map((TracePacket p) => p.trackEvent.writeToJson())
+            .map((TracePacket p) => jsonEncode(p.trackEvent.toProto3Json()))
             .join('\n'),
       );
 
+      expect(
+        performanceController
+            .timelineEventsController.perfettoController.processor.uiTrackId,
+        isNotNull,
+        reason: 'Expected uiTrackId to be non-null',
+      );
+      expect(
+        performanceController.timelineEventsController.perfettoController
+            .processor.rasterTrackId,
+        isNotNull,
+        reason: 'Expected rasterTrackId to be non-null',
+      );
+      expect(
+        performanceController.timelineEventsController.perfettoController
+            .processor.frameRangeFromTimelineEvents,
+        isNotNull,
+        reason: 'Expected frameRangeFromTimelineEvents to be non-null',
+      );
+
       logStatus('Verify Flutter frames have been assigned timeline events');
-      // _verifyFlutterFramesHaveTimelineEvents(performanceController);
+      _verifyFlutterFramesHaveTimelineEvents(performanceController);
 
       // logStatus(
       //   'toggling the Performance Overlay to trigger new Flutter frames',
@@ -118,6 +139,17 @@ void _verifyFlutterFramesHaveTimelineEvents(
       performanceController.flutterFramesController.flutterFrames.value;
   expect(flutterFrames, isNotEmpty);
   for (final frame in flutterFrames) {
+    if (frame.timelineEventData.uiEvent == null ||
+        frame.timelineEventData.rasterEvent == null) {
+      expect(
+        performanceController.timelineEventsController.perfettoController
+            .processor.debugProcessingLog
+            .toString(),
+        isEmpty,
+        reason: 'debug log:\n'
+            '${performanceController.timelineEventsController.perfettoController.processor.debugProcessingLog.toString()}',
+      );
+    }
     expect(
       frame.timelineEventData.uiEvent,
       isNotNull,
