@@ -16,9 +16,9 @@ in compliance with
 2. Private field
 3. Public setter (when needed)
 
-## Naming for typedef`s and function variables
+## Naming for `typedef`s and function variables
 
-Follow [Flutter repo naming rules for typedef`s and function variables](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#naming-rules-for-typedefs-and-function-variables).
+Follow [Flutter repo naming rules for `typedef`s and function variables](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#naming-rules-for-typedefs-and-function-variables).
 
 ## Overriding equality
 
