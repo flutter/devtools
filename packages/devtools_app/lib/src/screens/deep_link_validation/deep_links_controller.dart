@@ -318,7 +318,7 @@ class DeepLinksController extends DisposableController {
         domains: domains,
         applicationId: applicationId,
       );
-    } catch (e) {
+    } catch (_) {
       //TODO(hangyujin): Add more error handling for cases like RPC error and invalid json.
       pagePhase.value = PagePhase.errorPage;
       return linkdatas;

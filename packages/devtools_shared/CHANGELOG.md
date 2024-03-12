@@ -3,6 +3,7 @@
 `value` parameter optional.
 * Add a helper method `packageRootFromFileUriString`.
 * Refactor yaml extension methods.
+* Add deep link app checking functionality.
 
 # 7.0.0
 * **Breaking change:** remove the `ServerApi.setCompleted` method that was a
