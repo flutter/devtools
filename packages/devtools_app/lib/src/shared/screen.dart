@@ -211,7 +211,9 @@ abstract class Screen {
           requiresFlutter: metadata.requiresFlutter,
           requiresDebugBuild: metadata.requiresDebugBuild,
           requiresVmDeveloperMode: metadata.requiresVmDeveloperMode,
-          worksOffline: metadata.worksOffline,
+          worksOffline: metadata.worksOffline ||
+              !(FeatureFlags.memoryAnalysis &&
+                  metadata.id == ScreenMetaData.memory.id),
           shouldShowForFlutterVersion: shouldShowForFlutterVersion,
           showFloatingDebuggerControls: showFloatingDebuggerControls,
           title: titleGenerator == null ? metadata.title : null,
