@@ -8,6 +8,7 @@ it with a parameter `DTDConnectionInfo? dtd`.
 VM service connection is connected or disconnected from the client.
 * Add a helper method `packageRootFromFileUriString`.
 * Refactor yaml extension methods.
+* Add intent filters checking functionality for deep link validation.
 
 # 7.0.0
 * **Breaking change:** remove the `ServerApi.setCompleted` method that was a

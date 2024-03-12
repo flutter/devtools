@@ -102,6 +102,38 @@ enum DomainError {
   final String fixDetails;
 }
 
+/// There are currently two types of path errors, errors from intent filters and path format errors.
+enum PathError {
+  // Intent filter should have action tag.
+  intentFilterActionView(
+    'The intent filter must have a <action android:name="android.intent.action.VIEW" />',
+  ),
+  // Intent filter should have browsable tag.
+  intentFilterBrowsable(
+    'The intent filter must have a <category android:name="android.intent.category.BROWSABLE" />',
+  ),
+  // Intent filter should have default tag.
+  intentFilterDefault(
+    'The intent filter must have a <category android:name="android.intent.category.DEFAULT" />',
+  ),
+  // Intent filter should have autoVerify tag.
+  intentFilterAutoVerify(
+    'The intent filter must have android:autoVerify="true"',
+  ),
+  // Path has format.
+  pathFormat('path must starts with “/” or “.*”');
+
+  const PathError(this.description);
+  final String description;
+}
+
+Set<PathError> intentFilterErrors = <PathError>{
+  PathError.intentFilterActionView,
+  PathError.intentFilterBrowsable,
+  PathError.intentFilterDefault,
+  PathError.intentFilterAutoVerify,
+};
+
 /// Contains all data relevant to a deep link.
 class LinkData with SearchableDataMixin {
   LinkData({
@@ -110,7 +142,7 @@ class LinkData with SearchableDataMixin {
     required this.os,
     this.scheme = const <String>['http://', 'https://'],
     this.domainErrors = const <DomainError>[],
-    this.pathError = false,
+    this.pathErrors = const <PathError>{},
     this.associatedPath = const <String>[],
     this.associatedDomains = const <String>[],
   });
@@ -120,7 +152,7 @@ class LinkData with SearchableDataMixin {
   final List<PlatformOS> os;
   final List<String> scheme;
   final List<DomainError> domainErrors;
-  final bool pathError;
+  Set<PathError> pathErrors;
 
   final List<String> associatedPath;
   final List<String> associatedDomains;
@@ -306,7 +338,7 @@ class PathColumn extends ColumnData<LinkData>
     VoidCallback? onPressed,
   }) {
     return _ErrorAwareText(
-      isError: dataObject.pathError,
+      isError: dataObject.pathErrors.isNotEmpty,
       controller: controller,
       text: dataObject.path,
       link: dataObject,
@@ -443,7 +475,7 @@ class StatusColumn extends ColumnData<LinkData>
   String getValue(LinkData dataObject) {
     if (dataObject.domainErrors.isNotEmpty) {
       return 'Failed domain checks';
-    } else if (dataObject.pathError) {
+    } else if (dataObject.pathErrors.isNotEmpty) {
       return 'Failed path checks';
     } else {
       return 'No issues found';
@@ -492,7 +524,8 @@ class StatusColumn extends ColumnData<LinkData>
     bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
-    if (dataObject.domainErrors.isNotEmpty || dataObject.pathError) {
+    if (dataObject.domainErrors.isNotEmpty ||
+        dataObject.pathErrors.isNotEmpty) {
       return Text(
         getValue(dataObject),
         overflow: TextOverflow.ellipsis,
@@ -620,8 +653,8 @@ int _compareLinkData(
         if (a.domainErrors.isNotEmpty) return -1;
         if (b.domainErrors.isNotEmpty) return 1;
       } else {
-        if (a.pathError) return -1;
-        if (b.pathError) return 1;
+        if (a.pathErrors.isNotEmpty) return -1;
+        if (b.pathErrors.isNotEmpty) return 1;
       }
       return 0;
     case SortingOption.aToZ:

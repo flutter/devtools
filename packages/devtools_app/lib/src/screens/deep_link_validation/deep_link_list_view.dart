@@ -407,7 +407,7 @@ class _NotificationCardSection extends StatelessWidget {
   final DeepLinksController controller;
   @override
   Widget build(BuildContext context) {
-    if (domainErrorCount == 0 && domainErrorCount == 0) {
+    if (domainErrorCount == 0 && pathErrorCount == 0) {
       return const SizedBox.shrink();
     }
     return OutlineDecoration(
@@ -451,7 +451,7 @@ class _NotificationCardSection extends StatelessWidget {
                     DefaultTabController.of(context).index = 1;
                     controller.selectLink(
                       controller.getLinkDatasByPath
-                          .where((element) => element.pathError)
+                          .where((element) => element.pathErrors.isNotEmpty)
                           .first,
                     );
                     controller.updateDisplayOptions(showSplitScreen: true);
