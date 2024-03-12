@@ -19,7 +19,7 @@ const String _packageNameKey = 'package_name';
 const String _domainsKey = 'domains';
 const String _errorCodeKey = 'errorCode';
 const String _appLinkDomainsKey = 'app_link_domains';
-const String _fingerPrintsKey = 'supplemental_sha256_cert_fingerprints';
+const String _fingerprintsKey = 'supplemental_sha256_cert_fingerprints';
 const String _validationResultKey = 'validationResult';
 const String _domainNameKey = 'domainName';
 const String _checkNameKey = 'checkName';
@@ -72,7 +72,7 @@ class DeepLinksServices {
         body: jsonEncode({
           _packageNameKey: applicationId,
           _appLinkDomainsKey: domainList,
-          if (localFingerprint != null) _fingerPrintsKey: [localFingerprint],
+          if (localFingerprint != null) _fingerprintsKey: [localFingerprint],
         }),
       );
 
@@ -110,7 +110,7 @@ class DeepLinksServices {
         {
           _packageNameKey: applicationId,
           _domainsKey: [domain],
-          if (localFingerprint != null) _fingerPrintsKey: [localFingerprint],
+          if (localFingerprint != null) _fingerprintsKey: [localFingerprint],
         },
       ),
     );

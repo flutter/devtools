@@ -187,6 +187,7 @@ class _DomainCheckTable extends StatelessWidget {
         ),
         if (linkData.domainErrors.isNotEmpty)
           _DomainFixPanel(controller: controller),
+        const SizedBox(height: intermediateSpacing),
         _LocalFingerprint(controller: controller),
       ],
     );
@@ -206,21 +207,40 @@ class _LocalFingerprint extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: intermediateSpacing),
         Text(
           'Add a local fingerprint',
           style: theme.textTheme.titleSmall,
         ),
         const SizedBox(height: intermediateSpacing),
         Text(
-          'Fingerprints will be obtained from Play Developer Console, but you can '
+          'Fingerprints will be obtained from the Play Developer Console, but you can '
           'optionally provide an additional fingerprint.',
-          style: Theme.of(context).subtleTextStyle,
+          style: theme.subtleTextStyle,
         ),
         const SizedBox(height: intermediateSpacing),
         TextField(
-          onSubmitted: (fingerprint) =>
-              controller.addLocalFingerprint(context, fingerprint),
+          onSubmitted: (fingerprint) async {
+            final validFingerpintAdded =
+                controller.addLocalFingerprint(fingerprint);
+
+            if (!validFingerpintAdded) {
+              await showDialog(
+                context: context,
+                builder: (_) {
+                  return const AlertDialog(
+                    title: Text('This is not a valid fingerprint'),
+                    content: Text(
+                      'A valid fingerprint consists of 32 pairs of hexadecimal digits separated by colons.'
+                      'It should be the same encoding and format as in the assetlinks.json',
+                    ),
+                    actions: [
+                      DialogCloseButton(),
+                    ],
+                  );
+                },
+              );
+            }
+          },
         ),
         const SizedBox(height: intermediateSpacing),
         ValueListenableBuilder<String?>(
