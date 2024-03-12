@@ -573,9 +573,7 @@ class _PathCheckExpansionTile extends StatelessWidget {
           Expanded(child: status),
         ],
       ),
-      children: <Widget>[
-        Text(PathError.pathFormat.description),
-      ],
+      children: children,
     );
   }
 }
