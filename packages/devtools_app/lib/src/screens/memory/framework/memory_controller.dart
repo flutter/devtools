@@ -74,13 +74,18 @@ class MemoryController extends DisposableController
   MemoryController({
     DiffPaneController? diffPaneController,
     ProfilePaneController? profilePaneController,
+    bool? isOffline,
   }) {
-    isOffline = offlineController.offlineMode.value ||
-        !serviceConnection.serviceManager.hasConnection;
-    if (offlineController.shouldLoadOfflineData(ScreenMetaData.memory.id)) {
-      offlineData = offlineController.offlineDataJson[ScreenMetaData.memory.id];
-    }
-    if (!isOffline) {
+    this.isOffline = isOffline ??
+        offlineController.offlineMode.value ||
+            !serviceConnection.serviceManager.hasConnection;
+    print('MemoryController: isOffline = $isOffline');
+    if (this.isOffline) {
+      if (offlineController.shouldLoadOfflineData(ScreenMetaData.memory.id)) {
+        _offlineData =
+            offlineController.offlineDataJson[ScreenMetaData.memory.id];
+      }
+    } else {
       _controllers = MemoryFeatureControllers(
         diffPaneController,
         profilePaneController,
@@ -260,9 +265,6 @@ class MemoryController extends DisposableController
       _updateAndroidChartVisibility,
     );
   }
-
-  /// This flag will be needed for offline mode implementation.
-  bool offline = false;
 
   void _updateAndroidChartVisibility() {
     final bool isConnectedToAndroidAndAndroidEnabled =

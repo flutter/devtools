@@ -59,14 +59,16 @@ class MemoryBodyState extends State<MemoryBody>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    initController();
+    if (initController()) setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    if () {
+    if (controller.isOffline) {
+      print('MemoryBodyState.build: offline');
       return const OfflineMemoryBody();
     } else {
+      print('MemoryBodyState.build: connected');
       return const ConnectedMemoryBody();
     }
   }

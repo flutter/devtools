@@ -95,7 +95,7 @@ void main() {
         await pumpMemoryScreen(tester);
 
         // Should be collecting live feed.
-        expect(controller.offline, isFalse);
+        expect(controller.isOffline, isFalse);
 
         // Verify Memory, Memory Source, and Memory Sources content.
         expect(find.byTooltip(ChartPaneTooltips.pauseTooltip), findsOneWidget);
