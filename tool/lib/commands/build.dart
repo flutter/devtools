@@ -92,11 +92,11 @@ class BuildCommand extends Command {
           [
             'build',
             'web',
-            // Enable default optimizations: https://dart.dev/tools/dart-compile#js
-            '--dart2js-optimization=O1',
             '--web-renderer',
             'canvaskit',
             '--pwa-strategy=offline-first',
+            // Enable default optimizations: https://dart.dev/tools/dart-compile#js
+            '--dart2js-optimization=O1',
             if (buildMode != 'debug') '--$buildMode',
             '--no-tree-shake-icons',
           ],
