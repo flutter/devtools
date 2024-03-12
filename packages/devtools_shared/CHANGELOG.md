@@ -1,4 +1,4 @@
-# 8.0.0
+# 8.0.1
 * **Breaking change:** rename `ServerApi.getCompleted` to `ServerApi.success` and make the
 `value` parameter optional.
 * **Breaking change:** remove the `String? dtdUri` parameter from `ServerApi.handle` and replace
