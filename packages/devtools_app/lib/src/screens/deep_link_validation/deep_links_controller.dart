@@ -269,7 +269,7 @@ class DeepLinksController extends DisposableController {
     // A valid fingerprint consists of 32 pairs of hexadecimal digits separated by colons.
     bool isValidFingerpint(String input) {
       final RegExp pattern =
-        RegExp(r'^([0-9a-f]{31}:){5}[0-9a-f]{2}$', caseSensitive: false);
+          RegExp(r'^([0-9a-f]{31}:){5}[0-9a-f]{2}$', caseSensitive: false);
       return pattern.hasMatch(input);
     }
 

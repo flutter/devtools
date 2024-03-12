@@ -72,8 +72,7 @@ class DeepLinksServices {
         body: jsonEncode({
           _packageNameKey: applicationId,
           _appLinkDomainsKey: domainList,
-          if (localFingerprint?.isNotEmpty ?? false)
-            _fingerPrintsKey: [localFingerprint],
+          if (localFingerprint != null) _fingerPrintsKey: [localFingerprint],
         }),
       );
 
@@ -111,8 +110,7 @@ class DeepLinksServices {
         {
           _packageNameKey: applicationId,
           _domainsKey: [domain],
-          if (localFingerprint?.isNotEmpty ?? false)
-            _fingerPrintsKey: [localFingerprint],
+          if (localFingerprint != null) _fingerPrintsKey: [localFingerprint],
         },
       ),
     );

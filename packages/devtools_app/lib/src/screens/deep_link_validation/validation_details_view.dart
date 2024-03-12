@@ -234,7 +234,8 @@ class _LocalFingerprint extends StatelessWidget {
                   style: theme.textTheme.titleSmall,
                 ),
                 const SizedBox(height: intermediateSpacing),
-                Text(fingerprint??'', style: theme.textTheme.bodySmall),
+                if (fingerprint != null)
+                  Text(fingerprint, style: theme.textTheme.bodySmall),
               ],
             );
           },
