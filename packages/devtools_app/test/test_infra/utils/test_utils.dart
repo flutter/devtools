@@ -12,6 +12,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
+/// Creates a [FlutterTimelineEvent] for testing that mocks the
+/// contained [PerfettoTrackEvents].
 FlutterTimelineEvent testTimelineEvent({
   required String name,
   required TimelineEventType type,
@@ -42,9 +44,6 @@ FlutterTimelineEvent testTimelineEvent({
   return FlutterTimelineEvent(mockFirstTrackEvent)
     ..addEndTrackEvent(mockEndTrackEvent);
 }
-
-ChromeTraceEvent testTraceEvent(Map<String, dynamic> json) =>
-    ChromeTraceEvent(jsonDecode(jsonEncode(json)));
 
 /// Overrides the system's clipboard behaviour so that strings sent to the
 /// clipboard are instead passed to [clipboardContentsCallback]
