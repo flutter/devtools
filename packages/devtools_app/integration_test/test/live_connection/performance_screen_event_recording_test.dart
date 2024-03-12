@@ -80,7 +80,11 @@ void main() {
             .timelineEventsController.fullPerfettoTrace!.packet,
         growable: false,
       );
-      expect(refreshedTrace.length, greaterThan(initialTrace.length));
+      expect(
+        refreshedTrace.length,
+        greaterThan(initialTrace.length),
+        reason: 'Expeced new events to have been recorded.',
+      );
 
       logStatus('Verify new Flutter frames have been assigned timeline events');
       // Refresh the timeilne one more time to ensure we have collected all
@@ -94,7 +98,7 @@ void main() {
 
 Future<void> _refreshTimeline(WidgetTester tester) async {
   await tester.tap(find.byType(RefreshTimelineEventsButton));
-  await tester.pump(longPumpDuration);
+  await tester.pump(veryLongPumpDuration);
 }
 
 void _verifyFlutterFramesHaveTimelineEvents(
