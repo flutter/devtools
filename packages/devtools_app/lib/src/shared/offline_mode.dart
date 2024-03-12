@@ -45,10 +45,14 @@ class OfflineModeController {
 
 /// This mixin adds offline functionality to a screen.
 ///
-/// For offline mode, the screen controller should add this mixing,
-/// implement its abstract methods, and verify the value of the
+/// For offline mode, the screen controller should add this mixin,
+/// implement its abstract methods.
+///
+/// To detect if the app is in offline mode, check `offlineController.offlineMode.value`.
+///
+/// To detect if offline data are available check the value of the
 /// global `offlineController.shouldLoadOfflineData(...)`
-/// in the controller constructor to detect if the mode is offline.
+/// in the controller constructor.
 mixin OfflineScreenControllerMixin<T> on AutoDisposeControllerMixin {
   final _exportController = ExportController();
 

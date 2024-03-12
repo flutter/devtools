@@ -2,12 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../devtools_app.dart';
 import '../../../shared/analytics/analytics.dart' as ga;
+import '../../../shared/globals.dart';
+import '../../../shared/primitives/listenable.dart';
+import '../../../shared/screen.dart';
+import '../../../shared/utils.dart';
 import 'connected/screen_body.dart';
+import 'memory_controller.dart';
 import 'offline/screen_body.dart';
 
 class MemoryScreen extends Screen {
@@ -41,10 +46,13 @@ class MemoryBody extends StatefulWidget {
 }
 
 class MemoryBodyState extends State<MemoryBody>
-    with ProvidedControllerMixin<MemoryController, MemoryBody> {
+    with
+        ProvidedControllerMixin<MemoryController, MemoryBody>,
+        AutoDisposeMixin {
   @override
   void initState() {
     super.initState();
+    addAutoDisposeListener(offlineController.offlineMode);
     ga.screen(MemoryScreen.id);
   }
 
@@ -56,8 +64,9 @@ class MemoryBodyState extends State<MemoryBody>
 
   @override
   Widget build(BuildContext context) {
-    if (controller.isOffline ||
-        !serviceConnection.serviceManager.hasConnection) {
+    // controller.isOffline ||
+    //     !serviceConnection.serviceManager.hasConnection
+    if (offlineController.offlineMode.value) {
       return const OfflineMemoryBody();
     } else {
       return const ConnectedMemoryBody();
