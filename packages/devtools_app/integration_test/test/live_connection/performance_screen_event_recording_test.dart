@@ -60,6 +60,9 @@ void main() {
       expect(initialTrace, isNotEmpty);
       expect(initialTrackDescriptors, isNotEmpty);
 
+      final trackEvents = initialTrace.where((e) => e.hasTrackEvent());
+      expect(trackEvents, isNotEmpty);
+
       logStatus('Verify Flutter frames have been assigned timeline events');
       _verifyFlutterFramesHaveTimelineEvents(performanceController);
 

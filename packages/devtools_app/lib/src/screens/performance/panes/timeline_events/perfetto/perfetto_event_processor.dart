@@ -6,12 +6,16 @@ import 'dart:math';
 
 import 'package:fixnum/fixnum.dart';
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 
+import '../../../../../shared/development_helpers.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../performance_controller.dart';
 import '../../../performance_model.dart';
 import '../timeline_events_controller.dart';
 import 'tracing/model.dart';
+
+final _log = Logger('flutter_timeline_event_processor');
 
 class FlutterTimelineEventProcessor {
   FlutterTimelineEventProcessor(this.performanceController);
@@ -86,6 +90,10 @@ class FlutterTimelineEventProcessor {
       // We only care about process events that are associated with a Flutter
       // frame.
       currentTimelineEventsByTrackId[trackId] = timelineEvent;
+
+      debugTraceCallback(
+        () => _log.info('Event tree start: ${timelineEvent.name}'),
+      );
     }
   }
 
@@ -108,6 +116,10 @@ class FlutterTimelineEventProcessor {
     // the timeline and try to assign it to a Flutter frame.
     if (current.parent == null) {
       eventsController.addTimelineEvent(current);
+
+      debugTraceCallback(
+        () => _log.info('Event tree complete: ${current!.name}'),
+      );
     }
   }
 
