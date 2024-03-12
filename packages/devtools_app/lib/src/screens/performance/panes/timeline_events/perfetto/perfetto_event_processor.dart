@@ -101,7 +101,7 @@ class FlutterTimelineEventProcessor {
       currentTimelineEventsByTrackId[trackId] = timelineEvent;
 
       debugProcessingLog.writeln(
-        'SLICE_BEGIN: setting current to new event (${timelineEvent.name})',
+        'SLICE_BEGIN: setting current to new event (${timelineEvent.name}), type: ${timelineEvent.type}',
       );
       debugTraceCallback(
         () => _log.info('Event tree start: ${timelineEvent.name}, trackId: $trackId'),
@@ -136,7 +136,7 @@ class FlutterTimelineEventProcessor {
       debugProcessingLog.writeln(
         'SLICE_END: tree complete. Adding timeline event ${current.name})',
       );
-      eventsController.addTimelineEvent(current);
+      eventsController.addTimelineEvent(current, {logs: debugProcessingLog});
 
       debugTraceCallback(
         () => _log.info('Event tree complete: ${current!.name}'),
@@ -147,11 +147,11 @@ class FlutterTimelineEventProcessor {
   TimelineEventType _inferTrackType(PerfettoTrackEvent event) {
     // Fallback to checking the event name if we don't have a value for
     // [_uiTrackId] or [_rasterTrackId].
-    if (uiTrackId != null && event.trackId == uiTrackId ||
+    if ((uiTrackId != null && event.trackId == uiTrackId) ||
         event.name == FlutterTimelineEvent.uiEventName) {
       return TimelineEventType.ui;
     }
-    if (rasterTrackId != null && event.trackId == rasterTrackId ||
+    if ((rasterTrackId != null && event.trackId == rasterTrackId) ||
         event.name == FlutterTimelineEvent.rasterEventName) {
       return TimelineEventType.raster;
     }
