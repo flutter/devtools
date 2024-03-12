@@ -11,6 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
+import 'feature_flags.dart';
 import 'globals.dart';
 import 'primitives/listenable.dart';
 import 'ui/icons.dart';
@@ -205,7 +206,9 @@ abstract class Screen {
   }) : this.conditional(
           id: metadata.id,
           requiresLibrary: metadata.requiresLibrary,
-          requiresConnection: metadata.requiresConnection,
+          requiresConnection: metadata.requiresConnection ||
+              (FeatureFlags.memoryAnalysis &&
+                  metadata.id == ScreenMetaData.memory.id),
           requiresDartVm: metadata.requiresDartVm,
           requiresFlutter: metadata.requiresFlutter,
           requiresDebugBuild: metadata.requiresDebugBuild,
