@@ -154,9 +154,7 @@ class _DomainCheckTable extends StatelessWidget {
                         ? Text(
                             '${linkData.domainErrors.length} '
                             '${pluralize('Check', linkData.domainErrors.length)} failed',
-                            style: TextStyle(
-                              color: theme.colorScheme.error,
-                            ),
+                            style: theme.errorTextStyle,
                           )
                         : Text(
                             'No issues found',
@@ -509,9 +507,7 @@ class _IntentFilterCheck extends StatelessWidget {
       status: intentFilterErrorCount > 0
           ? Text(
               '$intentFilterErrorCount Check failed',
-              style: TextStyle(
-                color: theme.colorScheme.error,
-              ),
+              style: theme.errorTextStyle,
             )
           : const _NoIssueText(),
       children: <Widget>[
@@ -537,9 +533,7 @@ class _PathFormatCheck extends StatelessWidget {
       status: linkData.pathErrors.contains(PathError.pathFormat)
           ? Text(
               'Check failed',
-              style: TextStyle(
-                color: theme.colorScheme.error,
-              ),
+              style: theme.errorTextStyle,
             )
           : const _NoIssueText(),
       children: <Widget>[
@@ -559,6 +553,7 @@ class _PathCheckExpansionTile extends StatelessWidget {
   final String checkName;
   final Widget status;
   final List<Widget> children;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
