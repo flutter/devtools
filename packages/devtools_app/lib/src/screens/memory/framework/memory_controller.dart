@@ -60,8 +60,8 @@ class MemoryFeatureControllers {
   }
 }
 
-enum MemoryControllerInitialization {
-  initializing,
+enum MemoryInitializationStatus {
+  none,
   offline,
   connected,
 }
@@ -73,56 +73,47 @@ enum MemoryControllerInitialization {
 /// allows tests of the complicated logic in this class to run on the VM.
 ///
 /// The controller should be recreated for every new connection.
-///
-/// Parameters are provided for testability.
 class MemoryController extends DisposableController
     with
         AutoDisposeControllerMixin,
         OfflineScreenControllerMixin<MemoryScreenOfflineData> {
   MemoryController({
-    DiffPaneController? diffPaneController,
-    ProfilePaneController? profilePaneController,
-    bool? isOffline,
+    @visibleForTesting DiffPaneController? diffPaneController,
+    @visibleForTesting ProfilePaneController? profilePaneController,
+    @visibleForTesting bool? isOffline,
   }) {
-    bool isMemoryOffline() =>
-        isOffline ??
-        offlineController.offlineMode.value ||
-            !serviceConnection.serviceManager.hasConnection;
+    void initialize() => _initialize(
+          offline: isOffline ??
+              offlineController.offlineMode.value ||
+                  !serviceConnection.serviceManager.hasConnection,
+          diffPaneController: diffPaneController,
+          profilePaneController: profilePaneController,
+        );
 
-    _maybeInitialize(isOffline: isMemoryOffline());
-
-    addAutoDisposeListener(offlineController.offlineMode, () {
-      _maybeInitialize(isOffline: isMemoryOffline());
-    });
+    addAutoDisposeListener(offlineController.offlineMode, initialize);
+    initialize();
   }
 
-  ValueListenable<MemoryControllerInitialization> get initialization =>
+  ValueListenable<MemoryInitializationStatus> get initialization =>
       _initialization;
-  final ValueNotifier<MemoryControllerInitialization> _initialization =
-      ValueNotifier(MemoryControllerInitialization.initializing);
+  final ValueNotifier<MemoryInitializationStatus> _initialization =
+      ValueNotifier(MemoryInitializationStatus.none);
 
-  void _maybeInitialize({
-    DiffPaneController? diffPaneController,
-    ProfilePaneController? profilePaneController,
-    required bool isOffline,
+  void _initialize({
+    required DiffPaneController? diffPaneController,
+    required ProfilePaneController? profilePaneController,
+    required bool offline,
   }) {
-    if ((isOffline &&
-            initialization.value == MemoryControllerInitialization.offline) ||
-        (!isOffline &&
-            initialization.value == MemoryControllerInitialization.connected)) {
-      return;
-    }
-
-    _initialization.value = MemoryControllerInitialization.initializing;
-    if (isOffline) {
+    _initialization.value = MemoryInitializationStatus.none;
+    if (offline) {
       _maybeLoadOfflineData();
-      _initialization.value = MemoryControllerInitialization.offline;
+      _initialization.value = MemoryInitializationStatus.offline;
     } else {
       _controllers = MemoryFeatureControllers(
         diffPaneController,
         profilePaneController,
       );
-      _initialization.value = MemoryControllerInitialization.connected;
+      _initialization.value = MemoryInitializationStatus.connected;
     }
   }
 
@@ -142,9 +133,12 @@ class MemoryController extends DisposableController
   }
 
   void _maybeLoadOfflineData() {
+    print(
+        'loadOfflineData: ${offlineController.shouldLoadOfflineData(ScreenMetaData.memory.id)}');
     if (!offlineController.shouldLoadOfflineData(ScreenMetaData.memory.id)) {
       return;
     }
+    print('Loading offline data for memory screen');
     _offlineData = MemoryScreenOfflineData.fromJson(
       (offlineController.offlineDataJson[ScreenMetaData.memory.id]
           as Map<String, dynamic>)['$MemoryScreenOfflineData'],

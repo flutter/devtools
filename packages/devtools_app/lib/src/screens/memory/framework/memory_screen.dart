@@ -54,7 +54,7 @@ class MemoryBodyState extends State<MemoryBody>
     ga.screen(MemoryScreen.id);
   }
 
-  ValueListenable<MemoryControllerInitialization>? _initialization;
+  ValueListenable<MemoryInitializationStatus>? _initialization;
 
   @override
   void didChangeDependencies() {
@@ -71,11 +71,11 @@ class MemoryBodyState extends State<MemoryBody>
   @override
   Widget build(BuildContext context) {
     switch (controller.initialization.value) {
-      case MemoryControllerInitialization.offline:
+      case MemoryInitializationStatus.offline:
         return const OfflineMemoryBody();
-      case MemoryControllerInitialization.connected:
+      case MemoryInitializationStatus.connected:
         return const ConnectedMemoryBody();
-      case MemoryControllerInitialization.initializing:
+      case MemoryInitializationStatus.none:
         return const Center(child: Text('Initializing...'));
     }
   }

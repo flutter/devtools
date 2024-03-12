@@ -97,7 +97,7 @@ void main() {
         // Should be collecting live feed.
         expect(
           controller.initialization.value,
-          MemoryControllerInitialization.connected,
+          MemoryInitializationStatus.connected,
         );
 
         // Verify Memory, Memory Source, and Memory Sources content.
