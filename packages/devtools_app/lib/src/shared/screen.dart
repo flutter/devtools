@@ -206,8 +206,8 @@ abstract class Screen {
   }) : this.conditional(
           id: metadata.id,
           requiresLibrary: metadata.requiresLibrary,
-          requiresConnection: metadata.requiresConnection ||
-              (FeatureFlags.memoryAnalysis &&
+          requiresConnection: metadata.requiresConnection &&
+              !(FeatureFlags.memoryAnalysis &&
                   metadata.id == ScreenMetaData.memory.id),
           requiresDartVm: metadata.requiresDartVm,
           requiresFlutter: metadata.requiresFlutter,

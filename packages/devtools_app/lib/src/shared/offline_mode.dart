@@ -53,6 +53,9 @@ class OfflineModeController {
 /// To detect if offline data are available check the value of the
 /// global `offlineController.shouldLoadOfflineData(...)`
 /// in the controller constructor.
+///
+/// To make sure the screen loads without connection
+/// set `requiresConnection` to false in `ScreenMetaData`.
 mixin OfflineScreenControllerMixin<T> on AutoDisposeControllerMixin {
   final _exportController = ExportController();
 

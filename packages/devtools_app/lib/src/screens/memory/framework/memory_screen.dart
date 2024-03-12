@@ -64,9 +64,8 @@ class MemoryBodyState extends State<MemoryBody>
 
   @override
   Widget build(BuildContext context) {
-    // controller.isOffline ||
-    //     !serviceConnection.serviceManager.hasConnection
-    if (offlineController.offlineMode.value) {
+    if (offlineController.offlineMode.value ||
+        !serviceConnection.serviceManager.hasConnection) {
       return const OfflineMemoryBody();
     } else {
       return const ConnectedMemoryBody();
