@@ -241,20 +241,16 @@ class TimelineEventsController extends PerformanceFeatureController
   }) {
     if (!_isFlutterAppHelper()) return;
 
-    final buffer = StringBuffer();
-
     Int64? uiTrackId;
     Int64? rasterTrackId;
     Int64? flutterTestTrackId;
     for (final track in trackDescriptorEvents) {
       final name = track.name;
       final id = track.id;
-      buffer.writeln('$name, id: $id');
       // Android: "1.ui (12652)"
       // iOS: "io.flutter.1.ui (12652)"
       // MacOS, Linux, Windows, Dream (g3): "io.flutter.ui (225695)"
       if (name.contains(uiThreadSuffix)) {
-        buffer.writeln('setting uiTrackId to $id');
         uiTrackId = id;
       }
 
@@ -265,7 +261,6 @@ class TimelineEventsController extends PerformanceFeatureController
       // Also look for .gpu here for older versions of Flutter.
       // TODO(kenz): remove check for .gpu name in April 2021.
       if (name.contains(rasterThreadSuffix) || name.contains(gpuThreadSuffix)) {
-        buffer.writeln('setting raster to $id');
         rasterTrackId = id;
       }
 
@@ -282,7 +277,6 @@ class TimelineEventsController extends PerformanceFeatureController
       }
 
       if (name.contains(flutterTestThreadSuffix)) {
-        buffer.writeln('setting flutterTestTrackId to $id');
         flutterTestTrackId = id;
       }
     }
@@ -292,8 +286,6 @@ class TimelineEventsController extends PerformanceFeatureController
         rasterTrackId == null) {
       // If the connected app is a Flutter tester device, the UI and Raster
       // events will come on the same thread / track.
-      buffer.writeln(
-          'setting ui and raster to flutter test track id $flutterTestTrackId');
       uiTrackId = flutterTestTrackId;
       rasterTrackId = flutterTestTrackId;
     }
@@ -304,11 +296,9 @@ class TimelineEventsController extends PerformanceFeatureController
         '${trackDescriptorEvents.map((e) => e.name)}',
       );
     }
-    print('calling primetrack ids');
     perfettoController.processor.primeTrackIds(
       ui: uiTrackId,
       raster: rasterTrackId,
-      logs: buffer.toString(),
     );
   }
 
@@ -417,16 +407,13 @@ class TimelineEventsController extends PerformanceFeatureController
     perfettoController.scrollToTimeRange(timeRange);
   }
 
-  void addTimelineEvent(FlutterTimelineEvent event, {StringBuffer? logs}) {
+  void addTimelineEvent(FlutterTimelineEvent event) {
     assert(_isFlutterAppHelper());
-    _maybeAddEventToUnassignedFrame(event, logs: logs);
+    _maybeAddEventToUnassignedFrame(event);
   }
 
-  void _maybeAddEventToUnassignedFrame(FlutterTimelineEvent event,
-      {StringBuffer? logs}) {
+  void _maybeAddEventToUnassignedFrame(FlutterTimelineEvent event) {
     final frameNumber = event.flutterFrameNumber;
-    logs?.writeln(
-        '${event.name}, ${event.type}, $frameNumber, isUi: ${event.isUiEvent}, isRaster: ${event.isRasterEvent}');
     if (frameNumber != null && (event.isUiEvent || event.isRasterEvent)) {
       if (performanceController.flutterFramesController
           .hasUnassignedFlutterFrame(frameNumber)) {
@@ -434,7 +421,6 @@ class TimelineEventsController extends PerformanceFeatureController
           firstWellFormedFlutterFrameId ?? frameNumber,
           frameNumber,
         );
-        logs?.writeln('assignEventToFrame');
         performanceController.flutterFramesController.assignEventToFrame(
           frameNumber,
           event,
@@ -445,7 +431,6 @@ class TimelineEventsController extends PerformanceFeatureController
           frameNumber,
           () => FrameTimelineEventData(),
         );
-        logs?.writeln('unassignedEventsForFrame.setEventFlow');
         unassignedEventsForFrame.setEventFlow(event: event, setTimeData: false);
       }
     }

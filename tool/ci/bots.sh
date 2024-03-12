@@ -82,8 +82,7 @@ images under a 'failures/' directory are created as a result of the test run: \
 $ dart run integration_test/run_tests.dart --headless"
 
         if [ "$DEVICE" = "flutter" ]; then
-            # dart run integration_test/run_tests.dart --headless --shard="$SHARD"
-            dart run integration_test/run_tests.dart --headless --target=integration_test/test/live_connection/performance_screen_event_recording_test.dart
+            dart run integration_test/run_tests.dart --headless --shard="$SHARD"
         elif [ "$DEVICE" = "flutter-web" ]; then
             dart run integration_test/run_tests.dart --test-app-device=chrome --headless --shard="$SHARD"
         elif [ "$DEVICE" = "dart-cli" ]; then

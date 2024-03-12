@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/timeline_events_view.dart';
 import 'package:devtools_test/helpers.dart';
@@ -11,7 +9,6 @@ import 'package:devtools_test/integration_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:vm_service_protos/vm_service_protos.dart';
 
 // To run:
 // dart run integration_test/run_tests.dart --target=integration_test/test/live_connection/performance_screen_event_recording_test.dart
@@ -43,7 +40,7 @@ void main() {
       await tester.pump(safePumpDuration);
 
       await tester.tap(find.widgetWithText(InkWell, 'Timeline Events'));
-      await tester.pumpAndSettle(veryLongPumpDuration);
+      await tester.pumpAndSettle(longPumpDuration);
 
       // Find the [PerformanceController] to access its data.
       final performanceScreenFinder = find.byType(PerformanceScreenBody);
@@ -91,10 +88,11 @@ void main() {
       final performanceOverlayFinder = find.text('Performance Overlay');
       expect(performanceOverlayFinder, findsOneWidget);
       await tester.tap(performanceOverlayFinder);
-      await tester.pump(veryLongPumpDuration);
+      await tester.pump(longPumpDuration);
 
       logStatus('Refreshing the timeline to load new events');
-      await _refreshTimeline(tester);
+      await tester.tap(find.byType(RefreshTimelineEventsButton));
+      await tester.pump(longPumpDuration);
 
       logStatus('Verifying that we have recorded new events');
       final refreshedTrace = List.of(
@@ -105,13 +103,8 @@ void main() {
       expect(
         refreshedTrace.length,
         greaterThan(initialTrace.length),
-        reason: 'Expeced new events to have been recorded.',
+        reason: 'Expected new events to have been recorded, but none were.',
       );
     },
   );
-}
-
-Future<void> _refreshTimeline(WidgetTester tester) async {
-  await tester.tap(find.byType(RefreshTimelineEventsButton));
-  await tester.pump(veryLongPumpDuration);
 }

@@ -31,9 +31,6 @@ class FlutterTimelineEventProcessor {
   @visibleForTesting
   Int64? rasterTrackId;
 
-  @visibleForTesting
-  final debugProcessingLog = StringBuffer();
-
   /// The Flutter frame range that we have processed track events for.
   Range? get frameRangeFromTimelineEvents =>
       _startFrameId == null || _endFrameId == null
@@ -62,9 +59,6 @@ class FlutterTimelineEventProcessor {
   }
 
   void _processTrackEvents(List<PerfettoTrackEvent> events) {
-    debugProcessingLog.writeln(
-      '_processTrackEvents, uiTrackId = $uiTrackId, rasterTrackId: $rasterTrackId',
-    );
     for (final event in events) {
       _maybeSetFrameIds(event);
       event.timelineEventType = _inferTrackType(event);
@@ -90,22 +84,16 @@ class FlutterTimelineEventProcessor {
     final current = currentTimelineEventsByTrackId[trackId];
     final timelineEvent = FlutterTimelineEvent(event);
     if (current != null) {
-      debugProcessingLog.writeln(
-        'SLICE_BEGIN: adding child (${timelineEvent.name}) to parent (${current.name})',
-      );
       current.addChild(timelineEvent);
       currentTimelineEventsByTrackId[trackId] = timelineEvent;
     } else if (event.isUiFrameIdentifier || event.isRasterFrameIdentifier) {
       // We only care about process events that are associated with a Flutter
       // frame.
       currentTimelineEventsByTrackId[trackId] = timelineEvent;
-
-      debugProcessingLog.writeln(
-        'SLICE_BEGIN: setting current to new event (${timelineEvent.name}), type: ${timelineEvent.type}',
-      );
       debugTraceCallback(
-        () => _log
-            .info('Event tree start: ${timelineEvent.name}, trackId: $trackId'),
+        () => _log.info(
+          'Event tree start: ${timelineEvent.name}, trackId: $trackId',
+        ),
       );
     }
   }
@@ -115,9 +103,6 @@ class FlutterTimelineEventProcessor {
     var current = currentTimelineEventsByTrackId[trackId];
     if (current == null) return;
 
-    debugProcessingLog.writeln(
-      'SLICE_END: event complete ${current.name})',
-    );
     current.addEndTrackEvent(event);
 
     // Since this event is complete, move back up the tree to the nearest
@@ -126,22 +111,13 @@ class FlutterTimelineEventProcessor {
         current.parent!.time.end?.inMicroseconds != null) {
       current = current.parent;
     }
-    debugProcessingLog.writeln(
-      'SLICE_END: moving back up the tree to ${current.parent?.name})',
-    );
     currentTimelineEventsByTrackId[trackId] = current.parent;
 
     // If we have reached a null parent, this event is fully formed - add it to
     // the timeline and try to assign it to a Flutter frame.
     if (current.parent == null) {
-      debugProcessingLog.writeln(
-        'SLICE_END: tree complete. Adding timeline event ${current.name})',
-      );
-      eventsController.addTimelineEvent(current, logs: debugProcessingLog);
-
-      debugTraceCallback(
-        () => _log.info('Event tree complete: ${current!.name}'),
-      );
+      eventsController.addTimelineEvent(current);
+      debugTraceCallback(() => _log.info('Event tree complete:\n$current'));
     }
   }
 
@@ -180,22 +156,15 @@ class FlutterTimelineEventProcessor {
 
   /// Sets the UI and Raster track ids for the event processor if they are not
   /// already set.
-  void primeTrackIds(
-      {required Int64? ui, required Int64? raster, String? logs}) {
-    debugProcessingLog.writeln('primeTrackIds pre-logs: $logs');
-    debugProcessingLog
-        .writeln('inside primeTrackIds: ui - $ui, raster = $raster');
+  void primeTrackIds({required Int64? ui, required Int64? raster}) {
     uiTrackId ??= ui;
     rasterTrackId ??= raster;
-    debugProcessingLog.writeln(
-        'after primeTrackIds: ui - $uiTrackId, raster = $rasterTrackId');
   }
 
   void clear() {
     currentTimelineEventsByTrackId.clear();
     _startFrameId = null;
     _endFrameId = null;
-    debugProcessingLog.clear();
   }
 
   void dispose() {
