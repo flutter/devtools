@@ -382,10 +382,12 @@ class ServiceManager<T extends VmService> {
   }
 
   Future<void> manuallyDisconnect() async {
-    await vmServiceClosed(
-      connectionState:
-          const ConnectedState(false, userInitiatedConnectionState: true),
-    );
+    if (hasConnection) {
+      await vmServiceClosed(
+        connectionState:
+            const ConnectedState(false, userInitiatedConnectionState: true),
+      );
+    }
   }
 
   Future<Response> callServiceOnMainIsolate(String name) async {
