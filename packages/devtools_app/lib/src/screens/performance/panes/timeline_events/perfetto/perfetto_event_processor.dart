@@ -136,7 +136,7 @@ class FlutterTimelineEventProcessor {
       debugProcessingLog.writeln(
         'SLICE_END: tree complete. Adding timeline event ${current.name})',
       );
-      eventsController.addTimelineEvent(current, {logs: debugProcessingLog});
+      eventsController.addTimelineEvent(current, logs: debugProcessingLog);
 
       debugTraceCallback(
         () => _log.info('Event tree complete: ${current!.name}'),
