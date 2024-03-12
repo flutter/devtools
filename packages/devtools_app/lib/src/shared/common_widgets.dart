@@ -1734,15 +1734,11 @@ class CheckboxSetting extends StatelessWidget {
     return maybeWrapWithTooltip(
       tooltip: tooltip,
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           checkboxAndTitle,
           if (description != null) ...[
             Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(top: denseSpacing),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
                   children: [
                     RichText(
                       text: TextSpan(
@@ -1763,7 +1759,7 @@ class CheckboxSetting extends StatelessWidget {
                   ],
                 ),
               ),
-            ),
+            // ),
           ],
         ],
       ),
