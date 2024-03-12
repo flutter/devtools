@@ -57,7 +57,7 @@ class _ObjectInspectorViewState extends State<_ObjectInspectorView>
 
   @override
   Widget build(BuildContext context) {
-    return Split(
+    return SplitPane(
       axis: Axis.horizontal,
       initialFractions: const [0.2, 0.8],
       children: [

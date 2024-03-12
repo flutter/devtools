@@ -258,9 +258,9 @@ class ManualUpdateCommand extends Command {
 
   @override
   Future<void> run() async {
-    final newVersion = argResults!['new-version'].toString();
+    final newVersion = argResults!['new-version'] as String;
     final currentVersion =
-        argResults!['current-version']?.toString() ?? versionFromPubspecFile();
+        (argResults!['current-version'] as String?) ?? versionFromPubspecFile();
 
     if (currentVersion == null) {
       throw 'Could not determine the version, please set the current-version or determine why getting the version is failing.';
@@ -346,8 +346,8 @@ class AutoUpdateCommand extends Command {
 
   @override
   Future<void> run() async {
-    final type = argResults!['type'].toString();
-    final isDryRun = argResults!['dry-run'];
+    final type = argResults!['type'] as String;
+    final isDryRun = argResults!['dry-run'] as bool;
     final currentVersion = versionFromPubspecFile();
     String? newVersion;
     if (currentVersion == null) {

@@ -104,7 +104,7 @@ class SimulatedDevToolsWrapperState extends State<SimulatedDevToolsWrapper>
             environmentPanelMinWidth / availableWidth;
         final childFraction = 1 - environmentPanelFraction;
 
-        return Split(
+        return SplitPane(
           axis: Axis.horizontal,
           initialFractions: [childFraction, environmentPanelFraction],
           minSizes: const [100.0, 0.0],

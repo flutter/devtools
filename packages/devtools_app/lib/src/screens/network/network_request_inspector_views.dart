@@ -147,9 +147,9 @@ class HttpRequestView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: data.requestUpdatedNotifier,
-      builder: (context, __, ___) {
+    return ListenableBuilder(
+      listenable: data,
+      builder: (context, __) {
         final theme = Theme.of(context);
         final requestHeaders = data.requestHeaders;
         final requestContentType = requestHeaders?['content-type'] ?? '';
@@ -199,9 +199,9 @@ class HttpViewTrailingCopyButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: data.requestUpdatedNotifier,
-      builder: (context, __, ___) {
+    return ListenableBuilder(
+      listenable: data,
+      builder: (context, __) {
         final dataToCopy = dataSelector(data);
         final isLoading = data.isFetchingFullData;
         if (dataToCopy == null || dataToCopy.isEmpty || isLoading) {
@@ -246,9 +246,9 @@ class HttpResponseTrailingDropDown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: data.requestUpdatedNotifier,
-      builder: (_, __, ___) {
+    return ListenableBuilder(
+      listenable: data,
+      builder: (_, __) {
         final bool visible = (data.contentType != null &&
                 !data.contentType!.contains('image')) &&
             data.responseBody!.isNotEmpty;
@@ -302,9 +302,9 @@ class HttpResponseView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: data.requestUpdatedNotifier,
-      builder: (context, __, ___) {
+    return ListenableBuilder(
+      listenable: data,
+      builder: (context, __) {
         Widget child;
         final theme = Theme.of(context);
         // We shouldn't try and display an image response view when using the

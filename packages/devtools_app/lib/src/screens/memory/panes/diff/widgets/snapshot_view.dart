@@ -71,7 +71,7 @@ class SnapshotView extends StatelessWidget {
           ),
         );
 
-        return Split(
+        return SplitPane(
           axis: Axis.vertical,
           initialFractions: const [0.4, 0.6],
           minSizes: const [80, 80],

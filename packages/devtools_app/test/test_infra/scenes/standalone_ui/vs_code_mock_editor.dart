@@ -69,7 +69,7 @@ class _VsCodeFlutterPanelMockEditorState
   Widget build(BuildContext context) {
     final editorTheme = VsCodeTheme.of(context);
     final theme = Theme.of(context);
-    return Split(
+    return SplitPane(
       axis: Axis.horizontal,
       initialFractions: const [0.25, 0.75],
       minSizes: const [200, 200],
@@ -94,7 +94,7 @@ class _VsCodeFlutterPanelMockEditorState
             ),
           ],
         ),
-        Split(
+        SplitPane(
           axis: Axis.vertical,
           initialFractions: const [0.5, 0.5],
           minSizes: const [200, 200],
