@@ -1,6 +1,11 @@
-# 8.0.0
+# 8.0.1
 * **Breaking change:** rename `ServerApi.getCompleted` to `ServerApi.success` and make the
 `value` parameter optional.
+* **Breaking change:** remove the `String? dtdUri` parameter from `ServerApi.handle` and replace
+it with a parameter `DTDConnectionInfo? dtd`.
+* Introduce a new typedef `DTDConnectionInfo`.
+* Add a new API `apiNotifyForVmServiceConnection` that DevTools will call when a
+VM service connection is connected or disconnected from the client.
 * Add a helper method `packageRootFromFileUriString`.
 * Refactor yaml extension methods.
 

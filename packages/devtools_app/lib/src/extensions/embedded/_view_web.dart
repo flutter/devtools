@@ -273,8 +273,9 @@ class _ExtensionIFrameController extends DisposableController
         }
         break;
       case DevToolsExtensionEventType.vmServiceConnection:
-        final service = serviceConnection.serviceManager.service;
-        updateVmServiceConnection(uri: service?.wsUri);
+        updateVmServiceConnection(
+          uri: serviceConnection.serviceManager.serviceUri,
+        );
         break;
       case DevToolsExtensionEventType.showNotification:
         _handleShowNotification(event);
