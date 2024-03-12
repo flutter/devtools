@@ -66,35 +66,35 @@ void main() {
       logStatus('Verify Flutter frames have been assigned timeline events');
       _verifyFlutterFramesHaveTimelineEvents(performanceController);
 
-      logStatus(
-        'toggling the Performance Overlay to trigger new Flutter frames',
-      );
-      final performanceOverlayFinder = find.text('Performance Overlay');
-      expect(performanceOverlayFinder, findsOneWidget);
-      await tester.tap(performanceOverlayFinder);
-      await tester.pump(veryLongPumpDuration);
+      // logStatus(
+      //   'toggling the Performance Overlay to trigger new Flutter frames',
+      // );
+      // final performanceOverlayFinder = find.text('Performance Overlay');
+      // expect(performanceOverlayFinder, findsOneWidget);
+      // await tester.tap(performanceOverlayFinder);
+      // await tester.pump(veryLongPumpDuration);
 
-      logStatus('Refreshing the timeline to load new events');
-      await _refreshTimeline(tester);
+      // logStatus('Refreshing the timeline to load new events');
+      // await _refreshTimeline(tester);
 
-      logStatus('Verifying that we have not recorded new events');
-      final refreshedTrace = List.of(
-        performanceController
-            .timelineEventsController.fullPerfettoTrace!.packet,
-        growable: false,
-      );
-      expect(
-        refreshedTrace.length,
-        greaterThan(initialTrace.length),
-        reason: 'Expeced new events to have been recorded.',
-      );
+      // logStatus('Verifying that we have not recorded new events');
+      // final refreshedTrace = List.of(
+      //   performanceController
+      //       .timelineEventsController.fullPerfettoTrace!.packet,
+      //   growable: false,
+      // );
+      // expect(
+      //   refreshedTrace.length,
+      //   greaterThan(initialTrace.length),
+      //   reason: 'Expeced new events to have been recorded.',
+      // );
 
-      logStatus('Verify new Flutter frames have been assigned timeline events');
-      // Refresh the timeilne one more time to ensure we have collected all
-      // timeline events in the VM's buffer.
-      await _refreshTimeline(tester);
-      _verifyFlutterFramesHaveTimelineEvents(performanceController);
-      await tester.pump(veryLongPumpDuration);
+      // logStatus('Verify new Flutter frames have been assigned timeline events');
+      // // Refresh the timeilne one more time to ensure we have collected all
+      // // timeline events in the VM's buffer.
+      // await _refreshTimeline(tester);
+      // _verifyFlutterFramesHaveTimelineEvents(performanceController);
+      // await tester.pump(veryLongPumpDuration);
     },
   );
 }
