@@ -6,6 +6,8 @@
 // other libraries in this package.
 // Utils, that do not have dependencies, should go to primitives/utils.dart.
 
+import 'dart:async';
+
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -73,7 +75,7 @@ List<ConnectionDescription> generateDeviceDescription(
   ConnectionDescription? vmServiceConnection;
   if (includeVmServiceConnection &&
       serviceConnection.serviceManager.service != null) {
-    final description = serviceConnection.serviceManager.service!.wsUri!;
+    final description = serviceConnection.serviceManager.serviceUri!;
     vmServiceConnection = ConnectionDescription(
       title: 'VM Service Connection',
       description: description,
@@ -227,4 +229,48 @@ List<String> stripGoogle3(List<String> pathParts) {
 /// down event.
 extension IsKeyType on KeyEvent {
   bool get isKeyDownOrRepeat => this is KeyDownEvent || this is KeyRepeatEvent;
+}
+
+/// A helper class for [Timer] functionality, where the callbacks are debounced.
+class DebounceTimer {
+  /// A periodic timer that ensures [callback] is only called at most once
+  /// per [duration].
+  ///
+  /// [callback] is triggered once immediately, and then every [duration] the
+  /// timer checks to see if the previous [callback] call has finished running.
+  /// If it has finished, then then next call to [callback] will begin.
+  DebounceTimer.periodic(
+    Duration duration,
+    Future<void> Function() callback,
+  ) : _callback = callback {
+    // Start running the first call to the callback.
+    _runCallback();
+
+    // Start periodic timer so that the callback will be periodically triggered
+    // after the first callback.
+    _timer = Timer.periodic(duration, (_) => _runCallback());
+  }
+
+  void _runCallback() async {
+    // If the previous callback is still running, then don't trigger another
+    // callback. (debounce)
+    if (_isRunning) {
+      return;
+    }
+
+    try {
+      _isRunning = true;
+      await _callback();
+    } finally {
+      _isRunning = false;
+    }
+  }
+
+  late final Timer _timer;
+  final Future<void> Function() _callback;
+  bool _isRunning = false;
+
+  void cancel() {
+    _timer.cancel();
+  }
 }

@@ -19,6 +19,7 @@ const String _packageNameKey = 'package_name';
 const String _domainsKey = 'domains';
 const String _errorCodeKey = 'errorCode';
 const String _appLinkDomainsKey = 'app_link_domains';
+const String _fingerprintsKey = 'supplemental_sha256_cert_fingerprints';
 const String _validationResultKey = 'validationResult';
 const String _domainNameKey = 'domainName';
 const String _checkNameKey = 'checkName';
@@ -47,6 +48,7 @@ class DeepLinksServices {
   Future<Map<String, List<DomainError>>> validateAndroidDomain({
     required List<String> domains,
     required String applicationId,
+    required String? localFingerprint,
   }) async {
     final domainErrors = <String, List<DomainError>>{
       for (var domain in domains) domain: <DomainError>[],
@@ -70,6 +72,7 @@ class DeepLinksServices {
         body: jsonEncode({
           _packageNameKey: applicationId,
           _appLinkDomainsKey: domainList,
+          if (localFingerprint != null) _fingerprintsKey: [localFingerprint],
         }),
       );
 
@@ -98,6 +101,7 @@ class DeepLinksServices {
   Future<GenerateAssetLinksResult> generateAssetLinks({
     required String applicationId,
     required String domain,
+    required String? localFingerprint,
   }) async {
     final response = await http.post(
       Uri.parse(_assetLinksGenerationURL),
@@ -106,6 +110,7 @@ class DeepLinksServices {
         {
           _packageNameKey: applicationId,
           _domainsKey: [domain],
+          if (localFingerprint != null) _fingerprintsKey: [localFingerprint],
         },
       ),
     );

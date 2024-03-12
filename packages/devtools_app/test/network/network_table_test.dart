@@ -38,14 +38,14 @@ void main() {
 
       // Bypass controller recording so timelineMicroOffset is not time dependant
       controller = NetworkController();
-      currentRequests = CurrentNetworkRequests(onRequestDataChange: () {});
-      final networkRequests = controller.processNetworkTrafficHelper(
+      currentRequests = CurrentNetworkRequests();
+      controller.processNetworkTrafficHelper(
         socketProfile.sockets,
         httpProfile.requests,
         0,
         currentRequests: currentRequests,
       );
-      requests = networkRequests.requests;
+      requests = currentRequests.value;
     });
 
     DartIOHttpRequestData findRequestById(String id) {

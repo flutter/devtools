@@ -59,7 +59,7 @@ class HeapClassDetails extends StatelessWidget {
       },
     );
 
-    return Split(
+    return SplitPane(
       axis: Axis.horizontal,
       initialFractions: const [0.7, 0.3],
       children: [

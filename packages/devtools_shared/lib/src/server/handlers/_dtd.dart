@@ -9,10 +9,10 @@ part of '../server_api.dart';
 abstract class _DtdApiHandler {
   static shelf.Response handleGetDtdUri(
     ServerApi api,
-    String? dtdUri,
+    DTDConnectionInfo? dtd,
   ) {
     return ServerApi._encodeResponse(
-      {DtdApi.uriPropertyName: dtdUri},
+      {DtdApi.uriPropertyName: dtd?.uri},
       api: api,
     );
   }
