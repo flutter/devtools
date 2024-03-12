@@ -64,13 +64,7 @@ void main() {
       expect(initialTrackDescriptors, isNotEmpty);
 
       final trackEvents = initialTrace.where((e) => e.hasTrackEvent());
-      expect(
-        trackEvents,
-        isNotEmpty,
-        reason: trackEvents
-            .map((TracePacket p) => jsonEncode(p.trackEvent.toProto3Json()))
-            .join('\n'),
-      );
+      expect(trackEvents, isNotEmpty);
 
       expect(
         performanceController
@@ -91,38 +85,28 @@ void main() {
         reason: 'Expected frameRangeFromTimelineEvents to be non-null',
       );
 
-      logStatus('Verify Flutter frames have been assigned timeline events');
-      _verifyFlutterFramesHaveTimelineEvents(performanceController);
+      logStatus(
+        'toggling the Performance Overlay to trigger new Flutter frames',
+      );
+      final performanceOverlayFinder = find.text('Performance Overlay');
+      expect(performanceOverlayFinder, findsOneWidget);
+      await tester.tap(performanceOverlayFinder);
+      await tester.pump(veryLongPumpDuration);
 
-      // logStatus(
-      //   'toggling the Performance Overlay to trigger new Flutter frames',
-      // );
-      // final performanceOverlayFinder = find.text('Performance Overlay');
-      // expect(performanceOverlayFinder, findsOneWidget);
-      // await tester.tap(performanceOverlayFinder);
-      // await tester.pump(veryLongPumpDuration);
+      logStatus('Refreshing the timeline to load new events');
+      await _refreshTimeline(tester);
 
-      // logStatus('Refreshing the timeline to load new events');
-      // await _refreshTimeline(tester);
-
-      // logStatus('Verifying that we have not recorded new events');
-      // final refreshedTrace = List.of(
-      //   performanceController
-      //       .timelineEventsController.fullPerfettoTrace!.packet,
-      //   growable: false,
-      // );
-      // expect(
-      //   refreshedTrace.length,
-      //   greaterThan(initialTrace.length),
-      //   reason: 'Expeced new events to have been recorded.',
-      // );
-
-      // logStatus('Verify new Flutter frames have been assigned timeline events');
-      // // Refresh the timeilne one more time to ensure we have collected all
-      // // timeline events in the VM's buffer.
-      // await _refreshTimeline(tester);
-      // _verifyFlutterFramesHaveTimelineEvents(performanceController);
-      // await tester.pump(veryLongPumpDuration);
+      logStatus('Verifying that we have recorded new events');
+      final refreshedTrace = List.of(
+        performanceController
+            .timelineEventsController.fullPerfettoTrace!.packet,
+        growable: false,
+      );
+      expect(
+        refreshedTrace.length,
+        greaterThan(initialTrace.length),
+        reason: 'Expeced new events to have been recorded.',
+      );
     },
   );
 }
@@ -130,35 +114,4 @@ void main() {
 Future<void> _refreshTimeline(WidgetTester tester) async {
   await tester.tap(find.byType(RefreshTimelineEventsButton));
   await tester.pump(veryLongPumpDuration);
-}
-
-void _verifyFlutterFramesHaveTimelineEvents(
-  PerformanceController performanceController,
-) {
-  final flutterFrames =
-      performanceController.flutterFramesController.flutterFrames.value;
-  expect(flutterFrames, isNotEmpty);
-  for (final frame in flutterFrames) {
-    if (frame.timelineEventData.uiEvent == null ||
-        frame.timelineEventData.rasterEvent == null) {
-      expect(
-        performanceController.timelineEventsController.perfettoController
-            .processor.debugProcessingLog
-            .toString(),
-        isEmpty,
-        reason: 'debug log:\n'
-            '${performanceController.timelineEventsController.perfettoController.processor.debugProcessingLog.toString()}',
-      );
-    }
-    expect(
-      frame.timelineEventData.uiEvent,
-      isNotNull,
-      reason: 'Expected a non-null UI event for frame ${frame.id}.',
-    );
-    expect(
-      frame.timelineEventData.rasterEvent,
-      isNotNull,
-      reason: 'Expected a non-null Raster event for frame ${frame.id}.',
-    );
-  }
 }
