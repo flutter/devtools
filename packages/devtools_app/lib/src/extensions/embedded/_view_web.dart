@@ -131,9 +131,12 @@ class _ExtensionIFrameController extends DisposableController
           // request or show a more permanent error UI where we guide them to
           // file an issue against the extension package.
           notificationService.pushError(
-            'Something went wrong.'
-            ' ${embeddedExtensionController.extensionConfig.name} extension is '
+            'Something went wrong. The '
+            '${embeddedExtensionController.extensionConfig.name} extension is '
             'not ready.',
+            reportExplanation: 'The extension did not respond to multiple '
+                'DevToolsExtensionEventType.ping events with the expected '
+                'DevToolsExtensionEventType.pong event.',
           );
         }
       }),

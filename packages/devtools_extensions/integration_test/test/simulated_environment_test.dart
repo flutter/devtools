@@ -198,7 +198,7 @@ Future<void> _testCollapseEnvironmentPanel(
   WidgetTester tester,
   SimulatedDevToolsController simController,
 ) async {
-  final split = tester.widget<Split>(find.byType(Split));
+  final split = tester.widget<SplitPane>(find.byType(SplitPane));
 
   final divider = find.byKey(split.dividerKey(0));
   final environmentPanel = split.children[1];
@@ -214,7 +214,7 @@ Future<void> _testCollapseEnvironmentPanel(
   // Check that the [environmentPanelSizedBoxWidth] is the expected width.
   expect(
     environmentPanelSizedBoxWidth,
-    VmServiceConnection.totalControlsWidth + 2 * defaultSpacing,
+    VmServiceConnectionDisplay.totalControlsWidth + 2 * defaultSpacing,
   );
 
   // Drag the divider to the right by [environmentPanelSizedBoxWidth].

@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../shared/common_widgets.dart';
 import '../../shared/config_specific/launch_url/launch_url.dart';
@@ -291,15 +290,9 @@ class _GenerateAssetLinksPanel extends StatelessWidget {
                                         ),
                                       ),
                                     ),
-                                    IconButton(
-                                      onPressed: () async =>
-                                          await Clipboard.setData(
-                                        ClipboardData(
-                                          text: generatedAssetLinks
-                                              .generatedString,
-                                        ),
-                                      ),
-                                      icon: const Icon(Icons.copy_rounded),
+                                    CopyToClipboardControl(
+                                      dataProvider: () =>
+                                          generatedAssetLinks.generatedString,
                                     ),
                                   ],
                                 )

@@ -147,7 +147,7 @@ class _AppSizeBodyState extends State<AppSizeBody>
   }
 
   void _pushErrorMessage(String error) {
-    if (mounted) notificationService.push(error);
+    if (mounted) notificationService.pushError(error);
   }
 
   @override
@@ -556,7 +556,7 @@ class _AppSizeView extends StatelessWidget {
               includeTopBorder: false,
             ),
             Expanded(
-              child: Split(
+              child: SplitPane(
                 axis: Axis.vertical,
                 initialFractions: const [
                   initialFractionForTreemap,

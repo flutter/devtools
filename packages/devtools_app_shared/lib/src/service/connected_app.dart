@@ -180,7 +180,7 @@ class ConnectedApp {
             'Timed out trying to fetch flutter version from '
             '`ConnectedApp.initializeValues`.',
           );
-          return Future<FlutterVersion?>.value();
+          return Future<FlutterVersion?>.value(FlutterVersion.unknown());
         },
       );
       flutterVersionServiceListenable.removeListener(listener);
@@ -195,7 +195,7 @@ class ConnectedApp {
         isDartWebAppKey: isDartWebAppNow,
         isRunningOnDartVMKey: isRunningOnDartVM,
         operatingSystemKey: operatingSystem,
-        if (flutterVersionNow != null)
+        if (flutterVersionNow != null && !flutterVersionNow!.unknown)
           flutterVersionKey: flutterVersionNow!.version,
       };
 }

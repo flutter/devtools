@@ -13,9 +13,13 @@ import 'package:path/path.dart' as path;
 import 'shared.dart';
 
 const _buildAppFlag = 'build-app';
-const _machineFlag = 'machine';
-const _allowEmbeddingFlag = 'allow-embedding';
 const _debugServerFlag = 'debug-server';
+
+// TODO(https://github.com/flutter/devtools/issues/7232): Consider using
+// AllowAnythingParser instead of manually passing these args through.
+const _machineFlag = 'machine';
+const _dtdUriFlag = 'dtd-uri';
+const _allowEmbeddingFlag = 'allow-embedding';
 
 /// This command builds DevTools in release mode by running the
 /// `devtools_tool build` command and then serves DevTools with a locally
@@ -80,6 +84,10 @@ class ServeCommand extends Command {
         negatable: false,
         help: 'Sets output format to JSON for consumption in tools.',
       )
+      ..addOption(
+        _dtdUriFlag,
+        help: 'Sets the dtd uri when starting the devtools server',
+      )
       ..addFlag(
         _allowEmbeddingFlag,
         help: 'Allow embedding DevTools inside an iframe.',
@@ -105,15 +113,17 @@ class ServeCommand extends Command {
     final repo = DevToolsRepo.getInstance();
     final processManager = ProcessManager();
 
-    final buildApp = argResults![_buildAppFlag];
-    final debugServer = argResults![_debugServerFlag];
-    final updateFlutter = argResults![BuildCommandArgs.updateFlutter.flagName];
+    final buildApp = argResults![_buildAppFlag] as bool;
+    final debugServer = argResults![_debugServerFlag] as bool;
+    final updateFlutter =
+        argResults![BuildCommandArgs.updateFlutter.flagName] as bool;
     final updatePerfetto =
-        argResults![BuildCommandArgs.updatePerfetto.flagName];
-    final runPubGet = argResults![BuildCommandArgs.pubGet.flagName];
+        argResults![BuildCommandArgs.updatePerfetto.flagName] as bool;
+    final runPubGet = argResults![BuildCommandArgs.pubGet.flagName] as bool;
     final devToolsAppBuildMode =
-        argResults![BuildCommandArgs.buildMode.flagName];
+        argResults![BuildCommandArgs.buildMode.flagName] as String;
 
+    // Any flag that we aren't removing here is intended to be passed through.
     final remainingArguments = List.of(argResults!.arguments)
       ..remove(BuildCommandArgs.updateFlutter.asArg())
       ..remove(BuildCommandArgs.updateFlutter.asArg(negated: true))
