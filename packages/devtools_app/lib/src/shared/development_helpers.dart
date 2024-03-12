@@ -123,7 +123,7 @@ final debugSurveyMetadata = DevToolsSurvey.parse(
 ///
 /// This flag has performance implications, since printing a lot of data to the
 /// command line can be expensive.
-const debugPerfettoTraceProcessing = !kReleaseMode && false;
+const debugPerfettoTraceProcessing = !kReleaseMode && true;
 
 /// Helper method to call a callback only when debugging issues related to trace
 /// event duplicates (for example https://github.com/dart-lang/sdk/issues/46605).
