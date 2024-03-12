@@ -49,10 +49,10 @@ final pathErrorlinkData = LinkData(
   domain: 'www.google.com',
   path: '/abcd',
   os: [PlatformOS.android, PlatformOS.ios],
-  pathErrors: [
+  pathErrors: {
     PathError.intentFilterActionView,
     PathError.intentFilterDefault,
-  ],
+  },
 );
 
 void main() {
@@ -375,7 +375,7 @@ void main() {
             domain: 'www.domain2.com',
             path: '/path',
             os: [PlatformOS.ios],
-            pathErrors: [PathError.intentFilterActionView],
+            pathErrors: {PathError.intentFilterActionView},
           ),
           LinkData(
             domain: 'www.google.com',
@@ -520,7 +520,7 @@ void main() {
             domain: 'www.domain2.com',
             path: '/path2',
             os: [PlatformOS.ios],
-            pathErrors: [PathError.intentFilterActionView],
+            pathErrors: {PathError.intentFilterActionView},
           ),
           LinkData(
             domain: 'www.google.com',
