@@ -419,19 +419,22 @@ class TimelineEventsController extends PerformanceFeatureController
 
   void addTimelineEvent(FlutterTimelineEvent event, {StringBuffer? logs}) {
     assert(_isFlutterAppHelper());
-    _maybeAddEventToUnassignedFrame(event, logs:logs);
+    _maybeAddEventToUnassignedFrame(event, logs: logs);
   }
 
-  void _maybeAddEventToUnassignedFrame(FlutterTimelineEvent event, {StringBuffer? logs}) {
+  void _maybeAddEventToUnassignedFrame(FlutterTimelineEvent event,
+      {StringBuffer? logs}) {
     final frameNumber = event.flutterFrameNumber;
-    logs?.writeln('${event.name}, ${event.type}, $frameNumber, isUi: ${event.isUiEvent}, isRaster: ${event.isRasterEvent}');
+    logs?.writeln(
+        '${event.name}, ${event.type}, $frameNumber, isUi: ${event.isUiEvent}, isRaster: ${event.isRasterEvent}');
     if (frameNumber != null && (event.isUiEvent || event.isRasterEvent)) {
       if (performanceController.flutterFramesController
-          .hasUnassignedFlutterFrame(frameNumber!)) {
+          .hasUnassignedFlutterFrame(frameNumber)) {
         firstWellFormedFlutterFrameId = math.min(
           firstWellFormedFlutterFrameId ?? frameNumber,
           frameNumber,
         );
+        logs?.writeln('assignEventToFrame');
         performanceController.flutterFramesController.assignEventToFrame(
           frameNumber,
           event,
@@ -442,6 +445,7 @@ class TimelineEventsController extends PerformanceFeatureController
           frameNumber,
           () => FrameTimelineEventData(),
         );
+        logs?.writeln('unassignedEventsForFrame.setEventFlow');
         unassignedEventsForFrame.setEventFlow(event: event, setTimeData: false);
       }
     }
