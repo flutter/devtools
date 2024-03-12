@@ -266,19 +266,21 @@ class DeepLinksController extends DisposableController {
   final deepLinksServices = DeepLinksServices();
 
   void addLocalFingerprint(BuildContext context, String fingerprint) async {
-    bool isValidHexCode(String input) {
+    // A valid fingerprint consists of 32 pairs of hexadecimal digits separated by colons.
+    bool isValidFingerpint(String input) {
       final RegExp pattern =
-          RegExp(r'^([0-9a-f]{2}:)+[0-9a-f]{2}$', caseSensitive: false);
+        RegExp(r'^([0-9a-f]{31}:){5}[0-9a-f]{2}$', caseSensitive: false);
       return pattern.hasMatch(input);
     }
 
-    if (!isValidHexCode(fingerprint)) {
+    if (!isValidFingerpint(fingerprint)) {
       await showDialog(
         context: context,
         builder: (_) {
           return const AlertDialog(
             title: Text('This is not a valid fingerprint'),
             content: Text(
+              'A valid fingerprint consists of 32 pairs of hexadecimal digits separated by colons.'
               'It should be the same encoding and format as in the assetlinks.json',
             ),
             actions: [
