@@ -12,7 +12,8 @@ class MemoryScreenOfflineData {
 
   MemoryScreenOfflineData.fromJson(Map<String, dynamic> json)
       : assert(
-            json[_JsonFields.helloWorld.name] == _JsonFields.helloWorld.name);
+          json[_JsonFields.helloWorld.name] == _JsonFields.helloWorld.name,
+        );
 
   Map<String, dynamic> toJson() => {
         _JsonFields.helloWorld.name: _JsonFields.helloWorld.name,

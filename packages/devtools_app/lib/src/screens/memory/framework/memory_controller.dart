@@ -79,7 +79,6 @@ class MemoryController extends DisposableController
     this.isOffline = isOffline ??
         offlineController.offlineMode.value ||
             !serviceConnection.serviceManager.hasConnection;
-    print('MemoryController: isOffline = $isOffline');
     if (this.isOffline) {
       if (offlineController.shouldLoadOfflineData(ScreenMetaData.memory.id)) {
         _offlineData =
