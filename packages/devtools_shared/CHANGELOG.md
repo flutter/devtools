@@ -3,7 +3,7 @@
 `value` parameter optional.
 * Add a helper method `packageRootFromFileUriString`.
 * Refactor yaml extension methods.
-* Add intent filter checking functionality for deep link validation.
+* Add intent filters checking functionality for deep link validation.
 
 # 7.0.0
 * **Breaking change:** remove the `ServerApi.setCompleted` method that was a
