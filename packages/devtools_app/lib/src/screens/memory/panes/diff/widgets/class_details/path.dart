@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import '../../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../../shared/common_widgets.dart';
-import '../../../../../../shared/memory/class_name.dart';
 import '../../../../../../shared/memory/retaining_path.dart';
 import '../../../../../../shared/primitives/utils.dart';
 import '../../controller/class_data.dart';
@@ -32,9 +31,8 @@ class RetainingPathView extends StatelessWidget {
         children: [
           const SizedBox(height: densePadding),
           _PathControlPane(
-            className: data.classData.className,
             controller: controller,
-            path: data.path,
+            data: data,
           ),
           Expanded(
             child: Padding(
@@ -54,17 +52,16 @@ class RetainingPathView extends StatelessWidget {
 class _PathControlPane extends StatelessWidget {
   const _PathControlPane({
     required this.controller,
-    required this.path,
-    required this.className,
+    required this.data,
   });
 
-  final HeapClassName className;
-  final PathFromRoot path;
+  final PathData data;
   final RetainingPathController controller;
 
   @override
   Widget build(BuildContext context) {
-    final titleText = 'Retaining path for ${className.className}';
+    final titleText =
+        'Retaining path for ${data.classData.className.className}';
     return Row(
       children: [
         Expanded(
@@ -79,7 +76,7 @@ class _PathControlPane extends StatelessWidget {
         ),
         const SizedBox(width: denseSpacing),
         CopyToClipboardControl(
-          dataProvider: () => path.toLongString(delimiter: '\n'),
+          dataProvider: () => data.path.toLongString(delimiter: '\n'),
           // We do not give success message because it pops up directly on
           // top of the path widget, that makes the widget unavailable
           // while message is here.

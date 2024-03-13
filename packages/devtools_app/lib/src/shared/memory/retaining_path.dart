@@ -6,6 +6,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../development_helpers.dart';
 import '../primitives/utils.dart';
 import 'class_name.dart';
 
@@ -103,11 +104,6 @@ class PathFromRoot {
   static DebugRetainingPathUsage usage = DebugRetainingPathUsage();
 
   static PathFromRoot empty = const PathFromRoot._empty();
-
-  /// If false, the [classes] is always empty.
-  ///
-  /// Is used to evaluate performance of calculations.
-  static bool calculateSetOfClasses = true;
 
   static const _hashOfEmptyPath = 0;
 
