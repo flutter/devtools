@@ -9,6 +9,7 @@ import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../shared/heap/heap.dart';
 import '../controller/diff_pane_controller.dart';
+import '../data/classes_diff.dart';
 import '../data/heap_diff_store.dart';
 import '../controller/item_controller.dart';
 import 'class_details/class_details.dart';
@@ -29,7 +30,7 @@ class SnapshotView extends StatelessWidget {
       ],
       builder: (_, values, __) {
         final singleClasses = values.first as List<SingleClassStats>?;
-        final diffClasses = values.second as List<DiffClassStats>?;
+        final diffClasses = values.second as List<DiffClassData>?;
         if (controller.derived.updatingValues) {
           return const Center(child: Text('Calculating...'));
         }

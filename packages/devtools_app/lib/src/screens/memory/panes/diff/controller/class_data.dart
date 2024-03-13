@@ -8,7 +8,7 @@ import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../shared/heap/class_filter.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/primitives/simple_elements.dart';
-import '../data/heap_diff_store.dart';
+import '../data/classes_diff.dart';
 
 class RetainingPathController {
   final hideStandard = ValueNotifier<bool>(true);
@@ -61,5 +61,5 @@ class ClassesTableDiffData {
   final ClassFilterData filterData;
 
   /// Selected class.
-  final selection = ValueNotifier<DiffClassStats?>(null);
+  final selection = ValueNotifier<DiffClassData?>(null);
 }

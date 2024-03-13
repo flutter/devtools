@@ -66,11 +66,11 @@ class AdaptedHeap {
   }
 }
 
-abstract class HeapClasses<T extends ClassStats> with Sealable {
+abstract class HeapClasses<T extends ClassData> with Sealable {
   List<T> get classStatsList;
 }
 
-mixin FilterableHeapClasses<T extends ClassStats> on HeapClasses<T> {
+mixin FilterableHeapClasses<T extends ClassData> on HeapClasses<T> {
   ClassFilter? _appliedFilter;
   List<T>? _filtered;
 
@@ -114,8 +114,8 @@ class SingleHeapClasses extends HeapClasses<SingleClassStats>
 typedef StatsByPath = Map<ClassOnlyHeapPath, ObjectSetStats>;
 typedef StatsByPathEntry = MapEntry<ClassOnlyHeapPath, ObjectSetStats>;
 
-abstract class ClassStats with Sealable {
-  ClassStats({required this.statsByPath, required this.heapClass});
+abstract class ClassData with Sealable {
+  ClassData({required this.statsByPath, required this.heapClass});
 
   final StatsByPath statsByPath;
   late final List<StatsByPathEntry> statsByPathEntries = _getEntries();
@@ -128,7 +128,7 @@ abstract class ClassStats with Sealable {
 }
 
 /// Statistics for a class about a single heap.
-class SingleClassStats extends ClassStats {
+class SingleClassStats extends ClassData {
   SingleClassStats({required super.heapClass})
       : objects = ObjectSet(),
         super(statsByPath: <ClassOnlyHeapPath, ObjectSetStats>{});

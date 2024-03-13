@@ -11,7 +11,6 @@ import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../../shared/memory/class_name.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../shared/heap/heap.dart';
-import '../../../shared/heap/model.dart';
 import 'classes_diff.dart';
 
 /// Stores already calculated comparisons for heap couples.
@@ -83,23 +82,23 @@ class _HeapCouple {
 }
 
 /// List of classes with per-class comparison between two heaps.
-class DiffHeapClasses extends HeapClasses<DiffClassStats>
-    with FilterableHeapClasses<DiffClassStats> {
+class DiffHeapClasses extends HeapClasses<DiffClassData>
+    with FilterableHeapClasses<DiffClassData> {
   DiffHeapClasses._(_HeapCouple couple)
       : before = couple.older.data,
         after = couple.younger.data {
     classesByName = subtractMaps<HeapClassName, SingleClassStats,
-        SingleClassStats, DiffClassStats>(
+        SingleClassStats, DiffClassData>(
       from: couple.younger.classes.classesByName,
       subtract: couple.older.classes.classesByName,
       subtractor: ({subtract, from}) =>
-          DiffClassStats.diff(before: subtract, after: from),
+          DiffClassData.diff(before: subtract, after: from),
     );
   }
 
   /// Maps full class name to class.
-  late final Map<HeapClassName, DiffClassStats> classesByName;
-  late final List<DiffClassStats> classes =
+  late final Map<HeapClassName, DiffClassData> classesByName;
+  late final List<DiffClassData> classes =
       classesByName.values.toList(growable: false);
   final AdaptedHeapData before;
   final AdaptedHeapData after;
@@ -113,45 +112,5 @@ class DiffHeapClasses extends HeapClasses<DiffClassStats>
   }
 
   @override
-  List<DiffClassStats> get classStatsList => classes;
-}
-
-/// Comparison between two heaps for a class.
-class DiffClassStats extends ClassStats {
-  DiffClassStats._({
-    required super.statsByPath,
-    required super.heapClass,
-    required this.total,
-  });
-
-  final ObjectSetDiff total;
-
-  static DiffClassStats? diff({
-    required SingleClassStats? before,
-    required SingleClassStats? after,
-  }) {
-    if (before == null && after == null) return null;
-
-    final heapClass = (before?.heapClass ?? after?.heapClass)!;
-
-    final result = DiffClassStats._(
-      heapClass: heapClass,
-      total: ObjectSetDiff(
-        setBefore: before?.objects,
-        setAfter: after?.objects,
-      ),
-      statsByPath: subtractMaps<ClassOnlyHeapPath, ObjectSetStats,
-          ObjectSetStats, ObjectSetStats>(
-        from: after?.statsByPath,
-        subtract: before?.statsByPath,
-        subtractor: ({subtract, from}) =>
-            ObjectSetStats.subtract(subtract: subtract, from: from),
-      ),
-    );
-
-    if (result.isZero()) return null;
-    return result..seal();
-  }
-
-  bool isZero() => total.isZero;
+  List<DiffClassData> get classStatsList => classes;
 }

@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import '../../../../../shared/memory/simple_items.dart';
+import '../../../../../shared/primitives/utils.dart';
 import '../../../shared/heap/heap.dart';
+import '../../../shared/heap/model.dart';
 
 /// Comparison between two sets of objects.
 class ObjectSetDiff {
@@ -70,4 +72,44 @@ class ObjectSetDiff {
   final delta = ObjectSetStats();
 
   bool get isZero => delta.isZero;
+}
+
+/// Comparison between two heaps for a class.
+class DiffClassData extends ClassData {
+  DiffClassData._({
+    required super.statsByPath,
+    required super.heapClass,
+    required this.total,
+  });
+
+  final ObjectSetDiff total;
+
+  static DiffClassData? diff({
+    required SingleClassStats? before,
+    required SingleClassStats? after,
+  }) {
+    if (before == null && after == null) return null;
+
+    final heapClass = (before?.heapClass ?? after?.heapClass)!;
+
+    final result = DiffClassData._(
+      heapClass: heapClass,
+      total: ObjectSetDiff(
+        setBefore: before?.objects,
+        setAfter: after?.objects,
+      ),
+      statsByPath: subtractMaps<ClassOnlyHeapPath, ObjectSetStats,
+          ObjectSetStats, ObjectSetStats>(
+        from: after?.statsByPath,
+        subtract: before?.statsByPath,
+        subtractor: ({subtract, from}) =>
+            ObjectSetStats.subtract(subtract: subtract, from: from),
+      ),
+    );
+
+    if (result.isZero()) return null;
+    return result..seal();
+  }
+
+  bool isZero() => total.isZero;
 }
