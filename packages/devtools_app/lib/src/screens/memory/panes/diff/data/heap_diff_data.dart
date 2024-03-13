@@ -24,10 +24,10 @@ class HeapDiffData {
   final ClassDataList<DiffClassData> classes;
 }
 
-HeapDiffData calculateHeapDiffData(
-  HeapData before,
-  HeapData after,
-) {
+HeapDiffData calculateHeapDiffData({
+  required HeapData before,
+  required HeapData after,
+}) {
   final classesByName = subtractMaps<HeapClassName, SingleClassData,
       SingleClassData, DiffClassData>(
     from: after.classes!.asMap(),
