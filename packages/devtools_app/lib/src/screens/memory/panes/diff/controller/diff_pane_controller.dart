@@ -20,8 +20,8 @@ import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
 import '../../../shared/primitives/memory_utils.dart';
 import '../data/classes_diff.dart';
-import 'class_data.dart';
 import '../data/heap_diff_store.dart';
+import 'class_data.dart';
 import 'item_controller.dart';
 import 'utils.dart';
 

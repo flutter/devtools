@@ -18,7 +18,6 @@ import '../../../shared/widgets/class_filter.dart';
 import '../../../shared/widgets/shared_memory_widgets.dart';
 import '../controller/class_data.dart';
 import '../data/classes_diff.dart';
-import '../data/heap_diff_store.dart';
 import 'instances.dart';
 
 enum _DataPart {
