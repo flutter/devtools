@@ -14,19 +14,21 @@ class HeapObject {
 
   final HeapData heap;
 
-  /// If object is null, it exists in live app, but is not
-  /// located in heap.
+  /// Index of the object in the heap.
+  ///
+  /// If  null, it means the object exists in the live app, but is not
+  /// located in the heap.
   final int? index;
 
   Iterable<int>? _refs(RefDirection direction) {
-    final theObject = index;
-    if (theObject == null) return null;
+    final theIndex = index;
+    if (theIndex == null) return null;
 
     switch (direction) {
       case RefDirection.inbound:
-        return heap.graph.objects[theObject].referrers;
+        return heap.graph.objects[theIndex].referrers;
       case RefDirection.outbound:
-        return heap.graph.objects[theObject].references;
+        return heap.graph.objects[theIndex].references;
     }
   }
 
