@@ -27,4 +27,5 @@ MaterialApp
                    │
                    └─UnmanagedRestorationScope
                      └─SharedAppData
+                       │ state: _SharedAppDataState#00000
 ...

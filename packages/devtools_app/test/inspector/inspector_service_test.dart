@@ -370,14 +370,18 @@ void main() {
         expect(
           treeToDebugString(root),
           equalsIgnoringHashCodes(
-            '[root]\n'
-            ' └─MyApp\n'
-            '   └─MaterialApp\n'
-            '     └─Scaffold\n'
-            '       ├─Center\n'
-            '       │ └─Text\n'
-            '       └─AppBar\n'
-            '         └─Text\n',
+            '''
+[root]
+ └─MyApp
+   └─MaterialApp
+     └─Scaffold
+       ├─Center
+       │ └─Text
+       ├─AppBar
+       │ └─Text
+       └─FloatingActionButton
+         └─Icon
+''',
           ),
         );
         RemoteDiagnosticsNode nodeInSummaryTree =
@@ -386,12 +390,16 @@ void main() {
         expect(
           treeToDebugString(nodeInSummaryTree),
           equalsIgnoringHashCodes(
-            'MaterialApp\n'
-            ' └─Scaffold\n'
-            '   ├─Center\n'
-            '   │ └─Text\n'
-            '   └─AppBar\n'
-            '     └─Text\n',
+            '''
+MaterialApp
+ └─Scaffold
+   ├─Center
+   │ └─Text
+   ├─AppBar
+   │ └─Text
+   └─FloatingActionButton
+     └─Icon
+''',
           ),
         );
         RemoteDiagnosticsNode nodeInDetailsTree =
@@ -416,19 +424,8 @@ void main() {
 
         expect(
           treeToDebugString(nodeInDetailsTree),
-          anyOf(
-            equalsGoldenIgnoringHashCodes(
-              'inspector_service_text_details_tree.txt',
-            ),
-            equalsGoldenIgnoringHashCodes(
-              'inspector_service_text_details_tree_v2.txt',
-            ),
-            equalsGoldenIgnoringHashCodes(
-              'inspector_service_text_details_tree_v3.txt',
-            ),
-            equalsGoldenIgnoringHashCodes(
-              'inspector_service_text_details_tree_v4.txt',
-            ),
+          equalsGoldenIgnoringHashCodes(
+            'inspector_service_text_details_tree.txt',
           ),
         );
 
