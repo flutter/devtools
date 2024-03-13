@@ -3,8 +3,6 @@
 // in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
@@ -12,6 +10,7 @@ import 'package:devtools_app/src/shared/feature_flags.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/helpers.dart';
+import 'package:devtools_test/test_data.dart';
 import 'package:flutter/material.dart';
 import 'package:stager/stager.dart';
 
@@ -38,9 +37,7 @@ class PerformanceDefaultScene extends Scene {
     setGlobal(BannerMessagesController, BannerMessagesController());
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(ServiceConnectionManager, ServiceConnectionManager());
-    await _loadOfflineSnapshot(
-      'test/test_infra/test_data/performance/performance_diagnosis_world_clock.json',
-    );
+    await _loadOfflineSnapshot();
 
     controller = PerformanceController();
   }
@@ -54,16 +51,14 @@ class PerformanceDefaultScene extends Scene {
   }
 }
 
-Future<void> _loadOfflineSnapshot(String path) async {
+Future<void> _loadOfflineSnapshot() async {
   final completer = Completer<bool>();
   final importController = ImportController((screenId) {
     completer.complete(true);
   });
-
-  final data = await File(path).readAsString();
   final jsonFile = DevToolsJsonFile(
-    name: path,
-    data: jsonDecode(data),
+    name: 'fake/path/to/perf_data.dart',
+    data: samplePerformanceData,
     lastModifiedTime: DateTime.now(),
   );
   importController.importData(jsonFile);

@@ -5,7 +5,7 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../../test_infra/test_data/performance.dart';
+import '../../test_infra/test_data/performance/sample_performance_data.dart';
 
 void main() {
   group('$FlutterFrame', () {
@@ -17,11 +17,11 @@ void main() {
       expect(jankyFrameRasterOnly.shaderDuration.inMicroseconds, equals(0));
       expect(
         testFrameWithShaderJank.shaderDuration.inMicroseconds,
-        equals(50000),
+        equals(10010),
       );
       expect(
         testFrameWithSubtleShaderJank.shaderDuration.inMicroseconds,
-        equals(4000),
+        equals(3010),
       );
     });
 
