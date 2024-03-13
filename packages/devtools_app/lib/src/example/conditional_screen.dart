@@ -24,12 +24,10 @@ class ExampleConditionalScreen extends Screen {
           requiresLibrary: 'package:flutter/',
           title: 'Example',
           icon: Icons.palette,
+          worksOffline: true,
         );
 
   static const id = 'example';
-
-  @override
-  bool get worksOffline => true;
 
   @override
   Widget build(BuildContext context) {
