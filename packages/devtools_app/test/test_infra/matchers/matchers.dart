@@ -64,7 +64,7 @@ Matcher equalsGoldenIgnoringHashCodes(String path) {
 
 class _EqualsGoldenIgnoringHashCodes extends Matcher {
   _EqualsGoldenIgnoringHashCodes(String pathWithinGoldenDirectory) {
-    path = 'test/test_infra/goldens$_goldensSuffix/$pathWithinGoldenDirectory';
+    path = 'test/test_infra/goldens/$pathWithinGoldenDirectory';
     try {
       _value = _normalize(io.File(path).readAsStringSync());
     } catch (e) {
@@ -75,9 +75,6 @@ class _EqualsGoldenIgnoringHashCodes extends Matcher {
   late String _value;
 
   static final Object _mismatchedValueKey = Object();
-
-  static final String _goldensSuffix =
-      io.Platform.environment['DEVTOOLS_GOLDENS_SUFFIX'] ?? '';
 
   static bool get updateGoldens => autoUpdateGoldenFiles;
 
@@ -127,9 +124,7 @@ class _EqualsGoldenIgnoringHashCodes extends Matcher {
         .add('expected golden file \'$path\' with normalized value\n  ')
         .addDescriptionOf(_value)
         .add('\nbut got\n  ')
-        .addDescriptionOf(actualValue)
-        .add('\nTo update golden files run:\n')
-        .add('  tool/update_goldens.sh"\n');
+        .addDescriptionOf(actualValue);
   }
 }
 
