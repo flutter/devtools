@@ -15,6 +15,7 @@ import '../../../../../shared/config_specific/import_export/import_export.dart';
 import '../../../../../shared/file_import.dart';
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/memory/class_name.dart';
+import '../../../../../shared/memory/retaining_path.dart';
 import '../../../shared/heap/class_filter.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
@@ -180,7 +181,7 @@ class CoreData {
   HeapClassName? className;
 
   /// Selected retaining path (cross-snapshot).
-  ClassOnlyHeapPath? path;
+  PathFromRoot? path;
 
   /// Current class filter.
   ValueListenable<ClassFilter> get classFilter => _classFilter;
@@ -271,7 +272,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   }
 
   /// Updates cross-snapshot path if the argument is not null.
-  void _setPathIfNotNull(ClassOnlyHeapPath? path) {
+  void _setPathIfNotNull(PathFromRoot? path) {
     if (path == null || path == _core.path) return;
     _core.path = path;
     _updateValues();

@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../../../../../shared/memory/retaining_path.dart';
 import '../../../../../shared/memory/simple_items.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../shared/heap/heap.dart';
-import '../../../shared/heap/model.dart';
 
 /// Comparison between two sets of objects.
 class ObjectSetDiff {
@@ -98,8 +98,8 @@ class DiffClassData extends ClassData {
         setBefore: before?.objects,
         setAfter: after?.objects,
       ),
-      statsByPath: subtractMaps<ClassOnlyHeapPath, ObjectSetStats,
-          ObjectSetStats, ObjectSetStats>(
+      statsByPath: subtractMaps<PathFromRoot, ObjectSetStats, ObjectSetStats,
+          ObjectSetStats>(
         from: after?.statsByPath,
         subtract: before?.statsByPath,
         subtractor: ({subtract, from}) =>

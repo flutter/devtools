@@ -5,6 +5,7 @@
 import '../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../shared/memory/adapted_heap_object.dart';
 import '../../../../shared/memory/class_name.dart';
+import '../../../../shared/memory/retaining_path.dart';
 import '../../../../shared/memory/simple_items.dart';
 import '../../../../shared/primitives/utils.dart';
 import 'class_filter.dart';
@@ -111,8 +112,8 @@ class SingleHeapClasses extends HeapClasses<SingleClassStats>
   List<SingleClassStats> get classStatsList => classes;
 }
 
-typedef StatsByPath = Map<ClassOnlyHeapPath, ObjectSetStats>;
-typedef StatsByPathEntry = MapEntry<ClassOnlyHeapPath, ObjectSetStats>;
+typedef StatsByPath = Map<PathFromRoot, ObjectSetStats>;
+typedef StatsByPathEntry = MapEntry<PathFromRoot, ObjectSetStats>;
 
 abstract class ClassData with Sealable {
   ClassData({required this.statsByPath, required this.heapClass});
@@ -131,7 +132,7 @@ abstract class ClassData with Sealable {
 class SingleClassStats extends ClassData {
   SingleClassStats({required super.heapClass})
       : objects = ObjectSet(),
-        super(statsByPath: <ClassOnlyHeapPath, ObjectSetStats>{});
+        super(statsByPath: <PathFromRoot, ObjectSetStats>{});
 
   final ObjectSet objects;
 
@@ -148,7 +149,7 @@ class SingleClassStats extends ClassData {
 
     if (path == null) return;
     final objectsForPath = statsByPath.putIfAbsent(
-      ClassOnlyHeapPath(path),
+      PathFromRoot(path),
       () => ObjectSet(),
     );
     objectsForPath.countInstance(object, excludeFromRetained: false);
