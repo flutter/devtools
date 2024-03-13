@@ -161,27 +161,11 @@ class PerformanceController extends DisposableController
         }),
       );
     } else {
-      final shouldLoadOfflineData = offlineController
-              .shouldLoadOfflineData(PerformanceScreen.id) &&
-          offlineController.offlineDataJson[PerformanceData.traceEventsKey] !=
-              null;
-      if (shouldLoadOfflineData) {
-        // This is a workaround to guarantee that DevTools exports are compatible
-        // with other trace viewers (catapult, perfetto, chrome://tracing), which
-        // require a top level field named "traceEvents". See how timeline data is
-        // encoded in [ExportController.encode].
-        final timelineJson = Map<String, dynamic>.from(
-          offlineController.offlineDataJson[PerformanceScreen.id],
-        )..addAll({
-            PerformanceData.traceEventsKey: offlineController
-                .offlineDataJson[PerformanceData.traceEventsKey],
-          });
-        final offlinePerformanceData =
-            OfflinePerformanceData.parse(timelineJson);
-        if (!offlinePerformanceData.isEmpty) {
-          await loadOfflineData(offlinePerformanceData);
-        }
-      }
+      await maybeLoadOfflineData(
+        PerformanceScreen.id,
+        createData: (json) => OfflinePerformanceData.parse(json),
+        shouldLoad: (data) => !data.isEmpty,
+      );
     }
   }
 

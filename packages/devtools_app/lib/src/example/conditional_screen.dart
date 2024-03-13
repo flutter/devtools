@@ -88,17 +88,8 @@ class ExampleController extends DisposableController
     if (!offlineController.offlineMode.value) {
       // Do some initialization for online mode.
     } else {
-      final shouldLoadOfflineData =
-          offlineController.shouldLoadOfflineData(ExampleConditionalScreen.id);
-      if (shouldLoadOfflineData) {
-        final exampleScreenJson = Map<String, dynamic>.from(
-          offlineController.offlineDataJson[ExampleConditionalScreen.id],
-        );
-        final offlineData = ExampleScreenData.parse(exampleScreenJson);
-        if (!offlineData.title.isNotEmpty) {
-          await loadOfflineData(offlineData);
-        }
-      }
+      await maybeLoadOfflineData(
+        ExampleConditionalScreen.id,
     }
   }
 
