@@ -232,7 +232,7 @@ class _TestScreen extends Screen {
   final Key key;
 
   @override
-  Widget build(BuildContext context) {
+  Widget buildScreenBody(BuildContext context) {
     return SizedBox(key: key);
   }
 }
