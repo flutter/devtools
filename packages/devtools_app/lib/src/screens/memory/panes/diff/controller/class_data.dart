@@ -8,7 +8,7 @@ import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../shared/heap/class_filter.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/primitives/simple_elements.dart';
-import 'heap_diff.dart';
+import '../data/heap_diff_store.dart';
 
 class RetainingPathController {
   final hideStandard = ValueNotifier<bool>(true);

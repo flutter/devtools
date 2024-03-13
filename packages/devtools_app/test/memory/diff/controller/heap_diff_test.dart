@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/screens/memory/panes/diff/controller/heap_diff.dart';
+import 'package:devtools_app/src/screens/memory/panes/diff/data/heap_diff_store.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/heap.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/spanning_tree.dart';
 import 'package:devtools_app/src/shared/memory/adapted_heap_data.dart';
