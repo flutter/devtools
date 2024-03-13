@@ -339,7 +339,6 @@ T? breadthFirstTraversal<T extends TreeNode<T>>(
 }) {
   return _treeTraversal(
     root,
-    bfs: true,
     returnCondition: returnCondition,
     action: action,
   );
