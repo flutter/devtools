@@ -29,6 +29,9 @@ class ExampleConditionalScreen extends Screen {
   static const id = 'example';
 
   @override
+  bool get worksOffline => true;
+
+  @override
   Widget build(BuildContext context) {
     return const _ExampleConditionalScreenBody();
   }
@@ -90,6 +93,9 @@ class ExampleController extends DisposableController
     } else {
       await maybeLoadOfflineData(
         ExampleConditionalScreen.id,
+        createData: (json) => ExampleScreenData.parse(json),
+        shouldLoad: (data) => data.title.isNotEmpty,
+      );
     }
   }
 
