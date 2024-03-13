@@ -13,12 +13,12 @@ typedef ShortestRetainersResult = ({
   List<int>? retainedSizes,
 });
 
-ShortestRetainersResult findShortestRetainers(
-  int graphSize,
-  int rootIndex,
-  IsRetainer isRetainer,
-  References refs,
-  ShallowSize shallowSize, {
+ShortestRetainersResult findShortestRetainers({
+  required int graphSize,
+  required int rootIndex,
+  required IsRetainer isRetainer,
+  required References refs,
+  required ShallowSize shallowSize,
   bool calculateSizes = true,
 }) {
   final retainers = Uint32List(graphSize);

@@ -76,11 +76,11 @@ Future<HeapData> calculateHeapData(
     final weakClasses = _WeakClasses(graph);
 
     final result = findShortestRetainers(
-      graph.objects.length,
-      heapRootIndex,
-      weakClasses.isRetainer,
-      (int index) => graph.objects[index].references,
-      (int index) => graph.objects[index].shallowSize,
+      graphSize: graph.objects.length,
+      rootIndex: heapRootIndex,
+      isRetainer: weakClasses.isRetainer,
+      refs: (int index) => graph.objects[index].references,
+      shallowSize: (int index) => graph.objects[index].shallowSize,
       calculateSizes: calculateRetainedSizes,
     );
 
