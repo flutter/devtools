@@ -9,12 +9,14 @@ import 'heap_data.dart';
 import 'simple_items.dart';
 
 @immutable
+
+/// Object in a heap snapshot.
 class HeapObject {
   const HeapObject(this.heap, {required this.index});
 
   final HeapData heap;
 
-  /// Index of the object in the heap.
+  /// Index of the object in [heap].
   ///
   /// If  null, it means the object exists in the live app, but is not
   /// located in the heap.
