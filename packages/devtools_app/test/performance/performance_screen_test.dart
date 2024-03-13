@@ -20,9 +20,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:vm_service/vm_service.dart' as vm_service;
 
-import '../test_infra/test_data/performance.dart';
+import '../test_infra/test_data/performance/sample_performance_data.dart';
 
 void main() {
   const windowSize = Size(3000.0, 1000.0);
@@ -43,12 +42,10 @@ void main() {
     late PerformanceController controller;
     late FakeServiceConnectionManager fakeServiceConnection;
 
-    Future<void> setUpServiceManagerWithTimeline(
-      Map<String, dynamic> timelineJson,
-    ) async {
+    Future<void> setUpServiceManagerWithTimeline() async {
       fakeServiceConnection = FakeServiceConnectionManager(
         service: FakeServiceManager.createFakeService(
-          timelineData: vm_service.Timeline.parse(timelineJson),
+          timelineData: perfettoVmTimeline,
         ),
       );
       when(
@@ -97,7 +94,7 @@ void main() {
 
     setUp(() async {
       preferences.performance.showFlutterFramesChart.value = true;
-      await setUpServiceManagerWithTimeline(testTimelineJson);
+      await setUpServiceManagerWithTimeline();
       await shortDelay();
       controller = PerformanceController();
       await controller.initialized;

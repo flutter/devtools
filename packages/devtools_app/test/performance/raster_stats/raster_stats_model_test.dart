@@ -4,10 +4,9 @@
 
 import 'package:devtools_app/src/screens/performance/panes/raster_stats/raster_stats_model.dart';
 import 'package:devtools_app/src/shared/primitives/utils.dart';
+import 'package:devtools_test/test_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../../test_infra/test_data/performance_raster_stats.dart';
 
 void main() {
   late RasterStats rasterStats;
