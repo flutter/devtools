@@ -10,7 +10,7 @@ import '../../../../shared/ui/tab.dart';
 import '../../panes/diff/diff_pane.dart';
 import '../../panes/profile/profile_view.dart';
 import '../../panes/tracing/tracing_view.dart';
-import 'memory_controller.dart';
+import '../memory_controller.dart';
 
 @visibleForTesting
 class MemoryScreenKeys {

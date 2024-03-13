@@ -9,19 +9,22 @@ import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../../shared/globals.dart';
-import '../../../../shared/memory/class_name.dart';
-import '../../../../shared/utils.dart';
-import '../../panes/chart/primitives.dart';
-import '../../panes/diff/controller/diff_pane_controller.dart';
-import '../../panes/profile/profile_pane_controller.dart';
-import '../../panes/tracing/tracing_pane_controller.dart';
-import '../../shared/heap/model.dart';
-import '../../shared/primitives/memory_timeline.dart';
-import 'memory_protocol.dart';
+import '../../../shared/globals.dart';
+import '../../../shared/memory/class_name.dart';
+import '../../../shared/offline_mode.dart';
+import '../../../shared/screen.dart';
+import '../../../shared/utils.dart';
+import '../panes/chart/primitives.dart';
+import '../panes/diff/controller/diff_pane_controller.dart';
+import '../panes/profile/profile_pane_controller.dart';
+import '../panes/tracing/tracing_pane_controller.dart';
+import '../shared/heap/model.dart';
+import '../shared/primitives/memory_timeline.dart';
+import 'connected/memory_protocol.dart';
+import 'offline/screen_data.dart';
 
 class MemoryFeatureControllers {
-  /// [diffPaneController] is passed for testability.
+  /// Controllers are passed for testability.
   MemoryFeatureControllers(
     DiffPaneController? diffPaneController,
     ProfilePaneController? profilePaneController,
@@ -57,6 +60,12 @@ class MemoryFeatureControllers {
   }
 }
 
+enum MemoryInitializationStatus {
+  none,
+  offline,
+  connected,
+}
+
 /// This class contains the business logic for memory screen, for a connected
 /// application.
 ///
@@ -65,19 +74,83 @@ class MemoryFeatureControllers {
 ///
 /// The controller should be recreated for every new connection.
 class MemoryController extends DisposableController
-    with AutoDisposeControllerMixin {
+    with
+        AutoDisposeControllerMixin,
+        OfflineScreenControllerMixin<MemoryScreenOfflineData> {
   MemoryController({
-    DiffPaneController? diffPaneController,
-    ProfilePaneController? profilePaneController,
+    @visibleForTesting DiffPaneController? diffPaneController,
+    @visibleForTesting ProfilePaneController? profilePaneController,
+    @visibleForTesting bool? isOffline,
   }) {
-    controllers = MemoryFeatureControllers(
-      diffPaneController,
-      profilePaneController,
+    void initialize() => _initialize(
+          offline: isOffline ??
+              offlineController.offlineMode.value ||
+                  !serviceConnection.serviceManager.hasConnection,
+          diffPaneController: diffPaneController,
+          profilePaneController: profilePaneController,
+        );
+
+    addAutoDisposeListener(offlineController.offlineMode, initialize);
+    initialize();
+  }
+
+  ValueListenable<MemoryInitializationStatus> get initializationStatus =>
+      _initializationStatus;
+  final ValueNotifier<MemoryInitializationStatus> _initializationStatus =
+      ValueNotifier(MemoryInitializationStatus.none);
+
+  void _initialize({
+    required DiffPaneController? diffPaneController,
+    required ProfilePaneController? profilePaneController,
+    required bool offline,
+  }) {
+    _initializationStatus.value = MemoryInitializationStatus.none;
+    if (offline) {
+      _maybeLoadOfflineData();
+      _initializationStatus.value = MemoryInitializationStatus.offline;
+    } else {
+      _controllers = MemoryFeatureControllers(
+        diffPaneController,
+        profilePaneController,
+      );
+      _initializationStatus.value = MemoryInitializationStatus.connected;
+    }
+  }
+
+  @override
+  FutureOr<void> processOfflineData(MemoryScreenOfflineData offlineData) {
+    offlineData = offlineData;
+  }
+
+  @override
+  OfflineScreenData screenDataForExport() {
+    return OfflineScreenData(
+      screenId: ScreenMetaData.memory.id,
+      data: {
+        '$MemoryScreenOfflineData': MemoryScreenOfflineData(),
+      },
+    );
+  }
+
+  void _maybeLoadOfflineData() {
+    print(
+        'loadOfflineData: ${offlineController.shouldLoadOfflineData(ScreenMetaData.memory.id)}');
+    if (!offlineController.shouldLoadOfflineData(ScreenMetaData.memory.id)) {
+      return;
+    }
+    print('Loading offline data for memory screen');
+    _offlineData = MemoryScreenOfflineData.fromJson(
+      (offlineController.offlineDataJson[ScreenMetaData.memory.id]
+          as Map<String, dynamic>)['$MemoryScreenOfflineData'],
     );
   }
 
   /// Sub-controllers of memory controller.
-  late final MemoryFeatureControllers controllers;
+  MemoryFeatureControllers get controllers => _controllers!;
+  MemoryFeatureControllers? _controllers;
+
+  MemoryScreenOfflineData get offlineData => _offlineData!;
+  MemoryScreenOfflineData? _offlineData;
 
   /// Index of the selected feature tab.
   ///
@@ -227,9 +300,6 @@ class MemoryController extends DisposableController
       _updateAndroidChartVisibility,
     );
   }
-
-  /// This flag will be needed for offline mode implementation.
-  bool offline = false;
 
   void _updateAndroidChartVisibility() {
     final bool isConnectedToAndroidAndAndroidEnabled =

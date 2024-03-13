@@ -11,6 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
+import 'feature_flags.dart';
 import 'globals.dart';
 import 'primitives/listenable.dart';
 import 'ui/icons.dart';
@@ -54,6 +55,8 @@ enum ScreenMetaData {
     title: 'Memory',
     icon: Octicons.package,
     requiresDartVm: true,
+    worksOffline: true,
+    requiresConnection: false,
     tutorialVideoTimestamp: '?t=420',
   ),
   debugger(
@@ -203,12 +206,20 @@ abstract class Screen {
   }) : this.conditional(
           id: metadata.id,
           requiresLibrary: metadata.requiresLibrary,
-          requiresConnection: metadata.requiresConnection,
+          requiresConnection: metadata.requiresConnection
+          // &&
+          //     !(FeatureFlags.memoryAnalysis &&
+          //         metadata.id == ScreenMetaData.memory.id)
+          ,
           requiresDartVm: metadata.requiresDartVm,
           requiresFlutter: metadata.requiresFlutter,
           requiresDebugBuild: metadata.requiresDebugBuild,
           requiresVmDeveloperMode: metadata.requiresVmDeveloperMode,
-          worksOffline: metadata.worksOffline,
+          worksOffline: metadata.worksOffline
+          // ||
+          //     !(FeatureFlags.memoryAnalysis &&
+          //         metadata.id == ScreenMetaData.memory.id)
+          ,
           shouldShowForFlutterVersion: shouldShowForFlutterVersion,
           showFloatingDebuggerControls: showFloatingDebuggerControls,
           title: titleGenerator == null ? metadata.title : null,

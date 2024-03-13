@@ -16,7 +16,7 @@ import '../../panes/chart/memory_android_chart.dart';
 import '../../panes/chart/memory_events_pane.dart';
 import '../../panes/chart/memory_vm_chart.dart';
 import '../../panes/control/control_pane.dart';
-import 'memory_controller.dart';
+import '../memory_controller.dart';
 import 'memory_tabs.dart';
 
 class ConnectedMemoryBody extends StatefulWidget {

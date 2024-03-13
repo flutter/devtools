@@ -92,8 +92,8 @@ class MemoryDefaultScene extends Scene {
     controller = MemoryController(
       diffPaneController: diffController,
       profilePaneController: profileController,
+      isOffline: true,
     )
-      ..offline = true
       ..controllers.memoryTimeline.offlineData.clear()
       ..controllers.memoryTimeline.offlineData.addAll(memoryJson.data);
   }
