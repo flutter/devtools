@@ -69,6 +69,54 @@ class OfflineModeController {
 /// The [Screen] that is associated with this controller must have
 /// [Screen.worksOffline] set to true in order to enable offline support for the
 /// screen.
+///
+/// Example:
+///
+/// class MyScreenController with OfflineScreenControllerMixin<MyScreenData> {
+///   MyScreenController() {
+///     init();
+///   }
+///
+///   void init() {
+///     // If the screen supports reviewing history on app disconnect, add this.
+///     initReviewHistoryOnDisconnectListener();
+///
+///     if (offlineController.offlineMode.value) {
+///       await maybeLoadOfflineData(
+///         ScreenMetaData.myScreen.id,
+///         createData: (json) => MyScreenData.parse(json),
+///         shouldLoad: (data) => data.isNotEmpty,
+///       );
+///     } else {
+///       // Do normal screen initializaion.
+///     }
+///   }
+///
+///   // Override the abstract methods from [OfflineScreenControllerMixin].
+///
+///   @override
+///   OfflineScreenData screenDataForExport() => OfflineScreenData(
+///     screenId: ScreenMetaData.myScreen.id,
+///     data: {} // The data for this screen as a serializable JSON object.
+///   );
+///
+///   @override
+///   FutureOr<void> processOfflineData(MyScreenData offlineData) async {
+///     // Set up the all the data models and notifiers that feed MyScreen's UI.
+///   }
+/// }
+///
+/// ...
+///
+/// Then in the DevTools [ScreenMetaData] enum, set 'worksOffline' to true.
+///
+/// enum ScreenMetaData {
+///   ...
+///   myScreen(
+///     ...
+///     worksOffline: true,
+///   ),
+/// }
 mixin OfflineScreenControllerMixin<T> on AutoDisposeControllerMixin {
   final _exportController = ExportController();
 
@@ -92,7 +140,7 @@ mixin OfflineScreenControllerMixin<T> on AutoDisposeControllerMixin {
 
   /// Loads offline data for [screenId] when available, and when the
   /// [shouldLoad] condition is met.
-  /// 
+  ///
   /// Screen controllers that mix in [OfflineScreenControllerMixin] should call
   /// this during their initialization when DevTools is in offline mode, defined
   /// by [offlineController.offlineMode].
@@ -131,7 +179,7 @@ mixin OfflineScreenControllerMixin<T> on AutoDisposeControllerMixin {
   ///
   /// This is in preparation for the user clicking the 'Review History' button
   /// from the disconnect screen.
-  /// 
+  ///
   /// For screens that support the disconnect experience, which is a screen that
   /// allows you to view historical data from before the app was disconnected
   /// even after we lose connection to the device, this should be called in the
@@ -167,7 +215,7 @@ class OfflineScreenData {
   final String screenId;
 
   /// The JSON serializable data for the screen.
-  /// 
+  ///
   /// This data will be encoded as JSON and written to a file when data is
   /// exported from DevTools. This means that the values in [data] must be
   /// primitive types that can be encoded as JSON.
