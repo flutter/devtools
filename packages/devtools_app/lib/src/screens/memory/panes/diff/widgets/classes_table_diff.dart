@@ -17,7 +17,7 @@ import '../../../shared/primitives/simple_elements.dart';
 import '../../../shared/widgets/class_filter.dart';
 import '../../../shared/widgets/shared_memory_widgets.dart';
 import '../controller/class_data.dart';
-import '../controller/heap_diff.dart';
+import '../data/classes_diff.dart';
 import 'instances.dart';
 
 enum _DataPart {
@@ -27,10 +27,10 @@ enum _DataPart {
   persisted,
 }
 
-class _ClassNameColumn extends ColumnData<DiffClassStats>
+class _ClassNameColumn extends ColumnData<DiffClassData>
     implements
-        ColumnRenderer<DiffClassStats>,
-        ColumnHeaderRenderer<DiffClassStats> {
+        ColumnRenderer<DiffClassData>,
+        ColumnHeaderRenderer<DiffClassData> {
   _ClassNameColumn(this.diffData)
       : super(
           'Class',
@@ -42,19 +42,19 @@ class _ClassNameColumn extends ColumnData<DiffClassStats>
   final ClassesTableDiffData diffData;
 
   @override
-  String? getValue(DiffClassStats dataObject) => dataObject.heapClass.className;
+  String? getValue(DiffClassData dataObject) => dataObject.heapClass.className;
 
   @override
   bool get supportsSorting => true;
 
   @override
   // We are removing the tooltip, because it is provided by [HeapClassView].
-  String getTooltip(DiffClassStats dataObject) => '';
+  String getTooltip(DiffClassData dataObject) => '';
 
   @override
   Widget build(
     BuildContext context,
-    DiffClassStats data, {
+    DiffClassData data, {
     bool isRowSelected = false,
     bool isRowHovered = false,
     VoidCallback? onPressed,
@@ -82,8 +82,8 @@ class _ClassNameColumn extends ColumnData<DiffClassStats>
   }
 }
 
-class _InstanceColumn extends ColumnData<DiffClassStats>
-    implements ColumnRenderer<DiffClassStats> {
+class _InstanceColumn extends ColumnData<DiffClassData>
+    implements ColumnRenderer<DiffClassData> {
   _InstanceColumn(this.dataPart, this.diffData)
       : super(
           columnTitle(dataPart),
@@ -109,10 +109,10 @@ class _InstanceColumn extends ColumnData<DiffClassStats>
   }
 
   @override
-  int getValue(DiffClassStats dataObject) =>
+  int getValue(DiffClassData dataObject) =>
       _instances(dataObject).instanceCount;
 
-  ObjectSetStats _instances(DiffClassStats classStats) {
+  ObjectSetStats _instances(DiffClassData classStats) {
     switch (dataPart) {
       case _DataPart.created:
         return classStats.total.created;
@@ -126,7 +126,7 @@ class _InstanceColumn extends ColumnData<DiffClassStats>
   }
 
   @override
-  String getDisplayValue(DiffClassStats dataObject) {
+  String getDisplayValue(DiffClassData dataObject) {
     // Add leading sign for delta values.
     final value = getValue(dataObject);
     if (dataPart != _DataPart.delta || value <= 0) return value.toString();
@@ -139,7 +139,7 @@ class _InstanceColumn extends ColumnData<DiffClassStats>
   @override
   Widget? build(
     BuildContext context,
-    DiffClassStats data, {
+    DiffClassData data, {
     bool isRowSelected = false,
     bool isRowHovered = false,
     VoidCallback? onPressed,
@@ -170,7 +170,7 @@ class _InstanceColumn extends ColumnData<DiffClassStats>
   }
 }
 
-class _SizeColumn extends ColumnData<DiffClassStats> {
+class _SizeColumn extends ColumnData<DiffClassData> {
   _SizeColumn(this.dataPart, this.sizeType)
       : super(
           columnTitle(dataPart),
@@ -195,7 +195,7 @@ class _SizeColumn extends ColumnData<DiffClassStats> {
   }
 
   @override
-  int getValue(DiffClassStats classStats) {
+  int getValue(DiffClassData classStats) {
     switch (sizeType) {
       case SizeType.shallow:
         switch (dataPart) {
@@ -223,7 +223,7 @@ class _SizeColumn extends ColumnData<DiffClassStats> {
   }
 
   @override
-  String getDisplayValue(DiffClassStats classStats) {
+  String getDisplayValue(DiffClassData classStats) {
     // Add leading sign for delta values.
     final value = getValue(classStats);
     final asSize = prettyPrintRetainedSize(value)!;
@@ -243,8 +243,8 @@ class ClassesTableDiffColumns {
 
   late final sizeDeltaColumn = _SizeColumn(_DataPart.delta, sizeType);
 
-  late final List<ColumnData<DiffClassStats>> columnList =
-      <ColumnData<DiffClassStats>>[
+  late final List<ColumnData<DiffClassData>> columnList =
+      <ColumnData<DiffClassData>>[
     _ClassNameColumn(diffData),
     _InstanceColumn(_DataPart.created, diffData),
     _InstanceColumn(_DataPart.deleted, diffData),
@@ -308,7 +308,7 @@ class ClassesTableDiff extends StatelessWidget {
     };
   }
 
-  final List<DiffClassStats> classes;
+  final List<DiffClassData> classes;
   final ClassesTableDiffData diffData;
 
   List<ColumnGroup> _columnGroups() {
@@ -342,7 +342,7 @@ class ClassesTableDiff extends StatelessWidget {
 
         final columns = _columns[sizeType]!;
 
-        return FlatTable<DiffClassStats>(
+        return FlatTable<DiffClassData>(
           columns: columns.columnList,
           columnGroups: _columnGroups(),
           data: classes,
