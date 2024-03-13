@@ -186,19 +186,23 @@ class CoreData {
   SnapshotItem get selectedItem =>
       _snapshots.value[_selectedSnapshotIndex.value];
 
-  SnapshotDataItem? get selectedDataItem {
-    final theItem = selectedItem;
-    if (theItem is SnapshotDataItem) return theItem;
-    return null;
-  }
+  SnapshotDataItem? get selectedDataItem => selectedItem is SnapshotDataItem
+      ? selectedItem as SnapshotDataItem
+      : null;
 
-  /// Full name for the selected class (cross-snapshot).
+  /// Full name for the selected class.
+  ///
+  /// The name is applied to all snapshots.
   HeapClassName? className;
 
-  /// Selected retaining path (cross-snapshot).
+  /// Selected retaining path.
+  ///
+  /// The path is applied to all snapshots.
   PathFromRoot? path;
 
-  /// Current class filter (cross-snapshot).
+  /// Current class filter.
+  ///
+  /// This filter is applied to all snapshots.
   ValueListenable<ClassFilter> get classFilter => _classFilter;
   final _classFilter = ValueNotifier(ClassFilter.empty());
 }
@@ -280,9 +284,9 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   }
 
   /// Updates cross-snapshot class if the argument is not null.
-  void _setClassIfNotNull(HeapClassName? theClass) {
-    if (theClass == null || theClass == _core.className) return;
-    _core.className = theClass;
+  void _setClassIfNotNull(HeapClassName? className) {
+    if (className == null || className == _core.className) return;
+    _core.className = className;
     _updateValues();
   }
 
@@ -332,21 +336,16 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   }
 
   HeapDiffData? _currentDiff() {
-    final theItem = _core.selectedDataItem;
-    final itemToDiffWith = theItem?.diffWith.value;
-    return _diffStore.compare(theItem?.heap, itemToDiffWith?.heap);
+    final item = _core.selectedDataItem;
+    return _diffStore.compare(item?.heap, item?.diffWith.value?.heap);
   }
 
   void _updatePathTableData() {
-    final theClassData = classData.value;
+    final data = classData.value;
 
-    // pathData = theClassData?.byPath.keys
-    //     .map((path) => PathData(theClassData, path))
-    //     .toList();
-
-    final thePath = _core.path;
-    if (theClassData != null && thePath != null) {
-      selectedPath.value = PathData(theClassData, thePath);
+    final path = _core.path;
+    if (data != null && path != null) {
+      selectedPath.value = PathData(data, path);
     } else {
       selectedPath.value = null;
     }
@@ -406,6 +405,9 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
 
       _selectedItem.value = _core.selectedItem;
     } finally {
+      // Exceptions are caught by UI and gracefully communicated.
+      // Returning controller back to consistent state to make error reporting easier,
+      // and non-failing operations still working.
       _endUpdatingValues();
     }
   }

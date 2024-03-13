@@ -65,6 +65,10 @@ class ClassesTableDiffData {
   final selection = ValueNotifier<DiffClassData?>(null);
 }
 
+/// Data for visualization of a path.
+///
+/// Is instantiated only to visualize the selected path,
+/// not for each path in snapshot.
 class PathData {
   PathData(this.classData, this.path);
 

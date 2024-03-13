@@ -16,8 +16,8 @@ class ObjectSetDiff {
     required HeapData dataBefore,
     required HeapData dataAfter,
   }) {
-    final mapBefore = _toCodeToIndexMap(setBefore, dataBefore);
-    final mapAfter = _toCodeToIndexMap(setAfter, dataAfter);
+    final mapBefore = _hashCodeToIndexMap(setBefore, dataBefore);
+    final mapAfter = _hashCodeToIndexMap(setAfter, dataAfter);
 
     final allCodes = mapBefore.keys.toSet().union(mapAfter.keys.toSet());
 
@@ -82,7 +82,7 @@ class ObjectSetDiff {
     );
   }
 
-  static Map<int, int> _toCodeToIndexMap(
+  static Map<int, int> _hashCodeToIndexMap(
     ObjectSet? ids,
     HeapData? data,
   ) {
@@ -101,8 +101,11 @@ class ObjectSetDiff {
 }
 
 class DiffClassData extends ClassData {
-  DiffClassData._(HeapClassName heapClass, this.diff, this.byPath)
-      : super(className: heapClass);
+  DiffClassData._({
+    required HeapClassName heapClass,
+    required this.diff,
+    required this.byPath,
+  }) : super(className: heapClass);
 
   final ObjectSetDiff diff;
 
@@ -122,15 +125,15 @@ class DiffClassData extends ClassData {
     final heapClass = (before?.className ?? after?.className)!;
 
     final result = DiffClassData._(
-      heapClass,
-      ObjectSetDiff(
+      heapClass: heapClass,
+      diff: ObjectSetDiff(
         setBefore: before?.objects,
         setAfter: after?.objects,
         dataBefore: dataBefore,
         dataAfter: dataAfter,
       ),
       // PathFromRoot, ObjectSetStats
-      subtractMaps<PathFromRoot, ObjectSetStats, ObjectSetStats,
+      byPath: subtractMaps<PathFromRoot, ObjectSetStats, ObjectSetStats,
           ObjectSetStats>(
         from: after?.byPath,
         subtract: before?.byPath,
