@@ -322,7 +322,7 @@ class ChartController extends DisposableController
     buildLabelTimestamps(refresh: true);
   }
 
-  void buildLabelTimestamps({refresh = false}) {
+  void buildLabelTimestamps({bool refresh = false}) {
     if (isLabelsShared || timestamps.isEmpty) return;
 
     if (refresh) {

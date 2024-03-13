@@ -64,13 +64,9 @@ class SimulatedDevToolsController extends DisposableController
     // persists on hot restart.
 
     // TODO(kenz): add some validation and error handling if [uri] is bad input.
-    final normalizedUri =
-        uri != null ? normalizeVmServiceUri(uri).toString() : null;
     final event = DevToolsExtensionEvent(
       DevToolsExtensionEventType.vmServiceConnection,
-      data: {
-        ExtensionEventParameters.vmServiceConnectionUri: normalizedUri,
-      },
+      data: {ExtensionEventParameters.vmServiceConnectionUri: uri},
     );
     _postMessageToExtension(event);
   }
@@ -121,22 +117,12 @@ class SimulatedDevToolsController extends DisposableController
 
   Future<void> hotReloadConnectedApp() async {
     await serviceManager.performHotReload();
-    messageLogs.add(
-      MessageLogEntry(
-        source: MessageSource.info,
-        message: 'Hot reload performed on connected app',
-      ),
-    );
+    logInfoEvent('Hot reload performed on connected app');
   }
 
   Future<void> hotRestartConnectedApp() async {
     await serviceManager.performHotRestart();
-    messageLogs.add(
-      MessageLogEntry(
-        source: MessageSource.info,
-        message: 'Hot restart performed on connected app',
-      ),
-    );
+    logInfoEvent('Hot restart performed on connected app');
   }
 
   void toggleTheme() {
@@ -145,6 +131,12 @@ class SimulatedDevToolsController extends DisposableController
       theme: darkThemeEnabled
           ? ExtensionEventParameters.themeValueLight
           : ExtensionEventParameters.themeValueDark,
+    );
+  }
+
+  void logInfoEvent(String message) {
+    messageLogs.add(
+      MessageLogEntry(source: MessageSource.info, message: message),
     );
   }
 

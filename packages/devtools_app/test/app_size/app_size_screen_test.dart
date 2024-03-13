@@ -140,9 +140,9 @@ void main() {
         await loadDataAndPump(tester);
 
         // Verify the state of the splitter.
-        final splitFinder = find.byType(Split);
+        final splitFinder = find.byType(SplitPane);
         expect(splitFinder, findsOneWidget);
-        final Split splitter = tester.widget(splitFinder);
+        final SplitPane splitter = tester.widget(splitFinder);
         expect(splitter.initialFractions[0], equals(0.67));
         expect(splitter.initialFractions[1], equals(0.33));
       },
@@ -577,7 +577,7 @@ void main() {
         expect(deferredMenuItemFinder, findsOneWidget);
 
         // Select the main unit.
-        await tester.tap(find.text('Main').hitTestable());
+        await tester.tap(find.richText('Main').hitTestable());
         await tester.pumpAndSettle();
 
         // Verify the main unit is shown for entire app.
@@ -751,6 +751,6 @@ Finder _findDropdownButton<T>() {
 Finder _findMenuItemWithText<T>(String text) {
   return find.descendant(
     of: find.byType(DropdownMenuItem<T>),
-    matching: find.text(text).first,
+    matching: find.richText(text).hitTestable(),
   );
 }

@@ -20,28 +20,21 @@ class PerformanceSettingsDialog extends StatelessWidget {
     return DevToolsDialog(
       title: const DialogTitleText('Performance Settings'),
       includeDivider: false,
-      content: SizedBox(
-        width: defaultDialogWidth,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (serviceConnection
-                .serviceManager.connectedApp!.isFlutterAppNow!) ...[
-              FlutterSettings(
-                flutterFramesController: controller.flutterFramesController,
-              ),
-              const SizedBox(height: denseSpacing),
-            ],
-            CheckboxSetting(
-              notifier:
-                  controller.timelineEventsController.useLegacyTraceViewer,
-              title: 'Use legacy trace viewer',
-              onChanged: controller
-                  .timelineEventsController.toggleUseLegacyTraceViewer,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (serviceConnection
+              .serviceManager.connectedApp!.isFlutterAppNow!) ...[
+            FlutterSettings(
+              flutterFramesController: controller.flutterFramesController,
             ),
           ],
-        ),
+          // TODO(https://github.com/flutter/devtools/issues/7334): add a
+          // setting here to toggle whether we request the perfetto vm timeline
+          // with CPU samples. This has performance implications.
+          // See https://github.com/dart-lang/sdk/issues/55137.
+        ],
       ),
       actions: const [
         DialogCloseButton(),

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:math';
 
 import 'package:devtools_app_shared/ui.dart';
@@ -54,7 +53,6 @@ class _DeepLinkListViewState extends State<DeepLinkListView>
       // If not found, default to 0.
       releaseVariantIndex = max(releaseVariantIndex, 0);
       controller.selectedVariantIndex.value = releaseVariantIndex;
-      unawaited(controller.validateLinks());
     });
   }
 
@@ -81,78 +79,102 @@ class _DeepLinkListViewMainPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Provider.of<DeepLinksController>(context);
-    // TODO(hangyujin): Use MultiValueListenableBuilder.
-    return ValueListenableBuilder<DisplayOptions>(
-      valueListenable: controller.displayOptionsNotifier,
-      builder: (context, displayOptions, _) =>
-          ValueListenableBuilder<List<LinkData>?>(
-        valueListenable: controller.allLinkDatasNotifier,
-        builder: (context, linkDatas, _) {
-          if (linkDatas == null) {
+
+    return ValueListenableBuilder<PagePhase>(
+      valueListenable: controller.pagePhase,
+      builder: (context, pagePhase, _) {
+        switch (pagePhase) {
+          case PagePhase.emptyState:
+          case PagePhase.linksLoading:
+          case PagePhase.linksValidating:
             return Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const CenteredCircularProgressIndicator(),
                 const SizedBox(height: densePadding),
                 Text(
-                  'Validating deep links...',
+                  pagePhase == PagePhase.linksLoading
+                      ? 'Loading deep links...'
+                      : 'Validating deep links...',
                   style: Theme.of(context).subtleTextStyle,
                 ),
               ],
             );
-          }
-          if (displayOptions.showSplitScreen) {
-            return Row(
-              children: [
-                Expanded(
-                  child: _AllDeepLinkDataTable(controller: controller),
-                ),
-                VerticalDivider(
-                  width: 1.0,
-                  color: Theme.of(context).focusColor,
-                ),
-                Expanded(
-                  child: ValueListenableBuilder<LinkData?>(
-                    valueListenable: controller.selectedLink,
-                    builder: (context, selectedLink, _) => TabBarView(
-                      children: [
-                        ValidationDetailView(
-                          linkData: selectedLink!,
-                          controller: controller,
-                          viewType: TableViewType.domainView,
-                        ),
-                        ValidationDetailView(
-                          linkData: selectedLink,
-                          controller: controller,
-                          viewType: TableViewType.pathView,
-                        ),
-                        ValidationDetailView(
-                          linkData: selectedLink,
-                          controller: controller,
-                          viewType: TableViewType.singleUrlView,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            );
-          }
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          case PagePhase.linksValidated:
+            return const _ValidatedDeepLinksView();
+          case PagePhase.noLinks:
+            // TODO(hangyujin): This is just a place holder to add UI.
+            return const Text('Your flutter project has no Links to verify.');
+
+          case PagePhase.errorPage:
+            // TODO(hangyujin): This is just a place holder to add Error handling.
+            return const Text('Error');
+        }
+      },
+    );
+  }
+}
+
+class _ValidatedDeepLinksView extends StatelessWidget {
+  const _ValidatedDeepLinksView();
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = Provider.of<DeepLinksController>(context);
+    return ValueListenableBuilder<DisplayOptions>(
+      valueListenable: controller.displayOptionsNotifier,
+      builder: (context, displayOptions, _) {
+        if (displayOptions.showSplitScreen) {
+          return Row(
             children: [
-              _NotificationCardSection(
-                domainErrorCount: displayOptions.domainErrorCount,
-                pathErrorCount: displayOptions.pathErrorCount,
-                controller: controller,
-              ),
               Expanded(
                 child: _AllDeepLinkDataTable(controller: controller),
               ),
+              VerticalDivider(
+                width: 1.0,
+                color: Theme.of(context).focusColor,
+              ),
+              Expanded(
+                child: ValueListenableBuilder<LinkData?>(
+                  valueListenable: controller.selectedLink,
+                  builder: (context, selectedLink, _) => TabBarView(
+                    children: [
+                      ValidationDetailView(
+                        linkData: selectedLink!,
+                        controller: controller,
+                        viewType: TableViewType.domainView,
+                      ),
+                      ValidationDetailView(
+                        linkData: selectedLink,
+                        controller: controller,
+                        viewType: TableViewType.pathView,
+                      ),
+                      ValidationDetailView(
+                        linkData: selectedLink,
+                        controller: controller,
+                        viewType: TableViewType.singleUrlView,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ],
           );
-        },
-      ),
+        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _NotificationCardSection(
+              domainErrorCount: displayOptions.domainErrorCount,
+              pathErrorCount: displayOptions.pathErrorCount,
+              controller: controller,
+            ),
+            Expanded(
+              child: _AllDeepLinkDataTable(controller: controller),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -291,6 +313,7 @@ class _AllDeepLinkDataTable extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     const gaPrefix = 'deepLinkTab';
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         OutlineDecoration(
           showRight: false,
@@ -384,7 +407,7 @@ class _NotificationCardSection extends StatelessWidget {
   final DeepLinksController controller;
   @override
   Widget build(BuildContext context) {
-    if (domainErrorCount == 0 && domainErrorCount == 0) {
+    if (domainErrorCount == 0 && pathErrorCount == 0) {
       return const SizedBox.shrink();
     }
     return OutlineDecoration(
@@ -428,7 +451,7 @@ class _NotificationCardSection extends StatelessWidget {
                     DefaultTabController.of(context).index = 1;
                     controller.selectLink(
                       controller.getLinkDatasByPath
-                          .where((element) => element.pathError)
+                          .where((element) => element.pathErrors.isNotEmpty)
                           .first,
                     );
                     controller.updateDisplayOptions(showSplitScreen: true);
@@ -462,8 +485,8 @@ class NotificationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return SizedBox.fromSize(
       size: _kNotificationCardSize,
       child: Card(
@@ -484,14 +507,10 @@ class NotificationCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      title,
-                      style: textTheme.bodyMedium!
-                          .copyWith(color: colorScheme.onSurface),
-                    ),
+                    Text(title),
                     Text(
                       description,
-                      style: Theme.of(context).subtleTextStyle,
+                      style: theme.subtleTextStyle,
                     ),
                     Expanded(
                       child: Align(

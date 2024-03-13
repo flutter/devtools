@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// All Restful Servers are defined here.
+/// The RESTful APIs used by the app.
+library;
 
 /// All servers with RestfulAPI implement this base.
 abstract class RestfulAPI {
@@ -21,7 +22,7 @@ abstract class RestfulAPI {
 class StarWars extends RestfulAPI {
   StarWars([String name = starWarsPeople]) {
     _defaultUri = _friendlyNames[name]!;
-    _activefriendlyName = name;
+    _activeFriendlyName = name;
   }
 
   static const String starWarsFilms = 'StarWars Films';
@@ -40,13 +41,13 @@ class StarWars extends RestfulAPI {
     '$starWarsVehicles': 'https://swapi.co/api/vehicles',
   };
 
-  late final String _activefriendlyName;
+  late final String _activeFriendlyName;
   late final String _defaultUri;
 
   static List<String> get friendlyNames => _friendlyNames.keys.toList();
 
   @override
-  String get activeFriendlyName => _activefriendlyName;
+  String get activeFriendlyName => _activeFriendlyName;
 
   @override
   String uri() => _defaultUri;
@@ -93,7 +94,7 @@ class CityInformation {
   String state = '???';
 }
 
-/// openewathermap APIs
+/// OpenWeatherMap APIs
 ///
 ///   Docs on Restful APIs https://openweathermap.org/current#data
 ///

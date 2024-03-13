@@ -71,7 +71,7 @@ class LocalFileSystem {
     if (!fileName.endsWith('.json')) return null;
 
     final content = file.readAsStringSync();
-    final json = jsonDecode(content);
+    final json = jsonDecode(content) as Map;
     json['lastModifiedTime'] = file.lastModifiedSync().toString();
     return jsonEncode(json);
   }

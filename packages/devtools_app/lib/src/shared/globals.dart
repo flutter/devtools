@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/utils.dart';
+import 'package:flutter/foundation.dart';
 
 import '../extensions/extension_service.dart';
 import '../screens/debugger/breakpoint_manager.dart';
@@ -38,6 +40,8 @@ Storage get storage => globals[Storage] as Storage;
 
 SurveyService get surveyService => globals[SurveyService] as SurveyService;
 
+DTDManager get dtdManager => globals[DTDManager] as DTDManager;
+
 PreferencesController get preferences =>
     globals[PreferencesController] as PreferencesController;
 
@@ -66,4 +70,20 @@ bool get integrationTestMode => _integrationTestMode;
 bool _integrationTestMode = false;
 void setIntegrationTestMode() {
   _integrationTestMode = true;
+}
+
+/// Whether DevTools is being run in a test environment.
+bool get testMode => _testMode;
+bool _testMode = false;
+void setTestMode() {
+  _testMode = true;
+}
+
+/// Whether DevTools is being run as a stager app.
+bool get stagerMode => _stagerMode;
+bool _stagerMode = false;
+void setStagerMode() {
+  if (!kReleaseMode) {
+    _stagerMode = true;
+  }
 }

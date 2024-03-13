@@ -11,7 +11,7 @@ import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-import '../../test_infra/test_data/performance.dart';
+import '../../test_infra/test_data/performance/sample_performance_data.dart';
 
 // TODO(kenz): add better test coverage for [FlutterFramesController].
 void main() {
@@ -66,15 +66,6 @@ void main() {
     });
 
     test('can toggle frame selection', () {
-      final frame0 = testFrame0.shallowCopy()
-        ..setEventFlow(goldenUiTimelineEvent)
-        ..setEventFlow(goldenRasterTimelineEvent);
-      final frame1UiEvent = goldenUiTimelineEvent.deepCopy();
-      final frame1RasterEvent = goldenRasterTimelineEvent.deepCopy();
-      final frame1 = testFrame1.shallowCopy()
-        ..setEventFlow(frame1UiEvent)
-        ..setEventFlow(frame1RasterEvent);
-
       bool timelineControllerHandlerCalled = false;
       when(
         // ignore: discarded_futures, by design
@@ -88,27 +79,27 @@ void main() {
 
       // Select a frame.
       expect(framesController.selectedFrame.value, isNull);
-      framesController.handleSelectedFrame(frame0);
+      framesController.handleSelectedFrame(FlutterFrame2.frame);
       expect(
         framesController.selectedFrame.value,
-        equals(frame0),
+        equals(FlutterFrame2.frame),
       );
       // Verify the other feature controller handlers are called when a
       // frame is selected.
       expect(timelineControllerHandlerCalled, isTrue);
 
       // Unselect this frame.
-      framesController.handleSelectedFrame(frame0);
+      framesController.handleSelectedFrame(FlutterFrame2.frame);
       expect(
         framesController.selectedFrame.value,
         isNull,
       );
 
       // Select a different frame.
-      framesController.handleSelectedFrame(frame1);
+      framesController.handleSelectedFrame(FlutterFrame4.frame);
       expect(
         framesController.selectedFrame.value,
-        equals(frame1),
+        equals(FlutterFrame4.frame),
       );
     });
 
@@ -123,7 +114,7 @@ void main() {
 
       // TODO(kenz): add some timeline events for these frames to the offline
       // data and verify we correctly assign the events to their frames.
-      final offlineData = PerformanceData(
+      final offlineData = OfflinePerformanceData(
         frames: [testFrame0, testFrame1],
         selectedFrame: testFrame0,
         displayRefreshRate: 120.0,

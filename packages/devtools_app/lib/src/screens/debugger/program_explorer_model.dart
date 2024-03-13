@@ -330,7 +330,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
         final node = _createChild(function.name, function);
         _buildCodeNodes(function, node);
       }
-      for (final field in object.fields ?? []) {
+      for (final field in object.fields ?? <FieldRef>[]) {
         _createChild(field.name, field);
       }
       _sortEntriesByType();

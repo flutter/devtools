@@ -23,7 +23,7 @@ import 'simple_items.dart';
 
 final _log = Logger('utils');
 
-bool collectionEquals(e1, e2, {bool ordered = true}) {
+bool collectionEquals(Object? e1, Object? e2, {bool ordered = true}) {
   if (ordered) {
     return const DeepCollectionEquality().equals(e1, e2);
   }
@@ -1061,9 +1061,21 @@ extension StringExtension on String {
     return true;
   }
 
-  /// Whether [other] is a case insensitive match for this String
-  bool caseInsensitiveEquals(String? other) {
-    return toLowerCase() == other?.toLowerCase();
+  /// Whether [other] is a case insensitive match for this String.
+  ///
+  /// If [pattern] is a [RegExp], this method will return true if and only if
+  /// this String is a complete [RegExp] match, meaning that the regular
+  /// expression finds a match with starting index 0 and ending index
+  /// [this.length].
+  bool caseInsensitiveEquals(Pattern? pattern) {
+    if (pattern is RegExp) {
+      assert(!pattern.isCaseSensitive);
+      final completeMatch = pattern
+          .allMatches(this)
+          .firstWhereOrNull((match) => match.start == 0 && match.end == length);
+      return completeMatch != null;
+    }
+    return toLowerCase() == pattern.toString().toLowerCase();
   }
 
   /// Find all case insensitive matches of query in this String
@@ -1112,6 +1124,16 @@ extension ListExtension<T> on List<T> {
   T get second => this[1];
 
   T get third => this[2];
+
+  List<int> allIndicesWhere(bool Function(T element) test) {
+    final indices = <int>[];
+    for (var i = 0; i < length; i++) {
+      if (test(this[i])) {
+        indices.add(i);
+      }
+    }
+    return indices;
+  }
 }
 
 extension SetExtension<T> on Set<T> {
@@ -1145,56 +1167,13 @@ String simplifyDevToolsUrl(String url) {
   // http://localhost:123/#/page-id?key=value
   // Since we just want the query params, we will modify the url to have an
   // easy-to-parse form.
-  return url.replaceFirst(RegExp(r'#\/(\w*)[?]'), '?');
+  return url.replaceFirst(RegExp(r'#\/([\w\-]*)[?]'), '?');
 }
 
 Map<String, String> devToolsQueryParams(String url) {
   final modifiedUrl = simplifyDevToolsUrl(url);
   final uri = Uri.parse(modifiedUrl);
   return uri.queryParameters;
-}
-
-/// Gets a VM Service URI from a query string.
-///
-/// We read from the 'uri' value if it exists; otherwise we create a uri from
-/// the from 'port' and 'token' values.
-Uri? getServiceUriFromQueryString(String? location) {
-  if (location == null) {
-    return null;
-  }
-
-  final queryParams = Uri.parse(location).queryParameters;
-
-  // First try to use uri.
-  if (queryParams['uri'] != null) {
-    final uri = Uri.tryParse(queryParams['uri']!);
-
-    // Lots of things are considered valid URIs (including empty strings
-    // and single letters) since they can be relative, so we need to do some
-    // extra checks.
-    if (uri != null &&
-        uri.isAbsolute &&
-        (uri.isScheme('ws') ||
-            uri.isScheme('wss') ||
-            uri.isScheme('http') ||
-            uri.isScheme('https') ||
-            uri.isScheme('sse') ||
-            uri.isScheme('sses'))) {
-      return uri;
-    }
-  }
-
-  // Otherwise try 'port', 'token', and 'host'.
-  final port = int.tryParse(queryParams['port'] ?? '');
-  final token = queryParams['token'];
-  final host = queryParams['host'] ?? 'localhost';
-  if (port != null) {
-    return token == null
-        ? Uri.parse('ws://$host:$port/ws')
-        : Uri.parse('ws://$host:$port/$token/ws');
-  }
-
-  return null;
 }
 
 double safePositiveDouble(double value) {
@@ -1286,4 +1265,24 @@ Map<K, R> subtractMaps<K, F, S, R>({
     if (diff != null) result[key] = diff;
   }
   return result;
+}
+
+/// Returns the url (as a string) where the DevTools assets are served.
+///
+/// For Flutter apps and when DevTools is served via the `dart devtools`
+/// command, this url should be equivalent to [html.window.location.origin].
+/// However, when DevTools is served directly from DDS via the --observe flag,
+/// the authentication token and 'devtools/' path part are also required.
+///
+/// Examples:
+/// * 'http://127.0.0.1:61962/mb9Sw4gCYvU=/devtools/performance'
+///     ==> 'http://127.0.0.1:61962/mb9Sw4gCYvU=/devtools'
+/// * 'http://127.0.0.1:61962/performance' ==> 'http://127.0.0.1:61962'
+String devtoolsAssetsBasePath({required String origin, required String path}) {
+  const separator = '/';
+  final pathParts = path.split(separator);
+  // The last path part is the DevTools page (e.g. 'performance' or 'snapshot'),
+  // which is not part of the hosted asset path.
+  pathParts.removeLast();
+  return '$origin${pathParts.join(separator)}';
 }

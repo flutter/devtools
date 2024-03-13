@@ -41,39 +41,47 @@ void main() {
       expect(associations.length, 4);
 
       // 'id': 1
-      expect(associations[0].key.kind, InstanceKind.kString);
-      expect(associations[0].key.valueAsString, 'id');
-      ensureIsInCache(associations[0].key);
-      expect(associations[0].value.kind, InstanceKind.kInt);
-      expect(associations[0].value.valueAsString, '1');
-      ensureIsInCache(associations[0].value);
+      final idKey = associations[0].key as Instance;
+      expect(idKey.kind, InstanceKind.kString);
+      expect(idKey.valueAsString, 'id');
+      ensureIsInCache(idKey);
+      final idValue = associations[0].value as Instance;
+      expect(idValue.kind, InstanceKind.kInt);
+      expect(idValue.valueAsString, '1');
+      ensureIsInCache(idValue);
 
       // 'map': { ... }
-      expect(associations[1].key.kind, InstanceKind.kString);
-      expect(associations[1].key.valueAsString, 'map');
-      ensureIsInCache(associations[1].key);
-      expect(associations[1].value.kind, InstanceKind.kMap);
-      ensureIsInCache(associations[1].value);
+      final mapKey = associations[1].key as Instance;
+      expect(mapKey.kind, InstanceKind.kString);
+      expect(mapKey.valueAsString, 'map');
+      ensureIsInCache(mapKey);
+      final mapValue = associations[1].value as Instance;
+      expect(mapValue.kind, InstanceKind.kMap);
+      ensureIsInCache(mapValue);
       {
-        final contents = associations[1].value.associations!;
-        expect(contents.length, 1);
-        expect(contents[0].key.kind, InstanceKind.kString);
-        expect(contents[0].key.valueAsString, 'foo');
-        ensureIsInCache(contents[0].key);
-        expect(contents[0].value.kind, InstanceKind.kString);
-        expect(contents[0].value.valueAsString, 'bar');
-        ensureIsInCache(contents[0].value);
+        final contents = mapValue.associations!;
+        expect(contents, hasLength(1));
+        final foo = contents[0].key as Instance;
+        expect(foo.kind, InstanceKind.kString);
+        expect(foo.valueAsString, 'foo');
+        ensureIsInCache(foo);
+        final bar = contents[0].value as Instance;
+        expect(bar.kind, InstanceKind.kString);
+        expect(bar.valueAsString, 'bar');
+        ensureIsInCache(bar);
       }
 
       // 'list': [ ... ]
-      expect(associations[2].key.kind, InstanceKind.kString);
-      expect(associations[2].key.valueAsString, 'list');
-      ensureIsInCache(associations[2].key);
-      expect(associations[2].value.kind, InstanceKind.kList);
-      ensureIsInCache(associations[2].value);
+      final listKey = associations[2].key as Instance;
+      expect(listKey.kind, InstanceKind.kString);
+      expect(listKey.valueAsString, 'list');
+      ensureIsInCache(listKey);
+      final listValue = associations[2].value as Instance;
+      expect(listValue.kind, InstanceKind.kList);
+      ensureIsInCache(listValue);
       {
-        final contents = associations[2].value.elements!;
-        expect(contents.length, 4);
+        final contents = listValue.elements!.cast<Instance>();
+        expect(contents, hasLength(4));
         expect(contents[0].kind, InstanceKind.kInt);
         expect(contents[0].valueAsString, '1');
         ensureIsInCache(contents[0]);
@@ -102,21 +110,29 @@ void main() {
       final cache = JsonToServiceCache();
       final root = cache.insertJsonObject(data);
 
-      final list = root.associations![0].value;
+      final list = root.associations![0].value as Instance;
       expect(list.kind, InstanceKind.kList);
       final sublist = cache.getObject(objectId: list.id!, offset: 2, count: 5)!;
       expect(sublist.count, 5);
       for (int i = 0; i < sublist.count!; ++i) {
-        expect(sublist.elements![i].valueAsString, (i + 2).toString());
+        final element = sublist.elements![i] as Instance;
+        expect(element.valueAsString, (i + 2).toString());
       }
 
-      final map = root.associations![1].value;
+      final map = root.associations![1].value as Instance;
       expect(map.kind, InstanceKind.kMap);
       final submap = cache.getObject(objectId: map.id!, offset: 2, count: 5)!;
       expect(submap.count, 5);
       for (int i = 0; i < submap.count!; ++i) {
-        expect(submap.associations![i].key.valueAsString, (i + 2).toString());
-        expect(submap.associations![i].value.valueAsString, (i + 2).toString());
+        final association = submap.associations![i];
+        expect(
+          (association.key as Instance).valueAsString,
+          (i + 2).toString(),
+        );
+        expect(
+          (association.value as Instance).valueAsString,
+          (i + 2).toString(),
+        );
       }
     });
   });

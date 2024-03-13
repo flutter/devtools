@@ -11,13 +11,16 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  dart_foo:
+    path: ../packages_with_extensions/dart_foo/packages/dart_foo
   foo:
-    path: ../foo/packages/foo
+    path: ../packages_with_extensions/foo/packages/foo
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.3
+  test: ^1.25.2
 
 flutter:
   uses-material-design: true

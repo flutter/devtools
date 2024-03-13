@@ -11,7 +11,18 @@ import 'package:io/io.dart';
 import '../model.dart';
 import '../utils.dart';
 
+const _fatalInfosArg = 'fatal-infos';
+
 class AnalyzeCommand extends Command {
+  AnalyzeCommand() {
+    argParser.addFlag(
+      'fatal-infos',
+      help: 'Sets the "fatal-infos" flag for the dart analyze command',
+      defaultsTo: true,
+      negatable: true,
+    );
+  }
+
   @override
   String get name => 'analyze';
 
@@ -20,11 +31,11 @@ class AnalyzeCommand extends Command {
 
   @override
   Future run() async {
-    final sdk = FlutterSdk.current;
     final log = Logger.standard();
     final repo = DevToolsRepo.getInstance();
     final processManager = ProcessManager();
     final packages = repo.getPackages();
+    final fatalInfos = argResults![_fatalInfosArg] as bool;
 
     log.stdout('Running flutter analyze...');
 
@@ -38,9 +49,8 @@ class AnalyzeCommand extends Command {
       final progress = log.progress('  ${p.relativePath}');
 
       final process = await processManager.runProcess(
-        CliCommand.from(
-          sdk.dartToolPath,
-          ['analyze', '--fatal-infos'],
+        CliCommand.dart(
+          ['analyze', if (fatalInfos) '--fatal-infos'],
           // Run all so we can see the full set of results instead of stopping
           // on the first error.
           throwOnException: false,

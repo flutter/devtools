@@ -1,14 +1,16 @@
 include: package:flutter_lints/flutter.yaml
 
 analyzer:
-  #language:
-    #strict-inference: true # 34 issues
-    #strict-raw-types: true # 103 issues
+  language:
+    # strict-casts: true # Over 300 issues; mostly parsing JSON
+    # Enabling strict-inference requires adding type annotations to a bunch of
+    # silly locations; namely `Future.delayed`. Does not seem pragmatic right
+    # now.
+    # strict-inference: true # 34 issues
+    # strict-raw-types: true # Over 100 issues.
   errors:
     # treat missing required parameters as a warning (not a hint)
     missing_required_param: warning
-    # treat missing returns as a warning (not a hint)
-    missing_return: warning
   exclude:
     - build/**
     - '**.freezed.dart'
@@ -36,6 +38,7 @@ linter:
     - avoid_classes_with_only_static_members
     # - avoid_double_and_int_checks # only useful when targeting JS runtime
     - avoid_empty_else
+    - avoid_dynamic_calls
     - avoid_field_initializers_in_const_classes
     - avoid_function_literals_in_foreach_calls
     - avoid_init_to_null
@@ -220,12 +223,11 @@ dart_code_metrics:
     #    allowed-duplicated-chains: 2
     # - prefer-static-class
     - prefer-trailing-comma
-    - tag-name
     - always-remove-listener
     # - avoid-border-all Micro-optimization to avoid a const constructor.
     # - avoid-returning-widgets  This one is nice but has a lot of false positives.
     - avoid-shrink-wrap-in-lists
-    - avoid-unnecessary-setstate
+    # - avoid-unnecessary-setstate It is unclear why to "Avoid calling sync methods that call 'setState'."
     - avoid-expanded-as-spacer
     - avoid-wrapping-in-padding
     - check-for-equals-in-render-object-setters

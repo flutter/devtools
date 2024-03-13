@@ -39,7 +39,7 @@ class UpdateDartSdkDepsCommand extends Command {
 
   @override
   Future run() async {
-    final commit = argResults![_argCommit];
+    final commit = argResults![_argCommit] as String;
     final dartSdkLocation = localDartSdkLocation();
     final processManager = ProcessManager();
 
@@ -50,10 +50,10 @@ class UpdateDartSdkDepsCommand extends Command {
       additionalErrorMessage: DartSdkHelper.commandDebugMessage,
       commands: [
         CliCommand.git(
-          cmd: 'branch -D devtools-$commit',
+          ['branch', '-D', 'devtools-$commit'],
           throwOnException: false,
         ),
-        CliCommand.git(cmd: 'new-branch devtools-$commit'),
+        CliCommand.git(['new-branch', 'devtools-$commit']),
       ],
     );
 
@@ -65,16 +65,15 @@ class UpdateDartSdkDepsCommand extends Command {
       workingDirectory: dartSdkLocation,
       additionalErrorMessage: DartSdkHelper.commandDebugMessage,
       commands: [
-        CliCommand.git(cmd: 'add .'),
-        CliCommand.from(
-          'git',
+        CliCommand.git(['add', 'DEPS']),
+        CliCommand.git(
           [
             'commit',
             '-m',
             'Update DevTools rev to $commit',
           ],
         ),
-        CliCommand.git(cmd: 'cl upload -s -f'),
+        CliCommand.git(['cl', 'upload', '-s', '-f']),
       ],
     );
   }

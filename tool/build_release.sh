@@ -62,6 +62,7 @@ flutter pub get
 flutter build web \
   --web-renderer canvaskit \
   --pwa-strategy=offline-first \
+  --dart2js-optimization=O1 \
   --release \
   --no-tree-shake-icons
 

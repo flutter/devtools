@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:collection/collection.dart';
 import 'package:devtools_shared/devtools_deeplink.dart';
 import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:devtools_shared/devtools_shared.dart';
@@ -22,8 +21,9 @@ part '_deep_links_api.dart';
 part '_extensions_api.dart';
 part '_release_notes_api.dart';
 part '_survey_api.dart';
+part '_dtd_api.dart';
 
-final _log = Logger('_server_web');
+final _log = Logger('devtools_server_client');
 
 // The DevTools server is only available in release mode right now.
 // TODO(kenz): design a way to run the DevTools server and DevTools app together
@@ -37,6 +37,7 @@ Future<Response?> request(String url) async {
   Response? response;
 
   try {
+    _log.fine('requesting $url');
     response = await post(Uri.parse(url));
   } catch (_) {}
 
@@ -74,11 +75,31 @@ Future<DevToolsJsonFile?> requestFile({
   return null;
 }
 
+Future<void> notifyForVmServiceConnection({
+  required String vmServiceUri,
+  required bool connected,
+}) async {
+  if (isDevToolsServerAvailable) {
+    final uri = Uri(
+      path: apiNotifyForVmServiceConnection,
+      queryParameters: {
+        apiParameterValueKey: vmServiceUri,
+        apiParameterVmServiceConnected: connected.toString(),
+      },
+    );
+    final resp = await request(uri.toString());
+    final statusOk = resp?.statusOk ?? false;
+    if (!statusOk) {
+      logWarning(resp, apiNotifyForVmServiceConnection);
+    }
+  }
+}
+
 DevToolsJsonFile _devToolsJsonFileFromResponse(
   Response resp,
   String filePath,
 ) {
-  final data = json.decode(resp.body);
+  final data = json.decode(resp.body) as Map;
   final lastModified = data['lastModifiedTime'];
   final lastModifiedTime =
       lastModified != null ? DateTime.parse(lastModified) : DateTime.now();
@@ -89,7 +110,8 @@ DevToolsJsonFile _devToolsJsonFileFromResponse(
   );
 }
 
-void logWarning(Response? response, String apiType, [String? respText]) {
+void logWarning(Response? response, String apiType) {
+  final respText = response?.body;
   _log.warning(
     'HttpRequest $apiType failed status = ${response?.statusCode}'
     '${respText != null ? ', responseText = $respText' : ''}',
@@ -98,4 +120,6 @@ void logWarning(Response? response, String apiType, [String? respText]) {
 
 extension ResponseExtension on Response {
   bool get statusOk => statusCode == 200;
+  bool get statusForbidden => statusCode == 403;
+  bool get statusError => statusCode == 500;
 }

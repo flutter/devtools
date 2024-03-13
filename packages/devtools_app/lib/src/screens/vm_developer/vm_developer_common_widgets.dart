@@ -16,7 +16,6 @@ import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
-import '../../shared/table/table.dart';
 import '../../shared/tree.dart';
 import '../debugger/codeview.dart';
 import '../debugger/codeview_controller.dart';
@@ -68,7 +67,7 @@ class VMInfoCard extends StatelessWidget implements PreferredSizeWidget {
       return Size.infinite;
     }
     return Size.fromHeight(
-      areaPaneHeaderHeight +
+      defaultHeaderHeight +
           (rowKeyValues?.length ?? 0) * defaultRowHeight +
           defaultSpacing,
     );
@@ -478,7 +477,7 @@ class _RetainingObjectDescription extends StatelessWidget {
   });
 
   final RetainingObject object;
-  final Function(ObjRef? obj) onTap;
+  final void Function(ObjRef? obj) onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -650,7 +649,7 @@ class InboundReferenceWidget extends StatelessWidget {
       ),
     );
     return DefaultTextStyle(
-      style: theme.fixedFontStyle,
+      style: theme.regularTextStyle,
       child: Row(
         children: rowContent,
       ),
@@ -738,9 +737,9 @@ class VmServiceObjectLink extends StatelessWidget {
 
     final TextStyle style;
     if (isServiceObject) {
-      style = theme.fixedFontLinkStyle;
+      style = theme.linkTextStyle;
     } else {
-      style = theme.fixedFontStyle;
+      style = theme.regularTextStyle;
     }
     return TextSpan(
       text: text,
@@ -759,14 +758,9 @@ class VmServiceObjectLink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return RichText(
       maxLines: 1,
       text: TextSpan(
-        style: theme.linkTextStyle.apply(
-          fontFamily: theme.fixedFontStyle.fontFamily,
-          overflow: TextOverflow.ellipsis,
-        ),
         children: [buildTextSpan(context)],
       ),
     );
@@ -1028,7 +1022,7 @@ class _ObjectInspectorCodeViewState extends State<ObjectInspectorCodeView> {
           }
         }
 
-        return Split(
+        return SplitPane(
           axis: Axis.vertical,
           initialFractions: const [0.5, 0.5],
           children: [

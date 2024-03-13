@@ -77,7 +77,7 @@ class _StoreAllAsVariableMenu extends StatelessWidget {
     }
 
     MenuItemButton item(
-      title, {
+      String title, {
       required bool subclasses,
       required bool implementers,
     }) =>
@@ -127,15 +127,11 @@ class _StoreAsOneVariableMenu extends StatelessWidget {
       menuChildren: <Widget>[
         MenuItemButton(
           onPressed: sampler.oneStaticToConsole,
-          child: const Text(
-            'Any',
-          ),
+          child: const Text('Any'),
         ),
         MenuItemButton(
           onPressed: liveItemsEnabled ? sampler.oneLiveStaticToConsole : null,
-          child: const Text(
-            'Any, not garbage collected',
-          ),
+          child: const Text('Any, not garbage collected'),
         ),
       ],
       child: const Text(menuText),

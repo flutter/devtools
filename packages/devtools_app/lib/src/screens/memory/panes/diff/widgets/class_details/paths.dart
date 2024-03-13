@@ -39,7 +39,7 @@ class _InstanceColumn extends ColumnData<StatsByPathEntry> {
           isDiff ? 'Instance\nDelta' : 'Instances',
           titleTooltip: 'Number of instances of the class\n'
               'retained by the path.',
-          fixedWidthPx: scaleByFontFactor(85.0),
+          fixedWidthPx: scaleByFontFactor(80.0),
           alignment: ColumnAlignment.right,
         );
 
@@ -55,7 +55,7 @@ class _ShallowSizeColumn extends ColumnData<StatsByPathEntry> {
       : super(
           isDiff ? 'Shallow\nSize Delta' : 'Shallow\nDart Size',
           titleTooltip: SizeType.shallow.description,
-          fixedWidthPx: scaleByFontFactor(85.0),
+          fixedWidthPx: scaleByFontFactor(80.0),
           alignment: ColumnAlignment.right,
         );
 
@@ -78,7 +78,7 @@ class _RetainedSizeColumn extends ColumnData<StatsByPathEntry> {
       : super(
           isDiff ? 'Retained\nSize Delta' : 'Retained\nDart Size',
           titleTooltip: SizeType.retained.description,
-          fixedWidthPx: scaleByFontFactor(85.0),
+          fixedWidthPx: scaleByFontFactor(80.0),
           alignment: ColumnAlignment.right,
         );
 

@@ -589,11 +589,11 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
       }
     } else if (event[eventName] == devToolsEvent &&
         event.containsKey(customEvent)) {
-      final custom = event[customEvent] as Map<dynamic, dynamic>;
-      final data = custom[customEventData];
+      final custom = event[customEvent] as Map<Object?, Object?>;
+      final data = custom[customEventData] as Map<Object?, Object?>;
       for (var key in data.keys) {
         output.write('$key=');
-        output.writeln(_longValueToShort(data[key]));
+        output.writeln(_longValueToShort(data[key] as String));
       }
     } else {
       output.writeln('Unknown Event ${event[eventName]}');

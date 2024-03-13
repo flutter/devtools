@@ -12,7 +12,7 @@ import 'dart:async';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:js/js.dart';
 import 'package:logging/logging.dart';
-import 'package:web/helpers.dart';
+import 'package:web/web.dart';
 
 import '../../../devtools.dart' as devtools show version;
 import '../globals.dart';
@@ -793,6 +793,19 @@ Future<bool> enableAnalytics() async {
 
 Future<bool> disableAnalytics() async {
   return await setAnalyticsEnabled(false);
+}
+
+/// Fetch the legal consent message for telemetry collection for
+/// package:unified_analyitcs from the server
+Future<String> fetchAnalyticsConsentMessage() async {
+  return await server.fetchAnalyticsConsentMessage();
+}
+
+/// Communicates with the server to confirm with package:unified_analyitcs
+/// that the consent message has successfully been shown and to allow events
+/// to be recorded if the user has decided to remain opted in.
+Future<void> markConsentMessageAsShown() async {
+  return await server.markConsentMessageAsShown();
 }
 
 /// Computes the DevTools application. Fills in the devtoolsPlatformType and

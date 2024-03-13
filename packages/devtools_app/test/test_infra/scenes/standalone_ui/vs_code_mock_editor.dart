@@ -13,7 +13,7 @@ import '../../../test_infra/test_data/dart_tooling_api/mock_api.dart';
 /// A simple UI that acts as a stand-in host IDE to simplify the development
 /// workflow when working on embedded tooling.
 ///
-/// This UI interacts with [MockDartToolingApi] to allow triggering events that
+/// This UI interacts with [FakeDartToolingApi] to allow triggering events that
 /// would normally be fired by the IDE and also shows a log of recent requests.
 class VsCodeFlutterPanelMockEditor extends StatefulWidget {
   const VsCodeFlutterPanelMockEditor({
@@ -23,7 +23,7 @@ class VsCodeFlutterPanelMockEditor extends StatefulWidget {
   });
 
   /// The mock API to interact with.
-  final MockDartToolingApi api;
+  final FakeDartToolingApi api;
 
   final Widget? child;
 
@@ -34,14 +34,14 @@ class VsCodeFlutterPanelMockEditor extends StatefulWidget {
 
 class _VsCodeFlutterPanelMockEditorState
     extends State<VsCodeFlutterPanelMockEditor> {
-  MockDartToolingApi get api => widget.api;
+  FakeDartToolingApi get api => widget.api;
 
   /// The number of communication messages to keep in the log.
   static const maxLogEvents = 20;
 
   /// The last [maxLogEvents] communication messages sent between the panel
   /// and the "host IDE".
-  final logRing = DoubleLinkedQueue();
+  final logRing = DoubleLinkedQueue<String>();
 
   /// A stream that emits each time the log is updated to allow the log widget
   /// to be rebuilt.
@@ -69,7 +69,7 @@ class _VsCodeFlutterPanelMockEditorState
   Widget build(BuildContext context) {
     final editorTheme = VsCodeTheme.of(context);
     final theme = Theme.of(context);
-    return Split(
+    return SplitPane(
       axis: Axis.horizontal,
       initialFractions: const [0.25, 0.75],
       minSizes: const [200, 200],
@@ -94,7 +94,7 @@ class _VsCodeFlutterPanelMockEditorState
             ),
           ],
         ),
-        Split(
+        SplitPane(
           axis: Axis.vertical,
           initialFractions: const [0.5, 0.5],
           minSizes: const [200, 200],
@@ -133,18 +133,39 @@ class _VsCodeFlutterPanelMockEditorState
                   Row(
                     children: [
                       ElevatedButton(
-                        onPressed: () => api.startSession('debug', 'myMac'),
+                        onPressed: () => api.startSession(
+                          debuggerType: 'Flutter',
+                          deviceId: 'macos',
+                          flutterMode: 'debug',
+                        ),
                         child: const Text('Desktop debug'),
                       ),
                       const SizedBox(width: denseSpacing),
                       ElevatedButton(
-                        onPressed: () => api.startSession('debug', 'chrome'),
-                        child: const Text('Web debug'),
+                        onPressed: () => api.startSession(
+                          debuggerType: 'Flutter',
+                          deviceId: 'macos',
+                          flutterMode: 'profile',
+                        ),
+                        child: const Text('Desktop profile'),
                       ),
                       const SizedBox(width: denseSpacing),
                       ElevatedButton(
-                        onPressed: () => api.startSession('profile', 'myMac'),
-                        child: const Text('Desktop profile'),
+                        onPressed: () => api.startSession(
+                          debuggerType: 'Flutter',
+                          deviceId: 'macos',
+                          flutterMode: 'release',
+                        ),
+                        child: const Text('Desktop release'),
+                      ),
+                      const SizedBox(width: denseSpacing),
+                      ElevatedButton(
+                        onPressed: () => api.startSession(
+                          debuggerType: 'Flutter',
+                          deviceId: 'macos',
+                          flutterMode: 'jit_release',
+                        ),
+                        child: const Text('Desktop jit_release'),
                       ),
                     ],
                   ),
@@ -152,26 +173,54 @@ class _VsCodeFlutterPanelMockEditorState
                   Row(
                     children: [
                       ElevatedButton(
-                        onPressed: () => api.startSession('release', 'myMac'),
-                        child: const Text('Desktop release'),
-                      ),
-                      const SizedBox(width: denseSpacing),
-                      ElevatedButton(
-                        onPressed: () =>
-                            api.startSession('jit_release', 'myMac'),
-                        child: const Text('Desktop jit_release'),
-                      ),
-                      const SizedBox(width: denseSpacing),
-                      ElevatedButton(
-                        onPressed: () => api.endSessions(),
-                        style: theme.elevatedButtonTheme.style!.copyWith(
-                          backgroundColor: const MaterialStatePropertyAll(
-                            Colors.red,
-                          ),
+                        onPressed: () => api.startSession(
+                          debuggerType: 'Flutter',
+                          deviceId: 'chrome',
+                          flutterMode: 'debug',
                         ),
-                        child: const Text('Stop All'),
+                        child: const Text('Web debug'),
+                      ),
+                      const SizedBox(width: denseSpacing),
+                      ElevatedButton(
+                        onPressed: () => api.startSession(
+                          debuggerType: 'Flutter',
+                          deviceId: 'chrome',
+                          flutterMode: 'profile',
+                        ),
+                        child: const Text('Web profile'),
+                      ),
+                      const SizedBox(width: denseSpacing),
+                      ElevatedButton(
+                        onPressed: () => api.startSession(
+                          debuggerType: 'Flutter',
+                          deviceId: 'chrome',
+                          flutterMode: 'release',
+                        ),
+                        child: const Text('Web release'),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: denseSpacing),
+                  Row(
+                    children: [
+                      ElevatedButton(
+                        onPressed: () => api.startSession(
+                          debuggerType: 'Dart',
+                          deviceId: 'macos',
+                        ),
+                        child: const Text('Dart CLI'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: denseSpacing),
+                  ElevatedButton(
+                    onPressed: () => api.endSessions(),
+                    style: theme.elevatedButtonTheme.style!.copyWith(
+                      backgroundColor: const MaterialStatePropertyAll(
+                        Colors.red,
+                      ),
+                    ),
+                    child: const Text('Stop All'),
                   ),
                 ],
               ),

@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: constant_identifier_names
+
 /// ansi_up is an library that parses text containing ANSI color escape
 /// codes.
+library;
 
 class AnsiUp {
   AnsiUp()
@@ -372,7 +375,7 @@ class StyledText {
     this.url = '',
   });
 
-  factory StyledText.from(_TextWithAttr fragment) {
+  factory StyledText._from(_TextWithAttr fragment) {
     return StyledText(
       fragment.text,
       fgColor: fragment.fg?.rgb?.toList(),
@@ -420,11 +423,10 @@ class StyledText {
           (decoration == null) ? 'line-through' : '$decoration line-through';
     }
 
-    final _bgColor = bgColor;
-    final _fgColor = fgColor;
     return <String>[
-      if (_bgColor != null) 'background-color: ${_colorToCss(_bgColor)}',
-      if (_fgColor != null) 'color: ${_colorToCss(_fgColor)}',
+      if (bgColor case final bgColor?)
+        'background-color: ${_colorToCss(bgColor)}',
+      if (fgColor case final fgColor?) 'color: ${_colorToCss(fgColor)}',
       if (bold) 'font-weight: bold',
       if (italic) 'font-style: italic',
       if (decoration != null) 'text-decoration: $decoration',
@@ -455,7 +457,7 @@ Iterable<StyledText> decodeAnsiColorEscapeCodes(
     }
 
     if (packet.kind == PacketKind.Text) {
-      yield StyledText.from(ansiUp._withState(packet));
+      yield StyledText._from(ansiUp._withState(packet));
     } else if (packet.kind == PacketKind.SGR) {
       ansiUp._processAnsi(packet);
     } else if (packet.kind == PacketKind.OSCURL) {

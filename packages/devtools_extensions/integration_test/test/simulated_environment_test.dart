@@ -50,6 +50,8 @@ void main() {
     await _testShowNotification(tester, simController);
     logStatus('test showing a banner message from the extension');
     await _testShowBannerMessage(tester, simController);
+    logStatus('test collapsing environment panel');
+    await _testCollapseEnvironmentPanel(tester, simController);
 
     // NOTE: the force reload functionality cannot be tested because it will
     // make this test run in an infinite loop (it refreshes the whole window
@@ -189,6 +191,65 @@ Future<void> _testShowBannerMessage(
   expect(find.byType(LogListItem), findsNWidgets(1));
   expect(simController.messageLogs.value[0].source.name, 'extension');
   expect(simController.messageLogs.value[0].data!['type'], 'showBannerMessage');
+  await _clearLogs(tester, simController);
+}
+
+Future<void> _testCollapseEnvironmentPanel(
+  WidgetTester tester,
+  SimulatedDevToolsController simController,
+) async {
+  final split = tester.widget<SplitPane>(find.byType(SplitPane));
+
+  final divider = find.byKey(split.dividerKey(0));
+  final environmentPanel = split.children[1];
+
+  final environmentPanelSizedBox = find.descendant(
+    of: find.byWidget(environmentPanel),
+    matching: find.byType(SizedBox),
+  );
+
+  final double environmentPanelSizedBoxWidth =
+      tester.firstWidget<SizedBox>(environmentPanelSizedBox).width!;
+
+  // Check that the [environmentPanelSizedBoxWidth] is the expected width.
+  expect(
+    environmentPanelSizedBoxWidth,
+    VmServiceConnectionDisplay.totalControlsWidth + 2 * defaultSpacing,
+  );
+
+  // Drag the divider to the right by [environmentPanelSizedBoxWidth].
+  await tester.drag(
+    divider,
+    Offset(
+      environmentPanelSizedBoxWidth,
+      0,
+    ),
+  );
+  await tester.pumpAndSettle();
+
+  final Rect simulatedDevToolsWrapperRect =
+      tester.getRect(find.byType(SimulatedDevToolsWrapper));
+  final Rect environmentPanelRect =
+      tester.getRect(find.byWidget(environmentPanel));
+
+  // Verify that the environment panel is off screen to the right of the
+  // simulated devtools wrapper.
+  expect(
+    simulatedDevToolsWrapperRect.right,
+    lessThanOrEqualTo(environmentPanelRect.left.ceil()),
+  );
+
+  // Drag the divider to the left by [environmentPanelSizedBoxWidth].
+  //
+  // This is to bring the 'Clear logs' button into view so it can be tapped.
+  await tester.drag(
+    divider,
+    Offset(
+      -environmentPanelSizedBoxWidth,
+      0,
+    ),
+  );
+  await tester.pumpAndSettle();
   await _clearLogs(tester, simController);
 }
 

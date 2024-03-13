@@ -4,6 +4,7 @@
 
 import 'package:collection/collection.dart';
 import 'package:devtools_app/src/shared/primitives/utils.dart';
+import 'package:devtools_app/src/shared/screen.dart';
 import 'package:devtools_app/src/shared/utils.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -660,41 +661,23 @@ void main() {
         }),
       );
       expect(
-        devToolsQueryParams('http://localhost:123/#/?key=value.json&key2=123'),
+        devToolsQueryParams('http://localhost:123/?key=value.json&key2=123'),
         equals({
           'key': 'value.json',
           'key2': '123',
         }),
       );
-      expect(
-        devToolsQueryParams(
-          'http://localhost:9101/#/appsize?key=value.json&key2=123',
-        ),
-        equals({
-          'key': 'value.json',
-          'key2': '123',
-        }),
-      );
-    });
-
-    test('getServiceUriFromQueryString', () {
-      expect(
-        getServiceUriFromQueryString(
-          'http://localhost:123/?uri=http://localhost:456',
-        ).toString(),
-        equals('http://localhost:456'),
-      );
-      expect(
-        getServiceUriFromQueryString('http://localhost:123/?port=789')
-            .toString(),
-        equals('ws://localhost:789/ws'),
-      );
-      expect(
-        getServiceUriFromQueryString(
-          'http://localhost:123/?port=789&token=kjy78',
-        ).toString(),
-        equals('ws://localhost:789/kjy78/ws'),
-      );
+      for (final meta in ScreenMetaData.values) {
+        expect(
+          devToolsQueryParams(
+            'http://localhost:9101/${meta.id}?key=value.json&key2=123',
+          ),
+          equals({
+            'key': 'value.json',
+            'key2': '123',
+          }),
+        );
+      }
     });
 
     group('safeDivide', () {
@@ -1190,6 +1173,13 @@ void main() {
           isFalse,
         );
       });
+
+      test('allIndicesWhere', () {
+        final list = [1, 2, 1, 2, 3, 4];
+        expect(list.allIndicesWhere((element) => element.isEven), [1, 3, 5]);
+        expect(list.allIndicesWhere((element) => element.isOdd), [0, 2, 4]);
+        expect(list.allIndicesWhere((element) => element + 2 == 3), [0, 2]);
+      });
     });
 
     group('SetExtension', () {
@@ -1284,6 +1274,24 @@ void main() {
         expect(str.caseInsensitiveEquals(null), isFalse);
         expect(''.caseInsensitiveEquals(''), isTrue);
         expect(''.caseInsensitiveEquals(null), isFalse);
+
+        // Complete match.
+        expect(
+          str.caseInsensitiveEquals(RegExp('h.*o.*', caseSensitive: false)),
+          isTrue,
+        );
+        // Incomplete match.
+        expect(
+          str.caseInsensitiveEquals(RegExp('h.*o', caseSensitive: false)),
+          isFalse,
+        );
+        // No match.
+        expect(
+          str.caseInsensitiveEquals(
+            RegExp('hello.* this does not match', caseSensitive: false),
+          ),
+          isFalse,
+        );
       });
 
       test('caseInsensitiveAllMatches', () {
@@ -1381,7 +1389,10 @@ void main() {
           subtractor: elementSubtractor,
         );
 
-        expect(const SetEquality().equals(result.keys.toSet(), {1, 2}), true);
+        expect(
+          const SetEquality<int>().equals(result.keys.toSet(), {1, 2}),
+          true,
+        );
         expect(
           result[1],
           equals(_SubtractionResult(subtract: 'subtract', from: 1.0)),
@@ -1406,7 +1417,7 @@ void main() {
           subtractor: elementSubtractor,
         );
 
-        expect(const SetEquality().equals(result.keys.toSet(), {1}), true);
+        expect(const SetEquality<int>().equals(result.keys.toSet(), {1}), true);
         expect(
           result[1],
           equals(_SubtractionResult(subtract: null, from: 1.0)),
@@ -1427,7 +1438,7 @@ void main() {
           subtractor: elementSubtractor,
         );
 
-        expect(const SetEquality().equals(result.keys.toSet(), {1}), true);
+        expect(const SetEquality<int>().equals(result.keys.toSet(), {1}), true);
         expect(
           result[1],
           equals(_SubtractionResult(subtract: 'subtract', from: null)),
@@ -1438,7 +1449,7 @@ void main() {
 
   group('joinWithTrailing', () {
     test('joins no items', () {
-      expect([].joinWithTrailing(':'), equals(''));
+      expect(<String>[].joinWithTrailing(':'), equals(''));
     });
     test(' joins 1 item', () {
       expect(['A'].joinWithTrailing(':'), equals('A:'));
@@ -1446,6 +1457,27 @@ void main() {
     test(' joins multiple items', () {
       expect(['A', 'B', 'C'].joinWithTrailing(':'), equals('A:B:C:'));
     });
+  });
+
+  test('devtoolsAssetsBasePath', () {
+    // This is how a DevTools url will be structured when DevTools is served
+    // directly from DDS using the `--observe` flag.
+    expect(
+      devtoolsAssetsBasePath(
+        origin: 'http://127.0.0.1:61962',
+        path: '/mb9Sw4gCYvU=/devtools/performance',
+      ),
+      equals('http://127.0.0.1:61962/mb9Sw4gCYvU=/devtools'),
+    );
+    // This is how a DevTools url will be structured when served from DevTools
+    // server (e.g. from Flutter tools and from the `dart devtools` command).
+    expect(
+      devtoolsAssetsBasePath(
+        origin: 'http://127.0.0.1:61962',
+        path: '/performance',
+      ),
+      equals('http://127.0.0.1:61962'),
+    );
   });
 }
 

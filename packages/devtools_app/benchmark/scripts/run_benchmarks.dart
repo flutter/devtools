@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart';
+import 'package:web_benchmarks/analysis.dart';
 import 'package:web_benchmarks/server.dart';
 
 import '../test_infra/common.dart';
@@ -30,7 +31,12 @@ Future<void> main(List<String> args) async {
       await serveWebBenchmark(
         benchmarkAppDirectory: projectRootDirectory(),
         entryPoint: 'benchmark/test_infra/client.dart',
-        compilationOptions: CompilationOptions(useWasm: benchmarkArgs.useWasm),
+        compilationOptions: CompilationOptions(
+          useWasm: benchmarkArgs.useWasm,
+          renderer: benchmarkArgs.useSkwasm
+              ? WebRenderer.skwasm
+              : WebRenderer.canvaskit,
+        ),
         treeShakeIcons: false,
         initialPage: benchmarkInitialPage,
         headless: !benchmarkArgs.useBrowser,
@@ -46,7 +52,7 @@ Future<void> main(List<String> args) async {
     stdout.writeln(
       'Taking the average of ${benchmarkResults.length} benchmark runs.',
     );
-    taskResult = averageBenchmarkResults(benchmarkResults);
+    taskResult = computeAverage(benchmarkResults);
   }
 
   final resultsAsMap = taskResult.toJson();
@@ -99,6 +105,8 @@ class BenchmarkArgs {
 
   bool get useWasm => argResults[_wasmFlag];
 
+  bool get useSkwasm => argResults[_skwasmFlag];
+
   int get averageOf => int.parse(argResults[_averageOfOption]);
 
   String? get saveToFileLocation => argResults[_saveToFileOption];
@@ -108,6 +116,8 @@ class BenchmarkArgs {
   static const _browserFlag = 'browser';
 
   static const _wasmFlag = 'wasm';
+
+  static const _skwasmFlag = 'skwasm';
 
   static const _saveToFileOption = 'save-to-file';
 
@@ -127,6 +137,12 @@ class BenchmarkArgs {
         _wasmFlag,
         negatable: false,
         help: 'Runs the benchmark tests with dart2wasm',
+      )
+      ..addFlag(
+        _skwasmFlag,
+        negatable: false,
+        help:
+            'Runs the benchmark tests with the skwasm renderer instead of canvaskit.',
       )
       ..addOption(
         _saveToFileOption,
@@ -149,34 +165,4 @@ class BenchmarkArgs {
         valueHelp: '5',
       );
   }
-}
-
-// TODO(kenz): upstream the logic to average benchmarks into the
-// package:web_benchmarks
-
-/// Returns the average of the benchmark results in [results].
-///
-/// Each element in [results] is expected to have identical benchmark names and
-/// metrics; otherwise, an [Exception] will be thrown.
-BenchmarkResults averageBenchmarkResults(List<BenchmarkResults> results) {
-  if (results.isEmpty) {
-    throw Exception('Cannot take average of empty list.');
-  }
-
-  var totalSum = results.first;
-  for (int i = 1; i < results.length; i++) {
-    final current = results[i];
-    totalSum = totalSum.sumWith(current);
-  }
-
-  final average = totalSum.toJson();
-  for (final benchmark in totalSum.scores.keys) {
-    final scoresForBenchmark = totalSum.scores[benchmark]!;
-    for (int i = 0; i < scoresForBenchmark.length; i++) {
-      final score = scoresForBenchmark[i];
-      final averageValue = score.value / results.length;
-      average[benchmark]![i]['value'] = averageValue;
-    }
-  }
-  return BenchmarkResults.parse(average);
 }

@@ -45,7 +45,11 @@ class DevToolsAutomater {
     Future<void>.delayed(safePumpDuration, automateDevToolsGestures);
     return DevToolsApp(
       defaultScreens(sampleData: sampleData),
-      AnalyticsController(enabled: false, firstRun: false),
+      AnalyticsController(
+        enabled: false,
+        firstRun: false,
+        consentMessage: 'fake message',
+      ),
     );
   }
 
@@ -101,7 +105,7 @@ const Duration _animationCheckingInterval = Duration(milliseconds: 50);
 Future<void> animationStops() async {
   if (!WidgetsBinding.instance.hasScheduledFrame) return;
 
-  final Completer stopped = Completer<void>();
+  final stopped = Completer<void>();
 
   Timer.periodic(_animationCheckingInterval, (timer) {
     if (!WidgetsBinding.instance.hasScheduledFrame) {

@@ -11,6 +11,7 @@ import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
+import 'package:unified_analytics/src/constants.dart' as unified_analytics;
 
 const windowSize = Size(2000.0, 1000.0);
 
@@ -18,6 +19,7 @@ void main() {
   late AnalyticsController controller;
 
   late bool didCallEnableAnalytics;
+  late bool didMarkConsentMessageAsShown;
 
   Widget wrapWithAnalytics(
     Widget child, {
@@ -33,9 +35,18 @@ void main() {
     );
   }
 
+  test('Unit test parseAnalyticsConsentMessage with consent message', () {
+    final result =
+        parseAnalyticsConsentMessage(unified_analytics.kToolsMessage);
+
+    expect(result, isNotEmpty);
+    expect(result, hasLength(3));
+  });
+
   group('AnalyticsPrompt', () {
     setUp(() {
       didCallEnableAnalytics = false;
+      didMarkConsentMessageAsShown = false;
       setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
       setGlobal(IdeTheme, IdeTheme());
     });
@@ -49,15 +60,24 @@ void main() {
             onEnableAnalytics: () {
               didCallEnableAnalytics = true;
             },
+            consentMessage: 'fake message',
+            markConsentMessageAsShown: () {
+              didMarkConsentMessageAsShown = true;
+            },
           );
         });
 
         testWidgetsWithWindowSize(
-          'does not display prompt or call enable analytics',
+          'displays the prompt and calls enable analytics',
           windowSize,
           (WidgetTester tester) async {
             expect(controller.analyticsEnabled.value, isTrue);
-            expect(didCallEnableAnalytics, isFalse);
+            expect(
+              didCallEnableAnalytics,
+              isTrue,
+              reason: 'Analytics is enabled on first run',
+            );
+            expect(didMarkConsentMessageAsShown, isFalse);
             final prompt = wrapWithAnalytics(
               const AnalyticsPrompt(
                 child: Text('Child Text'),
@@ -67,10 +87,16 @@ void main() {
             await tester.pump();
             expect(
               find.text('Send usage statistics for DevTools?'),
-              findsNothing,
+              findsOne,
+              reason: 'The consent message should be shown on first run',
             );
             expect(controller.analyticsEnabled.value, isTrue);
-            expect(didCallEnableAnalytics, isFalse);
+            expect(
+              didMarkConsentMessageAsShown,
+              isTrue,
+              reason:
+                  'The consent message should be marked as shown after displaying',
+            );
           },
         );
 
@@ -91,6 +117,7 @@ void main() {
             onEnableAnalytics: () {
               didCallEnableAnalytics = true;
             },
+            consentMessage: 'fake message',
           );
         });
 
@@ -133,8 +160,11 @@ void main() {
             const AnalyticsPrompt(
               child: Text('Child Text'),
             ),
-            controllerToUse:
-                AnalyticsController(enabled: true, firstRun: false),
+            controllerToUse: AnalyticsController(
+              enabled: true,
+              firstRun: false,
+              consentMessage: 'fake message',
+            ),
           );
           await tester.pumpWidget(wrap(prompt));
           await tester.pump();
@@ -152,6 +182,7 @@ void main() {
             onEnableAnalytics: () {
               didCallEnableAnalytics = true;
             },
+            consentMessage: 'fake message',
           );
         });
 
@@ -290,6 +321,7 @@ void main() {
             onEnableAnalytics: () {
               didCallEnableAnalytics = true;
             },
+            consentMessage: 'fake message',
           );
         });
 
@@ -332,8 +364,11 @@ void main() {
             const AnalyticsPrompt(
               child: Text('Child Text'),
             ),
-            controllerToUse:
-                AnalyticsController(enabled: false, firstRun: false),
+            controllerToUse: AnalyticsController(
+              enabled: false,
+              firstRun: false,
+              consentMessage: 'fake message',
+            ),
           );
           await tester.pumpWidget(wrap(prompt));
           await tester.pump();

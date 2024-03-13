@@ -30,7 +30,7 @@ void main() {
   group(
     'Chart Timeseries',
     () {
-      late MemoryJson memoryJson;
+      late MemoryJson<HeapSample> memoryJson;
       bool memoryJasonInitialized = false;
 
       void loadData() {
@@ -217,8 +217,6 @@ void main() {
         expect(controller.canvasChartWidth, equals(2150.0));
 
         // Validate the Y axis before data added.
-        expect(controller.yScale.computedMin, equals(0.0));
-        expect(controller.yScale.computedMax, equals(0.0));
         expect(controller.yScale.labelTicks, equals(0.0));
         expect(controller.yScale.labelUnitExponent, 0.0);
         expect(controller.yScale.tickSpacing, equals(1.0));
@@ -289,8 +287,6 @@ void main() {
           expect(controller.canvasChartWidth, equals(2150.0));
 
           // Validate the Y axis after data added to all traces.
-          expect(controller.yScale.computedMin, equals(0.0));
-          expect(controller.yScale.computedMax, equals(719576719.5767195));
           expect(controller.yScale.labelTicks, equals(10.0));
           expect(controller.yScale.labelUnitExponent, 8.0);
           expect(controller.yScale.tickSpacing, equals(5291005.291005291));
@@ -376,8 +372,6 @@ void main() {
           expect(controller.canvasChartWidth, equals(2150.0));
 
           // Validate the Y axis after data added to all traces.
-          expect(controller.yScale.computedMin, equals(0.0));
-          expect(controller.yScale.computedMax, equals(719576719.5767195));
           expect(controller.yScale.labelTicks, equals(10.0));
           expect(controller.yScale.labelUnitExponent, 8.0);
           expect(controller.yScale.tickSpacing, equals(5291005.291005291));
@@ -420,8 +414,6 @@ void main() {
           expect(controller.canvasChartWidth, equals(2149.312));
 
           // Validate the Y axis after data added to all traces.
-          expect(controller.yScale.computedMin, equals(0.0));
-          expect(controller.yScale.computedMax, equals(719576719.5767195));
           expect(controller.yScale.labelTicks, equals(10.0));
           expect(controller.yScale.labelUnitExponent, 8.0);
           expect(controller.yScale.tickSpacing, equals(5291005.291005291));
@@ -575,7 +567,7 @@ void main() {
           } else if (event.isEventAllocationAccumulator) {
             final monitorType = event.allocationAccumulator;
             final rawData = Data(datum.timestamp, visibleMonitorEvent);
-            if (monitorType.isEmpty) continue;
+            if (monitorType!.isEmpty) continue;
             if (monitorType.isStart) {
               addDataToTrace(controller, monitorTraceIndex, rawData);
             } else if (monitorType.isReset) {
@@ -614,8 +606,6 @@ void main() {
         expect(controller.canvasChartWidth, equals(2150.0));
 
         // Validate the Y axis before any data.
-        expect(controller.yScale.computedMin, equals(0.3707865168539326));
-        expect(controller.yScale.computedMax, equals(2.426966292134831));
         expect(controller.yScale.labelTicks, equals(3.0));
         expect(controller.yScale.labelUnitExponent, 0.0);
         expect(controller.yScale.tickSpacing, equals(0.033707865168539325));
@@ -655,12 +645,8 @@ void main() {
           expect(controller.displayXLabels, true);
           expect(controller.canvasChartWidth, equals(2150.0));
 
-          // Validate the Y axis after data added to all traces.
-          expect(controller.yScale.computedMin, equals(0.0));
-
           // Rest of data is out of view because we're live view max is now 1.4
           // and only 2 labels visible.
-          expect(controller.yScale.computedMax, equals(2.426966292134831));
           expect(controller.yScale.labelTicks, equals(3.0));
 
           expect(controller.yScale.labelUnitExponent, 0.0);
@@ -769,8 +755,6 @@ void main() {
           expect(controller.canvasChartWidth, equals(2150.0));
 
           // Validate the Y axis after data added to all traces.
-          expect(controller.yScale.computedMin, equals(0.0));
-          expect(controller.yScale.computedMax, equals(2.426966292134831));
           expect(controller.yScale.labelTicks, equals(3.0));
           expect(controller.yScale.labelUnitExponent, 0.0);
           expect(controller.yScale.tickSpacing, equals(0.033707865168539325));
@@ -826,8 +810,6 @@ void main() {
           expect(controller.canvasChartWidth, equals(2149.312));
 
           // Validate the Y axis after data added to all traces.
-          expect(controller.yScale.computedMin, equals(0.0));
-          expect(controller.yScale.computedMax, equals(2.426966292134831));
           expect(controller.yScale.labelTicks, equals(3.0));
           expect(controller.yScale.labelUnitExponent, 0.0);
           expect(controller.yScale.tickSpacing, equals(0.033707865168539325));

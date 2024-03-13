@@ -54,7 +54,6 @@ class RasterStatsController extends PerformanceFeatureController {
   void setData(RasterStats? stats) {
     _rasterStats.value = stats;
     selectedSnapshot.value = stats?.selectedSnapshot;
-    performanceController.data!.rasterStats = stats;
   }
 
   @override
@@ -63,7 +62,7 @@ class RasterStatsController extends PerformanceFeatureController {
   }
 
   @override
-  Future<void> setOfflineData(PerformanceData offlineData) async {
+  Future<void> setOfflineData(OfflinePerformanceData offlineData) async {
     final offlineRasterStats = offlineData.rasterStats;
     if (offlineRasterStats != null) {
       setData(offlineRasterStats);

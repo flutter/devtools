@@ -4,7 +4,7 @@
 
 import 'dart:js_interop';
 
-import 'package:web/helpers.dart';
+import 'package:web/web.dart';
 
 import 'post_message.dart';
 
@@ -12,7 +12,7 @@ Stream<PostMessageEvent> get onPostMessage {
   return window.onMessage.map(
     (message) => PostMessageEvent(
       origin: message.origin,
-      data: message.data,
+      data: message.data.dartify(),
     ),
   );
 }

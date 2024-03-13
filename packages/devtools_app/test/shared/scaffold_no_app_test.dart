@@ -48,7 +48,11 @@ void main() {
   Widget wrapScaffold(Widget child) {
     return wrapWithControllers(
       child,
-      analytics: AnalyticsController(enabled: false, firstRun: false),
+      analytics: AnalyticsController(
+        enabled: false,
+        firstRun: false,
+        consentMessage: 'fake message',
+      ),
       releaseNotes: ReleaseNotesController(),
     );
   }

@@ -318,7 +318,7 @@ class _NotificationMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final textStyle = theme.textTheme.bodyMedium;
+    final textStyle = theme.regularTextStyle;
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         denseSpacing,
@@ -329,7 +329,7 @@ class _NotificationMessage extends StatelessWidget {
       child: Text(
         widget.message.text,
         style: widget.message.isError
-            ? textStyle?.copyWith(color: theme.colorScheme.error)
+            ? textStyle.copyWith(color: theme.colorScheme.error)
             : textStyle,
         overflow: TextOverflow.visible,
         maxLines: 10,

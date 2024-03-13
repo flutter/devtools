@@ -4,11 +4,14 @@ homepage: https://github.com/flutter/devtools/tree/master/third_party/packages/c
 version: 1.0.0
 
 environment:
-  sdk: '>=2.12.0 <4.0.0'
+  sdk: ^3.0.0
 
 dependencies:
   flutter:
     sdk: flutter
+
+dev_dependencies:
+  flutter_lints: ^3.0.1
 
 flutter:
   fonts:

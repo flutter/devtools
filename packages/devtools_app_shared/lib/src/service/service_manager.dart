@@ -83,7 +83,7 @@ class ServiceManager<T extends VmService> {
 
   final resolvedUriManager = ResolvedUriManager();
 
-  /// Proxy to state inside the isolateManager, for code consizeness.
+  /// Proxy to state inside the isolateManager, for code conciseness.
   ///
   /// Defaults to false if there is no main isolate.
   bool get isMainIsolatePaused =>
@@ -105,6 +105,13 @@ class ServiceManager<T extends VmService> {
   ConnectedApp? connectedApp;
 
   T? service;
+
+  /// The URI of the most recent VM service connection [service].
+  ///
+  /// We store this in a local variable so that we still have access to it when
+  /// the VM service closes.
+  String? serviceUri;
+
   VM? vm;
   String? sdkVersion;
 
@@ -145,6 +152,7 @@ class ServiceManager<T extends VmService> {
     String name, {
     String? isolateId,
     Map<String, dynamic>? args,
+    // ignore: avoid-redundant-async, for some reasons tests fail without `async
   }) async {
     final registeredMethod = _registeredMethodsForService[name];
     if (registeredMethod == null) {
@@ -215,6 +223,8 @@ class ServiceManager<T extends VmService> {
       return;
     }
     this.service = service;
+    serviceUri = service.wsUri!;
+
     if (_serviceAvailable.isCompleted) {
       _serviceAvailable = Completer();
     }
@@ -365,16 +375,19 @@ class ServiceManager<T extends VmService> {
   void _closeVmServiceConnection() {
     _serviceAvailable = Completer();
     service = null;
+    serviceUri = null;
     vm = null;
     sdkVersion = null;
     connectedApp = null;
   }
 
   Future<void> manuallyDisconnect() async {
-    await vmServiceClosed(
-      connectionState:
-          const ConnectedState(false, userInitiatedConnectionState: true),
-    );
+    if (hasConnection) {
+      await vmServiceClosed(
+        connectionState:
+            const ConnectedState(false, userInitiatedConnectionState: true),
+      );
+    }
   }
 
   Future<Response> callServiceOnMainIsolate(String name) async {
@@ -432,7 +445,12 @@ class ServiceManager<T extends VmService> {
 
   /// This can throw an [RPCError].
   Future<void> performHotRestart() async {
-    await callServiceOnMainIsolate(hotRestartServiceName);
+    isolateManager.hotRestartInProgress = true;
+    try {
+      await callServiceOnMainIsolate(hotRestartServiceName);
+    } catch (_) {
+      isolateManager.hotRestartInProgress = false;
+    }
   }
 }
 

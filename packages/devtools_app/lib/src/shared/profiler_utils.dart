@@ -268,7 +268,7 @@ class MethodAndSourceDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fontStyle = Theme.of(context).fixedFontStyle;
+    final fontStyle = Theme.of(context).regularTextStyle;
     final sourceTextSpans = <TextSpan>[];
     final packageUriWithSourceLine = uriWithSourceLine(packageUri, sourceLine);
 
@@ -315,12 +315,12 @@ class MethodAndSourceDisplay extends StatelessWidget {
       ),
     );
     if (displayInRow) {
+      // Include this [Row] so that the clickable [VmServiceObjectLink]
+      // does not extend all the way to the end of the row.
       return Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          richText,
-          // Include this [Spacer] so that the clickable [VmServiceObjectLink]
-          // does not extend all the way to the end of the row.
-          const Spacer(),
+          Flexible(child: richText),
         ],
       );
     }

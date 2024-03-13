@@ -21,7 +21,7 @@ class ServiceExtension<T> {
   final bool shouldCallOnAllIsolates;
 }
 
-class ToggleableServiceExtension<T> extends ServiceExtension {
+class ToggleableServiceExtension<T extends Object> extends ServiceExtension<T> {
   ToggleableServiceExtension({
     required super.extension,
     required T enabledValue,
@@ -228,11 +228,11 @@ final profilePlatformChannels = ToggleableServiceExtension<bool>(
 final String didSendFirstFrameEvent =
     '$flutterExtensionPrefix${WidgetsServiceExtensions.didSendFirstFrameEvent.name}';
 
-final serviceExtensionsAllowlist = <String, ServiceExtension>{
+final serviceExtensionsAllowlist = <String, ServiceExtension<Object>>{
   for (var extension in _extensionDescriptions) extension.extension: extension,
 };
 
-final List<ServiceExtension> _extensionDescriptions = [
+final List<ServiceExtension<Object>> _extensionDescriptions = [
   debugAllowBanner,
   debugPaint,
   debugPaintBaselines,
@@ -266,7 +266,8 @@ final List<ServiceExtension> _extensionDescriptions = [
 /// extensions are safe to run before the first frame as there is little harm
 /// in setting these extensions after one frame has rendered without the
 /// extension set.
-final Set<String> _unsafeBeforeFirstFrameFlutterExtensions = <ServiceExtension>[
+final Set<String> _unsafeBeforeFirstFrameFlutterExtensions =
+    <ServiceExtension<Object>>[
   debugPaint,
   debugPaintBaselines,
   repaintRainbow,

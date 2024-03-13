@@ -9,14 +9,9 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../shared/analytics/constants.dart' as gac;
-import '../../../../shared/charts/flame_chart.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/http/http_service.dart' as http_service;
-import '../../../../shared/primitives/utils.dart';
-import '../../../../shared/ui/search.dart';
-import 'legacy/legacy_events_controller.dart';
-import 'legacy/timeline_flame_chart.dart';
 import 'perfetto/perfetto.dart';
 import 'timeline_events_controller.dart';
 
@@ -27,33 +22,10 @@ class TimelineEventsTabView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: controller.useLegacyTraceViewer,
-      builder: (context, useLegacy, _) {
-        return useLegacy
-            ? KeepAliveWrapper(
-                child: MultiValueListenableBuilder(
-                  listenables: [
-                    controller.status,
-                    controller.legacyController.processor.progressNotifier,
-                  ],
-                  builder: (context, values, _) {
-                    final status = values.first as EventsControllerStatus;
-                    final processingProgress = values.second as double;
-                    return TimelineEventsView(
-                      controller: controller,
-                      processing: status == EventsControllerStatus.processing,
-                      processingProgress: processingProgress,
-                    );
-                  },
-                ),
-              )
-            : KeepAliveWrapper(
-                child: EmbeddedPerfetto(
-                  perfettoController: controller.perfettoController,
-                ),
-              );
-      },
+    return KeepAliveWrapper(
+      child: EmbeddedPerfetto(
+        perfettoController: controller.perfettoController,
+      ),
     );
   }
 }
@@ -65,49 +37,24 @@ class TimelineEventsTabControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: controller.useLegacyTraceViewer,
-      builder: (context, useLegacy, _) {
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            if (useLegacy) ...[
-              ValueListenableBuilder<EventsControllerStatus>(
-                valueListenable: controller.status,
-                builder: (context, status, _) {
-                  final searchFieldEnabled =
-                      status == EventsControllerStatus.ready;
-                  return SearchField<LegacyTimelineEventsController>(
-                    searchController: controller.legacyController,
-                    searchFieldEnabled: searchFieldEnabled,
-                    searchFieldWidth: wideSearchFieldWidth,
-                  );
-                },
-              ),
-              const SizedBox(width: denseSpacing),
-              FlameChartHelpButton(
-                gaScreen: gac.performance,
-                gaSelection: gac.PerformanceEvents.timelineFlameChartHelp.name,
-              ),
-            ],
-            if (!controller.useLegacyTraceViewer.value)
-              Padding(
-                padding: const EdgeInsets.only(right: densePadding),
-                child: PerfettoHelpButton(
-                  perfettoController: controller.perfettoController,
-                ),
-              ),
-            if (!offlineController.offlineMode.value) ...[
-              // TODO(kenz): add a switch to enable the CPU profiler once the
-              // tracing format supports it (when we switch to protozero).
-              const SizedBox(width: denseSpacing),
-              TraceCategoriesButton(controller: controller),
-              const SizedBox(width: denseSpacing),
-              RefreshTimelineEventsButton(controller: controller),
-            ],
-          ],
-        );
-      },
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(right: densePadding),
+          child: PerfettoHelpButton(
+            perfettoController: controller.perfettoController,
+          ),
+        ),
+        if (!offlineController.offlineMode.value) ...[
+          // TODO(kenz): add a switch to enable the CPU profiler once the
+          // tracing format supports it (when we switch to protozero).
+          const SizedBox(width: densePadding),
+          TraceCategoriesButton(controller: controller),
+          const SizedBox(width: densePadding),
+          RefreshTimelineEventsButton(controller: controller),
+        ],
+      ],
     );
   }
 }
@@ -160,7 +107,7 @@ class RefreshTimelineEventsButton extends StatelessWidget {
           outlined: false,
           onPressed: status == EventsControllerStatus.processing
               ? null
-              : controller.processAllTraceEvents,
+              : controller.forceRefresh,
           tooltip: 'Refresh timeline events',
           gaScreen: gac.performance,
           gaSelection: gac.PerformanceEvents.refreshTimelineEvents.name,

@@ -5,18 +5,20 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:js_interop';
+import 'dart:typed_data';
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_app_shared/web_utils.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:web/helpers.dart';
+import 'package:vm_service_protos/vm_service_protos.dart';
+import 'package:web/web.dart';
 
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
+import '../../../../../shared/development_helpers.dart';
 import '../../../../../shared/globals.dart';
-import '../../../../../shared/primitives/trace_event.dart';
 import '../../../../../shared/primitives/utils.dart';
+import '../../../performance_utils.dart';
 import '_perfetto_controller_web.dart';
 import 'perfetto_controller.dart';
 
@@ -43,15 +45,12 @@ class _PerfettoState extends State<Perfetto> with AutoDisposeMixin {
     _perfettoController = widget.perfettoController as PerfettoControllerImpl;
     _viewController = _PerfettoViewController(_perfettoController)..init();
 
-    // If [_perfettoController.activeTraceEvents] has a null value, the trace
+    // If [_perfettoController.activeTrace.trace] has a null value, the trace
     // data has not yet been initialized.
-    if (_perfettoController.activeTraceEvents.value != null) {
+    if (_perfettoController.activeTrace.trace != null) {
       _loadActiveTrace();
     }
-    addAutoDisposeListener(
-      _perfettoController.activeTraceEvents,
-      _loadActiveTrace,
-    );
+    addAutoDisposeListener(_perfettoController.activeTrace, _loadActiveTrace);
 
     _scrollToActiveTimeRange();
     addAutoDisposeListener(
@@ -61,8 +60,12 @@ class _PerfettoState extends State<Perfetto> with AutoDisposeMixin {
   }
 
   void _loadActiveTrace() {
-    assert(_perfettoController.activeTraceEvents.value != null);
-    _viewController._loadTrace(_perfettoController.activeTraceEvents.value!);
+    assert(_perfettoController.activeTrace.trace != null);
+    unawaited(
+      _viewController._loadPerfettoTrace(
+        _perfettoController.activeTrace.trace!,
+      ),
+    );
   }
 
   void _scrollToActiveTimeRange() {
@@ -158,14 +161,22 @@ class _PerfettoViewController extends DisposableController
     );
   }
 
-  void _loadTrace(List<TraceEventWrapper> devToolsTraceEvents) {
-    final encodedJson = jsonEncode({
-      'traceEvents': devToolsTraceEvents
-          .map((eventWrapper) => eventWrapper.event.json)
-          .toList(),
-    });
-    final buffer = Uint8List.fromList(encodedJson.codeUnits);
+  Future<void> _loadPerfettoTrace(Trace trace) async {
+    late Uint8List buffer;
+    debugTimeSync(
+      () => buffer = trace.writeToBuffer(),
+      debugName: 'Trace.writeToBuffer',
+    );
 
+    if (buffer.isEmpty) {
+      // TODO(kenz): is there a better way to create an empty data set using the
+      // protozero format? I think this is still using the legacy Chrome format.
+      // We can't use `Trace()` because the Perfetto post message handler throws
+      // an exception if an empty buffer is posted.
+      buffer = Uint8List.fromList(jsonEncode({'traceEvents': []}).codeUnits);
+    }
+
+    await _pingPerfettoUntilReady();
     ga.select(gac.performance, gac.PerformanceEvents.perfettoLoadTrace.name);
     _postMessage({
       'perfetto': {
@@ -180,11 +191,7 @@ class _PerfettoViewController extends DisposableController
     if (timeRange == null) return;
 
     if (!timeRange.isWellFormed) {
-      notificationService.push(
-        'No timeline events available for the selected frame. Timeline '
-        'events occurred too long ago before DevTools could access them. '
-        'To avoid this, open the DevTools Performance page earlier.',
-      );
+      pushNoTimelineEventsAvailableWarning();
       return;
     }
     await _pingPerfettoUntilReady();

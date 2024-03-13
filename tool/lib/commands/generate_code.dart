@@ -35,10 +35,10 @@ class GenerateCodeCommand extends Command {
     final repo = DevToolsRepo.getInstance();
     final processManager = ProcessManager();
 
-    final upgrade = argResults![_upgradeFlag];
+    final upgrade = argResults![_upgradeFlag] as bool;
     if (upgrade) {
       await processManager.runProcess(
-        CliCommand.tool('pub-get --only-main --upgrade'),
+        CliCommand.tool(['pub-get', '--only-main', '--upgrade']),
       );
     }
 
@@ -47,7 +47,13 @@ class GenerateCodeCommand extends Command {
       final directoryPath = path.join(repo.repoPath, 'packages', packageName);
       await processManager.runProcess(
         CliCommand.flutter(
-          'pub run build_runner build --delete-conflicting-outputs',
+          [
+            'pub',
+            'run',
+            'build_runner',
+            'build',
+            '--delete-conflicting-outputs',
+          ],
         ),
         workingDirectory: directoryPath,
       );

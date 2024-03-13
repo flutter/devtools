@@ -13,7 +13,6 @@ import '../../shared/common_widgets.dart';
 import '../../shared/http/http.dart';
 import '../../shared/http/http_request_data.dart';
 import '../../shared/primitives/utils.dart';
-import '../../shared/table/table.dart';
 import '../../shared/ui/colors.dart';
 import 'network_controller.dart';
 import 'network_model.dart';
@@ -148,9 +147,9 @@ class HttpRequestView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: data.requestUpdatedNotifier,
-      builder: (context, __, ___) {
+    return ListenableBuilder(
+      listenable: data,
+      builder: (context, __) {
         final theme = Theme.of(context);
         final requestHeaders = data.requestHeaders;
         final requestContentType = requestHeaders?['content-type'] ?? '';
@@ -162,11 +161,13 @@ class HttpRequestView extends StatelessWidget {
         }
 
         final isJson = switch (requestContentType) {
-          List() => requestContentType.any((e) => e.contains('json')),
+          List() =>
+            requestContentType.any((e) => (e as String).contains('json')),
           String() => requestContentType.contains('json'),
           _ => throw StateError(
               "Expected 'content-type' to be a List or String, but got: "
-              '$requestContentType'),
+              '$requestContentType',
+            ),
         };
 
         Widget child;
@@ -198,9 +199,9 @@ class HttpViewTrailingCopyButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: data.requestUpdatedNotifier,
-      builder: (context, __, ___) {
+    return ListenableBuilder(
+      listenable: data,
+      builder: (context, __) {
         final dataToCopy = dataSelector(data);
         final isLoading = data.isFetchingFullData;
         if (dataToCopy == null || dataToCopy.isEmpty || isLoading) {
@@ -245,9 +246,9 @@ class HttpResponseTrailingDropDown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: data.requestUpdatedNotifier,
-      builder: (_, __, ___) {
+    return ListenableBuilder(
+      listenable: data,
+      builder: (_, __) {
         final bool visible = (data.contentType != null &&
                 !data.contentType!.contains('image')) &&
             data.responseBody!.isNotEmpty;
@@ -301,9 +302,9 @@ class HttpResponseView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: data.requestUpdatedNotifier,
-      builder: (context, __, ___) {
+    return ListenableBuilder(
+      listenable: data,
+      builder: (context, __) {
         Widget child;
         final theme = Theme.of(context);
         // We shouldn't try and display an image response view when using the
@@ -785,8 +786,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
     }
     final duration = Duration(
       microseconds: data.endTimestamp!.microsecondsSinceEpoch -
-          data.instantEvents.last.timestampMicros -
-          data.timelineMicrosecondsSinceEpoch(0),
+          data.instantEvents.last.timestamp.microsecondsSinceEpoch,
     );
     timingWidgets.add(
       _buildTimingRow(nextColor(), 'Response', duration),

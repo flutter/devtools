@@ -12,7 +12,7 @@ import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../../test_infra/test_data/performance.dart';
+import '../../test_infra/test_data/performance/sample_performance_data.dart';
 
 void main() {
   late FlutterFramesController framesController;
@@ -131,7 +131,7 @@ void main() {
 
     group('starting scroll position', () {
       const totalNumFrames = 50;
-      const totalFramesInView = 14;
+      const totalFramesInView = 15;
 
       setUp(() {
         var number = 0;

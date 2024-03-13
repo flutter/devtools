@@ -311,8 +311,9 @@ class _PackageColumn extends TreeColumnData<DominatorTreeNode> {
 
 extension CallGraphNodeDisplay on CallGraphNode {
   String get display {
-    final displayText =
-        data is ProgramInfoNode ? data.qualifiedName : data.toString();
+    final displayText = data is ProgramInfoNode
+        ? (data as ProgramInfoNode).qualifiedName
+        : data.toString();
     if (displayText == '@shared') {
       // Special case '@shared' because this is the name of the call graph root,
       // and '@root' has a more intuitive meaning.

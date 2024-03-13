@@ -44,30 +44,53 @@ class ExtensionsManager {
   /// [serveAvailableExtensions] is called.
   final devtoolsExtensions = <DevToolsExtensionConfig>[];
 
-  /// Serves any available DevTools extensions for the given [rootPath], where
-  /// [rootPath] is the root for a Dart or Flutter project containing the
-  /// `.dart_tool/` directory.
+  /// Serves any available DevTools extensions for the given [rootPathFileUri],
+  /// where [rootPathFileUri] is the root for a Dart or Flutter project
+  /// containing the `.dart_tool/` directory.
+  ///
+  /// [rootPathFileUri] is expected to be a file uri (e.g. starting with
+  /// 'file://').
   ///
   /// This method first looks up the available extensions using
   /// package:extension_discovery, and the available extension's
   /// assets will be copied to the `build/devtools_extensions` directory that
   /// DevTools server is serving.
-  Future<void> serveAvailableExtensions(String? rootPath) async {
+  Future<void> serveAvailableExtensions(
+    String? rootPathFileUri,
+    List<String> logs,
+  ) async {
+    if (rootPathFileUri != null && !rootPathFileUri.startsWith('file://')) {
+      throw ArgumentError.value(
+        rootPathFileUri,
+        'rootPathFileUri',
+        'must be a file:// URI String',
+      );
+    }
+
+    logs.add(
+      'ExtensionsManager.serveAvailableExtensions: '
+      'rootPathFileUri: $rootPathFileUri',
+    );
+
     devtoolsExtensions.clear();
     final parsingErrors = StringBuffer();
 
-    if (rootPath != null) {
+    if (rootPathFileUri != null) {
       late final List<Extension> extensions;
       try {
         extensions = await findExtensions(
           'devtools',
-          packageConfig: Uri.file(
-            path.join(
-              rootPath,
+          packageConfig: Uri.parse(
+            path.posix.join(
+              rootPathFileUri,
               '.dart_tool',
               'package_config.json',
             ),
           ),
+        );
+        logs.add(
+          'ExtensionsManager.serveAvailableExtensions: findExtensionsResult  - '
+          '${extensions.map((e) => e.package).toList()}',
         );
       } catch (e) {
         extensions = <Extension>[];
@@ -111,7 +134,7 @@ class ExtensionsManager {
     _resetServedPluginsDir();
     await Future.wait([
       for (final extension in devtoolsExtensions)
-        _moveToServedExtensionsDir(extension.name, extension.path),
+        _moveToServedExtensionsDir(extension.name, extension.path, logs: logs),
     ]);
 
     if (parsingErrors.isNotEmpty) {
@@ -139,11 +162,16 @@ class ExtensionsManager {
 
   Future<void> _moveToServedExtensionsDir(
     String extensionPackageName,
-    String extensionPath,
-  ) async {
+    String extensionPath, {
+    required List<String> logs,
+  }) async {
     final newExtensionPath = path.join(
       _servedExtensionsPath,
       extensionPackageName,
+    );
+    logs.add(
+      'ExtensionsManager._moveToServedExtensionsDir: moving '
+      '$extensionPath to $newExtensionPath',
     );
     await copyPath(extensionPath, newExtensionPath);
   }

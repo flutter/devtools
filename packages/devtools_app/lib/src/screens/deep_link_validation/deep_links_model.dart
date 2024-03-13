@@ -24,14 +24,115 @@ enum PlatformOS {
   final String description;
 }
 
-// TODO(hangyujin): Handle more domain error cases.
 enum DomainError {
-  existence('Domain doesn\'t exist'),
-  fingerprints('Fingerprints unavailable');
+  // Existence of an asset link file.
+  existence(
+    'Digital Asset Links JSON file existence failed',
+    'This test checks whether the assetlinks.json file, '
+        'which is used to verify the association between the app and the '
+        'domain name, exists under your domain.',
+    'Add a Digital Asset Links JSON file to all of the '
+        'failed website domains at the following location: '
+        'https://[domain.name]/.well-known/assetlinks.json. See the following recommended asset link json file. ',
+  ),
+  // Asset link file should define a link to this app.
+  appIdentifier(
+    'Package name failed',
+    'The test checks your Digital Asset Links JSON file '
+        'for package name validation, which the mobile device '
+        'uses to verify ownership of the app.',
+    'Ensure your Digital Asset Links JSON file declares the '
+        'correct package name with the "android_app" namespace for '
+        'all of the failed website domains. Also, confirm that the '
+        'app is available in the Google Play store. See the following recommended asset link json file. ',
+  ),
+  // Asset link file should contain the correct fingerprint.
+  fingerprints(
+    'Fingerprint validation failed',
+    'This test checks your Digital Asset Links JSON file for '
+        'sha256 fingerprint validation, which the mobile device uses '
+        'to verify ownership of the app.',
+    'Add sha256_cert_fingerprints to the Digital Asset Links JSON '
+        'file for all of the failed website domains. If the fingerprint '
+        'has already been added, make sure it\'s correct and that the '
+        '"android_app" namespace is declared on it. See the following recommended asset link json file. ',
+  ),
+  // Asset link file should be served with the correct content type.
+  contentType(
+    'JSON content type failed',
+    'This test checks your Digital Asset Links JSON file for content type '
+        'validation, which defines the format of the JSON file. This allows '
+        'the mobile device to verify ownership of the app.',
+    'Ensure the content-type is "application/json" for all of the failed website domains.',
+  ),
+  // Asset link file should be accessible via https.
+  httpsAccessibility(
+    'HTTPS accessibility failed',
+    'This test tries to access your Digital Asset Links '
+        'JSON file over an HTTPS connection, which must be '
+        'accessible to verify ownership of the app.',
+    'Ensure your Digital Asset Links JSON file is accessible '
+        'over an HTTPS connection for all of the failed website domains (even if '
+        'the app\'s intent filter declares HTTP as the data scheme).',
+  ),
 
-  const DomainError(this.description);
+  // Asset link file should be accessible with no redirects.
+  nonRedirect(
+    'Domain non-redirect failed',
+    'This test checks that your domain is accessible without '
+        'redirects. This domain must be directly accessible '
+        'to verify ownership of the app.',
+    'Ensure your domain is accessible without any redirects ',
+  ),
+
+  // Asset link domain should be valid/not malformed.
+  hostForm(
+    'Host attribute formed properly failed',
+    'This test checks that your android:host attribute has a valid domain URL pattern.',
+    'Make sure the host is a properly formed web address such '
+        'as google.com or www.google.com, without "http://" or "https://".',
+  ),
+  // Issues that are not covered by other checks. An example that may be in this
+  // category is Android validation API failures.
+  other('Check failed', '', '');
+
+  const DomainError(this.title, this.explanation, this.fixDetails);
+  final String title;
+  final String explanation;
+  final String fixDetails;
+}
+
+/// There are currently two types of path errors, errors from intent filters and path format errors.
+enum PathError {
+  // Intent filter should have action tag.
+  intentFilterActionView(
+    'The intent filter must have a <action android:name="android.intent.action.VIEW" />',
+  ),
+  // Intent filter should have browsable tag.
+  intentFilterBrowsable(
+    'The intent filter must have a <category android:name="android.intent.category.BROWSABLE" />',
+  ),
+  // Intent filter should have default tag.
+  intentFilterDefault(
+    'The intent filter must have a <category android:name="android.intent.category.DEFAULT" />',
+  ),
+  // Intent filter should have autoVerify tag.
+  intentFilterAutoVerify(
+    'The intent filter must have android:autoVerify="true"',
+  ),
+  // Path has format.
+  pathFormat('path must starts with “/” or “.*”');
+
+  const PathError(this.description);
   final String description;
 }
+
+Set<PathError> intentFilterErrors = <PathError>{
+  PathError.intentFilterActionView,
+  PathError.intentFilterBrowsable,
+  PathError.intentFilterDefault,
+  PathError.intentFilterAutoVerify,
+};
 
 /// Contains all data relevant to a deep link.
 class LinkData with SearchableDataMixin {
@@ -41,7 +142,7 @@ class LinkData with SearchableDataMixin {
     required this.os,
     this.scheme = const <String>['http://', 'https://'],
     this.domainErrors = const <DomainError>[],
-    this.pathError = false,
+    this.pathErrors = const <PathError>{},
     this.associatedPath = const <String>[],
     this.associatedDomains = const <String>[],
   });
@@ -51,7 +152,7 @@ class LinkData with SearchableDataMixin {
   final List<PlatformOS> os;
   final List<String> scheme;
   final List<DomainError> domainErrors;
-  final bool pathError;
+  Set<PathError> pathErrors;
 
   final List<String> associatedPath;
   final List<String> associatedDomains;
@@ -90,6 +191,7 @@ class _ErrorAwareText extends StatelessWidget {
               right: defaultSpacing,
             ),
             preferBelow: true,
+            enableTapToDismiss: false,
             richMessage: WidgetSpan(
               child: SizedBox(
                 width: kToolTipWidth,
@@ -236,7 +338,7 @@ class PathColumn extends ColumnData<LinkData>
     VoidCallback? onPressed,
   }) {
     return _ErrorAwareText(
-      isError: dataObject.pathError,
+      isError: dataObject.pathErrors.isNotEmpty,
       controller: controller,
       text: dataObject.path,
       link: dataObject,
@@ -373,7 +475,7 @@ class StatusColumn extends ColumnData<LinkData>
   String getValue(LinkData dataObject) {
     if (dataObject.domainErrors.isNotEmpty) {
       return 'Failed domain checks';
-    } else if (dataObject.pathError) {
+    } else if (dataObject.pathErrors.isNotEmpty) {
       return 'Failed path checks';
     } else {
       return 'No issues found';
@@ -422,7 +524,8 @@ class StatusColumn extends ColumnData<LinkData>
     bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
-    if (dataObject.domainErrors.isNotEmpty || dataObject.pathError) {
+    if (dataObject.domainErrors.isNotEmpty ||
+        dataObject.pathErrors.isNotEmpty) {
       return Text(
         getValue(dataObject),
         overflow: TextOverflow.ellipsis,
@@ -550,8 +653,8 @@ int _compareLinkData(
         if (a.domainErrors.isNotEmpty) return -1;
         if (b.domainErrors.isNotEmpty) return 1;
       } else {
-        if (a.pathError) return -1;
-        if (b.pathError) return 1;
+        if (a.pathErrors.isNotEmpty) return -1;
+        if (b.pathErrors.isNotEmpty) return 1;
       }
       return 0;
     case SortingOption.aToZ:

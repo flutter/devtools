@@ -1,27 +1,28 @@
 This is draft for future release notes, that are going to land on
 [the Flutter website](https://docs.flutter.dev/tools/devtools/release-notes).
 
-# DevTools 2.31.0 release notes
+# DevTools 2.34.0 release notes
 
-The 2.31.0 release of the Dart and Flutter DevTools
+The 2.34.0 release of the Dart and Flutter DevTools
 includes the following changes among other general improvements.
 To learn more about DevTools, check out the
 [DevTools overview](https://docs.flutter.dev/tools/devtools/overview).
 
 ## General updates
 
-TODO: Remove this section if there are not any general updates.
+* Fixed an issue preventing DevTools from connecting to Flutter apps that are not
+launched from Flutter Tools. - [#6848](https://github.com/flutter/devtools/issues/6848)
 
 ## Inspector updates
 
-* Added link to package directory documentation, from the inspect settings dialog - [6825](https://github.com/flutter/devtools/pull/6825)
-* Fix bug where widgets owned by the Flutter framework were showing up in the widget tree view -
-[6857](https://github.com/flutter/devtools/pull/6857)
-* Only cache pub root directories added by the user - [6897](https://github.com/flutter/devtools/pull/6897)
+TODO: Remove this section if there are not any general updates.
 
 ## Performance updates
-
-* Changed raster layer preview background to a checkerboard. - [#6827](https://github.com/flutter/devtools/pull/6827)
+* Include CPU samples in the Timeline. - [#7333](https://github.com/flutter/devtools/pull/7333)
+* Removed the legacy trace viewer. The legacy trace viwer was replaced with the
+embedded Perfetto trace viewer in DevTools version 2.21.1, but was available
+behind a setting to ensure a smooth rollout. This release of DevTools removes
+the legacy trace viewer entirely. - [#7316](https://github.com/flutter/devtools/pull/7316)
 
 ## CPU profiler updates
 
@@ -33,17 +34,16 @@ TODO: Remove this section if there are not any general updates.
 
 ## Debugger updates
 
-* Highlight `extension type` as a declaration keyword,
-  highlight the `$` in identifier interpolation as part of the interpolation,
-  and properly highlight comments within type arguments. - [6837](https://github.com/flutter/devtools/pull/6837)
+TODO: Remove this section if there are not any general updates.
 
 ## Network profiler updates
 
-TODO: Remove this section if there are not any general updates.
+* Improved Network profiler performance. [#7266](https://github.com/flutter/devtools/pull/7266)
+* Fixed a bug where selected pending requests weren't refreshing the tab once updated. [#7266](https://github.com/flutter/devtools/pull/7266)
 
 ## Logging updates
 
-* Added scrollbar to details pane. - [#6917](https://github.com/flutter/devtools/pull/6917)
+TODO: Remove this section if there are not any general updates.
 
 ## App size tool updates
 
@@ -60,4 +60,4 @@ TODO: Remove this section if there are not any general updates.
 ## Full commit history
 
 To find a complete list of changes in this release, check out the
-[DevTools git log](https://github.com/flutter/devtools/tree/v2.31.0).
+[DevTools git log](https://github.com/flutter/devtools/tree/v2.34.0).

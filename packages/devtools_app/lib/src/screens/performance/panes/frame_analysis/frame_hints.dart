@@ -59,7 +59,7 @@ class FrameHints extends StatelessWidget {
             if (intrinsicOperationsCount > 0)
               IntrinsicOperationsHint(intrinsicOperationsCount),
           ]
-        : [];
+        : <Widget>[];
     final rasterHints = showRasterJankHints
         ? [
             const Text('Raster Jank Detected'),
@@ -71,7 +71,7 @@ class FrameHints extends StatelessWidget {
             const SizedBox(height: denseSpacing),
             const RasterStatsHint(),
           ]
-        : [];
+        : <Widget>[];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

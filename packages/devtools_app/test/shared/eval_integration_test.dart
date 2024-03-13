@@ -4,6 +4,7 @@
 
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../test_infra/flutter_test_driver.dart';
@@ -48,7 +49,7 @@ void main() {
 
     group('asyncEval', () {
       test(
-        'supports expresions that do not start with the await keyword',
+        'supports expressions that do not start with the await keyword',
         () async {
           await env.setupEnvironment();
 
@@ -92,6 +93,9 @@ void main() {
           expect(instance.valueAsString, '42');
         },
         timeout: const Timeout.factor(2),
+        // TODO(https://github.com/flutter/devtools/issues/6998): if this flake
+        // is addressed, we can unskip this for the Flutter customer tests.
+        tags: skipForCustomerTestsTag,
       );
 
       test(
@@ -114,7 +118,7 @@ void main() {
                 (_) => throw Exception(
                   'The FutureFailedException was not thrown as expected.',
                 ),
-                onError: (err) => err,
+                onError: (Object? err) => err,
               );
 
           expect(

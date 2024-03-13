@@ -1,3 +1,42 @@
+# 8.0.1
+* **Breaking change:** rename `ServerApi.getCompleted` to `ServerApi.success` and make the
+`value` parameter optional.
+* **Breaking change:** remove the `String? dtdUri` parameter from `ServerApi.handle` and replace
+it with a parameter `DTDConnectionInfo? dtd`.
+* Introduce a new typedef `DTDConnectionInfo`.
+* Add a new API `apiNotifyForVmServiceConnection` that DevTools will call when a
+VM service connection is connected or disconnected from the client.
+* Add a helper method `packageRootFromFileUriString`.
+* Refactor yaml extension methods.
+* Add intent filters checking functionality for deep link validation.
+
+# 7.0.0
+* **Breaking change:** remove the `ServerApi.setCompleted` method that was a
+duplicate of `ServerApi.getCompleted`.
+* **Breaking change:** add required parameter `analytics` to `ServerApi.handle`, which accepts
+an instance of `Analytics` from `package:unified_analytics`.
+* Add the ability to send debug logs in DevTools server request responses. 
+* Add an optional positional parameter `logs` to the `ServerApi.serverError` method.
+* Include debug logs with the `ExtensionsApi.apiServeAvailableExtensions` API response.
+* Devtools server API `apiGetConsentMessage` added to fetch the consent message from
+  `package:unified_analytics`.
+* Devtools server API `apiMarkConsentMessageAsShown` added to mark the consent message for
+  `package:unified_analytics` as shown to enable telemetry.
+
+# 6.0.4
+* Add `apiGetDtdUri` to the server api.
+* Add a description and link to documentation to the `devtools_options.yaml` file that
+is created in a user's project.
+
+# 6.0.3
+* `CompareMixin` is now generic, implementing `Comparable<T>` instead of
+  `Comparable<dynamic>`, and it's operators each therefore accept a `T`
+  argument.
+* `SemanticVersion` now mixes in `CompareMixin<SemanticVersion>`, and it's
+  `compareTo` method therefore now accepts a `SemanticVersion`.
+* Fix an issue parsing file paths that could prevent extensions from being detected.
+* Bump `package:vm_service` dependency to `>=13.0.0 <15.0.0`.
+
 # 6.0.2
 * Fix an issue parsing file paths on Windows that could prevent extensions from being detected.
 

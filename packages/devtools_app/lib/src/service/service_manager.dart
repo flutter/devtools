@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/utils.dart';
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
@@ -17,6 +18,7 @@ import '../shared/diagnostics/inspector_service.dart';
 import '../shared/error_badge_manager.dart';
 import '../shared/feature_flags.dart';
 import '../shared/globals.dart';
+import '../shared/server/server.dart' as server;
 import '../shared/title.dart';
 import '../shared/utils.dart';
 import 'service_registrations.dart' as registrations;
@@ -129,6 +131,13 @@ class ServiceConnectionManager {
     if (debugLogServiceProtocolEvents) {
       serviceTrafficLogger = VmServiceTrafficLogger(service!);
     }
+
+    unawaited(
+      server.notifyForVmServiceConnection(
+        vmServiceUri: serviceManager.serviceUri!,
+        connected: true,
+      ),
+    );
   }
 
   void _beforeCloseVmService(VmServiceWrapper? service) {
@@ -139,6 +148,15 @@ class ServiceConnectionManager {
         ? OfflineConnectedApp.parse(serviceManager.connectedApp!.toJson())
         : null;
     offlineController.previousConnectedApp = previousConnectedApp;
+
+    // This must be called before we close the VM service so that
+    // [serviceManager.serviceUri] is not null.
+    unawaited(
+      server.notifyForVmServiceConnection(
+        vmServiceUri: serviceManager.serviceUri!,
+        connected: false,
+      ),
+    );
   }
 
   void _afterCloseVmService(VmServiceWrapper? service) {
@@ -166,6 +184,8 @@ class ServiceConnectionManager {
     await serviceManager.isolateManager.init(isolates);
   }
 
+  // TODO(kenz): consider caching this value for the duration of the VM service
+  // connection.
   Future<String?> rootLibraryForMainIsolate() async {
     final mainIsolateRef = await whenValueNonNull(
       serviceManager.isolateManager.mainIsolate,
@@ -182,10 +202,23 @@ class ServiceConnectionManager {
     final selectedIsolateRefId = mainIsolateRef.id!;
     await serviceManager.resolvedUriManager
         .fetchFileUris(selectedIsolateRefId, [rootLib]);
-    return serviceManager.resolvedUriManager.lookupFileUri(
+    final fileUriString = serviceManager.resolvedUriManager.lookupFileUri(
       selectedIsolateRefId,
       rootLib,
     );
+    _log.fine('rootLibraryForMainIsolate: $fileUriString');
+    return fileUriString;
+  }
+
+  // TODO(kenz): consider caching this value for the duration of the VM service
+  // connection.
+  Future<String?> rootPackageDirectoryForMainIsolate() async {
+    final fileUriString = await serviceConnection.rootLibraryForMainIsolate();
+    final packageUriString = fileUriString != null
+        ? packageRootFromFileUriString(fileUriString)
+        : null;
+    _log.fine('rootPackageDirectoryForMainIsolate: $packageUriString');
+    return packageUriString;
   }
 
   Future<Response> get adbMemoryInfo async {
@@ -202,8 +235,8 @@ class ServiceConnectionManager {
         await serviceManager.callServiceExtensionOnMainIsolate(
       registrations.flutterListViews,
     );
-    final List<Map<String, Object?>> views =
-        flutterViewListResponse.json!['views'].cast<Map<String, Object?>>();
+    final views = (flutterViewListResponse.json!['views'] as List)
+        .cast<Map<String, Object?>>();
 
     // Each isolate should only have one FlutterView.
     final flutterView = views.firstWhereOrNull(

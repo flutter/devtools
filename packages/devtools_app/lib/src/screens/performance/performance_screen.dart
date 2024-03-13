@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
-import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:provider/provider.dart';
@@ -74,18 +73,6 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    maybePushUnsupportedFlutterVersionWarning(
-      PerformanceScreen.id,
-      supportedFlutterVersion: SemanticVersion(
-        major: 2,
-        minor: 3,
-        // Specifying patch makes the version number more readable.
-        // ignore: avoid_redundant_argument_values
-        patch: 0,
-        preReleaseMajor: 16,
-        preReleaseMinor: 0,
-      ),
-    );
     maybePushDebugModePerformanceMessage(context, PerformanceScreen.id);
 
     if (!initController()) return;
@@ -198,7 +185,7 @@ const performancePanelLink =
     'https://developer.chrome.com/docs/devtools/performance';
 
 const flutterWebInstructionsMd = '''
-# How to use Chrome DevTools for performance profiling
+## How to use Chrome DevTools for performance profiling
 
 The Flutter framework emits timeline events as it works to build frames, draw 
 scenes, and track other activity such as garbage collections. These events are 
@@ -208,14 +195,14 @@ You can also emit your own timeline events using the `dart:developer`
 [Timeline]($timelineLink) and [TimelineTask]($timelineTaskLink) APIs for further
 performance analysis.
 
-## Optional flags to enhance tracing
+### Optional flags to enhance tracing
 
 - [debugProfileBuildsEnabled]($debugBuildsLink): Adds Timeline events for every Widget built.
 - [debugProfileBuildsEnabledUserWidgets]($debugUserBuildsLink): Adds Timeline events for every user-created Widget built.
 - [debugProfileLayoutsEnabled]($debugLayoutsLink): Adds Timeline events for every RenderObject layout.
 - [debugProfilePaintsEnabled]($debugPaintsLink): Adds Timeline events for every RenderObject painted.
 
-## Instructions
+### Instructions
 
 1. *[Optional]* Set any desired tracing flags to true from your app's main method.
 2. Run your Flutter web app in [profile mode]($profileModeLink).
@@ -224,7 +211,7 @@ your application, and start recording to capture timeline events.
 ''';
 
 const dartWebInstructionsMd = '''
-# How to use Chrome DevTools for performance profiling
+## How to use Chrome DevTools for performance profiling
 
 Any events emitted using the `dart:developer` [Timeline]($timelineLink) and 
 [TimelineTask]($timelineTaskLink) APIs are exposed in the Chrome DevTools 

@@ -37,8 +37,10 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
       }
     }
 
-    for (final flag in flags ?? []) {
-      unawaited(setFlag(flag.flagName, flag.value));
+    if (flags != null) {
+      for (final flag in flags) {
+        unawaited(setFlag(flag.flagName, flag.value));
+      }
     }
   }
 
@@ -49,8 +51,8 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
     'timeOriginMicros': 47377796685,
     'timeExtentMicros': 3000,
     'pid': 54321,
-    'functions': [],
-    'samples': [],
+    'functions': <Object?>[],
+    'samples': <Object?>[],
   })!;
 
   CpuSamples cpuSamples;
@@ -70,7 +72,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   SemanticVersion dartIoVersion = SemanticVersion(major: 1, minor: 3);
 
   final VmFlagManager _vmFlagManager;
-  final Timeline? _timelineData;
+  final PerfettoTimeline? _timelineData;
   SocketProfile? _socketProfile;
   final List<SocketStatistic> _startingSockets;
   HttpProfile? _httpProfile;
@@ -348,15 +350,15 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
       Future.value(TimelineFlags.parse(_vmTimelineFlags)!);
 
   @override
-  Future<Timeline> getVMTimeline({
+  Future<PerfettoTimeline> getPerfettoVMTimelineWithCpuSamplesWrapper({
     int? timeOriginMicros,
     int? timeExtentMicros,
   }) {
-    final result = _timelineData;
-    if (result == null) {
+    final perfettoTimeline = _timelineData;
+    if (perfettoTimeline == null) {
       throw StateError('timelineData was not provided to FakeServiceManager');
     }
-    return Future.value(result);
+    return Future.value(perfettoTimeline);
   }
 
   @override
@@ -414,10 +416,14 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   @override
   Future<HttpProfile> getHttpProfileWrapper(
     String isolateId, {
-    int? updatedSince,
+    DateTime? updatedSince,
   }) {
     return Future.value(
-      _httpProfile ?? HttpProfile(requests: [], timestamp: 0),
+      _httpProfile ??
+          HttpProfile(
+            requests: [],
+            timestamp: DateTime.fromMicrosecondsSinceEpoch(0),
+          ),
     );
   }
 
@@ -428,7 +434,10 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   }
 
   void restoreFakeHttpProfileRequests() {
-    _httpProfile = HttpProfile(requests: _startingRequests, timestamp: 0);
+    _httpProfile = HttpProfile(
+      requests: _startingRequests,
+      timestamp: DateTime.fromMicrosecondsSinceEpoch(0),
+    );
   }
 
   @override

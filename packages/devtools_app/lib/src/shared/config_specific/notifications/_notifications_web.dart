@@ -4,22 +4,23 @@
 
 import 'dart:js_interop';
 
-import 'package:web/helpers.dart' as web_helpers;
-import 'package:web/web.dart';
+import 'package:web/web.dart' as web;
 
 class Notification {
   Notification(String title, {String body = ''}) {
-    _impl = web_helpers.Notification(
+    _impl = web.Notification(
       title,
-      NotificationOptions(body: body),
+      web.NotificationOptions(body: body),
     );
   }
 
-  late final web_helpers.Notification _impl;
+  late final web.Notification _impl;
 
   static Future<String> requestPermission() async =>
-      ((await web_helpers.Notification.requestPermission().toDart) as JSString)
-          .toDart;
+      // TODO(srujzs): This was needed in 0.4.0 as generics were not available.
+      // This is no longer true 0.5.0 onwards.
+      // ignore: unnecessary_cast
+      ((await web.Notification.requestPermission().toDart) as JSString).toDart;
 
   void close() {
     _impl.close();

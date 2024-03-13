@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'package:web/helpers.dart';
+import 'package:web/web.dart';
 
 import '../../globals.dart';
 import '../../primitives/utils.dart';

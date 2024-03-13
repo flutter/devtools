@@ -191,9 +191,19 @@ class VmServiceWrapper extends VmService {
     }
   }
 
-  // Mark: Overrides for [DdsExtension]. It would help with logical grouping to
-  // make these extension methods, but that makes testing more difficult due to
-  // mocking limitations for extension methods.
+  // Mark: Overrides for [DdsExtension]. We wrap these methods so that we can
+  // override them in tests.
+
+  Future<PerfettoTimeline> getPerfettoVMTimelineWithCpuSamplesWrapper({
+    int? timeOriginMicros,
+    int? timeExtentMicros,
+  }) {
+    return getPerfettoVMTimelineWithCpuSamples(
+      timeOriginMicros: timeOriginMicros,
+      timeExtentMicros: timeExtentMicros,
+    );
+  }
+
   Stream<Event> get onExtensionEventWithHistorySafe {
     return _maybeReturnStreamWithHistory(
       onExtensionEventWithHistory,
@@ -264,7 +274,7 @@ class VmServiceWrapper extends VmService {
 
   Future<HttpProfile> getHttpProfileWrapper(
     String isolateId, {
-    int? updatedSince,
+    DateTime? updatedSince,
   }) {
     return getHttpProfile(isolateId, updatedSince: updatedSince);
   }

@@ -32,7 +32,6 @@ void main() {
 
     test('has value', () {
       expect(controller.darkModeTheme.value, isNotNull);
-      expect(controller.denseModeEnabled.value, isNotNull);
     });
 
     test('toggleDarkModeTheme', () {
@@ -60,19 +59,6 @@ void main() {
           .toggleVmDeveloperMode(!controller.vmDeveloperModeEnabled.value);
       expect(valueChanged, isTrue);
       expect(controller.vmDeveloperModeEnabled.value, isNot(originalValue));
-    });
-
-    test('toggleDenseMode', () {
-      bool valueChanged = false;
-      final originalValue = controller.denseModeEnabled.value;
-
-      controller.denseModeEnabled.addListener(() {
-        valueChanged = true;
-      });
-
-      controller.toggleDenseMode(!controller.denseModeEnabled.value);
-      expect(valueChanged, isTrue);
-      expect(controller.denseModeEnabled.value, isNot(originalValue));
     });
   });
 
@@ -269,11 +255,8 @@ void main() {
       test(
         'does not save inferred directory to local cache',
         () async {
-          final cachedDirectoriesJson = await storage
-              .getValue('inspector.customPubRootDirectories_myPackage');
-          final cachedDirectories = List<String>.from(
-            jsonDecode(cachedDirectoriesJson!),
-          );
+          final cachedDirectories =
+              await controller.readCachedPubRootDirectories();
 
           expect(cachedDirectories, isNot(contains('test_dir/fake_app')));
         },
@@ -285,12 +268,8 @@ void main() {
           await controller.addPubRootDirectories(
             ['test_dir/fake_app/do_not_cache_dir'],
           );
-
-          final cachedDirectoriesJson = await storage
-              .getValue('inspector.customPubRootDirectories_myPackage');
-          final cachedDirectories = List<String>.from(
-            jsonDecode(cachedDirectoriesJson!),
-          );
+          final cachedDirectories =
+              await controller.readCachedPubRootDirectories();
 
           expect(
             cachedDirectories,
@@ -299,6 +278,78 @@ void main() {
         },
       );
     });
+
+    test('Flutter pub root is removed from cache on app connection', () async {
+      updateMainIsolateRootLibrary('test_dir/fake_app/lib/main.dart');
+      await storage.setValue(
+        'inspector.customPubRootDirectories_myPackage',
+        jsonEncode(
+          [
+            'flutter_dir/flutter/packages/flutter',
+            'test_dir/fake_app/custom_dir1',
+          ],
+        ),
+      );
+      await controller.handleConnectionToNewService();
+      final cachedDirectories = await controller.readCachedPubRootDirectories();
+
+      expect(
+        cachedDirectories,
+        isNot(contains('flutter_dir/flutter/packages/flutter')),
+      );
+      expect(
+        cachedDirectories,
+        contains('test_dir/fake_app/custom_dir1'),
+      );
+    });
+
+    test(
+      'Flutter pub root is removed from cache across multiple app connections',
+      () async {
+        updateMainIsolateRootLibrary('test_dir/fake_app/lib/main.dart');
+        await storage.setValue(
+          'inspector.customPubRootDirectories_myPackage',
+          jsonEncode(
+            [
+              'flutter_dir/flutter/packages/flutter',
+              'test_dir/fake_app/custom_dir1',
+            ],
+          ),
+        );
+        await controller.handleConnectionToNewService();
+        var cachedDirectories = await controller.readCachedPubRootDirectories();
+
+        expect(
+          cachedDirectories,
+          isNot(contains('flutter_dir/flutter/packages/flutter')),
+        );
+        expect(
+          cachedDirectories,
+          contains('test_dir/fake_app/custom_dir1'),
+        );
+
+        await storage.setValue(
+          'inspector.customPubRootDirectories_myPackage',
+          jsonEncode(
+            [
+              'flutter_dir/flutter/packages/flutter',
+              'test_dir/fake_app/custom_dir2',
+            ],
+          ),
+        );
+        await controller.handleConnectionToNewService();
+        cachedDirectories = await controller.readCachedPubRootDirectories();
+
+        expect(
+          cachedDirectories,
+          isNot(contains('flutter_dir/flutter/packages/flutter')),
+        );
+        expect(
+          cachedDirectories,
+          contains('test_dir/fake_app/custom_dir2'),
+        );
+      },
+    );
   });
 
   group('$MemoryPreferencesController', () {

@@ -160,7 +160,6 @@ abstract class Screen {
     this.requiresDebugBuild = false,
     this.requiresVmDeveloperMode = false,
     this.worksOffline = false,
-    this.shouldShowForFlutterVersion,
     this.showFloatingDebuggerControls = true,
   }) : assert((title == null) || (titleGenerator == null));
 
@@ -188,7 +187,6 @@ abstract class Screen {
           requiresDebugBuild: requiresDebugBuild,
           requiresVmDeveloperMode: requiresVmDeveloperMode,
           worksOffline: worksOffline,
-          shouldShowForFlutterVersion: shouldShowForFlutterVersion,
           showFloatingDebuggerControls: showFloatingDebuggerControls,
           title: title,
           titleGenerator: titleGenerator,
@@ -280,11 +278,6 @@ abstract class Screen {
   /// Whether this screen works offline and should show in offline mode even if conditions are not met.
   final bool worksOffline;
 
-  /// A callback that will determine whether or not this screen should be
-  /// available for a given flutter version.
-  final bool Function(FlutterVersion? currentFlutterVersion)?
-      shouldShowForFlutterVersion;
-
   /// Whether this screen should display the isolate selector in the status
   /// line.
   ///
@@ -293,10 +286,19 @@ abstract class Screen {
   ValueListenable<bool> get showIsolateSelector =>
       const FixedValueListenable<bool>(false);
 
-  /// The id to use to synthesize a help URL.
+  /// The documentation URL to use for this screen.
+  ///
+  /// If this returns a null value, [docPageId] will be used to create a
+  /// documentation URL.
+  String? get docsUrl => null;
+
+  /// The id to use to create a documentation URL for this screen.
   ///
   /// If the screen does not have a custom documentation page, this property
   /// should return `null`.
+  ///
+  /// If [docsUrl] returns a non-null value, [docsUrl] will be used instead of
+  /// creating a documentation url using [docPageId].
   String? get docPageId => null;
 
   double approximateTabWidth(
@@ -445,16 +447,6 @@ bool shouldShowScreen(Screen screen) {
   if (screen.requiresVmDeveloperMode) {
     if (!preferences.vmDeveloperModeEnabled.value) {
       _log.finest('screen requires vm developer mode: returning false');
-      return false;
-    }
-  }
-  if (screen.shouldShowForFlutterVersion != null) {
-    if (serviceConnection.serviceManager.connectedApp!.isFlutterAppNow ==
-            true &&
-        !screen.shouldShowForFlutterVersion!(
-          serviceConnection.serviceManager.connectedApp!.flutterVersionNow,
-        )) {
-      _log.finest('screen has flutter version restraints: returning false');
       return false;
     }
   }

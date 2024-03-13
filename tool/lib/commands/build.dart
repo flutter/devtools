@@ -54,23 +54,25 @@ class BuildCommand extends Command {
     final repo = DevToolsRepo.getInstance();
     final processManager = ProcessManager();
 
-    final updateFlutter = argResults![BuildCommandArgs.updateFlutter.flagName];
+    final updateFlutter =
+        argResults![BuildCommandArgs.updateFlutter.flagName] as bool;
     final updatePerfetto =
-        argResults![BuildCommandArgs.updatePerfetto.flagName];
-    final runPubGet = argResults![BuildCommandArgs.pubGet.flagName];
-    final buildMode = argResults![BuildCommandArgs.buildMode.flagName];
+        argResults![BuildCommandArgs.updatePerfetto.flagName] as bool;
+    final runPubGet = argResults![BuildCommandArgs.pubGet.flagName] as bool;
+    final buildMode =
+        argResults![BuildCommandArgs.buildMode.flagName] as String;
 
     final webBuildDir =
         Directory(path.join(repo.devtoolsAppDirectoryPath, 'build', 'web'));
 
     if (updateFlutter) {
       logStatus('updating tool/flutter-sdk to the latest flutter candidate');
-      await processManager.runProcess(CliCommand.tool('update-flutter-sdk'));
+      await processManager.runProcess(CliCommand.tool(['update-flutter-sdk']));
     }
 
     if (updatePerfetto) {
       logStatus('updating the bundled Perfetto assets');
-      await processManager.runProcess(CliCommand.tool('update-perfetto'));
+      await processManager.runProcess(CliCommand.tool(['update-perfetto']));
     }
 
     logStatus('cleaning project');
@@ -78,14 +80,14 @@ class BuildCommand extends Command {
       webBuildDir.deleteSync(recursive: true);
     }
     await processManager.runProcess(
-      CliCommand.flutter('clean'),
+      CliCommand.flutter(['clean']),
       workingDirectory: repo.devtoolsAppDirectoryPath,
     );
 
     logStatus('building DevTools in release mode');
     await processManager.runAll(
       commands: [
-        if (runPubGet) CliCommand.tool('pub-get --only-main'),
+        if (runPubGet) CliCommand.tool(['pub-get', '--only-main']),
         CliCommand.flutter(
           [
             'build',
@@ -93,9 +95,11 @@ class BuildCommand extends Command {
             '--web-renderer',
             'canvaskit',
             '--pwa-strategy=offline-first',
+            // Enable default optimizations: https://dart.dev/tools/dart-compile#js
+            '--dart2js-optimization=O1',
             if (buildMode != 'debug') '--$buildMode',
             '--no-tree-shake-icons',
-          ].join(' '),
+          ],
         ),
       ],
       workingDirectory: repo.devtoolsAppDirectoryPath,
@@ -108,7 +112,7 @@ class BuildCommand extends Command {
       for (final file in canvaskitDir.listSync()) {
         if (RegExp(r'canvaskit\..*').hasMatch(file.path)) {
           await processManager
-              .runProcess(CliCommand('chmod 0755 ${file.path}'));
+              .runProcess(CliCommand('chmod', ['0755', file.path]));
         }
       }
     }
