@@ -27,15 +27,15 @@ class HeapClassDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theData = classData;
-    if (theData == null) {
+    final data = classData;
+    if (data == null) {
       return const CenteredMessage(
         'Click a table row to see retaining paths here.',
       );
     }
 
     final retainingPathsTable = RetainingPathTable(
-      classData: theData,
+      classData: data,
       selection: pathSelection,
       isDiff: isDiff,
     );
@@ -50,8 +50,7 @@ class HeapClassDetails extends StatelessWidget {
         }
 
         return RetainingPathView(
-          className: theData.className,
-          path: pathData.path,
+          data: pathData,
           controller: pathController,
         );
       },

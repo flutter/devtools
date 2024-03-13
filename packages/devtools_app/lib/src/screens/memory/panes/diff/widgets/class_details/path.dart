@@ -16,13 +16,11 @@ import '../../controller/class_data.dart';
 class RetainingPathView extends StatelessWidget {
   const RetainingPathView({
     super.key,
-    required this.path,
+    required this.data,
     required this.controller,
-    required this.className,
   });
 
-  final HeapClassName className;
-  final PathFromRoot path;
+  final PathData data;
   final RetainingPathController controller;
 
   @override
@@ -34,9 +32,9 @@ class RetainingPathView extends StatelessWidget {
         children: [
           const SizedBox(height: densePadding),
           _PathControlPane(
-            className: className,
+            className: data.classData.className,
             controller: controller,
-            path: path,
+            path: data.path,
           ),
           Expanded(
             child: Padding(
@@ -44,7 +42,7 @@ class RetainingPathView extends StatelessWidget {
                 top: densePadding,
                 left: densePadding,
               ),
-              child: _PathView(path: path, controller: controller),
+              child: _PathView(path: data.path, controller: controller),
             ),
           ),
         ],
