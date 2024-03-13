@@ -94,9 +94,9 @@ class MemoryController extends DisposableController
     initialize();
   }
 
-  ValueListenable<MemoryInitializationStatus> get initialization =>
-      _initialization;
-  final ValueNotifier<MemoryInitializationStatus> _initialization =
+  ValueListenable<MemoryInitializationStatus> get initializationStatus =>
+      _initializationStatus;
+  final ValueNotifier<MemoryInitializationStatus> _initializationStatus =
       ValueNotifier(MemoryInitializationStatus.none);
 
   void _initialize({
@@ -104,16 +104,16 @@ class MemoryController extends DisposableController
     required ProfilePaneController? profilePaneController,
     required bool offline,
   }) {
-    _initialization.value = MemoryInitializationStatus.none;
+    _initializationStatus.value = MemoryInitializationStatus.none;
     if (offline) {
       _maybeLoadOfflineData();
-      _initialization.value = MemoryInitializationStatus.offline;
+      _initializationStatus.value = MemoryInitializationStatus.offline;
     } else {
       _controllers = MemoryFeatureControllers(
         diffPaneController,
         profilePaneController,
       );
-      _initialization.value = MemoryInitializationStatus.connected;
+      _initializationStatus.value = MemoryInitializationStatus.connected;
     }
   }
 

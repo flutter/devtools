@@ -61,7 +61,7 @@ class MemoryBodyState extends State<MemoryBody>
     super.didChangeDependencies();
     if (!initController()) return;
     _initialization?.removeListener(onUpdateInitialization);
-    _initialization = controller.initialization;
+    _initialization = controller.initializationStatus;
     addAutoDisposeListener(_initialization, onUpdateInitialization);
     onUpdateInitialization();
   }
@@ -70,7 +70,7 @@ class MemoryBodyState extends State<MemoryBody>
 
   @override
   Widget build(BuildContext context) {
-    switch (controller.initialization.value) {
+    switch (controller.initializationStatus.value) {
       case MemoryInitializationStatus.offline:
         return const OfflineMemoryBody();
       case MemoryInitializationStatus.connected:

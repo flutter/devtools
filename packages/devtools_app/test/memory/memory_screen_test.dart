@@ -96,7 +96,7 @@ void main() {
 
         // Should be collecting live feed.
         expect(
-          controller.initialization.value,
+          controller.initializationStatus.value,
           MemoryInitializationStatus.connected,
         );
 
