@@ -147,16 +147,13 @@ class PerformanceController extends DisposableController
         }),
       );
     } else {
-      if (offlineController.shouldLoadOfflineData(PerformanceScreen.id)) {
+      await maybeLoadOfflineData(
+        PerformanceScreen.id,
         // TODO(kenz): make sure DevTools exports can be loaded into the full
         // Perfetto trace viewer (ui.perfetto.dev).
-        final offlinePerformanceData = OfflinePerformanceData.parse(
-          offlineController.offlineDataJson[PerformanceScreen.id],
-        );
-        if (!offlinePerformanceData.isEmpty) {
-          await loadOfflineData(offlinePerformanceData);
-        }
-      }
+        createData: (json) => OfflinePerformanceData.parse(json),
+        shouldLoad: (data) => !data.isEmpty,
+      );
     }
   }
 

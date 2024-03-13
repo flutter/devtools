@@ -24,6 +24,7 @@ class ExampleConditionalScreen extends Screen {
           requiresLibrary: 'package:flutter/',
           title: 'Example',
           icon: Icons.palette,
+          worksOffline: true,
         );
 
   static const id = 'example';
@@ -88,17 +89,11 @@ class ExampleController extends DisposableController
     if (!offlineController.offlineMode.value) {
       // Do some initialization for online mode.
     } else {
-      final shouldLoadOfflineData =
-          offlineController.shouldLoadOfflineData(ExampleConditionalScreen.id);
-      if (shouldLoadOfflineData) {
-        final exampleScreenJson = Map<String, dynamic>.from(
-          offlineController.offlineDataJson[ExampleConditionalScreen.id],
-        );
-        final offlineData = ExampleScreenData.parse(exampleScreenJson);
-        if (!offlineData.title.isNotEmpty) {
-          await loadOfflineData(offlineData);
-        }
-      }
+      await maybeLoadOfflineData(
+        ExampleConditionalScreen.id,
+        createData: (json) => ExampleScreenData.parse(json),
+        shouldLoad: (data) => data.title.isNotEmpty,
+      );
     }
   }
 
