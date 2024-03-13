@@ -400,13 +400,13 @@ abstract class Screen {
   }
 
   /// Builds the default body to display for this screen.
-  /// 
+  ///
   /// This method must be implemented by subclasses.
   Widget buildScreenBody(BuildContext context);
 
   /// Builds the body to display for this screen when in a disconnected state,
   /// if this differs from the default body provided by [buildScreenBody].
-  /// 
+  ///
   /// This method will only be called when [requiresConnection] is not true,
   /// and when DevTools is in a disconnected state.
   Widget? buildDisconnectedScreenBody(BuildContext context) => null;
