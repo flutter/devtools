@@ -304,7 +304,7 @@ class VmCodeDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Split(
+    return SplitPane(
       initialFractions: const [0.4, 0.6],
       axis: Axis.vertical,
       children: [

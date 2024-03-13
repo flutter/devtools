@@ -131,7 +131,7 @@ class _LayerVisualizer extends StatelessWidget {
             ),
           );
         }
-        return Split(
+        return SplitPane(
           axis: Axis.horizontal,
           initialFractions: const [0.5, 0.5],
           children: [

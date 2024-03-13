@@ -1,6 +1,8 @@
-## 0.0.11-wip
+## 0.1.0
 * Remove deprecated `background` and `onBackground` values for `lightColorScheme`
 and `darkColorScheme`.
+* Rename `Split` to `SplitPane`.
+* Add `ServiceManager.serviceUri` field to store the connected VM service URI.
 
 ## 0.0.10
 * Add `DTDManager` class and export from `service.dart`.
@@ -44,7 +46,7 @@ a VM service connection.
 * Add optional parameter `id` to `DisposerMixin.addAutoDisposeListener` and
 `AutoDisposeMixin.addAutoDisposeListener` that allows for tagging a listener
 with a specific id.
-* Add optional parameter `excludeIds` to `DisposerMixin.cancelListeners` and 
+* Add optional parameter `excludeIds` to `DisposerMixin.cancelListeners` and
 `AutoDisposeMixin.cancelListeners` that allows for excluding listeners with
 a specific id from the cancel operation.
 

@@ -379,7 +379,7 @@ class _IsolatePortsWidgetState extends State<IsolatePortsWidget> {
   Widget build(BuildContext context) {
     final ports = widget.controller.ports;
     return OutlineDecoration(
-      child: Split(
+      child: SplitPane(
         axis: Axis.horizontal,
         initialFractions: const [
           0.3,
