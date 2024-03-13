@@ -2,10 +2,93 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
+
 import 'package:devtools_app/src/shared/primitives/byte_utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  group('$Uint8ListRingBuffer', () {
+    test('calculates size', () {
+      final list1 = Uint8List.fromList([1, 2, 3, 4]);
+      final list2 = Uint8List.fromList([5, 6, 7, 8]);
+      final list3 = Uint8List.fromList([9, 10, 11, 12]);
+
+      final buffer = Uint8ListRingBuffer(maxSizeBytes: 100);
+      expect(buffer.size, 0);
+      buffer.addData(list1);
+      expect(buffer.size, 4);
+      buffer.addData(list2);
+      expect(buffer.size, 8);
+      buffer.addData(list3);
+      expect(buffer.size, 12);
+    });
+
+    test('can add data', () {
+      final list1 = Uint8List.fromList([1, 2, 3, 4]);
+      final list2 = Uint8List.fromList([5, 6, 7, 8]);
+      final list3 = Uint8List.fromList([9, 10, 11, 12]);
+
+      final buffer = Uint8ListRingBuffer(maxSizeBytes: 10);
+      expect(buffer.data, isEmpty);
+
+      buffer.addData(list1);
+      expect(buffer.data.length, 1);
+      expect(buffer.size, 4);
+      expect(buffer.data, contains(list1));
+
+      buffer.addData(list2);
+      expect(buffer.data.length, 2);
+      expect(buffer.size, 8);
+      expect(buffer.data, contains(list1));
+      expect(buffer.data, contains(list2));
+
+      buffer.addData(list3);
+      expect(buffer.data.length, 2);
+      expect(buffer.size, 8);
+      expect(buffer.data, isNot(contains(list1)));
+      expect(buffer.data, contains(list2));
+      expect(buffer.data, contains(list3));
+    });
+
+    test('can merge data', () {
+      final list1 = Uint8List.fromList([1, 2, 3, 4]);
+      final list2 = Uint8List.fromList([5, 6, 7, 8]);
+
+      final buffer = Uint8ListRingBuffer(maxSizeBytes: 10);
+      expect(buffer.data, isEmpty);
+
+      buffer
+        ..addData(list1)
+        ..addData(list2);
+      expect(buffer.size, 8);
+
+      final merged = buffer.merged;
+      expect(merged.length, 8);
+      expect(merged, Uint8List.fromList([...list1, ...list2]));
+    });
+
+    test('can clear data', () {
+      final list1 = Uint8List.fromList([1, 2, 3, 4]);
+      final list2 = Uint8List.fromList([5, 6, 7, 8]);
+
+      final buffer = Uint8ListRingBuffer(maxSizeBytes: 10);
+      expect(buffer.data, isEmpty);
+
+      buffer
+        ..addData(list1)
+        ..addData(list2);
+      expect(buffer.data.length, 2);
+      expect(buffer.size, 8);
+      expect(buffer.data, contains(list1));
+      expect(buffer.data, contains(list2));
+
+      buffer.clear();
+      expect(buffer.data, isEmpty);
+      expect(buffer.size, 0);
+    });
+  });
+
   group('printBytes', () {
     test('${ByteUnit.kb}', () {
       const int kb = 1024;

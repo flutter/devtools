@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:fixnum/fixnum.dart';
@@ -14,19 +15,19 @@ import '../../../test_infra/test_data/performance/sample_performance_data.dart';
 void main() {
   group('$PerfettoTrace', () {
     test('setting trace with new trace object notifies listeners', () {
-      final startingTrace = Trace();
-      final perfettoTrace = PerfettoTrace(startingTrace);
-      final newTrace = Trace();
+      final startingBinary = Uint8List(0);
+      final perfettoTrace = PerfettoTrace(startingBinary);
+      final newBinary = Uint8List(0);
 
       bool notified = false;
       perfettoTrace.addListener(() => notified = true);
-      perfettoTrace.trace = newTrace;
+      perfettoTrace.trace = newBinary;
 
-      expect(perfettoTrace.trace, newTrace);
+      expect(perfettoTrace.traceBinary, newBinary);
       expect(notified, isTrue);
     });
     test('setting trace with identical object notifies listeners', () {
-      final trace = Trace();
+      final trace = Uint8List(0);
       final perfettoTrace = PerfettoTrace(trace);
 
       bool notified = false;

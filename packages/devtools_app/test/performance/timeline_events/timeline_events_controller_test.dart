@@ -51,7 +51,7 @@ void main() {
 
     test('can setOfflineData', () async {
       // Ensure we are starting in an empty state.
-      expect(eventsController.fullPerfettoTrace, isNull);
+      expect(eventsController.fullPerfettoTrace, isEmpty);
       expect(eventsController.perfettoController.processor.uiTrackId, isNull);
       expect(
         eventsController.perfettoController.processor.rasterTrackId,
@@ -66,7 +66,7 @@ void main() {
           .thenReturn(offlineData);
       await eventsController.setOfflineData(offlineData);
 
-      expect(eventsController.fullPerfettoTrace, isNotNull);
+      expect(eventsController.fullPerfettoTrace, isNotEmpty);
       expect(
         eventsController.perfettoController.processor.uiTrackId,
         equals(testUiTrackId),

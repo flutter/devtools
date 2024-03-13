@@ -33,6 +33,13 @@
             "flutterMode": "profile",
         },
         {
+            "name": "devtools + release",
+            "request": "launch",
+            "type": "dart",
+            "program": "devtools_app/lib/main.dart",
+            "flutterMode": "release",
+        },
+        {
             "name": "devtools + profile + experiments",
             "request": "launch",
             "type": "dart",
