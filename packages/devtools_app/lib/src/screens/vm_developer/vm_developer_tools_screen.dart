@@ -46,7 +46,7 @@ class VMDeveloperToolsScreen extends Screen {
       VMDeveloperToolsController.showIsolateSelector;
 
   @override
-  Widget build(BuildContext context) => const VMDeveloperToolsScreenBody();
+  Widget buildScreenBody(BuildContext context) => const VMDeveloperToolsScreenBody();
 }
 
 class VMDeveloperToolsScreenBody extends StatefulWidget {

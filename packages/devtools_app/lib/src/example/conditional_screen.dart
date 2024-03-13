@@ -29,7 +29,7 @@ class ExampleConditionalScreen extends Screen {
   static const id = 'example';
 
   @override
-  Widget build(BuildContext context) {
+  Widget buildScreenBody(BuildContext context) {
     return const _ExampleConditionalScreenBody();
   }
 }

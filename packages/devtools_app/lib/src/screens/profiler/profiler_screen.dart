@@ -39,14 +39,13 @@ class ProfilerScreen extends Screen {
       const FixedValueListenable<bool>(true);
 
   @override
-  Widget build(BuildContext context) {
-    final connected = serviceConnection.serviceManager.hasConnection &&
-        serviceConnection.serviceManager.connectedAppInitialized;
-    if (!connected && !offlineController.offlineMode.value) {
-      return const DisconnectedCpuProfilerScreenBody();
-    }
-
+  Widget buildScreenBody(BuildContext context) {
     return const ProfilerScreenBody();
+  }
+
+  @override
+  Widget buildDisconnectedScreenBody(BuildContext context) {
+    return const DisconnectedCpuProfilerScreenBody();
   }
 }
 

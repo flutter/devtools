@@ -52,7 +52,7 @@ class ProviderScreen extends Screen {
   static final id = ScreenMetaData.provider.id;
 
   @override
-  Widget build(BuildContext context) {
+  Widget buildScreenBody(BuildContext context) {
     return const ProviderScreenWrapper();
   }
 }

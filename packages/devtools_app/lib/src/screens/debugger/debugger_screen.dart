@@ -73,7 +73,7 @@ class DebuggerScreen extends Screen {
       const FixedValueListenable<bool>(true);
 
   @override
-  Widget build(BuildContext context) => const _DebuggerScreenBodyWrapper();
+  Widget buildScreenBody(BuildContext context) => const _DebuggerScreenBodyWrapper();
 
   @override
   Widget buildStatus(BuildContext context) {

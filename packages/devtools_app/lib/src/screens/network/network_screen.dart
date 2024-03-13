@@ -37,7 +37,7 @@ class NetworkScreen extends Screen {
   String get docPageId => screenId;
 
   @override
-  Widget build(BuildContext context) => const NetworkScreenBody();
+  Widget buildScreenBody(BuildContext context) => const NetworkScreenBody();
 
   @override
   Widget buildStatus(BuildContext context) {
