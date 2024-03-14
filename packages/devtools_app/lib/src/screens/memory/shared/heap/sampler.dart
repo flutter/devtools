@@ -24,7 +24,7 @@ class _HeapObjects {
   ///
   /// CPU and memory heavy to calculate,
   /// so avoid calling this member unless necessary.
-  late final Set<int> codes = objects.objects
+  late final Set<int> codes = objects.indexes
       .map((index) => heap.graph.objects[index].identityHashCode)
       .where((code) => code > 0)
       .toSet();
@@ -35,7 +35,7 @@ class LiveClassSampler {
     this.heapClass, {
     ObjectSet? objects,
     HeapData? heap,
-  })  : assert(objects?.objects.isNotEmpty ?? true),
+  })  : assert(objects?.indexes.isNotEmpty ?? true),
         assert((objects == null) == (heap == null)),
         _objects = objects == null ? null : _HeapObjects(objects, heap!);
 
@@ -200,7 +200,7 @@ class SnapshotClassSampler extends LiveClassSampler {
     final heapObjects = _objects!;
     ga.select(gac.memory, gac.MemoryEvent.dropOneStaticVariable);
 
-    final index = heapObjects.objects.objects.first;
+    final index = heapObjects.objects.indexes.first;
     final heapObject = HeapObject(heapObjects.heap, index: index);
 
     // drop to console

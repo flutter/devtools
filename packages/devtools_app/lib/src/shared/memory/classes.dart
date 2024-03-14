@@ -70,16 +70,19 @@ class ObjectSetStats {
 class ObjectSet extends ObjectSetStats {
   static ObjectSet empty = ObjectSet();
 
-  final objects = <int>[];
+  /// Indexes of the objects in a heap snapshot.
+  final indexes = <int>[];
 
-  /// Subset of objects that are excluded from the retained size
+  /// Indexes of objects that are excluded from the retained size
   /// calculation for this set.
   ///
+  /// Subset of [indexes].
+  ///
   /// See [countInstance].
-  final objectsExcludedFromRetainedSize = <int>{};
+  final excludedFromRetainedSize = <int>{};
 
   @override
-  bool get isZero => objects.isEmpty;
+  bool get isZero => indexes.isEmpty;
 
   @override
   void countInstance(
@@ -94,8 +97,8 @@ class ObjectSet extends ObjectSetStats {
       retainedSizes,
       excludeFromRetained: excludeFromRetained,
     );
-    objects.add(index);
-    if (excludeFromRetained) objectsExcludedFromRetainedSize.add(index);
+    indexes.add(index);
+    if (excludeFromRetained) excludedFromRetainedSize.add(index);
   }
 
   @override
@@ -156,10 +159,8 @@ class ClassDataList<T extends ClassData> {
   }
 
   /// Returns class data if [className] is presented in the [list].
-  ClassData? byName(HeapClassName? className) {
-    if (className == null) return null;
-    return list.firstWhereOrNull((c) => c.className == className);
-  }
+  ClassData? byName(HeapClassName? className) =>
+      list.firstWhereOrNull((c) => c.className == className);
 }
 
 abstract class ClassData {

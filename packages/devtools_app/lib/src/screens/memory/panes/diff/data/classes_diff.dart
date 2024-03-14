@@ -57,7 +57,7 @@ class ObjectSetDiff {
     ObjectSet originalSet,
   ) {
     final excludeFromRetained =
-        originalSet.objectsExcludedFromRetainedSize.contains(index);
+        originalSet.excludedFromRetainedSize.contains(index);
     setToAlter.countInstance(
       data.graph,
       index,
@@ -73,7 +73,7 @@ class ObjectSetDiff {
     ObjectSet originalSet,
   ) {
     final excludeFromRetained =
-        originalSet.objectsExcludedFromRetainedSize.contains(index);
+        originalSet.excludedFromRetainedSize.contains(index);
     setToAlter.uncountInstance(
       data.graph,
       index,
@@ -88,7 +88,7 @@ class ObjectSetDiff {
   ) {
     if (ids == null || data == null) return const {};
     return {
-      for (var id in ids.objects) data.graph.objects[id].identityHashCode: id,
+      for (var id in ids.indexes) data.graph.objects[id].identityHashCode: id,
     };
   }
 
