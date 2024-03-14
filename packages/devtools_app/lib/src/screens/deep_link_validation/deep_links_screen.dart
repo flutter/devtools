@@ -29,7 +29,7 @@ class DeepLinksScreen extends Screen {
   String get docsUrl => 'https://docs.flutter.dev/ui/navigation/deep-linking';
 
   @override
-  Widget build(BuildContext context) {
+  Widget buildScreenBody(BuildContext context) {
     return const DeepLinkPage();
   }
 }
