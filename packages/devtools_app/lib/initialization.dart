@@ -17,7 +17,7 @@ import 'src/shared/config_specific/framework_initialize/framework_initialize.dar
 import 'src/shared/config_specific/logger/logger_helpers.dart';
 import 'src/shared/feature_flags.dart';
 import 'src/shared/globals.dart';
-import 'src/shared/preferences.dart';
+import 'src/shared/preferences/preferences.dart';
 import 'src/shared/primitives/url_utils.dart';
 import 'src/shared/primitives/utils.dart';
 import 'src/shared/server/server.dart' as server;
