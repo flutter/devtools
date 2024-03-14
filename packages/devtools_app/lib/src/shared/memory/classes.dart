@@ -113,6 +113,10 @@ class ObjectSet extends ObjectSetStats {
 }
 
 @immutable
+
+/// List of classes with filtering support.
+///
+/// Is used to provide a list of classes to widgets.
 class ClassDataList<T extends ClassData> {
   const ClassDataList(this._originalList)
       : _appliedFilter = null,
@@ -163,6 +167,7 @@ class ClassDataList<T extends ClassData> {
       list.firstWhereOrNull((c) => c.className == className);
 }
 
+/// A data for a class needed to display the class.
 abstract class ClassData {
   ClassData({required this.className});
 
@@ -184,6 +189,7 @@ abstract class ClassData {
   }();
 }
 
+/// A data for a single class, without diffing.
 class SingleClassData extends ClassData {
   SingleClassData({required super.className});
 
@@ -191,7 +197,7 @@ class SingleClassData extends ClassData {
   final ObjectSet objects = ObjectSet();
 
   @override
-  final Map<PathFromRoot, ObjectSetStats> byPath = {};
+  final byPath = <PathFromRoot, ObjectSetStats>{};
 
   void countInstance(
     HeapSnapshotGraph graph, {
