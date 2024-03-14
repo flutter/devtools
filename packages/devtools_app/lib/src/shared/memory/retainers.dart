@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../../../../shared/memory/adapted_heap_data.dart';
-import '../../../../shared/memory/adapted_heap_object.dart';
-import '../../../../shared/primitives/utils.dart';
+import '../primitives/utils.dart';
+import 'adapted_heap_data.dart';
+import 'adapted_heap_object.dart';
 
 final _uiReleaser = UiReleaser();
 

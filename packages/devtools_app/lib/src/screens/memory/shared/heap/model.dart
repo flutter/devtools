@@ -57,17 +57,3 @@ Future<AdaptedHeapData> _adaptSnapshotGaWrapper(HeapSnapshotGraph graph) async {
   );
   return result;
 }
-
-/// Mark the object as deeply immutable.
-///
-/// There is no strong protection from mutation, just some asserts.
-mixin Sealable {
-  /// See doc for the mixin [Sealable].
-  void seal() {
-    _isSealed = true;
-  }
-
-  /// See doc for the mixin [Sealable].
-  bool get isSealed => _isSealed;
-  bool _isSealed = false;
-}

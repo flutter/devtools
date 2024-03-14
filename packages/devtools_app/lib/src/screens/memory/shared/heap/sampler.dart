@@ -10,8 +10,8 @@ import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/globals.dart';
 import '../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../shared/memory/class_name.dart';
+import '../../../../shared/memory/classes.dart';
 import '../../../../shared/vm_utils.dart';
-import 'heap.dart';
 
 class _HeapObjects {
   _HeapObjects(this.objects, this.heap);
