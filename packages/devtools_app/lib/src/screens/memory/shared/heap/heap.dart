@@ -5,11 +5,11 @@
 import '../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../shared/memory/class_name.dart';
 import '../../../../shared/memory/classes.dart';
+import '../../../../shared/memory/retainers.dart';
 import '../../../../shared/memory/retaining_path.dart';
 import '../../../../shared/memory/simple_items.dart';
 import '../../../../shared/primitives/utils.dart';
 import 'class_filter.dart';
-import 'spanning_tree.dart';
 
 class AdaptedHeap {
   AdaptedHeap._(this.data);
