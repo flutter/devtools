@@ -6,7 +6,6 @@ import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/controller/diff_pane_controller.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/diff_pane.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/class_filter.dart';
-import 'package:devtools_app/src/shared/memory/heap_graph_loader.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -14,7 +13,6 @@ import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stager/stager.dart';
-import 'package:vm_service/src/snapshot_graph.dart';
 
 import '../../test_data/memory/heap/heap_data.dart';
 
@@ -46,7 +44,7 @@ class DiffSnapshotScene extends Scene {
     );
     setGlobal(ServiceConnectionManager, fakeServiceConnection);
 
-    diffController = DiffPaneController(_TestGraphLoader());
+    diffController = DiffPaneController(HeapGraphLoaderMock());
     setClassFilterToShowAll();
 
     await diffController.takeSnapshot();
@@ -63,20 +61,4 @@ class DiffSnapshotScene extends Scene {
   }
 
   void tearDown() {}
-}
-
-/// Provides test snapshots.
-class _TestGraphLoader implements HeapGraphLoader {
-  int _nextIndex = 0;
-
-  @override
-  Future<(HeapSnapshotGraph, DateTime)> load() async {
-    // This delay is needed for UI to start showing the progress indicator.
-    await Future.delayed(const Duration(milliseconds: 100));
-    final result = await goldenHeapTests[_nextIndex].loadHeap();
-
-    _nextIndex = (_nextIndex + 1) % goldenHeapTests.length;
-
-    return (result, DateTime.now());
-  }
 }

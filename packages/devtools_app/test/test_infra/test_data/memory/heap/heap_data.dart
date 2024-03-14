@@ -26,6 +26,22 @@ class GoldenHeapTest {
   }
 }
 
+/// Provides test snapshots.
+class HeapGraphLoaderMock implements HeapGraphLoader {
+  int _nextIndex = 0;
+
+  @override
+  Future<(HeapSnapshotGraph, DateTime)> load() async {
+    // This delay is needed for UI to start showing the progress indicator.
+    await Future.delayed(const Duration(milliseconds: 100));
+    final result = await goldenHeapTests[_nextIndex].loadHeap();
+
+    _nextIndex = (_nextIndex + 1) % goldenHeapTests.length;
+
+    return (result, DateTime.now());
+  }
+}
+
 List<GoldenHeapTest> goldenHeapTests = <GoldenHeapTest>[
   GoldenHeapTest(
     fileName: 'counter_snapshot1',

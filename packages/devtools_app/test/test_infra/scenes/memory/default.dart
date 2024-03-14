@@ -77,20 +77,18 @@ class MemoryDefaultScene extends Scene {
       only: '',
     );
 
-    throw UnimplementedError('Implement the rest of the setup');
+    final diffController = DiffPaneController(_TestSnapshotTaker())
+      ..derived.applyFilter(showAllFilter);
 
-    // final diffController = DiffPaneController(_TestSnapshotTaker())
-    //   ..derived.applyFilter(showAllFilter);
+    final profileController = ProfilePaneController()..setFilter(showAllFilter);
 
-    // final profileController = ProfilePaneController()..setFilter(showAllFilter);
-
-    // controller = MemoryController(
-    //   diffPaneController: diffController,
-    //   profilePaneController: profileController,
-    // )
-    //   ..offline = true
-    //   ..controllers.memoryTimeline.offlineData.clear()
-    //   ..controllers.memoryTimeline.offlineData.addAll(memoryJson.data);
+    controller = MemoryController(
+      diffPaneController: diffController,
+      profilePaneController: profileController,
+    )
+      ..offline = true
+      ..controllers.memoryTimeline.offlineData.clear()
+      ..controllers.memoryTimeline.offlineData.addAll(memoryJson.data);
   }
 
   @override
