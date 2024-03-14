@@ -7,7 +7,6 @@ part of 'preferences.dart';
 /// Preferences for the Performance screen that are persisted to local storage.
 class PerformancePreferencesController extends DisposableController
     with AutoDisposeControllerMixin {
-
   /// Whether the Flutter frames chart should be visible or hidden.
   final showFlutterFramesChart = ValueNotifier<bool>(true);
 
