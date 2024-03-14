@@ -43,113 +43,109 @@ class HeapData {
       if (graph.objects[i].identityHashCode > 0)
         graph.objects[i].identityHashCode: i,
   };
-}
 
-final UiReleaser _uiReleaser = UiReleaser();
+  static final UiReleaser _uiReleaser = UiReleaser();
 
-///
-///
-/// The flags may be not needed for the features,
-/// but they may be needed to research how much CPU and memory
-/// each part consumes.
-Future<HeapData> calculateHeapData(
-  HeapSnapshotGraph graph,
-  DateTime created, {
-  bool calculateRetainingPaths = true,
-  bool calculateRetainedSizes = true,
-  bool calculateClassData = true,
-}) async {
-  if (!calculateClassData) {
-    return HeapData._(
-      graph,
-      null,
-      null,
-      created: created,
-      retainedSizes: null,
-    );
-  }
-
-  List<int>? retainers;
-  List<int>? retainedSizes;
-
-  if (calculateRetainingPaths || calculateRetainedSizes) {
-    final weakClasses = _WeakClasses(graph);
-
-    final result = findShortestRetainers(
-      graphSize: graph.objects.length,
-      rootIndex: heapRootIndex,
-      isRetainer: weakClasses.isRetainer,
-      refs: (int index) => graph.objects[index].references,
-      shallowSize: (int index) => graph.objects[index].shallowSize,
-      calculateSizes: calculateRetainedSizes,
-    );
-
-    if (calculateRetainingPaths) retainers = result.retainers;
-    if (calculateRetainedSizes) retainedSizes = result.retainedSizes;
-  }
-
-  ClassDataList<SingleClassData>? classDataList;
-  MemoryFootprint? footprint;
-
-  // Complexity of this part is O(n)*O(p) where
-  // n is number of objects and p is length of retaining path.
-  if (calculateClassData) {
-    final classes = <HeapClassName, SingleClassData>{};
-    int dartSize = 0;
-    int reachableSize = 0;
-
-    for (var i = 0; i < graph.objects.length; i++) {
-      if (_uiReleaser.step()) await _uiReleaser.releaseUi();
-      final object = graph.objects[i];
-      dartSize += object.shallowSize;
-
-      // We do not show objects that will be garbage collected soon.
-      // ignore: unnecessary_null_comparison, false positive
-      if (retainers != null && retainers[i] == 0) {
-        continue;
-      }
-
-      final className =
-          HeapClassName.fromHeapSnapshotClass(graph.classes[object.classId]);
-
-      // Ignore sentinels, because their size is not known.
-      if (className.isSentinel) {
-        assert(object.shallowSize == 0);
-        continue;
-      }
-
-      reachableSize += object.shallowSize;
-      final data = classes.putIfAbsent(
-        className,
-        () => SingleClassData(className: className),
-      );
-
-      data.countInstance(
+  /// Calculate the heap data from the given [graph].
+  static Future<HeapData> calculate(
+    HeapSnapshotGraph graph,
+    DateTime created, {
+    @visibleForTesting bool calculateRetainingPaths = true,
+    @visibleForTesting bool calculateRetainedSizes = true,
+    @visibleForTesting bool calculateClassData = true,
+  }) async {
+    if (!calculateClassData) {
+      return HeapData._(
         graph,
-        index: i,
-        retainers: retainers,
-        retainedSizes: retainedSizes,
-        heapRootIndex: heapRootIndex,
+        null,
+        null,
+        created: created,
+        retainedSizes: null,
       );
     }
 
-    footprint = MemoryFootprint(dart: dartSize, reachable: reachableSize);
-    classDataList = ClassDataList<SingleClassData>(classes.values.toList());
+    List<int>? retainers;
+    List<int>? retainedSizes;
 
-    // Check that retained size of root is the entire reachable heap.
-    assert(
-      retainedSizes == null ||
-          retainedSizes[heapRootIndex] == footprint.reachable,
+    if (calculateRetainingPaths || calculateRetainedSizes) {
+      final weakClasses = _WeakClasses(graph);
+
+      final result = findShortestRetainers(
+        graphSize: graph.objects.length,
+        rootIndex: heapRootIndex,
+        isRetainer: weakClasses.isRetainer,
+        refs: (int index) => graph.objects[index].references,
+        shallowSize: (int index) => graph.objects[index].shallowSize,
+        calculateSizes: calculateRetainedSizes,
+      );
+
+      if (calculateRetainingPaths) retainers = result.retainers;
+      if (calculateRetainedSizes) retainedSizes = result.retainedSizes;
+    }
+
+    ClassDataList<SingleClassData>? classDataList;
+    MemoryFootprint? footprint;
+
+    // Complexity of this part is O(n)*O(p) where
+    // n is number of objects and p is length of retaining path.
+    if (calculateClassData) {
+      final classes = <HeapClassName, SingleClassData>{};
+      int dartSize = 0;
+      int reachableSize = 0;
+
+      for (var i = 0; i < graph.objects.length; i++) {
+        if (_uiReleaser.step()) await _uiReleaser.releaseUi();
+        final object = graph.objects[i];
+        dartSize += object.shallowSize;
+
+        // We do not show objects that will be garbage collected soon.
+        // ignore: unnecessary_null_comparison, false positive
+        if (retainers != null && retainers[i] == 0) {
+          continue;
+        }
+
+        final className =
+            HeapClassName.fromHeapSnapshotClass(graph.classes[object.classId]);
+
+        // Ignore sentinels, because their size is not known.
+        if (className.isSentinel) {
+          assert(object.shallowSize == 0);
+          continue;
+        }
+
+        reachableSize += object.shallowSize;
+        final data = classes.putIfAbsent(
+          className,
+          () => SingleClassData(className: className),
+        );
+
+        data.countInstance(
+          graph,
+          index: i,
+          retainers: retainers,
+          retainedSizes: retainedSizes,
+          heapRootIndex: heapRootIndex,
+        );
+      }
+
+      footprint = MemoryFootprint(dart: dartSize, reachable: reachableSize);
+      classDataList = ClassDataList<SingleClassData>(classes.values.toList());
+
+      // Check that retained size of root is the entire reachable heap.
+      assert(
+        retainedSizes == null ||
+            retainedSizes[heapRootIndex] == footprint.reachable,
+      );
+    }
+
+    return HeapData._(
+      graph,
+      classDataList,
+      footprint,
+      created: created,
+      retainedSizes: retainedSizes,
     );
   }
-
-  return HeapData._(
-    graph,
-    classDataList,
-    footprint,
-    created: created,
-    retainedSizes: retainedSizes,
-  );
 }
 
 class _WeakClasses {

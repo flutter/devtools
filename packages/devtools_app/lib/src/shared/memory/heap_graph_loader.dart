@@ -10,34 +10,38 @@ import '../../screens/memory/shared/primitives/memory_utils.dart';
 
 abstract class HeapGraphLoader {
   const HeapGraphLoader();
-  Future<(HeapSnapshotGraph?, DateTime)> load();
+  Future<(HeapSnapshotGraph, DateTime)> load();
 }
 
+/// Loads a heap snapshot for the connected application in selected isolate.
 class HeapGraphLoaderRuntime extends HeapGraphLoader {
-  const HeapGraphLoaderRuntime(this._timeline);
+  /// If [timeline] is provided the loader will add a snapshot event to it.
+  const HeapGraphLoaderRuntime(this.timeline);
 
-  final MemoryTimeline? _timeline;
+  final MemoryTimeline? timeline;
 
   @override
-  Future<(HeapSnapshotGraph?, DateTime)> load() async {
-    final snapshot = await snapshotMemoryInSelectedIsolate();
-    _timeline?.addSnapshotEvent();
+  Future<(HeapSnapshotGraph, DateTime)> load() async {
+    final snapshot = (await snapshotMemoryInSelectedIsolate())!;
+    timeline?.addSnapshotEvent();
     return (snapshot, DateTime.now());
   }
 }
 
 class HeapGraphLoaderFile implements HeapGraphLoader {
-  HeapGraphLoaderFile(this._file);
+  HeapGraphLoaderFile(this.file);
 
-  final XFile _file;
+  HeapGraphLoaderFile.fromPath(String path) : file = XFile(path);
+
+  final XFile file;
 
   @override
-  Future<(HeapSnapshotGraph?, DateTime)> load() async {
-    final bytes = await _file.readAsBytes();
+  Future<(HeapSnapshotGraph, DateTime)> load() async {
+    final bytes = await file.readAsBytes();
     final data = bytes.buffer.asByteData();
     return (
       HeapSnapshotGraph.fromChunks([data]),
-      await _file.lastModified(),
+      await file.lastModified(),
     );
   }
 }

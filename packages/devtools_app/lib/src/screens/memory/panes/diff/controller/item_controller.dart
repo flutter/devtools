@@ -57,7 +57,7 @@ class SnapshotDataItem extends SnapshotItem implements RenamableItem {
     assert(_heap == null);
     final (graph, created) = await loader.load();
     if (graph != null) {
-      _heap = await calculateHeapData(graph, created);
+      _heap = await HeapData.calculate(graph, created);
     }
     _isProcessing.value = false;
   }
