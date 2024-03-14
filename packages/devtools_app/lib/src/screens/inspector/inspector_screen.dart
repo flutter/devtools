@@ -42,7 +42,7 @@ class InspectorScreen extends Screen {
   String get docPageId => screenId;
 
   @override
-  Widget build(BuildContext context) => const InspectorScreenBody();
+  Widget buildScreenBody(BuildContext context) => const InspectorScreenBody();
 }
 
 class InspectorScreenBody extends StatefulWidget {
@@ -151,8 +151,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       screenId: InspectorScreen.id,
     );
 
-    final splitAxis = Split.axisFor(context, 0.85);
-    final widgetTrees = Split(
+    final splitAxis = SplitPane.axisFor(context, 0.85);
+    final widgetTrees = SplitPane(
       axis: splitAxis,
       initialFractions: const [0.33, 0.67],
       children: [

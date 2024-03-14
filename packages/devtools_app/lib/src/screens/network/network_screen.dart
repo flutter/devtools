@@ -37,7 +37,7 @@ class NetworkScreen extends Screen {
   String get docPageId => screenId;
 
   @override
-  Widget build(BuildContext context) => const NetworkScreenBody();
+  Widget buildScreenBody(BuildContext context) => const NetworkScreenBody();
 
   @override
   Widget buildStatus(BuildContext context) {
@@ -278,7 +278,7 @@ class _NetworkProfilerBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Split(
+    return SplitPane(
       initialFractions: const [0.5, 0.5],
       minSizes: const [200, 200],
       axis: Axis.horizontal,

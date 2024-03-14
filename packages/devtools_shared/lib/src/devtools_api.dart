@@ -5,6 +5,15 @@
 /// All server APIs prefix:
 const apiPrefix = 'api/';
 
+/// Key used for any request or response to specify a value argument.
+const apiParameterValueKey = 'value';
+
+/// Notifies the DevTools server when a DevTools app client connects to a new
+/// VM service.
+const apiNotifyForVmServiceConnection =
+    '${apiPrefix}notifyForVmServiceConnection';
+const apiParameterVmServiceConnected = 'connected';
+
 /// Flutter GA properties APIs:
 const apiGetFlutterGAEnabled = '${apiPrefix}getFlutterGAEnabled';
 const apiGetFlutterGAClientId = '${apiPrefix}getFlutterGAClientId';

@@ -22,7 +22,6 @@ import 'package:vm_service/vm_service.dart';
   MockSpec<PerformanceController>(),
   MockSpec<FlutterFramesController>(),
   MockSpec<TimelineEventsController>(),
-  MockSpec<LegacyTimelineEventsController>(),
   MockSpec<LoggingController>(),
   MockSpec<RasterStatsController>(),
   MockSpec<ProgramExplorerController>(),
@@ -51,5 +50,7 @@ import 'package:vm_service/vm_service.dart';
   MockSpec<Obj>(),
   MockSpec<VM>(),
   MockSpec<VsCodeApi>(),
+  MockSpec<PerfettoTrackDescriptorEvent>(),
+  MockSpec<PerfettoTrackEvent>(),
 ])
 void main() {}

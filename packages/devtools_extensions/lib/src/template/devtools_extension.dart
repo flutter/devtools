@@ -138,8 +138,10 @@ class _DevToolsExtensionState extends State<DevToolsExtension>
   void initState() {
     super.initState();
     _initGlobals();
-    extensionManager._init(
-      connectToVmService: widget.requiresRunningApplication,
+    unawaited(
+      extensionManager._init(
+        connectToVmService: widget.requiresRunningApplication,
+      ),
     );
     for (final handler in widget.eventHandlers.entries) {
       extensionManager.registerEventHandler(handler.key, handler.value);

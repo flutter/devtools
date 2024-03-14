@@ -74,7 +74,7 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
           showRasterStats && hasOfflineData && offlineData.rasterStats != null;
       showRebuildStats = showRebuildStats &&
           hasOfflineData &&
-          offlineData.rebuildCountModel.isNotEmpty;
+          offlineData.rebuildCountModel != null;
     }
 
     final tabsAndControllers = _generateTabs(
@@ -137,7 +137,7 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
                     frameAnalysis: _selectedFlutterFrame!.frameAnalysis,
                     enhanceTracingController:
                         controller.enhanceTracingController,
-                    rebuildCountModel: controller.data!.rebuildCountModel,
+                    rebuildCountModel: controller.rebuildCountModel,
                   )
                 : const CenteredMessage(
                     'Select a frame above to view analysis data.',
@@ -163,7 +163,7 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
           tab: _buildTab(tabName: 'Rebuild Stats'),
           tabView: KeepAliveWrapper(
             child: RebuildStatsView(
-              model: controller.data!.rebuildCountModel,
+              model: controller.rebuildCountModel,
               selectedFrame: controller.flutterFramesController.selectedFrame,
             ),
           ),

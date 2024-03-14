@@ -337,7 +337,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
                 child: Padding(
                   padding: widget.appPadding,
                   child: showConsole
-                      ? Split(
+                      ? SplitPane(
                           axis: Axis.vertical,
                           splitters: [
                             ConsolePaneHeader(),
@@ -429,7 +429,7 @@ class SimpleScreen extends Screen {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget buildScreenBody(BuildContext context) {
     return child;
   }
 }

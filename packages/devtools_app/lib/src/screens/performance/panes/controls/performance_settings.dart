@@ -29,14 +29,11 @@ class PerformanceSettingsDialog extends StatelessWidget {
             FlutterSettings(
               flutterFramesController: controller.flutterFramesController,
             ),
-            const SizedBox(height: denseSpacing),
           ],
-          CheckboxSetting(
-            notifier: controller.timelineEventsController.useLegacyTraceViewer,
-            title: 'Use legacy trace viewer',
-            onChanged:
-                controller.timelineEventsController.toggleUseLegacyTraceViewer,
-          ),
+          // TODO(https://github.com/flutter/devtools/issues/7334): add a
+          // setting here to toggle whether we request the perfetto vm timeline
+          // with CPU samples. This has performance implications.
+          // See https://github.com/dart-lang/sdk/issues/55137.
         ],
       ),
       actions: const [

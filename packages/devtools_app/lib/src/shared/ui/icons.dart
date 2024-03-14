@@ -238,7 +238,7 @@ class _ColorIconPainter extends CustomPainter {
           size.width - iconMargin,
           size.height - iconMargin,
         ),
-        Paint()..color = colorScheme.background,
+        Paint()..color = colorScheme.surface,
       )
       ..drawRect(
         Rect.fromLTRB(

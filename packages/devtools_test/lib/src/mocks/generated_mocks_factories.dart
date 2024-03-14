@@ -19,9 +19,7 @@ import 'generated.mocks.dart';
 MockPerformanceController createMockPerformanceControllerWithDefaults() {
   final controller = MockPerformanceController();
   final timelineEventsController = MockTimelineEventsController();
-  final legacyTimelineEventsController = MockLegacyTimelineEventsController();
   final flutterFramesController = MockFlutterFramesController();
-  when(controller.data).thenReturn(PerformanceData());
   when(controller.enhanceTracingController)
       .thenReturn(EnhanceTracingController());
   when(controller.offlinePerformanceData).thenReturn(null);
@@ -35,7 +33,7 @@ MockPerformanceController createMockPerformanceControllerWithDefaults() {
   when(flutterFramesController.recordingFrames)
       .thenReturn(const FixedValueListenable<bool>(true));
   when(flutterFramesController.displayRefreshRate)
-      .thenReturn(ValueNotifier<double>(60.0));
+      .thenReturn(ValueNotifier<double>(defaultRefreshRate));
 
   // Stubs for Raster Stats feature.
   when(controller.rasterStatsController)
@@ -44,19 +42,12 @@ MockPerformanceController createMockPerformanceControllerWithDefaults() {
   // Stubs for Timeline Events feature.
   when(controller.timelineEventsController)
       .thenReturn(timelineEventsController);
-  when(timelineEventsController.useLegacyTraceViewer)
-      .thenReturn(ValueNotifier<bool>(true));
-  when(timelineEventsController.legacyController)
-      .thenReturn(legacyTimelineEventsController);
   when(timelineEventsController.status).thenReturn(
     ValueNotifier<EventsControllerStatus>(EventsControllerStatus.empty),
   );
-  when(legacyTimelineEventsController.searchMatches)
-      .thenReturn(const FixedValueListenable<List<TimelineEvent>>([]));
-  when(legacyTimelineEventsController.searchInProgressNotifier)
-      .thenReturn(const FixedValueListenable<bool>(false));
-  when(legacyTimelineEventsController.matchIndex)
-      .thenReturn(ValueNotifier<int>(0));
+
+  // Stubs for Rebuild Count feature
+  when(controller.rebuildCountModel).thenReturn(RebuildCountModel());
 
   return controller;
 }

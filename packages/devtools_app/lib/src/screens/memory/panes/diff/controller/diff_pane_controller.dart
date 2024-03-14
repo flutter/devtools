@@ -15,12 +15,14 @@ import '../../../../../shared/config_specific/import_export/import_export.dart';
 import '../../../../../shared/file_import.dart';
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/memory/class_name.dart';
+import '../../../../../shared/memory/retaining_path.dart';
 import '../../../shared/heap/class_filter.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
 import '../../../shared/primitives/memory_utils.dart';
+import '../data/classes_diff.dart';
+import '../data/heap_diff_store.dart';
 import 'class_data.dart';
-import 'heap_diff.dart';
 import 'item_controller.dart';
 import 'utils.dart';
 
@@ -179,7 +181,7 @@ class CoreData {
   HeapClassName? className;
 
   /// Selected retaining path (cross-snapshot).
-  ClassOnlyHeapPath? path;
+  PathFromRoot? path;
 
   /// Current class filter.
   ValueListenable<ClassFilter> get classFilter => _classFilter;
@@ -238,9 +240,9 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   late final ClassesTableDiffData classesTableDiff;
 
   /// Classes to show for currently selected item, if the item is diffed.
-  ValueListenable<List<DiffClassStats>?> get diffClassesToShow =>
+  ValueListenable<List<DiffClassData>?> get diffClassesToShow =>
       _diffClassesToShow;
-  final _diffClassesToShow = ValueNotifier<List<DiffClassStats>?>(null);
+  final _diffClassesToShow = ValueNotifier<List<DiffClassData>?>(null);
 
   /// Classes to show for currently selected item, if the item is not diffed.
   ValueListenable<List<SingleClassStats>?> get singleClassesToShow =>
@@ -270,7 +272,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   }
 
   /// Updates cross-snapshot path if the argument is not null.
-  void _setPathIfNotNull(ClassOnlyHeapPath? path) {
+  void _setPathIfNotNull(PathFromRoot? path) {
     if (path == null || path == _core.path) return;
     _core.path = path;
     _updateValues();
@@ -343,7 +345,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   }
 
   /// Returns [classStats] if it matches the current filter.
-  T? _filter<T extends ClassStats>(T? classStats) {
+  T? _filter<T extends ClassData>(T? classStats) {
     if (classStats == null) return null;
     if (_core.classFilter.value.apply(
       classStats.heapClass,
@@ -426,14 +428,14 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     ) =>
         a.objects.retainedSize > b.objects.retainedSize ? a : b;
 
-    DiffClassStats diffWithMaxRetainedSize(
-      DiffClassStats a,
-      DiffClassStats b,
+    DiffClassData diffWithMaxRetainedSize(
+      DiffClassData a,
+      DiffClassData b,
     ) =>
         a.total.delta.retainedSize > b.total.delta.retainedSize ? a : b;
 
     // Get class with max retained size.
-    final ClassStats theClass;
+    final ClassData theClass;
     if (classes is SingleHeapClasses) {
       final classStatsList = classes.filtered(
         _core.classFilter.value,

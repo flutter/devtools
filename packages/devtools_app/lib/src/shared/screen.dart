@@ -380,8 +380,36 @@ abstract class Screen {
     );
   }
 
-  /// Builds the body to display for this tab.
-  Widget build(BuildContext context);
+  /// Builds the body to display for this screen, accounting for screen
+  /// requirements like [requiresConnection].
+  ///
+  /// This method can be overridden to provide different build logic for a
+  /// [Screen] subclass.
+  Widget build(BuildContext context) {
+    if (!requiresConnection) {
+      final connected = serviceConnection.serviceManager.hasConnection &&
+          serviceConnection.serviceManager.connectedAppInitialized;
+      // Do not use the disconnected body in offline mode, because the default
+      // [buildScreenBody] should be used for offline states.
+      if (!connected && !offlineController.offlineMode.value) {
+        final disconnectedBody = buildDisconnectedScreenBody(context);
+        if (disconnectedBody != null) return disconnectedBody;
+      }
+    }
+    return buildScreenBody(context);
+  }
+
+  /// Builds the default body to display for this screen.
+  ///
+  /// This method must be implemented by subclasses.
+  Widget buildScreenBody(BuildContext context);
+
+  /// Builds the body to display for this screen when in a disconnected state,
+  /// if this differs from the default body provided by [buildScreenBody].
+  ///
+  /// This method will only be called when [requiresConnection] is not true,
+  /// and when DevTools is in a disconnected state.
+  Widget? buildDisconnectedScreenBody(BuildContext context) => null;
 
   /// Build a widget to display in the status line.
   ///

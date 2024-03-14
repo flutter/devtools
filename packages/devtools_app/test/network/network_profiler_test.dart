@@ -104,7 +104,7 @@ void main() {
       expect(find.byType(ResumeButton), findsOneWidget);
       expect(find.byType(PauseButton), findsOneWidget);
       expect(find.byType(ClearButton), findsOneWidget);
-      expect(find.byType(Split), findsOneWidget);
+      expect(find.byType(SplitPane), findsOneWidget);
 
       // Advance the clock to populate the network requests table.
       await tester.pump(const Duration(seconds: 2));
