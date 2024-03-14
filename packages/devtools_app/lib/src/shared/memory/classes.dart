@@ -1,3 +1,24 @@
+// Copyright 2024 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'adapted_heap_object.dart';
+import 'simple_items.dart';
+
+/// Mark the object as deeply immutable.
+///
+/// There is no strong protection from mutation, just some asserts.
+mixin Sealable {
+  /// See doc for the mixin [Sealable].
+  void seal() {
+    _isSealed = true;
+  }
+
+  /// See doc for the mixin [Sealable].
+  bool get isSealed => _isSealed;
+  bool _isSealed = false;
+}
+
 /// Statistical size-information about objects.
 class ObjectSetStats with Sealable {
   static ObjectSetStats? subtract({

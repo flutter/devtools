@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../../../../../shared/memory/classes.dart';
 import '../../../../../shared/memory/retaining_path.dart';
 import '../../../../../shared/memory/simple_items.dart';
 import '../../../../../shared/primitives/utils.dart';
