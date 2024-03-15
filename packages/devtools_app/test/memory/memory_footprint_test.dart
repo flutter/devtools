@@ -29,7 +29,7 @@
 //     final upperThreshold = gbToBytes(1.08);
 
 //     // Both thresholds are tested, because we want to lower the values
-//     // in case of optimisation.
+//     // in case of optimization.
 //     expect(delta, greaterThan(lowerThreshold));
 //     expect(delta, lessThan(upperThreshold));
 //   });

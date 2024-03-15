@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
-import 'package:devtools_app/src/shared/memory/heap_data.dart';
 import 'package:devtools_app/src/shared/memory/heap_graph_loader.dart';
 import 'package:vm_service/vm_service.dart';
 
