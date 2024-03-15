@@ -60,7 +60,7 @@ dependencies:
   unified_analytics: ^5.8.1
   url_launcher: ^6.1.0
   url_launcher_web: ^2.0.6
-  vm_service: ^14.0.0
+  vm_service: ^14.1.0
   vm_service_protos: ^1.0.0
   # TODO https://github.com/dart-lang/sdk/issues/52853 - unpin this version
   vm_snapshot_analysis: 0.7.2
