@@ -39,6 +39,12 @@ class HeapSnapshotGraphMock implements HeapSnapshotGraph {
   @override
   int get shallowSize => throw UnimplementedError();
 
+  @override
+  List<ByteData> toChunks() {
+    // TODO: implement toChunks
+    throw UnimplementedError();
+  }
+
   /// Adds object and returns index of the added object.
   int add(int hashCode) {
     objects.add(_HeapSnapshotObjectMock(identityHashCode: hashCode));

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
@@ -138,8 +139,13 @@ class DiffPaneController extends DisposableController {
 
   void exportCurrentItem() {
     final item = core.selectedDataItem!;
+    final data = item.heap!.graph
+        .toChunks()
+        .map((d) => utf8.decode(d.buffer.asUint8List()))
+        .join();
+
     ExportController().downloadFile(
-      'TODO: save real content after upgrading vm_service package, https://github.com/flutter/devtools/pull/7331',
+      data,
       fileName: ExportController.generateFileName(
         type: ExportFileType.json,
         prefix: item.name,

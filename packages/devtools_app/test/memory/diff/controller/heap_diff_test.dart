@@ -69,76 +69,30 @@ void main() {
     expect(diff.diff.persisted.instanceCount, 1);
   });
 
-  // test('$DiffClassStats calculates deletion as expected', () async {
-  //   final className =
-  //       HeapClassName.fromPath(className: 'myClass', library: 'library');
+  test('$DiffClassData calculates deletion as expected', () async {
+    final className =
+        HeapClassName.fromPath(className: 'myClass', library: 'library');
 
-  //   final deleted = _createObject(className, 1, {});
+    final graphBefore = HeapSnapshotGraphMock();
+    final deleted = graphBefore.add(1);
 
-  //   final statsBefore = await _createClassStats({deleted});
+    final classBefore = testClassData(
+      className,
+      [deleted],
+      graphBefore,
+    );
 
-  //   final stats = DiffClassStats.diff(before: statsBefore, after: null)!;
+    final diff = DiffClassData.compare(
+      before: classBefore,
+      dataBefore: await testHeapData(graphBefore),
+      after: null,
+      dataAfter: await testHeapData(),
+    )!;
 
-  //   expect(stats.heapClass, className);
-  //   expect(stats.total.created.instanceCount, 0);
-  //   expect(stats.total.deleted.instanceCount, 1);
-  //   expect(stats.total.delta.instanceCount, -1);
-  //   expect(stats.total.persisted.instanceCount, 0);
-  // });
+    expect(diff.className, className);
+    expect(diff.diff.created.instanceCount, 0);
+    expect(diff.diff.deleted.instanceCount, 1);
+    expect(diff.diff.delta.instanceCount, -1);
+    expect(diff.diff.persisted.instanceCount, 0);
+  });
 }
-
-// Future<SingleClassStats_> _createClassStats(
-//   Set<MockAdaptedHeapObject> instances,
-// ) async {
-//   final indexes =
-//       Iterable<int>.generate(instances.length).map((i) => i + 1).toSet();
-
-//   final objects = [
-//     _createObject(
-//       HeapClassName.fromPath(className: 'root', library: 'lib'),
-//       0,
-//       indexes,
-//     ),
-//     ...instances,
-//   ];
-
-//   final heap = AdaptedHeapData(
-//     objects,
-//     rootIndex: 0,
-//   );
-//   await calculateHeap(heap);
-
-//   final result = SingleClassStats_(heapClass: instances.first.heapClass);
-//   for (var index in indexes) {
-//     result.countInstance(heap, index);
-//   }
-
-//   return result;
-// }
-
-// MockAdaptedHeapObject _createObject(
-//   HeapClassName className,
-//   int code,
-//   Set<int> references,
-// ) =>
-//     MockAdaptedHeapObject(
-//       code: code,
-//       outRefs: references,
-//       heapClass: className,
-//       shallowSize: 1,
-//     );
-
-// Future<AdaptedHeap> _createSimplestHeap() async => await AdaptedHeap.create(
-//       AdaptedHeapData(
-//         [
-//           MockAdaptedHeapObject(
-//             code: 0,
-//             outRefs: {},
-//             heapClass:
-//                 HeapClassName.fromPath(className: 'root', library: 'lib'),
-//             shallowSize: 1,
-//           ),
-//         ],
-//         rootIndex: 0,
-//       ),
-//     );
