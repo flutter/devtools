@@ -3,6 +3,8 @@
 // in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/screens/memory/panes/diff/controller/diff_pane_controller.dart';
+import 'package:devtools_app/src/screens/memory/panes/profile/profile_pane_controller.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/class_filter.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -17,6 +19,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../test_infra/test_data/memory.dart';
 import '../../../test_infra/test_data/memory_allocation.dart';
+import '../../test_data/memory/heap/heap_data.dart';
 
 /// To run:
 /// flutter run -t test/test_infra/scenes/memory/default.stager_app.g.dart -d macos
@@ -77,7 +80,7 @@ class MemoryDefaultScene extends Scene {
       only: '',
     );
 
-    final diffController = DiffPaneController(_TestSnapshotTaker())
+    final diffController = DiffPaneController(HeapGraphLoaderMock())
       ..derived.applyFilter(showAllFilter);
 
     final profileController = ProfilePaneController()..setFilter(showAllFilter);
