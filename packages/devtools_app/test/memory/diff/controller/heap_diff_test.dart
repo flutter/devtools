@@ -9,6 +9,7 @@ import 'package:devtools_app/src/shared/memory/class_name.dart';
 import 'package:devtools_app/src/shared/memory/classes.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../../test_infra/test_data/memory/heap/factories.dart';
 import '../../../test_infra/test_data/memory/heap/heap_graph_mock.dart';
 
 void main() {
@@ -35,24 +36,27 @@ void main() {
     final className =
         HeapClassName.fromPath(className: 'myClass', library: 'library');
 
-    final deleted = _createObject(className, 1, {});
-    final persistedBefore = _createObject(className, 2, {});
-    final persistedAfter = _createObject(className, 2, {});
-    final created1 = _createObject(className, 3, {});
-    final created2 = _createObject(className, 4, {});
+    const deleted = 1;
+    const persistedBefore = 2;
+    const persistedAfter = 2;
+    const created1 = 3;
+    const created2 = 4;
 
-    final statsBefore = SingleClassData(className: className);
-    // await _createClassStats({deleted, persistedBefore});
+    final statsBefore = testClassData(className, [deleted, persistedBefore]);
     final statsAfter =
-        await _createClassStats({persistedAfter, created1, created2});
+        testClassData(className, [persistedAfter, created1, created2]);
 
-    final stats = DiffClassStats.diff(before: statsBefore, after: statsAfter)!;
+    final diff = DiffClassData.compare(
+        before: before,
+        dataBefore: dataBefore,
+        after: after,
+        dataAfter: dataAfter)!;
 
-    expect(stats.heapClass, className);
-    expect(stats.total.created.instanceCount, 2);
-    expect(stats.total.deleted.instanceCount, 1);
-    expect(stats.total.delta.instanceCount, 1);
-    expect(stats.total.persisted.instanceCount, 1);
+    expect(diff.className, className);
+    expect(diff.total.created.instanceCount, 2);
+    expect(diff.total.deleted.instanceCount, 1);
+    expect(diff.total.delta.instanceCount, 1);
+    expect(diff.total.persisted.instanceCount, 1);
   });
 
   // test('$DiffClassStats calculates deletion as expected', () async {

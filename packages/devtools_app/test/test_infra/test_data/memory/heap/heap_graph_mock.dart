@@ -16,7 +16,7 @@ class HeapSnapshotGraphMock implements HeapSnapshotGraph {
   int get capacity => throw UnimplementedError();
 
   @override
-  List<HeapSnapshotClass> get classes => [];
+  final List<HeapSnapshotClass> classes = [];
 
   @override
   List<HeapSnapshotExternalProperty> get externalProperties =>
@@ -32,13 +32,36 @@ class HeapSnapshotGraphMock implements HeapSnapshotGraph {
   String get name => throw UnimplementedError();
 
   @override
-  List<HeapSnapshotObject> get objects => [_HeapSnapshotObjectMock()];
+  final List<HeapSnapshotObject> objects = [_HeapSnapshotObjectMock()];
 
   @override
   int get referenceCount => throw UnimplementedError();
 
   @override
   int get shallowSize => throw UnimplementedError();
+}
+
+class _HeapSnapshotClassMock implements HeapSnapshotClass {
+  _HeapSnapshotClassMock({
+    this.name = '',
+    this.libraryName = '',
+  });
+
+  @override
+  final String name;
+
+  @override
+  final String libraryName;
+
+  @override
+  int get classId => throw UnimplementedError();
+
+  @override
+  List<HeapSnapshotField> get fields => throw UnimplementedError();
+
+  @override
+  // TODO: implement libraryUri
+  Uri get libraryUri => throw UnimplementedError();
 }
 
 class _HeapSnapshotObjectMock implements HeapSnapshotObject {

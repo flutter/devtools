@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/shared/memory/class_name.dart';
 import 'package:devtools_app/src/shared/memory/classes.dart';
 import 'package:devtools_app/src/shared/memory/heap_data.dart';
+import 'package:vm_service/vm_service.dart';
 
 import 'heap_graph_mock.dart';
 
@@ -13,4 +15,17 @@ Future<HeapData> testHeapData() async => await HeapData.calculate(
       rootIndex: HeapSnapshotGraphMock.rootIndex,
     );
 
-SingleClassData testClassData({deleted, persistedBefore}) {}
+SingleClassData testClassData(HeapClassName className, List<int> indexes) {
+  final graph = HeapSnapshotGraphMock();
+  final result = SingleClassData(className: className);
+  for (final index in indexes) {
+    result.countInstance(
+      graph,
+      index: index,
+      retainers: [],
+      retainedSizes: [],
+      heapRootIndex: HeapSnapshotGraphMock.rootIndex,
+    );
+  }
+  return result;
+}
