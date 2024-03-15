@@ -1,75 +1,73 @@
-// // Copyright 2022 The Chromium Authors. All rights reserved.
-// // Use of this source code is governed by a BSD-style license that can be
-// // found in the LICENSE file.
+// Copyright 2022 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
-// import 'package:devtools_app/src/screens/memory/panes/diff/controller/heap_diff_.dart';
-// import 'package:devtools_app/src/screens/memory/shared/heap/heap.dart';
-// import 'package:devtools_app/src/screens/memory/shared/heap/spanning_tree.dart';
-// import 'package:devtools_app/src/shared/memory/adapted_heap_data.dart';
-// import 'package:devtools_app/src/shared/memory/adapted_heap_object.dart';
-// import 'package:devtools_app/src/shared/memory/class_name.dart';
-// import 'package:flutter_test/flutter_test.dart';
+import 'package:devtools_app/src/screens/memory/panes/diff/data/heap_diff_data.dart';
+import 'package:devtools_app/src/screens/memory/panes/diff/data/heap_diff_store.dart';
+import 'package:flutter_test/flutter_test.dart';
 
-// void main() {
-//   test(
-//     '$HeapDiffStore_ does not create new $DiffHeapClasses for the same couple',
-//     () async {
-//       final heap1 = await _createSimplestHeap();
-//       final heap2 = await _createSimplestHeap();
+import '../../../test_infra/test_data/memory/heap/heap_graph_mock.dart';
 
-//       expect(heap1 == heap2, false);
+void main() {
+  test(
+    '$HeapDiffStore does not create new $HeapDiffData for the same couple',
+    () async {
+      final heap1 = await testHeapData();
+      final heap2 = await testHeapData();
 
-//       final store = HeapDiffStore_();
+      expect(heap1 == heap2, false);
 
-//       final couple1 = identityHashCode(store.compare_(heap1, heap2));
-//       final couple2 = identityHashCode(store.compare_(heap1, heap2));
-//       final couple3 = identityHashCode(store.compare_(heap2, heap1));
+      final store = HeapDiffStore();
 
-//       expect(couple1, couple2);
-//       expect(couple1, couple3);
-//     },
-//   );
+      final couple1 = identityHashCode(store.compare(heap1, heap2));
+      final couple2 = identityHashCode(store.compare(heap1, heap2));
+      final couple3 = identityHashCode(store.compare(heap2, heap1));
 
-//   test('$DiffClassStats calculates mix of cases as expected', () async {
-//     final className =
-//         HeapClassName.fromPath(className: 'myClass', library: 'library');
+      expect(couple1, couple2);
+      expect(couple1, couple3);
+    },
+  );
 
-//     final deleted = _createObject(className, 1, {});
-//     final persistedBefore = _createObject(className, 2, {});
-//     final persistedAfter = _createObject(className, 2, {});
-//     final created1 = _createObject(className, 3, {});
-//     final created2 = _createObject(className, 4, {});
+  // test('$DiffClassStats calculates mix of cases as expected', () async {
+  //   final className =
+  //       HeapClassName.fromPath(className: 'myClass', library: 'library');
 
-//     final statsBefore = await _createClassStats({deleted, persistedBefore});
-//     final statsAfter =
-//         await _createClassStats({persistedAfter, created1, created2});
+  //   final deleted = _createObject(className, 1, {});
+  //   final persistedBefore = _createObject(className, 2, {});
+  //   final persistedAfter = _createObject(className, 2, {});
+  //   final created1 = _createObject(className, 3, {});
+  //   final created2 = _createObject(className, 4, {});
 
-//     final stats = DiffClassStats.diff(before: statsBefore, after: statsAfter)!;
+  //   final statsBefore = await _createClassStats({deleted, persistedBefore});
+  //   final statsAfter =
+  //       await _createClassStats({persistedAfter, created1, created2});
 
-//     expect(stats.heapClass, className);
-//     expect(stats.total.created.instanceCount, 2);
-//     expect(stats.total.deleted.instanceCount, 1);
-//     expect(stats.total.delta.instanceCount, 1);
-//     expect(stats.total.persisted.instanceCount, 1);
-//   });
+  //   final stats = DiffClassStats.diff(before: statsBefore, after: statsAfter)!;
 
-//   test('$DiffClassStats calculates deletion as expected', () async {
-//     final className =
-//         HeapClassName.fromPath(className: 'myClass', library: 'library');
+  //   expect(stats.heapClass, className);
+  //   expect(stats.total.created.instanceCount, 2);
+  //   expect(stats.total.deleted.instanceCount, 1);
+  //   expect(stats.total.delta.instanceCount, 1);
+  //   expect(stats.total.persisted.instanceCount, 1);
+  // });
 
-//     final deleted = _createObject(className, 1, {});
+  // test('$DiffClassStats calculates deletion as expected', () async {
+  //   final className =
+  //       HeapClassName.fromPath(className: 'myClass', library: 'library');
 
-//     final statsBefore = await _createClassStats({deleted});
+  //   final deleted = _createObject(className, 1, {});
 
-//     final stats = DiffClassStats.diff(before: statsBefore, after: null)!;
+  //   final statsBefore = await _createClassStats({deleted});
 
-//     expect(stats.heapClass, className);
-//     expect(stats.total.created.instanceCount, 0);
-//     expect(stats.total.deleted.instanceCount, 1);
-//     expect(stats.total.delta.instanceCount, -1);
-//     expect(stats.total.persisted.instanceCount, 0);
-//   });
-// }
+  //   final stats = DiffClassStats.diff(before: statsBefore, after: null)!;
+
+  //   expect(stats.heapClass, className);
+  //   expect(stats.total.created.instanceCount, 0);
+  //   expect(stats.total.deleted.instanceCount, 1);
+  //   expect(stats.total.delta.instanceCount, -1);
+  //   expect(stats.total.persisted.instanceCount, 0);
+  // });
+}
 
 // Future<SingleClassStats_> _createClassStats(
 //   Set<MockAdaptedHeapObject> instances,

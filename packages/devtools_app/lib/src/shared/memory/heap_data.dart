@@ -13,7 +13,7 @@ import 'simple_items.dart';
 
 /// Value for rootIndex is taken from the doc:
 /// https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/heap_snapshot.md#object-ids
-const int heapRootIndex = 1;
+const int _heapRootIndex = 1;
 
 @immutable
 class HeapData {
@@ -23,6 +23,7 @@ class HeapData {
     this.footprint, {
     required this.created,
     required this.retainedSizes,
+    required this.rootIndex,
   });
 
   final HeapSnapshotGraph graph;
@@ -34,6 +35,8 @@ class HeapData {
   final List<int>? retainedSizes;
 
   final DateTime created;
+
+  final int rootIndex;
 
   /// Object index with the given identityHashCode.
   ///
@@ -53,6 +56,7 @@ class HeapData {
     @visibleForTesting bool calculateRetainingPaths = true,
     @visibleForTesting bool calculateRetainedSizes = true,
     @visibleForTesting bool calculateClassData = true,
+    @visibleForTesting int rootIndex = _heapRootIndex,
   }) async {
     if (!calculateClassData) {
       return HeapData._(
@@ -61,6 +65,7 @@ class HeapData {
         null,
         created: created,
         retainedSizes: null,
+        rootIndex: rootIndex,
       );
     }
 
@@ -72,7 +77,7 @@ class HeapData {
 
       final result = findShortestRetainers(
         graphSize: graph.objects.length,
-        rootIndex: heapRootIndex,
+        rootIndex: rootIndex,
         isRetainer: weakClasses.isRetainer,
         refs: (int index) => graph.objects[index].references,
         shallowSize: (int index) => graph.objects[index].shallowSize,
@@ -124,7 +129,7 @@ class HeapData {
           index: i,
           retainers: retainers,
           retainedSizes: retainedSizes,
-          heapRootIndex: heapRootIndex,
+          heapRootIndex: rootIndex,
         );
       }
 
@@ -134,7 +139,7 @@ class HeapData {
       // Check that retained size of root is the entire reachable heap.
       assert(
         retainedSizes == null ||
-            retainedSizes[heapRootIndex] == footprint.reachable,
+            retainedSizes[rootIndex] == footprint.reachable,
       );
     }
 
@@ -144,6 +149,7 @@ class HeapData {
       footprint,
       created: created,
       retainedSizes: retainedSizes,
+      rootIndex: rootIndex,
     );
   }
 }

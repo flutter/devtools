@@ -7,19 +7,39 @@ import 'package:vm_service/vm_service.dart';
 
 const _dataDir = 'test/test_infra/test_data/memory/heap/';
 
-class GoldenHeapTest {
+abstract class HeapTest {
+  HeapTest({required this.appClassName});
+
+  /// The name of the class that represents the app.
+  final String appClassName;
+
+  Future<HeapSnapshotGraph> loadHeap();
+}
+
+class GoldenHeapTest extends HeapTest {
   GoldenHeapTest({
+    required super.appClassName,
     required this.fileName,
-    required this.appClassName,
   });
 
   final String fileName;
-  final String appClassName;
 
+  @override
   Future<HeapSnapshotGraph> loadHeap() async {
     final (graph, _) =
         await HeapGraphLoaderFile.fromPath('$_dataDir$fileName').load();
     return graph;
+  }
+}
+
+class MockedHeapTest extends HeapTest {
+  MockedHeapTest({
+    required super.appClassName,
+  });
+
+  @override
+  Future<HeapSnapshotGraph> loadHeap() async {
+    throw UnimplementedError();
   }
 }
 
