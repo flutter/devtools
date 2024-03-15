@@ -56,7 +56,7 @@ class AppSizeScreen extends Screen {
   String get docPageId => id;
 
   @override
-  Widget build(BuildContext context) {
+  Widget buildScreenBody(BuildContext context) {
     // Since `handleDrop` is not specified for this [DragAndDrop] widget, drag
     // and drop events will be absorbed by it, meaning drag and drop actions
     // will be a no-op if they occur over this area. [DragAndDrop] widgets

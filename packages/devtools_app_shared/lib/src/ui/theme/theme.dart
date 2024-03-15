@@ -361,6 +361,8 @@ extension ThemeDataExtension on ThemeData {
   TextStyle regularTextStyleWithColor(Color? color) =>
       regularTextStyle.copyWith(color: color);
 
+  TextStyle get errorTextStyle => regularTextStyleWithColor(colorScheme.error);
+
   TextStyle get boldTextStyle =>
       regularTextStyle.copyWith(fontWeight: FontWeight.bold);
 

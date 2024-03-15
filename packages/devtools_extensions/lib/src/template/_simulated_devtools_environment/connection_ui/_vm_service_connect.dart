@@ -30,7 +30,7 @@ class VmServiceConnectionDisplay extends StatelessWidget {
       disconnectedHint: '(e.g., http://127.0.0.1:60851/fH-kAEXc7MQ=/)',
       onConnect: (value) => simController.updateVmServiceConnection(uri: value),
       onDisconnect: () => simController.updateVmServiceConnection(uri: null),
-      currentConnection: () => serviceManager.service!.wsUri ?? '--',
+      currentConnection: () => serviceManager.serviceUri ?? '--',
       help: const VmServiceHelp(),
     );
   }

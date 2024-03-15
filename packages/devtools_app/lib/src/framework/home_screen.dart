@@ -39,7 +39,7 @@ class HomeScreen extends Screen {
   final List<DevToolsJsonFile> sampleData;
 
   @override
-  Widget build(BuildContext context) {
+  Widget buildScreenBody(BuildContext context) {
     return HomeScreenBody(sampleData: sampleData);
   }
 }
@@ -295,7 +295,7 @@ class _ConnectInputState extends State<ConnectInput> with BlockingActionMixin {
         await FrameworkCore.initVmService(serviceUriAsString: uri);
     if (connected) {
       final connectedUri =
-          Uri.parse(serviceConnection.serviceManager.service!.wsUri!);
+          Uri.parse(serviceConnection.serviceManager.serviceUri!);
       routerDelegate.updateArgsIfChanged({'uri': '$connectedUri'});
       final shortUri = connectedUri.replace(path: '');
       notificationService.push('Successfully connected to $shortUri.');

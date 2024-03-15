@@ -28,7 +28,7 @@ elif [ "$PACKAGE" = "devtools_shared" ]; then
 
     pushd $DEVTOOLS_DIR/packages/devtools_shared
     echo `pwd`
-    flutter test test/
+    dart test test/
     popd
 
 fi

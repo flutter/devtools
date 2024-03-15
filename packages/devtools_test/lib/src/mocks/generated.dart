@@ -50,5 +50,7 @@ import 'package:vm_service/vm_service.dart';
   MockSpec<Obj>(),
   MockSpec<VM>(),
   MockSpec<VsCodeApi>(),
+  MockSpec<PerfettoTrackDescriptorEvent>(),
+  MockSpec<PerfettoTrackEvent>(),
 ])
 void main() {}

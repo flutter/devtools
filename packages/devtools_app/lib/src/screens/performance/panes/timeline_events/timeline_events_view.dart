@@ -107,7 +107,7 @@ class RefreshTimelineEventsButton extends StatelessWidget {
           outlined: false,
           onPressed: status == EventsControllerStatus.processing
               ? null
-              : controller.processAllTraceEvents,
+              : controller.forceRefresh,
           tooltip: 'Refresh timeline events',
           gaScreen: gac.performance,
           gaSelection: gac.PerformanceEvents.refreshTimelineEvents.name,

@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/screens/memory/shared/heap/spanning_tree.dart';
 import 'package:devtools_app/src/shared/memory/adapted_heap_data.dart';
 import 'package:devtools_app/src/shared/memory/adapted_heap_object.dart';
 import 'package:devtools_app/src/shared/memory/class_name.dart';
+import 'package:devtools_app/src/shared/memory/retainers.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
