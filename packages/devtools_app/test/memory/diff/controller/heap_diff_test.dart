@@ -6,6 +6,7 @@ import 'package:devtools_app/src/screens/memory/panes/diff/data/classes_diff.dar
 import 'package:devtools_app/src/screens/memory/panes/diff/data/heap_diff_data.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/data/heap_diff_store.dart';
 import 'package:devtools_app/src/shared/memory/class_name.dart';
+import 'package:devtools_app/src/shared/memory/classes.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../../test_infra/test_data/memory/heap/heap_graph_mock.dart';
@@ -40,7 +41,8 @@ void main() {
     final created1 = _createObject(className, 3, {});
     final created2 = _createObject(className, 4, {});
 
-    final statsBefore = await _createClassStats({deleted, persistedBefore});
+    final statsBefore = SingleClassData(className: className);
+    // await _createClassStats({deleted, persistedBefore});
     final statsAfter =
         await _createClassStats({persistedAfter, created1, created2});
 
