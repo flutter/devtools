@@ -4,7 +4,6 @@
 
 import 'dart:typed_data';
 
-import 'package:devtools_app/src/shared/memory/heap_data.dart';
 import 'package:vm_service/vm_service.dart';
 
 class HeapSnapshotGraphMock implements HeapSnapshotGraph {
@@ -39,6 +38,12 @@ class HeapSnapshotGraphMock implements HeapSnapshotGraph {
 
   @override
   int get shallowSize => throw UnimplementedError();
+
+  /// Adds object and returns index of the added object.
+  int add(int hashCode) {
+    objects.add(_HeapSnapshotObjectMock(identityHashCode: hashCode));
+    return objects.length - 1;
+  }
 }
 
 class _HeapSnapshotClassMock implements HeapSnapshotClass {
@@ -65,13 +70,13 @@ class _HeapSnapshotClassMock implements HeapSnapshotClass {
 }
 
 class _HeapSnapshotObjectMock implements HeapSnapshotObject {
-  _HeapSnapshotObjectMock();
+  _HeapSnapshotObjectMock({this.identityHashCode = 0});
 
   @override
   int get classId => throw UnimplementedError();
 
   @override
-  int get identityHashCode => throw UnimplementedError();
+  final int identityHashCode;
 
   @override
   HeapSnapshotClass get klass => throw UnimplementedError();

@@ -9,21 +9,25 @@ import 'package:vm_service/vm_service.dart';
 
 import 'heap_graph_mock.dart';
 
-Future<HeapData> testHeapData() async => await HeapData.calculate(
-      HeapSnapshotGraphMock(),
+Future<HeapData> testHeapData([HeapSnapshotGraphMock? graph]) async =>
+    await HeapData.calculate(
+      graph ?? HeapSnapshotGraphMock(),
       DateTime.now(),
       rootIndex: HeapSnapshotGraphMock.rootIndex,
     );
 
-SingleClassData testClassData(HeapClassName className, List<int> indexes) {
-  final graph = HeapSnapshotGraphMock();
+SingleClassData testClassData(
+  HeapClassName className,
+  List<int> indexes,
+  HeapSnapshotGraph graph,
+) {
   final result = SingleClassData(className: className);
   for (final index in indexes) {
     result.countInstance(
       graph,
       index: index,
-      retainers: [],
-      retainedSizes: [],
+      retainers: null,
+      retainedSizes: null,
       heapRootIndex: HeapSnapshotGraphMock.rootIndex,
     );
   }

@@ -6,7 +6,6 @@ import 'package:devtools_app/src/screens/memory/panes/diff/data/classes_diff.dar
 import 'package:devtools_app/src/screens/memory/panes/diff/data/heap_diff_data.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/data/heap_diff_store.dart';
 import 'package:devtools_app/src/shared/memory/class_name.dart';
-import 'package:devtools_app/src/shared/memory/classes.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../../test_infra/test_data/memory/heap/factories.dart';
@@ -36,27 +35,38 @@ void main() {
     final className =
         HeapClassName.fromPath(className: 'myClass', library: 'library');
 
-    const deleted = 1;
-    const persistedBefore = 2;
-    const persistedAfter = 2;
-    const created1 = 3;
-    const created2 = 4;
+    final graphBefore = HeapSnapshotGraphMock();
+    final deleted = graphBefore.add(1);
+    final persistedBefore = graphBefore.add(2);
 
-    final statsBefore = testClassData(className, [deleted, persistedBefore]);
-    final statsAfter =
-        testClassData(className, [persistedAfter, created1, created2]);
+    final graphAfter = HeapSnapshotGraphMock();
+    final persistedAfter = graphAfter.add(2);
+    final created1 = graphAfter.add(3);
+    final created2 = graphAfter.add(4);
+
+    final classBefore = testClassData(
+      className,
+      [deleted, persistedBefore],
+      graphBefore,
+    );
+    final classAfter = testClassData(
+      className,
+      [persistedAfter, created1, created2],
+      graphAfter,
+    );
 
     final diff = DiffClassData.compare(
-        before: before,
-        dataBefore: dataBefore,
-        after: after,
-        dataAfter: dataAfter)!;
+      before: classBefore,
+      dataBefore: await testHeapData(graphBefore),
+      after: classAfter,
+      dataAfter: await testHeapData(graphAfter),
+    )!;
 
     expect(diff.className, className);
-    expect(diff.total.created.instanceCount, 2);
-    expect(diff.total.deleted.instanceCount, 1);
-    expect(diff.total.delta.instanceCount, 1);
-    expect(diff.total.persisted.instanceCount, 1);
+    expect(diff.diff.created.instanceCount, 2);
+    expect(diff.diff.deleted.instanceCount, 1);
+    expect(diff.diff.delta.instanceCount, 1);
+    expect(diff.diff.persisted.instanceCount, 1);
   });
 
   // test('$DiffClassStats calculates deletion as expected', () async {
