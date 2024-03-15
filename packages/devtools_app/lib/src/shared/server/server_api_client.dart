@@ -203,7 +203,7 @@ class DevToolsServerConnection {
 
   /// Retrieves a preference value from the DevTools configuration file at
   /// ~/.flutter-devtools/.devtools.
-  Future<String> getPreferenceValue(String key) {
+  Future<String?> getPreferenceValue(String key) {
     return _callMethod('getPreferenceValue', {
       'key': key,
     });

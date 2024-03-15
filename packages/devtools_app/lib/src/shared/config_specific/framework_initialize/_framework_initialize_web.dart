@@ -94,7 +94,7 @@ class ServerConnectionStorage implements Storage {
   final DevToolsServerConnection connection;
 
   @override
-  Future<String> getValue(String key) {
+  Future<String?> getValue(String key) {
     return connection.getPreferenceValue(key);
   }
 
