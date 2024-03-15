@@ -7,12 +7,6 @@ import 'dart:typed_data';
 import 'package:devtools_app/src/shared/memory/heap_data.dart';
 import 'package:vm_service/vm_service.dart';
 
-Future<HeapData> testHeapData() async => await HeapData.calculate(
-      HeapSnapshotGraphMock(),
-      DateTime.now(),
-      rootIndex: HeapSnapshotGraphMock.rootIndex,
-    );
-
 class HeapSnapshotGraphMock implements HeapSnapshotGraph {
   HeapSnapshotGraphMock();
 
