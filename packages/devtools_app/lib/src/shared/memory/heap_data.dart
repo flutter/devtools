@@ -11,10 +11,6 @@ import 'classes.dart';
 import 'retainers.dart';
 import 'simple_items.dart';
 
-/// Value for rootIndex is taken from the doc:
-/// https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/heap_snapshot.md#object-ids
-const int _heapRootIndex = 1;
-
 @immutable
 class HeapData {
   HeapData._(
@@ -23,8 +19,11 @@ class HeapData {
     this.footprint, {
     required this.created,
     required this.retainedSizes,
-    required this.rootIndex,
   });
+
+  /// Value for rootIndex is taken from the doc:
+  /// https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/heap_snapshot.md#object-ids
+  static const int rootIndex = 1;
 
   final HeapSnapshotGraph graph;
 
@@ -36,8 +35,6 @@ class HeapData {
 
   final DateTime created;
 
-  final int rootIndex;
-
   /// Object index with the given identityHashCode.
   ///
   /// This field is calculated only for console evaluations
@@ -46,6 +43,11 @@ class HeapData {
       if (graph.objects[i].identityHashCode > 0)
         graph.objects[i].identityHashCode: i,
   };
+
+  @visibleForTesting
+  bool isReachable(int index) {
+    return retainedSizes![index] > 0;
+  }
 
   static final UiReleaser _uiReleaser = UiReleaser();
 
@@ -56,7 +58,6 @@ class HeapData {
     @visibleForTesting bool calculateRetainingPaths = true,
     @visibleForTesting bool calculateRetainedSizes = true,
     @visibleForTesting bool calculateClassData = true,
-    @visibleForTesting int rootIndex = _heapRootIndex,
   }) async {
     if (!calculateClassData) {
       return HeapData._(
@@ -65,7 +66,6 @@ class HeapData {
         null,
         created: created,
         retainedSizes: null,
-        rootIndex: rootIndex,
       );
     }
 
@@ -149,7 +149,6 @@ class HeapData {
       footprint,
       created: created,
       retainedSizes: retainedSizes,
-      rootIndex: rootIndex,
     );
   }
 }

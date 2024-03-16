@@ -22,7 +22,7 @@ void main() {
       test('has many objects and roots.', () {
         expect(heap.graph.objects.length, greaterThan(1000));
         expect(
-          heap.graph.objects[heap.rootIndex].references.length,
+          heap.graph.objects[HeapData.rootIndex].references.length,
           greaterThan(1000),
           reason: t.fileName,
         );

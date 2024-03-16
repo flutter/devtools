@@ -13,7 +13,6 @@ Future<HeapData> testHeapData([HeapSnapshotGraphMock? graph]) async =>
     await HeapData.calculate(
       graph ?? HeapSnapshotGraphMock(),
       DateTime.now(),
-      rootIndex: HeapSnapshotGraphMock.rootIndex,
     );
 
 SingleClassData testClassData(
@@ -28,7 +27,7 @@ SingleClassData testClassData(
       index: index,
       retainers: null,
       retainedSizes: null,
-      heapRootIndex: HeapSnapshotGraphMock.rootIndex,
+      heapRootIndex: HeapData.rootIndex,
     );
   }
   return result;

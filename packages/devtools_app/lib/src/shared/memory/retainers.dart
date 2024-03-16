@@ -9,10 +9,17 @@ typedef References = List<int> Function(int index);
 typedef ShallowSize = int Function(int index);
 
 typedef ShortestRetainersResult = ({
+  /// Retainer for each object in the graph.
+  ///
+  /// 0 means no-retainer.
+  /// Null is not used for no-retainer to save memory footprint.
   List<int> retainers,
   List<int>? retainedSizes,
 });
 
+/// Finds shortest retainers for each object in the graph.
+///
+/// Object at index 0 is sentinel and should not retain other objects.
 ShortestRetainersResult findShortestRetainers({
   required int graphSize,
   required int rootIndex,
@@ -21,6 +28,12 @@ ShortestRetainersResult findShortestRetainers({
   required ShallowSize shallowSize,
   bool calculateSizes = true,
 }) {
+  assert(refs(0).isEmpty);
+  assert(
+    rootIndex != 0,
+    'Root index should not be 0, it is reserved for no-retainer.',
+  );
+
   final retainers = Uint32List(graphSize);
   Uint32List? retainedSizes;
   if (calculateSizes) {
@@ -40,7 +53,7 @@ ShortestRetainersResult findShortestRetainers({
     final nextCut = <int>[];
     for (final index in cut) {
       for (final ref in refs(index)) {
-        if (retainers[ref] != 0) continue;
+        if (ref == 0 || retainers[ref] != 0) continue;
         retainers[ref] = index;
 
         if (isRetainer(ref)) {

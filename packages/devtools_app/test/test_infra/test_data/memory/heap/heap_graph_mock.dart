@@ -4,12 +4,13 @@
 
 import 'dart:typed_data';
 
+import 'package:collection/collection.dart';
 import 'package:vm_service/vm_service.dart';
+
+typedef RefsByIndex = Map<int, List<int>>;
 
 class HeapSnapshotGraphMock implements HeapSnapshotGraph {
   HeapSnapshotGraphMock();
-
-  static const rootIndex = 0;
 
   @override
   int get capacity => throw UnimplementedError();
@@ -31,7 +32,10 @@ class HeapSnapshotGraphMock implements HeapSnapshotGraph {
   String get name => throw UnimplementedError();
 
   @override
-  final List<HeapSnapshotObject> objects = [_HeapSnapshotObjectMock()];
+  final List<HeapSnapshotObject> objects = [
+    _HeapSnapshotObjectMock(), // Sentinel
+    _HeapSnapshotObjectMock(), // Root
+  ];
 
   @override
   int get referenceCount => throw UnimplementedError();
@@ -40,15 +44,32 @@ class HeapSnapshotGraphMock implements HeapSnapshotGraph {
   int get shallowSize => throw UnimplementedError();
 
   @override
-  List<ByteData> toChunks() {
-    // TODO: implement toChunks
-    throw UnimplementedError();
-  }
+  List<ByteData> toChunks() => throw UnimplementedError();
 
   /// Adds object and returns index of the added object.
   int add(int hashCode) {
     objects.add(_HeapSnapshotObjectMock(identityHashCode: hashCode));
     return objects.length - 1;
+  }
+
+  /// Sets one byte objects with given references.
+  ///
+  /// Missed indexes are considered as objects without references, zero size.
+  void setObjects(RefsByIndex refsByIndex) {
+    assert(!refsByIndex.containsKey(0), '0 is reserved for sentinel.');
+    objects.clear();
+    objects.add(_HeapSnapshotObjectMock()); // Sentinel
+    final newLength = refsByIndex.keys.max + 1;
+    for (var i = 1; i < newLength; i++) {
+      objects.add(
+        _HeapSnapshotObjectMock(
+          identityHashCode: i,
+          references: refsByIndex[i] ?? [],
+          shallowSize: refsByIndex.containsKey(i) ? 1 : 0,
+        ),
+      );
+      assert(objects.length - 1 == i);
+    }
   }
 }
 
@@ -76,7 +97,13 @@ class _HeapSnapshotClassMock implements HeapSnapshotClass {
 }
 
 class _HeapSnapshotObjectMock implements HeapSnapshotObject {
-  _HeapSnapshotObjectMock({this.identityHashCode = 0});
+  _HeapSnapshotObjectMock({
+    this.identityHashCode = 0,
+    List<int>? references,
+    this.shallowSize = 0,
+  }) {
+    this.references = Uint32List.fromList(references ?? []);
+  }
 
   @override
   int get classId => throw UnimplementedError();
@@ -88,13 +115,13 @@ class _HeapSnapshotObjectMock implements HeapSnapshotObject {
   HeapSnapshotClass get klass => throw UnimplementedError();
 
   @override
-  Uint32List get references => Uint32List.fromList([]);
+  late Uint32List references;
 
   @override
   Uint32List get referrers => throw UnimplementedError();
 
   @override
-  int get shallowSize => 0;
+  int shallowSize;
 
   @override
   Iterable<HeapSnapshotObject> get successors => throw UnimplementedError();
