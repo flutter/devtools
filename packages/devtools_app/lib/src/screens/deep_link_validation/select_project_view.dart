@@ -34,13 +34,18 @@ class _SelectProjectViewState extends State<SelectProjectView>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!initController()) return;
+    if (!initController()) return;    
+    callWhenControllerReady((_) async {
+      await controller.getPackageDirectoryForMainIsolate();
+      if(controller.packageDirectoryForMainIsolate.value!=null) {
+        _handleDirectoryPicked(controller.packageDirectoryForMainIsolate.value!);
+      }
+    });
   }
 
   @override
   void initState() {
     super.initState();
-    unawaited(_getPackageDirectoryForMainIsolate());
   }
 
   void _handleDirectoryPicked(String directory) async {
@@ -88,18 +93,6 @@ class _SelectProjectViewState extends State<SelectProjectView>
     setState(() {
       _retrievingFlutterProject = false;
     });
-  }
-
-  Future<void> _getPackageDirectoryForMainIsolate() async {
-    final packageUriString =
-        await serviceConnection.rootPackageDirectoryForMainIsolate();
-    if (packageUriString == null) return;
-
-    final path = Uri.parse(packageUriString).toFilePath();
-    setState(() {
-      packageDirectoryForMainIsolate = path;
-    });
-    _handleDirectoryPicked(path);
   }
 
   @override

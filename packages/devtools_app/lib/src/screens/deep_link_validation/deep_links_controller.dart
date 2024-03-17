@@ -10,6 +10,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
+import '../../shared/globals.dart';
 import '../../shared/server/server.dart' as server;
 import 'deep_links_model.dart';
 import 'deep_links_services.dart';
@@ -221,6 +222,16 @@ class DeepLinksController extends DisposableController {
     await validateLinks();
   }
 
+  Future<void> getPackageDirectoryForMainIsolate() async {
+    if (!serviceConnection.serviceManager.hasConnection) {
+      return;
+    }
+    final packageUriString =
+        await serviceConnection.rootPackageDirectoryForMainIsolate();
+    if (packageUriString == null) return;
+    packageDirectoryForMainIsolate.value = Uri.parse(packageUriString).toFilePath();
+  }
+
   /// Get all unverified link data.
   List<LinkData> get _allRawLinkDatas {
     final appLinks = _androidAppLinks[selectedVariantIndex.value]?.deeplinks;
@@ -247,6 +258,7 @@ class DeepLinksController extends DisposableController {
         .toList();
   }
 
+  final packageDirectoryForMainIsolate = ValueNotifier<String?>(null);
   final selectedProject = ValueNotifier<FlutterProject?>(null);
   final selectedLink = ValueNotifier<LinkData?>(null);
   final pagePhase = ValueNotifier<PagePhase>(PagePhase.emptyState);
