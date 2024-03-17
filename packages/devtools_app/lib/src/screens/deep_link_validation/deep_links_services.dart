@@ -110,7 +110,9 @@ class DeepLinksServices {
     }
 
     return ValidateAndroidDomainResult(
-        googlePlayFingerprintsAvailable, domainErrors);
+      googlePlayFingerprintsAvailable,
+      domainErrors,
+    );
   }
 
   Future<GenerateAssetLinksResult> generateAssetLinks({

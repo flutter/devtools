@@ -217,31 +217,32 @@ class _Fingerprint extends StatelessWidget {
                     ),
           children: [
             Padding(
-                padding: const EdgeInsets.all(largeSpacing),
-                child: RoundedOutlinedBorder(
-              child: Padding(
-                padding: const EdgeInsets.all(largeSpacing),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (!hasPdcFingerpint && !haslocalFingerpint) ...[
-                      const Text(
-                        'Fix guide:',
-                      ),
-                      const SizedBox(height: denseSpacing),
-                      Text(
-                        'To fix this issue, release your app on Play Developer Console to get a fingerprint. '
-                        'If you are not ready to release your app, enter a local fingerprint below can also allow you'
-                        'to proceed Android domain check.',
-                        style: theme.subtleTextStyle,
-                      ),
-                      const SizedBox(height: denseSpacing),
+              padding: const EdgeInsets.all(largeSpacing),
+              child: RoundedOutlinedBorder(
+                child: Padding(
+                  padding: const EdgeInsets.all(largeSpacing),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (!hasPdcFingerpint && !haslocalFingerpint) ...[
+                        const Text(
+                          'Fix guide:',
+                        ),
+                        const SizedBox(height: denseSpacing),
+                        Text(
+                          'To fix this issue, release your app on Play Developer Console to get a fingerprint. '
+                          'If you are not ready to release your app, enter a local fingerprint below can also allow you'
+                          'to proceed Android domain check.',
+                          style: theme.subtleTextStyle,
+                        ),
+                        const SizedBox(height: denseSpacing),
+                      ],
+                      // User can add local fingerprint no matter PDC fingerpint is detected or not.
+                      _LocalFingerprint(controller: controller),
                     ],
-                    // User can add local fingerprint no matter PDC fingerpint is detected or not.
-                    _LocalFingerprint(controller: controller),
-                  ],
+                  ),
                 ),
-              ),),
+              ),
             ),
           ],
         );
