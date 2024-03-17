@@ -311,6 +311,40 @@ class _DomainFixPanel extends StatelessWidget {
   }
 }
 
+class _CopyCard extends StatelessWidget {
+  const _CopyCard({this.content});
+
+  final String? content;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Theme.of(context).colorScheme.alternatingBackgroundColor1,
+      surfaceTintColor: Colors.transparent,
+      elevation: 0.0,
+      child: Padding(
+        padding: const EdgeInsets.all(denseSpacing),
+        child: content != null
+            ? Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Flexible(
+                    child: SelectionArea(
+                      child: Text(content!),
+                    ),
+                  ),
+                  CopyToClipboardControl(
+                    dataProvider: () => content,
+                  ),
+                ],
+              )
+            : const CenteredCircularProgressIndicator(),
+      ),
+    );
+  }
+}
+
 class _GenerateAssetLinksPanel extends StatelessWidget {
   const _GenerateAssetLinksPanel({
     required this.controller,
@@ -342,34 +376,7 @@ class _GenerateAssetLinksPanel extends StatelessWidget {
                   )
                 : Column(
                     children: [
-                      Card(
-                        color: theme.colorScheme.alternatingBackgroundColor1,
-                        surfaceTintColor: Colors.transparent,
-                        elevation: 0.0,
-                        child: Padding(
-                          padding: const EdgeInsets.all(denseSpacing),
-                          child: generatedAssetLinks != null
-                              ? Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Flexible(
-                                      child: SelectionArea(
-                                        child: Text(
-                                          generatedAssetLinks.generatedString,
-                                        ),
-                                      ),
-                                    ),
-                                    CopyToClipboardControl(
-                                      dataProvider: () =>
-                                          generatedAssetLinks.generatedString,
-                                    ),
-                                  ],
-                                )
-                              : const CenteredCircularProgressIndicator(),
-                        ),
-                      ),
+                      _CopyCard(content: generatedAssetLinks?.generatedString),
                       const SizedBox(height: denseSpacing),
                       Text(
                         'Update and publish this new recommended Digital Asset Links JSON file below at this location:',
@@ -586,6 +593,13 @@ class _IntentFilterCheck extends StatelessWidget {
       children: <Widget>[
         for (final error in intentFilterErrors)
           if (linkData.pathErrors.contains(error)) Text(error.description),
+        const _CopyCard(
+          content: '''<intent-filter android:autoVerify="true">
+    <action android:name="android.intent.action.VIEW" />
+    <category android:name="android.intent.category.DEFAULT" />
+    <category android:name="android.intent.category.BROWSABLE" />
+</intent-filter>''',
+        ),
       ],
     );
   }
