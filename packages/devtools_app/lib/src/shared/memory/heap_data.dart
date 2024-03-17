@@ -96,7 +96,7 @@ class HeapData {
     if (calculateClassData) {
       final classes = <HeapClassName, SingleClassData>{};
       int dartSize = 0;
-      int reachableSize = 0;
+      int reachableSize = graph.objects[rootIndex].shallowSize;
 
       for (var i = 0; i < graph.objects.length; i++) {
         if (_uiReleaser.step()) await _uiReleaser.releaseUi();
