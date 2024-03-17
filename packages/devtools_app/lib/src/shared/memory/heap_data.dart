@@ -174,7 +174,7 @@ class _WeakClasses {
   final HeapSnapshotGraph graph;
 
   /// Set of class ids that are not holding their references form garbage collection.
-  late final _weakClasses = const <int>{};
+  late final _weakClasses = <int>{};
 
   /// Returns true if the object is a retainer, where [objectIndex] is index in [graph].
   bool isRetainer(int objectIndex) {

@@ -36,74 +36,78 @@ void main() {
 final _sizeTests = [
   // Heaps without unreachable objects:
   _SizeTest(
-    name: 'One object heap',
+    name: 'Just root',
     heap: HeapSnapshotGraphMock()
       ..setObjects(
         {
           1: [],
         },
       ),
+    rootRetainedSize: 1,
+    unreachableSize: 0,
+  ),
+  _SizeTest(
+    name: 'Two objects heap',
+    heap: HeapSnapshotGraphMock()
+      ..setObjects(
+        {
+          1: [2],
+          2: [],
+        },
+      ),
     rootRetainedSize: 2,
+    unreachableSize: 0,
+  ),
+  _SizeTest(
+    name: 'Four objects heap',
+    heap: HeapSnapshotGraphMock()
+      ..setObjects(
+        {
+          1: [2, 3, 4],
+          2: [],
+          3: [],
+          4: [],
+        },
+      ),
+    rootRetainedSize: 4,
+    unreachableSize: 0,
+  ),
+
+  // Heaps with unreachable objects:
+
+  _SizeTest(
+    name: 'One unreachable object heap',
+    heap: HeapSnapshotGraphMock()
+      ..setObjects(
+        {
+          1: [],
+          2: [],
+        },
+      ),
+    rootRetainedSize: 1,
     unreachableSize: 1,
   ),
-  // _SizeTest(
-  //   name: 'Two objects heap',
-  //   heap: _heapData(
-  //     [
-  //       _createOneByteObject(0, [1]),
-  //       _createOneByteObject(1, []),
-  //     ],
-  //   ),
-  //   rootRetainedSize: 2,
-  //   unreachableSize: 0,
-  // ),
-  // _SizeTest(
-  //   name: 'Four objects heap',
-  //   heap: _heapData(
-  //     [
-  //       _createOneByteObject(0, [1, 2, 3]),
-  //       _createOneByteObject(1, []),
-  //       _createOneByteObject(2, []),
-  //       _createOneByteObject(3, []),
-  //     ],
-  //   ),
-  //   rootRetainedSize: 4,
-  //   unreachableSize: 0,
-  // ),
+  _SizeTest(
+    name: 'Many unreachable objects heap',
+    heap: HeapSnapshotGraphMock()
+      ..setObjects(
+        {
+          // Reachable:
+          1: [2, 3, 4],
+          2: [],
+          3: [],
+          4: [],
 
-  // // Heaps with unreachable objects:
-
-  // _SizeTest(
-  //   name: 'One unreachable object heap',
-  //   heap: _heapData(
-  //     [
-  //       _createOneByteObject(0, []),
-  //       _createOneByteObject(1, []),
-  //     ],
-  //   ),
-  //   rootRetainedSize: 1,
-  //   unreachableSize: 1,
-  // ),
-  // _SizeTest(
-  //   name: 'Many unreachable objects heap',
-  //   heap: _heapData(
-  //     [
-  //       // Reachable:
-  //       _createOneByteObject(0, [1, 2, 3]),
-  //       _createOneByteObject(1, []),
-  //       _createOneByteObject(2, []),
-  //       _createOneByteObject(3, []),
-
-  //       // Unreachable:
-  //       _createOneByteObject(4, [5, 6, 7]),
-  //       _createOneByteObject(5, []),
-  //       _createOneByteObject(6, []),
-  //       _createOneByteObject(7, []),
-  //     ],
-  //   ),
-  //   rootRetainedSize: 4,
-  //   unreachableSize: 4,
-  // ),
+          // Unreachable:
+          5: [6, 7, 8],
+          6: [],
+          7: [],
+          8: [],
+        },
+      ),
+    rootRetainedSize: 4,
+    unreachableSize: 4,
+  ),
 
   // // Heaps with weak objects:
   // _SizeTest(

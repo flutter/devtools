@@ -129,10 +129,10 @@ class HeapClassName {
 
   /// Whether a class can hold a reference to an object
   /// without preventing garbage collection.
-  late final bool isWeakEntry = _isWeakEntry(className, library);
+  late final bool isWeak = _isWeak(className, library);
 
-  /// See [isWeakEntry].
-  static bool _isWeakEntry(String className, String library) {
+  /// See [isWeak].
+  static bool _isWeak(String className, String library) {
     // Classes that hold reference to an object without preventing
     // its collection.
     const weakHolders = {

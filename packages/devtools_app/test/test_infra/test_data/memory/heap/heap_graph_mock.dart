@@ -5,6 +5,7 @@
 import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
+import 'package:devtools_app/src/shared/memory/class_name.dart';
 import 'package:vm_service/vm_service.dart';
 
 typedef RefsByIndex = Map<int, List<int>>;
@@ -16,7 +17,10 @@ class HeapSnapshotGraphMock implements HeapSnapshotGraph {
   int get capacity => throw UnimplementedError();
 
   @override
-  final List<HeapSnapshotClass> classes = [];
+  final List<HeapSnapshotClass> classes = [
+    _HeapSnapshotClassMock(),
+    _HeapSnapshotClassMock.weak(),
+  ];
 
   @override
   List<HeapSnapshotExternalProperty> get externalProperties =>
@@ -52,32 +56,51 @@ class HeapSnapshotGraphMock implements HeapSnapshotGraph {
     return objects.length - 1;
   }
 
-  /// Sets one byte objects with given references.
+  /// Resets objects.
   ///
-  /// Missed indexes are considered as objects without references, zero size.
+  /// Cleans all objects.
+  /// Creates sentinel at index 0 and sets one byte objects itemized in [refsByIndex] with given references.
+  ///
+  /// Throws if indexes are missed.
   void setObjects(RefsByIndex refsByIndex) {
     assert(!refsByIndex.containsKey(0), '0 is reserved for sentinel.');
     objects.clear();
     objects.add(_HeapSnapshotObjectMock()); // Sentinel
     final newLength = refsByIndex.keys.max + 1;
     for (var i = 1; i < newLength; i++) {
+      if (!refsByIndex.containsKey(i)) throw 'Index $i is missed.';
       objects.add(
         _HeapSnapshotObjectMock(
           identityHashCode: i,
           references: refsByIndex[i] ?? [],
-          shallowSize: refsByIndex.containsKey(i) ? 1 : 0,
+          shallowSize: 1,
         ),
       );
       assert(objects.length - 1 == i);
     }
   }
+
+  /// Sets weak objects itemized in [refsByIndex].
+  ///
+  /// Throws if indexes are missed.
+  void addWeakObjects(RefsByIndex refsByIndex) {
+    objects.add(_HeapSnapshotObjectMock.weak());
+  }
 }
 
 class _HeapSnapshotClassMock implements HeapSnapshotClass {
   _HeapSnapshotClassMock({
-    this.name = '',
-    this.libraryName = '',
+    this.name = 'DefaultClass',
+    this.libraryName = 'package:default/default.dart',
+    this.classId = _defaultClassId,
   });
+
+  _HeapSnapshotClassMock.weak()
+      : name = '_WeakProperty',
+        libraryName = 'dart:core',
+        classId = _weakClassId {
+    assert(HeapClassName.fromHeapSnapshotClass(this).isWeak);
+  }
 
   @override
   final String name;
@@ -86,27 +109,33 @@ class _HeapSnapshotClassMock implements HeapSnapshotClass {
   final String libraryName;
 
   @override
-  int get classId => throw UnimplementedError();
+  final int classId;
 
   @override
   List<HeapSnapshotField> get fields => throw UnimplementedError();
 
   @override
-  // TODO: implement libraryUri
-  Uri get libraryUri => throw UnimplementedError();
+  late final libraryUri = Uri.parse('');
 }
+
+const int _defaultClassId = 0;
+const int _weakClassId = 1;
 
 class _HeapSnapshotObjectMock implements HeapSnapshotObject {
   _HeapSnapshotObjectMock({
     this.identityHashCode = 0,
     List<int>? references,
     this.shallowSize = 0,
+    this.classId = _defaultClassId,
   }) {
     this.references = Uint32List.fromList(references ?? []);
   }
 
+  /// One byte weak object.
+  _HeapSnapshotObjectMock.weak() : this(classId: _weakClassId, shallowSize: 1);
+
   @override
-  int get classId => throw UnimplementedError();
+  final int classId;
 
   @override
   final int identityHashCode;
