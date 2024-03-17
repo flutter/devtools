@@ -180,11 +180,72 @@ class _DomainCheckTable extends StatelessWidget {
               ),
           ],
         ),
+        _Fingerprint(controller: controller),
         if (linkData.domainErrors.isNotEmpty)
           _DomainFixPanel(controller: controller),
         const SizedBox(height: intermediateSpacing),
-        _LocalFingerprint(controller: controller),
       ],
+    );
+  }
+}
+
+class _Fingerprint extends StatelessWidget {
+  const _Fingerprint({
+    required this.controller,
+  });
+
+  final DeepLinksController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return ValueListenableBuilder<String?>(
+      valueListenable: controller.localFingerprint,
+      builder: (context, localFingerprint, _) {
+        final hasPdcFingerpint =
+            controller.googlePlayFingerprintsAvailability.value;
+        final haslocalFingerpint = localFingerprint != null;
+        return ExpansionTile(
+          title: hasPdcFingerpint
+              ? const Text(
+                  'PDC fingerprint detected, enter a local fingerprint if needed',
+                )
+              : haslocalFingerpint
+                  ? const Text('Local fingerprint detected')
+                  : const _ErrorText(
+                      'Can\'t proceed check due to no fingerprint detected',
+                    ),
+          children: [
+            Padding(
+                padding: const EdgeInsets.all(largeSpacing),
+                child: RoundedOutlinedBorder(
+              child: Padding(
+                padding: const EdgeInsets.all(largeSpacing),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (!hasPdcFingerpint && !haslocalFingerpint) ...[
+                      const Text(
+                        'Fix guide:',
+                      ),
+                      const SizedBox(height: denseSpacing),
+                      Text(
+                        'To fix this issue, release your app on Play Developer Console to get a fingerprint. '
+                        'If you are not ready to release your app, enter a local fingerprint below can also allow you'
+                        'to proceed Android domain check.',
+                        style: theme.subtleTextStyle,
+                      ),
+                      const SizedBox(height: denseSpacing),
+                    ],
+                    // User can add local fingerprint no matter PDC fingerpint is detected or not.
+                    _LocalFingerprint(controller: controller),
+                  ],
+                ),
+              ),),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -428,17 +489,7 @@ class _FailureDetails extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: densePadding),
-              Row(
-                children: [
-                  Icon(
-                    Icons.error,
-                    color: Theme.of(context).colorScheme.error,
-                    size: defaultIconSize,
-                  ),
-                  const SizedBox(width: denseSpacing),
-                  Text('Issue ${i + 1} : ${linkData.domainErrors[i].title}'),
-                ],
-              ),
+              _ErrorText('Issue ${i + 1} : ${linkData.domainErrors[i].title}'),
               const SizedBox(height: densePadding),
               Padding(
                 padding: EdgeInsets.only(
@@ -656,6 +707,26 @@ class _NoIssueText extends StatelessWidget {
       style: TextStyle(
         color: Theme.of(context).colorScheme.green,
       ),
+    );
+  }
+}
+
+class _ErrorText extends StatelessWidget {
+  const _ErrorText(this.text);
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(
+          Icons.error,
+          color: Theme.of(context).colorScheme.error,
+          size: defaultIconSize,
+        ),
+        const SizedBox(width: denseSpacing),
+        Text(text),
+      ],
     );
   }
 }
