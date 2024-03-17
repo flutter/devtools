@@ -29,7 +29,6 @@ class SelectProjectView extends StatefulWidget {
 class _SelectProjectViewState extends State<SelectProjectView>
     with ProvidedControllerMixin<DeepLinksController, SelectProjectView> {
   bool _retrievingFlutterProject = false;
-  String? packageDirectoryForMainIsolate;
 
   @override
   void didChangeDependencies() {
