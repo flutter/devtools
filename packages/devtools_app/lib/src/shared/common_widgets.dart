@@ -1661,6 +1661,8 @@ class NotifierCheckbox extends StatelessWidget {
   }
 }
 
+/// A widget that represents a check box setting and automatically updates for
+/// value changes to [notifier].
 class CheckboxSetting extends StatelessWidget {
   const CheckboxSetting({
     Key? key,

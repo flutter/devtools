@@ -350,10 +350,20 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
       Future.value(TimelineFlags.parse(_vmTimelineFlags)!);
 
   @override
+  Future<PerfettoTimeline> getPerfettoVMTimeline({
+    int? timeOriginMicros,
+    int? timeExtentMicros,
+  }) =>
+      _getPerfettoVMTimeline();
+
+  @override
   Future<PerfettoTimeline> getPerfettoVMTimelineWithCpuSamplesWrapper({
     int? timeOriginMicros,
     int? timeExtentMicros,
-  }) {
+  }) =>
+      _getPerfettoVMTimeline();
+
+  Future<PerfettoTimeline> _getPerfettoVMTimeline() {
     final perfettoTimeline = _timelineData;
     if (perfettoTimeline == null) {
       throw StateError('timelineData was not provided to FakeServiceManager');

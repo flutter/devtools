@@ -157,18 +157,25 @@ class TimelineEventsController extends PerformanceFeatureController
       ),
     );
 
-    // TODO(https://github.com/flutter/devtools/issues/7334): toggle whether we
-    // call getPerfettoVMTimelineWithCpuSamples and getPerfettoVMTimeline based
-    // on the value of a user setting.
     late PerfettoTimeline rawPerfettoTimeline;
-    await debugTimeAsync(
-      () async => rawPerfettoTimeline =
-          await service.getPerfettoVMTimelineWithCpuSamplesWrapper(
-        timeOriginMicros: _nextPollStartMicros,
-        timeExtentMicros: currentVmTime.timestamp! - _nextPollStartMicros,
-      ),
-      debugName: 'VmService.getPerfettoVMTimelineWithCpuSamples',
-    );
+    if (preferences.performance.includeCpuSamplesInTimeline.value) {
+      await debugTimeAsync(
+        () async => rawPerfettoTimeline =
+            await service.getPerfettoVMTimelineWithCpuSamplesWrapper(
+          timeOriginMicros: _nextPollStartMicros,
+          timeExtentMicros: currentVmTime.timestamp! - _nextPollStartMicros,
+        ),
+        debugName: 'VmService.getPerfettoVMTimelineWithCpuSamples',
+      );
+    } else {
+      await debugTimeAsync(
+        () async => rawPerfettoTimeline = await service.getPerfettoVMTimeline(
+          timeOriginMicros: _nextPollStartMicros,
+          timeExtentMicros: currentVmTime.timestamp! - _nextPollStartMicros,
+        ),
+        debugName: 'VmService.getPerfettoVMTimeline',
+      );
+    }
     _nextPollStartMicros = currentVmTime.timestamp! + 1;
 
     Uint8List? traceBinary;
