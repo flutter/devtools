@@ -411,7 +411,8 @@ void main() {
     });
 
     test('has expected default values', () {
-      expect(controller.showFlutterFramesChart.value, isTrue);
+      expect(controller.showFlutterFramesChart.value, true);
+      expect(controller.includeCpuSamplesInTimeline.value, false);
     });
 
     test('stores values and reads them on init', () async {
@@ -419,12 +420,16 @@ void main() {
 
       // Remember original values.
       final showFramesChart = controller.showFlutterFramesChart.value;
+      final includeCpuSamplesInTimeline =
+          controller.includeCpuSamplesInTimeline.value;
 
       // Flip the values in controller.
       controller.showFlutterFramesChart.value = !showFramesChart;
+      controller.includeCpuSamplesInTimeline.value =
+          !includeCpuSamplesInTimeline;
 
       // Check the values are stored.
-      expect(storage.values, hasLength(1));
+      expect(storage.values, hasLength(2));
 
       // Reload the values from storage.
       await controller.init();
@@ -433,6 +438,10 @@ void main() {
       expect(
         controller.showFlutterFramesChart.value,
         !showFramesChart,
+      );
+      expect(
+        controller.includeCpuSamplesInTimeline.value,
+        !includeCpuSamplesInTimeline,
       );
 
       // Flip the values in storage.
@@ -447,6 +456,10 @@ void main() {
       expect(
         controller.showFlutterFramesChart.value,
         showFramesChart,
+      );
+      expect(
+        controller.includeCpuSamplesInTimeline.value,
+        includeCpuSamplesInTimeline,
       );
     });
   });
