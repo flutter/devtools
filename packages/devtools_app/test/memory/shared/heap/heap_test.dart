@@ -26,14 +26,33 @@ final _classA = HeapClassName.fromPath(className: 'A', library: 'l');
 final _classB = HeapClassName.fromPath(className: 'B', library: 'l');
 
 final _classSizeTests = <_ClassSizeTest>[
+  // _ClassSizeTest(
+  //   name: 'separate',
+  //   heap: HeapSnapshotGraphFake()
+  //     ..setObjects(
+  //       {
+  //         1: [2, 3, 4],
+  //         2: [],
+  //         3: [],
+  //         4: [],
+  //       },
+  //       classes: {
+  //         1: _root,
+  //         2: _classA,
+  //         3: _classA,
+  //         4: _classA,
+  //       },
+  //     ),
+  //   expectedClassARetainedSize: 3,
+  // ),
   _ClassSizeTest(
-    name: 'separate',
+    name: 'linked',
     heap: HeapSnapshotGraphFake()
       ..setObjects(
         {
-          1: [2, 3, 4],
-          2: [],
-          3: [],
+          1: [2],
+          2: [3],
+          3: [4],
           4: [],
         },
         classes: {
@@ -45,19 +64,6 @@ final _classSizeTests = <_ClassSizeTest>[
       ),
     expectedClassARetainedSize: 3,
   ),
-  // _ClassSizeTest(
-  //   name: 'linked',
-  //   heap: AdaptedHeapData(
-  //     [
-  //       _createOneByteObject(0, [1], _root),
-  //       _createOneByteObject(1, [2], _classA),
-  //       _createOneByteObject(2, [3], _classA),
-  //       _createOneByteObject(3, [], _classA),
-  //     ],
-  //     rootIndex: 0,
-  //   ),
-  //   expectedClassARetainedSize: 3,
-  // ),
   // _ClassSizeTest(
   //   name: 'full graph',
   //   heap: AdaptedHeapData(

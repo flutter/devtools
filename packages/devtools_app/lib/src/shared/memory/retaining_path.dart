@@ -40,6 +40,7 @@ class DebugRetainingPathUsage {
 /// about concrete instances and fields.
 /// To get more detailed information about the retaining path for a specific object,
 /// use [`leak_tracker/formattedRetainingPath`](https://github.com/dart-lang/leak_tracker/blob/f5620600a5ce1c44f65ddaa02001e200b096e14c/pkgs/leak_tracker/lib/src/leak_tracking/helpers.dart#L58).
+@immutable
 class PathFromRoot {
   PathFromRoot._(this.path)
       : assert(() {
@@ -58,21 +59,25 @@ class PathFromRoot {
   factory PathFromRoot.forObject(
     HeapSnapshotGraph graph, {
     required List<int> shortestRetainers,
-    required int objectId,
+    required int index,
   }) {
-    var nextObjectId = shortestRetainers[objectId];
-    if (nextObjectId == heapRootIndex) {
+    HeapClassName objectClass(int index) {
+      final classId = graph.objects[index].classId;
+      return HeapClassName.fromHeapSnapshotClass(graph.classes[classId]);
+    }
+
+    var nextIndex = shortestRetainers[index];
+    if (nextIndex == heapRootIndex) {
       return empty;
     }
 
     final path = <HeapClassName>[];
 
-    while (shortestRetainers[nextObjectId] != heapRootIndex) {
-      nextObjectId = shortestRetainers[nextObjectId];
-      final classId = graph.objects[nextObjectId].classId;
-      final className =
-          HeapClassName.fromHeapSnapshotClass(graph.classes[classId]);
+    while (true) {
+      final className = objectClass(nextIndex);
       path.add(className);
+      nextIndex = shortestRetainers[nextIndex];
+      if (nextIndex == heapRootIndex) break;
     }
 
     return PathFromRoot.fromPath(path);
