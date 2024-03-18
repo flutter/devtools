@@ -9,6 +9,7 @@ import 'package:devtools_app/src/shared/memory/class_name.dart';
 import 'package:vm_service/vm_service.dart';
 
 typedef RefsByIndex = Map<int, List<int>>;
+typedef ClassByIndex = Map<int, HeapClassName>;
 
 class HeapSnapshotGraphMock implements HeapSnapshotGraph {
   HeapSnapshotGraphMock();
@@ -62,7 +63,10 @@ class HeapSnapshotGraphMock implements HeapSnapshotGraph {
   /// Creates sentinel at index 0 and sets one byte objects itemized in [refsByIndex] with given references.
   ///
   /// Throws if indexes are missed.
-  void setObjects(RefsByIndex refsByIndex) {
+  void setObjects(
+    RefsByIndex refsByIndex, {
+    ClassByIndex? classes,
+  }) {
     assert(!refsByIndex.containsKey(0), '0 is reserved for sentinel.');
     objects.clear();
     objects.add(_HeapSnapshotObjectMock()); // Sentinel
@@ -72,7 +76,11 @@ class HeapSnapshotGraphMock implements HeapSnapshotGraph {
   /// Sets weak objects itemized in [refsByIndex].
   ///
   /// Throws if indexes are missed.
-  void addObjects(RefsByIndex refsByIndex, {bool weak = false}) {
+  void addObjects(
+    RefsByIndex refsByIndex, {
+    bool weak = false,
+    ClassByIndex? classes,
+  }) {
     final firstNewIndex = refsByIndex.keys.min;
     assert(
       firstNewIndex == objects.length,
@@ -82,16 +90,33 @@ class HeapSnapshotGraphMock implements HeapSnapshotGraph {
     final newLength = refsByIndex.keys.max + 1;
     for (var i = firstNewIndex; i < newLength; i++) {
       if (!refsByIndex.containsKey(i)) throw 'Index $i is missed.';
+
       objects.add(
         _HeapSnapshotObjectMock(
           identityHashCode: i,
           references: refsByIndex[i] ?? [],
           shallowSize: 1,
-          isWeak: weak,
+          classId: _classId(classes?[i]),
         ),
       );
       assert(objects.length - 1 == i);
     }
+  }
+
+  int? _classId(HeapClassName? className) {
+    if (className == null) return null;
+    final index = classes.indexWhere(
+      (c) => HeapClassName.fromHeapSnapshotClass(c) == className,
+    );
+    if (index >= 0) return index;
+
+    classes.add(
+      _HeapSnapshotClassMock(
+        name: className.className,
+        libraryName: className.library,
+      ),
+    );
+    return classes.length - 1;
   }
 }
 
@@ -133,8 +158,8 @@ class _HeapSnapshotObjectMock implements HeapSnapshotObject {
     this.identityHashCode = 0,
     List<int>? references,
     this.shallowSize = 0,
-    bool isWeak = false,
-  }) : classId = isWeak ? _weakClassId : _defaultClassId {
+    int? classId,
+  }) : classId = classId ?? _defaultClassId {
     this.references = Uint32List.fromList(references ?? []);
   }
 
