@@ -35,11 +35,11 @@ void main() {
     final className =
         HeapClassName.fromPath(className: 'myClass', library: 'library');
 
-    final graphBefore = HeapSnapshotGraphMock();
+    final graphBefore = HeapSnapshotGraphFake();
     final deleted = graphBefore.add(1);
     final persistedBefore = graphBefore.add(2);
 
-    final graphAfter = HeapSnapshotGraphMock();
+    final graphAfter = HeapSnapshotGraphFake();
     final persistedAfter = graphAfter.add(2);
     final created1 = graphAfter.add(3);
     final created2 = graphAfter.add(4);
@@ -73,7 +73,7 @@ void main() {
     final className =
         HeapClassName.fromPath(className: 'myClass', library: 'library');
 
-    final graphBefore = HeapSnapshotGraphMock();
+    final graphBefore = HeapSnapshotGraphFake();
     final deleted = graphBefore.add(1);
 
     final classBefore = testClassData(

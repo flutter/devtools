@@ -16,15 +16,24 @@ typedef ShallowSize = int Function(int index);
 typedef ShortestRetainersResult = ({
   /// Retainer for each object in the graph.
   ///
-  /// 0 means no-retainer.
+  /// When a value at index i is 0, it means the object at index i
+  /// has no retainers.
   /// Null is not used for no-retainer to save memory footprint.
   List<int> retainers,
+
+  /// Retained size for each object in the graph.
+  ///
+  /// If an object is unreachable, its retained size is 0.
   List<int>? retainedSizes,
 });
 
+/// Index of the sentinel object.
 const int _sentinelIndex = 0;
 
 /// Finds shortest retainers for each object in the graph.
+///
+/// Index 0 is reserved for sentinel object.
+/// The sentinel object should not have size and references.
 ShortestRetainersResult findShortestRetainers({
   required int graphSize,
   required int rootIndex,
@@ -34,6 +43,7 @@ ShortestRetainersResult findShortestRetainers({
   bool calculateSizes = true,
 }) {
   assert(refs(_sentinelIndex).isEmpty);
+  assert(shallowSize(_sentinelIndex) == 0);
   assert(
     rootIndex != _sentinelIndex,
     'Root index should not be $_sentinelIndex, it is reserved for no-retainer.',

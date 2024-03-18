@@ -9,9 +9,9 @@ import 'package:vm_service/vm_service.dart';
 
 import 'heap_graph_mock.dart';
 
-Future<HeapData> testHeapData([HeapSnapshotGraphMock? graph]) async =>
+Future<HeapData> testHeapData([HeapSnapshotGraphFake? graph]) async =>
     await HeapData.calculate(
-      graph ?? HeapSnapshotGraphMock(),
+      graph ?? HeapSnapshotGraphFake(),
       DateTime.now(),
     );
 
@@ -27,7 +27,6 @@ SingleClassData testClassData(
       index: index,
       retainers: null,
       retainedSizes: null,
-      heapRootIndex: HeapData.rootIndex,
     );
   }
   return result;

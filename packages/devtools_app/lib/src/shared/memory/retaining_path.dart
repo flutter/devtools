@@ -9,6 +9,7 @@ import 'package:vm_service/vm_service.dart';
 import '../development_helpers.dart';
 import '../primitives/utils.dart';
 import 'class_name.dart';
+import 'simple_items.dart';
 
 // ignore: avoid-dynamic, defined in package:collection
 bool Function(List<dynamic>? list1, List<dynamic>? list2) _listEquality =
@@ -58,7 +59,6 @@ class PathFromRoot {
     HeapSnapshotGraph graph, {
     required List<int> shortestRetainers,
     required int objectId,
-    required int heapRootIndex,
   }) {
     var nextObjectId = shortestRetainers[objectId];
     if (nextObjectId == heapRootIndex) {

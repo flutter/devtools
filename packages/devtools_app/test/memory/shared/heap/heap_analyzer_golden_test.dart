@@ -4,6 +4,7 @@
 
 import 'package:devtools_app/src/shared/memory/class_name.dart';
 import 'package:devtools_app/src/shared/memory/heap_data.dart';
+import 'package:devtools_app/src/shared/memory/simple_items.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../../test_infra/test_data/memory/heap/heap_data.dart';
@@ -22,7 +23,7 @@ void main() {
       test('has many objects and roots.', () {
         expect(heap.graph.objects.length, greaterThan(1000));
         expect(
-          heap.graph.objects[HeapData.rootIndex].references.length,
+          heap.graph.objects[heapRootIndex].references.length,
           greaterThan(1000),
           reason: t.fileName,
         );

@@ -204,7 +204,6 @@ class SingleClassData extends ClassData {
     required int index,
     required List<int>? retainers,
     required List<int>? retainedSizes,
-    required int heapRootIndex,
   }) {
     final PathFromRoot? path = retainers == null
         ? null
@@ -212,7 +211,6 @@ class SingleClassData extends ClassData {
             graph,
             shortestRetainers: retainers,
             objectId: index,
-            heapRootIndex: heapRootIndex,
           );
 
     final bool excludeFromRetained = path != null &&

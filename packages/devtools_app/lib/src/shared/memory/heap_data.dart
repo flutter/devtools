@@ -11,6 +11,7 @@ import 'classes.dart';
 import 'retainers.dart';
 import 'simple_items.dart';
 
+/// Raw and calculated data of the heap snapshot.
 @immutable
 class HeapData {
   HeapData._(
@@ -20,10 +21,6 @@ class HeapData {
     required this.created,
     required this.retainedSizes,
   });
-
-  /// Value for rootIndex is taken from the doc:
-  /// https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/heap_snapshot.md#object-ids
-  static const int rootIndex = 1;
 
   final HeapSnapshotGraph graph;
 
@@ -37,7 +34,7 @@ class HeapData {
 
   /// Object index with the given identityHashCode.
   ///
-  /// This field is calculated only for console evaluations
+  /// This field is calculated only for console evaluations.
   late final Map<int, int> indexByCode = {
     for (var i = 0; i < graph.objects.length; i++)
       if (graph.objects[i].identityHashCode > 0)
@@ -49,7 +46,7 @@ class HeapData {
     return retainedSizes![index] > 0;
   }
 
-  static final UiReleaser _uiReleaser = UiReleaser();
+  static final _uiReleaser = UiReleaser();
 
   /// Calculate the heap data from the given [graph].
   static Future<HeapData> calculate(
@@ -77,7 +74,7 @@ class HeapData {
 
       final result = findShortestRetainers(
         graphSize: graph.objects.length,
-        rootIndex: rootIndex,
+        rootIndex: heapRootIndex,
         isWeak: weakClasses.isWeak,
         refs: (int index) => graph.objects[index].references,
         shallowSize: (int index) => graph.objects[index].shallowSize,
@@ -96,15 +93,16 @@ class HeapData {
     if (calculateClassData) {
       final classes = <HeapClassName, SingleClassData>{};
       int dartSize = 0;
-      int reachableSize = graph.objects[rootIndex].shallowSize;
+      int reachableSize = graph.objects[heapRootIndex].shallowSize;
 
       for (var i = 0; i < graph.objects.length; i++) {
         if (_uiReleaser.step()) await _uiReleaser.releaseUi();
         final object = graph.objects[i];
         dartSize += object.shallowSize;
 
-        // We do not show objects that will be garbage collected soon.
-        if (retainers != null && retainers[i] == 0) {
+        // We do not show unreachable objects, i.e. objects
+        // that will be garbage collected soon.
+        if (retainers?[i] == 0) {
           continue;
         }
 
@@ -118,18 +116,18 @@ class HeapData {
         }
 
         reachableSize += object.shallowSize;
-        final data = classes.putIfAbsent(
-          className,
-          () => SingleClassData(className: className),
-        );
 
-        data.countInstance(
-          graph,
-          index: i,
-          retainers: retainers,
-          retainedSizes: retainedSizes,
-          heapRootIndex: rootIndex,
-        );
+        classes
+            .putIfAbsent(
+              className,
+              () => SingleClassData(className: className),
+            )
+            .countInstance(
+              graph,
+              index: i,
+              retainers: retainers,
+              retainedSizes: retainedSizes,
+            );
       }
 
       footprint = MemoryFootprint(dart: dartSize, reachable: reachableSize);
@@ -138,7 +136,7 @@ class HeapData {
       // Check that retained size of root is the entire reachable heap.
       assert(
         retainedSizes == null ||
-            retainedSizes[rootIndex] == footprint.reachable,
+            retainedSizes[heapRootIndex] == footprint.reachable,
       );
     }
 
@@ -172,7 +170,7 @@ class _WeakClasses {
 
   final HeapSnapshotGraph graph;
 
-  /// Set of class ids that are not holding their references form garbage collection.
+  /// Set of class ids that are not holding their references from garbage collection.
   late final _weakClasses = <int>{};
 
   /// Returns true if the object cannot retain other objects.

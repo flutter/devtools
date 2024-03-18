@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/shared/memory/class_name.dart';
+import 'package:devtools_app/src/shared/memory/classes.dart';
+import 'package:devtools_app/src/shared/memory/heap_data.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:vm_service/vm_service.dart';
 
 import '../../../test_infra/test_data/memory/heap/heap_graph_mock.dart';
 
@@ -15,9 +16,7 @@ class _ClassSizeTest {
     required this.expectedClassARetainedSize,
   });
 
-  Future<void> initialize() async {}
-
-  final HeapSnapshotGraph heap;
+  final HeapSnapshotGraphFake heap;
   final String name;
   final int expectedClassARetainedSize;
 }
@@ -29,7 +28,7 @@ final _classB = HeapClassName.fromPath(className: 'B', library: 'l');
 final _classSizeTests = <_ClassSizeTest>[
   _ClassSizeTest(
     name: 'separate',
-    heap: HeapSnapshotGraphMock()
+    heap: HeapSnapshotGraphFake()
       ..setObjects(
         {
           1: [2, 3, 4],
@@ -95,17 +94,18 @@ void main() {
     }
   });
 
-  // test('$SingleClassStats_ does not double-count self-referenced classes.', () {
-  //   for (final t in _classSizeTests) {
-  //     final classes = SingleClassStats_(heapClass: _classA);
-  //     for (final o in t.heap.objects) {
-  //       if (o.heapClass == _classA) classes.countInstance(t.heap, o.code);
-  //     }
-  //     expect(
-  //       classes.objects.retainedSize,
-  //       t.expectedClassARetainedSize,
-  //       reason: t.name,
-  //     );
-  //   }
-  // });
+  test('$SingleClassData does not double-count self-referenced classes.',
+      () async {
+    for (final t in _classSizeTests) {
+      final heapData = await HeapData.calculate(t.heap, DateTime.now());
+
+      final classData = heapData.classes!.byName(_classA)!;
+
+      expect(
+        classData.objects.retainedSize,
+        t.expectedClassARetainedSize,
+        reason: t.name,
+      );
+    }
+  });
 }

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/shared/memory/heap_data.dart';
+import 'package:devtools_app/src/shared/memory/simple_items.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -17,7 +18,7 @@ void main() {
       );
 
       expect(
-        heap.retainedSizes![HeapData.rootIndex],
+        heap.retainedSizes![heapRootIndex],
         equals(t.rootRetainedSize),
       );
 
@@ -37,7 +38,7 @@ final _sizeTests = [
   // Heaps without unreachable objects:
   _SizeTest(
     name: 'Just root',
-    heap: HeapSnapshotGraphMock()
+    heap: HeapSnapshotGraphFake()
       ..setObjects(
         {
           1: [],
@@ -48,7 +49,7 @@ final _sizeTests = [
   ),
   _SizeTest(
     name: 'Two objects heap',
-    heap: HeapSnapshotGraphMock()
+    heap: HeapSnapshotGraphFake()
       ..setObjects(
         {
           1: [2],
@@ -60,7 +61,7 @@ final _sizeTests = [
   ),
   _SizeTest(
     name: 'Four objects heap',
-    heap: HeapSnapshotGraphMock()
+    heap: HeapSnapshotGraphFake()
       ..setObjects(
         {
           1: [2, 3, 4],
@@ -77,7 +78,7 @@ final _sizeTests = [
 
   _SizeTest(
     name: 'One unreachable object heap',
-    heap: HeapSnapshotGraphMock()
+    heap: HeapSnapshotGraphFake()
       ..setObjects(
         {
           1: [],
@@ -89,7 +90,7 @@ final _sizeTests = [
   ),
   _SizeTest(
     name: 'Many unreachable objects heap',
-    heap: HeapSnapshotGraphMock()
+    heap: HeapSnapshotGraphFake()
       ..setObjects(
         {
           // Reachable:
@@ -117,7 +118,7 @@ final _sizeTests = [
     //  2w 3
     //  |
     //  4
-    heap: HeapSnapshotGraphMock()
+    heap: HeapSnapshotGraphFake()
       ..setObjects(
         {
           1: [2, 3],
@@ -145,7 +146,7 @@ final _sizeTests = [
     //  2w 3w
     //  |   \
     //  4   5
-    heap: HeapSnapshotGraphMock()
+    heap: HeapSnapshotGraphFake()
       ..setObjects(
         {
           1: [2, 3],
@@ -173,7 +174,7 @@ final _sizeTests = [
     name: 'Diamond',
     //  |\
     //  \|
-    heap: HeapSnapshotGraphMock()
+    heap: HeapSnapshotGraphFake()
       ..setObjects(
         {
           1: [2, 3],
@@ -190,7 +191,7 @@ final _sizeTests = [
     //  \
     //  |\
     //  \|
-    heap: HeapSnapshotGraphMock()
+    heap: HeapSnapshotGraphFake()
       ..setObjects(
         {
           1: [2],
@@ -208,7 +209,7 @@ final _sizeTests = [
     //  \
     //  |\
     //  \|
-    heap: HeapSnapshotGraphMock()
+    heap: HeapSnapshotGraphFake()
       ..setObjects(
         {
           1: [2],
@@ -235,7 +236,7 @@ final _sizeTests = [
     //  \
     //  |\
     //  \|
-    heap: HeapSnapshotGraphMock()
+    heap: HeapSnapshotGraphFake()
       ..setObjects(
         {
           1: [2],
