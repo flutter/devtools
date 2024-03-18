@@ -320,7 +320,6 @@ class _CopyCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       color: Theme.of(context).colorScheme.alternatingBackgroundColor1,
-      surfaceTintColor: Colors.transparent,
       elevation: 0.0,
       child: Padding(
         padding: const EdgeInsets.all(denseSpacing),
