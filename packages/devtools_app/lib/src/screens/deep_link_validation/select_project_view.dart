@@ -2,15 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/directory_picker.dart';
-import '../../shared/globals.dart';
 import '../../shared/server/server.dart' as server;
 import '../../shared/utils.dart';
 import 'deep_links_controller.dart';
