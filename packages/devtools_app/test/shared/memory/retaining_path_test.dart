@@ -28,9 +28,11 @@ void main() {
     expect(path1, isNot(path3));
   });
 
-  test('$PathFromRoot construction', () async {
+  group('$PathFromRoot construction', () {
     final root = HeapClassName.fromPath(className: 'Root', library: 'l');
     final classA = HeapClassName.fromPath(className: 'A', library: 'l');
+    final classB = HeapClassName.fromPath(className: 'B', library: 'l');
+    final classC = HeapClassName.fromPath(className: 'C', library: 'l');
 
     final graph = HeapSnapshotGraphFake()
       ..setObjects(
@@ -43,18 +45,37 @@ void main() {
         classes: {
           1: root,
           2: classA,
-          3: classA,
-          4: classA,
+          3: classB,
+          4: classC,
         },
       );
+    final shortestRetainers = const [0, 0, 1, 2, 3];
 
-    final path = PathFromRoot.forObject(
-      graph,
-      shortestRetainers: const [0, 0, 1, 2, 3],
-      index: 3,
-    );
+    PathFromRoot objectPath(int index) => PathFromRoot.forObject(
+          graph,
+          shortestRetainers: shortestRetainers,
+          index: index,
+        );
 
-    expect(path.path, hasLength(1));
-    expect(path.path[0], classA);
+    test('directly to root', () async {
+      final path = objectPath(2);
+
+      expect(path.path, hasLength(0));
+    });
+
+    test('one step', () async {
+      final path = objectPath(3);
+
+      expect(path.path, hasLength(1));
+      expect(path.path[0], classA);
+    });
+
+    test('two steps', () async {
+      final path = objectPath(4);
+
+      expect(path.path, hasLength(2));
+      expect(path.path[0], classB);
+      expect(path.path[1], classA);
+    });
   });
 }

@@ -26,25 +26,25 @@ final _classA = HeapClassName.fromPath(className: 'A', library: 'l');
 final _classB = HeapClassName.fromPath(className: 'B', library: 'l');
 
 final _classSizeTests = <_ClassSizeTest>[
-  // _ClassSizeTest(
-  //   name: 'separate',
-  //   heap: HeapSnapshotGraphFake()
-  //     ..setObjects(
-  //       {
-  //         1: [2, 3, 4],
-  //         2: [],
-  //         3: [],
-  //         4: [],
-  //       },
-  //       classes: {
-  //         1: _root,
-  //         2: _classA,
-  //         3: _classA,
-  //         4: _classA,
-  //       },
-  //     ),
-  //   expectedClassARetainedSize: 3,
-  // ),
+  _ClassSizeTest(
+    name: 'separate',
+    heap: HeapSnapshotGraphFake()
+      ..setObjects(
+        {
+          1: [2, 3, 4],
+          2: [],
+          3: [],
+          4: [],
+        },
+        classes: {
+          1: _root,
+          2: _classA,
+          3: _classA,
+          4: _classA,
+        },
+      ),
+    expectedClassARetainedSize: 3,
+  ),
   _ClassSizeTest(
     name: 'linked',
     heap: HeapSnapshotGraphFake()
@@ -64,19 +64,25 @@ final _classSizeTests = <_ClassSizeTest>[
       ),
     expectedClassARetainedSize: 3,
   ),
-  // _ClassSizeTest(
-  //   name: 'full graph',
-  //   heap: AdaptedHeapData(
-  //     [
-  //       _createOneByteObject(0, [1], _root),
-  //       _createOneByteObject(1, [2, 3], _classA),
-  //       _createOneByteObject(2, [3, 1], _classA),
-  //       _createOneByteObject(3, [1, 2], _classA),
-  //     ],
-  //     rootIndex: 0,
-  //   ),
-  //   expectedClassARetainedSize: 3,
-  // ),
+  _ClassSizeTest(
+    name: 'full graph',
+    heap: HeapSnapshotGraphFake()
+      ..setObjects(
+        {
+          1: [2],
+          2: [3, 4],
+          3: [2, 4],
+          4: [2, 3],
+        },
+        classes: {
+          1: _root,
+          2: _classA,
+          3: _classA,
+          4: _classA,
+        },
+      ),
+    expectedClassARetainedSize: 3,
+  ),
   // _ClassSizeTest(
   //   name: 'with global B',
   //   heap: AdaptedHeapData(
@@ -94,9 +100,10 @@ final _classSizeTests = <_ClassSizeTest>[
 ];
 
 void main() {
-  test('$SingleClassData does not double-count self-referenced classes.',
-      () async {
-    for (final t in _classSizeTests) {
+  for (final t in _classSizeTests) {
+    test(
+        '$SingleClassData does not double-count self-referenced classes, ${t.name}.',
+        () async {
       final heapData = await HeapData.calculate(t.heap, DateTime.now());
 
       final classes = heapData.classes!;
@@ -107,6 +114,6 @@ void main() {
         t.expectedClassARetainedSize,
         reason: t.name,
       );
-    }
-  });
+    });
+  }
 }
