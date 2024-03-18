@@ -49,7 +49,9 @@ class GenerateAssetLinksResult {
 
 class ValidateAndroidDomainResult {
   ValidateAndroidDomainResult(
-      this.googlePlayFingerprintsAvailability, this.domainErrors);
+    this.googlePlayFingerprintsAvailability,
+    this.domainErrors,
+  );
   bool googlePlayFingerprintsAvailability;
   Map<String, List<DomainError>> domainErrors;
 }

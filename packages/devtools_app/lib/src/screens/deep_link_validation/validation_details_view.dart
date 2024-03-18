@@ -225,9 +225,7 @@ class _Fingerprint extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       if (!hasPdcFingerpint && !haslocalFingerpint) ...[
-                        const Text(
-                          'Fix guide:',
-                        ),
+                        const Text('Fix guide:'),
                         const SizedBox(height: denseSpacing),
                         Text(
                           'To fix this issue, release your app on Play Developer Console to get a fingerprint. '
