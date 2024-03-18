@@ -91,12 +91,15 @@ class HeapSnapshotGraphMock implements HeapSnapshotGraph {
     for (var i = firstNewIndex; i < newLength; i++) {
       if (!refsByIndex.containsKey(i)) throw 'Index $i is missed.';
 
+      int? classId = _classId(classes?[i]);
+      classId ??= weak ? _weakClassId : _defaultClassId;
+
       objects.add(
         _HeapSnapshotObjectMock(
           identityHashCode: i,
           references: refsByIndex[i] ?? [],
           shallowSize: 1,
-          classId: _classId(classes?[i]),
+          classId: classId,
         ),
       );
       assert(objects.length - 1 == i);
