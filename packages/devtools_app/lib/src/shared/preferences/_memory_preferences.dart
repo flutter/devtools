@@ -39,8 +39,10 @@ class MemoryPreferencesController extends DisposableController
         }
       },
     );
-    androidCollectionEnabled.value =
-        await storage.getValue(_androidCollectionEnabledStorageId) == 'true';
+    androidCollectionEnabled.value = await boolValueFromStorage(
+      _androidCollectionEnabledStorageId,
+      defaultsTo: false,
+    );
 
     addAutoDisposeListener(
       showChart,
@@ -58,7 +60,10 @@ class MemoryPreferencesController extends DisposableController
         );
       },
     );
-    showChart.value = await storage.getValue(_showChartStorageId) != 'false';
+    showChart.value = await boolValueFromStorage(
+      _showChartStorageId,
+      defaultsTo: true,
+    );
 
     addAutoDisposeListener(
       refLimit,

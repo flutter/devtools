@@ -199,7 +199,7 @@ void main() {
           await tester.tap(find.text('Timeline Events'));
           await tester.pumpAndSettle();
 
-          expect(find.byType(TraceCategoriesButton), findsOneWidget);
+          expect(find.byType(TimelineSettingsButton), findsOneWidget);
           expect(find.byType(RefreshTimelineEventsButton), findsOneWidget);
           expect(find.byType(TimelineEventsTabView), findsOneWidget);
           expect(find.byType(EmbeddedPerfetto), findsOneWidget);
