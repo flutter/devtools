@@ -95,8 +95,10 @@ class BuildCommand extends Command {
             '--web-renderer',
             'canvaskit',
             '--pwa-strategy=offline-first',
+            // TODO(elliette): Compile with O1 optimization once
+            // https://github.com/dart-lang/sdk/issues/55234 is fixed:
             // Enable default optimizations: https://dart.dev/tools/dart-compile#js
-            '--dart2js-optimization=O1',
+            // '--dart2js-optimization=O1',
             if (buildMode != 'debug') '--$buildMode',
             '--no-tree-shake-icons',
           ],

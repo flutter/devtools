@@ -62,7 +62,9 @@ flutter pub get
 flutter build web \
   --web-renderer canvaskit \
   --pwa-strategy=offline-first \
-  --dart2js-optimization=O1 \
+  # TODO(elliette): Compile with O1 optimization once
+  # https://github.com/dart-lang/sdk/issues/55234 is fixed:
+  # --dart2js-optimization=O1 \
   --release \
   --no-tree-shake-icons
 
