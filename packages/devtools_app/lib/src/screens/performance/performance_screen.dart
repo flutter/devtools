@@ -37,18 +37,17 @@ class PerformanceScreen extends Screen {
   String get docPageId => id;
 
   @override
-  Widget build(BuildContext context) {
-    final connected = serviceConnection.serviceManager.hasConnection &&
-        serviceConnection.serviceManager.connectedAppInitialized;
-    if (!connected && !offlineController.offlineMode.value) {
-      return const DisconnectedPerformanceScreenBody();
-    }
-
+  Widget buildScreenBody(BuildContext context) {
     if (serviceConnection.serviceManager.connectedApp?.isDartWebAppNow ??
         false) {
       return const WebPerformanceScreenBody();
     }
     return const PerformanceScreenBody();
+  }
+
+  @override
+  Widget buildDisconnectedScreenBody(BuildContext context) {
+    return const DisconnectedPerformanceScreenBody();
   }
 }
 

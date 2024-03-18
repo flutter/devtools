@@ -19,11 +19,11 @@ To learn more about DevTools, check out the
   tree. - [#7353](https://github.com/flutter/devtools/pull/7353)
 
 ## Performance updates
-
-- Removed the legacy trace viewer. The legacy trace viwer was replaced with the
-  embedded Perfetto trace viewer in DevTools version 2.21.1, but was available
-  behind a setting to ensure a smooth rollout. This release of DevTools removes
-  the legacy trace viewer entirely. - [#7316](https://github.com/flutter/devtools/pull/7316)
+* Include CPU samples in the Timeline. - [#7333](https://github.com/flutter/devtools/pull/7333)
+* Removed the legacy trace viewer. The legacy trace viwer was replaced with the
+embedded Perfetto trace viewer in DevTools version 2.21.1, but was available
+behind a setting to ensure a smooth rollout. This release of DevTools removes
+the legacy trace viewer entirely. - [#7316](https://github.com/flutter/devtools/pull/7316)
 
 ## CPU profiler updates
 

@@ -79,17 +79,11 @@ class ProfilerScreenController extends DisposableController
         cpuProfilerController.updateViewForType(CpuProfilerViewType.function);
       });
     } else {
-      final shouldLoadOfflineData =
-          offlineController.shouldLoadOfflineData(ProfilerScreen.id);
-      if (shouldLoadOfflineData) {
-        final profilerJson = Map<String, dynamic>.from(
-          offlineController.offlineDataJson[ProfilerScreen.id],
-        );
-        final offlineProfilerData = CpuProfileData.parse(profilerJson);
-        if (!offlineProfilerData.isEmpty) {
-          await loadOfflineData(offlineProfilerData);
-        }
-      }
+      await maybeLoadOfflineData(
+        ProfilerScreen.id,
+        createData: (json) => CpuProfileData.parse(json),
+        shouldLoad: (data) => !data.isEmpty,
+      );
     }
   }
 

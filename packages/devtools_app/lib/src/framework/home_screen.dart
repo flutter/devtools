@@ -39,7 +39,7 @@ class HomeScreen extends Screen {
   final List<DevToolsJsonFile> sampleData;
 
   @override
-  Widget build(BuildContext context) {
+  Widget buildScreenBody(BuildContext context) {
     return HomeScreenBody(sampleData: sampleData);
   }
 }

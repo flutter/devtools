@@ -42,7 +42,7 @@ class InspectorScreen extends Screen {
   String get docPageId => screenId;
 
   @override
-  Widget build(BuildContext context) => const InspectorScreenBody();
+  Widget buildScreenBody(BuildContext context) => const InspectorScreenBody();
 }
 
 class InspectorScreenBody extends StatefulWidget {

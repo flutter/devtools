@@ -10,6 +10,9 @@ import '_cpu_profiler_data.dart';
 import '_performance_data.dart';
 import '_performance_data_large.dart';
 
+// To create Dart test data files from JSON, use the `tool/json_to_map.dart`
+// script.
+
 const cpuProfilerFileName = 'cpu_profile_data.json';
 const performanceFileName = 'performance_data.json';
 const performanceLargeFileName = 'performance_large_data.json';

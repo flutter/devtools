@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/screens/memory/panes/diff/controller/heap_diff.dart';
+import 'package:devtools_app/src/screens/memory/panes/diff/data/classes_diff.dart';
+import 'package:devtools_app/src/screens/memory/panes/diff/data/heap_diff_store.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/heap.dart';
-import 'package:devtools_app/src/screens/memory/shared/heap/spanning_tree.dart';
 import 'package:devtools_app/src/shared/memory/adapted_heap_data.dart';
 import 'package:devtools_app/src/shared/memory/adapted_heap_object.dart';
 import 'package:devtools_app/src/shared/memory/class_name.dart';
+import 'package:devtools_app/src/shared/memory/retainers.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -30,7 +31,7 @@ void main() {
     },
   );
 
-  test('$DiffClassStats calculates mix of cases as expected', () async {
+  test('$DiffClassData calculates mix of cases as expected', () async {
     final className =
         HeapClassName.fromPath(className: 'myClass', library: 'library');
 
@@ -44,7 +45,7 @@ void main() {
     final statsAfter =
         await _createClassStats({persistedAfter, created1, created2});
 
-    final stats = DiffClassStats.diff(before: statsBefore, after: statsAfter)!;
+    final stats = DiffClassData.diff(before: statsBefore, after: statsAfter)!;
 
     expect(stats.heapClass, className);
     expect(stats.total.created.instanceCount, 2);
@@ -53,7 +54,7 @@ void main() {
     expect(stats.total.persisted.instanceCount, 1);
   });
 
-  test('$DiffClassStats calculates deletion as expected', () async {
+  test('$DiffClassData calculates deletion as expected', () async {
     final className =
         HeapClassName.fromPath(className: 'myClass', library: 'library');
 
@@ -61,7 +62,7 @@ void main() {
 
     final statsBefore = await _createClassStats({deleted});
 
-    final stats = DiffClassStats.diff(before: statsBefore, after: null)!;
+    final stats = DiffClassData.diff(before: statsBefore, after: null)!;
 
     expect(stats.heapClass, className);
     expect(stats.total.created.instanceCount, 0);

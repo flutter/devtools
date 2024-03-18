@@ -429,7 +429,7 @@ class SimpleScreen extends Screen {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget buildScreenBody(BuildContext context) {
     return child;
   }
 }
