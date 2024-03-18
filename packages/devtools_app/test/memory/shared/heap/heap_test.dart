@@ -83,20 +83,27 @@ final _classSizeTests = <_ClassSizeTest>[
       ),
     expectedClassARetainedSize: 3,
   ),
-  // _ClassSizeTest(
-  //   name: 'with global B',
-  //   heap: AdaptedHeapData(
-  //     [
-  //       _createOneByteObject(0, [1], _root),
-  //       _createOneByteObject(1, [2, 4], _classA),
-  //       _createOneByteObject(2, [3, 4], _classA),
-  //       _createOneByteObject(3, [4], _classA),
-  //       _createOneByteObject(4, [], _classB),
-  //     ],
-  //     rootIndex: 0,
-  //   ),
-  //   expectedClassARetainedSize: 4,
-  // ),
+  _ClassSizeTest(
+    name: 'with global B',
+    heap: HeapSnapshotGraphFake()
+      ..setObjects(
+        {
+          1: [2],
+          2: [3, 5],
+          3: [4, 5],
+          4: [2, 3],
+          5: [],
+        },
+        classes: {
+          1: _root,
+          2: _classA,
+          3: _classA,
+          4: _classA,
+          5: _classB,
+        },
+      ),
+    expectedClassARetainedSize: 4,
+  ),
 ];
 
 void main() {
