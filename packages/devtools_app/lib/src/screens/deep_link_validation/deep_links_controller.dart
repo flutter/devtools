@@ -230,14 +230,14 @@ class DeepLinksController extends DisposableController {
     await validateLinks();
   }
 
-  Future<void> packageDirectoryForMainIsolate() async {
+  Future<String?> packageDirectoryForMainIsolate() async {
     if (!serviceConnection.serviceManager.hasConnection) {
-      return;
+      return null;
     }
     final packageUriString =
         await serviceConnection.rootPackageDirectoryForMainIsolate();
-    if (packageUriString == null) return;
-    packageDirectoryForMainIsolate.value = Uri.parse(packageUriString).toFilePath();
+    if (packageUriString == null) return null;
+    return Uri.parse(packageUriString).toFilePath();
   }
 
   Set<PathError> _getPathErrorsFromIntentFilterChecks(
@@ -288,7 +288,6 @@ class DeepLinksController extends DisposableController {
     return domainPathToLinkData.values.toList();
   }
 
-  final packageDirectoryForMainIsolate = ValueNotifier<String?>(null);
   final selectedProject = ValueNotifier<FlutterProject?>(null);
   final localFingerprint = ValueNotifier<String?>(null);
   final selectedLink = ValueNotifier<LinkData?>(null);
