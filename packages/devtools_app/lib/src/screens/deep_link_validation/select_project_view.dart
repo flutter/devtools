@@ -42,11 +42,6 @@ class _SelectProjectViewState extends State<SelectProjectView>
     });
   }
 
-  @override
-  void initState() {
-    super.initState();
-  }
-
   void _handleDirectoryPicked(String directory) async {
     setState(() {
       _retrievingFlutterProject = true;
