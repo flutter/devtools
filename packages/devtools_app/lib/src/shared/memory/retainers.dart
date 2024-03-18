@@ -4,8 +4,13 @@
 
 import 'dart:typed_data';
 
-typedef IsRetainer = bool Function(int index);
+/// Returns true if the given object can retain other objects from garbage collection.
+typedef IsWeak = bool Function(int index);
+
+/// List of references for the given object.
 typedef References = List<int> Function(int index);
+
+/// Shallow size of the given object.
 typedef ShallowSize = int Function(int index);
 
 typedef ShortestRetainersResult = ({
@@ -17,21 +22,21 @@ typedef ShortestRetainersResult = ({
   List<int>? retainedSizes,
 });
 
+const int _sentinelIndex = 0;
+
 /// Finds shortest retainers for each object in the graph.
-///
-/// Object at index 0 is sentinel and should not retain other objects.
 ShortestRetainersResult findShortestRetainers({
   required int graphSize,
   required int rootIndex,
-  required IsRetainer isRetainer,
+  required IsWeak isWeak,
   required References refs,
   required ShallowSize shallowSize,
   bool calculateSizes = true,
 }) {
-  assert(refs(0).isEmpty);
+  assert(refs(_sentinelIndex).isEmpty);
   assert(
-    rootIndex != 0,
-    'Root index should not be 0, it is reserved for no-retainer.',
+    rootIndex != _sentinelIndex,
+    'Root index should not be $_sentinelIndex, it is reserved for no-retainer.',
   );
 
   final retainers = Uint32List(graphSize);
@@ -53,13 +58,9 @@ ShortestRetainersResult findShortestRetainers({
     final nextCut = <int>[];
     for (final index in cut) {
       for (final ref in refs(index)) {
-        if (ref == 0 || retainers[ref] != 0) continue;
+        if (ref == _sentinelIndex || retainers[ref] != 0) continue;
         retainers[ref] = index;
-
-        if (isRetainer(ref)) {
-          retainedSizes?[ref] = shallowSize(ref);
-          continue;
-        }
+        retainedSizes?[ref] = shallowSize(ref);
 
         if (retainedSizes != null) {
           _addRetainedSize(
@@ -69,7 +70,7 @@ ShortestRetainersResult findShortestRetainers({
             shallowSize: shallowSize,
           );
         }
-        nextCut.add(ref);
+        if (!isWeak(ref)) nextCut.add(ref);
       }
     }
     cut = nextCut;

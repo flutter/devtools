@@ -109,78 +109,100 @@ final _sizeTests = [
     unreachableSize: 4,
   ),
 
-  // // Heaps with weak objects:
-  // _SizeTest(
-  //   name: 'One weak object heap',
-  //   //  0
-  //   //  | \
-  //   //  1w 2
-  //   //  |
-  //   //  3
-  //   heap: _heapData(
-  //     [
-  //       _createOneByteObject(0, [1, 2]),
-  //       _createOneByteWeakObject(1, [3]),
-  //       _createOneByteObject(2, []),
-  //       _createOneByteObject(3, []),
-  //     ],
-  //   ),
-  //   rootRetainedSize: 3,
-  //   unreachableSize: 1,
-  // ),
-  // _SizeTest(
-  //   name: 'Two weak objects heap',
-  //   //  0
-  //   //  | \
-  //   //  1w 2w
-  //   //  |   \
-  //   //  3   4
-  //   heap: _heapData(
-  //     [
-  //       _createOneByteObject(0, [1, 2]),
-  //       _createOneByteWeakObject(1, [3]),
-  //       _createOneByteWeakObject(2, [4]),
-  //       _createOneByteObject(3, []),
-  //       _createOneByteObject(4, []),
-  //     ],
-  //   ),
-  //   rootRetainedSize: 3,
-  //   unreachableSize: 2,
-  // ),
+  // Heaps with weak objects:
+  _SizeTest(
+    name: 'One weak object heap',
+    //  1
+    //  | \
+    //  2w 3
+    //  |
+    //  4
+    heap: HeapSnapshotGraphMock()
+      ..setObjects(
+        {
+          1: [2, 3],
+        },
+      )
+      ..addObjects(
+        {
+          2: [4],
+        },
+        weak: true,
+      )
+      ..addObjects(
+        {
+          3: [],
+          4: [],
+        },
+      ),
+    rootRetainedSize: 3,
+    unreachableSize: 1,
+  ),
+  _SizeTest(
+    name: 'Two weak objects heap',
+    //  1
+    //  | \
+    //  2w 3w
+    //  |   \
+    //  4   5
+    heap: HeapSnapshotGraphMock()
+      ..setObjects(
+        {
+          1: [2, 3],
+        },
+      )
+      ..addObjects(
+        {
+          2: [4],
+          3: [5],
+        },
+        weak: true,
+      )
+      ..addObjects(
+        {
+          4: [],
+          5: [],
+        },
+      ),
+    rootRetainedSize: 3,
+    unreachableSize: 2,
+  ),
 
-  // // Non-tree heaps.
-  // _SizeTest(
-  //   name: 'Diamond',
-  //   //  |\
-  //   //  \|
-  //   heap: _heapData(
-  //     [
-  //       _createOneByteObject(0, [1, 2]),
-  //       _createOneByteObject(1, [3]),
-  //       _createOneByteObject(2, [3]),
-  //       _createOneByteObject(3, []),
-  //     ],
-  //   ),
-  //   rootRetainedSize: 4,
-  //   unreachableSize: 0,
-  // ),
-  // _SizeTest(
-  //   name: 'Hanged diamond',
-  //   //  \
-  //   //  |\
-  //   //  \|
-  //   heap: _heapData(
-  //     [
-  //       _createOneByteObject(0, [1]),
-  //       _createOneByteObject(1, [2, 3]),
-  //       _createOneByteObject(2, [4]),
-  //       _createOneByteObject(3, [4]),
-  //       _createOneByteObject(4, []),
-  //     ],
-  //   ),
-  //   rootRetainedSize: 5,
-  //   unreachableSize: 0,
-  // ),
+  // Non-tree heaps.
+  _SizeTest(
+    name: 'Diamond',
+    //  |\
+    //  \|
+    heap: HeapSnapshotGraphMock()
+      ..setObjects(
+        {
+          1: [2, 3],
+          2: [4],
+          3: [4],
+          4: [],
+        },
+      ),
+    rootRetainedSize: 4,
+    unreachableSize: 0,
+  ),
+  _SizeTest(
+    name: 'Hanged diamond',
+    //  \
+    //  |\
+    //  \|
+    heap: HeapSnapshotGraphMock()
+      ..setObjects(
+        {
+          1: [2],
+          2: [3, 4],
+          3: [5],
+          4: [5],
+          5: [],
+        },
+      ),
+    rootRetainedSize: 5,
+    unreachableSize: 0,
+  ),
   // _SizeTest(
   //   name: 'Hanged weak diamond',
   //   //  \

@@ -65,13 +65,11 @@ class PathFromRoot {
       return empty;
     }
 
-    final rootClassId = graph.objects[heapRootIndex].classId;
     final path = <HeapClassName>[];
 
     while (shortestRetainers[nextObjectId] != heapRootIndex) {
       nextObjectId = shortestRetainers[nextObjectId];
       final classId = graph.objects[nextObjectId].classId;
-      assert(classId != rootClassId);
       final className =
           HeapClassName.fromHeapSnapshotClass(graph.classes[classId]);
       path.add(className);

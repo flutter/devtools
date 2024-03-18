@@ -66,25 +66,32 @@ class HeapSnapshotGraphMock implements HeapSnapshotGraph {
     assert(!refsByIndex.containsKey(0), '0 is reserved for sentinel.');
     objects.clear();
     objects.add(_HeapSnapshotObjectMock()); // Sentinel
+    addObjects(refsByIndex);
+  }
+
+  /// Sets weak objects itemized in [refsByIndex].
+  ///
+  /// Throws if indexes are missed.
+  void addObjects(RefsByIndex refsByIndex, {bool weak = false}) {
+    final firstNewIndex = refsByIndex.keys.min;
+    assert(
+      firstNewIndex == objects.length,
+      'Objects should be added at the end.',
+    );
+
     final newLength = refsByIndex.keys.max + 1;
-    for (var i = 1; i < newLength; i++) {
+    for (var i = firstNewIndex; i < newLength; i++) {
       if (!refsByIndex.containsKey(i)) throw 'Index $i is missed.';
       objects.add(
         _HeapSnapshotObjectMock(
           identityHashCode: i,
           references: refsByIndex[i] ?? [],
           shallowSize: 1,
+          isWeak: weak,
         ),
       );
       assert(objects.length - 1 == i);
     }
-  }
-
-  /// Sets weak objects itemized in [refsByIndex].
-  ///
-  /// Throws if indexes are missed.
-  void addWeakObjects(RefsByIndex refsByIndex) {
-    objects.add(_HeapSnapshotObjectMock.weak());
   }
 }
 
@@ -126,13 +133,10 @@ class _HeapSnapshotObjectMock implements HeapSnapshotObject {
     this.identityHashCode = 0,
     List<int>? references,
     this.shallowSize = 0,
-    this.classId = _defaultClassId,
-  }) {
+    bool isWeak = false,
+  }) : classId = isWeak ? _weakClassId : _defaultClassId {
     this.references = Uint32List.fromList(references ?? []);
   }
-
-  /// One byte weak object.
-  _HeapSnapshotObjectMock.weak() : this(classId: _weakClassId, shallowSize: 1);
 
   @override
   final int classId;

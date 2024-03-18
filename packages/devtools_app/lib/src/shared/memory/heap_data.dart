@@ -78,7 +78,7 @@ class HeapData {
       final result = findShortestRetainers(
         graphSize: graph.objects.length,
         rootIndex: rootIndex,
-        isRetainer: weakClasses.isRetainer,
+        isWeak: weakClasses.isWeak,
         refs: (int index) => graph.objects[index].references,
         shallowSize: (int index) => graph.objects[index].shallowSize,
         calculateSizes: calculateRetainedSizes,
@@ -104,7 +104,6 @@ class HeapData {
         dartSize += object.shallowSize;
 
         // We do not show objects that will be garbage collected soon.
-        // ignore: unnecessary_null_comparison, false positive
         if (retainers != null && retainers[i] == 0) {
           continue;
         }
@@ -176,10 +175,10 @@ class _WeakClasses {
   /// Set of class ids that are not holding their references form garbage collection.
   late final _weakClasses = <int>{};
 
-  /// Returns true if the object is a retainer, where [objectIndex] is index in [graph].
-  bool isRetainer(int objectIndex) {
+  /// Returns true if the object cannot retain other objects.
+  bool isWeak(int objectIndex) {
     final object = graph.objects[objectIndex];
-    if (object.references.isEmpty) return false;
+    if (object.references.isEmpty) return true;
     final classId = object.classId;
     if (_weakClasses.contains(classId)) return true;
     return false;
