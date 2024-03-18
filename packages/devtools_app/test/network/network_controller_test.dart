@@ -315,38 +315,38 @@ void main() {
           SocketStatistic.parse({...socketStatObject, 'id': '22'})!;
 
       test(
-          'adding multiple socket and http requests notifies listeners only once',
-          () {
-        final reqs = [request1Pending, request2Pending];
-        final sockets = [socketStats1Pending, socketStats2Pending];
-        currentNetworkRequests.updateOrAddAll(
-          requests: reqs,
-          sockets: sockets,
-          timelineMicrosOffset: 0,
-        );
-        expect(notifyCount, 1);
+        'adding multiple socket and http requests notifies listeners only once',
+        () {
+          final reqs = [request1Pending, request2Pending];
+          final sockets = [socketStats1Pending, socketStats2Pending];
+          currentNetworkRequests.updateOrAddAll(
+            requests: reqs,
+            sockets: sockets,
+            timelineMicrosOffset: 0,
+          );
+          expect(notifyCount, 1);
 
-        // Check that all requests ids are present and that there are no
-        // endtimes
-        expect(
-          currentNetworkRequests.value.map((e) => [e.id, e.endTimestamp]),
-          [
-            ['101', null],
-            ['102', null],
-            ['21', null],
-            ['22', null],
-          ],
-        );
+          // Check that all requests ids are present and that there are no
+          // endtimes
+          expect(
+            currentNetworkRequests.value.map((e) => [e.id, e.endTimestamp]),
+            [
+              ['101', null],
+              ['102', null],
+              ['21', null],
+              ['22', null],
+            ],
+          );
 
-        currentNetworkRequests.updateOrAddAll(
-          requests: [request1Done],
-          sockets: [socketStats1Done],
-          timelineMicrosOffset: 0,
-        );
-        expect(notifyCount, 2);
-        // Check that all requests ids are present and that the endtimes have
-        // been updated accordingly
-        expect(
+          currentNetworkRequests.updateOrAddAll(
+            requests: [request1Done],
+            sockets: [socketStats1Done],
+            timelineMicrosOffset: 0,
+          );
+          expect(notifyCount, 2);
+          // Check that all requests ids are present and that the endtimes have
+          // been updated accordingly
+          expect(
             currentNetworkRequests.value
                 .map((e) => [e.id, e.endTimestamp?.microsecondsSinceEpoch]),
             [
@@ -354,8 +354,10 @@ void main() {
               ['102', null],
               ['21', endTime],
               ['22', null],
-            ]);
-      });
+            ],
+          );
+        },
+      );
     });
   });
 }

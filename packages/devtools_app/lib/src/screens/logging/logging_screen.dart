@@ -38,7 +38,7 @@ class LoggingScreen extends Screen {
   String get docPageId => screenId;
 
   @override
-  Widget build(BuildContext context) => const LoggingScreenBody();
+  Widget buildScreenBody(BuildContext context) => const LoggingScreenBody();
 
   @override
   Widget buildStatus(BuildContext context) {

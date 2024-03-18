@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 import '../../../../shared/memory/adapted_heap_data.dart';
-import '../../../../shared/memory/adapted_heap_object.dart';
 import '../../../../shared/memory/class_name.dart';
+import '../../../../shared/memory/classes.dart';
+import '../../../../shared/memory/retainers.dart';
+import '../../../../shared/memory/retaining_path.dart';
 import '../../../../shared/memory/simple_items.dart';
 import '../../../../shared/primitives/utils.dart';
 import 'class_filter.dart';
-import 'model.dart';
-import 'spanning_tree.dart';
 
 class AdaptedHeap {
   AdaptedHeap._(this.data);
@@ -66,11 +66,11 @@ class AdaptedHeap {
   }
 }
 
-abstract class HeapClasses<T extends ClassStats> with Sealable {
+abstract class HeapClasses<T extends ClassData> with Sealable {
   List<T> get classStatsList;
 }
 
-mixin FilterableHeapClasses<T extends ClassStats> on HeapClasses<T> {
+mixin FilterableHeapClasses<T extends ClassData> on HeapClasses<T> {
   ClassFilter? _appliedFilter;
   List<T>? _filtered;
 
@@ -111,11 +111,11 @@ class SingleHeapClasses extends HeapClasses<SingleClassStats>
   List<SingleClassStats> get classStatsList => classes;
 }
 
-typedef StatsByPath = Map<ClassOnlyHeapPath, ObjectSetStats>;
-typedef StatsByPathEntry = MapEntry<ClassOnlyHeapPath, ObjectSetStats>;
+typedef StatsByPath = Map<PathFromRoot, ObjectSetStats>;
+typedef StatsByPathEntry = MapEntry<PathFromRoot, ObjectSetStats>;
 
-abstract class ClassStats with Sealable {
-  ClassStats({required this.statsByPath, required this.heapClass});
+abstract class ClassData with Sealable {
+  ClassData({required this.statsByPath, required this.heapClass});
 
   final StatsByPath statsByPath;
   late final List<StatsByPathEntry> statsByPathEntries = _getEntries();
@@ -128,10 +128,10 @@ abstract class ClassStats with Sealable {
 }
 
 /// Statistics for a class about a single heap.
-class SingleClassStats extends ClassStats {
+class SingleClassStats extends ClassData {
   SingleClassStats({required super.heapClass})
       : objects = ObjectSet(),
-        super(statsByPath: <ClassOnlyHeapPath, ObjectSetStats>{});
+        super(statsByPath: <PathFromRoot, ObjectSetStats>{});
 
   final ObjectSet objects;
 
@@ -148,92 +148,9 @@ class SingleClassStats extends ClassStats {
 
     if (path == null) return;
     final objectsForPath = statsByPath.putIfAbsent(
-      ClassOnlyHeapPath(path),
+      PathFromRoot(path),
       () => ObjectSet(),
     );
     objectsForPath.countInstance(object, excludeFromRetained: false);
-  }
-}
-
-/// Statistical size-information about objects.
-class ObjectSetStats with Sealable {
-  static ObjectSetStats? subtract({
-    required ObjectSetStats? subtract,
-    required ObjectSetStats? from,
-  }) {
-    from ??= _empty;
-    subtract ??= _empty;
-
-    final result = ObjectSetStats()
-      ..instanceCount = from.instanceCount - subtract.instanceCount
-      ..shallowSize = from.shallowSize - subtract.shallowSize
-      ..retainedSize = from.retainedSize - subtract.retainedSize;
-
-    if (result.isZero) return null;
-    return result;
-  }
-
-  static final _empty = ObjectSetStats()..seal();
-
-  int instanceCount = 0;
-  int shallowSize = 0;
-  int retainedSize = 0;
-
-  bool get isZero =>
-      shallowSize == 0 && retainedSize == 0 && instanceCount == 0;
-
-  void countInstance(
-    AdaptedHeapObject object, {
-    required bool excludeFromRetained,
-  }) {
-    assert(!isSealed);
-    if (!excludeFromRetained) retainedSize += object.retainedSize!;
-    shallowSize += object.shallowSize;
-    instanceCount++;
-  }
-
-  void uncountInstance(
-    AdaptedHeapObject object, {
-    required bool excludeFromRetained,
-  }) {
-    assert(!isSealed);
-    if (!excludeFromRetained) retainedSize -= object.retainedSize!;
-    shallowSize -= object.shallowSize;
-    instanceCount--;
-  }
-}
-
-/// Statistical and detailed size-information about objects.
-class ObjectSet extends ObjectSetStats {
-  static ObjectSet empty = ObjectSet()..seal();
-
-  final objectsByCodes = <IdentityHashCode, AdaptedHeapObject>{};
-
-  /// Subset of objects that are excluded from the retained size
-  /// calculation for this set.
-  ///
-  /// See [countInstance].
-  final objectsExcludedFromRetainedSize = <IdentityHashCode>{};
-
-  @override
-  bool get isZero => objectsByCodes.isEmpty;
-
-  @override
-  void countInstance(
-    AdaptedHeapObject object, {
-    required bool excludeFromRetained,
-  }) {
-    if (objectsByCodes.containsKey(object.code)) return;
-    super.countInstance(object, excludeFromRetained: excludeFromRetained);
-    objectsByCodes[object.code] = object;
-    if (excludeFromRetained) objectsExcludedFromRetainedSize.add(object.code);
-  }
-
-  @override
-  void uncountInstance(
-    AdaptedHeapObject object, {
-    required bool excludeFromRetained,
-  }) {
-    throw AssertionError('uncountInstance is not valid for $ObjectSet');
   }
 }

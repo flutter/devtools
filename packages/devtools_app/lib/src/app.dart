@@ -371,7 +371,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     // extension screens do not provide a controller through this mechanism.
     return widget.originalScreens
         .where(
-          (s) => s.providesController && (offline ? s.supportsOffline : true),
+          (s) =>
+              s.providesController && (offline ? s.screen.worksOffline : true),
         )
         .map((s) => s.controllerProvider(routerDelegate))
         .toList();
@@ -433,7 +434,6 @@ class DevToolsScreen<C extends Object?> {
     this.screen, {
     this.createController,
     this.controller,
-    this.supportsOffline = false,
   }) : assert(createController == null || controller == null);
 
   final Screen screen;
@@ -461,11 +461,6 @@ class DevToolsScreen<C extends Object?> {
   /// Returns true if a controller was provided for [screen]. If false,
   /// [screen] is responsible for creating and maintaining its own controller.
   bool get providesController => createController != null || controller != null;
-
-  /// Whether this screen has implemented offline support.
-  ///
-  /// Defaults to false.
-  final bool supportsOffline;
 
   Provider<C> controllerProvider(DevToolsRouterDelegate routerDelegate) {
     assert(
@@ -569,12 +564,10 @@ List<DevToolsScreen> defaultScreens({
     DevToolsScreen<PerformanceController>(
       PerformanceScreen(),
       createController: (_) => PerformanceController(),
-      supportsOffline: true,
     ),
     DevToolsScreen<ProfilerScreenController>(
       ProfilerScreen(),
       createController: (_) => ProfilerScreenController(),
-      supportsOffline: true,
     ),
     DevToolsScreen<MemoryController>(
       MemoryScreen(),
@@ -613,7 +606,6 @@ List<DevToolsScreen> defaultScreens({
       DevToolsScreen<ExampleController>(
         const ExampleConditionalScreen(),
         createController: (_) => ExampleController(),
-        supportsOffline: true,
       ),
   ];
 }

@@ -50,7 +50,7 @@ class TimelineEventsTabControls extends StatelessWidget {
           // TODO(kenz): add a switch to enable the CPU profiler once the
           // tracing format supports it (when we switch to protozero).
           const SizedBox(width: densePadding),
-          TraceCategoriesButton(controller: controller),
+          TimelineSettingsButton(controller: controller),
           const SizedBox(width: densePadding),
           RefreshTimelineEventsButton(controller: controller),
         ],
@@ -59,41 +59,35 @@ class TimelineEventsTabControls extends StatelessWidget {
   }
 }
 
-class TraceCategoriesButton extends StatelessWidget {
-  const TraceCategoriesButton({
-    required this.controller,
-    super.key,
-  });
+class TimelineSettingsButton extends StatelessWidget {
+  const TimelineSettingsButton({required this.controller, super.key});
 
   final TimelineEventsController controller;
 
   @override
   Widget build(BuildContext context) {
     return GaDevToolsButton.iconOnly(
-      icon: Icons.checklist_outlined,
+      icon: Icons.settings_outlined,
       outlined: false,
-      tooltip: 'Trace categories',
+      tooltip: 'Timeline settings',
       gaScreen: gac.performance,
-      gaSelection: gac.PerformanceEvents.traceCategories.name,
-      onPressed: () => _openTraceCategoriesDialog(context),
+      gaSelection: gac.PerformanceEvents.timelineSettings.name,
+      onPressed: () => _openTimelineSettingsDialog(context),
     );
   }
 
-  void _openTraceCategoriesDialog(BuildContext context) {
+  void _openTimelineSettingsDialog(BuildContext context) {
     unawaited(
       showDialog(
         context: context,
-        builder: (context) => const TraceCategoriesDialog(),
+        builder: (context) => const TimelineSettingsDialog(),
       ),
     );
   }
 }
 
 class RefreshTimelineEventsButton extends StatelessWidget {
-  const RefreshTimelineEventsButton({
-    Key? key,
-    required this.controller,
-  }) : super(key: key);
+  const RefreshTimelineEventsButton({required this.controller, super.key});
 
   final TimelineEventsController controller;
 
@@ -107,7 +101,7 @@ class RefreshTimelineEventsButton extends StatelessWidget {
           outlined: false,
           onPressed: status == EventsControllerStatus.processing
               ? null
-              : controller.processAllTraceEvents,
+              : controller.forceRefresh,
           tooltip: 'Refresh timeline events',
           gaScreen: gac.performance,
           gaSelection: gac.PerformanceEvents.refreshTimelineEvents.name,
@@ -117,14 +111,14 @@ class RefreshTimelineEventsButton extends StatelessWidget {
   }
 }
 
-class TraceCategoriesDialog extends StatefulWidget {
-  const TraceCategoriesDialog({super.key});
+class TimelineSettingsDialog extends StatefulWidget {
+  const TimelineSettingsDialog({super.key});
 
   @override
-  State<TraceCategoriesDialog> createState() => _TraceCategoriesDialogState();
+  State<TimelineSettingsDialog> createState() => _TimelineSettingsDialogState();
 }
 
-class _TraceCategoriesDialogState extends State<TraceCategoriesDialog>
+class _TimelineSettingsDialogState extends State<TimelineSettingsDialog>
     with AutoDisposeMixin {
   late final ValueNotifier<bool?> _httpLogging;
 
@@ -151,7 +145,7 @@ class _TraceCategoriesDialogState extends State<TraceCategoriesDialog>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return DevToolsDialog(
-      title: const DialogTitleText('Trace Categories'),
+      title: const DialogTitleText('Timeline Settings'),
       includeDivider: false,
       content: SizedBox(
         width: defaultDialogWidth,
@@ -173,6 +167,14 @@ class _TraceCategoriesDialogState extends State<TraceCategoriesDialog>
 
   List<Widget> _defaultRecordedStreams(ThemeData theme) {
     return [
+      ...dialogSubHeader(theme, 'General'),
+      CheckboxSetting(
+        notifier: preferences.performance.includeCpuSamplesInTimeline,
+        title: 'Include CPU samples in the timeline',
+        description: 'This may negatively affect performance.',
+      ),
+      const SizedBox(height: defaultSpacing),
+      ...dialogSubHeader(theme, 'Trace categories'),
       RichText(
         text: TextSpan(
           text: 'Default',

@@ -72,7 +72,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   SemanticVersion dartIoVersion = SemanticVersion(major: 1, minor: 3);
 
   final VmFlagManager _vmFlagManager;
-  final Timeline? _timelineData;
+  final PerfettoTimeline? _timelineData;
   SocketProfile? _socketProfile;
   final List<SocketStatistic> _startingSockets;
   HttpProfile? _httpProfile;
@@ -350,15 +350,25 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
       Future.value(TimelineFlags.parse(_vmTimelineFlags)!);
 
   @override
-  Future<Timeline> getVMTimeline({
+  Future<PerfettoTimeline> getPerfettoVMTimeline({
     int? timeOriginMicros,
     int? timeExtentMicros,
-  }) {
-    final result = _timelineData;
-    if (result == null) {
+  }) =>
+      _getPerfettoVMTimeline();
+
+  @override
+  Future<PerfettoTimeline> getPerfettoVMTimelineWithCpuSamplesWrapper({
+    int? timeOriginMicros,
+    int? timeExtentMicros,
+  }) =>
+      _getPerfettoVMTimeline();
+
+  Future<PerfettoTimeline> _getPerfettoVMTimeline() {
+    final perfettoTimeline = _timelineData;
+    if (perfettoTimeline == null) {
       throw StateError('timelineData was not provided to FakeServiceManager');
     }
-    return Future.value(result);
+    return Future.value(perfettoTimeline);
   }
 
   @override

@@ -33,7 +33,7 @@ void main() {
       await verifyScreenshot(binding, 'perfetto_initial_load');
 
       logStatus('select a Flutter Frame');
-      await tester.tap(find.byType(FlutterFramesChartItem).last);
+      await tester.tap(find.byType(FlutterFramesChartItem).first);
       await tester.pumpAndSettle(safePumpDuration);
 
       await verifyScreenshot(binding, 'perfetto_frame_selection');

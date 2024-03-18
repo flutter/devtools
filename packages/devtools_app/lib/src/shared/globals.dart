@@ -15,7 +15,7 @@ import 'console/eval/eval_service.dart';
 import 'environment_parameters/environment_parameters_base.dart';
 import 'framework_controller.dart';
 import 'offline_mode.dart';
-import 'preferences.dart';
+import 'preferences/preferences.dart';
 import 'primitives/message_bus.dart';
 import 'primitives/storage.dart';
 import 'scripts/script_manager.dart';
