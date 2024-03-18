@@ -7,7 +7,7 @@ import 'package:devtools_app/src/shared/memory/classes.dart';
 import 'package:devtools_app/src/shared/memory/heap_data.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../../../test_infra/test_data/memory/heap/heap_graph_mock.dart';
+import '../../../test_infra/test_data/memory/heap/heap_graph_fakes.dart';
 
 class _ClassSizeTest {
   _ClassSizeTest({
@@ -88,18 +88,13 @@ final _classSizeTests = <_ClassSizeTest>[
 ];
 
 void main() {
-  setUp(() async {
-    for (final t in _classSizeTests) {
-      await t.initialize();
-    }
-  });
-
   test('$SingleClassData does not double-count self-referenced classes.',
       () async {
     for (final t in _classSizeTests) {
       final heapData = await HeapData.calculate(t.heap, DateTime.now());
 
-      final classData = heapData.classes!.byName(_classA)!;
+      final classes = heapData.classes!;
+      final classData = classes.byName(_classA)!;
 
       expect(
         classData.objects.retainedSize,

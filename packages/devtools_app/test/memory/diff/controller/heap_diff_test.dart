@@ -9,7 +9,7 @@ import 'package:devtools_app/src/shared/memory/class_name.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../../test_infra/test_data/memory/heap/factories.dart';
-import '../../../test_infra/test_data/memory/heap/heap_graph_mock.dart';
+import '../../../test_infra/test_data/memory/heap/heap_graph_fakes.dart';
 
 void main() {
   test(

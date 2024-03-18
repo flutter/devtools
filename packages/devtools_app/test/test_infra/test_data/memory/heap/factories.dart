@@ -7,7 +7,7 @@ import 'package:devtools_app/src/shared/memory/classes.dart';
 import 'package:devtools_app/src/shared/memory/heap_data.dart';
 import 'package:vm_service/vm_service.dart';
 
-import 'heap_graph_mock.dart';
+import 'heap_graph_fakes.dart';
 
 Future<HeapData> testHeapData([HeapSnapshotGraphFake? graph]) async =>
     await HeapData.calculate(

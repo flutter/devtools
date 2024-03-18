@@ -7,7 +7,7 @@ import 'package:devtools_app/src/shared/memory/simple_items.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../test_infra/test_data/memory/heap/heap_graph_mock.dart';
+import '../../../test_infra/test_data/memory/heap/heap_graph_fakes.dart';
 
 void main() {
   for (var t in _sizeTests) {

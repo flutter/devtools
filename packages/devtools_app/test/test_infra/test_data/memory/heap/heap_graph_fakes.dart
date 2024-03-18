@@ -46,7 +46,7 @@ class HeapSnapshotGraphFake extends Fake implements HeapSnapshotGraph {
     assert(!refsByIndex.containsKey(0), '0 is reserved for sentinel.');
     objects.clear();
     objects.add(_HeapSnapshotObjectFake()); // Sentinel
-    addObjects(refsByIndex);
+    addObjects(refsByIndex, classes: classes);
   }
 
   /// Sets weak objects itemized in [refsByIndex].
