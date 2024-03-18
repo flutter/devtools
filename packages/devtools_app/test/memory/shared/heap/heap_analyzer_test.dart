@@ -203,40 +203,60 @@ final _sizeTests = [
     rootRetainedSize: 5,
     unreachableSize: 0,
   ),
-  // _SizeTest(
-  //   name: 'Hanged weak diamond',
-  //   //  \
-  //   //  |\
-  //   //  \|
-  //   heap: _heapData(
-  //     [
-  //       _createOneByteObject(0, [1]),
-  //       _createOneByteObject(1, [2, 3]),
-  //       _createOneByteWeakObject(2, [4]),
-  //       _createOneByteObject(3, [4]),
-  //       _createOneByteObject(4, []),
-  //     ],
-  //   ),
-  //   rootRetainedSize: 5,
-  //   unreachableSize: 0,
-  // ),
-  // _SizeTest(
-  //   name: 'Hanged very weak diamond',
-  //   //  \
-  //   //  |\
-  //   //  \|
-  //   heap: _heapData(
-  //     [
-  //       _createOneByteObject(0, [1]),
-  //       _createOneByteObject(1, [2, 3]),
-  //       _createOneByteWeakObject(2, [4]),
-  //       _createOneByteWeakObject(3, [4]),
-  //       _createOneByteObject(4, []),
-  //     ],
-  //   ),
-  //   rootRetainedSize: 4,
-  //   unreachableSize: 1,
-  // ),
+  _SizeTest(
+    name: 'Hanged weak diamond',
+    //  \
+    //  |\
+    //  \|
+    heap: HeapSnapshotGraphMock()
+      ..setObjects(
+        {
+          1: [2],
+          2: [3, 4],
+        },
+      )
+      ..addObjects(
+        {
+          3: [5],
+        },
+        weak: true,
+      )
+      ..addObjects(
+        {
+          4: [5],
+          5: [],
+        },
+      ),
+    rootRetainedSize: 5,
+    unreachableSize: 0,
+  ),
+  _SizeTest(
+    name: 'Hanged very weak diamond',
+    //  \
+    //  |\
+    //  \|
+    heap: HeapSnapshotGraphMock()
+      ..setObjects(
+        {
+          1: [2],
+          2: [3, 4],
+        },
+      )
+      ..addObjects(
+        {
+          3: [5],
+          4: [5],
+        },
+        weak: true,
+      )
+      ..addObjects(
+        {
+          5: [],
+        },
+      ),
+    rootRetainedSize: 4,
+    unreachableSize: 1,
+  ),
 ];
 
 class _SizeTest {
@@ -252,21 +272,3 @@ class _SizeTest {
   final int rootRetainedSize;
   final int unreachableSize;
 }
-
-// MockAdaptedHeapObject _createOneByteWeakObject(
-//   int codeAndIndex,
-//   List<int> references,
-// ) {
-//   final result = MockAdaptedHeapObject(
-//     code: codeAndIndex,
-//     outRefs: references.toSet(),
-//     heapClass: HeapClassName.fromPath(
-//       className: '_WeakProperty',
-//       library: 'dart.core',
-//     ),
-//     shallowSize: 1,
-//   );
-//   assert(result.heapClass.isWeakEntry, isTrue);
-//   return result;
-// }
-
