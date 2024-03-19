@@ -262,41 +262,43 @@ class _LocalFingerprint extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Add a local fingerprint',
-          style: theme.textTheme.titleSmall,
-        ),
+        const Text('Local fingerprint'),
         const SizedBox(height: intermediateSpacing),
-        Text(
-          'Fingerprints will be obtained from the Play Developer Console, but you can '
-          'optionally provide an additional fingerprint.',
-          style: theme.subtleTextStyle,
-        ),
-        const SizedBox(height: intermediateSpacing),
-        TextField(
-          onSubmitted: (fingerprint) async {
-            final validFingerpintAdded =
-                controller.addLocalFingerprint(fingerprint);
+        controller.localFingerprint.value == null
+            ? TextField(
+                decoration: const InputDecoration(
+                  labelText: 'Enter your local fingerprint',
+                  hintText: 'eg: F0:FD:6C:5B:41:0F:25:CB:25:C3:B5:33:46'
+                      ':C8:97:2F:AE:30:F8:EE:74:11:DF:91:04:80:AD:6B:2D:60:DB:83',
+                  filled: true,
+                ),
+                onSubmitted: (fingerprint) async {
+                  final validFingerpintAdded =
+                      controller.addLocalFingerprint(fingerprint);
 
-            if (!validFingerpintAdded) {
-              await showDialog(
-                context: context,
-                builder: (_) {
-                  return const AlertDialog(
-                    title: Text('This is not a valid fingerprint'),
-                    content: Text(
-                      'A valid fingerprint consists of 32 pairs of hexadecimal digits separated by colons.'
-                      'It should be the same encoding and format as in the assetlinks.json',
-                    ),
-                    actions: [
-                      DialogCloseButton(),
-                    ],
-                  );
+                  if (!validFingerpintAdded) {
+                    await showDialog(
+                      context: context,
+                      builder: (_) {
+                        return const AlertDialog(
+                          title: Text('This is not a valid fingerprint'),
+                          content: Text(
+                            'A valid fingerprint consists of 32 pairs of hexadecimal digits separated by colons.'
+                            'It should be the same encoding and format as in the assetlinks.json',
+                          ),
+                          actions: [
+                            DialogCloseButton(),
+                          ],
+                        );
+                      },
+                    );
+                  }
                 },
-              );
-            }
-          },
-        ),
+              )
+            : _CodeCard(
+                content: controller.localFingerprint.value,
+                hasCopyAction: false,
+              ),
         const SizedBox(height: intermediateSpacing),
         ValueListenableBuilder<String?>(
           valueListenable: controller.localFingerprint,
@@ -371,10 +373,14 @@ class _DomainFixPanel extends StatelessWidget {
   }
 }
 
-class _CopyCard extends StatelessWidget {
-  const _CopyCard({this.content});
+class _CodeCard extends StatelessWidget {
+  const _CodeCard({
+    this.content,
+    this.hasCopyAction = true,
+  });
 
   final String? content;
+  final bool hasCopyAction;
 
   @override
   Widget build(BuildContext context) {
@@ -393,9 +399,10 @@ class _CopyCard extends StatelessWidget {
                       child: Text(content!),
                     ),
                   ),
-                  CopyToClipboardControl(
-                    dataProvider: () => content,
-                  ),
+                  if (hasCopyAction)
+                    CopyToClipboardControl(
+                      dataProvider: () => content,
+                    ),
                 ],
               )
             : const CenteredCircularProgressIndicator(),
@@ -435,7 +442,7 @@ class _GenerateAssetLinksPanel extends StatelessWidget {
                   )
                 : Column(
                     children: [
-                      _CopyCard(content: generatedAssetLinks?.generatedString),
+                      _CodeCard(content: generatedAssetLinks?.generatedString),
                       const SizedBox(height: denseSpacing),
                       Text(
                         'Update and publish this new recommended Digital Asset Links JSON file below at this location:',
@@ -642,7 +649,7 @@ class _IntentFilterCheck extends StatelessWidget {
       children: <Widget>[
         for (final error in intentFilterErrors)
           if (linkData.pathErrors.contains(error)) Text(error.description),
-        const _CopyCard(
+        const _CodeCard(
           content: '''<intent-filter android:autoVerify="true">
     <action android:name="android.intent.action.VIEW" />
     <category android:name="android.intent.category.DEFAULT" />
