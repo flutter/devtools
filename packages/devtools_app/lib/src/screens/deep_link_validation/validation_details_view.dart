@@ -208,6 +208,7 @@ class _AssetLinksJsonFileIssues extends StatelessWidget {
         .toList();
     final theme = Theme.of(context);
     return ExpansionTile(
+      controlAffinity: ListTileControlAffinity.leading,
       title: _VerifiedOrErrorText(
         'Digital Asset Links JSON file related issues',
         isError: errors.isNotEmpty,
@@ -256,6 +257,7 @@ class _HostingIssues extends StatelessWidget {
         .where((error) => domainHostingErrors.contains(error))
         .toList();
     return ExpansionTile(
+      controlAffinity: ListTileControlAffinity.leading,
       title: _VerifiedOrErrorText(
         'Hosting related issues',
         isError: errors.isNotEmpty,
@@ -293,6 +295,7 @@ class _Fingerprint extends StatelessWidget {
             controller.googlePlayFingerprintsAvailability.value;
         final haslocalFingerpint = localFingerprint != null;
         return ExpansionTile(
+          controlAffinity: ListTileControlAffinity.leading,
           title: hasPdcFingerpint
               ? const _VerifiedOrErrorText(
                   'PDC fingerprint detected, enter a local fingerprint if needed',
