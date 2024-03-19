@@ -40,6 +40,7 @@ TODO: Remove this section if there are not any general updates.
 
 * Improved Network profiler performance. [#7266](https://github.com/flutter/devtools/pull/7266)
 * Fixed a bug where selected pending requests weren't refreshing the tab once updated. [#7266](https://github.com/flutter/devtools/pull/7266)
+* Fixed JsonViewer where all of the expanded sections would snap closed. [#7367](https://github.com/flutter/devtools/pull/7367)
 
 ## Logging updates
 
