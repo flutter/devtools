@@ -220,7 +220,8 @@ class _TableRowState<T> extends State<TableRow<T>>
 
   bool isHovering = false;
   late FixedExtentDelegate rowExtentDelegate;
-  List<_TableRowPartDisplayType> helper() {
+  late List<_TableRowPartDisplayType> rowDisplayParts;
+  List<_TableRowPartDisplayType> rowDisplayPartsHelper() {
     final rowDisplayParts = <_TableRowPartDisplayType>[];
     final groups = widget.columnGroups;
     if (groups != null && groups.isNotEmpty) {
@@ -251,9 +252,10 @@ class _TableRowState<T> extends State<TableRow<T>>
     scrollController = widget.linkedScrollControllerGroup.addAndGet();
     _initSearchListeners();
 
+    rowDisplayParts = rowDisplayPartsHelper();
     rowExtentDelegate = FixedExtentDelegate(
       computeExtent: (index) {
-        final parts = helper();
+        final parts = rowDisplayParts;
         // Maps the indices from [rowDisplayParts] to the corresponding index of
         // each column in [widget.columns].
         final columnIndexMap = <int, int>{};
@@ -280,7 +282,7 @@ class _TableRowState<T> extends State<TableRow<T>>
                 columnGroupSpacing;
         }
       },
-      computeLength: () => helper().length,
+      computeLength: () => rowDisplayParts.length,
     );
   }
 
@@ -294,6 +296,7 @@ class _TableRowState<T> extends State<TableRow<T>>
       scrollController = widget.linkedScrollControllerGroup.addAndGet();
     }
 
+    rowDisplayParts = rowDisplayPartsHelper();
     rowExtentDelegate.recompute();
 
     cancelListeners();
@@ -552,8 +555,6 @@ class _TableRowState<T> extends State<TableRow<T>>
       );
     }
 
-    final rowDisplayParts = helper();
-
     // Maps the indices from [rowDisplayParts] to the corresponding index of
     // each column in [widget.columns].
     final columnIndexMap = <int, int>{};
@@ -577,48 +578,28 @@ class _TableRowState<T> extends State<TableRow<T>>
         physics: const ClampingScrollPhysics(),
         controller: scrollController,
         extentDelegate: rowExtentDelegate,
-        childrenDelegate: SliverChildBuilderDelegate((context, int i) {
-          final displayTypeForIndex = rowDisplayParts[i];
-          switch (displayTypeForIndex) {
-            case _TableRowPartDisplayType.column:
-              final index = columnIndexMap[i]!;
-              return columnFor(
-                widget.columns[index],
-                widget.columnWidths[index],
-              );
-            case _TableRowPartDisplayType.columnSpacer:
-              return const SizedBox(
-                width: columnSpacing,
-                child: VerticalDivider(width: columnSpacing),
-              );
-            case _TableRowPartDisplayType.columnGroupSpacer:
-              return const _ColumnGroupSpacer();
-          }
-        }, childCount: rowDisplayParts.length),
+        childrenDelegate: SliverChildBuilderDelegate(
+          (context, int i) {
+            final displayTypeForIndex = rowDisplayParts[i];
+            switch (displayTypeForIndex) {
+              case _TableRowPartDisplayType.column:
+                final index = columnIndexMap[i]!;
+                return columnFor(
+                  widget.columns[index],
+                  widget.columnWidths[index],
+                );
+              case _TableRowPartDisplayType.columnSpacer:
+                return const SizedBox(
+                  width: columnSpacing,
+                  child: VerticalDivider(width: columnSpacing),
+                );
+              case _TableRowPartDisplayType.columnGroupSpacer:
+                return const _ColumnGroupSpacer();
+            }
+          },
+          childCount: rowDisplayParts.length,
+        ),
       ),
-      // ListView.builder(
-      //   scrollDirection: Axis.horizontal,
-      //   controller: scrollController,
-      //   itemCount: widget.columns.length + widget.columns.numSpacers,
-      //   itemBuilder: (context, int i) {
-      //     final displayTypeForIndex = rowDisplayParts[i];
-      //     switch (displayTypeForIndex) {
-      //       case _TableRowPartDisplayType.column:
-      //         final index = columnIndexMap[i]!;
-      //         return columnFor(
-      //           widget.columns[index],
-      //           widget.columnWidths[index],
-      //         );
-      //       case _TableRowPartDisplayType.columnSpacer:
-      //         return const SizedBox(
-      //           width: columnSpacing,
-      //           child: VerticalDivider(width: columnSpacing),
-      //         );
-      //       case _TableRowPartDisplayType.columnGroupSpacer:
-      //         return const _ColumnGroupSpacer();
-      //     }
-      //   },
-      // ),
     );
 
     if (widget.enableHoverHandling) {
