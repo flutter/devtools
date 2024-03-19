@@ -14,7 +14,8 @@ Future<List<String>> requestAndroidBuildVariants(String path) async {
     );
     final resp = await request(uri.toString());
     if (resp?.statusOk ?? false) {
-      return json.decode(resp!.body);
+      final jsonObject = jsonDecode(resp!.body) as List;
+      return jsonObject.map((dynamic item) => item as String).toList();
     } else {
       logWarning(resp, DeeplinkApi.androidBuildVariants);
     }
