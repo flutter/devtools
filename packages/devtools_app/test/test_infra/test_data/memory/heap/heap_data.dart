@@ -59,11 +59,13 @@ class HeapGraphLoaderGoldens implements HeapGraphLoader {
   }
 }
 
+typedef HeapProvider = Future<HeapSnapshotGraph> Function();
+
 /// Provides test snapshots, provided in constructor.
 class HeapGraphLoaderProvided implements HeapGraphLoader {
   HeapGraphLoaderProvided(this.graphs) : assert(graphs.isNotEmpty);
 
-  List<HeapSnapshotGraph> graphs;
+  List<HeapProvider> graphs;
 
   int _nextIndex = 0;
 
@@ -71,10 +73,10 @@ class HeapGraphLoaderProvided implements HeapGraphLoader {
   Future<(HeapSnapshotGraph, DateTime)> load() async {
     // This delay is needed for UI to start showing the progress indicator.
     await Future.delayed(const Duration(milliseconds: 100));
-    final result = graphs[_nextIndex];
-    _nextIndex = (_nextIndex + 1) % goldenHeapTests.length;
+    final result = graphs[_nextIndex]();
+    _nextIndex = (_nextIndex + 1) % graphs.length;
 
-    return (result, DateTime.now());
+    return (await result, DateTime.now());
   }
 }
 

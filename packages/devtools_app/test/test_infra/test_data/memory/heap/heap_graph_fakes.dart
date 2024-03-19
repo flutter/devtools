@@ -13,6 +13,11 @@ import 'package:vm_service/vm_service.dart';
 typedef RefsByIndex = Map<int, List<int>>;
 typedef ClassByIndex = Map<int, HeapClassName>;
 
+final _sentinelObject = _HeapSnapshotObjectFake();
+
+const int _defaultClassId = 0;
+const int _weakClassId = 1;
+
 class HeapSnapshotGraphFake extends Fake implements HeapSnapshotGraph {
   HeapSnapshotGraphFake();
 
@@ -24,8 +29,8 @@ class HeapSnapshotGraphFake extends Fake implements HeapSnapshotGraph {
 
   @override
   final List<HeapSnapshotObject> objects = [
-    _HeapSnapshotObjectFake(), // Sentinel
-    _HeapSnapshotObjectFake(), // Root
+    _sentinelObject,
+    _HeapSnapshotObjectFake(shallowSize: 1), // root
   ];
 
   /// Adds object and returns index of the added object.
@@ -46,7 +51,7 @@ class HeapSnapshotGraphFake extends Fake implements HeapSnapshotGraph {
   }) {
     assert(!refsByIndex.containsKey(0), '0 is reserved for sentinel.');
     objects.clear();
-    objects.add(_HeapSnapshotObjectFake()); // Sentinel
+    objects.add(_sentinelObject);
     addObjects(refsByIndex, classes: classes);
   }
 
@@ -68,7 +73,7 @@ class HeapSnapshotGraphFake extends Fake implements HeapSnapshotGraph {
           ),
         );
         final index = objects.length - 1;
-        objects[heapRootIndex].references.add(index);
+        (objects[heapRootIndex] as _HeapSnapshotObjectFake).addReference(index);
       }
     }
   }
@@ -151,18 +156,14 @@ class _HeapSnapshotClassFake extends Fake implements HeapSnapshotClass {
   late final libraryUri = Uri.parse('');
 }
 
-const int _defaultClassId = 0;
-const int _weakClassId = 1;
-
 class _HeapSnapshotObjectFake extends Fake implements HeapSnapshotObject {
   _HeapSnapshotObjectFake({
     this.identityHashCode = 0,
     List<int>? references,
     this.shallowSize = 0,
     int? classId,
-  }) : classId = classId ?? _defaultClassId {
-    this.references = Uint32List.fromList(references ?? []);
-  }
+  })  : classId = classId ?? _defaultClassId,
+        _references = references ?? [];
 
   @override
   final int classId;
@@ -171,8 +172,13 @@ class _HeapSnapshotObjectFake extends Fake implements HeapSnapshotObject {
   final int identityHashCode;
 
   @override
-  late Uint32List references;
+  Uint32List get references => Uint32List.fromList(_references);
+  final List<int> _references;
 
   @override
   int shallowSize;
+
+  void addReference(int i) {
+    _references.add(i);
+  }
 }

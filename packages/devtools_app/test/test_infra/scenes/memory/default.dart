@@ -82,7 +82,7 @@ class MemoryDefaultScene extends Scene {
       only: '',
     );
 
-    final diffController = DiffPaneController(HeapGraphLoaderGoldens())
+    final diffController = DiffPaneController(createHeapLoader())
       ..derived.applyFilter(showAllFilter);
 
     final profileController = ProfilePaneController()..setFilter(showAllFilter);
@@ -99,14 +99,21 @@ class MemoryDefaultScene extends Scene {
   @override
   String get title => '$MemoryDefaultScene';
 
-  Future<HeapGraphLoader> createHeapLoader() async {
-    final goldens = await Future.wait(goldenHeapTests.map((e) => e.loadHeap()));
+  HeapGraphLoader createHeapLoader() {
+    final simpleHeaps = [
+      {'A': 1, 'B': 2},
+      {'B': 1, 'C': 2, 'D': 3},
+      {'B': 1, 'C': 2, 'D': 3},
+    ]
+        .map((e) => () async => HeapSnapshotGraphFake()..addClassInstances(e))
+        .toList();
+
+    final goldenHeaps =
+        goldenHeapTests.map((e) => () async => e.loadHeap()).toList();
 
     return HeapGraphLoaderProvided([
-      HeapSnapshotGraphFake()..addClassInstances({'A': 1, 'B': 2}),
-      HeapSnapshotGraphFake()..addClassInstances({'B': 1, 'C': 2, 'D': 3}),
-      HeapSnapshotGraphFake()..addClassInstances({'B': 1, 'C': 2, 'D': 3}),
-      ...goldens,
+      ...simpleHeaps,
+      ...goldenHeaps,
     ]);
   }
 
