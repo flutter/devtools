@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
+import '../../shared/globals.dart';
 import '../../shared/server/server.dart' as server;
 import 'deep_links_model.dart';
 import 'deep_links_services.dart';
@@ -227,6 +228,16 @@ class DeepLinksController extends DisposableController {
       return;
     }
     await validateLinks();
+  }
+
+  Future<String?> packageDirectoryForMainIsolate() async {
+    if (!serviceConnection.serviceManager.hasConnection) {
+      return null;
+    }
+    final packageUriString =
+        await serviceConnection.rootPackageDirectoryForMainIsolate();
+    if (packageUriString == null) return null;
+    return Uri.parse(packageUriString).toFilePath();
   }
 
   Set<PathError> _getPathErrorsFromIntentFilterChecks(
