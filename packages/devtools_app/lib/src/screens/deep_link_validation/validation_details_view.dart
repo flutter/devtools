@@ -190,8 +190,8 @@ class _DomainCheckTable extends StatelessWidget {
   }
 }
 
-// There is a general fix for the asset links json file issues:
-// Update it with the generated asset link file.
+/// There is a general fix for the asset links json file issues:
+/// Update it with the generated asset link file.
 class _AssetLinksJsonFileIssues extends StatelessWidget {
   const _AssetLinksJsonFileIssues({
     required this.controller,
@@ -244,8 +244,8 @@ class _AssetLinksJsonFileIssues extends StatelessWidget {
   }
 }
 
-// Hosting issue cannot be fixed by generated asset link file.
-// There is a fix guide for each hosting issue.
+/// Hosting issue cannot be fixed by generated asset link file.
+/// There is a fix guide for each hosting issue.
 class _HostingIssues extends StatelessWidget {
   const _HostingIssues({required this.controller});
 
