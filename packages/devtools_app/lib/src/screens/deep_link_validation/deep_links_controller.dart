@@ -16,12 +16,12 @@ import 'deep_links_model.dart';
 import 'deep_links_services.dart';
 
 typedef _DomainAndPath = ({String domain, String path});
-const domainErrorsThatCanBeFixedByGeneratedJson = {
+const domainAssetLinksJsonFileErrors = {
   DomainError.existence,
   DomainError.appIdentifier,
   DomainError.fingerprints,
 };
-const domainErrorsThatCanNotBeFixedByGeneratedJson = {
+const domainHostingErrors = {
   DomainError.contentType,
   DomainError.httpsAccessibility,
   DomainError.nonRedirect,
