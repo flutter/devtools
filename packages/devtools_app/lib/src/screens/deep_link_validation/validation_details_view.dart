@@ -199,10 +199,9 @@ class _AssetLinksJsonFileIssues extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final linkData = controller.selectedLink.value!;
-    final errors = linkData.domainErrors
+    final errors = controller.selectedLink.value!.domainErrors
         .where(
-          (error) => domainErrorsThatCanBeFixedByGeneratedJson.contains(error),
+          (error) => domainAssetLinksJsonFileErrors.contains(error),
         )
         .toList();
     final theme = Theme.of(context);
@@ -249,12 +248,8 @@ class _HostingIssues extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final linkData = controller.selectedLink.value!;
-    final errors = linkData.domainErrors
-        .where(
-          (error) =>
-              domainErrorsThatCanNotBeFixedByGeneratedJson.contains(error),
-        )
+    final errors = controller.selectedLink.value!.domainErrors
+        .where((error) => domainHostingErrors.contains(error))
         .toList();
     return ExpansionTile(
       title: _VerifiedOrErrorText(
