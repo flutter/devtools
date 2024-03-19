@@ -289,6 +289,7 @@ class DeepLinksController extends DisposableController {
   }
 
   final selectedProject = ValueNotifier<FlutterProject?>(null);
+  final googlePlayFingerprintsAvailability = ValueNotifier<bool>(false);
   final localFingerprint = ValueNotifier<String?>(null);
   final selectedLink = ValueNotifier<LinkData?>(null);
   final pagePhase = ValueNotifier<PagePhase>(PagePhase.emptyState);
@@ -342,11 +343,14 @@ class DeepLinksController extends DisposableController {
     late final Map<String, List<DomainError>> domainErrors;
 
     try {
-      domainErrors = await deepLinksServices.validateAndroidDomain(
+      final result = await deepLinksServices.validateAndroidDomain(
         domains: domains,
         applicationId: applicationId,
         localFingerprint: localFingerprint.value,
       );
+      domainErrors = result.domainErrors;
+      googlePlayFingerprintsAvailability.value =
+          result.googlePlayFingerprintsAvailability;
     } catch (_) {
       //TODO(hangyujin): Add more error handling for cases like RPC error and invalid json.
       pagePhase.value = PagePhase.errorPage;
