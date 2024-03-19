@@ -181,9 +181,98 @@ class _DomainCheckTable extends StatelessWidget {
           ],
         ),
         _Fingerprint(controller: controller),
-        if (linkData.domainErrors.isNotEmpty)
-          _DomainFixPanel(controller: controller),
+        _AssetLinksJsonFileIssues(controller: controller),
+        _HostingIssues(controller: controller),
         const SizedBox(height: intermediateSpacing),
+        const _ViewDeveloperGuide(),
+      ],
+    );
+  }
+}
+
+/// There is a general fix for the asset links json file issues:
+/// Update it with the generated asset link file.
+class _AssetLinksJsonFileIssues extends StatelessWidget {
+  const _AssetLinksJsonFileIssues({
+    required this.controller,
+  });
+
+  final DeepLinksController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final errors = controller.selectedLink.value!.domainErrors
+        .where(
+          (error) => domainAssetLinksJsonFileErrors.contains(error),
+        )
+        .toList();
+    final theme = Theme.of(context);
+    return ExpansionTile(
+      controlAffinity: ListTileControlAffinity.leading,
+      title: _VerifiedOrErrorText(
+        'Digital Asset Links JSON file related issues',
+        isError: errors.isNotEmpty,
+      ),
+      children: [
+        if (errors.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.all(largeSpacing),
+            child: RoundedOutlinedBorder(
+              child: Padding(
+                padding: const EdgeInsets.all(largeSpacing),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _FailureDetails(errors: errors, showFixGuide: false),
+                    const Text('Fix guide:'),
+                    const SizedBox(height: denseSpacing),
+                    Text(
+                      'To fix above issues, publish the recommended Digital Asset Links'
+                      ' JSON file below to all of the failed website domains at the following'
+                      ' location: https://[domain.name]/.well-known/assetlinks.json.',
+                      style: theme.subtleTextStyle,
+                    ),
+                    const SizedBox(height: denseSpacing),
+                    _GenerateAssetLinksPanel(controller: controller),
+                  ],
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+/// Hosting issue cannot be fixed by generated asset link file.
+/// There is a fix guide for each hosting issue.
+class _HostingIssues extends StatelessWidget {
+  const _HostingIssues({required this.controller});
+
+  final DeepLinksController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final errors = controller.selectedLink.value!.domainErrors
+        .where((error) => domainHostingErrors.contains(error))
+        .toList();
+    return ExpansionTile(
+      controlAffinity: ListTileControlAffinity.leading,
+      title: _VerifiedOrErrorText(
+        'Hosting related issues',
+        isError: errors.isNotEmpty,
+      ),
+      children: [
+        for (final error in errors)
+          Padding(
+            padding: const EdgeInsets.all(largeSpacing),
+            child: RoundedOutlinedBorder(
+              child: Padding(
+                padding: const EdgeInsets.all(largeSpacing),
+                child: _FailureDetails(errors: [error]),
+              ),
+            ),
+          ),
       ],
     );
   }
@@ -206,14 +295,20 @@ class _Fingerprint extends StatelessWidget {
             controller.googlePlayFingerprintsAvailability.value;
         final haslocalFingerpint = localFingerprint != null;
         return ExpansionTile(
+          controlAffinity: ListTileControlAffinity.leading,
           title: hasPdcFingerpint
-              ? const Text(
+              ? const _VerifiedOrErrorText(
                   'PDC fingerprint detected, enter a local fingerprint if needed',
+                  isError: false,
                 )
               : haslocalFingerpint
-                  ? const Text('Local fingerprint detected')
-                  : const _ErrorText(
+                  ? const _VerifiedOrErrorText(
+                      'Local fingerprint detected',
+                      isError: false,
+                    )
+                  : const _VerifiedOrErrorText(
                       'Can\'t proceed check due to no fingerprint detected',
+                      isError: true,
                     ),
           children: [
             Padding(
@@ -320,52 +415,22 @@ class _LocalFingerprint extends StatelessWidget {
   }
 }
 
-class _DomainFixPanel extends StatelessWidget {
-  const _DomainFixPanel({
-    required this.controller,
-  });
-
-  final DeepLinksController controller;
+class _ViewDeveloperGuide extends StatelessWidget {
+  const _ViewDeveloperGuide();
 
   @override
   Widget build(BuildContext context) {
-    final linkData = controller.selectedLink.value!;
-    return ColoredBox(
-      color: Theme.of(context)
-          .colorScheme
-          .alternatingBackgroundColor2
-          .withOpacity(0.5),
-      child: Padding(
-        padding: const EdgeInsets.all(intermediateSpacing),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _FailureDetails(linkData: linkData),
-            if (linkData.domainErrors.any(
-              (error) =>
-                  domainErrorsThatCanBeFixedByGeneratedJson.contains(error),
-            ))
-              _GenerateAssetLinksPanel(controller: controller),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton(
-                onPressed: () {
-                  unawaited(
-                    launchUrl(
-                      'https://developer.android.com/training/app-links/verify-android-applinks',
-                    ),
-                  );
-                },
-                style: const ButtonStyle().copyWith(
-                  textStyle: MaterialStateProperty.resolveWith<TextStyle>((_) {
-                    return Theme.of(context).textTheme.bodySmall!;
-                  }),
-                ),
-                child: const Text('View developer guide'),
-              ),
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: DevToolsButton(
+        onPressed: () {
+          unawaited(
+            launchUrl(
+              'https://developer.android.com/training/app-links/verify-android-applinks',
             ),
-          ],
-        ),
+          );
+        },
+        label: 'View developer guide',
       ),
     );
   }
@@ -478,36 +543,36 @@ class _GenerateAssetLinksPanel extends StatelessWidget {
 
 class _FailureDetails extends StatelessWidget {
   const _FailureDetails({
-    required this.linkData,
+    required this.errors,
+    this.showFixGuide = true,
   });
 
-  final LinkData linkData;
+  final List<DomainError> errors;
+  final bool showFixGuide;
 
   @override
   Widget build(BuildContext context) {
-    final errorCount = linkData.domainErrors.length;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for (var i = 0; i < errorCount; i++)
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: densePadding),
-              _ErrorText('Issue ${i + 1} : ${linkData.domainErrors[i].title}'),
-              const SizedBox(height: densePadding),
-              Padding(
-                padding: EdgeInsets.only(
-                  left: defaultIconSize + denseSpacing,
-                ),
-                child: Text(
-                  linkData.domainErrors[i].explanation +
-                      linkData.domainErrors[i].fixDetails,
-                  style: Theme.of(context).subtleTextStyle,
-                ),
-              ),
-            ],
+        for (final error in errors) ...[
+          const SizedBox(height: densePadding),
+          Text('Issue : ${error.title}'),
+          const SizedBox(height: densePadding),
+          Text(
+            error.explanation,
+            style: Theme.of(context).subtleTextStyle,
           ),
+          if (showFixGuide) ...[
+            const SizedBox(height: defaultSpacing),
+            const Text('Fix guide:'),
+            const SizedBox(height: densePadding),
+            Text(
+              error.fixDetails,
+              style: Theme.of(context).subtleTextStyle,
+            ),
+          ],
+        ],
       ],
     );
   }
@@ -723,19 +788,26 @@ class _NoIssueText extends StatelessWidget {
   }
 }
 
-class _ErrorText extends StatelessWidget {
-  const _ErrorText(this.text);
+class _VerifiedOrErrorText extends StatelessWidget {
+  const _VerifiedOrErrorText(this.text, {required this.isError});
   final String text;
+  final bool isError;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(
-          Icons.error,
-          color: Theme.of(context).colorScheme.error,
-          size: defaultIconSize,
-        ),
+        isError
+            ? Icon(
+                Icons.error,
+                color: Theme.of(context).colorScheme.error,
+                size: defaultIconSize,
+              )
+            : Icon(
+                Icons.verified,
+                color: Theme.of(context).colorScheme.green,
+                size: defaultIconSize,
+              ),
         const SizedBox(width: denseSpacing),
         Text(text),
       ],
