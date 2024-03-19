@@ -108,6 +108,7 @@ class MemoryDefaultScene extends Scene {
         .map((e) => () async => HeapSnapshotGraphFake()..addClassInstances(e))
         .toList();
 
+    // ignore: avoid-redundant-async
     final goldenHeaps =
         goldenHeapTests.map((e) => () async => e.loadHeap()).toList();
 

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/shared/memory/class_name.dart';
-import 'package:devtools_app/src/shared/memory/heap_data.dart';
 import 'package:devtools_app/src/shared/memory/retaining_path.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -49,7 +48,7 @@ void main() {
           4: classC,
         },
       );
-    final shortestRetainers = const [0, 0, 1, 2, 3];
+    const shortestRetainers = [0, 0, 1, 2, 3];
 
     PathFromRoot objectPath(int index) => PathFromRoot.forObject(
           graph,
@@ -57,20 +56,20 @@ void main() {
           index: index,
         );
 
-    test('directly to root', () async {
+    test('directly to root', () {
       final path = objectPath(2);
 
       expect(path.path, hasLength(0));
     });
 
-    test('one step', () async {
+    test('one step', () {
       final path = objectPath(3);
 
       expect(path.path, hasLength(1));
       expect(path.path[0], classA);
     });
 
-    test('two steps', () async {
+    test('two steps', () {
       final path = objectPath(4);
 
       expect(path.path, hasLength(2));

@@ -109,18 +109,19 @@ final _classSizeTests = <_ClassSizeTest>[
 void main() {
   for (final t in _classSizeTests) {
     test(
-        '$SingleClassData does not double-count self-referenced classes, ${t.name}.',
-        () async {
-      final heapData = await HeapData.calculate(t.heap, DateTime.now());
+      '$SingleClassData does not double-count self-referenced classes, ${t.name}.',
+      () async {
+        final heapData = await HeapData.calculate(t.heap, DateTime.now());
 
-      final classes = heapData.classes!;
-      final classData = classes.byName(_classA)!;
+        final classes = heapData.classes!;
+        final classData = classes.byName(_classA)!;
 
-      expect(
-        classData.objects.retainedSize,
-        t.expectedClassARetainedSize,
-        reason: t.name,
-      );
-    });
+        expect(
+          classData.objects.retainedSize,
+          t.expectedClassARetainedSize,
+          reason: t.name,
+        );
+      },
+    );
   }
 }

@@ -35,7 +35,7 @@ void main() {
         expect(appObjects, hasLength(1), reason: t.fileName);
       });
 
-      test('has path to the object of type ${t.appClassName}.', () async {
+      test('has path to the object of type ${t.appClassName}.', () {
         final className =
             HeapClassName.fromHeapSnapshotClass(heap.graph.classes[appClassId]);
 
