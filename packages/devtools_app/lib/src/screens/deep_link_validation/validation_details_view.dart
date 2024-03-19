@@ -181,8 +181,11 @@ class _DomainCheckTable extends StatelessWidget {
           ],
         ),
         _Fingerprint(controller: controller),
-        _AssetLinksJsonFileIssues(controller: controller),
-        _HostingIssues(controller: controller),
+        if (controller.googlePlayFingerprintsAvailability.value ||
+            controller.localFingerprint.value != null) ...[
+          _AssetLinksJsonFileIssues(controller: controller),
+          _HostingIssues(controller: controller),
+        ],
         const SizedBox(height: intermediateSpacing),
         const _ViewDeveloperGuide(),
       ],
@@ -294,22 +297,28 @@ class _Fingerprint extends StatelessWidget {
         final hasPdcFingerpint =
             controller.googlePlayFingerprintsAvailability.value;
         final haslocalFingerpint = localFingerprint != null;
+
+        late String title;
+        if (hasPdcFingerpint && haslocalFingerpint) {
+          title = 'PDC fingerprint and Local fingerprint are detected';
+        }
+        if (hasPdcFingerpint && !haslocalFingerpint) {
+          title =
+              'PDC fingerprint detected, enter a local fingerprint if needed';
+        }
+        if (!hasPdcFingerpint && haslocalFingerpint) {
+          title = 'Local fingerprint detected';
+        }
+        if (!hasPdcFingerpint && !haslocalFingerpint) {
+          title = 'Can\'t proceed check due to no fingerprint detected';
+        }
+
         return ExpansionTile(
           controlAffinity: ListTileControlAffinity.leading,
-          title: hasPdcFingerpint
-              ? const _VerifiedOrErrorText(
-                  'PDC fingerprint detected, enter a local fingerprint if needed',
-                  isError: false,
-                )
-              : haslocalFingerpint
-                  ? const _VerifiedOrErrorText(
-                      'Local fingerprint detected',
-                      isError: false,
-                    )
-                  : const _VerifiedOrErrorText(
-                      'Can\'t proceed check due to no fingerprint detected',
-                      isError: true,
-                    ),
+          title: _VerifiedOrErrorText(
+            title,
+            isError: !hasPdcFingerpint && !haslocalFingerpint,
+          ),
           children: [
             Padding(
               padding: const EdgeInsets.all(largeSpacing),
@@ -319,7 +328,18 @@ class _Fingerprint extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      if (hasPdcFingerpint && !haslocalFingerpint) ...[
+                        Text(
+                          'Your PDC fingerprint has been detected. If you have local fingerprint, you can enter it below.',
+                          style: theme.subtleTextStyle,
+                        ),
+                        const SizedBox(height: denseSpacing),
+                      ],
                       if (!hasPdcFingerpint && !haslocalFingerpint) ...[
+                        const Text(
+                          'Issue: no fingerprint detached locally or on PDC',
+                        ),
+                        const SizedBox(height: denseSpacing),
                         const Text('Fix guide:'),
                         const SizedBox(height: denseSpacing),
                         Text(
@@ -459,15 +479,9 @@ class _CodeCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Flexible(
-                    child: SelectionArea(
-                      child: Text(content!),
-                    ),
-                  ),
+                  Flexible(child: SelectionArea(child: Text(content!))),
                   if (hasCopyAction)
-                    CopyToClipboardControl(
-                      dataProvider: () => content,
-                    ),
+                    CopyToClipboardControl(dataProvider: () => content),
                 ],
               )
             : const CenteredCircularProgressIndicator(),
