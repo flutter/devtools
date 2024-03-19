@@ -75,7 +75,8 @@ enum ClassType {
 ///
 /// Equal class names are not stored twice in memory.
 class HeapClassName {
-  HeapClassName._({required String? library, required this.className})
+  @visibleForTesting
+  HeapClassName({required String? library, required this.className})
       : library = _normalizeLibrary(library);
 
   static final _instances = <HeapClassName>{};
@@ -84,7 +85,7 @@ class HeapClassName {
     required String? library,
     required String className,
   }) {
-    final newInstance = HeapClassName._(library: library, className: className);
+    final newInstance = HeapClassName(library: library, className: className);
 
     final existingInstance = _instances.lookup(newInstance);
     if (existingInstance != null) return existingInstance;

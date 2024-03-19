@@ -6,6 +6,7 @@ import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/controller/diff_pane_controller.dart';
 import 'package:devtools_app/src/screens/memory/panes/profile/profile_pane_controller.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/class_filter.dart';
+import 'package:devtools_app/src/shared/memory/heap_graph_loader.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
@@ -20,6 +21,7 @@ import 'package:vm_service/vm_service.dart';
 import '../../../test_infra/test_data/memory.dart';
 import '../../../test_infra/test_data/memory_allocation.dart';
 import '../../test_data/memory/heap/heap_data.dart';
+import '../../test_data/memory/heap/heap_graph_fakes.dart';
 
 /// To run:
 /// flutter run -t test/test_infra/scenes/memory/default.stager_app.g.dart -d macos
@@ -80,7 +82,7 @@ class MemoryDefaultScene extends Scene {
       only: '',
     );
 
-    final diffController = DiffPaneController(HeapGraphLoaderMock())
+    final diffController = DiffPaneController(HeapGraphLoaderGoldens())
       ..derived.applyFilter(showAllFilter);
 
     final profileController = ProfilePaneController()..setFilter(showAllFilter);
@@ -96,6 +98,17 @@ class MemoryDefaultScene extends Scene {
 
   @override
   String get title => '$MemoryDefaultScene';
+
+  Future<HeapGraphLoader> createHeapLoader() async {
+    final goldens = await Future.wait(goldenHeapTests.map((e) => e.loadHeap()));
+
+    return HeapGraphLoaderProvided([
+      HeapSnapshotGraphFake()..addClassInstances({'A': 1, 'B': 2}),
+      HeapSnapshotGraphFake()..addClassInstances({'B': 1, 'C': 2, 'D': 3}),
+      HeapSnapshotGraphFake()..addClassInstances({'B': 1, 'C': 2, 'D': 3}),
+      ...goldens,
+    ]);
+  }
 
   void tearDown() {}
 }

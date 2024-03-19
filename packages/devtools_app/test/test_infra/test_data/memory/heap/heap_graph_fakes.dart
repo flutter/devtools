@@ -6,6 +6,7 @@ import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
 import 'package:devtools_app/src/shared/memory/class_name.dart';
+import 'package:devtools_app/src/shared/memory/simple_items.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -49,7 +50,30 @@ class HeapSnapshotGraphFake extends Fake implements HeapSnapshotGraph {
     addObjects(refsByIndex, classes: classes);
   }
 
-  /// Sets weak objects itemized in [refsByIndex].
+  /// Adds instances of specific class names.
+  ///
+  /// The objects are one byte size, reachable directly from root.
+  /// The classes has empty library name.
+  void addClassInstances(Map<String, int> classToInstanceCount) {
+    for (final entry in classToInstanceCount.entries) {
+      final classId =
+          maybeAddClass(HeapClassName(className: entry.key, library: null));
+      for (var i = 0; i < entry.value; i++) {
+        objects.add(
+          _HeapSnapshotObjectFake(
+            identityHashCode: objects.length,
+            references: [],
+            shallowSize: 1,
+            classId: classId,
+          ),
+        );
+        final index = objects.length - 1;
+        objects[heapRootIndex].references.add(index);
+      }
+    }
+  }
+
+  /// Adds objects itemized in [refsByIndex] and sets [classes].
   ///
   /// Throws if indexes are missed.
   void addObjects(

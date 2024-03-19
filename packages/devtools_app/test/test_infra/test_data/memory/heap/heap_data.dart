@@ -43,8 +43,8 @@ class MockedHeapTest extends HeapTest {
   }
 }
 
-/// Provides test snapshots.
-class HeapGraphLoaderMock implements HeapGraphLoader {
+/// Provides test snapshots from pre-saved goldens.
+class HeapGraphLoaderGoldens implements HeapGraphLoader {
   int _nextIndex = 0;
 
   @override
@@ -53,6 +53,25 @@ class HeapGraphLoaderMock implements HeapGraphLoader {
     await Future.delayed(const Duration(milliseconds: 100));
     final result = await goldenHeapTests[_nextIndex].loadHeap();
 
+    _nextIndex = (_nextIndex + 1) % goldenHeapTests.length;
+
+    return (result, DateTime.now());
+  }
+}
+
+/// Provides test snapshots, provided in constructor.
+class HeapGraphLoaderProvided implements HeapGraphLoader {
+  HeapGraphLoaderProvided(this.graphs) : assert(graphs.isNotEmpty);
+
+  List<HeapSnapshotGraph> graphs;
+
+  int _nextIndex = 0;
+
+  @override
+  Future<(HeapSnapshotGraph, DateTime)> load() async {
+    // This delay is needed for UI to start showing the progress indicator.
+    await Future.delayed(const Duration(milliseconds: 100));
+    final result = graphs[_nextIndex];
     _nextIndex = (_nextIndex + 1) % goldenHeapTests.length;
 
     return (result, DateTime.now());
