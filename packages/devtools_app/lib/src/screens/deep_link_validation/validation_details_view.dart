@@ -190,6 +190,8 @@ class _DomainCheckTable extends StatelessWidget {
   }
 }
 
+// There is a general fix for the asset links json file issues:
+// Update it with the generated asset link file.
 class _AssetLinksJsonFileIssues extends StatelessWidget {
   const _AssetLinksJsonFileIssues({
     required this.controller,
@@ -220,7 +222,7 @@ class _AssetLinksJsonFileIssues extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _FailureDetails(errors: errors),
+                    _FailureDetails(errors: errors, showFixGuide: false),
                     const Text('Fix guide:'),
                     const SizedBox(height: denseSpacing),
                     Text(
@@ -241,6 +243,8 @@ class _AssetLinksJsonFileIssues extends StatelessWidget {
   }
 }
 
+// Hosting issue cannot be fixed by generated asset link file.
+// There is a fix guide for each hosting issue.
 class _HostingIssues extends StatelessWidget {
   const _HostingIssues({required this.controller});
 
@@ -415,7 +419,7 @@ class _ViewDeveloperGuide extends StatelessWidget {
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.centerLeft,
-      child: TextButton(
+      child: DevToolsButton(
         onPressed: () {
           unawaited(
             launchUrl(
@@ -423,12 +427,7 @@ class _ViewDeveloperGuide extends StatelessWidget {
             ),
           );
         },
-        style: const ButtonStyle().copyWith(
-          textStyle: MaterialStateProperty.resolveWith<TextStyle>((_) {
-            return Theme.of(context).textTheme.bodySmall!;
-          }),
-        ),
-        child: const Text('View developer guide'),
+        label: 'View developer guide',
       ),
     );
   }
@@ -542,33 +541,35 @@ class _GenerateAssetLinksPanel extends StatelessWidget {
 class _FailureDetails extends StatelessWidget {
   const _FailureDetails({
     required this.errors,
+    this.showFixGuide = true,
   });
 
   final List<DomainError> errors;
+  final bool showFixGuide;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for (final error in errors)
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: densePadding),
-              Text('Issue : ${error.title}'),
-              const SizedBox(height: densePadding),
-              Padding(
-                padding: EdgeInsets.only(
-                  left: defaultIconSize + denseSpacing,
-                ),
-                child: Text(
-                  error.explanation + error.fixDetails,
-                  style: Theme.of(context).subtleTextStyle,
-                ),
-              ),
-            ],
+        for (final error in errors) ...[
+          const SizedBox(height: densePadding),
+          Text('Issue : ${error.title}'),
+          const SizedBox(height: densePadding),
+          Text(
+            error.explanation,
+            style: Theme.of(context).subtleTextStyle,
           ),
+          if (showFixGuide) ...[
+            const SizedBox(height: defaultSpacing),
+            const Text('Fix guide:'),
+            const SizedBox(height: densePadding),
+            Text(
+              error.fixDetails,
+              style: Theme.of(context).subtleTextStyle,
+            ),
+          ],
+        ],
       ],
     );
   }
