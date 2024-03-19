@@ -69,7 +69,7 @@ class EmptyProfileView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const CenteredMessage('No CPU samples recorded.');
+    return CenteredMessage(message: 'No CPU samples recorded.');
   }
 }
 

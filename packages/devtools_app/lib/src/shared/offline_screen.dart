@@ -88,7 +88,7 @@ class _OfflineLoadError extends StatelessWidget {
     return Column(
       children: [
         CenteredMessage(
-          'Cannot load offline data for screen \'$screenId\'',
+          message: 'Cannot load offline data for screen \'$screenId\'',
         ),
         const SizedBox(height: defaultSpacing),
         ExitOfflineButton(gaScreen: gac.simple),

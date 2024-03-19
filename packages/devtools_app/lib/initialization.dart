@@ -4,14 +4,12 @@
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:logging/logging.dart';
 
 import 'src/app.dart';
 import 'src/framework/app_error_handling.dart';
 import 'src/screens/debugger/syntax_highlighter.dart';
-import 'src/screens/provider/riverpod_error_logger_observer.dart';
 import 'src/shared/analytics/analytics_controller.dart';
 import 'src/shared/config_specific/framework_initialize/framework_initialize.dart';
 import 'src/shared/config_specific/logger/logger_helpers.dart';
@@ -48,12 +46,9 @@ void runDevTools({
 
     // Run the app.
     runApp(
-      ProviderScope(
-        observers: const [ErrorLoggerObserver()],
-        child: DevToolsApp(
-          screens ?? defaultScreens(sampleData: sampleData),
-          await analyticsController,
-        ),
+      DevToolsApp(
+        screens ?? defaultScreens(sampleData: sampleData),
+        await analyticsController,
       ),
     );
   });

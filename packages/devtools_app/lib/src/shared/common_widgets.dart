@@ -976,20 +976,34 @@ class LeftBorder extends StatelessWidget {
 final goldenRatio = 1 + sqrt(5) / 2;
 
 /// A centered text widget with the default DevTools text style applied.
+/// 
+/// Only one of [message] or [richMessage] can be specified.
 class CenteredMessage extends StatelessWidget {
-  const CenteredMessage(this.message, {super.key});
+  const CenteredMessage({
+    this.message,
+    this.richMessage,
+    super.key,
+  }) : assert((message == null) != (richMessage != null));
 
-  final String message;
+  final String? message;
+
+  final List<InlineSpan>? richMessage;
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Text(
-        message,
+    Widget child;
+    if (message != null) {
+      child = Text(
+        message!,
         textAlign: TextAlign.center,
         style: Theme.of(context).regularTextStyle,
-      ),
-    );
+      );
+    } else {
+      child = RichText(
+        text: TextSpan(children: richMessage),
+      );
+    }
+    return Center(child: child);
   }
 }
 
