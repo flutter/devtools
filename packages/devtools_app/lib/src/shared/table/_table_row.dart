@@ -250,24 +250,25 @@ class _TableRowState<T> extends State<TableRow<T>>
     contentKey = ValueKey(this);
     scrollController = widget.linkedScrollControllerGroup.addAndGet();
     _initSearchListeners();
-    final parts = helper();
-    // Maps the indices from [rowDisplayParts] to the corresponding index of
-    // each column in [widget.columns].
-    final columnIndexMap = <int, int>{};
-    // Add scope to guarantee [columnIndexTracker] is not used outside of this
-    // block.
-    {
-      var columnIndexTracker = 0;
-      for (int i = 0; i < parts.length; i++) {
-        final type = parts[i];
-        if (type == _TableRowPartDisplayType.column) {
-          columnIndexMap[i] = columnIndexTracker;
-          columnIndexTracker++;
-        }
-      }
-    }
+
     rowExtentDelegate = FixedExtentDelegate(
       computeExtent: (index) {
+        final parts = helper();
+        // Maps the indices from [rowDisplayParts] to the corresponding index of
+        // each column in [widget.columns].
+        final columnIndexMap = <int, int>{};
+        // Add scope to guarantee [columnIndexTracker] is not used outside of this
+        // block.
+        {
+          var columnIndexTracker = 0;
+          for (int i = 0; i < parts.length; i++) {
+            final type = parts[i];
+            if (type == _TableRowPartDisplayType.column) {
+              columnIndexMap[i] = columnIndexTracker;
+              columnIndexTracker++;
+            }
+          }
+        }
         switch (parts[index]) {
           case _TableRowPartDisplayType.column:
             final columnIndex = columnIndexMap[index]!;
@@ -279,7 +280,7 @@ class _TableRowState<T> extends State<TableRow<T>>
                 columnGroupSpacing;
         }
       },
-      computeLength: () => parts.length,
+      computeLength: () => helper().length,
     );
   }
 
@@ -292,6 +293,8 @@ class _TableRowState<T> extends State<TableRow<T>>
       scrollController.dispose();
       scrollController = widget.linkedScrollControllerGroup.addAndGet();
     }
+
+    rowExtentDelegate.recompute();
 
     cancelListeners();
     _initSearchListeners();
@@ -570,6 +573,7 @@ class _TableRowState<T> extends State<TableRow<T>>
     Widget rowContent = Padding(
       padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
       child: ExtentDelegateListView(
+        scrollDirection: Axis.horizontal,
         physics: const ClampingScrollPhysics(),
         controller: scrollController,
         extentDelegate: rowExtentDelegate,
@@ -590,7 +594,7 @@ class _TableRowState<T> extends State<TableRow<T>>
             case _TableRowPartDisplayType.columnGroupSpacer:
               return const _ColumnGroupSpacer();
           }
-        }),
+        }, childCount: rowDisplayParts.length),
       ),
       // ListView.builder(
       //   scrollDirection: Axis.horizontal,
