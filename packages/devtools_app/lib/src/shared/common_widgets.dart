@@ -1332,19 +1332,21 @@ class _JsonViewerState extends State<JsonViewer>
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(denseSpacing),
-      child: SingleChildScrollView(
-        child: FutureBuilder(
-          future: _initializeTree,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState != ConnectionState.done) {
-              return Container();
-            }
-            return ExpandableVariable(
-              variable: variable,
-            );
-          },
+    return SelectionArea(
+      child: Padding(
+        padding: const EdgeInsets.all(denseSpacing),
+        child: SingleChildScrollView(
+          child: FutureBuilder(
+            future: _initializeTree,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState != ConnectionState.done) {
+                return Container();
+              }
+              return ExpandableVariable(
+                variable: variable,
+              );
+            },
+          ),
         ),
       ),
     );
