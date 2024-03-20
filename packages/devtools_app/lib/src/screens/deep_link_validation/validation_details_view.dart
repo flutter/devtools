@@ -70,6 +70,8 @@ class ValidationDetailView extends StatelessWidget {
                       child: const Text('Recheck all'),
                     ),
                   ),
+                
+                const _ViewDeveloperGuide(),
                 if (viewType == TableViewType.domainView)
                   _DomainAssociatedLinksPanel(controller: controller),
               ],
@@ -157,7 +159,6 @@ class _DomainCheckTable extends StatelessWidget {
               ],
             ),
             const SizedBox(height: intermediateSpacing),
-            const _ViewDeveloperGuide(),
           ],
         );
       },
@@ -543,7 +544,7 @@ class _DomainAssociatedLinksPanel extends StatelessWidget {
                               size: defaultIconSize,
                             ),
                           const SizedBox(width: denseSpacing),
-                          Text(path),
+                          Text('${linkData.domain}$path'),
                         ],
                       ),
                     ),
