@@ -108,11 +108,7 @@ class DomainError extends CommonError {
   );
   // Issues that are not covered by other checks. An example that may be in this
   // category is Android validation API failures.
-  static const other = DomainError(
-    'Check failed',
-    '',
-    '',
-  );
+  static const other = DomainError('Check failed', '', '');
 }
 
 /// There are currently two types of path errors, errors from intent filters and path format errors.
