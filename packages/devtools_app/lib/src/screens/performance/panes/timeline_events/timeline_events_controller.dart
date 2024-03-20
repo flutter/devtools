@@ -401,7 +401,7 @@ class TimelineEventsController extends PerformanceFeatureController
 
     // TODO(https://github.com/flutter/flutter/issues/144782): remove once this
     // issue is fixed. Due to this bug, we sometimes have very large and
-    // innacurate values for frame time durations. When this occurs, fallback
+    // inaccurate values for frame time durations. When this occurs, fallback
     // to using the time range from the frame's timeline events. This heuristic
     // assumes that there will never be a frame that took longer than 100
     // seconds, which is still pretty high.
