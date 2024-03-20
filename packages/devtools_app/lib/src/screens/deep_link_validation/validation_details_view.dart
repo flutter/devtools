@@ -70,7 +70,6 @@ class ValidationDetailView extends StatelessWidget {
                       child: const Text('Recheck all'),
                     ),
                   ),
-                
                 const _ViewDeveloperGuide(),
                 if (viewType == TableViewType.domainView)
                   _DomainAssociatedLinksPanel(controller: controller),
