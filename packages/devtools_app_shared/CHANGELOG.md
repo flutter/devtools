@@ -3,6 +3,7 @@
 and `darkColorScheme`.
 * Rename `Split` to `SplitPane`.
 * Add `ServiceManager.serviceUri` field to store the connected VM service URI.
+* Update readme to use `pub add` instead of explicit package version.
 
 ## 0.0.10
 * Add `DTDManager` class and export from `service.dart`.
