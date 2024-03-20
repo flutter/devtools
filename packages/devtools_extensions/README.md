@@ -165,7 +165,7 @@ some_pkg/  # formerly the repository root of your pub package
 2. Add the `devtools_extensions` dependency to your Flutter web app.
 
    ```console
-   $ flutter pub add devtools_app_shared
+   $ flutter pub add devtools_extensions
    ```
 
 3. Add the `DevToolsExtension` widget at the root of your Fluter web app.
