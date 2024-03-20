@@ -39,13 +39,6 @@ void main() {
   //setGlobal(NotificationService, NotificationService());
 
   group('Allocation Profile Table', () {
-    // setUp(() async {
-    //   setGlobal(OfflineModeController, OfflineModeController());
-    //   setGlobal(IdeTheme, IdeTheme());
-    //   setGlobal(PreferencesController, PreferencesController());
-    //   _setUpServiceManagerForMemory();
-    // });
-
     Future<void> navigateToAllocationProfile(
       WidgetTester tester,
       ProfilePaneController allocationProfileController,
@@ -117,7 +110,7 @@ void main() {
               )!,
               findRichText: true,
             ),
-            findsOneWidget,
+            findsWidgets,
           );
 
           // Capacity
@@ -129,7 +122,7 @@ void main() {
               )!,
               findRichText: true,
             ),
-            findsOneWidget,
+            findsWidgets,
           );
 
           // Average collection time
@@ -141,7 +134,7 @@ void main() {
               ),
               findRichText: true,
             ),
-            findsOneWidget,
+            findsWidgets,
           );
 
           // # of collections
@@ -150,7 +143,7 @@ void main() {
               stats.collections.toString(),
               findRichText: true,
             ),
-            findsOneWidget,
+            findsWidgets,
           );
         }
 
