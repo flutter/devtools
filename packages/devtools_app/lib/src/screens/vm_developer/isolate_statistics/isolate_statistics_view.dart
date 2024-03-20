@@ -10,6 +10,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/common_widgets.dart';
+import '../../../shared/primitives/byte_utils.dart';
 import '../../../shared/primitives/utils.dart';
 import '../../../shared/table/table.dart';
 import '../../../shared/table/table_data.dart';

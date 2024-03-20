@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../../shared/analytics/constants.dart' as gac;
+import '../../../../../../shared/primitives/byte_utils.dart';
 import '../../../../../../shared/primitives/utils.dart';
 import '../../../../../../shared/table/table.dart';
 import '../../../../../../shared/table/table_data.dart';
@@ -66,11 +67,8 @@ class _ShallowSizeColumn extends ColumnData<StatsByPathEntry> {
   bool get numeric => true;
 
   @override
-  String getDisplayValue(StatsByPathEntry record) => prettyPrintBytes(
-        getValue(record),
-        includeUnit: true,
-        kbFractionDigits: 1,
-      )!;
+  String getDisplayValue(StatsByPathEntry record) =>
+      prettyPrintBytes(getValue(record), includeUnit: true)!;
 }
 
 class _RetainedSizeColumn extends ColumnData<StatsByPathEntry> {
@@ -89,11 +87,8 @@ class _RetainedSizeColumn extends ColumnData<StatsByPathEntry> {
   bool get numeric => true;
 
   @override
-  String getDisplayValue(StatsByPathEntry record) => prettyPrintBytes(
-        getValue(record),
-        includeUnit: true,
-        kbFractionDigits: 1,
-      )!;
+  String getDisplayValue(StatsByPathEntry record) =>
+      prettyPrintBytes(getValue(record), includeUnit: true)!;
 }
 
 class _RetainingPathTableColumns {
