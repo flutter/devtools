@@ -31,6 +31,13 @@ class _SelectProjectViewState extends State<SelectProjectView>
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!initController()) return;
+    callWhenControllerReady((_) async {
+      final packageDirectoryForMainIsolate =
+          await controller.packageDirectoryForMainIsolate();
+      if (packageDirectoryForMainIsolate != null) {
+        _handleDirectoryPicked(packageDirectoryForMainIsolate);
+      }
+    });
   }
 
   void _handleDirectoryPicked(String directory) async {

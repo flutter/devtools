@@ -10,17 +10,18 @@ import 'package:flutter/material.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
+import '../../shared/globals.dart';
 import '../../shared/server/server.dart' as server;
 import 'deep_links_model.dart';
 import 'deep_links_services.dart';
 
 typedef _DomainAndPath = ({String domain, String path});
-const domainErrorsThatCanBeFixedByGeneratedJson = {
+const domainAssetLinksJsonFileErrors = {
   DomainError.existence,
   DomainError.appIdentifier,
   DomainError.fingerprints,
 };
-const domainErrorsThatCanNotBeFixedByGeneratedJson = {
+const domainHostingErrors = {
   DomainError.contentType,
   DomainError.httpsAccessibility,
   DomainError.nonRedirect,
@@ -229,6 +230,16 @@ class DeepLinksController extends DisposableController {
     await validateLinks();
   }
 
+  Future<String?> packageDirectoryForMainIsolate() async {
+    if (!serviceConnection.serviceManager.hasConnection) {
+      return null;
+    }
+    final packageUriString =
+        await serviceConnection.rootPackageDirectoryForMainIsolate();
+    if (packageUriString == null) return null;
+    return Uri.parse(packageUriString).toFilePath();
+  }
+
   Set<PathError> _getPathErrorsFromIntentFilterChecks(
     IntentFilterChecks intentFilterChecks,
   ) {
@@ -278,6 +289,7 @@ class DeepLinksController extends DisposableController {
   }
 
   final selectedProject = ValueNotifier<FlutterProject?>(null);
+  final googlePlayFingerprintsAvailability = ValueNotifier<bool>(false);
   final localFingerprint = ValueNotifier<String?>(null);
   final selectedLink = ValueNotifier<LinkData?>(null);
   final pagePhase = ValueNotifier<PagePhase>(PagePhase.emptyState);
@@ -305,7 +317,11 @@ class DeepLinksController extends DisposableController {
     if (!isValidFingerpint(fingerprint)) {
       return false;
     }
-    localFingerprint.value = fingerprint;
+    if (localFingerprint.value != fingerprint) {
+      localFingerprint.value = fingerprint;
+      // If the local fingerprint is updated, re-generate asset link file.
+      unawaited(_generateAssetLinks());
+    }
     return true;
   }
 
@@ -331,11 +347,14 @@ class DeepLinksController extends DisposableController {
     late final Map<String, List<DomainError>> domainErrors;
 
     try {
-      domainErrors = await deepLinksServices.validateAndroidDomain(
+      final result = await deepLinksServices.validateAndroidDomain(
         domains: domains,
         applicationId: applicationId,
         localFingerprint: localFingerprint.value,
       );
+      domainErrors = result.domainErrors;
+      googlePlayFingerprintsAvailability.value =
+          result.googlePlayFingerprintsAvailability;
     } catch (_) {
       //TODO(hangyujin): Add more error handling for cases like RPC error and invalid json.
       pagePhase.value = PagePhase.errorPage;

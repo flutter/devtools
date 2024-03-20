@@ -574,6 +574,11 @@ void main() {
 
 class DeepLinksTestController extends DeepLinksController {
   @override
+  Future<String?> packageDirectoryForMainIsolate() async {
+    return null;
+  }
+
+  @override
   Future<void> validateLinks() async {
     if (allValidatedLinkDatas == null) return;
     displayLinkDatasNotifier.value = getFilterredLinks(allValidatedLinkDatas!);
