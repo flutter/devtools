@@ -263,21 +263,21 @@ class _Fingerprint extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final hasPdcFingerpint =
+    final hasPdcFingerprint =
         controller.googlePlayFingerprintsAvailability.value;
-    final haslocalFingerpint = controller.localFingerprint.value != null;
+    final haslocalFingerprint = controller.localFingerprint.value != null;
 
     late String title;
-    if (hasPdcFingerpint && haslocalFingerpint) {
+    if (hasPdcFingerprint && haslocalFingerprint) {
       title = 'PDC fingerprint and Local fingerprint are detected';
     }
-    if (hasPdcFingerpint && !haslocalFingerpint) {
+    if (hasPdcFingerprint && !haslocalFingerprint) {
       title = 'PDC fingerprint detected, enter a local fingerprint if needed';
     }
-    if (!hasPdcFingerpint && haslocalFingerpint) {
+    if (!hasPdcFingerprint && haslocalFingerprint) {
       title = 'Local fingerprint detected';
     }
-    if (!hasPdcFingerpint && !haslocalFingerpint) {
+    if (!hasPdcFingerprint && !haslocalFingerprint) {
       title = 'Can\'t proceed check due to no fingerprint detected';
     }
 
@@ -285,7 +285,7 @@ class _Fingerprint extends StatelessWidget {
       controlAffinity: ListTileControlAffinity.leading,
       title: _VerifiedOrErrorText(
         title,
-        isError: !hasPdcFingerpint && !haslocalFingerpint,
+        isError: !hasPdcFingerprint && !haslocalFingerprint,
       ),
       children: [
         Padding(
@@ -296,14 +296,14 @@ class _Fingerprint extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (hasPdcFingerpint && !haslocalFingerpint) ...[
+                  if (hasPdcFingerprint && !haslocalFingerprint) ...[
                     Text(
                       'Your PDC fingerprint has been detected. If you have local fingerprint, you can enter it below.',
                       style: theme.subtleTextStyle,
                     ),
                     const SizedBox(height: denseSpacing),
                   ],
-                  if (!hasPdcFingerpint && !haslocalFingerpint) ...[
+                  if (!hasPdcFingerprint && !haslocalFingerprint) ...[
                     const Text(
                       'Issue: no fingerprint detached locally or on PDC',
                     ),
@@ -318,7 +318,7 @@ class _Fingerprint extends StatelessWidget {
                     ),
                     const SizedBox(height: denseSpacing),
                   ],
-                  // User can add local fingerprint no matter PDC fingerpint is detected or not.
+                  // User can add local fingerprint no matter PDC fingerprint is detected or not.
                   _LocalFingerprint(controller: controller),
                 ],
               ),
@@ -353,10 +353,10 @@ class _LocalFingerprint extends StatelessWidget {
                   filled: true,
                 ),
                 onSubmitted: (fingerprint) async {
-                  final validFingerpintAdded =
+                  final validFingerprintAdded =
                       controller.addLocalFingerprint(fingerprint);
 
-                  if (!validFingerpintAdded) {
+                  if (!validFingerprintAdded) {
                     await showDialog(
                       context: context,
                       builder: (_) {
