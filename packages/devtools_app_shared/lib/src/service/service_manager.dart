@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:core';
 
+import 'package:dds_service_extensions/dds_service_extensions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
@@ -137,6 +138,13 @@ class ServiceManager<T extends VmService> {
     _deviceBusy.value = isBusy;
   }
 
+  /// Whether the flag pause_isolates_on_start was set by either the user or
+  /// another debugging client.
+  bool get pauseIsolatesOnStartExternallySet =>
+      _pauseIsolatesOnStartExternallySet;
+
+  bool _pauseIsolatesOnStartExternallySet = false;
+
   /// Set the device as busy during the duration of the given async task.
   Future<V> runDeviceBusyTask<V>(Future<V> task) async {
     try {
@@ -238,6 +246,8 @@ class ServiceManager<T extends VmService> {
     serviceExtensionManager.vmServiceOpened(service, connectedApp!);
     resolvedUriManager.vmServiceOpened(service);
 
+    await _configureIsolateSettings();
+
     await callLifecycleCallbacks(
       ServiceManagerLifecycle.beforeOpenVmService,
       service,
@@ -276,6 +286,45 @@ class ServiceManager<T extends VmService> {
     setDeviceBusy(false);
 
     _connectedState.value = connectionState;
+  }
+
+  Future<void> _configureIsolateSettings() async {
+    await _setPauseIsolatesOnStart();
+  }
+
+  Future<void> _setPauseIsolatesOnStart() async {
+    _pauseIsolatesOnStartExternallySet = await _isPauseIsolatesOnStartSet();
+
+    if (service == null) return;
+    final vmService = service!;
+
+    try {
+      await vmService.setFlag('pause_isolates_on_start', 'true');
+      await vmService.requirePermissionToResume(
+        onPauseStart: true,
+      );
+    } catch (error) {
+      _log.warning('$error');
+    }
+  }
+
+  Future<bool> _isPauseIsolatesOnStartSet() async {
+    if (service == null) return false;
+    final vmService = service!;
+
+    try {
+      final flagList = await vmService.getFlagList();
+      if (flagList.flags == null) return false;
+      final flags = flagList.flags!;
+      return flags.any(
+        (flag) =>
+            flag.name == 'pause_isolates_on_start' &&
+            flag.valueAsString == 'true',
+      );
+    } catch (error) {
+      _log.warning('$error');
+      return false;
+    }
   }
 
   /// Initializes the service manager for [service], including setting up other

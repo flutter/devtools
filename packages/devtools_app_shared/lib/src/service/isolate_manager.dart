@@ -99,6 +99,13 @@ final class IsolateManager with DisposerMixin {
     _isolates.add(isolateRef);
     isolateIndex(isolateRef);
     await _loadIsolateState(isolateRef);
+    // If the flag pause-breakpoints-on-start was successfully set, then each
+    // new isolate will start paused. Therefore resume it (unless it is the
+    // current isolate, in which case the breakpoint manager will resume it
+    // after setting breakpoints):
+    if (selectedIsolate.value?.id != isolateRef.id) {
+      await resumeIsolateIfPaused(isolateRef);
+    }
   }
 
   Future<void> _loadIsolateState(IsolateRef isolateRef) async {
@@ -235,6 +242,18 @@ final class IsolateManager with DisposerMixin {
     _clearIsolateStates();
     _mainIsolate.value = null;
     _isolateRunnableCompleters.clear();
+  }
+
+  Future<void> resumeIsolateIfPaused(IsolateRef isolateRef) async {
+    final isPaused = _isolateStates[isolateRef]?.isPaused.value ?? false;
+    if (!isPaused || isolateRef.id == null || _service == null) return;
+    final isolateId = isolateRef.id!;
+    final service = _service!;
+    try {
+      await service.resume(isolateId);
+    } catch (error) {
+      _log.warning(error);
+    }
   }
 
   void _clearIsolateStates() {
