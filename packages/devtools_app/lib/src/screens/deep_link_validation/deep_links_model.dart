@@ -34,7 +34,7 @@ class CommonError {
 class DomainError extends CommonError {
   const DomainError(title, explanation, fixDetails)
       : super(title, explanation, fixDetails);
-  
+
   // Existence of an asset link file.
   static const existence = DomainError(
     'Digital Asset Links JSON file existence failed',
@@ -119,7 +119,7 @@ class DomainError extends CommonError {
 class PathError extends CommonError {
   const PathError(title, explanation, fixDetails)
       : super(title, explanation, fixDetails);
-  
+
   // Intent filter should have action tag.
   static const intentFilterActionView = PathError(
     'Intent filter is missing action tag',
