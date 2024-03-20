@@ -6,6 +6,7 @@ import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/controller/diff_pane_controller.dart';
 import 'package:devtools_app/src/screens/memory/panes/profile/profile_pane_controller.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/class_filter.dart';
+import 'package:devtools_app/src/shared/memory/class_name.dart';
 import 'package:devtools_app/src/shared/memory/heap_graph_loader.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -109,12 +110,30 @@ class MemoryDefaultScene extends Scene {
         .map((e) => () async => HeapSnapshotGraphFake()..addClassInstances(e))
         .toList();
 
+    /// 100 instances of the same class with different paths of length 100.
+    Future<HeapSnapshotGraphFake> manyPaths() async {
+      final result = HeapSnapshotGraphFake();
+      final basePath = List<String>.generate(100, (i) => 'Referrer[i]');
+
+      for (int i = 0; i < 100; i++) {
+        result.addChain([...basePath, 'Owner$i', 'TheData']);
+      }
+      final selection = result.add();
+      result.objects[selection]
+        ..classId = result
+            .maybeAddClass(HeapClassName(library: '', className: 'HeavyClass'))!
+        ..shallowSize = 10000;
+
+      return result;
+    }
+
     final goldenHeaps =
         // ignore: avoid-redundant-async, match signature
         goldenHeapTests.map((e) => () async => e.loadHeap()).toList();
 
     return HeapGraphLoaderProvided([
       ...simpleHeaps,
+      manyPaths,
       ...goldenHeaps,
     ]);
   }

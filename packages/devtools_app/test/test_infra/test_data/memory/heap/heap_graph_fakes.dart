@@ -13,7 +13,7 @@ import 'package:vm_service/vm_service.dart';
 typedef RefsByIndex = Map<int, List<int>>;
 typedef ClassByIndex = Map<int, HeapClassName>;
 
-final _sentinelObject = _HeapSnapshotObjectFake();
+final _sentinelObject = HeapSnapshotObjectFake();
 
 const int _defaultClassId = 0;
 const int _weakClassId = 1;
@@ -28,14 +28,16 @@ class HeapSnapshotGraphFake extends Fake implements HeapSnapshotGraph {
   ];
 
   @override
-  final List<HeapSnapshotObject> objects = [
+  final List<HeapSnapshotObjectFake> objects = [
     _sentinelObject,
-    _HeapSnapshotObjectFake(shallowSize: 1), // root
+    HeapSnapshotObjectFake(shallowSize: 1), // root
   ];
 
   /// Adds object and returns index of the added object.
-  int add(int hashCode) {
-    objects.add(_HeapSnapshotObjectFake(identityHashCode: hashCode));
+  int add([int? hashCode]) {
+    objects.add(
+      HeapSnapshotObjectFake(identityHashCode: hashCode ?? objects.length),
+    );
     return objects.length - 1;
   }
 
@@ -55,6 +57,19 @@ class HeapSnapshotGraphFake extends Fake implements HeapSnapshotGraph {
     addObjects(refsByIndex, classes: classes);
   }
 
+  /// Adds set of object with specific path to root.
+  void addChain(List<String> path) {
+    var referrer = heapRootIndex;
+    for (var name in path) {
+      final classId =
+          maybeAddClass(HeapClassName(library: '', className: name));
+      final index = add();
+      objects[index].classId = classId!;
+      objects[referrer]._references.add(index);
+      referrer = index;
+    }
+  }
+
   /// Adds instances of specific class names.
   ///
   /// The objects are one byte size, reachable directly from root.
@@ -65,7 +80,7 @@ class HeapSnapshotGraphFake extends Fake implements HeapSnapshotGraph {
           maybeAddClass(HeapClassName(className: entry.key, library: null));
       for (var i = 0; i < entry.value; i++) {
         objects.add(
-          _HeapSnapshotObjectFake(
+          HeapSnapshotObjectFake(
             identityHashCode: objects.length,
             references: [],
             shallowSize: 1,
@@ -73,7 +88,7 @@ class HeapSnapshotGraphFake extends Fake implements HeapSnapshotGraph {
           ),
         );
         final index = objects.length - 1;
-        (objects[heapRootIndex] as _HeapSnapshotObjectFake).addReference(index);
+        (objects[heapRootIndex] as HeapSnapshotObjectFake).addReference(index);
       }
     }
   }
@@ -100,7 +115,7 @@ class HeapSnapshotGraphFake extends Fake implements HeapSnapshotGraph {
       classId ??= weak ? _weakClassId : _defaultClassId;
 
       objects.add(
-        _HeapSnapshotObjectFake(
+        HeapSnapshotObjectFake(
           identityHashCode: i,
           references: refsByIndex[i] ?? [],
           shallowSize: 1,
@@ -156,8 +171,8 @@ class _HeapSnapshotClassFake extends Fake implements HeapSnapshotClass {
   late final libraryUri = Uri.parse('');
 }
 
-class _HeapSnapshotObjectFake extends Fake implements HeapSnapshotObject {
-  _HeapSnapshotObjectFake({
+class HeapSnapshotObjectFake extends Fake implements HeapSnapshotObject {
+  HeapSnapshotObjectFake({
     this.identityHashCode = 0,
     List<int>? references,
     this.shallowSize = 0,
@@ -166,7 +181,7 @@ class _HeapSnapshotObjectFake extends Fake implements HeapSnapshotObject {
         _references = references ?? [];
 
   @override
-  final int classId;
+  int classId;
 
   @override
   final int identityHashCode;
