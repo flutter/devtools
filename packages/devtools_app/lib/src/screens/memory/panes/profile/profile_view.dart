@@ -290,11 +290,7 @@ class _GCHeapUsageColumn extends _GCHeapStatsColumn {
 
   @override
   String getDisplayValue(AdaptedProfile dataObject) {
-    return prettyPrintBytes(
-      getValue(dataObject),
-      includeUnit: true,
-      kbFractionDigits: 0,
-    )!;
+    return prettyPrintBytes(getValue(dataObject), includeUnit: true)!;
   }
 
   @override
@@ -318,11 +314,7 @@ class _GCHeapCapacityColumn extends _GCHeapStatsColumn {
 
   @override
   String getDisplayValue(AdaptedProfile dataObject) {
-    return prettyPrintBytes(
-      getValue(dataObject),
-      includeUnit: true,
-      kbFractionDigits: 0,
-    )!;
+    return prettyPrintBytes(getValue(dataObject), includeUnit: true)!;
   }
 
   @override

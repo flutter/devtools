@@ -422,7 +422,6 @@ class ImageResponseView extends StatelessWidget {
               prettyPrintBytes(
                 encodedResponse.lengthInBytes,
                 includeUnit: true,
-                kbFractionDigits: 0,
               )!,
             ),
             _buildRow(

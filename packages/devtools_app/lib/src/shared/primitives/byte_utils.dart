@@ -2,11 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:collection';
 import 'dart:math';
-import 'dart:typed_data';
-
-import 'package:intl/intl.dart';
 
 String? prettyPrintBytes(
   num? bytes, {
@@ -20,9 +16,10 @@ String? prettyPrintBytes(
   if (bytes == null) {
     return null;
   }
-  // TODO(peterdjlee): Generalize to handle different kbFractionDigits.
+  // TODO(kenz): Generalize to handle different kbFractionDigits.
   // Ensure a small number of bytes does not print as 0 KB.
-  // If bytes >= maxBytes and kbFractionDigits == 1, it will start rounding to 0.1 KB.
+  // If bytes >= maxBytes and kbFractionDigits == 1, it will start rounding to
+  // 0.1 KB.
   if (bytes.abs() < maxBytes && kbFractionDigits == 1) {
     var output = bytes.toString();
     if (includeUnit) {

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
-
 import 'package:devtools_app/src/shared/primitives/byte_utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -59,25 +57,11 @@ void main() {
     const int kb = 1024;
     const int mb = 1024 * kb;
 
-    expect(
-      prettyPrintBytes(
-        51,
-        kbFractionDigits: 1,
-        includeUnit: true,
-      ),
-      '51 B',
-    );
-    expect(
-      prettyPrintBytes(
-        52,
-        kbFractionDigits: 1,
-        includeUnit: true,
-      ),
-      '0.1 KB',
-    );
+    expect(prettyPrintBytes(51, includeUnit: true), '51 B');
+    expect(prettyPrintBytes(52, includeUnit: true), '0.1 KB');
 
     expect(prettyPrintBytes(kb), '1.0');
-    expect(prettyPrintBytes(kb + 100, kbFractionDigits: 1), '1.1');
+    expect(prettyPrintBytes(kb + 100), '1.1');
     expect(prettyPrintBytes(kb + 150, kbFractionDigits: 2), '1.15');
     expect(prettyPrintBytes(kb, includeUnit: true), '1.0 KB');
     expect(prettyPrintBytes(kb * 1000, includeUnit: true), '1000.0 KB');
