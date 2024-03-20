@@ -697,13 +697,15 @@ class _CheckTableHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       tileColor: Theme.of(context).colorScheme.deeplinkTableHeaderColor,
-      title: const Row(
-        children: [
-          SizedBox(width: defaultSpacing),
-          Expanded(child: Text('OS')),
-          Expanded(child: Text('Issue type')),
-          Expanded(child: Text('Status')),
-        ],
+      title: const Padding(
+        padding: EdgeInsets.symmetric(horizontal: defaultSpacing),
+        child: Row(
+          children: [
+            Expanded(child: Text('OS')),
+            Expanded(child: Text('Issue type')),
+            Expanded(child: Text('Status')),
+          ],
+        ),
       ),
     );
   }

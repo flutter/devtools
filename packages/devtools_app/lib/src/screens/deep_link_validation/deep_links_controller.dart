@@ -317,9 +317,11 @@ class DeepLinksController extends DisposableController {
     if (!isValidFingerpint(fingerprint)) {
       return false;
     }
-    localFingerprint.value = fingerprint;
-    // If the local fingerprint is updated, re-generate asset link file.
-    unawaited(_generateAssetLinks());
+    if (localFingerprint.value != fingerprint) {
+      localFingerprint.value = fingerprint;
+      // If the local fingerprint is updated, re-generate asset link file.
+      unawaited(_generateAssetLinks());
+    }
     return true;
   }
 
