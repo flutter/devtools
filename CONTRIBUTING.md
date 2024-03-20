@@ -125,6 +125,8 @@ request from the branch in your cloned repo to the DevTools master branch. Creat
     2. Locate version on bots by searching for `install dcm` in [build.yaml](https://github.com/flutter/devtools/blob/master/.github/workflows/build.yaml) and run `brew install cqlabs/dcm/dcm@<version on bots without -1>`
   
     You can check you current local version with `dcm --version`.
+   
+    If version of DCM on bots is outdated, consider to submit a PR to refresh the version on bots.
 
 ## Running and debugging DevTools
 
