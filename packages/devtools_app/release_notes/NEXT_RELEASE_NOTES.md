@@ -6,7 +6,7 @@ This is draft for future release notes, that are going to land on
 The 2.34.0 release of the Dart and Flutter DevTools
 includes the following changes among other general improvements.
 To learn more about DevTools, check out the
-[DevTools overview](https://docs.flutter.dev/tools/devtools/overview).
+[DevTools overview]({{site.url}}/tools/devtools/overview).
 
 ## General updates
 
