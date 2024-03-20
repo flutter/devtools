@@ -118,21 +118,3 @@ enum ByteUnit {
 
   String get display => _display ?? name.toUpperCase();
 }
-
-/// Stores a list of Uint8List objects in a ring buffer, keeping the total size
-/// at or below [maxSizeBytes].
-class Uint8ListRingBuffer {
-  Uint8ListRingBuffer({required this.maxSizeBytes});
-
-  final int maxSizeBytes;
-
-  final data = DoubleLinkedQueue<Uint8List>();
-
-  /// Returns the size of the ring buffer in bytes.
-  ///
-  /// Since each element in [data] is a Uint8List, the size of each element in
-  /// bytes is the length of the Uint8List.
-  int get size => data.fold(0, (sum, e) => sum + e.length);
-
-  /// Stores [binaryData] in [data] and removes as many early elements as
-  ///  necessary to keep the size of [data] smaller than [maxSizeBytes].
