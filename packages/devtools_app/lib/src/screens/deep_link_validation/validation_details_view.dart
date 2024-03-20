@@ -191,7 +191,7 @@ class _AssetLinksJsonFileIssues extends StatelessWidget {
       children: [
         if (errors.isNotEmpty)
           Padding(
-            padding: const EdgeInsets.all(largeSpacing),
+            padding: const EdgeInsets.symmetric(horizontal: largeSpacing),
             child: RoundedOutlinedBorder(
               child: Padding(
                 padding: const EdgeInsets.all(largeSpacing),
@@ -204,7 +204,7 @@ class _AssetLinksJsonFileIssues extends StatelessWidget {
                     Text(
                       'To fix above issues, publish the recommended Digital Asset Links'
                       ' JSON file below to all of the failed website domains at the following'
-                      ' location: https://[domain.name]/.well-known/assetlinks.json.',
+                      ' location: https://${controller.selectedLink.value!.domain}/.well-known/assetlinks.json.',
                       style: theme.subtleTextStyle,
                     ),
                     const SizedBox(height: denseSpacing),
@@ -240,7 +240,7 @@ class _HostingIssues extends StatelessWidget {
       children: [
         for (final error in errors)
           Padding(
-            padding: const EdgeInsets.all(largeSpacing),
+            padding: const EdgeInsets.symmetric(horizontal: largeSpacing),
             child: RoundedOutlinedBorder(
               child: Padding(
                 padding: const EdgeInsets.all(largeSpacing),
@@ -289,7 +289,7 @@ class _Fingerprint extends StatelessWidget {
       ),
       children: [
         Padding(
-          padding: const EdgeInsets.all(largeSpacing),
+          padding: const EdgeInsets.symmetric(horizontal: largeSpacing),
           child: RoundedOutlinedBorder(
             child: Padding(
               padding: const EdgeInsets.all(largeSpacing),
@@ -454,56 +454,13 @@ class _GenerateAssetLinksPanel extends StatelessWidget {
         GenerateAssetLinksResult? generatedAssetLinks,
         __,
       ) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Divider(),
-            const Text('Recommended Asset Links Json file :'),
-            const SizedBox(height: denseSpacing),
-            (generatedAssetLinks != null &&
-                    generatedAssetLinks.errorCode.isNotEmpty)
-                ? Text(
-                    'Not able to generate assetlinks.json, because the app ${controller.applicationId} is not uploaded to Google Play.',
-                    style: theme.subtleTextStyle,
-                  )
-                : Column(
-                    children: [
-                      _CodeCard(content: generatedAssetLinks?.generatedString),
-                      const SizedBox(height: denseSpacing),
-                      Text(
-                        'Update and publish this new recommended Digital Asset Links JSON file below at this location:',
-                        style: theme.subtleTextStyle,
-                      ),
-                      const SizedBox(height: denseSpacing),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Card(
-                          shape: const RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(4.0)),
-                          ),
-                          color: theme.colorScheme.outline,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: denseSpacing,
-                            ),
-                            child: SelectionArea(
-                              child: Text(
-                                'https://${controller.selectedLink.value!.domain}/.well-known/assetlinks.json',
-                                style: theme.regularTextStyle.copyWith(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: denseSpacing),
-                    ],
-                  ),
-          ],
-        );
+        return (generatedAssetLinks != null &&
+                generatedAssetLinks.errorCode.isNotEmpty)
+            ? Text(
+                'Not able to generate assetlinks.json, because the app ${controller.applicationId} is not uploaded to Google Play.',
+                style: theme.subtleTextStyle,
+              )
+            : _CodeCard(content: generatedAssetLinks?.generatedString);
       },
     );
   }
