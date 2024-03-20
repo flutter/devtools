@@ -38,10 +38,10 @@ TODO: Remove this section if there are not any general updates.
 
 ## Network profiler updates
 
-* Improved Network profiler performance. [#7266](https://github.com/flutter/devtools/pull/7266)
-* Fixed a bug where selected pending requests weren't refreshing the tab once updated. [#7266](https://github.com/flutter/devtools/pull/7266)
+* Improved Network profiler performance. - [#7266](https://github.com/flutter/devtools/pull/7266)
+* Fixed a bug where selected pending requests weren't refreshing the tab once updated. - [#7266](https://github.com/flutter/devtools/pull/7266)
 * Fixed the JSON viewer so multiline strings are visible in their row, and
-  through a tooltip [#7389](https://github.com/flutter/devtools/pull/7389)
+  through a tooltip. - [#7389](https://github.com/flutter/devtools/pull/7389)
 
 ## Logging updates
 

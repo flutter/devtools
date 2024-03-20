@@ -67,7 +67,7 @@ class DisplayProvider extends StatelessWidget {
       onTap: onTap,
       menuButtons: _getMenuButtons(context),
       child: DevToolsTooltip(
-        message: variable.displayValue.toString(),
+        message: originalDisplayValue,
         child: Text.rich(
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
