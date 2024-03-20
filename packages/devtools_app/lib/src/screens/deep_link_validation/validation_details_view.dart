@@ -30,45 +30,54 @@ class ValidationDetailView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      children: [
-        ValidationDetailHeader(viewType: viewType, controller: controller),
-        Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: extraLargeSpacing,
-            vertical: defaultSpacing,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'This tool helps you diagnose issues with App Links in your application.'
-                'Web checks are done for the web association'
-                ' file on your website. App checks are done for the intent filters in'
-                ' the manifest and info.plist files, routing issues, URL format, etc.',
-                style: Theme.of(context).subtleTextStyle,
-              ),
-              if (viewType == TableViewType.domainView ||
-                  viewType == TableViewType.singleUrlView)
-                _DomainCheckTable(controller: controller),
-              if (viewType == TableViewType.pathView ||
-                  viewType == TableViewType.singleUrlView)
-                _PathCheckTable(controller: controller),
-              const SizedBox(height: extraLargeSpacing),
-              if (linkData.domainErrors.isNotEmpty)
-                Align(
-                  alignment: Alignment.bottomRight,
-                  child: FilledButton(
-                    onPressed: () async => await controller.validateLinks(),
-                    child: const Text('Recheck all'),
-                  ),
+    return ListTileTheme(
+      // TODO(hangyujin): Set `minTileHeight` when it is available for devtool.
+      // related PR: https://github.com/flutter/flutter/pull/145244
+      data: const ListTileThemeData(
+        dense: true,
+        minVerticalPadding: 0,
+        contentPadding: EdgeInsets.zero,
+      ),
+      child: ListView(
+        children: [
+          ValidationDetailHeader(viewType: viewType, controller: controller),
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: extraLargeSpacing,
+              vertical: defaultSpacing,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'This tool helps you diagnose issues with App Links in your application.'
+                  'Web checks are done for the web association'
+                  ' file on your website. App checks are done for the intent filters in'
+                  ' the manifest and info.plist files, routing issues, URL format, etc.',
+                  style: Theme.of(context).subtleTextStyle,
                 ),
-              if (viewType == TableViewType.domainView)
-                _DomainAssociatedLinksPanel(controller: controller),
-            ],
+                if (viewType == TableViewType.domainView ||
+                    viewType == TableViewType.singleUrlView)
+                  _DomainCheckTable(controller: controller),
+                if (viewType == TableViewType.pathView ||
+                    viewType == TableViewType.singleUrlView)
+                  _PathCheckTable(controller: controller),
+                const SizedBox(height: extraLargeSpacing),
+                if (linkData.domainErrors.isNotEmpty)
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: FilledButton(
+                      onPressed: () async => await controller.validateLinks(),
+                      child: const Text('Recheck all'),
+                    ),
+                  ),
+                if (viewType == TableViewType.domainView)
+                  _DomainAssociatedLinksPanel(controller: controller),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -122,73 +131,37 @@ class _DomainCheckTable extends StatelessWidget {
   Widget build(BuildContext context) {
     final linkData = controller.selectedLink.value!;
     final theme = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const SizedBox(height: intermediateSpacing),
-        Text('Web check', style: theme.textTheme.titleSmall),
-        const SizedBox(height: denseSpacing),
-        DataTable(
-          headingRowColor: MaterialStateProperty.all(
-            theme.colorScheme.deeplinkTableHeaderColor,
-          ),
-          dataRowColor: MaterialStateProperty.all(
-            theme.colorScheme.alternatingBackgroundColor2,
-          ),
-          columns: const [
-            DataColumn(label: Text('OS')),
-            DataColumn(label: Text('Issue type')),
-            DataColumn(label: Text('Status')),
-          ],
-          headingRowHeight: defaultHeaderHeight,
-          dataRowMinHeight: defaultRowHeight,
-          dataRowMaxHeight: defaultRowHeight,
-          rows: [
-            if (linkData.os.contains(PlatformOS.android))
-              DataRow(
-                cells: [
-                  const DataCell(Text('Android')),
-                  const DataCell(Text('Digital assets link file')),
-                  DataCell(
-                    linkData.domainErrors.isNotEmpty
-                        ? Text(
-                            '${linkData.domainErrors.length} '
-                            '${pluralize('Check', linkData.domainErrors.length)} failed',
-                            style: theme.errorTextStyle,
-                          )
-                        : Text(
-                            'No issues found',
-                            style: TextStyle(
-                              color: theme.colorScheme.green,
-                            ),
-                          ),
-                  ),
+    return ValueListenableBuilder<String?>(
+      valueListenable: controller.localFingerprint,
+      builder: (context, localFingerprint, _) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const SizedBox(height: intermediateSpacing),
+            Text('Web check', style: theme.textTheme.titleSmall),
+            const SizedBox(height: denseSpacing),
+            const _CheckTableHeader(),
+            _CheckExpansionTile(
+              initiallyExpanded: true,
+              checkName: 'Digital assets link file',
+              status: linkData.domainErrors.isNotEmpty
+                  ? Text('check failed', style: theme.errorTextStyle)
+                  : const _NoIssueText(),
+              children: <Widget>[
+                _Fingerprint(controller: controller),
+                // The following checks are only displayed if a fingerprint exists.
+                if (controller.googlePlayFingerprintsAvailability.value ||
+                    localFingerprint != null) ...[
+                  _AssetLinksJsonFileIssues(controller: controller),
+                  _HostingIssues(controller: controller),
                 ],
-              ),
-            if (linkData.os.contains(PlatformOS.ios))
-              DataRow(
-                cells: [
-                  const DataCell(Text('iOS')),
-                  const DataCell(Text('Apple-App-Site-Association file')),
-                  DataCell(
-                    Text(
-                      'No issues found',
-                      style: TextStyle(color: theme.colorScheme.green),
-                    ),
-                  ),
-                ],
-              ),
+              ],
+            ),
+            const SizedBox(height: intermediateSpacing),
+            const _ViewDeveloperGuide(),
           ],
-        ),
-        _Fingerprint(controller: controller),
-        if (controller.googlePlayFingerprintsAvailability.value ||
-            controller.localFingerprint.value != null) ...[
-          _AssetLinksJsonFileIssues(controller: controller),
-          _HostingIssues(controller: controller),
-        ],
-        const SizedBox(height: intermediateSpacing),
-        const _ViewDeveloperGuide(),
-      ],
+        );
+      },
     );
   }
 }
@@ -291,75 +264,69 @@ class _Fingerprint extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return ValueListenableBuilder<String?>(
-      valueListenable: controller.localFingerprint,
-      builder: (context, localFingerprint, _) {
-        final hasPdcFingerpint =
-            controller.googlePlayFingerprintsAvailability.value;
-        final haslocalFingerpint = localFingerprint != null;
+    final hasPdcFingerpint =
+        controller.googlePlayFingerprintsAvailability.value;
+    final haslocalFingerpint = controller.localFingerprint.value != null;
 
-        late String title;
-        if (hasPdcFingerpint && haslocalFingerpint) {
-          title = 'PDC fingerprint and Local fingerprint are detected';
-        }
-        if (hasPdcFingerpint && !haslocalFingerpint) {
-          title =
-              'PDC fingerprint detected, enter a local fingerprint if needed';
-        }
-        if (!hasPdcFingerpint && haslocalFingerpint) {
-          title = 'Local fingerprint detected';
-        }
-        if (!hasPdcFingerpint && !haslocalFingerpint) {
-          title = 'Can\'t proceed check due to no fingerprint detected';
-        }
+    late String title;
+    if (hasPdcFingerpint && haslocalFingerpint) {
+      title = 'PDC fingerprint and Local fingerprint are detected';
+    }
+    if (hasPdcFingerpint && !haslocalFingerpint) {
+      title = 'PDC fingerprint detected, enter a local fingerprint if needed';
+    }
+    if (!hasPdcFingerpint && haslocalFingerpint) {
+      title = 'Local fingerprint detected';
+    }
+    if (!hasPdcFingerpint && !haslocalFingerpint) {
+      title = 'Can\'t proceed check due to no fingerprint detected';
+    }
 
-        return ExpansionTile(
-          controlAffinity: ListTileControlAffinity.leading,
-          title: _VerifiedOrErrorText(
-            title,
-            isError: !hasPdcFingerpint && !haslocalFingerpint,
-          ),
-          children: [
-            Padding(
+    return ExpansionTile(
+      controlAffinity: ListTileControlAffinity.leading,
+      title: _VerifiedOrErrorText(
+        title,
+        isError: !hasPdcFingerpint && !haslocalFingerpint,
+      ),
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(largeSpacing),
+          child: RoundedOutlinedBorder(
+            child: Padding(
               padding: const EdgeInsets.all(largeSpacing),
-              child: RoundedOutlinedBorder(
-                child: Padding(
-                  padding: const EdgeInsets.all(largeSpacing),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (hasPdcFingerpint && !haslocalFingerpint) ...[
-                        Text(
-                          'Your PDC fingerprint has been detected. If you have local fingerprint, you can enter it below.',
-                          style: theme.subtleTextStyle,
-                        ),
-                        const SizedBox(height: denseSpacing),
-                      ],
-                      if (!hasPdcFingerpint && !haslocalFingerpint) ...[
-                        const Text(
-                          'Issue: no fingerprint detached locally or on PDC',
-                        ),
-                        const SizedBox(height: denseSpacing),
-                        const Text('Fix guide:'),
-                        const SizedBox(height: denseSpacing),
-                        Text(
-                          'To fix this issue, release your app on Play Developer Console to get a fingerprint. '
-                          'If you are not ready to release your app, enter a local fingerprint below can also allow you'
-                          'to proceed Android domain check.',
-                          style: theme.subtleTextStyle,
-                        ),
-                        const SizedBox(height: denseSpacing),
-                      ],
-                      // User can add local fingerprint no matter PDC fingerpint is detected or not.
-                      _LocalFingerprint(controller: controller),
-                    ],
-                  ),
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (hasPdcFingerpint && !haslocalFingerpint) ...[
+                    Text(
+                      'Your PDC fingerprint has been detected. If you have local fingerprint, you can enter it below.',
+                      style: theme.subtleTextStyle,
+                    ),
+                    const SizedBox(height: denseSpacing),
+                  ],
+                  if (!hasPdcFingerpint && !haslocalFingerpint) ...[
+                    const Text(
+                      'Issue: no fingerprint detached locally or on PDC',
+                    ),
+                    const SizedBox(height: denseSpacing),
+                    const Text('Fix guide:'),
+                    const SizedBox(height: denseSpacing),
+                    Text(
+                      'To fix this issue, release your app on Play Developer Console to get a fingerprint. '
+                      'If you are not ready to release your app, enter a local fingerprint below can also allow you'
+                      'to proceed Android domain check.',
+                      style: theme.subtleTextStyle,
+                    ),
+                    const SizedBox(height: denseSpacing),
+                  ],
+                  // User can add local fingerprint no matter PDC fingerpint is detected or not.
+                  _LocalFingerprint(controller: controller),
+                ],
               ),
             ),
-          ],
-        );
-      },
+          ),
+        ),
+      ],
     );
   }
 }
@@ -373,7 +340,6 @@ class _LocalFingerprint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -383,8 +349,8 @@ class _LocalFingerprint extends StatelessWidget {
             ? TextField(
                 decoration: const InputDecoration(
                   labelText: 'Enter your local fingerprint',
-                  hintText: 'eg: F0:FD:6C:5B:41:0F:25:CB:25:C3:B5:33:46'
-                      ':C8:97:2F:AE:30:F8:EE:74:11:DF:91:04:80:AD:6B:2D:60:DB:83',
+                  hintText:
+                      'eg: A1:B2:C3:D4:A1:B2:C3:D4:A1:B2:C3:D4:A1:B2:C3:D4:A1:B2:C3:D4:A1:B2:C3:D4:A1:B2:C3:D4:A1:B2:C3:D4',
                   filled: true,
                 ),
                 onSubmitted: (fingerprint) async {
@@ -414,24 +380,6 @@ class _LocalFingerprint extends StatelessWidget {
                 content: controller.localFingerprint.value,
                 hasCopyAction: false,
               ),
-        const SizedBox(height: intermediateSpacing),
-        ValueListenableBuilder<String?>(
-          valueListenable: controller.localFingerprint,
-          builder: (context, fingerprint, _) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Your locally added fingerprint: ',
-                  style: theme.textTheme.titleSmall,
-                ),
-                const SizedBox(height: intermediateSpacing),
-                if (fingerprint != null)
-                  Text(fingerprint, style: theme.textTheme.bodySmall),
-              ],
-            );
-          },
-        ),
       ],
     );
   }
@@ -661,44 +609,21 @@ class _PathCheckTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return ListTileTheme(
-      dense: true,
-      minVerticalPadding: 0,
-      contentPadding: EdgeInsets.zero,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const SizedBox(height: intermediateSpacing),
-          Text(
-            'Path check',
-            style: theme.textTheme.titleSmall,
-          ),
-          const SizedBox(height: intermediateSpacing),
-          ListTile(
-            tileColor: theme.colorScheme.deeplinkTableHeaderColor,
-            title: const Row(
-              children: [
-                SizedBox(width: defaultSpacing),
-                Expanded(
-                  child: Text('OS'),
-                ),
-                Expanded(
-                  child: Text('Issue type'),
-                ),
-                Expanded(
-                  child: Text(
-                    'Status',
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const Divider(height: 1.0),
-          _IntentFilterCheck(controller: controller),
-          const Divider(height: 1.0),
-          _PathFormatCheck(controller: controller),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: intermediateSpacing),
+        Text(
+          'Path check',
+          style: theme.textTheme.titleSmall,
+        ),
+        const SizedBox(height: intermediateSpacing),
+        const _CheckTableHeader(),
+        const Divider(height: 1.0),
+        _IntentFilterCheck(controller: controller),
+        const Divider(height: 1.0),
+        _PathFormatCheck(controller: controller),
+      ],
     );
   }
 }
@@ -717,7 +642,7 @@ class _IntentFilterCheck extends StatelessWidget {
         .toList()
         .length;
 
-    return _PathCheckExpansionTile(
+    return _CheckExpansionTile(
       checkName: 'IntentFiler',
       status: intentFilterErrorCount > 0
           ? Text(
@@ -750,7 +675,7 @@ class _PathFormatCheck extends StatelessWidget {
     final linkData = controller.selectedLink.value!;
     final theme = Theme.of(context);
 
-    return _PathCheckExpansionTile(
+    return _CheckExpansionTile(
       checkName: 'URL format',
       status: linkData.pathErrors.contains(PathError.pathFormat)
           ? Text(
@@ -765,15 +690,36 @@ class _PathFormatCheck extends StatelessWidget {
   }
 }
 
-class _PathCheckExpansionTile extends StatelessWidget {
-  const _PathCheckExpansionTile({
+class _CheckTableHeader extends StatelessWidget {
+  const _CheckTableHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      tileColor: Theme.of(context).colorScheme.deeplinkTableHeaderColor,
+      title: const Row(
+        children: [
+          SizedBox(width: defaultSpacing),
+          Expanded(child: Text('OS')),
+          Expanded(child: Text('Issue type')),
+          Expanded(child: Text('Status')),
+        ],
+      ),
+    );
+  }
+}
+
+class _CheckExpansionTile extends StatelessWidget {
+  const _CheckExpansionTile({
     required this.checkName,
     required this.status,
     required this.children,
+    this.initiallyExpanded = false,
   });
 
   final String checkName;
   final Widget status;
+  final bool initiallyExpanded;
   final List<Widget> children;
 
   @override
@@ -782,6 +728,7 @@ class _PathCheckExpansionTile extends StatelessWidget {
     return ExpansionTile(
       backgroundColor: theme.colorScheme.alternatingBackgroundColor2,
       collapsedBackgroundColor: theme.colorScheme.alternatingBackgroundColor2,
+      initiallyExpanded: initiallyExpanded,
       title: Row(
         children: [
           const SizedBox(width: defaultSpacing),

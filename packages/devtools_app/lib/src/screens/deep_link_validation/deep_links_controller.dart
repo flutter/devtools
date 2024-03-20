@@ -318,6 +318,7 @@ class DeepLinksController extends DisposableController {
       return false;
     }
     localFingerprint.value = fingerprint;
+    unawaited(_generateAssetLinks());
     return true;
   }
 
