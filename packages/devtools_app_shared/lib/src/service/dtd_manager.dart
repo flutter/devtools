@@ -10,9 +10,9 @@ final _log = Logger('dtd_manager');
 
 /// Manages a connection to the Dart Tooling Daemon.
 class DTDManager {
-  ValueListenable<DTDConnection?> get connection => _connection;
-  final ValueNotifier<DTDConnection?> _connection =
-      ValueNotifier<DTDConnection?>(null);
+  ValueListenable<DartToolingDaemon?> get connection => _connection;
+  final ValueNotifier<DartToolingDaemon?> _connection =
+      ValueNotifier<DartToolingDaemon?>(null);
 
   /// Whether the [DTDManager] is connected to a running instance of the DTD.
   bool get hasConnection => connection.value != null;

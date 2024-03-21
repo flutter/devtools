@@ -148,9 +148,8 @@ class _DomainCheckTable extends StatelessWidget {
             _CheckExpansionTile(
               initiallyExpanded: !fingerprintExists,
               checkName: 'Digital assets link file',
-              status: linkData.domainErrors.isNotEmpty
-                  ? Text('check failed', style: theme.errorTextStyle)
-                  : const _NoIssueText(),
+              status:
+                  _CheckStatusText(hasError: linkData.domainErrors.isNotEmpty),
               children: <Widget>[
                 _Fingerprint(controller: controller),
                 // The following checks are only displayed if a fingerprint exists.
@@ -184,7 +183,6 @@ class _AssetLinksJsonFileIssues extends StatelessWidget {
           (error) => domainAssetLinksJsonFileErrors.contains(error),
         )
         .toList();
-    final theme = Theme.of(context);
     return ExpansionTile(
       controlAffinity: ListTileControlAffinity.leading,
       title: _VerifiedOrErrorText(
@@ -193,29 +191,18 @@ class _AssetLinksJsonFileIssues extends StatelessWidget {
       ),
       children: [
         if (errors.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: largeSpacing),
-            child: RoundedOutlinedBorder(
-              child: Padding(
-                padding: const EdgeInsets.all(largeSpacing),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _FailureDetails(errors: errors, showFixGuide: false),
-                    const Text('Fix guide:'),
-                    const SizedBox(height: denseSpacing),
-                    Text(
-                      'To fix above issues, publish the recommended Digital Asset Links'
-                      ' JSON file below to all of the failed website domains at the following'
-                      ' location: https://${controller.selectedLink.value!.domain}/.well-known/assetlinks.json.',
-                      style: theme.subtleTextStyle,
-                    ),
-                    const SizedBox(height: denseSpacing),
-                    _GenerateAssetLinksPanel(controller: controller),
-                  ],
-                ),
+          _IssuesBorderWrap(
+            children: [
+              _FailureDetails(
+                errors: errors,
+                oneFixGuideForAll:
+                    'To fix above issues, publish the recommended Digital Asset Links'
+                    ' JSON file below to all of the failed website domains at the following'
+                    ' location: https://${controller.selectedLink.value!.domain}/.well-known/assetlinks.json.',
               ),
-            ),
+              const SizedBox(height: denseSpacing),
+              _GenerateAssetLinksPanel(controller: controller),
+            ],
           ),
       ],
     );
@@ -242,14 +229,10 @@ class _HostingIssues extends StatelessWidget {
       ),
       children: [
         for (final error in errors)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: largeSpacing),
-            child: RoundedOutlinedBorder(
-              child: Padding(
-                padding: const EdgeInsets.all(largeSpacing),
-                child: _FailureDetails(errors: [error]),
-              ),
-            ),
+          _IssuesBorderWrap(
+            children: [
+              _FailureDetails(errors: [error]),
+            ],
           ),
       ],
     );
@@ -292,42 +275,33 @@ class _Fingerprint extends StatelessWidget {
         isError: isError,
       ),
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: largeSpacing),
-          child: RoundedOutlinedBorder(
-            child: Padding(
-              padding: const EdgeInsets.all(largeSpacing),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (hasPdcFingerprint && !haslocalFingerprint) ...[
-                    Text(
-                      'Your PDC fingerprint has been detected. If you have local fingerprint, you can enter it below.',
-                      style: theme.subtleTextStyle,
-                    ),
-                    const SizedBox(height: denseSpacing),
-                  ],
-                  if (isError) ...[
-                    const Text(
-                      'Issue: no fingerprint detached locally or on PDC',
-                    ),
-                    const SizedBox(height: denseSpacing),
-                    const Text('Fix guide:'),
-                    const SizedBox(height: denseSpacing),
-                    Text(
-                      'To fix this issue, release your app on Play Developer Console to get a fingerprint. '
-                      'If you are not ready to release your app, enter a local fingerprint below can also allow you'
-                      'to proceed Android domain check.',
-                      style: theme.subtleTextStyle,
-                    ),
-                    const SizedBox(height: denseSpacing),
-                  ],
-                  // User can add local fingerprint no matter PDC fingerprint is detected or not.
-                  _LocalFingerprint(controller: controller),
-                ],
+        _IssuesBorderWrap(
+          children: [
+            if (hasPdcFingerprint && !haslocalFingerprint) ...[
+              Text(
+                'Your PDC fingerprint has been detected. If you have local fingerprint, you can enter it below.',
+                style: theme.subtleTextStyle,
               ),
-            ),
-          ),
+              const SizedBox(height: denseSpacing),
+            ],
+            if (!hasPdcFingerprint && !haslocalFingerprint) ...[
+              const Text(
+                'Issue: no fingerprint detached locally or on PDC',
+              ),
+              const SizedBox(height: denseSpacing),
+              const Text('Fix guide:'),
+              const SizedBox(height: denseSpacing),
+              Text(
+                'To fix this issue, release your app on Play Developer Console to get a fingerprint. '
+                'If you are not ready to release your app, enter a local fingerprint below can also allow you'
+                'to proceed Android domain check.',
+                style: theme.subtleTextStyle,
+              ),
+              const SizedBox(height: denseSpacing),
+            ],
+            // User can add local fingerprint no matter PDC fingerprint is detected or not.
+            _LocalFingerprint(controller: controller),
+          ],
         ),
       ],
     );
@@ -473,11 +447,11 @@ class _GenerateAssetLinksPanel extends StatelessWidget {
 class _FailureDetails extends StatelessWidget {
   const _FailureDetails({
     required this.errors,
-    this.showFixGuide = true,
+    this.oneFixGuideForAll,
   });
 
-  final List<DomainError> errors;
-  final bool showFixGuide;
+  final List<CommonError> errors;
+  final String? oneFixGuideForAll;
 
   @override
   Widget build(BuildContext context) {
@@ -486,13 +460,13 @@ class _FailureDetails extends StatelessWidget {
       children: [
         for (final error in errors) ...[
           const SizedBox(height: densePadding),
-          Text('Issue : ${error.title}'),
+          Text('Issue: ${error.title}'),
           const SizedBox(height: densePadding),
           Text(
             error.explanation,
             style: Theme.of(context).subtleTextStyle,
           ),
-          if (showFixGuide) ...[
+          if (oneFixGuideForAll == null) ...[
             const SizedBox(height: defaultSpacing),
             const Text('Fix guide:'),
             const SizedBox(height: densePadding),
@@ -501,6 +475,15 @@ class _FailureDetails extends StatelessWidget {
               style: Theme.of(context).subtleTextStyle,
             ),
           ],
+        ],
+        if (oneFixGuideForAll != null) ...[
+          const SizedBox(height: defaultSpacing),
+          const Text('Fix guide:'),
+          const SizedBox(height: densePadding),
+          Text(
+            oneFixGuideForAll!,
+            style: Theme.of(context).subtleTextStyle,
+          ),
         ],
       ],
     );
@@ -596,30 +579,31 @@ class _IntentFilterCheck extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final linkData = controller.selectedLink.value!;
-    final theme = Theme.of(context);
-    final intentFilterErrorCount = intentFilterErrors
+    final errors = intentFilterErrors
         .where((error) => linkData.pathErrors.contains(error))
-        .toList()
-        .length;
+        .toList();
 
     return _CheckExpansionTile(
       checkName: 'IntentFiler',
-      status: intentFilterErrorCount > 0
-          ? Text(
-              '$intentFilterErrorCount Check failed',
-              style: theme.errorTextStyle,
-            )
-          : const _NoIssueText(),
+      status: _CheckStatusText(hasError: errors.isNotEmpty),
       children: <Widget>[
-        for (final error in intentFilterErrors)
-          if (linkData.pathErrors.contains(error)) Text(error.description),
-        const _CodeCard(
-          content: '''<intent-filter android:autoVerify="true">
+        if (errors.isNotEmpty)
+          _IssuesBorderWrap(
+            children: [
+              _FailureDetails(
+                errors: errors,
+                oneFixGuideForAll:
+                    'Copy the following code into your Manifest file.',
+              ),
+              const _CodeCard(
+                content: '''<intent-filter android:autoVerify="true">
     <action android:name="android.intent.action.VIEW" />
     <category android:name="android.intent.category.DEFAULT" />
     <category android:name="android.intent.category.BROWSABLE" />
 </intent-filter>''',
-        ),
+              ),
+            ],
+          ),
       ],
     );
   }
@@ -633,18 +617,18 @@ class _PathFormatCheck extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final linkData = controller.selectedLink.value!;
-    final theme = Theme.of(context);
+    final hasError = linkData.pathErrors.contains(PathError.pathFormat);
 
     return _CheckExpansionTile(
       checkName: 'URL format',
-      status: linkData.pathErrors.contains(PathError.pathFormat)
-          ? Text(
-              'Check failed',
-              style: theme.errorTextStyle,
-            )
-          : const _NoIssueText(),
+      status: _CheckStatusText(hasError: hasError),
       children: <Widget>[
-        Text(PathError.pathFormat.description),
+        if (hasError)
+          const _IssuesBorderWrap(
+            children: [
+              _FailureDetails(errors: [PathError.pathFormat]),
+            ],
+          ),
       ],
     );
   }
@@ -704,17 +688,51 @@ class _CheckExpansionTile extends StatelessWidget {
   }
 }
 
-class _NoIssueText extends StatelessWidget {
-  const _NoIssueText();
+class _IssuesBorderWrap extends StatelessWidget {
+  const _IssuesBorderWrap({required this.children});
+
+  final List<Widget> children;
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      'No issues found',
-      style: TextStyle(
-        color: Theme.of(context).colorScheme.green,
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: largeSpacing,
+        vertical: densePadding,
+      ),
+      child: RoundedOutlinedBorder(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: largeSpacing,
+            vertical: densePadding,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: children,
+          ),
+        ),
       ),
     );
+  }
+}
+
+class _CheckStatusText extends StatelessWidget {
+  const _CheckStatusText({required this.hasError});
+
+  final bool hasError;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return hasError
+        ? Text(
+            'Check failed',
+            style: theme.errorTextStyle,
+          )
+        : Text(
+            'No issues found',
+            style: TextStyle(color: theme.colorScheme.green),
+          );
   }
 }
 
