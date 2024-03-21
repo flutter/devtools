@@ -127,12 +127,9 @@ class RetainingPathTable extends StatelessWidget {
 
   @visibleForTesting
   static void resetSingletons() {
-    debugDataCalculationCount = 0;
     debugDataCalculationMicros = 0;
   }
 
-  @visibleForTesting
-  static int debugDataCalculationCount = 0;
   @visibleForTesting
   static int debugDataCalculationMicros = 0;
 
@@ -140,14 +137,12 @@ class RetainingPathTable extends StatelessWidget {
     Stopwatch? stopwatch;
     assert(() {
       stopwatch = Stopwatch()..start();
-      debugDataCalculationCount++;
       return true;
     }());
     final result =
         classData.byPath.keys.map((path) => PathData(classData, path)).toList();
     assert(() {
       debugDataCalculationMicros = stopwatch!.elapsedMicroseconds;
-      debugDataCalculationCount++;
       return true;
     }());
     return result;

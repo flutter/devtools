@@ -64,7 +64,6 @@ void main() {
           await tester.tap(find.text('TheData'));
           await tester.pumpAndSettle();
         });
-        expect(RetainingPathTable.debugDataCalculationCount, isPositive);
         expect(RetainingPathTable.debugDataCalculationMicros, isPositive);
         expect(RetainingPathTable.debugDataCalculationMicros, lessThan(2000));
       },
