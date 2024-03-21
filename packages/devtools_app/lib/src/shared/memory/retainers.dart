@@ -45,7 +45,7 @@ ShortestRetainersResult findShortestRetainers({
   assert(refs(_sentinelIndex).isEmpty);
   assert(
     shallowSize(_sentinelIndex) <= 0,
-    'Sentinel should have size 0, but size is ${shallowSize(_sentinelIndex)}.',
+    'Sentinel should have size 0 or -1 (not defined), but size is ${shallowSize(_sentinelIndex)}.',
   );
   assert(
     rootIndex != _sentinelIndex,

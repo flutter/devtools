@@ -73,11 +73,10 @@ class PathFromRoot {
 
     final path = <HeapClassName>[];
 
-    while (true) {
+    while (nextIndex != heapRootIndex) {
       final className = objectClass(nextIndex);
       path.add(className);
       nextIndex = shortestRetainers[nextIndex];
-      if (nextIndex == heapRootIndex) break;
     }
 
     return PathFromRoot.fromPath(path);
