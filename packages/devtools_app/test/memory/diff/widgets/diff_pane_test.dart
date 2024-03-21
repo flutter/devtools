@@ -34,7 +34,7 @@ void main() {
 
     setUp(() async {
       scene = MemoryDefaultScene();
-      await scene.setUp();
+      await scene.setUp(heapProviders: MemoryDefaultSceneHeaps.toTestDiff);
     });
 
     tearDown(() {

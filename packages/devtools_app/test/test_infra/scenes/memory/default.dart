@@ -6,7 +6,6 @@ import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/controller/diff_pane_controller.dart';
 import 'package:devtools_app/src/screens/memory/panes/profile/profile_pane_controller.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/class_filter.dart';
-import 'package:devtools_app/src/shared/memory/heap_graph_loader.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
@@ -23,6 +22,48 @@ import '../../../test_infra/test_data/memory_allocation.dart';
 import '../../test_data/memory/heap/heap_data.dart';
 import '../../test_data/memory/heap/heap_graph_fakes.dart';
 
+// ignore: avoid_classes_with_only_static_members, enum like classes are ok
+abstract class MemoryDefaultSceneHeaps {
+  /// Many instances of the same class with different long paths.
+  ///
+  /// If sorted by retaining path this class will be the second from the top.
+  /// It is needed to measure if selection of this class will cause UI to jank.
+  static Future<HeapSnapshotGraphFake> manyPaths() async {
+    const pathLen = 100;
+    const pathCount = 100;
+    final result = HeapSnapshotGraphFake();
+
+    for (int i = 0; i < pathCount; i++) {
+      final retainers = List<String>.generate(pathLen, (_) => 'Retainer$i');
+      final index = result.addChain([...retainers, 'TheData']);
+      result.objects[index].shallowSize = 10;
+    }
+
+    final heavyClassIndex = result.addChain(['HeavyClass']);
+    result.objects[heavyClassIndex].shallowSize = 10000;
+    return result;
+  }
+
+  static final List<HeapProvider> toTestDiff = [
+    {'A': 1, 'B': 2, 'C': 1},
+    {'A': 1, 'B': 2},
+    {'B': 1, 'C': 2, 'D': 3},
+    {'B': 1, 'C': 2, 'D': 3},
+  ]
+      .map((e) => () async => HeapSnapshotGraphFake()..addClassInstances(e))
+      .toList();
+
+  static final golden =
+      // ignore: avoid-redundant-async, match signature
+      goldenHeapTests.map((e) => () async => e.loadHeap()).toList();
+
+  static List<HeapProvider> get all => [
+        ...toTestDiff,
+        manyPaths,
+        ...golden,
+      ];
+}
+
 /// To run:
 /// flutter run -t test/test_infra/scenes/memory/default.stager_app.g.dart -d macos
 class MemoryDefaultScene extends Scene {
@@ -38,7 +79,17 @@ class MemoryDefaultScene extends Scene {
   }
 
   @override
-  Future<void> setUp({ClassList? classList}) async {
+
+  /// Sets up the scene.
+  ///
+  /// [classList] will be returned by VmService.getClassList.
+  /// [heapProviders] will be used to for heap snapshotting.
+  Future<void> setUp({
+    ClassList? classList,
+    List<HeapProvider>? heapProviders,
+  }) async {
+    heapProviders = heapProviders ?? MemoryDefaultSceneHeaps.all;
+
     setGlobal(
       DevToolsEnvironmentParameters,
       ExternalDevToolsEnvironmentParameters(),
@@ -82,8 +133,9 @@ class MemoryDefaultScene extends Scene {
       only: '',
     );
 
-    final diffController = DiffPaneController(createHeapLoader())
-      ..derived.applyFilter(showAllFilter);
+    final diffController =
+        DiffPaneController(HeapGraphLoaderProvided(heapProviders))
+          ..derived.applyFilter(showAllFilter);
 
     final profileController = ProfilePaneController()..setFilter(showAllFilter);
 
@@ -98,47 +150,6 @@ class MemoryDefaultScene extends Scene {
 
   @override
   String get title => '$MemoryDefaultScene';
-
-  HeapGraphLoader createHeapLoader() {
-    final simpleHeaps = [
-      {'A': 1, 'B': 2, 'C': 1},
-      {'A': 1, 'B': 2},
-      {'B': 1, 'C': 2, 'D': 3},
-      {'B': 1, 'C': 2, 'D': 3},
-    ]
-        .map((e) => () async => HeapSnapshotGraphFake()..addClassInstances(e))
-        .toList();
-
-    /// Many instances of the same class with different long paths.
-    ///
-    /// If sorted by retaining path this class will be the second from the top.
-    /// It is needed to measure if selection of this class will cause UI to jank.
-    Future<HeapSnapshotGraphFake> manyPaths() async {
-      const pathLen = 3;
-      const pathCount = 7;
-      final result = HeapSnapshotGraphFake();
-
-      for (int i = 0; i < pathCount; i++) {
-        final retainers = List<String>.generate(pathLen, (_) => 'Retainer$i');
-        final index = result.addChain([...retainers, 'TheData']);
-        result.objects[index].shallowSize = 10;
-      }
-
-      final heavyClassIndex = result.addChain(['HeavyClass']);
-      result.objects[heavyClassIndex].shallowSize = 10000;
-      return result;
-    }
-
-    final goldenHeaps =
-        // ignore: avoid-redundant-async, match signature
-        goldenHeapTests.map((e) => () async => e.loadHeap()).toList();
-
-    return HeapGraphLoaderProvided([
-      //...simpleHeaps,
-      manyPaths,
-      ...goldenHeaps,
-    ]);
-  }
 
   void tearDown() {}
 }
