@@ -5,7 +5,6 @@
 import 'package:devtools_app/src/shared/memory/class_name.dart';
 import 'package:devtools_app/src/shared/memory/classes.dart';
 import 'package:devtools_app/src/shared/memory/heap_data.dart';
-import 'package:devtools_app/src/shared/memory/retaining_path.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../../test_infra/test_data/memory/heap/heap_graph_fakes.dart';

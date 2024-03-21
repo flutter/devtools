@@ -25,6 +25,14 @@ Future<void> pumpScene(WidgetTester tester, MemoryDefaultScene scene) async {
   await tester.pumpAndSettle();
 }
 
+Future<void> takeSnapshot(WidgetTester tester, MemoryDefaultScene scene) async {
+  final snapshots = scene.controller.controllers.diff.core.snapshots;
+  final length = snapshots.value.length;
+  await tester.tap(find.byIcon(Icons.fiber_manual_record).first);
+  await tester.pumpAndSettle();
+  expect(snapshots.value.length, equals(length + 1));
+}
+
 // Set a wide enough screen width that we do not run into overflow.
 const windowSize = Size(2225.0, 1000.0);
 
@@ -38,10 +46,19 @@ void main() {
     scene.tearDown();
   });
 
-  group('Retaining path', () {
+  group('Many retaining paths', () {
     setUp(() async {
       await scene.setUp(heapProviders: [MemoryDefaultSceneHeaps.manyPaths]);
     });
+
+    testWidgetsWithWindowSize(
+      'do not jank UI',
+      windowSize,
+      (WidgetTester tester) async {
+        await pumpScene(tester, scene);
+        await takeSnapshot(tester, scene);
+      },
+    );
   });
 
   group('Diff pane', () {
@@ -68,8 +85,7 @@ void main() {
 
         // Record three snapshots.
         for (var i in Iterable<int>.generate(3)) {
-          await tester.tap(find.byIcon(Icons.fiber_manual_record).first);
-          await tester.pumpAndSettle();
+          await takeSnapshot(tester, scene);
           expect(find.text('selected-isolate-${i + 1}'), findsOneWidget);
         }
 
@@ -106,8 +122,7 @@ void main() {
         expect(snapshots.value.length, equals(1 + 3 - 1));
 
         // Record snapshot
-        await tester.tap(find.byIcon(Icons.fiber_manual_record));
-        await tester.pumpAndSettle();
+        await takeSnapshot(tester, scene);
         await expectLater(
           find.byType(DiffPane),
           matchesDevToolsGolden(

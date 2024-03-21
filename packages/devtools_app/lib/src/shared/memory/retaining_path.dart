@@ -100,7 +100,7 @@ class PathFromRoot {
   }
 
   @visibleForTesting
-  static resetSingletons() {
+  static void resetSingletons() {
     _instances = null;
     debugUsage = DebugRetainingPathUsage();
   }
