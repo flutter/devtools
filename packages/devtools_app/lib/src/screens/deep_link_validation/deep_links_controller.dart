@@ -303,7 +303,8 @@ class DeepLinksController extends DisposableController {
 
   /// These are link datas actually displayed in the data table after filtering by displayOptions.
   final displayLinkDatasNotifier = ValueNotifier<ValidatedLinkDatas>(
-      ValidatedLinkDatas(all: [], byDomain: [], byPath: []));
+    ValidatedLinkDatas(all: [], byDomain: [], byPath: []),
+  );
 
   final generatedAssetLinksForSelectedLink =
       ValueNotifier<GenerateAssetLinksResult?>(null);
