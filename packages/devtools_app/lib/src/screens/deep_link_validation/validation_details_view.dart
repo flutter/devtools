@@ -132,7 +132,6 @@ class _DomainCheckTable extends StatelessWidget {
   Widget build(BuildContext context) {
     final linkData = controller.selectedLink.value!;
     final theme = Theme.of(context);
-
     return ValueListenableBuilder<String?>(
       valueListenable: controller.localFingerprint,
       builder: (context, localFingerprint, _) {
