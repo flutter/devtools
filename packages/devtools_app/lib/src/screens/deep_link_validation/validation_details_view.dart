@@ -263,7 +263,7 @@ class _Fingerprint extends StatelessWidget {
     if (!hasPdcFingerprint && haslocalFingerprint) {
       title = 'Local fingerprint detected';
     }
-    if (!hasPdcFingerprint && !haslocalFingerprint) {
+    if (isError) {
       title = 'Can\'t proceed check due to no fingerprint detected';
     }
 
@@ -284,7 +284,7 @@ class _Fingerprint extends StatelessWidget {
               ),
               const SizedBox(height: denseSpacing),
             ],
-            if (!hasPdcFingerprint && !haslocalFingerprint) ...[
+            if (isError) ...[
               const Text(
                 'Issue: no fingerprint detached locally or on PDC',
               ),
