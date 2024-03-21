@@ -1,5 +1,6 @@
 ## 0.0.15-wip
 * Bump `devtools_app_shared` to ^0.1.0
+* Update readme to use `pub add` instead of explicit package version.
 
 ## 0.0.14
 * Add a global `dtdManager` for interacting with the Dart Tooling Daemon.
