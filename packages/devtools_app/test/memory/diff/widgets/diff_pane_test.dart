@@ -65,8 +65,8 @@ void main() {
           await tester.pumpAndSettle();
         });
         expect(RetainingPathTable.debugDataCalculationCount, isPositive);
-        expect(RetainingPathTable.debugDataCalculationMcs, isPositive);
-        expect(RetainingPathTable.debugDataCalculationMcs, lessThan(2000));
+        expect(RetainingPathTable.debugDataCalculationMicros, isPositive);
+        expect(RetainingPathTable.debugDataCalculationMicros, lessThan(2000));
       },
     );
   });
