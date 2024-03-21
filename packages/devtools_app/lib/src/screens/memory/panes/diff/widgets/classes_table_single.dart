@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/globals.dart';
+import '../../../../../shared/primitives/byte_utils.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/table/table_data.dart';
@@ -125,11 +126,8 @@ class _ShallowSizeColumn extends ColumnData<SingleClassStats> {
   bool get numeric => true;
 
   @override
-  String getDisplayValue(SingleClassStats classStats) => prettyPrintBytes(
-        getValue(classStats),
-        includeUnit: true,
-        kbFractionDigits: 1,
-      )!;
+  String getDisplayValue(SingleClassStats classStats) =>
+      prettyPrintBytes(getValue(classStats), includeUnit: true)!;
 }
 
 class _RetainedSizeColumn extends ColumnData<SingleClassStats> {

@@ -1,3 +1,6 @@
+# 8.1.0
+* Update `package:dtd` to `2.0.0`
+
 # 8.0.1
 * **Breaking change:** rename `ServerApi.getCompleted` to `ServerApi.success` and make the
 `value` parameter optional.
