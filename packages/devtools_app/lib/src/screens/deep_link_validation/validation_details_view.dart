@@ -456,7 +456,7 @@ class _FailureDetails extends StatelessWidget {
       children: [
         for (final error in errors) ...[
           const SizedBox(height: densePadding),
-          Text('Issue : ${error.title}'),
+          Text('Issue: ${error.title}'),
           const SizedBox(height: densePadding),
           Text(
             error.explanation,
@@ -698,9 +698,12 @@ class _IssuesBorderWrap extends StatelessWidget {
       ),
       child: RoundedOutlinedBorder(
         child: Padding(
-          padding: const EdgeInsets.all(largeSpacing),
+          padding: const EdgeInsets.symmetric(
+            horizontal: largeSpacing,
+            vertical: densePadding,
+          ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: children,
           ),
         ),
