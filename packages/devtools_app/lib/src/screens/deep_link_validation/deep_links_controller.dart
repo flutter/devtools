@@ -308,13 +308,13 @@ class DeepLinksController extends DisposableController {
 
   bool addLocalFingerprint(String fingerprint) {
     // A valid fingerprint consists of 32 pairs of hexadecimal digits separated by colons.
-    bool isValidFingerpint(String input) {
+    bool isValidFingerprint(String input) {
       final RegExp pattern =
           RegExp(r'^([0-9a-f]{2}:){31}[0-9a-f]{2}$', caseSensitive: false);
       return pattern.hasMatch(input);
     }
 
-    if (!isValidFingerpint(fingerprint)) {
+    if (!isValidFingerprint(fingerprint)) {
       return false;
     }
     if (localFingerprint.value != fingerprint) {
