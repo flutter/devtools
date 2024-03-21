@@ -9,7 +9,7 @@ import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/memory/simple_items.dart';
-import '../../../../../shared/primitives/utils.dart';
+import '../../../../../shared/primitives/byte_utils.dart';
 import '../../../shared/primitives/simple_elements.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/item_controller.dart';
@@ -140,7 +140,8 @@ class _SnapshotSizeView extends StatelessWidget {
     return Text(
       items.entries
           .map<String>(
-            (e) => '${e.key}: ${prettyPrintBytes(e.value, includeUnit: true)}',
+            (e) => '${e.key}: '
+                '${prettyPrintBytes(e.value, includeUnit: true, kbFractionDigits: 0)}',
           )
           // TODO(polina-c): consider using vertical divider instead of text.
           .join(' | '),

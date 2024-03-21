@@ -10,6 +10,7 @@ import '../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
+import '../../../../shared/primitives/byte_utils.dart';
 import '../../../../shared/primitives/simple_items.dart';
 import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/table/table.dart';
@@ -228,12 +229,7 @@ class _FieldSizeColumn extends ColumnData<ProfileRecord> {
 
   @override
   String getDisplayValue(ProfileRecord dataObject) =>
-      prettyPrintBytes(
-        getValue(dataObject),
-        includeUnit: true,
-        kbFractionDigits: 1,
-      ) ??
-      '';
+      prettyPrintBytes(getValue(dataObject), includeUnit: true) ?? '';
 
   @override
   String getTooltip(ProfileRecord dataObject) => '${getValue(dataObject)} B';
