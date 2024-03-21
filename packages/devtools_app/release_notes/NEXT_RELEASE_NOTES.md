@@ -12,7 +12,6 @@ To learn more about DevTools, check out the
 
 * Fixed an issue preventing DevTools from connecting to Flutter apps that are not
 launched from Flutter Tools. - [#6848](https://github.com/flutter/devtools/issues/6848)
-* Update `package:dtd` to `2.0.0` - [#7405](https://github.com/flutter/devtools/pull/7405)
 
 ## Inspector updates
 
