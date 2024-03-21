@@ -366,23 +366,23 @@ class _AllDeepLinkDataTable extends StatelessWidget {
           isScrollable: true,
         ),
         Expanded(
-          child: ValueListenableBuilder<List<LinkData>?>(
+          child: ValueListenableBuilder<ValidatedLinkDatas>(
             valueListenable: controller.displayLinkDatasNotifier,
             builder: (context, linkDatas, _) => TabBarView(
               children: [
                 _DataTable(
                   viewType: TableViewType.domainView,
-                  linkDatas: controller.linkDataByDomainNotifier.value,
+                  linkDatas: controller.displayLinkDatasNotifier.value.byDomain,
                   controller: controller,
                 ),
                 _DataTable(
                   viewType: TableViewType.pathView,
-                  linkDatas: controller.linkDataByPathNotifier.value,
+                  linkDatas: controller.displayLinkDatasNotifier.value.byPath,
                   controller: controller,
                 ),
                 _DataTable(
                   viewType: TableViewType.singleUrlView,
-                  linkDatas: linkDatas!,
+                  linkDatas: controller.displayLinkDatasNotifier.value.all,
                   controller: controller,
                 ),
               ],
@@ -425,7 +425,7 @@ class _NotificationCardSection extends StatelessWidget {
                     // Switch to the domain view. Select the first link with domain error and show the split screen.
                     DefaultTabController.of(context).index = 0;
                     controller.selectLink(
-                      controller.linkDataByDomainNotifier.value
+                      controller.displayLinkDatasNotifier.value.byDomain
                           .where((element) => element.domainErrors.isNotEmpty)
                           .first,
                     );
@@ -450,7 +450,7 @@ class _NotificationCardSection extends StatelessWidget {
                     // Switch to the path view. Select the first link with path error and show the split screen.
                     DefaultTabController.of(context).index = 1;
                     controller.selectLink(
-                      controller.linkDataByPathNotifier.value
+                      controller.displayLinkDatasNotifier.value.byPath
                           .where((element) => element.pathErrors.isNotEmpty)
                           .first,
                     );

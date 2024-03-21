@@ -16,6 +16,7 @@ import 'deep_links_model.dart';
 import 'deep_links_services.dart';
 
 typedef _DomainAndPath = ({String domain, String path});
+
 const domainAssetLinksJsonFileErrors = {
   DomainError.existence,
   DomainError.appIdentifier,
@@ -151,9 +152,9 @@ class DeepLinksController extends DisposableController {
       _androidAppLinks[selectedVariantIndex.value]?.applicationId ?? '';
 
   @visibleForTesting
-  List<LinkData> get getLinkDatasByPath {
+  List<LinkData> get linkDatasByPath {
     final linkDatasByPath = <String, LinkData>{};
-    for (var linkData in allValidatedLinkDatas) {
+    for (var linkData in validatedLinkDatas.all) {
       final previousRecord = linkDatasByPath[linkData.path];
       linkDatasByPath[linkData.path] = LinkData(
         domain: linkData.domain,
@@ -178,10 +179,10 @@ class DeepLinksController extends DisposableController {
   }
 
   @visibleForTesting
-  List<LinkData> get getLinkDatasByDomain {
+  List<LinkData> get linkDatasByDomain {
     final linkDatasByDomain = <String, LinkData>{};
 
-    for (var linkData in allValidatedLinkDatas) {
+    for (var linkData in validatedLinkDatas.all) {
       final previousRecord = linkDatasByDomain[linkData.domain];
       linkDatasByDomain[linkData.domain] = LinkData(
         domain: linkData.domain,
@@ -297,14 +298,12 @@ class DeepLinksController extends DisposableController {
   final pagePhase = ValueNotifier<PagePhase>(PagePhase.emptyState);
 
   /// These are all link datas before applying displayOptions.
-  List<LinkData> allValidatedLinkDatas = <LinkData>[];
-  List<LinkData> allValidatedLinkDatasbyDomain = <LinkData>[];
-  List<LinkData> allValidatedLinkDatasbyPath = <LinkData>[];
+  var validatedLinkDatas =
+      ValidatedLinkDatas(all: [], byDomain: [], byPath: []);
 
   /// These are link datas actually displayed in the data table after filtering by displayOptions.
-  final displayLinkDatasNotifier = ValueNotifier<List<LinkData>>(<LinkData>[]);
-  final linkDataByDomainNotifier = ValueNotifier<List<LinkData>>(<LinkData>[]);
-  final linkDataByPathNotifier = ValueNotifier<List<LinkData>>(<LinkData>[]);
+  final displayLinkDatasNotifier = ValueNotifier<ValidatedLinkDatas>(
+      ValidatedLinkDatas(all: [], byDomain: [], byPath: []));
 
   final generatedAssetLinksForSelectedLink =
       ValueNotifier<GenerateAssetLinksResult?>(null);
@@ -416,14 +415,16 @@ class DeepLinksController extends DisposableController {
       return;
     }
 
-    allValidatedLinkDatas = linkdata;
-    allValidatedLinkDatasbyDomain = getLinkDatasByDomain;
-    allValidatedLinkDatasbyPath = getLinkDatasByPath;
+    validatedLinkDatas = ValidatedLinkDatas(
+      all: linkdata,
+      byDomain: linkDatasByDomain,
+      byPath: linkDatasByPath,
+    );
     displayOptionsNotifier.value = displayOptionsNotifier.value.copyWith(
-      domainErrorCount: allValidatedLinkDatasbyDomain
+      domainErrorCount: validatedLinkDatas.byDomain
           .where((element) => element.domainErrors.isNotEmpty)
           .length,
-      pathErrorCount: allValidatedLinkDatasbyPath
+      pathErrorCount: validatedLinkDatas.byDomain
           .where((element) => element.pathErrors.isNotEmpty)
           .length,
     );
@@ -476,11 +477,11 @@ class DeepLinksController extends DisposableController {
   }
 
   void applyFilters() {
-    displayLinkDatasNotifier.value = getFilterredLinks(allValidatedLinkDatas);
-    linkDataByDomainNotifier.value =
-        getFilterredLinks(allValidatedLinkDatasbyDomain);
-    linkDataByPathNotifier.value =
-        getFilterredLinks(allValidatedLinkDatasbyPath);
+    displayLinkDatasNotifier.value = ValidatedLinkDatas(
+      all: getFilterredLinks(validatedLinkDatas.all),
+      byDomain: getFilterredLinks(validatedLinkDatas.byDomain),
+      byPath: getFilterredLinks(validatedLinkDatas.byPath),
+    );
   }
 
   @visibleForTesting
