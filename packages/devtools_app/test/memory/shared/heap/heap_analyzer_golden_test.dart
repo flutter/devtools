@@ -4,6 +4,7 @@
 
 import 'package:devtools_app/src/shared/memory/class_name.dart';
 import 'package:devtools_app/src/shared/memory/heap_data.dart';
+import 'package:devtools_app/src/shared/memory/retaining_path.dart';
 import 'package:devtools_app/src/shared/memory/simple_items.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -16,7 +17,16 @@ void main() {
       late int appClassId;
 
       setUp(() async {
+        PathFromRoot.resetSingletons();
+
         heap = await HeapData.calculate(await t.loadHeap(), DateTime.now());
+        expect(PathFromRoot.debugUsage.stored, isPositive);
+        expect(
+          PathFromRoot.debugUsage.constructed,
+          greaterThan(PathFromRoot.debugUsage.stored),
+        );
+        expect(PathFromRoot.debugUsage.stringified, 0);
+
         appClassId = findClassId(heap, t.appClassName);
       });
 

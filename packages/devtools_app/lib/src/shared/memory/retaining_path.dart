@@ -44,7 +44,7 @@ class DebugRetainingPathUsage {
 class PathFromRoot {
   PathFromRoot._(this.path)
       : assert(() {
-          usage.constructed++;
+          debugUsage.constructed++;
           return true;
         }()),
         hashCode = path.isEmpty ? _hashOfEmptyPath : Object.hashAll(path),
@@ -92,11 +92,17 @@ class PathFromRoot {
 
     instances.add(newInstance);
     assert(() {
-      usage.stored++;
-      assert(instances.length == usage.stored);
+      debugUsage.stored++;
+      assert(instances.length == debugUsage.stored);
       return true;
     }());
     return newInstance;
+  }
+
+  @visibleForTesting
+  static resetSingletons() {
+    _instances = null;
+    debugUsage = DebugRetainingPathUsage();
   }
 
   @visibleForTesting
@@ -104,7 +110,7 @@ class PathFromRoot {
   static Set<PathFromRoot>? _instances;
 
   @visibleForTesting
-  static DebugRetainingPathUsage usage = DebugRetainingPathUsage();
+  static DebugRetainingPathUsage debugUsage = DebugRetainingPathUsage();
 
   static PathFromRoot empty = const PathFromRoot._empty();
 
@@ -199,7 +205,7 @@ class PathFromRoot {
     required bool inverted,
   }) {
     assert(() {
-      usage.stringified++;
+      debugUsage.stringified++;
       return true;
     }());
     // Trailing separator is here to show object is referenced by root.
