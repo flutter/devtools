@@ -22,6 +22,9 @@ import '../../../test_infra/test_data/memory_allocation.dart';
 import '../../test_data/memory/heap/heap_data.dart';
 import '../../test_data/memory/heap/heap_graph_fakes.dart';
 
+// To run:
+// flutter run -t test/test_infra/scenes/memory/default.stager_app.g.dart -d macos
+
 // ignore: avoid_classes_with_only_static_members, enum like classes are ok
 abstract class MemoryDefaultSceneHeaps {
   /// Many instances of the same class with different long paths.
@@ -64,8 +67,6 @@ abstract class MemoryDefaultSceneHeaps {
       ];
 }
 
-/// To run:
-/// flutter run -t test/test_infra/scenes/memory/default.stager_app.g.dart -d macos
 class MemoryDefaultScene extends Scene {
   late MemoryController controller;
   late FakeServiceConnectionManager fakeServiceConnection;

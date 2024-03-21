@@ -126,6 +126,12 @@ class RetainingPathTable extends StatelessWidget {
   final ClassData classData;
 
   @visibleForTesting
+  static void resetSingletons() {
+    debugDataCalculationCount = 0;
+    debugDataCalculationMcs = 0;
+  }
+
+  @visibleForTesting
   static int debugDataCalculationCount = 0;
   @visibleForTesting
   static int debugDataCalculationMcs = 0;

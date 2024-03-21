@@ -5,6 +5,7 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/memory/framework/connected/memory_tabs.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/diff_pane.dart';
+import 'package:devtools_app/src/screens/memory/panes/diff/widgets/class_details/paths.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/widgets/snapshot_list.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
@@ -57,6 +58,15 @@ void main() {
       (WidgetTester tester) async {
         await pumpScene(tester, scene);
         await takeSnapshot(tester, scene);
+
+        RetainingPathTable.resetSingletons();
+        await tester.runAsync(() async {
+          await tester.tap(find.text('TheData'));
+          await tester.pumpAndSettle();
+        });
+        expect(RetainingPathTable.debugDataCalculationCount, isPositive);
+        expect(RetainingPathTable.debugDataCalculationMcs, isPositive);
+        expect(RetainingPathTable.debugDataCalculationMcs, lessThan(2000));
       },
     );
   });
