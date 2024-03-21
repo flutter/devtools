@@ -2,16 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:devtools_app_shared/ui.dart';
+import 'package:dtd/dtd.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
-import '../../shared/directory_picker.dart';
+import '../../shared/globals.dart';
 import '../../shared/server/server.dart' as server;
 import '../../shared/utils.dart';
 import 'deep_links_controller.dart';
 import 'deep_links_model.dart';
+import '../../shared/directory_picker.dart';
 
 const _kLinearProgressIndicatorWidth = 280.0;
 
@@ -27,6 +31,21 @@ class _SelectProjectViewState extends State<SelectProjectView>
     with ProvidedControllerMixin<DeepLinksController, SelectProjectView> {
   bool _retrievingFlutterProject = false;
 
+  IDEWorkspaceRoots? workspaceRoots;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_initWorkspaceRoots());
+  }
+
+  Future<void> _initWorkspaceRoots() async {
+    final roots = await dtdManager.workspaceRoots();
+    setState(() {
+      workspaceRoots = roots;
+    });
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -35,12 +54,12 @@ class _SelectProjectViewState extends State<SelectProjectView>
       final packageDirectoryForMainIsolate =
           await controller.packageDirectoryForMainIsolate();
       if (packageDirectoryForMainIsolate != null) {
-        _handleDirectoryPicked(packageDirectoryForMainIsolate);
+        _handleValidateProject(packageDirectoryForMainIsolate);
       }
     });
   }
 
-  void _handleDirectoryPicked(String directory) async {
+  void _handleValidateProject(String directory) async {
     setState(() {
       _retrievingFlutterProject = true;
     });
@@ -91,44 +110,67 @@ class _SelectProjectViewState extends State<SelectProjectView>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     if (_retrievingFlutterProject) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Project loading...',
-              style: theme.regularTextStyle,
-            ),
-            Container(
-              width: _kLinearProgressIndicatorWidth,
-              padding: const EdgeInsets.symmetric(vertical: densePadding),
-              child: const LinearProgressIndicator(),
-            ),
-            Text(
-              'The first load will take longer than usual',
-              style: theme.subtleTextStyle,
-            ),
-          ],
-        ),
-      );
+      return const _LoadingProjectView();
     }
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Padding(
-          padding: const EdgeInsets.all(defaultSpacing),
+          padding: const EdgeInsets.all(extraLargeSpacing),
           child: Text(
-            'Pick a local flutter project to check the status of all deep links.',
+            'Select a local flutter project to check the status of all deep links.',
             textAlign: TextAlign.center,
-            style: theme.textTheme.titleSmall,
+            style: Theme.of(context).textTheme.titleSmall,
           ),
         ),
-        DirectoryPicker(
-          onDirectoryPicked: _handleDirectoryPicked,
+        if (workspaceRoots != null &&
+            workspaceRoots!.ideWorkspaceRoots.isNotEmpty) ...[
+          ProjectRootsDropdown(
+            workspaceRoots: workspaceRoots!,
+            onValidatePressed: _handleValidateProject,
+          ),
+          const SizedBox(height: largeSpacing),
+          Text(
+            'Don\'t see your project in the list? Try entering your project below.',
+            style: theme.subtleTextStyle,
+          ),
+          const SizedBox(height: extraLargeSpacing * 2),
+        ],
+        ProjectRootTextField(
+          onValidatePressed: _handleValidateProject,
           enabled: !_retrievingFlutterProject,
         ),
       ],
+    );
+  }
+}
+
+class _LoadingProjectView extends StatelessWidget {
+  const _LoadingProjectView();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Project loading...',
+            style: theme.regularTextStyle,
+          ),
+          Container(
+            width: _kLinearProgressIndicatorWidth,
+            padding: const EdgeInsets.symmetric(vertical: densePadding),
+            child: const LinearProgressIndicator(),
+          ),
+          Text(
+            'The first load will take longer than usual',
+            style: theme.subtleTextStyle,
+          ),
+        ],
+      ),
     );
   }
 }
