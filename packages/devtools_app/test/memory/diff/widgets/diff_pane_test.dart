@@ -14,31 +14,39 @@ import '../../../test_infra/matchers/matchers.dart';
 import '../../../test_infra/scenes/memory/default.dart';
 import '../../../test_infra/scenes/scene_test_extensions.dart';
 
+Future<void> pumpScene(WidgetTester tester, MemoryDefaultScene scene) async {
+  await tester.pumpScene(scene);
+  // Delay to ensure the memory profiler has collected data.
+  await tester.pumpAndSettle(const Duration(seconds: 1));
+  expect(find.byType(MemoryBody), findsOneWidget);
+  await tester.tap(
+    find.byKey(MemoryScreenKeys.diffTab),
+  );
+  await tester.pumpAndSettle();
+}
+
+// Set a wide enough screen width that we do not run into overflow.
+const windowSize = Size(2225.0, 1000.0);
+
 void main() {
-  group('Diff pane', () {
-    late MemoryDefaultScene scene;
+  late MemoryDefaultScene scene;
+  setUp(() {
+    scene = MemoryDefaultScene();
+  });
 
-    Future<void> pumpScene(WidgetTester tester) async {
-      await tester.pumpScene(scene);
-      // Delay to ensure the memory profiler has collected data.
-      await tester.pumpAndSettle(const Duration(seconds: 1));
-      expect(find.byType(MemoryBody), findsOneWidget);
-      await tester.tap(
-        find.byKey(MemoryScreenKeys.diffTab),
-      );
-      await tester.pumpAndSettle();
-    }
+  tearDown(() {
+    scene.tearDown();
+  });
 
-    // Set a wide enough screen width that we do not run into overflow.
-    const windowSize = Size(2225.0, 1000.0);
-
+  group('Retaining path', () {
     setUp(() async {
-      scene = MemoryDefaultScene();
-      await scene.setUp(heapProviders: MemoryDefaultSceneHeaps.toTestDiff);
+      await scene.setUp(heapProviders: [MemoryDefaultSceneHeaps.manyPaths]);
     });
+  });
 
-    tearDown(() {
-      scene.tearDown();
+  group('Diff pane', () {
+    setUp(() async {
+      await scene.setUp(heapProviders: MemoryDefaultSceneHeaps.forDiffTesting);
     });
 
     testWidgetsWithWindowSize(
@@ -48,7 +56,7 @@ void main() {
         final snapshots = scene.controller.controllers.diff.core.snapshots;
         // Check the list contains only documentation item.
         expect(snapshots.value.length, equals(1));
-        await pumpScene(tester);
+        await pumpScene(tester, scene);
 
         // Check initial golden.
         await expectLater(

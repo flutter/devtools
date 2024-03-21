@@ -28,7 +28,7 @@ abstract class MemoryDefaultSceneHeaps {
   ///
   /// If sorted by retaining path this class will be the second from the top.
   /// It is needed to measure if selection of this class will cause UI to jank.
-  static Future<HeapSnapshotGraphFake> manyPaths() async {
+  static Future<HeapSnapshotGraph> manyPaths() async {
     const pathLen = 100;
     const pathCount = 100;
     final result = HeapSnapshotGraphFake();
@@ -44,7 +44,7 @@ abstract class MemoryDefaultSceneHeaps {
     return result;
   }
 
-  static final List<HeapProvider> toTestDiff = [
+  static final List<HeapProvider> forDiffTesting = [
     {'A': 1, 'B': 2, 'C': 1},
     {'A': 1, 'B': 2},
     {'B': 1, 'C': 2, 'D': 3},
@@ -58,7 +58,7 @@ abstract class MemoryDefaultSceneHeaps {
       goldenHeapTests.map((e) => () async => e.loadHeap()).toList();
 
   static List<HeapProvider> get all => [
-        ...toTestDiff,
+        ...forDiffTesting,
         manyPaths,
         ...golden,
       ];
