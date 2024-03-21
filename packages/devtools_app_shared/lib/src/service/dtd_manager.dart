@@ -55,8 +55,13 @@ class DTDManager {
       if (_workspaceRoots != null && forceRefresh) {
         _workspaceRoots = null;
       }
-      return _workspaceRoots ??=
-          await _connection.value!.getIDEWorkspaceRoots();
+      try {
+        return _workspaceRoots ??=
+            await _connection.value!.getIDEWorkspaceRoots();
+      } catch (e) {
+        _log.fine('Error fetching IDE workspaceRoots: $e');
+        return null;
+      }
     }
     return null;
   }
