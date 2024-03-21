@@ -15,8 +15,9 @@ typedef ClassByIndex = Map<int, HeapClassName>;
 
 final _sentinelObject = HeapSnapshotObjectFake();
 
-const int _defaultClassId = 0;
-const int _weakClassId = 1;
+const _defaultClassId = 0;
+const _weakClassId = 1;
+const _library = 'package:myLib/myLib.dart';
 
 class HeapSnapshotGraphFake extends Fake implements HeapSnapshotGraph {
   HeapSnapshotGraphFake();
@@ -57,17 +58,20 @@ class HeapSnapshotGraphFake extends Fake implements HeapSnapshotGraph {
     addObjects(refsByIndex, classes: classes);
   }
 
-  /// Adds set of object with specific path to root.
-  void addChain(List<String> path) {
+  /// Adds an object with specific path to root.
+  ///
+  /// Returns index of the object.
+  int addChain(List<String> path) {
     var referrer = heapRootIndex;
     for (var name in path) {
       final classId =
-          maybeAddClass(HeapClassName(library: '', className: name));
+          maybeAddClass(HeapClassName(library: _library, className: name));
       final index = add();
       objects[index].classId = classId!;
       objects[referrer]._references.add(index);
       referrer = index;
     }
+    return referrer;
   }
 
   /// Adds instances of specific class names.
@@ -88,7 +92,7 @@ class HeapSnapshotGraphFake extends Fake implements HeapSnapshotGraph {
           ),
         );
         final index = objects.length - 1;
-        (objects[heapRootIndex] as HeapSnapshotObjectFake).addReference(index);
+        objects[heapRootIndex].addReference(index);
       }
     }
   }
@@ -147,7 +151,7 @@ class HeapSnapshotGraphFake extends Fake implements HeapSnapshotGraph {
 class _HeapSnapshotClassFake extends Fake implements HeapSnapshotClass {
   _HeapSnapshotClassFake({
     this.name = 'DefaultClass',
-    this.libraryName = 'package:default/default.dart',
+    this.libraryName = _library,
     this.classId = _defaultClassId,
   });
 

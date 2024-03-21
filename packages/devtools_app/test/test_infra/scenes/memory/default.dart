@@ -6,7 +6,6 @@ import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/controller/diff_pane_controller.dart';
 import 'package:devtools_app/src/screens/memory/panes/profile/profile_pane_controller.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/class_filter.dart';
-import 'package:devtools_app/src/shared/memory/class_name.dart';
 import 'package:devtools_app/src/shared/memory/heap_graph_loader.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -110,20 +109,23 @@ class MemoryDefaultScene extends Scene {
         .map((e) => () async => HeapSnapshotGraphFake()..addClassInstances(e))
         .toList();
 
-    /// 100 instances of the same class with different paths of length 100.
+    /// Many instances of the same class with different long paths.
+    ///
+    /// If sorted by retaining path this class will be the second from the top.
+    /// It is needed to measure if selection of this class will cause UI to jank.
     Future<HeapSnapshotGraphFake> manyPaths() async {
+      const pathLen = 3;
+      const pathCount = 7;
       final result = HeapSnapshotGraphFake();
-      final basePath = List<String>.generate(100, (i) => 'Referrer[i]');
 
-      for (int i = 0; i < 100; i++) {
-        result.addChain([...basePath, 'Owner$i', 'TheData']);
+      for (int i = 0; i < pathCount; i++) {
+        final retainers = List<String>.generate(pathLen, (_) => 'Retainer$i');
+        final index = result.addChain([...retainers, 'TheData']);
+        result.objects[index].shallowSize = 10;
       }
-      final selection = result.add();
-      result.objects[selection]
-        ..classId = result
-            .maybeAddClass(HeapClassName(library: '', className: 'HeavyClass'))!
-        ..shallowSize = 10000;
 
+      final heavyClassIndex = result.addChain(['HeavyClass']);
+      result.objects[heavyClassIndex].shallowSize = 10000;
       return result;
     }
 
@@ -132,7 +134,7 @@ class MemoryDefaultScene extends Scene {
         goldenHeapTests.map((e) => () async => e.loadHeap()).toList();
 
     return HeapGraphLoaderProvided([
-      ...simpleHeaps,
+      //...simpleHeaps,
       manyPaths,
       ...goldenHeaps,
     ]);

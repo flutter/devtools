@@ -16,6 +16,8 @@ import 'package:stager/stager.dart';
 
 import '../../test_data/memory/heap/heap_data.dart';
 
+/// Fragment of the memory screen with diff for two snapshots.
+///
 /// To run:
 /// flutter run -t test/test_infra/scenes/memory/diff_snapshot.stager_app.g.dart -d macos
 class DiffSnapshotScene extends Scene {
