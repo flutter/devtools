@@ -150,9 +150,9 @@ class DeepLinksController extends DisposableController {
   String get applicationId =>
       _androidAppLinks[selectedVariantIndex.value]?.applicationId ?? '';
 
-  List<LinkData> get getLinkDatasByPath {
+  List<LinkData> get _getLinkDatasByPath {
     final linkDatasByPath = <String, LinkData>{};
-    for (var linkData in allValidatedLinkDatas!) {
+    for (var linkData in allValidatedLinkDatas) {
       final previousRecord = linkDatasByPath[linkData.path];
       linkDatasByPath[linkData.path] = LinkData(
         domain: linkData.domain,
@@ -176,10 +176,10 @@ class DeepLinksController extends DisposableController {
     return getFilterredLinks(linkDatasByPath.values.toList());
   }
 
-  List<LinkData> get getLinkDatasByDomain {
+  List<LinkData> get _getLinkDatasByDomain {
     final linkDatasByDomain = <String, LinkData>{};
 
-    for (var linkData in allValidatedLinkDatas!) {
+    for (var linkData in allValidatedLinkDatas) {
       final previousRecord = linkDatasByDomain[linkData.domain];
       linkDatasByDomain[linkData.domain] = LinkData(
         domain: linkData.domain,
@@ -294,8 +294,16 @@ class DeepLinksController extends DisposableController {
   final selectedLink = ValueNotifier<LinkData?>(null);
   final pagePhase = ValueNotifier<PagePhase>(PagePhase.emptyState);
 
-  List<LinkData>? allValidatedLinkDatas;
-  final displayLinkDatasNotifier = ValueNotifier<List<LinkData>?>(null);
+  /// These are all link datas before applying displayOptions.
+  List<LinkData> allValidatedLinkDatas = <LinkData>[];
+  List<LinkData> allValidatedLinkDatasbyDomain = <LinkData>[];
+  List<LinkData> allValidatedLinkDatasbyPath = <LinkData>[];
+
+  /// These are link datas actually displayed in the data table after filtering by displayOptions.
+  final displayLinkDatasNotifier = ValueNotifier<List<LinkData>>(<LinkData>[]);
+  final linkDataByDomainNotifier = ValueNotifier<List<LinkData>>(<LinkData>[]);
+  final linkDataByPathNotifier = ValueNotifier<List<LinkData>>(<LinkData>[]);
+
   final generatedAssetLinksForSelectedLink =
       ValueNotifier<GenerateAssetLinksResult?>(null);
 
@@ -405,20 +413,21 @@ class DeepLinksController extends DisposableController {
     if (pagePhase.value == PagePhase.errorPage) {
       return;
     }
+
     allValidatedLinkDatas = linkdata;
-
-    pagePhase.value = PagePhase.linksValidated;
-
-    displayLinkDatasNotifier.value = getFilterredLinks(allValidatedLinkDatas!);
-
+    allValidatedLinkDatasbyDomain = _getLinkDatasByDomain;
+    allValidatedLinkDatasbyPath = _getLinkDatasByPath;
     displayOptionsNotifier.value = displayOptionsNotifier.value.copyWith(
-      domainErrorCount: getLinkDatasByDomain
+      domainErrorCount: allValidatedLinkDatasbyDomain
           .where((element) => element.domainErrors.isNotEmpty)
           .length,
-      pathErrorCount: getLinkDatasByPath
+      pathErrorCount: allValidatedLinkDatasbyPath
           .where((element) => element.pathErrors.isNotEmpty)
           .length,
     );
+    applyFilters();
+
+    pagePhase.value = PagePhase.linksValidated;
   }
 
   void selectLink(LinkData linkdata) async {
@@ -431,7 +440,7 @@ class DeepLinksController extends DisposableController {
   set searchContent(String content) {
     displayOptionsNotifier.value =
         displayOptionsNotifier.value.copyWith(searchContent: content);
-    displayLinkDatasNotifier.value = getFilterredLinks(allValidatedLinkDatas!);
+    applyFilters();
   }
 
   void updateDisplayOptions({
@@ -458,8 +467,15 @@ class DeepLinksController extends DisposableController {
       displayOptionsNotifier.value =
           displayOptionsNotifier.value.updateFilter(removedFilter, false);
     }
+    applyFilters();
+  }
 
-    displayLinkDatasNotifier.value = getFilterredLinks(allValidatedLinkDatas!);
+  void applyFilters() {
+    displayLinkDatasNotifier.value = getFilterredLinks(allValidatedLinkDatas);
+    linkDataByDomainNotifier.value =
+        getFilterredLinks(allValidatedLinkDatasbyDomain);
+    linkDataByPathNotifier.value =
+        getFilterredLinks(allValidatedLinkDatasbyPath);
   }
 
   @visibleForTesting

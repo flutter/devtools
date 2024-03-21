@@ -372,12 +372,12 @@ class _AllDeepLinkDataTable extends StatelessWidget {
               children: [
                 _DataTable(
                   viewType: TableViewType.domainView,
-                  linkDatas: controller.getLinkDatasByDomain,
+                  linkDatas: controller.linkDataByDomainNotifier.value,
                   controller: controller,
                 ),
                 _DataTable(
                   viewType: TableViewType.pathView,
-                  linkDatas: controller.getLinkDatasByPath,
+                  linkDatas: controller.linkDataByPathNotifier.value,
                   controller: controller,
                 ),
                 _DataTable(
@@ -425,7 +425,7 @@ class _NotificationCardSection extends StatelessWidget {
                     // Switch to the domain view. Select the first link with domain error and show the split screen.
                     DefaultTabController.of(context).index = 0;
                     controller.selectLink(
-                      controller.getLinkDatasByDomain
+                      controller.linkDataByDomainNotifier.value
                           .where((element) => element.domainErrors.isNotEmpty)
                           .first,
                     );
@@ -450,7 +450,7 @@ class _NotificationCardSection extends StatelessWidget {
                     // Switch to the path view. Select the first link with path error and show the split screen.
                     DefaultTabController.of(context).index = 1;
                     controller.selectLink(
-                      controller.getLinkDatasByPath
+                      controller.linkDataByPathNotifier.value
                           .where((element) => element.pathErrors.isNotEmpty)
                           .first,
                     );
