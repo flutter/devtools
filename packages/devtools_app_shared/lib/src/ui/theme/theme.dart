@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 import '../ui_utils.dart';
 import 'ide_theme.dart';
