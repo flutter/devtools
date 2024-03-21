@@ -17,7 +17,7 @@ dependencies:
   path: ^1.8.0
   shelf: ^1.1.0
   sse: ^4.1.2
-  unified_analytics: ^5.8.1
+  unified_analytics: ^5.8.8
   usage: ^4.0.0
   vm_service: ">=13.0.0 <15.0.0"
   web_socket_channel: ^2.4.0
