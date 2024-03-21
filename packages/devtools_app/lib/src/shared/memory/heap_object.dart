@@ -1,4 +1,4 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -8,9 +8,8 @@ import 'class_name.dart';
 import 'heap_data.dart';
 import 'simple_items.dart';
 
-@immutable
-
 /// Object in a heap snapshot.
+@immutable
 class HeapObject {
   const HeapObject(this.heap, {required this.index});
 

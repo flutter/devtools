@@ -178,7 +178,6 @@ class _WeakClasses {
     final object = graph.objects[objectIndex];
     if (object.references.isEmpty) return true;
     final classId = object.classId;
-    if (_weakClasses.contains(classId)) return true;
-    return false;
+    return _weakClasses.contains(classId);
   }
 }
