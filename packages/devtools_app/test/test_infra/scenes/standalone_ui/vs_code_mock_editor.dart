@@ -7,7 +7,6 @@ import 'dart:convert';
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 import '../../../test_infra/test_data/dart_tooling_api/mock_api.dart';
 
