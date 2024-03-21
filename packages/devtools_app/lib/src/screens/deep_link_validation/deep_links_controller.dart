@@ -152,9 +152,9 @@ class DeepLinksController extends DisposableController {
       _androidAppLinks[selectedVariantIndex.value]?.applicationId ?? '';
 
   @visibleForTesting
-  List<LinkData> get linkDatasByPath {
+  List<LinkData> linkDatasByPath(List<LinkData> linkdatas) {
     final linkDatasByPath = <String, LinkData>{};
-    for (var linkData in validatedLinkDatas.all) {
+    for (var linkData in linkdatas) {
       final previousRecord = linkDatasByPath[linkData.path];
       linkDatasByPath[linkData.path] = LinkData(
         domain: linkData.domain,
@@ -179,10 +179,10 @@ class DeepLinksController extends DisposableController {
   }
 
   @visibleForTesting
-  List<LinkData> get linkDatasByDomain {
+  List<LinkData> linkDatasByDomain(List<LinkData> linkdatas) {
     final linkDatasByDomain = <String, LinkData>{};
 
-    for (var linkData in validatedLinkDatas.all) {
+    for (var linkData in linkdatas) {
       final previousRecord = linkDatasByDomain[linkData.domain];
       linkDatasByDomain[linkData.domain] = LinkData(
         domain: linkData.domain,
@@ -418,8 +418,8 @@ class DeepLinksController extends DisposableController {
 
     validatedLinkDatas = ValidatedLinkDatas(
       all: linkdata,
-      byDomain: linkDatasByDomain,
-      byPath: linkDatasByPath,
+      byDomain: linkDatasByDomain(linkdata),
+      byPath: linkDatasByPath(linkdata),
     );
     displayOptionsNotifier.value = displayOptionsNotifier.value.copyWith(
       domainErrorCount: validatedLinkDatas.byDomain
