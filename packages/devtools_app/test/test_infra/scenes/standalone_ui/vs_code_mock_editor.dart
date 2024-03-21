@@ -216,7 +216,7 @@ class _VsCodeFlutterPanelMockEditorState
                   ElevatedButton(
                     onPressed: () => api.endSessions(),
                     style: theme.elevatedButtonTheme.style!.copyWith(
-                      backgroundColor: const MaterialStatePropertyAll(
+                      backgroundColor: const WidgetStatePropertyAll(
                         Colors.red,
                       ),
                     ),
