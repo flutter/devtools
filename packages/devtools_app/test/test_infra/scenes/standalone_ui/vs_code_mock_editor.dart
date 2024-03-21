@@ -7,6 +7,7 @@ import 'dart:convert';
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 import '../../../test_infra/test_data/dart_tooling_api/mock_api.dart';
 
@@ -216,7 +217,7 @@ class _VsCodeFlutterPanelMockEditorState
                   ElevatedButton(
                     onPressed: () => api.endSessions(),
                     style: theme.elevatedButtonTheme.style!.copyWith(
-                      backgroundColor: const MaterialStatePropertyAll(
+                      backgroundColor: const WidgetStatePropertyAll(
                         Colors.red,
                       ),
                     ),

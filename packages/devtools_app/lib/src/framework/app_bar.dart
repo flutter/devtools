@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 
 import '../shared/common_widgets.dart';
@@ -201,7 +202,7 @@ class TabOverflowButton extends StatelessWidget {
             height: defaultToolbarHeight,
             child: MenuItemButton(
               style: const ButtonStyle().copyWith(
-                textStyle: MaterialStateProperty.resolveWith<TextStyle>((_) {
+                textStyle: WidgetStateProperty.resolveWith<TextStyle>((_) {
                   return theme.textTheme.titleSmall!;
                 }),
               ),
