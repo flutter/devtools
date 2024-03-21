@@ -150,7 +150,7 @@ class DeepLinksController extends DisposableController {
   String get applicationId =>
       _androidAppLinks[selectedVariantIndex.value]?.applicationId ?? '';
 
-  List<LinkData> get _getLinkDatasByPath {
+  List<LinkData> get getLinkDatasByPath {
     final linkDatasByPath = <String, LinkData>{};
     for (var linkData in allValidatedLinkDatas) {
       final previousRecord = linkDatasByPath[linkData.path];
@@ -176,7 +176,7 @@ class DeepLinksController extends DisposableController {
     return getFilterredLinks(linkDatasByPath.values.toList());
   }
 
-  List<LinkData> get _getLinkDatasByDomain {
+  List<LinkData> get getLinkDatasByDomain {
     final linkDatasByDomain = <String, LinkData>{};
 
     for (var linkData in allValidatedLinkDatas) {
@@ -415,8 +415,8 @@ class DeepLinksController extends DisposableController {
     }
 
     allValidatedLinkDatas = linkdata;
-    allValidatedLinkDatasbyDomain = _getLinkDatasByDomain;
-    allValidatedLinkDatasbyPath = _getLinkDatasByPath;
+    allValidatedLinkDatasbyDomain = getLinkDatasByDomain;
+    allValidatedLinkDatasbyPath = getLinkDatasByPath;
     displayOptionsNotifier.value = displayOptionsNotifier.value.copyWith(
       domainErrorCount: allValidatedLinkDatasbyDomain
           .where((element) => element.domainErrors.isNotEmpty)
@@ -467,7 +467,10 @@ class DeepLinksController extends DisposableController {
       displayOptionsNotifier.value =
           displayOptionsNotifier.value.updateFilter(removedFilter, false);
     }
-    applyFilters();
+
+    if (addedFilter != null ||removedFilter != null) {
+      applyFilters();
+    }
   }
 
   void applyFilters() {

@@ -580,17 +580,19 @@ class DeepLinksTestController extends DeepLinksController {
 
   @override
   Future<void> validateLinks() async {
-    if (allValidatedLinkDatas == null) return;
-    displayLinkDatasNotifier.value = getFilterredLinks(allValidatedLinkDatas!);
+    if (allValidatedLinkDatas.isEmpty) return;
+    allValidatedLinkDatasbyDomain = getLinkDatasByDomain;
+    allValidatedLinkDatasbyPath = getLinkDatasByPath;
 
     displayOptionsNotifier.value = displayOptionsNotifier.value.copyWith(
-      domainErrorCount: getLinkDatasByDomain
+      domainErrorCount: allValidatedLinkDatasbyDomain
           .where((element) => element.domainErrors.isNotEmpty)
           .length,
-      pathErrorCount: getLinkDatasByPath
+      pathErrorCount: allValidatedLinkDatasbyPath
           .where((element) => element.pathErrors.isNotEmpty)
           .length,
     );
+    applyFilters();
     pagePhase.value = PagePhase.linksValidated;
   }
 
