@@ -6,6 +6,7 @@ import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../shared/charts/chart_trace.dart';
+import '../../../../shared/primitives/byte_utils.dart';
 import '../../../../shared/primitives/utils.dart';
 import '../../framework/connected/memory_controller.dart';
 import 'memory_android_chart.dart';
@@ -380,7 +381,6 @@ class ChartsValues {
 
   String? formatNumeric(num? number) => prettyPrintBytes(
         number,
-        kbFractionDigits: 1,
         mbFractionDigits: 2,
         includeUnit: true,
         roundingPoint: 0.7,

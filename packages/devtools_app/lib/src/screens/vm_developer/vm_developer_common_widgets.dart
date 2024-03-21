@@ -15,6 +15,7 @@ import 'package:vm_service/vm_service.dart';
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/byte_utils.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/tree.dart';
 import '../debugger/codeview.dart';
@@ -237,7 +238,6 @@ class RequestableSizeWidget extends StatelessWidget {
                           : prettyPrintBytes(
                               int.parse(size.valueAsString!),
                               includeUnit: true,
-                              kbFractionDigits: 1,
                               maxBytes: 512,
                             )!,
                     ),
@@ -855,7 +855,6 @@ MapEntry<String, WidgetBuilder> shallowSizeRowBuilder(VmObject object) {
     prettyPrintBytes(
       object.obj.size ?? 0,
       includeUnit: true,
-      kbFractionDigits: 1,
       maxBytes: 512,
     ),
   );
