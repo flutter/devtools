@@ -2,7 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
 import 'dart:math';
+import 'dart:typed_data';
+
+import 'package:meta/meta.dart';
+
+import '../development_helpers.dart';
 
 String? prettyPrintBytes(
   num? bytes, {
@@ -114,4 +120,52 @@ enum ByteUnit {
   final String? _display;
 
   String get display => _display ?? name.toUpperCase();
+}
+
+/// Stores a list of Uint8List objects in a ring buffer, keeping the total size
+/// at or below [maxSizeBytes].
+class Uint8ListRingBuffer {
+  Uint8ListRingBuffer({required this.maxSizeBytes});
+
+  /// The maximum size in bytes that [data] will contain.
+  final int maxSizeBytes;
+
+  /// Returns the size of the ring buffer in bytes.
+  ///
+  /// Since each element in [data] is a Uint8List, the size of each element in
+  /// bytes is the length of the Uint8List.
+  int get size => data.fold(0, (sum, e) => sum + e.length);
+
+  @visibleForTesting
+  final data = ListQueue<Uint8List>();
+
+  /// Stores [binaryData] in [data] and removes as many early elements as
+  /// necessary to keep the size of [data] smaller than [maxSizeBytes].
+  void addData(Uint8List binaryData) {
+    data.add(binaryData);
+
+    final exceeded = size - maxSizeBytes;
+    if (exceeded < 0) return;
+
+    var bytesRemoved = 0;
+    while (bytesRemoved < exceeded && data.length > 1) {
+      final removed = data.removeFirst();
+      bytesRemoved += removed.length;
+    }
+  }
+
+  /// Merges all the data in this ring buffer into a single [Uint8List] and
+  /// returns it.
+  Uint8List get merged {
+    final allBytes = BytesBuilder();
+    debugTimeSync(
+      () => data.forEach(allBytes.add),
+      debugName: 'Uint8ListRingBuffer.mergeAllData',
+    );
+    return allBytes.takeBytes();
+  }
+
+  void clear() {
+    data.clear();
+  }
 }

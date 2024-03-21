@@ -2,15 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
+
 import 'package:devtools_app_shared/utils.dart';
-import 'package:vm_service_protos/vm_service_protos.dart';
 
 import '../../../../../shared/primitives/utils.dart';
 import '../../../performance_controller.dart';
+import '../timeline_event_processor.dart';
 import '../timeline_events_controller.dart';
 import '_perfetto_controller_desktop.dart'
     if (dart.library.js_interop) '_perfetto_controller_web.dart';
-import 'perfetto_event_processor.dart';
 
 PerfettoControllerImpl createPerfettoController(
   PerformanceController performanceController,
@@ -42,7 +43,7 @@ abstract class PerfettoController extends DisposableController {
 
   void onBecomingActive() {}
 
-  Future<void> loadTrace(Trace trace) async {}
+  Future<void> loadTrace(Uint8List traceBinary) async {}
 
   void scrollToTimeRange(TimeRange timeRange) {}
 
