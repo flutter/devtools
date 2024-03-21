@@ -38,7 +38,7 @@ final _sizeTests = [
   // Heaps without unreachable objects:
   _SizeTest(
     name: 'Just root',
-    heap: HeapSnapshotGraphFake()
+    heap: FakeHeapSnapshotGraph()
       ..setObjects(
         {
           1: [],
@@ -49,7 +49,7 @@ final _sizeTests = [
   ),
   _SizeTest(
     name: 'Two objects heap',
-    heap: HeapSnapshotGraphFake()
+    heap: FakeHeapSnapshotGraph()
       ..setObjects(
         {
           1: [2],
@@ -61,7 +61,7 @@ final _sizeTests = [
   ),
   _SizeTest(
     name: 'Four objects heap',
-    heap: HeapSnapshotGraphFake()
+    heap: FakeHeapSnapshotGraph()
       ..setObjects(
         {
           1: [2, 3, 4],
@@ -78,7 +78,7 @@ final _sizeTests = [
 
   _SizeTest(
     name: 'One unreachable object heap',
-    heap: HeapSnapshotGraphFake()
+    heap: FakeHeapSnapshotGraph()
       ..setObjects(
         {
           1: [],
@@ -90,7 +90,7 @@ final _sizeTests = [
   ),
   _SizeTest(
     name: 'Many unreachable objects heap',
-    heap: HeapSnapshotGraphFake()
+    heap: FakeHeapSnapshotGraph()
       ..setObjects(
         {
           // Reachable:
@@ -118,7 +118,7 @@ final _sizeTests = [
     //  2w 3
     //  |
     //  4
-    heap: HeapSnapshotGraphFake()
+    heap: FakeHeapSnapshotGraph()
       ..setObjects(
         {
           1: [2, 3],
@@ -146,7 +146,7 @@ final _sizeTests = [
     //  2w 3w
     //  |   \
     //  4   5
-    heap: HeapSnapshotGraphFake()
+    heap: FakeHeapSnapshotGraph()
       ..setObjects(
         {
           1: [2, 3],
@@ -174,7 +174,7 @@ final _sizeTests = [
     name: 'Diamond',
     //  |\
     //  \|
-    heap: HeapSnapshotGraphFake()
+    heap: FakeHeapSnapshotGraph()
       ..setObjects(
         {
           1: [2, 3],
@@ -191,7 +191,7 @@ final _sizeTests = [
     //  \
     //  |\
     //  \|
-    heap: HeapSnapshotGraphFake()
+    heap: FakeHeapSnapshotGraph()
       ..setObjects(
         {
           1: [2],
@@ -209,7 +209,7 @@ final _sizeTests = [
     //  \
     //  |\
     //  \|
-    heap: HeapSnapshotGraphFake()
+    heap: FakeHeapSnapshotGraph()
       ..setObjects(
         {
           1: [2],
@@ -236,7 +236,7 @@ final _sizeTests = [
     //  \
     //  |\
     //  \|
-    heap: HeapSnapshotGraphFake()
+    heap: FakeHeapSnapshotGraph()
       ..setObjects(
         {
           1: [2],

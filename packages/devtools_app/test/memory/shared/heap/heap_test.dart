@@ -16,7 +16,7 @@ class _ClassSizeTest {
     required this.expectedClassARetainedSize,
   });
 
-  final HeapSnapshotGraphFake heap;
+  final FakeHeapSnapshotGraph heap;
   final String name;
   final int expectedClassARetainedSize;
 }
@@ -28,7 +28,7 @@ final _classB = HeapClassName.fromPath(className: 'B', library: 'l');
 final _classSizeTests = <_ClassSizeTest>[
   _ClassSizeTest(
     name: 'separate',
-    heap: HeapSnapshotGraphFake()
+    heap: FakeHeapSnapshotGraph()
       ..setObjects(
         {
           1: [2, 3, 4],
@@ -47,7 +47,7 @@ final _classSizeTests = <_ClassSizeTest>[
   ),
   _ClassSizeTest(
     name: 'linked',
-    heap: HeapSnapshotGraphFake()
+    heap: FakeHeapSnapshotGraph()
       ..setObjects(
         {
           1: [2],
@@ -66,7 +66,7 @@ final _classSizeTests = <_ClassSizeTest>[
   ),
   _ClassSizeTest(
     name: 'full graph',
-    heap: HeapSnapshotGraphFake()
+    heap: FakeHeapSnapshotGraph()
       ..setObjects(
         {
           1: [2],
@@ -85,7 +85,7 @@ final _classSizeTests = <_ClassSizeTest>[
   ),
   _ClassSizeTest(
     name: 'with global B',
-    heap: HeapSnapshotGraphFake()
+    heap: FakeHeapSnapshotGraph()
       ..setObjects(
         {
           1: [2],

@@ -34,7 +34,7 @@ abstract class MemoryDefaultSceneHeaps {
   static Future<HeapSnapshotGraph> manyPaths() async {
     const pathLen = 100;
     const pathCount = 100;
-    final result = HeapSnapshotGraphFake();
+    final result = FakeHeapSnapshotGraph();
 
     for (int i = 0; i < pathCount; i++) {
       final retainers = List<String>.generate(pathLen, (_) => 'Retainer$i');
@@ -53,7 +53,7 @@ abstract class MemoryDefaultSceneHeaps {
     {'B': 1, 'C': 2, 'D': 3},
     {'B': 1, 'C': 2, 'D': 3},
   ]
-      .map((e) => () async => HeapSnapshotGraphFake()..addClassInstances(e))
+      .map((e) => () async => FakeHeapSnapshotGraph()..addClassInstances(e))
       .toList();
 
   static final golden =

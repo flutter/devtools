@@ -13,31 +13,31 @@ import 'package:vm_service/vm_service.dart';
 typedef RefsByIndex = Map<int, List<int>>;
 typedef ClassByIndex = Map<int, HeapClassName>;
 
-final _sentinelObject = HeapSnapshotObjectFake();
+final _sentinelObject = FakeSnapshotObjectFake();
 
 const _defaultClassId = 0;
 const _weakClassId = 1;
 const _library = 'package:myLib/myLib.dart';
 
-class HeapSnapshotGraphFake extends Fake implements HeapSnapshotGraph {
-  HeapSnapshotGraphFake();
+class FakeHeapSnapshotGraph extends Fake implements HeapSnapshotGraph {
+  FakeHeapSnapshotGraph();
 
   @override
   final List<HeapSnapshotClass> classes = [
-    _HeapSnapshotClassFake(),
-    _HeapSnapshotClassFake.weak(),
+    _FakeHeapSnapshotClass(),
+    _FakeHeapSnapshotClass.weak(),
   ];
 
   @override
-  final List<HeapSnapshotObjectFake> objects = [
+  final List<FakeSnapshotObjectFake> objects = [
     _sentinelObject,
-    HeapSnapshotObjectFake(shallowSize: 1), // root
+    FakeSnapshotObjectFake(shallowSize: 1), // root
   ];
 
   /// Adds object and returns index of the added object.
   int add([int? hashCode]) {
     objects.add(
-      HeapSnapshotObjectFake(identityHashCode: hashCode ?? objects.length),
+      FakeSnapshotObjectFake(identityHashCode: hashCode ?? objects.length),
     );
     return objects.length - 1;
   }
@@ -84,7 +84,7 @@ class HeapSnapshotGraphFake extends Fake implements HeapSnapshotGraph {
           maybeAddClass(HeapClassName(className: entry.key, library: null));
       for (var i = 0; i < entry.value; i++) {
         objects.add(
-          HeapSnapshotObjectFake(
+          FakeSnapshotObjectFake(
             identityHashCode: objects.length,
             references: [],
             shallowSize: 1,
@@ -119,7 +119,7 @@ class HeapSnapshotGraphFake extends Fake implements HeapSnapshotGraph {
       classId ??= weak ? _weakClassId : _defaultClassId;
 
       objects.add(
-        HeapSnapshotObjectFake(
+        FakeSnapshotObjectFake(
           identityHashCode: i,
           references: refsByIndex[i] ?? [],
           shallowSize: 1,
@@ -138,7 +138,7 @@ class HeapSnapshotGraphFake extends Fake implements HeapSnapshotGraph {
     if (index >= 0) return index;
 
     classes.add(
-      _HeapSnapshotClassFake(
+      _FakeHeapSnapshotClass(
         name: className.className,
         libraryName: className.library,
         classId: classes.length,
@@ -148,14 +148,14 @@ class HeapSnapshotGraphFake extends Fake implements HeapSnapshotGraph {
   }
 }
 
-class _HeapSnapshotClassFake extends Fake implements HeapSnapshotClass {
-  _HeapSnapshotClassFake({
+class _FakeHeapSnapshotClass extends Fake implements HeapSnapshotClass {
+  _FakeHeapSnapshotClass({
     this.name = 'DefaultClass',
     this.libraryName = _library,
     this.classId = _defaultClassId,
   });
 
-  _HeapSnapshotClassFake.weak()
+  _FakeHeapSnapshotClass.weak()
       : name = '_WeakProperty',
         libraryName = 'dart:core',
         classId = _weakClassId {
@@ -175,8 +175,8 @@ class _HeapSnapshotClassFake extends Fake implements HeapSnapshotClass {
   late final libraryUri = Uri.parse('');
 }
 
-class HeapSnapshotObjectFake extends Fake implements HeapSnapshotObject {
-  HeapSnapshotObjectFake({
+class FakeSnapshotObjectFake extends Fake implements HeapSnapshotObject {
+  FakeSnapshotObjectFake({
     this.identityHashCode = 0,
     List<int>? references,
     this.shallowSize = 0,

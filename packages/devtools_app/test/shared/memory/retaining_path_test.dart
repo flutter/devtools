@@ -33,7 +33,7 @@ void main() {
     final classB = HeapClassName.fromPath(className: 'B', library: 'l');
     final classC = HeapClassName.fromPath(className: 'C', library: 'l');
 
-    final graph = HeapSnapshotGraphFake()
+    final graph = FakeHeapSnapshotGraph()
       ..setObjects(
         {
           1: [2],
