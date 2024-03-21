@@ -71,7 +71,6 @@ class _ShallowSizeColumn extends ColumnData<PathData> {
   String getDisplayValue(PathData record) => prettyPrintBytes(
         getValue(record),
         includeUnit: true,
-        kbFractionDigits: 1,
       )!;
 }
 
@@ -94,7 +93,6 @@ class _RetainedSizeColumn extends ColumnData<PathData> {
   String getDisplayValue(PathData record) => prettyPrintBytes(
         getValue(record),
         includeUnit: true,
-        kbFractionDigits: 1,
       )!;
 }
 

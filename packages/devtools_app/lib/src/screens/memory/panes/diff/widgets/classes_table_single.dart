@@ -128,7 +128,6 @@ class _ShallowSizeColumn extends ColumnData<SingleClassData> {
   String getDisplayValue(SingleClassData data) => prettyPrintBytes(
         getValue(data),
         includeUnit: true,
-        kbFractionDigits: 1,
       )!;
 }
 
