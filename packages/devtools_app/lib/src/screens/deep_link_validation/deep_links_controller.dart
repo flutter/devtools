@@ -150,6 +150,7 @@ class DeepLinksController extends DisposableController {
   String get applicationId =>
       _androidAppLinks[selectedVariantIndex.value]?.applicationId ?? '';
 
+  @visibleForTesting
   List<LinkData> get getLinkDatasByPath {
     final linkDatasByPath = <String, LinkData>{};
     for (var linkData in allValidatedLinkDatas) {
@@ -176,6 +177,7 @@ class DeepLinksController extends DisposableController {
     return getFilterredLinks(linkDatasByPath.values.toList());
   }
 
+  @visibleForTesting
   List<LinkData> get getLinkDatasByDomain {
     final linkDatasByDomain = <String, LinkData>{};
 
@@ -468,7 +470,7 @@ class DeepLinksController extends DisposableController {
           displayOptionsNotifier.value.updateFilter(removedFilter, false);
     }
 
-    if (addedFilter != null ||removedFilter != null) {
+    if (addedFilter != null || removedFilter != null) {
       applyFilters();
     }
   }
