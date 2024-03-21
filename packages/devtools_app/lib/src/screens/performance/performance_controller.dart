@@ -242,8 +242,7 @@ class PerformanceController extends DisposableController
   OfflineScreenData screenDataForExport() => OfflineScreenData(
         screenId: PerformanceScreen.id,
         data: OfflinePerformanceData(
-          perfettoTraceBinary:
-              timelineEventsController.fullPerfettoTrace?.writeToBuffer(),
+          perfettoTraceBinary: timelineEventsController.fullPerfettoTrace,
           frames: flutterFramesController.flutterFrames.value,
           selectedFrame: flutterFramesController.selectedFrame.value,
           rasterStats: rasterStatsController.rasterStats.value,

@@ -8,12 +8,12 @@ import 'package:fixnum/fixnum.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 
-import '../../../../../shared/development_helpers.dart';
-import '../../../../../shared/primitives/utils.dart';
-import '../../../performance_controller.dart';
-import '../../../performance_model.dart';
-import '../timeline_events_controller.dart';
-import 'tracing/model.dart';
+import '../../../../shared/development_helpers.dart';
+import '../../../../shared/primitives/utils.dart';
+import '../../performance_controller.dart';
+import '../../performance_model.dart';
+import 'perfetto/tracing/model.dart';
+import 'timeline_events_controller.dart';
 
 final _log = Logger('flutter_timeline_event_processor');
 
