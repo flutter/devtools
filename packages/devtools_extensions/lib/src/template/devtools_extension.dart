@@ -65,7 +65,7 @@ ServiceManager get serviceManager =>
 
 /// A manager for interacting with the Dart Tooling Daemon, if available.
 ///
-/// This manager stores the current [DTDConnection], which provides access to
+/// This manager stores the current [DartToolingDaemon], which provides access to
 /// public methods registered by other DTD clients (for example, the IDE), as
 /// well as a minimal file sytsem API for reading, writing, and listing
 /// directories within the user's project.
