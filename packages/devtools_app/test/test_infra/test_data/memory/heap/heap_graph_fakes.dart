@@ -190,6 +190,10 @@ class FakeSnapshotObjectFake extends Fake implements HeapSnapshotObject {
   @override
   final int identityHashCode;
 
+  /// Object's references to other objects.
+  ///
+  /// Copying the list each time, because Uint32List is unmodifiable, and
+  /// we need to modify it to configure the snapshot for tests.
   @override
   Uint32List get references => Uint32List.fromList(_references);
   final List<int> _references;
