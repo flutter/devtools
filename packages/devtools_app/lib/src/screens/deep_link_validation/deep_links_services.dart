@@ -101,7 +101,7 @@ class DeepLinksServices {
         final List? failedChecks = domainResult[_failedChecksKey];
         if (failedChecks != null) {
           for (final Map<String, dynamic> failedCheck in failedChecks) {
-            final checkName = failedCheck[_checkNameKey];
+            final checkName = failedCheck[_checkNameKey] as String;
             final domainError = checkNameToDomainError[checkName];
             if (domainError != null) {
               domainErrors[domainName]!.add(domainError);

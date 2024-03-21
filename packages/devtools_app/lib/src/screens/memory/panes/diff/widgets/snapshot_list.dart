@@ -14,6 +14,7 @@ import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/dialogs.dart';
+import '../../../../../shared/primitives/byte_utils.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/item_controller.dart';
@@ -174,11 +175,7 @@ class SnapshotListTitle extends StatelessWidget {
       trailing.addAll([
         if (theItem.totalSize != null)
           Text(
-            prettyPrintBytes(
-              theItem.totalSize,
-              includeUnit: true,
-              kbFractionDigits: 1,
-            )!,
+            prettyPrintBytes(theItem.totalSize, includeUnit: true)!,
           ),
         Padding(
           padding: const EdgeInsets.only(left: ContextMenuButton.densePadding),
