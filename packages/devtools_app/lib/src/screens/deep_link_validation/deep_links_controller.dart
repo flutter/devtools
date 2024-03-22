@@ -222,6 +222,7 @@ class DeepLinksController extends DisposableController {
             );
           } catch (_) {
             pagePhase.value = PagePhase.errorPage;
+            return ;
           }
           _androidAppLinks[selectedVariantIndex.value] = result;
         },
