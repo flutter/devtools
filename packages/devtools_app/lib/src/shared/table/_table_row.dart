@@ -243,7 +243,7 @@ class _TableRowState<T> extends State<TableRow<T>>
           case _TableRowPartDisplayType.columnSpacer:
             return columnSpacing;
           case _TableRowPartDisplayType.columnGroupSpacer:
-            return (columnGroupSpacingWithPadding - columnGroupSpacing) / 2 +
+            return (columnGroupSpacingWithPadding - columnGroupSpacing) +
                 columnGroupSpacing;
         }
       },
