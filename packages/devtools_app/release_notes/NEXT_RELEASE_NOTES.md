@@ -47,6 +47,11 @@ TODO: Remove this section if there are not any general updates.
 
 TODO: Remove this section if there are not any general updates.
 
+## Deep Links tool updates
+
+* Automatically populate a list of Flutter projects from the connected
+IDE. - [#7415](https://github.com/flutter/devtools/pull/7415)
+
 ## App size tool updates
 
 TODO: Remove this section if there are not any general updates.
