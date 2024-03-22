@@ -56,30 +56,42 @@ class DisplayProvider extends StatelessWidget {
     }
 
     final hasName = variable.name?.isNotEmpty ?? false;
+
+    // The tooltip can be hovered over in order to see the original text.
+    final originalDisplayValue = variable.displayValue.toString();
+    // Only 1 line of text is permitted in the tree, since we only get 1 row.
+    // So replace all newlines with \\n so that the user can still see that
+    // there are new lines in the value.
+    final displayValue = originalDisplayValue.replaceAll('\n', '\\n');
     return InteractivityWrapper(
       onTap: onTap,
       menuButtons: _getMenuButtons(context),
-      child: Text.rich(
-        TextSpan(
-          text: hasName ? variable.name : null,
-          style: variable.artificialName
-              ? theme.subtleFixedFontStyle
-              : theme.fixedFontStyle.apply(
-                  color: theme.colorScheme.controlFlowSyntaxColor,
+      child: DevToolsTooltip(
+        message: originalDisplayValue,
+        child: Text.rich(
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          TextSpan(
+            text: hasName ? variable.name : null,
+            style: variable.artificialName
+                ? theme.subtleFixedFontStyle
+                : theme.fixedFontStyle.apply(
+                    color: theme.colorScheme.controlFlowSyntaxColor,
+                  ),
+            children: [
+              if (hasName)
+                TextSpan(
+                  text: ': ',
+                  style: theme.fixedFontStyle,
                 ),
-          children: [
-            if (hasName)
               TextSpan(
-                text: ': ',
-                style: theme.fixedFontStyle,
+                text: displayValue,
+                style: variable.artificialValue
+                    ? theme.subtleFixedFontStyle
+                    : _variableDisplayStyle(theme, variable),
               ),
-            TextSpan(
-              text: variable.displayValue.toString(),
-              style: variable.artificialValue
-                  ? theme.subtleFixedFontStyle
-                  : _variableDisplayStyle(theme, variable),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
