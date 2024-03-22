@@ -19,6 +19,7 @@ import '../../../../shared/analytics/metrics.dart';
 import '../../../../shared/development_helpers.dart';
 import '../../../../shared/future_work_tracker.dart';
 import '../../../../shared/globals.dart';
+import '../../../../shared/primitives/byte_utils.dart';
 import '../../../../shared/primitives/utils.dart';
 import '../../performance_controller.dart';
 import '../../performance_model.dart';
@@ -47,6 +48,7 @@ class TimelineEventsController extends PerformanceFeatureController
         _status.value = EventsControllerStatus.ready;
       }
     });
+    traceRingBuffer = Uint8ListRingBuffer(maxSizeBytes: _traceRingBufferSize);
   }
 
   static const uiThreadSuffix = '.ui';
@@ -60,10 +62,31 @@ class TimelineEventsController extends PerformanceFeatureController
 
   /// The complete Perfetto timeline that DevTools has received from the VM.
   ///
-  /// This value is built up by polling every [_timelinePollingInterval], and
-  /// fetching new Perfetto timeline data from the VM. New data is continually
-  /// merged with [fullPerfettoTrace] to keep this value up to date.
-  Trace? fullPerfettoTrace;
+  /// This returns the merged value of all the traces in [traceRingBuffer],
+  /// which is periodically trimmed to preserve memory in DevTools.
+  Uint8List get fullPerfettoTrace => traceRingBuffer.merged;
+
+  /// A ring buffer containing all the Perfetto trace binaries that we have
+  /// received from the VM.
+  ///
+  /// This ring buffer is built up by polling every [_timelinePollingInterval]
+  /// and fetching new Perfetto timeline data from the VM.
+  ///
+  /// We use a ring buffer for this data so that the earliest entries will be
+  /// removed when the total size of this queue exceeds [_traceRingBufferSize].
+  /// This prevents the Performance page from causing DevTools to OOM.
+  ///
+  /// The bytes contained in this ring buffer are stored until the Perfetto
+  /// viewer is refreshed, at which point [fullPerfettoTrace] will be called to
+  /// merge all of this data into a single trace binary for the Perfetto UI to
+  /// consume.
+  @visibleForTesting
+  late final Uint8ListRingBuffer traceRingBuffer;
+
+  /// Size limit in GB for [traceRingBuffer] that determines when traces should
+  /// be removed from the queue.
+  final _traceRingBufferSize =
+      convertBytes(1, from: ByteUnit.gb, to: ByteUnit.byte).round();
 
   /// Track events that we have received from the VM, but have not yet
   /// processed.
@@ -183,34 +206,16 @@ class TimelineEventsController extends PerformanceFeatureController
       () => traceBinary = base64Decode(rawPerfettoTimeline.trace!),
       debugName: 'base64Decode perfetto trace',
     );
+
     _updatePerfettoTrace(traceBinary!, logWarning: isInitialPull);
   }
 
   void _updatePerfettoTrace(Uint8List traceBinary, {bool logWarning = true}) {
-    final decodedTrace =
-        _prepareForTraceProcessing(traceBinary, logWarning: logWarning);
-
-    if (fullPerfettoTrace == null) {
-      debugTraceCallback(
-        () => _log.info(
-          '[_updatePerfettoTrace] setting initial perfetto trace',
-        ),
-      );
-      fullPerfettoTrace = decodedTrace ?? _traceFromBinary(traceBinary);
-    } else {
-      debugTraceCallback(
-        () => _log.info(
-          '[_updatePerfettoTrace] merging perfetto trace with new buffer',
-        ),
-      );
-      debugTimeSync(
-        () => fullPerfettoTrace!.mergeFromBuffer(traceBinary),
-        debugName: 'perfettoTrace.mergeFromBuffer',
-      );
-    }
+    _prepareForTraceProcessing(traceBinary, logWarning: logWarning);
+    traceRingBuffer.addData(traceBinary);
   }
 
-  Trace? _prepareForTraceProcessing(
+  void _prepareForTraceProcessing(
     Uint8List traceBinary, {
     bool logWarning = true,
   }) {
@@ -219,7 +224,7 @@ class TimelineEventsController extends PerformanceFeatureController
         () => _log
             .info('[_prepareTraceForProcessing] not a flutter app, returning.'),
       );
-      return null;
+      return;
     }
 
     final trace = _traceFromBinary(traceBinary);
@@ -239,7 +244,6 @@ class TimelineEventsController extends PerformanceFeatureController
       }
     }
     updateTrackIds(newTrackDescriptors, logWarning: logWarning);
-    return trace;
   }
 
   void updateTrackIds(
@@ -342,8 +346,7 @@ class TimelineEventsController extends PerformanceFeatureController
   }
 
   Future<void> loadPerfettoTrace() async {
-    debugTraceCallback(() => _log.info('[loadPerfettoTrace] updating viewer'));
-    await perfettoController.loadTrace(fullPerfettoTrace ?? Trace());
+    await perfettoController.loadTrace(fullPerfettoTrace);
   }
 
   @override
@@ -486,7 +489,7 @@ class TimelineEventsController extends PerformanceFeatureController
   @override
   Future<void> clearData() async {
     _unprocessedTrackEvents.clear();
-    fullPerfettoTrace = Trace();
+    traceRingBuffer.clear();
     _trackDescriptors.clear();
     _unassignedFlutterTimelineEvents.clear();
 

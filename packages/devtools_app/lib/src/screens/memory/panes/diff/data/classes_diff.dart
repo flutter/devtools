@@ -2,69 +2,94 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../../../../../shared/memory/class_name.dart';
 import '../../../../../shared/memory/classes.dart';
+import '../../../../../shared/memory/heap_data.dart';
 import '../../../../../shared/memory/retaining_path.dart';
-import '../../../../../shared/memory/simple_items.dart';
 import '../../../../../shared/primitives/utils.dart';
-import '../../../shared/heap/heap.dart';
 
 /// Comparison between two sets of objects.
 class ObjectSetDiff {
-  ObjectSetDiff({ObjectSet? setBefore, ObjectSet? setAfter}) {
-    setBefore ??= ObjectSet.empty;
-    setAfter ??= ObjectSet.empty;
+  ObjectSetDiff({
+    required ObjectSet? setBefore,
+    required ObjectSet? setAfter,
+    required HeapData dataBefore,
+    required HeapData dataAfter,
+  }) {
+    final mapBefore = _hashCodeToIndexMap(setBefore, dataBefore);
+    final mapAfter = _hashCodeToIndexMap(setAfter, dataAfter);
 
-    final allCodes = _unionCodes(setBefore, setAfter);
+    final allCodes = mapBefore.keys.toSet().union(mapAfter.keys.toSet());
 
     for (var code in allCodes) {
-      final before = setBefore.objectsByCodes[code];
-      final after = setAfter.objectsByCodes[code];
+      final before = mapBefore[code];
+      final after = mapAfter[code];
 
       if (before != null && after != null) {
-        // When an object exists both before and after
-        // the state 'after' is more interesting for user
-        // about the retained size.
-        final excludeFromRetained =
-            setAfter.objectsExcludedFromRetainedSize.contains(after.code);
-        persisted.countInstance(
-          after,
-          excludeFromRetained: excludeFromRetained,
-        );
+        _countInstance(persisted, after, dataAfter, setAfter!);
         continue;
       }
 
       if (before != null) {
-        final excludeFromRetained =
-            setBefore.objectsExcludedFromRetainedSize.contains(before.code);
-        deleted.countInstance(before, excludeFromRetained: excludeFromRetained);
-        delta.uncountInstance(before, excludeFromRetained: excludeFromRetained);
+        _countInstance(deleted, before, dataBefore, setBefore!);
+        _uncountInstance(delta, before, dataBefore, setBefore);
         continue;
       }
 
       if (after != null) {
-        final excludeFromRetained =
-            setAfter.objectsExcludedFromRetainedSize.contains(after.code);
-        created.countInstance(after, excludeFromRetained: excludeFromRetained);
-        delta.countInstance(after, excludeFromRetained: excludeFromRetained);
+        _countInstance(created, after, dataAfter, setAfter!);
+        _countInstance(delta, after, dataAfter, setAfter);
         continue;
       }
 
       assert(false);
     }
-    created.seal();
-    deleted.seal();
-    persisted.seal();
-    delta.seal();
+
     assert(
       delta.instanceCount == created.instanceCount - deleted.instanceCount,
     );
   }
 
-  static Set<IdentityHashCode> _unionCodes(ObjectSet set1, ObjectSet set2) {
-    final codesBefore = set1.objectsByCodes.keys.toSet();
-    final codesAfter = set2.objectsByCodes.keys.toSet();
+  static void _countInstance(
+    ObjectSetStats setToAlter,
+    int index,
+    HeapData data,
+    ObjectSet originalSet,
+  ) {
+    final excludeFromRetained =
+        originalSet.excludedFromRetainedSize.contains(index);
+    setToAlter.countInstance(
+      data.graph,
+      index,
+      data.retainedSizes,
+      excludeFromRetained: excludeFromRetained,
+    );
+  }
 
-    return codesBefore.union(codesAfter);
+  static void _uncountInstance(
+    ObjectSetStats setToAlter,
+    int index,
+    HeapData data,
+    ObjectSet originalSet,
+  ) {
+    final excludeFromRetained =
+        originalSet.excludedFromRetainedSize.contains(index);
+    setToAlter.uncountInstance(
+      data.graph,
+      index,
+      data.retainedSizes,
+      excludeFromRetained: excludeFromRetained,
+    );
+  }
+
+  static Map<int, int> _hashCodeToIndexMap(
+    ObjectSet? ids,
+    HeapData? data,
+  ) {
+    if (ids == null || data == null) return const {};
+    return {
+      for (var id in ids.indexes) data.graph.objects[id].identityHashCode: id,
+    };
   }
 
   final created = ObjectSet();
@@ -75,42 +100,51 @@ class ObjectSetDiff {
   bool get isZero => delta.isZero;
 }
 
-/// Comparison between two heaps for a class.
 class DiffClassData extends ClassData {
   DiffClassData._({
-    required super.statsByPath,
-    required super.heapClass,
-    required this.total,
-  });
+    required HeapClassName heapClass,
+    required this.diff,
+    required this.byPath,
+  }) : super(className: heapClass);
 
-  final ObjectSetDiff total;
+  final ObjectSetDiff diff;
 
-  static DiffClassData? diff({
-    required SingleClassStats? before,
-    required SingleClassStats? after,
+  @override
+  ObjectSetStats get objects => diff.delta;
+
+  @override
+  final Map<PathFromRoot, ObjectSetStats> byPath;
+
+  static DiffClassData? compare({
+    required SingleClassData? before,
+    required HeapData dataBefore,
+    required SingleClassData? after,
+    required HeapData dataAfter,
   }) {
     if (before == null && after == null) return null;
-
-    final heapClass = (before?.heapClass ?? after?.heapClass)!;
+    final heapClass = (before?.className ?? after?.className)!;
 
     final result = DiffClassData._(
       heapClass: heapClass,
-      total: ObjectSetDiff(
+      diff: ObjectSetDiff(
         setBefore: before?.objects,
         setAfter: after?.objects,
+        dataBefore: dataBefore,
+        dataAfter: dataAfter,
       ),
-      statsByPath: subtractMaps<PathFromRoot, ObjectSetStats, ObjectSetStats,
+      // PathFromRoot, ObjectSetStats
+      byPath: subtractMaps<PathFromRoot, ObjectSetStats, ObjectSetStats,
           ObjectSetStats>(
-        from: after?.statsByPath,
-        subtract: before?.statsByPath,
+        from: after?.byPath,
+        subtract: before?.byPath,
         subtractor: ({subtract, from}) =>
             ObjectSetStats.subtract(subtract: subtract, from: from),
       ),
     );
 
     if (result.isZero()) return null;
-    return result..seal();
+    return result;
   }
 
-  bool isZero() => total.isZero;
+  bool isZero() => diff.isZero;
 }

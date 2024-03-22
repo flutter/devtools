@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:ui_web' as ui_web;
 
 import 'package:flutter/foundation.dart';
-import 'package:vm_service_protos/vm_service_protos.dart';
 import 'package:web/web.dart';
 
 import '../../../../../shared/globals.dart';
@@ -145,7 +144,7 @@ class PerfettoControllerImpl extends PerfettoController {
 
   /// Trace data that we should load, but have not yet since the trace viewer
   /// is not visible (i.e. [TimelineEventsController.isActiveFeature] is false).
-  Trace? pendingTraceToLoad;
+  Uint8List? pendingTraceToLoad;
 
   /// Time range we should scroll to, but have not yet since the trace viewer
   /// is not visible (i.e. [TimelineEventsController.isActiveFeature] is false).
@@ -202,13 +201,13 @@ class PerfettoControllerImpl extends PerfettoController {
   }
 
   @override
-  Future<void> loadTrace(Trace trace) async {
+  Future<void> loadTrace(Uint8List traceBinary) async {
     if (!timelineEventsController.isActiveFeature) {
-      pendingTraceToLoad = trace;
+      pendingTraceToLoad = traceBinary;
       return;
     }
     pendingTraceToLoad = null;
-    activeTrace.trace = trace;
+    activeTrace.trace = traceBinary;
     await Future.delayed(_postTraceDelay);
   }
 
@@ -230,6 +229,6 @@ class PerfettoControllerImpl extends PerfettoController {
   @override
   Future<void> clear() async {
     processor.clear();
-    await loadTrace(Trace());
+    await loadTrace(Uint8List(0));
   }
 }

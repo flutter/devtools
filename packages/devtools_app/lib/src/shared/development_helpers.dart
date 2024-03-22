@@ -172,3 +172,8 @@ FutureOr<void> debugTimeAsync(
   final time = DateTime.now().millisecondsSinceEpoch - now;
   _log.info('$debugName: $time ms');
 }
+
+/// If false, the [HeapData.classes] is always empty.
+///
+/// Is used to evaluate performance of calculations.
+bool calculateSetOfClasses = true;

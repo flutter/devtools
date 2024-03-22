@@ -49,4 +49,22 @@ class DTDManager {
     _connection.value = null;
     _uri = null;
   }
+
+  Future<IDEWorkspaceRoots?> workspaceRoots({bool forceRefresh = false}) async {
+    if (hasConnection) {
+      if (_workspaceRoots != null && forceRefresh) {
+        _workspaceRoots = null;
+      }
+      try {
+        return _workspaceRoots ??=
+            await _connection.value!.getIDEWorkspaceRoots();
+      } catch (e) {
+        _log.fine('Error fetching IDE workspaceRoots: $e');
+        return null;
+      }
+    }
+    return null;
+  }
+
+  IDEWorkspaceRoots? _workspaceRoots;
 }

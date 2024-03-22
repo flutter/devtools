@@ -1,6 +1,11 @@
-## 0.0.15-wip
+## 0.1.1-wip
+* Update the simulated environment help dialogs with information about the
+new `--print-dtd` CLI flag.
+
+## 0.1.0
 * Bump `devtools_app_shared` to ^0.1.0
 * Update readme to use `pub add` instead of explicit package version.
+* Bump `devtools_shared` to ^8.1.0
 
 ## 0.0.14
 * Add a global `dtdManager` for interacting with the Dart Tooling Daemon.

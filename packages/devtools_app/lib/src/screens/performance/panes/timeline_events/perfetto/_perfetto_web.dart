@@ -10,12 +10,10 @@ import 'dart:typed_data';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_app_shared/web_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:vm_service_protos/vm_service_protos.dart';
 import 'package:web/web.dart';
 
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
-import '../../../../../shared/development_helpers.dart';
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../performance_utils.dart';
@@ -47,7 +45,7 @@ class _PerfettoState extends State<Perfetto> with AutoDisposeMixin {
 
     // If [_perfettoController.activeTrace.trace] has a null value, the trace
     // data has not yet been initialized.
-    if (_perfettoController.activeTrace.trace != null) {
+    if (_perfettoController.activeTrace.traceBinary != null) {
       _loadActiveTrace();
     }
     addAutoDisposeListener(_perfettoController.activeTrace, _loadActiveTrace);
@@ -60,10 +58,10 @@ class _PerfettoState extends State<Perfetto> with AutoDisposeMixin {
   }
 
   void _loadActiveTrace() {
-    assert(_perfettoController.activeTrace.trace != null);
+    assert(_perfettoController.activeTrace.traceBinary != null);
     unawaited(
       _viewController._loadPerfettoTrace(
-        _perfettoController.activeTrace.trace!,
+        _perfettoController.activeTrace.traceBinary!,
       ),
     );
   }
@@ -161,26 +159,22 @@ class _PerfettoViewController extends DisposableController
     );
   }
 
-  Future<void> _loadPerfettoTrace(Trace trace) async {
-    late Uint8List buffer;
-    debugTimeSync(
-      () => buffer = trace.writeToBuffer(),
-      debugName: 'Trace.writeToBuffer',
-    );
-
-    if (buffer.isEmpty) {
+  Future<void> _loadPerfettoTrace(Uint8List traceBinary) async {
+    if (traceBinary.isEmpty) {
       // TODO(kenz): is there a better way to create an empty data set using the
       // protozero format? I think this is still using the legacy Chrome format.
       // We can't use `Trace()` because the Perfetto post message handler throws
       // an exception if an empty buffer is posted.
-      buffer = Uint8List.fromList(jsonEncode({'traceEvents': []}).codeUnits);
+      traceBinary = Uint8List.fromList(
+        jsonEncode({'traceEvents': []}).codeUnits,
+      );
     }
 
     await _pingPerfettoUntilReady();
     ga.select(gac.performance, gac.PerformanceEvents.perfettoLoadTrace.name);
     _postMessage({
       'perfetto': {
-        'buffer': buffer,
+        'buffer': traceBinary,
         'title': 'DevTools timeline trace',
         'keepApiOpen': true,
       },
