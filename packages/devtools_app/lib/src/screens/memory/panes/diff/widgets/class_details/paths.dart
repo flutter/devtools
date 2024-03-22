@@ -125,28 +125,11 @@ class RetainingPathTable extends StatelessWidget {
   final bool isDiff;
   final ClassData classData;
 
-  @visibleForTesting
-  static void resetSingletons() {
-    debugDataCalculationMicros = 0;
-  }
+  late final _data = toPathDataList(classData);
 
   @visibleForTesting
-  static int debugDataCalculationMicros = 0;
-
-  late final _data = () {
-    Stopwatch? stopwatch;
-    assert(() {
-      stopwatch = Stopwatch()..start();
-      return true;
-    }());
-    final result =
-        classData.byPath.keys.map((path) => PathData(classData, path)).toList();
-    assert(() {
-      debugDataCalculationMicros = stopwatch!.elapsedMicroseconds;
-      return true;
-    }());
-    return result;
-  }();
+  static List<PathData> toPathDataList(ClassData classData) =>
+      classData.byPath.keys.map((path) => PathData(classData, path)).toList();
 
   static final _columnStore = <String, _RetainingPathTableColumns>{};
   static _RetainingPathTableColumns _columns(

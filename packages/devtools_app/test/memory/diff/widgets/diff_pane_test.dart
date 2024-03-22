@@ -5,7 +5,6 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/memory/framework/connected/memory_tabs.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/diff_pane.dart';
-import 'package:devtools_app/src/screens/memory/panes/diff/widgets/class_details/paths.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/widgets/snapshot_list.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
@@ -45,29 +44,6 @@ void main() {
 
   tearDown(() {
     scene.tearDown();
-  });
-
-  group('Many retaining paths', () {
-    setUp(() async {
-      await scene.setUp(heapProviders: [MemoryDefaultSceneHeaps.manyPaths]);
-    });
-
-    testWidgetsWithWindowSize(
-      'do not jank UI',
-      windowSize,
-      (WidgetTester tester) async {
-        await pumpScene(tester, scene);
-        await takeSnapshot(tester, scene);
-
-        RetainingPathTable.resetSingletons();
-        await tester.runAsync(() async {
-          await tester.tap(find.text('TheData'));
-          await tester.pumpAndSettle();
-        });
-        expect(RetainingPathTable.debugDataCalculationMicros, isPositive);
-        expect(RetainingPathTable.debugDataCalculationMicros, lessThan(2000));
-      },
-    );
   });
 
   group('Diff pane', () {
