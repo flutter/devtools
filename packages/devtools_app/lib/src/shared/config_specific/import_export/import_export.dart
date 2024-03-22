@@ -135,7 +135,7 @@ abstract class ExportController {
     return '${prefix}_$timestamp$postfix.$type';
   }
 
-  /// Downloads a file with [contents]
+  /// Downloads a file with [content]
   /// and pushes notification about success if [notify] is true.
   String downloadFile(
     String content, {

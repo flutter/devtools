@@ -8,9 +8,6 @@ enum RefDirection {
   outbound,
 }
 
-/// Result of invocation of [identityHashCode].
-typedef IdentityHashCode = int;
-
 class MemoryFootprint {
   MemoryFootprint({
     required this.dart,
@@ -23,3 +20,7 @@ class MemoryFootprint {
   /// Subset of [dart].
   final int reachable;
 }
+
+/// Value for rootIndex is taken from the doc:
+/// https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/heap_snapshot.md#object-ids
+const int heapRootIndex = 1;

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../../../shared/heap/heap.dart';
+import '../../../../../shared/memory/classes.dart';
 
 String classesToCsv(Iterable<ClassData> classes) {
   final csvBuffer = StringBuffer();
@@ -20,12 +20,12 @@ String classesToCsv(Iterable<ClassData> classes) {
     ].map((e) => '"$e"').join(','),
   );
 
-  for (var classStats in classes) {
-    for (var pathStats in classStats.statsByPathEntries) {
+  for (var classData in classes) {
+    for (var pathStats in classData.byPath.entries) {
       csvBuffer.writeln(
         [
-          classStats.heapClass.className,
-          classStats.heapClass.library,
+          classData.className.className,
+          classData.className.library,
           pathStats.value.instanceCount,
           pathStats.value.shallowSize,
           pathStats.value.retainedSize,

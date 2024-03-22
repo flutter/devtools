@@ -7,9 +7,11 @@ the same logic or styling.
 
 ## Usage
 
-Add a dependency to your `pubspec.yaml` file:
-```yaml
-devtools_app_shared: ^0.0.7
+The following will add the package as a dependency to your `pubspec.yaml` (and run an
+implicit `flutter pub get`):
+
+```console
+$ flutter pub add devtools_app_shared
 ```
 
 Import the component library that you need:

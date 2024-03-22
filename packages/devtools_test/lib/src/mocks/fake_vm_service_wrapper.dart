@@ -230,7 +230,13 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
       Future.value(Success());
 
   @override
-  Future<HeapSnapshotGraph> getHeapSnapshotGraph(IsolateRef isolateRef) async {
+  Future<HeapSnapshotGraph> getHeapSnapshotGraph(
+    IsolateRef isolateRef, {
+    bool calculateReferrers = false,
+    bool decodeExternalProperties = false,
+    bool decodeIdentityHashCodes = false,
+    bool decodeObjectData = false,
+  }) async {
     // Simulate a snapshot that takes .5 seconds.
     await Future.delayed(const Duration(milliseconds: 500));
     final result = MockHeapSnapshotGraph();

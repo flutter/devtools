@@ -3,25 +3,46 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
+import 'package:dtd/dtd.dart';
 import 'package:flutter/material.dart';
 
-class DirectoryPicker extends StatefulWidget {
-  const DirectoryPicker({
-    required this.onDirectoryPicked,
+import 'common_widgets.dart';
+import 'primitives/utils.dart';
+
+// TODO(kenz): move this file into the deep links screen directory.
+
+class ProjectRootTextField extends StatefulWidget {
+  const ProjectRootTextField({
+    required this.onValidatePressed,
     this.enabled = true,
     super.key,
   });
 
   final bool enabled;
 
-  final ValueChanged<String> onDirectoryPicked;
+  final void Function(String) onValidatePressed;
 
   @override
-  State<DirectoryPicker> createState() => _DirectoryPickerState();
+  State<ProjectRootTextField> createState() => _ProjectRootTextFieldState();
 }
 
-class _DirectoryPickerState extends State<DirectoryPicker> {
-  final TextEditingController controller = TextEditingController();
+class _ProjectRootTextFieldState extends State<ProjectRootTextField>
+    with AutoDisposeMixin {
+  final controller = TextEditingController();
+
+  late String currentText;
+
+  @override
+  void initState() {
+    super.initState();
+    currentText = controller.text;
+    addAutoDisposeListener(controller, () {
+      setState(() {
+        currentText = controller.text.trim();
+      });
+    });
+  }
 
   @override
   void dispose() {
@@ -38,28 +59,103 @@ class _DirectoryPickerState extends State<DirectoryPicker> {
         Flexible(
           flex: 4,
           fit: FlexFit.tight,
-          child: RoundedOutlinedBorder(
-            child: Container(
-              height: defaultTextFieldHeight,
-              padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-              child: TextField(
-                controller: controller,
-                enabled: widget.enabled,
-                onSubmitted: (String path) {
-                  widget.onDirectoryPicked(path.trim());
-                },
-                decoration: const InputDecoration(
-                  isDense: true,
-                  hintText: 'Enter path to a Flutter project here',
-                ),
-                style: Theme.of(context).regularTextStyle,
-                textAlign: TextAlign.left,
-              ),
+          child: Container(
+            height: defaultTextFieldHeight,
+            padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+            child: DevToolsClearableTextField(
+              controller: controller,
+              enabled: widget.enabled,
+              onSubmitted: (String path) {
+                widget.onValidatePressed(path.trim());
+              },
+              labelText: 'Path to Flutter project',
+              roundedBorder: true,
             ),
           ),
         ),
+        const SizedBox(width: defaultSpacing),
+        _ValidateDeepLinksButton(
+          projectRoot: currentText.isEmpty ? null : currentText,
+          onValidatePressed: widget.onValidatePressed,
+        ),
         const Spacer(),
       ],
+    );
+  }
+}
+
+class ProjectRootsDropdown extends StatefulWidget {
+  ProjectRootsDropdown({
+    required this.workspaceRoots,
+    required this.onValidatePressed,
+    super.key,
+  }) : assert(workspaceRoots.ideWorkspaceRoots.isNotEmpty);
+
+  final IDEWorkspaceRoots workspaceRoots;
+
+  final void Function(String) onValidatePressed;
+
+  @override
+  State<ProjectRootsDropdown> createState() => _ProjectRootsDropdownState();
+}
+
+class _ProjectRootsDropdownState extends State<ProjectRootsDropdown> {
+  Uri? selectedUri;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedUri = widget.workspaceRoots.ideWorkspaceRoots.safeFirst;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        RoundedDropDownButton<Uri>(
+          value: selectedUri,
+          items: [
+            for (final uri in widget.workspaceRoots.ideWorkspaceRoots)
+              _buildMenuItem(uri),
+          ],
+          onChanged: (uri) => setState(() {
+            selectedUri = uri;
+          }),
+        ),
+        const SizedBox(width: defaultSpacing),
+        _ValidateDeepLinksButton(
+          projectRoot: selectedUri?.path.trim(),
+          onValidatePressed: widget.onValidatePressed,
+        ),
+      ],
+    );
+  }
+
+  DropdownMenuItem<Uri> _buildMenuItem(Uri uri) {
+    return DropdownMenuItem<Uri>(
+      value: uri,
+      child: Text(uri.path),
+    );
+  }
+}
+
+class _ValidateDeepLinksButton extends StatelessWidget {
+  const _ValidateDeepLinksButton({
+    required this.projectRoot,
+    required this.onValidatePressed,
+  });
+
+  final String? projectRoot;
+  final void Function(String) onValidatePressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return DevToolsButton(
+      elevated: true,
+      label: 'Validate deep links',
+      onPressed:
+          projectRoot == null ? null : () => onValidatePressed(projectRoot!),
     );
   }
 }

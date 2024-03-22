@@ -19,6 +19,7 @@ import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 
+import 'byte_utils.dart';
 import 'simple_items.dart';
 
 final _log = Logger('utils');
@@ -39,90 +40,8 @@ String percent(double d, {int fractionDigits = 2}) =>
     '${(d * 100).toStringAsFixed(fractionDigits)}%';
 
 /// Unifies printing of retained size to avoid confusion related to different rounding.
-String? prettyPrintRetainedSize(int? bites) => prettyPrintBytes(
-      bites,
-      includeUnit: true,
-      kbFractionDigits: 1,
-    );
-
-String? prettyPrintBytes(
-  num? bytes, {
-  int kbFractionDigits = 0,
-  int mbFractionDigits = 1,
-  int gbFractionDigits = 1,
-  bool includeUnit = false,
-  num roundingPoint = 1.0,
-  int maxBytes = 52,
-}) {
-  if (bytes == null) {
-    return null;
-  }
-  // TODO(peterdjlee): Generalize to handle different kbFractionDigits.
-  // Ensure a small number of bytes does not print as 0 KB.
-  // If bytes >= maxBytes and kbFractionDigits == 1, it will start rounding to 0.1 KB.
-  if (bytes.abs() < maxBytes && kbFractionDigits == 1) {
-    var output = bytes.toString();
-    if (includeUnit) {
-      output += ' B';
-    }
-    return output;
-  }
-  final sizeInKB = bytes.abs() / 1024.0;
-  final sizeInMB = sizeInKB / 1024.0;
-  final sizeInGB = sizeInMB / 1024.0;
-
-  if (sizeInGB >= roundingPoint) {
-    return printGB(
-      bytes,
-      fractionDigits: gbFractionDigits,
-      includeUnit: includeUnit,
-    );
-  } else if (sizeInMB >= roundingPoint) {
-    return printMB(
-      bytes,
-      fractionDigits: mbFractionDigits,
-      includeUnit: includeUnit,
-    );
-  } else {
-    return printKB(
-      bytes,
-      fractionDigits: kbFractionDigits,
-      includeUnit: includeUnit,
-    );
-  }
-}
-
-String printKB(num bytes, {int fractionDigits = 0, bool includeUnit = false}) {
-  final NumberFormat kbPattern = NumberFormat.decimalPattern()
-    ..maximumFractionDigits = fractionDigits;
-
-  // We add ((1024/2)-1) to the value before formatting so that a non-zero byte
-  // value doesn't round down to 0. If showing decimal points, let it round normally.
-  // TODO(peterdjlee): Round up to the respective digit when fractionDigits > 0.
-  final processedBytes = fractionDigits == 0 ? bytes + 511 : bytes;
-  var output = kbPattern.format(processedBytes / 1024);
-  if (includeUnit) {
-    output += ' KB';
-  }
-  return output;
-}
-
-String printMB(num bytes, {int fractionDigits = 1, bool includeUnit = false}) {
-  var output = (bytes / (1024 * 1024.0)).toStringAsFixed(fractionDigits);
-  if (includeUnit) {
-    output += ' MB';
-  }
-  return output;
-}
-
-String printGB(num bytes, {int fractionDigits = 1, bool includeUnit = false}) {
-  var output =
-      (bytes / (1024 * 1024.0 * 1024.0)).toStringAsFixed(fractionDigits);
-  if (includeUnit) {
-    output += ' GB';
-  }
-  return output;
-}
+String? prettyPrintRetainedSize(int? bytes) =>
+    prettyPrintBytes(bytes, includeUnit: true);
 
 enum DurationDisplayUnit {
   micros('μs'),
@@ -1103,12 +1022,18 @@ extension IterableExtension<T> on Iterable<T> {
 }
 
 extension ListExtension<T> on List<T> {
-  List<T> joinWith(T separator) {
+  List<T> joinWith(
+    T separator, {
+    bool includeTrailing = false,
+    bool includeLeading = false,
+  }) {
     return [
+      if (includeLeading) separator,
       for (int i = 0; i < length; i++) ...[
         this[i],
         if (i != length - 1) separator,
       ],
+      if (includeTrailing) separator,
     ];
   }
 

@@ -6,14 +6,18 @@ import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/deep_link_validation/deep_link_list_view.dart';
 import 'package:devtools_app/src/screens/deep_link_validation/deep_links_model.dart';
 import 'package:devtools_app/src/screens/deep_link_validation/deep_links_services.dart';
+import 'package:devtools_app/src/screens/deep_link_validation/select_project_view.dart';
 import 'package:devtools_app/src/screens/deep_link_validation/validation_details_view.dart';
 import 'package:devtools_app/src/shared/directory_picker.dart';
+import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:devtools_test/helpers.dart';
+import 'package:dtd/dtd.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 
 final linkDatas = [
   LinkData(
@@ -56,7 +60,8 @@ final pathErrorlinkData = LinkData(
 );
 
 void main() {
-  setUp(() {
+  // ignore: avoid-redundant-async, false positive.
+  setUp(() async {
     setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
     setGlobal(
       DevToolsEnvironmentParameters,
@@ -65,6 +70,14 @@ void main() {
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());
+
+    final mockDtdManager = MockDTDManager();
+    final rootUri1 = Uri.parse('file:///Users/me/package_root_1');
+    final rootUri2 = Uri.parse('file:///Users/me/package_root_2');
+    when(mockDtdManager.workspaceRoots()).thenAnswer((_) async {
+      return IDEWorkspaceRoots(ideWorkspaceRoots: [rootUri1, rootUri2]);
+    });
+    setGlobal(DTDManager, mockDtdManager);
   });
 
   late DeepLinksScreen screen;
@@ -113,7 +126,9 @@ void main() {
         );
 
         expect(find.byType(DeepLinkPage), findsOneWidget);
-        expect(find.byType(DirectoryPicker), findsOneWidget);
+        expect(find.byType(SelectProjectView), findsOneWidget);
+        expect(find.byType(ProjectRootsDropdown), findsOneWidget);
+        expect(find.byType(ProjectRootTextField), findsOneWidget);
       },
     );
 

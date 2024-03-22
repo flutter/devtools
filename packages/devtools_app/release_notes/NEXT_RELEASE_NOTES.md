@@ -6,7 +6,7 @@ This is draft for future release notes, that are going to land on
 The 2.34.0 release of the Dart and Flutter DevTools
 includes the following changes among other general improvements.
 To learn more about DevTools, check out the
-[DevTools overview](https://docs.flutter.dev/tools/devtools/overview).
+[DevTools overview]({{site.url}}/tools/devtools/overview).
 
 ## General updates
 
@@ -30,7 +30,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## Memory updates
 
-TODO: Remove this section if there are not any general updates.
+* Enabled export of snapshots and improved snapshotting
+performance. - [#7197](https://github.com/flutter/devtools/pull/7197)
 
 ## Debugger updates
 
@@ -42,10 +43,16 @@ TODO: Remove this section if there are not any general updates.
 * Fixed a bug where selected pending requests weren't refreshing the tab once updated. - [#7266](https://github.com/flutter/devtools/pull/7266)
 * Fixed the JSON viewer so multiline strings are visible in their row, and
   through a tooltip. - [#7389](https://github.com/flutter/devtools/pull/7389)
+* Fixed JsonViewer where all of the expanded sections would snap closed. [#7367](https://github.com/flutter/devtools/pull/7367)
 
 ## Logging updates
 
 TODO: Remove this section if there are not any general updates.
+
+## Deep Links tool updates
+
+* Automatically populate a list of Flutter projects from the connected
+IDE. - [#7415](https://github.com/flutter/devtools/pull/7415)
 
 ## App size tool updates
 

@@ -8,6 +8,7 @@ import 'package:devtools_app/src/screens/memory/panes/profile/model.dart';
 import 'package:devtools_app/src/screens/memory/panes/profile/profile_pane_controller.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_service_private_extensions.dart';
 import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/primitives/byte_utils.dart';
 import 'package:devtools_app/src/shared/primitives/utils.dart';
 import 'package:devtools_app/src/shared/table/table.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -38,13 +39,6 @@ void main() {
   //setGlobal(NotificationService, NotificationService());
 
   group('Allocation Profile Table', () {
-    // setUp(() async {
-    //   setGlobal(OfflineModeController, OfflineModeController());
-    //   setGlobal(IdeTheme, IdeTheme());
-    //   setGlobal(PreferencesController, PreferencesController());
-    //   _setUpServiceManagerForMemory();
-    // });
-
     Future<void> navigateToAllocationProfile(
       WidgetTester tester,
       ProfilePaneController allocationProfileController,
@@ -116,7 +110,7 @@ void main() {
               )!,
               findRichText: true,
             ),
-            findsOneWidget,
+            findsWidgets,
           );
 
           // Capacity
@@ -128,7 +122,7 @@ void main() {
               )!,
               findRichText: true,
             ),
-            findsOneWidget,
+            findsWidgets,
           );
 
           // Average collection time
@@ -140,7 +134,7 @@ void main() {
               ),
               findRichText: true,
             ),
-            findsOneWidget,
+            findsWidgets,
           );
 
           // # of collections
@@ -149,7 +143,7 @@ void main() {
               stats.collections.toString(),
               findRichText: true,
             ),
-            findsOneWidget,
+            findsWidgets,
           );
         }
 

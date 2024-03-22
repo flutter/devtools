@@ -6,7 +6,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:devtools_app_shared/utils.dart';
-import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
@@ -16,12 +15,7 @@ final _log = Logger('_framework_initialize_desktop');
 
 /// Return the url the application is launched from.
 Future<String> initializePlatform() async {
-  // When running in a desktop embedder, Flutter throws an error because the
-  // platform is not officially supported. This is not needed for web.
-  debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
-
   setGlobal(Storage, FlutterDesktopStorage());
-
   return '';
 }
 
