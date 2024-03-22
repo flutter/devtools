@@ -367,6 +367,7 @@ class UriColumn extends ColumnData<NetworkRequest>
       : super.wide(
           'Uri',
           minWidthPx: scaleByFontFactor(100.0),
+          showTooltip: true,
         );
 
   @override
@@ -400,8 +401,6 @@ class MethodColumn extends ColumnData<NetworkRequest> {
   MethodColumn() : super('Method', fixedWidthPx: scaleByFontFactor(70));
 
   @override
-  String getTooltip(NetworkRequest dataObject) => '';
-  @override
   String getValue(NetworkRequest dataObject) {
     return dataObject.method;
   }
@@ -416,8 +415,6 @@ class ActionsColumn extends ColumnData<NetworkRequest>
           alignment: ColumnAlignment.right,
         );
 
-  @override
-  String getTooltip(NetworkRequest dataObject) => '';
   static const _actionSplashRadius = 16.0;
 
   @override
@@ -499,8 +496,6 @@ class StatusColumn extends ColumnData<NetworkRequest>
   }
 
   @override
-  String getTooltip(NetworkRequest dataObject) => '';
-  @override
   String getDisplayValue(NetworkRequest dataObject) {
     return dataObject.status == null ? '--' : dataObject.status.toString();
   }
@@ -532,8 +527,6 @@ class TypeColumn extends ColumnData<NetworkRequest> {
         );
 
   @override
-  String getTooltip(NetworkRequest dataObject) => '';
-  @override
   String getValue(NetworkRequest dataObject) {
     return dataObject.type;
   }
@@ -552,8 +545,6 @@ class DurationColumn extends ColumnData<NetworkRequest> {
           fixedWidthPx: scaleByFontFactor(80),
         );
 
-  @override
-  String getTooltip(NetworkRequest dataObject) => '';
   @override
   int? getValue(NetworkRequest dataObject) {
     return dataObject.duration?.inMilliseconds;
@@ -579,8 +570,6 @@ class TimestampColumn extends ColumnData<NetworkRequest> {
           fixedWidthPx: scaleByFontFactor(135),
         );
 
-  @override
-  String getTooltip(NetworkRequest dataObject) => '';
   @override
   DateTime? getValue(NetworkRequest dataObject) {
     return dataObject.startTimestamp;

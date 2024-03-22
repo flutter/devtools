@@ -26,6 +26,7 @@ abstract class ColumnData<T> {
     this.titleTooltip,
     this.alignment = ColumnAlignment.left,
     this.headerAlignment = TextAlign.left,
+    this.showTooltip = false,
   }) : minWidthPx = null;
 
   ColumnData.wide(
@@ -34,8 +35,10 @@ abstract class ColumnData<T> {
     this.minWidthPx,
     this.alignment = ColumnAlignment.left,
     this.headerAlignment = TextAlign.left,
+    this.showTooltip = false,
   }) : fixedWidthPx = null;
 
+  final bool showTooltip;
   final String title;
 
   final String? titleTooltip;
@@ -80,7 +83,8 @@ abstract class ColumnData<T> {
   String? getCaption(T dataObject) => null;
 
   /// Get the cell's tooltip value from the given [dataObject].
-  String getTooltip(T dataObject) => getDisplayValue(dataObject);
+  String getTooltip(T dataObject) =>
+      showTooltip ? getDisplayValue(dataObject) : '';
 
   /// Get the cell's rich tooltip span from the given [dataObject].
   ///
