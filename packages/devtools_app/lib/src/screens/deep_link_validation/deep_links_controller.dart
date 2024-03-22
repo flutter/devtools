@@ -298,12 +298,11 @@ class DeepLinksController extends DisposableController {
   final pagePhase = ValueNotifier<PagePhase>(PagePhase.emptyState);
 
   /// These are all link datas before applying displayOptions.
-  var validatedLinkDatas =
-      ValidatedLinkDatas(all: [], byDomain: [], byPath: []);
+  var validatedLinkDatas = ValidatedLinkDatas.empty();
 
   /// These are link datas actually displayed in the data table after filtering by displayOptions.
   final displayLinkDatasNotifier = ValueNotifier<ValidatedLinkDatas>(
-    ValidatedLinkDatas(all: [], byDomain: [], byPath: []),
+    ValidatedLinkDatas.empty(),
   );
 
   final generatedAssetLinksForSelectedLink =

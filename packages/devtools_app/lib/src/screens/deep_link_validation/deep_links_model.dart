@@ -165,6 +165,10 @@ class ValidatedLinkDatas {
     required this.byDomain,
     required this.byPath,
   });
+  ValidatedLinkDatas.empty()
+      : all = [],
+        byDomain = [],
+        byPath = [];
   final List<LinkData> all;
   final List<LinkData> byDomain;
   final List<LinkData> byPath;
