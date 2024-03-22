@@ -13,7 +13,7 @@ import 'package:vm_service/vm_service.dart';
 typedef RefsByIndex = Map<int, List<int>>;
 typedef ClassByIndex = Map<int, HeapClassName>;
 
-final _sentinelObject = FakeSnapshotObjectFake();
+final _sentinelObject = FakeSnapshotObject();
 
 const _defaultClassId = 0;
 const _weakClassId = 1;
@@ -29,15 +29,15 @@ class FakeHeapSnapshotGraph extends Fake implements HeapSnapshotGraph {
   ];
 
   @override
-  final List<FakeSnapshotObjectFake> objects = [
+  final List<FakeSnapshotObject> objects = [
     _sentinelObject,
-    FakeSnapshotObjectFake(shallowSize: 1), // root
+    FakeSnapshotObject(shallowSize: 1), // root
   ];
 
   /// Adds object and returns index of the added object.
   int add([int? hashCode]) {
     objects.add(
-      FakeSnapshotObjectFake(identityHashCode: hashCode ?? objects.length),
+      FakeSnapshotObject(identityHashCode: hashCode ?? objects.length),
     );
     return objects.length - 1;
   }
@@ -84,7 +84,7 @@ class FakeHeapSnapshotGraph extends Fake implements HeapSnapshotGraph {
           maybeAddClass(HeapClassName(className: entry.key, library: null));
       for (var i = 0; i < entry.value; i++) {
         objects.add(
-          FakeSnapshotObjectFake(
+          FakeSnapshotObject(
             identityHashCode: objects.length,
             references: [],
             shallowSize: 1,
@@ -119,7 +119,7 @@ class FakeHeapSnapshotGraph extends Fake implements HeapSnapshotGraph {
       classId ??= weak ? _weakClassId : _defaultClassId;
 
       objects.add(
-        FakeSnapshotObjectFake(
+        FakeSnapshotObject(
           identityHashCode: i,
           references: refsByIndex[i] ?? [],
           shallowSize: 1,
@@ -175,8 +175,8 @@ class _FakeHeapSnapshotClass extends Fake implements HeapSnapshotClass {
   late final libraryUri = Uri.parse('');
 }
 
-class FakeSnapshotObjectFake extends Fake implements HeapSnapshotObject {
-  FakeSnapshotObjectFake({
+class FakeSnapshotObject extends Fake implements HeapSnapshotObject {
+  FakeSnapshotObject({
     this.identityHashCode = 0,
     List<int>? references,
     this.shallowSize = 0,
