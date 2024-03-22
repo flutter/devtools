@@ -123,6 +123,7 @@ class SnapshotListTitle extends StatelessWidget {
     required this.onEdit,
     required this.onEditingComplete,
     required this.onDelete,
+    required this.onExport,
   }) : super(key: key);
 
   final SnapshotItem item;
@@ -143,6 +144,9 @@ class SnapshotListTitle extends StatelessWidget {
   /// Called when the 'Delete' context menu item is selected.
   final VoidCallback onDelete;
 
+  /// Called when the 'Export' context menu item is selected.
+  final VoidCallback onExport;
+
   @override
   Widget build(BuildContext context) {
     final theItem = item;
@@ -156,7 +160,7 @@ class SnapshotListTitle extends StatelessWidget {
         size: defaultIconSize,
         color: theme.colorScheme.onSurface,
       );
-    } else if (theItem is SnapshotInstanceItem) {
+    } else if (theItem is SnapshotDataItem) {
       leading = Expanded(
         child: ValueListenableBuilder(
           valueListenable: editIndex,
@@ -190,11 +194,17 @@ class SnapshotListTitle extends StatelessWidget {
                       onPressed: onDelete,
                       child: const Text('Delete'),
                     ),
+                    MenuItemButton(
+                      onPressed: onExport,
+                      child: const Text('Export'),
+                    ),
                   ],
                 )
               : const SizedBox(width: menuButtonWidth),
         ),
       ]);
+    } else {
+      throw StateError('Unknown item type: $theItem');
     }
 
     return ValueListenableBuilder<bool>(
@@ -222,7 +232,7 @@ class _EditableSnapshotName extends StatefulWidget {
     required this.onEditingComplete,
   });
 
-  final SnapshotInstanceItem item;
+  final RenamableItem item;
 
   final bool editMode;
 
@@ -399,9 +409,9 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
                     if (_editIndex.value == index) {
                       _editIndex.value = null;
                     }
-                    final item = widget.controller.core.snapshots.value[index];
-                    widget.controller.deleteSnapshot(item);
+                    widget.controller.deleteCurrentSnapshot();
                   },
+                  onExport: widget.controller.exportCurrentItem,
                 ),
               ),
             );

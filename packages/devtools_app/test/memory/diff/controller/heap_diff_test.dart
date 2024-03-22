@@ -3,20 +3,20 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/screens/memory/panes/diff/data/classes_diff.dart';
+import 'package:devtools_app/src/screens/memory/panes/diff/data/heap_diff_data.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/data/heap_diff_store.dart';
-import 'package:devtools_app/src/screens/memory/shared/heap/heap.dart';
-import 'package:devtools_app/src/shared/memory/adapted_heap_data.dart';
-import 'package:devtools_app/src/shared/memory/adapted_heap_object.dart';
 import 'package:devtools_app/src/shared/memory/class_name.dart';
-import 'package:devtools_app/src/shared/memory/retainers.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../../../test_infra/test_data/memory/heap/factories.dart';
+import '../../../test_infra/test_data/memory/heap/heap_graph_fakes.dart';
 
 void main() {
   test(
-    '$HeapDiffStore does not create new $DiffHeapClasses for the same couple',
+    '$HeapDiffStore does not create new $HeapDiffData for the same couple',
     () async {
-      final heap1 = await _createSimplestHeap();
-      final heap2 = await _createSimplestHeap();
+      final heap1 = await testHeapData();
+      final heap2 = await testHeapData();
 
       expect(heap1 == heap2, false);
 
@@ -35,95 +35,64 @@ void main() {
     final className =
         HeapClassName.fromPath(className: 'myClass', library: 'library');
 
-    final deleted = _createObject(className, 1, {});
-    final persistedBefore = _createObject(className, 2, {});
-    final persistedAfter = _createObject(className, 2, {});
-    final created1 = _createObject(className, 3, {});
-    final created2 = _createObject(className, 4, {});
+    final graphBefore = FakeHeapSnapshotGraph();
+    final deleted = graphBefore.add(1);
+    final persistedBefore = graphBefore.add(2);
 
-    final statsBefore = await _createClassStats({deleted, persistedBefore});
-    final statsAfter =
-        await _createClassStats({persistedAfter, created1, created2});
+    final graphAfter = FakeHeapSnapshotGraph();
+    final persistedAfter = graphAfter.add(2);
+    final created1 = graphAfter.add(3);
+    final created2 = graphAfter.add(4);
 
-    final stats = DiffClassData.diff(before: statsBefore, after: statsAfter)!;
+    final classBefore = testClassData(
+      className,
+      [deleted, persistedBefore],
+      graphBefore,
+    );
+    final classAfter = testClassData(
+      className,
+      [persistedAfter, created1, created2],
+      graphAfter,
+    );
 
-    expect(stats.heapClass, className);
-    expect(stats.total.created.instanceCount, 2);
-    expect(stats.total.deleted.instanceCount, 1);
-    expect(stats.total.delta.instanceCount, 1);
-    expect(stats.total.persisted.instanceCount, 1);
+    final diff = DiffClassData.compare(
+      before: classBefore,
+      dataBefore: await testHeapData(graphBefore),
+      after: classAfter,
+      dataAfter: await testHeapData(graphAfter),
+    )!;
+
+    expect(diff.className, className);
+    expect(diff.diff.created.instanceCount, 2);
+    expect(diff.diff.deleted.instanceCount, 1);
+    expect(diff.diff.delta.instanceCount, 1);
+    expect(diff.diff.persisted.instanceCount, 1);
   });
 
   test('$DiffClassData calculates deletion as expected', () async {
     final className =
         HeapClassName.fromPath(className: 'myClass', library: 'library');
 
-    final deleted = _createObject(className, 1, {});
+    final graphBefore = FakeHeapSnapshotGraph();
+    final deleted = graphBefore.add(1);
 
-    final statsBefore = await _createClassStats({deleted});
+    final classBefore = testClassData(
+      className,
+      [deleted],
+      graphBefore,
+    );
 
-    final stats = DiffClassData.diff(before: statsBefore, after: null)!;
+    final diff = DiffClassData.compare(
+      before: classBefore,
+      dataBefore: await testHeapData(graphBefore),
+      after: null,
+      dataAfter: await testHeapData(),
+    )!;
 
-    expect(stats.heapClass, className);
-    expect(stats.total.created.instanceCount, 0);
-    expect(stats.total.deleted.instanceCount, 1);
-    expect(stats.total.delta.instanceCount, -1);
-    expect(stats.total.persisted.instanceCount, 0);
+    expect(diff.className, className);
+    expect(diff.diff.created.instanceCount, 0);
+    expect(diff.diff.deleted.instanceCount, 1);
+    expect(diff.diff.delta.instanceCount, -1);
+    expect(diff.diff.persisted.instanceCount, 0);
   });
 }
-
-Future<SingleClassStats> _createClassStats(
-  Set<AdaptedHeapObject> instances,
-) async {
-  final indexes =
-      Iterable<int>.generate(instances.length).map((i) => i + 1).toSet();
-
-  final objects = [
-    _createObject(
-      HeapClassName.fromPath(className: 'root', library: 'lib'),
-      0,
-      indexes,
-    ),
-    ...instances,
-  ];
-
-  final heap = AdaptedHeapData(
-    objects,
-    rootIndex: 0,
-  );
-  await calculateHeap(heap);
-
-  final result = SingleClassStats(heapClass: instances.first.heapClass);
-  for (var index in indexes) {
-    result.countInstance(heap, index);
-  }
-
-  return result;
-}
-
-AdaptedHeapObject _createObject(
-  HeapClassName className,
-  int code,
-  Set<int> references,
-) =>
-    AdaptedHeapObject(
-      code: code,
-      outRefs: references,
-      heapClass: className,
-      shallowSize: 1,
-    );
-
-Future<AdaptedHeap> _createSimplestHeap() async => await AdaptedHeap.create(
-      AdaptedHeapData(
-        [
-          AdaptedHeapObject(
-            code: 0,
-            outRefs: {},
-            heapClass:
-                HeapClassName.fromPath(className: 'root', library: 'lib'),
-            shallowSize: 1,
-          ),
-        ],
-        rootIndex: 0,
-      ),
-    );

@@ -30,7 +30,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## Memory updates
 
-TODO: Remove this section if there are not any general updates.
+* Enabled export of snapshots and improved snapshotting
+performance. - [#7197](https://github.com/flutter/devtools/pull/7197)
 
 ## Debugger updates
 
