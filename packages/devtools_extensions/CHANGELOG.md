@@ -1,3 +1,7 @@
+## 0.1.1-wip
+* Update the simulated environment help dialogs with information about the
+new `--print-dtd` CLI flag.
+
 ## 0.1.0
 * Bump `devtools_app_shared` to ^0.1.0
 * Update readme to use `pub add` instead of explicit package version.
