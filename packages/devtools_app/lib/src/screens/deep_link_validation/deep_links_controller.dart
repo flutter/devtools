@@ -214,17 +214,17 @@ class DeepLinksController extends DisposableController {
         gac.deeplink,
         gac.AnalyzeFlutterProject.loadAppLinks.name,
         asyncOperation: () async {
-          late AppLinkSettings result;
+          final AppLinkSettings result;
           try {
             result = await server.requestAndroidAppLinkSettings(
               selectedProject.value!.path,
               buildVariant: variant,
             );
+            _androidAppLinks[selectedVariantIndex.value] = result;
           } catch (_) {
             pagePhase.value = PagePhase.errorPage;
             return ;
           }
-          _androidAppLinks[selectedVariantIndex.value] = result;
         },
       );
     }
