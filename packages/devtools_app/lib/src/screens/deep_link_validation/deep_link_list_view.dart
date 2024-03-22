@@ -372,17 +372,17 @@ class _AllDeepLinkDataTable extends StatelessWidget {
               children: [
                 _DataTable(
                   viewType: TableViewType.domainView,
-                  linkDatas: controller.displayLinkDatasNotifier.value.byDomain,
+                  linkDatas: linkDatas.byDomain,
                   controller: controller,
                 ),
                 _DataTable(
                   viewType: TableViewType.pathView,
-                  linkDatas: controller.displayLinkDatasNotifier.value.byPath,
+                  linkDatas: linkDatas.byPath,
                   controller: controller,
                 ),
                 _DataTable(
                   viewType: TableViewType.singleUrlView,
-                  linkDatas: controller.displayLinkDatasNotifier.value.all,
+                  linkDatas: linkDatas.all,
                   controller: controller,
                 ),
               ],

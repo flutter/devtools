@@ -223,7 +223,6 @@ class DeepLinksController extends DisposableController {
             _androidAppLinks[selectedVariantIndex.value] = result;
           } catch (_) {
             pagePhase.value = PagePhase.errorPage;
-            return ;
           }
         },
       );
@@ -426,7 +425,7 @@ class DeepLinksController extends DisposableController {
       domainErrorCount: validatedLinkDatas.byDomain
           .where((element) => element.domainErrors.isNotEmpty)
           .length,
-      pathErrorCount: validatedLinkDatas.byDomain
+      pathErrorCount: validatedLinkDatas.byPath
           .where((element) => element.pathErrors.isNotEmpty)
           .length,
     );
