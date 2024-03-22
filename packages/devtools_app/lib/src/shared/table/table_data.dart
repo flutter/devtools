@@ -40,6 +40,7 @@ abstract class ColumnData<T> {
   }) : fixedWidthPx = null;
 
   final bool showTooltip;
+
   final String title;
 
   final String? titleTooltip;
@@ -83,6 +84,8 @@ abstract class ColumnData<T> {
 
   String? getCaption(T dataObject) => null;
 
+  // TODO: remove redundant getTooltip overrides now that [showToolTip] is
+  // available.
   /// Get the cell's tooltip value from the given [dataObject].
   String getTooltip(T dataObject) =>
       showTooltip ? getDisplayValue(dataObject) : '';

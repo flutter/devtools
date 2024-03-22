@@ -219,7 +219,9 @@ class _TableRowState<T> extends State<TableRow<T>>
   bool isActiveSearchMatch = false;
 
   bool isHovering = false;
+
   late FixedExtentDelegate rowExtentDelegate;
+
   late List<_TableRowPartDisplayType> _rowDisplayParts;
 
   @override
