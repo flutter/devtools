@@ -16,12 +16,12 @@ import 'deep_links_model.dart';
 import 'deep_links_services.dart';
 
 typedef _DomainAndPath = ({String domain, String path});
-const domainErrorsThatCanBeFixedByGeneratedJson = {
+const domainAssetLinksJsonFileErrors = {
   DomainError.existence,
   DomainError.appIdentifier,
   DomainError.fingerprints,
 };
-const domainErrorsThatCanNotBeFixedByGeneratedJson = {
+const domainHostingErrors = {
   DomainError.contentType,
   DomainError.httpsAccessibility,
   DomainError.nonRedirect,
@@ -308,16 +308,20 @@ class DeepLinksController extends DisposableController {
 
   bool addLocalFingerprint(String fingerprint) {
     // A valid fingerprint consists of 32 pairs of hexadecimal digits separated by colons.
-    bool isValidFingerpint(String input) {
+    bool isValidFingerprint(String input) {
       final RegExp pattern =
           RegExp(r'^([0-9a-f]{2}:){31}[0-9a-f]{2}$', caseSensitive: false);
       return pattern.hasMatch(input);
     }
 
-    if (!isValidFingerpint(fingerprint)) {
+    if (!isValidFingerprint(fingerprint)) {
       return false;
     }
-    localFingerprint.value = fingerprint;
+    if (localFingerprint.value != fingerprint) {
+      localFingerprint.value = fingerprint;
+      // If the local fingerprint is updated, re-generate asset link file.
+      unawaited(_generateAssetLinks());
+    }
     return true;
   }
 

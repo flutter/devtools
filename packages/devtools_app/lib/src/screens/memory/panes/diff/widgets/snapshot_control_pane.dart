@@ -9,7 +9,7 @@ import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/memory/simple_items.dart';
-import '../../../../../shared/primitives/utils.dart';
+import '../../../../../shared/primitives/byte_utils.dart';
 import '../../../shared/primitives/simple_elements.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/item_controller.dart';
@@ -22,7 +22,7 @@ class SnapshotControlPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final current = controller.core.selectedItem as SnapshotInstanceItem;
+    final current = controller.core.selectedItem as SnapshotDataItem;
     final heapIsReady = current.heap != null;
     if (heapIsReady) {
       return Row(
@@ -46,11 +46,12 @@ class SnapshotControlPane extends StatelessWidget {
               ),
             ],
           ),
-          Expanded(
-            child: _SnapshotSizeView(
-              footprint: current.heap!.footprint,
+          if (current.heap!.footprint != null)
+            Expanded(
+              child: _SnapshotSizeView(
+                footprint: current.heap!.footprint!,
+              ),
             ),
-          ),
         ],
       );
     }
@@ -72,16 +73,16 @@ class _DiffDropdown extends StatelessWidget {
     }
   }
 
-  final SnapshotInstanceItem current;
+  final SnapshotDataItem current;
   final DiffPaneController controller;
 
-  List<DropdownMenuItem<SnapshotInstanceItem>> items() =>
+  List<DropdownMenuItem<SnapshotDataItem>> items() =>
       controller.core.snapshots.value
           .where((item) => item.hasData)
-          .cast<SnapshotInstanceItem>()
+          .cast<SnapshotDataItem>()
           .map(
         (item) {
-          return DropdownMenuItem<SnapshotInstanceItem>(
+          return DropdownMenuItem<SnapshotDataItem>(
             value: item,
             child: Text(item == current ? '-' : item.name),
           );
@@ -90,17 +91,17 @@ class _DiffDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<SnapshotInstanceItem?>(
+    return ValueListenableBuilder<SnapshotDataItem?>(
       valueListenable: current.diffWith,
       builder: (_, diffWith, __) => Row(
         children: [
           const Text('Diff with:'),
           const SizedBox(width: defaultSpacing),
-          RoundedDropDownButton<SnapshotInstanceItem>(
+          RoundedDropDownButton<SnapshotDataItem>(
             isDense: true,
             value: current.diffWith.value ?? current,
-            onChanged: (SnapshotInstanceItem? value) {
-              late SnapshotInstanceItem? newDiffWith;
+            onChanged: (SnapshotDataItem? value) {
+              late SnapshotDataItem? newDiffWith;
               if ((value ?? current) == current) {
                 ga.select(
                   gac.memory,
@@ -139,7 +140,8 @@ class _SnapshotSizeView extends StatelessWidget {
     return Text(
       items.entries
           .map<String>(
-            (e) => '${e.key}: ${prettyPrintBytes(e.value, includeUnit: true)}',
+            (e) => '${e.key}: '
+                '${prettyPrintBytes(e.value, includeUnit: true, kbFractionDigits: 0)}',
           )
           // TODO(polina-c): consider using vertical divider instead of text.
           .join(' | '),

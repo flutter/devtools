@@ -169,8 +169,21 @@ class VmServiceWrapper extends VmService {
     );
   }
 
-  Future<HeapSnapshotGraph> getHeapSnapshotGraph(IsolateRef isolateRef) async {
-    return await HeapSnapshotGraph.getSnapshot(this, isolateRef);
+  Future<HeapSnapshotGraph> getHeapSnapshotGraph(
+    IsolateRef isolateRef, {
+    bool calculateReferrers = true,
+    bool decodeObjectData = true,
+    bool decodeExternalProperties = true,
+    bool decodeIdentityHashCodes = true,
+  }) async {
+    return await HeapSnapshotGraph.getSnapshot(
+      this,
+      isolateRef,
+      calculateReferrers: calculateReferrers,
+      decodeObjectData: decodeObjectData,
+      decodeExternalProperties: decodeExternalProperties,
+      decodeIdentityHashCodes: decodeIdentityHashCodes,
+    );
   }
 
   @override

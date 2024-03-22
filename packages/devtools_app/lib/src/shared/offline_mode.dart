@@ -88,7 +88,7 @@ class OfflineModeController {
 ///         shouldLoad: (data) => data.isNotEmpty,
 ///       );
 ///     } else {
-///       // Do normal screen initializaion.
+///       // Do normal screen initialization.
 ///     }
 ///   }
 ///

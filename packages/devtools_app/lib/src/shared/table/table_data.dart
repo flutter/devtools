@@ -5,6 +5,7 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
+import '../primitives/byte_utils.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
 
@@ -344,7 +345,8 @@ abstract class SizeAndPercentageColumn<T> extends ColumnData<T> {
       richTooltipProvider?.call(dataObject, context);
 
   String _memoryAndPercentage(T dataObject) =>
-      '${prettyPrintBytes(sizeProvider!(dataObject), includeUnit: true)} (${_percentDisplay(dataObject)})';
+      '${prettyPrintBytes(sizeProvider!(dataObject), includeUnit: true, kbFractionDigits: 0)}'
+      ' (${_percentDisplay(dataObject)})';
 
   String _percentDisplay(T dataObject) =>
       percent(percentAsDoubleProvider(dataObject));

@@ -71,8 +71,12 @@ enum ClassType {
       CircleIcon(color: color, text: label, textColor: Colors.white);
 }
 
+/// Fully qualified Class name.
+///
+/// Equal class names are not stored twice in memory.
 class HeapClassName {
-  HeapClassName._({required String? library, required this.className})
+  @visibleForTesting
+  HeapClassName({required String? library, required this.className})
       : library = _normalizeLibrary(library);
 
   static final _instances = <HeapClassName>{};
@@ -81,7 +85,7 @@ class HeapClassName {
     required String? library,
     required String className,
   }) {
-    final newInstance = HeapClassName._(library: library, className: className);
+    final newInstance = HeapClassName(library: library, className: className);
 
     final existingInstance = _instances.lookup(newInstance);
     if (existingInstance != null) return existingInstance;
@@ -126,10 +130,10 @@ class HeapClassName {
 
   /// Whether a class can hold a reference to an object
   /// without preventing garbage collection.
-  late final bool isWeakEntry = _isWeakEntry(className, library);
+  late final bool isWeak = _isWeak(className, library);
 
-  /// See [isWeakEntry].
-  static bool _isWeakEntry(String className, String library) {
+  /// See [isWeak].
+  static bool _isWeak(String className, String library) {
     // Classes that hold reference to an object without preventing
     // its collection.
     const weakHolders = {

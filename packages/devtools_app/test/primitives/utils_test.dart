@@ -17,63 +17,6 @@ import 'package:provider/provider.dart';
 
 void main() {
   group('utils', () {
-    test('prettyPrintBytes', () {
-      const int kb = 1024;
-      const int mb = 1024 * kb;
-
-      expect(
-        prettyPrintBytes(
-          51,
-          kbFractionDigits: 1,
-          includeUnit: true,
-        ),
-        '51 B',
-      );
-      expect(
-        prettyPrintBytes(
-          52,
-          kbFractionDigits: 1,
-          includeUnit: true,
-        ),
-        '0.1 KB',
-      );
-
-      expect(prettyPrintBytes(kb), '1');
-      expect(prettyPrintBytes(kb + 100, kbFractionDigits: 1), '1.1');
-      expect(prettyPrintBytes(kb + 150, kbFractionDigits: 2), '1.15');
-      expect(prettyPrintBytes(kb, includeUnit: true), '1 KB');
-      expect(prettyPrintBytes(kb * 1000, includeUnit: true), '1,000 KB');
-
-      expect(prettyPrintBytes(mb), '1.0');
-      expect(prettyPrintBytes(mb + kb * 100), '1.1');
-      expect(prettyPrintBytes(mb + kb * 150, mbFractionDigits: 2), '1.15');
-      expect(prettyPrintBytes(mb, includeUnit: true), '1.0 MB');
-      expect(prettyPrintBytes(mb - kb, includeUnit: true), '1,023 KB');
-    });
-
-    test('printKb', () {
-      const int kb = 1024;
-
-      expect(printKB(0), '0');
-      expect(printKB(1), '1');
-      expect(printKB(kb - 1), '1');
-      expect(printKB(kb), '1');
-      expect(printKB(kb + 1), '2');
-      expect(printKB(2000), '2');
-    });
-
-    test('printMb', () {
-      const int mb = 1024 * 1024;
-
-      expect(printMB(10 * mb, fractionDigits: 0), '10');
-      expect(printMB(10 * mb), '10.0');
-      expect(printMB(10 * mb, fractionDigits: 2), '10.00');
-
-      expect(printMB(1000 * mb, fractionDigits: 0), '1000');
-      expect(printMB(1000 * mb), '1000.0');
-      expect(printMB(1000 * mb, fractionDigits: 2), '1000.00');
-    });
-
     group('durationText', () {
       test('infers unit based on duration', () {
         expect(

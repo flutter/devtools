@@ -118,6 +118,16 @@ request from the branch in your cloned repo to the DevTools master branch. Creat
 	devtools_tool generate-code --upgrade
 	```
 
+ - To update DCM to the same version as on GitHub bots with apt-get or brew:
+
+    1. Locate, copy and run apt-get command searching by searching for `install dcm` in [build.yaml](https://github.com/flutter/devtools/blob/master/.github/workflows/build.yaml)
+      
+    2. Locate version on bots by searching for `install dcm` in [build.yaml](https://github.com/flutter/devtools/blob/master/.github/workflows/build.yaml) and run `brew install cqlabs/dcm/dcm@<version on bots without -1>`
+  
+    You can check you current local version with `dcm --version`.
+   
+    If version of DCM on bots is outdated, consider to submit a PR to refresh the version on bots.
+
 ## Running and debugging DevTools
 
 There are a few different environments that you may need to run DevTools in. After running DevTools
