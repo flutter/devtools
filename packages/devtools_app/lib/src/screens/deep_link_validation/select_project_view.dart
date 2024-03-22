@@ -40,11 +40,7 @@ class _SelectProjectViewState extends State<SelectProjectView>
   }
 
   Future<void> _initWorkspaceRoots() async {
-    // TODO(kenz): this does not work well for mono-repos. What we really need
-    // to do is add a DevTools server API that looks through the DevTools
-    // project roots and returns all subdirectories that contain a pubspec.yaml
-    // file (maybe with a Flutter dependency?).
-    final roots = await dtdManager.workspaceRoots();
+    final roots = await dtdManager.projectRoots();
     setState(() {
       workspaceRoots = roots;
     });

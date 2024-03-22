@@ -67,4 +67,21 @@ class DTDManager {
   }
 
   IDEWorkspaceRoots? _workspaceRoots;
+
+  Future<UriList?> projectRoots({bool forceRefresh = false}) async {
+    if (hasConnection) {
+      if (_projectRoots != null && forceRefresh) {
+        _projectRoots = null;
+      }
+      try {
+        return _projectRoots ??= await _connection.value!.getProjectRoots();
+      } catch (e) {
+        _log.fine('Error fetching project roots: $e');
+        return null;
+      }
+    }
+    return null;
+  }
+
+  UriList? _projectRoots;
 }

@@ -1,6 +1,9 @@
+# 8.1.1-wip
+* Update `package:dtd` to `2.1.0`.
+
 # 8.1.0
-* Update `package:dtd` to `2.0.0`
-* Update `package:unified_analytics` to `5.8.8`
+* Update `package:dtd` to `2.0.0`.
+* Update `package:unified_analytics` to `5.8.8`.
 
 # 8.0.1
 * **Breaking change:** rename `ServerApi.getCompleted` to `ServerApi.success` and make the
