@@ -22,7 +22,7 @@ class SnapshotControlPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final current = controller.core.selectedItem as SnapshotInstanceItem;
+    final current = controller.core.selectedItem as SnapshotDataItem;
     final heapIsReady = current.heap != null;
     if (heapIsReady) {
       return Row(
@@ -46,11 +46,12 @@ class SnapshotControlPane extends StatelessWidget {
               ),
             ],
           ),
-          Expanded(
-            child: _SnapshotSizeView(
-              footprint: current.heap!.footprint,
+          if (current.heap!.footprint != null)
+            Expanded(
+              child: _SnapshotSizeView(
+                footprint: current.heap!.footprint!,
+              ),
             ),
-          ),
         ],
       );
     }
@@ -72,16 +73,16 @@ class _DiffDropdown extends StatelessWidget {
     }
   }
 
-  final SnapshotInstanceItem current;
+  final SnapshotDataItem current;
   final DiffPaneController controller;
 
-  List<DropdownMenuItem<SnapshotInstanceItem>> items() =>
+  List<DropdownMenuItem<SnapshotDataItem>> items() =>
       controller.core.snapshots.value
           .where((item) => item.hasData)
-          .cast<SnapshotInstanceItem>()
+          .cast<SnapshotDataItem>()
           .map(
         (item) {
-          return DropdownMenuItem<SnapshotInstanceItem>(
+          return DropdownMenuItem<SnapshotDataItem>(
             value: item,
             child: Text(item == current ? '-' : item.name),
           );
@@ -90,17 +91,17 @@ class _DiffDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<SnapshotInstanceItem?>(
+    return ValueListenableBuilder<SnapshotDataItem?>(
       valueListenable: current.diffWith,
       builder: (_, diffWith, __) => Row(
         children: [
           const Text('Diff with:'),
           const SizedBox(width: defaultSpacing),
-          RoundedDropDownButton<SnapshotInstanceItem>(
+          RoundedDropDownButton<SnapshotDataItem>(
             isDense: true,
             value: current.diffWith.value ?? current,
-            onChanged: (SnapshotInstanceItem? value) {
-              late SnapshotInstanceItem? newDiffWith;
+            onChanged: (SnapshotDataItem? value) {
+              late SnapshotDataItem? newDiffWith;
               if ((value ?? current) == current) {
                 ga.select(
                   gac.memory,

@@ -201,7 +201,7 @@ class TabOverflowButton extends StatelessWidget {
             height: defaultToolbarHeight,
             child: MenuItemButton(
               style: const ButtonStyle().copyWith(
-                textStyle: MaterialStateProperty.resolveWith<TextStyle>((_) {
+                textStyle: WidgetStateProperty.resolveWith<TextStyle>((_) {
                   return theme.textTheme.titleSmall!;
                 }),
               ),

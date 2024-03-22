@@ -11,7 +11,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../screens/debugger/debugger_model.dart';
 import '../globals.dart';
-import '../memory/adapted_heap_data.dart';
+import '../memory/heap_object.dart';
 import '../primitives/utils.dart';
 import 'dart_object_node.dart';
 import 'diagnostics_node.dart';
@@ -183,7 +183,7 @@ void _addChildrenToInstanceVariable({
   required DartObjectNode variable,
   required Instance value,
   required IsolateRef? isolateRef,
-  required HeapObjectSelection? heapSelection,
+  required HeapObject? heapSelection,
   Set<String>? existingNames,
 }) {
   switch (value.kind) {

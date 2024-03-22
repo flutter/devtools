@@ -42,14 +42,14 @@ class _ClassNameColumn extends ColumnData<DiffClassData>
   final ClassesTableDiffData diffData;
 
   @override
-  String? getValue(DiffClassData dataObject) => dataObject.heapClass.className;
+  String? getValue(DiffClassData data) => data.className.className;
 
   @override
   bool get supportsSorting => true;
 
   @override
-  // We are removing the tooltip, because it is provided by [HeapClassView].
-  String getTooltip(DiffClassData dataObject) => '';
+  // Tooltip is removed, because it is provided by [HeapClassView].
+  String getTooltip(DiffClassData data) => '';
 
   @override
   Widget build(
@@ -60,7 +60,7 @@ class _ClassNameColumn extends ColumnData<DiffClassData>
     VoidCallback? onPressed,
   }) {
     return HeapClassView(
-      theClass: data.heapClass,
+      theClass: data.className,
       showCopyButton: isRowSelected,
       copyGaItem: gac.MemoryEvent.diffClassDiffCopy,
       rootPackage: serviceConnection.serviceManager.rootInfoNow().package,
@@ -109,26 +109,25 @@ class _InstanceColumn extends ColumnData<DiffClassData>
   }
 
   @override
-  int getValue(DiffClassData dataObject) =>
-      _instances(dataObject).instanceCount;
+  int getValue(DiffClassData data) => _instances(data).instanceCount;
 
-  ObjectSetStats _instances(DiffClassData classStats) {
+  ObjectSetStats _instances(DiffClassData classData) {
     switch (dataPart) {
       case _DataPart.created:
-        return classStats.total.created;
+        return classData.diff.created;
       case _DataPart.deleted:
-        return classStats.total.deleted;
+        return classData.diff.deleted;
       case _DataPart.delta:
-        return classStats.total.delta;
+        return classData.diff.delta;
       case _DataPart.persisted:
-        return classStats.total.persisted;
+        return classData.diff.persisted;
     }
   }
 
   @override
-  String getDisplayValue(DiffClassData dataObject) {
+  String getDisplayValue(DiffClassData data) {
     // Add leading sign for delta values.
-    final value = getValue(dataObject);
+    final value = getValue(data);
     if (dataPart != _DataPart.delta || value <= 0) return value.toString();
     return '+$value';
   }
@@ -151,8 +150,9 @@ class _InstanceColumn extends ColumnData<DiffClassData>
       return null;
     }
 
-    final heapCallback =
-        dataPart == _DataPart.deleted ? diffData.before : diffData.after;
+    final heapCallback = dataPart == _DataPart.deleted
+        ? diffData.heapBefore
+        : diffData.heapAfter;
 
     if (objects is! ObjectSet) {
       throw StateError(
@@ -163,7 +163,7 @@ class _InstanceColumn extends ColumnData<DiffClassData>
     return HeapInstanceTableCell(
       objects,
       heapCallback,
-      data.heapClass,
+      data.className,
       isSelected: isRowSelected,
       liveItemsEnabled: dataPart != _DataPart.deleted,
     );
@@ -195,37 +195,37 @@ class _SizeColumn extends ColumnData<DiffClassData> {
   }
 
   @override
-  int getValue(DiffClassData classStats) {
+  int getValue(DiffClassData data) {
     switch (sizeType) {
       case SizeType.shallow:
         switch (dataPart) {
           case _DataPart.created:
-            return classStats.total.created.shallowSize;
+            return data.diff.created.shallowSize;
           case _DataPart.deleted:
-            return classStats.total.deleted.shallowSize;
+            return data.diff.deleted.shallowSize;
           case _DataPart.delta:
-            return classStats.total.delta.shallowSize;
+            return data.diff.delta.shallowSize;
           case _DataPart.persisted:
-            return classStats.total.persisted.shallowSize;
+            return data.diff.persisted.shallowSize;
         }
       case SizeType.retained:
         switch (dataPart) {
           case _DataPart.created:
-            return classStats.total.created.retainedSize;
+            return data.diff.created.retainedSize;
           case _DataPart.deleted:
-            return classStats.total.deleted.retainedSize;
+            return data.diff.deleted.retainedSize;
           case _DataPart.delta:
-            return classStats.total.delta.retainedSize;
+            return data.diff.delta.retainedSize;
           case _DataPart.persisted:
-            return classStats.total.persisted.retainedSize;
+            return data.diff.persisted.retainedSize;
         }
     }
   }
 
   @override
-  String getDisplayValue(DiffClassData classStats) {
+  String getDisplayValue(DiffClassData data) {
     // Add leading sign for delta values.
-    final value = getValue(classStats);
+    final value = getValue(data);
     final asSize = prettyPrintRetainedSize(value)!;
     if (dataPart != _DataPart.delta || value <= 0) return asSize;
     return '+$asSize';
@@ -347,7 +347,7 @@ class ClassesTableDiff extends StatelessWidget {
           columnGroups: _columnGroups(),
           data: classes,
           dataKey: dataKey,
-          keyFactory: (e) => Key(e.heapClass.fullName),
+          keyFactory: (e) => Key(e.className.fullName),
           selectionNotifier: diffData.selection,
           onItemSelected: (_) => ga.select(
             gac.memory,

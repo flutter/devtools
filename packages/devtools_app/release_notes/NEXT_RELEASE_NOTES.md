@@ -30,7 +30,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## Memory updates
 
-TODO: Remove this section if there are not any general updates.
+* Enabled export of snapshots and improved snapshotting
+performance. - [#7197](https://github.com/flutter/devtools/pull/7197)
 
 ## Debugger updates
 
@@ -45,6 +46,11 @@ TODO: Remove this section if there are not any general updates.
 ## Logging updates
 
 TODO: Remove this section if there are not any general updates.
+
+## Deep Links tool updates
+
+* Automatically populate a list of Flutter projects from the connected
+IDE. - [#7415](https://github.com/flutter/devtools/pull/7415)
 
 ## App size tool updates
 

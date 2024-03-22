@@ -1,45 +1,63 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../primitives/utils.dart';
-import 'adapted_heap_data.dart';
-import 'adapted_heap_object.dart';
+import 'dart:typed_data';
 
-final _uiReleaser = UiReleaser();
+/// Returns true if the given object can retain other objects from garbage collection.
+typedef IsWeak = bool Function(int index);
 
-/// Performs calculations on the [heap] to populate fields.
+/// List of references for the given object.
+typedef References = List<int> Function(int index);
+
+/// Shallow size of the given object.
+typedef ShallowSize = int Function(int index);
+
+typedef ShortestRetainersResult = ({
+  /// Retainer for each object in the graph.
+  ///
+  /// When a value at index i is 0, it means the object at index i
+  /// has no retainers.
+  /// Null is not used for no-retainer to save memory footprint.
+  List<int> retainers,
+
+  /// Retained size for each object in the graph.
+  ///
+  /// If an object is unreachable, its retained size is 0.
+  List<int>? retainedSizes,
+});
+
+/// Index of the sentinel object.
+const int _sentinelIndex = 0;
+
+/// Finds shortest retainers for each object in the graph.
 ///
-/// * Sets the field retainer and retainedSize for each object in the [heap], that
-/// has retaining path to the root.
-/// * Populates [AdaptedHeapObject.inRefs].
-/// * Sets [AdaptedHeapObject.totalDartSize].
-/// * Sets [AdaptedHeapData.allFieldsCalculated] to true.
-Future<void> calculateHeap(AdaptedHeapData heap) async {
-  assert(!heap.allFieldsCalculated);
-  await _setRetainers(heap);
-  await _setInboundRefs(heap);
-  heap.allFieldsCalculated = true;
-  _verifyHeapIntegrity(heap);
-}
+/// Index 0 is reserved for sentinel object.
+/// The sentinel object should not have size and references.
+ShortestRetainersResult findShortestRetainers({
+  required int graphSize,
+  required int rootIndex,
+  required IsWeak isWeak,
+  required References refs,
+  required ShallowSize shallowSize,
+  bool calculateSizes = true,
+}) {
+  assert(refs(_sentinelIndex).isEmpty);
+  assert(
+    shallowSize(_sentinelIndex) <= 0,
+    'Sentinel should have size 0 or -1 (not defined), but size is ${shallowSize(_sentinelIndex)}.',
+  );
+  assert(
+    rootIndex != _sentinelIndex,
+    'Root index should not be $_sentinelIndex, it is reserved for no-retainer.',
+  );
 
-Future<void> _setInboundRefs(AdaptedHeapData heap) async {
-  int totalDartSize = 0;
-  for (final from in Iterable<int>.generate(heap.objects.length)) {
-    totalDartSize += heap.objects[from].shallowSize;
-    if (_uiReleaser.step()) await _uiReleaser.releaseUi();
-    for (final to in heap.objects[from].outRefs) {
-      assert(from != to);
-      heap.objects[to].inRefs.add(from);
-    }
+  final retainers = Uint32List(graphSize);
+  Uint32List? retainedSizes;
+  if (calculateSizes) {
+    retainedSizes = Uint32List(graphSize);
+    retainedSizes[rootIndex] = shallowSize(rootIndex);
   }
-  heap.totalDartSize = totalDartSize;
-}
-
-/// The algorithm takes O(number of references in the heap).
-Future<void> _setRetainers(AdaptedHeapData heap) async {
-  heap.root.retainer = -1;
-  heap.root.retainedSize = heap.root.shallowSize;
 
   // Array of all objects where the best distance from root is n.
   // n starts with 0 and increases by 1 on each step of the algorithm.
@@ -47,90 +65,46 @@ Future<void> _setRetainers(AdaptedHeapData heap) async {
   // See description of cut:
   // https://en.wikipedia.org/wiki/Cut_(graph_theory)
   // On each step the algorithm moves the cut one step further from the root.
-  var cut = [heap.rootIndex];
+  var cut = [rootIndex];
 
-  // On each step of algorithm we know that all nodes at distance n or closer to
-  // root, has parent initialized.
-  while (true) {
-    if (_uiReleaser.step()) await _uiReleaser.releaseUi();
+  while (cut.isNotEmpty) {
     final nextCut = <int>[];
-    for (var r in cut) {
-      final retainer = heap.objects[r];
-      for (var c in retainer.outRefs) {
-        final child = heap.objects[c];
+    for (final index in cut) {
+      for (final ref in refs(index)) {
+        if (ref == _sentinelIndex || retainers[ref] != 0) continue;
+        retainers[ref] = index;
+        retainedSizes?[ref] = shallowSize(ref);
 
-        if (child.retainer != null) continue;
-        child.retainer = r;
-        child.retainedSize = child.shallowSize;
-
-        _propagateSize(child, heap);
-
-        if (_isRetainer(child)) {
-          nextCut.add(c);
+        if (retainedSizes != null) {
+          _addRetainedSize(
+            index: ref,
+            retainedSizes: retainedSizes,
+            retainers: retainers,
+            shallowSize: shallowSize,
+          );
         }
+        if (!isWeak(ref)) nextCut.add(ref);
       }
     }
-    if (nextCut.isEmpty) return;
     cut = nextCut;
   }
+
+  return (retainers: retainers, retainedSizes: retainedSizes);
 }
 
-/// Assuming the [object] is leaf, initializes its retained size
-/// and adds the size to all its retainers.
-void _propagateSize(AdaptedHeapObject object, AdaptedHeapData heap) {
-  assert(object.retainer != null);
-  assert(object.retainedSize == object.shallowSize);
-  final addedSize = object.shallowSize;
+/// Assuming the object is leaf, initializes its retained size
+/// and adds the size to each shortest retainer recursively.
+void _addRetainedSize({
+  required int index,
+  required Uint32List retainedSizes,
+  required Uint32List retainers,
+  required ShallowSize shallowSize,
+}) {
+  final addedSize = shallowSize(index);
+  retainedSizes[index] = addedSize;
 
-  while (object.retainer != -1) {
-    final retainer = heap.objects[object.retainer!];
-    assert(retainer.retainer != null);
-    assert(retainer != object);
-    retainer.retainedSize = retainer.retainedSize! + addedSize;
-    object = retainer;
+  while (retainers[index] > 0) {
+    index = retainers[index];
+    retainedSizes[index] += addedSize;
   }
-}
-
-bool _isRetainer(AdaptedHeapObject object) {
-  if (object.heapClass.isWeakEntry) return false;
-  return object.outRefs.isNotEmpty;
-}
-
-/// Verifies heap integrity rules.
-///
-/// 1. Nullness of 'retainedSize' and 'retainer' should be equal.
-///
-/// 2. Root's 'retainedSize' should be sum of shallow sizes of all reachable
-/// objects.
-///
-/// 3. All inRefs don't contain duplicates.
-void _verifyHeapIntegrity(AdaptedHeapData heap) {
-  assert(() {
-    var totalReachableSize = 0;
-    var totalInRefs = 0;
-    var totalOutRefs = 0;
-
-    for (final int i in Iterable.generate(heap.objects.length)) {
-      final object = heap.objects[i];
-      assert(
-        (object.retainedSize == null) == (object.retainer == null),
-        'retainedSize = ${object.retainedSize}, retainer = ${object.retainer}',
-      );
-      if (object.retainer != null) totalReachableSize += object.shallowSize;
-
-      assert(!object.inRefs.contains(i));
-      assert(!object.outRefs.contains(i));
-
-      totalInRefs += object.inRefs.length;
-      totalOutRefs += object.outRefs.length;
-    }
-
-    assert(totalInRefs == totalOutRefs, 'Error in inRefs calculation.');
-
-    assert(
-      heap.root.retainedSize == totalReachableSize,
-      '${heap.root.retainedSize} not equal to $totalReachableSize',
-    );
-    return true;
-  }());
 }

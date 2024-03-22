@@ -4,9 +4,10 @@
 
 import 'package:flutter/foundation.dart';
 
-import '../../../../../shared/memory/adapted_heap_data.dart';
+import '../../../../../shared/memory/classes.dart';
+import '../../../../../shared/memory/heap_object.dart';
+import '../../../../../shared/memory/retaining_path.dart';
 import '../../../shared/heap/class_filter.dart';
-import '../../../shared/heap/heap.dart';
 import '../../../shared/primitives/simple_elements.dart';
 import '../data/classes_diff.dart';
 
@@ -35,13 +36,13 @@ class ClassesTableSingleData {
   final ClassFilterData filterData;
 
   /// Selected class.
-  final selection = ValueNotifier<SingleClassStats?>(null);
+  final selection = ValueNotifier<SingleClassData?>(null);
 }
 
 class ClassesTableDiffData {
   ClassesTableDiffData({
-    required this.before,
-    required this.after,
+    required this.heapBefore,
+    required this.heapAfter,
     required this.filterData,
   });
 
@@ -52,14 +53,40 @@ class ClassesTableDiffData {
   // to subscribe for the changes, for performance reasons.
 
   /// Function to get selected first heap to diff.
-  final HeapDataCallback before;
+  final HeapDataCallback heapBefore;
 
   /// Function to get selected second heap to diff.
-  final HeapDataCallback after;
+  final HeapDataCallback heapAfter;
 
   /// Current class filter data.
   final ClassFilterData filterData;
 
   /// Selected class.
   final selection = ValueNotifier<DiffClassData?>(null);
+}
+
+/// Data for visualization of a path.
+///
+/// Is instantiated only to visualize the selected path,
+/// not for each path in snapshot.
+class PathData {
+  PathData(this.classData, this.path);
+
+  final ClassData classData;
+  final PathFromRoot path;
+
+  ObjectSetStats get objects => classData.byPath[path]!;
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is PathData &&
+        other.classData.className == classData.className &&
+        other.path == path;
+  }
+
+  @override
+  int get hashCode => Object.hash(classData.className, path);
 }

@@ -9,6 +9,7 @@ import 'package:devtools_test/integration_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:vm_service_protos/vm_service_protos.dart';
 
 // To run:
 // dart run integration_test/run_tests.dart --target=integration_test/test/live_connection/performance_screen_event_recording_test.dart
@@ -50,17 +51,16 @@ void main() {
       final performanceController = screenState.controller;
 
       logStatus('Verifying that data is processed upon first load');
-      final initialTrace = List.of(
-        performanceController
-            .timelineEventsController.fullPerfettoTrace!.packet,
-        growable: false,
+      final initialTrace = Trace.fromBuffer(
+        performanceController.timelineEventsController.fullPerfettoTrace,
       );
+      final initialTracePacket = List.of(initialTrace.packet, growable: false);
       final initialTrackDescriptors =
-          initialTrace.where((e) => e.hasTrackDescriptor());
-      expect(initialTrace, isNotEmpty);
+          initialTracePacket.where((e) => e.hasTrackDescriptor());
+      expect(initialTracePacket, isNotEmpty);
       expect(initialTrackDescriptors, isNotEmpty);
 
-      final trackEvents = initialTrace.where((e) => e.hasTrackEvent());
+      final trackEvents = initialTracePacket.where((e) => e.hasTrackEvent());
       expect(trackEvents, isNotEmpty);
 
       expect(
@@ -95,14 +95,14 @@ void main() {
       await tester.pump(longPumpDuration);
 
       logStatus('Verifying that we have recorded new events');
-      final refreshedTrace = List.of(
-        performanceController
-            .timelineEventsController.fullPerfettoTrace!.packet,
-        growable: false,
+      final refreshedTrace = Trace.fromBuffer(
+        performanceController.timelineEventsController.fullPerfettoTrace,
       );
+      final refreshedTracePacket =
+          List.of(refreshedTrace.packet, growable: false);
       expect(
-        refreshedTrace.length,
-        greaterThan(initialTrace.length),
+        refreshedTracePacket.length,
+        greaterThan(initialTracePacket.length),
         reason: 'Expected new events to have been recorded, but none were.',
       );
     },

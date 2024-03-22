@@ -1022,12 +1022,18 @@ extension IterableExtension<T> on Iterable<T> {
 }
 
 extension ListExtension<T> on List<T> {
-  List<T> joinWith(T separator) {
+  List<T> joinWith(
+    T separator, {
+    bool includeTrailing = false,
+    bool includeLeading = false,
+  }) {
     return [
+      if (includeLeading) separator,
       for (int i = 0; i < length; i++) ...[
         this[i],
         if (i != length - 1) separator,
       ],
+      if (includeTrailing) separator,
     ];
   }
 
