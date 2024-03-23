@@ -102,7 +102,8 @@ abstract class ColumnData<T> {
     return theme.regularTextStyleWithColor(textColor);
   }
 
-  // Configuration changes to columns will cause the table to be rebuilt.
+  /// Configuration changes to columns will cause the table to be rebuilt.
+  /// Defaults to title.
   String get config => title;
 
   @override
