@@ -216,7 +216,7 @@ class _DataTable extends StatelessWidget {
           })(),
           SchemeColumn(controller),
           OSColumn(controller),
-          if (!controller.displayOptions.showSplitScreen) ...[
+          if (!controller.displayOptionsNotifier.value.showSplitScreen) ...[
             StatusColumn(controller, viewType),
             NavigationColumn(),
           ],
