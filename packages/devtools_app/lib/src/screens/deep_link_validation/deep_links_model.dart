@@ -116,6 +116,13 @@ class PathError extends CommonError {
   const PathError(title, explanation, fixDetails)
       : super(title, explanation, fixDetails);
 
+  // Activity should have deep link enabled flag.
+  static const missingFlag = PathError(
+    'Activity is missing deep link enabled flag',
+    'The activity must have a <meta-data android:name="flutter_deeplinking_enabled" android:value="true" />',
+    '',
+  );
+
   // Intent filter should have action tag.
   static const intentFilterActionView = PathError(
     'Intent filter is missing action tag',
@@ -152,7 +159,8 @@ class PathError extends CommonError {
   );
 }
 
-Set<PathError> intentFilterErrors = <PathError>{
+Set<PathError> manifestFileErrors = <PathError>{
+  PathError.missingFlag,
   PathError.intentFilterActionView,
   PathError.intentFilterBrowsable,
   PathError.intentFilterDefault,
