@@ -277,6 +277,7 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
         );
     return columnsChanged;
   }
+  //
 
   @override
   Widget build(BuildContext context) {

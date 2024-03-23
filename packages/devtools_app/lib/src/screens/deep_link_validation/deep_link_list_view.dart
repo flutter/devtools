@@ -194,7 +194,13 @@ class _DataTable extends StatelessWidget {
     final domain = DomainColumn(controller);
     final path = PathColumn(controller);
 
-    return Padding(
+     
+    return ValueListenableBuilder<DisplayOptions>(
+            valueListenable: controller.displayOptionsNotifier,
+            builder: (context, d, _) {
+
+      return
+    Padding(
       padding: const EdgeInsets.only(top: denseSpacing),
       child: FlatTable<LinkData>(
         keyFactory: (node) => ValueKey(node.toString),
@@ -216,7 +222,7 @@ class _DataTable extends StatelessWidget {
           })(),
           SchemeColumn(controller),
           OSColumn(controller),
-          if (!controller.displayOptionsNotifier.value.showSplitScreen) ...[
+          if (!d.showSplitScreen) ...[
             StatusColumn(controller, viewType),
             NavigationColumn(),
           ],
@@ -225,6 +231,7 @@ class _DataTable extends StatelessWidget {
         defaultSortColumn: (viewType == TableViewType.pathView ? path : domain)
             as ColumnData<LinkData>,
         defaultSortDirection: SortDirection.ascending,
+        sortOriginalData: true,
         onItemSelected: (linkdata) {
           controller.selectLink(linkdata!);
           controller.updateDisplayOptions(showSplitScreen: true);
@@ -232,6 +239,8 @@ class _DataTable extends StatelessWidget {
         enableHoverHandling: true,
       ),
     );
+    
+    });
   }
 }
 

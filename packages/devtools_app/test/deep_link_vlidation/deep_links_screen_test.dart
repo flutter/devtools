@@ -436,7 +436,7 @@ void main() {
         expect(find.text('www.google.com'), findsOneWidget);
       },
     );
-
+    //TODO(hangyujin): Fix the sorting issue.
     testWidgetsWithWindowSize(
       'sort links',
       windowSize,
@@ -463,7 +463,11 @@ void main() {
 
         deepLinksController.selectedProject.value =
             FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
-        deepLinksController.allValidatedLinkDatas = linkDatas;
+        deepLinksController.validatedLinkDatas = ValidatedLinkDatas(
+          all: linkDatas,
+          byDomain: deepLinksController.linkDatasByDomain(linkDatas),
+          byPath: deepLinksController.linkDatasByPath(linkDatas),
+        );
 
         await pumpDeepLinkScreen(
           tester,
