@@ -456,7 +456,7 @@ void main() {
         expect(find.text('www.google.com'), findsOneWidget);
       },
     );
-    //TODO(hangyujin): Fix the sorting issue.
+
     testWidgetsWithWindowSize(
       'sort links',
       windowSize,
@@ -487,6 +487,11 @@ void main() {
           all: linkDatas,
           byDomain: deepLinksController.linkDatasByDomain(linkDatas),
           byPath: deepLinksController.linkDatasByPath(linkDatas),
+        );
+
+        await pumpDeepLinkScreen(
+          tester,
+          controller: deepLinksController,
         );
 
         expect(find.text('www.domain1.com'), findsOneWidget);

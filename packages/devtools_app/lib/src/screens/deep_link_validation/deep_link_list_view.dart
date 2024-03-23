@@ -194,13 +194,7 @@ class _DataTable extends StatelessWidget {
     final domain = DomainColumn(controller);
     final path = PathColumn(controller);
 
-     
-    return ValueListenableBuilder<DisplayOptions>(
-            valueListenable: controller.displayOptionsNotifier,
-            builder: (context, d, _) {
-
-      return
-    Padding(
+    return Padding(
       padding: const EdgeInsets.only(top: denseSpacing),
       child: FlatTable<LinkData>(
         keyFactory: (node) => ValueKey(node.toString),
@@ -222,7 +216,7 @@ class _DataTable extends StatelessWidget {
           })(),
           SchemeColumn(controller),
           OSColumn(controller),
-          if (!d.showSplitScreen) ...[
+          if (!controller.displayOptions.showSplitScreen) ...[
             StatusColumn(controller, viewType),
             NavigationColumn(),
           ],
@@ -239,8 +233,6 @@ class _DataTable extends StatelessWidget {
         enableHoverHandling: true,
       ),
     );
-    
-    });
   }
 }
 

@@ -474,15 +474,6 @@ class DeepLinksController extends DisposableController {
     if (addedFilter != null || removedFilter != null) {
       applyFilters();
     }
-
-    if(domainSortingOption!=null ||pathSortingOption!=null){
-      displayLinkDatasNotifier.value = ValidatedLinkDatas(
-      all: getFilterredLinks([...validatedLinkDatas.all]),
-      byDomain: getFilterredLinks([...validatedLinkDatas.byDomain]),
-      byPath: getFilterredLinks([...validatedLinkDatas.byPath]),
-    );
-
-    }
   }
 
   void applyFilters() {
