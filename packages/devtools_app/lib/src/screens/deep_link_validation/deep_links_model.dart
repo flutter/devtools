@@ -342,7 +342,7 @@ class DomainColumn extends ColumnData<LinkData>
       );
 
   @override
-  String get config => sortingOption.toString();
+  String get config => '$title $sortingOption';
 }
 
 class PathColumn extends ColumnData<LinkData>
@@ -403,7 +403,7 @@ class PathColumn extends ColumnData<LinkData>
       );
 
   @override
-  String get config => sortingOption.toString();
+  String get config => '$title $sortingOption';
 }
 
 class NumberOfAssociatedPathColumn extends ColumnData<LinkData> {
