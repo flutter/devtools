@@ -159,6 +159,21 @@ Set<PathError> intentFilterErrors = <PathError>{
   PathError.intentFilterAutoVerify,
 };
 
+class ValidatedLinkDatas {
+  ValidatedLinkDatas({
+    required this.all,
+    required this.byDomain,
+    required this.byPath,
+  });
+  ValidatedLinkDatas.empty()
+      : all = [],
+        byDomain = [],
+        byPath = [];
+  final List<LinkData> all;
+  final List<LinkData> byDomain;
+  final List<LinkData> byPath;
+}
+
 /// Contains all data relevant to a deep link.
 class LinkData with SearchableDataMixin {
   LinkData({
