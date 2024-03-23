@@ -268,16 +268,12 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
     FlatTable<T> newWidget,
   ) {
     final columnsChanged = !collectionEquals(
-          oldWidget.columns.map((c) => c.title),
-          newWidget.columns.map((c) => c.title),
+          oldWidget.columns.map((c) => c.config),
+          newWidget.columns.map((c) => c.config),
         ) ||
         !collectionEquals(
           oldWidget.columnGroups?.map((c) => c.title),
           newWidget.columnGroups?.map((c) => c.title),
-        ) ||
-        !collectionEquals(
-          oldWidget.columns.map((c) => c.compare),
-          newWidget.columns.map((c) => c.compare),
         );
     return columnsChanged;
   }

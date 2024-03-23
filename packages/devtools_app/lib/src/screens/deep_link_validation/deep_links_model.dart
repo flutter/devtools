@@ -286,9 +286,12 @@ class _ErrorAwareText extends StatelessWidget {
 
 class DomainColumn extends ColumnData<LinkData>
     implements ColumnRenderer<LinkData>, ColumnHeaderRenderer<LinkData> {
-  DomainColumn(this.controller) : super.wide('Domain');
+  DomainColumn(this.controller)
+      : sortingOption = controller.displayOptions.domainSortingOption,
+        super.wide('Domain');
 
   DeepLinksController controller;
+  SortingOption? sortingOption;
 
   @override
   Widget? buildHeader(
@@ -334,16 +337,22 @@ class DomainColumn extends ColumnData<LinkData>
   int compare(LinkData a, LinkData b) => _compareLinkData(
         a,
         b,
-        sortingOption: controller.displayOptions.domainSortingOption,
+        sortingOption: sortingOption,
         compareDomain: true,
       );
+
+  @override
+  String get config => sortingOption.toString();
 }
 
 class PathColumn extends ColumnData<LinkData>
     implements ColumnRenderer<LinkData>, ColumnHeaderRenderer<LinkData> {
-  PathColumn(this.controller) : super.wide('Path');
+  PathColumn(this.controller)
+      : sortingOption = controller.displayOptions.pathSortingOption,
+        super.wide('Path');
 
   DeepLinksController controller;
+  SortingOption? sortingOption;
 
   @override
   Widget? buildHeader(
@@ -389,9 +398,12 @@ class PathColumn extends ColumnData<LinkData>
   int compare(LinkData a, LinkData b) => _compareLinkData(
         a,
         b,
-        sortingOption: controller.displayOptions.pathSortingOption,
+        sortingOption: sortingOption,
         compareDomain: false,
       );
+
+  @override
+  String get config => sortingOption.toString();
 }
 
 class NumberOfAssociatedPathColumn extends ColumnData<LinkData> {
