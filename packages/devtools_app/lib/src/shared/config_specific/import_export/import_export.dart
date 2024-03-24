@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:devtools_app_shared/service.dart';
 import 'package:intl/intl.dart';
@@ -155,6 +156,29 @@ abstract class ExportController {
   /// Saves [content] to the [fileName].
   void saveFile({
     required String content,
+    required String fileName,
+  });
+
+  /// Downloads a file with [content]
+  /// and pushes notification about success if [notify] is true.
+  String downloadDataFile(
+    Uint8List content, {
+    String? fileName,
+    ExportFileType type = ExportFileType.json,
+    bool notify = true,
+  }) {
+    fileName ??= ExportController.generateFileName(type: type);
+    saveDataFile(
+      content: content,
+      fileName: fileName,
+    );
+    notificationService.push(successfulExportMessage(fileName));
+    return fileName;
+  }
+
+  /// Saves [content] to the [fileName].
+  void saveDataFile({
+    required Uint8List content,
     required String fileName,
   });
 
