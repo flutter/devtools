@@ -34,16 +34,31 @@ class ExportControllerWeb extends ExportController {
   }
 
   @override
-  void saveDataFile({required Uint8List content, required String fileName}) {
-    final element = document.createElement('a') as HTMLAnchorElement;
-    element.setAttribute(
-      'href',
-      URL.createObjectURL(Blob([content.toJS].toJS) as JSObject),
-    );
-    element.setAttribute('download', fileName);
-    element.style.display = 'none';
-    (document.body as HTMLBodyElement).append(element as JSAny);
-    element.click();
-    element.remove();
+  void saveDataFile({
+    required Uint8List content,
+    required String fileName,
+  }) {
+    // final element = document.createElement('a') as HTMLAnchorElement;
+
+    // print(1);
+    // // final c1 = content.toJS;
+
+    // // print(2);
+    // // final c2 = [c1].toJS;
+    // // print(3);
+    // // final c3 = Blob(c2);
+    // // print(4);
+    // // element.setAttribute(
+    // //   'href',
+    // //   URL.createObjectURL(c3 as JSObject),
+    // // );
+    // // print(5);
+    // // element.setAttribute('download', fileName);
+    // // element.style.display = 'none';
+    // // (document.body as HTMLBodyElement).append(element as JSAny);
+    // // element.click();
+    // // element.remove();
+
+    // // print(c1);
   }
 }
