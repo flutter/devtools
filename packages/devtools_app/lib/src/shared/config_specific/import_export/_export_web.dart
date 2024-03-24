@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:js_interop';
+import 'dart:typed_data';
 
 import 'package:web/web.dart' hide NodeGlue;
 
@@ -20,6 +21,20 @@ class ExportControllerWeb extends ExportController {
     required String content,
     required String fileName,
   }) {
+    final element = document.createElement('a') as HTMLAnchorElement;
+    element.setAttribute(
+      'href',
+      URL.createObjectURL(Blob([content.toJS].toJS) as JSObject),
+    );
+    element.setAttribute('download', fileName);
+    element.style.display = 'none';
+    (document.body as HTMLBodyElement).append(element as JSAny);
+    element.click();
+    element.remove();
+  }
+
+  @override
+  void saveDataFile({required Uint8List content, required String fileName}) {
     final element = document.createElement('a') as HTMLAnchorElement;
     element.setAttribute(
       'href',

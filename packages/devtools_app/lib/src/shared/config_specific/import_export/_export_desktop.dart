@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
+
 import '../file/file.dart';
 import 'import_export.dart';
 
 ExportControllerDesktop createExportController() {
-  return ExportControllerDesktop();
+  throw UnimplementedError();
 }
 
 class ExportControllerDesktop extends ExportController {
@@ -20,5 +22,10 @@ class ExportControllerDesktop extends ExportController {
     required String fileName,
   }) {
     _fs.writeStringToFile(fileName, content);
+  }
+
+  @override
+  void saveDataFile({required Uint8List content, required String fileName}) {
+    // TODO: implement saveDataFile
   }
 }
