@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:devtools_app_shared/service.dart';
 import 'package:intl/intl.dart';
