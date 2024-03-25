@@ -10,7 +10,7 @@ import 'package:devtools_test/integration_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
-import '../../test_infra/helpers/eval_utils.dart';
+import 'eval_utils.dart';
 
 // To run:
 // dart run integration_test/run_tests.dart --target=integration_test/test/live_connection/eval_and_browse_test.dart
