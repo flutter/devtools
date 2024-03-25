@@ -11,6 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
 import '../../test_infra/helpers/eval_utils.dart';
+import '../../test_infra/helpers/memory_screen_helpers.dart';
 
 // To run:
 // dart run integration_test/run_tests.dart --target=integration_test/test/live_connection/eval_and_browse_test.dart
@@ -33,7 +34,7 @@ void main() {
     await pumpAndConnectDevTools(tester, testApp);
 
     final evalTester = EvalTester(tester);
-    await evalTester.prepareMemoryUI();
+    await prepareMemoryUI(tester, makeConsoleWider: true);
 
     logStatus('test basic evaluation');
     await testBasicEval(evalTester);
@@ -48,7 +49,7 @@ void main() {
     await _profileAllInstances(evalTester);
 
     logStatus('test take a snapshot');
-    await evalTester.switchToSnapshotsAndTakeOne();
+    await evalTester.takeSnapshot();
 
     logStatus('test inbound references are listed on console instance');
     await _inboundReferencesAreListed(evalTester);

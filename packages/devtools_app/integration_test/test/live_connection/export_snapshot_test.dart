@@ -8,8 +8,10 @@ import 'package:devtools_test/integration_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
+import '../../test_infra/helpers/memory_screen_helpers.dart';
+
 // To run:
-// dart run integration_test/run_tests.dart --target=integration_test/test/live_connection/app_test.dart
+// dart run integration_test/run_tests.dart --target=integration_test/test/live_connection/export_snapshot_test.dart
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -28,11 +30,8 @@ void main() {
   testWidgets('connect to app and switch tabs', (tester) async {
     await pumpAndConnectDevTools(tester, testApp);
 
-    // For the sake of this test, do not show extension screens by default.
-    preferences.devToolsExtensions.showOnlyEnabledExtensions.value = true;
-    await tester.pumpAndSettle(shortPumpDuration);
+    await prepareMemoryUI(tester);
 
-    logStatus('verify that we can load each DevTools screen');
-    await navigateThroughDevToolsScreens(tester);
+    await takeHeapSnapshot(tester);
   });
 }
