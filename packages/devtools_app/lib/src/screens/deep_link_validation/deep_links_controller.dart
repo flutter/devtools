@@ -207,26 +207,26 @@ class DeepLinksController extends DisposableController {
 
   Future<void> loadAndroidAppLinksAndValidate() async {
     pagePhase.value = PagePhase.linksLoading;
-    if (!_androidAppLinks.containsKey(selectedVariantIndex.value)) {
-      final variant =
-          selectedProject.value!.androidVariants[selectedVariantIndex.value];
-      await ga.timeAsync(
-        gac.deeplink,
-        gac.AnalyzeFlutterProject.loadAppLinks.name,
-        asyncOperation: () async {
-          final AppLinkSettings result;
-          try {
-            result = await server.requestAndroidAppLinkSettings(
-              selectedProject.value!.path,
-              buildVariant: variant,
-            );
-            _androidAppLinks[selectedVariantIndex.value] = result;
-          } catch (_) {
-            pagePhase.value = PagePhase.errorPage;
-          }
-        },
-      );
-    }
+
+    final variant =
+        selectedProject.value!.androidVariants[selectedVariantIndex.value];
+    await ga.timeAsync(
+      gac.deeplink,
+      gac.AnalyzeFlutterProject.loadAppLinks.name,
+      asyncOperation: () async {
+        final AppLinkSettings result;
+        try {
+          result = await server.requestAndroidAppLinkSettings(
+            selectedProject.value!.path,
+            buildVariant: variant,
+          );
+          _androidAppLinks[selectedVariantIndex.value] = result;
+        } catch (_) {
+          pagePhase.value = PagePhase.errorPage;
+        }
+      },
+    );
+
     if (pagePhase.value == PagePhase.errorPage) {
       return;
     }
