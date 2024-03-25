@@ -70,9 +70,10 @@ class ValidationDetailView extends StatelessWidget {
                       child: const Text('Recheck all'),
                     ),
                   ),
-                const _ViewDeveloperGuide(),
                 if (viewType == TableViewType.domainView)
                   _DomainAssociatedLinksPanel(controller: controller),
+                const SizedBox(height: largeSpacing),
+                const _ViewDeveloperGuide(),
               ],
             ),
           ),
@@ -134,6 +135,9 @@ class _DomainCheckTable extends StatelessWidget {
     return ValueListenableBuilder<String?>(
       valueListenable: controller.localFingerprint,
       builder: (context, localFingerprint, _) {
+        final fingerprintExists =
+            controller.googlePlayFingerprintsAvailability.value ||
+                localFingerprint != null;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -142,15 +146,14 @@ class _DomainCheckTable extends StatelessWidget {
             const SizedBox(height: denseSpacing),
             const _CheckTableHeader(),
             _CheckExpansionTile(
-              initiallyExpanded: true,
+              initiallyExpanded: !fingerprintExists,
               checkName: 'Digital assets link file',
               status:
                   _CheckStatusText(hasError: linkData.domainErrors.isNotEmpty),
               children: <Widget>[
                 _Fingerprint(controller: controller),
                 // The following checks are only displayed if a fingerprint exists.
-                if (controller.googlePlayFingerprintsAvailability.value ||
-                    localFingerprint != null) ...[
+                if (fingerprintExists) ...[
                   _AssetLinksJsonFileIssues(controller: controller),
                   _HostingIssues(controller: controller),
                 ],
@@ -193,8 +196,8 @@ class _AssetLinksJsonFileIssues extends StatelessWidget {
               _FailureDetails(
                 errors: errors,
                 oneFixGuideForAll:
-                    'To fix above issues, publish the recommended Digital Asset Links'
-                    ' JSON file below to all of the failed website domains at the following'
+                    'To fix above issues, copy the recommended Digital Asset Links'
+                    ' JSON file below and publish it to all of the failed website domains at the following'
                     ' location: https://${controller.selectedLink.value!.domain}/.well-known/assetlinks.json.',
               ),
               const SizedBox(height: denseSpacing),
@@ -249,7 +252,7 @@ class _Fingerprint extends StatelessWidget {
     final hasPdcFingerprint =
         controller.googlePlayFingerprintsAvailability.value;
     final haslocalFingerprint = controller.localFingerprint.value != null;
-
+    final isError = !hasPdcFingerprint && !haslocalFingerprint;
     late String title;
     if (hasPdcFingerprint && haslocalFingerprint) {
       title = 'PDC fingerprint and Local fingerprint are detected';
@@ -260,15 +263,16 @@ class _Fingerprint extends StatelessWidget {
     if (!hasPdcFingerprint && haslocalFingerprint) {
       title = 'Local fingerprint detected';
     }
-    if (!hasPdcFingerprint && !haslocalFingerprint) {
+    if (isError) {
       title = 'Can\'t proceed check due to no fingerprint detected';
     }
 
     return ExpansionTile(
       controlAffinity: ListTileControlAffinity.leading,
+      initiallyExpanded: isError,
       title: _VerifiedOrErrorText(
         title,
-        isError: !hasPdcFingerprint && !haslocalFingerprint,
+        isError: isError,
       ),
       children: [
         _IssuesBorderWrap(
@@ -280,7 +284,7 @@ class _Fingerprint extends StatelessWidget {
               ),
               const SizedBox(height: denseSpacing),
             ],
-            if (!hasPdcFingerprint && !haslocalFingerprint) ...[
+            if (isError) ...[
               const Text(
                 'Issue: no fingerprint detached locally or on PDC',
               ),
@@ -334,7 +338,7 @@ class _LocalFingerprint extends StatelessWidget {
                     await showDialog(
                       context: context,
                       builder: (_) {
-                        return const AlertDialog(
+                        return const DevToolsDialog(
                           title: Text('This is not a valid fingerprint'),
                           content: Text(
                             'A valid fingerprint consists of 32 pairs of hexadecimal digits separated by colons.'
@@ -553,13 +557,13 @@ class _PathCheckTable extends StatelessWidget {
       children: [
         const SizedBox(height: intermediateSpacing),
         Text(
-          'Path check',
+          'App check',
           style: theme.textTheme.titleSmall,
         ),
         const SizedBox(height: intermediateSpacing),
         const _CheckTableHeader(),
         const Divider(height: 1.0),
-        _IntentFilterCheck(controller: controller),
+        _ManifestFileCheck(controller: controller),
         const Divider(height: 1.0),
         _PathFormatCheck(controller: controller),
       ],
@@ -567,20 +571,20 @@ class _PathCheckTable extends StatelessWidget {
   }
 }
 
-class _IntentFilterCheck extends StatelessWidget {
-  const _IntentFilterCheck({required this.controller});
+class _ManifestFileCheck extends StatelessWidget {
+  const _ManifestFileCheck({required this.controller});
 
   final DeepLinksController controller;
 
   @override
   Widget build(BuildContext context) {
     final linkData = controller.selectedLink.value!;
-    final errors = intentFilterErrors
+    final errors = manifestFileErrors
         .where((error) => linkData.pathErrors.contains(error))
         .toList();
 
     return _CheckExpansionTile(
-      checkName: 'IntentFiler',
+      checkName: 'Manifest file',
       status: _CheckStatusText(hasError: errors.isNotEmpty),
       children: <Widget>[
         if (errors.isNotEmpty)
@@ -592,7 +596,9 @@ class _IntentFilterCheck extends StatelessWidget {
                     'Copy the following code into your Manifest file.',
               ),
               const _CodeCard(
-                content: '''<intent-filter android:autoVerify="true">
+                content: ''''$metaDataDeepLinkingFlagTag'
+
+<intent-filter android:autoVerify="true">
     <action android:name="android.intent.action.VIEW" />
     <category android:name="android.intent.category.DEFAULT" />
     <category android:name="android.intent.category.BROWSABLE" />
@@ -637,9 +643,12 @@ class _CheckTableHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       tileColor: Theme.of(context).colorScheme.deeplinkTableHeaderColor,
-      title: const Padding(
-        padding: EdgeInsets.symmetric(horizontal: defaultSpacing),
-        child: Row(
+      title: Padding(
+        padding: EdgeInsets.only(
+          left: defaultSpacing,
+          right: defaultSpacing + actionsIconSize,
+        ),
+        child: const Row(
           children: [
             Expanded(child: Text('OS')),
             Expanded(child: Text('Issue type')),
@@ -667,18 +676,26 @@ class _CheckExpansionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final title = Row(
+      children: [
+        const SizedBox(width: defaultSpacing),
+        const Expanded(child: Text('Android')),
+        Expanded(child: Text(checkName)),
+        Expanded(child: status),
+      ],
+    );
+    if (children.isEmpty) {
+      return ListTile(
+        tileColor: theme.colorScheme.alternatingBackgroundColor2,
+        title: title,
+        trailing: SizedBox(width: actionsIconSize),
+      );
+    }
     return ExpansionTile(
       backgroundColor: theme.colorScheme.alternatingBackgroundColor2,
       collapsedBackgroundColor: theme.colorScheme.alternatingBackgroundColor2,
       initiallyExpanded: initiallyExpanded,
-      title: Row(
-        children: [
-          const SizedBox(width: defaultSpacing),
-          const Expanded(child: Text('Android')),
-          Expanded(child: Text(checkName)),
-          Expanded(child: status),
-        ],
-      ),
+      title: title,
       children: children,
     );
   }
