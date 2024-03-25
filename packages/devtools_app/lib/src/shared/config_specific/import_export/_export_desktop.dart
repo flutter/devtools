@@ -24,6 +24,7 @@ class ExportControllerDesktop extends ExportController {
     if (content is String) {
       _fs.writeStringToFile(fileName, content);
     } else if (content is Uint8List) {
+      // TODO(polina-c): implement https://github.com/flutter/devtools/issues/7425
       throw UnimplementedError();
     } else {
       throw StateError('Unsupported content type: $T');
