@@ -10,8 +10,7 @@ import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-// / Prepares the UI of the memory screen so that the eval-related elements are
-// / visible on the screen for testing.
+/// Prepares the UI of the memory screen for an integration test.
 Future<void> prepareMemoryUI(
   WidgetTester tester, {
   bool closeBannerWarning = true,
