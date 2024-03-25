@@ -4,7 +4,6 @@
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
-import 'package:dtd/dtd.dart';
 import 'package:flutter/material.dart';
 
 import 'common_widgets.dart';
@@ -86,12 +85,12 @@ class _ProjectRootTextFieldState extends State<ProjectRootTextField>
 
 class ProjectRootsDropdown extends StatefulWidget {
   ProjectRootsDropdown({
-    required this.workspaceRoots,
+    required this.projectRoots,
     required this.onValidatePressed,
     super.key,
-  }) : assert(workspaceRoots.ideWorkspaceRoots.isNotEmpty);
+  }) : assert(projectRoots.isNotEmpty);
 
-  final IDEWorkspaceRoots workspaceRoots;
+  final List<Uri> projectRoots;
 
   final void Function(String) onValidatePressed;
 
@@ -105,7 +104,7 @@ class _ProjectRootsDropdownState extends State<ProjectRootsDropdown> {
   @override
   void initState() {
     super.initState();
-    selectedUri = widget.workspaceRoots.ideWorkspaceRoots.safeFirst;
+    selectedUri = widget.projectRoots.safeFirst;
   }
 
   @override
@@ -116,8 +115,7 @@ class _ProjectRootsDropdownState extends State<ProjectRootsDropdown> {
         RoundedDropDownButton<Uri>(
           value: selectedUri,
           items: [
-            for (final uri in widget.workspaceRoots.ideWorkspaceRoots)
-              _buildMenuItem(uri),
+            for (final uri in widget.projectRoots) _buildMenuItem(uri),
           ],
           onChanged: (uri) => setState(() {
             selectedUri = uri;
