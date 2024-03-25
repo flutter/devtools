@@ -196,8 +196,8 @@ class _AssetLinksJsonFileIssues extends StatelessWidget {
               _FailureDetails(
                 errors: errors,
                 oneFixGuideForAll:
-                    'To fix above issues, publish the recommended Digital Asset Links'
-                    ' JSON file below to all of the failed website domains at the following'
+                    'To fix above issues, copy the recommended Digital Asset Links'
+                    ' JSON file below and publish it to all of the failed website domains at the following'
                     ' location: https://${controller.selectedLink.value!.domain}/.well-known/assetlinks.json.',
               ),
               const SizedBox(height: denseSpacing),
