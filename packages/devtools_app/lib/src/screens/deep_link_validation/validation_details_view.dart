@@ -70,9 +70,10 @@ class ValidationDetailView extends StatelessWidget {
                       child: const Text('Recheck all'),
                     ),
                   ),
-                const _ViewDeveloperGuide(),
                 if (viewType == TableViewType.domainView)
                   _DomainAssociatedLinksPanel(controller: controller),
+                const SizedBox(height: largeSpacing),
+                const _ViewDeveloperGuide(),
               ],
             ),
           ),
@@ -134,6 +135,9 @@ class _DomainCheckTable extends StatelessWidget {
     return ValueListenableBuilder<String?>(
       valueListenable: controller.localFingerprint,
       builder: (context, localFingerprint, _) {
+        final fingerprintExists =
+            controller.googlePlayFingerprintsAvailability.value ||
+                localFingerprint != null;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -142,15 +146,14 @@ class _DomainCheckTable extends StatelessWidget {
             const SizedBox(height: denseSpacing),
             const _CheckTableHeader(),
             _CheckExpansionTile(
-              initiallyExpanded: true,
+              initiallyExpanded: !fingerprintExists,
               checkName: 'Digital assets link file',
               status:
                   _CheckStatusText(hasError: linkData.domainErrors.isNotEmpty),
               children: <Widget>[
                 _Fingerprint(controller: controller),
                 // The following checks are only displayed if a fingerprint exists.
-                if (controller.googlePlayFingerprintsAvailability.value ||
-                    localFingerprint != null) ...[
+                if (fingerprintExists) ...[
                   _AssetLinksJsonFileIssues(controller: controller),
                   _HostingIssues(controller: controller),
                 ],
@@ -249,7 +252,7 @@ class _Fingerprint extends StatelessWidget {
     final hasPdcFingerprint =
         controller.googlePlayFingerprintsAvailability.value;
     final haslocalFingerprint = controller.localFingerprint.value != null;
-
+    final isError = !hasPdcFingerprint && !haslocalFingerprint;
     late String title;
     if (hasPdcFingerprint && haslocalFingerprint) {
       title = 'PDC fingerprint and Local fingerprint are detected';
@@ -260,15 +263,16 @@ class _Fingerprint extends StatelessWidget {
     if (!hasPdcFingerprint && haslocalFingerprint) {
       title = 'Local fingerprint detected';
     }
-    if (!hasPdcFingerprint && !haslocalFingerprint) {
+    if (isError) {
       title = 'Can\'t proceed check due to no fingerprint detected';
     }
 
     return ExpansionTile(
       controlAffinity: ListTileControlAffinity.leading,
+      initiallyExpanded: isError,
       title: _VerifiedOrErrorText(
         title,
-        isError: !hasPdcFingerprint && !haslocalFingerprint,
+        isError: isError,
       ),
       children: [
         _IssuesBorderWrap(
@@ -280,7 +284,7 @@ class _Fingerprint extends StatelessWidget {
               ),
               const SizedBox(height: denseSpacing),
             ],
-            if (!hasPdcFingerprint && !haslocalFingerprint) ...[
+            if (isError) ...[
               const Text(
                 'Issue: no fingerprint detached locally or on PDC',
               ),
