@@ -66,7 +66,7 @@ class ValidationDetailView extends StatelessWidget {
                   alignment: Alignment.bottomRight,
                   child: FilledButton(
                     onPressed: () async =>
-                        await controller.loadAndValidateAndroidAppLinks(),
+                        await controller.loadAndroidAppLinksAndValidate(),
                     child: const Text('Recheck all'),
                   ),
                 ),
