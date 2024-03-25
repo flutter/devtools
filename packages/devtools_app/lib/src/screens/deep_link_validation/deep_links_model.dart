@@ -15,6 +15,8 @@ import 'deep_links_controller.dart';
 
 const kDeeplinkTableCellDefaultWidth = 200.0;
 const kToolTipWidth = 344.0;
+const metaDataDeepLinkingFlagTag =
+    '<meta-data android:name="flutter_deeplinking_enabled" android:value="true" />';
 
 enum PlatformOS {
   android('Android'),
@@ -35,7 +37,7 @@ class DomainError extends CommonError {
   const DomainError(title, explanation, fixDetails)
       : super(title, explanation, fixDetails);
 
-  // Existence of an asset link file.
+  /// Existence of an asset link file.
   static const existence = DomainError(
     'Digital Asset Links JSON file existence failed',
     'This test checks whether the assetlinks.json file, '
@@ -46,7 +48,7 @@ class DomainError extends CommonError {
         'https://[domain.name]/.well-known/assetlinks.json. See the following recommended asset link json file. ',
   );
 
-  // Asset link file should define a link to this app.
+  /// Asset link file should define a link to this app.
   static const appIdentifier = DomainError(
     'Package name failed',
     'The test checks your Digital Asset Links JSON file '
@@ -58,7 +60,7 @@ class DomainError extends CommonError {
         'app is available in the Google Play store. See the following recommended asset link json file. ',
   );
 
-  // Asset link file should contain the correct fingerprint.
+  /// Asset link file should contain the correct fingerprint.
   static const fingerprints = DomainError(
     'Fingerprint validation failed',
     'This test checks your Digital Asset Links JSON file for '
@@ -70,7 +72,7 @@ class DomainError extends CommonError {
         '"android_app" namespace is declared on it. See the following recommended asset link json file. ',
   );
 
-  // Asset link file should be served with the correct content type.
+  /// Asset link file should be served with the correct content type.
   static const contentType = DomainError(
     'JSON content type failed',
     'This test checks your Digital Asset Links JSON file for content type '
@@ -79,7 +81,7 @@ class DomainError extends CommonError {
     'Ensure the content-type is "application/json" for all of the failed website domains.',
   );
 
-  // Asset link file should be accessible via https.
+  /// Asset link file should be accessible via https.
   static const httpsAccessibility = DomainError(
     'HTTPS accessibility failed',
     'This test tries to access your Digital Asset Links '
@@ -90,7 +92,7 @@ class DomainError extends CommonError {
         'the app\'s intent filter declares HTTP as the data scheme).',
   );
 
-  // Asset link file should be accessible with no redirects.
+  /// Asset link file should be accessible with no redirects.
   static const nonRedirect = DomainError(
     'Domain non-redirect failed',
     'This test checks that your domain is accessible without '
@@ -99,15 +101,16 @@ class DomainError extends CommonError {
     'Ensure your domain is accessible without any redirects ',
   );
 
-  // Asset link domain should be valid/not malformed.
+  /// Asset link domain should be valid/not malformed.
   static const hostForm = DomainError(
     'Host attribute formed properly failed',
     'This test checks that your android:host attribute has a valid domain URL pattern.',
     'Make sure the host is a properly formed web address such '
         'as google.com or www.google.com, without "http://" or "https://".',
   );
-  // Issues that are not covered by other checks. An example that may be in this
-  // category is Android validation API failures.
+
+  /// Issues that are not covered by other checks. An example that may be in this
+  /// category is Android validation API failures.
   static const other = DomainError('Check failed', '', '');
 }
 
@@ -116,35 +119,43 @@ class PathError extends CommonError {
   const PathError(title, explanation, fixDetails)
       : super(title, explanation, fixDetails);
 
-  // Intent filter should have action tag.
+  /// Activity should have deep link enabled flag.
+  static const missingDeepLinkingFlag = PathError(
+    'Activity is missing the deep linking enabled flag',
+    'The activity must have the following metadata tag: '
+        '$metaDataDeepLinkingFlagTag',
+    '',
+  );
+
+  /// Intent filter should have action tag.
   static const intentFilterActionView = PathError(
     'Intent filter is missing action tag',
     'The intent filter must have a <action android:name="android.intent.action.VIEW" />',
     '',
   );
 
-  // Intent filter should have browsable tag.
+  /// Intent filter should have browsable tag.
   static const intentFilterBrowsable = PathError(
     'Intent filter is missing browsable tag',
     'The intent filter must have a <category android:name="android.intent.category.BROWSABLE" />',
     '',
   );
 
-  // Intent filter should have default tag.
+  /// Intent filter should have default tag.
   static const intentFilterDefault = PathError(
     'Intent filter is missing default tag',
     'The intent filter must have a <category android:name="android.intent.category.DEFAULT" />',
     '',
   );
 
-  // Intent filter should have autoVerify tag.
+  /// Intent filter should have autoVerify tag.
   static const intentFilterAutoVerify = PathError(
     'Intent filter is missing autoVerify tag',
     'The intent filter must have android:autoVerify="true"',
     '',
   );
 
-  // Path has format.
+  /// Path has format.
   static const pathFormat = PathError(
     'Path format',
     '',
@@ -152,7 +163,8 @@ class PathError extends CommonError {
   );
 }
 
-Set<PathError> intentFilterErrors = <PathError>{
+Set<PathError> manifestFileErrors = <PathError>{
+  PathError.missingDeepLinkingFlag,
   PathError.intentFilterActionView,
   PathError.intentFilterBrowsable,
   PathError.intentFilterDefault,

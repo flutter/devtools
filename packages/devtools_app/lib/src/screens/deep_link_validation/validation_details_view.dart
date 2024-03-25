@@ -563,7 +563,7 @@ class _PathCheckTable extends StatelessWidget {
         const SizedBox(height: intermediateSpacing),
         const _CheckTableHeader(),
         const Divider(height: 1.0),
-        _IntentFilterCheck(controller: controller),
+        _ManifestFileCheck(controller: controller),
         const Divider(height: 1.0),
         _PathFormatCheck(controller: controller),
       ],
@@ -571,20 +571,20 @@ class _PathCheckTable extends StatelessWidget {
   }
 }
 
-class _IntentFilterCheck extends StatelessWidget {
-  const _IntentFilterCheck({required this.controller});
+class _ManifestFileCheck extends StatelessWidget {
+  const _ManifestFileCheck({required this.controller});
 
   final DeepLinksController controller;
 
   @override
   Widget build(BuildContext context) {
     final linkData = controller.selectedLink.value!;
-    final errors = intentFilterErrors
+    final errors = manifestFileErrors
         .where((error) => linkData.pathErrors.contains(error))
         .toList();
 
     return _CheckExpansionTile(
-      checkName: 'IntentFiler',
+      checkName: 'Manifest file',
       status: _CheckStatusText(hasError: errors.isNotEmpty),
       children: <Widget>[
         if (errors.isNotEmpty)
@@ -596,7 +596,9 @@ class _IntentFilterCheck extends StatelessWidget {
                     'Copy the following code into your Manifest file.',
               ),
               const _CodeCard(
-                content: '''<intent-filter android:autoVerify="true">
+                content: ''''$metaDataDeepLinkingFlagTag'
+
+<intent-filter android:autoVerify="true">
     <action android:name="android.intent.action.VIEW" />
     <category android:name="android.intent.category.DEFAULT" />
     <category android:name="android.intent.category.BROWSABLE" />
