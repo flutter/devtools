@@ -145,9 +145,9 @@ extension DevToolsColorExtension on ColorScheme {
       isLight ? Colors.grey[50]! : const Color(0xFF1B1B1F);
 
   Color get grey => const Color.fromARGB(255, 128, 128, 128);
-  Color get green => const Color.fromARGB(255, 156, 233, 195);
+  Color get green =>  isLight ? const Color(0xFF006B5F)  :const Color(0xFF54DBC8);
 
   Color get overlayShadowColor => const Color.fromRGBO(0, 0, 0, 0.5);
   Color get deeplinkUnavailableColor => const Color(0xFFFE7C04);
-  Color get deeplinkTableHeaderColor => Colors.black;
+  Color get deeplinkTableHeaderColor => isLight ? Colors.white : Colors.black;
 }

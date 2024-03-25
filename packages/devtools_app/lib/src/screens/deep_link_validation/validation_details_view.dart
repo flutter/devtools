@@ -338,7 +338,7 @@ class _LocalFingerprint extends StatelessWidget {
                     await showDialog(
                       context: context,
                       builder: (_) {
-                        return const AlertDialog(
+                        return const DevToolsDialog(
                           title: Text('This is not a valid fingerprint'),
                           content: Text(
                             'A valid fingerprint consists of 32 pairs of hexadecimal digits separated by colons.'
@@ -557,7 +557,7 @@ class _PathCheckTable extends StatelessWidget {
       children: [
         const SizedBox(height: intermediateSpacing),
         Text(
-          'Path check',
+          'App check',
           style: theme.textTheme.titleSmall,
         ),
         const SizedBox(height: intermediateSpacing),
