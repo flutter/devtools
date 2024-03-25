@@ -8,7 +8,7 @@ import '../file/file.dart';
 import 'import_export.dart';
 
 ExportControllerDesktop createExportController() {
-  throw UnimplementedError();
+  return ExportControllerDesktop();
 }
 
 class ExportControllerDesktop extends ExportController {
@@ -26,6 +26,6 @@ class ExportControllerDesktop extends ExportController {
 
   @override
   void saveDataFile({required Uint8List content, required String fileName}) {
-    // TODO: implement saveDataFile
+    throw UnimplementedError();
   }
 }
