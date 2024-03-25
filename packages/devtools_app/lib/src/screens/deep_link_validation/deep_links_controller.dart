@@ -202,10 +202,10 @@ class DeepLinksController extends DisposableController {
 
   late final selectedVariantIndex = ValueNotifier<int>(0);
   void _handleSelectedVariantIndexChanged() {
-    unawaited(_loadAndroidAppLinks());
+    unawaited(loadAndValidateAndroidAppLinks());
   }
 
-  Future<void> _loadAndroidAppLinks() async {
+  Future<void> loadAndValidateAndroidAppLinks() async {
     pagePhase.value = PagePhase.linksLoading;
     if (!_androidAppLinks.containsKey(selectedVariantIndex.value)) {
       final variant =

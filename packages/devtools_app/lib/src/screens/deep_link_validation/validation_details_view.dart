@@ -62,14 +62,14 @@ class ValidationDetailView extends StatelessWidget {
                     viewType == TableViewType.singleUrlView)
                   _PathCheckTable(controller: controller),
                 const SizedBox(height: extraLargeSpacing),
-                if (linkData.domainErrors.isNotEmpty)
-                  Align(
-                    alignment: Alignment.bottomRight,
-                    child: FilledButton(
-                      onPressed: () async => await controller.validateLinks(),
-                      child: const Text('Recheck all'),
-                    ),
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: FilledButton(
+                    onPressed: () async =>
+                        await controller.loadAndValidateAndroidAppLinks(),
+                    child: const Text('Recheck all'),
                   ),
+                ),
                 if (viewType == TableViewType.domainView)
                   _DomainAssociatedLinksPanel(controller: controller),
                 const SizedBox(height: largeSpacing),
