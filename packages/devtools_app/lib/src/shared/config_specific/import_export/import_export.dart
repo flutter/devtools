@@ -112,7 +112,8 @@ extension type _DevToolsSnapshot(Map<String, Object?> json) {
 enum ExportFileType {
   json,
   csv,
-  yaml;
+  yaml,
+  data;
 
   @override
   String toString() => name;
@@ -138,17 +139,23 @@ abstract class ExportController {
 
   /// Downloads a file with [content]
   /// and pushes notification about success if [notify] is true.
-  String downloadFile(
-    String content, {
+  String downloadFile<T>(
+    T content, {
     String? fileName,
     ExportFileType type = ExportFileType.json,
     bool notify = true,
   }) {
     fileName ??= ExportController.generateFileName(type: type);
-    saveFile(
-      content: content,
-      fileName: fileName,
-    );
+
+    switch (content) {
+      case String:
+        saveFile(content: content as String, fileName: fileName);
+      case Uint8List:
+        saveDataFile(content: content as Uint8List, fileName: fileName);
+      default:
+        throw 'Unsupported content type: $T';
+    }
+
     notificationService.push(successfulExportMessage(fileName));
     return fileName;
   }
@@ -158,23 +165,6 @@ abstract class ExportController {
     required String content,
     required String fileName,
   });
-
-  /// Downloads a file with [content]
-  /// and pushes notification about success if [notify] is true.
-  String downloadDataFile( invoke!!!!!
-    Uint8List content, {
-    String? fileName,
-    ExportFileType type = ExportFileType.json,
-    bool notify = true,
-  }) {
-    fileName ??= ExportController.generateFileName(type: type);
-    saveDataFile(
-      content: content,
-      fileName: fileName,
-    );
-    notificationService.push(successfulExportMessage(fileName));
-    return fileName;
-  }
 
   /// Saves [content] to the [fileName].
   void saveDataFile({
