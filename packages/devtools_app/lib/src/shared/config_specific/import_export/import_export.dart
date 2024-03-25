@@ -146,7 +146,10 @@ abstract class ExportController {
     bool notify = true,
   }) {
     fileName ??= ExportController.generateFileName(type: type);
-    saveFile(content: content as String, fileName: fileName);
+    saveFile(
+      content: content as String,
+      fileName: fileName,
+    );
     notificationService.push(successfulExportMessage(fileName));
     return fileName;
   }

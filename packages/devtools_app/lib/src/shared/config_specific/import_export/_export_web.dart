@@ -33,11 +33,7 @@ class ExportControllerWeb extends ExportController {
       throw 'Unsupported content type: $T';
     }
 
-    element.setAttribute(
-      'href',
-      // ignore: avoid_dynamic_calls, there is not better way in this case,
-      URL.createObjectURL(blob as JSObject),
-    );
+    element.setAttribute('href', URL.createObjectURL(blob as JSObject));
     element.setAttribute('download', fileName);
     element.style.display = 'none';
     (document.body as HTMLBodyElement).append(element as JSAny);
