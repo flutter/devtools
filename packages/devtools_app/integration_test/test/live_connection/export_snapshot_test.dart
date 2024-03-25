@@ -25,7 +25,7 @@ void main() {
     await resetHistory();
   });
 
-  testWidgets('connect to app and switch tabs', (tester) async {
+  testWidgets('Export snapshot', (tester) async {
     await pumpAndConnectDevTools(tester, testApp);
     await prepareMemoryUI(tester);
     await takeHeapSnapshot(tester);
