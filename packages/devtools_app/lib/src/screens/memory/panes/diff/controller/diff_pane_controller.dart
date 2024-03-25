@@ -144,7 +144,7 @@ class DiffPaneController extends DisposableController {
         .map((d) => utf8.decode(d.buffer.asUint8List()))
         .join();
 
-    ExportController().downloadFile(
+    ExportController().downloadDataFile(
       data,
       fileName: ExportController.generateFileName(
         type: ExportFileType.json,
