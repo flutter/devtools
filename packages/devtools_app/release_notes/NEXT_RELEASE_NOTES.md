@@ -52,7 +52,7 @@ TODO: Remove this section if there are not any general updates.
 ## Deep Links tool updates
 
 * Automatically populate a list of Flutter projects from the connected
-IDE. - [#7415](https://github.com/flutter/devtools/pull/7415)
+IDE. - [#7415](https://github.com/flutter/devtools/pull/7415), [#7431](https://github.com/flutter/devtools/pull/7431)
 
 ## App size tool updates
 
