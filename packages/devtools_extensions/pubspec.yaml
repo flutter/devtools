@@ -4,9 +4,10 @@ version: 0.1.1-wip
 
 repository: https://github.com/flutter/devtools/tree/master/packages/devtools_extensions
 
+# TODO(kenz): use version numbers from next Dart / Flutter beta release.
 environment:
-  sdk: ">=3.3.0-91.0.dev <4.0.0"
-  flutter: ">=3.17.0-0.0.pre"
+  sdk: ">=3.4.0-268.0.dev <4.0.0"
+  flutter: ">=3.21.0-14.0.pre.22"
 
 executables:
   devtools_extensions: devtools_extensions
@@ -14,7 +15,7 @@ executables:
 dependencies:
   args: ^2.4.2
   devtools_shared: ^8.1.0
-  devtools_app_shared: ^0.1.0
+  devtools_app_shared: ^0.1.1-dev.0
   flutter:
     sdk: flutter
   io: ^1.0.4
