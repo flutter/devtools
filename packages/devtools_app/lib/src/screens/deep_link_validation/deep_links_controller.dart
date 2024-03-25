@@ -257,7 +257,7 @@ class DeepLinksController extends DisposableController {
 
   /// Get all unverified link data.
   List<LinkData> get _allRawLinkDatas {
-    final appLinksSettings =_androidAppLinks[selectedVariantIndex.value];
+    final appLinksSettings = _androidAppLinks[selectedVariantIndex.value];
     if (appLinksSettings == null) {
       return const <LinkData>[];
     }
@@ -283,7 +283,8 @@ class DeepLinksController extends DisposableController {
         }
         final pathErrors = {
           ...linkData.pathErrors,
-          if(!appLinksSettings.deeplinkingFlagEnabled)PathError.missingFlag,
+          if (!appLinksSettings.deeplinkingFlagEnabled)
+            PathError.missingDeepLinkingFlag,
           ..._getPathErrorsFromIntentFilterChecks(appLink.intentFilterChecks),
         };
 

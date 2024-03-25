@@ -596,7 +596,7 @@ class _ManifestFileCheck extends StatelessWidget {
                     'Copy the following code into your Manifest file.',
               ),
               const _CodeCard(
-                content: '''<meta-data android:name="flutter_deeplinking_enabled" android:value="true" />
+                content: ''''$metaDataDeepLinkingFlagTag'
 
 <intent-filter android:autoVerify="true">
     <action android:name="android.intent.action.VIEW" />
