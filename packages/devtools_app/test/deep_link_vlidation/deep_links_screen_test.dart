@@ -74,8 +74,8 @@ void main() {
     final mockDtdManager = MockDTDManager();
     final rootUri1 = Uri.parse('file:///Users/me/package_root_1');
     final rootUri2 = Uri.parse('file:///Users/me/package_root_2');
-    when(mockDtdManager.workspaceRoots()).thenAnswer((_) async {
-      return IDEWorkspaceRoots(ideWorkspaceRoots: [rootUri1, rootUri2]);
+    when(mockDtdManager.projectRoots()).thenAnswer((_) async {
+      return UriList(uris: [rootUri1, rootUri2]);
     });
     setGlobal(DTDManager, mockDtdManager);
   });
