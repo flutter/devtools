@@ -37,7 +37,11 @@ extension HeapSnapshotGraphSerialization on HeapSnapshotGraph {
     return HeapSnapshotGraph.fromChunks([data]);
   }
 
-  Uint8List toSavableData() {
+  /// Serializes the graph to a list of bytes.
+  ///
+  /// Used to export graph to file to the same format as `writeHeapSnapshotToFile`.
+  /// See https://api.flutter.dev/flutter/dart-developer/NativeRuntime/writeHeapSnapshotToFile.html
+  Uint8List toUint8List() {
     final b = BytesBuilder();
     for (var chunk in toChunks()) {
       b.add(chunk.buffer.asUint8List());

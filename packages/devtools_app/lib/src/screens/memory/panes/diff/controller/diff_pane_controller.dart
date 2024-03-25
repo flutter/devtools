@@ -142,7 +142,7 @@ class DiffPaneController extends DisposableController {
     final item = core.selectedDataItem!;
 
     ExportController().downloadFile(
-      item.heap!.graph.toSavableData(),
+      item.heap!.graph.toUint8List(),
       fileName: ExportController.generateFileName(
         type: ExportFileType.data,
         prefix: item.name,
