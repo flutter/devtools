@@ -146,29 +146,14 @@ abstract class ExportController {
     bool notify = true,
   }) {
     fileName ??= ExportController.generateFileName(type: type);
-
-    switch (content) {
-      case String:
-        saveFile(content: content as String, fileName: fileName);
-      case Uint8List:
-        saveDataFile(content: content as Uint8List, fileName: fileName);
-      default:
-        throw 'Unsupported content type: $T';
-    }
-
+    saveFile(content: content as String, fileName: fileName);
     notificationService.push(successfulExportMessage(fileName));
     return fileName;
   }
 
   /// Saves [content] to the [fileName].
-  void saveFile({
-    required String content,
-    required String fileName,
-  });
-
-  /// Saves [content] to the [fileName].
-  void saveDataFile({
-    required Uint8List content,
+  void saveFile<T>({
+    required T content,
     required String fileName,
   });
 

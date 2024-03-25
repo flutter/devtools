@@ -17,15 +17,16 @@ class ExportControllerDesktop extends ExportController {
   static final _fs = FileIO();
 
   @override
-  void saveFile({
-    required String content,
+  void saveFile<T>({
+    required T content,
     required String fileName,
   }) {
-    _fs.writeStringToFile(fileName, content);
-  }
-
-  @override
-  void saveDataFile({required Uint8List content, required String fileName}) {
-    throw UnimplementedError();
+    if (content is String) {
+      _fs.writeStringToFile(fileName, content);
+    } else if (content is Uint8List) {
+      throw UnimplementedError();
+    } else {
+      throw StateError('Unsupported content type: $T');
+    }
   }
 }

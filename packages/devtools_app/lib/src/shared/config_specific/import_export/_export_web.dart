@@ -16,37 +16,32 @@ ExportControllerWeb createExportController() {
 class ExportControllerWeb extends ExportController {
   ExportControllerWeb() : super.impl();
 
-  void _downloadJsObject({
-    // ignore: avoid-dynamic, there is not better way in this case
-    required dynamic content,
+  @override
+  void saveFile<T>({
+    required T content,
     required String fileName,
   }) {
     final element = document.createElement('a') as HTMLAnchorElement;
+
+    late final Blob blob;
+
+    if (content is String) {
+      blob = Blob([content.toJS].toJS);
+    } else if (content is Uint8List) {
+      blob = Blob([content.toJS].toJS);
+    } else {
+      throw 'Unsupported content type: $T';
+    }
+
     element.setAttribute(
       'href',
-      // ignore: avoid-dynamic, avoid_dynamic_calls, there is not better way in this case,
-      URL.createObjectURL(Blob(([content.toJS] as dynamic).toJS) as JSObject),
+      // ignore: avoid_dynamic_calls, there is not better way in this case,
+      URL.createObjectURL(blob as JSObject),
     );
     element.setAttribute('download', fileName);
     element.style.display = 'none';
     (document.body as HTMLBodyElement).append(element as JSAny);
     element.click();
     element.remove();
-  }
-
-  @override
-  void saveFile({
-    required String content,
-    required String fileName,
-  }) {
-    _downloadJsObject(content: content, fileName: fileName);
-  }
-
-  @override
-  void saveDataFile({
-    required Uint8List content,
-    required String fileName,
-  }) {
-    _downloadJsObject(content: content, fileName: fileName);
   }
 }
