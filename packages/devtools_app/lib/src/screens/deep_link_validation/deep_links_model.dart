@@ -101,7 +101,7 @@ class DomainError extends CommonError {
 
   // Asset link domain should be valid/not malformed.
   static const hostForm = DomainError(
-    'Host attribute not formed properly',
+    'Host attribute is not formed properly',
     'This test checks that your android:host attribute has a valid domain URL pattern.',
     'Make sure the host is a properly formed web address such '
         'as google.com or www.google.com, without "http://" or "https://".',
