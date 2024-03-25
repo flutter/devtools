@@ -1,4 +1,4 @@
-## 0.1.1-wip
+## 0.1.1-dev.0
 * Update `package:dtd` to `^2.1.0`
 * Add `DTDManager.projectRoots` method.
 

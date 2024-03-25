@@ -107,7 +107,7 @@ class DTDManager {
       }
       try {
         return _projectRoots ??=
-            await _connection.value!.getProjectRoots(depth: depth);
+            await _connection.value!.getProjectRoots(depth: depth!);
       } catch (e) {
         _log.fine('Error fetching project roots: $e');
         return null;
