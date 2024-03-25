@@ -119,3 +119,17 @@ Future<Finder?> tapAndPumpWidget(
 
   throw StateError('Could not find $next');
 }
+
+Future<void> openContextMenuForSnapshot(
+  String snapshotName,
+  WidgetTester tester,
+) async {
+  await tapAndPumpWidget(tester, find.text(snapshotName));
+  await tapAndPumpWidget(
+    tester,
+    find.descendant(
+      of: find.byType(SnapshotListTitle),
+      matching: find.byType(ContextMenuButton),
+    ),
+  );
+}
