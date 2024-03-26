@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
-
 import '../file/file.dart';
 import 'import_export.dart';
 
@@ -21,13 +19,6 @@ class ExportControllerDesktop extends ExportController {
     required T content,
     required String fileName,
   }) {
-    if (content is String) {
-      _fs.writeStringToFile(fileName, content);
-    } else if (content is Uint8List) {
-      // TODO(polina-c): implement https://github.com/flutter/devtools/issues/7425
-      throw UnimplementedError();
-    } else {
-      throw StateError('Unsupported content type: $T');
-    }
+    _fs.writeContentsToFile<T>(fileName, content);
   }
 }
