@@ -242,18 +242,22 @@ class _DeepLinkListViewTopPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Provider.of<DeepLinksController>(context);
-    return SizedBox(
-      height: largeHeaderHeight,
-      child: Row(
+    return AreaPaneHeader(
+      roundedTopBorder:false,
+      includeTopBorder:false,
+      includeBottomBorder:false,
+      tall: true,
+      title: 
+      Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-            child: Text(
+      
+            
+            Text(
               'Validate and fix',
               style: Theme.of(context).textTheme.titleSmall,
             ),
-          ),
+     
           ValueListenableBuilder(
             valueListenable: controller.selectedVariantIndex,
             builder: (_, value, __) {
@@ -359,7 +363,7 @@ class _AllDeepLinkDataTable extends StatelessWidget {
           ),
         ),
         SizedBox(
-          height: largeHeaderHeight,
+          height: defaultHeaderHeight,
           child: TabBar(
             tabs: [
               DevToolsTab.create(

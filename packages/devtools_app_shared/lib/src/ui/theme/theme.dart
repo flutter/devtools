@@ -236,7 +236,6 @@ bool isValidLightColor(Color? color) {
 // Size constants:
 double get defaultToolbarHeight => scaleByFontFactor(32.0);
 double get defaultHeaderHeight => scaleByFontFactor(28.0);
-double get largeHeaderHeight => scaleByFontFactor(38.0);
 double get defaultButtonHeight => scaleByFontFactor(26.0);
 double get defaultRowHeight => scaleByFontFactor(24.0);
 double get defaultLinearProgressIndicatorHeight => scaleByFontFactor(4.0);
