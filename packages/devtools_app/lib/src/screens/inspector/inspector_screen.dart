@@ -375,7 +375,7 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
               ],
             ),
             Text(
-              '(e.g. /absolute/path/to/myPackage)',
+              '(e.g. /absolute/path/to/myPackage/)',
               style: theme.subtleTextStyle,
             ),
             const SizedBox(height: denseSpacing),

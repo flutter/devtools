@@ -17,7 +17,8 @@ launched from Flutter Tools. - [#6848](https://github.com/flutter/devtools/issue
 
 ## Inspector updates
 
-TODO: Remove this section if there are not any general updates.
+- Fixes an edge case where widgets from other packages could show up in the inspector
+  tree. - [#7353](https://github.com/flutter/devtools/pull/7353)
 
 ## Performance updates
 * Add a setting to include CPU samples in the Timeline. - [#7333](https://github.com/flutter/devtools/pull/7333), [#7369](https://github.com/flutter/devtools/pull/7369)
