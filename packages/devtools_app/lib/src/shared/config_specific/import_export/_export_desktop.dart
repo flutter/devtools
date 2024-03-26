@@ -4,6 +4,8 @@
 
 import 'dart:typed_data';
 
+import 'package:path/path.dart' as path;
+
 import '../file/file.dart';
 import 'import_export.dart';
 
@@ -24,9 +26,14 @@ class ExportControllerDesktop extends ExportController {
     if (content is String) {
       _fs.writeStringToFile(fileName, content);
     } else if (content is Uint8List) {
-      _fs.writeStringToFile(fileName, content);
+      _fs.writeStringToFile(toAbsolutePath(fileName), content);
     } else {
       throw StateError('Unsupported content type: $T');
     }
+  }
+
+  String toAbsolutePath(String fileName) {
+    if (!path.isRelative(fileName)) return fileName;
+    return path.join(_fs.exportDirectoryName(), fileName);
   }
 }
