@@ -6,10 +6,8 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
-import 'common_widgets.dart';
-import 'primitives/utils.dart';
-
-// TODO(kenz): move this file into the deep links screen directory.
+import '../../../shared/common_widgets.dart';
+import '../../../shared/primitives/utils.dart';
 
 class ProjectRootTextField extends StatefulWidget {
   const ProjectRootTextField({
