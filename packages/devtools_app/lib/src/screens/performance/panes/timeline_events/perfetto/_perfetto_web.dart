@@ -177,6 +177,7 @@ class _PerfettoViewController extends DisposableController
         'buffer': traceBinary,
         'title': 'DevTools timeline trace',
         'keepApiOpen': true,
+        'expandAllTrackGroups': true,
       },
     });
   }
