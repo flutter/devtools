@@ -88,3 +88,11 @@ For example:
 
 For a list of such arguments, see [_in_file_args.dart](test_infra/run/_in_file_args.dart). For an example of
 usage, see [eval_and_browse_test.dart](test/live_connection/eval_and_browse_test.dart).
+
+# How to disable a test
+
+To disable a test, add an entry to [_skipTests](https://github.com/flutter/devtools/blob/18e27f1ef33551414cccb1864a3bbf656dd15db1/packages/devtools_app/integration_test/run_tests.dart#L26)
+
+# How to find out which test failed on bots
+
+Search for `Exception: Test '` in the bot's log.
