@@ -708,16 +708,14 @@ class RoundedCornerOptions {
     this.showBottomRight = true,
   });
 
-  // Constructor to create an instance with all corners hidden
-  factory RoundedCornerOptions.empty() {
-    return const RoundedCornerOptions(
-      showTopLeft: false,
-      showTopRight: false,
-      showBottomLeft: false,
-      showBottomRight: false,
-    );
-  }
-  
+  // Static constant instance with all corners hidden
+  static const RoundedCornerOptions empty = RoundedCornerOptions(
+    showTopLeft: false,
+    showTopRight: false,
+    showBottomLeft: false,
+    showBottomRight: false,
+  );
+
   final bool showTopLeft;
   final bool showTopRight;
   final bool showBottomLeft;
@@ -767,38 +765,43 @@ class RoundedDropDownButton<T> extends StatelessWidget {
     final showTopRight = roundedCornerOptions?.showTopRight ?? true;
     final showBottomLeft = roundedCornerOptions?.showBottomLeft ?? true;
     final showBottomRight = roundedCornerOptions?.showBottomRight ?? true;
+
+    final button = Center(
+      child: SizedBox(
+        height: defaultButtonHeight - 2.0, // subtract 2.0 for width of border
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<T>(
+            padding: const EdgeInsets.only(
+              left: defaultSpacing,
+              right: borderPadding,
+            ),
+            value: value,
+            onChanged: onChanged,
+            isDense: isDense,
+            isExpanded: isExpanded,
+            borderRadius: BorderRadius.only(
+              topLeft: selectRadius(showTopLeft),
+              topRight: selectRadius(showTopRight),
+              bottomLeft: selectRadius(showBottomLeft),
+              bottomRight: selectRadius(showBottomRight),
+            ),
+            style: style,
+            selectedItemBuilder: selectedItemBuilder,
+            items: items,
+            focusColor: bgColor,
+          ),
+        ),
+      ),
+    );
+
+    if (roundedCornerOptions == RoundedCornerOptions.empty) return button;
+
     return RoundedOutlinedBorder(
       showTopLeft: showTopLeft,
       showTopRight: showTopRight,
       showBottomLeft: showBottomLeft,
       showBottomRight: showBottomRight,
-      child: Center(
-        child: SizedBox(
-          height: defaultButtonHeight - 2.0, // subtract 2.0 for width of border
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<T>(
-              padding: const EdgeInsets.only(
-                left: defaultSpacing,
-                right: borderPadding,
-              ),
-              value: value,
-              onChanged: onChanged,
-              isDense: isDense,
-              isExpanded: isExpanded,
-              borderRadius: BorderRadius.only(
-                topLeft: selectRadius(showTopLeft),
-                topRight: selectRadius(showTopRight),
-                bottomLeft: selectRadius(showBottomLeft),
-                bottomRight: selectRadius(showBottomRight),
-              ),
-              style: style,
-              selectedItemBuilder: selectedItemBuilder,
-              items: items,
-              focusColor: bgColor,
-            ),
-          ),
-        ),
-      ),
+      child: button,
     );
   }
 }

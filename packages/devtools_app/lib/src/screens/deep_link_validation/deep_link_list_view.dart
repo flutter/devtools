@@ -242,31 +242,33 @@ class _DeepLinkListViewTopPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Provider.of<DeepLinksController>(context);
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-          child: Text(
-            'Validate and fix',
-            style: Theme.of(context).textTheme.titleSmall,
+    return SizedBox(
+      height: largerHeaderHeight,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+            child: Text(
+              'Validate and fix',
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
           ),
-        ),
-        ValueListenableBuilder(
-          valueListenable: controller.selectedVariantIndex,
-          builder: (_, value, __) {
-            return _AndroidVariantDropdown(
-              androidVariants:
-                  controller.selectedProject.value!.androidVariants,
-              index: value,
-              onVariantIndexSelected: (index) {
-                controller.selectedVariantIndex.value = index;
-              },
-            );
-          },
-        ),
-      ],
-      //),
+          ValueListenableBuilder(
+            valueListenable: controller.selectedVariantIndex,
+            builder: (_, value, __) {
+              return _AndroidVariantDropdown(
+                androidVariants:
+                    controller.selectedProject.value!.androidVariants,
+                index: value,
+                onVariantIndexSelected: (index) {
+                  controller.selectedVariantIndex.value = index;
+                },
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 }
@@ -287,8 +289,8 @@ class _AndroidVariantDropdown extends StatelessWidget {
       children: [
         const Text('Android Variant:'),
         RoundedDropDownButton<int>(
+          roundedCornerOptions: RoundedCornerOptions.empty,
           value: index,
-          roundedCornerOptions: RoundedCornerOptions.empty(),
           items: [
             for (int i = 0; i < androidVariants.length; i++)
               DropdownMenuItem<int>(
@@ -357,7 +359,7 @@ class _AllDeepLinkDataTable extends StatelessWidget {
           ),
         ),
         SizedBox(
-          height: defaultHeaderHeight,
+          height: largerHeaderHeight,
           child: TabBar(
             tabs: [
               DevToolsTab.create(
