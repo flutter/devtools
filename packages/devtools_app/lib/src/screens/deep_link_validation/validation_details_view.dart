@@ -96,6 +96,7 @@ class ValidationDetailHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return OutlineDecoration(
       showLeft: false,
+      showRight: false,
       child: Container(
         height: actionWidgetSize,
         padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
