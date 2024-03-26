@@ -131,7 +131,7 @@ class PerformanceController extends DisposableController
             enhanceTracingController.assignStateForFrame(frame);
             flutterFramesController.addFrame(frame);
           } else if (event.extensionKind == 'Flutter.RebuiltWidgets' &&
-              FeatureFlags.widgetRebuildstats) {
+              FeatureFlags.widgetRebuildStats) {
             if (_currentRebuildWidgetsIsolate != event.isolate) {
               rebuildCountModel.clearFromRestart();
             }

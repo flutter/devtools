@@ -64,7 +64,7 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
 
     var showFrameAnalysis = isFlutterApp;
     var showRasterStats = isFlutterApp;
-    var showRebuildStats = FeatureFlags.widgetRebuildstats && isFlutterApp;
+    var showRebuildStats = FeatureFlags.widgetRebuildStats && isFlutterApp;
     final offlineData = controller.offlinePerformanceData;
     if (isOffline) {
       final hasOfflineData = offlineData != null;
