@@ -50,10 +50,6 @@ Future<void> prepareMemoryUI(
     await tester.pumpAndSettle();
   }
 
-  // For the sake of this test, do not show extension screens by default.
-  preferences.devToolsExtensions.showOnlyEnabledExtensions.value = true;
-  await tester.pumpAndSettle(shortPumpDuration);
-
   if (openDiff) {
     // Switch to diff tab.
     await tapAndPumpWidget(tester, find.text('Diff Snapshots'));
@@ -72,12 +68,6 @@ Future<void> takeHeapSnapshot(
     duration: snapshotDuration,
   );
   logStatus('Finished taking snapshot.');
-
-  // Sort by class.
-  await tapAndPumpWidget(tester, find.text('Class'));
-
-  // Select class.
-  await tapAndPumpWidget(tester, find.text('MyApp'));
 }
 
 /// Taps and settles.
