@@ -57,7 +57,7 @@ class ExternalDevToolsEnvironmentParameters
 
   @override
   String get perfettoIndexLocation =>
-      'packages/perfetto_ui_compiled/dist/index.html';
+      'packages/perfetto_ui_compiled/index.html';
 
   @override
   String? chrome115BreakpointBug() {

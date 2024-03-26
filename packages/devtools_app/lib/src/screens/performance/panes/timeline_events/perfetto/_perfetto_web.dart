@@ -206,7 +206,7 @@ class _PerfettoViewController extends DisposableController
 
   Future<void> _loadStyle(bool darkMode) async {
     // This message will be handled by [devtools_theme_handler.js], which is
-    // included in the Perfetto build inside [packages/perfetto_ui_compiled/dist].
+    // included in the Perfetto build inside [packages/perfetto_ui_compiled].
     await _pingDevToolsThemeHandlerUntilReady();
     _postMessageWithId(
       EmbeddedPerfettoEvent.devtoolsThemeChange.event,

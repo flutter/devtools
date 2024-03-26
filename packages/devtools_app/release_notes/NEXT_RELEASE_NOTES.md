@@ -25,6 +25,7 @@ TODO: Remove this section if there are not any general updates.
 embedded Perfetto trace viewer in DevTools version 2.21.1, but was available
 behind a setting to ensure a smooth rollout. This release of DevTools removes
 the legacy trace viewer entirely. - [#7316](https://github.com/flutter/devtools/pull/7316)
+* Updated the Perfetto trace viewer to the latest release. - [#7445](https://github.com/flutter/devtools/pull/7445)
 
 ## CPU profiler updates
 

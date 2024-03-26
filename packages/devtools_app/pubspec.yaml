@@ -107,32 +107,32 @@ flutter:
     # We have to explicitly list every asset under `packages/perfetto_ui_compiled/`
     # since directory support is not available for assets under `packages/`.
     # See (https://github.com/flutter/flutter/issues/112019).
-    - packages/perfetto_ui_compiled/dist/index.html
-    - packages/perfetto_ui_compiled/dist/service_worker.js
-    - packages/perfetto_ui_compiled/dist/devtools/devtools_dark.css
-    - packages/perfetto_ui_compiled/dist/devtools/devtools_light.css
-    - packages/perfetto_ui_compiled/dist/devtools/devtools_shared.css
-    - packages/perfetto_ui_compiled/dist/devtools/devtools_theme_handler.js
+    - packages/perfetto_ui_compiled/index.html
+    - packages/perfetto_ui_compiled/service_worker.js
+    - packages/perfetto_ui_compiled/devtools/devtools_dark.css
+    - packages/perfetto_ui_compiled/devtools/devtools_light.css
+    - packages/perfetto_ui_compiled/devtools/devtools_shared.css
+    - packages/perfetto_ui_compiled/devtools/devtools_theme_handler.js
     # The version number for all the Perfetto asset paths below is updated by running
     # `devtools_tool update-perfetto`.
-    - packages/perfetto_ui_compiled/dist/v33.0-1838a06af/engine_bundle.js
-    - packages/perfetto_ui_compiled/dist/v33.0-1838a06af/frontend_bundle.js
-    - packages/perfetto_ui_compiled/dist/v33.0-1838a06af/manifest.json
-    - packages/perfetto_ui_compiled/dist/v33.0-1838a06af/perfetto.css
-    - packages/perfetto_ui_compiled/dist/v33.0-1838a06af/trace_processor.wasm
-    - packages/perfetto_ui_compiled/dist/v33.0-1838a06af/assets/brand.png
-    - packages/perfetto_ui_compiled/dist/v33.0-1838a06af/assets/favicon.png
-    - packages/perfetto_ui_compiled/dist/v33.0-1838a06af/assets/logo-128.png
-    - packages/perfetto_ui_compiled/dist/v33.0-1838a06af/assets/logo-3d.png
-    - packages/perfetto_ui_compiled/dist/v33.0-1838a06af/assets/scheduling_latency.png
-    - packages/perfetto_ui_compiled/dist/v33.0-1838a06af/assets/MaterialSymbolsOutlined.woff2
-    - packages/perfetto_ui_compiled/dist/v33.0-1838a06af/assets/Roboto-100.woff2
-    - packages/perfetto_ui_compiled/dist/v33.0-1838a06af/assets/Roboto-300.woff2
-    - packages/perfetto_ui_compiled/dist/v33.0-1838a06af/assets/Roboto-400.woff2
-    - packages/perfetto_ui_compiled/dist/v33.0-1838a06af/assets/Roboto-500.woff2
-    - packages/perfetto_ui_compiled/dist/v33.0-1838a06af/assets/RobotoCondensed-Light.woff2
-    - packages/perfetto_ui_compiled/dist/v33.0-1838a06af/assets/RobotoCondensed-Regular.woff2
-    - packages/perfetto_ui_compiled/dist/v33.0-1838a06af/assets/RobotoMono-Regular.woff2
+    - packages/perfetto_ui_compiled/v43.2-fa75f6029/engine_bundle.js
+    - packages/perfetto_ui_compiled/v43.2-fa75f6029/frontend_bundle.js
+    - packages/perfetto_ui_compiled/v43.2-fa75f6029/manifest.json
+    - packages/perfetto_ui_compiled/v43.2-fa75f6029/perfetto.css
+    - packages/perfetto_ui_compiled/v43.2-fa75f6029/trace_processor.wasm
+    - packages/perfetto_ui_compiled/v43.2-fa75f6029/assets/brand.png
+    - packages/perfetto_ui_compiled/v43.2-fa75f6029/assets/favicon.png
+    - packages/perfetto_ui_compiled/v43.2-fa75f6029/assets/logo-128.png
+    - packages/perfetto_ui_compiled/v43.2-fa75f6029/assets/logo-3d.png
+    - packages/perfetto_ui_compiled/v43.2-fa75f6029/assets/scheduling_latency.png
+    - packages/perfetto_ui_compiled/v43.2-fa75f6029/assets/MaterialSymbolsOutlined.woff2
+    - packages/perfetto_ui_compiled/v43.2-fa75f6029/assets/Roboto-100.woff2
+    - packages/perfetto_ui_compiled/v43.2-fa75f6029/assets/Roboto-300.woff2
+    - packages/perfetto_ui_compiled/v43.2-fa75f6029/assets/Roboto-400.woff2
+    - packages/perfetto_ui_compiled/v43.2-fa75f6029/assets/Roboto-500.woff2
+    - packages/perfetto_ui_compiled/v43.2-fa75f6029/assets/RobotoCondensed-Light.woff2
+    - packages/perfetto_ui_compiled/v43.2-fa75f6029/assets/RobotoCondensed-Regular.woff2
+    - packages/perfetto_ui_compiled/v43.2-fa75f6029/assets/RobotoMono-Regular.woff2
 
   fonts:
     - family: Roboto
