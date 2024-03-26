@@ -86,10 +86,9 @@ class BreakpointManager with DisposerMixin {
       );
     }
 
-    // If the flag pause-breakpoints-on-start was successfully set, then the
-    // isolate should be paused. If that's the case, then resume it:
+    // Resume the isolate now that the breakpoints have been set:
     await serviceConnection.serviceManager.isolateManager
-        .resumeIsolateIfPaused(isolateRef);
+        .resumeIsolate(isolateRef);
   }
 
   void clearCache({required bool isServiceShutdown}) {
