@@ -243,7 +243,7 @@ class _DeepLinkListViewTopPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Provider.of<DeepLinksController>(context);
     return SizedBox(
-      height: largerHeaderHeight,
+      height: largeHeaderHeight,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -359,7 +359,7 @@ class _AllDeepLinkDataTable extends StatelessWidget {
           ),
         ),
         SizedBox(
-          height: largerHeaderHeight,
+          height: largeHeaderHeight,
           child: TabBar(
             tabs: [
               DevToolsTab.create(
