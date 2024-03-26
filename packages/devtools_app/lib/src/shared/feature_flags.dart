@@ -88,6 +88,7 @@ abstract class FeatureFlags {
     'widgetRebuildStats': widgetRebuildstats,
     'memoryAnalysis': memoryAnalysis,
     'dapDebugging': dapDebugging,
+    'snapshotExport': snapshotExport,
   };
 
   /// A helper to print the status of all the feature flags.
