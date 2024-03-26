@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/primitives/utils.dart';
@@ -251,8 +252,8 @@ class _ErrorAwareText extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      'This m.shopping.com domain has ${link.domainErrors.length} issue to fix. '
-                      'Fixing this domain will fix ${link.associatedPath.length} associated deep links.',
+                      'This ${link.domain} domain has ${link.domainErrors.length} ${pluralize('issue', link.domainErrors.length)} to fix. '
+                      'Fixing this domain will fix ${link.associatedPath.length} associated deep ${pluralize('link', link.associatedPath.length)}.',
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.tooltipTextColor,
                         fontSize: defaultFontSize,
