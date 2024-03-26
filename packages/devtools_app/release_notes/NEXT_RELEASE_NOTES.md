@@ -33,7 +33,7 @@ TODO: Remove this section if there are not any general updates.
 ## Memory updates
 
 * Enabled export of snapshots and improved snapshotting
-performance. - [#7197](https://github.com/flutter/devtools/pull/7197), [#7439](https://github.com/flutter/devtools/pull/7439), [7449](https://github.com/flutter/devtools/pull/7449)
+performance. - [#7197](https://github.com/flutter/devtools/pull/7197), [#7439](https://github.com/flutter/devtools/pull/7439), [#7449](https://github.com/flutter/devtools/pull/7449)
 
 * Fixed failures during disconnect in tracing. - [#7440](https://github.com/flutter/devtools/pull/7440)
 
