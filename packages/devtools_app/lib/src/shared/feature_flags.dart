@@ -60,7 +60,7 @@ abstract class FeatureFlags {
 
   /// Enable snapshot export.
   ///
-  /// https://github.com/flutter/devtools/issues/5606
+  /// https://github.com/flutter/devtools/issues/7425
   static bool snapshotExport = enableExperiments;
 
   /// Flag to enable the deep link validation tooling in DevTools, both for the
