@@ -2,8 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+import 'dart:typed_data';
+
 import 'package:file/file.dart';
 import 'package:file/local.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
@@ -45,13 +49,20 @@ class FileSystemDesktop implements FileIO {
   }
 
   @override
-  void writeStringToFile(
+  void writeStringToFile<T>(
     String filename,
-    String contents, {
+    T contents, {
     bool isMemory = false,
   }) {
-    final logFile = _exportDirectory(isMemory: isMemory).childFile(filename);
-    logFile.writeAsStringSync(contents, flush: true);
+    if (contents is String) {
+      final logFile = _exportDirectory(isMemory: isMemory).childFile(filename);
+      logFile.writeAsStringSync(contents, flush: true);
+    } else if (contents is Uint8List) {
+      final XFile file = XFile.fromData(contents, name: filename);
+      unawaited(file.saveTo(filename));
+    } else {
+      throw StateError('Unsupported content type: $T');
+    }
   }
 
   @override
