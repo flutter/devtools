@@ -29,7 +29,7 @@ class PerformanceDefaultScene extends Scene {
 
   @override
   Future<void> setUp() async {
-    FeatureFlags.widgetRebuildstats = true;
+    FeatureFlags.widgetRebuildStats = true;
 
     setGlobal(OfflineModeController, OfflineModeController());
     setGlobal(IdeTheme, IdeTheme());
@@ -47,7 +47,7 @@ class PerformanceDefaultScene extends Scene {
 
   // TODO(kenz): call tearDown on the scenes that use this scene
   void tearDown() {
-    FeatureFlags.widgetRebuildstats = false;
+    FeatureFlags.widgetRebuildStats = false;
   }
 }
 
