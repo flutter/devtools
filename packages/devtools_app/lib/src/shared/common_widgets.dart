@@ -708,6 +708,16 @@ class RoundedCornerOptions {
     this.showBottomRight = true,
   });
 
+  // Constructor to create an instance with all corners hidden
+  factory RoundedCornerOptions.empty() {
+    return const RoundedCornerOptions(
+      showTopLeft: false,
+      showTopRight: false,
+      showBottomLeft: false,
+      showBottomRight: false,
+    );
+  }
+  
   final bool showTopLeft;
   final bool showTopRight;
   final bool showBottomLeft;

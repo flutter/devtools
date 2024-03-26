@@ -242,29 +242,31 @@ class _DeepLinkListViewTopPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Provider.of<DeepLinksController>(context);
-    return AreaPaneHeader(
-      title: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+          child: Text(
             'Validate and fix',
-            style: Theme.of(context).textTheme.bodyLarge,
+            style: Theme.of(context).textTheme.titleSmall,
           ),
-          ValueListenableBuilder(
-            valueListenable: controller.selectedVariantIndex,
-            builder: (_, value, __) {
-              return _AndroidVariantDropdown(
-                androidVariants:
-                    controller.selectedProject.value!.androidVariants,
-                index: value,
-                onVariantIndexSelected: (index) {
-                  controller.selectedVariantIndex.value = index;
-                },
-              );
-            },
-          ),
-        ],
-      ),
+        ),
+        ValueListenableBuilder(
+          valueListenable: controller.selectedVariantIndex,
+          builder: (_, value, __) {
+            return _AndroidVariantDropdown(
+              androidVariants:
+                  controller.selectedProject.value!.androidVariants,
+              index: value,
+              onVariantIndexSelected: (index) {
+                controller.selectedVariantIndex.value = index;
+              },
+            );
+          },
+        ),
+      ],
+      //),
     );
   }
 }
@@ -286,6 +288,7 @@ class _AndroidVariantDropdown extends StatelessWidget {
         const Text('Android Variant:'),
         RoundedDropDownButton<int>(
           value: index,
+          roundedCornerOptions: RoundedCornerOptions.empty(),
           items: [
             for (int i = 0; i < androidVariants.length; i++)
               DropdownMenuItem<int>(
@@ -318,53 +321,61 @@ class _AllDeepLinkDataTable extends StatelessWidget {
       children: <Widget>[
         OutlineDecoration(
           showRight: false,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-                child: Text(
-                  'All deep links',
-                  style: textTheme.bodyLarge,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(denseSpacing),
-                child: SizedBox(
-                  width: controller.displayOptions.showSplitScreen
-                      ? _kSearchFieldSplitScreenWidth
-                      : _kSearchFieldFullWidth,
-                  child: DevToolsClearableTextField(
-                    labelText: '',
-                    hintText: 'Search a URL, domain or path',
-                    prefixIcon: const Icon(Icons.search),
-                    onChanged: (value) {
-                      controller.searchContent = value;
-                    },
-                    controller: controller.textEditingController,
+          showLeft: false,
+          child: SizedBox(
+            height: actionWidgetSize,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: defaultSpacing),
+                  child: Text(
+                    'All deep links',
+                    style: textTheme.titleSmall,
                   ),
                 ),
-              ),
-            ],
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
+                  child: SizedBox(
+                    width: controller.displayOptions.showSplitScreen
+                        ? _kSearchFieldSplitScreenWidth
+                        : _kSearchFieldFullWidth,
+                    child: DevToolsClearableTextField(
+                      labelText: '',
+                      hintText: 'Search a URL, domain or path',
+                      prefixIcon: const Icon(Icons.search),
+                      onChanged: (value) {
+                        controller.searchContent = value;
+                      },
+                      controller: controller.textEditingController,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-        TabBar(
-          tabs: [
-            DevToolsTab.create(
-              tabName: 'Domain view',
-              gaPrefix: gaPrefix,
-            ),
-            DevToolsTab.create(
-              tabName: 'Path view',
-              gaPrefix: gaPrefix,
-            ),
-            DevToolsTab.create(
-              tabName: 'Single URL view',
-              gaPrefix: gaPrefix,
-            ),
-          ],
-          tabAlignment: TabAlignment.start,
-          isScrollable: true,
+        SizedBox(
+          height: defaultHeaderHeight,
+          child: TabBar(
+            tabs: [
+              DevToolsTab.create(
+                tabName: 'Domain view',
+                gaPrefix: gaPrefix,
+              ),
+              DevToolsTab.create(
+                tabName: 'Path view',
+                gaPrefix: gaPrefix,
+              ),
+              DevToolsTab.create(
+                tabName: 'Single URL view',
+                gaPrefix: gaPrefix,
+              ),
+            ],
+            tabAlignment: TabAlignment.start,
+            isScrollable: true,
+          ),
         ),
         Expanded(
           child: ValueListenableBuilder<ValidatedLinkDatas>(
@@ -411,7 +422,7 @@ class _NotificationCardSection extends StatelessWidget {
     if (domainErrorCount == 0 && pathErrorCount == 0) {
       return const SizedBox.shrink();
     }
-    return OutlineDecoration(
+    return OutlineDecoration.onlyTop(
       child: Padding(
         padding: const EdgeInsets.all(defaultSpacing),
         child: Row(
