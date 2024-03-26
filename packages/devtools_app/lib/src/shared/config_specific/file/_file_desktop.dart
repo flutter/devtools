@@ -56,7 +56,7 @@ class FileSystemDesktop implements FileIO {
     if (contents is String) {
       file.writeAsStringSync(contents, flush: true);
     } else if (contents is Uint8List) {
-      file.writeAsBytesSync(contents);
+      file.writeAsBytesSync(contents, flush: true);
     } else {
       throw StateError('Unsupported content type: $T');
     }
