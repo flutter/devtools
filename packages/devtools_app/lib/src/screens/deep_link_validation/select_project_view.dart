@@ -5,13 +5,13 @@
 import 'dart:async';
 
 import 'package:devtools_app_shared/ui.dart';
-import 'package:dtd/dtd.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/directory_picker.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/server/server.dart' as server;
 import '../../shared/utils.dart';
 import 'deep_links_controller.dart';
@@ -31,7 +31,7 @@ class _SelectProjectViewState extends State<SelectProjectView>
     with ProvidedControllerMixin<DeepLinksController, SelectProjectView> {
   bool _retrievingFlutterProject = false;
 
-  IDEWorkspaceRoots? workspaceRoots;
+  List<Uri>? projectRoots;
 
   @override
   void initState() {
@@ -40,13 +40,9 @@ class _SelectProjectViewState extends State<SelectProjectView>
   }
 
   Future<void> _initWorkspaceRoots() async {
-    // TODO(kenz): this does not work well for mono-repos. What we really need
-    // to do is add a DevTools server API that looks through the DevTools
-    // project roots and returns all subdirectories that contain a pubspec.yaml
-    // file (maybe with a Flutter dependency?).
-    final roots = await dtdManager.workspaceRoots();
+    final roots = await dtdManager.projectRoots();
     setState(() {
-      workspaceRoots = roots;
+      projectRoots = roots?.uris;
     });
   }
 
@@ -127,10 +123,9 @@ class _SelectProjectViewState extends State<SelectProjectView>
             style: Theme.of(context).textTheme.titleSmall,
           ),
         ),
-        if (workspaceRoots != null &&
-            workspaceRoots!.ideWorkspaceRoots.isNotEmpty) ...[
+        if (!projectRoots.isNullOrEmpty) ...[
           ProjectRootsDropdown(
-            workspaceRoots: workspaceRoots!,
+            projectRoots: projectRoots!,
             onValidatePressed: _handleValidateProject,
           ),
           const SizedBox(height: largeSpacing),
