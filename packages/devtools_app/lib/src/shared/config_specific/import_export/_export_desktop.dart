@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
-
-import 'package:path/path.dart' as path;
-
 import '../file/file.dart';
 import 'import_export.dart';
 
@@ -23,6 +19,6 @@ class ExportControllerDesktop extends ExportController {
     required T content,
     required String fileName,
   }) {
-    _fs.writeStringToFile<T>(fileName, content);
+    _fs.writeContentsToFile<T>(fileName, content);
   }
 }

@@ -2,12 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:file/file.dart';
 import 'package:file/local.dart';
-import 'package:file_selector/file_selector.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
@@ -49,7 +47,7 @@ class FileSystemDesktop implements FileIO {
   }
 
   @override
-  void writeStringToFile<T>(
+  void writeContentsToFile<T>(
     String filename,
     T contents, {
     bool isMemory = false,
