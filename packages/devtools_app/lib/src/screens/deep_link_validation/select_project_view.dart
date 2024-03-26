@@ -88,7 +88,7 @@ class _SelectProjectViewState extends State<SelectProjectView>
           return const DevToolsDialog(
             title: Text('You selected a non Flutter project'),
             content: Text(
-              'Seems you selected a non-Flutter project. If it is not intended, please reselect a Flutter project.',
+              'It looks like you have selected a non-Flutter project. Please select a Flutter project instead.',
             ),
             actions: [
               DialogCloseButton(),

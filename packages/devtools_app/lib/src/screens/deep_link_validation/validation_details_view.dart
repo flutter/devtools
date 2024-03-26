@@ -292,8 +292,8 @@ class _Fingerprint extends StatelessWidget {
               const SizedBox(height: denseSpacing),
               Text(
                 'To fix this issue, release your app on Play Developer Console to get a fingerprint. '
-                'If you are not ready to release your app, enter a local fingerprint below can also allow you '
-                'to proceed Android domain check.',
+                'If you are not ready to release your app, you can proceed with the Android domain check '
+                'by entering a local fingerprint below.',
                 style: theme.subtleTextStyle,
               ),
               const SizedBox(height: denseSpacing),
