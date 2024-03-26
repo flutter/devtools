@@ -23,17 +23,6 @@ class ExportControllerDesktop extends ExportController {
     required T content,
     required String fileName,
   }) {
-    if (content is String) {
-      _fs.writeStringToFile(fileName, content);
-    } else if (content is Uint8List) {
-      _fs.writeStringToFile(toAbsolutePath(fileName), content);
-    } else {
-      throw StateError('Unsupported content type: $T');
-    }
-  }
-
-  String toAbsolutePath(String fileName) {
-    if (!path.isRelative(fileName)) return fileName;
-    return path.join(_fs.exportDirectoryName(), fileName);
+    _fs.writeStringToFile<T>(fileName, content);
   }
 }

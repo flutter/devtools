@@ -54,12 +54,13 @@ class FileSystemDesktop implements FileIO {
     T contents, {
     bool isMemory = false,
   }) {
+    final file = _exportDirectory(isMemory: isMemory).childFile(filename);
     if (contents is String) {
-      final logFile = _exportDirectory(isMemory: isMemory).childFile(filename);
-      logFile.writeAsStringSync(contents, flush: true);
+      file.writeAsStringSync(contents, flush: true);
     } else if (contents is Uint8List) {
-      final XFile file = XFile.fromData(contents, name: filename);
-      unawaited(file.saveTo(filename));
+      final path = file.path;
+      final XFile xFile = XFile.fromData(contents, name: path);
+      unawaited(xFile.saveTo(path));
     } else {
       throw StateError('Unsupported content type: $T');
     }
