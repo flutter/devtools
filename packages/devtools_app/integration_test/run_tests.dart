@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/shared/feature_flags.dart';
 import 'package:devtools_shared/devtools_test_utils.dart';
 
 import 'test_infra/run/_in_file_args.dart';
@@ -23,9 +24,11 @@ const _offlineIndicator = 'integration_test/test/offline';
 /// while a fix being worked on.
 ///
 /// Format: `'my_example_test.dart'`.
-const _skipTests = <String>[
+final List<String> _skipTests = <String>[
   // https://github.com/flutter/devtools/issues/6592
   'eval_and_browse_test.dart',
+  // https://github.com/flutter/devtools/issues/7425
+  'export_snapshot_test.dart',
 ];
 
 void main(List<String> args) async {
