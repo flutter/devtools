@@ -196,8 +196,8 @@ class _AssetLinksJsonFileIssues extends StatelessWidget {
               _FailureDetails(
                 errors: errors,
                 oneFixGuideForAll:
-                    'To fix above issues, publish the recommended Digital Asset Links'
-                    ' JSON file below to all of the failed website domains at the following'
+                    'To fix above issues, copy the recommended Digital Asset Links'
+                    ' JSON file below and publish it to all of the failed website domains at the following'
                     ' location: https://${controller.selectedLink.value!.domain}/.well-known/assetlinks.json.',
               ),
               const SizedBox(height: denseSpacing),
@@ -338,7 +338,7 @@ class _LocalFingerprint extends StatelessWidget {
                     await showDialog(
                       context: context,
                       builder: (_) {
-                        return const AlertDialog(
+                        return const DevToolsDialog(
                           title: Text('This is not a valid fingerprint'),
                           content: Text(
                             'A valid fingerprint consists of 32 pairs of hexadecimal digits separated by colons.'
@@ -557,13 +557,13 @@ class _PathCheckTable extends StatelessWidget {
       children: [
         const SizedBox(height: intermediateSpacing),
         Text(
-          'Path check',
+          'App check',
           style: theme.textTheme.titleSmall,
         ),
         const SizedBox(height: intermediateSpacing),
         const _CheckTableHeader(),
         const Divider(height: 1.0),
-        _IntentFilterCheck(controller: controller),
+        _ManifestFileCheck(controller: controller),
         const Divider(height: 1.0),
         _PathFormatCheck(controller: controller),
       ],
@@ -571,20 +571,20 @@ class _PathCheckTable extends StatelessWidget {
   }
 }
 
-class _IntentFilterCheck extends StatelessWidget {
-  const _IntentFilterCheck({required this.controller});
+class _ManifestFileCheck extends StatelessWidget {
+  const _ManifestFileCheck({required this.controller});
 
   final DeepLinksController controller;
 
   @override
   Widget build(BuildContext context) {
     final linkData = controller.selectedLink.value!;
-    final errors = intentFilterErrors
+    final errors = manifestFileErrors
         .where((error) => linkData.pathErrors.contains(error))
         .toList();
 
     return _CheckExpansionTile(
-      checkName: 'IntentFiler',
+      checkName: 'Manifest file',
       status: _CheckStatusText(hasError: errors.isNotEmpty),
       children: <Widget>[
         if (errors.isNotEmpty)
@@ -596,7 +596,9 @@ class _IntentFilterCheck extends StatelessWidget {
                     'Copy the following code into your Manifest file.',
               ),
               const _CodeCard(
-                content: '''<intent-filter android:autoVerify="true">
+                content: ''''$metaDataDeepLinkingFlagTag'
+
+<intent-filter android:autoVerify="true">
     <action android:name="android.intent.action.VIEW" />
     <category android:name="android.intent.category.DEFAULT" />
     <category android:name="android.intent.category.BROWSABLE" />
@@ -641,9 +643,12 @@ class _CheckTableHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       tileColor: Theme.of(context).colorScheme.deeplinkTableHeaderColor,
-      title: const Padding(
-        padding: EdgeInsets.symmetric(horizontal: defaultSpacing),
-        child: Row(
+      title: Padding(
+        padding: EdgeInsets.only(
+          left: defaultSpacing,
+          right: defaultSpacing + actionsIconSize,
+        ),
+        child: const Row(
           children: [
             Expanded(child: Text('OS')),
             Expanded(child: Text('Issue type')),
@@ -671,18 +676,26 @@ class _CheckExpansionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final title = Row(
+      children: [
+        const SizedBox(width: defaultSpacing),
+        const Expanded(child: Text('Android')),
+        Expanded(child: Text(checkName)),
+        Expanded(child: status),
+      ],
+    );
+    if (children.isEmpty) {
+      return ListTile(
+        tileColor: theme.colorScheme.alternatingBackgroundColor2,
+        title: title,
+        trailing: SizedBox(width: actionsIconSize),
+      );
+    }
     return ExpansionTile(
       backgroundColor: theme.colorScheme.alternatingBackgroundColor2,
       collapsedBackgroundColor: theme.colorScheme.alternatingBackgroundColor2,
       initiallyExpanded: initiallyExpanded,
-      title: Row(
-        children: [
-          const SizedBox(width: defaultSpacing),
-          const Expanded(child: Text('Android')),
-          Expanded(child: Text(checkName)),
-          Expanded(child: status),
-        ],
-      ),
+      title: title,
       children: children,
     );
   }

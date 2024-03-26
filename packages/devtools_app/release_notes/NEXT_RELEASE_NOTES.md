@@ -33,6 +33,8 @@ TODO: Remove this section if there are not any general updates.
 * Enabled export of snapshots and improved snapshotting
 performance. - [#7197](https://github.com/flutter/devtools/pull/7197), [#7439](https://github.com/flutter/devtools/pull/7439)
 
+* Fixed failures during disconnect in tracing. - [#7440](https://github.com/flutter/devtools/pull/7440)
+
 ## Debugger updates
 
 TODO: Remove this section if there are not any general updates.
