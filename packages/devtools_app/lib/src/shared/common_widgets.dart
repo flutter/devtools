@@ -708,7 +708,7 @@ class RoundedCornerOptions {
     this.showBottomRight = true,
   });
 
-  // Static constant instance with all borders hidden
+  /// Static constant instance with all borders hidden
   static const RoundedCornerOptions empty = RoundedCornerOptions(
     showTopLeft: false,
     showTopRight: false,
