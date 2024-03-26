@@ -39,7 +39,7 @@
     "assets/rec_vmstat.png": "sha256-NPpW3mqNqAU9gLehEMmEJa0qFEPjIWTFgFb+shQzxoc=",
     "assets/scheduling_latency.png": "sha256-B5t/L/QvRS9hk856dejJJvA157w3Lk9nCTJfE9O1mXw=",
     "engine_bundle.js": "sha256-Qk2jn5nbUGjBBNJVleZAIWP5tl8aCf0+JgLA1Dr4uUY=",
-    "frontend_bundle.js": "sha256-1Jjw9zLoaovQg80ErITfqRxrsOEvaXWuFLeIrE31DEg=",
+    "frontend_bundle.js": "sha256-O5slaHqaDPJxlGSQitVCLRSkNHWWhFjM6AJfZWrQWT8=",
     "perfetto.css": "sha256-7/kCPdVeCBJYakSOeNALoGjx/V6DH3tyPnzFlWgVRUg=",
     "trace_processor.wasm": "sha256-OGFJFP0U+doTO8GKICd1TQclUueRQyKNgOB0fpsdpgc=",
     "traceconv.wasm": "sha256-C655C+vr9vZZKgCE3E4Ro8HeKRm8kXzjjDGn8JVneTo=",
