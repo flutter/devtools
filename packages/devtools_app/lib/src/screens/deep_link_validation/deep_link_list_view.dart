@@ -225,6 +225,7 @@ class _DataTable extends StatelessWidget {
         defaultSortColumn: (viewType == TableViewType.pathView ? path : domain)
             as ColumnData<LinkData>,
         defaultSortDirection: SortDirection.ascending,
+        sortOriginalData: true,
         onItemSelected: (linkdata) {
           controller.selectLink(linkdata!);
           controller.updateDisplayOptions(showSplitScreen: true);

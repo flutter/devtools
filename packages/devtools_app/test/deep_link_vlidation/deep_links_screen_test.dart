@@ -456,88 +456,88 @@ void main() {
         expect(find.text('www.google.com'), findsOneWidget);
       },
     );
-    // TODO(hangyujin): Fix the sorting issue.
-    // testWidgetsWithWindowSize(
-    //   'sort links',
-    //   windowSize,
-    //   (WidgetTester tester) async {
-    //     final deepLinksController = DeepLinksTestController();
-    //     final linkDatas = [
-    //       LinkData(
-    //         domain: 'www.domain1.com',
-    //         path: '/',
-    //         os: [PlatformOS.android],
-    //       ),
-    //       LinkData(
-    //         domain: 'www.domain2.com',
-    //         path: '/path',
-    //         os: [PlatformOS.ios],
-    //         domainErrors: [DomainError.existence],
-    //       ),
-    //       LinkData(
-    //         domain: 'www.google.com',
-    //         path: '/',
-    //         os: [PlatformOS.android, PlatformOS.ios],
-    //       ),
-    //     ];
 
-    //     deepLinksController.selectedProject.value =
-    //         FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
-    //     deepLinksController.validatedLinkDatas = ValidatedLinkDatas(
-    //       all: linkDatas,
-    //       byDomain: deepLinksController.linkDatasByDomain(linkDatas),
-    //       byPath: deepLinksController.linkDatasByPath(linkDatas),
-    //     );
+    testWidgetsWithWindowSize(
+      'sort links',
+      windowSize,
+      (WidgetTester tester) async {
+        final deepLinksController = DeepLinksTestController();
+        final linkDatas = [
+          LinkData(
+            domain: 'www.domain1.com',
+            path: '/',
+            os: [PlatformOS.android],
+          ),
+          LinkData(
+            domain: 'www.domain2.com',
+            path: '/path',
+            os: [PlatformOS.ios],
+            domainErrors: [DomainError.existence],
+          ),
+          LinkData(
+            domain: 'www.google.com',
+            path: '/',
+            os: [PlatformOS.android, PlatformOS.ios],
+          ),
+        ];
 
-    //     await pumpDeepLinkScreen(
-    //       tester,
-    //       controller: deepLinksController,
-    //     );
+        deepLinksController.selectedProject.value =
+            FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
+        deepLinksController.validatedLinkDatas = ValidatedLinkDatas(
+          all: linkDatas,
+          byDomain: deepLinksController.linkDatasByDomain(linkDatas),
+          byPath: deepLinksController.linkDatasByPath(linkDatas),
+        );
 
-    //     expect(find.text('www.domain1.com'), findsOneWidget);
-    //     expect(find.text('www.domain2.com'), findsOneWidget);
-    //     expect(find.text('www.google.com'), findsOneWidget);
+        await pumpDeepLinkScreen(
+          tester,
+          controller: deepLinksController,
+        );
 
-    //     // Sort with a-z.
-    //     deepLinksController.updateDisplayOptions(
-    //       domainSortingOption: SortingOption.aToZ,
-    //     );
-    //     await tester.pumpAndSettle();
+        expect(find.text('www.domain1.com'), findsOneWidget);
+        expect(find.text('www.domain2.com'), findsOneWidget);
+        expect(find.text('www.google.com'), findsOneWidget);
 
-    //     var widgetACenter = tester.getCenter(find.text('www.domain1.com'));
-    //     var widgetBCenter = tester.getCenter(find.text('www.domain2.com'));
-    //     var widgetCCenter = tester.getCenter(find.text('www.google.com'));
+        // Sort with a-z.
+        deepLinksController.updateDisplayOptions(
+          domainSortingOption: SortingOption.aToZ,
+        );
+        await tester.pumpAndSettle();
 
-    //     expect(widgetACenter.dy < widgetBCenter.dy, true);
-    //     expect(widgetBCenter.dy < widgetCCenter.dy, true);
+        var widgetACenter = tester.getCenter(find.text('www.domain1.com'));
+        var widgetBCenter = tester.getCenter(find.text('www.domain2.com'));
+        var widgetCCenter = tester.getCenter(find.text('www.google.com'));
 
-    //     // Sort with z-a.
-    //     deepLinksController.updateDisplayOptions(
-    //       domainSortingOption: SortingOption.zToA,
-    //     );
-    //     await tester.pumpAndSettle();
+        expect(widgetACenter.dy < widgetBCenter.dy, true);
+        expect(widgetBCenter.dy < widgetCCenter.dy, true);
 
-    //     widgetACenter = tester.getCenter(find.text('www.domain1.com'));
-    //     widgetBCenter = tester.getCenter(find.text('www.domain2.com'));
-    //     widgetCCenter = tester.getCenter(find.text('www.google.com'));
+        // Sort with z-a.
+        deepLinksController.updateDisplayOptions(
+          domainSortingOption: SortingOption.zToA,
+        );
+        await tester.pumpAndSettle();
 
-    //     expect(widgetCCenter.dy < widgetBCenter.dy, true);
-    //     expect(widgetBCenter.dy < widgetACenter.dy, true);
+        widgetACenter = tester.getCenter(find.text('www.domain1.com'));
+        widgetBCenter = tester.getCenter(find.text('www.domain2.com'));
+        widgetCCenter = tester.getCenter(find.text('www.google.com'));
 
-    //     // Sort with error on top.
-    //     deepLinksController.updateDisplayOptions(
-    //       domainSortingOption: SortingOption.errorOnTop,
-    //     );
-    //     await tester.pumpAndSettle();
+        expect(widgetCCenter.dy < widgetBCenter.dy, true);
+        expect(widgetBCenter.dy < widgetACenter.dy, true);
 
-    //     widgetACenter = tester.getCenter(find.text('www.domain1.com'));
-    //     widgetBCenter = tester.getCenter(find.text('www.domain2.com'));
-    //     widgetCCenter = tester.getCenter(find.text('www.google.com'));
+        // Sort with error on top.
+        deepLinksController.updateDisplayOptions(
+          domainSortingOption: SortingOption.errorOnTop,
+        );
+        await tester.pumpAndSettle();
 
-    //     expect(widgetBCenter.dy < widgetACenter.dy, true);
-    //     expect(widgetBCenter.dy < widgetCCenter.dy, true);
-    //   },
-    // );
+        widgetACenter = tester.getCenter(find.text('www.domain1.com'));
+        widgetBCenter = tester.getCenter(find.text('www.domain2.com'));
+        widgetCCenter = tester.getCenter(find.text('www.google.com'));
+
+        expect(widgetBCenter.dy < widgetACenter.dy, true);
+        expect(widgetBCenter.dy < widgetCCenter.dy, true);
+      },
+    );
 
     testWidgetsWithWindowSize(
       'path view',
