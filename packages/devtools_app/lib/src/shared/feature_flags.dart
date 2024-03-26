@@ -58,6 +58,11 @@ abstract class FeatureFlags {
   /// https://github.com/flutter/devtools/issues/5606
   static bool memoryAnalysis = enableExperiments;
 
+  /// Enable snapshot export.
+  ///
+  /// https://github.com/flutter/devtools/issues/5606
+  static bool snapshotExport = enableExperiments;
+
   /// Flag to enable the deep link validation tooling in DevTools, both for the
   /// DevTools screen and the standalone tool for IDE embedding.
   ///

@@ -14,6 +14,7 @@ import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/dialogs.dart';
+import '../../../../../shared/feature_flags.dart';
 import '../../../../../shared/primitives/byte_utils.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../controller/diff_pane_controller.dart';
@@ -194,10 +195,11 @@ class SnapshotListTitle extends StatelessWidget {
                       onPressed: onDelete,
                       child: const Text('Delete'),
                     ),
-                    MenuItemButton(
-                      onPressed: onExport,
-                      child: const Text('Export'),
-                    ),
+                    if (FeatureFlags.snapshotExport)
+                      MenuItemButton(
+                        onPressed: onExport,
+                        child: const Text('Export'),
+                      ),
                   ],
                 )
               : const SizedBox(width: menuButtonWidth),
