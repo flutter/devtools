@@ -18,10 +18,12 @@ bash for quality assurance and to prevent regressions from slipping into the rel
 
 # How to release Dart DevTools
 
-1. [Release into the Dart SDK master branch](#release-into-the-dart-sdk-master-branch)
+1. Release into the Dart SDK master branch
+    -  [Full release](#full-release-into-the-dart-sdk-master-branch)
+    -  [Dev release](#dev-release-into-the-dart-sdk-master-branch)   
 2. [Cherry-pick releases into the Dart SDK stable / beta branches](#cherry-pick-releases)
 
-## Release into the Dart SDK master branch
+## Full release into the Dart SDK master branch
 
 ### Configure/Refresh environment
 
