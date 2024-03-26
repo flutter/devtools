@@ -218,7 +218,7 @@ the new release notes.
 ## Dev release into the Dart SDK master branch
 
 To publish a dev release follow just section [Update the DevTools hash in the Dart SDK](#update-the-devtools-hash-in-the-dart-sdk)
-of the full release process. The dev release can be later converted to a full release by all other steps for the selected commit.
+of the full release process. 
 
 ## Cherry-pick releases
 
