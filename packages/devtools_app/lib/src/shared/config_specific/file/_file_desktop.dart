@@ -58,9 +58,7 @@ class FileSystemDesktop implements FileIO {
     if (contents is String) {
       file.writeAsStringSync(contents, flush: true);
     } else if (contents is Uint8List) {
-      final path = file.path;
-      final XFile xFile = XFile.fromData(contents, name: path);
-      unawaited(xFile.saveTo(path));
+      file.writeAsBytesSync(contents);
     } else {
       throw StateError('Unsupported content type: $T');
     }
