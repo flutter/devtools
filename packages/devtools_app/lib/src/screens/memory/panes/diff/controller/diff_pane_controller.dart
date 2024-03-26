@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
@@ -19,6 +18,7 @@ import '../../../../../shared/memory/class_name.dart';
 import '../../../../../shared/memory/classes.dart';
 import '../../../../../shared/memory/heap_graph_loader.dart';
 import '../../../../../shared/memory/retaining_path.dart';
+import '../../../../../shared/memory/simple_items.dart';
 import '../../../shared/heap/class_filter.dart';
 import '../../../shared/primitives/memory_utils.dart';
 import '../data/classes_diff.dart';
@@ -139,15 +139,11 @@ class DiffPaneController extends DisposableController {
 
   void exportCurrentItem() {
     final item = core.selectedDataItem!;
-    final data = item.heap!.graph
-        .toChunks()
-        .map((d) => utf8.decode(d.buffer.asUint8List()))
-        .join();
 
     ExportController().downloadFile(
-      data,
+      item.heap!.graph.toUint8List(),
       fileName: ExportController.generateFileName(
-        type: ExportFileType.json,
+        type: ExportFileType.data,
         prefix: item.name,
       ),
     );

@@ -111,7 +111,8 @@ extension type _DevToolsSnapshot(Map<String, Object?> json) {
 enum ExportFileType {
   json,
   csv,
-  yaml;
+  yaml,
+  data;
 
   @override
   String toString() => name;
@@ -137,24 +138,21 @@ abstract class ExportController {
 
   /// Downloads a file with [content]
   /// and pushes notification about success if [notify] is true.
-  String downloadFile(
-    String content, {
+  String downloadFile<T>(
+    T content, {
     String? fileName,
     ExportFileType type = ExportFileType.json,
     bool notify = true,
   }) {
     fileName ??= ExportController.generateFileName(type: type);
-    saveFile(
-      content: content,
-      fileName: fileName,
-    );
+    saveFile<T>(content: content, fileName: fileName);
     notificationService.push(successfulExportMessage(fileName));
     return fileName;
   }
 
   /// Saves [content] to the [fileName].
-  void saveFile({
-    required String content,
+  void saveFile<T>({
+    required T content,
     required String fileName,
   });
 
