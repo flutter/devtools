@@ -12,6 +12,8 @@ To learn more about DevTools, check out the
 
 * Fixed an issue preventing DevTools from connecting to Flutter apps that are not
 launched from Flutter Tools. - [#6848](https://github.com/flutter/devtools/issues/6848)
+* Improved performance of the FlatTable. -
+  [#7391](https://github.com/flutter/devtools/pull/7391)
 
 ## Inspector updates
 
