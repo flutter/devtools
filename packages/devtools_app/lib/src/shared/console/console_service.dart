@@ -15,7 +15,7 @@ import '../diagnostics/generic_instance_reference.dart';
 import '../diagnostics/inspector_service.dart';
 import '../diagnostics/tree_builder.dart';
 import '../globals.dart';
-import '../memory/adapted_heap_data.dart';
+import '../memory/heap_object.dart';
 import '../primitives/utils.dart';
 
 /// A line in the console.
@@ -77,18 +77,17 @@ class ConsoleService with DisposerMixin {
   void appendBrowsableInstance({
     required InstanceRef? instanceRef,
     required IsolateRef? isolateRef,
-    required HeapObjectSelection? heapSelection,
+    required HeapObject? heapSelection,
   }) async {
     if (instanceRef == null) {
-      final object = heapSelection?.object;
-      if (object == null || isolateRef == null) {
+      if (heapSelection?.index == null || isolateRef == null) {
         serviceConnection.consoleService.appendStdio(
           'Not enough information to browse the instance.',
         );
         return;
       }
 
-      instanceRef = await evalService.findObject(object, isolateRef);
+      instanceRef = await evalService.findObject(heapSelection!, isolateRef);
     }
 
     // If instanceRef is null at this point, user will see static references.
@@ -109,7 +108,7 @@ class ConsoleService with DisposerMixin {
     required IsolateRef? isolateRef,
     bool forceScrollIntoView = false,
     bool expandAll = false,
-    HeapObjectSelection? heapSelection,
+    HeapObject? heapSelection,
   }) async {
     _stdioTrailingNewline = false;
     final variable = DartObjectNode.fromValue(

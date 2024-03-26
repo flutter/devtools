@@ -51,17 +51,19 @@ class PreferencesController extends DisposableController
 
   Future<void> init() async {
     // Get the current values and listen for and write back changes.
-    String? value = await storage.getValue('ui.darkMode');
-
-    final useDarkMode =
-        (value == null && useDarkThemeAsDefault) || value == 'true';
+    final darkModeValue = await storage.getValue('ui.darkMode');
+    final useDarkMode = (darkModeValue == null && useDarkThemeAsDefault) ||
+        darkModeValue == 'true';
     toggleDarkModeTheme(useDarkMode);
     addAutoDisposeListener(darkModeTheme, () {
       storage.setValue('ui.darkMode', '${darkModeTheme.value}');
     });
 
-    value = await storage.getValue('ui.vmDeveloperMode');
-    toggleVmDeveloperMode(value == 'true');
+    final vmDeveloperModeValue = await boolValueFromStorage(
+      'ui.vmDeveloperMode',
+      defaultsTo: false,
+    );
+    toggleVmDeveloperMode(vmDeveloperModeValue);
     addAutoDisposeListener(vmDeveloperModeEnabled, () {
       storage.setValue('ui.vmDeveloperMode', '${vmDeveloperModeEnabled.value}');
     });
@@ -77,10 +79,11 @@ class PreferencesController extends DisposableController
   }
 
   Future<void> _initVerboseLogging() async {
-    final verboseLoggingEnabledValue =
-        await storage.getValue(_verboseLoggingStorageId);
-
-    toggleVerboseLogging(verboseLoggingEnabledValue == 'true');
+    final verboseLoggingEnabledValue = await boolValueFromStorage(
+      _verboseLoggingStorageId,
+      defaultsTo: false,
+    );
+    toggleVerboseLogging(verboseLoggingEnabledValue);
     addAutoDisposeListener(verboseLoggingEnabled, () {
       storage.setValue(
         'verboseLogging',
@@ -123,4 +126,16 @@ class PreferencesController extends DisposableController
       }
     }
   }
+}
+
+/// Retrieves a boolean value from the preferences stored in local storage.
+///
+/// If the value is not present in the stored preferences, this will default to
+/// the value specified by [defaultsTo].
+Future<bool> boolValueFromStorage(
+  String storageKey, {
+  required bool defaultsTo,
+}) async {
+  final value = await storage.getValue(storageKey);
+  return defaultsTo ? value != 'false' : value == 'true';
 }

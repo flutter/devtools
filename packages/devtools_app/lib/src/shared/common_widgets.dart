@@ -804,6 +804,8 @@ class DevToolsClearableTextField extends StatelessWidget {
     this.onChanged,
     this.onSubmitted,
     this.autofocus = false,
+    this.enabled,
+    this.roundedBorder = false,
   })  : controller = controller ?? TextEditingController(),
         super(key: key);
 
@@ -815,8 +817,15 @@ class DevToolsClearableTextField extends StatelessWidget {
   final void Function(String)? onChanged;
   final void Function(String)? onSubmitted;
   final bool autofocus;
+  final bool? enabled;
+  final bool roundedBorder;
 
   static const _contentVerticalPadding = 6.0;
+
+  /// This is the default border radius used by the [OutlineInputBorder]
+  /// constructor.
+  static const _defaultInputBorderRadius =
+      BorderRadius.all(Radius.circular(4.0));
 
   @override
   Widget build(BuildContext context) {
@@ -826,6 +835,7 @@ class DevToolsClearableTextField extends StatelessWidget {
       child: TextField(
         autofocus: autofocus,
         controller: controller,
+        enabled: enabled,
         onChanged: onChanged,
         onSubmitted: onSubmitted,
         style: theme.regularTextStyle,
@@ -841,7 +851,11 @@ class DevToolsClearableTextField extends StatelessWidget {
             minHeight: defaultTextFieldHeight,
             maxHeight: defaultTextFieldHeight,
           ),
-          border: const OutlineInputBorder(),
+          border: OutlineInputBorder(
+            borderRadius: roundedBorder
+                ? const BorderRadius.all(defaultRadius)
+                : _defaultInputBorderRadius,
+          ),
           labelText: labelText,
           labelStyle: theme.subtleTextStyle,
           hintText: hintText,
@@ -1332,19 +1346,21 @@ class _JsonViewerState extends State<JsonViewer>
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(denseSpacing),
-      child: SingleChildScrollView(
-        child: FutureBuilder(
-          future: _initializeTree,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState != ConnectionState.done) {
-              return Container();
-            }
-            return ExpandableVariable(
-              variable: variable,
-            );
-          },
+    return SelectionArea(
+      child: Padding(
+        padding: const EdgeInsets.all(denseSpacing),
+        child: SingleChildScrollView(
+          child: FutureBuilder(
+            future: _initializeTree,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState != ConnectionState.done) {
+                return Container();
+              }
+              return ExpandableVariable(
+                variable: variable,
+              );
+            },
+          ),
         ),
       ),
     );
@@ -1661,6 +1677,8 @@ class NotifierCheckbox extends StatelessWidget {
   }
 }
 
+/// A widget that represents a check box setting and automatically updates for
+/// value changes to [notifier].
 class CheckboxSetting extends StatelessWidget {
   const CheckboxSetting({
     Key? key,

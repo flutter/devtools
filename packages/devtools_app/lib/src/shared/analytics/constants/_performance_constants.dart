@@ -6,6 +6,7 @@ part of '../constants.dart';
 
 enum PerformanceEvents {
   refreshTimelineEvents,
+  includeCpuSamplesInTimeline,
   performanceOverlay,
   timelineFlameChartHelp,
   framesChartVisibility,
@@ -29,7 +30,7 @@ enum PerformanceEvents {
   perfettoScrollToTimeRange,
   perfettoShowHelp,
   performanceSettings,
-  traceCategories,
+  timelineSettings,
   openDataFile,
   loadDataFromFile;
 

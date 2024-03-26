@@ -15,6 +15,8 @@ import 'deep_links_controller.dart';
 
 const kDeeplinkTableCellDefaultWidth = 200.0;
 const kToolTipWidth = 344.0;
+const metaDataDeepLinkingFlagTag =
+    '<meta-data android:name="flutter_deeplinking_enabled" android:value="true" />';
 
 enum PlatformOS {
   android('Android'),
@@ -24,20 +26,31 @@ enum PlatformOS {
   final String description;
 }
 
-enum DomainError {
-  // Existence of an asset link file.
-  existence(
-    'Digital Asset Links JSON file existence failed',
+class CommonError {
+  const CommonError(this.title, this.explanation, this.fixDetails);
+  final String title;
+  final String explanation;
+  final String fixDetails;
+}
+
+class DomainError extends CommonError {
+  const DomainError(title, explanation, fixDetails)
+      : super(title, explanation, fixDetails);
+
+  /// Existence of an asset link file.
+  static const existence = DomainError(
+    'Digital Asset Links JSON file does not exist',
     'This test checks whether the assetlinks.json file, '
         'which is used to verify the association between the app and the '
         'domain name, exists under your domain.',
     'Add a Digital Asset Links JSON file to all of the '
         'failed website domains at the following location: '
         'https://[domain.name]/.well-known/assetlinks.json. See the following recommended asset link json file. ',
-  ),
-  // Asset link file should define a link to this app.
-  appIdentifier(
-    'Package name failed',
+  );
+
+  /// Asset link file should define a link to this app.
+  static const appIdentifier = DomainError(
+    'Package name not found',
     'The test checks your Digital Asset Links JSON file '
         'for package name validation, which the mobile device '
         'uses to verify ownership of the app.',
@@ -45,9 +58,10 @@ enum DomainError {
         'correct package name with the "android_app" namespace for '
         'all of the failed website domains. Also, confirm that the '
         'app is available in the Google Play store. See the following recommended asset link json file. ',
-  ),
-  // Asset link file should contain the correct fingerprint.
-  fingerprints(
+  );
+
+  /// Asset link file should contain the correct fingerprint.
+  static const fingerprints = DomainError(
     'Fingerprint validation failed',
     'This test checks your Digital Asset Links JSON file for '
         'sha256 fingerprint validation, which the mobile device uses '
@@ -56,83 +70,121 @@ enum DomainError {
         'file for all of the failed website domains. If the fingerprint '
         'has already been added, make sure it\'s correct and that the '
         '"android_app" namespace is declared on it. See the following recommended asset link json file. ',
-  ),
-  // Asset link file should be served with the correct content type.
-  contentType(
-    'JSON content type failed',
+  );
+
+  /// Asset link file should be served with the correct content type.
+  static const contentType = DomainError(
+    'JSON content type incorrect',
     'This test checks your Digital Asset Links JSON file for content type '
         'validation, which defines the format of the JSON file. This allows '
         'the mobile device to verify ownership of the app.',
     'Ensure the content-type is "application/json" for all of the failed website domains.',
-  ),
-  // Asset link file should be accessible via https.
-  httpsAccessibility(
-    'HTTPS accessibility failed',
+  );
+
+  /// Asset link file should be accessible via https.
+  static const httpsAccessibility = DomainError(
+    'HTTPS accessibility check failed',
     'This test tries to access your Digital Asset Links '
         'JSON file over an HTTPS connection, which must be '
         'accessible to verify ownership of the app.',
     'Ensure your Digital Asset Links JSON file is accessible '
         'over an HTTPS connection for all of the failed website domains (even if '
         'the app\'s intent filter declares HTTP as the data scheme).',
-  ),
+  );
 
-  // Asset link file should be accessible with no redirects.
-  nonRedirect(
-    'Domain non-redirect failed',
+  /// Asset link file should be accessible with no redirects.
+  static const nonRedirect = DomainError(
+    'Domain non-redirect check failed',
     'This test checks that your domain is accessible without '
         'redirects. This domain must be directly accessible '
         'to verify ownership of the app.',
     'Ensure your domain is accessible without any redirects ',
-  ),
+  );
 
-  // Asset link domain should be valid/not malformed.
-  hostForm(
-    'Host attribute formed properly failed',
+  /// Asset link domain should be valid/not malformed.
+  static const hostForm = DomainError(
+    'Host attribute is not formed properly',
     'This test checks that your android:host attribute has a valid domain URL pattern.',
     'Make sure the host is a properly formed web address such '
         'as google.com or www.google.com, without "http://" or "https://".',
-  ),
-  // Issues that are not covered by other checks. An example that may be in this
-  // category is Android validation API failures.
-  other('Check failed', '', '');
+  );
 
-  const DomainError(this.title, this.explanation, this.fixDetails);
-  final String title;
-  final String explanation;
-  final String fixDetails;
+  /// Issues that are not covered by other checks. An example that may be in this
+  /// category is Android validation API failures.
+  static const other = DomainError('Check failed', '', '');
 }
 
 /// There are currently two types of path errors, errors from intent filters and path format errors.
-enum PathError {
-  // Intent filter should have action tag.
-  intentFilterActionView(
-    'The intent filter must have a <action android:name="android.intent.action.VIEW" />',
-  ),
-  // Intent filter should have browsable tag.
-  intentFilterBrowsable(
-    'The intent filter must have a <category android:name="android.intent.category.BROWSABLE" />',
-  ),
-  // Intent filter should have default tag.
-  intentFilterDefault(
-    'The intent filter must have a <category android:name="android.intent.category.DEFAULT" />',
-  ),
-  // Intent filter should have autoVerify tag.
-  intentFilterAutoVerify(
-    'The intent filter must have android:autoVerify="true"',
-  ),
-  // Path has format.
-  pathFormat('path must starts with “/” or “.*”');
+class PathError extends CommonError {
+  const PathError(title, explanation, fixDetails)
+      : super(title, explanation, fixDetails);
 
-  const PathError(this.description);
-  final String description;
+  /// Activity should have deep link enabled flag.
+  static const missingDeepLinkingFlag = PathError(
+    'Activity is missing the deep linking enabled flag',
+    'The activity must have the following metadata tag: '
+        '$metaDataDeepLinkingFlagTag',
+    '',
+  );
+
+  /// Intent filter should have action tag.
+  static const intentFilterActionView = PathError(
+    'Intent filter is missing action tag',
+    'The intent filter must have a <action android:name="android.intent.action.VIEW" />',
+    '',
+  );
+
+  /// Intent filter should have browsable tag.
+  static const intentFilterBrowsable = PathError(
+    'Intent filter is missing browsable tag',
+    'The intent filter must have a <category android:name="android.intent.category.BROWSABLE" />',
+    '',
+  );
+
+  /// Intent filter should have default tag.
+  static const intentFilterDefault = PathError(
+    'Intent filter is missing default tag',
+    'The intent filter must have a <category android:name="android.intent.category.DEFAULT" />',
+    '',
+  );
+
+  /// Intent filter should have autoVerify tag.
+  static const intentFilterAutoVerify = PathError(
+    'Intent filter is missing autoVerify tag',
+    'The intent filter must have android:autoVerify="true"',
+    '',
+  );
+
+  /// Path has format.
+  static const pathFormat = PathError(
+    'Path format',
+    '',
+    'Path must starts with “/” or “.*”',
+  );
 }
 
-Set<PathError> intentFilterErrors = <PathError>{
+Set<PathError> manifestFileErrors = <PathError>{
+  PathError.missingDeepLinkingFlag,
   PathError.intentFilterActionView,
   PathError.intentFilterBrowsable,
   PathError.intentFilterDefault,
   PathError.intentFilterAutoVerify,
 };
+
+class ValidatedLinkDatas {
+  ValidatedLinkDatas({
+    required this.all,
+    required this.byDomain,
+    required this.byPath,
+  });
+  ValidatedLinkDatas.empty()
+      : all = [],
+        byDomain = [],
+        byPath = [];
+  final List<LinkData> all;
+  final List<LinkData> byDomain;
+  final List<LinkData> byPath;
+}
 
 /// Contains all data relevant to a deep link.
 class LinkData with SearchableDataMixin {

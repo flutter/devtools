@@ -230,7 +230,13 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
       Future.value(Success());
 
   @override
-  Future<HeapSnapshotGraph> getHeapSnapshotGraph(IsolateRef isolateRef) async {
+  Future<HeapSnapshotGraph> getHeapSnapshotGraph(
+    IsolateRef isolateRef, {
+    bool calculateReferrers = false,
+    bool decodeExternalProperties = false,
+    bool decodeIdentityHashCodes = false,
+    bool decodeObjectData = false,
+  }) async {
     // Simulate a snapshot that takes .5 seconds.
     await Future.delayed(const Duration(milliseconds: 500));
     final result = MockHeapSnapshotGraph();
@@ -350,10 +356,20 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
       Future.value(TimelineFlags.parse(_vmTimelineFlags)!);
 
   @override
+  Future<PerfettoTimeline> getPerfettoVMTimeline({
+    int? timeOriginMicros,
+    int? timeExtentMicros,
+  }) =>
+      _getPerfettoVMTimeline();
+
+  @override
   Future<PerfettoTimeline> getPerfettoVMTimelineWithCpuSamplesWrapper({
     int? timeOriginMicros,
     int? timeExtentMicros,
-  }) {
+  }) =>
+      _getPerfettoVMTimeline();
+
+  Future<PerfettoTimeline> _getPerfettoVMTimeline() {
     final perfettoTimeline = _timelineData;
     if (perfettoTimeline == null) {
       throw StateError('timelineData was not provided to FakeServiceManager');

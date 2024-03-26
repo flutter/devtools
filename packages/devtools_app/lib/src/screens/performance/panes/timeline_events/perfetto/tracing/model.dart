@@ -9,31 +9,24 @@ import 'package:vm_service_protos/vm_service_protos.dart';
 
 import '../../../../performance_model.dart';
 
-/// A change notifer that contains a Perfetto [Trace] object.
+/// A change notifer that contains a Perfetto trace binary object [Uint8List].
 ///
-/// We use this custom change notifier instead of a raw ValueNotifier<Trace?> so
-/// that listeners are notified when the inner value of [_trace] is updated. For
-/// example, on method calls like [Trace.mergeFromBuffer], the inner value of
-/// the [Trace] object is changed by merging new data into the existing object.
-/// However, the object identity does not change for operations like this, which
-/// means that set calls to ValueNotifier.value would not notify listeners.
-///
-/// Using [PerfettoTrace] instead ensures that listeners are updated for calls
-/// to set the value of [trace], even when the existing [trace] and the new
-/// [value] satisfy Object equality.
+/// We use this custom change notifier instead of a raw
+/// ValueNotifier<Uint8List?> so that listeners are notified when the content of
+/// the [Uint8List] changes, even if the [Uint8List] object does not change.
 class PerfettoTrace extends ChangeNotifier {
-  PerfettoTrace(Trace? trace) : _trace = trace;
+  PerfettoTrace(Uint8List? traceBinary) : _traceBinary = traceBinary;
 
-  Trace? get trace => _trace;
-  Trace? _trace;
+  Uint8List? get traceBinary => _traceBinary;
+  Uint8List? _traceBinary;
 
-  /// Sets the value of [_trace] and notifies listeners.
+  /// Sets the value of [_traceBinary] and notifies listeners.
   ///
-  /// Listeners will be notified event if [_trace] and [value] satisfy Object
-  /// equality. This is intentional, since the data contained in the [Trace]
-  /// object may be different.
-  set trace(Trace? value) {
-    _trace = value;
+  /// Listeners will be notified event if [_traceBinary] and [value] satisfy
+  /// Object equality. This is intentional, since the content in the [Uint8List]
+  /// may be different.
+  set trace(Uint8List? value) {
+    _traceBinary = value;
     notifyListeners();
   }
 }

@@ -27,8 +27,9 @@ class ExtensionsPreferencesController extends DisposableController
         );
       },
     );
-    // Default the value to false if it is not set.
-    showOnlyEnabledExtensions.value =
-        await storage.getValue(_showOnlyEnabledExtensionsId) == 'true';
+    showOnlyEnabledExtensions.value = await boolValueFromStorage(
+      _showOnlyEnabledExtensionsId,
+      defaultsTo: false,
+    );
   }
 }

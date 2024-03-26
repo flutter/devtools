@@ -144,10 +144,10 @@ abstract class Handler {
     required bool connected,
     required ServerApi api,
   }) async {
-    DTDConnection? dtdConnection;
+    DartToolingDaemon? dartToolingDaemon;
     try {
-      dtdConnection = await DartToolingDaemon.connect(Uri.parse(dtd.uri!));
-      final currentRoots = (await dtdConnection.getIDEWorkspaceRoots())
+      dartToolingDaemon = await DartToolingDaemon.connect(Uri.parse(dtd.uri!));
+      final currentRoots = (await dartToolingDaemon.getIDEWorkspaceRoots())
           .ideWorkspaceRoots
           .toSet();
       // Add or remove [rootFromVmService] depending on whether this was a
@@ -155,12 +155,12 @@ abstract class Handler {
       final newRoots = connected
           ? (currentRoots..add(rootFromVmService)).toList()
           : (currentRoots..remove(rootFromVmService)).toList();
-      await dtdConnection.setIDEWorkspaceRoots(dtd.secret!, newRoots);
+      await dartToolingDaemon.setIDEWorkspaceRoots(dtd.secret!, newRoots);
       return api.success();
     } catch (e) {
       return api.serverError('$e');
     } finally {
-      await dtdConnection?.close();
+      await dartToolingDaemon?.close();
     }
   }
 }

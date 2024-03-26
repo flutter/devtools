@@ -4,13 +4,13 @@ version: 0.1.0
 repository: https://github.com/flutter/devtools/tree/master/packages/devtools_app_shared
 
 environment:
-  sdk: '>=3.3.0-91.0.dev <4.0.0'
-  flutter: '>=3.17.0-0.0.pre'
+  sdk: ">=3.3.0-91.0.dev <4.0.0"
+  flutter: ">=3.17.0-0.0.pre"
 
 dependencies:
   collection: ^1.15.0
-  devtools_shared: ^6.0.1
-  dtd: ^1.0.0
+  devtools_shared: ^8.1.0
+  dtd: ^2.0.0
   flutter:
     sdk: flutter
   logging: ^1.1.1
@@ -29,32 +29,32 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   fonts:
-  - family: Roboto
-    fonts:
-      - asset: fonts/Roboto/Roboto-Thin.ttf
-        weight: 100
-      - asset: fonts/Roboto/Roboto-Light.ttf
-        weight: 300
-      - asset: fonts/Roboto/Roboto-Regular.ttf
-        weight: 400
-      - asset: fonts/Roboto/Roboto-Medium.ttf
-        weight: 500
-      - asset: fonts/Roboto/Roboto-Bold.ttf
-        weight: 700
-      - asset: fonts/Roboto/Roboto-Black.ttf
-        weight: 900
-  - family: RobotoMono
-    fonts:
-      - asset: fonts/Roboto_Mono/RobotoMono-Thin.ttf
-        weight: 100
-      - asset: fonts/Roboto_Mono/RobotoMono-Light.ttf
-        weight: 300
-      - asset: fonts/Roboto_Mono/RobotoMono-Regular.ttf
-        weight: 400
-      - asset: fonts/Roboto_Mono/RobotoMono-Medium.ttf
-        weight: 500
-      - asset: fonts/Roboto_Mono/RobotoMono-Bold.ttf
-        weight: 700
+    - family: Roboto
+      fonts:
+        - asset: fonts/Roboto/Roboto-Thin.ttf
+          weight: 100
+        - asset: fonts/Roboto/Roboto-Light.ttf
+          weight: 300
+        - asset: fonts/Roboto/Roboto-Regular.ttf
+          weight: 400
+        - asset: fonts/Roboto/Roboto-Medium.ttf
+          weight: 500
+        - asset: fonts/Roboto/Roboto-Bold.ttf
+          weight: 700
+        - asset: fonts/Roboto/Roboto-Black.ttf
+          weight: 900
+    - family: RobotoMono
+      fonts:
+        - asset: fonts/Roboto_Mono/RobotoMono-Thin.ttf
+          weight: 100
+        - asset: fonts/Roboto_Mono/RobotoMono-Light.ttf
+          weight: 300
+        - asset: fonts/Roboto_Mono/RobotoMono-Regular.ttf
+          weight: 400
+        - asset: fonts/Roboto_Mono/RobotoMono-Medium.ttf
+          weight: 500
+        - asset: fonts/Roboto_Mono/RobotoMono-Bold.ttf
+          weight: 700
 
 dependency_overrides:
   devtools_shared:

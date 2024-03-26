@@ -10,9 +10,9 @@ final _log = Logger('dtd_manager');
 
 /// Manages a connection to the Dart Tooling Daemon.
 class DTDManager {
-  ValueListenable<DTDConnection?> get connection => _connection;
-  final ValueNotifier<DTDConnection?> _connection =
-      ValueNotifier<DTDConnection?>(null);
+  ValueListenable<DartToolingDaemon?> get connection => _connection;
+  final ValueNotifier<DartToolingDaemon?> _connection =
+      ValueNotifier<DartToolingDaemon?>(null);
 
   /// Whether the [DTDManager] is connected to a running instance of the DTD.
   bool get hasConnection => connection.value != null;
@@ -49,4 +49,22 @@ class DTDManager {
     _connection.value = null;
     _uri = null;
   }
+
+  Future<IDEWorkspaceRoots?> workspaceRoots({bool forceRefresh = false}) async {
+    if (hasConnection) {
+      if (_workspaceRoots != null && forceRefresh) {
+        _workspaceRoots = null;
+      }
+      try {
+        return _workspaceRoots ??=
+            await _connection.value!.getIDEWorkspaceRoots();
+      } catch (e) {
+        _log.fine('Error fetching IDE workspaceRoots: $e');
+        return null;
+      }
+    }
+    return null;
+  }
+
+  IDEWorkspaceRoots? _workspaceRoots;
 }

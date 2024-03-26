@@ -95,7 +95,7 @@ void main() {
 
     group('updateDtdWorkspaceRoots', () {
       TestDtdConnectionInfo? dtd;
-      DTDConnection? testDtdConnection;
+      DartToolingDaemon? testDtdConnection;
 
       setUp(() async {
         dtd = await startDtd();

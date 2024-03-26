@@ -41,7 +41,7 @@ class _VsCodeFlutterPanelMockEditorState
 
   /// The last [maxLogEvents] communication messages sent between the panel
   /// and the "host IDE".
-  final logRing = DoubleLinkedQueue<String>();
+  final logRing = ListQueue<String>();
 
   /// A stream that emits each time the log is updated to allow the log widget
   /// to be rebuilt.
@@ -216,7 +216,7 @@ class _VsCodeFlutterPanelMockEditorState
                   ElevatedButton(
                     onPressed: () => api.endSessions(),
                     style: theme.elevatedButtonTheme.style!.copyWith(
-                      backgroundColor: const MaterialStatePropertyAll(
+                      backgroundColor: const WidgetStatePropertyAll(
                         Colors.red,
                       ),
                     ),
