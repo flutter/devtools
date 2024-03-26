@@ -104,7 +104,16 @@ final class IsolateManager with DisposerMixin {
     // current isolate, in which case the breakpoint manager will resume it
     // after setting breakpoints):
     if (selectedIsolate.value?.id != isolateRef.id) {
-      await resumeIsolateIfPaused(isolateRef);
+      final isWebApp =
+          serviceConnection.serviceManager.connectedApp?.isDartWebAppNow ??
+              false;
+      // TODO(bug link) Once we can reliably determine whether a web app is
+      // paused, then switch to resumeIsolateIfPaused.
+      if (isWebApp) {
+        await resumeIsolate(isolateRef);
+      } else {
+        await resumeIsolateIfPaused(isolateRef);
+      }
     }
   }
 
@@ -244,9 +253,19 @@ final class IsolateManager with DisposerMixin {
     _isolateRunnableCompleters.clear();
   }
 
+  /// Resumes the isolate for the given [isolateRef] if it is paused.
+  ///
+  /// CAUTION: This is not reliable for web apps. An "isolate" can be paused,
+  /// but isPaused is returns false. See [bug link] for details.
   Future<void> resumeIsolateIfPaused(IsolateRef isolateRef) async {
     final isPaused = _isolateStates[isolateRef]?.isPaused.value ?? false;
-    if (!isPaused || isolateRef.id == null || _service == null) return;
+    if (isPaused) {
+      return resumeIsolate(isolateRef);
+    }
+  }
+
+  Future<void> resumeIsolate(IsolateRef isolateRef) async {
+    if (isolateRef.id == null || _service == null) return;
     final isolateId = isolateRef.id!;
     final service = _service!;
     try {
