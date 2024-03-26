@@ -41,12 +41,15 @@ found in the LICENSE file.
 header.overview,
 .details-panel,
 .details-panel-heading,
-.details-content .handle .tabs .tab,
+.handle .tabs .tab,
 .notes-editor-panel input,
 .popup-menu,
 .pf-popup,
 .pf-select,
-.modal-textarea {
+.pf-header-bar,
+.modal-textarea,
+input,
+.rows .row {
   background-color: var(--devtools-dark-background-color) !important;
   color: var(--devtools-dark-on-background-color) !important;
 }
@@ -56,23 +59,31 @@ body,
 .topbar,
 .material-icons.grey,
 .track-shell,
-.details-content .handle {
+.handle {
   background-color: var(--devtools-dark-background-color) !important;
 }
 
 /* Selectors that require only the default 'color' property. */
 body > main,
 .home-page,
-input,
 h1,
 .pf-button.pf-minimal,
 .pf-text-input, 
+.pf-menu .pf-menu-item,
 .query-table, .query-table thead td,
 .notes-editor-panel,
 .modal-dialog,
 .modal-logs,
-.modal-dialog main {
+.modal-dialog main,
+::placeholder,
+.pivot-table {
   color: var(--devtools-dark-on-background-color) !important;
+}
+
+/* Selectors that require only the default primary 'color' property. */
+.material-icons,
+.pf-anchor {
+  color: var(--devtools-dark-primary-color) !important;
 }
 
 ::-webkit-scrollbar-track {
@@ -93,8 +104,13 @@ h1,
   border-color: var(--devtools-dark-on-background-color) !important;
 }
 
-.material-icons {
-  color: var(--devtools-dark-primary-color) !important;
+.topbar .omnibox input {
+  margin: 0px 10px 0px 0px !important;
+  padding: 0px 0px !important;
+}
+
+.pf-keycap .material-icons {
+  color: #444d56 !important;
 }
 
 .track-shell {
@@ -129,7 +145,8 @@ header.overview .code {
   border-bottom: solid 1px var(--devtools-dark-on-background-color) !important;
 }
 
-.pf-ptree-grid .pf-tree-node:hover {
+.pf-ptree-grid .pf-tree-node:hover,
+.pf-button.pf-minimal.pf-active {
   background-color: var(--devtools-dark-border-color) !important;
 }
 
@@ -154,28 +171,29 @@ header.overview .code {
   background-color: var(--devtools-dark-border-color) !important;
 }
 
-.details-panel table tr:hover td, .details-panel table tr:hover th {
+table tr:hover td, table tr:hover th {
   background-color: #6e6e6e !important;
 }
 
-.details-content .handle {
+.handle {
   border-top: 1px solid var(--devtools-dark-border-color) !important;
   border-bottom: 1px solid var(--devtools-dark-border-color) !important;
 }
 
-.details-content .handle .tabs .tab {
+.handle .tabs .tab {
   border: none !important;
   z-index: 0 !important;
   box-shadow: none !important;
 }
 
-.details-content .handle .tabs .tab[active] {
+.handle .tabs .tab[active] {
   text-decoration: underline !important;
   text-decoration-color: var(--devtools-dark-primary-color) !important;
   text-decoration-thickness: 3px !important;
 }
 
-.details-content .handle .tabs .tab:hover {
+.handle .tabs .tab:hover,
+.button {
   background-color: var(--devtools-dark-border-color) !important;
 }
 
@@ -199,4 +217,12 @@ header.overview .code {
 
 .modal-logs, .modal-textarea {
   border: 1px solid var(--devtools-dark-border-color) !important;
+}
+
+button.pf-minimal.pf-active {
+  background: var(--selection-highlight-color) !important;
+}
+
+input:focus-visible {
+  outline-color: var(--devtools-dark-primary-color) !important;
 }
