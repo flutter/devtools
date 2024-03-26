@@ -21,7 +21,7 @@ bash for quality assurance and to prevent regressions from slipping into the rel
 1. Release into the Dart SDK master branch
     -  [Full release](#full-release-into-the-dart-sdk-master-branch)
     -  [Dev release](#dev-release-into-the-dart-sdk-master-branch)   
-2. [Cherry-pick releases into the Dart SDK stable / beta branches](#Cherry-pick releases)
+2. [Cherry-pick releases into the Dart SDK stable / beta branches](#cherry-pick-releases)
 
 ## Full release into the Dart SDK master branch
 
