@@ -92,7 +92,7 @@ class FlutterFrameAnalysisView extends StatelessWidget {
             ),
           ),
 
-          if (FeatureFlags.widgetRebuildstats) ...[
+          if (FeatureFlags.widgetRebuildStats) ...[
             if (rebuilds == null || rebuilds.isEmpty)
               ValueListenableBuilder<bool>(
                 valueListenable: serviceConnection
