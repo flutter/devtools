@@ -7,6 +7,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../screens/memory/shared/primitives/memory_timeline.dart';
 import '../../screens/memory/shared/primitives/memory_utils.dart';
+import 'simple_items.dart';
 
 abstract class HeapGraphLoader {
   const HeapGraphLoader();
@@ -37,10 +38,8 @@ class HeapGraphLoaderFile implements HeapGraphLoader {
 
   @override
   Future<(HeapSnapshotGraph, DateTime)> load() async {
-    final bytes = await file.readAsBytes();
-    final data = bytes.buffer.asByteData();
     return (
-      HeapSnapshotGraph.fromChunks([data]),
+      await HeapSnapshotGraphSerialization.load(file),
       await file.lastModified(),
     );
   }
