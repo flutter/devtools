@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/shared/feature_flags.dart';
 import 'package:devtools_shared/devtools_test_utils.dart';
 
 import 'test_infra/run/_in_file_args.dart';
