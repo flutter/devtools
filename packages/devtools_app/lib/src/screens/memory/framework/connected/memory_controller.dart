@@ -69,17 +69,29 @@ class MemoryFeatureControllers {
 class MemoryController extends DisposableController
     with AutoDisposeControllerMixin {
   MemoryController({
-    DiffPaneController? diffPaneController,
-    ProfilePaneController? profilePaneController,
+    @visibleForTesting DiffPaneController? diffPaneController,
+    @visibleForTesting ProfilePaneController? profilePaneController,
   }) {
     controllers = MemoryFeatureControllers(
       diffPaneController,
       profilePaneController,
     );
+    shareClassFilterBetweenProfileAndDiff();
   }
 
   /// Sub-controllers of memory controller.
   late final MemoryFeatureControllers controllers;
+
+  void shareClassFilterBetweenProfileAndDiff() {
+    controllers.profile.classFilter.addListener(() {
+      controllers.diff.derived
+          .applyFilter(controllers.profile.classFilter.value);
+    });
+
+    controllers.diff.core.classFilter.addListener(() {
+      controllers.profile.setFilter(controllers.diff.core.classFilter.value);
+    });
+  }
 
   /// Index of the selected feature tab.
   ///
