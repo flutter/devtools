@@ -243,21 +243,17 @@ class _DeepLinkListViewTopPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Provider.of<DeepLinksController>(context);
     return AreaPaneHeader(
-      roundedTopBorder:false,
-      includeTopBorder:false,
-      includeBottomBorder:false,
+      roundedTopBorder: false,
+      includeTopBorder: false,
+      includeBottomBorder: false,
       tall: true,
-      title: 
-      Row(
+      title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-      
-            
-            Text(
-              'Validate and fix',
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
-     
+          Text(
+            'Validate and fix',
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
           ValueListenableBuilder(
             valueListenable: controller.selectedVariantIndex,
             builder: (_, value, __) {
