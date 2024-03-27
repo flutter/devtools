@@ -354,67 +354,64 @@ class TimelineEventsController extends PerformanceFeatureController
     debugTraceCallback(
       () => _log.info('[handleSelectedFrame]\n${frame.toStringVerbose()}'),
     );
-    await _perfettoSelectFrame(frame);
-  }
 
-  Future<void> _perfettoSelectFrame(FlutterFrame frame) async {
+    void processMoreEventsOrExitHelper({
+      required FutureOr<void> Function() onProcessMore,
+    }) async {
+      final hasProcessedTimelineEventsForFrame =
+          perfettoController.processor.hasProcessedEventsForFrame(frame.id);
+      if (!hasProcessedTimelineEventsForFrame) {
+        final timelineEventsUnavailable =
+            perfettoController.processor.frameIsBeforeTimelineData(frame.id);
+        if (timelineEventsUnavailable) {
+          pushNoTimelineEventsAvailableWarning();
+          return;
+        }
+        await onProcessMore();
+      }
+    }
+
     // No need to process events again if we are in offline mode - we have
     // already processed all the available data.
     if (!offlineController.offlineMode.value) {
-      bool hasProcessedTimelineEventsForFrame =
-          perfettoController.processor.hasProcessedEventsForFrame(frame.id);
-      if (!hasProcessedTimelineEventsForFrame) {
-        debugTraceCallback(
-          () => _log.info(
-            '[_perfettoSelectFrame] no events for frame. Process all events.',
-          ),
-        );
-        processTrackEvents();
-      }
+      processMoreEventsOrExitHelper(
+        onProcessMore: () {
+          debugTraceCallback(
+            () => _log.info(
+              '[handleSelectedFrame] no events for frame. Process all events.',
+            ),
+          );
+          processTrackEvents();
+        },
+      );
 
-      hasProcessedTimelineEventsForFrame =
-          perfettoController.processor.hasProcessedEventsForFrame(frame.id);
-      if (!hasProcessedTimelineEventsForFrame) {
-        debugTraceCallback(
-          () => _log.info(
-            '[_perfettoSelectFrame] events still not processed. Force refresh.',
-          ),
-        );
-
-        final frameBeforeEarliestTimelineData =
-            firstWellFormedFlutterFrameId != null &&
-                frame.id < firstWellFormedFlutterFrameId!;
-        if (!frameBeforeEarliestTimelineData) {
-          // If we still have not processed the timeline events for this frame,
-          // try forcing a refresh. Only do this if it is possible to fetch the
-          // timeline data for the [frame] we are trying to scroll to.
+      // Call this a second time to see if events for this frame have been
+      // processed after calling the lighter weight [processTrackEvents] method,
+      // which processes all unprocessed events that we have collected.
+      processMoreEventsOrExitHelper(
+        onProcessMore: () async {
+          // If we still have not processed the events for this frame, force a
+          // refresh to pull the latest data from the VM.
+          debugTraceCallback(
+            () => _log.info(
+              '[handleSelectedFrame] events still not processed. Force refresh.',
+            ),
+          );
           await _workTracker.track(forceRefresh);
 
-          // TODO(kenz): it would be best if we can avoid making subsequent
-          // calls to [forceRefresh] when we hit this case.
-          if (firstWellFormedFlutterFrameId == null) {
+          final hasProcessedTimelineEventsForFrame =
+              perfettoController.processor.hasProcessedEventsForFrame(frame.id);
+          if (!hasProcessedTimelineEventsForFrame) {
             // At this point, we still have not processed any timeline events
-            // for Flutter frames, which means we will never have access to the
-            // timeline events for this [frame].
+            // for this Flutter frame, which means we will never have access to
+            // the timeline events for [frame].
             pushNoTimelineEventsAvailableWarning();
           }
-        }
-      }
+        },
+      );
     }
 
-    // TODO(https://github.com/flutter/flutter/issues/144782): remove once this
-    // issue is fixed. Due to this bug, we sometimes have very large and
-    // inaccurate values for frame time durations. When this occurs, fallback
-    // to using the time range from the frame's timeline events. This heuristic
-    // assumes that there will never be a frame that took longer than 100
-    // seconds, which is still pretty high.
-    var timeRange = frame.timeFromFrameTiming;
-    const frameTimeHeuristic = 100;
-    if (timeRange.duration.inSeconds > frameTimeHeuristic) {
-      timeRange = frame.timeFromEventFlows;
-    }
-
-    perfettoController.scrollToTimeRange(timeRange);
+    perfettoController.scrollToTimeRange(frame.timeFromFrameTiming);
   }
 
   void addTimelineEvent(FlutterTimelineEvent event) {
