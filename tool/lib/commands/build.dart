@@ -85,7 +85,6 @@ class BuildCommand extends Command {
     );
 
     logStatus('building DevTools in release mode');
-    final mode = buildMode == 'release' ? 'profile' : buildMode;
     await processManager.runAll(
       commands: [
         if (runPubGet) CliCommand.tool(['pub-get', '--only-main']),
@@ -96,7 +95,7 @@ class BuildCommand extends Command {
             '--web-renderer',
             'canvaskit',
             '--pwa-strategy=offline-first',
-            if (mode != 'debug') '--$mode',
+            if (buildMode != 'debug') '--$buildMode',
             '--no-tree-shake-icons',
           ],
         ),

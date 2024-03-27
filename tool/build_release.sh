@@ -62,7 +62,7 @@ flutter pub get
 flutter build web \
   --web-renderer canvaskit \
   --pwa-strategy=offline-first \
-  --profile \
+  --release \
   --no-tree-shake-icons
 
 # Ensure permissions are set correctly on canvaskit binaries.
