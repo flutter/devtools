@@ -190,8 +190,19 @@ published to pub.
 are any reasons why we should wait.** Since these packages follow their own release schedules,
 it is possible that there are changes that are not ready to publish.
 
-From the respective `devtools/packages/devtools_*` directories, run:
+From the respective `devtools/packages/devtools_*` directories, run `flutter pub publish`. You can copy
+commands from this code span:
+
    ```shell
+   # Assuming you are in one of packages root.
+
+   cd ../devtools_app_shared
+   flutter pub publish
+
+   cd ../devtools_extensions
+   flutter pub publish
+
+   cd ../devtools_shared
    flutter pub publish
    ```
 
