@@ -1,5 +1,6 @@
-# 8.1.1-wip
+# 8.1.1-dev.0
 * Update `package:dtd` to `2.1.0`.
+* Bump the minimum Dart SDK version to `3.4.0-275.0.dev`.
 
 # 8.1.0
 * Update `package:dtd` to `2.0.0`.

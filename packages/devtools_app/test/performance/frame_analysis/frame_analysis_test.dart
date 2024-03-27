@@ -48,13 +48,14 @@ void main() {
       FrameAnalysis? analysis,
     ) async {
       await tester.pumpWidget(
-        wrapWithControllers(
+        wrapSimple(
           FlutterFrameAnalysisView(
             frameAnalysis: analysis,
             enhanceTracingController: mockEnhanceTracingController,
             rebuildCountModel: rebuildCountModel,
+            displayRefreshRateNotifier:
+                const FixedValueListenable<double>(defaultRefreshRate),
           ),
-          performance: PerformanceController(),
         ),
       );
       expect(find.byType(FlutterFrameAnalysisView), findsOneWidget);
