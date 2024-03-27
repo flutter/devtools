@@ -88,10 +88,6 @@ class CliCommand {
     List<String> args, {
     bool throwOnException = true,
   }) {
-    // We do not use `Platform.script.toFilePath()`
-    // assuming path to the tool is in the PATH
-    // because of bug https://github.com/dart-lang/sdk/issues/54493
-
     var toolPath = Platform.script.toFilePath();
     if (!File(toolPath).existsSync()) {
       // Handling https://github.com/dart-lang/sdk/issues/54493
