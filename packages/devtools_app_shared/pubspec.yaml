@@ -9,7 +9,7 @@ environment:
 
 dependencies:
   collection: ^1.15.0
-  dds_service_extensions: ^1.7.0
+  dds_service_extensions: ^2.0.0
   devtools_shared: ^6.0.1
   dtd: ^1.0.0
   flutter:
