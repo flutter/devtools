@@ -150,7 +150,7 @@ class FlutterTestEnvironment {
 
         await serviceConnection.serviceManager.vmServiceOpened(
           _service,
-          onClosed: Completer().future,
+          onClosed: Completer<void>().future,
         );
         await _preferencesController!.init();
 

@@ -24,20 +24,20 @@ class FrameAnalysis {
   /// children of the "Layout" event.
   ///
   /// Example:
-  /// [-----Build----][-----------------Layout-----------------]
-  ///                       [--Build--]     [----Build----]
+  /// [-----BUILD----][-----------------LAYOUT (root)-----------------]
+  ///                       [--BUILD--]     [----BUILD----]
   late FramePhase buildPhase = _generateBuildPhase();
 
   FramePhase _generateBuildPhase() {
     final uiEvent = frame.timelineEventData.uiEvent;
     if (uiEvent == null) {
-      return FramePhase.build(events: <SyncTimelineEvent>[]);
+      return FramePhase.build(events: <FlutterTimelineEvent>[]);
     }
     final buildEvents = uiEvent
         .nodesWithCondition(
           (event) => FramePhaseType.build.isMatchForEventName(event.name),
         )
-        .cast<SyncTimelineEvent>();
+        .cast<FlutterTimelineEvent>();
     return FramePhase.build(events: buildEvents);
   }
 
@@ -50,8 +50,8 @@ class FrameAnalysis {
   /// in the Layout event, outside of the Build events.
   ///
   /// Example:
-  /// [-----------------Layout-----------------]
-  ///    [--Build--]     [----Build----]
+  /// [-----------------LAYOUT (root)-----------------]
+  ///    [--BUILD--]     [----BUILD----]
   late FramePhase layoutPhase = _generateLayoutPhase();
 
   FramePhase _generateLayoutPhase() {
@@ -67,18 +67,18 @@ class FrameAnalysis {
         );
         final buildDuration = buildChildren.fold<Duration>(
           Duration.zero,
-          (previous, TimelineEvent event) {
+          (previous, FlutterTimelineEvent event) {
             return previous + event.time.duration;
           },
         );
 
         return FramePhase.layout(
-          events: <SyncTimelineEvent>[layoutEvent as SyncTimelineEvent],
+          events: <FlutterTimelineEvent>[layoutEvent],
           duration: layoutEvent.time.duration - buildDuration,
         );
       }
     }
-    return FramePhase.layout(events: <SyncTimelineEvent>[]);
+    return FramePhase.layout(events: <FlutterTimelineEvent>[]);
   }
 
   /// Data for the Paint phase of [frame].
@@ -89,15 +89,13 @@ class FrameAnalysis {
   FramePhase _generatePaintPhase() {
     final uiEvent = frame.timelineEventData.uiEvent;
     if (uiEvent == null) {
-      return FramePhase.paint(events: <SyncTimelineEvent>[]);
+      return FramePhase.paint(events: <FlutterTimelineEvent>[]);
     }
     final paintEvent = uiEvent.firstChildWithCondition(
       (event) => FramePhaseType.paint.isMatchForEventName(event.name),
     );
     return FramePhase.paint(
-      events: <SyncTimelineEvent>[
-        if (paintEvent != null) paintEvent as SyncTimelineEvent,
-      ],
+      events: <FlutterTimelineEvent>[if (paintEvent != null) paintEvent],
     );
   }
 
@@ -161,7 +159,7 @@ class FrameAnalysis {
     assert(_intrinsicOperationsCount == null);
     int saveLayer = 0;
     for (final paintEvent in paintPhase.events) {
-      breadthFirstTraversal<TimelineEvent>(
+      breadthFirstTraversal<FlutterTimelineEvent>(
         paintEvent,
         action: (event) {
           if (event.name!.caseInsensitiveContains(saveLayerEventName)) {
@@ -174,7 +172,7 @@ class FrameAnalysis {
 
     int intrinsics = 0;
     for (final layoutEvent in layoutPhase.events) {
-      breadthFirstTraversal<TimelineEvent>(
+      breadthFirstTraversal<FlutterTimelineEvent>(
         layoutEvent,
         action: (event) {
           if (event.name!.caseInsensitiveContains(intrinsicsEventSuffix)) {
@@ -287,7 +285,7 @@ class FramePhase {
             });
 
   factory FramePhase.build({
-    required List<SyncTimelineEvent> events,
+    required List<FlutterTimelineEvent> events,
     Duration? duration,
   }) {
     return FramePhase._(
@@ -298,7 +296,7 @@ class FramePhase {
   }
 
   factory FramePhase.layout({
-    required List<SyncTimelineEvent> events,
+    required List<FlutterTimelineEvent> events,
     Duration? duration,
   }) {
     return FramePhase._(
@@ -309,7 +307,7 @@ class FramePhase {
   }
 
   factory FramePhase.paint({
-    required List<SyncTimelineEvent> events,
+    required List<FlutterTimelineEvent> events,
     Duration? duration,
   }) {
     return FramePhase._(
@@ -320,7 +318,7 @@ class FramePhase {
   }
 
   factory FramePhase.raster({
-    required List<SyncTimelineEvent> events,
+    required List<FlutterTimelineEvent> events,
     Duration? duration,
   }) {
     return FramePhase._(
@@ -334,7 +332,7 @@ class FramePhase {
 
   final FramePhaseType type;
 
-  final List<SyncTimelineEvent> events;
+  final List<FlutterTimelineEvent> events;
 
   final Duration duration;
 }

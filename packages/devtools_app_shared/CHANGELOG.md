@@ -1,3 +1,40 @@
+## 0.1.1-dev.0
+* Update `package:dtd` to `^2.1.0`
+* Add `DTDManager.projectRoots` method.
+* Bump the minimum Dart and Flutter SDK versions to `3.4.0-275.0.dev` and
+`3.21.0-15.0.pre` respectively.
+* Bump `devtools_shared` to ^8.1.1-dev.0
+
+## 0.1.0
+* Remove deprecated `background` and `onBackground` values for `lightColorScheme`
+and `darkColorScheme`.
+* Rename `Split` to `SplitPane`.
+* Add `ServiceManager.serviceUri` field to store the connected VM service URI.
+* Update readme to use `pub add` instead of explicit package version.
+* Update `package:dtd` to `^2.0.0`
+* Update `package:devtools_shared` to `^8.1.0`
+* Add `DTDManager.workspaceRoots` method.
+
+## 0.0.10
+* Add `DTDManager` class and export from `service.dart`.
+* Add `showDevToolsDialog` helper method.
+* Add `FlexSplitColumn` and `BlankHeader` common widgets.
+* Bump `package:vm_service` dependency to ^14.0.0.
+
+## 0.0.9
+* Bump `package:web` to `^0.4.1`.
+* Densify overall UI.
+* Add public members: `PaddedDivider.noPadding`, `singleLineDialogTextFieldDecoration`, `extraLargeSpacing`, `regularTextStyleWithColor`.
+* Remove public members: `areaPaneHeaderHeight`, `defaultSwitchHeight`,`
+`dialogTextFieldDecoration`
+* Automatically show tooltips for `DevToolsButton` whose labels have been hidden due to
+hitting a narrow screen threshold, specified by `minScreenWidthForTextBeforeScaling`.
+* Add an optional parameter `borderColor` to `DevToolsToggleButtonGroup`.
+* Add a strict type on `DialogApplyButton.onPressed` and `ToggleableServiceExtension`.
+* Change default styling of `regularTextStyle` to inherit from `TextTheme.bodySmall`.
+* Change default styling of `TextTheme.bodySmall`, `TextTheme.bodyMedium`,
+`TextTheme.titleSmall` in the base theme.
+
 ## 0.0.8
 * Add `ServiceManager.resolvedUriManager` for looking up package and file uris from
 a VM service connection.
@@ -20,7 +57,7 @@ a VM service connection.
 * Add optional parameter `id` to `DisposerMixin.addAutoDisposeListener` and
 `AutoDisposeMixin.addAutoDisposeListener` that allows for tagging a listener
 with a specific id.
-* Add optional parameter `excludeIds` to `DisposerMixin.cancelListeners` and 
+* Add optional parameter `excludeIds` to `DisposerMixin.cancelListeners` and
 `AutoDisposeMixin.cancelListeners` that allows for excluding listeners with
 a specific id from the cancel operation.
 

@@ -1,24 +1,34 @@
 This is draft for future release notes, that are going to land on
 [the Flutter website](https://docs.flutter.dev/tools/devtools/release-notes).
 
-# DevTools 2.32.0 release notes
+# DevTools 2.34.0 release notes
 
-The 2.32.0 release of the Dart and Flutter DevTools
+The 2.34.0 release of the Dart and Flutter DevTools
 includes the following changes among other general improvements.
 To learn more about DevTools, check out the
-[DevTools overview](https://docs.flutter.dev/tools/devtools/overview).
+[DevTools overview]({{site.url}}/tools/devtools/overview).
 
 ## General updates
 
-TODO: Remove this section if there are not any general updates.
+* Fixed an issue preventing DevTools from connecting to Flutter apps that are not
+launched from Flutter Tools. - [#6848](https://github.com/flutter/devtools/issues/6848)
+* Improved performance of the FlatTable. -
+  [#7391](https://github.com/flutter/devtools/pull/7391)
 
 ## Inspector updates
 
+* Fixes an edge case where widgets from other packages could show up in the inspector
+  tree. - [#7353](https://github.com/flutter/devtools/pull/7353)
 * Add a preference for the default inspector view - [#6949](https://github.com/flutter/devtools/pull/6949)
 
 ## Performance updates
-
-TODO: Remove this section if there are not any general updates.
+* Add a setting to include CPU samples in the Timeline. - [#7333](https://github.com/flutter/devtools/pull/7333), [#7369](https://github.com/flutter/devtools/pull/7369)
+* Removed the legacy trace viewer. The legacy trace viewer was replaced with the
+embedded Perfetto trace viewer in DevTools version 2.21.1, but was available
+behind a setting to ensure a smooth rollout. This release of DevTools removes
+the legacy trace viewer entirely. - [#7316](https://github.com/flutter/devtools/pull/7316)
+* Updated the Perfetto trace viewer to the latest release. - [#7445](https://github.com/flutter/devtools/pull/7445),
+[#7456](https://github.com/flutter/devtools/pull/7456)
 
 ## CPU profiler updates
 
@@ -26,25 +36,33 @@ TODO: Remove this section if there are not any general updates.
 
 ## Memory updates
 
-TODO: Remove this section if there are not any general updates.
+* Enabled export of snapshots and improved snapshotting
+performance. - [#7197](https://github.com/flutter/devtools/pull/7197), [#7439](https://github.com/flutter/devtools/pull/7439), [#7449](https://github.com/flutter/devtools/pull/7449)
+
+* Fixed failures during disconnect in tracing. - [#7440](https://github.com/flutter/devtools/pull/7440)
+
+* Made class filter shared between the panes `Profile Memory` and `Diff Snapshots`. - [#7462](https://github.com/flutter/devtools/pull/7462)
 
 ## Debugger updates
 
-* Highlight `extension type` as a declaration keyword,
-  highlight the `$` in identifier interpolation as part of the interpolation,
-  and properly highlight comments within type arguments. - [#6837](https://github.com/flutter/devtools/pull/6837)
+TODO: Remove this section if there are not any general updates.
 
 ## Network profiler updates
 
-TODO: Remove this section if there are not any general updates.
+* Improved Network profiler performance. - [#7266](https://github.com/flutter/devtools/pull/7266)
+* Fixed a bug where selected pending requests weren't refreshing the tab once updated. - [#7266](https://github.com/flutter/devtools/pull/7266)
+* Fixed the JSON viewer so multiline strings are visible in their row, and
+  through a tooltip. - [#7389](https://github.com/flutter/devtools/pull/7389)
+* Fixed JsonViewer where all of the expanded sections would snap closed. [#7367](https://github.com/flutter/devtools/pull/7367)
 
 ## Logging updates
 
-* Added toggle filters to filter out noisy Flutter and Dart logs - [#7026](https://github.com/flutter/devtools/pull/7026)
+TODO: Remove this section if there are not any general updates.
 
-    ![Logging view filters](images/logging_toggle_filters.png "Toggle filters for logging screen")
+## Deep Links tool updates
 
-* Added scrollbar to details pane. - [#6917](https://github.com/flutter/devtools/pull/6917)
+* Automatically populate a list of Flutter projects from the connected
+IDE. - [#7415](https://github.com/flutter/devtools/pull/7415), [#7431](https://github.com/flutter/devtools/pull/7431)
 
 ## App size tool updates
 
@@ -52,13 +70,13 @@ TODO: Remove this section if there are not any general updates.
 
 ## VS Code Sidebar updates
 
-* Fixed an issue that prevented the VS code sidebar from loading in recent beta/master builds. - [#6984](https://github.com/flutter/devtools/pull/6984)
+TODO: Remove this section if there are not any general updates.
 
 ## DevTools Extension updates
 
-* Fixed a couple bugs preventing Dart server apps from connecting to DevTools extensions. - [#6982](https://github.com/flutter/devtools/pull/6982), [#6993](https://github.com/flutter/devtools/pull/6993)
+TODO: Remove this section if there are not any general updates.
 
 ## Full commit history
 
 To find a complete list of changes in this release, check out the
-[DevTools git log](https://github.com/flutter/devtools/tree/v2.31.0).
+[DevTools git log](https://github.com/flutter/devtools/tree/v2.34.0).

@@ -14,7 +14,7 @@ import 'performance_controls.dart';
 class MoreDebuggingOptionsButton extends StatelessWidget {
   const MoreDebuggingOptionsButton({Key? key}) : super(key: key);
 
-  static const _width = 720.0;
+  static const _width = 620.0;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +29,7 @@ class MoreDebuggingOptionsButton extends StatelessWidget {
         extensions.disableClipLayers,
         extensions.disableOpacityLayers,
         extensions.disablePhysicalShapeLayers,
-        if (FeatureFlags.widgetRebuildstats) extensions.trackRebuildWidgets,
+        if (FeatureFlags.widgetRebuildStats) extensions.trackRebuildWidgets,
       ],
       overlayDescription: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

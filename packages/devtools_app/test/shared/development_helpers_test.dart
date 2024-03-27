@@ -10,5 +10,7 @@ void main() {
     expect(debugAnalytics, isFalse);
     expect(debugDevToolsExtensions, isFalse);
     expect(debugSurvey, isFalse);
+    expect(debugPerfettoTraceProcessing, isFalse);
+    expect(debugTimers, isFalse);
   });
 }

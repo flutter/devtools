@@ -16,7 +16,7 @@ import 'settings.dart';
 /// Create a stateful widget
 class MyGetHttpData extends StatefulWidget {
   @override
-  MyGetHttpDataState createState() => MyGetHttpDataState();
+  State<MyGetHttpData> createState() => MyGetHttpDataState();
 }
 
 // Create the state for our stateful widget

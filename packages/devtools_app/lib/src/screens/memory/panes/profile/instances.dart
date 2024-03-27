@@ -27,7 +27,7 @@ class ProfileInstanceTableCell extends StatelessWidget {
   final int count;
   final bool _shouldShowMenu;
   final HeapClassName heapClass;
-  late final ClassSampler _sampler = ClassSampler(heapClass);
+  late final LiveClassSampler _sampler = LiveClassSampler(heapClass);
 
   @override
   Widget build(BuildContext context) {
@@ -48,14 +48,14 @@ class ProfileInstanceTableCell extends StatelessWidget {
 class _StoreAllAsVariableMenu extends StatelessWidget {
   const _StoreAllAsVariableMenu(this.sampler);
 
-  final ClassSampler sampler;
+  final LiveClassSampler sampler;
 
   @override
   Widget build(BuildContext context) {
     const menuText = 'Store all class instances';
 
     MenuItemButton item(
-      title, {
+      String title, {
       required bool subclasses,
       required bool implementers,
     }) =>
@@ -86,15 +86,13 @@ class _StoreAllAsVariableMenu extends StatelessWidget {
 class _StoreAsOneVariableMenu extends StatelessWidget {
   const _StoreAsOneVariableMenu(this.sampler);
 
-  final ClassSampler sampler;
+  final LiveClassSampler sampler;
 
   @override
   Widget build(BuildContext context) {
     return MenuItemButton(
       onPressed: sampler.oneLiveToConsole,
-      child: const Text(
-        'Store one instance as a console variable',
-      ),
+      child: const Text('Store one instance as a console variable'),
     );
   }
 }

@@ -41,7 +41,7 @@ Future<T> _connectWithSse<T extends VmService>({
   );
   serviceCompleter.complete(service);
 
-  unawaited(stream.drain().catchError(onError));
+  unawaited(stream.drain<void>().catchError(onError));
   return serviceCompleter.future;
 }
 
@@ -87,9 +87,9 @@ Future<T> connect<T extends VmService>({
 }) {
   final connectedCompleter = Completer<T>();
 
-  void onError(error) {
+  void onError(Object? error) {
     if (!connectedCompleter.isCompleted) {
-      connectedCompleter.completeError(error);
+      connectedCompleter.completeError(error!);
     }
   }
 

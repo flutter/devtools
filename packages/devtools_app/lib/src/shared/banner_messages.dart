@@ -3,10 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:collection/collection.dart' show IterableExtension;
-import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
-import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -170,14 +168,18 @@ class BannerMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Card(
       color: messageType == BannerMessageType.error
           ? colorScheme.errorContainer
           : colorScheme.warningContainer,
       margin: const EdgeInsets.only(bottom: intermediateSpacing),
       child: Padding(
-        padding: const EdgeInsets.all(defaultSpacing),
+        padding: const EdgeInsets.symmetric(
+          vertical: densePadding,
+          horizontal: denseSpacing,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -191,6 +193,7 @@ class BannerMessage extends StatelessWidget {
                     messageType == BannerMessageType.error
                         ? Icons.error_outline
                         : Icons.warning_amber_outlined,
+                    size: actionsIconSize,
                     color: messageType == BannerMessageType.error
                         ? colorScheme.onErrorContainer
                         : colorScheme.onWarningContainer,
@@ -199,7 +202,7 @@ class BannerMessage extends StatelessWidget {
                 Expanded(
                   child: RichText(
                     text: TextSpan(
-                      style: TextStyle(
+                      style: theme.regularTextStyle.copyWith(
                         color: messageType == BannerMessageType.error
                             ? colorScheme.onErrorContainer
                             : colorScheme.onWarningContainer,
@@ -212,6 +215,7 @@ class BannerMessage extends StatelessWidget {
                 IconButton(
                   icon: Icon(
                     Icons.close,
+                    size: actionsIconSize,
                     color: messageType == BannerMessageType.error
                         ? colorScheme.onErrorContainer
                         : colorScheme.onWarningContainer,
@@ -475,61 +479,6 @@ For the most accurate absolute memory stats, relaunch your application in ''',
         ),
       ],
       screenId: screenId,
-    );
-  }
-}
-
-class UnsupportedFlutterVersionWarning {
-  const UnsupportedFlutterVersionWarning({
-    required this.screenId,
-    required this.currentFlutterVersion,
-    required this.supportedFlutterVersion,
-  });
-
-  final String screenId;
-
-  final FlutterVersion currentFlutterVersion;
-
-  final SemanticVersion supportedFlutterVersion;
-
-  BannerMessage build() {
-    return BannerWarning(
-      key: Key('UnsupportedFlutterVersionWarning - $screenId'),
-      textSpans: [
-        TextSpan(
-          text: 'This version of DevTools expects the connected app to be run'
-              ' on Flutter >= $supportedFlutterVersion, but the connected app'
-              ' is running on Flutter $currentFlutterVersion. Some'
-              ' functionality may not work. If this causes issues, try'
-              ' upgrading your Flutter version.',
-          style: TextStyle(fontSize: defaultFontSize),
-        ),
-      ],
-      screenId: screenId,
-    );
-  }
-}
-
-void maybePushUnsupportedFlutterVersionWarning(
-  String screenId, {
-  required SemanticVersion supportedFlutterVersion,
-}) {
-  final isFlutterApp =
-      serviceConnection.serviceManager.connectedApp?.isFlutterAppNow;
-  if (offlineController.offlineMode.value ||
-      isFlutterApp == null ||
-      !isFlutterApp) {
-    return;
-  }
-  final currentVersion =
-      serviceConnection.serviceManager.connectedApp!.flutterVersionNow!;
-  if (currentVersion < supportedFlutterVersion) {
-    bannerMessages.addMessage(
-      UnsupportedFlutterVersionWarning(
-        screenId: screenId,
-        currentFlutterVersion: currentVersion,
-        supportedFlutterVersion: supportedFlutterVersion,
-      ).build(),
     );
   }
 }

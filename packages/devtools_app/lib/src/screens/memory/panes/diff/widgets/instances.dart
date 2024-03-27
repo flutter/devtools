@@ -4,9 +4,9 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../../shared/memory/class_name.dart';
-import '../../../shared/heap/heap.dart';
+import '../../../../../shared/memory/classes.dart';
+import '../../../../../shared/memory/heap_object.dart';
 import '../../../shared/heap/sampler.dart';
 import '../../../shared/primitives/instance_context_menu.dart';
 
@@ -23,14 +23,14 @@ class HeapInstanceTableCell extends StatelessWidget {
     required bool isSelected,
     this.liveItemsEnabled = true,
   })  : _sampleObtainer = _shouldShowMenu(isSelected, objects)
-            ? HeapClassSampler(heapClass, objects, heap())
+            ? SnapshotClassSampler(heapClass, objects, heap())
             : null,
         _count = objects.instanceCount;
 
   static bool _shouldShowMenu(bool isSelected, ObjectSet objects) =>
       isSelected && objects.instanceCount > 0;
 
-  final HeapClassSampler? _sampleObtainer;
+  final SnapshotClassSampler? _sampleObtainer;
 
   final int _count;
   final bool liveItemsEnabled;
@@ -48,7 +48,7 @@ class HeapInstanceTableCell extends StatelessWidget {
 }
 
 List<Widget> _buildHeapInstancesMenu({
-  required HeapClassSampler? sampler,
+  required SnapshotClassSampler? sampler,
   required bool liveItemsEnabled,
 }) {
   if (sampler == null) return [];
@@ -64,7 +64,7 @@ class _StoreAllAsVariableMenu extends StatelessWidget {
     required this.liveItemsEnabled,
   });
 
-  final HeapClassSampler sampler;
+  final SnapshotClassSampler sampler;
   final bool liveItemsEnabled;
 
   @override
@@ -77,7 +77,7 @@ class _StoreAllAsVariableMenu extends StatelessWidget {
     }
 
     MenuItemButton item(
-      title, {
+      String title, {
       required bool subclasses,
       required bool implementers,
     }) =>
@@ -111,7 +111,7 @@ class _StoreAsOneVariableMenu extends StatelessWidget {
     required this.liveItemsEnabled,
   });
 
-  final HeapClassSampler sampler;
+  final SnapshotClassSampler sampler;
   final bool liveItemsEnabled;
 
   @override
@@ -127,15 +127,11 @@ class _StoreAsOneVariableMenu extends StatelessWidget {
       menuChildren: <Widget>[
         MenuItemButton(
           onPressed: sampler.oneStaticToConsole,
-          child: const Text(
-            'Any',
-          ),
+          child: const Text('Any'),
         ),
         MenuItemButton(
           onPressed: liveItemsEnabled ? sampler.oneLiveStaticToConsole : null,
-          child: const Text(
-            'Any, not garbage collected',
-          ),
+          child: const Text('Any, not garbage collected'),
         ),
       ],
       child: const Text(menuText),

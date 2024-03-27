@@ -59,8 +59,8 @@ to connect to Github with SSH.
 2. Make sure to [configure Git to keep your fork in sync](https://docs.github.com/en/get-started/quickstart/fork-a-repo#configuring-git-to-sync-your-fork-with-the-upstream-repository)
 with the upstream DevTools repo.
 3. Ensure that you have access to the `devtools_tool` executable by:
-	- Running `flutter pub get` on the `tool` directory
-	- Adding the `tool/bin` folder to your `PATH` environment variable:
+	- Running `flutter pub get` on the `devtools/tool` directory
+	- Adding the `devtools/tool/bin` folder to your `PATH` environment variable:
 	  - **MacOS Users**
 	    - add the following to your `~/.zshrc` file (or `~/.bashrc`, `~/.bash_profile` if you use Bash),
 		replacing `<DEVTOOLS_DIR>` with the local path to your DevTools repo:
@@ -117,6 +117,16 @@ request from the branch in your cloned repo to the DevTools master branch. Creat
 	```
 	devtools_tool generate-code --upgrade
 	```
+
+ - To update DCM to the same version as on GitHub bots with apt-get or brew:
+
+    1. Locate, copy and run apt-get command searching by searching for `install dcm` in [build.yaml](https://github.com/flutter/devtools/blob/master/.github/workflows/build.yaml)
+      
+    2. Locate version on bots by searching for `install dcm` in [build.yaml](https://github.com/flutter/devtools/blob/master/.github/workflows/build.yaml) and run `brew install cqlabs/dcm/dcm@<version on bots without -1>`
+  
+    You can check you current local version with `dcm --version`.
+   
+    If version of DCM on bots is outdated, consider to submit a PR to refresh the version on bots.
 
 ## Running and debugging DevTools
 

@@ -107,6 +107,7 @@ const analyzeDiff = 'analyzeDiff';
 // VM Tools UX Actions:
 const refreshIsolateStatistics = 'refreshIsolateStatistics';
 const refreshVmStatistics = 'refreshVmStatistics';
+const refreshProcessMemoryStatistics = 'refreshProcessMemoryStatistics';
 const requestSize = 'requestSize';
 
 // Settings actions:

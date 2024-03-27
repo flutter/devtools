@@ -43,6 +43,18 @@ final class FlutterVersion extends SemanticVersion {
     );
   }
 
+  factory FlutterVersion.unknown() {
+    return FlutterVersion._(
+      version: null,
+      channel: null,
+      repositoryUrl: null,
+      frameworkRevision: null,
+      frameworkCommitDate: null,
+      engineRevision: null,
+      dartSdkVersion: null,
+    );
+  }
+
   final String? version;
 
   final String? channel;
@@ -56,6 +68,15 @@ final class FlutterVersion extends SemanticVersion {
   final String? engineRevision;
 
   final SemanticVersion? dartSdkVersion;
+
+  bool get unknown =>
+      version == null &&
+      channel == null &&
+      repositoryUrl == null &&
+      frameworkRevision == null &&
+      frameworkCommitDate == null &&
+      engineRevision == null &&
+      dartSdkVersion == null;
 
   @override
   bool operator ==(Object other) {

@@ -3,10 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app_shared/ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../service/service_extension_widgets.dart';
 import '../../../../service/service_extensions.dart' as extensions;
+import '../../../../shared/common_widgets.dart';
 import '../../../../shared/feature_flags.dart';
 import '../../../../shared/globals.dart';
 import '../controls/enhance_tracing/enhance_tracing_controller.dart';
@@ -22,6 +24,7 @@ class FlutterFrameAnalysisView extends StatelessWidget {
     required this.frameAnalysis,
     required this.enhanceTracingController,
     required this.rebuildCountModel,
+    required this.displayRefreshRateNotifier,
   }) : super(key: key);
 
   final FrameAnalysis? frameAnalysis;
@@ -30,18 +33,17 @@ class FlutterFrameAnalysisView extends StatelessWidget {
 
   final RebuildCountModel rebuildCountModel;
 
+  final ValueListenable<double> displayRefreshRateNotifier;
+
   @override
   Widget build(BuildContext context) {
     final frameAnalysis = this.frameAnalysis;
     if (frameAnalysis == null) {
-      return const Center(
-        child: Text(
-          'No analysis data available for this frame. This means that the '
-          'timeline events\nfor this frame occurred too long ago and DevTools '
-          'could not access them.\n\nTo avoid this, open the DevTools Performance '
-          'page earlier.',
-          textAlign: TextAlign.center,
-        ),
+      return const CenteredMessage(
+        'No analysis data available for this frame. This means that the '
+        'timeline events\nfor this frame occurred too long ago and DevTools '
+        'could not access them.\n\nTo avoid this, open the DevTools Performance '
+        'page earlier.',
       );
     }
     final rebuilds = rebuildCountModel.rebuildsForFrame(frameAnalysis.frame.id);
@@ -76,9 +78,15 @@ class FlutterFrameAnalysisView extends StatelessWidget {
           // also needs to scroll and the devtools table functionality does not
           // support the shrinkWrap property and has features that would make
           //it difficult to handle robustly.
-          FrameHints(
-            frameAnalysis: frameAnalysis,
-            enhanceTracingController: enhanceTracingController,
+          ValueListenableBuilder(
+            valueListenable: displayRefreshRateNotifier,
+            builder: (context, refreshRate, _) {
+              return FrameHints(
+                frameAnalysis: frameAnalysis,
+                enhanceTracingController: enhanceTracingController,
+                displayRefreshRate: refreshRate,
+              );
+            },
           ),
           const PaddedDivider(
             padding: EdgeInsets.only(
@@ -94,7 +102,7 @@ class FlutterFrameAnalysisView extends StatelessWidget {
             ),
           ),
 
-          if (FeatureFlags.widgetRebuildstats) ...[
+          if (FeatureFlags.widgetRebuildStats) ...[
             if (rebuilds == null || rebuilds.isEmpty)
               ValueListenableBuilder<bool>(
                 valueListenable: serviceConnection

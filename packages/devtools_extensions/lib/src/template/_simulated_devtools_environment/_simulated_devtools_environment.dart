@@ -4,20 +4,24 @@
 
 import 'dart:async';
 import 'dart:js_interop';
+import 'dart:math' as math;
 
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:web/helpers.dart' hide Text;
+import 'package:flutter/services.dart';
+import 'package:web/web.dart' hide Text, Clipboard;
 
 import '../../api/api.dart';
 import '../../api/model.dart';
 import '../../utils.dart';
 import '../devtools_extension.dart';
 
-part '_connect_ui.dart';
 part '_simulated_devtools_controller.dart';
+part 'connection_ui/_connect.dart';
+part 'connection_ui/_dtd_connect.dart';
+part 'connection_ui/_vm_service_connect.dart';
 
 /// Wraps [child] in a simulated DevTools environment.
 ///
@@ -32,11 +36,14 @@ class SimulatedDevToolsWrapper extends StatefulWidget {
     super.key,
     required this.child,
     required this.requiresRunningApplication,
+    required this.onDtdConnectionChange,
   });
 
   final Widget child;
 
   final bool requiresRunningApplication;
+
+  final Future<void> Function(String?) onDtdConnectionChange;
 
   @override
   State<SimulatedDevToolsWrapper> createState() =>
@@ -48,19 +55,31 @@ class SimulatedDevToolsWrapperState extends State<SimulatedDevToolsWrapper>
     with AutoDisposeMixin {
   late final SimulatedDevToolsController simController;
 
-  late ConnectedState connectionState;
+  late final ScrollController scrollController;
 
-  bool get connected => connectionState.connected;
+  bool get vmServiceConnected => vmServiceConnectionState.connected;
+  late ConnectedState vmServiceConnectionState;
+
+  bool dtdConnected = false;
 
   @override
   void initState() {
     super.initState();
     simController = SimulatedDevToolsController()..init();
 
-    connectionState = serviceManager.connectedState.value;
+    scrollController = ScrollController();
+
+    vmServiceConnectionState = serviceManager.connectedState.value;
     addAutoDisposeListener(serviceManager.connectedState, () {
       setState(() {
-        connectionState = serviceManager.connectedState.value;
+        vmServiceConnectionState = serviceManager.connectedState.value;
+      });
+    });
+
+    dtdConnected = dtdManager.hasConnection;
+    addAutoDisposeListener(dtdManager.connection, () {
+      setState(() {
+        dtdConnected = dtdManager.hasConnection;
       });
     });
   }
@@ -68,79 +87,95 @@ class SimulatedDevToolsWrapperState extends State<SimulatedDevToolsWrapper>
   @override
   void dispose() {
     simController.dispose();
+    scrollController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Split(
-      axis: Axis.horizontal,
-      initialFractions: const [0.8, 0.2],
-      minSizes: const [
-        100.0,
-        _VmServiceConnection._totalControlsWidth + 2 * defaultSpacing,
-      ],
-      children: [
-        OutlineDecoration.onlyRight(
-          child: Padding(
-            padding: const EdgeInsets.all(defaultSpacing),
-            child: widget.child,
-          ),
-        ),
-        OutlineDecoration.onlyLeft(
-          child: Padding(
-            padding: const EdgeInsets.all(defaultSpacing),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Simulated DevTools Environment',
-                  style: theme.textTheme.titleMedium,
-                ),
-                const PaddedDivider(),
-                _VmServiceConnection(
-                  connected: connected,
-                  simController: simController,
-                ),
-                const SizedBox(height: denseSpacing),
-                _SimulatedApi(
-                  simController: simController,
-                  requiresRunningApplication: widget.requiresRunningApplication,
-                  connectedToApplication: connected,
-                ),
-                const PaddedDivider(),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Logs:',
-                            style: theme.textTheme.titleMedium,
-                          ),
-                          DevToolsButton.iconOnly(
-                            icon: Icons.clear,
-                            outlined: false,
-                            tooltip: 'Clear logs',
-                            onPressed: () => simController.messageLogs.clear(),
-                          ),
-                        ],
-                      ),
-                      const PaddedDivider.thin(),
-                      Expanded(
-                        child: _LogMessages(simController: simController),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final availableWidth = constraints.maxWidth;
+        const environmentPanelMinWidth =
+            VmServiceConnectionDisplay.totalControlsWidth + 2 * defaultSpacing;
+
+        final environmentPanelFraction =
+            environmentPanelMinWidth / availableWidth;
+        final childFraction = 1 - environmentPanelFraction;
+
+        return SplitPane(
+          axis: Axis.horizontal,
+          initialFractions: [childFraction, environmentPanelFraction],
+          minSizes: const [100.0, 0.0],
+          children: [
+            OutlineDecoration.onlyRight(
+              child: Padding(
+                padding: const EdgeInsets.all(defaultSpacing),
+                child: widget.child,
+              ),
             ),
-          ),
-        ),
-      ],
+            LayoutBuilder(
+              builder: (context, environmentPanelConstraints) {
+                final availableEnvironmentPanelWidth =
+                    environmentPanelConstraints.maxWidth;
+                final environmentPanelWidth = math.max(
+                  environmentPanelMinWidth,
+                  availableEnvironmentPanelWidth,
+                );
+
+                return Scrollbar(
+                  controller: scrollController,
+                  thumbVisibility: true,
+                  child: SingleChildScrollView(
+                    controller: scrollController,
+                    scrollDirection: Axis.horizontal,
+                    child: SizedBox(
+                      width: environmentPanelWidth,
+                      child: OutlineDecoration.onlyLeft(
+                        child: Padding(
+                          padding: const EdgeInsets.all(defaultSpacing),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Simulated DevTools Environment',
+                                style: theme.textTheme.titleMedium,
+                              ),
+                              const PaddedDivider(),
+                              VmServiceConnectionDisplay(
+                                connected: vmServiceConnected,
+                                simController: simController,
+                              ),
+                              const PaddedDivider(),
+                              DTDConnectionDisplay(
+                                simController: simController,
+                                connected: dtdConnected,
+                                onConnectionChange:
+                                    widget.onDtdConnectionChange,
+                              ),
+                              _SimulatedApi(
+                                simController: simController,
+                                requiresRunningApplication:
+                                    widget.requiresRunningApplication,
+                                connectedToApplication: vmServiceConnected,
+                              ),
+                              const PaddedDivider(),
+                              Expanded(
+                                child: _LogsView(simController: simController),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -206,6 +241,42 @@ class _SimulatedApi extends StatelessWidget {
             ),
         ],
       ),
+    );
+  }
+}
+
+class _LogsView extends StatelessWidget {
+  const _LogsView({required this.simController});
+
+  final SimulatedDevToolsController simController;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Logs:',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            DevToolsButton.iconOnly(
+              icon: Icons.clear,
+              outlined: false,
+              tooltip: 'Clear logs',
+              onPressed: () => simController.messageLogs.clear(),
+            ),
+          ],
+        ),
+        const PaddedDivider.thin(),
+        Expanded(
+          child: _LogMessages(
+            simController: simController,
+          ),
+        ),
+      ],
     );
   }
 }

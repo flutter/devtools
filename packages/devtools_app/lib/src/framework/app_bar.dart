@@ -159,7 +159,7 @@ class TabOverflowButton extends StatelessWidget {
 
   bool get overflowTabSelected => selectedIndex >= 0;
 
-  final Function(int) onItemSelected;
+  final void Function(int) onItemSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -201,7 +201,7 @@ class TabOverflowButton extends StatelessWidget {
             height: defaultToolbarHeight,
             child: MenuItemButton(
               style: const ButtonStyle().copyWith(
-                textStyle: MaterialStateProperty.resolveWith<TextStyle>((_) {
+                textStyle: WidgetStateProperty.resolveWith<TextStyle>((_) {
                   return theme.textTheme.titleSmall!;
                 }),
               ),

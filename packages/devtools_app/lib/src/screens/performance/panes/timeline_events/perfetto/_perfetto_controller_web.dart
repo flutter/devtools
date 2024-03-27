@@ -6,12 +6,12 @@ import 'dart:async';
 import 'dart:ui_web' as ui_web;
 
 import 'package:flutter/foundation.dart';
-import 'package:web/helpers.dart';
+import 'package:web/web.dart';
 
 import '../../../../../shared/globals.dart';
-import '../../../../../shared/primitives/trace_event.dart';
 import '../../../../../shared/primitives/utils.dart';
 import 'perfetto_controller.dart';
+import 'tracing/model.dart';
 
 /// Flag to enable embedding an instance of the Perfetto UI running on
 /// localhost.
@@ -131,12 +131,10 @@ class PerfettoControllerImpl extends PerfettoController {
 
   late final HTMLIFrameElement _perfettoIFrame;
 
-  /// The set of trace events that should be shown in the Perfetto trace viewer.
+  /// The Perfetto trace data that should be shown in the Perfetto trace viewer.
   ///
-  /// This set will start in a null state before the first trace is been loaded.
-  ValueListenable<List<TraceEventWrapper>?> get activeTraceEvents =>
-      _activeTraceEvents;
-  final _activeTraceEvents = ValueNotifier<List<TraceEventWrapper>?>(null);
+  /// This will start in a null state before the first trace is been loaded.
+  final activeTrace = PerfettoTrace(null);
 
   /// The time range that should be scrolled to, or focused, in the Perfetto
   /// trace viewer.
@@ -144,9 +142,9 @@ class PerfettoControllerImpl extends PerfettoController {
       _activeScrollToTimeRange;
   final _activeScrollToTimeRange = ValueNotifier<TimeRange?>(null);
 
-  /// Trace events that we should load, but have not yet since the trace viewer
+  /// Trace data that we should load, but have not yet since the trace viewer
   /// is not visible (i.e. [TimelineEventsController.isActiveFeature] is false).
-  List<TraceEventWrapper>? pendingTraceEventsToLoad;
+  Uint8List? pendingTraceToLoad;
 
   /// Time range we should scroll to, but have not yet since the trace viewer
   /// is not visible (i.e. [TimelineEventsController.isActiveFeature] is false).
@@ -185,15 +183,16 @@ class PerfettoControllerImpl extends PerfettoController {
   @override
   void dispose() async {
     await perfettoPostEventStream.close();
+    processor.dispose();
     super.dispose();
   }
 
   @override
   void onBecomingActive() {
     assert(timelineEventsController.isActiveFeature);
-    if (pendingTraceEventsToLoad != null) {
-      unawaited(loadTrace(pendingTraceEventsToLoad!));
-      pendingTraceEventsToLoad = null;
+    if (pendingTraceToLoad != null) {
+      unawaited(loadTrace(pendingTraceToLoad!));
+      pendingTraceToLoad = null;
     }
     if (pendingScrollToTimeRange != null) {
       scrollToTimeRange(pendingScrollToTimeRange!);
@@ -202,13 +201,13 @@ class PerfettoControllerImpl extends PerfettoController {
   }
 
   @override
-  Future<void> loadTrace(List<TraceEventWrapper> devToolsTraceEvents) async {
+  Future<void> loadTrace(Uint8List traceBinary) async {
     if (!timelineEventsController.isActiveFeature) {
-      pendingTraceEventsToLoad = List.of(devToolsTraceEvents);
+      pendingTraceToLoad = traceBinary;
       return;
     }
-    pendingTraceEventsToLoad = null;
-    _activeTraceEvents.value = List.of(devToolsTraceEvents);
+    pendingTraceToLoad = null;
+    activeTrace.trace = traceBinary;
     await Future.delayed(_postTraceDelay);
   }
 
@@ -229,6 +228,7 @@ class PerfettoControllerImpl extends PerfettoController {
 
   @override
   Future<void> clear() async {
-    await loadTrace([]);
+    processor.clear();
+    await loadTrace(Uint8List(0));
   }
 }

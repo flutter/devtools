@@ -41,8 +41,6 @@ void main() {
 
   setUp(() async {
     await env.setupEnvironment();
-    await storage.setValue('ui.denseMode', 'true');
-    preferences.toggleDenseMode(true);
   });
 
   tearDownAll(() async {

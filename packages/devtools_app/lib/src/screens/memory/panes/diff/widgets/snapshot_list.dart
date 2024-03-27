@@ -14,8 +14,8 @@ import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/dialogs.dart';
+import '../../../../../shared/primitives/byte_utils.dart';
 import '../../../../../shared/primitives/utils.dart';
-import '../../../../../shared/table/table.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/item_controller.dart';
 
@@ -73,23 +73,23 @@ class _ListControlPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: controller.isTakingSnapshot,
-      builder: (_, isProcessing, __) {
-        final clearAllEnabled = !isProcessing && controller.hasSnapshots;
-        return Row(
-          children: [
-            ToolbarAction(
-              icon: iconToTakeSnapshot,
-              tooltip: 'Take heap snapshot for the selected isolate',
-              onPressed: controller.isTakingSnapshot.value
-                  ? null
-                  : () => unawaited(_takeSnapshot(context)),
-            ),
-            ToolbarAction(
-              icon: Icons.block,
-              tooltip: 'Clear all snapshots',
-              onPressed: clearAllEnabled
+    return Row(
+      children: [
+        ToolbarAction(
+          icon: iconToTakeSnapshot,
+          size: defaultIconSize,
+          tooltip: 'Take heap snapshot for the selected isolate',
+          onPressed: () => unawaited(_takeSnapshot(context)),
+        ),
+        const SizedBox(width: densePadding),
+        ValueListenableBuilder(
+          valueListenable: controller.core.snapshots,
+          builder: (context, snapshots, _) {
+            return ToolbarAction(
+              icon: Icons.delete,
+              size: defaultIconSize,
+              tooltip: 'Delete all snapshots',
+              onPressed: controller.hasSnapshots
                   ? () {
                       ga.select(
                         gac.memory,
@@ -98,10 +98,16 @@ class _ListControlPane extends StatelessWidget {
                       controller.clearSnapshots();
                     }
                   : null,
-            ),
-          ],
-        );
-      },
+            );
+          },
+        ),
+        const Spacer(),
+        ToolbarAction(
+          icon: Icons.file_upload,
+          tooltip: 'Import snapshot(s) from disk',
+          onPressed: () => unawaited(controller.importSnapshots()),
+        ),
+      ],
     );
   }
 }
@@ -117,6 +123,7 @@ class SnapshotListTitle extends StatelessWidget {
     required this.onEdit,
     required this.onEditingComplete,
     required this.onDelete,
+    required this.onExport,
   }) : super(key: key);
 
   final SnapshotItem item;
@@ -137,6 +144,9 @@ class SnapshotListTitle extends StatelessWidget {
   /// Called when the 'Delete' context menu item is selected.
   final VoidCallback onDelete;
 
+  /// Called when the 'Export' context menu item is selected.
+  final VoidCallback onExport;
+
   @override
   Widget build(BuildContext context) {
     final theItem = item;
@@ -150,7 +160,7 @@ class SnapshotListTitle extends StatelessWidget {
         size: defaultIconSize,
         color: theme.colorScheme.onSurface,
       );
-    } else if (theItem is SnapshotInstanceItem) {
+    } else if (theItem is SnapshotDataItem) {
       leading = Expanded(
         child: ValueListenableBuilder(
           valueListenable: editIndex,
@@ -169,11 +179,7 @@ class SnapshotListTitle extends StatelessWidget {
       trailing.addAll([
         if (theItem.totalSize != null)
           Text(
-            prettyPrintBytes(
-              theItem.totalSize,
-              includeUnit: true,
-              kbFractionDigits: 1,
-            )!,
+            prettyPrintBytes(theItem.totalSize, includeUnit: true)!,
           ),
         Padding(
           padding: const EdgeInsets.only(left: ContextMenuButton.densePadding),
@@ -188,11 +194,17 @@ class SnapshotListTitle extends StatelessWidget {
                       onPressed: onDelete,
                       child: const Text('Delete'),
                     ),
+                    MenuItemButton(
+                      onPressed: onExport,
+                      child: const Text('Export'),
+                    ),
                   ],
                 )
               : const SizedBox(width: menuButtonWidth),
         ),
       ]);
+    } else {
+      throw StateError('Unknown item type: $theItem');
     }
 
     return ValueListenableBuilder<bool>(
@@ -220,7 +232,7 @@ class _EditableSnapshotName extends StatefulWidget {
     required this.onEditingComplete,
   });
 
-  final SnapshotInstanceItem item;
+  final RenamableItem item;
 
   final bool editMode;
 
@@ -278,13 +290,14 @@ class _EditableSnapshotNameState extends State<_EditableSnapshotName>
 
   @override
   Widget build(BuildContext context) {
+    // TODO(polina-c): start using ellipsis when it is available, https://github.com/flutter/devtools/issues/7130
     return TextField(
       controller: textEditingController,
       focusNode: textFieldFocusNode,
       autofocus: true,
       showCursor: widget.editMode,
       enabled: widget.editMode,
-      style: Theme.of(context).textTheme.bodyMedium,
+      style: Theme.of(context).regularTextStyle,
       decoration: const InputDecoration(
         isDense: true,
         border: InputBorder.none,
@@ -396,9 +409,9 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
                     if (_editIndex.value == index) {
                       _editIndex.value = null;
                     }
-                    final item = widget.controller.core.snapshots.value[index];
-                    widget.controller.deleteSnapshot(item);
+                    widget.controller.deleteCurrentSnapshot();
                   },
+                  onExport: widget.controller.exportCurrentItem,
                 ),
               ),
             );

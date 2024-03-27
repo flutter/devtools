@@ -302,7 +302,6 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           ),
       ],
     );
-    final theme = Theme.of(context);
 
     return Provider<ImportController>.value(
       value: _importController,
@@ -338,12 +337,10 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
                 child: Padding(
                   padding: widget.appPadding,
                   child: showConsole
-                      ? Split(
+                      ? SplitPane(
                           axis: Axis.vertical,
                           splitters: [
-                            ConsolePaneHeader(
-                              backgroundColor: theme.colorScheme.surface,
-                            ),
+                            ConsolePaneHeader(),
                           ],
                           initialFractions: const [0.8, 0.2],
                           children: [
@@ -432,7 +429,7 @@ class SimpleScreen extends Screen {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget buildScreenBody(BuildContext context) {
     return child;
   }
 }

@@ -13,17 +13,26 @@ import '../utils.dart';
 import 'shared.dart';
 
 const _buildFlag = 'build';
+const _authFlag = 'auth';
 
 class UpdatePerfettoCommand extends Command {
   UpdatePerfettoCommand() {
-    argParser.addOption(
-      _buildFlag,
-      abbr: 'b',
-      help: 'The build location of the Perfetto assets. When this is not '
-          'specified, the Perfetto assets will be fetched from the latest '
-          'source code at "android.googlesource.com".',
-      valueHelp: '/Users/me/path/to/perfetto/out/ui/ui/dist',
-    );
+    argParser
+      ..addOption(
+        _buildFlag,
+        abbr: 'b',
+        help: 'The build location of the Perfetto assets. When this is not '
+            'specified, the Perfetto assets will be fetched from the latest '
+            'source code at "android.googlesource.com".',
+        valueHelp: '/Users/me/path/to/perfetto/out/ui/ui/dist',
+      )
+      ..addFlag(
+        _authFlag,
+        negatable: true,
+        defaultsTo: true,
+        help: 'Whether to authenticate via "gcert" before cloning the Perfetto '
+            'repository.',
+      );
   }
 
   @override
@@ -43,13 +52,16 @@ class UpdatePerfettoCommand extends Command {
 
     final processManager = ProcessManager();
 
+    final authenticate = argResults![_authFlag] as bool;
+    if (authenticate) {
+      await processManager.runProcess(CliCommand('gcert', []));
+    }
+
     final perfettoUiCompiledLibPath = pathFromRepoRoot(
       path.join('third_party', 'packages', 'perfetto_ui_compiled', 'lib'),
     );
-    final perfettoUiCompiledBuildPath =
-        path.join(perfettoUiCompiledLibPath, 'dist');
     final perfettoDevToolsPath =
-        path.join(perfettoUiCompiledBuildPath, 'devtools');
+        path.join(perfettoUiCompiledLibPath, 'devtools');
 
     logStatus(
       'moving DevTools-Perfetto integration files to a temp directory.',
@@ -59,25 +71,27 @@ class UpdatePerfettoCommand extends Command {
     await copyPath(perfettoDevToolsPath, tempPerfettoDevTools.path);
 
     logStatus('deleting existing Perfetto build');
-    final existingBuild = Directory(perfettoUiCompiledBuildPath);
+    final existingBuild = Directory(perfettoUiCompiledLibPath);
     existingBuild.deleteSync(recursive: true);
 
     logStatus('updating Perfetto build');
-    final buildLocation = argResults![_buildFlag];
+    final buildLocation = argResults![_buildFlag] as String?;
     if (buildLocation != null) {
       logStatus('using Perfetto build from $buildLocation');
       logStatus(
         'copying content from $buildLocation to $perfettoUiCompiledLibPath',
       );
-      await copyPath(buildLocation, perfettoUiCompiledBuildPath);
+      await copyPath(buildLocation, perfettoUiCompiledLibPath);
     } else {
       logStatus('cloning Perfetto from HEAD and building from source');
       final tempPerfettoClone =
           Directory.systemTemp.createTempSync('perfetto_clone');
       await processManager.runProcess(
         CliCommand.git(
-          cmd:
-              'clone https://android.googlesource.com/platform/external/perfetto',
+          [
+            'clone',
+            'https://android.googlesource.com/platform/external/perfetto',
+          ],
         ),
         workingDirectory: tempPerfettoClone.path,
       );
@@ -85,8 +99,8 @@ class UpdatePerfettoCommand extends Command {
       logStatus('installing build deps and building the Perfetto UI');
       await processManager.runAll(
         commands: [
-          CliCommand('${path.join('tools', 'install-build-deps')} --ui'),
-          CliCommand(path.join('ui', 'build')),
+          CliCommand(path.join('tools', 'install-build-deps'), ['--ui']),
+          CliCommand(path.join('ui', 'build'), []),
         ],
         workingDirectory: path.join(tempPerfettoClone.path, 'perfetto'),
       );
@@ -134,7 +148,7 @@ class UpdatePerfettoCommand extends Command {
     tempPerfettoDevTools.deleteSync(recursive: true);
 
     _updateIndexFileForDevToolsEmbedding(
-      path.join(perfettoUiCompiledBuildPath, 'index.html'),
+      path.join(perfettoUiCompiledLibPath, 'index.html'),
     );
     _updatePerfettoAssetsInPubspec();
   }
@@ -161,21 +175,20 @@ class UpdatePerfettoCommand extends Command {
   void _updatePerfettoAssetsInPubspec() {
     logStatus('updating perfetto assets in the devtools_app pubspec.yaml file');
     final repo = DevToolsRepo.getInstance();
-    final perfettoDistDir = Directory(
+    final perfettoLibDir = Directory(
       path.join(
         repo.repoPath,
         'third_party',
         'packages',
         'perfetto_ui_compiled',
         'lib',
-        'dist',
       ),
     );
 
     // Find the new perfetto version number.
     String newVersionNumber = '';
     final versionRegExp = RegExp(r'v\d+[.]\d+-[0-9a-fA-F]+');
-    final entities = perfettoDistDir.listSync();
+    final entities = perfettoLibDir.listSync();
     for (FileSystemEntity entity in entities) {
       final path = entity.path;
       final match = versionRegExp.firstMatch(path);
@@ -198,10 +211,10 @@ class UpdatePerfettoCommand extends Command {
     );
 
     // TODO(kenz): Ensure the pubspec.yaml contains an entry for each file in
-    // [perfettoDistDir].
+    // [perfettoLibDir].
 
     final perfettoAssetRegExp = RegExp(
-      r'(?<prefix>^.*packages\/perfetto_ui_compiled\/dist\/)(?<version>v\d+[.]\d+-[0-9a-fA-F]+)(?<suffix>\/.*$)',
+      r'(?<prefix>^.*packages\/perfetto_ui_compiled\/)(?<version>v\d+[.]\d+-[0-9a-fA-F]+)(?<suffix>\/.*$)',
     );
     final lines = pubspec.readAsLinesSync();
     for (int i = 0; i < lines.length; i++) {

@@ -16,17 +16,19 @@ import 'help_dialog.dart';
 // TODO(devoncarew): Show some small UI indicator when we receive stdout/stderr.
 
 class ConsolePaneHeader extends AreaPaneHeader {
-  ConsolePaneHeader({super.key, Color? backgroundColor})
+  ConsolePaneHeader({super.key})
       : super(
           title: const Text('Console'),
           roundedTopBorder: true,
           actions: [
             const ConsoleHelpLink(),
+            const SizedBox(width: densePadding),
             CopyToClipboardControl(
               dataProvider: () =>
                   serviceConnection.consoleService.stdio.value.join('\n'),
               buttonKey: ConsolePane.copyToClipboardButtonKey,
             ),
+            const SizedBox(width: densePadding),
             DeleteControl(
               buttonKey: ConsolePane.clearStdioButtonKey,
               tooltip: 'Clear console output',

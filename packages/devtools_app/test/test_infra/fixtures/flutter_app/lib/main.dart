@@ -43,7 +43,17 @@ class MyApp extends StatelessWidget {
         body: const Center(
           child: Text('Hello, World!'),
         ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: _printHello,
+          tooltip: 'Say hi',
+          child: const Icon(Icons.abc),
+        ),
       ),
     );
+  }
+
+  void _printHello() {
+    // ignore: avoid_print, for testing.
+    print('Hello!');
   }
 }

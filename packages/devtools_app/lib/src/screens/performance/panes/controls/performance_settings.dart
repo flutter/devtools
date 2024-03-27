@@ -20,28 +20,17 @@ class PerformanceSettingsDialog extends StatelessWidget {
     return DevToolsDialog(
       title: const DialogTitleText('Performance Settings'),
       includeDivider: false,
-      content: SizedBox(
-        width: defaultDialogWidth,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (serviceConnection
-                .serviceManager.connectedApp!.isFlutterAppNow!) ...[
-              FlutterSettings(
-                flutterFramesController: controller.flutterFramesController,
-              ),
-              const SizedBox(height: denseSpacing),
-            ],
-            CheckboxSetting(
-              notifier:
-                  controller.timelineEventsController.useLegacyTraceViewer,
-              title: 'Use legacy trace viewer',
-              onChanged: controller
-                  .timelineEventsController.toggleUseLegacyTraceViewer,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (serviceConnection
+              .serviceManager.connectedApp!.isFlutterAppNow!) ...[
+            FlutterSettings(
+              flutterFramesController: controller.flutterFramesController,
             ),
           ],
-        ),
+        ],
       ),
       actions: const [
         DialogCloseButton(),

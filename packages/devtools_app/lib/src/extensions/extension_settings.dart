@@ -63,15 +63,13 @@ class ExtensionSettingsDialog extends StatelessWidget {
                   'enabled\n(i.e. do not show tabs for extensions that have no '
                   'preference set).',
             ),
-            const SizedBox(height: defaultSpacing),
+            const PaddedDivider(),
             Expanded(
               child: availableExtensions.isEmpty
                   ? Center(
                       child: Text(
                         'No extensions available.',
-                        style: theme.textTheme.bodyLarge!.copyWith(
-                          color: theme.colorScheme.subtleTextColor,
-                        ),
+                        style: theme.subtleTextStyle,
                       ),
                     )
                   : _ExtensionsList(extensions: availableExtensions),

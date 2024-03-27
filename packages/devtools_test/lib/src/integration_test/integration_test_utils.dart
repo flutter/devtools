@@ -18,7 +18,14 @@ import '../test_data/sample_data.dart';
 /// Required to have multiple test cases in a file.
 Future<void> resetHistory() async {
   // ignore: avoid-dynamic, necessary here.
-  await (ui.PlatformDispatcher.instance.views.single as dynamic).resetHistory();
+  await (ui.PlatformDispatcher.instance.views.single
+          as dynamic /* EngineFlutterWindow */)
+      // This dynamic call is necessary as `EngineFlutterWindow` is declared in
+      // the web-specific implementation of the Flutter Engine, at
+      // `lib/web_ui/lib/src/engine/window.dart` in the Flutter engine
+      // repository.
+      // ignore: avoid_dynamic_calls
+      .resetHistory();
 }
 
 Future<void> pumpAndConnectDevTools(
@@ -26,14 +33,14 @@ Future<void> pumpAndConnectDevTools(
   TestApp testApp,
 ) async {
   await pumpDevTools(tester);
-  expect(find.byType(ConnectDialog), findsOneWidget);
+  expect(find.byType(ConnectInput), findsOneWidget);
   expect(find.byType(ConnectedAppSummary), findsNothing);
   expect(find.text('No client connection'), findsOneWidget);
   _verifyFooterColor(tester, null);
 
   logStatus('verify that we can connect to an app');
   await connectToTestApp(tester, testApp);
-  expect(find.byType(ConnectDialog), findsNothing);
+  expect(find.byType(ConnectInput), findsNothing);
   expect(find.byType(ConnectedAppSummary), findsOneWidget);
   expect(find.text('No client connection'), findsNothing);
   _verifyFooterColor(tester, darkColorScheme.primary);
@@ -123,8 +130,7 @@ class TestApp {
 
   factory TestApp.fromEnvironment() {
     const testArgs = String.fromEnvironment('test_args');
-    final Map<String, Object> argsMap =
-        jsonDecode(testArgs).cast<String, Object>();
+    final argsMap = (jsonDecode(testArgs) as Map).cast<String, Object>();
     return TestApp.parse(argsMap);
   }
 

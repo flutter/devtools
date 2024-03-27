@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/primitives/utils.dart';
@@ -15,6 +16,8 @@ import 'deep_links_controller.dart';
 
 const kDeeplinkTableCellDefaultWidth = 200.0;
 const kToolTipWidth = 344.0;
+const metaDataDeepLinkingFlagTag =
+    '<meta-data android:name="flutter_deeplinking_enabled" android:value="true" />';
 
 enum PlatformOS {
   android('Android'),
@@ -24,13 +27,164 @@ enum PlatformOS {
   final String description;
 }
 
-// TODO(hangyujin): Handle more domain error cases.
-enum DomainError {
-  existence('Domain doesn\'t exist'),
-  fingerprints('Fingerprints unavailable');
+class CommonError {
+  const CommonError(this.title, this.explanation, this.fixDetails);
+  final String title;
+  final String explanation;
+  final String fixDetails;
+}
 
-  const DomainError(this.description);
-  final String description;
+class DomainError extends CommonError {
+  const DomainError(title, explanation, fixDetails)
+      : super(title, explanation, fixDetails);
+
+  /// Existence of an asset link file.
+  static const existence = DomainError(
+    'Digital Asset Links JSON file does not exist',
+    'This test checks whether the assetlinks.json file, '
+        'which is used to verify the association between the app and the '
+        'domain name, exists under your domain.',
+    'Add a Digital Asset Links JSON file to all of the '
+        'failed website domains at the following location: '
+        'https://[domain.name]/.well-known/assetlinks.json. See the following recommended asset link json file. ',
+  );
+
+  /// Asset link file should define a link to this app.
+  static const appIdentifier = DomainError(
+    'Package name not found',
+    'The test checks your Digital Asset Links JSON file '
+        'for package name validation, which the mobile device '
+        'uses to verify ownership of the app.',
+    'Ensure your Digital Asset Links JSON file declares the '
+        'correct package name with the "android_app" namespace for '
+        'all of the failed website domains. Also, confirm that the '
+        'app is available in the Google Play store. See the following recommended asset link json file. ',
+  );
+
+  /// Asset link file should contain the correct fingerprint.
+  static const fingerprints = DomainError(
+    'Fingerprint validation failed',
+    'This test checks your Digital Asset Links JSON file for '
+        'sha256 fingerprint validation, which the mobile device uses '
+        'to verify ownership of the app.',
+    'Add sha256_cert_fingerprints to the Digital Asset Links JSON '
+        'file for all of the failed website domains. If the fingerprint '
+        'has already been added, make sure it\'s correct and that the '
+        '"android_app" namespace is declared on it. See the following recommended asset link json file. ',
+  );
+
+  /// Asset link file should be served with the correct content type.
+  static const contentType = DomainError(
+    'JSON content type incorrect',
+    'This test checks your Digital Asset Links JSON file for content type '
+        'validation, which defines the format of the JSON file. This allows '
+        'the mobile device to verify ownership of the app.',
+    'Ensure the content-type is "application/json" for all of the failed website domains.',
+  );
+
+  /// Asset link file should be accessible via https.
+  static const httpsAccessibility = DomainError(
+    'HTTPS accessibility check failed',
+    'This test tries to access your Digital Asset Links '
+        'JSON file over an HTTPS connection, which must be '
+        'accessible to verify ownership of the app.',
+    'Ensure your Digital Asset Links JSON file is accessible '
+        'over an HTTPS connection for all of the failed website domains (even if '
+        'the app\'s intent filter declares HTTP as the data scheme).',
+  );
+
+  /// Asset link file should be accessible with no redirects.
+  static const nonRedirect = DomainError(
+    'Domain non-redirect check failed',
+    'This test checks that your domain is accessible without '
+        'redirects. This domain must be directly accessible '
+        'to verify ownership of the app.',
+    'Ensure your domain is accessible without any redirects ',
+  );
+
+  /// Asset link domain should be valid/not malformed.
+  static const hostForm = DomainError(
+    'Host attribute is not formed properly',
+    'This test checks that your android:host attribute has a valid domain URL pattern.',
+    'Make sure the host is a properly formed web address such '
+        'as google.com or www.google.com, without "http://" or "https://".',
+  );
+
+  /// Issues that are not covered by other checks. An example that may be in this
+  /// category is Android validation API failures.
+  static const other = DomainError('Check failed', '', '');
+}
+
+/// There are currently two types of path errors, errors from intent filters and path format errors.
+class PathError extends CommonError {
+  const PathError(title, explanation, fixDetails)
+      : super(title, explanation, fixDetails);
+
+  /// Activity should have deep link enabled flag.
+  static const missingDeepLinkingFlag = PathError(
+    'Activity is missing the deep linking enabled flag',
+    'The activity must have the following metadata tag: '
+        '$metaDataDeepLinkingFlagTag',
+    '',
+  );
+
+  /// Intent filter should have action tag.
+  static const intentFilterActionView = PathError(
+    'Intent filter is missing action tag',
+    'The intent filter must have a <action android:name="android.intent.action.VIEW" />',
+    '',
+  );
+
+  /// Intent filter should have browsable tag.
+  static const intentFilterBrowsable = PathError(
+    'Intent filter is missing browsable tag',
+    'The intent filter must have a <category android:name="android.intent.category.BROWSABLE" />',
+    '',
+  );
+
+  /// Intent filter should have default tag.
+  static const intentFilterDefault = PathError(
+    'Intent filter is missing default tag',
+    'The intent filter must have a <category android:name="android.intent.category.DEFAULT" />',
+    '',
+  );
+
+  /// Intent filter should have autoVerify tag.
+  static const intentFilterAutoVerify = PathError(
+    'Intent filter is missing autoVerify tag',
+    'The intent filter must have android:autoVerify="true"',
+    '',
+  );
+
+  /// Path has format.
+  static const pathFormat = PathError(
+    'Path format',
+    '',
+    'Path must starts with “/” or “.*”',
+  );
+}
+
+Set<PathError> manifestFileErrors = <PathError>{
+  PathError.missingDeepLinkingFlag,
+  PathError.intentFilterActionView,
+  PathError.intentFilterBrowsable,
+  PathError.intentFilterDefault,
+  PathError.intentFilterAutoVerify,
+};
+
+class ValidatedLinkDatas {
+  ValidatedLinkDatas({
+    required this.all,
+    required this.byDomain,
+    required this.byPath,
+  });
+  ValidatedLinkDatas.empty()
+      : all = [],
+        byDomain = [],
+        byPath = [];
+  final List<LinkData> all;
+  final List<LinkData> byDomain;
+  final List<LinkData> byPath;
 }
 
 /// Contains all data relevant to a deep link.
@@ -41,7 +195,7 @@ class LinkData with SearchableDataMixin {
     required this.os,
     this.scheme = const <String>['http://', 'https://'],
     this.domainErrors = const <DomainError>[],
-    this.pathError = false,
+    this.pathErrors = const <PathError>{},
     this.associatedPath = const <String>[],
     this.associatedDomains = const <String>[],
   });
@@ -51,7 +205,7 @@ class LinkData with SearchableDataMixin {
   final List<PlatformOS> os;
   final List<String> scheme;
   final List<DomainError> domainErrors;
-  final bool pathError;
+  Set<PathError> pathErrors;
 
   final List<String> associatedPath;
   final List<String> associatedDomains;
@@ -90,6 +244,7 @@ class _ErrorAwareText extends StatelessWidget {
               right: defaultSpacing,
             ),
             preferBelow: true,
+            enableTapToDismiss: false,
             richMessage: WidgetSpan(
               child: SizedBox(
                 width: kToolTipWidth,
@@ -97,8 +252,8 @@ class _ErrorAwareText extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      'This m.shopping.com domain has ${link.domainErrors.length} issue to fix. '
-                      'Fixing this domain will fix ${link.associatedPath.length} associated deep links.',
+                      'This ${link.domain} domain has ${link.domainErrors.length} ${pluralize('issue', link.domainErrors.length)} to fix. '
+                      'Fixing this domain will fix ${link.associatedPath.length} associated deep ${pluralize('link', link.associatedPath.length)}.',
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.tooltipTextColor,
                         fontSize: defaultFontSize,
@@ -144,9 +299,12 @@ class _ErrorAwareText extends StatelessWidget {
 
 class DomainColumn extends ColumnData<LinkData>
     implements ColumnRenderer<LinkData>, ColumnHeaderRenderer<LinkData> {
-  DomainColumn(this.controller) : super.wide('Domain');
+  DomainColumn(this.controller)
+      : sortingOption = controller.displayOptions.domainSortingOption,
+        super.wide('Domain');
 
   DeepLinksController controller;
+  SortingOption? sortingOption;
 
   @override
   Widget? buildHeader(
@@ -192,16 +350,22 @@ class DomainColumn extends ColumnData<LinkData>
   int compare(LinkData a, LinkData b) => _compareLinkData(
         a,
         b,
-        sortingOption: controller.displayOptions.domainSortingOption,
+        sortingOption: sortingOption,
         compareDomain: true,
       );
+
+  @override
+  String get config => '$title $sortingOption';
 }
 
 class PathColumn extends ColumnData<LinkData>
     implements ColumnRenderer<LinkData>, ColumnHeaderRenderer<LinkData> {
-  PathColumn(this.controller) : super.wide('Path');
+  PathColumn(this.controller)
+      : sortingOption = controller.displayOptions.pathSortingOption,
+        super.wide('Path');
 
   DeepLinksController controller;
+  SortingOption? sortingOption;
 
   @override
   Widget? buildHeader(
@@ -236,7 +400,7 @@ class PathColumn extends ColumnData<LinkData>
     VoidCallback? onPressed,
   }) {
     return _ErrorAwareText(
-      isError: dataObject.pathError,
+      isError: dataObject.pathErrors.isNotEmpty,
       controller: controller,
       text: dataObject.path,
       link: dataObject,
@@ -247,9 +411,12 @@ class PathColumn extends ColumnData<LinkData>
   int compare(LinkData a, LinkData b) => _compareLinkData(
         a,
         b,
-        sortingOption: controller.displayOptions.pathSortingOption,
+        sortingOption: sortingOption,
         compareDomain: false,
       );
+
+  @override
+  String get config => '$title $sortingOption';
 }
 
 class NumberOfAssociatedPathColumn extends ColumnData<LinkData> {
@@ -373,7 +540,7 @@ class StatusColumn extends ColumnData<LinkData>
   String getValue(LinkData dataObject) {
     if (dataObject.domainErrors.isNotEmpty) {
       return 'Failed domain checks';
-    } else if (dataObject.pathError) {
+    } else if (dataObject.pathErrors.isNotEmpty) {
       return 'Failed path checks';
     } else {
       return 'No issues found';
@@ -422,7 +589,8 @@ class StatusColumn extends ColumnData<LinkData>
     bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
-    if (dataObject.domainErrors.isNotEmpty || dataObject.pathError) {
+    if (dataObject.domainErrors.isNotEmpty ||
+        dataObject.pathErrors.isNotEmpty) {
       return Text(
         getValue(dataObject),
         overflow: TextOverflow.ellipsis,
@@ -550,8 +718,8 @@ int _compareLinkData(
         if (a.domainErrors.isNotEmpty) return -1;
         if (b.domainErrors.isNotEmpty) return 1;
       } else {
-        if (a.pathError) return -1;
-        if (b.pathError) return 1;
+        if (a.pathErrors.isNotEmpty) return -1;
+        if (b.pathErrors.isNotEmpty) return 1;
       }
       return 0;
     case SortingOption.aToZ:

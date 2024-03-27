@@ -11,24 +11,23 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/globals.dart';
 import '../../../../shared/memory/class_name.dart';
+import '../../../../shared/memory/heap_graph_loader.dart';
 import '../../../../shared/utils.dart';
 import '../../panes/chart/primitives.dart';
 import '../../panes/diff/controller/diff_pane_controller.dart';
 import '../../panes/profile/profile_pane_controller.dart';
 import '../../panes/tracing/tracing_pane_controller.dart';
-import '../../shared/heap/model.dart';
 import '../../shared/primitives/memory_timeline.dart';
 import 'memory_protocol.dart';
 
 class MemoryFeatureControllers {
-  /// [diffPaneController] is passed for testability.
+  /// Controllers are passed for testability.
   MemoryFeatureControllers(
     DiffPaneController? diffPaneController,
     ProfilePaneController? profilePaneController,
   ) {
     memoryTimeline = MemoryTimeline();
-    diff =
-        diffPaneController ?? DiffPaneController(SnapshotTaker(memoryTimeline));
+    diff = diffPaneController ?? _createDiffController();
     profile = profilePaneController ?? ProfilePaneController();
   }
 
@@ -37,9 +36,12 @@ class MemoryFeatureControllers {
   late MemoryTimeline memoryTimeline;
   TracingPaneController tracing = TracingPaneController();
 
+  DiffPaneController _createDiffController() =>
+      DiffPaneController(HeapGraphLoaderRuntime(memoryTimeline));
+
   void reset() {
     diff.dispose();
-    diff = DiffPaneController(SnapshotTaker(memoryTimeline));
+    diff = _createDiffController();
 
     profile.dispose();
     profile = ProfilePaneController();
@@ -67,17 +69,35 @@ class MemoryFeatureControllers {
 class MemoryController extends DisposableController
     with AutoDisposeControllerMixin {
   MemoryController({
-    DiffPaneController? diffPaneController,
-    ProfilePaneController? profilePaneController,
+    @visibleForTesting DiffPaneController? diffPaneController,
+    @visibleForTesting ProfilePaneController? profilePaneController,
   }) {
     controllers = MemoryFeatureControllers(
       diffPaneController,
       profilePaneController,
     );
+    shareClassFilterBetweenProfileAndDiff();
   }
 
   /// Sub-controllers of memory controller.
   late final MemoryFeatureControllers controllers;
+
+  void shareClassFilterBetweenProfileAndDiff() {
+    controllers.diff.derived.applyFilter(
+      controllers.profile.classFilter.value,
+    );
+
+    controllers.profile.classFilter.addListener(() {
+      controllers.diff.derived
+          .applyFilter(controllers.profile.classFilter.value);
+    });
+
+    controllers.diff.core.classFilter.addListener(() {
+      controllers.profile.setFilter(
+        controllers.diff.core.classFilter.value,
+      );
+    });
+  }
 
   /// Index of the selected feature tab.
   ///
@@ -210,7 +230,7 @@ class MemoryController extends DisposableController
 
     // TODO(terry): Used to detect stream being closed from the
     // memoryController dispose method.  Needed when a HOT RELOAD
-    // will call dispose however, spinup (initState) doesn't seem
+    // will call dispose however, initState doesn't seem
     // to happen David is working on scaffolding.
     _memoryTrackerController.stream.listen(
       (_) {},
@@ -290,7 +310,7 @@ class MemoryController extends DisposableController
     }
   }
 
-  /// Detect stale isolates (sentinaled), may happen after a hot restart.
+  /// Detect stale isolates (sentineled), may happen after a hot restart.
   Future<bool> isIsolateLive(String isolateId) async {
     try {
       final service = serviceConnection.serviceManager.service!;

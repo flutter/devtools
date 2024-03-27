@@ -11,6 +11,7 @@ import '../../shared/screen.dart';
 import '../../shared/utils.dart';
 import 'isolate_statistics/isolate_statistics_view.dart';
 import 'object_inspector/object_inspector_view.dart';
+import 'process_memory/process_memory_view.dart';
 import 'vm_developer_tools_controller.dart';
 import 'vm_statistics/vm_statistics_view.dart';
 
@@ -45,16 +46,18 @@ class VMDeveloperToolsScreen extends Screen {
       VMDeveloperToolsController.showIsolateSelector;
 
   @override
-  Widget build(BuildContext context) => const VMDeveloperToolsScreenBody();
+  Widget buildScreenBody(BuildContext context) =>
+      const VMDeveloperToolsScreenBody();
 }
 
 class VMDeveloperToolsScreenBody extends StatefulWidget {
   const VMDeveloperToolsScreenBody({super.key});
 
-  static List<VMDeveloperView> views = [
+  static final views = <VMDeveloperView>[
     const VMStatisticsView(),
     const IsolateStatisticsView(),
     ObjectInspectorView(),
+    const VMProcessMemoryView(),
   ];
 
   @override

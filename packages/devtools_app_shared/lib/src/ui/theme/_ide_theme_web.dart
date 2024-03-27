@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
-import 'package:web/helpers.dart';
+import 'package:web/web.dart';
 
 import '../../utils/url/url.dart';
 import '../../utils/utils.dart';

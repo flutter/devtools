@@ -40,8 +40,8 @@ class PubGetCommand extends Command {
     final processManager = ProcessManager();
     final packages = repo.getPackages();
 
-    final upgrade = argResults![_upgradeFlag];
-    final onlyMainPackages = argResults![_onlyMainFlag];
+    final upgrade = argResults![_upgradeFlag] as bool;
+    final onlyMainPackages = argResults![_onlyMainFlag] as bool;
     final command = upgrade ? 'upgrade' : 'get';
 
     log.stdout('Running flutter pub $command...');
@@ -59,7 +59,7 @@ class PubGetCommand extends Command {
 
       final process = await processManager.runProcess(
         CliCommand.flutter(
-          'pub $command',
+          ['pub', command],
           // Run all so we can see the full set of results instead of stopping
           // on the first error.
           throwOnException: false,

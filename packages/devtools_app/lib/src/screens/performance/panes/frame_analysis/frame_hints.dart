@@ -5,7 +5,6 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../service/service_extensions.dart' as extensions;
 import '../../../../shared/analytics/constants.dart' as gac;
@@ -13,7 +12,6 @@ import '../../../../shared/common_widgets.dart';
 import '../../../../shared/connected_app.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/utils.dart';
-import '../../performance_controller.dart';
 import '../../performance_utils.dart';
 import '../controls/enhance_tracing/enhance_tracing.dart';
 import '../controls/enhance_tracing/enhance_tracing_controller.dart';
@@ -25,18 +23,18 @@ class FrameHints extends StatelessWidget {
     Key? key,
     required this.frameAnalysis,
     required this.enhanceTracingController,
+    required this.displayRefreshRate,
   }) : super(key: key);
 
   final FrameAnalysis frameAnalysis;
 
   final EnhanceTracingController enhanceTracingController;
 
+  final double displayRefreshRate;
+
   @override
   Widget build(BuildContext context) {
-    final performanceController = Provider.of<PerformanceController>(context);
     final frame = frameAnalysis.frame;
-    final displayRefreshRate =
-        performanceController.flutterFramesController.displayRefreshRate.value;
     final showUiJankHints = frame.isUiJanky(displayRefreshRate);
     final showRasterJankHints = frame.isRasterJanky(displayRefreshRate);
     if (!(showUiJankHints || showRasterJankHints)) {
@@ -59,7 +57,7 @@ class FrameHints extends StatelessWidget {
             if (intrinsicOperationsCount > 0)
               IntrinsicOperationsHint(intrinsicOperationsCount),
           ]
-        : [];
+        : <Widget>[];
     final rasterHints = showRasterJankHints
         ? [
             const Text('Raster Jank Detected'),
@@ -71,7 +69,7 @@ class FrameHints extends StatelessWidget {
             const SizedBox(height: denseSpacing),
             const RasterStatsHint(),
           ]
-        : [];
+        : <Widget>[];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

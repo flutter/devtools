@@ -10,7 +10,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_extensions/api.dart';
 import 'package:devtools_extensions/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:web/helpers.dart';
+import 'package:web/web.dart';
 
 import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';
@@ -131,9 +131,12 @@ class _ExtensionIFrameController extends DisposableController
           // request or show a more permanent error UI where we guide them to
           // file an issue against the extension package.
           notificationService.pushError(
-            'Something went wrong.'
-            ' ${embeddedExtensionController.extensionConfig.name} extension is '
+            'Something went wrong. The '
+            '${embeddedExtensionController.extensionConfig.name} extension is '
             'not ready.',
+            reportExplanation: 'The extension did not respond to multiple '
+                'DevToolsExtensionEventType.ping events with the expected '
+                'DevToolsExtensionEventType.pong event.',
           );
         }
       }),
@@ -270,8 +273,9 @@ class _ExtensionIFrameController extends DisposableController
         }
         break;
       case DevToolsExtensionEventType.vmServiceConnection:
-        final service = serviceConnection.serviceManager.service;
-        updateVmServiceConnection(uri: service?.wsUri);
+        updateVmServiceConnection(
+          uri: serviceConnection.serviceManager.serviceUri,
+        );
         break;
       case DevToolsExtensionEventType.showNotification:
         _handleShowNotification(event);

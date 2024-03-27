@@ -786,10 +786,10 @@ mixin SearchableMixin<T> {
 }
 
 /// Callback when item in the drop-down list is selected.
-typedef SelectAutoComplete = Function(String selection);
+typedef SelectAutoComplete = void Function(String selection);
 
 /// Callback to handle highlighting item in the drop-down list.
-typedef HighlightAutoComplete = Function(
+typedef HighlightAutoComplete = void Function(
   AutoCompleteSearchControllerMixin controller,
   bool directionDown,
 );
@@ -1029,7 +1029,8 @@ class StatelessSearchField<T extends SearchableDataMixin>
 
   @override
   Widget build(BuildContext context) {
-    final textStyle = style ?? Theme.of(context).textTheme.bodyMedium;
+    final theme = Theme.of(context);
+    final textStyle = style ?? theme.regularTextStyle;
 
     final searchField = TextField(
       key: searchFieldKey,
@@ -1060,6 +1061,7 @@ class StatelessSearchField<T extends SearchableDataMixin>
             ),
             border: const OutlineInputBorder(),
             labelText: label,
+            labelStyle: theme.subtleTextStyle,
             // TODO(kenz): add the search icon to the search field.
             prefix: prefix != null
                 ? Row(
@@ -1209,7 +1211,7 @@ class _AutoCompleteSearchFieldState extends State<AutoCompleteSearchField>
             if (widget.overlayXPositionBuilder != null) {
               widget.controller.xPosition = widget.overlayXPositionBuilder!(
                 value,
-                widget.style ?? Theme.of(context).textTheme.titleMedium,
+                widget.style ?? Theme.of(context).regularTextStyle,
               );
             }
           },
@@ -1387,7 +1389,7 @@ class SearchNavigationControls extends StatelessWidget {
                     child: isSearchInProgress
                         ? SmallCircularProgressIndicator(
                             valueColor: AlwaysStoppedAnimation<Color?>(
-                              Theme.of(context).textTheme.bodyMedium!.color,
+                              Theme.of(context).regularTextStyle.color,
                             ),
                           )
                         : const SizedBox(),
@@ -1403,12 +1405,12 @@ class SearchNavigationControls extends StatelessWidget {
                   ),
                 ),
                 inputDecorationSuffixButton(
-                  Icons.keyboard_arrow_up,
-                  numMatches > 1 ? controller.previousMatch : null,
+                  icon: Icons.keyboard_arrow_up,
+                  onPressed: numMatches > 1 ? controller.previousMatch : null,
                 ),
                 inputDecorationSuffixButton(
-                  Icons.keyboard_arrow_down,
-                  numMatches > 1 ? controller.nextMatch : null,
+                  icon: Icons.keyboard_arrow_down,
+                  onPressed: numMatches > 1 ? controller.nextMatch : null,
                 ),
                 if (onClose != null) closeSearchDropdownButton(onClose),
               ],

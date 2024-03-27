@@ -82,7 +82,11 @@ void main() {
             screens: const [_screen1, _screen2],
           ),
           debugger: mockDebuggerController,
-          analytics: AnalyticsController(enabled: false, firstRun: false),
+          analytics: AnalyticsController(
+            enabled: false,
+            firstRun: false,
+            consentMessage: 'fake message',
+          ),
           releaseNotes: ReleaseNotesController(),
         ),
       );
@@ -111,7 +115,7 @@ class _TestScreen extends Screen {
   final Key key;
 
   @override
-  Widget build(BuildContext context) {
+  Widget buildScreenBody(BuildContext context) {
     return SizedBox(key: key);
   }
 }

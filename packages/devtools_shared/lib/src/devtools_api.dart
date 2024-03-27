@@ -5,6 +5,15 @@
 /// All server APIs prefix:
 const apiPrefix = 'api/';
 
+/// Key used for any request or response to specify a value argument.
+const apiParameterValueKey = 'value';
+
+/// Notifies the DevTools server when a DevTools app client connects to a new
+/// VM service.
+const apiNotifyForVmServiceConnection =
+    '${apiPrefix}notifyForVmServiceConnection';
+const apiParameterVmServiceConnected = 'connected';
+
 /// Flutter GA properties APIs:
 const apiGetFlutterGAEnabled = '${apiPrefix}getFlutterGAEnabled';
 const apiGetFlutterGAClientId = '${apiPrefix}getFlutterGAClientId';
@@ -14,6 +23,10 @@ const apiResetDevTools = '${apiPrefix}resetDevTools';
 const apiGetDevToolsFirstRun = '${apiPrefix}getDevToolsFirstRun';
 const apiGetDevToolsEnabled = '${apiPrefix}getDevToolsEnabled';
 const apiSetDevToolsEnabled = '${apiPrefix}setDevToolsEnabled';
+
+/// package:unified_analytics properties APIs:
+const apiGetConsentMessage = '${apiPrefix}getConsentMessage';
+const apiMarkConsentMessageAsShown = '${apiPrefix}markConsentMessageAsShown';
 
 /// Property name to apiSetDevToolsEnabled the DevToolsEnabled is the name used
 /// in queryParameter:
@@ -62,6 +75,11 @@ const baseAppSizeFilePropertyName = 'appSizeBase';
 
 const testAppSizeFilePropertyName = 'appSizeTest';
 
+abstract class DtdApi {
+  static const apiGetDtdUri = '${apiPrefix}getDtdUri';
+  static const uriPropertyName = 'dtdUri';
+}
+
 abstract class ExtensionsApi {
   /// Serves any available extensions and returns a list of their configurations
   /// to DevTools.
@@ -71,6 +89,8 @@ abstract class ExtensionsApi {
   /// The property name for the query parameter passed along with
   /// extension-related requests to the server that describes the package root
   /// for the app whose extensions are being queried.
+  ///
+  /// This field is a file:// URI string and NOT a path.
   static const extensionRootPathPropertyName = 'rootPath';
 
   /// The property name for the response that the server sends back upon

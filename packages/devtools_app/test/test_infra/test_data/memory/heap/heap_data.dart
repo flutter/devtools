@@ -2,28 +2,82 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
-import 'package:devtools_app/src/shared/memory/adapted_heap_data.dart';
+import 'package:devtools_app/src/shared/memory/heap_graph_loader.dart';
 import 'package:vm_service/vm_service.dart';
 
 const _dataDir = 'test/test_infra/test_data/memory/heap/';
 
-typedef HeapLoader = Future<AdaptedHeapData> Function();
+abstract class HeapTest {
+  HeapTest({required this.appClassName});
 
-class GoldenHeapTest {
+  /// The name of the class that represents the app.
+  final String appClassName;
+
+  Future<HeapSnapshotGraph> loadHeap();
+}
+
+class GoldenHeapTest extends HeapTest {
   GoldenHeapTest({
+    required super.appClassName,
     required this.fileName,
-    required this.appClassName,
   });
 
   final String fileName;
-  final String appClassName;
 
-  /// Loads the heap data from a file.
-  ///
-  /// Format is format used by [NativeRuntime.writeHeapSnapshotToFile].
-  Future<AdaptedHeapData> loadHeap() => heapFromFile('$_dataDir$fileName');
+  @override
+  Future<HeapSnapshotGraph> loadHeap() async {
+    final (graph, _) =
+        await HeapGraphLoaderFile.fromPath('$_dataDir$fileName').load();
+    return graph;
+  }
+}
+
+class MockedHeapTest extends HeapTest {
+  MockedHeapTest({
+    required super.appClassName,
+  });
+
+  @override
+  Future<HeapSnapshotGraph> loadHeap() async {
+    throw UnimplementedError();
+  }
+}
+
+/// Provides test snapshots from pre-saved goldens.
+class HeapGraphLoaderGoldens implements HeapGraphLoader {
+  int _nextIndex = 0;
+
+  @override
+  Future<(HeapSnapshotGraph, DateTime)> load() async {
+    // This delay is needed for UI to start showing the progress indicator.
+    await Future.delayed(const Duration(milliseconds: 100));
+    final result = await goldenHeapTests[_nextIndex].loadHeap();
+
+    _nextIndex = (_nextIndex + 1) % goldenHeapTests.length;
+
+    return (result, DateTime.now());
+  }
+}
+
+typedef HeapProvider = Future<HeapSnapshotGraph> Function();
+
+/// Provides test snapshots, provided in constructor.
+class HeapGraphLoaderProvided implements HeapGraphLoader {
+  HeapGraphLoaderProvided(this.graphs) : assert(graphs.isNotEmpty);
+
+  List<HeapProvider> graphs;
+
+  int _nextIndex = 0;
+
+  @override
+  Future<(HeapSnapshotGraph, DateTime)> load() async {
+    // This delay is needed for UI to start showing the progress indicator.
+    await Future.delayed(const Duration(milliseconds: 100));
+    final result = graphs[_nextIndex]();
+    _nextIndex = (_nextIndex + 1) % graphs.length;
+
+    return (await result, DateTime.now());
+  }
 }
 
 List<GoldenHeapTest> goldenHeapTests = <GoldenHeapTest>[
@@ -44,13 +98,3 @@ List<GoldenHeapTest> goldenHeapTests = <GoldenHeapTest>[
     appClassName: 'MyApp',
   ),
 ];
-
-Future<AdaptedHeapData> heapFromFile(
-  String fileName,
-) async {
-  final file = File(fileName);
-  final bytes = await file.readAsBytes();
-  final data = bytes.buffer.asByteData();
-  final graph = HeapSnapshotGraph.fromChunks([data]);
-  return AdaptedHeapData.fromHeapSnapshot(graph);
-}

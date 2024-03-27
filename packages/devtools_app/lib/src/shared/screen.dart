@@ -160,7 +160,6 @@ abstract class Screen {
     this.requiresDebugBuild = false,
     this.requiresVmDeveloperMode = false,
     this.worksOffline = false,
-    this.shouldShowForFlutterVersion,
     this.showFloatingDebuggerControls = true,
   }) : assert((title == null) || (titleGenerator == null));
 
@@ -188,7 +187,6 @@ abstract class Screen {
           requiresDebugBuild: requiresDebugBuild,
           requiresVmDeveloperMode: requiresVmDeveloperMode,
           worksOffline: worksOffline,
-          shouldShowForFlutterVersion: shouldShowForFlutterVersion,
           showFloatingDebuggerControls: showFloatingDebuggerControls,
           title: title,
           titleGenerator: titleGenerator,
@@ -280,11 +278,6 @@ abstract class Screen {
   /// Whether this screen works offline and should show in offline mode even if conditions are not met.
   final bool worksOffline;
 
-  /// A callback that will determine whether or not this screen should be
-  /// available for a given flutter version.
-  final bool Function(FlutterVersion? currentFlutterVersion)?
-      shouldShowForFlutterVersion;
-
   /// Whether this screen should display the isolate selector in the status
   /// line.
   ///
@@ -293,10 +286,19 @@ abstract class Screen {
   ValueListenable<bool> get showIsolateSelector =>
       const FixedValueListenable<bool>(false);
 
-  /// The id to use to synthesize a help URL.
+  /// The documentation URL to use for this screen.
+  ///
+  /// If this returns a null value, [docPageId] will be used to create a
+  /// documentation URL.
+  String? get docsUrl => null;
+
+  /// The id to use to create a documentation URL for this screen.
   ///
   /// If the screen does not have a custom documentation page, this property
   /// should return `null`.
+  ///
+  /// If [docsUrl] returns a non-null value, [docsUrl] will be used instead of
+  /// creating a documentation url using [docPageId].
   String? get docPageId => null;
 
   double approximateTabWidth(
@@ -378,8 +380,36 @@ abstract class Screen {
     );
   }
 
-  /// Builds the body to display for this tab.
-  Widget build(BuildContext context);
+  /// Builds the body to display for this screen, accounting for screen
+  /// requirements like [requiresConnection].
+  ///
+  /// This method can be overridden to provide different build logic for a
+  /// [Screen] subclass.
+  Widget build(BuildContext context) {
+    if (!requiresConnection) {
+      final connected = serviceConnection.serviceManager.hasConnection &&
+          serviceConnection.serviceManager.connectedAppInitialized;
+      // Do not use the disconnected body in offline mode, because the default
+      // [buildScreenBody] should be used for offline states.
+      if (!connected && !offlineController.offlineMode.value) {
+        final disconnectedBody = buildDisconnectedScreenBody(context);
+        if (disconnectedBody != null) return disconnectedBody;
+      }
+    }
+    return buildScreenBody(context);
+  }
+
+  /// Builds the default body to display for this screen.
+  ///
+  /// This method must be implemented by subclasses.
+  Widget buildScreenBody(BuildContext context);
+
+  /// Builds the body to display for this screen when in a disconnected state,
+  /// if this differs from the default body provided by [buildScreenBody].
+  ///
+  /// This method will only be called when [requiresConnection] is not true,
+  /// and when DevTools is in a disconnected state.
+  Widget? buildDisconnectedScreenBody(BuildContext context) => null;
 
   /// Build a widget to display in the status line.
   ///
@@ -445,16 +475,6 @@ bool shouldShowScreen(Screen screen) {
   if (screen.requiresVmDeveloperMode) {
     if (!preferences.vmDeveloperModeEnabled.value) {
       _log.finest('screen requires vm developer mode: returning false');
-      return false;
-    }
-  }
-  if (screen.shouldShowForFlutterVersion != null) {
-    if (serviceConnection.serviceManager.connectedApp!.isFlutterAppNow ==
-            true &&
-        !screen.shouldShowForFlutterVersion!(
-          serviceConnection.serviceManager.connectedApp!.flutterVersionNow,
-        )) {
-      _log.finest('screen has flutter version restraints: returning false');
       return false;
     }
   }

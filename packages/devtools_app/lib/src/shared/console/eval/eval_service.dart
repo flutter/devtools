@@ -10,7 +10,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../service/vm_service_wrapper.dart';
 import '../../globals.dart';
-import '../../memory/adapted_heap_object.dart';
+import '../../memory/heap_object.dart';
 import '../../vm_utils.dart';
 import '../primitives/scope.dart';
 
@@ -78,14 +78,12 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
 
     final isolateId = isolateRef.id!;
 
-    final scope = await _scopeIfSupported(isolateId);
-
     Future<Response> eval() async =>
         await serviceConnection.serviceManager.service!.evaluate(
           isolateId,
           (await isolate.isolate)!.rootLib!.id!,
           expressionText,
-          scope: scope,
+          scope: scope.value(isolateId: isolateId),
         );
 
     return await _evalWithVariablesRefresh(eval, isolateId);
@@ -166,44 +164,19 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
       );
     }
 
-    final scope = await _scopeIfSupported(isolateRefId);
-
     Future<Response> evalFunction() => _service.evaluateInFrame(
           isolateRefId,
           frame.index!,
           expression,
           disableBreakpoints: true,
-          scope: scope,
+          scope: scope.value(isolateId: isolateRefId),
         );
 
     return await _evalWithVariablesRefresh(evalFunction, isolateRefId);
   }
 
-  Future<Map<String, String>?> _scopeIfSupported(String isolateRefId) async {
-    if (!isScopeSupported()) return null;
-
-    return scope.value(isolateId: isolateRefId);
-  }
-
-  /// If scope is supported, returns true.
-  ///
-  /// If [emitWarningToConsole] and scope is not supported, emits warning message to console.
-  bool isScopeSupported({bool emitWarningToConsole = false}) {
-    // Web does not support scopes yet.
-    final isWeb =
-        serviceConnection.serviceManager.connectedApp?.isDartWebAppNow ?? true;
-    if (isWeb && emitWarningToConsole) {
-      serviceConnection.consoleService.appendStdio(
-        'Scope variables are not supported for web applications.',
-      );
-
-      return false;
-    }
-    return true;
-  }
-
   Future<InstanceRef?> findObject(
-    AdaptedHeapObject object,
+    HeapObject object,
     IsolateRef isolateRef,
   ) async {
     final isolateId = isolateRef.id!;
@@ -211,7 +184,7 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
     final theClass = (await serviceConnection.serviceManager.service!
             .getClassList(isolateId))
         .classes!
-        .firstWhereOrNull((ref) => object.heapClass.matches(ref));
+        .firstWhereOrNull((ref) => object.className?.matches(ref) ?? false);
 
     return await findInstance(isolateId, theClass?.id, object.code);
   }

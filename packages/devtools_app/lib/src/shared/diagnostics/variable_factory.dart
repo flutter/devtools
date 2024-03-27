@@ -11,7 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:vm_service/vm_service.dart';
 
-import '../memory/adapted_heap_data.dart';
+import '../memory/heap_object.dart';
 import '../vm_utils.dart';
 import 'dart_object_node.dart';
 import 'diagnostics_node.dart';
@@ -342,18 +342,19 @@ List<DartObjectNode> createVariablesForMap(
   // representation.
   final hasPrimitiveKey = associations.fold<bool>(
     false,
-    (p, e) => p || isPrimitiveInstanceKind(e.key.kind),
+    (p, e) => p || isPrimitiveInstanceKind((e.key as InstanceRef).kind),
   );
   for (var i = 0; i < associations.length; i++) {
     final association = associations[i];
+    final associationKey = association.key;
 
-    if (association.key is! InstanceRef) {
+    if (associationKey is! InstanceRef) {
       continue;
     }
     if (hasPrimitiveKey) {
       variables.add(
         DartObjectNode.fromValue(
-          name: association.key.valueAsString,
+          name: associationKey.valueAsString,
           value: association.value,
           isolateRef: isolateRef,
         ),
@@ -361,7 +362,7 @@ List<DartObjectNode> createVariablesForMap(
     } else {
       final key = DartObjectNode.fromValue(
         name: '[key]',
-        value: association.key,
+        value: associationKey,
         isolateRef: isolateRef,
         artificialName: true,
       );
@@ -478,7 +479,7 @@ List<DartObjectNode> createVariablesForSets(
 List<DartObjectNode> createVariablesForList(
   Instance instance,
   IsolateRef? isolateRef,
-  HeapObjectSelection? heapSelection,
+  HeapObject? heapSelection,
 ) {
   final variables = <DartObjectNode>[];
   final elements = instance.elements ?? [];

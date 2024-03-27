@@ -4,7 +4,8 @@
 
 export 'src/ui/common.dart';
 export 'src/ui/dialogs.dart';
-export 'src/ui/split.dart';
+export 'src/ui/flex_split_column.dart';
+export 'src/ui/split_pane.dart';
 export 'src/ui/theme/ide_theme.dart';
 export 'src/ui/theme/theme.dart';
 export 'src/ui/ui_utils.dart';

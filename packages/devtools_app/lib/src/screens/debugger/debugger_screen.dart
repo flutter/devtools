@@ -17,7 +17,6 @@ import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
 import '../../shared/diagnostics/primitives/source_location.dart';
-import '../../shared/flex_split_column.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/listenable.dart';
 import '../../shared/primitives/utils.dart';
@@ -74,7 +73,8 @@ class DebuggerScreen extends Screen {
       const FixedValueListenable<bool>(true);
 
   @override
-  Widget build(BuildContext context) => const _DebuggerScreenBodyWrapper();
+  Widget buildScreenBody(BuildContext context) =>
+      const _DebuggerScreenBodyWrapper();
 
   @override
   Widget buildStatus(BuildContext context) {
@@ -149,7 +149,7 @@ class DebuggerScreenBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Split(
+    return SplitPane(
       axis: Axis.horizontal,
       initialFractions: const [0.25, 0.75],
       children: [
@@ -239,6 +239,7 @@ class _BreakpointsWindowActions extends StatelessWidget {
               message: 'Remove all breakpoints',
               child: ToolbarAction(
                 icon: Icons.delete,
+                size: defaultIconSize,
                 onPressed: breakpoints.isNotEmpty
                     ? () => unawaited(breakpointManager.clearBreakpoints())
                     : null,
@@ -278,7 +279,7 @@ class DebuggerSourceAndControls extends StatelessWidget {
               // ignore: prefer-conditional-expression
               if (visible) {
                 // TODO(devoncarew): Animate this opening and closing.
-                return Split(
+                return SplitPane(
                   axis: Axis.horizontal,
                   initialFractions: const [0.7, 0.3],
                   children: [

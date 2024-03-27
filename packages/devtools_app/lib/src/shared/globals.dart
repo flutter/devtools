@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/utils.dart';
+import 'package:flutter/foundation.dart';
 
 import '../extensions/extension_service.dart';
 import '../screens/debugger/breakpoint_manager.dart';
-import '../service/dtd_manager.dart';
 import '../service/service_manager.dart';
 import '../shared/banner_messages.dart';
 import '../shared/notifications.dart';
@@ -14,7 +15,7 @@ import 'console/eval/eval_service.dart';
 import 'environment_parameters/environment_parameters_base.dart';
 import 'framework_controller.dart';
 import 'offline_mode.dart';
-import 'preferences.dart';
+import 'preferences/preferences.dart';
 import 'primitives/message_bus.dart';
 import 'primitives/storage.dart';
 import 'scripts/script_manager.dart';
@@ -69,4 +70,20 @@ bool get integrationTestMode => _integrationTestMode;
 bool _integrationTestMode = false;
 void setIntegrationTestMode() {
   _integrationTestMode = true;
+}
+
+/// Whether DevTools is being run in a test environment.
+bool get testMode => _testMode;
+bool _testMode = false;
+void setTestMode() {
+  _testMode = true;
+}
+
+/// Whether DevTools is being run as a stager app.
+bool get stagerMode => _stagerMode;
+bool _stagerMode = false;
+void setStagerMode() {
+  if (!kReleaseMode) {
+    _stagerMode = true;
+  }
 }

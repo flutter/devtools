@@ -17,6 +17,10 @@ import '../dart_tooling_api.dart';
 import '../vs_code_api.dart';
 import 'vs_code_api.dart';
 
+// TODO(https://github.com/flutter/devtools/issues/7055): migrate away from
+// postMessage and use the Dart Tooling Daemon to communicate between Dart
+// tooling surfaces.
+
 /// Whether to enable verbose logging for postMessage communication.
 ///
 /// This is useful for debugging when running inside VS Code.
@@ -41,7 +45,7 @@ class DartToolingApiImpl implements DartToolingApi {
     if (_enablePostMessageVerboseLogging) {
       setDevToolsLoggingLevel(verboseLoggingLevel);
     }
-    final postMessageController = StreamController();
+    final postMessageController = StreamController<Object?>();
     postMessageController.stream.listen((message) {
       // TODO(dantup): Using fine here doesn't work even though the
       // `setDevToolsLoggingLevel` call above seems like it should show finest

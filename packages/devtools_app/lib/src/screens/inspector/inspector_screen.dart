@@ -43,7 +43,7 @@ class InspectorScreen extends Screen {
   String get docPageId => screenId;
 
   @override
-  Widget build(BuildContext context) => const InspectorScreenBody();
+  Widget buildScreenBody(BuildContext context) => const InspectorScreenBody();
 }
 
 class InspectorScreenBody extends StatefulWidget {
@@ -152,8 +152,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       screenId: InspectorScreen.id,
     );
 
-    final splitAxis = Split.axisFor(context, 0.85);
-    final widgetTrees = Split(
+    final splitAxis = SplitPane.axisFor(context, 0.85);
+    final widgetTrees = SplitPane(
       axis: splitAxis,
       initialFractions: const [0.33, 0.67],
       children: [
@@ -360,16 +360,14 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
             const InspectorDefaultDetailsViewOption(),
             const SizedBox(height: denseSpacing),
             ...dialogSubHeader(theme, 'Package Directories'),
-            Text(
-              'Widgets in these directories will show up in your summary tree.',
-              style: theme.subtleTextStyle,
-            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  '(e.g. /absolute/path/to/myPackage)',
-                  style: theme.subtleTextStyle,
+                Expanded(
+                  child: Text(
+                    'Widgets in these directories will show up in your summary tree.',
+                    style: theme.subtleTextStyle,
+                  ),
                 ),
                 MoreInfoLink(
                   url: DocLinks.inspectorPackageDirectories.value,
@@ -378,6 +376,10 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
                       gac.InspectorDocs.packageDirectoriesDocs.name,
                 ),
               ],
+            ),
+            Text(
+              '(e.g. /absolute/path/to/myPackage/)',
+              style: theme.subtleTextStyle,
             ),
             const SizedBox(height: denseSpacing),
             const Expanded(
@@ -419,9 +421,12 @@ class InspectorSummaryTreeControls extends StatelessWidget {
           context,
           Row(
             children: <Widget>[
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: denseSpacing),
-                child: Text('Widget Tree'),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
+                child: Text(
+                  'Widget Tree',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
               ),
               ...!isSearchVisible
                   ? [
@@ -456,7 +461,7 @@ class InspectorSummaryTreeControls extends StatelessWidget {
 
   Container _controlsContainer(BuildContext context, Widget child) {
     return Container(
-      height: defaultHeaderHeight(isDense: isDense()),
+      height: defaultHeaderHeight,
       decoration: BoxDecoration(
         border: Border(
           bottom: defaultBorderSide(Theme.of(context)),
@@ -488,7 +493,7 @@ class ErrorNavigator extends StatelessWidget {
 
   final int? errorIndex;
 
-  final Function(int) onSelectError;
+  final void Function(int) onSelectError;
 
   @override
   Widget build(BuildContext context) {

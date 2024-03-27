@@ -37,7 +37,7 @@ enum FilteringTask {
   reuse,
 }
 
-typedef ApplyFilterCallback = Function(ClassFilter);
+typedef ApplyFilterCallback = void Function(ClassFilter);
 
 @immutable
 class ClassFilter {
@@ -78,11 +78,19 @@ class ClassFilter {
     return displayString;
   }
 
-  bool equals(ClassFilter value) {
-    return value.filterType == filterType &&
-        value.except == except &&
-        value.only == only;
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is ClassFilter &&
+        other.filterType == filterType &&
+        other.except == except &&
+        other.only == only;
   }
+
+  @override
+  int get hashCode => Object.hash(filterType, except, only);
 
   Set<String> _filtersAsSet() {
     Set<String> stringToSet(String? s) => s == null
@@ -141,6 +149,7 @@ class ClassFilter {
     }
   }
 
+  /// Returns true if [className] should be shown.
   bool apply(HeapClassName className, String? rootPackage) {
     if (className.isRoot) return false;
 

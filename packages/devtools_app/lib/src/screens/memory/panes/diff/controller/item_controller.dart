@@ -5,63 +5,76 @@
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../../../../shared/memory/adapted_heap_data.dart';
-import '../../../shared/heap/heap.dart';
+import '../../../../../shared/memory/heap_data.dart';
+import '../../../../../shared/memory/heap_graph_loader.dart';
 
 abstract class SnapshotItem extends DisposableController {
-  /// Number, that if shown in name, should be unique in the list.
-  ///
-  /// If the number is not expected to be shown in UI, it should be 0.
-  int get displayNumber;
+  /// Number to show with auto-generated names that may be non unique, like isolate name.
+  int? get displayNumber;
 
   ValueListenable<bool> get isProcessing => _isProcessing;
   final _isProcessing = ValueNotifier<bool>(false);
 
   /// If true, the item contains data, that can be compared and analyzed.
   bool get hasData;
+
+  @override
+  void dispose() {
+    _isProcessing.dispose();
+    super.dispose();
+  }
 }
 
 class SnapshotDocItem extends SnapshotItem {
   @override
-  int get displayNumber => 0;
+  int? get displayNumber => null;
 
   @override
   bool get hasData => false;
 }
 
-class SnapshotInstanceItem extends SnapshotItem {
-  SnapshotInstanceItem({
-    required this.displayNumber,
-    required this.isolateName,
+class SnapshotDataItem extends SnapshotItem implements RenamableItem {
+  SnapshotDataItem({
+    this.displayNumber,
+    required this.defaultName,
   }) {
     _isProcessing.value = true;
   }
 
-  final String isolateName;
+  HeapData? get heap => _heap;
+  HeapData? _heap;
 
-  AdaptedHeap? heap;
+  /// Automatically assigned name like isolate name or file name.
+  final String defaultName;
 
-  /// This method is expected to be called once when heap is actually received.
-  Future<void> initializeHeapData(AdaptedHeapData? data) async {
-    assert(heap == null);
-    if (data != null) {
-      data.snapshotName = name;
-      heap = await AdaptedHeap.create(data);
-    }
+  @override
+  final int? displayNumber;
+
+  @override
+  bool get hasData => _heap != null;
+
+  Future<void> loadHeap(HeapGraphLoader loader) async {
+    assert(_heap == null);
+    final (graph, created) = await loader.load();
+    _heap = await HeapData.calculate(graph, created);
     _isProcessing.value = false;
   }
 
   @override
-  final int displayNumber;
-
-  String get name => nameOverride ?? '$isolateName-$displayNumber';
-
   String? nameOverride;
 
-  final diffWith = ValueNotifier<SnapshotInstanceItem?>(null);
+  final diffWith = ValueNotifier<SnapshotDataItem?>(null);
 
   @override
-  bool get hasData => heap != null;
+  String get name =>
+      nameOverride ??
+      '$defaultName${displayNumber == null ? '' : '-$displayNumber'}';
 
-  int? get totalSize => heap?.data.totalReachableSize;
+  int? get totalSize => _heap?.footprint?.dart;
+}
+
+abstract class RenamableItem {
+  String get name;
+
+  String? nameOverride;
 }

@@ -9,9 +9,11 @@ import 'package:args/command_runner.dart';
 
 import '../model.dart';
 
+const _toVersionArg = 'to-version';
+
 class RollbackCommand extends Command {
   RollbackCommand() : super() {
-    argParser.addOption('to-version');
+    argParser.addOption(_toVersionArg, mandatory: true);
   }
 
   @override
@@ -35,7 +37,7 @@ class RollbackCommand extends Command {
     final extractDir =
         await io.Directory('${tempDir.path}/extract/').absolute.create();
     final client = io.HttpClient();
-    final version = argResults!['to-version'];
+    final version = argResults![_toVersionArg] as String;
     print('downloading tarball to ${tarball.path}');
     final tarballRequest = await client.getUrl(
       Uri.http(
