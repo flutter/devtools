@@ -60,8 +60,10 @@ class UpdatePerfettoCommand extends Command {
     final perfettoUiCompiledLibPath = pathFromRepoRoot(
       path.join('third_party', 'packages', 'perfetto_ui_compiled', 'lib'),
     );
+    final perfettoUiCompiledBuildPath =
+        path.join(perfettoUiCompiledLibPath, 'dist');
     final perfettoDevToolsPath =
-        path.join(perfettoUiCompiledLibPath, 'devtools');
+        path.join(perfettoUiCompiledBuildPath, 'devtools');
 
     logStatus(
       'moving DevTools-Perfetto integration files to a temp directory.',
@@ -71,7 +73,7 @@ class UpdatePerfettoCommand extends Command {
     await copyPath(perfettoDevToolsPath, tempPerfettoDevTools.path);
 
     logStatus('deleting existing Perfetto build');
-    final existingBuild = Directory(perfettoUiCompiledLibPath);
+    final existingBuild = Directory(perfettoUiCompiledBuildPath);
     existingBuild.deleteSync(recursive: true);
 
     logStatus('updating Perfetto build');
@@ -81,7 +83,7 @@ class UpdatePerfettoCommand extends Command {
       logStatus(
         'copying content from $buildLocation to $perfettoUiCompiledLibPath',
       );
-      await copyPath(buildLocation, perfettoUiCompiledLibPath);
+      await copyPath(buildLocation, perfettoUiCompiledBuildPath);
     } else {
       logStatus('cloning Perfetto from HEAD and building from source');
       final tempPerfettoClone =
@@ -148,7 +150,7 @@ class UpdatePerfettoCommand extends Command {
     tempPerfettoDevTools.deleteSync(recursive: true);
 
     _updateIndexFileForDevToolsEmbedding(
-      path.join(perfettoUiCompiledLibPath, 'index.html'),
+      path.join(perfettoUiCompiledBuildPath, 'index.html'),
     );
     _updatePerfettoAssetsInPubspec();
   }
@@ -175,20 +177,21 @@ class UpdatePerfettoCommand extends Command {
   void _updatePerfettoAssetsInPubspec() {
     logStatus('updating perfetto assets in the devtools_app pubspec.yaml file');
     final repo = DevToolsRepo.getInstance();
-    final perfettoLibDir = Directory(
+    final perfettoDistDir = Directory(
       path.join(
         repo.repoPath,
         'third_party',
         'packages',
         'perfetto_ui_compiled',
         'lib',
+        'dist',
       ),
     );
 
     // Find the new perfetto version number.
     String newVersionNumber = '';
     final versionRegExp = RegExp(r'v\d+[.]\d+-[0-9a-fA-F]+');
-    final entities = perfettoLibDir.listSync();
+    final entities = perfettoDistDir.listSync();
     for (FileSystemEntity entity in entities) {
       final path = entity.path;
       final match = versionRegExp.firstMatch(path);
@@ -211,10 +214,10 @@ class UpdatePerfettoCommand extends Command {
     );
 
     // TODO(kenz): Ensure the pubspec.yaml contains an entry for each file in
-    // [perfettoLibDir].
+    // [perfettoDistDir].
 
     final perfettoAssetRegExp = RegExp(
-      r'(?<prefix>^.*packages\/perfetto_ui_compiled\/)(?<version>v\d+[.]\d+-[0-9a-fA-F]+)(?<suffix>\/.*$)',
+      r'(?<prefix>^.*packages\/perfetto_ui_compiled\/dist\/)(?<version>v\d+[.]\d+-[0-9a-fA-F]+)(?<suffix>\/.*$)',
     );
     final lines = pubspec.readAsLinesSync();
     for (int i = 0; i < lines.length; i++) {
