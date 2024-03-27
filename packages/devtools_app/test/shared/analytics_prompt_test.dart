@@ -61,9 +61,6 @@ void main() {
               didCallEnableAnalytics = true;
             },
             consentMessage: 'fake message',
-            markConsentMessageAsShown: () {
-              didMarkConsentMessageAsShown = true;
-            },
           );
         });
 

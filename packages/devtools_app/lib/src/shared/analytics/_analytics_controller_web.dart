@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import '../dtd_extension.dart';
+import '../globals.dart';
 import '../server/server.dart' as server;
 import 'analytics.dart' as ga;
 import 'analytics_controller.dart';
@@ -33,8 +35,7 @@ Future<AnalyticsController> get devToolsAnalyticsController async {
         ga.initializeGA();
         ga.jsHookupListenerForGA();
       },
-      consentMessage: await ga.fetchAnalyticsConsentMessage(),
-      markConsentMessageAsShown: ga.markConsentMessageAsShown,
+      consentMessage: await dtdManager.analyticsConsentMessage(),
     ),
   );
   return _controllerCompleter!.future;
