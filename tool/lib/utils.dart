@@ -117,7 +117,7 @@ class CliCommand {
       // have selected that here.
       FlutterSdk.current.dartExePath,
       [
-        toolName,
+        toolPath,
         ...args,
       ],
       throwOnException: throwOnException,
