@@ -12,8 +12,8 @@ import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../test_infra/flutter_test_driver.dart' show FlutterRunConfiguration;
-import '../test_infra/flutter_test_environment.dart';
+import '../../test_infra/flutter_test_driver.dart' show FlutterRunConfiguration;
+import '../../test_infra/flutter_test_environment.dart';
 
 late MemoryController memoryController;
 
@@ -48,7 +48,7 @@ void main() {
         memoryController.onMemory.listen((MemoryTracker? memoryTracker) {
           if (!serviceConnection.serviceManager.hasConnection) {
             // VM Service connection has stopped - unexpected.
-            fail('VM Service connection stoped unexpectantly.');
+            fail('VM Service connection stopped unexpectedly.');
           } else {
             validateHeapInfo(memoryController.controllers.memoryTimeline);
           }
