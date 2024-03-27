@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be found
 // in the LICENSE file.
 
+// ignore: avoid_web_libraries_in_flutter
+import 'dart:html' as html;
 import 'dart:js_interop';
 
 import 'package:web/web.dart';
@@ -18,4 +20,10 @@ Stream<PostMessageEvent> get onPostMessage {
 }
 
 void postMessage(Object? message, String targetOrigin) =>
-    window.parent?.postMessage(message.jsify(), targetOrigin.toJS);
+    // TODO(dantup): Switch back to package:web version of this code once
+    //  https://github.com/dart-lang/sdk/issues/54938 is fixed.
+    //
+    // package:web version:
+    //   window.parent?.postMessage(message.jsify(), targetOrigin.toJS);
+    // legacy dart:html version:
+    html.window.parent?.postMessage(message, targetOrigin);

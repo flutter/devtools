@@ -12,6 +12,7 @@ import '../../../service/service_manager.dart';
 import '../../globals.dart';
 import '../../primitives/storage.dart';
 import '../../server/server_api_client.dart';
+import '../post_message/post_message.dart';
 
 /// Return the url the application is launched from.
 Future<String> initializePlatform() async {
@@ -82,9 +83,9 @@ void _sendKeyPressToParent(KeyboardEvent event) {
     'repeat': event.repeat,
     'shiftKey': event.shiftKey,
   };
-  window.parent?.postMessage(
-    {'command': 'keydown', 'data': data}.jsify(),
-    '*'.toJS,
+  postMessage(
+    {'command': 'keydown', 'data': data},
+    '*',
   );
 }
 
