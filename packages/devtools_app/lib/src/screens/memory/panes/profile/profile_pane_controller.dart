@@ -63,7 +63,7 @@ class ProfilePaneController extends DisposableController
   }
 
   void setFilter(ClassFilter filter) {
-    if (filter.equals(_classFilter.value)) return;
+    if (filter == _classFilter.value) return;
     _classFilter.value = filter;
     final currentProfile = _currentAllocationProfile.value;
     if (currentProfile == null) return;

@@ -40,6 +40,8 @@ performance. - [#7197](https://github.com/flutter/devtools/pull/7197), [#7439](h
 
 * Fixed failures during disconnect in tracing. - [#7440](https://github.com/flutter/devtools/pull/7440)
 
+* Made class filter shared between the panes `Profile Memory` and `Diff Snapshots`. - [#7462](https://github.com/flutter/devtools/pull/7462)
+
 ## Debugger updates
 
 TODO: Remove this section if there are not any general updates.

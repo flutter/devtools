@@ -280,7 +280,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   final _diffStore = HeapDiffStore();
 
   void applyFilter(ClassFilter filter) {
-    if (filter.equals(_core.classFilter.value)) return;
+    if (filter == _core.classFilter.value) return;
     _core._classFilter.value = filter;
     _updateValues();
   }
