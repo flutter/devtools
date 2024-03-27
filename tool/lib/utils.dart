@@ -100,8 +100,8 @@ class CliCommand {
 
     assert(
       File(toolPath).existsSync(),
-      'Tool path is detected wrongly: $toolPath.'
-      'It can be result of https://github.com/dart-lang/sdk/issues/54493',
+      'Tool path could not be determined, got: $toolPath.'
+      'It may be result of https://github.com/dart-lang/sdk/issues/54493',
     );
 
     return CliCommand(
