@@ -138,6 +138,8 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
                     enhanceTracingController:
                         controller.enhanceTracingController,
                     rebuildCountModel: controller.rebuildCountModel,
+                    displayRefreshRateNotifier:
+                        controller.flutterFramesController.displayRefreshRate,
                   )
                 : const CenteredMessage(
                     'Select a frame above to view analysis data.',

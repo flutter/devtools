@@ -514,6 +514,7 @@ class TimelineEventsController extends PerformanceFeatureController
     _pollingTimer?.cancel();
     _timelinePollingRateLimiter?.dispose();
     perfettoController.dispose();
+    _refreshWorkTracker.clear();
     super.dispose();
   }
 }
