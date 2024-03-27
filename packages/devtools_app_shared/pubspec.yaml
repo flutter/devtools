@@ -5,12 +5,12 @@ repository: https://github.com/flutter/devtools/tree/master/packages/devtools_ap
 
 # TODO(kenz): use version numbers from next Dart / Flutter beta release.
 environment:
-  sdk: ">=3.4.0-268.0.dev <4.0.0"
-  flutter: ">=3.21.0-14.0.pre.22"
+  sdk: ">=3.4.0-275.0.dev <4.0.0"
+  flutter: ">=3.21.0-15.0.pre"
 
 dependencies:
   collection: ^1.15.0
-  devtools_shared: ^8.1.0
+  devtools_shared: ^8.1.1-dev.0
   dtd: ^2.1.0
   flutter:
     sdk: flutter
