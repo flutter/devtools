@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be found
 // in the LICENSE file.
 
-// ignore: avoid_web_libraries_in_flutter
+// ignore: avoid_web_libraries_in_flutter, workaround for https://github.com/dart-lang/sdk/issues/54938
 import 'dart:html' as html;
 import 'dart:js_interop';
 
