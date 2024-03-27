@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:args/command_runner.dart';
 import 'package:devtools_tool/model.dart';
 import 'package:io/io.dart';
 import 'package:path/path.dart' as path;
@@ -88,8 +89,14 @@ class CliCommand {
     List<String> args, {
     bool throwOnException = true,
   }) {
-    print('!!!! ${FlutterSdk.current.dartExePath}');
-    print('!!!! ${Platform.script.toFilePath()}');
+    // We do not use `Platform.script.toFilePath()`
+    // assuming path to the tool is in the PATH
+    // because of bug https://github.com/dart-lang/sdk/issues/54493
+    var toolName = Platform.script.pathSegments.last;
+    assert(Platform.script.pathSegments.last.contains('.dart'));
+    toolName = toolName.substring(0, toolName.length - '.dart'.length);
+    assert(toolName.endsWith('_tool'));
+
     return CliCommand(
       // We must use the Dart VM from FlutterSdk.current here to ensure we
       // consistently use the selected version for child invocations. We do
@@ -98,7 +105,7 @@ class CliCommand {
       // have selected that here.
       FlutterSdk.current.dartExePath,
       [
-        Platform.script.toFilePath(),
+        toolName,
         ...args,
       ],
       throwOnException: throwOnException,
