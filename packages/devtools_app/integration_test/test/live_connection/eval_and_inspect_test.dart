@@ -15,11 +15,8 @@ import 'package:integration_test/integration_test.dart';
 
 import 'eval_utils.dart';
 
-// To run the test while connected to a flutter-tester device:
-// dart run integration_test/run_tests.dart --target=integration_test/test/live_connection/eval_and_inspect_test.dart
-
 // To run the test while connected to a chrome device:
-// dart run integration_test/run_tests.dart --target=integration_test/test/live_connection/eval_and_inspect_test.dart --test-app-device=chrome
+// dart run integration_test/run_tests.dart --target=integration_test/test/live_connection/eval_and_inspect_test.dart
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
