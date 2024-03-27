@@ -32,7 +32,7 @@ final _log = Logger('timeline_events_controller');
 
 enum EventsControllerStatus {
   empty,
-  processing,
+  refreshing,
   ready,
 }
 
@@ -40,10 +40,10 @@ class TimelineEventsController extends PerformanceFeatureController
     with AutoDisposeControllerMixin {
   TimelineEventsController(super.performanceController) {
     perfettoController = createPerfettoController(performanceController, this);
-    addAutoDisposeListener(_workTracker.active, () {
-      final active = _workTracker.active.value;
+    addAutoDisposeListener(_refreshWorkTracker.active, () {
+      final active = _refreshWorkTracker.active.value;
       if (active) {
-        _status.value = EventsControllerStatus.processing;
+        _status.value = EventsControllerStatus.refreshing;
       } else {
         _status.value = EventsControllerStatus.ready;
       }
@@ -56,6 +56,8 @@ class TimelineEventsController extends PerformanceFeatureController
   static const gpuThreadSuffix = '.gpu';
   static const platformThreadSuffix = '.platform';
   static const flutterTestThreadSuffix = '.flutter.test..platform';
+  static final _refreshWorkTrackerDelay =
+      const Duration(milliseconds: 500).inMicroseconds;
 
   /// Controller that contains business logic for the Perfetto trace viewer.
   late final PerfettoController perfettoController;
@@ -111,7 +113,7 @@ class TimelineEventsController extends PerformanceFeatureController
   final _status =
       ValueNotifier<EventsControllerStatus>(EventsControllerStatus.empty);
 
-  final _workTracker = FutureWorkTracker();
+  final _refreshWorkTracker = FutureWorkTracker();
 
   Timer? _pollingTimer;
 
@@ -314,6 +316,15 @@ class TimelineEventsController extends PerformanceFeatureController
   }
 
   Future<void> forceRefresh() async {
+    await _refreshWorkTracker.track(
+      _forceRefresh,
+      // Await a short delay so that we can insert the refreshing message
+      // overlay on top of the Perfetto UI.
+      delayMicros: _refreshWorkTrackerDelay,
+    );
+  }
+
+  Future<void> _forceRefresh() async {
     debugTraceCallback(() => _log.info('[forceRefresh]'));
     await _pullPerfettoVmTimeline();
     processTrackEvents();
@@ -397,7 +408,7 @@ class TimelineEventsController extends PerformanceFeatureController
               '[handleSelectedFrame] events still not processed. Force refresh.',
             ),
           );
-          await _workTracker.track(forceRefresh);
+          await forceRefresh();
 
           final hasProcessedTimelineEventsForFrame =
               perfettoController.processor.hasProcessedEventsForFrame(frame.id);
@@ -490,7 +501,7 @@ class TimelineEventsController extends PerformanceFeatureController
     _trackDescriptors.clear();
     _unassignedFlutterTimelineEvents.clear();
 
-    _workTracker.clear();
+    _refreshWorkTracker.clear();
     _status.value = EventsControllerStatus.empty;
     await perfettoController.clear();
   }
@@ -500,6 +511,7 @@ class TimelineEventsController extends PerformanceFeatureController
     _pollingTimer?.cancel();
     _timelinePollingRateLimiter?.dispose();
     perfettoController.dispose();
+    _refreshWorkTracker.clear();
     super.dispose();
   }
 }

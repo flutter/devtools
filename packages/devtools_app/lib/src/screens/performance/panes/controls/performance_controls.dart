@@ -47,7 +47,7 @@ class PerformanceControls extends StatelessWidget {
               builder: (context, status, _) {
                 return _PrimaryControls(
                   controller: controller,
-                  processing: status == EventsControllerStatus.processing,
+                  processing: status == EventsControllerStatus.refreshing,
                   offline: offline,
                   onClear: onClear,
                 );
