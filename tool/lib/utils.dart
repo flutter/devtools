@@ -6,8 +6,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:args/command_runner.dart';
-import 'package:cli_util/cli_logging.dart';
 import 'package:devtools_tool/model.dart';
 import 'package:io/io.dart';
 import 'package:path/path.dart' as path;
