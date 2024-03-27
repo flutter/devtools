@@ -145,7 +145,7 @@ Within minutes, a build should be uploaded for the commit you just merged and ta
 
 > [!NOTE]  
 > If the CIPD build times out, instructions for re-triggering can be found at
-[go/dart-engprod/release.md](go/dart-engprod/release.md)
+[go/dart-engprod/release.md](http://go/dart-engprod/release.md)
 
 ### Update the DevTools hash in the Dart SDK
 
