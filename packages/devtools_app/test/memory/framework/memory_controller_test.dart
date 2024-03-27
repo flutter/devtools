@@ -12,6 +12,18 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../test_infra/scenes/memory/default.dart';
 import '../../test_infra/scenes/scene_test_extensions.dart';
 
+final _filter1 = ClassFilter(
+  except: 'filter1',
+  filterType: ClassFilterType.except,
+  only: 'filter1',
+);
+
+final _filter2 = ClassFilter(
+  except: 'filter2',
+  filterType: ClassFilterType.except,
+  only: 'filter2',
+);
+
 Future<void> pumpScene(WidgetTester tester, MemoryDefaultScene scene) async {
   await tester.pumpScene(scene);
   // Delay to ensure the memory profiler has collected data.
@@ -34,6 +46,20 @@ Future<void> takeSnapshot(WidgetTester tester, MemoryDefaultScene scene) async {
 // Set a wide enough screen width that we do not run into overflow.
 const windowSize = Size(2225.0, 1000.0);
 
+void _verifyFiltersAreEqual(MemoryDefaultScene scene, [ClassFilter? filter]) {
+  expect(
+    scene.controller.controllers.diff.core.classFilter.value,
+    equals(scene.controller.controllers.profile.classFilter.value),
+  );
+
+  if (filter != null) {
+    expect(
+      scene.controller.controllers.diff.core.classFilter.value,
+      equals(filter),
+    );
+  }
+}
+
 void main() {
   late MemoryDefaultScene scene;
   setUp(() async {
@@ -52,10 +78,13 @@ void main() {
       await pumpScene(tester, scene);
       await takeSnapshot(tester, scene);
 
-      expect(
-        scene.controller.controllers.diff.core.classFilter.value,
-        equals(scene.controller.controllers.profile.classFilter.value),
-      );
+      _verifyFiltersAreEqual(scene);
+
+      scene.controller.controllers.diff.derived.applyFilter(_filter1);
+      _verifyFiltersAreEqual(scene, _filter1);
+
+      scene.controller.controllers.profile.setFilter(_filter2);
+      _verifyFiltersAreEqual(scene, _filter2);
     },
   );
 }
