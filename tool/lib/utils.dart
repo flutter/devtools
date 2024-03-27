@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
+import 'package:cli_util/cli_logging.dart';
 import 'package:devtools_tool/model.dart';
 import 'package:io/io.dart';
 import 'package:path/path.dart' as path;
@@ -92,10 +93,21 @@ class CliCommand {
     // We do not use `Platform.script.toFilePath()`
     // assuming path to the tool is in the PATH
     // because of bug https://github.com/dart-lang/sdk/issues/54493
-    var toolName = Platform.script.pathSegments.last;
-    assert(Platform.script.pathSegments.last.contains('.dart'));
-    toolName = toolName.substring(0, toolName.length - '.dart'.length);
-    assert(toolName.endsWith('_tool'));
+
+    var toolPath = Platform.script.toFilePath();
+    if (!File(toolPath).existsSync()) {
+      // Handling https://github.com/dart-lang/sdk/issues/54493
+      toolPath = toolPath.replaceAll(
+        'devtools/tool/tool/bin/devtools_tool.dart',
+        'devtools/tool/bin/devtools_tool.dart',
+      );
+    }
+
+    assert(
+      File(toolPath).existsSync(),
+      'Tool path is detected wrongly: $toolPath.'
+      'It can be result of https://github.com/dart-lang/sdk/issues/54493',
+    );
 
     return CliCommand(
       // We must use the Dart VM from FlutterSdk.current here to ensure we
