@@ -39,7 +39,7 @@ bool get enableBeta => enableExperiments || !isExternalBuild;
 // ignore: avoid_classes_with_only_static_members
 /// Flags to hide features under construction.
 ///
-/// When adding a new feature flag, the developer is respsonsible for adding it
+/// When adding a new feature flag, the developer is responsible for adding it
 /// to the [_allFlags] map for debugging purposes.
 abstract class FeatureFlags {
   /// Example usage of a flag for a beta feature.
@@ -51,7 +51,7 @@ abstract class FeatureFlags {
   /// Flag to enable widget rebuild stats ui.
   ///
   /// https://github.com/flutter/devtools/issues/4564.
-  static bool widgetRebuildstats = enableExperiments;
+  static bool widgetRebuildStats = enableExperiments;
 
   /// Flag to enable analysis of snapshots in disconnected mode.
   ///
@@ -80,7 +80,7 @@ abstract class FeatureFlags {
   /// When adding a new flag, you are responsible for adding it to this map as
   /// well.
   static final _allFlags = <String, bool>{
-    'widgetRebuildStats': widgetRebuildstats,
+    'widgetRebuildStats': widgetRebuildStats,
     'memoryAnalysis': memoryAnalysis,
     'dapDebugging': dapDebugging,
   };

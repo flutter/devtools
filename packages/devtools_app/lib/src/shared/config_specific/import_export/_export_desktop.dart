@@ -15,10 +15,10 @@ class ExportControllerDesktop extends ExportController {
   static final _fs = FileIO();
 
   @override
-  void saveFile({
-    required String content,
+  void saveFile<T>({
+    required T content,
     required String fileName,
   }) {
-    _fs.writeStringToFile(fileName, content);
+    _fs.writeContentsToFile<T>(fileName, content);
   }
 }

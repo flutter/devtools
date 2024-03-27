@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/primitives/utils.dart';
@@ -39,7 +40,7 @@ class DomainError extends CommonError {
 
   /// Existence of an asset link file.
   static const existence = DomainError(
-    'Digital Asset Links JSON file existence failed',
+    'Digital Asset Links JSON file does not exist',
     'This test checks whether the assetlinks.json file, '
         'which is used to verify the association between the app and the '
         'domain name, exists under your domain.',
@@ -50,7 +51,7 @@ class DomainError extends CommonError {
 
   /// Asset link file should define a link to this app.
   static const appIdentifier = DomainError(
-    'Package name failed',
+    'Package name not found',
     'The test checks your Digital Asset Links JSON file '
         'for package name validation, which the mobile device '
         'uses to verify ownership of the app.',
@@ -74,7 +75,7 @@ class DomainError extends CommonError {
 
   /// Asset link file should be served with the correct content type.
   static const contentType = DomainError(
-    'JSON content type failed',
+    'JSON content type incorrect',
     'This test checks your Digital Asset Links JSON file for content type '
         'validation, which defines the format of the JSON file. This allows '
         'the mobile device to verify ownership of the app.',
@@ -83,7 +84,7 @@ class DomainError extends CommonError {
 
   /// Asset link file should be accessible via https.
   static const httpsAccessibility = DomainError(
-    'HTTPS accessibility failed',
+    'HTTPS accessibility check failed',
     'This test tries to access your Digital Asset Links '
         'JSON file over an HTTPS connection, which must be '
         'accessible to verify ownership of the app.',
@@ -94,7 +95,7 @@ class DomainError extends CommonError {
 
   /// Asset link file should be accessible with no redirects.
   static const nonRedirect = DomainError(
-    'Domain non-redirect failed',
+    'Domain non-redirect check failed',
     'This test checks that your domain is accessible without '
         'redirects. This domain must be directly accessible '
         'to verify ownership of the app.',
@@ -103,7 +104,7 @@ class DomainError extends CommonError {
 
   /// Asset link domain should be valid/not malformed.
   static const hostForm = DomainError(
-    'Host attribute formed properly failed',
+    'Host attribute is not formed properly',
     'This test checks that your android:host attribute has a valid domain URL pattern.',
     'Make sure the host is a properly formed web address such '
         'as google.com or www.google.com, without "http://" or "https://".',
@@ -251,8 +252,8 @@ class _ErrorAwareText extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      'This m.shopping.com domain has ${link.domainErrors.length} issue to fix. '
-                      'Fixing this domain will fix ${link.associatedPath.length} associated deep links.',
+                      'This ${link.domain} domain has ${link.domainErrors.length} ${pluralize('issue', link.domainErrors.length)} to fix. '
+                      'Fixing this domain will fix ${link.associatedPath.length} associated deep ${pluralize('link', link.associatedPath.length)}.',
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.tooltipTextColor,
                         fontSize: defaultFontSize,
@@ -298,9 +299,12 @@ class _ErrorAwareText extends StatelessWidget {
 
 class DomainColumn extends ColumnData<LinkData>
     implements ColumnRenderer<LinkData>, ColumnHeaderRenderer<LinkData> {
-  DomainColumn(this.controller) : super.wide('Domain');
+  DomainColumn(this.controller)
+      : sortingOption = controller.displayOptions.domainSortingOption,
+        super.wide('Domain');
 
   DeepLinksController controller;
+  SortingOption? sortingOption;
 
   @override
   Widget? buildHeader(
@@ -346,16 +350,22 @@ class DomainColumn extends ColumnData<LinkData>
   int compare(LinkData a, LinkData b) => _compareLinkData(
         a,
         b,
-        sortingOption: controller.displayOptions.domainSortingOption,
+        sortingOption: sortingOption,
         compareDomain: true,
       );
+
+  @override
+  String get config => '$title $sortingOption';
 }
 
 class PathColumn extends ColumnData<LinkData>
     implements ColumnRenderer<LinkData>, ColumnHeaderRenderer<LinkData> {
-  PathColumn(this.controller) : super.wide('Path');
+  PathColumn(this.controller)
+      : sortingOption = controller.displayOptions.pathSortingOption,
+        super.wide('Path');
 
   DeepLinksController controller;
+  SortingOption? sortingOption;
 
   @override
   Widget? buildHeader(
@@ -401,9 +411,12 @@ class PathColumn extends ColumnData<LinkData>
   int compare(LinkData a, LinkData b) => _compareLinkData(
         a,
         b,
-        sortingOption: controller.displayOptions.pathSortingOption,
+        sortingOption: sortingOption,
         compareDomain: false,
       );
+
+  @override
+  String get config => '$title $sortingOption';
 }
 
 class NumberOfAssociatedPathColumn extends ColumnData<LinkData> {

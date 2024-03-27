@@ -62,14 +62,13 @@ class ValidationDetailView extends StatelessWidget {
                     viewType == TableViewType.singleUrlView)
                   _PathCheckTable(controller: controller),
                 const SizedBox(height: extraLargeSpacing),
-                if (linkData.domainErrors.isNotEmpty)
-                  Align(
-                    alignment: Alignment.bottomRight,
-                    child: FilledButton(
-                      onPressed: () async => await controller.validateLinks(),
-                      child: const Text('Recheck all'),
-                    ),
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: FilledButton(
+                    onPressed: controller.loadAndroidAppLinksAndValidate,
+                    child: const Text('Recheck all'),
                   ),
+                ),
                 if (viewType == TableViewType.domainView)
                   _DomainAssociatedLinksPanel(controller: controller),
                 const SizedBox(height: largeSpacing),
@@ -97,6 +96,7 @@ class ValidationDetailHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return OutlineDecoration(
       showLeft: false,
+      showRight: false,
       child: Container(
         height: actionWidgetSize,
         padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
@@ -196,8 +196,8 @@ class _AssetLinksJsonFileIssues extends StatelessWidget {
               _FailureDetails(
                 errors: errors,
                 oneFixGuideForAll:
-                    'To fix above issues, publish the recommended Digital Asset Links'
-                    ' JSON file below to all of the failed website domains at the following'
+                    'To fix the above issues, copy the recommended Digital Asset Links'
+                    ' JSON file below and publish it to all of the failed website domains at the following'
                     ' location: https://${controller.selectedLink.value!.domain}/.well-known/assetlinks.json.',
               ),
               const SizedBox(height: denseSpacing),
@@ -279,22 +279,22 @@ class _Fingerprint extends StatelessWidget {
           children: [
             if (hasPdcFingerprint && !haslocalFingerprint) ...[
               Text(
-                'Your PDC fingerprint has been detected. If you have local fingerprint, you can enter it below.',
+                'Your PDC fingerprint has been detected. If you have a local fingerprint, you can enter it below.',
                 style: theme.subtleTextStyle,
               ),
               const SizedBox(height: denseSpacing),
             ],
             if (isError) ...[
               const Text(
-                'Issue: no fingerprint detached locally or on PDC',
+                'Issue: no fingerprint detected locally or on PDC',
               ),
               const SizedBox(height: denseSpacing),
               const Text('Fix guide:'),
               const SizedBox(height: denseSpacing),
               Text(
                 'To fix this issue, release your app on Play Developer Console to get a fingerprint. '
-                'If you are not ready to release your app, enter a local fingerprint below can also allow you'
-                'to proceed Android domain check.',
+                'If you are not ready to release your app, you can proceed with the Android domain check '
+                'by entering a local fingerprint below.',
                 style: theme.subtleTextStyle,
               ),
               const SizedBox(height: denseSpacing),
@@ -338,7 +338,7 @@ class _LocalFingerprint extends StatelessWidget {
                     await showDialog(
                       context: context,
                       builder: (_) {
-                        return const AlertDialog(
+                        return const DevToolsDialog(
                           title: Text('This is not a valid fingerprint'),
                           content: Text(
                             'A valid fingerprint consists of 32 pairs of hexadecimal digits separated by colons.'
@@ -557,7 +557,7 @@ class _PathCheckTable extends StatelessWidget {
       children: [
         const SizedBox(height: intermediateSpacing),
         Text(
-          'Path check',
+          'App check',
           style: theme.textTheme.titleSmall,
         ),
         const SizedBox(height: intermediateSpacing),
@@ -643,9 +643,12 @@ class _CheckTableHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       tileColor: Theme.of(context).colorScheme.deeplinkTableHeaderColor,
-      title: const Padding(
-        padding: EdgeInsets.symmetric(horizontal: defaultSpacing),
-        child: Row(
+      title: Padding(
+        padding: EdgeInsets.only(
+          left: defaultSpacing,
+          right: defaultSpacing + actionsIconSize,
+        ),
+        child: const Row(
           children: [
             Expanded(child: Text('OS')),
             Expanded(child: Text('Issue type')),
@@ -673,18 +676,26 @@ class _CheckExpansionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final title = Row(
+      children: [
+        const SizedBox(width: defaultSpacing),
+        const Expanded(child: Text('Android')),
+        Expanded(child: Text(checkName)),
+        Expanded(child: status),
+      ],
+    );
+    if (children.isEmpty) {
+      return ListTile(
+        tileColor: theme.colorScheme.alternatingBackgroundColor2,
+        title: title,
+        trailing: SizedBox(width: actionsIconSize),
+      );
+    }
     return ExpansionTile(
       backgroundColor: theme.colorScheme.alternatingBackgroundColor2,
       collapsedBackgroundColor: theme.colorScheme.alternatingBackgroundColor2,
       initiallyExpanded: initiallyExpanded,
-      title: Row(
-        children: [
-          const SizedBox(width: defaultSpacing),
-          const Expanded(child: Text('Android')),
-          Expanded(child: Text(checkName)),
-          Expanded(child: status),
-        ],
-      ),
+      title: title,
       children: children,
     );
   }

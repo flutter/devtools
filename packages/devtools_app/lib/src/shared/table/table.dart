@@ -13,6 +13,7 @@ import 'package:flutter/services.dart';
 
 import '../collapsible_mixin.dart';
 import '../common_widgets.dart';
+import '../primitives/extent_delegate_list.dart';
 import '../primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';

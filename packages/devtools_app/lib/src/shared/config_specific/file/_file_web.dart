@@ -21,12 +21,16 @@ class FileSystemWeb implements FileIO {
   String exportDirectoryName({bool isMemory = false}) => 'LocalStorage';
 
   @override
-  void writeStringToFile(
+  void writeContentsToFile<T>(
     String filename,
-    String contents, {
+    T contents, {
     bool isMemory = false,
   }) {
-    _files.putIfAbsent(filename, () => contents);
+    if (contents is String) {
+      _files.putIfAbsent(filename, () => contents);
+    } else {
+      throw StateError('Unsupported content type: $T');
+    }
   }
 
   @override

@@ -1,4 +1,4 @@
-## 0.1.1-wip
+## 0.1.1-dev.0
 * Update the simulated environment help dialogs with information about the
 new `--print-dtd` CLI flag.
 * Bump the minimum Dart and Flutter SDK versions to `3.4.0-268.0.dev` and

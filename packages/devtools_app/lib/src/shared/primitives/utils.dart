@@ -1061,6 +1061,13 @@ extension ListExtension<T> on List<T> {
   }
 }
 
+extension NullableListExtension<T> on List<T>? {
+  bool get isNullOrEmpty {
+    final self = this;
+    return self == null || self.isEmpty;
+  }
+}
+
 extension SetExtension<T> on Set<T> {
   bool containsWhere(bool Function(T element) test) {
     for (var e in this) {

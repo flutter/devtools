@@ -12,17 +12,22 @@ To learn more about DevTools, check out the
 
 * Fixed an issue preventing DevTools from connecting to Flutter apps that are not
 launched from Flutter Tools. - [#6848](https://github.com/flutter/devtools/issues/6848)
+* Improved performance of the FlatTable. -
+  [#7391](https://github.com/flutter/devtools/pull/7391)
 
 ## Inspector updates
 
-TODO: Remove this section if there are not any general updates.
+- Fixes an edge case where widgets from other packages could show up in the inspector
+  tree. - [#7353](https://github.com/flutter/devtools/pull/7353)
 
 ## Performance updates
 * Add a setting to include CPU samples in the Timeline. - [#7333](https://github.com/flutter/devtools/pull/7333), [#7369](https://github.com/flutter/devtools/pull/7369)
-* Removed the legacy trace viewer. The legacy trace viwer was replaced with the
+* Removed the legacy trace viewer. The legacy trace viewer was replaced with the
 embedded Perfetto trace viewer in DevTools version 2.21.1, but was available
 behind a setting to ensure a smooth rollout. This release of DevTools removes
 the legacy trace viewer entirely. - [#7316](https://github.com/flutter/devtools/pull/7316)
+* Updated the Perfetto trace viewer to the latest release. - [#7445](https://github.com/flutter/devtools/pull/7445),
+[#7456](https://github.com/flutter/devtools/pull/7456)
 
 ## CPU profiler updates
 
@@ -31,7 +36,11 @@ TODO: Remove this section if there are not any general updates.
 ## Memory updates
 
 * Enabled export of snapshots and improved snapshotting
-performance. - [#7197](https://github.com/flutter/devtools/pull/7197)
+performance. - [#7197](https://github.com/flutter/devtools/pull/7197), [#7439](https://github.com/flutter/devtools/pull/7439), [#7449](https://github.com/flutter/devtools/pull/7449)
+
+* Fixed failures during disconnect in tracing. - [#7440](https://github.com/flutter/devtools/pull/7440)
+
+* Made class filter shared between the panes `Profile Memory` and `Diff Snapshots`. - [#7462](https://github.com/flutter/devtools/pull/7462)
 
 ## Debugger updates
 
@@ -52,7 +61,7 @@ TODO: Remove this section if there are not any general updates.
 ## Deep Links tool updates
 
 * Automatically populate a list of Flutter projects from the connected
-IDE. - [#7415](https://github.com/flutter/devtools/pull/7415)
+IDE. - [#7415](https://github.com/flutter/devtools/pull/7415), [#7431](https://github.com/flutter/devtools/pull/7431)
 
 ## App size tool updates
 

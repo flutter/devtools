@@ -12,6 +12,7 @@ and `darkColorScheme`.
 * Update readme to use `pub add` instead of explicit package version.
 * Update `package:dtd` to `^2.0.0`
 * Update `package:devtools_shared` to `^8.1.0`
+* Add `DTDManager.workspaceRoots` method.
 
 ## 0.0.10
 * Add `DTDManager` class and export from `service.dart`.

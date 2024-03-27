@@ -45,6 +45,15 @@ class FlutterTimelineEventProcessor {
     return frameRangeFromTimelineEvents?.contains(frameId) ?? false;
   }
 
+  bool frameIsBeforeTimelineData(int frameId) {
+    if (_startFrameId == null) {
+      // Since we do not know for certain that [frameId] is out of range, return
+      // false.
+      return false;
+    }
+    return frameId < _startFrameId!;
+  }
+
   /// The current timeline event nodes by track id.
   ///
   /// As we process [PerfettoTrackEvent]s, an event on a track will completely

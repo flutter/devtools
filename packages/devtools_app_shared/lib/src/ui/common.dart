@@ -60,7 +60,11 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final borderSide = defaultBorderSide(theme);
-    final decoration = !roundedTopBorder
+    final decoration = !roundedTopBorder &&
+            (includeTopBorder ||
+                includeBottomBorder ||
+                includeLeftBorder ||
+                includeRightBorder)
         ? BoxDecoration(
             border: Border(
               top: includeTopBorder ? borderSide : BorderSide.none,
