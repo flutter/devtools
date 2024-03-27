@@ -83,6 +83,8 @@ class MemoryController extends DisposableController
   late final MemoryFeatureControllers controllers;
 
   void shareClassFilterBetweenProfileAndDiff() {
+    controllers.diff.derived.applyFilter(controllers.profile.classFilter.value);
+
     controllers.profile.classFilter.addListener(() {
       controllers.diff.derived
           .applyFilter(controllers.profile.classFilter.value);
