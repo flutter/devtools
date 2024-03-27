@@ -88,6 +88,8 @@ class CliCommand {
     List<String> args, {
     bool throwOnException = true,
   }) {
+    print('!!!! ${FlutterSdk.current.dartExePath}');
+    print('!!!! ${Platform.script.toFilePath()}');
     return CliCommand(
       // We must use the Dart VM from FlutterSdk.current here to ensure we
       // consistently use the selected version for child invocations. We do
