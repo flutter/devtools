@@ -72,25 +72,29 @@ class _TimelineEventsTabViewState extends State<TimelineEventsTabView>
       _overlaySize.height,
       MediaQuery.of(context).size.height - 2 * denseSpacing,
     );
+    final theme = Theme.of(context);
     _refreshingOverlay?.remove();
     Overlay.of(context).insert(
       _refreshingOverlay = OverlayEntry(
         maintainState: true,
         builder: (context) {
           return Center(
-            child: RoundedOutlinedBorder(
-              child: Container(
-                margin: const EdgeInsets.only(top: _overlayOffset),
-                width: width,
-                height: height,
-                color: Colors.black.withAlpha(150),
-                child: Center(
-                  child: Text(
-                    'Refreshing the timeline...\n\n'
-                    'This may take a few seconds. Please do not\n'
-                    'refresh the page.',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.titleSmall,
+            child: Padding(
+              padding: const EdgeInsets.only(top: _overlayOffset),
+              child: RoundedOutlinedBorder(
+                clip: true,
+                child: Container(
+                  width: width,
+                  height: height,
+                  color: theme.colorScheme.semiTransparentOverlayColor,
+                  child: Center(
+                    child: Text(
+                      'Refreshing the timeline...\n\n'
+                      'This may take a few seconds. Please do not\n'
+                      'refresh the page.',
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.titleSmall,
+                    ),
                   ),
                 ),
               ),

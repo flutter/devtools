@@ -344,6 +344,10 @@ extension DevToolsSharedColorScheme on ColorScheme {
       isLight ? const Color(0xFF999999) : const Color(0xFF8A8A8A);
 
   Color get tooltipTextColor => isLight ? Colors.white : Colors.black;
+
+  Color get semiTransparentOverlayColor => isLight
+      ? Colors.grey.shade200.withAlpha(200)
+      : Colors.grey.shade800.withAlpha(200);
 }
 
 /// Utility extension methods to the [ThemeData] class.
