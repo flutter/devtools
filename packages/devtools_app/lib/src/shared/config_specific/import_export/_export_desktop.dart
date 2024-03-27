@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../file/file.dart';
+import '_file_desktop.dart';
 import 'import_export.dart';
 
 ExportControllerDesktop createExportController() {
@@ -12,7 +12,7 @@ ExportControllerDesktop createExportController() {
 class ExportControllerDesktop extends ExportController {
   ExportControllerDesktop() : super.impl();
 
-  static final _fs = FileIO();
+  static final _fs = FileSystemDesktop();
 
   @override
   void saveFile<T>({
