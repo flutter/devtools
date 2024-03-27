@@ -26,8 +26,6 @@ const _offlineIndicator = 'integration_test/test/offline';
 final List<String> _skipTests = <String>[
   // https://github.com/flutter/devtools/issues/6592
   'eval_and_browse_test.dart',
-  // https://github.com/flutter/devtools/issues/7425
-  'export_snapshot_test.dart',
 ];
 
 void main(List<String> args) async {
