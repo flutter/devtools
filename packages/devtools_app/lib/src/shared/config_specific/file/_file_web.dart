@@ -27,7 +27,8 @@ class FileSystemWeb implements FileIO {
     bool isMemory = false,
   }) {
     if (contents is String) {
-      _files.putIfAbsent(filename, () => contents);
+      String contentsForFiles() => contents;
+      _files.putIfAbsent(filename, contentsForFiles);
     } else {
       throw StateError('Unsupported content type: $T');
     }
