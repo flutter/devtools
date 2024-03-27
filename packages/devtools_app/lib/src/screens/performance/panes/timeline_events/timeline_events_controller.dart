@@ -185,19 +185,37 @@ class TimelineEventsController extends PerformanceFeatureController
     late PerfettoTimeline rawPerfettoTimeline;
     if (preferences.performance.includeCpuSamplesInTimeline.value) {
       await debugTimeAsync(
-        () async => rawPerfettoTimeline =
-            await service.getPerfettoVMTimelineWithCpuSamplesWrapper(
-          timeOriginMicros: _nextPollStartMicros,
-          timeExtentMicros: currentVmTime.timestamp! - _nextPollStartMicros,
-        ),
+        () async {
+          await ga.timeAsync(
+            gac.performance,
+            gac.PerformanceEvents.getPerfettoVMTimelineWithCpuSamplesTime.name,
+            asyncOperation: () async {
+              rawPerfettoTimeline =
+                  await service.getPerfettoVMTimelineWithCpuSamplesWrapper(
+                timeOriginMicros: _nextPollStartMicros,
+                timeExtentMicros:
+                    currentVmTime.timestamp! - _nextPollStartMicros,
+              );
+            },
+          );
+        },
         debugName: 'VmService.getPerfettoVMTimelineWithCpuSamples',
       );
     } else {
       await debugTimeAsync(
-        () async => rawPerfettoTimeline = await service.getPerfettoVMTimeline(
-          timeOriginMicros: _nextPollStartMicros,
-          timeExtentMicros: currentVmTime.timestamp! - _nextPollStartMicros,
-        ),
+        () async {
+          await ga.timeAsync(
+            gac.performance,
+            gac.PerformanceEvents.getPerfettoVMTimelineTime.name,
+            asyncOperation: () async {
+              rawPerfettoTimeline = await service.getPerfettoVMTimeline(
+                timeOriginMicros: _nextPollStartMicros,
+                timeExtentMicros:
+                    currentVmTime.timestamp! - _nextPollStartMicros,
+              );
+            },
+          );
+        },
         debugName: 'VmService.getPerfettoVMTimeline',
       );
     }
