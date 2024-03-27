@@ -9,19 +9,12 @@ import 'package:file/local.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
-import 'file.dart';
-
 final _log = Logger('_file_desktop');
 
-FileSystemDesktop createFileSystem() {
-  return FileSystemDesktop();
-}
-
 /// Abstracted local file system access for Flutter Desktop.
-class FileSystemDesktop implements FileIO {
+class FileSystemDesktop {
   final _fs = const LocalFileSystem();
 
-  @override
   String exportDirectoryName({bool isMemory = false}) =>
       _exportDirectory(isMemory: isMemory).path;
 
@@ -46,7 +39,7 @@ class FileSystemDesktop implements FileIO {
     return _fs.systemTempDirectory;
   }
 
-  @override
+  /// Create file in a directory (default Downloads).
   void writeContentsToFile<T>(
     String filename,
     T contents, {
@@ -62,7 +55,7 @@ class FileSystemDesktop implements FileIO {
     }
   }
 
-  @override
+  /// Returns content of filename or null if file is unknown or content empty.
   String readStringFromFile(String filename, {bool isMemory = false}) {
     final previousCurrentDirectory = _fs.currentDirectory;
 
@@ -78,7 +71,7 @@ class FileSystemDesktop implements FileIO {
     return jsonPayload;
   }
 
-  @override
+  /// List of files (basename only).
   List<String> list({required String prefix, bool isMemory = false}) {
     final List<String> logs = [];
 
@@ -112,7 +105,7 @@ class FileSystemDesktop implements FileIO {
     return logs;
   }
 
-  @override
+  /// Delete exported files created for testing only.
   bool deleteFile(String path, {bool isMemory = false}) {
     final previousCurrentDirectory = _fs.currentDirectory;
 
