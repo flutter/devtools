@@ -1,7 +1,8 @@
 # Dart & Flutter DevTools Extensions
 
-Extend Dart & Flutter's developer tool suite,
-[Dart DevTools](https://docs.flutter.dev/tools/devtools/overview), with your own custom tool.
+Extend [Dart DevTools](https://docs.flutter.dev/tools/devtools/overview)
+(aka Dart & Flutter's developer tool suite), with your own custom tool.
+
 DevTools' extension framework allows you to build tools that can leverage existing frameworks
 and utilities from DevTools (VM service connection, theming, shared widgets, utilities, etc.).
 
@@ -75,17 +76,17 @@ version: 0.0.1
 materialIconCodePoint: '0xe0b1'
 ```
 
-Copy the `config.yaml` file content above and paste it into the `config.yaml` file you just 
+Copy the `config.yaml` file content above and paste it into the `config.yaml` file you just
 created in your package. **It is important that you use the exact file name and field names
 as shown, or else your extension may fail to load in DevTools.**
 
-For each key, fill in the appropriate value for your package. 
-* `name`: the package name that this DevTools extension belongs to. The value of this field 
+For each key, fill in the appropriate value for your package.
+* `name`: the package name that this DevTools extension belongs to. The value of this field
 will be used in the extension page title bar. **(required)**
-* `issueTracker`: the url for your issue tracker. When a user clicks the “Report an issue” 
+* `issueTracker`: the url for your issue tracker. When a user clicks the “Report an issue”
 link in the DevTools UI, they will be directed to this url. **(required)**
-* `version`: the version of your DevTools extension. This version number should evolve over 
-time as you ship new features for your extension. The value of this field will be used in the 
+* `version`: the version of your DevTools extension. This version number should evolve over
+time as you ship new features for your extension. The value of this field will be used in the
 extension page title bar. **(required)**
 
   ![Extension title bar components](_readme_images/extension_title_bar.png)
@@ -109,7 +110,7 @@ extensions in an iFrame to display them dynamically in DevTools.
 ### Where to put your source code
 
 Only the pre-compiled output of your extension needs to be shipped with your pub package
-in order for DevTools to load it. 
+in order for DevTools to load it.
 
 #### Standalone extensions
 
@@ -151,12 +152,12 @@ some_pkg/  # formerly the repository root of your pub package
 
 ### Create the extension web app
 
-1. Create the Flutter web app 
+1. Create the Flutter web app
     - **Skip this step if you are building a standalone extension, since you already did
   this when you set up your package hierarchy.**
 
     From the directory where you want your extension source code to live, run the following
-    command, replacing `some_pkg_devtools_extension` with 
+    command, replacing `some_pkg_devtools_extension` with
     `<your_package_name>_devtools_extension``:
     ```sh
     flutter create --template app --platforms web some_pkg_devtools_extension
@@ -283,7 +284,7 @@ then run the application.
     you can launch the DevTools instance that was just started by running your app (either from
     a url printed to command line or from the IDE where you ran your test app). You can also run
     `dart devtools` from the command line.
-    * **If you need local or unreleased changes from DevTools**, you'll need to build and run 
+    * **If you need local or unreleased changes from DevTools**, you'll need to build and run
     DevTools from source. See the DevTools [CONTRIBUTING.md]() for a guide on how to do this.
     You'll need to build DevTools with the server and the front end to test extensions - see
     [instructions](https://github.com/flutter/devtools/blob/master/CONTRIBUTING.md#development-devtools-server--devtools-flutter-web-app).
