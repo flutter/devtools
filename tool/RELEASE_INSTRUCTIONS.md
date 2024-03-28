@@ -195,15 +195,14 @@ From the respective `devtools/packages/devtools_*` directories, run `flutter pub
 commands from here:
 
    ```shell
-   # Assuming you are in one of packages root.
+   # Assuming you are in one of the directories under packages/ (e.g packages/devtools_app).
+   cd ../devtools_shared
+   flutter pub publish
 
    cd ../devtools_app_shared
    flutter pub publish
 
    cd ../devtools_extensions
-   flutter pub publish
-
-   cd ../devtools_shared
    flutter pub publish
    ```
 
