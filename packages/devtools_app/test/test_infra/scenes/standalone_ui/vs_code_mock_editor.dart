@@ -41,7 +41,7 @@ class _VsCodeFlutterPanelMockEditorState
 
   /// The last [maxLogEvents] communication messages sent between the panel
   /// and the "host IDE".
-  final logRing = DoubleLinkedQueue<String>();
+  final logRing = ListQueue<String>();
 
   /// A stream that emits each time the log is updated to allow the log widget
   /// to be rebuilt.
@@ -69,7 +69,7 @@ class _VsCodeFlutterPanelMockEditorState
   Widget build(BuildContext context) {
     final editorTheme = VsCodeTheme.of(context);
     final theme = Theme.of(context);
-    return Split(
+    return SplitPane(
       axis: Axis.horizontal,
       initialFractions: const [0.25, 0.75],
       minSizes: const [200, 200],
@@ -94,7 +94,7 @@ class _VsCodeFlutterPanelMockEditorState
             ),
           ],
         ),
-        Split(
+        SplitPane(
           axis: Axis.vertical,
           initialFractions: const [0.5, 0.5],
           minSizes: const [200, 200],
@@ -216,7 +216,7 @@ class _VsCodeFlutterPanelMockEditorState
                   ElevatedButton(
                     onPressed: () => api.endSessions(),
                     style: theme.elevatedButtonTheme.style!.copyWith(
-                      backgroundColor: const MaterialStatePropertyAll(
+                      backgroundColor: const WidgetStatePropertyAll(
                         Colors.red,
                       ),
                     ),

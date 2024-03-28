@@ -123,8 +123,8 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   @override
   final GlobalKey<NavigatorState> navigatorKey;
 
-  static String get currentPage => _currentPage;
-  static late String _currentPage;
+  static String? get currentPage => _currentPage;
+  static String? _currentPage;
 
   final Page Function(
     BuildContext,

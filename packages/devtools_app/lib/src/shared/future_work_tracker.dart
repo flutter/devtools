@@ -33,12 +33,15 @@ class FutureWorkTracker {
   ///
   /// Unless [clear] is called, [active] will now return true until [future]
   /// completes either with a value or an error.
-  Future<Object?> track(Future<Object?> Function() futureCallback) async {
+  Future<Object?> track(
+    Future<Object?> Function() futureCallback, {
+    int delayMicros = 0,
+  }) async {
     _active.value = true;
 
     // Release the UI thread so that listeners of the [_active] notifier can
     // react before [futureCallback] is called.
-    await delayToReleaseUiThread();
+    await delayToReleaseUiThread(micros: delayMicros);
 
     final future = futureCallback();
     _inProgress.add(future);

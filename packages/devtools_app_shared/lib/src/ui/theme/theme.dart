@@ -109,8 +109,8 @@ ThemeData _baseTheme({
     ),
     menuButtonTheme: MenuButtonThemeData(
       style: ButtonStyle(
-        textStyle: MaterialStatePropertyAll<TextStyle>(theme.regularTextStyle),
-        fixedSize: const MaterialStatePropertyAll<Size>(Size.fromHeight(24.0)),
+        textStyle: WidgetStatePropertyAll<TextStyle>(theme.regularTextStyle),
+        fixedSize: const WidgetStatePropertyAll<Size>(Size.fromHeight(24.0)),
       ),
     ),
     dropdownMenuTheme: DropdownMenuThemeData(
@@ -148,11 +148,9 @@ const lightColorScheme = ColorScheme(
   errorContainer: Color(0xFFFFDAD5),
   onError: Color(0xFFFFFFFF),
   onErrorContainer: Color(0xFF410002),
-  background: Color(0xFFFFFFFF),
-  onBackground: Color(0xFF1B1B1F),
   surface: Color(0xFFFFFFFF),
   onSurface: Color(0xFF1B1B1F),
-  surfaceVariant: Color(0xFFE1E2EC),
+  surfaceContainerHighest: Color(0xFFE1E2EC),
   onSurfaceVariant: Color(0xFF44474F),
   outline: Color(0xFF75777F),
   onInverseSurface: Color(0xFFF2F0F4),
@@ -185,11 +183,9 @@ const darkColorScheme = ColorScheme(
   errorContainer: Color(0xFF930009),
   onError: Color(0xFF690004),
   onErrorContainer: Color(0xFFFFDAD5),
-  background: Color(0xFF1B1B1F),
-  onBackground: Color(0xFFE3E2E6),
   surface: Color(0xFF1B1B1F),
   onSurface: Color(0xFFC7C6CA),
-  surfaceVariant: Color(0xFF44474F),
+  surfaceContainerHighest: Color(0xFF44474F),
   onSurfaceVariant: Color(0xFFC4C6D0),
   outline: Color(0xFF8E9099),
   onInverseSurface: Color(0xFF1B1B1F),
@@ -348,6 +344,10 @@ extension DevToolsSharedColorScheme on ColorScheme {
       isLight ? const Color(0xFF999999) : const Color(0xFF8A8A8A);
 
   Color get tooltipTextColor => isLight ? Colors.white : Colors.black;
+
+  Color get semiTransparentOverlayColor => isLight
+      ? Colors.grey.shade200.withAlpha(200)
+      : Colors.grey.shade800.withAlpha(200);
 }
 
 /// Utility extension methods to the [ThemeData] class.
@@ -364,6 +364,8 @@ extension ThemeDataExtension on ThemeData {
 
   TextStyle regularTextStyleWithColor(Color? color) =>
       regularTextStyle.copyWith(color: color);
+
+  TextStyle get errorTextStyle => regularTextStyleWithColor(colorScheme.error);
 
   TextStyle get boldTextStyle =>
       regularTextStyle.copyWith(fontWeight: FontWeight.bold);
@@ -549,7 +551,7 @@ ButtonStyle _generateButtonStyle({
 }) {
   if (!isScreenWiderThan(context, minScreenWidthForTextBeforeScaling)) {
     buttonStyle = buttonStyle.copyWith(
-      padding: MaterialStateProperty.resolveWith<EdgeInsets>((_) {
+      padding: WidgetStateProperty.resolveWith<EdgeInsets>((_) {
         return EdgeInsets.zero;
       }),
     );

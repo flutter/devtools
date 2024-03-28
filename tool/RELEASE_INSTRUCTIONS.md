@@ -18,10 +18,12 @@ bash for quality assurance and to prevent regressions from slipping into the rel
 
 # How to release Dart DevTools
 
-1. [Release into the Dart SDK master branch](#release-into-the-dart-sdk-master-branch)
+1. Release into the Dart SDK master branch
+    -  [Full release](#full-release-into-the-dart-sdk-master-branch)
+    -  [Dev release](#dev-release-into-the-dart-sdk-master-branch)   
 2. [Cherry-pick releases into the Dart SDK stable / beta branches](#cherry-pick-releases)
 
-## Release into the Dart SDK master branch
+## Full release into the Dart SDK master branch
 
 ### Configure/Refresh environment
 
@@ -145,7 +147,7 @@ Within minutes, a build should be uploaded for the commit you just merged and ta
 
 > [!NOTE]  
 > If the CIPD build times out, instructions for re-triggering can be found at
-[go/dart-engprod/release.md](go/dart-engprod/release.md)
+[go/dart-engprod/release.md](http://go/dart-engprod/release.md)
 
 ### Update the DevTools hash in the Dart SDK
 
@@ -183,7 +185,12 @@ you may need to hard reload and clear your browser cache.
 ### Publish DevTools pub packages
 
 If `package:devtools_app_shared`, `package:devtools_extensions`, or
-`package:devtools_shared` have unreleased changes, publish these packages to pub.
+`package:devtools_shared` have unreleased changes, these packages may need to be
+published to pub.
+
+**Before publishing these packages, please message the DevTools Team chat room to ask if there
+are any reasons why we should wait.** Since these packages follow their own release schedules,
+it is possible that there are changes that are not ready to publish.
 
 From the respective `devtools/packages/devtools_*` directories, run:
    ```shell
@@ -207,6 +214,11 @@ to add DevTools release notes to Flutter website and test them in DevTools.
 2. Once release notes are submitted to the Flutter website, send an announcement to
 [g/flutter-internal-announce](http://g/flutter-internal-announce) with a link to
 the new release notes.
+
+## Dev release into the Dart SDK master branch
+
+To publish a dev release follow just section [Update the DevTools hash in the Dart SDK](#update-the-devtools-hash-in-the-dart-sdk)
+of the full release process. 
 
 ## Cherry-pick releases
 

@@ -6,6 +6,7 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/charts/treemap.dart';
+import '../../shared/primitives/byte_utils.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
@@ -112,11 +113,7 @@ class _SizeColumn extends ColumnData<TreemapNode> {
 
   @override
   String getDisplayValue(TreemapNode dataObject) {
-    return prettyPrintBytes(
-      dataObject.byteSize,
-      kbFractionDigits: 1,
-      includeUnit: true,
-    )!;
+    return prettyPrintBytes(dataObject.byteSize, includeUnit: true)!;
   }
 
   @override

@@ -140,9 +140,9 @@ void main() {
         await loadDataAndPump(tester);
 
         // Verify the state of the splitter.
-        final splitFinder = find.byType(Split);
+        final splitFinder = find.byType(SplitPane);
         expect(splitFinder, findsOneWidget);
-        final Split splitter = tester.widget(splitFinder);
+        final SplitPane splitter = tester.widget(splitFinder);
         expect(splitter.initialFractions[0], equals(0.67));
         expect(splitter.initialFractions[1], equals(0.33));
       },

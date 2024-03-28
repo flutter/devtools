@@ -4,21 +4,21 @@
 
 import 'package:flutter/material.dart';
 
-import 'split.dart';
+import 'split_pane.dart';
 
 /// A widget that takes a list of [children] and lays them out in a column where
 /// each child has a flexible height.
-/// 
+///
 /// Each child in [children] must have an accompanying header in [header]. Since
 /// each header must be a [PreferredSizeWidget], it is common to use the shared
 /// widgets [AreaPaneHeader] or [BlankHeader] for the column [headers].
-/// 
+///
 /// The user can customize the amount of space allocated to each child by
 /// clicking and dragging the [header]s that separate the children.
 ///
 /// [initialFractions] defines how much space to give each child when building
 /// this widget.
-/// 
+///
 /// [minSizes] defines the minimum size that each child can be set to when
 /// adjusting the sizes of the children.
 final class FlexSplitColumn extends StatelessWidget {
@@ -45,10 +45,10 @@ final class FlexSplitColumn extends StatelessWidget {
   /// The headers that will be laid out above each corresponding child in
   /// [children].
   ///
-  /// All headers but the first will be passed into [Split.splitters] when
-  /// creating the [Split] widget in `build`. Instead of being passed into
-  /// [Split.splitters], it will be combined with the first child in [children]
-  /// to create the first child we will pass into [Split.children].
+  /// All headers but the first will be passed into [SplitPane.splitters] when
+  /// creating the [SplitPane] widget in `build`. Instead of being passed into
+  /// [SplitPane.splitters], it will be combined with the first child in [children]
+  /// to create the first child we will pass into [SplitPane.children].
   ///
   /// We do this because the first header will not actually be a splitter as
   /// there is not any content above it for it to split.
@@ -64,7 +64,7 @@ final class FlexSplitColumn extends StatelessWidget {
   /// The children that will be laid out below each corresponding header in
   /// [headers].
   ///
-  /// All [children] except the first will be passed into [Split.children]
+  /// All [children] except the first will be passed into [SplitPane.children]
   /// unmodified. We need to modify the first child from [children] to account
   /// for the first header (see above).
   final List<Widget> _children;
@@ -139,7 +139,7 @@ final class FlexSplitColumn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Split(
+    return SplitPane(
       axis: Axis.vertical,
       initialFractions: _initialFractions,
       minSizes: _minSizes,

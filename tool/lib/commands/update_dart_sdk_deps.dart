@@ -39,7 +39,7 @@ class UpdateDartSdkDepsCommand extends Command {
 
   @override
   Future run() async {
-    final commit = argResults![_argCommit];
+    final commit = argResults![_argCommit] as String;
     final dartSdkLocation = localDartSdkLocation();
     final processManager = ProcessManager();
 

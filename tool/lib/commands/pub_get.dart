@@ -40,8 +40,8 @@ class PubGetCommand extends Command {
     final processManager = ProcessManager();
     final packages = repo.getPackages();
 
-    final upgrade = argResults![_upgradeFlag];
-    final onlyMainPackages = argResults![_onlyMainFlag];
+    final upgrade = argResults![_upgradeFlag] as bool;
+    final onlyMainPackages = argResults![_onlyMainFlag] as bool;
     final command = upgrade ? 'upgrade' : 'get';
 
     log.stdout('Running flutter pub $command...');

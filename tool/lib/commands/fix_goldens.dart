@@ -11,11 +11,13 @@ import 'package:path/path.dart' as path;
 
 import '../utils.dart';
 
+const _runIdArg = 'run-id';
+
 /// A command for downloading and applying golden fixes, when they are broken.
 class FixGoldensCommand extends Command {
   FixGoldensCommand() {
     argParser.addOption(
-      'run-id',
+      _runIdArg,
       help: 'The ID of the workflow run where the goldens are failing. '
           'e.g.https://github.com/flutter/devtools/actions/runs/<run-id>/job/16691428186',
       valueHelp: '12345',
@@ -36,7 +38,7 @@ class FixGoldensCommand extends Command {
     // Change the CWD to the repo root
     Directory.current = pathFromRepoRoot("");
 
-    final runId = argResults!['run-id']!;
+    final runId = argResults![_runIdArg] as String;
     final tmpDownloadDir = await Directory.systemTemp.createTemp();
     try {
       print('Downloading the artifacts to ${tmpDownloadDir.path}');
@@ -49,6 +51,8 @@ class FixGoldensCommand extends Command {
             runId,
             '-p',
             '*golden_image_failures*',
+            '-R',
+            'github.com/flutter/devtools',
             '-D',
             tmpDownloadDir.path,
           ],

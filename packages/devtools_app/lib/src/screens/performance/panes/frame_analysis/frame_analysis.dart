@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app_shared/ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../service/service_extension_widgets.dart';
@@ -23,6 +24,7 @@ class FlutterFrameAnalysisView extends StatelessWidget {
     required this.frameAnalysis,
     required this.enhanceTracingController,
     required this.rebuildCountModel,
+    required this.displayRefreshRateNotifier,
   }) : super(key: key);
 
   final FrameAnalysis? frameAnalysis;
@@ -30,6 +32,8 @@ class FlutterFrameAnalysisView extends StatelessWidget {
   final EnhanceTracingController enhanceTracingController;
 
   final RebuildCountModel rebuildCountModel;
+
+  final ValueListenable<double> displayRefreshRateNotifier;
 
   @override
   Widget build(BuildContext context) {
@@ -74,9 +78,15 @@ class FlutterFrameAnalysisView extends StatelessWidget {
           // also needs to scroll and the devtools table functionality does not
           // support the shrinkWrap property and has features that would make
           //it difficult to handle robustly.
-          FrameHints(
-            frameAnalysis: frameAnalysis,
-            enhanceTracingController: enhanceTracingController,
+          ValueListenableBuilder(
+            valueListenable: displayRefreshRateNotifier,
+            builder: (context, refreshRate, _) {
+              return FrameHints(
+                frameAnalysis: frameAnalysis,
+                enhanceTracingController: enhanceTracingController,
+                displayRefreshRate: refreshRate,
+              );
+            },
           ),
           const PaddedDivider(
             padding: EdgeInsets.only(
@@ -92,7 +102,7 @@ class FlutterFrameAnalysisView extends StatelessWidget {
             ),
           ),
 
-          if (FeatureFlags.widgetRebuildstats) ...[
+          if (FeatureFlags.widgetRebuildStats) ...[
             if (rebuilds == null || rebuilds.isEmpty)
               ValueListenableBuilder<bool>(
                 valueListenable: serviceConnection

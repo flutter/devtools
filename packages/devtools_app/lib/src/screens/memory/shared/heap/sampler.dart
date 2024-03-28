@@ -8,24 +8,34 @@ import 'package:vm_service/vm_service.dart';
 import '../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/globals.dart';
-import '../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../shared/memory/class_name.dart';
+import '../../../../shared/memory/classes.dart';
+import '../../../../shared/memory/heap_data.dart';
+import '../../../../shared/memory/heap_object.dart';
 import '../../../../shared/vm_utils.dart';
-import 'heap.dart';
 
 class _HeapObjects {
   _HeapObjects(this.objects, this.heap);
 
   final ObjectSet objects;
-  final AdaptedHeapData heap;
+  final HeapData heap;
+
+  /// A set of identity hash codes for the objects in the heap.
+  ///
+  /// CPU and memory heavy to calculate,
+  /// so avoid calling this member unless necessary.
+  late final Set<int> codes = objects.indexes
+      .map((index) => heap.graph.objects[index].identityHashCode)
+      .where((code) => code > 0)
+      .toSet();
 }
 
-class ClassSampler {
-  ClassSampler(
+class LiveClassSampler {
+  LiveClassSampler(
     this.heapClass, {
     ObjectSet? objects,
-    AdaptedHeapData? heap,
-  })  : assert(objects?.objectsByCodes.isNotEmpty ?? true),
+    HeapData? heap,
+  })  : assert(objects?.indexes.isNotEmpty ?? true),
         assert((objects == null) == (heap == null)),
         _objects = objects == null ? null : _HeapObjects(objects, heap!);
 
@@ -129,9 +139,8 @@ class ClassSampler {
     serviceConnection.consoleService.appendBrowsableInstance(
       instanceRef: list,
       isolateRef: _mainIsolateRef,
-      heapSelection: selection == null
-          ? null
-          : HeapObjectSelection(selection.heap, object: null),
+      heapSelection:
+          selection == null ? null : HeapObject(selection.heap, index: null),
     );
   }
 
@@ -147,23 +156,23 @@ class ClassSampler {
   }
 }
 
-class HeapClassSampler extends ClassSampler {
-  HeapClassSampler(
+class SnapshotClassSampler extends LiveClassSampler {
+  SnapshotClassSampler(
     HeapClassName heapClass,
     ObjectSet objects,
-    AdaptedHeapData heap,
+    HeapData heap,
   ) : super(heapClass, heap: heap, objects: objects);
 
   Future<void> oneLiveStaticToConsole() async {
-    final selection = _objects!;
-
     ga.select(gac.memory, gac.MemoryEvent.dropOneLiveVariable);
+
+    final heapObjects = _objects!;
     final instances = (await _liveInstances())?.instances;
 
     final instanceRef = instances?.firstWhereOrNull(
       (objRef) =>
           objRef is InstanceRef &&
-          selection.objects.objectsByCodes.containsKey(objRef.identityHashCode),
+          heapObjects.codes.contains(objRef.identityHashCode),
     ) as InstanceRef?;
 
     if (instanceRef == null) {
@@ -174,11 +183,10 @@ class HeapClassSampler extends ClassSampler {
       return;
     }
 
-    final heapObject =
-        selection.objects.objectsByCodes[instanceRef.identityHashCode!]!;
-
-    final heapSelection =
-        HeapObjectSelection(selection.heap, object: heapObject);
+    final heapSelection = HeapObject(
+      heapObjects.heap,
+      index: heapObjects.heap.indexByCode[instanceRef.identityHashCode!],
+    );
 
     // drop to console
     serviceConnection.consoleService.appendBrowsableInstance(
@@ -189,18 +197,17 @@ class HeapClassSampler extends ClassSampler {
   }
 
   void oneStaticToConsole() {
-    final selection = _objects!;
+    final heapObjects = _objects!;
     ga.select(gac.memory, gac.MemoryEvent.dropOneStaticVariable);
 
-    final heapObject = selection.objects.objectsByCodes.values.first;
-    final heapSelection =
-        HeapObjectSelection(selection.heap, object: heapObject);
+    final index = heapObjects.objects.indexes.first;
+    final heapObject = HeapObject(heapObjects.heap, index: index);
 
     // drop to console
     serviceConnection.consoleService.appendBrowsableInstance(
       instanceRef: null,
       isolateRef: _mainIsolateRef,
-      heapSelection: heapSelection,
+      heapSelection: heapObject,
     );
   }
 }

@@ -37,6 +37,7 @@ Future<Response?> request(String url) async {
   Response? response;
 
   try {
+    _log.fine('requesting $url');
     response = await post(Uri.parse(url));
   } catch (_) {}
 
@@ -74,6 +75,26 @@ Future<DevToolsJsonFile?> requestFile({
   return null;
 }
 
+Future<void> notifyForVmServiceConnection({
+  required String vmServiceUri,
+  required bool connected,
+}) async {
+  if (isDevToolsServerAvailable) {
+    final uri = Uri(
+      path: apiNotifyForVmServiceConnection,
+      queryParameters: {
+        apiParameterValueKey: vmServiceUri,
+        apiParameterVmServiceConnected: connected.toString(),
+      },
+    );
+    final resp = await request(uri.toString());
+    final statusOk = resp?.statusOk ?? false;
+    if (!statusOk) {
+      logWarning(resp, apiNotifyForVmServiceConnection);
+    }
+  }
+}
+
 DevToolsJsonFile _devToolsJsonFileFromResponse(
   Response resp,
   String filePath,
@@ -99,4 +120,6 @@ void logWarning(Response? response, String apiType) {
 
 extension ResponseExtension on Response {
   bool get statusOk => statusCode == 200;
+  bool get statusForbidden => statusCode == 403;
+  bool get statusError => statusCode == 500;
 }

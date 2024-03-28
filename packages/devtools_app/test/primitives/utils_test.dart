@@ -4,6 +4,7 @@
 
 import 'package:collection/collection.dart';
 import 'package:devtools_app/src/shared/primitives/utils.dart';
+import 'package:devtools_app/src/shared/screen.dart';
 import 'package:devtools_app/src/shared/utils.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -16,63 +17,6 @@ import 'package:provider/provider.dart';
 
 void main() {
   group('utils', () {
-    test('prettyPrintBytes', () {
-      const int kb = 1024;
-      const int mb = 1024 * kb;
-
-      expect(
-        prettyPrintBytes(
-          51,
-          kbFractionDigits: 1,
-          includeUnit: true,
-        ),
-        '51 B',
-      );
-      expect(
-        prettyPrintBytes(
-          52,
-          kbFractionDigits: 1,
-          includeUnit: true,
-        ),
-        '0.1 KB',
-      );
-
-      expect(prettyPrintBytes(kb), '1');
-      expect(prettyPrintBytes(kb + 100, kbFractionDigits: 1), '1.1');
-      expect(prettyPrintBytes(kb + 150, kbFractionDigits: 2), '1.15');
-      expect(prettyPrintBytes(kb, includeUnit: true), '1 KB');
-      expect(prettyPrintBytes(kb * 1000, includeUnit: true), '1,000 KB');
-
-      expect(prettyPrintBytes(mb), '1.0');
-      expect(prettyPrintBytes(mb + kb * 100), '1.1');
-      expect(prettyPrintBytes(mb + kb * 150, mbFractionDigits: 2), '1.15');
-      expect(prettyPrintBytes(mb, includeUnit: true), '1.0 MB');
-      expect(prettyPrintBytes(mb - kb, includeUnit: true), '1,023 KB');
-    });
-
-    test('printKb', () {
-      const int kb = 1024;
-
-      expect(printKB(0), '0');
-      expect(printKB(1), '1');
-      expect(printKB(kb - 1), '1');
-      expect(printKB(kb), '1');
-      expect(printKB(kb + 1), '2');
-      expect(printKB(2000), '2');
-    });
-
-    test('printMb', () {
-      const int mb = 1024 * 1024;
-
-      expect(printMB(10 * mb, fractionDigits: 0), '10');
-      expect(printMB(10 * mb), '10.0');
-      expect(printMB(10 * mb, fractionDigits: 2), '10.00');
-
-      expect(printMB(1000 * mb, fractionDigits: 0), '1000');
-      expect(printMB(1000 * mb), '1000.0');
-      expect(printMB(1000 * mb, fractionDigits: 2), '1000.00');
-    });
-
     group('durationText', () {
       test('infers unit based on duration', () {
         expect(
@@ -660,21 +604,23 @@ void main() {
         }),
       );
       expect(
-        devToolsQueryParams('http://localhost:123/#/?key=value.json&key2=123'),
+        devToolsQueryParams('http://localhost:123/?key=value.json&key2=123'),
         equals({
           'key': 'value.json',
           'key2': '123',
         }),
       );
-      expect(
-        devToolsQueryParams(
-          'http://localhost:9101/#/appsize?key=value.json&key2=123',
-        ),
-        equals({
-          'key': 'value.json',
-          'key2': '123',
-        }),
-      );
+      for (final meta in ScreenMetaData.values) {
+        expect(
+          devToolsQueryParams(
+            'http://localhost:9101/${meta.id}?key=value.json&key2=123',
+          ),
+          equals({
+            'key': 'value.json',
+            'key2': '123',
+          }),
+        );
+      }
     });
 
     group('safeDivide', () {
@@ -1179,6 +1125,17 @@ void main() {
       });
     });
 
+    group('NullableListExtension', () {
+      test('isNullOrEmpty', () {
+        List<int>? nullableList;
+        expect(nullableList.isNullOrEmpty, true);
+        nullableList = [];
+        expect(nullableList.isNullOrEmpty, true);
+        nullableList.add(1);
+        expect(nullableList.isNullOrEmpty, false);
+      });
+    });
+
     group('SetExtension', () {
       test('containsWhere', () {
         final set = {1, 2, 3, 4};
@@ -1381,7 +1338,7 @@ void main() {
             _SubtractionResult(subtract: subtract, from: from);
 
         final result = subtractMaps<int, double, String, _SubtractionResult>(
-          substract: subtract,
+          subtract: subtract,
           from: from,
           subtractor: elementSubtractor,
         );
@@ -1409,7 +1366,7 @@ void main() {
             _SubtractionResult(subtract: subtract, from: from);
 
         final result = subtractMaps<int, double, String, _SubtractionResult>(
-          substract: null,
+          subtract: null,
           from: from,
           subtractor: elementSubtractor,
         );
@@ -1430,7 +1387,7 @@ void main() {
             _SubtractionResult(subtract: subtract, from: from);
 
         final result = subtractMaps<int, double, String, _SubtractionResult>(
-          substract: subtract,
+          subtract: subtract,
           from: null,
           subtractor: elementSubtractor,
         );

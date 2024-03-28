@@ -801,7 +801,7 @@ class CpuProfileMetaData extends ProfileMetaData {
   }
 }
 
-class CpuSampleEvent extends TraceEvent {
+class CpuSampleEvent extends ChromeTraceEvent {
   CpuSampleEvent({
     required this.leafId,
     required this.userTag,
@@ -812,7 +812,7 @@ class CpuSampleEvent extends TraceEvent {
   factory CpuSampleEvent.parse(Map<String, dynamic> traceJson) {
     final leafId = traceJson[CpuProfileData.stackFrameIdKey];
     final args =
-        (traceJson[TraceEvent.argsKey] as Map?)?.cast<String, Object?>();
+        (traceJson[ChromeTraceEvent.argsKey] as Map?)?.cast<String, Object?>();
     final userTag = args?[CpuProfileData.userTagKey] as String?;
     final vmTag = args?[CpuProfileData.vmTagKey] as String?;
     return CpuSampleEvent(
@@ -1295,7 +1295,7 @@ class _CpuProfileTimelineTree {
   }
 }
 
-extension CpuSamplesExtension on vm_service.CpuSamples {
+extension on vm_service.CpuSamples {
   Map<String, dynamic> generateStackFramesJson({
     required String isolateId,
     int kRootId = 0,

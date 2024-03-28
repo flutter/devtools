@@ -6,11 +6,11 @@ part of '../constants.dart';
 
 enum PerformanceEvents {
   refreshTimelineEvents,
+  includeCpuSamplesInTimeline,
   performanceOverlay,
   timelineFlameChartHelp,
   framesChartVisibility,
   selectFlutterFrame,
-  traceEventProcessingTime,
   trackRebuilds,
   trackUserCreatedWidgetBuilds,
   trackPaints,
@@ -24,14 +24,17 @@ enum PerformanceEvents {
   clearRasterStats,
   fullScreenLayerImage,
   clearRebuildStats,
-  perfettoModeTraceEventProcessingTime('traceEventProcessingTime-perfettoMode'),
   perfettoLoadTrace,
   perfettoScrollToTimeRange,
   perfettoShowHelp,
   performanceSettings,
-  traceCategories,
+  timelineSettings,
   openDataFile,
-  loadDataFromFile;
+  loadDataFromFile,
+  // Timing events.
+  perfettoModeTraceEventProcessingTime('traceEventProcessingTime-perfettoMode'),
+  getPerfettoVMTimelineWithCpuSamplesTime,
+  getPerfettoVMTimelineTime;
 
   const PerformanceEvents([this.nameOverride]);
 

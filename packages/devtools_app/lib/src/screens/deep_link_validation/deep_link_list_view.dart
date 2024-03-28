@@ -225,6 +225,7 @@ class _DataTable extends StatelessWidget {
         defaultSortColumn: (viewType == TableViewType.pathView ? path : domain)
             as ColumnData<LinkData>,
         defaultSortDirection: SortDirection.ascending,
+        sortOriginalData: true,
         onItemSelected: (linkdata) {
           controller.selectLink(linkdata!);
           controller.updateDisplayOptions(showSplitScreen: true);
@@ -242,12 +243,16 @@ class _DeepLinkListViewTopPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Provider.of<DeepLinksController>(context);
     return AreaPaneHeader(
+      roundedTopBorder: false,
+      includeTopBorder: false,
+      includeBottomBorder: false,
+      tall: true,
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             'Validate and fix',
-            style: Theme.of(context).textTheme.bodyLarge,
+            style: Theme.of(context).textTheme.titleSmall,
           ),
           ValueListenableBuilder(
             valueListenable: controller.selectedVariantIndex,
@@ -284,6 +289,7 @@ class _AndroidVariantDropdown extends StatelessWidget {
       children: [
         const Text('Android Variant:'),
         RoundedDropDownButton<int>(
+          roundedCornerOptions: RoundedCornerOptions.empty,
           value: index,
           items: [
             for (int i = 0; i < androidVariants.length; i++)
@@ -317,72 +323,80 @@ class _AllDeepLinkDataTable extends StatelessWidget {
       children: <Widget>[
         OutlineDecoration(
           showRight: false,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-                child: Text(
-                  'All deep links',
-                  style: textTheme.bodyLarge,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(denseSpacing),
-                child: SizedBox(
-                  width: controller.displayOptions.showSplitScreen
-                      ? _kSearchFieldSplitScreenWidth
-                      : _kSearchFieldFullWidth,
-                  child: DevToolsClearableTextField(
-                    labelText: '',
-                    hintText: 'Search a URL, domain or path',
-                    prefixIcon: const Icon(Icons.search),
-                    onChanged: (value) {
-                      controller.searchContent = value;
-                    },
-                    controller: controller.textEditingController,
+          showLeft: false,
+          child: SizedBox(
+            height: actionWidgetSize,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: defaultSpacing),
+                  child: Text(
+                    'All deep links',
+                    style: textTheme.titleSmall,
                   ),
                 ),
-              ),
-            ],
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
+                  child: SizedBox(
+                    width: controller.displayOptions.showSplitScreen
+                        ? _kSearchFieldSplitScreenWidth
+                        : _kSearchFieldFullWidth,
+                    child: DevToolsClearableTextField(
+                      labelText: '',
+                      hintText: 'Search a URL, domain or path',
+                      prefixIcon: const Icon(Icons.search),
+                      onChanged: (value) {
+                        controller.searchContent = value;
+                      },
+                      controller: controller.textEditingController,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-        TabBar(
-          tabs: [
-            DevToolsTab.create(
-              tabName: 'Domain view',
-              gaPrefix: gaPrefix,
-            ),
-            DevToolsTab.create(
-              tabName: 'Path view',
-              gaPrefix: gaPrefix,
-            ),
-            DevToolsTab.create(
-              tabName: 'Single URL view',
-              gaPrefix: gaPrefix,
-            ),
-          ],
-          tabAlignment: TabAlignment.start,
-          isScrollable: true,
+        SizedBox(
+          height: defaultHeaderHeight,
+          child: TabBar(
+            tabs: [
+              DevToolsTab.create(
+                tabName: 'Domain view',
+                gaPrefix: gaPrefix,
+              ),
+              DevToolsTab.create(
+                tabName: 'Path view',
+                gaPrefix: gaPrefix,
+              ),
+              DevToolsTab.create(
+                tabName: 'Single URL view',
+                gaPrefix: gaPrefix,
+              ),
+            ],
+            tabAlignment: TabAlignment.start,
+            isScrollable: true,
+          ),
         ),
         Expanded(
-          child: ValueListenableBuilder<List<LinkData>?>(
+          child: ValueListenableBuilder<ValidatedLinkDatas>(
             valueListenable: controller.displayLinkDatasNotifier,
             builder: (context, linkDatas, _) => TabBarView(
               children: [
                 _DataTable(
                   viewType: TableViewType.domainView,
-                  linkDatas: controller.getLinkDatasByDomain,
+                  linkDatas: linkDatas.byDomain,
                   controller: controller,
                 ),
                 _DataTable(
                   viewType: TableViewType.pathView,
-                  linkDatas: controller.getLinkDatasByPath,
+                  linkDatas: linkDatas.byPath,
                   controller: controller,
                 ),
                 _DataTable(
                   viewType: TableViewType.singleUrlView,
-                  linkDatas: linkDatas!,
+                  linkDatas: linkDatas.all,
                   controller: controller,
                 ),
               ],
@@ -407,10 +421,10 @@ class _NotificationCardSection extends StatelessWidget {
   final DeepLinksController controller;
   @override
   Widget build(BuildContext context) {
-    if (domainErrorCount == 0 && domainErrorCount == 0) {
+    if (domainErrorCount == 0 && pathErrorCount == 0) {
       return const SizedBox.shrink();
     }
-    return OutlineDecoration(
+    return OutlineDecoration.onlyTop(
       child: Padding(
         padding: const EdgeInsets.all(defaultSpacing),
         child: Row(
@@ -425,7 +439,7 @@ class _NotificationCardSection extends StatelessWidget {
                     // Switch to the domain view. Select the first link with domain error and show the split screen.
                     DefaultTabController.of(context).index = 0;
                     controller.selectLink(
-                      controller.getLinkDatasByDomain
+                      controller.displayLinkDatasNotifier.value.byDomain
                           .where((element) => element.domainErrors.isNotEmpty)
                           .first,
                     );
@@ -450,8 +464,8 @@ class _NotificationCardSection extends StatelessWidget {
                     // Switch to the path view. Select the first link with path error and show the split screen.
                     DefaultTabController.of(context).index = 1;
                     controller.selectLink(
-                      controller.getLinkDatasByPath
-                          .where((element) => element.pathError)
+                      controller.displayLinkDatasNotifier.value.byPath
+                          .where((element) => element.pathErrors.isNotEmpty)
                           .first,
                     );
                     controller.updateDisplayOptions(showSplitScreen: true);

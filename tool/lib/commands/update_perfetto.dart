@@ -13,17 +13,26 @@ import '../utils.dart';
 import 'shared.dart';
 
 const _buildFlag = 'build';
+const _authFlag = 'auth';
 
 class UpdatePerfettoCommand extends Command {
   UpdatePerfettoCommand() {
-    argParser.addOption(
-      _buildFlag,
-      abbr: 'b',
-      help: 'The build location of the Perfetto assets. When this is not '
-          'specified, the Perfetto assets will be fetched from the latest '
-          'source code at "android.googlesource.com".',
-      valueHelp: '/Users/me/path/to/perfetto/out/ui/ui/dist',
-    );
+    argParser
+      ..addOption(
+        _buildFlag,
+        abbr: 'b',
+        help: 'The build location of the Perfetto assets. When this is not '
+            'specified, the Perfetto assets will be fetched from the latest '
+            'source code at "android.googlesource.com".',
+        valueHelp: '/Users/me/path/to/perfetto/out/ui/ui/dist',
+      )
+      ..addFlag(
+        _authFlag,
+        negatable: true,
+        defaultsTo: true,
+        help: 'Whether to authenticate via "gcert" before cloning the Perfetto '
+            'repository.',
+      );
   }
 
   @override
@@ -42,6 +51,11 @@ class UpdatePerfettoCommand extends Command {
     }
 
     final processManager = ProcessManager();
+
+    final authenticate = argResults![_authFlag] as bool;
+    if (authenticate) {
+      await processManager.runProcess(CliCommand('gcert', []));
+    }
 
     final perfettoUiCompiledLibPath = pathFromRepoRoot(
       path.join('third_party', 'packages', 'perfetto_ui_compiled', 'lib'),
@@ -63,7 +77,7 @@ class UpdatePerfettoCommand extends Command {
     existingBuild.deleteSync(recursive: true);
 
     logStatus('updating Perfetto build');
-    final buildLocation = argResults![_buildFlag];
+    final buildLocation = argResults![_buildFlag] as String?;
     if (buildLocation != null) {
       logStatus('using Perfetto build from $buildLocation');
       logStatus(

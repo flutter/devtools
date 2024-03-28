@@ -131,7 +131,7 @@ class _LayerVisualizer extends StatelessWidget {
             ),
           );
         }
-        return Split(
+        return SplitPane(
           axis: Axis.horizontal,
           initialFractions: const [0.5, 0.5],
           children: [
@@ -302,7 +302,7 @@ class LayerImage extends StatelessWidget {
                   children: [
                     CustomPaint(
                       painter: _CheckerBoardBackgroundPainter(
-                        theme.colorScheme.background,
+                        theme.colorScheme.surface,
                         theme.colorScheme.outlineVariant,
                       ),
                       child: Image.memory(snapshot.bytes),

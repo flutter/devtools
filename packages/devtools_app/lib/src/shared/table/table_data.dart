@@ -5,6 +5,7 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
+import '../primitives/byte_utils.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
 
@@ -26,6 +27,7 @@ abstract class ColumnData<T> {
     this.titleTooltip,
     this.alignment = ColumnAlignment.left,
     this.headerAlignment = TextAlign.left,
+    this.showTooltip = false,
   }) : minWidthPx = null;
 
   ColumnData.wide(
@@ -34,7 +36,10 @@ abstract class ColumnData<T> {
     this.minWidthPx,
     this.alignment = ColumnAlignment.left,
     this.headerAlignment = TextAlign.left,
+    this.showTooltip = false,
   }) : fixedWidthPx = null;
+
+  final bool showTooltip;
 
   final String title;
 
@@ -79,8 +84,11 @@ abstract class ColumnData<T> {
 
   String? getCaption(T dataObject) => null;
 
+  // TODO: remove redundant getTooltip overrides now that [showToolTip] is
+  // available.
   /// Get the cell's tooltip value from the given [dataObject].
-  String getTooltip(T dataObject) => getDisplayValue(dataObject);
+  String getTooltip(T dataObject) =>
+      showTooltip ? getDisplayValue(dataObject) : '';
 
   /// Get the cell's rich tooltip span from the given [dataObject].
   ///
@@ -100,6 +108,12 @@ abstract class ColumnData<T> {
     final textColor = getTextColor(dataObject) ?? theme.colorScheme.onSurface;
     return theme.regularTextStyleWithColor(textColor);
   }
+
+  /// The configuration for the column. Configuration changes to columns
+  /// will cause the table to be rebuilt.
+  ///
+  /// Defaults to title.
+  String get config => title;
 
   @override
   String toString() => title;
@@ -340,7 +354,8 @@ abstract class SizeAndPercentageColumn<T> extends ColumnData<T> {
       richTooltipProvider?.call(dataObject, context);
 
   String _memoryAndPercentage(T dataObject) =>
-      '${prettyPrintBytes(sizeProvider!(dataObject), includeUnit: true)} (${_percentDisplay(dataObject)})';
+      '${prettyPrintBytes(sizeProvider!(dataObject), includeUnit: true, kbFractionDigits: 0)}'
+      ' (${_percentDisplay(dataObject)})';
 
   String _percentDisplay(T dataObject) =>
       percent(percentAsDoubleProvider(dataObject));

@@ -2,22 +2,30 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/screens/memory/shared/heap/spanning_tree.dart';
-import 'package:devtools_app/src/shared/memory/adapted_heap_data.dart';
-import 'package:devtools_app/src/shared/memory/adapted_heap_object.dart';
-import 'package:devtools_app/src/shared/memory/class_name.dart';
+import 'package:devtools_app/src/shared/memory/heap_data.dart';
+import 'package:devtools_app/src/shared/memory/simple_items.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:vm_service/vm_service.dart';
+
+import '../../../test_infra/test_data/memory/heap/heap_graph_fakes.dart';
 
 void main() {
   for (var t in _sizeTests) {
     test('has expected root and unreachable sizes, ${t.name}.', () async {
-      await calculateHeap(t.heap);
-      expect(t.heap.root.retainedSize, equals(t.rootRetainedSize));
+      final heap = await HeapData.calculate(
+        t.heap,
+        DateTime.now(),
+      );
+
+      expect(
+        heap.retainedSizes![heapRootIndex],
+        equals(t.rootRetainedSize),
+      );
 
       var actualUnreachableSize = 0;
-      for (var object in t.heap.objects) {
-        if (object.retainer == null) {
-          expect(object.retainedSize, isNull);
+      for (int i = 0; i < t.heap.objects.length; i++) {
+        final object = t.heap.objects[i];
+        if (!heap.isReachable(i)) {
           actualUnreachableSize += object.shallowSize;
         }
       }
@@ -28,38 +36,40 @@ void main() {
 
 final _sizeTests = [
   // Heaps without unreachable objects:
-
   _SizeTest(
-    name: 'One object heap',
-    heap: _heapData(
-      [
-        _createOneByteObject(0, []),
-      ],
-    ),
+    name: 'Just root',
+    heap: FakeHeapSnapshotGraph()
+      ..setObjects(
+        {
+          1: [],
+        },
+      ),
     rootRetainedSize: 1,
     unreachableSize: 0,
   ),
   _SizeTest(
     name: 'Two objects heap',
-    heap: _heapData(
-      [
-        _createOneByteObject(0, [1]),
-        _createOneByteObject(1, []),
-      ],
-    ),
+    heap: FakeHeapSnapshotGraph()
+      ..setObjects(
+        {
+          1: [2],
+          2: [],
+        },
+      ),
     rootRetainedSize: 2,
     unreachableSize: 0,
   ),
   _SizeTest(
     name: 'Four objects heap',
-    heap: _heapData(
-      [
-        _createOneByteObject(0, [1, 2, 3]),
-        _createOneByteObject(1, []),
-        _createOneByteObject(2, []),
-        _createOneByteObject(3, []),
-      ],
-    ),
+    heap: FakeHeapSnapshotGraph()
+      ..setObjects(
+        {
+          1: [2, 3, 4],
+          2: [],
+          3: [],
+          4: [],
+        },
+      ),
     rootRetainedSize: 4,
     unreachableSize: 0,
   ),
@@ -68,32 +78,34 @@ final _sizeTests = [
 
   _SizeTest(
     name: 'One unreachable object heap',
-    heap: _heapData(
-      [
-        _createOneByteObject(0, []),
-        _createOneByteObject(1, []),
-      ],
-    ),
+    heap: FakeHeapSnapshotGraph()
+      ..setObjects(
+        {
+          1: [],
+          2: [],
+        },
+      ),
     rootRetainedSize: 1,
     unreachableSize: 1,
   ),
   _SizeTest(
     name: 'Many unreachable objects heap',
-    heap: _heapData(
-      [
-        // Reachable:
-        _createOneByteObject(0, [1, 2, 3]),
-        _createOneByteObject(1, []),
-        _createOneByteObject(2, []),
-        _createOneByteObject(3, []),
+    heap: FakeHeapSnapshotGraph()
+      ..setObjects(
+        {
+          // Reachable:
+          1: [2, 3, 4],
+          2: [],
+          3: [],
+          4: [],
 
-        // Unreachable:
-        _createOneByteObject(4, [5, 6, 7]),
-        _createOneByteObject(5, []),
-        _createOneByteObject(6, []),
-        _createOneByteObject(7, []),
-      ],
-    ),
+          // Unreachable:
+          5: [6, 7, 8],
+          6: [],
+          7: [],
+          8: [],
+        },
+      ),
     rootRetainedSize: 4,
     unreachableSize: 4,
   ),
@@ -101,38 +113,58 @@ final _sizeTests = [
   // Heaps with weak objects:
   _SizeTest(
     name: 'One weak object heap',
-    //  0
+    //  1
     //  | \
-    //  1w 2
+    //  2w 3
     //  |
-    //  3
-    heap: _heapData(
-      [
-        _createOneByteObject(0, [1, 2]),
-        _createOneByteWeakObject(1, [3]),
-        _createOneByteObject(2, []),
-        _createOneByteObject(3, []),
-      ],
-    ),
+    //  4
+    heap: FakeHeapSnapshotGraph()
+      ..setObjects(
+        {
+          1: [2, 3],
+        },
+      )
+      ..addObjects(
+        {
+          2: [4],
+        },
+        weak: true,
+      )
+      ..addObjects(
+        {
+          3: [],
+          4: [],
+        },
+      ),
     rootRetainedSize: 3,
     unreachableSize: 1,
   ),
   _SizeTest(
     name: 'Two weak objects heap',
-    //  0
+    //  1
     //  | \
-    //  1w 2w
+    //  2w 3w
     //  |   \
-    //  3   4
-    heap: _heapData(
-      [
-        _createOneByteObject(0, [1, 2]),
-        _createOneByteWeakObject(1, [3]),
-        _createOneByteWeakObject(2, [4]),
-        _createOneByteObject(3, []),
-        _createOneByteObject(4, []),
-      ],
-    ),
+    //  4   5
+    heap: FakeHeapSnapshotGraph()
+      ..setObjects(
+        {
+          1: [2, 3],
+        },
+      )
+      ..addObjects(
+        {
+          2: [4],
+          3: [5],
+        },
+        weak: true,
+      )
+      ..addObjects(
+        {
+          4: [],
+          5: [],
+        },
+      ),
     rootRetainedSize: 3,
     unreachableSize: 2,
   ),
@@ -142,14 +174,15 @@ final _sizeTests = [
     name: 'Diamond',
     //  |\
     //  \|
-    heap: _heapData(
-      [
-        _createOneByteObject(0, [1, 2]),
-        _createOneByteObject(1, [3]),
-        _createOneByteObject(2, [3]),
-        _createOneByteObject(3, []),
-      ],
-    ),
+    heap: FakeHeapSnapshotGraph()
+      ..setObjects(
+        {
+          1: [2, 3],
+          2: [4],
+          3: [4],
+          4: [],
+        },
+      ),
     rootRetainedSize: 4,
     unreachableSize: 0,
   ),
@@ -158,15 +191,16 @@ final _sizeTests = [
     //  \
     //  |\
     //  \|
-    heap: _heapData(
-      [
-        _createOneByteObject(0, [1]),
-        _createOneByteObject(1, [2, 3]),
-        _createOneByteObject(2, [4]),
-        _createOneByteObject(3, [4]),
-        _createOneByteObject(4, []),
-      ],
-    ),
+    heap: FakeHeapSnapshotGraph()
+      ..setObjects(
+        {
+          1: [2],
+          2: [3, 4],
+          3: [5],
+          4: [5],
+          5: [],
+        },
+      ),
     rootRetainedSize: 5,
     unreachableSize: 0,
   ),
@@ -175,15 +209,25 @@ final _sizeTests = [
     //  \
     //  |\
     //  \|
-    heap: _heapData(
-      [
-        _createOneByteObject(0, [1]),
-        _createOneByteObject(1, [2, 3]),
-        _createOneByteWeakObject(2, [4]),
-        _createOneByteObject(3, [4]),
-        _createOneByteObject(4, []),
-      ],
-    ),
+    heap: FakeHeapSnapshotGraph()
+      ..setObjects(
+        {
+          1: [2],
+          2: [3, 4],
+        },
+      )
+      ..addObjects(
+        {
+          3: [5],
+        },
+        weak: true,
+      )
+      ..addObjects(
+        {
+          4: [5],
+          5: [],
+        },
+      ),
     rootRetainedSize: 5,
     unreachableSize: 0,
   ),
@@ -192,15 +236,25 @@ final _sizeTests = [
     //  \
     //  |\
     //  \|
-    heap: _heapData(
-      [
-        _createOneByteObject(0, [1]),
-        _createOneByteObject(1, [2, 3]),
-        _createOneByteWeakObject(2, [4]),
-        _createOneByteWeakObject(3, [4]),
-        _createOneByteObject(4, []),
-      ],
-    ),
+    heap: FakeHeapSnapshotGraph()
+      ..setObjects(
+        {
+          1: [2],
+          2: [3, 4],
+        },
+      )
+      ..addObjects(
+        {
+          3: [5],
+          4: [5],
+        },
+        weak: true,
+      )
+      ..addObjects(
+        {
+          5: [],
+        },
+      ),
     rootRetainedSize: 4,
     unreachableSize: 1,
   ),
@@ -210,58 +264,12 @@ class _SizeTest {
   _SizeTest({
     required this.name,
     required this.heap,
-
-    /// Retained size of the root.
     required this.rootRetainedSize,
-
-    /// Total size of all unreachable objects.
     required this.unreachableSize,
-  }) : assert(_assertHeapIndexIsCode(heap));
+  });
 
-  final AdaptedHeapData heap;
+  final HeapSnapshotGraph heap;
   final String name;
   final int rootRetainedSize;
   final int unreachableSize;
 }
-
-AdaptedHeapObject _createOneByteObject(
-  int codeAndIndex,
-  List<int> references,
-) =>
-    AdaptedHeapObject(
-      code: codeAndIndex,
-      outRefs: references.toSet(),
-      heapClass: HeapClassName.fromPath(
-        className: 'MyClass',
-        library: 'my_lib',
-      ),
-      shallowSize: 1,
-    );
-
-AdaptedHeapObject _createOneByteWeakObject(
-  int codeAndIndex,
-  List<int> references,
-) {
-  final result = AdaptedHeapObject(
-    code: codeAndIndex,
-    outRefs: references.toSet(),
-    heapClass: HeapClassName.fromPath(
-      className: '_WeakProperty',
-      library: 'dart.core',
-    ),
-    shallowSize: 1,
-  );
-  assert(result.heapClass.isWeakEntry, isTrue);
-  return result;
-}
-
-AdaptedHeapData _heapData(List<AdaptedHeapObject> objects) {
-  return AdaptedHeapData(objects, rootIndex: 0);
-}
-
-/// For convenience of testing each heap object has code equal to the
-/// index in array.
-bool _assertHeapIndexIsCode(AdaptedHeapData heap) => heap.objects
-    .asMap()
-    .entries
-    .every((entry) => entry.key == entry.value.code);

@@ -6,22 +6,24 @@ import 'dart:async';
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_deeplink.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
+import '../../shared/globals.dart';
 import '../../shared/server/server.dart' as server;
 import 'deep_links_model.dart';
 import 'deep_links_services.dart';
 
 typedef _DomainAndPath = ({String domain, String path});
-const domainErrorsThatCanBeFixedByGeneratedJson = {
+
+const domainAssetLinksJsonFileErrors = {
   DomainError.existence,
   DomainError.appIdentifier,
   DomainError.fingerprints,
-  DomainError.contentType,
 };
-const domainErrorsThatCanNotBeFixedByGeneratedJson = {
+const domainHostingErrors = {
+  DomainError.contentType,
   DomainError.httpsAccessibility,
   DomainError.nonRedirect,
   DomainError.hostForm,
@@ -149,9 +151,10 @@ class DeepLinksController extends DisposableController {
   String get applicationId =>
       _androidAppLinks[selectedVariantIndex.value]?.applicationId ?? '';
 
-  List<LinkData> get getLinkDatasByPath {
+  @visibleForTesting
+  List<LinkData> linkDatasByPath(List<LinkData> linkdatas) {
     final linkDatasByPath = <String, LinkData>{};
-    for (var linkData in allValidatedLinkDatas!) {
+    for (var linkData in linkdatas) {
       final previousRecord = linkDatasByPath[linkData.path];
       linkDatasByPath[linkData.path] = LinkData(
         domain: linkData.domain,
@@ -168,17 +171,18 @@ class DeepLinksController extends DisposableController {
           ...previousRecord?.associatedDomains ?? [],
           linkData.domain,
         ],
-        pathError: linkData.pathError,
+        pathErrors: linkData.pathErrors,
       );
     }
 
     return getFilterredLinks(linkDatasByPath.values.toList());
   }
 
-  List<LinkData> get getLinkDatasByDomain {
+  @visibleForTesting
+  List<LinkData> linkDatasByDomain(List<LinkData> linkdatas) {
     final linkDatasByDomain = <String, LinkData>{};
 
-    for (var linkData in allValidatedLinkDatas!) {
+    for (var linkData in linkdatas) {
       final previousRecord = linkDatasByDomain[linkData.domain];
       linkDatasByDomain[linkData.domain] = LinkData(
         domain: linkData.domain,
@@ -198,61 +202,113 @@ class DeepLinksController extends DisposableController {
 
   late final selectedVariantIndex = ValueNotifier<int>(0);
   void _handleSelectedVariantIndexChanged() {
-    unawaited(_loadAndroidAppLinks());
+    unawaited(loadAndroidAppLinksAndValidate());
   }
 
-  Future<void> _loadAndroidAppLinks() async {
+  Future<void> loadAndroidAppLinksAndValidate() async {
     pagePhase.value = PagePhase.linksLoading;
-    if (!_androidAppLinks.containsKey(selectedVariantIndex.value)) {
-      final variant =
-          selectedProject.value!.androidVariants[selectedVariantIndex.value];
-      await ga.timeAsync(
-        gac.deeplink,
-        gac.AnalyzeFlutterProject.loadAppLinks.name,
-        asyncOperation: () async {
-          final result = await server.requestAndroidAppLinkSettings(
+
+    final variant =
+        selectedProject.value!.androidVariants[selectedVariantIndex.value];
+    await ga.timeAsync(
+      gac.deeplink,
+      gac.AnalyzeFlutterProject.loadAppLinks.name,
+      asyncOperation: () async {
+        final AppLinkSettings result;
+        try {
+          result = await server.requestAndroidAppLinkSettings(
             selectedProject.value!.path,
             buildVariant: variant,
           );
           _androidAppLinks[selectedVariantIndex.value] = result;
-        },
-      );
+        } catch (_) {
+          pagePhase.value = PagePhase.errorPage;
+        }
+      },
+    );
+
+    if (pagePhase.value == PagePhase.errorPage) {
+      return;
     }
     await validateLinks();
   }
 
+  Future<String?> packageDirectoryForMainIsolate() async {
+    if (!serviceConnection.serviceManager.hasConnection) {
+      return null;
+    }
+    final packageUriString =
+        await serviceConnection.rootPackageDirectoryForMainIsolate();
+    if (packageUriString == null) return null;
+    return Uri.parse(packageUriString).toFilePath();
+  }
+
+  Set<PathError> _getPathErrorsFromIntentFilterChecks(
+    IntentFilterChecks intentFilterChecks,
+  ) {
+    return {
+      if (!intentFilterChecks.hasActionView) PathError.intentFilterActionView,
+      if (!intentFilterChecks.hasBrowsableCategory)
+        PathError.intentFilterBrowsable,
+      if (!intentFilterChecks.hasDefaultCategory) PathError.intentFilterDefault,
+      if (!intentFilterChecks.hasAutoVerify) PathError.intentFilterAutoVerify,
+    };
+  }
+
   /// Get all unverified link data.
   List<LinkData> get _allRawLinkDatas {
-    final appLinks = _androidAppLinks[selectedVariantIndex.value]?.deeplinks;
-    if (appLinks == null) {
+    final appLinksSettings = _androidAppLinks[selectedVariantIndex.value];
+    if (appLinksSettings == null) {
       return const <LinkData>[];
     }
-    final domainPathToScheme = <_DomainAndPath, Set<String>>{};
+    final appLinks = appLinksSettings.deeplinks;
+
+    final domainPathToLinkData = <_DomainAndPath, LinkData>{};
     for (final appLink in appLinks) {
-      final schemes = domainPathToScheme.putIfAbsent(
-        (domain: appLink.host, path: appLink.path),
-        () => <String>{},
-      );
-      schemes.add(appLink.scheme);
+      final domainAndPath = (domain: appLink.host, path: appLink.path);
+
+      if (domainPathToLinkData[domainAndPath] == null) {
+        domainPathToLinkData[domainAndPath] = LinkData(
+          domain: appLink.host,
+          path: appLink.path,
+          pathErrors:
+              _getPathErrorsFromIntentFilterChecks(appLink.intentFilterChecks),
+          os: [PlatformOS.android],
+          scheme: [appLink.scheme],
+        );
+      } else {
+        final linkData = domainPathToLinkData[domainAndPath]!;
+        if (!linkData.scheme.contains(appLink.scheme)) {
+          linkData.scheme.add(appLink.scheme);
+        }
+        final pathErrors = {
+          ...linkData.pathErrors,
+          if (!appLinksSettings.deeplinkingFlagEnabled)
+            PathError.missingDeepLinkingFlag,
+          ..._getPathErrorsFromIntentFilterChecks(appLink.intentFilterChecks),
+        };
+
+        linkData.pathErrors = pathErrors;
+      }
     }
-    return domainPathToScheme.entries
-        .map(
-          (entry) => LinkData(
-            domain: entry.key.domain,
-            path: entry.key.path,
-            os: [PlatformOS.android],
-            scheme: entry.value.toList(),
-          ),
-        )
-        .toList();
+
+    return domainPathToLinkData.values.toList();
   }
 
   final selectedProject = ValueNotifier<FlutterProject?>(null);
+  final googlePlayFingerprintsAvailability = ValueNotifier<bool>(false);
+  final localFingerprint = ValueNotifier<String?>(null);
   final selectedLink = ValueNotifier<LinkData?>(null);
   final pagePhase = ValueNotifier<PagePhase>(PagePhase.emptyState);
 
-  List<LinkData>? allValidatedLinkDatas;
-  final displayLinkDatasNotifier = ValueNotifier<List<LinkData>?>(null);
+  /// These are all link datas before applying displayOptions.
+  var validatedLinkDatas = ValidatedLinkDatas.empty();
+
+  /// These are link datas actually displayed in the data table after filtering by displayOptions.
+  final displayLinkDatasNotifier = ValueNotifier<ValidatedLinkDatas>(
+    ValidatedLinkDatas.empty(),
+  );
+
   final generatedAssetLinksForSelectedLink =
       ValueNotifier<GenerateAssetLinksResult?>(null);
 
@@ -263,21 +319,38 @@ class DeepLinksController extends DisposableController {
   final textEditingController = TextEditingController();
   final deepLinksServices = DeepLinksServices();
 
+  bool addLocalFingerprint(String fingerprint) {
+    // A valid fingerprint consists of 32 pairs of hexadecimal digits separated by colons.
+    bool isValidFingerprint(String input) {
+      final RegExp pattern =
+          RegExp(r'^([0-9a-f]{2}:){31}[0-9a-f]{2}$', caseSensitive: false);
+      return pattern.hasMatch(input);
+    }
+
+    if (!isValidFingerprint(fingerprint)) {
+      return false;
+    }
+    if (localFingerprint.value != fingerprint) {
+      localFingerprint.value = fingerprint;
+      // If the local fingerprint is updated, re-generate asset link file.
+      unawaited(_generateAssetLinks());
+    }
+    return true;
+  }
+
   Future<void> _generateAssetLinks() async {
     generatedAssetLinksForSelectedLink.value = null;
     generatedAssetLinksForSelectedLink.value =
         await deepLinksServices.generateAssetLinks(
       domain: selectedLink.value!.domain,
       applicationId: applicationId,
+      localFingerprint: localFingerprint.value,
     );
   }
 
-  Future<List<LinkData>> _validateAndroidDomain() async {
-    final List<LinkData> linkdatas = _allRawLinkDatas;
-    if (linkdatas.isEmpty) {
-      pagePhase.value = PagePhase.noLinks;
-      return const <LinkData>[];
-    }
+  Future<List<LinkData>> _validateAndroidDomain(
+    List<LinkData> linkdatas,
+  ) async {
     final domains = linkdatas
         .where((linkdata) => linkdata.os.contains(PlatformOS.android))
         .map((linkdata) => linkdata.domain)
@@ -287,11 +360,15 @@ class DeepLinksController extends DisposableController {
     late final Map<String, List<DomainError>> domainErrors;
 
     try {
-      domainErrors = await deepLinksServices.validateAndroidDomain(
+      final result = await deepLinksServices.validateAndroidDomain(
         domains: domains,
         applicationId: applicationId,
+        localFingerprint: localFingerprint.value,
       );
-    } catch (e) {
+      domainErrors = result.domainErrors;
+      googlePlayFingerprintsAvailability.value =
+          result.googlePlayFingerprintsAvailability;
+    } catch (_) {
       //TODO(hangyujin): Add more error handling for cases like RPC error and invalid json.
       pagePhase.value = PagePhase.errorPage;
       return linkdatas;
@@ -304,7 +381,7 @@ class DeepLinksController extends DisposableController {
           domain: linkdata.domain,
           domainErrors: errors,
           path: linkdata.path,
-          pathError: linkdata.pathError,
+          pathErrors: linkdata.pathErrors,
           os: linkdata.os,
           scheme: linkdata.scheme,
           associatedDomains: linkdata.associatedDomains,
@@ -315,21 +392,49 @@ class DeepLinksController extends DisposableController {
     }).toList();
   }
 
-  Future<void> validateLinks() async {
-    pagePhase.value = PagePhase.linksValidating;
-    allValidatedLinkDatas = await _validateAndroidDomain();
-    if (pagePhase.value == PagePhase.linksValidating) {
-      pagePhase.value = PagePhase.linksValidated;
+  Future<List<LinkData>> _validatePath(List<LinkData> linkdatas) async {
+    for (final linkData in linkdatas) {
+      if (!(linkData.path.startsWith('/') || linkData.path == '.*')) {
+        linkData.pathErrors.add(PathError.pathFormat);
+      }
     }
-    displayLinkDatasNotifier.value = getFilterredLinks(allValidatedLinkDatas!);
+    return linkdatas;
+  }
 
+  Future<void> validateLinks() async {
+    List<LinkData> linkdata = _allRawLinkDatas;
+    if (linkdata.isEmpty) {
+      pagePhase.value = PagePhase.noLinks;
+      return;
+    }
+    pagePhase.value = PagePhase.linksValidating;
+
+    linkdata = await _validateAndroidDomain(linkdata);
+    if (pagePhase.value == PagePhase.errorPage) {
+      return;
+    }
+    linkdata = await _validatePath(linkdata);
+
+    if (pagePhase.value == PagePhase.errorPage) {
+      return;
+    }
+
+    validatedLinkDatas = ValidatedLinkDatas(
+      all: linkdata,
+      byDomain: linkDatasByDomain(linkdata),
+      byPath: linkDatasByPath(linkdata),
+    );
     displayOptionsNotifier.value = displayOptionsNotifier.value.copyWith(
-      domainErrorCount: getLinkDatasByDomain
+      domainErrorCount: validatedLinkDatas.byDomain
           .where((element) => element.domainErrors.isNotEmpty)
           .length,
-      pathErrorCount:
-          getLinkDatasByPath.where((element) => element.pathError).length,
+      pathErrorCount: validatedLinkDatas.byPath
+          .where((element) => element.pathErrors.isNotEmpty)
+          .length,
     );
+    applyFilters();
+
+    pagePhase.value = PagePhase.linksValidated;
   }
 
   void selectLink(LinkData linkdata) async {
@@ -342,7 +447,7 @@ class DeepLinksController extends DisposableController {
   set searchContent(String content) {
     displayOptionsNotifier.value =
         displayOptionsNotifier.value.copyWith(searchContent: content);
-    displayLinkDatasNotifier.value = getFilterredLinks(allValidatedLinkDatas!);
+    applyFilters();
   }
 
   void updateDisplayOptions({
@@ -370,7 +475,17 @@ class DeepLinksController extends DisposableController {
           displayOptionsNotifier.value.updateFilter(removedFilter, false);
     }
 
-    displayLinkDatasNotifier.value = getFilterredLinks(allValidatedLinkDatas!);
+    if (addedFilter != null || removedFilter != null) {
+      applyFilters();
+    }
+  }
+
+  void applyFilters() {
+    displayLinkDatasNotifier.value = ValidatedLinkDatas(
+      all: getFilterredLinks(validatedLinkDatas.all),
+      byDomain: getFilterredLinks(validatedLinkDatas.byDomain),
+      byPath: getFilterredLinks(validatedLinkDatas.byPath),
+    );
   }
 
   @visibleForTesting
@@ -394,10 +509,10 @@ class DeepLinksController extends DisposableController {
       if (!((linkData.domainErrors.isNotEmpty &&
               displayOptions.filters
                   .contains(FilterOption.failedDomainCheck)) ||
-          (linkData.pathError &&
+          (linkData.pathErrors.isNotEmpty &&
               displayOptions.filters.contains(FilterOption.failedPathCheck)) ||
-          (!linkData.domainErrors.isNotEmpty &&
-              !linkData.pathError &&
+          (linkData.domainErrors.isEmpty &&
+              linkData.pathErrors.isEmpty &&
               displayOptions.filters.contains(FilterOption.noIssue)))) {
         return false;
       }

@@ -105,6 +105,13 @@ class ServiceManager<T extends VmService> {
   ConnectedApp? connectedApp;
 
   T? service;
+
+  /// The URI of the most recent VM service connection [service].
+  ///
+  /// We store this in a local variable so that we still have access to it when
+  /// the VM service closes.
+  String? serviceUri;
+
   VM? vm;
   String? sdkVersion;
 
@@ -216,6 +223,8 @@ class ServiceManager<T extends VmService> {
       return;
     }
     this.service = service;
+    serviceUri = service.wsUri!;
+
     if (_serviceAvailable.isCompleted) {
       _serviceAvailable = Completer();
     }
@@ -366,16 +375,19 @@ class ServiceManager<T extends VmService> {
   void _closeVmServiceConnection() {
     _serviceAvailable = Completer();
     service = null;
+    serviceUri = null;
     vm = null;
     sdkVersion = null;
     connectedApp = null;
   }
 
   Future<void> manuallyDisconnect() async {
-    await vmServiceClosed(
-      connectionState:
-          const ConnectedState(false, userInitiatedConnectionState: true),
-    );
+    if (hasConnection) {
+      await vmServiceClosed(
+        connectionState:
+            const ConnectedState(false, userInitiatedConnectionState: true),
+      );
+    }
   }
 
   Future<Response> callServiceOnMainIsolate(String name) async {
