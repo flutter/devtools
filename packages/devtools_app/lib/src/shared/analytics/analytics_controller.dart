@@ -50,7 +50,7 @@ class AnalyticsController {
   /// Method to call to confirm with package:unified_analytics the user has
   /// seen the consent message.
   Future<void> markConsentMessageAsShown() async =>
-      await dtdManager.analyticsConsentMessage();
+      await dtdManager.analyticsClientShowedMessage();
 
   final VoidCallback? onSetupAnalytics;
 
