@@ -18,10 +18,12 @@ bash for quality assurance and to prevent regressions from slipping into the rel
 
 # How to release Dart DevTools
 
-1. [Release into the Dart SDK master branch](#release-into-the-dart-sdk-master-branch)
+1. Release into the Dart SDK master branch
+    -  [Full release](#full-release-into-the-dart-sdk-master-branch)
+    -  [Dev release](#dev-release-into-the-dart-sdk-master-branch)   
 2. [Cherry-pick releases into the Dart SDK stable / beta branches](#cherry-pick-releases)
 
-## Release into the Dart SDK master branch
+## Full release into the Dart SDK master branch
 
 ### Configure/Refresh environment
 
@@ -212,6 +214,11 @@ to add DevTools release notes to Flutter website and test them in DevTools.
 2. Once release notes are submitted to the Flutter website, send an announcement to
 [g/flutter-internal-announce](http://g/flutter-internal-announce) with a link to
 the new release notes.
+
+## Dev release into the Dart SDK master branch
+
+To publish a dev release follow just section [Update the DevTools hash in the Dart SDK](#update-the-devtools-hash-in-the-dart-sdk)
+of the full release process. 
 
 ## Cherry-pick releases
 
