@@ -184,7 +184,8 @@ you may need to hard reload and clear your browser cache.
 
 If `package:devtools_app_shared`, `package:devtools_extensions`, or
 `package:devtools_shared` have unreleased changes, these packages may need to be
-published to pub.
+published to pub. Publish the backages whith versions they have, even if it is
+`.dev` versions.
 
 **Before publishing these packages, please message the DevTools Team chat room to ask if there
 are any reasons why we should wait.** Since these packages follow their own release schedules,
