@@ -191,7 +191,7 @@ are any reasons why we should wait.** Since these packages follow their own rele
 it is possible that there are changes that are not ready to publish.
 
 From the respective `devtools/packages/devtools_*` directories, run `flutter pub publish`. You can copy
-commands from this code span:
+commands from here:
 
    ```shell
    # Assuming you are in one of packages root.
