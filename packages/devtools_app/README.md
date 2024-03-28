@@ -1,3 +1,5 @@
+Not for merge.
+
 ## What is this?
 
 This is a companion repo to the main Flutter repo. It contains the source code
