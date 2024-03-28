@@ -14,7 +14,7 @@ TODO: Remove this section if there are not any general updates.
 
 ## Inspector updates
 
-TODO: Remove this section if there are not any general updates.
+* Add a preference for the default inspector view - [#6949](https://github.com/flutter/devtools/pull/6949)
 
 ## Performance updates
 
