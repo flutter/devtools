@@ -4,13 +4,14 @@
 
 import 'dart:async';
 
-import 'analytics.dart' as ga;
+import '../dtd_extension.dart';
+import '../globals.dart';
 import 'analytics_controller.dart';
 
 FutureOr<AnalyticsController> get devToolsAnalyticsController async {
   return AnalyticsController(
     enabled: false,
     firstRun: false,
-    consentMessage: await ga.fetchAnalyticsConsentMessage(),
+    consentMessage: await dtdManager.analyticsConsentMessage(),
   );
 }

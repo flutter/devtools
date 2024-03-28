@@ -1,3 +1,10 @@
+# 9.0.0
+* **Breaking change:** remove parameter `analytics` from `ServerApi.handle` in favor
+of DTD implementation.
+* Bump `package:dtd` to `^2.2.0`
+* Remove DevTools server APIs `apiMarkConsentMessageAsShown` and `apiGetConsentMessage`
+in favor of DTD implementation.
+
 # 8.1.1-dev.0
 * Update `package:dtd` to `2.1.0`.
 * Bump the minimum Dart SDK version to `3.4.0-275.0.dev`.

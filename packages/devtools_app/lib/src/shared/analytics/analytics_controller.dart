@@ -6,6 +6,8 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
+import '../dtd_extension.dart';
+import '../globals.dart';
 import '_analytics_controller_stub.dart'
     if (dart.library.js_interop) '_analytics_controller_web.dart';
 
@@ -22,11 +24,9 @@ class AnalyticsController {
     this.onEnableAnalytics,
     this.onDisableAnalytics,
     this.onSetupAnalytics,
-    AsyncAnalyticsCallback? markConsentMessageAsShown,
   })  : analyticsEnabled = ValueNotifier<bool>(enabled),
         _shouldPrompt =
-            ValueNotifier<bool>(firstRun && consentMessage.isNotEmpty),
-        _markConsentMessageAsShown = markConsentMessageAsShown {
+            ValueNotifier<bool>(firstRun && consentMessage.isNotEmpty) {
     if (_shouldPrompt.value) {
       unawaited(toggleAnalyticsEnabled(true));
     }
@@ -49,14 +49,13 @@ class AnalyticsController {
 
   /// Method to call to confirm with package:unified_analytics the user has
   /// seen the consent message.
-  final AsyncAnalyticsCallback? _markConsentMessageAsShown;
   Future<void> markConsentMessageAsShown() async =>
-      await _markConsentMessageAsShown?.call();
+      await dtdManager.analyticsConsentMessage();
 
   final VoidCallback? onSetupAnalytics;
 
   /// Consent message for package:unified_analytics to be shown on first run.
-  final String consentMessage;
+  late final String consentMessage;
 
   Future<void> toggleAnalyticsEnabled(bool? enable) async {
     if (enable == true) {
