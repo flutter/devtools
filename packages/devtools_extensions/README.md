@@ -8,7 +8,7 @@ DevTools' extension framework allows you to add your custom tab to the DevTools 
 by creating a Dart package
 that leverage frameworks and utilities from DevTools (like VM service connection, theming,
 shared widgets, utilities, etc.). When an app, that depends on your
-package,  is connected to DevTools, your extension will show up in its own DevTools tab:
+package, is connected to DevTools, your extension will show up in its own DevTools tab:
 
 ![Example devtools extension](_readme_images/example_devtools_extension.png)
 
