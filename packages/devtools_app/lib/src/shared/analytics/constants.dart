@@ -4,7 +4,7 @@
 
 import 'package:devtools_shared/devtools_extensions.dart';
 
-import '../preferences.dart';
+import '../preferences/preferences.dart';
 import '../screen.dart';
 
 part 'constants/_cpu_profiler_constants.dart';

@@ -19,7 +19,7 @@ import '../../shared/console/eval/inspector_tree.dart';
 import '../../shared/editable_list.dart';
 import '../../shared/error_badge_manager.dart';
 import '../../shared/globals.dart';
-import '../../shared/preferences.dart';
+import '../../shared/preferences/preferences.dart';
 import '../../shared/primitives/blocking_action_mixin.dart';
 import '../../shared/primitives/simple_items.dart';
 import '../../shared/screen.dart';
@@ -585,7 +585,10 @@ class InspectorDefaultDetailsViewOption extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Select the default tab for the inspector.'),
+            Text(
+              'Select the default tab for the inspector.',
+              style: theme.subtleTextStyle,
+            ),
             const SizedBox(height: denseSpacing),
             Row(
               mainAxisSize: MainAxisSize.min,
