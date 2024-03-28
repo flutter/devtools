@@ -17,6 +17,9 @@ class PerformanceSettingsDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // This settings dialog currently only supports settings for Flutter apps
+    // and shouldn't be accessible for Dart CLI programs.
+    assert(serviceConnection.serviceManager.connectedApp!.isFlutterAppNow!);
     return DevToolsDialog(
       title: const DialogTitleText('Performance Settings'),
       includeDivider: false,
@@ -24,12 +27,9 @@ class PerformanceSettingsDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (serviceConnection
-              .serviceManager.connectedApp!.isFlutterAppNow!) ...[
-            FlutterSettings(
-              flutterFramesController: controller.flutterFramesController,
-            ),
-          ],
+          FlutterSettings(
+            flutterFramesController: controller.flutterFramesController,
+          ),
         ],
       ),
       actions: const [

@@ -130,11 +130,12 @@ class _SecondaryPerformanceControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isFlutterApp =
+        serviceConnection.serviceManager.connectedApp!.isFlutterAppNow!;
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        if (serviceConnection
-            .serviceManager.connectedApp!.isFlutterAppNow!) ...[
+        if (isFlutterApp) ...[
           ServiceExtensionButtonGroup(
             minScreenWidthForTextBeforeScaling:
                 PerformanceControls.minScreenWidthForTextBeforeScaling,
@@ -152,12 +153,14 @@ class _SecondaryPerformanceControls extends StatelessWidget {
           screenId: ScreenMetaData.performance.id,
           onSave: controller.exportData,
         ),
-        const SizedBox(width: denseSpacing),
-        SettingsOutlinedButton(
-          gaScreen: gac.performance,
-          gaSelection: gac.PerformanceEvents.performanceSettings.name,
-          onPressed: () => _openSettingsDialog(context),
-        ),
+        if (isFlutterApp) ...[
+          const SizedBox(width: denseSpacing),
+          SettingsOutlinedButton(
+            gaScreen: gac.performance,
+            gaSelection: gac.PerformanceEvents.performanceSettings.name,
+            onPressed: () => _openSettingsDialog(context),
+          ),
+        ],
       ],
     );
   }

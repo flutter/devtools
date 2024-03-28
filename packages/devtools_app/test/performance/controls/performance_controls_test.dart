@@ -102,7 +102,7 @@ void main() {
         expect(find.text('Enhance Tracing'), findsNothing);
         expect(find.text('More debugging options'), findsNothing);
         expect(find.byType(OpenSaveButtonGroup), findsOneWidget);
-        expect(find.byIcon(Icons.settings_outlined), findsOneWidget);
+        expect(find.byIcon(Icons.settings_outlined), findsNothing);
       },
     );
 
