@@ -19,7 +19,7 @@ dependencies:
   shelf: ^1.1.0
   sse: ^4.1.2
   # TODO(https://github.com/flutter/devtools/issues/7496): remove this dep
-  # when the breaking change to devtools_shared.
+  # when making the breaking change to devtools_shared.
   unified_analytics: ^5.8.8
   usage: ^4.0.0
   vm_service: ">=13.0.0 <15.0.0"

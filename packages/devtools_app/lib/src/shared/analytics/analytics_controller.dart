@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
-import '../dtd_extension.dart';
+import '../dtd_manager_extension.dart';
 import '../globals.dart';
 import '_analytics_controller_stub.dart'
     if (dart.library.js_interop) '_analytics_controller_web.dart';

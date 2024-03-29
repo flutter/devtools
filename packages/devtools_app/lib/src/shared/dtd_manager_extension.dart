@@ -5,7 +5,7 @@
 import 'package:devtools_app_shared/service.dart';
 import 'package:dtd/dtd.dart';
 import 'package:logging/logging.dart';
-import 'package:unified_analytics/unified_analytics.dart';
+import 'package:unified_analytics/unified_analytics.dart' as ua;
 
 final _log = Logger('dtd_manager');
 
@@ -20,12 +20,13 @@ final _log = Logger('dtd_manager');
 extension DevToolsDTDExtension on DTDManager {
   DartToolingDaemon get _dtd => connection.value!;
 
-  /// Gets the Dart and Flutter unified analytics consent message to prompt
-  /// users with on first run or when the message has been updated.
+  /// Gets the package:unified_analytics consent message to prompt users with on
+  /// first run or when the message has been updated.
   Future<String> analyticsConsentMessage() async {
     if (!hasConnection) return '';
     try {
-      final response = await _dtd.getAnalyticsConsentMessage(DashTool.devtools);
+      final response =
+          await _dtd.analyticsGetConsentMessage(ua.DashTool.devtools);
       return response.value! as String;
     } catch (e) {
       _log.fine('Error calling getAnalyticsConsentMessage: $e');
@@ -33,13 +34,13 @@ extension DevToolsDTDExtension on DTDManager {
     }
   }
 
-  /// Whether the unified analytics client for DevTools, which lives in the
-  /// connected Dart Tooling Daemon, should display the consent message.
+  /// Whether the package:unified_analytics consent message should be shown for
+  /// DevTools.
   Future<bool> shouldShowAnalyticsConsentMessage() async {
     if (!hasConnection) return false;
     try {
       final response =
-          await _dtd.shouldShowAnalyticsConsentMessage(DashTool.devtools);
+          await _dtd.analyticsShouldShowConsentMessage(ua.DashTool.devtools);
       return response.value! as bool;
     } catch (e) {
       _log.fine('Error calling shouldShowAnalyticsConsentMessage: $e');
@@ -47,21 +48,22 @@ extension DevToolsDTDExtension on DTDManager {
     }
   }
 
-  /// Marks the analytics consent message as shown for DevTools.
+  /// Marks the package:unified_analytics consent message as shown for DevTools.
   Future<void> analyticsClientShowedMessage() async {
     if (!hasConnection) return;
     try {
-      await _dtd.analyticsClientShowedMessage(DashTool.devtools);
+      await _dtd.analyticsClientShowedMessage(ua.DashTool.devtools);
     } catch (e) {
       _log.fine('Error calling analyticsClientShowedMessage: $e');
     }
   }
 
-  /// Whether the unified analytics telemetry is enabled for DevTools.
+  /// Whether the package:unified_analytics telemetry is enabled for DevTools.
   Future<bool> analyticsTelemetryEnabled() async {
     if (!hasConnection) return false;
     try {
-      final response = await _dtd.analyticsTelemetryEnabled(DashTool.devtools);
+      final response =
+          await _dtd.analyticsTelemetryEnabled(ua.DashTool.devtools);
       return response.value! as bool;
     } catch (e) {
       _log.fine('Error calling analyticsTelemetryEnabled: $e');
@@ -69,12 +71,22 @@ extension DevToolsDTDExtension on DTDManager {
     }
   }
 
-  /// Sets the unified analytics telemetry for DevTools to enabled or disabled
-  /// based on the value of [enabled].
+  /// Sets the package:unified_analytics telemetry to enabled or disabled based
+  /// on the value of [enabled].
   Future<void> setAnalyticsTelemetry(bool enabled) async {
     if (!hasConnection) return;
     try {
-      await _dtd.setAnalyticsTelemetry(DashTool.devtools, enabled: enabled);
+      await _dtd.analyticsSetTelemetry(ua.DashTool.devtools, enabled: enabled);
+    } catch (e) {
+      _log.fine('Error calling analyticsTelemetryEnabled: $e');
+    }
+  }
+
+  /// Sends an event to package:unified_analytics.
+  Future<void> sendAnalyticsEvent(ua.Event event) async {
+    if (!hasConnection) return;
+    try {
+      await _dtd.analyticsSend(ua.DashTool.devtools, event);
     } catch (e) {
       _log.fine('Error calling analyticsTelemetryEnabled: $e');
     }
