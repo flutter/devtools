@@ -92,10 +92,6 @@ class ServerApi {
         return _encodeResponse(true, api: api);
       case apiGetDevToolsFirstRun:
         // Has DevTools been run first time? To bring up analytics dialog.
-        //
-        // Additionally, package:unified_analytics will show a message if it
-        // is the first run with the package or the consent message version has
-        // been updated
         final isFirstRun = _devToolsUsage.isFirstRun;
         return _encodeResponse(isFirstRun, api: api);
       case apiGetDevToolsEnabled:
