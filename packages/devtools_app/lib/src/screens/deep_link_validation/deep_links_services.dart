@@ -22,7 +22,7 @@ const String _appLinkDomainsKey = 'app_link_domains';
 const String _fingerprintsKey = 'supplemental_sha256_cert_fingerprints';
 const String _validationResultKey = 'validationResult';
 const String _googlePlayFingerprintsAvailabilityKey =
-    '_googlePlayFingerprintsAvailability';
+    'googlePlayFingerprintsAvailability';
 const String _googlePlayFingerprintsAvailableValue = 'FINGERPRINTS_AVAILABLE';
 const String _domainNameKey = 'domainName';
 const String _checkNameKey = 'checkName';
