@@ -16,15 +16,19 @@ Use this format for the entry:
 [#10000000003](https://github.com/flutter/devtools/pull/10000000003)
 ```
 
+Find other examples in [previous notes]().
+
 ### Adding images to a release note entry
 
 Consider adding an image to the release note entry:
 
 1. Add the image to the `release_notes/images` folder,
-2. Reference it in the markdown:
+2. Reference it in the markdown, right after the release note entry:
 
     ```markdown
+
         ![Accessible image description](images/my_feature.png "Image hover description")
+
     ```
 
 #### Image style
