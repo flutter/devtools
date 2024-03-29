@@ -26,7 +26,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## Memory updates
 
-*
+* Replaced total size with reachable size in snapshot list. -
+[#7197](https://github.com/flutter/devtools/pull/7197)
 
 ## Debugger updates
 

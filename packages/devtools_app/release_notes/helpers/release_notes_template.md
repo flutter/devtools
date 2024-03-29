@@ -3,9 +3,14 @@ This is draft for future release notes, that are going to land on
 
 Template for a release notes item:
 
+------------
+* Enabled export of snapshots and improved snapshotting performance. -
+[#7197](https://github.com/flutter/devtools/pull/7197),
+[#7439](https://github.com/flutter/devtools/pull/7439),
+[#7449](https://github.com/flutter/devtools/pull/7449)
 
-Put images to the folder `images`.
-
+    ![Export snapshot](/tools/devtools/release-notes/images-2.34.1/7197-export.png "Export snapshot")
+------------
 
 # DevTools <number> release notes
 
