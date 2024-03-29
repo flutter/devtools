@@ -5,15 +5,31 @@ please add a release note entry to document this improvement.
 
 This entry should be phrased in the past tense (e.g. "Added XYZ" instead of "Add XYZ").
 
-### Adding images to a release note entry
+### Release note entry
 
-If you want to add an image to the release note entry,
-add the image to the `release_notes/images` folder,
-and then reference it in the markdown. For example:
+Use this format for the entry:
 
 ```markdown
-![Accessible image description](images/my_feature.png "Image hover description")
+* Created the best feature ever. -
+[#10000000001](https://github.com/flutter/devtools/pull/10000000001),
+[#10000000002](https://github.com/flutter/devtools/pull/10000000002),
+[#10000000003](https://github.com/flutter/devtools/pull/10000000003)
 ```
+
+Find other examples in [previous notes](https://github.com/flutter/website/tree/main/src/tools/devtools/release-notes).
+
+### Adding images to a release note entry
+
+Consider adding an image to the release note entry:
+
+1. Add the image to the `release_notes/images` folder,
+2. Reference it in the markdown, right after the release note entry:
+
+    ```markdown
+
+        ![Accessible image description](images/my_feature.png "Image hover description")
+
+    ```
 
 #### Image style
 Please use DevTools in **dark mode** when taking screenshots for release
@@ -42,7 +58,7 @@ changes for your release:
       - Make sure to copy all images over to the proper website directory:
         - `.../tools/devtools/release-notes/images-<VERSION>/`
       - Make sure to update all image links in the markdown with the `site_url` tag:
-        - `{{site.url}}/tools/devtools/release-notes/images-<VERSION>/<IMAGE_FILE>`
+        - `/tools/devtools/release-notes/images-<VERSION>/<IMAGE_FILE>`
   3. Once you are satisfied with the release notes,
   create a new branch directly on the `flutter/website` repo and open a PR,
   and then proceed to the testing steps below.
