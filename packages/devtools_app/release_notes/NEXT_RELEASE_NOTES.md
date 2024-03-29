@@ -26,7 +26,7 @@ TODO: Remove this section if there are not any general updates.
 
 ## Memory updates
 
-TODO: Remove this section if there are not any general updates.
+*
 
 ## Debugger updates
 

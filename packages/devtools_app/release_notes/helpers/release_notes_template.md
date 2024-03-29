@@ -1,6 +1,12 @@
 This is draft for future release notes, that are going to land on
 [the Flutter website](https://docs.flutter.dev/tools/devtools/release-notes).
 
+Template for a release notes item:
+
+
+Put images to the folder `images`.
+
+
 # DevTools <number> release notes
 
 The <number> release of the Dart and Flutter DevTools
