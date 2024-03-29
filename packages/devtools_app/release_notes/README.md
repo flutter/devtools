@@ -58,7 +58,7 @@ changes for your release:
       - Make sure to copy all images over to the proper website directory:
         - `.../tools/devtools/release-notes/images-<VERSION>/`
       - Make sure to update all image links in the markdown with the `site_url` tag:
-        - `{{site.url}}/tools/devtools/release-notes/images-<VERSION>/<IMAGE_FILE>`
+        - `/tools/devtools/release-notes/images-<VERSION>/<IMAGE_FILE>`
   3. Once you are satisfied with the release notes,
   create a new branch directly on the `flutter/website` repo and open a PR,
   and then proceed to the testing steps below.
