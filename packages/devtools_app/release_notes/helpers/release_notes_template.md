@@ -1,6 +1,17 @@
 This is draft for future release notes, that are going to land on
 [the Flutter website](https://docs.flutter.dev/tools/devtools/release-notes).
 
+Template for a release notes item:
+
+------------
+* Enabled export of snapshots and improved snapshotting performance. -
+[#7197](https://github.com/flutter/devtools/pull/7197),
+[#7439](https://github.com/flutter/devtools/pull/7439),
+[#7449](https://github.com/flutter/devtools/pull/7449)
+
+    ![Export snapshot](/tools/devtools/release-notes/images-2.34.1/7197-export.png "Export snapshot")
+------------
+
 # DevTools <number> release notes
 
 The <number> release of the Dart and Flutter DevTools
