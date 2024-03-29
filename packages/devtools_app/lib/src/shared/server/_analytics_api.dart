@@ -12,6 +12,9 @@ Future<bool> isFirstRun() async {
   if (isDevToolsServerAvailable) {
     final resp = await request(apiGetDevToolsFirstRun);
     if (resp?.statusCode == 200) {
+      // Additionally, package:unified_analytics will show a message if it
+      // is the first run with the package or the consent message version has
+      // been updated.
       firstRun = json.decode(resp!.body) ||
           await dtdManager.shouldShowAnalyticsConsentMessage();
     } else {
