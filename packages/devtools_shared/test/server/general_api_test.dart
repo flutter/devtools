@@ -12,6 +12,7 @@ import 'package:devtools_shared/src/server/server_api.dart' as server;
 import 'package:dtd/dtd.dart';
 import 'package:shelf/shelf.dart';
 import 'package:test/test.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../fakes.dart';
 import '../helpers.dart';
@@ -37,6 +38,7 @@ void main() {
           extensionsManager: ExtensionsManager(buildDir: '/'),
           deeplinkManager: FakeDeeplinkManager(),
           dtd: dtd,
+          analytics: const NoOpAnalytics(),
         );
       }
 

@@ -12,9 +12,10 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
 import 'package:logging/logging.dart';
 
-import '../../../devtools_app.dart';
 import '../development_helpers.dart';
 import '../dtd_extension.dart';
+import '../globals.dart';
+import '../primitives/utils.dart';
 
 part '_analytics_api.dart';
 part '_app_size_api.dart';

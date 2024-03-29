@@ -18,10 +18,10 @@ final _log = Logger('dtd_manager');
 /// specific to DevTools app and not for use by other clients using the
 /// [DTDManager] class (e.g. DevTools extensions).
 extension DevToolsDTDExtension on DTDManager {
-  // TODO(kenz): add dart doc for all of these.
-
   DartToolingDaemon get _dtd => connection.value!;
 
+  /// Gets the Dart and Flutter unified analytics consent message to prompt
+  /// users with on first run or when the message has been updated.
   Future<String> analyticsConsentMessage() async {
     if (!hasConnection) return '';
     try {
@@ -33,6 +33,8 @@ extension DevToolsDTDExtension on DTDManager {
     }
   }
 
+  /// Whether the unified analytics client for DevTools, which lives in the
+  /// connected Dart Tooling Daemon, should display the consent message.
   Future<bool> shouldShowAnalyticsConsentMessage() async {
     if (!hasConnection) return false;
     try {
@@ -45,6 +47,7 @@ extension DevToolsDTDExtension on DTDManager {
     }
   }
 
+  /// Marks the analytics consent message as shown for DevTools.
   Future<void> analyticsClientShowedMessage() async {
     if (!hasConnection) return;
     try {
@@ -54,6 +57,7 @@ extension DevToolsDTDExtension on DTDManager {
     }
   }
 
+  /// Whether the unified analytics telemetry is enabled for DevTools.
   Future<bool> analyticsTelemetryEnabled() async {
     if (!hasConnection) return false;
     try {
@@ -65,6 +69,8 @@ extension DevToolsDTDExtension on DTDManager {
     }
   }
 
+  /// Sets the unified analytics telemetry for DevTools to enabled or disabled
+  /// based on the value of [enabled].
   Future<void> setAnalyticsTelemetry(bool enabled) async {
     if (!hasConnection) return;
     try {
