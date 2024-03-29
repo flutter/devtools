@@ -16,7 +16,7 @@ Use this format for the entry:
 [#10000000003](https://github.com/flutter/devtools/pull/10000000003)
 ```
 
-Find other examples in [previous notes]().
+Find other examples in [previous notes](https://github.com/flutter/website/tree/main/src/tools/devtools/release-notes).
 
 ### Adding images to a release note entry
 
