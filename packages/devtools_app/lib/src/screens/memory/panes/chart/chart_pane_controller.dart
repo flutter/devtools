@@ -2,13 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
 import 'memory_android_chart.dart';
 import 'memory_events_pane.dart';
 import 'memory_vm_chart.dart';
+import 'primitives.dart';
 
-class MemoryChartPaneController {
+class MemoryChartPaneController extends DisposableController
+    with AutoDisposeControllerMixin {
   MemoryChartPaneController({
     required this.event,
     required this.vm,
@@ -47,4 +50,26 @@ class MemoryChartPaneController {
   ValueListenable get refreshCharts => _refreshCharts;
 
   final _refreshCharts = ValueNotifier<int>(0);
+
+  /// Default is to display default tick width based on width of chart of the collected
+  /// data in the chart.
+  final _displayIntervalNotifier =
+      ValueNotifier<ChartInterval>(ChartInterval.theDefault);
+
+  set displayInterval(ChartInterval interval) {
+    _displayIntervalNotifier.value = interval;
+  }
+
+  ChartInterval get displayInterval => _displayIntervalNotifier.value;
+
+  @override
+  void dispose() {
+    super.dispose();
+    _legendVisibleNotifier.dispose();
+    _displayIntervalNotifier.dispose();
+    _refreshCharts.dispose();
+    event.dispose();
+    vm.dispose();
+    android.dispose();
+  }
 }

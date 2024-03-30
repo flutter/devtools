@@ -46,7 +46,7 @@ class _IntervalDropdownState extends State<IntervalDropdown>
 
     return RoundedDropDownButton<ChartInterval>(
       isDense: true,
-      value: controller.displayInterval,
+      value: widget.chartController.displayInterval,
       onChanged: (ChartInterval? newValue) {
         final value = newValue!;
         setState(() {
@@ -54,7 +54,7 @@ class _IntervalDropdownState extends State<IntervalDropdown>
             gac.memory,
             '${gac.MemoryEvent.chartInterval}-${value.displayName}',
           );
-          controller.displayInterval = value;
+          widget.chartController.displayInterval = value;
           final duration = value.duration;
 
           widget.chartController.event.zoomDuration = duration;

@@ -12,7 +12,6 @@ import '../../../../shared/globals.dart';
 import '../../../../shared/memory/class_name.dart';
 import '../../../../shared/memory/heap_graph_loader.dart';
 import '../../../../shared/utils.dart';
-import '../../panes/chart/primitives.dart';
 import '../../panes/diff/controller/diff_pane_controller.dart';
 import '../../panes/profile/profile_pane_controller.dart';
 import '../../panes/tracing/tracing_pane_controller.dart';
@@ -107,17 +106,6 @@ class MemoryController extends DisposableController
   int selectedFeatureTabIndex = 0;
 
 // --------------------------------
-
-  /// Default is to display default tick width based on width of chart of the collected
-  /// data in the chart.
-  final _displayIntervalNotifier =
-      ValueNotifier<ChartInterval>(ChartInterval.theDefault);
-
-  set displayInterval(ChartInterval interval) {
-    _displayIntervalNotifier.value = interval;
-  }
-
-  ChartInterval get displayInterval => _displayIntervalNotifier.value;
 
   final _paused = ValueNotifier<bool>(false);
 
@@ -309,7 +297,6 @@ class MemoryController extends DisposableController
   @override
   void dispose() {
     super.dispose();
-    _displayIntervalNotifier.dispose();
     unawaited(_memoryTrackerController.close());
     _memoryTracker?.dispose();
     controllers.dispose();
