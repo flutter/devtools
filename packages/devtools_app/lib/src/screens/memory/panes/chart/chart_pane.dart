@@ -137,7 +137,8 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     });
 
     // There is no listener passed, so SetState will be invoked.
-    addAutoDisposeListener(controller.isAndroidChartVisibleNotifier);
+    addAutoDisposeListener(
+        controller.controllers.chart.isAndroidChartVisibleNotifier);
 
     _updateListeningState();
   }
@@ -193,7 +194,8 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
                       child: MemoryEventsPane(widget.chartController.event),
                     ),
                     MemoryVMChart(widget.chartController.vm),
-                    if (controller.isAndroidChartVisibleNotifier.value)
+                    if (controller
+                        .controllers.chart.isAndroidChartVisibleNotifier.value)
                       SizedBox(
                         height: defaultChartHeight,
                         child: MemoryAndroidChart(
@@ -207,7 +209,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
               MultiValueListenableBuilder(
                 listenables: [
                   widget.chartController.legendVisibleNotifier,
-                  controller.isAndroidChartVisibleNotifier,
+                  controller.controllers.chart.isAndroidChartVisibleNotifier,
                 ],
                 builder: (_, values, __) {
                   final isLegendVisible = values.first as bool;
@@ -253,7 +255,8 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     const dividerLineHorizontalSpace = 20.0;
     const totalDividerLineHorizontalSpace = dividerLineHorizontalSpace * 2;
 
-    if (!controller.isAndroidChartVisibleNotifier.value) return [];
+    if (!controller.controllers.chart.isAndroidChartVisibleNotifier.value)
+      return [];
 
     final androidDataDisplayed = chartsValues
         .androidDataToDisplay(widget.chartController.android.traces);
@@ -302,11 +305,12 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
     double totalHoverHeight;
     int totalTraces;
-    totalTraces = controller.isAndroidChartVisibleNotifier.value
-        ? chartsValues.vmData.entries.length -
-            1 +
-            chartsValues.androidData.entries.length
-        : chartsValues.vmData.entries.length - 1;
+    totalTraces =
+        controller.controllers.chart.isAndroidChartVisibleNotifier.value
+            ? chartsValues.vmData.entries.length -
+                1 +
+                chartsValues.androidData.entries.length
+            : chartsValues.vmData.entries.length - 1;
 
     totalHoverHeight = _computeHoverHeight(
       chartsValues.eventCount,

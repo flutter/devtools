@@ -5,6 +5,7 @@
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../../../shared/globals.dart';
 import 'memory_android_chart.dart';
 import 'memory_events_pane.dart';
 import 'memory_vm_chart.dart';
@@ -76,6 +77,20 @@ class MemoryChartPaneController extends DisposableController
 
   bool get isPaused => _paused.value;
 
+  final isAndroidChartVisibleNotifier = ValueNotifier<bool>(false);
+
+  void updateAndroidChartVisibility() {
+    final bool isConnectedToAndroidAndAndroidEnabled =
+        _isConnectedDeviceAndroid &&
+            preferences.memory.androidCollectionEnabled.value;
+
+    isAndroidChartVisibleNotifier.value = isConnectedToAndroidAndAndroidEnabled;
+  }
+
+  bool get _isConnectedDeviceAndroid {
+    return serviceConnection.serviceManager.vm?.operatingSystem == 'android';
+  }
+
   @override
   void dispose() {
     super.dispose();
@@ -85,5 +100,6 @@ class MemoryChartPaneController extends DisposableController
     event.dispose();
     vm.dispose();
     android.dispose();
+    isAndroidChartVisibleNotifier.dispose();
   }
 }

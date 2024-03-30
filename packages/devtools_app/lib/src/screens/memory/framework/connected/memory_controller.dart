@@ -124,8 +124,6 @@ class MemoryController extends DisposableController
 
 // --------------------------------
 
-  final isAndroidChartVisibleNotifier = ValueNotifier<bool>(false);
-
   String? get _isolateId =>
       serviceConnection.serviceManager.isolateManager.selectedIsolate.value?.id;
 
@@ -211,23 +209,15 @@ class MemoryController extends DisposableController
       },
     );
 
-    _updateAndroidChartVisibility();
+    controllers.chart.updateAndroidChartVisibility();
     addAutoDisposeListener(
       preferences.memory.androidCollectionEnabled,
-      _updateAndroidChartVisibility,
+      controllers.chart.updateAndroidChartVisibility,
     );
   }
 
   /// This flag will be needed for offline mode implementation.
   bool offline = false;
-
-  void _updateAndroidChartVisibility() {
-    final bool isConnectedToAndroidAndAndroidEnabled =
-        isConnectedDeviceAndroid &&
-            preferences.memory.androidCollectionEnabled.value;
-
-    isAndroidChartVisibleNotifier.value = isConnectedToAndroidAndAndroidEnabled;
-  }
 
   void _handleConnectionStop() {
     _memoryTracker?.stop();
@@ -258,10 +248,6 @@ class MemoryController extends DisposableController
 
   void stopTimeLine() {
     _memoryTracker?.stop();
-  }
-
-  bool get isConnectedDeviceAndroid {
-    return serviceConnection.serviceManager.vm?.operatingSystem == 'android';
   }
 
   bool get isGcing => _gcing;
