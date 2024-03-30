@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:devtools_app_shared/utils.dart';
-import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -106,22 +105,6 @@ class MemoryController extends DisposableController
   /// DevTools screen changes, so we must store this value in the controller
   /// instead of the widget state.
   int selectedFeatureTabIndex = 0;
-
-  HeapSample? _selectedDartSample;
-
-  HeapSample? _selectedAndroidSample;
-
-  HeapSample? getSelectedSample(ChartType type) => type == ChartType.dartHeaps
-      ? _selectedDartSample
-      : _selectedAndroidSample;
-
-  void setSelectedSample(ChartType type, HeapSample sample) {
-    if (type == ChartType.dartHeaps) {
-      _selectedDartSample = sample;
-    } else {
-      _selectedAndroidSample = sample;
-    }
-  }
 
   static const liveFeed = 'Live Feed';
 
