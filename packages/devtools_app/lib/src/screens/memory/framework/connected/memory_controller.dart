@@ -106,7 +106,7 @@ class MemoryController extends DisposableController
   /// instead of the widget state.
   int selectedFeatureTabIndex = 0;
 
-  static const liveFeed = 'Live Feed';
+// --------------------------------
 
   ValueListenable get refreshCharts => _refreshCharts;
 
