@@ -137,10 +137,6 @@ class MemoryController extends DisposableController
 
   bool hasStopped = false;
 
-  void _handleIsolateChanged() {
-    // TODO(terry): Need an event on the controller for this too?
-  }
-
   void _handleConnectionStart() {
     if (_memoryTracker == null) {
       _memoryTracker = MemoryTracker(this);
@@ -227,7 +223,7 @@ class MemoryController extends DisposableController
   void startTimeline() {
     addAutoDisposeListener(
       serviceConnection.serviceManager.isolateManager.selectedIsolate,
-      _handleIsolateChanged,
+      () {}, // TODO(terry): Need an event on the controller for this too?
     );
 
     addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
