@@ -68,7 +68,7 @@ class EventChartController extends ChartController {
   /// Loads all heap samples (live data or offline).
   void addSample(HeapSample sample) {
     // If paused don't update the chart (data is still collected).
-    if (_memoryController.paused.value) return;
+    if (_memoryController.controllers.chart.paused.value) return;
 
     addTimestamp(sample.timestamp);
 
@@ -417,7 +417,7 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
   /// Loads all heap samples (live data or offline).
   void _processHeapSample(HeapSample sample) {
     // If paused don't update the chart (data is still collected).
-    if (controller.isPaused) return;
+    if (controller.controllers.chart.isPaused) return;
     _chartController.addSample(sample);
   }
 }

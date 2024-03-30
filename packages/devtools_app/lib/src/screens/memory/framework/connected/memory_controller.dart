@@ -124,20 +124,6 @@ class MemoryController extends DisposableController
 
 // --------------------------------
 
-  final _paused = ValueNotifier<bool>(false);
-
-  ValueListenable<bool> get paused => _paused;
-
-  void pauseLiveFeed() {
-    _paused.value = true;
-  }
-
-  void resumeLiveFeed() {
-    _paused.value = false;
-  }
-
-  bool get isPaused => _paused.value;
-
   final isAndroidChartVisibleNotifier = ValueNotifier<bool>(false);
 
   String? get _isolateId =>

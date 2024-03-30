@@ -40,7 +40,7 @@ class VMChartController extends ChartController {
   /// Loads all heap samples (live data or offline).
   void addSample(HeapSample sample) {
     // If paused don't update the chart (data is still collected).
-    if (_memoryController.isPaused) return;
+    if (_memoryController.controllers.chart.isPaused) return;
 
     addTimestamp(sample.timestamp);
 
@@ -301,7 +301,7 @@ class MemoryVMChartState extends State<MemoryVMChart>
   /// Loads all heap samples (live data or offline).
   void _processHeapSample(HeapSample sample) {
     // If paused don't update the chart (data is still collected).
-    if (controller.paused.value) return;
+    if (controller.controllers.chart.paused.value) return;
     _chartController.addSample(sample);
   }
 }

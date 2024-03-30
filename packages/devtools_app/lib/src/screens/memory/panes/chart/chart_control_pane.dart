@@ -43,12 +43,12 @@ class _ChartControlPaneState extends State<ChartControlPane>
 
   void _onPause() {
     ga.select(gac.memory, gac.pause);
-    controller.pauseLiveFeed();
+    controller.controllers.chart.pauseLiveFeed();
   }
 
   void _onResume() {
     ga.select(gac.memory, gac.resume);
-    controller.resumeLiveFeed();
+    controller.controllers.chart.resumeLiveFeed();
   }
 
   void _clearTimeline() {
@@ -68,7 +68,7 @@ class _ChartControlPaneState extends State<ChartControlPane>
         Row(
           children: [
             ValueListenableBuilder<bool>(
-              valueListenable: controller.paused,
+              valueListenable: controller.controllers.chart.paused,
               builder: (context, paused, _) {
                 return PauseResumeButtonGroup(
                   paused: paused,

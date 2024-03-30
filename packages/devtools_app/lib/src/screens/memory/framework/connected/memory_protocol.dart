@@ -19,7 +19,7 @@ final _log = Logger('memory_protocol');
 class MemoryTracker {
   MemoryTracker(this.memoryController);
 
-  final MemoryController memoryController;
+  final MemoryController memoryController; // !!!!!!!!
 
   Timer? _pollingTimer;
 
@@ -43,13 +43,14 @@ class MemoryTracker {
 
   void start() {
     _updateLiveDataPolling();
-    memoryController.paused.addListener(_updateLiveDataPolling);
+    memoryController.controllers.chart.paused
+        .addListener(_updateLiveDataPolling);
   }
 
   void _updateLiveDataPolling() {
     if (serviceConnection.serviceManager.service == null) {
       // A service of null implies we're disconnected - signal paused.
-      memoryController.pauseLiveFeed();
+      memoryController.controllers.chart.pauseLiveFeed();
     }
 
     _pollingTimer ??= Timer(MemoryTimeline.updateDelay, _pollMemory);
@@ -63,7 +64,8 @@ class MemoryTracker {
   }
 
   void _cleanListenersAndTimers() {
-    memoryController.paused.removeListener(_updateLiveDataPolling);
+    memoryController.controllers.chart.paused
+        .removeListener(_updateLiveDataPolling);
 
     _pollingTimer?.cancel();
     unawaited(_gcStreamListener?.cancel());
