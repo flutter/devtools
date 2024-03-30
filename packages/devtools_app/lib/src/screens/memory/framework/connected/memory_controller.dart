@@ -12,6 +12,10 @@ import '../../../../shared/globals.dart';
 import '../../../../shared/memory/class_name.dart';
 import '../../../../shared/memory/heap_graph_loader.dart';
 import '../../../../shared/utils.dart';
+import '../../panes/chart/chart_pane_controller.dart';
+import '../../panes/chart/memory_android_chart.dart';
+import '../../panes/chart/memory_events_pane.dart';
+import '../../panes/chart/memory_vm_chart.dart';
 import '../../panes/diff/controller/diff_pane_controller.dart';
 import '../../panes/profile/profile_pane_controller.dart';
 import '../../panes/tracing/tracing_pane_controller.dart';
@@ -22,16 +26,28 @@ class MemoryFeatureControllers {
   /// Controllers are passed for testability.
   MemoryFeatureControllers(
     DiffPaneController? diffPaneController,
-    ProfilePaneController? profilePaneController,
-  ) {
+    ProfilePaneController? profilePaneController, {
+    required MemoryController? memoryController,
+  }) {
     memoryTimeline = MemoryTimeline();
     diff = diffPaneController ?? _createDiffController();
     profile = profilePaneController ?? ProfilePaneController();
+
+    final vmChartController = VMChartController(memoryController!); // !!!!!!!!
+    chart = MemoryChartPaneController(
+      event: EventChartController(memoryController),
+      vm: vmChartController,
+      android: AndroidChartController(
+        memoryController,
+        sharedLabels: vmChartController.labelTimestamps,
+      ),
+    );
   }
 
   late DiffPaneController diff;
   late ProfilePaneController profile;
   late MemoryTimeline memoryTimeline;
+  late MemoryChartPaneController chart;
   TracingPaneController tracing = TracingPaneController();
 
   DiffPaneController _createDiffController() =>
@@ -73,6 +89,7 @@ class MemoryController extends DisposableController
     controllers = MemoryFeatureControllers(
       diffPaneController,
       profilePaneController,
+      memoryController: this, // !!!!!!!!
     );
     shareClassFilterBetweenProfileAndDiff();
   }

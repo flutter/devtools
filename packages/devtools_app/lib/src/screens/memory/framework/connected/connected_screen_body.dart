@@ -11,10 +11,6 @@ import '../../../../shared/http/http_service.dart' as http_service;
 import '../../../../shared/screen.dart';
 import '../../../../shared/utils.dart';
 import '../../panes/chart/chart_pane.dart';
-import '../../panes/chart/chart_pane_controller.dart';
-import '../../panes/chart/memory_android_chart.dart';
-import '../../panes/chart/memory_events_pane.dart';
-import '../../panes/chart/memory_vm_chart.dart';
 import '../../panes/control/control_pane.dart';
 import 'memory_controller.dart';
 import 'memory_tabs.dart';
@@ -32,8 +28,6 @@ class _ConnectedMemoryBodyState extends State<ConnectedMemoryBody>
         SingleTickerProviderStateMixin,
         ProvidedControllerMixin<MemoryController, ConnectedMemoryBody> {
   MemoryController get memoryController => controller;
-
-  late MemoryChartPaneController _chartController;
 
   final _focusNode = FocusNode(debugLabel: 'memory');
 
@@ -54,16 +48,6 @@ class _ConnectedMemoryBodyState extends State<ConnectedMemoryBody>
     addAutoDisposeListener(http_service.httpLoggingState, () {
       maybePushHttpLoggingMessage(context, ScreenMetaData.memory.id);
     });
-
-    final vmChartController = VMChartController(controller);
-    _chartController = MemoryChartPaneController(
-      event: EventChartController(controller),
-      vm: vmChartController,
-      android: AndroidChartController(
-        controller,
-        sharedLabels: vmChartController.labelTimestamps,
-      ),
-    );
   }
 
   @override
@@ -74,7 +58,7 @@ class _ConnectedMemoryBodyState extends State<ConnectedMemoryBody>
         MemoryControlPane(controller: controller),
         const SizedBox(height: intermediateSpacing),
         MemoryChartPane(
-          chartController: _chartController,
+          chartController: controller.controllers.chart,
           keyFocusNode: _focusNode,
         ),
         Expanded(
