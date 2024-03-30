@@ -138,7 +138,8 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
     // There is no listener passed, so SetState will be invoked.
     addAutoDisposeListener(
-        controller.controllers.chart.isAndroidChartVisibleNotifier);
+      controller.controllers.chart.isAndroidChartVisibleNotifier,
+    );
 
     _updateListeningState();
   }
@@ -255,8 +256,9 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     const dividerLineHorizontalSpace = 20.0;
     const totalDividerLineHorizontalSpace = dividerLineHorizontalSpace * 2;
 
-    if (!controller.controllers.chart.isAndroidChartVisibleNotifier.value)
+    if (!controller.controllers.chart.isAndroidChartVisibleNotifier.value) {
       return [];
+    }
 
     final androidDataDisplayed = chartsValues
         .androidDataToDisplay(widget.chartController.android.traces);
