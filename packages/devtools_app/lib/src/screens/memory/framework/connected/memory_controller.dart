@@ -124,23 +124,10 @@ class MemoryController extends DisposableController
 
 // --------------------------------
 
-  final StreamController<MemoryTracker?> _memoryTrackerController =
-      StreamController<MemoryTracker?>.broadcast();
-
-  Stream<MemoryTracker?> get onMemory => _memoryTrackerController.stream;
-
-  MemoryTracker? _memoryTracker;
-
-  MemoryTracker? get memoryTracker => _memoryTracker;
-
-  bool get hasStarted => _memoryTracker != null;
-
-  bool hasStopped = false;
-
   void _handleConnectionStart() {
-    if (_memoryTracker == null) {
-      _memoryTracker = MemoryTracker(this);
-      _memoryTracker!.start();
+    if (controllers.chart.memoryTracker == null) {
+      controllers.chart.memoryTracker = MemoryTracker(this);
+      controllers.chart.memoryTracker!.start();
     }
 
     // Log Flutter extension events.
@@ -179,13 +166,15 @@ class MemoryController extends DisposableController
     );
 
     autoDisposeStreamSubscription(
-      _memoryTracker!.onChange.listen((_) {
-        _memoryTrackerController.add(_memoryTracker);
+      controllers.chart.memoryTracker!.onChange.listen((_) {
+        controllers.chart.memoryTrackerController
+            .add(controllers.chart.memoryTracker);
       }),
     );
     autoDisposeStreamSubscription(
-      _memoryTracker!.onChange.listen((_) {
-        _memoryTrackerController.add(_memoryTracker);
+      controllers.chart.memoryTracker!.onChange.listen((_) {
+        controllers.chart.memoryTrackerController
+            .add(controllers.chart.memoryTracker);
       }),
     );
 
@@ -193,12 +182,12 @@ class MemoryController extends DisposableController
     // memoryController dispose method.  Needed when a HOT RELOAD
     // will call dispose however, initState doesn't seem
     // to happen David is working on scaffolding.
-    _memoryTrackerController.stream.listen(
+    controllers.chart.memoryTrackerController.stream.listen(
       (_) {},
       onDone: () {
         // Stop polling and reset memoryTracker.
-        _memoryTracker?.stop();
-        _memoryTracker = null;
+        controllers.chart.memoryTracker?.stop();
+        controllers.chart.memoryTracker = null;
       },
     );
 
@@ -213,11 +202,12 @@ class MemoryController extends DisposableController
   bool offline = false;
 
   void _handleConnectionStop() {
-    _memoryTracker?.stop();
-    _memoryTrackerController.add(_memoryTracker);
+    controllers.chart.memoryTracker?.stop();
+    controllers.chart.memoryTrackerController
+        .add(controllers.chart.memoryTracker);
 
     controllers.reset();
-    hasStopped = true;
+    controllers.chart.hasStopped = true;
   }
 
   void startTimeline() {
@@ -240,7 +230,7 @@ class MemoryController extends DisposableController
   }
 
   void stopTimeLine() {
-    _memoryTracker?.stop();
+    controllers.chart.memoryTracker?.stop();
   }
 
   bool get isGcing => _gcing;
@@ -280,8 +270,8 @@ class MemoryController extends DisposableController
   @override
   void dispose() {
     super.dispose();
-    unawaited(_memoryTrackerController.close());
-    _memoryTracker?.dispose();
+    unawaited(controllers.chart.memoryTrackerController.close());
+    controllers.chart.memoryTracker?.dispose();
     controllers.dispose();
     HeapClassName.dispose();
   }

@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../shared/globals.dart';
+import '../../framework/connected/memory_protocol.dart';
 import 'memory_android_chart.dart';
 import 'memory_events_pane.dart';
 import 'memory_vm_chart.dart';
@@ -90,6 +93,17 @@ class MemoryChartPaneController extends DisposableController
   bool get _isConnectedDeviceAndroid {
     return serviceConnection.serviceManager.vm?.operatingSystem == 'android';
   }
+
+  final StreamController<MemoryTracker?> memoryTrackerController =
+      StreamController<MemoryTracker?>.broadcast();
+
+  Stream<MemoryTracker?> get onMemory => memoryTrackerController.stream;
+
+  MemoryTracker? memoryTracker;
+
+  bool get hasStarted => memoryTracker != null;
+
+  bool hasStopped = false;
 
   @override
   void dispose() {

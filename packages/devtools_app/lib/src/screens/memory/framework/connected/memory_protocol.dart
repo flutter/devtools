@@ -90,7 +90,7 @@ class MemoryTracker {
     _pollingTimer = null;
 
     if (!serviceConnection.serviceManager.hasConnection ||
-        memoryController.memoryTracker == null) {
+        memoryController.controllers.chart.memoryTracker == null) {
       _log.info('VM service connection and/or MemoryTracker lost.');
       return;
     }
