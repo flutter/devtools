@@ -124,9 +124,6 @@ class MemoryController extends DisposableController
 
 // --------------------------------
 
-  String? get _isolateId =>
-      serviceConnection.serviceManager.isolateManager.selectedIsolate.value?.id;
-
   final StreamController<MemoryTracker?> _memoryTrackerController =
       StreamController<MemoryTracker?>.broadcast();
 
@@ -257,7 +254,8 @@ class MemoryController extends DisposableController
     _gcing = true;
     try {
       await serviceConnection.serviceManager.service!.getAllocationProfile(
-        _isolateId!,
+        (serviceConnection
+            .serviceManager.isolateManager.selectedIsolate.value?.id)!,
         gc: true,
       );
       notificationService.push('Successfully garbage collected.');
