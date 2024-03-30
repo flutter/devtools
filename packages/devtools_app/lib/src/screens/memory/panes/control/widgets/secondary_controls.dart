@@ -28,7 +28,7 @@ class SecondaryControls extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         GaDevToolsButton(
-          onPressed: controller.isGcing ? null : _gc,
+          onPressed: controller.controllers.control.isGcing ? null : _gc,
           icon: Icons.delete,
           label: 'GC',
           tooltip: 'Trigger full garbage collection.',
@@ -58,6 +58,6 @@ class SecondaryControls extends StatelessWidget {
 
   Future<void> _gc() async {
     controller.controllers.memoryTimeline.addGCEvent();
-    await controller.gc();
+    await controller.controllers.control.gc();
   }
 }

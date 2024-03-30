@@ -231,23 +231,6 @@ class MemoryController extends DisposableController
     }
   }
 
-  bool get isGcing => _gcing;
-  bool _gcing = false;
-
-  Future<void> gc() async {
-    _gcing = true;
-    try {
-      await serviceConnection.serviceManager.service!.getAllocationProfile(
-        (serviceConnection
-            .serviceManager.isolateManager.selectedIsolate.value?.id)!,
-        gc: true,
-      );
-      notificationService.push('Successfully garbage collected.');
-    } finally {
-      _gcing = false;
-    }
-  }
-
   /// Detect stale isolates (sentineled), may happen after a hot restart.
   Future<bool> isIsolateLive(String isolateId) async {
     try {
