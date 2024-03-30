@@ -7,10 +7,10 @@ import 'dart:async';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../shared/analytics/constants.dart' as gac;
-import '../../../../shared/common_widgets.dart';
-import '../../framework/connected/memory_controller.dart';
-import '../../shared/primitives/simple_elements.dart';
+import '../../../../../shared/analytics/constants.dart' as gac;
+import '../../../../../shared/common_widgets.dart';
+import '../../../framework/connected/memory_controller.dart';
+import '../../../shared/primitives/simple_elements.dart';
 import 'settings_dialog.dart';
 
 /// Controls related to the entire memory screen.

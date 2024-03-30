@@ -6,8 +6,8 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../../shared/common_widgets.dart';
-import '../../../../shared/globals.dart';
+import '../../../../../shared/common_widgets.dart';
+import '../../../../../shared/globals.dart';
 
 /// The dialog keys for testing purposes.
 @visibleForTesting
