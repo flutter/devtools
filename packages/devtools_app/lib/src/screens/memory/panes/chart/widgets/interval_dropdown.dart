@@ -4,13 +4,13 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../shared/analytics/analytics.dart' as ga;
-import '../../../../shared/analytics/constants.dart' as gac;
-import '../../../../shared/common_widgets.dart';
-import '../../../../shared/utils.dart';
-import '../../framework/connected/memory_controller.dart';
-import 'chart_pane_controller.dart';
-import 'primitives.dart';
+import '../../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../../shared/analytics/constants.dart' as gac;
+import '../../../../../shared/common_widgets.dart';
+import '../../../../../shared/utils.dart';
+import '../../../framework/connected/memory_controller.dart';
+import '../controller/chart_pane_controller.dart';
+import '../data/primitives.dart';
 
 class IntervalDropdown extends StatefulWidget {
   const IntervalDropdown({Key? key, required this.chartController})

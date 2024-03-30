@@ -6,14 +6,14 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../shared/analytics/analytics.dart' as ga;
-import '../../../../shared/analytics/constants.dart' as gac;
-import '../../../../shared/common_widgets.dart';
-import '../../../../shared/primitives/simple_items.dart';
-import '../../../../shared/utils.dart';
-import '../../framework/connected/memory_controller.dart';
-import '../../shared/primitives/simple_elements.dart';
-import 'chart_pane_controller.dart';
+import '../../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../../shared/analytics/constants.dart' as gac;
+import '../../../../../shared/common_widgets.dart';
+import '../../../../../shared/primitives/simple_items.dart';
+import '../../../../../shared/utils.dart';
+import '../../../framework/connected/memory_controller.dart';
+import '../../../shared/primitives/simple_elements.dart';
+import '../controller/chart_pane_controller.dart';
 import 'interval_dropdown.dart';
 
 class ChartControlPane extends StatefulWidget {

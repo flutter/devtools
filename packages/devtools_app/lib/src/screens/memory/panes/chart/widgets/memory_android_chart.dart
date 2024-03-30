@@ -7,13 +7,14 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../shared/charts/chart.dart';
-import '../../../../shared/charts/chart_controller.dart';
-import '../../../../shared/charts/chart_trace.dart' as trace;
-import '../../../../shared/charts/chart_trace.dart' show ChartSymbol, ChartType;
-import '../../../../shared/utils.dart';
-import '../../framework/connected/memory_controller.dart';
-import '../../shared/primitives/memory_timeline.dart';
+import '../../../../../shared/charts/chart.dart';
+import '../../../../../shared/charts/chart_controller.dart';
+import '../../../../../shared/charts/chart_trace.dart' as trace;
+import '../../../../../shared/charts/chart_trace.dart'
+    show ChartSymbol, ChartType;
+import '../../../../../shared/utils.dart';
+import '../../../framework/connected/memory_controller.dart';
+import '../../../shared/primitives/memory_timeline.dart';
 
 class AndroidChartController extends ChartController {
   AndroidChartController(
@@ -21,7 +22,7 @@ class AndroidChartController extends ChartController {
     List<int> sharedLabels = const <int>[],
   }) : super(
           name: 'Android',
-          sharedLabelimestamps: sharedLabels,
+          sharedLabelTimestamps: sharedLabels,
         );
 
   final MemoryController _memoryController;

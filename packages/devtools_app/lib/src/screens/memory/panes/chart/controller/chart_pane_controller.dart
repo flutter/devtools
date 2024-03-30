@@ -7,12 +7,12 @@ import 'dart:async';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../../../shared/globals.dart';
-import '../../framework/connected/memory_protocol.dart';
-import 'memory_android_chart.dart';
-import 'memory_events_pane.dart';
-import 'memory_vm_chart.dart';
-import 'primitives.dart';
+import '../../../../../shared/globals.dart';
+import '../../../framework/connected/memory_protocol.dart';
+import '../data/primitives.dart';
+import '../widgets/memory_android_chart.dart';
+import '../widgets/memory_events_pane.dart';
+import '../widgets/memory_vm_chart.dart';
 
 class MemoryChartPaneController extends DisposableController
     with AutoDisposeControllerMixin {

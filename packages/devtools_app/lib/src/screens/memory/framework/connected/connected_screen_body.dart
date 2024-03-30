@@ -10,7 +10,7 @@ import '../../../../shared/banner_messages.dart';
 import '../../../../shared/http/http_service.dart' as http_service;
 import '../../../../shared/screen.dart';
 import '../../../../shared/utils.dart';
-import '../../panes/chart/chart_pane.dart';
+import '../../panes/chart/widgets/chart_pane.dart';
 import '../../panes/control/widgets/control_pane.dart';
 import 'memory_controller.dart';
 import 'memory_tabs.dart';

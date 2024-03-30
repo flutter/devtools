@@ -7,13 +7,13 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../shared/charts/chart.dart';
-import '../../../../shared/charts/chart_controller.dart';
-import '../../../../shared/charts/chart_trace.dart' as trace;
-import '../../../../shared/charts/chart_trace.dart' show ChartType;
-import '../../../../shared/utils.dart';
-import '../../framework/connected/memory_controller.dart';
-import '../../shared/primitives/memory_timeline.dart';
+import '../../../../../shared/charts/chart.dart';
+import '../../../../../shared/charts/chart_controller.dart';
+import '../../../../../shared/charts/chart_trace.dart' as trace;
+import '../../../../../shared/charts/chart_trace.dart' show ChartType;
+import '../../../../../shared/utils.dart';
+import '../../../framework/connected/memory_controller.dart';
+import '../../../shared/primitives/memory_timeline.dart';
 
 // TODO(terry): Consider custom painter?
 const _base = 'assets/img/legend/';

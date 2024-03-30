@@ -5,13 +5,13 @@
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../shared/charts/chart_trace.dart';
-import '../../../../shared/primitives/byte_utils.dart';
-import '../../../../shared/primitives/utils.dart';
-import '../../framework/connected/memory_controller.dart';
-import 'memory_android_chart.dart';
-import 'memory_events_pane.dart';
-import 'memory_vm_chart.dart';
+import '../../../../../shared/charts/chart_trace.dart';
+import '../../../../../shared/primitives/byte_utils.dart';
+import '../../../../../shared/primitives/utils.dart';
+import '../../../framework/connected/memory_controller.dart';
+import '../widgets/memory_android_chart.dart';
+import '../widgets/memory_events_pane.dart';
+import '../widgets/memory_vm_chart.dart';
 
 /// Event types handled for hover card.
 const devToolsEvent = 'DevTools.Event';
