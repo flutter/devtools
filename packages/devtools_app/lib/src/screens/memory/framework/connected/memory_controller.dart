@@ -16,6 +16,7 @@ import '../../panes/chart/chart_pane_controller.dart';
 import '../../panes/chart/memory_android_chart.dart';
 import '../../panes/chart/memory_events_pane.dart';
 import '../../panes/chart/memory_vm_chart.dart';
+import '../../panes/control/controller/control_pane_controller.dart';
 import '../../panes/diff/controller/diff_pane_controller.dart';
 import '../../panes/profile/profile_pane_controller.dart';
 import '../../panes/tracing/tracing_pane_controller.dart';
@@ -49,6 +50,7 @@ class MemoryFeatureControllers {
   late MemoryTimeline memoryTimeline;
   late MemoryChartPaneController chart;
   TracingPaneController tracing = TracingPaneController();
+  MemoryControlPaneController control = MemoryControlPaneController();
 
   DiffPaneController _createDiffController() =>
       DiffPaneController(HeapGraphLoaderRuntime(memoryTimeline));
