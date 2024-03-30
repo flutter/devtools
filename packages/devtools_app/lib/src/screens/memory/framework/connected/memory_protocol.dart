@@ -98,7 +98,7 @@ class MemoryTracker {
     final isolateMemory = <IsolateRef, MemoryUsage>{};
     for (IsolateRef isolateRef
         in serviceConnection.serviceManager.isolateManager.isolates.value) {
-      if (await memoryController.isIsolateLive(isolateRef.id!)) {
+      if (await _isIsolateLive(isolateRef.id!)) {
         isolateMemory[isolateRef] = await serviceConnection
             .serviceManager.service!
             .getMemoryUsage(isolateRef.id!);
@@ -125,6 +125,23 @@ class MemoryTracker {
     if (vm.json!.containsKey('_FAKE_VM')) return;
 
     _pollingTimer ??= Timer(MemoryTimeline.updateDelay, _pollMemory);
+  }
+
+  /// Detect stale isolates (sentineled), may happen after a hot restart.
+  static Future<bool> _isIsolateLive(String isolateId) async {
+    try {
+      final service = serviceConnection.serviceManager.service!;
+      await service.getIsolate(isolateId);
+    } catch (e) {
+      if (e is SentinelException) {
+        final SentinelException sentinelErr = e;
+        final message = 'isIsolateLive: Isolate sentinel $isolateId '
+            '${sentinelErr.sentinel.kind}';
+        debugLogger(message);
+        return false;
+      }
+    }
+    return true;
   }
 
   void _update(VM vm, Map<IsolateRef, MemoryUsage> isolateMemory) {
@@ -169,7 +186,7 @@ class MemoryTracker {
     String id,
     MemoryUsage? usage,
   ) async =>
-      await memoryController.isIsolateLive(id) ? usage : null;
+      await _isIsolateLive(id) ? usage : null;
 
   void _recalculate([bool fromGC = false]) async {
     int used = 0;

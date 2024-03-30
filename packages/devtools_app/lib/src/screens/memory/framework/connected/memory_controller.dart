@@ -11,7 +11,6 @@ import 'package:vm_service/vm_service.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/memory/class_name.dart';
 import '../../../../shared/memory/heap_graph_loader.dart';
-import '../../../../shared/utils.dart';
 import '../../panes/chart/chart_pane_controller.dart';
 import '../../panes/chart/memory_android_chart.dart';
 import '../../panes/chart/memory_events_pane.dart';
@@ -229,23 +228,6 @@ class MemoryController extends DisposableController
     if (serviceConnection.serviceManager.connectedAppInitialized) {
       _handleConnectionStart();
     }
-  }
-
-  /// Detect stale isolates (sentineled), may happen after a hot restart.
-  Future<bool> isIsolateLive(String isolateId) async {
-    try {
-      final service = serviceConnection.serviceManager.service!;
-      await service.getIsolate(isolateId);
-    } catch (e) {
-      if (e is SentinelException) {
-        final SentinelException sentinelErr = e;
-        final message = 'isIsolateLive: Isolate sentinel $isolateId '
-            '${sentinelErr.sentinel.kind}';
-        debugLogger(message);
-        return false;
-      }
-    }
-    return true;
   }
 
   @override
