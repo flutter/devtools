@@ -105,6 +105,10 @@ class MemoryChartPaneController extends DisposableController
 
   bool hasStopped = false;
 
+  void stopTimeLine() {
+    memoryTracker?.stop();
+  }
+
   @override
   void dispose() {
     super.dispose();

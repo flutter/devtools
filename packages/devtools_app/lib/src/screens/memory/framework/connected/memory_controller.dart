@@ -229,10 +229,6 @@ class MemoryController extends DisposableController
     }
   }
 
-  void stopTimeLine() {
-    controllers.chart.memoryTracker?.stop();
-  }
-
   bool get isGcing => _gcing;
   bool _gcing = false;
 
