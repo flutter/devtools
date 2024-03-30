@@ -109,7 +109,8 @@ class MemoryTracker {
     //    > adb shell dumpsys meminfo -d <package_name>
     adbMemoryInfo = serviceConnection.serviceManager.hasConnection &&
             serviceConnection.serviceManager.vm!.operatingSystem == 'android' &&
-            memoryController.isAndroidChartVisibleNotifier.value
+            memoryController
+                .controllers.chart.isAndroidChartVisibleNotifier.value
         ? await _fetchAdbInfo()
         : AdbMemoryInfo.empty();
 
