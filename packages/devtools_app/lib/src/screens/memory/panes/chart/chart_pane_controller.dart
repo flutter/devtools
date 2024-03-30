@@ -43,4 +43,8 @@ class MemoryChartPaneController {
     android.setupData();
     android.dirty = true;
   }
+
+  ValueListenable get refreshCharts => _refreshCharts;
+
+  final _refreshCharts = ValueNotifier<int>(0);
 }

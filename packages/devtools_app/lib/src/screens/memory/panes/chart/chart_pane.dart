@@ -130,7 +130,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
       _addTapLocationListener(location, allLocations);
     }
 
-    addAutoDisposeListener(controller.refreshCharts, () {
+    addAutoDisposeListener(widget.chartController.refreshCharts, () {
       setState(() {
         widget.chartController.recomputeChartData();
       });
@@ -572,7 +572,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
   String _decodeEventValues(Map<String, Object> event) {
     final output = StringBuffer();
     if (event[eventName] == imageSizesForFrameEvent) {
-      // TODO(terry): Need a more generic event displayer.
+      // TODO(terry): Need a more generic way to display event.
       // Flutter event emit the event name and value.
       final data = (event[eventData] as Map).cast<String, Object>();
       final key = data.keys.first;

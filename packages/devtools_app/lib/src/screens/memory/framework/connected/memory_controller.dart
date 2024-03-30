@@ -108,10 +108,6 @@ class MemoryController extends DisposableController
 
 // --------------------------------
 
-  ValueListenable get refreshCharts => _refreshCharts;
-
-  final _refreshCharts = ValueNotifier<int>(0);
-
   /// Default is to display default tick width based on width of chart of the collected
   /// data in the chart.
   final _displayIntervalNotifier =
