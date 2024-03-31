@@ -159,7 +159,7 @@ class MemoryTracker {
     _recalculate(true);
   }
 
-  /// Fetch the Fultter engine's Raster Cache metrics.
+  /// Fetch the Flutter engine's Raster Cache metrics.
   ///
   /// Returns engine's rasterCache estimates or null.
   Future<RasterCache?> _fetchRasterCacheInfo() async {
@@ -203,7 +203,7 @@ class MemoryTracker {
       if (checkIsolateUsage == null && !keysToRemove.contains(isolateId)) {
         // Sentinel Isolate don't include in the heap computation.
         keysToRemove.add(isolateId);
-        // Don't use this sential isolate for any heap computation.
+        // Don't use this sentinel isolate for any heap computation.
         usage = null;
       }
 
