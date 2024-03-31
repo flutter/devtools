@@ -8,7 +8,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../../shared/globals.dart';
-import '../../../framework/connected/memory_protocol.dart';
+import '../../../framework/connected/memory_tracker.dart';
 import '../data/primitives.dart';
 import '../widgets/memory_android_chart.dart';
 import '../widgets/memory_events_pane.dart';

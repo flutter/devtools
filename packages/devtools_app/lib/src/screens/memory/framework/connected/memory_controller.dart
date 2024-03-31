@@ -20,7 +20,7 @@ import '../../panes/diff/controller/diff_pane_controller.dart';
 import '../../panes/profile/profile_pane_controller.dart';
 import '../../panes/tracing/tracing_pane_controller.dart';
 import '../../shared/primitives/memory_timeline.dart';
-import 'memory_protocol.dart';
+import 'memory_tracker.dart';
 
 class MemoryFeatureControllers {
   /// Controllers are passed for testability.
