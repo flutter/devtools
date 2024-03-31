@@ -127,7 +127,8 @@ class MemoryController extends DisposableController
 
   void _handleConnectionStart() {
     if (controllers.chart.memoryTracker == null) {
-      controllers.chart.memoryTracker = MemoryTracker(this);
+      controllers.chart.memoryTracker =
+          MemoryTracker(controllers.memoryTimeline, controllers.chart);
       controllers.chart.memoryTracker!.start();
     }
 

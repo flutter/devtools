@@ -11,15 +11,16 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/globals.dart';
 import '../../../../shared/utils.dart';
+import '../../panes/chart/controller/chart_pane_controller.dart';
 import '../../shared/primitives/memory_timeline.dart';
-import 'memory_controller.dart';
 
 final _log = Logger('memory_protocol');
 
 class MemoryTracker {
-  MemoryTracker(this.memoryController);
+  MemoryTracker(this.timeline, this.chart);
 
-  final MemoryController memoryController; // !!!!!!!!
+  final MemoryTimeline timeline;
+  final MemoryChartPaneController chart;
 
   Timer? _pollingTimer;
 
@@ -43,14 +44,13 @@ class MemoryTracker {
 
   void start() {
     _updateLiveDataPolling();
-    memoryController.controllers.chart.paused
-        .addListener(_updateLiveDataPolling);
+    chart.paused.addListener(_updateLiveDataPolling);
   }
 
   void _updateLiveDataPolling() {
     if (serviceConnection.serviceManager.service == null) {
       // A service of null implies we're disconnected - signal paused.
-      memoryController.controllers.chart.pauseLiveFeed();
+      chart.pauseLiveFeed();
     }
 
     _pollingTimer ??= Timer(MemoryTimeline.updateDelay, _pollMemory);
@@ -64,8 +64,7 @@ class MemoryTracker {
   }
 
   void _cleanListenersAndTimers() {
-    memoryController.controllers.chart.paused
-        .removeListener(_updateLiveDataPolling);
+    chart.paused.removeListener(_updateLiveDataPolling);
 
     _pollingTimer?.cancel();
     unawaited(_gcStreamListener?.cancel());
@@ -90,7 +89,7 @@ class MemoryTracker {
     _pollingTimer = null;
 
     if (!serviceConnection.serviceManager.hasConnection ||
-        memoryController.controllers.chart.memoryTracker == null) {
+        chart.memoryTracker == null) {
       _log.info('VM service connection and/or MemoryTracker lost.');
       return;
     }
@@ -109,8 +108,7 @@ class MemoryTracker {
     //    > adb shell dumpsys meminfo -d <package_name>
     adbMemoryInfo = serviceConnection.serviceManager.hasConnection &&
             serviceConnection.serviceManager.vm!.operatingSystem == 'android' &&
-            memoryController
-                .controllers.chart.isAndroidChartVisibleNotifier.value
+            chart.isAndroidChartVisibleNotifier.value
         ? await _fetchAdbInfo()
         : AdbMemoryInfo.empty();
 
@@ -220,22 +218,20 @@ class MemoryTracker {
     // Removes any isolate that is a sentinel.
     isolateHeaps.removeWhere((key, value) => keysToRemove.contains(key));
 
-    final memoryTimeline = memoryController.controllers.memoryTimeline;
-
     int time = DateTime.now().millisecondsSinceEpoch;
-    if (memoryTimeline.data.isNotEmpty) {
-      time = math.max(time, memoryTimeline.data.last.timestamp);
+    if (timeline.data.isNotEmpty) {
+      time = math.max(time, timeline.data.last.timestamp);
     }
 
     // Process any memory events?
-    final eventSample = processEventSample(memoryTimeline, time);
+    final eventSample = processEventSample(timeline, time);
 
     if (eventSample != null && eventSample.isEventAllocationAccumulator) {
       if (eventSample.allocationAccumulator!.isStart) {
         // Stop Continuous events being auto posted - a new start is beginning.
-        memoryTimeline.monitorContinuesState = ContinuesState.stop;
+        timeline.monitorContinuesState = ContinuesState.stop;
       }
-    } else if (memoryTimeline.monitorContinuesState == ContinuesState.next) {
+    } else if (timeline.monitorContinuesState == ContinuesState.next) {
       if (_monitorContinues != null) {
         _monitorContinues!.cancel();
         _monitorContinues = null;
@@ -259,7 +255,7 @@ class MemoryTracker {
       rasterCache,
     );
 
-    memoryTimeline.addSample(sample);
+    timeline.addSample(sample);
 
     _changeController.add(null);
 
@@ -269,7 +265,7 @@ class MemoryTracker {
     if (eventSample != null &&
         eventSample.isEventAllocationAccumulator &&
         eventSample.allocationAccumulator!.isStart) {
-      memoryTimeline.monitorContinuesState = ContinuesState.next;
+      timeline.monitorContinuesState = ContinuesState.next;
     }
   }
 
