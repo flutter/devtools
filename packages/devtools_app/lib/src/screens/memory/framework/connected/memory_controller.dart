@@ -213,11 +213,6 @@ class MemoryController extends DisposableController
   }
 
   void startTimeline() {
-    addAutoDisposeListener(
-      serviceConnection.serviceManager.isolateManager.selectedIsolate,
-      () {}, // TODO(terry): Need an event on the controller for this too?
-    );
-
     addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
       if (serviceConnection.serviceManager.connectedState.value.connected) {
         _handleConnectionStart();
