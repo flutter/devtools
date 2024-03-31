@@ -259,7 +259,7 @@ class ChartController extends DisposableController
     _zoomDuration = duration;
     computeZoomRatio();
 
-    // All tick labels need to be recompted.
+    // All tick labels need to be recomputed.
     computeChartArea();
     computeLabelInterval();
 
@@ -559,7 +559,7 @@ class TapLocation {
   TapLocation(this.tapDownDetails, this.timestamp, this.index);
 
   /// Copy of TapLocation w/o the detail, implies not where tap occurred
-  /// but the multiple charts tied to the same timeline should be hilighted
+  /// but the multiple charts tied to the same timeline should be highlighted
   /// (selection point).
   TapLocation.copy(TapLocation original)
       : tapDownDetails = null,
