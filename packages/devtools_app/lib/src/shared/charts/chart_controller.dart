@@ -178,7 +178,7 @@ class ChartController extends DisposableController
 
   /// zoomDuration values of:
   ///     null implies all
-  ///     Duration() imples live (default)
+  ///     Duration() implies live (default)
   ///     Duration(minutes: 5) implies 5 minute interval
   Duration? _zoomDuration = const Duration();
 
