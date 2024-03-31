@@ -123,8 +123,6 @@ class MemoryController extends DisposableController
   /// instead of the widget state.
   int selectedFeatureTabIndex = 0;
 
-// --------------------------------
-
   void _handleConnectionStart() {
     if (controllers.chart.memoryTracker == null) {
       controllers.chart.memoryTracker =
