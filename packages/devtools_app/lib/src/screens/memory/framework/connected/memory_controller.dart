@@ -33,7 +33,7 @@ class MemoryFeatureControllers {
     diff = diffPaneController ?? _createDiffController();
     profile = profilePaneController ?? ProfilePaneController();
 
-    final vmChartController = VMChartController(memoryController!); // !!!!!!!!
+    final vmChartController = VMChartController(memoryController!);
     chart = MemoryChartPaneController(
       event: EventChartController(memoryController),
       vm: vmChartController,
@@ -90,7 +90,7 @@ class MemoryController extends DisposableController
     controllers = MemoryFeatureControllers(
       diffPaneController,
       profilePaneController,
-      memoryController: this, // !!!!!!!!
+      memoryController: this,
     );
     shareClassFilterBetweenProfileAndDiff();
   }
