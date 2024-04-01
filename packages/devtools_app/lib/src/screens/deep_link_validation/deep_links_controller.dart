@@ -14,6 +14,7 @@ import '../../shared/globals.dart';
 import '../../shared/server/server.dart' as server;
 import 'deep_links_model.dart';
 import 'deep_links_services.dart';
+import 'deep_link_list_view.dart';
 
 typedef _DomainAndPath = ({String domain, String path});
 
@@ -442,6 +443,31 @@ class DeepLinksController extends DisposableController {
     if (linkdata.domainErrors.isNotEmpty) {
       await _generateAssetLinks();
     }
+  }
+
+  void autoSelectLink(TableViewType viewType) async {
+    final linkDatas = displayLinkDatasNotifier.value;
+    late final LinkData linkdata;
+    switch (viewType) {
+      case TableViewType.domainView:
+        linkdata = linkDatas.byDomain
+                .where((e) => e.domainErrors.isNotEmpty)
+                .firstOrNull ??
+            linkDatas.byDomain.first;
+      case TableViewType.pathView:
+        linkdata = linkDatas.byPath
+                .where((e) => e.pathErrors.isNotEmpty)
+                .firstOrNull ??
+            linkDatas.byPath.first;
+      case TableViewType.singleUrlView:
+        linkdata = linkDatas.all
+                .where(
+                  (e) => e.domainErrors.isNotEmpty || e.pathErrors.isNotEmpty,
+                )
+                .firstOrNull ??
+            linkDatas.all.first;
+    }
+    selectLink(linkdata);
   }
 
   set searchContent(String content) {
