@@ -6,7 +6,7 @@
 import 'dart:async';
 
 import 'package:devtools_app/src/screens/memory/framework/connected/memory_controller.dart';
-import 'package:devtools_app/src/screens/memory/framework/connected/memory_protocol.dart';
+import 'package:devtools_app/src/screens/memory/framework/connected/memory_tracker.dart';
 import 'package:devtools_app/src/screens/memory/shared/primitives/memory_timeline.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_shared/devtools_shared.dart';
@@ -45,7 +45,8 @@ void main() {
       test('heap info', () async {
         await env.setupEnvironment();
 
-        memoryController.onMemory.listen((MemoryTracker? memoryTracker) {
+        memoryController.controllers.chart.onMemory
+            .listen((MemoryTracker? memoryTracker) {
           if (!serviceConnection.serviceManager.hasConnection) {
             // VM Service connection has stopped - unexpected.
             fail('VM Service connection stopped unexpectedly.');
@@ -101,6 +102,6 @@ const int defaultSampleSize = 5;
 Future<void> collectSamples([int sampleCount = defaultSampleSize]) async {
   // Keep memory profiler running for n samples of heap info from the VM.
   for (var trackers = 0; trackers < sampleCount; trackers++) {
-    await memoryController.onMemory.first;
+    await memoryController.controllers.chart.onMemory.first;
   }
 }

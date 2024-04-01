@@ -6,14 +6,14 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../shared/analytics/analytics.dart' as ga;
-import '../../../../shared/analytics/constants.dart' as gac;
-import '../../../../shared/common_widgets.dart';
-import '../../../../shared/primitives/simple_items.dart';
-import '../../../../shared/utils.dart';
-import '../../framework/connected/memory_controller.dart';
-import '../../shared/primitives/simple_elements.dart';
-import 'chart_pane_controller.dart';
+import '../../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../../shared/analytics/constants.dart' as gac;
+import '../../../../../shared/common_widgets.dart';
+import '../../../../../shared/primitives/simple_items.dart';
+import '../../../../../shared/utils.dart';
+import '../../../framework/connected/memory_controller.dart';
+import '../../../shared/primitives/simple_elements.dart';
+import '../controller/chart_pane_controller.dart';
 import 'interval_dropdown.dart';
 
 class ChartControlPane extends StatefulWidget {
@@ -43,12 +43,12 @@ class _ChartControlPaneState extends State<ChartControlPane>
 
   void _onPause() {
     ga.select(gac.memory, gac.pause);
-    controller.pauseLiveFeed();
+    controller.controllers.chart.pauseLiveFeed();
   }
 
   void _onResume() {
     ga.select(gac.memory, gac.resume);
-    controller.resumeLiveFeed();
+    controller.controllers.chart.resumeLiveFeed();
   }
 
   void _clearTimeline() {
@@ -68,7 +68,7 @@ class _ChartControlPaneState extends State<ChartControlPane>
         Row(
           children: [
             ValueListenableBuilder<bool>(
-              valueListenable: controller.paused,
+              valueListenable: controller.controllers.chart.paused,
               builder: (context, paused, _) {
                 return PauseResumeButtonGroup(
                   paused: paused,

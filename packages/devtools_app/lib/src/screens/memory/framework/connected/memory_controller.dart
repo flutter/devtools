@@ -5,36 +5,51 @@
 import 'dart:async';
 
 import 'package:devtools_app_shared/utils.dart';
-import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/globals.dart';
 import '../../../../shared/memory/class_name.dart';
 import '../../../../shared/memory/heap_graph_loader.dart';
-import '../../../../shared/utils.dart';
-import '../../panes/chart/primitives.dart';
+import '../../panes/chart/controller/chart_pane_controller.dart';
+import '../../panes/chart/widgets/memory_android_chart.dart';
+import '../../panes/chart/widgets/memory_events_pane.dart';
+import '../../panes/chart/widgets/memory_vm_chart.dart';
+import '../../panes/control/controller/control_pane_controller.dart';
 import '../../panes/diff/controller/diff_pane_controller.dart';
 import '../../panes/profile/profile_pane_controller.dart';
 import '../../panes/tracing/tracing_pane_controller.dart';
 import '../../shared/primitives/memory_timeline.dart';
-import 'memory_protocol.dart';
+import 'memory_tracker.dart';
 
 class MemoryFeatureControllers {
   /// Controllers are passed for testability.
   MemoryFeatureControllers(
     DiffPaneController? diffPaneController,
-    ProfilePaneController? profilePaneController,
-  ) {
+    ProfilePaneController? profilePaneController, {
+    required MemoryController? memoryController,
+  }) {
     memoryTimeline = MemoryTimeline();
     diff = diffPaneController ?? _createDiffController();
     profile = profilePaneController ?? ProfilePaneController();
+
+    final vmChartController = VMChartController(memoryController!);
+    chart = MemoryChartPaneController(
+      event: EventChartController(memoryController),
+      vm: vmChartController,
+      android: AndroidChartController(
+        memoryController,
+        sharedLabels: vmChartController.labelTimestamps,
+      ),
+    );
   }
 
   late DiffPaneController diff;
   late ProfilePaneController profile;
   late MemoryTimeline memoryTimeline;
+  late MemoryChartPaneController chart;
   TracingPaneController tracing = TracingPaneController();
+  MemoryControlPaneController control = MemoryControlPaneController();
 
   DiffPaneController _createDiffController() =>
       DiffPaneController(HeapGraphLoaderRuntime(memoryTimeline));
@@ -75,6 +90,7 @@ class MemoryController extends DisposableController
     controllers = MemoryFeatureControllers(
       diffPaneController,
       profilePaneController,
+      memoryController: this,
     );
     shareClassFilterBetweenProfileAndDiff();
   }
@@ -107,79 +123,11 @@ class MemoryController extends DisposableController
   /// instead of the widget state.
   int selectedFeatureTabIndex = 0;
 
-  HeapSample? _selectedDartSample;
-
-  HeapSample? _selectedAndroidSample;
-
-  HeapSample? getSelectedSample(ChartType type) => type == ChartType.dartHeaps
-      ? _selectedDartSample
-      : _selectedAndroidSample;
-
-  void setSelectedSample(ChartType type, HeapSample sample) {
-    if (type == ChartType.dartHeaps) {
-      _selectedDartSample = sample;
-    } else {
-      _selectedAndroidSample = sample;
-    }
-  }
-
-  static const liveFeed = 'Live Feed';
-
-  ValueListenable get refreshCharts => _refreshCharts;
-
-  final _refreshCharts = ValueNotifier<int>(0);
-
-  /// Default is to display default tick width based on width of chart of the collected
-  /// data in the chart.
-  final _displayIntervalNotifier =
-      ValueNotifier<ChartInterval>(ChartInterval.theDefault);
-
-  set displayInterval(ChartInterval interval) {
-    _displayIntervalNotifier.value = interval;
-  }
-
-  ChartInterval get displayInterval => _displayIntervalNotifier.value;
-
-  final _paused = ValueNotifier<bool>(false);
-
-  ValueListenable<bool> get paused => _paused;
-
-  void pauseLiveFeed() {
-    _paused.value = true;
-  }
-
-  void resumeLiveFeed() {
-    _paused.value = false;
-  }
-
-  bool get isPaused => _paused.value;
-
-  final isAndroidChartVisibleNotifier = ValueNotifier<bool>(false);
-
-  String? get _isolateId =>
-      serviceConnection.serviceManager.isolateManager.selectedIsolate.value?.id;
-
-  final StreamController<MemoryTracker?> _memoryTrackerController =
-      StreamController<MemoryTracker?>.broadcast();
-
-  Stream<MemoryTracker?> get onMemory => _memoryTrackerController.stream;
-
-  MemoryTracker? _memoryTracker;
-
-  MemoryTracker? get memoryTracker => _memoryTracker;
-
-  bool get hasStarted => _memoryTracker != null;
-
-  bool hasStopped = false;
-
-  void _handleIsolateChanged() {
-    // TODO(terry): Need an event on the controller for this too?
-  }
-
   void _handleConnectionStart() {
-    if (_memoryTracker == null) {
-      _memoryTracker = MemoryTracker(this);
-      _memoryTracker!.start();
+    if (controllers.chart.memoryTracker == null) {
+      controllers.chart.memoryTracker =
+          MemoryTracker(controllers.memoryTimeline, controllers.chart);
+      controllers.chart.memoryTracker!.start();
     }
 
     // Log Flutter extension events.
@@ -218,13 +166,15 @@ class MemoryController extends DisposableController
     );
 
     autoDisposeStreamSubscription(
-      _memoryTracker!.onChange.listen((_) {
-        _memoryTrackerController.add(_memoryTracker);
+      controllers.chart.memoryTracker!.onChange.listen((_) {
+        controllers.chart.memoryTrackerController
+            .add(controllers.chart.memoryTracker);
       }),
     );
     autoDisposeStreamSubscription(
-      _memoryTracker!.onChange.listen((_) {
-        _memoryTrackerController.add(_memoryTracker);
+      controllers.chart.memoryTracker!.onChange.listen((_) {
+        controllers.chart.memoryTrackerController
+            .add(controllers.chart.memoryTracker);
       }),
     );
 
@@ -232,47 +182,35 @@ class MemoryController extends DisposableController
     // memoryController dispose method.  Needed when a HOT RELOAD
     // will call dispose however, initState doesn't seem
     // to happen David is working on scaffolding.
-    _memoryTrackerController.stream.listen(
+    controllers.chart.memoryTrackerController.stream.listen(
       (_) {},
       onDone: () {
         // Stop polling and reset memoryTracker.
-        _memoryTracker?.stop();
-        _memoryTracker = null;
+        controllers.chart.memoryTracker?.stop();
+        controllers.chart.memoryTracker = null;
       },
     );
 
-    _updateAndroidChartVisibility();
+    controllers.chart.updateAndroidChartVisibility();
     addAutoDisposeListener(
       preferences.memory.androidCollectionEnabled,
-      _updateAndroidChartVisibility,
+      controllers.chart.updateAndroidChartVisibility,
     );
   }
 
   /// This flag will be needed for offline mode implementation.
   bool offline = false;
 
-  void _updateAndroidChartVisibility() {
-    final bool isConnectedToAndroidAndAndroidEnabled =
-        isConnectedDeviceAndroid &&
-            preferences.memory.androidCollectionEnabled.value;
-
-    isAndroidChartVisibleNotifier.value = isConnectedToAndroidAndAndroidEnabled;
-  }
-
   void _handleConnectionStop() {
-    _memoryTracker?.stop();
-    _memoryTrackerController.add(_memoryTracker);
+    controllers.chart.memoryTracker?.stop();
+    controllers.chart.memoryTrackerController
+        .add(controllers.chart.memoryTracker);
 
     controllers.reset();
-    hasStopped = true;
+    controllers.chart.hasStopped = true;
   }
 
   void startTimeline() {
-    addAutoDisposeListener(
-      serviceConnection.serviceManager.isolateManager.selectedIsolate,
-      _handleIsolateChanged,
-    );
-
     addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
       if (serviceConnection.serviceManager.connectedState.value.connected) {
         _handleConnectionStart();
@@ -286,53 +224,11 @@ class MemoryController extends DisposableController
     }
   }
 
-  void stopTimeLine() {
-    _memoryTracker?.stop();
-  }
-
-  bool get isConnectedDeviceAndroid {
-    return serviceConnection.serviceManager.vm?.operatingSystem == 'android';
-  }
-
-  bool get isGcing => _gcing;
-  bool _gcing = false;
-
-  Future<void> gc() async {
-    _gcing = true;
-    try {
-      await serviceConnection.serviceManager.service!.getAllocationProfile(
-        _isolateId!,
-        gc: true,
-      );
-      notificationService.push('Successfully garbage collected.');
-    } finally {
-      _gcing = false;
-    }
-  }
-
-  /// Detect stale isolates (sentineled), may happen after a hot restart.
-  Future<bool> isIsolateLive(String isolateId) async {
-    try {
-      final service = serviceConnection.serviceManager.service!;
-      await service.getIsolate(isolateId);
-    } catch (e) {
-      if (e is SentinelException) {
-        final SentinelException sentinelErr = e;
-        final message = 'isIsolateLive: Isolate sentinel $isolateId '
-            '${sentinelErr.sentinel.kind}';
-        debugLogger(message);
-        return false;
-      }
-    }
-    return true;
-  }
-
   @override
   void dispose() {
     super.dispose();
-    _displayIntervalNotifier.dispose();
-    unawaited(_memoryTrackerController.close());
-    _memoryTracker?.dispose();
+    unawaited(controllers.chart.memoryTrackerController.close());
+    controllers.chart.memoryTracker?.dispose();
     controllers.dispose();
     HeapClassName.dispose();
   }

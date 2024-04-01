@@ -7,13 +7,14 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../shared/charts/chart.dart';
-import '../../../../shared/charts/chart_controller.dart';
-import '../../../../shared/charts/chart_trace.dart' as trace;
-import '../../../../shared/charts/chart_trace.dart' show ChartSymbol, ChartType;
-import '../../../../shared/utils.dart';
-import '../../framework/connected/memory_controller.dart';
-import '../../shared/primitives/memory_timeline.dart';
+import '../../../../../shared/charts/chart.dart';
+import '../../../../../shared/charts/chart_controller.dart';
+import '../../../../../shared/charts/chart_trace.dart' as trace;
+import '../../../../../shared/charts/chart_trace.dart'
+    show ChartSymbol, ChartType;
+import '../../../../../shared/utils.dart';
+import '../../../framework/connected/memory_controller.dart';
+import '../../../shared/primitives/memory_timeline.dart';
 
 class AndroidChartController extends ChartController {
   AndroidChartController(
@@ -21,7 +22,7 @@ class AndroidChartController extends ChartController {
     List<int> sharedLabels = const <int>[],
   }) : super(
           name: 'Android',
-          sharedLabelimestamps: sharedLabels,
+          sharedLabelTimestamps: sharedLabels,
         );
 
   final MemoryController _memoryController;
@@ -51,7 +52,7 @@ class AndroidChartController extends ChartController {
   /// Loads all heap samples (live data or offline).
   void addSample(HeapSample sample) {
     // If paused don't update the chart (data is still collected).
-    if (_memoryController.isPaused) return;
+    if (_memoryController.controllers.chart.isPaused) return;
 
     addTimestamp(sample.timestamp);
 
@@ -387,7 +388,7 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
   /// Loads all heap samples (live data or offline).
   void _processHeapSample(HeapSample sample) {
     // If paused don't update the chart (data is still collected).
-    if (controller.paused.value) return;
+    if (controller.controllers.chart.paused.value) return;
     _chartController.addSample(sample);
   }
 }
