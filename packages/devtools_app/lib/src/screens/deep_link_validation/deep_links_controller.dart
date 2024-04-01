@@ -445,7 +445,7 @@ class DeepLinksController extends DisposableController {
     }
   }
 
-  void autoSelectLink(TableViewType viewType) async {
+  void autoSelectLink(TableViewType viewType) {
     final linkDatas = displayLinkDatasNotifier.value;
     late final LinkData linkdata;
     switch (viewType) {
