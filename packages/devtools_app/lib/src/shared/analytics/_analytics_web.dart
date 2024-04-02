@@ -632,11 +632,11 @@ void select(
     gaEventProvider: () => gtagEvent,
   );
 
-  ua.Event.devtoolsAction(
-    eventCategory: gtagEvent.event_category,
-    label: gtagEvent.event_label,
+  final uaEvent = ua.Event.devtoolsEvent(
+    eventCategory: gtagEvent.event_category!,
+    label: gtagEvent.event_label!,
     value: gtagEvent.value,
-    nonInteraction: gtagEvent.non_interaction,
+    userInitiatedInteraction: !gtagEvent.non_interaction,
     userApp: gtagEvent.user_app,
     userBuild: gtagEvent.user_build,
     userPlatform: gtagEvent.user_platform,
