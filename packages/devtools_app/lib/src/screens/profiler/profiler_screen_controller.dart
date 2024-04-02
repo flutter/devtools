@@ -10,7 +10,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../shared/config_specific/logger/allowed_error.dart';
 import '../../shared/globals.dart';
-import '../../shared/offline_mode.dart';
+import '../../shared/offline_data.dart';
 import '../../shared/primitives/utils.dart';
 import 'cpu_profile_model.dart';
 import 'cpu_profile_service.dart';
@@ -37,7 +37,7 @@ class ProfilerScreenController extends DisposableController
 
   Future<void> _initHelper() async {
     initReviewHistoryOnDisconnectListener();
-    if (!offlineController.offlineMode.value) {
+    if (!offlineDataController.showingOfflineData.value) {
       await allowedError(
         serviceConnection.serviceManager.service!
             .setProfilePeriod(mediumProfilePeriod),
@@ -136,7 +136,7 @@ class ProfilerScreenController extends DisposableController
   }
 
   @override
-  OfflineScreenData screenDataForExport() => OfflineScreenData(
+  OfflineScreenData prepareOfflineScreenData() => OfflineScreenData(
         screenId: ProfilerScreen.id,
         data: cpuProfileData!.toJson,
       );

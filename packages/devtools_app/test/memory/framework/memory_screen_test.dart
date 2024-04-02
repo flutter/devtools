@@ -52,7 +52,7 @@ void main() {
     );
     setGlobal(ServiceConnectionManager, fakeServiceConnection);
     setGlobal(PreferencesController, PreferencesController());
-    setGlobal(OfflineModeController, OfflineModeController());
+    setGlobal(OfflineDataController, OfflineDataController());
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());
     setGlobal(BannerMessagesController, BannerMessagesController());

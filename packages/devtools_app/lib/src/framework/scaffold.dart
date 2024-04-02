@@ -120,7 +120,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
     _setupTabController();
 
-    addAutoDisposeListener(offlineController.offlineMode);
+    addAutoDisposeListener(offlineDataController.showingOfflineData);
     autoDisposeStreamSubscription(
       frameworkController.onShowPageId.listen(_showPageById),
     );
@@ -252,7 +252,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   void _pushSnapshotScreenForImport(String screenId) {
     final args = {'screen': screenId};
     final routerDelegate = DevToolsRouterDelegate.of(context);
-    if (!offlineController.offlineMode.value) {
+    if (!offlineDataController.showingOfflineData.value) {
       routerDelegate.navigate(snapshotScreenId, args);
     } else {
       // If we are already in offline mode, we need to replace the existing page
@@ -294,7 +294,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         if (serviceConnection.serviceManager.connectedAppInitialized &&
             !serviceConnection
                 .serviceManager.connectedApp!.isProfileBuildNow! &&
-            !offlineController.offlineMode.value &&
+            !offlineDataController.showingOfflineData.value &&
             _currentScreen.showFloatingDebuggerControls)
           Container(
             alignment: Alignment.topCenter,
@@ -308,7 +308,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       builder: (context, _) {
         final showConsole =
             serviceConnection.serviceManager.connectedAppInitialized &&
-                !offlineController.offlineMode.value &&
+                !offlineDataController.showingOfflineData.value &&
                 _currentScreen.showConsole(widget.embed);
 
         return DragAndDrop(

@@ -129,7 +129,7 @@ class FlutterTestEnvironment {
         setGlobal(IdeTheme, IdeTheme());
         setGlobal(Storage, FlutterDesktopStorage());
         setGlobal(ServiceConnectionManager, ServiceConnectionManager());
-        setGlobal(OfflineModeController, OfflineModeController());
+        setGlobal(OfflineDataController, OfflineDataController());
         setGlobal(NotificationService, NotificationService());
 
         final preferencesController = PreferencesController();
