@@ -146,8 +146,12 @@ enum ScreenMetaData {
 
 /// Defines a page shown in the DevTools [TabBar].
 ///
-/// A devtools screen can be in three modes: offline-data, connected
-/// and not-connected. The screen can support only subset of modes.
+/// A devtools screen can be in three modes:
+/// * offline-data
+/// * connected
+/// * not-connected
+///
+/// A screen can support only subset of modes.
 ///
 /// For offline-data and connected modes:
 /// * Override [Screen.buildScreenBody] to build content
