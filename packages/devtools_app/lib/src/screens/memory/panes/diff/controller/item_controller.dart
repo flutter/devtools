@@ -70,7 +70,7 @@ class SnapshotDataItem extends SnapshotItem implements RenamableItem {
       nameOverride ??
       '$defaultName${displayNumber == null ? '' : '-$displayNumber'}';
 
-  int? get totalSize => _heap?.footprint?.dart;
+  int? get totalSize => _heap?.footprint?.reachable;
 }
 
 abstract class RenamableItem {

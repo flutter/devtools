@@ -5,11 +5,11 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../shared/ui/colors.dart';
-import '../../shared/primitives/painting.dart';
-import 'chart_pane_controller.dart';
+import '../../../../../shared/ui/colors.dart';
+import '../../../shared/primitives/painting.dart';
+import '../controller/chart_pane_controller.dart';
+import '../data/charts.dart';
 import 'memory_android_chart.dart';
-import 'memory_charts.dart';
 import 'memory_events_pane.dart';
 import 'memory_vm_chart.dart';
 

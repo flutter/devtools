@@ -139,7 +139,7 @@ class TimelineEventsTabControls extends StatelessWidget {
             perfettoController: controller.perfettoController,
           ),
         ),
-        if (!offlineController.offlineMode.value) ...[
+        if (!offlineDataController.showingOfflineData.value) ...[
           // TODO(kenz): add a switch to enable the CPU profiler once the
           // tracing format supports it (when we switch to protozero).
           const SizedBox(width: densePadding),

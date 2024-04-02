@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/screens/memory/panes/chart/chart_control_pane.dart';
-import 'package:devtools_app/src/screens/memory/panes/chart/memory_vm_chart.dart';
+import 'package:devtools_app/src/screens/memory/panes/chart/widgets/chart_control_pane.dart';
+import 'package:devtools_app/src/screens/memory/panes/chart/widgets/memory_vm_chart.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
@@ -52,7 +52,7 @@ void main() {
     );
     setGlobal(ServiceConnectionManager, fakeServiceConnection);
     setGlobal(PreferencesController, PreferencesController());
-    setGlobal(OfflineModeController, OfflineModeController());
+    setGlobal(OfflineDataController, OfflineDataController());
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());
     setGlobal(BannerMessagesController, BannerMessagesController());

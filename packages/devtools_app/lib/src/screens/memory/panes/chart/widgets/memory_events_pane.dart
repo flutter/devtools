@@ -7,13 +7,13 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../shared/charts/chart.dart';
-import '../../../../shared/charts/chart_controller.dart';
-import '../../../../shared/charts/chart_trace.dart' as trace;
-import '../../../../shared/charts/chart_trace.dart' show ChartType;
-import '../../../../shared/utils.dart';
-import '../../framework/connected/memory_controller.dart';
-import '../../shared/primitives/memory_timeline.dart';
+import '../../../../../shared/charts/chart.dart';
+import '../../../../../shared/charts/chart_controller.dart';
+import '../../../../../shared/charts/chart_trace.dart' as trace;
+import '../../../../../shared/charts/chart_trace.dart' show ChartType;
+import '../../../../../shared/utils.dart';
+import '../../../framework/connected/memory_controller.dart';
+import '../../../shared/primitives/memory_timeline.dart';
 
 // TODO(terry): Consider custom painter?
 const _base = 'assets/img/legend/';
@@ -68,7 +68,7 @@ class EventChartController extends ChartController {
   /// Loads all heap samples (live data or offline).
   void addSample(HeapSample sample) {
     // If paused don't update the chart (data is still collected).
-    if (_memoryController.paused.value) return;
+    if (_memoryController.controllers.chart.paused.value) return;
 
     addTimestamp(sample.timestamp);
 
@@ -417,7 +417,7 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
   /// Loads all heap samples (live data or offline).
   void _processHeapSample(HeapSample sample) {
     // If paused don't update the chart (data is still collected).
-    if (controller.isPaused) return;
+    if (controller.controllers.chart.isPaused) return;
     _chartController.addSample(sample);
   }
 }

@@ -7,19 +7,19 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../../shared/charts/chart_controller.dart';
-import '../../../../shared/common_widgets.dart';
-import '../../../../shared/globals.dart';
-import '../../../../shared/primitives/utils.dart';
-import '../../../../shared/ui/colors.dart';
-import '../../../../shared/utils.dart';
-import '../../framework/connected/memory_controller.dart';
-import '../../shared/primitives/painting.dart';
+import '../../../../../shared/charts/chart_controller.dart';
+import '../../../../../shared/common_widgets.dart';
+import '../../../../../shared/globals.dart';
+import '../../../../../shared/primitives/utils.dart';
+import '../../../../../shared/ui/colors.dart';
+import '../../../../../shared/utils.dart';
+import '../../../framework/connected/memory_controller.dart';
+import '../../../shared/primitives/painting.dart';
+import '../controller/chart_pane_controller.dart';
+import '../data/charts.dart';
 import 'chart_control_pane.dart';
-import 'chart_pane_controller.dart';
 import 'legend.dart';
 import 'memory_android_chart.dart';
-import 'memory_charts.dart';
 import 'memory_events_pane.dart';
 import 'memory_vm_chart.dart';
 
@@ -130,14 +130,16 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
       _addTapLocationListener(location, allLocations);
     }
 
-    addAutoDisposeListener(controller.refreshCharts, () {
+    addAutoDisposeListener(widget.chartController.refreshCharts, () {
       setState(() {
         widget.chartController.recomputeChartData();
       });
     });
 
     // There is no listener passed, so SetState will be invoked.
-    addAutoDisposeListener(controller.isAndroidChartVisibleNotifier);
+    addAutoDisposeListener(
+      controller.controllers.chart.isAndroidChartVisibleNotifier,
+    );
 
     _updateListeningState();
   }
@@ -145,7 +147,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
   void _updateListeningState() async {
     await serviceConnection.serviceManager.onServiceAvailable;
 
-    if (!controller.hasStarted) {
+    if (!controller.controllers.chart.hasStarted) {
       controller.startTimeline();
 
       // TODO(terry): Need to set the initial state of buttons.
@@ -193,7 +195,8 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
                       child: MemoryEventsPane(widget.chartController.event),
                     ),
                     MemoryVMChart(widget.chartController.vm),
-                    if (controller.isAndroidChartVisibleNotifier.value)
+                    if (controller
+                        .controllers.chart.isAndroidChartVisibleNotifier.value)
                       SizedBox(
                         height: defaultChartHeight,
                         child: MemoryAndroidChart(
@@ -207,7 +210,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
               MultiValueListenableBuilder(
                 listenables: [
                   widget.chartController.legendVisibleNotifier,
-                  controller.isAndroidChartVisibleNotifier,
+                  controller.controllers.chart.isAndroidChartVisibleNotifier,
                 ],
                 builder: (_, values, __) {
                   final isLegendVisible = values.first as bool;
@@ -239,7 +242,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
   @override
   void dispose() {
     _hideHover(); // hover will leak if not hide
-    controller.stopTimeLine();
+    controller.controllers.chart.stopTimeLine();
     super.dispose();
   }
 
@@ -253,7 +256,9 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     const dividerLineHorizontalSpace = 20.0;
     const totalDividerLineHorizontalSpace = dividerLineHorizontalSpace * 2;
 
-    if (!controller.isAndroidChartVisibleNotifier.value) return [];
+    if (!controller.controllers.chart.isAndroidChartVisibleNotifier.value) {
+      return [];
+    }
 
     final androidDataDisplayed = chartsValues
         .androidDataToDisplay(widget.chartController.android.traces);
@@ -302,11 +307,12 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
     double totalHoverHeight;
     int totalTraces;
-    totalTraces = controller.isAndroidChartVisibleNotifier.value
-        ? chartsValues.vmData.entries.length -
-            1 +
-            chartsValues.androidData.entries.length
-        : chartsValues.vmData.entries.length - 1;
+    totalTraces =
+        controller.controllers.chart.isAndroidChartVisibleNotifier.value
+            ? chartsValues.vmData.entries.length -
+                1 +
+                chartsValues.androidData.entries.length
+            : chartsValues.vmData.entries.length - 1;
 
     totalHoverHeight = _computeHoverHeight(
       chartsValues.eventCount,
@@ -572,7 +578,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
   String _decodeEventValues(Map<String, Object> event) {
     final output = StringBuffer();
     if (event[eventName] == imageSizesForFrameEvent) {
-      // TODO(terry): Need a more generic event displayer.
+      // TODO(terry): Need a more generic way to display event.
       // Flutter event emit the event name and value.
       final data = (event[eventData] as Map).cast<String, Object>();
       final key = data.keys.first;

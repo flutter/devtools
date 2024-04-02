@@ -7,10 +7,10 @@ import 'dart:async';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../shared/analytics/constants.dart' as gac;
-import '../../../../shared/common_widgets.dart';
-import '../../framework/connected/memory_controller.dart';
-import '../../shared/primitives/simple_elements.dart';
+import '../../../../../shared/analytics/constants.dart' as gac;
+import '../../../../../shared/common_widgets.dart';
+import '../../../framework/connected/memory_controller.dart';
+import '../../../shared/primitives/simple_elements.dart';
 import 'settings_dialog.dart';
 
 /// Controls related to the entire memory screen.
@@ -28,7 +28,7 @@ class SecondaryControls extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         GaDevToolsButton(
-          onPressed: controller.isGcing ? null : _gc,
+          onPressed: controller.controllers.control.isGcing ? null : _gc,
           icon: Icons.delete,
           label: 'GC',
           tooltip: 'Trigger full garbage collection.',
@@ -58,6 +58,6 @@ class SecondaryControls extends StatelessWidget {
 
   Future<void> _gc() async {
     controller.controllers.memoryTimeline.addGCEvent();
-    await controller.gc();
+    await controller.controllers.control.gc();
   }
 }

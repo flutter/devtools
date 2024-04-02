@@ -82,7 +82,7 @@ export 'src/shared/error_badge_manager.dart';
 export 'src/shared/globals.dart';
 export 'src/shared/http/http_request_data.dart';
 export 'src/shared/notifications.dart';
-export 'src/shared/offline_mode.dart';
+export 'src/shared/offline_data.dart';
 export 'src/shared/preferences/preferences.dart';
 export 'src/shared/primitives/listenable.dart';
 export 'src/shared/primitives/simple_items.dart';

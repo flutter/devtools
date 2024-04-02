@@ -49,6 +49,7 @@ import 'shared/common_widgets.dart';
 import 'shared/console/primitives/simple_items.dart';
 import 'shared/feature_flags.dart';
 import 'shared/globals.dart';
+import 'shared/offline_data.dart';
 import 'shared/offline_screen.dart';
 import 'shared/primitives/utils.dart';
 import 'shared/routing.dart';
@@ -471,7 +472,16 @@ class DevToolsScreen<C extends Object?> {
     if (controllerLocal != null) {
       return Provider<C>.value(value: controllerLocal);
     }
-    return Provider<C>(create: (_) => createController!(routerDelegate));
+
+    return Provider<C>(
+      create: (_) {
+        final controller = createController!(routerDelegate);
+        if (controller is OfflineScreenControllerMixin) {
+          controller.initReviewHistoryOnDisconnectListener();
+        }
+        return controller;
+      },
+    );
   }
 }
 
