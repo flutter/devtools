@@ -155,7 +155,7 @@ enum ScreenMetaData {
 /// * See [OfflineScreenControllerMixin] for documentation on how to
 /// enable and handle offline-data mode for a screen.
 ///
-/// For not-connected modes:
+/// For not-connected mode:
 /// * Override [Screen.buildDisconnectedScreenBody] to build content
 @immutable
 abstract class Screen {
