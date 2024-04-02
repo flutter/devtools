@@ -145,6 +145,17 @@ enum ScreenMetaData {
 }
 
 /// Defines a page shown in the DevTools [TabBar].
+///
+/// A devtools screen can be in three modes: offline-data, connected
+/// and not-connected. The screen can support only subset of modes.
+///
+/// For offline-data and connected modes:
+/// * Override [Screen.buildScreenBody] to build content
+/// * Use [ProvidedControllerMixin] to access controller
+/// * See [OfflineScreenControllerMixin] on how enable and handle offline-data mode.
+///
+/// For not-connected modes:
+/// * Override [Screen.buildDisconnectedScreenBody] to build content
 @immutable
 abstract class Screen {
   const Screen(

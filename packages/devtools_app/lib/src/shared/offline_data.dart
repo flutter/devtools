@@ -69,6 +69,10 @@ class OfflineDataController {
 /// [Screen.worksOffline] set to true in order to enable offline support for the
 /// screen.
 ///
+/// Check [OfflineDataController.showingOfflineData] in controller constructor.
+/// If it is true, the screen should ignore the connected application and just show
+/// the offline data.
+///
 /// Example:
 ///
 /// class MyScreenController with OfflineScreenControllerMixin<MyScreenData> {
@@ -77,9 +81,6 @@ class OfflineDataController {
 ///   }
 ///
 ///   void init() {
-///     // If the screen supports reviewing history on app disconnect, add this.
-///     initReviewHistoryOnDisconnectListener();
-///
 ///     if (offlineDataController.showingOfflineData.value) {
 ///       await maybeLoadOfflineData(
 ///         ScreenMetaData.myScreen.id,
@@ -87,7 +88,7 @@ class OfflineDataController {
 ///         shouldLoad: (data) => data.isNotEmpty,
 ///       );
 ///     } else {
-///       // Do normal screen initialization.
+///       // Do screen initialization for connected application.
 ///     }
 ///   }
 ///
