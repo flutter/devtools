@@ -19,9 +19,8 @@ import 'routing.dart';
 class OfflineDataController {
   /// Whether DevTools is in offline mode.
   ///
-  /// We consider DevTools to be in offline mode whenever there is "offline"
-  /// data, data that was previously saved from DevTools, being viewed as the
-  /// top level route in DevTools.
+  /// We consider DevTools to show offline data whenever there is data
+  /// that was previously saved from DevTools.
   ///
   /// The value of [showingOfflineData] is independent of the DevTools connection
   /// status. DevTools can be in offline mode both when connected to an app when
