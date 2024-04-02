@@ -431,11 +431,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
 /// [C] corresponds to the type of the screen's controller, which is created by
 /// [createController] or provided by [controllerProvider].
 class DevToolsScreen<C extends Object?> {
-  const DevToolsScreen(
-    this.screen, {
-    this.createController,
-    this.controller,
-  }) : assert(createController == null || controller == null);
+  const DevToolsScreen(this.screen, {this.createController});
 
   final Screen screen;
 
@@ -449,30 +445,11 @@ class DevToolsScreen<C extends Object?> {
   /// responsible for creating and maintaining its own controller.
   final C Function(DevToolsRouterDelegate)? createController;
 
-  /// A provided controller for this screen, if non-null.
-  ///
-  /// The controller will then be provided via [controllerProvider], and
-  /// widgets depending on this controller can access it by calling
-  /// `Provider<C>.of(context)`.
-  ///
-  /// If [createController] and [controller] are both null, [screen] will be
-  /// responsible for creating and maintaining its own controller.
-  final C? controller;
-
   /// Returns true if a controller was provided for [screen]. If false,
   /// [screen] is responsible for creating and maintaining its own controller.
-  bool get providesController => createController != null || controller != null;
+  bool get providesController => createController != null;
 
   Provider<C> controllerProvider(DevToolsRouterDelegate routerDelegate) {
-    assert(
-      (createController != null && controller == null) ||
-          (createController == null && controller != null),
-    );
-    final controllerLocal = controller;
-    if (controllerLocal != null) {
-      return Provider<C>.value(value: controllerLocal);
-    }
-
     return Provider<C>(
       create: (_) {
         final controller = createController!(routerDelegate);
