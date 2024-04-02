@@ -8,7 +8,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
 import '../shared/globals.dart';
-import '../shared/offline_mode.dart';
+import '../shared/offline_data.dart';
 import '../shared/screen.dart';
 import '../shared/utils.dart';
 

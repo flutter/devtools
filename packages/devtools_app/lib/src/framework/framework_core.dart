@@ -22,7 +22,7 @@ import '../shared/console/eval/eval_service.dart';
 import '../shared/framework_controller.dart';
 import '../shared/globals.dart';
 import '../shared/notifications.dart';
-import '../shared/offline_mode.dart';
+import '../shared/offline_data.dart';
 import '../shared/primitives/message_bus.dart';
 import '../shared/scripts/script_manager.dart';
 import '../shared/survey.dart';

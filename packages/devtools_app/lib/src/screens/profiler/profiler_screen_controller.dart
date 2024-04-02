@@ -10,7 +10,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../shared/config_specific/logger/allowed_error.dart';
 import '../../shared/globals.dart';
-import '../../shared/offline_mode.dart';
+import '../../shared/offline_data.dart';
 import '../../shared/primitives/utils.dart';
 import 'cpu_profile_model.dart';
 import 'cpu_profile_service.dart';

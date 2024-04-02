@@ -11,7 +11,7 @@ import '../../service/service_registrations.dart' as registrations;
 import '../../shared/diagnostics/inspector_service.dart';
 import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
-import '../../shared/offline_mode.dart';
+import '../../shared/offline_data.dart';
 import 'panes/controls/enhance_tracing/enhance_tracing_controller.dart';
 import 'panes/flutter_frames/flutter_frame_model.dart';
 import 'panes/flutter_frames/flutter_frames_controller.dart';
