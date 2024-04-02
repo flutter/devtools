@@ -48,7 +48,7 @@ void main() {
         ExternalDevToolsEnvironmentParameters(),
       );
       setGlobal(ServiceConnectionManager, fakeServiceManager);
-      setGlobal(OfflineModeController, OfflineModeController());
+      setGlobal(OfflineDataController, OfflineDataController());
       setGlobal(PreferencesController, PreferencesController());
       controller = CpuProfilerController();
       controller.useRegExp.value = false;

@@ -58,7 +58,7 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
 
   @override
   Widget build(BuildContext context) {
-    final isOffline = offlineController.offlineMode.value;
+    final isOffline = offlineDataController.showingOfflineData.value;
     final isFlutterApp =
         serviceConnection.serviceManager.connectedApp!.isFlutterAppNow!;
 

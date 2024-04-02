@@ -48,8 +48,8 @@ PreferencesController get preferences =>
 DevToolsEnvironmentParameters get devToolsExtensionPoints =>
     globals[DevToolsEnvironmentParameters] as DevToolsEnvironmentParameters;
 
-OfflineModeController get offlineController =>
-    globals[OfflineModeController] as OfflineModeController;
+OfflineDataController get offlineDataController =>
+    globals[OfflineDataController] as OfflineDataController;
 
 NotificationService get notificationService =>
     globals[NotificationService] as NotificationService;

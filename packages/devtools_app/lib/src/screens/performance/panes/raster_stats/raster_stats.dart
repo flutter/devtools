@@ -58,7 +58,7 @@ class RasterStatsView extends StatelessWidget {
     }
     return Column(
       children: [
-        if (!offlineController.offlineMode.value)
+        if (!offlineDataController.showingOfflineData.value)
           _RasterStatsControls(
             rasterStatsController: rasterStatsController,
           ),

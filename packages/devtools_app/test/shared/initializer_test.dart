@@ -23,7 +23,7 @@ void main() {
           .thenAnswer((_) => Future.value(false));
       setGlobal(ServiceConnectionManager, serviceManager);
       setGlobal(FrameworkController, FrameworkController());
-      setGlobal(OfflineModeController, OfflineModeController());
+      setGlobal(OfflineDataController, OfflineDataController());
       setGlobal(IdeTheme, IdeTheme());
     });
 

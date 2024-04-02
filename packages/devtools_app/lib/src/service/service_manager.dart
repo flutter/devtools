@@ -147,7 +147,7 @@ class ServiceConnectionManager {
     final previousConnectedApp = serviceManager.connectedApp != null
         ? OfflineConnectedApp.parse(serviceManager.connectedApp!.toJson())
         : null;
-    offlineController.previousConnectedApp = previousConnectedApp;
+    offlineDataController.previousConnectedApp = previousConnectedApp;
 
     // This must be called before we close the VM service so that
     // [serviceManager.serviceUri] is not null.

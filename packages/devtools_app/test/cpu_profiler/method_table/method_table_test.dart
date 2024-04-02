@@ -31,7 +31,7 @@ void main() {
       createMockServiceConnectionWithDefaults(),
     );
     setGlobal(IdeTheme, IdeTheme());
-    setGlobal(OfflineModeController, OfflineModeController());
+    setGlobal(OfflineDataController, OfflineDataController());
     final mockScriptManager = MockScriptManager();
     when(mockScriptManager.sortedScripts).thenReturn(
       ValueNotifier<List<ScriptRef>>([]),

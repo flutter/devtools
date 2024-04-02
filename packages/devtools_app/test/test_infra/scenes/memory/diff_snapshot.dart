@@ -33,7 +33,7 @@ class DiffSnapshotScene extends Scene {
 
   @override
   Future<void> setUp() async {
-    setGlobal(OfflineModeController, OfflineModeController());
+    setGlobal(OfflineDataController, OfflineDataController());
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());
 

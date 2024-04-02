@@ -37,7 +37,7 @@ class ProfilerScreenController extends DisposableController
 
   Future<void> _initHelper() async {
     initReviewHistoryOnDisconnectListener();
-    if (!offlineController.offlineMode.value) {
+    if (!offlineDataController.showingOfflineData.value) {
       await allowedError(
         serviceConnection.serviceManager.service!
             .setProfilePeriod(mediumProfilePeriod),

@@ -31,7 +31,7 @@ void main() {
       mockEnhanceTracingController = MockEnhanceTracingController();
       rebuildCountModel = RebuildCountModel();
       setGlobal(IdeTheme, IdeTheme());
-      setGlobal(OfflineModeController, OfflineModeController());
+      setGlobal(OfflineDataController, OfflineDataController());
       final fakeServiceConnection = FakeServiceConnectionManager();
       setGlobal(ServiceConnectionManager, fakeServiceConnection);
       setGlobal(NotificationService, NotificationService());

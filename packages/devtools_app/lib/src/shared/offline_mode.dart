@@ -14,20 +14,20 @@ import 'routing.dart';
 
 /// Controller that manages offline mode for DevTools.
 ///
-/// This class will be instantiated once and set as a global [offlineController]
+/// This class will be instantiated once and set as a global [offlineDataController]
 /// that can be accessed from anywhere in DevTools.
-class OfflineModeController {
+class OfflineDataController {
   /// Whether DevTools is in offline mode.
   ///
   /// We consider DevTools to be in offline mode whenever there is "offline"
   /// data, data that was previously saved from DevTools, being viewed as the
   /// top level route in DevTools.
   ///
-  /// The value of [offlineMode] is independent of the DevTools connection
+  /// The value of [showingOfflineData] is independent of the DevTools connection
   /// status. DevTools can be in offline mode both when connected to an app when
   /// disconnected from an app.
-  ValueListenable<bool> get offlineMode => _offlineMode;
-  final _offlineMode = ValueNotifier<bool>(false);
+  ValueListenable<bool> get showingOfflineData => _showingOfflineData;
+  final _showingOfflineData = ValueNotifier<bool>(false);
 
   /// The current offline data as raw JSON.
   ///
@@ -45,20 +45,20 @@ class OfflineModeController {
 
   /// Whether DevTools should load offline data for [screenId].
   bool shouldLoadOfflineData(String screenId) {
-    return _offlineMode.value &&
+    return _showingOfflineData.value &&
         offlineDataJson.isNotEmpty &&
         offlineDataJson[screenId] != null;
   }
 
-  void enterOfflineMode({required ConnectedApp offlineApp}) {
+  void startShowingOfflineData({required ConnectedApp offlineApp}) {
     previousConnectedApp = serviceConnection.serviceManager.connectedApp;
     serviceConnection.serviceManager.connectedApp = offlineApp;
-    _offlineMode.value = true;
+    _showingOfflineData.value = true;
   }
 
-  void exitOfflineMode() {
+  void stopShowingOfflineData() {
     serviceConnection.serviceManager.connectedApp = previousConnectedApp;
-    _offlineMode.value = false;
+    _showingOfflineData.value = false;
     offlineDataJson.clear();
     previousConnectedApp = null;
   }
@@ -81,7 +81,7 @@ class OfflineModeController {
 ///     // If the screen supports reviewing history on app disconnect, add this.
 ///     initReviewHistoryOnDisconnectListener();
 ///
-///     if (offlineController.offlineMode.value) {
+///     if (offlineDataController.showingOfflineData.value) {
 ///       await maybeLoadOfflineData(
 ///         ScreenMetaData.myScreen.id,
 ///         createData: (json) => MyScreenData.parse(json),
@@ -143,16 +143,16 @@ mixin OfflineScreenControllerMixin<T> on AutoDisposeControllerMixin {
   ///
   /// Screen controllers that mix in [OfflineScreenControllerMixin] should call
   /// this during their initialization when DevTools is in offline mode, defined
-  /// by [offlineController.offlineMode].
+  /// by [OfflineDataController.showingOfflineData].
   @protected
   Future<void> maybeLoadOfflineData(
     String screenId, {
     required T Function(Map<String, Object?> json) createData,
     required bool Function(T data) shouldLoad,
   }) async {
-    if (offlineController.shouldLoadOfflineData(screenId)) {
+    if (offlineDataController.shouldLoadOfflineData(screenId)) {
       final json = Map<String, Object?>.from(
-        offlineController.offlineDataJson[screenId],
+        offlineDataController.offlineDataJson[screenId],
       );
       final screenData = createData(json);
       if (shouldLoad(screenData)) {
@@ -195,12 +195,13 @@ mixin OfflineScreenControllerMixin<T> on AutoDisposeControllerMixin {
         // future if we support offline imports for more than once screen at a
         // time.
         if (DevToolsRouterDelegate.currentPage == currentScreenData.screenId) {
-          final previouslyConnectedApp = offlineController.previousConnectedApp;
+          final previouslyConnectedApp =
+              offlineDataController.previousConnectedApp;
           final offlineData = _exportController.generateDataForExport(
             offlineScreenData: currentScreenData.json,
             connectedApp: previouslyConnectedApp,
           );
-          offlineController.offlineDataJson = offlineData;
+          offlineDataController.offlineDataJson = offlineData;
         }
       }
     });

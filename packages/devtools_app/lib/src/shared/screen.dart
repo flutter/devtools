@@ -391,7 +391,7 @@ abstract class Screen {
           serviceConnection.serviceManager.connectedAppInitialized;
       // Do not use the disconnected body in offline mode, because the default
       // [buildScreenBody] should be used for offline states.
-      if (!connected && !offlineController.offlineMode.value) {
+      if (!connected && !offlineDataController.showingOfflineData.value) {
         final disconnectedBody = buildDisconnectedScreenBody(context);
         if (disconnectedBody != null) return disconnectedBody;
       }
@@ -422,7 +422,7 @@ abstract class Screen {
 /// Check whether a screen should be shown in the UI.
 bool shouldShowScreen(Screen screen) {
   _log.finest('shouldShowScreen: ${screen.screenId}');
-  if (offlineController.offlineMode.value) {
+  if (offlineDataController.showingOfflineData.value) {
     _log.finest('for offline mode: returning ${screen.worksOffline}');
     return screen.worksOffline;
   }

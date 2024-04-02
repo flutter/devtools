@@ -82,7 +82,7 @@ class PerformanceController extends DisposableController
   /// Performance screen data loaded via import.
   ///
   /// This is expected to be null when we are not in
-  /// [offlineController.offlineMode].
+  /// [OfflineDataController.showingOfflineData].
   ///
   /// This will contain the original data from the imported file, regardless of
   /// any selection modifications that occur while the data is displayed.
@@ -104,7 +104,7 @@ class PerformanceController extends DisposableController
     initReviewHistoryOnDisconnectListener();
 
     await _applyToFeatureControllersAsync((c) => c.init());
-    if (!offlineController.offlineMode.value) {
+    if (!offlineDataController.showingOfflineData.value) {
       await serviceConnection.serviceManager.onServiceAvailable;
 
       if (serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ??

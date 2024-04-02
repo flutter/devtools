@@ -86,7 +86,7 @@ class ExampleController extends DisposableController
   }
 
   Future<void> _initHelper() async {
-    if (!offlineController.offlineMode.value) {
+    if (!offlineDataController.showingOfflineData.value) {
       // Do some initialization for online mode.
     } else {
       await maybeLoadOfflineData(

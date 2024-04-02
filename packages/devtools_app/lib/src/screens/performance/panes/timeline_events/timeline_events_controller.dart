@@ -134,7 +134,7 @@ class TimelineEventsController extends PerformanceFeatureController
   Future<void> init() async {
     perfettoController.init();
 
-    if (!offlineController.offlineMode.value) {
+    if (!offlineDataController.showingOfflineData.value) {
       await _initForServiceConnection();
     }
   }
@@ -402,7 +402,7 @@ class TimelineEventsController extends PerformanceFeatureController
 
     // No need to process events again if we are in offline mode - we have
     // already processed all the available data.
-    if (!offlineController.offlineMode.value) {
+    if (!offlineDataController.showingOfflineData.value) {
       processMoreEventsOrExitHelper(
         onProcessMore: () {
           debugTraceCallback(
@@ -492,7 +492,7 @@ class TimelineEventsController extends PerformanceFeatureController
 
   bool _isFlutterAppHelper() {
     final offlineData = performanceController.offlinePerformanceData;
-    return offlineController.offlineMode.value
+    return offlineDataController.showingOfflineData.value
         ? offlineData != null && offlineData.frames.isNotEmpty
         : serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ??
             false;
