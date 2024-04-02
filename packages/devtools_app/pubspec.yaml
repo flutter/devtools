@@ -27,7 +27,7 @@ dependencies:
   devtools_app_shared: ^0.1.1-dev.0
   devtools_extensions: ^0.1.1-dev.0
   devtools_shared: ^8.1.1-dev.0
-  dtd: ^2.1.0
+  dtd: ^2.2.0
   file: ">=6.0.0 <8.0.0"
   file_selector: ^1.0.0
   fixnum: ^1.1.0
@@ -57,7 +57,7 @@ dependencies:
   stack_trace: ^1.10.0
   stream_channel: ^2.1.1
   string_scanner: ^1.1.0
-  unified_analytics: ^5.8.8
+  unified_analytics: ^6.0.0
   url_launcher: ^6.1.0
   url_launcher_web: ^2.0.6
   vm_service: ^14.1.0

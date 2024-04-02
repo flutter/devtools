@@ -1,3 +1,9 @@
+# 9.0.0
+* **Breaking change:** remove parameter `analytics` from `ServerApi.handle` in favor
+of DTD implementation.
+* **Breaking change:** remove DevTools server APIs `apiMarkConsentMessageAsShown` and `apiGetConsentMessage`
+in favor of DTD implementation.
+
 # 8.2.0
 * Bump `package:dtd` to `^2.2.0`
 

@@ -12,7 +12,6 @@ import 'package:collection/collection.dart';
 import 'package:dtd/dtd.dart';
 import 'package:meta/meta.dart';
 import 'package:shelf/shelf.dart' as shelf;
-import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../deeplink/deeplink_manager.dart';
@@ -55,10 +54,6 @@ class ServerApi {
     shelf.Request request, {
     required ExtensionsManager extensionsManager,
     required DeeplinkManager deeplinkManager,
-    // TODO(https://github.com/flutter/devtools/issues/7496): remove this when
-    // making the breaking change to devtools_shared.
-    // ignore: avoid-unused-parameters, this will be removed in a follow-up.
-    required Analytics analytics,
     ServerApi? api,
     DTDConnectionInfo? dtd,
   }) {

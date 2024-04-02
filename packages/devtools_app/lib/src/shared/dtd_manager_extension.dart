@@ -4,6 +4,8 @@
 
 import 'package:devtools_app_shared/service.dart';
 import 'package:dtd/dtd.dart';
+// ignore: implementation_imports, intentional use of extension methods in DTD
+import 'package:dtd/src/unified_analytics_service.dart';
 import 'package:logging/logging.dart';
 import 'package:unified_analytics/unified_analytics.dart' as ua;
 
@@ -78,7 +80,7 @@ extension DevToolsDTDExtension on DTDManager {
     try {
       await _dtd.analyticsSetTelemetry(ua.DashTool.devtools, enabled: enabled);
     } catch (e) {
-      _log.fine('Error calling analyticsTelemetryEnabled: $e');
+      _log.fine('Error calling setAnalyticsTelemetry: $e');
     }
   }
 
@@ -88,7 +90,7 @@ extension DevToolsDTDExtension on DTDManager {
     try {
       await _dtd.analyticsSend(ua.DashTool.devtools, event);
     } catch (e) {
-      _log.fine('Error calling analyticsTelemetryEnabled: $e');
+      _log.fine('Error calling sendAnalyticsEvent: $e');
     }
   }
 }
