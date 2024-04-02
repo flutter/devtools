@@ -239,7 +239,7 @@ class PerformanceController extends DisposableController
   }
 
   @override
-  OfflineScreenData screenDataForExport() => OfflineScreenData(
+  OfflineScreenData prepareOfflineScreenData() => OfflineScreenData(
         screenId: PerformanceScreen.id,
         data: OfflinePerformanceData(
           perfettoTraceBinary: timelineEventsController.fullPerfettoTrace,

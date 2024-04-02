@@ -95,7 +95,7 @@ class OfflineDataController {
 ///   // Override the abstract methods from [OfflineScreenControllerMixin].
 ///
 ///   @override
-///   OfflineScreenData screenDataForExport() => OfflineScreenData(
+///   OfflineScreenData prepareOfflineScreenData() => OfflineScreenData(
 ///     screenId: ScreenMetaData.myScreen.id,
 ///     data: {} // The data for this screen as a serializable JSON object.
 ///   );
@@ -129,7 +129,7 @@ mixin OfflineScreenControllerMixin<T> on AutoDisposeControllerMixin {
 
   /// Returns an [OfflineScreenData] object with the data that should be
   /// included in the offline data snapshot for this screen.
-  OfflineScreenData screenDataForExport();
+  OfflineScreenData prepareOfflineScreenData();
 
   /// Defines how the offline data for this screen should be processed and set.
   ///
@@ -170,7 +170,8 @@ mixin OfflineScreenControllerMixin<T> on AutoDisposeControllerMixin {
   /// Exports the current screen data to a .json file and downloads the file to
   /// the user's Downloads directory.
   void exportData() {
-    final encodedData = _exportController.encode(screenDataForExport().json);
+    final encodedData =
+        _exportController.encode(prepareOfflineScreenData().json);
     _exportController.downloadFile(encodedData);
   }
 
@@ -190,7 +191,7 @@ mixin OfflineScreenControllerMixin<T> on AutoDisposeControllerMixin {
           serviceConnection.serviceManager.connectedState.value;
       if (!connectionState.connected &&
           !connectionState.userInitiatedConnectionState) {
-        final currentScreenData = screenDataForExport();
+        final currentScreenData = prepareOfflineScreenData();
         // Only store data for the current page. We can change this in the
         // future if we support offline imports for more than once screen at a
         // time.
