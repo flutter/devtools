@@ -151,7 +151,7 @@ enum ScreenMetaData {
 /// * connected
 /// * not-connected
 ///
-/// A screen can support only subset of modes.
+/// A screen may support any combination of modes.
 ///
 /// For offline-data and connected modes:
 /// * Override [Screen.buildScreenBody] to build content
