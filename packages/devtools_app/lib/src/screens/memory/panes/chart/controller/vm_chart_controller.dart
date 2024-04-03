@@ -49,7 +49,9 @@ class VMChartController extends ChartController {
 
     final usedValue = sample.used.toDouble();
     addDataToTrace(
-        VmTraceName.used.index, chart_trace.Data(timestamp, usedValue));
+      VmTraceName.used.index,
+      chart_trace.Data(timestamp, usedValue),
+    );
 
     final capacityValue = sample.capacity.toDouble();
     addDataToTrace(
@@ -59,7 +61,9 @@ class VMChartController extends ChartController {
 
     final rssValue = sample.rss.toDouble();
     addDataToTrace(
-        VmTraceName.rSS.index, chart_trace.Data(timestamp, rssValue));
+      VmTraceName.rSS.index,
+      chart_trace.Data(timestamp, rssValue),
+    );
 
     final rasterLayerValue = sample.rasterCache.layerBytes.toDouble();
     addDataToTrace(
@@ -72,9 +76,5 @@ class VMChartController extends ChartController {
       VmTraceName.rasterPicture.index,
       chart_trace.Data(timestamp, rasterPictureValue),
     );
-  }
-
-  void addDataToTrace(int traceIndex, chart_trace.Data data) {
-    trace(traceIndex).addDatum(data);
   }
 }

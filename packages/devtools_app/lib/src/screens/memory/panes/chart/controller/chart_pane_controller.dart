@@ -32,7 +32,7 @@ class MemoryChartPaneController extends DisposableController
     paused: paused,
   );
 
-  ValueListenable<bool> get legendVisibleNotifier => _legendVisibleNotifier;
+  ValueListenable<bool> get isLegendVisible => _legendVisibleNotifier;
 
   final _legendVisibleNotifier = ValueNotifier<bool>(true);
 

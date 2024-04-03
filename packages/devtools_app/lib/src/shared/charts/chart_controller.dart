@@ -550,6 +550,10 @@ class ChartController extends DisposableController
     // return the first timestamp.
     return timestampedIndex >= 0 ? timestampedIndex : 0;
   }
+
+  void addDataToTrace(int traceIndex, Data data) {
+    trace(traceIndex).addDatum(data);
+  }
 }
 
 /// Location (index to the data & timestamp of the plotted values) where the user

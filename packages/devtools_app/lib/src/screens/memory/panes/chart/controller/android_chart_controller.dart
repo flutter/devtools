@@ -107,8 +107,4 @@ class AndroidChartController extends ChartController {
       chart_trace.Data(timestamp, totalValue),
     );
   }
-
-  void addDataToTrace(int traceIndex, chart_trace.Data data) {
-    trace(traceIndex).addDatum(data);
-  }
 }

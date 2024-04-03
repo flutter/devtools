@@ -201,7 +201,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
               // The legend.
               MultiValueListenableBuilder(
                 listenables: [
-                  widget.chart.legendVisibleNotifier,
+                  widget.chart.isLegendVisible,
                   widget.chart.isAndroidChartVisible,
                 ],
                 builder: (_, values, __) {

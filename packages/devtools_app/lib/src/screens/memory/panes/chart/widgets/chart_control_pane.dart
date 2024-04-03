@@ -30,12 +30,6 @@ class ChartPaneTooltips {
 
 class _ChartControlPaneState extends State<ChartControlPane>
     with AutoDisposeMixin {
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    //initController();
-  }
-
   void _onPause() {
     ga.select(gac.memory, gac.pause);
     widget.chart.pauseLiveFeed();
@@ -110,7 +104,7 @@ class _LegendButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
-      valueListenable: chartController.legendVisibleNotifier,
+      valueListenable: chartController.isLegendVisible,
       builder: (_, legendVisible, __) => GaDevToolsButton(
         onPressed: chartController.toggleLegendVisibility,
         gaScreen: gac.memory,

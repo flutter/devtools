@@ -121,8 +121,4 @@ class EventChartController extends ChartController {
       }
     }
   }
-
-  void addDataToTrace(int traceIndex, chart_trace.Data data) {
-    trace(traceIndex).addDatum(data);
-  }
 }
