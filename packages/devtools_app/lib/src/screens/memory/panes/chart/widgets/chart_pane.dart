@@ -148,7 +148,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     await serviceConnection.serviceManager.onServiceAvailable;
 
     if (!controller.controllers.chart.hasStarted) {
-      controller.startTimeline();
+      controller.controllers.chart.startTimeline();
 
       // TODO(terry): Need to set the initial state of buttons.
 /*

@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../../../../../shared/globals.dart';
 import '../../../framework/connected/memory_tracker.dart';
@@ -109,6 +110,100 @@ class MemoryChartPaneController extends DisposableController
 
   void stopTimeLine() {
     memoryTracker?.stop();
+  }
+
+  void _handleConnectionStart() {
+    if (memoryTracker == null) {
+      memoryTracker = MemoryTracker(memoryTimeline, this);
+      memoryTracker!.start();
+    }
+
+    // Log Flutter extension events.
+    // Note: We do not need to listen to event history here because we do not
+    // have matching historical data about total memory usage.
+    autoDisposeStreamSubscription(
+      serviceConnection.serviceManager.service!.onExtensionEvent
+          .listen((Event event) {
+        var extensionEventKind = event.extensionKind;
+        String? customEventKind;
+        if (MemoryTimeline.isCustomEvent(event.extensionKind!)) {
+          extensionEventKind = MemoryTimeline.devToolsExtensionEvent;
+          customEventKind =
+              MemoryTimeline.customEventName(event.extensionKind!);
+        }
+        final jsonData = event.extensionData!.data.cast<String, Object>();
+        // TODO(terry): Display events enabled in a settings page for now only these events.
+        switch (extensionEventKind) {
+          case 'Flutter.ImageSizesForFrame':
+            memoryTimeline.addExtensionEvent(
+              event.timestamp,
+              event.extensionKind,
+              jsonData,
+            );
+            break;
+          case MemoryTimeline.devToolsExtensionEvent:
+            memoryTimeline.addExtensionEvent(
+              event.timestamp,
+              MemoryTimeline.customDevToolsEvent,
+              jsonData,
+              customEventName: customEventKind,
+            );
+            break;
+        }
+      }),
+    );
+
+    autoDisposeStreamSubscription(
+      memoryTracker!.onChange.listen((_) {
+        memoryTrackerController.add(memoryTracker);
+      }),
+    );
+    autoDisposeStreamSubscription(
+      memoryTracker!.onChange.listen((_) {
+        memoryTrackerController.add(memoryTracker);
+      }),
+    );
+
+    // TODO(terry): Used to detect stream being closed from the
+    // memoryController dispose method.  Needed when a HOT RELOAD
+    // will call dispose however, initState doesn't seem
+    // to happen David is working on scaffolding.
+    memoryTrackerController.stream.listen(
+      (_) {},
+      onDone: () {
+        // Stop polling and reset memoryTracker.
+        memoryTracker?.stop();
+        memoryTracker = null;
+      },
+    );
+
+    updateAndroidChartVisibility();
+    addAutoDisposeListener(
+      preferences.memory.androidCollectionEnabled,
+      updateAndroidChartVisibility,
+    );
+  }
+
+  void _handleConnectionStop() {
+    memoryTracker?.stop();
+    memoryTrackerController.add(memoryTracker);
+
+    memoryTimeline.reset();
+    hasStopped = true;
+  }
+
+  void startTimeline() {
+    addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
+      if (serviceConnection.serviceManager.connectedState.value.connected) {
+        _handleConnectionStart();
+      } else {
+        _handleConnectionStop();
+      }
+    });
+
+    if (serviceConnection.serviceManager.connectedAppInitialized) {
+      _handleConnectionStart();
+    }
   }
 
   @override

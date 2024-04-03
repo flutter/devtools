@@ -34,7 +34,7 @@ void main() {
 
     env.afterNewSetup = () async {
       memoryController = MemoryController();
-      memoryController.startTimeline();
+      memoryController.controllers.chart.startTimeline();
     };
 
     group('MemoryController', () {
