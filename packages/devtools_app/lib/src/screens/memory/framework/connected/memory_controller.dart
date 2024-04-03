@@ -198,9 +198,6 @@ class MemoryController extends DisposableController
     );
   }
 
-  /// This flag will be needed for offline mode implementation.
-  bool offline = false;
-
   void _handleConnectionStop() {
     controllers.chart.memoryTracker?.stop();
     controllers.chart.memoryTrackerController
