@@ -11,43 +11,33 @@ import '../../../../../shared/charts/chart.dart';
 import '../../../../../shared/charts/chart_trace.dart' as trace;
 import '../../../../../shared/charts/chart_trace.dart'
     show ChartType, ChartSymbol;
-import '../../../../../shared/utils.dart';
-import '../../../framework/connected/memory_controller.dart';
 import '../../../shared/primitives/memory_timeline.dart';
 import '../controller/vm_chart_controller.dart';
 import '../data/charts.dart';
 
 class MemoryVMChart extends StatefulWidget {
-  const MemoryVMChart(this.chartController, {Key? key}) : super(key: key);
+  const MemoryVMChart(this.chart, {Key? key}) : super(key: key);
 
-  final VMChartController chartController;
+  final VMChartController chart;
 
   @override
   MemoryVMChartState createState() => MemoryVMChartState();
 }
 
-class MemoryVMChartState extends State<MemoryVMChart>
-    with
-        AutoDisposeMixin,
-        ProvidedControllerMixin<MemoryController, MemoryVMChart> {
+class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
   /// Controller attached to the chart.
-  VMChartController get _chartController => widget.chartController;
+  VMChartController get _chartController => widget.chart;
 
-  MemoryTimeline get _memoryTimeline =>
-      controller.controllers.chart.memoryTimeline;
+  MemoryTimeline get _memoryTimeline => widget.chart.memoryTimeline;
 
   @override
   void initState() {
     super.initState();
 
-    setupTraces();
+    _init();
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!initController()) return;
-
+  void _init() {
     cancelListeners();
 
     setupTraces();
@@ -60,6 +50,13 @@ class MemoryVMChartState extends State<MemoryVMChart>
         });
       }
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant MemoryVMChart oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.chart == widget.chart) return;
+    _init();
   }
 
   @override
@@ -227,7 +224,7 @@ class MemoryVMChartState extends State<MemoryVMChart>
   /// Loads all heap samples (live data or offline).
   void _processHeapSample(HeapSample sample) {
     // If paused don't update the chart (data is still collected).
-    if (controller.controllers.chart.paused.value) return;
+    if (widget.chart.paused.value) return;
     _chartController.addSample(sample);
   }
 }

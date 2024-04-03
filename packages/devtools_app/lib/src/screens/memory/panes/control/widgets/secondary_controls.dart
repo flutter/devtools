@@ -9,8 +9,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
-import '../../../framework/connected/memory_controller.dart';
 import '../../../shared/primitives/simple_elements.dart';
+import '../controller/control_pane_controller.dart';
 import 'settings_dialog.dart';
 
 /// Controls related to the entire memory screen.
@@ -20,7 +20,7 @@ class SecondaryControls extends StatelessWidget {
     required this.controller,
   }) : super(key: key);
 
-  final MemoryController controller;
+  final MemoryControlPaneController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +28,7 @@ class SecondaryControls extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         GaDevToolsButton(
-          onPressed: controller.controllers.control.isGcing ? null : _gc,
+          onPressed: controller.isGcing ? null : controller.gc,
           icon: Icons.delete,
           label: 'GC',
           tooltip: 'Trigger full garbage collection.',
@@ -54,10 +54,5 @@ class SecondaryControls extends StatelessWidget {
         builder: (context) => const MemorySettingsDialog(),
       ),
     );
-  }
-
-  Future<void> _gc() async {
-    controller.controllers.chart.memoryTimeline.addGCEvent();
-    await controller.controllers.control.gc();
   }
 }

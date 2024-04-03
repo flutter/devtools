@@ -19,20 +19,18 @@ class MemoryFeatureControllers {
   /// Controllers are passed for testability.
   MemoryFeatureControllers(
     DiffPaneController? diffPaneController,
-    ProfilePaneController? profilePaneController, {
-    required MemoryController? memoryController,
-  }) {
+    ProfilePaneController? profilePaneController,
+  ) {
     diff = diffPaneController ?? _createDiffController();
     profile = profilePaneController ?? ProfilePaneController();
-
-    chart = MemoryChartPaneController();
   }
 
   late DiffPaneController diff;
   late ProfilePaneController profile;
-  late MemoryChartPaneController chart;
+  late MemoryChartPaneController chart = MemoryChartPaneController();
   TracingPaneController tracing = TracingPaneController();
-  MemoryControlPaneController control = MemoryControlPaneController();
+  late MemoryControlPaneController control =
+      MemoryControlPaneController(chart.memoryTimeline);
 
   DiffPaneController _createDiffController() =>
       DiffPaneController(HeapGraphLoaderRuntime(chart.memoryTimeline));
@@ -73,7 +71,6 @@ class MemoryController extends DisposableController
     controllers = MemoryFeatureControllers(
       diffPaneController,
       profilePaneController,
-      memoryController: this,
     );
     shareClassFilterBetweenProfileAndDiff();
   }

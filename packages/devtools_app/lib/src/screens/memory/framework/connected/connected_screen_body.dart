@@ -55,7 +55,9 @@ class _ConnectedMemoryBodyState extends State<ConnectedMemoryBody>
     return Column(
       key: MemoryChartPane.hoverKey,
       children: [
-        MemoryControlPane(controller: controller),
+        MemoryControlPane(
+          controller: controller.controllers.control,
+        ),
         const SizedBox(height: intermediateSpacing),
         MemoryChartPane(
           chart: controller.controllers.chart,
