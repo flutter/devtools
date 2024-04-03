@@ -154,13 +154,13 @@ enum ScreenMetaData {
 /// A screen may support any combination of modes.
 ///
 /// For offline-data and connected modes:
-/// * Override [Screen.buildScreenBody] to build content
+/// * Override [Screen.buildScreenBody] to build content.
 /// * Use [ProvidedControllerMixin] to access controller.
 /// * See [OfflineScreenControllerMixin] for documentation on how to
 /// enable and handle offline-data mode for a screen.
 ///
 /// For not-connected mode:
-/// * Override [Screen.buildDisconnectedScreenBody] to build content
+/// * Override [Screen.buildDisconnectedScreenBody] to build content.
 @immutable
 abstract class Screen {
   const Screen(
