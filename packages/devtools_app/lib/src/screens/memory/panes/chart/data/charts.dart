@@ -11,7 +11,6 @@ import '../../../../../shared/primitives/utils.dart';
 import '../../../framework/connected/memory_controller.dart';
 import '../widgets/memory_android_chart.dart';
 import '../widgets/memory_events_pane.dart';
-import '../widgets/memory_vm_chart.dart';
 
 /// Event types handled for hover card.
 const devToolsEvent = 'DevTools.Event';
@@ -84,6 +83,17 @@ const eventsDisplayName = ' Events';
 const renderLine = 'color';
 const renderDashed = 'dashed';
 const renderImage = 'image';
+
+/// Name of each trace being charted, index order is the trace index
+/// too (order of trace creation top-down order).
+enum VmTraceName {
+  external,
+  used,
+  capacity,
+  rSS,
+  rasterLayer,
+  rasterPicture,
+}
 
 Map<String, Object?> traceRender({
   String? image,

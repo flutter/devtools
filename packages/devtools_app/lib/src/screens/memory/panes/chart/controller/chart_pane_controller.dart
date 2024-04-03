@@ -14,7 +14,7 @@ import '../../../shared/primitives/memory_timeline.dart';
 import '../data/primitives.dart';
 import '../widgets/memory_android_chart.dart';
 import '../widgets/memory_events_pane.dart';
-import '../widgets/memory_vm_chart.dart';
+import 'vm_chart_controller.dart';
 
 class MemoryChartPaneController extends DisposableController
     with AutoDisposeControllerMixin {
