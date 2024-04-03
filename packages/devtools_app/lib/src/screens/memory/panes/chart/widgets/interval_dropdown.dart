@@ -7,8 +7,6 @@ import 'package:flutter/material.dart';
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
-import '../../../../../shared/utils.dart';
-import '../../../framework/connected/memory_controller.dart';
 import '../controller/chart_pane_controller.dart';
 import '../data/primitives.dart';
 
@@ -22,14 +20,7 @@ class IntervalDropdown extends StatefulWidget {
   State<IntervalDropdown> createState() => _IntervalDropdownState();
 }
 
-class _IntervalDropdownState extends State<IntervalDropdown>
-    with ProvidedControllerMixin<MemoryController, IntervalDropdown> {
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    initController();
-  }
-
+class _IntervalDropdownState extends State<IntervalDropdown> {
   @override
   Widget build(BuildContext context) {
     final displayTypes =
