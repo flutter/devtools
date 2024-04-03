@@ -26,9 +26,9 @@ const eventLegendName = 'Event';
 const eventsLegendName = 'Events';
 
 class MemoryEventsPane extends StatefulWidget {
-  const MemoryEventsPane(this.chartController, {Key? key}) : super(key: key);
+  const MemoryEventsPane(this.chart, {Key? key}) : super(key: key);
 
-  final EventChartController chartController;
+  final EventChartController chart;
 
   @override
   MemoryEventsPaneState createState() => MemoryEventsPaneState();
@@ -38,9 +38,6 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
     with
         AutoDisposeMixin,
         ProvidedControllerMixin<MemoryController, MemoryEventsPane> {
-  /// Controller attached to this chart.
-  EventChartController get _chartController => widget.chartController;
-
   /// Note: The event pane is a fixed size chart (y-axis does not scale). The
   ///       Y-axis fixed range is (visibleVmEvent to extensionEvent) e.g.,
   ///
@@ -63,7 +60,7 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
     super.initState();
 
     // Line chart fixed Y range.
-    _chartController.setFixedYRange(visibleVmEvent, extensionEvent);
+    widget.chart.setFixedYRange(visibleVmEvent, extensionEvent);
   }
 
   @override
@@ -76,7 +73,7 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
     cancelListeners();
 
     setupTraces(isDarkMode: themeData.isDarkTheme);
-    _chartController.setupData();
+    widget.chart.setupData();
 
     // Monitor heap samples.
     addAutoDisposeListener(_memoryTimeline.sampleAddedNotifier, () {
@@ -96,63 +93,63 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
 
   @override
   Widget build(BuildContext context) {
-    if (_chartController.timestamps.isNotEmpty) {
-      return Chart(_chartController);
+    if (widget.chart.timestamps.isNotEmpty) {
+      return Chart(widget.chart);
     }
 
     return const SizedBox(width: denseSpacing);
   }
 
   void setupTraces({bool isDarkMode = true}) {
-    if (_chartController.traces.isNotEmpty) {
-      assert(_chartController.traces.length == EventsTraceName.values.length);
+    if (widget.chart.traces.isNotEmpty) {
+      assert(widget.chart.traces.length == EventsTraceName.values.length);
 
       final extensionEventsIndex = EventsTraceName.extensionEvents.index;
       assert(
-        _chartController.trace(extensionEventsIndex).name ==
+        widget.chart.trace(extensionEventsIndex).name ==
             EventsTraceName.values[extensionEventsIndex].toString(),
       );
 
       final snapshotIndex = EventsTraceName.snapshot.index;
       assert(
-        _chartController.trace(snapshotIndex).name ==
+        widget.chart.trace(snapshotIndex).name ==
             EventsTraceName.values[snapshotIndex].toString(),
       );
 
       final autoSnapshotIndex = EventsTraceName.autoSnapshot.index;
       assert(
-        _chartController.trace(autoSnapshotIndex).name ==
+        widget.chart.trace(autoSnapshotIndex).name ==
             EventsTraceName.values[autoSnapshotIndex].toString(),
       );
 
       final manualGCIndex = EventsTraceName.manualGC.index;
       assert(
-        _chartController.trace(manualGCIndex).name ==
+        widget.chart.trace(manualGCIndex).name ==
             EventsTraceName.values[manualGCIndex].toString(),
       );
 
       final monitorIndex = EventsTraceName.monitor.index;
       assert(
-        _chartController.trace(monitorIndex).name ==
+        widget.chart.trace(monitorIndex).name ==
             EventsTraceName.values[monitorIndex].toString(),
       );
 
       final monitorResetIndex = EventsTraceName.monitorReset.index;
       assert(
-        _chartController.trace(monitorResetIndex).name ==
+        widget.chart.trace(monitorResetIndex).name ==
             EventsTraceName.values[monitorResetIndex].toString(),
       );
 
       final gcIndex = EventsTraceName.gc.index;
       assert(
-        _chartController.trace(gcIndex).name ==
+        widget.chart.trace(gcIndex).name ==
             EventsTraceName.values[gcIndex].toString(),
       );
 
       return;
     }
 
-    final extensionEventsIndex = _chartController.createTrace(
+    final extensionEventsIndex = widget.chart.createTrace(
       trace.ChartType.symbol,
       trace.PaintCharacteristics(
         color: Colors.purpleAccent[100]!,
@@ -167,11 +164,11 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
     );
     assert(extensionEventsIndex == EventsTraceName.extensionEvents.index);
     assert(
-      _chartController.trace(extensionEventsIndex).name ==
+      widget.chart.trace(extensionEventsIndex).name ==
           EventsTraceName.values[extensionEventsIndex].toString(),
     );
 
-    final snapshotIndex = _chartController.createTrace(
+    final snapshotIndex = widget.chart.createTrace(
       trace.ChartType.symbol,
       trace.PaintCharacteristics(
         color: Colors.green,
@@ -184,12 +181,12 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
     );
     assert(snapshotIndex == EventsTraceName.snapshot.index);
     assert(
-      _chartController.trace(snapshotIndex).name ==
+      widget.chart.trace(snapshotIndex).name ==
           EventsTraceName.values[snapshotIndex].toString(),
     );
 
     // Auto-snapshot
-    final autoSnapshotIndex = _chartController.createTrace(
+    final autoSnapshotIndex = widget.chart.createTrace(
       ChartType.symbol,
       trace.PaintCharacteristics(
         color: Colors.red,
@@ -202,12 +199,12 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
     );
     assert(autoSnapshotIndex == EventsTraceName.autoSnapshot.index);
     assert(
-      _chartController.trace(autoSnapshotIndex).name ==
+      widget.chart.trace(autoSnapshotIndex).name ==
           EventsTraceName.values[autoSnapshotIndex].toString(),
     );
 
     // Manual GC
-    final manualGCIndex = _chartController.createTrace(
+    final manualGCIndex = widget.chart.createTrace(
       ChartType.symbol,
       trace.PaintCharacteristics(
         color: Colors.blue,
@@ -220,7 +217,7 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
     );
     assert(manualGCIndex == EventsTraceName.manualGC.index);
     assert(
-      _chartController.trace(manualGCIndex).name ==
+      widget.chart.trace(manualGCIndex).name ==
           EventsTraceName.values[manualGCIndex].toString(),
     );
 
@@ -228,7 +225,7 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
         isDarkMode ? Colors.yellowAccent : Colors.yellowAccent.shade400;
 
     // Monitor
-    final monitorIndex = _chartController.createTrace(
+    final monitorIndex = widget.chart.createTrace(
       ChartType.symbol,
       trace.PaintCharacteristics(
         color: mainMonitorColor,
@@ -241,11 +238,11 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
     );
     assert(monitorIndex == EventsTraceName.monitor.index);
     assert(
-      _chartController.trace(monitorIndex).name ==
+      widget.chart.trace(monitorIndex).name ==
           EventsTraceName.values[monitorIndex].toString(),
     );
 
-    final monitorResetIndex = _chartController.createTrace(
+    final monitorResetIndex = widget.chart.createTrace(
       ChartType.symbol,
       trace.PaintCharacteristics.concentric(
         color: Colors.grey[600]!,
@@ -260,12 +257,12 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
     );
     assert(monitorResetIndex == EventsTraceName.monitorReset.index);
     assert(
-      _chartController.trace(monitorResetIndex).name ==
+      widget.chart.trace(monitorResetIndex).name ==
           EventsTraceName.values[monitorResetIndex].toString(),
     );
 
     // VM GC
-    final gcIndex = _chartController.createTrace(
+    final gcIndex = widget.chart.createTrace(
       ChartType.symbol,
       trace.PaintCharacteristics(
         color: Colors.blue,
@@ -278,17 +275,17 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
     );
     assert(gcIndex == EventsTraceName.gc.index);
     assert(
-      _chartController.trace(gcIndex).name ==
+      widget.chart.trace(gcIndex).name ==
           EventsTraceName.values[gcIndex].toString(),
     );
 
-    assert(_chartController.traces.length == EventsTraceName.values.length);
+    assert(widget.chart.traces.length == EventsTraceName.values.length);
   }
 
   /// Loads all heap samples (live data or offline).
   void _processHeapSample(HeapSample sample) {
     // If paused don't update the chart (data is still collected).
     if (controller.controllers.chart.isPaused) return;
-    _chartController.addSample(sample);
+    widget.chart.addSample(sample);
   }
 }
