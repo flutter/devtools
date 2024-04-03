@@ -8,19 +8,7 @@ import 'package:flutter/foundation.dart';
 import '../../../../../shared/charts/chart_controller.dart';
 import '../../../../../shared/charts/chart_trace.dart' as trace;
 import '../../../shared/primitives/memory_timeline.dart';
-
-/// Name of each trace being charted, index order is the trace index
-/// too (order of trace creation top-down order).
-enum AndroidTraceName {
-  stack,
-  javaHeap,
-  code,
-  graphics,
-  nativeHeap,
-  other,
-  system,
-  total,
-}
+import '../data/charts.dart';
 
 class AndroidChartController extends ChartController {
   AndroidChartController(

@@ -15,6 +15,7 @@ import '../../../../../shared/utils.dart';
 import '../../../framework/connected/memory_controller.dart';
 import '../../../shared/primitives/memory_timeline.dart';
 import '../controller/android_chart_controller.dart';
+import '../data/charts.dart';
 
 class MemoryAndroidChart extends StatefulWidget {
   const MemoryAndroidChart(this.chartController, {Key? key}) : super(key: key);

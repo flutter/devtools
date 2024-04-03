@@ -15,18 +15,6 @@ import '../../../framework/connected/memory_controller.dart';
 import '../../../shared/primitives/memory_timeline.dart';
 import '../controller/event_chart_controller.dart';
 
-// TODO(terry): Consider custom painter?
-const _base = 'assets/img/legend/';
-const snapshotManualLegend = '${_base}snapshot_manual_glyph.png';
-const snapshotAutoLegend = '${_base}snapshot_auto_glyph.png';
-const monitorLegend = '${_base}monitor_glyph.png';
-const resetDarkLegend = '${_base}reset_glyph_dark.png';
-const resetLightLegend = '${_base}reset_glyph_light.png';
-const gcManualLegend = '${_base}gc_manual_glyph.png';
-const gcVMLegend = '${_base}gc_vm_glyph.png';
-String eventLegendAsset(int eventCount) =>
-    '$_base${pluralize('event', eventCount)}_glyph.png';
-
 /// Events trace name displayed
 const manualSnapshotLegendName = 'Snapshot';
 const autoSnapshotLegendName = 'Auto';

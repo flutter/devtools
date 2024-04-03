@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
@@ -9,8 +10,30 @@ import '../../../../../shared/charts/chart_trace.dart';
 import '../../../../../shared/primitives/byte_utils.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../framework/connected/memory_controller.dart';
-import '../controller/android_chart_controller.dart';
-import '../widgets/memory_events_pane.dart';
+
+/// Name of each trace being charted, index order is the trace index
+/// too (order of trace creation top-down order).
+enum AndroidTraceName {
+  stack,
+  javaHeap,
+  code,
+  graphics,
+  nativeHeap,
+  other,
+  system,
+  total,
+}
+
+const _base = 'assets/img/legend/';
+const snapshotManualLegend = '${_base}snapshot_manual_glyph.png';
+const snapshotAutoLegend = '${_base}snapshot_auto_glyph.png';
+const monitorLegend = '${_base}monitor_glyph.png';
+const resetDarkLegend = '${_base}reset_glyph_dark.png';
+const resetLightLegend = '${_base}reset_glyph_light.png';
+const gcManualLegend = '${_base}gc_manual_glyph.png';
+const gcVMLegend = '${_base}gc_vm_glyph.png';
+String eventLegendAsset(int eventCount) =>
+    '$_base${pluralize('event', eventCount)}_glyph.png';
 
 /// Event types handled for hover card.
 const devToolsEvent = 'DevTools.Event';
