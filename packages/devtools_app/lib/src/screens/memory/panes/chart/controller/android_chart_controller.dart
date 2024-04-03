@@ -3,10 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:devtools_shared/devtools_shared.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../../../shared/charts/chart_controller.dart';
 import '../../../../../shared/charts/chart_trace.dart' as trace;
-import '../../../framework/connected/memory_controller.dart';
+import '../../../shared/primitives/memory_timeline.dart';
 
 /// Name of each trace being charted, index order is the trace index
 /// too (order of trace creation top-down order).
@@ -23,14 +24,16 @@ enum AndroidTraceName {
 
 class AndroidChartController extends ChartController {
   AndroidChartController(
-    this._memoryController, {
+    this.memoryTimeline, {
+    required this.paused,
     List<int> sharedLabels = const <int>[],
   }) : super(
           name: 'Android',
           sharedLabelTimestamps: sharedLabels,
         );
 
-  final MemoryController _memoryController;
+  ValueListenable<bool> paused;
+  MemoryTimeline memoryTimeline;
 
   // TODO(terry): Only load max visible data collected, when pruning of data
   //              charted is added.
@@ -41,11 +44,9 @@ class AndroidChartController extends ChartController {
     // have been toggled to be displayed - yet.
     if (traces.isNotEmpty) {
       final chartDataLength = timestampsLength;
-      final dataLength =
-          _memoryController.controllers.chart.memoryTimeline.data.length;
+      final dataLength = memoryTimeline.data.length;
 
-      final dataRange =
-          _memoryController.controllers.chart.memoryTimeline.data.getRange(
+      final dataRange = memoryTimeline.data.getRange(
         chartDataLength,
         dataLength,
       );
@@ -57,7 +58,7 @@ class AndroidChartController extends ChartController {
   /// Loads all heap samples (live data or offline).
   void addSample(HeapSample sample) {
     // If paused don't update the chart (data is still collected).
-    if (_memoryController.controllers.chart.isPaused) return;
+    if (paused.value) return;
 
     addTimestamp(sample.timestamp);
 

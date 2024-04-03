@@ -3,16 +3,21 @@
 // found in the LICENSE file.
 
 import 'package:devtools_shared/devtools_shared.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../../../shared/charts/chart_controller.dart';
 import '../../../../../shared/charts/chart_trace.dart' as trace;
-import '../../../framework/connected/memory_controller.dart';
+import '../../../shared/primitives/memory_timeline.dart';
 import '../data/charts.dart';
 
 class VMChartController extends ChartController {
-  VMChartController(this._memoryController) : super(name: 'VM Memory');
+  VMChartController(this.memoryTimeline, {required this.paused})
+      : super(name: 'VM Memory');
 
-  final MemoryController _memoryController;
+  ValueListenable<bool> paused;
+  MemoryTimeline memoryTimeline;
+
+  //final MemoryController _memoryController;
 
   // TODO(terry): Only load max visible data collected, when pruning of data
   //              charted is added.
@@ -20,11 +25,9 @@ class VMChartController extends ChartController {
   @override
   void setupData() {
     final chartDataLength = timestampsLength;
-    final dataLength =
-        _memoryController.controllers.chart.memoryTimeline.data.length;
+    final dataLength = memoryTimeline.data.length;
 
-    final dataRange =
-        _memoryController.controllers.chart.memoryTimeline.data.getRange(
+    final dataRange = memoryTimeline.data.getRange(
       chartDataLength,
       dataLength,
     );
@@ -35,7 +38,7 @@ class VMChartController extends ChartController {
   /// Loads all heap samples (live data or offline).
   void addSample(HeapSample sample) {
     // If paused don't update the chart (data is still collected).
-    if (_memoryController.controllers.chart.isPaused) return;
+    if (paused.value) return;
 
     addTimestamp(sample.timestamp);
 

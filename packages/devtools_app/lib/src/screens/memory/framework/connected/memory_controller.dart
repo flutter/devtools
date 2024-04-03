@@ -9,9 +9,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../../../shared/memory/class_name.dart';
 import '../../../../shared/memory/heap_graph_loader.dart';
-import '../../panes/chart/controller/android_chart_controller.dart';
 import '../../panes/chart/controller/chart_pane_controller.dart';
-import '../../panes/chart/controller/vm_chart_controller.dart';
 import '../../panes/control/controller/control_pane_controller.dart';
 import '../../panes/diff/controller/diff_pane_controller.dart';
 import '../../panes/profile/profile_pane_controller.dart';
@@ -27,14 +25,7 @@ class MemoryFeatureControllers {
     diff = diffPaneController ?? _createDiffController();
     profile = profilePaneController ?? ProfilePaneController();
 
-    final vmChartController = VMChartController(memoryController!);
-    chart = MemoryChartPaneController(
-      vm: vmChartController,
-      android: AndroidChartController(
-        memoryController,
-        sharedLabels: vmChartController.labelTimestamps,
-      ),
-    );
+    chart = MemoryChartPaneController();
   }
 
   late DiffPaneController diff;
