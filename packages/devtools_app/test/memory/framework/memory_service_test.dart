@@ -6,7 +6,7 @@
 import 'dart:async';
 
 import 'package:devtools_app/src/screens/memory/framework/connected/memory_controller.dart';
-import 'package:devtools_app/src/screens/memory/framework/connected/memory_tracker.dart';
+import 'package:devtools_app/src/screens/memory/panes/chart/controller/memory_tracker.dart';
 import 'package:devtools_app/src/screens/memory/shared/primitives/memory_timeline.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_shared/devtools_shared.dart';

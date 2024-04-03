@@ -9,11 +9,11 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../../shared/globals.dart';
-import '../../../framework/connected/memory_tracker.dart';
 import '../../../shared/primitives/memory_timeline.dart';
 import '../data/primitives.dart';
 import 'android_chart_controller.dart';
 import 'event_chart_controller.dart';
+import 'memory_tracker.dart';
 import 'vm_chart_controller.dart';
 
 class MemoryChartPaneController extends DisposableController
