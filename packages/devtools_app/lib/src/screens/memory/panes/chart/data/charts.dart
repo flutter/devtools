@@ -9,7 +9,8 @@ import 'package:flutter/material.dart';
 import '../../../../../shared/charts/chart_trace.dart';
 import '../../../../../shared/primitives/byte_utils.dart';
 import '../../../../../shared/primitives/utils.dart';
-import '../../../framework/connected/memory_controller.dart';
+import '../../../shared/primitives/memory_timeline.dart';
+//import '../../../framework/connected/memory_controller.dart';
 
 /// Name of each trace being charted, index order is the trace index
 /// too (order of trace creation top-down order).
@@ -137,11 +138,18 @@ Map<String, Object?> traceRender({
 
 /// Retrieve all data values of a given index (timestamp) of the collected data.
 class ChartsValues {
-  ChartsValues(this.controller, this.index, this.timestamp) {
+  ChartsValues(
+    this.memoryTimeline, {
+    required this.index,
+    required this.timestamp,
+    required this.isAndroidChartVisible,
+  }) {
     _getDataFromIndex();
   }
 
-  final MemoryController controller;
+  final MemoryTimeline memoryTimeline;
+
+  final ValueNotifier<bool> isAndroidChartVisible;
 
   final int index;
 
@@ -212,8 +220,7 @@ class ChartsValues {
 
   void _getEventData(Map<String, Object> results) {
     // Use the detailed extension events data stored in the memoryTimeline.
-    final eventInfo =
-        controller.controllers.chart.memoryTimeline.data[index].memoryEventInfo;
+    final eventInfo = memoryTimeline.data[index].memoryEventInfo;
 
     if (eventInfo.isEmpty) return;
 
@@ -256,8 +263,7 @@ class ChartsValues {
   }
 
   void _getVMData(Map<String, Object> results) {
-    final HeapSample heapSample =
-        controller.controllers.chart.memoryTimeline.data[index];
+    final HeapSample heapSample = memoryTimeline.data[index];
 
     results[rssJsonName] = heapSample.rss;
     results[capacityJsonName] = heapSample.capacity;
@@ -269,8 +275,7 @@ class ChartsValues {
   }
 
   void _getAndroidData(Map<String, Object> results) {
-    final AdbMemoryInfo androidData =
-        controller.controllers.chart.memoryTimeline.data[index].adbMemoryInfo;
+    final AdbMemoryInfo androidData = memoryTimeline.data[index].adbMemoryInfo;
 
     results[adbTotalJsonName] = androidData.total;
     results[adbOtherJsonName] = androidData.other;
@@ -353,7 +358,7 @@ class ChartsValues {
   Map<String, Map<String, Object?>> androidDataToDisplay(List<Trace> traces) {
     final androidDataDisplayed = <String, Map<String, Object?>>{};
 
-    if (controller.controllers.chart.isAndroidChartVisible.value) {
+    if (isAndroidChartVisible.value) {
       final data = androidData;
 
       // Total trace

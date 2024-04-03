@@ -102,9 +102,11 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
       }
 
       final allValues = ChartsValues(
-        controller,
-        value.index,
-        value.timestamp ?? _timestamp,
+        controller.controllers.chart.memoryTimeline,
+        isAndroidChartVisible:
+            controller.controllers.chart.isAndroidChartVisible,
+        index: value.index,
+        timestamp: value.timestamp ?? _timestamp,
       );
 
       _showHover(
