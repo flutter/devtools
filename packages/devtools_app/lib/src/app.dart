@@ -450,8 +450,8 @@ class DevToolsScreen<C extends Object?> {
   /// in the constructor to make sure the service is ready to be used.
   ///
   /// The controller does not need to handle re-connection to the application. When reconnected,
-  /// DevTools will create a new controller. However, make sure the controller
-  /// do not fail if the connection is lost.
+  /// DevTools will create a new controller. However, the controller should make sure
+  /// not to fail if the connection is lost.
   final C Function(DevToolsRouterDelegate)? createController;
 
   /// Returns true if a controller was provided for [screen]. If false,
