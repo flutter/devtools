@@ -57,6 +57,13 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final themeData = Theme.of(context);
+    setupTraces(isDarkMode: themeData.isDarkTheme);
+  }
+
+  @override
   void didUpdateWidget(covariant MemoryEventsPane oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.chart == widget.chart) return;
@@ -67,11 +74,8 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
     // Line chart fixed Y range.
     widget.chart.setFixedYRange(visibleVmEvent, extensionEvent);
 
-    final themeData = Theme.of(context);
-
     cancelListeners();
 
-    setupTraces(isDarkMode: themeData.isDarkTheme);
     widget.chart.setupData();
 
     // Monitor heap samples.
