@@ -86,14 +86,14 @@ class MemoryChartPaneController extends DisposableController
 
   bool get isPaused => _paused.value;
 
-  final isAndroidChartVisibleNotifier = ValueNotifier<bool>(false);
+  final isAndroidChartVisible = ValueNotifier<bool>(false);
 
   void updateAndroidChartVisibility() {
     final bool isConnectedToAndroidAndAndroidEnabled =
         _isConnectedDeviceAndroid &&
             preferences.memory.androidCollectionEnabled.value;
 
-    isAndroidChartVisibleNotifier.value = isConnectedToAndroidAndAndroidEnabled;
+    isAndroidChartVisible.value = isConnectedToAndroidAndAndroidEnabled;
   }
 
   bool get _isConnectedDeviceAndroid {
@@ -117,7 +117,11 @@ class MemoryChartPaneController extends DisposableController
 
   void _handleConnectionStart() {
     if (memoryTracker == null) {
-      memoryTracker = MemoryTracker(memoryTimeline, this);
+      memoryTracker = MemoryTracker(
+        memoryTimeline,
+        isAndroidChartVisible: isAndroidChartVisible,
+        paused: paused,
+      );
       memoryTracker!.start();
     }
 
@@ -218,6 +222,6 @@ class MemoryChartPaneController extends DisposableController
     event.dispose();
     vm.dispose();
     android.dispose();
-    isAndroidChartVisibleNotifier.dispose();
+    isAndroidChartVisible.dispose();
   }
 }

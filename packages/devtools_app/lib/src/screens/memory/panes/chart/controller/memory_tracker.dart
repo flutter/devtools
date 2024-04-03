@@ -6,21 +6,26 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:devtools_shared/devtools_shared.dart';
+import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/primitives/memory_timeline.dart';
-import 'chart_pane_controller.dart';
 
 final _log = Logger('memory_protocol');
 
 class MemoryTracker {
-  MemoryTracker(this.timeline, this.chart);
+  MemoryTracker(
+    this.timeline, {
+    required this.paused,
+    required this.isAndroidChartVisible,
+  });
 
   final MemoryTimeline timeline;
-  final MemoryChartPaneController chart;
+  final ValueListenable<bool> paused;
+  final ValueNotifier<bool> isAndroidChartVisible;
 
   Timer? _pollingTimer;
 
@@ -44,15 +49,10 @@ class MemoryTracker {
 
   void start() {
     _updateLiveDataPolling();
-    chart.paused.addListener(_updateLiveDataPolling);
+    paused.addListener(_updateLiveDataPolling);
   }
 
   void _updateLiveDataPolling() {
-    if (serviceConnection.serviceManager.service == null) {
-      // A service of null implies we're disconnected - signal paused.
-      chart.pauseLiveFeed();
-    }
-
     _pollingTimer ??= Timer(MemoryTimeline.updateDelay, _pollMemory);
     _gcStreamListener ??= serviceConnection.serviceManager.service?.onGCEvent
         .listen(_handleGCEvent);
@@ -64,7 +64,7 @@ class MemoryTracker {
   }
 
   void _cleanListenersAndTimers() {
-    chart.paused.removeListener(_updateLiveDataPolling);
+    paused.removeListener(_updateLiveDataPolling);
 
     _pollingTimer?.cancel();
     unawaited(_gcStreamListener?.cancel());
@@ -88,12 +88,6 @@ class MemoryTracker {
   void _pollMemory() async {
     _pollingTimer = null;
 
-    if (!serviceConnection.serviceManager.hasConnection ||
-        chart.memoryTracker == null) {
-      _log.info('VM service connection and/or MemoryTracker lost.');
-      return;
-    }
-
     final isolateMemory = <IsolateRef, MemoryUsage>{};
     for (IsolateRef isolateRef
         in serviceConnection.serviceManager.isolateManager.isolates.value) {
@@ -108,7 +102,7 @@ class MemoryTracker {
     //    > adb shell dumpsys meminfo -d <package_name>
     adbMemoryInfo = serviceConnection.serviceManager.hasConnection &&
             serviceConnection.serviceManager.vm!.operatingSystem == 'android' &&
-            chart.isAndroidChartVisibleNotifier.value
+            isAndroidChartVisible.value
         ? await _fetchAdbInfo()
         : AdbMemoryInfo.empty();
 
