@@ -12,8 +12,8 @@ import '../../../../../shared/globals.dart';
 import '../../../framework/connected/memory_tracker.dart';
 import '../../../shared/primitives/memory_timeline.dart';
 import '../data/primitives.dart';
-import '../widgets/memory_events_pane.dart';
 import 'android_chart_controller.dart';
+import 'event_chart_controller.dart';
 import 'vm_chart_controller.dart';
 
 class MemoryChartPaneController extends DisposableController
