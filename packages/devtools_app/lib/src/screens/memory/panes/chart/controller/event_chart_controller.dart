@@ -6,7 +6,7 @@ import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../../shared/charts/chart_controller.dart';
-import '../../../../../shared/charts/chart_trace.dart' as trace;
+import '../../../../../shared/charts/chart_trace.dart' as chart_trace;
 import '../../../shared/primitives/memory_timeline.dart';
 
 /// VM's GCs are displayed in a smaller glyph and closer to the heap graph.
@@ -73,12 +73,12 @@ class EventChartController extends ChartController {
       // Plot the VM GC on the VmEvent trace with a fixed Y coordinate.
       addDataToTrace(
         EventsTraceName.gc.index,
-        trace.Data(sample.timestamp, visibleVmEvent),
+        chart_trace.Data(sample.timestamp, visibleVmEvent),
       );
     }
     final events = sample.memoryEventInfo;
     if (events.hasExtensionEvents) {
-      final data = trace.DataAggregate(
+      final data = chart_trace.DataAggregate(
         sample.timestamp,
         extensionEvent,
         (events.extensionEvents?.theEvents ?? []).length,
@@ -88,7 +88,7 @@ class EventChartController extends ChartController {
 
     // User events snapshot, auto-snapshot, manual GC, are plotted on the top-line
     // of the event pane (visible Events).
-    final data = trace.Data(
+    final data = chart_trace.Data(
       sample.timestamp,
       visibleEvent,
     );
@@ -110,7 +110,7 @@ class EventChartController extends ChartController {
 
     if (sample.memoryEventInfo.isEventAllocationAccumulator) {
       final allocationEvent = events.allocationAccumulator!;
-      final data = trace.Data(
+      final data = chart_trace.Data(
         sample.timestamp,
         visibleMonitorEvent,
       );
@@ -122,7 +122,7 @@ class EventChartController extends ChartController {
     }
   }
 
-  void addDataToTrace(int traceIndex, trace.Data data) {
-    this.trace(traceIndex).addDatum(data);
+  void addDataToTrace(int traceIndex, chart_trace.Data data) {
+    trace(traceIndex).addDatum(data);
   }
 }

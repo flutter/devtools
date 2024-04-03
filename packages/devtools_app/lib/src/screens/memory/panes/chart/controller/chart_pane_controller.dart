@@ -116,48 +116,46 @@ class MemoryChartPaneController extends DisposableController
   }
 
   void _handleConnectionStart() {
-    if (memoryTracker == null) {
-      memoryTracker = MemoryTracker(
-        memoryTimeline,
-        isAndroidChartVisible: isAndroidChartVisible,
-        paused: paused,
-      );
-      memoryTracker!.start();
-    }
+    memoryTracker ??= MemoryTracker(
+      memoryTimeline,
+      isAndroidChartVisible: isAndroidChartVisible,
+      paused: paused,
+    )..start();
 
     // Log Flutter extension events.
     // Note: We do not need to listen to event history here because we do not
     // have matching historical data about total memory usage.
     autoDisposeStreamSubscription(
-      serviceConnection.serviceManager.service!.onExtensionEvent
-          .listen((Event event) {
-        var extensionEventKind = event.extensionKind;
-        String? customEventKind;
-        if (MemoryTimeline.isCustomEvent(event.extensionKind!)) {
-          extensionEventKind = MemoryTimeline.devToolsExtensionEvent;
-          customEventKind =
-              MemoryTimeline.customEventName(event.extensionKind!);
-        }
-        final jsonData = event.extensionData!.data.cast<String, Object>();
-        // TODO(terry): Display events enabled in a settings page for now only these events.
-        switch (extensionEventKind) {
-          case 'Flutter.ImageSizesForFrame':
-            memoryTimeline.addExtensionEvent(
-              event.timestamp,
-              event.extensionKind,
-              jsonData,
-            );
-            break;
-          case MemoryTimeline.devToolsExtensionEvent:
-            memoryTimeline.addExtensionEvent(
-              event.timestamp,
-              MemoryTimeline.customDevToolsEvent,
-              jsonData,
-              customEventName: customEventKind,
-            );
-            break;
-        }
-      }),
+      serviceConnection.serviceManager.service!.onExtensionEvent.listen(
+        (Event event) {
+          var extensionEventKind = event.extensionKind;
+          String? customEventKind;
+          if (MemoryTimeline.isCustomEvent(event.extensionKind!)) {
+            extensionEventKind = MemoryTimeline.devToolsExtensionEvent;
+            customEventKind =
+                MemoryTimeline.customEventName(event.extensionKind!);
+          }
+          final jsonData = event.extensionData!.data.cast<String, Object>();
+          // TODO(terry): Display events enabled in a settings page for now only these events.
+          switch (extensionEventKind) {
+            case 'Flutter.ImageSizesForFrame':
+              memoryTimeline.addExtensionEvent(
+                event.timestamp,
+                event.extensionKind,
+                jsonData,
+              );
+              break;
+            case MemoryTimeline.devToolsExtensionEvent:
+              memoryTimeline.addExtensionEvent(
+                event.timestamp,
+                MemoryTimeline.customDevToolsEvent,
+                jsonData,
+                customEventName: customEventKind,
+              );
+              break;
+          }
+        },
+      ),
     );
 
     autoDisposeStreamSubscription(

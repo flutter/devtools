@@ -6,7 +6,7 @@ import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../../shared/charts/chart_controller.dart';
-import '../../../../../shared/charts/chart_trace.dart' as trace;
+import '../../../../../shared/charts/chart_trace.dart' as chart_trace;
 import '../../../shared/primitives/memory_timeline.dart';
 import '../data/charts.dart';
 
@@ -56,13 +56,13 @@ class AndroidChartController extends ChartController {
     final stackValue = adb.stack.toDouble();
     addDataToTrace(
       AndroidTraceName.stack.index,
-      trace.Data(timestamp, stackValue),
+      chart_trace.Data(timestamp, stackValue),
     );
 
     final graphicValue = adb.graphics.toDouble();
     addDataToTrace(
       AndroidTraceName.graphics.index,
-      trace.Data(
+      chart_trace.Data(
         timestamp,
         graphicValue,
       ),
@@ -71,7 +71,7 @@ class AndroidChartController extends ChartController {
     final nativeHeapValue = adb.nativeHeap.toDouble();
     addDataToTrace(
       AndroidTraceName.nativeHeap.index,
-      trace.Data(
+      chart_trace.Data(
         timestamp,
         nativeHeapValue,
       ),
@@ -80,35 +80,35 @@ class AndroidChartController extends ChartController {
     final javaHeapValue = adb.javaHeap.toDouble();
     addDataToTrace(
       AndroidTraceName.javaHeap.index,
-      trace.Data(timestamp, javaHeapValue),
+      chart_trace.Data(timestamp, javaHeapValue),
     );
 
     final codeValue = adb.code.toDouble();
     addDataToTrace(
       AndroidTraceName.code.index,
-      trace.Data(timestamp, codeValue),
+      chart_trace.Data(timestamp, codeValue),
     );
 
     final otherValue = adb.other.toDouble();
     addDataToTrace(
       AndroidTraceName.other.index,
-      trace.Data(timestamp, otherValue),
+      chart_trace.Data(timestamp, otherValue),
     );
 
     final systemValue = adb.system.toDouble();
     addDataToTrace(
       AndroidTraceName.system.index,
-      trace.Data(timestamp, systemValue),
+      chart_trace.Data(timestamp, systemValue),
     );
 
     final totalValue = adb.total.toDouble();
     addDataToTrace(
       AndroidTraceName.total.index,
-      trace.Data(timestamp, totalValue),
+      chart_trace.Data(timestamp, totalValue),
     );
   }
 
-  void addDataToTrace(int traceIndex, trace.Data data) {
-    this.trace(traceIndex).addDatum(data);
+  void addDataToTrace(int traceIndex, chart_trace.Data data) {
+    trace(traceIndex).addDatum(data);
   }
 }

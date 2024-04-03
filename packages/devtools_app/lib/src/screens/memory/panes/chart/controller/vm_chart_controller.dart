@@ -6,7 +6,7 @@ import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../../shared/charts/chart_controller.dart';
-import '../../../../../shared/charts/chart_trace.dart' as trace;
+import '../../../../../shared/charts/chart_trace.dart' as chart_trace;
 import '../../../shared/primitives/memory_timeline.dart';
 import '../data/charts.dart';
 
@@ -44,35 +44,37 @@ class VMChartController extends ChartController {
     final externalValue = sample.external.toDouble();
     addDataToTrace(
       VmTraceName.external.index,
-      trace.Data(timestamp, externalValue),
+      chart_trace.Data(timestamp, externalValue),
     );
 
     final usedValue = sample.used.toDouble();
-    addDataToTrace(VmTraceName.used.index, trace.Data(timestamp, usedValue));
+    addDataToTrace(
+        VmTraceName.used.index, chart_trace.Data(timestamp, usedValue));
 
     final capacityValue = sample.capacity.toDouble();
     addDataToTrace(
       VmTraceName.capacity.index,
-      trace.Data(timestamp, capacityValue),
+      chart_trace.Data(timestamp, capacityValue),
     );
 
     final rssValue = sample.rss.toDouble();
-    addDataToTrace(VmTraceName.rSS.index, trace.Data(timestamp, rssValue));
+    addDataToTrace(
+        VmTraceName.rSS.index, chart_trace.Data(timestamp, rssValue));
 
     final rasterLayerValue = sample.rasterCache.layerBytes.toDouble();
     addDataToTrace(
       VmTraceName.rasterLayer.index,
-      trace.Data(timestamp, rasterLayerValue),
+      chart_trace.Data(timestamp, rasterLayerValue),
     );
 
     final rasterPictureValue = sample.rasterCache.pictureBytes.toDouble();
     addDataToTrace(
       VmTraceName.rasterPicture.index,
-      trace.Data(timestamp, rasterPictureValue),
+      chart_trace.Data(timestamp, rasterPictureValue),
     );
   }
 
-  void addDataToTrace(int traceIndex, trace.Data data) {
-    this.trace(traceIndex).addDatum(data);
+  void addDataToTrace(int traceIndex, chart_trace.Data data) {
+    trace(traceIndex).addDatum(data);
   }
 }
