@@ -155,7 +155,7 @@ enum ScreenMetaData {
 ///
 /// For offline-data and connected modes:
 /// * Override [Screen.buildScreenBody] to build content
-/// * Use [ProvidedControllerMixin] to access controller
+/// * Use [ProvidedControllerMixin] to access controller.
 /// * See [OfflineScreenControllerMixin] for documentation on how to
 /// enable and handle offline-data mode for a screen.
 ///

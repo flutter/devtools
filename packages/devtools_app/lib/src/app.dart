@@ -443,6 +443,15 @@ class DevToolsScreen<C extends Object?> {
   ///
   /// If [createController] and [controller] are both null, [screen] will be
   /// responsible for creating and maintaining its own controller.
+  ///
+  /// The controller should expect to be already connected to an application
+  /// at the time of creation.
+  /// But it should invoke unawaitable `serviceConnection.serviceManager.onServiceAvailable`
+  /// in the constructor to make sure the service is ready to be used.
+  ///
+  /// The controller does not need to handle re-connection to the application. When reconnected,
+  /// DevTools will create a new controller. However, make sure the controller
+  /// do not fail if the connection is lost.
   final C Function(DevToolsRouterDelegate)? createController;
 
   /// Returns true if a controller was provided for [screen]. If false,
