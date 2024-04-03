@@ -57,7 +57,7 @@ class SecondaryControls extends StatelessWidget {
   }
 
   Future<void> _gc() async {
-    controller.controllers.memoryTimeline.addGCEvent();
+    controller.controllers.chart.memoryTimeline.addGCEvent();
     await controller.controllers.control.gc();
   }
 }

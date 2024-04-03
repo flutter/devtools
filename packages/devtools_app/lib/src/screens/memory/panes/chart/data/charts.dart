@@ -180,7 +180,7 @@ class ChartsValues {
   void _getEventData(Map<String, Object> results) {
     // Use the detailed extension events data stored in the memoryTimeline.
     final eventInfo =
-        controller.controllers.memoryTimeline.data[index].memoryEventInfo;
+        controller.controllers.chart.memoryTimeline.data[index].memoryEventInfo;
 
     if (eventInfo.isEmpty) return;
 
@@ -224,7 +224,7 @@ class ChartsValues {
 
   void _getVMData(Map<String, Object> results) {
     final HeapSample heapSample =
-        controller.controllers.memoryTimeline.data[index];
+        controller.controllers.chart.memoryTimeline.data[index];
 
     results[rssJsonName] = heapSample.rss;
     results[capacityJsonName] = heapSample.capacity;
@@ -237,7 +237,7 @@ class ChartsValues {
 
   void _getAndroidData(Map<String, Object> results) {
     final AdbMemoryInfo androidData =
-        controller.controllers.memoryTimeline.data[index].adbMemoryInfo;
+        controller.controllers.chart.memoryTimeline.data[index].adbMemoryInfo;
 
     results[adbTotalJsonName] = androidData.total;
     results[adbOtherJsonName] = androidData.other;

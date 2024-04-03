@@ -29,7 +29,6 @@ class MemoryFeatureControllers {
     ProfilePaneController? profilePaneController, {
     required MemoryController? memoryController,
   }) {
-    memoryTimeline = MemoryTimeline();
     diff = diffPaneController ?? _createDiffController();
     profile = profilePaneController ?? ProfilePaneController();
 
@@ -46,13 +45,12 @@ class MemoryFeatureControllers {
 
   late DiffPaneController diff;
   late ProfilePaneController profile;
-  late MemoryTimeline memoryTimeline;
   late MemoryChartPaneController chart;
   TracingPaneController tracing = TracingPaneController();
   MemoryControlPaneController control = MemoryControlPaneController();
 
   DiffPaneController _createDiffController() =>
-      DiffPaneController(HeapGraphLoaderRuntime(memoryTimeline));
+      DiffPaneController(HeapGraphLoaderRuntime(chart.memoryTimeline));
 
   void reset() {
     diff.dispose();
@@ -64,7 +62,7 @@ class MemoryFeatureControllers {
     tracing.dispose();
     tracing = TracingPaneController();
 
-    memoryTimeline.reset();
+    chart.memoryTimeline.reset();
   }
 
   void dispose() {
@@ -126,7 +124,7 @@ class MemoryController extends DisposableController
   void _handleConnectionStart() {
     if (controllers.chart.memoryTracker == null) {
       controllers.chart.memoryTracker =
-          MemoryTracker(controllers.memoryTimeline, controllers.chart);
+          MemoryTracker(controllers.chart.memoryTimeline, controllers.chart);
       controllers.chart.memoryTracker!.start();
     }
 
@@ -147,14 +145,14 @@ class MemoryController extends DisposableController
         // TODO(terry): Display events enabled in a settings page for now only these events.
         switch (extensionEventKind) {
           case 'Flutter.ImageSizesForFrame':
-            controllers.memoryTimeline.addExtensionEvent(
+            controllers.chart.memoryTimeline.addExtensionEvent(
               event.timestamp,
               event.extensionKind,
               jsonData,
             );
             break;
           case MemoryTimeline.devToolsExtensionEvent:
-            controllers.memoryTimeline.addExtensionEvent(
+            controllers.chart.memoryTimeline.addExtensionEvent(
               event.timestamp,
               MemoryTimeline.customDevToolsEvent,
               jsonData,

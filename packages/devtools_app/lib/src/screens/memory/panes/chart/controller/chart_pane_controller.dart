@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../../../../shared/globals.dart';
 import '../../../framework/connected/memory_tracker.dart';
+import '../../../shared/primitives/memory_timeline.dart';
 import '../data/primitives.dart';
 import '../widgets/memory_android_chart.dart';
 import '../widgets/memory_events_pane.dart';
@@ -22,6 +23,7 @@ class MemoryChartPaneController extends DisposableController
     required this.android,
   });
 
+  final MemoryTimeline memoryTimeline = MemoryTimeline();
   final EventChartController event;
   final VMChartController vm;
   final AndroidChartController android;

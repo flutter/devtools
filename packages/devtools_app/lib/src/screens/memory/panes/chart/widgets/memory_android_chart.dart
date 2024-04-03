@@ -37,10 +37,10 @@ class AndroidChartController extends ChartController {
     if (traces.isNotEmpty) {
       final chartDataLength = timestampsLength;
       final dataLength =
-          _memoryController.controllers.memoryTimeline.data.length;
+          _memoryController.controllers.chart.memoryTimeline.data.length;
 
       final dataRange =
-          _memoryController.controllers.memoryTimeline.data.getRange(
+          _memoryController.controllers.chart.memoryTimeline.data.getRange(
         chartDataLength,
         dataLength,
       );
@@ -148,7 +148,8 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
   /// Controller attached to the chart.
   AndroidChartController get _chartController => widget.chartController;
 
-  MemoryTimeline get _memoryTimeline => controller.controllers.memoryTimeline;
+  MemoryTimeline get _memoryTimeline =>
+      controller.controllers.chart.memoryTimeline;
 
   @override
   void initState() {

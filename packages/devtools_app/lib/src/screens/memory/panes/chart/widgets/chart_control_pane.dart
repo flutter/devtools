@@ -54,7 +54,7 @@ class _ChartControlPaneState extends State<ChartControlPane>
   void _clearTimeline() {
     ga.select(gac.memory, gac.clear);
 
-    controller.controllers.memoryTimeline.reset();
+    controller.controllers.chart.memoryTimeline.reset();
 
     // Remove history of all plotted data in all charts.
     widget.chartController.resetAll();
