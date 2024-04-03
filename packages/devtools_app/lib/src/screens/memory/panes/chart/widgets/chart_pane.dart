@@ -232,7 +232,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
               ),
               // Chart control pane.
               ChartControlPane(
-                chartController: widget.chartController,
+                chart: widget.chartController,
               ),
             ],
           ),

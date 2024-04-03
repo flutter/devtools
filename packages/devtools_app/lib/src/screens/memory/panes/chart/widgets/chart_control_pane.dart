@@ -10,16 +10,13 @@ import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/primitives/simple_items.dart';
-import '../../../../../shared/utils.dart';
-import '../../../framework/connected/memory_controller.dart';
 import '../../../shared/primitives/simple_elements.dart';
 import '../controller/chart_pane_controller.dart';
 import 'interval_dropdown.dart';
 
 class ChartControlPane extends StatefulWidget {
-  const ChartControlPane({Key? key, required this.chartController})
-      : super(key: key);
-  final MemoryChartPaneController chartController;
+  const ChartControlPane({Key? key, required this.chart}) : super(key: key);
+  final MemoryChartPaneController chart;
 
   @override
   State<ChartControlPane> createState() => _ChartControlPaneState();
@@ -32,32 +29,30 @@ class ChartPaneTooltips {
 }
 
 class _ChartControlPaneState extends State<ChartControlPane>
-    with
-        ProvidedControllerMixin<MemoryController, ChartControlPane>,
-        AutoDisposeMixin {
+    with AutoDisposeMixin {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    initController();
+    //initController();
   }
 
   void _onPause() {
     ga.select(gac.memory, gac.pause);
-    controller.controllers.chart.pauseLiveFeed();
+    widget.chart.pauseLiveFeed();
   }
 
   void _onResume() {
     ga.select(gac.memory, gac.resume);
-    controller.controllers.chart.resumeLiveFeed();
+    widget.chart.resumeLiveFeed();
   }
 
   void _clearTimeline() {
     ga.select(gac.memory, gac.clear);
 
-    controller.controllers.chart.memoryTimeline.reset();
+    widget.chart.memoryTimeline.reset();
 
     // Remove history of all plotted data in all charts.
-    widget.chartController.resetAll();
+    widget.chart.resetAll();
   }
 
   @override
@@ -68,7 +63,7 @@ class _ChartControlPaneState extends State<ChartControlPane>
         Row(
           children: [
             ValueListenableBuilder<bool>(
-              valueListenable: controller.controllers.chart.paused,
+              valueListenable: widget.chart.paused,
               builder: (context, paused, _) {
                 return PauseResumeButtonGroup(
                   paused: paused,
@@ -95,11 +90,11 @@ class _ChartControlPaneState extends State<ChartControlPane>
         const SizedBox(height: denseSpacing),
         Row(
           children: [
-            _LegendButton(chartController: widget.chartController),
+            _LegendButton(chartController: widget.chart),
           ],
         ),
         const SizedBox(height: denseSpacing),
-        IntervalDropdown(chartController: widget.chartController),
+        IntervalDropdown(chartController: widget.chart),
         const SizedBox(height: denseSpacing),
         const _ChartHelpLink(),
       ],

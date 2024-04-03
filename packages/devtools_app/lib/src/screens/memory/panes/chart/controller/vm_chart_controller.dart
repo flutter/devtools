@@ -17,8 +17,6 @@ class VMChartController extends ChartController {
   ValueListenable<bool> paused;
   MemoryTimeline memoryTimeline;
 
-  //final MemoryController _memoryController;
-
   // TODO(terry): Only load max visible data collected, when pruning of data
   //              charted is added.
   /// Preload any existing data collected but not in the chart.
