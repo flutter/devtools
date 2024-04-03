@@ -445,8 +445,8 @@ class DevToolsScreen<C extends Object?> {
   /// responsible for creating and maintaining its own controller.
   ///
   /// In the controller initialization, if logic requires a connected [VmService]
-  /// object (serviceConnection.serviceManager.service), then the controller should first await
-  /// the serviceConnection.serviceManager.onServiceAvailable future to ensure the service has
+  /// object (`serviceConnection.serviceManager.service`), then the controller should first await
+  /// the `serviceConnection.serviceManager.onServiceAvailable` future to ensure the service has
   /// been initialized.
   /// The controller does not need to handle re-connection to the application. When reconnected,
   /// DevTools will create a new controller. However, the controller should make sure
