@@ -183,6 +183,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
                         height: defaultChartHeight,
                         child: MemoryAndroidChart(
                           widget.chart.android,
+                          widget.chart.memoryTimeline,
                         ),
                       ),
                   ],

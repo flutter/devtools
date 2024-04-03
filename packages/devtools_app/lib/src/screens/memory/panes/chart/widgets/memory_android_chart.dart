@@ -11,30 +11,25 @@ import '../../../../../shared/charts/chart.dart';
 import '../../../../../shared/charts/chart_trace.dart' as trace;
 import '../../../../../shared/charts/chart_trace.dart'
     show ChartSymbol, ChartType;
-import '../../../../../shared/utils.dart';
-import '../../../framework/connected/memory_controller.dart';
 import '../../../shared/primitives/memory_timeline.dart';
 import '../controller/android_chart_controller.dart';
 import '../data/charts.dart';
 
 class MemoryAndroidChart extends StatefulWidget {
-  const MemoryAndroidChart(this.chartController, {Key? key}) : super(key: key);
+  const MemoryAndroidChart(this.chart, this.memoryTimeline, {Key? key})
+      : super(key: key);
 
-  final AndroidChartController chartController;
+  final AndroidChartController chart;
+  final MemoryTimeline memoryTimeline;
 
   @override
   MemoryAndroidChartState createState() => MemoryAndroidChartState();
 }
 
 class MemoryAndroidChartState extends State<MemoryAndroidChart>
-    with
-        AutoDisposeMixin,
-        ProvidedControllerMixin<MemoryController, MemoryAndroidChart> {
+    with AutoDisposeMixin {
   /// Controller attached to the chart.
-  AndroidChartController get _chartController => widget.chartController;
-
-  MemoryTimeline get _memoryTimeline =>
-      controller.controllers.chart.memoryTimeline;
+  AndroidChartController get _chartController => widget.chart;
 
   @override
   void initState() {
@@ -42,18 +37,18 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!initController()) return;
+  void didUpdateWidget(covariant MemoryAndroidChart oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.memoryTimeline == widget.memoryTimeline) return;
 
     cancelListeners();
 
     setupTraces();
     _chartController.setupData();
 
-    addAutoDisposeListener(_memoryTimeline.sampleAddedNotifier, () {
-      if (_memoryTimeline.sampleAddedNotifier.value != null) {
-        _processHeapSample(_memoryTimeline.sampleAddedNotifier.value!);
+    addAutoDisposeListener(widget.memoryTimeline.sampleAddedNotifier, () {
+      if (widget.memoryTimeline.sampleAddedNotifier.value != null) {
+        _processHeapSample(widget.memoryTimeline.sampleAddedNotifier.value!);
       }
     });
   }
@@ -274,7 +269,7 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
   /// Loads all heap samples (live data or offline).
   void _processHeapSample(HeapSample sample) {
     // If paused don't update the chart (data is still collected).
-    if (controller.controllers.chart.paused.value) return;
+    if (widget.chart.paused.value) return;
     _chartController.addSample(sample);
   }
 }
