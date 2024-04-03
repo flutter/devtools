@@ -10,8 +10,6 @@ import 'package:flutter/material.dart';
 import '../../../../../shared/charts/chart.dart';
 import '../../../../../shared/charts/chart_trace.dart' as trace;
 import '../../../../../shared/charts/chart_trace.dart' show ChartType;
-import '../../../../../shared/utils.dart';
-import '../../../framework/connected/memory_controller.dart';
 import '../../../shared/primitives/memory_timeline.dart';
 import '../controller/event_chart_controller.dart';
 
@@ -35,9 +33,7 @@ class MemoryEventsPane extends StatefulWidget {
 }
 
 class MemoryEventsPaneState extends State<MemoryEventsPane>
-    with
-        AutoDisposeMixin,
-        ProvidedControllerMixin<MemoryController, MemoryEventsPane> {
+    with AutoDisposeMixin {
   /// Note: The event pane is a fixed size chart (y-axis does not scale). The
   ///       Y-axis fixed range is (visibleVmEvent to extensionEvent) e.g.,
   ///
@@ -52,21 +48,24 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
   ///       Their y-position is such that the symbols won't overlap.
   /// TODO(terry): Consider a better solution e.g., % in the Y-axis.
 
-  MemoryTimeline get _memoryTimeline =>
-      controller.controllers.chart.memoryTimeline;
+  MemoryTimeline get _memoryTimeline => widget.chart.memoryTimeline;
 
   @override
   void initState() {
     super.initState();
-
-    // Line chart fixed Y range.
-    widget.chart.setFixedYRange(visibleVmEvent, extensionEvent);
+    _init();
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!initController()) return;
+  void didUpdateWidget(covariant MemoryEventsPane oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.chart == widget.chart) return;
+    _init();
+  }
+
+  void _init() {
+    // Line chart fixed Y range.
+    widget.chart.setFixedYRange(visibleVmEvent, extensionEvent);
 
     final themeData = Theme.of(context);
 
@@ -285,7 +284,7 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
   /// Loads all heap samples (live data or offline).
   void _processHeapSample(HeapSample sample) {
     // If paused don't update the chart (data is still collected).
-    if (controller.controllers.chart.isPaused) return;
+    if (widget.chart.paused.value) return;
     widget.chart.addSample(sample);
   }
 }
