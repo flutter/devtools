@@ -9,9 +9,9 @@ import 'package:flutter/foundation.dart';
 
 import '../../../../shared/memory/class_name.dart';
 import '../../../../shared/memory/heap_graph_loader.dart';
+import '../../panes/chart/controller/android_chart_controller.dart';
 import '../../panes/chart/controller/chart_pane_controller.dart';
 import '../../panes/chart/controller/vm_chart_controller.dart';
-import '../../panes/chart/widgets/memory_android_chart.dart';
 import '../../panes/chart/widgets/memory_events_pane.dart';
 import '../../panes/control/controller/control_pane_controller.dart';
 import '../../panes/diff/controller/diff_pane_controller.dart';

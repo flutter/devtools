@@ -8,116 +8,13 @@ import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../shared/charts/chart.dart';
-import '../../../../../shared/charts/chart_controller.dart';
 import '../../../../../shared/charts/chart_trace.dart' as trace;
 import '../../../../../shared/charts/chart_trace.dart'
     show ChartSymbol, ChartType;
 import '../../../../../shared/utils.dart';
 import '../../../framework/connected/memory_controller.dart';
 import '../../../shared/primitives/memory_timeline.dart';
-
-class AndroidChartController extends ChartController {
-  AndroidChartController(
-    this._memoryController, {
-    List<int> sharedLabels = const <int>[],
-  }) : super(
-          name: 'Android',
-          sharedLabelTimestamps: sharedLabels,
-        );
-
-  final MemoryController _memoryController;
-
-  // TODO(terry): Only load max visible data collected, when pruning of data
-  //              charted is added.
-  /// Preload any existing data collected but not in the chart.
-  @override
-  void setupData() {
-    // Only display if traces have been created. Android memory may not
-    // have been toggled to be displayed - yet.
-    if (traces.isNotEmpty) {
-      final chartDataLength = timestampsLength;
-      final dataLength =
-          _memoryController.controllers.chart.memoryTimeline.data.length;
-
-      final dataRange =
-          _memoryController.controllers.chart.memoryTimeline.data.getRange(
-        chartDataLength,
-        dataLength,
-      );
-
-      dataRange.forEach(addSample);
-    }
-  }
-
-  /// Loads all heap samples (live data or offline).
-  void addSample(HeapSample sample) {
-    // If paused don't update the chart (data is still collected).
-    if (_memoryController.controllers.chart.isPaused) return;
-
-    addTimestamp(sample.timestamp);
-
-    final timestamp = sample.timestamp;
-    final adb = sample.adbMemoryInfo;
-
-    final stackValue = adb.stack.toDouble();
-    addDataToTrace(
-      AndroidTraceName.stack.index,
-      trace.Data(timestamp, stackValue),
-    );
-
-    final graphicValue = adb.graphics.toDouble();
-    addDataToTrace(
-      AndroidTraceName.graphics.index,
-      trace.Data(
-        timestamp,
-        graphicValue,
-      ),
-    );
-
-    final nativeHeapValue = adb.nativeHeap.toDouble();
-    addDataToTrace(
-      AndroidTraceName.nativeHeap.index,
-      trace.Data(
-        timestamp,
-        nativeHeapValue,
-      ),
-    );
-
-    final javaHeapValue = adb.javaHeap.toDouble();
-    addDataToTrace(
-      AndroidTraceName.javaHeap.index,
-      trace.Data(timestamp, javaHeapValue),
-    );
-
-    final codeValue = adb.code.toDouble();
-    addDataToTrace(
-      AndroidTraceName.code.index,
-      trace.Data(timestamp, codeValue),
-    );
-
-    final otherValue = adb.other.toDouble();
-    addDataToTrace(
-      AndroidTraceName.other.index,
-      trace.Data(timestamp, otherValue),
-    );
-
-    final systemValue = adb.system.toDouble();
-    addDataToTrace(
-      AndroidTraceName.system.index,
-      trace.Data(timestamp, systemValue),
-    );
-
-    final totalValue = adb.total.toDouble();
-    addDataToTrace(
-      AndroidTraceName.total.index,
-      trace.Data(timestamp, totalValue),
-    );
-  }
-
-  void addDataToTrace(int traceIndex, trace.Data data) {
-    this.trace(traceIndex).addDatum(data);
-  }
-}
+import '../controller/android_chart_controller.dart';
 
 class MemoryAndroidChart extends StatefulWidget {
   const MemoryAndroidChart(this.chartController, {Key? key}) : super(key: key);
@@ -126,19 +23,6 @@ class MemoryAndroidChart extends StatefulWidget {
 
   @override
   MemoryAndroidChartState createState() => MemoryAndroidChartState();
-}
-
-/// Name of each trace being charted, index order is the trace index
-/// too (order of trace creation top-down order).
-enum AndroidTraceName {
-  stack,
-  javaHeap,
-  code,
-  graphics,
-  nativeHeap,
-  other,
-  system,
-  total,
 }
 
 class MemoryAndroidChartState extends State<MemoryAndroidChart>

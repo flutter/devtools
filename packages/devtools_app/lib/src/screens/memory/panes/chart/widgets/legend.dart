@@ -7,10 +7,10 @@ import 'package:flutter/material.dart';
 
 import '../../../../../shared/ui/colors.dart';
 import '../../../shared/primitives/painting.dart';
+import '../controller/android_chart_controller.dart';
 import '../controller/chart_pane_controller.dart';
 import '../controller/vm_chart_controller.dart';
 import '../data/charts.dart';
-import 'memory_android_chart.dart';
 import 'memory_events_pane.dart';
 
 final _legendWidth = scaleByFontFactor(200.0);

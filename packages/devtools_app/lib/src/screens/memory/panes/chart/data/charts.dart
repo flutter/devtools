@@ -9,7 +9,7 @@ import '../../../../../shared/charts/chart_trace.dart';
 import '../../../../../shared/primitives/byte_utils.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../framework/connected/memory_controller.dart';
-import '../widgets/memory_android_chart.dart';
+import '../controller/android_chart_controller.dart';
 import '../widgets/memory_events_pane.dart';
 
 /// Event types handled for hover card.
