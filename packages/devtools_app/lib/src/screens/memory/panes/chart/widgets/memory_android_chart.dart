@@ -34,13 +34,17 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
   @override
   void initState() {
     super.initState();
+    _init();
   }
 
   @override
   void didUpdateWidget(covariant MemoryAndroidChart oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.memoryTimeline == widget.memoryTimeline) return;
+    _init();
+  }
 
+  void _init() {
     cancelListeners();
 
     setupTraces();

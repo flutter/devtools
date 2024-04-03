@@ -113,10 +113,19 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
   }
 
   @override
+  void initState() {
+    super.initState();
+    _init();
+  }
+
+  @override
   void didUpdateWidget(covariant MemoryChartPane oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.chart == widget.chart) return;
+    _init();
+  }
 
+  void _init() {
     final allLocations = [
       widget.chart.event.tapLocation,
       widget.chart.vm.tapLocation,
