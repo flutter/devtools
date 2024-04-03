@@ -43,8 +43,8 @@ class EventChartController extends ChartController {
           name: 'Event Pane',
         );
 
-  ValueListenable<bool> paused;
-  MemoryTimeline memoryTimeline;
+  final ValueListenable<bool> paused;
+  final MemoryTimeline memoryTimeline;
 
   // TODO(terry): Only load max visible data collected, when pruning of data
   //              charted is added.

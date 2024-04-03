@@ -29,7 +29,7 @@ class MemoryFeatureControllers {
   late ProfilePaneController profile;
   late MemoryChartPaneController chart = MemoryChartPaneController();
   TracingPaneController tracing = TracingPaneController();
-  late MemoryControlPaneController control =
+  late final MemoryControlPaneController control =
       MemoryControlPaneController(chart.memoryTimeline);
 
   DiffPaneController _createDiffController() =>
