@@ -3,10 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:devtools_shared/devtools_shared.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../../../shared/charts/chart_controller.dart';
 import '../../../../../shared/charts/chart_trace.dart' as trace;
-import '../../../framework/connected/memory_controller.dart';
+import '../../../shared/primitives/memory_timeline.dart';
 
 /// VM's GCs are displayed in a smaller glyph and closer to the heap graph.
 const visibleVmEvent = 0.4;
@@ -34,7 +35,7 @@ enum EventsTraceName {
 }
 
 class EventChartController extends ChartController {
-  EventChartController(this._memoryController)
+  EventChartController(this.memoryTimeline, {required this.paused})
       : super(
           displayYLabels: false,
           displayXAxis: false,
@@ -42,7 +43,8 @@ class EventChartController extends ChartController {
           name: 'Event Pane',
         );
 
-  final MemoryController _memoryController;
+  ValueListenable<bool> paused;
+  MemoryTimeline memoryTimeline;
 
   // TODO(terry): Only load max visible data collected, when pruning of data
   //              charted is added.
@@ -50,11 +52,9 @@ class EventChartController extends ChartController {
   @override
   void setupData() {
     final chartDataLength = timestampsLength;
-    final dataLength =
-        _memoryController.controllers.chart.memoryTimeline.data.length;
+    final dataLength = memoryTimeline.data.length;
 
-    final dataRange =
-        _memoryController.controllers.chart.memoryTimeline.data.getRange(
+    final dataRange = memoryTimeline.data.getRange(
       chartDataLength,
       dataLength,
     );
@@ -65,7 +65,7 @@ class EventChartController extends ChartController {
   /// Loads all heap samples (live data or offline).
   void addSample(HeapSample sample) {
     // If paused don't update the chart (data is still collected).
-    if (_memoryController.controllers.chart.paused.value) return;
+    if (paused.value) return;
 
     addTimestamp(sample.timestamp);
 

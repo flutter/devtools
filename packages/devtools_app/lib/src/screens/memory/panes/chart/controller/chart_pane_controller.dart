@@ -19,13 +19,14 @@ import 'vm_chart_controller.dart';
 class MemoryChartPaneController extends DisposableController
     with AutoDisposeControllerMixin {
   MemoryChartPaneController({
-    required this.event,
     required this.vm,
     required this.android,
-  });
+  }) {
+    event = EventChartController(memoryTimeline, paused: paused);
+  }
 
   final MemoryTimeline memoryTimeline = MemoryTimeline();
-  final EventChartController event;
+  late final EventChartController event;
   final VMChartController vm;
   final AndroidChartController android;
 
