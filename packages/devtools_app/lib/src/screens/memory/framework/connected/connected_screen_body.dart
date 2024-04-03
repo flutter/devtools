@@ -58,7 +58,7 @@ class _ConnectedMemoryBodyState extends State<ConnectedMemoryBody>
         MemoryControlPane(controller: controller),
         const SizedBox(height: intermediateSpacing),
         MemoryChartPane(
-          chartController: controller.controllers.chart,
+          chart: controller.controllers.chart,
           keyFocusNode: _focusNode,
         ),
         Expanded(
