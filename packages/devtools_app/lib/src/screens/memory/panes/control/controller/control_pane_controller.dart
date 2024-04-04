@@ -3,8 +3,12 @@
 // found in the LICENSE file.
 
 import '../../../../../shared/globals.dart';
+import '../../../shared/primitives/memory_timeline.dart';
 
 class MemoryControlPaneController {
+  MemoryControlPaneController(this.memoryTimeline);
+
+  final MemoryTimeline memoryTimeline;
   bool get isGcing => _gcing;
   bool _gcing = false;
 
@@ -16,6 +20,7 @@ class MemoryControlPaneController {
             .serviceManager.isolateManager.selectedIsolate.value?.id)!,
         gc: true,
       );
+      memoryTimeline.addGCEvent();
       notificationService.push('Successfully garbage collected.');
     } finally {
       _gcing = false;

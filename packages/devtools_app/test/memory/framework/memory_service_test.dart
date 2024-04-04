@@ -6,7 +6,7 @@
 import 'dart:async';
 
 import 'package:devtools_app/src/screens/memory/framework/connected/memory_controller.dart';
-import 'package:devtools_app/src/screens/memory/framework/connected/memory_tracker.dart';
+import 'package:devtools_app/src/screens/memory/panes/chart/controller/memory_tracker.dart';
 import 'package:devtools_app/src/screens/memory/shared/primitives/memory_timeline.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_shared/devtools_shared.dart';
@@ -34,7 +34,7 @@ void main() {
 
     env.afterNewSetup = () async {
       memoryController = MemoryController();
-      memoryController.startTimeline();
+      memoryController.controllers.chart.startTimeline();
     };
 
     group('MemoryController', () {
@@ -51,7 +51,7 @@ void main() {
             // VM Service connection has stopped - unexpected.
             fail('VM Service connection stopped unexpectedly.');
           } else {
-            validateHeapInfo(memoryController.controllers.memoryTimeline);
+            validateHeapInfo(memoryController.controllers.chart.memoryTimeline);
           }
         });
 

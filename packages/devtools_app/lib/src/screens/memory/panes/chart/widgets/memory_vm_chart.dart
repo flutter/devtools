@@ -8,121 +8,36 @@ import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../shared/charts/chart.dart';
-import '../../../../../shared/charts/chart_controller.dart';
 import '../../../../../shared/charts/chart_trace.dart' as trace;
 import '../../../../../shared/charts/chart_trace.dart'
     show ChartType, ChartSymbol;
-import '../../../../../shared/utils.dart';
-import '../../../framework/connected/memory_controller.dart';
 import '../../../shared/primitives/memory_timeline.dart';
-
-class VMChartController extends ChartController {
-  VMChartController(this._memoryController) : super(name: 'VM Memory');
-
-  final MemoryController _memoryController;
-
-  // TODO(terry): Only load max visible data collected, when pruning of data
-  //              charted is added.
-  /// Preload any existing data collected but not in the chart.
-  @override
-  void setupData() {
-    final chartDataLength = timestampsLength;
-    final dataLength = _memoryController.controllers.memoryTimeline.data.length;
-
-    final dataRange =
-        _memoryController.controllers.memoryTimeline.data.getRange(
-      chartDataLength,
-      dataLength,
-    );
-
-    dataRange.forEach(addSample);
-  }
-
-  /// Loads all heap samples (live data or offline).
-  void addSample(HeapSample sample) {
-    // If paused don't update the chart (data is still collected).
-    if (_memoryController.controllers.chart.isPaused) return;
-
-    addTimestamp(sample.timestamp);
-
-    final timestamp = sample.timestamp;
-    final externalValue = sample.external.toDouble();
-    addDataToTrace(
-      VmTraceName.external.index,
-      trace.Data(timestamp, externalValue),
-    );
-
-    final usedValue = sample.used.toDouble();
-    addDataToTrace(VmTraceName.used.index, trace.Data(timestamp, usedValue));
-
-    final capacityValue = sample.capacity.toDouble();
-    addDataToTrace(
-      VmTraceName.capacity.index,
-      trace.Data(timestamp, capacityValue),
-    );
-
-    final rssValue = sample.rss.toDouble();
-    addDataToTrace(VmTraceName.rSS.index, trace.Data(timestamp, rssValue));
-
-    final rasterLayerValue = sample.rasterCache.layerBytes.toDouble();
-    addDataToTrace(
-      VmTraceName.rasterLayer.index,
-      trace.Data(timestamp, rasterLayerValue),
-    );
-
-    final rasterPictureValue = sample.rasterCache.pictureBytes.toDouble();
-    addDataToTrace(
-      VmTraceName.rasterPicture.index,
-      trace.Data(timestamp, rasterPictureValue),
-    );
-  }
-
-  void addDataToTrace(int traceIndex, trace.Data data) {
-    this.trace(traceIndex).addDatum(data);
-  }
-}
+import '../controller/vm_chart_controller.dart';
+import '../data/charts.dart';
 
 class MemoryVMChart extends StatefulWidget {
-  const MemoryVMChart(this.chartController, {Key? key}) : super(key: key);
+  const MemoryVMChart(this.chart, {Key? key}) : super(key: key);
 
-  final VMChartController chartController;
+  final VMChartController chart;
 
   @override
   MemoryVMChartState createState() => MemoryVMChartState();
 }
 
-/// Name of each trace being charted, index order is the trace index
-/// too (order of trace creation top-down order).
-enum VmTraceName {
-  external,
-  used,
-  capacity,
-  rSS,
-  rasterLayer,
-  rasterPicture,
-}
-
-class MemoryVMChartState extends State<MemoryVMChart>
-    with
-        AutoDisposeMixin,
-        ProvidedControllerMixin<MemoryController, MemoryVMChart> {
+class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
   /// Controller attached to the chart.
-  VMChartController get _chartController => widget.chartController;
+  VMChartController get _chartController => widget.chart;
 
-  MemoryTimeline get _memoryTimeline => controller.controllers.memoryTimeline;
+  MemoryTimeline get _memoryTimeline => widget.chart.memoryTimeline;
 
   @override
   void initState() {
     super.initState();
 
-    setupTraces();
+    _init();
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!initController()) return;
-
+  void _init() {
     cancelListeners();
 
     setupTraces();
@@ -135,6 +50,13 @@ class MemoryVMChartState extends State<MemoryVMChart>
         });
       }
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant MemoryVMChart oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.chart == widget.chart) return;
+    _init();
   }
 
   @override
@@ -302,7 +224,7 @@ class MemoryVMChartState extends State<MemoryVMChart>
   /// Loads all heap samples (live data or offline).
   void _processHeapSample(HeapSample sample) {
     // If paused don't update the chart (data is still collected).
-    if (controller.controllers.chart.paused.value) return;
+    if (widget.chart.paused.value) return;
     _chartController.addSample(sample);
   }
 }
