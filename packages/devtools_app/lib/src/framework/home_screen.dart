@@ -74,13 +74,6 @@ class _HomeScreenBodyState extends State<HomeScreenBody> with AutoDisposeMixin {
             SampleDataDropDownButton(sampleData: widget.sampleData),
             const SizedBox(height: defaultSpacing),
           ],
-          // TODO(polina-c): make the MemoryScreen a static screen and remove
-          // this section from the Home page. See this PR for more details:
-          // https://github.com/flutter/devtools/pull/6010.
-          if (FeatureFlags.memoryAnalysis) ...[
-            const SizedBox(height: defaultSpacing),
-            const MemoryAnalysisInstructions(),
-          ],
         ],
       ),
     );
