@@ -186,7 +186,7 @@ FutureOr<void> debugTimeAsync(
   _log.info('$debugName: $time ms');
 }
 
-/// If true, classes are ommitted when calculating a retaining path.
+/// If true, classes are omitted when calculating a retaining path.
 /// 
 /// This flag is used to evaluate the performance of retaining path
 /// calculations.
