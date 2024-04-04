@@ -81,7 +81,7 @@ abstract class FeatureFlags {
   /// well.
   static final _allFlags = <String, bool>{
     'widgetRebuildStats': widgetRebuildStats,
-    'memoryAnalysis': memoryOffline,
+    'memoryOffline': memoryOffline,
     'dapDebugging': dapDebugging,
   };
 
