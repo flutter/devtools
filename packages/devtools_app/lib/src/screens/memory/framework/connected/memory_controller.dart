@@ -6,7 +6,9 @@ import 'dart:async';
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
+import 'package:web/helpers.dart';
 
+import '../../../../../devtools_app.dart';
 import '../../../../shared/memory/class_name.dart';
 import '../../../../shared/memory/heap_graph_loader.dart';
 import '../../../../shared/offline_data.dart';
@@ -122,14 +124,18 @@ class MemoryController extends DisposableController
   }
 
   @override
-  OfflineScreenData prepareOfflineScreenData() {
-    // TODO: implement prepareOfflineScreenData
-    throw UnimplementedError();
-  }
+  OfflineScreenData prepareOfflineScreenData() => OfflineScreenData(
+        screenId: MemoryScreen.id,
+        data: OfflineMemoryData().toJson(),
+        // {
+        //   // 'selectedTab: selectedFeatureTabIndex,
+        //   // 'diffData': controllers.diff.prepareForOffline(),
+        //   // 'profileData': controllers.profile.prepareForOffline(),
+        //   // 'chartData': controllers.chart.prepareForOffline(),
+        //   // 'controlData': controllers.control.prepareForOffline(),
+        // },
+      );
 
   @override
-  FutureOr<void> processOfflineData(OfflineMemoryData offlineData) {
-    // TODO: implement processOfflineData
-    throw UnimplementedError();
-  }
+  FutureOr<void> processOfflineData(OfflineMemoryData offlineData) {}
 }
