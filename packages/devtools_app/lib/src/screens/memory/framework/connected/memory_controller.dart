@@ -2,16 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+import 'dart:math';
+
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../../../../devtools_app.dart';
 import '../../../../shared/memory/class_name.dart';
 import '../../../../shared/memory/heap_graph_loader.dart';
+import '../../../../shared/offline_data.dart';
 import '../../panes/chart/controller/chart_pane_controller.dart';
 import '../../panes/control/controller/control_pane_controller.dart';
 import '../../panes/diff/controller/diff_pane_controller.dart';
 import '../../panes/profile/profile_pane_controller.dart';
 import '../../panes/tracing/tracing_pane_controller.dart';
+import '../offline_data/offline_data.dart';
 
 /// This class contains the business logic for memory screen, for a connected
 /// application.
@@ -21,7 +27,9 @@ import '../../panes/tracing/tracing_pane_controller.dart';
 ///
 /// The controller should be recreated for every new connection.
 class MemoryController extends DisposableController
-    with AutoDisposeControllerMixin {
+    with
+        AutoDisposeControllerMixin,
+        OfflineScreenControllerMixin<OfflineMemoryData> {
   MemoryController({
     @visibleForTesting DiffPaneController? diffPaneController,
     @visibleForTesting ProfilePaneController? profilePaneController,
@@ -45,7 +53,7 @@ class MemoryController extends DisposableController
   late MemoryChartPaneController chart = MemoryChartPaneController();
   TracingPaneController tracing = TracingPaneController();
   late final MemoryControlPaneController control =
-      MemoryControlPaneController(chart.memoryTimeline);
+      MemoryControlPaneController(chart.memoryTimeline, exportData: exportData);
 
   @override
   void dispose() {
@@ -88,4 +96,20 @@ class MemoryController extends DisposableController
       );
     });
   }
+
+  @override
+  OfflineScreenData prepareOfflineScreenData() => OfflineScreenData(
+        screenId: ScreenMetaData.memory.id,
+        data: OfflineMemoryData().toJson(),
+        // {
+        //   // 'selectedTab: selectedFeatureTabIndex,
+        //   // 'diffData': controllers.diff.prepareForOffline(),
+        //   // 'profileData': controllers.profile.prepareForOffline(),
+        //   // 'chartData': controllers.chart.prepareForOffline(),
+        //   // 'controlData': controllers.control.prepareForOffline(),
+        // },
+      );
+
+  @override
+  FutureOr<void> processOfflineData(OfflineMemoryData offlineData) {}
 }
