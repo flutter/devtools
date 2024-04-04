@@ -4,6 +4,7 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/analytics/prompt.dart';
+import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -11,7 +12,7 @@ import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
-import 'package:unified_analytics/src/constants.dart' as unified_analytics;
+import 'package:unified_analytics/src/constants.dart' as ua;
 
 const windowSize = Size(2000.0, 1000.0);
 
@@ -36,8 +37,7 @@ void main() {
   }
 
   test('Unit test parseAnalyticsConsentMessage with consent message', () {
-    final result =
-        parseAnalyticsConsentMessage(unified_analytics.kToolsMessage);
+    final result = parseAnalyticsConsentMessage(ua.kToolsMessage);
 
     expect(result, isNotEmpty);
     expect(result, hasLength(3));
@@ -49,16 +49,21 @@ void main() {
       didMarkConsentMessageAsShown = false;
       setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
       setGlobal(IdeTheme, IdeTheme());
+      setGlobal(DTDManager, MockDTDManager());
     });
+
     group('with analytics enabled', () {
       group('on first run', () {
         setUp(() {
           didCallEnableAnalytics = false;
-          controller = AnalyticsController(
+          controller = TestAnalyticsController(
             enabled: true,
             firstRun: true,
             onEnableAnalytics: () {
               didCallEnableAnalytics = true;
+            },
+            onMarkConsentMessageAsShown: () {
+              didMarkConsentMessageAsShown = true;
             },
             consentMessage: 'fake message',
           );
@@ -374,4 +379,24 @@ void main() {
       );
     });
   });
+}
+
+class TestAnalyticsController extends AnalyticsController {
+  TestAnalyticsController({
+    required super.enabled,
+    required super.firstRun,
+    required super.consentMessage,
+    super.onEnableAnalytics,
+    super.onDisableAnalytics,
+    super.onSetupAnalytics,
+    this.onMarkConsentMessageAsShown,
+  });
+
+  VoidCallback? onMarkConsentMessageAsShown;
+
+  @override
+  Future<void> markConsentMessageAsShown() async {
+    await super.markConsentMessageAsShown();
+    onMarkConsentMessageAsShown?.call();
+  }
 }
