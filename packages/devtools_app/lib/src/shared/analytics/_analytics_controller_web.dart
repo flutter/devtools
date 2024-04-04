@@ -6,7 +6,6 @@ import 'dart:async';
 
 import '../dtd_manager_extensions.dart';
 import '../globals.dart';
-import '../server/server.dart' as server;
 import 'analytics.dart' as ga;
 import 'analytics_controller.dart';
 
@@ -14,13 +13,13 @@ Future<AnalyticsController> get devToolsAnalyticsController async {
   if (_controllerCompleter != null) return _controllerCompleter!.future;
   _controllerCompleter = Completer<AnalyticsController>();
   var enabled = false;
-  var firstRun = false;
+  var shouldShowConsentMessage = false;
   try {
     if (await ga.isAnalyticsEnabled()) {
       enabled = true;
     }
-    if (await server.isFirstRun()) {
-      firstRun = true;
+    if (await ga.shouldShowAnalyticsConsentMessage()) {
+      shouldShowConsentMessage = true;
     }
   } catch (_) {
     // Ignore issues if analytics could not be initialized.
@@ -28,9 +27,9 @@ Future<AnalyticsController> get devToolsAnalyticsController async {
   _controllerCompleter!.complete(
     AnalyticsController(
       enabled: enabled,
-      firstRun: firstRun,
-      onEnableAnalytics: ga.enableAnalytics,
-      onDisableAnalytics: ga.disableAnalytics,
+      shouldShowConsentMessage: shouldShowConsentMessage,
+      onEnableAnalytics: () => ga.setAnalyticsEnabled(true),
+      onDisableAnalytics: () => ga.setAnalyticsEnabled(false),
       onSetupAnalytics: () {
         ga.initializeGA();
         ga.jsHookupListenerForGA();

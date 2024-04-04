@@ -58,7 +58,7 @@ void main() {
           didCallEnableAnalytics = false;
           controller = TestAnalyticsController(
             enabled: true,
-            firstRun: true,
+            shouldShowConsentMessage: true,
             onEnableAnalytics: () {
               didCallEnableAnalytics = true;
             },
@@ -115,7 +115,7 @@ void main() {
         setUp(() {
           controller = AnalyticsController(
             enabled: true,
-            firstRun: false,
+            shouldShowConsentMessage: false,
             onEnableAnalytics: () {
               didCallEnableAnalytics = true;
             },
@@ -164,7 +164,7 @@ void main() {
             ),
             controllerToUse: AnalyticsController(
               enabled: true,
-              firstRun: false,
+              shouldShowConsentMessage: false,
               consentMessage: 'fake message',
             ),
           );
@@ -180,7 +180,7 @@ void main() {
         setUp(() {
           controller = AnalyticsController(
             enabled: false,
-            firstRun: true,
+            shouldShowConsentMessage: true,
             onEnableAnalytics: () {
               didCallEnableAnalytics = true;
             },
@@ -319,7 +319,7 @@ void main() {
         setUp(() {
           controller = AnalyticsController(
             enabled: false,
-            firstRun: false,
+            shouldShowConsentMessage: false,
             onEnableAnalytics: () {
               didCallEnableAnalytics = true;
             },
@@ -368,7 +368,7 @@ void main() {
             ),
             controllerToUse: AnalyticsController(
               enabled: false,
-              firstRun: false,
+              shouldShowConsentMessage: false,
               consentMessage: 'fake message',
             ),
           );
@@ -384,7 +384,7 @@ void main() {
 class TestAnalyticsController extends AnalyticsController {
   TestAnalyticsController({
     required super.enabled,
-    required super.firstRun,
+    required super.shouldShowConsentMessage,
     required super.consentMessage,
     super.onEnableAnalytics,
     super.onDisableAnalytics,

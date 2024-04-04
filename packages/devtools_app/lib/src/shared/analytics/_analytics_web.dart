@@ -10,11 +10,13 @@ library;
 import 'dart:async';
 
 import 'package:devtools_app_shared/ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:js/js.dart';
 import 'package:logging/logging.dart';
 import 'package:web/web.dart';
 
 import '../../../devtools.dart' as devtools show version;
+import '../dtd_manager_extensions.dart';
 import '../globals.dart';
 import '../server/server.dart' as server;
 import '../utils.dart';
@@ -425,16 +427,51 @@ class GtagExceptionDevTools extends GtagException {
   external int? get inspector_tree_controller_id;
 }
 
-/// Request DevTools property value 'enabled' (GA enabled) stored in the file
-/// '~/.flutter-devtools/.devtools'.
+/// Whether google analytics are enabled.
 Future<bool> isAnalyticsEnabled() async {
-  return await server.isAnalyticsEnabled();
+  bool enabled = false;
+  if (kReleaseMode) {
+    enabled = await dtdManager.analyticsTelemetryEnabled();
+  }
+
+  // TODO(https://github.com/flutter/devtools/issues/7083): remove this block
+  // when the legacy analytics are fully removed. For now, check that both
+  // unified analytics are enabled and the legacy analytics are enabled.
+  if (enabled) {
+    enabled = await server.isAnalyticsEnabled();
+  }
+
+  return enabled;
 }
 
-/// Set the DevTools property 'enabled' (GA enabled) stored in the file
-/// '~/flutter-devtools/.devtools'.
-Future<bool> setAnalyticsEnabled(bool value) async {
-  return await server.setAnalyticsEnabled(value);
+/// Sets whether google analytics are enabled.
+Future<void> setAnalyticsEnabled(bool value) async {
+  if (kReleaseMode) {
+    await dtdManager.setAnalyticsTelemetry(value);
+  }
+  // TODO(https://github.com/flutter/devtools/issues/7083): remove this call
+  // when the legacy analytics are fully removed.
+  await server.setAnalyticsEnabled(value);
+}
+
+/// Whether the google analytics consent message should be shown.
+Future<bool> shouldShowAnalyticsConsentMessage() async {
+  bool shouldShow = false;
+  if (kReleaseMode) {
+    // When asked if the consent message should be shown,
+    // package:unified_analytics will return true if this the user's first run
+    // (unlikely for the case of DevTools since the user is likely to have
+    // already seen the message from another Dash tool (Dart or Flutter CLI,
+    // IDE, etc.) or when the consent message version has been updated.
+    shouldShow = await dtdManager.shouldShowAnalyticsConsentMessage();
+  }
+  // TODO(https://github.com/flutter/devtools/issues/7083): remove this block
+  // when the legacy analytics are fully removed.
+  if (!shouldShow) {
+    shouldShow = await server.isFirstRun();
+  }
+
+  return shouldShow;
 }
 
 void screen(
@@ -786,14 +823,6 @@ external String gaDevToolsPropertyId();
 
 @JS('hookupListenerForGA')
 external void jsHookupListenerForGA();
-
-Future<bool> enableAnalytics() async {
-  return await setAnalyticsEnabled(true);
-}
-
-Future<bool> disableAnalytics() async {
-  return await setAnalyticsEnabled(false);
-}
 
 /// Computes the DevTools application. Fills in the devtoolsPlatformType and
 /// devtoolsChrome.

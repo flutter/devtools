@@ -11,6 +11,11 @@ import '../globals.dart';
 import '_analytics_controller_stub.dart'
     if (dart.library.js_interop) '_analytics_controller_web.dart';
 
+// TODO(https://github.com/flutter/devtools/issues/7083): once the legacy
+// analytics are removed, we will no longer need an analytics controller
+// implementation for web and for desktop. With the unified analytics
+// integration, all analytics requests will go through DTD, so there is no need
+// for platform specific code.
 Future<AnalyticsController> get analyticsController async =>
     await devToolsAnalyticsController;
 
@@ -19,14 +24,15 @@ typedef AsyncAnalyticsCallback = FutureOr<void> Function();
 class AnalyticsController {
   AnalyticsController({
     required bool enabled,
-    required bool firstRun,
+    required bool shouldShowConsentMessage,
     required this.consentMessage,
     this.onEnableAnalytics,
     this.onDisableAnalytics,
     this.onSetupAnalytics,
   })  : analyticsEnabled = ValueNotifier<bool>(enabled),
-        _shouldPrompt =
-            ValueNotifier<bool>(firstRun && consentMessage.isNotEmpty) {
+        _shouldPrompt = ValueNotifier<bool>(
+          shouldShowConsentMessage && consentMessage.isNotEmpty,
+        ) {
     if (_shouldPrompt.value) {
       unawaited(toggleAnalyticsEnabled(true));
     }

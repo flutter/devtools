@@ -4,24 +4,21 @@
 
 part of 'server.dart';
 
+// TODO(https://github.com/flutter/devtools/issues/7083): remove these server
+// endpoints when the legacy analytics are fully removed.
+
 /// Request DevTools property value 'firstRun' (GA dialog) stored in the file
 /// '~/flutter-devtools/.devtools'.
 Future<bool> isFirstRun() async {
   bool firstRun = false;
-
   if (isDevToolsServerAvailable) {
     final resp = await request(apiGetDevToolsFirstRun);
     if (resp?.statusCode == 200) {
-      // Additionally, package:unified_analytics will show a message if it
-      // is the first run with the package or the consent message version has
-      // been updated.
-      firstRun = json.decode(resp!.body) ||
-          await dtdManager.shouldShowAnalyticsConsentMessage();
+      firstRun = json.decode(resp!.body);
     } else {
       logWarning(resp, apiGetDevToolsFirstRun);
     }
   }
-
   return firstRun;
 }
 
@@ -32,8 +29,7 @@ Future<bool> isAnalyticsEnabled() async {
   if (isDevToolsServerAvailable) {
     final resp = await request(apiGetDevToolsEnabled);
     if (resp?.statusOk ?? false) {
-      enabled = json.decode(resp!.body) &&
-          await dtdManager.analyticsTelemetryEnabled();
+      enabled = json.decode(resp!.body);
     } else {
       logWarning(resp, apiGetDevToolsEnabled);
     }
@@ -43,10 +39,7 @@ Future<bool> isAnalyticsEnabled() async {
 
 /// Set the DevTools property 'enabled' (GA enabled) stored in the file
 /// '~/.flutter-devtools/.devtools'.
-///
-/// Returns whether the set call was successful.
-Future<bool> setAnalyticsEnabled([bool value = true]) async {
-  await dtdManager.setAnalyticsTelemetry(value);
+Future<void> setAnalyticsEnabled([bool value = true]) async {
   if (isDevToolsServerAvailable) {
     final resp = await request(
       '$apiSetDevToolsEnabled'
@@ -54,12 +47,10 @@ Future<bool> setAnalyticsEnabled([bool value = true]) async {
     );
     if (resp?.statusOk ?? false) {
       assert(json.decode(resp!.body) == value);
-      return true;
     } else {
       logWarning(resp, apiSetDevToolsEnabled);
     }
   }
-  return false;
 }
 
 // TODO(terry): Move to an API scheme similar to the VM service extension where

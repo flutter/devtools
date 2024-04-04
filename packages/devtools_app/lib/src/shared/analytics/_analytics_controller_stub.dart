@@ -11,7 +11,7 @@ import 'analytics_controller.dart';
 FutureOr<AnalyticsController> get devToolsAnalyticsController async {
   return AnalyticsController(
     enabled: false,
-    firstRun: false,
+    shouldShowConsentMessage: false,
     consentMessage: await dtdManager.analyticsConsentMessage(),
   );
 }
