@@ -449,6 +449,7 @@ Future<void> setAnalyticsEnabled(bool value) async {
   if (kReleaseMode) {
     await dtdManager.setAnalyticsTelemetry(value);
   }
+
   // TODO(https://github.com/flutter/devtools/issues/7083): remove this call
   // when the legacy analytics are fully removed.
   await server.setAnalyticsEnabled(value);
@@ -465,6 +466,7 @@ Future<bool> shouldShowAnalyticsConsentMessage() async {
     // IDE, etc.) or when the consent message version has been updated.
     shouldShow = await dtdManager.shouldShowAnalyticsConsentMessage();
   }
+
   // TODO(https://github.com/flutter/devtools/issues/7083): remove this block
   // when the legacy analytics are fully removed.
   if (!shouldShow) {
