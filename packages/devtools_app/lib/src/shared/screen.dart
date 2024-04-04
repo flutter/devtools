@@ -145,6 +145,22 @@ enum ScreenMetaData {
 }
 
 /// Defines a page shown in the DevTools [TabBar].
+///
+/// A devtools screen can be in three modes:
+/// * offline-data
+/// * connected
+/// * not-connected
+///
+/// A screen may support any combination of modes.
+///
+/// For offline-data and connected modes:
+/// * Override [Screen.buildScreenBody] to build content.
+/// * Use [ProvidedControllerMixin] to access controller.
+/// * See [OfflineScreenControllerMixin] for documentation on how to
+/// enable and handle offline-data mode for a screen.
+///
+/// For not-connected mode:
+/// * Override [Screen.buildDisconnectedScreenBody] to build content.
 @immutable
 abstract class Screen {
   const Screen(
@@ -391,7 +407,7 @@ abstract class Screen {
           serviceConnection.serviceManager.connectedAppInitialized;
       // Do not use the disconnected body in offline mode, because the default
       // [buildScreenBody] should be used for offline states.
-      if (!connected && !offlineController.offlineMode.value) {
+      if (!connected && !offlineDataController.showingOfflineData.value) {
         final disconnectedBody = buildDisconnectedScreenBody(context);
         if (disconnectedBody != null) return disconnectedBody;
       }
@@ -422,7 +438,7 @@ abstract class Screen {
 /// Check whether a screen should be shown in the UI.
 bool shouldShowScreen(Screen screen) {
   _log.finest('shouldShowScreen: ${screen.screenId}');
-  if (offlineController.offlineMode.value) {
+  if (offlineDataController.showingOfflineData.value) {
     _log.finest('for offline mode: returning ${screen.worksOffline}');
     return screen.worksOffline;
   }

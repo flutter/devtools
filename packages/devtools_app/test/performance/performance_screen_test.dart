@@ -33,7 +33,7 @@ void main() {
     );
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(PreferencesController, PreferencesController());
-    setGlobal(OfflineModeController, OfflineModeController());
+    setGlobal(OfflineDataController, OfflineDataController());
     setGlobal(NotificationService, NotificationService());
     setGlobal(BannerMessagesController, BannerMessagesController());
   });

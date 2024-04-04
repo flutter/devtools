@@ -4,13 +4,11 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../shared/analytics/analytics.dart' as ga;
-import '../../../../shared/analytics/constants.dart' as gac;
-import '../../../../shared/common_widgets.dart';
-import '../../../../shared/utils.dart';
-import '../../framework/connected/memory_controller.dart';
-import 'chart_pane_controller.dart';
-import 'primitives.dart';
+import '../../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../../shared/analytics/constants.dart' as gac;
+import '../../../../../shared/common_widgets.dart';
+import '../controller/chart_pane_controller.dart';
+import '../data/primitives.dart';
 
 class IntervalDropdown extends StatefulWidget {
   const IntervalDropdown({Key? key, required this.chartController})
@@ -22,14 +20,7 @@ class IntervalDropdown extends StatefulWidget {
   State<IntervalDropdown> createState() => _IntervalDropdownState();
 }
 
-class _IntervalDropdownState extends State<IntervalDropdown>
-    with ProvidedControllerMixin<MemoryController, IntervalDropdown> {
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    initController();
-  }
-
+class _IntervalDropdownState extends State<IntervalDropdown> {
   @override
   Widget build(BuildContext context) {
     final displayTypes =
@@ -46,7 +37,7 @@ class _IntervalDropdownState extends State<IntervalDropdown>
 
     return RoundedDropDownButton<ChartInterval>(
       isDense: true,
-      value: controller.displayInterval,
+      value: widget.chartController.displayInterval,
       onChanged: (ChartInterval? newValue) {
         final value = newValue!;
         setState(() {
@@ -54,7 +45,7 @@ class _IntervalDropdownState extends State<IntervalDropdown>
             gac.memory,
             '${gac.MemoryEvent.chartInterval}-${value.displayName}',
           );
-          controller.displayInterval = value;
+          widget.chartController.displayInterval = value;
           final duration = value.duration;
 
           widget.chartController.event.zoomDuration = duration;

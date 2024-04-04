@@ -39,13 +39,13 @@ class ChartController extends DisposableController
     this.displayXLabels = true,
     this.displayYLabels = true,
     this.name,
-    List<int>? sharedLabelimestamps,
+    List<int>? sharedLabelTimestamps,
   }) {
     // TODO(terry): Compute dynamically based on X-axis labels text height.
     bottomPadding = !displayXLabels ? 0.0 : 40.0;
 
-    if (sharedLabelimestamps != null) {
-      labelTimestamps = sharedLabelimestamps;
+    if (sharedLabelTimestamps != null) {
+      labelTimestamps = sharedLabelTimestamps;
       _labelsShared = true;
     }
   }
@@ -178,7 +178,7 @@ class ChartController extends DisposableController
 
   /// zoomDuration values of:
   ///     null implies all
-  ///     Duration() imples live (default)
+  ///     Duration() implies live (default)
   ///     Duration(minutes: 5) implies 5 minute interval
   Duration? _zoomDuration = const Duration();
 
@@ -259,7 +259,7 @@ class ChartController extends DisposableController
     _zoomDuration = duration;
     computeZoomRatio();
 
-    // All tick labels need to be recompted.
+    // All tick labels need to be recomputed.
     computeChartArea();
     computeLabelInterval();
 
@@ -550,6 +550,10 @@ class ChartController extends DisposableController
     // return the first timestamp.
     return timestampedIndex >= 0 ? timestampedIndex : 0;
   }
+
+  void addDataToTrace(int traceIndex, Data data) {
+    trace(traceIndex).addDatum(data);
+  }
 }
 
 /// Location (index to the data & timestamp of the plotted values) where the user
@@ -559,7 +563,7 @@ class TapLocation {
   TapLocation(this.tapDownDetails, this.timestamp, this.index);
 
   /// Copy of TapLocation w/o the detail, implies not where tap occurred
-  /// but the multiple charts tied to the same timeline should be hilighted
+  /// but the multiple charts tied to the same timeline should be highlighted
   /// (selection point).
   TapLocation.copy(TapLocation original)
       : tapDownDetails = null,

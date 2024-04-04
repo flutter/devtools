@@ -54,7 +54,7 @@ void main() {
       DevToolsEnvironmentParameters,
       ExternalDevToolsEnvironmentParameters(),
     );
-    setGlobal(OfflineModeController, OfflineModeController());
+    setGlobal(OfflineDataController, OfflineDataController());
     setGlobal(NotificationService, NotificationService());
     setGlobal(BannerMessagesController, BannerMessagesController());
     setGlobal(PreferencesController, PreferencesController());

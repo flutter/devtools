@@ -497,9 +497,9 @@ class ExitOfflineButton extends StatelessWidget {
       label: 'Exit offline mode',
       icon: Icons.clear,
       gaScreen: gaScreen,
-      gaSelection: gac.exitOfflineMode,
+      gaSelection: gac.stopShowingOfflineData,
       onPressed: () {
-        offlineController.exitOfflineMode();
+        offlineDataController.stopShowingOfflineData();
         // Use Router.neglect to replace the current history entry with
         // the homepage so that clicking Back will not return here.
         Router.neglect(
@@ -524,11 +524,11 @@ class OfflineAwareControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
-      valueListenable: offlineController.offlineMode,
+      valueListenable: offlineDataController.showingOfflineData,
       builder: (context, offline, _) {
         return Row(
           children: [
-            if (offlineController.offlineMode.value)
+            if (offlineDataController.showingOfflineData.value)
               Padding(
                 padding: const EdgeInsets.only(right: defaultSpacing),
                 child: ExitOfflineButton(gaScreen: gaScreen),

@@ -23,7 +23,7 @@ void main() {
     );
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(PreferencesController, PreferencesController());
-    setGlobal(OfflineModeController, OfflineModeController());
+    setGlobal(OfflineDataController, OfflineDataController());
     setGlobal(NotificationService, NotificationService());
   });
 
@@ -51,7 +51,7 @@ void main() {
     });
 
     tearDown(() {
-      offlineController.exitOfflineMode();
+      offlineDataController.stopShowingOfflineData();
     });
 
     Future<void> pumpControls(WidgetTester tester) async {
@@ -110,7 +110,7 @@ void main() {
       'builds for offline mode',
       windowSize,
       (WidgetTester tester) async {
-        offlineController.enterOfflineMode(
+        offlineDataController.startShowingOfflineData(
           offlineApp: serviceConnection.serviceManager.connectedApp!,
         );
         await pumpControls(tester);
@@ -122,7 +122,7 @@ void main() {
         expect(find.text('More debugging options'), findsNothing);
         expect(find.byType(OpenSaveButtonGroup), findsNothing);
         expect(find.byIcon(Icons.settings_outlined), findsNothing);
-        offlineController.exitOfflineMode();
+        offlineDataController.stopShowingOfflineData();
       },
     );
   });

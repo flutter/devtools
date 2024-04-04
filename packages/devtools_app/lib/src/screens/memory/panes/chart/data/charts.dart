@@ -2,16 +2,39 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../shared/charts/chart_trace.dart';
-import '../../../../shared/primitives/byte_utils.dart';
-import '../../../../shared/primitives/utils.dart';
-import '../../framework/connected/memory_controller.dart';
-import 'memory_android_chart.dart';
-import 'memory_events_pane.dart';
-import 'memory_vm_chart.dart';
+import '../../../../../shared/charts/chart_trace.dart';
+import '../../../../../shared/primitives/byte_utils.dart';
+import '../../../../../shared/primitives/utils.dart';
+import '../../../shared/primitives/memory_timeline.dart';
+//import '../../../framework/connected/memory_controller.dart';
+
+/// Name of each trace being charted, index order is the trace index
+/// too (order of trace creation top-down order).
+enum AndroidTraceName {
+  stack,
+  javaHeap,
+  code,
+  graphics,
+  nativeHeap,
+  other,
+  system,
+  total,
+}
+
+const _base = 'assets/img/legend/';
+const snapshotManualLegend = '${_base}snapshot_manual_glyph.png';
+const snapshotAutoLegend = '${_base}snapshot_auto_glyph.png';
+const monitorLegend = '${_base}monitor_glyph.png';
+const resetDarkLegend = '${_base}reset_glyph_dark.png';
+const resetLightLegend = '${_base}reset_glyph_light.png';
+const gcManualLegend = '${_base}gc_manual_glyph.png';
+const gcVMLegend = '${_base}gc_vm_glyph.png';
+String eventLegendAsset(int eventCount) =>
+    '$_base${pluralize('event', eventCount)}_glyph.png';
 
 /// Event types handled for hover card.
 const devToolsEvent = 'DevTools.Event';
@@ -85,6 +108,17 @@ const renderLine = 'color';
 const renderDashed = 'dashed';
 const renderImage = 'image';
 
+/// Name of each trace being charted, index order is the trace index
+/// too (order of trace creation top-down order).
+enum VmTraceName {
+  external,
+  used,
+  capacity,
+  rSS,
+  rasterLayer,
+  rasterPicture,
+}
+
 Map<String, Object?> traceRender({
   String? image,
   Color? color,
@@ -104,11 +138,18 @@ Map<String, Object?> traceRender({
 
 /// Retrieve all data values of a given index (timestamp) of the collected data.
 class ChartsValues {
-  ChartsValues(this.controller, this.index, this.timestamp) {
+  ChartsValues(
+    this.memoryTimeline, {
+    required this.index,
+    required this.timestamp,
+    required this.isAndroidChartVisible,
+  }) {
     _getDataFromIndex();
   }
 
-  final MemoryController controller;
+  final MemoryTimeline memoryTimeline;
+
+  final ValueNotifier<bool> isAndroidChartVisible;
 
   final int index;
 
@@ -179,8 +220,7 @@ class ChartsValues {
 
   void _getEventData(Map<String, Object> results) {
     // Use the detailed extension events data stored in the memoryTimeline.
-    final eventInfo =
-        controller.controllers.memoryTimeline.data[index].memoryEventInfo;
+    final eventInfo = memoryTimeline.data[index].memoryEventInfo;
 
     if (eventInfo.isEmpty) return;
 
@@ -223,8 +263,7 @@ class ChartsValues {
   }
 
   void _getVMData(Map<String, Object> results) {
-    final HeapSample heapSample =
-        controller.controllers.memoryTimeline.data[index];
+    final HeapSample heapSample = memoryTimeline.data[index];
 
     results[rssJsonName] = heapSample.rss;
     results[capacityJsonName] = heapSample.capacity;
@@ -236,8 +275,7 @@ class ChartsValues {
   }
 
   void _getAndroidData(Map<String, Object> results) {
-    final AdbMemoryInfo androidData =
-        controller.controllers.memoryTimeline.data[index].adbMemoryInfo;
+    final AdbMemoryInfo androidData = memoryTimeline.data[index].adbMemoryInfo;
 
     results[adbTotalJsonName] = androidData.total;
     results[adbOtherJsonName] = androidData.other;
@@ -320,7 +358,7 @@ class ChartsValues {
   Map<String, Map<String, Object?>> androidDataToDisplay(List<Trace> traces) {
     final androidDataDisplayed = <String, Map<String, Object?>>{};
 
-    if (controller.isAndroidChartVisibleNotifier.value) {
+    if (isAndroidChartVisible.value) {
       final data = androidData;
 
       // Total trace
