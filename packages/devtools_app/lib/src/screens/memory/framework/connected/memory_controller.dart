@@ -9,28 +9,34 @@ import 'package:flutter/foundation.dart';
 
 import '../../../../shared/memory/class_name.dart';
 import '../../../../shared/memory/heap_graph_loader.dart';
+import '../../../../shared/offline_data.dart';
 import '../../panes/chart/controller/chart_pane_controller.dart';
 import '../../panes/control/controller/control_pane_controller.dart';
 import '../../panes/diff/controller/diff_pane_controller.dart';
 import '../../panes/profile/profile_pane_controller.dart';
 import '../../panes/tracing/tracing_pane_controller.dart';
+import '../offline_data/offline_data.dart';
 
 class MemoryFeatureControllers {
   /// Controllers are passed for testability.
   MemoryFeatureControllers(
     DiffPaneController? diffPaneController,
-    ProfilePaneController? profilePaneController,
-  ) {
+    ProfilePaneController? profilePaneController, {
+    required VoidCallback exportData,
+  }) {
     diff = diffPaneController ?? _createDiffController();
     profile = profilePaneController ?? ProfilePaneController();
+    control = MemoryControlPaneController(
+      chart.memoryTimeline,
+      exportData: exportData,
+    );
   }
 
   late DiffPaneController diff;
   late ProfilePaneController profile;
   late MemoryChartPaneController chart = MemoryChartPaneController();
   TracingPaneController tracing = TracingPaneController();
-  late final MemoryControlPaneController control =
-      MemoryControlPaneController(chart.memoryTimeline);
+  late final MemoryControlPaneController control;
 
   DiffPaneController _createDiffController() =>
       DiffPaneController(HeapGraphLoaderRuntime(chart.memoryTimeline));
@@ -63,7 +69,9 @@ class MemoryFeatureControllers {
 ///
 /// The controller should be recreated for every new connection.
 class MemoryController extends DisposableController
-    with AutoDisposeControllerMixin {
+    with
+        AutoDisposeControllerMixin,
+        OfflineScreenControllerMixin<OfflineMemoryData> {
   MemoryController({
     @visibleForTesting DiffPaneController? diffPaneController,
     @visibleForTesting ProfilePaneController? profilePaneController,
@@ -71,6 +79,7 @@ class MemoryController extends DisposableController
     controllers = MemoryFeatureControllers(
       diffPaneController,
       profilePaneController,
+      exportData: exportData,
     );
     shareClassFilterBetweenProfileAndDiff();
   }
@@ -110,5 +119,17 @@ class MemoryController extends DisposableController
     controllers.chart.memoryTracker?.dispose();
     controllers.dispose();
     HeapClassName.dispose();
+  }
+
+  @override
+  OfflineScreenData prepareOfflineScreenData() {
+    // TODO: implement prepareOfflineScreenData
+    throw UnimplementedError();
+  }
+
+  @override
+  FutureOr<void> processOfflineData(OfflineMemoryData offlineData) {
+    // TODO: implement processOfflineData
+    throw UnimplementedError();
   }
 }

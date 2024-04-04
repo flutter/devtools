@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
+import '../../../../../shared/file_import.dart';
+import '../../../../../shared/screen.dart';
 import '../../../shared/primitives/simple_elements.dart';
 import '../controller/control_pane_controller.dart';
 import 'settings_dialog.dart';
@@ -35,6 +37,11 @@ class SecondaryControls extends StatelessWidget {
           minScreenWidthForTextBeforeScaling: memoryControlsMinVerboseWidth,
           gaScreen: gac.memory,
           gaSelection: gac.MemoryEvent.gc,
+        ),
+        const SizedBox(width: denseSpacing),
+        OpenSaveButtonGroup(
+          screenId: ScreenMetaData.memory.id,
+          onSave: controller.exportData,
         ),
         const SizedBox(width: denseSpacing),
         SettingsOutlinedButton(
