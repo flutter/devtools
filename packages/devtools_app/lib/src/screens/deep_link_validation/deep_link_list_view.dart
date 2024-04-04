@@ -438,11 +438,7 @@ class _NotificationCardSection extends StatelessWidget {
                   onPressed: () {
                     // Switch to the domain view. Select the first link with domain error and show the split screen.
                     DefaultTabController.of(context).index = 0;
-                    controller.selectLink(
-                      controller.displayLinkDatasNotifier.value.byDomain
-                          .where((element) => element.domainErrors.isNotEmpty)
-                          .first,
-                    );
+                    controller.autoSelectLink(TableViewType.domainView);
                     controller.updateDisplayOptions(showSplitScreen: true);
                   },
                   child: const Padding(
@@ -463,11 +459,7 @@ class _NotificationCardSection extends StatelessWidget {
                   onPressed: () {
                     // Switch to the path view. Select the first link with path error and show the split screen.
                     DefaultTabController.of(context).index = 1;
-                    controller.selectLink(
-                      controller.displayLinkDatasNotifier.value.byPath
-                          .where((element) => element.pathErrors.isNotEmpty)
-                          .first,
-                    );
+                    controller.autoSelectLink(TableViewType.pathView);
                     controller.updateDisplayOptions(showSplitScreen: true);
                   },
                   child: const Padding(
