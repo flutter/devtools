@@ -36,10 +36,10 @@ class _SelectProjectViewState extends State<SelectProjectView>
   @override
   void initState() {
     super.initState();
-    unawaited(_initWorkspaceRoots());
+    unawaited(_initProjectRoots());
   }
 
-  Future<void> _initWorkspaceRoots() async {
+  Future<void> _initProjectRoots() async {
     final roots = await dtdManager.projectRoots();
     setState(() {
       projectRoots = roots?.uris;

@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 
 import '../../../shared/common_widgets.dart';
 import '../../../shared/primitives/utils.dart';
+import '../../../shared/ui/utils.dart';
 
 class ProjectRootTextField extends StatefulWidget {
   const ProjectRootTextField({
@@ -49,34 +50,22 @@ class _ProjectRootTextFieldState extends State<ProjectRootTextField>
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Spacer(),
-        Flexible(
-          flex: 4,
-          fit: FlexFit.tight,
-          child: Container(
-            height: defaultTextFieldHeight,
-            padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-            child: DevToolsClearableTextField(
-              controller: controller,
-              enabled: widget.enabled,
-              onSubmitted: (String path) {
-                widget.onValidatePressed(path.trim());
-              },
-              labelText: 'Path to Flutter project',
-              roundedBorder: true,
-            ),
-          ),
+    return _FlexibleProjectSelectionView(
+      selectedProjectRoot: currentText.isEmpty ? null : currentText,
+      onValidatePressed: widget.onValidatePressed,
+      child: Container(
+        height: defaultTextFieldHeight,
+        padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+        child: DevToolsClearableTextField(
+          controller: controller,
+          enabled: widget.enabled,
+          onSubmitted: (String path) {
+            widget.onValidatePressed(path.trim());
+          },
+          labelText: 'Path to Flutter project',
+          roundedBorder: true,
         ),
-        const SizedBox(width: defaultSpacing),
-        _ValidateDeepLinksButton(
-          projectRoot: currentText.isEmpty ? null : currentText,
-          onValidatePressed: widget.onValidatePressed,
-        ),
-        const Spacer(),
-      ],
+      ),
     );
   }
 }
@@ -107,32 +96,90 @@ class _ProjectRootsDropdownState extends State<ProjectRootsDropdown> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        RoundedDropDownButton<Uri>(
-          value: selectedUri,
-          items: [
-            for (final uri in widget.projectRoots) _buildMenuItem(uri),
-          ],
-          onChanged: (uri) => setState(() {
-            selectedUri = uri;
-          }),
-        ),
-        const SizedBox(width: defaultSpacing),
-        _ValidateDeepLinksButton(
-          projectRoot: selectedUri?.path.trim(),
-          onValidatePressed: widget.onValidatePressed,
-        ),
-      ],
+    return _FlexibleProjectSelectionView(
+      selectedProjectRoot: selectedUri?.path.trim(),
+      onValidatePressed: widget.onValidatePressed,
+      child: RoundedDropDownButton<Uri>(
+        isDense: true,
+        isExpanded: true,
+        value: selectedUri,
+        items: [
+          for (final uri in widget.projectRoots) _buildMenuItem(uri),
+        ],
+        onChanged: (uri) => setState(() {
+          selectedUri = uri;
+        }),
+      ),
     );
   }
 
   DropdownMenuItem<Uri> _buildMenuItem(Uri uri) {
     return DropdownMenuItem<Uri>(
       value: uri,
-      child: Text(uri.path),
+      child: DevToolsTooltip(
+        message: uri.path,
+        waitDuration: tooltipWaitExtraLong,
+        child: Text(
+          uri.path,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
     );
+  }
+}
+
+class _FlexibleProjectSelectionView extends StatelessWidget {
+  const _FlexibleProjectSelectionView({
+    required this.selectedProjectRoot,
+    required this.onValidatePressed,
+    required this.child,
+  });
+
+  final String? selectedProjectRoot;
+  final void Function(String) onValidatePressed;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = ScreenSize(context).width;
+    final showButtonInRow = screenWidth > MediaSize.xs;
+
+    final button = _ValidateDeepLinksButton(
+      projectRoot: selectedProjectRoot,
+      onValidatePressed: onValidatePressed,
+    );
+
+    Widget content = Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Spacer(),
+        Flexible(
+          flex: 8,
+          fit: FlexFit.tight,
+          child: child,
+        ),
+        if (showButtonInRow) ...[
+          const SizedBox(width: defaultSpacing),
+          button,
+        ],
+        const Spacer(),
+      ],
+    );
+
+    // If the button is not in the [content] [Row], place the button below
+    // [content] in a [Column].
+    if (!showButtonInRow) {
+      content = Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          content,
+          const SizedBox(height: defaultSpacing),
+          button,
+        ],
+      );
+    }
+
+    return content;
   }
 }
 

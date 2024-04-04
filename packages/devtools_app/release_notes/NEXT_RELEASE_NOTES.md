@@ -45,6 +45,10 @@ TODO: Remove this section if there are not any general updates.
 
 TODO: Remove this section if there are not any general updates.
 
+## Deep links tool updates
+
+* Improve layout for narrow screens. - [#7524](https://github.com/flutter/devtools/pull/7524)
+
 ## VS Code Sidebar updates
 
 TODO: Remove this section if there are not any general updates.

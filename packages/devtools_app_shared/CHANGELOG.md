@@ -1,3 +1,10 @@
+## 0.1.2-wip
+* Add `tooltipWaitExtraLong` to `utils.dart`.
+
+## 0.1.1
+* TODO(kenz): publish with bumped min versions to next Dart and Flutter beta
+releases.
+
 ## 0.1.1-dev.0
 * Update `package:dtd` to `^2.1.0`
 * Add `DTDManager.projectRoots` method.
