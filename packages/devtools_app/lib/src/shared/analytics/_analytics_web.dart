@@ -444,17 +444,6 @@ Future<bool> isAnalyticsEnabled() async {
   return enabled;
 }
 
-/// Sets whether google analytics are enabled.
-Future<void> setAnalyticsEnabled(bool value) async {
-  if (kReleaseMode) {
-    await dtdManager.setAnalyticsTelemetry(value);
-  }
-
-  // TODO(https://github.com/flutter/devtools/issues/7083): remove this call
-  // when the legacy analytics are fully removed.
-  await server.setAnalyticsEnabled(value);
-}
-
 /// Whether the google analytics consent message should be shown.
 Future<bool> shouldShowAnalyticsConsentMessage() async {
   bool shouldShow = false;
@@ -917,4 +906,17 @@ Map<String, dynamic> generateSurveyQueryParameters() {
     versionKey: devtoolsVersion,
     internalKey: (!isExternalBuild).toString(),
   };
+}
+
+FutureOr<void> legacyOnEnableAnalytics() async {
+  await server.setAnalyticsEnabled();
+}
+
+FutureOr<void> legacyOnDisableAnalytics() async {
+  await server.setAnalyticsEnabled(false);
+}
+
+void legacyOnSetupAnalytics() {
+  initializeGA();
+  jsHookupListenerForGA();
 }

@@ -116,7 +116,7 @@ void main() {
           controller = AnalyticsController(
             enabled: true,
             shouldShowConsentMessage: false,
-            onEnableAnalytics: () {
+            legacyOnEnableAnalytics: () {
               didCallEnableAnalytics = true;
             },
             consentMessage: 'fake message',
@@ -181,7 +181,7 @@ void main() {
           controller = AnalyticsController(
             enabled: false,
             shouldShowConsentMessage: true,
-            onEnableAnalytics: () {
+            legacyOnEnableAnalytics: () {
               didCallEnableAnalytics = true;
             },
             consentMessage: 'fake message',
@@ -320,7 +320,7 @@ void main() {
           controller = AnalyticsController(
             enabled: false,
             shouldShowConsentMessage: false,
-            onEnableAnalytics: () {
+            legacyOnEnableAnalytics: () {
               didCallEnableAnalytics = true;
             },
             consentMessage: 'fake message',
@@ -386,7 +386,7 @@ class TestAnalyticsController extends AnalyticsController {
     required super.enabled,
     required super.shouldShowConsentMessage,
     required super.consentMessage,
-    super.onEnableAnalytics,
+    super.legacyOnEnableAnalytics,
     super.onDisableAnalytics,
     super.onSetupAnalytics,
     this.onMarkConsentMessageAsShown,
