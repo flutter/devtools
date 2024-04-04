@@ -94,18 +94,14 @@ class AnalyticsController {
       if (kReleaseMode) {
         await dtdManager.setAnalyticsTelemetry(true);
       }
-      if (legacyOnEnableAnalytics != null) {
-        await legacyOnEnableAnalytics!();
-      }
+      await legacyOnEnableAnalytics?.call();
     } else {
       analyticsEnabled.value = false;
       hidePrompt();
       if (kReleaseMode) {
         await dtdManager.setAnalyticsTelemetry(false);
       }
-      if (legacyOnDisableAnalytics != null) {
-        await legacyOnDisableAnalytics!();
-      }
+      await legacyOnDisableAnalytics?.call();
     }
   }
 
