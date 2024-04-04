@@ -11,6 +11,13 @@ import 'package:logging/logging.dart';
 import 'globals.dart';
 import 'survey.dart';
 
+// This file contains helpers that can be used during local development. Any
+// changes to variables in this file (like flipping a bool to true or setting
+// a non-null value for a debug String) should be intended for local
+// development only, and should never be checked into source control. The
+// default values for variables in this file are test covered in
+// `development_helpers_test.dart`.
+
 final _log = Logger('dev_helpers');
 
 /// Set this to a real DTD URI String for ease of developing features that use
@@ -185,9 +192,3 @@ FutureOr<void> debugTimeAsync(
   final time = DateTime.now().millisecondsSinceEpoch - now;
   _log.info('$debugName: $time ms');
 }
-
-/// If true, classes are omitted when calculating a retaining path.
-/// 
-/// This flag is used to evaluate the performance of retaining path
-/// calculations.
-bool debugOmitClassesInRetainingPath = false;

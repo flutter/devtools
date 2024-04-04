@@ -13,6 +13,5 @@ void main() {
     expect(debugSurvey, isFalse);
     expect(debugPerfettoTraceProcessing, isFalse);
     expect(debugTimers, isFalse);
-    expect(debugOmitClassesInRetainingPath, isFalse);
   });
 }

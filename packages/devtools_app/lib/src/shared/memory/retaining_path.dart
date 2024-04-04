@@ -6,7 +6,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../development_helpers.dart';
 import '../primitives/utils.dart';
 import 'class_name.dart';
 import 'simple_items.dart';
@@ -42,8 +41,10 @@ class DebugRetainingPathUsage {
 /// use [`leak_tracker/formattedRetainingPath`](https://github.com/dart-lang/leak_tracker/blob/f5620600a5ce1c44f65ddaa02001e200b096e14c/pkgs/leak_tracker/lib/src/leak_tracking/helpers.dart#L58).
 @immutable
 class PathFromRoot {
-  PathFromRoot._(this.path)
-      : assert(() {
+  PathFromRoot._(
+    this.path, {
+    @visibleForTesting bool debugOmitClassesInRetainingPath = false,
+  })  : assert(() {
           debugUsage.constructed++;
           return true;
         }()),
@@ -82,12 +83,23 @@ class PathFromRoot {
     return PathFromRoot.fromPath(path);
   }
 
-  factory PathFromRoot.fromPath(List<HeapClassName> path) {
+  factory PathFromRoot.fromPath(
+    List<HeapClassName> path, {
+    @visibleForTesting debugOmitClassesInRetainingPath = false,
+  }) {
     if (path.isEmpty) return empty;
-    final existingInstance = instances.lookup(PathFromRoot._(path));
+    final existingInstance = instances.lookup(
+      PathFromRoot._(
+        path,
+        debugOmitClassesInRetainingPath: debugOmitClassesInRetainingPath,
+      ),
+    );
     if (existingInstance != null) return existingInstance;
 
-    final newInstance = PathFromRoot._(List.unmodifiable(path));
+    final newInstance = PathFromRoot._(
+      List.unmodifiable(path),
+      debugOmitClassesInRetainingPath: debugOmitClassesInRetainingPath,
+    );
 
     instances.add(newInstance);
     assert(() {
