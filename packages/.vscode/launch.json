@@ -23,7 +23,7 @@
             "program": "devtools_app/lib/main.dart",
             "args": [
                 "--dart-define",
-                "memory_analysis_experiment=true",
+                "memory_offline_experiment=true",
                 "enable_experiments=true",
             ],
         },
