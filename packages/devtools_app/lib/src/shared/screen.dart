@@ -57,7 +57,7 @@ enum ScreenMetaData {
     requiresDartVm: true,
     tutorialVideoTimestamp: '?t=420',
     // ignore: avoid_redundant_argument_values, false positive
-    worksWithOfflineData: kMemoryOfflineExperiment,
+    worksWithOfflineData: FeatureFlags.memoryOffline,
   ),
   debugger(
     'debugger',

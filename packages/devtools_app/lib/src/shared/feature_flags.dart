@@ -35,7 +35,7 @@ void setEnableExperiments() {
 @visibleForTesting
 bool get enableBeta => enableExperiments || !isExternalBuild;
 
-const bool kMemoryOfflineExperiment =
+const bool _kMemoryOfflineExperiment =
     bool.fromEnvironment('memory_offline_experiment');
 
 // It is ok to have enum-like static only classes.
@@ -59,8 +59,8 @@ abstract class FeatureFlags {
   /// Flag to enable offline data on memory screen.
   ///
   /// https://github.com/flutter/devtools/issues/5606
-  static bool memoryOffline =
-      kMemoryOfflineExperiment; // requires special handling because it needs to be const
+  static const bool memoryOffline =
+      _kMemoryOfflineExperiment; // requires special handling because it needs to be const
 
   /// Flag to enable the deep link validation tooling in DevTools, both for the
   /// DevTools screen and the standalone tool for IDE embedding.
