@@ -22,7 +22,9 @@
             "type": "dart",
             "program": "devtools_app/lib/main.dart",
             "args": [
-                "--dart-define=enable_experiments=true"
+                "--dart-define",
+                "memory_analysis_experiment=true",
+                "enable_experiments=true",
             ],
         },
         {
