@@ -214,6 +214,8 @@ class MemoryChartPaneController extends DisposableController
   @override
   void dispose() {
     super.dispose();
+    unawaited(memoryTrackerController.close());
+    memoryTracker?.dispose();
     _legendVisibleNotifier.dispose();
     _displayIntervalNotifier.dispose();
     _refreshCharts.dispose();

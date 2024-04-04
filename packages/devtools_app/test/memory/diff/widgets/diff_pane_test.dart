@@ -26,7 +26,7 @@ Future<void> pumpScene(WidgetTester tester, MemoryDefaultScene scene) async {
 }
 
 Future<void> takeSnapshot(WidgetTester tester, MemoryDefaultScene scene) async {
-  final snapshots = scene.controller.controllers.diff.core.snapshots;
+  final snapshots = scene.controller.diff.core.snapshots;
   final length = snapshots.value.length;
   await tester.tap(find.byIcon(Icons.fiber_manual_record).first);
   await tester.pumpAndSettle();
@@ -55,7 +55,7 @@ void main() {
       'records and deletes snapshots',
       windowSize,
       (WidgetTester tester) async {
-        final snapshots = scene.controller.controllers.diff.core.snapshots;
+        final snapshots = scene.controller.diff.core.snapshots;
         // Check the list contains only documentation item.
         expect(snapshots.value.length, equals(1));
         await pumpScene(tester, scene);

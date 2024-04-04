@@ -34,7 +34,7 @@ void main() {
 
     env.afterNewSetup = () async {
       memoryController = MemoryController();
-      memoryController.controllers.chart.startTimeline();
+      memoryController.chart.startTimeline();
     };
 
     group('MemoryController', () {
@@ -45,13 +45,12 @@ void main() {
       test('heap info', () async {
         await env.setupEnvironment();
 
-        memoryController.controllers.chart.onMemory
-            .listen((MemoryTracker? memoryTracker) {
+        memoryController.chart.onMemory.listen((MemoryTracker? memoryTracker) {
           if (!serviceConnection.serviceManager.hasConnection) {
             // VM Service connection has stopped - unexpected.
             fail('VM Service connection stopped unexpectedly.');
           } else {
-            validateHeapInfo(memoryController.controllers.chart.memoryTimeline);
+            validateHeapInfo(memoryController.chart.memoryTimeline);
           }
         });
 
@@ -102,6 +101,6 @@ const int defaultSampleSize = 5;
 Future<void> collectSamples([int sampleCount = defaultSampleSize]) async {
   // Keep memory profiler running for n samples of heap info from the VM.
   for (var trackers = 0; trackers < sampleCount; trackers++) {
-    await memoryController.controllers.chart.onMemory.first;
+    await memoryController.chart.onMemory.first;
   }
 }
