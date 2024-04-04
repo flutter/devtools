@@ -373,7 +373,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     return widget.originalScreens
         .where(
           (s) =>
-              s.providesController && (offline ? s.screen.worksOffline : true),
+              s.providesController &&
+              (offline ? s.screen.worksWithOfflineData : true),
         )
         .map((s) => s.controllerProvider(routerDelegate))
         .toList();

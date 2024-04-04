@@ -66,7 +66,7 @@ class OfflineDataController {
 /// Mixin that provides offline support for a DevTools screen controller.
 ///
 /// The [Screen] that is associated with this controller must have
-/// [Screen.worksOffline] set to true in order to enable offline support for the
+/// [Screen.worksWithOfflineData] set to true in order to enable offline support for the
 /// screen.
 ///
 /// Check [OfflineDataController.showingOfflineData] in controller constructor.
@@ -108,13 +108,13 @@ class OfflineDataController {
 ///
 /// ...
 ///
-/// Then in the DevTools [ScreenMetaData] enum, set 'worksOffline' to true.
+/// Then in the DevTools [ScreenMetaData] enum, set 'worksWithOfflineData' to true.
 ///
 /// enum ScreenMetaData {
 ///   ...
 ///   myScreen(
 ///     ...
-///     worksOffline: true,
+///     worksWithOfflineData: true,
 ///   ),
 /// }
 mixin OfflineScreenControllerMixin<T> on AutoDisposeControllerMixin {
