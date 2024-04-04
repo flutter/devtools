@@ -7,12 +7,12 @@ in favor of DTD implementation.
 * Remove `package:unified_analytics` dependency.
 
 # 8.1.1-dev.0
-* Update `package:dtd` to `2.1.0`.
+* Bump `package:dtd` to `2.1.0`.
 * Bump the minimum Dart SDK version to `3.4.0-275.0.dev`.
 
 # 8.1.0
-* Update `package:dtd` to `2.0.0`.
-* Update `package:unified_analytics` to `5.8.8`.
+* Bump `package:dtd` to `2.0.0`.
+* Bump `package:unified_analytics` to `5.8.8`.
 
 # 8.0.1
 * **Breaking change:** rename `ServerApi.getCompleted` to `ServerApi.success` and make the
