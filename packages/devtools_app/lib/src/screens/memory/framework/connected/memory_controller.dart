@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math';
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
@@ -11,7 +10,6 @@ import 'package:flutter/foundation.dart';
 import '../../../../../devtools_app.dart';
 import '../../../../shared/memory/class_name.dart';
 import '../../../../shared/memory/heap_graph_loader.dart';
-import '../../../../shared/offline_data.dart';
 import '../../panes/chart/controller/chart_pane_controller.dart';
 import '../../panes/control/controller/control_pane_controller.dart';
 import '../../panes/diff/controller/diff_pane_controller.dart';
@@ -34,10 +32,11 @@ class MemoryController extends DisposableController
     @visibleForTesting DiffPaneController? diffPaneController,
     @visibleForTesting ProfilePaneController? profilePaneController,
   }) {
-    diff = diffPaneController ?? _createDiffController();
+    diff = diffPaneController ??
+        DiffPaneController(HeapGraphLoaderRuntime(chart.memoryTimeline));
     profile = profilePaneController ?? ProfilePaneController();
 
-    shareClassFilterBetweenProfileAndDiff();
+    _shareClassFilterBetweenProfileAndDiff();
   }
 
   /// Index of the selected feature tab.
@@ -65,23 +64,7 @@ class MemoryController extends DisposableController
     profile.dispose();
   }
 
-  DiffPaneController _createDiffController() =>
-      DiffPaneController(HeapGraphLoaderRuntime(chart.memoryTimeline));
-
-  void reset() {
-    diff.dispose();
-    diff = _createDiffController();
-
-    profile.dispose();
-    profile = ProfilePaneController();
-
-    tracing.dispose();
-    tracing = TracingPaneController();
-
-    chart.memoryTimeline.reset();
-  }
-
-  void shareClassFilterBetweenProfileAndDiff() {
+  void _shareClassFilterBetweenProfileAndDiff() {
     diff.derived.applyFilter(
       profile.classFilter.value,
     );
