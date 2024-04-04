@@ -22,11 +22,11 @@ final _log = Logger('dev_helpers');
 
 /// Set this to a real DTD URI String for ease of developing features that use
 /// the Dart Tooling Daemon.
-/// 
+///
 /// Without using this flag, you would need to run DevTools with the DevTools
 /// server (devtools_tool serve) in order to pass a DTD URI to the DevTools
 /// server, which is not convenient for development.
-/// 
+///
 /// You can use a real DTD URI from an IDE (VS Code or IntelliJ / Android
 /// Studio) using the "Copy DTD URI" action, or you can run a Dart or Flutter
 /// app from the command line with the `--print-dtd` flag.
