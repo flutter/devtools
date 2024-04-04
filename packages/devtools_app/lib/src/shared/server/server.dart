@@ -13,7 +13,7 @@ import 'package:http/http.dart';
 import 'package:logging/logging.dart';
 
 import '../development_helpers.dart';
-import '../dtd_manager_extension.dart';
+import '../dtd_manager_extensions.dart';
 import '../globals.dart';
 import '../primitives/utils.dart';
 

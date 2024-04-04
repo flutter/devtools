@@ -29,7 +29,7 @@ extension DevToolsDTDExtension on DTDManager {
     try {
       final response =
           await _dtd.analyticsGetConsentMessage(ua.DashTool.devtools);
-      return response.value! as String;
+      return response.value!;
     } catch (e) {
       _log.fine('Error calling getAnalyticsConsentMessage: $e');
       return '';
@@ -43,7 +43,7 @@ extension DevToolsDTDExtension on DTDManager {
     try {
       final response =
           await _dtd.analyticsShouldShowConsentMessage(ua.DashTool.devtools);
-      return response.value! as bool;
+      return response.value!;
     } catch (e) {
       _log.fine('Error calling shouldShowAnalyticsConsentMessage: $e');
       return false;
@@ -66,7 +66,7 @@ extension DevToolsDTDExtension on DTDManager {
     try {
       final response =
           await _dtd.analyticsTelemetryEnabled(ua.DashTool.devtools);
-      return response.value! as bool;
+      return response.value!;
     } catch (e) {
       _log.fine('Error calling analyticsTelemetryEnabled: $e');
       return false;

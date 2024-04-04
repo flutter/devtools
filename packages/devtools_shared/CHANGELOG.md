@@ -3,9 +3,8 @@
 of DTD implementation.
 * **Breaking change:** remove DevTools server APIs `apiMarkConsentMessageAsShown` and `apiGetConsentMessage`
 in favor of DTD implementation.
-
-# 8.2.0
 * Bump `package:dtd` to `^2.2.0`
+* Remove `package:unified_analytics` dependency.
 
 # 8.1.1-dev.0
 * Update `package:dtd` to `2.1.0`.

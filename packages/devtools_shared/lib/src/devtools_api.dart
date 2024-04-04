@@ -24,12 +24,6 @@ const apiGetDevToolsFirstRun = '${apiPrefix}getDevToolsFirstRun';
 const apiGetDevToolsEnabled = '${apiPrefix}getDevToolsEnabled';
 const apiSetDevToolsEnabled = '${apiPrefix}setDevToolsEnabled';
 
-// TODO(https://github.com/flutter/devtools/issues/7496): remove these when
-// making the breaking change to devtools_shared.
-/// package:unified_analytics properties APIs:
-const apiGetConsentMessage = '${apiPrefix}getConsentMessage';
-const apiMarkConsentMessageAsShown = '${apiPrefix}markConsentMessageAsShown';
-
 /// Property name to apiSetDevToolsEnabled the DevToolsEnabled is the name used
 /// in queryParameter:
 const devToolsEnabledPropertyName = 'enabled';

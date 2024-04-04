@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import '../dtd_manager_extension.dart';
+import '../dtd_manager_extensions.dart';
 import '../globals.dart';
 import '../server/server.dart' as server;
 import 'analytics.dart' as ga;
