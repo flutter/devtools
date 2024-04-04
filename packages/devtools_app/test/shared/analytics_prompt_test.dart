@@ -59,7 +59,7 @@ void main() {
           controller = TestAnalyticsController(
             enabled: true,
             shouldShowConsentMessage: true,
-            onEnableAnalytics: () {
+            legacyOnEnableAnalytics: () {
               didCallEnableAnalytics = true;
             },
             onMarkConsentMessageAsShown: () {
@@ -387,8 +387,8 @@ class TestAnalyticsController extends AnalyticsController {
     required super.shouldShowConsentMessage,
     required super.consentMessage,
     super.legacyOnEnableAnalytics,
-    super.onDisableAnalytics,
-    super.onSetupAnalytics,
+    super.legacyOnDisableAnalytics,
+    super.legacyOnSetupAnalytics,
     this.onMarkConsentMessageAsShown,
   });
 
