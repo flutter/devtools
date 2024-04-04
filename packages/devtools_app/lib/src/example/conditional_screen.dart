@@ -24,7 +24,7 @@ class ExampleConditionalScreen extends Screen {
           requiresLibrary: 'package:flutter/',
           title: 'Example',
           icon: Icons.palette,
-          worksOffline: true,
+          worksWithOfflineData: true,
         );
 
   static const id = 'example';
