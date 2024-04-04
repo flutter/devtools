@@ -13,7 +13,7 @@ import 'survey.dart';
 
 final _log = Logger('dev_helpers');
 
-/// Set this to a real DTD uri String for ease of developing features that use
+/// Set this to a real DTD URI String for ease of developing features that use
 /// the Dart Tooling Daemon.
 /// 
 /// Without using this flag, you would need to run DevTools with the DevTools
