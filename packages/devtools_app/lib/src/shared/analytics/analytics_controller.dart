@@ -108,9 +108,7 @@ class AnalyticsController {
   void setUpAnalytics() {
     if (_analyticsInitialized) return;
     assert(analyticsEnabled.value = true);
-    if (legacyOnSetupAnalytics != null) {
-      legacyOnSetupAnalytics!();
-    }
+    legacyOnSetupAnalytics?.call();
     _analyticsInitialized = true;
   }
 
