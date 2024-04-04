@@ -55,7 +55,7 @@ class AnalyticsController {
   final VoidCallback? onSetupAnalytics;
 
   /// Consent message for package:unified_analytics to be shown on first run.
-  late final String consentMessage;
+  final String consentMessage;
 
   Future<void> toggleAnalyticsEnabled(bool? enable) async {
     if (enable == true) {
