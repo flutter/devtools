@@ -7,10 +7,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('debug flags are false', () {
+    expect(debugDtdUri, isNull);
     expect(debugAnalytics, isFalse);
     expect(debugDevToolsExtensions, isFalse);
     expect(debugSurvey, isFalse);
     expect(debugPerfettoTraceProcessing, isFalse);
     expect(debugTimers, isFalse);
+    expect(debugOmitClassesInRetainingPath, isFalse);
   });
 }

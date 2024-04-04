@@ -48,7 +48,7 @@ class PathFromRoot {
           return true;
         }()),
         hashCode = path.isEmpty ? _hashOfEmptyPath : Object.hashAll(path),
-        classes = calculateSetOfClasses ? path.toSet() : const {};
+        classes = debugOmitClassesInRetainingPath ? const {} : path.toSet();
 
   /// For objects directly referenced from root.
   const PathFromRoot._empty()

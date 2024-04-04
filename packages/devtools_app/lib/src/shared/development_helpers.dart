@@ -13,6 +13,19 @@ import 'survey.dart';
 
 final _log = Logger('dev_helpers');
 
+/// Set this to a real DTD uri String for ease of developing features that use
+/// the Dart Tooling Daemon.
+/// 
+/// Without using this flag, you would need to run DevTools with the DevTools
+/// server (devtools_tool serve) in order to pass a DTD URI to the DevTools
+/// server, which is not convenient for development.
+/// 
+/// You can use a real DTD URI from an IDE (VS Code or IntelliJ / Android
+/// Studio) using the "Copy DTD URI" action, or you can run a Dart or Flutter
+/// app from the command line with the `--print-dtd` flag.
+String? get debugDtdUri => kReleaseMode ? null : _debugDtdUri;
+String? _debugDtdUri;
+
 /// Enable this flag to debug analytics when DevTools is run in debug or profile
 /// mode, otherwise analytics will only be sent in release builds.
 ///
@@ -173,7 +186,8 @@ FutureOr<void> debugTimeAsync(
   _log.info('$debugName: $time ms');
 }
 
-/// If false, the [HeapData.classes] is always empty.
-///
-/// Is used to evaluate performance of calculations.
-bool calculateSetOfClasses = true;
+/// If true, classes are ommitted when calculating a retaining path.
+/// 
+/// This flag is used to evaluate the performance of retaining path
+/// calculations.
+bool debugOmitClassesInRetainingPath = false;

@@ -14,6 +14,8 @@ Future<Uri?> getDtdUri() async {
       final uriString = parsedResult[DtdApi.uriPropertyName] as String?;
       return uriString != null ? Uri.parse(uriString) : null;
     }
+  } else if (debugDtdUri != null) {
+    return Uri.parse(debugDtdUri!);
   }
   return null;
 }
