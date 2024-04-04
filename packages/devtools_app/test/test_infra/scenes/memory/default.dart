@@ -144,8 +144,8 @@ class MemoryDefaultScene extends Scene {
       diffPaneController: diffController,
       profilePaneController: profileController,
     )
-      ..controllers.chart.memoryTimeline.offlineData.clear()
-      ..controllers.chart.memoryTimeline.offlineData.addAll(memoryJson.data);
+      ..chart.memoryTimeline.offlineData.clear()
+      ..chart.memoryTimeline.offlineData.addAll(memoryJson.data);
   }
 
   @override

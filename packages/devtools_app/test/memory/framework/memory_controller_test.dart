@@ -36,7 +36,7 @@ Future<void> pumpScene(WidgetTester tester, MemoryDefaultScene scene) async {
 }
 
 Future<void> takeSnapshot(WidgetTester tester, MemoryDefaultScene scene) async {
-  final snapshots = scene.controller.controllers.diff.core.snapshots;
+  final snapshots = scene.controller.diff.core.snapshots;
   final length = snapshots.value.length;
   await tester.tap(find.byIcon(Icons.fiber_manual_record).first);
   await tester.pumpAndSettle();
@@ -48,13 +48,13 @@ const windowSize = Size(2225.0, 1000.0);
 
 void _verifyFiltersAreEqual(MemoryDefaultScene scene, [ClassFilter? filter]) {
   expect(
-    scene.controller.controllers.diff.core.classFilter.value,
-    equals(scene.controller.controllers.profile.classFilter.value),
+    scene.controller.diff.core.classFilter.value,
+    equals(scene.controller.profile.classFilter.value),
   );
 
   if (filter != null) {
     expect(
-      scene.controller.controllers.diff.core.classFilter.value,
+      scene.controller.diff.core.classFilter.value,
       equals(filter),
     );
   }
@@ -80,10 +80,10 @@ void main() {
 
       _verifyFiltersAreEqual(scene);
 
-      scene.controller.controllers.diff.derived.applyFilter(_filter1);
+      scene.controller.diff.derived.applyFilter(_filter1);
       _verifyFiltersAreEqual(scene, _filter1);
 
-      scene.controller.controllers.profile.setFilter(_filter2);
+      scene.controller.profile.setFilter(_filter2);
       _verifyFiltersAreEqual(scene, _filter2);
     },
   );

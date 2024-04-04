@@ -56,11 +56,11 @@ class _ConnectedMemoryBodyState extends State<ConnectedMemoryBody>
       key: MemoryChartPane.hoverKey,
       children: [
         MemoryControlPane(
-          controller: controller.controllers.control,
+          controller: controller.control,
         ),
         const SizedBox(height: intermediateSpacing),
         MemoryChartPane(
-          chart: controller.controllers.chart,
+          chart: controller.chart,
           keyFocusNode: _focusNode,
         ),
         Expanded(
