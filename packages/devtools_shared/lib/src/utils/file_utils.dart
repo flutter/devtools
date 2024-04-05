@@ -12,7 +12,7 @@ String packageRootFromFileUriString(String fileUriString) {
   // server and having the server look for the package folder that contains the
   // `.dart_tool` directory.
   final directoryRegExp =
-      RegExp(r'\/(lib|bin|integration_test|test|benchmark)\/.+\.dart');
+      RegExp(r'\/(lib|bin|integration_test|test|benchmark|example)\/.+\.dart');
   final directoryIndex = fileUriString.indexOf(directoryRegExp);
   if (directoryIndex != -1) {
     fileUriString = fileUriString.substring(0, directoryIndex);
