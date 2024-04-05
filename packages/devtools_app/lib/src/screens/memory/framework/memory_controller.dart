@@ -8,15 +8,15 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../../../../devtools_app.dart';
-import '../../../../shared/memory/class_name.dart';
-import '../../../../shared/memory/heap_graph_loader.dart';
-import '../../panes/chart/controller/chart_pane_controller.dart';
-import '../../panes/control/controller/control_pane_controller.dart';
-import '../../panes/diff/controller/diff_pane_controller.dart';
-import '../../panes/profile/profile_pane_controller.dart';
-import '../../panes/tracing/tracing_pane_controller.dart';
-import '../offline_data/offline_data.dart';
+import '../../../../devtools_app.dart';
+import '../../../shared/memory/class_name.dart';
+import '../../../shared/memory/heap_graph_loader.dart';
+import '../panes/chart/controller/chart_pane_controller.dart';
+import '../panes/control/controller/control_pane_controller.dart';
+import '../panes/diff/controller/diff_pane_controller.dart';
+import '../panes/profile/profile_pane_controller.dart';
+import '../panes/tracing/tracing_pane_controller.dart';
+import 'offline_data/offline_data.dart';
 
 /// This class contains the business logic for memory screen, for a connected
 /// application.
