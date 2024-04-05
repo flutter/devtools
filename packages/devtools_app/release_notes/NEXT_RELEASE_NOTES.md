@@ -55,7 +55,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## DevTools Extension updates
 
-TODO: Remove this section if there are not any general updates.
+* Fixed an issue preventing extensions to load for run targets under the `example`
+directory. - [#7533](https://github.com/flutter/devtools/pull/7533)
 
 ## Full commit history
 
