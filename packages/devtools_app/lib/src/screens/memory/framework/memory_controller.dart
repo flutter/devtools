@@ -123,5 +123,12 @@ class MemoryController extends DisposableController
       );
 
   @override
-  FutureOr<void> processOfflineData(OfflineMemoryData offlineData) {}
+  FutureOr<void> processOfflineData(OfflineMemoryData offlineData) {
+    assert(!isInitialized.value);
+    diff = offlineData.diff;
+    profile = offlineData.profile;
+    chart = offlineData.chart;
+    selectedFeatureTabIndex = offlineData.selectedTab;
+    tracing = TracingPaneController();
+  }
 }
