@@ -13,7 +13,7 @@ import '../../../shared/utils.dart';
 import '../panes/chart/widgets/chart_pane.dart';
 import '../panes/control/widgets/control_pane.dart';
 import 'memory_controller.dart';
-import 'connected/memory_tabs.dart';
+import 'memory_tabs.dart';
 
 class ConnectedMemoryBody extends StatefulWidget {
   const ConnectedMemoryBody({super.key});
