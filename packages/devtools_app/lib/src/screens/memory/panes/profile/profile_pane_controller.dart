@@ -15,6 +15,18 @@ import 'model.dart';
 
 class ProfilePaneController extends DisposableController
     with AutoDisposeControllerMixin {
+  ProfilePaneController();
+
+  ProfilePaneController._();
+
+  factory ProfilePaneController.forOfflineData(Map<String, dynamic> json) {
+    return ProfilePaneController._();
+  }
+
+  Map<String, dynamic> prepareForOffline() {
+    return {};
+  }
+
   final _exportController = ExportController();
 
   /// The current profile being displayed.
@@ -168,9 +180,5 @@ class ProfilePaneController extends DisposableController
       csvBuffer.toString(),
       type: ExportFileType.csv,
     );
-  }
-
-  Map<String, dynamic> prepareForOffline() {
-    return {};
   }
 }
