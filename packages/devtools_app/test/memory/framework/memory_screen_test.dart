@@ -103,11 +103,11 @@ void main() {
         expect(find.byType(MemoryVMChart), findsOneWidget);
 
         expect(
-          controller.controllers.chart.memoryTimeline.liveData.isEmpty,
+          controller.chart.memoryTimeline.liveData.isEmpty,
           isTrue,
         );
         expect(
-          controller.controllers.chart.memoryTimeline.offlineData.isEmpty,
+          controller.chart.memoryTimeline.offlineData.isEmpty,
           isTrue,
         );
       },

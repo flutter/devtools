@@ -111,7 +111,7 @@ void main() {
       (WidgetTester tester) async {
         await pumpScene(tester);
 
-        final controller = scene.controller.controllers.tracing;
+        final controller = scene.controller.tracing;
         final state = controller.stateForIsolate.value;
         expect(state.filteredClassList.value.isNotEmpty, isTrue);
         expect(controller.initializing.value, isFalse);
@@ -276,7 +276,7 @@ void main() {
       (WidgetTester tester) async {
         await pumpScene(tester);
 
-        final controller = scene.controller.controllers.tracing;
+        final controller = scene.controller.tracing;
         final state = controller.stateForIsolate.value;
         expect(state.filteredClassList.value.isNotEmpty, isTrue);
         expect(controller.initializing.value, isFalse);
@@ -380,7 +380,7 @@ void main() {
       testWidgetsWithWindowSize('simple', windowSize, (tester) async {
         await pumpScene(tester);
 
-        final controller = scene.controller.controllers.tracing;
+        final controller = scene.controller.tracing;
         final state = controller.stateForIsolate.value;
 
         final filterTextField = find.byType(DevToolsClearableTextField);
@@ -407,7 +407,7 @@ void main() {
         (tester) async {
           await pumpScene(tester);
 
-          final controller = scene.controller.controllers.tracing;
+          final controller = scene.controller.tracing;
           final state = controller.stateForIsolate.value;
 
           final checkboxes = find.byType(Checkbox);
@@ -448,7 +448,7 @@ void main() {
         (tester) async {
           await pumpScene(tester);
 
-          final controller = scene.controller.controllers.tracing;
+          final controller = scene.controller.tracing;
           final state = controller.stateForIsolate.value;
 
           expect(state.selectedTracedClass.value, isNull);

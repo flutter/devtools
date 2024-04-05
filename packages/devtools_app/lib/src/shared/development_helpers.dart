@@ -11,7 +11,27 @@ import 'package:logging/logging.dart';
 import 'globals.dart';
 import 'survey.dart';
 
+// This file contains helpers that can be used during local development. Any
+// changes to variables in this file (like flipping a bool to true or setting
+// a non-null value for a debug String) should be intended for local
+// development only, and should never be checked into source control. The
+// default values for variables in this file are test covered in
+// `development_helpers_test.dart`.
+
 final _log = Logger('dev_helpers');
+
+/// Set this to a real DTD URI String for ease of developing features that use
+/// the Dart Tooling Daemon.
+///
+/// Without using this flag, you would need to run DevTools with the DevTools
+/// server (devtools_tool serve) in order to pass a DTD URI to the DevTools
+/// server, which is not convenient for development.
+///
+/// You can use a real DTD URI from an IDE (VS Code or IntelliJ / Android
+/// Studio) using the "Copy DTD URI" action, or you can run a Dart or Flutter
+/// app from the command line with the `--print-dtd` flag.
+String? get debugDtdUri => kReleaseMode ? null : _debugDtdUri;
+String? _debugDtdUri;
 
 /// Enable this flag to debug analytics when DevTools is run in debug or profile
 /// mode, otherwise analytics will only be sent in release builds.
@@ -172,8 +192,3 @@ FutureOr<void> debugTimeAsync(
   final time = DateTime.now().millisecondsSinceEpoch - now;
   _log.info('$debugName: $time ms');
 }
-
-/// If false, the [HeapData.classes] is always empty.
-///
-/// Is used to evaluate performance of calculations.
-bool calculateSetOfClasses = true;
