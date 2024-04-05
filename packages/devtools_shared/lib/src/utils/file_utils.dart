@@ -38,9 +38,13 @@ Future<String> packageRootFromFileUriString(
     final parts = List.of(Uri.parse(fileUriString).pathSegments);
     while (parts.isNotEmpty) {
       parts.removeLast();
-      // Include the leading slash because `pathSegments` will remove it.
+      // Include the leading slash because `pathSegments` will remove it, and a
+      // leading slash is required for 'Uri.file' to properly set the 'file'
+      // URI scheme.
       // Include the trailing slash because the IDE workspace root this URI is
-      // a part of may have a trailing slash.
+      // a part of may have a trailing slash, and DTD checks that the URI we
+      // pass to `listDirectoryContents` starts with at least one IDE workspace
+      // root.
       var pathString = p.joinAll(parts);
       if (!pathString.startsWith('/')) pathString = '/$pathString';
       if (!pathString.endsWith('/')) pathString = '$pathString/';
@@ -48,7 +52,7 @@ Future<String> packageRootFromFileUriString(
       final currentUri = Uri.file(pathString);
       try {
         final directoryContents = await dtd.listDirectoryContents(currentUri);
-        final containsDartToolDirectory = (directoryContents.uris ?? [])
+        final containsDartToolDirectory = (directoryContents.uris ?? const [])
             .any((uri) => uri.path.endsWith('.dart_tool/'));
         if (containsDartToolDirectory) {
           final uriAsString = currentUri.toString();

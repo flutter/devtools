@@ -11,91 +11,35 @@ import 'package:test/test.dart';
 
 import '../helpers.dart';
 
+const projectRootParts = ['absolute_path_to', 'my_app_root'];
+late String projectRoot;
+
+late File libFile;
+late File libSubFile;
+late File binFile;
+late File binSubFile;
+late File testFile;
+late File testSubFile;
+late File integrationTestFile;
+late File integrationTestSubFile;
+late File benchmarkFile;
+late File benchmarkSubFile;
+late File exampleFile;
+late File exampleSubFile;
+late File anyFile;
+late File anySubFile;
+
 void main() {
   group('file uri helpers', () {
     TestDtdConnectionInfo? dtd;
     DartToolingDaemon? testDtdConnection;
-
-    const projectRootParts = ['absolute_path_to', 'my_app_root'];
-    late String projectRoot;
-
-    late File libFile;
-    late File libSubFile;
-    late File binFile;
-    late File binSubFile;
-    late File testFile;
-    late File testSubFile;
-    late File integrationTestFile;
-    late File integrationTestSubFile;
-    late File benchmarkFile;
-    late File benchmarkSubFile;
-    late File exampleFile;
-    late File exampleSubFile;
-    late File anyFile;
-    late File anySubFile;
 
     setUp(() async {
       dtd = await startDtd();
       expect(dtd!.uri, isNotNull, reason: 'Error starting DTD for test');
       testDtdConnection = await DartToolingDaemon.connect(Uri.parse(dtd!.uri!));
 
-      // Set up the project root.
-      final tmpDirectory = Directory.systemTemp.createTempSync();
-      final projectRootDirectory =
-          Directory(p.joinAll([tmpDirectory.path, ...projectRootParts]))
-            ..createSync(recursive: true);
-      final directoryPath =
-          Uri.file(projectRootDirectory.uri.toFilePath()).toString();
-      // Remove the trailing slash.
-      projectRoot = directoryPath.substring(0, directoryPath.length - 1);
-
-      // Set up the project root contents.
-      Directory(p.join(projectRootDirectory.path, '.dart_tool'))
-          .createSync(recursive: true);
-      libFile = File(p.join(projectRootDirectory.path, 'lib', 'foo.dart'))
-        ..createSync(recursive: true);
-      libSubFile =
-          File(p.join(projectRootDirectory.path, 'lib', 'sub', 'foo.dart'))
-            ..createSync(recursive: true);
-      binFile = File(p.join(projectRootDirectory.path, 'bin', 'foo.dart'))
-        ..createSync(recursive: true);
-      binSubFile =
-          File(p.join(projectRootDirectory.path, 'bin', 'sub', 'foo.dart'))
-            ..createSync(recursive: true);
-      testFile =
-          File(p.join(projectRootDirectory.path, 'test', 'foo_test.dart'))
-            ..createSync(recursive: true);
-      testSubFile = File(
-        p.join(projectRootDirectory.path, 'test', 'sub', 'foo_test.dart'),
-      )..createSync(recursive: true);
-      integrationTestFile = File(
-        p.join(projectRootDirectory.path, 'integration_test', 'foo_test.dart'),
-      )..createSync(recursive: true);
-      integrationTestSubFile = File(
-        p.join(
-          projectRootDirectory.path,
-          'integration_test',
-          'sub',
-          'foo_test.dart',
-        ),
-      )..createSync(recursive: true);
-      benchmarkFile =
-          File(p.join(projectRootDirectory.path, 'benchmark', 'foo.dart'))
-            ..createSync(recursive: true);
-      benchmarkSubFile = File(
-        p.join(projectRootDirectory.path, 'benchmark', 'sub', 'foo.dart'),
-      )..createSync(recursive: true);
-      exampleFile =
-          File(p.join(projectRootDirectory.path, 'example', 'foo.dart'))
-            ..createSync(recursive: true);
-      exampleSubFile =
-          File(p.join(projectRootDirectory.path, 'example', 'sub', 'foo.dart'))
-            ..createSync(recursive: true);
-      anyFile = File(p.join(projectRootDirectory.path, 'any_name', 'foo.dart'))
-        ..createSync(recursive: true);
-      anySubFile =
-          File(p.join(projectRootDirectory.path, 'any_name', 'sub', 'foo.dart'))
-            ..createSync(recursive: true);
+      _setupTestDirectoryStructure();
 
       await testDtdConnection!.setIDEWorkspaceRoots(
         dtd!.secret!,
@@ -181,4 +125,93 @@ void main() {
       );
     }
   });
+}
+
+/// Sets up the directory structure for each test.
+///
+/// Test directory structure:
+/// my_app_root/
+///   .dart_tool/
+///   any_name/
+///     foo.dart
+///     sub/
+///       foo.dart
+///   benchmark/
+///     foo.dart
+///     sub/
+///       foo.dart
+///   bin/
+///     foo.dart
+///     sub/
+///       foo.dart
+///   example/
+///     foo.dart
+///     sub/
+///       foo.dart
+///   integration_test/
+///     foo_test.dart
+///     sub/
+///       foo_test.dart
+///   lib/
+///     foo.dart
+///     sub/
+///       foo.dart
+///   test/
+///     foo_test.dart
+///     sub/
+///       foo_test.dart
+void _setupTestDirectoryStructure() {
+  final tmpDirectory = Directory.systemTemp.createTempSync();
+  final projectRootDirectory =
+      Directory(p.joinAll([tmpDirectory.path, ...projectRootParts]))
+        ..createSync(recursive: true);
+  final directoryPath =
+      Uri.file(projectRootDirectory.uri.toFilePath()).toString();
+
+  // Remove the trailing slash and set the value of [projectRoot].
+  projectRoot = directoryPath.substring(0, directoryPath.length - 1);
+
+  // Set up the project root contents.
+  Directory(p.join(projectRootDirectory.path, '.dart_tool'))
+      .createSync(recursive: true);
+  libFile = File(p.join(projectRootDirectory.path, 'lib', 'foo.dart'))
+    ..createSync(recursive: true);
+  libSubFile = File(p.join(projectRootDirectory.path, 'lib', 'sub', 'foo.dart'))
+    ..createSync(recursive: true);
+  binFile = File(p.join(projectRootDirectory.path, 'bin', 'foo.dart'))
+    ..createSync(recursive: true);
+  binSubFile = File(p.join(projectRootDirectory.path, 'bin', 'sub', 'foo.dart'))
+    ..createSync(recursive: true);
+  testFile = File(p.join(projectRootDirectory.path, 'test', 'foo_test.dart'))
+    ..createSync(recursive: true);
+  testSubFile = File(
+    p.join(projectRootDirectory.path, 'test', 'sub', 'foo_test.dart'),
+  )..createSync(recursive: true);
+  integrationTestFile = File(
+    p.join(projectRootDirectory.path, 'integration_test', 'foo_test.dart'),
+  )..createSync(recursive: true);
+  integrationTestSubFile = File(
+    p.join(
+      projectRootDirectory.path,
+      'integration_test',
+      'sub',
+      'foo_test.dart',
+    ),
+  )..createSync(recursive: true);
+  benchmarkFile =
+      File(p.join(projectRootDirectory.path, 'benchmark', 'foo.dart'))
+        ..createSync(recursive: true);
+  benchmarkSubFile = File(
+    p.join(projectRootDirectory.path, 'benchmark', 'sub', 'foo.dart'),
+  )..createSync(recursive: true);
+  exampleFile = File(p.join(projectRootDirectory.path, 'example', 'foo.dart'))
+    ..createSync(recursive: true);
+  exampleSubFile =
+      File(p.join(projectRootDirectory.path, 'example', 'sub', 'foo.dart'))
+        ..createSync(recursive: true);
+  anyFile = File(p.join(projectRootDirectory.path, 'any_name', 'foo.dart'))
+    ..createSync(recursive: true);
+  anySubFile =
+      File(p.join(projectRootDirectory.path, 'any_name', 'sub', 'foo.dart'))
+        ..createSync(recursive: true);
 }
