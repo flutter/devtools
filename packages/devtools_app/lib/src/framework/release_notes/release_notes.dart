@@ -31,7 +31,10 @@ bool debugTestReleaseNotes = false;
 const String? _debugReleaseNotesUrl = null;
 
 const releaseNotesKey = Key('release_notes');
-const _unsupportedPathSyntax = '{{site.url}}';
+final _baseUrlRelativeMarkdownLinkPattern = RegExp(
+  r'(\[.*?]\()(\/.*\s*)',
+  multiLine: true,
+);
 const _releaseNotesPath = '/f/devtools-releases.json';
 final _flutterDocsSite = Uri.https('docs.flutter.dev');
 
@@ -98,10 +101,11 @@ class ReleaseNotesController extends SidePanelController {
       final debugUri = Uri.parse(debugUrl);
       final releaseNotesMarkdown = await http.read(debugUri);
 
-      // Update image links to use debug/testing URL.
-      markdown.value = releaseNotesMarkdown.replaceAll(
-        _unsupportedPathSyntax,
-        debugUri.replace(path: '').toString(),
+      // Update the base-url-relative links in the file to
+      // absolute links using the debug/testing URL.
+      markdown.value = _convertBaseUrlRelativeLinks(
+        releaseNotesMarkdown,
+        debugUri.replace(path: ''),
       );
 
       toggleVisibility(true);
@@ -162,11 +166,10 @@ class ReleaseNotesController extends SidePanelController {
           continue;
         }
 
-        // Replace the {{site.url}} template syntax that the
-        // Flutter docs website uses to specify site URLs.
-        markdown.value = releaseNotesMarkdown.replaceAll(
-          _unsupportedPathSyntax,
-          _flutterDocsSite.toString(),
+        // Update the base-url-relative links in the file to absolute links.
+        markdown.value = _convertBaseUrlRelativeLinks(
+          releaseNotesMarkdown,
+          _flutterDocsSite,
         );
 
         toggleVisibility(true);
@@ -188,6 +191,14 @@ class ReleaseNotesController extends SidePanelController {
     );
     return;
   }
+
+  /// Convert all site-base-url relative links in [markdownContent]
+  /// to absolute links from the specified [baseUrl].
+  String _convertBaseUrlRelativeLinks(String markdownContent, Uri baseUrl) =>
+      markdownContent.replaceAllMapped(
+        _baseUrlRelativeMarkdownLinkPattern,
+        (m) => '${m[1]}${baseUrl.toString()}${m[2]}',
+      );
 
   /// Retrieve and parse the release note index from the
   /// Flutter website at [_flutterDocsSite]/[_releaseNotesPath].
