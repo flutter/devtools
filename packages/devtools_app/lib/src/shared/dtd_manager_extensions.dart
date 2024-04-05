@@ -29,6 +29,7 @@ extension DevToolsDTDExtension on DTDManager {
     try {
       final response =
           await _dtd.analyticsGetConsentMessage(ua.DashTool.devtools);
+      _log.finer('DTDManager.analyticsConsentMessage success');
       return response.value!;
     } catch (e) {
       _log.fine('Error calling getAnalyticsConsentMessage: $e');
@@ -43,7 +44,11 @@ extension DevToolsDTDExtension on DTDManager {
     try {
       final response =
           await _dtd.analyticsShouldShowConsentMessage(ua.DashTool.devtools);
-      return response.value!;
+      final shouldShow = response.value!;
+      _log.finer(
+        'DTDManager.shouldShowAnalyticsConsentMessage result: $shouldShow',
+      );
+      return shouldShow;
     } catch (e) {
       _log.fine('Error calling shouldShowAnalyticsConsentMessage: $e');
       return false;
@@ -55,6 +60,7 @@ extension DevToolsDTDExtension on DTDManager {
     if (!hasConnection) return;
     try {
       await _dtd.analyticsClientShowedMessage(ua.DashTool.devtools);
+      _log.finer('DTDManager.analyticsClientShowedMessage success');
     } catch (e) {
       _log.fine('Error calling analyticsClientShowedMessage: $e');
     }
@@ -66,7 +72,9 @@ extension DevToolsDTDExtension on DTDManager {
     try {
       final response =
           await _dtd.analyticsTelemetryEnabled(ua.DashTool.devtools);
-      return response.value!;
+      final enabled = response.value!;
+      _log.finer('DTDManager.analyticsTelemetryEnabled result: $enabled');
+      return enabled;
     } catch (e) {
       _log.fine('Error calling analyticsTelemetryEnabled: $e');
       return false;
@@ -79,6 +87,7 @@ extension DevToolsDTDExtension on DTDManager {
     if (!hasConnection) return;
     try {
       await _dtd.analyticsSetTelemetry(ua.DashTool.devtools, enabled: enabled);
+      _log.finer('DTDManager.setAnalyticsTelemetry: $enabled');
     } catch (e) {
       _log.fine('Error calling setAnalyticsTelemetry: $e');
     }
@@ -89,6 +98,7 @@ extension DevToolsDTDExtension on DTDManager {
     if (!hasConnection) return;
     try {
       await _dtd.analyticsSend(ua.DashTool.devtools, event);
+      _log.finer('DTDManager.sendAnalyticsEvent: ${event.eventName}');
     } catch (e) {
       _log.fine('Error calling sendAnalyticsEvent: $e');
     }

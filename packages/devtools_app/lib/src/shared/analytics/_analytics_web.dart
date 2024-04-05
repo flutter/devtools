@@ -450,9 +450,8 @@ Future<bool> shouldShowAnalyticsConsentMessage() async {
   if (kReleaseMode) {
     // When asked if the consent message should be shown,
     // package:unified_analytics will return true if this the user's first run
-    // (unlikely for the case of DevTools since the user is likely to have
-    // already seen the message from another Dash tool (Dart or Flutter CLI,
-    // IDE, etc.) or when the consent message version has been updated.
+    // of DevTools with package:unified_analytics support or when the consent
+    // message version has been updated.
     shouldShow = await dtdManager.shouldShowAnalyticsConsentMessage();
   }
 
