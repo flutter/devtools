@@ -48,16 +48,13 @@ class MemoryController extends DisposableController
 
   late final DiffPaneController diff;
 
-  late ProfilePaneController profile;
+  late final ProfilePaneController profile;
 
-  late final MemoryChartPaneController chart = MemoryChartPaneController();
+  late final MemoryChartPaneController chart;
 
-  final TracingPaneController tracing = TracingPaneController();
+  late final TracingPaneController tracing;
 
-  late final MemoryControlPaneController control = MemoryControlPaneController(
-    chart.memoryTimeline,
-    exportData: exportData,
-  );
+  late final MemoryControlPaneController control;
 
   @override
   void dispose() {
@@ -76,6 +73,7 @@ class MemoryController extends DisposableController
     final showingOfflineData = offlineDataController.showingOfflineData.value;
 
     if (showingOfflineData) {
+      // Triggers `processOfflineData`, that initializes all the controllers.
       await maybeLoadOfflineData(
         PerformanceScreen.id,
         createData: (json) => OfflineMemoryData.parse(json),
@@ -85,6 +83,12 @@ class MemoryController extends DisposableController
       diff = diffPaneController ??
           DiffPaneController(HeapGraphLoaderRuntime(chart.memoryTimeline));
       profile = profilePaneController ?? ProfilePaneController();
+      chart = MemoryChartPaneController();
+      tracing = TracingPaneController();
+      control = MemoryControlPaneController(
+        chart.memoryTimeline,
+        exportData: exportData,
+      );
     }
 
     _shareClassFilterBetweenProfileAndDiff();
