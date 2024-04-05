@@ -166,6 +166,10 @@ class DiffPaneController extends DisposableController {
       ),
     );
   }
+
+  Map<String, dynamic> prepareForOffline() {
+    return {};
+  }
 }
 
 /// Values that define what data to show on diff screen.

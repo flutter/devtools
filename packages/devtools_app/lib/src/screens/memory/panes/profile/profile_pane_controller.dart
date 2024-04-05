@@ -169,4 +169,8 @@ class ProfilePaneController extends DisposableController
       type: ExportFileType.csv,
     );
   }
+
+  Map<String, dynamic> prepareForOffline() {
+    return {};
+  }
 }

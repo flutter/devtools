@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 
 import '../../../../../devtools_app.dart';
 import '../../../../shared/memory/class_name.dart';
@@ -32,12 +33,10 @@ class MemoryController extends DisposableController
     @visibleForTesting DiffPaneController? diffPaneController,
     @visibleForTesting ProfilePaneController? profilePaneController,
   }) {
-    diff = diffPaneController ??
-        DiffPaneController(HeapGraphLoaderRuntime(chart.memoryTimeline));
-    profile = profilePaneController ?? ProfilePaneController();
-
-    _shareClassFilterBetweenProfileAndDiff();
+    unawaited(_init(diffPaneController, profilePaneController));
   }
+
+  ValueNotifier<bool> isInitialized = ValueNotifier(false);
 
   /// Index of the selected feature tab.
   ///
@@ -47,12 +46,18 @@ class MemoryController extends DisposableController
   /// instead of the widget state.
   int selectedFeatureTabIndex = 0;
 
-  late DiffPaneController diff;
+  late final DiffPaneController diff;
+
   late ProfilePaneController profile;
-  late MemoryChartPaneController chart = MemoryChartPaneController();
-  TracingPaneController tracing = TracingPaneController();
-  late final MemoryControlPaneController control =
-      MemoryControlPaneController(chart.memoryTimeline, exportData: exportData);
+
+  late final MemoryChartPaneController chart = MemoryChartPaneController();
+
+  final TracingPaneController tracing = TracingPaneController();
+
+  late final MemoryControlPaneController control = MemoryControlPaneController(
+    chart.memoryTimeline,
+    exportData: exportData,
+  );
 
   @override
   void dispose() {
@@ -62,6 +67,28 @@ class MemoryController extends DisposableController
     tracing.dispose();
     diff.dispose();
     profile.dispose();
+  }
+
+  Future<void> _init(
+    @visibleForTesting DiffPaneController? diffPaneController,
+    @visibleForTesting ProfilePaneController? profilePaneController,
+  ) async {
+    final showingOfflineData = offlineDataController.showingOfflineData.value;
+
+    if (showingOfflineData) {
+      await maybeLoadOfflineData(
+        PerformanceScreen.id,
+        createData: (json) => OfflineMemoryData.parse(json),
+        shouldLoad: (data) => !data.isEmpty,
+      );
+    } else {
+      diff = diffPaneController ??
+          DiffPaneController(HeapGraphLoaderRuntime(chart.memoryTimeline));
+      profile = profilePaneController ?? ProfilePaneController();
+    }
+
+    _shareClassFilterBetweenProfileAndDiff();
+    isInitialized.value = true;
   }
 
   void _shareClassFilterBetweenProfileAndDiff() {
@@ -83,14 +110,12 @@ class MemoryController extends DisposableController
   @override
   OfflineScreenData prepareOfflineScreenData() => OfflineScreenData(
         screenId: ScreenMetaData.memory.id,
-        data: OfflineMemoryData().toJson(),
-        // {
-        //   // 'selectedTab: selectedFeatureTabIndex,
-        //   // 'diffData': controllers.diff.prepareForOffline(),
-        //   // 'profileData': controllers.profile.prepareForOffline(),
-        //   // 'chartData': controllers.chart.prepareForOffline(),
-        //   // 'controlData': controllers.control.prepareForOffline(),
-        // },
+        data: OfflineMemoryData(
+          diff,
+          profile,
+          chart,
+          selectedTab: selectedFeatureTabIndex,
+        ).toJson(),
       );
 
   @override

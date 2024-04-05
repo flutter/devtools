@@ -224,4 +224,8 @@ class MemoryChartPaneController extends DisposableController
     android.dispose();
     isAndroidChartVisible.dispose();
   }
+
+  Map<String, dynamic> prepareForOffline() {
+    return {};
+  }
 }
