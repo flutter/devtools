@@ -26,7 +26,7 @@ export 'src/screens/inspector/inspector_screen.dart';
 export 'src/screens/inspector/inspector_tree_controller.dart';
 export 'src/screens/logging/logging_controller.dart';
 export 'src/screens/logging/logging_screen.dart';
-export 'src/screens/memory/framework/connected/memory_controller.dart';
+export 'src/screens/memory/framework/memory_controller.dart';
 export 'src/screens/memory/framework/memory_screen.dart';
 export 'src/screens/network/network_controller.dart';
 export 'src/screens/network/network_model.dart';
