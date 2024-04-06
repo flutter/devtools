@@ -121,7 +121,7 @@ class MemoryController extends DisposableController
           profile,
           chart,
           selectedTab: selectedFeatureTabIndex,
-        ).toJson(),
+        ).prepareForOffline(),
       );
 
   @override

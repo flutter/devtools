@@ -24,11 +24,14 @@ class OfflineMemoryData {
   factory OfflineMemoryData.parse(Map<String, dynamic> json) {
     return OfflineMemoryData(
       DiffPaneController.parse(
-          json[_Json.diffData] as Map<String, dynamic>? ?? {}),
+        json[_Json.diffData] as Map<String, dynamic>? ?? {},
+      ),
       ProfilePaneController.parse(
-          json[_Json.profileData] as Map<String, dynamic>? ?? {}),
+        json[_Json.profileData] as Map<String, dynamic>? ?? {},
+      ),
       MemoryChartPaneController.parse(
-          json[_Json.chartData] as Map<String, dynamic>? ?? {}),
+        json[_Json.chartData] as Map<String, dynamic>? ?? {},
+      ),
       selectedTab: json[_Json.selectedTab] as int? ?? 0,
     );
   }
@@ -40,7 +43,7 @@ class OfflineMemoryData {
   final MemoryChartPaneController chart;
   final int selectedTab;
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> prepareForOffline() {
     return {
       _Json.selectedTab: selectedTab,
       _Json.diffData: diff.prepareForOffline(),

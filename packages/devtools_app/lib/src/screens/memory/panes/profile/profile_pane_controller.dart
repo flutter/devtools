@@ -25,8 +25,6 @@ class ProfilePaneController extends DisposableController
     return {};
   }
 
-  final _exportController = ExportController();
-
   /// The current profile being displayed.
   ValueListenable<AdaptedProfile?> get currentAllocationProfile =>
       _currentAllocationProfile;
@@ -174,7 +172,7 @@ class ProfilePaneController extends DisposableController
         ].join(','),
       );
     }
-    _exportController.downloadFile(
+    ExportController().downloadFile(
       csvBuffer.toString(),
       type: ExportFileType.csv,
     );
