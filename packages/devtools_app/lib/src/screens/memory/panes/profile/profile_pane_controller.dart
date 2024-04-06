@@ -18,6 +18,7 @@ class ProfilePaneController extends DisposableController
   ProfilePaneController();
 
   factory ProfilePaneController.parse(Map<String, dynamic> map) {
+    assert(offlineDataController.showingOfflineData.value);
     return ProfilePaneController();
   }
 

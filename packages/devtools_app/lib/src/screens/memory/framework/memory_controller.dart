@@ -73,7 +73,7 @@ class MemoryController extends DisposableController
     final showingOfflineData = offlineDataController.showingOfflineData.value;
 
     if (showingOfflineData) {
-      // Triggers `processOfflineData`, that initializes all the controllers.
+      // Triggers [processOfflineData], that initializes all the controllers.
       await maybeLoadOfflineData(
         PerformanceScreen.id,
         createData: (json) => OfflineMemoryData.parse(json),
@@ -97,6 +97,28 @@ class MemoryController extends DisposableController
     isInitialized.value = true;
   }
 
+  @override
+  OfflineScreenData prepareOfflineScreenData() => OfflineScreenData(
+        screenId: ScreenMetaData.memory.id,
+        data: OfflineMemoryData(
+          diff,
+          profile,
+          chart,
+          selectedTab: selectedFeatureTabIndex,
+        ).prepareForOffline(),
+      );
+
+  @override
+  FutureOr<void> processOfflineData(OfflineMemoryData offlineData) {
+    assert(offlineDataController.showingOfflineData.value);
+    assert(!isInitialized.value);
+    diff = offlineData.diff;
+    profile = offlineData.profile;
+    chart = offlineData.chart;
+    selectedFeatureTabIndex = offlineData.selectedTab;
+    tracing = TracingPaneController();
+  }
+
   void _shareClassFilterBetweenProfileAndDiff() {
     diff.derived.applyFilter(
       profile.classFilter.value,
@@ -111,26 +133,5 @@ class MemoryController extends DisposableController
         diff.core.classFilter.value,
       );
     });
-  }
-
-  @override
-  OfflineScreenData prepareOfflineScreenData() => OfflineScreenData(
-        screenId: ScreenMetaData.memory.id,
-        data: OfflineMemoryData(
-          diff,
-          profile,
-          chart,
-          selectedTab: selectedFeatureTabIndex,
-        ).prepareForOffline(),
-      );
-
-  @override
-  FutureOr<void> processOfflineData(OfflineMemoryData offlineData) {
-    assert(!isInitialized.value);
-    diff = offlineData.diff;
-    profile = offlineData.profile;
-    chart = offlineData.chart;
-    selectedFeatureTabIndex = offlineData.selectedTab;
-    tracing = TracingPaneController();
   }
 }

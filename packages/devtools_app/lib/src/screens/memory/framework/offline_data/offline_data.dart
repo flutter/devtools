@@ -18,6 +18,7 @@ class OfflineMemoryData {
     this.diff,
     this.profile,
     this.chart, {
+    this.isEmpty = false,
     required this.selectedTab,
   });
 
@@ -33,15 +34,17 @@ class OfflineMemoryData {
         json[_Json.chartData] as Map<String, dynamic>? ?? {},
       ),
       selectedTab: json[_Json.selectedTab] as int? ?? 0,
+      isEmpty: json.isEmpty,
     );
   }
 
-  bool isEmpty = false;
+  final bool isEmpty;
+
+  final int selectedTab;
 
   final DiffPaneController diff;
   final ProfilePaneController profile;
   final MemoryChartPaneController chart;
-  final int selectedTab;
 
   Map<String, dynamic> prepareForOffline() {
     return {
