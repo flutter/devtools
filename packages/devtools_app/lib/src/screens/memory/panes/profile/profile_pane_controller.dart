@@ -17,10 +17,8 @@ class ProfilePaneController extends DisposableController
     with AutoDisposeControllerMixin {
   ProfilePaneController();
 
-  ProfilePaneController._();
-
-  factory ProfilePaneController.forOfflineData(Map<String, dynamic> json) {
-    return ProfilePaneController._();
+  factory ProfilePaneController.parse(Map<String, dynamic> map) {
+    return ProfilePaneController();
   }
 
   Map<String, dynamic> prepareForOffline() {

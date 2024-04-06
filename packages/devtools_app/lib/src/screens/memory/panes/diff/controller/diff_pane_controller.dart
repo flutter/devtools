@@ -29,9 +29,17 @@ import 'class_data.dart';
 import 'item_controller.dart';
 
 class DiffPaneController extends DisposableController {
-  DiffPaneController(this._heapGraphLoader);
+  DiffPaneController({required this.loader});
 
-  final HeapGraphLoader _heapGraphLoader;
+  factory DiffPaneController.parse(Map<String, dynamic> map) {
+    return DiffPaneController(loader: null);
+  }
+
+  Map<String, dynamic> prepareForOffline() {
+    return {};
+  }
+
+  final HeapGraphLoader? loader;
 
   final retainingPathController = RetainingPathController();
 
@@ -43,6 +51,7 @@ class DiffPaneController extends DisposableController {
   bool get hasSnapshots => core.snapshots.value.length > 1;
 
   Future<void> takeSnapshot() async {
+    final loader = this.loader!;
     ga.select(
       gac.memory,
       gac.MemoryEvent.diffTakeSnapshotControlPane,
@@ -53,7 +62,7 @@ class DiffPaneController extends DisposableController {
       defaultName: selectedIsolateName ?? '<isolate-not-detected>',
     );
 
-    await _addSnapshot(_heapGraphLoader, item);
+    await _addSnapshot(loader, item);
     derived._updateValues();
   }
 
@@ -165,10 +174,6 @@ class DiffPaneController extends DisposableController {
         prefix: filePrefix,
       ),
     );
-  }
-
-  Map<String, dynamic> prepareForOffline() {
-    return {};
   }
 }
 

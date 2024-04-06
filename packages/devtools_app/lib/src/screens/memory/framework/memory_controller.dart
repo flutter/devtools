@@ -81,7 +81,9 @@ class MemoryController extends DisposableController
       );
     } else {
       diff = diffPaneController ??
-          DiffPaneController(HeapGraphLoaderRuntime(chart.memoryTimeline));
+          DiffPaneController(
+            loader: HeapGraphLoaderRuntime(chart.memoryTimeline),
+          );
       profile = profilePaneController ?? ProfilePaneController();
       chart = MemoryChartPaneController();
       tracing = TracingPaneController();

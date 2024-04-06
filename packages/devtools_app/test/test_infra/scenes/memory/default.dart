@@ -135,7 +135,7 @@ class MemoryDefaultScene extends Scene {
     );
 
     final diffController =
-        DiffPaneController(HeapGraphLoaderProvided(heapProviders))
+        DiffPaneController(loader: HeapGraphLoaderProvided(heapProviders))
           ..derived.applyFilter(showAllFilter);
 
     final profileController = ProfilePaneController()..setFilter(showAllFilter);

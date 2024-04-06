@@ -22,13 +22,15 @@ class OfflineMemoryData {
   });
 
   factory OfflineMemoryData.parse(Map<String, dynamic> json) {
-    throw UnimplementedError();
-    // return OfflineMemoryData(
-    //   selectedTab: json[_Json.selectedTab] as int,
-    //   diffData: json[_Json.diffData] as Map<String, dynamic>,
-    //   profileData: json[_Json.profileData] as Map<String, dynamic>,
-    //   chartData: json[_Json.chartData] as Map<String, dynamic>,
-    // );
+    return OfflineMemoryData(
+      DiffPaneController.parse(
+          json[_Json.diffData] as Map<String, dynamic>? ?? {}),
+      ProfilePaneController.parse(
+          json[_Json.profileData] as Map<String, dynamic>? ?? {}),
+      MemoryChartPaneController.parse(
+          json[_Json.chartData] as Map<String, dynamic>? ?? {}),
+      selectedTab: json[_Json.selectedTab] as int? ?? 0,
+    );
   }
 
   bool isEmpty = false;

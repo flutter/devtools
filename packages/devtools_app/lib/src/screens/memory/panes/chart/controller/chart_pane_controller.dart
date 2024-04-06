@@ -20,6 +20,14 @@ class MemoryChartPaneController extends DisposableController
     with AutoDisposeControllerMixin {
   MemoryChartPaneController();
 
+  factory MemoryChartPaneController.parse(Map<String, dynamic> map) {
+    return MemoryChartPaneController();
+  }
+
+  Map<String, dynamic> prepareForOffline() {
+    return {};
+  }
+
   final MemoryTimeline memoryTimeline = MemoryTimeline();
 
   late final EventChartController event =
@@ -223,9 +231,5 @@ class MemoryChartPaneController extends DisposableController
     vm.dispose();
     android.dispose();
     isAndroidChartVisible.dispose();
-  }
-
-  Map<String, dynamic> prepareForOffline() {
-    return {};
   }
 }
