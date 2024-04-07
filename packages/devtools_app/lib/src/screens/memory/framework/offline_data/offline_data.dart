@@ -5,9 +5,11 @@
 import '../../panes/chart/controller/chart_pane_controller.dart';
 import '../../panes/diff/controller/diff_pane_controller.dart';
 import '../../panes/profile/profile_pane_controller.dart';
+import '../../shared/heap/class_filter.dart';
 
 class _Json {
   static const selectedTab = 'selectedTab';
+  static const classFilter = 'classFilter';
   static const diffData = 'diffData';
   static const profileData = 'profileData';
   static const chartData = 'chartData';
@@ -17,22 +19,20 @@ class OfflineMemoryData {
   OfflineMemoryData(
     this.diff,
     this.profile,
-    this.chart, {
+    this.chart,
+    this.filter, {
     this.isEmpty = false,
     required this.selectedTab,
   });
 
   factory OfflineMemoryData.parse(Map<String, dynamic> json) {
+    Map<String, dynamic> item(String key) =>
+        json[key] as Map<String, dynamic>? ?? {};
     return OfflineMemoryData(
-      DiffPaneController.parse(
-        json[_Json.diffData] as Map<String, dynamic>? ?? {},
-      ),
-      ProfilePaneController.parse(
-        json[_Json.profileData] as Map<String, dynamic>? ?? {},
-      ),
-      MemoryChartPaneController.parse(
-        json[_Json.chartData] as Map<String, dynamic>? ?? {},
-      ),
+      DiffPaneController.parse(item(_Json.diffData)),
+      ProfilePaneController.parse(item(_Json.profileData)),
+      MemoryChartPaneController.parse(item(_Json.chartData)),
+      ClassFilter.parse(item(_Json.classFilter)),
       selectedTab: json[_Json.selectedTab] as int? ?? 0,
       isEmpty: json.isEmpty,
     );
@@ -41,6 +41,7 @@ class OfflineMemoryData {
   final bool isEmpty;
 
   final int selectedTab;
+  final ClassFilter filter; // filter is shared between tabs, so it's here
 
   final DiffPaneController diff;
   final ProfilePaneController profile;
@@ -52,6 +53,7 @@ class OfflineMemoryData {
       _Json.diffData: diff.prepareForOffline(),
       _Json.profileData: profile.prepareForOffline(),
       _Json.chartData: chart.prepareForOffline(),
+      _Json.classFilter: profile.classFilter.value.prepareForOffline(),
     };
   }
 }

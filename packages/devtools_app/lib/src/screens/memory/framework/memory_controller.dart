@@ -104,6 +104,7 @@ class MemoryController extends DisposableController
           diff,
           profile,
           chart,
+          profile.classFilter.value,
           selectedTab: selectedFeatureTabIndex,
         ).prepareForOffline(),
       );
@@ -117,6 +118,8 @@ class MemoryController extends DisposableController
     chart = offlineData.chart;
     selectedFeatureTabIndex = offlineData.selectedTab;
     tracing = TracingPaneController();
+    profile.setFilter(offlineData.filter);
+    diff.derived.applyFilter(offlineData.filter);
   }
 
   void _shareClassFilterBetweenProfileAndDiff() {
