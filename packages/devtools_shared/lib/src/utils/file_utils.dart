@@ -4,7 +4,6 @@
 
 import 'package:dtd/dtd.dart';
 import 'package:meta/meta.dart';
-import 'package:path/path.dart' as p;
 
 /// Attempts to detect the package root of [fileUriString].
 ///
