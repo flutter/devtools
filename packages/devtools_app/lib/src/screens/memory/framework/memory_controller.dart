@@ -16,26 +16,8 @@ import '../panes/control/controller/control_pane_controller.dart';
 import '../panes/diff/controller/diff_pane_controller.dart';
 import '../panes/profile/profile_pane_controller.dart';
 import '../panes/tracing/tracing_pane_controller.dart';
+import '../tmp_mode.dart';
 import 'offline_data/offline_data.dart';
-
-enum DevToolsMode {
-  /// Not interacting with app or data from a previous session.
-  disconnected,
-
-  /// Interacting with a connected application.
-  connected,
-
-  /// Showing data saved from a previous session and ignoring connection status.
-  offlineData,
-}
-
-DevToolsMode get devToolsMode {
-  return offlineDataController.showingOfflineData.value
-      ? DevToolsMode.offlineData
-      : serviceConnection.serviceManager.hasConnection
-          ? DevToolsMode.connected
-          : DevToolsMode.disconnected;
-}
 
 /// This class contains the business logic for memory screen.
 ///
@@ -108,8 +90,10 @@ class MemoryController extends DisposableController
           createData: (json) => OfflineMemoryData.parse(json),
           shouldLoad: (data) => !data.isEmpty,
         );
+        // If shouldLoad returns true, previous line is noop, so data should be initialized.
         if (!_dataInitialized) _initializeData();
     }
+    assert(_dataInitialized);
     assert(!isInitialized.value);
     isInitialized.value = true;
   }
@@ -121,6 +105,7 @@ class MemoryController extends DisposableController
   }) {
     assert(!isInitialized.value);
     assert(!_dataInitialized);
+
     chart = offlineData?.chart ?? MemoryChartPaneController();
     diff = diffPaneController ??
         offlineData?.diff ??
@@ -135,18 +120,17 @@ class MemoryController extends DisposableController
       exportData: exportData,
     );
     tracing = TracingPaneController();
-
     selectedFeatureTabIndex =
         offlineData?.selectedTab ?? selectedFeatureTabIndex;
-
-    if (offlineData != null) profile.setFilter(offlineData.filter);
+    profile.setFilter(offlineData?.filter);
     _shareClassFilterBetweenProfileAndDiff();
 
     _dataInitialized = true;
   }
 
-  void _connectToApp() {
+  void _connectToApp() async {
     assert(_dataInitialized);
+    await serviceConnection.serviceManager.onServiceAvailable;
   }
 
   @override
@@ -168,9 +152,7 @@ class MemoryController extends DisposableController
   }
 
   void _shareClassFilterBetweenProfileAndDiff() {
-    diff.derived.applyFilter(
-      profile.classFilter.value,
-    );
+    diff.derived.applyFilter(profile.classFilter.value);
 
     profile.classFilter.addListener(() {
       diff.derived.applyFilter(profile.classFilter.value);

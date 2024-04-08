@@ -11,15 +11,18 @@ import 'package:vm_service/vm_service.dart';
 import '../../../../shared/config_specific/import_export/import_export.dart';
 import '../../../../shared/globals.dart';
 import '../../shared/heap/class_filter.dart';
+import '../../tmp_mode.dart';
 import 'model.dart';
 
 class ProfilePaneController extends DisposableController
     with AutoDisposeControllerMixin {
-  ProfilePaneController();
+  ProfilePaneController(this.mode);
+
+  final DevToolsMode mode;
 
   factory ProfilePaneController.parse(Map<String, dynamic> map) {
     assert(offlineDataController.showingOfflineData.value);
-    return ProfilePaneController();
+    return ProfilePaneController(DevToolsMode.offlineData);
   }
 
   Map<String, dynamic> prepareForOffline() {
@@ -71,7 +74,8 @@ class ProfilePaneController extends DisposableController
     _initialized = true;
   }
 
-  void setFilter(ClassFilter filter) {
+  void setFilter(ClassFilter? filter) {
+    if (filter == null) return;
     if (filter == _classFilter.value) return;
     _classFilter.value = filter;
     final currentProfile = _currentAllocationProfile.value;
