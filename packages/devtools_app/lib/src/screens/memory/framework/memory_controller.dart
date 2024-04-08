@@ -16,6 +16,7 @@ import '../panes/control/controller/control_pane_controller.dart';
 import '../panes/diff/controller/diff_pane_controller.dart';
 import '../panes/profile/profile_pane_controller.dart';
 import '../panes/tracing/tracing_pane_controller.dart';
+import '../shared/primitives/simple_elements.dart';
 import 'offline_data/offline_data.dart';
 
 /// This class contains the business logic for memory screen, for a connected
@@ -37,6 +38,12 @@ class MemoryController extends DisposableController
   }
 
   ValueNotifier<bool> isInitialized = ValueNotifier(false);
+
+  /// Mode of memory screen.
+  ///
+  /// Is detected at the time of initialization
+  /// and does not change in lifetime of the controller.
+  late final MemoryScreenMode mode;
 
   /// Index of the selected feature tab.
   ///
@@ -66,29 +73,48 @@ class MemoryController extends DisposableController
     profile.dispose();
   }
 
+  bool get _devToolsIsShowingOfflineData =>
+      offlineDataController.showingOfflineData.value;
+
   Future<void> _init(
     @visibleForTesting DiffPaneController? diffPaneController,
     @visibleForTesting ProfilePaneController? profilePaneController,
   ) async {
-    final showingOfflineData = offlineDataController.showingOfflineData.value;
-
-    print('showingOfflineData: $showingOfflineData');
-
-    if (showingOfflineData) {
-      // Triggers [processOfflineData], that initializes all the controllers.
-      await maybeLoadOfflineData(
-        PerformanceScreen.id,
-        createData: (json) => OfflineMemoryData.parse(json),
-        shouldLoad: (data) => !data.isEmpty,
-      );
-    } else {
-      chart = MemoryChartPaneController();
-      diff = diffPaneController ??
-          DiffPaneController(
-            loader: HeapGraphLoaderRuntime(chart.memoryTimeline),
-          );
-      profile = profilePaneController ?? ProfilePaneController();
+    if (_devToolsIsShowingOfflineData) {
+      assert(diffPaneController == null && profilePaneController == null);
+      await _maybeInitOfflineDataMode();
+      if (!isInitialized.value) await _initDisconnectedMode();
+      assert(isInitialized.value);
+      return;
     }
+    await _initConnectedMode(diffPaneController, profilePaneController);
+    assert(isInitialized.value);
+  }
+
+  Future<void> _maybeInitOfflineDataMode() async {
+    assert(_devToolsIsShowingOfflineData);
+    assert(!isInitialized.value);
+    // Triggers [processOfflineData], that initializes all the controllers.
+    await maybeLoadOfflineData(
+      PerformanceScreen.id,
+      createData: (json) => OfflineMemoryData.parse(json),
+      shouldLoad: (data) => !data.isEmpty,
+    );
+  }
+
+  Future<void> _initConnectedMode(
+    @visibleForTesting DiffPaneController? diffPaneController,
+    @visibleForTesting ProfilePaneController? profilePaneController,
+  ) async {
+    assert(!_devToolsIsShowingOfflineData);
+    assert(!isInitialized.value);
+
+    chart = MemoryChartPaneController();
+    diff = diffPaneController ??
+        DiffPaneController(
+          loader: HeapGraphLoaderRuntime(chart.memoryTimeline),
+        );
+    profile = profilePaneController ?? ProfilePaneController();
 
     control = MemoryControlPaneController(
       chart.memoryTimeline,
@@ -98,6 +124,11 @@ class MemoryController extends DisposableController
 
     _shareClassFilterBetweenProfileAndDiff();
     isInitialized.value = true;
+  }
+
+  Future<void> _initDisconnectedMode() async {
+    assert(!_devToolsIsShowingOfflineData);
+    assert(!isInitialized.value);
   }
 
   @override
@@ -122,6 +153,7 @@ class MemoryController extends DisposableController
     selectedFeatureTabIndex = offlineData.selectedTab;
     profile.setFilter(offlineData.filter);
     diff.derived.applyFilter(offlineData.filter);
+    isInitialized.value = true;
   }
 
   void _shareClassFilterBetweenProfileAndDiff() {
