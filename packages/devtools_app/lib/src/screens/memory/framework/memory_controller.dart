@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math';
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
