@@ -8,9 +8,16 @@ import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../devtools_app.dart';
 import 'config_specific/import_export/import_export.dart';
 import 'globals.dart';
 import 'routing.dart';
+
+DevToolsMode get devToolsMode {
+  return offlineDataController.showingOfflineData.value
+      ? DevToolsMode.offlineData
+      : ;
+}
 
 /// Controller that manages offline mode for DevTools.
 ///
