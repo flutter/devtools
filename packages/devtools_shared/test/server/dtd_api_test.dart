@@ -10,7 +10,6 @@ import 'package:devtools_shared/src/extensions/extension_manager.dart';
 import 'package:devtools_shared/src/server/server_api.dart';
 import 'package:shelf/shelf.dart';
 import 'package:test/test.dart';
-import 'package:unified_analytics/unified_analytics.dart';
 
 import '../fakes.dart';
 
@@ -31,7 +30,6 @@ void main() {
         extensionsManager: ExtensionsManager(buildDir: '/'),
         deeplinkManager: FakeDeeplinkManager(),
         dtd: (uri: dtdUri, secret: null),
-        analytics: const NoOpAnalytics(),
       );
       expect(response.statusCode, HttpStatus.ok);
       expect(
