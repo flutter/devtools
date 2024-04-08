@@ -20,22 +20,13 @@ final _log = Logger('_analytics_stub');
 /// both web and desktop, and manipulate this value for tests running on the VM.
 String ideLaunched = '';
 
-Future<void> setAnalyticsEnabled(bool value) async {}
-
 FutureOr<bool> isAnalyticsEnabled() => false;
+
+FutureOr<bool> shouldShowAnalyticsConsentMessage() => false;
 
 void initializeGA() {}
 
 void jsHookupListenerForGA() {}
-
-Future<void> enableAnalytics() async {}
-
-Future<void> disableAnalytics() async {}
-
-Future<String> fetchAnalyticsConsentMessage() async =>
-    'stubbed consent message';
-
-Future<void> markConsentMessageAsShown() async {}
 
 void screen(
   String screenName, [
@@ -115,3 +106,9 @@ Future<void> setupDimensions() async {}
 void setupUserApplicationDimensions() {}
 
 Map<String, dynamic> generateSurveyQueryParameters() => {};
+
+// TODO(https://github.com/flutter/devtools/issues/7083): remove these
+// when the legacy analytics are fully removed.
+FutureOr<void> legacyOnEnableAnalytics() {}
+FutureOr<void> legacyOnDisableAnalytics() {}
+void legacyOnSetupAnalytics() {}

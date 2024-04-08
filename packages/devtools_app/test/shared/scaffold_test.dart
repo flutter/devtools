@@ -49,7 +49,7 @@ void main() {
       child,
       analytics: AnalyticsController(
         enabled: false,
-        firstRun: false,
+        shouldShowConsentMessage: false,
         consentMessage: 'fake message',
       ),
       releaseNotes: ReleaseNotesController(),
