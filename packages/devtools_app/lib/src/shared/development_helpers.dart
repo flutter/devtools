@@ -33,11 +33,14 @@ final _log = Logger('dev_helpers');
 String? get debugDtdUri => kReleaseMode ? null : _debugDtdUri;
 String? _debugDtdUri;
 
-/// Enable this flag to debug analytics when DevTools is run in debug or profile
-/// mode, otherwise analytics will only be sent in release builds.
+/// Enable this flag to send and debug analytics when DevTools is run in debug
+/// or profile mode, otherwise analytics will only be sent in release builds.
 ///
 /// `ga.isAnalyticsEnabled()` still must return true for analytics to be sent.
-bool debugAnalytics = false;
+bool debugSendAnalytics = false;
+
+/// Enable this flag to show always show the analytics consent message.
+bool debugShowAnalyticsConsentMessage = false;
 
 /// Whether to build DevTools for conveniently debugging DevTools extensions.
 ///
