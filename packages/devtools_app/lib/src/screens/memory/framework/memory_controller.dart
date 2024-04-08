@@ -72,6 +72,8 @@ class MemoryController extends DisposableController
   ) async {
     final showingOfflineData = offlineDataController.showingOfflineData.value;
 
+    print('showingOfflineData: $showingOfflineData');
+
     if (showingOfflineData) {
       // Triggers [processOfflineData], that initializes all the controllers.
       await maybeLoadOfflineData(
@@ -80,12 +82,12 @@ class MemoryController extends DisposableController
         shouldLoad: (data) => !data.isEmpty,
       );
     } else {
+      chart = MemoryChartPaneController();
       diff = diffPaneController ??
           DiffPaneController(
             loader: HeapGraphLoaderRuntime(chart.memoryTimeline),
           );
       profile = profilePaneController ?? ProfilePaneController();
-      chart = MemoryChartPaneController();
     }
 
     control = MemoryControlPaneController(

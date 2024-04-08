@@ -52,6 +52,12 @@ class _ConnectedMemoryBodyState extends State<ConnectedMemoryBody>
 
   @override
   Widget build(BuildContext context) {
+    if (!memoryController.isInitialized.value) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
     return Column(
       key: MemoryChartPane.hoverKey,
       children: [
