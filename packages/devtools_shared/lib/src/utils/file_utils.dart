@@ -5,7 +5,10 @@
 import 'package:dtd/dtd.dart';
 import 'package:meta/meta.dart';
 
-/// Attempts to detect the package root of [fileUriString].
+const _fileUriPrefix = 'file://';
+
+/// Attempts to detect the package root of [fileUriString], which is expected to
+/// be a proper file URI (i.e. starts with "file://").
 ///
 /// This method first tries to use the Dart Tooling Daemon to walk the
 /// directory structure of [fileUriString] and look for the package root; we
@@ -30,6 +33,11 @@ Future<String> packageRootFromFileUriString(
   DartToolingDaemon? dtd,
   @visibleForTesting bool throwOnDtdSearchFailed = false,
 }) async {
+  assert(
+    fileUriString.startsWith(_fileUriPrefix),
+    'Invalid URI format: expected URI String to start with "$_fileUriPrefix".',
+  );
+
   if (dtd != null) {
     // Use type [Object] so we can store exceptions of all types.
     Object? exception;
@@ -77,7 +85,7 @@ Future<String> packageRootFromFileUriString(
 
 String _assertUriFormatAndReturn(String uriString) {
   assert(
-    uriString.startsWith('file:///'),
+    uriString.startsWith(_fileUriPrefix),
     'Invalid URI format: should be a file URI.',
   );
   assert(

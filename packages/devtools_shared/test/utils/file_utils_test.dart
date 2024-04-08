@@ -67,7 +67,16 @@ void main() {
       expect(result, equals(expected ?? projectRoot));
     }
 
-    for (final useDtd in [true, false]) {
+    test('packageRootFromFileUriString throw exception for invalid input', () {
+      expect(
+        () async {
+          await packageRootFromFileUriString('/not/a/valid/file/uri');
+        },
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
+    for (final useDtd in const [true, false]) {
       test(
         'packageRootFromFileUriString${useDtd ? ' using DTD' : ''}',
         () async {
