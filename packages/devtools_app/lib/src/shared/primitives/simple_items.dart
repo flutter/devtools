@@ -59,7 +59,7 @@ enum DocLinks {
 }
 
 enum DevToolsMode {
-  /// No connection to app and no data from a previous session.
+  /// Not interacting with app or data from a previous session.
   disconnected,
 
   /// Interacting with a connected application.
