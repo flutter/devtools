@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math';
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
@@ -86,12 +87,13 @@ class MemoryController extends DisposableController
           );
       profile = profilePaneController ?? ProfilePaneController();
       chart = MemoryChartPaneController();
-      tracing = TracingPaneController();
-      control = MemoryControlPaneController(
-        chart.memoryTimeline,
-        exportData: exportData,
-      );
     }
+
+    control = MemoryControlPaneController(
+      chart.memoryTimeline,
+      exportData: exportData,
+    );
+    tracing = TracingPaneController();
 
     _shareClassFilterBetweenProfileAndDiff();
     isInitialized.value = true;
@@ -117,7 +119,6 @@ class MemoryController extends DisposableController
     profile = offlineData.profile;
     chart = offlineData.chart;
     selectedFeatureTabIndex = offlineData.selectedTab;
-    tracing = TracingPaneController();
     profile.setFilter(offlineData.filter);
     diff.derived.applyFilter(offlineData.filter);
   }
