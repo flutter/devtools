@@ -10,13 +10,14 @@ import 'package:flutter/foundation.dart';
 
 import '../../devtools_app.dart';
 import 'config_specific/import_export/import_export.dart';
-import 'globals.dart';
-import 'routing.dart';
 
+/// Current mode of DevTools.
 DevToolsMode get devToolsMode {
   return offlineDataController.showingOfflineData.value
       ? DevToolsMode.offlineData
-      : ;
+      : serviceConnection.serviceManager.hasConnection
+          ? DevToolsMode.connected
+          : DevToolsMode.disconnected;
 }
 
 /// Controller that manages offline mode for DevTools.
