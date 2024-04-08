@@ -65,6 +65,6 @@ enum DevToolsMode {
   /// Interacting with a connected application.
   connected,
 
-  /// Showing data saved from a previous session.
+  /// Showing data saved from a previous session and ignoring connection status.
   offlineData,
 }
