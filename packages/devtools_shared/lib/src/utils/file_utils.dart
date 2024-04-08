@@ -47,9 +47,11 @@ Future<String> packageRootFromFileUriString(
             .any((uri) => uri.path.endsWith('.dart_tool/'));
         if (containsDartToolDirectory) {
           final uriAsString = uri.toString();
-          return uriAsString.endsWith('/')
-              ? uriAsString.substring(0, uriAsString.length - 1)
-              : uriAsString;
+          return _assertUriFormatAndReturn(
+            uriAsString.endsWith('/')
+                ? uriAsString.substring(0, uriAsString.length - 1)
+                : uriAsString,
+          );
         }
       } catch (e) {
         // Fail gracefully on exception, and proceed to using heuristic below.
@@ -71,5 +73,17 @@ Future<String> packageRootFromFileUriString(
   if (directoryIndex != -1) {
     fileUriString = fileUriString.substring(0, directoryIndex);
   }
-  return fileUriString;
+  return _assertUriFormatAndReturn(fileUriString);
+}
+
+String _assertUriFormatAndReturn(String uriString) {
+  assert(
+    uriString.startsWith('file:///'),
+    'Invalid URI format: should be a file URI.',
+  );
+  assert(
+    !uriString.endsWith('/'),
+    'Invalid URI format: should not have a trailing slash.',
+  );
+  return uriString;
 }

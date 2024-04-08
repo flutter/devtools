@@ -224,11 +224,6 @@ class ServiceConnectionManager {
             dtd: dtdManager.connection.value,
           )
         : null;
-
-    if (packageUriString != null) {
-      assert(packageUriString.startsWith('file:///'));
-      assert(!packageUriString.endsWith('/'));
-    }
     _log.fine('rootPackageDirectoryForMainIsolate: $packageUriString');
     return packageUriString;
   }
