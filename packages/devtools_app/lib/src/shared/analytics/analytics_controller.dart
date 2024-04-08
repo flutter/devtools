@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
+import '../development_helpers.dart';
 import '../dtd_manager_extensions.dart';
 import '../globals.dart';
 
@@ -22,7 +23,8 @@ Future<AnalyticsController> get analyticsController async {
   var shouldShowConsentMessage = false;
   try {
     enabled = await ga.isAnalyticsEnabled();
-    shouldShowConsentMessage = await ga.shouldShowAnalyticsConsentMessage();
+    shouldShowConsentMessage = debugShowAnalyticsConsentMessage ||
+        await ga.shouldShowAnalyticsConsentMessage();
   } catch (_) {
     // Ignore issues if analytics could not be initialized.
   }

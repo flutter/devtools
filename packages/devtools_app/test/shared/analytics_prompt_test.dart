@@ -43,6 +43,25 @@ void main() {
     expect(result, hasLength(3));
   });
 
+  test('Unit test adjustLineBreaks with consent message', () {
+    final result = adjustLineBreaks(ua.kToolsMessage);
+    const expected =
+        'The {{ toolDescription }} uses Google Analytics to report usage and diagnostic '
+        'data along with package dependencies, and crash reporting to send basic crash '
+        'reports. This data is used to help improve the Dart platform, Flutter framework, '
+        'and related tools.'
+        '\n\n'
+        'Telemetry is not sent on the very first run. To disable reporting of telemetry, '
+        'run this terminal command:'
+        '\n\n'
+        '    {{ toolName }} --disable-analytics'
+        '\n\n'
+        'If you opt out of telemetry, an opt-out event will be sent, and then no further '
+        'information will be sent. This data is collected in accordance with the Google '
+        'Privacy Policy (https://policies.google.com/privacy). ';
+    expect(result, expected);
+  });
+
   group('AnalyticsPrompt', () {
     setUp(() {
       didCallEnableAnalytics = false;
@@ -302,7 +321,7 @@ void main() {
             expect(controller.analyticsEnabled.value, isTrue);
             expect(didCallEnableAnalytics, isTrue);
 
-            final noThanksFinder = find.text('No thanks.');
+            final noThanksFinder = find.text('No thanks');
             expect(noThanksFinder, findsOneWidget);
             await tester.tap(noThanksFinder);
             await tester.pumpAndSettle();
