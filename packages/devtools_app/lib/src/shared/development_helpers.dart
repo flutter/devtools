@@ -39,7 +39,8 @@ String? _debugDtdUri;
 /// `ga.isAnalyticsEnabled()` still must return true for analytics to be sent.
 bool debugSendAnalytics = false;
 
-/// Enable this flag to show always show the analytics consent message.
+/// Enable this flag to always show the analytics consent message, regardless
+/// of whether any other conditions are met.
 bool debugShowAnalyticsConsentMessage = false;
 
 /// Whether to build DevTools for conveniently debugging DevTools extensions.
