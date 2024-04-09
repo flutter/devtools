@@ -112,8 +112,6 @@ class MemoryChartPaneController extends DisposableController
 
   bool get hasStarted => _memoryTracker != null;
 
-  void stopTimeLine() => _memoryTracker?.stop();
-
   void _handleConnectionStart() {
     _memoryTracker ??= MemoryTracker(
       memoryTimeline,
@@ -188,7 +186,7 @@ class MemoryChartPaneController extends DisposableController
     );
   }
 
-  void _handleConnectionStop() {
+  void _onDisconnect() {
     _memoryTracker?.stop();
     _memoryTrackerController.add(_memoryTracker);
 
@@ -200,7 +198,7 @@ class MemoryChartPaneController extends DisposableController
       if (serviceConnection.serviceManager.connectedState.value.connected) {
         _handleConnectionStart();
       } else {
-        _handleConnectionStop();
+        _onDisconnect();
       }
     });
 

@@ -233,8 +233,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
   @override
   void dispose() {
-    _hideHover(); // hover will leak if not hide
-    widget.chart.stopTimeLine();
+    _hideHover();
     super.dispose();
   }
 
