@@ -41,7 +41,6 @@ class ChartController extends DisposableController
     this.name,
     List<int>? sharedLabelTimestamps,
   }) {
-    // TODO(terry): Compute dynamically based on X-axis labels text height.
     bottomPadding = !displayXLabels ? 0.0 : 40.0;
 
     if (sharedLabelTimestamps != null) {
@@ -430,7 +429,7 @@ class ChartController extends DisposableController
   double yPositionToYCanvasCoord(double y) => -yPosition(y);
 
   Trace trace(int index) {
-    assert(index < traces.length);
+    assert(index < traces.length, '$index, ${traces.length}');
     return traces[index];
   }
 
