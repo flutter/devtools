@@ -112,7 +112,7 @@ class MemoryChartPaneController extends DisposableController
 
   bool get hasStarted => _memoryTracker != null;
 
-  void _handleConnectionStart() {
+  void _onConnect() {
     _memoryTracker ??= MemoryTracker(
       memoryTimeline,
       isAndroidChartVisible: isAndroidChartVisible,
@@ -196,14 +196,14 @@ class MemoryChartPaneController extends DisposableController
   void startTimeline() {
     addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
       if (serviceConnection.serviceManager.connectedState.value.connected) {
-        _handleConnectionStart();
+        _onConnect();
       } else {
         _onDisconnect();
       }
     });
 
     if (serviceConnection.serviceManager.connectedAppInitialized) {
-      _handleConnectionStart();
+      _onConnect();
     }
   }
 
