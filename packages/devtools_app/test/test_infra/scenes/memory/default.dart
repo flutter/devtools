@@ -127,6 +127,7 @@ class MemoryDefaultScene extends Scene {
     when(fakeServiceConnection.serviceManager.vm.operatingSystem)
         .thenReturn('ios');
     setGlobal(ServiceConnectionManager, fakeServiceConnection);
+    setGlobal(OfflineDataController, OfflineDataController());
 
     final showAllFilter = ClassFilter(
       filterType: ClassFilterType.showAll,
