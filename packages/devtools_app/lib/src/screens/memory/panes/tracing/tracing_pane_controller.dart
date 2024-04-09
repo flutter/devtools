@@ -8,11 +8,6 @@ import 'package:flutter/widgets.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/globals.dart';
-import '../../../../shared/memory/class_name.dart';
-import '../../../../shared/primitives/utils.dart';
-import '../../../../shared/table/table_data.dart';
-import '../../../profiler/cpu_profile_model.dart';
-import '../../../profiler/cpu_profile_transformer.dart';
 import 'tracing_data.dart';
 
 class TracingPaneController extends DisposableController
