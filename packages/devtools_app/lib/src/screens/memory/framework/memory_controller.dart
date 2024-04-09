@@ -45,7 +45,6 @@ class MemoryController extends DisposableController
   /// DevTools mode at the time of creation of the controller.
   ///
   /// DevTools will recreate controller when the mode changes.
-  // ignore: unused_field, TODO(polina-c): https://github.com/flutter/devtools/issues/6972
   late final DevToolsMode _mode;
 
   /// Index of the selected feature tab.
