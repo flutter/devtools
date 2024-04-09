@@ -16,7 +16,6 @@ import '../panes/control/controller/control_pane_controller.dart';
 import '../panes/diff/controller/diff_pane_controller.dart';
 import '../panes/profile/profile_pane_controller.dart';
 import '../panes/tracing/tracing_pane_controller.dart';
-import '../tmp_mode.dart';
 import 'offline_data/offline_data.dart';
 
 /// This class contains the business logic for memory screen.

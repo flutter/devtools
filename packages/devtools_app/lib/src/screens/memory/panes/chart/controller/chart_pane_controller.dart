@@ -9,8 +9,8 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../../shared/globals.dart';
+import '../../../../../shared/primitives/simple_items.dart';
 import '../../../shared/primitives/memory_timeline.dart';
-import '../../../tmp_mode.dart';
 import '../data/primitives.dart';
 import 'android_chart_controller.dart';
 import 'event_chart_controller.dart';
