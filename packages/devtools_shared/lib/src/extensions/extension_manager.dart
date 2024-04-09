@@ -19,13 +19,6 @@ const extensionBuildDefault = 'build';
 /// assets will be copied to the `build/devtools_extensions` directory that
 /// DevTools server is serving.
 class ExtensionsManager {
-  ExtensionsManager({required this.buildDir});
-
-  // TODO(kenz): remove this field before submitting. This will be a breaking change.
-  /// The build directory of DevTools that is being served by the DevTools
-  /// server.
-  final String buildDir;
-
   /// The list of available DevTools extensions that are being served by the
   /// DevTools server.
   ///
