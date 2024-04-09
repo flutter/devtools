@@ -33,13 +33,17 @@ class MemoryController extends DisposableController
     @visibleForTesting DiffPaneController? connectedDiff,
     @visibleForTesting ProfilePaneController? connectedProfile,
   }) {
+    if (connectedDiff != null && connectedProfile != null) {
+      _mode = DevToolsMode.connected;
+    } else {
+      _mode = devToolsMode;
+    }
     unawaited(_init(connectedDiff, connectedProfile));
   }
 
-  bool _dataInitialized = false;
-  ValueNotifier<bool> isInitialized = ValueNotifier(false);
+  late final DevToolsMode _mode;
 
-  final DevToolsMode _mode = devToolsMode;
+  ValueNotifier<bool> isInitialized = ValueNotifier(false);
 
   /// Index of the selected feature tab.
   ///
@@ -82,7 +86,6 @@ class MemoryController extends DisposableController
           diffPaneController: connectedDiff,
           profilePaneController: connectedProfile,
         );
-        _connectToApp();
       case DevToolsMode.offlineData:
         assert(connectedDiff == null && connectedProfile == null);
         await maybeLoadOfflineData(
@@ -90,12 +93,10 @@ class MemoryController extends DisposableController
           createData: (json) => OfflineMemoryData.parse(json),
           shouldLoad: (data) => !data.isEmpty,
         );
-        // If shouldLoad returns true, previous line is noop, so data should be initialized.
-        if (!_dataInitialized) _initializeData();
+        // If shouldLoad returns false, previous line is noop, so data should be initialized.
+        if (!isInitialized.value) _initializeData();
     }
-    assert(_dataInitialized);
-    assert(!isInitialized.value);
-    isInitialized.value = true;
+    assert(isInitialized.value);
   }
 
   void _initializeData({
@@ -104,7 +105,6 @@ class MemoryController extends DisposableController
     @visibleForTesting ProfilePaneController? profilePaneController,
   }) {
     assert(!isInitialized.value);
-    assert(!_dataInitialized);
 
     chart = offlineData?.chart ?? MemoryChartPaneController();
     diff = diffPaneController ??
@@ -125,12 +125,7 @@ class MemoryController extends DisposableController
     profile.setFilter(offlineData?.filter);
     _shareClassFilterBetweenProfileAndDiff();
 
-    _dataInitialized = true;
-  }
-
-  void _connectToApp() async {
-    assert(_dataInitialized);
-    await serviceConnection.serviceManager.onServiceAvailable;
+    isInitialized.value = true;
   }
 
   @override
@@ -147,7 +142,7 @@ class MemoryController extends DisposableController
 
   @override
   FutureOr<void> processOfflineData(OfflineMemoryData offlineData) {
-    assert(!_dataInitialized);
+    assert(!isInitialized.value);
     _initializeData(offlineData: offlineData);
   }
 
