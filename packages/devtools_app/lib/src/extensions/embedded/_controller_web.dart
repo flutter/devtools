@@ -48,8 +48,7 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController
     );
     final baseUri = path.join(
       basePath,
-      'devtools_extensions',
-      extensionConfig.name,
+      extensionConfig.path,
       'index.html',
     );
     final queryParams = {
