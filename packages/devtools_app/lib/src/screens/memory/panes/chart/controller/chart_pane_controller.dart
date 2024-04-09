@@ -112,11 +112,7 @@ class MemoryChartPaneController extends DisposableController
 
   bool get hasStarted => _memoryTracker != null;
 
-  bool hasStopped = false;
-
-  void stopTimeLine() {
-    _memoryTracker?.stop();
-  }
+  void stopTimeLine() => _memoryTracker?.stop();
 
   void _handleConnectionStart() {
     _memoryTracker ??= MemoryTracker(
@@ -197,7 +193,6 @@ class MemoryChartPaneController extends DisposableController
     _memoryTrackerController.add(_memoryTracker);
 
     memoryTimeline.reset();
-    hasStopped = true;
   }
 
   void startTimeline() {
