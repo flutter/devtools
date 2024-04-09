@@ -11,8 +11,6 @@ import 'package:flutter/widgets.dart';
 import '../../../../devtools_app.dart';
 import '../../../shared/memory/class_name.dart';
 import '../../../shared/memory/heap_graph_loader.dart';
-import '../../../shared/primitives/simple_items.dart';
-import '../../../shared/utils.dart';
 import '../panes/chart/controller/chart_pane_controller.dart';
 import '../panes/control/controller/control_pane_controller.dart';
 import '../panes/diff/controller/diff_pane_controller.dart';
