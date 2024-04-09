@@ -17,7 +17,6 @@ import 'framework_controller.dart';
 import 'offline_data.dart';
 import 'preferences/preferences.dart';
 import 'primitives/message_bus.dart';
-import 'primitives/simple_items.dart';
 import 'primitives/storage.dart';
 import 'scripts/script_manager.dart';
 import 'survey.dart';
@@ -87,13 +86,4 @@ void setStagerMode() {
   if (!kReleaseMode) {
     _stagerMode = true;
   }
-}
-
-/// Current mode of DevTools.
-DevToolsMode get devToolsMode {
-  return offlineDataController.showingOfflineData.value
-      ? DevToolsMode.offlineData
-      : serviceConnection.serviceManager.hasConnection
-          ? DevToolsMode.connected
-          : DevToolsMode.disconnected;
 }
