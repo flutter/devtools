@@ -2,7 +2,9 @@
 * **Breaking change:** remove parameter `analytics` from `ServerApi.handle` in favor
 of DTD implementation.
 * **Breaking change:** remove DevTools server APIs `apiMarkConsentMessageAsShown` and `apiGetConsentMessage`
+* **Breaking change:** remove parameter `buildDir` from `ExtensionsManager`.
 in favor of DTD implementation.
+* Stop copying DevTools extensions assets to the DevTools build directory.
 * Bump `package:dtd` to `2.2.0`
 * Remove `package:unified_analytics` dependency.
 * Use DTD in the `packageRootFromFileUriString` utility to detect the package root.

@@ -21,7 +21,7 @@ const extensionBuildDefault = 'build';
 class ExtensionsManager {
   ExtensionsManager({required this.buildDir});
 
-  // TODO(kenz): remove this field. This will be a breaking change.
+  // TODO(kenz): remove this field before submitting. This will be a breaking change.
   /// The build directory of DevTools that is being served by the DevTools
   /// server.
   final String buildDir;
