@@ -113,10 +113,10 @@ class MemoryChartPaneController extends DisposableController
     return serviceConnection.serviceManager.vm?.operatingSystem == 'android';
   }
 
-  final StreamController<MemoryTracker?> memoryTrackerController =
+  final StreamController<MemoryTracker?> _memoryTrackerController =
       StreamController<MemoryTracker?>.broadcast();
 
-  Stream<MemoryTracker?> get onMemory => memoryTrackerController.stream;
+  Stream<MemoryTracker?> get onMemory => _memoryTrackerController.stream;
 
   MemoryTracker? memoryTracker;
 
@@ -173,12 +173,12 @@ class MemoryChartPaneController extends DisposableController
 
     autoDisposeStreamSubscription(
       memoryTracker!.onChange.listen((_) {
-        memoryTrackerController.add(memoryTracker);
+        _memoryTrackerController.add(memoryTracker);
       }),
     );
     autoDisposeStreamSubscription(
       memoryTracker!.onChange.listen((_) {
-        memoryTrackerController.add(memoryTracker);
+        _memoryTrackerController.add(memoryTracker);
       }),
     );
 
@@ -186,7 +186,7 @@ class MemoryChartPaneController extends DisposableController
     // memoryController dispose method.  Needed when a HOT RELOAD
     // will call dispose however, initState doesn't seem
     // to happen David is working on scaffolding.
-    memoryTrackerController.stream.listen(
+    _memoryTrackerController.stream.listen(
       (_) {},
       onDone: () {
         // Stop polling and reset memoryTracker.
@@ -204,7 +204,7 @@ class MemoryChartPaneController extends DisposableController
 
   void _handleConnectionStop() {
     memoryTracker?.stop();
-    memoryTrackerController.add(memoryTracker);
+    _memoryTrackerController.add(memoryTracker);
 
     memoryTimeline.reset();
     hasStopped = true;
@@ -227,7 +227,7 @@ class MemoryChartPaneController extends DisposableController
   @override
   void dispose() {
     super.dispose();
-    unawaited(memoryTrackerController.close());
+    unawaited(_memoryTrackerController.close());
     memoryTracker?.dispose();
     _legendVisibleNotifier.dispose();
     _displayIntervalNotifier.dispose();
