@@ -46,9 +46,7 @@ class MemoryChartPaneController extends DisposableController
   );
 
   ValueListenable<bool> get isLegendVisible => _legendVisibleNotifier;
-
   final _legendVisibleNotifier = ValueNotifier<bool>(true);
-
   bool toggleLegendVisibility() =>
       _legendVisibleNotifier.value = !_legendVisibleNotifier.value;
 
