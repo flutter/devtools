@@ -10,6 +10,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../../../shared/globals.dart';
 import '../../../shared/primitives/memory_timeline.dart';
+import '../../../tmp_mode.dart';
 import '../data/primitives.dart';
 import 'android_chart_controller.dart';
 import 'event_chart_controller.dart';
@@ -18,11 +19,13 @@ import 'vm_chart_controller.dart';
 
 class MemoryChartPaneController extends DisposableController
     with AutoDisposeControllerMixin {
-  MemoryChartPaneController();
+  MemoryChartPaneController(this.mode);
 
   factory MemoryChartPaneController.parse(Map<String, dynamic> map) {
-    return MemoryChartPaneController();
+    return MemoryChartPaneController(DevToolsMode.offlineData);
   }
+
+  DevToolsMode mode;
 
   Map<String, dynamic> prepareForOffline() {
     return {};

@@ -106,7 +106,7 @@ class MemoryController extends DisposableController
   }) {
     assert(!isInitialized.value);
 
-    chart = offlineData?.chart ?? MemoryChartPaneController();
+    chart = offlineData?.chart ?? MemoryChartPaneController(_mode);
     diff = diffPaneController ??
         offlineData?.diff ??
         DiffPaneController(
@@ -122,7 +122,7 @@ class MemoryController extends DisposableController
     tracing = TracingPaneController();
     selectedFeatureTabIndex =
         offlineData?.selectedTab ?? selectedFeatureTabIndex;
-    profile.setFilter(offlineData?.filter);
+    if (offlineData != null) profile.setFilter(offlineData.filter);
     _shareClassFilterBetweenProfileAndDiff();
 
     isInitialized.value = true;
