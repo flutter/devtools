@@ -22,12 +22,14 @@ class MemoryChartPaneController extends DisposableController
   MemoryChartPaneController(this.mode);
 
   factory MemoryChartPaneController.parse(Map<String, dynamic> map) {
+    // TODO(polina-c): implement, https://github.com/flutter/devtools/issues/6972
     return MemoryChartPaneController(DevToolsMode.offlineData);
   }
 
   DevToolsMode mode;
 
   Map<String, dynamic> prepareForOffline() {
+    // TODO(polina-c): implement, https://github.com/flutter/devtools/issues/6972
     return {};
   }
 

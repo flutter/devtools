@@ -32,10 +32,12 @@ class DiffPaneController extends DisposableController {
   DiffPaneController({required this.loader});
 
   factory DiffPaneController.parse(Map<String, dynamic> map) {
+    // TODO(polina-c): implement, https://github.com/flutter/devtools/issues/6972
     return DiffPaneController(loader: null);
   }
 
   Map<String, dynamic> prepareForOffline() {
+    // TODO(polina-c): implement, https://github.com/flutter/devtools/issues/6972
     return {};
   }
 
