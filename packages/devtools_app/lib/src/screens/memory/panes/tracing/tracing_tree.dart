@@ -14,6 +14,7 @@ import '../../../../shared/table/table_data.dart';
 import '../../../../shared/ui/tab.dart';
 import '../../../profiler/cpu_profile_model.dart';
 import '../../../profiler/panes/cpu_profile_columns.dart';
+import 'tracing_data.dart';
 import 'tracing_pane_controller.dart';
 
 const double _countColumnWidth = 100;
@@ -158,7 +159,7 @@ To trace allocations for a class:
 2. Interact with your app to trigger an allocation of the class.
 
 3. Click 'Refresh' above to view the tree of collected stack traces of
-constructor calls for the selected class. 
+constructor calls for the selected class.
 ''';
 
 class _TracingTreeHeader extends StatelessWidget {

@@ -75,7 +75,7 @@ class TestDartApp {
   Process? process;
 
   Future<String> start() async {
-    _initTestApp();
+    await _initTestApp();
     process = await Process.start(
       Platform.resolvedExecutable,
       ['--observe=0', 'run', 'bin/main.dart'],
@@ -108,13 +108,11 @@ class TestDartApp {
     process?.kill();
     await process?.exitCode;
     process = null;
-    if (directory.existsSync()) directory.deleteSync(recursive: true);
+    await _deleteTestAppDirectory();
   }
 
-  void _initTestApp() {
-    if (directory.existsSync()) {
-      directory.deleteSync(recursive: true);
-    }
+  Future<void> _initTestApp() async {
+    await _deleteTestAppDirectory();
     directory.createSync(recursive: true);
 
     final mainFile = File(path.join(directory.path, 'bin', 'main.dart'))
@@ -127,5 +125,37 @@ void main() async {
   }
 }
 ''');
+  }
+
+  /// Deletes the directory that contains the test app.
+  ///
+  /// Deletes will be retried if they fail for a period to avoid failing due to
+  /// Windows being slow to unlock files after processes terminate.
+  Future<void> _deleteTestAppDirectory() async {
+    // On Windows, trying to delete the test directory immediately after the
+    // test completes may fail with a file locking error. To avoid this, retry
+    // the delete a few times before failing.
+    //
+    // On DanTup's Windows PC, it can take ~5s for the delete to work sometimes
+    // and this will probably be slower on bots. Allow a reasonable time because
+    // taking 10s to delete is better than failing the tests for a non-bug.
+    const maxAttempts = 20;
+    const retryDelay = Duration(milliseconds: 500);
+    for (var attempt = 1;
+        directory.existsSync() && attempt <= maxAttempts;
+        attempt++) {
+      try {
+        directory.deleteSync(recursive: true);
+        break;
+      } catch (_) {
+        if (attempt == maxAttempts) {
+          rethrow;
+        }
+
+        // ignore: avoid_print, deliberate print to monitor delete failures
+        print('Failed to delete test app on attempt $attempt, will retry...');
+        await Future.delayed(retryDelay);
+      }
+    }
   }
 }
