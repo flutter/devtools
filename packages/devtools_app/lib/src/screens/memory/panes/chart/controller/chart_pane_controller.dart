@@ -69,37 +69,28 @@ class MemoryChartPaneController extends DisposableController
   }
 
   ValueListenable get refreshCharts => _refreshCharts;
-
   final _refreshCharts = ValueNotifier<int>(0);
 
   /// Default is to display default tick width based on width of chart of the collected
   /// data in the chart.
-  final _displayIntervalNotifier =
+  final _displayInterval =
       ValueNotifier<ChartInterval>(ChartInterval.theDefault);
 
   set displayInterval(ChartInterval interval) {
-    _displayIntervalNotifier.value = interval;
+    _displayInterval.value = interval;
   }
 
-  ChartInterval get displayInterval => _displayIntervalNotifier.value;
-
-  final _paused = ValueNotifier<bool>(false);
+  ChartInterval get displayInterval => _displayInterval.value;
 
   ValueListenable<bool> get paused => _paused;
-
-  void pauseLiveFeed() {
-    _paused.value = true;
-  }
-
-  void resumeLiveFeed() {
-    _paused.value = false;
-  }
-
+  final _paused = ValueNotifier<bool>(false);
+  void pauseLiveFeed() => _paused.value = true;
+  void resumeLiveFeed() => _paused.value = false;
   bool get isPaused => _paused.value;
 
   final isAndroidChartVisible = ValueNotifier<bool>(false);
 
-  void updateAndroidChartVisibility() {
+  void _updateAndroidChartVisibility() {
     final bool isConnectedToAndroidAndAndroidEnabled =
         _isConnectedDeviceAndroid &&
             preferences.memory.androidCollectionEnabled.value;
@@ -114,20 +105,21 @@ class MemoryChartPaneController extends DisposableController
   final StreamController<MemoryTracker?> _memoryTrackerController =
       StreamController<MemoryTracker?>.broadcast();
 
+  @visibleForTesting
   Stream<MemoryTracker?> get onMemory => _memoryTrackerController.stream;
 
-  MemoryTracker? memoryTracker;
+  MemoryTracker? _memoryTracker;
 
-  bool get hasStarted => memoryTracker != null;
+  bool get hasStarted => _memoryTracker != null;
 
   bool hasStopped = false;
 
   void stopTimeLine() {
-    memoryTracker?.stop();
+    _memoryTracker?.stop();
   }
 
   void _handleConnectionStart() {
-    memoryTracker ??= MemoryTracker(
+    _memoryTracker ??= MemoryTracker(
       memoryTimeline,
       isAndroidChartVisible: isAndroidChartVisible,
       paused: paused,
@@ -170,13 +162,13 @@ class MemoryChartPaneController extends DisposableController
     );
 
     autoDisposeStreamSubscription(
-      memoryTracker!.onChange.listen((_) {
-        _memoryTrackerController.add(memoryTracker);
+      _memoryTracker!.onChange.listen((_) {
+        _memoryTrackerController.add(_memoryTracker);
       }),
     );
     autoDisposeStreamSubscription(
-      memoryTracker!.onChange.listen((_) {
-        _memoryTrackerController.add(memoryTracker);
+      _memoryTracker!.onChange.listen((_) {
+        _memoryTrackerController.add(_memoryTracker);
       }),
     );
 
@@ -188,21 +180,21 @@ class MemoryChartPaneController extends DisposableController
       (_) {},
       onDone: () {
         // Stop polling and reset memoryTracker.
-        memoryTracker?.stop();
-        memoryTracker = null;
+        _memoryTracker?.stop();
+        _memoryTracker = null;
       },
     );
 
-    updateAndroidChartVisibility();
+    _updateAndroidChartVisibility();
     addAutoDisposeListener(
       preferences.memory.androidCollectionEnabled,
-      updateAndroidChartVisibility,
+      _updateAndroidChartVisibility,
     );
   }
 
   void _handleConnectionStop() {
-    memoryTracker?.stop();
-    _memoryTrackerController.add(memoryTracker);
+    _memoryTracker?.stop();
+    _memoryTrackerController.add(_memoryTracker);
 
     memoryTimeline.reset();
     hasStopped = true;
@@ -226,9 +218,9 @@ class MemoryChartPaneController extends DisposableController
   void dispose() {
     super.dispose();
     unawaited(_memoryTrackerController.close());
-    memoryTracker?.dispose();
+    _memoryTracker?.dispose();
     _legendVisibleNotifier.dispose();
-    _displayIntervalNotifier.dispose();
+    _displayInterval.dispose();
     _refreshCharts.dispose();
     event.dispose();
     vm.dispose();
