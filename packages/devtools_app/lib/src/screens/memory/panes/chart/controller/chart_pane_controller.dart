@@ -86,7 +86,6 @@ class MemoryChartPaneController extends DisposableController
   final _paused = ValueNotifier<bool>(false);
   void pauseLiveFeed() => _paused.value = true;
   void resumeLiveFeed() => _paused.value = false;
-  bool get isPaused => _paused.value;
 
   final isAndroidChartVisible = ValueNotifier<bool>(false);
 
