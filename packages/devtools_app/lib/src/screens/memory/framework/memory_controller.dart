@@ -11,6 +11,8 @@ import 'package:flutter/widgets.dart';
 import '../../../../devtools_app.dart';
 import '../../../shared/memory/class_name.dart';
 import '../../../shared/memory/heap_graph_loader.dart';
+import '../../../shared/primitives/simple_items.dart';
+import '../../../shared/utils.dart';
 import '../panes/chart/controller/chart_pane_controller.dart';
 import '../panes/control/controller/control_pane_controller.dart';
 import '../panes/diff/controller/diff_pane_controller.dart';
@@ -32,7 +34,7 @@ class MemoryController extends DisposableController
     @visibleForTesting DiffPaneController? connectedDiff,
     @visibleForTesting ProfilePaneController? connectedProfile,
   }) {
-    if (connectedDiff != null && connectedProfile != null) {
+    if (connectedDiff != null || connectedProfile != null) {
       _mode = DevToolsMode.connected;
     } else {
       _mode = devToolsMode;
@@ -40,9 +42,13 @@ class MemoryController extends DisposableController
     unawaited(_init(connectedDiff, connectedProfile));
   }
 
-  late final DevToolsMode _mode;
-
   ValueNotifier<bool> isInitialized = ValueNotifier(false);
+
+  /// DevTools mode at the time of creation of the controller.
+  ///
+  /// DevTools will recreate controller when the mode changes.
+  // ignore: unused_field, TODO(polina-c): https://github.com/flutter/devtools/issues/6972
+  late final DevToolsMode _mode;
 
   /// Index of the selected feature tab.
   ///
