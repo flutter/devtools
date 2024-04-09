@@ -14,6 +14,7 @@ import '../../../../shared/table/table.dart';
 import '../../../../shared/table/table_controller.dart';
 import '../../../../shared/table/table_data.dart';
 import '../../shared/widgets/shared_memory_widgets.dart';
+import 'tracing_data.dart';
 import 'tracing_pane_controller.dart';
 
 /// The default width for columns containing *mostly* numeric data (e.g.,
