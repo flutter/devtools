@@ -64,9 +64,10 @@ class CliCommand {
   factory CliCommand.dart(
     List<String> args, {
     bool throwOnException = true,
+    String? sdkOverride,
   }) {
     return CliCommand(
-      FlutterSdk.current.dartExePath,
+      sdkOverride ?? FlutterSdk.current.dartExePath,
       args,
       throwOnException: throwOnException,
     );

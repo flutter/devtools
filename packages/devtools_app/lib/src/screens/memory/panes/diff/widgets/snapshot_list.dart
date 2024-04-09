@@ -274,7 +274,7 @@ class _EditableSnapshotNameState extends State<_EditableSnapshotName>
   @override
   void didUpdateWidget(_EditableSnapshotName oldWidget) {
     super.didUpdateWidget(oldWidget);
-    textEditingController.text = widget.item.name;
+    if (oldWidget.item == widget.item) return;
     _updateFocus();
   }
 
@@ -349,7 +349,8 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
   @override
   void didUpdateWidget(covariant _SnapshotListItems oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.controller != widget.controller) _init();
+    if (oldWidget.controller == widget.controller) return;
+    _init();
   }
 
   void _init() {

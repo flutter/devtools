@@ -66,7 +66,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
   void initState() {
     super.initState();
     ga.screen(PerformanceScreen.id);
-    addAutoDisposeListener(offlineController.offlineMode);
+    addAutoDisposeListener(offlineDataController.showingOfflineData);
   }
 
   @override
@@ -94,8 +94,9 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
           );
         }
 
-        final offlineMode = offlineController.offlineMode.value;
-        final isOfflineFlutterApp = offlineMode &&
+        final showingOfflineData =
+            offlineDataController.showingOfflineData.value;
+        final isOfflineFlutterApp = showingOfflineData &&
             controller.offlinePerformanceData != null &&
             controller.offlinePerformanceData!.frames.isNotEmpty;
         return Column(
@@ -106,12 +107,12 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
             ),
             const SizedBox(height: intermediateSpacing),
             if (isOfflineFlutterApp ||
-                (!offlineMode &&
+                (!showingOfflineData &&
                     serviceConnection
                         .serviceManager.connectedApp!.isFlutterAppNow!))
               FlutterFramesChart(
                 controller.flutterFramesController,
-                offlineMode: offlineMode,
+                showingOfflineData: showingOfflineData,
                 impellerEnabled: controller.impellerEnabled,
               ),
             const Expanded(child: TabbedPerformanceView()),
@@ -186,11 +187,11 @@ const performancePanelLink =
 const flutterWebInstructionsMd = '''
 ## How to use Chrome DevTools for performance profiling
 
-The Flutter framework emits timeline events as it works to build frames, draw 
-scenes, and track other activity such as garbage collections. These events are 
+The Flutter framework emits timeline events as it works to build frames, draw
+scenes, and track other activity such as garbage collections. These events are
 exposed in the Chrome DevTools performance panel for debugging.
 
-You can also emit your own timeline events using the `dart:developer` 
+You can also emit your own timeline events using the `dart:developer`
 [Timeline]($timelineLink) and [TimelineTask]($timelineTaskLink) APIs for further
 performance analysis.
 
@@ -212,8 +213,8 @@ your application, and start recording to capture timeline events.
 const dartWebInstructionsMd = '''
 ## How to use Chrome DevTools for performance profiling
 
-Any events emitted using the `dart:developer` [Timeline]($timelineLink) and 
-[TimelineTask]($timelineTaskLink) APIs are exposed in the Chrome DevTools 
+Any events emitted using the `dart:developer` [Timeline]($timelineLink) and
+[TimelineTask]($timelineTaskLink) APIs are exposed in the Chrome DevTools
 performance panel.
 
 Open up the [Chrome DevTools' Performance panel]($performancePanelLink) for

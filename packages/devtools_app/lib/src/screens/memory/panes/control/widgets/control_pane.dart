@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../../framework/connected/memory_controller.dart';
+import '../controller/control_pane_controller.dart';
 import 'primary_controls.dart';
 import 'secondary_controls.dart';
 
@@ -14,7 +14,7 @@ class MemoryControlPane extends StatelessWidget {
     required this.controller,
   }) : super(key: key);
 
-  final MemoryController controller;
+  final MemoryControlPaneController controller;
 
   @override
   Widget build(BuildContext context) {

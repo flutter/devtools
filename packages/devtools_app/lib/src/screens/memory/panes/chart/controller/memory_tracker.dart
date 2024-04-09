@@ -6,20 +6,26 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:devtools_shared/devtools_shared.dart';
+import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../../shared/globals.dart';
-import '../../../../shared/utils.dart';
-import '../../shared/primitives/memory_timeline.dart';
-import 'memory_controller.dart';
+import '../../../../../shared/globals.dart';
+import '../../../../../shared/utils.dart';
+import '../../../shared/primitives/memory_timeline.dart';
 
 final _log = Logger('memory_protocol');
 
 class MemoryTracker {
-  MemoryTracker(this.memoryController);
+  MemoryTracker(
+    this.timeline, {
+    required this.paused,
+    required this.isAndroidChartVisible,
+  });
 
-  final MemoryController memoryController;
+  final MemoryTimeline timeline;
+  final ValueListenable<bool> paused;
+  final ValueNotifier<bool> isAndroidChartVisible;
 
   Timer? _pollingTimer;
 
@@ -43,15 +49,10 @@ class MemoryTracker {
 
   void start() {
     _updateLiveDataPolling();
-    memoryController.paused.addListener(_updateLiveDataPolling);
+    paused.addListener(_updateLiveDataPolling);
   }
 
   void _updateLiveDataPolling() {
-    if (serviceConnection.serviceManager.service == null) {
-      // A service of null implies we're disconnected - signal paused.
-      memoryController.pauseLiveFeed();
-    }
-
     _pollingTimer ??= Timer(MemoryTimeline.updateDelay, _pollMemory);
     _gcStreamListener ??= serviceConnection.serviceManager.service?.onGCEvent
         .listen(_handleGCEvent);
@@ -63,7 +64,7 @@ class MemoryTracker {
   }
 
   void _cleanListenersAndTimers() {
-    memoryController.paused.removeListener(_updateLiveDataPolling);
+    paused.removeListener(_updateLiveDataPolling);
 
     _pollingTimer?.cancel();
     unawaited(_gcStreamListener?.cancel());
@@ -87,16 +88,10 @@ class MemoryTracker {
   void _pollMemory() async {
     _pollingTimer = null;
 
-    if (!serviceConnection.serviceManager.hasConnection ||
-        memoryController.memoryTracker == null) {
-      _log.info('VM service connection and/or MemoryTracker lost.');
-      return;
-    }
-
     final isolateMemory = <IsolateRef, MemoryUsage>{};
     for (IsolateRef isolateRef
         in serviceConnection.serviceManager.isolateManager.isolates.value) {
-      if (await memoryController.isIsolateLive(isolateRef.id!)) {
+      if (await _isIsolateLive(isolateRef.id!)) {
         isolateMemory[isolateRef] = await serviceConnection
             .serviceManager.service!
             .getMemoryUsage(isolateRef.id!);
@@ -107,7 +102,7 @@ class MemoryTracker {
     //    > adb shell dumpsys meminfo -d <package_name>
     adbMemoryInfo = serviceConnection.serviceManager.hasConnection &&
             serviceConnection.serviceManager.vm!.operatingSystem == 'android' &&
-            memoryController.isAndroidChartVisibleNotifier.value
+            isAndroidChartVisible.value
         ? await _fetchAdbInfo()
         : AdbMemoryInfo.empty();
 
@@ -122,6 +117,23 @@ class MemoryTracker {
     if (vm.json!.containsKey('_FAKE_VM')) return;
 
     _pollingTimer ??= Timer(MemoryTimeline.updateDelay, _pollMemory);
+  }
+
+  /// Detect stale isolates (sentineled), may happen after a hot restart.
+  static Future<bool> _isIsolateLive(String isolateId) async {
+    try {
+      final service = serviceConnection.serviceManager.service!;
+      await service.getIsolate(isolateId);
+    } catch (e) {
+      if (e is SentinelException) {
+        final SentinelException sentinelErr = e;
+        final message = 'isIsolateLive: Isolate sentinel $isolateId '
+            '${sentinelErr.sentinel.kind}';
+        debugLogger(message);
+        return false;
+      }
+    }
+    return true;
   }
 
   void _update(VM vm, Map<IsolateRef, MemoryUsage> isolateMemory) {
@@ -141,7 +153,7 @@ class MemoryTracker {
     _recalculate(true);
   }
 
-  /// Fetch the Fultter engine's Raster Cache metrics.
+  /// Fetch the Flutter engine's Raster Cache metrics.
   ///
   /// Returns engine's rasterCache estimates or null.
   Future<RasterCache?> _fetchRasterCacheInfo() async {
@@ -166,7 +178,7 @@ class MemoryTracker {
     String id,
     MemoryUsage? usage,
   ) async =>
-      await memoryController.isIsolateLive(id) ? usage : null;
+      await _isIsolateLive(id) ? usage : null;
 
   void _recalculate([bool fromGC = false]) async {
     int used = 0;
@@ -185,7 +197,7 @@ class MemoryTracker {
       if (checkIsolateUsage == null && !keysToRemove.contains(isolateId)) {
         // Sentinel Isolate don't include in the heap computation.
         keysToRemove.add(isolateId);
-        // Don't use this sential isolate for any heap computation.
+        // Don't use this sentinel isolate for any heap computation.
         usage = null;
       }
 
@@ -200,22 +212,20 @@ class MemoryTracker {
     // Removes any isolate that is a sentinel.
     isolateHeaps.removeWhere((key, value) => keysToRemove.contains(key));
 
-    final memoryTimeline = memoryController.controllers.memoryTimeline;
-
     int time = DateTime.now().millisecondsSinceEpoch;
-    if (memoryTimeline.data.isNotEmpty) {
-      time = math.max(time, memoryTimeline.data.last.timestamp);
+    if (timeline.data.isNotEmpty) {
+      time = math.max(time, timeline.data.last.timestamp);
     }
 
     // Process any memory events?
-    final eventSample = processEventSample(memoryTimeline, time);
+    final eventSample = processEventSample(timeline, time);
 
     if (eventSample != null && eventSample.isEventAllocationAccumulator) {
       if (eventSample.allocationAccumulator!.isStart) {
         // Stop Continuous events being auto posted - a new start is beginning.
-        memoryTimeline.monitorContinuesState = ContinuesState.stop;
+        timeline.monitorContinuesState = ContinuesState.stop;
       }
-    } else if (memoryTimeline.monitorContinuesState == ContinuesState.next) {
+    } else if (timeline.monitorContinuesState == ContinuesState.next) {
       if (_monitorContinues != null) {
         _monitorContinues!.cancel();
         _monitorContinues = null;
@@ -239,7 +249,7 @@ class MemoryTracker {
       rasterCache,
     );
 
-    memoryTimeline.addSample(sample);
+    timeline.addSample(sample);
 
     _changeController.add(null);
 
@@ -249,7 +259,7 @@ class MemoryTracker {
     if (eventSample != null &&
         eventSample.isEventAllocationAccumulator &&
         eventSample.allocationAccumulator!.isStart) {
-      memoryTimeline.monitorContinuesState = ContinuesState.next;
+      timeline.monitorContinuesState = ContinuesState.next;
     }
   }
 

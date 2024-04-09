@@ -7,29 +7,28 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../../shared/charts/chart_controller.dart';
-import '../../../../shared/common_widgets.dart';
-import '../../../../shared/globals.dart';
-import '../../../../shared/primitives/utils.dart';
-import '../../../../shared/ui/colors.dart';
-import '../../../../shared/utils.dart';
-import '../../framework/connected/memory_controller.dart';
-import '../../shared/primitives/painting.dart';
+import '../../../../../shared/charts/chart_controller.dart';
+import '../../../../../shared/common_widgets.dart';
+import '../../../../../shared/globals.dart';
+import '../../../../../shared/primitives/utils.dart';
+import '../../../../../shared/ui/colors.dart';
+import '../../../../../shared/utils.dart';
+import '../../../shared/primitives/painting.dart';
+import '../controller/chart_pane_controller.dart';
+import '../data/charts.dart';
 import 'chart_control_pane.dart';
-import 'chart_pane_controller.dart';
 import 'legend.dart';
 import 'memory_android_chart.dart';
-import 'memory_charts.dart';
 import 'memory_events_pane.dart';
 import 'memory_vm_chart.dart';
 
 class MemoryChartPane extends StatefulWidget {
   const MemoryChartPane({
     Key? key,
-    required this.chartController,
+    required this.chart,
     required this.keyFocusNode,
   }) : super(key: key);
-  final MemoryChartPaneController chartController;
+  final MemoryChartPaneController chart;
 
   /// Which widget's key press will be handled by chart.
   final FocusNode keyFocusNode;
@@ -41,10 +40,7 @@ class MemoryChartPane extends StatefulWidget {
 }
 
 class _MemoryChartPaneState extends State<MemoryChartPane>
-    with
-        AutoDisposeMixin,
-        SingleTickerProviderStateMixin,
-        ProvidedControllerMixin<MemoryController, MemoryChartPane> {
+    with AutoDisposeMixin, SingleTickerProviderStateMixin {
   OverlayEntry? _hoverOverlayEntry;
 
   static const _hoverXOffset = 10;
@@ -102,9 +98,10 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
       }
 
       final allValues = ChartsValues(
-        controller,
-        value.index,
-        value.timestamp ?? _timestamp,
+        widget.chart.memoryTimeline,
+        isAndroidChartVisible: widget.chart.isAndroidChartVisible,
+        index: value.index,
+        timestamp: value.timestamp ?? _timestamp,
       );
 
       _showHover(
@@ -116,28 +113,39 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!initController()) return;
+  void initState() {
+    super.initState();
+    _init();
+  }
 
+  @override
+  void didUpdateWidget(covariant MemoryChartPane oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.chart == widget.chart) return;
+    _init();
+  }
+
+  void _init() {
     final allLocations = [
-      widget.chartController.event.tapLocation,
-      widget.chartController.vm.tapLocation,
-      widget.chartController.android.tapLocation,
+      widget.chart.event.tapLocation,
+      widget.chart.vm.tapLocation,
+      widget.chart.android.tapLocation,
     ];
 
     for (var location in allLocations) {
       _addTapLocationListener(location, allLocations);
     }
 
-    addAutoDisposeListener(controller.refreshCharts, () {
+    addAutoDisposeListener(widget.chart.refreshCharts, () {
       setState(() {
-        widget.chartController.recomputeChartData();
+        widget.chart.recomputeChartData();
       });
     });
 
     // There is no listener passed, so SetState will be invoked.
-    addAutoDisposeListener(controller.isAndroidChartVisibleNotifier);
+    addAutoDisposeListener(
+      widget.chart.isAndroidChartVisible,
+    );
 
     _updateListeningState();
   }
@@ -145,20 +153,8 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
   void _updateListeningState() async {
     await serviceConnection.serviceManager.onServiceAvailable;
 
-    if (!controller.hasStarted) {
-      controller.startTimeline();
-
-      // TODO(terry): Need to set the initial state of buttons.
-/*
-      pauseButton.disabled = false;
-      resumeButton.disabled = true;
-
-      vmMemorySnapshotButton.disabled = false;
-      resetAccumulatorsButton.disabled = false;
-      gcNowButton.disabled = false;
-
-      memoryChart.disabled = false;
-*/
+    if (!widget.chart.hasStarted) {
+      widget.chart.startTimeline();
     }
   }
 
@@ -168,8 +164,6 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     return ValueListenableBuilder<bool>(
       valueListenable: preferences.memory.showChart,
       builder: (_, showChart, __) {
-        // TODO(https://github.com/flutter/devtools/issues/4576): animate
-        // showing and hiding the chart.
         if (!showChart) return const SizedBox.shrink();
 
         return KeyboardListener(
@@ -190,14 +184,15 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
                   children: [
                     SizedBox(
                       height: memoryEventsPainHeight,
-                      child: MemoryEventsPane(widget.chartController.event),
+                      child: MemoryEventsPane(widget.chart.event),
                     ),
-                    MemoryVMChart(widget.chartController.vm),
-                    if (controller.isAndroidChartVisibleNotifier.value)
+                    MemoryVMChart(widget.chart.vm),
+                    if (widget.chart.isAndroidChartVisible.value)
                       SizedBox(
                         height: defaultChartHeight,
                         child: MemoryAndroidChart(
-                          widget.chartController.android,
+                          widget.chart.android,
+                          widget.chart.memoryTimeline,
                         ),
                       ),
                   ],
@@ -206,8 +201,8 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
               // The legend.
               MultiValueListenableBuilder(
                 listenables: [
-                  widget.chartController.legendVisibleNotifier,
-                  controller.isAndroidChartVisibleNotifier,
+                  widget.chart.isLegendVisible,
+                  widget.chart.isAndroidChartVisible,
                 ],
                 builder: (_, values, __) {
                   final isLegendVisible = values.first as bool;
@@ -220,14 +215,14 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
                     ),
                     child: MemoryChartLegend(
                       isAndroidVisible: isAndroidChartVisible,
-                      chartController: widget.chartController,
+                      chartController: widget.chart,
                     ),
                   );
                 },
               ),
               // Chart control pane.
               ChartControlPane(
-                chartController: widget.chartController,
+                chart: widget.chart,
               ),
             ],
           ),
@@ -239,13 +234,13 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
   @override
   void dispose() {
     _hideHover(); // hover will leak if not hide
-    controller.stopTimeLine();
+    widget.chart.stopTimeLine();
     super.dispose();
   }
 
   List<Widget> _displayVmDataInHover(ChartsValues chartsValues) =>
       _dataToDisplay(
-        chartsValues.displayVmDataToDisplay(widget.chartController.vm.traces),
+        chartsValues.displayVmDataToDisplay(widget.chart.vm.traces),
       );
 
   List<Widget> _displayAndroidDataInHover(ChartsValues chartsValues) {
@@ -253,10 +248,12 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     const dividerLineHorizontalSpace = 20.0;
     const totalDividerLineHorizontalSpace = dividerLineHorizontalSpace * 2;
 
-    if (!controller.isAndroidChartVisibleNotifier.value) return [];
+    if (!widget.chart.isAndroidChartVisible.value) {
+      return [];
+    }
 
-    final androidDataDisplayed = chartsValues
-        .androidDataToDisplay(widget.chartController.android.traces);
+    final androidDataDisplayed =
+        chartsValues.androidDataToDisplay(widget.chart.android.traces);
 
     // Separator between Android data.
     // TODO(terry): Why Center widget doesn't work (parent width is bigger/centered too far right).
@@ -302,7 +299,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
     double totalHoverHeight;
     int totalTraces;
-    totalTraces = controller.isAndroidChartVisibleNotifier.value
+    totalTraces = widget.chart.isAndroidChartVisible.value
         ? chartsValues.vmData.entries.length -
             1 +
             chartsValues.androidData.entries.length
@@ -471,9 +468,9 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
   void _hideHover() {
     if (_hoverOverlayEntry != null) {
-      widget.chartController.event.tapLocation.value = null;
-      widget.chartController.vm.tapLocation.value = null;
-      widget.chartController.android.tapLocation.value = null;
+      widget.chart.event.tapLocation.value = null;
+      widget.chart.vm.tapLocation.value = null;
+      widget.chart.android.tapLocation.value = null;
 
       _hoverOverlayEntry?.remove();
       _hoverOverlayEntry = null;
@@ -572,7 +569,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
   String _decodeEventValues(Map<String, Object> event) {
     final output = StringBuffer();
     if (event[eventName] == imageSizesForFrameEvent) {
-      // TODO(terry): Need a more generic event displayer.
+      // TODO(terry): Need a more generic way to display event.
       // Flutter event emit the event name and value.
       final data = (event[eventData] as Map).cast<String, Object>();
       final key = data.keys.first;

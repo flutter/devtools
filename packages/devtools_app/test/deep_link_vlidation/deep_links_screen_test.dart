@@ -1,11 +1,10 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/deep_link_validation/deep_link_list_view.dart';
 import 'package:devtools_app/src/screens/deep_link_validation/deep_links_model.dart';
-import 'package:devtools_app/src/screens/deep_link_validation/deep_links_services.dart';
 import 'package:devtools_app/src/screens/deep_link_validation/project_root_selection/root_selector.dart';
 import 'package:devtools_app/src/screens/deep_link_validation/project_root_selection/select_project_view.dart';
 import 'package:devtools_app/src/screens/deep_link_validation/validation_details_view.dart';
@@ -18,6 +17,8 @@ import 'package:dtd/dtd.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+
+import '../test_infra/utils/deep_links_utils.dart';
 
 final linkDatas = [
   LinkData(
@@ -95,7 +96,6 @@ void main() {
         deepLink: controller,
       ),
     );
-    deferredLoadingSupportEnabled = true;
     await tester.pump(const Duration(seconds: 1));
     expect(find.byType(DeepLinkPage), findsOneWidget);
   }
@@ -125,7 +125,6 @@ void main() {
           controller: deepLinksController,
         );
 
-        expect(find.byType(DeepLinkPage), findsOneWidget);
         expect(find.byType(SelectProjectView), findsOneWidget);
         expect(find.byType(ProjectRootsDropdown), findsOneWidget);
         expect(find.byType(ProjectRootTextField), findsOneWidget);
@@ -613,39 +612,4 @@ void main() {
       },
     );
   });
-}
-
-class DeepLinksTestController extends DeepLinksController {
-  @override
-  Future<String?> packageDirectoryForMainIsolate() async {
-    return null;
-  }
-
-  @override
-  Future<void> validateLinks() async {
-    if (validatedLinkDatas.all.isEmpty) {
-      return;
-    }
-    displayOptionsNotifier.value = displayOptionsNotifier.value.copyWith(
-      domainErrorCount: validatedLinkDatas.byDomain
-          .where((element) => element.domainErrors.isNotEmpty)
-          .length,
-      pathErrorCount: validatedLinkDatas.byPath
-          .where((element) => element.pathErrors.isNotEmpty)
-          .length,
-    );
-    applyFilters();
-    pagePhase.value = PagePhase.linksValidated;
-  }
-
-  @override
-  void selectLink(LinkData linkdata) async {
-    selectedLink.value = linkdata;
-    if (linkdata.domainErrors.isNotEmpty) {
-      generatedAssetLinksForSelectedLink.value = GenerateAssetLinksResult(
-        '',
-        'fake generated content',
-      );
-    }
-  }
 }

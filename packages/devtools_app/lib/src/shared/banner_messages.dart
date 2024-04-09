@@ -487,7 +487,7 @@ void maybePushDebugModePerformanceMessage(
   BuildContext context,
   String screenId,
 ) {
-  if (offlineController.offlineMode.value) return;
+  if (offlineDataController.showingOfflineData.value) return;
   if (serviceConnection.serviceManager.connectedApp?.isDebugFlutterAppNow ??
       false) {
     bannerMessages.addMessage(
@@ -500,7 +500,7 @@ void maybePushDebugModeMemoryMessage(
   BuildContext context,
   String screenId,
 ) {
-  if (offlineController.offlineMode.value) return;
+  if (offlineDataController.showingOfflineData.value) return;
   if (serviceConnection.serviceManager.connectedApp?.isDebugFlutterAppNow ??
       false) {
     bannerMessages.addMessage(DebugModeMemoryMessage(screenId).build(context));

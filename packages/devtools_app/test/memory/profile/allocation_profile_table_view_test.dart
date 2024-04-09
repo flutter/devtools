@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/screens/memory/framework/connected/memory_tabs.dart';
 import 'package:devtools_app/src/screens/memory/framework/memory_screen.dart';
+import 'package:devtools_app/src/screens/memory/framework/memory_tabs.dart';
 import 'package:devtools_app/src/screens/memory/panes/profile/model.dart';
 import 'package:devtools_app/src/screens/memory/panes/profile/profile_pane_controller.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_service_private_extensions.dart';
@@ -59,8 +59,7 @@ void main() {
       (WidgetTester tester) async {
         await pumpMemoryScreen(tester);
 
-        final allocationProfileController =
-            scene.controller.controllers.profile;
+        final allocationProfileController = scene.controller.profile;
 
         preferences.toggleVmDeveloperMode(false);
         await navigateToAllocationProfile(tester, allocationProfileController);
@@ -159,8 +158,7 @@ void main() {
       (WidgetTester tester) async {
         await pumpMemoryScreen(tester);
 
-        final allocationProfileController =
-            scene.controller.controllers.profile;
+        final allocationProfileController = scene.controller.profile;
         await navigateToAllocationProfile(tester, allocationProfileController);
 
         // We'll clear it for now so we can tell when it's refreshed.
@@ -189,8 +187,7 @@ void main() {
       (WidgetTester tester) async {
         await pumpMemoryScreen(tester);
 
-        final allocationProfileController =
-            scene.controller.controllers.profile;
+        final allocationProfileController = scene.controller.profile;
 
         await navigateToAllocationProfile(tester, allocationProfileController);
 

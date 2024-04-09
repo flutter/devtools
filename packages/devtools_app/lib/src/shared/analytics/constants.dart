@@ -53,6 +53,8 @@ const feedbackLink = 'feedback';
 const feedbackButton = 'feedbackButton';
 const contributingLink = 'contributing';
 const discordLink = 'discord';
+String startingTheme({required bool darkMode}) =>
+    'startingTheme-${darkMode ? 'dark' : 'light'}';
 
 // Inspector UX actions:
 const refresh = 'refresh';
@@ -146,7 +148,7 @@ const expandAll = 'expandAll';
 const collapseAll = 'collapseAll';
 const profileModeDocs = 'profileModeDocs';
 const visibilityButton = 'visibilityButton';
-const exitOfflineMode = 'exitOfflineMode';
+const stopShowingOfflineData = 'exitOfflineMode';
 // This should track the time from `initState` for a screen to the time when
 // the page data has loaded and is ready to interact with.
 const pageReady = 'pageReady';

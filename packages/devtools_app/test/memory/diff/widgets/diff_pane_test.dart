@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/screens/memory/framework/connected/memory_tabs.dart';
+import 'package:devtools_app/src/screens/memory/framework/memory_tabs.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/diff_pane.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/widgets/snapshot_list.dart';
 import 'package:devtools_test/helpers.dart';
@@ -26,7 +26,7 @@ Future<void> pumpScene(WidgetTester tester, MemoryDefaultScene scene) async {
 }
 
 Future<void> takeSnapshot(WidgetTester tester, MemoryDefaultScene scene) async {
-  final snapshots = scene.controller.controllers.diff.core.snapshots;
+  final snapshots = scene.controller.diff.core.snapshots;
   final length = snapshots.value.length;
   await tester.tap(find.byIcon(Icons.fiber_manual_record).first);
   await tester.pumpAndSettle();
@@ -55,7 +55,7 @@ void main() {
       'records and deletes snapshots',
       windowSize,
       (WidgetTester tester) async {
-        final snapshots = scene.controller.controllers.diff.core.snapshots;
+        final snapshots = scene.controller.diff.core.snapshots;
         // Check the list contains only documentation item.
         expect(snapshots.value.length, equals(1));
         await pumpScene(tester, scene);

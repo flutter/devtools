@@ -4,12 +4,12 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../shared/analytics/constants.dart' as gac;
-import '../../../../shared/common_widgets.dart';
-import '../../../../shared/ui/tab.dart';
-import '../../panes/diff/diff_pane.dart';
-import '../../panes/profile/profile_view.dart';
-import '../../panes/tracing/tracing_view.dart';
+import '../../../shared/analytics/constants.dart' as gac;
+import '../../../shared/common_widgets.dart';
+import '../../../shared/ui/tab.dart';
+import '../panes/diff/diff_pane.dart';
+import '../panes/profile/profile_view.dart';
+import '../panes/tracing/tracing_view.dart';
 import 'memory_controller.dart';
 
 @visibleForTesting
@@ -52,7 +52,7 @@ class MemoryTabView extends StatelessWidget {
         ),
         tabView: KeepAliveWrapper(
           child: AllocationProfileTableView(
-            controller: controller.controllers.profile,
+            controller: controller.profile,
           ),
         ),
       ),
@@ -64,7 +64,7 @@ class MemoryTabView extends StatelessWidget {
         ),
         tabView: KeepAliveWrapper(
           child: DiffPane(
-            diffController: controller.controllers.diff,
+            diffController: controller.diff,
           ),
         ),
       ),
@@ -75,7 +75,7 @@ class MemoryTabView extends StatelessWidget {
           gaPrefix: _gaPrefix,
         ),
         tabView: KeepAliveWrapper(
-          child: TracingPane(controller: controller.controllers.tracing),
+          child: TracingPane(controller: controller.tracing),
         ),
       ),
     ];

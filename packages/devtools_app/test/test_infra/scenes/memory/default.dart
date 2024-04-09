@@ -95,7 +95,7 @@ class MemoryDefaultScene extends Scene {
       DevToolsEnvironmentParameters,
       ExternalDevToolsEnvironmentParameters(),
     );
-    setGlobal(OfflineModeController, OfflineModeController());
+    setGlobal(OfflineDataController, OfflineDataController());
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());
     setGlobal(BannerMessagesController, BannerMessagesController());
@@ -144,9 +144,8 @@ class MemoryDefaultScene extends Scene {
       diffPaneController: diffController,
       profilePaneController: profileController,
     )
-      ..offline = true
-      ..controllers.memoryTimeline.offlineData.clear()
-      ..controllers.memoryTimeline.offlineData.addAll(memoryJson.data);
+      ..chart.memoryTimeline.offlineData.clear()
+      ..chart.memoryTimeline.offlineData.addAll(memoryJson.data);
   }
 
   @override

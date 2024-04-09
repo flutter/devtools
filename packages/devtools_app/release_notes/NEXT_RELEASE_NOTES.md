@@ -26,7 +26,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## Memory updates
 
-TODO: Remove this section if there are not any general updates.
+* Replaced total size with reachable size in snapshot list. -
+[#7493](https://github.com/flutter/devtools/pull/7493)
 
 ## Debugger updates
 
@@ -44,13 +45,19 @@ TODO: Remove this section if there are not any general updates.
 
 TODO: Remove this section if there are not any general updates.
 
+## Deep links tool updates
+
+* Improve layout for narrow screens. - [#7524](https://github.com/flutter/devtools/pull/7524)
+
 ## VS Code Sidebar updates
 
 TODO: Remove this section if there are not any general updates.
 
 ## DevTools Extension updates
 
-TODO: Remove this section if there are not any general updates.
+* Detect extensions for all types of run targets in a package. - [#7533](https://github.com/flutter/devtools/pull/7533),
+[#7535](https://github.com/flutter/devtools/pull/7535)
+
 
 ## Full commit history
 

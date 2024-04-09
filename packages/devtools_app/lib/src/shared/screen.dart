@@ -11,6 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
+import 'feature_flags.dart';
 import 'globals.dart';
 import 'primitives/listenable.dart';
 import 'ui/icons.dart';
@@ -36,7 +37,7 @@ enum ScreenMetaData {
     'performance',
     title: 'Performance',
     icon: Octicons.pulse,
-    worksOffline: true,
+    worksWithOfflineData: true,
     requiresConnection: false,
     tutorialVideoTimestamp: '?t=261',
   ),
@@ -45,7 +46,7 @@ enum ScreenMetaData {
     title: 'CPU Profiler',
     icon: Octicons.dashboard,
     requiresDartVm: true,
-    worksOffline: true,
+    worksWithOfflineData: true,
     requiresConnection: false,
     tutorialVideoTimestamp: '?t=340',
   ),
@@ -55,6 +56,8 @@ enum ScreenMetaData {
     icon: Octicons.package,
     requiresDartVm: true,
     tutorialVideoTimestamp: '?t=420',
+    // ignore: avoid_redundant_argument_values, false positive
+    worksWithOfflineData: FeatureFlags.memoryOffline,
   ),
   debugger(
     'debugger',
@@ -115,7 +118,7 @@ enum ScreenMetaData {
     this.requiresFlutter = false,
     this.requiresDebugBuild = false,
     this.requiresVmDeveloperMode = false,
-    this.worksOffline = false,
+    this.worksWithOfflineData = false,
     this.requiresLibrary,
     this.tutorialVideoTimestamp,
   });
@@ -128,7 +131,7 @@ enum ScreenMetaData {
   final bool requiresFlutter;
   final bool requiresDebugBuild;
   final bool requiresVmDeveloperMode;
-  final bool worksOffline;
+  final bool worksWithOfflineData;
   final String? requiresLibrary;
 
   /// The timestamp for the chapter of "Dive in to DevTools" YouTube video that
@@ -145,6 +148,22 @@ enum ScreenMetaData {
 }
 
 /// Defines a page shown in the DevTools [TabBar].
+///
+/// A devtools screen can be in three modes:
+/// * offline-data
+/// * connected
+/// * not-connected
+///
+/// A screen may support any combination of modes.
+///
+/// For offline-data and connected modes:
+/// * Override [Screen.buildScreenBody] to build content.
+/// * Use [ProvidedControllerMixin] to access controller.
+/// * See [OfflineScreenControllerMixin] for documentation on how to
+/// enable and handle offline-data mode for a screen.
+///
+/// For not-connected mode:
+/// * Override [Screen.buildDisconnectedScreenBody] to build content.
 @immutable
 abstract class Screen {
   const Screen(
@@ -159,7 +178,7 @@ abstract class Screen {
     this.requiresFlutter = false,
     this.requiresDebugBuild = false,
     this.requiresVmDeveloperMode = false,
-    this.worksOffline = false,
+    this.worksWithOfflineData = false,
     this.showFloatingDebuggerControls = true,
   }) : assert((title == null) || (titleGenerator == null));
 
@@ -171,7 +190,7 @@ abstract class Screen {
     bool requiresFlutter = false,
     bool requiresDebugBuild = false,
     bool requiresVmDeveloperMode = false,
-    bool worksOffline = false,
+    bool worksWithOfflineData = false,
     bool Function(FlutterVersion? currentVersion)? shouldShowForFlutterVersion,
     bool showFloatingDebuggerControls = true,
     String? title,
@@ -186,7 +205,7 @@ abstract class Screen {
           requiresFlutter: requiresFlutter,
           requiresDebugBuild: requiresDebugBuild,
           requiresVmDeveloperMode: requiresVmDeveloperMode,
-          worksOffline: worksOffline,
+          worksWithOfflineData: worksWithOfflineData,
           showFloatingDebuggerControls: showFloatingDebuggerControls,
           title: title,
           titleGenerator: titleGenerator,
@@ -208,7 +227,7 @@ abstract class Screen {
           requiresFlutter: metadata.requiresFlutter,
           requiresDebugBuild: metadata.requiresDebugBuild,
           requiresVmDeveloperMode: metadata.requiresVmDeveloperMode,
-          worksOffline: metadata.worksOffline,
+          worksWithOfflineData: metadata.worksWithOfflineData,
           shouldShowForFlutterVersion: shouldShowForFlutterVersion,
           showFloatingDebuggerControls: showFloatingDebuggerControls,
           title: titleGenerator == null ? metadata.title : null,
@@ -276,7 +295,7 @@ abstract class Screen {
   final bool requiresVmDeveloperMode;
 
   /// Whether this screen works offline and should show in offline mode even if conditions are not met.
-  final bool worksOffline;
+  final bool worksWithOfflineData;
 
   /// Whether this screen should display the isolate selector in the status
   /// line.
@@ -391,7 +410,7 @@ abstract class Screen {
           serviceConnection.serviceManager.connectedAppInitialized;
       // Do not use the disconnected body in offline mode, because the default
       // [buildScreenBody] should be used for offline states.
-      if (!connected && !offlineController.offlineMode.value) {
+      if (!connected && !offlineDataController.showingOfflineData.value) {
         final disconnectedBody = buildDisconnectedScreenBody(context);
         if (disconnectedBody != null) return disconnectedBody;
       }
@@ -422,9 +441,9 @@ abstract class Screen {
 /// Check whether a screen should be shown in the UI.
 bool shouldShowScreen(Screen screen) {
   _log.finest('shouldShowScreen: ${screen.screenId}');
-  if (offlineController.offlineMode.value) {
-    _log.finest('for offline mode: returning ${screen.worksOffline}');
-    return screen.worksOffline;
+  if (offlineDataController.showingOfflineData.value) {
+    _log.finest('for offline mode: returning ${screen.worksWithOfflineData}');
+    return screen.worksWithOfflineData;
   }
 
   final serviceReady = serviceConnection.serviceManager.isServiceAvailable &&
