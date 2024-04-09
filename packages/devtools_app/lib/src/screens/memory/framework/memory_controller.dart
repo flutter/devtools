@@ -7,6 +7,8 @@ import 'package:flutter/foundation.dart';
 
 import '../../../shared/memory/class_name.dart';
 import '../../../shared/memory/heap_graph_loader.dart';
+import '../../../shared/primitives/simple_items.dart';
+import '../../../shared/utils.dart';
 import '../panes/chart/controller/chart_pane_controller.dart';
 import '../panes/control/controller/control_pane_controller.dart';
 import '../panes/diff/controller/diff_pane_controller.dart';
@@ -31,6 +33,12 @@ class MemoryController extends DisposableController
 
     shareClassFilterBetweenProfileAndDiff();
   }
+
+  /// DevTools mode at the time of creation of the controller.
+  ///
+  /// DevTools will recreate controller when the mode changes.
+  // ignore: unused_field, TODO(polina-c): https://github.com/flutter/devtools/issues/6972
+  final DevToolsMode _mode = devToolsMode;
 
   /// Index of the selected feature tab.
   ///
