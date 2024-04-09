@@ -14,6 +14,8 @@ class DTDManager {
   final ValueNotifier<DartToolingDaemon?> _connection =
       ValueNotifier<DartToolingDaemon?>(null);
 
+  DartToolingDaemon get _dtd => _connection.value!;
+
   /// Whether the [DTDManager] is connected to a running instance of the DTD.
   bool get hasConnection => connection.value != null;
 
@@ -68,19 +70,16 @@ class DTDManager {
   /// available. When [forceRefresh] is true, the cached value will be cleared
   /// and recomputed.
   Future<IDEWorkspaceRoots?> workspaceRoots({bool forceRefresh = false}) async {
-    if (hasConnection) {
-      if (_workspaceRoots != null && forceRefresh) {
-        _workspaceRoots = null;
-      }
-      try {
-        return _workspaceRoots ??=
-            await _connection.value!.getIDEWorkspaceRoots();
-      } catch (e) {
-        _log.fine('Error fetching IDE workspaceRoots: $e');
-        return null;
-      }
+    if (!hasConnection) return null;
+    if (_workspaceRoots != null && forceRefresh) {
+      _workspaceRoots = null;
     }
-    return null;
+    try {
+      return _workspaceRoots ??= await _dtd.getIDEWorkspaceRoots();
+    } catch (e) {
+      _log.fine('Error fetching IDE workspaceRoots: $e');
+      return null;
+    }
   }
 
   IDEWorkspaceRoots? _workspaceRoots;
@@ -101,19 +100,16 @@ class DTDManager {
     int? depth = defaultGetProjectRootsDepth,
     bool forceRefresh = false,
   }) async {
-    if (hasConnection) {
-      if (_projectRoots != null && forceRefresh) {
-        _projectRoots = null;
-      }
-      try {
-        return _projectRoots ??=
-            await _connection.value!.getProjectRoots(depth: depth!);
-      } catch (e) {
-        _log.fine('Error fetching project roots: $e');
-        return null;
-      }
+    if (!hasConnection) return null;
+    if (_projectRoots != null && forceRefresh) {
+      _projectRoots = null;
     }
-    return null;
+    try {
+      return _projectRoots ??= await _dtd.getProjectRoots(depth: depth!);
+    } catch (e) {
+      _log.fine('Error fetching project roots: $e');
+      return null;
+    }
   }
 
   UriList? _projectRoots;

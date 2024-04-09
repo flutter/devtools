@@ -60,25 +60,36 @@ abstract class Handler {
       );
     }
 
-    final detectRootResponse = await detectRootPackageForVmService(
-      vmServiceUriAsString: vmServiceUriAsString,
-      vmServiceUri: vmServiceUri,
-      connected: connected,
-      api: api,
-    );
-    if (detectRootResponse.success) {
-      final rootUri = detectRootResponse.uri;
-      if (rootUri == null) {
-        return api.success();
-      }
-      return updateDtdWorkspaceRoots(
-        dtd!,
-        rootFromVmService: rootUri,
+    DartToolingDaemon? dartToolingDaemon;
+    try {
+      dartToolingDaemon = await DartToolingDaemon.connect(Uri.parse(dtd!.uri!));
+
+      final detectRootResponse = await detectRootPackageForVmService(
+        vmServiceUriAsString: vmServiceUriAsString,
+        vmServiceUri: vmServiceUri,
         connected: connected,
         api: api,
+        dtd: dartToolingDaemon,
       );
-    } else {
-      return api.serverError(detectRootResponse.message);
+      if (detectRootResponse.success) {
+        final rootUri = detectRootResponse.uri;
+        if (rootUri == null) {
+          return api.success();
+        }
+        return updateDtdWorkspaceRoots(
+          dartToolingDaemon,
+          dtdConnectionInfo: dtd,
+          rootFromVmService: rootUri,
+          connected: connected,
+          api: api,
+        );
+      } else {
+        return api.serverError(detectRootResponse.message);
+      }
+    } catch (e) {
+      return api.serverError('$e');
+    } finally {
+      await dartToolingDaemon?.close();
     }
   }
 
@@ -88,6 +99,7 @@ abstract class Handler {
     required Uri vmServiceUri,
     required bool connected,
     required ServerApi api,
+    required DartToolingDaemon dtd,
   }) async {
     late Uri rootPackageUri;
     if (connected) {
@@ -103,7 +115,7 @@ abstract class Handler {
           serviceFactory: VmService.defaultFactory,
         );
 
-        final root = await vmService.rootPackageDirectoryForMainIsolate;
+        final root = await vmService.rootPackageDirectoryForMainIsolate(dtd);
         if (root == null) {
           return (
             success: false,
@@ -139,37 +151,31 @@ abstract class Handler {
 
   @visibleForTesting
   static Future<shelf.Response> updateDtdWorkspaceRoots(
-    DTDConnectionInfo dtd, {
+    DartToolingDaemon dtd, {
+    required DTDConnectionInfo dtdConnectionInfo,
     required Uri rootFromVmService,
     required bool connected,
     required ServerApi api,
   }) async {
-    DartToolingDaemon? dartToolingDaemon;
-    try {
-      dartToolingDaemon = await DartToolingDaemon.connect(Uri.parse(dtd.uri!));
-      final currentRoots = (await dartToolingDaemon.getIDEWorkspaceRoots())
-          .ideWorkspaceRoots
-          .toSet();
-      // Add or remove [rootFromVmService] depending on whether this was a
-      // connect or disconnect notification.
-      final newRoots = connected
-          ? (currentRoots..add(rootFromVmService)).toList()
-          : (currentRoots..remove(rootFromVmService)).toList();
-      await dartToolingDaemon.setIDEWorkspaceRoots(dtd.secret!, newRoots);
-      return api.success();
-    } catch (e) {
-      return api.serverError('$e');
-    } finally {
-      await dartToolingDaemon?.close();
-    }
+    final currentRoots =
+        (await dtd.getIDEWorkspaceRoots()).ideWorkspaceRoots.toSet();
+    // Add or remove [rootFromVmService] depending on whether this was a
+    // connect or disconnect notification.
+    final newRoots = connected
+        ? (currentRoots..add(rootFromVmService)).toList()
+        : (currentRoots..remove(rootFromVmService)).toList();
+    await dtd.setIDEWorkspaceRoots(dtdConnectionInfo.secret!, newRoots);
+    return api.success();
   }
 }
 
 extension on VmService {
-  Future<String?> get rootPackageDirectoryForMainIsolate async {
+  Future<String?> rootPackageDirectoryForMainIsolate(
+    DartToolingDaemon dtd,
+  ) async {
     final fileUriString = await _rootLibraryForMainIsolate;
     return fileUriString != null
-        ? packageRootFromFileUriString(fileUriString)
+        ? packageRootFromFileUriString(fileUriString, dtd: dtd)
         : null;
   }
 

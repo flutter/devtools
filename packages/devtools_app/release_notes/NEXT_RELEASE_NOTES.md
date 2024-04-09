@@ -55,8 +55,9 @@ TODO: Remove this section if there are not any general updates.
 
 ## DevTools Extension updates
 
-* Fixed an issue preventing extensions to load for run targets under the `example`
-directory. - [#7533](https://github.com/flutter/devtools/pull/7533)
+* Detect extensions for all types of run targets in a package. - [#7533](https://github.com/flutter/devtools/pull/7533),
+[#7535](https://github.com/flutter/devtools/pull/7535)
+
 
 ## Full commit history
 
