@@ -2,10 +2,15 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:extension_discovery/extension_discovery.dart';
 import 'package:path/path.dart' as path;
 
 import 'extension_model.dart';
+
+/// Location where DevTools extension assets will be served, relative to where
+/// DevTools assets are served (build/).
+const extensionRequestPath = 'devtools_extensions';
 
 /// The default location for the DevTools extension, relative to
 /// `<parent_package_root>/extension/devtools/`.
@@ -25,6 +30,21 @@ class ExtensionsManager {
   /// This list will be cleared and re-populated each time
   /// [serveAvailableExtensions] is called.
   final devtoolsExtensions = <DevToolsExtensionConfig>[];
+
+  final _extensionLocationsByIdentifier = <String, String?>{};
+
+  /// Returns the absolute path of the assets for the extension with identifier
+  /// [extensionIdentifier].
+  /// 
+  /// This caches values upon first request for faster lookup.
+  String? lookupLocationFor(String extensionIdentifier) {
+    return _extensionLocationsByIdentifier.putIfAbsent(
+      extensionIdentifier,
+      () => devtoolsExtensions
+          .firstWhereOrNull((e) => e.identifier == extensionIdentifier)
+          ?.path,
+    );
+  }
 
   /// Serves any available DevTools extensions for the given
   /// [rootFileUriString], where [rootFileUriString] is the root for a Dart or
@@ -54,7 +74,7 @@ class ExtensionsManager {
       'rootPathFileUri: $rootFileUriString',
     );
 
-    devtoolsExtensions.clear();
+    _clear();
     final parsingErrors = StringBuffer();
 
     // Find all runtime extensions for [rootFileUriString], if non-null, and add
@@ -121,6 +141,11 @@ class ExtensionsManager {
         'files:\n$parsingErrors',
       );
     }
+  }
+
+  void _clear() {
+    _extensionLocationsByIdentifier.clear();
+    devtoolsExtensions.clear();
   }
 }
 

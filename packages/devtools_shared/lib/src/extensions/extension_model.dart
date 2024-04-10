@@ -142,6 +142,8 @@ class DevToolsExtensionConfig implements Comparable {
 
   String get displayName => name.toLowerCase();
 
+  String get identifier => '${displayName}_$version';
+
   String get analyticsSafeName => isPubliclyHosted ? name : 'private';
 
   Map<String, Object?> toJson() => {

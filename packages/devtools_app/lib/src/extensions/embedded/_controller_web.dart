@@ -7,6 +7,7 @@ import 'dart:ui_web' as ui_web;
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_extensions/api.dart';
+import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:path/path.dart' as path;
 import 'package:web/web.dart';
 
@@ -48,7 +49,8 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController
     );
     final baseUri = path.join(
       basePath,
-      extensionConfig.path,
+      extensionRequestPath,
+      extensionConfig.identifier,
       'index.html',
     );
     final queryParams = {
