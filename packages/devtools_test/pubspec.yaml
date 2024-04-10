@@ -2,7 +2,10 @@ name: devtools_test
 description: A package containing shared test helpers for Dart DevTools tests.
 publish_to: none
 
-# Note: this version should only be updated by running tools/update_version.dart
+# TODO(kenz): remove the version field here since this package is never published
+# nor depended upon by anything other than a path dependency.
+
+# Note: this version should only be updated by running devtools_tool update-version
 # that updates all versions of packages from packages/devtools.
 # When publishing new versions of this package be sure to publish a new version
 # of package:devtools as well. package:devtools contains a compiled snapshot of
@@ -18,7 +21,10 @@ environment:
 dependencies:
   async: ^2.0.0
   collection: ^1.15.0
-  devtools_shared: ^6.0.1
+  devtools_shared:
+    path: ../devtools_shared
+  # TODO(kenz): use a path dependency here since devtools_app is never published.
+  # This will require updating the `devtools_tool update-version` command.
   devtools_app: 2.35.0-dev.8
   devtools_app_shared:
     path: ../devtools_app_shared
