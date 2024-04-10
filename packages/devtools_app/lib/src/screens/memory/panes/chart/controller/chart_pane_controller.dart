@@ -28,6 +28,8 @@ enum _ConnectionState {
   disconnected,
 }
 
+typedef _MemoryEventHandler = void Function(Event);
+
 /// Manages connection between chart and application.
 ///
 /// Configures the connection first time when it is needed.
@@ -38,20 +40,22 @@ enum _ConnectionState {
 ///
 /// When connection is lost, [paused] turns to true.
 class _ChartConnectionController extends DisposableController {
-  _ChartConnectionController();
+  _ChartConnectionController({required this.onData});
 
+  final _MemoryEventHandler onData;
   _ConnectionState _state = _ConnectionState.notStarted;
 
   bool get paused => _paused;
   bool _paused = true;
-  set paused(bool value) {
+  Future<void> setPaused(bool value) async {
     if (_paused == value) return;
     _paused = value;
-    if (!_paused) _maybeConnect();
+    if (!_paused) await _maybeConnect();
   }
 
-  void _maybeConnect() {
+  Future<void> _maybeConnect() async {
     if (_state != _ConnectionState.notStarted) return;
+    await serviceConnection.serviceManager.onServiceAvailable;
 
     _state = _ConnectionState.connected;
   }
