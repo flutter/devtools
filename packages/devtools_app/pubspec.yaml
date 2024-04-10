@@ -24,8 +24,8 @@ dependencies:
   collection: ^1.15.0
   dap: ^1.1.0
   dds_service_extensions: ^1.6.0
-  devtools_app_shared: ^0.1.1-dev.0
-  devtools_extensions: ^0.1.1-dev.0
+  devtools_app_shared: ^0.1.1
+  devtools_extensions: ^0.1.1
   devtools_shared: ^8.1.1
   dtd: ^2.2.0
   file: ">=6.0.0 <8.0.0"
