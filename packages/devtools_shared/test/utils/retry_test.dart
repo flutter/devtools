@@ -42,7 +42,7 @@ void main() {
 
     test('throws after max retries reached', () async {
       expect(counter, 0);
-      expect(
+      await expectLater(
         () async {
           await runWithRetry(
             callback: () => callback(succeedOnAttempt: 11),
