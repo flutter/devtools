@@ -6,6 +6,7 @@ in favor of DTD implementation.
 * Bump `package:dtd` to `2.2.0`
 * Remove `package:unified_analytics` dependency.
 * Use DTD in the `packageRootFromFileUriString` utility to detect the package root.
+* Add `runWithRetry` utility method.
 
 # 8.1.1
 * TODO: publish this version with min Dart SDK version of the next Dart Beta.
