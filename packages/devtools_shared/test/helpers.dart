@@ -144,7 +144,7 @@ void main() async {
       callback: () => directory.deleteSync(recursive: true),
       maxRetries: 20,
       retryDelay: const Duration(milliseconds: 500),
-      stopCondition: () => directory.existsSync(),
+      stopCondition: () => !directory.existsSync(),
       onRetry: (attempt) =>
           // ignore: avoid_print, deliberate print to monitor delete failures
           print('Failed to delete test app on attempt $attempt, will retry...'),
