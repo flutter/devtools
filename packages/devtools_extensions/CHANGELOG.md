@@ -1,8 +1,8 @@
-## 0.1.1-dev.0
+## 0.1.1
 * Update the simulated environment help dialogs with information about the
 new `--print-dtd` CLI flag.
-* Bump the minimum Dart and Flutter SDK versions to `3.4.0-275.0.dev` and
-`3.21.0-15.0.pre` respectively.
+* Bump the minimum Dart and Flutter SDK versions to `3.4.0-282.1.beta` and
+`3.22.0-0.1.pre` respectively.
 * Bump `devtools_app_shared` to ^0.1.1-dev.0
 * Bump `devtools_shared` to ^8.1.1-dev.0
 
