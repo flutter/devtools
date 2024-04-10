@@ -11,12 +11,12 @@ environment:
 dependencies:
   async: ^2.0.0
   collection: ^1.15.0
-  devtools_shared:
-    path: ../devtools_shared
   devtools_app:
     path: ../devtools_app
   devtools_app_shared:
     path: ../devtools_app_shared
+  devtools_shared:
+    path: ../devtools_shared
   flutter:
     sdk: flutter
   flutter_test:
