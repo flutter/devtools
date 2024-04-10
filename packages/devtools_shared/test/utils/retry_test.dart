@@ -22,7 +22,7 @@ void main() {
   }
 
   group('runWithRetry', () {
-    test('succeeds after a single attempts', () async {
+    test('succeeds after a single attempt', () async {
       expect(counter, 0);
       await runWithRetry(
         callback: () => callback(succeedOnAttempt: 1),
@@ -52,6 +52,21 @@ void main() {
         throwsException,
       );
       expect(counter, 10);
+    });
+
+    test('stops early if continueCondition is not met', () async {
+      expect(counter, 0);
+      await expectLater(
+        () async {
+          await runWithRetry(
+            callback: () => callback(succeedOnAttempt: 5),
+            maxRetries: 10,
+            continueCondition: () => counter < 3,
+          );
+        },
+        throwsA(isA<StateError>()),
+      );
+      expect(counter, 3);
     });
   });
 }

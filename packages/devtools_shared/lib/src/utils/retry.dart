@@ -18,20 +18,22 @@ Future<void> runWithRetry({
   required FutureOr<void> Function() callback,
   required int maxRetries,
   Duration retryDelay = const Duration(milliseconds: 250),
-  bool Function()? continueCondition,
-  void Function(int attempt)? onRetry,
+  FutureOr<bool> Function()? continueCondition,
+  FutureOr<void> Function(int attempt)? onRetry,
 }) async {
-  for (var attempt = 1;
-      attempt <= maxRetries && (continueCondition?.call() ?? true);
-      attempt++) {
+  for (var attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      await callback();
+      if (await continueCondition?.call() ?? true) {
+        await callback();
+      } else {
+        throw StateError('Continue condition not met. Cannot retry.');
+      }
       break;
     } catch (e) {
-      if (attempt == maxRetries) {
+      if (attempt == maxRetries || e is StateError) {
         rethrow;
       }
-      onRetry?.call(attempt);
+      await onRetry?.call(attempt);
       await Future.delayed(retryDelay);
     }
   }
