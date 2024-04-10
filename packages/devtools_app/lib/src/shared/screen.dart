@@ -154,6 +154,8 @@ enum ScreenMetaData {
 /// * connected
 /// * not-connected
 ///
+/// See [devToolsMode].
+///
 /// A screen may support any combination of modes.
 ///
 /// For offline-data and connected modes:

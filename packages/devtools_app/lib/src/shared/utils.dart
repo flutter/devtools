@@ -22,6 +22,7 @@ import '../../devtools.dart' as devtools;
 import 'common_widgets.dart';
 import 'connected_app.dart';
 import 'globals.dart';
+import 'primitives/simple_items.dart';
 
 final _log = Logger('lib/src/shared/utils');
 
@@ -273,4 +274,13 @@ class DebounceTimer {
   void cancel() {
     _timer.cancel();
   }
+}
+
+/// Current mode of DevTools.
+DevToolsMode get devToolsMode {
+  return offlineDataController.showingOfflineData.value
+      ? DevToolsMode.offlineData
+      : serviceConnection.serviceManager.hasConnection
+          ? DevToolsMode.connected
+          : DevToolsMode.disconnected;
 }

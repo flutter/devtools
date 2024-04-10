@@ -78,9 +78,9 @@ void main() {
 
   group('MemoryScreen', () {
     setUp(() {
+      setUpServiceManagerForMemory();
       screen = MemoryScreen();
       controller = MemoryController();
-      setUpServiceManagerForMemory();
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {

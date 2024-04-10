@@ -76,7 +76,7 @@ abstract class Handler {
         if (rootUri == null) {
           return api.success();
         }
-        return updateDtdWorkspaceRoots(
+        return await updateDtdWorkspaceRoots(
           dartToolingDaemon,
           dtdConnectionInfo: dtd,
           rootFromVmService: rootUri,
@@ -175,7 +175,7 @@ extension on VmService {
   ) async {
     final fileUriString = await _rootLibraryForMainIsolate;
     return fileUriString != null
-        ? packageRootFromFileUriString(fileUriString, dtd: dtd)
+        ? await packageRootFromFileUriString(fileUriString, dtd: dtd)
         : null;
   }
 
