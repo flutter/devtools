@@ -17,6 +17,48 @@ import 'event_chart_controller.dart';
 import 'memory_tracker.dart';
 import 'vm_chart_controller.dart';
 
+/// States of chart connection.
+///
+/// In lifetime of one chart controller the states are changed in the following order:
+/// [notStarted] -> [connected] -> [disconnected].
+/// Reconnection does not happen.
+enum _ConnectionState {
+  notStarted,
+  connected,
+  disconnected,
+}
+
+/// Manages connection between chart and application.
+///
+/// Configures the connection first time when it is needed.
+/// Pauses / resumes handling memory events when user pauses / resumes chart.
+/// Handles accidental disconnect.
+/// It is not chart controller's responsibility to handle reconnection and graceful
+/// interaction with user. It just should not fail when connection is lost.
+///
+/// When connection is lost, [paused] turns to true.
+class _ChartConnectionController extends DisposableController {
+  _ChartConnectionController();
+
+  _ConnectionState _state = _ConnectionState.notStarted;
+
+  bool get paused => _paused;
+  bool _paused = true;
+  set paused(bool value) {
+    if (_paused == value) return;
+    _paused = value;
+    if (!_paused) _maybeConnect();
+  }
+
+  void _maybeConnect() {
+    if (_state != _ConnectionState.notStarted) return;
+
+    _state = _ConnectionState.connected;
+  }
+
+  void dispose() {}
+}
+
 class MemoryChartPaneController extends DisposableController
     with AutoDisposeControllerMixin {
   MemoryChartPaneController(this.mode);
@@ -32,6 +74,9 @@ class MemoryChartPaneController extends DisposableController
     // TODO(polina-c): implement, https://github.com/flutter/devtools/issues/6972
     return {};
   }
+
+  late final _ChartConnectionController? _chartConnection =
+      mode == DevToolsMode.connected ? _ChartConnectionController() : null;
 
   final MemoryTimeline memoryTimeline = MemoryTimeline();
 
