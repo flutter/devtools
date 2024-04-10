@@ -34,7 +34,7 @@ void main() {
       };
       final response = await ServerApi.handle(
         request,
-        extensionsManager: ExtensionsManager(buildDir: '/'),
+        extensionsManager: ExtensionsManager(),
         deeplinkManager: fakeManager,
       );
       expect(response.statusCode, HttpStatus.ok);
@@ -55,7 +55,7 @@ void main() {
         );
         final response = await ServerApi.handle(
           request,
-          extensionsManager: ExtensionsManager(buildDir: '/'),
+          extensionsManager: ExtensionsManager(),
           deeplinkManager: FakeDeeplinkManager(),
         );
         expect(response.statusCode, HttpStatus.badRequest);
@@ -84,7 +84,7 @@ void main() {
       };
       final response = await ServerApi.handle(
         request,
-        extensionsManager: ExtensionsManager(buildDir: '/'),
+        extensionsManager: ExtensionsManager(),
         deeplinkManager: fakeManager,
       );
       expect(response.statusCode, HttpStatus.ok);
@@ -113,7 +113,7 @@ void main() {
       };
       final response = await ServerApi.handle(
         request,
-        extensionsManager: ExtensionsManager(buildDir: '/'),
+        extensionsManager: ExtensionsManager(),
         deeplinkManager: fakeManager,
       );
       expect(response.statusCode, HttpStatus.ok);
@@ -147,7 +147,7 @@ void main() {
         };
         final response = await ServerApi.handle(
           request,
-          extensionsManager: ExtensionsManager(buildDir: '/'),
+          extensionsManager: ExtensionsManager(),
           deeplinkManager: fakeManager,
         );
         expect(response.statusCode, HttpStatus.ok);
