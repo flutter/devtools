@@ -9,28 +9,27 @@ import 'dart:async';
 /// * [maxRetries] the maximum number of times [callback] will be ran before
 ///   rethrowing an exception if it does not complete successfully.
 /// * [retryDelay] the time to wait between retry attempts.
-/// * [continueCondition] an optional callback that determines whether we should
-///   continue retrying, in addition to the condition that we must not retry
-///   more than [maxRetries] times.
+/// * [stopCondition] an optional callback that determines whether we should
+///   stop retrying, in addition to the condition that we must not retry
+///   more than [maxRetries] times. If the [stopCondition] is met, we will stop
+///   retrying without exception.
 /// * [onRetry] an optional callback that will be called if [callback] fails
 ///   and we need to attempt a retry.
 Future<void> runWithRetry({
   required FutureOr<void> Function() callback,
   required int maxRetries,
   Duration retryDelay = const Duration(milliseconds: 250),
-  FutureOr<bool> Function()? continueCondition,
+  FutureOr<bool> Function()? stopCondition,
   FutureOr<void> Function(int attempt)? onRetry,
 }) async {
-  for (var attempt = 1; attempt <= maxRetries; attempt++) {
+  for (var attempt = 1;
+      attempt <= maxRetries && (await stopCondition?.call() != true);
+      attempt++) {
     try {
-      if (await continueCondition?.call() ?? true) {
-        await callback();
-      } else {
-        throw StateError('Continue condition not met. Cannot retry.');
-      }
+      await callback();
       break;
     } catch (e) {
-      if (attempt == maxRetries || e is StateError) {
+      if (attempt == maxRetries) {
         rethrow;
       }
       await onRetry?.call(attempt);

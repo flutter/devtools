@@ -66,19 +66,15 @@ void main() {
       expect(counter, 10);
     });
 
-    test('stops early if continueCondition is not met', () async {
-      expect(counter, 0);
-      await expectLater(
+    test('stops early without exception if stopCondition is met',
         () async {
-          await runWithRetry(
-            callback: () => callback(succeedOnAttempt: 5),
-            maxRetries: 10,
-            continueCondition: () => counter < 3,
-          );
-        },
-        throwsA(isA<StateError>()),
+      expect(counter, 0);
+      await runWithRetry(
+        callback: () => callback(succeedOnAttempt: 5),
+        maxRetries: 10,
+        stopCondition: () => counter > 3,
       );
-      expect(counter, 3);
+      expect(counter, 4);
     });
   });
 }
