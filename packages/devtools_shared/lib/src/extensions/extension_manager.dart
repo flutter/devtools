@@ -8,10 +8,6 @@ import 'package:path/path.dart' as path;
 
 import 'extension_model.dart';
 
-/// Location where DevTools extension assets will be served, relative to where
-/// DevTools assets are served (build/).
-const extensionRequestPath = 'devtools_extensions';
-
 /// The default location for the DevTools extension, relative to
 /// `<parent_package_root>/extension/devtools/`.
 const extensionBuildDefault = 'build';

@@ -64,8 +64,7 @@ void main() {
       expect(counter, 10);
     });
 
-    test('stops early without exception if stopCondition is met',
-        () async {
+    test('stops early without exception if stopCondition is met', () async {
       expect(counter, 0);
       await runWithRetry(
         callback: () => callback(succeedOnAttempt: 5),
