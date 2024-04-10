@@ -40,6 +40,18 @@ void main() {
       expect(counter, 5);
     });
 
+    test('calls onRetry callback for each retry attempt', () async {
+      var str = '';
+      expect(counter, 0);
+      await runWithRetry(
+        callback: () => callback(succeedOnAttempt: 5),
+        maxRetries: 10,
+        onRetry: (attempt) => str = '$str$attempt',
+      );
+      expect(counter, 5);
+      expect(str, '1234');
+    });
+
     test('throws after max retries reached', () async {
       expect(counter, 0);
       await expectLater(
