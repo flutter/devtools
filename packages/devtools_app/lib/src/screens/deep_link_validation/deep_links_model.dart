@@ -193,7 +193,7 @@ class LinkData with SearchableDataMixin {
     required this.domain,
     required this.path,
     required this.os,
-    this.scheme = const <String>['http://', 'https://'],
+    this.scheme = const <String>{},
     this.domainErrors = const <DomainError>[],
     this.pathErrors = const <PathError>{},
     this.associatedPath = const <String>[],
@@ -201,9 +201,9 @@ class LinkData with SearchableDataMixin {
   });
 
   final String path;
-  final String domain;
+  final String? domain;
   final List<PlatformOS> os;
-  final List<String> scheme;
+  final Set<String> scheme;
   final List<DomainError> domainErrors;
   Set<PathError> pathErrors;
 
@@ -212,7 +212,7 @@ class LinkData with SearchableDataMixin {
 
   @override
   bool matchesSearchToken(RegExp regExpSearch) {
-    return domain.caseInsensitiveContains(regExpSearch) ||
+    return (domain != null && domain!.caseInsensitiveContains(regExpSearch)) ||
         path.caseInsensitiveContains(regExpSearch);
   }
 
@@ -328,7 +328,7 @@ class DomainColumn extends ColumnData<LinkData>
   }
 
   @override
-  String getValue(LinkData dataObject) => dataObject.domain;
+  String getValue(LinkData dataObject) => dataObject.domain ?? 'missing domain';
 
   @override
   Widget build(
@@ -338,12 +338,14 @@ class DomainColumn extends ColumnData<LinkData>
     bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
-    return _ErrorAwareText(
-      isError: dataObject.domainErrors.isNotEmpty,
-      controller: controller,
-      text: dataObject.domain,
-      link: dataObject,
-    );
+    return dataObject.domain == null
+        ? Text('missing domain', style: Theme.of(context).errorTextStyle)
+        : _ErrorAwareText(
+            isError: dataObject.domainErrors.isNotEmpty,
+            controller: controller,
+            text: dataObject.domain!,
+            link: dataObject,
+          );
   }
 
   @override
@@ -474,7 +476,9 @@ class SchemeColumn extends ColumnData<LinkData>
     bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
-    return Text(getValue(dataObject));
+    return dataObject.scheme.isEmpty
+        ? Text('missing scheme', style: Theme.of(context).errorTextStyle)
+        : Text(getValue(dataObject));
   }
 
   @override
@@ -723,11 +727,11 @@ int _compareLinkData(
       }
       return 0;
     case SortingOption.aToZ:
-      if (compareDomain) return a.domain.compareTo(b.domain);
+      if (compareDomain) return (a.domain ?? '').compareTo(b.domain ?? '');
 
       return a.path.compareTo(b.path);
     case SortingOption.zToA:
-      if (compareDomain) return b.domain.compareTo(a.domain);
+      if (compareDomain) return (b.domain ?? '').compareTo(a.domain ?? '');
 
       return b.path.compareTo(a.path);
   }
