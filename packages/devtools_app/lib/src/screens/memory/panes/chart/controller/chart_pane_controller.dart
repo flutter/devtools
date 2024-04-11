@@ -80,7 +80,11 @@ class MemoryChartPaneController extends DisposableController
   }
 
   late final _ChartConnectionController? _chartConnection =
-      mode == DevToolsMode.connected ? _ChartConnectionController() : null;
+      mode == DevToolsMode.connected
+          ? _ChartConnectionController(onData: _onMemoryData)
+          : null;
+
+  void _onMemoryData(Event data) {}
 
   final MemoryTimeline memoryTimeline = MemoryTimeline();
 
