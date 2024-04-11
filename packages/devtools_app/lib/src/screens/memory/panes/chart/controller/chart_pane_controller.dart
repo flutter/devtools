@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
@@ -100,11 +98,6 @@ class MemoryChartPaneController extends DisposableController
     return serviceConnection.serviceManager.vm?.operatingSystem == 'android';
   }
 
-  final StreamController<MemoryTracker?> memoryTrackerController =
-      StreamController<MemoryTracker?>.broadcast();
-
-  Stream<MemoryTracker?> get onMemory => memoryTrackerController.stream;
-
   MemoryTracker? memoryTracker;
 
   bool get hasStarted => memoryTracker != null;
@@ -158,30 +151,6 @@ class MemoryChartPaneController extends DisposableController
       ),
     );
 
-    autoDisposeStreamSubscription(
-      memoryTracker!.onChange.listen((_) {
-        memoryTrackerController.add(memoryTracker);
-      }),
-    );
-    autoDisposeStreamSubscription(
-      memoryTracker!.onChange.listen((_) {
-        memoryTrackerController.add(memoryTracker);
-      }),
-    );
-
-    // TODO(terry): Used to detect stream being closed from the
-    // memoryController dispose method.  Needed when a HOT RELOAD
-    // will call dispose however, initState doesn't seem
-    // to happen David is working on scaffolding.
-    memoryTrackerController.stream.listen(
-      (_) {},
-      onDone: () {
-        // Stop polling and reset memoryTracker.
-        memoryTracker?.stop();
-        memoryTracker = null;
-      },
-    );
-
     updateAndroidChartVisibility();
     addAutoDisposeListener(
       preferences.memory.androidCollectionEnabled,
@@ -191,8 +160,6 @@ class MemoryChartPaneController extends DisposableController
 
   void _handleConnectionStop() {
     memoryTracker?.stop();
-    memoryTrackerController.add(memoryTracker);
-
     memoryTimeline.reset();
     hasStopped = true;
   }
@@ -214,7 +181,6 @@ class MemoryChartPaneController extends DisposableController
   @override
   void dispose() {
     super.dispose();
-    unawaited(memoryTrackerController.close());
     memoryTracker?.dispose();
     _legendVisibleNotifier.dispose();
     _displayIntervalNotifier.dispose();
