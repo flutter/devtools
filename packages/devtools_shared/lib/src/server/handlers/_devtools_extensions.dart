@@ -13,7 +13,7 @@ abstract class _ExtensionsApiHandler {
     ExtensionsManager extensionsManager,
   ) async {
     final missingRequiredParams = ServerApi._checkRequiredParameters(
-      [ExtensionsApi.extensionRootPathPropertyName],
+      [ExtensionsApi.packageRootUriPropertyName],
       queryParams: queryParams,
       api: api,
       requestName: ExtensionsApi.apiServeAvailableExtensions,
@@ -21,7 +21,8 @@ abstract class _ExtensionsApiHandler {
     if (missingRequiredParams != null) return missingRequiredParams;
 
     final logs = <String>[];
-    final rootPath = queryParams[ExtensionsApi.extensionRootPathPropertyName];
+    final rootFileUriString =
+        queryParams[ExtensionsApi.packageRootUriPropertyName];
     final result = <String, Object?>{};
 
     /// Helper to return a success response with all available extensions
@@ -40,7 +41,10 @@ abstract class _ExtensionsApiHandler {
     }
 
     try {
-      await extensionsManager.serveAvailableExtensions(rootPath, logs);
+      await extensionsManager.serveAvailableExtensions(
+        rootFileUriString,
+        logs,
+      );
     } on ExtensionParsingException catch (e) {
       // For [ExtensionParsingException]s, we should return a success response
       // with a warning message.

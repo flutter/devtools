@@ -50,7 +50,7 @@ Future<List<DevToolsExtensionConfig>> refreshAvailableExtensions(
       return [];
     }
   } else if (debugDevToolsExtensions) {
-    return debugHandleRefreshAvailableExtensions(appRoot);
+    return debugHandleRefreshAvailableExtensions();
   }
   return [];
 }
@@ -91,7 +91,6 @@ Future<ExtensionEnabledState> extensionEnabledState({
     }
   } else if (debugDevToolsExtensions) {
     return debugHandleExtensionEnabledState(
-      appRoot: appRoot,
       extensionName: extensionName,
       enable: enable,
     );

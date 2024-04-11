@@ -87,7 +87,8 @@ abstract class ExtensionsApi {
   /// for the app whose extensions are being queried.
   ///
   /// This field is a file:// URI string and NOT a path.
-  static const extensionRootPathPropertyName = 'rootPath';
+  static const packageRootUriPropertyName = 'packageRootUri';
+
 
   /// The property name for the response that the server sends back upon
   /// receiving a [apiServeAvailableExtensions] request.

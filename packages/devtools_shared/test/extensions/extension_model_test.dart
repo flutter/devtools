@@ -10,7 +10,7 @@ void main() {
     test('parses with a String materialIconCodePoint field', () {
       final config = DevToolsExtensionConfig.parse({
         'name': 'foo',
-        'path': 'path/to/foo/extension',
+        'extensionAssetsUri': 'path/to/foo/extension',
         'issueTracker': 'www.google.com',
         'version': '1.0.0',
         'materialIconCodePoint': '0xf012',
@@ -18,7 +18,7 @@ void main() {
       });
 
       expect(config.name, 'foo');
-      expect(config.path, 'path/to/foo/extension');
+      expect(config.extensionAssetsUri, 'path/to/foo/extension');
       expect(config.issueTrackerLink, 'www.google.com');
       expect(config.version, '1.0.0');
       expect(config.materialIconCodePoint, 0xf012);
@@ -27,7 +27,7 @@ void main() {
     test('parses with an int materialIconCodePoint field', () {
       final config = DevToolsExtensionConfig.parse({
         'name': 'foo',
-        'path': 'path/to/foo/extension',
+        'extensionAssetsUri': 'path/to/foo/extension',
         'issueTracker': 'www.google.com',
         'version': '1.0.0',
         'materialIconCodePoint': 0xf012,
@@ -35,7 +35,7 @@ void main() {
       });
 
       expect(config.name, 'foo');
-      expect(config.path, 'path/to/foo/extension');
+      expect(config.extensionAssetsUri, 'path/to/foo/extension');
       expect(config.issueTrackerLink, 'www.google.com');
       expect(config.version, '1.0.0');
       expect(config.materialIconCodePoint, 0xf012);
@@ -44,14 +44,14 @@ void main() {
     test('parses with a null materialIconCodePoint field', () {
       final config = DevToolsExtensionConfig.parse({
         'name': 'foo',
-        'path': 'path/to/foo/extension',
+        'extensionAssetsUri': 'path/to/foo/extension',
         'issueTracker': 'www.google.com',
         'version': '1.0.0',
         'isPubliclyHosted': 'false',
       });
 
       expect(config.name, 'foo');
-      expect(config.path, 'path/to/foo/extension');
+      expect(config.extensionAssetsUri, 'path/to/foo/extension');
       expect(config.issueTrackerLink, 'www.google.com');
       expect(config.version, '1.0.0');
       expect(config.materialIconCodePoint, 0xf03f);
@@ -82,22 +82,10 @@ void main() {
       expect(
         () {
           DevToolsExtensionConfig.parse({
-            'path': 'path/to/foo/extension',
             'issueTracker': 'www.google.com',
             'version': '1.0.0',
-            'isPubliclyHosted': 'false',
-          });
-        },
-        throwsMissingRequiredFieldsError(),
-      );
-
-      // Missing 'path'.
-      expect(
-        () {
-          DevToolsExtensionConfig.parse({
-            'name': 'foo',
-            'issueTracker': 'www.google.com',
-            'version': '1.0.0',
+            'materialIconCodePoint': 0xf012,
+            'extensionAssetsUri': 'path/to/foo/extension',
             'isPubliclyHosted': 'false',
           });
         },
@@ -109,8 +97,9 @@ void main() {
         () {
           DevToolsExtensionConfig.parse({
             'name': 'foo',
-            'path': 'path/to/foo/extension',
             'version': '1.0.0',
+            'materialIconCodePoint': 0xf012,
+            'extensionAssetsUri': 'path/to/foo/extension',
             'isPubliclyHosted': 'false',
           });
         },
@@ -122,8 +111,37 @@ void main() {
         () {
           DevToolsExtensionConfig.parse({
             'name': 'foo',
-            'path': 'path/to/foo/extension',
             'issueTracker': 'www.google.com',
+            'materialIconCodePoint': 0xf012,
+            'extensionAssetsUri': 'path/to/foo/extension',
+            'isPubliclyHosted': 'false',
+          });
+        },
+        throwsMissingRequiredFieldsError(),
+      );
+
+      // Missing 'materialIconCodePoint'.
+      expect(
+        () {
+          DevToolsExtensionConfig.parse({
+            'name': 'foo',
+            'issueTracker': 'www.google.com',
+            'version': '1.0.0',
+            'extensionAssetsUri': 'path/to/foo/extension',
+            'isPubliclyHosted': 'false',
+          });
+        },
+        throwsMissingRequiredFieldsError(),
+      );
+
+      // Missing 'extensionAssetsUri'.
+      expect(
+        () {
+          DevToolsExtensionConfig.parse({
+            'name': 'foo',
+            'issueTracker': 'www.google.com',
+            'version': '1.0.0',
+            'materialIconCodePoint': 0xf012,
             'isPubliclyHosted': 'false',
           });
         },
@@ -135,9 +153,10 @@ void main() {
         () {
           DevToolsExtensionConfig.parse({
             'name': 'foo',
-            'path': 'path/to/foo/extension',
-            'version': '1.0.0',
             'issueTracker': 'www.google.com',
+            'version': '1.0.0',
+            'materialIconCodePoint': 0xf012,
+            'extensionAssetsUri': 'path/to/foo/extension',
           });
         },
         throwsMissingIsPubliclyHostedError(),
@@ -159,9 +178,10 @@ void main() {
         () {
           DevToolsExtensionConfig.parse({
             'name': 23,
-            'path': 'path/to/foo/extension',
             'issueTracker': 'www.google.com',
             'version': '1.0.0',
+            'materialIconCodePoint': 0xf012,
+            'extensionAssetsUri': 'path/to/foo/extension',
             'isPubliclyHosted': 'false',
           });
         },
@@ -172,9 +192,10 @@ void main() {
         () {
           DevToolsExtensionConfig.parse({
             'name': 'foo',
-            'path': 'path/to/foo/extension',
             'issueTracker': 'www.google.com',
             'version': '1.0.0',
+            'materialIconCodePoint': 0xf012,
+            'extensionAssetsUri': 'path/to/foo/extension',
             'isPubliclyHosted': false,
           });
         },
@@ -197,9 +218,10 @@ void main() {
         () {
           DevToolsExtensionConfig.parse({
             'name': 'name with spaces',
-            'path': 'path/to/foo/extension',
             'issueTracker': 'www.google.com',
             'version': '1.0.0',
+            'materialIconCodePoint': 0xf012,
+            'extensionAssetsUri': 'path/to/foo/extension',
             'isPubliclyHosted': 'false',
           });
         },
@@ -210,7 +232,7 @@ void main() {
         () {
           DevToolsExtensionConfig.parse({
             'name': 'Name_With_Capital_Letters',
-            'path': 'path/to/foo/extension',
+            'extensionAssetsUri': 'path/to/foo/extension',
             'issueTracker': 'www.google.com',
             'version': '1.0.0',
             'isPubliclyHosted': 'false',
@@ -223,9 +245,10 @@ void main() {
         () {
           DevToolsExtensionConfig.parse({
             'name': 'name.with\'specialchars/',
-            'path': 'path/to/foo/extension',
             'issueTracker': 'www.google.com',
             'version': '1.0.0',
+            'materialIconCodePoint': 0xf012,
+            'extensionAssetsUri': 'path/to/foo/extension',
             'isPubliclyHosted': 'false',
           });
         },

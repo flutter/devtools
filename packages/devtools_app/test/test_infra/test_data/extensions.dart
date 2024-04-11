@@ -10,7 +10,7 @@ final fooExtension = DevToolsExtensionConfig.parse({
   DevToolsExtensionConfig.nameKey: 'foo',
   DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
   DevToolsExtensionConfig.versionKey: '1.0.0',
-  DevToolsExtensionConfig.pathKey: '/path/to/foo',
+  DevToolsExtensionConfig.extensionAssetsUriKey: '/path/to/foo',
   DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
 });
 
@@ -19,7 +19,7 @@ final barExtension = DevToolsExtensionConfig.parse({
   DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
   DevToolsExtensionConfig.versionKey: '2.0.0',
   DevToolsExtensionConfig.materialIconCodePointKey: 0xe638,
-  DevToolsExtensionConfig.pathKey: '/path/to/bar',
+  DevToolsExtensionConfig.extensionAssetsUriKey: '/path/to/bar',
   DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
 });
 
@@ -29,6 +29,6 @@ final providerExtension = DevToolsExtensionConfig.parse({
       'https://github.com/rrousselGit/provider/issues',
   DevToolsExtensionConfig.versionKey: '3.0.0',
   DevToolsExtensionConfig.materialIconCodePointKey: 0xe50a,
-  DevToolsExtensionConfig.pathKey: '/path/to/provider',
+  DevToolsExtensionConfig.extensionAssetsUriKey: '/path/to/provider',
   DevToolsExtensionConfig.isPubliclyHostedKey: 'true',
 });
