@@ -47,9 +47,6 @@ class MemoryTracker {
   /// Polled engine's RasterCache estimates.
   RasterCache? rasterCache;
 
-  Stream<void> get onChange => _changeController.stream;
-  final _changeController = StreamController<void>.broadcast();
-
   StreamSubscription<Event>? _gcStreamListener;
 
   Timer? _monitorContinues;
@@ -257,8 +254,6 @@ class MemoryTracker {
     );
 
     timeline.addSample(sample);
-
-    _changeController.add(null);
 
     // Signal continues events are to be emitted.  These events are hidden
     // until a reset event then the continuous events between last monitor
