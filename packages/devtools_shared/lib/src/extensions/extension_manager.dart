@@ -75,7 +75,7 @@ class ExtensionsManager {
 
     // Find all runtime extensions for [rootFileUriString], if non-null.
     if (rootFileUriString != null) {
-      await addExtensionsForRoot(
+      await _addExtensionsForRoot(
         rootFileUriString,
         logs: logs,
         parsingErrors: parsingErrors,
@@ -93,7 +93,7 @@ class ExtensionsManager {
   /// Finds the available extensions for the package root at
   /// [rootFileUriString], generates [DevToolsExtensionConfig] objects, and adds
   /// them to [devtoolsExtensions].
-  Future<void> addExtensionsForRoot(
+  Future<void> _addExtensionsForRoot(
     String rootFileUriString, {
     required List<String> logs,
     required StringBuffer parsingErrors,
