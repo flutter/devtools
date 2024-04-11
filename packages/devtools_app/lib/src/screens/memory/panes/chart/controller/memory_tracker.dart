@@ -16,6 +16,12 @@ import '../../../shared/primitives/memory_timeline.dart';
 
 final _log = Logger('memory_protocol');
 
+enum _ContinuesState {
+  none,
+  stop,
+  next,
+}
+
 class MemoryTracker {
   MemoryTracker(
     this.timeline, {
@@ -26,6 +32,7 @@ class MemoryTracker {
   final MemoryTimeline timeline;
   final ValueListenable<bool> paused;
   final ValueNotifier<bool> isAndroidChartVisible;
+  _ContinuesState _monitorContinuesState = _ContinuesState.none;
 
   Timer? _pollingTimer;
 
@@ -223,9 +230,9 @@ class MemoryTracker {
     if (eventSample != null && eventSample.isEventAllocationAccumulator) {
       if (eventSample.allocationAccumulator!.isStart) {
         // Stop Continuous events being auto posted - a new start is beginning.
-        timeline.monitorContinuesState = ContinuesState.stop;
+        _monitorContinuesState = _ContinuesState.stop;
       }
-    } else if (timeline.monitorContinuesState == ContinuesState.next) {
+    } else if (_monitorContinuesState == _ContinuesState.next) {
       if (_monitorContinues != null) {
         _monitorContinues!.cancel();
         _monitorContinues = null;
@@ -259,7 +266,7 @@ class MemoryTracker {
     if (eventSample != null &&
         eventSample.isEventAllocationAccumulator &&
         eventSample.allocationAccumulator!.isStart) {
-      timeline.monitorContinuesState = ContinuesState.next;
+      _monitorContinuesState = _ContinuesState.next;
     }
   }
 
