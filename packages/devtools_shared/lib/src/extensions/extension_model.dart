@@ -24,6 +24,7 @@ class DevToolsExtensionConfig implements Comparable {
           nameKey: final String name,
           issueTrackerKey: final String issueTracker,
           versionKey: final String version,
+          // ignore: avoid-unnecessary-type-assertions, this can be a String or an int
           materialIconCodePointKey: final Object codePointFromJson,
           // The expected keys below are not from the extension's config.yaml
           // file; they are generated during the extension detection mechanism
