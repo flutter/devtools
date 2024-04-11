@@ -32,28 +32,21 @@ typedef _MemoryEventHandler = void Function(Event);
 
 /// Manages connection between chart and application.
 ///
-/// Configures the connection first time when it is needed.
-/// Pauses / resumes handling memory events when user pauses / resumes chart.
-/// Handles accidental disconnect.
-/// It is not chart controller's responsibility to handle reconnection and graceful
-/// interaction with user. It just should not fail when connection is lost.
+/// The connection consists of listeners to events from vm and
+/// ongoing requests to vm service for current memory usage.
 ///
-/// When connection is lost, [paused] turns to true.
+/// When user pauses the chart, the data is still collected.
+///
+/// Handles accidental disconnect.
+/// It is not the memory screen's responsibility to handle reconnection and graceful
+/// interaction with user. The screen just should not fail when connection is lost.
 class _ChartConnectionController extends DisposableController {
   _ChartConnectionController({required this.onData});
 
   final _MemoryEventHandler onData;
   _ConnectionState _state = _ConnectionState.notStarted;
 
-  bool get paused => _paused;
-  bool _paused = true;
-  Future<void> setPaused(bool value) async {
-    if (_paused == value) return;
-    _paused = value;
-    if (!_paused) await _maybeConnect();
-  }
-
-  Future<void> _maybeConnect() async {
+  Future<void> maybeConnect() async {
     if (_state != _ConnectionState.notStarted) return;
     await serviceConnection.serviceManager.onServiceAvailable;
 

@@ -24,7 +24,8 @@ class ChartControlPane extends StatefulWidget {
 
 @visibleForTesting
 class ChartPaneTooltips {
-  static const String pauseTooltip = 'Pause the chart';
+  static const String pauseTooltip =
+      'Pause the chart. Data will be still collected and shown when you resume.';
   static const String resumeTooltip = 'Resume the chart';
 }
 
