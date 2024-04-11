@@ -91,7 +91,7 @@ class DevToolsExtensionConfig implements Comparable {
     }
   }
 
-  // The following keys are required in the extension's 'config.yaml' file.
+  // The following keys are required in the extension's config.yaml file.
   static const nameKey = 'name';
   static const issueTrackerKey = 'issueTracker';
   static const versionKey = 'version';
@@ -103,7 +103,7 @@ class DevToolsExtensionConfig implements Comparable {
     materialIconCodePointKey,
   ];
 
-  // The following keys are never expected to be in the extensions 'config.yaml'
+  // The following keys are never expected to be in the extensions config.yaml
   // file. They are generated during the extension detection mechanism in the
   // DevTools server.
   static const extensionAssetsUriKey = 'extensionAssetsUri';
@@ -115,7 +115,7 @@ class DevToolsExtensionConfig implements Comparable {
 
   /// The package name that this extension is for.
   ///
-  /// This value should be defined by the extension's 'config.yaml' file.
+  /// This value should be defined by the extension's config.yaml file.
   final String name;
 
   // TODO(kenz): we might want to add validation to these issue tracker
@@ -124,7 +124,7 @@ class DevToolsExtensionConfig implements Comparable {
   // 'pub.dev/packages/$name'.
   /// The link to the issue tracker for this DevTools extension.
   ///
-  /// This value should be defined by the extension's 'config.yaml' file.
+  /// This value should be defined by the extension's config.yaml file.
   ///
   /// This should not point to the flutter/devtools or flutter/flutter issue
   /// trackers, but rather to the issue tracker for the package that provides
@@ -133,7 +133,7 @@ class DevToolsExtensionConfig implements Comparable {
 
   /// The version for the DevTools extension.
   ///
-  /// This value should be defined by the extension's 'config.yaml' file.
+  /// This value should be defined by the extension's config.yaml file.
   ///
   /// This may match the version of the parent package or use a different
   /// versioning system as decided by the extension author.
@@ -142,27 +142,27 @@ class DevToolsExtensionConfig implements Comparable {
   /// The code point for the material icon that will parsed by Flutter's
   /// [IconData] class for displaying in DevTools.
   ///
-  /// This value should be defined by the extension's 'config.yaml' file. If the
+  /// This value should be defined by the extension's config.yaml file. If the
   /// provided value cannot be parsed, [defaultCodePoint] will be used.
   ///
   /// This code point should be part of the 'MaterialIcons' font family.
   /// See https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/material/icons.dart.
   final int materialIconCodePoint;
 
-  /// The file:// URI where this extension's assets live.
+  /// The `file://` URI where this extension's assets live.
   ///
   /// This will most likely be in the user's pub cache, but may also be
   /// somewhere else on the user's machine if, for example, a dependency is
   /// specified as a path dependency.
   ///
-  /// This value will NOT be defined by the extension's 'config.yaml' file; it
+  /// This value will NOT be defined by the extension's config.yaml file; it
   /// is derived on the DevTools server as part of the extension detection
   /// mechanism.
   final String extensionAssetsUri;
 
   /// Whether this extension is distrubuted in a public package on pub.dev.
   ///
-  /// This value will NOT be defined by the extension's 'config.yaml' file; it
+  /// This value will NOT be defined by the extension's config.yaml file; it
   /// is derived on the DevTools server as part of the extension detection
   /// mechanism.
   final bool isPubliclyHosted;
@@ -215,7 +215,7 @@ class DevToolsExtensionConfig implements Comparable {
       );
 
   static void _assertGeneratedKeysPresent(Map<String, Object?> json) {
-    final missingKeys = [];
+    final missingKeys = <String>[];
     for (final key in _serverGeneratedKeys) {
       if (!json.containsKey(key)) {
         missingKeys.add(key);
