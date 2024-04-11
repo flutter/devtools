@@ -17,7 +17,6 @@ class DevToolsExtensionConfig implements Comparable {
   });
 
   factory DevToolsExtensionConfig.parse(Map<String, Object?> json) {
-
     if (json
         case {
           // The exptected keys below are required fields in the extension's
@@ -65,9 +64,7 @@ class DevToolsExtensionConfig implements Comparable {
     } else {
       _assertGeneratedKeysPresent(json);
       final jsonKeysFromConfigFile = Set.of(json.keys.toSet())
-        ..removeAll([
-          ..._serverGeneratedKeys,
-        ]);
+        ..removeAll(_serverGeneratedKeys);
       final diff = _requiredKeys.toSet().difference(
             jsonKeysFromConfigFile,
           );
@@ -151,7 +148,6 @@ class DevToolsExtensionConfig implements Comparable {
   /// See https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/material/icons.dart.
   final int materialIconCodePoint;
 
-
   /// The file:// URI where this extension's assets live.
   ///
   /// This will most likely be in the user's pub cache, but may also be
@@ -162,6 +158,7 @@ class DevToolsExtensionConfig implements Comparable {
   /// is derived on the DevTools server as part of the extension detection
   /// mechanism.
   final String extensionAssetsUri;
+
   /// Whether this extension is distrubuted in a public package on pub.dev.
   ///
   /// This value will NOT be defined by the extension's 'config.yaml' file; it
