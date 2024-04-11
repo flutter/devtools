@@ -109,7 +109,10 @@ $_extensionsKey:
   }) {
     final yamlEditor = YamlEditor('');
     yamlEditor.update([], options);
-    _lookupOptionsFile(rootUri)?.writeAsStringSync(yamlEditor.toString());
+    _lookupOptionsFile(rootUri)?.writeAsStringSync(
+      yamlEditor.toString(),
+      flush: true,
+    );
   }
 
   /// Returns the `devtools_options.yaml` file in the [rootUri] directory.
@@ -129,7 +132,10 @@ $_extensionsKey:
     if (!optionsFile.existsSync()) {
       optionsFile
         ..createSync()
-        ..writeAsStringSync(_defaultOptions);
+        ..writeAsStringSync(
+          _defaultOptions,
+          flush: true,
+        );
     }
     return optionsFile;
   }

@@ -5,6 +5,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_shared/src/extensions/extension_manager.dart';
 import 'package:devtools_shared/src/server/server_api.dart';
@@ -18,39 +19,41 @@ import '../helpers.dart';
 late Directory testDirectory;
 late String projectRoot;
 
-// TODO(kenz): add tests for ExtensionsApi.apiExtensionEnabledState.
-
 void main() {
   late ExtensionsManager extensionsManager;
 
+  setUp(() {
+    extensionsManager = ExtensionsManager();
+  });
+
+  tearDown(() async {
+    // Run with retry to ensure this deletes properly on Windows.
+    await deleteDirectoryWithRetry(testDirectory);
+  });
+
+  Future<Response> serveExtensions(ExtensionsManager manager) async {
+    final request = Request(
+      'post',
+      Uri(
+        scheme: 'https',
+        host: 'localhost',
+        path: ExtensionsApi.apiServeAvailableExtensions,
+        queryParameters: {
+          ExtensionsApi.extensionRootPathPropertyName: projectRoot,
+        },
+      ),
+    );
+    return await ServerApi.handle(
+      request,
+      extensionsManager: manager,
+      deeplinkManager: FakeDeeplinkManager(),
+    );
+  }
+
   group(ExtensionsApi.apiServeAvailableExtensions, () {
-    setUp(() {
-      extensionsManager = ExtensionsManager();
-    });
-
-    tearDown(() async {
-      // Run with retry to ensure this deletes properly on Windows.
-      await deleteDirectoryWithRetry(testDirectory);
-    });
-
     test('succeeds for valid extensions', () async {
       await _setupTestDirectoryStructure();
-      final request = Request(
-        'post',
-        Uri(
-          scheme: 'https',
-          host: 'localhost',
-          path: ExtensionsApi.apiServeAvailableExtensions,
-          queryParameters: {
-            ExtensionsApi.extensionRootPathPropertyName: projectRoot,
-          },
-        ),
-      );
-      final response = await ServerApi.handle(
-        request,
-        extensionsManager: extensionsManager,
-        deeplinkManager: FakeDeeplinkManager(),
-      );
+      final response = await serveExtensions(extensionsManager);
       expect(response.statusCode, HttpStatus.ok);
       expect(extensionsManager.devtoolsExtensions.length, 2);
       expect(extensionsManager.devtoolsExtensions[0].name, 'drift');
@@ -59,22 +62,7 @@ void main() {
 
     test('succeeds with mix of valid and invalid extensions', () async {
       await _setupTestDirectoryStructure(includeBadExtension: true);
-      final request = Request(
-        'post',
-        Uri(
-          scheme: 'https',
-          host: 'localhost',
-          path: ExtensionsApi.apiServeAvailableExtensions,
-          queryParameters: {
-            ExtensionsApi.extensionRootPathPropertyName: projectRoot,
-          },
-        ),
-      );
-      final Response response = await ServerApi.handle(
-        request,
-        extensionsManager: extensionsManager,
-        deeplinkManager: FakeDeeplinkManager(),
-      );
+      final response = await serveExtensions(extensionsManager);
       expect(response.statusCode, HttpStatus.ok);
       expect(extensionsManager.devtoolsExtensions.length, 2);
       expect(extensionsManager.devtoolsExtensions[0].name, 'drift');
@@ -92,22 +80,7 @@ void main() {
     test('succeeds for valid extensions when an exception is thrown', () async {
       await _setupTestDirectoryStructure();
       extensionsManager = _TestExtensionsManager();
-      final request = Request(
-        'post',
-        Uri(
-          scheme: 'https',
-          host: 'localhost',
-          path: ExtensionsApi.apiServeAvailableExtensions,
-          queryParameters: {
-            ExtensionsApi.extensionRootPathPropertyName: projectRoot,
-          },
-        ),
-      );
-      final response = await ServerApi.handle(
-        request,
-        extensionsManager: extensionsManager,
-        deeplinkManager: FakeDeeplinkManager(),
-      );
+      final response = await serveExtensions(extensionsManager);
       expect(response.statusCode, HttpStatus.ok);
       expect(extensionsManager.devtoolsExtensions.length, 2);
       expect(extensionsManager.devtoolsExtensions[0].name, 'drift');
@@ -119,34 +92,95 @@ void main() {
       expect(warning, contains('Fake exception for test'));
     });
 
-    test('fails when an exception is thrown and there are no valid extensions',
-        () async {
-      await _setupTestDirectoryStructure(
-        includeDependenciesWithExtensions: false,
-      );
-      extensionsManager = _TestExtensionsManager();
+    test(
+      'fails when an exception is thrown and there are no valid extensions',
+      () async {
+        await _setupTestDirectoryStructure(
+          includeDependenciesWithExtensions: false,
+        );
+        extensionsManager = _TestExtensionsManager();
+        final response = await serveExtensions(extensionsManager);
+        expect(response.statusCode, HttpStatus.internalServerError);
+        expect(extensionsManager.devtoolsExtensions, isEmpty);
+
+        final parsedResponse =
+            json.decode(await response.readAsString()) as Map;
+        final error = parsedResponse['error'];
+        expect(error, contains('Fake exception for test'));
+      },
+    );
+  });
+
+  group(ExtensionsApi.apiExtensionEnabledState, () {
+    late File optionsFile;
+
+    setUp(() async {
+      await _setupTestDirectoryStructure();
+      optionsFile =
+          File(p.join(testDirectory.path, 'my_app', 'devtools_options.yaml'));
+    });
+
+    Future<Response> sendEnabledStateRequest({
+      required String extensionName,
+      required bool enable,
+    }) async {
       final request = Request(
         'post',
         Uri(
           scheme: 'https',
           host: 'localhost',
-          path: ExtensionsApi.apiServeAvailableExtensions,
+          path: ExtensionsApi.apiExtensionEnabledState,
           queryParameters: {
             ExtensionsApi.extensionRootPathPropertyName: projectRoot,
+            ExtensionsApi.extensionNamePropertyName: extensionName,
+            ExtensionsApi.enabledStatePropertyName: enable.toString(),
           },
         ),
       );
-      final response = await ServerApi.handle(
+      return await ServerApi.handle(
         request,
         extensionsManager: extensionsManager,
         deeplinkManager: FakeDeeplinkManager(),
       );
-      expect(response.statusCode, HttpStatus.internalServerError);
-      expect(extensionsManager.devtoolsExtensions, isEmpty);
+    }
 
-      final parsedResponse = json.decode(await response.readAsString()) as Map;
-      final error = parsedResponse['error'];
-      expect(error, contains('Fake exception for test'));
+    test('options file does not exist until first acesss', () async {
+      await serveExtensions(extensionsManager);
+      expect(optionsFile.existsSync(), isFalse);
+    });
+
+    test('can get and set enabled states', () async {
+      await serveExtensions(extensionsManager);
+      var response = await sendEnabledStateRequest(
+        extensionName: 'drift',
+        enable: true,
+      );
+      expect(response.statusCode, HttpStatus.ok);
+      expect(
+        jsonDecode(await response.readAsString()),
+        ExtensionEnabledState.enabled.name,
+      );
+
+      response = await sendEnabledStateRequest(
+        extensionName: 'provider',
+        enable: false,
+      );
+      expect(response.statusCode, HttpStatus.ok);
+      expect(
+        jsonDecode(await response.readAsString()),
+        ExtensionEnabledState.disabled.name,
+      );
+
+      expect(optionsFile.existsSync(), isTrue);
+      expect(
+        optionsFile.readAsStringSync(),
+        contains(
+          '''
+extensions:
+  - drift: true
+  - provider: false''',
+        ),
+      );
     });
   });
 }
