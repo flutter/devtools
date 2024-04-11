@@ -10,6 +10,7 @@ final fooExtension = DevToolsExtensionConfig.parse({
   DevToolsExtensionConfig.nameKey: 'foo',
   DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
   DevToolsExtensionConfig.versionKey: '1.0.0',
+  DevToolsExtensionConfig.materialIconCodePointKey: '0xe0b1',
   DevToolsExtensionConfig.extensionAssetsUriKey: '/path/to/foo',
   DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
 });
