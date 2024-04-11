@@ -41,22 +41,6 @@ void main() {
       expect(config.materialIconCodePoint, 0xf012);
     });
 
-    test('parses with a null materialIconCodePoint field', () {
-      final config = DevToolsExtensionConfig.parse({
-        'name': 'foo',
-        'extensionAssetsUri': 'path/to/foo/extension',
-        'issueTracker': 'www.google.com',
-        'version': '1.0.0',
-        'isPubliclyHosted': 'false',
-      });
-
-      expect(config.name, 'foo');
-      expect(config.extensionAssetsUri, 'path/to/foo/extension');
-      expect(config.issueTrackerLink, 'www.google.com');
-      expect(config.version, '1.0.0');
-      expect(config.materialIconCodePoint, 0xf03f);
-    });
-
     test('parse throws when missing a required field', () {
       Matcher throwsMissingRequiredFieldsError() {
         return throwsA(
@@ -68,12 +52,12 @@ void main() {
         );
       }
 
-      Matcher throwsMissingIsPubliclyHostedError() {
+      Matcher throwsMissingGeneratedKeysError() {
         return throwsA(
           isA<StateError>().having(
             (e) => e.message,
-            'missing isPubliclyHosted key StateError',
-            startsWith('Missing key "isPubliclyHosted"'),
+            'Missing generated keys StateError',
+            startsWith('Missing generated keys'),
           ),
         );
       }
@@ -145,7 +129,7 @@ void main() {
             'isPubliclyHosted': 'false',
           });
         },
-        throwsMissingRequiredFieldsError(),
+        throwsMissingGeneratedKeysError(),
       );
 
       // Missing 'isPubliclyHosted'.
@@ -159,7 +143,7 @@ void main() {
             'extensionAssetsUri': 'path/to/foo/extension',
           });
         },
-        throwsMissingIsPubliclyHostedError(),
+        throwsMissingGeneratedKeysError(),
       );
     });
 
@@ -232,9 +216,10 @@ void main() {
         () {
           DevToolsExtensionConfig.parse({
             'name': 'Name_With_Capital_Letters',
-            'extensionAssetsUri': 'path/to/foo/extension',
             'issueTracker': 'www.google.com',
             'version': '1.0.0',
+            'materialIconCodePoint': 0xf012,
+            'extensionAssetsUri': 'path/to/foo/extension',
             'isPubliclyHosted': 'false',
           });
         },
