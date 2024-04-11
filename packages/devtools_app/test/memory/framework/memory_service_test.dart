@@ -2,13 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@TestOn('vm')
-import 'dart:async';
-
 import 'package:devtools_app/src/screens/memory/framework/memory_controller.dart';
-import 'package:devtools_app/src/screens/memory/panes/chart/controller/memory_tracker.dart';
 import 'package:devtools_app/src/screens/memory/shared/primitives/memory_timeline.dart';
-import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter_test/flutter_test.dart';
 
