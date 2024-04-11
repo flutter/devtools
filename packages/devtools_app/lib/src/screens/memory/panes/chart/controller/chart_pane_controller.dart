@@ -26,7 +26,7 @@ typedef _MemoryEventHandler = void Function(Event);
 ///
 /// When user pauses the chart, the data is still collected.
 ///
-/// Does not fail when accidental disconnect happened.
+/// Does not fail in case of accidental disconnect.
 class _ChartConnectionController extends DisposableController {
   _ChartConnectionController({required this.onData});
 
