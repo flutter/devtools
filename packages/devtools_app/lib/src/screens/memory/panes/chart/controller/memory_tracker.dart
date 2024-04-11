@@ -13,6 +13,7 @@ import 'package:vm_service/vm_service.dart';
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/primitives/memory_timeline.dart';
+import '../data/primitives.dart';
 
 final _log = Logger('memory_protocol');
 
@@ -33,8 +34,6 @@ class MemoryTracker {
   final ValueListenable<bool> paused;
   final ValueNotifier<bool> isAndroidChartVisible;
   _ContinuesState _monitorContinuesState = _ContinuesState.none;
-
-  Timer? _pollingTimer;
 
   final _isolateHeaps = <String, MemoryUsage>{};
 
@@ -57,7 +56,6 @@ class MemoryTracker {
   }
 
   void _updateLiveDataPolling() {
-    _pollingTimer ??= Timer(MemoryTimeline.updateDelay, _pollMemory);
     _gcStreamListener ??= serviceConnection.serviceManager.service?.onGCEvent
         .listen(_handleGCEvent);
   }
@@ -69,10 +67,7 @@ class MemoryTracker {
 
   void _cleanListenersAndTimers() {
     paused.removeListener(_updateLiveDataPolling);
-
-    _pollingTimer?.cancel();
     unawaited(_gcStreamListener?.cancel());
-    _pollingTimer = null;
     _gcStreamListener = null;
   }
 
@@ -89,9 +84,7 @@ class MemoryTracker {
     _updateGCEvent(event.isolate!.id!, memoryUsage);
   }
 
-  void _pollMemory() async {
-    _pollingTimer = null;
-
+  Future<void> pollMemory() async {
     final isolateMemory = <IsolateRef, MemoryUsage>{};
     for (IsolateRef isolateRef
         in serviceConnection.serviceManager.isolateManager.isolates.value) {
@@ -119,8 +112,6 @@ class MemoryTracker {
 
     // TODO(terry): Is there a better way to detect an integration test running?
     if (vm.json!.containsKey('_FAKE_VM')) return;
-
-    _pollingTimer ??= Timer(MemoryTimeline.updateDelay, _pollMemory);
   }
 
   /// Detect stale isolates (sentineled), may happen after a hot restart.
@@ -295,12 +286,11 @@ class MemoryTracker {
       final timeDuration = Duration(milliseconds: time);
       final eventDuration = Duration(milliseconds: eventTime);
 
-      // If the event is +/- _updateDelay (500 ms) of the current time then
-      // associate the EventSample with the current HeapSample.
-      const delay = MemoryTimeline.updateDelay;
       final compared = timeDuration.compareTo(eventDuration);
       if (compared < 0) {
-        if ((timeDuration + delay).compareTo(eventDuration) >= 0) {
+        // If the event is +/- _updateDelay (500 ms) of the current time then
+        // associate the EventSample with the current HeapSample.
+        if ((timeDuration + chartUpdateDelay).compareTo(eventDuration) >= 0) {
           // Currently, events are all UI events so duration < _updateDelay
           return _pullClone(memoryTimeline, time);
         }
@@ -317,9 +307,9 @@ class MemoryTracker {
 
       if (compared > 0) {
         final msDiff = time - eventTime;
-        if (msDiff > MemoryTimeline.delayMs) {
+        if (msDiff > chartUpdateDelay.inMilliseconds) {
           // eventSample is in the future.
-          if ((timeDuration - delay).compareTo(eventDuration) >= 0) {
+          if ((timeDuration - chartUpdateDelay).compareTo(eventDuration) >= 0) {
             // Able to match event time to a heap sample. We will attach the
             // EventSample to this HeapSample.
             return _pullClone(memoryTimeline, time);

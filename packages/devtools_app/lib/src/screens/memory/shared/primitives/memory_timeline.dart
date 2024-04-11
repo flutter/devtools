@@ -11,9 +11,6 @@ import '../../../../shared/primitives/utils.dart';
 
 /// All Raw data received from the VM and offline data loaded from a memory log file.
 class MemoryTimeline {
-  static const delayMs = 500;
-  static const Duration updateDelay = Duration(milliseconds: delayMs);
-
   /// This flag will be needed for offline mode implementation.
   final offline = false;
 

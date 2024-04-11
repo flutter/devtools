@@ -18,6 +18,7 @@ import 'memory_tracker.dart';
 import 'vm_chart_controller.dart';
 
 typedef _MemoryEventHandler = void Function(Event);
+typedef _PollMemoryHandler = Future<void> Function();
 
 /// Connection between chart and application.
 ///
@@ -28,14 +29,29 @@ typedef _MemoryEventHandler = void Function(Event);
 ///
 /// Does not fail in case of accidental disconnect.
 ///
-/// All interactions between chart and vm happen through this class.
+/// All interactions between chart and vm are initiated by this class.
 class _ChartConnection extends DisposableController {
-  _ChartConnection({required this.onData});
+  _ChartConnection({required this.onMemoryData, required this.pollMemory});
 
-  final _MemoryEventHandler onData;
+  final _MemoryEventHandler onMemoryData;
+  final _PollMemoryHandler pollMemory;
+  Timer? _pollingTimer;
 
   Future<void> connect() async {
     await serviceConnection.serviceManager.onServiceAvailable;
+    await _onPoll();
+  }
+
+  Future<void> _onPoll() async {
+    _pollingTimer = null;
+    await pollMemory();
+    _pollingTimer = Timer(chartUpdateDelay, _onPoll);
+  }
+
+  @override
+  void dispose() {
+    _pollingTimer?.cancel();
+    super.dispose();
   }
 }
 
@@ -113,7 +129,10 @@ class MemoryChartPaneController extends DisposableController
     if (!_paused.value) return;
     if (mode != DevToolsMode.connected) throw StateError('Not connected.');
     if (_chartConnection == null) {
-      _chartConnection = _ChartConnection(onData: _onMemoryData);
+      _chartConnection = _ChartConnection(
+        onMemoryData: _onMemoryData,
+        pollMemory: _memoryTracker.pollMemory,
+      );
       await _chartConnection!.connect();
     }
     _paused.value = false;
