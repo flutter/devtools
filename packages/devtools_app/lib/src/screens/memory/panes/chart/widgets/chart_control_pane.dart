@@ -36,9 +36,9 @@ class _ChartControlPaneState extends State<ChartControlPane>
     widget.chart.pause();
   }
 
-  void _onResume() {
+  Future<void> _onResume() async {
     ga.select(gac.memory, gac.resume);
-    widget.chart.resume();
+    await widget.chart.resume();
   }
 
   void _clearTimeline() {
