@@ -18,6 +18,8 @@ import '../helpers.dart';
 late Directory testDirectory;
 late String projectRoot;
 
+// TODO(kenz): add tests for ExtensionsApi.apiExtensionEnabledState.
+
 void main() {
   late ExtensionsManager extensionsManager;
 
