@@ -8,6 +8,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_deeplink.dart';
 import 'package:flutter/material.dart';
 
+import '../../../devtools_app.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/globals.dart';
@@ -184,7 +185,7 @@ class DeepLinksController extends DisposableController {
   List<LinkData> linkDatasByDomain(List<LinkData> linkdatas) {
     final linkDatasByDomain = <String, LinkData>{};
     for (var linkData in linkdatas) {
-      if (linkData.domain?.isEmpty ?? true) {
+      if (linkData.domain.isNullOrEmpty) {
         continue;
       }
       final previousRecord = linkDatasByDomain[linkData.domain];
@@ -271,6 +272,7 @@ class DeepLinksController extends DisposableController {
     final domainPathToLinkData = <_DomainAndPath, LinkData>{};
     for (final appLink in appLinks) {
       final domainAndPath = (domain: appLink.host, path: appLink.path);
+      final scheme = appLink.scheme;
 
       if (domainPathToLinkData[domainAndPath] == null) {
         domainPathToLinkData[domainAndPath] = LinkData(
@@ -279,12 +281,12 @@ class DeepLinksController extends DisposableController {
           pathErrors:
               _getPathErrorsFromIntentFilterChecks(appLink.intentFilterChecks),
           os: [PlatformOS.android],
-          scheme: {if (appLink.scheme != null) appLink.scheme!},
+          scheme: {if (scheme != null) scheme},
         );
       } else {
         final linkData = domainPathToLinkData[domainAndPath]!;
-        if (appLink.scheme != null) {
-          linkData.scheme.add(appLink.scheme!);
+        if (scheme != null) {
+          linkData.scheme.add(scheme);
         }
         final pathErrors = {
           ...linkData.pathErrors,
@@ -345,10 +347,11 @@ class DeepLinksController extends DisposableController {
 
   Future<void> _generateAssetLinks() async {
     generatedAssetLinksForSelectedLink.value = null;
-    if (selectedLink.value!.domain != null) {
+    final domain = selectedLink.value!.domain;
+    if (domain != null) {
       generatedAssetLinksForSelectedLink.value =
           await deepLinksServices.generateAssetLinks(
-        domain: selectedLink.value!.domain!,
+        domain: domain,
         applicationId: applicationId,
         localFingerprint: localFingerprint.value,
       );
