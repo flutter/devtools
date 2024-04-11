@@ -11,13 +11,10 @@ import '../utils.dart';
 // TODO(kenz): If changes are made to this script, first consider refactoring to
 // use https://github.com/dart-lang/pubspec_parse.
 
-// `package:devtools_app_shared`, `package:devtools_extensions` and
-// `package:devtools_shared` have their own versioning strategies. Do not
-// include those packages in the list here.
-final _pubspecs = [
-  'packages/devtools_app/pubspec.yaml',
-  'packages/devtools_test/pubspec.yaml',
-].map((p) => File(pathFromRepoRoot(p))).toList();
+// All other devtools_* pubspecs have their own versioning strategies, or do not
+// have a version at all (in the case of devtools_test).
+final _devtoolsAppPubspec =
+    File(pathFromRepoRoot('packages/devtools_app/pubspec.yaml'));
 
 final _releaseNoteDirPath =
     pathFromRepoRoot('packages/devtools_app/release_notes');
@@ -42,11 +39,11 @@ Future<void> performTheVersionUpdate({
   required String currentVersion,
   required String newVersion,
 }) async {
-  print('Updating pubspecs from $currentVersion to version $newVersion...');
-
-  for (final pubspec in _pubspecs) {
-    writeVersionToPubspec(pubspec, newVersion);
-  }
+  print(
+    'Updating devtools_app/pubspec.yaml from $currentVersion to version '
+    '$newVersion...',
+  );
+  writeVersionToPubspec(_devtoolsAppPubspec, newVersion);
 
   print('Updating devtools.dart to version $newVersion...');
   writeVersionToVersionFile(
@@ -124,8 +121,7 @@ String? incrementVersionByType(String version, String type) {
 }
 
 String? versionFromPubspecFile() {
-  final pubspec = _pubspecs.first;
-  final lines = pubspec.readAsLinesSync();
+  final lines = _devtoolsAppPubspec.readAsLinesSync();
   for (final line in lines) {
     if (line.startsWith(pubspecVersionPrefix)) {
       return line.substring(pubspecVersionPrefix.length).trim();
@@ -144,26 +140,15 @@ void writeVersionToPubspec(File pubspec, String version) {
       // This is a top level section of the pubspec.
       currentSection = sectionRegExp.firstMatch(line)![0];
     }
-    if (editablePubspecSections.contains(currentSection)) {
-      if (line.startsWith(pubspecVersionPrefix)) {
-        line = [
-          line.substring(
-            0,
-            line.indexOf(pubspecVersionPrefix) + pubspecVersionPrefix.length,
-          ),
-          ' $version',
-        ].join();
-      } else {
-        for (final prefix in devToolsDependencyPrefixes) {
-          if (line.contains(prefix)) {
-            line = [
-              line.substring(0, line.indexOf(prefix) + prefix.length),
-              version,
-            ].join();
-            break;
-          }
-        }
-      }
+    if (currentSection == pubspecVersionPrefix &&
+        line.startsWith(pubspecVersionPrefix)) {
+      line = [
+        line.substring(
+          0,
+          line.indexOf(pubspecVersionPrefix) + pubspecVersionPrefix.length,
+        ),
+        ' $version',
+      ].join();
     }
     revisedLines.add(line);
   }
@@ -222,16 +207,6 @@ bool isDevVersion(String version) {
 }
 
 const pubspecVersionPrefix = 'version:';
-const editablePubspecSections = [
-  pubspecVersionPrefix,
-  'dependencies:',
-  'dev_dependencies:',
-];
-
-const devToolsDependencyPrefixes = [
-  'devtools_app: ',
-  'devtools_test: ',
-];
 
 class ManualUpdateCommand extends Command {
   ManualUpdateCommand() {
