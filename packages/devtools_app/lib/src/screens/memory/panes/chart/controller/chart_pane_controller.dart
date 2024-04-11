@@ -28,9 +28,9 @@ typedef _MemoryEventHandler = void Function(Event);
 ///
 /// Does not fail in case of accidental disconnect.
 ///
-/// Encapsulates all interactions between chart and vm.
-class _ChartConnectionController extends DisposableController {
-  _ChartConnectionController({required this.onData});
+/// All interactions between chart and vm happen through this class.
+class _ChartConnection extends DisposableController {
+  _ChartConnection({required this.onData});
 
   final _MemoryEventHandler onData;
 
@@ -55,7 +55,7 @@ class MemoryChartPaneController extends DisposableController
     return {};
   }
 
-  _ChartConnectionController? _chartConnection;
+  _ChartConnection? _chartConnection;
 
   final MemoryTimeline memoryTimeline = MemoryTimeline();
 
@@ -113,7 +113,7 @@ class MemoryChartPaneController extends DisposableController
     if (!_paused.value) return;
     if (mode != DevToolsMode.connected) throw StateError('Not connected.');
     if (_chartConnection == null) {
-      _chartConnection = _ChartConnectionController(onData: _onMemoryData);
+      _chartConnection = _ChartConnection(onData: _onMemoryData);
       await _chartConnection!.connect();
     }
     _paused.value = false;
