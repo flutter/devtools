@@ -31,7 +31,7 @@ class ExtensionsManager {
 
   /// Returns the absolute path of the assets for the extension with identifier
   /// [extensionIdentifier].
-  /// 
+  ///
   /// This caches values upon first request for faster lookup.
   String? lookupLocationFor(String extensionIdentifier) {
     return _extensionLocationsByIdentifier.putIfAbsent(
@@ -76,59 +76,11 @@ class ExtensionsManager {
     // Find all runtime extensions for [rootFileUriString], if non-null, and add
     // them to [devtoolsExtensions].
     if (rootFileUriString != null) {
-      late final List<Extension> extensions;
-      try {
-        extensions = await findExtensions(
-          'devtools',
-          packageConfig: Uri.parse(
-            path.posix.join(
-              rootFileUriString,
-              '.dart_tool',
-              'package_config.json',
-            ),
-          ),
-        );
-        logs.add(
-          'ExtensionsManager.serveAvailableExtensions: findExtensionsResult  - '
-          '${extensions.map((e) => e.package).toList()}',
-        );
-      } catch (e) {
-        extensions = <Extension>[];
-        rethrow;
-      }
-
-      for (final extension in extensions) {
-        final config = extension.config;
-        // TODO(https://github.com/dart-lang/pub/issues/4042): make this check
-        // more robust.
-        final isPubliclyHosted = (extension.rootUri.path.contains('pub.dev') ||
-                extension.rootUri.path.contains('pub.flutter-io.cn'))
-            .toString();
-
-        // This should be relative to the 'extension/devtools/' directory and
-        // defaults to 'build';
-        final relativeExtensionLocation =
-            config['buildLocation'] as String? ?? 'build';
-
-        final location = path.join(
-          extension.rootUri.toFilePath(),
-          'extension',
-          'devtools',
-          relativeExtensionLocation,
-        );
-
-        try {
-          final extensionConfig = DevToolsExtensionConfig.parse({
-            ...config,
-            DevToolsExtensionConfig.pathKey: location,
-            DevToolsExtensionConfig.isPubliclyHostedKey: isPubliclyHosted,
-          });
-          devtoolsExtensions.add(extensionConfig);
-        } on StateError catch (e) {
-          parsingErrors.writeln(e.message);
-          continue;
-        }
-      }
+      await addExtensionsForRoot(
+        rootFileUriString,
+        logs: logs,
+        parsingErrors: parsingErrors,
+      );
     }
 
     if (parsingErrors.isNotEmpty) {
@@ -136,6 +88,66 @@ class ExtensionsManager {
         'Encountered errors while parsing extension config.yaml '
         'files:\n$parsingErrors',
       );
+    }
+  }
+
+  Future<void> addExtensionsForRoot(
+    String rootFileUriString, {
+    required List<String> logs,
+    required StringBuffer parsingErrors,
+  }) async {
+    late final List<Extension> extensions;
+    try {
+      extensions = await findExtensions(
+        'devtools',
+        packageConfig: Uri.parse(
+          path.posix.join(
+            rootFileUriString,
+            '.dart_tool',
+            'package_config.json',
+          ),
+        ),
+      );
+      logs.add(
+        'ExtensionsManager.serveAvailableExtensions: findExtensionsResult  - '
+        '${extensions.map((e) => e.package).toList()}',
+      );
+    } catch (e) {
+      extensions = <Extension>[];
+      rethrow;
+    }
+
+    for (final extension in extensions) {
+      final config = extension.config;
+      // TODO(https://github.com/dart-lang/pub/issues/4042): make this check
+      // more robust.
+      final isPubliclyHosted = (extension.rootUri.path.contains('pub.dev') ||
+              extension.rootUri.path.contains('pub.flutter-io.cn'))
+          .toString();
+
+      // This should be relative to the 'extension/devtools/' directory and
+      // defaults to 'build';
+      final relativeExtensionLocation =
+          config['buildLocation'] as String? ?? 'build';
+
+      final location = path.join(
+        extension.rootUri.toFilePath(),
+        'extension',
+        'devtools',
+        relativeExtensionLocation,
+      );
+
+      try {
+        final extensionConfig = DevToolsExtensionConfig.parse({
+          ...config,
+          DevToolsExtensionConfig.pathKey: location,
+          DevToolsExtensionConfig.isPubliclyHostedKey: isPubliclyHosted,
+        });
+        devtoolsExtensions.add(extensionConfig);
+      } on StateError catch (e) {
+        parsingErrors.writeln(e.message);
+        continue;
+      }
     }
   }
 
