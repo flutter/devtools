@@ -9,13 +9,6 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/primitives/utils.dart';
 
-enum ContinuesState {
-  none,
-  start,
-  stop,
-  next,
-}
-
 /// All Raw data received from the VM and offline data loaded from a memory log file.
 class MemoryTimeline {
   static const delayMs = 500;
@@ -59,8 +52,6 @@ class MemoryTimeline {
 
   /// List of events awaiting to be posted to HeapSample.
   final _eventSamples = <EventSample>[];
-
-  ContinuesState monitorContinuesState = ContinuesState.none;
 
   void postEventSample(EventSample event) {
 /*
