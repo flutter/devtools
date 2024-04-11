@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:path/path.dart' as path;
 
 typedef TestDtdConnectionInfo = ({
@@ -139,23 +140,14 @@ void main() async {
     // On DanTup's Windows PC, it can take ~5s for the delete to work sometimes
     // and this will probably be slower on bots. Allow a reasonable time because
     // taking 10s to delete is better than failing the tests for a non-bug.
-    const maxAttempts = 20;
-    const retryDelay = Duration(milliseconds: 500);
-    for (var attempt = 1;
-        directory.existsSync() && attempt <= maxAttempts;
-        attempt++) {
-      try {
-        directory.deleteSync(recursive: true);
-        break;
-      } catch (_) {
-        if (attempt == maxAttempts) {
-          rethrow;
-        }
-
-        // ignore: avoid_print, deliberate print to monitor delete failures
-        print('Failed to delete test app on attempt $attempt, will retry...');
-        await Future.delayed(retryDelay);
-      }
-    }
+    await runWithRetry(
+      callback: () => directory.deleteSync(recursive: true),
+      maxRetries: 20,
+      retryDelay: const Duration(milliseconds: 500),
+      stopCondition: () => !directory.existsSync(),
+      onRetry: (attempt) =>
+          // ignore: avoid_print, deliberate print to monitor delete failures
+          print('Failed to delete test app on attempt $attempt, will retry...'),
+    );
   }
 }

@@ -34,7 +34,7 @@ void main() {
         );
         return server.ServerApi.handle(
           request,
-          extensionsManager: ExtensionsManager(buildDir: '/'),
+          extensionsManager: ExtensionsManager(),
           deeplinkManager: FakeDeeplinkManager(),
           dtd: dtd,
         );

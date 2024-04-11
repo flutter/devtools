@@ -27,7 +27,7 @@ void main() {
       );
       final response = await ServerApi.handle(
         request,
-        extensionsManager: ExtensionsManager(buildDir: '/'),
+        extensionsManager: ExtensionsManager(),
         deeplinkManager: FakeDeeplinkManager(),
         dtd: (uri: dtdUri, secret: null),
       );

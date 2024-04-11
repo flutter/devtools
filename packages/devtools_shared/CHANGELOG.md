@@ -1,18 +1,21 @@
+# 9.0.1
+* Restructure `devtools_extensions.dart` and `devtools_extensions_io.dart` libraries.
+
 # 9.0.0
 * **Breaking change:** remove parameter `analytics` from `ServerApi.handle` in favor
 of DTD implementation.
 * **Breaking change:** remove DevTools server APIs `apiMarkConsentMessageAsShown` and `apiGetConsentMessage`
+* **Breaking change:** remove parameter `buildDir` from `ExtensionsManager`.
 in favor of DTD implementation.
+* Stop copying DevTools extensions assets to the DevTools build directory.
 * Bump `package:dtd` to `2.2.0`
 * Remove `package:unified_analytics` dependency.
 * Use DTD in the `packageRootFromFileUriString` utility to detect the package root.
+* Add `runWithRetry` utility method.
 
 # 8.1.1
-* TODO: publish this version with min Dart SDK version of the next Dart Beta.
-
-# 8.1.1-dev.0
 * Bump `package:dtd` to `2.1.0`.
-* Bump the minimum Dart SDK version to `3.4.0-275.0.dev`.
+* Bump the minimum Dart SDK version to `3.4.0-282.1.beta`.
 
 # 8.1.0
 * Bump `package:dtd` to `2.0.0`.
