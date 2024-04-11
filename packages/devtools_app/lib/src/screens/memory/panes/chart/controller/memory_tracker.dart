@@ -222,7 +222,7 @@ class MemoryTracker {
     }
 
     // Process any memory events?
-    final eventSample = processEventSample(timeline, time);
+    final eventSample = _processEventSample(timeline, time);
 
     if (eventSample != null && eventSample.isEventAllocationAccumulator) {
       if (eventSample.allocationAccumulator!.isStart) {
@@ -272,10 +272,10 @@ class MemoryTracker {
   /// (time parameter)).
   ///
   /// Returns copy of events to associate with an existing HeapSample tick
-  /// (contained in the EventSample). See [processEventSample] it computes the
+  /// (contained in the EventSample). See [_processEventSample] it computes the
   /// events to aggregate to an existing HeapSample or delay associating those
   /// events until the next HeapSample (tick) received see [_recalculate].
-  EventSample pullClone(MemoryTimeline memoryTimeline, int time) {
+  EventSample _pullClone(MemoryTimeline memoryTimeline, int time) {
     final pulledEvent = memoryTimeline.pullEventSample();
     final extensionEvents = memoryTimeline.extensionEvents;
     final eventSample = pulledEvent.clone(
@@ -289,7 +289,7 @@ class MemoryTracker {
     return eventSample;
   }
 
-  EventSample? processEventSample(MemoryTimeline memoryTimeline, int time) {
+  EventSample? _processEventSample(MemoryTimeline memoryTimeline, int time) {
     if (memoryTimeline.anyEvents) {
       final eventTime = memoryTimeline.peekEventTimestamp;
       final timeDuration = Duration(milliseconds: time);
@@ -302,7 +302,7 @@ class MemoryTracker {
       if (compared < 0) {
         if ((timeDuration + delay).compareTo(eventDuration) >= 0) {
           // Currently, events are all UI events so duration < _updateDelay
-          return pullClone(memoryTimeline, time);
+          return _pullClone(memoryTimeline, time);
         }
         // Throw away event, missed attempt to attach to a HeapSample.
         final ignoreEvent = memoryTimeline.pullEventSample();
@@ -322,13 +322,13 @@ class MemoryTracker {
           if ((timeDuration - delay).compareTo(eventDuration) >= 0) {
             // Able to match event time to a heap sample. We will attach the
             // EventSample to this HeapSample.
-            return pullClone(memoryTimeline, time);
+            return _pullClone(memoryTimeline, time);
           }
           // Keep the event, its time hasn't caught up to the HeapSample time yet.
           return null;
         }
         // The almost exact eventSample we have.
-        return pullClone(memoryTimeline, time);
+        return _pullClone(memoryTimeline, time);
       }
     }
 
