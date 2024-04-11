@@ -67,7 +67,7 @@ abstract class _ExtensionsApiHandler {
   ) {
     final missingRequiredParams = ServerApi._checkRequiredParameters(
       [
-        ExtensionsApi.extensionRootPathPropertyName,
+        ExtensionsApi.packageRootUriPropertyName,
         ExtensionsApi.extensionNamePropertyName,
       ],
       queryParams: queryParams,
@@ -76,14 +76,15 @@ abstract class _ExtensionsApiHandler {
     );
     if (missingRequiredParams != null) return missingRequiredParams;
 
-    final rootPath = queryParams[ExtensionsApi.extensionRootPathPropertyName]!;
-    final rootUri = Uri.parse(rootPath);
+    final rootFileUriString =
+        queryParams[ExtensionsApi.packageRootUriPropertyName]!;
+    final rootFileUri = Uri.parse(rootFileUriString);
     final extensionName = queryParams[ExtensionsApi.extensionNamePropertyName]!;
 
     final activate = queryParams[ExtensionsApi.enabledStatePropertyName];
     if (activate != null) {
       final newState = ServerApi._devToolsOptions.setExtensionEnabledState(
-        rootUri: rootUri,
+        rootUri: rootFileUri,
         extensionName: extensionName,
         enable: bool.parse(activate),
       );
@@ -91,7 +92,7 @@ abstract class _ExtensionsApiHandler {
     }
     final activationState =
         ServerApi._devToolsOptions.lookupExtensionEnabledState(
-      rootUri: rootUri,
+      rootUri: rootFileUri,
       extensionName: extensionName,
     );
     return ServerApi._encodeResponse(activationState.name, api: api);
