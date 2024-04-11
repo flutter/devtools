@@ -33,12 +33,12 @@ class _ChartControlPaneState extends State<ChartControlPane>
     with AutoDisposeMixin {
   void _onPause() {
     ga.select(gac.memory, gac.pause);
-    widget.chart.pauseLiveFeed();
+    widget.chart.pause();
   }
 
   void _onResume() {
     ga.select(gac.memory, gac.resume);
-    widget.chart.resumeLiveFeed();
+    widget.chart.resume();
   }
 
   void _clearTimeline() {

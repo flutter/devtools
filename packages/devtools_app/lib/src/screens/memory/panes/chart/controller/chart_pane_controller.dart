@@ -17,40 +17,23 @@ import 'event_chart_controller.dart';
 import 'memory_tracker.dart';
 import 'vm_chart_controller.dart';
 
-/// States of chart connection.
-///
-/// In lifetime of one chart controller the states are changed in the following order:
-/// [notStarted] -> [connected] -> [disconnected].
-/// Reconnection does not happen.
-enum _ConnectionState {
-  notStarted,
-  connected,
-  disconnected,
-}
-
 typedef _MemoryEventHandler = void Function(Event);
 
-/// Manages connection between chart and application.
+/// Connection between chart and application.
 ///
 /// The connection consists of listeners to events from vm and
 /// ongoing requests to vm service for current memory usage.
 ///
 /// When user pauses the chart, the data is still collected.
 ///
-/// Handles accidental disconnect.
-/// It is not the memory screen's responsibility to handle reconnection and graceful
-/// interaction with user. The screen just should not fail when connection is lost.
+/// Does not fail when accidental disconnect happened.
 class _ChartConnectionController extends DisposableController {
   _ChartConnectionController({required this.onData});
 
   final _MemoryEventHandler onData;
-  _ConnectionState _state = _ConnectionState.notStarted;
 
-  Future<void> maybeConnect() async {
-    if (_state != _ConnectionState.notStarted) return;
+  Future<void> connect() async {
     await serviceConnection.serviceManager.onServiceAvailable;
-
-    _state = _ConnectionState.connected;
   }
 }
 
@@ -70,10 +53,7 @@ class MemoryChartPaneController extends DisposableController
     return {};
   }
 
-  late final _ChartConnectionController? _chartConnection =
-      mode == DevToolsMode.connected
-          ? _ChartConnectionController(onData: _onMemoryData)
-          : null;
+  _ChartConnectionController? _chartConnection;
 
   final MemoryTimeline memoryTimeline = MemoryTimeline();
 
@@ -125,9 +105,17 @@ class MemoryChartPaneController extends DisposableController
   ChartInterval get displayInterval => _displayInterval.value;
 
   ValueListenable<bool> get paused => _paused;
-  final _paused = ValueNotifier<bool>(false);
-  void pauseLiveFeed() => _paused.value = true;
-  void resumeLiveFeed() => _paused.value = false;
+  final _paused = ValueNotifier<bool>(true);
+  void pause() => _paused.value = true;
+  Future<void> resume() async {
+    if (!_paused.value) return;
+    if (mode != DevToolsMode.connected) throw StateError('Not connected.');
+    if (_chartConnection == null) {
+      _chartConnection = _ChartConnectionController(onData: _onMemoryData);
+      await _chartConnection!.connect();
+    }
+    _paused.value = false;
+  }
 
   final isAndroidChartVisible = ValueNotifier<bool>(false);
 
@@ -198,7 +186,7 @@ class MemoryChartPaneController extends DisposableController
   }
 
   void _onDisconnect() {
-    _memoryTracker?.stop();
+    _memoryTracker.stop();
     memoryTimeline.reset();
   }
 
@@ -219,7 +207,7 @@ class MemoryChartPaneController extends DisposableController
   @override
   void dispose() {
     super.dispose();
-    _memoryTracker?.dispose();
+    _memoryTracker.dispose();
     _legendVisibleNotifier.dispose();
     _displayInterval.dispose();
     _refreshCharts.dispose();
@@ -227,5 +215,6 @@ class MemoryChartPaneController extends DisposableController
     vm.dispose();
     android.dispose();
     isAndroidChartVisible.dispose();
+    _chartConnection?.dispose();
   }
 }
