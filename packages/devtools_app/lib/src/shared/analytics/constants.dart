@@ -4,6 +4,7 @@
 
 import 'package:devtools_shared/devtools_extensions.dart';
 
+import '../preferences/preferences.dart';
 import '../screen.dart';
 
 part 'constants/_cpu_profiler_constants.dart';
@@ -77,6 +78,10 @@ const treeNodeSelection = 'treeNodeSelection';
 const inspectorSettings = 'inspectorSettings';
 const loggingSettings = 'loggingSettings';
 const refreshPubRoots = 'refreshPubRoots';
+final defaultDetailsViewToLayoutExplorer =
+    InspectorDetailsViewType.layoutExplorer.name;
+final defaultDetailsViewToWidgetDetails =
+    InspectorDetailsViewType.widgetDetailsTree.name;
 
 enum HomeScreenEvents {
   connectToApp,
