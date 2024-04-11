@@ -4,7 +4,6 @@
 
 import 'package:collection/collection.dart';
 import 'package:extension_discovery/extension_discovery.dart';
-import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
 import 'extension_model.dart';
@@ -71,7 +70,7 @@ class ExtensionsManager {
       'rootPathFileUri: $rootFileUriString',
     );
 
-    clear();
+    _clear();
     final parsingErrors = StringBuffer();
 
     // Find all runtime extensions for [rootFileUriString], if non-null.
@@ -154,8 +153,7 @@ class ExtensionsManager {
     }
   }
 
-  @visibleForTesting
-  void clear() {
+  void _clear() {
     _extensionLocationsByIdentifier.clear();
     devtoolsExtensions.clear();
   }
