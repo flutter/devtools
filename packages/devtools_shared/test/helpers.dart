@@ -109,11 +109,11 @@ class TestDartApp {
     process?.kill();
     await process?.exitCode;
     process = null;
-    await _deleteTestAppDirectory();
+    await deleteDirectoryWithRetry(directory);
   }
 
   Future<void> _initTestApp() async {
-    await _deleteTestAppDirectory();
+    await deleteDirectoryWithRetry(directory);
     directory.createSync(recursive: true);
 
     final mainFile = File(path.join(directory.path, 'bin', 'main.dart'))
@@ -127,27 +127,27 @@ void main() async {
 }
 ''');
   }
+}
 
-  /// Deletes the directory that contains the test app.
-  ///
-  /// Deletes will be retried if they fail for a period to avoid failing due to
-  /// Windows being slow to unlock files after processes terminate.
-  Future<void> _deleteTestAppDirectory() async {
-    // On Windows, trying to delete the test directory immediately after the
-    // test completes may fail with a file locking error. To avoid this, retry
-    // the delete a few times before failing.
-    //
-    // On DanTup's Windows PC, it can take ~5s for the delete to work sometimes
-    // and this will probably be slower on bots. Allow a reasonable time because
-    // taking 10s to delete is better than failing the tests for a non-bug.
-    await runWithRetry(
-      callback: () => directory.deleteSync(recursive: true),
-      maxRetries: 20,
-      retryDelay: const Duration(milliseconds: 500),
-      stopCondition: () => !directory.existsSync(),
-      onRetry: (attempt) =>
-          // ignore: avoid_print, deliberate print to monitor delete failures
-          print('Failed to delete test app on attempt $attempt, will retry...'),
-    );
-  }
+/// Deletes [directory] and retries if the delete operation fails.
+///
+/// Deletes will be retried if they fail for a period to avoid failing due to
+/// Windows being slow to unlock files after processes terminate.
+Future<void> deleteDirectoryWithRetry(Directory directory) async {
+  // On Windows, trying to delete a directory immediately after the
+  // test completes may fail with a file locking error. To avoid this, retry
+  // the delete a few times before failing.
+  //
+  // On DanTup's Windows PC, it can take ~5s for the delete to work sometimes
+  // and this will probably be slower on bots. Allow a reasonable time because
+  // taking 10s to delete is better than failing the tests for a non-bug.
+  await runWithRetry(
+    callback: () => directory.deleteSync(recursive: true),
+    maxRetries: 20,
+    retryDelay: const Duration(milliseconds: 500),
+    stopCondition: () => !directory.existsSync(),
+    onRetry: (attempt) =>
+        // ignore: avoid_print, deliberate print to monitor delete failures
+        print('Failed to delete directory on attempt $attempt. Retrying...'),
+  );
 }

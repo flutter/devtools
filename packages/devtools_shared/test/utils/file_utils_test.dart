@@ -14,6 +14,7 @@ import '../helpers.dart';
 const projectRootParts = ['absolute_path_to', 'my_app_root'];
 late String projectRoot;
 
+late Directory testDirectory;
 late File libFile;
 late File libSubFile;
 late File binFile;
@@ -34,6 +35,10 @@ void main() {
     TestDtdConnectionInfo? dtd;
     DartToolingDaemon? testDtdConnection;
 
+    setUpAll(() {
+      _setupTestDirectoryStructure();
+    });
+
     setUp(() async {
       dtd = await startDtd();
       expect(dtd!.uri, isNotNull, reason: 'Error starting DTD for test');
@@ -52,6 +57,11 @@ void main() {
       dtd?.dtdProcess?.kill();
       await dtd?.dtdProcess?.exitCode;
       dtd = null;
+    });
+
+    tearDownAll(() async {
+      // Run with retry to ensure this deletes properly on Windows.
+      await deleteDirectoryWithRetry(testDirectory);
     });
 
     Future<void> verifyPackageRoot(
@@ -170,9 +180,9 @@ void main() {
 ///     sub/
 ///       foo_test.dart
 void _setupTestDirectoryStructure() {
-  final tmpDirectory = Directory.systemTemp.createTempSync();
+  testDirectory = Directory.systemTemp.createTempSync();
   final projectRootDirectory =
-      Directory(p.joinAll([tmpDirectory.path, ...projectRootParts]))
+      Directory(p.joinAll([testDirectory.path, ...projectRootParts]))
         ..createSync(recursive: true);
   final directoryPath =
       Uri.file(projectRootDirectory.uri.toFilePath()).toString();
