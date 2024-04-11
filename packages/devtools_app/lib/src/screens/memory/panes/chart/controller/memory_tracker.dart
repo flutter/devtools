@@ -36,13 +36,13 @@ class MemoryTracker {
 
   Timer? _pollingTimer;
 
-  final isolateHeaps = <String, MemoryUsage>{};
+  final _isolateHeaps = <String, MemoryUsage>{};
 
   /// Polled VM current RSS.
   int processRss = 0;
 
   /// Polled adb dumpsys meminfo values.
-  AdbMemoryInfo? adbMemoryInfo;
+  AdbMemoryInfo? _adbMemoryInfo;
 
   /// Polled engine's RasterCache estimates.
   RasterCache? rasterCache;
@@ -104,7 +104,7 @@ class MemoryTracker {
 
     // Polls for current Android meminfo using:
     //    > adb shell dumpsys meminfo -d <package_name>
-    adbMemoryInfo = serviceConnection.serviceManager.hasConnection &&
+    _adbMemoryInfo = serviceConnection.serviceManager.hasConnection &&
             serviceConnection.serviceManager.vm!.operatingSystem == 'android' &&
             isAndroidChartVisible.value
         ? await _fetchAdbInfo()
@@ -143,17 +143,17 @@ class MemoryTracker {
   void _update(VM vm, Map<IsolateRef, MemoryUsage> isolateMemory) {
     processRss = vm.json!['_currentRSS'];
 
-    isolateHeaps.clear();
+    _isolateHeaps.clear();
 
     for (IsolateRef isolateRef in isolateMemory.keys) {
-      isolateHeaps[isolateRef.id!] = isolateMemory[isolateRef]!;
+      _isolateHeaps[isolateRef.id!] = isolateMemory[isolateRef]!;
     }
 
     _recalculate();
   }
 
   void _updateGCEvent(String isolateId, MemoryUsage memoryUsage) {
-    isolateHeaps[isolateId] = memoryUsage;
+    _isolateHeaps[isolateId] = memoryUsage;
     _recalculate(true);
   }
 
@@ -191,11 +191,11 @@ class MemoryTracker {
 
     final keysToRemove = <String>[];
 
-    final isolateCount = isolateHeaps.length;
-    final keys = isolateHeaps.keys.toList();
+    final isolateCount = _isolateHeaps.length;
+    final keys = _isolateHeaps.keys.toList();
     for (var index = 0; index < isolateCount; index++) {
       final isolateId = keys[index];
-      var usage = isolateHeaps[isolateId];
+      var usage = _isolateHeaps[isolateId];
       // Check if the isolate is dead (sentinel), null implies sentinel.
       final checkIsolateUsage = await _isolateMemoryUsage(isolateId, usage);
       if (checkIsolateUsage == null && !keysToRemove.contains(isolateId)) {
@@ -214,7 +214,7 @@ class MemoryTracker {
     }
 
     // Removes any isolate that is a sentinel.
-    isolateHeaps.removeWhere((key, value) => keysToRemove.contains(key));
+    _isolateHeaps.removeWhere((key, value) => keysToRemove.contains(key));
 
     int time = DateTime.now().millisecondsSinceEpoch;
     if (timeline.data.isNotEmpty) {
@@ -248,7 +248,7 @@ class MemoryTracker {
       used,
       external,
       fromGC,
-      adbMemoryInfo,
+      _adbMemoryInfo,
       eventSample,
       rasterCache,
     );
