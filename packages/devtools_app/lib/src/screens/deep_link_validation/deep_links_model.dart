@@ -18,6 +18,8 @@ const kDeeplinkTableCellDefaultWidth = 200.0;
 const kToolTipWidth = 344.0;
 const metaDataDeepLinkingFlagTag =
     '<meta-data android:name="flutter_deeplinking_enabled" android:value="true" />';
+const missingDomain = 'missing domain';
+const missingScheme = 'missing scheme';
 
 enum PlatformOS {
   android('Android'),
@@ -477,7 +479,7 @@ class SchemeColumn extends ColumnData<LinkData>
     VoidCallback? onPressed,
   }) {
     return dataObject.scheme.isEmpty
-        ? Text('missing scheme', style: Theme.of(context).errorTextStyle)
+        ? Text(missingScheme, style: Theme.of(context).errorTextStyle)
         : Text(getValue(dataObject));
   }
 
