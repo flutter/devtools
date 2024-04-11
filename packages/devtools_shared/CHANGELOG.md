@@ -1,3 +1,6 @@
+# 9.0.1
+* Restructure `devtools_extensions.dart` and `devtools_extensions_io.dart` libraries.
+
 # 9.0.0
 * **Breaking change:** remove parameter `analytics` from `ServerApi.handle` in favor
 of DTD implementation.
