@@ -150,16 +150,16 @@ class MemoryChartPaneController extends DisposableController
     return serviceConnection.serviceManager.vm?.operatingSystem == 'android';
   }
 
-  MemoryTracker? _memoryTracker;
+  late final MemoryTracker _memoryTracker = MemoryTracker(
+    memoryTimeline,
+    isAndroidChartVisible: isAndroidChartVisible,
+    paused: paused,
+  );
 
-  bool get hasStarted => _memoryTracker != null;
+  bool get hasStarted => paused.value;
 
   void _onConnect() {
-    _memoryTracker ??= MemoryTracker(
-      memoryTimeline,
-      isAndroidChartVisible: isAndroidChartVisible,
-      paused: paused,
-    )..start();
+    _memoryTracker.start();
 
     // Log Flutter extension events.
     // Note: We do not need to listen to event history here because we do not
