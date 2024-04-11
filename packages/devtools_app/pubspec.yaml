@@ -71,7 +71,8 @@ dependencies:
 dev_dependencies:
   args: ^2.4.2
   build_runner: ^2.3.3
-  devtools_test: 2.35.0-dev.8
+  devtools_test:
+    path: ../devtools_test
   fake_async: ^1.3.1
   flutter_driver:
     sdk: flutter
