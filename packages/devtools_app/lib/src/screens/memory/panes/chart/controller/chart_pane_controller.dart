@@ -156,7 +156,7 @@ class MemoryChartPaneController extends DisposableController
     paused: paused,
   );
 
-  bool get hasStarted => paused.value;
+  bool get hasStarted => !paused.value;
 
   void _onConnect() {
     _memoryTracker.start();
@@ -205,7 +205,7 @@ class MemoryChartPaneController extends DisposableController
   }
 
   void _onDisconnect() {
-    _memoryTracker?.stop();
+    _memoryTracker.stop();
     memoryTimeline.reset();
   }
 
@@ -226,7 +226,7 @@ class MemoryChartPaneController extends DisposableController
   @override
   void dispose() {
     super.dispose();
-    _memoryTracker?.dispose();
+    _memoryTracker.dispose();
     _legendVisibleNotifier.dispose();
     _displayInterval.dispose();
     _refreshCharts.dispose();
