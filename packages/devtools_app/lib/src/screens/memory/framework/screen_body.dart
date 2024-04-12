@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
@@ -31,10 +33,19 @@ class _ConnectedMemoryBodyState extends State<ConnectedMemoryBody>
 
   final _focusNode = FocusNode(debugLabel: 'memory');
 
+  bool _initialized = false;
+
   @override
   void initState() {
     super.initState();
     autoDisposeFocusNode(_focusNode);
+    unawaited(_init());
+  }
+
+  Future<void> _init() async {
+    await memoryController.initialized;
+    _initialized = true;
+    setState(() {});
   }
 
   @override
@@ -52,7 +63,7 @@ class _ConnectedMemoryBodyState extends State<ConnectedMemoryBody>
 
   @override
   Widget build(BuildContext context) {
-    if (!memoryController.isInitialized.value) {
+    if (!_initialized) {
       return const Center(
         child: CircularProgressIndicator(),
       );

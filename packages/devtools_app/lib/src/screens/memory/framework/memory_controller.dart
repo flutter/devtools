@@ -8,9 +8,12 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../../../devtools_app.dart';
 import '../../../shared/memory/class_name.dart';
 import '../../../shared/memory/heap_graph_loader.dart';
+import '../../../shared/offline_data.dart';
+import '../../../shared/primitives/simple_items.dart';
+import '../../../shared/screen.dart';
+import '../../../shared/utils.dart';
 import '../panes/chart/controller/chart_pane_controller.dart';
 import '../panes/control/controller/control_pane_controller.dart';
 import '../panes/diff/controller/diff_pane_controller.dart';
@@ -40,7 +43,8 @@ class MemoryController extends DisposableController
     unawaited(_init(connectedDiff, connectedProfile));
   }
 
-  ValueNotifier<bool> isInitialized = ValueNotifier(false);
+  Future<void> get initialized => _initialized.future;
+  final _initialized = Completer<void>();
 
   /// DevTools mode at the time of creation of the controller.
   ///
@@ -79,10 +83,11 @@ class MemoryController extends DisposableController
     @visibleForTesting DiffPaneController? connectedDiff,
     @visibleForTesting ProfilePaneController? connectedProfile,
   ) async {
-    assert(!isInitialized.value);
+    assert(!_initialized.isCompleted);
     switch (_mode) {
       case DevToolsMode.disconnected:
-        throw StateError('Memory screen does not support disconnected mode.');
+        // TODO: load memory screen in disconnected mode, https://github.com/flutter/devtools/issues/6972
+        _initializeData();
       case DevToolsMode.connected:
         _initializeData(
           diffPaneController: connectedDiff,
@@ -91,14 +96,14 @@ class MemoryController extends DisposableController
       case DevToolsMode.offlineData:
         assert(connectedDiff == null && connectedProfile == null);
         await maybeLoadOfflineData(
-          PerformanceScreen.id,
+          ScreenMetaData.memory.id,
           createData: (json) => OfflineMemoryData.parse(json),
           shouldLoad: (data) => !data.isEmpty,
         );
         // If shouldLoad returns false, previous line is noop, so data should be initialized.
-        if (!isInitialized.value) _initializeData();
+        if (!_initialized.isCompleted) _initializeData();
     }
-    assert(isInitialized.value);
+    assert(_initialized.isCompleted);
   }
 
   void _initializeData({
@@ -106,7 +111,7 @@ class MemoryController extends DisposableController
     @visibleForTesting DiffPaneController? diffPaneController,
     @visibleForTesting ProfilePaneController? profilePaneController,
   }) {
-    assert(!isInitialized.value);
+    assert(!_initialized.isCompleted);
 
     chart = offlineData?.chart ?? MemoryChartPaneController(_mode);
     diff = diffPaneController ??
@@ -128,7 +133,7 @@ class MemoryController extends DisposableController
     if (offlineData != null) profile.setFilter(offlineData.filter);
     _shareClassFilterBetweenProfileAndDiff();
 
-    isInitialized.value = true;
+    _initialized.complete();
   }
 
   @override
@@ -145,7 +150,7 @@ class MemoryController extends DisposableController
 
   @override
   FutureOr<void> processOfflineData(OfflineMemoryData offlineData) {
-    assert(!isInitialized.value);
+    assert(!_initialized.isCompleted);
     _initializeData(offlineData: offlineData);
   }
 
