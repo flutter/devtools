@@ -98,10 +98,9 @@ class MemoryController extends DisposableController
         await maybeLoadOfflineData(
           ScreenMetaData.memory.id,
           createData: (json) => OfflineMemoryData.parse(json),
-          shouldLoad: (data) => !data.isEmpty,
+          shouldLoad: (data) => true,
         );
-        // If shouldLoad returns false, previous line is noop, so data should be initialized.
-        if (!_initialized.isCompleted) _initializeData();
+        assert(_initialized.isCompleted);
     }
     assert(_initialized.isCompleted);
   }

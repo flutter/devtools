@@ -21,10 +21,11 @@ class OfflineMemoryData {
     this.profile,
     this.chart,
     this.filter, {
-    this.isEmpty = false,
     required this.selectedTab,
   });
 
+  // TODO: use an extension type for the Json parsing, https://github.com/flutter/devtools/issues/6972
+  // https://github.com/flutter/devtools/pull/7572#discussion_r1563102256
   factory OfflineMemoryData.parse(Map<String, dynamic> json) {
     Map<String, dynamic> item(String key) =>
         json[key] as Map<String, dynamic>? ?? {};
@@ -34,11 +35,8 @@ class OfflineMemoryData {
       MemoryChartPaneController.parse(item(_Json.chartData)),
       ClassFilter.parse(item(_Json.classFilter)),
       selectedTab: json[_Json.selectedTab] as int? ?? 0,
-      isEmpty: json.isEmpty,
     );
   }
-
-  final bool isEmpty;
 
   final int selectedTab;
   final ClassFilter filter; // filter is shared between tabs, so it's here

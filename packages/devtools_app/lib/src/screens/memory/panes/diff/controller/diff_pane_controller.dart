@@ -53,18 +53,15 @@ class DiffPaneController extends DisposableController {
   bool get hasSnapshots => core.snapshots.value.length > 1;
 
   Future<void> takeSnapshot() async {
-    final loader = this.loader!;
     ga.select(
       gac.memory,
       gac.MemoryEvent.diffTakeSnapshotControlPane,
     );
-
     final item = SnapshotDataItem(
       displayNumber: _nextDisplayNumber(),
       defaultName: selectedIsolateName ?? '<isolate-not-detected>',
     );
-
-    await _addSnapshot(loader, item);
+    await _addSnapshot(loader!, item);
     derived._updateValues();
   }
 
