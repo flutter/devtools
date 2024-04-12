@@ -81,12 +81,19 @@ class MemoryChartPaneController extends DisposableController
   }
 
   DevToolsMode mode;
-  bool? isDeviceAndroid;
+
+  /// Wether device is android, if [mode] is not [DevToolsMode.connected].
+  final bool? isDeviceAndroid;
 
   Future<void> _init() async {
+    _updateAndroidChartVisibility();
     if (mode == DevToolsMode.connected && isChartVisible.value) {
       await resume();
     }
+    addAutoDisposeListener(
+      preferences.memory.androidCollectionEnabled,
+      _updateAndroidChartVisibility,
+    );
   }
 
   Map<String, dynamic> prepareForOffline() {
@@ -191,10 +198,6 @@ class MemoryChartPaneController extends DisposableController
     );
 
     _updateAndroidChartVisibility();
-    addAutoDisposeListener(
-      preferences.memory.androidCollectionEnabled,
-      _updateAndroidChartVisibility,
-    );
   }
 
   void _onMemoryData(Event data) {
