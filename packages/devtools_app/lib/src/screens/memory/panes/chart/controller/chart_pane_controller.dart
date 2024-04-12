@@ -157,9 +157,6 @@ class MemoryChartPaneController extends DisposableController
     android.dirty = true;
   }
 
-  ValueListenable get refreshCharts => _refreshCharts;
-  final _refreshCharts = ValueNotifier<int>(0);
-
   /// Default is to display default tick width based on width of chart of the collected
   /// data in the chart.
   final _displayInterval =
@@ -194,7 +191,6 @@ class MemoryChartPaneController extends DisposableController
     super.dispose();
     _legendVisibleNotifier.dispose();
     _displayInterval.dispose();
-    _refreshCharts.dispose();
     event.dispose();
     vm.dispose();
     android.dispose();

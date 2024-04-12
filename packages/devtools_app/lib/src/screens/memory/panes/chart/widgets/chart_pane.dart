@@ -136,12 +136,6 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
       _addTapLocationListener(location, allLocations);
     }
 
-    addAutoDisposeListener(widget.chart.refreshCharts, () {
-      setState(() {
-        widget.chart.recomputeChartData();
-      });
-    });
-
     // There is no listener passed, so SetState will be invoked.
     addAutoDisposeListener(
       widget.chart.isAndroidChartVisible,
