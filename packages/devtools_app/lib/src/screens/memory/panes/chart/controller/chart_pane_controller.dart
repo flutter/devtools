@@ -94,6 +94,9 @@ class MemoryChartPaneController extends DisposableController
   DevToolsMode mode;
 
   /// Wether device is android, if [mode] is not [DevToolsMode.connected].
+  ///
+  /// If [mode] is [DevToolsMode.connected], this value should be detected
+  /// by [_chartConnection].
   final bool? isDeviceAndroid;
 
   Future<void> _init() async {

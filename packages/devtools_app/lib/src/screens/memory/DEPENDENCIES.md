@@ -6,6 +6,7 @@ Dependencies that create loops (inversions) are marked with `!`.
 ```mermaid
 flowchart TD;
 framework-->panes;
+framework-->shared;
 panes-->shared;
 ```
 
