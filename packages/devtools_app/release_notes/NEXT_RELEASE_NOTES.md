@@ -22,7 +22,9 @@ TODO: Remove this section if there are not any general updates.
 
 ## CPU profiler updates
 
-TODO: Remove this section if there are not any general updates.
+* Changed to a single button, for starting and stopping
+  recording. - [#7573](https://github.com/flutter/devtools/pull/7573)
+  ![A screen shot of the CPU profiler tab, with the new recording button.](./images/profiler_recording.png)
 
 ## Memory updates
 
@@ -35,7 +37,9 @@ TODO: Remove this section if there are not any general updates.
 
 ## Network profiler updates
 
-TODO: Remove this section if there are not any general updates.
+* Changed to a single button, for starting and stopping
+  recording. - [#7573](https://github.com/flutter/devtools/pull/7573)
+  ![A screen shot of the network tab, with the new recording button.](./images/network_recording.png)
 
 ## Logging updates
 
