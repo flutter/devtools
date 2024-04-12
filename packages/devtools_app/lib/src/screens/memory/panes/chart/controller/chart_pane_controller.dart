@@ -29,9 +29,16 @@ import 'vm_chart_controller.dart';
 /// So, if this class is not instantiated, the interaction does not happen.
 class _ChartConnection extends DisposableController
     with AutoDisposeControllerMixin {
-  _ChartConnection(this._memoryTracker);
+  _ChartConnection(this.timeline, {required this.isAndroidChartVisible});
 
-  final MemoryTracker _memoryTracker;
+  final MemoryTimeline timeline;
+  final ValueNotifier<bool> isAndroidChartVisible;
+
+  late final MemoryTracker _memoryTracker = MemoryTracker(
+    timeline,
+    isAndroidChartVisible: isAndroidChartVisible,
+  );
+
   Timer? _pollingTimer;
   bool _connected = false;
 
@@ -107,7 +114,10 @@ class MemoryChartPaneController extends DisposableController
 
   late final _ChartConnection? _chartConnection =
       (mode == DevToolsMode.connected)
-          ? _ChartConnection(_memoryTracker)
+          ? _ChartConnection(
+              memoryTimeline,
+              isAndroidChartVisible: isAndroidChartVisible,
+            )
           : null;
 
   final MemoryTimeline memoryTimeline = MemoryTimeline();
@@ -178,11 +188,6 @@ class MemoryChartPaneController extends DisposableController
     isAndroidChartVisible.value =
         isAndroid && preferences.memory.androidCollectionEnabled.value;
   }
-
-  late final MemoryTracker _memoryTracker = MemoryTracker(
-    memoryTimeline,
-    isAndroidChartVisible: isAndroidChartVisible,
-  );
 
   @override
   void dispose() {
