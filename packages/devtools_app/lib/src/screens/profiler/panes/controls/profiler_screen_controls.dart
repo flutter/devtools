@@ -80,8 +80,8 @@ class _PrimaryControls extends StatelessWidget {
           minScreenWidthForTextBeforeScaling:
               _primaryControlsMinIncludeTextWidth,
           onPressed: () async => recording
-              ? controller.stopRecording()
-              : controller.startRecording(),
+              ? await controller.stopRecording()
+              : await controller.startRecording(),
         ),
         const SizedBox(width: denseSpacing),
         ClearButton(
