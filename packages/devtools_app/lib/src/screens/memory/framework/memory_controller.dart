@@ -119,6 +119,7 @@ class MemoryController extends DisposableController
         ProfilePaneController();
     control = MemoryControlPaneController(
       chart.memoryTimeline,
+      isChartVisible: chart.isChartVisible,
       exportData: exportData,
     );
     tracing = TracingPaneController();

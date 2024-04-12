@@ -8,10 +8,15 @@ import '../../../../../shared/globals.dart';
 import '../../../shared/primitives/memory_timeline.dart';
 
 class MemoryControlPaneController {
-  MemoryControlPaneController(this.memoryTimeline, {required this.exportData});
+  MemoryControlPaneController(
+    this.memoryTimeline, {
+    required this.isChartVisible,
+    required this.exportData,
+  });
 
   final MemoryTimeline memoryTimeline;
   final VoidCallback exportData;
+  final ValueNotifier<bool> isChartVisible;
 
   bool get isGcing => _gcing;
   bool _gcing = false;

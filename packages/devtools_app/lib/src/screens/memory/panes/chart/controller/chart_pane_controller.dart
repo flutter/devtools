@@ -30,6 +30,7 @@ typedef _PollMemoryHandler = Future<void> Function();
 /// Does not fail in case of accidental disconnect.
 ///
 /// All interactions between chart and vm are initiated by this class.
+/// So, if this class is not instantiated, the interaction does not happen.
 class _ChartConnection extends DisposableController {
   _ChartConnection({required this.onMemoryData, required this.pollMemory});
 
@@ -64,7 +65,12 @@ class _ChartConnection extends DisposableController {
 class MemoryChartPaneController extends DisposableController
     with AutoDisposeControllerMixin {
   MemoryChartPaneController(this.mode, {this.isDeviceAndroid})
-      : assert(mode == DevToolsMode.connected || isDeviceAndroid != null);
+      : assert(
+          mode == DevToolsMode.connected || isDeviceAndroid != null,
+          'If application is not connected, isDeviceAndroid must be provided.',
+        ) {
+    unawaited(_init());
+  }
 
   factory MemoryChartPaneController.parse(Map<String, dynamic> map) {
     // TODO(polina-c): implement, https://github.com/flutter/devtools/issues/6972
@@ -76,6 +82,12 @@ class MemoryChartPaneController extends DisposableController
 
   DevToolsMode mode;
   bool? isDeviceAndroid;
+
+  Future<void> _init() async {
+    if (mode == DevToolsMode.connected && isChartVisible.value) {
+      await resume();
+    }
+  }
 
   Map<String, dynamic> prepareForOffline() {
     // TODO(polina-c): implement, https://github.com/flutter/devtools/issues/6972
@@ -106,6 +118,8 @@ class MemoryChartPaneController extends DisposableController
   final _legendVisibleNotifier = ValueNotifier<bool>(true);
   bool toggleLegendVisibility() =>
       _legendVisibleNotifier.value = !_legendVisibleNotifier.value;
+
+  ValueNotifier<bool> isChartVisible = preferences.memory.showChart;
 
   void resetAll() {
     event.reset();
