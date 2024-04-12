@@ -30,13 +30,15 @@ class MemoryTracker {
   });
 
   final MemoryTimeline timeline;
+
   final ValueListenable<bool> isAndroidChartVisible;
+
   _ContinuesState _monitorContinuesState = _ContinuesState.none;
 
   final _isolateHeaps = <String, MemoryUsage>{};
 
   /// Polled VM current RSS.
-  int processRss = 0;
+  int _processRss = 0;
 
   /// Polled adb dumpsys meminfo values.
   AdbMemoryInfo? _adbMemoryInfo;
@@ -67,7 +69,6 @@ class MemoryTracker {
       customEventKind = MemoryTimeline.customEventName(data.extensionKind!);
     }
     final jsonData = data.extensionData!.data.cast<String, Object>();
-    // TODO(terry): Display events enabled in a settings page for now only these events.
     switch (extensionEventKind) {
       case 'Flutter.ImageSizesForFrame':
         timeline.addExtensionEvent(
@@ -112,9 +113,6 @@ class MemoryTracker {
     // Polls for current RSS size.
     final vm = await serviceConnection.serviceManager.service!.getVM();
     _update(vm, isolateMemory);
-
-    // TODO(terry): Is there a better way to detect an integration test running?
-    if (vm.json!.containsKey('_FAKE_VM')) return;
   }
 
   /// Detect stale isolates (sentineled), may happen after a hot restart.
@@ -135,7 +133,7 @@ class MemoryTracker {
   }
 
   void _update(VM vm, Map<IsolateRef, MemoryUsage> isolateMemory) {
-    processRss = vm.json!['_currentRSS'];
+    _processRss = vm.json!['_currentRSS'];
 
     _isolateHeaps.clear();
 
@@ -236,7 +234,7 @@ class MemoryTracker {
 
     final HeapSample sample = HeapSample(
       time,
-      processRss,
+      _processRss,
       // Displaying capacity dashed line on top of stacked (used + external).
       capacity + external,
       used,
