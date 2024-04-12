@@ -239,6 +239,35 @@ class ToolbarRefresh extends ToolbarAction {
   });
 }
 
+class StartStopRecordingButton extends GaDevToolsButton {
+  StartStopRecordingButton({
+    super.key,
+    required this.recording,
+    required super.onPressed,
+    required super.gaScreen,
+    required super.gaSelection,
+    super.minScreenWidthForTextBeforeScaling,
+    String? tooltipOverride,
+    Color? colorOverride,
+    String? labelOverride,
+  }) : super(
+          icon: _icon(recording),
+          label: labelOverride ?? _label(recording),
+          color: colorOverride ?? _color(recording),
+          tooltip: tooltipOverride ?? _tooltip(recording),
+        );
+  final bool recording;
+  static IconData _icon(bool recording) =>
+      recording ? Icons.stop : Icons.fiber_manual_record;
+  static String _label(bool recording) =>
+      recording ? 'Stop recording' : 'Start recording';
+  static String _tooltip(bool recording) =>
+      recording ? 'Stop recording' : 'Start recording';
+  static Color? _color(bool recording) => recording
+      ? Colors.red
+      : null; // Todo: is there a theme color that could be picked here?
+}
+
 /// Button to start recording data.
 ///
 /// * `recording`: Whether recording is in progress.
