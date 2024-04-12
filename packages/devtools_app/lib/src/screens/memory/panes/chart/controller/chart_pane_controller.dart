@@ -182,7 +182,6 @@ class MemoryChartPaneController extends DisposableController
   late final MemoryTracker _memoryTracker = MemoryTracker(
     memoryTimeline,
     isAndroidChartVisible: isAndroidChartVisible,
-    paused: paused,
   );
 
   bool get hasStarted => paused.value;

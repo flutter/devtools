@@ -26,12 +26,10 @@ enum _ContinuesState {
 class MemoryTracker {
   MemoryTracker(
     this.timeline, {
-    required this.paused,
     required this.isAndroidChartVisible,
   });
 
   final MemoryTimeline timeline;
-  final ValueListenable<bool> paused;
   final ValueNotifier<bool> isAndroidChartVisible;
   _ContinuesState _monitorContinuesState = _ContinuesState.none;
 
