@@ -30,7 +30,7 @@ class MemoryTracker {
   });
 
   final MemoryTimeline timeline;
-  final ValueNotifier<bool> isAndroidChartVisible;
+  final ValueListenable<bool> isAndroidChartVisible;
   _ContinuesState _monitorContinuesState = _ContinuesState.none;
 
   final _isolateHeaps = <String, MemoryUsage>{};

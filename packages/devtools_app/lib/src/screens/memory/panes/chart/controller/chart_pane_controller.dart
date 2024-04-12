@@ -32,7 +32,7 @@ class _ChartConnection extends DisposableController
   _ChartConnection(this.timeline, {required this.isAndroidChartVisible});
 
   final MemoryTimeline timeline;
-  final ValueNotifier<bool> isAndroidChartVisible;
+  final ValueListenable<bool> isAndroidChartVisible;
 
   late final MemoryTracker _memoryTracker = MemoryTracker(
     timeline,
