@@ -41,13 +41,16 @@ class _ChartConnection extends DisposableController
   Future<void> maybeConnect() async {
     if (_connected) return;
     await serviceConnection.serviceManager.onServiceAvailable;
-    _memoryTracker.start(); // ?????????
     autoDisposeStreamSubscription(
       serviceConnection.serviceManager.service!.onExtensionEvent
           .listen(_memoryTracker.onMemoryData),
     );
-    _connected = true;
+    autoDisposeStreamSubscription(
+      serviceConnection.serviceManager.service!.onGCEvent
+          .listen(_memoryTracker.onGCEvent),
+    );
     await _onPoll();
+    _connected = true;
   }
 
   Future<void> _onPoll() async {
@@ -187,7 +190,6 @@ class MemoryChartPaneController extends DisposableController
   @override
   void dispose() {
     super.dispose();
-    _memoryTracker.dispose();
     _legendVisibleNotifier.dispose();
     _displayInterval.dispose();
     _refreshCharts.dispose();

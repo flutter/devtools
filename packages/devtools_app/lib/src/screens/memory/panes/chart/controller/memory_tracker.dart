@@ -46,32 +46,9 @@ class MemoryTracker {
   /// Polled engine's RasterCache estimates.
   RasterCache? rasterCache;
 
-  StreamSubscription<Event>? _gcStreamListener;
-
   Timer? _monitorContinues;
 
-  void start() {
-    _updateLiveDataPolling();
-    paused.addListener(_updateLiveDataPolling);
-  }
-
-  void _updateLiveDataPolling() {
-    _gcStreamListener ??= serviceConnection.serviceManager.service?.onGCEvent
-        .listen(_handleGCEvent);
-  }
-
-  void stop() {
-    _updateLiveDataPolling();
-    _cleanListenersAndTimers();
-  }
-
-  void _cleanListenersAndTimers() {
-    paused.removeListener(_updateLiveDataPolling);
-    unawaited(_gcStreamListener?.cancel());
-    _gcStreamListener = null;
-  }
-
-  void _handleGCEvent(Event event) {
+  void onGCEvent(Event event) {
     final HeapSpace newHeap = HeapSpace.parse(event.json!['new'])!;
     final HeapSpace oldHeap = HeapSpace.parse(event.json!['old'])!;
 
@@ -356,9 +333,5 @@ class MemoryTracker {
     }
 
     return null;
-  }
-
-  void dispose() {
-    _cleanListenersAndTimers();
   }
 }
