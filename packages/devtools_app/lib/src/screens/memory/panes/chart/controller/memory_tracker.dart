@@ -84,6 +84,34 @@ class MemoryTracker {
     _updateGCEvent(event.isolate!.id!, memoryUsage);
   }
 
+  void onMemoryData(Event data) {
+    var extensionEventKind = data.extensionKind;
+    String? customEventKind;
+    if (MemoryTimeline.isCustomEvent(data.extensionKind!)) {
+      extensionEventKind = MemoryTimeline.devToolsExtensionEvent;
+      customEventKind = MemoryTimeline.customEventName(data.extensionKind!);
+    }
+    final jsonData = data.extensionData!.data.cast<String, Object>();
+    // TODO(terry): Display events enabled in a settings page for now only these events.
+    switch (extensionEventKind) {
+      case 'Flutter.ImageSizesForFrame':
+        timeline.addExtensionEvent(
+          data.timestamp,
+          data.extensionKind,
+          jsonData,
+        );
+        break;
+      case MemoryTimeline.devToolsExtensionEvent:
+        timeline.addExtensionEvent(
+          data.timestamp,
+          MemoryTimeline.customDevToolsEvent,
+          jsonData,
+          customEventName: customEventKind,
+        );
+        break;
+    }
+  }
+
   Future<void> pollMemory() async {
     final isolateMemory = <IsolateRef, MemoryUsage>{};
     for (IsolateRef isolateRef

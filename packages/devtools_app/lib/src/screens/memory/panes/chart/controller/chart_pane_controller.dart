@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
-import 'package:vm_service/vm_service.dart';
 
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/primitives/simple_items.dart';
@@ -16,9 +15,6 @@ import 'android_chart_controller.dart';
 import 'event_chart_controller.dart';
 import 'memory_tracker.dart';
 import 'vm_chart_controller.dart';
-
-typedef _MemoryEventHandler = void Function(Event);
-typedef _PollMemoryHandler = Future<void> Function();
 
 /// Connection between chart and application.
 ///
@@ -33,14 +29,8 @@ typedef _PollMemoryHandler = Future<void> Function();
 /// So, if this class is not instantiated, the interaction does not happen.
 class _ChartConnection extends DisposableController
     with AutoDisposeControllerMixin {
-  _ChartConnection(
-    this._memoryTracker, {
-    required this.onMemoryData,
-    required this.pollMemory,
-  });
+  _ChartConnection(this._memoryTracker);
 
-  final _MemoryEventHandler onMemoryData;
-  final _PollMemoryHandler pollMemory;
   final MemoryTracker _memoryTracker;
   Timer? _pollingTimer;
   bool _connected = false;
@@ -54,7 +44,7 @@ class _ChartConnection extends DisposableController
     _memoryTracker.start(); // ?????????
     autoDisposeStreamSubscription(
       serviceConnection.serviceManager.service!.onExtensionEvent
-          .listen(onMemoryData),
+          .listen(_memoryTracker.onMemoryData),
     );
     _connected = true;
     await _onPoll();
@@ -62,7 +52,7 @@ class _ChartConnection extends DisposableController
 
   Future<void> _onPoll() async {
     _pollingTimer = null;
-    await pollMemory();
+    await _memoryTracker.pollMemory();
     _pollingTimer = Timer(chartUpdateDelay, _onPoll);
   }
 
@@ -114,11 +104,7 @@ class MemoryChartPaneController extends DisposableController
 
   late final _ChartConnection? _chartConnection =
       (mode == DevToolsMode.connected)
-          ? _ChartConnection(
-              _memoryTracker,
-              onMemoryData: _onMemoryData,
-              pollMemory: _memoryTracker.pollMemory,
-            )
+          ? _ChartConnection(_memoryTracker)
           : null;
 
   final MemoryTimeline memoryTimeline = MemoryTimeline();
@@ -197,34 +183,6 @@ class MemoryChartPaneController extends DisposableController
   );
 
   bool get hasStarted => paused.value;
-
-  void _onMemoryData(Event data) {
-    var extensionEventKind = data.extensionKind;
-    String? customEventKind;
-    if (MemoryTimeline.isCustomEvent(data.extensionKind!)) {
-      extensionEventKind = MemoryTimeline.devToolsExtensionEvent;
-      customEventKind = MemoryTimeline.customEventName(data.extensionKind!);
-    }
-    final jsonData = data.extensionData!.data.cast<String, Object>();
-    // TODO(terry): Display events enabled in a settings page for now only these events.
-    switch (extensionEventKind) {
-      case 'Flutter.ImageSizesForFrame':
-        memoryTimeline.addExtensionEvent(
-          data.timestamp,
-          data.extensionKind,
-          jsonData,
-        );
-        break;
-      case MemoryTimeline.devToolsExtensionEvent:
-        memoryTimeline.addExtensionEvent(
-          data.timestamp,
-          MemoryTimeline.customDevToolsEvent,
-          jsonData,
-          customEventName: customEventKind,
-        );
-        break;
-    }
-  }
 
   @override
   void dispose() {
