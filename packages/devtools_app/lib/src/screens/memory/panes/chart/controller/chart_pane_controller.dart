@@ -31,7 +31,8 @@ typedef _PollMemoryHandler = Future<void> Function();
 ///
 /// All interactions between chart and vm are initiated by this class.
 /// So, if this class is not instantiated, the interaction does not happen.
-class _ChartConnection extends DisposableController {
+class _ChartConnection extends DisposableController
+    with AutoDisposeControllerMixin {
   _ChartConnection({required this.onMemoryData, required this.pollMemory});
 
   final _MemoryEventHandler onMemoryData;
@@ -45,6 +46,10 @@ class _ChartConnection extends DisposableController {
   Future<void> maybeConnect() async {
     if (_connected) return;
     await serviceConnection.serviceManager.onServiceAvailable;
+    autoDisposeStreamSubscription(
+      serviceConnection.serviceManager.service!.onExtensionEvent
+          .listen(onMemoryData),
+    );
     _connected = true;
     await _onPoll();
   }
@@ -188,14 +193,6 @@ class MemoryChartPaneController extends DisposableController
 
   void _onConnect() {
     _memoryTracker.start();
-
-    // Log Flutter extension events.
-    // Note: We do not need to listen to event history here because we do not
-    // have matching historical data about total memory usage.
-    autoDisposeStreamSubscription(
-      serviceConnection.serviceManager.service!.onExtensionEvent
-          .listen(_onMemoryData),
-    );
 
     _updateAndroidChartVisibility();
   }
