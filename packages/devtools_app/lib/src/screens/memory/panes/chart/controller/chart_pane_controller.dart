@@ -38,6 +38,9 @@ class _ChartConnection extends DisposableController {
   Timer? _pollingTimer;
   bool _connected = false;
 
+  late final isDeviceAndroid =
+      serviceConnection.serviceManager.vm?.operatingSystem == 'android';
+
   Future<void> maybeConnect() async {
     if (_connected) return;
     await serviceConnection.serviceManager.onServiceAvailable;
@@ -60,14 +63,19 @@ class _ChartConnection extends DisposableController {
 
 class MemoryChartPaneController extends DisposableController
     with AutoDisposeControllerMixin {
-  MemoryChartPaneController(this.mode);
+  MemoryChartPaneController(this.mode, {this.isDeviceAndroid})
+      : assert(mode == DevToolsMode.connected || isDeviceAndroid != null);
 
   factory MemoryChartPaneController.parse(Map<String, dynamic> map) {
     // TODO(polina-c): implement, https://github.com/flutter/devtools/issues/6972
-    return MemoryChartPaneController(DevToolsMode.offlineData);
+    return MemoryChartPaneController(
+      DevToolsMode.offlineData,
+      isDeviceAndroid: false,
+    );
   }
 
   DevToolsMode mode;
+  bool? isDeviceAndroid;
 
   Map<String, dynamic> prepareForOffline() {
     // TODO(polina-c): implement, https://github.com/flutter/devtools/issues/6972
@@ -144,15 +152,9 @@ class MemoryChartPaneController extends DisposableController
   final isAndroidChartVisible = ValueNotifier<bool>(false);
 
   void _updateAndroidChartVisibility() {
-    final bool isConnectedToAndroidAndAndroidEnabled =
-        _isConnectedDeviceAndroid &&
-            preferences.memory.androidCollectionEnabled.value;
-
-    isAndroidChartVisible.value = isConnectedToAndroidAndAndroidEnabled;
-  }
-
-  bool get _isConnectedDeviceAndroid {
-    return serviceConnection.serviceManager.vm?.operatingSystem == 'android';
+    final isAndroid = isDeviceAndroid ?? _chartConnection!.isDeviceAndroid;
+    isAndroidChartVisible.value =
+        isAndroid && preferences.memory.androidCollectionEnabled.value;
   }
 
   late final MemoryTracker _memoryTracker = MemoryTracker(
