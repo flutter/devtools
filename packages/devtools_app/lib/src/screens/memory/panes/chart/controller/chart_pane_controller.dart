@@ -184,8 +184,6 @@ class MemoryChartPaneController extends DisposableController
     isAndroidChartVisible: isAndroidChartVisible,
   );
 
-  bool get hasStarted => paused.value;
-
   @override
   void dispose() {
     super.dispose();
