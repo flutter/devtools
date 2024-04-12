@@ -33,10 +33,15 @@ typedef _PollMemoryHandler = Future<void> Function();
 /// So, if this class is not instantiated, the interaction does not happen.
 class _ChartConnection extends DisposableController
     with AutoDisposeControllerMixin {
-  _ChartConnection({required this.onMemoryData, required this.pollMemory});
+  _ChartConnection(
+    this._memoryTracker, {
+    required this.onMemoryData,
+    required this.pollMemory,
+  });
 
   final _MemoryEventHandler onMemoryData;
   final _PollMemoryHandler pollMemory;
+  final MemoryTracker _memoryTracker;
   Timer? _pollingTimer;
   bool _connected = false;
 
@@ -46,6 +51,7 @@ class _ChartConnection extends DisposableController
   Future<void> maybeConnect() async {
     if (_connected) return;
     await serviceConnection.serviceManager.onServiceAvailable;
+    _memoryTracker.start(); // ?????????
     autoDisposeStreamSubscription(
       serviceConnection.serviceManager.service!.onExtensionEvent
           .listen(onMemoryData),
@@ -109,6 +115,7 @@ class MemoryChartPaneController extends DisposableController
   late final _ChartConnection? _chartConnection =
       (mode == DevToolsMode.connected)
           ? _ChartConnection(
+              _memoryTracker,
               onMemoryData: _onMemoryData,
               pollMemory: _memoryTracker.pollMemory,
             )
@@ -191,12 +198,6 @@ class MemoryChartPaneController extends DisposableController
 
   bool get hasStarted => paused.value;
 
-  void _onConnect() {
-    _memoryTracker.start();
-
-    _updateAndroidChartVisibility();
-  }
-
   void _onMemoryData(Event data) {
     var extensionEventKind = data.extensionKind;
     String? customEventKind;
@@ -222,25 +223,6 @@ class MemoryChartPaneController extends DisposableController
           customEventName: customEventKind,
         );
         break;
-    }
-  }
-
-  void _onDisconnect() {
-    _memoryTracker.stop();
-    memoryTimeline.reset();
-  }
-
-  void startTimeline() {
-    addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
-      if (serviceConnection.serviceManager.connectedState.value.connected) {
-        _onConnect();
-      } else {
-        _onDisconnect();
-      }
-    });
-
-    if (serviceConnection.serviceManager.connectedAppInitialized) {
-      _onConnect();
     }
   }
 

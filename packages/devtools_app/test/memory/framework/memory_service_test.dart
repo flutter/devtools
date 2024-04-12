@@ -29,7 +29,6 @@ void main() {
 
     env.afterNewSetup = () async {
       memoryController = MemoryController();
-      memoryController.chart.startTimeline();
     };
   }
 }

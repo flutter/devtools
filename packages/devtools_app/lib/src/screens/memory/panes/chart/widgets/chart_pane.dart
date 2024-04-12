@@ -146,16 +146,6 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     addAutoDisposeListener(
       widget.chart.isAndroidChartVisible,
     );
-
-    _updateListeningState();
-  }
-
-  void _updateListeningState() async {
-    await serviceConnection.serviceManager.onServiceAvailable;
-
-    if (!widget.chart.hasStarted) {
-      widget.chart.startTimeline();
-    }
   }
 
   @override
