@@ -14,7 +14,7 @@ TODO: Remove this section if there are not any general updates.
 
 ## Inspector updates
 
-TODO: Remove this section if there are not any general updates.
+* Add a preference for the default inspector view - [#6949](https://github.com/flutter/devtools/pull/6949)
 
 ## Performance updates
 
@@ -48,6 +48,7 @@ TODO: Remove this section if there are not any general updates.
 ## Deep links tool updates
 
 * Improve layout for narrow screens. - [#7524](https://github.com/flutter/devtools/pull/7524)
+* Add error handling for missing schemes and domains - [#7559](https://github.com/flutter/devtools/pull/7559)
 
 ## VS Code Sidebar updates
 
