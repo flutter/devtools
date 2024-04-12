@@ -36,9 +36,12 @@ class _ChartConnection extends DisposableController {
   final _MemoryEventHandler onMemoryData;
   final _PollMemoryHandler pollMemory;
   Timer? _pollingTimer;
+  bool _connected = false;
 
-  Future<void> connect() async {
+  Future<void> maybeConnect() async {
+    if (_connected) return;
     await serviceConnection.serviceManager.onServiceAvailable;
+    _connected = true;
     await _onPoll();
   }
 
@@ -71,7 +74,13 @@ class MemoryChartPaneController extends DisposableController
     return {};
   }
 
-  _ChartConnection? _chartConnection;
+  late final _ChartConnection? _chartConnection =
+      (mode == DevToolsMode.connected)
+          ? _ChartConnection(
+              onMemoryData: _onMemoryData,
+              pollMemory: _memoryTracker.pollMemory,
+            )
+          : null;
 
   final MemoryTimeline memoryTimeline = MemoryTimeline();
 
@@ -128,13 +137,7 @@ class MemoryChartPaneController extends DisposableController
   Future<void> resume() async {
     if (!_paused.value) return;
     if (mode != DevToolsMode.connected) throw StateError('Not connected.');
-    if (_chartConnection == null) {
-      _chartConnection = _ChartConnection(
-        onMemoryData: _onMemoryData,
-        pollMemory: _memoryTracker.pollMemory,
-      );
-      await _chartConnection!.connect();
-    }
+    await _chartConnection!.maybeConnect();
     _paused.value = false;
   }
 
