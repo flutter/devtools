@@ -100,6 +100,7 @@ class MemoryController extends DisposableController
           createData: (json) => OfflineMemoryData.parse(json),
           shouldLoad: (data) => true,
         );
+        if (!_initialized.isCompleted) _initializeData();
         assert(_initialized.isCompleted);
     }
     assert(_initialized.isCompleted);
