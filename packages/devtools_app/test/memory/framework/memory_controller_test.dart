@@ -25,7 +25,7 @@ final _filter2 = ClassFilter(
 );
 
 Future<void> pumpScene(WidgetTester tester, MemoryDefaultScene scene) async {
-  await tester.pumpScene(scene);
+  await tester.pumpSceneAsync(scene);
   // Delay to ensure the memory profiler has collected data.
   await tester.pumpAndSettle(const Duration(seconds: 1));
   expect(find.byType(MemoryBody), findsOneWidget);

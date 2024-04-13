@@ -59,7 +59,7 @@ void main() {
     late final CpuSamples allocationTracingProfile;
 
     Future<void> pumpScene(WidgetTester tester) async {
-      await tester.pumpScene(scene);
+      await tester.pumpSceneAsync(scene);
       // Delay to ensure the memory profiler has collected data.
       await tester.pumpAndSettle(const Duration(seconds: 1));
       expect(find.byType(MemoryBody), findsOneWidget);
