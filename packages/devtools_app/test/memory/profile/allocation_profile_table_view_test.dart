@@ -27,13 +27,6 @@ void main() {
     await scene.setUp();
   });
 
-  Future<void> pumpMemoryScreen(WidgetTester tester) async {
-    await tester.pumpScene(scene);
-    // Delay to ensure the memory profiler has collected data.
-    await tester.pumpAndSettle(const Duration(seconds: 1));
-    expect(find.byType(MemoryBody), findsOneWidget);
-  }
-
   // Set a wide enough screen width that we do not run into overflow.
   const windowSize = Size(2225.0, 1200.0);
   //setGlobal(NotificationService, NotificationService());
@@ -57,7 +50,7 @@ void main() {
       'respects VM Developer Mode setting',
       windowSize,
       (WidgetTester tester) async {
-        await pumpMemoryScreen(tester);
+        await scene.pump(tester);
 
         final allocationProfileController = scene.controller.profile;
 
@@ -156,7 +149,7 @@ void main() {
       'manually refreshes',
       windowSize,
       (WidgetTester tester) async {
-        await pumpMemoryScreen(tester);
+        await scene.pump(tester);
 
         final allocationProfileController = scene.controller.profile;
         await navigateToAllocationProfile(tester, allocationProfileController);
@@ -185,7 +178,7 @@ void main() {
       'refreshes on GC',
       windowSize,
       (WidgetTester tester) async {
-        await pumpMemoryScreen(tester);
+        await scene.pump(tester);
 
         final allocationProfileController = scene.controller.profile;
 
@@ -227,7 +220,7 @@ void main() {
       'sorts correctly',
       windowSize,
       (WidgetTester tester) async {
-        await pumpMemoryScreen(tester);
+        await scene.pump(tester);
 
         final table = find.byType(FlatTable<ProfileRecord>);
         expect(table, findsOneWidget);

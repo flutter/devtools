@@ -18,13 +18,6 @@ import '../../test_infra/scenes/scene_test_extensions.dart';
 void main() {
   late MemoryDefaultScene scene;
 
-  Future<void> pumpMemoryScreen(WidgetTester tester) async {
-    await tester.pumpSceneAsync(scene);
-    // Delay to ensure the memory profiler has collected data.
-    await tester.pumpAndSettle(const Duration(seconds: 1));
-    expect(find.byType(MemoryBody), findsOneWidget);
-  }
-
   // Set a wide enough screen width that we do not run into overflow.
   const windowSize = Size(2225.0, 1000.0);
 
@@ -41,7 +34,7 @@ void main() {
     'settings update preferences',
     windowSize,
     (WidgetTester tester) async {
-      await pumpMemoryScreen(tester);
+      await scene.pump(tester);
 
       // Open the dialog.
       await tester.tap(find.byType(SettingsOutlinedButton));

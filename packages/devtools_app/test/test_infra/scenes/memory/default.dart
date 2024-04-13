@@ -21,6 +21,7 @@ import '../../../test_infra/test_data/memory.dart';
 import '../../../test_infra/test_data/memory_allocation.dart';
 import '../../test_data/memory/heap/heap_data.dart';
 import '../../test_data/memory/heap/heap_graph_fakes.dart';
+import '../scene_test_extensions.dart';
 
 // To run:
 // flutter run -t test/test_infra/scenes/memory/default.stager_app.g.dart -d macos
@@ -77,6 +78,13 @@ class MemoryDefaultScene extends Scene {
       const MemoryBody(),
       memory: controller,
     );
+  }
+
+  Future<void> pump(WidgetTester tester) async {
+    await tester.pumpSceneAsync(this);
+    // Delay to ensure the memory profiler has collected data.
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(find.byType(MemoryBody), findsOneWidget);
   }
 
   @override
