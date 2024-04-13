@@ -8,10 +8,12 @@ import 'package:stager/stager.dart';
 
 extension StagerTestExtensions on WidgetTester {
   Future<void> pumpScene(Scene scene) async {
-    await pumpWidget(
-      Builder(
-        builder: (BuildContext context) => scene.build(context),
-      ),
-    );
+    await runAsync(() async {
+      await pumpWidget(
+        Builder(
+          builder: (BuildContext context) => scene.build(context),
+        ),
+      );
+    });
   }
 }
