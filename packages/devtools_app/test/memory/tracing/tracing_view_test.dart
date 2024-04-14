@@ -18,7 +18,6 @@ import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../test_infra/scenes/memory/default.dart';
-import '../../test_infra/scenes/scene_test_extensions.dart';
 import '../../test_infra/utils/test_utils.dart';
 
 // TODO(bkonyi): add tests for multi-isolate support.

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/screens/memory/framework/memory_screen.dart';
 import 'package:devtools_app/src/screens/memory/panes/control/widgets/settings_dialog.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/globals.dart';
@@ -13,7 +12,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../test_infra/matchers/matchers.dart';
 import '../../test_infra/scenes/memory/default.dart';
-import '../../test_infra/scenes/scene_test_extensions.dart';
 
 void main() {
   late MemoryDefaultScene scene;

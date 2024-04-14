@@ -12,7 +12,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../../test_infra/matchers/matchers.dart';
 import '../../../test_infra/scenes/memory/default.dart';
-import '../../../test_infra/scenes/scene_test_extensions.dart';
 
 Future<void> pumpScene(WidgetTester tester, MemoryDefaultScene scene) async {
   await scene.pump(tester);
