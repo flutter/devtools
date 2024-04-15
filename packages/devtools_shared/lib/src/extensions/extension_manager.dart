@@ -140,7 +140,7 @@ class ExtensionsManager {
       );
 
       try {
-        final extensionConfig = DevToolsExtensionConfig.parse({
+        final extensionConfig = DevToolsExtensionConfig.fromJson({
           ...config,
           DevToolsExtensionConfig.pathKey: location,
           DevToolsExtensionConfig.isPubliclyHostedKey: isPubliclyHosted,

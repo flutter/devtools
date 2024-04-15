@@ -149,7 +149,7 @@ class PerformanceController extends DisposableController
         PerformanceScreen.id,
         // TODO(kenz): make sure DevTools exports can be loaded into the full
         // Perfetto trace viewer (ui.perfetto.dev).
-        createData: (json) => OfflinePerformanceData.parse(json),
+        createData: (json) => OfflinePerformanceData.fromJson(json),
         shouldLoad: (data) => !data.isEmpty,
       );
     }

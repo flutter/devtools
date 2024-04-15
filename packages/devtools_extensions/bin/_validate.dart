@@ -49,7 +49,7 @@ class ValidateExtensionCommand extends Command {
 
       // Try to parse the config.yaml file. This will throw an exception if there
       // are parsing errors.
-      DevToolsExtensionConfig.parse(
+      DevToolsExtensionConfig.fromJson(
         {
           ..._configAsMap(packagePath),
           // These are generated on the DevTools server, so pass in stubbed

@@ -13,7 +13,7 @@ void main() {
 
   group('$RasterStats model', () {
     test('parse from service data', () {
-      rasterStats = RasterStats.parse(rasterStatsFromServiceJson);
+      rasterStats = RasterStats.fromJson(rasterStatsFromServiceJson);
       expect(rasterStats.layerSnapshots.length, equals(2));
       expect(rasterStats.selectedSnapshot, isNotNull);
       expect(rasterStats.selectedSnapshot!.id, equals(12731));
@@ -41,7 +41,7 @@ void main() {
     });
 
     test('parse from devtools data', () {
-      rasterStats = RasterStats.parse(rasterStatsFromDevToolsJson);
+      rasterStats = RasterStats.fromJson(rasterStatsFromDevToolsJson);
       expect(rasterStats.layerSnapshots.length, equals(2));
       expect(rasterStats.selectedSnapshot, isNotNull);
       expect(rasterStats.selectedSnapshot!.id, equals(12734));
@@ -69,7 +69,7 @@ void main() {
     });
 
     test('to json', () {
-      rasterStats = RasterStats.parse(rasterStatsFromServiceJson);
+      rasterStats = RasterStats.fromJson(rasterStatsFromServiceJson);
       final json = rasterStats.json;
       final expected = Map<String, Object?>.from(rasterStatsFromServiceJson);
       // The expected output should not have the 'type' field that comes from

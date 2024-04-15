@@ -175,7 +175,7 @@ class LocationMap {
 class RebuildCountModel {
   RebuildCountModel();
 
-  RebuildCountModel.parse(Map<String, Object?> json) {
+  RebuildCountModel.fromJson(Map<String, Object?> json) {
     if (json.isEmpty) return;
     locationMap.processLocationMap(json[_locationsKey] as Map<String, Object?>);
     final frames =

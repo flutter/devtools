@@ -91,7 +91,7 @@ class ExampleController extends DisposableController
     } else {
       await maybeLoadOfflineData(
         ExampleConditionalScreen.id,
-        createData: (json) => ExampleScreenData.parse(json),
+        createData: (json) => ExampleScreenData.fromJson(json),
         shouldLoad: (data) => data.title.isNotEmpty,
       );
     }
@@ -116,7 +116,7 @@ class ExampleController extends DisposableController
 class ExampleScreenData {
   ExampleScreenData(this.title);
 
-  factory ExampleScreenData.parse(Map<String, Object?> json) {
+  factory ExampleScreenData.fromJson(Map<String, Object?> json) {
     return ExampleScreenData(json[_titleKey] as String);
   }
 

@@ -6,7 +6,7 @@ import 'package:devtools_shared/src/extensions/extension_model.dart';
 
 final testExtensions = [fooExtension, barExtension, providerExtension];
 
-final fooExtension = DevToolsExtensionConfig.parse({
+final fooExtension = DevToolsExtensionConfig.fromJson({
   DevToolsExtensionConfig.nameKey: 'foo',
   DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
   DevToolsExtensionConfig.versionKey: '1.0.0',
@@ -14,7 +14,7 @@ final fooExtension = DevToolsExtensionConfig.parse({
   DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
 });
 
-final barExtension = DevToolsExtensionConfig.parse({
+final barExtension = DevToolsExtensionConfig.fromJson({
   DevToolsExtensionConfig.nameKey: 'bar',
   DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
   DevToolsExtensionConfig.versionKey: '2.0.0',
@@ -23,7 +23,7 @@ final barExtension = DevToolsExtensionConfig.parse({
   DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
 });
 
-final providerExtension = DevToolsExtensionConfig.parse({
+final providerExtension = DevToolsExtensionConfig.fromJson({
   DevToolsExtensionConfig.nameKey: 'provider',
   DevToolsExtensionConfig.issueTrackerKey:
       'https://github.com/rrousselGit/provider/issues',

@@ -8,7 +8,7 @@ import 'package:test/test.dart';
 void main() {
   group('$DevToolsExtensionConfig', () {
     test('parses with a String materialIconCodePoint field', () {
-      final config = DevToolsExtensionConfig.parse({
+      final config = DevToolsExtensionConfig.fromJson({
         'name': 'foo',
         'path': 'path/to/foo/extension',
         'issueTracker': 'www.google.com',
@@ -25,7 +25,7 @@ void main() {
     });
 
     test('parses with an int materialIconCodePoint field', () {
-      final config = DevToolsExtensionConfig.parse({
+      final config = DevToolsExtensionConfig.fromJson({
         'name': 'foo',
         'path': 'path/to/foo/extension',
         'issueTracker': 'www.google.com',
@@ -42,7 +42,7 @@ void main() {
     });
 
     test('parses with a null materialIconCodePoint field', () {
-      final config = DevToolsExtensionConfig.parse({
+      final config = DevToolsExtensionConfig.fromJson({
         'name': 'foo',
         'path': 'path/to/foo/extension',
         'issueTracker': 'www.google.com',
@@ -81,7 +81,7 @@ void main() {
       // Missing 'name'.
       expect(
         () {
-          DevToolsExtensionConfig.parse({
+          DevToolsExtensionConfig.fromJson({
             'path': 'path/to/foo/extension',
             'issueTracker': 'www.google.com',
             'version': '1.0.0',
@@ -94,7 +94,7 @@ void main() {
       // Missing 'path'.
       expect(
         () {
-          DevToolsExtensionConfig.parse({
+          DevToolsExtensionConfig.fromJson({
             'name': 'foo',
             'issueTracker': 'www.google.com',
             'version': '1.0.0',
@@ -107,7 +107,7 @@ void main() {
       // Missing 'issueTracker'.
       expect(
         () {
-          DevToolsExtensionConfig.parse({
+          DevToolsExtensionConfig.fromJson({
             'name': 'foo',
             'path': 'path/to/foo/extension',
             'version': '1.0.0',
@@ -120,7 +120,7 @@ void main() {
       // Missing 'version'.
       expect(
         () {
-          DevToolsExtensionConfig.parse({
+          DevToolsExtensionConfig.fromJson({
             'name': 'foo',
             'path': 'path/to/foo/extension',
             'issueTracker': 'www.google.com',
@@ -133,7 +133,7 @@ void main() {
       // Missing 'isPubliclyHosted'.
       expect(
         () {
-          DevToolsExtensionConfig.parse({
+          DevToolsExtensionConfig.fromJson({
             'name': 'foo',
             'path': 'path/to/foo/extension',
             'version': '1.0.0',
@@ -157,7 +157,7 @@ void main() {
 
       expect(
         () {
-          DevToolsExtensionConfig.parse({
+          DevToolsExtensionConfig.fromJson({
             'name': 23,
             'path': 'path/to/foo/extension',
             'issueTracker': 'www.google.com',
@@ -170,7 +170,7 @@ void main() {
 
       expect(
         () {
-          DevToolsExtensionConfig.parse({
+          DevToolsExtensionConfig.fromJson({
             'name': 'foo',
             'path': 'path/to/foo/extension',
             'issueTracker': 'www.google.com',
@@ -195,7 +195,7 @@ void main() {
 
       expect(
         () {
-          DevToolsExtensionConfig.parse({
+          DevToolsExtensionConfig.fromJson({
             'name': 'name with spaces',
             'path': 'path/to/foo/extension',
             'issueTracker': 'www.google.com',
@@ -208,7 +208,7 @@ void main() {
 
       expect(
         () {
-          DevToolsExtensionConfig.parse({
+          DevToolsExtensionConfig.fromJson({
             'name': 'Name_With_Capital_Letters',
             'path': 'path/to/foo/extension',
             'issueTracker': 'www.google.com',
@@ -221,7 +221,7 @@ void main() {
 
       expect(
         () {
-          DevToolsExtensionConfig.parse({
+          DevToolsExtensionConfig.fromJson({
             'name': 'name.with\'specialchars/',
             'path': 'path/to/foo/extension',
             'issueTracker': 'www.google.com',

@@ -145,7 +145,7 @@ class ServiceConnectionManager {
     // viewing data after disconnect. This must be done before resetting the
     // rest of the service manager state.
     final previousConnectedApp = serviceManager.connectedApp != null
-        ? OfflineConnectedApp.parse(serviceManager.connectedApp!.toJson())
+        ? OfflineConnectedApp.fromJson(serviceManager.connectedApp!.toJson())
         : null;
     offlineDataController.previousConnectedApp = previousConnectedApp;
 

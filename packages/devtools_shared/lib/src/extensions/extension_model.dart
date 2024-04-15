@@ -16,7 +16,7 @@ class DevToolsExtensionConfig implements Comparable {
     required this.isPubliclyHosted,
   });
 
-  factory DevToolsExtensionConfig.parse(Map<String, Object?> json) {
+  factory DevToolsExtensionConfig.fromJson(Map<String, Object?> json) {
     // Defaults to the code point for [Icons.extensions_outlined] if null.
     late int codePoint;
     final codePointFromJson = json[materialIconCodePointKey];

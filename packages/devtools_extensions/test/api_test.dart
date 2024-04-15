@@ -8,21 +8,21 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('$DevToolsExtensionEvent', () {
     test('parse', () {
-      var event = DevToolsExtensionEvent.parse({
+      var event = DevToolsExtensionEvent.fromJson({
         'type': 'ping',
         'data': {'foo': 'bar'},
       });
       expect(event.type, DevToolsExtensionEventType.ping);
       expect(event.data, {'foo': 'bar'});
 
-      event = DevToolsExtensionEvent.parse({
+      event = DevToolsExtensionEvent.fromJson({
         'type': 'pong',
         'data': {'baz': 'bob'},
       });
       expect(event.type, DevToolsExtensionEventType.pong);
       expect(event.data, {'baz': 'bob'});
 
-      event = DevToolsExtensionEvent.parse({
+      event = DevToolsExtensionEvent.fromJson({
         'type': 'idk',
       });
       expect(event.type, DevToolsExtensionEventType.unknown);
@@ -156,7 +156,7 @@ void main() {
 
   group('$ShowNotificationExtensionEvent', () {
     test('constructs for expected values', () {
-      final event = DevToolsExtensionEvent.parse({
+      final event = DevToolsExtensionEvent.fromJson({
         'type': 'showNotification',
         'data': {
           'message': 'foo message',
@@ -166,7 +166,7 @@ void main() {
       expect(showNotificationEvent.message, 'foo message');
     });
     test('throws for unexpected values', () {
-      final event1 = DevToolsExtensionEvent.parse({
+      final event1 = DevToolsExtensionEvent.fromJson({
         'type': 'showNotification',
         'data': {
           // Missing required fields.
@@ -179,7 +179,7 @@ void main() {
         throwsFormatException,
       );
 
-      final event2 = DevToolsExtensionEvent.parse({
+      final event2 = DevToolsExtensionEvent.fromJson({
         'type': 'showNotification',
         'data': {
           // Bad key.
@@ -193,7 +193,7 @@ void main() {
         throwsFormatException,
       );
 
-      final event3 = DevToolsExtensionEvent.parse({
+      final event3 = DevToolsExtensionEvent.fromJson({
         'type': 'showNotification',
         'data': {
           // Bad value.
@@ -207,7 +207,7 @@ void main() {
         throwsFormatException,
       );
 
-      final event4 = DevToolsExtensionEvent.parse({
+      final event4 = DevToolsExtensionEvent.fromJson({
         // Wrong type.
         'type': 'showBannerMessage',
         'data': {
@@ -225,7 +225,7 @@ void main() {
 
   group('$ShowBannerMessageExtensionEvent', () {
     test('constructs for expected values', () {
-      var event = DevToolsExtensionEvent.parse({
+      var event = DevToolsExtensionEvent.fromJson({
         'type': 'showBannerMessage',
         'data': {
           'id': 'fooMessageId',
@@ -242,7 +242,7 @@ void main() {
       expect(showBannerMessageEvent.extensionName, 'foo');
       expect(showBannerMessageEvent.ignoreIfAlreadyDismissed, true);
 
-      event = DevToolsExtensionEvent.parse({
+      event = DevToolsExtensionEvent.fromJson({
         'type': 'showBannerMessage',
         'data': {
           'id': 'blah',
@@ -261,7 +261,7 @@ void main() {
       expect(showBannerMessageEvent.ignoreIfAlreadyDismissed, false);
     });
     test('throws for unexpected values', () {
-      final event1 = DevToolsExtensionEvent.parse({
+      final event1 = DevToolsExtensionEvent.fromJson({
         'type': 'showBannerMessage',
         'data': {
           // Missing required fields.
@@ -275,7 +275,7 @@ void main() {
         throwsFormatException,
       );
 
-      final event2 = DevToolsExtensionEvent.parse({
+      final event2 = DevToolsExtensionEvent.fromJson({
         'type': 'showBannerMessage',
         'data': {
           // Bad keys.
@@ -292,7 +292,7 @@ void main() {
         throwsFormatException,
       );
 
-      final event3 = DevToolsExtensionEvent.parse({
+      final event3 = DevToolsExtensionEvent.fromJson({
         'type': 'showBannerMessage',
         'data': {
           // Bad values.
@@ -309,7 +309,7 @@ void main() {
         throwsFormatException,
       );
 
-      final event4 = DevToolsExtensionEvent.parse({
+      final event4 = DevToolsExtensionEvent.fromJson({
         // Wrong type.
         'type': 'showNotification',
         'data': {

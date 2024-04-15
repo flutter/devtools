@@ -43,7 +43,7 @@ Future<List<DevToolsExtensionConfig>> refreshAvailableExtensions(
       );
 
       return extensionsAsJson
-          .map((p) => DevToolsExtensionConfig.parse(p))
+          .map((p) => DevToolsExtensionConfig.fromJson(p))
           .toList();
     } else {
       logWarning(resp, ExtensionsApi.apiServeAvailableExtensions);
