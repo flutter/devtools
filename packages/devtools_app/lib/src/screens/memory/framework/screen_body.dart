@@ -7,6 +7,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
 import '../../../shared/banner_messages.dart';
+import '../../../shared/common_widgets.dart';
 import '../../../shared/http/http_service.dart' as http_service;
 import '../../../shared/screen.dart';
 import '../../../shared/utils.dart';
@@ -73,9 +74,7 @@ class _ConnectedMemoryBodyState extends State<ConnectedMemoryBody>
             ],
           );
         } else {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
+          return const CenteredCircularProgressIndicator();
         }
       },
     );

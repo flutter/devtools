@@ -86,7 +86,7 @@ class MemoryController extends DisposableController
     assert(!_initialized.isCompleted);
     switch (_mode) {
       case DevToolsMode.disconnected:
-        // TODO: load memory screen in disconnected mode, https://github.com/flutter/devtools/issues/6972
+        // TODO(polina-c): load memory screen in disconnected mode, https://github.com/flutter/devtools/issues/6972
         _initializeData();
       case DevToolsMode.connected:
         _initializeData(

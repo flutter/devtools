@@ -24,7 +24,7 @@ class OfflineMemoryData {
     required this.selectedTab,
   });
 
-  // TODO: use an extension type for the Json parsing, https://github.com/flutter/devtools/issues/6972
+  // TODO(polina-c): use an extension type for the Json parsing, https://github.com/flutter/devtools/issues/6972
   // https://github.com/flutter/devtools/pull/7572#discussion_r1563102256
   factory OfflineMemoryData.parse(Map<String, dynamic> json) {
     Map<String, dynamic> item(String key) =>
