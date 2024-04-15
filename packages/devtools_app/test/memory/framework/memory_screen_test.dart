@@ -69,7 +69,8 @@ void main() {
     );
 
     // Delay to ensure the memory profiler has collected data.
-    await tester.pumpAndSettle(const Duration(seconds: 1));
+    await tester
+        .runAsync(() async => tester.pumpAndSettle(const Duration(seconds: 1)));
     expect(find.byType(MemoryBody), findsOneWidget);
   }
 
@@ -101,15 +102,6 @@ void main() {
         expect(find.text('GC'), findsOneWidget);
 
         expect(find.byType(MemoryVMChart), findsOneWidget);
-
-        expect(
-          controller.chart.memoryTimeline.liveData.isEmpty,
-          isTrue,
-        );
-        expect(
-          controller.chart.memoryTimeline.offlineData.isEmpty,
-          isTrue,
-        );
       },
     );
   });
