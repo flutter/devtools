@@ -263,9 +263,7 @@ class StartStopRecordingButton extends GaDevToolsButton {
       recording ? 'Stop recording' : 'Start recording';
   static String _tooltip(bool recording) =>
       recording ? 'Stop recording' : 'Start recording';
-  static Color? _color(bool recording) => recording
-      ? Colors.red
-      : null; // Todo: is there a theme color that could be picked here?
+  static Color? _color(bool recording) => recording ? Colors.red : null;
 }
 
 /// Button to start recording data.
