@@ -46,6 +46,25 @@ class _Json {
   static const type = 'type';
 }
 
+extension type _ClassFilterJson(Map<String, Object?> json) {
+  ClassFilter parse() {
+    final type = json[_Json.type] as String?;
+    return ClassFilter(
+      filterType:
+          ClassFilterType.values.lastWhereOrNull((t) => t.name == type) ??
+              _defaultFilterType,
+      except: json[_Json.except] as String? ?? ClassFilter.defaultExceptString,
+      only: json[_Json.only] as String?,
+    );
+  }
+
+  static Map<String, Object?> toJson(ClassFilter data) => {
+        _Json.type: data.filterType.name,
+        _Json.except: data.except,
+        _Json.only: data.only,
+      };
+}
+
 const _defaultFilterType = ClassFilterType.except;
 
 @immutable
@@ -64,26 +83,9 @@ class ClassFilter {
           only: null,
         );
 
-  factory ClassFilter.fromJson(Map<String, dynamic> json) {
-    final type = json[_Json.type] as String?;
-    return ClassFilter(
-      filterType:
-          ClassFilterType.values.lastWhereOrNull((t) => t.name == type) ??
-              _defaultFilterType,
-      except: json[_Json.except] as String? ?? defaultExceptString,
-      only: json[_Json.only] as String?,
-    );
-  }
-
-  // TODO: use an extension type for the Json parsing, https://github.com/flutter/devtools/issues/6972
-  // https://github.com/flutter/devtools/pull/7572#discussion_r1563130198
-  Map<String, dynamic> toJson() {
-    return {
-      _Json.type: filterType.name,
-      _Json.except: except,
-      _Json.only: only,
-    };
-  }
+  factory ClassFilter.fromJson(Map<String, dynamic> json) =>
+      _ClassFilterJson(json).parse();
+  Map<String, dynamic> toJson() => _ClassFilterJson.toJson(this);
 
   @visibleForTesting
   static final defaultExceptString =

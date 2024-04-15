@@ -15,18 +15,8 @@ class _Json {
   static const chartData = 'chartData';
 }
 
-class OfflineMemoryData {
-  OfflineMemoryData(
-    this.diff,
-    this.profile,
-    this.chart,
-    this.filter, {
-    required this.selectedTab,
-  });
-
-  // TODO(polina-c): use an extension type for the Json parsing, https://github.com/flutter/devtools/issues/6972
-  // https://github.com/flutter/devtools/pull/7572#discussion_r1563102256
-  factory OfflineMemoryData.fromJson(Map<String, dynamic> json) {
+extension type _OfflineMemoryDataJson(Map<String, Object?> json) {
+  OfflineMemoryData parse() {
     Map<String, dynamic> item(String key) =>
         json[key] as Map<String, dynamic>? ?? {};
     return OfflineMemoryData(
@@ -38,20 +28,32 @@ class OfflineMemoryData {
     );
   }
 
+  static Map<String, Object?> toJson(OfflineMemoryData data) => {
+        _Json.selectedTab: data.selectedTab,
+        _Json.diffData: data.diff.toJson(),
+        _Json.profileData: data.profile.toJson(),
+        _Json.chartData: data.chart.toJson(),
+        _Json.classFilter: data.profile.classFilter.value.toJson(),
+      };
+}
+
+class OfflineMemoryData {
+  OfflineMemoryData(
+    this.diff,
+    this.profile,
+    this.chart,
+    this.filter, {
+    required this.selectedTab,
+  });
+
+  factory OfflineMemoryData.fromJson(Map<String, dynamic> json) =>
+      _OfflineMemoryDataJson(json).parse();
+  Map<String, dynamic> toJson() => _OfflineMemoryDataJson.toJson(this);
+
   final int selectedTab;
   final ClassFilter filter; // filter is shared between tabs, so it's here
 
   final DiffPaneController diff;
   final ProfilePaneController profile;
   final MemoryChartPaneController chart;
-
-  Map<String, dynamic> toJson() {
-    return {
-      _Json.selectedTab: selectedTab,
-      _Json.diffData: diff.toJson(),
-      _Json.profileData: profile.toJson(),
-      _Json.chartData: chart.toJson(),
-      _Json.classFilter: profile.classFilter.value.toJson(),
-    };
-  }
 }
