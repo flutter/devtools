@@ -20,7 +20,6 @@ import '../utils.dart';
 /// VS Code, 'profile' or the default 'release' mode must be used because
 /// the '--dart2js-optimization=O1' flag that is passed for 'debug' builds
 /// will cause issues with the VS Code embedding.
-/// 
 ///
 /// If the [BuildCommandArgs.useFlutterFromPath] argument is present, the
 /// Flutter SDK will not be updated to the latest Flutter candidate before
