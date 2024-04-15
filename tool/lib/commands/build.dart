@@ -84,7 +84,7 @@ class BuildCommand extends Command {
       workingDirectory: repo.devtoolsAppDirectoryPath,
     );
 
-    logStatus('building DevTools in release mode');
+    logStatus('building DevTools in $buildMode mode');
     await processManager.runAll(
       commands: [
         if (runPubGet) CliCommand.tool(['pub-get', '--only-main']),
@@ -95,6 +95,8 @@ class BuildCommand extends Command {
             '--web-renderer',
             'canvaskit',
             '--pwa-strategy=offline-first',
+            // Do not minify stack traces in debug mode.
+            if (buildMode == 'debug') '--dart2js-optimization=O1',
             if (buildMode != 'debug') '--$buildMode',
             '--no-tree-shake-icons',
           ],
