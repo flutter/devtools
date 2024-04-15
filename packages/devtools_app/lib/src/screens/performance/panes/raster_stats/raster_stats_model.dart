@@ -15,7 +15,7 @@ class RasterStats {
     required this.selectedSnapshot,
   });
 
-  factory RasterStats.parse(Map<String, Object?> json) {
+  factory RasterStats.fromJson(Map<String, Object?> json) {
     Size? originalFrameSize;
     final originalWidth = json[_frameWidthKey] as num?;
     final originalHeight = json[_frameHeightKey] as num?;
@@ -37,7 +37,7 @@ class RasterStats {
     final snapshots = <LayerSnapshot>[];
     var totalRasterTime = Duration.zero;
     for (final snapshotJson in snapshotsFromJson) {
-      final layerSnapshot = LayerSnapshot.parse(snapshotJson);
+      final layerSnapshot = LayerSnapshot.fromJson(snapshotJson);
       snapshots.add(layerSnapshot);
       totalRasterTime += layerSnapshot.duration;
       if (layerSnapshot.id == selectedId) {
@@ -105,7 +105,7 @@ class LayerSnapshot {
     required this.bytes,
   });
 
-  factory LayerSnapshot.parse(Map<String, Object?> json) {
+  factory LayerSnapshot.fromJson(Map<String, Object?> json) {
     final id = json[_layerIdKey] as int;
     final dur = Duration(microseconds: json[_durationKey] as int);
     final size = Size(

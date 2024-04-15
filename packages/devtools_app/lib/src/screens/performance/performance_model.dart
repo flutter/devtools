@@ -23,7 +23,7 @@ class OfflinePerformanceData {
     double? displayRefreshRate,
   }) : displayRefreshRate = displayRefreshRate ?? defaultRefreshRate;
 
-  factory OfflinePerformanceData.parse(Map<String, Object?> json_) {
+  factory OfflinePerformanceData.fromJson(Map<String, Object?> json_) {
     final json = _PerformanceDataJson(json_);
 
     final selectedFrameId = json.selectedFrameId;
@@ -83,7 +83,7 @@ extension type _PerformanceDataJson(Map<String, Object?> json) {
   RasterStats? get rasterStats {
     final raw = (json[OfflinePerformanceData.rasterStatsKey] as Map? ?? {})
         .cast<String, Object>();
-    return raw.isNotEmpty ? RasterStats.parse(raw) : null;
+    return raw.isNotEmpty ? RasterStats.fromJson(raw) : null;
   }
 
   int? get selectedFrameId =>
@@ -93,7 +93,7 @@ extension type _PerformanceDataJson(Map<String, Object?> json) {
       (json[OfflinePerformanceData.flutterFramesKey] as List? ?? [])
           .cast<Map>()
           .map((f) => f.cast<String, dynamic>())
-          .map((f) => FlutterFrame.parse(f))
+          .map((f) => FlutterFrame.fromJson(f))
           .toList();
 
   double get displayRefreshRate =>
@@ -105,7 +105,7 @@ extension type _PerformanceDataJson(Map<String, Object?> json) {
     final raw =
         (json[OfflinePerformanceData.rebuildCountModelKey] as Map? ?? {})
             .cast<String, dynamic>();
-    return raw.isNotEmpty ? RebuildCountModel.parse(raw) : null;
+    return raw.isNotEmpty ? RebuildCountModel.fromJson(raw) : null;
   }
 }
 
