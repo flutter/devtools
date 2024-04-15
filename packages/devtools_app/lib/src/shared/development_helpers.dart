@@ -88,14 +88,14 @@ final stubExtensionEnabledStates = <String, ExtensionEnabledState>{};
 /// Stubbed extensions so we can develop DevTools Extensions without a server
 /// connection.
 final List<DevToolsExtensionConfig> debugExtensions = [
-  DevToolsExtensionConfig.fromJson({
+  DevToolsExtensionConfig.parse({
     DevToolsExtensionConfig.nameKey: 'foo',
     DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
     DevToolsExtensionConfig.versionKey: '1.0.0',
     DevToolsExtensionConfig.pathKey: '/path/to/foo',
     DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
   }),
-  DevToolsExtensionConfig.fromJson({
+  DevToolsExtensionConfig.parse({
     DevToolsExtensionConfig.nameKey: 'bar',
     DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
     DevToolsExtensionConfig.versionKey: '2.0.0',
@@ -103,7 +103,7 @@ final List<DevToolsExtensionConfig> debugExtensions = [
     DevToolsExtensionConfig.pathKey: '/path/to/bar',
     DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
   }),
-  DevToolsExtensionConfig.fromJson({
+  DevToolsExtensionConfig.parse({
     DevToolsExtensionConfig.nameKey: 'provider',
     DevToolsExtensionConfig.issueTrackerKey:
         'https://github.com/rrousselGit/provider/issues',

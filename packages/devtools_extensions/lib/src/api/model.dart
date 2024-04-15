@@ -16,7 +16,7 @@ class DevToolsExtensionEvent {
     this.source,
   });
 
-  factory DevToolsExtensionEvent.fromJson(Map<String, Object?> json) {
+  factory DevToolsExtensionEvent.parse(Map<String, Object?> json) {
     final eventType =
         DevToolsExtensionEventType.from(json[_typeKey]! as String);
     final data = (json[_dataKey] as Map?)?.cast<String, Object?>();
@@ -27,7 +27,7 @@ class DevToolsExtensionEvent {
   static DevToolsExtensionEvent? tryParse(Object data) {
     try {
       final dataAsMap = (data as Map).cast<String, Object?>();
-      return DevToolsExtensionEvent.fromJson(dataAsMap);
+      return DevToolsExtensionEvent.parse(dataAsMap);
     } catch (_) {
       return null;
     }
