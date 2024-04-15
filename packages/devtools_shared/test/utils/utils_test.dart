@@ -10,42 +10,80 @@ import 'package:test/test.dart';
 void main() {
   group('CompleterExtension', () {
     late Completer<int> completer;
-    int? value;
 
     setUp(() {
       completer = Completer<int>();
-      value = null;
-      unawaited(completer.future.then((v) => value = v));
     });
 
-    test('completes if incomplete', () async {
-      expect(completer.isCompleted, false);
-      expect(value, isNull);
+    group('safeComplete', () {
+      int? value;
+      setUp(() {
+        value = null;
+        unawaited(completer.future.then((v) => value = v));
+      });
 
-      completer.safeComplete(5);
-      await completer.future;
-      expect(completer.isCompleted, true);
-      expect(value, 5);
+      test('completes successfully', () async {
+        expect(completer.isCompleted, false);
+        expect(value, isNull);
+
+        completer.safeComplete(5);
+        await completer.future;
+        expect(completer.isCompleted, true);
+        expect(value, 5);
+      });
+
+      test('does not complete if already completed', () async {
+        expect(completer.isCompleted, false);
+        expect(value, isNull);
+        completer.complete(1);
+        await completer.future;
+
+        expect(completer.isCompleted, true);
+        expect(value, 1);
+
+        completer.safeComplete(5);
+        expect(completer.isCompleted, true);
+        expect(value, 1);
+
+        String? elseValue;
+        completer.safeComplete(3, () => elseValue = 'hit orElse');
+        expect(completer.isCompleted, true);
+        expect(value, 1);
+        expect(elseValue, 'hit orElse');
+      });
     });
 
-    test('does not complete if complete', () async {
-      expect(completer.isCompleted, false);
-      expect(value, isNull);
-      completer.complete(1);
-      await completer.future;
+    group('safeCompleteError', () {
+      late Future<int> errorFuture;
+      ({Object error, StackTrace? st})? error;
 
-      expect(completer.isCompleted, true);
-      expect(value, 1);
+      setUp(() {
+        unawaited(
+          errorFuture = completer.future.onError((e, st) {
+            error = (error: e!, st: st);
+            return -1;
+          }),
+        );
+      });
 
-      completer.safeComplete(5);
-      expect(completer.isCompleted, true);
-      expect(value, 1);
+      test('completes successfully', () async {
+        completer.safeCompleteError('This is an error');
+        await errorFuture;
+        expect(completer.isCompleted, true);
+        expect(error?.error, 'This is an error');
+      });
 
-      String? elseValue;
-      completer.safeComplete(3, () => elseValue = 'hit orElse');
-      expect(completer.isCompleted, true);
-      expect(value, 1);
-      expect(elseValue, 'hit orElse');
+      test('does not complete if already completed', () async {
+        completer.safeCompleteError('This is an error');
+        await errorFuture;
+        expect(completer.isCompleted, true);
+        expect(error?.error, 'This is an error');
+
+        completer.safeCompleteError('This is a different error');
+        await errorFuture;
+        expect(completer.isCompleted, true);
+        expect(error?.error, 'This is an error');
+      });
     });
   });
 }
