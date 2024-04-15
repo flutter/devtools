@@ -2,43 +2,54 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 
 import '../../../shared/memory/class_name.dart';
 import '../../../shared/memory/heap_graph_loader.dart';
+import '../../../shared/offline_data.dart';
 import '../../../shared/primitives/simple_items.dart';
+import '../../../shared/screen.dart';
 import '../../../shared/utils.dart';
 import '../panes/chart/controller/chart_pane_controller.dart';
 import '../panes/control/controller/control_pane_controller.dart';
 import '../panes/diff/controller/diff_pane_controller.dart';
 import '../panes/profile/profile_pane_controller.dart';
 import '../panes/tracing/tracing_pane_controller.dart';
+import 'offline_data/offline_data.dart';
 
-/// This class contains the business logic for memory screen, for a connected
-/// application.
+/// This class contains the business logic for memory screen.
 ///
 /// This class must not have direct dependencies on web-only libraries. This
 /// allows tests of the complicated logic in this class to run on the VM.
 ///
 /// The controller should be recreated for every new connection.
 class MemoryController extends DisposableController
-    with AutoDisposeControllerMixin {
+    with
+        AutoDisposeControllerMixin,
+        OfflineScreenControllerMixin<OfflineMemoryData> {
   MemoryController({
-    @visibleForTesting DiffPaneController? diffPaneController,
-    @visibleForTesting ProfilePaneController? profilePaneController,
+    @visibleForTesting DiffPaneController? connectedDiff,
+    @visibleForTesting ProfilePaneController? connectedProfile,
   }) {
-    diff = diffPaneController ?? _createDiffController();
-    profile = profilePaneController ?? ProfilePaneController();
-
-    shareClassFilterBetweenProfileAndDiff();
+    if (connectedDiff != null || connectedProfile != null) {
+      _mode = DevToolsMode.connected;
+    } else {
+      _mode = devToolsMode;
+    }
+    unawaited(_init(connectedDiff, connectedProfile));
   }
+
+  Future<void> get initialized => _initialized.future;
+  final _initialized = Completer<void>();
 
   /// DevTools mode at the time of creation of the controller.
   ///
   /// DevTools will recreate controller when the mode changes.
-  // ignore: unused_field, TODO(polina-c): https://github.com/flutter/devtools/issues/6972
-  final DevToolsMode _mode = devToolsMode;
+  late final DevToolsMode _mode;
 
   /// Index of the selected feature tab.
   ///
@@ -48,12 +59,15 @@ class MemoryController extends DisposableController
   /// instead of the widget state.
   int selectedFeatureTabIndex = 0;
 
-  late DiffPaneController diff;
-  late ProfilePaneController profile;
-  late MemoryChartPaneController chart = MemoryChartPaneController();
-  TracingPaneController tracing = TracingPaneController();
-  late final MemoryControlPaneController control =
-      MemoryControlPaneController(chart.memoryTimeline);
+  late final DiffPaneController diff;
+
+  late final ProfilePaneController profile;
+
+  late final MemoryChartPaneController chart;
+
+  late final TracingPaneController tracing;
+
+  late final MemoryControlPaneController control;
 
   @override
   void dispose() {
@@ -65,26 +79,85 @@ class MemoryController extends DisposableController
     profile.dispose();
   }
 
-  DiffPaneController _createDiffController() =>
-      DiffPaneController(HeapGraphLoaderRuntime(chart.memoryTimeline));
-
-  void reset() {
-    diff.dispose();
-    diff = _createDiffController();
-
-    profile.dispose();
-    profile = ProfilePaneController();
-
-    tracing.dispose();
-    tracing = TracingPaneController();
-
-    chart.memoryTimeline.reset();
+  Future<void> _init(
+    @visibleForTesting DiffPaneController? connectedDiff,
+    @visibleForTesting ProfilePaneController? connectedProfile,
+  ) async {
+    assert(!_initialized.isCompleted);
+    switch (_mode) {
+      case DevToolsMode.disconnected:
+        // TODO(polina-c): load memory screen in disconnected mode, https://github.com/flutter/devtools/issues/6972
+        _initializeData();
+      case DevToolsMode.connected:
+        _initializeData(
+          diffPaneController: connectedDiff,
+          profilePaneController: connectedProfile,
+        );
+      case DevToolsMode.offlineData:
+        assert(connectedDiff == null && connectedProfile == null);
+        await maybeLoadOfflineData(
+          ScreenMetaData.memory.id,
+          createData: (json) => OfflineMemoryData.parse(json),
+          shouldLoad: (data) => true,
+        );
+        // [maybeLoadOfflineData] will be a noop if there is no offline data for the memory screen,
+        //  so ensure we still call [_initializedData] if it has not been called.
+        if (!_initialized.isCompleted) _initializeData();
+        assert(_initialized.isCompleted);
+    }
+    assert(_initialized.isCompleted);
   }
 
-  void shareClassFilterBetweenProfileAndDiff() {
-    diff.derived.applyFilter(
-      profile.classFilter.value,
+  void _initializeData({
+    OfflineMemoryData? offlineData,
+    @visibleForTesting DiffPaneController? diffPaneController,
+    @visibleForTesting ProfilePaneController? profilePaneController,
+  }) {
+    assert(!_initialized.isCompleted);
+
+    chart = offlineData?.chart ?? MemoryChartPaneController(_mode);
+    diff = diffPaneController ??
+        offlineData?.diff ??
+        DiffPaneController(
+          loader: HeapGraphLoaderRuntime(chart.memoryTimeline),
+        );
+    profile = profilePaneController ??
+        offlineData?.profile ??
+        ProfilePaneController();
+    control = MemoryControlPaneController(
+      chart.memoryTimeline,
+      isChartVisible: chart.isChartVisible,
+      exportData: exportData,
     );
+    tracing = TracingPaneController();
+    selectedFeatureTabIndex =
+        offlineData?.selectedTab ?? selectedFeatureTabIndex;
+    if (offlineData != null) profile.setFilter(offlineData.filter);
+    _shareClassFilterBetweenProfileAndDiff();
+
+    _initialized.complete();
+  }
+
+  @override
+  OfflineScreenData prepareOfflineScreenData() => OfflineScreenData(
+        screenId: ScreenMetaData.memory.id,
+        data: OfflineMemoryData(
+          diff,
+          profile,
+          chart,
+          profile.classFilter.value,
+          selectedTab: selectedFeatureTabIndex,
+        ).prepareForOffline(),
+      );
+
+  @override
+  FutureOr<void> processOfflineData(OfflineMemoryData offlineData) {
+    assert(!_initialized.isCompleted);
+    _initializeData(offlineData: offlineData);
+  }
+
+  void _shareClassFilterBetweenProfileAndDiff() {
+    diff.derived.applyFilter(profile.classFilter.value);
 
     profile.classFilter.addListener(() {
       diff.derived.applyFilter(profile.classFilter.value);

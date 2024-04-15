@@ -15,6 +15,18 @@ import 'model.dart';
 
 class ProfilePaneController extends DisposableController
     with AutoDisposeControllerMixin {
+  ProfilePaneController();
+
+  factory ProfilePaneController.parse(Map<String, dynamic> map) {
+    // TODO(polina-c): implement, https://github.com/flutter/devtools/issues/6972
+    return ProfilePaneController();
+  }
+
+  Map<String, dynamic> prepareForOffline() {
+    // TODO(polina-c): implement, https://github.com/flutter/devtools/issues/6972
+    return {};
+  }
+
   final _exportController = ExportController();
 
   /// The current profile being displayed.
