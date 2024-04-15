@@ -208,13 +208,13 @@ extension ObjRefPrivateViewExtension on ObjRef {
 
   /// Casts the current [ObjRef] into an instance of [SubtypeTestCacheRef].
   SubtypeTestCacheRef get asSubtypeTestCache =>
-      SubtypeTestCacheRef.parse(json!);
+      SubtypeTestCacheRef.fromJson(json!);
 
   /// `true` if this object is an instance of [WeakArrayRef].
   bool get isWeakArray => vmType == _weakArrayType;
 
   /// Casts the current [ObjRef] into an instance of [WeakArrayRef].
-  WeakArrayRef get asWeakArray => WeakArrayRef.parse(json!);
+  WeakArrayRef get asWeakArray => WeakArrayRef.fromJson(json!);
 }
 
 /// An extension on [Obj] which allows for access to VM internal fields.
@@ -229,7 +229,7 @@ extension ObjPrivateViewExtension on Obj {
   SubtypeTestCache get asSubtypeTestCache => SubtypeTestCache.parse(json!);
 
   /// Casts the current [Obj] into an instance of [WeakArray].
-  WeakArray get asWeakArray => WeakArray.parse(json!);
+  WeakArray get asWeakArray => WeakArray.fromJson(json!);
 }
 
 /// A reference to a [WeakArray], which is an array consisting of weak
@@ -245,7 +245,7 @@ class WeakArrayRef implements ObjRef {
     required this.length,
   });
 
-  factory WeakArrayRef.parse(Map<String, dynamic> json) => WeakArrayRef(
+  factory WeakArrayRef.fromJson(Map<String, dynamic> json) => WeakArrayRef(
         id: json['id'],
         json: json,
         length: json['length'],
@@ -285,7 +285,7 @@ class WeakArray extends WeakArrayRef implements Obj {
     required this.classRef,
   });
 
-  factory WeakArray.parse(Map<String, dynamic> json) => WeakArray(
+  factory WeakArray.fromJson(Map<String, dynamic> json) => WeakArray(
         id: json['id'],
         json: json,
         length: json['length'],
@@ -317,7 +317,7 @@ class SubtypeTestCacheRef implements ObjRef {
     required this.json,
   });
 
-  factory SubtypeTestCacheRef.parse(Map<String, dynamic> json) =>
+  factory SubtypeTestCacheRef.fromJson(Map<String, dynamic> json) =>
       SubtypeTestCacheRef(
         id: json['id'],
         json: json,

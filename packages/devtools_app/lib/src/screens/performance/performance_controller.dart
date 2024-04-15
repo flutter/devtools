@@ -125,7 +125,7 @@ class PerformanceController extends DisposableController
             .serviceManager.service!.onExtensionEventWithHistorySafe
             .listen((event) {
           if (event.extensionKind == 'Flutter.Frame') {
-            final frame = FlutterFrame.parse(event.extensionData!.data);
+            final frame = FlutterFrame.fromJson(event.extensionData!.data);
             enhanceTracingController.assignStateForFrame(frame);
             flutterFramesController.addFrame(frame);
           } else if (event.extensionKind == 'Flutter.RebuiltWidgets' &&

@@ -26,14 +26,14 @@ class OfflineMemoryData {
 
   // TODO(polina-c): use an extension type for the Json parsing, https://github.com/flutter/devtools/issues/6972
   // https://github.com/flutter/devtools/pull/7572#discussion_r1563102256
-  factory OfflineMemoryData.parse(Map<String, dynamic> json) {
+  factory OfflineMemoryData.fromJson(Map<String, dynamic> json) {
     Map<String, dynamic> item(String key) =>
         json[key] as Map<String, dynamic>? ?? {};
     return OfflineMemoryData(
-      DiffPaneController.parse(item(_Json.diffData)),
-      ProfilePaneController.parse(item(_Json.profileData)),
-      MemoryChartPaneController.parse(item(_Json.chartData)),
-      ClassFilter.parse(item(_Json.classFilter)),
+      DiffPaneController.fromJson(item(_Json.diffData)),
+      ProfilePaneController.fromJson(item(_Json.profileData)),
+      MemoryChartPaneController.fromJson(item(_Json.chartData)),
+      ClassFilter.fromJson(item(_Json.classFilter)),
       selectedTab: json[_Json.selectedTab] as int? ?? 0,
     );
   }
@@ -45,13 +45,13 @@ class OfflineMemoryData {
   final ProfilePaneController profile;
   final MemoryChartPaneController chart;
 
-  Map<String, dynamic> prepareForOffline() {
+  Map<String, dynamic> toJson() {
     return {
       _Json.selectedTab: selectedTab,
-      _Json.diffData: diff.prepareForOffline(),
-      _Json.profileData: profile.prepareForOffline(),
-      _Json.chartData: chart.prepareForOffline(),
-      _Json.classFilter: profile.classFilter.value.prepareForOffline(),
+      _Json.diffData: diff.toJson(),
+      _Json.profileData: profile.toJson(),
+      _Json.chartData: chart.toJson(),
+      _Json.classFilter: profile.classFilter.value.toJson(),
     };
   }
 }

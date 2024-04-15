@@ -97,7 +97,7 @@ class MemoryController extends DisposableController
         assert(connectedDiff == null && connectedProfile == null);
         await maybeLoadOfflineData(
           ScreenMetaData.memory.id,
-          createData: (json) => OfflineMemoryData.parse(json),
+          createData: (json) => OfflineMemoryData.fromJson(json),
           shouldLoad: (data) => true,
         );
         // [maybeLoadOfflineData] will be a noop if there is no offline data for the memory screen,
@@ -147,7 +147,7 @@ class MemoryController extends DisposableController
           chart,
           profile.classFilter.value,
           selectedTab: selectedFeatureTabIndex,
-        ).prepareForOffline(),
+        ).toJson(),
       );
 
   @override

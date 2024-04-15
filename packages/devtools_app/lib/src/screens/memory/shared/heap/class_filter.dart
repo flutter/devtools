@@ -64,7 +64,7 @@ class ClassFilter {
           only: null,
         );
 
-  factory ClassFilter.parse(Map<String, dynamic> json) {
+  factory ClassFilter.fromJson(Map<String, dynamic> json) {
     final type = json[_Json.type] as String?;
     return ClassFilter(
       filterType:
@@ -77,7 +77,7 @@ class ClassFilter {
 
   // TODO: use an extension type for the Json parsing, https://github.com/flutter/devtools/issues/6972
   // https://github.com/flutter/devtools/pull/7572#discussion_r1563130198
-  Map<String, dynamic> prepareForOffline() {
+  Map<String, dynamic> toJson() {
     return {
       _Json.type: filterType.name,
       _Json.except: except,

@@ -58,7 +58,8 @@ class EnhanceTracingController extends DisposableController
       (event) {
         if (event.extensionKind == 'Flutter.Frame' &&
             _firstLiveFrameId == null) {
-          _firstLiveFrameId = FlutterFrame.parse(event.extensionData!.data).id;
+          _firstLiveFrameId =
+              FlutterFrame.fromJson(event.extensionData!.data).id;
           // See https://github.com/dart-lang/linter/issues/3801
           // ignore: discarded_futures
           unawaited(_firstFrameEventSubscription!.cancel());

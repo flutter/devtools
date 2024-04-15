@@ -83,7 +83,7 @@ class MemoryChartPaneController extends DisposableController
     unawaited(_init());
   }
 
-  factory MemoryChartPaneController.parse(Map<String, dynamic> map) {
+  factory MemoryChartPaneController.fromJson(Map<String, dynamic> map) {
     // TODO(polina-c): implement, https://github.com/flutter/devtools/issues/6972
     return MemoryChartPaneController(
       DevToolsMode.offlineData,
@@ -110,7 +110,7 @@ class MemoryChartPaneController extends DisposableController
     );
   }
 
-  Map<String, dynamic> prepareForOffline() {
+  Map<String, dynamic> toJson() {
     // TODO(polina-c): implement, https://github.com/flutter/devtools/issues/6972
     return {};
   }

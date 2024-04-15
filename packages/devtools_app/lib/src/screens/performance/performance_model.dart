@@ -93,7 +93,7 @@ extension type _PerformanceDataJson(Map<String, Object?> json) {
       (json[OfflinePerformanceData.flutterFramesKey] as List? ?? [])
           .cast<Map>()
           .map((f) => f.cast<String, dynamic>())
-          .map((f) => FlutterFrame.parse(f))
+          .map((f) => FlutterFrame.fromJson(f))
           .toList();
 
   double get displayRefreshRate =>

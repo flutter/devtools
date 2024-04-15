@@ -43,7 +43,7 @@ void main() {
       ),
     );
     setGlobal(ScriptManager, mockScriptManager);
-    final data = CpuProfileData.parse(simpleCpuProfile2);
+    final data = CpuProfileData.fromJson(simpleCpuProfile2);
     await CpuProfileTransformer().processData(data, processId: 'test');
     methodTableController = MethodTableController(
       dataNotifier: FixedValueListenable<CpuProfileData>(data),
