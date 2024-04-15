@@ -31,7 +31,7 @@ final class FlutterVersion extends SemanticVersion {
     preReleaseMinor = semVer.preReleaseMinor;
   }
 
-  factory FlutterVersion.parse(Map<String, dynamic> json) {
+  factory FlutterVersion.fromJson(Map<String, dynamic> json) {
     return FlutterVersion._(
       version: json['frameworkVersion'],
       channel: json['channel'],

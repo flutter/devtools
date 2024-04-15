@@ -38,7 +38,7 @@ void main() {
       isWebApp: false,
     );
     when(app.flutterVersionNow).thenReturn(
-      FlutterVersion.parse(
+      FlutterVersion.fromJson(
         (await fakeServiceConnection.serviceManager.flutterVersion).json!,
       ),
     );

@@ -165,7 +165,7 @@ class ConnectedApp {
           final registered = flutterVersionServiceListenable.value;
           if (registered) {
             _flutterVersionCompleter.complete(
-              FlutterVersion.parse(
+              FlutterVersion.fromJson(
                 (await serviceManager!.flutterVersion).json!,
               ),
             );

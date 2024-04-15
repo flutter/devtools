@@ -124,7 +124,7 @@ bool debugSurvey = false;
 /// The survey metadata that will be used instead of the live data from
 /// 'docs.flutter.dev/f/dart-devtools-survey-metadata.json' when [debugSurvey]
 /// is true;
-final debugSurveyMetadata = DevToolsSurvey.parse(
+final debugSurveyMetadata = DevToolsSurvey.fromJson(
   {
     '_comments': [
       'uniqueId must be updated with each new survey so DevTools knows to re-prompt users.',

@@ -58,7 +58,7 @@ void main() {
       when(app.isFlutterAppNow).thenReturn(true);
       when(app.isProfileBuild).thenAnswer((_) => Future.value(false));
       when(app.flutterVersionNow).thenReturn(
-        FlutterVersion.parse(
+        FlutterVersion.fromJson(
           (await fakeServiceConnection.serviceManager.flutterVersion).json!,
         ),
       );
