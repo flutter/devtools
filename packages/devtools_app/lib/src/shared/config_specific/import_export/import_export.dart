@@ -89,7 +89,7 @@ class ImportController {
     }
 
     final connectedApp =
-        OfflineConnectedApp.fromJson(devToolsSnapshot.connectedApp);
+        OfflineConnectedApp.parse(devToolsSnapshot.connectedApp);
     offlineDataController
       ..startShowingOfflineData(offlineApp: connectedApp)
       ..offlineDataJson = devToolsSnapshot.json;

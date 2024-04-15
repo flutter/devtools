@@ -165,7 +165,7 @@ class ConnectedApp {
           final registered = flutterVersionServiceListenable.value;
           if (registered) {
             _flutterVersionCompleter.complete(
-              FlutterVersion.fromJson(
+              FlutterVersion.parse(
                 (await serviceManager!.flutterVersion).json!,
               ),
             );
@@ -209,7 +209,7 @@ final class OfflineConnectedApp extends ConnectedApp {
     this.operatingSystem = ConnectedApp.unknownOS,
   }) : super(null);
 
-  factory OfflineConnectedApp.fromJson(Map<String, Object?>? json) {
+  factory OfflineConnectedApp.parse(Map<String, Object?>? json) {
     if (json == null) return OfflineConnectedApp();
     return OfflineConnectedApp(
       isFlutterAppNow: json[ConnectedApp.isFlutterAppKey] as bool?,

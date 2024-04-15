@@ -122,7 +122,7 @@ void mockConnectedApp(
       .thenReturn(isFlutterApp && !isWebApp);
   if (isFlutterApp) {
     when(connectedApp.flutterVersionNow).thenReturn(
-      FlutterVersion.fromJson({
+      FlutterVersion.parse({
         'type': 'Success',
         'frameworkVersion': '2.10.0',
         'channel': 'unknown',
@@ -171,7 +171,7 @@ void mockFlutterVersion(
   SemanticVersion version,
 ) {
   when(connectedApp.flutterVersionNow).thenReturn(
-    FlutterVersion.fromJson({
+    FlutterVersion.parse({
       'frameworkVersion': '$version',
     }),
   );
