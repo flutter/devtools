@@ -10,17 +10,17 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:vm_service/vm_service.dart' hide TimelineEvent;
 
-import '../../test_infra/test_data/performance.dart';
+import '../../test_infra/test_data/performance/sample_performance_data.dart';
 
 // TODO(kenz): add better test coverage for [TimelineEventsController].
 
 void main() {
+  late MockPerformanceController performanceController;
   final ServiceConnectionManager fakeServiceManager =
       FakeServiceConnectionManager(
     service: FakeServiceManager.createFakeService(
-      timelineData: Timeline.parse(testTimelineJson)!,
+      timelineData: perfettoVmTimeline,
     ),
   );
 
@@ -36,10 +36,9 @@ void main() {
           .thenReturn(initializedCompleter);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(IdeTheme, IdeTheme());
-      setGlobal(OfflineModeController, OfflineModeController());
+      setGlobal(OfflineDataController, OfflineDataController());
 
-      final performanceController =
-          createMockPerformanceControllerWithDefaults();
+      performanceController = createMockPerformanceControllerWithDefaults();
       eventsController = TimelineEventsController(performanceController);
       final flutterFramesController = MockFlutterFramesController();
       when(performanceController.timelineEventsController)
@@ -52,38 +51,29 @@ void main() {
 
     test('can setOfflineData', () async {
       // Ensure we are starting in an empty state.
-      expect(eventsController.allTraceEvents, isEmpty);
-      expect(eventsController.data!.timelineEvents, isEmpty);
-      expect(eventsController.perfettoController.processor.uiThreadId, isNull);
+      expect(eventsController.fullPerfettoTrace, isEmpty);
+      expect(eventsController.perfettoController.processor.uiTrackId, isNull);
       expect(
-        eventsController.perfettoController.processor.rasterThreadId,
+        eventsController.perfettoController.processor.rasterTrackId,
         isNull,
       );
 
-      offlineController.enterOfflineMode(
+      offlineDataController.startShowingOfflineData(
         offlineApp: serviceConnection.serviceManager.connectedApp!,
       );
-      final traceEvents = [...goldenUiTraceEvents, ...goldenRasterTraceEvents]
-          .map((e) => e.json)
-          .toList()
-          .cast<Map<String, dynamic>>();
-      // TODO(kenz): add some frames for these timeline events to the offline
-      // data and verify we correctly assign the events to their frames.
-      final offlineData = PerformanceData(traceEvents: traceEvents);
+      final offlineData = OfflinePerformanceData.fromJson(rawPerformanceData);
+      when(performanceController.offlinePerformanceData)
+          .thenReturn(offlineData);
       await eventsController.setOfflineData(offlineData);
 
+      expect(eventsController.fullPerfettoTrace, isNotEmpty);
       expect(
-        eventsController.allTraceEvents.length,
-        equals(traceEvents.length),
-      );
-      expect(eventsController.data!.timelineEvents.length, equals(2));
-      expect(
-        eventsController.perfettoController.processor.uiThreadId,
-        equals(testUiThreadId),
+        eventsController.perfettoController.processor.uiTrackId,
+        equals(testUiTrackId),
       );
       expect(
-        eventsController.perfettoController.processor.rasterThreadId,
-        equals(testRasterThreadId),
+        eventsController.perfettoController.processor.rasterTrackId,
+        equals(testRasterTrackId),
       );
     });
   });

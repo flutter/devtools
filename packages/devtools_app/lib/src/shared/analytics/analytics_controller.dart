@@ -6,27 +6,56 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
-import '_analytics_controller_stub.dart'
-    if (dart.library.js_interop) '_analytics_controller_web.dart';
+import '../development_helpers.dart';
+import '../dtd_manager_extensions.dart';
+import '../globals.dart';
 
-Future<AnalyticsController> get analyticsController async =>
-    await devToolsAnalyticsController;
+import 'analytics.dart' as ga;
+
+Future<AnalyticsController> get analyticsController async {
+  if (_analyticsController != null) return _analyticsController!;
+
+  // TODO(https://github.com/flutter/devtools/issues/7083): when the legacy
+  // analytics are fully removed, this try-catch is unnecessary because we will
+  // get these values directly from [dtdManater], like how the consentMessage
+  // parameter is specified below.
+  var enabled = false;
+  var shouldShowConsentMessage = false;
+  try {
+    enabled = await ga.isAnalyticsEnabled();
+    shouldShowConsentMessage = debugShowAnalyticsConsentMessage ||
+        await ga.shouldShowAnalyticsConsentMessage();
+  } catch (_) {
+    // Ignore issues if analytics could not be initialized.
+  }
+  return _analyticsController = AnalyticsController(
+    enabled: enabled,
+    shouldShowConsentMessage: shouldShowConsentMessage,
+    consentMessage: await dtdManager.analyticsConsentMessage(),
+    // TODO(https://github.com/flutter/devtools/issues/7083): remove these
+    // when the legacy analytics are fully removed.
+    legacyOnEnableAnalytics: ga.legacyOnEnableAnalytics,
+    legacyOnDisableAnalytics: ga.legacyOnDisableAnalytics,
+    legacyOnSetupAnalytics: ga.legacyOnSetupAnalytics,
+  );
+}
+
+AnalyticsController? _analyticsController;
 
 typedef AsyncAnalyticsCallback = FutureOr<void> Function();
 
 class AnalyticsController {
   AnalyticsController({
     required bool enabled,
-    required bool firstRun,
+    required bool shouldShowConsentMessage,
     required this.consentMessage,
-    this.onEnableAnalytics,
-    this.onDisableAnalytics,
-    this.onSetupAnalytics,
-    AsyncAnalyticsCallback? markConsentMessageAsShown,
+    this.legacyOnEnableAnalytics,
+    this.legacyOnDisableAnalytics,
+    this.legacyOnSetupAnalytics,
   })  : analyticsEnabled = ValueNotifier<bool>(enabled),
-        _shouldPrompt =
-            ValueNotifier<bool>(firstRun && consentMessage.isNotEmpty),
-        _markConsentMessageAsShown = markConsentMessageAsShown {
+        _shouldPrompt = ValueNotifier<bool>(
+          shouldShowConsentMessage && consentMessage.isNotEmpty,
+        ) {
     if (_shouldPrompt.value) {
       unawaited(toggleAnalyticsEnabled(true));
     }
@@ -43,45 +72,45 @@ class AnalyticsController {
   bool get analyticsInitialized => _analyticsInitialized;
   bool _analyticsInitialized = false;
 
-  final AsyncAnalyticsCallback? onEnableAnalytics;
-
-  final AsyncAnalyticsCallback? onDisableAnalytics;
-
   /// Method to call to confirm with package:unified_analytics the user has
   /// seen the consent message.
-  final AsyncAnalyticsCallback? _markConsentMessageAsShown;
   Future<void> markConsentMessageAsShown() async =>
-      await _markConsentMessageAsShown?.call();
-
-  final VoidCallback? onSetupAnalytics;
+      await dtdManager.analyticsClientShowedMessage();
 
   /// Consent message for package:unified_analytics to be shown on first run.
   final String consentMessage;
 
+  // TODO(https://github.com/flutter/devtools/issues/7083): remove these
+  // when the legacy analytics are fully removed.
+  final AsyncAnalyticsCallback? legacyOnEnableAnalytics;
+  final AsyncAnalyticsCallback? legacyOnDisableAnalytics;
+  final VoidCallback? legacyOnSetupAnalytics;
+
+  /// Sets whether google analytics are enabled.
   Future<void> toggleAnalyticsEnabled(bool? enable) async {
     if (enable == true) {
       analyticsEnabled.value = true;
       if (!_analyticsInitialized) {
         setUpAnalytics();
       }
-      if (onEnableAnalytics != null) {
-        await onEnableAnalytics!();
+      if (kReleaseMode) {
+        await dtdManager.setAnalyticsTelemetry(true);
       }
+      await legacyOnEnableAnalytics?.call();
     } else {
       analyticsEnabled.value = false;
       hidePrompt();
-      if (onDisableAnalytics != null) {
-        await onDisableAnalytics!();
+      if (kReleaseMode) {
+        await dtdManager.setAnalyticsTelemetry(false);
       }
+      await legacyOnDisableAnalytics?.call();
     }
   }
 
   void setUpAnalytics() {
     if (_analyticsInitialized) return;
     assert(analyticsEnabled.value = true);
-    if (onSetupAnalytics != null) {
-      onSetupAnalytics!();
-    }
+    legacyOnSetupAnalytics?.call();
     _analyticsInitialized = true;
   }
 

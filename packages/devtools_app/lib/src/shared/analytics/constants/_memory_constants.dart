@@ -52,6 +52,7 @@ class MemoryEvent {
   static const diffSnapshotDiffOff = 'diffSnapshotDiffSelectOff';
   static const diffSnapshotFilter = 'diffSnapshotFilter';
   static const diffSnapshotDownloadCsv = 'diffSnapshotDownloadCsv';
+  static const diffSnapshotExport = 'diffSnapshotExport';
   static const diffSnapshotDelete = 'diffSnapshotDelete';
 
   static const diffClassDiffSelect = 'diffClassDiffSelect';

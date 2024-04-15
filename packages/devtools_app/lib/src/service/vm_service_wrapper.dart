@@ -13,6 +13,7 @@ import 'package:dap/dap.dart' as dap;
 import 'package:dds_service_extensions/dap.dart';
 import 'package:dds_service_extensions/dds_service_extensions.dart';
 import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
@@ -169,8 +170,21 @@ class VmServiceWrapper extends VmService {
     );
   }
 
-  Future<HeapSnapshotGraph> getHeapSnapshotGraph(IsolateRef isolateRef) async {
-    return await HeapSnapshotGraph.getSnapshot(this, isolateRef);
+  Future<HeapSnapshotGraph> getHeapSnapshotGraph(
+    IsolateRef isolateRef, {
+    bool calculateReferrers = true,
+    bool decodeObjectData = true,
+    bool decodeExternalProperties = true,
+    bool decodeIdentityHashCodes = true,
+  }) async {
+    return await HeapSnapshotGraph.getSnapshot(
+      this,
+      isolateRef,
+      calculateReferrers: calculateReferrers,
+      decodeObjectData: decodeObjectData,
+      decodeExternalProperties: decodeExternalProperties,
+      decodeIdentityHashCodes: decodeIdentityHashCodes,
+    );
   }
 
   @override
@@ -191,9 +205,19 @@ class VmServiceWrapper extends VmService {
     }
   }
 
-  // Mark: Overrides for [DdsExtension]. It would help with logical grouping to
-  // make these extension methods, but that makes testing more difficult due to
-  // mocking limitations for extension methods.
+  // Mark: Overrides for [DdsExtension]. We wrap these methods so that we can
+  // override them in tests.
+
+  Future<PerfettoTimeline> getPerfettoVMTimelineWithCpuSamplesWrapper({
+    int? timeOriginMicros,
+    int? timeExtentMicros,
+  }) {
+    return getPerfettoVMTimelineWithCpuSamples(
+      timeOriginMicros: timeOriginMicros,
+      timeExtentMicros: timeExtentMicros,
+    );
+  }
+
   Stream<Event> get onExtensionEventWithHistorySafe {
     return _maybeReturnStreamWithHistory(
       onExtensionEventWithHistory,
@@ -357,8 +381,8 @@ class VmServiceWrapper extends VmService {
 
     void futureComplete() {
       activeFutures.remove(trackedFuture);
-      if (activeFutures.isEmpty && !_allFuturesCompleter.isCompleted) {
-        _allFuturesCompleter.complete(true);
+      if (activeFutures.isEmpty) {
+        _allFuturesCompleter.safeComplete(true);
       }
     }
 

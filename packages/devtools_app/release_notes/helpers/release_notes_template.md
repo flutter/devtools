@@ -6,7 +6,7 @@ This is draft for future release notes, that are going to land on
 The <number> release of the Dart and Flutter DevTools
 includes the following changes among other general improvements.
 To learn more about DevTools, check out the
-[DevTools overview](https://docs.flutter.dev/tools/devtools/overview).
+[DevTools overview]({{site.url}}/tools/devtools/overview).
 
 ## General updates
 
@@ -41,6 +41,10 @@ TODO: Remove this section if there are not any general updates.
 TODO: Remove this section if there are not any general updates.
 
 ## App size tool updates
+
+TODO: Remove this section if there are not any general updates.
+
+## Deep links tool updates
 
 TODO: Remove this section if there are not any general updates.
 

@@ -73,7 +73,8 @@ class DebuggerScreen extends Screen {
       const FixedValueListenable<bool>(true);
 
   @override
-  Widget build(BuildContext context) => const _DebuggerScreenBodyWrapper();
+  Widget buildScreenBody(BuildContext context) =>
+      const _DebuggerScreenBodyWrapper();
 
   @override
   Widget buildStatus(BuildContext context) {
@@ -148,7 +149,7 @@ class DebuggerScreenBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Split(
+    return SplitPane(
       axis: Axis.horizontal,
       initialFractions: const [0.25, 0.75],
       children: [
@@ -278,7 +279,7 @@ class DebuggerSourceAndControls extends StatelessWidget {
               // ignore: prefer-conditional-expression
               if (visible) {
                 // TODO(devoncarew): Animate this opening and closing.
-                return Split(
+                return SplitPane(
                   axis: Axis.horizontal,
                   initialFractions: const [0.7, 0.3],
                   children: [

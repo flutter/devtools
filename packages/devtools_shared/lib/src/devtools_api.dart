@@ -5,6 +5,15 @@
 /// All server APIs prefix:
 const apiPrefix = 'api/';
 
+/// Key used for any request or response to specify a value argument.
+const apiParameterValueKey = 'value';
+
+/// Notifies the DevTools server when a DevTools app client connects to a new
+/// VM service.
+const apiNotifyForVmServiceConnection =
+    '${apiPrefix}notifyForVmServiceConnection';
+const apiParameterVmServiceConnected = 'connected';
+
 /// Flutter GA properties APIs:
 const apiGetFlutterGAEnabled = '${apiPrefix}getFlutterGAEnabled';
 const apiGetFlutterGAClientId = '${apiPrefix}getFlutterGAClientId';
@@ -14,10 +23,6 @@ const apiResetDevTools = '${apiPrefix}resetDevTools';
 const apiGetDevToolsFirstRun = '${apiPrefix}getDevToolsFirstRun';
 const apiGetDevToolsEnabled = '${apiPrefix}getDevToolsEnabled';
 const apiSetDevToolsEnabled = '${apiPrefix}setDevToolsEnabled';
-
-/// package:unified_analytics properties APIs:
-const apiGetConsentMessage = '${apiPrefix}getConsentMessage';
-const apiMarkConsentMessageAsShown = '${apiPrefix}markConsentMessageAsShown';
 
 /// Property name to apiSetDevToolsEnabled the DevToolsEnabled is the name used
 /// in queryParameter:

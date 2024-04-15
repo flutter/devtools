@@ -37,7 +37,7 @@ class RasterStatsController extends PerformanceFeatureController {
     try {
       final response = await serviceConnection.renderFrameWithRasterStats;
       final json = response?.json ?? <String, Object?>{};
-      final rasterStats = RasterStats.parse(json);
+      final rasterStats = RasterStats.fromJson(json);
       setData(rasterStats);
     } catch (e, st) {
       _log.shout('Error collecting raster stats: $e', e, st);
@@ -54,7 +54,6 @@ class RasterStatsController extends PerformanceFeatureController {
   void setData(RasterStats? stats) {
     _rasterStats.value = stats;
     selectedSnapshot.value = stats?.selectedSnapshot;
-    performanceController.data!.rasterStats = stats;
   }
 
   @override
@@ -63,7 +62,7 @@ class RasterStatsController extends PerformanceFeatureController {
   }
 
   @override
-  Future<void> setOfflineData(PerformanceData offlineData) async {
+  Future<void> setOfflineData(OfflinePerformanceData offlineData) async {
     final offlineRasterStats = offlineData.rasterStats;
     if (offlineRasterStats != null) {
       setData(offlineRasterStats);

@@ -250,12 +250,20 @@ class ThemedColor {
 }
 
 enum MediaSize with EnumIndexOrdering {
-  xxs,
-  xs,
-  s,
-  m,
-  l,
-  xl,
+  xxs(widthThreshold: 300.0, heightThreshold: 300),
+  xs(widthThreshold: 600.0, heightThreshold: 450),
+  s(widthThreshold: 900.0, heightThreshold: 600),
+  m(widthThreshold: 1200.0, heightThreshold: 750),
+  l(widthThreshold: 1500.0, heightThreshold: 900),
+  xl(widthThreshold: double.infinity, heightThreshold: double.infinity);
+
+  const MediaSize({
+    required this.widthThreshold,
+    required this.heightThreshold,
+  });
+
+  final double widthThreshold;
+  final double heightThreshold;
 }
 
 class ScreenSize {
@@ -271,21 +279,17 @@ class ScreenSize {
 
   MediaSize _calculateWidth(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    if (width < 300) return MediaSize.xxs;
-    if (width < 600) return MediaSize.xs;
-    if (width < 900) return MediaSize.s;
-    if (width < 1200) return MediaSize.m;
-    if (width < 1500) return MediaSize.l;
-    return MediaSize.xl;
+    return MediaSize.values.firstWhere(
+      (size) => width < size.widthThreshold,
+      orElse: () => MediaSize.xl,
+    );
   }
 
   MediaSize _calculateHeight(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
-    if (height < 300) return MediaSize.xxs;
-    if (height < 450) return MediaSize.xs;
-    if (height < 600) return MediaSize.s;
-    if (height < 750) return MediaSize.m;
-    if (height < 900) return MediaSize.l;
-    return MediaSize.xl;
+    return MediaSize.values.firstWhere(
+      (size) => height < size.heightThreshold,
+      orElse: () => MediaSize.xl,
+    );
   }
 }

@@ -4,17 +4,16 @@
 
 import 'package:devtools_app/src/screens/performance/panes/raster_stats/raster_stats_model.dart';
 import 'package:devtools_app/src/shared/primitives/utils.dart';
+import 'package:devtools_test/test_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../../test_infra/test_data/performance_raster_stats.dart';
 
 void main() {
   late RasterStats rasterStats;
 
   group('$RasterStats model', () {
     test('parse from service data', () {
-      rasterStats = RasterStats.parse(rasterStatsFromServiceJson);
+      rasterStats = RasterStats.fromJson(rasterStatsFromServiceJson);
       expect(rasterStats.layerSnapshots.length, equals(2));
       expect(rasterStats.selectedSnapshot, isNotNull);
       expect(rasterStats.selectedSnapshot!.id, equals(12731));
@@ -42,7 +41,7 @@ void main() {
     });
 
     test('parse from devtools data', () {
-      rasterStats = RasterStats.parse(rasterStatsFromDevToolsJson);
+      rasterStats = RasterStats.fromJson(rasterStatsFromDevToolsJson);
       expect(rasterStats.layerSnapshots.length, equals(2));
       expect(rasterStats.selectedSnapshot, isNotNull);
       expect(rasterStats.selectedSnapshot!.id, equals(12734));
@@ -70,7 +69,7 @@ void main() {
     });
 
     test('to json', () {
-      rasterStats = RasterStats.parse(rasterStatsFromServiceJson);
+      rasterStats = RasterStats.fromJson(rasterStatsFromServiceJson);
       final json = rasterStats.json;
       final expected = Map<String, Object?>.from(rasterStatsFromServiceJson);
       // The expected output should not have the 'type' field that comes from

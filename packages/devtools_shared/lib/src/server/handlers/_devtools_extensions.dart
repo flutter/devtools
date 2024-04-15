@@ -23,6 +23,22 @@ abstract class _ExtensionsApiHandler {
     final logs = <String>[];
     final rootPath = queryParams[ExtensionsApi.extensionRootPathPropertyName];
     final result = <String, Object?>{};
+
+    /// Helper to return a success response with all available extensions
+    /// detected by [extensionsManager].
+    shelf.Response succeedWithAvailableExtensions({String? warning}) {
+      final extensions =
+          extensionsManager.devtoolsExtensions.map((p) => p.toJson()).toList();
+      result[ExtensionsApi.extensionsResultPropertyName] = extensions;
+      if (warning != null) {
+        result[ExtensionsApi.extensionsResultWarningPropertyName] = warning;
+      }
+      return ServerApi._encodeResponse(
+        ServerApi._wrapWithLogs(result, logs),
+        api: api,
+      );
+    }
+
     try {
       await extensionsManager.serveAvailableExtensions(rootPath, logs);
     } on ExtensionParsingException catch (e) {
@@ -30,17 +46,15 @@ abstract class _ExtensionsApiHandler {
       // with a warning message.
       result[ExtensionsApi.extensionsResultWarningPropertyName] = e.message;
     } catch (e) {
-      // For all other exceptions, return an error response.
+      // If any extensions were successfully detected, return a success response
+      // with a warning.
+      if (extensionsManager.devtoolsExtensions.isNotEmpty) {
+        return succeedWithAvailableExtensions(warning: '$e');
+      }
       return api.serverError('$e', logs);
     }
 
-    final extensions =
-        extensionsManager.devtoolsExtensions.map((p) => p.toJson()).toList();
-    result[ExtensionsApi.extensionsResultPropertyName] = extensions;
-    return ServerApi._encodeResponse(
-      ServerApi._wrapWithLogs(result, logs),
-      api: api,
-    );
+    return succeedWithAvailableExtensions();
   }
 
   static shelf.Response handleExtensionEnabledState(

@@ -2,17 +2,46 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:devtools_shared/devtools_extensions.dart';
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 
 import 'globals.dart';
 import 'survey.dart';
 
-/// Enable this flag to debug analytics when DevTools is run in debug or profile
-/// mode, otherwise analytics will only be sent in release builds.
+// This file contains helpers that can be used during local development. Any
+// changes to variables in this file (like flipping a bool to true or setting
+// a non-null value for a debug String) should be intended for local
+// development only, and should never be checked into source control. The
+// default values for variables in this file are test covered in
+// `development_helpers_test.dart`.
+
+final _log = Logger('dev_helpers');
+
+/// Set this to a real DTD URI String for ease of developing features that use
+/// the Dart Tooling Daemon.
+///
+/// Without using this flag, you would need to run DevTools with the DevTools
+/// server (devtools_tool serve) in order to pass a DTD URI to the DevTools
+/// server, which is not convenient for development.
+///
+/// You can use a real DTD URI from an IDE (VS Code or IntelliJ / Android
+/// Studio) using the "Copy DTD URI" action, or you can run a Dart or Flutter
+/// app from the command line with the `--print-dtd` flag.
+String? get debugDtdUri => kReleaseMode ? null : _debugDtdUri;
+String? _debugDtdUri;
+
+/// Enable this flag to send and debug analytics when DevTools is run in debug
+/// or profile mode, otherwise analytics will only be sent in release builds.
 ///
 /// `ga.isAnalyticsEnabled()` still must return true for analytics to be sent.
-bool debugAnalytics = false;
+bool debugSendAnalytics = false;
+
+/// Enable this flag to always show the analytics consent message, regardless
+/// of whether any other conditions are met.
+bool debugShowAnalyticsConsentMessage = false;
 
 /// Whether to build DevTools for conveniently debugging DevTools extensions.
 ///
@@ -95,7 +124,7 @@ bool debugSurvey = false;
 /// The survey metadata that will be used instead of the live data from
 /// 'docs.flutter.dev/f/dart-devtools-survey-metadata.json' when [debugSurvey]
 /// is true;
-final debugSurveyMetadata = DevToolsSurvey.parse(
+final debugSurveyMetadata = DevToolsSurvey.fromJson(
   {
     '_comments': [
       'uniqueId must be updated with each new survey so DevTools knows to re-prompt users.',
@@ -109,3 +138,61 @@ final debugSurveyMetadata = DevToolsSurvey.parse(
     'endDate': '2023-10-20T09:00:00-07:00',
   },
 );
+
+/// Enable this flag to debug Perfetto trace processing in the Performance
+/// screen.
+///
+/// When this flag is true, helpful print debugging will be emitted signaling
+/// important data for the trace processing logic.
+///
+/// This flag has performance implications, since printing a lot of data to the
+/// command line can be expensive.
+const debugPerfettoTraceProcessing = !kReleaseMode && false;
+
+/// Helper method to call a callback only when debugging issues related to trace
+/// event duplicates (for example https://github.com/dart-lang/sdk/issues/46605).
+void debugTraceCallback(void Function() callback) {
+  if (debugPerfettoTraceProcessing) {
+    callback();
+  }
+}
+
+/// Enable this flag to print timing information for callbacks wrapped in
+/// [debugTimeSync] or [debugTimeAsync].
+const debugTimers = !kReleaseMode && false;
+
+/// Debug helper to run a synchronous [callback] and print the time it took to
+/// run to stdout.
+///
+/// This will only time the operation when [debugTimers] is true.
+void debugTimeSync(
+  void Function() callback, {
+  required String debugName,
+}) {
+  if (!debugTimers) {
+    callback();
+    return;
+  }
+  final now = DateTime.now().millisecondsSinceEpoch;
+  callback();
+  final time = DateTime.now().millisecondsSinceEpoch - now;
+  _log.info('$debugName: $time ms');
+}
+
+/// Debug helper to run an asynchronous [callback] and print the time it took to
+/// run to stdout.
+///
+/// This will only time the operation when [debugTimers] is true.
+FutureOr<void> debugTimeAsync(
+  FutureOr<void> Function() callback, {
+  required String debugName,
+}) async {
+  if (!debugTimers) {
+    await callback();
+    return;
+  }
+  final now = DateTime.now().millisecondsSinceEpoch;
+  await callback();
+  final time = DateTime.now().millisecondsSinceEpoch - now;
+  _log.info('$debugName: $time ms');
+}

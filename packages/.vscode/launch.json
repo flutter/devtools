@@ -22,7 +22,10 @@
             "type": "dart",
             "program": "devtools_app/lib/main.dart",
             "args": [
-                "--dart-define=enable_experiments=true"
+                "--dart-define",
+                "memory_offline_experiment=true",
+                "--dart-define",
+                "enable_experiments=true",
             ],
         },
         {
@@ -33,6 +36,13 @@
             "flutterMode": "profile",
         },
         {
+            "name": "devtools + release",
+            "request": "launch",
+            "type": "dart",
+            "program": "devtools_app/lib/main.dart",
+            "flutterMode": "release",
+        },
+        {
             "name": "devtools + profile + experiments",
             "request": "launch",
             "type": "dart",
@@ -41,6 +51,13 @@
             "args": [
                 "--dart-define=enable_experiments=true"
             ],
+        },
+        {
+            "name": "devtools + release",
+            "request": "launch",
+            "type": "dart",
+            "program": "devtools_app/lib/main.dart",
+            "flutterMode": "release",
         },
         {
             "name": "memory/default",

@@ -41,7 +41,7 @@ Future<void> main() async {
           // Create the goldens directory if it does not exist.
           Directory(_goldensDirectoryPath).createSync();
         }
-        goldenFile.writeAsBytesSync(screenshotBytes);
+        goldenFile.writeAsBytesSync(screenshotBytes, flush: true);
         print('Golden image updated: $screenshotName.png');
         return true;
       }

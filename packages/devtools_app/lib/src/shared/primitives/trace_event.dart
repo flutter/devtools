@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(devoncarew): Upstream this class to the service protocol library.
-
-/// A single timeline event.
-class TraceEvent {
+/// A single trace event that follows the Chrome Trace Event Format.
+///
+/// See Chrome Trace Event Format documentation:
+/// https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
+class ChromeTraceEvent {
   /// Creates a timeline event given JSON-encoded event data.
-  TraceEvent(this.json)
+  ChromeTraceEvent(this.json)
       : name = json[nameKey] as String?,
         category = json[categoryKey] as String?,
         phase = json[phaseKey] as String?,
@@ -96,16 +97,7 @@ class TraceEvent {
   /// Arbitrary data attached to the event.
   final Map<String, Object?>? args;
 
-  String get asyncUID =>
-      generateAsyncUID(id: id, category: category, scope: scope);
-
-  TimelineEventType? _type;
-
-  TimelineEventType get type => _type ??= TimelineEventType.other;
-
-  set type(TimelineEventType t) => _type = t;
-
-  TraceEvent copy({
+  ChromeTraceEvent copy({
     String? name,
     String? category,
     String? phase,
@@ -115,7 +107,7 @@ class TraceEvent {
     int? timestampMicros,
     Map<String, dynamic>? args,
   }) {
-    return TraceEvent({
+    return ChromeTraceEvent({
       nameKey: name ?? this.name,
       categoryKey: category ?? this.category,
       phaseKey: phase ?? this.phase,
@@ -128,75 +120,6 @@ class TraceEvent {
   }
 
   @override
-  String toString() => '$type event [$idKey: $id] [$phaseKey: $phase] '
+  String toString() => '[$idKey: $id] [$phaseKey: $phase] '
       '$name - [$timestampKey: $timestampMicros] [$durationKey: $duration]';
-}
-
-int _traceEventWrapperId = 0;
-
-class TraceEventWrapper implements Comparable<TraceEventWrapper> {
-  TraceEventWrapper(this.event, this.timeReceived)
-      : wrapperId = _traceEventWrapperId++;
-  final TraceEvent event;
-
-  final num timeReceived;
-
-  final int wrapperId;
-
-  Map<String, dynamic> get json => event.json;
-
-  bool get isShaderEvent => event.args!['devtoolsTag'] == 'shaders';
-
-  @override
-  int compareTo(TraceEventWrapper other) {
-    // Order events based on their timestamps. If the events share a timestamp,
-    // order them in the order we received them.
-    final compare = (event.timestampMicros ?? 0)
-        .compareTo(other.event.timestampMicros ?? 0);
-    return compare != 0 ? compare : wrapperId.compareTo(other.wrapperId);
-  }
-}
-
-String generateAsyncUID({
-  required String? id,
-  required String? category,
-  String? scope,
-}) {
-  return [
-    if (category != null) category,
-    if (scope != null) scope,
-    if (id != null) id,
-  ].join(':');
-}
-
-enum TimelineEventType {
-  ui,
-  raster,
-  async,
-  other,
-}
-
-class ThreadNameEvent {
-  const ThreadNameEvent._(this.name, this.threadId);
-
-  factory ThreadNameEvent.from(TraceEvent event) {
-    final args = event.args!;
-    return ThreadNameEvent._(
-      args[TraceEvent.nameKey] as String?,
-      event.threadId,
-    );
-  }
-
-  final String? name;
-  final int? threadId;
-
-  @override
-  bool operator ==(Object other) {
-    return other is ThreadNameEvent &&
-        name == other.name &&
-        threadId == other.threadId;
-  }
-
-  @override
-  int get hashCode => Object.hash(name, threadId);
 }

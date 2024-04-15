@@ -12,6 +12,7 @@ import 'package:image/image.dart' as image;
 import '../../shared/common_widgets.dart';
 import '../../shared/http/http.dart';
 import '../../shared/http/http_request_data.dart';
+import '../../shared/primitives/byte_utils.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/colors.dart';
 import 'network_controller.dart';
@@ -63,39 +64,41 @@ class HttpRequestHeadersView extends StatelessWidget {
     final requestHeaders = data.requestHeaders;
     return LayoutBuilder(
       builder: (context, constraints) {
-        return ListView(
-          children: [
-            _buildTile(
-              'General',
-              [
-                for (final entry in general.entries)
-                  _Row(
-                    entry: entry,
-                    constraints: constraints,
-                    isErrorValue: data.didFail && entry.key == 'statusCode',
-                  ),
-              ],
-              key: generalKey,
-            ),
-            _buildTile(
-              'Response Headers',
-              [
-                if (responseHeaders != null)
-                  for (final entry in responseHeaders.entries)
-                    _Row(entry: entry, constraints: constraints),
-              ],
-              key: responseHeadersKey,
-            ),
-            _buildTile(
-              'Request Headers',
-              [
-                if (requestHeaders != null)
-                  for (final entry in requestHeaders.entries)
-                    _Row(entry: entry, constraints: constraints),
-              ],
-              key: requestHeadersKey,
-            ),
-          ],
+        return SelectionArea(
+          child: ListView(
+            children: [
+              _buildTile(
+                'General',
+                [
+                  for (final entry in general.entries)
+                    _Row(
+                      entry: entry,
+                      constraints: constraints,
+                      isErrorValue: data.didFail && entry.key == 'statusCode',
+                    ),
+                ],
+                key: generalKey,
+              ),
+              _buildTile(
+                'Response Headers',
+                [
+                  if (responseHeaders != null)
+                    for (final entry in responseHeaders.entries)
+                      _Row(entry: entry, constraints: constraints),
+                ],
+                key: responseHeadersKey,
+              ),
+              _buildTile(
+                'Request Headers',
+                [
+                  if (requestHeaders != null)
+                    for (final entry in requestHeaders.entries)
+                      _Row(entry: entry, constraints: constraints),
+                ],
+                key: requestHeadersKey,
+              ),
+            ],
+          ),
         );
       },
     );
@@ -121,17 +124,16 @@ class _Row extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SelectableText(
+          Text(
             '${entry.key}: ',
             style: Theme.of(context).textTheme.titleSmall,
           ),
           Expanded(
-            child: SelectableText(
+            child: Text(
               style: isErrorValue
                   ? TextStyle(color: Theme.of(context).colorScheme.error)
                   : null,
               '${entry.value}',
-              minLines: 1,
             ),
           ),
         ],
@@ -147,9 +149,9 @@ class HttpRequestView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: data.requestUpdatedNotifier,
-      builder: (context, __, ___) {
+    return ListenableBuilder(
+      listenable: data,
+      builder: (context, __) {
         final theme = Theme.of(context);
         final requestHeaders = data.requestHeaders;
         final requestContentType = requestHeaders?['content-type'] ?? '';
@@ -199,9 +201,9 @@ class HttpViewTrailingCopyButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: data.requestUpdatedNotifier,
-      builder: (context, __, ___) {
+    return ListenableBuilder(
+      listenable: data,
+      builder: (context, __) {
         final dataToCopy = dataSelector(data);
         final isLoading = data.isFetchingFullData;
         if (dataToCopy == null || dataToCopy.isEmpty || isLoading) {
@@ -246,9 +248,9 @@ class HttpResponseTrailingDropDown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: data.requestUpdatedNotifier,
-      builder: (_, __, ___) {
+    return ListenableBuilder(
+      listenable: data,
+      builder: (_, __) {
         final bool visible = (data.contentType != null &&
                 !data.contentType!.contains('image')) &&
             data.responseBody!.isNotEmpty;
@@ -302,9 +304,9 @@ class HttpResponseView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: data.requestUpdatedNotifier,
-      builder: (context, __, ___) {
+    return ListenableBuilder(
+      listenable: data,
+      builder: (context, __) {
         Widget child;
         final theme = Theme.of(context);
         // We shouldn't try and display an image response view when using the
@@ -444,12 +446,12 @@ class ImageResponseView extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SelectableText(
+          Text(
             '$key: ',
             style: Theme.of(context).textTheme.titleSmall,
           ),
           Expanded(
-            child: SelectableText(
+            child: Text(
               value,
               // TODO(kenz): use top level overflow parameter if
               // https://github.com/flutter/flutter/issues/82722 is fixed.
@@ -495,7 +497,7 @@ class HttpRequestCookiesView extends StatelessWidget {
     );
   }
 
-  DataCell _buildCell(String? value) => DataCell(SelectableText(value ?? '--'));
+  DataCell _buildCell(String? value) => DataCell(Text(value ?? '--'));
 
   DataCell _buildIconCell(IconData icon) =>
       DataCell(Icon(icon, size: defaultIconSize));
@@ -515,7 +517,7 @@ class HttpRequestCookiesView extends StatelessWidget {
     }) {
       return DataColumn(
         label: Expanded(
-          child: SelectableText(
+          child: Text(
             title,
             // TODO(kenz): use top level overflow parameter if
             // https://github.com/flutter/flutter/issues/82722 is fixed.
@@ -637,16 +639,18 @@ class NetworkRequestOverviewView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(defaultSpacing),
-      children: [
-        ..._buildGeneralRows(context),
-        if (data is WebSocket) ..._buildSocketOverviewRows(context),
-        const PaddedDivider(
-          padding: EdgeInsets.only(bottom: denseRowSpacing),
-        ),
-        ..._buildTimingOverview(context),
-      ],
+    return SelectionArea(
+      child: ListView(
+        padding: const EdgeInsets.all(defaultSpacing),
+        children: [
+          ..._buildGeneralRows(context),
+          if (data is WebSocket) ..._buildSocketOverviewRows(context),
+          const PaddedDivider(
+            padding: EdgeInsets.only(bottom: denseRowSpacing),
+          ),
+          ..._buildTimingOverview(context),
+        ],
+      ),
     );
   }
 
@@ -903,7 +907,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
       children: [
         SizedBox(
           width: _keyWidth,
-          child: SelectableText(
+          child: Text(
             title.isEmpty ? '' : '$title: ',
             style: Theme.of(context).textTheme.titleSmall,
           ),
@@ -916,10 +920,9 @@ class NetworkRequestOverviewView extends StatelessWidget {
   }
 
   Widget _valueText(String value, [TextStyle? style]) {
-    return SelectableText(
+    return Text(
       style: style,
       value,
-      minLines: 1,
     );
   }
 }

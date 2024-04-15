@@ -109,8 +109,8 @@ ThemeData _baseTheme({
     ),
     menuButtonTheme: MenuButtonThemeData(
       style: ButtonStyle(
-        textStyle: MaterialStatePropertyAll<TextStyle>(theme.regularTextStyle),
-        fixedSize: const MaterialStatePropertyAll<Size>(Size.fromHeight(24.0)),
+        textStyle: WidgetStatePropertyAll<TextStyle>(theme.regularTextStyle),
+        fixedSize: const WidgetStatePropertyAll<Size>(Size.fromHeight(24.0)),
       ),
     ),
     dropdownMenuTheme: DropdownMenuThemeData(
@@ -344,6 +344,10 @@ extension DevToolsSharedColorScheme on ColorScheme {
       isLight ? const Color(0xFF999999) : const Color(0xFF8A8A8A);
 
   Color get tooltipTextColor => isLight ? Colors.white : Colors.black;
+
+  Color get semiTransparentOverlayColor => isLight
+      ? Colors.grey.shade200.withAlpha(200)
+      : Colors.grey.shade800.withAlpha(200);
 }
 
 /// Utility extension methods to the [ThemeData] class.
@@ -360,6 +364,8 @@ extension ThemeDataExtension on ThemeData {
 
   TextStyle regularTextStyleWithColor(Color? color) =>
       regularTextStyle.copyWith(color: color);
+
+  TextStyle get errorTextStyle => regularTextStyleWithColor(colorScheme.error);
 
   TextStyle get boldTextStyle =>
       regularTextStyle.copyWith(fontWeight: FontWeight.bold);
@@ -545,7 +551,7 @@ ButtonStyle _generateButtonStyle({
 }) {
   if (!isScreenWiderThan(context, minScreenWidthForTextBeforeScaling)) {
     buttonStyle = buttonStyle.copyWith(
-      padding: MaterialStateProperty.resolveWith<EdgeInsets>((_) {
+      padding: WidgetStateProperty.resolveWith<EdgeInsets>((_) {
         return EdgeInsets.zero;
       }),
     );

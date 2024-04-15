@@ -19,6 +19,7 @@ import '../../shared/console/eval/inspector_tree.dart';
 import '../../shared/editable_list.dart';
 import '../../shared/error_badge_manager.dart';
 import '../../shared/globals.dart';
+import '../../shared/preferences/preferences.dart';
 import '../../shared/primitives/blocking_action_mixin.dart';
 import '../../shared/primitives/simple_items.dart';
 import '../../shared/screen.dart';
@@ -42,7 +43,7 @@ class InspectorScreen extends Screen {
   String get docPageId => screenId;
 
   @override
-  Widget build(BuildContext context) => const InspectorScreenBody();
+  Widget buildScreenBody(BuildContext context) => const InspectorScreenBody();
 }
 
 class InspectorScreenBody extends StatefulWidget {
@@ -151,8 +152,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       screenId: InspectorScreen.id,
     );
 
-    final splitAxis = Split.axisFor(context, 0.85);
-    final widgetTrees = Split(
+    final splitAxis = SplitPane.axisFor(context, 0.85);
+    final widgetTrees = SplitPane(
       axis: splitAxis,
       initialFractions: const [0.33, 0.67],
       children: [
@@ -333,7 +334,7 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final dialogHeight = scaleByFontFactor(400.0);
+    final dialogHeight = scaleByFontFactor(500.0);
     return DevToolsDialog(
       title: const DialogTitleText('Flutter Inspector Settings'),
       content: SizedBox(
@@ -356,6 +357,8 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
               gaItem: gac.inspectorHoverEvalMode,
             ),
             const SizedBox(height: denseSpacing),
+            const InspectorDefaultDetailsViewOption(),
+            const SizedBox(height: denseSpacing),
             ...dialogSubHeader(theme, 'Package Directories'),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -375,7 +378,7 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
               ],
             ),
             Text(
-              '(e.g. /absolute/path/to/myPackage)',
+              '(e.g. /absolute/path/to/myPackage/)',
               style: theme.subtleTextStyle,
             ),
             const SizedBox(height: denseSpacing),
@@ -567,6 +570,63 @@ class _ErrorNavigatorButton extends StatelessWidget {
         onPressed: onPressed,
       ),
     );
+  }
+}
+
+class InspectorDefaultDetailsViewOption extends StatelessWidget {
+  const InspectorDefaultDetailsViewOption({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: preferences.inspector.defaultDetailsView,
+      builder: (context, selection, _) {
+        final theme = Theme.of(context);
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Select the default tab for the inspector.',
+              style: theme.subtleTextStyle,
+            ),
+            const SizedBox(height: denseSpacing),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Radio<InspectorDetailsViewType>(
+                  value: InspectorDetailsViewType.layoutExplorer,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  groupValue: selection,
+                  onChanged: _onChanged,
+                ),
+                Text(InspectorDetailsViewType.layoutExplorer.key),
+                const SizedBox(width: denseSpacing),
+                Radio<InspectorDetailsViewType>(
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  value: InspectorDetailsViewType.widgetDetailsTree,
+                  groupValue: selection,
+                  onChanged: _onChanged,
+                ),
+                Text(InspectorDetailsViewType.widgetDetailsTree.key),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _onChanged(InspectorDetailsViewType? value) {
+    if (value != null) {
+      preferences.inspector.setDefaultInspectorDetailsView(value);
+      final item = value.name == InspectorDetailsViewType.layoutExplorer.name
+          ? gac.defaultDetailsViewToLayoutExplorer
+          : gac.defaultDetailsViewToWidgetDetails;
+      ga.select(
+        gac.inspector,
+        item,
+      );
+    }
   }
 }
 

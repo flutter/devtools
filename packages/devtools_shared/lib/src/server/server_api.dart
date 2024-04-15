@@ -8,13 +8,19 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:collection/collection.dart';
+import 'package:dtd/dtd.dart';
+import 'package:meta/meta.dart';
 import 'package:shelf/shelf.dart' as shelf;
-import 'package:unified_analytics/unified_analytics.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../deeplink/deeplink_manager.dart';
 import '../devtools_api.dart';
 import '../extensions/extension_enablement.dart';
 import '../extensions/extension_manager.dart';
+import '../service/service.dart';
+import '../service_utils.dart';
+import '../utils/file_utils.dart';
 import 'file_system.dart';
 import 'usage.dart';
 
@@ -23,6 +29,10 @@ import 'usage.dart';
 part 'handlers/_deeplink.dart';
 part 'handlers/_devtools_extensions.dart';
 part 'handlers/_dtd.dart';
+part 'handlers/_general.dart';
+
+/// Describes an instance of the Dart Tooling Daemon.
+typedef DTDConnectionInfo = ({String? uri, String? secret});
 
 /// The DevTools server API.
 ///
@@ -44,15 +54,20 @@ class ServerApi {
     shelf.Request request, {
     required ExtensionsManager extensionsManager,
     required DeeplinkManager deeplinkManager,
-    required Analytics analytics,
     ServerApi? api,
-    String? dtdUri,
+    DTDConnectionInfo? dtd,
   }) {
     api ??= ServerApi();
     final queryParams = request.requestedUri.queryParameters;
     // TODO(kenz): break this switch statement up so that it uses helper methods
     // for each case. Also use [_checkRequiredParameters] helper.
     switch (request.url.path) {
+      case apiNotifyForVmServiceConnection:
+        return Handler.handleNotifyForVmServiceConnection(
+          api,
+          queryParams,
+          dtd,
+        );
       // ----- Flutter Tool GA store. -----
       case apiGetFlutterGAEnabled:
         // Is Analytics collection enabled?
@@ -77,17 +92,11 @@ class ServerApi {
         return _encodeResponse(true, api: api);
       case apiGetDevToolsFirstRun:
         // Has DevTools been run first time? To bring up analytics dialog.
-        //
-        // Additionally, package:unified_analytics will show a message if it
-        // is the first run with the package or the consent message version has
-        // been updated
-        final isFirstRun =
-            _devToolsUsage.isFirstRun || analytics.shouldShowMessage;
+        final isFirstRun = _devToolsUsage.isFirstRun;
         return _encodeResponse(isFirstRun, api: api);
       case apiGetDevToolsEnabled:
         // Is DevTools Analytics collection enabled?
-        final isEnabled =
-            _devToolsUsage.analyticsEnabled && analytics.telemetryEnabled;
+        final isEnabled = _devToolsUsage.analyticsEnabled;
         return _encodeResponse(isEnabled, api: api);
       case apiSetDevToolsEnabled:
         // Enable or disable DevTools analytics collection.
@@ -96,14 +105,8 @@ class ServerApi {
               json.decode(queryParams[devToolsEnabledPropertyName]!);
 
           _devToolsUsage.analyticsEnabled = analyticsEnabled;
-          analytics.setTelemetry(analyticsEnabled);
         }
         return _encodeResponse(_devToolsUsage.analyticsEnabled, api: api);
-      case apiGetConsentMessage:
-        return api.success(analytics.getConsentMessage);
-      case apiMarkConsentMessageAsShown:
-        analytics.clientShowedMessage();
-        return _encodeResponse(true, api: api);
 
       // ----- DevTools survey store. -----
 
@@ -266,7 +269,7 @@ class ServerApi {
           deeplinkManager,
         );
       case DtdApi.apiGetDtdUri:
-        return _DtdApiHandler.handleGetDtdUri(api, dtdUri);
+        return _DtdApiHandler.handleGetDtdUri(api, dtd);
       default:
         return api.notImplemented();
     }
@@ -329,6 +332,11 @@ class ServerApi {
   ///
   /// The response optionally contains a single String [value].
   shelf.Response success([String? value]) => shelf.Response.ok(value);
+
+  /// A [shelf.Response] for API calls that are forbidden for the current state
+  /// of the server.
+  shelf.Response forbidden([String? reason]) =>
+      shelf.Response.forbidden(reason);
 
   /// A [shelf.Response] for API calls that encountered a request problem e.g.,
   /// setActiveSurvey not called.

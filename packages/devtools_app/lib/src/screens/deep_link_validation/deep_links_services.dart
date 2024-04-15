@@ -19,7 +19,11 @@ const String _packageNameKey = 'package_name';
 const String _domainsKey = 'domains';
 const String _errorCodeKey = 'errorCode';
 const String _appLinkDomainsKey = 'app_link_domains';
+const String _fingerprintsKey = 'supplemental_sha256_cert_fingerprints';
 const String _validationResultKey = 'validationResult';
+const String _googlePlayFingerprintsAvailabilityKey =
+    'googlePlayFingerprintsAvailability';
+const String _googlePlayFingerprintsAvailableValue = 'FINGERPRINTS_AVAILABLE';
 const String _domainNameKey = 'domainName';
 const String _checkNameKey = 'checkName';
 const String _failedChecksKey = 'failedChecks';
@@ -43,10 +47,20 @@ class GenerateAssetLinksResult {
   String generatedString;
 }
 
+class ValidateAndroidDomainResult {
+  ValidateAndroidDomainResult(
+    this.googlePlayFingerprintsAvailability,
+    this.domainErrors,
+  );
+  bool googlePlayFingerprintsAvailability;
+  Map<String, List<DomainError>> domainErrors;
+}
+
 class DeepLinksServices {
-  Future<Map<String, List<DomainError>>> validateAndroidDomain({
+  Future<ValidateAndroidDomainResult> validateAndroidDomain({
     required List<String> domains,
     required String applicationId,
+    required String? localFingerprint,
   }) async {
     final domainErrors = <String, List<DomainError>>{
       for (var domain in domains) domain: <DomainError>[],
@@ -62,6 +76,7 @@ class DeepLinksServices {
             : (index + 1) * _domainBatchSize,
       ),
     );
+    late bool googlePlayFingerprintsAvailable;
 
     for (final domainList in domainsBybatch) {
       final response = await http.post(
@@ -70,6 +85,7 @@ class DeepLinksServices {
         body: jsonEncode({
           _packageNameKey: applicationId,
           _appLinkDomainsKey: domainList,
+          if (localFingerprint != null) _fingerprintsKey: [localFingerprint],
         }),
       );
 
@@ -77,12 +93,15 @@ class DeepLinksServices {
           json.decode(response.body) as Map<String, dynamic>;
 
       final validationResult = result[_validationResultKey] as List;
+      googlePlayFingerprintsAvailable =
+          result[_googlePlayFingerprintsAvailabilityKey] ==
+              _googlePlayFingerprintsAvailableValue;
       for (final Map<String, dynamic> domainResult in validationResult) {
         final String domainName = domainResult[_domainNameKey];
         final List? failedChecks = domainResult[_failedChecksKey];
         if (failedChecks != null) {
           for (final Map<String, dynamic> failedCheck in failedChecks) {
-            final checkName = failedCheck[_checkNameKey];
+            final checkName = failedCheck[_checkNameKey] as String;
             final domainError = checkNameToDomainError[checkName];
             if (domainError != null) {
               domainErrors[domainName]!.add(domainError);
@@ -92,12 +111,16 @@ class DeepLinksServices {
       }
     }
 
-    return domainErrors;
+    return ValidateAndroidDomainResult(
+      googlePlayFingerprintsAvailable,
+      domainErrors,
+    );
   }
 
   Future<GenerateAssetLinksResult> generateAssetLinks({
     required String applicationId,
     required String domain,
+    required String? localFingerprint,
   }) async {
     final response = await http.post(
       Uri.parse(_assetLinksGenerationURL),
@@ -106,6 +129,7 @@ class DeepLinksServices {
         {
           _packageNameKey: applicationId,
           _domainsKey: [domain],
+          if (localFingerprint != null) _fingerprintsKey: [localFingerprint],
         },
       ),
     );

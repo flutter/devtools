@@ -497,9 +497,9 @@ class ExitOfflineButton extends StatelessWidget {
       label: 'Exit offline mode',
       icon: Icons.clear,
       gaScreen: gaScreen,
-      gaSelection: gac.exitOfflineMode,
+      gaSelection: gac.stopShowingOfflineData,
       onPressed: () {
-        offlineController.exitOfflineMode();
+        offlineDataController.stopShowingOfflineData();
         // Use Router.neglect to replace the current history entry with
         // the homepage so that clicking Back will not return here.
         Router.neglect(
@@ -524,11 +524,11 @@ class OfflineAwareControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
-      valueListenable: offlineController.offlineMode,
+      valueListenable: offlineDataController.showingOfflineData,
       builder: (context, offline, _) {
         return Row(
           children: [
-            if (offlineController.offlineMode.value)
+            if (offlineDataController.showingOfflineData.value)
               Padding(
                 padding: const EdgeInsets.only(right: defaultSpacing),
                 child: ExitOfflineButton(gaScreen: gaScreen),
@@ -708,6 +708,14 @@ class RoundedCornerOptions {
     this.showBottomRight = true,
   });
 
+  /// Static constant instance with all borders hidden
+  static const RoundedCornerOptions empty = RoundedCornerOptions(
+    showTopLeft: false,
+    showTopRight: false,
+    showBottomLeft: false,
+    showBottomRight: false,
+  );
+
   final bool showTopLeft;
   final bool showTopRight;
   final bool showBottomLeft;
@@ -757,38 +765,43 @@ class RoundedDropDownButton<T> extends StatelessWidget {
     final showTopRight = roundedCornerOptions?.showTopRight ?? true;
     final showBottomLeft = roundedCornerOptions?.showBottomLeft ?? true;
     final showBottomRight = roundedCornerOptions?.showBottomRight ?? true;
+
+    final button = Center(
+      child: SizedBox(
+        height: defaultButtonHeight - 2.0, // subtract 2.0 for width of border
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<T>(
+            padding: const EdgeInsets.only(
+              left: defaultSpacing,
+              right: borderPadding,
+            ),
+            value: value,
+            onChanged: onChanged,
+            isDense: isDense,
+            isExpanded: isExpanded,
+            borderRadius: BorderRadius.only(
+              topLeft: selectRadius(showTopLeft),
+              topRight: selectRadius(showTopRight),
+              bottomLeft: selectRadius(showBottomLeft),
+              bottomRight: selectRadius(showBottomRight),
+            ),
+            style: style,
+            selectedItemBuilder: selectedItemBuilder,
+            items: items,
+            focusColor: bgColor,
+          ),
+        ),
+      ),
+    );
+
+    if (roundedCornerOptions == RoundedCornerOptions.empty) return button;
+
     return RoundedOutlinedBorder(
       showTopLeft: showTopLeft,
       showTopRight: showTopRight,
       showBottomLeft: showBottomLeft,
       showBottomRight: showBottomRight,
-      child: Center(
-        child: SizedBox(
-          height: defaultButtonHeight - 2.0, // subtract 2.0 for width of border
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<T>(
-              padding: const EdgeInsets.only(
-                left: defaultSpacing,
-                right: borderPadding,
-              ),
-              value: value,
-              onChanged: onChanged,
-              isDense: isDense,
-              isExpanded: isExpanded,
-              borderRadius: BorderRadius.only(
-                topLeft: selectRadius(showTopLeft),
-                topRight: selectRadius(showTopRight),
-                bottomLeft: selectRadius(showBottomLeft),
-                bottomRight: selectRadius(showBottomRight),
-              ),
-              style: style,
-              selectedItemBuilder: selectedItemBuilder,
-              items: items,
-              focusColor: bgColor,
-            ),
-          ),
-        ),
-      ),
+      child: button,
     );
   }
 }
@@ -804,6 +817,8 @@ class DevToolsClearableTextField extends StatelessWidget {
     this.onChanged,
     this.onSubmitted,
     this.autofocus = false,
+    this.enabled,
+    this.roundedBorder = false,
   })  : controller = controller ?? TextEditingController(),
         super(key: key);
 
@@ -815,8 +830,15 @@ class DevToolsClearableTextField extends StatelessWidget {
   final void Function(String)? onChanged;
   final void Function(String)? onSubmitted;
   final bool autofocus;
+  final bool? enabled;
+  final bool roundedBorder;
 
   static const _contentVerticalPadding = 6.0;
+
+  /// This is the default border radius used by the [OutlineInputBorder]
+  /// constructor.
+  static const _defaultInputBorderRadius =
+      BorderRadius.all(Radius.circular(4.0));
 
   @override
   Widget build(BuildContext context) {
@@ -826,6 +848,7 @@ class DevToolsClearableTextField extends StatelessWidget {
       child: TextField(
         autofocus: autofocus,
         controller: controller,
+        enabled: enabled,
         onChanged: onChanged,
         onSubmitted: onSubmitted,
         style: theme.regularTextStyle,
@@ -841,7 +864,11 @@ class DevToolsClearableTextField extends StatelessWidget {
             minHeight: defaultTextFieldHeight,
             maxHeight: defaultTextFieldHeight,
           ),
-          border: const OutlineInputBorder(),
+          border: OutlineInputBorder(
+            borderRadius: roundedBorder
+                ? const BorderRadius.all(defaultRadius)
+                : _defaultInputBorderRadius,
+          ),
           labelText: labelText,
           labelStyle: theme.subtleTextStyle,
           hintText: hintText,
@@ -1332,19 +1359,21 @@ class _JsonViewerState extends State<JsonViewer>
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(denseSpacing),
-      child: SingleChildScrollView(
-        child: FutureBuilder(
-          future: _initializeTree,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState != ConnectionState.done) {
-              return Container();
-            }
-            return ExpandableVariable(
-              variable: variable,
-            );
-          },
+    return SelectionArea(
+      child: Padding(
+        padding: const EdgeInsets.all(denseSpacing),
+        child: SingleChildScrollView(
+          child: FutureBuilder(
+            future: _initializeTree,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState != ConnectionState.done) {
+                return Container();
+              }
+              return ExpandableVariable(
+                variable: variable,
+              );
+            },
+          ),
         ),
       ),
     );
@@ -1661,6 +1690,8 @@ class NotifierCheckbox extends StatelessWidget {
   }
 }
 
+/// A widget that represents a check box setting and automatically updates for
+/// value changes to [notifier].
 class CheckboxSetting extends StatelessWidget {
   const CheckboxSetting({
     Key? key,
@@ -1734,34 +1765,29 @@ class CheckboxSetting extends StatelessWidget {
     return maybeWrapWithTooltip(
       tooltip: tooltip,
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           checkboxAndTitle,
           if (description != null) ...[
             Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(top: denseSpacing),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    RichText(
+              child: Row(
+                children: [
+                  RichText(
+                    text: TextSpan(
+                      text: ' • ',
+                      style: theme.subtleTextStyle,
+                    ),
+                  ),
+                  Flexible(
+                    child: RichText(
+                      maxLines: 4,
+                      overflow: TextOverflow.ellipsis,
                       text: TextSpan(
-                        text: ' • ',
+                        text: description,
                         style: theme.subtleTextStyle,
                       ),
                     ),
-                    Flexible(
-                      child: RichText(
-                        maxLines: 4,
-                        overflow: TextOverflow.ellipsis,
-                        text: TextSpan(
-                          text: description,
-                          style: theme.subtleTextStyle,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ],

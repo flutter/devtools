@@ -9,6 +9,7 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_extensions/api.dart';
 import 'package:devtools_extensions/utils.dart';
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:web/web.dart';
 
@@ -268,13 +269,12 @@ class _ExtensionIFrameController extends DisposableController
 
     switch (event.type) {
       case DevToolsExtensionEventType.pong:
-        if (!_extensionHandlerReady.isCompleted) {
-          _extensionHandlerReady.complete();
-        }
+        _extensionHandlerReady.safeComplete();
         break;
       case DevToolsExtensionEventType.vmServiceConnection:
-        final service = serviceConnection.serviceManager.service;
-        updateVmServiceConnection(uri: service?.wsUri);
+        updateVmServiceConnection(
+          uri: serviceConnection.serviceManager.serviceUri,
+        );
         break;
       case DevToolsExtensionEventType.showNotification:
         _handleShowNotification(event);

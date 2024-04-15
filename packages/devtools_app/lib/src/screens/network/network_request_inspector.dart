@@ -45,9 +45,15 @@ class NetworkRequestInspector extends StatelessWidget {
                     style: Theme.of(context).regularTextStyle,
                   ),
                 )
-              : AnalyticsTabbedView(
-                  tabs: _generateTabs(data),
-                  gaScreen: gac.network,
+              : ListenableBuilder(
+                  listenable: data,
+                  builder: (context, _) {
+                    return AnalyticsTabbedView(
+                      analyticsSessionIdentifier: data.id,
+                      tabs: _generateTabs(data),
+                      gaScreen: gac.network,
+                    );
+                  },
                 ),
         );
       },

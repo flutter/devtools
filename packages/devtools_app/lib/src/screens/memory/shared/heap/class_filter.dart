@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../shared/globals.dart';
@@ -39,6 +40,14 @@ enum FilteringTask {
 
 typedef ApplyFilterCallback = void Function(ClassFilter);
 
+class _Json {
+  static const except = 'except';
+  static const only = 'only';
+  static const type = 'type';
+}
+
+const _defaultFilterType = ClassFilterType.except;
+
 @immutable
 class ClassFilter {
   ClassFilter({
@@ -50,10 +59,31 @@ class ClassFilter {
 
   ClassFilter.empty()
       : this(
-          filterType: ClassFilterType.except,
+          filterType: _defaultFilterType,
           except: defaultExceptString,
           only: null,
         );
+
+  factory ClassFilter.fromJson(Map<String, dynamic> json) {
+    final type = json[_Json.type] as String?;
+    return ClassFilter(
+      filterType:
+          ClassFilterType.values.lastWhereOrNull((t) => t.name == type) ??
+              _defaultFilterType,
+      except: json[_Json.except] as String? ?? defaultExceptString,
+      only: json[_Json.only] as String?,
+    );
+  }
+
+  // TODO: use an extension type for the Json parsing, https://github.com/flutter/devtools/issues/6972
+  // https://github.com/flutter/devtools/pull/7572#discussion_r1563130198
+  Map<String, dynamic> toJson() {
+    return {
+      _Json.type: filterType.name,
+      _Json.except: except,
+      _Json.only: only,
+    };
+  }
 
   @visibleForTesting
   static final defaultExceptString =
@@ -78,11 +108,19 @@ class ClassFilter {
     return displayString;
   }
 
-  bool equals(ClassFilter value) {
-    return value.filterType == filterType &&
-        value.except == except &&
-        value.only == only;
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is ClassFilter &&
+        other.filterType == filterType &&
+        other.except == except &&
+        other.only == only;
   }
+
+  @override
+  int get hashCode => Object.hash(filterType, except, only);
 
   Set<String> _filtersAsSet() {
     Set<String> stringToSet(String? s) => s == null
@@ -141,6 +179,7 @@ class ClassFilter {
     }
   }
 
+  /// Returns true if [className] should be shown.
   bool apply(HeapClassName className, String? rootPackage) {
     if (className.isRoot) return false;
 

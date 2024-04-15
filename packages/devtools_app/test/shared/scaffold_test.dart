@@ -38,7 +38,7 @@ void main() {
     setGlobal(ServiceConnectionManager, mockServiceConnection);
     setGlobal(FrameworkController, FrameworkController());
     setGlobal(SurveyService, SurveyService());
-    setGlobal(OfflineModeController, OfflineModeController());
+    setGlobal(OfflineDataController, OfflineDataController());
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());
     setGlobal(BannerMessagesController, BannerMessagesController());
@@ -49,7 +49,7 @@ void main() {
       child,
       analytics: AnalyticsController(
         enabled: false,
-        firstRun: false,
+        shouldShowConsentMessage: false,
         consentMessage: 'fake message',
       ),
       releaseNotes: ReleaseNotesController(),
@@ -232,7 +232,7 @@ class _TestScreen extends Screen {
   final Key key;
 
   @override
-  Widget build(BuildContext context) {
+  Widget buildScreenBody(BuildContext context) {
     return SizedBox(key: key);
   }
 }

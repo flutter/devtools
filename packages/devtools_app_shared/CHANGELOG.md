@@ -1,6 +1,23 @@
-## 0.0.11-wip
+## 0.2.0-dev.0
+* Add `tooltipWaitExtraLong` to `utils.dart`.
+* Bump `devtools_shared` dependency to `^9.0.1`.
+
+## 0.1.1
+* Update `package:dtd` to `^2.1.0`
+* Add `DTDManager.projectRoots` method.
+* Bump the minimum Dart and Flutter SDK versions to `3.4.0-282.1.beta` and
+`3.22.0-0.1.pre` respectively.
+* Bump `devtools_shared` to ^8.1.1-dev.0
+
+## 0.1.0
 * Remove deprecated `background` and `onBackground` values for `lightColorScheme`
 and `darkColorScheme`.
+* Rename `Split` to `SplitPane`.
+* Add `ServiceManager.serviceUri` field to store the connected VM service URI.
+* Update readme to use `pub add` instead of explicit package version.
+* Update `package:dtd` to `^2.0.0`
+* Update `package:devtools_shared` to `^8.1.0`
+* Add `DTDManager.workspaceRoots` method.
 
 ## 0.0.10
 * Add `DTDManager` class and export from `service.dart`.
@@ -44,7 +61,7 @@ a VM service connection.
 * Add optional parameter `id` to `DisposerMixin.addAutoDisposeListener` and
 `AutoDisposeMixin.addAutoDisposeListener` that allows for tagging a listener
 with a specific id.
-* Add optional parameter `excludeIds` to `DisposerMixin.cancelListeners` and 
+* Add optional parameter `excludeIds` to `DisposerMixin.cancelListeners` and
 `AutoDisposeMixin.cancelListeners` that allows for excluding listeners with
 a specific id from the cancel operation.
 

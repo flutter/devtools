@@ -58,7 +58,7 @@ class RasterStatsView extends StatelessWidget {
     }
     return Column(
       children: [
-        if (!offlineController.offlineMode.value)
+        if (!offlineDataController.showingOfflineData.value)
           _RasterStatsControls(
             rasterStatsController: rasterStatsController,
           ),
@@ -131,7 +131,7 @@ class _LayerVisualizer extends StatelessWidget {
             ),
           );
         }
-        return Split(
+        return SplitPane(
           axis: Axis.horizontal,
           initialFractions: const [0.5, 0.5],
           children: [

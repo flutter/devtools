@@ -11,7 +11,6 @@ import 'package:flutter/foundation.dart';
 
 import '../../../../service/service_manager.dart';
 import '../../../../shared/globals.dart';
-import '../../../../shared/primitives/trace_event.dart';
 import '../../../../shared/primitives/utils.dart';
 import '../../performance_controller.dart';
 import '../../performance_model.dart';
@@ -69,7 +68,7 @@ class FlutterFramesController extends PerformanceFeatureController {
 
   @override
   Future<void> init() async {
-    if (!offlineController.offlineMode.value) {
+    if (!offlineDataController.showingOfflineData.value) {
       await serviceConnection.serviceManager.onServiceAvailable;
       final connectedApp = serviceConnection.serviceManager.connectedApp!;
       if (connectedApp.isFlutterAppNow!) {
@@ -81,7 +80,6 @@ class FlutterFramesController extends PerformanceFeatureController {
             : defaultRefreshRate;
 
         _displayRefreshRate.value = refreshRate ?? defaultRefreshRate;
-        data?.displayRefreshRate = _displayRefreshRate.value;
       }
     }
   }
@@ -106,7 +104,6 @@ class FlutterFramesController extends PerformanceFeatureController {
         _addPendingFlutterFrames();
       }
       _maybeBadgeTabForJankyFrame(frame);
-      data!.frames.add(frame);
       _flutterFrames.add(frame);
     } else {
       _pendingFlutterFrames.add(frame);
@@ -123,14 +120,10 @@ class FlutterFramesController extends PerformanceFeatureController {
     }
   }
 
-  void assignEventToFrame(
-    int? frameNumber,
-    SyncTimelineEvent event,
-    TimelineEventType type,
-  ) {
+  void assignEventToFrame(int? frameNumber, FlutterTimelineEvent event) {
     assert(frameNumber != null && hasUnassignedFlutterFrame(frameNumber));
     final frame = _unassignedFlutterFrames[frameNumber]!;
-    frame.setEventFlow(event, type: type);
+    frame.setEventFlow(event);
     if (frame.isWellFormed) {
       _unassignedFlutterFrames.remove(frameNumber);
       _updateFirstWellFormedFrameMicros(frame);
@@ -143,7 +136,6 @@ class FlutterFramesController extends PerformanceFeatureController {
 
   void _addPendingFlutterFrames() {
     _pendingFlutterFrames.forEach(_maybeBadgeTabForJankyFrame);
-    data!.frames.addAll(_pendingFlutterFrames);
     _flutterFrames.addAll(_pendingFlutterFrames);
     _pendingFlutterFrames.clear();
   }
@@ -186,21 +178,14 @@ class FlutterFramesController extends PerformanceFeatureController {
 
   @override
   void handleSelectedFrame(FlutterFrame frame) {
-    if (data == null) {
-      return;
-    }
-    final theData = data!;
-
     currentFrameBeingSelected = frame;
 
     // Unselect [frame] if is already selected.
-    if (theData.selectedFrame == frame) {
-      theData.selectedFrame = null;
+    if (_selectedFrameNotifier.value == frame) {
       _selectedFrameNotifier.value = null;
       return;
     }
 
-    theData.selectedFrame = frame;
     _selectedFrameNotifier.value = frame;
 
     // We do not need to block the UI on the TimelineEvents feature loading the
@@ -211,16 +196,15 @@ class FlutterFramesController extends PerformanceFeatureController {
   }
 
   @override
-  Future<void> setOfflineData(PerformanceData offlineData) async {
+  Future<void> setOfflineData(OfflinePerformanceData offlineData) async {
     offlineData.frames.forEach(_assignEventsToFrame);
     _flutterFrames
       ..clear()
       ..addAll(offlineData.frames);
     final frameToSelect = offlineData.frames.firstWhereOrNull(
-      (frame) => frame.id == offlineData.selectedFrameId,
+      (frame) => frame.id == offlineData.selectedFrame?.id,
     );
     if (frameToSelect != null) {
-      performanceController.data!.selectedFrame = frameToSelect;
       _selectedFrameNotifier.value = frameToSelect;
     }
 

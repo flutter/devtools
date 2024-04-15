@@ -1,6 +1,22 @@
+## 0.2.0-dev.0
+* Bump `devtools_shared` dependency to `^9.0.1`.
+
+## 0.1.1
+* Update the simulated environment help dialogs with information about the
+new `--print-dtd` CLI flag.
+* Bump the minimum Dart and Flutter SDK versions to `3.4.0-282.1.beta` and
+`3.22.0-0.1.pre` respectively.
+* Bump `devtools_app_shared` to ^0.1.1-dev.0
+* Bump `devtools_shared` to ^8.1.1-dev.0
+
+## 0.1.0
+* Bump `devtools_app_shared` to ^0.1.0
+* Update readme to use `pub add` instead of explicit package version.
+* Bump `devtools_shared` to ^8.1.0
+
 ## 0.0.14
 * Add a global `dtdManager` for interacting with the Dart Tooling Daemon.
-* Add support for connecting to the Dart Tooling Daemon from the 
+* Add support for connecting to the Dart Tooling Daemon from the
 simulated DevTools environment.
 * Add help buttons to the VM Service and DTD connection text fields in the
 simulated DevTools environment.

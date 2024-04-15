@@ -30,7 +30,7 @@ class VmServiceConnectionDisplay extends StatelessWidget {
       disconnectedHint: '(e.g., http://127.0.0.1:60851/fH-kAEXc7MQ=/)',
       onConnect: (value) => simController.updateVmServiceConnection(uri: value),
       onDisconnect: () => simController.updateVmServiceConnection(uri: null),
-      currentConnection: () => serviceManager.service!.wsUri ?? '--',
+      currentConnection: () => serviceManager.serviceUri ?? '--',
       help: const VmServiceHelp(),
     );
   }
@@ -49,10 +49,25 @@ class VmServiceHelp extends StatelessWidget {
           Text(
             'If your DevTools extension interacts with a running Dart '
             'application, then you will need to run a test application and '
-            'connect it to the simulated environment.\n\n'
-            '1. Run a Dart or Flutter application.\n',
+            'connect it to the simulated environment.\n\n',
             style: theme.regularTextStyle,
           ),
+          RichText(
+            text: TextSpan(
+              style: theme.regularTextStyle,
+              text: '1. Run a Dart or Flutter application. If you also need to '
+                  'connect your extension to the Dart Tooling Daemon, run your '
+                  'app with the ',
+              children: [
+                TextSpan(
+                  text: '--print-dtd',
+                  style: theme.boldTextStyle,
+                ),
+                const TextSpan(text: ' flag.'),
+              ],
+            ),
+          ),
+          const SizedBox(height: denseSpacing),
           RichText(
             text: TextSpan(
               style: theme.regularTextStyle,

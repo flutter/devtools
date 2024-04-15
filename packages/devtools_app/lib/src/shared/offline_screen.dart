@@ -46,8 +46,8 @@ class _OfflineScreenBodyState extends State<OfflineScreenBody>
   void initState() {
     super.initState();
     _initScreen();
-    addAutoDisposeListener(offlineController.offlineMode, () {
-      if (!offlineController.offlineMode.value) {
+    addAutoDisposeListener(offlineDataController.showingOfflineData, () {
+      if (!offlineDataController.showingOfflineData.value) {
         setState(() {
           _screen = null;
         });

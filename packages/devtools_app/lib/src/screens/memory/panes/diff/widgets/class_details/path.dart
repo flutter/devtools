@@ -8,18 +8,18 @@ import 'package:flutter/material.dart';
 import '../../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../../shared/common_widgets.dart';
+import '../../../../../../shared/memory/retaining_path.dart';
 import '../../../../../../shared/primitives/utils.dart';
-import '../../../../shared/heap/model.dart';
 import '../../controller/class_data.dart';
 
 class RetainingPathView extends StatelessWidget {
   const RetainingPathView({
     super.key,
-    required this.path,
+    required this.data,
     required this.controller,
   });
 
-  final ClassOnlyHeapPath path;
+  final PathData data;
   final RetainingPathController controller;
 
   @override
@@ -32,7 +32,7 @@ class RetainingPathView extends StatelessWidget {
           const SizedBox(height: densePadding),
           _PathControlPane(
             controller: controller,
-            path: path,
+            data: data,
           ),
           Expanded(
             child: Padding(
@@ -40,7 +40,7 @@ class RetainingPathView extends StatelessWidget {
                 top: densePadding,
                 left: densePadding,
               ),
-              child: _PathView(path: path, controller: controller),
+              child: _PathView(path: data.path, controller: controller),
             ),
           ),
         ],
@@ -50,14 +50,18 @@ class RetainingPathView extends StatelessWidget {
 }
 
 class _PathControlPane extends StatelessWidget {
-  const _PathControlPane({required this.controller, required this.path});
+  const _PathControlPane({
+    required this.controller,
+    required this.data,
+  });
 
-  final ClassOnlyHeapPath path;
+  final PathData data;
   final RetainingPathController controller;
 
   @override
   Widget build(BuildContext context) {
-    final titleText = 'Retaining path for ${path.classes.last.className}';
+    final titleText =
+        'Retaining path for ${data.classData.className.className}';
     return Row(
       children: [
         Expanded(
@@ -72,9 +76,9 @@ class _PathControlPane extends StatelessWidget {
         ),
         const SizedBox(width: denseSpacing),
         CopyToClipboardControl(
-          dataProvider: () => path.toLongString(delimiter: '\n'),
+          dataProvider: () => data.path.toLongString(delimiter: '\n'),
           // We do not give success message because it pops up directly on
-          // top of the path widget, that makes the widget anavailable
+          // top of the path widget, that makes the widget unavailable
           // while message is here.
           successMessage: null,
           gaScreen: gac.memory,
@@ -119,7 +123,7 @@ class _PathControlPane extends StatelessWidget {
 class _PathView extends StatelessWidget {
   const _PathView({required this.path, required this.controller});
 
-  final ClassOnlyHeapPath path;
+  final PathFromRoot path;
   final RetainingPathController controller;
 
   @override

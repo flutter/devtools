@@ -65,7 +65,7 @@ ServiceManager get serviceManager =>
 
 /// A manager for interacting with the Dart Tooling Daemon, if available.
 ///
-/// This manager stores the current [DTDConnection], which provides access to
+/// This manager stores the current [DartToolingDaemon], which provides access to
 /// public methods registered by other DTD clients (for example, the IDE), as
 /// well as a minimal file sytsem API for reading, writing, and listing
 /// directories within the user's project.
@@ -138,8 +138,10 @@ class _DevToolsExtensionState extends State<DevToolsExtension>
   void initState() {
     super.initState();
     _initGlobals();
-    extensionManager._init(
-      connectToVmService: widget.requiresRunningApplication,
+    unawaited(
+      extensionManager._init(
+        connectToVmService: widget.requiresRunningApplication,
+      ),
     );
     for (final handler in widget.eventHandlers.entries) {
       extensionManager.registerEventHandler(handler.key, handler.value);

@@ -22,7 +22,7 @@ Follow [Flutter repo naming rules for typedefs and function variables](https://g
 
 ## Overriding equality
 
-Use [boilerplaite](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#common-boilerplates-for-operator--and-hashcode).
+Use [boilerplate](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#common-boilerplates-for-operator--and-hashcode).
 
 ## URIs and File Paths
 

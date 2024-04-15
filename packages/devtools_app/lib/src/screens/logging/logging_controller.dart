@@ -19,6 +19,7 @@ import '../../service/vm_service_wrapper.dart';
 import '../../shared/diagnostics/diagnostics_node.dart';
 import '../../shared/diagnostics/inspector_service.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/byte_utils.dart';
 import '../../shared/primitives/message_bus.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/filter.dart';
@@ -348,8 +349,8 @@ class LoggingController extends DisposableController
 
     final String summary = '${isolateRef['name']} • '
         '${e.json!['reason']} collection in $time ms • '
-        '${printMB(usedBytes, includeUnit: true)} used of '
-        '${printMB(capacityBytes, includeUnit: true)}';
+        '${printBytes(usedBytes, unit: ByteUnit.mb, includeUnit: true)} used of '
+        '${printBytes(capacityBytes, unit: ByteUnit.mb, includeUnit: true)}';
 
     final event = <String, Object>{
       'reason': e.json!['reason'],

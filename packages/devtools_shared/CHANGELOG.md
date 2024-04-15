@@ -1,8 +1,42 @@
-# 8.0.0
+# 9.1.0-wip
+* Return valid extensions from the `apiServeAvailableExtensions` endpoint even when
+an exception is thrown.
+* Add utility extension methods on `Completer`: `safeComplete` and `safeCompleteError`.
+
+# 9.0.1
+* Restructure `devtools_extensions.dart` and `devtools_extensions_io.dart` libraries.
+
+# 9.0.0
+* **Breaking change:** remove parameter `analytics` from `ServerApi.handle` in favor
+of DTD implementation.
+* **Breaking change:** remove DevTools server APIs `apiMarkConsentMessageAsShown` and `apiGetConsentMessage`
+* **Breaking change:** remove parameter `buildDir` from `ExtensionsManager`.
+in favor of DTD implementation.
+* Stop copying DevTools extensions assets to the DevTools build directory.
+* Bump `package:dtd` to `2.2.0`
+* Remove `package:unified_analytics` dependency.
+* Use DTD in the `packageRootFromFileUriString` utility to detect the package root.
+* Add `runWithRetry` utility method.
+
+# 8.1.1
+* Bump `package:dtd` to `2.1.0`.
+* Bump the minimum Dart SDK version to `3.4.0-282.1.beta`.
+
+# 8.1.0
+* Bump `package:dtd` to `2.0.0`.
+* Bump `package:unified_analytics` to `5.8.8`.
+
+# 8.0.1
 * **Breaking change:** rename `ServerApi.getCompleted` to `ServerApi.success` and make the
 `value` parameter optional.
+* **Breaking change:** remove the `String? dtdUri` parameter from `ServerApi.handle` and replace
+it with a parameter `DTDConnectionInfo? dtd`.
+* Introduce a new typedef `DTDConnectionInfo`.
+* Add a new API `apiNotifyForVmServiceConnection` that DevTools will call when a
+VM service connection is connected or disconnected from the client.
 * Add a helper method `packageRootFromFileUriString`.
 * Refactor yaml extension methods.
+* Add intent filters checking functionality for deep link validation.
 
 # 7.0.0
 * **Breaking change:** remove the `ServerApi.setCompleted` method that was a

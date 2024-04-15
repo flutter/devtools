@@ -17,7 +17,6 @@ import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
 import '../shared/config_specific/import_export/import_export.dart';
 import '../shared/connection_info.dart';
-import '../shared/feature_flags.dart';
 import '../shared/globals.dart';
 import '../shared/primitives/blocking_action_mixin.dart';
 import '../shared/primitives/utils.dart';
@@ -39,7 +38,7 @@ class HomeScreen extends Screen {
   final List<DevToolsJsonFile> sampleData;
 
   @override
-  Widget build(BuildContext context) {
+  Widget buildScreenBody(BuildContext context) {
     return HomeScreenBody(sampleData: sampleData);
   }
 }
@@ -73,13 +72,6 @@ class _HomeScreenBodyState extends State<HomeScreenBody> with AutoDisposeMixin {
           if (widget.sampleData.isNotEmpty && !kReleaseMode && !connected) ...[
             SampleDataDropDownButton(sampleData: widget.sampleData),
             const SizedBox(height: defaultSpacing),
-          ],
-          // TODO(polina-c): make the MemoryScreen a static screen and remove
-          // this section from the Home page. See this PR for more details:
-          // https://github.com/flutter/devtools/pull/6010.
-          if (FeatureFlags.memoryAnalysis) ...[
-            const SizedBox(height: defaultSpacing),
-            const MemoryAnalysisInstructions(),
           ],
         ],
       ),
@@ -295,7 +287,7 @@ class _ConnectInputState extends State<ConnectInput> with BlockingActionMixin {
         await FrameworkCore.initVmService(serviceUriAsString: uri);
     if (connected) {
       final connectedUri =
-          Uri.parse(serviceConnection.serviceManager.service!.wsUri!);
+          Uri.parse(serviceConnection.serviceManager.serviceUri!);
       routerDelegate.updateArgsIfChanged({'uri': '$connectedUri'});
       final shortUri = connectedUri.replace(path: '');
       notificationService.push('Successfully connected to $shortUri.');

@@ -8,7 +8,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
 import '../shared/globals.dart';
-import '../shared/offline_mode.dart';
+import '../shared/offline_data.dart';
 import '../shared/screen.dart';
 import '../shared/utils.dart';
 
@@ -24,12 +24,13 @@ class ExampleConditionalScreen extends Screen {
           requiresLibrary: 'package:flutter/',
           title: 'Example',
           icon: Icons.palette,
+          worksWithOfflineData: true,
         );
 
   static const id = 'example';
 
   @override
-  Widget build(BuildContext context) {
+  Widget buildScreenBody(BuildContext context) {
     return const _ExampleConditionalScreenBody();
   }
 }
@@ -85,20 +86,14 @@ class ExampleController extends DisposableController
   }
 
   Future<void> _initHelper() async {
-    if (!offlineController.offlineMode.value) {
+    if (!offlineDataController.showingOfflineData.value) {
       // Do some initialization for online mode.
     } else {
-      final shouldLoadOfflineData =
-          offlineController.shouldLoadOfflineData(ExampleConditionalScreen.id);
-      if (shouldLoadOfflineData) {
-        final exampleScreenJson = Map<String, dynamic>.from(
-          offlineController.offlineDataJson[ExampleConditionalScreen.id],
-        );
-        final offlineData = ExampleScreenData.parse(exampleScreenJson);
-        if (!offlineData.title.isNotEmpty) {
-          await loadOfflineData(offlineData);
-        }
-      }
+      await maybeLoadOfflineData(
+        ExampleConditionalScreen.id,
+        createData: (json) => ExampleScreenData.fromJson(json),
+        shouldLoad: (data) => data.title.isNotEmpty,
+      );
     }
   }
 
@@ -110,7 +105,7 @@ class ExampleController extends DisposableController
   }
 
   @override
-  OfflineScreenData screenDataForExport() {
+  OfflineScreenData prepareOfflineScreenData() {
     return OfflineScreenData(
       screenId: ExampleConditionalScreen.id,
       data: data.value.json,
@@ -121,7 +116,7 @@ class ExampleController extends DisposableController
 class ExampleScreenData {
   ExampleScreenData(this.title);
 
-  factory ExampleScreenData.parse(Map<String, Object?> json) {
+  factory ExampleScreenData.fromJson(Map<String, Object?> json) {
     return ExampleScreenData(json[_titleKey] as String);
   }
 

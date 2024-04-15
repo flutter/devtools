@@ -1,28 +1,24 @@
 This is draft for future release notes, that are going to land on
 [the Flutter website](https://docs.flutter.dev/tools/devtools/release-notes).
 
-# DevTools 2.34.0 release notes
+# DevTools 2.35.0 release notes
 
-The 2.34.0 release of the Dart and Flutter DevTools
+The 2.35.0 release of the Dart and Flutter DevTools
 includes the following changes among other general improvements.
 To learn more about DevTools, check out the
-[DevTools overview](https://docs.flutter.dev/tools/devtools/overview).
+[DevTools overview]({{site.url}}/tools/devtools/overview).
 
 ## General updates
 
-* Fixed an issue preventing DevTools from connecting to Flutter apps that are not
-launched from Flutter Tools. - [#6848](https://github.com/flutter/devtools/issues/6848)
+TODO: Remove this section if there are not any general updates.
 
 ## Inspector updates
 
-TODO: Remove this section if there are not any general updates.
+* Add a preference for the default inspector view - [#6949](https://github.com/flutter/devtools/pull/6949)
 
 ## Performance updates
 
-* Removed the legacy trace viewer. The legacy trace viwer was replaced with the
-embedded Perfetto trace viewer in DevTools version 2.21.1, but was available
-behind a setting to ensure a smooth rollout. This release of DevTools removes
-the legacy trace viewer entirely. - [#7316](https://github.com/flutter/devtools/pull/7316)
+TODO: Remove this section if there are not any general updates.
 
 ## CPU profiler updates
 
@@ -30,7 +26,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## Memory updates
 
-TODO: Remove this section if there are not any general updates.
+* Replaced total size with reachable size in snapshot list. -
+[#7493](https://github.com/flutter/devtools/pull/7493)
 
 ## Debugger updates
 
@@ -48,15 +45,22 @@ TODO: Remove this section if there are not any general updates.
 
 TODO: Remove this section if there are not any general updates.
 
+## Deep links tool updates
+
+* Improve layout for narrow screens. - [#7524](https://github.com/flutter/devtools/pull/7524)
+* Add error handling for missing schemes and domains - [#7559](https://github.com/flutter/devtools/pull/7559)
+
 ## VS Code Sidebar updates
 
 TODO: Remove this section if there are not any general updates.
 
 ## DevTools Extension updates
 
-TODO: Remove this section if there are not any general updates.
+* Detect extensions for all types of run targets in a package. - [#7533](https://github.com/flutter/devtools/pull/7533),
+[#7535](https://github.com/flutter/devtools/pull/7535)
+
 
 ## Full commit history
 
 To find a complete list of changes in this release, check out the
-[DevTools git log](https://github.com/flutter/devtools/tree/v2.34.0).
+[DevTools git log](https://github.com/flutter/devtools/tree/v2.35.0).
