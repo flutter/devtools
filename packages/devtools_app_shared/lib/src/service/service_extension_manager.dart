@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:core';
 
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
@@ -436,11 +437,7 @@ final class ServiceExtensionManager with DisposerMixin {
     // service extensions that might be registered.
     _performActionAndClearMap<Completer<bool>>(
       _maybeRegisteringServiceExtensions,
-      action: (completer) {
-        if (!completer.isCompleted) {
-          completer.complete(false);
-        }
-      },
+      action: (completer) => completer.safeComplete(false),
     );
 
     _performActionAndClearMap<ValueNotifier<bool>>(
