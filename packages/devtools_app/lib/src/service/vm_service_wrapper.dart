@@ -13,6 +13,7 @@ import 'package:dap/dap.dart' as dap;
 import 'package:dds_service_extensions/dap.dart';
 import 'package:dds_service_extensions/dds_service_extensions.dart';
 import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
@@ -380,8 +381,8 @@ class VmServiceWrapper extends VmService {
 
     void futureComplete() {
       activeFutures.remove(trackedFuture);
-      if (activeFutures.isEmpty && !_allFuturesCompleter.isCompleted) {
-        _allFuturesCompleter.complete(true);
+      if (activeFutures.isEmpty) {
+        _allFuturesCompleter.safeComplete(true);
       }
     }
 

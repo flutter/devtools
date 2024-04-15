@@ -1,6 +1,7 @@
 # 9.1.0-wip
 * Return valid extensions from the `apiServeAvailableExtensions` endpoint even when
 an exception is thrown.
+* Add utility extension methods on `Completer`: `safeComplete` and `safeCompleteError`.
 
 # 9.0.1
 * Restructure `devtools_extensions.dart` and `devtools_extensions_io.dart` libraries.

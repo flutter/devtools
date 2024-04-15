@@ -11,6 +11,7 @@ import 'package:devtools_app/src/service/service_extensions.dart' as extensions;
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:devtools_test/integration_test.dart';
 import 'package:flutter/widgets.dart';
@@ -398,8 +399,8 @@ Future<void> _serviceExtensionAvailable(String extensionName) async {
 
   final completer = Completer<void>();
   void listener() {
-    if (listenable.value && !completer.isCompleted) {
-      completer.complete();
+    if (listenable.value) {
+      completer.safeComplete();
     }
   }
 
