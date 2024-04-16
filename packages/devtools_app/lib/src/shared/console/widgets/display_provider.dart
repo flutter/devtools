@@ -128,23 +128,24 @@ class _DisplayProviderState extends State<DisplayProvider> {
 
     if (isHoverEnabled) {
       return SelectionContainer.disabled(
-          child: MouseRegion(
-        onEnter: (_) {
-          if (isHoverEnabled) {
-            setState(() {
-              isHovered = true;
-            });
-          }
-        },
-        onExit: (event) {
-          if (widget.onCopy != null) {
-            setState(() {
-              isHovered = false;
-            });
-          }
-        },
-        child: contents,
-      ));
+        child: MouseRegion(
+          onEnter: (_) {
+            if (isHoverEnabled) {
+              setState(() {
+                isHovered = true;
+              });
+            }
+          },
+          onExit: (event) {
+            if (widget.onCopy != null) {
+              setState(() {
+                isHovered = false;
+              });
+            }
+          },
+          child: contents,
+        ),
+      );
     }
     return contents;
   }
@@ -180,7 +181,7 @@ class _DisplayProviderState extends State<DisplayProvider> {
         ContextMenuButtonItem(
           onPressed: () => onCopy(),
           label: copyLabel,
-        )
+        ),
     ];
   }
 
