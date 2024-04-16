@@ -79,6 +79,8 @@ class MemoryController extends DisposableController
     profile.dispose();
   }
 
+  static const _jsonKey = 'data';
+
   Future<void> _init(
     @visibleForTesting DiffPaneController? connectedDiff,
     @visibleForTesting ProfilePaneController? connectedProfile,
@@ -97,7 +99,11 @@ class MemoryController extends DisposableController
         assert(connectedDiff == null && connectedProfile == null);
         await maybeLoadOfflineData(
           ScreenMetaData.memory.id,
-          createData: (json) => OfflineMemoryData.fromJson(json),
+          createData: (json) {
+            final data = json[_jsonKey];
+            if (data is OfflineMemoryData) return data;
+            return OfflineMemoryData.fromJson(json);
+          },
           shouldLoad: (data) => true,
         );
         // [maybeLoadOfflineData] will be a noop if there is no offline data for the memory screen,
@@ -141,13 +147,18 @@ class MemoryController extends DisposableController
   @override
   OfflineScreenData prepareOfflineScreenData() => OfflineScreenData(
         screenId: ScreenMetaData.memory.id,
-        data: OfflineMemoryData(
-          diff,
-          profile,
-          chart,
-          profile.classFilter.value,
-          selectedTab: selectedFeatureTabIndex,
-        ).toJson(),
+        data: {
+          // Passing serializable data without conversion to json here
+          // to save time when data are passed in-process,
+          // without serialization.
+          'data': OfflineMemoryData(
+            diff,
+            profile,
+            chart,
+            profile.classFilter.value,
+            selectedTab: selectedFeatureTabIndex,
+          ),
+        },
       );
 
   @override
