@@ -149,8 +149,7 @@ class MemoryController extends DisposableController
         screenId: ScreenMetaData.memory.id,
         data: {
           // Passing serializable data without conversion to json here
-          // to save time when data are passed in-process,
-          // without serialization.
+          // to skip serialization when data are passed in-process.
           'data': OfflineMemoryData(
             diff,
             profile,
