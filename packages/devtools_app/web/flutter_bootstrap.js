@@ -35,11 +35,7 @@ function bootstrapAppFor3P() {
 
 // Bootstrap app for 1P environments:
 function bootstrapAppFor1P() {
-  _flutter.loader.load({
-    config: {
-      canvasKitBaseUrl: 'canvaskit/'
-    }
-  });
+  _flutter.loader.load();
 }
 
 unregisterDevToolsServiceWorker();
