@@ -27,7 +27,7 @@ class MemoryControlPane extends StatelessWidget {
         children: [
           PrimaryControls(controller: controller),
           const Spacer(),
-          SecondaryControls(controller: controller),
+          SecondaryControls(controller: controller, offline: offline),
         ],
       ),
     );
