@@ -69,10 +69,12 @@ void main() {
           // Filter out unawaited streamListen calls.
           .where((call) => call != 'streamListen')
           .toList()
-          .sublist(0, 6),
+          .sublist(0, 8),
       equals([
         'getSupportedProtocols',
         'getVersion',
+        'setFlag',
+        'requirePermissionToResume',
         'getFlagList',
         'getDartDevelopmentServiceVersion',
         'getDartDevelopmentServiceVersion',
