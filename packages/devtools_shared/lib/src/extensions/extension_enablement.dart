@@ -9,6 +9,7 @@ import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 import 'package:yaml_edit/yaml_edit.dart';
 
+import 'constants.dart';
 import 'extension_model.dart';
 import 'yaml_utils.dart';
 
@@ -127,7 +128,7 @@ $_extensionsKey:
       return null;
     }
 
-    final optionsFile = File(path.join(rootDir.path, optionsFileName));
+    final optionsFile = File(path.join(rootDir.path, devtoolsOptionsFileName));
     if (!optionsFile.existsSync()) {
       optionsFile
         ..createSync()
