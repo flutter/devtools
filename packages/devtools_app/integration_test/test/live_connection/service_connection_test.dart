@@ -188,10 +188,11 @@ void main() {
 
     logStatus('reconnecting to the test device');
     await connectToTestApp(tester, testApp);
-    await serviceConnection.serviceManager.waitUntilNotPaused();
 
     logStatus('verify extension states have been restored from the device');
     for (final ext in serviceExtensionsToEnable) {
+      await serviceConnection.serviceManager.serviceExtensionManager
+          .waitForServiceExtensionAvailable(ext.$1);
       expect(
         serviceConnection.serviceManager.serviceExtensionManager
             .isServiceExtensionAvailable(ext.$1),
