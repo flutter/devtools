@@ -56,22 +56,24 @@ class MemoryController extends DisposableController
   /// instead of the widget state.
   int selectedFeatureTabIndex = 0;
 
-  late final DiffPaneController _diff;
+  late final DiffPaneController diff;
 
-  late final ProfilePaneController _profile;
+  late final ProfilePaneController profile;
 
-  late final MemoryChartPaneController _chart;
+  late final MemoryChartPaneController chart;
 
-  late final TracingPaneController _tracing;
+  late final TracingPaneController tracing;
+
+  late final MemoryControlPaneController control;
 
   @override
   void dispose() {
     super.dispose();
     HeapClassName.dispose();
-    _chart.dispose();
-    _tracing.dispose();
-    _diff.dispose();
-    _profile.dispose();
+    chart.dispose();
+    tracing.dispose();
+    diff.dispose();
+    profile.dispose();
   }
 
   static const _jsonKey = 'data';
@@ -116,24 +118,24 @@ class MemoryController extends DisposableController
   }) {
     assert(!_initialized.isCompleted);
 
-    _chart = offlineData?.chart ?? MemoryChartPaneController(_mode);
-    _diff = diffPaneController ??
+    chart = offlineData?.chart ?? MemoryChartPaneController(_mode);
+    diff = diffPaneController ??
         offlineData?.diff ??
         DiffPaneController(
-          loader: HeapGraphLoaderRuntime(_chart.memoryTimeline),
+          loader: HeapGraphLoaderRuntime(chart.memoryTimeline),
         );
-    _profile = profilePaneController ??
+    profile = profilePaneController ??
         offlineData?.profile ??
         ProfilePaneController();
-    MemoryControlPaneController(
-      _chart.memoryTimeline,
-      isChartVisible: _chart.isChartVisible,
+    control = MemoryControlPaneController(
+      chart.memoryTimeline,
+      isChartVisible: chart.isChartVisible,
       exportData: exportData,
     );
-    _tracing = TracingPaneController();
+    tracing = TracingPaneController();
     selectedFeatureTabIndex =
         offlineData?.selectedTab ?? selectedFeatureTabIndex;
-    if (offlineData != null) _profile.setFilter(offlineData.filter);
+    if (offlineData != null) profile.setFilter(offlineData.filter);
     _shareClassFilterBetweenProfileAndDiff();
 
     _initialized.complete();
@@ -146,10 +148,10 @@ class MemoryController extends DisposableController
           // Passing serializable data without conversion to json here
           // to skip serialization when data are passed in-process.
           _jsonKey: OfflineMemoryData(
-            _diff,
-            _profile,
-            _chart,
-            _profile.classFilter.value,
+            diff,
+            profile,
+            chart,
+            profile.classFilter.value,
             selectedTab: selectedFeatureTabIndex,
           ),
         },
@@ -162,15 +164,15 @@ class MemoryController extends DisposableController
   }
 
   void _shareClassFilterBetweenProfileAndDiff() {
-    _diff.derived.applyFilter(_profile.classFilter.value);
+    diff.derived.applyFilter(profile.classFilter.value);
 
-    _profile.classFilter.addListener(() {
-      _diff.derived.applyFilter(_profile.classFilter.value);
+    profile.classFilter.addListener(() {
+      diff.derived.applyFilter(profile.classFilter.value);
     });
 
-    _diff.core.classFilter.addListener(() {
-      _profile.setFilter(
-        _diff.core.classFilter.value,
+    diff.core.classFilter.addListener(() {
+      profile.setFilter(
+        diff.core.classFilter.value,
       );
     });
   }
