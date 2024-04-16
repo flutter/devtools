@@ -90,6 +90,25 @@ class ServiceManager<T extends VmService> {
   bool get isMainIsolatePaused =>
       isolateManager.mainIsolateState?.isPaused.value ?? false;
 
+  Future<void> waitUntilNotPaused() {
+    final notPausedCompleter = Completer<bool>();
+    final isPaused = isMainIsolatePaused;
+
+    if (isPaused) {
+      final mainIsolate = isolateManager.mainIsolateState;
+      mainIsolate?.isPaused.addListener(() {
+        final isPausedNow = isMainIsolatePaused;
+        if (!isPausedNow) {
+          notPausedCompleter.complete(true);
+        }
+      });
+    } else {
+      notPausedCompleter.complete(true);
+    }
+
+    return notPausedCompleter.future;
+  }
+
   Future<RootInfo?> tryToDetectMainRootInfo() async {
     await isolateManager.mainIsolateState?.waitForIsolateLoad();
     return isolateManager.mainIsolateState?.rootInfo;
