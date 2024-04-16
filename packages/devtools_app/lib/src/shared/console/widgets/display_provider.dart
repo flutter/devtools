@@ -18,7 +18,7 @@ import '../../ui/colors.dart';
 import 'description.dart';
 
 /// The display provider for variables fetched via the VM service protocol.
-class DisplayProvider extends StatelessWidget {
+class DisplayProvider extends StatefulWidget {
   const DisplayProvider({
     super.key,
     required this.variable,
@@ -31,24 +31,30 @@ class DisplayProvider extends StatelessWidget {
   final void Function(DartObjectNode)? onCopy;
 
   @override
+  State<DisplayProvider> createState() => _DisplayProviderState();
+}
+
+class _DisplayProviderState extends State<DisplayProvider> {
+  bool isHovered = false;
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    if (variable.text != null) {
+    if (widget.variable.text != null) {
       return InteractivityWrapper(
-        onTap: onTap,
+        onTap: widget.onTap,
         menuButtons: _getMenuButtons(context),
         child: Text.rich(
           TextSpan(
             children: processAnsiTerminalCodes(
-              variable.text,
+              widget.variable.text,
               theme.subtleFixedFontStyle,
             ),
           ),
         ),
       );
     }
-    final diagnostic = variable.ref?.diagnostic;
+    final diagnostic = widget.variable.ref?.diagnostic;
     if (diagnostic != null) {
       return DiagnosticsNodeDescription(
         diagnostic,
@@ -57,51 +63,67 @@ class DisplayProvider extends StatelessWidget {
       );
     }
 
-    final hasName = variable.name?.isNotEmpty ?? false;
-
-    String copyLabel = 'Copy contents';
-    if (hasName) {
-      copyLabel += ' of ${variable.name}';
-    }
+    final hasName = widget.variable.name?.isNotEmpty ?? false;
 
     // The tooltip can be hovered over in order to see the original text.
-    final originalDisplayValue = variable.displayValue.toString();
+    final originalDisplayValue = widget.variable.displayValue.toString();
     // Only 1 line of text is permitted in the tree, since we only get 1 row.
     // So replace all newlines with \\n so that the user can still see that
     // there are new lines in the value.
     final displayValue = originalDisplayValue.replaceAll('\n', '\\n');
     return InteractivityWrapper(
-      onTap: onTap,
+      onTap: widget.onTap,
       menuButtons: _getMenuButtons(
         context,
-        onCopy: () => onCopy?.call(variable),
-        copyLabel: copyLabel,
       ),
-      child: DevToolsTooltip(
-        message: originalDisplayValue,
-        child: Text.rich(
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          TextSpan(
-            text: hasName ? variable.name : null,
-            style: variable.artificialName
-                ? theme.subtleFixedFontStyle
-                : theme.fixedFontStyle.apply(
-                    color: theme.colorScheme.controlFlowSyntaxColor,
+      child: MouseRegion(
+        onEnter: (_) => setState(() {
+          isHovered = true;
+        }),
+        onExit: (event) => setState(() {
+          isHovered = false;
+        }),
+        child: DevToolsTooltip(
+          message: originalDisplayValue,
+          child: Container(
+            color: isHovered ? Theme.of(context).highlightColor : null,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text.rich(
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    TextSpan(
+                      text: hasName ? widget.variable.name : null,
+                      style: widget.variable.artificialName
+                          ? theme.subtleFixedFontStyle
+                          : theme.fixedFontStyle.apply(
+                              color: theme.colorScheme.controlFlowSyntaxColor,
+                            ),
+                      children: [
+                        if (hasName)
+                          TextSpan(
+                            text: ': ',
+                            style: theme.fixedFontStyle,
+                          ),
+                        TextSpan(
+                          text: displayValue,
+                          style: widget.variable.artificialValue
+                              ? theme.subtleFixedFontStyle
+                              : _variableDisplayStyle(theme, widget.variable),
+                        ),
+                      ],
+                    ),
                   ),
-            children: [
-              if (hasName)
-                TextSpan(
-                  text: ': ',
-                  style: theme.fixedFontStyle,
                 ),
-              TextSpan(
-                text: displayValue,
-                style: variable.artificialValue
-                    ? theme.subtleFixedFontStyle
-                    : _variableDisplayStyle(theme, variable),
-              ),
-            ],
+                if (isHovered && widget.onCopy != null)
+                  DevToolsButton(
+                    icon: Icons.copy,
+                    outlined: false,
+                    onPressed: () => widget.onCopy!.call(widget.variable),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
@@ -114,20 +136,20 @@ class DisplayProvider extends StatelessWidget {
     String? copyLabel,
   }) {
     return [
-      if (variable.isRerootable)
+      if (widget.variable.isRerootable)
         ContextMenuButtonItem(
           onPressed: () {
             ContextMenuController.removeAny();
-            final ref = variable.ref;
+            final ref = widget.variable.ref;
             serviceConnection.consoleService.appendBrowsableInstance(
-              instanceRef: variable.value as InstanceRef?,
+              instanceRef: widget.variable.value as InstanceRef?,
               isolateRef: ref?.isolateRef,
               heapSelection: ref?.heapSelection,
             );
           },
           label: 'Reroot',
         ),
-      if (serviceConnection.inspectorService != null && variable.isRoot)
+      if (serviceConnection.inspectorService != null && widget.variable.isRoot)
         ContextMenuButtonItem(
           onPressed: () {
             ContextMenuController.removeAny();
@@ -148,11 +170,11 @@ class DisplayProvider extends StatelessWidget {
   ) async {
     final router = DevToolsRouterDelegate.of(context);
     final inspectorService = serviceConnection.inspectorService;
-    if (await variable.inspectWidget()) {
+    if (await widget.variable.inspectWidget()) {
       router.navigateIfNotCurrent(ScreenMetaData.inspector.id);
     } else {
       if (inspectorService!.isDisposed) return;
-      final isInspectable = await variable.isInspectable;
+      final isInspectable = await widget.variable.isInspectable;
       if (inspectorService.isDisposed) return;
       if (isInspectable) {
         notificationService.push(
