@@ -37,7 +37,8 @@ class EmbeddedExtensionHeader extends StatelessWidget {
           child: RichText(
             text: TextSpan(
               text: 'package:$extensionName extension',
-              style: theme.regularTextStyle.copyWith(fontWeight: FontWeight.bold),
+              style:
+                  theme.regularTextStyle.copyWith(fontWeight: FontWeight.bold),
               children: [
                 TextSpan(
                   text: ' (v${extension.version})',
