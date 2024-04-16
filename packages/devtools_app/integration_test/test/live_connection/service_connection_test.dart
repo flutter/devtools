@@ -54,7 +54,7 @@ void main() {
       // Use a range instead of an exact number because service extension
       // calls are not consistent. This will still catch any spurious calls
       // that are unintentionally added at start up.
-      const Range(40, 70).contains(vmServiceCallCount),
+      const Range(35, 70).contains(vmServiceCallCount),
       isTrue,
       reason: 'Unexpected number of vm service calls upon connection: '
           '$vmServiceCallCount. If this is expected, please update this test '
