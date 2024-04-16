@@ -150,7 +150,7 @@ class MemoryController extends DisposableController
         data: {
           // Passing serializable data without conversion to json here
           // to skip serialization when data are passed in-process.
-          'data': OfflineMemoryData(
+          _jsonKey: OfflineMemoryData(
             diff,
             profile,
             chart,
