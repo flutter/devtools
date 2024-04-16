@@ -115,15 +115,6 @@ final List<DevToolsExtensionConfig> debugExtensions = [
     DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
     DevToolsExtensionConfig.detectedFromStaticContextKey: 'true',
   }),
-  DevToolsExtensionConfig.parse({
-    DevToolsExtensionConfig.nameKey: 'provider',
-    DevToolsExtensionConfig.issueTrackerKey:
-        'https://github.com/rrousselGit/provider/issues',
-    DevToolsExtensionConfig.versionKey: '3.0.0',
-    DevToolsExtensionConfig.materialIconCodePointKey: 0xe50a,
-    DevToolsExtensionConfig.extensionAssetsUriKey: '/path/to/provider',
-    DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
-  }),
 ];
 
 /// Enable this flag to debug the DevTools survey logic.
