@@ -171,7 +171,7 @@ mixin OfflineScreenControllerMixin<T> on AutoDisposeControllerMixin {
   /// the user's Downloads directory.
   void exportData() {
     final encodedData =
-        _exportController.encode(prepareOfflineScreenData().json);
+        _exportController.encode(prepareOfflineScreenData().toJson());
     _exportController.downloadFile(encodedData);
   }
 
@@ -199,7 +199,7 @@ mixin OfflineScreenControllerMixin<T> on AutoDisposeControllerMixin {
           final previouslyConnectedApp =
               offlineDataController.previousConnectedApp;
           final offlineData = _exportController.generateDataForExport(
-            offlineScreenData: currentScreenData.json,
+            offlineScreenData: currentScreenData.toJson(),
             connectedApp: previouslyConnectedApp,
           );
           offlineDataController.offlineDataJson = offlineData;
@@ -223,7 +223,7 @@ class OfflineScreenData {
   /// primitive types that can be encoded as JSON.
   final Map<String, Object?> data;
 
-  Map<String, Object?> get json => {
+  Map<String, Object?> toJson() => {
         DevToolsExportKeys.activeScreenId.name: screenId,
         screenId: data,
       };

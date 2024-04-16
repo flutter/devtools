@@ -21,14 +21,14 @@ void main() {
     });
 
     test('init from parse', () {
-      OfflinePerformanceData offlineData = OfflinePerformanceData.parse({});
+      OfflinePerformanceData offlineData = OfflinePerformanceData.fromJson({});
       expect(offlineData.frames, isEmpty);
       expect(offlineData.selectedFrame, isNull);
       expect(offlineData.selectedFrame, isNull);
       expect(offlineData.displayRefreshRate, equals(60.0));
       expect(offlineData.rasterStats, isNull);
 
-      offlineData = OfflinePerformanceData.parse(rawPerformanceData);
+      offlineData = OfflinePerformanceData.fromJson(rawPerformanceData);
       expect(offlineData.perfettoTraceBinary, isNotNull);
       expect(offlineData.frames.length, 3);
       expect(offlineData.selectedFrame, isNotNull);
@@ -42,7 +42,7 @@ void main() {
     });
 
     test('to json', () {
-      OfflinePerformanceData offlineData = OfflinePerformanceData.parse({});
+      OfflinePerformanceData offlineData = OfflinePerformanceData.fromJson({});
       expect(
         offlineData.toJson(),
         equals({
@@ -55,7 +55,7 @@ void main() {
         }),
       );
 
-      offlineData = OfflinePerformanceData.parse(rawPerformanceData);
+      offlineData = OfflinePerformanceData.fromJson(rawPerformanceData);
       expect(offlineData.toJson(), rawPerformanceData);
     });
   });

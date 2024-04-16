@@ -20,24 +20,27 @@ class SecondaryControls extends StatelessWidget {
   const SecondaryControls({
     Key? key,
     required this.controller,
+    required this.offline,
   }) : super(key: key);
 
   final MemoryControlPaneController controller;
+  final bool offline;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        GaDevToolsButton(
-          onPressed: controller.isGcing ? null : controller.gc,
-          icon: Icons.delete,
-          label: 'GC',
-          tooltip: 'Trigger full garbage collection.',
-          minScreenWidthForTextBeforeScaling: memoryControlsMinVerboseWidth,
-          gaScreen: gac.memory,
-          gaSelection: gac.MemoryEvent.gc,
-        ),
+        if (!offline)
+          GaDevToolsButton(
+            onPressed: controller.isGcing ? null : controller.gc,
+            icon: Icons.delete,
+            label: 'GC',
+            tooltip: 'Trigger full garbage collection.',
+            minScreenWidthForTextBeforeScaling: memoryControlsMinVerboseWidth,
+            gaScreen: gac.memory,
+            gaSelection: gac.MemoryEvent.gc,
+          ),
         const SizedBox(width: denseSpacing),
         OpenSaveButtonGroup(
           screenId: ScreenMetaData.memory.id,
