@@ -4,7 +4,10 @@
 * **Breaking change:** rename `ExtensionsApi.extensionRootPathPropertyName`
 to `ExtensionsApi.packageRootUriPropertyName`, and modify the String value
 for the parameter from 'rootPath' to 'packageRootUri'.
-
+* **Breaking change:** add new required JSON fields "devtoolsOptionsUri" and
+"detectedFromStaticContext" in the `DevToolsExtensionConfig.parse` factory constructor.
+* Add new fields `requiresConnection`, `devtoolsOptionsUri`, and `detectedFromStaticContext`
+to `DevToolsExtensionConfig`.
 * Return valid extensions from the `apiServeAvailableExtensions` endpoint even when
 an exception is thrown.
 * Add utility extension methods on `Completer`: `safeComplete` and `safeCompleteError`.
