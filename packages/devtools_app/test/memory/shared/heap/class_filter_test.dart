@@ -28,22 +28,39 @@ void main() {
     expect(filter.filters, {'f1', 'f2', 'f3'});
   });
 
-  test('$ClassFilter.filter filters.', () {
-    final filter = ClassFilter(
+  test('$ClassFilter.filter is noop when not selected filter changes.', () {
+    final filter1 = ClassFilter(
       filterType: ClassFilterType.except,
       except: 'class1, library2, library3/class3',
       only: '',
     );
 
-    final result = ClassFilter.filter(
+    final result1 = ClassFilter.filter(
       oldFilter: null,
-      newFilter: filter,
+      newFilter: filter1,
       oldFiltered: null,
       original: _data,
       extractClass: (c) => c,
       rootPackage: null,
     );
 
-    expect(result, [_class4]);
+    expect(result1, [_class4]);
+
+    final filter2 = ClassFilter(
+      filterType: ClassFilterType.except,
+      except: filter1.except,
+      only: 'something',
+    );
+
+    final result2 = ClassFilter.filter(
+      oldFilter: filter1,
+      newFilter: filter2,
+      oldFiltered: result1,
+      original: _data,
+      extractClass: (c) => c,
+      rootPackage: null,
+    );
+
+    expect(result2, result1);
   });
 }
