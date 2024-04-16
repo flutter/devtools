@@ -102,7 +102,7 @@ class MemoryController extends DisposableController
           createData: (json) {
             final data = json[_jsonKey];
             if (data is OfflineMemoryData) return data;
-            return OfflineMemoryData.fromJson(json);
+            return OfflineMemoryData.fromJson(data as Map<String, dynamic>);
           },
           shouldLoad: (data) => true,
         );
