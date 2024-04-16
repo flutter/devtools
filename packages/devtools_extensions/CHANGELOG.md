@@ -1,5 +1,6 @@
 ## 0.2.0-dev.0
 * Bump `devtools_shared` dependency to `^10.0.0`.
+* Fix file locations in the `dart_foo` extension example.
 
 ## 0.1.1
 * Update the simulated environment help dialogs with information about the

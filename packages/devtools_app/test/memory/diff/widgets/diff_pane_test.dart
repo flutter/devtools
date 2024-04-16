@@ -12,13 +12,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../../test_infra/matchers/matchers.dart';
 import '../../../test_infra/scenes/memory/default.dart';
-import '../../../test_infra/scenes/scene_test_extensions.dart';
 
 Future<void> pumpScene(WidgetTester tester, MemoryDefaultScene scene) async {
-  await tester.pumpScene(scene);
-  // Delay to ensure the memory profiler has collected data.
-  await tester.pumpAndSettle(const Duration(seconds: 1));
-  expect(find.byType(MemoryBody), findsOneWidget);
+  await scene.pump(tester);
   await tester.tap(
     find.byKey(MemoryScreenKeys.diffTab),
   );

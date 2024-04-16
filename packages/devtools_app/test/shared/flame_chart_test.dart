@@ -135,7 +135,7 @@ void main() {
 
       controller = CpuProfilerController();
       flameChart = CpuProfileFlameChart(
-        data: CpuProfileData.parse(cpuProfileResponseJson),
+        data: CpuProfileData.fromJson(cpuProfileResponseJson),
         width: 1000.0,
         height: 1000.0,
         selectionNotifier: ValueNotifier<CpuStackFrame?>(null),

@@ -80,7 +80,7 @@ class ProfilerScreenController extends DisposableController
     } else {
       await maybeLoadOfflineData(
         ProfilerScreen.id,
-        createData: (json) => CpuProfileData.parse(json),
+        createData: (json) => CpuProfileData.fromJson(json),
         shouldLoad: (data) => !data.isEmpty,
       );
     }

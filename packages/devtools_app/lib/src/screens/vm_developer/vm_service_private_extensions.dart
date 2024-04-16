@@ -195,7 +195,7 @@ extension ObjRefPrivateViewExtension on ObjRef {
   bool get isICData => vmType == _icDataType;
 
   /// Casts the current [ObjRef] into an instance of [ICDataRef].
-  ICDataRef get asICData => ICDataRef.parse(json!);
+  ICDataRef get asICData => ICDataRef.fromJson(json!);
 
   /// `true` if this object is an instance of [ObjectPool].
   bool get isObjectPool => vmType == _objectPoolType;
@@ -208,13 +208,13 @@ extension ObjRefPrivateViewExtension on ObjRef {
 
   /// Casts the current [ObjRef] into an instance of [SubtypeTestCacheRef].
   SubtypeTestCacheRef get asSubtypeTestCache =>
-      SubtypeTestCacheRef.parse(json!);
+      SubtypeTestCacheRef.fromJson(json!);
 
   /// `true` if this object is an instance of [WeakArrayRef].
   bool get isWeakArray => vmType == _weakArrayType;
 
   /// Casts the current [ObjRef] into an instance of [WeakArrayRef].
-  WeakArrayRef get asWeakArray => WeakArrayRef.parse(json!);
+  WeakArrayRef get asWeakArray => WeakArrayRef.fromJson(json!);
 }
 
 /// An extension on [Obj] which allows for access to VM internal fields.
@@ -223,13 +223,13 @@ extension ObjPrivateViewExtension on Obj {
   ObjectPool get asObjectPool => ObjectPool.parse(json!);
 
   /// Casts the current [Obj] into an instance of [ICData].
-  ICData get asICData => ICData.parse(json!);
+  ICData get asICData => ICData.fromJson(json!);
 
   /// Casts the current [Obj] into an instance of [SubtypeTestCache].
-  SubtypeTestCache get asSubtypeTestCache => SubtypeTestCache.parse(json!);
+  SubtypeTestCache get asSubtypeTestCache => SubtypeTestCache.fromJson(json!);
 
   /// Casts the current [Obj] into an instance of [WeakArray].
-  WeakArray get asWeakArray => WeakArray.parse(json!);
+  WeakArray get asWeakArray => WeakArray.fromJson(json!);
 }
 
 /// A reference to a [WeakArray], which is an array consisting of weak
@@ -245,7 +245,7 @@ class WeakArrayRef implements ObjRef {
     required this.length,
   });
 
-  factory WeakArrayRef.parse(Map<String, dynamic> json) => WeakArrayRef(
+  factory WeakArrayRef.fromJson(Map<String, dynamic> json) => WeakArrayRef(
         id: json['id'],
         json: json,
         length: json['length'],
@@ -285,7 +285,7 @@ class WeakArray extends WeakArrayRef implements Obj {
     required this.classRef,
   });
 
-  factory WeakArray.parse(Map<String, dynamic> json) => WeakArray(
+  factory WeakArray.fromJson(Map<String, dynamic> json) => WeakArray(
         id: json['id'],
         json: json,
         length: json['length'],
@@ -317,7 +317,7 @@ class SubtypeTestCacheRef implements ObjRef {
     required this.json,
   });
 
-  factory SubtypeTestCacheRef.parse(Map<String, dynamic> json) =>
+  factory SubtypeTestCacheRef.fromJson(Map<String, dynamic> json) =>
       SubtypeTestCacheRef(
         id: json['id'],
         json: json,
@@ -349,7 +349,8 @@ class SubtypeTestCache extends SubtypeTestCacheRef implements Obj {
     required this.cache,
   });
 
-  factory SubtypeTestCache.parse(Map<String, dynamic> json) => SubtypeTestCache(
+  factory SubtypeTestCache.fromJson(Map<String, dynamic> json) =>
+      SubtypeTestCache(
         id: json['id'],
         size: json['size'],
         cache: createServiceObject(json['_cache'], [])! as InstanceRef,
@@ -380,7 +381,7 @@ class ICDataRef implements ObjRef {
     required this.selector,
   });
 
-  factory ICDataRef.parse(Map<String, dynamic> json) => ICDataRef(
+  factory ICDataRef.fromJson(Map<String, dynamic> json) => ICDataRef(
         id: json['id'],
         owner: createServiceObject(json['_owner'], []) as ObjRef,
         selector: json['_selector'],
@@ -423,7 +424,7 @@ class ICData extends ICDataRef implements Obj {
     required this.entries,
   }) : super();
 
-  factory ICData.parse(Map<String, dynamic> json) => ICData(
+  factory ICData.fromJson(Map<String, dynamic> json) => ICData(
         id: json['id'],
         owner: createServiceObject(json['_owner'], []) as ObjRef,
         selector: json['_selector'],
@@ -626,7 +627,7 @@ extension CodePrivateViewExtension on Code {
   ObjectPoolRef get objectPool => ObjectPoolRef.parse(json![_objectPoolKey]);
 
   bool get hasInliningData => json!.containsKey(InliningData.kInlinedFunctions);
-  InliningData get inliningData => InliningData.parse(json!);
+  InliningData get inliningData => InliningData.fromJson(json!);
 }
 
 extension AddressExtension on num {
@@ -637,7 +638,7 @@ extension AddressExtension on num {
 class InliningData {
   const InliningData._({required this.entries});
 
-  factory InliningData.parse(Map<String, dynamic> json) {
+  factory InliningData.fromJson(Map<String, dynamic> json) {
     final startAddress = int.parse(json[kStartAddressKey], radix: 16);
     final intervals = (json[kInlinedIntervals] as List).cast<List>();
     final functions = (json[kInlinedFunctions] as List)

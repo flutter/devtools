@@ -29,9 +29,19 @@ import 'class_data.dart';
 import 'item_controller.dart';
 
 class DiffPaneController extends DisposableController {
-  DiffPaneController(this._heapGraphLoader);
+  DiffPaneController({required this.loader});
 
-  final HeapGraphLoader _heapGraphLoader;
+  factory DiffPaneController.fromJson(Map<String, dynamic> map) {
+    // TODO(polina-c): implement, https://github.com/flutter/devtools/issues/6972
+    return DiffPaneController(loader: null);
+  }
+
+  Map<String, dynamic> toJson() {
+    // TODO(polina-c): implement, https://github.com/flutter/devtools/issues/6972
+    return {};
+  }
+
+  final HeapGraphLoader? loader;
 
   final retainingPathController = RetainingPathController();
 
@@ -47,13 +57,11 @@ class DiffPaneController extends DisposableController {
       gac.memory,
       gac.MemoryEvent.diffTakeSnapshotControlPane,
     );
-
     final item = SnapshotDataItem(
       displayNumber: _nextDisplayNumber(),
       defaultName: selectedIsolateName ?? '<isolate-not-detected>',
     );
-
-    await _addSnapshot(_heapGraphLoader, item);
+    await _addSnapshot(loader!, item);
     derived._updateValues();
   }
 

@@ -13,66 +13,42 @@ import 'package:vm_service/vm_service.dart';
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/primitives/memory_timeline.dart';
+import '../data/primitives.dart';
 
 final _log = Logger('memory_protocol');
+
+enum _ContinuesState {
+  none,
+  stop,
+  next,
+}
 
 class MemoryTracker {
   MemoryTracker(
     this.timeline, {
-    required this.paused,
     required this.isAndroidChartVisible,
   });
 
   final MemoryTimeline timeline;
-  final ValueListenable<bool> paused;
-  final ValueNotifier<bool> isAndroidChartVisible;
 
-  Timer? _pollingTimer;
+  final ValueListenable<bool> isAndroidChartVisible;
 
-  final isolateHeaps = <String, MemoryUsage>{};
+  _ContinuesState _monitorContinuesState = _ContinuesState.none;
+
+  final _isolateHeaps = <String, MemoryUsage>{};
 
   /// Polled VM current RSS.
-  int processRss = 0;
+  int _processRss = 0;
 
   /// Polled adb dumpsys meminfo values.
-  AdbMemoryInfo? adbMemoryInfo;
+  AdbMemoryInfo? _adbMemoryInfo;
 
   /// Polled engine's RasterCache estimates.
   RasterCache? rasterCache;
 
-  Stream<void> get onChange => _changeController.stream;
-  final _changeController = StreamController<void>.broadcast();
-
-  StreamSubscription<Event>? _gcStreamListener;
-
   Timer? _monitorContinues;
 
-  void start() {
-    _updateLiveDataPolling();
-    paused.addListener(_updateLiveDataPolling);
-  }
-
-  void _updateLiveDataPolling() {
-    _pollingTimer ??= Timer(MemoryTimeline.updateDelay, _pollMemory);
-    _gcStreamListener ??= serviceConnection.serviceManager.service?.onGCEvent
-        .listen(_handleGCEvent);
-  }
-
-  void stop() {
-    _updateLiveDataPolling();
-    _cleanListenersAndTimers();
-  }
-
-  void _cleanListenersAndTimers() {
-    paused.removeListener(_updateLiveDataPolling);
-
-    _pollingTimer?.cancel();
-    unawaited(_gcStreamListener?.cancel());
-    _pollingTimer = null;
-    _gcStreamListener = null;
-  }
-
-  void _handleGCEvent(Event event) {
+  void onGCEvent(Event event) {
     final HeapSpace newHeap = HeapSpace.parse(event.json!['new'])!;
     final HeapSpace oldHeap = HeapSpace.parse(event.json!['old'])!;
 
@@ -85,9 +61,34 @@ class MemoryTracker {
     _updateGCEvent(event.isolate!.id!, memoryUsage);
   }
 
-  void _pollMemory() async {
-    _pollingTimer = null;
+  void onMemoryData(Event data) {
+    var extensionEventKind = data.extensionKind;
+    String? customEventKind;
+    if (MemoryTimeline.isCustomEvent(data.extensionKind!)) {
+      extensionEventKind = MemoryTimeline.devToolsExtensionEvent;
+      customEventKind = MemoryTimeline.customEventName(data.extensionKind!);
+    }
+    final jsonData = data.extensionData!.data.cast<String, Object>();
+    switch (extensionEventKind) {
+      case 'Flutter.ImageSizesForFrame':
+        timeline.addExtensionEvent(
+          data.timestamp,
+          data.extensionKind,
+          jsonData,
+        );
+        break;
+      case MemoryTimeline.devToolsExtensionEvent:
+        timeline.addExtensionEvent(
+          data.timestamp,
+          MemoryTimeline.customDevToolsEvent,
+          jsonData,
+          customEventName: customEventKind,
+        );
+        break;
+    }
+  }
 
+  Future<void> pollMemory() async {
     final isolateMemory = <IsolateRef, MemoryUsage>{};
     for (IsolateRef isolateRef
         in serviceConnection.serviceManager.isolateManager.isolates.value) {
@@ -100,7 +101,7 @@ class MemoryTracker {
 
     // Polls for current Android meminfo using:
     //    > adb shell dumpsys meminfo -d <package_name>
-    adbMemoryInfo = serviceConnection.serviceManager.hasConnection &&
+    _adbMemoryInfo = serviceConnection.serviceManager.hasConnection &&
             serviceConnection.serviceManager.vm!.operatingSystem == 'android' &&
             isAndroidChartVisible.value
         ? await _fetchAdbInfo()
@@ -112,11 +113,6 @@ class MemoryTracker {
     // Polls for current RSS size.
     final vm = await serviceConnection.serviceManager.service!.getVM();
     _update(vm, isolateMemory);
-
-    // TODO(terry): Is there a better way to detect an integration test running?
-    if (vm.json!.containsKey('_FAKE_VM')) return;
-
-    _pollingTimer ??= Timer(MemoryTimeline.updateDelay, _pollMemory);
   }
 
   /// Detect stale isolates (sentineled), may happen after a hot restart.
@@ -137,19 +133,19 @@ class MemoryTracker {
   }
 
   void _update(VM vm, Map<IsolateRef, MemoryUsage> isolateMemory) {
-    processRss = vm.json!['_currentRSS'];
+    _processRss = vm.json!['_currentRSS'];
 
-    isolateHeaps.clear();
+    _isolateHeaps.clear();
 
     for (IsolateRef isolateRef in isolateMemory.keys) {
-      isolateHeaps[isolateRef.id!] = isolateMemory[isolateRef]!;
+      _isolateHeaps[isolateRef.id!] = isolateMemory[isolateRef]!;
     }
 
     _recalculate();
   }
 
   void _updateGCEvent(String isolateId, MemoryUsage memoryUsage) {
-    isolateHeaps[isolateId] = memoryUsage;
+    _isolateHeaps[isolateId] = memoryUsage;
     _recalculate(true);
   }
 
@@ -187,11 +183,11 @@ class MemoryTracker {
 
     final keysToRemove = <String>[];
 
-    final isolateCount = isolateHeaps.length;
-    final keys = isolateHeaps.keys.toList();
+    final isolateCount = _isolateHeaps.length;
+    final keys = _isolateHeaps.keys.toList();
     for (var index = 0; index < isolateCount; index++) {
       final isolateId = keys[index];
-      var usage = isolateHeaps[isolateId];
+      var usage = _isolateHeaps[isolateId];
       // Check if the isolate is dead (sentinel), null implies sentinel.
       final checkIsolateUsage = await _isolateMemoryUsage(isolateId, usage);
       if (checkIsolateUsage == null && !keysToRemove.contains(isolateId)) {
@@ -210,7 +206,7 @@ class MemoryTracker {
     }
 
     // Removes any isolate that is a sentinel.
-    isolateHeaps.removeWhere((key, value) => keysToRemove.contains(key));
+    _isolateHeaps.removeWhere((key, value) => keysToRemove.contains(key));
 
     int time = DateTime.now().millisecondsSinceEpoch;
     if (timeline.data.isNotEmpty) {
@@ -218,14 +214,14 @@ class MemoryTracker {
     }
 
     // Process any memory events?
-    final eventSample = processEventSample(timeline, time);
+    final eventSample = _processEventSample(timeline, time);
 
     if (eventSample != null && eventSample.isEventAllocationAccumulator) {
       if (eventSample.allocationAccumulator!.isStart) {
         // Stop Continuous events being auto posted - a new start is beginning.
-        timeline.monitorContinuesState = ContinuesState.stop;
+        _monitorContinuesState = _ContinuesState.stop;
       }
-    } else if (timeline.monitorContinuesState == ContinuesState.next) {
+    } else if (_monitorContinuesState == _ContinuesState.next) {
       if (_monitorContinues != null) {
         _monitorContinues!.cancel();
         _monitorContinues = null;
@@ -238,20 +234,18 @@ class MemoryTracker {
 
     final HeapSample sample = HeapSample(
       time,
-      processRss,
+      _processRss,
       // Displaying capacity dashed line on top of stacked (used + external).
       capacity + external,
       used,
       external,
       fromGC,
-      adbMemoryInfo,
+      _adbMemoryInfo,
       eventSample,
       rasterCache,
     );
 
     timeline.addSample(sample);
-
-    _changeController.add(null);
 
     // Signal continues events are to be emitted.  These events are hidden
     // until a reset event then the continuous events between last monitor
@@ -259,7 +253,7 @@ class MemoryTracker {
     if (eventSample != null &&
         eventSample.isEventAllocationAccumulator &&
         eventSample.allocationAccumulator!.isStart) {
-      timeline.monitorContinuesState = ContinuesState.next;
+      _monitorContinuesState = _ContinuesState.next;
     }
   }
 
@@ -270,10 +264,10 @@ class MemoryTracker {
   /// (time parameter)).
   ///
   /// Returns copy of events to associate with an existing HeapSample tick
-  /// (contained in the EventSample). See [processEventSample] it computes the
+  /// (contained in the EventSample). See [_processEventSample] it computes the
   /// events to aggregate to an existing HeapSample or delay associating those
   /// events until the next HeapSample (tick) received see [_recalculate].
-  EventSample pullClone(MemoryTimeline memoryTimeline, int time) {
+  EventSample _pullClone(MemoryTimeline memoryTimeline, int time) {
     final pulledEvent = memoryTimeline.pullEventSample();
     final extensionEvents = memoryTimeline.extensionEvents;
     final eventSample = pulledEvent.clone(
@@ -287,20 +281,19 @@ class MemoryTracker {
     return eventSample;
   }
 
-  EventSample? processEventSample(MemoryTimeline memoryTimeline, int time) {
+  EventSample? _processEventSample(MemoryTimeline memoryTimeline, int time) {
     if (memoryTimeline.anyEvents) {
       final eventTime = memoryTimeline.peekEventTimestamp;
       final timeDuration = Duration(milliseconds: time);
       final eventDuration = Duration(milliseconds: eventTime);
 
-      // If the event is +/- _updateDelay (500 ms) of the current time then
-      // associate the EventSample with the current HeapSample.
-      const delay = MemoryTimeline.updateDelay;
       final compared = timeDuration.compareTo(eventDuration);
       if (compared < 0) {
-        if ((timeDuration + delay).compareTo(eventDuration) >= 0) {
+        // If the event is +/- _updateDelay (500 ms) of the current time then
+        // associate the EventSample with the current HeapSample.
+        if ((timeDuration + chartUpdateDelay).compareTo(eventDuration) >= 0) {
           // Currently, events are all UI events so duration < _updateDelay
-          return pullClone(memoryTimeline, time);
+          return _pullClone(memoryTimeline, time);
         }
         // Throw away event, missed attempt to attach to a HeapSample.
         final ignoreEvent = memoryTimeline.pullEventSample();
@@ -315,18 +308,18 @@ class MemoryTracker {
 
       if (compared > 0) {
         final msDiff = time - eventTime;
-        if (msDiff > MemoryTimeline.delayMs) {
+        if (msDiff > chartUpdateDelay.inMilliseconds) {
           // eventSample is in the future.
-          if ((timeDuration - delay).compareTo(eventDuration) >= 0) {
+          if ((timeDuration - chartUpdateDelay).compareTo(eventDuration) >= 0) {
             // Able to match event time to a heap sample. We will attach the
             // EventSample to this HeapSample.
-            return pullClone(memoryTimeline, time);
+            return _pullClone(memoryTimeline, time);
           }
           // Keep the event, its time hasn't caught up to the HeapSample time yet.
           return null;
         }
         // The almost exact eventSample we have.
-        return pullClone(memoryTimeline, time);
+        return _pullClone(memoryTimeline, time);
       }
     }
 
@@ -336,9 +329,5 @@ class MemoryTracker {
     }
 
     return null;
-  }
-
-  void dispose() {
-    _cleanListenersAndTimers();
   }
 }

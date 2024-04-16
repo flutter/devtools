@@ -37,7 +37,7 @@ class RasterStatsController extends PerformanceFeatureController {
     try {
       final response = await serviceConnection.renderFrameWithRasterStats;
       final json = response?.json ?? <String, Object?>{};
-      final rasterStats = RasterStats.parse(json);
+      final rasterStats = RasterStats.fromJson(json);
       setData(rasterStats);
     } catch (e, st) {
       _log.shout('Error collecting raster stats: $e', e, st);

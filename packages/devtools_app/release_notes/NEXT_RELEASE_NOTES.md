@@ -48,10 +48,12 @@ TODO: Remove this section if there are not any general updates.
 ## Deep links tool updates
 
 * Improve layout for narrow screens. - [#7524](https://github.com/flutter/devtools/pull/7524)
+* Add error handling for missing schemes and domains - [#7559](https://github.com/flutter/devtools/pull/7559)
 
 ## VS Code Sidebar updates
 
-TODO: Remove this section if there are not any general updates.
+* Added a DevTools section with a list of tools that are available without a debug
+session. - [#7598](https://github.com/flutter/devtools/pull/7598)
 
 ## DevTools Extension updates
 
