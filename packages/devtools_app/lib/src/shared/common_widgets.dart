@@ -1266,9 +1266,11 @@ class TextViewer extends StatelessWidget {
     } else {
       displayText = text;
     }
-    return Text(
-      displayText,
-      style: style,
+    return SelectionArea(
+      child: Text(
+        displayText,
+        style: style,
+      ),
     );
   }
 }
@@ -1371,18 +1373,6 @@ class _JsonViewerState extends State<JsonViewer>
               }
               return ExpandableVariable(
                 variable: variable,
-                onCopy: (copiedVariable) {
-                  unawaited(
-                    copyToClipboard(
-                      json.encode(
-                        serviceConnection
-                            .serviceManager.service!.fakeServiceCache
-                            .instanceToJson(copiedVariable.value as Instance),
-                      ),
-                      'JSON copied to clipboard',
-                    ),
-                  );
-                },
               );
             },
           ),
