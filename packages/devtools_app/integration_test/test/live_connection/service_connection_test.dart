@@ -188,6 +188,7 @@ void main() {
 
     logStatus('reconnecting to the test device');
     await connectToTestApp(tester, testApp);
+    await serviceConnection.serviceManager.waitUntilNotPaused();
 
     logStatus('verify extension states have been restored from the device');
     for (final ext in serviceExtensionsToEnable) {
@@ -195,6 +196,7 @@ void main() {
         serviceConnection.serviceManager.serviceExtensionManager
             .isServiceExtensionAvailable(ext.$1),
         isTrue,
+        reason: 'Expect ${ext.$1} to be available',
       );
       await _verifyExtensionStateInServiceManager(
         ext.$1,
@@ -445,6 +447,15 @@ Future<void> _verifyExtensionStateInServiceManager(
 
   final ServiceExtensionState state = await stateCompleter.future;
   stateListenable.removeListener(stateListener);
-  expect(state.enabled, equals(enabled));
-  expect(state.value, equals(value));
+  expect(
+    state.enabled,
+    equals(enabled),
+    reason:
+        'Expected $extensionName state to ${enabled ? '' : 'not'} be enabled.',
+  );
+  expect(
+    state.value,
+    equals(value),
+    reason: 'Expected $extensionName state to have the value: $value',
+  );
 }

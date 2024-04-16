@@ -112,27 +112,6 @@ abstract class InspectorServiceBase extends DisposableController
   bool get useDaemonApi =>
       !serviceConnection.serviceManager.isMainIsolatePaused;
 
-  Future<void> waitUntilNotPaused() {
-    final notPausedCompleter = Completer<bool>();
-    final isPaused = serviceConnection.serviceManager.isMainIsolatePaused;
-
-    if (isPaused) {
-      final mainIsolate =
-          serviceConnection.serviceManager.isolateManager.mainIsolateState;
-      mainIsolate?.isPaused.addListener(() {
-        final isPausedNow =
-            serviceConnection.serviceManager.isMainIsolatePaused;
-        if (!isPausedNow) {
-          notPausedCompleter.complete(true);
-        }
-      });
-    } else {
-      notPausedCompleter.complete(true);
-    }
-
-    return notPausedCompleter.future;
-  }
-
   @override
   void dispose() {
     _isDisposed = true;
@@ -442,7 +421,7 @@ class InspectorService extends InspectorServiceBase {
   }
 
   Future<void> _addPubRootDirectories(List<String> pubDirectories) async {
-    await waitUntilNotPaused();
+    await serviceConnection.serviceManager.waitUntilNotPaused();
     assert(useDaemonApi);
     await invokeServiceMethodDaemonNoGroupArgs(
       WidgetInspectorServiceExtensions.addPubRootDirectories.name,
@@ -451,7 +430,7 @@ class InspectorService extends InspectorServiceBase {
   }
 
   Future<void> _removePubRootDirectories(List<String> pubDirectories) async {
-    await waitUntilNotPaused();
+    await serviceConnection.serviceManager.waitUntilNotPaused();
     assert(useDaemonApi);
     await invokeServiceMethodDaemonNoGroupArgs(
       WidgetInspectorServiceExtensions.removePubRootDirectories.name,
@@ -460,7 +439,7 @@ class InspectorService extends InspectorServiceBase {
   }
 
   Future<List<String>?> getPubRootDirectories() async {
-    await waitUntilNotPaused();
+    await serviceConnection.serviceManager.waitUntilNotPaused();
     assert(useDaemonApi);
     final response = await invokeServiceMethodDaemonNoGroupArgs(
       WidgetInspectorServiceExtensions.getPubRootDirectories.name,
@@ -477,7 +456,7 @@ class InspectorService extends InspectorServiceBase {
   ///
   /// See [LocationMap] which provides support to parse this JSON.
   Future<Map<String, dynamic>> widgetLocationIdMap() async {
-    await waitUntilNotPaused();
+    await serviceConnection.serviceManager.waitUntilNotPaused();
     assert(useDaemonApi);
     final response = await invokeServiceMethodDaemonNoGroupArgs(
       'widgetLocationIdMap',
