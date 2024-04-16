@@ -8,13 +8,9 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../../shared/globals.dart';
-import '../../../../../shared/primitives/simple_items.dart';
 import '../../../shared/primitives/memory_timeline.dart';
 import '../data/primitives.dart';
-import 'android_chart_controller.dart';
-import 'event_chart_controller.dart';
 import 'memory_tracker.dart';
-import 'vm_chart_controller.dart';
 
 /// Connection between chart and application.
 ///
