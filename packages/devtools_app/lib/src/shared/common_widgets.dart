@@ -256,7 +256,7 @@ class StartStopRecordingButton extends GaDevToolsButton {
           color: colorOverride ?? _color(recording),
           tooltip: tooltipOverride ?? _tooltip(recording),
         );
-  final bool recording;
+
   static IconData _icon(bool recording) =>
       recording ? Icons.stop : Icons.fiber_manual_record;
   static String _label(bool recording) =>
@@ -264,6 +264,8 @@ class StartStopRecordingButton extends GaDevToolsButton {
   static String _tooltip(bool recording) =>
       recording ? 'Stop recording' : 'Start recording';
   static Color? _color(bool recording) => recording ? Colors.red : null;
+
+  final bool recording;
 }
 
 /// Button to start recording data.

@@ -76,12 +76,11 @@ class _PrimaryControls extends StatelessWidget {
         StartStopRecordingButton(
           recording: recording,
           gaScreen: gac.cpuProfiler,
-          gaSelection: gac.record,
+          gaSelection: recording ? gac.stop : gac.record,
           minScreenWidthForTextBeforeScaling:
               _primaryControlsMinIncludeTextWidth,
-          onPressed: () async => recording
-              ? await controller.stopRecording()
-              : await controller.startRecording(),
+          onPressed:
+              recording ? controller.stopRecording : controller.startRecording,
         ),
         const SizedBox(width: denseSpacing),
         ClearButton(

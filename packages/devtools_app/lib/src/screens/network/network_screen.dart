@@ -221,7 +221,7 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
               : 'Resume recording network traffic',
           minScreenWidthForTextBeforeScaling: double.infinity,
           gaScreen: gac.network,
-          gaSelection: gac.pause,
+          gaSelection: _recording ? gac.pause : gac.resume,
         ),
         const SizedBox(width: denseSpacing),
         ClearButton(
