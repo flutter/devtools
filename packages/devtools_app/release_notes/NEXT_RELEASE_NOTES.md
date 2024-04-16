@@ -34,8 +34,10 @@ TODO: Remove this section if there are not any general updates.
 TODO: Remove this section if there are not any general updates.
 
 ## Network profiler updates
-
-TODO: Remove this section if there are not any general updates.
+ 
+* Added text selection in text viewer for requests and responses. - [#7596](https://github.com/flutter/devtools/pull/7596)
+* Added a JSON copy experience to the JSON viewer. - [#7596](https://github.com/flutter/devtools/pull/7596)
+  ![An image of the new json copy experience for the JSON viewer](./images/json_viewer_copy.png)
 
 ## Logging updates
 

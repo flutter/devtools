@@ -1291,6 +1291,7 @@ class _JsonViewerState extends State<JsonViewer>
     with ProvidedControllerMixin<DebuggerController, JsonViewer> {
   late Future<void> _initializeTree;
   late DartObjectNode variable;
+  static const jsonEncoder = JsonEncoder.withIndent('  ');
 
   Future<void> _buildAndExpand(
     DartObjectNode variable,
@@ -1376,7 +1377,7 @@ class _JsonViewerState extends State<JsonViewer>
                 onCopy: (copiedVariable) {
                   unawaited(
                     copyToClipboard(
-                      json.encode(
+                      jsonEncoder.convert(
                         serviceConnection
                             .serviceManager.service!.fakeServiceCache
                             .instanceToJson(copiedVariable.value as Instance),
