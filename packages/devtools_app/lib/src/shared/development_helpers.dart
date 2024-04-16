@@ -100,7 +100,7 @@ final List<DevToolsExtensionConfig> debugExtensions = [
     DevToolsExtensionConfig.materialIconCodePointKey: 0xe50a,
     DevToolsExtensionConfig.extensionAssetsUriKey: '/path/to/provider',
     DevToolsExtensionConfig.devtoolsOptionsUriKey: '/path/to/options/file',
-    DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
+    DevToolsExtensionConfig.isPubliclyHostedKey: 'true',
     DevToolsExtensionConfig.detectedFromStaticContextKey: 'false',
   }),
   // Static extension.
