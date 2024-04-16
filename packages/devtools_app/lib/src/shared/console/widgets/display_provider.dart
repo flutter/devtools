@@ -79,48 +79,46 @@ class _DisplayProviderState extends State<DisplayProvider> {
       menuButtons: _getMenuButtons(
         context,
       ),
-      child: MouseRegion(
-        child: DevToolsTooltip(
-          message: originalDisplayValue,
-          child: Container(
-            color: isHovered ? Theme.of(context).highlightColor : null,
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text.rich(
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    TextSpan(
-                      text: hasName ? widget.variable.name : null,
-                      style: widget.variable.artificialName
-                          ? theme.subtleFixedFontStyle
-                          : theme.fixedFontStyle.apply(
-                              color: theme.colorScheme.controlFlowSyntaxColor,
-                            ),
-                      children: [
-                        if (hasName)
-                          TextSpan(
-                            text: ': ',
-                            style: theme.fixedFontStyle,
+      child: DevToolsTooltip(
+        message: originalDisplayValue,
+        child: Container(
+          color: isHovered ? Theme.of(context).highlightColor : null,
+          child: Row(
+            children: [
+              Expanded(
+                child: Text.rich(
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  TextSpan(
+                    text: hasName ? widget.variable.name : null,
+                    style: widget.variable.artificialName
+                        ? theme.subtleFixedFontStyle
+                        : theme.fixedFontStyle.apply(
+                            color: theme.colorScheme.controlFlowSyntaxColor,
                           ),
+                    children: [
+                      if (hasName)
                         TextSpan(
-                          text: displayValue,
-                          style: widget.variable.artificialValue
-                              ? theme.subtleFixedFontStyle
-                              : _variableDisplayStyle(theme, widget.variable),
+                          text: ': ',
+                          style: theme.fixedFontStyle,
                         ),
-                      ],
-                    ),
+                      TextSpan(
+                        text: displayValue,
+                        style: widget.variable.artificialValue
+                            ? theme.subtleFixedFontStyle
+                            : _variableDisplayStyle(theme, widget.variable),
+                      ),
+                    ],
                   ),
                 ),
-                if (isHovered && widget.onCopy != null)
-                  DevToolsButton(
-                    icon: Icons.copy,
-                    outlined: false,
-                    onPressed: () => widget.onCopy!.call(widget.variable),
-                  ),
-              ],
-            ),
+              ),
+              if (isHovered && widget.onCopy != null)
+                DevToolsButton(
+                  icon: Icons.copy,
+                  outlined: false,
+                  onPressed: () => widget.onCopy!.call(widget.variable),
+                ),
+            ],
           ),
         ),
       ),
@@ -130,18 +128,14 @@ class _DisplayProviderState extends State<DisplayProvider> {
       return SelectionContainer.disabled(
         child: MouseRegion(
           onEnter: (_) {
-            if (isHoverEnabled) {
-              setState(() {
-                isHovered = true;
-              });
-            }
+            setState(() {
+              isHovered = true;
+            });
           },
           onExit: (event) {
-            if (widget.onCopy != null) {
-              setState(() {
-                isHovered = false;
-              });
-            }
+            setState(() {
+              isHovered = false;
+            });
           },
           child: contents,
         ),
@@ -151,10 +145,8 @@ class _DisplayProviderState extends State<DisplayProvider> {
   }
 
   List<ContextMenuButtonItem> _getMenuButtons(
-    BuildContext context, {
-    void Function()? onCopy,
-    String? copyLabel,
-  }) {
+    BuildContext context,
+  ) {
     return [
       if (widget.variable.isRerootable)
         ContextMenuButtonItem(
@@ -176,11 +168,6 @@ class _DisplayProviderState extends State<DisplayProvider> {
             _handleInspect(context);
           },
           label: 'Inspect',
-        ),
-      if (onCopy != null)
-        ContextMenuButtonItem(
-          onPressed: () => onCopy(),
-          label: copyLabel,
         ),
     ];
   }
