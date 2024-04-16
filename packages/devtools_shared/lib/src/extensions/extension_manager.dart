@@ -7,7 +7,6 @@ import 'package:extension_discovery/extension_discovery.dart';
 import 'package:path/path.dart' as path;
 
 import '../../devtools_extensions_io.dart';
-import '../server/server_api.dart';
 import 'extension_model.dart';
 
 /// The default location for the DevTools extension, relative to
@@ -30,10 +29,6 @@ class ExtensionsManager {
   final devtoolsExtensions = <DevToolsExtensionConfig>[];
 
   final _extensionLocationsByIdentifier = <String, String?>{};
-
-  /// The depth to search the user's IDE workspace roots for projects with
-  /// DevTools extensions.
-  static const _staticExtensionsSearchDepth = 6;
 
   /// Returns the absolute path of the assets for the extension with identifier
   /// [extensionIdentifier].
