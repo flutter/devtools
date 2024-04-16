@@ -23,12 +23,9 @@ class DevToolsExtensionConfig implements Comparable {
     // Default to true if this value is not specified in the JSON.
     final requiresConnectionValue = json[requiresConnectionKey];
     final requiresConnection =
-        requiresConnectionValue != false && requiresConnectionValue != 'false';
 
     if (json
         case {
-          // The exptected keys below are required fields in the extension's
-          // config.yaml file.
           nameKey: final String name,
           issueTrackerKey: final String issueTracker,
           versionKey: final String version,
@@ -263,6 +260,7 @@ class DevToolsExtensionConfig implements Comparable {
         other.name == name &&
         other.issueTrackerLink == issueTrackerLink &&
         other.version == version &&
+        other.extensionAssetsUri == extensionAssetsUri &&
         other.materialIconCodePoint == materialIconCodePoint &&
         other.requiresConnection == requiresConnection &&
         other.extensionAssetsUri == extensionAssetsUri &&
@@ -276,6 +274,7 @@ class DevToolsExtensionConfig implements Comparable {
         name,
         issueTrackerLink,
         version,
+        extensionAssetsUri,
         materialIconCodePoint,
         requiresConnection,
         extensionAssetsUri,
