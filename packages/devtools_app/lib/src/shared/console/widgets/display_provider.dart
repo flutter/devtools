@@ -63,6 +63,9 @@ class _DisplayProviderState extends State<DisplayProvider> {
       );
     }
 
+    // Only enable hover behaviour when copy behaviour is provided.
+    final isHoverEnabled = widget.onCopy != null;
+
     final hasName = widget.variable.name?.isNotEmpty ?? false;
 
     // The tooltip can be hovered over in order to see the original text.
@@ -71,18 +74,12 @@ class _DisplayProviderState extends State<DisplayProvider> {
     // So replace all newlines with \\n so that the user can still see that
     // there are new lines in the value.
     final displayValue = originalDisplayValue.replaceAll('\n', '\\n');
-    return InteractivityWrapper(
+    final contents = InteractivityWrapper(
       onTap: widget.onTap,
       menuButtons: _getMenuButtons(
         context,
       ),
       child: MouseRegion(
-        onEnter: (_) => setState(() {
-          isHovered = true;
-        }),
-        onExit: (event) => setState(() {
-          isHovered = false;
-        }),
         child: DevToolsTooltip(
           message: originalDisplayValue,
           child: Container(
@@ -128,6 +125,28 @@ class _DisplayProviderState extends State<DisplayProvider> {
         ),
       ),
     );
+
+    if (isHoverEnabled) {
+      return SelectionContainer.disabled(
+          child: MouseRegion(
+        onEnter: (_) {
+          if (isHoverEnabled) {
+            setState(() {
+              isHovered = true;
+            });
+          }
+        },
+        onExit: (event) {
+          if (widget.onCopy != null) {
+            setState(() {
+              isHovered = false;
+            });
+          }
+        },
+        child: contents,
+      ));
+    }
+    return contents;
   }
 
   List<ContextMenuButtonItem> _getMenuButtons(
