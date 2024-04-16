@@ -1,5 +1,5 @@
 ## 0.2.0-dev.0
-* Bump `devtools_shared` dependency to `^9.0.1`.
+* Bump `devtools_shared` dependency to `^10.0.0`.
 * Fix file locations in the `dart_foo` extension example.
 
 ## 0.1.1

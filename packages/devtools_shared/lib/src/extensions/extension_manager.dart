@@ -38,7 +38,7 @@ class ExtensionsManager {
       extensionIdentifier,
       () => devtoolsExtensions
           .firstWhereOrNull((e) => e.identifier == extensionIdentifier)
-          ?.path,
+          ?.extensionAssetsUri,
     );
   }
 
@@ -142,7 +142,7 @@ class ExtensionsManager {
       try {
         final extensionConfig = DevToolsExtensionConfig.parse({
           ...config,
-          DevToolsExtensionConfig.pathKey: location,
+          DevToolsExtensionConfig.extensionAssetsUriKey: location,
           DevToolsExtensionConfig.isPubliclyHostedKey: isPubliclyHosted,
         });
         devtoolsExtensions.add(extensionConfig);
