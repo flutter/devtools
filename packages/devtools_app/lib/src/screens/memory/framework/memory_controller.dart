@@ -34,13 +34,10 @@ class MemoryController extends DisposableController
   MemoryController({
     @visibleForTesting DiffPaneController? connectedDiff,
     @visibleForTesting ProfilePaneController? connectedProfile,
-  }) {
-    if (connectedDiff != null || connectedProfile != null) {
-      _mode = DevToolsMode.connected;
-    } else {
-      _mode = devToolsMode;
-    }
-    unawaited(_init(connectedDiff, connectedProfile));
+  }) : _mode = connectedDiff != null || connectedProfile != null
+            ? DevToolsMode.connected
+            : devToolsMode {
+    _init(connectedDiff, connectedProfile);
   }
 
   Future<void> get initialized => _initialized.future;
@@ -49,39 +46,37 @@ class MemoryController extends DisposableController
   /// DevTools mode at the time of creation of the controller.
   ///
   /// DevTools will recreate controller when the mode changes.
-  late final DevToolsMode _mode;
+  final DevToolsMode _mode;
 
   /// Index of the selected feature tab.
   ///
   /// This value is used to set the initial tab selection of the
-  /// [MemoryTabView]. This widget will be disposed and re-initialized on
+  /// `MemoryTabView`. This widget will be disposed and re-initialized on
   /// DevTools screen changes, so we must store this value in the controller
   /// instead of the widget state.
   int selectedFeatureTabIndex = 0;
 
-  late final DiffPaneController diff;
+  late final DiffPaneController _diff;
 
-  late final ProfilePaneController profile;
+  late final ProfilePaneController _profile;
 
-  late final MemoryChartPaneController chart;
+  late final MemoryChartPaneController _chart;
 
-  late final TracingPaneController tracing;
-
-  late final MemoryControlPaneController control;
+  late final TracingPaneController _tracing;
 
   @override
   void dispose() {
     super.dispose();
     HeapClassName.dispose();
-    chart.dispose();
-    tracing.dispose();
-    diff.dispose();
-    profile.dispose();
+    _chart.dispose();
+    _tracing.dispose();
+    _diff.dispose();
+    _profile.dispose();
   }
 
   static const _jsonKey = 'data';
 
-  Future<void> _init(
+  void _init(
     @visibleForTesting DiffPaneController? connectedDiff,
     @visibleForTesting ProfilePaneController? connectedProfile,
   ) async {
@@ -121,24 +116,24 @@ class MemoryController extends DisposableController
   }) {
     assert(!_initialized.isCompleted);
 
-    chart = offlineData?.chart ?? MemoryChartPaneController(_mode);
-    diff = diffPaneController ??
+    _chart = offlineData?.chart ?? MemoryChartPaneController(_mode);
+    _diff = diffPaneController ??
         offlineData?.diff ??
         DiffPaneController(
-          loader: HeapGraphLoaderRuntime(chart.memoryTimeline),
+          loader: HeapGraphLoaderRuntime(_chart.memoryTimeline),
         );
-    profile = profilePaneController ??
+    _profile = profilePaneController ??
         offlineData?.profile ??
         ProfilePaneController();
-    control = MemoryControlPaneController(
-      chart.memoryTimeline,
-      isChartVisible: chart.isChartVisible,
+    MemoryControlPaneController(
+      _chart.memoryTimeline,
+      isChartVisible: _chart.isChartVisible,
       exportData: exportData,
     );
-    tracing = TracingPaneController();
+    _tracing = TracingPaneController();
     selectedFeatureTabIndex =
         offlineData?.selectedTab ?? selectedFeatureTabIndex;
-    if (offlineData != null) profile.setFilter(offlineData.filter);
+    if (offlineData != null) _profile.setFilter(offlineData.filter);
     _shareClassFilterBetweenProfileAndDiff();
 
     _initialized.complete();
@@ -151,10 +146,10 @@ class MemoryController extends DisposableController
           // Passing serializable data without conversion to json here
           // to skip serialization when data are passed in-process.
           _jsonKey: OfflineMemoryData(
-            diff,
-            profile,
-            chart,
-            profile.classFilter.value,
+            _diff,
+            _profile,
+            _chart,
+            _profile.classFilter.value,
             selectedTab: selectedFeatureTabIndex,
           ),
         },
@@ -167,15 +162,15 @@ class MemoryController extends DisposableController
   }
 
   void _shareClassFilterBetweenProfileAndDiff() {
-    diff.derived.applyFilter(profile.classFilter.value);
+    _diff.derived.applyFilter(_profile.classFilter.value);
 
-    profile.classFilter.addListener(() {
-      diff.derived.applyFilter(profile.classFilter.value);
+    _profile.classFilter.addListener(() {
+      _diff.derived.applyFilter(_profile.classFilter.value);
     });
 
-    diff.core.classFilter.addListener(() {
-      profile.setFilter(
-        diff.core.classFilter.value,
+    _diff.core.classFilter.addListener(() {
+      _profile.setFilter(
+        _diff.core.classFilter.value,
       );
     });
   }
