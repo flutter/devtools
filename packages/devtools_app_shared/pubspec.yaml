@@ -10,14 +10,14 @@ environment:
 dependencies:
   collection: ^1.15.0
   dds_service_extensions: ^2.0.0
-  devtools_shared: ^9.0.1
+  devtools_shared: ^10.0.0-dev.0
   dtd: ^2.1.0
   flutter:
     sdk: flutter
   logging: ^1.1.1
   meta: ^1.9.1
   pointer_interceptor: ^0.9.3+3
-  vm_service: ^14.1.0
+  vm_service: ^14.1.1
   web: ^0.4.1
 
 dev_dependencies:
