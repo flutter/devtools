@@ -23,10 +23,12 @@ class DisplayProvider extends StatelessWidget {
     super.key,
     required this.variable,
     required this.onTap,
+    this.onCopy,
   });
 
   final DartObjectNode variable;
   final VoidCallback onTap;
+  final void Function(DartObjectNode)? onCopy;
 
   @override
   Widget build(BuildContext context) {
@@ -57,6 +59,11 @@ class DisplayProvider extends StatelessWidget {
 
     final hasName = variable.name?.isNotEmpty ?? false;
 
+    String copyLabel = 'Copy contents';
+    if (hasName) {
+      copyLabel += ' of ${variable.name}';
+    }
+
     // The tooltip can be hovered over in order to see the original text.
     final originalDisplayValue = variable.displayValue.toString();
     // Only 1 line of text is permitted in the tree, since we only get 1 row.
@@ -65,7 +72,11 @@ class DisplayProvider extends StatelessWidget {
     final displayValue = originalDisplayValue.replaceAll('\n', '\\n');
     return InteractivityWrapper(
       onTap: onTap,
-      menuButtons: _getMenuButtons(context),
+      menuButtons: _getMenuButtons(
+        context,
+        onCopy: () => onCopy?.call(variable),
+        copyLabel: copyLabel,
+      ),
       child: DevToolsTooltip(
         message: originalDisplayValue,
         child: Text.rich(
@@ -98,8 +109,10 @@ class DisplayProvider extends StatelessWidget {
   }
 
   List<ContextMenuButtonItem> _getMenuButtons(
-    BuildContext context,
-  ) {
+    BuildContext context, {
+    void Function()? onCopy,
+    String? copyLabel,
+  }) {
     return [
       if (variable.isRerootable)
         ContextMenuButtonItem(
@@ -122,6 +135,11 @@ class DisplayProvider extends StatelessWidget {
           },
           label: 'Inspect',
         ),
+      if (onCopy != null)
+        ContextMenuButtonItem(
+          onPressed: () => onCopy(),
+          label: copyLabel,
+        )
     ];
   }
 

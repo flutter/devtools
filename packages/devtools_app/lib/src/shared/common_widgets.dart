@@ -1371,6 +1371,18 @@ class _JsonViewerState extends State<JsonViewer>
               }
               return ExpandableVariable(
                 variable: variable,
+                onCopy: (copiedVariable) {
+                  unawaited(
+                    copyToClipboard(
+                      json.encode(
+                        serviceConnection
+                            .serviceManager.service!.fakeServiceCache
+                            .instanceToJson(copiedVariable.value as Instance),
+                      ),
+                      'JSON copied to clipboard',
+                    ),
+                  );
+                },
               );
             },
           ),
