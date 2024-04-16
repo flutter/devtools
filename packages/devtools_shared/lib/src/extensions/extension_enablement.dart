@@ -14,7 +14,6 @@ import 'yaml_utils.dart';
 
 /// Manages the `devtools_options.yaml` file and allows read / write access.
 class DevToolsOptions {
-  static const optionsFileName = 'devtools_options.yaml';
   static const _extensionsKey = 'extensions';
   static const _descriptionKey = 'description';
   static const _documentationKey = 'documentation';

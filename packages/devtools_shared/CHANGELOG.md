@@ -6,6 +6,8 @@ to `ExtensionsApi.packageRootUriPropertyName`, and modify the String value
 for the parameter from 'rootPath' to 'packageRootUri'.
 * **Breaking change:** add new required JSON fields "devtoolsOptionsUri" and
 "detectedFromStaticContext" in the `DevToolsExtensionConfig.parse` factory constructor.
+* **Breaking change:** remove `DevToolsOptions.optionsFileName` constant in favor of
+new constant `devtoolsOptionsFileName`.
 * Add new fields `requiresConnection`, `devtoolsOptionsUri`, and `detectedFromStaticContext`
 to `DevToolsExtensionConfig`.
 * Return valid extensions from the `apiServeAvailableExtensions` endpoint even when

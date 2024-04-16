@@ -6,7 +6,7 @@ import 'package:collection/collection.dart';
 import 'package:extension_discovery/extension_discovery.dart';
 import 'package:path/path.dart' as path;
 
-import '../../devtools_extensions_io.dart';
+import 'constants.dart';
 import 'extension_model.dart';
 
 /// The default location for the DevTools extension, relative to
@@ -147,7 +147,7 @@ class ExtensionsManager {
           // devtools_options.yaml at the same location as the workspace's
           // .dart_tool/package_config.json file.
           DevToolsExtensionConfig.devtoolsOptionsUriKey:
-              path.join(rootFileUriString, DevToolsOptions.optionsFileName),
+              path.join(rootFileUriString, devtoolsOptionsFileName),
           DevToolsExtensionConfig.isPubliclyHostedKey: isPubliclyHosted,
           DevToolsExtensionConfig.detectedFromStaticContextKey:
               staticContext.toString(),
