@@ -52,8 +52,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## VS Code Sidebar updates
 
-* Added a DevTools section with a list of tools that are available without a debug
-session. - [#7598](https://github.com/flutter/devtools/pull/7598)
+* Added a DevTools section with a list of tools and extensions that are available without
+a debug session. - [#7598](https://github.com/flutter/devtools/pull/7598), [#7604](https://github.com/flutter/devtools/pull/7604)
 
 ## DevTools Extension updates
 
