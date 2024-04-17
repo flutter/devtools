@@ -1266,11 +1266,9 @@ class TextViewer extends StatelessWidget {
     } else {
       displayText = text;
     }
-    return SelectionArea(
-      child: Text(
-        displayText,
-        style: style,
-      ),
+    return SelectableText(
+      displayText,
+      style: style,
     );
   }
 }
