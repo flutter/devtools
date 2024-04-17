@@ -129,7 +129,7 @@ class MemoryController extends DisposableController
         );
     profile = profilePaneController ??
         offlineData?.profile ??
-        ProfilePaneController();
+        ProfilePaneController(mode: _mode);
     control = MemoryControlPaneController(
       chart.memoryTimeline,
       isChartVisible: chart.isChartVisible,
