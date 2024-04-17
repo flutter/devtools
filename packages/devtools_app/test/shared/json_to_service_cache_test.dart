@@ -137,41 +137,43 @@ void main() {
     });
   });
 
-  test('instanceToJson converts Instances back to the JSON that created them',
-      () {
-    const data = <String, Object?>{
-      'id': 1,
-      'map': {
-        'foo': 'bar',
-        'baz': [
-          'a',
-          null,
-        ],
-      },
-      'list': [
-        [
-          7,
-          '8',
-          9.0,
-        ],
-        1,
-        '2',
-        4.9,
-        true,
-        null,
-        {
-          'a': 'b',
-          'c': 'd',
+  test(
+    'instanceToJson converts Instances back to the JSON that created them',
+    () {
+      const data = <String, Object?>{
+        'id': 1,
+        'map': {
+          'foo': 'bar',
+          'baz': [
+            'a',
+            null,
+          ],
         },
-      ],
-      'aNullValue': null,
-    };
+        'list': [
+          [
+            7,
+            '8',
+            9.0,
+          ],
+          1,
+          '2',
+          4.9,
+          true,
+          null,
+          {
+            'a': 'b',
+            'c': 'd',
+          },
+        ],
+        'aNullValue': null,
+      };
 
-    final cache = JsonToServiceCache();
-    final root = cache.insertJsonObject(data);
+      final cache = JsonToServiceCache();
+      final root = cache.insertJsonObject(data);
 
-    final rootConvertedBackToJson = cache.instanceToJson(root);
+      final rootConvertedBackToJson = cache.instanceToJson(root);
 
-    expect(rootConvertedBackToJson, data);
-  });
+      expect(rootConvertedBackToJson, data);
+    },
+  );
 }

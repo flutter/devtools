@@ -14,10 +14,10 @@ import 'package:shelf/shelf.dart';
 import 'package:test/test.dart';
 
 import '../fakes.dart';
+import '../helpers/helpers.dart';
 
 late Directory testDirectory;
 late String projectRoot;
-import '../helpers/helpers.dart';
 
 void main() {
   late ExtensionsManager extensionsManager;
