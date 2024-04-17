@@ -104,7 +104,8 @@ final class IsolateManager with DisposerMixin {
     // new isolate will start paused. Therefore resume it (unless it is the
     // current isolate, in which case the breakpoint manager will resume it
     // after setting breakpoints):
-    if (selectedIsolate.value?.id != isolateRef.id) {
+    final selectedIsolateId = selectedIsolate.value?.id;
+    if (selectedIsolateId != null && selectedIsolateId != isolateRef.id) {
       await resumeIsolate(isolateRef);
     }
   }
