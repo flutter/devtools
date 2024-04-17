@@ -7,16 +7,18 @@ import 'dart:async';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
+import '../../extensions/extension_screen.dart';
+import '../../extensions/extension_service.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/screen.dart';
 import '../api/vs_code_api.dart';
 
+/// A widget that displays DevTools options, including buttons to open static
+/// screens, and a list of static DevTools extensions available for the IDE
+/// workspace.
 class DevToolsSidebarOptions extends StatelessWidget {
-  const DevToolsSidebarOptions({
-    required this.api,
-    super.key,
-  });
+  const DevToolsSidebarOptions({required this.api, super.key});
 
   final VsCodeApi api;
 
@@ -66,6 +68,8 @@ class DevToolsSidebarOptions extends StatelessWidget {
             'application.',
           ),
         ),
+        const SizedBox(height: denseSpacing),
+        _DevToolsExtensions(api: api),
       ],
     );
   }
@@ -81,6 +85,94 @@ class DevToolsSidebarOptions extends StatelessWidget {
       ScreenMetaData.cpuProfiler => false,
       _ => !screen.requiresConnection,
     };
+  }
+}
+
+class _DevToolsExtensions extends StatefulWidget {
+  const _DevToolsExtensions({required this.api});
+
+  final VsCodeApi api;
+
+  @override
+  State<_DevToolsExtensions> createState() => _DevToolsExtensionsState();
+}
+
+class _DevToolsExtensionsState extends State<_DevToolsExtensions> {
+  ExtensionService? _extensionService;
+
+  @override
+  void initState() {
+    super.initState();
+    _initExtensions();
+  }
+
+  void _initExtensions() {
+    _extensionService = ExtensionService(ignoreServiceConnection: true);
+    unawaited(_extensionService!.initialize());
+  }
+
+  @override
+  void dispose() {
+    _extensionService?.dispose();
+    _extensionService = null;
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'DevTools Extensions',
+          style: theme.textTheme.titleMedium,
+        ),
+        ValueListenableBuilder(
+          valueListenable: _extensionService!.visibleExtensions,
+          builder: (context, extensions, _) {
+            if (extensions.isEmpty) {
+              return const Padding(
+                padding: EdgeInsets.only(left: borderPadding),
+                child: Text('No extensions detected.'),
+              );
+            }
+            return Table(
+              defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+              children: [
+                for (final ext in extensions)
+                  _createDevToolsScreenRow(
+                    label: ext.name,
+                    icon: ext.icon,
+                    api: widget.api,
+                    theme: theme,
+                    onPressed: () {
+                      ga.select(
+                        gac.VsCodeFlutterSidebar.id,
+                        gac.VsCodeFlutterSidebar.openDevToolsScreen(
+                          gac.DevToolsExtensionEvents.extensionScreenName(ext),
+                        ),
+                      );
+                      unawaited(
+                        widget.api.openDevToolsPage(null, page: ext.screenId),
+                      );
+                    },
+                  ),
+              ],
+            );
+          },
+        ),
+        const PaddedDivider.thin(),
+        const Padding(
+          padding: EdgeInsets.only(left: borderPadding),
+          child: Text(
+            'Begin a debug session to use extensions that require a running '
+            'application.',
+          ),
+        ),
+      ],
+    );
   }
 }
 
