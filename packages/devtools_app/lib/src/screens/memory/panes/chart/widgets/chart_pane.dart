@@ -98,7 +98,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
       }
 
       final allValues = ChartsValues(
-        widget.chart.memoryTimeline,
+        widget.chart.data.timeline,
         isAndroidChartVisible: widget.chart.isAndroidChartVisible,
         index: value.index,
         timestamp: value.timestamp ?? _timestamp,
@@ -176,7 +176,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
                         height: defaultChartHeight,
                         child: MemoryAndroidChart(
                           widget.chart.android,
-                          widget.chart.memoryTimeline,
+                          widget.chart.data.timeline,
                         ),
                       ),
                   ],
@@ -185,7 +185,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
               // The legend.
               MultiValueListenableBuilder(
                 listenables: [
-                  widget.chart.isLegendVisible,
+                  widget.chart.data.isLegendVisible,
                   widget.chart.isAndroidChartVisible,
                 ],
                 builder: (_, values, __) {

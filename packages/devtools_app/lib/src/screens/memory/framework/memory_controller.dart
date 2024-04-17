@@ -125,13 +125,13 @@ class MemoryController extends DisposableController
     diff = diffPaneController ??
         offlineData?.diff ??
         DiffPaneController(
-          loader: HeapGraphLoaderRuntime(chart.memoryTimeline),
+          loader: HeapGraphLoaderRuntime(chart.data.timeline),
         );
     profile = profilePaneController ??
         offlineData?.profile ??
         ProfilePaneController();
     control = MemoryControlPaneController(
-      chart.memoryTimeline,
+      chart.data.timeline,
       isChartVisible: chart.isChartVisible,
       exportData: exportData,
     );
