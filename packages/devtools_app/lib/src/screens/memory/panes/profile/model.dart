@@ -15,6 +15,17 @@ class _Json {
 }
 
 class AdaptedProfile {
+  AdaptedProfile._(
+    this.records,
+    this._total,
+    this._items,
+    this._itemsFiltered,
+    this.filter,
+    this.newSpaceGCStats,
+    this.oldSpaceGCStats,
+    this.totalGCStats,
+  );
+
   AdaptedProfile.fromAllocationProfile(
     AllocationProfile profile,
     this.filter,
@@ -71,12 +82,19 @@ class AdaptedProfile {
   factory AdaptedProfile.fromJson(Map<String, dynamic> json) {
     final profile =
         AllocationProfile.fromJson(json[_Json.data] as Map<String, dynamic>);
-    final rootPackage = json['rootPackage'] as String?;
+    final rootPackage = json[_Json.rootPackage] as String?;
     return AdaptedProfile.fromAllocationProfile(
       profile,
       ClassFilter.empty(),
       rootPackage,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      _Json.data: records,
+      _Json.rootPackage: rootPackage,
+    };
   }
 
   /// A record per class plus one total record, with applied filter.
