@@ -8,5 +8,16 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('$ExtensionService', () {
     // TODO(kenz): add tests for the ExtensionService class.
+    test('refresh', () {});
+
+    test('deduplicateExtensions', () {});
+
+    test('_refreshExtensionEnabledStates', () {});
+
+    test('setExtensionEnabledState', () {});
+
+    test('ignore behavior', () {});
+
+    test('takeLatestExtension', () {});
   });
 }

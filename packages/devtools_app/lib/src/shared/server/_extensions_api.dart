@@ -8,7 +8,7 @@ part of 'server.dart';
 /// serve their assets on the server, and return the list of available
 /// extensions here.
 Future<List<DevToolsExtensionConfig>> refreshAvailableExtensions(
-  Uri appRoot,
+  Uri? appRoot,
 ) async {
   _log.fine('refreshAvailableExtensions for app root: ${appRoot.toString()}');
   if (debugDevToolsExtensions) {
@@ -18,7 +18,7 @@ Future<List<DevToolsExtensionConfig>> refreshAvailableExtensions(
     final uri = Uri(
       path: ExtensionsApi.apiServeAvailableExtensions,
       queryParameters: {
-        ExtensionsApi.packageRootUriPropertyName: appRoot.toString(),
+        ExtensionsApi.packageRootUriPropertyName: appRoot?.toString(),
       },
     );
     final resp = await request(uri.toString());
@@ -60,16 +60,20 @@ Future<List<DevToolsExtensionConfig>> refreshAvailableExtensions(
 /// DevTools extension, and optionally to set the enabled state (when [enable]
 /// is non-null).
 ///
+/// [devtoolsOptionsFileUri] is the path to the 'devtools_options.yaml' file
+/// where the enabled state for [extensionName] is stored.
+///
 /// If [enable] is specified, the server will first set the enabled state
 /// to the value set forth by [enable] and then return the value that is saved
 /// to disk.
 Future<ExtensionEnabledState> extensionEnabledState({
-  required Uri appRoot,
+  required String devtoolsOptionsFileUri,
   required String extensionName,
   bool? enable,
 }) async {
   _log.fine(
-    '${enable != null ? 'setting' : 'getting'} extensionEnabledState for $extensionName',
+    '${enable != null ? 'setting' : 'getting'} extensionEnabledState for '
+    '$extensionName in options file ($devtoolsOptionsFileUri)',
   );
   if (debugDevToolsExtensions) {
     return debugHandleExtensionEnabledState(
@@ -81,7 +85,7 @@ Future<ExtensionEnabledState> extensionEnabledState({
     final uri = Uri(
       path: ExtensionsApi.apiExtensionEnabledState,
       queryParameters: {
-        ExtensionsApi.packageRootUriPropertyName: appRoot.toString(),
+        ExtensionsApi.devtoolsOptionsUriPropertyName: devtoolsOptionsFileUri,
         ExtensionsApi.extensionNamePropertyName: extensionName,
         if (enable != null)
           ExtensionsApi.enabledStatePropertyName: enable.toString(),

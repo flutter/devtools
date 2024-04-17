@@ -5,11 +5,9 @@
 import 'dart:io';
 
 import 'package:collection/collection.dart';
-import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 import 'package:yaml_edit/yaml_edit.dart';
 
-import 'constants.dart';
 import 'extension_model.dart';
 import 'yaml_utils.dart';
 
@@ -25,15 +23,17 @@ $_extensionsKey:
 ''';
 
   /// Returns the current enabled state for [extensionName] in the
-  /// 'devtools_options.yaml' file at [rootUri].
+  /// 'devtools_options.yaml' file at [devtoolsOptionsUri].
   ///
   /// If the 'devtools_options.yaml' file does not exist, it will be created
   /// with an empty set of extensions.
+  ///
+  /// [devtoolsOptionsUri] is expected to be a file:// URI.
   ExtensionEnabledState lookupExtensionEnabledState({
-    required Uri rootUri,
+    required Uri devtoolsOptionsUri,
     required String extensionName,
   }) {
-    final options = _optionsAsMap(rootUri: rootUri);
+    final options = _optionsAsMap(optionsUri: devtoolsOptionsUri);
     if (options == null) return ExtensionEnabledState.error;
 
     final extensions =
@@ -52,15 +52,17 @@ $_extensionsKey:
   }
 
   /// Sets the enabled state for [extensionName] in the
-  /// 'devtools_options.yaml' file at [rootUri].
+  /// 'devtools_options.yaml' file at [devtoolsOptionsUri].
   ///
   /// If the 'devtools_options.yaml' file does not exist, it will be created.
+  ///
+  /// [devtoolsOptionsUri] is expected to be a file:// URI.
   ExtensionEnabledState setExtensionEnabledState({
-    required Uri rootUri,
+    required Uri devtoolsOptionsUri,
     required String extensionName,
     required bool enable,
   }) {
-    final options = _optionsAsMap(rootUri: rootUri);
+    final options = _optionsAsMap(optionsUri: devtoolsOptionsUri);
     if (options == null) return ExtensionEnabledState.error;
 
     var extensions =
@@ -80,62 +82,51 @@ $_extensionsKey:
       extension[extensionName] = enable;
     }
 
-    _writeToOptionsFile(rootUri: rootUri, options: options);
+    _writeToOptionsFile(optionsUri: devtoolsOptionsUri, options: options);
 
     // Lookup the enabled state from the file we just wrote to to ensure that
     // are not returning an out of sync result.
     return lookupExtensionEnabledState(
-      rootUri: rootUri,
+      devtoolsOptionsUri: devtoolsOptionsUri,
       extensionName: extensionName,
     );
   }
 
-  /// Returns the content of the `devtools_options.yaml` file at [rootUri] as a
-  /// Map.
-  Map<String, Object?>? _optionsAsMap({required Uri rootUri}) {
-    final optionsFile = _lookupOptionsFile(rootUri);
+  /// Returns the content of the `devtools_options.yaml` file at [optionsUri]
+  /// as a Map.
+  Map<String, Object?>? _optionsAsMap({required Uri optionsUri}) {
+    final optionsFile = _lookupOptionsFile(optionsUri);
     if (optionsFile == null) return null;
     final yamlMap = loadYaml(optionsFile.readAsStringSync()) as YamlMap;
     return yamlMap.toDartMap();
   }
 
-  /// Writes the `devtools_options.yaml` file at [rootUri] with the value of
+  /// Writes the `devtools_options.yaml` file at [optionsUri] with the value of
   /// [options] as YAML.
   ///
   /// Any existing content in `devtools_options.yaml` will be overwritten.
   void _writeToOptionsFile({
-    required Uri rootUri,
+    required Uri optionsUri,
     required Map<String, Object?> options,
   }) {
     final yamlEditor = YamlEditor('');
     yamlEditor.update([], options);
-    _lookupOptionsFile(rootUri)?.writeAsStringSync(
+    _lookupOptionsFile(optionsUri)?.writeAsStringSync(
       yamlEditor.toString(),
       flush: true,
     );
   }
 
-  /// Returns the `devtools_options.yaml` file in the [rootUri] directory.
+  /// Returns the `devtools_options.yaml` file at [optionsUri].
   ///
-  /// Returns null if the directory at [rootUri] does not exist. Otherwise, if
-  /// the `devtools_options.yaml` does not already exist, it will be created
+  /// If the `devtools_options.yaml` does not already exist, it will be created
   /// and written with [_defaultOptions], and then returned.
-  File? _lookupOptionsFile(Uri rootUri) {
-    final rootDir = Directory.fromUri(rootUri);
-    if (!rootDir.existsSync()) {
-      // ignore: avoid_print, intentional print for server-side logs.
-      print('Directory does not exist at path: ${rootUri.toString()}');
-      return null;
-    }
-
-    final optionsFile = File(path.join(rootDir.path, devtoolsOptionsFileName));
+  File? _lookupOptionsFile(Uri optionsUri) {
+    final optionsFile = File.fromUri(optionsUri);
     if (!optionsFile.existsSync()) {
       optionsFile
-        ..createSync()
-        ..writeAsStringSync(
-          _defaultOptions,
-          flush: true,
-        );
+        ..createSync(recursive: true)
+        ..writeAsStringSync(_defaultOptions, flush: true);
     }
     return optionsFile;
   }

@@ -115,6 +115,30 @@ final List<DevToolsExtensionConfig> debugExtensions = [
     DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
     DevToolsExtensionConfig.detectedFromStaticContextKey: 'true',
   }),
+  // Static extension that is a newer version of another static extension.
+  DevToolsExtensionConfig.parse({
+    DevToolsExtensionConfig.nameKey: 'bar',
+    DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
+    DevToolsExtensionConfig.versionKey: '2.1.0', // Newer version.
+    DevToolsExtensionConfig.materialIconCodePointKey: 0xe638,
+    DevToolsExtensionConfig.requiresConnectionKey: 'false',
+    DevToolsExtensionConfig.extensionAssetsUriKey: '/path/to/bar',
+    DevToolsExtensionConfig.devtoolsOptionsUriKey: '/path/to/options/file',
+    DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
+    DevToolsExtensionConfig.detectedFromStaticContextKey: 'true',
+  }),
+  // Static extension that is a duplicate of a runtime extension.
+  DevToolsExtensionConfig.parse({
+    DevToolsExtensionConfig.nameKey: 'foo',
+    DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
+    DevToolsExtensionConfig.versionKey: '1.0.0',
+    DevToolsExtensionConfig.materialIconCodePointKey: '0xe0b1',
+    DevToolsExtensionConfig.requiresConnectionKey: 'false',
+    DevToolsExtensionConfig.extensionAssetsUriKey: '/path/to/foo',
+    DevToolsExtensionConfig.devtoolsOptionsUriKey: '/path/to/options/file',
+    DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
+    DevToolsExtensionConfig.detectedFromStaticContextKey: 'true',
+  }),
 ];
 
 /// Enable this flag to debug the DevTools survey logic.

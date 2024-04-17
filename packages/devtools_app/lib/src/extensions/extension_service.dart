@@ -4,32 +4,45 @@
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_extensions.dart';
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 
 import '../shared/globals.dart';
+import '../shared/primitives/utils.dart';
 import '../shared/server/server.dart' as server;
 
 final _log = Logger('ExtensionService');
 
+// TODO(https://github.com/flutter/devtools/issues/7594): detect extensions from
+// globally activated pub packages.
+
 class ExtensionService extends DisposableController
     with AutoDisposeControllerMixin {
-  ExtensionService({this.fixedAppRoot});
+  ExtensionService({this.fixedAppRoot, this.ignoreServiceConnection = false});
 
   /// The fixed (unchanging) root file:// URI for the application this
   /// [ExtensionService] will manage DevTools extensions for.
   ///
-  /// When null, the root will be calculated from the [serviceManager]'s
+  /// When null, [_appRoot] will be calculated from the [serviceManager]'s
   /// currently connected app. See [_initAppRoot].
   final Uri? fixedAppRoot;
+
+  /// Whether to ignore the VM service connection for the context of this
+  /// service.
+  final bool ignoreServiceConnection;
 
   /// The root file:// URI for the Dart / Flutter application this
   /// [ExtensionService] will manage DevTools extensions for.
   Uri? _appRoot;
 
-  /// All the DevTools extensions that are available for the connected
-  /// application, regardless of whether they have been enabled or disabled
-  /// by the user.
+  /// All the DevTools extensions, runtime and static, that are available for
+  /// the connected application, regardless of whether they have been enabled or
+  /// disabled by the user.
+  ///
+  /// This set of extensions will include one version of a DevTools extension
+  /// per package and will exclude any duplicates that have been marked as
+  /// ignored in [deduplicateExtensions].
   ValueListenable<List<DevToolsExtensionConfig>> get availableExtensions =>
       _availableExtensions;
   final _availableExtensions = ValueNotifier<List<DevToolsExtensionConfig>>([]);
@@ -39,6 +52,23 @@ class ExtensionService extends DisposableController
   ValueListenable<List<DevToolsExtensionConfig>> get visibleExtensions =>
       _visibleExtensions;
   final _visibleExtensions = ValueNotifier<List<DevToolsExtensionConfig>>([]);
+
+  /// DevTools extensions available in the user's project that do not require a
+  /// running application.
+  ///
+  /// The user's project roots are detected from the Dart Tooling Daemon.
+  /// Extensions are then derived from the `package_config.json` files contained
+  /// in each of these project roots.
+  ///
+  /// Any static extensions that match a detected runtime extension will be
+  /// ignored to prevent duplicates.
+  var _staticExtensions = <DevToolsExtensionConfig>[];
+
+  /// DevTools extensions available for the connected VM service.
+  ///
+  /// These extensions are derived from the `package_config.json` file contained
+  /// in the package root of the main isolate's root library.
+  var _runtimeExtensions = <DevToolsExtensionConfig>[];
 
   /// Returns the [ValueListenable] that stores the [ExtensionEnabledState] for
   /// the DevTools Extension with [extensionName].
@@ -61,28 +91,24 @@ class ExtensionService extends DisposableController
       <String, ValueNotifier<ExtensionEnabledState>>{};
 
   Future<void> initialize() async {
-    await _initAppRoot();
-    await _maybeRefreshExtensions();
-
+    await _refresh(
+      connected: ignoreServiceConnection
+          ? false
+          : serviceConnection.serviceManager.connectedState.value.connected,
+    );
     cancelListeners();
 
     // We only need to add VM service manager related listeners when we are
     // interacting with the currently connected app (i.e. when
     // [fixedAppRootUri] is null).
-    if (fixedAppRoot == null) {
+    if (fixedAppRoot == null && !ignoreServiceConnection) {
       addAutoDisposeListener(
         serviceConnection.serviceManager.connectedState,
         () async {
-          if (serviceConnection.serviceManager.connectedState.value.connected) {
-            _log.fine(
-              'established new app connection. Initializing and refreshing.',
-            );
-            await _initAppRoot();
-            await _maybeRefreshExtensions();
-          } else {
-            _log.fine('app disconnected. Initializing and refreshing.');
-            _reset();
-          }
+          await _refresh(
+            connected:
+                serviceConnection.serviceManager.connectedState.value.connected,
+          );
         },
       );
 
@@ -91,15 +117,11 @@ class ExtensionService extends DisposableController
       addAutoDisposeListener(
         serviceConnection.serviceManager.isolateManager.mainIsolate,
         () async {
-          if (serviceConnection
-                  .serviceManager.isolateManager.mainIsolate.value !=
-              null) {
-            _log.fine('main isolate changed. Initializing and refreshing.');
-            await _initAppRoot();
-            await _maybeRefreshExtensions();
-          } else {
-            _reset();
-          }
+          await _refresh(
+            connected: serviceConnection
+                    .serviceManager.isolateManager.mainIsolate.value !=
+                null,
+          );
         },
       );
     }
@@ -116,31 +138,100 @@ class ExtensionService extends DisposableController
     // .dart_tool/package_config.json file for changes.
   }
 
-  Future<void> _initAppRoot() async {
-    _appRoot = fixedAppRoot ?? await _connectedAppRoot();
-  }
+  Future<void> _refresh({required bool connected}) async {
+    _reset();
 
-  Future<void> _maybeRefreshExtensions() async {
-    if (_appRoot == null) return;
+    _appRoot = fixedAppRoot;
+    if (connected && !ignoreServiceConnection) {
+      _appRoot = await _connectedAppRoot();
+    } else {
+      _appRoot = null;
+    }
+
+    // TODO(kenz): gracefully handle app connections / disconnects when there
+    // are already static extensions in use. The current code resets everything
+    // when connection states change or hot restarts occur.
 
     _refreshInProgress.value = true;
-    _availableExtensions.value =
-        await server.refreshAvailableExtensions(_appRoot!)
-          ..sort();
+    final allExtensions = await server.refreshAvailableExtensions(_appRoot);
+    _runtimeExtensions =
+        allExtensions.where((e) => !e.detectedFromStaticContext).toList();
+    _staticExtensions = allExtensions
+        .where((e) => e.detectedFromStaticContext && !e.requiresConnection)
+        .toList();
+    deduplicateExtensions();
+    _availableExtensions.value = [
+      ..._runtimeExtensions,
+      ..._staticExtensions.where((ext) => !ext.ignored),
+    ]..sort();
     await _refreshExtensionEnabledStates();
     _refreshInProgress.value = false;
   }
 
-  Future<void> _refreshExtensionEnabledStates() async {
-    if (_appRoot == null) return;
+  @visibleForTesting
+  void deduplicateExtensions() {
+    // TODO(kenz): consider handling duplicates in a way that gives the user a
+    // choice of which version they want to use.
+    _deduplicateStaticExtensionsWithStaticExtensions();
+    _deduplicateStaticExtensionsWithRuntimeExtensions();
+  }
 
+  /// De-duplicates static extensions from other static extensions by ignoring
+  /// all that are not the latest version when there are duplicates.
+  void _deduplicateStaticExtensionsWithStaticExtensions() {
+    final deduped = <String>{};
+    for (final staticExtension in _staticExtensions) {
+      if (deduped.contains(staticExtension.name)) continue;
+      deduped.add(staticExtension.name);
+
+      final duplicates =
+          _staticExtensions.where((e) => e.name == staticExtension.name);
+      var latest = staticExtension;
+      for (final duplicate in duplicates) {
+        latest = takeLatestExtension(latest, duplicate);
+      }
+      latest.ignore(false);
+      for (final duplicate in duplicates) {
+        if (duplicate != latest) {
+          _log.fine(
+            'ignoring duplicate static extension ${duplicate.name}, '
+            '${duplicate.devtoolsOptionsUri}',
+          );
+          duplicate.ignore();
+        }
+      }
+    }
+  }
+
+  // De-duplicates unignored static extensions from runtime extensions by
+  // ignoring the static extension when there is a duplicate.
+  void _deduplicateStaticExtensionsWithRuntimeExtensions() {
+    for (final staticExtension
+        in _staticExtensions.where((ext) => !ext.ignored)) {
+      // TODO(kenz): do we need to match on something other than name? Names
+      // _should_ be unique since they match a pub package name, but this may
+      // not always be true for extensions that are not published on pub or
+      // extensions that do not follow best practices for naming.
+      final isRuntimeDuplicate = _runtimeExtensions
+          .containsWhere((ext) => ext.name == staticExtension.name);
+      if (isRuntimeDuplicate) {
+        _log.fine(
+          'ignoring runtime extension duplicate (static) '
+          '${staticExtension.name}, ${staticExtension.devtoolsOptionsUri}',
+        );
+        staticExtension.ignore();
+      }
+    }
+  }
+
+  Future<void> _refreshExtensionEnabledStates() async {
     final onlyIncludeEnabled =
         preferences.devToolsExtensions.showOnlyEnabledExtensions.value;
 
     final visible = <DevToolsExtensionConfig>[];
     for (final extension in _availableExtensions.value) {
       final stateFromOptionsFile = await server.extensionEnabledState(
-        appRoot: _appRoot!,
+        devtoolsOptionsFileUri: extension.devtoolsOptionsUri,
         extensionName: extension.name,
       );
       final stateNotifier = _extensionEnabledStates.putIfAbsent(
@@ -168,23 +259,33 @@ class ExtensionService extends DisposableController
     _visibleExtensions.value = visible;
   }
 
-  /// Sets the enabled state for [extension].
+  /// Sets the enabled state for [extension] and any currently ignored
+  /// duplicates of [extension].
   Future<void> setExtensionEnabledState(
     DevToolsExtensionConfig extension, {
     required bool enable,
   }) async {
-    if (_appRoot == null) return;
-
-    await server.extensionEnabledState(
-      appRoot: _appRoot!,
-      extensionName: extension.name,
-      enable: enable,
-    );
+    // Set the enabled state for all matching extensions, even if some are
+    // marked as ignored due to being a duplicate. This ensures that
+    // devtools_options.yaml files are kept in sync across the project.
+    final allMatchingExtensions = [..._runtimeExtensions, ..._staticExtensions]
+        .where((e) => e.name == extension.name);
+    for (final ext in allMatchingExtensions) {
+      await server.extensionEnabledState(
+        devtoolsOptionsFileUri: ext.devtoolsOptionsUri,
+        extensionName: ext.name,
+        enable: enable,
+      );
+    }
     await _refreshExtensionEnabledStates();
   }
 
   void _reset() {
     _appRoot = null;
+    _runtimeExtensions.clear();
+    _staticExtensions.clear();
+    _ignoredStaticExtensionsByHashCode.clear();
+
     _availableExtensions.value = [];
     _visibleExtensions.value = [];
     _extensionEnabledStates.clear();
@@ -197,4 +298,63 @@ Future<Uri?> _connectedAppRoot() async {
       await serviceConnection.rootPackageDirectoryForMainIsolate();
   if (packageUriString == null) return null;
   return Uri.parse(packageUriString);
+}
+
+extension on DevToolsExtensionConfig {
+  /// Whether this extension configuration should be ignored.
+  ///
+  /// An extension may be ignored if it is a duplicate or if it is an older
+  /// version of an existing extension, for example.
+  bool get ignored =>
+      _ignoredStaticExtensionsByHashCode.contains(identityHashCode(this));
+
+  /// Marks this extension configuration as ignored or unignored based on the
+  /// value of [ignore].
+  ///
+  /// An extension may be ignored if it is a duplicate or if it is an older
+  /// version of an existing extension, for example.
+  void ignore([bool ignore = true]) {
+    if (ignore) {
+      _ignoredStaticExtensionsByHashCode.add(identityHashCode(this));
+    } else {
+      _ignoredStaticExtensionsByHashCode.remove(identityHashCode(this));
+    }
+  }
+}
+
+final _ignoredStaticExtensionsByHashCode = <int>{};
+
+/// Compares the versions of extension configurations [a] and [b] and returns
+/// the extension configuration with the latest version, following semantic
+/// versioning rules.
+@visibleForTesting
+DevToolsExtensionConfig takeLatestExtension(
+  DevToolsExtensionConfig a,
+  DevToolsExtensionConfig b,
+) {
+  bool exceptionParsingA = false;
+  bool exceptionParsingB = false;
+  SemanticVersion? versionA;
+  SemanticVersion? versionB;
+  try {
+    versionA = SemanticVersion.parse(a.version);
+  } catch (_) {
+    exceptionParsingA = true;
+  }
+
+  try {
+    versionB = SemanticVersion.parse(b.version);
+  } catch (_) {
+    exceptionParsingB = true;
+  }
+
+  if (exceptionParsingA || exceptionParsingB) {
+    if (exceptionParsingA) {
+      return b;
+    }
+    return a;
+  }
+
+  final versionCompare = versionA!.compareTo(versionB!);
+  return versionCompare >= 0 ? a : b;
 }

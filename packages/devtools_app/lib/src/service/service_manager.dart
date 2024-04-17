@@ -119,7 +119,10 @@ class ServiceConnectionManager {
 
     // Set up analytics dimensions for the connected app.
     ga.setupUserApplicationDimensions();
+
     if (FeatureFlags.devToolsExtensions) {
+      // TODO(kenz): calling this again may result in losing state for any
+      // static extensions in use before we connected to an app.
       await extensionService.initialize();
     }
 
