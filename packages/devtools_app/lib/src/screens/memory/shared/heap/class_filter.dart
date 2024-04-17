@@ -75,8 +75,6 @@ class ClassFilter {
     );
   }
 
-  // TODO: use an extension type for the Json parsing, https://github.com/flutter/devtools/issues/6972
-  // https://github.com/flutter/devtools/pull/7572#discussion_r1563130198
   Map<String, dynamic> toJson() {
     return {
       _Json.type: filterType.name,
