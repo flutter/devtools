@@ -62,7 +62,7 @@ class ExtensionManager {
     }
 
     final vmServiceUri = queryParams[_vmServiceQueryParameter];
-    if (vmServiceUri == null) {
+    if (vmServiceUri == null && !_useSimulatedEnvironment) {
       // Request the vm service uri for the connected app. DevTools will
       // respond with a [DevToolsPluginEventType.connectedVmService] event
       // containing the currently connected app's vm service URI.
