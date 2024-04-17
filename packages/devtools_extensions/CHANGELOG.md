@@ -1,4 +1,5 @@
 ## 0.2.0-dev.0
+* Update `extension_config_spec.md` to include an optional field `requiresConnection`.
 * Bump `devtools_shared` dependency to `^10.0.0`.
 * Fix file locations in the `dart_foo` extension example.
 

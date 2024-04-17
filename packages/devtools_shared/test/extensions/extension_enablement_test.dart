@@ -28,8 +28,7 @@ void main() {
     File optionsFileFromTmp() {
       final tmpFiles = tmpDir.listSync();
       expect(tmpFiles, isNotEmpty);
-      final optionsFile =
-          File('${tmpDir.path}/${DevToolsOptions.optionsFileName}');
+      final optionsFile = File('${tmpDir.path}/$devtoolsOptionsFileName');
       expect(optionsFile.existsSync(), isTrue);
       return optionsFile;
     }
