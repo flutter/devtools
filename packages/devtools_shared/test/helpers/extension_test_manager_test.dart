@@ -64,7 +64,7 @@ environment:
 name: static_extension_1
 issueTracker: https://www.google.com/
 version: 1.0.0
-materialIconCodePoint: 0xe50a
+materialIconCodePoint: 58634
 requiresConnection: false
 ''',
       );
@@ -96,7 +96,7 @@ environment:
 name: static_extension_2
 issueTracker: https://www.google.com/
 version: 2.0.0
-materialIconCodePoint: 0xe50a
+materialIconCodePoint: 58634
 requiresConnection: false
 ''',
       );
@@ -131,7 +131,7 @@ environment:
 name: static_extension_1
 issueTracker: https://www.google.com/
 version: 2.0.0
-materialIconCodePoint: 0xe50a
+materialIconCodePoint: 58634
 requiresConnection: false
 ''',
       );
@@ -163,7 +163,7 @@ environment:
 name: BAD_EXTENSION
 issueTracker: https://www.google.com/
 version: 1.0.0
-materialIconCodePoint: 0xe50a
+materialIconCodePoint: 58634
 
 ''',
       );
