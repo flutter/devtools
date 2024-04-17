@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../../../../../shared/analytics/constants.dart' as gac;
+import '../../../../../shared/common_widgets.dart';
 import '../controller/control_pane_controller.dart';
 import 'primary_controls.dart';
 import 'secondary_controls.dart';
@@ -18,13 +20,16 @@ class MemoryControlPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        PrimaryControls(controller: controller),
-        const Spacer(),
-        SecondaryControls(controller: controller),
-      ],
+    return OfflineAwareControls(
+      gaScreen: gac.performance,
+      controlsBuilder: (offline) => Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          PrimaryControls(controller: controller),
+          const Spacer(),
+          SecondaryControls(controller: controller, offline: offline),
+        ],
+      ),
     );
   }
 }

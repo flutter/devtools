@@ -170,10 +170,6 @@ void main() {
               );
 
               expect(
-                inspectorServiceLocal.rootPackages.toList(),
-                equals(['flutter_app']),
-              );
-              expect(
                 inspectorServiceLocal.rootPackagePrefixes.toList(),
                 isEmpty,
               );
@@ -182,48 +178,8 @@ void main() {
                 ['/usr/jacobr/foo/lib', '/usr/jacobr/bar/lib/bla'],
               );
               expect(
-                inspectorServiceLocal.rootPackages.toList(),
-                equals(['foo', 'bar']),
-              );
-              expect(
                 inspectorServiceLocal.rootPackagePrefixes.toList(),
                 isEmpty,
-              );
-
-              expect(
-                inspectorServiceLocal.isLocalUri('package:foo/src/bar.dart'),
-                isTrue,
-              );
-              expect(
-                inspectorServiceLocal
-                    .isLocalUri('package:foo.bla/src/bar.dart'),
-                isFalse,
-              );
-              expect(
-                inspectorServiceLocal.isLocalUri('package:foos/src/bar.dart'),
-                isFalse,
-              );
-              expect(
-                inspectorServiceLocal.isLocalUri('package:bar/src/bar.dart'),
-                isTrue,
-              );
-              expect(
-                inspectorServiceLocal.isLocalUri(
-                  'package:bar.core/src/bar.dart',
-                ),
-                isFalse,
-              );
-              expect(
-                inspectorServiceLocal.isLocalUri(
-                  'package:bar.core.bla/src/bar.dart',
-                ),
-                isFalse,
-              );
-              expect(
-                inspectorServiceLocal.isLocalUri(
-                  'package:bar.cores/src/bar.dart',
-                ),
-                isFalse,
               );
             } finally {
               // Restore.
@@ -251,10 +207,6 @@ void main() {
               ['/usr/me/clients/google3/foo/bar/baz/lib/src/bla'],
             );
             expect(
-              inspectorServiceLocal.rootPackages.toList(),
-              equals(['foo.bar.baz']),
-            );
-            expect(
               inspectorServiceLocal.rootPackagePrefixes.toList(),
               equals(['foo.bar.baz.']),
             );
@@ -263,12 +215,6 @@ void main() {
               '/usr/me/clients/google3/foo/bar/baz/lib/src/bla',
               '/usr/me/clients/google3/foo/core/lib',
             ]);
-            expect(
-              inspectorServiceLocal.rootPackages.toList(),
-              equals(
-                ['foo.bar.baz', 'foo.core'],
-              ),
-            );
             expect(
               inspectorServiceLocal.rootPackagePrefixes.toList(),
               equals(
@@ -282,12 +228,6 @@ void main() {
               '/usr/me/clients/google3/foo/core/',
             ]);
             expect(
-              inspectorServiceLocal.rootPackages.toList(),
-              equals(
-                ['foo.bar.baz', 'foo.core'],
-              ),
-            );
-            expect(
               inspectorServiceLocal.rootPackagePrefixes.toList(),
               equals(
                 ['foo.bar.baz.', 'foo.core.'],
@@ -298,55 +238,14 @@ void main() {
               '/usr/me/clients/google3/third_party/dart_src/bar/core/lib',
             ]);
             expect(
-              inspectorServiceLocal.rootPackages.toList(),
-              equals(['foo', 'bar.core']),
-            );
-            expect(
               inspectorServiceLocal.rootPackagePrefixes.toList(),
               equals(['foo.', 'bar.core.']),
-            );
-
-            expect(
-              inspectorServiceLocal.isLocalUri('package:foo/src/bar.dart'),
-              isTrue,
-            );
-            // Package at subdirectory.
-            expect(
-              inspectorServiceLocal.isLocalUri('package:foo.bla/src/bar.dart'),
-              isTrue,
-            );
-            expect(
-              inspectorServiceLocal.isLocalUri('package:foos/src/bar.dart'),
-              isFalse,
-            );
-            expect(
-              inspectorServiceLocal.isLocalUri('package:bar/src/bar.dart'),
-              isFalse,
-            );
-            expect(
-              inspectorServiceLocal.isLocalUri('package:bar.core/src/bar.dart'),
-              isTrue,
-            );
-            // Package at subdirectory.
-            expect(
-              inspectorServiceLocal
-                  .isLocalUri('package:bar.core.bla/src/bar.dart'),
-              isTrue,
-            );
-            expect(
-              inspectorServiceLocal
-                  .isLocalUri('package:bar.cores/src/bar.dart'),
-              isFalse,
             );
 
             await inspectorServiceLocal.addPubRootDirectories([
               '/usr/me/clients/google3/third_party/dart/foo',
               '/usr/me/clients/google3/third_party/dart_src/bar/core',
             ]);
-            expect(
-              inspectorServiceLocal.rootPackages.toList(),
-              equals(['foo', 'bar.core']),
-            );
             expect(
               inspectorServiceLocal.rootPackagePrefixes.toList(),
               equals(['foo.', 'bar.core.']),
