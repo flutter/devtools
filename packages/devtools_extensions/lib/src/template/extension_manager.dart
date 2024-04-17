@@ -45,7 +45,7 @@ class ExtensionManager {
   EventListener? _handleMessageListener;
 
   // ignore: unused_element, false positive due to part files
-  Future<void> _init({required bool connectToVmService}) async {
+  Future<void> _init() async {
     window.addEventListener(
       'message',
       _handleMessageListener = _handleMessage.toJS,
@@ -62,19 +62,17 @@ class ExtensionManager {
     }
 
     final vmServiceUri = queryParams[_vmServiceQueryParameter];
-    if (connectToVmService) {
-      if (vmServiceUri == null) {
-        // Request the vm service uri for the connected app. DevTools will
-        // respond with a [DevToolsPluginEventType.connectedVmService] event
-        // containing the currently connected app's vm service URI.
-        postMessageToDevTools(
-          DevToolsExtensionEvent(
-            DevToolsExtensionEventType.vmServiceConnection,
-          ),
-        );
-      } else {
-        unawaited(_connectToVmService(vmServiceUri));
-      }
+    if (vmServiceUri == null) {
+      // Request the vm service uri for the connected app. DevTools will
+      // respond with a [DevToolsPluginEventType.connectedVmService] event
+      // containing the currently connected app's vm service URI.
+      postMessageToDevTools(
+        DevToolsExtensionEvent(
+          DevToolsExtensionEventType.vmServiceConnection,
+        ),
+      );
+    } else {
+      unawaited(_connectToVmService(vmServiceUri));
     }
   }
 
