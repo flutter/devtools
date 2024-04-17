@@ -9,20 +9,20 @@ import 'package:flutter/foundation.dart';
 
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/primitives/simple_items.dart';
-import '../../../shared/primitives/memory_timeline.dart';
-import '../data/primitives.dart';
 import 'android_chart_controller.dart';
 import 'chart_connection.dart';
+import 'chart_data.dart';
 import 'event_chart_controller.dart';
 import 'vm_chart_controller.dart';
 
 class MemoryChartPaneController extends DisposableController
     with AutoDisposeControllerMixin {
-  MemoryChartPaneController(this.mode, {this.isDeviceAndroid})
+  MemoryChartPaneController(this.mode, {bool? isDeviceAndroid})
       : assert(
           mode == DevToolsMode.connected || isDeviceAndroid != null,
           'If application is not connected, isDeviceAndroid must be provided.',
-        ) {
+        ),
+        data = ChartData(isDeviceAndroid: isDeviceAndroid) {
     unawaited(_init());
   }
 
@@ -34,13 +34,22 @@ class MemoryChartPaneController extends DisposableController
     );
   }
 
+  Map<String, dynamic> toJson() {
+    // TODO(polina-c): implement, https://github.com/flutter/devtools/issues/6972
+    return {};
+  }
+
   DevToolsMode mode;
 
-  /// Wether device is android, if [mode] is not [DevToolsMode.connected].
-  ///
-  /// If [mode] is [DevToolsMode.connected], this value should be detected
-  /// by [_chartConnection].
-  final bool? isDeviceAndroid;
+  final ChartData data;
+
+  late final ChartConnection? _chartConnection =
+      (mode == DevToolsMode.connected)
+          ? ChartConnection(
+              data.timeline,
+              isAndroidChartVisible: isAndroidChartVisible,
+            )
+          : null;
 
   Future<void> _init() async {
     _updateAndroidChartVisibility();
@@ -53,35 +62,15 @@ class MemoryChartPaneController extends DisposableController
     );
   }
 
-  Map<String, dynamic> toJson() {
-    // TODO(polina-c): implement, https://github.com/flutter/devtools/issues/6972
-    return {};
-  }
-
-  late final ChartConnection? _chartConnection =
-      (mode == DevToolsMode.connected)
-          ? ChartConnection(
-              memoryTimeline,
-              isAndroidChartVisible: isAndroidChartVisible,
-            )
-          : null;
-
-  final MemoryTimeline memoryTimeline = MemoryTimeline();
-
   late final EventChartController event =
-      EventChartController(memoryTimeline, paused: paused);
+      EventChartController(data.timeline, paused: paused);
   late final VMChartController vm =
-      VMChartController(memoryTimeline, paused: paused);
+      VMChartController(data.timeline, paused: paused);
   late final AndroidChartController android = AndroidChartController(
-    memoryTimeline,
+    data.timeline,
     sharedLabels: vm.labelTimestamps,
     paused: paused,
   );
-
-  ValueListenable<bool> get isLegendVisible => _legendVisibleNotifier;
-  final _legendVisibleNotifier = ValueNotifier<bool>(true);
-  bool toggleLegendVisibility() =>
-      _legendVisibleNotifier.value = !_legendVisibleNotifier.value;
 
   ValueNotifier<bool> isChartVisible = preferences.memory.showChart;
 
@@ -103,17 +92,6 @@ class MemoryChartPaneController extends DisposableController
     android.dirty = true;
   }
 
-  /// Default is to display default tick width based on width of chart of the collected
-  /// data in the chart.
-  final _displayInterval =
-      ValueNotifier<ChartInterval>(ChartInterval.theDefault);
-
-  set displayInterval(ChartInterval interval) {
-    _displayInterval.value = interval;
-  }
-
-  ChartInterval get displayInterval => _displayInterval.value;
-
   ValueListenable<bool> get paused => _paused;
   final _paused = ValueNotifier<bool>(true);
   void pause() => _paused.value = true;
@@ -127,7 +105,7 @@ class MemoryChartPaneController extends DisposableController
   final isAndroidChartVisible = ValueNotifier<bool>(false);
 
   void _updateAndroidChartVisibility() {
-    final isAndroid = isDeviceAndroid ?? _chartConnection!.isDeviceAndroid;
+    final isAndroid = data.isDeviceAndroid ?? _chartConnection!.isDeviceAndroid;
     isAndroidChartVisible.value =
         isAndroid && preferences.memory.androidCollectionEnabled.value;
   }
@@ -135,8 +113,7 @@ class MemoryChartPaneController extends DisposableController
   @override
   void dispose() {
     super.dispose();
-    _legendVisibleNotifier.dispose();
-    _displayInterval.dispose();
+    data.dispose();
     event.dispose();
     vm.dispose();
     android.dispose();

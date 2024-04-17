@@ -44,7 +44,7 @@ class _ChartControlPaneState extends State<ChartControlPane>
   void _clearTimeline() {
     ga.select(gac.memory, gac.clear);
 
-    widget.chart.memoryTimeline.reset();
+    widget.chart.data.timeline.reset();
 
     // Remove history of all plotted data in all charts.
     widget.chart.resetAll();
@@ -105,9 +105,9 @@ class _LegendButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
-      valueListenable: chartController.isLegendVisible,
+      valueListenable: chartController.data.isLegendVisible,
       builder: (_, legendVisible, __) => GaDevToolsButton(
-        onPressed: chartController.toggleLegendVisibility,
+        onPressed: chartController.data.toggleLegendVisibility,
         gaScreen: gac.memory,
         gaSelection: legendVisible
             ? gac.MemoryEvent.hideChartLegend
