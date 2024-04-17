@@ -12,9 +12,9 @@ import '../data/primitives.dart';
 class ChartData {
   ChartData({required this.isDeviceAndroid});
 
-  /// Wether device is android, if it [mode] is not [DevToolsMode.connected].
+  /// Wether device is android, if [mode] is not [DevToolsMode.connected].
   ///
-  /// If [mode] is [DevToolsMode.connected], this value  is null
+  /// If [mode] is [DevToolsMode.connected], this value is null
   /// and chart visibility should be detected based on connected app.
   final bool? isDeviceAndroid;
 
