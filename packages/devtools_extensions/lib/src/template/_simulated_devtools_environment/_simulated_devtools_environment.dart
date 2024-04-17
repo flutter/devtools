@@ -35,13 +35,10 @@ class SimulatedDevToolsWrapper extends StatefulWidget {
   const SimulatedDevToolsWrapper({
     super.key,
     required this.child,
-    required this.requiresRunningApplication,
     required this.onDtdConnectionChange,
   });
 
   final Widget child;
-
-  final bool requiresRunningApplication;
 
   final Future<void> Function(String?) onDtdConnectionChange;
 
@@ -156,8 +153,6 @@ class SimulatedDevToolsWrapperState extends State<SimulatedDevToolsWrapper>
                               ),
                               _SimulatedApi(
                                 simController: simController,
-                                requiresRunningApplication:
-                                    widget.requiresRunningApplication,
                                 connectedToApplication: vmServiceConnected,
                               ),
                               const PaddedDivider(),
@@ -183,21 +178,15 @@ class SimulatedDevToolsWrapperState extends State<SimulatedDevToolsWrapper>
 class _SimulatedApi extends StatelessWidget {
   const _SimulatedApi({
     required this.simController,
-    required this.requiresRunningApplication,
     required this.connectedToApplication,
   });
 
   final SimulatedDevToolsController simController;
 
-  final bool requiresRunningApplication;
-
   final bool connectedToApplication;
 
   @override
   Widget build(BuildContext context) {
-    if (requiresRunningApplication && !connectedToApplication) {
-      return const SizedBox.shrink();
-    }
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: denseSpacing),
       child: Column(
