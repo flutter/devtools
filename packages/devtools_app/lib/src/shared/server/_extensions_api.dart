@@ -15,7 +15,7 @@ Future<List<DevToolsExtensionConfig>> refreshAvailableExtensions(
     final uri = Uri(
       path: ExtensionsApi.apiServeAvailableExtensions,
       queryParameters: {
-        ExtensionsApi.extensionRootPathPropertyName: appRoot.toString(),
+        ExtensionsApi.packageRootUriPropertyName: appRoot.toString(),
       },
     );
     final resp = await request(uri.toString());
@@ -50,7 +50,7 @@ Future<List<DevToolsExtensionConfig>> refreshAvailableExtensions(
       return [];
     }
   } else if (debugDevToolsExtensions) {
-    return debugHandleRefreshAvailableExtensions(appRoot);
+    return debugHandleRefreshAvailableExtensions();
   }
   return [];
 }
@@ -74,7 +74,7 @@ Future<ExtensionEnabledState> extensionEnabledState({
     final uri = Uri(
       path: ExtensionsApi.apiExtensionEnabledState,
       queryParameters: {
-        ExtensionsApi.extensionRootPathPropertyName: appRoot.toString(),
+        ExtensionsApi.packageRootUriPropertyName: appRoot.toString(),
         ExtensionsApi.extensionNamePropertyName: extensionName,
         if (enable != null)
           ExtensionsApi.enabledStatePropertyName: enable.toString(),
@@ -91,7 +91,6 @@ Future<ExtensionEnabledState> extensionEnabledState({
     }
   } else if (debugDevToolsExtensions) {
     return debugHandleExtensionEnabledState(
-      appRoot: appRoot,
       extensionName: extensionName,
       enable: enable,
     );

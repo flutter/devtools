@@ -141,7 +141,7 @@ void main() {
         var rasterTime = 12000;
         for (var i = 0; i < totalNumFrames; i++) {
           framesController.addFrame(
-            FlutterFrame.parse({
+            FlutterFrame.fromJson({
               'number': number++,
               'startTime': startTime += 50000,
               'elapsed': elapsedTime += 50000,

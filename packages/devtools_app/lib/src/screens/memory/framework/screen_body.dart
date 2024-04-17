@@ -7,6 +7,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
 import '../../../shared/banner_messages.dart';
+import '../../../shared/common_widgets.dart';
 import '../../../shared/http/http_service.dart' as http_service;
 import '../../../shared/screen.dart';
 import '../../../shared/utils.dart';
@@ -52,21 +53,30 @@ class _ConnectedMemoryBodyState extends State<ConnectedMemoryBody>
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      key: MemoryChartPane.hoverKey,
-      children: [
-        MemoryControlPane(
-          controller: controller.control,
-        ),
-        const SizedBox(height: intermediateSpacing),
-        MemoryChartPane(
-          chart: controller.chart,
-          keyFocusNode: _focusNode,
-        ),
-        Expanded(
-          child: MemoryTabView(memoryController),
-        ),
-      ],
+    return FutureBuilder<void>(
+      future: memoryController.initialized,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          return Column(
+            key: MemoryChartPane.hoverKey,
+            children: [
+              MemoryControlPane(
+                controller: controller.control,
+              ),
+              const SizedBox(height: intermediateSpacing),
+              MemoryChartPane(
+                chart: controller.chart,
+                keyFocusNode: _focusNode,
+              ),
+              Expanded(
+                child: MemoryTabView(memoryController),
+              ),
+            ],
+          );
+        } else {
+          return const CenteredCircularProgressIndicator();
+        }
+      },
     );
   }
 }

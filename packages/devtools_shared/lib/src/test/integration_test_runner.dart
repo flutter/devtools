@@ -70,7 +70,7 @@ class IntegrationTestRunner with IOMixin {
             final testResultJson = line.substring(line.indexOf('{'));
             final testResultMap =
                 jsonDecode(testResultJson) as Map<String, Object?>;
-            final result = _IntegrationTestResult.parse(testResultMap);
+            final result = _IntegrationTestResult.fromJson(testResultMap);
             if (!result.result) {
               exceptionBuffer
                 ..writeln('$result')
@@ -147,7 +147,7 @@ class IntegrationTestRunner with IOMixin {
 class _IntegrationTestResult {
   _IntegrationTestResult._(this.result, this.methodName, this.details);
 
-  factory _IntegrationTestResult.parse(Map<String, Object?> json) {
+  factory _IntegrationTestResult.fromJson(Map<String, Object?> json) {
     final result = json[resultKey] == 'true';
     final failureDetails =
         (json[failureDetailsKey] as List<Object?>).cast<String>().firstOrNull ??

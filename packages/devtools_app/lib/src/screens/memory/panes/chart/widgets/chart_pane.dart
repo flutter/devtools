@@ -136,26 +136,10 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
       _addTapLocationListener(location, allLocations);
     }
 
-    addAutoDisposeListener(widget.chart.refreshCharts, () {
-      setState(() {
-        widget.chart.recomputeChartData();
-      });
-    });
-
     // There is no listener passed, so SetState will be invoked.
     addAutoDisposeListener(
       widget.chart.isAndroidChartVisible,
     );
-
-    _updateListeningState();
-  }
-
-  void _updateListeningState() async {
-    await serviceConnection.serviceManager.onServiceAvailable;
-
-    if (!widget.chart.hasStarted) {
-      widget.chart.startTimeline();
-    }
   }
 
   @override
@@ -233,8 +217,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
   @override
   void dispose() {
-    _hideHover(); // hover will leak if not hide
-    widget.chart.stopTimeLine();
+    _hideHover();
     super.dispose();
   }
 

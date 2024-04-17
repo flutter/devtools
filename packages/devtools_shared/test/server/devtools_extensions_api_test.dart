@@ -39,7 +39,7 @@ void main() {
         host: 'localhost',
         path: ExtensionsApi.apiServeAvailableExtensions,
         queryParameters: {
-          ExtensionsApi.extensionRootPathPropertyName: projectRoot,
+          ExtensionsApi.packageRootUriPropertyName: projectRoot,
         },
       ),
     );
@@ -131,7 +131,7 @@ void main() {
           host: 'localhost',
           path: ExtensionsApi.apiExtensionEnabledState,
           queryParameters: {
-            ExtensionsApi.extensionRootPathPropertyName: projectRoot,
+            ExtensionsApi.packageRootUriPropertyName: projectRoot,
             ExtensionsApi.extensionNamePropertyName: extensionName,
             ExtensionsApi.enabledStatePropertyName: enable.toString(),
           },

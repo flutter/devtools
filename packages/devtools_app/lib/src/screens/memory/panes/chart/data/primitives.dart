@@ -23,3 +23,5 @@ enum ChartInterval {
 
   final String displayName;
 }
+
+const Duration chartUpdateDelay = Duration(milliseconds: 500);

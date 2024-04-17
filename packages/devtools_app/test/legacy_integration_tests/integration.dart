@@ -9,6 +9,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_shared/devtools_test_utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
@@ -302,12 +303,12 @@ class WebBuildFixture {
 
       // Serving `web` on http://localhost:8080
       if (line.contains('Serving `web`')) {
-        if (!hasUrl.isCompleted) {
-          final String url = line.substring(line.indexOf('http://'));
-          hasUrl.complete(url);
-        } else {
-          print('Ignoring "Serving..." notification because already completed');
-        }
+        hasUrl.safeComplete(
+          line.substring(line.indexOf('http://')),
+          () => print(
+            'Ignoring "Serving..." notification because already completed',
+          ),
+        );
       }
     });
 

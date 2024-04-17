@@ -1,6 +1,13 @@
-# 9.1.0-wip
+# 10.0.0-dev.0
+* **Breaking change:** rename `DevToolsExtensionConfig.path` to
+`DevToolsExtensionConfig.extensionAssetsUri` and update class documentation.
+* **Breaking change:** rename `ExtensionsApi.extensionRootPathPropertyName`
+to `ExtensionsApi.packageRootUriPropertyName`, and modify the String value
+for the parameter from 'rootPath' to 'packageRootUri'.
+
 * Return valid extensions from the `apiServeAvailableExtensions` endpoint even when
 an exception is thrown.
+* Add utility extension methods on `Completer`: `safeComplete` and `safeCompleteError`.
 
 # 9.0.1
 * Restructure `devtools_extensions.dart` and `devtools_extensions_io.dart` libraries.

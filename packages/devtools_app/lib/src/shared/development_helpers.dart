@@ -54,16 +54,10 @@ final debugDevToolsExtensions =
     _debugDevToolsExtensions || integrationTestMode || testMode || stagerMode;
 const _debugDevToolsExtensions = false;
 
-List<DevToolsExtensionConfig> debugHandleRefreshAvailableExtensions(
-  // ignore: avoid-unused-parameters, false positive due to conditional imports
-  Uri appRoot,
-) {
-  return debugExtensions;
-}
+List<DevToolsExtensionConfig> debugHandleRefreshAvailableExtensions() =>
+    debugExtensions;
 
 ExtensionEnabledState debugHandleExtensionEnabledState({
-  // ignore: avoid-unused-parameters, false positive due to conditional imports
-  required Uri appRoot,
   required String extensionName,
   bool? enable,
 }) {
@@ -92,7 +86,8 @@ final List<DevToolsExtensionConfig> debugExtensions = [
     DevToolsExtensionConfig.nameKey: 'foo',
     DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
     DevToolsExtensionConfig.versionKey: '1.0.0',
-    DevToolsExtensionConfig.pathKey: '/path/to/foo',
+    DevToolsExtensionConfig.materialIconCodePointKey: '0xe0b1',
+    DevToolsExtensionConfig.extensionAssetsUriKey: '/path/to/foo',
     DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
   }),
   DevToolsExtensionConfig.parse({
@@ -100,7 +95,7 @@ final List<DevToolsExtensionConfig> debugExtensions = [
     DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
     DevToolsExtensionConfig.versionKey: '2.0.0',
     DevToolsExtensionConfig.materialIconCodePointKey: 0xe638,
-    DevToolsExtensionConfig.pathKey: '/path/to/bar',
+    DevToolsExtensionConfig.extensionAssetsUriKey: '/path/to/bar',
     DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
   }),
   DevToolsExtensionConfig.parse({
@@ -109,7 +104,7 @@ final List<DevToolsExtensionConfig> debugExtensions = [
         'https://github.com/rrousselGit/provider/issues',
     DevToolsExtensionConfig.versionKey: '3.0.0',
     DevToolsExtensionConfig.materialIconCodePointKey: 0xe50a,
-    DevToolsExtensionConfig.pathKey: '/path/to/provider',
+    DevToolsExtensionConfig.extensionAssetsUriKey: '/path/to/provider',
     DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
   }),
 ];
@@ -124,7 +119,7 @@ bool debugSurvey = false;
 /// The survey metadata that will be used instead of the live data from
 /// 'docs.flutter.dev/f/dart-devtools-survey-metadata.json' when [debugSurvey]
 /// is true;
-final debugSurveyMetadata = DevToolsSurvey.parse(
+final debugSurveyMetadata = DevToolsSurvey.fromJson(
   {
     '_comments': [
       'uniqueId must be updated with each new survey so DevTools knows to re-prompt users.',

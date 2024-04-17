@@ -79,7 +79,7 @@ void main() {
     });
 
     test('setOfflineData', () async {
-      final rasterStats = RasterStats.parse(rasterStatsFromServiceJson);
+      final rasterStats = RasterStats.fromJson(rasterStatsFromServiceJson);
 
       // Ensure we are starting in a null state.
       expect(controller.rasterStats.value, isNull);
