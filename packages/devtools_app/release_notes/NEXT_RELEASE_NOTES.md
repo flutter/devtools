@@ -59,6 +59,9 @@ session. - [#7598](https://github.com/flutter/devtools/pull/7598)
 
 ## DevTools Extension updates
 
+* Deprecate the `DevToolsExtension.requiresRunningApplication` field in favor of the
+new optional `requiresConnection` field that can be added to an extension's `config.yaml`
+file. - [#7611](https://github.com/flutter/devtools/pull/7611), [#7602](https://github.com/flutter/devtools/pull/7602)
 * Detect extensions for all types of run targets in a package. - [#7533](https://github.com/flutter/devtools/pull/7533),
 [#7535](https://github.com/flutter/devtools/pull/7535)
 
