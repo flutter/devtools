@@ -9,6 +9,11 @@ import '../../../../shared/table/table_data.dart';
 import '../../../vm_developer/vm_service_private_extensions.dart';
 import '../../shared/heap/class_filter.dart';
 
+class _Json {
+  static const rootPackage = 'root';
+  static const data = 'data';
+}
+
 class AdaptedProfile {
   AdaptedProfile.fromAllocationProfile(
     AllocationProfile profile,
@@ -61,6 +66,17 @@ class AdaptedProfile {
       _total,
       ..._itemsFiltered,
     ];
+  }
+
+  factory AdaptedProfile.fromJson(Map<String, dynamic> json) {
+    final profile =
+        AllocationProfile.fromJson(json[_Json.data] as Map<String, dynamic>);
+    final rootPackage = json['rootPackage'] as String?;
+    return AdaptedProfile.fromAllocationProfile(
+      profile,
+      ClassFilter.empty(),
+      rootPackage,
+    );
   }
 
   /// A record per class plus one total record, with applied filter.
