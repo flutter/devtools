@@ -67,24 +67,27 @@ class AdaptedProfile {
     );
   }
 
-  // factory AdaptedProfile.fromJson(Map<String, dynamic> json) {
-  //   return AdaptedProfile._(
-  //     total: ,
-  //     items: (profile.members ?? [])
-  //         .map((e) => ProfileRecord.fromClassHeapStats(e))
-  //         .toList(),
-  //     newSpaceGCStats: profile.newSpaceGCStats,
-  //     oldSpaceGCStats: profile.oldSpaceGCStats,
-  //     totalGCStats: profile.totalGCStats,
-  //   );
-  // }
+  factory AdaptedProfile.fromJson(Map<String, dynamic> json) {
+    return AdaptedProfile._(
+      total: ProfileRecord.fromJson(json[_ProfileJson.total]),
+      items: (json[_ProfileJson.items] as List)
+          .map((e) => ProfileRecord.fromJson(e))
+          .toList(),
+      newSpaceGCStats: GCStats.fromJson(json[_ProfileJson.newGC]),
+      oldSpaceGCStats: GCStats.fromJson(json[_ProfileJson.oldGC]),
+      totalGCStats: GCStats.fromJson(json[_ProfileJson.totalGC]),
+    );
+  }
 
-  // Map<String, dynamic> toJson() {
-  //   return {
-  //     _Json.data: records,
-  //     _Json.rootPackage: rootPackage,
-  //   };
-  // }
+  Map<String, dynamic> toJson() {
+    return {
+      _ProfileJson.total: _total.toJson(),
+      _ProfileJson.items: _items.map((e) => e.toJson()).toList(),
+      _ProfileJson.newGC: newSpaceGCStats.toJson(),
+      _ProfileJson.oldGC: oldSpaceGCStats.toJson(),
+      _ProfileJson.totalGC: totalGCStats.toJson(),
+    };
+  }
 
   /// A record per class plus one total record, with applied filter.
   late final List<ProfileRecord> records = _records ??= [
