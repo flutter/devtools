@@ -637,7 +637,6 @@ void select(
   bool nonInteraction = false,
   ScreenAnalyticsMetrics Function()? screenMetricsProvider,
 }) {
-  // here
   _log.fine(
     'Event: select('
     'screenName:$screenName, '
@@ -689,6 +688,8 @@ void select(
     rowCount: gtagEvent.row_count,
     inspectorTreeControllerId: gtagEvent.inspector_tree_controller_id,
   );
+
+  unawaited(dtdManager.sendAnalyticsEvent(uaEvent));
 }
 
 /// Sends an analytics event to signal that something in DevTools was viewed.
