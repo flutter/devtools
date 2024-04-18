@@ -14,7 +14,7 @@ import 'package:shelf/shelf.dart';
 import 'package:test/test.dart';
 
 import '../fakes.dart';
-import '../helpers.dart';
+import '../helpers/helpers.dart';
 
 void main() {
   group('General DevTools server API', () {
