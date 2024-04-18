@@ -193,7 +193,6 @@ GtagEventDevTools _gtagEvent({
   int value = 0,
   ScreenAnalyticsMetrics? screenMetrics,
 }) {
-  // here
   return GtagEventDevTools(
     event_category: event_category,
     event_label: event_label,
