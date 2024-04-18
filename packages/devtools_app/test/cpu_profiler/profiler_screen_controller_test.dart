@@ -21,7 +21,7 @@ void main() {
         ExternalDevToolsEnvironmentParameters(),
       );
       setGlobal(ServiceConnectionManager, fakeServiceConnection);
-      setGlobal(OfflineModeController, OfflineModeController());
+      setGlobal(OfflineDataController, OfflineDataController());
       setGlobal(PreferencesController, PreferencesController());
       controller = ProfilerScreenController();
     });

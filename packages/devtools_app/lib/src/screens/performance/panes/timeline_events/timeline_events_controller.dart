@@ -32,7 +32,7 @@ final _log = Logger('timeline_events_controller');
 
 enum EventsControllerStatus {
   empty,
-  processing,
+  refreshing,
   ready,
 }
 
@@ -40,10 +40,10 @@ class TimelineEventsController extends PerformanceFeatureController
     with AutoDisposeControllerMixin {
   TimelineEventsController(super.performanceController) {
     perfettoController = createPerfettoController(performanceController, this);
-    addAutoDisposeListener(_workTracker.active, () {
-      final active = _workTracker.active.value;
+    addAutoDisposeListener(_refreshWorkTracker.active, () {
+      final active = _refreshWorkTracker.active.value;
       if (active) {
-        _status.value = EventsControllerStatus.processing;
+        _status.value = EventsControllerStatus.refreshing;
       } else {
         _status.value = EventsControllerStatus.ready;
       }
@@ -56,6 +56,8 @@ class TimelineEventsController extends PerformanceFeatureController
   static const gpuThreadSuffix = '.gpu';
   static const platformThreadSuffix = '.platform';
   static const flutterTestThreadSuffix = '.flutter.test..platform';
+  static final _refreshWorkTrackerDelay =
+      const Duration(milliseconds: 500).inMicroseconds;
 
   /// Controller that contains business logic for the Perfetto trace viewer.
   late final PerfettoController perfettoController;
@@ -111,7 +113,7 @@ class TimelineEventsController extends PerformanceFeatureController
   final _status =
       ValueNotifier<EventsControllerStatus>(EventsControllerStatus.empty);
 
-  final _workTracker = FutureWorkTracker();
+  final _refreshWorkTracker = FutureWorkTracker();
 
   Timer? _pollingTimer;
 
@@ -132,7 +134,7 @@ class TimelineEventsController extends PerformanceFeatureController
   Future<void> init() async {
     perfettoController.init();
 
-    if (!offlineController.offlineMode.value) {
+    if (!offlineDataController.showingOfflineData.value) {
       await _initForServiceConnection();
     }
   }
@@ -183,19 +185,37 @@ class TimelineEventsController extends PerformanceFeatureController
     late PerfettoTimeline rawPerfettoTimeline;
     if (preferences.performance.includeCpuSamplesInTimeline.value) {
       await debugTimeAsync(
-        () async => rawPerfettoTimeline =
-            await service.getPerfettoVMTimelineWithCpuSamplesWrapper(
-          timeOriginMicros: _nextPollStartMicros,
-          timeExtentMicros: currentVmTime.timestamp! - _nextPollStartMicros,
-        ),
+        () async {
+          await ga.timeAsync(
+            gac.performance,
+            gac.PerformanceEvents.getPerfettoVMTimelineWithCpuSamplesTime.name,
+            asyncOperation: () async {
+              rawPerfettoTimeline =
+                  await service.getPerfettoVMTimelineWithCpuSamplesWrapper(
+                timeOriginMicros: _nextPollStartMicros,
+                timeExtentMicros:
+                    currentVmTime.timestamp! - _nextPollStartMicros,
+              );
+            },
+          );
+        },
         debugName: 'VmService.getPerfettoVMTimelineWithCpuSamples',
       );
     } else {
       await debugTimeAsync(
-        () async => rawPerfettoTimeline = await service.getPerfettoVMTimeline(
-          timeOriginMicros: _nextPollStartMicros,
-          timeExtentMicros: currentVmTime.timestamp! - _nextPollStartMicros,
-        ),
+        () async {
+          await ga.timeAsync(
+            gac.performance,
+            gac.PerformanceEvents.getPerfettoVMTimelineTime.name,
+            asyncOperation: () async {
+              rawPerfettoTimeline = await service.getPerfettoVMTimeline(
+                timeOriginMicros: _nextPollStartMicros,
+                timeExtentMicros:
+                    currentVmTime.timestamp! - _nextPollStartMicros,
+              );
+            },
+          );
+        },
         debugName: 'VmService.getPerfettoVMTimeline',
       );
     }
@@ -314,6 +334,15 @@ class TimelineEventsController extends PerformanceFeatureController
   }
 
   Future<void> forceRefresh() async {
+    await _refreshWorkTracker.track(
+      _forceRefresh,
+      // Await a short delay so that we can insert the refreshing message
+      // overlay on top of the Perfetto UI.
+      delayMicros: _refreshWorkTrackerDelay,
+    );
+  }
+
+  Future<void> _forceRefresh() async {
     debugTraceCallback(() => _log.info('[forceRefresh]'));
     await _pullPerfettoVmTimeline();
     processTrackEvents();
@@ -354,67 +383,64 @@ class TimelineEventsController extends PerformanceFeatureController
     debugTraceCallback(
       () => _log.info('[handleSelectedFrame]\n${frame.toStringVerbose()}'),
     );
-    await _perfettoSelectFrame(frame);
-  }
 
-  Future<void> _perfettoSelectFrame(FlutterFrame frame) async {
+    void processMoreEventsOrExitHelper({
+      required FutureOr<void> Function() onProcessMore,
+    }) async {
+      final hasProcessedTimelineEventsForFrame =
+          perfettoController.processor.hasProcessedEventsForFrame(frame.id);
+      if (!hasProcessedTimelineEventsForFrame) {
+        final timelineEventsUnavailable =
+            perfettoController.processor.frameIsBeforeTimelineData(frame.id);
+        if (timelineEventsUnavailable) {
+          pushNoTimelineEventsAvailableWarning();
+          return;
+        }
+        await onProcessMore();
+      }
+    }
+
     // No need to process events again if we are in offline mode - we have
     // already processed all the available data.
-    if (!offlineController.offlineMode.value) {
-      bool hasProcessedTimelineEventsForFrame =
-          perfettoController.processor.hasProcessedEventsForFrame(frame.id);
-      if (!hasProcessedTimelineEventsForFrame) {
-        debugTraceCallback(
-          () => _log.info(
-            '[_perfettoSelectFrame] no events for frame. Process all events.',
-          ),
-        );
-        processTrackEvents();
-      }
+    if (!offlineDataController.showingOfflineData.value) {
+      processMoreEventsOrExitHelper(
+        onProcessMore: () {
+          debugTraceCallback(
+            () => _log.info(
+              '[handleSelectedFrame] no events for frame. Process all events.',
+            ),
+          );
+          processTrackEvents();
+        },
+      );
 
-      hasProcessedTimelineEventsForFrame =
-          perfettoController.processor.hasProcessedEventsForFrame(frame.id);
-      if (!hasProcessedTimelineEventsForFrame) {
-        debugTraceCallback(
-          () => _log.info(
-            '[_perfettoSelectFrame] events still not processed. Force refresh.',
-          ),
-        );
+      // Call this a second time to see if events for this frame have been
+      // processed after calling the lighter weight [processTrackEvents] method,
+      // which processes all unprocessed events that we have collected.
+      processMoreEventsOrExitHelper(
+        onProcessMore: () async {
+          // If we still have not processed the events for this frame, force a
+          // refresh to pull the latest data from the VM.
+          debugTraceCallback(
+            () => _log.info(
+              '[handleSelectedFrame] events still not processed. Force refresh.',
+            ),
+          );
+          await forceRefresh();
 
-        final frameBeforeEarliestTimelineData =
-            firstWellFormedFlutterFrameId != null &&
-                frame.id < firstWellFormedFlutterFrameId!;
-        if (!frameBeforeEarliestTimelineData) {
-          // If we still have not processed the timeline events for this frame,
-          // try forcing a refresh. Only do this if it is possible to fetch the
-          // timeline data for the [frame] we are trying to scroll to.
-          await _workTracker.track(forceRefresh);
-
-          // TODO(kenz): it would be best if we can avoid making subsequent
-          // calls to [forceRefresh] when we hit this case.
-          if (firstWellFormedFlutterFrameId == null) {
+          final hasProcessedTimelineEventsForFrame =
+              perfettoController.processor.hasProcessedEventsForFrame(frame.id);
+          if (!hasProcessedTimelineEventsForFrame) {
             // At this point, we still have not processed any timeline events
-            // for Flutter frames, which means we will never have access to the
-            // timeline events for this [frame].
+            // for this Flutter frame, which means we will never have access to
+            // the timeline events for [frame].
             pushNoTimelineEventsAvailableWarning();
           }
-        }
-      }
+        },
+      );
     }
 
-    // TODO(https://github.com/flutter/flutter/issues/144782): remove once this
-    // issue is fixed. Due to this bug, we sometimes have very large and
-    // inaccurate values for frame time durations. When this occurs, fallback
-    // to using the time range from the frame's timeline events. This heuristic
-    // assumes that there will never be a frame that took longer than 100
-    // seconds, which is still pretty high.
-    var timeRange = frame.timeFromFrameTiming;
-    const frameTimeHeuristic = 100;
-    if (timeRange.duration.inSeconds > frameTimeHeuristic) {
-      timeRange = frame.timeFromEventFlows;
-    }
-
-    perfettoController.scrollToTimeRange(timeRange);
+    perfettoController.scrollToTimeRange(frame.timeFromFrameTiming);
   }
 
   void addTimelineEvent(FlutterTimelineEvent event) {
@@ -466,7 +492,7 @@ class TimelineEventsController extends PerformanceFeatureController
 
   bool _isFlutterAppHelper() {
     final offlineData = performanceController.offlinePerformanceData;
-    return offlineController.offlineMode.value
+    return offlineDataController.showingOfflineData.value
         ? offlineData != null && offlineData.frames.isNotEmpty
         : serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ??
             false;
@@ -493,7 +519,7 @@ class TimelineEventsController extends PerformanceFeatureController
     _trackDescriptors.clear();
     _unassignedFlutterTimelineEvents.clear();
 
-    _workTracker.clear();
+    _refreshWorkTracker.clear();
     _status.value = EventsControllerStatus.empty;
     await perfettoController.clear();
   }
@@ -503,6 +529,7 @@ class TimelineEventsController extends PerformanceFeatureController
     _pollingTimer?.cancel();
     _timelinePollingRateLimiter?.dispose();
     perfettoController.dispose();
+    _refreshWorkTracker.clear();
     super.dispose();
   }
 }

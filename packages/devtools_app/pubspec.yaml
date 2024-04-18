@@ -4,13 +4,13 @@ publish_to: none
 
 # Note: this version should only be updated by running tools/update_version.dart
 # that updates all versions of devtools packages (devtools_app, devtools_test).
-version: 2.34.0-dev.14
+version: 2.35.0-dev.10
 
 repository: https://github.com/flutter/devtools/tree/master/packages/devtools_app
 
 environment:
-  sdk: ">=3.3.0-91.0.dev <4.0.0"
-  flutter: ">=3.17.0-0.0.pre"
+  sdk: ">=3.4.0-275.0.dev <4.0.0"
+  flutter: ">=3.21.0-15.0.pre"
 
 dependencies:
   ansi_up: ^1.0.0
@@ -24,10 +24,10 @@ dependencies:
   collection: ^1.15.0
   dap: ^1.1.0
   dds_service_extensions: ^1.6.0
-  devtools_app_shared: ^0.1.0
-  devtools_extensions: ^0.0.10
-  devtools_shared: ^6.0.1
-  dtd: ^2.0.0
+  devtools_app_shared: ^0.2.0-dev.0
+  devtools_extensions: ^0.2.0-dev.0
+  devtools_shared: ^10.0.0-dev.0
+  dtd: ^2.2.0
   file: ">=6.0.0 <8.0.0"
   file_selector: ^1.0.0
   fixnum: ^1.1.0
@@ -60,7 +60,7 @@ dependencies:
   unified_analytics: ^6.0.0
   url_launcher: ^6.1.0
   url_launcher_web: ^2.0.6
-  vm_service: ^14.1.0
+  vm_service: ^14.1.1
   vm_service_protos: ^1.0.0
   # TODO https://github.com/dart-lang/sdk/issues/52853 - unpin this version
   vm_snapshot_analysis: 0.7.2
@@ -71,7 +71,8 @@ dependencies:
 dev_dependencies:
   args: ^2.4.2
   build_runner: ^2.3.3
-  devtools_test: 2.34.0-dev.14
+  devtools_test:
+    path: ../devtools_test
   fake_async: ^1.3.1
   flutter_driver:
     sdk: flutter
@@ -115,24 +116,24 @@ flutter:
     - packages/perfetto_ui_compiled/dist/devtools/devtools_theme_handler.js
     # The version number for all the Perfetto asset paths below is updated by running
     # `devtools_tool update-perfetto`.
-    - packages/perfetto_ui_compiled/dist/v33.0-1838a06af/engine_bundle.js
-    - packages/perfetto_ui_compiled/dist/v33.0-1838a06af/frontend_bundle.js
-    - packages/perfetto_ui_compiled/dist/v33.0-1838a06af/manifest.json
-    - packages/perfetto_ui_compiled/dist/v33.0-1838a06af/perfetto.css
-    - packages/perfetto_ui_compiled/dist/v33.0-1838a06af/trace_processor.wasm
-    - packages/perfetto_ui_compiled/dist/v33.0-1838a06af/assets/brand.png
-    - packages/perfetto_ui_compiled/dist/v33.0-1838a06af/assets/favicon.png
-    - packages/perfetto_ui_compiled/dist/v33.0-1838a06af/assets/logo-128.png
-    - packages/perfetto_ui_compiled/dist/v33.0-1838a06af/assets/logo-3d.png
-    - packages/perfetto_ui_compiled/dist/v33.0-1838a06af/assets/scheduling_latency.png
-    - packages/perfetto_ui_compiled/dist/v33.0-1838a06af/assets/MaterialSymbolsOutlined.woff2
-    - packages/perfetto_ui_compiled/dist/v33.0-1838a06af/assets/Roboto-100.woff2
-    - packages/perfetto_ui_compiled/dist/v33.0-1838a06af/assets/Roboto-300.woff2
-    - packages/perfetto_ui_compiled/dist/v33.0-1838a06af/assets/Roboto-400.woff2
-    - packages/perfetto_ui_compiled/dist/v33.0-1838a06af/assets/Roboto-500.woff2
-    - packages/perfetto_ui_compiled/dist/v33.0-1838a06af/assets/RobotoCondensed-Light.woff2
-    - packages/perfetto_ui_compiled/dist/v33.0-1838a06af/assets/RobotoCondensed-Regular.woff2
-    - packages/perfetto_ui_compiled/dist/v33.0-1838a06af/assets/RobotoMono-Regular.woff2
+    - packages/perfetto_ui_compiled/dist/v34.0-16f63abe3/engine_bundle.js
+    - packages/perfetto_ui_compiled/dist/v34.0-16f63abe3/frontend_bundle.js
+    - packages/perfetto_ui_compiled/dist/v34.0-16f63abe3/manifest.json
+    - packages/perfetto_ui_compiled/dist/v34.0-16f63abe3/perfetto.css
+    - packages/perfetto_ui_compiled/dist/v34.0-16f63abe3/trace_processor.wasm
+    - packages/perfetto_ui_compiled/dist/v34.0-16f63abe3/assets/brand.png
+    - packages/perfetto_ui_compiled/dist/v34.0-16f63abe3/assets/favicon.png
+    - packages/perfetto_ui_compiled/dist/v34.0-16f63abe3/assets/logo-128.png
+    - packages/perfetto_ui_compiled/dist/v34.0-16f63abe3/assets/logo-3d.png
+    - packages/perfetto_ui_compiled/dist/v34.0-16f63abe3/assets/scheduling_latency.png
+    - packages/perfetto_ui_compiled/dist/v34.0-16f63abe3/assets/MaterialSymbolsOutlined.woff2
+    - packages/perfetto_ui_compiled/dist/v34.0-16f63abe3/assets/Roboto-100.woff2
+    - packages/perfetto_ui_compiled/dist/v34.0-16f63abe3/assets/Roboto-300.woff2
+    - packages/perfetto_ui_compiled/dist/v34.0-16f63abe3/assets/Roboto-400.woff2
+    - packages/perfetto_ui_compiled/dist/v34.0-16f63abe3/assets/Roboto-500.woff2
+    - packages/perfetto_ui_compiled/dist/v34.0-16f63abe3/assets/RobotoCondensed-Light.woff2
+    - packages/perfetto_ui_compiled/dist/v34.0-16f63abe3/assets/RobotoCondensed-Regular.woff2
+    - packages/perfetto_ui_compiled/dist/v34.0-16f63abe3/assets/RobotoMono-Regular.woff2
 
   fonts:
     - family: Roboto

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/primitives/utils.dart';
@@ -17,6 +18,8 @@ const kDeeplinkTableCellDefaultWidth = 200.0;
 const kToolTipWidth = 344.0;
 const metaDataDeepLinkingFlagTag =
     '<meta-data android:name="flutter_deeplinking_enabled" android:value="true" />';
+const missingDomain = 'missing domain';
+const missingScheme = 'missing scheme';
 
 enum PlatformOS {
   android('Android'),
@@ -192,7 +195,7 @@ class LinkData with SearchableDataMixin {
     required this.domain,
     required this.path,
     required this.os,
-    this.scheme = const <String>['http://', 'https://'],
+    this.scheme = const <String>{},
     this.domainErrors = const <DomainError>[],
     this.pathErrors = const <PathError>{},
     this.associatedPath = const <String>[],
@@ -200,9 +203,9 @@ class LinkData with SearchableDataMixin {
   });
 
   final String path;
-  final String domain;
+  final String? domain;
   final List<PlatformOS> os;
-  final List<String> scheme;
+  final Set<String> scheme;
   final List<DomainError> domainErrors;
   Set<PathError> pathErrors;
 
@@ -211,7 +214,7 @@ class LinkData with SearchableDataMixin {
 
   @override
   bool matchesSearchToken(RegExp regExpSearch) {
-    return domain.caseInsensitiveContains(regExpSearch) ||
+    return (domain?.caseInsensitiveContains(regExpSearch) ?? false) ||
         path.caseInsensitiveContains(regExpSearch);
   }
 
@@ -251,8 +254,8 @@ class _ErrorAwareText extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      'This m.shopping.com domain has ${link.domainErrors.length} issue to fix. '
-                      'Fixing this domain will fix ${link.associatedPath.length} associated deep links.',
+                      'This ${link.domain} domain has ${link.domainErrors.length} ${pluralize('issue', link.domainErrors.length)} to fix. '
+                      'Fixing this domain will fix ${link.associatedPath.length} associated deep ${pluralize('link', link.associatedPath.length)}.',
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.tooltipTextColor,
                         fontSize: defaultFontSize,
@@ -298,9 +301,12 @@ class _ErrorAwareText extends StatelessWidget {
 
 class DomainColumn extends ColumnData<LinkData>
     implements ColumnRenderer<LinkData>, ColumnHeaderRenderer<LinkData> {
-  DomainColumn(this.controller) : super.wide('Domain');
+  DomainColumn(this.controller)
+      : sortingOption = controller.displayOptions.domainSortingOption,
+        super.wide('Domain');
 
   DeepLinksController controller;
+  SortingOption? sortingOption;
 
   @override
   Widget? buildHeader(
@@ -324,7 +330,7 @@ class DomainColumn extends ColumnData<LinkData>
   }
 
   @override
-  String getValue(LinkData dataObject) => dataObject.domain;
+  String getValue(LinkData dataObject) => dataObject.domain ?? 'missing domain';
 
   @override
   Widget build(
@@ -334,28 +340,36 @@ class DomainColumn extends ColumnData<LinkData>
     bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
-    return _ErrorAwareText(
-      isError: dataObject.domainErrors.isNotEmpty,
-      controller: controller,
-      text: dataObject.domain,
-      link: dataObject,
-    );
+    return dataObject.domain == null
+        ? Text('missing domain', style: Theme.of(context).errorTextStyle)
+        : _ErrorAwareText(
+            isError: dataObject.domainErrors.isNotEmpty,
+            controller: controller,
+            text: dataObject.domain!,
+            link: dataObject,
+          );
   }
 
   @override
   int compare(LinkData a, LinkData b) => _compareLinkData(
         a,
         b,
-        sortingOption: controller.displayOptions.domainSortingOption,
+        sortingOption: sortingOption,
         compareDomain: true,
       );
+
+  @override
+  String get config => '$title $sortingOption';
 }
 
 class PathColumn extends ColumnData<LinkData>
     implements ColumnRenderer<LinkData>, ColumnHeaderRenderer<LinkData> {
-  PathColumn(this.controller) : super.wide('Path');
+  PathColumn(this.controller)
+      : sortingOption = controller.displayOptions.pathSortingOption,
+        super.wide('Path');
 
   DeepLinksController controller;
+  SortingOption? sortingOption;
 
   @override
   Widget? buildHeader(
@@ -401,9 +415,12 @@ class PathColumn extends ColumnData<LinkData>
   int compare(LinkData a, LinkData b) => _compareLinkData(
         a,
         b,
-        sortingOption: controller.displayOptions.pathSortingOption,
+        sortingOption: sortingOption,
         compareDomain: false,
       );
+
+  @override
+  String get config => '$title $sortingOption';
 }
 
 class NumberOfAssociatedPathColumn extends ColumnData<LinkData> {
@@ -461,7 +478,9 @@ class SchemeColumn extends ColumnData<LinkData>
     bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
-    return Text(getValue(dataObject));
+    return dataObject.scheme.isEmpty
+        ? Text(missingScheme, style: Theme.of(context).errorTextStyle)
+        : Text(getValue(dataObject));
   }
 
   @override
@@ -710,11 +729,11 @@ int _compareLinkData(
       }
       return 0;
     case SortingOption.aToZ:
-      if (compareDomain) return a.domain.compareTo(b.domain);
+      if (compareDomain) return (a.domain ?? '').compareTo(b.domain ?? '');
 
       return a.path.compareTo(b.path);
     case SortingOption.zToA:
-      if (compareDomain) return b.domain.compareTo(a.domain);
+      if (compareDomain) return (b.domain ?? '').compareTo(a.domain ?? '');
 
       return b.path.compareTo(a.path);
   }

@@ -64,9 +64,10 @@ class CliCommand {
   factory CliCommand.dart(
     List<String> args, {
     bool throwOnException = true,
+    String? sdkOverride,
   }) {
     return CliCommand(
-      FlutterSdk.current.dartExePath,
+      sdkOverride ?? FlutterSdk.current.dartExePath,
       args,
       throwOnException: throwOnException,
     );
@@ -88,6 +89,22 @@ class CliCommand {
     List<String> args, {
     bool throwOnException = true,
   }) {
+    var toolPath = Platform.script.toFilePath();
+    if (!File(toolPath).existsSync()) {
+      // Handling https://github.com/dart-lang/sdk/issues/54493
+      // Platform.script.toFilePath() duplicates next to current directory, when run recursively from itself.
+      toolPath = toolPath.replaceAll(
+        'devtools/tool/tool/bin/devtools_tool.dart',
+        'devtools/tool/bin/devtools_tool.dart',
+      );
+    }
+
+    assert(
+      File(toolPath).existsSync(),
+      'Tool path could not be determined, got: $toolPath.'
+      'It may be result of https://github.com/dart-lang/sdk/issues/54493',
+    );
+
     return CliCommand(
       // We must use the Dart VM from FlutterSdk.current here to ensure we
       // consistently use the selected version for child invocations. We do
@@ -96,7 +113,7 @@ class CliCommand {
       // have selected that here.
       FlutterSdk.current.dartExePath,
       [
-        Platform.script.toFilePath(),
+        toolPath,
         ...args,
       ],
       throwOnException: throwOnException,

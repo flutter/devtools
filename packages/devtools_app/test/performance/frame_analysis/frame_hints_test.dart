@@ -43,7 +43,7 @@ void main() {
       when(mockRasterPhase.type).thenReturn(FramePhaseType.raster);
 
       setGlobal(IdeTheme, IdeTheme());
-      setGlobal(OfflineModeController, OfflineModeController());
+      setGlobal(OfflineDataController, OfflineDataController());
       final fakeServiceConnection = FakeServiceConnectionManager();
       setGlobal(ServiceConnectionManager, fakeServiceConnection);
       setGlobal(NotificationService, NotificationService());
@@ -60,12 +60,12 @@ void main() {
       FrameAnalysis frameAnalysis,
     ) async {
       await tester.pumpWidget(
-        wrapWithControllers(
+        wrapSimple(
           FrameHints(
             frameAnalysis: frameAnalysis,
             enhanceTracingController: mockEnhanceTracingController,
+            displayRefreshRate: defaultRefreshRate,
           ),
-          performance: PerformanceController(),
         ),
       );
       expect(find.byType(FrameHints), findsOneWidget);

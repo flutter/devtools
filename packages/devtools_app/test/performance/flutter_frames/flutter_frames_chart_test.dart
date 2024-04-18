@@ -19,14 +19,14 @@ void main() {
 
   Future<void> pumpChart(
     WidgetTester tester, {
-    bool offlineMode = false,
+    bool showingOfflineData = false,
     bool impellerEnabled = false,
   }) async {
     await tester.pumpWidget(
       wrap(
         FlutterFramesChart(
           framesController,
-          offlineMode: offlineMode,
+          showingOfflineData: showingOfflineData,
           impellerEnabled: impellerEnabled,
         ),
       ),
@@ -45,7 +45,7 @@ void main() {
         isWebApp: false,
       );
       setGlobal(ServiceConnectionManager, fakeServiceConnection);
-      setGlobal(OfflineModeController, OfflineModeController());
+      setGlobal(OfflineDataController, OfflineDataController());
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(NotificationService, NotificationService());
       setGlobal(BannerMessagesController, BannerMessagesController());
@@ -109,7 +109,7 @@ void main() {
 
     testWidgets('builds in offline mode', (WidgetTester tester) async {
       framesController.clearData();
-      await pumpChart(tester, offlineMode: true);
+      await pumpChart(tester, showingOfflineData: true);
       expect(find.byType(FramesChart), findsOneWidget);
       expect(find.byType(FramesChartControls), findsOneWidget);
       expect(find.byType(PauseResumeButtonGroup), findsNothing);
@@ -141,7 +141,7 @@ void main() {
         var rasterTime = 12000;
         for (var i = 0; i < totalNumFrames; i++) {
           framesController.addFrame(
-            FlutterFrame.parse({
+            FlutterFrame.fromJson({
               'number': number++,
               'startTime': startTime += 50000,
               'elapsed': elapsedTime += 50000,

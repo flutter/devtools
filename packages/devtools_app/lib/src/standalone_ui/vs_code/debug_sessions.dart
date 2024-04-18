@@ -39,7 +39,10 @@ class DebugSessions extends StatelessWidget {
           style: Theme.of(context).textTheme.titleMedium,
         ),
         if (sessions.isEmpty)
-          const Text('Begin a debug session to use DevTools.')
+          const Padding(
+            padding: EdgeInsets.only(left: borderPadding),
+            child: Text('No debug sessions'),
+          )
         else
           Table(
             columnWidths: const {

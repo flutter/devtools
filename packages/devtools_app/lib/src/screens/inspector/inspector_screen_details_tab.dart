@@ -10,6 +10,8 @@ import 'package:flutter/material.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
+import '../../shared/globals.dart';
+import '../../shared/preferences/preferences.dart';
 import '../../shared/primitives/blocking_action_mixin.dart';
 import '../../shared/ui/tab.dart';
 import 'inspector_controller.dart';
@@ -30,21 +32,33 @@ class InspectorDetails extends StatelessWidget {
   Widget build(BuildContext context) {
     final tabs = [
       (
-        tab: _buildTab(tabName: 'Layout Explorer'),
+        tab: _buildTab(tabName: InspectorDetailsViewType.layoutExplorer.key),
         tabView: LayoutExplorerTab(controller: controller),
       ),
       (
         tab: _buildTab(
-          tabName: 'Widget Details Tree',
+          tabName: InspectorDetailsViewType.widgetDetailsTree.key,
           trailing: InspectorExpandCollapseButtons(controller: controller),
         ),
         tabView: detailsTree,
       ),
     ];
+    return ValueListenableBuilder(
+      valueListenable: preferences.inspector.defaultDetailsView,
+      builder: (BuildContext context, value, Widget? child) {
+        int defaultInspectorViewIndex = 0;
 
-    return AnalyticsTabbedView(
-      tabs: tabs,
-      gaScreen: gac.inspector,
+        if (preferences.inspector.defaultDetailsView.value ==
+            InspectorDetailsViewType.widgetDetailsTree) {
+          defaultInspectorViewIndex = 1;
+        }
+
+        return AnalyticsTabbedView(
+          tabs: tabs,
+          gaScreen: gac.inspector,
+          initialSelectedIndex: defaultInspectorViewIndex,
+        );
+      },
     );
   }
 

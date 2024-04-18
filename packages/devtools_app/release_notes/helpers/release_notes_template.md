@@ -44,6 +44,10 @@ TODO: Remove this section if there are not any general updates.
 
 TODO: Remove this section if there are not any general updates.
 
+## Deep links tool updates
+
+TODO: Remove this section if there are not any general updates.
+
 ## VS Code Sidebar updates
 
 TODO: Remove this section if there are not any general updates.

@@ -1,14 +1,13 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/deep_link_validation/deep_link_list_view.dart';
 import 'package:devtools_app/src/screens/deep_link_validation/deep_links_model.dart';
-import 'package:devtools_app/src/screens/deep_link_validation/deep_links_services.dart';
-import 'package:devtools_app/src/screens/deep_link_validation/select_project_view.dart';
+import 'package:devtools_app/src/screens/deep_link_validation/project_root_selection/root_selector.dart';
+import 'package:devtools_app/src/screens/deep_link_validation/project_root_selection/select_project_view.dart';
 import 'package:devtools_app/src/screens/deep_link_validation/validation_details_view.dart';
-import 'package:devtools_app/src/shared/directory_picker.dart';
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -18,6 +17,8 @@ import 'package:dtd/dtd.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+
+import '../test_infra/utils/deep_links_utils.dart';
 
 final linkDatas = [
   LinkData(
@@ -74,8 +75,8 @@ void main() {
     final mockDtdManager = MockDTDManager();
     final rootUri1 = Uri.parse('file:///Users/me/package_root_1');
     final rootUri2 = Uri.parse('file:///Users/me/package_root_2');
-    when(mockDtdManager.workspaceRoots()).thenAnswer((_) async {
-      return IDEWorkspaceRoots(ideWorkspaceRoots: [rootUri1, rootUri2]);
+    when(mockDtdManager.projectRoots()).thenAnswer((_) async {
+      return UriList(uris: [rootUri1, rootUri2]);
     });
     setGlobal(DTDManager, mockDtdManager);
   });
@@ -95,7 +96,6 @@ void main() {
         deepLink: controller,
       ),
     );
-    deferredLoadingSupportEnabled = true;
     await tester.pump(const Duration(seconds: 1));
     expect(find.byType(DeepLinkPage), findsOneWidget);
   }
@@ -125,7 +125,6 @@ void main() {
           controller: deepLinksController,
         );
 
-        expect(find.byType(DeepLinkPage), findsOneWidget);
         expect(find.byType(SelectProjectView), findsOneWidget);
         expect(find.byType(ProjectRootsDropdown), findsOneWidget);
         expect(find.byType(ProjectRootTextField), findsOneWidget);
@@ -456,88 +455,130 @@ void main() {
         expect(find.text('www.google.com'), findsOneWidget);
       },
     );
-    // TODO(hangyujin): Fix the sorting issue.
-    // testWidgetsWithWindowSize(
-    //   'sort links',
-    //   windowSize,
-    //   (WidgetTester tester) async {
-    //     final deepLinksController = DeepLinksTestController();
-    //     final linkDatas = [
-    //       LinkData(
-    //         domain: 'www.domain1.com',
-    //         path: '/',
-    //         os: [PlatformOS.android],
-    //       ),
-    //       LinkData(
-    //         domain: 'www.domain2.com',
-    //         path: '/path',
-    //         os: [PlatformOS.ios],
-    //         domainErrors: [DomainError.existence],
-    //       ),
-    //       LinkData(
-    //         domain: 'www.google.com',
-    //         path: '/',
-    //         os: [PlatformOS.android, PlatformOS.ios],
-    //       ),
-    //     ];
 
-    //     deepLinksController.selectedProject.value =
-    //         FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
-    //     deepLinksController.validatedLinkDatas = ValidatedLinkDatas(
-    //       all: linkDatas,
-    //       byDomain: deepLinksController.linkDatasByDomain(linkDatas),
-    //       byPath: deepLinksController.linkDatasByPath(linkDatas),
-    //     );
+    testWidgetsWithWindowSize(
+      'sort links',
+      windowSize,
+      (WidgetTester tester) async {
+        final deepLinksController = DeepLinksTestController();
+        final linkDatas = [
+          LinkData(
+            domain: 'www.domain1.com',
+            path: '/',
+            os: [PlatformOS.android],
+          ),
+          LinkData(
+            domain: 'www.domain2.com',
+            path: '/path',
+            os: [PlatformOS.ios],
+            domainErrors: [DomainError.existence],
+          ),
+          LinkData(
+            domain: 'www.google.com',
+            path: '/',
+            os: [PlatformOS.android, PlatformOS.ios],
+          ),
+        ];
 
-    //     await pumpDeepLinkScreen(
-    //       tester,
-    //       controller: deepLinksController,
-    //     );
+        deepLinksController.selectedProject.value =
+            FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
+        deepLinksController.validatedLinkDatas = ValidatedLinkDatas(
+          all: linkDatas,
+          byDomain: deepLinksController.linkDatasByDomain(linkDatas),
+          byPath: deepLinksController.linkDatasByPath(linkDatas),
+        );
 
-    //     expect(find.text('www.domain1.com'), findsOneWidget);
-    //     expect(find.text('www.domain2.com'), findsOneWidget);
-    //     expect(find.text('www.google.com'), findsOneWidget);
+        await pumpDeepLinkScreen(
+          tester,
+          controller: deepLinksController,
+        );
 
-    //     // Sort with a-z.
-    //     deepLinksController.updateDisplayOptions(
-    //       domainSortingOption: SortingOption.aToZ,
-    //     );
-    //     await tester.pumpAndSettle();
+        expect(find.text('www.domain1.com'), findsOneWidget);
+        expect(find.text('www.domain2.com'), findsOneWidget);
+        expect(find.text('www.google.com'), findsOneWidget);
 
-    //     var widgetACenter = tester.getCenter(find.text('www.domain1.com'));
-    //     var widgetBCenter = tester.getCenter(find.text('www.domain2.com'));
-    //     var widgetCCenter = tester.getCenter(find.text('www.google.com'));
+        // Sort with a-z.
+        deepLinksController.updateDisplayOptions(
+          domainSortingOption: SortingOption.aToZ,
+        );
+        await tester.pumpAndSettle();
 
-    //     expect(widgetACenter.dy < widgetBCenter.dy, true);
-    //     expect(widgetBCenter.dy < widgetCCenter.dy, true);
+        var widgetACenter = tester.getCenter(find.text('www.domain1.com'));
+        var widgetBCenter = tester.getCenter(find.text('www.domain2.com'));
+        var widgetCCenter = tester.getCenter(find.text('www.google.com'));
 
-    //     // Sort with z-a.
-    //     deepLinksController.updateDisplayOptions(
-    //       domainSortingOption: SortingOption.zToA,
-    //     );
-    //     await tester.pumpAndSettle();
+        expect(widgetACenter.dy < widgetBCenter.dy, true);
+        expect(widgetBCenter.dy < widgetCCenter.dy, true);
 
-    //     widgetACenter = tester.getCenter(find.text('www.domain1.com'));
-    //     widgetBCenter = tester.getCenter(find.text('www.domain2.com'));
-    //     widgetCCenter = tester.getCenter(find.text('www.google.com'));
+        // Sort with z-a.
+        deepLinksController.updateDisplayOptions(
+          domainSortingOption: SortingOption.zToA,
+        );
+        await tester.pumpAndSettle();
 
-    //     expect(widgetCCenter.dy < widgetBCenter.dy, true);
-    //     expect(widgetBCenter.dy < widgetACenter.dy, true);
+        widgetACenter = tester.getCenter(find.text('www.domain1.com'));
+        widgetBCenter = tester.getCenter(find.text('www.domain2.com'));
+        widgetCCenter = tester.getCenter(find.text('www.google.com'));
 
-    //     // Sort with error on top.
-    //     deepLinksController.updateDisplayOptions(
-    //       domainSortingOption: SortingOption.errorOnTop,
-    //     );
-    //     await tester.pumpAndSettle();
+        expect(widgetCCenter.dy < widgetBCenter.dy, true);
+        expect(widgetBCenter.dy < widgetACenter.dy, true);
 
-    //     widgetACenter = tester.getCenter(find.text('www.domain1.com'));
-    //     widgetBCenter = tester.getCenter(find.text('www.domain2.com'));
-    //     widgetCCenter = tester.getCenter(find.text('www.google.com'));
+        // Sort with error on top.
+        deepLinksController.updateDisplayOptions(
+          domainSortingOption: SortingOption.errorOnTop,
+        );
+        await tester.pumpAndSettle();
 
-    //     expect(widgetBCenter.dy < widgetACenter.dy, true);
-    //     expect(widgetBCenter.dy < widgetCCenter.dy, true);
-    //   },
-    // );
+        widgetACenter = tester.getCenter(find.text('www.domain1.com'));
+        widgetBCenter = tester.getCenter(find.text('www.domain2.com'));
+        widgetCCenter = tester.getCenter(find.text('www.google.com'));
+
+        expect(widgetBCenter.dy < widgetACenter.dy, true);
+        expect(widgetBCenter.dy < widgetCCenter.dy, true);
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'show scheme or missing scheme',
+      windowSize,
+      (WidgetTester tester) async {
+        final deepLinksController = DeepLinksTestController();
+
+        deepLinksController.selectedProject.value =
+            FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
+
+        final linkDatas = [
+          LinkData(
+            domain: 'www.domain1.com',
+            path: '/',
+            os: [PlatformOS.android],
+          ),
+          LinkData(
+            domain: 'www.domain2.com',
+            path: '/',
+            os: [PlatformOS.ios],
+            scheme: {'http'},
+          ),
+        ];
+
+        deepLinksController.validatedLinkDatas = ValidatedLinkDatas(
+          all: linkDatas,
+          byDomain: deepLinksController.linkDatasByDomain(linkDatas),
+          byPath: deepLinksController.linkDatasByPath(linkDatas),
+        );
+
+        await pumpDeepLinkScreen(
+          tester,
+          controller: deepLinksController,
+        );
+
+        expect(find.text('www.domain1.com'), findsOneWidget);
+        expect(find.text('www.domain2.com'), findsOneWidget);
+
+        expect(find.text('missing scheme'), findsOneWidget);
+        expect(find.text('http'), findsOneWidget);
+      },
+    );
 
     testWidgetsWithWindowSize(
       'path view',
@@ -613,39 +654,4 @@ void main() {
       },
     );
   });
-}
-
-class DeepLinksTestController extends DeepLinksController {
-  @override
-  Future<String?> packageDirectoryForMainIsolate() async {
-    return null;
-  }
-
-  @override
-  Future<void> validateLinks() async {
-    if (validatedLinkDatas.all.isEmpty) {
-      return;
-    }
-    displayOptionsNotifier.value = displayOptionsNotifier.value.copyWith(
-      domainErrorCount: validatedLinkDatas.byDomain
-          .where((element) => element.domainErrors.isNotEmpty)
-          .length,
-      pathErrorCount: validatedLinkDatas.byPath
-          .where((element) => element.pathErrors.isNotEmpty)
-          .length,
-    );
-    applyFilters();
-    pagePhase.value = PagePhase.linksValidated;
-  }
-
-  @override
-  void selectLink(LinkData linkdata) async {
-    selectedLink.value = linkdata;
-    if (linkdata.domainErrors.isNotEmpty) {
-      generatedAssetLinksForSelectedLink.value = GenerateAssetLinksResult(
-        '',
-        'fake generated content',
-      );
-    }
-  }
 }

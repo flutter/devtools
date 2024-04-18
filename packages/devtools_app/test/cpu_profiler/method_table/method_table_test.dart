@@ -31,7 +31,7 @@ void main() {
       createMockServiceConnectionWithDefaults(),
     );
     setGlobal(IdeTheme, IdeTheme());
-    setGlobal(OfflineModeController, OfflineModeController());
+    setGlobal(OfflineDataController, OfflineDataController());
     final mockScriptManager = MockScriptManager();
     when(mockScriptManager.sortedScripts).thenReturn(
       ValueNotifier<List<ScriptRef>>([]),
@@ -43,7 +43,7 @@ void main() {
       ),
     );
     setGlobal(ScriptManager, mockScriptManager);
-    final data = CpuProfileData.parse(simpleCpuProfile2);
+    final data = CpuProfileData.fromJson(simpleCpuProfile2);
     await CpuProfileTransformer().processData(data, processId: 'test');
     methodTableController = MethodTableController(
       dataNotifier: FixedValueListenable<CpuProfileData>(data),

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -15,16 +16,108 @@ import '../../../../shared/http/http_service.dart' as http_service;
 import 'perfetto/perfetto.dart';
 import 'timeline_events_controller.dart';
 
-class TimelineEventsTabView extends StatelessWidget {
+class TimelineEventsTabView extends StatefulWidget {
   const TimelineEventsTabView({super.key, required this.controller});
 
   final TimelineEventsController controller;
 
   @override
+  State<TimelineEventsTabView> createState() => _TimelineEventsTabViewState();
+}
+
+class _TimelineEventsTabViewState extends State<TimelineEventsTabView>
+    with AutoDisposeMixin {
+  /// Size for the [_refreshingOverlay].
+  static const _overlaySize = Size(300.0, 200.0);
+
+  /// Offset to position the [_refreshingOverlay] over the top of the
+  /// timeline events view.
+  static const _overlayOffset = 50.0;
+
+  /// Timeout used by [_removeOverlayTimer].
+  static const _removeOverlayTimeout = Duration(seconds: 6);
+
+  /// Timer that will remove [_refreshingOverlay], after a time period of
+  /// [_removeOverlayTimeout], if it has not already been removed due to a
+  /// change in [TimelineEventsController.status].
+  Timer? _removeOverlayTimer;
+
+  OverlayEntry? _refreshingOverlay;
+
+  @override
+  void initState() {
+    super.initState();
+    addAutoDisposeListener(widget.controller.status, () {
+      final status = widget.controller.status.value;
+      if (status == EventsControllerStatus.refreshing) {
+        _insertOverlay();
+      } else {
+        _removeOverlay();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _removeOverlay();
+    super.dispose();
+  }
+
+  void _insertOverlay() {
+    final width = math.min(
+      _overlaySize.width,
+      MediaQuery.of(context).size.width - 2 * denseSpacing,
+    );
+    final height = math.min(
+      _overlaySize.height,
+      MediaQuery.of(context).size.height - 2 * denseSpacing,
+    );
+    final theme = Theme.of(context);
+    _refreshingOverlay?.remove();
+    Overlay.of(context).insert(
+      _refreshingOverlay = OverlayEntry(
+        maintainState: true,
+        builder: (context) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.only(top: _overlayOffset),
+              child: RoundedOutlinedBorder(
+                clip: true,
+                child: Container(
+                  width: width,
+                  height: height,
+                  color: theme.colorScheme.semiTransparentOverlayColor,
+                  child: Center(
+                    child: Text(
+                      'Refreshing the timeline...\n\n'
+                      'This may take a few seconds. Please do not\n'
+                      'refresh the page.',
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.titleSmall,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+    _removeOverlayTimer = Timer(_removeOverlayTimeout, _removeOverlay);
+  }
+
+  void _removeOverlay() {
+    _refreshingOverlay?.remove();
+    _refreshingOverlay = null;
+    _removeOverlayTimer?.cancel();
+    _removeOverlayTimer = null;
+  }
+
+  @override
   Widget build(BuildContext context) {
     return KeepAliveWrapper(
       child: EmbeddedPerfetto(
-        perfettoController: controller.perfettoController,
+        perfettoController: widget.controller.perfettoController,
       ),
     );
   }
@@ -46,7 +139,7 @@ class TimelineEventsTabControls extends StatelessWidget {
             perfettoController: controller.perfettoController,
           ),
         ),
-        if (!offlineController.offlineMode.value) ...[
+        if (!offlineDataController.showingOfflineData.value) ...[
           // TODO(kenz): add a switch to enable the CPU profiler once the
           // tracing format supports it (when we switch to protozero).
           const SizedBox(width: densePadding),
@@ -99,7 +192,7 @@ class RefreshTimelineEventsButton extends StatelessWidget {
         return RefreshButton(
           iconOnly: true,
           outlined: false,
-          onPressed: status == EventsControllerStatus.processing
+          onPressed: status == EventsControllerStatus.refreshing
               ? null
               : controller.forceRefresh,
           tooltip: 'Refresh timeline events',

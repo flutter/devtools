@@ -1125,6 +1125,17 @@ void main() {
       });
     });
 
+    group('NullableListExtension', () {
+      test('isNullOrEmpty', () {
+        List<int>? nullableList;
+        expect(nullableList.isNullOrEmpty, true);
+        nullableList = [];
+        expect(nullableList.isNullOrEmpty, true);
+        nullableList.add(1);
+        expect(nullableList.isNullOrEmpty, false);
+      });
+    });
+
     group('SetExtension', () {
       test('containsWhere', () {
         final set = {1, 2, 3, 4};

@@ -120,7 +120,7 @@ Future<void> disconnectFromTestApp(WidgetTester tester) async {
 class TestApp {
   TestApp._({required this.vmServiceUri});
 
-  factory TestApp.parse(Map<String, Object> json) {
+  factory TestApp.fromJson(Map<String, Object> json) {
     final serviceUri = json[serviceUriKey] as String?;
     if (serviceUri == null) {
       throw Exception('Cannot create a TestApp with a null service uri.');
@@ -131,7 +131,7 @@ class TestApp {
   factory TestApp.fromEnvironment() {
     const testArgs = String.fromEnvironment('test_args');
     final argsMap = (jsonDecode(testArgs) as Map).cast<String, Object>();
-    return TestApp.parse(argsMap);
+    return TestApp.fromJson(argsMap);
   }
 
   static const serviceUriKey = 'service_uri';

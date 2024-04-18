@@ -55,7 +55,7 @@ class ValidateExtensionCommand extends Command {
           // These are generated on the DevTools server, so pass in stubbed
           // values for the sake of validation.
           DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
-          DevToolsExtensionConfig.pathKey: '',
+          DevToolsExtensionConfig.extensionAssetsUriKey: '',
         },
       );
 

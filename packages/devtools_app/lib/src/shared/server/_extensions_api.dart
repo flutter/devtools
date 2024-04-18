@@ -10,12 +10,15 @@ part of 'server.dart';
 Future<List<DevToolsExtensionConfig>> refreshAvailableExtensions(
   Uri appRoot,
 ) async {
-  _log.fine('refreshAvailableExtensions for ${appRoot.toString()}');
+  _log.fine('refreshAvailableExtensions for app root: ${appRoot.toString()}');
+  if (debugDevToolsExtensions) {
+    return debugHandleRefreshAvailableExtensions();
+  }
   if (isDevToolsServerAvailable) {
     final uri = Uri(
       path: ExtensionsApi.apiServeAvailableExtensions,
       queryParameters: {
-        ExtensionsApi.extensionRootPathPropertyName: appRoot.toString(),
+        ExtensionsApi.packageRootUriPropertyName: appRoot.toString(),
       },
     );
     final resp = await request(uri.toString());
@@ -49,8 +52,6 @@ Future<List<DevToolsExtensionConfig>> refreshAvailableExtensions(
       logWarning(resp, ExtensionsApi.apiServeAvailableExtensions);
       return [];
     }
-  } else if (debugDevToolsExtensions) {
-    return debugHandleRefreshAvailableExtensions(appRoot);
   }
   return [];
 }
@@ -70,11 +71,17 @@ Future<ExtensionEnabledState> extensionEnabledState({
   _log.fine(
     '${enable != null ? 'setting' : 'getting'} extensionEnabledState for $extensionName',
   );
+  if (debugDevToolsExtensions) {
+    return debugHandleExtensionEnabledState(
+      extensionName: extensionName,
+      enable: enable,
+    );
+  }
   if (isDevToolsServerAvailable) {
     final uri = Uri(
       path: ExtensionsApi.apiExtensionEnabledState,
       queryParameters: {
-        ExtensionsApi.extensionRootPathPropertyName: appRoot.toString(),
+        ExtensionsApi.packageRootUriPropertyName: appRoot.toString(),
         ExtensionsApi.extensionNamePropertyName: extensionName,
         if (enable != null)
           ExtensionsApi.enabledStatePropertyName: enable.toString(),
@@ -89,12 +96,6 @@ Future<ExtensionEnabledState> extensionEnabledState({
     } else {
       logWarning(resp, ExtensionsApi.apiExtensionEnabledState);
     }
-  } else if (debugDevToolsExtensions) {
-    return debugHandleExtensionEnabledState(
-      appRoot: appRoot,
-      extensionName: extensionName,
-      enable: enable,
-    );
   }
   return ExtensionEnabledState.error;
 }

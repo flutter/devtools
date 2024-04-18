@@ -14,6 +14,8 @@ class DTDManager {
   final ValueNotifier<DartToolingDaemon?> _connection =
       ValueNotifier<DartToolingDaemon?>(null);
 
+  DartToolingDaemon get _dtd => _connection.value!;
+
   /// Whether the [DTDManager] is connected to a running instance of the DTD.
   bool get hasConnection => connection.value != null;
 
@@ -48,23 +50,67 @@ class DTDManager {
 
     _connection.value = null;
     _uri = null;
+    _workspaceRoots = null;
+    _projectRoots = null;
   }
 
+  /// Returns the workspace roots for the Dart Tooling Daemon connection.
+  ///
+  /// These roots are set by the tool that started DTD, which may be the IDE,
+  /// DevTools server, or DDS (the Dart Development Service managed by the Dart
+  /// or Flutter CLI tools).
+  ///
+  /// A workspace root is considered any directory that is at the root of the
+  /// IDE's open project or workspace, or in the case where the Dart Tooling
+  /// Daemon was started from the DevTools server or DDS (e.g. an app ran from
+  /// the CLI), a workspace root is the root directory for the Dart or Flutter
+  /// program connected to DevTools.
+  ///
+  /// By default, the cached value [_workspaceRoots] will be returned when
+  /// available. When [forceRefresh] is true, the cached value will be cleared
+  /// and recomputed.
   Future<IDEWorkspaceRoots?> workspaceRoots({bool forceRefresh = false}) async {
-    if (hasConnection) {
-      if (_workspaceRoots != null && forceRefresh) {
-        _workspaceRoots = null;
-      }
-      try {
-        return _workspaceRoots ??=
-            await _connection.value!.getIDEWorkspaceRoots();
-      } catch (e) {
-        _log.fine('Error fetching IDE workspaceRoots: $e');
-        return null;
-      }
+    if (!hasConnection) return null;
+    if (_workspaceRoots != null && forceRefresh) {
+      _workspaceRoots = null;
     }
-    return null;
+    try {
+      return _workspaceRoots ??= await _dtd.getIDEWorkspaceRoots();
+    } catch (e) {
+      _log.fine('Error fetching IDE workspaceRoots: $e');
+      return null;
+    }
   }
 
   IDEWorkspaceRoots? _workspaceRoots;
+
+  /// Returns the project roots for the Dart Tooling Daemon connection.
+  ///
+  /// A project root is any directory, contained within the current set of
+  /// [workspaceRoots], that contains a 'pubspec.yaml' file.
+  ///
+  /// By default, the cached value [_projectRoots] will be returned when
+  /// available. When [forceRefresh] is true, the cached value will be cleared
+  /// and recomputed.
+  ///
+  /// [depth] is the maximum depth that each workspace root directory tree will
+  /// will be searched for project roots. Setting [depth] to a large number
+  /// may have performance implications when traversing large trees.
+  Future<UriList?> projectRoots({
+    int? depth = defaultGetProjectRootsDepth,
+    bool forceRefresh = false,
+  }) async {
+    if (!hasConnection) return null;
+    if (_projectRoots != null && forceRefresh) {
+      _projectRoots = null;
+    }
+    try {
+      return _projectRoots ??= await _dtd.getProjectRoots(depth: depth!);
+    } catch (e) {
+      _log.fine('Error fetching project roots: $e');
+      return null;
+    }
+  }
+
+  UriList? _projectRoots;
 }

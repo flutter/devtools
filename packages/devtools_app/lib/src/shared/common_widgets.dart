@@ -497,9 +497,9 @@ class ExitOfflineButton extends StatelessWidget {
       label: 'Exit offline mode',
       icon: Icons.clear,
       gaScreen: gaScreen,
-      gaSelection: gac.exitOfflineMode,
+      gaSelection: gac.stopShowingOfflineData,
       onPressed: () {
-        offlineController.exitOfflineMode();
+        offlineDataController.stopShowingOfflineData();
         // Use Router.neglect to replace the current history entry with
         // the homepage so that clicking Back will not return here.
         Router.neglect(
@@ -524,11 +524,11 @@ class OfflineAwareControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
-      valueListenable: offlineController.offlineMode,
+      valueListenable: offlineDataController.showingOfflineData,
       builder: (context, offline, _) {
         return Row(
           children: [
-            if (offlineController.offlineMode.value)
+            if (offlineDataController.showingOfflineData.value)
               Padding(
                 padding: const EdgeInsets.only(right: defaultSpacing),
                 child: ExitOfflineButton(gaScreen: gaScreen),
@@ -708,6 +708,14 @@ class RoundedCornerOptions {
     this.showBottomRight = true,
   });
 
+  /// Static constant instance with all borders hidden
+  static const RoundedCornerOptions empty = RoundedCornerOptions(
+    showTopLeft: false,
+    showTopRight: false,
+    showBottomLeft: false,
+    showBottomRight: false,
+  );
+
   final bool showTopLeft;
   final bool showTopRight;
   final bool showBottomLeft;
@@ -757,38 +765,43 @@ class RoundedDropDownButton<T> extends StatelessWidget {
     final showTopRight = roundedCornerOptions?.showTopRight ?? true;
     final showBottomLeft = roundedCornerOptions?.showBottomLeft ?? true;
     final showBottomRight = roundedCornerOptions?.showBottomRight ?? true;
+
+    final button = Center(
+      child: SizedBox(
+        height: defaultButtonHeight - 2.0, // subtract 2.0 for width of border
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<T>(
+            padding: const EdgeInsets.only(
+              left: defaultSpacing,
+              right: borderPadding,
+            ),
+            value: value,
+            onChanged: onChanged,
+            isDense: isDense,
+            isExpanded: isExpanded,
+            borderRadius: BorderRadius.only(
+              topLeft: selectRadius(showTopLeft),
+              topRight: selectRadius(showTopRight),
+              bottomLeft: selectRadius(showBottomLeft),
+              bottomRight: selectRadius(showBottomRight),
+            ),
+            style: style,
+            selectedItemBuilder: selectedItemBuilder,
+            items: items,
+            focusColor: bgColor,
+          ),
+        ),
+      ),
+    );
+
+    if (roundedCornerOptions == RoundedCornerOptions.empty) return button;
+
     return RoundedOutlinedBorder(
       showTopLeft: showTopLeft,
       showTopRight: showTopRight,
       showBottomLeft: showBottomLeft,
       showBottomRight: showBottomRight,
-      child: Center(
-        child: SizedBox(
-          height: defaultButtonHeight - 2.0, // subtract 2.0 for width of border
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<T>(
-              padding: const EdgeInsets.only(
-                left: defaultSpacing,
-                right: borderPadding,
-              ),
-              value: value,
-              onChanged: onChanged,
-              isDense: isDense,
-              isExpanded: isExpanded,
-              borderRadius: BorderRadius.only(
-                topLeft: selectRadius(showTopLeft),
-                topRight: selectRadius(showTopRight),
-                bottomLeft: selectRadius(showBottomLeft),
-                bottomRight: selectRadius(showBottomRight),
-              ),
-              style: style,
-              selectedItemBuilder: selectedItemBuilder,
-              items: items,
-              focusColor: bgColor,
-            ),
-          ),
-        ),
-      ),
+      child: button,
     );
   }
 }
@@ -1253,7 +1266,7 @@ class TextViewer extends StatelessWidget {
     } else {
       displayText = text;
     }
-    return Text(
+    return SelectableText(
       displayText,
       style: style,
     );
@@ -1276,6 +1289,7 @@ class _JsonViewerState extends State<JsonViewer>
     with ProvidedControllerMixin<DebuggerController, JsonViewer> {
   late Future<void> _initializeTree;
   late DartObjectNode variable;
+  static const jsonEncoder = JsonEncoder.withIndent('  ');
 
   Future<void> _buildAndExpand(
     DartObjectNode variable,
@@ -1358,6 +1372,18 @@ class _JsonViewerState extends State<JsonViewer>
               }
               return ExpandableVariable(
                 variable: variable,
+                onCopy: (copiedVariable) {
+                  unawaited(
+                    copyToClipboard(
+                      jsonEncoder.convert(
+                        serviceConnection
+                            .serviceManager.service!.fakeServiceCache
+                            .instanceToJson(copiedVariable.value as Instance),
+                      ),
+                      'JSON copied to clipboard',
+                    ),
+                  );
+                },
               );
             },
           ),

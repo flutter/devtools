@@ -364,6 +364,7 @@ class UriColumn extends ColumnData<NetworkRequest>
       : super.wide(
           'Uri',
           minWidthPx: scaleByFontFactor(100.0),
+          showTooltip: true,
         );
 
   @override
