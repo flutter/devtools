@@ -113,21 +113,22 @@ class AdaptedProfile {
   final GCStats totalGCStats;
 }
 
+/// Constants ar short here, as they repeat and we want to save space.
 class _RecordJson {
-  static const isTotal = 'isTotal';
-  static const heapClass = 'heapClass';
-  static const totalInstances = 'totalInstances';
-  static const totalSize = 'totalSize';
-  static const totalDartHeapSize = 'totalDartHeapSize';
-  static const totalExternalSize = 'totalExternalSize';
-  static const newSpaceInstances = 'newSpaceInstances';
-  static const newSpaceSize = 'newSpaceSize';
-  static const newSpaceDartHeapSize = 'newSpaceDartHeapSize';
-  static const newSpaceExternalSize = 'newSpaceExternalSize';
-  static const oldSpaceInstances = 'oldSpaceInstances';
-  static const oldSpaceSize = 'oldSpaceSize';
-  static const oldSpaceDartHeapSize = 'oldSpaceDartHeapSize';
-  static const oldSpaceExternalSize = 'oldSpaceExternalSize';
+  static const isTotal = 'it';
+  static const heapClass = 'c';
+  static const totalInstances = 'ti';
+  static const totalSize = 'ts';
+  static const totalDartHeapSize = 'tds';
+  static const totalExternalSize = 'tes';
+  static const newSpaceInstances = 'ni';
+  static const newSpaceSize = 'ns';
+  static const newSpaceDartHeapSize = 'nds';
+  static const newSpaceExternalSize = 'nes';
+  static const oldSpaceInstances = 'oi';
+  static const oldSpaceSize = 'os';
+  static const oldSpaceDartHeapSize = 'ods';
+  static const oldSpaceExternalSize = 'oes';
 }
 
 class ProfileRecord with PinnableListEntry {

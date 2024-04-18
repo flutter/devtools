@@ -72,8 +72,8 @@ enum ClassType {
 }
 
 class _Json {
-  static const className = 'name';
-  static const library = 'lib';
+  static const className = 'n';
+  static const library = 'l';
 }
 
 /// Fully qualified Class name.
