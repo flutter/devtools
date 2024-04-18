@@ -14,26 +14,31 @@ import '../../../../shared/primitives/simple_items.dart';
 import '../../shared/heap/class_filter.dart';
 import 'model.dart';
 
-class _ProfileJson {
-  static const total = 'total';
-  static const items = 'items';
-  static const newGC = 'newGC';
-  static const oldGC = 'oldGC';
-  static const totalGC = 'totalGC';
+class _Json {
+  static const profile = 'profile';
 }
 
 class ProfilePaneController extends DisposableController
     with AutoDisposeControllerMixin {
-  ProfilePaneController({required this.mode});
+  ProfilePaneController({required this.mode, AdaptedProfile? profile})
+      : assert(profile == null || mode != DevToolsMode.connected) {
+    if (profile != null) {
+      _currentAllocationProfile.value = profile;
+      _initializeSelection();
+    }
+  }
 
   factory ProfilePaneController.fromJson(Map<String, dynamic> map) {
-    // TODO(polina-c): implement, https://github.com/flutter/devtools/issues/6972
-    return ProfilePaneController(mode: DevToolsMode.offlineData);
+    return ProfilePaneController(
+      mode: DevToolsMode.offlineData,
+      profile: AdaptedProfile.fromJson(map[_Json.profile]),
+    );
   }
 
   Map<String, dynamic> toJson() {
-    // TODO(polina-c): implement, https://github.com/flutter/devtools/issues/6972
-    return {};
+    return {
+      _Json.profile: _currentAllocationProfile.value?.toJson(),
+    };
   }
 
   final DevToolsMode mode;
