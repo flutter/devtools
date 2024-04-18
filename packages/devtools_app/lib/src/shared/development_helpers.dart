@@ -88,15 +88,9 @@ final List<DevToolsExtensionConfig> debugExtensions = [
     DevToolsExtensionConfig.versionKey: '1.0.0',
     DevToolsExtensionConfig.materialIconCodePointKey: '0xe0b1',
     DevToolsExtensionConfig.extensionAssetsUriKey: '/path/to/foo',
+    DevToolsExtensionConfig.devtoolsOptionsUriKey: '/path/to/options/file',
     DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
-  }),
-  DevToolsExtensionConfig.parse({
-    DevToolsExtensionConfig.nameKey: 'bar',
-    DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
-    DevToolsExtensionConfig.versionKey: '2.0.0',
-    DevToolsExtensionConfig.materialIconCodePointKey: 0xe638,
-    DevToolsExtensionConfig.extensionAssetsUriKey: '/path/to/bar',
-    DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
+    DevToolsExtensionConfig.detectedFromStaticContextKey: 'false',
   }),
   DevToolsExtensionConfig.parse({
     DevToolsExtensionConfig.nameKey: 'provider',
@@ -105,7 +99,21 @@ final List<DevToolsExtensionConfig> debugExtensions = [
     DevToolsExtensionConfig.versionKey: '3.0.0',
     DevToolsExtensionConfig.materialIconCodePointKey: 0xe50a,
     DevToolsExtensionConfig.extensionAssetsUriKey: '/path/to/provider',
+    DevToolsExtensionConfig.devtoolsOptionsUriKey: '/path/to/options/file',
+    DevToolsExtensionConfig.isPubliclyHostedKey: 'true',
+    DevToolsExtensionConfig.detectedFromStaticContextKey: 'false',
+  }),
+  // Static extension.
+  DevToolsExtensionConfig.parse({
+    DevToolsExtensionConfig.nameKey: 'bar',
+    DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
+    DevToolsExtensionConfig.versionKey: '2.0.0',
+    DevToolsExtensionConfig.materialIconCodePointKey: 0xe638,
+    DevToolsExtensionConfig.requiresConnectionKey: 'false',
+    DevToolsExtensionConfig.extensionAssetsUriKey: '/path/to/bar',
+    DevToolsExtensionConfig.devtoolsOptionsUriKey: '/path/to/options/file',
     DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
+    DevToolsExtensionConfig.detectedFromStaticContextKey: 'true',
   }),
 ];
 

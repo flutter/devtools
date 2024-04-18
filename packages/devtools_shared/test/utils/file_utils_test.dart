@@ -9,7 +9,7 @@ import 'package:dtd/dtd.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
-import '../helpers.dart';
+import '../helpers/helpers.dart';
 
 const projectRootParts = ['absolute_path_to', 'my_app_root'];
 late String projectRoot;
@@ -34,10 +34,6 @@ void main() {
   group('file uri helpers', () {
     TestDtdConnectionInfo? dtd;
     DartToolingDaemon? testDtdConnection;
-
-    setUpAll(() {
-      _setupTestDirectoryStructure();
-    });
 
     setUp(() async {
       dtd = await startDtd();

@@ -1,4 +1,6 @@
 ## 0.2.0-dev.0
+* Deprecate the `DevToolsExtension.requiresRunningApplication` field.
+* Update `extension_config_spec.md` to include an optional field `requiresConnection`.
 * Bump `devtools_shared` dependency to `^10.0.0`.
 * Fix file locations in the `dart_foo` extension example.
 

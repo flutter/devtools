@@ -10,7 +10,10 @@ part of 'server.dart';
 Future<List<DevToolsExtensionConfig>> refreshAvailableExtensions(
   Uri appRoot,
 ) async {
-  _log.fine('refreshAvailableExtensions for ${appRoot.toString()}');
+  _log.fine('refreshAvailableExtensions for app root: ${appRoot.toString()}');
+  if (debugDevToolsExtensions) {
+    return debugHandleRefreshAvailableExtensions();
+  }
   if (isDevToolsServerAvailable) {
     final uri = Uri(
       path: ExtensionsApi.apiServeAvailableExtensions,
@@ -49,8 +52,6 @@ Future<List<DevToolsExtensionConfig>> refreshAvailableExtensions(
       logWarning(resp, ExtensionsApi.apiServeAvailableExtensions);
       return [];
     }
-  } else if (debugDevToolsExtensions) {
-    return debugHandleRefreshAvailableExtensions();
   }
   return [];
 }
@@ -70,6 +71,12 @@ Future<ExtensionEnabledState> extensionEnabledState({
   _log.fine(
     '${enable != null ? 'setting' : 'getting'} extensionEnabledState for $extensionName',
   );
+  if (debugDevToolsExtensions) {
+    return debugHandleExtensionEnabledState(
+      extensionName: extensionName,
+      enable: enable,
+    );
+  }
   if (isDevToolsServerAvailable) {
     final uri = Uri(
       path: ExtensionsApi.apiExtensionEnabledState,
@@ -89,11 +96,6 @@ Future<ExtensionEnabledState> extensionEnabledState({
     } else {
       logWarning(resp, ExtensionsApi.apiExtensionEnabledState);
     }
-  } else if (debugDevToolsExtensions) {
-    return debugHandleExtensionEnabledState(
-      extensionName: extensionName,
-      enable: enable,
-    );
   }
   return ExtensionEnabledState.error;
 }

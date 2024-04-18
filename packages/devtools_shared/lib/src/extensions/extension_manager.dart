@@ -6,6 +6,7 @@ import 'package:collection/collection.dart';
 import 'package:extension_discovery/extension_discovery.dart';
 import 'package:path/path.dart' as path;
 
+import 'constants.dart';
 import 'extension_model.dart';
 
 /// The default location for the DevTools extension, relative to
@@ -57,28 +58,22 @@ class ExtensionsManager {
     String? rootFileUriString,
     List<String> logs,
   ) async {
-    if (rootFileUriString != null && !rootFileUriString.startsWith('file://')) {
-      throw ArgumentError.value(
-        rootFileUriString,
-        'rootPathFileUri',
-        'must be a file:// URI String',
-      );
-    }
-
     logs.add(
-      'ExtensionsManager.serveAvailableExtensions: '
+      'ExtensionsManager.serveAvailableExtensions for '
       'rootPathFileUri: $rootFileUriString',
     );
 
     _clear();
     final parsingErrors = StringBuffer();
 
-    // Find all runtime extensions for [rootFileUriString], if non-null.
-    if (rootFileUriString != null) {
+    // Find all runtime extensions for [rootFileUriString], if non-null and
+    // non-empty.
+    if (rootFileUriString != null && rootFileUriString.isNotEmpty) {
       await _addExtensionsForRoot(
         rootFileUriString,
         logs: logs,
         parsingErrors: parsingErrors,
+        staticContext: false,
       );
     }
 
@@ -97,21 +92,26 @@ class ExtensionsManager {
     String rootFileUriString, {
     required List<String> logs,
     required StringBuffer parsingErrors,
+    required bool staticContext,
   }) async {
+    _assertUriFormat(rootFileUriString);
     late final List<Extension> extensions;
     try {
+      // TODO(https://github.com/dart-lang/pub/issues/4218): this assumes that
+      // the .dart_tool/package_config.json file is in the package root, which
+      // may be an incorrect assumption for monorepos.
+      final packageConfigPath = path.posix.join(
+        rootFileUriString,
+        '.dart_tool',
+        'package_config.json',
+      );
       extensions = await findExtensions(
         'devtools',
-        packageConfig: Uri.parse(
-          path.posix.join(
-            rootFileUriString,
-            '.dart_tool',
-            'package_config.json',
-          ),
-        ),
+        packageConfig: Uri.parse(packageConfigPath),
       );
       logs.add(
-        'ExtensionsManager.serveAvailableExtensions: findExtensionsResult  - '
+        'ExtensionsManager._addExtensionsForRoot find extensions for '
+        'config: $packageConfigPath, result: '
         '${extensions.map((e) => e.package).toList()}',
       );
     } catch (e) {
@@ -143,13 +143,26 @@ class ExtensionsManager {
         final extensionConfig = DevToolsExtensionConfig.parse({
           ...config,
           DevToolsExtensionConfig.extensionAssetsUriKey: location,
+          // TODO(kenz): for monorepos, we may want to store the
+          // devtools_options.yaml at the same location as the workspace's
+          // .dart_tool/package_config.json file.
+          DevToolsExtensionConfig.devtoolsOptionsUriKey:
+              path.join(rootFileUriString, devtoolsOptionsFileName),
           DevToolsExtensionConfig.isPubliclyHostedKey: isPubliclyHosted,
+          DevToolsExtensionConfig.detectedFromStaticContextKey:
+              staticContext.toString(),
         });
         devtoolsExtensions.add(extensionConfig);
       } on StateError catch (e) {
         parsingErrors.writeln(e.message);
         continue;
       }
+    }
+  }
+
+  void _assertUriFormat(String? uriString) {
+    if (uriString != null && !uriString.startsWith('file://')) {
+      throw ArgumentError.value(uriString, 'must be a file:// URI String');
     }
   }
 

@@ -9,12 +9,12 @@ import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 import 'package:yaml_edit/yaml_edit.dart';
 
+import 'constants.dart';
 import 'extension_model.dart';
 import 'yaml_utils.dart';
 
 /// Manages the `devtools_options.yaml` file and allows read / write access.
 class DevToolsOptions {
-  static const optionsFileName = 'devtools_options.yaml';
   static const _extensionsKey = 'extensions';
   static const _descriptionKey = 'description';
   static const _documentationKey = 'documentation';
@@ -128,7 +128,7 @@ $_extensionsKey:
       return null;
     }
 
-    final optionsFile = File(path.join(rootDir.path, optionsFileName));
+    final optionsFile = File(path.join(rootDir.path, devtoolsOptionsFileName));
     if (!optionsFile.existsSync()) {
       optionsFile
         ..createSync()

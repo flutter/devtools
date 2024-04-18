@@ -2,34 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_shared/src/extensions/extension_model.dart';
+import 'package:devtools_app/src/shared/development_helpers.dart';
 
-final testExtensions = [fooExtension, barExtension, providerExtension];
-
-final fooExtension = DevToolsExtensionConfig.parse({
-  DevToolsExtensionConfig.nameKey: 'foo',
-  DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
-  DevToolsExtensionConfig.versionKey: '1.0.0',
-  DevToolsExtensionConfig.materialIconCodePointKey: '0xe0b1',
-  DevToolsExtensionConfig.extensionAssetsUriKey: '/path/to/foo',
-  DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
-});
-
-final barExtension = DevToolsExtensionConfig.parse({
-  DevToolsExtensionConfig.nameKey: 'bar',
-  DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
-  DevToolsExtensionConfig.versionKey: '2.0.0',
-  DevToolsExtensionConfig.materialIconCodePointKey: 0xe638,
-  DevToolsExtensionConfig.extensionAssetsUriKey: '/path/to/bar',
-  DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
-});
-
-final providerExtension = DevToolsExtensionConfig.parse({
-  DevToolsExtensionConfig.nameKey: 'provider',
-  DevToolsExtensionConfig.issueTrackerKey:
-      'https://github.com/rrousselGit/provider/issues',
-  DevToolsExtensionConfig.versionKey: '3.0.0',
-  DevToolsExtensionConfig.materialIconCodePointKey: 0xe50a,
-  DevToolsExtensionConfig.extensionAssetsUriKey: '/path/to/provider',
-  DevToolsExtensionConfig.isPubliclyHostedKey: 'true',
-});
+final testExtensions = List.of(debugExtensions)..sort();
+final barExtension = testExtensions[0];
+final fooExtension = testExtensions[1];
+final providerExtension = testExtensions[2];

@@ -22,10 +22,7 @@ void main() {
 
   testWidgets('end to end simulated environment', (tester) async {
     runApp(
-      const DevToolsExtension(
-        requiresRunningApplication: false,
-        child: TestDevToolsExtension(),
-      ),
+      const DevToolsExtension(child: TestDevToolsExtension()),
     );
     await tester.pump(safePumpDuration);
     expect(find.byType(DevToolsExtension), findsOneWidget);
