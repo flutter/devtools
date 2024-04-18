@@ -244,9 +244,10 @@ For example, if you want current Flutter beta to be updated with fixed DevTools,
     ```
 You will get DevTools version and Dart SDK version to fix.
 
-2. Checkout that tag locally. For this
+2. Checkout that tag in your local DevTools repo. For this
 example, we'll use `v2.29.0` as the base branch and `2.29.1` as the cherry-pick branch.
    ```
+   git fetch --all 
    git checkout v2.29.0
    ```
 
