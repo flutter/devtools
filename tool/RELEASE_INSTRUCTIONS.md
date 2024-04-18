@@ -235,25 +235,34 @@ of the full release process.
 ### Prepare the release in the `flutter/devtools` repo
 
 1. Find the [DevTools tag](https://github.com/flutter/devtools/tags) that you want
-to perform the cherry-pick release on top of. Then checkout that tag locally. For this
+to perform the cherry-pick release on top of.
+
+For example, if you want current Flutter beta to be updated with fixed DevTools, run in Flutter repo:
+    ```
+    git checkout upstream/beta
+    flutter --version
+    ```
+You will get DevTools version and Dart SDK version to fix.
+
+2. Checkout that tag locally. For this
 example, we'll use `v2.29.0` as the base branch and `2.29.1` as the cherry-pick branch.
    ```
    git checkout v2.29.0
    ```
 
-2. Create a new branch for your cherry pick release. 
+3. Create a new branch for your cherry pick release. 
    ```
    git checkout -b 2.29.1
    ```
 
-3. Cherry pick the commit(s) you want in this cherry-pick release, and bump the 
+4. Cherry pick the commit(s) you want in this cherry-pick release, and bump the 
 DevTools version number:
    ```
    git cherry-pick <commit>
    devtools_tool update-version auto -t patch
    ```
 
-4. Commit your changes and push to the `upstream` remote.
+5. Commit your changes and push to the `upstream` remote.
    ```
    git add .
    git commit -m "Prepare cherry-pick release - DevTools 2.29.1"
