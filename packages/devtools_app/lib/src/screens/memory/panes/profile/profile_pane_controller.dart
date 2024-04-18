@@ -14,6 +14,14 @@ import '../../../../shared/primitives/simple_items.dart';
 import '../../shared/heap/class_filter.dart';
 import 'model.dart';
 
+class _ProfileJson {
+  static const total = 'total';
+  static const items = 'items';
+  static const newGC = 'newGC';
+  static const oldGC = 'oldGC';
+  static const totalGC = 'totalGC';
+}
+
 class ProfilePaneController extends DisposableController
     with AutoDisposeControllerMixin {
   ProfilePaneController({required this.mode});
