@@ -71,6 +71,11 @@ enum ClassType {
       CircleIcon(color: color, text: label, textColor: Colors.white);
 }
 
+class _Json {
+  static const className = 'name';
+  static const library = 'lib';
+}
+
 /// Fully qualified Class name.
 ///
 /// Equal class names are not stored twice in memory.
@@ -78,6 +83,20 @@ class HeapClassName {
   @visibleForTesting
   HeapClassName({required String? library, required this.className})
       : library = _normalizeLibrary(library);
+
+  factory HeapClassName.fromJson(Map<String, dynamic> json) {
+    return HeapClassName(
+      library: json[_Json.library] as String?,
+      className: json[_Json.className] as String,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      _Json.className: className,
+      _Json.library: library,
+    };
+  }
 
   static final _instances = <HeapClassName>{};
 
