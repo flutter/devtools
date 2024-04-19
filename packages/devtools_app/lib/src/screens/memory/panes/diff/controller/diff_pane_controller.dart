@@ -31,7 +31,7 @@ import 'item_controller.dart';
 class DiffPaneController extends DisposableController {
   DiffPaneController({required this.loader});
 
-  factory DiffPaneController.fromJson(Map<String, dynamic> map) {
+  factory DiffPaneController.fromJson(Map<String, dynamic> json) {
     // TODO(polina-c): implement, https://github.com/flutter/devtools/issues/6972
     return DiffPaneController(loader: null);
   }

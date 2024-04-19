@@ -28,10 +28,10 @@ class ProfilePaneController extends DisposableController
     }
   }
 
-  factory ProfilePaneController.fromJson(Map<String, dynamic> map) {
+  factory ProfilePaneController.fromJson(Map<String, dynamic> json) {
     return ProfilePaneController(
       mode: DevToolsMode.offlineData,
-      profile: AdaptedProfile.fromJson(map[_Json.profile]),
+      profile: AdaptedProfile.fromJson(json[_Json.profile]),
     );
   }
 

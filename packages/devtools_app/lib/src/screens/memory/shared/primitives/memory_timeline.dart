@@ -9,23 +9,34 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/primitives/utils.dart';
 
+class _Json {
+  static const data = 'data';
+}
+
 /// All Raw data received from the VM or offline data.
 class MemoryTimeline {
-  MemoryTimeline();
+  MemoryTimeline({List<HeapSample>? data}) {
+    this.data = data ?? [];
+  }
 
-  factory MemoryTimeline.fromJson(Map<String, dynamic> map) {
-    throw UnimplementedError();
+  factory MemoryTimeline.fromJson(Map<String, dynamic> json) {
+    return MemoryTimeline(
+      data: (json[_Json.data] as List)
+          .map((e) => HeapSample.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
   }
 
   Map<String, dynamic> toJson() {
-    // TODO(polina-c): implement, https://github.com/flutter/devtools/issues/6972
-    return {};
+    return {
+      _Json.data: data.map((e) => e.toJson()).toList(),
+    };
   }
 
   int get endingIndex => data.isNotEmpty ? data.length - 1 : -1;
 
   /// Raw Heap sampling data from the VM.
-  final List<HeapSample> data = [];
+  late final List<HeapSample> data;
 
   /// Extension Events.
   ValueListenable<Event?> get eventNotifier => _eventFiredNotifier;
@@ -61,9 +72,6 @@ class MemoryTimeline {
   final _extensionEvents = <ExtensionEvent>[];
 
   bool get anyPendingExtensionEvents => _extensionEvents.isNotEmpty;
-
-  /// Whether the timeline has been manually paused via the Pause button.
-  bool manuallyPaused = false;
 
   void reset() {
     data.clear();

@@ -37,22 +37,26 @@ class ChartData {
     _isLegendVisible = ValueNotifier<bool>(isLegendVisible ?? true);
   }
 
-  factory ChartData.fromJson(Map<String, dynamic> map) {
+  factory ChartData.fromJson(Map<String, dynamic> json) {
     return ChartData(
       mode: DevToolsMode.offlineData,
-      isDeviceAndroid: map[_Json.isDeviceAndroid] as bool? ?? false,
+      isDeviceAndroid: json[_Json.isDeviceAndroid] as bool? ?? false,
       timeline:
-          MemoryTimeline.fromJson(map[_Json.timeline] as Map<String, dynamic>),
+          MemoryTimeline.fromJson(json[_Json.timeline] as Map<String, dynamic>),
       interval: ChartInterval.values
-              .firstWhereOrNull((i) => i.name == map[_Json.interval]) ??
+              .firstWhereOrNull((i) => i.name == json[_Json.interval]) ??
           ChartInterval.theDefault,
-      isLegendVisible: map[_Json.isLegendVisible] as bool?,
+      isLegendVisible: json[_Json.isLegendVisible] as bool?,
     );
   }
 
   Map<String, dynamic> toJson() {
-    // TODO(polina-c): implement, https://github.com/flutter/devtools/issues/6972
-    return {};
+    return {
+      _Json.isDeviceAndroid: isDeviceAndroid,
+      _Json.timeline: timeline.toJson(),
+      _Json.interval: displayInterval.name,
+      _Json.isLegendVisible: isLegendVisible.value,
+    };
   }
 
   /// Wether device is android, if not connected to application.
