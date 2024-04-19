@@ -68,15 +68,16 @@ class MemoryChartPaneController extends DisposableController
       data = offlineData!;
     }
 
-    _updateAndroidChartVisibility();
-
-    if (mode == DevToolsMode.connected && isChartVisible.value) {
-      await maybeConnect();
-    }
-
+    _calculateAndroidChartVisibility();
     addAutoDisposeListener(
       preferences.memory.androidCollectionEnabled,
-      _updateAndroidChartVisibility,
+      _calculateAndroidChartVisibility,
+    );
+
+    await _onChartVisibilityChanged();
+    addAutoDisposeListener(
+      preferences.memory.showChart,
+      () => unawaited(_onChartVisibilityChanged()),
     );
   }
 
@@ -89,8 +90,6 @@ class MemoryChartPaneController extends DisposableController
     sharedLabels: vm.labelTimestamps,
     paused: paused,
   );
-
-  ValueNotifier<bool> isChartVisible = preferences.memory.showChart;
 
   void resetAll() {
     event.reset();
@@ -118,21 +117,29 @@ class MemoryChartPaneController extends DisposableController
     _paused.value = false;
   }
 
-  Future<void> _updateChartVisibility(bool show) async {}
-
-  /// Is invoked when chart is first time expanded.
-  Future<void> maybeConnect() async {
-    if (!_paused.value) return;
-    if (mode != DevToolsMode.connected) return;
+  /// Connects when chart is first time expanded.
+  ///
+  /// If chart is already connected, does nothing.
+  /// Return true if connection was setup.
+  Future<bool> maybeConnect() async {
+    if (!_paused.value) return false;
+    if (mode != DevToolsMode.connected) return false;
     await _chartConnection!.maybeConnect();
+    return true;
   }
 
   final isAndroidChartVisible = ValueNotifier<bool>(false);
-
-  void _updateAndroidChartVisibility() {
+  void _calculateAndroidChartVisibility() {
     final isAndroid = data.isDeviceAndroid ?? _chartConnection!.isDeviceAndroid;
     isAndroidChartVisible.value =
         isAndroid && preferences.memory.androidCollectionEnabled.value;
+  }
+
+  ValueListenable<bool> isChartVisible = preferences.memory.showChart;
+  Future<void> _onChartVisibilityChanged() async {
+    if (isChartVisible.value) {
+      if (await maybeConnect()) resume();
+    }
   }
 
   @override
