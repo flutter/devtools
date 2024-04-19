@@ -22,7 +22,9 @@ TODO: Remove this section if there are not any general updates.
 
 ## CPU profiler updates
 
-TODO: Remove this section if there are not any general updates.
+* Changed to a single button, for starting and stopping
+  recording. - [#7573](https://github.com/flutter/devtools/pull/7573)
+  ![A screen shot of the CPU profiler tab, with the new recording button.](./images/profiler_recording.png)
 
 ## Memory updates
 
@@ -34,7 +36,10 @@ TODO: Remove this section if there are not any general updates.
 * During a hot-restart, `pause_isolates_on_start` and only `resume` the app once breakpoints are set. - [#7234](https://github.com/flutter/devtools/pull/7234)
 
 ## Network profiler updates
- 
+
+* Changed to a single button, for starting and stopping
+  recording. - [#7573](https://github.com/flutter/devtools/pull/7573)
+  ![A screen shot of the network tab, with the new recording button.](./images/network_recording.png)
 * Added text selection in text viewer for requests and responses. - [#7596](https://github.com/flutter/devtools/pull/7596)
 * Added a JSON copy experience to the JSON viewer. - [#7596](https://github.com/flutter/devtools/pull/7596)
   ![An image of the new json copy experience for the JSON viewer](./images/json_viewer_copy.png)
