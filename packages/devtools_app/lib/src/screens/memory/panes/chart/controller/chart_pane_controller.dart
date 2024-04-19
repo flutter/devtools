@@ -26,28 +26,6 @@ class MemoryChartPaneController extends DisposableController
     unawaited(_init(data));
   }
 
-  factory MemoryChartPaneController.offlineData(
-    MemoryChartPaneController controller,
-  ) {
-    return MemoryChartPaneController(
-      DevToolsMode.offlineData,
-      data: controller.data,
-    );
-  }
-
-  factory MemoryChartPaneController.fromJson(Map<String, dynamic> map) {
-    // TODO(polina-c): implement, https://github.com/flutter/devtools/issues/6972
-    return MemoryChartPaneController(
-      DevToolsMode.offlineData,
-      data: ChartData.offlineData(throw UnimplementedError()),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    // TODO(polina-c): implement, https://github.com/flutter/devtools/issues/6972
-    return {};
-  }
-
   DevToolsMode mode;
 
   late final ChartData data;

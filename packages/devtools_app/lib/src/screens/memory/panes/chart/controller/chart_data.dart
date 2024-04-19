@@ -4,7 +4,6 @@
 
 import 'package:flutter/foundation.dart';
 
-import '../../../../../shared/primitives/simple_items.dart';
 import '../../../shared/primitives/memory_timeline.dart';
 import '../data/primitives.dart';
 
@@ -26,12 +25,27 @@ class ChartData {
 
   ChartData.offlineData(
     ChartData data,
-  ) : this._(isDeviceAndroid: data.isDeviceAndroid!);
+  ) : this._(
+          isDeviceAndroid: data.isDeviceAndroid!,
+          timeline: data.timeline,
+          interval: data.displayInterval,
+          isLegendVisible: data.isLegendVisible.value,
+        );
 
-  /// Wether device is android, if [mode] is not [DevToolsMode.connected].
+  factory ChartData.fromJson(Map<String, dynamic> map) {
+    // TODO(polina-c): implement, https://github.com/flutter/devtools/issues/6972
+    throw UnimplementedError();
+  }
+
+  Map<String, dynamic> toJson() {
+    // TODO(polina-c): implement, https://github.com/flutter/devtools/issues/6972
+    return {};
+  }
+
+  /// Wether device is android, if not connected to application.
   ///
-  /// If [mode] is [DevToolsMode.connected], this value is null
-  /// and chart visibility should be detected based on signal from connected app.
+  /// If connected to application, this value is null
+  /// and android chart visibility should be detected based on signal from the connected app.
   final bool? isDeviceAndroid;
 
   late final MemoryTimeline timeline;

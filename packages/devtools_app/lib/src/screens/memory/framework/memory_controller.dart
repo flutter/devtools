@@ -121,7 +121,7 @@ class MemoryController extends DisposableController
   }) {
     assert(!_initialized.isCompleted);
 
-    chart = offlineData?.chart ?? MemoryChartPaneController(_mode);
+    chart = MemoryChartPaneController(_mode, data: offlineData?.chart);
     diff = diffPaneController ??
         offlineData?.diff ??
         DiffPaneController(
@@ -152,7 +152,7 @@ class MemoryController extends DisposableController
           _jsonKey: OfflineMemoryData(
             diff,
             profile,
-            MemoryChartPaneController.offlineData(chart),
+            chart.data,
             profile.classFilter.value,
             selectedTab: selectedFeatureTabIndex,
           ),
