@@ -37,6 +37,7 @@ class AdaptedProfile {
     final adaptedProfile = AdaptedProfile._(
       total: ProfileRecord.total(profile),
       items: (profile.members ?? [])
+          .where((e) => (e.instancesCurrent ?? 0) > 0)
           .map((e) => ProfileRecord.fromClassHeapStats(e))
           .toList(),
       newSpaceGCStats: profile.newSpaceGCStats,

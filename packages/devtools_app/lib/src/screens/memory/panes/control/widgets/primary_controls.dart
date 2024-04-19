@@ -24,7 +24,7 @@ class PrimaryControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return VisibilityButton(
-      show: preferences.memory.showChart,
+      show: controller.isChartVisible,
       gaScreen: gac.memory,
       onPressed: (show) => controller.isChartVisible.value = show,
       minScreenWidthForTextBeforeScaling: memoryControlsMinVerboseWidth,
