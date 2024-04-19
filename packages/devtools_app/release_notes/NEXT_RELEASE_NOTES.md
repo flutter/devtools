@@ -43,6 +43,8 @@ TODO: Remove this section if there are not any general updates.
 * Added text selection in text viewer for requests and responses. - [#7596](https://github.com/flutter/devtools/pull/7596)
 * Added a JSON copy experience to the JSON viewer. - [#7596](https://github.com/flutter/devtools/pull/7596)
   ![An image of the new json copy experience for the JSON viewer](./images/json_viewer_copy.png)
+* Fixed a bug where stopping and starting network recording listed requests that
+  happened while not recording. - [#7626](https://github.com/flutter/devtools/pull/7626)
 
 ## Logging updates
 
