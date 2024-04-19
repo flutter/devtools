@@ -34,7 +34,7 @@ class AdaptedProfile {
     ClassFilter filter,
     String? rootPackage,
   ) {
-    final result = AdaptedProfile._(
+    final adaptedProfile = AdaptedProfile._(
       total: ProfileRecord.total(profile),
       items: (profile.members ?? [])
           .map((e) => ProfileRecord.fromClassHeapStats(e))
@@ -44,7 +44,7 @@ class AdaptedProfile {
       totalGCStats: profile.totalGCStats,
     );
 
-    return AdaptedProfile.withNewFilter(result, filter, rootPackage);
+    return AdaptedProfile.withNewFilter(adaptedProfile, filter, rootPackage);
   }
 
   AdaptedProfile.withNewFilter(

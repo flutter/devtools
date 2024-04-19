@@ -214,7 +214,7 @@ class CoreData {
   ///
   /// This filter is applied to all snapshots.
   ValueListenable<ClassFilter> get classFilter => _classFilter;
-  final _classFilter = ValueNotifier(ClassFilter.empty());
+  final _classFilter = ValueNotifier(ClassFilter.defaultFilter());
 }
 
 /// Values that can be calculated from [CoreData] and notifiers that take signal

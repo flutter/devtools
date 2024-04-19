@@ -59,8 +59,9 @@ class ProfilePaneController extends DisposableController
 
   /// Current class filter.
   ValueListenable<ClassFilter> get classFilter => _classFilter;
-  final _classFilter = ValueNotifier(ClassFilter.empty());
+  final _classFilter = ValueNotifier(ClassFilter.defaultFilter());
   void setFilter(ClassFilter filter) {
+    print('setFilter: $filter');
     if (filter == _classFilter.value) return;
     _classFilter.value = filter;
     final currentProfile = _currentAllocationProfile.value;
@@ -122,6 +123,7 @@ class ProfilePaneController extends DisposableController
     if (isolate == null) return;
 
     final allocationProfile = await service.getAllocationProfile(isolate.id!);
+    print('!!! refresh with ${classFilter.value.displayString}');
     _currentAllocationProfile.value = AdaptedProfile.fromAllocationProfile(
       allocationProfile,
       classFilter.value,
