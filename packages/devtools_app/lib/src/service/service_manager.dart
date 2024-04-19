@@ -16,7 +16,6 @@ import '../shared/connected_app.dart';
 import '../shared/console/console_service.dart';
 import '../shared/diagnostics/inspector_service.dart';
 import '../shared/error_badge_manager.dart';
-import '../shared/feature_flags.dart';
 import '../shared/globals.dart';
 import '../shared/server/server.dart' as server;
 import '../shared/title.dart';
@@ -119,12 +118,6 @@ class ServiceConnectionManager {
 
     // Set up analytics dimensions for the connected app.
     ga.setupUserApplicationDimensions();
-
-    if (FeatureFlags.devToolsExtensions) {
-      // TODO(kenz): calling this again may result in losing state for any
-      // static extensions in use before we connected to an app.
-      await extensionService.initialize();
-    }
 
     _inspectorService = devToolsExtensionPoints.inspectorServiceProvider();
 

@@ -98,7 +98,6 @@ class ExtensionsManager {
           depth: _staticExtensionsSearchDepth,
         );
         for (final root in projectRoots.uris ?? const <Uri>[]) {
-          final rootAsString = root.toString();
           await _addExtensionsForRoot(
             // TODO(https://github.com/dart-lang/pub/issues/4218): this logic
             // assumes that the .dart_tool folder containing the
@@ -107,7 +106,7 @@ class ExtensionsManager {
             // returns all directories within the IDE workspace roots that have
             // a pubspec.yaml file). This may be an incorrect assumption for
             // monorepos.
-            rootAsString,
+            root.toString(),
             logs: logs,
             parsingErrors: parsingErrors,
             staticContext: true,

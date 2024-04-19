@@ -89,7 +89,9 @@ Future<void> initializeDevTools({
 
   // This must be called after the DTD connection has been initialized and after
   // preferences have been initialized.
-  await extensionService.initialize();
+  if (FeatureFlags.devToolsExtensions) {
+    await extensionService.initialize();
+  }
 }
 
 /// Initializes some DevTools global fields for our Flutter integration tests.

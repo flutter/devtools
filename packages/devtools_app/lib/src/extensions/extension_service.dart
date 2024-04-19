@@ -70,6 +70,18 @@ class ExtensionService extends DisposableController
   /// in the package root of the main isolate's root library.
   var _runtimeExtensions = <DevToolsExtensionConfig>[];
 
+  /// The set of extensions that have been ignored due to being a duplicate of
+  /// some kind.
+  /// 
+  /// An extension may be a duplicate if it was detected in both the set of
+  /// runtime and static extensions, or if it is an older version of an existing
+  /// extension.
+  /// 
+  /// Ignored extensions will not be shown to the user, but their enablement
+  /// states will still be updated for changes to their matching extension's
+  /// state (the matching extension that is not ignored).
+  final _ignoredStaticExtensionsByHashCode = <int>{};
+
   /// Returns the [ValueListenable] that stores the [ExtensionEnabledState] for
   /// the DevTools Extension with [extensionName].
   ValueListenable<ExtensionEnabledState> enabledStateListenable(
@@ -268,16 +280,38 @@ class ExtensionService extends DisposableController
     // Set the enabled state for all matching extensions, even if some are
     // marked as ignored due to being a duplicate. This ensures that
     // devtools_options.yaml files are kept in sync across the project.
-    final allMatchingExtensions = [..._runtimeExtensions, ..._staticExtensions]
-        .where((e) => e.name == extension.name);
-    for (final ext in allMatchingExtensions) {
-      await server.extensionEnabledState(
-        devtoolsOptionsFileUri: ext.devtoolsOptionsUri,
-        extensionName: ext.name,
-        enable: enable,
-      );
-    }
+    final allMatchingExtensions = [
+      ..._runtimeExtensions,
+      ..._staticExtensions,
+    ].where((e) => e.name == extension.name);
+    await Future.wait([
+      for (final ext in allMatchingExtensions)
+        server.extensionEnabledState(
+          devtoolsOptionsFileUri: ext.devtoolsOptionsUri,
+          extensionName: ext.name,
+          enable: enable,
+        ),
+    ]);
     await _refreshExtensionEnabledStates();
+  }
+
+  /// Marks this extension configuration as ignored or unignored based on the
+  /// value of [ignore].
+  ///
+  /// An extension may be ignored if it is a duplicate or if it is an older
+  /// version of an existing extension, for example.
+  void ignoreExtension([bool ignore = true]) {
+    ignore
+        ? _ignoredStaticExtensionsByHashCode.add(identityHashCode(this))
+        : _ignoredStaticExtensionsByHashCode.remove(identityHashCode(this));
+  }
+
+  /// Whether this extension configuration should be ignored.
+  ///
+  /// An extension may be ignored if it is a duplicate or if it is an older
+  /// version of an existing extension, for example.
+  bool isExtensionIgnored(DevToolsExtensionConfig ext) {
+    return _ignoredStaticExtensionsByHashCode.contains(identityHashCode(ext));
   }
 
   void _reset() {
@@ -314,11 +348,9 @@ extension on DevToolsExtensionConfig {
   /// An extension may be ignored if it is a duplicate or if it is an older
   /// version of an existing extension, for example.
   void ignore([bool ignore = true]) {
-    if (ignore) {
-      _ignoredStaticExtensionsByHashCode.add(identityHashCode(this));
-    } else {
-      _ignoredStaticExtensionsByHashCode.remove(identityHashCode(this));
-    }
+    ignore
+        ? _ignoredStaticExtensionsByHashCode.add(identityHashCode(this))
+        : _ignoredStaticExtensionsByHashCode.remove(identityHashCode(this));
   }
 }
 

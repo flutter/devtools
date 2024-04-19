@@ -6,7 +6,7 @@ import 'package:collection/collection.dart';
 
 /// Describes an extension that can be dynamically loaded into a custom screen
 /// in DevTools.
-class DevToolsExtensionConfig implements Comparable {
+class DevToolsExtensionConfig implements Comparable<DevToolsExtensionConfig> {
   DevToolsExtensionConfig._({
     required this.name,
     required this.issueTrackerLink,
@@ -248,13 +248,12 @@ class DevToolsExtensionConfig implements Comparable {
 
   @override
   // ignore: avoid-dynamic, avoids invalid_override error
-  int compareTo(other) {
-    final otherConfig = other as DevToolsExtensionConfig;
-    var compare = name.compareTo(otherConfig.name);
+  int compareTo(DevToolsExtensionConfig other) {
+    var compare = name.compareTo(other.name);
     if (compare == 0) {
-      compare = extensionAssetsUri.compareTo(otherConfig.extensionAssetsUri);
+      compare = extensionAssetsUri.compareTo(other.extensionAssetsUri);
       if (compare == 0) {
-        return devtoolsOptionsUri.compareTo(otherConfig.devtoolsOptionsUri);
+        return devtoolsOptionsUri.compareTo(other.devtoolsOptionsUri);
       }
     }
     return compare;
