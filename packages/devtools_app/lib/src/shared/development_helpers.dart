@@ -83,37 +83,49 @@ final stubExtensionEnabledStates = <String, ExtensionEnabledState>{};
 abstract class StubDevToolsExtensions {
   /// Extension for package:foo detected from a running app that requires a
   /// connected app.
-  static late final DevToolsExtensionConfig fooExtension;
+  static DevToolsExtensionConfig get fooExtension =>
+      _ensureInitialized(_fooExtension);
+  static late final DevToolsExtensionConfig _fooExtension;
 
   /// Extension for package:provider detected from a running app that requires a
   /// connected app.
-  static late final DevToolsExtensionConfig providerExtension;
+  static DevToolsExtensionConfig get providerExtension =>
+      _ensureInitialized(_providerExtension);
+  static late final DevToolsExtensionConfig _providerExtension;
 
   /// Extension for package:some_tool detected from a running app, but that does
   /// not require a connected app.
-  static late final DevToolsExtensionConfig someToolExtension;
+  static DevToolsExtensionConfig get someToolExtension =>
+      _ensureInitialized(_someToolExtension);
+  static late final DevToolsExtensionConfig _someToolExtension;
 
   /// Extension for package:bar detected from a static context that does not
   /// require a connected app.
-  static late final DevToolsExtensionConfig barExtension;
+  static DevToolsExtensionConfig get barExtension => _ensureInitialized(_barExtension);
+  static late final DevToolsExtensionConfig _barExtension;
 
   /// Extension for package:bar detected from a static context that does not
   /// require a connected app and that is also a newer version of another static
   /// extension.
-  static late final DevToolsExtensionConfig newerBarExtension;
+  static DevToolsExtensionConfig get newerBarExtension =>
+      _ensureInitialized(_newerBarExtension);
+  static late final DevToolsExtensionConfig _newerBarExtension;
 
   /// Extension for package:baz detected from a static context that requires a
   /// connected app.
-  static late final DevToolsExtensionConfig bazExtension;
+  static DevToolsExtensionConfig get bazExtension => _ensureInitialized(_bazExtension);
+  static late final DevToolsExtensionConfig _bazExtension;
 
   /// Extension for package:foo detected from a static context that is a duplicate
   /// of a runtime extension [fooExtension].
-  static late final DevToolsExtensionConfig duplicateFooExtension;
+  static DevToolsExtensionConfig get duplicateFooExtension =>
+      _ensureInitialized(_duplicateFooExtension);
+  static late final DevToolsExtensionConfig _duplicateFooExtension;
 
   /// Stubbed extensions so we can develop DevTools Extensions without a server
   /// connection.
   static final List<DevToolsExtensionConfig> extensions = [
-    fooExtension = DevToolsExtensionConfig.parse({
+    _fooExtension = DevToolsExtensionConfig.parse({
       DevToolsExtensionConfig.nameKey: 'foo',
       DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
       DevToolsExtensionConfig.versionKey: '1.0.0',
@@ -123,7 +135,7 @@ abstract class StubDevToolsExtensions {
       DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
       DevToolsExtensionConfig.detectedFromStaticContextKey: 'false',
     }),
-    providerExtension = DevToolsExtensionConfig.parse({
+    _providerExtension = DevToolsExtensionConfig.parse({
       DevToolsExtensionConfig.nameKey: 'provider',
       DevToolsExtensionConfig.issueTrackerKey:
           'https://github.com/rrousselGit/provider/issues',
@@ -134,7 +146,7 @@ abstract class StubDevToolsExtensions {
       DevToolsExtensionConfig.isPubliclyHostedKey: 'true',
       DevToolsExtensionConfig.detectedFromStaticContextKey: 'false',
     }),
-    someToolExtension = DevToolsExtensionConfig.parse({
+    _someToolExtension = DevToolsExtensionConfig.parse({
       DevToolsExtensionConfig.nameKey: 'some_tool',
       DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
       DevToolsExtensionConfig.versionKey: '1.0.0',
@@ -145,7 +157,7 @@ abstract class StubDevToolsExtensions {
       DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
       DevToolsExtensionConfig.detectedFromStaticContextKey: 'false',
     }),
-    barExtension = DevToolsExtensionConfig.parse({
+    _barExtension = DevToolsExtensionConfig.parse({
       DevToolsExtensionConfig.nameKey: 'bar',
       DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
       DevToolsExtensionConfig.versionKey: '2.0.0',
@@ -156,7 +168,7 @@ abstract class StubDevToolsExtensions {
       DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
       DevToolsExtensionConfig.detectedFromStaticContextKey: 'true',
     }),
-    newerBarExtension = DevToolsExtensionConfig.parse({
+    _newerBarExtension = DevToolsExtensionConfig.parse({
       DevToolsExtensionConfig.nameKey: 'bar',
       DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
       DevToolsExtensionConfig.versionKey: '2.1.0', // Newer version.
@@ -167,7 +179,7 @@ abstract class StubDevToolsExtensions {
       DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
       DevToolsExtensionConfig.detectedFromStaticContextKey: 'true',
     }),
-    bazExtension = DevToolsExtensionConfig.parse({
+    _bazExtension = DevToolsExtensionConfig.parse({
       DevToolsExtensionConfig.nameKey: 'baz',
       DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
       DevToolsExtensionConfig.versionKey: '1.0.0',
@@ -177,7 +189,7 @@ abstract class StubDevToolsExtensions {
       DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
       DevToolsExtensionConfig.detectedFromStaticContextKey: 'true',
     }),
-    duplicateFooExtension = DevToolsExtensionConfig.parse({
+    _duplicateFooExtension = DevToolsExtensionConfig.parse({
       DevToolsExtensionConfig.nameKey: 'foo',
       DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
       DevToolsExtensionConfig.versionKey: '1.0.0',
@@ -188,6 +200,14 @@ abstract class StubDevToolsExtensions {
       DevToolsExtensionConfig.detectedFromStaticContextKey: 'true',
     }),
   ];
+
+  static DevToolsExtensionConfig _ensureInitialized(
+    DevToolsExtensionConfig ext,
+  ) {
+    // ignore: unnecessary_statements, initializing late variables.
+    extensions;
+    return ext;
+  }
 }
 
 /// Enable this flag to debug the DevTools survey logic.
