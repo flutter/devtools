@@ -123,7 +123,6 @@ class ProfilePaneController extends DisposableController
     if (isolate == null) return;
 
     final allocationProfile = await service.getAllocationProfile(isolate.id!);
-    print('!!! refresh with ${classFilter.value.displayString}');
     _currentAllocationProfile.value = AdaptedProfile.fromAllocationProfile(
       allocationProfile,
       classFilter.value,
