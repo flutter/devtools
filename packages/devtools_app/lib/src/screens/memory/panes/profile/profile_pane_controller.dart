@@ -61,7 +61,6 @@ class ProfilePaneController extends DisposableController
   ValueListenable<ClassFilter> get classFilter => _classFilter;
   final _classFilter = ValueNotifier(ClassFilter.defaultFilter());
   void setFilter(ClassFilter filter) {
-    print('setFilter: $filter');
     if (filter == _classFilter.value) return;
     _classFilter.value = filter;
     final currentProfile = _currentAllocationProfile.value;
