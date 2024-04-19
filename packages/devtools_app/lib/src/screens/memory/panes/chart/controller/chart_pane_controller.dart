@@ -40,7 +40,7 @@ class MemoryChartPaneController extends DisposableController
 
   Future<void> _init(ChartData? offlineData) async {
     if (mode == DevToolsMode.connected) {
-      data = ChartData.connected();
+      data = ChartData(mode: DevToolsMode.connected);
     } else {
       assert(offlineData!.isDeviceAndroid != null);
       data = offlineData!;

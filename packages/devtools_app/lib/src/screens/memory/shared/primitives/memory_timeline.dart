@@ -11,6 +11,17 @@ import '../../../../shared/primitives/utils.dart';
 
 /// All Raw data received from the VM or offline data.
 class MemoryTimeline {
+  MemoryTimeline();
+
+  factory MemoryTimeline.fromJson(Map<String, dynamic> map) {
+    throw UnimplementedError();
+  }
+
+  Map<String, dynamic> toJson() {
+    // TODO(polina-c): implement, https://github.com/flutter/devtools/issues/6972
+    return {};
+  }
+
   int get endingIndex => data.isNotEmpty ? data.length - 1 : -1;
 
   /// Raw Heap sampling data from the VM.

@@ -2,39 +2,52 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../../../../../devtools_app.dart';
 import '../../../shared/primitives/memory_timeline.dart';
 import '../data/primitives.dart';
 
+class _Json {
+  static const isDeviceAndroid = 'isAndroid';
+  static const timeline = 'timeline';
+  static const interval = 'interval';
+  static const isLegendVisible = 'isLegendVisible';
+}
+
 /// Chart data, that should be saved when transferred to offline data mode.
 class ChartData {
-  ChartData._({
+  ChartData({
+    required DevToolsMode mode,
     this.isDeviceAndroid,
     MemoryTimeline? timeline,
     ChartInterval? interval,
     bool? isLegendVisible,
-  }) {
+  }) : assert(
+          mode == DevToolsMode.connected ||
+              (isDeviceAndroid != null &&
+                  timeline != null &&
+                  interval != null &&
+                  isLegendVisible != null),
+        ) {
     this.timeline = timeline ?? MemoryTimeline();
     _displayInterval =
         ValueNotifier<ChartInterval>(interval ?? ChartInterval.theDefault);
     _isLegendVisible = ValueNotifier<bool>(isLegendVisible ?? true);
   }
 
-  ChartData.connected() : this._();
-
-  ChartData.offlineData(
-    ChartData data,
-  ) : this._(
-          isDeviceAndroid: data.isDeviceAndroid!,
-          timeline: data.timeline,
-          interval: data.displayInterval,
-          isLegendVisible: data.isLegendVisible.value,
-        );
-
   factory ChartData.fromJson(Map<String, dynamic> map) {
-    // TODO(polina-c): implement, https://github.com/flutter/devtools/issues/6972
-    throw UnimplementedError();
+    return ChartData(
+      mode: DevToolsMode.offlineData,
+      isDeviceAndroid: map[_Json.isDeviceAndroid] as bool? ?? false,
+      timeline:
+          MemoryTimeline.fromJson(map[_Json.timeline] as Map<String, dynamic>),
+      interval: ChartInterval.values
+              .firstWhereOrNull((i) => i.name == map[_Json.interval]) ??
+          ChartInterval.theDefault,
+      isLegendVisible: map[_Json.isLegendVisible] as bool?,
+    );
   }
 
   Map<String, dynamic> toJson() {
