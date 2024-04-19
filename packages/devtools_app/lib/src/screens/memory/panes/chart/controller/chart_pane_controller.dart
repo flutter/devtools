@@ -17,20 +17,29 @@ import 'vm_chart_controller.dart';
 
 class MemoryChartPaneController extends DisposableController
     with AutoDisposeControllerMixin {
-  MemoryChartPaneController(this.mode, {bool? isDeviceAndroid})
+  MemoryChartPaneController(this.mode, {ChartData? data})
       : assert(
-          mode == DevToolsMode.connected || isDeviceAndroid != null,
+          mode == DevToolsMode.connected || data != null,
           'If application is not connected, isDeviceAndroid must be provided.',
         ),
-        data = ChartData(isDeviceAndroid: isDeviceAndroid) {
+        data = data ?? ChartData(isDeviceAndroid: null) {
     unawaited(_init());
+  }
+
+  factory MemoryChartPaneController.offlineData(
+    MemoryChartPaneController controller,
+  ) {
+    return MemoryChartPaneController(
+      DevToolsMode.offlineData,
+      data: controller.data,
+    );
   }
 
   factory MemoryChartPaneController.fromJson(Map<String, dynamic> map) {
     // TODO(polina-c): implement, https://github.com/flutter/devtools/issues/6972
     return MemoryChartPaneController(
       DevToolsMode.offlineData,
-      isDeviceAndroid: false,
+      data: ChartData(isDeviceAndroid: null),
     );
   }
 

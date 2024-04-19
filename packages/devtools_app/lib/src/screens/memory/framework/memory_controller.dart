@@ -153,7 +153,7 @@ class MemoryController extends DisposableController
           _jsonKey: OfflineMemoryData(
             diff,
             profile,
-            chart,
+            MemoryChartPaneController.offlineData(chart),
             profile.classFilter.value,
             selectedTab: selectedFeatureTabIndex,
           ),
