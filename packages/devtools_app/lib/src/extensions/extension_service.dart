@@ -42,7 +42,7 @@ class ExtensionService extends DisposableController
   ///
   /// This set of extensions will include one version of a DevTools extension
   /// per package and will exclude any duplicates that have been marked as
-  /// ignored in [deduplicateExtensions].
+  /// ignored in [maybeIgnoreExtensions].
   ValueListenable<List<DevToolsExtensionConfig>> get availableExtensions =>
       _availableExtensions;
   final _availableExtensions = ValueNotifier<List<DevToolsExtensionConfig>>([]);
@@ -72,11 +72,11 @@ class ExtensionService extends DisposableController
 
   /// The set of extensions that have been ignored due to being a duplicate of
   /// some kind.
-  /// 
+  ///
   /// An extension may be a duplicate if it was detected in both the set of
   /// runtime and static extensions, or if it is an older version of an existing
   /// extension.
-  /// 
+  ///
   /// Ignored extensions will not be shown to the user, but their enablement
   /// states will still be updated for changes to their matching extension's
   /// state (the matching extension that is not ignored).
@@ -168,10 +168,10 @@ class ExtensionService extends DisposableController
     final allExtensions = await server.refreshAvailableExtensions(_appRoot);
     _runtimeExtensions =
         allExtensions.where((e) => !e.detectedFromStaticContext).toList();
-    _staticExtensions = allExtensions
-        .where((e) => e.detectedFromStaticContext && !e.requiresConnection)
-        .toList();
-    deduplicateExtensions();
+    _staticExtensions =
+        allExtensions.where((e) => e.detectedFromStaticContext).toList();
+    maybeIgnoreExtensions(connected: connected);
+
     _availableExtensions.value = [
       ..._runtimeExtensions,
       ..._staticExtensions.where((ext) => !ext.ignored),
@@ -181,11 +181,19 @@ class ExtensionService extends DisposableController
   }
 
   @visibleForTesting
-  void deduplicateExtensions() {
+  void maybeIgnoreExtensions({required bool connected}) {
     // TODO(kenz): consider handling duplicates in a way that gives the user a
     // choice of which version they want to use.
     _deduplicateStaticExtensionsWithStaticExtensions();
     _deduplicateStaticExtensionsWithRuntimeExtensions();
+
+    // Some extensions detected from a static context may actually require a
+    // running application.
+    for (final ext in _staticExtensions) {
+      if (!connected && ext.requiresConnection) {
+        ext.ignore();
+      }
+    }
   }
 
   /// De-duplicates static extensions from other static extensions by ignoring

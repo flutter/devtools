@@ -18,6 +18,8 @@ void main() {
 
     test('ignore behavior', () {});
 
-    test('takeLatestExtension', () {});
+    test('takeLatestExtension', () {
+      // expect(takeLatestExtension(),);
+    });
   });
 }

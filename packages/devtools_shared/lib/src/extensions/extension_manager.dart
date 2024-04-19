@@ -34,7 +34,7 @@ class ExtensionsManager {
 
   /// The depth to search the user's IDE workspace roots for projects with
   /// DevTools extensions.
-  /// 
+  ///
   /// We use a larger depth than the default to reduce the risk of missing
   /// static extensions in the user's project.
   static const _staticExtensionsSearchDepth = 8;
@@ -98,6 +98,10 @@ class ExtensionsManager {
           depth: _staticExtensionsSearchDepth,
         );
         for (final root in projectRoots.uris ?? const <Uri>[]) {
+          // Skip the runtime app root. These extensions have already been
+          // added to [devtoolsExtensions].
+          if (root.toString() == rootFileUriString) continue;
+
           await _addExtensionsForRoot(
             // TODO(https://github.com/dart-lang/pub/issues/4218): this logic
             // assumes that the .dart_tool folder containing the
