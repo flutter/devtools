@@ -200,16 +200,14 @@ class ExtensionService extends DisposableController
           _staticExtensions.where((e) => e.name == staticExtension.name);
       var latest = staticExtension;
       for (final duplicate in duplicates) {
-        latest = takeLatestExtension(latest, duplicate);
-      }
-      latest.ignore(false);
-      for (final duplicate in duplicates) {
-        if (duplicate != latest) {
+        final currentLatest = takeLatestExtension(latest, duplicate);
+        if (latest != currentLatest) {
           _log.fine(
             'ignoring duplicate static extension ${duplicate.name}, '
             '${duplicate.devtoolsOptionsUri}',
           );
-          duplicate.ignore();
+          latest.ignore();
+          latest = currentLatest..ignore(false);
         }
       }
     }
