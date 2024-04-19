@@ -244,6 +244,15 @@ class NetworkController extends DisposableController
     _recordingNotifier.value = state;
   }
 
+  /// Updtates the last refresh time of the socket and http data refresh times.
+  ///
+  /// This will ensure that future fetches for http and socket requests will at
+  /// most fetch requests since [updateLastRefreshTime] was called.
+  Future<void> updateLastRefreshTime() async {
+    _networkService.updateLastHttpDataRefreshTime();
+    await _networkService.updateLastSocketDataRefreshTime();
+  }
+
   Future<bool> _recordingNetworkTraffic({
     required _NetworkTrafficType type,
   }) async {
