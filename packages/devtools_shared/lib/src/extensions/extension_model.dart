@@ -247,7 +247,6 @@ class DevToolsExtensionConfig implements Comparable<DevToolsExtensionConfig> {
       };
 
   @override
-  // ignore: avoid-dynamic, avoids invalid_override error
   int compareTo(DevToolsExtensionConfig other) {
     var compare = name.compareTo(other.name);
     if (compare == 0) {
