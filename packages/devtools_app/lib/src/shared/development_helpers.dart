@@ -55,7 +55,7 @@ final debugDevToolsExtensions =
 const _debugDevToolsExtensions = false;
 
 List<DevToolsExtensionConfig> debugHandleRefreshAvailableExtensions() =>
-    debugExtensions;
+    StubDevToolsExtensions.extensions;
 
 ExtensionEnabledState debugHandleExtensionEnabledState({
   required String extensionName,
@@ -79,43 +79,116 @@ void resetDevToolsExtensionEnabledStates() =>
 /// server connection.
 final stubExtensionEnabledStates = <String, ExtensionEnabledState>{};
 
-/// Stubbed extensions so we can develop DevTools Extensions without a server
-/// connection.
-final List<DevToolsExtensionConfig> debugExtensions = [
-  DevToolsExtensionConfig.parse({
-    DevToolsExtensionConfig.nameKey: 'foo',
-    DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
-    DevToolsExtensionConfig.versionKey: '1.0.0',
-    DevToolsExtensionConfig.materialIconCodePointKey: '0xe0b1',
-    DevToolsExtensionConfig.extensionAssetsUriKey: '/path/to/foo',
-    DevToolsExtensionConfig.devtoolsOptionsUriKey: '/path/to/options/file',
-    DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
-    DevToolsExtensionConfig.detectedFromStaticContextKey: 'false',
-  }),
-  DevToolsExtensionConfig.parse({
-    DevToolsExtensionConfig.nameKey: 'provider',
-    DevToolsExtensionConfig.issueTrackerKey:
-        'https://github.com/rrousselGit/provider/issues',
-    DevToolsExtensionConfig.versionKey: '3.0.0',
-    DevToolsExtensionConfig.materialIconCodePointKey: 0xe50a,
-    DevToolsExtensionConfig.extensionAssetsUriKey: '/path/to/provider',
-    DevToolsExtensionConfig.devtoolsOptionsUriKey: '/path/to/options/file',
-    DevToolsExtensionConfig.isPubliclyHostedKey: 'true',
-    DevToolsExtensionConfig.detectedFromStaticContextKey: 'false',
-  }),
-  // Static extension.
-  DevToolsExtensionConfig.parse({
-    DevToolsExtensionConfig.nameKey: 'bar',
-    DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
-    DevToolsExtensionConfig.versionKey: '2.0.0',
-    DevToolsExtensionConfig.materialIconCodePointKey: 0xe638,
-    DevToolsExtensionConfig.requiresConnectionKey: 'false',
-    DevToolsExtensionConfig.extensionAssetsUriKey: '/path/to/bar',
-    DevToolsExtensionConfig.devtoolsOptionsUriKey: '/path/to/options/file',
-    DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
-    DevToolsExtensionConfig.detectedFromStaticContextKey: 'true',
-  }),
-];
+// ignore: avoid_classes_with_only_static_members, useful for testing.
+abstract class StubDevToolsExtensions {
+  /// Extension for package:foo detected from a running app that requires a
+  /// connected app.
+  static late final DevToolsExtensionConfig fooExtension;
+
+  /// Extension for package:provider detected from a running app that requires a
+  /// connected app.
+  static late final DevToolsExtensionConfig providerExtension;
+
+  /// Extension for package:some_tool detected from a running app, but that does
+  /// not require a connected app.
+  static late final DevToolsExtensionConfig someToolExtension;
+
+  /// Extension for package:bar detected from a static context that does not
+  /// require a connected app.
+  static late final DevToolsExtensionConfig barExtension;
+
+  /// Extension for package:bar detected from a static context that does not
+  /// require a connected app and that is also a newer version of another static
+  /// extension.
+  static late final DevToolsExtensionConfig newerBarExtension;
+
+  /// Extension for package:baz detected from a static context that requires a
+  /// connected app.
+  static late final DevToolsExtensionConfig bazExtension;
+
+  /// Extension for package:foo detected from a static context that is a duplicate
+  /// of a runtime extension [fooExtension].
+  static late final DevToolsExtensionConfig duplicateFooExtension;
+
+  /// Stubbed extensions so we can develop DevTools Extensions without a server
+  /// connection.
+  static final List<DevToolsExtensionConfig> extensions = [
+    fooExtension = DevToolsExtensionConfig.parse({
+      DevToolsExtensionConfig.nameKey: 'foo',
+      DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
+      DevToolsExtensionConfig.versionKey: '1.0.0',
+      DevToolsExtensionConfig.materialIconCodePointKey: '0xe0b1',
+      DevToolsExtensionConfig.extensionAssetsUriKey: '/path/to/foo',
+      DevToolsExtensionConfig.devtoolsOptionsUriKey: '/path/to/options/file',
+      DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
+      DevToolsExtensionConfig.detectedFromStaticContextKey: 'false',
+    }),
+    providerExtension = DevToolsExtensionConfig.parse({
+      DevToolsExtensionConfig.nameKey: 'provider',
+      DevToolsExtensionConfig.issueTrackerKey:
+          'https://github.com/rrousselGit/provider/issues',
+      DevToolsExtensionConfig.versionKey: '3.0.0',
+      DevToolsExtensionConfig.materialIconCodePointKey: 0xe50a,
+      DevToolsExtensionConfig.extensionAssetsUriKey: '/path/to/provider',
+      DevToolsExtensionConfig.devtoolsOptionsUriKey: '/path/to/options/file',
+      DevToolsExtensionConfig.isPubliclyHostedKey: 'true',
+      DevToolsExtensionConfig.detectedFromStaticContextKey: 'false',
+    }),
+    someToolExtension = DevToolsExtensionConfig.parse({
+      DevToolsExtensionConfig.nameKey: 'some_tool',
+      DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
+      DevToolsExtensionConfig.versionKey: '1.0.0',
+      DevToolsExtensionConfig.materialIconCodePointKey: '0xe0b1',
+      DevToolsExtensionConfig.requiresConnectionKey: 'false',
+      DevToolsExtensionConfig.extensionAssetsUriKey: '/path/to/some_tool',
+      DevToolsExtensionConfig.devtoolsOptionsUriKey: '/path/to/options/file',
+      DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
+      DevToolsExtensionConfig.detectedFromStaticContextKey: 'false',
+    }),
+    barExtension = DevToolsExtensionConfig.parse({
+      DevToolsExtensionConfig.nameKey: 'bar',
+      DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
+      DevToolsExtensionConfig.versionKey: '2.0.0',
+      DevToolsExtensionConfig.materialIconCodePointKey: 0xe638,
+      DevToolsExtensionConfig.requiresConnectionKey: 'false',
+      DevToolsExtensionConfig.extensionAssetsUriKey: '/path/to/bar',
+      DevToolsExtensionConfig.devtoolsOptionsUriKey: '/path/to/options/file',
+      DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
+      DevToolsExtensionConfig.detectedFromStaticContextKey: 'true',
+    }),
+    newerBarExtension = DevToolsExtensionConfig.parse({
+      DevToolsExtensionConfig.nameKey: 'bar',
+      DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
+      DevToolsExtensionConfig.versionKey: '2.1.0', // Newer version.
+      DevToolsExtensionConfig.materialIconCodePointKey: 0xe638,
+      DevToolsExtensionConfig.requiresConnectionKey: 'false',
+      DevToolsExtensionConfig.extensionAssetsUriKey: '/path/to/bar',
+      DevToolsExtensionConfig.devtoolsOptionsUriKey: '/path/to/options/file',
+      DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
+      DevToolsExtensionConfig.detectedFromStaticContextKey: 'true',
+    }),
+    bazExtension = DevToolsExtensionConfig.parse({
+      DevToolsExtensionConfig.nameKey: 'baz',
+      DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
+      DevToolsExtensionConfig.versionKey: '1.0.0',
+      DevToolsExtensionConfig.materialIconCodePointKey: 0xe638,
+      DevToolsExtensionConfig.extensionAssetsUriKey: '/path/to/baz',
+      DevToolsExtensionConfig.devtoolsOptionsUriKey: '/path/to/options/file',
+      DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
+      DevToolsExtensionConfig.detectedFromStaticContextKey: 'true',
+    }),
+    duplicateFooExtension = DevToolsExtensionConfig.parse({
+      DevToolsExtensionConfig.nameKey: 'foo',
+      DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
+      DevToolsExtensionConfig.versionKey: '1.0.0',
+      DevToolsExtensionConfig.materialIconCodePointKey: '0xe0b1',
+      DevToolsExtensionConfig.extensionAssetsUriKey: '/path/to/foo',
+      DevToolsExtensionConfig.devtoolsOptionsUriKey: '/path/to/options/file',
+      DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
+      DevToolsExtensionConfig.detectedFromStaticContextKey: 'true',
+    }),
+  ];
+}
 
 /// Enable this flag to debug the DevTools survey logic.
 ///

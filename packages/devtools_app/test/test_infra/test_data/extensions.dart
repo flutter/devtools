@@ -4,7 +4,4 @@
 
 import 'package:devtools_app/src/shared/development_helpers.dart';
 
-final testExtensions = List.of(debugExtensions)..sort();
-final barExtension = testExtensions[0];
-final fooExtension = testExtensions[1];
-final providerExtension = testExtensions[2];
+final testExtensions = List.of(StubDevToolsExtensions.extensions)..sort();

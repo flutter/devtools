@@ -4,6 +4,7 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/extensions/extension_settings.dart';
+import 'package:devtools_app/src/shared/development_helpers.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_extensions.dart';
@@ -75,15 +76,23 @@ void main() {
         await tester.pumpWidget(wrapSimple(dialog));
 
         expect(
-          extensionService.enabledStateListenable(barExtension.name).value,
+          extensionService
+              .enabledStateListenable(StubDevToolsExtensions.barExtension.name)
+              .value,
           ExtensionEnabledState.none,
         );
         expect(
-          extensionService.enabledStateListenable(fooExtension.name).value,
+          extensionService
+              .enabledStateListenable(StubDevToolsExtensions.fooExtension.name)
+              .value,
           ExtensionEnabledState.none,
         );
         expect(
-          extensionService.enabledStateListenable(providerExtension.name).value,
+          extensionService
+              .enabledStateListenable(
+                StubDevToolsExtensions.providerExtension.name,
+              )
+              .value,
           ExtensionEnabledState.none,
         );
 
@@ -115,7 +124,9 @@ void main() {
           ),
         );
         expect(
-          extensionService.enabledStateListenable(barExtension.name).value,
+          extensionService
+              .enabledStateListenable(StubDevToolsExtensions.barExtension.name)
+              .value,
           ExtensionEnabledState.enabled,
         );
 
@@ -127,7 +138,9 @@ void main() {
           ),
         );
         expect(
-          extensionService.enabledStateListenable(fooExtension.name).value,
+          extensionService
+              .enabledStateListenable(StubDevToolsExtensions.fooExtension.name)
+              .value,
           ExtensionEnabledState.enabled,
         );
 
@@ -139,7 +152,11 @@ void main() {
           ),
         );
         expect(
-          extensionService.enabledStateListenable(providerExtension.name).value,
+          extensionService
+              .enabledStateListenable(
+                StubDevToolsExtensions.providerExtension.name,
+              )
+              .value,
           ExtensionEnabledState.disabled,
         );
 
@@ -165,15 +182,15 @@ void main() {
         );
 
         await extensionService.setExtensionEnabledState(
-          barExtension,
+          StubDevToolsExtensions.barExtension,
           enable: true,
         );
         await extensionService.setExtensionEnabledState(
-          fooExtension,
+          StubDevToolsExtensions.fooExtension,
           enable: true,
         );
         await extensionService.setExtensionEnabledState(
-          providerExtension,
+          StubDevToolsExtensions.providerExtension,
           enable: false,
         );
 
