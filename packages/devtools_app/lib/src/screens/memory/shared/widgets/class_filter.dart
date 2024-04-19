@@ -135,7 +135,7 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
           gac.memory,
           gac.MemoryEvent.diffSnapshotFilterReset,
         );
-        setState(() => _loadStateFromFilter(ClassFilter.defaultFilter()));
+        setState(() => _loadStateFromFilter(ClassFilter.theDefault()));
       },
       onApply: () {
         ga.select(

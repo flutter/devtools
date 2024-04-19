@@ -59,7 +59,7 @@ class ProfilePaneController extends DisposableController
 
   /// Current class filter.
   ValueListenable<ClassFilter> get classFilter => _classFilter;
-  final _classFilter = ValueNotifier(ClassFilter.defaultFilter());
+  final _classFilter = ValueNotifier(ClassFilter.theDefault());
   void setFilter(ClassFilter filter) {
     if (filter == _classFilter.value) return;
     _classFilter.value = filter;

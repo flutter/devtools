@@ -57,7 +57,7 @@ class ClassFilter {
   })  : except = _trimByLine(except),
         only = only == null ? null : _trimByLine(only);
 
-  ClassFilter.defaultFilter()
+  ClassFilter.theDefault()
       : this(
           filterType: _defaultFilterType,
           except: defaultExceptString,

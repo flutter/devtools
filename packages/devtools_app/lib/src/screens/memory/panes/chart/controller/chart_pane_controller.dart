@@ -39,7 +39,7 @@ class MemoryChartPaneController extends DisposableController
     // TODO(polina-c): implement, https://github.com/flutter/devtools/issues/6972
     return MemoryChartPaneController(
       DevToolsMode.offlineData,
-      data: ChartData(isDeviceAndroid: null),
+      data: ChartData.offlineData(throw UnimplementedError()),
     );
   }
 
@@ -62,7 +62,7 @@ class MemoryChartPaneController extends DisposableController
 
   Future<void> _init(ChartData? offlineData) async {
     if (mode == DevToolsMode.connected) {
-      data = ChartData(isDeviceAndroid: null);
+      data = ChartData.connected();
     } else {
       assert(offlineData!.isDeviceAndroid != null);
       data = offlineData!;
