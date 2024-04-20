@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+class _Json {
+  static const heap = 'heap';
+  static const usage = 'usage';
+  static const capacity = 'capacity';
+  static const collections = 'coll';
+  static const averageCollectionTime = 'act';
+}
+
 class GCStats {
   GCStats({
     required this.heap,
@@ -27,20 +35,20 @@ class GCStats {
 
   factory GCStats.fromJson(Map<String, dynamic> json) {
     return GCStats(
-      heap: json[heapKey] as String,
-      usage: json[usedKey] as int,
-      capacity: json[capacityKey] as int,
-      collections: json[collectionsKey] as int,
-      averageCollectionTime: json[averageCollectionTimeKey] as double,
+      heap: json[_Json.heap] as String,
+      usage: json[_Json.usage] as int,
+      capacity: json[_Json.capacity] as int,
+      collections: json[_Json.collections] as int,
+      averageCollectionTime: json[_Json.averageCollectionTime] as double,
     );
   }
 
   Map<String, dynamic> toJson() => {
-        heapKey: heap,
-        usedKey: usage,
-        capacityKey: capacity,
-        collectionsKey: collections,
-        timeKey: averageCollectionTime,
+        _Json.heap: heap,
+        _Json.usage: usage,
+        _Json.capacity: capacity,
+        _Json.collections: collections,
+        _Json.averageCollectionTime: averageCollectionTime,
       };
 
   static const heapKey = 'heapKey';
