@@ -85,6 +85,10 @@ class BreakpointManager with DisposerMixin {
         isolateRef: isolateRef,
       );
     }
+
+    // Resume the isolate now that the breakpoints have been set:
+    await serviceConnection.serviceManager.isolateManager
+        .resumeIsolate(isolateRef);
   }
 
   void clearCache({required bool isServiceShutdown}) {
