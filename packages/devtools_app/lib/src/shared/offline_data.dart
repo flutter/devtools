@@ -66,7 +66,7 @@ class OfflineDataController {
 /// Mixin that provides offline support for a DevTools screen controller.
 ///
 /// The [Screen] that is associated with this controller must have
-/// [Screen.worksWithOfflineData] set to true in order to enable offline support for the
+/// [ScreenMetaData.worksWithOfflineData] set to true in order to enable offline support for the
 /// screen.
 ///
 /// Check [OfflineDataController.showingOfflineData] in controller constructor.
