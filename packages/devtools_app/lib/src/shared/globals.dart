@@ -87,3 +87,6 @@ void setStagerMode() {
     _stagerMode = true;
   }
 }
+
+/// Whether DevTools is being run in any type of testing mode.
+bool get anyTestMode => _integrationTestMode || _testMode || _stagerMode;
