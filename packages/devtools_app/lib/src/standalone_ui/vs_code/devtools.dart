@@ -232,7 +232,6 @@ class _RuntimeToolInstructions extends StatelessWidget {
   const _RuntimeToolInstructions({
     required this.hasDebugSessions,
     required this.toolDescription,
-    super.key,
   });
 
   final bool hasDebugSessions;
