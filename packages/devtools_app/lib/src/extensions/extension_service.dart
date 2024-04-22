@@ -170,7 +170,13 @@ class ExtensionService extends DisposableController
         allExtensions.where((e) => !e.detectedFromStaticContext).toList();
     _staticExtensions =
         allExtensions.where((e) => e.detectedFromStaticContext).toList();
-    maybeIgnoreExtensions(connected: connected);
+    maybeIgnoreExtensions(
+      connected: connected,
+      staticExtensions: _staticExtensions,
+      runtimeExtensions: _runtimeExtensions,
+      isIgnored: isExtensionIgnored,
+      onIgnore: ignoreExtension,
+    );
 
     _availableExtensions.value = [
       ..._runtimeExtensions,
@@ -181,25 +187,31 @@ class ExtensionService extends DisposableController
   }
 
   @visibleForTesting
-  void maybeIgnoreExtensions({required bool connected}) {
+  static void maybeIgnoreExtensions({
+    required bool connected,
+    required List<DevToolsExtensionConfig> staticExtensions,
+    required List<DevToolsExtensionConfig> runtimeExtensions,
+    required bool Function(DevToolsExtensionConfig) isIgnored,
+    required void Function(DevToolsExtensionConfig, [bool ignore]) onIgnore,
+  }) {
     // TODO(kenz): consider handling duplicates in a way that gives the user a
     // choice of which version they want to use.
     deduplicateStaticExtensions(
-      _staticExtensions,
-      onIgnore: ignoreExtension,
+      staticExtensions,
+      onIgnore: onIgnore,
     );
     deduplicateStaticExtensionsWithRuntimeExtensions(
-      staticExtensions: _staticExtensions,
-      runtimeExtensions: _runtimeExtensions,
-      isIgnored: isExtensionIgnored,
-      onIgnore: ignoreExtension,
+      staticExtensions: staticExtensions,
+      runtimeExtensions: runtimeExtensions,
+      isIgnored: isIgnored,
+      onIgnore: onIgnore,
     );
 
     // Some extensions detected from a static context may actually require a
     // running application.
-    for (final ext in _staticExtensions) {
+    for (final ext in staticExtensions) {
       if (!connected && ext.requiresConnection) {
-        ignoreExtension(ext);
+        onIgnore(ext);
       }
     }
   }
@@ -209,7 +221,7 @@ class ExtensionService extends DisposableController
   @visibleForTesting
   static void deduplicateStaticExtensions(
     List<DevToolsExtensionConfig> extensions, {
-    required void Function(DevToolsExtensionConfig, bool ignore) onIgnore,
+    required void Function(DevToolsExtensionConfig, [bool ignore]) onIgnore,
   }) {
     final deduped = <String>{};
     for (final staticExtension in extensions) {
@@ -217,7 +229,7 @@ class ExtensionService extends DisposableController
       deduped.add(staticExtension.name);
 
       final duplicates =
-          extensions.where((e) => e.name == staticExtension.name);
+          extensions.where((e) => e != staticExtension && e.name == staticExtension.name);
       var latest = staticExtension;
       for (final duplicate in duplicates) {
         final currentLatest = takeLatestExtension(latest, duplicate);

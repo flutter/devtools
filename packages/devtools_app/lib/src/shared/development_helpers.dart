@@ -165,7 +165,7 @@ abstract class StubDevToolsExtensions {
   });
 
   /// Extension for package:foo detected from a static context that is a duplicate
-  /// of a runtime extension [fooExtension].
+  /// of a runtime extension [fooExtension], which requires a connected app.
   static final duplicateFooExtension = DevToolsExtensionConfig.parse({
     DevToolsExtensionConfig.nameKey: 'foo',
     DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',

@@ -64,6 +64,8 @@ session. - [#7598](https://github.com/flutter/devtools/pull/7598)
 
 ## DevTools Extension updates
 
+* Support DevTools extensions that do not require a running app, and detect them from the
+user's IDE workspace. - [#7612](https://github.com/flutter/devtools/pull/7612)
 * Deprecate the `DevToolsExtension.requiresRunningApplication` field in favor of the
 new optional `requiresConnection` field that can be added to an extension's `config.yaml`
 file. - [#7611](https://github.com/flutter/devtools/pull/7611), [#7602](https://github.com/flutter/devtools/pull/7602)
