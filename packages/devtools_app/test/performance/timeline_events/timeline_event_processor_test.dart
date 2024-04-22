@@ -35,7 +35,7 @@ void main() {
     );
 
     setGlobal(IdeTheme, IdeTheme());
-    setGlobal(OfflineModeController, OfflineModeController());
+    setGlobal(OfflineDataController, OfflineDataController());
     setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
   });
 

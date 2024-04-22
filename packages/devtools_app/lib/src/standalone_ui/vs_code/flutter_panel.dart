@@ -14,6 +14,7 @@ import '../api/dart_tooling_api.dart';
 import '../api/vs_code_api.dart';
 import 'debug_sessions.dart';
 import 'devices.dart';
+import 'devtools.dart';
 
 /// A general Flutter sidebar panel for embedding inside IDEs.
 ///
@@ -107,13 +108,16 @@ class _VsCodeConnectedPanelState extends State<_VsCodeConnectedPanel> {
                 },
               ),
               const SizedBox(height: defaultSpacing),
-              if (widget.api.capabilities.selectDevice)
+              if (widget.api.capabilities.selectDevice) ...[
                 Devices(
                   widget.api,
                   devices: devices,
                   unsupportedDevices: unsupportedDevices,
                   selectedDeviceId: devicesSnapshot.data?.selectedDeviceId,
                 ),
+                const SizedBox(height: denseSpacing),
+              ],
+              DevToolsSidebarOptions(api: widget.api),
             ],
           );
         },

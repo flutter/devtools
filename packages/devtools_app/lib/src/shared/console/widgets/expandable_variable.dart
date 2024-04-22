@@ -18,6 +18,7 @@ class ExpandableVariable extends StatelessWidget {
     this.variable,
     this.dataDisplayProvider,
     this.isSelectable = true,
+    this.onCopy,
   }) : super(key: key);
 
   @visibleForTesting
@@ -27,6 +28,7 @@ class ExpandableVariable extends StatelessWidget {
   final Widget Function(DartObjectNode, void Function())? dataDisplayProvider;
 
   final bool isSelectable;
+  final void Function(DartObjectNode)? onCopy;
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +45,7 @@ class ExpandableVariable extends StatelessWidget {
           (variable, onPressed) => DisplayProvider(
                 variable: variable,
                 onTap: onPressed,
+                onCopy: onCopy,
               ),
       onItemSelected: onItemPressed,
       isSelectable: isSelectable,

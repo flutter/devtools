@@ -36,7 +36,7 @@ void main() {
           .thenReturn(initializedCompleter);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(IdeTheme, IdeTheme());
-      setGlobal(OfflineModeController, OfflineModeController());
+      setGlobal(OfflineDataController, OfflineDataController());
 
       performanceController = createMockPerformanceControllerWithDefaults();
       eventsController = TimelineEventsController(performanceController);
@@ -58,10 +58,10 @@ void main() {
         isNull,
       );
 
-      offlineController.enterOfflineMode(
+      offlineDataController.startShowingOfflineData(
         offlineApp: serviceConnection.serviceManager.connectedApp!,
       );
-      final offlineData = OfflinePerformanceData.parse(rawPerformanceData);
+      final offlineData = OfflinePerformanceData.fromJson(rawPerformanceData);
       when(performanceController.offlinePerformanceData)
           .thenReturn(offlineData);
       await eventsController.setOfflineData(offlineData);

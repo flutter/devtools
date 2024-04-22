@@ -12,6 +12,7 @@ import 'package:vm_service/vm_service.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../sse/sse_shim.dart';
+import '../utils/utils.dart';
 
 Future<T> _connectWithSse<T extends VmService>({
   required Uri uri,
@@ -87,11 +88,7 @@ Future<T> connect<T extends VmService>({
 }) {
   final connectedCompleter = Completer<T>();
 
-  void onError(Object? error) {
-    if (!connectedCompleter.isCompleted) {
-      connectedCompleter.completeError(error!);
-    }
-  }
+  void onError(Object? error) => connectedCompleter.safeCompleteError(error!);
 
   // Connects to a VM Service but does not verify the connection was fully
   // successful.
@@ -118,11 +115,7 @@ Future<T> connect<T extends VmService>({
   }
 
   connectHelper().then(
-    (service) {
-      if (!connectedCompleter.isCompleted) {
-        connectedCompleter.complete(service);
-      }
-    },
+    (service) => connectedCompleter.safeComplete(service),
     onError: onError,
   );
   finishedCompleter.future.then((_) {

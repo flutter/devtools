@@ -4,11 +4,13 @@
 
 part of 'server.dart';
 
+// TODO(https://github.com/flutter/devtools/issues/7083): remove these server
+// endpoints when the legacy analytics are fully removed.
+
 /// Request DevTools property value 'firstRun' (GA dialog) stored in the file
 /// '~/flutter-devtools/.devtools'.
 Future<bool> isFirstRun() async {
   bool firstRun = false;
-
   if (isDevToolsServerAvailable) {
     final resp = await request(apiGetDevToolsFirstRun);
     if (resp?.statusCode == 200) {
@@ -17,7 +19,6 @@ Future<bool> isFirstRun() async {
       logWarning(resp, apiGetDevToolsFirstRun);
     }
   }
-
   return firstRun;
 }
 
@@ -38,9 +39,7 @@ Future<bool> isAnalyticsEnabled() async {
 
 /// Set the DevTools property 'enabled' (GA enabled) stored in the file
 /// '~/.flutter-devtools/.devtools'.
-///
-/// Returns whether the set call was successful.
-Future<bool> setAnalyticsEnabled([bool value = true]) async {
+Future<void> setAnalyticsEnabled([bool value = true]) async {
   if (isDevToolsServerAvailable) {
     final resp = await request(
       '$apiSetDevToolsEnabled'
@@ -48,32 +47,9 @@ Future<bool> setAnalyticsEnabled([bool value = true]) async {
     );
     if (resp?.statusOk ?? false) {
       assert(json.decode(resp!.body) == value);
-      return true;
     } else {
       logWarning(resp, apiSetDevToolsEnabled);
     }
-  }
-  return false;
-}
-
-/// Fetch the consent message for package:unified_analytics.
-Future<String> fetchAnalyticsConsentMessage() async {
-  String? consentMessage = '';
-  if (isDevToolsServerAvailable) {
-    final resp = await request(apiGetConsentMessage);
-    if (resp?.statusOk ?? false) {
-      consentMessage = resp!.body;
-    }
-  }
-
-  return consentMessage;
-}
-
-/// Confirm with package:unified_analytics that the consent message
-/// has been shown to the user.
-Future<void> markConsentMessageAsShown() async {
-  if (isDevToolsServerAvailable) {
-    await request(apiMarkConsentMessageAsShown);
   }
 }
 

@@ -239,6 +239,35 @@ class ToolbarRefresh extends ToolbarAction {
   });
 }
 
+class StartStopRecordingButton extends GaDevToolsButton {
+  StartStopRecordingButton({
+    super.key,
+    required this.recording,
+    required super.onPressed,
+    required super.gaScreen,
+    required super.gaSelection,
+    super.minScreenWidthForTextBeforeScaling,
+    String? tooltipOverride,
+    Color? colorOverride,
+    String? labelOverride,
+  }) : super(
+          icon: _icon(recording),
+          label: labelOverride ?? _label(recording),
+          color: colorOverride ?? _color(recording),
+          tooltip: tooltipOverride ?? _tooltip(recording),
+        );
+
+  static IconData _icon(bool recording) =>
+      recording ? Icons.stop : Icons.fiber_manual_record;
+  static String _label(bool recording) =>
+      recording ? 'Stop recording' : 'Start recording';
+  static String _tooltip(bool recording) =>
+      recording ? 'Stop recording' : 'Start recording';
+  static Color? _color(bool recording) => recording ? Colors.red : null;
+
+  final bool recording;
+}
+
 /// Button to start recording data.
 ///
 /// * `recording`: Whether recording is in progress.
@@ -497,9 +526,9 @@ class ExitOfflineButton extends StatelessWidget {
       label: 'Exit offline mode',
       icon: Icons.clear,
       gaScreen: gaScreen,
-      gaSelection: gac.exitOfflineMode,
+      gaSelection: gac.stopShowingOfflineData,
       onPressed: () {
-        offlineController.exitOfflineMode();
+        offlineDataController.stopShowingOfflineData();
         // Use Router.neglect to replace the current history entry with
         // the homepage so that clicking Back will not return here.
         Router.neglect(
@@ -524,11 +553,11 @@ class OfflineAwareControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
-      valueListenable: offlineController.offlineMode,
+      valueListenable: offlineDataController.showingOfflineData,
       builder: (context, offline, _) {
         return Row(
           children: [
-            if (offlineController.offlineMode.value)
+            if (offlineDataController.showingOfflineData.value)
               Padding(
                 padding: const EdgeInsets.only(right: defaultSpacing),
                 child: ExitOfflineButton(gaScreen: gaScreen),
@@ -1266,7 +1295,7 @@ class TextViewer extends StatelessWidget {
     } else {
       displayText = text;
     }
-    return Text(
+    return SelectableText(
       displayText,
       style: style,
     );
@@ -1289,6 +1318,7 @@ class _JsonViewerState extends State<JsonViewer>
     with ProvidedControllerMixin<DebuggerController, JsonViewer> {
   late Future<void> _initializeTree;
   late DartObjectNode variable;
+  static const jsonEncoder = JsonEncoder.withIndent('  ');
 
   Future<void> _buildAndExpand(
     DartObjectNode variable,
@@ -1371,6 +1401,18 @@ class _JsonViewerState extends State<JsonViewer>
               }
               return ExpandableVariable(
                 variable: variable,
+                onCopy: (copiedVariable) {
+                  unawaited(
+                    copyToClipboard(
+                      jsonEncoder.convert(
+                        serviceConnection
+                            .serviceManager.service!.fakeServiceCache
+                            .instanceToJson(copiedVariable.value as Instance),
+                      ),
+                      'JSON copied to clipboard',
+                    ),
+                  );
+                },
               );
             },
           ),

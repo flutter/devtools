@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/screens/memory/framework/connected/memory_tabs.dart';
-import 'package:devtools_app/src/screens/memory/framework/memory_screen.dart';
+import 'package:devtools_app/src/screens/memory/framework/memory_tabs.dart';
 import 'package:devtools_app/src/screens/memory/panes/profile/model.dart';
 import 'package:devtools_app/src/screens/memory/panes/profile/profile_pane_controller.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_service_private_extensions.dart';
@@ -17,7 +16,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../test_infra/scenes/memory/default.dart';
-import '../../test_infra/scenes/scene_test_extensions.dart';
 
 void main() {
   late MemoryDefaultScene scene;
@@ -26,13 +24,6 @@ void main() {
     scene = MemoryDefaultScene();
     await scene.setUp();
   });
-
-  Future<void> pumpMemoryScreen(WidgetTester tester) async {
-    await tester.pumpScene(scene);
-    // Delay to ensure the memory profiler has collected data.
-    await tester.pumpAndSettle(const Duration(seconds: 1));
-    expect(find.byType(MemoryBody), findsOneWidget);
-  }
 
   // Set a wide enough screen width that we do not run into overflow.
   const windowSize = Size(2225.0, 1200.0);
@@ -57,10 +48,9 @@ void main() {
       'respects VM Developer Mode setting',
       windowSize,
       (WidgetTester tester) async {
-        await pumpMemoryScreen(tester);
+        await scene.pump(tester);
 
-        final allocationProfileController =
-            scene.controller.controllers.profile;
+        final allocationProfileController = scene.controller.profile;
 
         preferences.toggleVmDeveloperMode(false);
         await navigateToAllocationProfile(tester, allocationProfileController);
@@ -157,10 +147,9 @@ void main() {
       'manually refreshes',
       windowSize,
       (WidgetTester tester) async {
-        await pumpMemoryScreen(tester);
+        await scene.pump(tester);
 
-        final allocationProfileController =
-            scene.controller.controllers.profile;
+        final allocationProfileController = scene.controller.profile;
         await navigateToAllocationProfile(tester, allocationProfileController);
 
         // We'll clear it for now so we can tell when it's refreshed.
@@ -187,10 +176,9 @@ void main() {
       'refreshes on GC',
       windowSize,
       (WidgetTester tester) async {
-        await pumpMemoryScreen(tester);
+        await scene.pump(tester);
 
-        final allocationProfileController =
-            scene.controller.controllers.profile;
+        final allocationProfileController = scene.controller.profile;
 
         await navigateToAllocationProfile(tester, allocationProfileController);
 
@@ -230,7 +218,7 @@ void main() {
       'sorts correctly',
       windowSize,
       (WidgetTester tester) async {
-        await pumpMemoryScreen(tester);
+        await scene.pump(tester);
 
         final table = find.byType(FlatTable<ProfileRecord>);
         expect(table, findsOneWidget);

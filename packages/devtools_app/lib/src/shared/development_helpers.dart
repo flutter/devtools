@@ -11,13 +11,37 @@ import 'package:logging/logging.dart';
 import 'globals.dart';
 import 'survey.dart';
 
+// This file contains helpers that can be used during local development. Any
+// changes to variables in this file (like flipping a bool to true or setting
+// a non-null value for a debug String) should be intended for local
+// development only, and should never be checked into source control. The
+// default values for variables in this file are test covered in
+// `development_helpers_test.dart`.
+
 final _log = Logger('dev_helpers');
 
-/// Enable this flag to debug analytics when DevTools is run in debug or profile
-/// mode, otherwise analytics will only be sent in release builds.
+/// Set this to a real DTD URI String for ease of developing features that use
+/// the Dart Tooling Daemon.
+///
+/// Without using this flag, you would need to run DevTools with the DevTools
+/// server (devtools_tool serve) in order to pass a DTD URI to the DevTools
+/// server, which is not convenient for development.
+///
+/// You can use a real DTD URI from an IDE (VS Code or IntelliJ / Android
+/// Studio) using the "Copy DTD URI" action, or you can run a Dart or Flutter
+/// app from the command line with the `--print-dtd` flag.
+String? get debugDtdUri => kReleaseMode ? null : _debugDtdUri;
+String? _debugDtdUri;
+
+/// Enable this flag to send and debug analytics when DevTools is run in debug
+/// or profile mode, otherwise analytics will only be sent in release builds.
 ///
 /// `ga.isAnalyticsEnabled()` still must return true for analytics to be sent.
-bool debugAnalytics = false;
+bool debugSendAnalytics = false;
+
+/// Enable this flag to always show the analytics consent message, regardless
+/// of whether any other conditions are met.
+bool debugShowAnalyticsConsentMessage = false;
 
 /// Whether to build DevTools for conveniently debugging DevTools extensions.
 ///
@@ -30,16 +54,10 @@ final debugDevToolsExtensions =
     _debugDevToolsExtensions || integrationTestMode || testMode || stagerMode;
 const _debugDevToolsExtensions = false;
 
-List<DevToolsExtensionConfig> debugHandleRefreshAvailableExtensions(
-  // ignore: avoid-unused-parameters, false positive due to conditional imports
-  Uri appRoot,
-) {
-  return debugExtensions;
-}
+List<DevToolsExtensionConfig> debugHandleRefreshAvailableExtensions() =>
+    debugExtensions;
 
 ExtensionEnabledState debugHandleExtensionEnabledState({
-  // ignore: avoid-unused-parameters, false positive due to conditional imports
-  required Uri appRoot,
   required String extensionName,
   bool? enable,
 }) {
@@ -68,16 +86,11 @@ final List<DevToolsExtensionConfig> debugExtensions = [
     DevToolsExtensionConfig.nameKey: 'foo',
     DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
     DevToolsExtensionConfig.versionKey: '1.0.0',
-    DevToolsExtensionConfig.pathKey: '/path/to/foo',
+    DevToolsExtensionConfig.materialIconCodePointKey: '0xe0b1',
+    DevToolsExtensionConfig.extensionAssetsUriKey: '/path/to/foo',
+    DevToolsExtensionConfig.devtoolsOptionsUriKey: '/path/to/options/file',
     DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
-  }),
-  DevToolsExtensionConfig.parse({
-    DevToolsExtensionConfig.nameKey: 'bar',
-    DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
-    DevToolsExtensionConfig.versionKey: '2.0.0',
-    DevToolsExtensionConfig.materialIconCodePointKey: 0xe638,
-    DevToolsExtensionConfig.pathKey: '/path/to/bar',
-    DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
+    DevToolsExtensionConfig.detectedFromStaticContextKey: 'false',
   }),
   DevToolsExtensionConfig.parse({
     DevToolsExtensionConfig.nameKey: 'provider',
@@ -85,8 +98,22 @@ final List<DevToolsExtensionConfig> debugExtensions = [
         'https://github.com/rrousselGit/provider/issues',
     DevToolsExtensionConfig.versionKey: '3.0.0',
     DevToolsExtensionConfig.materialIconCodePointKey: 0xe50a,
-    DevToolsExtensionConfig.pathKey: '/path/to/provider',
+    DevToolsExtensionConfig.extensionAssetsUriKey: '/path/to/provider',
+    DevToolsExtensionConfig.devtoolsOptionsUriKey: '/path/to/options/file',
+    DevToolsExtensionConfig.isPubliclyHostedKey: 'true',
+    DevToolsExtensionConfig.detectedFromStaticContextKey: 'false',
+  }),
+  // Static extension.
+  DevToolsExtensionConfig.parse({
+    DevToolsExtensionConfig.nameKey: 'bar',
+    DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
+    DevToolsExtensionConfig.versionKey: '2.0.0',
+    DevToolsExtensionConfig.materialIconCodePointKey: 0xe638,
+    DevToolsExtensionConfig.requiresConnectionKey: 'false',
+    DevToolsExtensionConfig.extensionAssetsUriKey: '/path/to/bar',
+    DevToolsExtensionConfig.devtoolsOptionsUriKey: '/path/to/options/file',
     DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
+    DevToolsExtensionConfig.detectedFromStaticContextKey: 'true',
   }),
 ];
 
@@ -100,7 +127,7 @@ bool debugSurvey = false;
 /// The survey metadata that will be used instead of the live data from
 /// 'docs.flutter.dev/f/dart-devtools-survey-metadata.json' when [debugSurvey]
 /// is true;
-final debugSurveyMetadata = DevToolsSurvey.parse(
+final debugSurveyMetadata = DevToolsSurvey.fromJson(
   {
     '_comments': [
       'uniqueId must be updated with each new survey so DevTools knows to re-prompt users.',
@@ -172,8 +199,3 @@ FutureOr<void> debugTimeAsync(
   final time = DateTime.now().millisecondsSinceEpoch - now;
   _log.info('$debugName: $time ms');
 }
-
-/// If false, the [HeapData.classes] is always empty.
-///
-/// Is used to evaluate performance of calculations.
-bool calculateSetOfClasses = true;

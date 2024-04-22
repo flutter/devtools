@@ -25,7 +25,7 @@ void main() {
         (_) => Future.value(Response.parse(rasterStatsFromServiceJson)),
       );
       setGlobal(ServiceConnectionManager, mockServiceConnection);
-      setGlobal(OfflineModeController, OfflineModeController());
+      setGlobal(OfflineDataController, OfflineDataController());
       setGlobal(IdeTheme, IdeTheme());
 
       controller =

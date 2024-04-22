@@ -65,7 +65,10 @@ class ValidationDetailView extends StatelessWidget {
                 Align(
                   alignment: Alignment.bottomRight,
                   child: FilledButton(
-                    onPressed: controller.loadAndroidAppLinksAndValidate,
+                    onPressed: () async {
+                      await controller.loadAndroidAppLinksAndValidate();
+                      controller.autoSelectLink(viewType);
+                    },
                     child: const Text('Recheck all'),
                   ),
                 ),
@@ -596,7 +599,7 @@ class _ManifestFileCheck extends StatelessWidget {
                     'Copy the following code into your Manifest file.',
               ),
               const _CodeCard(
-                content: ''''$metaDataDeepLinkingFlagTag'
+                content: '''$metaDataDeepLinkingFlagTag
 
 <intent-filter android:autoVerify="true">
     <action android:name="android.intent.action.VIEW" />

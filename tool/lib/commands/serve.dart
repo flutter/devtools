@@ -20,6 +20,7 @@ const _debugServerFlag = 'debug-server';
 const _machineFlag = 'machine';
 const _dtdUriFlag = 'dtd-uri';
 const _allowEmbeddingFlag = 'allow-embedding';
+const _serveWithDartSdkFlag = 'serve-with-dart-sdk';
 
 /// This command builds DevTools in release mode by running the
 /// `devtools_tool build` command and then serves DevTools with a locally
@@ -91,6 +92,12 @@ class ServeCommand extends Command {
       ..addFlag(
         _allowEmbeddingFlag,
         help: 'Allow embedding DevTools inside an iframe.',
+      )
+      ..addOption(
+        _serveWithDartSdkFlag,
+        help: 'Uses the specified Dart SDK to serve the DevTools server',
+        valueHelp:
+            '/Users/me/absolute_path_to/sdk/xcodebuild/ReleaseX64/dart-sdk/bin/dart',
       );
   }
 
@@ -122,6 +129,7 @@ class ServeCommand extends Command {
     final runPubGet = argResults![BuildCommandArgs.pubGet.flagName] as bool;
     final devToolsAppBuildMode =
         argResults![BuildCommandArgs.buildMode.flagName] as String;
+    final serveWithDartSdk = argResults![_serveWithDartSdkFlag] as String?;
 
     // Any flag that we aren't removing here is intended to be passed through.
     final remainingArguments = List.of(argResults!.arguments)
@@ -135,6 +143,9 @@ class ServeCommand extends Command {
       ..remove(BuildCommandArgs.pubGet.asArg(negated: true))
       ..removeWhere(
         (element) => element.startsWith(BuildCommandArgs.buildMode.asArg()),
+      )
+      ..removeWhere(
+        (element) => element.startsWith(valueAsArg(_serveWithDartSdkFlag)),
       );
 
     final localDartSdkLocation = Platform.environment['LOCAL_DART_SDK'];
@@ -205,6 +216,7 @@ class ServeCommand extends Command {
           // the "dart devtools" command for testing local DevTools/server changes.
           ...remainingArguments,
         ],
+        sdkOverride: serveWithDartSdk,
       ),
       workingDirectory: localDartSdkLocation,
     );

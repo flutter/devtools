@@ -20,8 +20,8 @@ bool equalsWithinEpsilon(double a, double b) {
 }
 
 const tooltipWait = Duration(milliseconds: 500);
-
 const tooltipWaitLong = Duration(milliseconds: 1000);
+const tooltipWaitExtraLong = Duration(milliseconds: 1500);
 
 /// Pluralizes a word, following english rules (1, many).
 ///

@@ -54,6 +54,7 @@ class PreferencesController extends DisposableController
     final darkModeValue = await storage.getValue('ui.darkMode');
     final useDarkMode = (darkModeValue == null && useDarkThemeAsDefault) ||
         darkModeValue == 'true';
+    ga.impression(gac.devToolsMain, gac.startingTheme(darkMode: useDarkMode));
     toggleDarkModeTheme(useDarkMode);
     addAutoDisposeListener(darkModeTheme, () {
       storage.setValue('ui.darkMode', '${darkModeTheme.value}');

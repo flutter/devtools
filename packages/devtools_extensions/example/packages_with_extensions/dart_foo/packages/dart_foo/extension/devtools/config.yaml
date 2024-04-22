@@ -1,0 +1,5 @@
+name: dart_foo
+issueTracker: https://www.google.com/
+version: 1.0.0
+materialIconCodePoint: "0xe50a"
+requiresConnection: false
