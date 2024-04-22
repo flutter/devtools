@@ -237,17 +237,19 @@ of the full release process.
 1. Find the [DevTools tag](https://github.com/flutter/devtools/tags) that you want
 to perform the cherry-pick release on top of.
 
-For example, if you want current Flutter beta to be updated with fixed DevTools, run in Flutter repo:
-    ```
-    git checkout upstream/beta
-    flutter --version
-    ```
-You will get DevTools version and Dart SDK version to fix.
+For example, if you want to perform a cherry pick release of DevTools into
+the Flutter / Dart beta branch, you can see what the current version of DevTools
+is on Flutter / Dart beta by doing the following:
+
+    a. Go to https://flutter-ko.dev/development/tools/sdk/releases and copy the version of the latest Beta release.
+    b. In your terminal from the flutter repository, run git checkout <latest-beta-version>.
+    c. Once your local flutter source is on the latest beta, run `flutter --version` to see which version of DevTools 
+       is on current Flutter / Dart beta (assuming `which flutter` points to your local Flutter git repository).
 
 2. Checkout that tag in your local DevTools repo. For this
 example, we'll use `v2.29.0` as the base branch and `2.29.1` as the cherry-pick branch.
    ```
-   git fetch --all 
+   git fetch upstream 
    git checkout v2.29.0
    ```
 
@@ -318,7 +320,7 @@ the CL yet.
 Follow the [Request cherry-pick approval](https://github.com/dart-lang/sdk/wiki/Cherry-picks-to-a-release-channel#request-cherry-pick-approval) instructions to
 create a cherry-pick request against the Dart SDK.
 
-Once the Dart release engineers approve both your cherry-pick issue and your
+Once the Dart release engineers (listed in [OWNERS](https://github.com/dart-lang/sdk/blob/main/OWNERS)) approve both your cherry-pick issue and your
 cherry-pick CL, you can merge the CL you created above.
 
 **Do not move on to the next steps unless your cherry-pick CL has been approved
