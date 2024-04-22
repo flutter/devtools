@@ -98,7 +98,7 @@ Future<Finder> findTab(WidgetController controller, IconData icon) async {
     await controller.tap(tabOverflowButtonFinder);
     await controller.pump(shortPumpDuration);
   }
-  return find.widgetWithIcon(Tab, icon);
+  return find.widgetWithIcon(Tab, icon).first;
 }
 
 // ignore: avoid-dynamic, wrapper around `expect`, which uses dynamic types.
