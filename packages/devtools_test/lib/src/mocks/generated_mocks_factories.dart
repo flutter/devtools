@@ -206,8 +206,17 @@ Future<MockExtensionService> createMockExtensionServiceWithDefaults(
   List<DevToolsExtensionConfig> extensions,
 ) async {
   final mockExtensionService = MockExtensionService();
+  // TODO(kenz): once static extension support is landed, de-duplicate these
+  // extensions properly.
+  final extensionsWithoutDuplicates = <DevToolsExtensionConfig>[];
+  for (final ext in extensions) {
+    if (extensionsWithoutDuplicates.containsWhere((e) => e.name == ext.name)) {
+      continue;
+    }
+    extensionsWithoutDuplicates.add(ext);
+  }
   when(mockExtensionService.availableExtensions)
-      .thenReturn(ImmediateValueNotifier(extensions));
+      .thenReturn(ImmediateValueNotifier(extensionsWithoutDuplicates));
 
   final stubEnabledStates = <String, ValueNotifier<ExtensionEnabledState>>{};
 

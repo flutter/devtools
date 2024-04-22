@@ -21,7 +21,7 @@ void main() {
 
   group('$ExtensionSettingsDialog', () {
     setUp(() async {
-      dialog = const ExtensionSettingsDialog();
+      dialog = const ExtensionSettingsDialog(tall: true);
       setGlobal(PreferencesController, PreferencesController());
       setGlobal(
         ExtensionService,
@@ -60,7 +60,7 @@ void main() {
         );
         expect(find.text('No extensions available.'), findsNothing);
         expect(find.byType(ListView), findsOneWidget);
-        expect(find.byType(ExtensionSetting), findsNWidgets(3));
+        expect(find.byType(ExtensionSetting), findsNWidgets(5));
         await expectLater(
           find.byWidget(dialog),
           matchesDevToolsGolden(
@@ -83,6 +83,12 @@ void main() {
         );
         expect(
           extensionService
+              .enabledStateListenable(StubDevToolsExtensions.bazExtension.name)
+              .value,
+          ExtensionEnabledState.none,
+        );
+        expect(
+          extensionService
               .enabledStateListenable(StubDevToolsExtensions.fooExtension.name)
               .value,
           ExtensionEnabledState.none,
@@ -95,11 +101,25 @@ void main() {
               .value,
           ExtensionEnabledState.none,
         );
+        expect(
+          extensionService
+              .enabledStateListenable(
+                StubDevToolsExtensions.someToolExtension.name,
+              )
+              .value,
+          ExtensionEnabledState.none,
+        );
 
         final barSetting = tester
             .widgetList<ExtensionSetting>(find.byType(ExtensionSetting))
             .where(
               (setting) => setting.extension.name.caseInsensitiveEquals('bar'),
+            )
+            .first;
+        final bazSetting = tester
+            .widgetList<ExtensionSetting>(find.byType(ExtensionSetting))
+            .where(
+              (setting) => setting.extension.name.caseInsensitiveEquals('baz'),
             )
             .first;
         final fooSetting = tester
@@ -115,19 +135,40 @@ void main() {
                   setting.extension.name.caseInsensitiveEquals('provider'),
             )
             .first;
+        final someToolSetting = tester
+            .widgetList<ExtensionSetting>(find.byType(ExtensionSetting))
+            .where(
+              (setting) =>
+                  setting.extension.name.caseInsensitiveEquals('some_tool'),
+            )
+            .first;
 
-        // Enable the 'bar' extension.
+        // Disable the 'bar' extension.
         await tester.tap(
           find.descendant(
             of: find.byWidget(barSetting),
-            matching: find.text('Enabled'),
+            matching: find.text('Disabled'),
           ),
         );
         expect(
           extensionService
               .enabledStateListenable(StubDevToolsExtensions.barExtension.name)
               .value,
-          ExtensionEnabledState.enabled,
+          ExtensionEnabledState.disabled,
+        );
+
+        // Disable the 'baz' extension.
+        await tester.tap(
+          find.descendant(
+            of: find.byWidget(bazSetting),
+            matching: find.text('Disabled'),
+          ),
+        );
+        expect(
+          extensionService
+              .enabledStateListenable(StubDevToolsExtensions.bazExtension.name)
+              .value,
+          ExtensionEnabledState.disabled,
         );
 
         // Enable the 'foo' extension.
@@ -144,11 +185,11 @@ void main() {
           ExtensionEnabledState.enabled,
         );
 
-        // Disable the 'provider' extension.
+        // Enable the 'provider' extension.
         await tester.tap(
           find.descendant(
             of: find.byWidget(providerSetting),
-            matching: find.text('Disabled'),
+            matching: find.text('Enabled'),
           ),
         );
         expect(
@@ -157,7 +198,23 @@ void main() {
                 StubDevToolsExtensions.providerExtension.name,
               )
               .value,
-          ExtensionEnabledState.disabled,
+          ExtensionEnabledState.enabled,
+        );
+
+        // Enable the 'some_tool' extension.
+        await tester.tap(
+          find.descendant(
+            of: find.byWidget(someToolSetting),
+            matching: find.text('Enabled'),
+          ),
+        );
+        expect(
+          extensionService
+              .enabledStateListenable(
+                StubDevToolsExtensions.someToolExtension.name,
+              )
+              .value,
+          ExtensionEnabledState.enabled,
         );
 
         await tester.pumpWidget(wrapSimple(dialog));
@@ -183,7 +240,11 @@ void main() {
 
         await extensionService.setExtensionEnabledState(
           StubDevToolsExtensions.barExtension,
-          enable: true,
+          enable: false,
+        );
+        await extensionService.setExtensionEnabledState(
+          StubDevToolsExtensions.bazExtension,
+          enable: false,
         );
         await extensionService.setExtensionEnabledState(
           StubDevToolsExtensions.fooExtension,
@@ -191,7 +252,11 @@ void main() {
         );
         await extensionService.setExtensionEnabledState(
           StubDevToolsExtensions.providerExtension,
-          enable: false,
+          enable: true,
+        );
+        await extensionService.setExtensionEnabledState(
+          StubDevToolsExtensions.someToolExtension,
+          enable: true,
         );
 
         await tester.pumpWidget(wrapSimple(dialog));
