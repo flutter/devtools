@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: invalid_use_of_visible_for_testing_member, devtools_test is a in testing only package.
+
 import 'dart:async';
 
 import 'package:devtools_app/devtools_app.dart';
@@ -206,8 +208,22 @@ Future<MockExtensionService> createMockExtensionServiceWithDefaults(
   List<DevToolsExtensionConfig> extensions,
 ) async {
   final mockExtensionService = MockExtensionService();
+  final runtimeExtensions =
+      extensions.where((e) => !e.detectedFromStaticContext).toList();
+  final staticExtensions =
+      extensions.where((e) => e.detectedFromStaticContext).toList();
+  ExtensionService.deduplicateStaticExtensions(staticExtensions);
+  ExtensionService.deduplicateStaticExtensionsWithRuntimeExtensions(
+    staticExtensions: staticExtensions,
+    runtimeExtensions: runtimeExtensions,
+  );
+
+  final availableExtensions = [
+    ...runtimeExtensions,
+    ...staticExtensions.where((ext) => !ext.ignored),
+  ]..sort();
   when(mockExtensionService.availableExtensions)
-      .thenReturn(ImmediateValueNotifier(extensions));
+      .thenReturn(ImmediateValueNotifier(availableExtensions));
 
   final stubEnabledStates = <String, ValueNotifier<ExtensionEnabledState>>{};
 

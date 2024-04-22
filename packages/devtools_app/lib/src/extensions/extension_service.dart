@@ -184,8 +184,11 @@ class ExtensionService extends DisposableController
   void maybeIgnoreExtensions({required bool connected}) {
     // TODO(kenz): consider handling duplicates in a way that gives the user a
     // choice of which version they want to use.
-    _deduplicateStaticExtensionsWithStaticExtensions();
-    _deduplicateStaticExtensionsWithRuntimeExtensions();
+    deduplicateStaticExtensions(_staticExtensions);
+    deduplicateStaticExtensionsWithRuntimeExtensions(
+      staticExtensions: _staticExtensions,
+      runtimeExtensions: _runtimeExtensions,
+    );
 
     // Some extensions detected from a static context may actually require a
     // running application.
@@ -198,14 +201,17 @@ class ExtensionService extends DisposableController
 
   /// De-duplicates static extensions from other static extensions by ignoring
   /// all that are not the latest version when there are duplicates.
-  void _deduplicateStaticExtensionsWithStaticExtensions() {
+  @visibleForTesting
+  static void deduplicateStaticExtensions(
+    List<DevToolsExtensionConfig> extensions,
+  ) {
     final deduped = <String>{};
-    for (final staticExtension in _staticExtensions) {
+    for (final staticExtension in extensions) {
       if (deduped.contains(staticExtension.name)) continue;
       deduped.add(staticExtension.name);
 
       final duplicates =
-          _staticExtensions.where((e) => e.name == staticExtension.name);
+          extensions.where((e) => e.name == staticExtension.name);
       var latest = staticExtension;
       for (final duplicate in duplicates) {
         final currentLatest = takeLatestExtension(latest, duplicate);
@@ -223,14 +229,18 @@ class ExtensionService extends DisposableController
 
   // De-duplicates unignored static extensions from runtime extensions by
   // ignoring the static extension when there is a duplicate.
-  void _deduplicateStaticExtensionsWithRuntimeExtensions() {
+  @visibleForTesting
+  static void deduplicateStaticExtensionsWithRuntimeExtensions({
+    required List<DevToolsExtensionConfig> staticExtensions,
+    required List<DevToolsExtensionConfig> runtimeExtensions,
+  }) {
     for (final staticExtension
-        in _staticExtensions.where((ext) => !ext.ignored)) {
+        in staticExtensions.where((ext) => !ext.ignored)) {
       // TODO(kenz): do we need to match on something other than name? Names
       // _should_ be unique since they match a pub package name, but this may
       // not always be true for extensions that are not published on pub or
       // extensions that do not follow best practices for naming.
-      final isRuntimeDuplicate = _runtimeExtensions
+      final isRuntimeDuplicate = runtimeExtensions
           .containsWhere((ext) => ext.name == staticExtension.name);
       if (isRuntimeDuplicate) {
         _log.fine(
