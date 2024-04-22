@@ -28,6 +28,7 @@ void main() {
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(PreferencesController, PreferencesController());
       setGlobal(ServiceConnectionManager, ServiceConnectionManager());
+      setGlobal(OfflineDataController, OfflineDataController());
       fooScreen = ExtensionScreen(StubDevToolsExtensions.fooExtension);
       barScreen = ExtensionScreen(StubDevToolsExtensions.barExtension);
       providerScreen =
