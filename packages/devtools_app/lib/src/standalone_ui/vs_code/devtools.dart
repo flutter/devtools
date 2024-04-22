@@ -18,9 +18,14 @@ import '../api/vs_code_api.dart';
 /// screens, and a list of static DevTools extensions available for the IDE
 /// workspace.
 class DevToolsSidebarOptions extends StatelessWidget {
-  const DevToolsSidebarOptions({required this.api, super.key});
+  const DevToolsSidebarOptions({
+    required this.api,
+    required this.hasDebugSessions,
+    super.key,
+  });
 
   final VsCodeApi api;
+  final bool hasDebugSessions;
 
   @override
   Widget build(BuildContext context) {
@@ -61,15 +66,15 @@ class DevToolsSidebarOptions extends StatelessWidget {
           ],
         ),
         const PaddedDivider.thin(),
-        const Padding(
-          padding: EdgeInsets.only(left: borderPadding),
-          child: Text(
-            'Begin a debug session to use tools that require a running '
-            'application.',
-          ),
+        _RuntimeToolInstructions(
+          hasDebugSessions: hasDebugSessions,
+          toolDescription: 'tools',
         ),
         const SizedBox(height: denseSpacing),
-        _DevToolsExtensions(api: api),
+        _DevToolsExtensions(
+          api: api,
+          hasDebugSessions: hasDebugSessions,
+        ),
       ],
     );
   }
@@ -89,9 +94,13 @@ class DevToolsSidebarOptions extends StatelessWidget {
 }
 
 class _DevToolsExtensions extends StatefulWidget {
-  const _DevToolsExtensions({required this.api});
+  const _DevToolsExtensions({
+    required this.api,
+    required this.hasDebugSessions,
+  });
 
   final VsCodeApi api;
+  final bool hasDebugSessions;
 
   @override
   State<_DevToolsExtensions> createState() => _DevToolsExtensionsState();
@@ -164,12 +173,9 @@ class _DevToolsExtensionsState extends State<_DevToolsExtensions> {
           },
         ),
         const PaddedDivider.thin(),
-        const Padding(
-          padding: EdgeInsets.only(left: borderPadding),
-          child: Text(
-            'Begin a debug session to use extensions that require a running '
-            'application.',
-          ),
+        _RuntimeToolInstructions(
+          hasDebugSessions: widget.hasDebugSessions,
+          toolDescription: 'extensions',
         ),
       ],
     );
@@ -220,4 +226,28 @@ TableRow _createDevToolsScreenRow({
       ),
     ],
   );
+}
+
+class _RuntimeToolInstructions extends StatelessWidget {
+  const _RuntimeToolInstructions({
+    required this.hasDebugSessions,
+    required this.toolDescription,
+    super.key,
+  });
+
+  final bool hasDebugSessions;
+  final String toolDescription;
+
+  @override
+  Widget build(BuildContext context) {
+    final instruction = hasDebugSessions
+        ? 'Open the tools menu for a debug session to access '
+        : 'Begin a debug session to use ';
+    return Padding(
+      padding: const EdgeInsets.only(left: borderPadding),
+      child: Text(
+        '$instruction $toolDescription that require a running application.',
+      ),
+    );
+  }
 }

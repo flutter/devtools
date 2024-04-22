@@ -39,8 +39,18 @@ void main() {
     setGlobal(PreferencesController, PreferencesController());
   });
 
-  Future<void> pumpDevToolsSidebarOptions(WidgetTester tester) async {
-    await tester.pumpWidget(wrap(DevToolsSidebarOptions(api: mockVsCodeApi)));
+  Future<void> pumpDevToolsSidebarOptions(
+    WidgetTester tester, {
+    bool hasDebugSessions = false,
+  }) async {
+    await tester.pumpWidget(
+      wrap(
+        DevToolsSidebarOptions(
+          api: mockVsCodeApi,
+          hasDebugSessions: hasDebugSessions,
+        ),
+      ),
+    );
     // Additional pump to allow for initializing the extensions service.
     await tester.pumpAndSettle();
   }
@@ -77,6 +87,28 @@ void main() {
           find.text(
             'Begin a debug session to use extensions that require a running '
             'application.',
+          ),
+          findsOneWidget,
+        );
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'changes runtime tool instructions with non-empty debug sessions',
+      windowSize,
+      (tester) async {
+        await pumpDevToolsSidebarOptions(tester, hasDebugSessions: true);
+        expect(
+          find.text(
+            'Open the tools menu for a debug session to access tools that '
+            'require a running application.',
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.text(
+            'Open the tools menu for a debug session to access extensions that '
+            'require a running application.',
           ),
           findsOneWidget,
         );
