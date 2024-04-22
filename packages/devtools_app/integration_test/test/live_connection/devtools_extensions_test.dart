@@ -345,7 +345,7 @@ Future<void> _verifyExtensionVisibilitySetting(WidgetTester tester) async {
     preferences.devToolsExtensions.showOnlyEnabledExtensions.value,
     isFalse,
   );
-  expect(extensionService.visibleExtensions.value.length, 3);
+  expect(extensionService.visibleExtensions.value.length, 7);
   // No need to open the settings menu as it should already be open.
   await _toggleShowOnlyEnabledExtensions(tester);
   expect(
@@ -360,7 +360,7 @@ Future<void> _verifyExtensionVisibilitySetting(WidgetTester tester) async {
     preferences.devToolsExtensions.showOnlyEnabledExtensions.value,
     isFalse,
   );
-  expect(extensionService.visibleExtensions.value.length, 3);
+  expect(extensionService.visibleExtensions.value.length, 7);
 
   await _closeExtensionSettingsMenu(tester);
 }
