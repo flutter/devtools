@@ -21,7 +21,8 @@ void main() {
 
   group('$ExtensionSettingsDialog', () {
     setUp(() async {
-      dialog = const ExtensionSettingsDialog(tall: true);
+      setTestMode();
+      dialog = const ExtensionSettingsDialog();
       setGlobal(PreferencesController, PreferencesController());
       setGlobal(
         ExtensionService,
