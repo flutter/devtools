@@ -242,8 +242,8 @@ the Flutter / Dart beta branch, you can see what the current version of DevTools
 is on Flutter / Dart beta by doing the following:
 
     a. Go to https://flutter-ko.dev/development/tools/sdk/releases and copy the version of the latest Beta release.
-    b. In your terminal from the flutter repository, run git checkout <latest-beta-version>.
-    c. Once your local flutter source is on the latest beta, run `flutter --version` to see which version of DevTools 
+    b. In your terminal from the flutter repository, `run git checkout <latest-beta-version>`.
+    c. Once your local Flutter source code is on the latest beta, run `flutter --version` to see which version of DevTools 
        is on current Flutter / Dart beta (assuming `which flutter` points to your local Flutter git repository).
 
 2. Checkout that tag in your local DevTools repo. For this
