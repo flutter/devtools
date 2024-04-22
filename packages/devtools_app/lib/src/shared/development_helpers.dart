@@ -154,28 +154,28 @@ abstract class StubDevToolsExtensions {
   /// Extension for package:baz detected from a static context that requires a
   /// connected app.
   static final bazExtension = DevToolsExtensionConfig.parse({
-      DevToolsExtensionConfig.nameKey: 'baz',
-      DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
-      DevToolsExtensionConfig.versionKey: '1.0.0',
-      DevToolsExtensionConfig.materialIconCodePointKey: 0xe638,
-      DevToolsExtensionConfig.extensionAssetsUriKey: '/path/to/baz',
-      DevToolsExtensionConfig.devtoolsOptionsUriKey: '/path/to/options/file',
-      DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
-      DevToolsExtensionConfig.detectedFromStaticContextKey: 'true',
-    });
+    DevToolsExtensionConfig.nameKey: 'baz',
+    DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
+    DevToolsExtensionConfig.versionKey: '1.0.0',
+    DevToolsExtensionConfig.materialIconCodePointKey: 0xe638,
+    DevToolsExtensionConfig.extensionAssetsUriKey: '/path/to/baz',
+    DevToolsExtensionConfig.devtoolsOptionsUriKey: '/path/to/options/file',
+    DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
+    DevToolsExtensionConfig.detectedFromStaticContextKey: 'true',
+  });
 
   /// Extension for package:foo detected from a static context that is a duplicate
   /// of a runtime extension [fooExtension].
   static final duplicateFooExtension = DevToolsExtensionConfig.parse({
-      DevToolsExtensionConfig.nameKey: 'foo',
-      DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
-      DevToolsExtensionConfig.versionKey: '1.0.0',
-      DevToolsExtensionConfig.materialIconCodePointKey: '0xe0b1',
-      DevToolsExtensionConfig.extensionAssetsUriKey: '/path/to/foo',
-      DevToolsExtensionConfig.devtoolsOptionsUriKey: '/path/to/options/file',
-      DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
-      DevToolsExtensionConfig.detectedFromStaticContextKey: 'true',
-    });
+    DevToolsExtensionConfig.nameKey: 'foo',
+    DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
+    DevToolsExtensionConfig.versionKey: '1.0.0',
+    DevToolsExtensionConfig.materialIconCodePointKey: '0xe0b1',
+    DevToolsExtensionConfig.extensionAssetsUriKey: '/path/to/foo',
+    DevToolsExtensionConfig.devtoolsOptionsUriKey: '/path/to/options/file',
+    DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
+    DevToolsExtensionConfig.detectedFromStaticContextKey: 'true',
+  });
 
   /// Stubbed extensions so we can develop DevTools Extensions without a server
   /// connection.

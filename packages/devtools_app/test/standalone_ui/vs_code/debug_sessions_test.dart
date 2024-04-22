@@ -203,8 +203,13 @@ void main() {
         await tester.pumpAndSettle();
 
         // We should now see the extensions in the dropdown menu.
-        expect(find.text('bar'), findsOneWidget);
-        expect(find.text('foo'), findsOneWidget);
+
+        // TODO(kenz): use `findsOneWidget` for these once static extensions
+        // support is landed, which includes logic for removing duplicate
+        // extensions.
+        expect(find.text('bar'), findsWidgets);
+        expect(find.text('foo'), findsWidgets);
+
         expect(find.text('provider'), findsOneWidget);
       },
     );
