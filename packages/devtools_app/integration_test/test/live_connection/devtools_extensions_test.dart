@@ -84,7 +84,7 @@ void main() {
     await _verifyExtensionsSettingsMenu(
       tester,
       [
-        ExtensionEnabledState.disabled, // bar 
+        ExtensionEnabledState.disabled, // bar
         ExtensionEnabledState.none, // baz
         ExtensionEnabledState.none, // foo
         ExtensionEnabledState.none, // provider
