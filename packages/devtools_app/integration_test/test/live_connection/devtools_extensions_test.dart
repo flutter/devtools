@@ -37,11 +37,15 @@ void main() {
     await pumpAndConnectDevTools(tester, testApp);
     resetDevToolsExtensionEnabledStates();
 
-    expect(extensionService.availableExtensions.value.length, 3);
-    expect(extensionService.visibleExtensions.value.length, 3);
+    expect(extensionService.availableExtensions.value.length, 7);
+    expect(extensionService.visibleExtensions.value.length, 7);
     await _verifyExtensionsSettingsMenu(
       tester,
       [
+        ExtensionEnabledState.none,
+        ExtensionEnabledState.none,
+        ExtensionEnabledState.none,
+        ExtensionEnabledState.none,
         ExtensionEnabledState.none,
         ExtensionEnabledState.none,
         ExtensionEnabledState.none,
@@ -65,13 +69,17 @@ void main() {
         ExtensionEnabledState.enabled,
         ExtensionEnabledState.none,
         ExtensionEnabledState.none,
+        ExtensionEnabledState.none,
+        ExtensionEnabledState.none,
+        ExtensionEnabledState.none,
+        ExtensionEnabledState.none,
       ],
     );
 
     await _verifyContextMenuActions(tester);
 
-    expect(extensionService.availableExtensions.value.length, 3);
-    expect(extensionService.visibleExtensions.value.length, 2);
+    expect(extensionService.availableExtensions.value.length, 7);
+    expect(extensionService.visibleExtensions.value.length, 6);
     await _verifyExtensionTabVisibility(
       tester,
       extensionIndex: 0,
@@ -81,6 +89,10 @@ void main() {
       tester,
       [
         ExtensionEnabledState.disabled,
+        ExtensionEnabledState.none,
+        ExtensionEnabledState.none,
+        ExtensionEnabledState.none,
+        ExtensionEnabledState.none,
         ExtensionEnabledState.none,
         ExtensionEnabledState.none,
       ],
@@ -94,8 +106,8 @@ void main() {
     );
     await _answerEnableExtensionPrompt(tester, enable: false);
 
-    expect(extensionService.availableExtensions.value.length, 3);
-    expect(extensionService.visibleExtensions.value.length, 1);
+    expect(extensionService.availableExtensions.value.length, 7);
+    expect(extensionService.visibleExtensions.value.length, 5);
     await _verifyExtensionTabVisibility(
       tester,
       extensionIndex: 1,
@@ -107,14 +119,18 @@ void main() {
         ExtensionEnabledState.disabled,
         ExtensionEnabledState.disabled,
         ExtensionEnabledState.none,
+        ExtensionEnabledState.none,
+        ExtensionEnabledState.none,
+        ExtensionEnabledState.none,
+        ExtensionEnabledState.none,
       ],
     );
 
     logStatus('verify we can re-enable an extension from the settings menu');
     await _changeExtensionSetting(tester, extensionIndex: 1, enable: true);
 
-    expect(extensionService.availableExtensions.value.length, 3);
-    expect(extensionService.visibleExtensions.value.length, 2);
+    expect(extensionService.availableExtensions.value.length, 7);
+    expect(extensionService.visibleExtensions.value.length, 6);
     await _switchToExtensionScreen(tester, extensionIndex: 1);
     expect(find.byType(EnableExtensionPrompt), findsNothing);
     expect(find.byType(EmbeddedExtensionView), findsOneWidget);
@@ -124,6 +140,10 @@ void main() {
       [
         ExtensionEnabledState.disabled,
         ExtensionEnabledState.enabled,
+        ExtensionEnabledState.none,
+        ExtensionEnabledState.none,
+        ExtensionEnabledState.none,
+        ExtensionEnabledState.none,
         ExtensionEnabledState.none,
       ],
     );
@@ -140,8 +160,8 @@ void main() {
 
     logStatus('disable the extension from the settings menu');
     await _changeExtensionSetting(tester, extensionIndex: 2, enable: false);
-    expect(extensionService.availableExtensions.value.length, 3);
-    expect(extensionService.visibleExtensions.value.length, 1);
+    expect(extensionService.availableExtensions.value.length, 7);
+    expect(extensionService.visibleExtensions.value.length, 5);
     await _verifyExtensionTabVisibility(
       tester,
       extensionIndex: 2,
@@ -153,6 +173,10 @@ void main() {
         ExtensionEnabledState.disabled,
         ExtensionEnabledState.enabled,
         ExtensionEnabledState.disabled,
+        ExtensionEnabledState.none,
+        ExtensionEnabledState.none,
+        ExtensionEnabledState.none,
+        ExtensionEnabledState.none,
       ],
     );
   });
