@@ -174,7 +174,7 @@ class ExtensionService extends DisposableController
 
     _availableExtensions.value = [
       ..._runtimeExtensions,
-      ..._staticExtensions.where((ext) => !ext.ignored),
+      ..._staticExtensions.where((ext) => !isExtensionIgnored(ext)),
     ]..sort();
     await _refreshExtensionEnabledStates();
     _refreshInProgress.value = false;
@@ -184,17 +184,22 @@ class ExtensionService extends DisposableController
   void maybeIgnoreExtensions({required bool connected}) {
     // TODO(kenz): consider handling duplicates in a way that gives the user a
     // choice of which version they want to use.
-    deduplicateStaticExtensions(_staticExtensions);
+    deduplicateStaticExtensions(
+      _staticExtensions,
+      onIgnore: ignoreExtension,
+    );
     deduplicateStaticExtensionsWithRuntimeExtensions(
       staticExtensions: _staticExtensions,
       runtimeExtensions: _runtimeExtensions,
+      isIgnored: isExtensionIgnored,
+      onIgnore: ignoreExtension,
     );
 
     // Some extensions detected from a static context may actually require a
     // running application.
     for (final ext in _staticExtensions) {
       if (!connected && ext.requiresConnection) {
-        ext.ignore();
+        ignoreExtension(ext);
       }
     }
   }
@@ -203,8 +208,9 @@ class ExtensionService extends DisposableController
   /// all that are not the latest version when there are duplicates.
   @visibleForTesting
   static void deduplicateStaticExtensions(
-    List<DevToolsExtensionConfig> extensions,
-  ) {
+    List<DevToolsExtensionConfig> extensions, {
+    required void Function(DevToolsExtensionConfig, bool ignore) onIgnore,
+  }) {
     final deduped = <String>{};
     for (final staticExtension in extensions) {
       if (deduped.contains(staticExtension.name)) continue;
@@ -220,8 +226,9 @@ class ExtensionService extends DisposableController
             'ignoring duplicate static extension ${duplicate.name}, '
             '${duplicate.devtoolsOptionsUri}',
           );
-          latest.ignore();
-          latest = currentLatest..ignore(false);
+          onIgnore(latest, true);
+          onIgnore(currentLatest, false);
+          latest = currentLatest;
         }
       }
     }
@@ -233,9 +240,11 @@ class ExtensionService extends DisposableController
   static void deduplicateStaticExtensionsWithRuntimeExtensions({
     required List<DevToolsExtensionConfig> staticExtensions,
     required List<DevToolsExtensionConfig> runtimeExtensions,
+    required bool Function(DevToolsExtensionConfig) isIgnored,
+    required void Function(DevToolsExtensionConfig) onIgnore,
   }) {
     for (final staticExtension
-        in staticExtensions.where((ext) => !ext.ignored)) {
+        in staticExtensions.where((ext) => !isIgnored(ext))) {
       // TODO(kenz): do we need to match on something other than name? Names
       // _should_ be unique since they match a pub package name, but this may
       // not always be true for extensions that are not published on pub or
@@ -247,7 +256,7 @@ class ExtensionService extends DisposableController
           'ignoring runtime extension duplicate (static) '
           '${staticExtension.name}, ${staticExtension.devtoolsOptionsUri}',
         );
-        staticExtension.ignore();
+        onIgnore(staticExtension);
       }
     }
   }
@@ -316,10 +325,10 @@ class ExtensionService extends DisposableController
   ///
   /// An extension may be ignored if it is a duplicate or if it is an older
   /// version of an existing extension, for example.
-  void ignoreExtension([bool ignore = true]) {
+  void ignoreExtension(DevToolsExtensionConfig ext, [bool ignore = true]) {
     ignore
-        ? _ignoredStaticExtensionsByHashCode.add(identityHashCode(this))
-        : _ignoredStaticExtensionsByHashCode.remove(identityHashCode(this));
+        ? _ignoredStaticExtensionsByHashCode.add(identityHashCode(ext))
+        : _ignoredStaticExtensionsByHashCode.remove(identityHashCode(ext));
   }
 
   /// Whether this extension configuration should be ignored.
@@ -349,28 +358,6 @@ Future<Uri?> _connectedAppRoot() async {
   if (packageUriString == null) return null;
   return Uri.parse(packageUriString);
 }
-
-extension on DevToolsExtensionConfig {
-  /// Whether this extension configuration should be ignored.
-  ///
-  /// An extension may be ignored if it is a duplicate or if it is an older
-  /// version of an existing extension, for example.
-  bool get ignored =>
-      _ignoredStaticExtensionsByHashCode.contains(identityHashCode(this));
-
-  /// Marks this extension configuration as ignored or unignored based on the
-  /// value of [ignore].
-  ///
-  /// An extension may be ignored if it is a duplicate or if it is an older
-  /// version of an existing extension, for example.
-  void ignore([bool ignore = true]) {
-    ignore
-        ? _ignoredStaticExtensionsByHashCode.add(identityHashCode(this))
-        : _ignoredStaticExtensionsByHashCode.remove(identityHashCode(this));
-  }
-}
-
-final _ignoredStaticExtensionsByHashCode = <int>{};
 
 /// Compares the versions of extension configurations [a] and [b] and returns
 /// the extension configuration with the latest version, following semantic
