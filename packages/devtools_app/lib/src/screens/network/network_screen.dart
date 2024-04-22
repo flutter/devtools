@@ -213,24 +213,15 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
     final hasRequests = _filteredRequests.isNotEmpty;
     return Row(
       children: [
-        PauseButton(
-          minScreenWidthForTextBeforeScaling:
-              _NetworkProfilerControls._includeTextWidth,
-          tooltip: 'Pause recording network traffic',
+        StartStopRecordingButton(
+          recording: _recording,
+          onPressed: () => widget.controller.togglePolling(!_recording),
+          tooltipOverride: _recording
+              ? 'Stop recording network traffic'
+              : 'Resume recording network traffic',
+          minScreenWidthForTextBeforeScaling: double.infinity,
           gaScreen: gac.network,
-          gaSelection: gac.pause,
-          onPressed:
-              _recording ? () => widget.controller.togglePolling(false) : null,
-        ),
-        const SizedBox(width: denseSpacing),
-        ResumeButton(
-          minScreenWidthForTextBeforeScaling:
-              _NetworkProfilerControls._includeTextWidth,
-          tooltip: 'Resume recording network traffic',
-          gaScreen: gac.network,
-          gaSelection: gac.resume,
-          onPressed:
-              _recording ? null : () => widget.controller.togglePolling(true),
+          gaSelection: _recording ? gac.pause : gac.resume,
         ),
         const SizedBox(width: denseSpacing),
         ClearButton(
