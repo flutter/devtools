@@ -195,8 +195,10 @@ void main() {
 
         // We should not see the extensions in the dropdown menu at this point.
         expect(find.text('bar'), findsNothing);
+        expect(find.text('baz'), findsNothing);
         expect(find.text('foo'), findsNothing);
         expect(find.text('provider'), findsNothing);
+        expect(find.text('some_tool'), findsNothing);
 
         final hoverLocation = tester.getCenter(extensionsSubmenuButtonFinder);
         await tester.startGesture(hoverLocation, kind: PointerDeviceKind.mouse);
@@ -204,13 +206,11 @@ void main() {
 
         // We should now see the extensions in the dropdown menu.
 
-        // TODO(kenz): use `findsOneWidget` for these once static extensions
-        // support is landed, which includes logic for removing duplicate
-        // extensions.
-        expect(find.text('bar'), findsWidgets);
-        expect(find.text('foo'), findsWidgets);
-
+        expect(find.text('bar'), findsOneWidget);
+        expect(find.text('baz'), findsOneWidget);
+        expect(find.text('foo'), findsOneWidget);
         expect(find.text('provider'), findsOneWidget);
+        expect(find.text('some_tool'), findsOneWidget);
       },
     );
   });
