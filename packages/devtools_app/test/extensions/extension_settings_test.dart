@@ -40,7 +40,13 @@ void main() {
         ),
       );
       await extensionService.initialize();
-      dialog = const ExtensionSettingsDialog();
+      expect(extensionService.staticExtensions.length, 4);
+      expect(extensionService.runtimeExtensions.length, 3);
+      expect(extensionService.availableExtensions.value.length, 5);
+
+      dialog = ExtensionSettingsDialog(
+        extensions: extensionService.availableExtensions.value,
+      );
     });
 
     tearDown(() {
@@ -50,11 +56,9 @@ void main() {
     testWidgets(
       'builds dialog with no available extensions',
       (WidgetTester tester) async {
-        setGlobal(
-          ExtensionService,
-          await createMockExtensionServiceWithDefaults([]),
+        await tester.pumpWidget(
+          wrapSimple(const ExtensionSettingsDialog(extensions: [])),
         );
-        await tester.pumpWidget(wrapSimple(dialog));
         expect(find.text('DevTools Extensions'), findsOneWidget);
         expect(
           find.textContaining('Extensions are provided by the pub packages'),

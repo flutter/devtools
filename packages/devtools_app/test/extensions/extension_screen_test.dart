@@ -10,12 +10,9 @@ import 'package:devtools_app/src/shared/development_helpers.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_extensions.dart';
-import 'package:devtools_test/devtools_test.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../test_infra/test_data/extensions.dart';
 
 void main() {
   const windowSize = Size(2000.0, 2000.0);
@@ -25,6 +22,7 @@ void main() {
     late ExtensionScreen providerScreen;
 
     setUp(() async {
+      setTestMode();
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(PreferencesController, PreferencesController());
       setGlobal(ServiceConnectionManager, ServiceConnectionManager());
@@ -36,8 +34,18 @@ void main() {
 
       setGlobal(
         ExtensionService,
-        await createMockExtensionServiceWithDefaults(testExtensions),
+        ExtensionService(
+          fixedAppRoot: Uri.parse('file:///Users/me/package_root_1'),
+        ),
       );
+      await extensionService.initialize();
+      expect(extensionService.staticExtensions.length, 4);
+      expect(extensionService.runtimeExtensions.length, 3);
+      expect(extensionService.availableExtensions.value.length, 5);
+    });
+
+    tearDown(() {
+      resetDevToolsExtensionEnabledStates();
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {
