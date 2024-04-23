@@ -11,13 +11,10 @@ import 'package:flutter/widgets.dart';
 class LayoutExplorerSerializationDelegate
     extends InspectorSerializationDelegate {
   LayoutExplorerSerializationDelegate({
-    String groupName = '',
-    int subtreeDepth = 1,
-    required WidgetInspectorService service,
+    String super.groupName = '',
+    super.subtreeDepth,
+    required super.service,
   }) : super(
-          groupName: groupName,
-          subtreeDepth: subtreeDepth,
-          service: service,
           summaryTree: true,
           addAdditionalPropertiesCallback: (node, delegate) {
             final additionalJson = <String, Object>{};

@@ -73,7 +73,7 @@ class Selection<T> {
 @visibleForTesting
 class DevToolsTable<T> extends StatefulWidget {
   const DevToolsTable({
-    Key? key,
+    super.key,
     required this.tableController,
     required this.columnWidths,
     required this.rowBuilder,
@@ -88,7 +88,7 @@ class DevToolsTable<T> extends StatefulWidget {
     this.headerColor,
     this.fillWithEmptyRows = false,
     this.enableHoverHandling = false,
-  }) : super(key: key);
+  });
 
   final TableControllerBase<T> tableController;
   final bool autoScrollContent;

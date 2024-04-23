@@ -67,12 +67,11 @@ class PerformanceControls extends StatelessWidget {
 
 class _PrimaryControls extends StatelessWidget {
   const _PrimaryControls({
-    Key? key,
     required this.controller,
     required this.processing,
     required this.offline,
     required this.onClear,
-  }) : super(key: key);
+  });
 
   final PerformanceController controller;
 
@@ -122,9 +121,8 @@ class _PrimaryControls extends StatelessWidget {
 
 class _SecondaryPerformanceControls extends StatelessWidget {
   const _SecondaryPerformanceControls({
-    Key? key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   final PerformanceController controller;
 

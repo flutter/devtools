@@ -20,12 +20,12 @@ import 'frame_time_visualizer.dart';
 
 class FlutterFrameAnalysisView extends StatelessWidget {
   const FlutterFrameAnalysisView({
-    Key? key,
+    super.key,
     required this.frameAnalysis,
     required this.enhanceTracingController,
     required this.rebuildCountModel,
     required this.displayRefreshRateNotifier,
-  }) : super(key: key);
+  });
 
   final FrameAnalysis? frameAnalysis;
 

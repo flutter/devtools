@@ -136,10 +136,10 @@ abstract class BreakpointAndSourcePosition
 
 class _BreakpointAndSourcePositionResolved extends BreakpointAndSourcePosition {
   _BreakpointAndSourcePositionResolved(
-    Breakpoint breakpoint,
-    SourcePosition? sourcePosition,
+    super.breakpoint,
+    super.sourcePosition,
     this.location,
-  ) : super._(breakpoint, sourcePosition);
+  ) : super._();
 
   final SourceLocation location;
 
@@ -162,10 +162,10 @@ class _BreakpointAndSourcePositionResolved extends BreakpointAndSourcePosition {
 class _BreakpointAndSourcePositionUnresolved
     extends BreakpointAndSourcePosition {
   _BreakpointAndSourcePositionUnresolved(
-    Breakpoint breakpoint,
-    SourcePosition? sourcePosition,
+    super.breakpoint,
+    super.sourcePosition,
     this.location,
-  ) : super._(breakpoint, sourcePosition);
+  ) : super._();
 
   final UnresolvedSourceLocation location;
 

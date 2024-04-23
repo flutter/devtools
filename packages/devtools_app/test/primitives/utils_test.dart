@@ -1468,7 +1468,7 @@ class TestProvidedController {
 }
 
 class TestStatefulWidget extends StatefulWidget {
-  const TestStatefulWidget({Key? key}) : super(key: key);
+  const TestStatefulWidget({super.key});
 
   @override
   State<TestStatefulWidget> createState() => _TestStatefulWidgetState();

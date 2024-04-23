@@ -38,12 +38,11 @@ final _flutterDocsSite = Uri.https('docs.flutter.dev');
 class ReleaseNotesViewer extends SidePanelViewer {
   const ReleaseNotesViewer({
     required super.controller,
-    Widget? child,
+    super.child,
   }) : super(
           key: releaseNotesKey,
           title: 'What\'s new in DevTools?',
           textIfMarkdownDataEmpty: 'Stay tuned for updates.',
-          child: child,
         );
 }
 

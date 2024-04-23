@@ -16,11 +16,10 @@ import '../shared/globals.dart';
 /// A [ScaffoldAction] that, when clicked, will open a dialog menu for
 /// managing DevTools extension states.
 class ExtensionSettingsAction extends ScaffoldAction {
-  ExtensionSettingsAction({super.key, Color? color})
+  ExtensionSettingsAction({super.key, super.color})
       : super(
           icon: Icons.extension_outlined,
           tooltip: 'DevTools Extensions',
-          color: color,
           onPressed: (context) {
             unawaited(
               showDialog(

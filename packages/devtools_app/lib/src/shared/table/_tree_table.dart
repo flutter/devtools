@@ -27,7 +27,7 @@ enum TreeTableScrollKind {
 /// be applied to every tree.
 class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
   TreeTable({
-    Key? key,
+    super.key,
     required this.keyFactory,
     required this.dataRoots,
     required this.dataKey,
@@ -45,8 +45,7 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
   })  : selectionNotifier = selectionNotifier ??
             ValueNotifier<Selection<T?>>(Selection.empty()),
         assert(columns.contains(treeColumn)),
-        assert(columns.contains(defaultSortColumn)),
-        super(key: key);
+        assert(columns.contains(defaultSortColumn));
 
   /// Factory that creates keys for each row in this table.
   final Key Function(T) keyFactory;

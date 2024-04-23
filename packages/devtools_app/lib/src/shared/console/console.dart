@@ -73,10 +73,9 @@ class ConsoleFrame extends StatelessWidget {
 /// This is a ListView of text lines, with a monospace font and a border.
 class _ConsoleOutput extends StatefulWidget {
   const _ConsoleOutput({
-    Key? key,
     required this.lines,
     this.footer,
-  }) : super(key: key);
+  });
 
   final ValueListenable<List<ConsoleLine>> lines;
 

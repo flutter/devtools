@@ -24,7 +24,7 @@ const eventLegendName = 'Event';
 const eventsLegendName = 'Events';
 
 class MemoryEventsPane extends StatefulWidget {
-  const MemoryEventsPane(this.chart, {Key? key}) : super(key: key);
+  const MemoryEventsPane(this.chart, {super.key});
 
   final EventChartController chart;
 

@@ -370,12 +370,11 @@ class VmCodeDisplay extends StatelessWidget {
 
 class InliningTable extends StatelessWidget {
   InliningTable({
-    Key? key,
+    super.key,
     required this.code,
     required this.controller,
     required this.ticks,
-  })  : inliningData = code.obj.inliningData,
-        super(key: key);
+  })  : inliningData = code.obj.inliningData;
 
   final CodeObject code;
   final InliningData inliningData;
@@ -425,11 +424,11 @@ class InliningTable extends StatelessWidget {
 
 class CodeTable extends StatelessWidget {
   CodeTable({
-    Key? key,
+    super.key,
     required this.code,
     required this.controller,
     required this.ticks,
-  }) : super(key: key);
+  });
 
   late final columns = <ColumnData<Instruction>>[
     _AddressColumn(),

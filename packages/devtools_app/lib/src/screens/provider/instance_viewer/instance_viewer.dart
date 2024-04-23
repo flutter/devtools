@@ -95,10 +95,10 @@ void showErrorSnackBar(BuildContext context, Object error) {
 
 class InstanceViewer extends ConsumerStatefulWidget {
   const InstanceViewer({
-    Key? key,
+    super.key,
     required this.rootPath,
     required this.showInternalProperties,
-  }) : super(key: key);
+  });
 
   final InstancePath rootPath;
   final bool showInternalProperties;
@@ -428,13 +428,12 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
 
 class _ObjectHeader extends StatelessWidget {
   const _ObjectHeader({
-    Key? key,
     this.type,
     required this.hash,
     required this.meta,
     required this.startToken,
     required this.endToken,
-  }) : super(key: key);
+  });
 
   final String? type;
   final int hash;
@@ -469,11 +468,10 @@ class _ObjectHeader extends StatelessWidget {
 
 class _EditableField extends StatefulWidget {
   const _EditableField({
-    Key? key,
     required this.setter,
     required this.child,
     required this.initialEditString,
-  }) : super(key: key);
+  });
 
   final Widget child;
   final String initialEditString;
@@ -593,11 +591,11 @@ class _EditableFieldState extends State<_EditableField> {
 
 class _Expandable extends StatelessWidget {
   const _Expandable({
-    Key? key,
+    super.key,
     required this.isExpanded,
     required this.isExpandable,
     required this.title,
-  }) : super(key: key);
+  });
 
   final StateController<bool>? isExpanded;
   final bool isExpandable;

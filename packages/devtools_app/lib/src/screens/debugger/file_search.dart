@@ -360,13 +360,13 @@ class FileSearchResults {
       : [
           ..._exactFileNameMatches
               .map(query.createExactFileNameAutoCompleteMatch)
-              .toList(),
+              ,
           ..._exactFullPathMatches
               .map(query.createExactFullPathAutoCompleteMatch)
-              .toList(),
+              ,
           ..._fuzzyMatches
               .map(query.createFuzzyMatchAutoCompleteMatch)
-              .toList(),
+              ,
         ];
 
   FileSearchResults copyWith({

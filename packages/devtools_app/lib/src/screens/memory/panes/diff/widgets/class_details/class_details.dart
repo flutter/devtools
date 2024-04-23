@@ -13,12 +13,12 @@ import 'paths.dart';
 
 class HeapClassDetails extends StatelessWidget {
   const HeapClassDetails({
-    Key? key,
+    super.key,
     required this.classData,
     required this.pathSelection,
     required this.isDiff,
     required this.pathController,
-  }) : super(key: key);
+  });
 
   final ClassData? classData;
   final ValueNotifier<PathData?> pathSelection;

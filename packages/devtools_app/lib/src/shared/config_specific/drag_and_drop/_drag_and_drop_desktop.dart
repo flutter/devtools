@@ -12,7 +12,7 @@ DragAndDropManagerDesktop createDragAndDropManager(int viewId) {
 }
 
 class DragAndDropManagerDesktop extends DragAndDropManager {
-  DragAndDropManagerDesktop(int viewId) : super.impl(viewId);
+  DragAndDropManagerDesktop(super.viewId) : super.impl();
 
   @override
   void init() {}

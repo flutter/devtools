@@ -262,7 +262,7 @@ class VideoTutorialLink extends StatelessWidget {
 }
 
 class IsolateSelector extends StatelessWidget {
-  const IsolateSelector({Key? key}) : super(key: key);
+  const IsolateSelector({super.key});
 
   @override
   Widget build(BuildContext context) {

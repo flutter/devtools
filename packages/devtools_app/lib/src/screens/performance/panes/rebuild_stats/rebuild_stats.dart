@@ -21,10 +21,10 @@ import 'rebuild_stats_model.dart';
 
 class RebuildStatsView extends StatefulWidget {
   const RebuildStatsView({
-    Key? key,
+    super.key,
     required this.model,
     required this.selectedFrame,
-  }) : super(key: key);
+  });
 
   final RebuildCountModel model;
   final ValueListenable<FlutterFrame?> selectedFrame;
@@ -152,10 +152,10 @@ class _RebuildStatsViewState extends State<RebuildStatsView>
 
 class RebuildTable extends StatefulWidget {
   const RebuildTable({
-    Key? key,
+    super.key,
     required this.metricNames,
     required this.metrics,
-  }) : super(key: key);
+  });
 
   final List<String> metricNames;
   final List<RebuildLocationStats> metrics;
@@ -252,9 +252,8 @@ class _LocationColumn extends ColumnData<RebuildLocationStats> {
 }
 
 class _RebuildCountColumn extends ColumnData<RebuildLocationStats> {
-  _RebuildCountColumn(String name, this.metricIndex)
+  _RebuildCountColumn(super.name, this.metricIndex)
       : super(
-          name,
           fixedWidthPx: scaleByFontFactor(130),
         );
 

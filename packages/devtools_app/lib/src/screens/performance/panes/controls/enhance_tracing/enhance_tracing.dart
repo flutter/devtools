@@ -20,8 +20,8 @@ import 'enhance_tracing_controller.dart';
 class EnhanceTracingButton extends StatelessWidget {
   const EnhanceTracingButton(
     this.enhanceTracingController, {
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static const title = 'Enhance Tracing';
 
@@ -111,7 +111,7 @@ extension TrackWidgetBuildsScopeExtension on TrackWidgetBuildsScope {
 }
 
 class TrackWidgetBuildsSetting extends StatefulWidget {
-  const TrackWidgetBuildsSetting({Key? key}) : super(key: key);
+  const TrackWidgetBuildsSetting({super.key});
 
   @override
   State<TrackWidgetBuildsSetting> createState() =>
@@ -257,10 +257,10 @@ class _TrackWidgetBuildsSettingState extends State<TrackWidgetBuildsSetting>
 
 class TrackWidgetBuildsCheckbox extends StatelessWidget {
   const TrackWidgetBuildsCheckbox({
-    Key? key,
+    super.key,
     required this.trackingNotifier,
     required this.enabled,
-  }) : super(key: key);
+  });
 
   final ValueNotifier<bool> trackingNotifier;
 
@@ -327,10 +327,10 @@ class TrackWidgetBuildsCheckbox extends StatelessWidget {
 
 class TrackWidgetBuildsScopeSelector extends StatelessWidget {
   const TrackWidgetBuildsScopeSelector({
-    Key? key,
+    super.key,
     required this.scope,
     required this.enabled,
-  }) : super(key: key);
+  });
 
   final TrackWidgetBuildsScope? scope;
 
