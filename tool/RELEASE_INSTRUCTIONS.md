@@ -6,6 +6,8 @@ Discord channel before trying to create a DevTools release.
 
 # DevTools release process
 
+![A diagram of the DevTools release process](./_markdown_images/release_diagram.png)
+
 A new minor version of DevTools should be released into the Dart SDK **monthly**.
 This release should be timed with the Dart / Flutter release code cutoff dates so
 that we can ensure it is included with the next Flutter beta (see the
@@ -280,7 +282,7 @@ DevTools version number:
 ### Manually run the DevTools Builder
 
 Follow the instructions at
-[go/dart-engprod/devtools.md#cherry-picks](go/dart-engprod/devtools.md#cherry-picks)
+[go/dart-engprod/devtools.md#cherry-picks](http://go/dart-engprod/devtools.md#cherry-picks)
 to trigger the DevTools builder.
 
 ### Create the cherry-pick CL in the Dart SDK
