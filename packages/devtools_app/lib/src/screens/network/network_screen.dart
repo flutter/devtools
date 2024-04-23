@@ -138,11 +138,11 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
   }
 
   @override
-  void dispose() async {
+  void dispose() {
     // TODO(kenz): this won't work well if we eventually have multiple clients
     // that want to listen to network data.
-    await controller.stopRecording();
     super.dispose();
+    unawaited(controller.stopRecording());
   }
 
   @override
