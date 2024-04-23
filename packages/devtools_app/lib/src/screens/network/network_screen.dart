@@ -163,9 +163,8 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
 /// clear, search, filter, etc.).
 class _NetworkProfilerControls extends StatefulWidget {
   const _NetworkProfilerControls({
-    Key? key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   static const _includeTextWidth = 810.0;
 
@@ -262,8 +261,7 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
 }
 
 class _NetworkProfilerBody extends StatelessWidget {
-  const _NetworkProfilerBody({Key? key, required this.controller})
-      : super(key: key);
+  const _NetworkProfilerBody({required this.controller});
 
   final NetworkController controller;
 
@@ -293,12 +291,12 @@ class _NetworkProfilerBody extends StatelessWidget {
 
 class NetworkRequestsTable extends StatelessWidget {
   const NetworkRequestsTable({
-    Key? key,
+    super.key,
     required this.networkController,
     required this.requests,
     required this.searchMatchesNotifier,
     required this.activeSearchMatchNotifier,
-  }) : super(key: key);
+  });
 
   static final methodColumn = MethodColumn();
   static final addressColumn = UriColumn();

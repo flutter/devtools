@@ -96,14 +96,14 @@ TextSpan? findLongestTextSpan(List<TextSpan> spans) {
 /// [offsetController].
 class OffsetScrollbar extends StatefulWidget {
   const OffsetScrollbar({
-    Key? key,
+    super.key,
     this.isAlwaysShown = false,
     required this.axis,
     required this.controller,
     required this.offsetController,
     required this.child,
     required this.offsetControllerViewportDimension,
-  }) : super(key: key);
+  });
 
   final bool isAlwaysShown;
   final Axis axis;

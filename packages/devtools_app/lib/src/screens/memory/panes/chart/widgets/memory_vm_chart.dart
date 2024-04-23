@@ -16,7 +16,7 @@ import '../controller/vm_chart_controller.dart';
 import '../data/charts.dart';
 
 class MemoryVMChart extends StatefulWidget {
-  const MemoryVMChart(this.chart, {Key? key}) : super(key: key);
+  const MemoryVMChart(this.chart, {super.key});
 
   final VMChartController chart;
 

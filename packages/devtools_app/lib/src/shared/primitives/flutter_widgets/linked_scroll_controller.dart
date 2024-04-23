@@ -143,8 +143,8 @@ class _LinkedScrollControllerGroupOffsetNotifier extends ChangeNotifier {
 class _LinkedScrollController extends ScrollController {
   _LinkedScrollController(
     this._controllers, {
-    required double initialScrollOffset,
-  }) : super(initialScrollOffset: initialScrollOffset);
+    required super.initialScrollOffset,
+  });
 
   final LinkedScrollControllerGroup _controllers;
 
@@ -220,16 +220,11 @@ class _LinkedScrollController extends ScrollController {
 class _LinkedScrollPosition extends ScrollPositionWithSingleContext {
   _LinkedScrollPosition(
     this.owner, {
-    required ScrollPhysics physics,
-    required ScrollContext context,
-    double? initialPixels,
-    ScrollPosition? oldPosition,
-  }) : super(
-          physics: physics,
-          context: context,
-          initialPixels: initialPixels,
-          oldPosition: oldPosition,
-        );
+    required super.physics,
+    required super.context,
+    super.initialPixels = null,
+    super.oldPosition,
+  });
 
   final _LinkedScrollController owner;
 
@@ -339,7 +334,7 @@ class _LinkedScrollPosition extends ScrollPositionWithSingleContext {
 }
 
 class _LinkedScrollActivity extends ScrollActivity {
-  _LinkedScrollActivity(_LinkedScrollPosition delegate) : super(delegate);
+  _LinkedScrollActivity(_LinkedScrollPosition super.delegate);
 
   @override
   _LinkedScrollPosition get delegate => super.delegate as _LinkedScrollPosition;

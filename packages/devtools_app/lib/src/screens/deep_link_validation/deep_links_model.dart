@@ -37,8 +37,7 @@ class CommonError {
 }
 
 class DomainError extends CommonError {
-  const DomainError(title, explanation, fixDetails)
-      : super(title, explanation, fixDetails);
+  const DomainError(super.title, super.explanation, super.fixDetails);
 
   /// Existence of an asset link file.
   static const existence = DomainError(
@@ -119,8 +118,7 @@ class DomainError extends CommonError {
 
 /// There are currently two types of path errors, errors from intent filters and path format errors.
 class PathError extends CommonError {
-  const PathError(title, explanation, fixDetails)
-      : super(title, explanation, fixDetails);
+  const PathError(super.title, super.explanation, super.fixDetails);
 
   /// Activity should have deep link enabled flag.
   static const missingDeepLinkingFlag = PathError(

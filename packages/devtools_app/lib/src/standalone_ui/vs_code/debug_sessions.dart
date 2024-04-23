@@ -228,8 +228,7 @@ class _DevToolsMenuState extends State<_DevToolsMenu> {
       menuChildren: [
         ...ScreenMetaData.values
             .where(_shouldIncludeScreen)
-            .map(devToolsButton)
-            .toList(),
+            .map(devToolsButton),
         if (widget.supportsOpenExternal)
           DevToolsScreenMenuItem(
             title: 'Open in Browser',

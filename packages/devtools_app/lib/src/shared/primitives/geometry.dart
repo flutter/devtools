@@ -50,9 +50,8 @@ abstract class LineSegment {
 
 class HorizontalLineSegment extends LineSegment
     implements Comparable<HorizontalLineSegment> {
-  HorizontalLineSegment(Offset start, Offset end, {double opacity = 1.0})
-      : assert(start.dy == end.dy),
-        super(start, end, opacity: opacity);
+  HorizontalLineSegment(super.start, super.end, {super.opacity = 1.0})
+      : assert(start.dy == end.dy);
 
   double get y => start.dy;
 
@@ -98,11 +97,10 @@ class HorizontalLineSegment extends LineSegment
 class VerticalLineSegment extends LineSegment
     implements Comparable<VerticalLineSegment> {
   VerticalLineSegment(
-    Offset start,
-    Offset end, {
-    double opacity = 1.0,
-  })  : assert(start.dx == end.dx),
-        super(start, end, opacity: opacity);
+    super.start,
+    super.end, {
+    super.opacity = 1.0,
+  }) : assert(start.dx == end.dx);
 
   double get x => start.dx;
 

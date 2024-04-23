@@ -187,8 +187,7 @@ class DevToolsError {
 }
 
 class InspectableWidgetError extends DevToolsError {
-  InspectableWidgetError(String errorMessage, String id, {bool read = false})
-      : super(errorMessage, id, read: read);
+  InspectableWidgetError(super.errorMessage, super.id, {super.read});
 
   @override
   InspectableWidgetError asRead() =>

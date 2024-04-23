@@ -33,11 +33,11 @@ final _log = Logger('initializer');
 /// here.
 class Initializer extends StatefulWidget {
   const Initializer({
-    Key? key,
+    super.key,
     required this.url,
     required this.builder,
     this.allowConnectionScreenOnDisconnect = true,
-  }) : super(key: key);
+  });
 
   /// The builder for the widget's children.
   ///

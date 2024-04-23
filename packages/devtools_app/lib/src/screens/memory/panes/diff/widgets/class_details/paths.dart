@@ -115,11 +115,11 @@ class _RetainingPathTableColumns {
 
 class RetainingPathTable extends StatelessWidget {
   RetainingPathTable({
-    Key? key,
+    super.key,
     required this.classData,
     required this.selection,
     required this.isDiff,
-  }) : super(key: key);
+  });
 
   final ValueNotifier<PathData?> selection;
   final bool isDiff;

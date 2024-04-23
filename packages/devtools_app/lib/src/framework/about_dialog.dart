@@ -76,7 +76,7 @@ class DevToolsAboutDialog extends StatelessWidget {
 }
 
 class _FeedbackLink extends StatelessWidget {
-  const _FeedbackLink({Key? key}) : super(key: key);
+  const _FeedbackLink();
 
   @override
   Widget build(BuildContext context) {
@@ -90,7 +90,7 @@ class _FeedbackLink extends StatelessWidget {
 }
 
 class _ContributingLink extends StatelessWidget {
-  const _ContributingLink({Key? key}) : super(key: key);
+  const _ContributingLink();
 
   static const _contributingGuideUrl =
       'https://github.com/flutter/devtools/blob/master/CONTRIBUTING.md';
@@ -112,7 +112,7 @@ class _ContributingLink extends StatelessWidget {
 }
 
 class _DiscordLink extends StatelessWidget {
-  const _DiscordLink({Key? key}) : super(key: key);
+  const _DiscordLink();
 
   static const _discordWikiUrl = 'https://github.com/flutter/flutter/wiki/Chat';
 
@@ -133,11 +133,10 @@ class _DiscordLink extends StatelessWidget {
 }
 
 class OpenAboutAction extends ScaffoldAction {
-  OpenAboutAction({super.key, Color? color})
+  OpenAboutAction({super.key, super.color})
       : super(
           icon: Icons.help_outline,
           tooltip: 'About DevTools',
-          color: color,
           onPressed: (context) {
             unawaited(
               showDialog(

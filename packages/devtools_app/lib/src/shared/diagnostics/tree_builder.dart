@@ -300,13 +300,13 @@ Future<void> _addValueItems(
   if (value is ObjRef) {
     value = await getObject(isolateRef: isolateRef!, value: value);
     switch (value.runtimeType) {
-      case Func:
+      case const (Func):
         final function = value as Func;
         variable.addAllChildren(
           createVariablesForFunc(function, isolateRef),
         );
         break;
-      case Context:
+      case const (Context):
         final context = value as Context;
         variable.addAllChildren(
           createVariablesForContext(context, isolateRef),
@@ -315,7 +315,7 @@ Future<void> _addValueItems(
     }
   } else if (value is! String && value is! num && value is! bool) {
     switch (value.runtimeType) {
-      case Parameter:
+      case const (Parameter):
         final parameter = value as Parameter;
         variable.addAllChildren(
           createVariablesForParameter(parameter, isolateRef),

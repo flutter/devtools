@@ -823,7 +823,7 @@ class ScrollingFlameChartRowState<V extends FlameChartDataMixin<V>>
 
 class FlameChartNodeWidget extends StatelessWidget {
   const FlameChartNodeWidget({
-    Key? key,
+    super.key,
     required this.index,
     required this.nodes,
     required this.zoom,
@@ -831,7 +831,7 @@ class FlameChartNodeWidget extends StatelessWidget {
     required this.chartWidth,
     required this.selected,
     required this.hovered,
-  }) : super(key: key);
+  });
 
   final int index;
 
@@ -1313,23 +1313,16 @@ abstract class FlameChartPainter extends CustomPainter {
 
 class TimelineGridPainter extends FlameChartPainter {
   TimelineGridPainter({
-    required double zoom,
-    required BoxConstraints constraints,
-    required double verticalScrollOffset,
-    required double horizontalScrollOffset,
-    required double chartStartInset,
+    required super.zoom,
+    required super.constraints,
+    required super.verticalScrollOffset,
+    required super.horizontalScrollOffset,
+    required super.chartStartInset,
     required this.chartEndInset,
     required this.flameChartWidth,
     required this.duration,
-    required ColorScheme colorScheme,
-  }) : super(
-          zoom: zoom,
-          constraints: constraints,
-          verticalScrollOffset: verticalScrollOffset,
-          horizontalScrollOffset: horizontalScrollOffset,
-          chartStartInset: chartStartInset,
-          colorScheme: colorScheme,
-        );
+    required super.colorScheme,
+  });
 
   static const timestampOffset = 6.0;
 
@@ -1466,11 +1459,11 @@ class TimelineGridPainter extends FlameChartPainter {
 
 class FlameChartHelpButton extends StatelessWidget {
   const FlameChartHelpButton({
-    Key? key,
+    super.key,
     required this.gaScreen,
     required this.gaSelection,
     this.additionalInfo = const <Widget>[],
-  }) : super(key: key);
+  });
 
   final String gaScreen;
   final String gaSelection;
