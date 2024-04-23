@@ -5,6 +5,8 @@
 import 'dart:async';
 
 import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
+import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:flutter/material.dart';
 
 import '../../extensions/extension_screen.dart';
@@ -106,8 +108,11 @@ class _DevToolsExtensions extends StatefulWidget {
   State<_DevToolsExtensions> createState() => _DevToolsExtensionsState();
 }
 
-class _DevToolsExtensionsState extends State<_DevToolsExtensions> {
+class _DevToolsExtensionsState extends State<_DevToolsExtensions>
+    with AutoDisposeMixin {
   ExtensionService? _extensionService;
+
+  var extensions = <DevToolsExtensionConfig>[];
 
   @override
   void initState() {
@@ -117,6 +122,13 @@ class _DevToolsExtensionsState extends State<_DevToolsExtensions> {
 
   void _initExtensions() {
     _extensionService = ExtensionService(ignoreServiceConnection: true);
+
+    cancelListeners();
+    extensions = _extensionService!.visibleExtensions.value;
+    addAutoDisposeListener(_extensionService!.visibleExtensions, () {
+      extensions = _extensionService!.visibleExtensions.value;
+    });
+
     unawaited(_extensionService!.initialize());
   }
 
@@ -129,8 +141,9 @@ class _DevToolsExtensionsState extends State<_DevToolsExtensions> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    if (extensions.isEmpty) return const SizedBox();
 
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -138,39 +151,28 @@ class _DevToolsExtensionsState extends State<_DevToolsExtensions> {
           'DevTools Extensions',
           style: theme.textTheme.titleMedium,
         ),
-        ValueListenableBuilder(
-          valueListenable: _extensionService!.visibleExtensions,
-          builder: (context, extensions, _) {
-            if (extensions.isEmpty) {
-              return const Padding(
-                padding: EdgeInsets.only(left: borderPadding),
-                child: Text('No extensions detected.'),
-              );
-            }
-            return Table(
-              defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-              children: [
-                for (final ext in extensions)
-                  _createDevToolsScreenRow(
-                    label: ext.name,
-                    icon: ext.icon,
-                    api: widget.api,
-                    theme: theme,
-                    onPressed: () {
-                      ga.select(
-                        gac.VsCodeFlutterSidebar.id,
-                        gac.VsCodeFlutterSidebar.openDevToolsScreen(
-                          gac.DevToolsExtensionEvents.extensionScreenName(ext),
-                        ),
-                      );
-                      unawaited(
-                        widget.api.openDevToolsPage(null, page: ext.screenId),
-                      );
-                    },
-                  ),
-              ],
-            );
-          },
+        Table(
+          defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+          children: [
+            for (final ext in extensions)
+              _createDevToolsScreenRow(
+                label: ext.name,
+                icon: ext.icon,
+                api: widget.api,
+                theme: theme,
+                onPressed: () {
+                  ga.select(
+                    gac.VsCodeFlutterSidebar.id,
+                    gac.VsCodeFlutterSidebar.openDevToolsScreen(
+                      gac.DevToolsExtensionEvents.extensionScreenName(ext),
+                    ),
+                  );
+                  unawaited(
+                    widget.api.openDevToolsPage(null, page: ext.screenId),
+                  );
+                },
+              ),
+          ],
         ),
         const PaddedDivider.thin(),
         _RuntimeToolInstructions(
