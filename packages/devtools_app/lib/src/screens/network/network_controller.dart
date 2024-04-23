@@ -231,14 +231,20 @@ class NetworkController extends DisposableController
       http_service.toggleHttpRequestLogging(true),
       networkService.toggleSocketProfiling(true),
     ]);
-    togglePolling(true);
+    await togglePolling(true);
   }
 
-  void stopRecording() {
-    togglePolling(false);
+  Future<void> stopRecording() async {
+    await togglePolling(false);
   }
 
-  void togglePolling(bool state) {
+  Future<void> togglePolling(bool state) async {
+    if (state) {
+      // Update the last refresh time so that the next polling instance
+      // will only fetch values since we started recording.
+      await updateLastRefreshTime();
+    }
+
     // Do not toggle the vm recording state - just enable or disable polling.
     _updatePollingState(state);
     _recordingNotifier.value = state;

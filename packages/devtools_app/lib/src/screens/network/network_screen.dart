@@ -138,10 +138,10 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
   }
 
   @override
-  void dispose() {
+  void dispose() async {
     // TODO(kenz): this won't work well if we eventually have multiple clients
     // that want to listen to network data.
-    controller.stopRecording();
+    await controller.stopRecording();
     super.dispose();
   }
 
@@ -215,14 +215,7 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
       children: [
         StartStopRecordingButton(
           recording: _recording,
-          onPressed: () async {
-            if (!_recording) {
-              // Update the last refresh time so that the next polling instance
-              // will only fetch values since we started recording.
-              await widget.controller.updateLastRefreshTime();
-            }
-            widget.controller.togglePolling(!_recording);
-          },
+          onPressed: () async => widget.controller.togglePolling(!_recording),
           tooltipOverride: _recording
               ? 'Stop recording network traffic'
               : 'Resume recording network traffic',
