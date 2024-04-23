@@ -8,7 +8,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
 import '../shared/globals.dart';
-import '../shared/offline_mode.dart';
+import '../shared/offline_data.dart';
 import '../shared/screen.dart';
 import '../shared/utils.dart';
 
@@ -24,7 +24,7 @@ class ExampleConditionalScreen extends Screen {
           requiresLibrary: 'package:flutter/',
           title: 'Example',
           icon: Icons.palette,
-          worksOffline: true,
+          worksWithOfflineData: true,
         );
 
   static const id = 'example';
@@ -86,12 +86,12 @@ class ExampleController extends DisposableController
   }
 
   Future<void> _initHelper() async {
-    if (!offlineController.offlineMode.value) {
+    if (!offlineDataController.showingOfflineData.value) {
       // Do some initialization for online mode.
     } else {
       await maybeLoadOfflineData(
         ExampleConditionalScreen.id,
-        createData: (json) => ExampleScreenData.parse(json),
+        createData: (json) => ExampleScreenData.fromJson(json),
         shouldLoad: (data) => data.title.isNotEmpty,
       );
     }
@@ -105,7 +105,7 @@ class ExampleController extends DisposableController
   }
 
   @override
-  OfflineScreenData screenDataForExport() {
+  OfflineScreenData prepareOfflineScreenData() {
     return OfflineScreenData(
       screenId: ExampleConditionalScreen.id,
       data: data.value.json,
@@ -116,7 +116,7 @@ class ExampleController extends DisposableController
 class ExampleScreenData {
   ExampleScreenData(this.title);
 
-  factory ExampleScreenData.parse(Map<String, Object?> json) {
+  factory ExampleScreenData.fromJson(Map<String, Object?> json) {
     return ExampleScreenData(json[_titleKey] as String);
   }
 

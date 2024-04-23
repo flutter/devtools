@@ -16,7 +16,10 @@ import '../utils.dart';
 ///
 /// By default, this command builds DevTools in release mode, but this can be
 /// overridden by passing 'debug' or 'profile' as the
-/// [BuildCommandArgs.buildMode] argument.
+/// [BuildCommandArgs.buildMode] argument. For testing embedded content in
+/// VS Code, 'profile' or the default 'release' mode must be used because
+/// the '--dart2js-optimization=O1' flag that is passed for 'debug' builds
+/// will cause issues with the VS Code embedding.
 ///
 /// If the [BuildCommandArgs.useFlutterFromPath] argument is present, the
 /// Flutter SDK will not be updated to the latest Flutter candidate before
@@ -84,7 +87,7 @@ class BuildCommand extends Command {
       workingDirectory: repo.devtoolsAppDirectoryPath,
     );
 
-    logStatus('building DevTools in release mode');
+    logStatus('building DevTools in $buildMode mode');
     await processManager.runAll(
       commands: [
         if (runPubGet) CliCommand.tool(['pub-get', '--only-main']),
@@ -95,6 +98,8 @@ class BuildCommand extends Command {
             '--web-renderer',
             'canvaskit',
             '--pwa-strategy=offline-first',
+            // Do not minify stack traces in debug mode.
+            if (buildMode == 'debug') '--dart2js-optimization=O1',
             if (buildMode != 'debug') '--$buildMode',
             '--no-tree-shake-icons',
           ],

@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/screens/memory/panes/chart/chart_control_pane.dart';
-import 'package:devtools_app/src/screens/memory/panes/chart/memory_vm_chart.dart';
+import 'package:devtools_app/src/screens/memory/panes/chart/widgets/chart_control_pane.dart';
+import 'package:devtools_app/src/screens/memory/panes/chart/widgets/memory_vm_chart.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
@@ -52,7 +52,7 @@ void main() {
     );
     setGlobal(ServiceConnectionManager, fakeServiceConnection);
     setGlobal(PreferencesController, PreferencesController());
-    setGlobal(OfflineModeController, OfflineModeController());
+    setGlobal(OfflineDataController, OfflineDataController());
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());
     setGlobal(BannerMessagesController, BannerMessagesController());
@@ -69,7 +69,8 @@ void main() {
     );
 
     // Delay to ensure the memory profiler has collected data.
-    await tester.pumpAndSettle(const Duration(seconds: 1));
+    await tester
+        .runAsync(() async => tester.pumpAndSettle(const Duration(seconds: 1)));
     expect(find.byType(MemoryBody), findsOneWidget);
   }
 
@@ -78,9 +79,9 @@ void main() {
 
   group('MemoryScreen', () {
     setUp(() {
+      setUpServiceManagerForMemory();
       screen = MemoryScreen();
       controller = MemoryController();
-      setUpServiceManagerForMemory();
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {
@@ -94,9 +95,6 @@ void main() {
       (WidgetTester tester) async {
         await pumpMemoryScreen(tester);
 
-        // Should be collecting live feed.
-        expect(controller.offline, isFalse);
-
         // Verify Memory, Memory Source, and Memory Sources content.
         expect(find.byTooltip(ChartPaneTooltips.pauseTooltip), findsOneWidget);
         expect(find.byTooltip(ChartPaneTooltips.resumeTooltip), findsOneWidget);
@@ -104,15 +102,6 @@ void main() {
         expect(find.text('GC'), findsOneWidget);
 
         expect(find.byType(MemoryVMChart), findsOneWidget);
-
-        expect(
-          controller.controllers.memoryTimeline.liveData.isEmpty,
-          isTrue,
-        );
-        expect(
-          controller.controllers.memoryTimeline.offlineData.isEmpty,
-          isTrue,
-        );
       },
     );
   });

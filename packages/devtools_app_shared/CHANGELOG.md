@@ -1,8 +1,13 @@
-## 0.1.1-dev.0
+## 0.2.0-dev.0
+* Add `tooltipWaitExtraLong` to `utils.dart`.
+* Bump `devtools_shared` dependency to `^10.0.0`.
+* Bump `vm_service` dependency to `^14.2.1`.
+
+## 0.1.1
 * Update `package:dtd` to `^2.1.0`
 * Add `DTDManager.projectRoots` method.
-* Bump the minimum Dart and Flutter SDK versions to `3.4.0-275.0.dev` and
-`3.21.0-15.0.pre` respectively.
+* Bump the minimum Dart and Flutter SDK versions to `3.4.0-282.1.beta` and
+`3.22.0-0.1.pre` respectively.
 * Bump `devtools_shared` to ^8.1.1-dev.0
 
 ## 0.1.0

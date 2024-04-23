@@ -63,7 +63,7 @@ abstract interface class VsCodeApi {
   /// Depending on user settings, this may open embedded (the default) or in an
   /// external browser window.
   Future<void> openDevToolsPage(
-    String debugSessionId, {
+    String? debugSessionId, {
     String? page,
     bool? forceExternal,
   });

@@ -30,7 +30,7 @@ class GTag {
     String eventName, {
     required GtagEvent Function() gaEventProvider,
   }) async {
-    if (debugAnalytics || (kReleaseMode && await ga.isAnalyticsEnabled())) {
+    if (debugSendAnalytics || (kReleaseMode && await ga.isAnalyticsEnabled())) {
       _gTagCommandName(_event, eventName, gaEventProvider());
     }
   }
@@ -38,7 +38,7 @@ class GTag {
   static void exception({
     required GtagException Function() gaExceptionProvider,
   }) async {
-    if (debugAnalytics || (kReleaseMode && await ga.isAnalyticsEnabled())) {
+    if (debugSendAnalytics || (kReleaseMode && await ga.isAnalyticsEnabled())) {
       _gTagCommandName(_event, _exception, gaExceptionProvider());
     }
   }

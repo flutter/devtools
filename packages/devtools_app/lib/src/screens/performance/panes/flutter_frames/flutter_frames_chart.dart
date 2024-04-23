@@ -32,13 +32,13 @@ class FlutterFramesChart extends StatelessWidget {
   const FlutterFramesChart(
     this.framesController, {
     super.key,
-    required this.offlineMode,
+    required this.showingOfflineData,
     required this.impellerEnabled,
   });
 
   final FlutterFramesController framesController;
 
-  final bool offlineMode;
+  final bool showingOfflineData;
 
   final bool impellerEnabled;
 
@@ -59,7 +59,7 @@ class FlutterFramesChart extends StatelessWidget {
           frames: frames,
           displayRefreshRate: displayRefreshRate,
           isVisible: showChart,
-          offlineMode: offlineMode,
+          showingOfflineData: showingOfflineData,
           impellerEnabled: impellerEnabled,
         );
       },
@@ -73,7 +73,7 @@ class _FlutterFramesChart extends StatefulWidget {
     required this.frames,
     required this.displayRefreshRate,
     required this.isVisible,
-    required this.offlineMode,
+    required this.showingOfflineData,
     required this.impellerEnabled,
   });
 
@@ -85,7 +85,7 @@ class _FlutterFramesChart extends StatefulWidget {
 
   final bool isVisible;
 
-  final bool offlineMode;
+  final bool showingOfflineData;
 
   final bool impellerEnabled;
 
@@ -123,7 +123,7 @@ class _FlutterFramesChartState extends State<_FlutterFramesChart> {
       );
       bannerMessages.addMessage(
         ShaderJankMessage(
-          offlineController.offlineMode.value
+          offlineDataController.showingOfflineData.value
               ? SimpleScreen.id
               : PerformanceScreen.id,
           jankyFramesCount: shaderJankFrames.length,
@@ -172,7 +172,7 @@ class _FlutterFramesChartState extends State<_FlutterFramesChart> {
               framesController: widget.framesController,
               frames: widget.frames,
               displayRefreshRate: widget.displayRefreshRate,
-              offlineMode: widget.offlineMode,
+              showingOfflineData: widget.showingOfflineData,
               impellerEnabled: widget.impellerEnabled,
             ),
           ),
@@ -364,7 +364,7 @@ class FramesChartControls extends StatelessWidget {
     required this.framesController,
     required this.frames,
     required this.displayRefreshRate,
-    required this.offlineMode,
+    required this.showingOfflineData,
     required this.impellerEnabled,
   });
 
@@ -378,7 +378,7 @@ class FramesChartControls extends StatelessWidget {
 
   final double displayRefreshRate;
 
-  final bool offlineMode;
+  final bool showingOfflineData;
 
   final bool impellerEnabled;
 
@@ -388,7 +388,7 @@ class FramesChartControls extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (!offlineMode)
+        if (!showingOfflineData)
           ValueListenableBuilder<bool>(
             valueListenable: framesController.recordingFrames,
             builder: (context, recording, child) {

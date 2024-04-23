@@ -69,7 +69,7 @@ final class VsCodeApiImpl extends ToolApiImpl implements VsCodeApi {
 
   @override
   Future<void> openDevToolsPage(
-    String debugSessionId, {
+    String? debugSessionId, {
     String? page,
     bool? forceExternal,
   }) {

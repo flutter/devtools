@@ -6,7 +6,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/screens/memory/framework/connected/memory_tabs.dart';
+import 'package:devtools_app/src/screens/memory/framework/memory_tabs.dart';
 import 'package:devtools_app/src/screens/memory/panes/tracing/tracing_pane_controller.dart';
 import 'package:devtools_app/src/screens/memory/panes/tracing/tracing_tree.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -18,7 +18,6 @@ import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../test_infra/scenes/memory/default.dart';
-import '../../test_infra/scenes/scene_test_extensions.dart';
 import '../../test_infra/utils/test_utils.dart';
 
 // TODO(bkonyi): add tests for multi-isolate support.
@@ -59,10 +58,7 @@ void main() {
     late final CpuSamples allocationTracingProfile;
 
     Future<void> pumpScene(WidgetTester tester) async {
-      await tester.pumpScene(scene);
-      // Delay to ensure the memory profiler has collected data.
-      await tester.pumpAndSettle(const Duration(seconds: 1));
-      expect(find.byType(MemoryBody), findsOneWidget);
+      await scene.pump(tester);
       await tester.tap(
         find.byKey(MemoryScreenKeys.dartHeapAllocationTracingTab),
       );
@@ -111,7 +107,7 @@ void main() {
       (WidgetTester tester) async {
         await pumpScene(tester);
 
-        final controller = scene.controller.controllers.tracing;
+        final controller = scene.controller.tracing;
         final state = controller.stateForIsolate.value;
         expect(state.filteredClassList.value.isNotEmpty, isTrue);
         expect(controller.initializing.value, isFalse);
@@ -276,7 +272,7 @@ void main() {
       (WidgetTester tester) async {
         await pumpScene(tester);
 
-        final controller = scene.controller.controllers.tracing;
+        final controller = scene.controller.tracing;
         final state = controller.stateForIsolate.value;
         expect(state.filteredClassList.value.isNotEmpty, isTrue);
         expect(controller.initializing.value, isFalse);
@@ -380,7 +376,7 @@ void main() {
       testWidgetsWithWindowSize('simple', windowSize, (tester) async {
         await pumpScene(tester);
 
-        final controller = scene.controller.controllers.tracing;
+        final controller = scene.controller.tracing;
         final state = controller.stateForIsolate.value;
 
         final filterTextField = find.byType(DevToolsClearableTextField);
@@ -407,7 +403,7 @@ void main() {
         (tester) async {
           await pumpScene(tester);
 
-          final controller = scene.controller.controllers.tracing;
+          final controller = scene.controller.tracing;
           final state = controller.stateForIsolate.value;
 
           final checkboxes = find.byType(Checkbox);
@@ -448,7 +444,7 @@ void main() {
         (tester) async {
           await pumpScene(tester);
 
-          final controller = scene.controller.controllers.tracing;
+          final controller = scene.controller.tracing;
           final state = controller.stateForIsolate.value;
 
           expect(state.selectedTracedClass.value, isNull);

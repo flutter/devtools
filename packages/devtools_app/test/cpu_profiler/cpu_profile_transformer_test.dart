@@ -16,7 +16,7 @@ void main() {
 
     setUp(() {
       cpuProfileTransformer = CpuProfileTransformer();
-      cpuProfileData = CpuProfileData.parse(cpuProfileResponseJson);
+      cpuProfileData = CpuProfileData.fromJson(cpuProfileResponseJson);
     });
 
     test('processData', () async {
@@ -35,7 +35,7 @@ void main() {
     test('process response with missing leaf frame', () {
       bool runTest() {
         final cpuProfileDataWithMissingLeaf =
-            CpuProfileData.parse(responseWithMissingLeafFrame);
+            CpuProfileData.fromJson(responseWithMissingLeafFrame);
         expect(
           () async {
             await cpuProfileTransformer.processData(

@@ -147,7 +147,7 @@ class ServiceConnectionManager {
     final previousConnectedApp = serviceManager.connectedApp != null
         ? OfflineConnectedApp.parse(serviceManager.connectedApp!.toJson())
         : null;
-    offlineController.previousConnectedApp = previousConnectedApp;
+    offlineDataController.previousConnectedApp = previousConnectedApp;
 
     // This must be called before we close the VM service so that
     // [serviceManager.serviceUri] is not null.
@@ -212,10 +212,17 @@ class ServiceConnectionManager {
 
   // TODO(kenz): consider caching this value for the duration of the VM service
   // connection.
+  /// Returns the root package directory for the main isolate.
+  ///
+  /// If a non-null value is returned, the value will be a file URI String and
+  /// it will NOT have a trailing slash.
   Future<String?> rootPackageDirectoryForMainIsolate() async {
     final fileUriString = await serviceConnection.rootLibraryForMainIsolate();
     final packageUriString = fileUriString != null
-        ? packageRootFromFileUriString(fileUriString)
+        ? await packageRootFromFileUriString(
+            fileUriString,
+            dtd: dtdManager.connection.value,
+          )
         : null;
     _log.fine('rootPackageDirectoryForMainIsolate: $packageUriString');
     return packageUriString;

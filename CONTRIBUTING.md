@@ -73,8 +73,8 @@ with the upstream DevTools repo.
 		- Locate the `Path` variable and click **Edit**
 		- Click the **New** button and paste in `<DEVTOOLS_DIR>/tool/bin`, replacing `<DEVTOOLS_DIR>`
 		with the local path to your DevTools repo.
-	
-	Explore the commands and helpers that the `devtools_tool` provides by running `devtools_tool -h`. 
+
+	Explore the commands and helpers that the `devtools_tool` provides by running `devtools_tool -h`.
 4. **Optional:** enable and activate DCM (Dart Code Metrics) - see the [DCM section below](#enable-and-activate-dcm-dart-code-metrics)
 
 #### Set up your IDE
@@ -92,8 +92,7 @@ of launch configurations for running and debugging DevTools:
 2. Create a branch from your cloned DevTools repo: `git checkout -b myBranch`
 3. Ensure your branch, dependencies, and generated code are up-to-date: `devtools_tool sync`
 4. Implement your changes, and commit to your branch: `git commit -m “description”`
-	- If your improvement is user-facing, document it in [NEXT_RELEASE_NOTES.md](packages/devtools_app/release_notes/NEXT_RELEASE_NOTES.md)
-	and include this edit as part of your PR.
+	- If your improvement is user-facing, [document it](packages/devtools_app/release_notes/README.md) in the same PR.
 5. Push to your branch to GitHub: `git push origin myBranch`
 6. Navigate to the [Pull Requests](https://github.com/flutter/devtools/pulls) tab in the main
 [DevTools repo](https://github.com/flutter/devtools). You should see a popup to create a pull
@@ -121,11 +120,11 @@ request from the branch in your cloned repo to the DevTools master branch. Creat
  - To update DCM to the same version as on GitHub bots with apt-get or brew:
 
     1. Locate, copy and run apt-get command searching by searching for `install dcm` in [build.yaml](https://github.com/flutter/devtools/blob/master/.github/workflows/build.yaml)
-      
+
     2. Locate version on bots by searching for `install dcm` in [build.yaml](https://github.com/flutter/devtools/blob/master/.github/workflows/build.yaml) and run `brew install cqlabs/dcm/dcm@<version on bots without -1>`
-  
+
     You can check you current local version with `dcm --version`.
-   
+
     If version of DCM on bots is outdated, consider to submit a PR to refresh the version on bots.
 
 ## Running and debugging DevTools
@@ -213,7 +212,7 @@ code to debug.
 1. Run your Dart or Flutter app
 	> Note: some DevTools features may be unavailable depending on the test app platform (Flutter native, Flutter web, Dart CLI, etc.) or run mode
 	(debug, profile) you choose.
-2. Copy the URI printed to the command line (you will use this uri to connect to DevTools) 
+2. Copy the URI printed to the command line (you will use this uri to connect to DevTools)
 
 	```
 	"A Dart VM Service on iPhone 14 Pro Max is available at: <copy-this-uri>"

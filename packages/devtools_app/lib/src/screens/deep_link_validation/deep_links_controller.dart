@@ -8,14 +8,15 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_deeplink.dart';
 import 'package:flutter/material.dart';
 
+import '../../../devtools_app.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
-import '../../shared/globals.dart';
 import '../../shared/server/server.dart' as server;
+import 'deep_link_list_view.dart';
 import 'deep_links_model.dart';
 import 'deep_links_services.dart';
 
-typedef _DomainAndPath = ({String domain, String path});
+typedef _DomainAndPath = ({String? domain, String path});
 
 const domainAssetLinksJsonFileErrors = {
   DomainError.existence,
@@ -159,6 +160,7 @@ class DeepLinksController extends DisposableController {
       linkDatasByPath[linkData.path] = LinkData(
         domain: linkData.domain,
         path: linkData.path,
+        scheme: linkData.scheme.union(previousRecord?.scheme ?? {}),
         os: [
           if (previousRecord?.os.contains(PlatformOS.android) ??
               false || linkData.os.contains(PlatformOS.android))
@@ -169,7 +171,7 @@ class DeepLinksController extends DisposableController {
         ],
         associatedDomains: [
           ...previousRecord?.associatedDomains ?? [],
-          linkData.domain,
+          if (linkData.domain != null) linkData.domain!,
         ],
         pathErrors: linkData.pathErrors,
       );
@@ -181,12 +183,15 @@ class DeepLinksController extends DisposableController {
   @visibleForTesting
   List<LinkData> linkDatasByDomain(List<LinkData> linkdatas) {
     final linkDatasByDomain = <String, LinkData>{};
-
     for (var linkData in linkdatas) {
+      if (linkData.domain.isNullOrEmpty) {
+        continue;
+      }
       final previousRecord = linkDatasByDomain[linkData.domain];
-      linkDatasByDomain[linkData.domain] = LinkData(
+      linkDatasByDomain[linkData.domain!] = LinkData(
         domain: linkData.domain,
         path: linkData.path,
+        scheme: linkData.scheme.union(previousRecord?.scheme ?? {}),
         os: linkData.os,
         associatedPath: [
           ...previousRecord?.associatedPath ?? [],
@@ -266,6 +271,7 @@ class DeepLinksController extends DisposableController {
     final domainPathToLinkData = <_DomainAndPath, LinkData>{};
     for (final appLink in appLinks) {
       final domainAndPath = (domain: appLink.host, path: appLink.path);
+      final scheme = appLink.scheme;
 
       if (domainPathToLinkData[domainAndPath] == null) {
         domainPathToLinkData[domainAndPath] = LinkData(
@@ -274,12 +280,12 @@ class DeepLinksController extends DisposableController {
           pathErrors:
               _getPathErrorsFromIntentFilterChecks(appLink.intentFilterChecks),
           os: [PlatformOS.android],
-          scheme: [appLink.scheme],
+          scheme: {if (scheme != null) scheme},
         );
       } else {
         final linkData = domainPathToLinkData[domainAndPath]!;
-        if (!linkData.scheme.contains(appLink.scheme)) {
-          linkData.scheme.add(appLink.scheme);
+        if (scheme != null) {
+          linkData.scheme.add(scheme);
         }
         final pathErrors = {
           ...linkData.pathErrors,
@@ -340,20 +346,27 @@ class DeepLinksController extends DisposableController {
 
   Future<void> _generateAssetLinks() async {
     generatedAssetLinksForSelectedLink.value = null;
-    generatedAssetLinksForSelectedLink.value =
-        await deepLinksServices.generateAssetLinks(
-      domain: selectedLink.value!.domain,
-      applicationId: applicationId,
-      localFingerprint: localFingerprint.value,
-    );
+    final domain = selectedLink.value!.domain;
+    if (domain != null) {
+      generatedAssetLinksForSelectedLink.value =
+          await deepLinksServices.generateAssetLinks(
+        domain: domain,
+        applicationId: applicationId,
+        localFingerprint: localFingerprint.value,
+      );
+    }
   }
 
   Future<List<LinkData>> _validateAndroidDomain(
     List<LinkData> linkdatas,
   ) async {
     final domains = linkdatas
-        .where((linkdata) => linkdata.os.contains(PlatformOS.android))
-        .map((linkdata) => linkdata.domain)
+        .where(
+          (linkdata) =>
+              linkdata.os.contains(PlatformOS.android) &&
+              linkdata.domain != null,
+        )
+        .map((linkdata) => linkdata.domain!)
         .toSet()
         .toList();
 
@@ -442,6 +455,31 @@ class DeepLinksController extends DisposableController {
     if (linkdata.domainErrors.isNotEmpty) {
       await _generateAssetLinks();
     }
+  }
+
+  void autoSelectLink(TableViewType viewType) {
+    final linkDatas = displayLinkDatasNotifier.value;
+    late final LinkData linkdata;
+    switch (viewType) {
+      case TableViewType.domainView:
+        linkdata = linkDatas.byDomain
+                .where((e) => e.domainErrors.isNotEmpty)
+                .firstOrNull ??
+            linkDatas.byDomain.first;
+      case TableViewType.pathView:
+        linkdata = linkDatas.byPath
+                .where((e) => e.pathErrors.isNotEmpty)
+                .firstOrNull ??
+            linkDatas.byPath.first;
+      case TableViewType.singleUrlView:
+        linkdata = linkDatas.all
+                .where(
+                  (e) => e.domainErrors.isNotEmpty || e.pathErrors.isNotEmpty,
+                )
+                .firstOrNull ??
+            linkDatas.all.first;
+    }
+    selectLink(linkdata);
   }
 
   set searchContent(String content) {

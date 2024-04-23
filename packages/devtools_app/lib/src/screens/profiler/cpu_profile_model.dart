@@ -168,7 +168,7 @@ class CpuProfileData {
     _cpuProfileRoot = CpuStackFrame.root(profileMetaData);
   }
 
-  factory CpuProfileData.parse(Map<String, dynamic> json_) {
+  factory CpuProfileData.fromJson(Map<String, dynamic> json_) {
     final json = _CpuProfileDataJson(json_);
     final profileMetaData = CpuProfileMetaData(
       sampleCount: json.sampleCount ?? 0,
@@ -529,7 +529,7 @@ class CpuProfileData {
     );
   }
 
-  factory CpuProfileData.empty() => CpuProfileData.parse({});
+  factory CpuProfileData.empty() => CpuProfileData.fromJson({});
 
   /// Generates [CpuProfileData] from the provided [CpuSamples].
   ///
@@ -586,7 +586,7 @@ class CpuProfileData {
 
     await _addPackageUrisToTraceObject(isolateId, traceObject);
 
-    return CpuProfileData.parse(traceObject);
+    return CpuProfileData.fromJson(traceObject);
   }
 
   /// Helper function for determining and updating the
@@ -769,7 +769,7 @@ extension type _CpuProfileDataJson(Map<String, dynamic> json) {
       (json[CpuProfileData._traceEventsKey] as List?)
           ?.cast<Map>()
           .map((trace) => trace.cast<String, Object?>())
-          .map((trace) => CpuSampleEvent.parse(trace))
+          .map((trace) => CpuSampleEvent.fromJson(trace))
           .toList()
           .cast<CpuSampleEvent>();
 }
@@ -809,7 +809,7 @@ class CpuSampleEvent extends ChromeTraceEvent {
     required Map<String, dynamic> traceJson,
   }) : super(traceJson);
 
-  factory CpuSampleEvent.parse(Map<String, dynamic> traceJson) {
+  factory CpuSampleEvent.fromJson(Map<String, dynamic> traceJson) {
     final leafId = traceJson[CpuProfileData.stackFrameIdKey];
     final args =
         (traceJson[ChromeTraceEvent.argsKey] as Map?)?.cast<String, Object?>();
@@ -913,7 +913,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
 
   final String? parentId;
 
-  /// The set of ids for all ancesctors of this [CpuStackFrame].
+  /// The set of ids for all ancestors of this [CpuStackFrame].
   ///
   /// This is late and final, so it will only be created once for performance
   /// reasons. This method should only be called when the [CpuStackFrame] is

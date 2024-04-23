@@ -6,6 +6,7 @@ part of 'server.dart';
 
 /// Asks the Devtools Server to return a Dart Tooling Daemon uri if it has one.
 Future<Uri?> getDtdUri() async {
+  if (debugDtdUri != null) return Uri.parse(debugDtdUri!);
   if (isDevToolsServerAvailable) {
     final uri = Uri(path: DtdApi.apiGetDtdUri);
     final resp = await request(uri.toString());

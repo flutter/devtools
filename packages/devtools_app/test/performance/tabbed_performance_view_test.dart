@@ -44,7 +44,7 @@ void main() {
     );
 
     setGlobal(ServiceConnectionManager, fakeServiceConnection);
-    setGlobal(OfflineModeController, OfflineModeController());
+    setGlobal(OfflineDataController, OfflineDataController());
     when(serviceConnection.serviceManager.connectedApp!.isDartWebApp)
         .thenAnswer((_) => Future.value(false));
   }

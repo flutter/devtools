@@ -125,7 +125,7 @@ class SurveyService {
       final response = await get(_metadataUrl);
       if (response.statusCode == 200) {
         final Map<String, dynamic> contents = json.decode(response.body);
-        return DevToolsSurvey.parse(contents);
+        return DevToolsSurvey.fromJson(contents);
       }
     } on Error catch (e, st) {
       _log.shout('Error fetching survey content: $e', e, st);
@@ -161,7 +161,7 @@ class DevToolsSurvey {
     this.devEnvironments,
   );
 
-  factory DevToolsSurvey.parse(Map<String, dynamic> json) {
+  factory DevToolsSurvey.fromJson(Map<String, dynamic> json) {
     final id = json[_uniqueIdKey];
     final startDate = json[_startDateKey] != null
         ? DateTime.parse(json[_startDateKey])

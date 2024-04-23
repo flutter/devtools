@@ -90,8 +90,8 @@ class ImportController {
 
     final connectedApp =
         OfflineConnectedApp.parse(devToolsSnapshot.connectedApp);
-    offlineController
-      ..enterOfflineMode(offlineApp: connectedApp)
+    offlineDataController
+      ..startShowingOfflineData(offlineApp: connectedApp)
       ..offlineDataJson = devToolsSnapshot.json;
     notificationService.push(attemptingToImportMessage(activeScreenId));
     _pushSnapshotScreenForImport(activeScreenId);

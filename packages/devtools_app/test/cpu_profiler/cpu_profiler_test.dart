@@ -44,7 +44,7 @@ void main() {
 
     final transformer = CpuProfileTransformer();
     controller = CpuProfilerController();
-    cpuProfileData = CpuProfileData.parse(goldenCpuProfileDataJson);
+    cpuProfileData = CpuProfileData.fromJson(goldenCpuProfileDataJson);
     await transformer.processData(
       cpuProfileData,
       processId: 'test',
@@ -54,7 +54,7 @@ void main() {
       DevToolsEnvironmentParameters,
       ExternalDevToolsEnvironmentParameters(),
     );
-    setGlobal(OfflineModeController, OfflineModeController());
+    setGlobal(OfflineDataController, OfflineDataController());
     setGlobal(NotificationService, NotificationService());
     setGlobal(BannerMessagesController, BannerMessagesController());
     setGlobal(PreferencesController, PreferencesController());
@@ -79,7 +79,7 @@ void main() {
       'builds for empty cpuProfileData',
       windowSize,
       (WidgetTester tester) async {
-        cpuProfileData = CpuProfileData.parse(emptyCpuProfileDataJson);
+        cpuProfileData = CpuProfileData.fromJson(emptyCpuProfileDataJson);
         cpuProfiler = CpuProfiler(
           data: cpuProfileData,
           controller: controller,
@@ -178,7 +178,8 @@ void main() {
         // initialization.
         await Future.delayed(const Duration(seconds: 1));
 
-        cpuProfileData = CpuProfileData.parse(cpuProfileDataWithUserTagsJson);
+        cpuProfileData =
+            CpuProfileData.fromJson(cpuProfileDataWithUserTagsJson);
       });
 
       testWidgetsWithWindowSize(
@@ -426,7 +427,8 @@ void main() {
         // initialization.
         await Future.delayed(const Duration(seconds: 1));
 
-        cpuProfileData = CpuProfileData.parse(cpuProfileDataWithUserTagsJson);
+        cpuProfileData =
+            CpuProfileData.fromJson(cpuProfileDataWithUserTagsJson);
         await controller.cpuProfilerController.transformer.processData(
           cpuProfileData,
           processId: 'test',
@@ -598,7 +600,8 @@ void main() {
         await Future.delayed(const Duration(seconds: 1));
 
         preferences.toggleVmDeveloperMode(true);
-        cpuProfileData = CpuProfileData.parse(cpuProfileDataWithUserTagsJson);
+        cpuProfileData =
+            CpuProfileData.fromJson(cpuProfileDataWithUserTagsJson);
         for (final filter in controller
             .cpuProfilerController.activeFilter.value.toggleFilters) {
           filter.enabled.value = false;
