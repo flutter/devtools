@@ -215,7 +215,8 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
       children: [
         StartStopRecordingButton(
           recording: _recording,
-          onPressed: () async => widget.controller.togglePolling(!_recording),
+          onPressed: () async =>
+              await widget.controller.togglePolling(!_recording),
           tooltipOverride: _recording
               ? 'Stop recording network traffic'
               : 'Resume recording network traffic',
