@@ -181,7 +181,7 @@ class ExtensionService extends DisposableController
     // running application.
     for (final ext in staticExtensions) {
       if (!connectedToApp && ext.requiresConnection) {
-        ignoreExtension(ext);
+        setExtensionIgnored(ext);
       }
     }
   }
@@ -204,8 +204,8 @@ class ExtensionService extends DisposableController
             'ignoring duplicate static extension ${duplicate.name}, '
             '${duplicate.devtoolsOptionsUri}',
           );
-          ignoreExtension(latest);
-          ignoreExtension(currentLatest, false);
+          setExtensionIgnored(latest);
+          setExtensionIgnored(currentLatest, false);
           latest = currentLatest;
         }
       }
@@ -228,7 +228,7 @@ class ExtensionService extends DisposableController
           'ignoring runtime extension duplicate (static) '
           '${staticExtension.name}, ${staticExtension.devtoolsOptionsUri}',
         );
-        ignoreExtension(staticExtension);
+        setExtensionIgnored(staticExtension);
       }
     }
   }
@@ -297,7 +297,8 @@ class ExtensionService extends DisposableController
   ///
   /// An extension may be ignored if it is a duplicate or if it is an older
   /// version of an existing extension, for example.
-  void ignoreExtension(DevToolsExtensionConfig ext, [bool ignore = true]) {
+  @visibleForTesting
+  void setExtensionIgnored(DevToolsExtensionConfig ext, [bool ignore = true]) {
     ignore
         ? _ignoredStaticExtensionsByHashCode.add(identityHashCode(ext))
         : _ignoredStaticExtensionsByHashCode.remove(identityHashCode(ext));
