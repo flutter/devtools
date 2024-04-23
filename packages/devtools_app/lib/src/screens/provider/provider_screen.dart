@@ -58,7 +58,7 @@ class ProviderScreen extends Screen {
 }
 
 class ProviderScreenWrapper extends StatefulWidget {
-  const ProviderScreenWrapper({Key? key}) : super(key: key);
+  const ProviderScreenWrapper({super.key});
 
   @override
   State<ProviderScreenWrapper> createState() => _ProviderScreenWrapperState();
@@ -88,7 +88,7 @@ class _ProviderScreenWrapperState extends State<ProviderScreenWrapper>
 }
 
 class ProviderScreenBody extends ConsumerWidget {
-  const ProviderScreenBody({Key? key}) : super(key: key);
+  const ProviderScreenBody({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

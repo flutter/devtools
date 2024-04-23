@@ -227,7 +227,7 @@ class _IsolateIDColumn extends ColumnData<Isolate> {
 }
 
 abstract class _IsolateMemoryColumn extends ColumnData<Isolate> {
-  _IsolateMemoryColumn(String title) : super.wide(title);
+  _IsolateMemoryColumn(super.title) : super.wide();
 
   int getCapacity(Isolate i);
   int getUsage(Isolate i);

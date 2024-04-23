@@ -14,8 +14,8 @@ import 'theme.dart';
 class FreeSpaceVisualizerWidget extends StatelessWidget {
   const FreeSpaceVisualizerWidget(
     this.renderProperties, {
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final RenderProperties renderProperties;
 
@@ -92,8 +92,8 @@ class PaddingVisualizerWidget extends StatelessWidget {
   const PaddingVisualizerWidget(
     this.renderProperties, {
     required this.horizontal,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final RenderProperties renderProperties;
   final bool horizontal;

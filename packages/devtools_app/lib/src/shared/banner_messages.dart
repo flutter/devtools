@@ -114,7 +114,7 @@ class BannerMessagesController {
 }
 
 class BannerMessages extends StatelessWidget {
-  const BannerMessages({Key? key, required this.screen}) : super(key: key);
+  const BannerMessages({super.key, required this.screen});
 
   final Screen screen;
 
@@ -234,13 +234,10 @@ class BannerMessage extends StatelessWidget {
 
 class _BannerError extends BannerMessage {
   const _BannerError({
-    required Key key,
-    required List<TextSpan> textSpans,
-    required String screenId,
+    required Key super.key,
+    required List<TextSpan> super.textSpans,
+    required super.screenId,
   }) : super(
-          key: key,
-          textSpans: textSpans,
-          screenId: screenId,
           messageType: BannerMessageType.error,
         );
 }

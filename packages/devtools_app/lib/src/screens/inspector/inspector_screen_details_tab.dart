@@ -22,8 +22,8 @@ class InspectorDetails extends StatelessWidget {
   const InspectorDetails({
     required this.detailsTree,
     required this.controller,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final Widget detailsTree;
   final InspectorController controller;
@@ -73,9 +73,9 @@ class InspectorDetails extends StatelessWidget {
 
 class InspectorExpandCollapseButtons extends StatefulWidget {
   const InspectorExpandCollapseButtons({
-    Key? key,
+    super.key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   final InspectorController controller;
 

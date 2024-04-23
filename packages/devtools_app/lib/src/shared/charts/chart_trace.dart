@@ -18,7 +18,7 @@ class Data {
 /// Stores the count of number of same points collected @ timestamp.  Used for
 /// ExtensionEvents to coallase multiple events to one plotted symbol.
 class DataAggregate extends Data {
-  DataAggregate(int timestamp, double y, this.count) : super(timestamp, y);
+  DataAggregate(super.timestamp, super.y, this.count);
 
   final int count;
 }

@@ -26,9 +26,9 @@ import 'vm_unknown_object_display.dart';
 /// program explorer.
 class ObjectViewport extends StatelessWidget {
   const ObjectViewport({
-    Key? key,
+    super.key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   final ObjectInspectorViewController controller;
 

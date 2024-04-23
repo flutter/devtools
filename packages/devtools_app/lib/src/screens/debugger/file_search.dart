@@ -359,14 +359,10 @@ class FileSearchResults {
       ? allScripts.map((script) => AutoCompleteMatch(script.uri!)).toList()
       : [
           ..._exactFileNameMatches
-              .map(query.createExactFileNameAutoCompleteMatch)
-              .toList(),
+              .map(query.createExactFileNameAutoCompleteMatch),
           ..._exactFullPathMatches
-              .map(query.createExactFullPathAutoCompleteMatch)
-              .toList(),
-          ..._fuzzyMatches
-              .map(query.createFuzzyMatchAutoCompleteMatch)
-              .toList(),
+              .map(query.createExactFullPathAutoCompleteMatch),
+          ..._fuzzyMatches.map(query.createFuzzyMatchAutoCompleteMatch),
         ];
 
   FileSearchResults copyWith({

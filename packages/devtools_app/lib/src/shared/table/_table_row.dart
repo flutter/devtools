@@ -26,7 +26,7 @@ class TableRow<T> extends StatefulWidget {
   /// Constructs a [TableRow] that presents the column values for
   /// [node].
   const TableRow({
-    Key? key,
+    super.key,
     required this.linkedScrollControllerGroup,
     required this.node,
     required this.columns,
@@ -48,12 +48,11 @@ class TableRow<T> extends StatefulWidget {
         secondarySortColumn = null,
         onSortChanged = null,
         _rowType = _TableRowType.data,
-        tall = false,
-        super(key: key);
+        tall = false;
 
   /// Constructs a [TableRow] that is empty.
   const TableRow.filler({
-    Key? key,
+    super.key,
     required this.linkedScrollControllerGroup,
     required this.columns,
     required this.columnWidths,
@@ -75,13 +74,12 @@ class TableRow<T> extends StatefulWidget {
         tall = false,
         enableHoverHandling = false,
         displayTreeGuidelines = false,
-        _rowType = _TableRowType.filler,
-        super(key: key);
+        _rowType = _TableRowType.filler;
 
   /// Constructs a [TableRow] that presents the column titles instead
   /// of any [node].
   const TableRow.tableColumnHeader({
-    Key? key,
+    super.key,
     required this.linkedScrollControllerGroup,
     required this.columns,
     required this.columnWidths,
@@ -103,13 +101,12 @@ class TableRow<T> extends StatefulWidget {
         activeSearchMatchNotifier = null,
         displayTreeGuidelines = false,
         enableHoverHandling = false,
-        _rowType = _TableRowType.columnHeader,
-        super(key: key);
+        _rowType = _TableRowType.columnHeader;
 
   /// Constructs a [TableRow] that presents column group titles instead of any
   /// [node].
   const TableRow.tableColumnGroupHeader({
-    Key? key,
+    super.key,
     required this.linkedScrollControllerGroup,
     required this.columnGroups,
     required this.columnWidths,
@@ -131,8 +128,7 @@ class TableRow<T> extends StatefulWidget {
         activeSearchMatchNotifier = null,
         displayTreeGuidelines = false,
         enableHoverHandling = false,
-        _rowType = _TableRowType.columnGroupHeader,
-        super(key: key);
+        _rowType = _TableRowType.columnGroupHeader;
 
   final LinkedScrollControllerGroup linkedScrollControllerGroup;
 

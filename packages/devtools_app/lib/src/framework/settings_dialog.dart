@@ -17,11 +17,10 @@ import '../shared/log_storage.dart';
 import '../shared/server/server.dart';
 
 class OpenSettingsAction extends ScaffoldAction {
-  OpenSettingsAction({super.key, Color? color})
+  OpenSettingsAction({super.key, super.color})
       : super(
           icon: Icons.settings_outlined,
           tooltip: 'Settings',
-          color: color,
           onPressed: (context) {
             unawaited(
               showDialog(

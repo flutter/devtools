@@ -298,10 +298,10 @@ class _SizeGroupTitle extends StatelessWidget {
 
 class ClassesTableDiff extends StatelessWidget {
   ClassesTableDiff({
-    Key? key,
+    super.key,
     required this.classes,
     required this.diffData,
-  }) : super(key: key) {
+  }) {
     _columns = {
       for (var sizeType in SizeType.values)
         sizeType: ClassesTableDiffColumns(sizeType, diffData),

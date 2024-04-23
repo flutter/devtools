@@ -776,11 +776,11 @@ extension type _CpuProfileDataJson(Map<String, dynamic> json) {
 
 class CpuProfileMetaData extends ProfileMetaData {
   CpuProfileMetaData({
-    required int sampleCount,
+    required super.sampleCount,
     required this.samplePeriod,
     required this.stackDepth,
-    required TimeRange? time,
-  }) : super(sampleCount: sampleCount, time: time);
+    required super.time,
+  });
 
   final int samplePeriod;
 
@@ -1223,9 +1223,9 @@ class _CpuProfileTimelineTree {
   String? get name {
     if (isCodeTree) return _code.name;
     switch (_function.runtimeType) {
-      case vm_service.FuncRef:
+      case const (vm_service.FuncRef):
         return (_function as vm_service.FuncRef?)?.name;
-      case vm_service.NativeFunction:
+      case const (vm_service.NativeFunction):
         return (_function as vm_service.NativeFunction?)?.name;
     }
     return null;
@@ -1316,7 +1316,7 @@ extension on vm_service.CpuSamples {
         final function = current._function as vm_service.FuncRef;
         var owner = function.owner;
         switch (owner.runtimeType) {
-          case vm_service.FuncRef:
+          case const (vm_service.FuncRef):
             owner = owner as vm_service.FuncRef;
             final functionName = owner.name;
 
@@ -1327,7 +1327,7 @@ extension on vm_service.CpuSamples {
 
             nameParts.insertAll(0, [className, functionName]);
             break;
-          case vm_service.ClassRef:
+          case const (vm_service.ClassRef):
             final className = (owner as vm_service.ClassRef).name;
             nameParts.insert(0, className);
         }

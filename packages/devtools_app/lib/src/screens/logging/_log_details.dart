@@ -12,7 +12,7 @@ import '../../shared/console/console.dart';
 import 'logging_controller.dart';
 
 class LogDetails extends StatefulWidget {
-  const LogDetails({Key? key, required this.log}) : super(key: key);
+  const LogDetails({super.key, required this.log});
 
   final LogData? log;
 

@@ -902,12 +902,10 @@ typedef DevToolsJsonFileHandler = void Function(DevToolsJsonFile file);
 class DevToolsJsonFile extends DevToolsFile<Object> {
   const DevToolsJsonFile({
     required String name,
-    required DateTime lastModifiedTime,
-    required Object data,
+    required super.lastModifiedTime,
+    required super.data,
   }) : super(
           path: name,
-          lastModifiedTime: lastModifiedTime,
-          data: data,
         );
 }
 

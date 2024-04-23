@@ -113,10 +113,10 @@ class MemoryChartLegend extends StatelessWidget {
 
 class LegendRow extends StatelessWidget {
   const LegendRow({
-    Key? key,
+    super.key,
     required this.entry1,
     this.entry2,
-  }) : super(key: key);
+  });
 
   final MapEntry<String, Map<String, Object?>> entry1;
   final MapEntry<String, Map<String, Object?>>? entry2;

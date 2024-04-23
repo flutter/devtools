@@ -22,7 +22,7 @@ import '../controller/item_controller.dart';
 final _log = Logger('snapshot_list');
 
 class SnapshotList extends StatelessWidget {
-  const SnapshotList({Key? key, required this.controller}) : super(key: key);
+  const SnapshotList({super.key, required this.controller});
   final DiffPaneController controller;
 
   @override
@@ -50,8 +50,7 @@ class SnapshotList extends StatelessWidget {
 const iconToTakeSnapshot = Icons.fiber_manual_record;
 
 class _ListControlPane extends StatelessWidget {
-  const _ListControlPane({Key? key, required this.controller})
-      : super(key: key);
+  const _ListControlPane({required this.controller});
 
   final DiffPaneController controller;
 
@@ -115,7 +114,7 @@ class _ListControlPane extends StatelessWidget {
 @visibleForTesting
 class SnapshotListTitle extends StatelessWidget {
   const SnapshotListTitle({
-    Key? key,
+    super.key,
     required this.item,
     required this.index,
     required this.selected,
@@ -124,7 +123,7 @@ class SnapshotListTitle extends StatelessWidget {
     required this.onEditingComplete,
     required this.onDelete,
     required this.onExport,
-  }) : super(key: key);
+  });
 
   final SnapshotItem item;
 
