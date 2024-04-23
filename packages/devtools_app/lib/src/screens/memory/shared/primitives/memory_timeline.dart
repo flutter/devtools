@@ -57,8 +57,7 @@ class MemoryTimeline {
     return event != null ? event.timestamp : -1;
   }
 
-  ValueNotifier<int> get sampleEventNotifier => _sampleEventNotifier;
-  final _sampleEventNotifier = ValueNotifier<int>(0);
+  final ValueNotifier<int> sampleEventNotifier = ValueNotifier<int>(0);
 
   ExtensionEvents? get extensionEvents {
     if (_extensionEvents.isNotEmpty) {
