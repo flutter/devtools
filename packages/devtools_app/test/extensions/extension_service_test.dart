@@ -179,7 +179,7 @@ void main() {
         );
       }
       for (final ext in extensionsToIgnore) {
-        service.setExtensionIgnored(ext, false);
+        service.setExtensionIgnored(ext, ignore: false);
       }
       for (final ext in StubDevToolsExtensions.extensions()) {
         expect(service.isExtensionIgnored(ext), false);

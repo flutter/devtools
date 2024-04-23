@@ -205,7 +205,7 @@ class ExtensionService extends DisposableController
             '${duplicate.devtoolsOptionsUri}',
           );
           setExtensionIgnored(latest);
-          setExtensionIgnored(currentLatest, false);
+          setExtensionIgnored(currentLatest, ignore: false);
           latest = currentLatest;
         }
       }
@@ -298,7 +298,7 @@ class ExtensionService extends DisposableController
   /// An extension may be ignored if it is a duplicate or if it is an older
   /// version of an existing extension, for example.
   @visibleForTesting
-  void setExtensionIgnored(DevToolsExtensionConfig ext, [bool ignore = true]) {
+  void setExtensionIgnored(DevToolsExtensionConfig ext, {bool ignore = true}) {
     ignore
         ? _ignoredStaticExtensionsByHashCode.add(identityHashCode(ext))
         : _ignoredStaticExtensionsByHashCode.remove(identityHashCode(ext));
