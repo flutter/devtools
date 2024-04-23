@@ -267,8 +267,8 @@ class ServiceConnectionManager {
   ///   layerBytes - layer raster cache entries in bytes
   ///   pictureBytes - picture raster cache entries in bytes
   Future<Response?> get rasterCacheMetrics async {
-    if (serviceManager.connectedApp == null ||
-        !await serviceManager.connectedApp!.isFlutterApp) {
+    final app = serviceManager.connectedApp;
+    if (app == null || !await app.isFlutterApp) {
       return null;
     }
 

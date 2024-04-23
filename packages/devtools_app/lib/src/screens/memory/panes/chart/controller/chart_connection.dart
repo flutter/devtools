@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
@@ -11,6 +12,8 @@ import '../../../../../shared/globals.dart';
 import '../../../shared/primitives/memory_timeline.dart';
 import '../data/primitives.dart';
 import 'memory_tracker.dart';
+
+typedef _AsyncVoidCallback = Future<void> Function();
 
 /// Connection between chart and application.
 ///
@@ -38,28 +41,59 @@ class ChartConnection extends DisposableController
   Timer? _pollingTimer;
   bool _connected = false;
 
-  late final isDeviceAndroid =
-      serviceConnection.serviceManager.vm?.operatingSystem == 'android';
+  /// If true, the connection to application was lost.
+  bool _disconnected = false;
+
+  late final isDeviceAndroid = _isDevToolsCurrentlyConnected()
+      ? serviceConnection.serviceManager.vm?.operatingSystem == 'android'
+      : false;
+
+  /// True if DevTools is in connected mode and the connection to the app is alive.
+  bool _isDevToolsCurrentlyConnected() =>
+      !offlineDataController.showingOfflineData.value &&
+      serviceConnection.serviceManager.connectedState.value.connected &&
+      serviceConnection.serviceManager.connectedApp != null;
 
   Future<void> maybeConnect() async {
-    if (_connected) return;
-    await serviceConnection.serviceManager.onServiceAvailable;
-    autoDisposeStreamSubscription(
-      serviceConnection.serviceManager.service!.onExtensionEvent
-          .listen(_memoryTracker.onMemoryData),
-    );
-    autoDisposeStreamSubscription(
-      serviceConnection.serviceManager.service!.onGCEvent
-          .listen(_memoryTracker.onGCEvent),
-    );
-    await _onPoll();
+    if (_connected || _disconnected) return;
     _connected = true;
+    await _runSafely(() async {
+      await serviceConnection.serviceManager.onServiceAvailable;
+      autoDisposeStreamSubscription(
+        serviceConnection.serviceManager.service!.onExtensionEvent
+            .listen(_memoryTracker.onMemoryData),
+      );
+      autoDisposeStreamSubscription(
+        serviceConnection.serviceManager.service!.onGCEvent
+            .listen(_memoryTracker.onGCEvent),
+      );
+      await _onPoll();
+    });
   }
 
   Future<void> _onPoll() async {
-    _pollingTimer = null;
-    await _memoryTracker.pollMemory();
-    _pollingTimer = Timer(chartUpdateDelay, _onPoll);
+    assert(_connected);
+    if (_disconnected) return;
+    await _runSafely(() async {
+      _pollingTimer = null;
+      await _memoryTracker.pollMemory();
+      _pollingTimer = Timer(chartUpdateDelay, _onPoll);
+    });
+  }
+
+  /// Run callback resiliently to disconnect.
+  Future<void> _runSafely(_AsyncVoidCallback callback) async {
+    if (_disconnected) return;
+    try {
+      await callback();
+    } catch (e) {
+      if (_isDevToolsCurrentlyConnected()) {
+        rethrow;
+      } else {
+        _disconnected = true;
+        _pollingTimer?.cancel();
+      }
+    }
   }
 
   @override
