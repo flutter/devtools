@@ -621,7 +621,7 @@ class ToolbarAction extends StatelessWidget {
     this.color,
     this.gaScreen,
     this.gaSelection,
-  })  : assert((gaScreen == null) == (gaSelection == null));
+  }) : assert((gaScreen == null) == (gaSelection == null));
 
   final TextStyle? style;
   final IconData icon;
@@ -847,7 +847,7 @@ class DevToolsClearableTextField extends StatelessWidget {
     this.autofocus = false,
     this.enabled,
     this.roundedBorder = false,
-  })  : controller = controller ?? TextEditingController();
+  }) : controller = controller ?? TextEditingController();
 
   final TextEditingController controller;
   final String? hintText;

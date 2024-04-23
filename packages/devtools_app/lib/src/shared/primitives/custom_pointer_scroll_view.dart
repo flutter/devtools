@@ -33,7 +33,7 @@ abstract class CustomPointerScrollView extends BoxScrollView {
     super.semanticChildCount,
     super.dragStartBehavior,
     this.customPointerSignalHandler,
-  })  : _primary = primary ??
+  }) : _primary = primary ??
             controller == null && identical(scrollDirection, Axis.vertical);
 
   final void Function(PointerSignalEvent event)? customPointerSignalHandler;
@@ -87,7 +87,7 @@ class CustomPointerScrollable extends StatefulWidget {
     this.semanticChildCount,
     this.dragStartBehavior = DragStartBehavior.start,
     this.customPointerSignalHandler,
-  })  : assert(semanticChildCount == null || semanticChildCount >= 0);
+  }) : assert(semanticChildCount == null || semanticChildCount >= 0);
 
   /// The direction in which this widget scrolls.
   ///
@@ -699,7 +699,7 @@ class _ScrollSemantics extends SingleChildRenderObjectWidget {
     required this.allowImplicitScrolling,
     required this.semanticChildCount,
     super.child,
-  })  : assert(semanticChildCount == null || semanticChildCount >= 0);
+  }) : assert(semanticChildCount == null || semanticChildCount >= 0);
 
   final ScrollPosition position;
   final bool allowImplicitScrolling;

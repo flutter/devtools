@@ -641,7 +641,7 @@ class ServiceExtensionCheckboxGroupButton extends StatefulWidget {
     this.tooltip,
     double overlayWidthBeforeScaling = _defaultWidth,
     this.minScreenWidthForTextBeforeScaling,
-  })  : overlayWidth = scaleByFontFactor(overlayWidthBeforeScaling);
+  }) : overlayWidth = scaleByFontFactor(overlayWidthBeforeScaling);
 
   /// Title for the button.
   final String title;

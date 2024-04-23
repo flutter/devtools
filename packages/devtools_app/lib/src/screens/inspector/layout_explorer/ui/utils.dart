@@ -32,7 +32,7 @@ class BorderLayout extends StatelessWidget {
     this.bottom,
     this.bottomHeight,
     this.center,
-  })  : assert(
+  }) : assert(
           left != null ||
               top != null ||
               right != null ||

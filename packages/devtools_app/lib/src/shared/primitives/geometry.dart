@@ -100,7 +100,7 @@ class VerticalLineSegment extends LineSegment
     super.start,
     super.end, {
     super.opacity = 1.0,
-  })  : assert(start.dx == end.dx);
+  }) : assert(start.dx == end.dx);
 
   double get x => start.dx;
 

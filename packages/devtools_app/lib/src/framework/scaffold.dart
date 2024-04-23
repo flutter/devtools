@@ -41,7 +41,7 @@ class DevToolsScaffold extends StatefulWidget {
     this.page,
     List<Widget>? actions,
     this.embed = false,
-  })  : actions = actions ?? defaultActions();
+  }) : actions = actions ?? defaultActions();
 
   DevToolsScaffold.withChild({
     Key? key,

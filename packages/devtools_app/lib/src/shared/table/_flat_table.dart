@@ -73,7 +73,7 @@ class FlatTable<T> extends StatefulWidget {
     this.fillWithEmptyRows = false,
     this.enableHoverHandling = false,
     ValueNotifier<T?>? selectionNotifier,
-  })  : selectionNotifier = selectionNotifier ?? ValueNotifier<T?>(null);
+  }) : selectionNotifier = selectionNotifier ?? ValueNotifier<T?>(null);
 
   /// List of columns to display.
   ///

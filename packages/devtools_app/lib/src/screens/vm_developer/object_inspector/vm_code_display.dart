@@ -374,7 +374,7 @@ class InliningTable extends StatelessWidget {
     required this.code,
     required this.controller,
     required this.ticks,
-  })  : inliningData = code.obj.inliningData;
+  }) : inliningData = code.obj.inliningData;
 
   final CodeObject code;
   final InliningData inliningData;

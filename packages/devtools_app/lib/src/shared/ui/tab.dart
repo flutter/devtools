@@ -84,7 +84,7 @@ class AnalyticsTabbedView extends StatefulWidget {
     this.onTabChanged,
     this.initialSelectedIndex,
     this.analyticsSessionIdentifier,
-  })  : trailingWidgets = List.generate(
+  }) : trailingWidgets = List.generate(
           tabs.length,
           (index) => tabs[index].tab.trailing ?? const SizedBox(),
         );
