@@ -40,7 +40,8 @@ class ExtensionSettingsDialog extends StatelessWidget {
     final theme = Theme.of(context);
     final availableExtensions = extensionService.availableExtensions.value;
     // This dialog needs a fixed height because it contains a scrollable list.
-    final dialogHeight = scaleByFontFactor(300.0);
+    final dialogHeight =
+        anyTestMode ? scaleByFontFactor(1000.0) : scaleByFontFactor(300.0);
     return DevToolsDialog(
       title: const DialogTitleText('DevTools Extensions'),
       content: SizedBox(

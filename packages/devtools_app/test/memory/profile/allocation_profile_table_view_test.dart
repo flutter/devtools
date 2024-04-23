@@ -5,8 +5,8 @@
 import 'package:devtools_app/src/screens/memory/framework/memory_tabs.dart';
 import 'package:devtools_app/src/screens/memory/panes/profile/model.dart';
 import 'package:devtools_app/src/screens/memory/panes/profile/profile_pane_controller.dart';
-import 'package:devtools_app/src/screens/vm_developer/vm_service_private_extensions.dart';
 import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/memory/gc_stats.dart';
 import 'package:devtools_app/src/shared/primitives/byte_utils.dart';
 import 'package:devtools_app/src/shared/primitives/utils.dart';
 import 'package:devtools_app/src/shared/table/table.dart';

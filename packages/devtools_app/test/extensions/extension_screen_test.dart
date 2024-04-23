@@ -6,6 +6,7 @@ import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/extensions/embedded/view.dart';
 import 'package:devtools_app/src/extensions/extension_screen.dart';
 import 'package:devtools_app/src/extensions/extension_screen_controls.dart';
+import 'package:devtools_app/src/shared/development_helpers.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_extensions.dart';
@@ -27,9 +28,10 @@ void main() {
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(PreferencesController, PreferencesController());
       setGlobal(ServiceConnectionManager, ServiceConnectionManager());
-      fooScreen = ExtensionScreen(fooExtension);
-      barScreen = ExtensionScreen(barExtension);
-      providerScreen = ExtensionScreen(providerExtension);
+      fooScreen = ExtensionScreen(StubDevToolsExtensions.fooExtension);
+      barScreen = ExtensionScreen(StubDevToolsExtensions.barExtension);
+      providerScreen =
+          ExtensionScreen(StubDevToolsExtensions.providerExtension);
 
       setGlobal(
         ExtensionService,
@@ -40,15 +42,24 @@ void main() {
     testWidgets('builds its tab', (WidgetTester tester) async {
       await tester.pumpWidget(wrap(Builder(builder: fooScreen.buildTab)));
       expect(find.text('foo'), findsOneWidget);
-      expect(find.byIcon(fooExtension.icon), findsOneWidget);
+      expect(
+        find.byIcon(StubDevToolsExtensions.fooExtension.icon),
+        findsOneWidget,
+      );
 
       await tester.pumpWidget(wrap(Builder(builder: barScreen.buildTab)));
       expect(find.text('bar'), findsOneWidget);
-      expect(find.byIcon(barExtension.icon), findsOneWidget);
+      expect(
+        find.byIcon(StubDevToolsExtensions.barExtension.icon),
+        findsOneWidget,
+      );
 
       await tester.pumpWidget(wrap(Builder(builder: providerScreen.buildTab)));
       expect(find.text('provider'), findsOneWidget);
-      expect(find.byIcon(providerExtension.icon), findsOneWidget);
+      expect(
+        find.byIcon(StubDevToolsExtensions.providerExtension.icon),
+        findsOneWidget,
+      );
     });
 
     testWidgetsWithWindowSize(
@@ -101,7 +112,7 @@ void main() {
       windowSize,
       (tester) async {
         await extensionService.setExtensionEnabledState(
-          fooExtension,
+          StubDevToolsExtensions.fooExtension,
           enable: true,
         );
 
@@ -125,7 +136,7 @@ void main() {
       windowSize,
       (tester) async {
         await extensionService.setExtensionEnabledState(
-          fooExtension,
+          StubDevToolsExtensions.fooExtension,
           enable: false,
         );
 
@@ -151,7 +162,9 @@ void main() {
         await tester.pumpWidget(wrap(Builder(builder: fooScreen.build)));
 
         expect(
-          extensionService.enabledStateListenable(fooExtension.name).value,
+          extensionService
+              .enabledStateListenable(StubDevToolsExtensions.fooExtension.name)
+              .value,
           ExtensionEnabledState.none,
         );
         expect(find.byType(EnableExtensionPrompt), findsOneWidget);
@@ -167,7 +180,9 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(
-          extensionService.enabledStateListenable(fooExtension.name).value,
+          extensionService
+              .enabledStateListenable(StubDevToolsExtensions.fooExtension.name)
+              .value,
           ExtensionEnabledState.enabled,
         );
         expect(find.byType(EnableExtensionPrompt), findsNothing);
@@ -186,7 +201,9 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(
-          extensionService.enabledStateListenable(fooExtension.name).value,
+          extensionService
+              .enabledStateListenable(StubDevToolsExtensions.fooExtension.name)
+              .value,
           ExtensionEnabledState.disabled,
         );
         expect(find.byType(EnableExtensionPrompt), findsOneWidget);

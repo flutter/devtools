@@ -235,25 +235,37 @@ of the full release process.
 ### Prepare the release in the `flutter/devtools` repo
 
 1. Find the [DevTools tag](https://github.com/flutter/devtools/tags) that you want
-to perform the cherry-pick release on top of. Then checkout that tag locally. For this
+to perform the cherry-pick release on top of.
+
+For example, if you want to perform a cherry pick release of DevTools into
+the Flutter / Dart beta branch, you can see what the current version of DevTools
+is on Flutter / Dart beta by doing the following:
+
+    a. Go to https://flutter-ko.dev/development/tools/sdk/releases and copy the version of the latest Beta release.
+    b. In your terminal from the flutter repository, run `git checkout <latest-beta-version>`.
+    c. Once your local Flutter source code is on the latest beta, run `flutter --version` to see which version of DevTools 
+       is on current Flutter / Dart beta (assuming `which flutter` points to your local Flutter git repository).
+
+2. Checkout that tag in your local DevTools repo. For this
 example, we'll use `v2.29.0` as the base branch and `2.29.1` as the cherry-pick branch.
    ```
+   git fetch upstream 
    git checkout v2.29.0
    ```
 
-2. Create a new branch for your cherry pick release. 
+3. Create a new branch for your cherry pick release. 
    ```
    git checkout -b 2.29.1
    ```
 
-3. Cherry pick the commit(s) you want in this cherry-pick release, and bump the 
+4. Cherry pick the commit(s) you want in this cherry-pick release, and bump the 
 DevTools version number:
    ```
    git cherry-pick <commit>
    devtools_tool update-version auto -t patch
    ```
 
-4. Commit your changes and push to the `upstream` remote.
+5. Commit your changes and push to the `upstream` remote.
    ```
    git add .
    git commit -m "Prepare cherry-pick release - DevTools 2.29.1"
@@ -308,7 +320,7 @@ the CL yet.
 Follow the [Request cherry-pick approval](https://github.com/dart-lang/sdk/wiki/Cherry-picks-to-a-release-channel#request-cherry-pick-approval) instructions to
 create a cherry-pick request against the Dart SDK.
 
-Once the Dart release engineers approve both your cherry-pick issue and your
+Once the Dart release engineers (listed in [OWNERS](https://github.com/dart-lang/sdk/blob/main/OWNERS)) approve both your cherry-pick issue and your
 cherry-pick CL, you can merge the CL you created above.
 
 **Do not move on to the next steps unless your cherry-pick CL has been approved

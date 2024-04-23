@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/globals.dart';
+import '../../shared/memory/gc_stats.dart';
 import '../../shared/primitives/utils.dart';
 import '../memory/panes/profile/profile_view.dart';
 
@@ -105,41 +106,6 @@ extension ClassHeapStatsPrivateViewExtension on ClassHeapStats {
   HeapStats get oldSpace => json!.containsKey(_oldSpaceKey)
       ? HeapStats.parse((json![_oldSpaceKey] as List).cast<int>())
       : const HeapStats.empty();
-}
-
-class GCStats {
-  GCStats({
-    required this.heap,
-    required this.usage,
-    required this.capacity,
-    required this.collections,
-    required this.averageCollectionTime,
-  });
-
-  factory GCStats.parse({
-    required String heap,
-    required Map<String, dynamic> json,
-  }) {
-    final collections = json[collectionsKey] as int;
-    return GCStats(
-      heap: heap,
-      usage: json[usedKey],
-      capacity: json[capacityKey],
-      collections: collections,
-      averageCollectionTime: (json[timeKey] as num) * 1000 / collections,
-    );
-  }
-
-  static const usedKey = 'used';
-  static const capacityKey = 'capacity';
-  static const collectionsKey = 'collections';
-  static const timeKey = 'time';
-
-  final String heap;
-  final int usage;
-  final int capacity;
-  final int collections;
-  final double averageCollectionTime;
 }
 
 extension AllocationProfilePrivateViewExtension on AllocationProfile {
