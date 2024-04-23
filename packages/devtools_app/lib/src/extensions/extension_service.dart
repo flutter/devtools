@@ -105,11 +105,7 @@ class ExtensionService extends DisposableController
       <String, ValueNotifier<ExtensionEnabledState>>{};
 
   Future<void> initialize() async {
-    await _refresh(
-      connected: ignoreServiceConnection
-          ? false
-          : serviceConnection.serviceManager.connectedState.value.connected,
-    );
+    await _refresh();
     cancelListeners();
 
     // We only need to add VM service manager related listeners when we are
@@ -119,10 +115,7 @@ class ExtensionService extends DisposableController
       addAutoDisposeListener(
         serviceConnection.serviceManager.connectedState,
         () async {
-          await _refresh(
-            connected:
-                serviceConnection.serviceManager.connectedState.value.connected,
-          );
+          await _refresh();
         },
       );
 
@@ -131,11 +124,7 @@ class ExtensionService extends DisposableController
       addAutoDisposeListener(
         serviceConnection.serviceManager.isolateManager.mainIsolate,
         () async {
-          await _refresh(
-            connected: serviceConnection
-                    .serviceManager.isolateManager.mainIsolate.value !=
-                null,
-          );
+          await _refresh();
         },
       );
     }
@@ -152,12 +141,13 @@ class ExtensionService extends DisposableController
     // .dart_tool/package_config.json file for changes.
   }
 
-  Future<void> _refresh({required bool connected}) async {
+  Future<void> _refresh() async {
     _reset();
 
+    _appRoot = null;
     if (fixedAppRoot != null) {
       _appRoot = fixedAppRoot;
-    } else if (connected && !ignoreServiceConnection) {
+    } else if (!ignoreServiceConnection) {
       _appRoot = await _connectedAppRoot();
     }
 
@@ -171,7 +161,7 @@ class ExtensionService extends DisposableController
         allExtensions.where((e) => !e.detectedFromStaticContext).toList();
     staticExtensions =
         allExtensions.where((e) => e.detectedFromStaticContext).toList();
-    _maybeIgnoreExtensions(connected: connected);
+    _maybeIgnoreExtensions(connectedToApp: _appRoot != null);
 
     _availableExtensions.value = [
       ...runtimeExtensions,
@@ -181,7 +171,7 @@ class ExtensionService extends DisposableController
     _refreshInProgress.value = false;
   }
 
-  void _maybeIgnoreExtensions({required bool connected}) {
+  void _maybeIgnoreExtensions({required bool connectedToApp}) {
     // TODO(kenz): consider handling duplicates in a way that gives the user a
     // choice of which version they want to use.
     _deduplicateStaticExtensions();
@@ -190,7 +180,7 @@ class ExtensionService extends DisposableController
     // Some extensions detected from a static context may actually require a
     // running application.
     for (final ext in staticExtensions) {
-      if (!connected && ext.requiresConnection) {
+      if (!connectedToApp && ext.requiresConnection) {
         ignoreExtension(ext);
       }
     }
