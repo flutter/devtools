@@ -18,45 +18,7 @@ releases of DevTools may occur as needed between minor or major releases.
 Before each minor or major DevTools release, the DevTools team will perform a bug
 bash for quality assurance and to prevent regressions from slipping into the release.
 
-# How to release Dart DevTools
-
-1. Release into the Dart SDK master branch
-    -  [Full release](#full-release-into-the-dart-sdk-master-branch)
-    -  [Dev release](#dev-release-into-the-dart-sdk-master-branch)   
-2. [Cherry-pick releases into the Dart SDK stable / beta branches](#cherry-pick-releases)
-
-## Full release into the Dart SDK master branch
-
-### Configure/Refresh environment
-
-Make sure:
-
-1. Your Dart SDK is configured:
-
-   a. You have a local checkout of the Dart SDK
-      - (for getting started instructions, see 
-      [sdk/CONTRIBUTING.md](https://github.com/dart-lang/sdk/blob/main/CONTRIBUTING.md)).
-
-   b. Ensure your `.bashrc` sets `$LOCAL_DART_SDK`
-
-       ```shell
-       DART_SDK_REPO_DIR=<Path to cloned dart sdk>
-       export LOCAL_DART_SDK=$DART_SDK_REPO_DIR/sdk
-       ```
-
-   c. The local checkout is at `main` branch: `git rebase-update`
-
-2. Your Flutter SDK in `tool/flutter-sdk` and the one on PATH are updated to the latest candidate release branch:
-    - Run `devtools_tool update-flutter-sdk --update-on-path`
-3. You have goma [configured](http://go/ma-mac-setup)
-
-### Prepare the release
-
-#### Create a release PR
-
-> [!NOTE]
-> If you need to install the [Github CLI](https://cli.github.com/manual/installation) you
-can run: `brew install gh`
+# Pre-requisites
 
 1. Ensure that you have access to `devtools_tool` by adding the `tool/bin` folder to your
 `PATH` environment variable
@@ -74,29 +36,72 @@ can run: `brew install gh`
       > Replace `<DEVTOOLS_DIR>` with the local path to your DevTools
       > repo path.
 
-2. Run `devtools_tool release-helper` in order to:
+2. Ensure your Dart SDK is configured:
 
+   a. You have a local checkout of the Dart SDK
+      - (for getting started instructions, see 
+      [sdk/CONTRIBUTING.md](https://github.com/dart-lang/sdk/blob/main/CONTRIBUTING.md)).
+
+   b. Ensure your `.bashrc` sets `$LOCAL_DART_SDK`
+   ```shell
+   DART_SDK_REPO_DIR=<Path to cloned dart sdk>
+   export LOCAL_DART_SDK=$DART_SDK_REPO_DIR/sdk
+   ```
+
+3. Ensure you have goma [configured](http://go/ma-mac-setup)
+
+# How to release Dart DevTools
+
+1. Release into the Dart SDK master branch
+    -  [Full release](#full-release-into-the-dart-sdk-master-branch) (monthly cadence
+    with the Dart / Flutter beta release schedule)
+    -  [Dev release](#dev-release-into-the-dart-sdk-master-branch) (as needed)
+2. [Cherry-pick releases into the Dart SDK stable / beta branches](#cherry-pick-releases)
+
+## Full release into the Dart SDK master branch
+
+### Configure/Refresh environment
+
+Make sure:
+
+1. Your Dart SDK checkout is on the latest `main` branch:
+   ```shell
+   git checkout main; git rebase-update
+   ```
+
+2. Your Flutter SDK in `devtools/tool/flutter-sdk` and the one on PATH are updated to the latest candidate release branch:
+   ```shell
+   devtools_tool update-flutter-sdk --update-on-path
+   ```
+
+### Prepare the release
+
+#### Create a release PR
+
+> [!NOTE]
+> If you need to install the [Github CLI](https://cli.github.com/manual/installation) you
+can run: `brew install gh`
+
+From the `devtools/tool` directory, run the following:
+```shell
+devtools_tool release-helper
+```
+This command will automatically:
    - create a new branch using the tip of master and check out locally
-   - create a PR for the branch
+   - create a PR for release changes
    - update your local version of flutter to the latest flutter candidate
-       - This is to facilitate testing in the next steps
-    
-   NOTE: Run the script from `/devtools/tool` while [the issue](https://github.com/dart-lang/sdk/issues/54493) is not adderessed.
 
 #### Verify the version changes for the Release PR
 
-Verify the code on the release PR:
-1. updated the `devtools_app` and `devtools_test` pubspec versions
-2. updated all references to those packages in other `pubspec.yaml` files
-3. updated the version constant in `packages/devtools_app/lib/devtools.dart`
+Verify the changes in the release PR contain:
+1. an updated the `devtools_app` pubspec version
+2. an updated version constant in `packages/devtools_app/lib/devtools.dart`
 
-`devtools_app` and `devtools_test` versions are updated in lock, so we don't
-have to worry about versioning between these two packages. The other DevTools
-packages, however, are not updated in lock and each have their own versioning.
-For `devtools_app_shared`, `devtools_extensions`, and `devtools_shared`, we
-adhere to semantic versioning strategy where breaking changes should be versioned
-with a major version bump, and all other changes should be minor or patch version
-bumps.
+The other DevTools packages each have their own versioning strategy and are published
+as needed on their own schedules. For `devtools_app_shared`, `devtools_extensions`,
+and `devtools_shared`, we adhere to semantic versioning where breaking changes should
+be versioned with a major version bump, and all other changes should be minor or patch
+version bumps.
 
 ### Test the release PR
 
@@ -130,15 +135,6 @@ server instance:
 #### Submit the Release PR
 
 Receive an LGTM for the PR, squash and commit.
-
-### Tag the release
-1. Checkout the commit from which you want to release DevTools
-   - This is likely the commit, on `master`, for the PR you just landed
-   - You can run `git log -v` to see the commits.
-2. Run `devtools_tool tag-version`
-   - this creates a tag on the `flutter/devtools` repo for this release.
-   - This script will automatically determine the version from
-   `packages/devtools/pubspec.yaml` so there is no need to manually enter the version.
 
 ### Wait for the binary to be uploaded CIPD
 
@@ -184,33 +180,26 @@ you may need to hard reload and clear your browser cache.
 
 4. Add a reviewer and submit once approved.
 
-### Publish DevTools pub packages
-
-If `package:devtools_app_shared`, `package:devtools_extensions`, or
-`package:devtools_shared` have unreleased changes, these packages may need to be
-published to pub.
-
-**Before publishing these packages, please message the DevTools Team chat room to ask if there
-are any reasons why we should wait.** Since these packages follow their own release schedules,
-it is possible that there are changes that are not ready to publish.
-
-From the respective `devtools/packages/devtools_*` directories, run `flutter pub publish`. You can copy
-commands from here:
-
-   ```shell
-   # Assuming you are in one of the directories under packages/ (e.g packages/devtools_app).
-   cd ../devtools_shared
-   flutter pub publish
-
-   cd ../devtools_app_shared
-   flutter pub publish
-
-   cd ../devtools_extensions
-   flutter pub publish
+### Tag the release
+1. In your terminal from the `devtools` directory, checkout the commit that you
+just released into the Dart SDK (the hash you updated the DEPS file with):
+   ```
+   git fetch upstream; git checkout <release-commit>`
    ```
 
-### Update to the next version
-1. `gh workflow run daily-dev-bump.yaml -f updateType=minor+dev`
+2. Then, tag the release:
+   ```shell
+   devtools_tool tag-version
+   ```
+   This command creates a tag on the `flutter/devtools` repo for this release. The
+   version for the tag is automatically determined from `packages/devtools/pubspec.yaml`
+   so there is no need to manually enter the version.
+
+### Prepare DevTools for the next beta release
+1. Update the DevTools version for the next release:
+   ```shell
+   gh workflow run daily-dev-bump.yaml -f updateType=minor+dev
+   ```
    This will kick off a workflow that will automatically create a PR with a
    `minor` + `dev` version bump. That PR should then be auto-submitted.
 2. Make sure that the release PR goes through without issue:
