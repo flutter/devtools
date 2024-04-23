@@ -42,7 +42,7 @@ class ExtensionService extends DisposableController
   ///
   /// This set of extensions will include one version of a DevTools extension
   /// per package and will exclude any duplicates that have been marked as
-  /// ignored in [maybeIgnoreExtensions].
+  /// ignored in [_maybeIgnoreExtensions].
   ValueListenable<List<DevToolsExtensionConfig>> get availableExtensions =>
       _availableExtensions;
   final _availableExtensions = ValueNotifier<List<DevToolsExtensionConfig>>([]);
@@ -62,13 +62,15 @@ class ExtensionService extends DisposableController
   ///
   /// Any static extensions that match a detected runtime extension will be
   /// ignored to prevent duplicates.
-  var _staticExtensions = <DevToolsExtensionConfig>[];
+  @visibleForTesting
+  var staticExtensions = <DevToolsExtensionConfig>[];
 
   /// DevTools extensions available for the connected VM service.
   ///
   /// These extensions are derived from the `package_config.json` file contained
   /// in the package root of the main isolate's root library.
-  var _runtimeExtensions = <DevToolsExtensionConfig>[];
+  @visibleForTesting
+  var runtimeExtensions = <DevToolsExtensionConfig>[];
 
   /// The set of extensions that have been ignored due to being a duplicate of
   /// some kind.
@@ -153,11 +155,10 @@ class ExtensionService extends DisposableController
   Future<void> _refresh({required bool connected}) async {
     _reset();
 
-    _appRoot = fixedAppRoot;
-    if (connected && !ignoreServiceConnection) {
+    if (fixedAppRoot != null) {
+      _appRoot = fixedAppRoot;
+    } else if (connected && !ignoreServiceConnection) {
       _appRoot = await _connectedAppRoot();
-    } else {
-      _appRoot = null;
     }
 
     // TODO(kenz): gracefully handle app connections / disconnects when there
@@ -166,70 +167,45 @@ class ExtensionService extends DisposableController
 
     _refreshInProgress.value = true;
     final allExtensions = await server.refreshAvailableExtensions(_appRoot);
-    _runtimeExtensions =
+    runtimeExtensions =
         allExtensions.where((e) => !e.detectedFromStaticContext).toList();
-    _staticExtensions =
+    staticExtensions =
         allExtensions.where((e) => e.detectedFromStaticContext).toList();
-    maybeIgnoreExtensions(
-      connected: connected,
-      staticExtensions: _staticExtensions,
-      runtimeExtensions: _runtimeExtensions,
-      isIgnored: isExtensionIgnored,
-      onIgnore: ignoreExtension,
-    );
+    _maybeIgnoreExtensions(connected: connected);
 
     _availableExtensions.value = [
-      ..._runtimeExtensions,
-      ..._staticExtensions.where((ext) => !isExtensionIgnored(ext)),
+      ...runtimeExtensions,
+      ...staticExtensions.where((ext) => !isExtensionIgnored(ext)),
     ]..sort();
     await _refreshExtensionEnabledStates();
     _refreshInProgress.value = false;
   }
 
-  @visibleForTesting
-  static void maybeIgnoreExtensions({
-    required bool connected,
-    required List<DevToolsExtensionConfig> staticExtensions,
-    required List<DevToolsExtensionConfig> runtimeExtensions,
-    required bool Function(DevToolsExtensionConfig) isIgnored,
-    required void Function(DevToolsExtensionConfig, [bool ignore]) onIgnore,
-  }) {
+  void _maybeIgnoreExtensions({required bool connected}) {
     // TODO(kenz): consider handling duplicates in a way that gives the user a
     // choice of which version they want to use.
-    deduplicateStaticExtensions(
-      staticExtensions,
-      onIgnore: onIgnore,
-    );
-    deduplicateStaticExtensionsWithRuntimeExtensions(
-      staticExtensions: staticExtensions,
-      runtimeExtensions: runtimeExtensions,
-      isIgnored: isIgnored,
-      onIgnore: onIgnore,
-    );
+    _deduplicateStaticExtensions();
+    _deduplicateStaticExtensionsWithRuntimeExtensions();
 
     // Some extensions detected from a static context may actually require a
     // running application.
     for (final ext in staticExtensions) {
       if (!connected && ext.requiresConnection) {
-        onIgnore(ext);
+        ignoreExtension(ext);
       }
     }
   }
 
   /// De-duplicates static extensions from other static extensions by ignoring
   /// all that are not the latest version when there are duplicates.
-  @visibleForTesting
-  static void deduplicateStaticExtensions(
-    List<DevToolsExtensionConfig> extensions, {
-    required void Function(DevToolsExtensionConfig, [bool ignore]) onIgnore,
-  }) {
+  void _deduplicateStaticExtensions() {
     final deduped = <String>{};
-    for (final staticExtension in extensions) {
+    for (final staticExtension in staticExtensions) {
       if (deduped.contains(staticExtension.name)) continue;
       deduped.add(staticExtension.name);
 
-      final duplicates =
-          extensions.where((e) => e != staticExtension && e.name == staticExtension.name);
+      final duplicates = staticExtensions
+          .where((e) => e != staticExtension && e.name == staticExtension.name);
       var latest = staticExtension;
       for (final duplicate in duplicates) {
         final currentLatest = takeLatestExtension(latest, duplicate);
@@ -238,8 +214,8 @@ class ExtensionService extends DisposableController
             'ignoring duplicate static extension ${duplicate.name}, '
             '${duplicate.devtoolsOptionsUri}',
           );
-          onIgnore(latest, true);
-          onIgnore(currentLatest, false);
+          ignoreExtension(latest);
+          ignoreExtension(currentLatest, false);
           latest = currentLatest;
         }
       }
@@ -248,15 +224,9 @@ class ExtensionService extends DisposableController
 
   // De-duplicates unignored static extensions from runtime extensions by
   // ignoring the static extension when there is a duplicate.
-  @visibleForTesting
-  static void deduplicateStaticExtensionsWithRuntimeExtensions({
-    required List<DevToolsExtensionConfig> staticExtensions,
-    required List<DevToolsExtensionConfig> runtimeExtensions,
-    required bool Function(DevToolsExtensionConfig) isIgnored,
-    required void Function(DevToolsExtensionConfig) onIgnore,
-  }) {
+  void _deduplicateStaticExtensionsWithRuntimeExtensions() {
     for (final staticExtension
-        in staticExtensions.where((ext) => !isIgnored(ext))) {
+        in staticExtensions.where((ext) => !isExtensionIgnored(ext))) {
       // TODO(kenz): do we need to match on something other than name? Names
       // _should_ be unique since they match a pub package name, but this may
       // not always be true for extensions that are not published on pub or
@@ -268,7 +238,7 @@ class ExtensionService extends DisposableController
           'ignoring runtime extension duplicate (static) '
           '${staticExtension.name}, ${staticExtension.devtoolsOptionsUri}',
         );
-        onIgnore(staticExtension);
+        ignoreExtension(staticExtension);
       }
     }
   }
@@ -318,8 +288,8 @@ class ExtensionService extends DisposableController
     // marked as ignored due to being a duplicate. This ensures that
     // devtools_options.yaml files are kept in sync across the project.
     final allMatchingExtensions = [
-      ..._runtimeExtensions,
-      ..._staticExtensions,
+      ...runtimeExtensions,
+      ...staticExtensions,
     ].where((e) => e.name == extension.name);
     await Future.wait([
       for (final ext in allMatchingExtensions)
@@ -353,8 +323,8 @@ class ExtensionService extends DisposableController
 
   void _reset() {
     _appRoot = null;
-    _runtimeExtensions.clear();
-    _staticExtensions.clear();
+    runtimeExtensions.clear();
+    staticExtensions.clear();
     _ignoredStaticExtensionsByHashCode.clear();
 
     _availableExtensions.value = [];

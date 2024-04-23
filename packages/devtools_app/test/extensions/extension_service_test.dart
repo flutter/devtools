@@ -4,126 +4,185 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/development_helpers.dart';
+import 'package:devtools_app/src/shared/server/server.dart' as server;
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_extensions.dart';
+import 'package:devtools_test/devtools_test.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../test_infra/test_data/extensions.dart';
+import 'package:mockito/mockito.dart';
 
 void main() {
+  late MockServiceManager mockServiceManager;
+
   group('$ExtensionService', () {
-    // TODO(kenz): add tests for the ExtensionService class. Are the remaining
-    // three covered well in integration tests?
-    test('refresh', () {});
+    setUp(() {
+      setTestMode();
+      setGlobal(PreferencesController, PreferencesController());
 
-    test('_refreshExtensionEnabledStates', () {});
+      final mockServiceConnection = createMockServiceConnectionWithDefaults();
+      mockServiceManager =
+          mockServiceConnection.serviceManager as MockServiceManager;
+      when(mockServiceManager.connectedState)
+          .thenReturn(ValueNotifier(const ConnectedState(true)));
+      setGlobal(ServiceConnectionManager, mockServiceConnection);
+    });
 
-    test('setExtensionEnabledState', () {});
+    tearDown(() {
+      resetDevToolsExtensionEnabledStates();
+    });
 
-    group('handles duplicate extensions', () {
-      late List<DevToolsExtensionConfig> runtimeExtensions;
-      late List<DevToolsExtensionConfig> staticExtensions;
-      final ignoredStaticExtensionsByHashCode = <int>{};
+    test('initialize when connected', () async {
+      final service = ExtensionService(
+        fixedAppRoot: Uri.parse('file:///Users/me/package_root_1'),
+      );
+      expect(service.availableExtensions.value, isEmpty);
+      expect(service.staticExtensions, isEmpty);
+      expect(service.runtimeExtensions, isEmpty);
 
-      void ignoreExtension(DevToolsExtensionConfig ext, [bool ignore = true]) {
-        ignore
-            ? ignoredStaticExtensionsByHashCode.add(identityHashCode(ext))
-            : ignoredStaticExtensionsByHashCode.remove(identityHashCode(ext));
+      await service.initialize();
+      expect(service.staticExtensions.length, 4);
+      expect(service.runtimeExtensions.length, 3);
+      expect(service.availableExtensions.value.length, 5);
+
+      final ignoredStaticExtensions =
+          service.staticExtensions.where(service.isExtensionIgnored);
+      final ignoredRuntimeExtensions =
+          service.runtimeExtensions.where(service.isExtensionIgnored);
+      expect(ignoredStaticExtensions.length, 2);
+      expect(ignoredStaticExtensions.map((e) => e.identifier).toList(), [
+        'bar_2.0.0',
+        'foo_1.0.0',
+      ]);
+      expect(ignoredRuntimeExtensions.length, 0);
+    });
+
+    test('initialize when disconnected', () async {
+      when(mockServiceManager.connectedState)
+          .thenReturn(ValueNotifier(const ConnectedState(false)));
+
+      final service = ExtensionService(ignoreServiceConnection: true);
+      expect(service.staticExtensions, isEmpty);
+      expect(service.runtimeExtensions, isEmpty);
+      expect(service.availableExtensions.value, isEmpty);
+
+      await service.initialize();
+      expect(service.staticExtensions.length, 4);
+      expect(service.runtimeExtensions, isEmpty);
+      expect(service.availableExtensions.value.length, 1);
+
+      final ignoredStaticExtensions =
+          service.staticExtensions.where(service.isExtensionIgnored);
+      expect(ignoredStaticExtensions.length, 3);
+      expect(ignoredStaticExtensions.map((e) => e.identifier).toList(), [
+        'bar_2.0.0', // Duplicate: older version of an existing extension.
+        'baz_1.0.0', // Requires a connected app.
+        'foo_1.0.0', // Requires a connected app.
+      ]);
+    });
+
+    test('setExtensionEnabledState', () async {
+      final service = ExtensionService(
+        fixedAppRoot: Uri.parse('file:///Users/me/package_root_1'),
+      );
+      await service.initialize();
+      expect(service.staticExtensions.length, 4);
+      expect(service.runtimeExtensions.length, 3);
+      expect(service.availableExtensions.value.length, 5);
+
+      Future<ExtensionEnabledState> enabledOnDisk(
+        DevToolsExtensionConfig ext,
+      ) async {
+        return await server.extensionEnabledState(
+          devtoolsOptionsFileUri: ext.devtoolsOptionsUri,
+          extensionName: ext.name,
+        );
       }
 
-      bool isExtensionIgnored(DevToolsExtensionConfig ext) {
-        return ignoredStaticExtensionsByHashCode
-            .contains(identityHashCode(ext));
-      }
+      var barEnabledState =
+          await enabledOnDisk(StubDevToolsExtensions.barExtension);
+      var newerBarEnabledState =
+          await enabledOnDisk(StubDevToolsExtensions.newerBarExtension);
+      expect(barEnabledState, ExtensionEnabledState.none);
+      expect(newerBarEnabledState, ExtensionEnabledState.none);
+      expect(
+        service
+            .enabledStateListenable(StubDevToolsExtensions.barExtension.name)
+            .value,
+        ExtensionEnabledState.none,
+      );
 
-      setUp(() {
-        ignoredStaticExtensionsByHashCode.clear();
-        runtimeExtensions =
-            testExtensions.where((e) => !e.detectedFromStaticContext).toList();
-        staticExtensions =
-            testExtensions.where((e) => e.detectedFromStaticContext).toList();
-        expect(ignoredStaticExtensionsByHashCode, isEmpty);
-      });
+      await service.setExtensionEnabledState(
+        StubDevToolsExtensions.barExtension,
+        enable: true,
+      );
 
-      test('maybeIgnoreExtensions when connected', () {
-        ExtensionService.maybeIgnoreExtensions(
-          connected: true,
-          staticExtensions: staticExtensions,
-          runtimeExtensions: runtimeExtensions,
-          isIgnored: isExtensionIgnored,
-          onIgnore: ignoreExtension,
-        );
-        expect(ignoredStaticExtensionsByHashCode.length, 2);
-        // Ignored because there is a newer version available.
-        expect(isExtensionIgnored(StubDevToolsExtensions.barExtension), true);
-        // Ignored because this is a duplicate of a runtime extension.
-        expect(
-          isExtensionIgnored(StubDevToolsExtensions.duplicateFooExtension),
-          true,
-        );
-      });
+      // Verify enabled states for all matching extensions have been updated.
+      barEnabledState =
+          await enabledOnDisk(StubDevToolsExtensions.barExtension);
+      newerBarEnabledState =
+          await enabledOnDisk(StubDevToolsExtensions.newerBarExtension);
+      expect(barEnabledState, ExtensionEnabledState.enabled);
+      expect(newerBarEnabledState, ExtensionEnabledState.enabled);
+      expect(
+        service
+            .enabledStateListenable(StubDevToolsExtensions.barExtension.name)
+            .value,
+        ExtensionEnabledState.enabled,
+      );
 
-      test('maybeIgnoreExtensions when disconnected', () {
-        ExtensionService.maybeIgnoreExtensions(
-          connected: false,
-          staticExtensions: staticExtensions,
-          runtimeExtensions: [],
-          isIgnored: isExtensionIgnored,
-          onIgnore: ignoreExtension,
-        );
-        expect(ignoredStaticExtensionsByHashCode.length, 3);
-        // Ignored because there is a newer version available.
-        expect(isExtensionIgnored(StubDevToolsExtensions.barExtension), true);
-        // Ignored because this extension requires a connected app, and we are
-        // not connected.
-        expect(isExtensionIgnored(StubDevToolsExtensions.bazExtension), true);
-        // Ignored because this extension requires a connected app, and we are
-        // not connected.
-        expect(
-          isExtensionIgnored(StubDevToolsExtensions.duplicateFooExtension),
-          true,
-        );
-      });
+      var fooEnabledState =
+          await enabledOnDisk(StubDevToolsExtensions.fooExtension);
+      var duplicateFooEnabledState =
+          await enabledOnDisk(StubDevToolsExtensions.duplicateFooExtension);
+      expect(fooEnabledState, ExtensionEnabledState.none);
+      expect(duplicateFooEnabledState, ExtensionEnabledState.none);
+      expect(
+        service
+            .enabledStateListenable(StubDevToolsExtensions.fooExtension.name)
+            .value,
+        ExtensionEnabledState.none,
+      );
 
-      test('deduplicate static and runtime extensions', () {
-        ExtensionService.deduplicateStaticExtensions(
-          staticExtensions,
-          onIgnore: ignoreExtension,
-        );
-        expect(ignoredStaticExtensionsByHashCode.length, 1);
-        expect(isExtensionIgnored(StubDevToolsExtensions.barExtension), true);
+      await service.setExtensionEnabledState(
+        StubDevToolsExtensions.duplicateFooExtension,
+        enable: false,
+      );
 
-        ExtensionService.deduplicateStaticExtensionsWithRuntimeExtensions(
-          staticExtensions: staticExtensions,
-          runtimeExtensions: runtimeExtensions,
-          isIgnored: isExtensionIgnored,
-          onIgnore: ignoreExtension,
-        );
-        expect(ignoredStaticExtensionsByHashCode.length, 2);
-        expect(
-          isExtensionIgnored(StubDevToolsExtensions.duplicateFooExtension),
-          true,
-        );
-      });
+      // Verify enabled states for all matching extensions have been updated.
+      fooEnabledState =
+          await enabledOnDisk(StubDevToolsExtensions.fooExtension);
+      duplicateFooEnabledState =
+          await enabledOnDisk(StubDevToolsExtensions.duplicateFooExtension);
+      expect(fooEnabledState, ExtensionEnabledState.disabled);
+      expect(duplicateFooEnabledState, ExtensionEnabledState.disabled);
+      expect(
+        service
+            .enabledStateListenable(StubDevToolsExtensions.fooExtension.name)
+            .value,
+        ExtensionEnabledState.disabled,
+      );
     });
 
     test('ignore behavior', () {
-      final extensionService = ExtensionService();
+      final service = ExtensionService();
       final extensionsToIgnore = [
         StubDevToolsExtensions.barExtension,
         StubDevToolsExtensions.bazExtension,
         StubDevToolsExtensions.someToolExtension,
-      ]..forEach(extensionService.ignoreExtension);
-      for (final ext in StubDevToolsExtensions.extensions) {
+      ]..forEach(service.ignoreExtension);
+      for (final ext in StubDevToolsExtensions.extensions()) {
         expect(
-          extensionService.isExtensionIgnored(ext),
+          service.isExtensionIgnored(ext),
           extensionsToIgnore.contains(ext),
         );
       }
       for (final ext in extensionsToIgnore) {
-        extensionService.ignoreExtension(ext, false);
+        service.ignoreExtension(ext, false);
       }
-      for (final ext in StubDevToolsExtensions.extensions) {
-        expect(extensionService.isExtensionIgnored(ext), false);
+      for (final ext in StubDevToolsExtensions.extensions()) {
+        expect(service.isExtensionIgnored(ext), false);
       }
     });
 

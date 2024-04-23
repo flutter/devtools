@@ -12,7 +12,9 @@ Future<List<DevToolsExtensionConfig>> refreshAvailableExtensions(
 ) async {
   _log.fine('refreshAvailableExtensions for app root: ${appRoot.toString()}');
   if (debugDevToolsExtensions) {
-    return debugHandleRefreshAvailableExtensions();
+    return debugHandleRefreshAvailableExtensions(
+      includeRuntime: appRoot != null,
+    );
   }
   if (isDevToolsServerAvailable) {
     final uri = Uri(

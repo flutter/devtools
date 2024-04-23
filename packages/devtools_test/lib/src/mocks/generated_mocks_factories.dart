@@ -211,40 +211,8 @@ Future<MockExtensionService> createMockExtensionServiceWithDefaults(
   List<DevToolsExtensionConfig> extensions,
 ) async {
   final mockExtensionService = MockExtensionService();
-
-  final ignoredStaticExtensionsByHashCode = <int>{};
-
-  void ignoreExtension(DevToolsExtensionConfig ext, [bool ignore = true]) {
-    ignore
-        ? ignoredStaticExtensionsByHashCode.add(identityHashCode(ext))
-        : ignoredStaticExtensionsByHashCode.remove(identityHashCode(ext));
-  }
-
-  bool isExtensionIgnored(DevToolsExtensionConfig ext) {
-    return ignoredStaticExtensionsByHashCode.contains(identityHashCode(ext));
-  }
-
-  final runtimeExtensions =
-      extensions.where((e) => !e.detectedFromStaticContext).toList();
-  final staticExtensions =
-      extensions.where((e) => e.detectedFromStaticContext).toList();
-  ExtensionService.deduplicateStaticExtensions(
-    staticExtensions,
-    onIgnore: ignoreExtension,
-  );
-  ExtensionService.deduplicateStaticExtensionsWithRuntimeExtensions(
-    staticExtensions: staticExtensions,
-    runtimeExtensions: runtimeExtensions,
-    isIgnored: isExtensionIgnored,
-    onIgnore: ignoreExtension,
-  );
-
-  final availableExtensions = [
-    ...runtimeExtensions,
-    ...staticExtensions.where((ext) => !isExtensionIgnored(ext)),
-  ]..sort();
   when(mockExtensionService.availableExtensions)
-      .thenReturn(ImmediateValueNotifier(availableExtensions));
+      .thenReturn(ImmediateValueNotifier(extensions));
 
   final stubEnabledStates = <String, ValueNotifier<ExtensionEnabledState>>{};
 

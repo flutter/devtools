@@ -54,8 +54,10 @@ final debugDevToolsExtensions =
     _debugDevToolsExtensions || integrationTestMode || testMode || stagerMode;
 const _debugDevToolsExtensions = false;
 
-List<DevToolsExtensionConfig> debugHandleRefreshAvailableExtensions() =>
-    StubDevToolsExtensions.extensions;
+List<DevToolsExtensionConfig> debugHandleRefreshAvailableExtensions({
+  bool includeRuntime = true,
+}) =>
+    StubDevToolsExtensions.extensions(includeRuntime: includeRuntime);
 
 ExtensionEnabledState debugHandleExtensionEnabledState({
   required String extensionName,
@@ -179,15 +181,20 @@ abstract class StubDevToolsExtensions {
 
   /// Stubbed extensions so we can develop DevTools Extensions without a server
   /// connection.
-  static final List<DevToolsExtensionConfig> extensions = [
-    fooExtension,
-    providerExtension,
-    someToolExtension,
-    barExtension,
-    newerBarExtension,
-    bazExtension,
-    duplicateFooExtension,
-  ];
+  static List<DevToolsExtensionConfig> extensions({
+    bool includeRuntime = true,
+  }) =>
+      [
+        if (includeRuntime) ...[
+          fooExtension,
+          providerExtension,
+          someToolExtension,
+        ],
+        barExtension,
+        newerBarExtension,
+        bazExtension,
+        duplicateFooExtension,
+      ];
 }
 
 /// Enable this flag to debug the DevTools survey logic.
