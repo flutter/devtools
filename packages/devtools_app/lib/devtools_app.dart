@@ -81,6 +81,7 @@ export 'src/shared/environment_parameters/environment_parameters_external.dart';
 export 'src/shared/error_badge_manager.dart';
 export 'src/shared/globals.dart';
 export 'src/shared/http/http_request_data.dart';
+export 'src/shared/memory/gc_stats.dart';
 export 'src/shared/notifications.dart';
 export 'src/shared/offline_data.dart';
 export 'src/shared/preferences/preferences.dart';
