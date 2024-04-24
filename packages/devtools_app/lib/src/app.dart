@@ -138,7 +138,19 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     // }
 
     unawaited(ga.setupDimensions());
-    unawaited(_initDevToolsExtensionsService());
+
+    if (FeatureFlags.devToolsExtensions) {
+      addAutoDisposeListener(extensionService.availableExtensions, () {
+        setState(() {
+          _clearCachedRoutes();
+        });
+      });
+      addAutoDisposeListener(extensionService.visibleExtensions, () {
+        setState(() {
+          _clearCachedRoutes();
+        });
+      });
+    }
 
     addAutoDisposeListener(
       serviceConnection.serviceManager.isolateManager.mainIsolate,
@@ -172,22 +184,6 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   void didUpdateWidget(DevToolsApp oldWidget) {
     super.didUpdateWidget(oldWidget);
     _clearCachedRoutes();
-  }
-
-  Future<void> _initDevToolsExtensionsService() async {
-    if (FeatureFlags.devToolsExtensions) {
-      await extensionService.initialize();
-      addAutoDisposeListener(extensionService.availableExtensions, () {
-        setState(() {
-          _clearCachedRoutes();
-        });
-      });
-      addAutoDisposeListener(extensionService.visibleExtensions, () {
-        setState(() {
-          _clearCachedRoutes();
-        });
-      });
-    }
   }
 
   /// Gets the page for a given page/path and args.

@@ -86,6 +86,10 @@ Future<void> initializeDevTools({
   // Wait for preferences to load before rendering the app to avoid a flash of
   // content with the incorrect theme.
   await preferences.init();
+
+  // This must be called after the DTD connection has been initialized and after
+  // preferences have been initialized.
+  await extensionService.initialize();
 }
 
 /// Initializes some DevTools global fields for our Flutter integration tests.
