@@ -159,8 +159,11 @@ class ExtensionService extends DisposableController
 
     _refreshInProgress.value = true;
     final allExtensions = await server.refreshAvailableExtensions(_appRoot);
-    runtimeExtensions =
-        allExtensions.where((e) => !e.detectedFromStaticContext).toList();
+    _log.fine(
+      'detected extensions from the server: '
+      '${allExtensions.map((e) => '[${e.identifier} from ${e.devtoolsOptionsUri}], ').toList().toString()}',
+    );
+    allExtensions.where((e) => !e.detectedFromStaticContext).toList();
     staticExtensions =
         allExtensions.where((e) => e.detectedFromStaticContext).toList();
     _maybeIgnoreExtensions(connectedToApp: _appRoot != null);
@@ -203,8 +206,9 @@ class ExtensionService extends DisposableController
         final currentLatest = takeLatestExtension(latest, duplicate);
         if (latest != currentLatest) {
           _log.fine(
-            'ignoring duplicate static extension ${duplicate.name}, '
-            '${duplicate.devtoolsOptionsUri}',
+            'ignoring duplicate static extension ${duplicate.identifier} at '
+            '${duplicate.devtoolsOptionsUri} in favor of a newer version '
+            '${currentLatest.identifier} at ${currentLatest.devtoolsOptionsUri}',
           );
           setExtensionIgnored(latest);
           setExtensionIgnored(currentLatest, ignore: false);
@@ -227,8 +231,9 @@ class ExtensionService extends DisposableController
           .containsWhere((ext) => ext.name == staticExtension.name);
       if (isRuntimeDuplicate) {
         _log.fine(
-          'ignoring runtime extension duplicate (static) '
-          '${staticExtension.name}, ${staticExtension.devtoolsOptionsUri}',
+          'ignoring duplicate static extension ${staticExtension.identifier} '
+          'at ${staticExtension.devtoolsOptionsUri} in favor of a matching '
+          'runtime extension.',
         );
         setExtensionIgnored(staticExtension);
       }
