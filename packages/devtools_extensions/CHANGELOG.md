@@ -4,6 +4,7 @@
 * Bump `devtools_shared` dependency to `^10.0.0`.
 * Fix file locations in the `dart_foo` extension example.
 * Bump `vm_service` dependency to `^14.2.1`.
+* Add an example of a standalone extension.
 
 ## 0.1.1
 * Update the simulated environment help dialogs with information about the
