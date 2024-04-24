@@ -325,6 +325,21 @@ class ExtensionService extends DisposableController
     _extensionEnabledStates.clear();
     _refreshInProgress.value = false;
   }
+
+  @override
+  void dispose() {
+    for (final notifier in _extensionEnabledStates.values) {
+      notifier.dispose();
+    }
+
+    // [_reset] must be called before disposing these notifiers.
+    _reset();
+    _availableExtensions.dispose();
+    _visibleExtensions.dispose();
+    _refreshInProgress.dispose();
+
+    super.dispose();
+  }
 }
 
 Future<Uri?> _connectedAppRoot() async {
