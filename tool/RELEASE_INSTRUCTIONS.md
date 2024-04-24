@@ -352,20 +352,20 @@ onto the `flutter/devtools` protected branch (`master`).
    in **zero** lines of code.
    - Ask a member of the DevTools team for review, but **DO NOT** squash and merge yet.
 
-2. Contact a member of the Dash team who has Admin access to the `flutter/devtools`
-repository settings (@godofredoc or @devoncarew). Ask them to:
-    - temporarily modify the `flutter/devtools` repository settings to "allow merge
-      commits at the repo level and remove `require linear history`". 
+2. Create internal bug using http://go/flutter-security-bug, with priority P2 and type `Process`:
+
+   Title:
+       Create merge commit for cherry-pick PR.
+   
+   Body:
     
-   Provide them with a link to your PR for context.
+       1. Temporarily modify the settings of https://github.com/flutter/devtools to "allow merge
+       commits at the repo level and remove `require linear history`".
+       2. Merge <link to PR>
+       3. Revert the settings.
 
-3. Once merge commits have been enabled for the repository, land your PR by
-selecting "Create a merge commit" from the merge dropdown options at the bottom
-of the PR.
-
-4. Once you have successfully merged your PR, reach back out to the person who
-modified the `flutter/devtools` repository settings for you and ask them to revert
-the settings change.
+    Assign and send link to the bug to a member of the Dash team who has Admin access to the
+    `flutter/devtools` repository settings (@godofredoc, @piinks or @tvolkert).
 
 ### Additional resources
 - `dart-lang/sdk` cherry-pick [Wiki](https://github.com/dart-lang/sdk/wiki/Cherry-picks-to-a-release-channel)
