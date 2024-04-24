@@ -26,7 +26,8 @@ class ChartData {
     bool? isLegendVisible,
   }) : assert(
           mode == DevToolsMode.connected ||
-              (isDeviceAndroid != null &&
+              (mode == DevToolsMode.offlineData &&
+                  isDeviceAndroid != null &&
                   timeline != null &&
                   interval != null &&
                   isLegendVisible != null),
@@ -59,11 +60,11 @@ class ChartData {
     };
   }
 
-  /// Wether device is android, if not connected to application.
+  /// Wether device is android.
   ///
-  /// If connected to application, this value is null
-  /// and android chart visibility should be detected based on signal from the connected app.
-  final bool? isDeviceAndroid;
+  /// If connected to application, this value is set after the class creation,
+  /// by the instance owner.
+  bool? isDeviceAndroid;
 
   late final MemoryTimeline timeline;
 

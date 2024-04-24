@@ -44,6 +44,7 @@ class MemoryChartPaneController extends DisposableController
     } else {
       assert(offlineData!.isDeviceAndroid != null);
       data = offlineData!;
+      recomputeChartData();
     }
 
     _calculateAndroidChartVisibility();
@@ -108,9 +109,9 @@ class MemoryChartPaneController extends DisposableController
 
   final isAndroidChartVisible = ValueNotifier<bool>(false);
   void _calculateAndroidChartVisibility() {
-    final isAndroid = data.isDeviceAndroid ?? _chartConnection!.isDeviceAndroid;
-    isAndroidChartVisible.value =
-        isAndroid && preferences.memory.androidCollectionEnabled.value;
+    data.isDeviceAndroid ??= _chartConnection!.isDeviceAndroid;
+    isAndroidChartVisible.value = data.isDeviceAndroid! &&
+        preferences.memory.androidCollectionEnabled.value;
   }
 
   ValueListenable<bool> isChartVisible = preferences.memory.showChart;
