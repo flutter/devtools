@@ -11,8 +11,7 @@ final _log = Logger('dtd_manager');
 /// Manages a connection to the Dart Tooling Daemon.
 class DTDManager {
   ValueListenable<DartToolingDaemon?> get connection => _connection;
-  final ValueNotifier<DartToolingDaemon?> _connection =
-      ValueNotifier<DartToolingDaemon?>(null);
+  final _connection = ValueNotifier<DartToolingDaemon?>(null);
 
   DartToolingDaemon get _dtd => _connection.value!;
 
@@ -52,6 +51,11 @@ class DTDManager {
     _uri = null;
     _workspaceRoots = null;
     _projectRoots = null;
+  }
+
+  Future<void> dispose() async {
+    await disconnect();
+    _connection.dispose();
   }
 
   /// Returns the workspace roots for the Dart Tooling Daemon connection.
