@@ -106,14 +106,13 @@ class MemoryController extends DisposableController
             return OfflineMemoryData.fromJson(data as Map<String, dynamic>);
           },
           shouldLoad: (data) => true,
-          loadData: (data) => _initializeData(offlineData: data),
+          loadData: (data) async => await _initializeData(offlineData: data),
         );
         // [maybeLoadOfflineData] will be a noop if there is no offline data for the memory screen,
         //  so ensure we still call [_initializedData] if it has not been called.
         if (!loaded) {
           await _initializeData();
         }
-        assert(_dataInitialized.isCompleted);
     }
     assert(_dataInitialized.isCompleted);
   }
