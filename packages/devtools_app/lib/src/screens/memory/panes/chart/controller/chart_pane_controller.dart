@@ -44,7 +44,6 @@ class MemoryChartPaneController extends DisposableController
     } else {
       assert(offlineData!.isDeviceAndroid != null);
       data = offlineData!;
-      data.timeline.sampleEventNotifier.value++;
     }
 
     _calculateAndroidChartVisibility();
