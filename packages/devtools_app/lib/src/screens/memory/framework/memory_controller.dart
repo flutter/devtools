@@ -35,6 +35,7 @@ class MemoryController extends DisposableController
     @visibleForTesting DiffPaneController? connectedDiff,
     @visibleForTesting ProfilePaneController? connectedProfile,
   }) {
+    print('!!!!!!!!! creating MemoryController');
     if (connectedDiff != null || connectedProfile != null) {
       _mode = DevToolsMode.connected;
     } else {
@@ -97,7 +98,7 @@ class MemoryController extends DisposableController
         );
       case DevToolsMode.offlineData:
         assert(connectedDiff == null && connectedProfile == null);
-        await maybeLoadOfflineData(
+        final loaded = await maybeLoadOfflineData(
           ScreenMetaData.memory.id,
           createData: (json) {
             final data = json[_jsonKey];
@@ -108,7 +109,9 @@ class MemoryController extends DisposableController
         );
         // [maybeLoadOfflineData] will be a noop if there is no offline data for the memory screen,
         //  so ensure we still call [_initializedData] if it has not been called.
-        if (!_initialized.isCompleted) await _initializeData();
+        if (!loaded) {
+          await _initializeData();
+        }
         assert(_initialized.isCompleted);
     }
     assert(_initialized.isCompleted);
@@ -145,25 +148,28 @@ class MemoryController extends DisposableController
   }
 
   @override
-  OfflineScreenData prepareOfflineScreenData() => OfflineScreenData(
-        screenId: ScreenMetaData.memory.id,
-        data: {
-          // Passing serializable data without conversion to json here
-          // to skip serialization when data are passed in-process.
-          _jsonKey: OfflineMemoryData(
-            diff,
-            profile,
-            chart.data,
-            profile.classFilter.value,
-            selectedTab: selectedFeatureTabIndex,
-          ),
-        },
-      );
+  OfflineScreenData prepareOfflineScreenData() {
+    return OfflineScreenData(
+      screenId: ScreenMetaData.memory.id,
+      data: {
+        // Passing serializable data without conversion to json here
+        // to skip serialization when data are passed in-process.
+        _jsonKey: OfflineMemoryData(
+          diff,
+          profile,
+          chart.data,
+          profile.classFilter.value,
+          selectedTab: selectedFeatureTabIndex,
+        ),
+      },
+    );
+  }
 
   @override
   FutureOr<void> processOfflineData(OfflineMemoryData offlineData) {
     assert(!_initialized.isCompleted);
     _initializeData(offlineData: offlineData);
+    assert(_initialized.isCompleted);
   }
 
   void _shareClassFilterBetweenProfileAndDiff() {

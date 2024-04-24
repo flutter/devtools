@@ -144,8 +144,10 @@ mixin OfflineScreenControllerMixin<T> on AutoDisposeControllerMixin {
   /// Screen controllers that mix in [OfflineScreenControllerMixin] should call
   /// this during their initialization when DevTools is in offline mode, defined
   /// by [OfflineDataController.showingOfflineData].
+  ///
+  /// Returns true if offline data was loaded, false otherwise.
   @protected
-  Future<void> maybeLoadOfflineData(
+  Future<bool> maybeLoadOfflineData(
     String screenId, {
     required T Function(Map<String, Object?> json) createData,
     required bool Function(T data) shouldLoad,
@@ -157,8 +159,10 @@ mixin OfflineScreenControllerMixin<T> on AutoDisposeControllerMixin {
       final screenData = createData(json);
       if (shouldLoad(screenData)) {
         await _loadOfflineData(screenData);
+        return true;
       }
     }
+    return false;
   }
 
   Future<void> _loadOfflineData(T offlineData) async {
