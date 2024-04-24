@@ -86,7 +86,6 @@ Future<void> initializeDevTools({
   // Wait for preferences to load before rendering the app to avoid a flash of
   // content with the incorrect theme.
   await preferences.init();
-
 }
 
 /// Initializes some DevTools global fields for our Flutter integration tests.
