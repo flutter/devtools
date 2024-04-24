@@ -35,13 +35,21 @@ void main() {
         'foo_devtools_extension',
       ),
     ),
+    (
+      relativePublishLocation: '.',
+      sourceCodeLocation: p.join(
+        'example',
+        'packages_with_extensions',
+        'standalone_extension',
+      ),
+    ),
   ];
 
   group('devtools_extensions validate command succeeds', () {
     for (final example in examplesWithExtensions) {
       test(example.relativePublishLocation, () async {
         final p = await Process.run(
-          Platform.resolvedExecutable,
+          'dart',
           [
             'run',
             'devtools_extensions',
