@@ -151,15 +151,17 @@ class PerformanceController extends DisposableController
         // Perfetto trace viewer (ui.perfetto.dev).
         createData: (json) => OfflinePerformanceData.fromJson(json),
         shouldLoad: (data) => !data.isEmpty,
-        loadData: (OfflinePerformanceData data) async {
-          await clearData();
-          offlinePerformanceData = data;
-          await _applyToFeatureControllersAsync(
-            (c) => c.setOfflineData(offlinePerformanceData!),
-          );
-        },
+        loadData: _loadOfflineData,
       );
     }
+  }
+
+  Future<void> _loadOfflineData(OfflinePerformanceData data) async {
+    await clearData();
+    offlinePerformanceData = data;
+    await _applyToFeatureControllersAsync(
+      (c) => c.setOfflineData(offlinePerformanceData!),
+    );
   }
 
   void _fetchMissingRebuildLocations() async {

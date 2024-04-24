@@ -82,21 +82,23 @@ class ProfilerScreenController extends DisposableController
         ProfilerScreen.id,
         createData: (json) => CpuProfileData.fromJson(json),
         shouldLoad: (data) => !data.isEmpty,
-        loadData: (CpuProfileData data) async {
-          await cpuProfilerController.transformer.processData(
-            data,
-            processId: 'offline data processing',
-          );
-          cpuProfilerController.loadProcessedData(
-            CpuProfilePair(
-              functionProfile: data,
-              codeProfile: null,
-            ),
-            storeAsUserTagNone: true,
-          );
-        },
+        loadData: _loadOfflineData,
       );
     }
+  }
+
+  Future<void> _loadOfflineData(CpuProfileData data) async {
+    await cpuProfilerController.transformer.processData(
+      data,
+      processId: 'offline data processing',
+    );
+    cpuProfilerController.loadProcessedData(
+      CpuProfilePair(
+        functionProfile: data,
+        codeProfile: null,
+      ),
+      storeAsUserTagNone: true,
+    );
   }
 
   final cpuProfilerController = CpuProfilerController();

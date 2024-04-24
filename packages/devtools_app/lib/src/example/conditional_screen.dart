@@ -93,7 +93,7 @@ class ExampleController extends DisposableController
         ExampleConditionalScreen.id,
         createData: (json) => ExampleScreenData.fromJson(json),
         shouldLoad: (data) => data.title.isNotEmpty,
-        loadData: (data) async => this.data.value = data,
+        loadData: (data) => this.data.value = data,
       );
     }
   }
