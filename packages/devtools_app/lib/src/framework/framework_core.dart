@@ -58,7 +58,7 @@ abstract class FrameworkCore {
   }
 
   /// Disposes framework level services and managers.
-  /// 
+  ///
   /// Any service or manager that is initialized in [init] should be disposed
   /// here. This method is called from the [DevToolsAppState.dispose] lifecycle
   /// method.
