@@ -5,6 +5,7 @@
 * Fix file locations in the `dart_foo` extension example.
 * Bump `vm_service` dependency to `^14.2.1`.
 * Dispose `DTDManager` when the `DevToolsExtension` widget state is disposed.
+* Add an example of a standalone extension.
 
 ## 0.1.1
 * Update the simulated environment help dialogs with information about the
