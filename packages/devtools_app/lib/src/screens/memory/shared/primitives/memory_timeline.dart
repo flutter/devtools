@@ -57,8 +57,6 @@ class MemoryTimeline {
     return event != null ? event.timestamp : -1;
   }
 
-  final ValueNotifier<int> sampleEventNotifier = ValueNotifier<int>(0);
-
   ExtensionEvents? get extensionEvents {
     if (_extensionEvents.isNotEmpty) {
       final eventsToProcess = ExtensionEvents(_extensionEvents.toList());
@@ -95,7 +93,6 @@ class MemoryTimeline {
   void addSample(HeapSample sample) {
     data.add(sample);
     _sampleAddedNotifier.value = sample;
-    sampleEventNotifier.value++;
   }
 
   void addExtensionEvent(
