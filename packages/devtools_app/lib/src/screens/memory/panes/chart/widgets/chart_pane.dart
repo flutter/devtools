@@ -24,10 +24,10 @@ import 'memory_vm_chart.dart';
 
 class MemoryChartPane extends StatefulWidget {
   const MemoryChartPane({
-    Key? key,
+    super.key,
     required this.chart,
     required this.keyFocusNode,
-  }) : super(key: key);
+  });
   final MemoryChartPaneController chart;
 
   /// Which widget's key press will be handled by chart.

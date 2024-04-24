@@ -120,7 +120,7 @@ abstract class ColumnData<T> {
 }
 
 abstract class TreeColumnData<T extends TreeNode<T>> extends ColumnData<T> {
-  TreeColumnData(String title) : super.wide(title);
+  TreeColumnData(super.title) : super.wide();
 
   static double get treeToggleWidth => scaleByFontFactor(14.0);
 

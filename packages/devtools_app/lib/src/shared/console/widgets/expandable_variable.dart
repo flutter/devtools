@@ -14,12 +14,12 @@ import 'display_provider.dart';
 
 class ExpandableVariable extends StatelessWidget {
   const ExpandableVariable({
-    Key? key,
+    super.key,
     this.variable,
     this.dataDisplayProvider,
     this.isSelectable = true,
     this.onCopy,
-  }) : super(key: key);
+  });
 
   @visibleForTesting
   static const emptyExpandableVariableKey = Key('empty expandable variable');

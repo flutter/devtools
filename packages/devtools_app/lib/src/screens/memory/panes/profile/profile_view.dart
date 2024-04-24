@@ -374,9 +374,8 @@ class _GCLatencyColumn extends _GCHeapStatsColumn {
 
 class _GCStatsTable extends StatelessWidget {
   const _GCStatsTable({
-    Key? key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   static final _columnGroup = [
     ColumnGroup.fromText(
@@ -505,9 +504,8 @@ class AllocationProfileTableViewState
 
 class _AllocationProfileTable extends StatelessWidget {
   _AllocationProfileTable({
-    Key? key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   /// List of columns displayed in VM developer mode state.
   static final _vmModeColumnGroups = [
@@ -599,9 +597,8 @@ class _AllocationProfileTable extends StatelessWidget {
 
 class _AllocationProfileTableControls extends StatelessWidget {
   const _AllocationProfileTableControls({
-    Key? key,
     required this.allocationProfileController,
-  }) : super(key: key);
+  });
 
   final ProfilePaneController allocationProfileController;
 
@@ -631,9 +628,8 @@ class _AllocationProfileTableControls extends StatelessWidget {
 
 class _ExportAllocationProfileButton extends StatelessWidget {
   const _ExportAllocationProfileButton({
-    Key? key,
     required this.allocationProfileController,
-  }) : super(key: key);
+  });
 
   final ProfilePaneController allocationProfileController;
 
@@ -660,9 +656,8 @@ class _ExportAllocationProfileButton extends StatelessWidget {
 
 class _RefreshOnGCToggleButton extends StatelessWidget {
   const _RefreshOnGCToggleButton({
-    Key? key,
     required this.allocationProfileController,
-  }) : super(key: key);
+  });
 
   final ProfilePaneController allocationProfileController;
 
@@ -690,7 +685,7 @@ class _RefreshOnGCToggleButton extends StatelessWidget {
 }
 
 class _ProfileHelpLink extends StatelessWidget {
-  const _ProfileHelpLink({Key? key}) : super(key: key);
+  const _ProfileHelpLink();
 
   static const _documentationTopic = gac.MemoryEvent.profileHelp;
 

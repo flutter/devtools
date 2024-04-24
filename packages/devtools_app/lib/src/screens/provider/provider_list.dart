@@ -50,7 +50,7 @@ final AutoDisposeStateNotifierProvider<StateController<String?>, String?>
 );
 
 class ProviderList extends ConsumerStatefulWidget {
-  const ProviderList({Key? key}) : super(key: key);
+  const ProviderList({super.key});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _ProviderListState();
@@ -99,9 +99,9 @@ class _ProviderListState extends ConsumerState<ProviderList> {
 
 class ProviderNodeItem extends ConsumerWidget {
   const ProviderNodeItem({
-    Key? key,
+    super.key,
     required this.node,
-  }) : super(key: key);
+  });
 
   final ProviderNode node;
 

@@ -473,8 +473,7 @@ typedef UrlParametersBuilder = Widget Function(
 /// This avoids issues with widgets in the appbar being hidden by the banner
 /// in a web or desktop app.
 class _AlternateCheckedModeBanner extends StatelessWidget {
-  const _AlternateCheckedModeBanner({Key? key, required this.builder})
-      : super(key: key);
+  const _AlternateCheckedModeBanner({required this.builder});
   final WidgetBuilder builder;
 
   @override

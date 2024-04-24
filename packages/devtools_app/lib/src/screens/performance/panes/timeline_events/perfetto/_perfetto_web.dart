@@ -22,9 +22,9 @@ import 'perfetto_controller.dart';
 
 class Perfetto extends StatefulWidget {
   const Perfetto({
-    Key? key,
+    super.key,
     required this.perfettoController,
-  }) : super(key: key);
+  });
 
   final PerfettoController perfettoController;
 

@@ -12,10 +12,10 @@ import '../../shared/primitives/utils.dart';
 
 class InspectorBreadcrumbNavigator extends StatelessWidget {
   const InspectorBreadcrumbNavigator({
-    Key? key,
+    super.key,
     required this.items,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   /// Max number of visible breadcrumbs including root item but not 'more' item.
   /// E.g. value 5 means root and 4 breadcrumbs can be displayed, other
@@ -85,10 +85,9 @@ class InspectorBreadcrumbNavigator extends StatelessWidget {
 
 class _InspectorBreadcrumb extends StatelessWidget {
   const _InspectorBreadcrumb({
-    Key? key,
     required this.data,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   static const _iconScale = 0.75;
 

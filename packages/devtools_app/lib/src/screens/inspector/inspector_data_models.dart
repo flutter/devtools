@@ -283,14 +283,14 @@ extension MainAxisAlignmentExtension on MainAxisAlignment {
 /// TODO(albertusangga): Move this to [RemoteDiagnosticsNode] once dart:html app is removed.
 class FlexLayoutProperties extends LayoutProperties {
   FlexLayoutProperties({
-    required Size size,
-    required List<LayoutProperties> children,
-    required RemoteDiagnosticsNode node,
-    BoxConstraints? constraints,
-    bool isFlex = false,
-    String? description,
-    num? flexFactor,
-    FlexFit? flexFit,
+    required super.size,
+    required super.children,
+    required super.node,
+    super.constraints,
+    super.isFlex = false,
+    super.description,
+    super.flexFactor,
+    super.flexFit,
     this.direction = Axis.vertical,
     this.mainAxisAlignment,
     this.crossAxisAlignment,
@@ -298,19 +298,10 @@ class FlexLayoutProperties extends LayoutProperties {
     required this.textDirection,
     required this.verticalDirection,
     this.textBaseline,
-  }) : super.values(
-          size: size,
-          children: children,
-          node: node,
-          constraints: constraints,
-          isFlex: isFlex,
-          description: description,
-          flexFactor: flexFactor,
-          flexFit: flexFit,
-        );
+  }) : super.values();
 
   FlexLayoutProperties._fromNode(
-    RemoteDiagnosticsNode node, {
+    super.node, {
     this.direction = Axis.vertical,
     this.mainAxisAlignment,
     this.mainAxisSize,
@@ -318,7 +309,7 @@ class FlexLayoutProperties extends LayoutProperties {
     required this.textDirection,
     required this.verticalDirection,
     this.textBaseline,
-  }) : super(node);
+  });
 
   factory FlexLayoutProperties.fromDiagnostics(RemoteDiagnosticsNode node) {
     // Cache the properties on an expando so that local tweaks to

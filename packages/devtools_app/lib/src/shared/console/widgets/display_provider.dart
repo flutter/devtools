@@ -203,13 +203,13 @@ class _DisplayProviderState extends State<DisplayProvider> {
       final value = variable.ref?.value;
       if (value != null) {
         switch (value.runtimeType) {
-          case String:
+          case const (String):
             kind = InstanceKind.kString;
             break;
-          case num:
+          case const (num):
             kind = InstanceKind.kInt;
             break;
-          case bool:
+          case const (bool):
             kind = InstanceKind.kBool;
             break;
         }

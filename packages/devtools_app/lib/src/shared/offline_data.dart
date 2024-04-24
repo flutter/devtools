@@ -66,7 +66,7 @@ class OfflineDataController {
 /// Mixin that provides offline support for a DevTools screen controller.
 ///
 /// The [Screen] that is associated with this controller must have
-/// [ScreenMetaData.worksWithOfflineData] set to true in order to enable offline support for the
+/// [Screen.worksWithOfflineData] set to true in order to enable offline support for the
 /// screen.
 ///
 /// Check [OfflineDataController.showingOfflineData] in controller constructor.
@@ -86,6 +86,9 @@ class OfflineDataController {
 ///         ScreenMetaData.myScreen.id,
 ///         createData: (json) => MyScreenData.parse(json),
 ///         shouldLoad: (data) => data.isNotEmpty,
+///         loadData: (data) async {
+///           // Set up the all the data models and notifiers that feed MyScreen's UI.
+///         },
 ///       );
 ///     } else {
 ///       // Do screen initialization for connected application.
@@ -99,11 +102,6 @@ class OfflineDataController {
 ///     screenId: ScreenMetaData.myScreen.id,
 ///     data: {} // The data for this screen as a serializable JSON object.
 ///   );
-///
-///   @override
-///   FutureOr<void> processOfflineData(MyScreenData offlineData) async {
-///     // Set up the all the data models and notifiers that feed MyScreen's UI.
-///   }
 /// }
 ///
 /// ...
@@ -131,13 +129,6 @@ mixin OfflineScreenControllerMixin<T> on AutoDisposeControllerMixin {
   /// included in the offline data snapshot for this screen.
   OfflineScreenData prepareOfflineScreenData();
 
-  /// Defines how the offline data for this screen should be processed and set.
-  ///
-  /// Each screen controller that mixes in [OfflineScreenControllerMixin] is
-  /// responsible for setting up the data models and feeding the data to the
-  /// screen for offline viewing - that should occur in this method.
-  FutureOr<void> processOfflineData(T offlineData);
-
   /// Loads offline data for [screenId] when available, and when the
   /// [shouldLoad] condition is met.
   ///
@@ -145,12 +136,16 @@ mixin OfflineScreenControllerMixin<T> on AutoDisposeControllerMixin {
   /// this during their initialization when DevTools is in offline mode, defined
   /// by [OfflineDataController.showingOfflineData].
   ///
-  /// Returns true if offline data was loaded, false otherwise.
+  /// [loadData] defines how the offline data for this screen should be processed and set.
+  /// Each screen controller that mixes in [OfflineScreenControllerMixin] is
+  /// responsible for setting up the data models and feeding the data to the
+  /// screen for offline viewing - that should occur in this method.
   @protected
-  Future<bool> maybeLoadOfflineData(
+  Future<void> maybeLoadOfflineData(
     String screenId, {
     required T Function(Map<String, Object?> json) createData,
     required bool Function(T data) shouldLoad,
+    required FutureOr<void> Function(T data) loadData,
   }) async {
     if (offlineDataController.shouldLoadOfflineData(screenId)) {
       final json = Map<String, Object?>.from(
@@ -158,17 +153,11 @@ mixin OfflineScreenControllerMixin<T> on AutoDisposeControllerMixin {
       );
       final screenData = createData(json);
       if (shouldLoad(screenData)) {
-        await _loadOfflineData(screenData);
-        return true;
+        _loadingOfflineData.value = true;
+        await loadData(screenData);
+        _loadingOfflineData.value = false;
       }
     }
-    return false;
-  }
-
-  Future<void> _loadOfflineData(T offlineData) async {
-    _loadingOfflineData.value = true;
-    await processOfflineData(offlineData);
-    _loadingOfflineData.value = false;
   }
 
   /// Exports the current screen data to a .json file and downloads the file to

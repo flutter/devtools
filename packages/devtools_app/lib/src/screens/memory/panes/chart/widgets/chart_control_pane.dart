@@ -15,7 +15,7 @@ import '../controller/chart_pane_controller.dart';
 import 'interval_dropdown.dart';
 
 class ChartControlPane extends StatefulWidget {
-  const ChartControlPane({Key? key, required this.chart}) : super(key: key);
+  const ChartControlPane({super.key, required this.chart});
   final MemoryChartPaneController chart;
 
   @override
@@ -122,7 +122,7 @@ class _LegendButton extends StatelessWidget {
 }
 
 class _ChartHelpLink extends StatelessWidget {
-  const _ChartHelpLink({Key? key}) : super(key: key);
+  const _ChartHelpLink();
 
   static const _documentationTopic = gac.MemoryEvent.chartHelp;
 

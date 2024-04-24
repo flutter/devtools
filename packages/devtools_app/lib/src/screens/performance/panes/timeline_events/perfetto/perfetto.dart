@@ -11,8 +11,7 @@ import '_perfetto_desktop.dart'
 import 'perfetto_controller.dart';
 
 class EmbeddedPerfetto extends StatelessWidget {
-  const EmbeddedPerfetto({Key? key, required this.perfettoController})
-      : super(key: key);
+  const EmbeddedPerfetto({super.key, required this.perfettoController});
 
   final PerfettoController perfettoController;
 

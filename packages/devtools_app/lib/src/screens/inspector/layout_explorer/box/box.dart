@@ -11,7 +11,6 @@ import 'package:flutter/material.dart';
 import '../../../../shared/diagnostics/diagnostics_node.dart';
 import '../../../../shared/primitives/math_utils.dart';
 import '../../../../shared/primitives/utils.dart';
-import '../../inspector_controller.dart';
 import '../../inspector_data_models.dart';
 import '../ui/free_space.dart';
 import '../ui/layout_explorer_widget.dart';
@@ -22,9 +21,9 @@ import '../ui/widgets_theme.dart';
 
 class BoxLayoutExplorerWidget extends LayoutExplorerWidget {
   const BoxLayoutExplorerWidget(
-    InspectorController inspectorController, {
-    Key? key,
-  }) : super(inspectorController, key: key);
+    super.inspectorController, {
+    super.key,
+  });
 
   static bool shouldDisplay(RemoteDiagnosticsNode _) {
     // Pretend this layout explorer is always available. This layout explorer
@@ -373,12 +372,12 @@ String describeBoxName(LayoutProperties properties) {
 /// Widget that represents and visualize a direct child of Flex widget.
 class BoxChildVisualizer extends StatelessWidget {
   const BoxChildVisualizer({
-    Key? key,
+    super.key,
     required this.state,
     required this.layoutProperties,
     required this.renderProperties,
     required this.isSelected,
-  }) : super(key: key);
+  });
 
   final BoxLayoutExplorerWidgetState state;
 

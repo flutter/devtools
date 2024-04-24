@@ -618,11 +618,11 @@ class FlutterFramesChartItem extends StatelessWidget {
 
 class FlutterFrameTooltip extends StatelessWidget {
   const FlutterFrameTooltip({
-    Key? key,
+    super.key,
     required this.child,
     required this.frame,
     required this.hasShaderJank,
-  }) : super(key: key);
+  });
 
   final Widget child;
 

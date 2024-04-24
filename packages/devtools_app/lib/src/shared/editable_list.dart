@@ -122,7 +122,7 @@ class _EditableListState extends State<EditableList> {
 @visibleForTesting
 class EditableListActionBar extends StatelessWidget {
   const EditableListActionBar({
-    Key? key,
+    super.key,
     required this.textFieldFocusNode,
     required this.textFieldController,
     required this.isRefreshing,
@@ -131,7 +131,7 @@ class EditableListActionBar extends StatelessWidget {
     required this.onRefresh,
     required this.gaScreen,
     required this.gaRefreshSelection,
-  }) : super(key: key);
+  });
 
   final FocusNode textFieldFocusNode;
   final TextEditingController textFieldController;
@@ -200,10 +200,9 @@ class EditableListActionBar extends StatelessWidget {
 
 class _EditableListContentView extends StatelessWidget {
   _EditableListContentView({
-    Key? key,
     required this.entries,
     required this.onEntryRemoved,
-  }) : super(key: key);
+  });
 
   final ListValueNotifier<String> entries;
   final void Function(String) onEntryRemoved;
@@ -231,10 +230,10 @@ class _EditableListContentView extends StatelessWidget {
 @visibleForTesting
 class EditableListRow extends StatelessWidget {
   const EditableListRow({
-    Key? key,
+    super.key,
     required this.entry,
     required this.onEntryRemoved,
-  }) : super(key: key);
+  });
 
   final String entry;
   final void Function(String) onEntryRemoved;

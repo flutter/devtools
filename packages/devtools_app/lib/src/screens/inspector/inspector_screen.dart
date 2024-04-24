@@ -397,13 +397,13 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
 
 class InspectorSummaryTreeControls extends StatelessWidget {
   const InspectorSummaryTreeControls({
-    Key? key,
+    super.key,
     required this.constraints,
     required this.isSearchVisible,
     required this.onRefreshInspectorPressed,
     required this.onSearchVisibleToggle,
     required this.searchFieldBuilder,
-  }) : super(key: key);
+  });
 
   static const _searchBreakpoint = 375.0;
 
@@ -483,11 +483,11 @@ class InspectorSummaryTreeControls extends StatelessWidget {
 
 class ErrorNavigator extends StatelessWidget {
   const ErrorNavigator({
-    Key? key,
+    super.key,
     required this.errors,
     required this.errorIndex,
     required this.onSelectError,
-  }) : super(key: key);
+  });
 
   final LinkedHashMap<String, InspectableWidgetError> errors;
 

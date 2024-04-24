@@ -11,9 +11,9 @@ import '../controller/control_pane_controller.dart';
 
 class PrimaryControls extends StatelessWidget {
   const PrimaryControls({
-    Key? key,
+    super.key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   @visibleForTesting
   static const memoryChartText = 'Memory chart';

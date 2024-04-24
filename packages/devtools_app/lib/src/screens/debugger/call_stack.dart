@@ -16,7 +16,7 @@ import 'debugger_controller.dart';
 import 'debugger_model.dart';
 
 class CallStack extends StatefulWidget {
-  const CallStack({Key? key}) : super(key: key);
+  const CallStack({super.key});
 
   @override
   State<CallStack> createState() => _CallStackState();
