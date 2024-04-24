@@ -95,6 +95,12 @@ class MemoryTimeline {
     _sampleAddedNotifier.value = sample;
   }
 
+  void notifyAboutAllSamples() {
+    for (final sample in data) {
+      _sampleAddedNotifier.value = sample;
+    }
+  }
+
   void addExtensionEvent(
     int? timestamp,
     String? eventKind,

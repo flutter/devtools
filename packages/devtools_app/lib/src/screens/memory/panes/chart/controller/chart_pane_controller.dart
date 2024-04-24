@@ -20,8 +20,10 @@ class MemoryChartPaneController extends DisposableController
   MemoryChartPaneController(this.mode, {ChartData? data})
       : assert(
           mode == DevToolsMode.connected ||
-              (data != null && data.isDeviceAndroid != null),
-          'If application is not connected, isDeviceAndroid must be provided.',
+              (mode == DevToolsMode.offlineData &&
+                  data != null &&
+                  data.isDeviceAndroid != null),
+          '$mode, $data, ${data?.isDeviceAndroid}',
         ) {
     unawaited(_init(data));
   }
@@ -38,7 +40,11 @@ class MemoryChartPaneController extends DisposableController
             )
           : null;
 
+  Future<void> get initialized => _initialized.future;
+  final _initialized = Completer<void>();
+
   Future<void> _init(ChartData? offlineData) async {
+    assert(!_initialized.isCompleted);
     if (mode == DevToolsMode.connected) {
       data = ChartData(mode: DevToolsMode.connected);
     } else {
@@ -58,6 +64,13 @@ class MemoryChartPaneController extends DisposableController
       preferences.memory.showChart,
       () => unawaited(_onChartVisibilityChanged()),
     );
+
+    if (mode == DevToolsMode.offlineData) {
+      data.timeline.notifyAboutAllSamples();
+      recomputeChartData();
+    }
+    _initialized.complete();
+    print('!!! MemoryChartPaneController init');
   }
 
   late final EventChartController event =

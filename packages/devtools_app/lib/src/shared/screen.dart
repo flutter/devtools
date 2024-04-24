@@ -58,8 +58,6 @@ enum ScreenMetaData {
     tutorialVideoTimestamp: '?t=420',
     // ignore: avoid_redundant_argument_values, false positive
     worksWithOfflineData: FeatureFlags.memoryOffline,
-    // ignore: avoid_redundant_argument_values, false positive
-    requiresConnection: !FeatureFlags.memoryOffline,
   ),
   debugger(
     'debugger',

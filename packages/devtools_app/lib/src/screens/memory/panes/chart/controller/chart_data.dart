@@ -39,7 +39,7 @@ class ChartData {
   }
 
   factory ChartData.fromJson(Map<String, dynamic> json) {
-    return ChartData(
+    final result = ChartData(
       mode: DevToolsMode.offlineData,
       isDeviceAndroid: json[_Json.isDeviceAndroid] as bool? ?? false,
       timeline:
@@ -49,11 +49,12 @@ class ChartData {
           ChartInterval.theDefault,
       isLegendVisible: json[_Json.isLegendVisible] as bool?,
     );
+    return result;
   }
 
   Map<String, dynamic> toJson() {
     return {
-      _Json.isDeviceAndroid: isDeviceAndroid,
+      _Json.isDeviceAndroid: isDeviceAndroid ?? false,
       _Json.timeline: timeline.toJson(),
       _Json.interval: displayInterval.name,
       _Json.isLegendVisible: isLegendVisible.value,
