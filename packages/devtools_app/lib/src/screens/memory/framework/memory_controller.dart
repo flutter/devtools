@@ -44,8 +44,8 @@ class MemoryController extends DisposableController
     unawaited(_init(connectedDiff, connectedProfile));
   }
 
-  Future<void> get initialized => _initialized.future;
-  final _initialized = Completer<void>();
+  Future<void> get initialized => _dataInitialized.future;
+  final _dataInitialized = Completer<void>();
 
   /// DevTools mode at the time of creation of the controller.
   ///
@@ -86,7 +86,7 @@ class MemoryController extends DisposableController
     @visibleForTesting DiffPaneController? connectedDiff,
     @visibleForTesting ProfilePaneController? connectedProfile,
   ) async {
-    assert(!_initialized.isCompleted);
+    assert(!_dataInitialized.isCompleted);
     switch (_mode) {
       case DevToolsMode.disconnected:
         // TODO(polina-c): load memory screen in disconnected mode, https://github.com/flutter/devtools/issues/6972
@@ -106,15 +106,16 @@ class MemoryController extends DisposableController
             return OfflineMemoryData.fromJson(data as Map<String, dynamic>);
           },
           shouldLoad: (data) => true,
+          loadData: (data) => _initializeData(offlineData: data),
         );
         // [maybeLoadOfflineData] will be a noop if there is no offline data for the memory screen,
         //  so ensure we still call [_initializedData] if it has not been called.
         if (!loaded) {
           await _initializeData();
         }
-        assert(_initialized.isCompleted);
+        assert(_dataInitialized.isCompleted);
     }
-    assert(_initialized.isCompleted);
+    assert(_dataInitialized.isCompleted);
   }
 
   Future<void> _initializeData({
@@ -122,7 +123,7 @@ class MemoryController extends DisposableController
     @visibleForTesting DiffPaneController? diffPaneController,
     @visibleForTesting ProfilePaneController? profilePaneController,
   }) async {
-    assert(!_initialized.isCompleted);
+    assert(!_dataInitialized.isCompleted);
 
     chart = MemoryChartPaneController(_mode, data: offlineData?.chart);
     diff = diffPaneController ??
@@ -144,7 +145,7 @@ class MemoryController extends DisposableController
     _shareClassFilterBetweenProfileAndDiff();
 
     await chart.initialized;
-    _initialized.complete();
+    _dataInitialized.complete();
   }
 
   @override
@@ -163,13 +164,6 @@ class MemoryController extends DisposableController
         ),
       },
     );
-  }
-
-  @override
-  FutureOr<void> processOfflineData(OfflineMemoryData offlineData) {
-    assert(!_initialized.isCompleted);
-    _initializeData(offlineData: offlineData);
-    assert(_initialized.isCompleted);
   }
 
   void _shareClassFilterBetweenProfileAndDiff() {
