@@ -133,10 +133,11 @@ mixin OfflineScreenControllerMixin<T> on AutoDisposeControllerMixin {
   /// [shouldLoad] condition is met.
   ///
   /// Screen controllers that mix in [OfflineScreenControllerMixin] should call
-  /// this during their initialization when DevTools is in offline mode, defined
-  /// by [OfflineDataController.showingOfflineData].
+  /// this during their initialization when DevTools is in offline mode,
+  /// defined by [OfflineDataController.showingOfflineData].
   ///
-  /// [loadData] defines how the offline data for this screen should be processed and set.
+  /// [loadData] defines how the offline data for this screen should be
+  /// processed and set.
   /// Each screen controller that mixes in [OfflineScreenControllerMixin] is
   /// responsible for setting up the data models and feeding the data to the
   /// screen for offline viewing - that should occur in this method.
