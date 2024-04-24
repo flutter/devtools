@@ -331,13 +331,9 @@ class ExtensionService extends DisposableController
     for (final notifier in _extensionEnabledStates.values) {
       notifier.dispose();
     }
-
-    // [_reset] must be called before disposing these notifiers.
-    _reset();
     _availableExtensions.dispose();
     _visibleExtensions.dispose();
     _refreshInProgress.dispose();
-
     super.dispose();
   }
 }

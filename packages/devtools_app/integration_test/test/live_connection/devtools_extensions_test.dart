@@ -25,11 +25,13 @@ void main() {
   late TestApp testApp;
 
   setUpAll(() {
+    logStatus('devtools_extensions_test setUpAll');
     testApp = TestApp.fromEnvironment();
     expect(testApp.vmServiceUri, isNotNull);
   });
 
   tearDown(() {
+    logStatus('devtools_extensions_test tearDown');
     resetDevToolsExtensionEnabledStates();
   });
 
