@@ -353,7 +353,7 @@ onto the `flutter/devtools` protected branch (`master`).
    - Ask a member of the DevTools team for review, but **DO NOT** squash and merge yet.
 
 2. Contact a member of the Dash team who has Admin access to the `flutter/devtools`
-repository settings (@godofredoc or @devoncarew). Ask them to:
+repository settings (@godofredoc, @piinks, or @tvolkert). Ask them to:
     - temporarily modify the `flutter/devtools` repository settings to "allow merge
       commits at the repo level and remove `require linear history`". 
     
