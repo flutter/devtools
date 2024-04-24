@@ -54,6 +54,7 @@ import 'shared/primitives/utils.dart';
 import 'shared/routing.dart';
 import 'shared/screen.dart';
 import 'shared/ui/hover.dart';
+import 'shared/ui/utils.dart';
 import 'standalone_ui/standalone_screen.dart';
 
 // Assign to true to use a sample implementation of a conditional screen.
@@ -173,9 +174,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
 
   @override
   void dispose() {
-    // preferences is initialized in main() to avoid flash of content with
-    // incorrect theme.
-    preferences.dispose();
+    FrameworkCore.dispose();
     super.dispose();
   }
 

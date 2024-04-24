@@ -119,9 +119,6 @@ class ServiceConnectionManager {
 
     // Set up analytics dimensions for the connected app.
     ga.setupUserApplicationDimensions();
-    if (FeatureFlags.devToolsExtensions) {
-      await extensionService.initialize();
-    }
 
     _inspectorService = devToolsExtensionPoints.inspectorServiceProvider();
 

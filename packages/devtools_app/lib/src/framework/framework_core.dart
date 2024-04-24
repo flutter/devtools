@@ -18,23 +18,61 @@ import '../screens/debugger/breakpoint_manager.dart';
 import '../service/service_manager.dart';
 import '../service/vm_service_wrapper.dart';
 import '../shared/banner_messages.dart';
+import '../shared/config_specific/framework_initialize/framework_initialize.dart';
 import '../shared/console/eval/eval_service.dart';
 import '../shared/framework_controller.dart';
 import '../shared/globals.dart';
 import '../shared/notifications.dart';
 import '../shared/offline_data.dart';
+import '../shared/preferences/preferences.dart';
 import '../shared/primitives/message_bus.dart';
 import '../shared/scripts/script_manager.dart';
+import '../shared/server/server.dart' as server;
 import '../shared/survey.dart';
+import 'app_error_handling.dart';
 
 typedef ErrorReporter = void Function(String title, Object error);
 
 final _log = Logger('framework_core');
 
-// TODO(jacobr): refactor this class to not use static members.
-// ignore: avoid_classes_with_only_static_members
-class FrameworkCore {
-  static void initGlobals() {
+// ignore: avoid_classes_with_only_static_members, intentional grouping of static methods.
+abstract class FrameworkCore {
+  /// Initializes the DevTools framework, which includes setting up global
+  /// variables, local storage, preferences, and initializing framework level
+  /// managers like the Dart Tooling Daemon manager and the DevTools extensions
+  /// service.
+  static Future<void> init() async {
+    _initGlobals();
+
+    await initializePlatform();
+
+    // Print the version number at startup.
+    _log.info('DevTools version ${devtools.version}.');
+
+    await _initDTDConnection();
+
+    final preferences = PreferencesController();
+    // Wait for preferences to load before rendering the app to avoid a flash of
+    // content with the incorrect theme.
+    await preferences.init();
+
+    // This must be called after the DTD connection has been initialized and after
+    // preferences have been initialized.
+    await extensionService.initialize();
+  }
+
+  /// Disposes framework level services and managers.
+  /// 
+  /// Any service or manager that is initialized in [init] should be disposed
+  /// here. This method is called from the [DevToolsAppState.dispose] lifecycle
+  /// method.
+  static void dispose() {
+    extensionService.dispose();
+    preferences.dispose();
+    unawaited(dtdManager.dispose());
+  }
+
+  static void _initGlobals() {
     setGlobal(ServiceConnectionManager, ServiceConnectionManager());
     setGlobal(MessageBus, MessageBus());
     setGlobal(FrameworkController, FrameworkController());
@@ -48,11 +86,6 @@ class FrameworkCore {
     setGlobal(ExtensionService, ExtensionService());
     setGlobal(IdeTheme, getIdeTheme());
     setGlobal(DTDManager, DTDManager());
-  }
-
-  static void init() {
-    // Print the version number at startup.
-    _log.info('DevTools version ${devtools.version}.');
   }
 
   static bool initializationInProgress = false;
@@ -124,6 +157,40 @@ class FrameworkCore {
     notificationService.pushError(
       '$title, $error',
       isReportable: false,
+    );
+  }
+}
+
+Future<void> _initDTDConnection() async {
+  try {
+    // Get the dtdUri from the devtools server
+    final dtdUri = await server.getDtdUri();
+
+    if (dtdUri != null) {
+      await dtdManager.connect(
+        dtdUri,
+        onError: (e, st) {
+          notificationService.pushError(
+            'Failed to connect to the Dart Tooling Daemon',
+            isReportable: false,
+          );
+          reportError(
+            e,
+            errorType: 'Dart Tooling Daemon connection failed.',
+            stack: st,
+          );
+        },
+      );
+    } else {
+      _log.info('No DTD uri provided from the server during initialization.');
+    }
+  } catch (e, st) {
+    // Dtd failing to connect does not interfere with devtools starting up so
+    // catch any errors and report them.
+    reportError(
+      e,
+      errorType: 'Failed to initialize the DTD connection.',
+      stack: st,
     );
   }
 }
