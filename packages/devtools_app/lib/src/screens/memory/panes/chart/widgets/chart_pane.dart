@@ -17,10 +17,10 @@ import '../../../shared/primitives/painting.dart';
 import '../controller/chart_pane_controller.dart';
 import '../data/charts.dart';
 import 'chart_control_pane.dart';
-import 'legend.dart';
 import 'charts/android_chart.dart';
 import 'charts/events_chart.dart';
 import 'charts/vm_chart.dart';
+import 'legend.dart';
 
 class MemoryChartPane extends StatefulWidget {
   const MemoryChartPane({

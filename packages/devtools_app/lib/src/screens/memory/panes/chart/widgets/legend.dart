@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../../shared/ui/colors.dart';
 import '../../../shared/primitives/painting.dart';
-import '../controller/charts/android_chart_controller.dart';
 import '../controller/chart_pane_controller.dart';
+import '../controller/charts/android_chart_controller.dart';
 import '../controller/charts/vm_chart_controller.dart';
 import '../data/charts.dart';
 import 'charts/events_chart.dart';
