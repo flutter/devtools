@@ -242,8 +242,8 @@ class _RuntimeToolInstructions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final instruction = hasDebugSessions
-        ? 'Open the tools menu for a debug session to access '
-        : 'Begin a debug session to use ';
+        ? 'Open the tools menu for a debug session to access'
+        : 'Begin a debug session to use';
     return Padding(
       padding: const EdgeInsets.only(left: borderPadding),
       child: Text(
