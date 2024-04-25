@@ -15,7 +15,10 @@ import '../../data/charts.dart';
 
 class VMChartController extends ChartController {
   VMChartController(this.memoryTimeline, {required this.paused})
-      : super(name: 'VM Memory');
+      : super(name: 'VM Memory') {
+    setupTraces();
+    setupData();
+  }
 
   final ValueListenable<bool> paused;
   final MemoryTimeline memoryTimeline;
