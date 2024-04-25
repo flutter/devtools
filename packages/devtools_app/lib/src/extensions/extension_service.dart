@@ -150,6 +150,8 @@ class ExtensionService extends DisposableController
       _appRoot = fixedAppRoot;
     } else if (serviceConnection
             .serviceManager.connectedState.value.connected &&
+        serviceConnection.serviceManager.isolateManager.mainIsolate.value !=
+            null &&
         !ignoreServiceConnection) {
       _appRoot = await _connectedAppRoot();
     }

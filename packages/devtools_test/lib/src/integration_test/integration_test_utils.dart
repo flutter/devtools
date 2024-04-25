@@ -107,6 +107,7 @@ Future<void> connectToTestApp(WidgetTester tester, TestApp testApp) async {
 }
 
 Future<void> disconnectFromTestApp(WidgetTester tester) async {
+  logStatus('disconnect from test app');
   await tester.tap(
     find.descendant(
       of: find.byType(DevToolsAppBar),
