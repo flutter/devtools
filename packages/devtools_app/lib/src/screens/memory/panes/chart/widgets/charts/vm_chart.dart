@@ -4,7 +4,6 @@
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
-import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../../shared/charts/chart.dart';
@@ -21,9 +20,6 @@ class MemoryVMChart extends StatefulWidget {
 }
 
 class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
-  /// Controller attached to the chart.
-  VMChartController get _chartController => widget.chart;
-
   MemoryTimeline get _memoryTimeline => widget.chart.memoryTimeline;
 
   @override
@@ -37,12 +33,12 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
     cancelListeners();
 
     widget.chart.setupTraces();
-    _chartController.setupData();
+    widget.chart.setupData();
 
     addAutoDisposeListener(_memoryTimeline.sampleAddedNotifier, () {
       if (_memoryTimeline.sampleAddedNotifier.value != null) {
         setState(() {
-          _processHeapSample(_memoryTimeline.sampleAddedNotifier.value!);
+          widget.chart.addSample(_memoryTimeline.sampleAddedNotifier.value!);
         });
       }
     });
@@ -57,20 +53,13 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
 
   @override
   Widget build(BuildContext context) {
-    if (_chartController.timestamps.isNotEmpty) {
+    if (widget.chart.timestamps.isNotEmpty) {
       return SizedBox(
         height: defaultChartHeight,
-        child: Chart(_chartController),
+        child: Chart(widget.chart),
       );
     }
 
     return const SizedBox(width: denseSpacing);
-  }
-
-  /// Loads all heap samples (live data or offline).
-  void _processHeapSample(HeapSample sample) {
-    // If paused don't update the chart (data is still collected).
-    if (widget.chart.paused.value) return;
-    _chartController.addSample(sample);
   }
 }
