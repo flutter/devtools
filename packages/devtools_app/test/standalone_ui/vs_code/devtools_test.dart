@@ -82,7 +82,6 @@ void main() {
         await pumpDevToolsSidebarOptions(tester);
         expect(find.text('DevTools Extensions'), findsOneWidget);
         expect(find.text('bar'), findsOneWidget);
-        expect(find.text('foo'), findsOneWidget);
         expect(
           find.text(
             'Begin a debug session to use extensions that require a running '

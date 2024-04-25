@@ -126,7 +126,9 @@ class _DevToolsExtensionsState extends State<_DevToolsExtensions>
     cancelListeners();
     extensions = _extensionService!.visibleExtensions.value;
     addAutoDisposeListener(_extensionService!.visibleExtensions, () {
-      extensions = _extensionService!.visibleExtensions.value;
+      setState(() {
+        extensions = _extensionService!.visibleExtensions.value;
+      });
     });
 
     unawaited(_extensionService!.initialize());
