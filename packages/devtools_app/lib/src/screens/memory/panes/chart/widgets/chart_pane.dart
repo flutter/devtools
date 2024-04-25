@@ -18,9 +18,9 @@ import '../controller/chart_pane_controller.dart';
 import '../data/charts.dart';
 import 'chart_control_pane.dart';
 import 'legend.dart';
-import 'memory_android_chart.dart';
-import 'memory_events_pane.dart';
-import 'memory_vm_chart.dart';
+import 'charts/android_chart.dart';
+import 'charts/events_chart.dart';
+import 'charts/vm_chart.dart';
 
 class MemoryChartPane extends StatefulWidget {
   const MemoryChartPane({

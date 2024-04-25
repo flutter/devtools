@@ -7,11 +7,11 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../../shared/charts/chart.dart';
-import '../../../../../shared/charts/chart_trace.dart' as trace;
-import '../../../../../shared/charts/chart_trace.dart' show ChartType;
-import '../../../shared/primitives/memory_timeline.dart';
-import '../controller/event_chart_controller.dart';
+import '../../../../../../shared/charts/chart.dart';
+import '../../../../../../shared/charts/chart_trace.dart' as trace;
+import '../../../../../../shared/charts/chart_trace.dart' show ChartType;
+import '../../../../shared/primitives/memory_timeline.dart';
+import '../../controller/event_chart_controller.dart';
 
 /// Events trace name displayed
 const manualSnapshotLegendName = 'Snapshot';

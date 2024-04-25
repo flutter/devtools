@@ -7,13 +7,13 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../../shared/charts/chart.dart';
-import '../../../../../shared/charts/chart_trace.dart' as trace;
-import '../../../../../shared/charts/chart_trace.dart'
+import '../../../../../../shared/charts/chart.dart';
+import '../../../../../../shared/charts/chart_trace.dart' as trace;
+import '../../../../../../shared/charts/chart_trace.dart'
     show ChartSymbol, ChartType;
-import '../../../shared/primitives/memory_timeline.dart';
-import '../controller/android_chart_controller.dart';
-import '../data/charts.dart';
+import '../../../../shared/primitives/memory_timeline.dart';
+import '../../controller/android_chart_controller.dart';
+import '../../data/charts.dart';
 
 class MemoryAndroidChart extends StatefulWidget {
   const MemoryAndroidChart(this.chart, this.memoryTimeline, {super.key});
