@@ -4,9 +4,12 @@
 
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 import '../../../../../../shared/charts/chart_controller.dart';
 import '../../../../../../shared/charts/chart_trace.dart' as chart_trace;
+import '../../../../../../shared/charts/chart_trace.dart'
+    show ChartType, PaintCharacteristics, ChartSymbol;
 import '../../../../shared/primitives/memory_timeline.dart';
 
 /// VM's GCs are displayed in a smaller glyph and closer to the heap graph.
@@ -53,7 +56,9 @@ class EventChartController extends ChartController {
           displayXAxis: false,
           displayXLabels: false,
           name: 'Event Pane',
-        );
+        ) {
+    setupTraces();
+  }
 
   final ValueListenable<bool> paused;
   final MemoryTimeline memoryTimeline;
@@ -69,6 +74,185 @@ class EventChartController extends ChartController {
     );
 
     dataRange.forEach(addSample);
+  }
+
+  void setupTraces() {
+    if (traces.isNotEmpty) {
+      assert(traces.length == EventsTraceName.values.length);
+
+      final extensionEventsIndex = EventsTraceName.extensionEvents.index;
+      assert(
+        trace(extensionEventsIndex).name ==
+            EventsTraceName.values[extensionEventsIndex].toString(),
+      );
+
+      final snapshotIndex = EventsTraceName.snapshot.index;
+      assert(
+        trace(snapshotIndex).name ==
+            EventsTraceName.values[snapshotIndex].toString(),
+      );
+
+      final autoSnapshotIndex = EventsTraceName.autoSnapshot.index;
+      assert(
+        trace(autoSnapshotIndex).name ==
+            EventsTraceName.values[autoSnapshotIndex].toString(),
+      );
+
+      final manualGCIndex = EventsTraceName.manualGC.index;
+      assert(
+        trace(manualGCIndex).name ==
+            EventsTraceName.values[manualGCIndex].toString(),
+      );
+
+      final monitorIndex = EventsTraceName.monitor.index;
+      assert(
+        trace(monitorIndex).name ==
+            EventsTraceName.values[monitorIndex].toString(),
+      );
+
+      final monitorResetIndex = EventsTraceName.monitorReset.index;
+      assert(
+        trace(monitorResetIndex).name ==
+            EventsTraceName.values[monitorResetIndex].toString(),
+      );
+
+      final gcIndex = EventsTraceName.gc.index;
+      assert(
+        trace(gcIndex).name == EventsTraceName.values[gcIndex].toString(),
+      );
+
+      return;
+    }
+
+    final extensionEventsIndex = createTrace(
+      ChartType.symbol,
+      PaintCharacteristics(
+        color: Colors.purpleAccent[100]!,
+        colorAggregate: Colors.purpleAccent[400],
+        symbol: ChartSymbol.filledTriangle,
+        height: 20,
+        width: 20,
+        fixedMinY: visibleVmEvent,
+        fixedMaxY: extensionEvent,
+      ),
+      name: EventsTraceName.extensionEvents.toString(),
+    );
+    assert(extensionEventsIndex == EventsTraceName.extensionEvents.index);
+    assert(
+      trace(extensionEventsIndex).name ==
+          EventsTraceName.values[extensionEventsIndex].toString(),
+    );
+
+    final snapshotIndex = createTrace(
+      ChartType.symbol,
+      PaintCharacteristics(
+        color: Colors.green,
+        strokeWidth: 3,
+        diameter: 6,
+        fixedMinY: visibleVmEvent,
+        fixedMaxY: extensionEvent,
+      ),
+      name: EventsTraceName.snapshot.toString(),
+    );
+    assert(snapshotIndex == EventsTraceName.snapshot.index);
+    assert(
+      trace(snapshotIndex).name ==
+          EventsTraceName.values[snapshotIndex].toString(),
+    );
+
+    // Auto-snapshot
+    final autoSnapshotIndex = createTrace(
+      ChartType.symbol,
+      PaintCharacteristics(
+        color: Colors.red,
+        strokeWidth: 3,
+        diameter: 6,
+        fixedMinY: visibleVmEvent,
+        fixedMaxY: extensionEvent,
+      ),
+      name: EventsTraceName.autoSnapshot.toString(),
+    );
+    assert(autoSnapshotIndex == EventsTraceName.autoSnapshot.index);
+    assert(
+      trace(autoSnapshotIndex).name ==
+          EventsTraceName.values[autoSnapshotIndex].toString(),
+    );
+
+    // Manual GC
+    final manualGCIndex = createTrace(
+      ChartType.symbol,
+      PaintCharacteristics(
+        color: Colors.blue,
+        strokeWidth: 3,
+        diameter: 6,
+        fixedMinY: visibleVmEvent,
+        fixedMaxY: extensionEvent,
+      ),
+      name: EventsTraceName.manualGC.toString(),
+    );
+    assert(manualGCIndex == EventsTraceName.manualGC.index);
+    assert(
+      trace(manualGCIndex).name ==
+          EventsTraceName.values[manualGCIndex].toString(),
+    );
+
+    final mainMonitorColor = Colors.yellowAccent.shade400;
+
+    // Monitor
+    final monitorIndex = createTrace(
+      ChartType.symbol,
+      PaintCharacteristics(
+        color: mainMonitorColor,
+        strokeWidth: 3,
+        diameter: 6,
+        fixedMinY: visibleVmEvent,
+        fixedMaxY: extensionEvent,
+      ),
+      name: EventsTraceName.monitor.toString(),
+    );
+    assert(monitorIndex == EventsTraceName.monitor.index);
+    assert(
+      trace(monitorIndex).name ==
+          EventsTraceName.values[monitorIndex].toString(),
+    );
+
+    final monitorResetIndex = createTrace(
+      ChartType.symbol,
+      PaintCharacteristics.concentric(
+        color: Colors.grey[600]!,
+        strokeWidth: 4,
+        diameter: 6,
+        fixedMinY: visibleVmEvent,
+        fixedMaxY: extensionEvent,
+        concentricCenterColor: mainMonitorColor,
+        concentricCenterDiameter: 4,
+      ),
+      name: EventsTraceName.monitorReset.toString(),
+    );
+    assert(monitorResetIndex == EventsTraceName.monitorReset.index);
+    assert(
+      trace(monitorResetIndex).name ==
+          EventsTraceName.values[monitorResetIndex].toString(),
+    );
+
+    // VM GC
+    final gcIndex = createTrace(
+      ChartType.symbol,
+      PaintCharacteristics(
+        color: Colors.blue,
+        symbol: ChartSymbol.disc,
+        diameter: 4,
+        fixedMinY: visibleVmEvent,
+        fixedMaxY: extensionEvent,
+      ),
+      name: EventsTraceName.gc.toString(),
+    );
+    assert(gcIndex == EventsTraceName.gc.index);
+    assert(
+      trace(gcIndex).name == EventsTraceName.values[gcIndex].toString(),
+    );
+
+    assert(traces.length == EventsTraceName.values.length);
   }
 
   void addSample(HeapSample sample) {

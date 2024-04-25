@@ -8,20 +8,8 @@ import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../../shared/charts/chart.dart';
-import '../../../../../../shared/charts/chart_trace.dart' as trace;
-import '../../../../../../shared/charts/chart_trace.dart' show ChartType;
 import '../../../../shared/primitives/memory_timeline.dart';
 import '../../controller/charts/event_chart_controller.dart';
-
-/// Events trace name displayed
-const manualSnapshotLegendName = 'Snapshot';
-const autoSnapshotLegendName = 'Auto';
-const monitorLegendName = 'Monitor';
-const resetLegendName = 'Reset';
-const vmGCLegendName = 'GC VM';
-const manualGCLegendName = 'Manual';
-const eventLegendName = 'Event';
-const eventsLegendName = 'Events';
 
 class MemoryEventsPane extends StatefulWidget {
   const MemoryEventsPane(this.chart, {super.key});
@@ -34,21 +22,12 @@ class MemoryEventsPane extends StatefulWidget {
 
 class MemoryEventsPaneState extends State<MemoryEventsPane>
     with AutoDisposeMixin {
-  /// TODO(terry): Consider a better solution e.g., % in the Y-axis.
-
   MemoryTimeline get _memoryTimeline => widget.chart.memoryTimeline;
 
   @override
   void initState() {
     super.initState();
     _init();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final themeData = Theme.of(context);
-    setupTraces(isDarkMode: themeData.isDarkTheme);
   }
 
   @override
@@ -89,188 +68,6 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
     }
 
     return const SizedBox(width: denseSpacing);
-  }
-
-  void setupTraces({bool isDarkMode = true}) {
-    if (widget.chart.traces.isNotEmpty) {
-      assert(widget.chart.traces.length == EventsTraceName.values.length);
-
-      final extensionEventsIndex = EventsTraceName.extensionEvents.index;
-      assert(
-        widget.chart.trace(extensionEventsIndex).name ==
-            EventsTraceName.values[extensionEventsIndex].toString(),
-      );
-
-      final snapshotIndex = EventsTraceName.snapshot.index;
-      assert(
-        widget.chart.trace(snapshotIndex).name ==
-            EventsTraceName.values[snapshotIndex].toString(),
-      );
-
-      final autoSnapshotIndex = EventsTraceName.autoSnapshot.index;
-      assert(
-        widget.chart.trace(autoSnapshotIndex).name ==
-            EventsTraceName.values[autoSnapshotIndex].toString(),
-      );
-
-      final manualGCIndex = EventsTraceName.manualGC.index;
-      assert(
-        widget.chart.trace(manualGCIndex).name ==
-            EventsTraceName.values[manualGCIndex].toString(),
-      );
-
-      final monitorIndex = EventsTraceName.monitor.index;
-      assert(
-        widget.chart.trace(monitorIndex).name ==
-            EventsTraceName.values[monitorIndex].toString(),
-      );
-
-      final monitorResetIndex = EventsTraceName.monitorReset.index;
-      assert(
-        widget.chart.trace(monitorResetIndex).name ==
-            EventsTraceName.values[monitorResetIndex].toString(),
-      );
-
-      final gcIndex = EventsTraceName.gc.index;
-      assert(
-        widget.chart.trace(gcIndex).name ==
-            EventsTraceName.values[gcIndex].toString(),
-      );
-
-      return;
-    }
-
-    final extensionEventsIndex = widget.chart.createTrace(
-      trace.ChartType.symbol,
-      trace.PaintCharacteristics(
-        color: Colors.purpleAccent[100]!,
-        colorAggregate: Colors.purpleAccent[400],
-        symbol: trace.ChartSymbol.filledTriangle,
-        height: 20,
-        width: 20,
-        fixedMinY: visibleVmEvent,
-        fixedMaxY: extensionEvent,
-      ),
-      name: EventsTraceName.extensionEvents.toString(),
-    );
-    assert(extensionEventsIndex == EventsTraceName.extensionEvents.index);
-    assert(
-      widget.chart.trace(extensionEventsIndex).name ==
-          EventsTraceName.values[extensionEventsIndex].toString(),
-    );
-
-    final snapshotIndex = widget.chart.createTrace(
-      trace.ChartType.symbol,
-      trace.PaintCharacteristics(
-        color: Colors.green,
-        strokeWidth: 3,
-        diameter: 6,
-        fixedMinY: visibleVmEvent,
-        fixedMaxY: extensionEvent,
-      ),
-      name: EventsTraceName.snapshot.toString(),
-    );
-    assert(snapshotIndex == EventsTraceName.snapshot.index);
-    assert(
-      widget.chart.trace(snapshotIndex).name ==
-          EventsTraceName.values[snapshotIndex].toString(),
-    );
-
-    // Auto-snapshot
-    final autoSnapshotIndex = widget.chart.createTrace(
-      ChartType.symbol,
-      trace.PaintCharacteristics(
-        color: Colors.red,
-        strokeWidth: 3,
-        diameter: 6,
-        fixedMinY: visibleVmEvent,
-        fixedMaxY: extensionEvent,
-      ),
-      name: EventsTraceName.autoSnapshot.toString(),
-    );
-    assert(autoSnapshotIndex == EventsTraceName.autoSnapshot.index);
-    assert(
-      widget.chart.trace(autoSnapshotIndex).name ==
-          EventsTraceName.values[autoSnapshotIndex].toString(),
-    );
-
-    // Manual GC
-    final manualGCIndex = widget.chart.createTrace(
-      ChartType.symbol,
-      trace.PaintCharacteristics(
-        color: Colors.blue,
-        strokeWidth: 3,
-        diameter: 6,
-        fixedMinY: visibleVmEvent,
-        fixedMaxY: extensionEvent,
-      ),
-      name: EventsTraceName.manualGC.toString(),
-    );
-    assert(manualGCIndex == EventsTraceName.manualGC.index);
-    assert(
-      widget.chart.trace(manualGCIndex).name ==
-          EventsTraceName.values[manualGCIndex].toString(),
-    );
-
-    final mainMonitorColor =
-        isDarkMode ? Colors.yellowAccent : Colors.yellowAccent.shade400;
-
-    // Monitor
-    final monitorIndex = widget.chart.createTrace(
-      ChartType.symbol,
-      trace.PaintCharacteristics(
-        color: mainMonitorColor,
-        strokeWidth: 3,
-        diameter: 6,
-        fixedMinY: visibleVmEvent,
-        fixedMaxY: extensionEvent,
-      ),
-      name: EventsTraceName.monitor.toString(),
-    );
-    assert(monitorIndex == EventsTraceName.monitor.index);
-    assert(
-      widget.chart.trace(monitorIndex).name ==
-          EventsTraceName.values[monitorIndex].toString(),
-    );
-
-    final monitorResetIndex = widget.chart.createTrace(
-      ChartType.symbol,
-      trace.PaintCharacteristics.concentric(
-        color: Colors.grey[600]!,
-        strokeWidth: 4,
-        diameter: 6,
-        fixedMinY: visibleVmEvent,
-        fixedMaxY: extensionEvent,
-        concentricCenterColor: mainMonitorColor,
-        concentricCenterDiameter: 4,
-      ),
-      name: EventsTraceName.monitorReset.toString(),
-    );
-    assert(monitorResetIndex == EventsTraceName.monitorReset.index);
-    assert(
-      widget.chart.trace(monitorResetIndex).name ==
-          EventsTraceName.values[monitorResetIndex].toString(),
-    );
-
-    // VM GC
-    final gcIndex = widget.chart.createTrace(
-      ChartType.symbol,
-      trace.PaintCharacteristics(
-        color: Colors.blue,
-        symbol: trace.ChartSymbol.disc,
-        diameter: 4,
-        fixedMinY: visibleVmEvent,
-        fixedMaxY: extensionEvent,
-      ),
-      name: EventsTraceName.gc.toString(),
-    );
-    assert(gcIndex == EventsTraceName.gc.index);
-    assert(
-      widget.chart.trace(gcIndex).name ==
-          EventsTraceName.values[gcIndex].toString(),
-    );
-
-    assert(widget.chart.traces.length == EventsTraceName.values.length);
   }
 
   /// Loads all heap samples (live data or offline).
