@@ -13,6 +13,17 @@ import '../../../../../../shared/charts/chart_trace.dart'
 import '../../../../shared/primitives/memory_timeline.dart';
 import '../../data/charts.dart';
 
+// ignore: avoid_classes_with_only_static_members, enum-like classes are ok
+class _Colors {
+  static final capacity = Colors.grey[400]!;
+  static const used = Color(0xff33b5e5);
+  static const externals = Color(0xff4ddeff);
+
+  static final rasterLayer = Colors.greenAccent.shade400;
+  static const rasterPicture = Color(0xffff4444);
+  static final rss = Colors.orange.shade700;
+}
+
 class VMChartController extends ChartController {
   VMChartController(this.memoryTimeline, {required this.paused})
       : super(name: 'VM Memory') {
@@ -91,15 +102,6 @@ class VMChartController extends ChartController {
     );
   }
 
-  // TODO(terry): Move colors to theme?
-  static final capacityColor = Colors.grey[400]!;
-  static const usedColor = Color(0xff33b5e5);
-  static const externalColor = Color(0xff4ddeff);
-  // TODO(terry): UX review of raster colors see https://github.com/flutter/devtools/issues/2616
-  final rasterLayerColor = Colors.greenAccent.shade400;
-  static const rasterPictureColor = Color(0xffff4444);
-  final rssColor = Colors.orange.shade700;
-
   void setupTraces() {
     if (traces.isNotEmpty) {
       assert(traces.length == VmTraceName.values.length);
@@ -144,7 +146,7 @@ class VMChartController extends ChartController {
     final externalIndex = createTrace(
       ChartType.line,
       chart_trace.PaintCharacteristics(
-        color: externalColor,
+        color: _Colors.externals,
         symbol: chart_trace.ChartSymbol.disc,
         diameter: 1.5,
       ),
@@ -160,7 +162,7 @@ class VMChartController extends ChartController {
     final usedIndex = createTrace(
       ChartType.line,
       chart_trace.PaintCharacteristics(
-        color: usedColor,
+        color: _Colors.used,
         symbol: chart_trace.ChartSymbol.disc,
         diameter: 1.5,
       ),
@@ -176,7 +178,7 @@ class VMChartController extends ChartController {
     final capacityIndex = createTrace(
       ChartType.line,
       chart_trace.PaintCharacteristics(
-        color: capacityColor,
+        color: _Colors.capacity,
         diameter: 0.0,
         symbol: ChartSymbol.dashedLine,
       ),
@@ -191,7 +193,7 @@ class VMChartController extends ChartController {
     final rSSIndex = createTrace(
       ChartType.line,
       chart_trace.PaintCharacteristics(
-        color: rssColor,
+        color: _Colors.rss,
         symbol: ChartSymbol.dashedLine,
         strokeWidth: 2,
       ),
@@ -205,7 +207,7 @@ class VMChartController extends ChartController {
     final rasterLayerIndex = createTrace(
       chart_trace.ChartType.line,
       chart_trace.PaintCharacteristics(
-        color: rasterLayerColor,
+        color: _Colors.rasterLayer,
         symbol: chart_trace.ChartSymbol.dashedLine,
         strokeWidth: 2,
       ),
@@ -220,7 +222,7 @@ class VMChartController extends ChartController {
     final rasterPictureIndex = createTrace(
       chart_trace.ChartType.line,
       chart_trace.PaintCharacteristics(
-        color: rasterPictureColor,
+        color: _Colors.rasterPicture,
         symbol: chart_trace.ChartSymbol.dashedLine,
         strokeWidth: 2,
       ),
