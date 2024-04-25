@@ -101,7 +101,7 @@ void main() {
 
         expect(find.text('GC'), findsOneWidget);
 
-        expect(find.byType(MemoryVMChart), findsOneWidget);
+        expect(find.byType(MemoryChart), findsOneWidget);
       },
     );
   });

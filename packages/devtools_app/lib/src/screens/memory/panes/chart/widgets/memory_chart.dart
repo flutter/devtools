@@ -4,22 +4,24 @@
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
+import 'package:devtools_shared/devtools_shared.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../shared/charts/chart.dart';
 import '../../../../../shared/charts/chart_controller.dart';
-import '../controller/charts/vm_chart_controller.dart';
 
-class MemoryVMChart extends StatefulWidget {
-  const MemoryVMChart(this.chart, {super.key});
+class MemoryChart extends StatefulWidget {
+  const MemoryChart(this.chart, this.sampleAdded, {super.key});
 
-  final VMChartController chart;
+  final ChartController chart;
+  final ValueListenable<HeapSample?> sampleAdded;
 
   @override
-  MemoryVMChartState createState() => MemoryVMChartState();
+  MemoryChartState createState() => MemoryChartState();
 }
 
-class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
+class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
   @override
   void initState() {
     super.initState();
@@ -28,11 +30,11 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
 
   void _init() {
     cancelListeners();
-    addAutoDisposeListener(widget.chart.memoryTimeline.sampleAdded);
+    addAutoDisposeListener(widget.sampleAdded);
   }
 
   @override
-  void didUpdateWidget(covariant MemoryVMChart oldWidget) {
+  void didUpdateWidget(covariant MemoryChart oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.chart == widget.chart) return;
     _init();
