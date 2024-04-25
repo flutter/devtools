@@ -6,18 +6,19 @@ import 'dart:io';
 
 import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:devtools_shared/devtools_extensions_io.dart';
+import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
 void main() {
   group('$DevToolsOptions', () {
     late DevToolsOptions options;
     late Directory tmpDir;
-    late Uri tmpUri;
+    late Uri optionsUri;
 
     setUp(() {
       options = DevToolsOptions();
       tmpDir = Directory.current.createTempSync();
-      tmpUri = Uri.file(tmpDir.path);
+      optionsUri = Uri.file(p.join(tmpDir.path, devtoolsOptionsFileName));
     });
 
     tearDown(() {
@@ -28,7 +29,7 @@ void main() {
     File optionsFileFromTmp() {
       final tmpFiles = tmpDir.listSync();
       expect(tmpFiles, isNotEmpty);
-      final optionsFile = File('${tmpDir.path}/$devtoolsOptionsFileName');
+      final optionsFile = File.fromUri(optionsUri);
       expect(optionsFile.existsSync(), isTrue);
       return optionsFile;
     }
@@ -36,7 +37,7 @@ void main() {
     test('extensionEnabledState creates options file when none exists', () {
       expect(tmpDir.listSync(), isEmpty);
       options.lookupExtensionEnabledState(
-        rootUri: tmpUri,
+        devtoolsOptionsUri: optionsUri,
         extensionName: 'foo',
       );
       final file = optionsFileFromTmp();
@@ -52,7 +53,7 @@ extensions:
 
     test('can write to options file', () {
       options.setExtensionEnabledState(
-        rootUri: tmpUri,
+        devtoolsOptionsUri: optionsUri,
         extensionName: 'foo',
         enable: true,
       );
@@ -69,12 +70,12 @@ extensions:
 
     test('can read from options file', () {
       options.setExtensionEnabledState(
-        rootUri: tmpUri,
+        devtoolsOptionsUri: optionsUri,
         extensionName: 'foo',
         enable: true,
       );
       options.setExtensionEnabledState(
-        rootUri: tmpUri,
+        devtoolsOptionsUri: optionsUri,
         extensionName: 'bar',
         enable: false,
       );
@@ -91,21 +92,21 @@ extensions:
 
       expect(
         options.lookupExtensionEnabledState(
-          rootUri: tmpUri,
+          devtoolsOptionsUri: optionsUri,
           extensionName: 'foo',
         ),
         ExtensionEnabledState.enabled,
       );
       expect(
         options.lookupExtensionEnabledState(
-          rootUri: tmpUri,
+          devtoolsOptionsUri: optionsUri,
           extensionName: 'bar',
         ),
         ExtensionEnabledState.disabled,
       );
       expect(
         options.lookupExtensionEnabledState(
-          rootUri: tmpUri,
+          devtoolsOptionsUri: optionsUri,
           extensionName: 'baz',
         ),
         ExtensionEnabledState.none,

@@ -231,6 +231,7 @@ class ServerApi {
           api,
           queryParams,
           extensionsManager,
+          dtd,
         );
 
       case ExtensionsApi.apiExtensionEnabledState:

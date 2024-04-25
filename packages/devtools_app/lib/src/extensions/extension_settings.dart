@@ -24,20 +24,24 @@ class ExtensionSettingsAction extends ScaffoldAction {
             unawaited(
               showDialog(
                 context: context,
-                builder: (context) => const ExtensionSettingsDialog(),
+                builder: (context) => ExtensionSettingsDialog(
+                  extensions: extensionService.availableExtensions.value,
+                ),
               ),
             );
           },
         );
 }
 
+@visibleForTesting
 class ExtensionSettingsDialog extends StatelessWidget {
-  const ExtensionSettingsDialog({super.key});
+  const ExtensionSettingsDialog({required this.extensions, super.key});
+
+  final List<DevToolsExtensionConfig> extensions;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final availableExtensions = extensionService.availableExtensions.value;
     // This dialog needs a fixed height because it contains a scrollable list.
     final dialogHeight =
         anyTestMode ? scaleByFontFactor(1000.0) : scaleByFontFactor(300.0);
@@ -65,14 +69,14 @@ class ExtensionSettingsDialog extends StatelessWidget {
             ),
             const PaddedDivider(),
             Expanded(
-              child: availableExtensions.isEmpty
+              child: extensions.isEmpty
                   ? Center(
                       child: Text(
                         'No extensions available.',
                         style: theme.subtleTextStyle,
                       ),
                     )
-                  : _ExtensionsList(extensions: availableExtensions),
+                  : _ExtensionsList(extensions: extensions),
             ),
           ],
         ),
