@@ -28,10 +28,7 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
 
   void _init() {
     cancelListeners();
-
-    addAutoDisposeListener(widget.chart.updated, () {
-      setState(() {});
-    });
+    addAutoDisposeListener(widget.chart.updated);
   }
 
   @override
