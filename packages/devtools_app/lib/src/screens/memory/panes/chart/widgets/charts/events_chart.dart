@@ -46,14 +46,6 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
       if (value == null) return;
       setState(() => widget.chart.addSample(value));
     });
-
-    // Monitor event fired.
-    addAutoDisposeListener(_memoryTimeline.eventNotifier, () {
-      setState(() {
-        // TODO(terry): New event received.
-        //_processHeapSample(_memoryTimeline.eventNotifier.value);
-      });
-    });
   }
 
   @override
