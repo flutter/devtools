@@ -142,6 +142,7 @@ class ExtensionService extends DisposableController
   }
 
   Future<void> _refresh() async {
+    _log.fine('refreshing the ExtensionService');
     _reset();
 
     _appRoot = null;
@@ -159,15 +160,11 @@ class ExtensionService extends DisposableController
 
     _refreshInProgress.value = true;
     final allExtensions = await server.refreshAvailableExtensions(_appRoot);
-    _log.fine(
-      'detected extensions from the server: '
-      '${allExtensions.map((e) => '[${e.identifier} from ${e.devtoolsOptionsUri}], ').toList().toString()}',
-    );
-    allExtensions.where((e) => !e.detectedFromStaticContext).toList();
+    runtimeExtensions =
+        allExtensions.where((e) => !e.detectedFromStaticContext).toList();
     staticExtensions =
         allExtensions.where((e) => e.detectedFromStaticContext).toList();
     _maybeIgnoreExtensions(connectedToApp: _appRoot != null);
-
     _availableExtensions.value = [
       ...runtimeExtensions,
       ...staticExtensions.where((ext) => !isExtensionIgnored(ext)),
@@ -186,6 +183,10 @@ class ExtensionService extends DisposableController
     // running application.
     for (final ext in staticExtensions) {
       if (!connectedToApp && ext.requiresConnection) {
+        _log.fine(
+          'ignoring static extension ${ext.identifier} at '
+          '${ext.devtoolsOptionsUri} because it requires a connected app.',
+        );
         setExtensionIgnored(ext);
       }
     }
@@ -199,21 +200,32 @@ class ExtensionService extends DisposableController
       if (deduped.contains(staticExtension.name)) continue;
       deduped.add(staticExtension.name);
 
-      final duplicates = staticExtensions
-          .where((e) => e != staticExtension && e.name == staticExtension.name);
-      var latest = staticExtension;
-      for (final duplicate in duplicates) {
-        final currentLatest = takeLatestExtension(latest, duplicate);
-        if (latest != currentLatest) {
-          _log.fine(
-            'ignoring duplicate static extension ${duplicate.identifier} at '
-            '${duplicate.devtoolsOptionsUri} in favor of a newer version '
-            '${currentLatest.identifier} at ${currentLatest.devtoolsOptionsUri}',
-          );
-          setExtensionIgnored(latest);
-          setExtensionIgnored(currentLatest, ignore: false);
-          latest = currentLatest;
+      // This includes [staticExtension] itself.
+      final matchingExtensions =
+          staticExtensions.where((e) => e.name == staticExtension.name);
+      if (matchingExtensions.length > 1) {
+        _log.fine(
+          'detected duplicate static extensions for ${staticExtension.name}',
+        );
+
+        // Ignore all matching extensions and then mark the [latest] as
+        // unignored after the loop is finished.
+        var latest = staticExtension;
+        for (final ext in matchingExtensions) {
+          setExtensionIgnored(ext);
+          latest = takeLatestExtension(latest, ext);
         }
+        setExtensionIgnored(latest, ignore: false);
+
+        _log.fine(
+          'ignored ${matchingExtensions.length - 1} duplicate static '
+          '${pluralize('extension', matchingExtensions.length - 1)} in favor of '
+          '${latest.identifier} at ${latest.devtoolsOptionsUri}',
+        );
+      } else {
+        _log.fine(
+          'no duplicates found for static extension ${staticExtension.name}',
+        );
       }
     }
   }
@@ -221,6 +233,7 @@ class ExtensionService extends DisposableController
   // De-duplicates unignored static extensions from runtime extensions by
   // ignoring the static extension when there is a duplicate.
   void _deduplicateStaticExtensionsWithRuntimeExtensions() {
+    if (runtimeExtensions.isEmpty) return;
     for (final staticExtension
         in staticExtensions.where((ext) => !isExtensionIgnored(ext))) {
       // TODO(kenz): do we need to match on something other than name? Names
@@ -320,6 +333,7 @@ class ExtensionService extends DisposableController
   }
 
   void _reset() {
+    _log.fine('resetting the ExtensionService');
     _appRoot = null;
     runtimeExtensions.clear();
     staticExtensions.clear();

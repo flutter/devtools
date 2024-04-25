@@ -20,7 +20,17 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.3
+  standalone_extension:
+    path: ../packages_with_extensions/standalone_extension
   test: ^1.21.0
 
 flutter:
   uses-material-design: true
+
+dependency_overrides:
+  devtools_app_shared:
+    path: ../../../devtools_app_shared
+  devtools_extensions:
+    path: ../../../devtools_extensions 
+  devtools_shared:
+    path: ../../../devtools_shared

@@ -59,6 +59,7 @@ void main() {
         await tester.pumpWidget(
           wrapSimple(const ExtensionSettingsDialog(extensions: [])),
         );
+        await tester.pumpAndSettle();
         expect(find.text('DevTools Extensions'), findsOneWidget);
         expect(
           find.textContaining('Extensions are provided by the pub packages'),
@@ -74,6 +75,7 @@ void main() {
       'builds dialog with available extensions',
       (WidgetTester tester) async {
         await tester.pumpWidget(wrapSimple(dialog));
+        await tester.pumpAndSettle();
         expect(find.text('DevTools Extensions'), findsOneWidget);
         expect(
           find.textContaining('Extensions are provided by the pub packages'),
@@ -95,6 +97,7 @@ void main() {
       'pressing toggle buttons makes calls to the $ExtensionService',
       (WidgetTester tester) async {
         await tester.pumpWidget(wrapSimple(dialog));
+        await tester.pumpAndSettle();
 
         expect(
           extensionService
@@ -244,6 +247,7 @@ void main() {
         );
 
         await tester.pumpWidget(wrapSimple(dialog));
+        await tester.pumpAndSettle();
         await expectLater(
           find.byWidget(dialog),
           matchesDevToolsGolden(
@@ -257,6 +261,7 @@ void main() {
       'toggle buttons update for changes to value notifiers',
       (WidgetTester tester) async {
         await tester.pumpWidget(wrapSimple(dialog));
+        await tester.pumpAndSettle();
         await expectLater(
           find.byWidget(dialog),
           matchesDevToolsGolden(
@@ -286,6 +291,7 @@ void main() {
         );
 
         await tester.pumpWidget(wrapSimple(dialog));
+        await tester.pumpAndSettle();
         await expectLater(
           find.byWidget(dialog),
           matchesDevToolsGolden(
