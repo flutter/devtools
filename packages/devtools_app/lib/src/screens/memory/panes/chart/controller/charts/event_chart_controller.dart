@@ -58,6 +58,8 @@ class EventChartController extends ChartController {
           name: 'Event Pane',
         ) {
     setupTraces();
+    setFixedYRange(visibleVmEvent, extensionEvent);
+    setupData();
   }
 
   final ValueListenable<bool> paused;

@@ -38,12 +38,7 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
   }
 
   void _init() {
-    // Line chart fixed Y range.
-    widget.chart.setFixedYRange(visibleVmEvent, extensionEvent);
-
     cancelListeners();
-
-    widget.chart.setupData();
 
     // Monitor heap samples.
     addAutoDisposeListener(_memoryTimeline.sampleAdded, () {
