@@ -42,13 +42,9 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.chart.timestamps.isNotEmpty) {
-      return SizedBox(
-        height: defaultChartHeight,
-        child: Chart(widget.chart),
-      );
-    }
-
-    return const SizedBox(width: denseSpacing);
+    return SizedBox(
+      height: defaultChartHeight,
+      child: Chart(widget.chart),
+    );
   }
 }
