@@ -57,7 +57,7 @@ class EventChartController extends ChartController {
           displayXLabels: false,
           name: 'Event Pane',
         ) {
-    setupTraces();
+    _setupTraces();
     setFixedYRange(visibleVmEvent, extensionEvent);
     setupData();
   }
@@ -78,7 +78,7 @@ class EventChartController extends ChartController {
     dataRange.forEach(addSample);
   }
 
-  void setupTraces() {
+  void _setupTraces() {
     if (traces.isNotEmpty) {
       assert(traces.length == EventsTraceName.values.length);
 

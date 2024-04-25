@@ -34,7 +34,7 @@ class AndroidChartController extends ChartController {
           name: 'Android',
           sharedLabelTimestamps: sharedLabels,
         ) {
-    setupTraces();
+    _setupTraces();
     setupData();
 
     addAutoDisposeListener(memoryTimeline.sampleAdded, () {
@@ -67,7 +67,7 @@ class AndroidChartController extends ChartController {
     }
   }
 
-  void setupTraces() {
+  void _setupTraces() {
     if (traces.isNotEmpty) {
       assert(traces.length == AndroidTraceName.values.length);
 
