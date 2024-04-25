@@ -38,6 +38,7 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
   }
 
   void _init() {
+    print('!!!! MemoryVMChart._init');
     cancelListeners();
 
     setupTraces();
@@ -61,14 +62,16 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
 
   @override
   Widget build(BuildContext context) {
-    if (_chartController.timestamps.isNotEmpty) {
-      return SizedBox(
-        height: defaultChartHeight,
-        child: Chart(_chartController),
-      );
-    }
+    // if (_chartController.timestamps.isEmpty) {
+    //   print('!!! MemoryVMChart.build: No data to display.');
+    //   return const SizedBox(width: denseSpacing);
+    // }
 
-    return const SizedBox(width: denseSpacing);
+    print('!!! Showing chart');
+    return SizedBox(
+      height: defaultChartHeight,
+      child: Chart(_chartController),
+    );
   }
 
   // TODO(terry): Move colors to theme?

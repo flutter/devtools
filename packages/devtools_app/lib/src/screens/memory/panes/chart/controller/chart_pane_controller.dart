@@ -68,6 +68,7 @@ class MemoryChartPaneController extends DisposableController
     if (mode == DevToolsMode.offlineData) {
       data.timeline.notifyAboutAllSamples();
       recomputeChartData();
+      print('!!! sent notifyAboutAllSamples and recomputeChartData');
     }
     _initialized.complete();
     print('!!! MemoryChartPaneController init');
