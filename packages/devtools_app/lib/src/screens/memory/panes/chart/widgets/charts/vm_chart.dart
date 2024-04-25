@@ -7,7 +7,6 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../../shared/charts/chart.dart';
-import '../../../../shared/primitives/memory_timeline.dart';
 import '../../controller/charts/vm_chart_controller.dart';
 
 class MemoryVMChart extends StatefulWidget {
@@ -20,8 +19,6 @@ class MemoryVMChart extends StatefulWidget {
 }
 
 class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
-  MemoryTimeline get _memoryTimeline => widget.chart.memoryTimeline;
-
   @override
   void initState() {
     super.initState();
@@ -32,12 +29,8 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
   void _init() {
     cancelListeners();
 
-    addAutoDisposeListener(_memoryTimeline.sampleAddedNotifier, () {
-      if (_memoryTimeline.sampleAddedNotifier.value != null) {
-        setState(() {
-          widget.chart.addSample(_memoryTimeline.sampleAddedNotifier.value!);
-        });
-      }
+    addAutoDisposeListener(widget.chart.updated, () {
+      setState(() {});
     });
   }
 

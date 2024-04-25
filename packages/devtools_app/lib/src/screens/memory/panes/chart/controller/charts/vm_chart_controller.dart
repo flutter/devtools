@@ -18,10 +18,20 @@ class VMChartController extends ChartController {
       : super(name: 'VM Memory') {
     setupTraces();
     setupData();
+
+    addAutoDisposeListener(memoryTimeline.sampleAdded, () {
+      if (memoryTimeline.sampleAdded.value != null) {
+        addSample(memoryTimeline.sampleAdded.value!);
+        _updated.value++;
+      }
+    });
   }
 
   final ValueListenable<bool> paused;
   final MemoryTimeline memoryTimeline;
+
+  ValueListenable<int> get updated => _updated;
+  final ValueNotifier<int> _updated = ValueNotifier<int>(0);
 
   @override
   void setupData() {

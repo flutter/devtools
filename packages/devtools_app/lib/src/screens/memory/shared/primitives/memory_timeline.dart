@@ -21,8 +21,8 @@ class MemoryTimeline {
   final _eventFiredNotifier = ValueNotifier<Event?>(null);
 
   /// Notifies that a new Heap sample has been added to the timeline.
-  ValueListenable<HeapSample?> get sampleAddedNotifier => _sampleAddedNotifier;
-  final _sampleAddedNotifier = ValueNotifier<HeapSample?>(null);
+  ValueListenable<HeapSample?> get sampleAdded => _sampleAdded;
+  final _sampleAdded = ValueNotifier<HeapSample?>(null);
 
   /// List of events awaiting to be posted to HeapSample.
   final _eventSamples = <EventSample>[];
@@ -76,7 +76,7 @@ class MemoryTimeline {
 
   void addSample(HeapSample sample) {
     data.add(sample);
-    _sampleAddedNotifier.value = sample;
+    _sampleAdded.value = sample;
     sampleEventNotifier.value++;
   }
 

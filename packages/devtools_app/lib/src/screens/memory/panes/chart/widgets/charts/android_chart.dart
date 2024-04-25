@@ -49,9 +49,9 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
     setupTraces();
     _chartController.setupData();
 
-    addAutoDisposeListener(widget.memoryTimeline.sampleAddedNotifier, () {
-      if (widget.memoryTimeline.sampleAddedNotifier.value != null) {
-        _processHeapSample(widget.memoryTimeline.sampleAddedNotifier.value!);
+    addAutoDisposeListener(widget.memoryTimeline.sampleAdded, () {
+      if (widget.memoryTimeline.sampleAdded.value != null) {
+        _processHeapSample(widget.memoryTimeline.sampleAdded.value!);
       }
     });
   }
