@@ -205,7 +205,8 @@ void main() {
         DevToolsExtensionConfig.materialIconCodePointKey: 0xe638,
         DevToolsExtensionConfig.requiresConnectionKey: 'false',
         DevToolsExtensionConfig.extensionAssetsPathKey: '/absolute/path/to/bar',
-        DevToolsExtensionConfig.devtoolsOptionsUriKey: 'file:///path/to/options/file',
+        DevToolsExtensionConfig.devtoolsOptionsUriKey:
+            'file:///path/to/options/file',
         DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
         DevToolsExtensionConfig.detectedFromStaticContextKey: 'true',
       });
@@ -216,7 +217,8 @@ void main() {
         DevToolsExtensionConfig.materialIconCodePointKey: 0xe638,
         DevToolsExtensionConfig.requiresConnectionKey: 'false',
         DevToolsExtensionConfig.extensionAssetsPathKey: '/absolute/path/to/bar',
-        DevToolsExtensionConfig.devtoolsOptionsUriKey: 'file:///path/to/options/file',
+        DevToolsExtensionConfig.devtoolsOptionsUriKey:
+            'file:///path/to/options/file',
         DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
         DevToolsExtensionConfig.detectedFromStaticContextKey: 'true',
       });
@@ -230,7 +232,8 @@ void main() {
         DevToolsExtensionConfig.materialIconCodePointKey: 0xe638,
         DevToolsExtensionConfig.requiresConnectionKey: 'false',
         DevToolsExtensionConfig.extensionAssetsPathKey: '/absolute/path/to/bar',
-        DevToolsExtensionConfig.devtoolsOptionsUriKey: 'file:///path/to/options/file',
+        DevToolsExtensionConfig.devtoolsOptionsUriKey:
+            'file:///path/to/options/file',
         DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
         DevToolsExtensionConfig.detectedFromStaticContextKey: 'true',
       });
@@ -255,7 +258,8 @@ void main() {
         DevToolsExtensionConfig.materialIconCodePointKey: 0xe638,
         DevToolsExtensionConfig.requiresConnectionKey: 'false',
         DevToolsExtensionConfig.extensionAssetsPathKey: '/absolute/path/to/bar',
-        DevToolsExtensionConfig.devtoolsOptionsUriKey: 'file:///path/to/options/file',
+        DevToolsExtensionConfig.devtoolsOptionsUriKey:
+            'file:///path/to/options/file',
         DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
         DevToolsExtensionConfig.detectedFromStaticContextKey: 'true',
       });
@@ -266,7 +270,8 @@ void main() {
         DevToolsExtensionConfig.materialIconCodePointKey: 0xe638,
         DevToolsExtensionConfig.requiresConnectionKey: 'false',
         DevToolsExtensionConfig.extensionAssetsPathKey: '/absolute/path/to/bar',
-        DevToolsExtensionConfig.devtoolsOptionsUriKey: 'file:///path/to/options/file',
+        DevToolsExtensionConfig.devtoolsOptionsUriKey:
+            'file:///path/to/options/file',
         DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
         DevToolsExtensionConfig.detectedFromStaticContextKey: 'true',
       });
