@@ -93,7 +93,7 @@ abstract class ExtensionsApi {
   /// [apiExtensionEnabledState] requests, that specifies the location of the
   /// 'devtools_options.yaml' file that is responsible for storing extension
   /// enablement states.
-  /// 
+  ///
   /// This field is a `file://` URI string and NOT a path.
   static const devtoolsOptionsUriPropertyName = 'devtoolsOptionsUri';
 

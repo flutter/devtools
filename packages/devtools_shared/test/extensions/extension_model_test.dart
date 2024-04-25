@@ -120,7 +120,8 @@ void main() {
               'version': '1.0.0',
               'materialIconCodePoint': 0xf012,
               'extensionAssetsPath': '/absolute/path/to/foo/extension',
-              'devtoolsOptionsUri': 'file:///path/to/package/devtools_options.yaml',
+              'devtoolsOptionsUri':
+                  'file:///path/to/package/devtools_options.yaml',
               'isPubliclyHosted': 'false',
               'detectedFromStaticContext': 'false',
             });
@@ -137,7 +138,8 @@ void main() {
               'version': '1.0.0',
               'materialIconCodePoint': 0xf012,
               'extensionAssetsPath': '/absolute/path/to/foo/extension',
-              'devtoolsOptionsUri': 'file:///path/to/package/devtools_options.yaml',
+              'devtoolsOptionsUri':
+                  'file:///path/to/package/devtools_options.yaml',
               'isPubliclyHosted': 'false',
               'detectedFromStaticContext': 'false',
             });
@@ -154,7 +156,8 @@ void main() {
               'issueTracker': 'www.google.com',
               'materialIconCodePoint': 0xf012,
               'extensionAssetsPath': '/absolute/path/to/foo/extension',
-              'devtoolsOptionsUri': 'file:///path/to/package/devtools_options.yaml',
+              'devtoolsOptionsUri':
+                  'file:///path/to/package/devtools_options.yaml',
               'isPubliclyHosted': 'false',
               'detectedFromStaticContext': 'false',
             });
@@ -171,7 +174,8 @@ void main() {
               'issueTracker': 'www.google.com',
               'version': '1.0.0',
               'extensionAssetsPath': '/absolute/path/to/foo/extension',
-              'devtoolsOptionsUri': 'file:///path/to/package/devtools_options.yaml',
+              'devtoolsOptionsUri':
+                  'file:///path/to/package/devtools_options.yaml',
               'isPubliclyHosted': 'false',
               'detectedFromStaticContext': 'false',
             });
@@ -187,7 +191,8 @@ void main() {
               'issueTracker': 'www.google.com',
               'version': '1.0.0',
               'materialIconCodePoint': 0xf012,
-              'devtoolsOptionsUri': 'file:///path/to/package/devtools_options.yaml',
+              'devtoolsOptionsUri':
+                  'file:///path/to/package/devtools_options.yaml',
               'isPubliclyHosted': 'false',
               'detectedFromStaticContext': 'false',
             });
@@ -239,7 +244,8 @@ void main() {
               'version': '1.0.0',
               'materialIconCodePoint': 0xf012,
               'extensionAssetsPath': '/absolute/path/to/foo/extension',
-              'devtoolsOptionsUri': 'file:///path/to/package/devtools_options.yaml',
+              'devtoolsOptionsUri':
+                  'file:///path/to/package/devtools_options.yaml',
               'isPubliclyHosted': 'false',
             });
           },
@@ -268,7 +274,8 @@ void main() {
             'version': '1.0.0',
             'materialIconCodePoint': 0xf012,
             'extensionAssetsPath': '/absolute/path/to/foo/extension',
-            'devtoolsOptionsUri': 'file:///path/to/package/devtools_options.yaml',
+            'devtoolsOptionsUri':
+                'file:///path/to/package/devtools_options.yaml',
             'isPubliclyHosted': 'false',
             'detectedFromStaticContext': 'false',
           });
@@ -284,7 +291,8 @@ void main() {
             'version': '1.0.0',
             'materialIconCodePoint': 0xf012,
             'extensionAssetsPath': '/absolute/path/to/foo/extension',
-            'devtoolsOptionsUri': 'file:///path/to/package/devtools_options.yaml',
+            'devtoolsOptionsUri':
+                'file:///path/to/package/devtools_options.yaml',
             // Expects a String here.
             'isPubliclyHosted': false,
             'detectedFromStaticContext': 'false',
@@ -313,7 +321,8 @@ void main() {
             'version': '1.0.0',
             'materialIconCodePoint': 0xf012,
             'extensionAssetsPath': '/absolute/path/to/foo/extension',
-            'devtoolsOptionsUri': 'file:///path/to/package/devtools_options.yaml',
+            'devtoolsOptionsUri':
+                'file:///path/to/package/devtools_options.yaml',
             'isPubliclyHosted': 'false',
             'detectedFromStaticContext': 'false',
           });
@@ -329,7 +338,8 @@ void main() {
             'version': '1.0.0',
             'materialIconCodePoint': 0xf012,
             'extensionAssetsPath': '/absolute/path/to/foo/extension',
-            'devtoolsOptionsUri': 'file:///path/to/package/devtools_options.yaml',
+            'devtoolsOptionsUri':
+                'file:///path/to/package/devtools_options.yaml',
             'isPubliclyHosted': 'false',
             'detectedFromStaticContext': 'false',
           });
@@ -345,7 +355,8 @@ void main() {
             'version': '1.0.0',
             'materialIconCodePoint': 0xf012,
             'extensionAssetsPath': '/absolute/path/to/foo/extension',
-            'devtoolsOptionsUri': 'file:///path/to/package/devtools_options.yaml',
+            'devtoolsOptionsUri':
+                'file:///path/to/package/devtools_options.yaml',
             'isPubliclyHosted': 'false',
             'detectedFromStaticContext': 'false',
           });
