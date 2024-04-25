@@ -5,20 +5,29 @@
 import 'dart:async';
 
 import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
+import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:flutter/material.dart';
 
+import '../../extensions/extension_screen.dart';
+import '../../extensions/extension_service.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/screen.dart';
 import '../api/vs_code_api.dart';
 
+/// A widget that displays DevTools options, including buttons to open static
+/// screens, and a list of static DevTools extensions available for the IDE
+/// workspace.
 class DevToolsSidebarOptions extends StatelessWidget {
   const DevToolsSidebarOptions({
     required this.api,
+    required this.hasDebugSessions,
     super.key,
   });
 
   final VsCodeApi api;
+  final bool hasDebugSessions;
 
   @override
   Widget build(BuildContext context) {
@@ -59,12 +68,14 @@ class DevToolsSidebarOptions extends StatelessWidget {
           ],
         ),
         const PaddedDivider.thin(),
-        const Padding(
-          padding: EdgeInsets.only(left: borderPadding),
-          child: Text(
-            'Begin a debug session to use tools that require a running '
-            'application.',
-          ),
+        _RuntimeToolInstructions(
+          hasDebugSessions: hasDebugSessions,
+          toolDescription: 'tools',
+        ),
+        const SizedBox(height: denseSpacing),
+        _DevToolsExtensions(
+          api: api,
+          hasDebugSessions: hasDebugSessions,
         ),
       ],
     );
@@ -81,6 +92,97 @@ class DevToolsSidebarOptions extends StatelessWidget {
       ScreenMetaData.cpuProfiler => false,
       _ => !screen.requiresConnection,
     };
+  }
+}
+
+class _DevToolsExtensions extends StatefulWidget {
+  const _DevToolsExtensions({
+    required this.api,
+    required this.hasDebugSessions,
+  });
+
+  final VsCodeApi api;
+  final bool hasDebugSessions;
+
+  @override
+  State<_DevToolsExtensions> createState() => _DevToolsExtensionsState();
+}
+
+class _DevToolsExtensionsState extends State<_DevToolsExtensions>
+    with AutoDisposeMixin {
+  ExtensionService? _extensionService;
+
+  var extensions = <DevToolsExtensionConfig>[];
+
+  @override
+  void initState() {
+    super.initState();
+    _initExtensions();
+  }
+
+  void _initExtensions() {
+    _extensionService = ExtensionService(ignoreServiceConnection: true);
+
+    cancelListeners();
+    extensions = _extensionService!.visibleExtensions.value;
+    addAutoDisposeListener(_extensionService!.visibleExtensions, () {
+      setState(() {
+        extensions = _extensionService!.visibleExtensions.value;
+      });
+    });
+
+    unawaited(_extensionService!.initialize());
+  }
+
+  @override
+  void dispose() {
+    _extensionService?.dispose();
+    _extensionService = null;
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (extensions.isEmpty) return const SizedBox();
+
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'DevTools Extensions',
+          style: theme.textTheme.titleMedium,
+        ),
+        Table(
+          defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+          children: [
+            for (final ext in extensions)
+              _createDevToolsScreenRow(
+                label: ext.name,
+                icon: ext.icon,
+                api: widget.api,
+                theme: theme,
+                onPressed: () {
+                  ga.select(
+                    gac.VsCodeFlutterSidebar.id,
+                    gac.VsCodeFlutterSidebar.openDevToolsScreen(
+                      gac.DevToolsExtensionEvents.extensionScreenName(ext),
+                    ),
+                  );
+                  unawaited(
+                    widget.api.openDevToolsPage(null, page: ext.screenId),
+                  );
+                },
+              ),
+          ],
+        ),
+        const PaddedDivider.thin(),
+        _RuntimeToolInstructions(
+          hasDebugSessions: widget.hasDebugSessions,
+          toolDescription: 'extensions',
+        ),
+      ],
+    );
   }
 }
 
@@ -128,4 +230,27 @@ TableRow _createDevToolsScreenRow({
       ),
     ],
   );
+}
+
+class _RuntimeToolInstructions extends StatelessWidget {
+  const _RuntimeToolInstructions({
+    required this.hasDebugSessions,
+    required this.toolDescription,
+  });
+
+  final bool hasDebugSessions;
+  final String toolDescription;
+
+  @override
+  Widget build(BuildContext context) {
+    final instruction = hasDebugSessions
+        ? 'Open the tools menu for a debug session to access'
+        : 'Begin a debug session to use';
+    return Padding(
+      padding: const EdgeInsets.only(left: borderPadding),
+      child: Text(
+        '$instruction $toolDescription that require a running application.',
+      ),
+    );
+  }
 }

@@ -59,11 +59,13 @@ TODO: Remove this section if there are not any general updates.
 
 ## VS Code Sidebar updates
 
-* Added a DevTools section with a list of tools that are available without a debug
-session. - [#7598](https://github.com/flutter/devtools/pull/7598)
+* Added a DevTools section with a list of tools and extensions that are available without
+a debug session. - [#7598](https://github.com/flutter/devtools/pull/7598), [#7604](https://github.com/flutter/devtools/pull/7604)
 
 ## DevTools Extension updates
 
+* Support DevTools extensions that do not require a running app, and detect them from the
+user's IDE workspace. - [#7612](https://github.com/flutter/devtools/pull/7612)
 * Deprecate the `DevToolsExtension.requiresRunningApplication` field in favor of the
 new optional `requiresConnection` field that can be added to an extension's `config.yaml`
 file. - [#7611](https://github.com/flutter/devtools/pull/7611), [#7602](https://github.com/flutter/devtools/pull/7602)
