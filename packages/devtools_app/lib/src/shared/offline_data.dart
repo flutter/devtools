@@ -141,10 +141,8 @@ mixin OfflineScreenControllerMixin<T> on AutoDisposeControllerMixin {
   /// Each screen controller that mixes in [OfflineScreenControllerMixin] is
   /// responsible for setting up the data models and feeding the data to the
   /// screen for offline viewing - that should occur in this method.
-  ///
-  /// Returns true if offline data was loaded, false otherwise.
   @protected
-  Future<bool> maybeLoadOfflineData(
+  Future<void> maybeLoadOfflineData(
     String screenId, {
     required T Function(Map<String, Object?> json) createData,
     required bool Function(T data) shouldLoad,
@@ -159,10 +157,8 @@ mixin OfflineScreenControllerMixin<T> on AutoDisposeControllerMixin {
         _loadingOfflineData.value = true;
         await loadData(screenData);
         _loadingOfflineData.value = false;
-        return true;
       }
     }
-    return false;
   }
 
   /// Exports the current screen data to a .json file and downloads the file to
