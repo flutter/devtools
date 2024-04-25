@@ -264,7 +264,6 @@ class DevToolsExtensionConfig implements Comparable<DevToolsExtensionConfig> {
         other.name == name &&
         other.issueTrackerLink == issueTrackerLink &&
         other.version == version &&
-        other.extensionAssetsPath == extensionAssetsPath &&
         other.materialIconCodePoint == materialIconCodePoint &&
         other.requiresConnection == requiresConnection &&
         other.extensionAssetsPath == extensionAssetsPath &&
@@ -278,7 +277,6 @@ class DevToolsExtensionConfig implements Comparable<DevToolsExtensionConfig> {
         name,
         issueTrackerLink,
         version,
-        extensionAssetsPath,
         materialIconCodePoint,
         requiresConnection,
         extensionAssetsPath,
