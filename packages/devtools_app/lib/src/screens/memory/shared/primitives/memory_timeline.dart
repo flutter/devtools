@@ -93,7 +93,6 @@ class MemoryTimeline {
   void addSample(HeapSample sample) {
     data.add(sample);
     _sampleAdded.value = sample;
-    sampleEventNotifier.value++;
   }
 
   void addExtensionEvent(
