@@ -11,8 +11,7 @@ import '../controller/chart_pane_controller.dart';
 import '../data/primitives.dart';
 
 class IntervalDropdown extends StatefulWidget {
-  const IntervalDropdown({Key? key, required this.chartController})
-      : super(key: key);
+  const IntervalDropdown({super.key, required this.chartController});
 
   final MemoryChartPaneController chartController;
 
@@ -37,7 +36,7 @@ class _IntervalDropdownState extends State<IntervalDropdown> {
 
     return RoundedDropDownButton<ChartInterval>(
       isDense: true,
-      value: widget.chartController.displayInterval,
+      value: widget.chartController.data.displayInterval,
       onChanged: (ChartInterval? newValue) {
         final value = newValue!;
         setState(() {
@@ -45,7 +44,7 @@ class _IntervalDropdownState extends State<IntervalDropdown> {
             gac.memory,
             '${gac.MemoryEvent.chartInterval}-${value.displayName}',
           );
-          widget.chartController.displayInterval = value;
+          widget.chartController.data.displayInterval = value;
           final duration = value.duration;
 
           widget.chartController.event.zoomDuration = duration;

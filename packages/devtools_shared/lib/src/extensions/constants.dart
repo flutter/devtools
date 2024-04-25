@@ -5,3 +5,7 @@
 /// Location where DevTools extension assets will be served, relative to where
 /// DevTools assets are served (build/).
 const extensionRequestPath = 'devtools_extensions';
+
+/// The name of the options file where extension enablement states are stored
+/// in a user's project.
+const devtoolsOptionsFileName = 'devtools_options.yaml';

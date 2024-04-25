@@ -8,9 +8,9 @@ import 'perfetto_controller.dart';
 
 class Perfetto extends StatelessWidget {
   const Perfetto({
-    Key? key,
+    super.key,
     required this.perfettoController,
-  }) : super(key: key);
+  });
 
   final PerfettoController perfettoController;
 

@@ -735,14 +735,13 @@ abstract class InspectorControllerClient {
 
 class InspectorTree extends StatefulWidget {
   const InspectorTree({
-    Key? key,
+    super.key,
     required this.treeController,
     this.summaryTreeController,
     this.isSummaryTree = false,
     this.widgetErrors,
     this.screenId,
-  })  : assert(isSummaryTree == (summaryTreeController == null)),
-        super(key: key);
+  }) : assert(isSummaryTree == (summaryTreeController == null));
 
   final InspectorTreeController? treeController;
 

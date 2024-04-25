@@ -22,7 +22,9 @@ TODO: Remove this section if there are not any general updates.
 
 ## CPU profiler updates
 
-TODO: Remove this section if there are not any general updates.
+* Changed to a single button, for starting and stopping
+  recording. - [#7573](https://github.com/flutter/devtools/pull/7573)
+  ![A screen shot of the CPU profiler tab, with the new recording button.](./images/profiler_recording.png)
 
 ## Memory updates
 
@@ -31,11 +33,16 @@ TODO: Remove this section if there are not any general updates.
 
 ## Debugger updates
 
-TODO: Remove this section if there are not any general updates.
+* During a hot-restart, `pause_isolates_on_start` and only `resume` the app once breakpoints are set. - [#7234](https://github.com/flutter/devtools/pull/7234)
 
 ## Network profiler updates
 
-TODO: Remove this section if there are not any general updates.
+* Changed to a single button, for starting and stopping
+  recording. - [#7573](https://github.com/flutter/devtools/pull/7573)
+  ![A screen shot of the network tab, with the new recording button.](./images/network_recording.png)
+* Added text selection in text viewer for requests and responses. - [#7596](https://github.com/flutter/devtools/pull/7596)
+* Added a JSON copy experience to the JSON viewer. - [#7596](https://github.com/flutter/devtools/pull/7596)
+  ![An image of the new json copy experience for the JSON viewer](./images/json_viewer_copy.png)
 
 ## Logging updates
 
@@ -57,6 +64,11 @@ a debug session. - [#7598](https://github.com/flutter/devtools/pull/7598), [#760
 
 ## DevTools Extension updates
 
+* Support DevTools extensions that do not require a running app, and detect them from the
+user's IDE workspace. - [#7612](https://github.com/flutter/devtools/pull/7612)
+* Deprecate the `DevToolsExtension.requiresRunningApplication` field in favor of the
+new optional `requiresConnection` field that can be added to an extension's `config.yaml`
+file. - [#7611](https://github.com/flutter/devtools/pull/7611), [#7602](https://github.com/flutter/devtools/pull/7602)
 * Detect extensions for all types of run targets in a package. - [#7533](https://github.com/flutter/devtools/pull/7533),
 [#7535](https://github.com/flutter/devtools/pull/7535)
 

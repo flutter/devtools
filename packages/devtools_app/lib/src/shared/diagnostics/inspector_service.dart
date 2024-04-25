@@ -366,23 +366,26 @@ class InspectorService extends InspectorServiceBase {
     _onRootDirectoriesChanged(rootDirectories);
   }
 
-  Future<void> _addPubRootDirectories(List<String> pubDirectories) {
+  Future<void> _addPubRootDirectories(List<String> pubDirectories) async {
+    await serviceConnection.serviceManager.waitUntilNotPaused();
     assert(useDaemonApi);
-    return invokeServiceMethodDaemonNoGroupArgs(
+    await invokeServiceMethodDaemonNoGroupArgs(
       WidgetInspectorServiceExtensions.addPubRootDirectories.name,
       pubDirectories,
     );
   }
 
-  Future<void> _removePubRootDirectories(List<String> pubDirectories) {
+  Future<void> _removePubRootDirectories(List<String> pubDirectories) async {
+    await serviceConnection.serviceManager.waitUntilNotPaused();
     assert(useDaemonApi);
-    return invokeServiceMethodDaemonNoGroupArgs(
+    await invokeServiceMethodDaemonNoGroupArgs(
       WidgetInspectorServiceExtensions.removePubRootDirectories.name,
       pubDirectories,
     );
   }
 
   Future<List<String>?> getPubRootDirectories() async {
+    await serviceConnection.serviceManager.waitUntilNotPaused();
     assert(useDaemonApi);
     final response = await invokeServiceMethodDaemonNoGroupArgs(
       WidgetInspectorServiceExtensions.getPubRootDirectories.name,
@@ -399,6 +402,7 @@ class InspectorService extends InspectorServiceBase {
   ///
   /// See [LocationMap] which provides support to parse this JSON.
   Future<Map<String, dynamic>> widgetLocationIdMap() async {
+    await serviceConnection.serviceManager.waitUntilNotPaused();
     assert(useDaemonApi);
     final response = await invokeServiceMethodDaemonNoGroupArgs(
       'widgetLocationIdMap',
@@ -936,9 +940,9 @@ abstract class InspectorObjectGroupBase
 /// special logic to handle orphaned requests.
 class ObjectGroup extends InspectorObjectGroupBase {
   ObjectGroup(
-    String debugName,
+    super.debugName,
     this.inspectorService,
-  ) : super(debugName);
+  );
 
   @override
   final InspectorService inspectorService;

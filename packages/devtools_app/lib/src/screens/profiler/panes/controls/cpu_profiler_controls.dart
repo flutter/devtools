@@ -18,8 +18,7 @@ final profilerScreenSearchFieldKey =
     GlobalKey(debugLabel: 'ProfilerScreenSearchFieldKey');
 
 class CpuProfileFilterDialog extends StatelessWidget {
-  const CpuProfileFilterDialog({required this.controller, Key? key})
-      : super(key: key);
+  const CpuProfileFilterDialog({required this.controller, super.key});
 
   static const filterQueryInstructions = '''
 Type a filter query to show or hide specific stack frames.

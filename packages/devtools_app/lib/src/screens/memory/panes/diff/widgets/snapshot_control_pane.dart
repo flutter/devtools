@@ -15,8 +15,7 @@ import '../controller/diff_pane_controller.dart';
 import '../controller/item_controller.dart';
 
 class SnapshotControlPane extends StatelessWidget {
-  const SnapshotControlPane({Key? key, required this.controller})
-      : super(key: key);
+  const SnapshotControlPane({super.key, required this.controller});
 
   final DiffPaneController controller;
 
@@ -61,10 +60,9 @@ class SnapshotControlPane extends StatelessWidget {
 
 class _DiffDropdown extends StatelessWidget {
   _DiffDropdown({
-    Key? key,
     required this.current,
     required this.controller,
-  }) : super(key: key) {
+  }) {
     final list = controller.core.snapshots.value;
     final diffWith = current.diffWith.value;
     // Check if diffWith was deleted from list.
@@ -126,8 +124,7 @@ class _DiffDropdown extends StatelessWidget {
 }
 
 class _SnapshotSizeView extends StatelessWidget {
-  const _SnapshotSizeView({Key? key, required this.footprint})
-      : super(key: key);
+  const _SnapshotSizeView({required this.footprint});
 
   final MemoryFootprint footprint;
 

@@ -15,7 +15,7 @@ import '../controller/chart_pane_controller.dart';
 import 'interval_dropdown.dart';
 
 class ChartControlPane extends StatefulWidget {
-  const ChartControlPane({Key? key, required this.chart}) : super(key: key);
+  const ChartControlPane({super.key, required this.chart});
   final MemoryChartPaneController chart;
 
   @override
@@ -44,7 +44,7 @@ class _ChartControlPaneState extends State<ChartControlPane>
   void _clearTimeline() {
     ga.select(gac.memory, gac.clear);
 
-    widget.chart.memoryTimeline.reset();
+    widget.chart.data.timeline.reset();
 
     // Remove history of all plotted data in all charts.
     widget.chart.resetAll();
@@ -105,9 +105,9 @@ class _LegendButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
-      valueListenable: chartController.isLegendVisible,
+      valueListenable: chartController.data.isLegendVisible,
       builder: (_, legendVisible, __) => GaDevToolsButton(
-        onPressed: chartController.toggleLegendVisibility,
+        onPressed: chartController.data.toggleLegendVisibility,
         gaScreen: gac.memory,
         gaSelection: legendVisible
             ? gac.MemoryEvent.hideChartLegend
@@ -122,7 +122,7 @@ class _LegendButton extends StatelessWidget {
 }
 
 class _ChartHelpLink extends StatelessWidget {
-  const _ChartHelpLink({Key? key}) : super(key: key);
+  const _ChartHelpLink();
 
   static const _documentationTopic = gac.MemoryEvent.chartHelp;
 

@@ -21,7 +21,7 @@ import 'widgets/snapshot_list.dart';
 import 'widgets/snapshot_view.dart';
 
 class DiffPane extends StatelessWidget {
-  const DiffPane({Key? key, required this.diffController}) : super(key: key);
+  const DiffPane({super.key, required this.diffController});
 
   final DiffPaneController diffController;
 
@@ -46,8 +46,7 @@ class DiffPane extends StatelessWidget {
 }
 
 class _SnapshotItemContent extends StatelessWidget {
-  const _SnapshotItemContent({Key? key, required this.controller})
-      : super(key: key);
+  const _SnapshotItemContent({required this.controller});
 
   final DiffPaneController controller;
 

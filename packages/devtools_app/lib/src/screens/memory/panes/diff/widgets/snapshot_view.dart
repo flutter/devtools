@@ -16,7 +16,7 @@ import 'classes_table_diff.dart';
 import 'classes_table_single.dart';
 
 class SnapshotView extends StatelessWidget {
-  const SnapshotView({Key? key, required this.controller}) : super(key: key);
+  const SnapshotView({super.key, required this.controller});
 
   final DiffPaneController controller;
 

@@ -437,6 +437,7 @@ enum TestAppDevice {
       'perfetto_test.dart',
       'performance_screen_event_recording_test.dart',
       'service_connection_test.dart',
+      'service_extensions_test.dart',
     ],
     TestAppDevice.cli: [
       'debugger_panel_test.dart',
@@ -445,6 +446,7 @@ enum TestAppDevice {
       'perfetto_test.dart',
       'performance_screen_event_recording_test.dart',
       'service_connection_test.dart',
+      'service_extensions_test.dart',
     ],
   };
 

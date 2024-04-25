@@ -105,6 +105,7 @@ class MemoryController extends DisposableController
             return OfflineMemoryData.fromJson(data as Map<String, dynamic>);
           },
           shouldLoad: (data) => true,
+          loadData: (data) => _initializeData(offlineData: data),
         );
         // [maybeLoadOfflineData] will be a noop if there is no offline data for the memory screen,
         //  so ensure we still call [_initializedData] if it has not been called.
@@ -125,13 +126,13 @@ class MemoryController extends DisposableController
     diff = diffPaneController ??
         offlineData?.diff ??
         DiffPaneController(
-          loader: HeapGraphLoaderRuntime(chart.memoryTimeline),
+          loader: HeapGraphLoaderRuntime(chart.data.timeline),
         );
     profile = profilePaneController ??
         offlineData?.profile ??
         ProfilePaneController();
     control = MemoryControlPaneController(
-      chart.memoryTimeline,
+      chart.data.timeline,
       isChartVisible: chart.isChartVisible,
       exportData: exportData,
     );
@@ -159,12 +160,6 @@ class MemoryController extends DisposableController
           ),
         },
       );
-
-  @override
-  FutureOr<void> processOfflineData(OfflineMemoryData offlineData) {
-    assert(!_initialized.isCompleted);
-    _initializeData(offlineData: offlineData);
-  }
 
   void _shareClassFilterBetweenProfileAndDiff() {
     diff.derived.applyFilter(profile.classFilter.value);

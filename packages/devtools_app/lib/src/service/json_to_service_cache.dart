@@ -120,6 +120,48 @@ class JsonToServiceCache {
     return _insertPrimitive(json);
   }
 
+  /// Recursively convert an [Instance] back to JSON that could have created it.
+  Object? instanceToJson(Instance instance) {
+    switch (instance.kind) {
+      case InstanceKind.kMap:
+        final map = <String, Object?>{};
+        for (final association in instance.associations ?? <MapAssociation>[]) {
+          map[(association.key as Instance).valueAsString!] =
+              instanceToJson(association.value);
+        }
+        return map;
+      case InstanceKind.kList:
+        return [...instance.elements?.map((e) => instanceToJson(e)) ?? []];
+      case InstanceKind.kString:
+        return instance.valueAsString;
+      case InstanceKind.kInt:
+        final value = instance.valueAsString;
+        if (value == null) {
+          return null;
+        } else {
+          return int.parse(value);
+        }
+      case InstanceKind.kBool:
+        final value = instance.valueAsString;
+        if (value == null) {
+          return null;
+        } else {
+          return bool.parse(value);
+        }
+      case InstanceKind.kDouble:
+        final value = instance.valueAsString;
+        if (value == null) {
+          return null;
+        } else {
+          return double.parse(value);
+        }
+      case InstanceKind.kNull:
+        return null;
+      default:
+        throw 'Unhandled instance type: ${instance.kind}';
+    }
+  }
+
   /// Recursively removes [Instance] entries in the cache starting from a root
   /// [Instance].
   void removeJsonObject(Instance root) {

@@ -114,11 +114,11 @@ class ConnectionSection extends StatelessWidget {
 
 class LandingScreenSection extends StatelessWidget {
   const LandingScreenSection({
-    Key? key,
+    super.key,
     required this.title,
     required this.child,
     this.actions = const [],
-  }) : super(key: key);
+  });
 
   final String title;
 
@@ -152,7 +152,7 @@ class LandingScreenSection extends StatelessWidget {
 }
 
 class ConnectInput extends StatefulWidget {
-  const ConnectInput({Key? key}) : super(key: key);
+  const ConnectInput({super.key});
 
   @override
   State<ConnectInput> createState() => _ConnectInputState();
@@ -302,7 +302,7 @@ class _ConnectInputState extends State<ConnectInput> with BlockingActionMixin {
 
 @visibleForTesting
 class MemoryAnalysisInstructions extends StatelessWidget {
-  const MemoryAnalysisInstructions({Key? key}) : super(key: key);
+  const MemoryAnalysisInstructions({super.key});
 
   @override
   Widget build(BuildContext context) {

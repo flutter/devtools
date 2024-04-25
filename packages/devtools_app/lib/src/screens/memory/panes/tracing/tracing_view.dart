@@ -18,9 +18,9 @@ import 'tracing_tree.dart';
 
 class TracingPane extends StatefulWidget {
   const TracingPane({
-    Key? key,
+    super.key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   final TracingPaneController controller;
 
@@ -111,7 +111,7 @@ class _TracingControls extends StatelessWidget {
 }
 
 class _ProfileHelpLink extends StatelessWidget {
-  const _ProfileHelpLink({Key? key}) : super(key: key);
+  const _ProfileHelpLink();
 
   static const _documentationTopic = gac.MemoryEvent.tracingHelp;
 
