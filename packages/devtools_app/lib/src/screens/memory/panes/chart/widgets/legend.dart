@@ -7,11 +7,10 @@ import 'package:flutter/material.dart';
 
 import '../../../../../shared/ui/colors.dart';
 import '../../../shared/primitives/painting.dart';
-import '../controller/android_chart_controller.dart';
 import '../controller/chart_pane_controller.dart';
-import '../controller/vm_chart_controller.dart';
+import '../controller/charts/android_chart_controller.dart';
+import '../controller/charts/vm_chart_controller.dart';
 import '../data/charts.dart';
-import 'memory_events_pane.dart';
 
 final _legendWidth = scaleByFontFactor(200.0);
 final _legendTextWidth = scaleByFontFactor(55.0);
@@ -197,30 +196,42 @@ class LegendRow extends StatelessWidget {
   }
 }
 
+/// Events trace name displayed
+class _Names {
+  static const manualSnapshot = 'Snapshot';
+  static const autoSnapshot = 'Auto';
+  static const monitor = 'Monitor';
+  static const reset = 'Reset';
+  static const vmGC = 'GC VM';
+  static const manualGC = 'Manual';
+  static const event = 'Event';
+  static const events = 'Events';
+}
+
 Map<String, Map<String, Object?>> eventLegendContent(bool isLight) => {
-      manualSnapshotLegendName: traceRender(
+      _Names.manualSnapshot: traceRender(
         image: snapshotManualLegend,
       ),
-      autoSnapshotLegendName: traceRender(
+      _Names.autoSnapshot: traceRender(
         image: snapshotAutoLegend,
       ),
-      monitorLegendName: traceRender(
+      _Names.monitor: traceRender(
         image: monitorLegend,
       ),
-      resetLegendName: traceRender(
+      _Names.reset: traceRender(
         image: isLight ? resetLightLegend : resetDarkLegend,
       ),
-      vmGCLegendName: traceRender(
+      _Names.vmGC: traceRender(
         image: gcVMLegend,
       ),
-      manualGCLegendName: traceRender(
+      _Names.manualGC: traceRender(
         image: gcManualLegend,
       ),
       // TODO: why do we need both a singular and plural legend entry for event?
-      eventLegendName: traceRender(
+      _Names.event: traceRender(
         image: eventLegendAsset(1),
       ),
-      eventsLegendName: traceRender(
+      _Names.events: traceRender(
         image: eventLegendAsset(2),
       ),
     };

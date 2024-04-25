@@ -18,9 +18,7 @@ import '../controller/chart_pane_controller.dart';
 import '../data/charts.dart';
 import 'chart_control_pane.dart';
 import 'legend.dart';
-import 'memory_android_chart.dart';
-import 'memory_events_pane.dart';
-import 'memory_vm_chart.dart';
+import 'memory_chart.dart';
 
 class MemoryChartPane extends StatefulWidget {
   const MemoryChartPane({
@@ -144,7 +142,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
   @override
   Widget build(BuildContext context) {
-    print('!!!! build MemoryChartPane');
+    final sampleAdded = widget.chart.data.timeline.sampleAdded;
     const memoryEventsPainHeight = 70.0;
     return ValueListenableBuilder<bool>(
       valueListenable: preferences.memory.showChart,
@@ -169,16 +167,13 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
                   children: [
                     SizedBox(
                       height: memoryEventsPainHeight,
-                      child: MemoryEventsPane(widget.chart.event),
+                      child: MemoryChart(widget.chart.event, sampleAdded),
                     ),
-                    MemoryVMChart(widget.chart.vm),
+                    MemoryChart(widget.chart.vm, sampleAdded),
                     if (widget.chart.isAndroidChartVisible.value)
                       SizedBox(
                         height: defaultChartHeight,
-                        child: MemoryAndroidChart(
-                          widget.chart.android,
-                          widget.chart.data.timeline,
-                        ),
+                        child: MemoryChart(widget.chart.android, sampleAdded),
                       ),
                   ],
                 ),
