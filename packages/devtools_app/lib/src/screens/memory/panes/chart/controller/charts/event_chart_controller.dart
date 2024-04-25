@@ -60,6 +60,12 @@ class EventChartController extends ChartController {
     _setupTraces();
     setFixedYRange(visibleVmEvent, extensionEvent);
     setupData();
+
+    addAutoDisposeListener(memoryTimeline.sampleAdded, () {
+      if (memoryTimeline.sampleAdded.value != null) {
+        addSample(memoryTimeline.sampleAdded.value!);
+      }
+    });
   }
 
   final ValueListenable<bool> paused;

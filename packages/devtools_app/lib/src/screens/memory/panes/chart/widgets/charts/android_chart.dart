@@ -40,7 +40,7 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
 
   void _init() {
     cancelListeners();
-    addAutoDisposeListener(widget.chart.traceChanged);
+    addAutoDisposeListener(widget.chart.memoryTimeline.sampleAdded);
   }
 
   @override

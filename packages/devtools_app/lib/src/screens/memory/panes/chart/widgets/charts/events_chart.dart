@@ -40,12 +40,7 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
   void _init() {
     cancelListeners();
 
-    // Monitor heap samples.
-    addAutoDisposeListener(_memoryTimeline.sampleAdded, () {
-      final value = _memoryTimeline.sampleAdded.value;
-      if (value == null) return;
-      setState(() => widget.chart.addSample(value));
-    });
+    addAutoDisposeListener(widget.chart.memoryTimeline.sampleAdded);
   }
 
   @override

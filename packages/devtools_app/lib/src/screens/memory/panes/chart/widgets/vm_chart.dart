@@ -6,13 +6,14 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../../../shared/charts/chart.dart';
-import '../../../../../../shared/charts/chart_controller.dart';
+import '../../../../../shared/charts/chart.dart';
+import '../../../../../shared/charts/chart_controller.dart';
+import '../controller/charts/vm_chart_controller.dart';
 
 class MemoryVMChart extends StatefulWidget {
   const MemoryVMChart(this.chart, {super.key});
 
-  final ChartController chart;
+  final VMChartController chart;
 
   @override
   MemoryVMChartState createState() => MemoryVMChartState();
@@ -27,7 +28,7 @@ class MemoryVMChartState extends State<MemoryVMChart> with AutoDisposeMixin {
 
   void _init() {
     cancelListeners();
-    addAutoDisposeListener(widget.chart.traceChanged);
+    addAutoDisposeListener(widget.chart.memoryTimeline.sampleAdded);
   }
 
   @override
