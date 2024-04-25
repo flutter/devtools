@@ -21,7 +21,7 @@ void main() {
       });
 
       expect(config.name, 'foo');
-      expect(config.extensionAssetsPath, 'absolute/path/to/foo/extension');
+      expect(config.extensionAssetsPath, '/absolute/path/to/foo/extension');
       expect(config.issueTrackerLink, 'www.google.com');
       expect(config.version, '1.0.0');
       expect(config.materialIconCodePoint, 0xf012);

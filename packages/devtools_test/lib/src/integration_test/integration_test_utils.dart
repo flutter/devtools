@@ -33,18 +33,10 @@ Future<void> pumpAndConnectDevTools(
   TestApp testApp,
 ) async {
   await pumpDevTools(tester);
-  expect(find.byType(ConnectInput), findsOneWidget);
-  expect(find.byType(ConnectedAppSummary), findsNothing);
-  expect(find.text('No client connection'), findsOneWidget);
-  _verifyFooterColor(tester, null);
-
-  logStatus('verify that we can connect to an app');
   await connectToTestApp(tester, testApp);
-  expect(find.byType(ConnectInput), findsNothing);
-  expect(find.byType(ConnectedAppSummary), findsOneWidget);
-  expect(find.text('No client connection'), findsNothing);
-  _verifyFooterColor(tester, darkColorScheme.primary);
+}
 
+Future<void> closeReleaseNotesViewer(WidgetTester tester) async {
   // If the release notes viewer is open, close it.
   final releaseNotesView =
       tester.widget<ReleaseNotesViewer>(find.byType(ReleaseNotesViewer));
@@ -88,9 +80,15 @@ Future<void> pumpDevTools(WidgetTester tester) async {
   // Await a delay to ensure the widget tree has loaded.
   await tester.pumpAndSettle(veryLongPumpDuration);
   expect(find.byType(DevToolsApp), findsOneWidget);
+
+  await closeReleaseNotesViewer(tester);
 }
 
 Future<void> connectToTestApp(WidgetTester tester, TestApp testApp) async {
+  logStatus('connecting to test app');
+  expect(find.byType(ConnectInput), findsOneWidget);
+  expect(find.byType(ConnectedAppSummary), findsNothing);
+  _verifyFooterColor(tester, null);
   final textFieldFinder = find.byType(TextField);
   // TODO(https://github.com/flutter/flutter/issues/89749): use
   // `tester.enterText` once this issue is fixed.
@@ -99,10 +97,13 @@ Future<void> connectToTestApp(WidgetTester tester, TestApp testApp) async {
   await tester.tap(
     find.ancestor(
       of: find.text('Connect'),
-      matching: find.byType(ElevatedButton),
+      matching: find.byType(DevToolsButton),
     ),
   );
   await tester.pumpAndSettle(longPumpDuration);
+  expect(find.byType(ConnectInput), findsNothing);
+  expect(find.byType(ConnectedAppSummary), findsOneWidget);
+  _verifyFooterColor(tester, darkColorScheme.primary);
 }
 
 Future<void> disconnectFromTestApp(WidgetTester tester) async {

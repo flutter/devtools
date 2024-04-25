@@ -25,19 +25,34 @@ void main() {
   late TestApp testApp;
 
   setUpAll(() {
-    logStatus('devtools_extensions_test setUpAll');
     testApp = TestApp.fromEnvironment();
     expect(testApp.vmServiceUri, isNotNull);
   });
 
+  setUp(() {
+    resetDevToolsExtensionEnabledStates();
+  });
+
   tearDown(() {
-    logStatus('devtools_extensions_test tearDown');
     resetDevToolsExtensionEnabledStates();
   });
 
   testWidgets('end to end extensions flow', (tester) async {
-    await pumpAndConnectDevTools(tester, testApp);
-    resetDevToolsExtensionEnabledStates();
+    await pumpDevTools(tester);
+
+    logStatus(
+      'verify static extensions are available before connecting to an app',
+    );
+    expect(extensionService.availableExtensions.value.length, 1);
+    expect(extensionService.visibleExtensions.value.length, 1);
+    await _verifyExtensionsSettingsMenu(
+      tester,
+      [
+        ExtensionEnabledState.none, // bar
+      ],
+    );
+
+    await connectToTestApp(tester, testApp);
 
     expect(extensionService.availableExtensions.value.length, 5);
     expect(extensionService.visibleExtensions.value.length, 5);
