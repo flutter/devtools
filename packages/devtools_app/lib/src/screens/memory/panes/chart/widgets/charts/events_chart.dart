@@ -34,18 +34,6 @@ class MemoryEventsPane extends StatefulWidget {
 
 class MemoryEventsPaneState extends State<MemoryEventsPane>
     with AutoDisposeMixin {
-  /// Note: The event pane is a fixed size chart (y-axis does not scale). The
-  ///       Y-axis fixed range is (visibleVmEvent to extensionEvent) e.g.,
-  ///
-  ///                         ____________________
-  ///         extensionEvent -|            *  (3.7)
-  ///                         |         *  (2.4)
-  ///                         |      *  (1.4)
-  ///         visibleVmEvent -|   *  (0.4)
-  ///                    0.0 _|___________________
-  ///
-  ///       The *s in the above chart are plotted at each y position (3.7, 2.4, 1.4, 0.4).
-  ///       Their y-position is such that the symbols won't overlap.
   /// TODO(terry): Consider a better solution e.g., % in the Y-axis.
 
   MemoryTimeline get _memoryTimeline => widget.chart.memoryTimeline;

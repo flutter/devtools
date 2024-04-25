@@ -34,6 +34,18 @@ enum EventsTraceName {
   gc,
 }
 
+/// The event pane is a fixed size chart (y-axis does not scale). The
+/// Y-axis fixed range is (visibleVmEvent to extensionEvent) e.g.,
+///
+///                   ____________________
+///   extensionEvent -|            *  (3.7)
+///                   |         *  (2.4)
+///                   |      *  (1.4)
+///   visibleVmEvent -|   *  (0.4)
+///              0.0 _|___________________
+///
+/// The *s in the above chart are plotted at each y position (3.7, 2.4, 1.4, 0.4).
+/// Their y-position is such that the symbols won't overlap.
 class EventChartController extends ChartController {
   EventChartController(this.memoryTimeline, {required this.paused})
       : super(
@@ -46,9 +58,6 @@ class EventChartController extends ChartController {
   final ValueListenable<bool> paused;
   final MemoryTimeline memoryTimeline;
 
-  // TODO(terry): Only load max visible data collected, when pruning of data
-  //              charted is added.
-  /// Preload any existing data collected but not in the chart.
   @override
   void setupData() {
     final chartDataLength = timestampsLength;
@@ -62,7 +71,6 @@ class EventChartController extends ChartController {
     dataRange.forEach(addSample);
   }
 
-  /// Loads all heap samples (live data or offline).
   void addSample(HeapSample sample) {
     // If paused don't update the chart (data is still collected).
     if (paused.value) return;
