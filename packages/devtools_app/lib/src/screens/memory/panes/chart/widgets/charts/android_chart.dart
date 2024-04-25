@@ -12,7 +12,7 @@ import '../../../../../../shared/charts/chart_trace.dart' as trace;
 import '../../../../../../shared/charts/chart_trace.dart'
     show ChartSymbol, ChartType;
 import '../../../../shared/primitives/memory_timeline.dart';
-import '../../controller/android_chart_controller.dart';
+import '../../controller/charts/android_chart_controller.dart';
 import '../../data/charts.dart';
 
 class MemoryAndroidChart extends StatefulWidget {

@@ -12,7 +12,7 @@ import '../../../../../../shared/charts/chart_trace.dart' as trace;
 import '../../../../../../shared/charts/chart_trace.dart'
     show ChartType, ChartSymbol;
 import '../../../../shared/primitives/memory_timeline.dart';
-import '../../controller/vm_chart_controller.dart';
+import '../../controller/charts/vm_chart_controller.dart';
 import '../../data/charts.dart';
 
 class MemoryVMChart extends StatefulWidget {

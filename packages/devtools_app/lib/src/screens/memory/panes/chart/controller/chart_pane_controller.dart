@@ -9,11 +9,11 @@ import 'package:flutter/foundation.dart';
 
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/primitives/simple_items.dart';
-import 'android_chart_controller.dart';
+import 'charts/android_chart_controller.dart';
 import 'chart_connection.dart';
 import 'chart_data.dart';
-import 'event_chart_controller.dart';
-import 'vm_chart_controller.dart';
+import 'charts/event_chart_controller.dart';
+import 'charts/vm_chart_controller.dart';
 
 class MemoryChartPaneController extends DisposableController
     with AutoDisposeControllerMixin {

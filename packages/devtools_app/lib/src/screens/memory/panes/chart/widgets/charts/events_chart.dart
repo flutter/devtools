@@ -11,7 +11,7 @@ import '../../../../../../shared/charts/chart.dart';
 import '../../../../../../shared/charts/chart_trace.dart' as trace;
 import '../../../../../../shared/charts/chart_trace.dart' show ChartType;
 import '../../../../shared/primitives/memory_timeline.dart';
-import '../../controller/event_chart_controller.dart';
+import '../../controller/charts/event_chart_controller.dart';
 
 /// Events trace name displayed
 const manualSnapshotLegendName = 'Snapshot';

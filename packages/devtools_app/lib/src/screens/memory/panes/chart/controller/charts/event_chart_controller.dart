@@ -5,9 +5,9 @@
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../../../../shared/charts/chart_controller.dart';
-import '../../../../../shared/charts/chart_trace.dart' as chart_trace;
-import '../../../shared/primitives/memory_timeline.dart';
+import '../../../../../../shared/charts/chart_controller.dart';
+import '../../../../../../shared/charts/chart_trace.dart' as chart_trace;
+import '../../../../shared/primitives/memory_timeline.dart';
 
 /// VM's GCs are displayed in a smaller glyph and closer to the heap graph.
 const visibleVmEvent = 0.4;
