@@ -357,7 +357,7 @@ void _verifyExtension(
   expect(ext.isPubliclyHosted, extensionPackage.isPubliclyHosted);
   if (extensionPackage.isPubliclyHosted) {
     expect(
-      ext.extensionAssetsUri,
+      ext.extensionAssetsPath,
       endsWith(
         p.join(
           '.pub-cache',
@@ -372,7 +372,7 @@ void _verifyExtension(
     );
   } else {
     expect(
-      ext.extensionAssetsUri,
+      ext.extensionAssetsPath,
       contains(
         p.join(
           'extensions',

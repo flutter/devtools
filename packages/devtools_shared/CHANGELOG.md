@@ -1,6 +1,6 @@
 # 10.0.0-dev.0
 * **Breaking change:** rename `DevToolsExtensionConfig.path` to
-`DevToolsExtensionConfig.extensionAssetsUri` and update class documentation.
+`DevToolsExtensionConfig.extensionAssetsPath` and update class documentation.
 * **Breaking change:** rename `ExtensionsApi.extensionRootPathPropertyName`
 to `ExtensionsApi.packageRootUriPropertyName`, and modify the String value
 for the parameter from 'rootPath' to 'packageRootUri'.

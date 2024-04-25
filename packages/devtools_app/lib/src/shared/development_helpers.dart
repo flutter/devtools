@@ -90,8 +90,9 @@ abstract class StubDevToolsExtensions {
     DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
     DevToolsExtensionConfig.versionKey: '1.0.0',
     DevToolsExtensionConfig.materialIconCodePointKey: '0xe0b1',
-    DevToolsExtensionConfig.extensionAssetsUriKey: '/path/to/foo',
-    DevToolsExtensionConfig.devtoolsOptionsUriKey: '/path/to/options/file',
+    DevToolsExtensionConfig.extensionAssetsPathKey: '/absolute/path/to/foo',
+    DevToolsExtensionConfig.devtoolsOptionsUriKey:
+        'file:///path/to/options/file',
     DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
     DevToolsExtensionConfig.detectedFromStaticContextKey: 'false',
   });
@@ -104,8 +105,10 @@ abstract class StubDevToolsExtensions {
         'https://github.com/rrousselGit/provider/issues',
     DevToolsExtensionConfig.versionKey: '3.0.0',
     DevToolsExtensionConfig.materialIconCodePointKey: 0xe50a,
-    DevToolsExtensionConfig.extensionAssetsUriKey: '/path/to/provider',
-    DevToolsExtensionConfig.devtoolsOptionsUriKey: '/path/to/options/file',
+    DevToolsExtensionConfig.extensionAssetsPathKey:
+        '/absolute/path/to/provider',
+    DevToolsExtensionConfig.devtoolsOptionsUriKey:
+        'file:///path/to/options/file',
     DevToolsExtensionConfig.isPubliclyHostedKey: 'true',
     DevToolsExtensionConfig.detectedFromStaticContextKey: 'false',
   });
@@ -118,8 +121,10 @@ abstract class StubDevToolsExtensions {
     DevToolsExtensionConfig.versionKey: '1.0.0',
     DevToolsExtensionConfig.materialIconCodePointKey: '0xe00c',
     DevToolsExtensionConfig.requiresConnectionKey: 'false',
-    DevToolsExtensionConfig.extensionAssetsUriKey: '/path/to/some_tool',
-    DevToolsExtensionConfig.devtoolsOptionsUriKey: '/path/to/options/file',
+    DevToolsExtensionConfig.extensionAssetsPathKey:
+        '/absolute/path/to/some_tool',
+    DevToolsExtensionConfig.devtoolsOptionsUriKey:
+        'file:///path/to/options/file',
     DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
     DevToolsExtensionConfig.detectedFromStaticContextKey: 'false',
   });
@@ -132,8 +137,9 @@ abstract class StubDevToolsExtensions {
     DevToolsExtensionConfig.versionKey: '2.0.0',
     DevToolsExtensionConfig.materialIconCodePointKey: 0xe638,
     DevToolsExtensionConfig.requiresConnectionKey: 'false',
-    DevToolsExtensionConfig.extensionAssetsUriKey: '/path/to/bar',
-    DevToolsExtensionConfig.devtoolsOptionsUriKey: '/path/to/options/file',
+    DevToolsExtensionConfig.extensionAssetsPathKey: '/absolute/path/to/bar',
+    DevToolsExtensionConfig.devtoolsOptionsUriKey:
+        'file:///path/to/options/file',
     DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
     DevToolsExtensionConfig.detectedFromStaticContextKey: 'true',
   });
@@ -147,8 +153,9 @@ abstract class StubDevToolsExtensions {
     DevToolsExtensionConfig.versionKey: '2.1.0', // Newer version.
     DevToolsExtensionConfig.materialIconCodePointKey: 0xe638,
     DevToolsExtensionConfig.requiresConnectionKey: 'false',
-    DevToolsExtensionConfig.extensionAssetsUriKey: '/path/to/bar',
-    DevToolsExtensionConfig.devtoolsOptionsUriKey: '/path/to/options/file',
+    DevToolsExtensionConfig.extensionAssetsPathKey: '/absolute/path/to/bar',
+    DevToolsExtensionConfig.devtoolsOptionsUriKey:
+        'file:///path/to/options/file',
     DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
     DevToolsExtensionConfig.detectedFromStaticContextKey: 'true',
   });
@@ -160,8 +167,9 @@ abstract class StubDevToolsExtensions {
     DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
     DevToolsExtensionConfig.versionKey: '1.0.0',
     DevToolsExtensionConfig.materialIconCodePointKey: 0xe716,
-    DevToolsExtensionConfig.extensionAssetsUriKey: '/path/to/baz',
-    DevToolsExtensionConfig.devtoolsOptionsUriKey: '/path/to/options/file',
+    DevToolsExtensionConfig.extensionAssetsPathKey: '/absolute/path/to/baz',
+    DevToolsExtensionConfig.devtoolsOptionsUriKey:
+        'file:///path/to/options/file',
     DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
     DevToolsExtensionConfig.detectedFromStaticContextKey: 'true',
   });
@@ -173,8 +181,9 @@ abstract class StubDevToolsExtensions {
     DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
     DevToolsExtensionConfig.versionKey: '1.0.0',
     DevToolsExtensionConfig.materialIconCodePointKey: '0xe0b1',
-    DevToolsExtensionConfig.extensionAssetsUriKey: '/path/to/foo',
-    DevToolsExtensionConfig.devtoolsOptionsUriKey: '/path/to/options/file',
+    DevToolsExtensionConfig.extensionAssetsPathKey: '/absolute/path/to/foo',
+    DevToolsExtensionConfig.devtoolsOptionsUriKey:
+        'file:///path/to/options/file',
     DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
     DevToolsExtensionConfig.detectedFromStaticContextKey: 'true',
   });

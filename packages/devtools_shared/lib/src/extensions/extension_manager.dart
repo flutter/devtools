@@ -48,7 +48,7 @@ class ExtensionsManager {
       extensionIdentifier,
       () => devtoolsExtensions
           .firstWhereOrNull((e) => e.identifier == extensionIdentifier)
-          ?.extensionAssetsUri,
+          ?.extensionAssetsPath,
     );
   }
 
@@ -186,7 +186,7 @@ class ExtensionsManager {
       try {
         final extensionConfig = DevToolsExtensionConfig.parse({
           ...config,
-          DevToolsExtensionConfig.extensionAssetsUriKey: location,
+          DevToolsExtensionConfig.extensionAssetsPathKey: location,
           // TODO(kenz): for monorepos, we may want to store the
           // devtools_options.yaml at the same location as the workspace's
           // .dart_tool/package_config.json file.

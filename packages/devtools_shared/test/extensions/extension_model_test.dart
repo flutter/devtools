@@ -14,14 +14,14 @@ void main() {
         'version': '1.0.0',
         'materialIconCodePoint': '0xf012',
         // requiresConnection field can be omitted because it is optional.
-        'extensionAssetsUri': 'path/to/foo/extension',
+        'extensionAssetsPath': 'path/to/foo/extension',
         'devtoolsOptionsUri': 'path/to/package/devtools_options.yaml',
         'isPubliclyHosted': 'false',
         'detectedFromStaticContext': 'false',
       });
 
       expect(config.name, 'foo');
-      expect(config.extensionAssetsUri, 'path/to/foo/extension');
+      expect(config.extensionAssetsPath, 'path/to/foo/extension');
       expect(config.issueTrackerLink, 'www.google.com');
       expect(config.version, '1.0.0');
       expect(config.materialIconCodePoint, 0xf012);
@@ -35,14 +35,14 @@ void main() {
         'version': '1.0.0',
         'materialIconCodePoint': 0xf012,
         'requiresConnection': 'true',
-        'extensionAssetsUri': 'path/to/foo/extension',
+        'extensionAssetsPath': 'path/to/foo/extension',
         'devtoolsOptionsUri': 'path/to/package/devtools_options.yaml',
         'isPubliclyHosted': 'false',
         'detectedFromStaticContext': 'false',
       });
 
       expect(config.name, 'foo');
-      expect(config.extensionAssetsUri, 'path/to/foo/extension');
+      expect(config.extensionAssetsPath, 'path/to/foo/extension');
       expect(config.issueTrackerLink, 'www.google.com');
       expect(config.version, '1.0.0');
       expect(config.materialIconCodePoint, 0xf012);
@@ -56,14 +56,14 @@ void main() {
         'version': '1.0.0',
         'materialIconCodePoint': '0xf012',
         'requiresConnection': 'false',
-        'extensionAssetsUri': 'path/to/foo/extension',
+        'extensionAssetsPath': 'path/to/foo/extension',
         'devtoolsOptionsUri': 'path/to/package/devtools_options.yaml',
         'isPubliclyHosted': 'false',
         'detectedFromStaticContext': 'false',
       });
 
       expect(config.name, 'foo');
-      expect(config.extensionAssetsUri, 'path/to/foo/extension');
+      expect(config.extensionAssetsPath, 'path/to/foo/extension');
       expect(config.issueTrackerLink, 'www.google.com');
       expect(config.version, '1.0.0');
       expect(config.materialIconCodePoint, 0xf012);
@@ -77,14 +77,14 @@ void main() {
         'version': '1.0.0',
         'materialIconCodePoint': 0xf012,
         'requiresConnection': false,
-        'extensionAssetsUri': 'path/to/foo/extension',
+        'extensionAssetsPath': 'path/to/foo/extension',
         'devtoolsOptionsUri': 'path/to/package/devtools_options.yaml',
         'isPubliclyHosted': 'false',
         'detectedFromStaticContext': 'false',
       });
 
       expect(config.name, 'foo');
-      expect(config.extensionAssetsUri, 'path/to/foo/extension');
+      expect(config.extensionAssetsPath, 'path/to/foo/extension');
       expect(config.issueTrackerLink, 'www.google.com');
       expect(config.version, '1.0.0');
       expect(config.materialIconCodePoint, 0xf012);
@@ -119,7 +119,7 @@ void main() {
               'issueTracker': 'www.google.com',
               'version': '1.0.0',
               'materialIconCodePoint': 0xf012,
-              'extensionAssetsUri': 'path/to/foo/extension',
+              'extensionAssetsPath': 'path/to/foo/extension',
               'devtoolsOptionsUri': 'path/to/package/devtools_options.yaml',
               'isPubliclyHosted': 'false',
               'detectedFromStaticContext': 'false',
@@ -136,7 +136,7 @@ void main() {
               'name': 'foo',
               'version': '1.0.0',
               'materialIconCodePoint': 0xf012,
-              'extensionAssetsUri': 'path/to/foo/extension',
+              'extensionAssetsPath': 'path/to/foo/extension',
               'devtoolsOptionsUri': 'path/to/package/devtools_options.yaml',
               'isPubliclyHosted': 'false',
               'detectedFromStaticContext': 'false',
@@ -153,7 +153,7 @@ void main() {
               'name': 'foo',
               'issueTracker': 'www.google.com',
               'materialIconCodePoint': 0xf012,
-              'extensionAssetsUri': 'path/to/foo/extension',
+              'extensionAssetsPath': 'path/to/foo/extension',
               'devtoolsOptionsUri': 'path/to/package/devtools_options.yaml',
               'isPubliclyHosted': 'false',
               'detectedFromStaticContext': 'false',
@@ -170,7 +170,7 @@ void main() {
               'name': 'foo',
               'issueTracker': 'www.google.com',
               'version': '1.0.0',
-              'extensionAssetsUri': 'path/to/foo/extension',
+              'extensionAssetsPath': 'path/to/foo/extension',
               'devtoolsOptionsUri': 'path/to/package/devtools_options.yaml',
               'isPubliclyHosted': 'false',
               'detectedFromStaticContext': 'false',
@@ -179,7 +179,7 @@ void main() {
           throwsMissingRequiredFieldsError(),
         );
       });
-      test('extensionAssetsUri', () {
+      test('extensionAssetsPath', () {
         expect(
           () {
             DevToolsExtensionConfig.parse({
@@ -204,7 +204,7 @@ void main() {
               'issueTracker': 'www.google.com',
               'version': '1.0.0',
               'materialIconCodePoint': 0xf012,
-              'extensionAssetsUri': 'path/to/foo/extension',
+              'extensionAssetsPath': 'path/to/foo/extension',
               'isPubliclyHosted': 'false',
               'detectedFromStaticContext': 'false',
             });
@@ -221,7 +221,7 @@ void main() {
               'issueTracker': 'www.google.com',
               'version': '1.0.0',
               'materialIconCodePoint': 0xf012,
-              'extensionAssetsUri': 'path/to/foo/extension',
+              'extensionAssetsPath': 'path/to/foo/extension',
               'devtoolsOptionsUri': 'path/to/package/devtools_options.yaml',
               'detectedFromStaticContext': 'false',
             });
@@ -238,7 +238,7 @@ void main() {
               'issueTracker': 'www.google.com',
               'version': '1.0.0',
               'materialIconCodePoint': 0xf012,
-              'extensionAssetsUri': 'path/to/foo/extension',
+              'extensionAssetsPath': 'path/to/foo/extension',
               'devtoolsOptionsUri': 'path/to/package/devtools_options.yaml',
               'isPubliclyHosted': 'false',
             });
@@ -267,7 +267,7 @@ void main() {
             'issueTracker': 'www.google.com',
             'version': '1.0.0',
             'materialIconCodePoint': 0xf012,
-            'extensionAssetsUri': 'path/to/foo/extension',
+            'extensionAssetsPath': 'path/to/foo/extension',
             'devtoolsOptionsUri': 'path/to/package/devtools_options.yaml',
             'isPubliclyHosted': 'false',
             'detectedFromStaticContext': 'false',
@@ -283,7 +283,7 @@ void main() {
             'issueTracker': 'www.google.com',
             'version': '1.0.0',
             'materialIconCodePoint': 0xf012,
-            'extensionAssetsUri': 'path/to/foo/extension',
+            'extensionAssetsPath': 'path/to/foo/extension',
             'devtoolsOptionsUri': 'path/to/package/devtools_options.yaml',
             // Expects a String here.
             'isPubliclyHosted': false,
@@ -312,7 +312,7 @@ void main() {
             'issueTracker': 'www.google.com',
             'version': '1.0.0',
             'materialIconCodePoint': 0xf012,
-            'extensionAssetsUri': 'path/to/foo/extension',
+            'extensionAssetsPath': 'path/to/foo/extension',
             'devtoolsOptionsUri': 'path/to/package/devtools_options.yaml',
             'isPubliclyHosted': 'false',
             'detectedFromStaticContext': 'false',
@@ -328,7 +328,7 @@ void main() {
             'issueTracker': 'www.google.com',
             'version': '1.0.0',
             'materialIconCodePoint': 0xf012,
-            'extensionAssetsUri': 'path/to/foo/extension',
+            'extensionAssetsPath': 'path/to/foo/extension',
             'devtoolsOptionsUri': 'path/to/package/devtools_options.yaml',
             'isPubliclyHosted': 'false',
             'detectedFromStaticContext': 'false',
@@ -344,7 +344,7 @@ void main() {
             'issueTracker': 'www.google.com',
             'version': '1.0.0',
             'materialIconCodePoint': 0xf012,
-            'extensionAssetsUri': 'path/to/foo/extension',
+            'extensionAssetsPath': 'path/to/foo/extension',
             'devtoolsOptionsUri': 'path/to/package/devtools_options.yaml',
             'isPubliclyHosted': 'false',
             'detectedFromStaticContext': 'false',
