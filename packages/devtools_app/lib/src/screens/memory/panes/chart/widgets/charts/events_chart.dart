@@ -44,7 +44,7 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
     addAutoDisposeListener(_memoryTimeline.sampleAdded, () {
       final value = _memoryTimeline.sampleAdded.value;
       if (value == null) return;
-      setState(() => _processHeapSample(value));
+      setState(() => widget.chart.addSample(value));
     });
 
     // Monitor event fired.
@@ -63,12 +63,5 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
     }
 
     return const SizedBox(width: denseSpacing);
-  }
-
-  /// Loads all heap samples (live data or offline).
-  void _processHeapSample(HeapSample sample) {
-    // If paused don't update the chart (data is still collected).
-    if (widget.chart.paused.value) return;
-    widget.chart.addSample(sample);
   }
 }
