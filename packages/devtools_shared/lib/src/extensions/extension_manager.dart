@@ -3,9 +3,11 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'package:collection/collection.dart';
+import 'package:dtd/dtd.dart';
 import 'package:extension_discovery/extension_discovery.dart';
 import 'package:path/path.dart' as path;
 
+import '../server/server_api.dart';
 import 'constants.dart';
 import 'extension_model.dart';
 
@@ -30,6 +32,13 @@ class ExtensionsManager {
 
   final _extensionLocationsByIdentifier = <String, String?>{};
 
+  /// The depth to search the user's IDE workspace roots for projects with
+  /// DevTools extensions.
+  ///
+  /// We use a larger depth than the default to reduce the risk of missing
+  /// static extensions in the user's project.
+  static const _staticExtensionsSearchDepth = 8;
+
   /// Returns the absolute path of the assets for the extension with identifier
   /// [extensionIdentifier].
   ///
@@ -39,7 +48,7 @@ class ExtensionsManager {
       extensionIdentifier,
       () => devtoolsExtensions
           .firstWhereOrNull((e) => e.identifier == extensionIdentifier)
-          ?.extensionAssetsUri,
+          ?.extensionAssetsPath,
     );
   }
 
@@ -57,6 +66,7 @@ class ExtensionsManager {
   Future<void> serveAvailableExtensions(
     String? rootFileUriString,
     List<String> logs,
+    DTDConnectionInfo? dtd,
   ) async {
     logs.add(
       'ExtensionsManager.serveAvailableExtensions for '
@@ -75,6 +85,40 @@ class ExtensionsManager {
         parsingErrors: parsingErrors,
         staticContext: false,
       );
+    }
+
+    // Find all static extensions for the project roots, which are derived from
+    // the Dart Tooling Daemon, and add them to [devtoolsExtensions].
+    final dtdUri = dtd?.uri;
+    if (dtdUri != null) {
+      DartToolingDaemon? dartToolingDaemon;
+      try {
+        dartToolingDaemon = await DartToolingDaemon.connect(Uri.parse(dtdUri));
+        final projectRoots = await dartToolingDaemon.getProjectRoots(
+          depth: _staticExtensionsSearchDepth,
+        );
+        for (final root in projectRoots.uris ?? const <Uri>[]) {
+          // Skip the runtime app root. These extensions have already been
+          // added to [devtoolsExtensions].
+          if (root.toString() == rootFileUriString) continue;
+
+          await _addExtensionsForRoot(
+            // TODO(https://github.com/dart-lang/pub/issues/4218): this logic
+            // assumes that the .dart_tool folder containing the
+            // package_config.json file is in the same directory as the
+            // pubspec.yaml file (since `dartToolingDaemon.getProjectRoots`
+            // returns all directories within the IDE workspace roots that have
+            // a pubspec.yaml file). This may be an incorrect assumption for
+            // monorepos.
+            root.toString(),
+            logs: logs,
+            parsingErrors: parsingErrors,
+            staticContext: true,
+          );
+        }
+      } finally {
+        await dartToolingDaemon?.close();
+      }
     }
 
     if (parsingErrors.isNotEmpty) {
@@ -142,7 +186,7 @@ class ExtensionsManager {
       try {
         final extensionConfig = DevToolsExtensionConfig.parse({
           ...config,
-          DevToolsExtensionConfig.extensionAssetsUriKey: location,
+          DevToolsExtensionConfig.extensionAssetsPathKey: location,
           // TODO(kenz): for monorepos, we may want to store the
           // devtools_options.yaml at the same location as the workspace's
           // .dart_tool/package_config.json file.

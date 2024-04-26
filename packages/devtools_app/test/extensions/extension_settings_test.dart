@@ -5,6 +5,7 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/extensions/extension_settings.dart';
 import 'package:devtools_app/src/shared/development_helpers.dart';
+import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_extensions.dart';
@@ -12,9 +13,9 @@ import 'package:devtools_test/devtools_test.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 
 import '../test_infra/matchers/matchers.dart';
-import '../test_infra/test_data/extensions.dart';
 
 void main() {
   late ExtensionSettingsDialog dialog;
@@ -22,23 +23,43 @@ void main() {
   group('$ExtensionSettingsDialog', () {
     setUp(() async {
       setTestMode();
-      dialog = const ExtensionSettingsDialog();
+
+      setGlobal(IdeTheme, IdeTheme());
       setGlobal(PreferencesController, PreferencesController());
+      final mockServiceConnection = createMockServiceConnectionWithDefaults();
+      final mockServiceManager =
+          mockServiceConnection.serviceManager as MockServiceManager;
+      when(mockServiceManager.connectedState)
+          .thenReturn(ValueNotifier(const ConnectedState(true)));
+      setGlobal(ServiceConnectionManager, mockServiceConnection);
+
       setGlobal(
         ExtensionService,
-        await createMockExtensionServiceWithDefaults(testExtensions),
+        ExtensionService(
+          fixedAppRoot: Uri.parse('file:///Users/me/package_root_1'),
+        ),
       );
-      setGlobal(IdeTheme, IdeTheme());
+      await extensionService.initialize();
+      expect(extensionService.staticExtensions.length, 4);
+      expect(extensionService.runtimeExtensions.length, 3);
+      expect(extensionService.availableExtensions.value.length, 5);
+
+      dialog = ExtensionSettingsDialog(
+        extensions: extensionService.availableExtensions.value,
+      );
+    });
+
+    tearDown(() {
+      resetDevToolsExtensionEnabledStates();
     });
 
     testWidgets(
       'builds dialog with no available extensions',
       (WidgetTester tester) async {
-        setGlobal(
-          ExtensionService,
-          await createMockExtensionServiceWithDefaults([]),
+        await tester.pumpWidget(
+          wrapSimple(const ExtensionSettingsDialog(extensions: [])),
         );
-        await tester.pumpWidget(wrapSimple(dialog));
+        await tester.pumpAndSettle();
         expect(find.text('DevTools Extensions'), findsOneWidget);
         expect(
           find.textContaining('Extensions are provided by the pub packages'),
@@ -54,6 +75,7 @@ void main() {
       'builds dialog with available extensions',
       (WidgetTester tester) async {
         await tester.pumpWidget(wrapSimple(dialog));
+        await tester.pumpAndSettle();
         expect(find.text('DevTools Extensions'), findsOneWidget);
         expect(
           find.textContaining('Extensions are provided by the pub packages'),
@@ -75,6 +97,7 @@ void main() {
       'pressing toggle buttons makes calls to the $ExtensionService',
       (WidgetTester tester) async {
         await tester.pumpWidget(wrapSimple(dialog));
+        await tester.pumpAndSettle();
 
         expect(
           extensionService
@@ -151,6 +174,7 @@ void main() {
             matching: find.text('Disabled'),
           ),
         );
+        await tester.pumpAndSettle();
         expect(
           extensionService
               .enabledStateListenable(StubDevToolsExtensions.barExtension.name)
@@ -165,6 +189,7 @@ void main() {
             matching: find.text('Disabled'),
           ),
         );
+        await tester.pumpAndSettle();
         expect(
           extensionService
               .enabledStateListenable(StubDevToolsExtensions.bazExtension.name)
@@ -179,6 +204,7 @@ void main() {
             matching: find.text('Enabled'),
           ),
         );
+        await tester.pumpAndSettle();
         expect(
           extensionService
               .enabledStateListenable(StubDevToolsExtensions.fooExtension.name)
@@ -193,6 +219,7 @@ void main() {
             matching: find.text('Enabled'),
           ),
         );
+        await tester.pumpAndSettle();
         expect(
           extensionService
               .enabledStateListenable(
@@ -209,6 +236,7 @@ void main() {
             matching: find.text('Enabled'),
           ),
         );
+        await tester.pumpAndSettle();
         expect(
           extensionService
               .enabledStateListenable(
@@ -219,6 +247,7 @@ void main() {
         );
 
         await tester.pumpWidget(wrapSimple(dialog));
+        await tester.pumpAndSettle();
         await expectLater(
           find.byWidget(dialog),
           matchesDevToolsGolden(
@@ -232,6 +261,7 @@ void main() {
       'toggle buttons update for changes to value notifiers',
       (WidgetTester tester) async {
         await tester.pumpWidget(wrapSimple(dialog));
+        await tester.pumpAndSettle();
         await expectLater(
           find.byWidget(dialog),
           matchesDevToolsGolden(
@@ -261,6 +291,7 @@ void main() {
         );
 
         await tester.pumpWidget(wrapSimple(dialog));
+        await tester.pumpAndSettle();
         await expectLater(
           find.byWidget(dialog),
           matchesDevToolsGolden(

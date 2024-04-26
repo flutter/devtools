@@ -6,23 +6,18 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
-import 'package:logging/logging.dart';
 
 import 'src/app.dart';
 import 'src/framework/app_error_handling.dart';
+import 'src/framework/framework_core.dart';
 import 'src/screens/debugger/syntax_highlighter.dart';
 import 'src/screens/provider/riverpod_error_logger_observer.dart';
 import 'src/shared/analytics/analytics_controller.dart';
-import 'src/shared/config_specific/framework_initialize/framework_initialize.dart';
 import 'src/shared/config_specific/logger/logger_helpers.dart';
 import 'src/shared/feature_flags.dart';
 import 'src/shared/globals.dart';
-import 'src/shared/preferences/preferences.dart';
 import 'src/shared/primitives/url_utils.dart';
 import 'src/shared/primitives/utils.dart';
-import 'src/shared/server/server.dart' as server;
-
-final _log = Logger('initializtion');
 
 /// Handles necessary initialization then runs DevTools.
 ///
@@ -77,15 +72,7 @@ Future<void> initializeDevTools({
     enableExperiments: shouldEnableExperiments,
   );
 
-  // Initialize the framework before we do anything else, otherwise the
-  // StorageController won't be initialized and preferences won't be loaded.
-  await initializeFramework();
-  await _initDTDConnection();
-
-  final preferences = PreferencesController();
-  // Wait for preferences to load before rendering the app to avoid a flash of
-  // content with the incorrect theme.
-  await preferences.init();
+  await FrameworkCore.init();
 }
 
 /// Initializes some DevTools global fields for our Flutter integration tests.
@@ -102,40 +89,6 @@ void _maybeInitForIntegrationTestMode({
   setIntegrationTestMode();
   if (enableExperiments) {
     setEnableExperiments();
-  }
-}
-
-Future<void> _initDTDConnection() async {
-  try {
-    // Get the dtdUri from the devtools server
-    final dtdUri = await server.getDtdUri();
-
-    if (dtdUri != null) {
-      await dtdManager.connect(
-        dtdUri,
-        onError: (e, st) {
-          notificationService.pushError(
-            'Failed to connect to the Dart Tooling Daemon',
-            isReportable: false,
-          );
-          reportError(
-            e,
-            errorType: 'Dart Tooling Daemon connection failed.',
-            stack: st,
-          );
-        },
-      );
-    } else {
-      _log.info('No DTD uri provided from the server during initialization.');
-    }
-  } catch (e, st) {
-    // Dtd failing to connect does not interfere with devtools starting up so
-    // catch any errors and report them.
-    reportError(
-      e,
-      errorType: 'Failed to initialize the DTD connection.',
-      stack: st,
-    );
   }
 }
 

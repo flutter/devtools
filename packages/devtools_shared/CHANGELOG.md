@@ -1,6 +1,6 @@
 # 10.0.0-dev.0
 * **Breaking change:** rename `DevToolsExtensionConfig.path` to
-`DevToolsExtensionConfig.extensionAssetsUri` and update class documentation.
+`DevToolsExtensionConfig.extensionAssetsPath` and update class documentation.
 * **Breaking change:** rename `ExtensionsApi.extensionRootPathPropertyName`
 to `ExtensionsApi.packageRootUriPropertyName`, and modify the String value
 for the parameter from 'rootPath' to 'packageRootUri'.
@@ -8,8 +8,16 @@ for the parameter from 'rootPath' to 'packageRootUri'.
 "detectedFromStaticContext" in the `DevToolsExtensionConfig.parse` factory constructor.
 * **Breaking change:** remove `DevToolsOptions.optionsFileName` constant in favor of
 new constant `devtoolsOptionsFileName`.
+* **Breaking change:** modify the `ExtensionsApi.apiExtensionEnabledState`
+API to expect a query parameter "devtoolsOptionsUri" instead of "rootPath".
+* **Breaking change:** replace the `rootUri` parameter in the
+`DevToolsOptions.lookupExtensionEnabledState` and
+`DevToolsOptions.setExtensionEnabledState` methods with new parameter
+`devtoolsOptionsUri`. Modify logic to expect a full file URI to the
+options file instead of expecting the package root in which it is contained.
 * Add new fields `requiresConnection`, `devtoolsOptionsUri`, and `detectedFromStaticContext`
 to `DevToolsExtensionConfig`.
+* Add `ExtensionsApi.devtoolsOptionsUriPropertyName` field.
 * Return valid extensions from the `apiServeAvailableExtensions` endpoint even when
 an exception is thrown.
 * Add utility extension methods on `Completer`: `safeComplete` and `safeCompleteError`.

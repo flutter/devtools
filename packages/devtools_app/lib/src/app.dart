@@ -139,26 +139,26 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
 
     unawaited(ga.setupDimensions());
 
+    void clearRoutesAndSetState() {
+      setState(() {
+        _clearCachedRoutes();
+      });
+    }
+
     if (FeatureFlags.devToolsExtensions) {
-      addAutoDisposeListener(extensionService.availableExtensions, () {
-        setState(() {
-          _clearCachedRoutes();
-        });
-      });
-      addAutoDisposeListener(extensionService.visibleExtensions, () {
-        setState(() {
-          _clearCachedRoutes();
-        });
-      });
+      addAutoDisposeListener(
+        extensionService.availableExtensions,
+        clearRoutesAndSetState,
+      );
+      addAutoDisposeListener(
+        extensionService.visibleExtensions,
+        clearRoutesAndSetState,
+      );
     }
 
     addAutoDisposeListener(
       serviceConnection.serviceManager.isolateManager.mainIsolate,
-      () {
-        setState(() {
-          _clearCachedRoutes();
-        });
-      },
+      clearRoutesAndSetState,
     );
 
     _isDarkThemeEnabledPreference = preferences.darkModeTheme.value;
@@ -173,9 +173,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
 
   @override
   void dispose() {
-    // preferences is initialized in main() to avoid flash of content with
-    // incorrect theme.
-    preferences.dispose();
+    FrameworkCore.dispose();
     super.dispose();
   }
 

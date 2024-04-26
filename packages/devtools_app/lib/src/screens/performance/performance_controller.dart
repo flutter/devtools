@@ -151,8 +151,17 @@ class PerformanceController extends DisposableController
         // Perfetto trace viewer (ui.perfetto.dev).
         createData: (json) => OfflinePerformanceData.fromJson(json),
         shouldLoad: (data) => !data.isEmpty,
+        loadData: _loadOfflineData,
       );
     }
+  }
+
+  Future<void> _loadOfflineData(OfflinePerformanceData data) async {
+    await clearData();
+    offlinePerformanceData = data;
+    await _applyToFeatureControllersAsync(
+      (c) => c.setOfflineData(offlinePerformanceData!),
+    );
   }
 
   void _fetchMissingRebuildLocations() async {
@@ -248,15 +257,6 @@ class PerformanceController extends DisposableController
           displayRefreshRate: flutterFramesController.displayRefreshRate.value,
         ).toJson(),
       );
-
-  @override
-  FutureOr<void> processOfflineData(OfflinePerformanceData offlineData) async {
-    await clearData();
-    offlinePerformanceData = offlineData;
-    await _applyToFeatureControllersAsync(
-      (c) => c.setOfflineData(offlinePerformanceData!),
-    );
-  }
 }
 
 abstract class PerformanceFeatureController extends DisposableController {
