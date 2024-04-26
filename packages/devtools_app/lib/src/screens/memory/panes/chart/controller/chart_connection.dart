@@ -38,10 +38,12 @@ class ChartConnection extends DisposableController
   );
 
   Timer? _pollingTimer;
-  bool _connected = false;
 
-  /// If true, the connection to application was lost.
-  bool _disconnected = false;
+  /// If completed, this instance was connected to the application.
+  final Completer<void> _connected = Completer();
+
+  /// If true, the instance lost connection to the application.
+  final Completer<void> _disconnected = Completer();
 
   late final isDeviceAndroid = _isDevToolsCurrentlyConnected()
       ? serviceConnection.serviceManager.vm?.operatingSystem == 'android'
@@ -58,8 +60,8 @@ class ChartConnection extends DisposableController
       serviceConnection.serviceManager.connectedApp != null;
 
   Future<void> maybeConnect() async {
-    if (_connected || _disconnected) return;
-    _connected = true;
+    if (_connected.isCompleted || _disconnected.isCompleted) return;
+    _connected.complete();
     await _runSafely(() async {
       await serviceConnection.serviceManager.onServiceAvailable;
       autoDisposeStreamSubscription(
@@ -75,8 +77,8 @@ class ChartConnection extends DisposableController
   }
 
   Future<void> _onPoll() async {
-    assert(_connected);
-    if (_disconnected) return;
+    assert(_connected.isCompleted);
+    if (_disconnected.isCompleted) return;
     await _runSafely(() async {
       _pollingTimer = null;
       await _memoryTracker.pollMemory();
@@ -86,14 +88,14 @@ class ChartConnection extends DisposableController
 
   /// Run callback resiliently to disconnect.
   Future<void> _runSafely(_AsyncVoidCallback callback) async {
-    if (_disconnected) return;
+    if (_disconnected.isCompleted) return;
     try {
       await callback();
     } catch (e) {
       if (_isDevToolsCurrentlyConnected()) {
         rethrow;
       } else {
-        _disconnected = true;
+        _disconnected.complete();
         _pollingTimer?.cancel();
       }
     }
