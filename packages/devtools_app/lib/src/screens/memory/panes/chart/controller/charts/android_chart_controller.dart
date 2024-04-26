@@ -34,7 +34,6 @@ class AndroidChartController extends ChartController {
           name: 'Android',
           sharedLabelTimestamps: sharedLabels,
         ) {
-    _setupTraces();
     setupData();
 
     addAutoDisposeListener(memoryTimeline.sampleAdded, () {
@@ -52,6 +51,7 @@ class AndroidChartController extends ChartController {
   /// Preload any existing data collected but not in the chart.
   @override
   void setupData() {
+    _setupTraces();
     // Only display if traces have been created. Android memory may not
     // have been toggled to be displayed - yet.
     if (traces.isNotEmpty) {

@@ -50,6 +50,7 @@ class MemoryChartPaneController extends DisposableController
     } else {
       assert(offlineData!.isDeviceAndroid != null);
       data = offlineData!;
+      _paused.value = false;
       recomputeChartData();
     }
 
@@ -65,14 +66,7 @@ class MemoryChartPaneController extends DisposableController
       () => unawaited(_onChartVisibilityChanged()),
     );
 
-    if (mode == DevToolsMode.offlineData) {
-      _paused.value = false;
-      // data.timeline.notifyAboutAllSamples();
-      recomputeChartData();
-      print('!!! sent notifyAboutAllSamples and recomputeChartData');
-    }
     _initialized.complete();
-    print('!!! MemoryChartPaneController init');
   }
 
   late final EventChartController event =

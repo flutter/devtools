@@ -35,7 +35,6 @@ class MemoryController extends DisposableController
     @visibleForTesting DiffPaneController? connectedDiff,
     @visibleForTesting ProfilePaneController? connectedProfile,
   }) {
-    print('!!!!!!!!! creating MemoryController');
     if (connectedDiff != null || connectedProfile != null) {
       _mode = DevToolsMode.connected;
     } else {

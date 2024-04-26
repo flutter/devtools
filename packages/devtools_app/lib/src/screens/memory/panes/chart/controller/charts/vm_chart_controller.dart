@@ -27,7 +27,6 @@ class _Colors {
 class VMChartController extends ChartController {
   VMChartController(this.memoryTimeline, {required this.paused})
       : super(name: 'VM Memory') {
-    _setupTraces();
     setupData();
 
     addAutoDisposeListener(memoryTimeline.sampleAdded, () {
@@ -42,6 +41,7 @@ class VMChartController extends ChartController {
 
   @override
   void setupData() {
+    _setupTraces();
     final chartDataLength = timestampsLength;
     final dataLength = memoryTimeline.data.length;
 
