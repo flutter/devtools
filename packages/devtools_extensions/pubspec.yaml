@@ -13,7 +13,7 @@ executables:
 
 dependencies:
   args: ^2.4.2
-  devtools_shared: ^10.0.0-dev.0
+  devtools_shared: ^10.0.0-dev.1
   devtools_app_shared: ^0.2.0-dev.0
   flutter:
     sdk: flutter
