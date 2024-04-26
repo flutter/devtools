@@ -355,7 +355,7 @@ onto the `flutter/devtools` protected branch (`master`).
 2. Create internal bug using http://go/flutter-security-bug, with priority P2 and type `Process`:
 
    Title:
-       Create merge commit for cherry-pick PR.
+       Create merge commit for Flutter/DevTools cherry-pick.
    
    Body:
     
