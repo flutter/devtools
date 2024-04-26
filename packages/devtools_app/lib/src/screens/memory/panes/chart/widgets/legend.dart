@@ -195,7 +195,9 @@ class _LegendRow extends StatelessWidget {
   }
 }
 
-enum _Names {
+// TODO(polina-c): this list overlaps with [_EventsTraceName] in [event_chart_controller.dart].
+// Consider refactoring to avoid duplication.
+enum _LegendCategory {
   manualSnapshot('Snapshot'),
   autoSnapshot('Auto'),
   monitor('Monitor'),
@@ -206,35 +208,35 @@ enum _Names {
   events('Events'),
   ;
 
-  const _Names(this.displayName);
+  const _LegendCategory(this.displayName);
 
   final String displayName;
 }
 
 Map<String, Map<String, Object?>> _eventLegendContent(bool isLight) => {
-      _Names.manualSnapshot.displayName: traceRender(
+      _LegendCategory.manualSnapshot.displayName: traceRender(
         image: snapshotManualLegend,
       ),
-      _Names.autoSnapshot.displayName: traceRender(
+      _LegendCategory.autoSnapshot.displayName: traceRender(
         image: snapshotAutoLegend,
       ),
-      _Names.monitor.displayName: traceRender(
+      _LegendCategory.monitor.displayName: traceRender(
         image: monitorLegend,
       ),
-      _Names.reset.displayName: traceRender(
+      _LegendCategory.reset.displayName: traceRender(
         image: isLight ? resetLightLegend : resetDarkLegend,
       ),
-      _Names.vmGC.displayName: traceRender(
+      _LegendCategory.vmGC.displayName: traceRender(
         image: gcVMLegend,
       ),
-      _Names.manualGC.displayName: traceRender(
+      _LegendCategory.manualGC.displayName: traceRender(
         image: gcManualLegend,
       ),
       // TODO: why do we need both a singular and plural legend entry for event?
-      _Names.event.displayName: traceRender(
+      _LegendCategory.event.displayName: traceRender(
         image: eventLegendAsset(1),
       ),
-      _Names.events.displayName: traceRender(
+      _LegendCategory.events.displayName: traceRender(
         image: eventLegendAsset(2),
       ),
     };
