@@ -397,3 +397,8 @@ channel to connect with other DevTools extension authors and the DevTools team.
 
 For feature requests or bugs, please [file an issue](https://github.com/flutter/devtools/issues/new)
 on the DevTools Github repository.
+
+For other documentation and guides, check out the
+[DevTools Extensions](https://docs.flutter.dev/tools/devtools/extensions) page on flutter.dev or
+[Dart and Flutter DevTools extensions](https://medium.com/flutter/dart-flutter-devtools-extensions-c8bc1aaf8e5f),
+a free article on Medium.
