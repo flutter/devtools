@@ -29,7 +29,7 @@ class _Sizes {
 
 /// Name of each trace being charted, index order is the trace index
 /// too (order of trace creation top-down order).
-enum EventsTraceName {
+enum _EventsTraceName {
   extensionEvents,
   snapshot,
   autoSnapshot,
@@ -88,47 +88,47 @@ class EventChartController extends ChartController {
 
   void _setupTraces() {
     if (traces.isNotEmpty) {
-      assert(traces.length == EventsTraceName.values.length);
+      assert(traces.length == _EventsTraceName.values.length);
 
-      final extensionEventsIndex = EventsTraceName.extensionEvents.index;
+      final extensionEventsIndex = _EventsTraceName.extensionEvents.index;
       assert(
         trace(extensionEventsIndex).name ==
-            EventsTraceName.values[extensionEventsIndex].toString(),
+            _EventsTraceName.values[extensionEventsIndex].toString(),
       );
 
-      final snapshotIndex = EventsTraceName.snapshot.index;
+      final snapshotIndex = _EventsTraceName.snapshot.index;
       assert(
         trace(snapshotIndex).name ==
-            EventsTraceName.values[snapshotIndex].toString(),
+            _EventsTraceName.values[snapshotIndex].toString(),
       );
 
-      final autoSnapshotIndex = EventsTraceName.autoSnapshot.index;
+      final autoSnapshotIndex = _EventsTraceName.autoSnapshot.index;
       assert(
         trace(autoSnapshotIndex).name ==
-            EventsTraceName.values[autoSnapshotIndex].toString(),
+            _EventsTraceName.values[autoSnapshotIndex].toString(),
       );
 
-      final manualGCIndex = EventsTraceName.manualGC.index;
+      final manualGCIndex = _EventsTraceName.manualGC.index;
       assert(
         trace(manualGCIndex).name ==
-            EventsTraceName.values[manualGCIndex].toString(),
+            _EventsTraceName.values[manualGCIndex].toString(),
       );
 
-      final monitorIndex = EventsTraceName.monitor.index;
+      final monitorIndex = _EventsTraceName.monitor.index;
       assert(
         trace(monitorIndex).name ==
-            EventsTraceName.values[monitorIndex].toString(),
+            _EventsTraceName.values[monitorIndex].toString(),
       );
 
-      final monitorResetIndex = EventsTraceName.monitorReset.index;
+      final monitorResetIndex = _EventsTraceName.monitorReset.index;
       assert(
         trace(monitorResetIndex).name ==
-            EventsTraceName.values[monitorResetIndex].toString(),
+            _EventsTraceName.values[monitorResetIndex].toString(),
       );
 
-      final gcIndex = EventsTraceName.gc.index;
+      final gcIndex = _EventsTraceName.gc.index;
       assert(
-        trace(gcIndex).name == EventsTraceName.values[gcIndex].toString(),
+        trace(gcIndex).name == _EventsTraceName.values[gcIndex].toString(),
       );
 
       return;
@@ -145,12 +145,12 @@ class EventChartController extends ChartController {
         fixedMinY: _Sizes.visibleVm,
         fixedMaxY: _Sizes.extensions,
       ),
-      name: EventsTraceName.extensionEvents.toString(),
+      name: _EventsTraceName.extensionEvents.toString(),
     );
-    assert(extensionEventsIndex == EventsTraceName.extensionEvents.index);
+    assert(extensionEventsIndex == _EventsTraceName.extensionEvents.index);
     assert(
       trace(extensionEventsIndex).name ==
-          EventsTraceName.values[extensionEventsIndex].toString(),
+          _EventsTraceName.values[extensionEventsIndex].toString(),
     );
 
     final snapshotIndex = createTrace(
@@ -162,12 +162,12 @@ class EventChartController extends ChartController {
         fixedMinY: _Sizes.visibleVm,
         fixedMaxY: _Sizes.extensions,
       ),
-      name: EventsTraceName.snapshot.toString(),
+      name: _EventsTraceName.snapshot.toString(),
     );
-    assert(snapshotIndex == EventsTraceName.snapshot.index);
+    assert(snapshotIndex == _EventsTraceName.snapshot.index);
     assert(
       trace(snapshotIndex).name ==
-          EventsTraceName.values[snapshotIndex].toString(),
+          _EventsTraceName.values[snapshotIndex].toString(),
     );
 
     // Auto-snapshot
@@ -180,12 +180,12 @@ class EventChartController extends ChartController {
         fixedMinY: _Sizes.visibleVm,
         fixedMaxY: _Sizes.extensions,
       ),
-      name: EventsTraceName.autoSnapshot.toString(),
+      name: _EventsTraceName.autoSnapshot.toString(),
     );
-    assert(autoSnapshotIndex == EventsTraceName.autoSnapshot.index);
+    assert(autoSnapshotIndex == _EventsTraceName.autoSnapshot.index);
     assert(
       trace(autoSnapshotIndex).name ==
-          EventsTraceName.values[autoSnapshotIndex].toString(),
+          _EventsTraceName.values[autoSnapshotIndex].toString(),
     );
 
     // Manual GC
@@ -198,12 +198,12 @@ class EventChartController extends ChartController {
         fixedMinY: _Sizes.visibleVm,
         fixedMaxY: _Sizes.extensions,
       ),
-      name: EventsTraceName.manualGC.toString(),
+      name: _EventsTraceName.manualGC.toString(),
     );
-    assert(manualGCIndex == EventsTraceName.manualGC.index);
+    assert(manualGCIndex == _EventsTraceName.manualGC.index);
     assert(
       trace(manualGCIndex).name ==
-          EventsTraceName.values[manualGCIndex].toString(),
+          _EventsTraceName.values[manualGCIndex].toString(),
     );
 
     final mainMonitorColor = Colors.yellowAccent.shade400;
@@ -218,12 +218,12 @@ class EventChartController extends ChartController {
         fixedMinY: _Sizes.visibleVm,
         fixedMaxY: _Sizes.extensions,
       ),
-      name: EventsTraceName.monitor.toString(),
+      name: _EventsTraceName.monitor.toString(),
     );
-    assert(monitorIndex == EventsTraceName.monitor.index);
+    assert(monitorIndex == _EventsTraceName.monitor.index);
     assert(
       trace(monitorIndex).name ==
-          EventsTraceName.values[monitorIndex].toString(),
+          _EventsTraceName.values[monitorIndex].toString(),
     );
 
     final monitorResetIndex = createTrace(
@@ -237,12 +237,12 @@ class EventChartController extends ChartController {
         concentricCenterColor: mainMonitorColor,
         concentricCenterDiameter: 4,
       ),
-      name: EventsTraceName.monitorReset.toString(),
+      name: _EventsTraceName.monitorReset.toString(),
     );
-    assert(monitorResetIndex == EventsTraceName.monitorReset.index);
+    assert(monitorResetIndex == _EventsTraceName.monitorReset.index);
     assert(
       trace(monitorResetIndex).name ==
-          EventsTraceName.values[monitorResetIndex].toString(),
+          _EventsTraceName.values[monitorResetIndex].toString(),
     );
 
     // VM GC
@@ -255,14 +255,14 @@ class EventChartController extends ChartController {
         fixedMinY: _Sizes.visibleVm,
         fixedMaxY: _Sizes.extensions,
       ),
-      name: EventsTraceName.gc.toString(),
+      name: _EventsTraceName.gc.toString(),
     );
-    assert(gcIndex == EventsTraceName.gc.index);
+    assert(gcIndex == _EventsTraceName.gc.index);
     assert(
-      trace(gcIndex).name == EventsTraceName.values[gcIndex].toString(),
+      trace(gcIndex).name == _EventsTraceName.values[gcIndex].toString(),
     );
 
-    assert(traces.length == EventsTraceName.values.length);
+    assert(traces.length == _EventsTraceName.values.length);
   }
 
   void addSample(HeapSample sample) {
@@ -274,7 +274,7 @@ class EventChartController extends ChartController {
     if (sample.isGC) {
       // Plot the VM GC on the VmEvent trace with a fixed Y coordinate.
       addDataToTrace(
-        EventsTraceName.gc.index,
+        _EventsTraceName.gc.index,
         chart_trace.Data(sample.timestamp, _Sizes.visibleVm),
       );
     }
@@ -285,7 +285,7 @@ class EventChartController extends ChartController {
         _Sizes.extensions,
         (events.extensionEvents?.theEvents ?? []).length,
       );
-      addDataToTrace(EventsTraceName.extensionEvents.index, data);
+      addDataToTrace(_EventsTraceName.extensionEvents.index, data);
     }
 
     // User events snapshot, auto-snapshot, manual GC, are plotted on the top-line
@@ -297,17 +297,17 @@ class EventChartController extends ChartController {
 
     if (events.isEventGC) {
       // Plot manual requested GC on the visibleEvent Y coordinate.
-      addDataToTrace(EventsTraceName.manualGC.index, data);
+      addDataToTrace(_EventsTraceName.manualGC.index, data);
     }
 
     if (events.isEventSnapshot) {
       // Plot snapshot on the visibleEvent Y coordinate.
-      addDataToTrace(EventsTraceName.snapshot.index, data);
+      addDataToTrace(_EventsTraceName.snapshot.index, data);
     }
 
     if (events.isEventSnapshotAuto) {
       // Plot auto-snapshot on the visibleEvent Y coordinate.
-      addDataToTrace(EventsTraceName.autoSnapshot.index, data);
+      addDataToTrace(_EventsTraceName.autoSnapshot.index, data);
     }
 
     if (sample.memoryEventInfo.isEventAllocationAccumulator) {
@@ -317,9 +317,9 @@ class EventChartController extends ChartController {
         _Sizes.visibleMonitor,
       );
       if (allocationEvent.isReset) {
-        addDataToTrace(EventsTraceName.monitorReset.index, data);
+        addDataToTrace(_EventsTraceName.monitorReset.index, data);
       } else if (allocationEvent.isStart) {
-        addDataToTrace(EventsTraceName.monitor.index, data);
+        addDataToTrace(_EventsTraceName.monitor.index, data);
       }
     }
   }
