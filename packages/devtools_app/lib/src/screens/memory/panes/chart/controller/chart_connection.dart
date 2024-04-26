@@ -49,6 +49,10 @@ class ChartConnection extends DisposableController
 
   /// True if DevTools is in connected mode and the connection to the app is alive.
   bool _isDevToolsCurrentlyConnected() =>
+      // Theoretically it should be enough to check only connectedState.value.connected,
+      // but practically these values are not always in sync and, if at least
+      // on of them means disconnection this class consider the connection as lost,
+      // and stops interaction with it.
       !offlineDataController.showingOfflineData.value &&
       serviceConnection.serviceManager.connectedState.value.connected &&
       serviceConnection.serviceManager.connectedApp != null;
