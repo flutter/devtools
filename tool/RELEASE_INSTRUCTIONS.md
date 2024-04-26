@@ -352,10 +352,10 @@ onto the `flutter/devtools` protected branch (`master`).
    in **zero** lines of code.
    - Ask a member of the DevTools team for review, but **DO NOT** squash and merge yet.
 
-2. Create internal bug using http://go/flutter-security-bug, with priority P2 and type `Process`:
+2. Create internal bug using [http://go/flutter-security-bug](http://go/flutter-security-bug/?priority=P2&type=Process):
 
    Title:
-       Create merge commit for Flutter/DevTools cherry-pick.
+       Create merge commit for flutter/devtools cherry-pick.
    
    Body:
     
@@ -365,7 +365,7 @@ onto the `flutter/devtools` protected branch (`master`).
        3. Revert the settings.
 
     Assign and send link to the bug to a member of the Dash team who has Admin access to the
-    `flutter/devtools` repository settings (@godofredoc, @piinks or @tvolkert).
+    `flutter/devtools` repository settings (@piinks or @tvolkert).
 
 ### Additional resources
 - `dart-lang/sdk` cherry-pick [Wiki](https://github.com/dart-lang/sdk/wiki/Cherry-picks-to-a-release-channel)
