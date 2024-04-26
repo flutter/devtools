@@ -327,7 +327,7 @@ class DevToolsButton extends StatelessWidget {
     this.elevated = false,
     this.outlined = true,
     this.tooltipPadding,
-  })  : assert(
+  }) : assert(
           label != null || icon != null,
           'Either icon or label must be specified.',
         );
@@ -476,7 +476,7 @@ final class DevToolsTooltip extends StatelessWidget {
     this.padding = const EdgeInsets.all(defaultSpacing),
     this.decoration,
     this.textStyle,
-  })  : assert((message == null) != (richMessage == null));
+  }) : assert((message == null) != (richMessage == null));
 
   final String? message;
   final InlineSpan? richMessage;
