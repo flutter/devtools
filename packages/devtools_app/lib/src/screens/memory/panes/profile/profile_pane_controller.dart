@@ -14,9 +14,7 @@ import '../../../../shared/primitives/simple_items.dart';
 import '../../shared/heap/class_filter.dart';
 import 'model.dart';
 
-class _Json {
-  static const profile = 'profile';
-}
+const _jsonProfile = 'profile';
 
 class ProfilePaneController extends DisposableController
     with AutoDisposeControllerMixin {
@@ -31,13 +29,13 @@ class ProfilePaneController extends DisposableController
   factory ProfilePaneController.fromJson(Map<String, dynamic> json) {
     return ProfilePaneController(
       mode: DevToolsMode.offlineData,
-      profile: AdaptedProfile.fromJson(json[_Json.profile]),
+      profile: AdaptedProfile.fromJson(json[_jsonProfile]),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      _Json.profile: _currentAllocationProfile.value?.toJson(),
+      _jsonProfile: _currentAllocationProfile.value?.toJson(),
     };
   }
 

@@ -50,10 +50,8 @@ class ConnectedApp {
   String? _operatingSystem;
 
   // TODO(kenz): investigate if we can use `libraryUriAvailableNow` instead.
-  Future<bool> get isFlutterApp async =>
-      (_isFlutterApp ??=
-          await serviceManager?.libraryUriAvailable(flutterLibraryUri)) ??
-      false;
+  Future<bool> get isFlutterApp async => _isFlutterApp ??=
+      await serviceManager!.libraryUriAvailable(flutterLibraryUri);
 
   bool? get isFlutterAppNow {
     assert(_isFlutterApp != null);

@@ -8,19 +8,17 @@ import 'package:intl/intl.dart';
 
 import '../../../../shared/primitives/utils.dart';
 
-class _Json {
-  static const data = 'data';
-}
+const _jsonData = 'data';
 
 /// All Raw data received from the VM or offline data.
 class MemoryTimeline {
   MemoryTimeline({List<HeapSample>? data}) {
-    this.data = data ?? [];
+    this.data = data ?? []; // Not using const because data is mutable.
   }
 
   factory MemoryTimeline.fromJson(Map<String, dynamic> json) {
     return MemoryTimeline(
-      data: (json[_Json.data] as List)
+      data: (json[_jsonData] as List)
           .map((e) => HeapSample.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
@@ -28,7 +26,7 @@ class MemoryTimeline {
 
   Map<String, dynamic> toJson() {
     return {
-      _Json.data: data.map((e) => e.toJson()).toList(),
+      _jsonData: data.map((e) => e.toJson()).toList(),
     };
   }
 
