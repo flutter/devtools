@@ -73,7 +73,7 @@ For a standalone extension (an extension that is not being shipped as part of an
 pub package), it is acceptable to include your extension source code in the same package
 that the extension is shipped with. This will simplify development, and since users of your
 package will add a dependency on your package as a `dev_dependency`, the size of your
-package will not affect the user's app size. Your package strucutre will look like this:
+package will not affect the user's app size. Your package structure will look like this:
 
 ```
 my_new_tool
