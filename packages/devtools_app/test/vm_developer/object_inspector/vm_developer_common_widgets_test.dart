@@ -57,7 +57,7 @@ void main() {
 
     // Intentionally unawaited.
     // ignore: discarded_futures
-    when(mockClassObject.requestReachableSize()).thenAnswer((_) {
+    when(mockClassObject.requestReachableSize()).thenAnswer((_) async {
       fetchingSizeNotifier.value = true;
 
       if (requestedSize.valueAsString == null) {
@@ -75,7 +75,7 @@ void main() {
 
     // Intentionally unawaited.
     // ignore: discarded_futures
-    when(mockClassObject.requestRetainingPath()).thenAnswer((_) {
+    when(mockClassObject.requestRetainingPath()).thenAnswer((_) async {
       retainingPathNotifier.value = testRetainingPath;
     });
 
@@ -83,7 +83,7 @@ void main() {
 
     // Intentionally unawaited.
     // ignore: discarded_futures
-    when(mockClassObject.requestInboundsRefs()).thenAnswer((_) {
+    when(mockClassObject.requestInboundsRefs()).thenAnswer((_) async {
       inboundRefsNotifier.clear();
       inboundRefsNotifier.addAll(
         InboundReferencesTreeNode.buildTreeRoots(testInboundRefs),
@@ -92,7 +92,7 @@ void main() {
 
     // Intentionally unawaited.
     // ignore: discarded_futures
-    when(mockClassObject.expandInboundRef(any)).thenAnswer((_) {
+    when(mockClassObject.expandInboundRef(any)).thenAnswer((_) async {
       for (final entry in inboundRefsNotifier.value) {
         entry.addAllChildren(
           InboundReferencesTreeNode.buildTreeRoots(
