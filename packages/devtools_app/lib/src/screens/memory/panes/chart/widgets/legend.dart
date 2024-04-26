@@ -37,7 +37,7 @@ class MemoryChartLegend extends StatelessWidget {
 
     final legendRows = <Widget>[];
 
-    final events = eventLegendContent(colorScheme.isLight);
+    final events = _eventLegendContent(colorScheme.isLight);
     legendRows.add(
       Container(
         padding: _legendTitlePadding,
@@ -50,7 +50,7 @@ class MemoryChartLegend extends StatelessWidget {
       final leftEntry = iterator.current;
       final rightEntry = iterator.moveNext() ? iterator.current : null;
       legendRows.add(
-        LegendRow(
+        _LegendRow(
           entry1: leftEntry,
           entry2: rightEntry,
         ),
@@ -67,7 +67,7 @@ class MemoryChartLegend extends StatelessWidget {
 
     for (final entry in vms.entries) {
       legendRows.add(
-        LegendRow(
+        _LegendRow(
           entry1: entry,
         ),
       );
@@ -84,7 +84,7 @@ class MemoryChartLegend extends StatelessWidget {
 
       for (final entry in androids.entries) {
         legendRows.add(
-          LegendRow(
+          _LegendRow(
             entry1: entry,
           ),
         );
@@ -110,9 +110,8 @@ class MemoryChartLegend extends StatelessWidget {
   }
 }
 
-class LegendRow extends StatelessWidget {
-  const LegendRow({
-    super.key,
+class _LegendRow extends StatelessWidget {
+  const _LegendRow({
     required this.entry1,
     this.entry2,
   });
@@ -196,42 +195,46 @@ class LegendRow extends StatelessWidget {
   }
 }
 
-/// Events trace name displayed
-class _Names {
-  static const manualSnapshot = 'Snapshot';
-  static const autoSnapshot = 'Auto';
-  static const monitor = 'Monitor';
-  static const reset = 'Reset';
-  static const vmGC = 'GC VM';
-  static const manualGC = 'Manual';
-  static const event = 'Event';
-  static const events = 'Events';
+enum _Names {
+  manualSnapshot('Snapshot'),
+  autoSnapshot('Auto'),
+  monitor('Monitor'),
+  reset('Reset'),
+  vmGC('GC VM'),
+  manualGC('Manual'),
+  event('Event'),
+  events('Events'),
+  ;
+
+  const _Names(this.displayName);
+
+  final String displayName;
 }
 
-Map<String, Map<String, Object?>> eventLegendContent(bool isLight) => {
-      _Names.manualSnapshot: traceRender(
+Map<String, Map<String, Object?>> _eventLegendContent(bool isLight) => {
+      _Names.manualSnapshot.displayName: traceRender(
         image: snapshotManualLegend,
       ),
-      _Names.autoSnapshot: traceRender(
+      _Names.autoSnapshot.displayName: traceRender(
         image: snapshotAutoLegend,
       ),
-      _Names.monitor: traceRender(
+      _Names.monitor.displayName: traceRender(
         image: monitorLegend,
       ),
-      _Names.reset: traceRender(
+      _Names.reset.displayName: traceRender(
         image: isLight ? resetLightLegend : resetDarkLegend,
       ),
-      _Names.vmGC: traceRender(
+      _Names.vmGC.displayName: traceRender(
         image: gcVMLegend,
       ),
-      _Names.manualGC: traceRender(
+      _Names.manualGC.displayName: traceRender(
         image: gcManualLegend,
       ),
       // TODO: why do we need both a singular and plural legend entry for event?
-      _Names.event: traceRender(
+      _Names.event.displayName: traceRender(
         image: eventLegendAsset(1),
       ),
-      _Names.events: traceRender(
+      _Names.events.displayName: traceRender(
         image: eventLegendAsset(2),
       ),
     };
