@@ -86,8 +86,16 @@ abstract class ExtensionsApi {
   /// extension-related requests to the server that describes the package root
   /// for the app whose extensions are being queried.
   ///
-  /// This field is a file:// URI string and NOT a path.
+  /// This field is a `file://` URI string and NOT a path.
   static const packageRootUriPropertyName = 'packageRootUri';
+
+  /// The property name for the query parameter, passed along with
+  /// [apiExtensionEnabledState] requests, that specifies the location of the
+  /// 'devtools_options.yaml' file that is responsible for storing extension
+  /// enablement states.
+  ///
+  /// This field is a `file://` URI string and NOT a path.
+  static const devtoolsOptionsUriPropertyName = 'devtoolsOptionsUri';
 
   /// The property name for the response that the server sends back upon
   /// receiving a [apiServeAvailableExtensions] request.

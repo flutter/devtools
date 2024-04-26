@@ -23,8 +23,7 @@ class ExtensionScreen extends Screen {
           id: extensionConfig.screenId,
           title: extensionConfig.name,
           icon: extensionConfig.icon,
-          // TODO(kenz): support static DevTools extensions.
-          requiresConnection: true,
+          requiresConnection: extensionConfig.requiresConnection,
         );
 
   final DevToolsExtensionConfig extensionConfig;
