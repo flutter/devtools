@@ -5,7 +5,6 @@
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
-import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/primitives/utils.dart';
 
@@ -15,10 +14,6 @@ class MemoryTimeline {
 
   /// Raw Heap sampling data from the VM.
   final List<HeapSample> data = [];
-
-  /// Extension Events.
-  ValueListenable<Event?> get eventNotifier => _eventFiredNotifier;
-  final _eventFiredNotifier = ValueNotifier<Event?>(null);
 
   /// Notifies that a new Heap sample has been added to the timeline.
   ValueListenable<HeapSample?> get sampleAdded => _sampleAdded;
@@ -34,9 +29,6 @@ class MemoryTimeline {
     final event = _eventSamples.safeFirst;
     return event != null ? event.timestamp : -1;
   }
-
-  ValueNotifier<int> get sampleEventNotifier => _sampleEventNotifier;
-  final _sampleEventNotifier = ValueNotifier<int>(0);
 
   ExtensionEvents? get extensionEvents {
     if (_extensionEvents.isNotEmpty) {
@@ -77,7 +69,6 @@ class MemoryTimeline {
   void addSample(HeapSample sample) {
     data.add(sample);
     _sampleAdded.value = sample;
-    sampleEventNotifier.value++;
   }
 
   void addExtensionEvent(
