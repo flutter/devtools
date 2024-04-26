@@ -4,6 +4,7 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/memory/panes/chart/widgets/chart_control_pane.dart';
+import 'package:devtools_app/src/screens/memory/panes/chart/widgets/chart_pane.dart';
 import 'package:devtools_app/src/screens/memory/panes/chart/widgets/memory_chart.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -101,7 +102,7 @@ void main() {
 
         expect(find.text('GC'), findsOneWidget);
 
-        expect(find.byType(MemoryChart), findsOneWidget);
+        expect(find.byType(MemoryChartPane), findsOneWidget);
       },
     );
   });
