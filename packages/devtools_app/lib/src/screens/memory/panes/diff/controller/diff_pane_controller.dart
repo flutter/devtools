@@ -48,9 +48,19 @@ class DiffPaneController extends DisposableController {
     final snapshots = (json[_Json.snapshots] as List)
         .map((e) => SnapshotDataItem.fromJson(e))
         .toList();
+
+    final diffWith = json[_Json.diffWith] as List<int?>;
+
+    for (var i = 0; i < snapshots.length; i++) {
+      final diffIndex = diffWith[i];
+      if (diffIndex != null) {
+        snapshots[i].diffWith.value = snapshots[diffIndex];
+      }
+    }
+
     return DiffPaneController(
       loader: null,
-      //snapshots: snapshots,
+      snapshots: snapshots,
     );
   }
 
