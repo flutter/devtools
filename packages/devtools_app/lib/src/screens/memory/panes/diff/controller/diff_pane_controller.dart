@@ -26,19 +26,50 @@ import '../data/csv.dart';
 import '../data/heap_diff_data.dart';
 import '../data/heap_diff_store.dart';
 import 'class_data.dart';
-import 'item_controller.dart';
+import 'snapshot_item.dart';
+
+class _Json {
+  static const snapshots = 'snapshots';
+  static const diffWith = 'diffWith';
+}
 
 class DiffPaneController extends DisposableController {
-  DiffPaneController({required this.loader});
+  DiffPaneController({
+    required this.loader,
+    List<SnapshotDataItem>? snapshots,
+  }) {
+    if (snapshots != null) {
+      core._snapshots.value.addAll(snapshots);
+    }
+    derived._updateValues();
+  }
 
   factory DiffPaneController.fromJson(Map<String, dynamic> json) {
-    // TODO(polina-c): implement, https://github.com/flutter/devtools/issues/6972
-    return DiffPaneController(loader: null);
+    final snapshots = (json[_Json.snapshots] as List)
+        .map((e) => SnapshotDataItem.fromJson(e))
+        .toList();
+    return DiffPaneController(
+      loader: null,
+      //snapshots: snapshots,
+    );
   }
 
   Map<String, dynamic> toJson() {
-    // TODO(polina-c): implement, https://github.com/flutter/devtools/issues/6972
-    return {};
+    final snapshots =
+        core.snapshots.value.whereType<SnapshotDataItem>().toList();
+
+    final snapshotToIndex =
+        snapshots.asMap().map((index, item) => MapEntry(item, index));
+
+    final diffsWith = snapshots.map((item) {
+      final diffWith = item.diffWith.value;
+      return diffWith == null ? null : snapshotToIndex[diffWith];
+    }).toList();
+
+    return {
+      _Json.snapshots: snapshots,
+      _Json.diffWith: diffsWith,
+    };
   }
 
   final HeapGraphLoader? loader;

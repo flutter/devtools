@@ -17,7 +17,7 @@ import '../../../../../shared/dialogs.dart';
 import '../../../../../shared/primitives/byte_utils.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../controller/diff_pane_controller.dart';
-import '../controller/item_controller.dart';
+import '../controller/snapshot_item.dart';
 
 final _log = Logger('snapshot_list');
 

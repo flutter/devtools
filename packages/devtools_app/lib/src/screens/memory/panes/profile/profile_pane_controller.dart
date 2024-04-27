@@ -41,7 +41,7 @@ class ProfilePaneController extends DisposableController
 
   Map<String, dynamic> toJson() {
     return {
-      _jsonProfile: _currentAllocationProfile.value?.toJson(),
+      _jsonProfile: _currentAllocationProfile.value,
     };
   }
 

@@ -33,12 +33,28 @@ class SnapshotDocItem extends SnapshotItem {
   bool get hasData => false;
 }
 
+class _Json {
+  static const defaultName = 'defaultName';
+  static const displayNumber = 'displayNumber';
+  static const snapshot = 'snapshot';
+  static const nameOverride = 'nameOverride';
+  static const diffWith = 'diffWith';
+}
+
 class SnapshotDataItem extends SnapshotItem implements RenamableItem {
   SnapshotDataItem({
     this.displayNumber,
     required this.defaultName,
   }) {
     _isProcessing.value = true;
+  }
+
+  factory SnapshotDataItem.fromJson(Map<String, dynamic> json) {
+    throw UnimplementedError();
+  }
+
+  Map<String, dynamic> toJson() {
+    return {};
   }
 
   HeapData? get heap => _heap;

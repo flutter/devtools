@@ -12,7 +12,7 @@ import '../../../../../shared/memory/simple_items.dart';
 import '../../../../../shared/primitives/byte_utils.dart';
 import '../../../shared/primitives/simple_elements.dart';
 import '../controller/diff_pane_controller.dart';
-import '../controller/item_controller.dart';
+import '../controller/snapshot_item.dart';
 
 class SnapshotControlPane extends StatelessWidget {
   const SnapshotControlPane({super.key, required this.controller});
