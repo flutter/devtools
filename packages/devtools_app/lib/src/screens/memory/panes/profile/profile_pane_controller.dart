@@ -129,7 +129,6 @@ class ProfilePaneController extends DisposableController
   /// Clear the current allocation profile and request an updated version from
   /// the VM service.
   Future<void> refresh() async {
-    print('!!! refreshing');
     final service = serviceConnection.serviceManager.service;
     if (service == null) return;
     _currentAllocationProfile.value = null;
