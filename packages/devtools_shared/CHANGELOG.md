@@ -1,3 +1,7 @@
+# 10.0.0-dev.1
+* Export `DTDConnectionInfo` from the `devtools_shared.dart` library instead
+of the `devtools_server.dart` library.
+
 # 10.0.0-dev.0
 * **Breaking change:** rename `DevToolsExtensionConfig.path` to
 `DevToolsExtensionConfig.extensionAssetsPath` and update class documentation.

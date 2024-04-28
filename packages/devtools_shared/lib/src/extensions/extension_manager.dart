@@ -7,7 +7,7 @@ import 'package:dtd/dtd.dart';
 import 'package:extension_discovery/extension_discovery.dart';
 import 'package:path/path.dart' as path;
 
-import '../server/server_api.dart';
+import '../common.dart';
 import 'constants.dart';
 import 'extension_model.dart';
 

@@ -39,7 +39,7 @@ In all cases, the above 4 traces share the same X-Axis time scale.  However, the
 First, create a StatefulWidget to contain the chart e.g.,
 ```
 class MyChart extends StatefulWidget {
-  MyChart({Key key}) : super(key: key);
+  MyChart({super.key});
 
   final controller = ChartController();
 

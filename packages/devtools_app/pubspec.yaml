@@ -4,7 +4,7 @@ publish_to: none
 
 # Note: this version should only be updated by running tools/update_version.dart
 # that updates all versions of devtools packages (devtools_app, devtools_test).
-version: 2.35.0-dev.16
+version: 2.35.0-dev.18
 
 repository: https://github.com/flutter/devtools/tree/master/packages/devtools_app
 
@@ -26,7 +26,7 @@ dependencies:
   dds_service_extensions: ^2.0.0
   devtools_app_shared: ^0.2.0-dev.0
   devtools_extensions: ^0.2.0-dev.0
-  devtools_shared: ^10.0.0-dev.0
+  devtools_shared: ^10.0.0-dev.1
   dtd: ^2.2.0
   file: ">=6.0.0 <8.0.0"
   file_selector: ^1.0.0
