@@ -12,10 +12,11 @@ import '../../../test_infra/test_data/memory/heap/heap_graph_fakes.dart';
 void main() {
   for (var t in _sizeTests) {
     test('has expected root and unreachable sizes, ${t.name}.', () async {
-      final heap = await HeapData.calculate(
+      final heap = HeapData(
         t.heap,
-        DateTime.now(),
+        created: DateTime.now(),
       );
+      await heap.calculate;
 
       expect(
         heap.retainedSizes![heapRootIndex],

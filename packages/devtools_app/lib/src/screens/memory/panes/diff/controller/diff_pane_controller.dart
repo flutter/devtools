@@ -65,8 +65,10 @@ class DiffPaneController extends DisposableController {
   }
 
   Map<String, dynamic> toJson() {
-    final snapshots =
-        core.snapshots.value.whereType<SnapshotDataItem>().toList();
+    final snapshots = core.snapshots.value
+        .whereType<SnapshotDataItem>()
+        .where((s) => s.heap != null)
+        .toList();
 
     final snapshotToIndex =
         snapshots.asMap().map((index, item) => MapEntry(item, index));

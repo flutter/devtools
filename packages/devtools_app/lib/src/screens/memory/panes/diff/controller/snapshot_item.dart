@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
@@ -36,25 +38,46 @@ class SnapshotDocItem extends SnapshotItem {
 class _Json {
   static const defaultName = 'defaultName';
   static const displayNumber = 'displayNumber';
-  static const snapshot = 'snapshot';
+  static const chunks = 'chunks';
+  static const created = 'created';
   static const nameOverride = 'nameOverride';
-  static const diffWith = 'diffWith';
 }
 
 class SnapshotDataItem extends SnapshotItem implements RenamableItem {
   SnapshotDataItem({
-    this.displayNumber,
     required this.defaultName,
-  }) {
-    _isProcessing.value = true;
-  }
+    this.displayNumber,
+    this.nameOverride,
+  });
 
   factory SnapshotDataItem.fromJson(Map<String, dynamic> json) {
-    throw UnimplementedError();
+    final result = SnapshotDataItem(
+      displayNumber: json[_Json.displayNumber] as int?,
+      defaultName: json[_Json.defaultName] as String,
+      nameOverride: json[_Json.nameOverride] as String?,
+    );
+
+    final loader = HeapGraphLoaderFromChunks(
+      chunks: json[_Json.chunks] as List<ByteData>,
+      created: json[_Json.created] as DateTime,
+    );
+
+    unawaited(
+      result.loadHeap(loader),
+    ); // Start the loading process, that will result in progress indicator in UI.
+
+    return result;
   }
 
   Map<String, dynamic> toJson() {
-    return {};
+    final heap = _heap!; // Not processed heaps are not serializable.
+    return {
+      _Json.defaultName: defaultName,
+      _Json.displayNumber: displayNumber,
+      _Json.nameOverride: nameOverride,
+      _Json.chunks: heap.graph.toChunks(),
+      _Json.created: heap.created,
+    };
   }
 
   HeapData? get heap => _heap;
@@ -72,8 +95,9 @@ class SnapshotDataItem extends SnapshotItem implements RenamableItem {
   Future<void> loadHeap(HeapGraphLoader loader) async {
     assert(_heap == null);
     final (graph, created) = await loader.load();
-    _heap = await HeapData.calculate(graph, created);
     _isProcessing.value = false;
+    _heap = HeapData(graph, created: created);
+    _isProcessing.value = true;
   }
 
   @override
