@@ -186,8 +186,8 @@ class GtagEventDevTools extends GtagEvent {
 // This cannot be a factory constructor in the [GtagEventDevTools] class due to
 // https://github.com/dart-lang/sdk/issues/46967.
 GtagEventDevTools _gtagEvent({
-  String? event_category,
-  String? event_label,
+  required String event_category,
+  required String event_label,
   String? send_to,
   bool non_interaction = false,
   int value = 0,
@@ -472,6 +472,7 @@ void screen(
   _log.fine('Event: Screen(screenName:$screenName, value:$value)');
   final gtagEvent = _gtagEvent(
     event_category: gac.screenViewEvent,
+    event_label: gac.init,
     value: value,
     send_to: gaDevToolsPropertyId(),
   );
