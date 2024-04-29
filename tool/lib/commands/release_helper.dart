@@ -118,7 +118,7 @@ class ReleaseHelperCommand extends Command {
         ),
       );
 
-      final newVersion = getNewVersionResult.stdout.split('\n').last.trim();
+      final newVersion = getNewVersionResult.stdout.trim().split('\n').last;
 
       log.stdout(getNewVersionResult.stdout.split('\n').toString());
 
