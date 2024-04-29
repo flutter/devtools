@@ -149,7 +149,8 @@ class ReleaseHelperCommand extends Command {
       );
 
       log.stdout(
-          'Your Draft release PR can be found at: ${prURL.stdout.trim()}');
+        'Your Draft release PR can be found at: ${prURL.stdout.trim()}',
+      );
       log.stdout('DONE');
       log.stdout(
         'Build, run and test this release using: `devtools_tool serve`',
