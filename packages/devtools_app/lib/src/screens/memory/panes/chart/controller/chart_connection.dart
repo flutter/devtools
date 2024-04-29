@@ -115,8 +115,9 @@ class ChartConnection extends DisposableController
 
   @override
   void dispose() {
+    // Not nulling out timer, because we need timer to be not null and inactive
+    // for `_isConnectionStopped` to return true.
     _pollingTimer?.cancel();
-    _pollingTimer = null;
     super.dispose();
   }
 }
