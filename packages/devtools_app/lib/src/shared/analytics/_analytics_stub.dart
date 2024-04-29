@@ -98,7 +98,6 @@ void impression(
 void reportError(
   String errorMessage, {
   bool fatal = false,
-  ScreenAnalyticsMetrics Function()? screenMetricsProvider,
 }) {}
 
 Future<void> setupDimensions() async {}

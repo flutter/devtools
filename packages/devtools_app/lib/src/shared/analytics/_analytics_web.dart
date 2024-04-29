@@ -680,7 +680,6 @@ String? _lastGaError;
 void reportError(
   String errorMessage, {
   bool fatal = false,
-  ScreenAnalyticsMetrics Function()? screenMetricsProvider,
 }) {
   // Don't keep recording same last error.
   if (_lastGaError == errorMessage) return;
@@ -690,10 +689,13 @@ void reportError(
     gaExceptionProvider: () => _gtagException(
       errorMessage,
       fatal: fatal,
-      screenMetrics:
-          screenMetricsProvider != null ? screenMetricsProvider() : null,
     ),
   );
+
+  // TODO(kenz): we may want to create a new event `devtoolsException` if we
+  // need all of our custom dimensions logged with exceptions.
+  final uaEvent = ua.Event.exception(exception: errorMessage);
+  unawaited(dtdManager.sendAnalyticsEvent(uaEvent));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
