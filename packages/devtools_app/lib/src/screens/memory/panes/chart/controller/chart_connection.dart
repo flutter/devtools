@@ -12,8 +12,6 @@ import '../../../shared/primitives/memory_timeline.dart';
 import '../data/primitives.dart';
 import 'memory_tracker.dart';
 
-typedef _AsyncVoidCallback = Future<void> Function();
-
 /// Connection between chart and application.
 ///
 /// The connection consists of listeners to events from vm and
@@ -50,7 +48,7 @@ class ChartConnection extends DisposableController
 
   // True if connection was started and then stopped.
   bool get _isConnectionStopped {
-    if (!_initialized.isCompleted) return false;
+    assert(_initialized.isCompleted);
     return _pollingTimer?.isActive == false;
   }
 
@@ -93,10 +91,12 @@ class ChartConnection extends DisposableController
       serviceConnection.serviceManager.service!.onExtensionEvent
           .listen(_memoryTracker.onMemoryData),
     );
+
     autoDisposeStreamSubscription(
       serviceConnection.serviceManager.service!.onGCEvent
           .listen(_memoryTracker.onGCEvent),
     );
+
     await _startPolling();
   }
 
@@ -108,9 +108,7 @@ class ChartConnection extends DisposableController
       await _memoryTracker.pollMemory();
       _pollingTimer = Timer(chartUpdateDelay, _startPolling);
     } catch (e) {
-      if (_checkConnection()) {
-        rethrow;
-      }
+      if (_checkConnection()) rethrow;
     }
   }
 
