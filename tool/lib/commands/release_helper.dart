@@ -18,9 +18,9 @@ class ReleaseHelperCommand extends Command {
       _debugFlag,
       negatable: false,
       help:
-          'Whether to run this script for development purposes. This disables '
-          'some checks like requiring no local changes or checking out a fresh '
-          'copy of the master branch.',
+          'Whether to run this script for development purposes. This allows '
+          'local changes to be made to this script without throwing an '
+          'exception, and will return the current branch after executing.',
     );
   }
 
