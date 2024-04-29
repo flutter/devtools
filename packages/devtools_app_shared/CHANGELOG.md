@@ -2,6 +2,7 @@
 * Add `tooltipWaitExtraLong` to `utils.dart`.
 * Bump `devtools_shared` dependency to `^10.0.0`.
 * Bump `vm_service` dependency to `^14.2.1`.
+* Add a `DTDManager.dispose` method.
 
 ## 0.1.1
 * Update `package:dtd` to `^2.1.0`

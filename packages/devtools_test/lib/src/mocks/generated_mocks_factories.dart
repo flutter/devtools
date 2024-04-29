@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: invalid_use_of_visible_for_testing_member, devtools_test is a in testing only package.
+
 import 'dart:async';
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/utils.dart';
-import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart' hide TimelineEvent;
@@ -200,48 +201,4 @@ MockLoggingController createMockLoggingControllerWithDefaults({
       .thenReturn(const FixedValueListenable(false));
   when(mockLoggingController.matchIndex).thenReturn(ValueNotifier<int>(0));
   return mockLoggingController;
-}
-
-Future<MockExtensionService> createMockExtensionServiceWithDefaults(
-  List<DevToolsExtensionConfig> extensions,
-) async {
-  final mockExtensionService = MockExtensionService();
-  when(mockExtensionService.availableExtensions)
-      .thenReturn(ImmediateValueNotifier(extensions));
-
-  final stubEnabledStates = <String, ValueNotifier<ExtensionEnabledState>>{};
-
-  void computeVisibleExtensions() {
-    final visible = <DevToolsExtensionConfig>[];
-    for (final e in extensions) {
-      final state = stubEnabledStates[e.name.toLowerCase()]!.value;
-      if (state != ExtensionEnabledState.disabled) {
-        visible.add(e);
-      }
-    }
-    when(mockExtensionService.visibleExtensions)
-        .thenReturn(ValueNotifier(visible));
-  }
-
-  for (final e in extensions) {
-    stubEnabledStates[e.displayName] =
-        ValueNotifier<ExtensionEnabledState>(ExtensionEnabledState.none);
-    when(mockExtensionService.enabledStateListenable(e.name))
-        .thenReturn(stubEnabledStates[e.displayName]!);
-    when(mockExtensionService.enabledStateListenable(e.name.toLowerCase()))
-        .thenReturn(stubEnabledStates[e.displayName]!);
-    when(mockExtensionService.setExtensionEnabledState(e, enable: true))
-        .thenAnswer((_) async {
-      stubEnabledStates[e.displayName]!.value = ExtensionEnabledState.enabled;
-      computeVisibleExtensions();
-    });
-    when(mockExtensionService.setExtensionEnabledState(e, enable: false))
-        .thenAnswer((_) async {
-      stubEnabledStates[e.name.toLowerCase()]!.value =
-          ExtensionEnabledState.disabled;
-      computeVisibleExtensions();
-    });
-  }
-  computeVisibleExtensions();
-  return mockExtensionService;
 }

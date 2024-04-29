@@ -251,11 +251,11 @@ abstract class GrammarMatcher {
 
 /// A simple matcher which matches a single line.
 class _SimpleMatcher extends GrammarMatcher {
-  _SimpleMatcher(Map<String, Object?> json)
+  _SimpleMatcher(super.json)
       : match = RegExp(json['match'] as String, multiLine: true),
         captures = (json['captures'] as Map<String, Object?>?)
             ?.cast<String, Map<String, Object?>>(),
-        super._(json);
+        super._();
 
   static bool isType(Map<String, Object?> json) {
     return json.containsKey('match');
@@ -288,7 +288,7 @@ class _SimpleMatcher extends GrammarMatcher {
 }
 
 class _MultilineMatcher extends GrammarMatcher {
-  _MultilineMatcher(Map<String, Object?> json)
+  _MultilineMatcher(super.json)
       : begin = RegExp(json['begin'] as String, multiLine: true),
         beginCaptures = json['beginCaptures'] as Map<String, Object?>?,
         contentName = json['contentName'] as String?,
@@ -305,7 +305,7 @@ class _MultilineMatcher extends GrammarMatcher {
             .map((e) => GrammarMatcher.fromJson(e))
             .toList()
             .cast<GrammarMatcher>(),
-        super._(json);
+        super._();
 
   static bool isType(Map<String, Object?> json) {
     return json.containsKey('begin') &&
@@ -517,13 +517,13 @@ class _MultilineMatcher extends GrammarMatcher {
 }
 
 class _PatternMatcher extends GrammarMatcher {
-  _PatternMatcher(Map<String, Object?> json)
+  _PatternMatcher(super.json)
       : patterns = (json['patterns'] as List<Object?>?)
             ?.cast<Map<String, Object?>>()
             .map((e) => GrammarMatcher.fromJson(e))
             .toList()
             .cast<GrammarMatcher>(),
-        super._(json);
+        super._();
 
   static bool isType(Map<String, Object?> json) {
     return json.containsKey('patterns');

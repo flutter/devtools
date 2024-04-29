@@ -15,11 +15,10 @@ import '../shared/globals.dart';
 /// Button that, when clicked, will open the DevTools issue tracker in the
 /// browser.
 class ReportFeedbackButton extends ScaffoldAction {
-  ReportFeedbackButton({super.key, Color? color})
+  ReportFeedbackButton({super.key, super.color})
       : super(
           icon: Icons.bug_report_outlined,
           tooltip: 'Report feedback',
-          color: color,
           onPressed: (_) {
             ga.select(
               gac.devToolsMain,

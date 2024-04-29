@@ -11,8 +11,7 @@ import '../controller/chart_pane_controller.dart';
 import '../data/primitives.dart';
 
 class IntervalDropdown extends StatefulWidget {
-  const IntervalDropdown({Key? key, required this.chartController})
-      : super(key: key);
+  const IntervalDropdown({super.key, required this.chartController});
 
   final MemoryChartPaneController chartController;
 

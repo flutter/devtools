@@ -36,13 +36,12 @@ import 'status_line.dart';
 /// for different routes.
 class DevToolsScaffold extends StatefulWidget {
   DevToolsScaffold({
-    Key? key,
+    super.key,
     required this.screens,
     this.page,
     List<Widget>? actions,
     this.embed = false,
-  })  : actions = actions ?? defaultActions(),
-        super(key: key);
+  }) : actions = actions ?? defaultActions();
 
   DevToolsScaffold.withChild({
     Key? key,

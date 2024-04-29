@@ -18,10 +18,10 @@ import 'settings_dialog.dart';
 /// Controls related to the entire memory screen.
 class SecondaryControls extends StatelessWidget {
   const SecondaryControls({
-    Key? key,
+    super.key,
     required this.controller,
     required this.offline,
-  }) : super(key: key);
+  });
 
   final MemoryControlPaneController controller;
   final bool offline;

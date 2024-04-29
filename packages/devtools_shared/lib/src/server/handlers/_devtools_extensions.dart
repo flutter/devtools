@@ -11,6 +11,7 @@ abstract class _ExtensionsApiHandler {
     ServerApi api,
     Map<String, String> queryParams,
     ExtensionsManager extensionsManager,
+    DTDConnectionInfo? dtd,
   ) async {
     final missingRequiredParams = ServerApi._checkRequiredParameters(
       [ExtensionsApi.packageRootUriPropertyName],
@@ -44,6 +45,7 @@ abstract class _ExtensionsApiHandler {
       await extensionsManager.serveAvailableExtensions(
         rootFileUriString,
         logs,
+        dtd,
       );
     } on ExtensionParsingException catch (e) {
       // For [ExtensionParsingException]s, we should return a success response
@@ -67,7 +69,7 @@ abstract class _ExtensionsApiHandler {
   ) {
     final missingRequiredParams = ServerApi._checkRequiredParameters(
       [
-        ExtensionsApi.packageRootUriPropertyName,
+        ExtensionsApi.devtoolsOptionsUriPropertyName,
         ExtensionsApi.extensionNamePropertyName,
       ],
       queryParams: queryParams,
@@ -76,15 +78,15 @@ abstract class _ExtensionsApiHandler {
     );
     if (missingRequiredParams != null) return missingRequiredParams;
 
-    final rootFileUriString =
-        queryParams[ExtensionsApi.packageRootUriPropertyName]!;
-    final rootFileUri = Uri.parse(rootFileUriString);
+    final devtoolsOptionsFileUriString =
+        queryParams[ExtensionsApi.devtoolsOptionsUriPropertyName]!;
+    final devtoolsOptionsFileUri = Uri.parse(devtoolsOptionsFileUriString);
     final extensionName = queryParams[ExtensionsApi.extensionNamePropertyName]!;
 
     final activate = queryParams[ExtensionsApi.enabledStatePropertyName];
     if (activate != null) {
       final newState = ServerApi._devToolsOptions.setExtensionEnabledState(
-        rootUri: rootFileUri,
+        devtoolsOptionsUri: devtoolsOptionsFileUri,
         extensionName: extensionName,
         enable: bool.parse(activate),
       );
@@ -92,7 +94,7 @@ abstract class _ExtensionsApiHandler {
     }
     final activationState =
         ServerApi._devToolsOptions.lookupExtensionEnabledState(
-      rootUri: rootFileUri,
+      devtoolsOptionsUri: devtoolsOptionsFileUri,
       extensionName: extensionName,
     );
     return ServerApi._encodeResponse(activationState.name, api: api);

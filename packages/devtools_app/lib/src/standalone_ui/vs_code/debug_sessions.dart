@@ -166,7 +166,10 @@ class _DevToolsMenuState extends State<_DevToolsMenu> {
           sessionRootPath.contains(r'\') && !sessionRootPath.contains(r'/');
       final fileUri = Uri.file(sessionRootPath, windows: isWindows);
       assert(fileUri.isScheme('file'));
-      _extensionServiceForSession = ExtensionService(fixedAppRoot: fileUri);
+      _extensionServiceForSession = ExtensionService(
+        fixedAppRoot: fileUri,
+        ignoreServiceConnection: true,
+      );
       unawaited(_extensionServiceForSession!.initialize());
     }
   }
@@ -225,8 +228,7 @@ class _DevToolsMenuState extends State<_DevToolsMenu> {
       menuChildren: [
         ...ScreenMetaData.values
             .where(_shouldIncludeScreen)
-            .map(devToolsButton)
-            .toList(),
+            .map(devToolsButton),
         if (widget.supportsOpenExternal)
           DevToolsScreenMenuItem(
             title: 'Open in Browser',

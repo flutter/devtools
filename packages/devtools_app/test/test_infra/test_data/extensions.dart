@@ -4,4 +4,4 @@
 
 import 'package:devtools_app/src/shared/development_helpers.dart';
 
-final testExtensions = List.of(StubDevToolsExtensions.extensions)..sort();
+final testExtensions = List.of(StubDevToolsExtensions.extensions())..sort();

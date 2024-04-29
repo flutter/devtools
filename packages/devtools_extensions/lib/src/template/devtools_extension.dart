@@ -168,7 +168,7 @@ class _DevToolsExtensionState extends State<DevToolsExtension>
     removeGlobal(ExtensionManager);
     removeGlobal(ServiceManager);
     removeGlobal(IdeTheme);
-    await (globals[DTDManager] as DTDManager?)?.disconnect();
+    await (globals[DTDManager] as DTDManager?)?.dispose();
     removeGlobal(DTDManager);
   }
 

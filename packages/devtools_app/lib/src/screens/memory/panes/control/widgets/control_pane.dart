@@ -12,9 +12,9 @@ import 'secondary_controls.dart';
 
 class MemoryControlPane extends StatelessWidget {
   const MemoryControlPane({
-    Key? key,
+    super.key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   final MemoryControlPaneController controller;
 

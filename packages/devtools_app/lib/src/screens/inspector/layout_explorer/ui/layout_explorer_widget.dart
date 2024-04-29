@@ -22,8 +22,8 @@ const maxRequestsPerSecond = 3.0;
 abstract class LayoutExplorerWidget extends StatefulWidget {
   const LayoutExplorerWidget(
     this.inspectorController, {
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final InspectorController inspectorController;
 }

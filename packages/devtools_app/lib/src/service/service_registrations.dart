@@ -12,12 +12,12 @@ import '../shared/constants.dart';
 
 class RegisteredServiceDescription extends RegisteredService {
   const RegisteredServiceDescription._({
-    required String service,
-    required String title,
+    required super.service,
+    required super.title,
     this.icon,
     this.gaScreenName,
     this.gaItem,
-  }) : super(service: service, title: title);
+  });
 
   final Widget? icon;
   final String? gaScreenName;

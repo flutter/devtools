@@ -4,7 +4,7 @@ publish_to: none
 
 # Note: this version should only be updated by running tools/update_version.dart
 # that updates all versions of devtools packages (devtools_app, devtools_test).
-version: 2.35.0-dev.15
+version: 2.35.0-dev.19
 
 repository: https://github.com/flutter/devtools/tree/master/packages/devtools_app
 
@@ -26,21 +26,21 @@ dependencies:
   dds_service_extensions: ^2.0.0
   devtools_app_shared: ^0.2.0-dev.0
   devtools_extensions: ^0.2.0-dev.0
-  devtools_shared: ^10.0.0-dev.0
+  devtools_shared: ^10.0.0-dev.1
   dtd: ^2.2.0
   file: ">=6.0.0 <8.0.0"
   file_selector: ^1.0.0
   fixnum: ^1.1.0
   flutter:
     sdk: flutter
-  flutter_markdown: ^0.6.8
+  flutter_markdown: ^0.7.1
   # TODO: https://github.com/flutter/devtools/issues/4569 - unpin this version
   flutter_riverpod: 2.0.0-dev.9
   flutter_web_plugins:
     sdk: flutter
   http: ^1.1.0
   image: ^4.1.3
-  intl: ^0.18.0
+  intl: ^0.19.0
   js: ^0.6.1+1
   json_rpc_2: ^3.0.2
   logging: ^1.1.1
@@ -63,7 +63,7 @@ dependencies:
   vm_service: ^14.2.1
   vm_service_protos: ^1.0.0
   # TODO https://github.com/dart-lang/sdk/issues/52853 - unpin this version
-  vm_snapshot_analysis: 0.7.2
+  vm_snapshot_analysis: ^0.7.6
   web: ^0.4.1
   web_socket_channel: ^2.1.0
   # widget_icons: ^0.0.1
@@ -76,14 +76,14 @@ dev_dependencies:
   fake_async: ^1.3.1
   flutter_driver:
     sdk: flutter
-  flutter_lints: ^2.0.3
+  flutter_lints: ^3.0.2
   flutter_test:
     sdk: flutter
   integration_test:
     sdk: flutter
   mockito: ^5.4.1
   stager: ^1.0.1
-  test: ^1.21.1
+  test: ^1.21.0
   web_benchmarks: ^1.1.0
   webkit_inspection_protocol: ">=0.5.0 <2.0.0"
 

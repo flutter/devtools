@@ -46,7 +46,7 @@ final debuggerCodeViewFileOpenerKey =
 // controller.
 class CodeView extends StatefulWidget {
   const CodeView({
-    Key? key,
+    super.key,
     required this.codeViewController,
     required this.scriptRef,
     required this.parsedScript,
@@ -55,7 +55,7 @@ class CodeView extends StatefulWidget {
     this.initialPosition,
     this.onSelected,
     this.enableHistory = true,
-  }) : super(key: key);
+  });
 
   static const debuggerCodeViewHorizontalScrollbarKey =
       Key('debuggerCodeViewHorizontalScrollbarKey');
@@ -668,9 +668,9 @@ class _ProfileInformationGutterHeader extends StatelessWidget {
 
 class ProfileInformationGutterItem extends StatelessWidget {
   const ProfileInformationGutterItem({
-    Key? key,
+    super.key,
     required this.profilerData,
-  }) : super(key: key);
+  });
 
   final ProfileReportEntry profilerData;
 
@@ -920,7 +920,7 @@ class Gutter extends StatelessWidget {
 
 class GutterItem extends StatelessWidget {
   const GutterItem({
-    Key? key,
+    super.key,
     required this.lineNumber,
     required this.isBreakpoint,
     required this.isExecutable,
@@ -928,7 +928,7 @@ class GutterItem extends StatelessWidget {
     required this.onPressed,
     required this.allowInteraction,
     required this.coverageHit,
-  }) : super(key: key);
+  });
 
   final int lineNumber;
 
@@ -1020,7 +1020,7 @@ class GutterItem extends StatelessWidget {
 
 class Lines extends StatefulWidget {
   const Lines({
-    Key? key,
+    super.key,
     required this.height,
     required this.codeViewController,
     required this.scrollController,
@@ -1029,7 +1029,7 @@ class Lines extends StatefulWidget {
     required this.activeSearchMatchNotifier,
     required this.selectedFrameNotifier,
     required this.showProfileInformation,
-  }) : super(key: key);
+  });
 
   final double height;
   final CodeViewController codeViewController;
@@ -1157,13 +1157,13 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
 
 class LineItem extends StatefulWidget {
   const LineItem({
-    Key? key,
+    super.key,
     required this.lineContents,
     this.pausedFrame,
     this.focused = false,
     this.searchMatches,
     this.activeSearchMatch,
-  }) : super(key: key);
+  });
 
   static double get _hoverWidth => scaleByFontFactor(400.0);
 

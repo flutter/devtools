@@ -14,6 +14,7 @@ import 'package:meta/meta.dart';
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:vm_service/vm_service.dart';
 
+import '../common.dart';
 import '../deeplink/deeplink_manager.dart';
 import '../devtools_api.dart';
 import '../extensions/extension_enablement.dart';
@@ -30,9 +31,6 @@ part 'handlers/_deeplink.dart';
 part 'handlers/_devtools_extensions.dart';
 part 'handlers/_dtd.dart';
 part 'handlers/_general.dart';
-
-/// Describes an instance of the Dart Tooling Daemon.
-typedef DTDConnectionInfo = ({String? uri, String? secret});
 
 /// The DevTools server API.
 ///
@@ -231,6 +229,7 @@ class ServerApi {
           api,
           queryParams,
           extensionsManager,
+          dtd,
         );
 
       case ExtensionsApi.apiExtensionEnabledState:

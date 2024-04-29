@@ -23,7 +23,7 @@ import '../utils/utils.dart';
 final class SplitPane extends StatefulWidget {
   /// Builds a split oriented along [axis].
   SplitPane({
-    Key? key,
+    super.key,
     required this.axis,
     required this.children,
     required this.initialFractions,
@@ -31,8 +31,7 @@ final class SplitPane extends StatefulWidget {
     this.splitters,
   })  : assert(children.length >= 2),
         assert(initialFractions.length >= 2),
-        assert(children.length == initialFractions.length),
-        super(key: key) {
+        assert(children.length == initialFractions.length) {
     _verifyFractionsSumTo1(initialFractions);
     if (minSizes != null) {
       assert(minSizes!.length == children.length);

@@ -93,16 +93,12 @@ class ExampleController extends DisposableController
         ExampleConditionalScreen.id,
         createData: (json) => ExampleScreenData.fromJson(json),
         shouldLoad: (data) => data.title.isNotEmpty,
+        loadData: (data) => this.data.value = data,
       );
     }
   }
 
   // Overrides for [OfflineScreenControllerMixin]
-
-  @override
-  FutureOr<void> processOfflineData(ExampleScreenData offlineData) {
-    data.value = offlineData;
-  }
 
   @override
   OfflineScreenData prepareOfflineScreenData() {

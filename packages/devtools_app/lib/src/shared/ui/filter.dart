@@ -253,7 +253,7 @@ class _FilterDialogState<T> extends State<FilterDialog<T>>
 }
 
 class ToggleFilterElement extends StatelessWidget {
-  const ToggleFilterElement({Key? key, required this.filter}) : super(key: key);
+  const ToggleFilterElement({super.key, required this.filter});
 
   final ToggleFilter filter;
 

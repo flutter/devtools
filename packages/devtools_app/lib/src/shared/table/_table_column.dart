@@ -37,13 +37,13 @@ abstract class ColumnHeaderRenderer<T> {
 
 class _ColumnHeader<T> extends StatelessWidget {
   const _ColumnHeader({
-    Key? key,
+    super.key,
     required this.column,
     required this.isSortColumn,
     required this.sortDirection,
     required this.onSortChanged,
     this.secondarySortColumn,
-  }) : super(key: key);
+  });
 
   final ColumnData<T> column;
 
@@ -132,8 +132,7 @@ class _ColumnGroupHeaderRow extends StatelessWidget {
     required this.groups,
     required this.columnWidths,
     required this.scrollController,
-    Key? key,
-  }) : super(key: key);
+  });
 
   final List<ColumnGroup> groups;
 
@@ -181,7 +180,7 @@ class _ColumnGroupHeaderRow extends StatelessWidget {
 }
 
 class _ColumnGroupSpacer extends StatelessWidget {
-  const _ColumnGroupSpacer({Key? key}) : super(key: key);
+  const _ColumnGroupSpacer();
 
   @override
   Widget build(BuildContext context) {

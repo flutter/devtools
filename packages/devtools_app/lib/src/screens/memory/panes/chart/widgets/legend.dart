@@ -7,11 +7,10 @@ import 'package:flutter/material.dart';
 
 import '../../../../../shared/ui/colors.dart';
 import '../../../shared/primitives/painting.dart';
-import '../controller/android_chart_controller.dart';
 import '../controller/chart_pane_controller.dart';
-import '../controller/vm_chart_controller.dart';
+import '../controller/charts/android_chart_controller.dart';
+import '../controller/charts/vm_chart_controller.dart';
 import '../data/charts.dart';
-import 'memory_events_pane.dart';
 
 final _legendWidth = scaleByFontFactor(200.0);
 final _legendTextWidth = scaleByFontFactor(55.0);
@@ -38,7 +37,7 @@ class MemoryChartLegend extends StatelessWidget {
 
     final legendRows = <Widget>[];
 
-    final events = eventLegendContent(colorScheme.isLight);
+    final events = _eventLegendContent(colorScheme.isLight);
     legendRows.add(
       Container(
         padding: _legendTitlePadding,
@@ -51,7 +50,7 @@ class MemoryChartLegend extends StatelessWidget {
       final leftEntry = iterator.current;
       final rightEntry = iterator.moveNext() ? iterator.current : null;
       legendRows.add(
-        LegendRow(
+        _LegendRow(
           entry1: leftEntry,
           entry2: rightEntry,
         ),
@@ -68,7 +67,7 @@ class MemoryChartLegend extends StatelessWidget {
 
     for (final entry in vms.entries) {
       legendRows.add(
-        LegendRow(
+        _LegendRow(
           entry1: entry,
         ),
       );
@@ -85,7 +84,7 @@ class MemoryChartLegend extends StatelessWidget {
 
       for (final entry in androids.entries) {
         legendRows.add(
-          LegendRow(
+          _LegendRow(
             entry1: entry,
           ),
         );
@@ -111,12 +110,11 @@ class MemoryChartLegend extends StatelessWidget {
   }
 }
 
-class LegendRow extends StatelessWidget {
-  const LegendRow({
-    Key? key,
+class _LegendRow extends StatelessWidget {
+  const _LegendRow({
     required this.entry1,
     this.entry2,
-  }) : super(key: key);
+  });
 
   final MapEntry<String, Map<String, Object?>> entry1;
   final MapEntry<String, Map<String, Object?>>? entry2;
@@ -197,30 +195,48 @@ class LegendRow extends StatelessWidget {
   }
 }
 
-Map<String, Map<String, Object?>> eventLegendContent(bool isLight) => {
-      manualSnapshotLegendName: traceRender(
+// TODO(polina-c): this list overlaps with [_EventsTraceName] in [event_chart_controller.dart].
+// Consider refactoring to avoid duplication.
+enum _LegendCategory {
+  manualSnapshot('Snapshot'),
+  autoSnapshot('Auto'),
+  monitor('Monitor'),
+  reset('Reset'),
+  vmGC('GC VM'),
+  manualGC('Manual'),
+  event('Event'),
+  events('Events'),
+  ;
+
+  const _LegendCategory(this.displayName);
+
+  final String displayName;
+}
+
+Map<String, Map<String, Object?>> _eventLegendContent(bool isLight) => {
+      _LegendCategory.manualSnapshot.displayName: traceRender(
         image: snapshotManualLegend,
       ),
-      autoSnapshotLegendName: traceRender(
+      _LegendCategory.autoSnapshot.displayName: traceRender(
         image: snapshotAutoLegend,
       ),
-      monitorLegendName: traceRender(
+      _LegendCategory.monitor.displayName: traceRender(
         image: monitorLegend,
       ),
-      resetLegendName: traceRender(
+      _LegendCategory.reset.displayName: traceRender(
         image: isLight ? resetLightLegend : resetDarkLegend,
       ),
-      vmGCLegendName: traceRender(
+      _LegendCategory.vmGC.displayName: traceRender(
         image: gcVMLegend,
       ),
-      manualGCLegendName: traceRender(
+      _LegendCategory.manualGC.displayName: traceRender(
         image: gcManualLegend,
       ),
       // TODO: why do we need both a singular and plural legend entry for event?
-      eventLegendName: traceRender(
+      _LegendCategory.event.displayName: traceRender(
         image: eventLegendAsset(1),
       ),
-      eventsLegendName: traceRender(
+      _LegendCategory.events.displayName: traceRender(
         image: eventLegendAsset(2),
       ),
     };

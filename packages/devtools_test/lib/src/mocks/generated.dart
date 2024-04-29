@@ -14,7 +14,6 @@ import 'package:vm_service/vm_service.dart';
   MockSpec<DebuggerController>(),
   MockSpec<EnhanceTracingController>(),
   MockSpec<ErrorBadgeManager>(),
-  MockSpec<ExtensionService>(),
   MockSpec<FrameAnalysis>(),
   MockSpec<FramePhase>(),
   MockSpec<HeapSnapshotGraph>(),

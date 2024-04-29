@@ -940,9 +940,9 @@ abstract class InspectorObjectGroupBase
 /// special logic to handle orphaned requests.
 class ObjectGroup extends InspectorObjectGroupBase {
   ObjectGroup(
-    String debugName,
+    super.debugName,
     this.inspectorService,
-  ) : super(debugName);
+  );
 
   @override
   final InspectorService inspectorService;

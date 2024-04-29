@@ -104,10 +104,10 @@ class VmObjectPoolDisplay extends StatelessWidget {
 
 class ObjectPoolTable extends StatelessWidget {
   ObjectPoolTable({
-    Key? key,
+    super.key,
     required this.objectPool,
     required this.controller,
-  }) : super(key: key);
+  });
 
   late final columns = <ColumnData<ObjectPoolEntry>>[
     _AddressColumn(),
