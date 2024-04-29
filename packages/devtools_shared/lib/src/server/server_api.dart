@@ -69,19 +69,11 @@ class ServerApi {
       // ----- Flutter Tool GA store. -----
       case apiGetFlutterGAEnabled:
         // Is Analytics collection enabled?
-        return _encodeResponse(
-          FlutterUsage.doesStoreExist ? _usage!.enabled : '',
-          api: api,
-        );
+        return _encodeResponse('', api: api);
       case apiGetFlutterGAClientId:
         // Flutter Tool GA clientId - ONLY get Flutter's clientId if enabled is
         // true.
-        return (FlutterUsage.doesStoreExist)
-            ? _encodeResponse(
-                _usage!.enabled ? _usage!.clientId : '',
-                api: api,
-              )
-            : _encodeResponse('', api: api);
+        return _encodeResponse('', api: api);
 
       // ----- DevTools GA store. -----
 
@@ -305,12 +297,6 @@ class ServerApi {
           )
         : null;
   }
-
-  // Accessing Flutter usage file e.g., ~/.flutter.
-  // NOTE: Only access the file if it exists otherwise Flutter Tool hasn't yet
-  //       been run.
-  static final FlutterUsage? _usage =
-      FlutterUsage.doesStoreExist ? FlutterUsage() : null;
 
   // Accessing DevTools usage file e.g., ~/.flutter-devtools/.devtools
   static final _devToolsUsage = DevToolsUsage();
