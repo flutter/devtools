@@ -20,7 +20,7 @@ class ReleaseHelperCommand extends Command {
       help:
           'Whether to run this script for development purposes. This allows '
           'local changes to be made to this script without throwing an '
-          'exception, and will return the current branch after executing.',
+          'exception, and will checkout the current branch after executing.',
     );
   }
 
