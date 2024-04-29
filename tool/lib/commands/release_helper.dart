@@ -174,8 +174,22 @@ class ReleaseHelperCommand extends Command {
       if (committedLocalChanges) {
         // Bring back the local changes we committed to the initial branch.
         await processManager.runProcess(
+          CliCommand.git(['checkout', initialBranch]),
+        );
+        await processManager.runProcess(
           CliCommand.git(['reset', '--soft', 'HEAD~1']),
         );
+        if (releaseBranch != null) {
+          await processManager.runProcess(
+            CliCommand.git(
+              [
+                'checkout',
+                '-b',
+                releaseBranch,
+              ],
+            ),
+          );
+        }
       }
     }
   }
