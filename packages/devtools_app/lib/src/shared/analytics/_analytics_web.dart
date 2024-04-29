@@ -13,6 +13,7 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:js/js.dart';
 import 'package:logging/logging.dart';
+import 'package:unified_analytics/unified_analytics.dart' as ua;
 import 'package:web/web.dart';
 
 import '../../../devtools.dart' as devtools show version;
@@ -642,18 +643,52 @@ void select(
     'value:$value, '
     'nonInteraction:$nonInteraction)',
   );
+  final gtagEvent = _gtagEvent(
+    event_category: gac.selectEvent,
+    event_label: selectedItem,
+    value: value,
+    non_interaction: nonInteraction,
+    send_to: gaDevToolsPropertyId(),
+    screenMetrics:
+        screenMetricsProvider != null ? screenMetricsProvider() : null,
+  );
   GTag.event(
     screenName,
-    gaEventProvider: () => _gtagEvent(
-      event_category: gac.selectEvent,
-      event_label: selectedItem,
-      value: value,
-      non_interaction: nonInteraction,
-      send_to: gaDevToolsPropertyId(),
-      screenMetrics:
-          screenMetricsProvider != null ? screenMetricsProvider() : null,
-    ),
+    gaEventProvider: () => gtagEvent,
   );
+
+  final uaEvent = ua.Event.devtoolsEvent(
+    eventCategory: gtagEvent.event_category!,
+    label: gtagEvent.event_label!,
+    value: gtagEvent.value,
+    userInitiatedInteraction: !gtagEvent.non_interaction,
+    userApp: gtagEvent.user_app,
+    userBuild: gtagEvent.user_build,
+    userPlatform: gtagEvent.user_platform,
+    devtoolsPlatform: gtagEvent.devtools_platform,
+    devtoolsChrome: gtagEvent.devtools_chrome,
+    devtoolsVersion: gtagEvent.devtools_version,
+    ideLaunched: gtagEvent.ide_launched,
+    isExternalBuild: gtagEvent.is_external_build,
+    isEmbedded: gtagEvent.is_embedded,
+    ideLaunchedFeature: gtagEvent.ide_launched_feature,
+    g3Username: gtagEvent.g3_username,
+    uiDurationMicros: gtagEvent.ui_duration_micros,
+    rasterDurationMicros: gtagEvent.raster_duration_micros,
+    shaderCompilationDurationMicros:
+        gtagEvent.shader_compilation_duration_micros,
+    traceEventCount: gtagEvent.trace_event_count,
+    cpuSampleCount: gtagEvent.cpu_sample_count,
+    cpuStackDepth: gtagEvent.cpu_stack_depth,
+    heapDiffObjectsBefore: gtagEvent.heap_diff_objects_before,
+    heapDiffObjectsAfter: gtagEvent.heap_diff_objects_after,
+    heapObjectsTotal: gtagEvent.heap_objects_total,
+    rootSetCount: gtagEvent.root_set_count,
+    rowCount: gtagEvent.row_count,
+    inspectorTreeControllerId: gtagEvent.inspector_tree_controller_id,
+  );
+
+  unawaited(dtdManager.sendAnalyticsEvent(uaEvent));
 }
 
 /// Sends an analytics event to signal that something in DevTools was viewed.
