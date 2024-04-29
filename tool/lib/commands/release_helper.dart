@@ -184,7 +184,6 @@ class ReleaseHelperCommand extends Command {
             CliCommand.git(
               [
                 'checkout',
-                '-b',
                 releaseBranch,
               ],
             ),
