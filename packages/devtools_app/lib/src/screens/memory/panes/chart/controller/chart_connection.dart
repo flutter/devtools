@@ -106,6 +106,7 @@ class ChartConnection extends DisposableController
     try {
       _pollingTimer = null;
       await _memoryTracker.pollMemory();
+      // Timer is not periodic because we do not want polls to overlap.
       _pollingTimer = Timer(chartUpdateDelay, _startPolling);
     } catch (e) {
       if (_checkConnection()) rethrow;
