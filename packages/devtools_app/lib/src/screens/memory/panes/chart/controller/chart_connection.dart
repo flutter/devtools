@@ -40,63 +40,76 @@ class ChartConnection extends DisposableController
   Timer? _pollingTimer;
 
   /// If completed, this instance was connected to the application.
-  final Completer<void> _connected = Completer();
+  final Completer<void> _initialized = Completer();
 
-  /// If true, the instance lost connection to the application.
-  final Completer<void> _disconnected = Completer();
-
-  late final isDeviceAndroid = _isDevToolsCurrentlyConnected()
-      ? serviceConnection.serviceManager.vm?.operatingSystem == 'android'
-      : false;
-
-  /// True if DevTools is in connected mode and the connection to the app is alive.
-  bool _isDevToolsCurrentlyConnected() =>
-      // Theoretically it should be enough to check only connectedState.value.connected,
-      // but practically these values are not always in sync and, if at least
-      // on of them means disconnection this class consider the connection as lost,
-      // and stops interaction with it.
-      !offlineDataController.showingOfflineData.value &&
-      serviceConnection.serviceManager.connectedState.value.connected &&
-      serviceConnection.serviceManager.connectedApp != null;
-
-  Future<void> maybeConnect() async {
-    if (_connected.isCompleted || _disconnected.isCompleted) return;
-    _connected.complete();
-    await _runSafely(() async {
-      await serviceConnection.serviceManager.onServiceAvailable;
-      autoDisposeStreamSubscription(
-        serviceConnection.serviceManager.service!.onExtensionEvent
-            .listen(_memoryTracker.onMemoryData),
-      );
-      autoDisposeStreamSubscription(
-        serviceConnection.serviceManager.service!.onGCEvent
-            .listen(_memoryTracker.onGCEvent),
-      );
-      await _onPoll();
-    });
+  void _stopConnection() {
+    _pollingTimer?.cancel();
+    cancelStreamSubscriptions();
+    cancelListeners();
   }
 
-  Future<void> _onPoll() async {
-    assert(_connected.isCompleted);
-    if (_disconnected.isCompleted) return;
-    await _runSafely(() async {
+  // True if connection was started and then stopped.
+  bool get _isConnectionStopped {
+    if (!_initialized.isCompleted) return false;
+    return _pollingTimer?.isActive == false;
+  }
+
+  late bool isDeviceAndroid;
+
+  /// True if DevTools is in connected mode.
+  ///
+  /// If DevTools is in offline mode, stops connection and returns false.
+  bool _checkConnection() {
+    assert(_initialized.isCompleted);
+    if (_isConnectionStopped) return false;
+
+    // If connection is up and running, return true.
+    if (!offlineDataController.showingOfflineData.value &&
+        serviceConnection.serviceManager.connectedState.value.connected) {
+      return true;
+    }
+
+    // Otherwise stop connection and return false.
+    _stopConnection();
+    return false;
+  }
+
+  Future<void> maybeInitialize() async {
+    if (_initialized.isCompleted) return;
+    _initialized.complete();
+    if (!_checkConnection()) return;
+
+    await serviceConnection.serviceManager.onServiceAvailable;
+
+    isDeviceAndroid =
+        serviceConnection.serviceManager.vm?.operatingSystem == 'android';
+
+    addAutoDisposeListener(
+      serviceConnection.serviceManager.connectedState,
+      _checkConnection,
+    );
+
+    autoDisposeStreamSubscription(
+      serviceConnection.serviceManager.service!.onExtensionEvent
+          .listen(_memoryTracker.onMemoryData),
+    );
+    autoDisposeStreamSubscription(
+      serviceConnection.serviceManager.service!.onGCEvent
+          .listen(_memoryTracker.onGCEvent),
+    );
+    await _startPolling();
+  }
+
+  Future<void> _startPolling() async {
+    assert(_initialized.isCompleted);
+    if (!_checkConnection()) return;
+    try {
       _pollingTimer = null;
       await _memoryTracker.pollMemory();
-      _pollingTimer = Timer(chartUpdateDelay, _onPoll);
-    });
-  }
-
-  /// Run callback resiliently to disconnect.
-  Future<void> _runSafely(_AsyncVoidCallback callback) async {
-    if (_disconnected.isCompleted) return;
-    try {
-      await callback();
+      _pollingTimer = Timer(chartUpdateDelay, _startPolling);
     } catch (e) {
-      if (_isDevToolsCurrentlyConnected()) {
+      if (_checkConnection()) {
         rethrow;
-      } else {
-        _disconnected.complete();
-        _pollingTimer?.cancel();
       }
     }
   }
@@ -104,6 +117,7 @@ class ChartConnection extends DisposableController
   @override
   void dispose() {
     _pollingTimer?.cancel();
+    _pollingTimer = null;
     super.dispose();
   }
 }
