@@ -6,18 +6,26 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
+import 'package:cli_util/cli_logging.dart';
+import 'package:devtools_tool/model.dart';
 import 'package:devtools_tool/utils.dart';
 import 'package:io/io.dart';
+import 'package:path/path.dart' as p;
 
 class ReleaseHelperCommand extends Command {
   ReleaseHelperCommand() {
     argParser.addFlag(
-      'use-current-branch',
+      _debugFlag,
       negatable: false,
       help:
-          'Uses the current branch as the base for the release, instead of a fresh copy of master. For use when developing.',
+          'Whether to run this script for development purposes. This disables '
+          'some checks like requiring no local changes or checking out a fresh '
+          'copy of the master branch.',
     );
   }
+
+  static const _debugFlag = 'debug';
+
   @override
   String get description =>
       'Creates a release version of devtools from the master branch, and pushes up a draft PR.';
@@ -27,15 +35,17 @@ class ReleaseHelperCommand extends Command {
 
   @override
   FutureOr? run() async {
+    final log = Logger.standard();
     final processManager = ProcessManager();
 
-    final useCurrentBranch = argResults!['use-current-branch'] as bool;
+    final debug = argResults![_debugFlag] as bool;
     final currentBranchResult = await processManager.runProcess(
       CliCommand.git(['rev-parse', '--abbrev-ref', 'HEAD']),
     );
     final initialBranch = currentBranchResult.stdout.trim();
     String? releaseBranch;
 
+    bool committedLocalChanges = false;
     try {
       Directory.current = pathFromRepoRoot("");
       final remoteUpstream = await findRemote(
@@ -43,43 +53,61 @@ class ReleaseHelperCommand extends Command {
         remoteId: 'flutter/devtools.git',
       );
 
-      final gitStatusResult = await processManager.runProcess(
-        CliCommand.git(['status', '-s']),
-      );
-      final gitStatus = gitStatusResult.stdout;
-      if (gitStatus.isNotEmpty) {
-        throw "Error: Make sure your working directory is clean before running the helper";
+      try {
+        await _ensureNoLocalChanges(processManager);
+      } catch (_) {
+        if (debug) {
+          // Temporarily commit any local changes to this script to the current
+          // branch. This commit will be reset at the end of the script.
+          final pathToReleaseHelperScript = Uri.parse(
+            p.posix.join(
+              DevToolsRepo.getInstance().toolDirectoryPath,
+              'lib',
+              'commands',
+              'release_helper.dart',
+            ),
+          ).toFilePath();
+          await processManager.runProcess(
+            CliCommand.git(['add', pathToReleaseHelperScript]),
+          );
+          await processManager.runProcess(
+            CliCommand.git(['commit', '-m', 'temp']),
+          );
+          committedLocalChanges = true;
+
+          // Try again now that we've committed local changes to this script.
+          await _ensureNoLocalChanges(processManager);
+        } else {
+          rethrow;
+        }
       }
+
+      log.stdout("Preparing the release branch.");
+      await processManager.runProcess(
+        CliCommand.git(['fetch', remoteUpstream, 'master']),
+      );
 
       releaseBranch =
           'release_helper_branch_${DateTime.now().millisecondsSinceEpoch}';
-
-      if (!useCurrentBranch) {
-        print("Preparing the release branch.");
-        await processManager.runProcess(
-          CliCommand.git(['fetch', remoteUpstream, 'master']),
-        );
-      }
-
       await processManager.runProcess(
         CliCommand.git(
           [
             'checkout',
             '-b',
             releaseBranch,
-            if (useCurrentBranch) '$remoteUpstream/master',
+            '$remoteUpstream/master',
           ],
         ),
       );
 
-      print("Ensuring ./tool packages are ready.");
+      log.stdout("Ensuring ./tool package is ready.");
       Directory.current = pathFromRepoRoot("tool");
       await processManager.runProcess(
         CliCommand.dart(['pub', 'get']),
         workingDirectory: pathFromRepoRoot("tool"),
       );
 
-      print("Setting the release version.");
+      log.stdout("Setting the release version.");
       await processManager.runProcess(
         CliCommand.tool(['update-version', 'auto', '--type', 'release']),
       );
@@ -92,6 +120,8 @@ class ReleaseHelperCommand extends Command {
 
       final newVersion = getNewVersionResult.stdout.split('\n').last.trim();
 
+      log.stdout(getNewVersionResult.stdout.split('\n').toString());
+
       final commitMessage = "Prepare for release $newVersion";
 
       await processManager.runAll(
@@ -101,7 +131,7 @@ class ReleaseHelperCommand extends Command {
         ],
       );
 
-      print('Creating the PR.');
+      log.stdout('Creating the PR.');
       final prURL = await processManager.runProcess(
         CliCommand(
           'gh',
@@ -118,13 +148,14 @@ class ReleaseHelperCommand extends Command {
         ),
       );
 
-      print('Your Draft release PR can be found at: ${prURL.stdout.trim()}');
-      print('DONE');
-      print(
+      log.stdout(
+          'Your Draft release PR can be found at: ${prURL.stdout.trim()}');
+      log.stdout('DONE');
+      log.stdout(
         'Build, run and test this release using: `devtools_tool serve`',
       );
     } catch (e) {
-      print(e);
+      log.stderr(e.toString());
 
       // try to bring the caller back to their original branch
       await processManager.runProcess(
@@ -139,6 +170,26 @@ class ReleaseHelperCommand extends Command {
           releaseBranch,
         ]);
       }
+    } finally {
+      if (committedLocalChanges) {
+        // Bring back the local changes we committed to the initial branch.
+        await processManager.runProcess(
+          CliCommand.git(['reset', '--soft', 'HEAD~1']),
+        );
+      }
+    }
+  }
+
+  Future<void> _ensureNoLocalChanges(ProcessManager processManager) async {
+    final gitStatusResult = await processManager.runProcess(
+      CliCommand.git(['status', '-s']),
+    );
+    final gitStatus = gitStatusResult.stdout;
+    if (gitStatus.isNotEmpty) {
+      throw Exception(
+        'Error: Make sure your working directory does not have any local '
+        'changes before running the release_helper command.',
+      );
     }
   }
 }
