@@ -280,6 +280,11 @@ class ServiceManager<T extends VmService> {
   FutureOr<void> vmServiceClosed({
     ConnectedState connectionState = const ConnectedState(false),
   }) async {
+    // This needs to be the first call in this method so that listeners get
+    // the notification of app disconnect before we shut down other managers and
+    // services that listeners may be assuming have an app connection.
+    _connectedState.value = const ConnectedState(false);
+
     await callLifecycleCallbacks(
       ServiceManagerLifecycle.beforeCloseVmService,
       this.service,
@@ -296,8 +301,6 @@ class ServiceManager<T extends VmService> {
     _registeredMethodsForService.clear();
     _registeredServiceNotifiers.clear();
     setDeviceBusy(false);
-
-    _connectedState.value = connectionState;
   }
 
   Future<void> _configureIsolateSettings() async {
