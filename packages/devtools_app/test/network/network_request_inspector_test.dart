@@ -90,7 +90,7 @@ void main() {
         equals(expectedResponseBody),
       );
 
-      controller.stopRecording();
+      await controller.stopRecording();
 
       // pumpAndSettle so residual http timers can clear.
       await tester.pumpAndSettle(const Duration(seconds: 1));
@@ -132,7 +132,7 @@ void main() {
         equals(expectedResponseBody),
       );
 
-      controller.stopRecording();
+      await controller.stopRecording();
 
       // pumpAndSettle so residual http timers can clear.
       await tester.pumpAndSettle(const Duration(seconds: 1));
