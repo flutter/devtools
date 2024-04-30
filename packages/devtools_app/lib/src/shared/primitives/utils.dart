@@ -359,10 +359,14 @@ extension JsonMap on Map<String, Object?> {
   String prettyPrint() => const JsonEncoder.withIndent('  ').convert(this);
 }
 
-const _microsecondsInSecond = 1000000;
-
-class PeriodicTimerWithOverlapProtection {
-  PeriodicTimerWithOverlapProtection(
+/// Periodic timer with overlap protection.
+///
+/// This class ensures that the callback is not called more frequently than the
+/// specified rate per second. If the callback takes longer to execute than the
+/// specified delay, the callback will be called as soon as possible after the
+/// previous callback completes.
+class Poller {
+  Poller(
     this.delay,
     this.callback,
     double? ratePerSecond,
@@ -378,6 +382,8 @@ class PeriodicTimerWithOverlapProtection {
   final RateLimiterCallback callback;
   final RateLimiter _rateLimiter;
   late Timer _timer;
+
+  static const _microsecondsInSecond = 1000000;
 
   void dispose() {
     _timer.cancel();

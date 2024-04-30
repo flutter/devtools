@@ -126,7 +126,7 @@ class TimelineEventsController extends PerformanceFeatureController
 
   static const _timelinePollingInterval = Duration(seconds: 10);
 
-  PeriodicTimerWithOverlapProtection? _timelinePolling;
+  Poller? _timelinePoller;
 
   @override
   Future<void> init() async {
@@ -147,14 +147,14 @@ class TimelineEventsController extends PerformanceFeatureController
 
     addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
       if (!serviceConnection.serviceManager.connectedState.value.connected) {
-        _timelinePolling?.dispose();
+        _timelinePoller?.dispose();
       }
     });
 
     // Load available timeline events.
     await forceRefresh();
 
-    _timelinePolling = PeriodicTimerWithOverlapProtection(
+    _timelinePoller = Poller(
       _timelinePollingInterval,
       _pullPerfettoVmTimeline,
       _timelinePollingRateLimit,
@@ -516,7 +516,7 @@ class TimelineEventsController extends PerformanceFeatureController
 
   @override
   void dispose() {
-    _timelinePolling?.dispose();
+    _timelinePoller?.dispose();
     perfettoController.dispose();
     _refreshWorkTracker.clear();
     super.dispose();
