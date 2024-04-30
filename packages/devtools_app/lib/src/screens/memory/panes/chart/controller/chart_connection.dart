@@ -13,6 +13,12 @@ import '../../../shared/primitives/memory_timeline.dart';
 import '../data/primitives.dart';
 import 'memory_tracker.dart';
 
+enum _ConnectionState {
+  notInitialized,
+  connected,
+  stopped,
+}
+
 /// Connection between chart and application.
 ///
 /// The connection consists of listeners to events from vm and
@@ -38,18 +44,14 @@ class ChartConnection extends DisposableController
 
   DebounceTimer? _polling;
 
-  /// If completed, this instance was connected to the application.
-  final Completer<void> _initialized = Completer();
+  _ConnectionState _connectionState = _ConnectionState.notInitialized;
 
   void _stopConnection() {
     _polling?.cancel();
+    _polling = null;
     cancelStreamSubscriptions();
     cancelListeners();
-  }
-
-  // True if connection was started and then stopped.
-  bool get _isConnectionStopped {
-    return _initialized.isCompleted && _polling?.isCancelled == true;
+    _connectionState = _ConnectionState.stopped;
   }
 
   late bool isDeviceAndroid;
@@ -58,8 +60,8 @@ class ChartConnection extends DisposableController
   ///
   /// If DevTools is in offline mode, stops connection and returns false.
   bool _checkConnection() {
-    assert(_initialized.isCompleted);
-    if (_isConnectionStopped) return false;
+    assert(_connectionState != _ConnectionState.notInitialized);
+    if (_connectionState == _ConnectionState.stopped) return false;
 
     // If connection is up and running, return true.
     if (!offlineDataController.showingOfflineData.value &&
@@ -73,8 +75,8 @@ class ChartConnection extends DisposableController
   }
 
   Future<void> maybeInitialize() async {
-    if (_initialized.isCompleted) return;
-    _initialized.complete();
+    if (_connectionState != _ConnectionState.notInitialized) return;
+    _connectionState = _ConnectionState.connected;
     if (!_checkConnection()) return;
 
     await serviceConnection.serviceManager.onServiceAvailable;
@@ -112,9 +114,8 @@ class ChartConnection extends DisposableController
 
   @override
   void dispose() {
-    // Not nulling out _polling, because we need _polling to be not null and inactive
-    // for `_isConnectionStopped` to return true.
     _polling?.dispose();
+    _polling = null;
     super.dispose();
   }
 }

@@ -62,7 +62,7 @@ class MemoryChartPaneController extends DisposableController
 
     await _onChartVisibilityChanged();
     addAutoDisposeListener(
-      preferences.memory.showChart,
+      isChartVisible,
       () => unawaited(_onChartVisibilityChanged()),
     );
 
@@ -105,10 +105,9 @@ class MemoryChartPaneController extends DisposableController
     _paused.value = false;
   }
 
-  /// Connects when chart is first time expanded.
+  /// Establishes the chart connection when the chart is expanded for the first time.
   ///
-  /// If chart is already connected, does nothing.
-  /// Return true if connection was setup.
+  /// Returns true if the chart was already connected or the connection was established.
   Future<bool> maybeConnect() async {
     if (!_paused.value) return false;
     if (mode != DevToolsMode.connected) return false;
@@ -123,11 +122,9 @@ class MemoryChartPaneController extends DisposableController
         preferences.memory.androidCollectionEnabled.value;
   }
 
-  ValueListenable<bool> isChartVisible = preferences.memory.showChart;
+  ValueListenable<bool> get isChartVisible => preferences.memory.showChart;
   Future<void> _onChartVisibilityChanged() async {
-    if (isChartVisible.value) {
-      if (await maybeConnect()) resume();
-    }
+    if (isChartVisible.value && await maybeConnect()) resume();
   }
 
   @override
