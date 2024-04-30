@@ -115,8 +115,6 @@ class TimelineEventsController extends PerformanceFeatureController
 
   final _refreshWorkTracker = FutureWorkTracker();
 
-  Timer? _pollingTimer;
-
   int _nextPollStartMicros = 0;
 
   /// The number of requests per second that we allow for pulling the VM
@@ -128,7 +126,7 @@ class TimelineEventsController extends PerformanceFeatureController
 
   static const _timelinePollingInterval = Duration(seconds: 10);
 
-  RateLimiter? _timelinePollingRateLimiter;
+  PeriodicTimerWithOverlapProtection? _timelinePolling;
 
   @override
   Future<void> init() async {
@@ -149,26 +147,18 @@ class TimelineEventsController extends PerformanceFeatureController
 
     addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
       if (!serviceConnection.serviceManager.connectedState.value.connected) {
-        _pollingTimer?.cancel();
-        _timelinePollingRateLimiter?.dispose();
+        _timelinePolling?.dispose();
       }
     });
 
     // Load available timeline events.
     await forceRefresh();
 
-    _timelinePollingRateLimiter = RateLimiter(
-      _timelinePollingRateLimit,
+    _timelinePolling = PeriodicTimerWithOverlapProtection(
+      _timelinePollingInterval,
       _pullPerfettoVmTimeline,
+      _timelinePollingRateLimit,
     );
-
-    // Poll for new timeline events.
-    // We are polling here instead of listening to the timeline event stream
-    // because the event stream is sending out of order and duplicate events.
-    // See https://github.com/dart-lang/sdk/issues/46605.
-    _pollingTimer = Timer.periodic(_timelinePollingInterval, (_) {
-      _timelinePollingRateLimiter!.scheduleRequest();
-    });
   }
 
   Future<void> _pullPerfettoVmTimeline({bool isInitialPull = false}) async {
@@ -526,8 +516,7 @@ class TimelineEventsController extends PerformanceFeatureController
 
   @override
   void dispose() {
-    _pollingTimer?.cancel();
-    _timelinePollingRateLimiter?.dispose();
+    _timelinePolling?.dispose();
     perfettoController.dispose();
     _refreshWorkTracker.clear();
     super.dispose();

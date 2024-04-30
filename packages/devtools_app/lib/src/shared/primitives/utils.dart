@@ -359,6 +359,32 @@ extension JsonMap on Map<String, Object?> {
   String prettyPrint() => const JsonEncoder.withIndent('  ').convert(this);
 }
 
+const _microsecondsInSecond = 1000000;
+
+class PeriodicTimerWithOverlapProtection {
+  PeriodicTimerWithOverlapProtection(
+    this.delay,
+    this.callback,
+    double? ratePerSecond,
+  )   : assert(delay.inMicroseconds > 0),
+        _rateLimiter = RateLimiter(
+          ratePerSecond ?? _microsecondsInSecond / delay.inMicroseconds,
+          callback,
+        ) {
+    _timer = Timer.periodic(delay, (_) => _rateLimiter.scheduleRequest());
+  }
+
+  final Duration delay;
+  final RateLimiterCallback callback;
+  final RateLimiter _rateLimiter;
+  late Timer _timer;
+
+  void dispose() {
+    _timer.cancel();
+    _rateLimiter.dispose();
+  }
+}
+
 typedef RateLimiterCallback = Future<void> Function();
 
 /// Rate limiter that ensures a [callback] is run no more  than the
