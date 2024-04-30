@@ -48,7 +48,6 @@ class MemoryChartPaneController extends DisposableController
     if (mode == DevToolsMode.connected) {
       data = ChartData(mode: DevToolsMode.connected);
     } else {
-      assert(offlineData!.isDeviceAndroid != null);
       data = offlineData!;
       _paused.value = false;
       recomputeChartData();

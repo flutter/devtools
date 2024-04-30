@@ -115,7 +115,7 @@ class AdaptedProfile {
   final GCStats totalGCStats;
 }
 
-/// Constants ar short here, as they repeat and we want to save space.
+/// Constants are short here, as they repeat and we want to save space.
 class _RecordJson {
   static const isTotal = 'it';
   static const heapClass = 'c';
