@@ -6,31 +6,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
-import 'package:usage/usage_io.dart';
 
 import 'file_system.dart';
-
-/// Access the file '~/.flutter'.
-class FlutterUsage {
-  FlutterUsage({String settingsName = 'flutter'}) {
-    _analytics = AnalyticsIO('', settingsName, '');
-  }
-
-  late Analytics _analytics;
-
-  /// Does the .flutter store exist?
-  static bool get doesStoreExist {
-    return LocalFileSystem.flutterStoreExists();
-  }
-
-  bool get isFirstRun => _analytics.firstRun;
-
-  bool get enabled => _analytics.enabled;
-
-  set enabled(bool value) => _analytics.enabled = value;
-
-  String get clientId => _analytics.clientId;
-}
 
 // Access the DevTools on disk store (~/.flutter-devtools/.devtools).
 class DevToolsUsage {
