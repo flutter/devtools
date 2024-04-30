@@ -361,9 +361,9 @@ extension JsonMap on Map<String, Object?> {
 
 /// Periodic timer with overlap protection.
 ///
-/// This class ensures that the callback is not called more frequently than the
-/// specified rate per second. If the callback takes longer to execute than the
-/// specified delay, the callback will be called as soon as possible after the
+/// This class ensures that the [callback] is not called more frequently than the
+/// [ratePerSecond]. If the callback takes longer to execute than the
+/// [delay], the callback will be called as soon as possible after the
 /// previous callback completes.
 class Poller {
   Poller(
