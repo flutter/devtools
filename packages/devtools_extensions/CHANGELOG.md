@@ -1,6 +1,19 @@
-## 0.1.1-wip
+## 0.2.0-dev.0
+* Deprecate the `DevToolsExtension.requiresRunningApplication` field.
+* Update `extension_config_spec.md` to include an optional field `requiresConnection`.
+* Bump `devtools_shared` dependency to `^10.0.0`.
+* Fix file locations in the `dart_foo` extension example.
+* Bump `vm_service` dependency to `^14.2.1`.
+* Dispose `DTDManager` when the `DevToolsExtension` widget state is disposed.
+* Add an example of a standalone extension.
+
+## 0.1.1
 * Update the simulated environment help dialogs with information about the
 new `--print-dtd` CLI flag.
+* Bump the minimum Dart and Flutter SDK versions to `3.4.0-282.1.beta` and
+`3.22.0-0.1.pre` respectively.
+* Bump `devtools_app_shared` to ^0.1.1-dev.0
+* Bump `devtools_shared` to ^8.1.1-dev.0
 
 ## 0.1.0
 * Bump `devtools_app_shared` to ^0.1.0

@@ -27,6 +27,7 @@ abstract class ColumnData<T> {
     this.titleTooltip,
     this.alignment = ColumnAlignment.left,
     this.headerAlignment = TextAlign.left,
+    this.showTooltip = false,
   }) : minWidthPx = null;
 
   ColumnData.wide(
@@ -35,7 +36,10 @@ abstract class ColumnData<T> {
     this.minWidthPx,
     this.alignment = ColumnAlignment.left,
     this.headerAlignment = TextAlign.left,
+    this.showTooltip = false,
   }) : fixedWidthPx = null;
+
+  final bool showTooltip;
 
   final String title;
 
@@ -80,8 +84,11 @@ abstract class ColumnData<T> {
 
   String? getCaption(T dataObject) => null;
 
+  // TODO: remove redundant getTooltip overrides now that [showToolTip] is
+  // available.
   /// Get the cell's tooltip value from the given [dataObject].
-  String getTooltip(T dataObject) => getDisplayValue(dataObject);
+  String getTooltip(T dataObject) =>
+      showTooltip ? getDisplayValue(dataObject) : '';
 
   /// Get the cell's rich tooltip span from the given [dataObject].
   ///
@@ -102,12 +109,18 @@ abstract class ColumnData<T> {
     return theme.regularTextStyleWithColor(textColor);
   }
 
+  /// The configuration for the column. Configuration changes to columns
+  /// will cause the table to be rebuilt.
+  ///
+  /// Defaults to title.
+  String get config => title;
+
   @override
   String toString() => title;
 }
 
 abstract class TreeColumnData<T extends TreeNode<T>> extends ColumnData<T> {
-  TreeColumnData(String title) : super.wide(title);
+  TreeColumnData(super.title) : super.wide();
 
   static double get treeToggleWidth => scaleByFontFactor(14.0);
 

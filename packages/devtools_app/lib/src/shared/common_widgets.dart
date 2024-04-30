@@ -239,6 +239,35 @@ class ToolbarRefresh extends ToolbarAction {
   });
 }
 
+class StartStopRecordingButton extends GaDevToolsButton {
+  StartStopRecordingButton({
+    super.key,
+    required this.recording,
+    required super.onPressed,
+    required super.gaScreen,
+    required super.gaSelection,
+    super.minScreenWidthForTextBeforeScaling,
+    String? tooltipOverride,
+    Color? colorOverride,
+    String? labelOverride,
+  }) : super(
+          icon: _icon(recording),
+          label: labelOverride ?? _label(recording),
+          color: colorOverride ?? _color(recording),
+          tooltip: tooltipOverride ?? _tooltip(recording),
+        );
+
+  static IconData _icon(bool recording) =>
+      recording ? Icons.stop : Icons.fiber_manual_record;
+  static String _label(bool recording) =>
+      recording ? 'Stop recording' : 'Start recording';
+  static String _tooltip(bool recording) =>
+      recording ? 'Stop recording' : 'Start recording';
+  static Color? _color(bool recording) => recording ? Colors.red : null;
+
+  final bool recording;
+}
+
 /// Button to start recording data.
 ///
 /// * `recording`: Whether recording is in progress.
@@ -451,10 +480,10 @@ class DevToolsSwitch extends StatelessWidget {
 
 class ProcessingInfo extends StatelessWidget {
   const ProcessingInfo({
-    Key? key,
+    super.key,
     required this.progressValue,
     required this.processedObject,
-  }) : super(key: key);
+  });
 
   final double? progressValue;
 
@@ -497,9 +526,9 @@ class ExitOfflineButton extends StatelessWidget {
       label: 'Exit offline mode',
       icon: Icons.clear,
       gaScreen: gaScreen,
-      gaSelection: gac.exitOfflineMode,
+      gaSelection: gac.stopShowingOfflineData,
       onPressed: () {
-        offlineController.exitOfflineMode();
+        offlineDataController.stopShowingOfflineData();
         // Use Router.neglect to replace the current history entry with
         // the homepage so that clicking Back will not return here.
         Router.neglect(
@@ -524,11 +553,11 @@ class OfflineAwareControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
-      valueListenable: offlineController.offlineMode,
+      valueListenable: offlineDataController.showingOfflineData,
       builder: (context, offline, _) {
         return Row(
           children: [
-            if (offlineController.offlineMode.value)
+            if (offlineDataController.showingOfflineData.value)
               Padding(
                 padding: const EdgeInsets.only(right: defaultSpacing),
                 child: ExitOfflineButton(gaScreen: gaScreen),
@@ -586,14 +615,13 @@ class ToolbarAction extends StatelessWidget {
     required this.icon,
     required this.onPressed,
     this.tooltip,
-    Key? key,
+    super.key,
     this.size,
     this.style,
     this.color,
     this.gaScreen,
     this.gaSelection,
-  })  : assert((gaScreen == null) == (gaSelection == null)),
-        super(key: key);
+  }) : assert((gaScreen == null) == (gaSelection == null));
 
   final TextStyle? style;
   final IconData icon;
@@ -679,10 +707,10 @@ abstract class ScaffoldAction extends StatelessWidget {
 /// [link] is the link that should be opened when the button is clicked.
 class InformationButton extends StatelessWidget {
   const InformationButton({
-    Key? key,
+    super.key,
     required this.tooltip,
     required this.link,
-  }) : super(key: key);
+  });
 
   final String tooltip;
 
@@ -708,6 +736,14 @@ class RoundedCornerOptions {
     this.showBottomRight = true,
   });
 
+  /// Static constant instance with all borders hidden
+  static const RoundedCornerOptions empty = RoundedCornerOptions(
+    showTopLeft: false,
+    showTopRight: false,
+    showBottomLeft: false,
+    showBottomRight: false,
+  );
+
   final bool showTopLeft;
   final bool showTopRight;
   final bool showBottomLeft;
@@ -716,7 +752,7 @@ class RoundedCornerOptions {
 
 class RoundedDropDownButton<T> extends StatelessWidget {
   const RoundedDropDownButton({
-    Key? key,
+    super.key,
     this.value,
     this.onChanged,
     this.isDense = false,
@@ -725,7 +761,7 @@ class RoundedDropDownButton<T> extends StatelessWidget {
     this.selectedItemBuilder,
     this.items,
     this.roundedCornerOptions,
-  }) : super(key: key);
+  });
 
   final T? value;
 
@@ -757,45 +793,50 @@ class RoundedDropDownButton<T> extends StatelessWidget {
     final showTopRight = roundedCornerOptions?.showTopRight ?? true;
     final showBottomLeft = roundedCornerOptions?.showBottomLeft ?? true;
     final showBottomRight = roundedCornerOptions?.showBottomRight ?? true;
+
+    final button = Center(
+      child: SizedBox(
+        height: defaultButtonHeight - 2.0, // subtract 2.0 for width of border
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<T>(
+            padding: const EdgeInsets.only(
+              left: defaultSpacing,
+              right: borderPadding,
+            ),
+            value: value,
+            onChanged: onChanged,
+            isDense: isDense,
+            isExpanded: isExpanded,
+            borderRadius: BorderRadius.only(
+              topLeft: selectRadius(showTopLeft),
+              topRight: selectRadius(showTopRight),
+              bottomLeft: selectRadius(showBottomLeft),
+              bottomRight: selectRadius(showBottomRight),
+            ),
+            style: style,
+            selectedItemBuilder: selectedItemBuilder,
+            items: items,
+            focusColor: bgColor,
+          ),
+        ),
+      ),
+    );
+
+    if (roundedCornerOptions == RoundedCornerOptions.empty) return button;
+
     return RoundedOutlinedBorder(
       showTopLeft: showTopLeft,
       showTopRight: showTopRight,
       showBottomLeft: showBottomLeft,
       showBottomRight: showBottomRight,
-      child: Center(
-        child: SizedBox(
-          height: defaultButtonHeight - 2.0, // subtract 2.0 for width of border
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<T>(
-              padding: const EdgeInsets.only(
-                left: defaultSpacing,
-                right: borderPadding,
-              ),
-              value: value,
-              onChanged: onChanged,
-              isDense: isDense,
-              isExpanded: isExpanded,
-              borderRadius: BorderRadius.only(
-                topLeft: selectRadius(showTopLeft),
-                topRight: selectRadius(showTopRight),
-                bottomLeft: selectRadius(showBottomLeft),
-                bottomRight: selectRadius(showBottomRight),
-              ),
-              style: style,
-              selectedItemBuilder: selectedItemBuilder,
-              items: items,
-              focusColor: bgColor,
-            ),
-          ),
-        ),
-      ),
+      child: button,
     );
   }
 }
 
 class DevToolsClearableTextField extends StatelessWidget {
   DevToolsClearableTextField({
-    Key? key,
+    super.key,
     required this.labelText,
     TextEditingController? controller,
     this.hintText,
@@ -806,8 +847,7 @@ class DevToolsClearableTextField extends StatelessWidget {
     this.autofocus = false,
     this.enabled,
     this.roundedBorder = false,
-  })  : controller = controller ?? TextEditingController(),
-        super(key: key);
+  }) : controller = controller ?? TextEditingController();
 
   final TextEditingController controller;
   final String? hintText;
@@ -1253,7 +1293,7 @@ class TextViewer extends StatelessWidget {
     } else {
       displayText = text;
     }
-    return Text(
+    return SelectableText(
       displayText,
       style: style,
     );
@@ -1276,6 +1316,7 @@ class _JsonViewerState extends State<JsonViewer>
     with ProvidedControllerMixin<DebuggerController, JsonViewer> {
   late Future<void> _initializeTree;
   late DartObjectNode variable;
+  static const jsonEncoder = JsonEncoder.withIndent('  ');
 
   Future<void> _buildAndExpand(
     DartObjectNode variable,
@@ -1358,6 +1399,18 @@ class _JsonViewerState extends State<JsonViewer>
               }
               return ExpandableVariable(
                 variable: variable,
+                onCopy: (copiedVariable) {
+                  unawaited(
+                    copyToClipboard(
+                      jsonEncoder.convert(
+                        serviceConnection
+                            .serviceManager.service!.fakeServiceCache
+                            .instanceToJson(copiedVariable.value as Instance),
+                      ),
+                      'JSON copied to clipboard',
+                    ),
+                  );
+                },
               );
             },
           ),
@@ -1369,12 +1422,12 @@ class _JsonViewerState extends State<JsonViewer>
 
 class MoreInfoLink extends StatelessWidget {
   const MoreInfoLink({
-    Key? key,
+    super.key,
     required this.url,
     required this.gaScreenName,
     required this.gaSelectedItemDescription,
     this.padding,
-  }) : super(key: key);
+  });
 
   final String url;
 
@@ -1506,10 +1559,10 @@ class Link {
 
 class Legend extends StatelessWidget {
   const Legend({
-    Key? key,
+    super.key,
     required this.entries,
     this.dense = false,
-  }) : super(key: key);
+  });
 
   double get legendSquareSize =>
       dense ? scaleByFontFactor(12.0) : scaleByFontFactor(16.0);
@@ -1628,12 +1681,12 @@ class CopyToClipboardControl extends StatelessWidget {
 /// [ValueNotifier] and changes to the [ValueNotifier] updating the checkbox.
 class NotifierCheckbox extends StatelessWidget {
   const NotifierCheckbox({
-    Key? key,
+    super.key,
     required this.notifier,
     this.onChanged,
     this.enabled = true,
     this.checkboxKey,
-  }) : super(key: key);
+  });
 
   /// The notifier this [NotifierCheckbox] is responsible for listening to and
   /// updating.
@@ -1681,7 +1734,7 @@ class NotifierCheckbox extends StatelessWidget {
 /// value changes to [notifier].
 class CheckboxSetting extends StatelessWidget {
   const CheckboxSetting({
-    Key? key,
+    super.key,
     required this.notifier,
     required this.title,
     this.description,
@@ -1691,7 +1744,7 @@ class CheckboxSetting extends StatelessWidget {
     this.gaScreenName,
     this.gaItem,
     this.checkboxKey,
-  }) : super(key: key);
+  });
 
   final ValueNotifier<bool?> notifier;
 
@@ -1785,7 +1838,7 @@ class CheckboxSetting extends StatelessWidget {
 }
 
 class PubWarningText extends StatelessWidget {
-  const PubWarningText({Key? key}) : super(key: key);
+  const PubWarningText({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -1823,11 +1876,11 @@ class PubWarningText extends StatelessWidget {
 
 class BlinkingIcon extends StatefulWidget {
   const BlinkingIcon({
-    Key? key,
+    super.key,
     required this.icon,
     required this.color,
     required this.size,
-  }) : super(key: key);
+  });
 
   final IconData icon;
 
@@ -1933,9 +1986,9 @@ class _MultiValueListenableBuilderState
 
 class SmallCircularProgressIndicator extends StatelessWidget {
   const SmallCircularProgressIndicator({
-    Key? key,
+    super.key,
     required this.valueColor,
-  }) : super(key: key);
+  });
 
   final Animation<Color?> valueColor;
 
@@ -1950,12 +2003,12 @@ class SmallCircularProgressIndicator extends StatelessWidget {
 
 class ElevatedCard extends StatelessWidget {
   const ElevatedCard({
-    Key? key,
+    super.key,
     required this.child,
     this.width,
     this.height,
     this.padding,
-  }) : super(key: key);
+  });
 
   final Widget child;
   final double? width;
@@ -1989,7 +2042,7 @@ class ElevatedCard extends StatelessWidget {
 ///
 /// See [AutomaticKeepAliveClientMixin] for more information.
 class KeepAliveWrapper extends StatefulWidget {
-  const KeepAliveWrapper({Key? key, required this.child}) : super(key: key);
+  const KeepAliveWrapper({super.key, required this.child});
 
   final Widget child;
 
@@ -2102,14 +2155,14 @@ class VerticalLineSpacer extends StatelessWidget {
 
 class DownloadButton extends StatelessWidget {
   const DownloadButton({
-    Key? key,
+    super.key,
     this.onPressed,
     this.tooltip = 'Download data',
     this.label = 'Download',
     required this.minScreenWidthForTextBeforeScaling,
     required this.gaScreen,
     required this.gaSelection,
-  }) : super(key: key);
+  });
 
   final VoidCallback? onPressed;
   final String? tooltip;

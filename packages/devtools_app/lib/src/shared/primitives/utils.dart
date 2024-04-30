@@ -902,12 +902,10 @@ typedef DevToolsJsonFileHandler = void Function(DevToolsJsonFile file);
 class DevToolsJsonFile extends DevToolsFile<Object> {
   const DevToolsJsonFile({
     required String name,
-    required DateTime lastModifiedTime,
-    required Object data,
+    required super.lastModifiedTime,
+    required super.data,
   }) : super(
           path: name,
-          lastModifiedTime: lastModifiedTime,
-          data: data,
         );
 }
 
@@ -1058,6 +1056,13 @@ extension ListExtension<T> on List<T> {
       }
     }
     return indices;
+  }
+}
+
+extension NullableListExtension<T> on List<T>? {
+  bool get isNullOrEmpty {
+    final self = this;
+    return self == null || self.isEmpty;
   }
 }
 

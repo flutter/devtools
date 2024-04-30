@@ -12,7 +12,7 @@ import '../../../../shared/globals.dart';
 import 'performance_controls.dart';
 
 class MoreDebuggingOptionsButton extends StatelessWidget {
-  const MoreDebuggingOptionsButton({Key? key}) : super(key: key);
+  const MoreDebuggingOptionsButton({super.key});
 
   static const _width = 620.0;
 
@@ -29,7 +29,7 @@ class MoreDebuggingOptionsButton extends StatelessWidget {
         extensions.disableClipLayers,
         extensions.disableOpacityLayers,
         extensions.disablePhysicalShapeLayers,
-        if (FeatureFlags.widgetRebuildstats) extensions.trackRebuildWidgets,
+        if (FeatureFlags.widgetRebuildStats) extensions.trackRebuildWidgets,
       ],
       overlayDescription: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

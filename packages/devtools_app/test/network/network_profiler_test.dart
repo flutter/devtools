@@ -89,8 +89,8 @@ void main() {
       expect(controller.recordingNotifier.value, true);
 
       // Pause recording.
-      expect(find.byType(PauseButton), findsOneWidget);
-      await tester.tap(find.byType(PauseButton));
+      expect(find.byType(StartStopRecordingButton), findsOneWidget);
+      await tester.tap(find.byType(StartStopRecordingButton));
       await tester.pumpAndSettle();
 
       // Check that we've stopped polling.
@@ -101,8 +101,7 @@ void main() {
     });
 
     Future<void> loadRequestsAndCheck(WidgetTester tester) async {
-      expect(find.byType(ResumeButton), findsOneWidget);
-      expect(find.byType(PauseButton), findsOneWidget);
+      expect(find.byType(StartStopRecordingButton), findsOneWidget);
       expect(find.byType(ClearButton), findsOneWidget);
       expect(find.byType(SplitPane), findsOneWidget);
 
@@ -290,7 +289,7 @@ void main() {
         }
 
         // Pause recording.
-        await tester.tap(find.byType(PauseButton));
+        await tester.tap(find.byType(StartStopRecordingButton));
         await tester.pump();
 
         await clearTimeouts(tester);
@@ -336,7 +335,7 @@ void main() {
         await loadRequestsAndCheck(tester);
 
         // Pause the profiler.
-        await tester.tap(find.byType(PauseButton));
+        await tester.tap(find.byType(StartStopRecordingButton));
         await tester.pumpAndSettle();
 
         // Clear the results.

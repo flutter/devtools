@@ -11,10 +11,12 @@ heap_data.dart-->class_name.dart;
 heap_data.dart-->classes.dart;
 heap_data.dart-->retainers.dart;
 heap_data.dart-->simple_items.dart;
+heap_graph_loader.dart-->simple_items.dart;
 heap_object.dart-->class_name.dart;
 heap_object.dart-->heap_data.dart;
 heap_object.dart-->simple_items.dart;
 retaining_path.dart-->class_name.dart;
+retaining_path.dart-->simple_items.dart;
 ```
 
 ### Inversions

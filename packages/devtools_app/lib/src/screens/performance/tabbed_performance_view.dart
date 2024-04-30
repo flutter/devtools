@@ -58,13 +58,13 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
 
   @override
   Widget build(BuildContext context) {
-    final isOffline = offlineController.offlineMode.value;
+    final isOffline = offlineDataController.showingOfflineData.value;
     final isFlutterApp =
         serviceConnection.serviceManager.connectedApp!.isFlutterAppNow!;
 
     var showFrameAnalysis = isFlutterApp;
     var showRasterStats = isFlutterApp;
-    var showRebuildStats = FeatureFlags.widgetRebuildstats && isFlutterApp;
+    var showRebuildStats = FeatureFlags.widgetRebuildStats && isFlutterApp;
     final offlineData = controller.offlinePerformanceData;
     if (isOffline) {
       final hasOfflineData = offlineData != null;
@@ -138,6 +138,8 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
                     enhanceTracingController:
                         controller.enhanceTracingController,
                     rebuildCountModel: controller.rebuildCountModel,
+                    displayRefreshRateNotifier:
+                        controller.flutterFramesController.displayRefreshRate,
                   )
                 : const CenteredMessage(
                     'Select a frame above to view analysis data.',

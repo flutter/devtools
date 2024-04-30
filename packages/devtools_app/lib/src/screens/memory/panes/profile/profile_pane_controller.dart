@@ -15,6 +15,18 @@ import 'model.dart';
 
 class ProfilePaneController extends DisposableController
     with AutoDisposeControllerMixin {
+  ProfilePaneController();
+
+  factory ProfilePaneController.fromJson(Map<String, dynamic> map) {
+    // TODO(polina-c): implement, https://github.com/flutter/devtools/issues/6972
+    return ProfilePaneController();
+  }
+
+  Map<String, dynamic> toJson() {
+    // TODO(polina-c): implement, https://github.com/flutter/devtools/issues/6972
+    return {};
+  }
+
   final _exportController = ExportController();
 
   /// The current profile being displayed.
@@ -63,7 +75,7 @@ class ProfilePaneController extends DisposableController
   }
 
   void setFilter(ClassFilter filter) {
-    if (filter.equals(_classFilter.value)) return;
+    if (filter == _classFilter.value) return;
     _classFilter.value = filter;
     final currentProfile = _currentAllocationProfile.value;
     if (currentProfile == null) return;

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/screens/memory/framework/connected/memory_tabs.dart';
+import 'package:devtools_app/src/screens/memory/framework/memory_tabs.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/diff_pane.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/widgets/snapshot_list.dart';
 import 'package:devtools_test/helpers.dart';
@@ -12,13 +12,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../../test_infra/matchers/matchers.dart';
 import '../../../test_infra/scenes/memory/default.dart';
-import '../../../test_infra/scenes/scene_test_extensions.dart';
 
 Future<void> pumpScene(WidgetTester tester, MemoryDefaultScene scene) async {
-  await tester.pumpScene(scene);
-  // Delay to ensure the memory profiler has collected data.
-  await tester.pumpAndSettle(const Duration(seconds: 1));
-  expect(find.byType(MemoryBody), findsOneWidget);
+  await scene.pump(tester);
   await tester.tap(
     find.byKey(MemoryScreenKeys.diffTab),
   );
@@ -26,7 +22,7 @@ Future<void> pumpScene(WidgetTester tester, MemoryDefaultScene scene) async {
 }
 
 Future<void> takeSnapshot(WidgetTester tester, MemoryDefaultScene scene) async {
-  final snapshots = scene.controller.controllers.diff.core.snapshots;
+  final snapshots = scene.controller.diff.core.snapshots;
   final length = snapshots.value.length;
   await tester.tap(find.byIcon(Icons.fiber_manual_record).first);
   await tester.pumpAndSettle();
@@ -55,7 +51,7 @@ void main() {
       'records and deletes snapshots',
       windowSize,
       (WidgetTester tester) async {
-        final snapshots = scene.controller.controllers.diff.core.snapshots;
+        final snapshots = scene.controller.diff.core.snapshots;
         // Check the list contains only documentation item.
         expect(snapshots.value.length, equals(1));
         await pumpScene(tester, scene);

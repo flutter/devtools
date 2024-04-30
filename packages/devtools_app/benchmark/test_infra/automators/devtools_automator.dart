@@ -47,7 +47,7 @@ class DevToolsAutomater {
       defaultScreens(sampleData: sampleData),
       AnalyticsController(
         enabled: false,
-        firstRun: false,
+        shouldShowConsentMessage: false,
         consentMessage: 'fake message',
       ),
     );

@@ -29,9 +29,8 @@ import 'screens/inspector/inspector_screen.dart';
 import 'screens/inspector/inspector_tree_controller.dart';
 import 'screens/logging/logging_controller.dart';
 import 'screens/logging/logging_screen.dart';
-import 'screens/memory/framework/connected/memory_controller.dart';
+import 'screens/memory/framework/memory_controller.dart';
 import 'screens/memory/framework/memory_screen.dart';
-import 'screens/memory/framework/static/static_screen_body.dart';
 import 'screens/network/network_controller.dart';
 import 'screens/network/network_screen.dart';
 import 'screens/performance/performance_controller.dart';
@@ -49,6 +48,7 @@ import 'shared/common_widgets.dart';
 import 'shared/console/primitives/simple_items.dart';
 import 'shared/feature_flags.dart';
 import 'shared/globals.dart';
+import 'shared/offline_data.dart';
 import 'shared/offline_screen.dart';
 import 'shared/primitives/utils.dart';
 import 'shared/routing.dart';
@@ -139,26 +139,26 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
 
     unawaited(ga.setupDimensions());
 
+    void clearRoutesAndSetState() {
+      setState(() {
+        _clearCachedRoutes();
+      });
+    }
+
     if (FeatureFlags.devToolsExtensions) {
-      addAutoDisposeListener(extensionService.availableExtensions, () {
-        setState(() {
-          _clearCachedRoutes();
-        });
-      });
-      addAutoDisposeListener(extensionService.visibleExtensions, () {
-        setState(() {
-          _clearCachedRoutes();
-        });
-      });
+      addAutoDisposeListener(
+        extensionService.availableExtensions,
+        clearRoutesAndSetState,
+      );
+      addAutoDisposeListener(
+        extensionService.visibleExtensions,
+        clearRoutesAndSetState,
+      );
     }
 
     addAutoDisposeListener(
       serviceConnection.serviceManager.isolateManager.mainIsolate,
-      () {
-        setState(() {
-          _clearCachedRoutes();
-        });
-      },
+      clearRoutesAndSetState,
     );
 
     _isDarkThemeEnabledPreference = preferences.darkModeTheme.value;
@@ -173,9 +173,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
 
   @override
   void dispose() {
-    // preferences is initialized in main() to avoid flash of content with
-    // incorrect theme.
-    preferences.dispose();
+    FrameworkCore.dispose();
     super.dispose();
   }
 
@@ -330,18 +328,6 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
           ),
         );
       },
-      if (FeatureFlags.memoryAnalysis)
-        memoryAnalysisScreenId: (_, __, args, ____) {
-          final embed = isEmbedded(args);
-          return DevToolsScaffold.withChild(
-            key: const Key('memoryanalysis'),
-            embed: embed,
-            child: MultiProvider(
-              providers: _providedControllers(),
-              child: const StaticMemoryBody(),
-            ),
-          );
-        },
       ..._standaloneScreens,
     };
   }
@@ -372,7 +358,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     return widget.originalScreens
         .where(
           (s) =>
-              s.providesController && (offline ? s.screen.worksOffline : true),
+              s.providesController &&
+              (offline ? s.screen.worksWithOfflineData : true),
         )
         .map((s) => s.controllerProvider(routerDelegate))
         .toList();
@@ -430,11 +417,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
 /// [C] corresponds to the type of the screen's controller, which is created by
 /// [createController] or provided by [controllerProvider].
 class DevToolsScreen<C extends Object?> {
-  const DevToolsScreen(
-    this.screen, {
-    this.createController,
-    this.controller,
-  }) : assert(createController == null || controller == null);
+  const DevToolsScreen(this.screen, {this.createController});
 
   final Screen screen;
 
@@ -446,32 +429,30 @@ class DevToolsScreen<C extends Object?> {
   ///
   /// If [createController] and [controller] are both null, [screen] will be
   /// responsible for creating and maintaining its own controller.
+  ///
+  /// In the controller initialization, if logic requires a connected [VmService]
+  /// object (`serviceConnection.serviceManager.service`), then the controller should first await
+  /// the `serviceConnection.serviceManager.onServiceAvailable` future to ensure the service has
+  /// been initialized.
+  /// The controller does not need to handle re-connection to the application. When reconnected,
+  /// DevTools will create a new controller. However, the controller should make sure
+  /// not to fail if the connection is lost.
   final C Function(DevToolsRouterDelegate)? createController;
-
-  /// A provided controller for this screen, if non-null.
-  ///
-  /// The controller will then be provided via [controllerProvider], and
-  /// widgets depending on this controller can access it by calling
-  /// `Provider<C>.of(context)`.
-  ///
-  /// If [createController] and [controller] are both null, [screen] will be
-  /// responsible for creating and maintaining its own controller.
-  final C? controller;
 
   /// Returns true if a controller was provided for [screen]. If false,
   /// [screen] is responsible for creating and maintaining its own controller.
-  bool get providesController => createController != null || controller != null;
+  bool get providesController => createController != null;
 
   Provider<C> controllerProvider(DevToolsRouterDelegate routerDelegate) {
-    assert(
-      (createController != null && controller == null) ||
-          (createController == null && controller != null),
+    return Provider<C>(
+      create: (_) {
+        final controller = createController!(routerDelegate);
+        if (controller is OfflineScreenControllerMixin) {
+          controller.initReviewHistoryOnDisconnectListener();
+        }
+        return controller;
+      },
     );
-    final controllerLocal = controller;
-    if (controllerLocal != null) {
-      return Provider<C>.value(value: controllerLocal);
-    }
-    return Provider<C>(create: (_) => createController!(routerDelegate));
   }
 }
 
@@ -490,8 +471,7 @@ typedef UrlParametersBuilder = Widget Function(
 /// This avoids issues with widgets in the appbar being hidden by the banner
 /// in a web or desktop app.
 class _AlternateCheckedModeBanner extends StatelessWidget {
-  const _AlternateCheckedModeBanner({Key? key, required this.builder})
-      : super(key: key);
+  const _AlternateCheckedModeBanner({required this.builder});
   final WidgetBuilder builder;
 
   @override

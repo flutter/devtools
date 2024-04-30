@@ -1,2 +1,4 @@
 extensions:
   - foo: true
+  - standalone_extension: true
+  - dart_foo: true

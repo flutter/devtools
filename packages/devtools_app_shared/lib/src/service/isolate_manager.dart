@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:core';
 
 import 'package:collection/collection.dart' show IterableExtension;
+import 'package:dds_service_extensions/dds_service_extensions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
@@ -99,6 +100,14 @@ final class IsolateManager with DisposerMixin {
     _isolates.add(isolateRef);
     isolateIndex(isolateRef);
     await _loadIsolateState(isolateRef);
+    // If the flag pause-breakpoints-on-start was successfully set, then each
+    // new isolate will start paused. Therefore resume it (unless it is the
+    // current isolate, in which case the breakpoint manager will resume it
+    // after setting breakpoints):
+    final selectedIsolateId = selectedIsolate.value?.id;
+    if (selectedIsolateId != null && selectedIsolateId != isolateRef.id) {
+      await resumeIsolate(isolateRef);
+    }
   }
 
   Future<void> _loadIsolateState(IsolateRef isolateRef) async {
@@ -235,6 +244,32 @@ final class IsolateManager with DisposerMixin {
     _clearIsolateStates();
     _mainIsolate.value = null;
     _isolateRunnableCompleters.clear();
+  }
+
+  /// Resumes the isolate by calling [DdsExtension.readyToResume].
+  ///
+  /// CAUTION: This should only be used for a tool-initiated resume, not a user-
+  /// initiated resume. See:
+  ///  https://github.com/dart-lang/sdk/commit/5536951738ba599d96e075b7140e52b28e233
+  Future<void> resumeIsolate(IsolateRef isolateRef) async {
+    if (isolateRef.id == null || _service == null) return;
+    final isolateId = isolateRef.id!;
+    try {
+      await _readyToResume(isolateId);
+    } catch (error) {
+      _log.warning(error);
+    }
+  }
+
+  Future<void> _readyToResume(String isolateId) async {
+    final service = _service!;
+    try {
+      await service.readyToResume(isolateId);
+    } on UnimplementedError {
+      // Fallback to a regular resume if the DDS version doesn't support
+      // `readyToResume`:
+      await service.resume(isolateId);
+    }
   }
 
   void _clearIsolateStates() {

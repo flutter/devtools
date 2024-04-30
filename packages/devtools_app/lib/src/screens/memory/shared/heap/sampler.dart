@@ -158,10 +158,10 @@ class LiveClassSampler {
 
 class SnapshotClassSampler extends LiveClassSampler {
   SnapshotClassSampler(
-    HeapClassName heapClass,
+    super.heapClass,
     ObjectSet objects,
     HeapData heap,
-  ) : super(heapClass, heap: heap, objects: objects);
+  ) : super(heap: heap, objects: objects);
 
   Future<void> oneLiveStaticToConsole() async {
     ga.select(gac.memory, gac.MemoryEvent.dropOneLiveVariable);

@@ -56,7 +56,7 @@ void main() {
       rebuildCountModel.processRebuildEvent(jsonDecode(event3));
       rebuildCountModel.processRebuildEvent(jsonDecode(event2));
       final json = jsonEncode(rebuildCountModel.toJson());
-      rebuildCountModel = RebuildCountModel.parse(jsonDecode(json));
+      rebuildCountModel = RebuildCountModel.fromJson(jsonDecode(json));
 
       expect(getLocation(9)!.location.name, 'PlanetWidget');
       expect(getLocation(9)!.buildCount, 44);

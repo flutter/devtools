@@ -424,9 +424,9 @@ class OpenFileAction extends Action<OpenFileIntent> {
 
 class DebuggerStatus extends StatefulWidget {
   const DebuggerStatus({
-    Key? key,
+    super.key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   final DebuggerController controller;
 

@@ -19,7 +19,7 @@ final _notificationWidth = _notificationHeight * goldenRatio;
 
 /// Manager for notifications in the app.
 class NotificationsView extends StatelessWidget {
-  const NotificationsView({Key? key, required this.child}) : super(key: key);
+  const NotificationsView({super.key, required this.child});
 
   final Widget child;
 
@@ -43,7 +43,7 @@ class NotificationsView extends StatelessWidget {
 /// in _NotificationsState.build because there would be no Overlay in the tree
 /// at the time Overlay.of(context) is called.
 class _Notifications extends StatefulWidget {
-  const _Notifications({Key? key, required this.child}) : super(key: key);
+  const _Notifications({required this.child});
 
   final Widget child;
 
@@ -180,10 +180,9 @@ class _NotificationOverlay extends StatelessWidget {
 
 class _Notification extends StatefulWidget {
   const _Notification({
-    Key? key,
     required this.message,
     required this.remove,
-  }) : super(key: key);
+  });
 
   final NotificationMessage message;
   final void Function(_Notification) remove;

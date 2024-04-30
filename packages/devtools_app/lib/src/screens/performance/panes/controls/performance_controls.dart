@@ -47,7 +47,7 @@ class PerformanceControls extends StatelessWidget {
               builder: (context, status, _) {
                 return _PrimaryControls(
                   controller: controller,
-                  processing: status == EventsControllerStatus.processing,
+                  processing: status == EventsControllerStatus.refreshing,
                   offline: offline,
                   onClear: onClear,
                 );
@@ -67,12 +67,11 @@ class PerformanceControls extends StatelessWidget {
 
 class _PrimaryControls extends StatelessWidget {
   const _PrimaryControls({
-    Key? key,
     required this.controller,
     required this.processing,
     required this.offline,
     required this.onClear,
-  }) : super(key: key);
+  });
 
   final PerformanceController controller;
 
@@ -122,19 +121,19 @@ class _PrimaryControls extends StatelessWidget {
 
 class _SecondaryPerformanceControls extends StatelessWidget {
   const _SecondaryPerformanceControls({
-    Key? key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   final PerformanceController controller;
 
   @override
   Widget build(BuildContext context) {
+    final isFlutterApp =
+        serviceConnection.serviceManager.connectedApp!.isFlutterAppNow!;
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        if (serviceConnection
-            .serviceManager.connectedApp!.isFlutterAppNow!) ...[
+        if (isFlutterApp) ...[
           ServiceExtensionButtonGroup(
             minScreenWidthForTextBeforeScaling:
                 PerformanceControls.minScreenWidthForTextBeforeScaling,
@@ -152,12 +151,14 @@ class _SecondaryPerformanceControls extends StatelessWidget {
           screenId: ScreenMetaData.performance.id,
           onSave: controller.exportData,
         ),
-        const SizedBox(width: denseSpacing),
-        SettingsOutlinedButton(
-          gaScreen: gac.performance,
-          gaSelection: gac.PerformanceEvents.performanceSettings.name,
-          onPressed: () => _openSettingsDialog(context),
-        ),
+        if (isFlutterApp) ...[
+          const SizedBox(width: denseSpacing),
+          SettingsOutlinedButton(
+            gaScreen: gac.performance,
+            gaSelection: gac.PerformanceEvents.performanceSettings.name,
+            onPressed: () => _openSettingsDialog(context),
+          ),
+        ],
       ],
     );
   }

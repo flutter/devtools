@@ -15,7 +15,7 @@ import 'theme/theme.dart';
 /// This is typically used as a title for a logical area of the screen.
 class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
   const AreaPaneHeader({
-    Key? key,
+    super.key,
     required this.title,
     this.maxLines = 1,
     this.actions = const [],
@@ -28,7 +28,7 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
     this.includeBottomBorder = true,
     this.includeLeftBorder = false,
     this.includeRightBorder = false,
-  }) : super(key: key);
+  });
 
   final Widget title;
   final int maxLines;
@@ -60,7 +60,11 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final borderSide = defaultBorderSide(theme);
-    final decoration = !roundedTopBorder
+    final decoration = !roundedTopBorder &&
+            (includeTopBorder ||
+                includeBottomBorder ||
+                includeLeftBorder ||
+                includeRightBorder)
         ? BoxDecoration(
             border: Border(
               top: includeTopBorder ? borderSide : BorderSide.none,
@@ -209,13 +213,13 @@ final class RoundedOutlinedBorder extends StatelessWidget {
 /// [showTop], [showBottom], [showLeft] or [showRight] to false.
 final class OutlineDecoration extends StatelessWidget {
   const OutlineDecoration({
-    Key? key,
+    super.key,
     this.child,
     this.showTop = true,
     this.showBottom = true,
     this.showLeft = true,
     this.showRight = true,
-  }) : super(key: key);
+  });
 
   factory OutlineDecoration.onlyBottom({required Widget? child}) =>
       OutlineDecoration(
@@ -282,9 +286,9 @@ BorderSide defaultBorderSide(ThemeData theme) {
 /// Convenience [Divider] with [Padding] that provides a good divider in forms.
 final class PaddedDivider extends StatelessWidget {
   const PaddedDivider({
-    Key? key,
+    super.key,
     this.padding = const EdgeInsets.only(bottom: 10.0),
-  }) : super(key: key);
+  });
 
   const PaddedDivider.thin({super.key})
       : padding = const EdgeInsets.only(bottom: 4.0);
@@ -313,7 +317,7 @@ final class PaddedDivider extends StatelessWidget {
 ///    omitted.
 class DevToolsButton extends StatelessWidget {
   const DevToolsButton({
-    Key? key,
+    super.key,
     required this.onPressed,
     this.icon,
     this.label,
@@ -323,11 +327,10 @@ class DevToolsButton extends StatelessWidget {
     this.elevated = false,
     this.outlined = true,
     this.tooltipPadding,
-  })  : assert(
+  }) : assert(
           label != null || icon != null,
           'Either icon or label must be specified.',
-        ),
-        super(key: key);
+        );
 
   factory DevToolsButton.iconOnly({
     required IconData icon,
@@ -463,7 +466,7 @@ class DevToolsButton extends StatelessWidget {
 /// common delay before the tooltip is shown.
 final class DevToolsTooltip extends StatelessWidget {
   const DevToolsTooltip({
-    Key? key,
+    super.key,
     this.message,
     this.richMessage,
     required this.child,
@@ -473,8 +476,7 @@ final class DevToolsTooltip extends StatelessWidget {
     this.padding = const EdgeInsets.all(defaultSpacing),
     this.decoration,
     this.textStyle,
-  })  : assert((message == null) != (richMessage == null)),
-        super(key: key);
+  }) : assert((message == null) != (richMessage == null));
 
   final String? message;
   final InlineSpan? richMessage;
@@ -511,14 +513,14 @@ final class DevToolsTooltip extends StatelessWidget {
 
 final class DevToolsToggleButtonGroup extends StatelessWidget {
   const DevToolsToggleButtonGroup({
-    Key? key,
+    super.key,
     required this.children,
     required this.selectedStates,
     required this.onPressed,
     this.fillColor,
     this.selectedColor,
     this.borderColor,
-  }) : super(key: key);
+  });
 
   final List<Widget> children;
 
@@ -557,7 +559,7 @@ final class DevToolsToggleButtonGroup extends StatelessWidget {
 
 final class DevToolsToggleButton extends StatelessWidget {
   const DevToolsToggleButton({
-    Key? key,
+    super.key,
     required this.onPressed,
     required this.isSelected,
     required this.message,
@@ -565,7 +567,7 @@ final class DevToolsToggleButton extends StatelessWidget {
     this.outlined = true,
     this.label,
     this.shape,
-  }) : super(key: key);
+  });
 
   final String message;
 
@@ -718,12 +720,12 @@ final class ButtonGroupItemData {
 
 final class DevToolsFilterButton extends StatelessWidget {
   const DevToolsFilterButton({
-    Key? key,
+    super.key,
     required this.onPressed,
     required this.isFilterActive,
     this.message = 'Filter',
     this.outlined = true,
-  }) : super(key: key);
+  });
 
   final VoidCallback onPressed;
   final bool isFilterActive;

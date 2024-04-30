@@ -62,14 +62,16 @@ class ValidationDetailView extends StatelessWidget {
                     viewType == TableViewType.singleUrlView)
                   _PathCheckTable(controller: controller),
                 const SizedBox(height: extraLargeSpacing),
-                if (linkData.domainErrors.isNotEmpty)
-                  Align(
-                    alignment: Alignment.bottomRight,
-                    child: FilledButton(
-                      onPressed: () async => await controller.validateLinks(),
-                      child: const Text('Recheck all'),
-                    ),
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: FilledButton(
+                    onPressed: () async {
+                      await controller.loadAndroidAppLinksAndValidate();
+                      controller.autoSelectLink(viewType);
+                    },
+                    child: const Text('Recheck all'),
                   ),
+                ),
                 if (viewType == TableViewType.domainView)
                   _DomainAssociatedLinksPanel(controller: controller),
                 const SizedBox(height: largeSpacing),
@@ -97,6 +99,7 @@ class ValidationDetailHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return OutlineDecoration(
       showLeft: false,
+      showRight: false,
       child: Container(
         height: actionWidgetSize,
         padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
@@ -196,7 +199,7 @@ class _AssetLinksJsonFileIssues extends StatelessWidget {
               _FailureDetails(
                 errors: errors,
                 oneFixGuideForAll:
-                    'To fix above issues, copy the recommended Digital Asset Links'
+                    'To fix the above issues, copy the recommended Digital Asset Links'
                     ' JSON file below and publish it to all of the failed website domains at the following'
                     ' location: https://${controller.selectedLink.value!.domain}/.well-known/assetlinks.json.',
               ),
@@ -279,22 +282,22 @@ class _Fingerprint extends StatelessWidget {
           children: [
             if (hasPdcFingerprint && !haslocalFingerprint) ...[
               Text(
-                'Your PDC fingerprint has been detected. If you have local fingerprint, you can enter it below.',
+                'Your PDC fingerprint has been detected. If you have a local fingerprint, you can enter it below.',
                 style: theme.subtleTextStyle,
               ),
               const SizedBox(height: denseSpacing),
             ],
             if (isError) ...[
               const Text(
-                'Issue: no fingerprint detached locally or on PDC',
+                'Issue: no fingerprint detected locally or on PDC',
               ),
               const SizedBox(height: denseSpacing),
               const Text('Fix guide:'),
               const SizedBox(height: denseSpacing),
               Text(
                 'To fix this issue, release your app on Play Developer Console to get a fingerprint. '
-                'If you are not ready to release your app, enter a local fingerprint below can also allow you'
-                'to proceed Android domain check.',
+                'If you are not ready to release your app, you can proceed with the Android domain check '
+                'by entering a local fingerprint below.',
                 style: theme.subtleTextStyle,
               ),
               const SizedBox(height: denseSpacing),
@@ -596,7 +599,7 @@ class _ManifestFileCheck extends StatelessWidget {
                     'Copy the following code into your Manifest file.',
               ),
               const _CodeCard(
-                content: ''''$metaDataDeepLinkingFlagTag'
+                content: '''$metaDataDeepLinkingFlagTag
 
 <intent-filter android:autoVerify="true">
     <action android:name="android.intent.action.VIEW" />

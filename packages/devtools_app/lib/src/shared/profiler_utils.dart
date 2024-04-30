@@ -278,7 +278,7 @@ class MethodAndSourceDisplay extends StatelessWidget {
       final sourceDisplay = '($packageUriWithSourceLine)';
       final script = scriptManager.scriptRefForUri(packageUri);
       final showSourceAsLink =
-          script != null && !offlineController.offlineMode.value;
+          script != null && !offlineDataController.showingOfflineData.value;
       if (showSourceAsLink) {
         sourceTextSpans.add(
           VmServiceObjectLink(

@@ -1,74 +1,81 @@
 This is draft for future release notes, that are going to land on
 [the Flutter website](https://docs.flutter.dev/tools/devtools/release-notes).
 
-# DevTools 2.34.0 release notes
+# DevTools 2.35.0 release notes
 
-The 2.34.0 release of the Dart and Flutter DevTools
+The 2.35.0 release of the Dart and Flutter DevTools
 includes the following changes among other general improvements.
 To learn more about DevTools, check out the
 [DevTools overview]({{site.url}}/tools/devtools/overview).
 
 ## General updates
 
-* Fixed an issue preventing DevTools from connecting to Flutter apps that are not
-launched from Flutter Tools. - [#6848](https://github.com/flutter/devtools/issues/6848)
+TODO: Remove this section if there are not any general updates.
 
 ## Inspector updates
 
-TODO: Remove this section if there are not any general updates.
+* Add a preference for the default inspector view - [#6949](https://github.com/flutter/devtools/pull/6949)
 
 ## Performance updates
-* Add a setting to include CPU samples in the Timeline. - [#7333](https://github.com/flutter/devtools/pull/7333), [#7369](https://github.com/flutter/devtools/pull/7369)
-* Removed the legacy trace viewer. The legacy trace viwer was replaced with the
-embedded Perfetto trace viewer in DevTools version 2.21.1, but was available
-behind a setting to ensure a smooth rollout. This release of DevTools removes
-the legacy trace viewer entirely. - [#7316](https://github.com/flutter/devtools/pull/7316)
+
+TODO: Remove this section if there are not any general updates.
 
 ## CPU profiler updates
 
-TODO: Remove this section if there are not any general updates.
+* Changed to a single button, for starting and stopping
+  recording. - [#7573](https://github.com/flutter/devtools/pull/7573)
+  ![A screen shot of the CPU profiler tab, with the new recording button.](./images/profiler_recording.png)
 
 ## Memory updates
 
-* Enabled export of snapshots and improved snapshotting
-performance. - [#7197](https://github.com/flutter/devtools/pull/7197)
-
-* Fixed failures during disconnect in tracing. - [#7440](https://github.com/flutter/devtools/pull/7440)
+* Replaced total size with reachable size in snapshot list. -
+[#7493](https://github.com/flutter/devtools/pull/7493)
 
 ## Debugger updates
 
-TODO: Remove this section if there are not any general updates.
+* During a hot-restart, `pause_isolates_on_start` and only `resume` the app once breakpoints are set. - [#7234](https://github.com/flutter/devtools/pull/7234)
 
 ## Network profiler updates
 
-* Improved Network profiler performance. - [#7266](https://github.com/flutter/devtools/pull/7266)
-* Fixed a bug where selected pending requests weren't refreshing the tab once updated. - [#7266](https://github.com/flutter/devtools/pull/7266)
-* Fixed the JSON viewer so multiline strings are visible in their row, and
-  through a tooltip. - [#7389](https://github.com/flutter/devtools/pull/7389)
-* Fixed JsonViewer where all of the expanded sections would snap closed. [#7367](https://github.com/flutter/devtools/pull/7367)
+* Changed to a single button, for starting and stopping
+  recording. - [#7573](https://github.com/flutter/devtools/pull/7573)
+  ![A screen shot of the network tab, with the new recording button.](./images/network_recording.png)
+* Added text selection in text viewer for requests and responses. - [#7596](https://github.com/flutter/devtools/pull/7596)
+* Added a JSON copy experience to the JSON viewer. - [#7596](https://github.com/flutter/devtools/pull/7596)
+  ![An image of the new json copy experience for the JSON viewer](./images/json_viewer_copy.png)
+* Fixed a bug where stopping and starting network recording listed requests that
+  happened while not recording. - [#7626](https://github.com/flutter/devtools/pull/7626)
 
 ## Logging updates
 
 TODO: Remove this section if there are not any general updates.
 
-## Deep Links tool updates
-
-* Automatically populate a list of Flutter projects from the connected
-IDE. - [#7415](https://github.com/flutter/devtools/pull/7415)
-
 ## App size tool updates
 
 TODO: Remove this section if there are not any general updates.
 
+## Deep links tool updates
+
+* Improve layout for narrow screens. - [#7524](https://github.com/flutter/devtools/pull/7524)
+* Add error handling for missing schemes and domains - [#7559](https://github.com/flutter/devtools/pull/7559)
+
 ## VS Code Sidebar updates
 
-TODO: Remove this section if there are not any general updates.
+* Added a DevTools section with a list of tools and extensions that are available without
+a debug session. - [#7598](https://github.com/flutter/devtools/pull/7598), [#7604](https://github.com/flutter/devtools/pull/7604)
 
 ## DevTools Extension updates
 
-TODO: Remove this section if there are not any general updates.
+* Support DevTools extensions that do not require a running app, and detect them from the
+user's IDE workspace. - [#7612](https://github.com/flutter/devtools/pull/7612)
+* Deprecate the `DevToolsExtension.requiresRunningApplication` field in favor of the
+new optional `requiresConnection` field that can be added to an extension's `config.yaml`
+file. - [#7611](https://github.com/flutter/devtools/pull/7611), [#7602](https://github.com/flutter/devtools/pull/7602)
+* Detect extensions for all types of run targets in a package. - [#7533](https://github.com/flutter/devtools/pull/7533),
+[#7535](https://github.com/flutter/devtools/pull/7535)
+
 
 ## Full commit history
 
 To find a complete list of changes in this release, check out the
-[DevTools git log](https://github.com/flutter/devtools/tree/v2.34.0).
+[DevTools git log](https://github.com/flutter/devtools/tree/v2.35.0).

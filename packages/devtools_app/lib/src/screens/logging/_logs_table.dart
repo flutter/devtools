@@ -15,12 +15,12 @@ import 'logging_controller.dart';
 
 class LogsTable extends StatelessWidget {
   const LogsTable({
-    Key? key,
+    super.key,
     required this.data,
     required this.selectionNotifier,
     required this.searchMatchesNotifier,
     required this.activeSearchMatchNotifier,
-  }) : super(key: key);
+  });
 
   final List<LogData> data;
   final ValueNotifier<LogData?> selectionNotifier;

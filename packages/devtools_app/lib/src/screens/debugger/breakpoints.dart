@@ -17,7 +17,7 @@ double get executableLineRadius => scaleByFontFactor(1.5);
 double get breakpointRadius => scaleByFontFactor(6.0);
 
 class Breakpoints extends StatefulWidget {
-  const Breakpoints({Key? key}) : super(key: key);
+  const Breakpoints({super.key});
 
   @override
   State<Breakpoints> createState() => _BreakpointsState();

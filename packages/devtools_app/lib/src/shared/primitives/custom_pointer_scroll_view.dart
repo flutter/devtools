@@ -21,33 +21,20 @@ abstract class CustomPointerScrollView extends BoxScrollView {
   ///
   /// If the [primary] argument is true, the [controller] must be null.
   const CustomPointerScrollView({
-    Key? key,
-    Axis scrollDirection = Axis.vertical,
-    bool reverse = false,
-    ScrollController? controller,
-    bool? primary,
-    ScrollPhysics? physics,
-    bool shrinkWrap = false,
-    EdgeInsetsGeometry? padding,
-    double? cacheExtent,
-    int? semanticChildCount,
-    DragStartBehavior dragStartBehavior = DragStartBehavior.start,
+    super.key,
+    super.scrollDirection,
+    super.reverse,
+    super.controller,
+    super.primary,
+    super.physics,
+    super.shrinkWrap,
+    super.padding,
+    super.cacheExtent,
+    super.semanticChildCount,
+    super.dragStartBehavior,
     this.customPointerSignalHandler,
-  })  : _primary = primary ??
-            controller == null && identical(scrollDirection, Axis.vertical),
-        super(
-          key: key,
-          scrollDirection: scrollDirection,
-          reverse: reverse,
-          controller: controller,
-          padding: padding,
-          primary: primary,
-          physics: physics,
-          shrinkWrap: shrinkWrap,
-          cacheExtent: cacheExtent,
-          semanticChildCount: semanticChildCount,
-          dragStartBehavior: dragStartBehavior,
-        );
+  }) : _primary = primary ??
+            controller == null && identical(scrollDirection, Axis.vertical);
 
   final void Function(PointerSignalEvent event)? customPointerSignalHandler;
 
@@ -90,7 +77,7 @@ abstract class CustomPointerScrollView extends BoxScrollView {
 /// pointer signal event handling via [customPointerSignalHandler].
 class CustomPointerScrollable extends StatefulWidget {
   const CustomPointerScrollable({
-    Key? key,
+    super.key,
     this.axisDirection = AxisDirection.down,
     this.controller,
     this.physics,
@@ -100,8 +87,7 @@ class CustomPointerScrollable extends StatefulWidget {
     this.semanticChildCount,
     this.dragStartBehavior = DragStartBehavior.start,
     this.customPointerSignalHandler,
-  })  : assert(semanticChildCount == null || semanticChildCount >= 0),
-        super(key: key);
+  }) : assert(semanticChildCount == null || semanticChildCount >= 0);
 
   /// The direction in which this widget scrolls.
   ///
@@ -678,11 +664,10 @@ class CustomPointerScrollableState extends State<CustomPointerScrollable>
 // _ScrollableScope.
 class _ScrollableScope extends InheritedWidget {
   const _ScrollableScope({
-    Key? key,
     required this.scrollable,
     required this.position,
-    required Widget child,
-  }) : super(key: key, child: child);
+    required super.child,
+  });
 
   final CustomPointerScrollableState scrollable;
   final ScrollPosition position;
@@ -709,13 +694,12 @@ class _ScrollableScope extends InheritedWidget {
 /// scrollable children.
 class _ScrollSemantics extends SingleChildRenderObjectWidget {
   const _ScrollSemantics({
-    Key? key,
+    super.key,
     required this.position,
     required this.allowImplicitScrolling,
     required this.semanticChildCount,
-    Widget? child,
-  })  : assert(semanticChildCount == null || semanticChildCount >= 0),
-        super(key: key, child: child);
+    super.child,
+  }) : assert(semanticChildCount == null || semanticChildCount >= 0);
 
   final ScrollPosition position;
   final bool allowImplicitScrolling;

@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:core';
 
+import 'package:dds_service_extensions/dds_service_extensions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
@@ -88,6 +89,25 @@ class ServiceManager<T extends VmService> {
   /// Defaults to false if there is no main isolate.
   bool get isMainIsolatePaused =>
       isolateManager.mainIsolateState?.isPaused.value ?? false;
+
+  Future<void> waitUntilNotPaused() {
+    final notPausedCompleter = Completer<bool>();
+    final isPaused = isMainIsolatePaused;
+
+    if (isPaused) {
+      final mainIsolate = isolateManager.mainIsolateState;
+      mainIsolate?.isPaused.addListener(() {
+        final isPausedNow = isMainIsolatePaused;
+        if (!isPausedNow) {
+          notPausedCompleter.complete(true);
+        }
+      });
+    } else {
+      notPausedCompleter.complete(true);
+    }
+
+    return notPausedCompleter.future;
+  }
 
   Future<RootInfo?> tryToDetectMainRootInfo() async {
     await isolateManager.mainIsolateState?.waitForIsolateLoad();
@@ -238,6 +258,8 @@ class ServiceManager<T extends VmService> {
     serviceExtensionManager.vmServiceOpened(service, connectedApp!);
     resolvedUriManager.vmServiceOpened(service);
 
+    await _configureIsolateSettings();
+
     await callLifecycleCallbacks(
       ServiceManagerLifecycle.beforeOpenVmService,
       service,
@@ -258,6 +280,11 @@ class ServiceManager<T extends VmService> {
   FutureOr<void> vmServiceClosed({
     ConnectedState connectionState = const ConnectedState(false),
   }) async {
+    // This needs to be the first call in this method so that listeners get
+    // the notification of app disconnect before we shut down other managers and
+    // services that listeners may be assuming have an app connection.
+    _connectedState.value = connectionState;
+
     await callLifecycleCallbacks(
       ServiceManagerLifecycle.beforeCloseVmService,
       this.service,
@@ -274,8 +301,24 @@ class ServiceManager<T extends VmService> {
     _registeredMethodsForService.clear();
     _registeredServiceNotifiers.clear();
     setDeviceBusy(false);
+  }
 
-    _connectedState.value = connectionState;
+  Future<void> _configureIsolateSettings() async {
+    await _setPauseIsolatesOnStart();
+  }
+
+  Future<void> _setPauseIsolatesOnStart() async {
+    if (service == null) return;
+    final vmService = service!;
+
+    try {
+      await vmService.setFlag('pause_isolates_on_start', 'true');
+      await vmService.requirePermissionToResume(
+        onPauseStart: true,
+      );
+    } catch (error) {
+      _log.warning('$error');
+    }
   }
 
   /// Initializes the service manager for [service], including setting up other

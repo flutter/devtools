@@ -11,7 +11,6 @@ enum PerformanceEvents {
   timelineFlameChartHelp,
   framesChartVisibility,
   selectFlutterFrame,
-  traceEventProcessingTime,
   trackRebuilds,
   trackUserCreatedWidgetBuilds,
   trackPaints,
@@ -25,14 +24,17 @@ enum PerformanceEvents {
   clearRasterStats,
   fullScreenLayerImage,
   clearRebuildStats,
-  perfettoModeTraceEventProcessingTime('traceEventProcessingTime-perfettoMode'),
   perfettoLoadTrace,
   perfettoScrollToTimeRange,
   perfettoShowHelp,
   performanceSettings,
   timelineSettings,
   openDataFile,
-  loadDataFromFile;
+  loadDataFromFile,
+  // Timing events.
+  perfettoModeTraceEventProcessingTime('traceEventProcessingTime-perfettoMode'),
+  getPerfettoVMTimelineWithCpuSamplesTime,
+  getPerfettoVMTimelineTime;
 
   const PerformanceEvents([this.nameOverride]);
 

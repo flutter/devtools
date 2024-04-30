@@ -33,11 +33,11 @@ final _log = Logger('initializer');
 /// here.
 class Initializer extends StatefulWidget {
   const Initializer({
-    Key? key,
+    super.key,
     required this.url,
     required this.builder,
     this.allowConnectionScreenOnDisconnect = true,
-  }) : super(key: key);
+  });
 
   /// The builder for the widget's children.
   ///
@@ -175,15 +175,15 @@ class _InitializerState extends State<Initializer>
   }
 
   void _reviewHistory() {
-    assert(offlineController.offlineDataJson.isNotEmpty);
+    assert(offlineDataController.offlineDataJson.isNotEmpty);
 
-    offlineController.enterOfflineMode(
-      offlineApp: offlineController.previousConnectedApp!,
+    offlineDataController.startShowingOfflineData(
+      offlineApp: offlineDataController.previousConnectedApp!,
     );
     hideDisconnectedOverlay();
     final args = <String, String?>{
       'uri': null,
-      'screen': offlineController
+      'screen': offlineDataController
           .offlineDataJson[DevToolsExportKeys.activeScreenId.name] as String,
     };
     final routerDelegate = DevToolsRouterDelegate.of(context);
@@ -218,7 +218,7 @@ class _InitializerState extends State<Initializer>
               else
                 const Text('Run a new debug session to reconnect'),
               const Spacer(),
-              if (offlineController.offlineDataJson.isNotEmpty)
+              if (offlineDataController.offlineDataJson.isNotEmpty)
                 ElevatedButton(
                   onPressed: _reviewHistory,
                   child: const Text('Review recent data (offline)'),
@@ -234,7 +234,7 @@ class _InitializerState extends State<Initializer>
 
   @override
   Widget build(BuildContext context) {
-    return _checkLoaded() || offlineController.offlineMode.value
+    return _checkLoaded() || offlineDataController.showingOfflineData.value
         ? widget.builder(context)
         : Scaffold(
             body: currentDisconnectedOverlay != null

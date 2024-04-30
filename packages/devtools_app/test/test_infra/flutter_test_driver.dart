@@ -275,8 +275,7 @@ abstract class FlutterTestDriver {
 }
 
 class FlutterRunTestDriver extends FlutterTestDriver {
-  FlutterRunTestDriver(Directory projectFolder, {String? logPrefix})
-      : super(projectFolder, logPrefix: logPrefix);
+  FlutterRunTestDriver(super.projectFolder, {super.logPrefix});
 
   String? _currentRunningAppId;
 

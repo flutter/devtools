@@ -4,6 +4,7 @@
 
 import 'package:devtools_shared/devtools_extensions.dart';
 
+import '../preferences/preferences.dart';
 import '../screen.dart';
 
 part 'constants/_cpu_profiler_constants.dart';
@@ -41,6 +42,7 @@ final deeplink = ScreenMetaData.deepLinks.id;
 // GA events not associated with a any screen e.g., hotReload, hotRestart, etc
 const devToolsMain = 'main';
 const appDisconnected = 'appDisconnected';
+const init = 'init';
 
 // DevTools UI action selected (clicked).
 
@@ -52,6 +54,8 @@ const feedbackLink = 'feedback';
 const feedbackButton = 'feedbackButton';
 const contributingLink = 'contributing';
 const discordLink = 'discord';
+String startingTheme({required bool darkMode}) =>
+    'startingTheme-${darkMode ? 'dark' : 'light'}';
 
 // Inspector UX actions:
 const refresh = 'refresh';
@@ -75,6 +79,10 @@ const treeNodeSelection = 'treeNodeSelection';
 const inspectorSettings = 'inspectorSettings';
 const loggingSettings = 'loggingSettings';
 const refreshPubRoots = 'refreshPubRoots';
+final defaultDetailsViewToLayoutExplorer =
+    InspectorDetailsViewType.layoutExplorer.name;
+final defaultDetailsViewToWidgetDetails =
+    InspectorDetailsViewType.widgetDetailsTree.name;
 
 enum HomeScreenEvents {
   connectToApp,
@@ -141,7 +149,7 @@ const expandAll = 'expandAll';
 const collapseAll = 'collapseAll';
 const profileModeDocs = 'profileModeDocs';
 const visibilityButton = 'visibilityButton';
-const exitOfflineMode = 'exitOfflineMode';
+const stopShowingOfflineData = 'exitOfflineMode';
 // This should track the time from `initState` for a screen to the time when
 // the page data has loaded and is ready to interact with.
 const pageReady = 'pageReady';

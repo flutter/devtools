@@ -4,6 +4,7 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/analytics/prompt.dart';
+import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -11,7 +12,7 @@ import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
-import 'package:unified_analytics/src/constants.dart' as unified_analytics;
+import 'package:unified_analytics/src/constants.dart' as ua;
 
 const windowSize = Size(2000.0, 1000.0);
 
@@ -36,11 +37,29 @@ void main() {
   }
 
   test('Unit test parseAnalyticsConsentMessage with consent message', () {
-    final result =
-        parseAnalyticsConsentMessage(unified_analytics.kToolsMessage);
+    final result = parseAnalyticsConsentMessage(ua.kToolsMessage);
 
     expect(result, isNotEmpty);
     expect(result, hasLength(3));
+  });
+
+  test('Unit test adjustLineBreaks with consent message', () {
+    final result = adjustLineBreaks(ua.kToolsMessage);
+    const expected =
+        'The {{ toolDescription }} uses Google Analytics to report usage and diagnostic '
+        'data along with package dependencies, and crash reporting to send basic crash '
+        'reports. This data is used to help improve the Dart platform, Flutter framework, '
+        'and related tools.'
+        '\n\n'
+        'Telemetry is not sent on the very first run. To disable reporting of telemetry, '
+        'run this terminal command:'
+        '\n\n'
+        '    {{ toolName }} --disable-analytics'
+        '\n\n'
+        'If you opt out of telemetry, an opt-out event will be sent, and then no further '
+        'information will be sent. This data is collected in accordance with the Google '
+        'Privacy Policy (https://policies.google.com/privacy). ';
+    expect(result, expected);
   });
 
   group('AnalyticsPrompt', () {
@@ -49,21 +68,23 @@ void main() {
       didMarkConsentMessageAsShown = false;
       setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
       setGlobal(IdeTheme, IdeTheme());
+      setGlobal(DTDManager, MockDTDManager());
     });
+
     group('with analytics enabled', () {
       group('on first run', () {
         setUp(() {
           didCallEnableAnalytics = false;
-          controller = AnalyticsController(
+          controller = TestAnalyticsController(
             enabled: true,
-            firstRun: true,
-            onEnableAnalytics: () {
+            shouldShowConsentMessage: true,
+            legacyOnEnableAnalytics: () {
               didCallEnableAnalytics = true;
             },
-            consentMessage: 'fake message',
-            markConsentMessageAsShown: () {
+            onMarkConsentMessageAsShown: () {
               didMarkConsentMessageAsShown = true;
             },
+            consentMessage: 'fake message',
           );
         });
 
@@ -113,8 +134,8 @@ void main() {
         setUp(() {
           controller = AnalyticsController(
             enabled: true,
-            firstRun: false,
-            onEnableAnalytics: () {
+            shouldShowConsentMessage: false,
+            legacyOnEnableAnalytics: () {
               didCallEnableAnalytics = true;
             },
             consentMessage: 'fake message',
@@ -162,7 +183,7 @@ void main() {
             ),
             controllerToUse: AnalyticsController(
               enabled: true,
-              firstRun: false,
+              shouldShowConsentMessage: false,
               consentMessage: 'fake message',
             ),
           );
@@ -178,8 +199,8 @@ void main() {
         setUp(() {
           controller = AnalyticsController(
             enabled: false,
-            firstRun: true,
-            onEnableAnalytics: () {
+            shouldShowConsentMessage: true,
+            legacyOnEnableAnalytics: () {
               didCallEnableAnalytics = true;
             },
             consentMessage: 'fake message',
@@ -300,7 +321,7 @@ void main() {
             expect(controller.analyticsEnabled.value, isTrue);
             expect(didCallEnableAnalytics, isTrue);
 
-            final noThanksFinder = find.text('No thanks.');
+            final noThanksFinder = find.text('No thanks');
             expect(noThanksFinder, findsOneWidget);
             await tester.tap(noThanksFinder);
             await tester.pumpAndSettle();
@@ -317,8 +338,8 @@ void main() {
         setUp(() {
           controller = AnalyticsController(
             enabled: false,
-            firstRun: false,
-            onEnableAnalytics: () {
+            shouldShowConsentMessage: false,
+            legacyOnEnableAnalytics: () {
               didCallEnableAnalytics = true;
             },
             consentMessage: 'fake message',
@@ -366,7 +387,7 @@ void main() {
             ),
             controllerToUse: AnalyticsController(
               enabled: false,
-              firstRun: false,
+              shouldShowConsentMessage: false,
               consentMessage: 'fake message',
             ),
           );
@@ -377,4 +398,24 @@ void main() {
       );
     });
   });
+}
+
+class TestAnalyticsController extends AnalyticsController {
+  TestAnalyticsController({
+    required super.enabled,
+    required super.shouldShowConsentMessage,
+    required super.consentMessage,
+    super.legacyOnEnableAnalytics,
+    super.legacyOnDisableAnalytics,
+    super.legacyOnSetupAnalytics,
+    this.onMarkConsentMessageAsShown,
+  });
+
+  VoidCallback? onMarkConsentMessageAsShown;
+
+  @override
+  Future<void> markConsentMessageAsShown() async {
+    await super.markConsentMessageAsShown();
+    onMarkConsentMessageAsShown?.call();
+  }
 }

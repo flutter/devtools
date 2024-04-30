@@ -31,7 +31,7 @@ void main() {
       mockEnhanceTracingController = MockEnhanceTracingController();
       rebuildCountModel = RebuildCountModel();
       setGlobal(IdeTheme, IdeTheme());
-      setGlobal(OfflineModeController, OfflineModeController());
+      setGlobal(OfflineDataController, OfflineDataController());
       final fakeServiceConnection = FakeServiceConnectionManager();
       setGlobal(ServiceConnectionManager, fakeServiceConnection);
       setGlobal(NotificationService, NotificationService());
@@ -48,13 +48,14 @@ void main() {
       FrameAnalysis? analysis,
     ) async {
       await tester.pumpWidget(
-        wrapWithControllers(
+        wrapSimple(
           FlutterFrameAnalysisView(
             frameAnalysis: analysis,
             enhanceTracingController: mockEnhanceTracingController,
             rebuildCountModel: rebuildCountModel,
+            displayRefreshRateNotifier:
+                const FixedValueListenable<double>(defaultRefreshRate),
           ),
-          performance: PerformanceController(),
         ),
       );
       expect(find.byType(FlutterFrameAnalysisView), findsOneWidget);

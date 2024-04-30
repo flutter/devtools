@@ -12,9 +12,9 @@ import 'package:collection/collection.dart';
 import 'package:dtd/dtd.dart';
 import 'package:meta/meta.dart';
 import 'package:shelf/shelf.dart' as shelf;
-import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../common.dart';
 import '../deeplink/deeplink_manager.dart';
 import '../devtools_api.dart';
 import '../extensions/extension_enablement.dart';
@@ -31,9 +31,6 @@ part 'handlers/_deeplink.dart';
 part 'handlers/_devtools_extensions.dart';
 part 'handlers/_dtd.dart';
 part 'handlers/_general.dart';
-
-/// Describes an instance of the Dart Tooling Daemon.
-typedef DTDConnectionInfo = ({String? uri, String? secret});
 
 /// The DevTools server API.
 ///
@@ -55,7 +52,6 @@ class ServerApi {
     shelf.Request request, {
     required ExtensionsManager extensionsManager,
     required DeeplinkManager deeplinkManager,
-    required Analytics analytics,
     ServerApi? api,
     DTDConnectionInfo? dtd,
   }) {
@@ -73,19 +69,11 @@ class ServerApi {
       // ----- Flutter Tool GA store. -----
       case apiGetFlutterGAEnabled:
         // Is Analytics collection enabled?
-        return _encodeResponse(
-          FlutterUsage.doesStoreExist ? _usage!.enabled : '',
-          api: api,
-        );
+        return _encodeResponse('', api: api);
       case apiGetFlutterGAClientId:
         // Flutter Tool GA clientId - ONLY get Flutter's clientId if enabled is
         // true.
-        return (FlutterUsage.doesStoreExist)
-            ? _encodeResponse(
-                _usage!.enabled ? _usage!.clientId : '',
-                api: api,
-              )
-            : _encodeResponse('', api: api);
+        return _encodeResponse('', api: api);
 
       // ----- DevTools GA store. -----
 
@@ -94,17 +82,11 @@ class ServerApi {
         return _encodeResponse(true, api: api);
       case apiGetDevToolsFirstRun:
         // Has DevTools been run first time? To bring up analytics dialog.
-        //
-        // Additionally, package:unified_analytics will show a message if it
-        // is the first run with the package or the consent message version has
-        // been updated
-        final isFirstRun =
-            _devToolsUsage.isFirstRun || analytics.shouldShowMessage;
+        final isFirstRun = _devToolsUsage.isFirstRun;
         return _encodeResponse(isFirstRun, api: api);
       case apiGetDevToolsEnabled:
         // Is DevTools Analytics collection enabled?
-        final isEnabled =
-            _devToolsUsage.analyticsEnabled && analytics.telemetryEnabled;
+        final isEnabled = _devToolsUsage.analyticsEnabled;
         return _encodeResponse(isEnabled, api: api);
       case apiSetDevToolsEnabled:
         // Enable or disable DevTools analytics collection.
@@ -113,14 +95,8 @@ class ServerApi {
               json.decode(queryParams[devToolsEnabledPropertyName]!);
 
           _devToolsUsage.analyticsEnabled = analyticsEnabled;
-          analytics.setTelemetry(analyticsEnabled);
         }
         return _encodeResponse(_devToolsUsage.analyticsEnabled, api: api);
-      case apiGetConsentMessage:
-        return api.success(analytics.getConsentMessage);
-      case apiMarkConsentMessageAsShown:
-        analytics.clientShowedMessage();
-        return _encodeResponse(true, api: api);
 
       // ----- DevTools survey store. -----
 
@@ -245,6 +221,7 @@ class ServerApi {
           api,
           queryParams,
           extensionsManager,
+          dtd,
         );
 
       case ExtensionsApi.apiExtensionEnabledState:
@@ -320,12 +297,6 @@ class ServerApi {
           )
         : null;
   }
-
-  // Accessing Flutter usage file e.g., ~/.flutter.
-  // NOTE: Only access the file if it exists otherwise Flutter Tool hasn't yet
-  //       been run.
-  static final FlutterUsage? _usage =
-      FlutterUsage.doesStoreExist ? FlutterUsage() : null;
 
   // Accessing DevTools usage file e.g., ~/.flutter-devtools/.devtools
   static final _devToolsUsage = DevToolsUsage();

@@ -24,10 +24,6 @@ const apiGetDevToolsFirstRun = '${apiPrefix}getDevToolsFirstRun';
 const apiGetDevToolsEnabled = '${apiPrefix}getDevToolsEnabled';
 const apiSetDevToolsEnabled = '${apiPrefix}setDevToolsEnabled';
 
-/// package:unified_analytics properties APIs:
-const apiGetConsentMessage = '${apiPrefix}getConsentMessage';
-const apiMarkConsentMessageAsShown = '${apiPrefix}markConsentMessageAsShown';
-
 /// Property name to apiSetDevToolsEnabled the DevToolsEnabled is the name used
 /// in queryParameter:
 const devToolsEnabledPropertyName = 'enabled';
@@ -90,8 +86,16 @@ abstract class ExtensionsApi {
   /// extension-related requests to the server that describes the package root
   /// for the app whose extensions are being queried.
   ///
-  /// This field is a file:// URI string and NOT a path.
-  static const extensionRootPathPropertyName = 'rootPath';
+  /// This field is a `file://` URI string and NOT a path.
+  static const packageRootUriPropertyName = 'packageRootUri';
+
+  /// The property name for the query parameter, passed along with
+  /// [apiExtensionEnabledState] requests, that specifies the location of the
+  /// 'devtools_options.yaml' file that is responsible for storing extension
+  /// enablement states.
+  ///
+  /// This field is a `file://` URI string and NOT a path.
+  static const devtoolsOptionsUriPropertyName = 'devtoolsOptionsUri';
 
   /// The property name for the response that the server sends back upon
   /// receiving a [apiServeAvailableExtensions] request.

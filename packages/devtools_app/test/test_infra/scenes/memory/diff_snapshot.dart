@@ -33,7 +33,7 @@ class DiffSnapshotScene extends Scene {
 
   @override
   Future<void> setUp() async {
-    setGlobal(OfflineModeController, OfflineModeController());
+    setGlobal(OfflineDataController, OfflineDataController());
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());
 
@@ -46,7 +46,7 @@ class DiffSnapshotScene extends Scene {
     );
     setGlobal(ServiceConnectionManager, fakeServiceConnection);
 
-    diffController = DiffPaneController(HeapGraphLoaderGoldens());
+    diffController = DiffPaneController(loader: HeapGraphLoaderGoldens());
     setClassFilterToShowAll();
 
     await diffController.takeSnapshot();

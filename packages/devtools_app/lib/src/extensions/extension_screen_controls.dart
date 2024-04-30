@@ -32,16 +32,20 @@ class EmbeddedExtensionHeader extends StatelessWidget {
     final extensionName = extension.displayName;
     return Row(
       children: [
-        RichText(
-          text: TextSpan(
-            text: 'package:$extensionName extension',
-            style: theme.regularTextStyle.copyWith(fontWeight: FontWeight.bold),
-            children: [
-              TextSpan(
-                text: ' (v${extension.version})',
-                style: theme.subtleTextStyle,
-              ),
-            ],
+        Padding(
+          padding: const EdgeInsets.only(left: borderPadding),
+          child: RichText(
+            text: TextSpan(
+              text: 'package:$extensionName extension',
+              style:
+                  theme.regularTextStyle.copyWith(fontWeight: FontWeight.bold),
+              children: [
+                TextSpan(
+                  text: ' (v${extension.version})',
+                  style: theme.subtleTextStyle,
+                ),
+              ],
+            ),
           ),
         ),
         const Spacer(),

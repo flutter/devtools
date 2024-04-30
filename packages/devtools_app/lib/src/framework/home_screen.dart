@@ -17,7 +17,6 @@ import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
 import '../shared/config_specific/import_export/import_export.dart';
 import '../shared/connection_info.dart';
-import '../shared/feature_flags.dart';
 import '../shared/globals.dart';
 import '../shared/primitives/blocking_action_mixin.dart';
 import '../shared/primitives/utils.dart';
@@ -74,13 +73,6 @@ class _HomeScreenBodyState extends State<HomeScreenBody> with AutoDisposeMixin {
             SampleDataDropDownButton(sampleData: widget.sampleData),
             const SizedBox(height: defaultSpacing),
           ],
-          // TODO(polina-c): make the MemoryScreen a static screen and remove
-          // this section from the Home page. See this PR for more details:
-          // https://github.com/flutter/devtools/pull/6010.
-          if (FeatureFlags.memoryAnalysis) ...[
-            const SizedBox(height: defaultSpacing),
-            const MemoryAnalysisInstructions(),
-          ],
         ],
       ),
     );
@@ -122,11 +114,11 @@ class ConnectionSection extends StatelessWidget {
 
 class LandingScreenSection extends StatelessWidget {
   const LandingScreenSection({
-    Key? key,
+    super.key,
     required this.title,
     required this.child,
     this.actions = const [],
-  }) : super(key: key);
+  });
 
   final String title;
 
@@ -160,7 +152,7 @@ class LandingScreenSection extends StatelessWidget {
 }
 
 class ConnectInput extends StatefulWidget {
-  const ConnectInput({Key? key}) : super(key: key);
+  const ConnectInput({super.key});
 
   @override
   State<ConnectInput> createState() => _ConnectInputState();
@@ -310,7 +302,7 @@ class _ConnectInputState extends State<ConnectInput> with BlockingActionMixin {
 
 @visibleForTesting
 class MemoryAnalysisInstructions extends StatelessWidget {
-  const MemoryAnalysisInstructions({Key? key}) : super(key: key);
+  const MemoryAnalysisInstructions({super.key});
 
   @override
   Widget build(BuildContext context) {

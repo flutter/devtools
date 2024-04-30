@@ -15,7 +15,7 @@ DragAndDropManagerWeb createDragAndDropManager(int viewId) {
 }
 
 class DragAndDropManagerWeb extends DragAndDropManager {
-  DragAndDropManagerWeb(int viewId) : super.impl(viewId);
+  DragAndDropManagerWeb(super.viewId) : super.impl();
 
   late final StreamSubscription<MouseEvent> onDragOverSubscription;
 

@@ -141,8 +141,8 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
   void dispose() {
     // TODO(kenz): this won't work well if we eventually have multiple clients
     // that want to listen to network data.
-    controller.stopRecording();
     super.dispose();
+    unawaited(controller.stopRecording());
   }
 
   @override
@@ -163,9 +163,8 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
 /// clear, search, filter, etc.).
 class _NetworkProfilerControls extends StatefulWidget {
   const _NetworkProfilerControls({
-    Key? key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   static const _includeTextWidth = 810.0;
 
@@ -213,24 +212,16 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
     final hasRequests = _filteredRequests.isNotEmpty;
     return Row(
       children: [
-        PauseButton(
-          minScreenWidthForTextBeforeScaling:
-              _NetworkProfilerControls._includeTextWidth,
-          tooltip: 'Pause recording network traffic',
+        StartStopRecordingButton(
+          recording: _recording,
+          onPressed: () async =>
+              await widget.controller.togglePolling(!_recording),
+          tooltipOverride: _recording
+              ? 'Stop recording network traffic'
+              : 'Resume recording network traffic',
+          minScreenWidthForTextBeforeScaling: double.infinity,
           gaScreen: gac.network,
-          gaSelection: gac.pause,
-          onPressed:
-              _recording ? () => widget.controller.togglePolling(false) : null,
-        ),
-        const SizedBox(width: denseSpacing),
-        ResumeButton(
-          minScreenWidthForTextBeforeScaling:
-              _NetworkProfilerControls._includeTextWidth,
-          tooltip: 'Resume recording network traffic',
-          gaScreen: gac.network,
-          gaSelection: gac.resume,
-          onPressed:
-              _recording ? null : () => widget.controller.togglePolling(true),
+          gaSelection: _recording ? gac.pause : gac.resume,
         ),
         const SizedBox(width: denseSpacing),
         ClearButton(
@@ -271,8 +262,7 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
 }
 
 class _NetworkProfilerBody extends StatelessWidget {
-  const _NetworkProfilerBody({Key? key, required this.controller})
-      : super(key: key);
+  const _NetworkProfilerBody({required this.controller});
 
   final NetworkController controller;
 
@@ -302,12 +292,12 @@ class _NetworkProfilerBody extends StatelessWidget {
 
 class NetworkRequestsTable extends StatelessWidget {
   const NetworkRequestsTable({
-    Key? key,
+    super.key,
     required this.networkController,
     required this.requests,
     required this.searchMatchesNotifier,
     required this.activeSearchMatchNotifier,
-  }) : super(key: key);
+  });
 
   static final methodColumn = MethodColumn();
   static final addressColumn = UriColumn();
@@ -364,6 +354,7 @@ class UriColumn extends ColumnData<NetworkRequest>
       : super.wide(
           'Uri',
           minWidthPx: scaleByFontFactor(100.0),
+          showTooltip: true,
         );
 
   @override
