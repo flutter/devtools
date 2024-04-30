@@ -157,7 +157,7 @@ class TimelineEventsController extends PerformanceFeatureController
     _timelinePoller = Poller(
       _timelinePollingInterval,
       _pullPerfettoVmTimeline,
-      _timelinePollingRateLimit,
+      maxPollsPerSecond: _timelinePollingRateLimit,
     );
   }
 
