@@ -8,6 +8,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../../shared/globals.dart';
+import '../../../../../shared/primitives/utils.dart';
 import '../../../shared/primitives/memory_timeline.dart';
 import '../data/primitives.dart';
 import 'memory_tracker.dart';
@@ -35,21 +36,22 @@ class ChartConnection extends DisposableController
     isAndroidChartVisible: isAndroidChartVisible,
   );
 
-  Timer? _pollingTimer;
+  RateLimiter? _polling;
 
   /// If completed, this instance was connected to the application.
   final Completer<void> _initialized = Completer();
 
   void _stopConnection() {
-    _pollingTimer?.cancel();
+    _polling?.dispose();
+    _polling = null;
     cancelStreamSubscriptions();
     cancelListeners();
   }
 
   // True if connection was started and then stopped.
   bool get _isConnectionStopped {
-    assert(_initialized.isCompleted);
-    return _pollingTimer?.isActive == false;
+    return _initialized.isCompleted);
+    return _polling?. == false;
   }
 
   late bool isDeviceAndroid;
@@ -97,26 +99,30 @@ class ChartConnection extends DisposableController
           .listen(_memoryTracker.onGCEvent),
     );
 
-    await _startPolling();
+    _startPolling();
   }
 
-  Future<void> _startPolling() async {
+  void _startPolling() {
     assert(_initialized.isCompleted);
     if (!_checkConnection()) return;
-    try {
-      await _memoryTracker.pollMemory();
-      // Timer is not periodic because we do not want polls to overlap.
-      _pollingTimer = Timer(chartUpdateDelay, _startPolling);
-    } catch (e) {
-      if (_checkConnection()) rethrow;
-    }
+    _polling = RateLimiter(
+      chartUpdatesPerSecond,
+      () async {
+        if (!_checkConnection()) return;
+        try {
+          await _memoryTracker.pollMemory();
+        } catch (e) {
+          if (_checkConnection()) rethrow;
+        }
+      },
+    );
   }
 
   @override
   void dispose() {
     // Not nulling out timer, because we need timer to be not null and inactive
     // for `_isConnectionStopped` to return true.
-    _pollingTimer?.cancel();
+    _polling?.dispose();
     super.dispose();
   }
 }
