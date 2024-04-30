@@ -8,7 +8,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../../shared/globals.dart';
-import '../../../../../shared/primitives/utils.dart';
+import '../../../../../shared/utils.dart';
 import '../../../shared/primitives/memory_timeline.dart';
 import '../data/primitives.dart';
 import 'memory_tracker.dart';
@@ -36,22 +36,20 @@ class ChartConnection extends DisposableController
     isAndroidChartVisible: isAndroidChartVisible,
   );
 
-  RateLimiter? _polling;
+  DebounceTimer? _polling;
 
   /// If completed, this instance was connected to the application.
   final Completer<void> _initialized = Completer();
 
   void _stopConnection() {
-    _polling?.dispose();
-    _polling = null;
+    _polling?.cancel();
     cancelStreamSubscriptions();
     cancelListeners();
   }
 
   // True if connection was started and then stopped.
   bool get _isConnectionStopped {
-    return _initialized.isCompleted);
-    return _polling?. == false;
+    return _initialized.isCompleted && _polling?.isCancelled == true;
   }
 
   late bool isDeviceAndroid;
@@ -99,14 +97,8 @@ class ChartConnection extends DisposableController
           .listen(_memoryTracker.onGCEvent),
     );
 
-    _startPolling();
-  }
-
-  void _startPolling() {
-    assert(_initialized.isCompleted);
-    if (!_checkConnection()) return;
-    _polling = RateLimiter(
-      chartUpdatesPerSecond,
+    _polling = DebounceTimer.periodic(
+      chartUpdateDelay,
       () async {
         if (!_checkConnection()) return;
         try {
@@ -120,7 +112,7 @@ class ChartConnection extends DisposableController
 
   @override
   void dispose() {
-    // Not nulling out timer, because we need timer to be not null and inactive
+    // Not nulling out _polling, because we need _polling to be not null and inactive
     // for `_isConnectionStopped` to return true.
     _polling?.dispose();
     super.dispose();
