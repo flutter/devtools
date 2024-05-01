@@ -95,9 +95,9 @@ class SnapshotDataItem extends SnapshotItem implements RenamableItem {
   Future<void> loadHeap(HeapGraphLoader loader) async {
     assert(_heap == null);
     final (graph, created) = await loader.load();
-    _isProcessing.value = false;
     _heap = HeapData(graph, created: created);
-    _isProcessing.value = true;
+    await _heap!.calculate;
+    _isProcessing.value = false;
   }
 
   @override
