@@ -274,6 +274,12 @@ class DebounceTimer {
   void cancel() {
     _timer.cancel();
   }
+
+  bool get isCancelled => !_timer.isActive;
+
+  void dispose() {
+    cancel();
+  }
 }
 
 /// Current mode of DevTools.

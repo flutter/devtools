@@ -43,7 +43,7 @@ void main() {
       // always enabled.
       await controller.startRecording();
       expect(controller.isPolling, true);
-      controller.stopRecording();
+      await controller.stopRecording();
     });
 
     test('start and pause recording', () async {
@@ -61,16 +61,16 @@ void main() {
       );
 
       // Pause polling.
-      controller.togglePolling(false);
+      await controller.togglePolling(false);
       expect(notifier.value, false);
       expect(controller.isPolling, false);
 
       // Resume polling.
-      controller.togglePolling(true);
+      await controller.togglePolling(true);
       expect(notifier.value, true);
       expect(controller.isPolling, true);
 
-      controller.stopRecording();
+      await controller.stopRecording();
       expect(notifier.value, false);
       expect(controller.isPolling, false);
     });
@@ -116,7 +116,7 @@ void main() {
       await controller.clear();
       requests = requestsNotifier.value;
       expect(requests.isEmpty, true);
-      controller.stopRecording();
+      await controller.stopRecording();
     });
 
     test('matchesForSearch', () async {

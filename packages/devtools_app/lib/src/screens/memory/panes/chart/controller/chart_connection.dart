@@ -8,11 +8,16 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../../shared/globals.dart';
+import '../../../../../shared/utils.dart';
 import '../../../shared/primitives/memory_timeline.dart';
 import '../data/primitives.dart';
 import 'memory_tracker.dart';
 
-typedef _AsyncVoidCallback = Future<void> Function();
+enum _ConnectionState {
+  notInitialized,
+  connected,
+  stopped,
+}
 
 /// Connection between chart and application.
 ///
@@ -37,73 +42,80 @@ class ChartConnection extends DisposableController
     isAndroidChartVisible: isAndroidChartVisible,
   );
 
-  Timer? _pollingTimer;
+  DebounceTimer? _polling;
 
-  /// If completed, this instance was connected to the application.
-  final Completer<void> _connected = Completer();
+  _ConnectionState _connectionState = _ConnectionState.notInitialized;
 
-  /// If true, the instance lost connection to the application.
-  final Completer<void> _disconnected = Completer();
-
-  late final isDeviceAndroid = _isDevToolsCurrentlyConnected()
-      ? serviceConnection.serviceManager.vm?.operatingSystem == 'android'
-      : false;
-
-  /// True if DevTools is in connected mode and the connection to the app is alive.
-  bool _isDevToolsCurrentlyConnected() =>
-      // Theoretically it should be enough to check only connectedState.value.connected,
-      // but practically these values are not always in sync and, if at least
-      // on of them means disconnection this class consider the connection as lost,
-      // and stops interaction with it.
-      !offlineDataController.showingOfflineData.value &&
-      serviceConnection.serviceManager.connectedState.value.connected &&
-      serviceConnection.serviceManager.connectedApp != null;
-
-  Future<void> maybeConnect() async {
-    if (_connected.isCompleted || _disconnected.isCompleted) return;
-    _connected.complete();
-    await _runSafely(() async {
-      await serviceConnection.serviceManager.onServiceAvailable;
-      autoDisposeStreamSubscription(
-        serviceConnection.serviceManager.service!.onExtensionEvent
-            .listen(_memoryTracker.onMemoryData),
-      );
-      autoDisposeStreamSubscription(
-        serviceConnection.serviceManager.service!.onGCEvent
-            .listen(_memoryTracker.onGCEvent),
-      );
-      await _onPoll();
-    });
+  void _stopConnection() {
+    _polling?.cancel();
+    _polling = null;
+    cancelStreamSubscriptions();
+    cancelListeners();
+    _connectionState = _ConnectionState.stopped;
   }
 
-  Future<void> _onPoll() async {
-    assert(_connected.isCompleted);
-    if (_disconnected.isCompleted) return;
-    await _runSafely(() async {
-      _pollingTimer = null;
-      await _memoryTracker.pollMemory();
-      _pollingTimer = Timer(chartUpdateDelay, _onPoll);
-    });
-  }
+  late bool isDeviceAndroid;
 
-  /// Run callback resiliently to disconnect.
-  Future<void> _runSafely(_AsyncVoidCallback callback) async {
-    if (_disconnected.isCompleted) return;
-    try {
-      await callback();
-    } catch (e) {
-      if (_isDevToolsCurrentlyConnected()) {
-        rethrow;
-      } else {
-        _disconnected.complete();
-        _pollingTimer?.cancel();
-      }
+  /// True if DevTools is in connected mode.
+  ///
+  /// If DevTools is in offline mode, stops connection and returns false.
+  bool _checkConnection() {
+    assert(_connectionState != _ConnectionState.notInitialized);
+    if (_connectionState == _ConnectionState.stopped) return false;
+
+    // If connection is up and running, return true.
+    if (!offlineDataController.showingOfflineData.value &&
+        serviceConnection.serviceManager.connectedState.value.connected) {
+      return true;
     }
+
+    // Otherwise stop connection and return false.
+    _stopConnection();
+    return false;
+  }
+
+  Future<void> maybeInitialize() async {
+    if (_connectionState != _ConnectionState.notInitialized) return;
+    _connectionState = _ConnectionState.connected;
+    if (!_checkConnection()) return;
+
+    await serviceConnection.serviceManager.onServiceAvailable;
+
+    isDeviceAndroid =
+        serviceConnection.serviceManager.vm?.operatingSystem == 'android';
+
+    addAutoDisposeListener(
+      serviceConnection.serviceManager.connectedState,
+      _checkConnection,
+    );
+
+    autoDisposeStreamSubscription(
+      serviceConnection.serviceManager.service!.onExtensionEvent
+          .listen(_memoryTracker.onMemoryData),
+    );
+
+    autoDisposeStreamSubscription(
+      serviceConnection.serviceManager.service!.onGCEvent
+          .listen(_memoryTracker.onGCEvent),
+    );
+
+    _polling = DebounceTimer.periodic(
+      chartUpdateDelay,
+      () async {
+        if (!_checkConnection()) return;
+        try {
+          await _memoryTracker.pollMemory();
+        } catch (e) {
+          if (_checkConnection()) rethrow;
+        }
+      },
+    );
   }
 
   @override
   void dispose() {
-    _pollingTimer?.cancel();
+    _polling?.dispose();
+    _polling = null;
     super.dispose();
   }
 }

@@ -14,8 +14,6 @@ import '../../../../shared/primitives/simple_items.dart';
 import '../../shared/heap/class_filter.dart';
 import 'model.dart';
 
-const _jsonProfile = 'profile';
-
 class ProfilePaneController extends DisposableController
     with AutoDisposeControllerMixin {
   ProfilePaneController({required this.mode, AdaptedProfile? profile})
@@ -44,6 +42,8 @@ class ProfilePaneController extends DisposableController
       _jsonProfile: _currentAllocationProfile.value,
     };
   }
+
+  static const _jsonProfile = 'profile';
 
   final DevToolsMode mode;
 

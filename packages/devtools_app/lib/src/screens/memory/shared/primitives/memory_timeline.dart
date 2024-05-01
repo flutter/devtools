@@ -8,8 +8,6 @@ import 'package:intl/intl.dart';
 
 import '../../../../shared/primitives/utils.dart';
 
-const _jsonData = 'data';
-
 /// All Raw data received from the VM or offline data.
 class MemoryTimeline {
   MemoryTimeline({List<HeapSample>? data}) {
@@ -29,6 +27,8 @@ class MemoryTimeline {
       _jsonData: data,
     };
   }
+
+  static const _jsonData = 'data';
 
   int get endingIndex => data.isNotEmpty ? data.length - 1 : -1;
 

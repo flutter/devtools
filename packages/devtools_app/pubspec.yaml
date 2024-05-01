@@ -4,7 +4,7 @@ publish_to: none
 
 # Note: this version should only be updated by running tools/update_version.dart
 # that updates all versions of devtools packages (devtools_app, devtools_test).
-version: 2.35.0-dev.18
+version: 2.35.0
 
 repository: https://github.com/flutter/devtools/tree/master/packages/devtools_app
 
@@ -57,7 +57,7 @@ dependencies:
   stack_trace: ^1.10.0
   stream_channel: ^2.1.1
   string_scanner: ^1.1.0
-  unified_analytics: ^6.0.0
+  unified_analytics: ^6.1.0
   url_launcher: ^6.1.0
   url_launcher_web: ^2.0.6
   vm_service: ^14.2.1

@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../../../../../devtools_app.dart';
+import '../../../../../shared/primitives/simple_items.dart';
 import '../../../shared/primitives/memory_timeline.dart';
 import '../data/primitives.dart';
 
@@ -24,18 +23,18 @@ class ChartData {
     MemoryTimeline? timeline,
     ChartInterval? interval,
     bool? isLegendVisible,
-  }) : assert(
+  })  : assert(
           mode == DevToolsMode.connected ||
               (mode == DevToolsMode.offlineData &&
                   isDeviceAndroid != null &&
                   timeline != null &&
                   interval != null &&
                   isLegendVisible != null),
-        ) {
+        ),
+        _displayInterval =
+            ValueNotifier<ChartInterval>(interval ?? ChartInterval.theDefault),
+        _isLegendVisible = ValueNotifier<bool>(isLegendVisible ?? true) {
     this.timeline = timeline ?? MemoryTimeline();
-    _displayInterval =
-        ValueNotifier<ChartInterval>(interval ?? ChartInterval.theDefault);
-    _isLegendVisible = ValueNotifier<bool>(isLegendVisible ?? true);
   }
 
   factory ChartData.fromJson(Map<String, dynamic> json) {
@@ -44,8 +43,7 @@ class ChartData {
       isDeviceAndroid: json[_Json.isDeviceAndroid] as bool? ?? false,
       timeline:
           MemoryTimeline.fromJson(json[_Json.timeline] as Map<String, dynamic>),
-      interval: ChartInterval.values
-              .firstWhereOrNull((i) => i.name == json[_Json.interval]) ??
+      interval: ChartInterval.byName(json[_Json.interval]) ??
           ChartInterval.theDefault,
       isLegendVisible: json[_Json.isLegendVisible] as bool?,
     );
@@ -61,7 +59,7 @@ class ChartData {
     };
   }
 
-  /// Wether device is android.
+  /// Whether the device is an Android device.
   ///
   /// If connected to application, this value is set after the class creation,
   /// by the instance owner.
@@ -72,7 +70,7 @@ class ChartData {
   /// Default is to display default tick width based on width of chart of the collected
   /// data in the chart.
   ChartInterval get displayInterval => _displayInterval.value;
-  late final ValueNotifier<ChartInterval> _displayInterval;
+  final ValueNotifier<ChartInterval> _displayInterval;
   set displayInterval(ChartInterval interval) {
     _displayInterval.value = interval;
   }

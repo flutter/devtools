@@ -13,6 +13,7 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:js/js.dart';
 import 'package:logging/logging.dart';
+import 'package:unified_analytics/unified_analytics.dart' as ua;
 import 'package:web/web.dart';
 
 import '../../../devtools.dart' as devtools show version;
@@ -185,8 +186,8 @@ class GtagEventDevTools extends GtagEvent {
 // This cannot be a factory constructor in the [GtagEventDevTools] class due to
 // https://github.com/dart-lang/sdk/issues/46967.
 GtagEventDevTools _gtagEvent({
-  String? event_category,
-  String? event_label,
+  required String event_category,
+  required String event_label,
   String? send_to,
   bool non_interaction = false,
   int value = 0,
@@ -469,14 +470,13 @@ void screen(
   int value = 0,
 ]) {
   _log.fine('Event: Screen(screenName:$screenName, value:$value)');
-  GTag.event(
-    screenName,
-    gaEventProvider: () => _gtagEvent(
-      event_category: gac.screenViewEvent,
-      value: value,
-      send_to: gaDevToolsPropertyId(),
-    ),
+  final gtagEvent = _gtagEvent(
+    event_category: gac.screenViewEvent,
+    event_label: gac.init,
+    value: value,
+    send_to: gaDevToolsPropertyId(),
   );
+  _sendEventForScreen(screenName, gtagEvent);
 }
 
 String _operationKey(String screenName, String timedOperation) {
@@ -615,16 +615,14 @@ void _timing(
     'timedOperation:$timedOperation, '
     'durationMicros:$durationMicros)',
   );
-  GTag.event(
-    screenName,
-    gaEventProvider: () => _gtagEvent(
-      event_category: gac.timingEvent,
-      event_label: timedOperation,
-      value: durationMicros,
-      send_to: gaDevToolsPropertyId(),
-      screenMetrics: screenMetrics,
-    ),
+  final gtagEvent = _gtagEvent(
+    event_category: gac.timingEvent,
+    event_label: timedOperation,
+    value: durationMicros,
+    send_to: gaDevToolsPropertyId(),
+    screenMetrics: screenMetrics,
   );
+  _sendEventForScreen(screenName, gtagEvent);
 }
 
 /// Sends an analytics event to signal that something in DevTools was selected.
@@ -642,18 +640,16 @@ void select(
     'value:$value, '
     'nonInteraction:$nonInteraction)',
   );
-  GTag.event(
-    screenName,
-    gaEventProvider: () => _gtagEvent(
-      event_category: gac.selectEvent,
-      event_label: selectedItem,
-      value: value,
-      non_interaction: nonInteraction,
-      send_to: gaDevToolsPropertyId(),
-      screenMetrics:
-          screenMetricsProvider != null ? screenMetricsProvider() : null,
-    ),
+  final gtagEvent = _gtagEvent(
+    event_category: gac.selectEvent,
+    event_label: selectedItem,
+    value: value,
+    non_interaction: nonInteraction,
+    send_to: gaDevToolsPropertyId(),
+    screenMetrics:
+        screenMetricsProvider != null ? screenMetricsProvider() : null,
   );
+  _sendEventForScreen(screenName, gtagEvent);
 }
 
 /// Sends an analytics event to signal that something in DevTools was viewed.
@@ -669,17 +665,15 @@ void impression(
     'screenName:$screenName, '
     'item:$item)',
   );
-  GTag.event(
-    screenName,
-    gaEventProvider: () => _gtagEvent(
-      event_category: gac.impressionEvent,
-      event_label: item,
-      non_interaction: true,
-      send_to: gaDevToolsPropertyId(),
-      screenMetrics:
-          screenMetricsProvider != null ? screenMetricsProvider() : null,
-    ),
+  final gtagEvent = _gtagEvent(
+    event_category: gac.impressionEvent,
+    event_label: item,
+    non_interaction: true,
+    send_to: gaDevToolsPropertyId(),
+    screenMetrics:
+        screenMetricsProvider != null ? screenMetricsProvider() : null,
   );
+  _sendEventForScreen(screenName, gtagEvent);
 }
 
 String? _lastGaError;
@@ -687,7 +681,6 @@ String? _lastGaError;
 void reportError(
   String errorMessage, {
   bool fatal = false,
-  ScreenAnalyticsMetrics Function()? screenMetricsProvider,
 }) {
   // Don't keep recording same last error.
   if (_lastGaError == errorMessage) return;
@@ -697,10 +690,13 @@ void reportError(
     gaExceptionProvider: () => _gtagException(
       errorMessage,
       fatal: fatal,
-      screenMetrics:
-          screenMetricsProvider != null ? screenMetricsProvider() : null,
     ),
   );
+
+  // TODO(kenz): we may want to create a new event `devtoolsException` if we
+  // need all of our custom dimensions logged with exceptions.
+  final uaEvent = ua.Event.exception(exception: errorMessage);
+  unawaited(dtdManager.sendAnalyticsEvent(uaEvent));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -918,4 +914,46 @@ FutureOr<void> legacyOnDisableAnalytics() async {
 void legacyOnSetupAnalytics() {
   initializeGA();
   jsHookupListenerForGA();
+}
+
+void _sendEventForScreen(String screenName, GtagEventDevTools gtagEvent) {
+  GTag.event(
+    screenName,
+    gaEventProvider: () => gtagEvent,
+  );
+  final uaEvent = uaEventFromGtagEvent(gtagEvent);
+  unawaited(dtdManager.sendAnalyticsEvent(uaEvent));
+}
+
+ua.Event uaEventFromGtagEvent(GtagEventDevTools gtagEvent) {
+  return ua.Event.devtoolsEvent(
+    eventCategory: gtagEvent.event_category!,
+    label: gtagEvent.event_label!,
+    value: gtagEvent.value,
+    userInitiatedInteraction: !gtagEvent.non_interaction,
+    userApp: gtagEvent.user_app,
+    userBuild: gtagEvent.user_build,
+    userPlatform: gtagEvent.user_platform,
+    devtoolsPlatform: gtagEvent.devtools_platform,
+    devtoolsChrome: gtagEvent.devtools_chrome,
+    devtoolsVersion: gtagEvent.devtools_version,
+    ideLaunched: gtagEvent.ide_launched,
+    isExternalBuild: gtagEvent.is_external_build,
+    isEmbedded: gtagEvent.is_embedded,
+    ideLaunchedFeature: gtagEvent.ide_launched_feature,
+    g3Username: gtagEvent.g3_username,
+    uiDurationMicros: gtagEvent.ui_duration_micros,
+    rasterDurationMicros: gtagEvent.raster_duration_micros,
+    shaderCompilationDurationMicros:
+        gtagEvent.shader_compilation_duration_micros,
+    traceEventCount: gtagEvent.trace_event_count,
+    cpuSampleCount: gtagEvent.cpu_sample_count,
+    cpuStackDepth: gtagEvent.cpu_stack_depth,
+    heapDiffObjectsBefore: gtagEvent.heap_diff_objects_before,
+    heapDiffObjectsAfter: gtagEvent.heap_diff_objects_after,
+    heapObjectsTotal: gtagEvent.heap_objects_total,
+    rootSetCount: gtagEvent.root_set_count,
+    rowCount: gtagEvent.row_count,
+    inspectorTreeControllerId: gtagEvent.inspector_tree_controller_id,
+  );
 }
