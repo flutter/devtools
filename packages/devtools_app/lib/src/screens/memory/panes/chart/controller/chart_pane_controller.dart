@@ -59,10 +59,10 @@ class MemoryChartPaneController extends DisposableController
       () => unawaited(_onChartVisibilityChanged()),
     );
 
-    _calculateAndroidChartVisibility();
+    _maybeCalculateAndroidChartVisibility();
     addAutoDisposeListener(
       preferences.memory.androidCollectionEnabled,
-      _calculateAndroidChartVisibility,
+      _maybeCalculateAndroidChartVisibility,
     );
 
     _initialized.complete();
@@ -115,7 +115,7 @@ class MemoryChartPaneController extends DisposableController
   }
 
   final isAndroidChartVisible = ValueNotifier<bool>(false);
-  void _calculateAndroidChartVisibility() {
+  void _maybeCalculateAndroidChartVisibility() {
     if (!isChartVisible.value) return;
     data.isDeviceAndroid ??= _chartConnection!.isDeviceAndroid;
     isAndroidChartVisible.value = data.isDeviceAndroid! &&
@@ -125,7 +125,7 @@ class MemoryChartPaneController extends DisposableController
   ValueListenable<bool> get isChartVisible => preferences.memory.showChart;
   Future<void> _onChartVisibilityChanged() async {
     if (isChartVisible.value && await maybeConnect()) resume();
-    _calculateAndroidChartVisibility();
+    _maybeCalculateAndroidChartVisibility();
   }
 
   @override
