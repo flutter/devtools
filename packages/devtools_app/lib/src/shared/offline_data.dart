@@ -73,6 +73,12 @@ class OfflineDataController {
 /// If it is true, the screen should ignore the connected application and just show
 /// the offline data.
 ///
+/// The controller, created in connected mode, should not stop interacting with
+/// application even if DevTools switched to offline mode.
+/// In this case DevTools will initiate creation of new controller
+/// while preserving the old one, in order to return to it when user stops
+/// analysis offline data.
+///
 /// Example:
 ///
 /// class MyScreenController with OfflineScreenControllerMixin<MyScreenData> {
