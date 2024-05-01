@@ -1,0 +1,211 @@
+// Copyright 2024 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'dart:async';
+import 'dart:io';
+
+import 'package:args/command_runner.dart';
+import 'package:cli_util/cli_logging.dart';
+import 'package:devtools_tool/model.dart';
+import 'package:devtools_tool/utils.dart';
+import 'package:io/io.dart';
+import 'package:path/path.dart' as p;
+
+class ReleaseNotesCommand extends Command {
+  ReleaseNotesCommand() {
+    argParser.addOption(
+      _websiteRepoPath,
+      abbr: 'w',
+      help: 'The absolute path to the flutter/website repo clone on disk.',
+    );
+  }
+
+  static const _websiteRepoPath = 'website-repo';
+
+  @override
+  String get description =>
+      'Creates a PR on the flutter/website repo with the current release notes.';
+
+  @override
+  String get name => 'release-notes';
+
+  @override
+  FutureOr? run() async {
+    final log = Logger.standard();
+    final processManager = ProcessManager();
+
+    final devToolsReleaseNotesDirectory = Directory(
+      p.join(
+        DevToolsRepo.getInstance().devtoolsAppDirectoryPath,
+        'release_notes',
+      ),
+    );
+    final devToolsReleaseNotes = _DevToolsReleaseNotes.fromFile(
+      File(p.join(devToolsReleaseNotesDirectory.path, 'NEXT_RELEASE_NOTES.md')),
+    );
+    final releaseNotesVersion = devToolsReleaseNotes.version;
+    log.stdout(
+      'Drafting release notes for DevTools version $releaseNotesVersion...',
+    );
+
+    final websiteRepoPath = argResults![_websiteRepoPath] as String;
+    try {
+     await processManager.runAll(
+        commands: [
+          CliCommand.git(['checkout', '.']),
+          CliCommand.git(['checkout', 'main']),
+          CliCommand.git(['pull']),
+          CliCommand.git(['submodule', 'update', '--init', '--recursive']),
+          CliCommand.git(
+            ['checkout', '-b', 'devtools-release-notes-$releaseNotesVersion'],
+          ),
+        ],
+        workingDirectory: websiteRepoPath,
+      );
+    } catch (e) {
+      log.stderr(
+        'Something went wrong while trying to prepare a branch on the '
+        'flutter/website repo. Please make sure your flutter/website clone '
+        'is set up as specified by the contributing instructions: '
+        'https://github.com/flutter/website?tab=readme-ov-file#contributing.'
+        '\n\n$e',
+      );
+      return;
+    }
+
+    final websiteReleaseNotesDir = Directory(
+      p.join(
+        websiteRepoPath,
+        'src',
+        'content',
+        'tools',
+        'devtools',
+        'release-notes',
+      ),
+    );
+    if (!websiteReleaseNotesDir.existsSync()) {
+      throw FileSystemException(
+        'Website release notes directory does not exist.',
+        websiteReleaseNotesDir.path,
+      );
+    }
+
+    File(
+      p.join(
+        websiteReleaseNotesDir.path,
+        'release-notes-$releaseNotesVersion.md',
+      ),
+    )
+      ..createSync()
+      ..writeAsStringSync('''---
+short-title: $releaseNotesVersion release notes
+description: Release notes for Dart and Flutter DevTools version $releaseNotesVersion.
+toc: false
+---
+
+{% include ./release-notes-$releaseNotesVersion-src.md %}
+''');
+
+    final releaseNotesSrcMd = File(
+      p.join(
+        websiteReleaseNotesDir.path,
+        'release-notes-$releaseNotesVersion-src.md',
+      ),
+    )..createSync();
+
+    final srcLines = devToolsReleaseNotes.srcLines;
+    if (devToolsReleaseNotes.imageLineIndices.isNotEmpty) {
+      // This set of release notes contains images. Perform the line
+      // transformations and copy the image files.
+      final websiteImagesDirName = 'images-$releaseNotesVersion';
+      final devtoolsImagesDir =
+          Directory(p.join(devToolsReleaseNotesDirectory.path, 'images'));
+      final websiteImagesDir = Directory(
+        p.join(websiteReleaseNotesDir.path, websiteImagesDirName),
+      )..createSync();
+      await copyPath(devtoolsImagesDir.path, websiteImagesDir.path);
+
+      // Remove the .gitkeep file that was copied over.
+      File(p.join(websiteImagesDir.path, '.gitkeep')).deleteSync();
+
+      for (final index in devToolsReleaseNotes.imageLineIndices) {
+        final line = srcLines[index];
+        final transformed = line.replaceFirst(
+          _DevToolsReleaseNotes._imagePathMarker,
+          '/tools/devtools/release-notes/$websiteImagesDirName',
+        );
+        srcLines[index] = transformed;
+      }
+    }
+
+    releaseNotesSrcMd.writeAsStringSync(srcLines.joinWithNewLine());
+
+    log.stdout(
+      'Release notes successfully drafted in a local flutter/website branch. '
+      'Please clean them up by deleting empty sections and fixing any grammar '
+      'mistakes or typos.\n\nCreate a PR on the flutter/website repo when you are '
+      'finished.',
+    );
+  }
+}
+
+class _DevToolsReleaseNotes {
+  _DevToolsReleaseNotes._({
+    required this.file,
+    required this.version,
+    required this.srcLines,
+    required this.imageLineIndices,
+  });
+
+  factory _DevToolsReleaseNotes.fromFile(File file) {
+    if (!file.existsSync()) {
+      throw FileSystemException(
+        'NEXT_RELEASE_NOTES.md file does not exist.',
+        file.path,
+      );
+    }
+
+    final rawLines = file.readAsLinesSync();
+
+    late String version;
+    late int titleLineIndex;
+    final versionRegExp = RegExp(r"\d+\.\d+\.\d+");
+    for (int i = 0; i < rawLines.length; i++) {
+      final line = rawLines[i];
+      final matches = versionRegExp.allMatches(line);
+      if (matches.isEmpty) continue;
+      // This match should be from the line "# DevTools <x.y.z> release notes".
+      version = matches.first.group(0)!;
+      // This is the markdown title where the release notes src begins.
+      titleLineIndex = i;
+      break;
+    }
+
+    // TODO(kenz): one nice polish task could be to remove sections that are
+    // empty (i.e. sections that have the line
+    // "TODO: Remove this section if there are not any general updates.").
+    final srcLines = rawLines.sublist(titleLineIndex);
+    final imageLineIndices = <int>{};
+    for (int i = 0; i < srcLines.length; i++) {
+      final line = srcLines[i];
+      if (line.contains(_imagePathMarker)) {
+        imageLineIndices.add(i);
+      }
+    }
+
+    return _DevToolsReleaseNotes._(
+      file: file,
+      version: version,
+      srcLines: srcLines,
+      imageLineIndices: imageLineIndices,
+    );
+  }
+
+  final File file;
+  final String version;
+  final List<String> srcLines;
+  final Set<int> imageLineIndices;
+
+  static const _imagePathMarker = './images/';
+}
