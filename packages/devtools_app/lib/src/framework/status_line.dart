@@ -45,7 +45,8 @@ class StatusLine extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = isConnected ? theme.colorScheme.onPrimary : null;
+    final color =
+        (isConnected && !isEmbedded) ? theme.colorScheme.onPrimary : null;
     final height = statusLineHeight + padding.top + padding.bottom;
     return ValueListenableBuilder<bool>(
       valueListenable: currentScreen.showIsolateSelector,
