@@ -42,6 +42,7 @@ final deeplink = ScreenMetaData.deepLinks.id;
 // GA events not associated with a any screen e.g., hotReload, hotRestart, etc
 const devToolsMain = 'main';
 const appDisconnected = 'appDisconnected';
+const init = 'init';
 
 // DevTools UI action selected (clicked).
 

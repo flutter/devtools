@@ -39,13 +39,13 @@ class _InspectorTreeRowWidget extends StatefulWidget {
   /// Constructs a [_InspectorTreeRowWidget] that presents a line in the
   /// Inspector tree.
   const _InspectorTreeRowWidget({
-    required Key key,
+    required super.key,
     required this.row,
     required this.inspectorTreeState,
     this.error,
     required this.scrollControllerX,
     required this.viewportWidth,
-  }) : super(key: key);
+  });
 
   final _InspectorTreeState inspectorTreeState;
 

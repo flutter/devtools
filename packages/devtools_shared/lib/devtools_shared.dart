@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+export 'src/common.dart';
 export 'src/devtools_api.dart';
 export 'src/memory/adb_memory_info.dart';
 export 'src/memory/class_heap_detail_stats.dart';

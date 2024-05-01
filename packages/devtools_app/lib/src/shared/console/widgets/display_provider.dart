@@ -114,7 +114,7 @@ class _DisplayProviderState extends State<DisplayProvider> {
               ),
               if (isHovered && widget.onCopy != null)
                 DevToolsButton(
-                  icon: Icons.copy,
+                  icon: Icons.copy_outlined,
                   outlined: false,
                   onPressed: () => widget.onCopy!.call(widget.variable),
                 ),
