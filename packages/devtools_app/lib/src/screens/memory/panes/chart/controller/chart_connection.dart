@@ -11,12 +11,6 @@ import '../../../shared/primitives/memory_timeline.dart';
 import '../data/primitives.dart';
 import 'memory_tracker.dart';
 
-enum ChartConnectionState {
-  notInitialized,
-  connected,
-  stopped,
-}
-
 /// Connection between chart and application.
 ///
 /// The connection consists of listeners to events from vm and
@@ -44,48 +38,24 @@ class ChartVmConnection extends DisposableController
 
   DebounceTimer? _polling;
 
-  ChartConnectionState state = ChartConnectionState.notInitialized;
-
-  void _stopConnection() {
-    _polling?.cancel();
-    _polling = null;
-    state = ChartConnectionState.stopped;
-  }
-
-  late bool isDeviceAndroid;
-
-  /// True if still connected to application.
-  ///
-  /// If disconnected, stops interaction with app, declares disconnected state and returns false.
-  bool _checkConnection() {
-    assert(state != ChartConnectionState.notInitialized);
-    if (state == ChartConnectionState.stopped) return false;
-
-    // If connection is up and running, return true.
-    if (serviceConnection.serviceManager.connectedState.value.connected) {
-      return true;
-    }
-
-    // Otherwise stop connection and return false.
-    _stopConnection();
-    return false;
-  }
+  late final bool isDeviceAndroid;
 
   void maybeInit() async {
-    if (initialized) return;
-    state = ChartConnectionState.connected;
-    if (!_checkConnection()) {
-      isDeviceAndroid = false;
+    if (initialized ||
+        !serviceConnection.serviceManager.connectedState.value.connected) {
       return;
     }
 
     isDeviceAndroid =
         serviceConnection.serviceManager.vm?.operatingSystem == 'android';
 
-    addAutoDisposeListener(
-      serviceConnection.serviceManager.connectedState,
-      _checkConnection,
-    );
+    addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
+      final connected =
+          serviceConnection.serviceManager.connectedState.value.connected;
+      if (!connected) {
+        _polling?.cancel();
+      }
+    });
 
     autoDisposeStreamSubscription(
       serviceConnection.serviceManager.service!.onExtensionEvent
@@ -100,11 +70,15 @@ class ChartVmConnection extends DisposableController
     _polling = DebounceTimer.periodic(
       chartUpdateDelay,
       () async {
-        if (!_checkConnection()) return;
+        if (!serviceConnection.serviceManager.connectedState.value.connected) {
+          return;
+        }
         try {
           await _memoryTracker.pollMemory();
         } catch (e) {
-          if (_checkConnection()) rethrow;
+          if (serviceConnection.serviceManager.connectedState.value.connected) {
+            rethrow;
+          }
         }
       },
     );
