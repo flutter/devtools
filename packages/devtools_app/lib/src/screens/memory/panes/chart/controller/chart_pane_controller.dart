@@ -25,16 +25,16 @@ class MemoryChartPaneController extends DisposableController
                   data.isDeviceAndroid != null),
           '$mode, $data, ${data?.isDeviceAndroid}',
         ) {
-    unawaited(_init(data));
+    _init(data);
   }
 
   DevToolsMode mode;
 
   late final ChartData data;
 
-  late final ChartConnection? _chartConnection =
+  late final ChartVmConnection? _chartConnection =
       (mode == DevToolsMode.connected)
-          ? ChartConnection(
+          ? ChartVmConnection(
               data.timeline,
               isAndroidChartVisible: isAndroidChartVisible,
             )
@@ -43,7 +43,7 @@ class MemoryChartPaneController extends DisposableController
   Future<void> get initialized => _initialized.future;
   final _initialized = Completer<void>();
 
-  Future<void> _init(ChartData? offlineData) async {
+  void _init(ChartData? offlineData) {
     assert(!_initialized.isCompleted);
     if (mode == DevToolsMode.connected) {
       data = ChartData(mode: DevToolsMode.connected);
@@ -53,11 +53,8 @@ class MemoryChartPaneController extends DisposableController
       recomputeChartData();
     }
 
-    await _onChartVisibilityChanged();
-    addAutoDisposeListener(
-      isChartVisible,
-      () => unawaited(_onChartVisibilityChanged()),
-    );
+    _updateChartVisibility();
+    addAutoDisposeListener(isChartVisible, _updateChartVisibility);
 
     _maybeCalculateAndroidChartVisibility();
     addAutoDisposeListener(
@@ -100,18 +97,7 @@ class MemoryChartPaneController extends DisposableController
   final _paused = ValueNotifier<bool>(true);
   void pause() => _paused.value = true;
   void resume() {
-    assert(mode == DevToolsMode.connected && _chartConnection != null);
     _paused.value = false;
-  }
-
-  /// Establishes the chart connection when the chart is expanded for the first time.
-  ///
-  /// Returns true if the chart was already connected or the connection was established.
-  Future<bool> maybeConnect() async {
-    if (!_paused.value) return false;
-    if (mode != DevToolsMode.connected) return false;
-    await _chartConnection!.maybeInitialize();
-    return true;
   }
 
   final isAndroidChartVisible = ValueNotifier<bool>(false);
@@ -127,8 +113,11 @@ class MemoryChartPaneController extends DisposableController
   }
 
   ValueListenable<bool> get isChartVisible => preferences.memory.showChart;
-  Future<void> _onChartVisibilityChanged() async {
-    if (isChartVisible.value && await maybeConnect()) resume();
+  void _updateChartVisibility() {
+    if (isChartVisible.value && mode != DevToolsMode.offlineData) {
+      _chartConnection!.maybeInit();
+      resume();
+    }
     _maybeCalculateAndroidChartVisibility();
   }
 

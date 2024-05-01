@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
@@ -30,9 +28,9 @@ enum ChartConnectionState {
 ///
 /// All interactions between chart and vm are initiated by this class.
 /// So, if this class is not instantiated, the interaction does not happen.
-class ChartConnection extends DisposableController
+class ChartVmConnection extends DisposableController
     with AutoDisposeControllerMixin {
-  ChartConnection(this.timeline, {required this.isAndroidChartVisible});
+  ChartVmConnection(this.timeline, {required this.isAndroidChartVisible});
 
   final MemoryTimeline timeline;
   final ValueListenable<bool> isAndroidChartVisible;
@@ -41,6 +39,8 @@ class ChartConnection extends DisposableController
     timeline,
     isAndroidChartVisible: isAndroidChartVisible,
   );
+
+  bool initialized = false;
 
   DebounceTimer? _polling;
 
@@ -71,15 +71,13 @@ class ChartConnection extends DisposableController
     return false;
   }
 
-  Future<void> maybeInitialize() async {
-    if (state != ChartConnectionState.notInitialized) return;
+  void maybeInit() async {
+    if (initialized) return;
     state = ChartConnectionState.connected;
     if (!_checkConnection()) {
       isDeviceAndroid = false;
       return;
     }
-
-    await serviceConnection.serviceManager.onServiceAvailable;
 
     isDeviceAndroid =
         serviceConnection.serviceManager.vm?.operatingSystem == 'android';
@@ -110,6 +108,8 @@ class ChartConnection extends DisposableController
         }
       },
     );
+
+    initialized = true;
   }
 
   @override

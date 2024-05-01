@@ -8,6 +8,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import '../../../shared/globals.dart';
 import '../../../shared/memory/class_name.dart';
 import '../../../shared/memory/heap_graph_loader.dart';
 import '../../../shared/offline_data.dart';
@@ -91,6 +92,7 @@ class MemoryController extends DisposableController
         // TODO(polina-c): load memory screen in disconnected mode, https://github.com/flutter/devtools/issues/6972
         await _initializeData();
       case DevToolsMode.connected:
+        await serviceConnection.serviceManager.onServiceAvailable;
         await _initializeData(
           diffPaneController: connectedDiff,
           profilePaneController: connectedProfile,
