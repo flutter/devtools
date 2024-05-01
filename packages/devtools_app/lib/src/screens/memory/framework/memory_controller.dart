@@ -37,7 +37,7 @@ class MemoryController extends DisposableController
     @visibleForTesting ProfilePaneController? connectedProfile,
   }) {
     if (connectedDiff != null || connectedProfile != null) {
-      _mode = DevToolsMode.connected;
+      _mode = ControllerCreationMode.connected;
     } else {
       _mode = devToolsMode;
     }
@@ -50,7 +50,7 @@ class MemoryController extends DisposableController
   /// DevTools mode at the time of creation of the controller.
   ///
   /// DevTools will recreate controller when the mode changes.
-  late final DevToolsMode _mode;
+  late final ControllerCreationMode _mode;
 
   /// Index of the selected feature tab.
   ///
@@ -88,16 +88,16 @@ class MemoryController extends DisposableController
   ) async {
     assert(!_dataInitialized.isCompleted);
     switch (_mode) {
-      case DevToolsMode.disconnected:
+      case ControllerCreationMode.disconnected:
         // TODO(polina-c): load memory screen in disconnected mode, https://github.com/flutter/devtools/issues/6972
         await _initializeData();
-      case DevToolsMode.connected:
+      case ControllerCreationMode.connected:
         await serviceConnection.serviceManager.onServiceAvailable;
         await _initializeData(
           diffPaneController: connectedDiff,
           profilePaneController: connectedProfile,
         );
-      case DevToolsMode.offlineData:
+      case ControllerCreationMode.offlineData:
         assert(connectedDiff == null && connectedProfile == null);
         final loaded = await maybeLoadOfflineData(
           ScreenMetaData.memory.id,

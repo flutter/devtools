@@ -88,6 +88,7 @@ class ChartVmConnection extends DisposableController
 
   @override
   void dispose() {
+    _polling?.cancel();
     _polling?.dispose();
     _polling = null;
     super.dispose();

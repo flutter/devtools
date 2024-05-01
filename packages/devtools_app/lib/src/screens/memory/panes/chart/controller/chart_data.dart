@@ -18,14 +18,14 @@ class _Json {
 /// Chart data, that should be saved when transferred to offline data mode.
 class ChartData {
   ChartData({
-    required DevToolsMode mode,
+    required ControllerCreationMode mode,
     this.isDeviceAndroid,
     MemoryTimeline? timeline,
     ChartInterval? interval,
     bool? isLegendVisible,
   })  : assert(
-          mode == DevToolsMode.connected ||
-              (mode == DevToolsMode.offlineData &&
+          mode == ControllerCreationMode.connected ||
+              (mode == ControllerCreationMode.offlineData &&
                   isDeviceAndroid != null &&
                   timeline != null &&
                   interval != null &&
@@ -39,7 +39,7 @@ class ChartData {
 
   factory ChartData.fromJson(Map<String, dynamic> json) {
     final result = ChartData(
-      mode: DevToolsMode.offlineData,
+      mode: ControllerCreationMode.offlineData,
       isDeviceAndroid: json[_Json.isDeviceAndroid] as bool? ?? false,
       timeline:
           MemoryTimeline.fromJson(json[_Json.timeline] as Map<String, dynamic>),

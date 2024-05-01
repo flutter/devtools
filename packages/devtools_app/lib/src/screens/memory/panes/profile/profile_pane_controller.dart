@@ -17,7 +17,7 @@ import 'model.dart';
 class ProfilePaneController extends DisposableController
     with AutoDisposeControllerMixin {
   ProfilePaneController({required this.mode, AdaptedProfile? profile})
-      : assert(profile == null || mode != DevToolsMode.connected) {
+      : assert(profile == null || mode != ControllerCreationMode.connected) {
     if (profile != null) {
       _currentAllocationProfile.value = profile;
       _initializeSelection();
@@ -26,7 +26,7 @@ class ProfilePaneController extends DisposableController
 
   factory ProfilePaneController.fromJson(Map<String, dynamic> json) {
     return ProfilePaneController(
-      mode: DevToolsMode.offlineData,
+      mode: ControllerCreationMode.offlineData,
       profile: AdaptedProfile.fromJson(json[_jsonProfile]),
     );
   }
@@ -39,7 +39,7 @@ class ProfilePaneController extends DisposableController
 
   static const _jsonProfile = 'profile';
 
-  final DevToolsMode mode;
+  final ControllerCreationMode mode;
 
   /// The current profile being displayed.
   ValueListenable<AdaptedProfile?> get currentAllocationProfile =>

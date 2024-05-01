@@ -19,8 +19,8 @@ class MemoryChartPaneController extends DisposableController
     with AutoDisposeControllerMixin {
   MemoryChartPaneController(this.mode, {ChartData? data})
       : assert(
-          mode == DevToolsMode.connected ||
-              (mode == DevToolsMode.offlineData &&
+          mode == ControllerCreationMode.connected ||
+              (mode == ControllerCreationMode.offlineData &&
                   data != null &&
                   data.isDeviceAndroid != null),
           '$mode, $data, ${data?.isDeviceAndroid}',
@@ -28,12 +28,12 @@ class MemoryChartPaneController extends DisposableController
     _init(data);
   }
 
-  DevToolsMode mode;
+  ControllerCreationMode mode;
 
   late final ChartData data;
 
   late final ChartVmConnection? _chartConnection =
-      (mode == DevToolsMode.connected)
+      (mode == ControllerCreationMode.connected)
           ? ChartVmConnection(
               data.timeline,
               isAndroidChartVisible: isAndroidChartVisible,
@@ -45,8 +45,8 @@ class MemoryChartPaneController extends DisposableController
 
   void _init(ChartData? offlineData) {
     assert(!_initialized.isCompleted);
-    if (mode == DevToolsMode.connected) {
-      data = ChartData(mode: DevToolsMode.connected);
+    if (mode == ControllerCreationMode.connected) {
+      data = ChartData(mode: ControllerCreationMode.connected);
     } else {
       data = offlineData!;
       _paused.value = false;
@@ -103,10 +103,7 @@ class MemoryChartPaneController extends DisposableController
   final isAndroidChartVisible = ValueNotifier<bool>(false);
   void _maybeCalculateAndroidChartVisibility() {
     if (!isChartVisible.value) return;
-    assert(
-      data.isDeviceAndroid != null ||
-          _chartConnection!.state != ChartConnectionState.notInitialized,
-    );
+    assert(data.isDeviceAndroid != null || _chartConnection!.initialized);
     data.isDeviceAndroid ??= _chartConnection!.isDeviceAndroid;
     isAndroidChartVisible.value = data.isDeviceAndroid! &&
         preferences.memory.androidCollectionEnabled.value;
@@ -114,7 +111,9 @@ class MemoryChartPaneController extends DisposableController
 
   ValueListenable<bool> get isChartVisible => preferences.memory.showChart;
   void _updateChartVisibility() {
-    if (isChartVisible.value && mode != DevToolsMode.offlineData) {
+    if (isChartVisible.value &&
+        mode != ControllerCreationMode.offlineData &&
+        serviceConnection.serviceManager.connectedState.value.connected) {
       _chartConnection!.maybeInit();
       resume();
     }

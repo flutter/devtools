@@ -148,7 +148,7 @@ class MemoryDefaultScene extends Scene {
           ..derived.applyFilter(showAllFilter);
 
     final profileController =
-        ProfilePaneController(mode: DevToolsMode.connected)
+        ProfilePaneController(mode: ControllerCreationMode.connected)
           ..setFilter(showAllFilter);
 
     controller = MemoryController(

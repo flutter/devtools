@@ -58,7 +58,8 @@ enum DocLinks {
   }
 }
 
-enum DevToolsMode {
+/// The DevTools mode in which a controller object was created.
+enum ControllerCreationMode {
   /// Not interacting with app or data from a previous session.
   disconnected,
 
