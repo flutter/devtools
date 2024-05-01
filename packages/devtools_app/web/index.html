@@ -50,13 +50,83 @@
     }
   </script>
 
+  <script>
+    // The value below is injected by flutter build, do not touch.
+    var serviceWorkerVersion = null;
+  </script>
+  <!-- This script adds the flutter initialization JS code -->
+  <script src="flutter.js" defer></script> 
+
   <!-- TODO(elliette): Remove once https://github.com/flutter/flutter/issues/122541 is fixed. -->
   <link rel="stylesheet" href="styles.css">
 
 </head>
 
 <body>
-  <script src="flutter_bootstrap.js" async></script>
+
+  <script>
+    // Unregister the old custom DevTools service worker (if it exists). It was
+    // removed in: https://github.com/flutter/devtools/pull/5331
+    function unregisterDevToolsServiceWorker() {
+      if ('serviceWorker' in navigator) {
+        const DEVTOOLS_SW = 'service_worker.js';
+        const FLUTTER_SW = 'flutter_service_worker.js';
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            for (let registration of registrations) {
+                const activeWorker = registration.active;
+                if (activeWorker != null) {
+                    const url = activeWorker.scriptURL;
+                    if (url.includes(DEVTOOLS_SW) && !url.includes(FLUTTER_SW)) {
+                        registration.unregister();
+                    }
+                }
+            }
+        });
+      }
+    }
+
+    // Bootstrap app for 3P environments:
+    function bootstrapAppFor3P() {
+      window.addEventListener('load', function(ev) {
+        // Download main.dart.js
+        _flutter.loader.loadEntrypoint({
+          serviceWorker: {
+            serviceWorkerVersion: serviceWorkerVersion,
+          },
+          onEntrypointLoaded: function(engineInitializer) {
+            engineInitializer.initializeEngine({
+              renderer: 'canvaskit',
+              canvasKitBaseUrl: 'canvaskit/'
+            })
+            .then(function(appRunner) {
+              appRunner.runApp();
+            });
+          }
+        });
+      });
+    }
+
+    // Bootstrap app for 1P environments:
+    function bootstrapAppFor1P() {
+      window.addEventListener('load', function(ev) {
+        // Download main.dart.js
+        _flutter.loader.loadEntrypoint({
+          entrypointUrl: 'main.dart.js',
+          onEntrypointLoaded: function(engineInitializer) {
+            engineInitializer.initializeEngine({
+              renderer: 'canvaskit',
+            })
+            .then(function(appRunner) {
+              appRunner.runApp();
+            });
+          }
+        });
+      });
+    }
+
+    unregisterDevToolsServiceWorker();
+    bootstrapAppFor3P();
+  </script>
 </body>
 
 </html>
