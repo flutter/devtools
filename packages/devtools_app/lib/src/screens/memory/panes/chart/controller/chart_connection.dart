@@ -49,9 +49,6 @@ class ChartConnection extends DisposableController
   void _stopConnection() {
     _polling?.cancel();
     _polling = null;
-    // We use state to declare disconnection.
-    // We cannot use nullness of _polling to check disconnection, because there is async gap in
-    // `maybeInitialize` when state is already initialized, but _polling is still null.
     state = ChartConnectionState.stopped;
   }
 
