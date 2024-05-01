@@ -49,9 +49,10 @@ class ReleaseNotesCommand extends Command {
       'Drafting release notes for DevTools version $releaseNotesVersion...',
     );
 
+    // Create a local branch on the flutter/website repo.
     final websiteRepoPath = argResults![_websiteRepoPath] as String;
     try {
-     await processManager.runAll(
+      await processManager.runAll(
         commands: [
           CliCommand.git(['checkout', '.']),
           CliCommand.git(['checkout', 'main']),
@@ -91,6 +92,7 @@ class ReleaseNotesCommand extends Command {
       );
     }
 
+    // Write the 'release-notes-<x.y.z>.md' file.
     File(
       p.join(
         websiteReleaseNotesDir.path,
@@ -98,15 +100,19 @@ class ReleaseNotesCommand extends Command {
       ),
     )
       ..createSync()
-      ..writeAsStringSync('''---
+      ..writeAsStringSync(
+        '''---
 short-title: $releaseNotesVersion release notes
 description: Release notes for Dart and Flutter DevTools version $releaseNotesVersion.
 toc: false
 ---
 
 {% include ./release-notes-$releaseNotesVersion-src.md %}
-''');
+''',
+        flush: true,
+      );
 
+    // Create the 'release-notes-<x.y.z>-src.md' file.
     final releaseNotesSrcMd = File(
       p.join(
         websiteReleaseNotesDir.path,
@@ -115,6 +121,8 @@ toc: false
     )..createSync();
 
     final srcLines = devToolsReleaseNotes.srcLines;
+
+    // Copy release notes images and fix image reference paths.
     if (devToolsReleaseNotes.imageLineIndices.isNotEmpty) {
       // This set of release notes contains images. Perform the line
       // transformations and copy the image files.
@@ -139,7 +147,26 @@ toc: false
       }
     }
 
-    releaseNotesSrcMd.writeAsStringSync(srcLines.joinWithNewLine());
+    // Write the 'release-notes-<x.y.z>-src.md' file, including any updates for
+    // image paths.
+    releaseNotesSrcMd.writeAsStringSync(
+      srcLines.joinWithNewLine(),
+      flush: true,
+    );
+
+    // Write the 'devtools_releases.yml' file.
+    final releasesYml =
+        File(p.join(websiteRepoPath, 'src', '_data', 'devtools_releases.yml'));
+    if (!releasesYml.existsSync()) {
+      throw FileSystemException(
+        'The devtools_releases.yml file does not exist.',
+        releasesYml.path,
+      );
+    }
+    final releasesYmlContent =
+        releasesYml.readAsStringSync().replaceFirst('releases:', '''releases:
+  - '$releaseNotesVersion\'''');
+    releasesYml.writeAsStringSync(releasesYmlContent, flush: true);
 
     log.stdout(
       'Release notes successfully drafted in a local flutter/website branch. '
