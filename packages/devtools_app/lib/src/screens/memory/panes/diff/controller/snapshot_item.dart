@@ -14,17 +14,10 @@ abstract class SnapshotItem extends DisposableController {
   /// Number to show with auto-generated names that may be non unique, like isolate name.
   int? get displayNumber;
 
-  ValueListenable<bool> get isProcessing => _isProcessing;
-  final _isProcessing = ValueNotifier<bool>(false);
+  Future<void> get process;
 
   /// If true, the item contains data, that can be compared and analyzed.
   bool get hasData;
-
-  @override
-  void dispose() {
-    _isProcessing.dispose();
-    super.dispose();
-  }
 }
 
 class SnapshotDocItem extends SnapshotItem {
@@ -33,6 +26,9 @@ class SnapshotDocItem extends SnapshotItem {
 
   @override
   bool get hasData => false;
+
+  @override
+  Future<void> get process => Future.value();
 }
 
 class _Json {
@@ -97,7 +93,7 @@ class SnapshotDataItem extends SnapshotItem implements RenamableItem {
     final (graph, created) = await loader.load();
     _heap = HeapData(graph, created: created);
     await _heap!.calculate;
-    _isProcessing.value = false;
+    _processed.complete();
   }
 
   @override
@@ -111,6 +107,11 @@ class SnapshotDataItem extends SnapshotItem implements RenamableItem {
       '$defaultName${displayNumber == null ? '' : '-$displayNumber'}';
 
   int? get totalSize => _heap?.footprint?.reachable;
+
+  @override
+  Future<void> get process => _processed.future;
+  final _processed = Completer<void>();
+  bool get isProcessed => _processed.isCompleted;
 }
 
 abstract class RenamableItem {

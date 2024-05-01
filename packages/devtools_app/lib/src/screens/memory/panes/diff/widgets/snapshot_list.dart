@@ -206,17 +206,17 @@ class SnapshotListTitle extends StatelessWidget {
       throw StateError('Unknown item type: $theItem');
     }
 
-    return ValueListenableBuilder<bool>(
-      valueListenable: theItem.isProcessing,
-      builder: (_, isProcessing, __) => Padding(
+    return FutureBuilder(
+      future: theItem.process,
+      builder: (_, AsyncSnapshot<void> snapshot) => Padding(
         padding: const EdgeInsets.symmetric(horizontal: denseRowSpacing),
         child: Row(
           children: [
             leading,
-            if (isProcessing)
-              CenteredCircularProgressIndicator(size: smallProgressSize)
+            if (snapshot.hasData)
+              ...trailing
             else
-              ...trailing,
+              CenteredCircularProgressIndicator(size: smallProgressSize),
           ],
         ),
       ),
