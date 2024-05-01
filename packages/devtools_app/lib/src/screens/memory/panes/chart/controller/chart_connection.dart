@@ -13,7 +13,7 @@ import '../../../shared/primitives/memory_timeline.dart';
 import '../data/primitives.dart';
 import 'memory_tracker.dart';
 
-enum _ConnectionState {
+enum ChartConnectionState {
   notInitialized,
   connected,
   stopped,
@@ -44,28 +44,25 @@ class ChartConnection extends DisposableController
 
   DebounceTimer? _polling;
 
-  _ConnectionState _connectionState = _ConnectionState.notInitialized;
+  ChartConnectionState state = ChartConnectionState.notInitialized;
 
   void _stopConnection() {
     _polling?.cancel();
     _polling = null;
-    cancelStreamSubscriptions();
-    cancelListeners();
-    _connectionState = _ConnectionState.stopped;
+    state = ChartConnectionState.stopped;
   }
 
   late bool isDeviceAndroid;
 
-  /// True if DevTools is in connected mode.
+  /// True if still connected to application.
   ///
-  /// If DevTools is in offline mode, stops connection and returns false.
+  /// If disconnected, stops interaction with app, declares disconnected state and returns false.
   bool _checkConnection() {
-    assert(_connectionState != _ConnectionState.notInitialized);
-    if (_connectionState == _ConnectionState.stopped) return false;
+    assert(state != ChartConnectionState.notInitialized);
+    if (state == ChartConnectionState.stopped) return false;
 
     // If connection is up and running, return true.
-    if (!offlineDataController.showingOfflineData.value &&
-        serviceConnection.serviceManager.connectedState.value.connected) {
+    if (serviceConnection.serviceManager.connectedState.value.connected) {
       return true;
     }
 
@@ -75,9 +72,12 @@ class ChartConnection extends DisposableController
   }
 
   Future<void> maybeInitialize() async {
-    if (_connectionState != _ConnectionState.notInitialized) return;
-    _connectionState = _ConnectionState.connected;
-    if (!_checkConnection()) return;
+    if (state != ChartConnectionState.notInitialized) return;
+    state = ChartConnectionState.connected;
+    if (!_checkConnection()) {
+      isDeviceAndroid = false;
+      return;
+    }
 
     await serviceConnection.serviceManager.onServiceAvailable;
 
