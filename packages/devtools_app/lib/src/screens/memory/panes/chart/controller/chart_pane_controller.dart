@@ -117,6 +117,10 @@ class MemoryChartPaneController extends DisposableController
   final isAndroidChartVisible = ValueNotifier<bool>(false);
   void _maybeCalculateAndroidChartVisibility() {
     if (!isChartVisible.value) return;
+    assert(
+      data.isDeviceAndroid != null ||
+          _chartConnection!.connectionState != ConnectionState.notInitialized,
+    );
     data.isDeviceAndroid ??= _chartConnection!.isDeviceAndroid;
     isAndroidChartVisible.value = data.isDeviceAndroid! &&
         preferences.memory.androidCollectionEnabled.value;

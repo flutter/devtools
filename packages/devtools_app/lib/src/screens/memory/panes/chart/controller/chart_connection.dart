@@ -13,7 +13,7 @@ import '../../../shared/primitives/memory_timeline.dart';
 import '../data/primitives.dart';
 import 'memory_tracker.dart';
 
-enum _ConnectionState {
+enum ConnectionState {
   notInitialized,
   connected,
   stopped,
@@ -44,14 +44,14 @@ class ChartConnection extends DisposableController
 
   DebounceTimer? _polling;
 
-  _ConnectionState _connectionState = _ConnectionState.notInitialized;
+  ConnectionState connectionState = ConnectionState.notInitialized;
 
   void _stopConnection() {
     _polling?.cancel();
     _polling = null;
     cancelStreamSubscriptions();
     cancelListeners();
-    _connectionState = _ConnectionState.stopped;
+    connectionState = ConnectionState.stopped;
   }
 
   late bool isDeviceAndroid;
@@ -60,8 +60,8 @@ class ChartConnection extends DisposableController
   ///
   /// If DevTools is in offline mode, stops connection and returns false.
   bool _checkConnection() {
-    assert(_connectionState != _ConnectionState.notInitialized);
-    if (_connectionState == _ConnectionState.stopped) return false;
+    assert(connectionState != ConnectionState.notInitialized);
+    if (connectionState == ConnectionState.stopped) return false;
 
     // If connection is up and running, return true.
     if (!offlineDataController.showingOfflineData.value &&
@@ -75,9 +75,12 @@ class ChartConnection extends DisposableController
   }
 
   Future<void> maybeInitialize() async {
-    if (_connectionState != _ConnectionState.notInitialized) return;
-    _connectionState = _ConnectionState.connected;
-    if (!_checkConnection()) return;
+    if (connectionState != ConnectionState.notInitialized) return;
+    connectionState = ConnectionState.connected;
+    if (!_checkConnection()) {
+      isDeviceAndroid = false;
+      return;
+    }
 
     await serviceConnection.serviceManager.onServiceAvailable;
 
