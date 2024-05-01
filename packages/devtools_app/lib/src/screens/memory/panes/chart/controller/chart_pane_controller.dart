@@ -119,7 +119,7 @@ class MemoryChartPaneController extends DisposableController
     if (!isChartVisible.value) return;
     assert(
       data.isDeviceAndroid != null ||
-          _chartConnection!.connectionState != ConnectionState.notInitialized,
+          _chartConnection!.state != ChartConnectionState.notInitialized,
     );
     data.isDeviceAndroid ??= _chartConnection!.isDeviceAndroid;
     isAndroidChartVisible.value = data.isDeviceAndroid! &&

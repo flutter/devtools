@@ -13,7 +13,7 @@ import '../../../shared/primitives/memory_timeline.dart';
 import '../data/primitives.dart';
 import 'memory_tracker.dart';
 
-enum ConnectionState {
+enum ChartConnectionState {
   notInitialized,
   connected,
   stopped,
@@ -44,14 +44,14 @@ class ChartConnection extends DisposableController
 
   DebounceTimer? _polling;
 
-  ConnectionState connectionState = ConnectionState.notInitialized;
+  ChartConnectionState state = ChartConnectionState.notInitialized;
 
   void _stopConnection() {
     _polling?.cancel();
     _polling = null;
     cancelStreamSubscriptions();
     cancelListeners();
-    connectionState = ConnectionState.stopped;
+    state = ChartConnectionState.stopped;
   }
 
   late bool isDeviceAndroid;
@@ -60,8 +60,8 @@ class ChartConnection extends DisposableController
   ///
   /// If DevTools is in offline mode, stops connection and returns false.
   bool _checkConnection() {
-    assert(connectionState != ConnectionState.notInitialized);
-    if (connectionState == ConnectionState.stopped) return false;
+    assert(state != ChartConnectionState.notInitialized);
+    if (state == ChartConnectionState.stopped) return false;
 
     // If connection is up and running, return true.
     if (!offlineDataController.showingOfflineData.value &&
@@ -75,8 +75,8 @@ class ChartConnection extends DisposableController
   }
 
   Future<void> maybeInitialize() async {
-    if (connectionState != ConnectionState.notInitialized) return;
-    connectionState = ConnectionState.connected;
+    if (state != ChartConnectionState.notInitialized) return;
+    state = ChartConnectionState.connected;
     if (!_checkConnection()) {
       isDeviceAndroid = false;
       return;
