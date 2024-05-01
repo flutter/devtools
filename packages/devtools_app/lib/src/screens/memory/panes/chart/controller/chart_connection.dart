@@ -49,23 +49,20 @@ class ChartConnection extends DisposableController
   void _stopConnection() {
     _polling?.cancel();
     _polling = null;
-    cancelStreamSubscriptions();
-    cancelListeners();
     state = ChartConnectionState.stopped;
   }
 
   late bool isDeviceAndroid;
 
-  /// True if DevTools is in connected mode.
+  /// True if still connected to application.
   ///
-  /// If DevTools is in offline mode, stops connection and returns false.
+  /// If disconnected, stops interaction with app, declares disconnected state and returns false.
   bool _checkConnection() {
     assert(state != ChartConnectionState.notInitialized);
     if (state == ChartConnectionState.stopped) return false;
 
     // If connection is up and running, return true.
-    if (!offlineDataController.showingOfflineData.value &&
-        serviceConnection.serviceManager.connectedState.value.connected) {
+    if (serviceConnection.serviceManager.connectedState.value.connected) {
       return true;
     }
 
