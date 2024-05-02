@@ -55,7 +55,7 @@ Before continuing, ensure you have your local environment set up for
 
 Draft release notes on a local `flutter/website` branch using the following command:
 ```console
-devtools_tool release-notes -w /Users/me/absolute/path/to/website
+devtools_tool release-notes -w /Users/me/absolute/path/to/flutter/website
 ```
 
 Clean up the drafted notes on your local `flutter/website` branch and open a PR.
