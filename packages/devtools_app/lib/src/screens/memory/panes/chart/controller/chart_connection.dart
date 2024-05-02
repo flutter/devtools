@@ -43,11 +43,11 @@ class ChartVmConnection extends DisposableController
   /// Initializes the connection.
   ///
   /// This method should be called without async gap after validation that
-  /// the application is not disconnected.
+  /// the application still connected.
   void maybeInit() async {
     if (initialized) return;
 
-    assert(!serviceConnection.serviceManager.connectedState.value.connected);
+    assert(serviceConnection.serviceManager.connectedState.value.connected);
 
     isDeviceAndroid =
         serviceConnection.serviceManager.vm?.operatingSystem == 'android';
