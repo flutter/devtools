@@ -32,6 +32,7 @@ class MemoryChartPaneController extends DisposableController
     } else {
       this.data = data!;
       _chartConnection = null;
+      // Setting paused to false, because `recomputeChartData` is noop when it is true.
       _paused.value = false;
       recomputeChartData();
       _paused.value = true;
@@ -85,9 +86,7 @@ class MemoryChartPaneController extends DisposableController
   ValueListenable<bool> get paused => _paused;
   final _paused = ValueNotifier<bool>(true);
   void pause() => _paused.value = true;
-  void resume() {
-    _paused.value = false;
-  }
+  void resume() => _paused.value = false;
 
   final isAndroidChartVisible = ValueNotifier<bool>(false);
   void _maybeCalculateAndroidChartVisibility() {
