@@ -40,16 +40,14 @@ class ChartVmConnection extends DisposableController
 
   late final bool isDeviceAndroid;
 
+  /// Initializes the connection.
+  ///
+  /// This method should be called without async gap after validation
+  /// the application is not disconnected.
   void maybeInit() async {
     if (initialized) return;
 
-    // We do this check for cases of accidental disconnect, in order to avoid
-    // failure for initialization of `isDeviceAndroid` next line.
-    if (!serviceConnection.serviceManager.connectedState.value.connected) {
-      isDeviceAndroid = false;
-      initialized = true;
-      return;
-    }
+    assert(!serviceConnection.serviceManager.connectedState.value.connected);
 
     isDeviceAndroid =
         serviceConnection.serviceManager.vm?.operatingSystem == 'android';
