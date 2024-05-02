@@ -283,10 +283,10 @@ class DebounceTimer {
 }
 
 /// Current mode of DevTools.
-DevToolsMode get devToolsMode {
+ControllerCreationMode get devToolsMode {
   return offlineDataController.showingOfflineData.value
-      ? DevToolsMode.offlineData
+      ? ControllerCreationMode.offlineData
       : serviceConnection.serviceManager.hasConnection
-          ? DevToolsMode.connected
-          : DevToolsMode.disconnected;
+          ? ControllerCreationMode.connected
+          : ControllerCreationMode.disconnected;
 }

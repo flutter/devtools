@@ -148,15 +148,18 @@ class MemoryDefaultScene extends Scene {
           ..derived.applyFilter(showAllFilter);
 
     final profileController =
-        ProfilePaneController(mode: DevToolsMode.connected)
+        ProfilePaneController(mode: ControllerCreationMode.connected)
           ..setFilter(showAllFilter);
 
     controller = MemoryController(
       connectedDiff: diffController,
       connectedProfile: profileController,
-    )
-      ..chart.data.timeline.data.clear()
-      ..chart.data.timeline.data.addAll(memoryJson.data);
+    );
+
+    await controller.initialized;
+
+    controller.chart.data.timeline.data.clear();
+    controller.chart.data.timeline.data.addAll(memoryJson.data);
   }
 
   @override

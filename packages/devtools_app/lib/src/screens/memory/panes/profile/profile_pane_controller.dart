@@ -32,7 +32,7 @@ class ProfilePaneController extends DisposableController
 
   factory ProfilePaneController.fromJson(Map<String, dynamic> json) {
     return ProfilePaneController(
-      mode: DevToolsMode.offlineData,
+      mode: ControllerCreationMode.offlineData,
       profile: AdaptedProfile.fromJson(json[_jsonProfile]),
     );
   }
@@ -45,7 +45,7 @@ class ProfilePaneController extends DisposableController
 
   static const _jsonProfile = 'profile';
 
-  final DevToolsMode mode;
+  final ControllerCreationMode mode;
 
   /// The current profile being displayed.
   ValueListenable<AdaptedProfile?> get currentAllocationProfile =>

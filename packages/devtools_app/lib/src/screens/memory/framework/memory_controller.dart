@@ -8,6 +8,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import '../../../shared/globals.dart';
 import '../../../shared/memory/class_name.dart';
 import '../../../shared/memory/heap_graph_loader.dart';
 import '../../../shared/offline_data.dart';
@@ -36,7 +37,7 @@ class MemoryController extends DisposableController
     @visibleForTesting ProfilePaneController? connectedProfile,
   }) {
     if (connectedDiff != null || connectedProfile != null) {
-      _mode = DevToolsMode.connected;
+      _mode = ControllerCreationMode.connected;
     } else {
       _mode = devToolsMode;
     }
@@ -49,7 +50,7 @@ class MemoryController extends DisposableController
   /// DevTools mode at the time of creation of the controller.
   ///
   /// DevTools will recreate controller when the mode changes.
-  late final DevToolsMode _mode;
+  late final ControllerCreationMode _mode;
 
   /// Index of the selected feature tab.
   ///
@@ -87,15 +88,16 @@ class MemoryController extends DisposableController
   ) async {
     assert(!_dataInitialized.isCompleted);
     switch (_mode) {
-      case DevToolsMode.disconnected:
+      case ControllerCreationMode.disconnected:
         // TODO(polina-c): load memory screen in disconnected mode, https://github.com/flutter/devtools/issues/6972
-        await _initializeData();
-      case DevToolsMode.connected:
-        await _initializeData(
+        _initializeData();
+      case ControllerCreationMode.connected:
+        await serviceConnection.serviceManager.onServiceAvailable;
+        _initializeData(
           diffPaneController: connectedDiff,
           profilePaneController: connectedProfile,
         );
-      case DevToolsMode.offlineData:
+      case ControllerCreationMode.offlineData:
         assert(connectedDiff == null && connectedProfile == null);
         final loaded = await maybeLoadOfflineData(
           ScreenMetaData.memory.id,
@@ -105,23 +107,23 @@ class MemoryController extends DisposableController
             return OfflineMemoryData.fromJson(data as Map<String, dynamic>);
           },
           shouldLoad: (data) => true,
-          loadData: (data) async => await _initializeData(offlineData: data),
+          loadData: (data) => _initializeData(offlineData: data),
         );
         // [maybeLoadOfflineData] will be a noop if there is no offline data for the memory screen,
         //  so ensure we still call [_initializedData] if it has not been called.
         assert(loaded == _dataInitialized.isCompleted);
-        if (!loaded) {
-          await _initializeData();
+        if (_dataInitialized.isCompleted) {
+          _initializeData();
         }
     }
     assert(_dataInitialized.isCompleted);
   }
 
-  Future<void> _initializeData({
+  void _initializeData({
     OfflineMemoryData? offlineData,
     @visibleForTesting DiffPaneController? diffPaneController,
     @visibleForTesting ProfilePaneController? profilePaneController,
-  }) async {
+  }) {
     assert(!_dataInitialized.isCompleted);
 
     chart = MemoryChartPaneController(_mode, data: offlineData?.chart);
@@ -143,7 +145,6 @@ class MemoryController extends DisposableController
     if (offlineData != null) profile.setFilter(offlineData.filter);
     _shareClassFilterBetweenProfileAndDiff();
 
-    await chart.initialized;
     _dataInitialized.complete();
   }
 
