@@ -18,8 +18,8 @@ class ProfilePaneController extends DisposableController
     with AutoDisposeControllerMixin {
   ProfilePaneController({required this.mode, AdaptedProfile? profile})
       : assert(
-          (mode == DevToolsMode.connected && profile == null) ||
-              (mode == DevToolsMode.offlineData && profile != null),
+          (mode == ControllerCreationMode.connected && profile == null) ||
+              (mode == ControllerCreationMode.offlineData && profile != null),
         ) {
     if (profile != null) {
       _currentAllocationProfile.value = AdaptedProfile.withNewFilter(
@@ -93,7 +93,7 @@ class ProfilePaneController extends DisposableController
     if (_initialized.isCompleted) {
       return;
     }
-    if (mode == DevToolsMode.connected) {
+    if (mode == ControllerCreationMode.connected) {
       autoDisposeStreamSubscription(
         serviceConnection.serviceManager.service!.onGCEvent.listen((event) {
           if (refreshOnGc.value) {
