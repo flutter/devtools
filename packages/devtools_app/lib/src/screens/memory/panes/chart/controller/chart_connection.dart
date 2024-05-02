@@ -42,7 +42,7 @@ class ChartVmConnection extends DisposableController
 
   /// Initializes the connection.
   ///
-  /// This method should be called without async gap after validation
+  /// This method should be called without async gap after validation that
   /// the application is not disconnected.
   void maybeInit() async {
     if (initialized) return;
