@@ -25,32 +25,18 @@ class MemoryChartPaneController extends DisposableController
                   data.isDeviceAndroid != null),
           '$mode, $data, ${data?.isDeviceAndroid}',
         ) {
-    _init(data);
-  }
-
-  ControllerCreationMode mode;
-
-  late final ChartData data;
-
-  late final ChartVmConnection? _chartConnection =
-      (mode == ControllerCreationMode.connected)
-          ? ChartVmConnection(
-              data.timeline,
-              isAndroidChartVisible: isAndroidChartVisible,
-            )
-          : null;
-
-  Future<void> get initialized => _initialized.future;
-  final _initialized = Completer<void>();
-
-  void _init(ChartData? offlineData) {
-    assert(!_initialized.isCompleted);
     if (mode == ControllerCreationMode.connected) {
-      data = ChartData(mode: ControllerCreationMode.connected);
+      this.data = ChartData(mode: ControllerCreationMode.connected);
+      _chartConnection = ChartVmConnection(
+        this.data.timeline,
+        isAndroidChartVisible: isAndroidChartVisible,
+      );
     } else {
-      data = offlineData!;
+      this.data = data!;
+      _chartConnection = null;
       _paused.value = false;
       recomputeChartData();
+      _paused.value = true;
     }
 
     _updateChartVisibility();
@@ -61,9 +47,14 @@ class MemoryChartPaneController extends DisposableController
       preferences.memory.androidCollectionEnabled,
       _maybeCalculateAndroidChartVisibility,
     );
-
-    _initialized.complete();
   }
+
+  /// The mode at which the controller was created.
+  ControllerCreationMode mode;
+
+  late final ChartData data;
+
+  late final ChartVmConnection? _chartConnection;
 
   late final EventChartController event =
       EventChartController(data.timeline, paused: paused);

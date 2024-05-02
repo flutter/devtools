@@ -41,8 +41,11 @@ class ChartVmConnection extends DisposableController
   late final bool isDeviceAndroid;
 
   void maybeInit() async {
-    if (initialized ||
-        !serviceConnection.serviceManager.connectedState.value.connected) {
+    if (initialized) return;
+    initialized = true;
+
+    if (!serviceConnection.serviceManager.connectedState.value.connected) {
+      isDeviceAndroid = false;
       return;
     }
 
@@ -82,8 +85,6 @@ class ChartVmConnection extends DisposableController
         }
       },
     );
-
-    initialized = true;
   }
 
   @override

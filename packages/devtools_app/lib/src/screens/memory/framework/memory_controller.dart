@@ -90,10 +90,10 @@ class MemoryController extends DisposableController
     switch (_mode) {
       case ControllerCreationMode.disconnected:
         // TODO(polina-c): load memory screen in disconnected mode, https://github.com/flutter/devtools/issues/6972
-        await _initializeData();
+        _initializeData();
       case ControllerCreationMode.connected:
         await serviceConnection.serviceManager.onServiceAvailable;
-        await _initializeData(
+        _initializeData(
           diffPaneController: connectedDiff,
           profilePaneController: connectedProfile,
         );
@@ -107,23 +107,23 @@ class MemoryController extends DisposableController
             return OfflineMemoryData.fromJson(data as Map<String, dynamic>);
           },
           shouldLoad: (data) => true,
-          loadData: (data) async => await _initializeData(offlineData: data),
+          loadData: (data) => _initializeData(offlineData: data),
         );
         // [maybeLoadOfflineData] will be a noop if there is no offline data for the memory screen,
         //  so ensure we still call [_initializedData] if it has not been called.
         assert(loaded == _dataInitialized.isCompleted);
         if (_dataInitialized.isCompleted) {
-          await _initializeData();
+          _initializeData();
         }
     }
     assert(_dataInitialized.isCompleted);
   }
 
-  Future<void> _initializeData({
+  void _initializeData({
     OfflineMemoryData? offlineData,
     @visibleForTesting DiffPaneController? diffPaneController,
     @visibleForTesting ProfilePaneController? profilePaneController,
-  }) async {
+  }) {
     assert(!_dataInitialized.isCompleted);
 
     chart = MemoryChartPaneController(_mode, data: offlineData?.chart);
@@ -145,7 +145,6 @@ class MemoryController extends DisposableController
     if (offlineData != null) profile.setFilter(offlineData.filter);
     _shareClassFilterBetweenProfileAndDiff();
 
-    await chart.initialized;
     _dataInitialized.complete();
   }
 
