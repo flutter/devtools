@@ -43,7 +43,7 @@ class ChartVmConnection extends DisposableController
   void maybeInit() async {
     if (initialized) return;
 
-    // We do this check for cases of disconnect, in order to avoid
+    // We do this check for cases of accidental disconnect, in order to avoid
     // failure for initialization of `isDeviceAndroid` next line.
     if (!serviceConnection.serviceManager.connectedState.value.connected) {
       isDeviceAndroid = false;
