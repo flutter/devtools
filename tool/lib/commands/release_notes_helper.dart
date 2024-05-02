@@ -54,7 +54,7 @@ class ReleaseNotesCommand extends Command {
     try {
       await processManager.runAll(
         commands: [
-          CliCommand.git(['checkout', '.']),
+          CliCommand.git(['stash']),
           CliCommand.git(['checkout', 'main']),
           CliCommand.git(['pull']),
           CliCommand.git(['submodule', 'update', '--init', '--recursive']),
