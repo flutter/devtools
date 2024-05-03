@@ -7,6 +7,7 @@ import 'package:args/command_runner.dart';
 import 'package:devtools_tool/commands/build.dart';
 import 'package:devtools_tool/commands/fix_goldens.dart';
 import 'package:devtools_tool/commands/generate_code.dart';
+import 'package:devtools_tool/commands/release_notes_helper.dart';
 import 'package:devtools_tool/commands/serve.dart';
 import 'package:devtools_tool/commands/sync.dart';
 import 'package:devtools_tool/commands/tag_version.dart';
@@ -35,6 +36,7 @@ class DevToolsCommandRunner extends CommandRunner {
     addCommand(ListCommand());
     addCommand(PubGetCommand());
     addCommand(ReleaseHelperCommand());
+    addCommand(ReleaseNotesCommand());
     addCommand(RepoCheckCommand());
     addCommand(RollbackCommand());
     addCommand(ServeCommand());

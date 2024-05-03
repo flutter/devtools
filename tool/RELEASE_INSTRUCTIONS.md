@@ -195,6 +195,15 @@ just released into the Dart SDK (the hash you updated the DEPS file with):
    version for the tag is automatically determined from `packages/devtools/pubspec.yaml`
    so there is no need to manually enter the version.
 
+### Verify and Submit the release notes
+
+1. Follow the instructions outlined in the release notes
+[README.md](https://github.com/flutter/devtools/blob/master/packages/devtools_app/release_notes/README.md)
+to add DevTools release notes to Flutter website and test them in DevTools.
+2. Once release notes are submitted to the Flutter website, send an announcement to
+[g/flutter-internal-announce](http://g/flutter-internal-announce) with a link to
+the new release notes.
+
 ### Prepare DevTools for the next beta release
 1. Update the DevTools version for the next release:
    ```shell
@@ -206,15 +215,6 @@ just released into the Dart SDK (the hash you updated the DEPS file with):
    - See the workflow run [here](https://github.com/flutter/devtools/actions/workflows/daily-dev-bump.yaml)
    - Go to https://github.com/flutter/devtools/pulls to see the pull request that
    ends up being created
-
-### Verify and Submit the release notes
-
-1. Follow the instructions outlined in the release notes
-[README.md](https://github.com/flutter/devtools/blob/master/packages/devtools_app/release_notes/README.md)
-to add DevTools release notes to Flutter website and test them in DevTools.
-2. Once release notes are submitted to the Flutter website, send an announcement to
-[g/flutter-internal-announce](http://g/flutter-internal-announce) with a link to
-the new release notes.
 
 ## Dev release into the Dart SDK master branch
 
