@@ -44,7 +44,7 @@ class ChartVmConnection extends DisposableController
   ///
   /// This method should be called without async gap after validation that
   /// the application is still connected.
-  void maybeInit() async {
+  void init() {
     if (initialized) return;
 
     assert(serviceConnection.serviceManager.connectedState.value.connected);
@@ -74,6 +74,7 @@ class ChartVmConnection extends DisposableController
       chartUpdateDelay,
       () async {
         if (!serviceConnection.serviceManager.connectedState.value.connected) {
+          _polling?.cancel();
           return;
         }
         try {
