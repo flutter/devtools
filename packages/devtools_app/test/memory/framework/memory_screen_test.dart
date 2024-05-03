@@ -78,10 +78,11 @@ void main() {
   const windowSize = Size(2225.0, 1000.0);
 
   group('MemoryScreen', () {
-    setUp(() {
+    setUp(() async {
       setUpServiceManagerForMemory();
       screen = MemoryScreen();
       controller = MemoryController();
+      await controller.initialized;
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {
@@ -95,7 +96,7 @@ void main() {
       (WidgetTester tester) async {
         await pumpMemoryScreen(tester);
 
-        // Verify Memory, Memory Source, and Memory Sources content.
+        // Verify chart is visible.
         expect(find.byTooltip(ChartPaneTooltips.pauseTooltip), findsOneWidget);
         expect(find.byTooltip(ChartPaneTooltips.resumeTooltip), findsOneWidget);
 

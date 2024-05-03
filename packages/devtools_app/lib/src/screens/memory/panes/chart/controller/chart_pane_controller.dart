@@ -99,12 +99,15 @@ class MemoryChartPaneController extends DisposableController
 
   ValueListenable<bool> get isChartVisible => preferences.memory.showChart;
   void _updateChartVisibility() {
-    if (isChartVisible.value &&
-        mode != ControllerCreationMode.offlineData &&
-        serviceConnection.serviceManager.connectedState.value.connected) {
-      _chartConnection!.maybeInit();
-      resume();
+    if (isChartVisible.value && mode != ControllerCreationMode.offlineData) {
+      if (serviceConnection.serviceManager.connectedState.value.connected) {
+        _chartConnection!.maybeInit();
+        resume();
+      } else {
+        data.isDeviceAndroid ??= false;
+      }
     }
+
     _maybeCalculateAndroidChartVisibility();
   }
 
