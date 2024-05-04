@@ -10,10 +10,30 @@ import '../../../../shared/primitives/utils.dart';
 
 /// All Raw data received from the VM or offline data.
 class MemoryTimeline {
+  MemoryTimeline({List<HeapSample>? data}) {
+    this.data = data ?? []; // Not using const because data is mutable.
+  }
+
+  factory MemoryTimeline.fromJson(Map<String, dynamic> json) {
+    return MemoryTimeline(
+      data: (json[_jsonData] as List)
+          .map((e) => HeapSample.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      _jsonData: data.map((e) => e.toJson()).toList(),
+    };
+  }
+
+  static const _jsonData = 'data';
+
   int get endingIndex => data.isNotEmpty ? data.length - 1 : -1;
 
   /// Raw Heap sampling data from the VM.
-  final List<HeapSample> data = [];
+  late final List<HeapSample> data;
 
   /// Notifies that a new Heap sample has been added to the timeline.
   ValueListenable<HeapSample?> get sampleAdded => _sampleAdded;
@@ -42,9 +62,6 @@ class MemoryTimeline {
   final _extensionEvents = <ExtensionEvent>[];
 
   bool get anyPendingExtensionEvents => _extensionEvents.isNotEmpty;
-
-  /// Whether the timeline has been manually paused via the Pause button.
-  bool manuallyPaused = false;
 
   void reset() {
     data.clear();

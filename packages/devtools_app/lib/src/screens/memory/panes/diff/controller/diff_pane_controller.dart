@@ -31,7 +31,7 @@ import 'item_controller.dart';
 class DiffPaneController extends DisposableController {
   DiffPaneController({required this.loader});
 
-  factory DiffPaneController.fromJson(Map<String, dynamic> map) {
+  factory DiffPaneController.fromJson(Map<String, dynamic> json) {
     // TODO(polina-c): implement, https://github.com/flutter/devtools/issues/6972
     return DiffPaneController(loader: null);
   }
@@ -214,7 +214,7 @@ class CoreData {
   ///
   /// This filter is applied to all snapshots.
   ValueListenable<ClassFilter> get classFilter => _classFilter;
-  final _classFilter = ValueNotifier(ClassFilter.empty());
+  final _classFilter = ValueNotifier(ClassFilter.theDefault());
 }
 
 /// Values that can be calculated from [CoreData] and notifiers that take signal

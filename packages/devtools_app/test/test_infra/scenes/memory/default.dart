@@ -147,14 +147,20 @@ class MemoryDefaultScene extends Scene {
         DiffPaneController(loader: HeapGraphLoaderProvided(heapProviders))
           ..derived.applyFilter(showAllFilter);
 
-    final profileController = ProfilePaneController()..setFilter(showAllFilter);
+    final profileController =
+        ProfilePaneController(mode: ControllerCreationMode.connected)
+          ..setFilter(showAllFilter);
 
     controller = MemoryController(
       connectedDiff: diffController,
       connectedProfile: profileController,
-    )
-      ..chart.data.timeline.data.clear()
-      ..chart.data.timeline.data.addAll(memoryJson.data);
+    );
+
+    await controller.initialized;
+
+    controller.chart.data.timeline.data
+      ..clear()
+      ..addAll(memoryJson.data);
   }
 
   @override

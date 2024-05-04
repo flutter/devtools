@@ -59,7 +59,6 @@ class EventChartController extends ChartController {
           displayXLabels: false,
           name: 'Event Pane',
         ) {
-    _setupTraces();
     setFixedYRange(_Sizes.visibleVm, _Sizes.extensions);
     setupData();
 
@@ -75,6 +74,7 @@ class EventChartController extends ChartController {
 
   @override
   void setupData() {
+    _setupTraces();
     final chartDataLength = timestampsLength;
     final dataLength = memoryTimeline.data.length;
 

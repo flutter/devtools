@@ -146,7 +146,7 @@ class MemoryTracker {
 
   void _updateGCEvent(String isolateId, MemoryUsage memoryUsage) {
     _isolateHeaps[isolateId] = memoryUsage;
-    _recalculate(true);
+    _recalculate(fromGC: true);
   }
 
   /// Fetch the Flutter engine's Raster Cache metrics.
@@ -176,7 +176,7 @@ class MemoryTracker {
   ) async =>
       await _isIsolateLive(id) ? usage : null;
 
-  void _recalculate([bool fromGC = false]) async {
+  void _recalculate({bool fromGC = false}) async {
     int used = 0;
     int capacity = 0;
     int external = 0;

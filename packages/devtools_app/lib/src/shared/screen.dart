@@ -166,6 +166,7 @@ enum ScreenMetaData {
 ///
 /// For not-connected mode:
 /// * Override [Screen.buildDisconnectedScreenBody] to build content.
+/// * Set [ScreenMetaData.requiresConnection] to false.
 @immutable
 abstract class Screen {
   const Screen(

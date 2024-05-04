@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../../panes/chart/controller/chart_pane_controller.dart';
+import '../../panes/chart/controller/chart_data.dart';
 import '../../panes/diff/controller/diff_pane_controller.dart';
 import '../../panes/profile/profile_pane_controller.dart';
 import '../../shared/heap/class_filter.dart';
@@ -30,7 +30,7 @@ class OfflineMemoryData {
     return OfflineMemoryData(
       DiffPaneController.fromJson(item(_Json.diffData)),
       ProfilePaneController.fromJson(item(_Json.profileData)),
-      MemoryChartPaneController.fromJson(item(_Json.chartData)),
+      ChartData.fromJson(item(_Json.chartData)),
       ClassFilter.fromJson(item(_Json.classFilter)),
       selectedTab: json[_Json.selectedTab] as int? ?? 0,
     );
@@ -41,7 +41,7 @@ class OfflineMemoryData {
 
   final DiffPaneController diff;
   final ProfilePaneController profile;
-  final MemoryChartPaneController chart;
+  final ChartData chart;
 
   Map<String, dynamic> toJson() {
     return {

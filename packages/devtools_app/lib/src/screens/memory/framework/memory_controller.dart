@@ -8,6 +8,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import '../../../shared/globals.dart';
 import '../../../shared/memory/class_name.dart';
 import '../../../shared/memory/heap_graph_loader.dart';
 import '../../../shared/offline_data.dart';
@@ -36,20 +37,20 @@ class MemoryController extends DisposableController
     @visibleForTesting ProfilePaneController? connectedProfile,
   }) {
     if (connectedDiff != null || connectedProfile != null) {
-      _mode = DevToolsMode.connected;
+      _mode = ControllerCreationMode.connected;
     } else {
       _mode = devToolsMode;
     }
     unawaited(_init(connectedDiff, connectedProfile));
   }
 
-  Future<void> get initialized => _initialized.future;
-  final _initialized = Completer<void>();
+  Future<void> get initialized => _dataInitialized.future;
+  final _dataInitialized = Completer<void>();
 
   /// DevTools mode at the time of creation of the controller.
   ///
   /// DevTools will recreate controller when the mode changes.
-  late final DevToolsMode _mode;
+  late final ControllerCreationMode _mode;
 
   /// Index of the selected feature tab.
   ///
@@ -85,19 +86,20 @@ class MemoryController extends DisposableController
     @visibleForTesting DiffPaneController? connectedDiff,
     @visibleForTesting ProfilePaneController? connectedProfile,
   ) async {
-    assert(!_initialized.isCompleted);
+    assert(!_dataInitialized.isCompleted);
     switch (_mode) {
-      case DevToolsMode.disconnected:
+      case ControllerCreationMode.disconnected:
         // TODO(polina-c): load memory screen in disconnected mode, https://github.com/flutter/devtools/issues/6972
         _initializeData();
-      case DevToolsMode.connected:
+      case ControllerCreationMode.connected:
+        await serviceConnection.serviceManager.onServiceAvailable;
         _initializeData(
           diffPaneController: connectedDiff,
           profilePaneController: connectedProfile,
         );
-      case DevToolsMode.offlineData:
+      case ControllerCreationMode.offlineData:
         assert(connectedDiff == null && connectedProfile == null);
-        await maybeLoadOfflineData(
+        final loaded = await maybeLoadOfflineData(
           ScreenMetaData.memory.id,
           createData: (json) {
             final data = json[_jsonKey];
@@ -109,10 +111,12 @@ class MemoryController extends DisposableController
         );
         // [maybeLoadOfflineData] will be a noop if there is no offline data for the memory screen,
         //  so ensure we still call [_initializedData] if it has not been called.
-        if (!_initialized.isCompleted) _initializeData();
-        assert(_initialized.isCompleted);
+        assert(loaded == _dataInitialized.isCompleted);
+        if (!_dataInitialized.isCompleted) {
+          _initializeData();
+        }
     }
-    assert(_initialized.isCompleted);
+    assert(_dataInitialized.isCompleted);
   }
 
   void _initializeData({
@@ -120,9 +124,9 @@ class MemoryController extends DisposableController
     @visibleForTesting DiffPaneController? diffPaneController,
     @visibleForTesting ProfilePaneController? profilePaneController,
   }) {
-    assert(!_initialized.isCompleted);
+    assert(!_dataInitialized.isCompleted);
 
-    chart = offlineData?.chart ?? MemoryChartPaneController(_mode);
+    chart = MemoryChartPaneController(_mode, data: offlineData?.chart);
     diff = diffPaneController ??
         offlineData?.diff ??
         DiffPaneController(
@@ -130,10 +134,9 @@ class MemoryController extends DisposableController
         );
     profile = profilePaneController ??
         offlineData?.profile ??
-        ProfilePaneController();
+        ProfilePaneController(mode: _mode);
     control = MemoryControlPaneController(
       chart.data.timeline,
-      isChartVisible: chart.isChartVisible,
       exportData: exportData,
     );
     tracing = TracingPaneController();
@@ -142,24 +145,26 @@ class MemoryController extends DisposableController
     if (offlineData != null) profile.setFilter(offlineData.filter);
     _shareClassFilterBetweenProfileAndDiff();
 
-    _initialized.complete();
+    _dataInitialized.complete();
   }
 
   @override
-  OfflineScreenData prepareOfflineScreenData() => OfflineScreenData(
-        screenId: ScreenMetaData.memory.id,
-        data: {
-          // Passing serializable data without conversion to json here
-          // to skip serialization when data are passed in-process.
-          _jsonKey: OfflineMemoryData(
-            diff,
-            profile,
-            chart,
-            profile.classFilter.value,
-            selectedTab: selectedFeatureTabIndex,
-          ),
-        },
-      );
+  OfflineScreenData prepareOfflineScreenData() {
+    return OfflineScreenData(
+      screenId: ScreenMetaData.memory.id,
+      data: {
+        // Passing serializable data without conversion to json here
+        // to skip serialization when data is passed in-process.
+        _jsonKey: OfflineMemoryData(
+          diff,
+          profile,
+          chart.data,
+          profile.classFilter.value,
+          selectedTab: selectedFeatureTabIndex,
+        ),
+      },
+    );
+  }
 
   void _shareClassFilterBetweenProfileAndDiff() {
     diff.derived.applyFilter(profile.classFilter.value);

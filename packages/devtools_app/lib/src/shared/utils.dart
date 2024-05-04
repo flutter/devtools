@@ -274,13 +274,19 @@ class DebounceTimer {
   void cancel() {
     _timer.cancel();
   }
+
+  bool get isCancelled => !_timer.isActive;
+
+  void dispose() {
+    cancel();
+  }
 }
 
 /// Current mode of DevTools.
-DevToolsMode get devToolsMode {
+ControllerCreationMode get devToolsMode {
   return offlineDataController.showingOfflineData.value
-      ? DevToolsMode.offlineData
+      ? ControllerCreationMode.offlineData
       : serviceConnection.serviceManager.hasConnection
-          ? DevToolsMode.connected
-          : DevToolsMode.disconnected;
+          ? ControllerCreationMode.connected
+          : ControllerCreationMode.disconnected;
 }
