@@ -48,7 +48,7 @@ class MemoryChartPaneController extends DisposableController
 
   late final ChartData data;
 
-  late final ChartVmConnection? _chartConnection;
+  ChartVmConnection? _chartConnection;
 
   late final EventChartController event =
       EventChartController(data.timeline, paused: paused);
