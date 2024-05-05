@@ -28,6 +28,25 @@ class ProfilePaneController extends DisposableController
         _rootPackage,
       );
     }
+
+    if (mode == ControllerCreationMode.connected) {
+      autoDisposeStreamSubscription(
+        serviceConnection.serviceManager.service!.onGCEvent.listen((event) {
+          if (refreshOnGc.value) {
+            unawaited(refresh());
+          }
+        }),
+      );
+      addAutoDisposeListener(
+        serviceConnection.serviceManager.isolateManager.selectedIsolate,
+        () {
+          unawaited(refresh());
+        },
+      );
+      unawaited(refresh());
+    }
+
+    _initializeSelection();
   }
 
   factory ProfilePaneController.fromJson(Map<String, dynamic> json) {
@@ -86,34 +105,6 @@ class ProfilePaneController extends DisposableController
 
   late final _rootPackage =
       serviceConnection.serviceManager.rootInfoNow().package;
-
-  final Completer<void> _initialized = Completer<void>();
-
-  void initialize() {
-    if (_initialized.isCompleted) {
-      return;
-    }
-    if (mode == ControllerCreationMode.connected) {
-      autoDisposeStreamSubscription(
-        serviceConnection.serviceManager.service!.onGCEvent.listen((event) {
-          if (refreshOnGc.value) {
-            unawaited(refresh());
-          }
-        }),
-      );
-      addAutoDisposeListener(
-        serviceConnection.serviceManager.isolateManager.selectedIsolate,
-        () {
-          unawaited(refresh());
-        },
-      );
-      unawaited(refresh());
-    }
-
-    _initializeSelection();
-
-    _initialized.complete();
-  }
 
   @visibleForTesting
   void clearCurrentProfile() => _currentAllocationProfile.value = null;
