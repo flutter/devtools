@@ -25,21 +25,16 @@ class MemoryChartPaneController extends DisposableController
         ) {
     if (mode == ControllerCreationMode.connected) {
       this.data = ChartData(mode: ControllerCreationMode.connected);
-      _chartConnection = ChartVmConnection(
-        this.data.timeline,
-        isAndroidChartVisible: isAndroidChartVisible,
-      );
     } else {
       this.data = data!;
-      _chartConnection = null;
       // Setting paused to false, because `recomputeChartData` is noop when it is true.
       _paused.value = false;
       recomputeChartData();
       _paused.value = true;
     }
 
-    _updateChartVisibility();
-    addAutoDisposeListener(isChartVisible, _updateChartVisibility);
+    _maybeUpdateChart();
+    addAutoDisposeListener(isChartVisible, _maybeUpdateChart);
 
     _maybeCalculateAndroidChartVisibility();
     addAutoDisposeListener(
@@ -53,7 +48,7 @@ class MemoryChartPaneController extends DisposableController
 
   late final ChartData data;
 
-  late final ChartVmConnection? _chartConnection;
+  ChartVmConnection? _chartConnection;
 
   late final EventChartController event =
       EventChartController(data.timeline, paused: paused);
@@ -98,12 +93,22 @@ class MemoryChartPaneController extends DisposableController
   }
 
   ValueListenable<bool> get isChartVisible => preferences.memory.showChart;
-  void _updateChartVisibility() {
-    if (isChartVisible.value &&
-        mode != ControllerCreationMode.offlineData &&
-        serviceConnection.serviceManager.connectedState.value.connected) {
-      _chartConnection!.maybeInit();
-      resume();
+
+  void _maybeUpdateChart() {
+    if (!isChartVisible.value) return;
+    if (mode == ControllerCreationMode.connected) {
+      if (_chartConnection == null) {
+        _chartConnection ??= _chartConnection = ChartVmConnection(
+          data.timeline,
+          isAndroidChartVisible: isAndroidChartVisible,
+        );
+        if (serviceConnection.serviceManager.connectedState.value.connected) {
+          _chartConnection!.init();
+          resume();
+        } else {
+          data.isDeviceAndroid ??= false;
+        }
+      }
     }
     _maybeCalculateAndroidChartVisibility();
   }
