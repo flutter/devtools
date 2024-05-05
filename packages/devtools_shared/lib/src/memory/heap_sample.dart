@@ -53,9 +53,9 @@ class HeapSample {
         'used': used,
         'external': external,
         'gc': isGC,
-        'adb_memoryInfo': adbMemoryInfo.toJson(),
-        'memory_eventInfo': memoryEventInfo.toJson(),
-        'raster_cache': rasterCache.toJson(),
+        'adb_memoryInfo': adbMemoryInfo,
+        'memory_eventInfo': memoryEventInfo,
+        'raster_cache': rasterCache,
       };
 
   /// Version of HeapSample JSON payload.

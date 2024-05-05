@@ -17,7 +17,7 @@ import '../../../../../shared/dialogs.dart';
 import '../../../../../shared/primitives/byte_utils.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../controller/diff_pane_controller.dart';
-import '../controller/item_controller.dart';
+import '../controller/snapshot_item.dart';
 
 final _log = Logger('snapshot_list');
 
@@ -206,17 +206,17 @@ class SnapshotListTitle extends StatelessWidget {
       throw StateError('Unknown item type: $theItem');
     }
 
-    return ValueListenableBuilder<bool>(
-      valueListenable: theItem.isProcessing,
-      builder: (_, isProcessing, __) => Padding(
+    return FutureBuilder(
+      future: theItem.process,
+      builder: (_, AsyncSnapshot<void> snapshot) => Padding(
         padding: const EdgeInsets.symmetric(horizontal: denseRowSpacing),
         child: Row(
           children: [
             leading,
-            if (isProcessing)
-              CenteredCircularProgressIndicator(size: smallProgressSize)
+            if (snapshot.hasData)
+              ...trailing
             else
-              ...trailing,
+              CenteredCircularProgressIndicator(size: smallProgressSize),
           ],
         ),
       ),

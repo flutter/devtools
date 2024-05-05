@@ -10,10 +10,11 @@ import '../../../test_infra/scenes/memory/default.dart';
 
 void main() {
   test('Many retaining paths do not jank UI.', () async {
-    final heap = await HeapData.calculate(
+    final heap = HeapData(
       await MemoryDefaultSceneHeaps.manyPaths(),
-      DateTime.now(),
+      created: DateTime.now(),
     );
+    await heap.calculate;
     final data = heap.classes!.list
         .firstWhere((c) => c.className.className == 'TheData');
 

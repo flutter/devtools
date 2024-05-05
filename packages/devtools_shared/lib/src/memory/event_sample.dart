@@ -129,14 +129,6 @@ class ExtensionEvents {
     return ExtensionEvents(events);
   }
 
-  final theEvents = <ExtensionEvent>[];
-
-  bool get isEmpty => theEvents.isEmpty;
-
-  bool get isNotEmpty => theEvents.isNotEmpty;
-
-  void clear() => theEvents.clear();
-
   Map<String, dynamic> toJson() {
     final eventsAsJson = <String, dynamic>{};
     var index = 0;
@@ -147,6 +139,14 @@ class ExtensionEvents {
 
     return eventsAsJson;
   }
+
+  final theEvents = <ExtensionEvent>[];
+
+  bool get isEmpty => theEvents.isEmpty;
+
+  bool get isNotEmpty => theEvents.isNotEmpty;
+
+  void clear() => theEvents.clear();
 
   @override
   String toString() => '[ExtensionEvents = '

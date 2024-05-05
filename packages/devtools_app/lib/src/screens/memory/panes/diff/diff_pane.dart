@@ -15,7 +15,7 @@ import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/simple_items.dart';
 import '../../shared/widgets/shared_memory_widgets.dart';
 import 'controller/diff_pane_controller.dart';
-import 'controller/item_controller.dart';
+import 'controller/snapshot_item.dart';
 import 'widgets/snapshot_control_pane.dart';
 import 'widgets/snapshot_list.dart';
 import 'widgets/snapshot_view.dart';
@@ -154,9 +154,9 @@ Find unexpected memory usage by comparing two heap snapshots:
 
 2. Use one of the following ways to get a **heap snapshot**:
 
-    a. To view current memory allocation click the ● button
+    a. To take snapshot of the connected application click the ● button
 
-    b. To import a snapshot taken with
+    b. To import a snapshot exported from DevTools or taken with
     [auto-snapshotting](https://github.com/dart-lang/leak_tracker/blob/main/doc/USAGE.md) or
     [writeHeapSnapshotToFile](https://api.flutter.dev/flutter/dart-developer/NativeRuntime/writeHeapSnapshotToFile.html)
     click the ![import]($uploadImageUrl) button

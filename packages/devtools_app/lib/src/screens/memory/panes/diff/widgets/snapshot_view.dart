@@ -9,7 +9,7 @@ import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/memory/classes.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../controller/diff_pane_controller.dart';
-import '../controller/item_controller.dart';
+import '../controller/snapshot_item.dart';
 import '../data/classes_diff.dart';
 import 'class_details/class_details.dart';
 import 'classes_table_diff.dart';
@@ -37,7 +37,7 @@ class SnapshotView extends StatelessWidget {
         final classes = controller.derived.classesBeforeFiltering.value;
         if (classes == null) {
           final current = controller.core.selectedItem as SnapshotDataItem;
-          return current.isProcessing.value
+          return current.isProcessed
               ? const SizedBox.shrink()
               : const Center(child: Text('Could not take snapshot.'));
         }

@@ -46,10 +46,10 @@ class OfflineMemoryData {
   Map<String, dynamic> toJson() {
     return {
       _Json.selectedTab: selectedTab,
-      _Json.diffData: diff.toJson(),
-      _Json.profileData: profile.toJson(),
-      _Json.chartData: chart.toJson(),
-      _Json.classFilter: profile.classFilter.value.toJson(),
+      _Json.diffData: diff,
+      _Json.profileData: profile,
+      _Json.chartData: chart,
+      _Json.classFilter: profile.classFilter.value,
     };
   }
 }

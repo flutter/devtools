@@ -53,7 +53,7 @@ class ChartData {
   Map<String, dynamic> toJson() {
     return {
       _Json.isDeviceAndroid: isDeviceAndroid ?? false,
-      _Json.timeline: timeline.toJson(),
+      _Json.timeline: timeline,
       _Json.interval: displayInterval.name,
       _Json.isLegendVisible: isLegendVisible.value,
     };

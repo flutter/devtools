@@ -26,19 +26,62 @@ import '../data/csv.dart';
 import '../data/heap_diff_data.dart';
 import '../data/heap_diff_store.dart';
 import 'class_data.dart';
-import 'item_controller.dart';
+import 'snapshot_item.dart';
+
+class _Json {
+  static const snapshots = 'snapshots';
+  static const diffWith = 'diffWith';
+}
 
 class DiffPaneController extends DisposableController {
-  DiffPaneController({required this.loader});
+  DiffPaneController({
+    required this.loader,
+    List<SnapshotDataItem>? snapshots,
+  }) {
+    if (snapshots != null) {
+      core._snapshots.value.addAll(snapshots);
+    }
+    derived._updateValues();
+  }
 
   factory DiffPaneController.fromJson(Map<String, dynamic> json) {
-    // TODO(polina-c): implement, https://github.com/flutter/devtools/issues/6972
-    return DiffPaneController(loader: null);
+    final snapshots = (json[_Json.snapshots] as List)
+        .map((e) => SnapshotDataItem.fromJson(e))
+        .toList();
+
+    final diffWith = json[_Json.diffWith] as List<int?>;
+
+    for (var i = 0; i < snapshots.length; i++) {
+      final diffIndex = diffWith[i];
+      if (diffIndex != null) {
+        snapshots[i].diffWith.value = snapshots[diffIndex];
+      }
+    }
+
+    return DiffPaneController(
+      loader: null,
+      snapshots: snapshots,
+    );
   }
 
   Map<String, dynamic> toJson() {
-    // TODO(polina-c): implement, https://github.com/flutter/devtools/issues/6972
-    return {};
+    final snapshots = core.snapshots.value
+        .whereType<SnapshotDataItem>()
+        .where((s) => s.heap != null)
+        .toList();
+
+    final snapshotToIndex =
+        snapshots.asMap().map((index, item) => MapEntry(item, index));
+
+    final diffsWith = snapshots.map((item) {
+      final diffWith = item.diffWith.value;
+      return diffWith == null ? null : snapshotToIndex[diffWith];
+    }).toList();
+
+    return {
+      _Json.snapshots: snapshots,
+      _Json.diffWith: diffsWith,
+    };
   }
 
   final HeapGraphLoader? loader;
@@ -330,8 +373,14 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
         assert(classesTableDiff.selection.value == null, details);
       }
 
-      assert((singleClassesToShow.value == null) == singleHidden, details);
-      assert((diffClassesToShow.value == null) == diffHidden, details);
+      assert(
+        (singleClassesToShow.value == null) == singleHidden,
+        '$details, ${singleClassesToShow.value}, $singleHidden',
+      );
+      assert(
+        (diffClassesToShow.value == null) == diffHidden,
+        '$details, ${singleClassesToShow.value}, $singleHidden',
+      );
 
       return true;
     }());
