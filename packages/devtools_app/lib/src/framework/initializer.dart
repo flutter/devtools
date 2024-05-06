@@ -16,6 +16,7 @@ import '../shared/config_specific/import_export/import_export.dart';
 import '../shared/framework_controller.dart';
 import '../shared/globals.dart';
 import '../shared/primitives/utils.dart';
+import '../shared/query_parameters.dart';
 import '../shared/routing.dart';
 import '../shared/ui/colors.dart';
 import 'framework_core.dart';
@@ -182,8 +183,8 @@ class _InitializerState extends State<Initializer>
     );
     hideDisconnectedOverlay();
     final args = <String, String?>{
-      'uri': null,
-      'screen': offlineDataController
+      DevToolsQueryParams.vmServiceUriKey: null,
+      DevToolsQueryParams.offlineScreenIdKey: offlineDataController
           .offlineDataJson[DevToolsExportKeys.activeScreenId.name] as String,
     };
     final routerDelegate = DevToolsRouterDelegate.of(context);
