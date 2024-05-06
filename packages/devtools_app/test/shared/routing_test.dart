@@ -70,7 +70,7 @@ void main() {
   });
 
   void expectConfigArgs([Map<String, String> args = defaultArgs]) {
-    expect(routerDelegate.currentConfiguration!.args, args);
+    expect(routerDelegate.currentConfiguration!.params, args);
   }
 
   group('Route state handler', () {

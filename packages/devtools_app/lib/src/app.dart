@@ -51,6 +51,7 @@ import 'shared/globals.dart';
 import 'shared/offline_data.dart';
 import 'shared/offline_screen.dart';
 import 'shared/primitives/utils.dart';
+import 'shared/query_parameters.dart';
 import 'shared/routing.dart';
 import 'shared/screen.dart';
 import 'shared/ui/hover.dart';
@@ -187,7 +188,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   Page _getPage(
     BuildContext context,
     String? page,
-    Map<String, String?> args,
+    DevToolsQueryParams params,
     DevToolsNavigationState? state,
   ) {
     // `page` will initially be null while the router is set up, then we will
@@ -201,7 +202,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       Widget widget = pages[page]!(
         context,
         page,
-        args,
+        params,
         state,
       );
       assert(
@@ -210,7 +211,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
             builder: (context) => pages[page]!(
               context,
               page,
-              args,
+              params,
               state,
             ),
           );
@@ -224,7 +225,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     return MaterialPage(
       child: DevToolsScaffold.withChild(
         key: const Key('not-found'),
-        embed: isEmbedded(args),
+        embed: params.embed,
         child: PageNotFound(
           page: page,
           routerDelegate: routerDelegate,
@@ -236,18 +237,18 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   Widget _buildTabbedPage(
     BuildContext _,
     String? page,
-    Map<String, String?> params,
+    DevToolsQueryParams queryParams,
     DevToolsNavigationState? __,
   ) {
-    final vmServiceUri = params['uri'];
-    final embed = isEmbedded(params);
-    final hide = {...?params['hide']?.split(',')};
+    final vmServiceUri = queryParams.vmServiceUri;
+    final embed = queryParams.embed;
+    final hiddenScreens = queryParams.hiddenScreens;
 
     // TODO(dantup): We should be able simplify this a little, removing params['page']
     // and only supporting /inspector (etc.) instead of also &page=inspector if
     // all IDEs switch over to those URLs.
     if (page?.isEmpty ?? true) {
-      page = params['page'];
+      page = queryParams.legacyPage;
     }
 
     final connectedToVmService =
@@ -265,7 +266,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         builder: (_, __, child) {
           final screens = _visibleScreens()
               .where((p) => embed && page != null ? p.screenId == page : true)
-              .where((p) => !hide.contains(p.screenId))
+              .where((p) => !hiddenScreens.contains(p.screenId))
               .toList();
           final connectedToFlutterApp =
               serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ??
@@ -316,15 +317,13 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     return _routes ??= {
       homeScreenId: _buildTabbedPage,
       for (final screen in _screens) screen.screenId: _buildTabbedPage,
-      snapshotScreenId: (_, __, args, ___) {
-        final snapshotArgs = OfflineDataArguments.fromArgs(args);
-        final embed = isEmbedded(args);
+      snapshotScreenId: (_, __, params, ___) {
         return DevToolsScaffold.withChild(
           key: UniqueKey(),
-          embed: embed,
+          embed: params.embed,
           child: MultiProvider(
             providers: _providedControllers(offline: true),
-            child: OfflineScreenBody(snapshotArgs, _screens),
+            child: OfflineScreenBody(params.offlineScreenId, _screens),
           ),
         );
       },
@@ -341,8 +340,6 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         type.name: (_, __, args, ___) => type.screen,
     };
   }
-
-  bool isEmbedded(Map<String, String?> args) => args['embed'] == 'true';
 
   Map<String, UrlParametersBuilder>? _routes;
 
@@ -461,7 +458,7 @@ class DevToolsScreen<C extends Object?> {
 typedef UrlParametersBuilder = Widget Function(
   BuildContext,
   String?,
-  Map<String, String?>,
+  DevToolsQueryParams,
   DevToolsNavigationState?,
 );
 

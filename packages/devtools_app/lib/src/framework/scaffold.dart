@@ -18,6 +18,7 @@ import '../shared/console/widgets/console_pane.dart';
 import '../shared/feature_flags.dart';
 import '../shared/framework_controller.dart';
 import '../shared/globals.dart';
+import '../shared/query_parameters.dart';
 import '../shared/routing.dart';
 import '../shared/screen.dart';
 import '../shared/title.dart';
@@ -220,7 +221,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         Router.neglect(context, () {
           routerDelegate.navigateIfNotCurrent(
             _currentScreen.screenId,
-            routerDelegate.currentConfiguration?.args,
+            routerDelegate.currentConfiguration?.params.params,
             routerDelegate.currentConfiguration?.state,
           );
         });
@@ -249,10 +250,10 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
   /// Pushes the snapshot screen for an offline import.
   void _pushSnapshotScreenForImport(String screenId) {
-    final args = {'screen': screenId};
+    final params = {DevToolsQueryParams.offlineScreenIdKey: screenId};
     final routerDelegate = DevToolsRouterDelegate.of(context);
     if (!offlineDataController.showingOfflineData.value) {
-      routerDelegate.navigate(snapshotScreenId, args);
+      routerDelegate.navigate(snapshotScreenId, params);
     } else {
       // If we are already in offline mode, we need to replace the existing page
       // so clicking Back does not go through all of the old snapshots.
@@ -261,7 +262,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       // history entry.
       Router.neglect(
         context,
-        () => routerDelegate.navigate(snapshotScreenId, args),
+        () => routerDelegate.navigate(snapshotScreenId, params),
       );
     }
   }

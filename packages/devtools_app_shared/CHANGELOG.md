@@ -4,6 +4,7 @@
 * Bump `vm_service` dependency to `^14.2.1`.
 * Add a `DTDManager.dispose` method.
 * Fix a race condition during service manager disconnect.
+* Add `IdeThemeQueryParams` extension type for parsing query params.
 
 ## 0.1.1
 * Update `package:dtd` to `^2.1.0`
