@@ -57,7 +57,7 @@ void main() {
 
       expect(
         scene.diffController.core.snapshots.value
-            .where((element) => element.hasData),
+            .where((s) => s is SnapshotDataItem && s.isProcessed),
         hasLength(2),
       );
 

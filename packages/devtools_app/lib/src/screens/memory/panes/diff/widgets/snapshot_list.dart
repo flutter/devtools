@@ -207,19 +207,24 @@ class SnapshotListTitle extends StatelessWidget {
     }
 
     return FutureBuilder(
-      future: theItem.process,
-      builder: (_, AsyncSnapshot<void> snapshot) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: denseRowSpacing),
-        child: Row(
-          children: [
-            leading,
-            if (snapshot.hasData)
-              ...trailing
-            else
-              CenteredCircularProgressIndicator(size: smallProgressSize),
-          ],
-        ),
-      ),
+      future: theItem is SnapshotDataItem ? theItem.process : null,
+      builder: (_, __) {
+        final isProcessing =
+            theItem is SnapshotDataItem ? !theItem.isProcessed : false;
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: denseRowSpacing),
+          child: Row(
+            children: [
+              leading,
+              if (isProcessing)
+                CenteredCircularProgressIndicator(size: smallProgressSize)
+              else
+                ...trailing,
+            ],
+          ),
+        );
+      },
     );
   }
 }

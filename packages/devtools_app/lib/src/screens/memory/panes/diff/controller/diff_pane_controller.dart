@@ -358,7 +358,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
       var diffHidden = true;
       var details = 'no data';
       final item = selectedItem.value;
-      if (item is SnapshotDataItem && item.hasData) {
+      if (item is SnapshotDataItem && item.isProcessed) {
         diffHidden = item.diffWith.value == null;
         singleHidden = !diffHidden;
         details = diffHidden ? 'single' : 'diff';

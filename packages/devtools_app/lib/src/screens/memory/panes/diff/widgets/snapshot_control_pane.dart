@@ -76,7 +76,7 @@ class _DiffDropdown extends StatelessWidget {
 
   List<DropdownMenuItem<SnapshotDataItem>> items() =>
       controller.core.snapshots.value
-          .where((item) => item.hasData)
+          .where((item) => item is SnapshotDataItem && item.isProcessed)
           .cast<SnapshotDataItem>()
           .map(
         (item) {

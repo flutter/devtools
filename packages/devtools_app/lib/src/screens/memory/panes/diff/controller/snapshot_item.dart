@@ -13,22 +13,11 @@ import '../../../../../shared/memory/heap_graph_loader.dart';
 abstract class SnapshotItem extends DisposableController {
   /// Number to show with auto-generated names that may be non unique, like isolate name.
   int? get displayNumber;
-
-  Future<void> get process;
-
-  /// If true, the item contains data, that can be compared and analyzed.
-  bool get hasData;
 }
 
 class SnapshotDocItem extends SnapshotItem {
   @override
   int? get displayNumber => null;
-
-  @override
-  bool get hasData => false;
-
-  @override
-  Future<void> get process => Future.value();
 }
 
 class _Json {
@@ -85,9 +74,6 @@ class SnapshotDataItem extends SnapshotItem implements RenamableItem {
   @override
   final int? displayNumber;
 
-  @override
-  bool get hasData => _heap != null;
-
   Future<void> loadHeap(HeapGraphLoader loader) async {
     assert(_heap == null);
     final (graph, created) = await loader.load();
@@ -108,7 +94,6 @@ class SnapshotDataItem extends SnapshotItem implements RenamableItem {
 
   int? get totalSize => _heap?.footprint?.reachable;
 
-  @override
   Future<void> get process => _processed.future;
   final _processed = Completer<void>();
   bool get isProcessed => _processed.isCompleted;
