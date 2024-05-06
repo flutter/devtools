@@ -38,6 +38,9 @@ bool get enableBeta => enableExperiments || !isExternalBuild;
 const bool _kMemoryOfflineExperiment =
     bool.fromEnvironment('memory_offline_experiment');
 
+const bool _kLoggingImprovementsExperiment =
+    bool.fromEnvironment('logging_improvements_experiment');
+
 // It is ok to have enum-like static only classes.
 // ignore: avoid_classes_with_only_static_members
 /// Flags to hide features under construction.
@@ -70,9 +73,16 @@ abstract class FeatureFlags {
 
   /// Flag to enable DevTools extensions.
   ///
-  /// TODO(https://github.com/flutter/devtools/issues/6443): remove this flag
+  /// TODO(https://github.com/flutter/devztools/issues/6443): remove this flag
   /// once extension support is added in g3.
   static bool devToolsExtensions = isExternalBuild;
+
+  /// Flag to enable the new Logging experience.
+  ///
+  /// https://github.com/flutter/devtools/issues/7703
+
+  static bool loggingImprovements =
+      _kLoggingImprovementsExperiment || enableExperiments;
 
   /// Flag to enable debugging via DAP.
   ///
@@ -87,6 +97,7 @@ abstract class FeatureFlags {
     'widgetRebuildStats': widgetRebuildStats,
     'memoryOffline': memoryOffline,
     'dapDebugging': dapDebugging,
+    'loggingImprovements': loggingImprovements,
   };
 
   /// A helper to print the status of all the feature flags.
