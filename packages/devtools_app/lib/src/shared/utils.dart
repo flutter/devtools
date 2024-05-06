@@ -36,7 +36,7 @@ void debugLogger(String message) {
   );
 }
 
-bool isEmbedded() => ideTheme.embed;
+bool isEmbedded() => ideTheme.embedded;
 
 extension VmExtension on VM {
   List<IsolateRef> isolatesForDevToolsMode() {

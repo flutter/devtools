@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
@@ -41,19 +42,19 @@ class DevToolsScaffold extends StatefulWidget {
     required this.screens,
     this.page,
     List<Widget>? actions,
-    this.embed = false,
+    this.embedMode = EmbedMode.none,
   }) : actions = actions ?? defaultActions();
 
   DevToolsScaffold.withChild({
     Key? key,
     required Widget child,
-    bool embed = false,
+    EmbedMode embedMode = EmbedMode.none,
     List<Widget>? actions,
   }) : this(
           key: key,
           screens: [SimpleScreen(child)],
           actions: actions,
-          embed: embed,
+          embedMode: embedMode,
         );
 
   static List<Widget> defaultActions({Color? color}) => [
@@ -69,7 +70,7 @@ class DevToolsScaffold extends StatefulWidget {
         horizontalPadding.left,
         isEmbedded() ? 2.0 : intermediateSpacing,
         horizontalPadding.right,
-        isEmbedded() ? 0.0 : intermediateSpacing,
+        isEmbedded() ? 2.0 : intermediateSpacing,
       );
 
   // Note: when changing this value, also update `flameChartContainerOffset`
@@ -84,8 +85,11 @@ class DevToolsScaffold extends StatefulWidget {
   /// The page being rendered.
   final String? page;
 
-  /// Whether to render the embedded view (without the header).
-  final bool embed;
+  /// The type of embedding for DevTools.
+  ///
+  /// This may result in rendering the DevTools without the top level tab bar.
+  /// See [EmbedMode].
+  final EmbedMode embedMode;
 
   /// Actions that it's possible to perform in this Scaffold.
   ///
@@ -198,7 +202,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         // Send the page change info to the framework controller (it can then
         // send it on to the devtools server, if one is connected).
         frameworkController.notifyPageChange(
-          PageChangeEvent(screen.screenId, widget.embed),
+          PageChangeEvent(screen.screenId, widget.embedMode),
         );
 
         // Clear error count when navigating to a screen.
@@ -230,7 +234,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
     // Broadcast the initial page.
     frameworkController.notifyPageChange(
-      PageChangeEvent(_currentScreen.screenId, widget.embed),
+      PageChangeEvent(_currentScreen.screenId, widget.embedMode),
     );
   }
 
@@ -309,7 +313,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         final showConsole =
             serviceConnection.serviceManager.connectedAppInitialized &&
                 !offlineDataController.showingOfflineData.value &&
-                _currentScreen.showConsole(widget.embed);
+                _currentScreen.showConsole(widget.embedMode);
 
         return DragAndDrop(
           handleDrop: _importController.importData,
@@ -318,7 +322,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
               context,
             ),
             child: Scaffold(
-              appBar: widget.embed
+              appBar: widget.embedMode == EmbedMode.embedOne
                   ? null
                   : PreferredSize(
                       preferredSize: Size.fromHeight(defaultToolbarHeight),
@@ -360,7 +364,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
               ),
               bottomNavigationBar: StatusLine(
                 currentScreen: _currentScreen,
-                isEmbedded: widget.embed,
+                isEmbedded: widget.embedMode.embedded,
                 isConnected: serviceConnection.serviceManager.hasConnection &&
                     serviceConnection.serviceManager.connectedAppInitialized,
               ),

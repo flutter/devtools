@@ -5,6 +5,7 @@
 * Add a `DTDManager.dispose` method.
 * Fix a race condition during service manager disconnect.
 * Add `IdeThemeQueryParams` extension type for parsing query params.
+* Add `EmbedMode` to enumerate the possible DevTools embedded states.
 
 ## 0.1.1
 * Update `package:dtd` to `^2.1.0`
