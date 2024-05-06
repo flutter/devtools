@@ -203,6 +203,8 @@ void main() {
 
         // Emit a GC event to trigger a refresh.
         fakeService.emitGCEvent();
+        // Time to refresh.
+        await tester.runAsync(() => Future.delayed(const Duration(seconds: 1)));
         await tester.pumpAndSettle();
 
         // Ensure that we have populated the current allocation profile.
