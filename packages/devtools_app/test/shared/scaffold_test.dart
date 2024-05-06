@@ -169,7 +169,7 @@ void main() {
           DevToolsScaffold(page: _screen1.screenId, screens: const [_screen1]),
         ),
       );
-      expect(find.byType(DevToolsAppBar), findsNothing);
+      expect(find.byType(DevToolsAppBar), findsOneWidget);
       expect(find.byKey(_k1), findsOneWidget);
       expect(find.byKey(_t1), findsNothing);
     },
@@ -244,7 +244,7 @@ void main() {
           DevToolsScaffold(
             screens: const [_screen1, _screen2],
             page: _screen2.screenId,
-            embedMode: EmbedMode.embedOne,
+            embedMode: EmbedMode.embedMany,
           ),
         ),
       );
