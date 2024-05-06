@@ -3,9 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 
 extension type DevToolsQueryParams(Map<String, String?> params) {
   static DevToolsQueryParams empty() => DevToolsQueryParams({});
+
+  static DevToolsQueryParams load() => DevToolsQueryParams(loadQueryParams());
 
   DevToolsQueryParams withUpdates(Map<String, String?>? updates) {
     return DevToolsQueryParams({...params, ...?updates});
@@ -16,6 +19,8 @@ extension type DevToolsQueryParams(Map<String, String?> params) {
   bool get embed => ideThemeParams.embed;
 
   Set<String> get hiddenScreens => {...?params[hideScreensKey]?.split(',')};
+
+  bool get hideExtensions => hiddenScreens.contains('extensions');
 
   String? get offlineScreenId => params[offlineScreenIdKey];
 
