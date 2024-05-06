@@ -26,13 +26,13 @@ class StatusLine extends StatelessWidget {
     required this.currentScreen,
     required this.isEmbedded,
     required bool isConnected,
-  }) : highlightWhenConnected = isConnected && !isEmbedded;
+  }) : highlightForConnection = isConnected && !isEmbedded;
 
   final Screen currentScreen;
   final bool isEmbedded;
 
   /// Whether to highlight the footer when DevTools is connected to an app.
-  final bool highlightWhenConnected;
+  final bool highlightForConnection;
 
   static const deviceInfoTooltip = 'Device Info';
 
@@ -47,7 +47,7 @@ class StatusLine extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = highlightWhenConnected ? theme.colorScheme.onPrimary : null;
+    final color = highlightForConnection ? theme.colorScheme.onPrimary : null;
     final height = statusLineHeight + padding.top + padding.bottom;
     return ValueListenableBuilder<bool>(
       valueListenable: currentScreen.showIsolateSelector,
@@ -56,7 +56,7 @@ class StatusLine extends StatelessWidget {
           style: TextStyle(color: color),
           child: Container(
             decoration: BoxDecoration(
-              color: highlightWhenConnected ? theme.colorScheme.primary : null,
+              color: highlightForConnection ? theme.colorScheme.primary : null,
               border: Border(
                 top: Divider.createBorderSide(context, width: 1.0),
               ),
@@ -76,7 +76,7 @@ class StatusLine extends StatelessWidget {
 
   List<Widget> _getStatusItems(BuildContext context, bool showIsolateSelector) {
     final theme = Theme.of(context);
-    final color = highlightWhenConnected ? theme.colorScheme.onPrimary : null;
+    final color = highlightForConnection ? theme.colorScheme.onPrimary : null;
     final screenWidth = ScreenSize(context).width;
     final Widget? pageStatus = currentScreen.buildStatus(context);
     final widerThanXxs = screenWidth > MediaSize.xxs;
@@ -89,14 +89,14 @@ class StatusLine extends StatelessWidget {
           DocumentationLink(
             screen: currentScreen,
             screenWidth: screenWidth,
-            highlightWhenConnected: highlightWhenConnected,
+            highlightForConnection: highlightForConnection,
           ),
           if (showVideoTutorial) ...[
             BulletSpacer(color: color),
             VideoTutorialLink(
               screenMetaData: screenMetaData!,
               screenWidth: screenWidth,
-              highlightWhenConnected: highlightWhenConnected,
+              highlightForConnection: highlightForConnection,
             ),
           ],
         ],
@@ -138,7 +138,7 @@ class StatusLine extends StatelessWidget {
             description = vm.deviceDisplay;
           }
 
-          final color = highlightWhenConnected
+          final color = highlightForConnection
               ? theme.colorScheme.onPrimary
               : theme.regularTextStyle.color;
 
@@ -164,7 +164,7 @@ class StatusLine extends StatelessWidget {
                 message: 'Connected device',
                 child: Text(
                   description,
-                  style: highlightWhenConnected
+                  style: highlightForConnection
                       ? theme.regularTextStyle
                           .copyWith(color: theme.colorScheme.onPrimary)
                       : theme.regularTextStyle,
@@ -200,19 +200,19 @@ class DocumentationLink extends StatelessWidget {
     super.key,
     required this.screen,
     required this.screenWidth,
-    required this.highlightWhenConnected,
+    required this.highlightForConnection,
   });
 
   final Screen screen;
 
   final MediaSize screenWidth;
 
-  final bool highlightWhenConnected;
+  final bool highlightForConnection;
 
   @override
   Widget build(BuildContext context) {
     final color =
-        highlightWhenConnected ? Theme.of(context).colorScheme.onPrimary : null;
+        highlightForConnection ? Theme.of(context).colorScheme.onPrimary : null;
     final docPageId = screen.docPageId ?? '';
     return LinkIconLabel(
       icon: Icons.library_books_outlined,
@@ -235,21 +235,21 @@ class VideoTutorialLink extends StatelessWidget {
     super.key,
     required this.screenMetaData,
     required this.screenWidth,
-    required this.highlightWhenConnected,
+    required this.highlightForConnection,
   });
 
   final ScreenMetaData screenMetaData;
 
   final MediaSize screenWidth;
 
-  final bool highlightWhenConnected;
+  final bool highlightForConnection;
 
   static const _devToolsYouTubeVideoUrl = 'https://youtu.be/_EYk-E29edo';
 
   @override
   Widget build(BuildContext context) {
     final color =
-        highlightWhenConnected ? Theme.of(context).colorScheme.onPrimary : null;
+        highlightForConnection ? Theme.of(context).colorScheme.onPrimary : null;
     return LinkIconLabel(
       icon: Icons.ondemand_video_rounded,
       link: Link(
