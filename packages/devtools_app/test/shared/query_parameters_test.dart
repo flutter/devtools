@@ -25,7 +25,7 @@ void main() {
 
       expect(params.vmServiceUri, 'some_uri');
       expect(params.embed, true);
-      expect(params.hiddenScreens, {'foo', 'bar', 'baz'});
+      expect(params.hiddenScreens, {'foo', 'bar', 'extensions'});
       expect(params.hideExtensions, true);
       expect(params.offlineScreenId, 'performance');
       expect(params.legacyPage, 'memory');
