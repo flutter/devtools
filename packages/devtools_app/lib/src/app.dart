@@ -244,7 +244,6 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   ) {
     final vmServiceUri = queryParams.vmServiceUri;
     final embedMode = queryParams.embedMode;
-    final hiddenScreens = queryParams.hiddenScreens;
 
     // TODO(dantup): We should be able simplify this a little, removing params['page']
     // and only supporting /inspector (etc.) instead of also &page=inspector if
@@ -268,26 +267,37 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         builder: (_, __, child) {
           final screens = _visibleScreens()
               .where(
-                (s) => _maybeIncludeOnlyEmbeddedScreen(
+                (s) => maybeIncludeOnlyEmbeddedScreen(
                   s,
                   page: page,
                   embedMode: embedMode,
                 ),
               )
-              .where((s) => !hiddenScreens.contains(s.screenId))
               .toList();
-          if (queryParams.hideExtensions) {
-            screens.removeWhere((s) => s is ExtensionScreen);
-          }
-          final connectedToFlutterApp =
-              serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ??
-                  false;
-          final connectedToDartWebApp =
-              serviceConnection.serviceManager.connectedApp?.isDartWebAppNow ??
-                  false;
-          return MultiProvider(
-            providers: _providedControllers(),
-            child: DevToolsScaffold(
+
+          removeHiddenScreens(screens, queryParams);
+
+          DevToolsScaffold scaffold;
+          if (screens.isEmpty) {
+            // TODO(https://github.com/dart-lang/pub-dev/issues/7216): add an
+            // extensions store or a link to a pub.dev query for packages with
+            // extensions.
+            scaffold = DevToolsScaffold.withChild(
+              embedMode: embedMode,
+              child: CenteredMessage(
+                'No DevTools '
+                '${queryParams.hideAllExceptExtensions ? 'extensions' : 'screens'} '
+                'available for your project.',
+              ),
+            );
+          } else {
+            final connectedToFlutterApp = serviceConnection
+                    .serviceManager.connectedApp?.isFlutterAppNow ??
+                false;
+            final connectedToDartWebApp = serviceConnection
+                    .serviceManager.connectedApp?.isDartWebAppNow ??
+                false;
+            scaffold = DevToolsScaffold(
               embedMode: embedMode,
               page: page,
               screens: screens,
@@ -310,7 +320,11 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
                       ],
                       ...DevToolsScaffold.defaultActions(),
                     ],
-            ),
+            );
+          }
+          return MultiProvider(
+            providers: _providedControllers(),
+            child: scaffold,
           );
         },
       );
@@ -323,23 +337,6 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
             builder: (_) => scaffoldBuilder(),
           )
         : scaffoldBuilder();
-  }
-
-  /// Helper function that will be used in a 'List.where' call to generate a
-  /// list of [Screen]s to pass to a [DevToolsScaffold].
-  ///
-  /// When [embedMode] is [EmbedMode.embedOne], this method will return true
-  /// only when [screen] matches the specified [page]. Otherwise, this method
-  /// will return true for any [screen].
-  bool _maybeIncludeOnlyEmbeddedScreen(
-    Screen screen, {
-    required String? page,
-    required EmbedMode embedMode,
-  }) {
-    if (embedMode == EmbedMode.embedOne && page != null) {
-      return screen.screenId == page;
-    }
-    return true;
   }
 
   /// The pages that the app exposes.
@@ -435,6 +432,46 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       scrollBehavior:
           const MaterialScrollBehavior().copyWith(scrollbars: !kIsWeb),
     );
+  }
+
+  /// Helper function that will be used in a 'List.where' call to generate a
+  /// list of [Screen]s to pass to a [DevToolsScaffold].
+  ///
+  /// When [embedMode] is [EmbedMode.embedOne], this method will return true
+  /// only when [screen] matches the specified [page]. Otherwise, this method
+  /// will return true for any [screen].
+  @visibleForTesting
+  static bool maybeIncludeOnlyEmbeddedScreen(
+    Screen screen, {
+    required String? page,
+    required EmbedMode embedMode,
+  }) {
+    if (embedMode == EmbedMode.embedOne && page != null) {
+      return screen.screenId == page;
+    }
+    return true;
+  }
+
+  /// Helper function that removes any hidden screens from [screens] based on
+  /// the value of the 'hide' query parameter in [params].
+  @visibleForTesting
+  static void removeHiddenScreens(
+    List<Screen> screens,
+    DevToolsQueryParams params,
+  ) {
+    screens.removeWhere((s) => params.hiddenScreens.contains(s.screenId));
+
+    // When 'hide=extensions' is in the query parameters, this remove all
+    // extension screens.
+    if (params.hideExtensions) {
+      screens.removeWhere((s) => s is ExtensionScreen);
+    }
+
+    // When 'hide=all-except-extensions' is in the query parameters, this
+    // is an extensions-only view.
+    if (params.hideAllExceptExtensions) {
+      screens.removeWhere((s) => s is! ExtensionScreen);
+    }
   }
 }
 

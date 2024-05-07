@@ -27,7 +27,10 @@ extension type DevToolsQueryParams(Map<String, String?> params) {
 
   Set<String> get hiddenScreens => {...?params[hideScreensKey]?.split(',')};
 
-  bool get hideExtensions => hiddenScreens.contains('extensions');
+  bool get hideExtensions => hiddenScreens.contains(hideExtensionsValue);
+
+  bool get hideAllExceptExtensions =>
+      hiddenScreens.contains(hideAllExceptExtensionsValue);
 
   String? get offlineScreenId => params[offlineScreenIdKey];
 
@@ -38,6 +41,8 @@ extension type DevToolsQueryParams(Map<String, String?> params) {
 
   static const vmServiceUriKey = 'uri';
   static const hideScreensKey = 'hide';
+  static const hideExtensionsValue = 'extensions';
+  static const hideAllExceptExtensionsValue = 'all-except-extensions';
   static const offlineScreenIdKey = 'screen';
   static const inspectorRefKey = 'inspectorRef';
 

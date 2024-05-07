@@ -43,7 +43,7 @@ class DevToolsScaffold extends StatefulWidget {
     this.page,
     List<Widget>? actions,
     this.embedMode = EmbedMode.none,
-  }) : actions = actions ?? defaultActions();
+  }) : actions = actions ?? (embedMode.embedded ? [] : defaultActions());
 
   DevToolsScaffold.withChild({
     Key? key,
@@ -95,7 +95,7 @@ class DevToolsScaffold extends StatefulWidget {
   /// Actions that it's possible to perform in this Scaffold.
   ///
   /// These will generally be [RegisteredServiceExtensionButton]s.
-  final List<Widget>? actions;
+  final List<Widget> actions;
 
   @override
   State<StatefulWidget> createState() => DevToolsScaffoldState();
@@ -315,7 +315,11 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
             serviceConnection.serviceManager.connectedAppInitialized &&
                 !offlineDataController.showingOfflineData.value &&
                 _currentScreen.showConsole(widget.embedMode);
-
+        final containsSingleSimpleScreen =
+            widget.screens.length == 1 && widget.screens.first is SimpleScreen;
+        final showAppBar = widget.embedMode == EmbedMode.none ||
+            (widget.embedMode == EmbedMode.embedMany &&
+                !containsSingleSimpleScreen);
         return DragAndDrop(
           handleDrop: _importController.importData,
           child: KeyboardShortcuts(
@@ -323,9 +327,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
               context,
             ),
             child: Scaffold(
-              appBar: widget.embedMode == EmbedMode.embedOne
-                  ? null
-                  : PreferredSize(
+              appBar: showAppBar
+                  ? PreferredSize(
                       preferredSize: Size.fromHeight(defaultToolbarHeight),
                       // Place the AppBar inside of a Hero widget to keep it the same across
                       // route transitions.
@@ -337,7 +340,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
                           actions: widget.actions,
                         ),
                       ),
-                    ),
+                    )
+                  : null,
               body: OutlineDecoration.onlyTop(
                 child: Padding(
                   padding: widget.appPadding,

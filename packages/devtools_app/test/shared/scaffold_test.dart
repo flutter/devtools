@@ -5,6 +5,7 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/framework/scaffold.dart';
 import 'package:devtools_app/src/shared/framework_controller.dart';
+import 'package:devtools_app/src/shared/query_parameters.dart';
 import 'package:devtools_app/src/shared/survey.dart';
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/shared.dart';
@@ -45,7 +46,7 @@ void main() {
     setGlobal(BannerMessagesController, BannerMessagesController());
   });
 
-  Widget wrapScaffold(Widget child) {
+  Widget wrapScaffold(Widget child, {DevToolsQueryParams? queryParams}) {
     return wrapWithControllers(
       child,
       analytics: AnalyticsController(
@@ -54,6 +55,7 @@ void main() {
         consentMessage: 'fake message',
       ),
       releaseNotes: ReleaseNotesController(),
+      queryParams: queryParams,
     );
   }
 
@@ -237,18 +239,58 @@ void main() {
   );
 
   testWidgets(
+    'hides the app bar for EmbedMode.embedMany with a single simple screen',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        wrapScaffold(
+          DevToolsScaffold.withChild(
+            embedMode: EmbedMode.embedMany,
+            child: const Center(child: Text('some message')),
+          ),
+        ),
+      );
+      expect(find.byType(DevToolsAppBar), findsNothing);
+    },
+  );
+
+  testWidgets(
     'shows the app bar for EmbedMode.embedMany',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         wrapScaffold(
           DevToolsScaffold(
-            screens: const [_screen1, _screen2],
+            screens: const [_screen2],
             page: _screen2.screenId,
             embedMode: EmbedMode.embedMany,
           ),
         ),
       );
       expect(find.byType(DevToolsAppBar), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'uses empty actions as default when embedded',
+    (WidgetTester tester) async {
+      var scaffold = DevToolsScaffold(
+        screens: const [_screen1, _screen2],
+        page: _screen1.screenId,
+      );
+      expect(scaffold.actions.length, 4);
+
+      scaffold = DevToolsScaffold(
+        screens: const [_screen1, _screen2],
+        page: _screen1.screenId,
+        embedMode: EmbedMode.embedOne,
+      );
+      expect(scaffold.actions, isEmpty);
+
+      scaffold = DevToolsScaffold(
+        screens: const [_screen1, _screen2],
+        page: _screen1.screenId,
+        embedMode: EmbedMode.embedMany,
+      );
+      expect(scaffold.actions, isEmpty);
     },
   );
 }
