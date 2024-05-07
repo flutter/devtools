@@ -7,8 +7,9 @@
 @JS()
 library;
 
+import 'dart:js_interop';
+
 import 'package:flutter/foundation.dart';
-import 'package:js/js.dart';
 
 import '../../shared/development_helpers.dart';
 import 'analytics.dart' as ga;

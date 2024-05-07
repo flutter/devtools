@@ -8,9 +8,9 @@
 library;
 
 import 'dart:async';
+import 'dart:js_interop';
 
 import 'package:flutter/foundation.dart';
-import 'package:js/js.dart';
 import 'package:logging/logging.dart';
 import 'package:unified_analytics/unified_analytics.dart' as ua;
 import 'package:web/web.dart';
