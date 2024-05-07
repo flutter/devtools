@@ -49,22 +49,18 @@ final _log = Logger('_analytics_web');
 @JS('initializeGA')
 external void initializeGA();
 
-@JS()
-@anonymous
-class GtagEventDevTools extends GtagEvent {
+extension type GtagEventDevTools._(JSObject _) implements GtagEvent {
   // TODO(kenz): try to make this accept a JSON map of extra parameters rather
   // than a fixed list of fields. See
   // https://github.com/flutter/devtools/pull/3281#discussion_r692376353.
-  external factory GtagEventDevTools({
+  external  GtagEventDevTools({
     String? event_category,
     String? event_label, // Event e.g., gaScreenViewEvent, gaSelectEvent, etc.
     String? send_to, // UA ID of target GA property to receive event data.
 
     int value,
     bool non_interaction,
-    // This code is going away so not worth cleaning up to be free of dynamic.
-    // ignore: avoid-dynamic
-    dynamic custom_map,
+    Object? custom_map,
 
     // NOTE: Do not reorder any of these. Order here must match the order in the
     // Google Analytics console.
@@ -113,72 +109,39 @@ class GtagEventDevTools extends GtagEvent {
     int? inspector_tree_controller_id, // metric12
   });
 
-  @override
   external String? get event_category;
-
-  @override
   external String? get event_label;
-
-  @override
   external String? get send_to;
-
-  @override
   external int get value; // Positive number.
-
-  @override
   external bool get non_interaction;
-
-  @override
   external Object get custom_map;
 
   // Custom dimensions:
   external String? get user_app;
-
   external String? get user_build;
-
   external String? get user_platform;
-
   external String? get devtools_platform;
-
   external String? get devtools_chrome;
-
   external String? get devtools_version;
-
   external String? get ide_launched;
-
   external String? get flutter_client_id;
-
   external String? get is_external_build;
-
   external String? get is_embedded;
-
   external String? get g3_username;
-
   external String? get ide_launched_feature;
 
   // Custom metrics:
   external int? get ui_duration_micros;
-
   external int? get raster_duration_micros;
-
   external int? get shader_compilation_duration_micros;
-
   external int? get cpu_sample_count;
-
   external int? get cpu_stack_depth;
-
   external int? get trace_event_count;
-
   external int? get heap_diff_objects_before;
-
   external int? get heap_diff_objects_after;
-
   external int? get heap_objects_total;
-
   external int? get root_set_count;
-
   external int? get row_count;
-
   external int? get inspector_tree_controller_id;
 }
 
@@ -318,10 +281,8 @@ GtagExceptionDevTools _gtagException(
   );
 }
 
-@JS()
-@anonymous
-class GtagExceptionDevTools extends GtagException {
-  external factory GtagExceptionDevTools({
+extension type GtagExceptionDevTools._(JSObject _) implements GtagException {
+  external GtagExceptionDevTools({
     String? description,
     bool fatal,
 
@@ -371,59 +332,35 @@ class GtagExceptionDevTools extends GtagException {
     int? inspector_tree_controller_id, // metric12
   });
 
-  @override
   external String? get description; // Description of the error.
-  @override
   external bool get fatal; // Fatal error.
 
   // Custom dimensions:
   external String? get user_app;
-
   external String? get user_build;
-
   external String? get user_platform;
-
   external String? get devtools_platform;
-
   external String? get devtools_chrome;
-
   external String? get devtools_version;
-
   external String? get ide_launched;
-
   external String? get flutter_client_id;
-
   external String? get is_external_build;
-
   external String? get is_embedded;
-
   external String? get g3_username;
-
   external String? get ide_launched_feature;
 
   // Custom metrics:
   external int? get ui_duration_micros;
-
   external int? get raster_duration_micros;
-
   external int? get shader_compilation_duration_micros;
-
   external int? get cpu_sample_count;
-
   external int? get cpu_stack_depth;
-
   external int? get trace_event_count;
-
   external int? get heap_diff_objects_before;
-
   external int? get heap_diff_objects_after;
-
   external int? get heap_objects_total;
-
   external int? get root_set_count;
-
   external int? get row_count;
-
   external int? get inspector_tree_controller_id;
 }
 
