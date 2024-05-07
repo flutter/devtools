@@ -114,8 +114,8 @@ class ExtensionEvent {
 }
 
 class ExtensionEvents {
-  ExtensionEvents(List<ExtensionEvent> events) {
-    theEvents.addAll(events);
+  ExtensionEvents(List<ExtensionEvent> items) {
+    events.addAll(items);
   }
 
   factory ExtensionEvents.fromJson(Map<String, Object> json) {
@@ -132,7 +132,7 @@ class ExtensionEvents {
   Map<String, dynamic> toJson() {
     final eventsAsJson = <String, dynamic>{};
     var index = 0;
-    for (var event in theEvents) {
+    for (var event in events) {
       eventsAsJson['$index'] = event.toJson();
       index++;
     }
@@ -140,13 +140,13 @@ class ExtensionEvents {
     return eventsAsJson;
   }
 
-  final theEvents = <ExtensionEvent>[];
+  final events = <ExtensionEvent>[];
 
-  bool get isEmpty => theEvents.isEmpty;
+  bool get isEmpty => events.isEmpty;
 
-  bool get isNotEmpty => theEvents.isNotEmpty;
+  bool get isNotEmpty => events.isNotEmpty;
 
-  void clear() => theEvents.clear();
+  void clear() => events.clear();
 
   @override
   String toString() => '[ExtensionEvents = '
@@ -163,12 +163,12 @@ class EventSample {
     this.extensionEvents,
   );
 
-  EventSample.gcEvent(this.timestamp, {ExtensionEvents? events})
+  EventSample.gcEvent(this.timestamp, {ExtensionEvents? theEvents})
       : isEventGC = true,
         isEventSnapshot = false,
         isEventSnapshotAuto = false,
         allocationAccumulator = null,
-        extensionEvents = events;
+        extensionEvents = theEvents;
 
   EventSample.snapshotEvent(
     this.timestamp, {

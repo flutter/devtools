@@ -123,7 +123,7 @@ class MemoryTimeline {
     _eventSamples.add(
       EventSample.gcEvent(
         timestamp,
-        events: extensionEvents,
+        theEvents: extensionEvents,
       ),
     );
   }
