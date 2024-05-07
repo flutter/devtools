@@ -27,6 +27,8 @@ extension type DevToolsQueryParams(Map<String, String?> params) {
 
   Set<String> get hiddenScreens => {...?params[hideScreensKey]?.split(',')};
 
+  bool get hideExtensions => hiddenScreens.contains('extensions');
+
   String? get offlineScreenId => params[offlineScreenIdKey];
 
   String? get inspectorRef => params[inspectorRefKey];

@@ -276,6 +276,9 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
               )
               .where((s) => !hiddenScreens.contains(s.screenId))
               .toList();
+          if (queryParams.hideExtensions) {
+            screens.removeWhere((s) => s is ExtensionScreen);
+          }
           final connectedToFlutterApp =
               serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ??
                   false;
