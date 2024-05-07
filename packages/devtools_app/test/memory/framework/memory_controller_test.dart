@@ -26,8 +26,6 @@ Future<void> pumpScene(WidgetTester tester, MemoryDefaultScene scene) async {
   await scene.pump(tester);
 
   await tester.tap(find.byKey(MemoryScreenKeys.diffTab));
-  await tester.runAsync(() => Future.delayed(const Duration(seconds: 4)));
-  await tester.pump();
   await tester.pumpAndSettle();
 }
 
