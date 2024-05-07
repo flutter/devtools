@@ -327,7 +327,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
 
   /// Helper function that will be used in a 'List.where' call to generate a
   /// list of [Screen]s to pass to a [DevToolsScaffold].
-  /// 
+  ///
   /// When [embedMode] is [EmbedMode.embedOne], this method will return true
   /// only when [screen] matches the specified [page]. Otherwise, this method
   /// will return true for any [screen].
