@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
@@ -37,7 +38,7 @@ class InspectorScreen extends Screen {
   // There is not enough room to safely show the console in the embed view of
   // the DevTools and IDEs have their own consoles.
   @override
-  bool showConsole(bool embed) => !embed;
+  bool showConsole(EmbedMode embedMode) => !embedMode.embedded;
 
   @override
   String get docPageId => screenId;

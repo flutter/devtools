@@ -19,7 +19,7 @@ import '../service/vm_service_wrapper.dart';
 import 'diagnostics/diagnostics_node.dart';
 import 'globals.dart';
 import 'primitives/listenable.dart';
-import 'primitives/utils.dart';
+import 'query_parameters.dart';
 
 class ErrorBadgeManager extends DisposableController
     with AutoDisposeControllerMixin {
@@ -92,8 +92,8 @@ class ErrorBadgeManager extends DisposableController
     }
 
     final queryParams =
-        devToolsQueryParams(devToolsUrlNode.getStringMember('value')!);
-    final inspectorRef = queryParams['inspectorRef'] ?? '';
+        DevToolsQueryParams.fromUrl(devToolsUrlNode.getStringMember('value')!);
+    final inspectorRef = queryParams.inspectorRef ?? '';
 
     return InspectableWidgetError(errorMessage, inspectorRef);
   }

@@ -18,9 +18,9 @@ import 'screen.dart';
 /// This screen can be displayed both when DevTools is and is not connected to
 /// an app.
 class OfflineScreenBody extends StatefulWidget {
-  const OfflineScreenBody(this.args, this.possibleScreens, {super.key});
+  const OfflineScreenBody(this.screenId, this.possibleScreens, {super.key});
 
-  final OfflineDataArguments args;
+  final String? screenId;
 
   /// All possible screens, both visible and hidden, that DevTools was started
   /// with.
@@ -58,7 +58,7 @@ class _OfflineScreenBodyState extends State<OfflineScreenBody>
   @override
   void didUpdateWidget(OfflineScreenBody oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.args != oldWidget.args ||
+    if (widget.screenId != oldWidget.screenId ||
         widget.possibleScreens != oldWidget.possibleScreens) {
       _initScreen();
     }
@@ -66,7 +66,7 @@ class _OfflineScreenBodyState extends State<OfflineScreenBody>
 
   void _initScreen() {
     _screen = widget.possibleScreens.firstWhereOrNull(
-      (s) => s.screenId == widget.args.screenId,
+      (s) => s.screenId == widget.screenId,
     );
   }
 
@@ -74,7 +74,7 @@ class _OfflineScreenBodyState extends State<OfflineScreenBody>
   Widget build(BuildContext context) {
     return _screen != null
         ? _screen!.build(context)
-        : _OfflineLoadError(screenId: widget.args.screenId);
+        : _OfflineLoadError(screenId: widget.screenId);
   }
 }
 
@@ -95,13 +95,4 @@ class _OfflineLoadError extends StatelessWidget {
       ],
     );
   }
-}
-
-class OfflineDataArguments {
-  OfflineDataArguments(this.screenId);
-
-  OfflineDataArguments.fromArgs(Map<String, String?> args)
-      : this(args['screen']);
-
-  final String? screenId;
 }

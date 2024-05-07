@@ -4,6 +4,7 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/standalone_ui/vs_code/flutter_panel.dart';
+import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
@@ -48,7 +49,7 @@ class VsCodeScene extends Scene {
     return IdeTheme(
       backgroundColor: vsCodeTheme.editorBackgroundColor,
       foregroundColor: vsCodeTheme.foregroundColor,
-      embed: true,
+      embedMode: EmbedMode.embedOne,
     );
   }
 

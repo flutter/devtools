@@ -8,6 +8,7 @@
 import 'dart:async';
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/helpers.dart';
@@ -356,7 +357,7 @@ MaterialApp
 
       test('disables hover eval mode by default when embedded', () async {
         await env.setupEnvironment();
-        setGlobal(IdeTheme, IdeTheme(embed: true));
+        setGlobal(IdeTheme, IdeTheme(embedMode: EmbedMode.embedOne));
         expect(inspectorService!.hoverEvalModeEnabledByDefault, isFalse);
       });
 

@@ -13,6 +13,7 @@ import 'package:flutter/services.dart';
 import '../framework/framework_core.dart';
 import 'globals.dart';
 import 'primitives/utils.dart';
+import 'query_parameters.dart';
 
 const memoryAnalysisScreenId = 'memoryanalysis';
 
@@ -21,10 +22,10 @@ const snapshotScreenId = 'snapshot';
 
 /// Represents a Page/route for a DevTools screen.
 class DevToolsRouteConfiguration {
-  DevToolsRouteConfiguration(this.page, this.args, this.state);
+  DevToolsRouteConfiguration(this.page, this.params, this.state);
 
   final String page;
-  final Map<String, String?> args;
+  final DevToolsQueryParams params;
   final DevToolsNavigationState? state;
 }
 
@@ -73,7 +74,7 @@ class DevToolsRouteInformationParser
     final path = uri.path.isNotEmpty ? uri.path.substring(1) : '';
     final configuration = DevToolsRouteConfiguration(
       path,
-      uri.queryParameters,
+      DevToolsQueryParams(uri.queryParameters),
       _navigationStateFromRouteInformation(routeInformation),
     );
     return SynchronousFuture<DevToolsRouteConfiguration>(configuration);
@@ -87,7 +88,7 @@ class DevToolsRouteInformationParser
     // the opposite of what's done in [parseRouteInformation]).
     final path = '/${configuration.page}';
     // Create a new map in case the one we were given was unmodifiable.
-    final params = {...configuration.args};
+    final params = {...configuration.params.params};
     params.removeWhere((key, value) => value == null);
     return RouteInformation(
       uri: Uri(path: path, queryParameters: params),
@@ -129,7 +130,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   final Page Function(
     BuildContext,
     String?,
-    Map<String, String?>,
+    DevToolsQueryParams,
     DevToolsNavigationState?,
   ) _getPage;
 
@@ -147,12 +148,12 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   Widget build(BuildContext context) {
     final routeConfig = currentConfiguration;
     final page = routeConfig?.page;
-    final args = routeConfig?.args ?? {};
+    final params = routeConfig?.params ?? DevToolsQueryParams.empty();
     final state = routeConfig?.state;
 
     return Navigator(
       key: navigatorKey,
-      pages: [_getPage(context, page, args, state)],
+      pages: [_getPage(context, page, params, state)],
       onPopPage: (_, __) {
         if (_routes.length <= 1) {
           return false;
@@ -194,17 +195,18 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     Map<String, String?>? argUpdates,
     DevToolsNavigationState? state,
   ]) {
-    final newArgs = {...currentConfiguration?.args ?? {}, ...?argUpdates};
+    final newParams = currentConfiguration?.params.withUpdates(argUpdates) ??
+        DevToolsQueryParams.empty();
 
     // Ensure we disconnect from any previously connected applications if we do
     // not have a vm service uri as a query parameter, unless we are loading an
     // offline file.
-    if (page != snapshotScreenId && newArgs['uri'] == null) {
+    if (page != snapshotScreenId && newParams.vmServiceUri == null) {
       unawaited(serviceConnection.serviceManager.manuallyDisconnect());
     }
 
     _replaceStack(
-      DevToolsRouteConfiguration(page, newArgs, state),
+      DevToolsRouteConfiguration(page, newParams, state),
     );
     notifyListeners();
   }
@@ -249,7 +251,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
 
     final currentConfig = currentConfiguration!;
     final currentPage = currentConfig.page;
-    final newArgs = {...currentConfig.args, ...argUpdates};
+    final newArgs = currentConfig.params.withUpdates(argUpdates);
     _replaceStack(
       DevToolsRouteConfiguration(
         currentPage,
@@ -265,14 +267,14 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     _replaceStack(
       DevToolsRouteConfiguration(
         currentConfig.page,
-        currentConfig.args,
+        currentConfig.params,
         state,
       ),
     );
 
     final path = '/${currentConfig.page}';
     // Create a new map in case the one we were given was unmodifiable.
-    final params = Map.of(currentConfig.args);
+    final params = Map.of(currentConfig.params.params);
     params.removeWhere((key, value) => value == null);
     await SystemNavigator.routeInformationUpdated(
       uri: Uri(path: path, queryParameters: params),
@@ -294,7 +296,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     _replaceStack(
       DevToolsRouteConfiguration(
         currentConfig.page,
-        currentConfig.args,
+        currentConfig.params,
         currentConfig.state?.merge(stateUpdate) ?? stateUpdate,
       ),
     );
@@ -307,8 +309,8 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   bool _changesArgs(Map<String, String?>? changes) {
     final currentConfig = currentConfiguration!;
     return !mapEquals(
-      {...currentConfig.args, ...?changes},
-      {...currentConfig.args},
+      currentConfig.params.withUpdates(changes).params,
+      currentConfig.params.params,
     );
   }
 
