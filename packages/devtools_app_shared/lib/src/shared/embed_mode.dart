@@ -43,8 +43,9 @@ enum EmbedMode {
   static const _embedModeOneValue = 'one';
   static const _embedModeManyValue = 'many';
 
-  // TODO(kenz): remove legacy values in May of 2025 when all IDEs are not using
-  // these and 12 months have passed to allow users enough time to upgrade.
+  // TODO(kenz): remove legacy value in May of 2025 when all IDEs and the Dart
+  // Debug Extension are not using this value, and after 12 months have passed
+  // to allow users enough time to upgrade.
   static const _legacyEmbedKey = 'embed';
 
   bool get embedded =>

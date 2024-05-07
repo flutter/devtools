@@ -268,11 +268,13 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         builder: (_, __, child) {
           final screens = _visibleScreens()
               .where(
-                (p) => embedMode == EmbedMode.embedOne && page != null
-                    ? p.screenId == page
-                    : true,
+                (s) => _maybeIncludeOnlyEmbeddedScreen(
+                  s,
+                  page: page,
+                  embedMode: embedMode,
+                ),
               )
-              .where((p) => !hiddenScreens.contains(p.screenId))
+              .where((s) => !hiddenScreens.contains(s.screenId))
               .toList();
           final connectedToFlutterApp =
               serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ??
@@ -318,6 +320,23 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
             builder: (_) => scaffoldBuilder(),
           )
         : scaffoldBuilder();
+  }
+
+  /// Helper function that will be used in a 'List.where' call to generate a
+  /// list of [Screen]s to pass to a [DevToolsScaffold].
+  /// 
+  /// When [embedMode] is [EmbedMode.embedOne], this method will return true
+  /// only when [screen] matches the specified [page]. Otherwise, this method
+  /// will return true for any [screen].
+  bool _maybeIncludeOnlyEmbeddedScreen(
+    Screen screen, {
+    required String? page,
+    required EmbedMode embedMode,
+  }) {
+    if (embedMode == EmbedMode.embedOne && page != null) {
+      return screen.screenId == page;
+    }
+    return true;
   }
 
   /// The pages that the app exposes.
