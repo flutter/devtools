@@ -16,7 +16,7 @@ IdeTheme getIdeTheme() {
     backgroundColor: queryParams.backgroundColor,
     foregroundColor: queryParams.foregroundColor,
     fontSize: queryParams.fontSize,
-    embed: queryParams.embed,
+    embedMode: queryParams.embedMode,
     isDarkMode: queryParams.darkMode,
   );
 

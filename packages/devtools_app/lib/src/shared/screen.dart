@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -246,7 +247,7 @@ abstract class Screen {
   final bool showFloatingDebuggerControls;
 
   /// Whether to show the console for this screen.
-  bool showConsole(bool embed) => false;
+  bool showConsole(EmbedMode embedMode) => false;
 
   /// Which keyboard shortcuts should be enabled for this screen.
   ShortcutsConfiguration buildKeyboardShortcuts(BuildContext context) =>

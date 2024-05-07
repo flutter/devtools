@@ -9,7 +9,6 @@ library;
 
 import 'dart:async';
 
-import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:js/js.dart';
 import 'package:logging/logging.dart';
@@ -208,7 +207,7 @@ GtagEventDevTools _gtagEvent({
     ide_launched: ideLaunched,
     flutter_client_id: flutterClientId,
     is_external_build: isExternalBuild.toString(),
-    is_embedded: ideTheme.embed.toString(),
+    is_embedded: isEmbedded().toString(),
     g3_username: devToolsExtensionPoints.username(),
     ide_launched_feature: ideLaunchedFeature,
     // [PerformanceScreenMetrics]
@@ -273,7 +272,7 @@ GtagExceptionDevTools _gtagException(
     ide_launched: _ideLaunched,
     flutter_client_id: flutterClientId,
     is_external_build: isExternalBuild.toString(),
-    is_embedded: ideTheme.embed.toString(),
+    is_embedded: isEmbedded().toString(),
     g3_username: devToolsExtensionPoints.username(),
     ide_launched_feature: ideLaunchedFeature,
     // [PerformanceScreenMetrics]

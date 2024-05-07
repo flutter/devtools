@@ -5,6 +5,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 
+import '../../shared/embed_mode.dart';
 import '../../utils/utils.dart';
 import 'theme.dart';
 
@@ -19,17 +20,19 @@ final class IdeTheme {
     this.backgroundColor,
     this.foregroundColor,
     this.fontSize = unscaledDefaultFontSize,
-    this.embed = false,
+    this.embedMode = EmbedMode.none,
     this.isDarkMode = true,
   });
 
   final Color? backgroundColor;
   final Color? foregroundColor;
   final double fontSize;
-  final bool embed;
+  final EmbedMode embedMode;
   final bool isDarkMode;
 
   double get fontSizeFactor => fontSize / unscaledDefaultFontSize;
+
+  bool get embedded => embedMode.embedded;
 }
 
 extension type IdeThemeQueryParams(Map<String, String?> params) {
@@ -40,14 +43,13 @@ extension type IdeThemeQueryParams(Map<String, String?> params) {
   double get fontSize =>
       _tryParseDouble(params[fontSizeKey]) ?? unscaledDefaultFontSize;
 
-  bool get embed => params[embedKey] == 'true';
+  EmbedMode get embedMode => EmbedMode.fromArgs(params);
 
   bool get darkMode => params[devToolsThemeKey] != lightThemeValue;
 
   static const backgroundColorKey = 'backgroundColor';
   static const foregroundColorKey = 'foregroundColor';
   static const fontSizeKey = 'fontSize';
-  static const embedKey = 'embed';
   static const devToolsThemeKey = 'theme';
   static const lightThemeValue = 'light';
 

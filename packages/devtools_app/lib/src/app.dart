@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
@@ -55,6 +56,7 @@ import 'shared/query_parameters.dart';
 import 'shared/routing.dart';
 import 'shared/screen.dart';
 import 'shared/ui/hover.dart';
+import 'shared/utils.dart';
 import 'standalone_ui/standalone_screen.dart';
 
 // Assign to true to use a sample implementation of a conditional screen.
@@ -115,7 +117,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     // the IDE one (since the user can't access the preference, and the
     // preference may have been set in an external window and differ from the
     // IDE theme).
-    return ideTheme.embed ? ideTheme.isDarkMode : _isDarkThemeEnabledPreference;
+    return isEmbedded() ? ideTheme.isDarkMode : _isDarkThemeEnabledPreference;
   }
 
   bool _isDarkThemeEnabledPreference = true;
@@ -225,7 +227,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     return MaterialPage(
       child: DevToolsScaffold.withChild(
         key: const Key('not-found'),
-        embed: params.embed,
+        embedMode: params.embedMode,
         child: PageNotFound(
           page: page,
           routerDelegate: routerDelegate,
@@ -241,7 +243,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     DevToolsNavigationState? __,
   ) {
     final vmServiceUri = queryParams.vmServiceUri;
-    final embed = queryParams.embed;
+    final embedMode = queryParams.embedMode;
     final hiddenScreens = queryParams.hiddenScreens;
 
     // TODO(dantup): We should be able simplify this a little, removing params['page']
@@ -265,8 +267,14 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         ],
         builder: (_, __, child) {
           final screens = _visibleScreens()
-              .where((p) => embed && page != null ? p.screenId == page : true)
-              .where((p) => !hiddenScreens.contains(p.screenId))
+              .where(
+                (s) => _maybeIncludeOnlyEmbeddedScreen(
+                  s,
+                  page: page,
+                  embedMode: embedMode,
+                ),
+              )
+              .where((s) => !hiddenScreens.contains(s.screenId))
               .toList();
           if (queryParams.hideExtensions) {
             screens.removeWhere((s) => s is ExtensionScreen);
@@ -280,26 +288,28 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
           return MultiProvider(
             providers: _providedControllers(),
             child: DevToolsScaffold(
-              embed: embed,
+              embedMode: embedMode,
               page: page,
               screens: screens,
-              actions: [
-                if (connectedToVmService) ...[
-                  // Hide the hot reload button for Dart web apps, where the
-                  // hot reload service extension is not avilable and where the
-                  // [service.reloadServices] RPC is not implemented.
-                  // TODO(https://github.com/flutter/devtools/issues/6441): find
-                  // a way to show this for Dart web apps when supported.
-                  if (!connectedToDartWebApp)
-                    HotReloadButton(
-                      callOnVmServiceDirectly: !connectedToFlutterApp,
-                    ),
-                  // This button will hide itself based on whether the
-                  // hot restart service is available for the connected app.
-                  const HotRestartButton(),
-                ],
-                ...DevToolsScaffold.defaultActions(),
-              ],
+              actions: isEmbedded()
+                  ? []
+                  : [
+                      if (connectedToVmService) ...[
+                        // Hide the hot reload button for Dart web apps, where the
+                        // hot reload service extension is not avilable and where the
+                        // [service.reloadServices] RPC is not implemented.
+                        // TODO(https://github.com/flutter/devtools/issues/6441): find
+                        // a way to show this for Dart web apps when supported.
+                        if (!connectedToDartWebApp)
+                          HotReloadButton(
+                            callOnVmServiceDirectly: !connectedToFlutterApp,
+                          ),
+                        // This button will hide itself based on whether the
+                        // hot restart service is available for the connected app.
+                        const HotRestartButton(),
+                      ],
+                      ...DevToolsScaffold.defaultActions(),
+                    ],
             ),
           );
         },
@@ -309,10 +319,27 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     return connectedToVmService
         ? Initializer(
             url: vmServiceUri,
-            allowConnectionScreenOnDisconnect: !embed,
+            allowConnectionScreenOnDisconnect: !embedMode.embedded,
             builder: (_) => scaffoldBuilder(),
           )
         : scaffoldBuilder();
+  }
+
+  /// Helper function that will be used in a 'List.where' call to generate a
+  /// list of [Screen]s to pass to a [DevToolsScaffold].
+  ///
+  /// When [embedMode] is [EmbedMode.embedOne], this method will return true
+  /// only when [screen] matches the specified [page]. Otherwise, this method
+  /// will return true for any [screen].
+  bool _maybeIncludeOnlyEmbeddedScreen(
+    Screen screen, {
+    required String? page,
+    required EmbedMode embedMode,
+  }) {
+    if (embedMode == EmbedMode.embedOne && page != null) {
+      return screen.screenId == page;
+    }
+    return true;
   }
 
   /// The pages that the app exposes.
@@ -323,7 +350,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       snapshotScreenId: (_, __, params, ___) {
         return DevToolsScaffold.withChild(
           key: UniqueKey(),
-          embed: params.embed,
+          embedMode: params.embedMode,
           child: MultiProvider(
             providers: _providedControllers(offline: true),
             child: OfflineScreenBody(params.offlineScreenId, _screens),

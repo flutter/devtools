@@ -13,7 +13,6 @@ import 'dart:developer';
 
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/service_extensions.dart';
-import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -243,7 +242,7 @@ class InspectorService extends InspectorServiceBase {
 
   // When DevTools is embedded, default hover eval mode to off.
   @override
-  bool get hoverEvalModeEnabledByDefault => !ideTheme.embed;
+  bool get hoverEvalModeEnabledByDefault => !isEmbedded();
 
   void onExtensionVmServiceReceived(Event e) {
     if ('Flutter.Frame' == e.extensionKind) {
