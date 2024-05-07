@@ -18,9 +18,8 @@ class HeapData {
   HeapData(
     this.graph, {
     required this.created,
-    @visibleForTesting bool startCalculation = true,
   }) {
-    if (startCalculation) unawaited(_calculate());
+    unawaited(_calculate());
   }
 
   final HeapSnapshotGraph graph;

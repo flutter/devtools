@@ -47,6 +47,7 @@ class HeapGraphLoaderFile implements HeapGraphLoader {
   }
 }
 
+/// Loads a heap snapshot from `List<ByteData>` created with HeapSnapshotGraph.toChunks.
 class HeapGraphLoaderFromChunks implements HeapGraphLoader {
   HeapGraphLoaderFromChunks({required this.chunks, required this.created});
 

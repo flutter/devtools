@@ -46,10 +46,13 @@ class DiffPaneController extends DisposableController {
 
   factory DiffPaneController.fromJson(Map<String, dynamic> json) {
     final snapshots = (json[_Json.snapshots] as List)
+        .cast<Map<String, dynamic>>()
         .map((e) => SnapshotDataItem.fromJson(e))
         .toList();
 
     final diffWith = json[_Json.diffWith] as List<int?>;
+
+    assert(snapshots.length == diffWith.length);
 
     for (var i = 0; i < snapshots.length; i++) {
       final diffIndex = diffWith[i];
@@ -73,14 +76,14 @@ class DiffPaneController extends DisposableController {
     final snapshotToIndex =
         snapshots.asMap().map((index, item) => MapEntry(item, index));
 
-    final diffsWith = snapshots.map((item) {
+    final diffsWithSnapshots = snapshots.map((item) {
       final diffWith = item.diffWith.value;
       return diffWith == null ? null : snapshotToIndex[diffWith];
     }).toList();
 
     return {
       _Json.snapshots: snapshots,
-      _Json.diffWith: diffsWith,
+      _Json.diffWith: diffsWithSnapshots,
     };
   }
 

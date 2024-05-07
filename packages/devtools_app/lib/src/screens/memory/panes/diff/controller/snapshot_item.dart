@@ -38,7 +38,7 @@ class SnapshotDataItem extends SnapshotItem implements RenamableItem {
   factory SnapshotDataItem.fromJson(Map<String, dynamic> json) {
     final result = SnapshotDataItem(
       displayNumber: json[_Json.displayNumber] as int?,
-      defaultName: json[_Json.defaultName] as String,
+      defaultName: json[_Json.defaultName] as String? ?? 'no name',
       nameOverride: json[_Json.nameOverride] as String?,
     );
 
@@ -47,15 +47,16 @@ class SnapshotDataItem extends SnapshotItem implements RenamableItem {
       created: json[_Json.created] as DateTime,
     );
 
-    unawaited(
-      result.loadHeap(loader),
-    ); // Start the loading process, that will result in progress indicator in UI.
+    // Start the loading process, that will result in progress indicator in UI.
+    unawaited(result.loadHeap(loader));
 
     return result;
   }
 
   Map<String, dynamic> toJson() {
-    final heap = _heap!; // Not processed heaps are not serializable.
+    final heap = _heap;
+    assert(isProcessed && _heap != null);
+    if (heap == null) return {};
     return {
       _Json.defaultName: defaultName,
       _Json.displayNumber: displayNumber,
