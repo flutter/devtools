@@ -53,14 +53,14 @@ extension type GtagEventDevTools._(JSObject _) implements GtagEvent {
   // TODO(kenz): try to make this accept a JSON map of extra parameters rather
   // than a fixed list of fields. See
   // https://github.com/flutter/devtools/pull/3281#discussion_r692376353.
-  external  GtagEventDevTools({
+  external factory GtagEventDevTools({
     String? event_category,
     String? event_label, // Event e.g., gaScreenViewEvent, gaSelectEvent, etc.
     String? send_to, // UA ID of target GA property to receive event data.
 
     int value,
     bool non_interaction,
-    Object? custom_map,
+    JSObject? custom_map,
 
     // NOTE: Do not reorder any of these. Order here must match the order in the
     // Google Analytics console.
@@ -114,7 +114,7 @@ extension type GtagEventDevTools._(JSObject _) implements GtagEvent {
   external String? get send_to;
   external int get value; // Positive number.
   external bool get non_interaction;
-  external Object get custom_map;
+  external JSObject? get custom_map;
 
   // Custom dimensions:
   external String? get user_app;
@@ -282,7 +282,7 @@ GtagExceptionDevTools _gtagException(
 }
 
 extension type GtagExceptionDevTools._(JSObject _) implements GtagException {
-  external GtagExceptionDevTools({
+  external factory GtagExceptionDevTools({
     String? description,
     bool fatal,
 
