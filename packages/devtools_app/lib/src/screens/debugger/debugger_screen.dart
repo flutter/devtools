@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:codicon/codicon.dart';
+import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
@@ -45,7 +46,7 @@ class DebuggerScreen extends Screen {
   static final id = ScreenMetaData.debugger.id;
 
   @override
-  bool showConsole(bool embed) => true;
+  bool showConsole(EmbedMode embedMode) => true;
 
   @override
   ShortcutsConfiguration buildKeyboardShortcuts(BuildContext context) {

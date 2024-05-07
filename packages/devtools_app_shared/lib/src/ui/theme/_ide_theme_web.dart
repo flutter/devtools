@@ -2,28 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be found
 // in the LICENSE file.
 
-import 'package:flutter/widgets.dart';
-import 'package:logging/logging.dart';
 import 'package:web/web.dart';
 
 import '../../utils/url/url.dart';
 import '../../utils/utils.dart';
 import 'ide_theme.dart';
-import 'theme.dart';
-
-final _log = Logger('ide_theme_web');
 
 /// Load any IDE-supplied theming.
 IdeTheme getIdeTheme() {
-  final queryParams = loadQueryParams();
+  final queryParams = IdeThemeQueryParams(loadQueryParams());
 
   final overrides = IdeTheme(
-    backgroundColor: _tryParseColor(queryParams['backgroundColor']),
-    foregroundColor: _tryParseColor(queryParams['foregroundColor']),
-    fontSize:
-        _tryParseDouble(queryParams['fontSize']) ?? unscaledDefaultFontSize,
-    embed: queryParams['embed'] == 'true',
-    isDarkMode: queryParams['theme'] != 'light',
+    backgroundColor: queryParams.backgroundColor,
+    foregroundColor: queryParams.foregroundColor,
+    fontSize: queryParams.fontSize,
+    embedMode: queryParams.embedMode,
+    isDarkMode: queryParams.darkMode,
   );
 
   // If the environment has provided a background color, set it immediately
@@ -34,38 +28,4 @@ IdeTheme getIdeTheme() {
   }
 
   return overrides;
-}
-
-Color? _tryParseColor(String? input) {
-  if (input == null) return null;
-
-  try {
-    return parseCssHexColor(input);
-  } catch (e, st) {
-    // The user can manipulate the query string so if the value is invalid
-    // print the value but otherwise continue.
-    _log.warning(
-      'Failed to parse "$input" as a color from the querystring, ignoring: $e',
-      e,
-      st,
-    );
-    return null;
-  }
-}
-
-double? _tryParseDouble(String? input) {
-  try {
-    if (input != null) {
-      return double.parse(input);
-    }
-  } catch (e, st) {
-    // The user can manipulate the query string so if the value is invalid
-    // print the value but otherwise continue.
-    _log.warning(
-      'Failed to parse "$input" as a double from the querystring, ignoring: $e',
-      e,
-      st,
-    );
-  }
-  return null;
 }
