@@ -467,8 +467,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       screens.removeWhere((s) => s is ExtensionScreen);
     }
 
-    // When 'hide=all-except-extensions' is in the query parameters, this
-    // is an extensions-only view.
+    // When 'hide=all-except-extensions' is in the query parameters, remove all
+    // non-extension screens.
     if (params.hideAllExceptExtensions) {
       screens.removeWhere((s) => s is! ExtensionScreen);
     }
