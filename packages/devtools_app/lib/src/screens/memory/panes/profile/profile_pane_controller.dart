@@ -30,6 +30,23 @@ class ProfilePaneController extends DisposableController
     }
   }
 
+  factory ProfilePaneController.fromJson(Map<String, dynamic> json) {
+    return ProfilePaneController(
+      mode: ControllerCreationMode.offlineData,
+      profile: AdaptedProfile.fromJson(json[_jsonProfile]),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      _jsonProfile: _currentAllocationProfile.value,
+    };
+  }
+
+  static const _jsonProfile = 'profile';
+
+  final ControllerCreationMode mode;
+
   bool _initialized = false;
 
   /// Initializes the controller if it is not initialized yet.
@@ -57,23 +74,6 @@ class ProfilePaneController extends DisposableController
 
     _initialized = true;
   }
-
-  factory ProfilePaneController.fromJson(Map<String, dynamic> json) {
-    return ProfilePaneController(
-      mode: ControllerCreationMode.offlineData,
-      profile: AdaptedProfile.fromJson(json[_jsonProfile]),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      _jsonProfile: _currentAllocationProfile.value,
-    };
-  }
-
-  static const _jsonProfile = 'profile';
-
-  final ControllerCreationMode mode;
 
   /// The current profile being displayed.
   ValueListenable<AdaptedProfile?> get currentAllocationProfile =>
