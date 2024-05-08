@@ -14,7 +14,8 @@ void main() {
     test('successfully creates params', () {
       final params = DevToolsQueryParams({
         DevToolsQueryParams.vmServiceUriKey: 'some_uri',
-        DevToolsQueryParams.hideScreensKey: 'foo,bar,extensions',
+        DevToolsQueryParams.hideScreensKey:
+            'foo,bar,extensions,all-except-extensions',
         DevToolsQueryParams.offlineScreenIdKey: 'performance',
         DevToolsQueryParams.legacyPageKey: 'memory',
         // IdeThemeQueryParams values
@@ -27,8 +28,12 @@ void main() {
 
       expect(params.vmServiceUri, 'some_uri');
       expect(params.embedMode, EmbedMode.embedOne);
-      expect(params.hiddenScreens, {'foo', 'bar', 'extensions'});
+      expect(
+        params.hiddenScreens,
+        {'foo', 'bar', 'extensions', 'all-except-extensions'},
+      );
       expect(params.hideExtensions, true);
+      expect(params.hideAllExceptExtensions, true);
       expect(params.offlineScreenId, 'performance');
       expect(params.legacyPage, 'memory');
       expect(params.ideThemeParams.params, isNotEmpty);

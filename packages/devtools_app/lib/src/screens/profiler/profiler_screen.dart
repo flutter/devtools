@@ -187,7 +187,7 @@ class DisconnectedCpuProfilerScreenBody extends StatelessWidget {
     return FileImportContainer(
       instructions: importInstructions,
       actionText: 'Load data',
-      gaScreen: gac.appSize,
+      gaScreen: gac.cpuProfiler,
       gaSelectionImport: gac.CpuProfilerEvents.openDataFile.name,
       gaSelectionAction: gac.CpuProfilerEvents.loadDataFromFile.name,
       onAction: (jsonFile) {
