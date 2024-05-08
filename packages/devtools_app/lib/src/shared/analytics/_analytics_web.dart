@@ -8,9 +8,9 @@
 library;
 
 import 'dart:async';
+import 'dart:js_interop';
 
 import 'package:flutter/foundation.dart';
-import 'package:js/js.dart';
 import 'package:logging/logging.dart';
 import 'package:unified_analytics/unified_analytics.dart' as ua;
 import 'package:web/web.dart';
@@ -49,9 +49,7 @@ final _log = Logger('_analytics_web');
 @JS('initializeGA')
 external void initializeGA();
 
-@JS()
-@anonymous
-class GtagEventDevTools extends GtagEvent {
+extension type GtagEventDevTools._(JSObject _) implements GtagEvent {
   // TODO(kenz): try to make this accept a JSON map of extra parameters rather
   // than a fixed list of fields. See
   // https://github.com/flutter/devtools/pull/3281#discussion_r692376353.
@@ -62,9 +60,7 @@ class GtagEventDevTools extends GtagEvent {
 
     int value,
     bool non_interaction,
-    // This code is going away so not worth cleaning up to be free of dynamic.
-    // ignore: avoid-dynamic
-    dynamic custom_map,
+    JSObject? custom_map,
 
     // NOTE: Do not reorder any of these. Order here must match the order in the
     // Google Analytics console.
@@ -113,72 +109,112 @@ class GtagEventDevTools extends GtagEvent {
     int? inspector_tree_controller_id, // metric12
   });
 
-  @override
-  external String? get event_category;
-
-  @override
-  external String? get event_label;
-
-  @override
-  external String? get send_to;
-
-  @override
-  external int get value; // Positive number.
-
-  @override
-  external bool get non_interaction;
-
-  @override
-  external Object get custom_map;
-
   // Custom dimensions:
   external String? get user_app;
-
   external String? get user_build;
-
   external String? get user_platform;
-
   external String? get devtools_platform;
-
   external String? get devtools_chrome;
-
   external String? get devtools_version;
-
   external String? get ide_launched;
-
   external String? get flutter_client_id;
-
   external String? get is_external_build;
-
   external String? get is_embedded;
-
   external String? get g3_username;
-
   external String? get ide_launched_feature;
 
   // Custom metrics:
   external int? get ui_duration_micros;
-
   external int? get raster_duration_micros;
-
   external int? get shader_compilation_duration_micros;
-
   external int? get cpu_sample_count;
-
   external int? get cpu_stack_depth;
-
   external int? get trace_event_count;
-
   external int? get heap_diff_objects_before;
-
   external int? get heap_diff_objects_after;
-
   external int? get heap_objects_total;
-
   external int? get root_set_count;
-
   external int? get row_count;
+  external int? get inspector_tree_controller_id;
+}
 
+extension type GtagExceptionDevTools._(JSObject _) implements GtagException {
+  external factory GtagExceptionDevTools({
+    String? description,
+    bool fatal,
+
+    // NOTE: Do not reorder any of these. Order here must match the order in the
+    // Google Analytics console.
+
+    String? user_app, // dimension1 (flutter or web)
+    String? user_build, // dimension2 (debug or profile)
+    String? user_platform, // dimension3 (android or ios)
+    String? devtools_platform, // dimension4 linux/android/mac/windows
+    String? devtools_chrome, // dimension5 Chrome version #
+    String? devtools_version, // dimension6 DevTools version #
+    String? ide_launched, // dimension7 IDE launched DevTools
+    String? flutter_client_id, // dimension8 Flutter tool clientId
+    String? is_external_build, // dimension9 External build or google3
+    String? is_embedded, // dimension10 Whether devtools is embedded
+    String? g3_username, // dimension11 g3 username (null for external users)
+
+    // dimension12 IDE feature that launched Devtools
+    // The following is a non-exhaustive list of possible values for this dimension:
+    // "command" - VS Code command palette
+    // "sidebarContent" - the content of the sidebar (e.g. the DevTools dropdown for a debug session)
+    // "sidebarTitle" - the DevTools action in the sidebar title
+    // "touchbar" - MacOS touchbar button
+    // "launchConfiguration" - configured explicitly in launch configuration
+    // "onDebugAutomatic" - configured to always run on debug session start
+    // "onDebugPrompt" - user responded to prompt when running a debug session
+    // "languageStatus" - launched from the language status popout
+    String? ide_launched_feature,
+
+    // Performance screen metrics. See [PerformanceScreenMetrics].
+    int? ui_duration_micros, // metric1
+    int? raster_duration_micros, // metric2
+    int? shader_compilation_duration_micros, // metric3
+    // Profiler screen metrics. See [ProfilerScreenMetrics].
+    int? cpu_sample_count, // metric4
+    int? cpu_stack_depth, // metric5
+    // Performance screen metric. See [PerformanceScreenMetrics].
+    int? trace_event_count, // metric6
+    // Memory screen metric. See [MemoryScreenMetrics].
+    int? heap_diff_objects_before, // metric7
+    int? heap_diff_objects_after, // metric8
+    int? heap_objects_total, // metric9
+    // Inspector screen metrics. See [InspectorScreenMetrics].
+    int? root_set_count, // metric10
+    int? row_count, // metric11
+    int? inspector_tree_controller_id, // metric12
+  });
+
+  // Custom dimensions:
+  external String? get user_app;
+  external String? get user_build;
+  external String? get user_platform;
+  external String? get devtools_platform;
+  external String? get devtools_chrome;
+  external String? get devtools_version;
+  external String? get ide_launched;
+  external String? get flutter_client_id;
+  external String? get is_external_build;
+  external String? get is_embedded;
+  external String? get g3_username;
+  external String? get ide_launched_feature;
+
+  // Custom metrics:
+  external int? get ui_duration_micros;
+  external int? get raster_duration_micros;
+  external int? get shader_compilation_duration_micros;
+  external int? get cpu_sample_count;
+  external int? get cpu_stack_depth;
+  external int? get trace_event_count;
+  external int? get heap_diff_objects_before;
+  external int? get heap_diff_objects_after;
+  external int? get heap_objects_total;
+  external int? get root_set_count;
+  external int? get row_count;
   external int? get inspector_tree_controller_id;
 }
 
@@ -316,115 +352,6 @@ GtagExceptionDevTools _gtagException(
         ? screenMetrics.inspectorTreeControllerId
         : null,
   );
-}
-
-@JS()
-@anonymous
-class GtagExceptionDevTools extends GtagException {
-  external factory GtagExceptionDevTools({
-    String? description,
-    bool fatal,
-
-    // NOTE: Do not reorder any of these. Order here must match the order in the
-    // Google Analytics console.
-
-    String? user_app, // dimension1 (flutter or web)
-    String? user_build, // dimension2 (debug or profile)
-    String? user_platform, // dimension3 (android or ios)
-    String? devtools_platform, // dimension4 linux/android/mac/windows
-    String? devtools_chrome, // dimension5 Chrome version #
-    String? devtools_version, // dimension6 DevTools version #
-    String? ide_launched, // dimension7 IDE launched DevTools
-    String? flutter_client_id, // dimension8 Flutter tool clientId
-    String? is_external_build, // dimension9 External build or google3
-    String? is_embedded, // dimension10 Whether devtools is embedded
-    String? g3_username, // dimension11 g3 username (null for external users)
-
-    // dimension12 IDE feature that launched Devtools
-    // The following is a non-exhaustive list of possible values for this dimension:
-    // "command" - VS Code command palette
-    // "sidebarContent" - the content of the sidebar (e.g. the DevTools dropdown for a debug session)
-    // "sidebarTitle" - the DevTools action in the sidebar title
-    // "touchbar" - MacOS touchbar button
-    // "launchConfiguration" - configured explicitly in launch configuration
-    // "onDebugAutomatic" - configured to always run on debug session start
-    // "onDebugPrompt" - user responded to prompt when running a debug session
-    // "languageStatus" - launched from the language status popout
-    String? ide_launched_feature,
-
-    // Performance screen metrics. See [PerformanceScreenMetrics].
-    int? ui_duration_micros, // metric1
-    int? raster_duration_micros, // metric2
-    int? shader_compilation_duration_micros, // metric3
-    // Profiler screen metrics. See [ProfilerScreenMetrics].
-    int? cpu_sample_count, // metric4
-    int? cpu_stack_depth, // metric5
-    // Performance screen metric. See [PerformanceScreenMetrics].
-    int? trace_event_count, // metric6
-    // Memory screen metric. See [MemoryScreenMetrics].
-    int? heap_diff_objects_before, // metric7
-    int? heap_diff_objects_after, // metric8
-    int? heap_objects_total, // metric9
-    // Inspector screen metrics. See [InspectorScreenMetrics].
-    int? root_set_count, // metric10
-    int? row_count, // metric11
-    int? inspector_tree_controller_id, // metric12
-  });
-
-  @override
-  external String? get description; // Description of the error.
-  @override
-  external bool get fatal; // Fatal error.
-
-  // Custom dimensions:
-  external String? get user_app;
-
-  external String? get user_build;
-
-  external String? get user_platform;
-
-  external String? get devtools_platform;
-
-  external String? get devtools_chrome;
-
-  external String? get devtools_version;
-
-  external String? get ide_launched;
-
-  external String? get flutter_client_id;
-
-  external String? get is_external_build;
-
-  external String? get is_embedded;
-
-  external String? get g3_username;
-
-  external String? get ide_launched_feature;
-
-  // Custom metrics:
-  external int? get ui_duration_micros;
-
-  external int? get raster_duration_micros;
-
-  external int? get shader_compilation_duration_micros;
-
-  external int? get cpu_sample_count;
-
-  external int? get cpu_stack_depth;
-
-  external int? get trace_event_count;
-
-  external int? get heap_diff_objects_before;
-
-  external int? get heap_diff_objects_after;
-
-  external int? get heap_objects_total;
-
-  external int? get root_set_count;
-
-  external int? get row_count;
-
-  external int? get inspector_tree_controller_id;
 }
 
 /// Whether google analytics are enabled.
