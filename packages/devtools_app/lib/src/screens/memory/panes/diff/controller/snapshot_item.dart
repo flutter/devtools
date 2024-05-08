@@ -42,9 +42,12 @@ class SnapshotDataItem extends SnapshotItem implements RenamableItem {
       nameOverride: json[_Json.nameOverride] as String?,
     );
 
+    final chunks = json[_Json.chunks] as List<ByteData>?;
+    if (chunks == null) return result;
+
     final loader = HeapGraphLoaderFromChunks(
-      chunks: json[_Json.chunks] as List<ByteData>,
-      created: json[_Json.created] as DateTime,
+      chunks: chunks,
+      created: json[_Json.created] as DateTime? ?? DateTime.now(),
     );
 
     // Start the loading process, that will result in progress indicator in UI.
@@ -54,15 +57,12 @@ class SnapshotDataItem extends SnapshotItem implements RenamableItem {
   }
 
   Map<String, dynamic> toJson() {
-    final heap = _heap;
-    assert(isProcessed && _heap != null);
-    if (heap == null) return {};
     return {
       _Json.defaultName: defaultName,
       _Json.displayNumber: displayNumber,
       _Json.nameOverride: nameOverride,
-      _Json.chunks: heap.graph.toChunks(),
-      _Json.created: heap.created,
+      _Json.chunks: _heap?.graph.toChunks(),
+      _Json.created: _heap?.created,
     };
   }
 
