@@ -79,8 +79,11 @@ class ChartVmConnection extends DisposableController
         }
         try {
           await _memoryTracker.pollMemory();
-        } catch (e) {
+        } catch (e, stack) {
           if (serviceConnection.serviceManager.connectedState.value.connected) {
+            print('!!!!');
+            print(e);
+            print(stack);
             rethrow;
           }
         }
