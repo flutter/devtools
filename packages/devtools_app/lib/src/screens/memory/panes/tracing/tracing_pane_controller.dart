@@ -34,6 +34,8 @@ class TracingPaneController extends DisposableController
   final textEditingController = TextEditingController();
 
   bool _initialized = false;
+
+  /// Initializes the controller if it is not initialized yet.
   Future<void> initialize() async {
     if (_initialized) return;
     _initialized = true;

@@ -28,6 +28,13 @@ class ProfilePaneController extends DisposableController
         _rootPackage,
       );
     }
+  }
+
+  bool _initialized = false;
+
+  /// Initializes the controller if it is not initialized yet.
+  void initialize() {
+    if (_initialized) return;
 
     if (mode == ControllerCreationMode.connected) {
       autoDisposeStreamSubscription(
@@ -47,6 +54,8 @@ class ProfilePaneController extends DisposableController
     }
 
     _initializeSelection();
+
+    _initialized = true;
   }
 
   factory ProfilePaneController.fromJson(Map<String, dynamic> json) {
