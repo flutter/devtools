@@ -511,3 +511,5 @@ final profilePlatformChannels =
       'https://docs.flutter.dev/platform-integration/platform-channels',
   gaDocsItem: gac.PerformanceDocs.platformChannelsDocs.name,
 );
+
+const testTargetLibraryExtension = 'ext.test.testTargetLibrary';

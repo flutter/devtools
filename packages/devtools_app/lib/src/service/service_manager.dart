@@ -214,12 +214,14 @@ class ServiceConnectionManager {
   /// it will NOT have a trailing slash.
   Future<String?> rootPackageDirectoryForMainIsolate() async {
     final fileUriString = await serviceConnection.rootLibraryForMainIsolate();
+    print('fileUriString: $fileUriString');
     final packageUriString = fileUriString != null
         ? await packageRootFromFileUriString(
             fileUriString,
             dtd: dtdManager.connection.value,
           )
         : null;
+    print('rootPackageDirectoryForMainIsolate: $packageUriString');
     _log.fine('rootPackageDirectoryForMainIsolate: $packageUriString');
     return packageUriString;
   }
