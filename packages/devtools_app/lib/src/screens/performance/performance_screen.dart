@@ -157,7 +157,7 @@ class DisconnectedPerformanceScreenBody extends StatelessWidget {
     return FileImportContainer(
       instructions: importInstructions,
       actionText: 'Load data',
-      gaScreen: gac.appSize,
+      gaScreen: gac.performance,
       gaSelectionImport: gac.PerformanceEvents.openDataFile.name,
       gaSelectionAction: gac.PerformanceEvents.loadDataFromFile.name,
       onAction: (jsonFile) {

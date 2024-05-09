@@ -73,6 +73,13 @@ class OfflineDataController {
 /// If it is true, the screen should ignore the connected application and just show
 /// the offline data.
 ///
+/// If a screen controller (A) is created for offline mode while another
+/// instance of this screen controller (B) exists for interacting
+/// with the current DevTools connection, screen controller (B) should
+/// continue to work as it normally would in the background. This will
+/// ensure that the user can return to what they were looking at
+/// previously before entering offline mode to view offline data.
+///
 /// Example:
 ///
 /// class MyScreenController with OfflineScreenControllerMixin<MyScreenData> {

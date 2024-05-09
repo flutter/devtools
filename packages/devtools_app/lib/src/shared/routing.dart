@@ -37,23 +37,21 @@ class DevToolsRouteInformationParser
   DevToolsRouteInformationParser();
 
   @visibleForTesting
-  DevToolsRouteInformationParser.test(this._forceVmServiceUri);
+  DevToolsRouteInformationParser.test(this._testQueryParams);
 
-  /// The value for the 'uri' query parameter in a DevTools uri.
+  /// Query parameters that can be set on DevTools routes for testing purposes.
   ///
   /// This is to be used in a testing environment only and can be set via the
   /// [DevToolsRouteInformationParser.test] constructor.
-  String? _forceVmServiceUri;
+  DevToolsQueryParams? _testQueryParams;
 
   @override
   Future<DevToolsRouteConfiguration> parseRouteInformation(
     RouteInformation routeInformation,
   ) async {
     var uri = routeInformation.uri;
-    if (_forceVmServiceUri != null) {
-      final newQueryParams = Map<String, dynamic>.from(uri.queryParameters);
-      newQueryParams['uri'] = _forceVmServiceUri;
-      uri = uri.copyWith(queryParameters: newQueryParams);
+    if (_testQueryParams != null) {
+      uri = uri.copyWith(queryParameters: _testQueryParams!.params);
     }
 
     final uriFromParams = uri.queryParameters['uri'];
@@ -62,7 +60,7 @@ class DevToolsRouteInformationParser
       // query parameter, ensure we manually disconnect from any previously
       // connected applications.
       await serviceConnection.serviceManager.manuallyDisconnect();
-    } else if (_forceVmServiceUri == null) {
+    } else if (_testQueryParams == null) {
       // Otherwise, connect to the vm service from the query parameter before
       // loading the route (but do not do this in a testing environment).
       await FrameworkCore.initVmService(serviceUriAsString: uriFromParams);
