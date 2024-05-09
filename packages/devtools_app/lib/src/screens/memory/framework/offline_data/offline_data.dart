@@ -27,10 +27,16 @@ class OfflineMemoryData {
 
   factory OfflineMemoryData.fromJson(Map<String, dynamic> json) {
     return OfflineMemoryData(
-      deserialize(json[_Json.diffData], DiffPaneController.fromJson),
-      deserialize(json[_Json.profileData], ProfilePaneController.fromJson),
-      deserialize(json[_Json.chartData], ChartData.fromJson),
-      deserialize(json[_Json.classFilter], ClassFilter.fromJson),
+      deserialize<DiffPaneController>(
+        json[_Json.diffData],
+        DiffPaneController.fromJson,
+      ),
+      deserialize<ProfilePaneController>(
+        json[_Json.profileData],
+        ProfilePaneController.fromJson,
+      ),
+      deserialize<ChartData>(json[_Json.chartData], ChartData.fromJson),
+      deserialize<ClassFilter>(json[_Json.classFilter], ClassFilter.fromJson),
       selectedTab: json[_Json.selectedTab] as int? ?? 0,
     );
   }

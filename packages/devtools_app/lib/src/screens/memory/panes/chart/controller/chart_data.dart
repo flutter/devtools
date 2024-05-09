@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/shared/primitives/serialization.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../../shared/primitives/simple_items.dart';
@@ -38,15 +39,13 @@ class ChartData {
   }
 
   factory ChartData.fromJson(Map<String, dynamic> json) {
-    final timeline = json[_Json.timeline];
     final result = ChartData(
       mode: ControllerCreationMode.offlineData,
       isDeviceAndroid: json[_Json.isDeviceAndroid] as bool? ?? false,
-      timeline: timeline is MemoryTimeline
-          ? timeline
-          : MemoryTimeline.fromJson(
-              json[_Json.timeline] as Map<String, dynamic>,
-            ),
+      timeline: deserialize<MemoryTimeline>(
+        json[_Json.timeline],
+        MemoryTimeline.fromJson,
+      ),
       interval: ChartInterval.byName(json[_Json.interval]) ??
           ChartInterval.theDefault,
       isLegendVisible: json[_Json.isLegendVisible] as bool?,
