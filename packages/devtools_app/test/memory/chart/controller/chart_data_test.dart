@@ -4,12 +4,9 @@
 
 import 'package:devtools_app/src/screens/memory/panes/chart/controller/chart_data.dart';
 import 'package:devtools_app/src/screens/memory/panes/chart/data/primitives.dart';
-import 'package:devtools_app/src/screens/memory/panes/diff/controller/snapshot_item.dart';
 import 'package:devtools_app/src/screens/memory/shared/primitives/memory_timeline.dart';
 import 'package:devtools_app/src/shared/primitives/simple_items.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../../../test_infra/test_data/memory/heap/heap_data.dart';
 
 void main() {
   test(

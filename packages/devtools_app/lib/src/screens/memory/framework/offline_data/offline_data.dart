@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:vm_snapshot_analysis/instruction_sizes.dart';
-
 import '../../../../shared/primitives/serialization.dart';
 import '../../panes/chart/controller/chart_data.dart';
 import '../../panes/diff/controller/diff_pane_controller.dart';

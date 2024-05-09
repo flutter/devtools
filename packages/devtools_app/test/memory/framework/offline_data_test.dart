@@ -6,7 +6,6 @@ import 'package:devtools_app/src/screens/memory/framework/offline_data/offline_d
 import 'package:devtools_app/src/screens/memory/panes/chart/controller/chart_data.dart';
 import 'package:devtools_app/src/screens/memory/panes/chart/data/primitives.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/controller/diff_pane_controller.dart';
-import 'package:devtools_app/src/screens/memory/panes/diff/controller/snapshot_item.dart';
 import 'package:devtools_app/src/screens/memory/panes/profile/profile_pane_controller.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/class_filter.dart';
 import 'package:devtools_app/src/screens/memory/shared/primitives/memory_timeline.dart';
@@ -41,9 +40,13 @@ void main() {
       expect(fromJson.chart.isDeviceAndroid, item.chart.isDeviceAndroid);
       expect(fromJson.chart.timeline, item.chart.timeline);
       expect(
-          fromJson.chart.displayInterval.name, item.chart.displayInterval.name);
-      expect(fromJson.chart.isLegendVisible.value,
-          item.chart.isLegendVisible.value);
+        fromJson.chart.displayInterval.name,
+        item.chart.displayInterval.name,
+      );
+      expect(
+        fromJson.chart.isLegendVisible.value,
+        item.chart.isLegendVisible.value,
+      );
     },
   );
 }
