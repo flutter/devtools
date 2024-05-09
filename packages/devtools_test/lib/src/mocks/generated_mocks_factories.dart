@@ -207,7 +207,8 @@ MockLoggingControllerV2 createMockLoggingControllerV2WithDefaults({
   List<LogDataV2> data = const [],
 }) {
   provideDummy<ListValueNotifier<LogDataV2>>(
-      ListValueNotifier<LogDataV2>(data));
+    ListValueNotifier<LogDataV2>(data),
+  );
   final mockLoggingController = MockLoggingControllerV2();
   when(mockLoggingController.data).thenReturn(data);
   when(mockLoggingController.filteredData)
