@@ -20,8 +20,7 @@ void main() {
         isLegendVisible: true,
       );
 
-      final json = item.toJson();
-      final fromJson = ChartData.fromJson(json);
+      final fromJson = ChartData.fromJson(item.toJson());
 
       expect(fromJson.isDeviceAndroid, item.isDeviceAndroid);
       expect(fromJson.timeline, item.timeline);
@@ -34,9 +33,7 @@ void main() {
     '$ChartData serializes and deserializes correctly, connected',
     () {
       final item = ChartData(mode: ControllerCreationMode.connected);
-
-      final json = item.toJson();
-      final fromJson = ChartData.fromJson(json);
+      final fromJson = ChartData.fromJson(item.toJson());
 
       expect(fromJson.isDeviceAndroid, false);
       expect(fromJson.timeline, item.timeline);
