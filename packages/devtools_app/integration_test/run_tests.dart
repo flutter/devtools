@@ -28,7 +28,7 @@ const _testDeviceAll = 'all';
 /// while a fix being worked on.
 ///
 /// Format: `'my_example_test.dart'`.
-final Map<String, Set<String>> _skipTestsForDevice = <String, Set<String>>{
+final _skipTestsForDevice = <String, Set<String>>{
   _testDeviceAll: {
     // https://github.com/flutter/devtools/issues/6592
     'eval_and_browse_test.dart',
