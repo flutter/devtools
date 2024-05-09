@@ -30,21 +30,6 @@ void main() {
       );
     }
 
-    void addGcData(String message) {
-      controller.log(
-        LogDataV2(
-          'gc',
-          jsonEncode({'kind': 'gc', 'message': message}),
-          0,
-          summary: message,
-        ),
-      );
-    }
-
-    void addLogWithKind(String kind) {
-      controller.log(LogDataV2(kind, jsonEncode({'foo': 'test_data'}), 0));
-    }
-
     setUp(() {
       setGlobal(
         ServiceConnectionManager,
