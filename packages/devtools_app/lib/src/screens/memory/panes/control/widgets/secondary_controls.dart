@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/file_import.dart';
+import '../../../../../shared/primitives/simple_items.dart';
 import '../../../../../shared/screen.dart';
 import '../../../shared/primitives/simple_elements.dart';
 import '../controller/control_pane_controller.dart';
@@ -20,18 +21,17 @@ class SecondaryControls extends StatelessWidget {
   const SecondaryControls({
     super.key,
     required this.controller,
-    required this.offline,
   });
 
   final MemoryControlPaneController controller;
-  final bool offline;
 
   @override
   Widget build(BuildContext context) {
+    final isConnected = controller.mode == ControllerCreationMode.connected;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (!offline)
+        if (isConnected)
           GaDevToolsButton(
             onPressed: controller.isGcing ? null : controller.gc,
             icon: Icons.delete,
@@ -41,18 +41,20 @@ class SecondaryControls extends StatelessWidget {
             gaScreen: gac.memory,
             gaSelection: gac.MemoryEvent.gc,
           ),
-        const SizedBox(width: denseSpacing),
+        if (isConnected)
+          if (isConnected) const SizedBox(width: denseSpacing),
         OpenSaveButtonGroup(
           screenId: ScreenMetaData.memory.id,
           onSave: controller.exportData,
         ),
-        const SizedBox(width: denseSpacing),
-        SettingsOutlinedButton(
-          gaScreen: gac.memory,
-          gaSelection: gac.MemoryEvent.settings,
-          onPressed: () => _openSettingsDialog(context),
-          tooltip: 'Open memory settings',
-        ),
+        if (isConnected) const SizedBox(width: denseSpacing),
+        if (isConnected)
+          SettingsOutlinedButton(
+            gaScreen: gac.memory,
+            gaSelection: gac.MemoryEvent.settings,
+            onPressed: () => _openSettingsDialog(context),
+            tooltip: 'Open memory settings',
+          ),
       ],
     );
   }

@@ -49,6 +49,6 @@ class OfflineMemoryData {
   final ClassFilter filter; // filter is shared between tabs, so it's here
 
   final DiffPaneController diff;
-  final ProfilePaneController profile;
-  final ChartData chart;
+  final ProfilePaneController? profile;
+  final ChartData? chart;
 }

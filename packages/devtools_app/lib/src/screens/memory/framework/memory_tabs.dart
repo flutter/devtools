@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/common_widgets.dart';
+import '../../../shared/primitives/simple_items.dart';
 import '../../../shared/ui/tab.dart';
 import '../panes/diff/diff_pane.dart';
 import '../panes/profile/profile_view.dart';
@@ -42,21 +43,7 @@ class MemoryTabView extends StatelessWidget {
     );
   }
 
-  List<({DevToolsTab tab, Widget tabView})> _generateTabRecords() {
-    return [
-      (
-        tab: DevToolsTab.create(
-          key: MemoryScreenKeys.dartHeapTableProfileTab,
-          tabName: 'Profile Memory',
-          gaPrefix: _gaPrefix,
-        ),
-        tabView: KeepAliveWrapper(
-          child: AllocationProfileTableView(
-            controller: controller.profile,
-          ),
-        ),
-      ),
-      (
+  TabAndView _diff() => (
         tab: DevToolsTab.create(
           key: MemoryScreenKeys.diffTab,
           gaPrefix: _gaPrefix,
@@ -67,17 +54,38 @@ class MemoryTabView extends StatelessWidget {
             diffController: controller.diff,
           ),
         ),
-      ),
-      (
+      );
+
+  TabAndView _profile() => (
+        tab: DevToolsTab.create(
+          key: MemoryScreenKeys.dartHeapTableProfileTab,
+          tabName: 'Profile Memory',
+          gaPrefix: _gaPrefix,
+        ),
+        tabView: KeepAliveWrapper(
+          child: AllocationProfileTableView(
+            controller: controller.profile!,
+          ),
+        ),
+      );
+
+  TabAndView _trace() => (
         tab: DevToolsTab.create(
           key: MemoryScreenKeys.dartHeapAllocationTracingTab,
           tabName: 'Trace Instances',
           gaPrefix: _gaPrefix,
         ),
         tabView: KeepAliveWrapper(
-          child: TracingPane(controller: controller.tracing),
+          child: TracingPane(controller: controller.tracing!),
         ),
-      ),
+      );
+
+  List<TabAndView> _generateTabRecords() {
+    final hasData = controller.mode != ControllerCreationMode.disconnected;
+    return [
+      if (hasData) _profile(),
+      _diff(),
+      if (hasData) _trace(),
     ];
   }
 }

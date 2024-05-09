@@ -37,9 +37,9 @@ class MemoryController extends DisposableController
     @visibleForTesting ProfilePaneController? connectedProfile,
   }) {
     if (connectedDiff != null || connectedProfile != null) {
-      _mode = ControllerCreationMode.connected;
+      mode = ControllerCreationMode.connected;
     } else {
-      _mode = devToolsMode;
+      mode = devToolsMode;
     }
     unawaited(_init(connectedDiff, connectedProfile));
   }
@@ -50,7 +50,7 @@ class MemoryController extends DisposableController
   /// DevTools mode at the time of creation of the controller.
   ///
   /// DevTools will recreate controller when the mode changes.
-  late final ControllerCreationMode _mode;
+  late final ControllerCreationMode mode;
 
   /// Index of the selected feature tab.
   ///
@@ -62,11 +62,11 @@ class MemoryController extends DisposableController
 
   late final DiffPaneController diff;
 
-  late final ProfilePaneController profile;
+  late final ProfilePaneController? profile;
 
-  late final MemoryChartPaneController chart;
+  late final MemoryChartPaneController? chart;
 
-  late final TracingPaneController tracing;
+  late final TracingPaneController? tracing;
 
   late final MemoryControlPaneController control;
 
@@ -74,10 +74,10 @@ class MemoryController extends DisposableController
   void dispose() {
     super.dispose();
     HeapClassName.dispose();
-    chart.dispose();
-    tracing.dispose();
+    chart?.dispose();
+    tracing?.dispose();
     diff.dispose();
-    profile.dispose();
+    profile?.dispose();
   }
 
   static const _jsonKey = 'data';
@@ -87,7 +87,7 @@ class MemoryController extends DisposableController
     @visibleForTesting ProfilePaneController? connectedProfile,
   ) async {
     assert(!_dataInitialized.isCompleted);
-    switch (_mode) {
+    switch (mode) {
       case ControllerCreationMode.disconnected:
         // TODO(polina-c): load memory screen in disconnected mode, https://github.com/flutter/devtools/issues/6972
         _initializeData();
@@ -126,24 +126,41 @@ class MemoryController extends DisposableController
   }) {
     assert(!_dataInitialized.isCompleted);
 
-    chart = MemoryChartPaneController(_mode, data: offlineData?.chart);
+    final hasData = mode != ControllerCreationMode.disconnected;
+    final isConnected = mode == ControllerCreationMode.connected;
+
+    chart = hasData
+        ? MemoryChartPaneController(mode, data: offlineData?.chart)
+        : null;
+
     diff = diffPaneController ??
         offlineData?.diff ??
         DiffPaneController(
-          loader: HeapGraphLoaderRuntime(chart.data.timeline),
+          loader:
+              isConnected ? HeapGraphLoaderRuntime(chart!.data.timeline) : null,
         );
-    profile = profilePaneController ??
-        offlineData?.profile ??
-        ProfilePaneController(mode: _mode);
+
+    if (hasData) {
+      profile = profilePaneController ??
+          offlineData?.profile ??
+          ProfilePaneController(mode: mode);
+    } else {
+      profile = null;
+    }
+
     control = MemoryControlPaneController(
-      chart.data.timeline,
+      chart?.data.timeline,
+      mode,
       exportData: exportData,
     );
-    tracing = TracingPaneController();
+
+    tracing = hasData ? TracingPaneController() : null;
+
     selectedFeatureTabIndex =
         offlineData?.selectedTab ?? selectedFeatureTabIndex;
-    if (offlineData != null) profile.setFilter(offlineData.filter);
-    _shareClassFilterBetweenProfileAndDiff();
+
+    if (offlineData != null) profile?.setFilter(offlineData.filter);
+    if (hasData) _shareClassFilterBetweenProfileAndDiff();
 
     _dataInitialized.complete();
   }
@@ -158,8 +175,8 @@ class MemoryController extends DisposableController
         _jsonKey: OfflineMemoryData(
           diff,
           profile,
-          chart.data,
-          profile.classFilter.value,
+          chart?.data,
+          diff.core.classFilter.value,
           selectedTab: selectedFeatureTabIndex,
         ),
       },
@@ -167,14 +184,15 @@ class MemoryController extends DisposableController
   }
 
   void _shareClassFilterBetweenProfileAndDiff() {
-    diff.derived.applyFilter(profile.classFilter.value);
+    final theProfile = profile!;
+    diff.derived.applyFilter(theProfile.classFilter.value);
 
-    profile.classFilter.addListener(() {
-      diff.derived.applyFilter(profile.classFilter.value);
+    theProfile.classFilter.addListener(() {
+      diff.derived.applyFilter(theProfile.classFilter.value);
     });
 
     diff.core.classFilter.addListener(() {
-      profile.setFilter(
+      theProfile.setFilter(
         diff.core.classFilter.value,
       );
     });

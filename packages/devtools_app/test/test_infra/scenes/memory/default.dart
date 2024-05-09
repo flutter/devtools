@@ -159,7 +159,7 @@ class MemoryDefaultScene extends Scene {
 
     await controller.initialized;
 
-    controller.chart.data.timeline.data
+    controller.chart!.data.timeline.data
       ..clear()
       ..addAll(memoryJson.data);
   }
