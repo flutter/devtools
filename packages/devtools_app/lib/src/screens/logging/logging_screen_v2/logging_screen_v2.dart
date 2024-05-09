@@ -60,7 +60,7 @@ class _LoggingScreenBodyV2State extends State<LoggingScreenBodyV2>
         ProvidedControllerMixin<LoggingControllerV2, LoggingScreenBodyV2> {
   late final ScrollController _verticalController = ScrollController();
   List<String> items = [];
-  late List<LogData> filteredLogs;
+  late List<LogDataV2> filteredLogs;
   @override
   void initState() {
     super.initState();
@@ -109,22 +109,34 @@ class _LoggingScreenBodyV2State extends State<LoggingScreenBodyV2>
           ],
         ),
         Expanded(
-          child: Scrollbar(
-            thumbVisibility: true,
-            controller: _verticalController,
-            child: CustomScrollView(
-              controller: _verticalController,
-              slivers: <Widget>[
-                SliverVariedExtentList.builder(
-                  itemCount: filteredLogs.length,
-                  itemBuilder: _buildRow,
-                  itemExtentBuilder: _calculateRowHeight,
-                ),
-              ],
-            ),
-          ),
+          child: LogsTableV2(filteredLogs),
         ),
       ],
+    );
+  }
+}
+
+class LogsTableV2 extends StatelessWidget {
+  LogsTableV2(this.filteredLogs, {super.key});
+
+  final ScrollController _verticalController = ScrollController();
+  final List<LogDataV2> filteredLogs;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scrollbar(
+      thumbVisibility: true,
+      controller: _verticalController,
+      child: CustomScrollView(
+        controller: _verticalController,
+        slivers: <Widget>[
+          SliverVariedExtentList.builder(
+            itemCount: filteredLogs.length,
+            itemBuilder: _buildRow,
+            itemExtentBuilder: _calculateRowHeight,
+          ),
+        ],
+      ),
     );
   }
 
@@ -137,8 +149,8 @@ class _LoggingScreenBodyV2State extends State<LoggingScreenBodyV2>
   }
 }
 
-class LoggingSettingsDialog extends StatelessWidget {
-  const LoggingSettingsDialog({super.key});
+class LoggingSettingsDialogV2 extends StatelessWidget {
+  const LoggingSettingsDialogV2({super.key});
 
   @override
   Widget build(BuildContext context) {

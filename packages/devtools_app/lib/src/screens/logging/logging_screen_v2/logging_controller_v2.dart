@@ -23,20 +23,8 @@ final _log = Logger('logging_controller');
 
 // For performance reasons, we drop old logs in batches, so the log will grow
 // to kMaxLogItemsUpperBound then truncate to kMaxLogItemsLowerBound.
-const int kMaxLogItemsLowerBound = 5000;
-const int kMaxLogItemsUpperBound = 5500;
-final DateFormat timeFormat = DateFormat('HH:mm:ss.SSS');
 
 bool _verboseDebugging = false;
-
-typedef OnShowDetails = void Function({
-  String? text,
-  InspectorTreeController? tree,
-});
-
-typedef CreateLoggingTree = InspectorTreeController Function({
-  VoidCallback? onSelectionChange,
-});
 
 Future<String> _retrieveFullStringValue(
   VmServiceWrapper? service,
@@ -61,7 +49,7 @@ const _flutterFirstFrameKind = 'Flutter.FirstFrame';
 const _flutterFrameworkInitializationKind = 'Flutter.FrameworkInitialization';
 
 class LoggingControllerV2 extends DisposableController
-    with AutoDisposeControllerMixin, FilterControllerMixin<LogData> {
+    with AutoDisposeControllerMixin, FilterControllerMixin<LogDataV2> {
   LoggingControllerV2() {
     addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
       if (serviceConnection.serviceManager.connectedState.value.connected) {
@@ -96,12 +84,13 @@ class LoggingControllerV2 extends DisposableController
   /// See also [statusText].
   Stream<String> get onLogStatusChanged => _logStatusController.stream;
 
-  List<LogData> data = <LogData>[];
+  List<LogDataV2> data = <LogDataV2>[];
 
-  final selectedLog = ValueNotifier<LogData?>(null);
+  final selectedLog = ValueNotifier<LogDataV2?>(null);
 
-  void _updateData(List<LogData> logs) {
+  void _updateData(List<LogDataV2> logs) {
     data = logs;
+    filteredData.replaceAll(logs);
     _updateSelection();
     _updateStatus();
   }
@@ -109,7 +98,7 @@ class LoggingControllerV2 extends DisposableController
   void _updateSelection() {
     final selected = selectedLog.value;
     if (selected != null) {
-      final List<LogData> logs = filteredData.value;
+      final List<LogDataV2> logs = filteredData.value;
       if (!logs.contains(selected)) {
         selectedLog.value = null;
       }
@@ -188,7 +177,7 @@ class LoggingControllerV2 extends DisposableController
           '$frameId ${frame.elapsedMs.toStringAsFixed(1).padLeft(4)}ms ';
 
       log(
-        LogData(
+        LogDataV2(
           e.extensionKind!.toLowerCase(),
           jsonEncode(e.extensionData!.data),
           e.timestamp,
@@ -200,7 +189,7 @@ class LoggingControllerV2 extends DisposableController
 
       for (final image in images) {
         log(
-          LogData(
+          LogDataV2(
             e.extensionKind!.toLowerCase(),
             jsonEncode(image.json),
             e.timestamp,
@@ -212,7 +201,7 @@ class LoggingControllerV2 extends DisposableController
       final NavigationInfo navInfo = NavigationInfo.from(e.extensionData!.data);
 
       log(
-        LogData(
+        LogDataV2(
           e.extensionKind!.toLowerCase(),
           jsonEncode(e.json),
           e.timestamp,
@@ -221,7 +210,7 @@ class LoggingControllerV2 extends DisposableController
       );
     } else if (untitledEvents.contains(e.extensionKind)) {
       log(
-        LogData(
+        LogDataV2(
           e.extensionKind!.toLowerCase(),
           jsonEncode(e.json),
           e.timestamp,
@@ -233,7 +222,7 @@ class LoggingControllerV2 extends DisposableController
           ServiceExtensionStateChangedInfo.from(e.extensionData!.data);
 
       log(
-        LogData(
+        LogDataV2(
           e.extensionKind!.toLowerCase(),
           jsonEncode(e.json),
           e.timestamp,
@@ -258,7 +247,7 @@ class LoggingControllerV2 extends DisposableController
 
       final RemoteDiagnosticsNode summary = _findFirstSummary(node) ?? node;
       log(
-        LogData(
+        LogDataV2(
           e.extensionKind!.toLowerCase(),
           jsonEncode(e.extensionData!.data),
           e.timestamp,
@@ -267,7 +256,7 @@ class LoggingControllerV2 extends DisposableController
       );
     } else {
       log(
-        LogData(
+        LogDataV2(
           e.extensionKind!.toLowerCase(),
           jsonEncode(e.json),
           e.timestamp,
@@ -300,7 +289,7 @@ class LoggingControllerV2 extends DisposableController
     };
 
     final String message = jsonEncode(event);
-    log(LogData('gc', message, e.timestamp, summary: summary));
+    log(LogDataV2('gc', message, e.timestamp, summary: summary));
   }
 
   void _handleDeveloperLogEvent(Event e) {
@@ -382,7 +371,7 @@ class LoggingControllerV2 extends DisposableController
     final bool isError = level != null && level >= severeIssue ? true : false;
 
     log(
-      LogData(
+      LogDataV2(
         loggerName,
         details,
         e.timestamp,
@@ -393,7 +382,7 @@ class LoggingControllerV2 extends DisposableController
     );
   }
 
-  void log(LogData log) {
+  void log(LogDataV2 log) {
     data.add(log);
     // TODO(@CoderDake): Add filtersearch behavior
     // TODO(@CoderDake): Add Search behavior
@@ -425,7 +414,7 @@ class LoggingControllerV2 extends DisposableController
     autoDisposeStreamSubscription(
       messageBus.onEvent(type: 'reload.end').listen((BusEvent event) {
         log(
-          LogData(
+          LogDataV2(
             'hot.reload',
             event.data as String?,
             DateTime.now().millisecondsSinceEpoch,
@@ -437,7 +426,7 @@ class LoggingControllerV2 extends DisposableController
     autoDisposeStreamSubscription(
       messageBus.onEvent(type: 'restart.end').listen((BusEvent event) {
         log(
-          LogData(
+          LogDataV2(
             'hot.restart',
             event.data as String?,
             DateTime.now().millisecondsSinceEpoch,
@@ -475,7 +464,7 @@ class LoggingControllerV2 extends DisposableController
     }
 
     log(
-      LogData(
+      LogDataV2(
         event.type,
         jsonEncode(debuggerEvent.json),
         debuggerEvent.timestamp,
@@ -495,7 +484,7 @@ class LoggingControllerV2 extends DisposableController
     }
 
     log(
-      LogData(
+      LogDataV2(
         event.type,
         details,
         DateTime.now().millisecondsSinceEpoch,
@@ -534,7 +523,7 @@ class _StdoutEventHandler {
   final String name;
   final bool isError;
 
-  LogData? buffer;
+  LogDataV2? buffer;
   Timer? timer;
 
   void handle(Event e) {
@@ -545,7 +534,7 @@ class _StdoutEventHandler {
 
       if (message == '\n') {
         loggingController.log(
-          LogData(
+          LogDataV2(
             buffer!.kind,
             buffer!.details! + message,
             buffer!.timestamp,
@@ -568,7 +557,7 @@ class _StdoutEventHandler {
       summary = message.substring(0, maxLength);
     }
 
-    final LogData data = LogData(
+    final LogDataV2 data = LogDataV2(
       name,
       message,
       e.timestamp,
@@ -614,8 +603,8 @@ String? _valueAsString(InstanceRef? ref) {
 /// case, this log entry will have a non-null `detailsComputer` field. After the
 /// data is calculated, the log entry will be modified to contain the calculated
 /// `details` data.
-class LogData with SearchableDataMixin {
-  LogData(
+class LogDataV2 with SearchableDataMixin {
+  LogDataV2(
     this.kind,
     this._details,
     this.timestamp, {
@@ -726,31 +715,4 @@ extension type _ImageSize(Map<String, dynamic> json) {
   double get width => json['width'];
 
   double get height => json['height'];
-}
-
-class NavigationInfo {
-  NavigationInfo(this._route);
-
-  static const String eventName = 'Flutter.Navigation';
-
-  static NavigationInfo from(Map<String, dynamic> data) {
-    return NavigationInfo(data['route']);
-  }
-
-  final Map<String, dynamic>? _route;
-
-  String? get routeDescription => _route == null ? null : _route['description'];
-}
-
-class ServiceExtensionStateChangedInfo {
-  ServiceExtensionStateChangedInfo(this.extension, this.value);
-
-  static const String eventName = 'Flutter.ServiceExtensionStateChanged';
-
-  static ServiceExtensionStateChangedInfo from(Map<String, dynamic> data) {
-    return ServiceExtensionStateChangedInfo(data['extension'], data['value']);
-  }
-
-  final String? extension;
-  final Object value;
 }
