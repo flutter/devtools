@@ -19,6 +19,7 @@ import '../../../../../shared/memory/classes.dart';
 import '../../../../../shared/memory/heap_graph_loader.dart';
 import '../../../../../shared/memory/retaining_path.dart';
 import '../../../../../shared/memory/simple_items.dart';
+import '../../../../../shared/primitives/serialization.dart';
 import '../../../shared/heap/class_filter.dart';
 import '../../../shared/primitives/memory_utils.dart';
 import '../data/classes_diff.dart';
@@ -45,10 +46,9 @@ class DiffPaneController extends DisposableController {
   }
 
   factory DiffPaneController.fromJson(Map<String, dynamic> json) {
-    final snapshots = (json[_Json.snapshots] as List).map((e) {
-      if (e is SnapshotDataItem) return e;
-      return SnapshotDataItem.fromJson(e);
-    }).toList();
+    final snapshots = (json[_Json.snapshots] as List)
+        .map((e) => deserialize(e, SnapshotDataItem.fromJson))
+        .toList();
 
     final diffWith = json[_Json.diffWith] as List<int?>;
 
