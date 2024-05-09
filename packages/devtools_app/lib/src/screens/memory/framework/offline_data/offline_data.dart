@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:vm_snapshot_analysis/instruction_sizes.dart';
+
+import '../../../../shared/primitives/serialization.dart';
 import '../../panes/chart/controller/chart_data.dart';
 import '../../panes/diff/controller/diff_pane_controller.dart';
 import '../../panes/profile/profile_pane_controller.dart';
@@ -25,15 +28,23 @@ class OfflineMemoryData {
   });
 
   factory OfflineMemoryData.fromJson(Map<String, dynamic> json) {
-    Map<String, dynamic> item(String key) =>
-        json[key] as Map<String, dynamic>? ?? {};
     return OfflineMemoryData(
-      DiffPaneController.fromJson(item(_Json.diffData)),
-      ProfilePaneController.fromJson(item(_Json.profileData)),
-      ChartData.fromJson(item(_Json.chartData)),
-      ClassFilter.fromJson(item(_Json.classFilter)),
+      deserialize(json[_Json.diffData], DiffPaneController.fromJson),
+      deserialize(json[_Json.profileData], ProfilePaneController.fromJson),
+      deserialize(json[_Json.chartData], ChartData.fromJson),
+      deserialize(json[_Json.classFilter], ClassFilter.fromJson),
       selectedTab: json[_Json.selectedTab] as int? ?? 0,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      _Json.selectedTab: selectedTab,
+      _Json.diffData: diff,
+      _Json.profileData: profile,
+      _Json.chartData: chart,
+      _Json.classFilter: filter,
+    };
   }
 
   final int selectedTab;
@@ -42,14 +53,4 @@ class OfflineMemoryData {
   final DiffPaneController diff;
   final ProfilePaneController profile;
   final ChartData chart;
-
-  Map<String, dynamic> toJson() {
-    return {
-      _Json.selectedTab: selectedTab,
-      _Json.diffData: diff,
-      _Json.profileData: profile,
-      _Json.chartData: chart,
-      _Json.classFilter: profile.classFilter.value,
-    };
-  }
 }

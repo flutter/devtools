@@ -39,16 +39,16 @@ class DiffPaneController extends DisposableController {
     List<SnapshotDataItem>? snapshots,
   }) {
     if (snapshots != null) {
-      core._snapshots.value.addAll(snapshots);
+      core._snapshots.addAll(snapshots);
     }
     derived._updateValues();
   }
 
   factory DiffPaneController.fromJson(Map<String, dynamic> json) {
-    final snapshots = (json[_Json.snapshots] as List)
-        .cast<Map<String, dynamic>>()
-        .map((e) => SnapshotDataItem.fromJson(e))
-        .toList();
+    final snapshots = (json[_Json.snapshots] as List).map((e) {
+      if (e is SnapshotDataItem) return e;
+      return SnapshotDataItem.fromJson(e);
+    }).toList();
 
     final diffWith = json[_Json.diffWith] as List<int?>;
 
