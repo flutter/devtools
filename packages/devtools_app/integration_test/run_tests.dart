@@ -67,7 +67,7 @@ Future<void> _runTest(
   final testTarget = testRunnerArgs.testTarget!;
   final testDevice = testRunnerArgs.testAppDevice.name;
 
-  final skipAll = _skipTestsForDevice[_testDeviceAll] ?? {};
+  final skipAll = _skipTestsForDevice[_testDeviceAll]!;
   final skipForDevice = _skipTestsForDevice[testDevice] ?? {};
   final shouldSkip =
       {...skipAll, ...skipForDevice}.any((t) => testTarget.endsWith(t));
