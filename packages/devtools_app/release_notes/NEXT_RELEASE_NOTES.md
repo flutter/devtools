@@ -34,7 +34,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## Network profiler updates
 
-TODO: Remove this section if there are not any general updates.
+* Add better support for narrow viewing windows, like when this
+screen is embedded in the IDE. - [#7726](https://github.com/flutter/devtools/pull/7726)
 
 ## Logging updates
 

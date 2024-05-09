@@ -23,6 +23,7 @@ import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
 import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
+import '../../shared/ui/utils.dart';
 import '../../shared/utils.dart';
 import 'network_controller.dart';
 import 'network_model.dart';
@@ -209,6 +210,7 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = ScreenSize(context).width;
     final hasRequests = _filteredRequests.isNotEmpty;
     return Row(
       children: [
@@ -237,7 +239,9 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
         SearchField<NetworkController>(
           searchController: widget.controller,
           searchFieldEnabled: hasRequests,
-          searchFieldWidth: wideSearchFieldWidth,
+          searchFieldWidth: screenWidth <= MediaSize.xs
+              ? defaultSearchFieldWidth
+              : wideSearchFieldWidth,
         ),
         const SizedBox(width: denseSpacing),
         DevToolsFilterButton(
@@ -268,10 +272,11 @@ class _NetworkProfilerBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final splitAxis = SplitPane.axisFor(context, 1.0);
     return SplitPane(
-      initialFractions: const [0.5, 0.5],
+      initialFractions: splitAxis == Axis.horizontal ? [0.6, 0.4] : [0.5, 0.5],
       minSizes: const [200, 200],
-      axis: Axis.horizontal,
+      axis: splitAxis,
       children: [
         ValueListenableBuilder<List<NetworkRequest>>(
           valueListenable: controller.filteredData,
@@ -353,7 +358,7 @@ class UriColumn extends ColumnData<NetworkRequest>
   UriColumn()
       : super.wide(
           'Uri',
-          minWidthPx: scaleByFontFactor(100.0),
+          minWidthPx: scaleByFontFactor(isEmbedded() ? 100 : 150.0),
           showTooltip: true,
         );
 
@@ -385,7 +390,7 @@ class UriColumn extends ColumnData<NetworkRequest>
 }
 
 class MethodColumn extends ColumnData<NetworkRequest> {
-  MethodColumn() : super('Method', fixedWidthPx: scaleByFontFactor(70));
+  MethodColumn() : super('Method', fixedWidthPx: scaleByFontFactor(60));
 
   @override
   String getValue(NetworkRequest dataObject) {
@@ -474,7 +479,8 @@ class StatusColumn extends ColumnData<NetworkRequest>
       : super(
           'Status',
           alignment: ColumnAlignment.right,
-          fixedWidthPx: scaleByFontFactor(62),
+          headerAlignment: TextAlign.right,
+          fixedWidthPx: scaleByFontFactor(50),
         );
 
   @override
@@ -510,7 +516,8 @@ class TypeColumn extends ColumnData<NetworkRequest> {
       : super(
           'Type',
           alignment: ColumnAlignment.right,
-          fixedWidthPx: scaleByFontFactor(62),
+          headerAlignment: TextAlign.right,
+          fixedWidthPx: scaleByFontFactor(50),
         );
 
   @override
@@ -529,7 +536,8 @@ class DurationColumn extends ColumnData<NetworkRequest> {
       : super(
           'Duration',
           alignment: ColumnAlignment.right,
-          fixedWidthPx: scaleByFontFactor(80),
+          headerAlignment: TextAlign.right,
+          fixedWidthPx: scaleByFontFactor(75),
         );
 
   @override
@@ -554,7 +562,8 @@ class TimestampColumn extends ColumnData<NetworkRequest> {
       : super(
           'Timestamp',
           alignment: ColumnAlignment.right,
-          fixedWidthPx: scaleByFontFactor(135),
+          headerAlignment: TextAlign.right,
+          fixedWidthPx: scaleByFontFactor(115),
         );
 
   @override
