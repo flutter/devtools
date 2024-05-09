@@ -4,10 +4,6 @@
 
 @TestOn('vm')
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/screens/logging/_log_details.dart';
-import 'package:devtools_app/src/screens/logging/_logs_table.dart';
-import 'package:devtools_app/src/screens/logging/_message_column.dart';
-import 'package:devtools_app/src/service/service_extension_widgets.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';

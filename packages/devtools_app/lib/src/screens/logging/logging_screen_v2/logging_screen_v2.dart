@@ -58,7 +58,6 @@ class _LoggingScreenBodyV2State extends State<LoggingScreenBodyV2>
     with
         AutoDisposeMixin,
         ProvidedControllerMixin<LoggingControllerV2, LoggingScreenBodyV2> {
-  late final ScrollController _verticalController = ScrollController();
   List<String> items = [];
   late List<LogDataV2> filteredLogs;
   @override
