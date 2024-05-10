@@ -77,7 +77,6 @@ abstract class FeatureFlags {
   /// Flag to enable the new Logging experience.
   ///
   /// https://github.com/flutter/devtools/issues/7703
-
   static bool loggingV2 = enableExperiments;
 
   /// Flag to enable debugging via DAP.
