@@ -52,7 +52,6 @@ Future<String> _retrieveFullStringValue(
       Future.value(fallback);
 }
 
-// const _gcLogKind = 'gc';
 const _flutterFirstFrameKind = 'Flutter.FirstFrame';
 const _flutterFrameworkInitializationKind = 'Flutter.FrameworkInitialization';
 
