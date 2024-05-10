@@ -8,7 +8,6 @@ import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 
-import '../service/service_extensions.dart';
 import '../shared/globals.dart';
 import '../shared/primitives/utils.dart';
 import '../shared/server/server.dart' as server;
@@ -153,7 +152,7 @@ class ExtensionService extends DisposableController
         serviceConnection.serviceManager.connectedState.value.connected &&
         serviceConnection.serviceManager.isolateManager.mainIsolate.value !=
             null) {
-      _appRoot = await _connectedAppRoot();
+      _appRoot = await serviceConnection.connectedAppPackageRoot();
     }
 
     // TODO(kenz): gracefully handle app connections / disconnects when there
@@ -357,33 +356,6 @@ class ExtensionService extends DisposableController
     _refreshInProgress.dispose();
     super.dispose();
   }
-}
-
-Future<Uri?> _connectedAppRoot() async {
-  String? packageUriString;
-
-  // // Whether the connected app is a test process spawned by package:test. We
-  // // can assume this is true if the [testTargetLibraryExtension] is a registered
-  // // service extension on the main isolate.
-  // final isTestTarget = serviceConnection.serviceManager.serviceExtensionManager
-  //     .hasServiceExtension(testTargetLibraryExtension)
-  //     .value;
-
-  // if (isTestTarget) {
-  //   final result = await serviceConnection.serviceManager
-  //       .callServiceExtensionOnMainIsolate(testTargetLibraryExtension);
-  //   packageUriString = result.json?['value'];
-  //   _log.fine(
-  //     'fetched library from $testTargetLibraryExtension: $packageUriString',
-  //   );
-  // }
-
-  if (packageUriString == null) {
-    packageUriString =
-        await serviceConnection.rootPackageDirectoryForMainIsolate();
-    _log.fine('fetched library from main isolate: $packageUriString');
-  }
-  return packageUriString == null ? null : Uri.parse(packageUriString);
 }
 
 /// Compares the versions of extension configurations [a] and [b] and returns
