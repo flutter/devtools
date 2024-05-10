@@ -14,9 +14,18 @@ import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 import 'package:vm_service/vm_service.dart';
 
-import '../../../../devtools_app.dart';
+import '../../../service/vm_service_wrapper.dart';
+import '../../../shared/diagnostics/diagnostics_node.dart';
+import '../../../shared/diagnostics/inspector_service.dart';
+import '../../../shared/globals.dart';
 import '../../../shared/primitives/byte_utils.dart';
 import '../../../shared/primitives/message_bus.dart';
+import '../../../shared/primitives/utils.dart';
+import '../../../shared/ui/filter.dart';
+import '../../../shared/ui/search.dart';
+import '../logging_controller.dart'
+    show NavigationInfo, ServiceExtensionStateChangedInfo;
+import '../logging_screen.dart';
 
 final _log = Logger('logging_controller');
 
