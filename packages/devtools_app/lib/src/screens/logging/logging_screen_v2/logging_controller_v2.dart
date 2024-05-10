@@ -1,4 +1,4 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,20 +10,41 @@ import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
+import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 import 'package:vm_service/vm_service.dart';
 
-import '../../../../devtools_app.dart';
+import '../../../service/vm_service_wrapper.dart';
+import '../../../shared/diagnostics/diagnostics_node.dart';
+import '../../../shared/diagnostics/inspector_service.dart';
+import '../../../shared/globals.dart';
 import '../../../shared/primitives/byte_utils.dart';
 import '../../../shared/primitives/message_bus.dart';
+import '../../../shared/primitives/utils.dart';
+import '../../../shared/ui/filter.dart';
+import '../../../shared/ui/search.dart';
+import '../../inspector/inspector_tree_controller.dart';
+import '../logging_screen.dart';
 
 final _log = Logger('logging_controller');
 
 // For performance reasons, we drop old logs in batches, so the log will grow
 // to kMaxLogItemsUpperBound then truncate to kMaxLogItemsLowerBound.
+const int kMaxLogItemsLowerBoundV2 = 5000;
+const int kMaxLogItemsUpperBoundV2 = 5500;
+final DateFormat timeFormatV2 = DateFormat('HH:mm:ss.SSS');
 
 bool _verboseDebugging = false;
+
+typedef OnShowDetailsV2 = void Function({
+  String? text,
+  InspectorTreeController? tree,
+});
+
+typedef CreateLoggingTreeV2 = InspectorTreeController Function({
+  VoidCallback? onSelectionChange,
+});
 
 Future<String> _retrieveFullStringValue(
   VmServiceWrapper? service,
@@ -43,12 +64,24 @@ Future<String> _retrieveFullStringValue(
       Future.value(fallback);
 }
 
-// const _gcLogKind = 'gc';
+const _gcLogKind = 'gc';
 const _flutterFirstFrameKind = 'Flutter.FirstFrame';
 const _flutterFrameworkInitializationKind = 'Flutter.FrameworkInitialization';
+const _verboseFlutterFrameworkLogKinds = [
+  _flutterFirstFrameKind,
+  _flutterFrameworkInitializationKind,
+  _FrameInfo.eventName,
+  _ImageSizesForFrame.eventName,
+];
+const _verboseFlutterServiceLogKinds = [
+  ServiceExtensionStateChangedInfoV2.eventName,
+];
 
 class LoggingControllerV2 extends DisposableController
-    with AutoDisposeControllerMixin, FilterControllerMixin<LogDataV2> {
+    with
+        SearchControllerMixin<LogDataV2>,
+        FilterControllerMixin<LogDataV2>,
+        AutoDisposeControllerMixin {
   LoggingControllerV2() {
     addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
       if (serviceConnection.serviceManager.connectedState.value.connected) {
@@ -71,9 +104,46 @@ class LoggingControllerV2 extends DisposableController
       _handleConnectionStart(serviceConnection.serviceManager.service!);
     }
     _handleBusEvents();
+    subscribeToFilterChanges();
   }
 
+  /// The toggle filters available for the Logging screen.
+  @override
+  List<ToggleFilter<LogDataV2>> createToggleFilters() => [
+        if (serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ??
+            true) ...[
+          ToggleFilter<LogDataV2>(
+            name: 'Hide verbose Flutter framework logs (initialization, frame '
+                'times, image sizes)',
+            includeCallback: (log) => !_verboseFlutterFrameworkLogKinds
+                .any((kind) => kind.caseInsensitiveEquals(log.kind)),
+            enabledByDefault: true,
+          ),
+          ToggleFilter<LogDataV2>(
+            name: 'Hide verbose Flutter service logs (service extension state '
+                'changes)',
+            includeCallback: (log) => !_verboseFlutterServiceLogKinds
+                .any((kind) => kind.caseInsensitiveEquals(log.kind)),
+            enabledByDefault: true,
+          ),
+        ],
+        ToggleFilter<LogDataV2>(
+          name: 'Hide garbage collection logs',
+          includeCallback: (log) => !log.kind.caseInsensitiveEquals(_gcLogKind),
+          enabledByDefault: true,
+        ),
+      ];
+
   static const kindFilterId = 'logging-kind-filter';
+
+  @override
+  Map<String, QueryFilterArgument<LogDataV2>> createQueryFilterArgs() => {
+        kindFilterId: QueryFilterArgument<LogDataV2>(
+          keys: ['kind', 'k'],
+          dataValueProvider: (log) => log.kind,
+          substringMatch: true,
+        ),
+      };
 
   final StreamController<String> _logStatusController =
       StreamController.broadcast();
@@ -89,7 +159,8 @@ class LoggingControllerV2 extends DisposableController
 
   void _updateData(List<LogDataV2> logs) {
     data = logs;
-    filteredData.replaceAll(logs);
+    filterData(activeFilter.value);
+    refreshSearchMatches();
     _updateSelection();
     _updateStatus();
   }
@@ -128,6 +199,7 @@ class LoggingControllerV2 extends DisposableController
   }
 
   void clear() {
+    resetFilter();
     _updateData([]);
     serviceConnection.errorBadgeManager.clearErrors(LoggingScreen.id);
   }
@@ -196,8 +268,9 @@ class LoggingControllerV2 extends DisposableController
           ),
         );
       }
-    } else if (e.extensionKind == NavigationInfo.eventName) {
-      final NavigationInfo navInfo = NavigationInfo.from(e.extensionData!.data);
+    } else if (e.extensionKind == NavigationInfoV2.eventName) {
+      final NavigationInfoV2 navInfo =
+          NavigationInfoV2.from(e.extensionData!.data);
 
       log(
         LogDataV2(
@@ -216,9 +289,10 @@ class LoggingControllerV2 extends DisposableController
           summary: '',
         ),
       );
-    } else if (e.extensionKind == ServiceExtensionStateChangedInfo.eventName) {
-      final ServiceExtensionStateChangedInfo changedInfo =
-          ServiceExtensionStateChangedInfo.from(e.extensionData!.data);
+    } else if (e.extensionKind ==
+        ServiceExtensionStateChangedInfoV2.eventName) {
+      final ServiceExtensionStateChangedInfoV2 changedInfo =
+          ServiceExtensionStateChangedInfoV2.from(e.extensionData!.data);
 
       log(
         LogDataV2(
@@ -382,12 +456,25 @@ class LoggingControllerV2 extends DisposableController
   }
 
   void log(LogDataV2 log) {
-    data.add(log);
-    // TODO(@CoderDake): Add filtersearch behavior
-    // TODO(@CoderDake): Add Search behavior
-    // TODO(@CoderDake): Add Selection update behavior
-    // TODO(@CoderDake): Add status update
-    filteredData.add(log);
+    List<LogDataV2> currentLogs = List.of(data);
+
+    // Insert the new item and clamped the list to kMaxLogItemsLength.
+    currentLogs.add(log);
+
+    // Note: We need to drop rows from the start because we want to drop old
+    // rows but because that's expensive, we only do it periodically (eg. when
+    // the list is 500 rows more).
+    if (currentLogs.length > kMaxLogItemsUpperBoundV2) {
+      int itemsToRemove = currentLogs.length - kMaxLogItemsLowerBoundV2;
+      // Ensure we remove an even number of rows to keep the alternating
+      // background in-sync.
+      if (itemsToRemove % 2 == 1) {
+        itemsToRemove--;
+      }
+      currentLogs = currentLogs.sublist(itemsToRemove);
+    }
+
+    _updateData(currentLogs);
   }
 
   static RemoteDiagnosticsNode? _findFirstSummary(RemoteDiagnosticsNode node) {
@@ -490,6 +577,54 @@ class LoggingControllerV2 extends DisposableController
         summary: summary,
       ),
     );
+  }
+
+  @override
+  Iterable<LogDataV2> get currentDataToSearchThrough => filteredData.value;
+
+  @override
+  void filterData(Filter<LogDataV2> filter) {
+    super.filterData(filter);
+
+    bool filterCallback(LogDataV2 log) {
+      final filteredOutByToggleFilters = filter.toggleFilters.any(
+        (toggleFilter) =>
+            toggleFilter.enabled.value && !toggleFilter.includeCallback(log),
+      );
+      if (filteredOutByToggleFilters) return false;
+
+      final queryFilter = filter.queryFilter;
+      if (!queryFilter.isEmpty) {
+        final filteredOutByQueryFilterArgument = queryFilter
+            .filterArguments.values
+            .any((argument) => !argument.matchesValue(log));
+        if (filteredOutByQueryFilterArgument) return false;
+
+        if (filter.queryFilter.substringExpressions.isNotEmpty) {
+          for (final substring in filter.queryFilter.substringExpressions) {
+            final matchesKind = log.kind.caseInsensitiveContains(substring);
+            if (matchesKind) return true;
+
+            final matchesSummary = log.summary != null &&
+                log.summary!.caseInsensitiveContains(substring);
+            if (matchesSummary) return true;
+
+            final matchesDetails = log.details != null &&
+                log.details!.caseInsensitiveContains(substring);
+            if (matchesDetails) return true;
+          }
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    filteredData
+      ..clear()
+      ..addAll(
+        data.where(filterCallback).toList(),
+      );
   }
 }
 
@@ -714,4 +849,31 @@ extension type _ImageSize(Map<String, dynamic> json) {
   double get width => json['width'];
 
   double get height => json['height'];
+}
+
+class NavigationInfoV2 {
+  NavigationInfoV2(this._route);
+
+  static const String eventName = 'Flutter.Navigation';
+
+  static NavigationInfoV2 from(Map<String, dynamic> data) {
+    return NavigationInfoV2(data['route']);
+  }
+
+  final Map<String, dynamic>? _route;
+
+  String? get routeDescription => _route == null ? null : _route['description'];
+}
+
+class ServiceExtensionStateChangedInfoV2 {
+  ServiceExtensionStateChangedInfoV2(this.extension, this.value);
+
+  static const String eventName = 'Flutter.ServiceExtensionStateChanged';
+
+  static ServiceExtensionStateChangedInfoV2 from(Map<String, dynamic> data) {
+    return ServiceExtensionStateChangedInfoV2(data['extension'], data['value']);
+  }
+
+  final String? extension;
+  final Object value;
 }
