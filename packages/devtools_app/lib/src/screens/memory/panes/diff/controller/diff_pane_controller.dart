@@ -7,6 +7,7 @@ import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:devtools_app_shared/utils.dart';
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../../shared/analytics/analytics.dart' as ga;
@@ -19,7 +20,6 @@ import '../../../../../shared/memory/classes.dart';
 import '../../../../../shared/memory/heap_graph_loader.dart';
 import '../../../../../shared/memory/retaining_path.dart';
 import '../../../../../shared/memory/simple_items.dart';
-import '../../../../../shared/primitives/serialization.dart';
 import '../../../shared/heap/class_filter.dart';
 import '../../../shared/primitives/memory_utils.dart';
 import '../data/classes_diff.dart';
@@ -47,7 +47,7 @@ class DiffPaneController extends DisposableController {
 
   factory DiffPaneController.fromJson(Map<String, dynamic> json) {
     final snapshots = (json[_Json.snapshots] as List)
-        .map((e) => deserialize(e, SnapshotDataItem.fromJson))
+        .map((e) => deserialize<SnapshotDataItem>(e, SnapshotDataItem.fromJson))
         .toList();
 
     final diffWith = json[_Json.diffWith] as List<int?>;
@@ -76,14 +76,14 @@ class DiffPaneController extends DisposableController {
     final snapshotToIndex =
         snapshots.asMap().map((index, item) => MapEntry(item, index));
 
-    final diffsWithSnapshots = snapshots.map((item) {
+    final diffWithIndices = snapshots.map((item) {
       final diffWith = item.diffWith.value;
       return diffWith == null ? null : snapshotToIndex[diffWith];
     }).toList();
 
     return {
       _Json.snapshots: snapshots,
-      _Json.diffWith: diffsWithSnapshots,
+      _Json.diffWith: diffWithIndices,
     };
   }
 

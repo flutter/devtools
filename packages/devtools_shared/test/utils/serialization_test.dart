@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/shared/primitives/serialization.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:devtools_shared/src/utils/serialization.dart';
+import 'package:test/test.dart';
 
 void main() {
   test('deserialize works for json', () {
