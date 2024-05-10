@@ -391,10 +391,10 @@ class LoggingControllerV2 extends DisposableController
 
   void log(LogDataV2 log) {
     data.add(log);
-    // TODO(@CoderDake): Add filtersearch behavior
-    // TODO(@CoderDake): Add Search behavior
-    // TODO(@CoderDake): Add Selection update behavior
-    // TODO(@CoderDake): Add status update
+    // TODO(danchevalier): Add filtersearch behavior
+    // TODO(danchevalier): Add Search behavior
+    // TODO(danchevalier): Add Selection update behavior
+    // TODO(danchevalier): Add status update
     filteredData.add(log);
   }
 

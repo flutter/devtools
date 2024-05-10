@@ -30,8 +30,7 @@ void main() {
     setUp(() {
       mockLoggingController = createMockLoggingControllerV2WithDefaults();
 
-      final FakeServiceConnectionManager fakeServiceConnection =
-          FakeServiceConnectionManager();
+      final fakeServiceConnection = FakeServiceConnectionManager();
       when(
         fakeServiceConnection.serviceManager.connectedApp!.isFlutterWebAppNow,
       ).thenReturn(false);

@@ -118,7 +118,7 @@ class _LoggingScreenBodyV2State extends State<LoggingScreenBodyV2>
 class LogsTableV2 extends StatelessWidget {
   LogsTableV2(this.filteredLogs, {super.key});
 
-  final ScrollController _verticalController = ScrollController();
+  final _verticalController = ScrollController();
   final List<LogDataV2> filteredLogs;
 
   @override
