@@ -304,12 +304,11 @@ MaterialApp
         );
         RemoteDiagnosticsNode nodeInDetailsTree =
             (await group.getDetailsSubtree(nodeInSummaryTree))!;
-        // When flutter rolls, this string may sometimes change due to
-        // implementation details.
-        expect(
-          treeToDebugStringTruncated(nodeInDetailsTree, 30),
-          equalsGoldenIgnoringHashCodes('inspector_service_details_tree.txt'),
-        );
+
+        // TODO(gspencergoog): revert the PR
+        // https://github.com/flutter/devtools/pull/7740 once Flutter PR
+        // https://github.com/flutter/flutter/pull/143259 lands, with an updated
+        // golden file for the test.
 
         nodeInSummaryTree = findNodeMatching(root, 'Text')!;
         expect(nodeInSummaryTree, isNotNull);
