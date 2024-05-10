@@ -4,6 +4,7 @@
 
 import 'dart:convert';
 
+import '../utils/serialization.dart';
 import 'adb_memory_info.dart';
 import 'event_sample.dart';
 
@@ -24,9 +25,6 @@ class HeapSample {
         rasterCache = rasterCache ?? RasterCache.empty();
 
   factory HeapSample.fromJson(Map<String, dynamic> json) {
-    final adbMemoryInfo = json['adb_memoryInfo'];
-    final memoryEventInfo = json['memory_eventInfo'];
-    final rasterCache = json['raster_cache'];
     return HeapSample(
       json['timestamp'] as int,
       json['rss'] as int,
@@ -34,15 +32,12 @@ class HeapSample {
       json['used'] as int,
       json['external'] as int,
       json['gc'] as bool,
-      adbMemoryInfo != null
-          ? AdbMemoryInfo.fromJson(adbMemoryInfo)
-          : AdbMemoryInfo.empty(),
-      memoryEventInfo != null
-          ? EventSample.fromJson(memoryEventInfo)
-          : EventSample.empty(),
-      rasterCache != null
-          ? RasterCache.fromJson(rasterCache)
-          : RasterCache.empty(),
+      deserialize<AdbMemoryInfo>(
+        json['adb_memoryInfo'],
+        AdbMemoryInfo.fromJson,
+      ),
+      deserialize<EventSample>(json['memory_eventInfo'], EventSample.fromJson),
+      deserialize<RasterCache>(json['raster_cache'], RasterCache.fromJson),
     );
   }
 

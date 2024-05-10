@@ -15,10 +15,7 @@ import 'simple_items.dart';
 
 /// Raw and calculated data of the heap snapshot.
 class HeapData {
-  HeapData(
-    this.graph, {
-    required this.created,
-  }) {
+  HeapData(this.graph, {required this.created}) {
     unawaited(_calculate());
   }
 

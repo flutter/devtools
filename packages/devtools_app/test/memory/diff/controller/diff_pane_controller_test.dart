@@ -1,7 +1,3 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
 // Copyright 2024 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -63,6 +59,10 @@ void main() {
         snapshotsFromJson.first.diffWith.value == snapshotsFromJson.last,
         true,
       );
+      expect(snapshotsFromJson.last.diffWith.value, null);
+
+      expect(snapshotsFromJson.first.name, snapshots.first.name);
+      expect(snapshotsFromJson.last.name, snapshots.last.name);
     },
   );
 }
