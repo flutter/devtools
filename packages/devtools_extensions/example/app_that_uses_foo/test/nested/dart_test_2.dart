@@ -5,8 +5,9 @@
 import 'package:dart_foo/dart_foo.dart';
 import 'package:test/test.dart';
 
-// This test can be run to verify that the `package:foo` DevTools extension
-// loads properly when debugging a Dart test target with DevTools.
+// This test can be run to verify that the DevTools extensions available for
+// package:app_that_uses_foo load properly when debugging a Dart test target
+// with DevTools.
 //
 // This doubles as a test to make sure the DevTools extension loads properly
 // when the test target is in a subdirectory of 'test/'.
