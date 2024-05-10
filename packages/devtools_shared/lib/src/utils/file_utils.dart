@@ -76,7 +76,7 @@ Future<String> packageRootFromFileUriString(
   // by walking the directory structure, default to using a regexp heuristic.
   final directoryRegExp =
       RegExp(r'\/(lib|bin|integration_test|test|benchmark|example)\/.+\.dart');
-  final directoryIndex = fileUriString.indexOf(directoryRegExp);
+  final directoryIndex = fileUriString.lastIndexOf(directoryRegExp);
   if (directoryIndex != -1) {
     fileUriString = fileUriString.substring(0, directoryIndex);
   }
