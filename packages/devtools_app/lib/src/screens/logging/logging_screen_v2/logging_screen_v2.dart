@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 import '../../../service/service_extension_widgets.dart';
 import '../../../shared/analytics/analytics.dart' as ga;
 import '../../../shared/analytics/constants.dart' as gac;
+import '../../../shared/common_widgets.dart';
 import '../../../shared/screen.dart';
 import '../../../shared/utils.dart';
 import 'logging_controller_v2.dart';
@@ -88,20 +89,14 @@ class _LoggingScreenBodyV2State extends State<LoggingScreenBodyV2>
         Row(
           children: [
             Expanded(
-              child: TextField(
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: 'Filter',
-                ),
+              child: DevToolsClearableTextField(
+                labelText: 'Filter',
                 onSubmitted: (value) {},
               ),
             ),
             Expanded(
-              child: TextField(
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: 'Search',
-                ),
+              child: DevToolsClearableTextField(
+                labelText: 'Search',
                 onSubmitted: (value) {},
               ),
             ),
