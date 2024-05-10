@@ -9,11 +9,17 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../devtools_app.dart';
 import '../../../service/service_extension_widgets.dart';
 import '../../../shared/analytics/analytics.dart' as ga;
 import '../../../shared/analytics/constants.dart' as gac;
+import '../../../shared/common_widgets.dart';
+import '../../../shared/primitives/utils.dart';
+import '../../../shared/screen.dart';
+import '../../../shared/ui/filter.dart';
+import '../../../shared/ui/search.dart';
+import '../../../shared/utils.dart';
 import '../shared/constants.dart';
+import 'logging_controller_v2.dart';
 
 /// Presents logs from the connected app.
 class LoggingScreenV2 extends Screen {
