@@ -126,7 +126,7 @@ void main() {
               isTrue,
             );
             final rootLibrary =
-                await serviceConnection.rootLibraryForMainIsolate();
+                await serviceConnection.mainIsolateRootLibraryUriAsString();
             await inspectorServiceLocal.addPubRootDirectories([rootLibrary!]);
             final List<String> rootDirectories =
                 await inspectorServiceLocal.getPubRootDirectories() ?? [];
