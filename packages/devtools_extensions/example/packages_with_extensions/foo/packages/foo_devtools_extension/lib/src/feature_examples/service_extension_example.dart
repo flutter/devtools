@@ -10,6 +10,8 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_extensions/devtools_extensions.dart';
 import 'package:flutter/material.dart';
 
+import '../common/ui.dart';
+
 /// A widget that shows an example of how to call a service extension over the
 /// VM Service protocol.
 ///
@@ -49,7 +51,7 @@ class _ServiceExtensionExampleState extends State<ServiceExtensionExample> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SectionHeader(
+        const SectionHeader(
           number: 1,
           title:
               'Example of calling service extensions to fetch data from your package',

@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_extensions/api.dart';
 import 'package:devtools_extensions/devtools_extensions.dart';
 import 'package:flutter/material.dart';
+
+import '../common/ui.dart';
 
 /// This widget shows an example of how you can register a custom event handler
 /// for any type of [DevToolsExtensionEventType].
@@ -49,7 +50,7 @@ class _ListeningForDevToolsEventExampleState
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SectionHeader(
+        const SectionHeader(
           number: 3,
           title: 'Example of listening for a DevTools event',
         ),

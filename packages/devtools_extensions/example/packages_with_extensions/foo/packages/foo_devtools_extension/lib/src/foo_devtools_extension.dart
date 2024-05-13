@@ -6,10 +6,11 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_extensions/devtools_extensions.dart';
 import 'package:flutter/material.dart';
 
-import 'devtools_event_example.dart';
-import 'devtools_extension_api_example.dart';
-import 'expression_evaluation_example.dart';
-import 'service_extension_example.dart';
+import 'feature_examples/devtools_event_example.dart';
+import 'feature_examples/devtools_extension_api_example.dart';
+import 'feature_examples/dtd_example.dart';
+import 'feature_examples/expression_evaluation_example.dart';
+import 'feature_examples/service_extension_example.dart';
 
 class FooDevToolsExtension extends StatelessWidget {
   const FooDevToolsExtension({super.key});
@@ -51,6 +52,7 @@ class _FooExtensionHomePageState extends State<FooExtensionHomePage> {
             SizedBox(height: 32.0),
             CallingDevToolsExtensionsAPIsExample(),
             SizedBox(height: 32.0),
+            DartToolingDaemonExample(),
           ],
         ),
       ),
