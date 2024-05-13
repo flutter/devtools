@@ -49,11 +49,10 @@ class _ListeningForDevToolsEventExampleState
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          '3. Example of listening for a DevTools event',
-          style: Theme.of(context).textTheme.titleMedium,
+        SectionHeader(
+          number: 3,
+          title: 'Example of listening for a DevTools event',
         ),
-        const PaddedDivider.thin(),
         Text('Received an unknown event from DevTools: $message'),
       ],
     );

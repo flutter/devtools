@@ -19,7 +19,6 @@ import 'package:foo/foo.dart';
 //
 // flutter test test/ --start-paused
 
-
 void main() {
   testWidgets('Builds $MyAppThatUsesFoo', (tester) async {
     await tester.pumpWidget(const MyAppThatUsesFoo());

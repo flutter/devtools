@@ -50,6 +50,7 @@ class _FooExtensionHomePageState extends State<FooExtensionHomePage> {
             ListeningForDevToolsEventExample(),
             SizedBox(height: 32.0),
             CallingDevToolsExtensionsAPIsExample(),
+            SizedBox(height: 32.0),
           ],
         ),
       ),

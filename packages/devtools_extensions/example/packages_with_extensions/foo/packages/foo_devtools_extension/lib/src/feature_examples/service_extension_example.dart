@@ -49,11 +49,11 @@ class _ServiceExtensionExampleState extends State<ServiceExtensionExample> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          '1. Example of calling service extensions to fetch data from your package',
-          style: Theme.of(context).textTheme.titleMedium,
+        SectionHeader(
+          number: 1,
+          title:
+              'Example of calling service extensions to fetch data from your package',
         ),
-        const PaddedDivider.thin(),
         SelectedThing(
           selectedThingId: selectedId,
           onIncrement: () => _changeId(increment: true),
