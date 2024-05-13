@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
-import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/service.dart' hide SentinelException;
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
@@ -181,7 +181,7 @@ class ServiceConnectionManager {
   /// contains the .dart_tool/package_config.json file.
   ///
   /// This method contains special logic for detecting the package root for
-  /// test targets (i.e. a VM service connections spawned from `dart test` or
+  /// test targets (i.e., a VM service connections spawned from `dart test` or
   /// `flutter test`). This is because the main isolate for test targets is
   /// running the test runner, and not the test library itself, so we have to do
   /// some extra work to find the package root of the test target.
@@ -227,11 +227,17 @@ class ServiceConnectionManager {
         ?.isolateNow
         ?.rootLib;
     if (ref == null) return null;
-    final library = await serviceManager.service!.getObject(
-      serviceManager.isolateManager.mainIsolate.value!.id!,
-      ref.id!,
-    );
-    return library is Library ? library : null;
+    try {
+      final library = await serviceManager.service!.getObject(
+        serviceManager.isolateManager.mainIsolate.value!.id!,
+        ref.id!,
+      );
+      assert(library is Library);
+      return library as Library;
+    } on SentinelException catch (_) {
+      // Fail gracefully if the request to get the Library object fails.
+      return null;
+    }
   }
 
   // TODO(kenz): consider caching this value for the duration of the VM service
