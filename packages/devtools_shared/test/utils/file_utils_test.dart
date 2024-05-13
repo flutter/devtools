@@ -27,6 +27,8 @@ late File benchmarkFile;
 late File benchmarkSubFile;
 late File exampleFile;
 late File exampleSubFile;
+late File nestedProjectLibFile;
+late File nestedProjectTestFile;
 late File anyFile;
 late File anySubFile;
 
@@ -125,6 +127,18 @@ void main() {
             useDtd: useDtd,
           );
 
+          // Dart file in a nested project.
+          await verifyPackageRoot(
+            nestedProjectLibFile.uri.toString(),
+            expected: p.join(projectRoot, 'example', 'nested_project'),
+            useDtd: useDtd,
+          );
+          await verifyPackageRoot(
+            nestedProjectTestFile.uri.toString(),
+            expected: p.join(projectRoot, 'example', 'nested_project'),
+            useDtd: useDtd,
+          );
+
           // Dart file under an unknown directory.
           await verifyPackageRoot(
             anyFile.uri.toString(),
@@ -163,6 +177,12 @@ void main() {
 ///     foo.dart
 ///     sub/
 ///       foo.dart
+///     nested_project/
+///       .dart_tool/
+///       lib/
+///         foo.dart
+///       test/
+///         foo_test.dart
 ///   integration_test/
 ///     foo_test.dart
 ///     sub/
@@ -224,6 +244,33 @@ void _setupTestDirectoryStructure() {
   exampleSubFile =
       File(p.join(projectRootDirectory.path, 'example', 'sub', 'foo.dart'))
         ..createSync(recursive: true);
+  // Setup a nested Dart project under the 'example' directory.
+  Directory(
+    p.join(
+      projectRootDirectory.path,
+      'example',
+      'nested_project',
+      '.dart_tool',
+    ),
+  ).createSync(recursive: true);
+  nestedProjectLibFile = File(
+    p.join(
+      projectRootDirectory.path,
+      'example',
+      'nested_project',
+      'lib',
+      'foo.dart',
+    ),
+  )..createSync(recursive: true);
+  nestedProjectTestFile = File(
+    p.join(
+      projectRootDirectory.path,
+      'example',
+      'nested_project',
+      'test',
+      'foo_test.dart',
+    ),
+  )..createSync(recursive: true);
   anyFile = File(p.join(projectRootDirectory.path, 'any_name', 'foo.dart'))
     ..createSync(recursive: true);
   anySubFile =
