@@ -15,7 +15,7 @@ import 'package:test/test.dart';
 // To test this, run the following command and copy the VM service URI to
 // connect to DevTools:
 //
-// dart test test/nested/simple_test_1.dart --pause-after-load
+// dart test test/nested/dart_test_1.dart --pause-after-load
 //
 // To test this test as part of a suite, use this command instead:
 //
