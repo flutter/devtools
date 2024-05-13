@@ -55,7 +55,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## DevTools Extension updates
 
-TODO: Remove this section if there are not any general updates.
+* Fix an issue with detecting extensions for nested Dart or Flutter
+projects. - [#7742](https://github.com/flutter/devtools/pull/7742)
 
 ## Full commit history
 
