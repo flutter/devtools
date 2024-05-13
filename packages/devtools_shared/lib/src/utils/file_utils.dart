@@ -35,7 +35,8 @@ Future<String> packageRootFromFileUriString(
 }) async {
   assert(
     fileUriString.startsWith(_fileUriPrefix),
-    'Invalid URI format: expected URI String to start with "$_fileUriPrefix".',
+    'Invalid URI format: expected URI String to start with "$_fileUriPrefix", '
+    'but instead, got $fileUriString.',
   );
 
   if (dtd != null) {
@@ -67,8 +68,11 @@ Future<String> packageRootFromFileUriString(
       }
     }
     if (throwOnDtdSearchFailed) {
-      throw Exception('Expected DTD to detect the package root, but it failed'
-          '${exception != null ? ' with exception: $exception' : '.'}');
+      throw Exception(
+        'Expected DTD to detect the package root for '
+        '$fileUriString, but it failed'
+        '${exception != null ? ' with exception: $exception' : '.'}',
+      );
     }
   }
 
