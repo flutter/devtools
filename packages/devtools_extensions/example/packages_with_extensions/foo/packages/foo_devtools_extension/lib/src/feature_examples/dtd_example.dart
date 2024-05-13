@@ -5,6 +5,7 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_extensions/api.dart';
 import 'package:devtools_extensions/devtools_extensions.dart';
+import 'package:dtd/dtd.dart';
 import 'package:flutter/material.dart';
 
 /// This widget shows an example of how you can call public APIs exposed by
@@ -22,8 +23,44 @@ class DartToolingDaemonExample extends StatelessWidget {
           number: 5,
           title: 'Example of calling Dart Tooling Daemon APIs',
         ),
-        Text('TODO'),
       ],
     );
   }
+}
+
+extension DTDExtension on DTDManager {
+  DartToolingDaemon get _dtd => connection.value!;
+
+  Future<String?> readFile(Uri uri) async {
+    if (!hasConnection) return;
+    try {
+      final response = await _dtd.readFileAsString(uri);
+      return response.content;
+    } catch (_) {
+      // Fail gracefully.
+      return '';
+    }
+  }
+
+  Future<void> writeFile(Uri uri, String contents) async {
+    if (!hasConnection) return;
+    try {
+      final response = await _dtd.writeFileAsString(uri, contents);
+    } catch (_) {
+      // Fail gracefully.
+      return;
+    }
+  }
+
+  Future<List<Uri>> listDirectoryContents(Uri uri) async {
+    if (!hasConnection) return;
+    try {
+      final response = await _dtd.listDirectoryContents(uri, contents);
+      return response.uris ?? [];
+    } catch (_) {
+      // Fail gracefully.
+      return;
+    }
+  }
+  
 }
