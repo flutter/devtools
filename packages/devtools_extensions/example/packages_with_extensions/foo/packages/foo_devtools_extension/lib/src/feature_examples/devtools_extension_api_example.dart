@@ -27,10 +27,6 @@ class CallingDevToolsExtensionsAPIsExample extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionHeader(
-          number: 4,
-          title: 'Example of calling DevTools extension APIs',
-        ),
         ElevatedButton(
           onPressed: () => extensionManager.postMessageToDevTools(
             DevToolsExtensionEvent(

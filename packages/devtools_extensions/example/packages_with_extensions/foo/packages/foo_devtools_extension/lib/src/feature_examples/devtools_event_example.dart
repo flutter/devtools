@@ -6,8 +6,6 @@ import 'package:devtools_extensions/api.dart';
 import 'package:devtools_extensions/devtools_extensions.dart';
 import 'package:flutter/material.dart';
 
-import '../common/ui.dart';
-
 /// This widget shows an example of how you can register a custom event handler
 /// for any type of [DevToolsExtensionEventType].
 ///
@@ -46,16 +44,6 @@ class _ListeningForDevToolsEventExampleState
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SectionHeader(
-          number: 3,
-          title: 'Example of listening for a DevTools event',
-        ),
-        Text('Received an unknown event from DevTools: $message'),
-      ],
-    );
+    return Text('Received an unknown event from DevTools: $message');
   }
 }

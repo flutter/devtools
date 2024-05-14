@@ -51,11 +51,6 @@ class _ServiceExtensionExampleState extends State<ServiceExtensionExample> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionHeader(
-          number: 1,
-          title:
-              'Example of calling service extensions to fetch data from your package',
-        ),
         SelectedThing(
           selectedThingId: selectedId,
           onIncrement: () => _changeId(increment: true),
@@ -256,6 +251,7 @@ class _SelectedThingState extends State<SelectedThing> {
             IconButton.filled(
               onPressed: widget.onIncrement,
               icon: const Icon(Icons.arrow_upward_rounded),
+              iconSize: defaultIconSize,
             ),
             const SizedBox(
               width: densePadding,
@@ -263,6 +259,7 @@ class _SelectedThingState extends State<SelectedThing> {
             IconButton.filled(
               onPressed: widget.onDecrement,
               icon: const Icon(Icons.arrow_downward_rounded),
+              iconSize: defaultIconSize,
             ),
           ],
         ),
