@@ -13,6 +13,22 @@ import 'package:path/path.dart' as p;
 
 /// This widget shows an example of how you can call public APIs exposed by
 /// the Dart Tooling Daemon.
+///
+/// The DevTools extensions framework gives you access to a global variable
+/// [dtdManager], which can be used to interact with the active
+/// Dart Tooling Daemon connection in DevTools. See
+/// https://pub.dev/packages/dtd for information on the Dart Tooling Daemon and
+/// API docs on the types of functionality this package provides access to.
+///
+/// This example shows how to use [dtdManager] to:
+/// * fetch IDE workspace roots
+/// * fetch project roots
+/// * read from a project file
+/// * write to a project file
+///
+/// This is not an exhaustive list of DTD functionality, but is intended to be
+/// used as a code sample to help extension authors get started working with the
+/// Dart Tooling Daemon.
 class DartToolingDaemonExample extends StatefulWidget {
   const DartToolingDaemonExample({super.key});
 
@@ -55,9 +71,11 @@ class _DartToolingDaemonExampleState extends State<DartToolingDaemonExample> {
           description: 'project',
           onRefresh: _updateRoots,
         ),
+        if (workspaceRoots.isNotEmpty) ...[
+          const SizedBox(height: defaultSpacing),
+          _ReadWriteTmpFile(root: workspaceRoots.first),
+        ],
         const SizedBox(height: defaultSpacing),
-        if (workspaceRoots.isNotEmpty)
-          ReadWriteTmpFile(root: workspaceRoots.first),
         // TODO(kenz): make this a link once the LinkTextSpan utility is exposed
         // in devtools_app_shared.
         const Text(
@@ -116,16 +134,16 @@ class _RootsList extends StatelessWidget {
   }
 }
 
-class ReadWriteTmpFile extends StatefulWidget {
-  const ReadWriteTmpFile({required this.root, super.key});
+class _ReadWriteTmpFile extends StatefulWidget {
+  const _ReadWriteTmpFile({required this.root});
 
   final Uri root;
 
   @override
-  State<ReadWriteTmpFile> createState() => _ReadWriteTmpFileState();
+  State<_ReadWriteTmpFile> createState() => _ReadWriteTmpFileState();
 }
 
-class _ReadWriteTmpFileState extends State<ReadWriteTmpFile> {
+class _ReadWriteTmpFileState extends State<_ReadWriteTmpFile> {
   late final TextEditingController textEditingController;
   late final Uri tmpFileUri;
   String tmpFileContent = '';
@@ -251,7 +269,7 @@ class _ReadWriteTmpFileState extends State<ReadWriteTmpFile> {
 ///
 /// These extension methods are helpful for easier interaction with the current
 /// [DartToolingDaemon] connection.
-extension DTDExtension on DTDManager {
+extension on DTDManager {
   DartToolingDaemon get _dtd => connection.value!;
 
   Future<String> readFile(Uri uri) async {
