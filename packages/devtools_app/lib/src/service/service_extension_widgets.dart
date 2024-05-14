@@ -728,9 +728,9 @@ class _ServiceExtensionCheckboxGroupButtonState
     if (widget.forceShowOverlayController != null) {
       cancelStreamSubscriptions();
       autoDisposeStreamSubscription(
-        widget.forceShowOverlayController!.stream.listen(
-          (_) => _insertOverlay(context),
-        ),
+        widget.forceShowOverlayController!.stream.listen((_) {
+          if (mounted) _insertOverlay(context);
+        }),
       );
     }
   }
