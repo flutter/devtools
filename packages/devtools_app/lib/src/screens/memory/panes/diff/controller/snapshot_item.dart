@@ -20,12 +20,22 @@ class SnapshotDocItem extends SnapshotItem {
   int? get displayNumber => null;
 }
 
-class _Json {
+// ignore: avoid_classes_with_only_static_members, enum-like classes are ok
+@visibleForTesting
+class Json {
   static const defaultName = 'defaultName';
   static const displayNumber = 'displayNumber';
   static const chunks = 'chunks';
   static const created = 'created';
   static const nameOverride = 'nameOverride';
+
+  static final all = [
+    defaultName,
+    displayNumber,
+    chunks,
+    created,
+    nameOverride,
+  ];
 }
 
 class SnapshotDataItem extends SnapshotItem implements RenamableItem {
@@ -37,17 +47,17 @@ class SnapshotDataItem extends SnapshotItem implements RenamableItem {
 
   factory SnapshotDataItem.fromJson(Map<String, dynamic> json) {
     final result = SnapshotDataItem(
-      displayNumber: json[_Json.displayNumber] as int?,
-      defaultName: json[_Json.defaultName] as String? ?? 'no name',
-      nameOverride: json[_Json.nameOverride] as String?,
+      displayNumber: json[Json.displayNumber] as int?,
+      defaultName: json[Json.defaultName] as String? ?? 'no name',
+      nameOverride: json[Json.nameOverride] as String?,
     );
 
-    final chunks = json[_Json.chunks] as List<ByteData>?;
+    final chunks = json[Json.chunks] as List<ByteData>?;
     if (chunks == null) return result;
 
     final loader = HeapGraphLoaderFromChunks(
       chunks: chunks,
-      created: json[_Json.created] as DateTime? ?? DateTime.now(),
+      created: json[Json.created] as DateTime? ?? DateTime.now(),
     );
 
     // Start the loading process, that will result in progress indicator in UI.
@@ -58,11 +68,11 @@ class SnapshotDataItem extends SnapshotItem implements RenamableItem {
 
   Map<String, dynamic> toJson() {
     return {
-      _Json.defaultName: defaultName,
-      _Json.displayNumber: displayNumber,
-      _Json.nameOverride: nameOverride,
-      _Json.chunks: _heap?.graph.toChunks(),
-      _Json.created: _heap?.created,
+      Json.defaultName: defaultName,
+      Json.displayNumber: displayNumber,
+      Json.nameOverride: nameOverride,
+      Json.chunks: _heap?.graph.toChunks(),
+      Json.created: _heap?.created,
     };
   }
 
