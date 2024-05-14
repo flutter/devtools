@@ -87,11 +87,6 @@ class _EvalExampleState extends State<EvalExample> with AutoDisposeMixin {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '2. Example of evaluating expressions to fetch data from your package',
-          style: theme.textTheme.titleMedium,
-        ),
-        const PaddedDivider.thin(),
-        Text(
           'These evaluations can be called when the main isolate is paused and '
           'when it is not.',
           style: theme.subtleTextStyle,

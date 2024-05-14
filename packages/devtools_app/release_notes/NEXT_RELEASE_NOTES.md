@@ -59,6 +59,9 @@ TODO: Remove this section if there are not any general updates.
 tests. - [#7717](https://github.com/flutter/devtools/pull/7717)
 * Fix an issue with detecting extensions for nested Dart or Flutter
 projects. - [#7742](https://github.com/flutter/devtools/pull/7742)
+* Add an example to `package:devtools_extensions` that shows how to
+interact with the Dart Tooling Daemon from a DevTools
+extension. - [#7752](https://github.com/flutter/devtools/pull/7752)
 
 ## Full commit history
 
