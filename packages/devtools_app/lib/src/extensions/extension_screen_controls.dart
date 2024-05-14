@@ -50,8 +50,8 @@ class EmbeddedExtensionHeader extends StatelessWidget {
         ),
         const Spacer(),
         RichText(
-          text: LinkTextSpan(
-            link: Link(
+          text: GaLinkTextSpan(
+            link: GaLink(
               display: 'Report an issue',
               url: extension.issueTrackerLink,
               gaScreenName: gac.DevToolsExtensionEvents.extensionScreenId.name,

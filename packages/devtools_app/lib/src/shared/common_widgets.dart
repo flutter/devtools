@@ -9,7 +9,6 @@ import 'dart:math';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -18,7 +17,6 @@ import '../screens/inspector/layout_explorer/ui/theme.dart';
 import 'analytics/analytics.dart' as ga;
 import 'analytics/constants.dart' as gac;
 import 'config_specific/copy_to_clipboard/copy_to_clipboard.dart';
-import 'config_specific/launch_url/launch_url.dart';
 import 'console/widgets/expandable_variable.dart';
 import 'diagnostics/dart_object_node.dart';
 import 'diagnostics/tree_builder.dart';
@@ -722,7 +720,7 @@ class InformationButton extends StatelessWidget {
       message: tooltip,
       child: IconButton(
         icon: const Icon(Icons.help_outline),
-        onPressed: () async => await launchUrl(link),
+        onPressed: () async => await launchUrlWithErrorHandling(link),
       ),
     );
   }
@@ -1466,7 +1464,7 @@ class MoreInfoLink extends StatelessWidget {
   }
 
   void _onLinkTap() {
-    unawaited(launchUrl(url));
+    unawaited(launchUrlWithErrorHandling(url));
     ga.select(gaScreenName, gaSelectedItemDescription);
   }
 }
@@ -1480,7 +1478,7 @@ class LinkIconLabel extends StatelessWidget {
   });
 
   final IconData icon;
-  final Link link;
+  final GaLink link;
   final Color? color;
 
   @override
@@ -1511,49 +1509,42 @@ class LinkIconLabel extends StatelessWidget {
   }
 
   void _onLinkTap() {
-    unawaited(launchUrl(link.url));
+    unawaited(launchUrlWithErrorHandling(link.url));
     if (link.gaScreenName != null && link.gaSelectedItemDescription != null) {
       ga.select(link.gaScreenName!, link.gaSelectedItemDescription!);
     }
   }
 }
 
-class LinkTextSpan extends TextSpan {
-  LinkTextSpan({
-    required Link link,
+class GaLinkTextSpan extends LinkTextSpan {
+  GaLinkTextSpan({
+    required GaLink link,
     required BuildContext context,
     TextStyle? style,
   }) : super(
-          text: link.display,
-          style: style ?? Theme.of(context).linkTextStyle,
-          recognizer: TapGestureRecognizer()
-            ..onTap = () async {
-              if (link.gaScreenName != null &&
-                  link.gaSelectedItemDescription != null) {
-                ga.select(
-                  link.gaScreenName!,
-                  link.gaSelectedItemDescription!,
-                );
-              }
-              await launchUrl(link.url);
-            },
+          link: link,
+          context: context,
+          onTap: () {
+            if (link.gaScreenName != null &&
+                link.gaSelectedItemDescription != null) {
+              ga.select(
+                link.gaScreenName!,
+                link.gaSelectedItemDescription!,
+              );
+            }
+          },
         );
 }
 
-class Link {
-  const Link({
-    required this.display,
-    required this.url,
+class GaLink extends Link {
+  const GaLink({
+    required super.display,
+    required super.url,
     this.gaScreenName,
     this.gaSelectedItemDescription,
   });
 
-  final String display;
-
-  final String url;
-
   final String? gaScreenName;
-
   final String? gaSelectedItemDescription;
 }
 
