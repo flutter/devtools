@@ -34,6 +34,7 @@ const defaultDialogRadius = 20.0;
 double get assumedMonospaceCharacterWidth =>
     scaleByFontFactor(_assumedMonospaceCharacterWidth);
 double _assumedMonospaceCharacterWidth = 9.0;
+
 @visibleForTesting
 void setAssumedMonospaceCharacterWidth(double width) {
   _assumedMonospaceCharacterWidth = width;
@@ -257,10 +258,13 @@ class StartStopRecordingButton extends GaDevToolsButton {
 
   static IconData _icon(bool recording) =>
       recording ? Icons.stop : Icons.fiber_manual_record;
+
   static String _label(bool recording) =>
       recording ? 'Stop recording' : 'Start recording';
+
   static String _tooltip(bool recording) =>
       recording ? 'Stop recording' : 'Start recording';
+
   static Color? _color(bool recording) => recording ? Colors.red : null;
 
   final bool recording;
@@ -1277,6 +1281,7 @@ class TextViewer extends StatelessWidget {
   });
 
   final String text;
+
   // TODO: change the maxLength if we determine a more appropriate limit
   // in https://github.com/flutter/devtools/issues/6263.
   final int maxLength;
@@ -1519,11 +1524,10 @@ class LinkIconLabel extends StatelessWidget {
 class GaLinkTextSpan extends LinkTextSpan {
   GaLinkTextSpan({
     required GaLink link,
-    required BuildContext context,
+    required super.context,
     TextStyle? style,
   }) : super(
           link: link,
-          context: context,
           onTap: () {
             if (link.gaScreenName != null &&
                 link.gaSelectedItemDescription != null) {
