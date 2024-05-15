@@ -7,9 +7,9 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 
-import 'config_specific/launch_url/launch_url.dart';
 import 'globals.dart';
 import 'primitives/utils.dart';
+import 'utils.dart';
 
 class NotificationMessage {
   NotificationMessage(
@@ -83,7 +83,7 @@ class NotificationService {
             ? additionalInfoParts.join('\n\n')
             : null;
         unawaited(
-          launchUrl(
+          launchUrlWithErrorHandling(
             devToolsExtensionPoints
                 .issueTrackerLink(
                   issueTitle: 'Reporting error: $errorMessage',

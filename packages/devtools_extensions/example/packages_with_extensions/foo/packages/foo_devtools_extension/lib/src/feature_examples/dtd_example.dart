@@ -56,6 +56,7 @@ class _DartToolingDaemonExampleState extends State<DartToolingDaemonExample> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -76,11 +77,24 @@ class _DartToolingDaemonExampleState extends State<DartToolingDaemonExample> {
           _ReadWriteTmpFile(root: workspaceRoots.first),
         ],
         const SizedBox(height: defaultSpacing),
-        // TODO(kenz): make this a link once the LinkTextSpan utility is exposed
-        // in devtools_app_shared.
-        const Text(
-          'Explore package:dtd to learn about all the things you can do with '
-          'the Dart Tooling Daemon.',
+        RichText(
+          text: TextSpan(
+            text: 'Explore ',
+            style: theme.regularTextStyle,
+            children: [
+              LinkTextSpan(
+                link: const Link(
+                  display: 'package:dtd',
+                  url: 'https://pub.dev/packages/dtd',
+                ),
+                context: context,
+              ),
+              const TextSpan(
+                text: ' to learn about the functionality that the Dart Tooling '
+                    'Daemon provides.',
+              ),
+            ],
+          ),
         ),
       ],
     );

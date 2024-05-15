@@ -7,6 +7,10 @@
 * Add `IdeThemeQueryParams` extension type for parsing query params.
 * Add `EmbedMode` to enumerate the possible DevTools embedded states.
 * Add `IsolateManager.waitForMainIsolateState` method.
+* Add `LinkTextSpan` and `Link` classes.
+* Add `launchUrl` utility method that has platform agnostic handling for
+launching a URL in the browser, and includes special handling for launching
+URLs when in an embedded VS Code view.
 
 ## 0.1.1
 * Update `package:dtd` to `^2.1.0`

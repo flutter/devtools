@@ -9,7 +9,6 @@ import 'dart:math';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -18,7 +17,6 @@ import '../screens/inspector/layout_explorer/ui/theme.dart';
 import 'analytics/analytics.dart' as ga;
 import 'analytics/constants.dart' as gac;
 import 'config_specific/copy_to_clipboard/copy_to_clipboard.dart';
-import 'config_specific/launch_url/launch_url.dart';
 import 'console/widgets/expandable_variable.dart';
 import 'diagnostics/dart_object_node.dart';
 import 'diagnostics/tree_builder.dart';
@@ -36,6 +34,7 @@ const defaultDialogRadius = 20.0;
 double get assumedMonospaceCharacterWidth =>
     scaleByFontFactor(_assumedMonospaceCharacterWidth);
 double _assumedMonospaceCharacterWidth = 9.0;
+
 @visibleForTesting
 void setAssumedMonospaceCharacterWidth(double width) {
   _assumedMonospaceCharacterWidth = width;
@@ -259,10 +258,13 @@ class StartStopRecordingButton extends GaDevToolsButton {
 
   static IconData _icon(bool recording) =>
       recording ? Icons.stop : Icons.fiber_manual_record;
+
   static String _label(bool recording) =>
       recording ? 'Stop recording' : 'Start recording';
+
   static String _tooltip(bool recording) =>
       recording ? 'Stop recording' : 'Start recording';
+
   static Color? _color(bool recording) => recording ? Colors.red : null;
 
   final bool recording;
@@ -722,7 +724,7 @@ class InformationButton extends StatelessWidget {
       message: tooltip,
       child: IconButton(
         icon: const Icon(Icons.help_outline),
-        onPressed: () async => await launchUrl(link),
+        onPressed: () async => await launchUrlWithErrorHandling(link),
       ),
     );
   }
@@ -1279,6 +1281,7 @@ class TextViewer extends StatelessWidget {
   });
 
   final String text;
+
   // TODO: change the maxLength if we determine a more appropriate limit
   // in https://github.com/flutter/devtools/issues/6263.
   final int maxLength;
@@ -1466,7 +1469,7 @@ class MoreInfoLink extends StatelessWidget {
   }
 
   void _onLinkTap() {
-    unawaited(launchUrl(url));
+    unawaited(launchUrlWithErrorHandling(url));
     ga.select(gaScreenName, gaSelectedItemDescription);
   }
 }
@@ -1480,7 +1483,7 @@ class LinkIconLabel extends StatelessWidget {
   });
 
   final IconData icon;
-  final Link link;
+  final GaLink link;
   final Color? color;
 
   @override
@@ -1511,49 +1514,41 @@ class LinkIconLabel extends StatelessWidget {
   }
 
   void _onLinkTap() {
-    unawaited(launchUrl(link.url));
+    unawaited(launchUrlWithErrorHandling(link.url));
     if (link.gaScreenName != null && link.gaSelectedItemDescription != null) {
       ga.select(link.gaScreenName!, link.gaSelectedItemDescription!);
     }
   }
 }
 
-class LinkTextSpan extends TextSpan {
-  LinkTextSpan({
-    required Link link,
-    required BuildContext context,
+class GaLinkTextSpan extends LinkTextSpan {
+  GaLinkTextSpan({
+    required GaLink link,
+    required super.context,
     TextStyle? style,
   }) : super(
-          text: link.display,
-          style: style ?? Theme.of(context).linkTextStyle,
-          recognizer: TapGestureRecognizer()
-            ..onTap = () async {
-              if (link.gaScreenName != null &&
-                  link.gaSelectedItemDescription != null) {
-                ga.select(
-                  link.gaScreenName!,
-                  link.gaSelectedItemDescription!,
-                );
-              }
-              await launchUrl(link.url);
-            },
+          link: link,
+          onTap: () {
+            if (link.gaScreenName != null &&
+                link.gaSelectedItemDescription != null) {
+              ga.select(
+                link.gaScreenName!,
+                link.gaSelectedItemDescription!,
+              );
+            }
+          },
         );
 }
 
-class Link {
-  const Link({
-    required this.display,
-    required this.url,
+class GaLink extends Link {
+  const GaLink({
+    required super.display,
+    required super.url,
     this.gaScreenName,
     this.gaSelectedItemDescription,
   });
 
-  final String display;
-
-  final String url;
-
   final String? gaScreenName;
-
   final String? gaSelectedItemDescription;
 }
 
