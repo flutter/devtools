@@ -47,9 +47,9 @@ included in `package:standalone_extension`'s  `extension/devtools/build` directo
 
 ## End-user application
 
-These are the applications that depend on the
-[extension-providing package](#extension-providing-package) and
-can use to the [DevTools extension](#devtools-extension-web-app) provided by the parent package.
+These are the applications that depend on
+[extension-providing packages](#extension-providing-package) and
+can use their [DevTools extensions](#devtools-extension-web-app).
 
 ### `app_that_uses_foo`
 
