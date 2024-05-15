@@ -5,7 +5,6 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 
 import '../../../service/service_extension_widgets.dart';
@@ -15,6 +14,7 @@ import '../../../shared/common_widgets.dart';
 import '../../../shared/screen.dart';
 import '../../../shared/utils.dart';
 import 'logging_controller_v2.dart';
+import 'logging_table_v2.dart';
 
 /// Presents logs from the connected app.
 class LoggingScreenV2 extends Screen {
@@ -61,6 +61,7 @@ class _LoggingScreenBodyV2State extends State<LoggingScreenBodyV2>
         ProvidedControllerMixin<LoggingControllerV2, LoggingScreenBodyV2> {
   List<String> items = [];
   late List<LogDataV2> filteredLogs;
+
   @override
   void initState() {
     super.initState();
@@ -84,62 +85,11 @@ class _LoggingScreenBodyV2State extends State<LoggingScreenBodyV2>
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: DevToolsClearableTextField(
-                labelText: 'Filter',
-                onSubmitted: (value) {},
-              ),
-            ),
-            Expanded(
-              child: DevToolsClearableTextField(
-                labelText: 'Search',
-                onSubmitted: (value) {},
-              ),
-            ),
-          ],
-        ),
-        Expanded(
-          child: LogsTableV2(filteredLogs),
-        ),
-      ],
-    );
-  }
-}
-
-class LogsTableV2 extends StatelessWidget {
-  LogsTableV2(this.filteredLogs, {super.key});
-
-  final ScrollController _verticalController = ScrollController();
-  final List<LogDataV2> filteredLogs;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scrollbar(
-      thumbVisibility: true,
-      controller: _verticalController,
-      child: CustomScrollView(
-        controller: _verticalController,
-        slivers: <Widget>[
-          SliverVariedExtentList.builder(
-            itemCount: filteredLogs.length,
-            itemBuilder: _buildRow,
-            itemExtentBuilder: _calculateRowHeight,
-          ),
-        ],
+    return Expanded(
+      child: LoggingTableV2(
+        model: controller.loggingModel,
       ),
     );
-  }
-
-  Widget? _buildRow(BuildContext context, int index) {
-    return Text('Row ${filteredLogs[index].summary}');
-  }
-
-  double _calculateRowHeight(int index, SliverLayoutDimensions dimensions) {
-    return 15.0;
   }
 }
 

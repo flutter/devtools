@@ -26,6 +26,7 @@ import '../../../shared/ui/search.dart';
 import '../logging_controller.dart'
     show NavigationInfo, ServiceExtensionStateChangedInfo;
 import '../logging_screen.dart';
+import './logging_model.dart';
 
 final _log = Logger('logging_controller');
 
@@ -94,7 +95,7 @@ class LoggingControllerV2 extends DisposableController
   List<LogDataV2> data = <LogDataV2>[];
 
   final selectedLog = ValueNotifier<LogDataV2?>(null);
-
+  final loggingModel = LoggingTableModel();
   void _updateData(List<LogDataV2> logs) {
     data = logs;
     filteredData.replaceAll(logs);
@@ -390,12 +391,7 @@ class LoggingControllerV2 extends DisposableController
   }
 
   void log(LogDataV2 log) {
-    data.add(log);
-    // TODO(@CoderDake): Add filtersearch behavior
-    // TODO(@CoderDake): Add Search behavior
-    // TODO(@CoderDake): Add Selection update behavior
-    // TODO(@CoderDake): Add status update
-    filteredData.add(log);
+    loggingModel.add(log);
   }
 
   static RemoteDiagnosticsNode? _findFirstSummary(RemoteDiagnosticsNode node) {
@@ -619,7 +615,10 @@ class LogDataV2 with SearchableDataMixin {
     this.isError = false,
     this.detailsComputer,
     this.node,
-  });
+  }) {
+    // Fetch details immediately on creation.
+    unawaited(compute());
+  }
 
   final String kind;
   final int? timestamp;
@@ -634,15 +633,21 @@ class LogDataV2 with SearchableDataMixin {
 
   String? get details => _details;
 
-  bool get needsComputing => detailsComputer != null;
+  ValueListenable<bool> get needsComputing => _needsComputing;
+  final ValueNotifier<bool> _needsComputing = ValueNotifier<bool>(true);
 
   Future<void> compute() async {
-    _details = await detailsComputer!();
-    detailsComputer = null;
+    if (needsComputing.value) {
+      if (detailsComputer != null) {
+        _details = await detailsComputer!();
+      }
+      detailsComputer = null;
+      _needsComputing.value = false;
+    }
   }
 
   String? prettyPrinted() {
-    if (needsComputing) {
+    if (needsComputing.value) {
       return details;
     }
 
