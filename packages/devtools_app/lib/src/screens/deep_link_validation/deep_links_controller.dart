@@ -43,9 +43,9 @@ enum PagePhase {
   linksValidating,
   // Links are validated.
   linksValidated,
-  // Something went wrong when analyzing the Flutter project
+  // Error when analyzing the Flutter project.
   analyzeErrorPage,
-  // Error when validating domains
+  // Error when validating domains.
   validationErrorPage,
 }
 
