@@ -426,7 +426,7 @@ class DeepLinksController extends DisposableController {
       return;
     }
     pagePhase.value = PagePhase.linksValidating;
-    List<LinkData> linkdata = _allRawLinkDatas(appLinkSettings);
+    var linkdata = _allRawLinkDatas(appLinkSettings);
 
     linkdata = await _validateAndroidDomain(linkdata);
     if (pagePhase.value == PagePhase.validationErrorPage) {
