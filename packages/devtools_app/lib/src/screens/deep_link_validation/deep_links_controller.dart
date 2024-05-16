@@ -43,8 +43,10 @@ enum PagePhase {
   linksValidating,
   // Links are validated.
   linksValidated,
-  // Error page.
-  errorPage,
+  // Something went wrong when analyzing the Flutter project
+  analyzeErrorPage,
+  // Error when validating domains
+  validationErrorPage,
 }
 
 enum FilterOption {
@@ -204,6 +206,8 @@ class DeepLinksController extends DisposableController {
     return getFilterredLinks(linkDatasByDomain.values.toList());
   }
 
+  AppLinkSettings? get currentAppLinkSettings =>
+      _androidAppLinks[selectedVariantIndex.value];
   final Map<int, AppLinkSettings> _androidAppLinks = <int, AppLinkSettings>{};
 
   late final selectedVariantIndex = ValueNotifier<int>(0);
@@ -228,12 +232,12 @@ class DeepLinksController extends DisposableController {
           );
           _androidAppLinks[selectedVariantIndex.value] = result;
         } catch (_) {
-          pagePhase.value = PagePhase.errorPage;
+          pagePhase.value = PagePhase.validationErrorPage;
         }
       },
     );
 
-    if (pagePhase.value == PagePhase.errorPage) {
+    if (pagePhase.value == PagePhase.validationErrorPage) {
       return;
     }
     await validateLinks();
@@ -262,11 +266,7 @@ class DeepLinksController extends DisposableController {
   }
 
   /// Get all unverified link data.
-  List<LinkData> get _allRawLinkDatas {
-    final appLinksSettings = _androidAppLinks[selectedVariantIndex.value];
-    if (appLinksSettings == null) {
-      return const <LinkData>[];
-    }
+  List<LinkData> _allRawLinkDatas(AppLinkSettings appLinksSettings) {
     final appLinks = appLinksSettings.deeplinks;
 
     final domainPathToLinkData = <_DomainAndPath, LinkData>{};
@@ -384,7 +384,7 @@ class DeepLinksController extends DisposableController {
           result.googlePlayFingerprintsAvailability;
     } catch (_) {
       //TODO(hangyujin): Add more error handling for cases like RPC error and invalid json.
-      pagePhase.value = PagePhase.errorPage;
+      pagePhase.value = PagePhase.validationErrorPage;
       return linkdatas;
     }
 
@@ -416,20 +416,25 @@ class DeepLinksController extends DisposableController {
   }
 
   Future<void> validateLinks() async {
-    List<LinkData> linkdata = _allRawLinkDatas;
-    if (linkdata.isEmpty) {
+    final appLinkSettings = currentAppLinkSettings;
+    if (appLinkSettings == null) {
       pagePhase.value = PagePhase.noLinks;
       return;
     }
+    if (appLinkSettings.error != null) {
+      pagePhase.value = PagePhase.analyzeErrorPage;
+      return;
+    }
     pagePhase.value = PagePhase.linksValidating;
+    List<LinkData> linkdata = _allRawLinkDatas(appLinkSettings);
 
     linkdata = await _validateAndroidDomain(linkdata);
-    if (pagePhase.value == PagePhase.errorPage) {
+    if (pagePhase.value == PagePhase.validationErrorPage) {
       return;
     }
     linkdata = await _validatePath(linkdata);
 
-    if (pagePhase.value == PagePhase.errorPage) {
+    if (pagePhase.value == PagePhase.validationErrorPage) {
       return;
     }
 
