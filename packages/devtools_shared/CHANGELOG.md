@@ -3,6 +3,7 @@
 of the `devtools_server.dart` library.
 * Support detecting package roots for nested Dart projects in the
 `packageRootFromFileUriString` utility method.
+*
 
 # 10.0.0-dev.0
 * **Breaking change:** rename `DevToolsExtensionConfig.path` to
@@ -68,7 +69,7 @@ VM service connection is connected or disconnected from the client.
 duplicate of `ServerApi.getCompleted`.
 * **Breaking change:** add required parameter `analytics` to `ServerApi.handle`, which accepts
 an instance of `Analytics` from `package:unified_analytics`.
-* Add the ability to send debug logs in DevTools server request responses. 
+* Add the ability to send debug logs in DevTools server request responses.
 * Add an optional positional parameter `logs` to the `ServerApi.serverError` method.
 * Include debug logs with the `ExtensionsApi.apiServeAvailableExtensions` API response.
 * Devtools server API `apiGetConsentMessage` added to fetch the consent message from

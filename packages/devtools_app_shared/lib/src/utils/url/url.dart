@@ -26,7 +26,7 @@ Future<void> launchUrl(String url, {void Function()? onError}) async {
     }
   } finally {
     // Always pass the request up to VS Code because we could fail both silently
-    // (the usual behaviour) or with another error like
+    // (the usual behavior) or with another error like
     // "Attempted to call Window.open with a null window"
     // https://github.com/flutter/devtools/issues/6105.
     //
