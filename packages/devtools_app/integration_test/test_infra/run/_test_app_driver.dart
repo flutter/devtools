@@ -431,9 +431,6 @@ enum TestAppDevice {
     TestAppDevice.flutterTester: [],
     TestAppDevice.flutterChrome: [
       'eval_and_browse_test.dart',
-      // TODO(https://github.com/flutter/devtools/issues/7145): Figure out why
-      // this fails on bots but passes locally and enable.
-      'eval_and_inspect_test.dart',
       'perfetto_test.dart',
       'performance_screen_event_recording_test.dart',
       'service_connection_test.dart',

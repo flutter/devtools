@@ -13,6 +13,7 @@ import 'package:vm_service/vm_service.dart' hide Error;
 
 import '../utils/auto_dispose.dart';
 import '../utils/list.dart';
+import '../utils/utils.dart';
 import 'isolate_state.dart';
 import 'service_extensions.dart' as extensions;
 
@@ -23,6 +24,10 @@ base mixin TestIsolateManager implements IsolateManager {}
 
 final class IsolateManager with DisposerMixin {
   final _isolateStates = <IsolateRef, IsolateState>{};
+
+  /// The amount of time we will wait for the main isolate to become non-null
+  /// when calling [waitForMainIsolateState].
+  static const _waitForMainIsolateStateTimeout = Duration(seconds: 3);
 
   /// Signifies whether the main isolate should be selected if it is started.
   ///
@@ -63,6 +68,17 @@ final class IsolateManager with DisposerMixin {
     return _mainIsolate.value != null
         ? _isolateStates[_mainIsolate.value!]
         : null;
+  }
+
+  Future<IsolateState?> waitForMainIsolateState() async {
+    final mainIsolateRef = await whenValueNonNull<IsolateRef?>(
+      mainIsolate,
+      timeout: _waitForMainIsolateStateTimeout,
+    );
+    if (mainIsolateRef == null) return null;
+    final state = mainIsolateState;
+    await state?.waitForIsolateLoad();
+    return state;
   }
 
   /// Return a unique, monotonically increasing number for this Isolate.

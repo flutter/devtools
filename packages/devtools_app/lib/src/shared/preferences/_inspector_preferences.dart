@@ -212,8 +212,9 @@ class InspectorPreferencesController extends DisposableController
   /// directories are for the current project so we make a best guess based on
   /// the root library for the main isolate.
   Future<String?> _inferPubRootDirectory() async {
-    final path = await serviceConnection.rootLibraryForMainIsolate();
-    if (path == null) {
+    final fileUriString =
+        await serviceConnection.mainIsolateRootLibraryUriAsString();
+    if (fileUriString == null) {
       return null;
     }
     // TODO(jacobr): Once https://github.com/flutter/flutter/issues/26615 is
@@ -222,7 +223,7 @@ class InspectorPreferencesController extends DisposableController
     // TODO(jacobr): use the list of loaded scripts to determine the appropriate
     // package root directory given that the root script of this project is in
     // this directory rather than guessing based on url structure.
-    final parts = path.split('/');
+    final parts = fileUriString.split('/');
     String? pubRootDirectory;
     // For google3, we grab the top-level directory in the google3 directory
     // (e.g. /education), or the top-level directory in third_party (e.g.
@@ -230,7 +231,7 @@ class InspectorPreferencesController extends DisposableController
     if (isGoogle3Path(parts)) {
       pubRootDirectory = _pubRootDirectoryForGoogle3(parts);
     } else {
-      final parts = path.split('/');
+      final parts = fileUriString.split('/');
 
       for (int i = parts.length - 1; i >= 0; i--) {
         final part = parts[i];

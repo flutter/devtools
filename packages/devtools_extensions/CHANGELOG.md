@@ -6,6 +6,9 @@
 * Bump `vm_service` dependency to `^14.2.1`.
 * Dispose `DTDManager` when the `DevToolsExtension` widget state is disposed.
 * Add an example of a standalone extension.
+* Add examples of Dart and Flutter tests that can be ran and connected to
+available DevTools extensions.
+* Add an example of interacting with the Dart Tooling Daemon from a DevTools extension.
 
 ## 0.1.1
 * Update the simulated environment help dialogs with information about the

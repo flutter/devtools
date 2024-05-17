@@ -34,7 +34,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## Network profiler updates
 
-TODO: Remove this section if there are not any general updates.
+* Add better support for narrow viewing windows, like when this
+screen is embedded in the IDE. - [#7726](https://github.com/flutter/devtools/pull/7726)
 
 ## Logging updates
 
@@ -54,7 +55,13 @@ TODO: Remove this section if there are not any general updates.
 
 ## DevTools Extension updates
 
-TODO: Remove this section if there are not any general updates.
+* Fix an issue with detecting extensions for Dart or Flutter
+tests. - [#7717](https://github.com/flutter/devtools/pull/7717)
+* Fix an issue with detecting extensions for nested Dart or Flutter
+projects. - [#7742](https://github.com/flutter/devtools/pull/7742)
+* Add an example to `package:devtools_extensions` that shows how to
+interact with the Dart Tooling Daemon from a DevTools
+extension. - [#7752](https://github.com/flutter/devtools/pull/7752)
 
 ## Full commit history
 

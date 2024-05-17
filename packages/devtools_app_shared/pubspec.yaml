@@ -17,6 +17,7 @@ dependencies:
   logging: ^1.1.1
   meta: ^1.9.1
   pointer_interceptor: ^0.9.3+3
+  url_launcher: ^6.1.0
   vm_service: ^14.2.1
   web: ^0.4.1
 

@@ -13,11 +13,11 @@ import 'package:logging/logging.dart';
 import '../../../devtools.dart' as devtools show version;
 import '../shared/notifications.dart';
 import 'analytics/analytics.dart' as ga;
-import 'config_specific/launch_url/launch_url.dart';
 import 'development_helpers.dart';
 import 'globals.dart';
 import 'primitives/utils.dart';
 import 'server/server.dart' as server;
+import 'utils.dart';
 
 final _log = Logger('survey');
 
@@ -144,7 +144,7 @@ class SurveyService {
     required String surveyUrl,
     required String message,
   }) async {
-    await launchUrl(surveyUrl);
+    await launchUrlWithErrorHandling(surveyUrl);
     await server.setSurveyActionTaken();
     notificationService.dismiss(message);
   }

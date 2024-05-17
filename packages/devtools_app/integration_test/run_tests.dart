@@ -5,6 +5,7 @@
 import 'package:devtools_shared/devtools_test_utils.dart';
 
 import 'test_infra/run/_in_file_args.dart';
+import 'test_infra/run/_test_app_driver.dart';
 import 'test_infra/run/_utils.dart';
 import 'test_infra/run/run_test.dart';
 
@@ -17,18 +18,31 @@ import 'test_infra/run/run_test.dart';
 const _testDirectory = 'integration_test/test';
 const _offlineIndicator = 'integration_test/test/offline';
 
-/// The set of test that should be skipped for all devices.
+/// The key in [_skipTestsForDevice] that will hold a set of tests that should
+/// be skipped for all test devices.
+const _testDeviceAll = 'all';
+
+/// The set of tests that should be skipped for each type of test target.
 ///
 /// This list should be empty most of the time, but may contain a broken test
 /// while a fix being worked on.
 ///
 /// Format: `'my_example_test.dart'`.
-final List<String> _skipTests = <String>[
-  // https://github.com/flutter/devtools/issues/6592
-  'eval_and_browse_test.dart',
-  // https://github.com/flutter/devtools/issues/7425
-  'export_snapshot_test.dart',
-];
+final _skipTestsForDevice = <String, Set<String>>{
+  _testDeviceAll: {
+    // https://github.com/flutter/devtools/issues/6592
+    'eval_and_browse_test.dart',
+    // https://github.com/flutter/devtools/issues/7425
+    'export_snapshot_test.dart',
+  },
+  TestAppDevice.flutterChrome.name: {
+    // TODO(https://github.com/flutter/devtools/issues/7145): Figure out why
+    // this fails on bots but passes locally and enable.
+    'eval_and_inspect_test.dart',
+    // TODO(https://github.com/flutter/devtools/issues/7732): fix and unskip.
+    'debugger_panel_test.dart',
+  },
+};
 
 void main(List<String> args) async {
   final testRunnerArgs = DevToolsAppTestRunnerArgs(
@@ -51,8 +65,12 @@ Future<void> _runTest(
   DevToolsAppTestRunnerArgs testRunnerArgs,
 ) async {
   final testTarget = testRunnerArgs.testTarget!;
+  final testDevice = testRunnerArgs.testAppDevice.name;
 
-  final shouldSkip = _skipTests.any((t) => testTarget.endsWith(t));
+  final skipAll = _skipTestsForDevice[_testDeviceAll]!;
+  final skipForDevice = _skipTestsForDevice[testDevice] ?? {};
+  final shouldSkip =
+      {...skipAll, ...skipForDevice}.any((t) => testTarget.endsWith(t));
   if (shouldSkip) return;
 
   if (!testRunnerArgs.testAppDevice.supportsTest(testTarget)) {

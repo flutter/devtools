@@ -118,7 +118,7 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt>
             style: theme.regularTextStyle,
           ),
           LinkTextSpan(
-            link: Link(
+            link: GaLink(
               display: consentMessageRegExpResults[1],
               url: consentMessageRegExpResults[1],
             ),
