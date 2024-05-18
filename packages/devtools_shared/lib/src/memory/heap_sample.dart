@@ -64,7 +64,9 @@ class HeapSample {
         AdbMemoryInfo.fromJson,
       ),
       deserialize<EventSample>(
-          json[Json.memoryEventInfo], EventSample.fromJson),
+        json[Json.memoryEventInfo],
+        EventSample.fromJson,
+      ),
       deserialize<RasterCache>(json[Json.rasterCache], RasterCache.fromJson),
     );
   }
