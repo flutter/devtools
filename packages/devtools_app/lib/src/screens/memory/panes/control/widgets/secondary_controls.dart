@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
+import '../../../../../shared/feature_flags.dart';
 import '../../../../../shared/file_import.dart';
 import '../../../../../shared/screen.dart';
 import '../../../shared/primitives/simple_elements.dart';
@@ -31,7 +32,7 @@ class SecondaryControls extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (!offline)
+        if (!offline) ...[
           GaDevToolsButton(
             onPressed: controller.isGcing ? null : controller.gc,
             icon: Icons.delete,
@@ -41,12 +42,15 @@ class SecondaryControls extends StatelessWidget {
             gaScreen: gac.memory,
             gaSelection: gac.MemoryEvent.gc,
           ),
-        const SizedBox(width: denseSpacing),
-        OpenSaveButtonGroup(
-          screenId: ScreenMetaData.memory.id,
-          onSave: controller.exportData,
-        ),
-        const SizedBox(width: denseSpacing),
+          const SizedBox(width: denseSpacing),
+        ],
+        if (FeatureFlags.memoryOffline) ...[
+          OpenSaveButtonGroup(
+            screenId: ScreenMetaData.memory.id,
+            onSave: controller.exportData,
+          ),
+          const SizedBox(width: denseSpacing),
+        ],
         SettingsOutlinedButton(
           gaScreen: gac.memory,
           gaSelection: gac.MemoryEvent.settings,
