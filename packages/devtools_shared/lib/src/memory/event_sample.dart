@@ -4,6 +4,8 @@
 
 import 'dart:convert';
 
+import 'package:meta/meta.dart';
+
 /// Monitor heap object allocations (in the VM).  The allocation monitor will
 /// cause 'start' event exist in the HeapSample. Immediately afterwards a
 /// 'continues' event is added on each subsequent timestamp tick (HeapSample)

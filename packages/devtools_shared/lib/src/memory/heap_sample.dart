@@ -4,9 +4,36 @@
 
 import 'dart:convert';
 
+import 'package:meta/meta.dart';
+
 import '../utils/serialization.dart';
 import 'adb_memory_info.dart';
 import 'event_sample.dart';
+
+@visibleForTesting
+class Json {
+  static const rss = 'rss';
+  static const capacity = 'capacity';
+  static const used = 'used';
+  static const externalMemory = 'external';
+  static const gc = 'gc';
+  static const adbMemoryInfo = 'adb_memoryInfo';
+  static const memoryEventInfo = 'memory_eventInfo';
+  static const rasterCache = 'raster_cache';
+  static const timestamp = 'timestamp';
+
+  static const all = {
+    rss,
+    capacity,
+    used,
+    externalMemory,
+    gc,
+    adbMemoryInfo,
+    memoryEventInfo,
+    rasterCache,
+    timestamp,
+  };
+}
 
 /// DevTools Plotted and JSON persisted memory information.
 class HeapSample {
@@ -26,31 +53,32 @@ class HeapSample {
 
   factory HeapSample.fromJson(Map<String, dynamic> json) {
     return HeapSample(
-      json['timestamp'] as int,
-      json['rss'] as int,
-      json['capacity'] as int,
-      json['used'] as int,
-      json['external'] as int,
-      json['gc'] as bool,
+      json[Json.timestamp] as int,
+      json[Json.rss] as int,
+      json[Json.capacity] as int,
+      json[Json.used] as int,
+      json[Json.externalMemory] as int,
+      json[Json.gc] as bool,
       deserialize<AdbMemoryInfo>(
-        json['adb_memoryInfo'],
+        json[Json.adbMemoryInfo],
         AdbMemoryInfo.fromJson,
       ),
-      deserialize<EventSample>(json['memory_eventInfo'], EventSample.fromJson),
-      deserialize<RasterCache>(json['raster_cache'], RasterCache.fromJson),
+      deserialize<EventSample>(
+          json[Json.memoryEventInfo], EventSample.fromJson),
+      deserialize<RasterCache>(json[Json.rasterCache], RasterCache.fromJson),
     );
   }
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'timestamp': timestamp,
-        'rss': rss,
-        'capacity': capacity,
-        'used': used,
-        'external': external,
-        'gc': isGC,
-        'adb_memoryInfo': adbMemoryInfo,
-        'memory_eventInfo': memoryEventInfo,
-        'raster_cache': rasterCache,
+        Json.timestamp: timestamp,
+        Json.rss: rss,
+        Json.capacity: capacity,
+        Json.used: used,
+        Json.externalMemory: external,
+        Json.gc: isGC,
+        Json.adbMemoryInfo: adbMemoryInfo,
+        Json.memoryEventInfo: memoryEventInfo,
+        Json.rasterCache: rasterCache,
       };
 
   /// Version of HeapSample JSON payload.

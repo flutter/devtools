@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:devtools_app/src/screens/memory/framework/memory_tabs.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/controller/diff_pane_controller.dart';
+import 'package:devtools_app/src/screens/memory/panes/diff/controller/diff_pane_controller.dart'
+    as diff_pane_controller show Json;
 import 'package:devtools_app/src/screens/memory/panes/diff/controller/snapshot_item.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
@@ -49,7 +52,12 @@ void main() {
       expect(snapshots.length, 2);
       snapshots.first.diffWith.value = snapshots.last;
 
-      final fromJson = DiffPaneController.fromJson(controller.toJson());
+      final json = controller.toJson();
+      expect(
+        json.keys.sorted(),
+        equals(diff_pane_controller.Json.all.sorted()),
+      );
+      final fromJson = DiffPaneController.fromJson(json);
 
       final snapshotsFromJson =
           fromJson.core.snapshots.value.whereType<SnapshotDataItem>();

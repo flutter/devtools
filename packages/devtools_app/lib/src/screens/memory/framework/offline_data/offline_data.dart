@@ -3,18 +3,28 @@
 // found in the LICENSE file.
 
 import 'package:devtools_shared/devtools_shared.dart';
+import 'package:meta/meta.dart';
 
 import '../../panes/chart/controller/chart_data.dart';
 import '../../panes/diff/controller/diff_pane_controller.dart';
 import '../../panes/profile/profile_pane_controller.dart';
 import '../../shared/heap/class_filter.dart';
 
-class _Json {
+@visibleForTesting
+class Json {
   static const selectedTab = 'selectedTab';
   static const classFilter = 'classFilter';
   static const diffData = 'diffData';
   static const profileData = 'profileData';
   static const chartData = 'chartData';
+
+  static const all = {
+    selectedTab,
+    classFilter,
+    diffData,
+    profileData,
+    chartData,
+  };
 }
 
 class OfflineMemoryData {
@@ -29,26 +39,26 @@ class OfflineMemoryData {
   factory OfflineMemoryData.fromJson(Map<String, dynamic> json) {
     return OfflineMemoryData(
       deserialize<DiffPaneController>(
-        json[_Json.diffData],
+        json[Json.diffData],
         DiffPaneController.fromJson,
       ),
       deserialize<ProfilePaneController>(
-        json[_Json.profileData],
+        json[Json.profileData],
         ProfilePaneController.fromJson,
       ),
-      deserialize<ChartData>(json[_Json.chartData], ChartData.fromJson),
-      deserialize<ClassFilter>(json[_Json.classFilter], ClassFilter.fromJson),
-      selectedTab: json[_Json.selectedTab] as int? ?? 0,
+      deserialize<ChartData>(json[Json.chartData], ChartData.fromJson),
+      deserialize<ClassFilter>(json[Json.classFilter], ClassFilter.fromJson),
+      selectedTab: json[Json.selectedTab] as int? ?? 0,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      _Json.selectedTab: selectedTab,
-      _Json.diffData: diff,
-      _Json.profileData: profile,
-      _Json.chartData: chart,
-      _Json.classFilter: filter,
+      Json.selectedTab: selectedTab,
+      Json.diffData: diff,
+      Json.profileData: profile,
+      Json.chartData: chart,
+      Json.classFilter: filter,
     };
   }
 
