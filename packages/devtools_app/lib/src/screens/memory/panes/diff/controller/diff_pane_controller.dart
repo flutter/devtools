@@ -88,6 +88,7 @@ class DiffPaneController extends DisposableController {
     return {
       Json.snapshots.name: snapshots,
       Json.diffWith.name: diffWithIndices,
+      Json.rootPackage.name: core.rootPackage,
     };
   }
 
