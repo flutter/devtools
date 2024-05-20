@@ -152,7 +152,7 @@ class ExtensionService extends DisposableController
         serviceConnection.serviceManager.connectedState.value.connected &&
         serviceConnection.serviceManager.isolateManager.mainIsolate.value !=
             null) {
-      _appRoot = await _connectedAppRoot();
+      _appRoot = await serviceConnection.connectedAppPackageRoot();
     }
 
     // TODO(kenz): gracefully handle app connections / disconnects when there
@@ -356,13 +356,6 @@ class ExtensionService extends DisposableController
     _refreshInProgress.dispose();
     super.dispose();
   }
-}
-
-Future<Uri?> _connectedAppRoot() async {
-  final packageUriString =
-      await serviceConnection.rootPackageDirectoryForMainIsolate();
-  if (packageUriString == null) return null;
-  return Uri.parse(packageUriString);
 }
 
 /// Compares the versions of extension configurations [a] and [b] and returns

@@ -9,7 +9,6 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
@@ -135,11 +134,7 @@ class WebPerformanceScreenBody extends StatelessWidget {
       data: isFlutterWebApp ? flutterWebInstructionsMd : dartWebInstructionsMd,
       onTapLink: (_, url, __) {
         if (url != null) {
-          unawaited(
-            launchUrl(
-              Uri.parse(url),
-            ),
-          );
+          unawaited(launchUrlWithErrorHandling(url));
         }
       },
     );
@@ -157,7 +152,7 @@ class DisconnectedPerformanceScreenBody extends StatelessWidget {
     return FileImportContainer(
       instructions: importInstructions,
       actionText: 'Load data',
-      gaScreen: gac.appSize,
+      gaScreen: gac.performance,
       gaSelectionImport: gac.PerformanceEvents.openDataFile.name,
       gaSelectionAction: gac.PerformanceEvents.loadDataFromFile.name,
       onAction: (jsonFile) {

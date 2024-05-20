@@ -11,8 +11,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
-import 'config_specific/launch_url/launch_url.dart';
 import 'primitives/utils.dart';
+import 'utils.dart';
 
 class SidePanelViewer extends StatefulWidget {
   const SidePanelViewer({
@@ -183,7 +183,7 @@ class SidePanel extends AnimatedWidget {
                     child: Markdown(
                       data: markdownData!,
                       onTapLink: (text, url, title) =>
-                          unawaited(launchUrl(url!)),
+                          unawaited(launchUrlWithErrorHandling(url!)),
                     ),
                   ),
           ],

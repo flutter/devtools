@@ -152,14 +152,10 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     return Navigator(
       key: navigatorKey,
       pages: [_getPage(context, page, params, state)],
-      onPopPage: (_, __) {
-        if (_routes.length <= 1) {
-          return false;
-        }
-
+      onDidRemovePage: (_) {
+        if (_routes.length <= 1) return;
         _routes.removeLast();
         notifyListeners();
-        return true;
       },
     );
   }

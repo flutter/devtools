@@ -114,8 +114,8 @@ class ExtensionEvent {
 }
 
 class ExtensionEvents {
-  ExtensionEvents(List<ExtensionEvent> items) {
-    events.addAll(items);
+  ExtensionEvents(List<ExtensionEvent> events) {
+    this.events.addAll(events);
   }
 
   factory ExtensionEvents.fromJson(Map<String, Object> json) {
@@ -163,12 +163,12 @@ class EventSample {
     this.extensionEvents,
   );
 
-  EventSample.gcEvent(this.timestamp, {ExtensionEvents? theEvents})
+  EventSample.gcEvent(this.timestamp, {ExtensionEvents? events})
       : isEventGC = true,
         isEventSnapshot = false,
         isEventSnapshotAuto = false,
         allocationAccumulator = null,
-        extensionEvents = theEvents;
+        extensionEvents = events;
 
   EventSample.snapshotEvent(
     this.timestamp, {

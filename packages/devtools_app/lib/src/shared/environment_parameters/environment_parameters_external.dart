@@ -19,8 +19,8 @@ class ExternalDevToolsEnvironmentParameters
       <ScriptPopupMenuOption>[];
 
   @override
-  Link issueTrackerLink({String? additionalInfo, String? issueTitle}) {
-    return Link(
+  GaLink issueTrackerLink({String? additionalInfo, String? issueTitle}) {
+    return GaLink(
       display: _newDevToolsIssueUriDisplay,
       url: newDevToolsGitHubIssueUriLengthSafe(
         additionalInfo: additionalInfo,
@@ -39,7 +39,7 @@ class ExternalDevToolsEnvironmentParameters
   }
 
   @override
-  Link? enableSourceMapsLink() {
+  GaLink? enableSourceMapsLink() {
     // This should always return a null value for 3p users.
     return null;
   }

@@ -216,7 +216,7 @@ class DocumentationLink extends StatelessWidget {
     final docPageId = screen.docPageId ?? '';
     return LinkIconLabel(
       icon: Icons.library_books_outlined,
-      link: Link(
+      link: GaLink(
         display: screenWidth <= MediaSize.xs ? 'Docs' : 'Read docs',
         url: screen.docsUrl ??
             'https://docs.flutter.dev/tools/devtools/$docPageId',
@@ -252,7 +252,7 @@ class VideoTutorialLink extends StatelessWidget {
         highlightForConnection ? Theme.of(context).colorScheme.onPrimary : null;
     return LinkIconLabel(
       icon: Icons.ondemand_video_rounded,
-      link: Link(
+      link: GaLink(
         display: screenWidth <= MediaSize.xs ? 'Tutorial' : 'Watch tutorial',
         url:
             '$_devToolsYouTubeVideoUrl${screenMetaData.tutorialVideoTimestamp}',

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:devtools_app/src/screens/memory/panes/chart/controller/chart_data.dart';
 import 'package:devtools_app/src/screens/memory/panes/chart/data/primitives.dart';
 import 'package:devtools_app/src/screens/memory/shared/primitives/memory_timeline.dart';
@@ -20,7 +21,9 @@ void main() {
         isLegendVisible: true,
       );
 
-      final fromJson = ChartData.fromJson(item.toJson());
+      final json = item.toJson();
+      expect(json.keys.sorted(), equals(Json.all.sorted()));
+      final fromJson = ChartData.fromJson(json);
 
       expect(fromJson.isDeviceAndroid, item.isDeviceAndroid);
       expect(fromJson.timeline, item.timeline);

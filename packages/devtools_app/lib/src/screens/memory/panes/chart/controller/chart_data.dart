@@ -9,11 +9,15 @@ import '../../../../../shared/primitives/simple_items.dart';
 import '../../../shared/primitives/memory_timeline.dart';
 import '../data/primitives.dart';
 
-class _Json {
+// ignore: avoid_classes_with_only_static_members, enum-like classes are ok
+@visibleForTesting
+class Json {
   static const isDeviceAndroid = 'isAndroid';
   static const timeline = 'timeline';
   static const interval = 'interval';
   static const isLegendVisible = 'isLegendVisible';
+
+  static final all = [isDeviceAndroid, timeline, interval, isLegendVisible];
 }
 
 /// Chart data, that should be saved when transferred to offline data mode.
@@ -41,24 +45,24 @@ class ChartData {
   factory ChartData.fromJson(Map<String, dynamic> json) {
     final result = ChartData(
       mode: ControllerCreationMode.offlineData,
-      isDeviceAndroid: json[_Json.isDeviceAndroid] as bool? ?? false,
+      isDeviceAndroid: json[Json.isDeviceAndroid] as bool? ?? false,
       timeline: deserialize<MemoryTimeline>(
-        json[_Json.timeline],
+        json[Json.timeline],
         MemoryTimeline.fromJson,
       ),
-      interval: ChartInterval.byName(json[_Json.interval]) ??
-          ChartInterval.theDefault,
-      isLegendVisible: json[_Json.isLegendVisible] as bool?,
+      interval:
+          ChartInterval.byName(json[Json.interval]) ?? ChartInterval.theDefault,
+      isLegendVisible: json[Json.isLegendVisible] as bool?,
     );
     return result;
   }
 
   Map<String, dynamic> toJson() {
     return {
-      _Json.isDeviceAndroid: isDeviceAndroid ?? false,
-      _Json.timeline: timeline,
-      _Json.interval: displayInterval.name,
-      _Json.isLegendVisible: isLegendVisible.value,
+      Json.isDeviceAndroid: isDeviceAndroid ?? false,
+      Json.timeline: timeline,
+      Json.interval: displayInterval.name,
+      Json.isLegendVisible: isLegendVisible.value,
     };
   }
 

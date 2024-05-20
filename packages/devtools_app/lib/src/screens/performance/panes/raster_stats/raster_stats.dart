@@ -40,8 +40,8 @@ class RasterStatsView extends StatelessWidget {
                 'Impeller backend.\nLearn more about the status of ',
             style: Theme.of(context).regularTextStyle,
             children: [
-              LinkTextSpan(
-                link: Link(
+              GaLinkTextSpan(
+                link: GaLink(
                   display: 'Impeller',
                   url: impellerDocsUrl,
                   gaScreenName: gac.performance,

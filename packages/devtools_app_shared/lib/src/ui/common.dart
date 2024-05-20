@@ -4,8 +4,10 @@
 
 import 'dart:convert';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
+import '../utils/url/url.dart';
 import '../utils/utils.dart';
 import 'theme/theme.dart';
 
@@ -895,4 +897,31 @@ extension ScrollControllerAutoScroll on ScrollController {
       }
     }
   }
+}
+
+/// A text span that will launch the provided URL from [link] when clicked.
+class LinkTextSpan extends TextSpan {
+  LinkTextSpan({
+    required Link link,
+    required BuildContext context,
+    VoidCallback? onTap,
+    VoidCallback? onLaunchUrlError,
+    TextStyle? style,
+  }) : super(
+          text: link.display,
+          style: style ?? Theme.of(context).linkTextStyle,
+          recognizer: TapGestureRecognizer()
+            ..onTap = () async {
+              onTap?.call();
+              await launchUrl(link.url, onError: onLaunchUrlError);
+            },
+        );
+}
+
+/// A data model for a clickable link in a UI.
+class Link {
+  const Link({required this.display, required this.url});
+
+  final String display;
+  final String url;
 }

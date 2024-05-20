@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/controller/snapshot_item.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -13,12 +14,13 @@ void main() {
     () async {
       final item = SnapshotDataItem(
         defaultName: 'defaultName',
-        displayNumber: 1,
+        displayNumber: 5,
         nameOverride: 'nameOverride',
       );
       await item.loadHeap(HeapGraphLoaderGoldens());
 
       final json = item.toJson();
+      expect(json.keys.sorted(), equals(Json.all.sorted()));
       final fromJson = SnapshotDataItem.fromJson(json);
 
       expect(fromJson.defaultName, item.defaultName);
@@ -31,6 +33,8 @@ void main() {
         fromJson.heap!.graph.objects.length,
         item.heap!.graph.objects.length,
       );
+
+      expect(fromJson.heap!.created, item.heap!.created);
     },
   );
 }

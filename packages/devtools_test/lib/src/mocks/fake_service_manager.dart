@@ -92,7 +92,7 @@ class FakeServiceConnectionManager extends Fake
   }
 
   @override
-  Future<String?> rootLibraryForMainIsolate() {
+  Future<String?> mainIsolateRootLibraryUriAsString() {
     final fakeIsolateManager =
         _serviceManager.isolateManager as FakeIsolateManager;
     return Future.value(fakeIsolateManager.rootLibrary);
