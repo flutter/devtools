@@ -16,11 +16,7 @@ enum Json {
   interval,
   isLegendVisible;
 
-  const Json({String? nameOverride}) : _nameOverride = nameOverride;
-
-  final String? _nameOverride;
-
-  String get key => _nameOverride ?? name;
+  String get key => name;
 }
 
 /// Chart data, that should be saved when transferred to offline data mode.

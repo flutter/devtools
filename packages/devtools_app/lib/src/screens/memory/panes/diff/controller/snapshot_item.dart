@@ -28,11 +28,7 @@ enum Json {
   created,
   nameOverride;
 
-  const Json({String? nameOverride}) : _nameOverride = nameOverride;
-
-  final String? _nameOverride;
-
-  String get key => _nameOverride ?? name;
+  String get key => name;
 }
 
 class SnapshotDataItem extends SnapshotItem implements RenamableItem {
