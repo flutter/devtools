@@ -133,17 +133,23 @@ class MemoryController extends DisposableController
         ? MemoryChartPaneController(mode, data: offlineData?.chart)
         : null;
 
+    final rootPackage = serviceConnection.serviceManager.rootInfoNow().package!;
+
     diff = diffPaneController ??
         offlineData?.diff ??
         DiffPaneController(
           loader:
               isConnected ? HeapGraphLoaderRuntime(chart!.data.timeline) : null,
+          rootPackage: rootPackage,
         );
 
     if (hasData) {
       profile = profilePaneController ??
           offlineData?.profile ??
-          ProfilePaneController(mode: mode);
+          ProfilePaneController(
+            mode: mode,
+            rootPackage: rootPackage,
+          );
     } else {
       profile = null;
     }

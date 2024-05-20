@@ -19,8 +19,9 @@ void main() {
     '$OfflineMemoryData serializes and deserializes correctly',
     () {
       final item = OfflineMemoryData(
-        DiffPaneController(loader: null),
-        ProfilePaneController(mode: ControllerCreationMode.connected),
+        DiffPaneController(loader: null, rootPackage: 'root'),
+        ProfilePaneController(
+            mode: ControllerCreationMode.connected, rootPackage: 'root'),
         ChartData(
           mode: ControllerCreationMode.offlineData,
           isDeviceAndroid: true,
