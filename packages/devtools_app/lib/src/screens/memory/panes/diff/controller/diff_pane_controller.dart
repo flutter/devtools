@@ -51,7 +51,8 @@ class DiffPaneController extends DisposableController {
         .map((e) => deserialize<SnapshotDataItem>(e, SnapshotDataItem.fromJson))
         .toList();
 
-    final diffWith = json[Json.diffWith.name] as List<int?>;
+    final diffWith =
+        (json[Json.diffWith.name] as List).map((e) => e as int?).toList();
 
     assert(snapshots.length == diffWith.length);
 
