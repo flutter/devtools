@@ -11,20 +11,12 @@ import '../../panes/profile/profile_pane_controller.dart';
 import '../../shared/heap/class_filter.dart';
 
 @visibleForTesting
-class Json {
-  static const selectedTab = 'selectedTab';
-  static const classFilter = 'classFilter';
-  static const diffData = 'diffData';
-  static const profileData = 'profileData';
-  static const chartData = 'chartData';
-
-  static const all = {
-    selectedTab,
-    classFilter,
-    diffData,
-    profileData,
-    chartData,
-  };
+enum Json {
+  selectedTab,
+  classFilter,
+  diffData,
+  profileData,
+  chartData;
 }
 
 class OfflineMemoryData {
@@ -39,26 +31,29 @@ class OfflineMemoryData {
   factory OfflineMemoryData.fromJson(Map<String, dynamic> json) {
     return OfflineMemoryData(
       deserialize<DiffPaneController>(
-        json[Json.diffData],
+        json[Json.diffData.name],
         DiffPaneController.fromJson,
       ),
       deserialize<ProfilePaneController>(
-        json[Json.profileData],
+        json[Json.profileData.name],
         ProfilePaneController.fromJson,
       ),
-      deserialize<ChartData>(json[Json.chartData], ChartData.fromJson),
-      deserialize<ClassFilter>(json[Json.classFilter], ClassFilter.fromJson),
-      selectedTab: json[Json.selectedTab] as int? ?? 0,
+      deserialize<ChartData>(json[Json.chartData.name], ChartData.fromJson),
+      deserialize<ClassFilter>(
+        json[Json.classFilter.name],
+        ClassFilter.fromJson,
+      ),
+      selectedTab: json[Json.selectedTab.name] as int? ?? 0,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      Json.selectedTab: selectedTab,
-      Json.diffData: diff,
-      Json.profileData: profile,
-      Json.chartData: chart,
-      Json.classFilter: filter,
+      Json.selectedTab.name: selectedTab,
+      Json.diffData.name: diff,
+      Json.profileData.name: profile,
+      Json.chartData.name: chart,
+      Json.classFilter.name: filter,
     };
   }
 

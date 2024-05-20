@@ -29,13 +29,10 @@ import '../data/heap_diff_store.dart';
 import 'class_data.dart';
 import 'snapshot_item.dart';
 
-// ignore: avoid_classes_with_only_static_members, enum-like classes are ok
 @visibleForTesting
-class Json {
-  static const snapshots = 'snapshots';
-  static const diffWith = 'diffWith';
-
-  static final all = [snapshots, diffWith];
+enum Json {
+  snapshots,
+  diffWith;
 }
 
 class DiffPaneController extends DisposableController {
@@ -50,11 +47,11 @@ class DiffPaneController extends DisposableController {
   }
 
   factory DiffPaneController.fromJson(Map<String, dynamic> json) {
-    final snapshots = (json[Json.snapshots] as List)
+    final snapshots = (json[Json.snapshots.name] as List)
         .map((e) => deserialize<SnapshotDataItem>(e, SnapshotDataItem.fromJson))
         .toList();
 
-    final diffWith = json[Json.diffWith] as List<int?>;
+    final diffWith = json[Json.diffWith.name] as List<int?>;
 
     assert(snapshots.length == diffWith.length);
 
@@ -86,8 +83,8 @@ class DiffPaneController extends DisposableController {
     }).toList();
 
     return {
-      Json.snapshots: snapshots,
-      Json.diffWith: diffWithIndices,
+      Json.snapshots.name: snapshots,
+      Json.diffWith.name: diffWithIndices,
     };
   }
 

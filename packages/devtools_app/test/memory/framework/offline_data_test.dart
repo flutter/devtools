@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:collection/collection.dart';
 import 'package:devtools_app/src/screens/memory/framework/offline_data/offline_data.dart';
 import 'package:devtools_app/src/screens/memory/framework/offline_data/offline_data.dart'
     as offline_data show Json;
@@ -34,7 +33,10 @@ void main() {
       );
 
       final json = item.toJson();
-      expect(json.keys.sorted(), equals(offline_data.Json.all.sorted()));
+      expect(
+        json.keys.toSet(),
+        equals(offline_data.Json.values.map((e) => e.name).toSet()),
+      );
       final fromJson = OfflineMemoryData.fromJson(json);
 
       expect(fromJson.selectedTab, item.selectedTab);

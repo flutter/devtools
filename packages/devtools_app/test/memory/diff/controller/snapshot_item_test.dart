@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:collection/collection.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/controller/snapshot_item.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -20,7 +19,7 @@ void main() {
       await item.loadHeap(HeapGraphLoaderGoldens());
 
       final json = item.toJson();
-      expect(json.keys.sorted(), equals(Json.all.sorted()));
+      expect(json.keys.toSet(), equals(Json.values.map((e) => e.name).toSet()));
       final fromJson = SnapshotDataItem.fromJson(json);
 
       expect(fromJson.defaultName, item.defaultName);

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:collection/collection.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:test/test.dart';
 
@@ -21,7 +20,7 @@ void main() {
     );
 
     final json = sample.toJson();
-    expect(json.keys.sorted(), equals(Json.all.sorted()));
+    expect(json.keys.toSet(), equals(Json.values.map((e) => e.key).toSet()));
     final fromJson = HeapSample.fromJson(json);
 
     expect(sample.timestamp, equals(fromJson.timestamp));
