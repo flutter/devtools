@@ -54,7 +54,7 @@ void main() {
       final json = controller.toJson();
       expect(
         json.keys.toSet(),
-        equals(diff_pane_controller.Json.values.map((e) => e.key).toSet()),
+        equals(diff_pane_controller.Json.values.map((e) => e.name).toSet()),
       );
       final fromJson = DiffPaneController.fromJson(json);
 

@@ -33,8 +33,6 @@ import 'snapshot_item.dart';
 enum Json {
   snapshots,
   diffWith;
-
-  String get key => name;
 }
 
 class DiffPaneController extends DisposableController {
@@ -85,8 +83,8 @@ class DiffPaneController extends DisposableController {
     }).toList();
 
     return {
-      Json.snapshots.key: snapshots,
-      Json.diffWith.key: diffWithIndices,
+      Json.snapshots.name: snapshots,
+      Json.diffWith.name: diffWithIndices,
     };
   }
 

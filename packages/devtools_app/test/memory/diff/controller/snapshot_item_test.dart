@@ -19,7 +19,7 @@ void main() {
       await item.loadHeap(HeapGraphLoaderGoldens());
 
       final json = item.toJson();
-      expect(json.keys.toSet(), equals(Json.values.map((e) => e.key).toSet()));
+      expect(json.keys.toSet(), equals(Json.values.map((e) => e.name).toSet()));
       final fromJson = SnapshotDataItem.fromJson(json);
 
       expect(fromJson.defaultName, item.defaultName);

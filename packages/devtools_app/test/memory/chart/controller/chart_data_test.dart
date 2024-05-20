@@ -21,7 +21,7 @@ void main() {
       );
 
       final json = item.toJson();
-      expect(json.keys.toSet(), equals(Json.values.map((e) => e.key).toSet()));
+      expect(json.keys.toSet(), equals(Json.values.map((e) => e.name).toSet()));
       final fromJson = ChartData.fromJson(json);
 
       expect(fromJson.isDeviceAndroid, item.isDeviceAndroid);

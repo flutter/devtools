@@ -27,8 +27,6 @@ enum Json {
   chunks,
   created,
   nameOverride;
-
-  String get key => name;
 }
 
 class SnapshotDataItem extends SnapshotItem implements RenamableItem {
@@ -61,11 +59,11 @@ class SnapshotDataItem extends SnapshotItem implements RenamableItem {
 
   Map<String, dynamic> toJson() {
     return {
-      Json.defaultName.key: defaultName,
-      Json.displayNumber.key: displayNumber,
-      Json.nameOverride.key: nameOverride,
-      Json.chunks.key: _heap?.graph.toChunks(),
-      Json.created.key: _heap?.created,
+      Json.defaultName.name: defaultName,
+      Json.displayNumber.name: displayNumber,
+      Json.nameOverride.name: nameOverride,
+      Json.chunks.name: _heap?.graph.toChunks(),
+      Json.created.name: _heap?.created,
     };
   }
 

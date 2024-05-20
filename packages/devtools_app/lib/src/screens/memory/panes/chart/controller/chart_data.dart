@@ -15,8 +15,6 @@ enum Json {
   timeline,
   interval,
   isLegendVisible;
-
-  String get key => name;
 }
 
 /// Chart data, that should be saved when transferred to offline data mode.
@@ -58,10 +56,10 @@ class ChartData {
 
   Map<String, dynamic> toJson() {
     return {
-      Json.isDeviceAndroid.key: isDeviceAndroid ?? false,
-      Json.timeline.key: timeline,
-      Json.interval.key: displayInterval.name,
-      Json.isLegendVisible.key: isLegendVisible.value,
+      Json.isDeviceAndroid.name: isDeviceAndroid ?? false,
+      Json.timeline.name: timeline,
+      Json.interval.name: displayInterval.name,
+      Json.isLegendVisible.name: isLegendVisible.value,
     };
   }
 
