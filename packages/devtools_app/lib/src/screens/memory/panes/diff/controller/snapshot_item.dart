@@ -20,18 +20,19 @@ class SnapshotDocItem extends SnapshotItem {
   int? get displayNumber => null;
 }
 
-// ignore: avoid_classes_with_only_static_members, enum-like classes are ok
 @visibleForTesting
 enum Json {
-  defaultName('defaultName'),
-  displayNumber('displayNumber'),
-  chunks('chunks'),
-  created('created'),
-  nameOverride('nameOverride');
+  defaultName,
+  displayNumber,
+  chunks,
+  created,
+  nameOverride;
 
-  const Json(this.key);
+  const Json({String? nameOverride}) : _nameOverride = nameOverride;
 
-  final String key;
+  final String? _nameOverride;
+
+  String get key => _nameOverride ?? name;
 }
 
 class SnapshotDataItem extends SnapshotItem implements RenamableItem {

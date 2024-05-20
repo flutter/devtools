@@ -9,17 +9,18 @@ import '../../../../../shared/primitives/simple_items.dart';
 import '../../../shared/primitives/memory_timeline.dart';
 import '../data/primitives.dart';
 
-// ignore: avoid_classes_with_only_static_members, enum-like classes are ok
 @visibleForTesting
 enum Json {
-  isDeviceAndroid('isAndroid'),
-  timeline('timeline'),
-  interval('interval'),
-  isLegendVisible('isLegendVisible');
+  isDeviceAndroid,
+  timeline,
+  interval,
+  isLegendVisible;
 
-  const Json(this.key);
+  const Json({String? nameOverride}) : _nameOverride = nameOverride;
 
-  final String key;
+  final String? _nameOverride;
+
+  String get key => _nameOverride ?? name;
 }
 
 /// Chart data, that should be saved when transferred to offline data mode.

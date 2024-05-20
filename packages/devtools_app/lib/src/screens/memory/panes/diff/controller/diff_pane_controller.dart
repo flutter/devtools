@@ -29,15 +29,16 @@ import '../data/heap_diff_store.dart';
 import 'class_data.dart';
 import 'snapshot_item.dart';
 
-// ignore: avoid_classes_with_only_static_members, enum-like classes are ok
 @visibleForTesting
 enum Json {
-  snapshots('snapshots'),
-  diffWith('diffWith');
+  snapshots,
+  diffWith;
 
-  const Json(this.key);
+  const Json({String? nameOverride}) : _nameOverride = nameOverride;
 
-  final String key;
+  final String? _nameOverride;
+
+  String get key => _nameOverride ?? name;
 }
 
 class DiffPaneController extends DisposableController {
