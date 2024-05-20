@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:collection/collection.dart';
 import 'package:devtools_app/src/screens/memory/framework/memory_tabs.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/controller/diff_pane_controller.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/controller/diff_pane_controller.dart'
@@ -54,8 +53,8 @@ void main() {
 
       final json = controller.toJson();
       expect(
-        json.keys.sorted(),
-        equals(diff_pane_controller.Json.all.sorted()),
+        json.keys.toSet(),
+        equals(diff_pane_controller.Json.values.map((e) => e.key).toSet()),
       );
       final fromJson = DiffPaneController.fromJson(json);
 

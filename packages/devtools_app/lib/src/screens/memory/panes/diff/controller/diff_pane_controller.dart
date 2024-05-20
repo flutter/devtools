@@ -31,11 +31,13 @@ import 'snapshot_item.dart';
 
 // ignore: avoid_classes_with_only_static_members, enum-like classes are ok
 @visibleForTesting
-class Json {
-  static const snapshots = 'snapshots';
-  static const diffWith = 'diffWith';
+enum Json {
+  snapshots('snapshots'),
+  diffWith('diffWith');
 
-  static final all = [snapshots, diffWith];
+  const Json(this.key);
+
+  final String key;
 }
 
 class DiffPaneController extends DisposableController {
@@ -86,8 +88,8 @@ class DiffPaneController extends DisposableController {
     }).toList();
 
     return {
-      Json.snapshots: snapshots,
-      Json.diffWith: diffWithIndices,
+      Json.snapshots.key: snapshots,
+      Json.diffWith.key: diffWithIndices,
     };
   }
 

@@ -22,20 +22,16 @@ class SnapshotDocItem extends SnapshotItem {
 
 // ignore: avoid_classes_with_only_static_members, enum-like classes are ok
 @visibleForTesting
-class Json {
-  static const defaultName = 'defaultName';
-  static const displayNumber = 'displayNumber';
-  static const chunks = 'chunks';
-  static const created = 'created';
-  static const nameOverride = 'nameOverride';
+enum Json {
+  defaultName('defaultName'),
+  displayNumber('displayNumber'),
+  chunks('chunks'),
+  created('created'),
+  nameOverride('nameOverride');
 
-  static final all = [
-    defaultName,
-    displayNumber,
-    chunks,
-    created,
-    nameOverride,
-  ];
+  const Json(this.key);
+
+  final String key;
 }
 
 class SnapshotDataItem extends SnapshotItem implements RenamableItem {
@@ -68,11 +64,11 @@ class SnapshotDataItem extends SnapshotItem implements RenamableItem {
 
   Map<String, dynamic> toJson() {
     return {
-      Json.defaultName: defaultName,
-      Json.displayNumber: displayNumber,
-      Json.nameOverride: nameOverride,
-      Json.chunks: _heap?.graph.toChunks(),
-      Json.created: _heap?.created,
+      Json.defaultName.key: defaultName,
+      Json.displayNumber.key: displayNumber,
+      Json.nameOverride.key: nameOverride,
+      Json.chunks.key: _heap?.graph.toChunks(),
+      Json.created.key: _heap?.created,
     };
   }
 

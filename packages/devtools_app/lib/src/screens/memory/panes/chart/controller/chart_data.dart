@@ -11,13 +11,15 @@ import '../data/primitives.dart';
 
 // ignore: avoid_classes_with_only_static_members, enum-like classes are ok
 @visibleForTesting
-class Json {
-  static const isDeviceAndroid = 'isAndroid';
-  static const timeline = 'timeline';
-  static const interval = 'interval';
-  static const isLegendVisible = 'isLegendVisible';
+enum Json {
+  isDeviceAndroid('isAndroid'),
+  timeline('timeline'),
+  interval('interval'),
+  isLegendVisible('isLegendVisible');
 
-  static final all = [isDeviceAndroid, timeline, interval, isLegendVisible];
+  const Json(this.key);
+
+  final String key;
 }
 
 /// Chart data, that should be saved when transferred to offline data mode.
@@ -59,10 +61,10 @@ class ChartData {
 
   Map<String, dynamic> toJson() {
     return {
-      Json.isDeviceAndroid: isDeviceAndroid ?? false,
-      Json.timeline: timeline,
-      Json.interval: displayInterval.name,
-      Json.isLegendVisible: isLegendVisible.value,
+      Json.isDeviceAndroid.key: isDeviceAndroid ?? false,
+      Json.timeline.key: timeline,
+      Json.interval.key: displayInterval.name,
+      Json.isLegendVisible.key: isLegendVisible.value,
     };
   }
 
