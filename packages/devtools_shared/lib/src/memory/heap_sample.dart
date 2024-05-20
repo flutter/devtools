@@ -61,10 +61,12 @@ class HeapSample {
         json[Json.memoryEventInfo.key],
         EventSample.fromJson,
       ),
-      deserialize<RasterCache>(
-        json[Json.rasterCache.key],
-        RasterCache.fromJson,
-      ),
+      json[Json.rasterCache.key] == null
+          ? null
+          : deserialize<RasterCache>(
+              json[Json.rasterCache.key],
+              (json) => RasterCache.fromJson(json),
+            ),
     );
   }
 
