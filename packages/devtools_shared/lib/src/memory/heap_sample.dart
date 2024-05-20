@@ -4,8 +4,30 @@
 
 import 'dart:convert';
 
+import 'package:meta/meta.dart';
+
+import '../utils/serialization.dart';
 import 'adb_memory_info.dart';
 import 'event_sample.dart';
+
+@visibleForTesting
+enum Json {
+  rss,
+  capacity,
+  used,
+  external,
+  gc,
+  adbMemoryInfo(nameOverride: 'adb_memoryInfo'),
+  memoryEventInfo(nameOverride: 'memory_eventInfo'),
+  rasterCache,
+  timestamp;
+
+  const Json({String? nameOverride}) : _nameOverride = nameOverride;
+
+  final String? _nameOverride;
+
+  String get key => _nameOverride ?? name;
+}
 
 /// DevTools Plotted and JSON persisted memory information.
 class HeapSample {
@@ -24,38 +46,40 @@ class HeapSample {
         rasterCache = rasterCache ?? RasterCache.empty();
 
   factory HeapSample.fromJson(Map<String, dynamic> json) {
-    final adbMemoryInfo = json['adb_memoryInfo'];
-    final memoryEventInfo = json['memory_eventInfo'];
-    final rasterCache = json['raster_cache'];
     return HeapSample(
-      json['timestamp'] as int,
-      json['rss'] as int,
-      json['capacity'] as int,
-      json['used'] as int,
-      json['external'] as int,
-      json['gc'] as bool,
-      adbMemoryInfo != null
-          ? AdbMemoryInfo.fromJson(adbMemoryInfo)
-          : AdbMemoryInfo.empty(),
-      memoryEventInfo != null
-          ? EventSample.fromJson(memoryEventInfo)
-          : EventSample.empty(),
-      rasterCache != null
-          ? RasterCache.fromJson(rasterCache)
-          : RasterCache.empty(),
+      json[Json.timestamp.key] as int,
+      json[Json.rss.key] as int,
+      json[Json.capacity.key] as int,
+      json[Json.used.key] as int,
+      json[Json.external.key] as int,
+      json[Json.gc.key] as bool,
+      deserialize<AdbMemoryInfo>(
+        json[Json.adbMemoryInfo.key],
+        AdbMemoryInfo.fromJson,
+      ),
+      deserialize<EventSample>(
+        json[Json.memoryEventInfo.key],
+        EventSample.fromJson,
+      ),
+      json[Json.rasterCache.key] == null
+          ? null
+          : deserialize<RasterCache>(
+              json[Json.rasterCache.key],
+              (json) => RasterCache.fromJson(json),
+            ),
     );
   }
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'timestamp': timestamp,
-        'rss': rss,
-        'capacity': capacity,
-        'used': used,
-        'external': external,
-        'gc': isGC,
-        'adb_memoryInfo': adbMemoryInfo.toJson(),
-        'memory_eventInfo': memoryEventInfo.toJson(),
-        'raster_cache': rasterCache.toJson(),
+        Json.timestamp.key: timestamp,
+        Json.rss.key: rss,
+        Json.capacity.key: capacity,
+        Json.used.key: used,
+        Json.external.key: external,
+        Json.gc.key: isGC,
+        Json.adbMemoryInfo.key: adbMemoryInfo,
+        Json.memoryEventInfo.key: memoryEventInfo,
+        Json.rasterCache.key: rasterCache,
       };
 
   /// Version of HeapSample JSON payload.

@@ -83,11 +83,11 @@ class AdaptedProfile {
 
   Map<String, dynamic> toJson() {
     return {
-      _ProfileJson.total: _total.toJson(),
-      _ProfileJson.items: _items.map((e) => e.toJson()).toList(),
-      _ProfileJson.newGC: newSpaceGCStats.toJson(),
-      _ProfileJson.oldGC: oldSpaceGCStats.toJson(),
-      _ProfileJson.totalGC: totalGCStats.toJson(),
+      _ProfileJson.total: _total,
+      _ProfileJson.items: _items,
+      _ProfileJson.newGC: newSpaceGCStats,
+      _ProfileJson.oldGC: oldSpaceGCStats,
+      _ProfileJson.totalGC: totalGCStats,
     };
   }
 
@@ -221,7 +221,7 @@ class ProfileRecord with PinnableListEntry {
   Map<String, dynamic> toJson() {
     return {
       _RecordJson.isTotal: isTotal,
-      _RecordJson.heapClass: heapClass.toJson(),
+      _RecordJson.heapClass: heapClass,
       _RecordJson.totalInstances: totalInstances,
       _RecordJson.totalSize: totalSize,
       _RecordJson.totalDartHeapSize: totalDartHeapSize,

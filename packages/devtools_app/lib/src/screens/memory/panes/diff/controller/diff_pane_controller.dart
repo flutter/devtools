@@ -7,6 +7,7 @@ import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:devtools_app_shared/utils.dart';
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../../shared/analytics/analytics.dart' as ga;
@@ -26,19 +27,66 @@ import '../data/csv.dart';
 import '../data/heap_diff_data.dart';
 import '../data/heap_diff_store.dart';
 import 'class_data.dart';
-import 'item_controller.dart';
+import 'snapshot_item.dart';
+
+@visibleForTesting
+enum Json {
+  snapshots,
+  diffWith;
+}
 
 class DiffPaneController extends DisposableController {
-  DiffPaneController({required this.loader});
+  DiffPaneController({
+    required this.loader,
+    List<SnapshotDataItem>? snapshots,
+  }) {
+    if (snapshots != null) {
+      core._snapshots.addAll(snapshots);
+    }
+    derived._updateValues();
+  }
 
   factory DiffPaneController.fromJson(Map<String, dynamic> json) {
-    // TODO(polina-c): implement, https://github.com/flutter/devtools/issues/6972
-    return DiffPaneController(loader: null);
+    final snapshots = (json[Json.snapshots.name] as List)
+        .map((e) => deserialize<SnapshotDataItem>(e, SnapshotDataItem.fromJson))
+        .toList();
+
+    final diffWith =
+        (json[Json.diffWith.name] as List).map((e) => e as int?).toList();
+
+    assert(snapshots.length == diffWith.length);
+
+    for (var i = 0; i < snapshots.length; i++) {
+      final diffIndex = diffWith[i];
+      if (diffIndex != null) {
+        snapshots[i].diffWith.value = snapshots[diffIndex];
+      }
+    }
+
+    return DiffPaneController(
+      loader: null,
+      snapshots: snapshots,
+    );
   }
 
   Map<String, dynamic> toJson() {
-    // TODO(polina-c): implement, https://github.com/flutter/devtools/issues/6972
-    return {};
+    final snapshots = core.snapshots.value
+        .whereType<SnapshotDataItem>()
+        .where((s) => s.heap != null)
+        .toList();
+
+    final snapshotToIndex =
+        snapshots.asMap().map((index, item) => MapEntry(item, index));
+
+    final diffWithIndices = snapshots.map((item) {
+      final diffWith = item.diffWith.value;
+      return diffWith == null ? null : snapshotToIndex[diffWith];
+    }).toList();
+
+    return {
+      Json.snapshots.name: snapshots,
+      Json.diffWith.name: diffWithIndices,
+    };
   }
 
   final HeapGraphLoader? loader;
@@ -315,7 +363,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
       var diffHidden = true;
       var details = 'no data';
       final item = selectedItem.value;
-      if (item is SnapshotDataItem && item.hasData) {
+      if (item is SnapshotDataItem && item.isProcessed) {
         diffHidden = item.diffWith.value == null;
         singleHidden = !diffHidden;
         details = diffHidden ? 'single' : 'diff';
@@ -330,8 +378,14 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
         assert(classesTableDiff.selection.value == null, details);
       }
 
-      assert((singleClassesToShow.value == null) == singleHidden, details);
-      assert((diffClassesToShow.value == null) == diffHidden, details);
+      assert(
+        (singleClassesToShow.value == null) == singleHidden,
+        '$details, ${singleClassesToShow.value}, $singleHidden',
+      );
+      assert(
+        (diffClassesToShow.value == null) == diffHidden,
+        '$details, ${singleClassesToShow.value}, $singleHidden',
+      );
 
       return true;
     }());

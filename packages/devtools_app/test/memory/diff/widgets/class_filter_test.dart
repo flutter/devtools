@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/screens/memory/panes/diff/controller/item_controller.dart';
+import 'package:devtools_app/src/screens/memory/panes/diff/controller/snapshot_item.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/diff_pane.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/class_filter.dart';
 import 'package:devtools_app/src/screens/memory/shared/widgets/class_filter.dart';
@@ -57,7 +57,7 @@ void main() {
 
       expect(
         scene.diffController.core.snapshots.value
-            .where((element) => element.hasData),
+            .where((s) => s is SnapshotDataItem && s.isProcessed),
         hasLength(2),
       );
 

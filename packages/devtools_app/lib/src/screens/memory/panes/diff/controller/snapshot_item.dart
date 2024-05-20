@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
@@ -11,34 +13,58 @@ import '../../../../../shared/memory/heap_graph_loader.dart';
 abstract class SnapshotItem extends DisposableController {
   /// Number to show with auto-generated names that may be non unique, like isolate name.
   int? get displayNumber;
-
-  ValueListenable<bool> get isProcessing => _isProcessing;
-  final _isProcessing = ValueNotifier<bool>(false);
-
-  /// If true, the item contains data, that can be compared and analyzed.
-  bool get hasData;
-
-  @override
-  void dispose() {
-    _isProcessing.dispose();
-    super.dispose();
-  }
 }
 
 class SnapshotDocItem extends SnapshotItem {
   @override
   int? get displayNumber => null;
+}
 
-  @override
-  bool get hasData => false;
+@visibleForTesting
+enum Json {
+  defaultName,
+  displayNumber,
+  chunks,
+  created,
+  nameOverride;
 }
 
 class SnapshotDataItem extends SnapshotItem implements RenamableItem {
   SnapshotDataItem({
-    this.displayNumber,
     required this.defaultName,
-  }) {
-    _isProcessing.value = true;
+    this.displayNumber,
+    this.nameOverride,
+  });
+
+  factory SnapshotDataItem.fromJson(Map<String, dynamic> json) {
+    final result = SnapshotDataItem(
+      displayNumber: json[Json.displayNumber.name] as int?,
+      defaultName: json[Json.defaultName.name] as String? ?? 'no name',
+      nameOverride: json[Json.nameOverride.name] as String?,
+    );
+
+    final chunks = json[Json.chunks.name] as List<ByteData>?;
+    if (chunks == null) return result;
+
+    final loader = HeapGraphLoaderFromChunks(
+      chunks: chunks,
+      created: json[Json.created.name] as DateTime? ?? DateTime.now(),
+    );
+
+    // Start the loading process, that will result in progress indicator in UI.
+    unawaited(result.loadHeap(loader));
+
+    return result;
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      Json.defaultName.name: defaultName,
+      Json.displayNumber.name: displayNumber,
+      Json.nameOverride.name: nameOverride,
+      Json.chunks.name: _heap?.graph.toChunks(),
+      Json.created.name: _heap?.created,
+    };
   }
 
   HeapData? get heap => _heap;
@@ -50,14 +76,12 @@ class SnapshotDataItem extends SnapshotItem implements RenamableItem {
   @override
   final int? displayNumber;
 
-  @override
-  bool get hasData => _heap != null;
-
   Future<void> loadHeap(HeapGraphLoader loader) async {
     assert(_heap == null);
     final (graph, created) = await loader.load();
-    _heap = await HeapData.calculate(graph, created);
-    _isProcessing.value = false;
+    _heap = HeapData(graph, created: created);
+    await _heap!.calculate;
+    _processed.complete();
   }
 
   @override
@@ -71,6 +95,10 @@ class SnapshotDataItem extends SnapshotItem implements RenamableItem {
       '$defaultName${displayNumber == null ? '' : '-$displayNumber'}';
 
   int? get totalSize => _heap?.footprint?.reachable;
+
+  Future<void> get process => _processed.future;
+  final _processed = Completer<void>();
+  bool get isProcessed => _processed.isCompleted;
 }
 
 abstract class RenamableItem {

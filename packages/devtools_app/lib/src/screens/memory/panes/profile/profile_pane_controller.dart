@@ -17,10 +17,16 @@ import 'model.dart';
 class ProfilePaneController extends DisposableController
     with AutoDisposeControllerMixin {
   ProfilePaneController({required this.mode, AdaptedProfile? profile})
-      : assert(profile == null || mode != ControllerCreationMode.connected) {
+      : assert(
+          (mode == ControllerCreationMode.connected && profile == null) ||
+              (mode == ControllerCreationMode.offlineData && profile != null),
+        ) {
     if (profile != null) {
-      _currentAllocationProfile.value = profile;
-      _initializeSelection();
+      _currentAllocationProfile.value = AdaptedProfile.withNewFilter(
+        profile,
+        classFilter.value,
+        _rootPackage,
+      );
     }
   }
 
@@ -33,7 +39,7 @@ class ProfilePaneController extends DisposableController
 
   Map<String, dynamic> toJson() {
     return {
-      _jsonProfile: _currentAllocationProfile.value?.toJson(),
+      _jsonProfile: _currentAllocationProfile.value,
     };
   }
 
@@ -41,10 +47,46 @@ class ProfilePaneController extends DisposableController
 
   final ControllerCreationMode mode;
 
+  bool _initialized = false;
+
+  /// Initializes the controller if it is not initialized yet.
+  void initialize() {
+    if (_initialized) return;
+
+    if (mode == ControllerCreationMode.connected) {
+      autoDisposeStreamSubscription(
+        serviceConnection.serviceManager.service!.onGCEvent.listen((event) {
+          if (refreshOnGc.value) {
+            unawaited(refresh());
+          }
+        }),
+      );
+      addAutoDisposeListener(
+        serviceConnection.serviceManager.isolateManager.selectedIsolate,
+        () {
+          unawaited(refresh());
+        },
+      );
+      unawaited(refresh());
+    }
+
+    _initializeSelection();
+
+    _initialized = true;
+  }
+
   /// The current profile being displayed.
   ValueListenable<AdaptedProfile?> get currentAllocationProfile =>
       _currentAllocationProfile;
   final _currentAllocationProfile = ValueNotifier<AdaptedProfile?>(null);
+  void _setProfile(AllocationProfile profile) {
+    _currentAllocationProfile.value = AdaptedProfile.fromAllocationProfile(
+      profile,
+      classFilter.value,
+      _rootPackage,
+    );
+    _initializeSelection();
+  }
 
   /// Specifies if the allocation profile should be refreshed when a GC event
   /// is received.
@@ -73,30 +115,6 @@ class ProfilePaneController extends DisposableController
   late final _rootPackage =
       serviceConnection.serviceManager.rootInfoNow().package;
 
-  bool _initialized = false;
-
-  void initialize() {
-    if (_initialized) {
-      return;
-    }
-
-    autoDisposeStreamSubscription(
-      serviceConnection.serviceManager.service!.onGCEvent.listen((event) {
-        if (refreshOnGc.value) {
-          unawaited(refresh());
-        }
-      }),
-    );
-    addAutoDisposeListener(
-      serviceConnection.serviceManager.isolateManager.selectedIsolate,
-      () {
-        unawaited(refresh());
-      },
-    );
-    unawaited(refresh());
-    _initialized = true;
-  }
-
   @visibleForTesting
   void clearCurrentProfile() => _currentAllocationProfile.value = null;
 
@@ -119,13 +137,8 @@ class ProfilePaneController extends DisposableController
         serviceConnection.serviceManager.isolateManager.selectedIsolate.value;
     if (isolate == null) return;
 
-    final allocationProfile = await service.getAllocationProfile(isolate.id!);
-    _currentAllocationProfile.value = AdaptedProfile.fromAllocationProfile(
-      allocationProfile,
-      classFilter.value,
-      _rootPackage,
-    );
-    _initializeSelection();
+    final profile = await service.getAllocationProfile(isolate.id!);
+    _setProfile(profile);
   }
 
   void _initializeSelection() {

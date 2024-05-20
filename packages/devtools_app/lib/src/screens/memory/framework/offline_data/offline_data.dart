@@ -2,17 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_shared/devtools_shared.dart';
+import 'package:meta/meta.dart';
+
 import '../../panes/chart/controller/chart_data.dart';
 import '../../panes/diff/controller/diff_pane_controller.dart';
 import '../../panes/profile/profile_pane_controller.dart';
 import '../../shared/heap/class_filter.dart';
 
-class _Json {
-  static const selectedTab = 'selectedTab';
-  static const classFilter = 'classFilter';
-  static const diffData = 'diffData';
-  static const profileData = 'profileData';
-  static const chartData = 'chartData';
+@visibleForTesting
+enum Json {
+  selectedTab,
+  classFilter,
+  diffData,
+  profileData,
+  chartData;
 }
 
 class OfflineMemoryData {
@@ -25,15 +29,32 @@ class OfflineMemoryData {
   });
 
   factory OfflineMemoryData.fromJson(Map<String, dynamic> json) {
-    Map<String, dynamic> item(String key) =>
-        json[key] as Map<String, dynamic>? ?? {};
     return OfflineMemoryData(
-      DiffPaneController.fromJson(item(_Json.diffData)),
-      ProfilePaneController.fromJson(item(_Json.profileData)),
-      ChartData.fromJson(item(_Json.chartData)),
-      ClassFilter.fromJson(item(_Json.classFilter)),
-      selectedTab: json[_Json.selectedTab] as int? ?? 0,
+      deserialize<DiffPaneController>(
+        json[Json.diffData.name],
+        DiffPaneController.fromJson,
+      ),
+      deserialize<ProfilePaneController>(
+        json[Json.profileData.name],
+        ProfilePaneController.fromJson,
+      ),
+      deserialize<ChartData>(json[Json.chartData.name], ChartData.fromJson),
+      deserialize<ClassFilter>(
+        json[Json.classFilter.name],
+        ClassFilter.fromJson,
+      ),
+      selectedTab: json[Json.selectedTab.name] as int? ?? 0,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      Json.selectedTab.name: selectedTab,
+      Json.diffData.name: diff,
+      Json.profileData.name: profile,
+      Json.chartData.name: chart,
+      Json.classFilter.name: filter,
+    };
   }
 
   final int selectedTab;
@@ -42,14 +63,4 @@ class OfflineMemoryData {
   final DiffPaneController diff;
   final ProfilePaneController profile;
   final ChartData chart;
-
-  Map<String, dynamic> toJson() {
-    return {
-      _Json.selectedTab: selectedTab,
-      _Json.diffData: diff.toJson(),
-      _Json.profileData: profile.toJson(),
-      _Json.chartData: chart.toJson(),
-      _Json.classFilter: profile.classFilter.value.toJson(),
-    };
-  }
 }

@@ -24,7 +24,7 @@ class MemoryTimeline {
 
   Map<String, dynamic> toJson() {
     return {
-      _jsonData: data.map((e) => e.toJson()).toList(),
+      _jsonData: data,
     };
   }
 

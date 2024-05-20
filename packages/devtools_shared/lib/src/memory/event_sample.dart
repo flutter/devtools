@@ -115,7 +115,7 @@ class ExtensionEvent {
 
 class ExtensionEvents {
   ExtensionEvents(List<ExtensionEvent> events) {
-    theEvents.addAll(events);
+    this.events.addAll(events);
   }
 
   factory ExtensionEvents.fromJson(Map<String, Object> json) {
@@ -129,24 +129,24 @@ class ExtensionEvents {
     return ExtensionEvents(events);
   }
 
-  final theEvents = <ExtensionEvent>[];
-
-  bool get isEmpty => theEvents.isEmpty;
-
-  bool get isNotEmpty => theEvents.isNotEmpty;
-
-  void clear() => theEvents.clear();
-
   Map<String, dynamic> toJson() {
     final eventsAsJson = <String, dynamic>{};
     var index = 0;
-    for (var event in theEvents) {
+    for (var event in events) {
       eventsAsJson['$index'] = event.toJson();
       index++;
     }
 
     return eventsAsJson;
   }
+
+  final events = <ExtensionEvent>[];
+
+  bool get isEmpty => events.isEmpty;
+
+  bool get isNotEmpty => events.isNotEmpty;
+
+  void clear() => events.clear();
 
   @override
   String toString() => '[ExtensionEvents = '

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -12,25 +14,24 @@ import 'retainers.dart';
 import 'simple_items.dart';
 
 /// Raw and calculated data of the heap snapshot.
-@immutable
 class HeapData {
-  HeapData._(
-    this.graph,
-    this.classes,
-    this.footprint, {
-    required this.created,
-    required this.retainedSizes,
-  });
+  HeapData(this.graph, {required this.created}) {
+    unawaited(_calculate());
+  }
 
   final HeapSnapshotGraph graph;
 
-  final ClassDataList<SingleClassData>? classes;
-
-  final MemoryFootprint? footprint;
-
-  final List<int>? retainedSizes;
-
   final DateTime created;
+
+  Future<void> get calculate => _calculated.future;
+  final _calculated = Completer<void>();
+  bool get isCalculated => _calculated.isCompleted;
+
+  ClassDataList<SingleClassData>? classes;
+
+  MemoryFootprint? footprint;
+
+  List<int>? retainedSizes;
 
   /// Object index with the given identityHashCode.
   ///
@@ -49,25 +50,14 @@ class HeapData {
   static final _uiReleaser = UiReleaser();
 
   /// Calculate the heap data from the given [graph].
-  static Future<HeapData> calculate(
-    HeapSnapshotGraph graph,
-    DateTime created, {
+  Future<void> _calculate({
     @visibleForTesting bool calculateRetainingPaths = true,
     @visibleForTesting bool calculateRetainedSizes = true,
     @visibleForTesting bool calculateClassData = true,
   }) async {
-    if (!calculateClassData) {
-      return HeapData._(
-        graph,
-        null,
-        null,
-        created: created,
-        retainedSizes: null,
-      );
-    }
+    if (!calculateClassData) return;
 
     List<int>? retainers;
-    List<int>? retainedSizes;
 
     if (calculateRetainingPaths || calculateRetainedSizes) {
       final weakClasses = _WeakClasses(graph);
@@ -85,13 +75,10 @@ class HeapData {
       if (calculateRetainedSizes) retainedSizes = result.retainedSizes;
     }
 
-    ClassDataList<SingleClassData>? classDataList;
-    MemoryFootprint? footprint;
-
     // Complexity of this part is O(n)*O(p) where
     // n is number of objects and p is length of retaining path.
     if (calculateClassData) {
-      final classes = <HeapClassName, SingleClassData>{};
+      final nameToClass = <HeapClassName, SingleClassData>{};
       int dartSize = 0;
       int reachableSize = graph.objects[heapRootIndex].shallowSize;
 
@@ -117,7 +104,7 @@ class HeapData {
 
         reachableSize += object.shallowSize;
 
-        classes
+        nameToClass
             .putIfAbsent(
               className,
               () => SingleClassData(className: className),
@@ -131,22 +118,16 @@ class HeapData {
       }
 
       footprint = MemoryFootprint(dart: dartSize, reachable: reachableSize);
-      classDataList = ClassDataList<SingleClassData>(classes.values.toList());
+      classes = ClassDataList<SingleClassData>(nameToClass.values.toList());
 
       // Check that retained size of root is the entire reachable heap.
       assert(
         retainedSizes == null ||
-            retainedSizes[heapRootIndex] == footprint.reachable,
+            retainedSizes![heapRootIndex] == footprint!.reachable,
       );
     }
 
-    return HeapData._(
-      graph,
-      classDataList,
-      footprint,
-      created: created,
-      retainedSizes: retainedSizes,
-    );
+    _calculated.complete();
   }
 }
 

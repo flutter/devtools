@@ -1,3 +1,7 @@
+# 10.0.0-dev.3
+* Added helper `deserialize`
+* Extended serialization for `HeapSample` and `ExtensionEvents`
+
 # 10.0.0-dev.2
 * Support detecting package roots for nested Dart projects in the
 `packageRootFromFileUriString` utility method.
@@ -70,7 +74,7 @@ VM service connection is connected or disconnected from the client.
 duplicate of `ServerApi.getCompleted`.
 * **Breaking change:** add required parameter `analytics` to `ServerApi.handle`, which accepts
 an instance of `Analytics` from `package:unified_analytics`.
-* Add the ability to send debug logs in DevTools server request responses. 
+* Add the ability to send debug logs in DevTools server request responses.
 * Add an optional positional parameter `logs` to the `ServerApi.serverError` method.
 * Include debug logs with the `ExtensionsApi.apiServeAvailableExtensions` API response.
 * Devtools server API `apiGetConsentMessage` added to fetch the consent message from

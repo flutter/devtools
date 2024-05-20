@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+import 'dart:typed_data';
+
 import 'package:file_selector/file_selector.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -11,7 +14,7 @@ import 'simple_items.dart';
 
 abstract class HeapGraphLoader {
   const HeapGraphLoader();
-  Future<(HeapSnapshotGraph, DateTime)> load();
+  FutureOr<(HeapSnapshotGraph, DateTime)> load();
 }
 
 /// Loads a heap snapshot for the connected application in selected isolate.
@@ -42,5 +45,19 @@ class HeapGraphLoaderFile implements HeapGraphLoader {
       await HeapSnapshotGraphSerialization.load(file),
       await file.lastModified(),
     );
+  }
+}
+
+/// Loads a heap snapshot from `List<ByteData>` created with HeapSnapshotGraph.toChunks.
+class HeapGraphLoaderFromChunks implements HeapGraphLoader {
+  HeapGraphLoaderFromChunks({required this.chunks, required this.created});
+
+  final List<ByteData> chunks;
+
+  final DateTime created;
+
+  @override
+  (HeapSnapshotGraph, DateTime) load() {
+    return (HeapSnapshotGraph.fromChunks(chunks), created);
   }
 }
