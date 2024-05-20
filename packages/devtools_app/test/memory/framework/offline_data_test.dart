@@ -44,15 +44,15 @@ void main() {
       expect(fromJson.filter, item.filter);
       expect(fromJson.diff, item.diff);
       expect(fromJson.profile, item.profile);
-      expect(fromJson.chart!.isDeviceAndroid, item.chart!.isDeviceAndroid);
-      expect(fromJson.chart!.timeline, item.chart!.timeline);
+      expect(fromJson.chart.isDeviceAndroid, item.chart.isDeviceAndroid);
+      expect(fromJson.chart.timeline, item.chart.timeline);
       expect(
-        fromJson.chart!.displayInterval.name,
-        item.chart!.displayInterval.name,
+        fromJson.chart.displayInterval.name,
+        item.chart.displayInterval.name,
       );
       expect(
-        fromJson.chart!.isLegendVisible.value,
-        item.chart!.isLegendVisible.value,
+        fromJson.chart.isLegendVisible.value,
+        item.chart.isLegendVisible.value,
       );
     },
   );
