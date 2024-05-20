@@ -20,7 +20,7 @@ void main() {
     );
 
     final json = sample.toJson();
-    expect(json.keys.toSet(), equals(Json.values.map((e) => e.name).toSet()));
+    expect(json.keys.toSet(), equals(Json.values.map((e) => e.key).toSet()));
     final fromJson = HeapSample.fromJson(json);
 
     expect(sample.timestamp, equals(fromJson.timestamp));
