@@ -34,7 +34,10 @@ void main() {
       );
 
       final json = item.toJson();
-      expect(json.keys.sorted(), equals(offline_data.Json.all.sorted()));
+      expect(
+        json.keys.toSet(),
+        equals(offline_data.Json.values.map((e) => e.name).toSet()),
+      );
       final fromJson = OfflineMemoryData.fromJson(json);
 
       expect(fromJson.selectedTab, item.selectedTab);

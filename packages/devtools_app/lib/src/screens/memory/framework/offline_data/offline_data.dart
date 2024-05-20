@@ -11,20 +11,12 @@ import '../../panes/profile/profile_pane_controller.dart';
 import '../../shared/heap/class_filter.dart';
 
 @visibleForTesting
-class Json {
-  static const selectedTab = 'selectedTab';
-  static const classFilter = 'classFilter';
-  static const diffData = 'diffData';
-  static const profileData = 'profileData';
-  static const chartData = 'chartData';
-
-  static const all = {
-    selectedTab,
-    classFilter,
-    diffData,
-    profileData,
-    chartData,
-  };
+enum Json {
+  selectedTab,
+  classFilter,
+  diffData,
+  profileData,
+  chartData;
 }
 
 class OfflineMemoryData {
@@ -54,11 +46,11 @@ class OfflineMemoryData {
 
   Map<String, dynamic> toJson() {
     return {
-      Json.selectedTab: selectedTab,
-      Json.diffData: diff,
-      Json.profileData: profile,
-      Json.chartData: chart,
-      Json.classFilter: filter,
+      Json.selectedTab.name: selectedTab,
+      Json.diffData.name: diff,
+      Json.profileData.name: profile,
+      Json.chartData.name: chart,
+      Json.classFilter.name: filter,
     };
   }
 
