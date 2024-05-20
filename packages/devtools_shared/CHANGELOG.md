@@ -1,14 +1,14 @@
+# 10.0.0-dev.3
+* Added helper `deserialize`
+* Extended serialization for `HeapSample` and `ExtensionEvents`
+
 # 10.0.0-dev.2
 * Support detecting package roots for nested Dart projects in the
 `packageRootFromFileUriString` utility method.
-* Added helper `deserialize`
-* Extended serialization for `HeapSample` and `ExtensionEvents`
 
 # 10.0.0-dev.1
 * Export `DTDConnectionInfo` from the `devtools_shared.dart` library instead
 of the `devtools_server.dart` library.
-* Support detecting package roots for nested Dart projects in the
-`packageRootFromFileUriString` utility method.
 
 # 10.0.0-dev.0
 * **Breaking change:** rename `DevToolsExtensionConfig.path` to
