@@ -42,14 +42,14 @@ class ChartData {
   factory ChartData.fromJson(Map<String, dynamic> json) {
     final result = ChartData(
       mode: ControllerCreationMode.offlineData,
-      isDeviceAndroid: json[Json.isDeviceAndroid] as bool? ?? false,
+      isDeviceAndroid: json[Json.isDeviceAndroid.name] as bool? ?? false,
       timeline: deserialize<MemoryTimeline>(
-        json[Json.timeline],
+        json[Json.timeline.name],
         MemoryTimeline.fromJson,
       ),
-      interval:
-          ChartInterval.byName(json[Json.interval]) ?? ChartInterval.theDefault,
-      isLegendVisible: json[Json.isLegendVisible] as bool?,
+      interval: ChartInterval.byName(json[Json.interval.name]) ??
+          ChartInterval.theDefault,
+      isLegendVisible: json[Json.isLegendVisible.name] as bool?,
     );
     return result;
   }

@@ -38,17 +38,17 @@ class SnapshotDataItem extends SnapshotItem implements RenamableItem {
 
   factory SnapshotDataItem.fromJson(Map<String, dynamic> json) {
     final result = SnapshotDataItem(
-      displayNumber: json[Json.displayNumber] as int?,
-      defaultName: json[Json.defaultName] as String? ?? 'no name',
-      nameOverride: json[Json.nameOverride] as String?,
+      displayNumber: json[Json.displayNumber.name] as int?,
+      defaultName: json[Json.defaultName.name] as String? ?? 'no name',
+      nameOverride: json[Json.nameOverride.name] as String?,
     );
 
-    final chunks = json[Json.chunks] as List<ByteData>?;
+    final chunks = json[Json.chunks.name] as List<ByteData>?;
     if (chunks == null) return result;
 
     final loader = HeapGraphLoaderFromChunks(
       chunks: chunks,
-      created: json[Json.created] as DateTime? ?? DateTime.now(),
+      created: json[Json.created.name] as DateTime? ?? DateTime.now(),
     );
 
     // Start the loading process, that will result in progress indicator in UI.
