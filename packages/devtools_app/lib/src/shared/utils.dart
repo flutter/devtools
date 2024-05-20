@@ -22,6 +22,7 @@ import '../../devtools.dart' as devtools;
 import 'common_widgets.dart';
 import 'connected_app.dart';
 import 'globals.dart';
+import 'primitives/simple_items.dart';
 
 final _log = Logger('lib/src/shared/utils');
 
@@ -35,7 +36,7 @@ void debugLogger(String message) {
   );
 }
 
-bool isEmbedded() => ideTheme.embed;
+bool isEmbedded() => ideTheme.embedded;
 
 extension VmExtension on VM {
   List<IsolateRef> isolatesForDevToolsMode() {
@@ -273,4 +274,26 @@ class DebounceTimer {
   void cancel() {
     _timer.cancel();
   }
+
+  bool get isCancelled => !_timer.isActive;
+
+  void dispose() {
+    cancel();
+  }
+}
+
+/// Current mode of DevTools.
+ControllerCreationMode get devToolsMode {
+  return offlineDataController.showingOfflineData.value
+      ? ControllerCreationMode.offlineData
+      : serviceConnection.serviceManager.hasConnection
+          ? ControllerCreationMode.connected
+          : ControllerCreationMode.disconnected;
+}
+
+Future<void> launchUrlWithErrorHandling(String url) async {
+  await launchUrl(
+    url,
+    onError: () => notificationService.push('Unable to open $url.'),
+  );
 }

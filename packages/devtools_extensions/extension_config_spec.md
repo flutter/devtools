@@ -14,11 +14,25 @@ title bar.
 [material/icons.dart](https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/material/icons.dart).
 This icon will be used for the extension’s tab in the top-level DevTools tab bar.
 
-## Example
+## Optional fields
+- `requiresConnection`: whether this DevTools extension requires a connected Dart or
+Flutter application to run. If this is not specified, this value will default to `true`.
 
+## Examples
+
+An extension for `foo_package` that requires a connected app to use:
 ```yaml
 name: foo_package
 issueTracker: <link_to_your_issue_tracker.com>
 version: 0.0.1
 materialIconCodePoint: '0xe0b1'
+```
+
+An extension for `foo_package` that does not require a connected app to use:
+```yaml
+name: foo_package
+issueTracker: <link_to_your_issue_tracker.com>
+version: 0.0.1
+materialIconCodePoint: '0xe0b1'
+requiresConnection: false
 ```

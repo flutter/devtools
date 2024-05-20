@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -154,6 +155,8 @@ enum ScreenMetaData {
 /// * connected
 /// * not-connected
 ///
+/// See [devToolsMode].
+///
 /// A screen may support any combination of modes.
 ///
 /// For offline-data and connected modes:
@@ -164,6 +167,7 @@ enum ScreenMetaData {
 ///
 /// For not-connected mode:
 /// * Override [Screen.buildDisconnectedScreenBody] to build content.
+/// * Set [ScreenMetaData.requiresConnection] to false.
 @immutable
 abstract class Screen {
   const Screen(
@@ -243,7 +247,7 @@ abstract class Screen {
   final bool showFloatingDebuggerControls;
 
   /// Whether to show the console for this screen.
-  bool showConsole(bool embed) => false;
+  bool showConsole(EmbedMode embedMode) => false;
 
   /// Which keyboard shortcuts should be enabled for this screen.
   ShortcutsConfiguration buildKeyboardShortcuts(BuildContext context) =>

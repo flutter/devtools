@@ -23,7 +23,7 @@ class FlutterFrame {
     required this.vsyncOverheadTime,
   });
 
-  factory FlutterFrame.parse(Map<String, dynamic> json) {
+  factory FlutterFrame.fromJson(Map<String, dynamic> json) {
     final timeStart = Duration(microseconds: json[startTimeKey]!);
     final timeEnd = timeStart + Duration(microseconds: json[elapsedKey]!);
     final frameTime = TimeRange()
@@ -175,7 +175,7 @@ class FlutterFrame {
   }
 
   FlutterFrame shallowCopy() {
-    return FlutterFrame.parse(json);
+    return FlutterFrame.fromJson(json);
   }
 }
 

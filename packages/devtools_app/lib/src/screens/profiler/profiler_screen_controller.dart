@@ -80,10 +80,25 @@ class ProfilerScreenController extends DisposableController
     } else {
       await maybeLoadOfflineData(
         ProfilerScreen.id,
-        createData: (json) => CpuProfileData.parse(json),
+        createData: (json) => CpuProfileData.fromJson(json),
         shouldLoad: (data) => !data.isEmpty,
+        loadData: _loadOfflineData,
       );
     }
+  }
+
+  Future<void> _loadOfflineData(CpuProfileData data) async {
+    await cpuProfilerController.transformer.processData(
+      data,
+      processId: 'offline data processing',
+    );
+    cpuProfilerController.loadProcessedData(
+      CpuProfilePair(
+        functionProfile: data,
+        codeProfile: null,
+      ),
+      storeAsUserTagNone: true,
+    );
   }
 
   final cpuProfilerController = CpuProfilerController();
@@ -139,21 +154,6 @@ class ProfilerScreenController extends DisposableController
         screenId: ProfilerScreen.id,
         data: cpuProfileData!.toJson,
       );
-
-  @override
-  FutureOr<void> processOfflineData(CpuProfileData offlineData) async {
-    await cpuProfilerController.transformer.processData(
-      offlineData,
-      processId: 'offline data processing',
-    );
-    cpuProfilerController.loadProcessedData(
-      CpuProfilePair(
-        functionProfile: offlineData,
-        codeProfile: null,
-      ),
-      storeAsUserTagNone: true,
-    );
-  }
 
   Future<void> clear() async {
     await cpuProfilerController.clear();

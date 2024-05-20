@@ -13,7 +13,6 @@ import 'dart:developer';
 
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/service_extensions.dart';
-import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -204,10 +203,6 @@ class InspectorService extends InspectorServiceBase {
   final ValueNotifier<List<String>> _rootDirectories = ValueNotifier([]);
 
   @visibleForTesting
-  Set<String> get rootPackages => _rootPackages;
-  late Set<String> _rootPackages;
-
-  @visibleForTesting
   List<String> get rootPackagePrefixes => _rootPackagePrefixes;
   late List<String> _rootPackagePrefixes;
 
@@ -247,7 +242,7 @@ class InspectorService extends InspectorServiceBase {
 
   // When DevTools is embedded, default hover eval mode to off.
   @override
-  bool get hoverEvalModeEnabledByDefault => !ideTheme.embed;
+  bool get hoverEvalModeEnabledByDefault => !isEmbedded();
 
   void onExtensionVmServiceReceived(Event e) {
     if ('Flutter.Frame' == e.extensionKind) {
@@ -326,9 +321,8 @@ class InspectorService extends InspectorServiceBase {
     return false;
   }
 
-  Future<void> _onRootDirectoriesChanged(List<String> directories) async {
+  void _onRootDirectoriesChanged(List<String> directories) {
     _rootDirectories.value = directories;
-    _rootPackages = {};
     _rootPackagePrefixes = [];
     for (var directory in directories) {
       // TODO(jacobr): add an API to DDS to provide the actual mapping to and
@@ -356,87 +350,41 @@ class InspectorService extends InspectorServiceBase {
           packageParts = packageParts.sublist(2);
         }
         final google3PackageName = packageParts.join('.');
-        _rootPackages.add(google3PackageName);
         _rootPackagePrefixes.add('$google3PackageName.');
-      } else {
-        _rootPackages.add(path.last);
       }
     }
-
-    await _updateLocalClasses();
-  }
-
-  Future<void> _updateLocalClasses() {
-    return Future.value();
-    // TODO(https://github.com/flutter/devtools/issues/4393)
-    // localClasses.clear();
-    // if (_rootDirectories.value.isNotEmpty) {
-    //   final isolate = inspectorLibrary.isolate!;
-    //   for (var libraryRef in isolate.libraries!) {
-    //     if (isLocalUri(libraryRef.uri!)) {
-    //       try {
-    //         final Library library = await inspectorLibrary.service
-    //             .getObject(isolate.id!, libraryRef.id!) as Library;
-    //         for (var classRef in library.classes!) {
-    //           localClasses[classRef.name!] = classRef;
-    //         }
-    //       } catch (e) {
-    //         // Workaround until https://github.com/flutter/devtools/issues/3110
-    //         // is fixed.
-    //         assert(serviceManager.manager.connectedApp!.isDartWebAppNow!);
-    //       }
-    //     }
-    //   }
-    // }
-  }
-
-  @visibleForTesting
-  bool isLocalUri(String rawUri) {
-    final uri = Uri.parse(rawUri);
-    if (uri.scheme != 'file' && uri.scheme != 'dart') {
-      // package scheme or some other dart specific scheme.
-      final packageName = uri.pathSegments.first;
-      if (_rootPackages.contains(packageName)) return true;
-
-      // This attempts to gracefully handle the bazel package case.
-      return _rootPackagePrefixes
-          .any((prefix) => packageName.startsWith(prefix));
-    }
-    for (var root in _rootDirectories.value) {
-      if (root.endsWith(rawUri)) {
-        return true;
-      }
-    }
-    return false;
   }
 
   Future<void> addPubRootDirectories(List<String> rootDirectories) async {
     await _addPubRootDirectories(rootDirectories);
-    await _onRootDirectoriesChanged(rootDirectories);
+    _onRootDirectoriesChanged(rootDirectories);
   }
 
   Future<void> removePubRootDirectories(List<String> rootDirectories) async {
     await _removePubRootDirectories(rootDirectories);
-    await _onRootDirectoriesChanged(rootDirectories);
+    _onRootDirectoriesChanged(rootDirectories);
   }
 
-  Future<void> _addPubRootDirectories(List<String> pubDirectories) {
+  Future<void> _addPubRootDirectories(List<String> pubDirectories) async {
+    await serviceConnection.serviceManager.waitUntilNotPaused();
     assert(useDaemonApi);
-    return invokeServiceMethodDaemonNoGroupArgs(
+    await invokeServiceMethodDaemonNoGroupArgs(
       WidgetInspectorServiceExtensions.addPubRootDirectories.name,
       pubDirectories,
     );
   }
 
-  Future<void> _removePubRootDirectories(List<String> pubDirectories) {
+  Future<void> _removePubRootDirectories(List<String> pubDirectories) async {
+    await serviceConnection.serviceManager.waitUntilNotPaused();
     assert(useDaemonApi);
-    return invokeServiceMethodDaemonNoGroupArgs(
+    await invokeServiceMethodDaemonNoGroupArgs(
       WidgetInspectorServiceExtensions.removePubRootDirectories.name,
       pubDirectories,
     );
   }
 
   Future<List<String>?> getPubRootDirectories() async {
+    await serviceConnection.serviceManager.waitUntilNotPaused();
     assert(useDaemonApi);
     final response = await invokeServiceMethodDaemonNoGroupArgs(
       WidgetInspectorServiceExtensions.getPubRootDirectories.name,
@@ -453,6 +401,7 @@ class InspectorService extends InspectorServiceBase {
   ///
   /// See [LocationMap] which provides support to parse this JSON.
   Future<Map<String, dynamic>> widgetLocationIdMap() async {
+    await serviceConnection.serviceManager.waitUntilNotPaused();
     assert(useDaemonApi);
     final response = await invokeServiceMethodDaemonNoGroupArgs(
       'widgetLocationIdMap',
@@ -990,9 +939,9 @@ abstract class InspectorObjectGroupBase
 /// special logic to handle orphaned requests.
 class ObjectGroup extends InspectorObjectGroupBase {
   ObjectGroup(
-    String debugName,
+    super.debugName,
     this.inspectorService,
-  ) : super(debugName);
+  );
 
   @override
   final InspectorService inspectorService;

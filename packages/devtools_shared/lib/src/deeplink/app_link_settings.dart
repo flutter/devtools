@@ -60,8 +60,8 @@ class AndroidDeeplink {
 
   factory AndroidDeeplink._fromJsonObject(Map<String, dynamic> json) {
     return AndroidDeeplink._(
-      json[_kSchemeKey] as String,
-      json[_kHostKey] as String,
+      json[_kSchemeKey] as String?,
+      json[_kHostKey] as String?,
       json[_kPathKey] as String,
       IntentFilterChecks._fromJsonObject(
         json[_kIntentFilterChecksKey] as Map<String, dynamic>,
@@ -75,10 +75,10 @@ class AndroidDeeplink {
   static const _kIntentFilterChecksKey = 'intentFilterCheck';
 
   /// The scheme section of the deeplink.
-  final String scheme;
+  final String? scheme;
 
   /// The host section of the deeplink.
-  final String host;
+  final String? host;
 
   /// The path pattern section of the deeplink.
   final String path;

@@ -1,15 +1,22 @@
-## 0.1.2-wip
+## 0.2.0-dev.0
 * Add `tooltipWaitExtraLong` to `utils.dart`.
+* Bump `devtools_shared` dependency to `^10.0.0`.
+* Bump `vm_service` dependency to `^14.2.1`.
+* Add a `DTDManager.dispose` method.
+* Fix a race condition during service manager disconnect.
+* Add `IdeThemeQueryParams` extension type for parsing query params.
+* Add `EmbedMode` to enumerate the possible DevTools embedded states.
+* Add `IsolateManager.waitForMainIsolateState` method.
+* Add `LinkTextSpan` and `Link` classes.
+* Add `launchUrl` utility method that has platform agnostic handling for
+launching a URL in the browser, and includes special handling for launching
+URLs when in an embedded VS Code view.
 
 ## 0.1.1
-* TODO(kenz): publish with bumped min versions to next Dart and Flutter beta
-releases.
-
-## 0.1.1-dev.0
 * Update `package:dtd` to `^2.1.0`
 * Add `DTDManager.projectRoots` method.
-* Bump the minimum Dart and Flutter SDK versions to `3.4.0-275.0.dev` and
-`3.21.0-15.0.pre` respectively.
+* Bump the minimum Dart and Flutter SDK versions to `3.4.0-282.1.beta` and
+`3.22.0-0.1.pre` respectively.
 * Bump `devtools_shared` to ^8.1.1-dev.0
 
 ## 0.1.0

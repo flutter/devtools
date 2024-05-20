@@ -902,12 +902,10 @@ typedef DevToolsJsonFileHandler = void Function(DevToolsJsonFile file);
 class DevToolsJsonFile extends DevToolsFile<Object> {
   const DevToolsJsonFile({
     required String name,
-    required DateTime lastModifiedTime,
-    required Object data,
+    required super.lastModifiedTime,
+    required super.data,
   }) : super(
           path: name,
-          lastModifiedTime: lastModifiedTime,
-          data: data,
         );
 }
 
@@ -1090,22 +1088,6 @@ extension SetExtension<T> on Set<T> {
 
 extension UiListExtension<T> on List<T> {
   int get numSpacers => max(0, length - 1);
-}
-
-String simplifyDevToolsUrl(String url) {
-  // DevTools urls can have the form:
-  // http://localhost:123/?key=value
-  // http://localhost:123/#/?key=value
-  // http://localhost:123/#/page-id?key=value
-  // Since we just want the query params, we will modify the url to have an
-  // easy-to-parse form.
-  return url.replaceFirst(RegExp(r'#\/([\w\-]*)[?]'), '?');
-}
-
-Map<String, String> devToolsQueryParams(String url) {
-  final modifiedUrl = simplifyDevToolsUrl(url);
-  final uri = Uri.parse(modifiedUrl);
-  return uri.queryParameters;
 }
 
 double safePositiveDouble(double value) {

@@ -4,7 +4,6 @@
 
 import 'package:collection/collection.dart';
 import 'package:devtools_app/src/shared/primitives/utils.dart';
-import 'package:devtools_app/src/shared/screen.dart';
 import 'package:devtools_app/src/shared/utils.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -593,34 +592,6 @@ void main() {
       // No leading class names.
       name = '_CustomZone.run';
       expect(getSimpleStackFrameName(name), equals(name));
-    });
-
-    test('devToolsQueryParams', () {
-      expect(
-        devToolsQueryParams('http://localhost:123/?key=value.json&key2=123'),
-        equals({
-          'key': 'value.json',
-          'key2': '123',
-        }),
-      );
-      expect(
-        devToolsQueryParams('http://localhost:123/?key=value.json&key2=123'),
-        equals({
-          'key': 'value.json',
-          'key2': '123',
-        }),
-      );
-      for (final meta in ScreenMetaData.values) {
-        expect(
-          devToolsQueryParams(
-            'http://localhost:9101/${meta.id}?key=value.json&key2=123',
-          ),
-          equals({
-            'key': 'value.json',
-            'key2': '123',
-          }),
-        );
-      }
     });
 
     group('safeDivide', () {
@@ -1468,7 +1439,7 @@ class TestProvidedController {
 }
 
 class TestStatefulWidget extends StatefulWidget {
-  const TestStatefulWidget({Key? key}) : super(key: key);
+  const TestStatefulWidget({super.key});
 
   @override
   State<TestStatefulWidget> createState() => _TestStatefulWidgetState();

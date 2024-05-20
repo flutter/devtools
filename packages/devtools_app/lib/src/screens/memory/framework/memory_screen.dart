@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../shared/analytics/analytics.dart' as ga;
 import '../../../shared/primitives/listenable.dart';
 import '../../../shared/screen.dart';
-import 'connected/connected_screen_body.dart';
+import 'screen_body.dart';
 
 class MemoryScreen extends Screen {
   MemoryScreen() : super.fromMetaData(ScreenMetaData.memory);
@@ -28,7 +29,7 @@ class MemoryScreen extends Screen {
   // TODO(polina-c): when embedded and VSCode console features are implemented,
   // should be in native console in VSCode
   @override
-  bool showConsole(bool embed) => true;
+  bool showConsole(EmbedMode embedMode) => true;
 }
 
 class MemoryBody extends StatefulWidget {

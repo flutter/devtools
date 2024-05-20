@@ -16,22 +16,16 @@ class DevToolsTab extends Tab {
   /// The only difference is this tab makes more of an effort to reflect
   /// changes in font and icon sizes.
   DevToolsTab._({
-    required Key key,
-    String? text,
-    Icon? icon,
-    EdgeInsets iconMargin = const EdgeInsets.only(bottom: 10.0),
+    required Key super.key,
+    super.text,
+    Icon? super.icon,
     required this.gaId,
     this.trailing,
-    Widget? child,
+    super.child,
   })  : assert(text != null || child != null || icon != null),
         assert(text == null || child == null),
         super(
-          key: key,
-          text: text,
-          icon: icon,
-          iconMargin: iconMargin,
           height: calculateHeight(icon, text, child),
-          child: child,
         );
 
   factory DevToolsTab.create({
@@ -83,18 +77,17 @@ class DevToolsTab extends Tab {
 /// send spurious analytics events.
 class AnalyticsTabbedView extends StatefulWidget {
   AnalyticsTabbedView({
-    Key? key,
+    super.key,
     required this.tabs,
     required this.gaScreen,
     this.sendAnalytics = true,
     this.onTabChanged,
     this.initialSelectedIndex,
     this.analyticsSessionIdentifier,
-  })  : trailingWidgets = List.generate(
+  }) : trailingWidgets = List.generate(
           tabs.length,
           (index) => tabs[index].tab.trailing ?? const SizedBox(),
-        ),
-        super(key: key);
+        );
 
   final List<({DevToolsTab tab, Widget tabView})> tabs;
 

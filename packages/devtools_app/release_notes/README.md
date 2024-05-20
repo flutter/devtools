@@ -46,22 +46,19 @@ viewer can be used efficiently.
 Release notes for DevTools are hosted on the Flutter website.
 They are indexed at https://docs.flutter.dev/tools/devtools/release-notes.
 
-To add release notes for the latest release, create a PR with the appropriate
-changes for your release:
+### Prerequisite
 
-  1. Copy the markdown from [NEXT_RELEASE_NOTES.md](NEXT_RELEASE_NOTES.md) over
-  to the Flutter website. This file contains the running release notes for
-  the current DevTools version.
-      - See this [PR](https://github.com/flutter/website/pull/10113) for
-        an example of how to add these notes to the Flutter website.
-  2. Copy any images from the `images/` directory over to the Flutter website.
-      - Make sure to copy all images over to the proper website directory:
-        - `.../tools/devtools/release-notes/images-<VERSION>/`
-      - Make sure to update all image links in the markdown with the `site_url` tag:
-        - `/tools/devtools/release-notes/images-<VERSION>/<IMAGE_FILE>`
-  3. Once you are satisfied with the release notes,
-  create a new branch directly on the `flutter/website` repo and open a PR,
-  and then proceed to the testing steps below.
+Before continuing, ensure you have your local environment set up for
+[contributing](https://github.com/flutter/website) to the `flutter/website` repo.
+
+### Creating the release notes PR
+
+Draft release notes on a local `flutter/website` branch using the following command:
+```console
+devtools_tool release-notes -w /Users/me/absolute/path/to/flutter/website
+```
+
+Clean up the drafted notes on your local `flutter/website` branch and open a PR.
 
 ### Testing the release notes in DevTools
 

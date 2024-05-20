@@ -114,7 +114,7 @@ class BannerMessagesController {
 }
 
 class BannerMessages extends StatelessWidget {
-  const BannerMessages({Key? key, required this.screen}) : super(key: key);
+  const BannerMessages({super.key, required this.screen});
 
   final Screen screen;
 
@@ -234,13 +234,10 @@ class BannerMessage extends StatelessWidget {
 
 class _BannerError extends BannerMessage {
   const _BannerError({
-    required Key key,
-    required List<TextSpan> textSpans,
-    required String screenId,
+    required Key super.key,
+    required List<TextSpan> super.textSpans,
+    required super.screenId,
   }) : super(
-          key: key,
-          textSpans: textSpans,
-          screenId: screenId,
           messageType: BannerMessageType.error,
         );
 }
@@ -339,8 +336,8 @@ class ShaderJankMessage {
               '$jankDurationText spent in shader compilation. To pre-compile '
               'shaders, see the instructions at ',
         ),
-        LinkTextSpan(
-          link: Link(
+        GaLinkTextSpan(
+          link: GaLink(
             display: preCompileShadersDocsUrl,
             url: preCompileShadersDocsUrl,
             gaScreenName: screenId,
@@ -356,8 +353,8 @@ class ShaderJankMessage {
             text: '\n\nNote: this is a legacy solution with many pitfalls. '
                 'Try ',
           ),
-          LinkTextSpan(
-            link: Link(
+          GaLinkTextSpan(
+            link: GaLink(
               display: 'Impeller',
               url: impellerDocsUrl,
               gaScreenName: screenId,
@@ -394,8 +391,8 @@ class HighCpuSamplingRateMessage {
           text: '''
 You are opting in to a high CPU sampling rate. This may affect the performance of your application. Please read our ''',
         ),
-        LinkTextSpan(
-          link: Link(
+        GaLinkTextSpan(
+          link: GaLink(
             display: 'documentation',
             url: _cpuSamplingRateDocsUrl,
             gaScreenName: screenId,
@@ -530,13 +527,13 @@ extension BannerMessageThemeExtension on ThemeData {
       );
 }
 
-LinkTextSpan _runInProfileModeTextSpan(
+GaLinkTextSpan _runInProfileModeTextSpan(
   BuildContext context, {
   required String screenId,
   required TextStyle style,
 }) {
-  return LinkTextSpan(
-    link: Link(
+  return GaLinkTextSpan(
+    link: GaLink(
       display: 'profile mode',
       url: _runInProfileModeDocsUrl,
       gaScreenName: screenId,

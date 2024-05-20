@@ -191,7 +191,10 @@ class DevToolsServerConnection {
         'currentPage',
         {
           'id': page.id,
-          'embedded': page.embedded,
+          // TODO(kenz): see if we need to change the client code on the
+          // DevTools server to be aware of the type of embedded mode (many vs.
+          // one).
+          'embedded': page.embedMode.embedded,
         },
       ),
     );

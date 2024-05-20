@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +20,7 @@ import '../../shared/console/eval/inspector_tree.dart';
 import '../../shared/editable_list.dart';
 import '../../shared/error_badge_manager.dart';
 import '../../shared/globals.dart';
+import '../../shared/preferences/preferences.dart';
 import '../../shared/primitives/blocking_action_mixin.dart';
 import '../../shared/primitives/simple_items.dart';
 import '../../shared/screen.dart';
@@ -36,7 +38,7 @@ class InspectorScreen extends Screen {
   // There is not enough room to safely show the console in the embed view of
   // the DevTools and IDEs have their own consoles.
   @override
-  bool showConsole(bool embed) => !embed;
+  bool showConsole(EmbedMode embedMode) => !embedMode.embedded;
 
   @override
   String get docPageId => screenId;
@@ -333,7 +335,7 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final dialogHeight = scaleByFontFactor(400.0);
+    final dialogHeight = scaleByFontFactor(500.0);
     return DevToolsDialog(
       title: const DialogTitleText('Flutter Inspector Settings'),
       content: SizedBox(
@@ -355,6 +357,8 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
                   'Hovering over any widget displays its properties and values.',
               gaItem: gac.inspectorHoverEvalMode,
             ),
+            const SizedBox(height: denseSpacing),
+            const InspectorDefaultDetailsViewOption(),
             const SizedBox(height: denseSpacing),
             ...dialogSubHeader(theme, 'Package Directories'),
             Row(
@@ -394,13 +398,13 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
 
 class InspectorSummaryTreeControls extends StatelessWidget {
   const InspectorSummaryTreeControls({
-    Key? key,
+    super.key,
     required this.constraints,
     required this.isSearchVisible,
     required this.onRefreshInspectorPressed,
     required this.onSearchVisibleToggle,
     required this.searchFieldBuilder,
-  }) : super(key: key);
+  });
 
   static const _searchBreakpoint = 375.0;
 
@@ -480,11 +484,11 @@ class InspectorSummaryTreeControls extends StatelessWidget {
 
 class ErrorNavigator extends StatelessWidget {
   const ErrorNavigator({
-    Key? key,
+    super.key,
     required this.errors,
     required this.errorIndex,
     required this.onSelectError,
-  }) : super(key: key);
+  });
 
   final LinkedHashMap<String, InspectableWidgetError> errors;
 
@@ -567,6 +571,63 @@ class _ErrorNavigatorButton extends StatelessWidget {
         onPressed: onPressed,
       ),
     );
+  }
+}
+
+class InspectorDefaultDetailsViewOption extends StatelessWidget {
+  const InspectorDefaultDetailsViewOption({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: preferences.inspector.defaultDetailsView,
+      builder: (context, selection, _) {
+        final theme = Theme.of(context);
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Select the default tab for the inspector.',
+              style: theme.subtleTextStyle,
+            ),
+            const SizedBox(height: denseSpacing),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Radio<InspectorDetailsViewType>(
+                  value: InspectorDetailsViewType.layoutExplorer,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  groupValue: selection,
+                  onChanged: _onChanged,
+                ),
+                Text(InspectorDetailsViewType.layoutExplorer.key),
+                const SizedBox(width: denseSpacing),
+                Radio<InspectorDetailsViewType>(
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  value: InspectorDetailsViewType.widgetDetailsTree,
+                  groupValue: selection,
+                  onChanged: _onChanged,
+                ),
+                Text(InspectorDetailsViewType.widgetDetailsTree.key),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _onChanged(InspectorDetailsViewType? value) {
+    if (value != null) {
+      preferences.inspector.setDefaultInspectorDetailsView(value);
+      final item = value.name == InspectorDetailsViewType.layoutExplorer.name
+          ? gac.defaultDetailsViewToLayoutExplorer
+          : gac.defaultDetailsViewToWidgetDetails;
+      ga.select(
+        gac.inspector,
+        item,
+      );
+    }
   }
 }
 

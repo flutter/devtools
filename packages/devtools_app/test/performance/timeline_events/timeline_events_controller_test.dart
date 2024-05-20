@@ -61,7 +61,7 @@ void main() {
       offlineDataController.startShowingOfflineData(
         offlineApp: serviceConnection.serviceManager.connectedApp!,
       );
-      final offlineData = OfflinePerformanceData.parse(rawPerformanceData);
+      final offlineData = OfflinePerformanceData.fromJson(rawPerformanceData);
       when(performanceController.offlinePerformanceData)
           .thenReturn(offlineData);
       await eventsController.setOfflineData(offlineData);

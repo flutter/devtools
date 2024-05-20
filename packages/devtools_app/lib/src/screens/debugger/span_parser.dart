@@ -43,7 +43,7 @@ class Grammar {
     return Grammar._(
       name: json['name'] as String,
       scopeName: json['scopeName'] as String,
-      topLevelMatcher: GrammarMatcher.parse(json),
+      topLevelMatcher: GrammarMatcher.fromJson(json),
       repository: Repository.build(json),
     );
   }
@@ -168,7 +168,7 @@ class Repository {
       return;
     }
     for (final subRepo in repositoryJson.keys) {
-      matchers[subRepo] = GrammarMatcher.parse(repositoryJson[subRepo]!);
+      matchers[subRepo] = GrammarMatcher.fromJson(repositoryJson[subRepo]!);
     }
   }
 
@@ -183,7 +183,7 @@ class Repository {
 }
 
 abstract class GrammarMatcher {
-  factory GrammarMatcher.parse(Map<String, Object?> json) {
+  factory GrammarMatcher.fromJson(Map<String, Object?> json) {
     if (_IncludeMatcher.isType(json)) {
       return _IncludeMatcher(json['include'] as String);
     } else if (_SimpleMatcher.isType(json)) {
@@ -237,7 +237,7 @@ abstract class GrammarMatcher {
             scanner.substring(0, captureEndLocation.position),
             position: captureStartLocation.position,
           );
-          GrammarMatcher.parse(capture)
+          GrammarMatcher.fromJson(capture)
               .scan(grammar, captureScanner, scopeStack);
         }
 
@@ -251,11 +251,11 @@ abstract class GrammarMatcher {
 
 /// A simple matcher which matches a single line.
 class _SimpleMatcher extends GrammarMatcher {
-  _SimpleMatcher(Map<String, Object?> json)
+  _SimpleMatcher(super.json)
       : match = RegExp(json['match'] as String, multiLine: true),
         captures = (json['captures'] as Map<String, Object?>?)
             ?.cast<String, Map<String, Object?>>(),
-        super._(json);
+        super._();
 
   static bool isType(Map<String, Object?> json) {
     return json.containsKey('match');
@@ -288,7 +288,7 @@ class _SimpleMatcher extends GrammarMatcher {
 }
 
 class _MultilineMatcher extends GrammarMatcher {
-  _MultilineMatcher(Map<String, Object?> json)
+  _MultilineMatcher(super.json)
       : begin = RegExp(json['begin'] as String, multiLine: true),
         beginCaptures = json['beginCaptures'] as Map<String, Object?>?,
         contentName = json['contentName'] as String?,
@@ -302,10 +302,10 @@ class _MultilineMatcher extends GrammarMatcher {
             : RegExp(json['while'] as String, multiLine: true),
         patterns = (json['patterns'] as List<Object?>?)
             ?.cast<Map<String, Object?>>()
-            .map((e) => GrammarMatcher.parse(e))
+            .map((e) => GrammarMatcher.fromJson(e))
             .toList()
             .cast<GrammarMatcher>(),
-        super._(json);
+        super._();
 
   static bool isType(Map<String, Object?> json) {
     return json.containsKey('begin') &&
@@ -517,13 +517,13 @@ class _MultilineMatcher extends GrammarMatcher {
 }
 
 class _PatternMatcher extends GrammarMatcher {
-  _PatternMatcher(Map<String, Object?> json)
+  _PatternMatcher(super.json)
       : patterns = (json['patterns'] as List<Object?>?)
             ?.cast<Map<String, Object?>>()
-            .map((e) => GrammarMatcher.parse(e))
+            .map((e) => GrammarMatcher.fromJson(e))
             .toList()
             .cast<GrammarMatcher>(),
-        super._(json);
+        super._();
 
   static bool isType(Map<String, Object?> json) {
     return json.containsKey('patterns');

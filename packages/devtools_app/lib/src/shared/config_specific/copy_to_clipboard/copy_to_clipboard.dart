@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be found
 // in the LICENSE file.
 
-import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 
 import '../../globals.dart';
+import '../../utils.dart';
 import '_copy_to_clipboard_desktop.dart'
     if (dart.library.js_interop) '_copy_to_clipboard_web.dart';
 
@@ -31,7 +31,7 @@ Future<void> copyToClipboard(
 
     if (successMessage != null) notificationService.push(successMessage);
   } catch (e) {
-    if (ideTheme.embed) {
+    if (isEmbedded()) {
       _log.warning(
         'DevTools copy failed. This may be as a result of a known bug in VSCode. '
         'See https://github.com/Dart-Code/Dart-Code/issues/4540 for more '

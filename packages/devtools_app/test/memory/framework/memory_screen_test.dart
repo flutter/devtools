@@ -4,7 +4,7 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/memory/panes/chart/widgets/chart_control_pane.dart';
-import 'package:devtools_app/src/screens/memory/panes/chart/widgets/memory_vm_chart.dart';
+import 'package:devtools_app/src/screens/memory/panes/chart/widgets/chart_pane.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
@@ -69,7 +69,8 @@ void main() {
     );
 
     // Delay to ensure the memory profiler has collected data.
-    await tester.pumpAndSettle(const Duration(seconds: 1));
+    await tester
+        .runAsync(() async => tester.pumpAndSettle(const Duration(seconds: 1)));
     expect(find.byType(MemoryBody), findsOneWidget);
   }
 
@@ -77,10 +78,11 @@ void main() {
   const windowSize = Size(2225.0, 1000.0);
 
   group('MemoryScreen', () {
-    setUp(() {
+    setUp(() async {
+      setUpServiceManagerForMemory();
       screen = MemoryScreen();
       controller = MemoryController();
-      setUpServiceManagerForMemory();
+      await controller.initialized;
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {
@@ -94,22 +96,13 @@ void main() {
       (WidgetTester tester) async {
         await pumpMemoryScreen(tester);
 
-        // Verify Memory, Memory Source, and Memory Sources content.
+        // Verify chart is visible.
         expect(find.byTooltip(ChartPaneTooltips.pauseTooltip), findsOneWidget);
         expect(find.byTooltip(ChartPaneTooltips.resumeTooltip), findsOneWidget);
 
         expect(find.text('GC'), findsOneWidget);
 
-        expect(find.byType(MemoryVMChart), findsOneWidget);
-
-        expect(
-          controller.chart.memoryTimeline.liveData.isEmpty,
-          isTrue,
-        );
-        expect(
-          controller.chart.memoryTimeline.offlineData.isEmpty,
-          isTrue,
-        );
+        expect(find.byType(MemoryChartPane), findsOneWidget);
       },
     );
   });

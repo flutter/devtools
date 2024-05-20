@@ -405,12 +405,12 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
         }
       } else {
         switch (child.object.runtimeType) {
-          case ScriptRef:
-          case Script:
+          case const (ScriptRef):
+          case const (Script):
             scriptNodes.add(child);
             break;
-          case LibraryRef:
-          case Library:
+          case const (LibraryRef):
+          case const (Library):
             final obj = child.object as LibraryRef;
             if (obj.uri!.startsWith(dartPrefix) ||
                 obj.uri!.startsWith(packagePrefix)) {
@@ -419,20 +419,20 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
               userLibraryNodes.add(child);
             }
             break;
-          case ClassRef:
-          case Class:
+          case const (ClassRef):
+          case const (Class):
             classNodes.add(child);
             break;
-          case FuncRef:
-          case Func:
+          case const (FuncRef):
+          case const (Func):
             functionNodes.add(child);
             break;
-          case FieldRef:
-          case Field:
+          case const (FieldRef):
+          case const (Field):
             variableNodes.add(child);
             break;
-          case CodeRef:
-          case Code:
+          case const (CodeRef):
+          case const (Code):
             codeNodes.add(child);
             break;
           default:

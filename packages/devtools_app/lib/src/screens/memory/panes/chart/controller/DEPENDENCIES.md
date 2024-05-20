@@ -5,9 +5,11 @@ Dependencies that create loops (inversions) are marked with `!`.
 
 ```mermaid
 flowchart TD;
+chart_connection.dart-->memory_tracker.dart;
 chart_pane_controller.dart-->android_chart_controller.dart;
+chart_pane_controller.dart-->chart_connection.dart;
+chart_pane_controller.dart-->chart_data.dart;
 chart_pane_controller.dart-->event_chart_controller.dart;
-chart_pane_controller.dart-->memory_tracker.dart;
 chart_pane_controller.dart-->vm_chart_controller.dart;
 ```
 

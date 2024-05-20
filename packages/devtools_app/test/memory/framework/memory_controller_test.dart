@@ -2,15 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/screens/memory/framework/connected/memory_tabs.dart';
+import 'package:devtools_app/src/screens/memory/framework/memory_tabs.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/class_filter.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../test_infra/scenes/memory/default.dart';
-import '../../test_infra/scenes/scene_test_extensions.dart';
 
 final _filter1 = ClassFilter(
   except: 'filter1',
@@ -25,10 +23,8 @@ final _filter2 = ClassFilter(
 );
 
 Future<void> pumpScene(WidgetTester tester, MemoryDefaultScene scene) async {
-  await tester.pumpScene(scene);
-  // Delay to ensure the memory profiler has collected data.
-  await tester.pumpAndSettle(const Duration(seconds: 1));
-  expect(find.byType(MemoryBody), findsOneWidget);
+  await scene.pump(tester);
+
   await tester.tap(
     find.byKey(MemoryScreenKeys.diffTab),
   );

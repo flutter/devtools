@@ -239,11 +239,10 @@ class HotReloadButton extends StatelessWidget {
 }
 
 class _HotReloadScaffoldAction extends ScaffoldAction {
-  _HotReloadScaffoldAction({Color? color})
+  _HotReloadScaffoldAction()
       : super(
           icon: hotReloadIcon,
           tooltip: HotReloadButton._hotReloadTooltip,
-          color: color,
           onPressed: (context) {
             ga.select(gac.devToolsMain, gac.hotReload);
             _callHotReload();
@@ -324,9 +323,9 @@ class _RegisteredServiceExtensionButton extends ServiceExtensionWidget {
   const _RegisteredServiceExtensionButton._({
     required this.serviceDescription,
     required this.action,
-    required String completedText,
-    required String Function(Object? error) describeError,
-  }) : super(completedText: completedText, describeError: describeError);
+    required String super.completedText,
+    required super.describeError,
+  });
 
   /// The service to subscribe to.
   final RegisteredServiceDescription serviceDescription;
@@ -408,14 +407,10 @@ class StructuredErrorsToggle extends StatelessWidget {
 /// Service extensions can be found in [service_extensions.dart].
 class _ServiceExtensionToggle extends ServiceExtensionWidget {
   const _ServiceExtensionToggle({
-    Key? key,
     required this.service,
-    required String Function(Object?) describeError,
+    required super.describeError,
   }) : super(
-          key: key,
-          // Don't show messages on success or when this toggle is in progress.
           completedText: null,
-          describeError: describeError,
         );
   final ToggleableServiceExtensionDescription service;
 
@@ -497,12 +492,10 @@ class _ServiceExtensionToggleState extends State<_ServiceExtensionToggle>
 /// Service extensions can be found in [service_extensions.dart].
 class ServiceExtensionCheckbox extends ServiceExtensionWidget {
   ServiceExtensionCheckbox({
-    Key? key,
+    super.key,
     required this.serviceExtension,
     this.showDescription = true,
   }) : super(
-          key: key,
-          // Don't show messages on success or when this toggle is in progress.
           completedText: null,
           describeError: (error) => _errorMessage(
             serviceExtension.extension,
@@ -638,7 +631,7 @@ class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
 /// a list of service extension checkbox settings.
 class ServiceExtensionCheckboxGroupButton extends StatefulWidget {
   ServiceExtensionCheckboxGroupButton({
-    Key? key,
+    super.key,
     required this.title,
     required this.icon,
     required this.extensions,
@@ -648,8 +641,7 @@ class ServiceExtensionCheckboxGroupButton extends StatefulWidget {
     this.tooltip,
     double overlayWidthBeforeScaling = _defaultWidth,
     this.minScreenWidthForTextBeforeScaling,
-  })  : overlayWidth = scaleByFontFactor(overlayWidthBeforeScaling),
-        super(key: key);
+  }) : overlayWidth = scaleByFontFactor(overlayWidthBeforeScaling);
 
   /// Title for the button.
   final String title;
@@ -736,9 +728,9 @@ class _ServiceExtensionCheckboxGroupButtonState
     if (widget.forceShowOverlayController != null) {
       cancelStreamSubscriptions();
       autoDisposeStreamSubscription(
-        widget.forceShowOverlayController!.stream.listen(
-          (_) => _insertOverlay(context),
-        ),
+        widget.forceShowOverlayController!.stream.listen((_) {
+          if (mounted) _insertOverlay(context);
+        }),
       );
     }
   }
@@ -858,12 +850,11 @@ class _ServiceExtensionCheckboxGroupButtonState
 
 class _ServiceExtensionCheckboxGroupOverlay extends StatelessWidget {
   const _ServiceExtensionCheckboxGroupOverlay({
-    Key? key,
     required this.description,
     required this.extensions,
     required this.width,
     this.customExtensionUi = const <String, Widget>{},
-  }) : super(key: key);
+  });
 
   /// Description for this checkbox settings overlay.
   ///
@@ -924,10 +915,10 @@ class _ServiceExtensionCheckboxGroupOverlay extends StatelessWidget {
 /// Widget that knows how to talk to a service extension and surface the relevant errors.
 abstract class ServiceExtensionWidget extends StatefulWidget {
   const ServiceExtensionWidget({
-    Key? key,
+    super.key,
     required this.completedText,
     required this.describeError,
-  }) : super(key: key);
+  });
 
   /// The text to show when the action is completed.
   ///
@@ -988,10 +979,10 @@ mixin ServiceExtensionMixin<T extends ServiceExtensionWidget> on State<T> {
 
 class ServiceExtensionTooltip extends StatelessWidget {
   const ServiceExtensionTooltip({
-    Key? key,
+    super.key,
     required this.description,
     required this.child,
-  }) : super(key: key);
+  });
 
   final ToggleableServiceExtensionDescription description;
   final Widget child;
@@ -1028,10 +1019,10 @@ class ServiceExtensionTooltip extends StatelessWidget {
 /// Rich tooltip with a description and "more info" link
 class ServiceExtensionRichTooltip extends StatelessWidget {
   const ServiceExtensionRichTooltip({
-    Key? key,
+    super.key,
     required this.description,
     required this.child,
-  }) : super(key: key);
+  });
 
   final ToggleableServiceExtensionDescription description;
   final Widget child;

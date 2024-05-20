@@ -8,6 +8,7 @@
 import 'dart:async';
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/helpers.dart';
@@ -125,7 +126,7 @@ void main() {
               isTrue,
             );
             final rootLibrary =
-                await serviceConnection.rootLibraryForMainIsolate();
+                await serviceConnection.mainIsolateRootLibraryUriAsString();
             await inspectorServiceLocal.addPubRootDirectories([rootLibrary!]);
             final List<String> rootDirectories =
                 await inspectorServiceLocal.getPubRootDirectories() ?? [];
@@ -170,10 +171,6 @@ void main() {
               );
 
               expect(
-                inspectorServiceLocal.rootPackages.toList(),
-                equals(['flutter_app']),
-              );
-              expect(
                 inspectorServiceLocal.rootPackagePrefixes.toList(),
                 isEmpty,
               );
@@ -182,48 +179,8 @@ void main() {
                 ['/usr/jacobr/foo/lib', '/usr/jacobr/bar/lib/bla'],
               );
               expect(
-                inspectorServiceLocal.rootPackages.toList(),
-                equals(['foo', 'bar']),
-              );
-              expect(
                 inspectorServiceLocal.rootPackagePrefixes.toList(),
                 isEmpty,
-              );
-
-              expect(
-                inspectorServiceLocal.isLocalUri('package:foo/src/bar.dart'),
-                isTrue,
-              );
-              expect(
-                inspectorServiceLocal
-                    .isLocalUri('package:foo.bla/src/bar.dart'),
-                isFalse,
-              );
-              expect(
-                inspectorServiceLocal.isLocalUri('package:foos/src/bar.dart'),
-                isFalse,
-              );
-              expect(
-                inspectorServiceLocal.isLocalUri('package:bar/src/bar.dart'),
-                isTrue,
-              );
-              expect(
-                inspectorServiceLocal.isLocalUri(
-                  'package:bar.core/src/bar.dart',
-                ),
-                isFalse,
-              );
-              expect(
-                inspectorServiceLocal.isLocalUri(
-                  'package:bar.core.bla/src/bar.dart',
-                ),
-                isFalse,
-              );
-              expect(
-                inspectorServiceLocal.isLocalUri(
-                  'package:bar.cores/src/bar.dart',
-                ),
-                isFalse,
               );
             } finally {
               // Restore.
@@ -251,10 +208,6 @@ void main() {
               ['/usr/me/clients/google3/foo/bar/baz/lib/src/bla'],
             );
             expect(
-              inspectorServiceLocal.rootPackages.toList(),
-              equals(['foo.bar.baz']),
-            );
-            expect(
               inspectorServiceLocal.rootPackagePrefixes.toList(),
               equals(['foo.bar.baz.']),
             );
@@ -263,12 +216,6 @@ void main() {
               '/usr/me/clients/google3/foo/bar/baz/lib/src/bla',
               '/usr/me/clients/google3/foo/core/lib',
             ]);
-            expect(
-              inspectorServiceLocal.rootPackages.toList(),
-              equals(
-                ['foo.bar.baz', 'foo.core'],
-              ),
-            );
             expect(
               inspectorServiceLocal.rootPackagePrefixes.toList(),
               equals(
@@ -282,12 +229,6 @@ void main() {
               '/usr/me/clients/google3/foo/core/',
             ]);
             expect(
-              inspectorServiceLocal.rootPackages.toList(),
-              equals(
-                ['foo.bar.baz', 'foo.core'],
-              ),
-            );
-            expect(
               inspectorServiceLocal.rootPackagePrefixes.toList(),
               equals(
                 ['foo.bar.baz.', 'foo.core.'],
@@ -298,55 +239,14 @@ void main() {
               '/usr/me/clients/google3/third_party/dart_src/bar/core/lib',
             ]);
             expect(
-              inspectorServiceLocal.rootPackages.toList(),
-              equals(['foo', 'bar.core']),
-            );
-            expect(
               inspectorServiceLocal.rootPackagePrefixes.toList(),
               equals(['foo.', 'bar.core.']),
-            );
-
-            expect(
-              inspectorServiceLocal.isLocalUri('package:foo/src/bar.dart'),
-              isTrue,
-            );
-            // Package at subdirectory.
-            expect(
-              inspectorServiceLocal.isLocalUri('package:foo.bla/src/bar.dart'),
-              isTrue,
-            );
-            expect(
-              inspectorServiceLocal.isLocalUri('package:foos/src/bar.dart'),
-              isFalse,
-            );
-            expect(
-              inspectorServiceLocal.isLocalUri('package:bar/src/bar.dart'),
-              isFalse,
-            );
-            expect(
-              inspectorServiceLocal.isLocalUri('package:bar.core/src/bar.dart'),
-              isTrue,
-            );
-            // Package at subdirectory.
-            expect(
-              inspectorServiceLocal
-                  .isLocalUri('package:bar.core.bla/src/bar.dart'),
-              isTrue,
-            );
-            expect(
-              inspectorServiceLocal
-                  .isLocalUri('package:bar.cores/src/bar.dart'),
-              isFalse,
             );
 
             await inspectorServiceLocal.addPubRootDirectories([
               '/usr/me/clients/google3/third_party/dart/foo',
               '/usr/me/clients/google3/third_party/dart_src/bar/core',
             ]);
-            expect(
-              inspectorServiceLocal.rootPackages.toList(),
-              equals(['foo', 'bar.core']),
-            );
             expect(
               inspectorServiceLocal.rootPackagePrefixes.toList(),
               equals(['foo.', 'bar.core.']),
@@ -404,12 +304,11 @@ MaterialApp
         );
         RemoteDiagnosticsNode nodeInDetailsTree =
             (await group.getDetailsSubtree(nodeInSummaryTree))!;
-        // When flutter rolls, this string may sometimes change due to
-        // implementation details.
-        expect(
-          treeToDebugStringTruncated(nodeInDetailsTree, 30),
-          equalsGoldenIgnoringHashCodes('inspector_service_details_tree.txt'),
-        );
+
+        // TODO(gspencergoog): revert the PR
+        // https://github.com/flutter/devtools/pull/7740 once Flutter PR
+        // https://github.com/flutter/flutter/pull/143259 lands, with an updated
+        // golden file for the test.
 
         nodeInSummaryTree = findNodeMatching(root, 'Text')!;
         expect(nodeInSummaryTree, isNotNull);
@@ -457,7 +356,7 @@ MaterialApp
 
       test('disables hover eval mode by default when embedded', () async {
         await env.setupEnvironment();
-        setGlobal(IdeTheme, IdeTheme(embed: true));
+        setGlobal(IdeTheme, IdeTheme(embedMode: EmbedMode.embedOne));
         expect(inspectorService!.hoverEvalModeEnabledByDefault, isFalse);
       });
 

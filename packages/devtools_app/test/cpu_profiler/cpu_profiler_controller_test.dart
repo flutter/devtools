@@ -328,7 +328,7 @@ void main() {
       await disableAllFiltering();
 
       final cpuProfileDataWithTags =
-          CpuProfileData.parse(cpuProfileDataWithUserTagsJson);
+          CpuProfileData.fromJson(cpuProfileDataWithUserTagsJson);
       await controller.transformer.processData(
         cpuProfileDataWithTags,
         processId: 'test',
@@ -422,7 +422,7 @@ void main() {
         isTrue,
       );
       final cpuProfileDataWithTags =
-          CpuProfileData.parse(cpuProfileDataWithUserTagsJson);
+          CpuProfileData.fromJson(cpuProfileDataWithUserTagsJson);
       await controller.transformer.processData(
         cpuProfileDataWithTags,
         processId: 'test',

@@ -64,7 +64,7 @@ Example: ''',
 }
 
 class ConsoleHelpLink extends StatelessWidget {
-  const ConsoleHelpLink({Key? key}) : super(key: key);
+  const ConsoleHelpLink({super.key});
 
   @override
   Widget build(BuildContext context) {

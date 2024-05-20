@@ -33,11 +33,15 @@ final _log = Logger('dev_helpers');
 String? get debugDtdUri => kReleaseMode ? null : _debugDtdUri;
 String? _debugDtdUri;
 
-/// Enable this flag to debug analytics when DevTools is run in debug or profile
-/// mode, otherwise analytics will only be sent in release builds.
+/// Enable this flag to send and debug analytics when DevTools is run in debug
+/// or profile mode, otherwise analytics will only be sent in release builds.
 ///
 /// `ga.isAnalyticsEnabled()` still must return true for analytics to be sent.
-bool debugAnalytics = false;
+bool debugSendAnalytics = false;
+
+/// Enable this flag to always show the analytics consent message, regardless
+/// of whether any other conditions are met.
+bool debugShowAnalyticsConsentMessage = false;
 
 /// Whether to build DevTools for conveniently debugging DevTools extensions.
 ///
@@ -50,16 +54,12 @@ final debugDevToolsExtensions =
     _debugDevToolsExtensions || integrationTestMode || testMode || stagerMode;
 const _debugDevToolsExtensions = false;
 
-List<DevToolsExtensionConfig> debugHandleRefreshAvailableExtensions(
-  // ignore: avoid-unused-parameters, false positive due to conditional imports
-  Uri appRoot,
-) {
-  return debugExtensions;
-}
+List<DevToolsExtensionConfig> debugHandleRefreshAvailableExtensions({
+  bool includeRuntime = true,
+}) =>
+    StubDevToolsExtensions.extensions(includeRuntime: includeRuntime);
 
 ExtensionEnabledState debugHandleExtensionEnabledState({
-  // ignore: avoid-unused-parameters, false positive due to conditional imports
-  required Uri appRoot,
   required String extensionName,
   bool? enable,
 }) {
@@ -81,34 +81,130 @@ void resetDevToolsExtensionEnabledStates() =>
 /// server connection.
 final stubExtensionEnabledStates = <String, ExtensionEnabledState>{};
 
-/// Stubbed extensions so we can develop DevTools Extensions without a server
-/// connection.
-final List<DevToolsExtensionConfig> debugExtensions = [
-  DevToolsExtensionConfig.parse({
+// ignore: avoid_classes_with_only_static_members, useful for testing.
+abstract class StubDevToolsExtensions {
+  /// Extension for package:foo detected from a running app that requires a
+  /// connected app.
+  static final fooExtension = DevToolsExtensionConfig.parse({
     DevToolsExtensionConfig.nameKey: 'foo',
     DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
     DevToolsExtensionConfig.versionKey: '1.0.0',
-    DevToolsExtensionConfig.pathKey: '/path/to/foo',
+    DevToolsExtensionConfig.materialIconCodePointKey: '0xe0b1',
+    DevToolsExtensionConfig.extensionAssetsPathKey: '/absolute/path/to/foo',
+    DevToolsExtensionConfig.devtoolsOptionsUriKey:
+        'file:///path/to/options/file',
     DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
-  }),
-  DevToolsExtensionConfig.parse({
-    DevToolsExtensionConfig.nameKey: 'bar',
-    DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
-    DevToolsExtensionConfig.versionKey: '2.0.0',
-    DevToolsExtensionConfig.materialIconCodePointKey: 0xe638,
-    DevToolsExtensionConfig.pathKey: '/path/to/bar',
-    DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
-  }),
-  DevToolsExtensionConfig.parse({
+    DevToolsExtensionConfig.detectedFromStaticContextKey: 'false',
+  });
+
+  /// Extension for package:provider detected from a running app that requires a
+  /// connected app.
+  static final providerExtension = DevToolsExtensionConfig.parse({
     DevToolsExtensionConfig.nameKey: 'provider',
     DevToolsExtensionConfig.issueTrackerKey:
         'https://github.com/rrousselGit/provider/issues',
     DevToolsExtensionConfig.versionKey: '3.0.0',
     DevToolsExtensionConfig.materialIconCodePointKey: 0xe50a,
-    DevToolsExtensionConfig.pathKey: '/path/to/provider',
+    DevToolsExtensionConfig.extensionAssetsPathKey:
+        '/absolute/path/to/provider',
+    DevToolsExtensionConfig.devtoolsOptionsUriKey:
+        'file:///path/to/options/file',
+    DevToolsExtensionConfig.isPubliclyHostedKey: 'true',
+    DevToolsExtensionConfig.detectedFromStaticContextKey: 'false',
+  });
+
+  /// Extension for package:some_tool detected from a running app, but that does
+  /// not require a connected app.
+  static final someToolExtension = DevToolsExtensionConfig.parse({
+    DevToolsExtensionConfig.nameKey: 'some_tool',
+    DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
+    DevToolsExtensionConfig.versionKey: '1.0.0',
+    DevToolsExtensionConfig.materialIconCodePointKey: '0xe00c',
+    DevToolsExtensionConfig.requiresConnectionKey: 'false',
+    DevToolsExtensionConfig.extensionAssetsPathKey:
+        '/absolute/path/to/some_tool',
+    DevToolsExtensionConfig.devtoolsOptionsUriKey:
+        'file:///path/to/options/file',
     DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
-  }),
-];
+    DevToolsExtensionConfig.detectedFromStaticContextKey: 'false',
+  });
+
+  /// Extension for package:bar detected from a static context that does not
+  /// require a connected app.
+  static final barExtension = DevToolsExtensionConfig.parse({
+    DevToolsExtensionConfig.nameKey: 'bar',
+    DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
+    DevToolsExtensionConfig.versionKey: '2.0.0',
+    DevToolsExtensionConfig.materialIconCodePointKey: 0xe638,
+    DevToolsExtensionConfig.requiresConnectionKey: 'false',
+    DevToolsExtensionConfig.extensionAssetsPathKey: '/absolute/path/to/bar',
+    DevToolsExtensionConfig.devtoolsOptionsUriKey:
+        'file:///path/to/options/file',
+    DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
+    DevToolsExtensionConfig.detectedFromStaticContextKey: 'true',
+  });
+
+  /// Extension for package:bar detected from a static context that does not
+  /// require a connected app and that is also a newer version of another static
+  /// extension.
+  static final newerBarExtension = DevToolsExtensionConfig.parse({
+    DevToolsExtensionConfig.nameKey: 'bar',
+    DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
+    DevToolsExtensionConfig.versionKey: '2.1.0', // Newer version.
+    DevToolsExtensionConfig.materialIconCodePointKey: 0xe638,
+    DevToolsExtensionConfig.requiresConnectionKey: 'false',
+    DevToolsExtensionConfig.extensionAssetsPathKey: '/absolute/path/to/bar',
+    DevToolsExtensionConfig.devtoolsOptionsUriKey:
+        'file:///path/to/options/file',
+    DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
+    DevToolsExtensionConfig.detectedFromStaticContextKey: 'true',
+  });
+
+  /// Extension for package:baz detected from a static context that requires a
+  /// connected app.
+  static final bazExtension = DevToolsExtensionConfig.parse({
+    DevToolsExtensionConfig.nameKey: 'baz',
+    DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
+    DevToolsExtensionConfig.versionKey: '1.0.0',
+    DevToolsExtensionConfig.materialIconCodePointKey: 0xe716,
+    DevToolsExtensionConfig.extensionAssetsPathKey: '/absolute/path/to/baz',
+    DevToolsExtensionConfig.devtoolsOptionsUriKey:
+        'file:///path/to/options/file',
+    DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
+    DevToolsExtensionConfig.detectedFromStaticContextKey: 'true',
+  });
+
+  /// Extension for package:foo detected from a static context that is a duplicate
+  /// of a runtime extension [fooExtension], which requires a connected app.
+  static final duplicateFooExtension = DevToolsExtensionConfig.parse({
+    DevToolsExtensionConfig.nameKey: 'foo',
+    DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
+    DevToolsExtensionConfig.versionKey: '1.0.0',
+    DevToolsExtensionConfig.materialIconCodePointKey: '0xe0b1',
+    DevToolsExtensionConfig.extensionAssetsPathKey: '/absolute/path/to/foo',
+    DevToolsExtensionConfig.devtoolsOptionsUriKey:
+        'file:///path/to/options/file',
+    DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
+    DevToolsExtensionConfig.detectedFromStaticContextKey: 'true',
+  });
+
+  /// Stubbed extensions so we can develop DevTools Extensions without a server
+  /// connection.
+  static List<DevToolsExtensionConfig> extensions({
+    bool includeRuntime = true,
+  }) =>
+      [
+        if (includeRuntime) ...[
+          fooExtension,
+          providerExtension,
+          someToolExtension,
+        ],
+        barExtension,
+        newerBarExtension,
+        bazExtension,
+        duplicateFooExtension,
+      ];
+}
 
 /// Enable this flag to debug the DevTools survey logic.
 ///
@@ -120,7 +216,7 @@ bool debugSurvey = false;
 /// The survey metadata that will be used instead of the live data from
 /// 'docs.flutter.dev/f/dart-devtools-survey-metadata.json' when [debugSurvey]
 /// is true;
-final debugSurveyMetadata = DevToolsSurvey.parse(
+final debugSurveyMetadata = DevToolsSurvey.fromJson(
   {
     '_comments': [
       'uniqueId must be updated with each new survey so DevTools knows to re-prompt users.',

@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
@@ -14,6 +15,7 @@ import '../api/dart_tooling_api.dart';
 import '../api/vs_code_api.dart';
 import 'debug_sessions.dart';
 import 'devices.dart';
+import 'devtools.dart';
 
 /// A general Flutter sidebar panel for embedding inside IDEs.
 ///
@@ -66,12 +68,24 @@ class _VsCodeConnectedPanel extends StatefulWidget {
   State<_VsCodeConnectedPanel> createState() => _VsCodeConnectedPanelState();
 }
 
-class _VsCodeConnectedPanelState extends State<_VsCodeConnectedPanel> {
+class _VsCodeConnectedPanelState extends State<_VsCodeConnectedPanel>
+    with AutoDisposeMixin {
+  var debugSessions = <VsCodeDebugSession>[];
+
   @override
   void initState() {
     super.initState();
 
     unawaited(widget.api.initialize());
+
+    cancelStreamSubscriptions();
+    autoDisposeStreamSubscription(
+      widget.api.debugSessionsChanged.listen((event) {
+        setState(() {
+          debugSessions = event.sessions;
+        });
+      }),
+    );
   }
 
   @override
@@ -94,26 +108,25 @@ class _VsCodeConnectedPanelState extends State<_VsCodeConnectedPanel> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              StreamBuilder(
-                stream: widget.api.debugSessionsChanged,
-                builder: (context, debugSessionsSnapshot) {
-                  final sessions =
-                      debugSessionsSnapshot.data?.sessions ?? const [];
-                  return DebugSessions(
-                    api: widget.api,
-                    sessions: sessions,
-                    deviceMap: deviceMap,
-                  );
-                },
+              DebugSessions(
+                api: widget.api,
+                sessions: debugSessions,
+                deviceMap: deviceMap,
               ),
               const SizedBox(height: defaultSpacing),
-              if (widget.api.capabilities.selectDevice)
+              if (widget.api.capabilities.selectDevice) ...[
                 Devices(
                   widget.api,
                   devices: devices,
                   unsupportedDevices: unsupportedDevices,
                   selectedDeviceId: devicesSnapshot.data?.selectedDeviceId,
                 ),
+                const SizedBox(height: denseSpacing),
+              ],
+              DevToolsSidebarOptions(
+                api: widget.api,
+                hasDebugSessions: debugSessions.isNotEmpty,
+              ),
             ],
           );
         },

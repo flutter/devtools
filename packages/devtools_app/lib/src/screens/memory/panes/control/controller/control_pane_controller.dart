@@ -2,13 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+
 import '../../../../../shared/globals.dart';
 import '../../../shared/primitives/memory_timeline.dart';
 
 class MemoryControlPaneController {
-  MemoryControlPaneController(this.memoryTimeline);
+  MemoryControlPaneController(
+    this.memoryTimeline, {
+    required this.exportData,
+  });
 
   final MemoryTimeline memoryTimeline;
+  final VoidCallback exportData;
+  final ValueNotifier<bool> isChartVisible = preferences.memory.showChart;
+
   bool get isGcing => _gcing;
   bool _gcing = false;
 

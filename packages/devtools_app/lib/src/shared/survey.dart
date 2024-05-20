@@ -13,11 +13,11 @@ import 'package:logging/logging.dart';
 import '../../../devtools.dart' as devtools show version;
 import '../shared/notifications.dart';
 import 'analytics/analytics.dart' as ga;
-import 'config_specific/launch_url/launch_url.dart';
 import 'development_helpers.dart';
 import 'globals.dart';
 import 'primitives/utils.dart';
 import 'server/server.dart' as server;
+import 'utils.dart';
 
 final _log = Logger('survey');
 
@@ -125,7 +125,7 @@ class SurveyService {
       final response = await get(_metadataUrl);
       if (response.statusCode == 200) {
         final Map<String, dynamic> contents = json.decode(response.body);
-        return DevToolsSurvey.parse(contents);
+        return DevToolsSurvey.fromJson(contents);
       }
     } on Error catch (e, st) {
       _log.shout('Error fetching survey content: $e', e, st);
@@ -144,7 +144,7 @@ class SurveyService {
     required String surveyUrl,
     required String message,
   }) async {
-    await launchUrl(surveyUrl);
+    await launchUrlWithErrorHandling(surveyUrl);
     await server.setSurveyActionTaken();
     notificationService.dismiss(message);
   }
@@ -161,7 +161,7 @@ class DevToolsSurvey {
     this.devEnvironments,
   );
 
-  factory DevToolsSurvey.parse(Map<String, dynamic> json) {
+  factory DevToolsSurvey.fromJson(Map<String, dynamic> json) {
     final id = json[_uniqueIdKey];
     final startDate = json[_startDateKey] != null
         ? DateTime.parse(json[_startDateKey])

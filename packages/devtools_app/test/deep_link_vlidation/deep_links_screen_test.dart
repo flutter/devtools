@@ -539,6 +539,48 @@ void main() {
     );
 
     testWidgetsWithWindowSize(
+      'show scheme or missing scheme',
+      windowSize,
+      (WidgetTester tester) async {
+        final deepLinksController = DeepLinksTestController();
+
+        deepLinksController.selectedProject.value =
+            FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
+
+        final linkDatas = [
+          LinkData(
+            domain: 'www.domain1.com',
+            path: '/',
+            os: [PlatformOS.android],
+          ),
+          LinkData(
+            domain: 'www.domain2.com',
+            path: '/',
+            os: [PlatformOS.ios],
+            scheme: {'http'},
+          ),
+        ];
+
+        deepLinksController.validatedLinkDatas = ValidatedLinkDatas(
+          all: linkDatas,
+          byDomain: deepLinksController.linkDatasByDomain(linkDatas),
+          byPath: deepLinksController.linkDatasByPath(linkDatas),
+        );
+
+        await pumpDeepLinkScreen(
+          tester,
+          controller: deepLinksController,
+        );
+
+        expect(find.text('www.domain1.com'), findsOneWidget);
+        expect(find.text('www.domain2.com'), findsOneWidget);
+
+        expect(find.text('missing scheme'), findsOneWidget);
+        expect(find.text('http'), findsOneWidget);
+      },
+    );
+
+    testWidgetsWithWindowSize(
       'path view',
       windowSize,
       (WidgetTester tester) async {

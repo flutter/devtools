@@ -33,8 +33,6 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-
     return ValueListenableBuilder<bool>(
       valueListenable: controller.shouldPrompt,
       builder: (context, showPrompt, child) {
@@ -72,19 +70,17 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt>
                 children: [
                   Text(
                     'Send usage statistics for DevTools?',
-                    style: textTheme.headlineSmall,
+                    style: theme.boldTextStyle,
                   ),
-                  IconButton.outlined(
-                    icon: const Icon(Icons.close),
+                  IconButton(
+                    icon: Icon(Icons.close, size: actionsIconSize),
                     onPressed: controller.hidePrompt,
                   ),
                 ],
               ),
-              const Padding(
-                padding: EdgeInsets.only(top: defaultSpacing),
-              ),
-              _analyticsDescription(textTheme),
-              const SizedBox(height: denseRowSpacing),
+              const SizedBox(height: denseSpacing),
+              _analyticsDescription(theme),
+              const SizedBox(height: defaultSpacing),
               _actionButtons(),
             ],
           ),
@@ -93,44 +89,45 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt>
     );
   }
 
-  Widget _analyticsDescription(TextTheme textTheme) {
+  Widget _analyticsDescription(ThemeData theme) {
     final consentMessageRegExpResults =
-        parseAnalyticsConsentMessage(controller.consentMessage);
+        parseAnalyticsConsentMessage(controller.consentMessage)
+            ?.map((e) => adjustLineBreaks(e))
+            .toList();
 
-    // When failing to parse the consent message, fallback to
-    // displaying the consent message in its regular form
+    // When failing to parse the consent message, fallback to displaying the
+    // consent message in its regular form.
     if (consentMessageRegExpResults == null) {
-      return RichText(
-        text: TextSpan(
+      return SelectableText.rich(
+        TextSpan(
           children: [
             TextSpan(
-              text: controller.consentMessage,
-              style: textTheme.titleMedium,
+              text: adjustLineBreaks(controller.consentMessage),
+              style: theme.regularTextStyle,
             ),
           ],
         ),
       );
     }
 
-    return RichText(
-      text: TextSpan(
+    return SelectableText.rich(
+      TextSpan(
         children: [
           TextSpan(
             text: consentMessageRegExpResults[0],
-            style: textTheme.titleMedium,
+            style: theme.regularTextStyle,
           ),
           LinkTextSpan(
-            link: Link(
+            link: GaLink(
               display: consentMessageRegExpResults[1],
               url: consentMessageRegExpResults[1],
             ),
             context: context,
-            style:
-                textTheme.titleMedium?.copyWith(color: const Color(0xFF54C1EF)),
+            style: theme.linkTextStyle,
           ),
           TextSpan(
             text: consentMessageRegExpResults[2],
-            style: textTheme.titleMedium,
+            style: theme.regularTextStyle,
           ),
         ],
       ),
@@ -141,23 +138,21 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt>
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        ElevatedButton(
+        DevToolsButton(
+          label: 'No thanks',
           onPressed: () {
             // This will also hide the prompt.
             unawaited(controller.toggleAnalyticsEnabled(false));
           },
-          style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
-          child: const Text('No thanks.'),
         ),
-        const Padding(
-          padding: EdgeInsets.only(left: defaultSpacing),
-        ),
-        ElevatedButton(
+        const SizedBox(width: defaultSpacing),
+        DevToolsButton(
+          label: 'Sounds good!',
+          elevated: true,
           onPressed: () {
             unawaited(controller.toggleAnalyticsEnabled(true));
             controller.hidePrompt();
           },
-          child: const Text('Sounds good!'),
         ),
       ],
     );
@@ -168,9 +163,10 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt>
 /// `package:unified_analytics` so that the URL can be
 /// separated from the block of text so that we can have a
 /// hyperlink in the displayed consent message.
+@visibleForTesting
 List<String>? parseAnalyticsConsentMessage(String consentMessage) {
   final results = <String>[];
-  final RegExp pattern =
+  final pattern =
       RegExp(r'^([\S\s]*)(https?:\/\/[^\s]+)(\)\.)$', multiLine: true);
 
   final matches = pattern.allMatches(consentMessage);
@@ -190,4 +186,14 @@ List<String>? parseAnalyticsConsentMessage(String consentMessage) {
   }
 
   return results;
+}
+
+/// Replaces single line breaks with spaces so that the text [value] can be
+/// displayed in a responsive UI and does not have fixed line breaks that do not
+/// match the width of the view.
+@visibleForTesting
+String adjustLineBreaks(String value) {
+  final pattern =
+      RegExp(r'(?<!\r\n|\r|\n)(\r\n|\r|\n)(?!\r\n|\r|\n)', multiLine: true);
+  return value.replaceAll(pattern, ' ');
 }

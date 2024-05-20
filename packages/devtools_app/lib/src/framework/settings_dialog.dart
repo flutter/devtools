@@ -15,13 +15,13 @@ import '../shared/config_specific/copy_to_clipboard/copy_to_clipboard.dart';
 import '../shared/globals.dart';
 import '../shared/log_storage.dart';
 import '../shared/server/server.dart';
+import '../shared/utils.dart';
 
 class OpenSettingsAction extends ScaffoldAction {
-  OpenSettingsAction({super.key, Color? color})
+  OpenSettingsAction({super.key, super.color})
       : super(
           icon: Icons.settings_outlined,
           tooltip: 'Settings',
-          color: color,
           onPressed: (context) {
             unawaited(
               showDialog(
@@ -45,14 +45,15 @@ class SettingsDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Flexible(
-            child: CheckboxSetting(
-              title: 'Use a dark theme',
-              notifier: preferences.darkModeTheme,
-              onChanged: preferences.toggleDarkModeTheme,
-              gaItem: gac.darkTheme,
+          if (!isEmbedded())
+            Flexible(
+              child: CheckboxSetting(
+                title: 'Use a dark theme',
+                notifier: preferences.darkModeTheme,
+                onChanged: preferences.toggleDarkModeTheme,
+                gaItem: gac.darkTheme,
+              ),
             ),
-          ),
           if (isExternalBuild && isDevToolsServerAvailable)
             Flexible(
               child: CheckboxSetting(

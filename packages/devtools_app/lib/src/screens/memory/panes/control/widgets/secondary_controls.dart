@@ -9,6 +9,9 @@ import 'package:flutter/material.dart';
 
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
+import '../../../../../shared/feature_flags.dart';
+import '../../../../../shared/file_import.dart';
+import '../../../../../shared/screen.dart';
 import '../../../shared/primitives/simple_elements.dart';
 import '../controller/control_pane_controller.dart';
 import 'settings_dialog.dart';
@@ -16,27 +19,38 @@ import 'settings_dialog.dart';
 /// Controls related to the entire memory screen.
 class SecondaryControls extends StatelessWidget {
   const SecondaryControls({
-    Key? key,
+    super.key,
     required this.controller,
-  }) : super(key: key);
+    required this.offline,
+  });
 
   final MemoryControlPaneController controller;
+  final bool offline;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        GaDevToolsButton(
-          onPressed: controller.isGcing ? null : controller.gc,
-          icon: Icons.delete,
-          label: 'GC',
-          tooltip: 'Trigger full garbage collection.',
-          minScreenWidthForTextBeforeScaling: memoryControlsMinVerboseWidth,
-          gaScreen: gac.memory,
-          gaSelection: gac.MemoryEvent.gc,
-        ),
-        const SizedBox(width: denseSpacing),
+        if (!offline) ...[
+          GaDevToolsButton(
+            onPressed: controller.isGcing ? null : controller.gc,
+            icon: Icons.delete,
+            label: 'GC',
+            tooltip: 'Trigger full garbage collection.',
+            minScreenWidthForTextBeforeScaling: memoryControlsMinVerboseWidth,
+            gaScreen: gac.memory,
+            gaSelection: gac.MemoryEvent.gc,
+          ),
+          const SizedBox(width: denseSpacing),
+        ],
+        if (FeatureFlags.memoryOffline) ...[
+          OpenSaveButtonGroup(
+            screenId: ScreenMetaData.memory.id,
+            onSave: controller.exportData,
+          ),
+          const SizedBox(width: denseSpacing),
+        ],
         SettingsOutlinedButton(
           gaScreen: gac.memory,
           gaSelection: gac.MemoryEvent.settings,

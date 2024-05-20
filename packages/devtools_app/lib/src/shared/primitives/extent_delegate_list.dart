@@ -6,7 +6,6 @@ import 'dart:math' as math;
 
 import 'package:collection/collection.dart' as collection;
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -162,30 +161,19 @@ class FixedExtentDelegate extends FixedExtentDelegateBase {
 /// screen need to be animated.
 class ExtentDelegateListView extends CustomPointerScrollView {
   const ExtentDelegateListView({
-    Key? key,
-    Axis scrollDirection = Axis.vertical,
-    bool reverse = false,
-    ScrollController? controller,
-    bool? primary,
-    ScrollPhysics? physics,
-    bool shrinkWrap = false,
-    EdgeInsetsGeometry? padding,
+    super.key,
+    super.scrollDirection,
+    super.reverse,
+    super.controller,
+    super.primary,
+    super.physics,
+    super.shrinkWrap,
+    super.padding,
     required this.childrenDelegate,
     required this.extentDelegate,
-    int? semanticChildCount,
-    void Function(PointerSignalEvent event)? customPointerSignalHandler,
-  }) : super(
-          key: key,
-          scrollDirection: scrollDirection,
-          reverse: reverse,
-          controller: controller,
-          primary: primary,
-          physics: physics,
-          shrinkWrap: shrinkWrap,
-          padding: padding,
-          semanticChildCount: semanticChildCount,
-          customPointerSignalHandler: customPointerSignalHandler,
-        );
+    super.semanticChildCount,
+    super.customPointerSignalHandler,
+  });
 
   /// A delegate that provides the children for the [ExtentDelegateListView].
   final SliverChildDelegate childrenDelegate;
@@ -213,10 +201,10 @@ class SliverExtentDelegateList extends SliverMultiBoxAdaptorWidget {
   /// Creates a sliver that places box children with the same main axis extent
   /// in a linear array.
   const SliverExtentDelegateList({
-    Key? key,
-    required SliverChildDelegate delegate,
+    super.key,
+    required super.delegate,
     required this.extentDelegate,
-  }) : super(key: key, delegate: delegate);
+  });
 
   /// The extent the children are forced to have in the main axis.
   final ExtentDelegate? extentDelegate;
@@ -254,9 +242,9 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
   ///
   /// The [childManager] argument must not be null.
   RenderSliverExtentDelegateBoxAdaptor({
-    required RenderSliverBoxChildManager childManager,
+    required super.childManager,
     required ExtentDelegate? extentDelegate,
-  }) : super(childManager: childManager) {
+  }) {
     _markNeedsLayout = markNeedsLayout;
     this.extentDelegate = extentDelegate;
   }

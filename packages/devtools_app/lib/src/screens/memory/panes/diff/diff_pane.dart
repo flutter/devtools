@@ -10,9 +10,9 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
-import '../../../../shared/config_specific/launch_url/launch_url.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/simple_items.dart';
+import '../../../../shared/utils.dart';
 import '../../shared/widgets/shared_memory_widgets.dart';
 import 'controller/diff_pane_controller.dart';
 import 'controller/item_controller.dart';
@@ -21,7 +21,7 @@ import 'widgets/snapshot_list.dart';
 import 'widgets/snapshot_view.dart';
 
 class DiffPane extends StatelessWidget {
-  const DiffPane({Key? key, required this.diffController}) : super(key: key);
+  const DiffPane({super.key, required this.diffController});
 
   final DiffPaneController diffController;
 
@@ -46,8 +46,7 @@ class DiffPane extends StatelessWidget {
 }
 
 class _SnapshotItemContent extends StatelessWidget {
-  const _SnapshotItemContent({Key? key, required this.controller})
-      : super(key: key);
+  const _SnapshotItemContent({required this.controller});
 
   final DiffPaneController controller;
 
@@ -76,7 +75,7 @@ class _SnapshotItemContent extends StatelessWidget {
                             p: Theme.of(context).regularTextStyle,
                           ),
                           onTapLink: (text, url, title) =>
-                              unawaited(launchUrl(url!)),
+                              unawaited(launchUrlWithErrorHandling(url!)),
                         ),
                       ),
                       const SizedBox(width: densePadding),

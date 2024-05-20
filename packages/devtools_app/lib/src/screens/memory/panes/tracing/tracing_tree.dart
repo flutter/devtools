@@ -14,6 +14,7 @@ import '../../../../shared/table/table_data.dart';
 import '../../../../shared/ui/tab.dart';
 import '../../../profiler/cpu_profile_model.dart';
 import '../../../profiler/panes/cpu_profile_columns.dart';
+import 'tracing_data.dart';
 import 'tracing_pane_controller.dart';
 
 const double _countColumnWidth = 100;
@@ -126,9 +127,8 @@ class _AllocationTracingTreeState extends State<AllocationTracingTree>
 
 class _TracingInstructions extends StatelessWidget {
   const _TracingInstructions({
-    Key? key,
     this.prefix,
-  }) : super(key: key);
+  });
 
   final String? prefix;
 
@@ -158,17 +158,16 @@ To trace allocations for a class:
 2. Interact with your app to trigger an allocation of the class.
 
 3. Click 'Refresh' above to view the tree of collected stack traces of
-constructor calls for the selected class. 
+constructor calls for the selected class.
 ''';
 
 class _TracingTreeHeader extends StatelessWidget {
   const _TracingTreeHeader({
-    Key? key,
     required this.controller,
     required this.tabController,
     required this.tabs,
     required this.updateTreeStateCallback,
-  }) : super(key: key);
+  });
 
   final TracingPaneController controller;
   final void Function(VoidCallback) updateTreeStateCallback;
@@ -311,9 +310,9 @@ class _ExclusiveCountColumn extends ColumnData<CpuStackFrame> {
 /// A table of an allocation profile tree.
 class TracingTable extends StatelessWidget {
   const TracingTable({
-    Key? key,
+    super.key,
     required this.dataRoots,
-  }) : super(key: key);
+  });
 
   static final treeColumn = MethodAndSourceColumn();
   static final startingSortColumn = _InclusiveCountColumn();

@@ -9,24 +9,23 @@ import 'package:flutter/material.dart';
 import '../shared/analytics/analytics.dart' as ga;
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
-import '../shared/config_specific/launch_url/launch_url.dart';
 import '../shared/globals.dart';
+import '../shared/utils.dart';
 
 /// Button that, when clicked, will open the DevTools issue tracker in the
 /// browser.
 class ReportFeedbackButton extends ScaffoldAction {
-  ReportFeedbackButton({super.key, Color? color})
+  ReportFeedbackButton({super.key, super.color})
       : super(
           icon: Icons.bug_report_outlined,
           tooltip: 'Report feedback',
-          color: color,
           onPressed: (_) {
             ga.select(
               gac.devToolsMain,
               gac.feedbackButton,
             );
             unawaited(
-              launchUrl(
+              launchUrlWithErrorHandling(
                 devToolsExtensionPoints.issueTrackerLink().url,
               ),
             );

@@ -17,8 +17,7 @@ import 'controller.dart';
 /// When DevTools is run on Desktop for development, this widget displays a
 /// placeholder, since Flutter Desktop does not currently support web views.
 class EmbeddedExtensionView extends StatefulWidget {
-  const EmbeddedExtensionView({Key? key, required this.controller})
-      : super(key: key);
+  const EmbeddedExtensionView({super.key, required this.controller});
 
   final EmbeddedExtensionController controller;
 

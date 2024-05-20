@@ -1,0 +1,29 @@
+name: standalone_extension
+description: An example of a standalone DevTools extension.
+publish_to: 'none'
+
+version: 1.0.0
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: '>=3.0.0'
+
+dependencies:
+  devtools_app_shared:
+    path: ../../../../devtools_app_shared
+  devtools_extensions:
+    path: ../../../../devtools_extensions 
+  flutter:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+
+dependency_overrides:
+  devtools_app_shared:
+    path: ../../../../devtools_app_shared
+  devtools_extensions:
+    path: ../../../../devtools_extensions 
+  devtools_shared:
+    path: ../../../../devtools_shared
+  flutter_lints: ^2.0.3

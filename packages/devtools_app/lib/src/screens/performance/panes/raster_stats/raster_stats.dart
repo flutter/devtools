@@ -40,8 +40,8 @@ class RasterStatsView extends StatelessWidget {
                 'Impeller backend.\nLearn more about the status of ',
             style: Theme.of(context).regularTextStyle,
             children: [
-              LinkTextSpan(
-                link: Link(
+              GaLinkTextSpan(
+                link: GaLink(
                   display: 'Impeller',
                   url: impellerDocsUrl,
                   gaScreenName: gac.performance,
@@ -159,10 +159,10 @@ class _LayerVisualizer extends StatelessWidget {
 @visibleForTesting
 class LayerSnapshotTable extends StatelessWidget {
   const LayerSnapshotTable({
-    Key? key,
+    super.key,
     required this.controller,
     required this.snapshots,
-  }) : super(key: key);
+  });
 
   static final _layerColumn = _LayerColumn();
   static final _timeColumn = _RenderingTimeColumn();
@@ -250,11 +250,11 @@ class _RenderingTimePercentageColumn extends ColumnData<LayerSnapshot> {
 @visibleForTesting
 class LayerImage extends StatelessWidget {
   const LayerImage({
-    Key? key,
+    super.key,
     required this.snapshot,
     required this.originalFrameSize,
     this.includeFullScreenButton = false,
-  }) : super(key: key);
+  });
 
   final LayerSnapshot? snapshot;
 
@@ -362,10 +362,9 @@ class LayerImage extends StatelessWidget {
 
 class _FullScreenButton extends StatelessWidget {
   const _FullScreenButton({
-    Key? key,
     required this.snapshot,
     required this.originalFrameSize,
-  }) : super(key: key);
+  });
 
   final LayerSnapshot snapshot;
 
@@ -402,10 +401,9 @@ class _FullScreenButton extends StatelessWidget {
 
 class _LayerImageDialog extends StatelessWidget {
   const _LayerImageDialog({
-    Key? key,
     required this.snapshot,
     required this.originalFrameSize,
-  }) : super(key: key);
+  });
 
   final LayerSnapshot snapshot;
 

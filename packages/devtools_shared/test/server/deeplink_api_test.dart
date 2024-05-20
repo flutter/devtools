@@ -10,7 +10,6 @@ import 'package:devtools_shared/src/extensions/extension_manager.dart';
 import 'package:devtools_shared/src/server/server_api.dart';
 import 'package:shelf/shelf.dart';
 import 'package:test/test.dart';
-import 'package:unified_analytics/unified_analytics.dart';
 
 import '../fakes.dart';
 
@@ -35,9 +34,8 @@ void main() {
       };
       final response = await ServerApi.handle(
         request,
-        extensionsManager: ExtensionsManager(buildDir: '/'),
+        extensionsManager: ExtensionsManager(),
         deeplinkManager: fakeManager,
-        analytics: const NoOpAnalytics(),
       );
       expect(response.statusCode, HttpStatus.ok);
       expect(await response.readAsString(), '["debug", "release]');
@@ -57,9 +55,8 @@ void main() {
         );
         final response = await ServerApi.handle(
           request,
-          extensionsManager: ExtensionsManager(buildDir: '/'),
+          extensionsManager: ExtensionsManager(),
           deeplinkManager: FakeDeeplinkManager(),
-          analytics: const NoOpAnalytics(),
         );
         expect(response.statusCode, HttpStatus.badRequest);
       },
@@ -87,9 +84,8 @@ void main() {
       };
       final response = await ServerApi.handle(
         request,
-        extensionsManager: ExtensionsManager(buildDir: '/'),
+        extensionsManager: ExtensionsManager(),
         deeplinkManager: fakeManager,
-        analytics: const NoOpAnalytics(),
       );
       expect(response.statusCode, HttpStatus.ok);
       expect(await response.readAsString(), someMessage);
@@ -117,9 +113,8 @@ void main() {
       };
       final response = await ServerApi.handle(
         request,
-        extensionsManager: ExtensionsManager(buildDir: '/'),
+        extensionsManager: ExtensionsManager(),
         deeplinkManager: fakeManager,
-        analytics: const NoOpAnalytics(),
       );
       expect(response.statusCode, HttpStatus.ok);
       expect(await response.readAsString(), someMessage);
@@ -152,9 +147,8 @@ void main() {
         };
         final response = await ServerApi.handle(
           request,
-          extensionsManager: ExtensionsManager(buildDir: '/'),
+          extensionsManager: ExtensionsManager(),
           deeplinkManager: fakeManager,
-          analytics: const NoOpAnalytics(),
         );
         expect(response.statusCode, HttpStatus.ok);
         expect(await response.readAsString(), someMessage);

@@ -77,7 +77,7 @@ void main() {
           debugger: mockDebuggerController,
           analytics: AnalyticsController(
             enabled: false,
-            firstRun: false,
+            shouldShowConsentMessage: false,
             consentMessage: 'fake message',
           ),
           releaseNotes: ReleaseNotesController(),

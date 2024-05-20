@@ -18,16 +18,14 @@ import '../controller/chart_pane_controller.dart';
 import '../data/charts.dart';
 import 'chart_control_pane.dart';
 import 'legend.dart';
-import 'memory_android_chart.dart';
-import 'memory_events_pane.dart';
-import 'memory_vm_chart.dart';
+import 'memory_chart.dart';
 
 class MemoryChartPane extends StatefulWidget {
   const MemoryChartPane({
-    Key? key,
+    super.key,
     required this.chart,
     required this.keyFocusNode,
-  }) : super(key: key);
+  });
   final MemoryChartPaneController chart;
 
   /// Which widget's key press will be handled by chart.
@@ -98,7 +96,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
       }
 
       final allValues = ChartsValues(
-        widget.chart.memoryTimeline,
+        widget.chart.data.timeline,
         isAndroidChartVisible: widget.chart.isAndroidChartVisible,
         index: value.index,
         timestamp: value.timestamp ?? _timestamp,
@@ -136,30 +134,15 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
       _addTapLocationListener(location, allLocations);
     }
 
-    addAutoDisposeListener(widget.chart.refreshCharts, () {
-      setState(() {
-        widget.chart.recomputeChartData();
-      });
-    });
-
     // There is no listener passed, so SetState will be invoked.
     addAutoDisposeListener(
       widget.chart.isAndroidChartVisible,
     );
-
-    _updateListeningState();
-  }
-
-  void _updateListeningState() async {
-    await serviceConnection.serviceManager.onServiceAvailable;
-
-    if (!widget.chart.hasStarted) {
-      widget.chart.startTimeline();
-    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final sampleAdded = widget.chart.data.timeline.sampleAdded;
     const memoryEventsPainHeight = 70.0;
     return ValueListenableBuilder<bool>(
       valueListenable: preferences.memory.showChart,
@@ -184,16 +167,13 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
                   children: [
                     SizedBox(
                       height: memoryEventsPainHeight,
-                      child: MemoryEventsPane(widget.chart.event),
+                      child: MemoryChart(widget.chart.event, sampleAdded),
                     ),
-                    MemoryVMChart(widget.chart.vm),
+                    MemoryChart(widget.chart.vm, sampleAdded),
                     if (widget.chart.isAndroidChartVisible.value)
                       SizedBox(
                         height: defaultChartHeight,
-                        child: MemoryAndroidChart(
-                          widget.chart.android,
-                          widget.chart.memoryTimeline,
-                        ),
+                        child: MemoryChart(widget.chart.android, sampleAdded),
                       ),
                   ],
                 ),
@@ -201,7 +181,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
               // The legend.
               MultiValueListenableBuilder(
                 listenables: [
-                  widget.chart.isLegendVisible,
+                  widget.chart.data.isLegendVisible,
                   widget.chart.isAndroidChartVisible,
                 ],
                 builder: (_, values, __) {
@@ -233,8 +213,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
   @override
   void dispose() {
-    _hideHover(); // hover will leak if not hide
-    widget.chart.stopTimeLine();
+    _hideHover();
     super.dispose();
   }
 

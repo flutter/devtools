@@ -125,7 +125,7 @@ class PerformanceController extends DisposableController
             .serviceManager.service!.onExtensionEventWithHistorySafe
             .listen((event) {
           if (event.extensionKind == 'Flutter.Frame') {
-            final frame = FlutterFrame.parse(event.extensionData!.data);
+            final frame = FlutterFrame.fromJson(event.extensionData!.data);
             enhanceTracingController.assignStateForFrame(frame);
             flutterFramesController.addFrame(frame);
           } else if (event.extensionKind == 'Flutter.RebuiltWidgets' &&
@@ -149,10 +149,19 @@ class PerformanceController extends DisposableController
         PerformanceScreen.id,
         // TODO(kenz): make sure DevTools exports can be loaded into the full
         // Perfetto trace viewer (ui.perfetto.dev).
-        createData: (json) => OfflinePerformanceData.parse(json),
+        createData: (json) => OfflinePerformanceData.fromJson(json),
         shouldLoad: (data) => !data.isEmpty,
+        loadData: _loadOfflineData,
       );
     }
+  }
+
+  Future<void> _loadOfflineData(OfflinePerformanceData data) async {
+    await clearData();
+    offlinePerformanceData = data;
+    await _applyToFeatureControllersAsync(
+      (c) => c.setOfflineData(offlinePerformanceData!),
+    );
   }
 
   void _fetchMissingRebuildLocations() async {
@@ -248,15 +257,6 @@ class PerformanceController extends DisposableController
           displayRefreshRate: flutterFramesController.displayRefreshRate.value,
         ).toJson(),
       );
-
-  @override
-  FutureOr<void> processOfflineData(OfflinePerformanceData offlineData) async {
-    await clearData();
-    offlinePerformanceData = offlineData;
-    await _applyToFeatureControllersAsync(
-      (c) => c.setOfflineData(offlinePerformanceData!),
-    );
-  }
 }
 
 abstract class PerformanceFeatureController extends DisposableController {

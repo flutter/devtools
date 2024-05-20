@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
+
 enum ChartType {
   dartHeaps,
   androidHeaps,
@@ -22,4 +24,10 @@ enum ChartInterval {
   final Duration? duration;
 
   final String displayName;
+
+  static ChartInterval? byName(String name) {
+    return values.firstWhereOrNull((i) => i.name == name);
+  }
 }
+
+const Duration chartUpdateDelay = Duration(milliseconds: 500);

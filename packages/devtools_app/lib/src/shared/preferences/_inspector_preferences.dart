@@ -4,9 +4,23 @@
 
 part of 'preferences.dart';
 
+enum InspectorDetailsViewType {
+  layoutExplorer(nameOverride: 'Layout Explorer'),
+  widgetDetailsTree(nameOverride: 'Widget Details Tree');
+
+  const InspectorDetailsViewType({String? nameOverride})
+      : _nameOverride = nameOverride;
+
+  final String? _nameOverride;
+
+  String get key => _nameOverride ?? name;
+}
+
 class InspectorPreferencesController extends DisposableController
     with AutoDisposeControllerMixin {
   ValueListenable<bool> get hoverEvalModeEnabled => _hoverEvalMode;
+  ValueListenable<InspectorDetailsViewType> get defaultDetailsView =>
+      _defaultDetailsView;
   ListValueNotifier<String> get pubRootDirectories => _pubRootDirectories;
   ValueListenable<bool> get isRefreshingPubRootDirectories =>
       _pubRootDirectoriesAreBusy;
@@ -17,7 +31,13 @@ class InspectorPreferencesController extends DisposableController
   final _pubRootDirectories = ListValueNotifier<String>([]);
   final _pubRootDirectoriesAreBusy = ValueNotifier<bool>(false);
   final _busyCounter = ValueNotifier<int>(0);
+  final _defaultDetailsView = ValueNotifier<InspectorDetailsViewType>(
+    InspectorDetailsViewType.layoutExplorer,
+  );
+
   static const _hoverEvalModeStorageId = 'inspector.hoverEvalMode';
+  static const _defaultDetailsViewStorageId =
+      'inspector.defaultDetailsViewType';
   static const _customPubRootDirectoriesStoragePrefix =
       'inspector.customPubRootDirectories';
   String? _mainScriptDir;
@@ -40,6 +60,7 @@ class InspectorPreferencesController extends DisposableController
     await _initHoverEvalMode();
     // TODO(jacobr): consider initializing this first as it is not blocking.
     _initPubRootDirectories();
+    await _initDefaultInspectorDetailsView();
   }
 
   Future<void> _initHoverEvalMode() async {
@@ -60,6 +81,27 @@ class InspectorPreferencesController extends DisposableController
     hoverEvalModeEnabledValue ??=
         (_inspectorService?.hoverEvalModeEnabledByDefault ?? false).toString();
     setHoverEvalMode(hoverEvalModeEnabledValue == 'true');
+  }
+
+  Future<void> _initDefaultInspectorDetailsView() async {
+    await _updateInspectorDetailsViewSelection();
+
+    addAutoDisposeListener(_defaultDetailsView, () {
+      storage.setValue(
+        _defaultDetailsViewStorageId,
+        _defaultDetailsView.value.name.toString(),
+      );
+    });
+  }
+
+  Future<void> _updateInspectorDetailsViewSelection() async {
+    final inspectorDetailsView =
+        await storage.getValue(_defaultDetailsViewStorageId);
+
+    if (inspectorDetailsView != null) {
+      _defaultDetailsView.value = InspectorDetailsViewType.values
+          .firstWhere((e) => e.name.toString() == inspectorDetailsView);
+    }
   }
 
   void _initPubRootDirectories() {
@@ -119,6 +161,7 @@ class InspectorPreferencesController extends DisposableController
     await _updateMainScriptRef();
     await _updateHoverEvalMode();
     await loadPubRootDirectories();
+    await _updateInspectorDetailsViewSelection();
   }
 
   Future<void> loadPubRootDirectories() async {
@@ -169,8 +212,9 @@ class InspectorPreferencesController extends DisposableController
   /// directories are for the current project so we make a best guess based on
   /// the root library for the main isolate.
   Future<String?> _inferPubRootDirectory() async {
-    final path = await serviceConnection.rootLibraryForMainIsolate();
-    if (path == null) {
+    final fileUriString =
+        await serviceConnection.mainIsolateRootLibraryUriAsString();
+    if (fileUriString == null) {
       return null;
     }
     // TODO(jacobr): Once https://github.com/flutter/flutter/issues/26615 is
@@ -179,7 +223,7 @@ class InspectorPreferencesController extends DisposableController
     // TODO(jacobr): use the list of loaded scripts to determine the appropriate
     // package root directory given that the root script of this project is in
     // this directory rather than guessing based on url structure.
-    final parts = path.split('/');
+    final parts = fileUriString.split('/');
     String? pubRootDirectory;
     // For google3, we grab the top-level directory in the google3 directory
     // (e.g. /education), or the top-level directory in third_party (e.g.
@@ -187,7 +231,7 @@ class InspectorPreferencesController extends DisposableController
     if (isGoogle3Path(parts)) {
       pubRootDirectory = _pubRootDirectoryForGoogle3(parts);
     } else {
-      final parts = path.split('/');
+      final parts = fileUriString.split('/');
 
       for (int i = parts.length - 1; i >= 0; i--) {
         final part = parts[i];
@@ -327,5 +371,9 @@ class InspectorPreferencesController extends DisposableController
   /// Change the value for the hover eval mode setting.
   void setHoverEvalMode(bool enableHoverEvalMode) {
     _hoverEvalMode.value = enableHoverEvalMode;
+  }
+
+  void setDefaultInspectorDetailsView(InspectorDetailsViewType value) {
+    _defaultDetailsView.value = value;
   }
 }

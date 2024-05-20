@@ -10,12 +10,36 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/config_specific/import_export/import_export.dart';
 import '../../../../shared/globals.dart';
+import '../../../../shared/primitives/simple_items.dart';
 import '../../shared/heap/class_filter.dart';
 import 'model.dart';
 
 class ProfilePaneController extends DisposableController
     with AutoDisposeControllerMixin {
-  final _exportController = ExportController();
+  ProfilePaneController({required this.mode, AdaptedProfile? profile})
+      : assert(profile == null || mode != ControllerCreationMode.connected) {
+    if (profile != null) {
+      _currentAllocationProfile.value = profile;
+      _initializeSelection();
+    }
+  }
+
+  factory ProfilePaneController.fromJson(Map<String, dynamic> json) {
+    return ProfilePaneController(
+      mode: ControllerCreationMode.offlineData,
+      profile: AdaptedProfile.fromJson(json[_jsonProfile]),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      _jsonProfile: _currentAllocationProfile.value?.toJson(),
+    };
+  }
+
+  static const _jsonProfile = 'profile';
+
+  final ControllerCreationMode mode;
 
   /// The current profile being displayed.
   ValueListenable<AdaptedProfile?> get currentAllocationProfile =>
@@ -33,7 +57,18 @@ class ProfilePaneController extends DisposableController
 
   /// Current class filter.
   ValueListenable<ClassFilter> get classFilter => _classFilter;
-  final _classFilter = ValueNotifier(ClassFilter.empty());
+  final _classFilter = ValueNotifier(ClassFilter.theDefault());
+  void setFilter(ClassFilter filter) {
+    if (filter == _classFilter.value) return;
+    _classFilter.value = filter;
+    final currentProfile = _currentAllocationProfile.value;
+    if (currentProfile == null) return;
+    _currentAllocationProfile.value = AdaptedProfile.withNewFilter(
+      currentProfile,
+      classFilter.value,
+      _rootPackage,
+    );
+  }
 
   late final _rootPackage =
       serviceConnection.serviceManager.rootInfoNow().package;
@@ -60,18 +95,6 @@ class ProfilePaneController extends DisposableController
     );
     unawaited(refresh());
     _initialized = true;
-  }
-
-  void setFilter(ClassFilter filter) {
-    if (filter == _classFilter.value) return;
-    _classFilter.value = filter;
-    final currentProfile = _currentAllocationProfile.value;
-    if (currentProfile == null) return;
-    _currentAllocationProfile.value = AdaptedProfile.withNewFilter(
-      currentProfile,
-      classFilter.value,
-      _rootPackage,
-    );
   }
 
   @visibleForTesting
@@ -164,7 +187,7 @@ class ProfilePaneController extends DisposableController
         ].join(','),
       );
     }
-    _exportController.downloadFile(
+    ExportController().downloadFile(
       csvBuffer.toString(),
       type: ExportFileType.csv,
     );

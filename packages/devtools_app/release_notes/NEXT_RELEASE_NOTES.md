@@ -1,9 +1,9 @@
 This is draft for future release notes, that are going to land on
 [the Flutter website](https://docs.flutter.dev/tools/devtools/release-notes).
 
-# DevTools 2.35.0 release notes
+# DevTools 2.36.0 release notes
 
-The 2.35.0 release of the Dart and Flutter DevTools
+The 2.36.0 release of the Dart and Flutter DevTools
 includes the following changes among other general improvements.
 To learn more about DevTools, check out the
 [DevTools overview](/tools/devtools/overview).
@@ -26,8 +26,7 @@ TODO: Remove this section if there are not any general updates.
 
 ## Memory updates
 
-* Replaced total size with reachable size in snapshot list. -
-[#7493](https://github.com/flutter/devtools/pull/7493)
+TODO: Remove this section if there are not any general updates.
 
 ## Debugger updates
 
@@ -35,7 +34,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## Network profiler updates
 
-TODO: Remove this section if there are not any general updates.
+* Add better support for narrow viewing windows, like when this
+screen is embedded in the IDE. - [#7726](https://github.com/flutter/devtools/pull/7726)
 
 ## Logging updates
 
@@ -47,7 +47,7 @@ TODO: Remove this section if there are not any general updates.
 
 ## Deep links tool updates
 
-* Improve layout for narrow screens. - [#7524](https://github.com/flutter/devtools/pull/7524)
+TODO: Remove this section if there are not any general updates.
 
 ## VS Code Sidebar updates
 
@@ -55,9 +55,15 @@ TODO: Remove this section if there are not any general updates.
 
 ## DevTools Extension updates
 
-TODO: Remove this section if there are not any general updates.
+* Fix an issue with detecting extensions for Dart or Flutter
+tests. - [#7717](https://github.com/flutter/devtools/pull/7717)
+* Fix an issue with detecting extensions for nested Dart or Flutter
+projects. - [#7742](https://github.com/flutter/devtools/pull/7742)
+* Add an example to `package:devtools_extensions` that shows how to
+interact with the Dart Tooling Daemon from a DevTools
+extension. - [#7752](https://github.com/flutter/devtools/pull/7752)
 
 ## Full commit history
 
 To find a complete list of changes in this release, check out the
-[DevTools git log](https://github.com/flutter/devtools/tree/v2.35.0).
+[DevTools git log](https://github.com/flutter/devtools/tree/v2.36.0).

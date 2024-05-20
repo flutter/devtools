@@ -91,18 +91,14 @@ class ExampleController extends DisposableController
     } else {
       await maybeLoadOfflineData(
         ExampleConditionalScreen.id,
-        createData: (json) => ExampleScreenData.parse(json),
+        createData: (json) => ExampleScreenData.fromJson(json),
         shouldLoad: (data) => data.title.isNotEmpty,
+        loadData: (data) => this.data.value = data,
       );
     }
   }
 
   // Overrides for [OfflineScreenControllerMixin]
-
-  @override
-  FutureOr<void> processOfflineData(ExampleScreenData offlineData) {
-    data.value = offlineData;
-  }
 
   @override
   OfflineScreenData prepareOfflineScreenData() {
@@ -116,7 +112,7 @@ class ExampleController extends DisposableController
 class ExampleScreenData {
   ExampleScreenData(this.title);
 
-  factory ExampleScreenData.parse(Map<String, Object?> json) {
+  factory ExampleScreenData.fromJson(Map<String, Object?> json) {
     return ExampleScreenData(json[_titleKey] as String);
   }
 

@@ -57,3 +57,15 @@ enum DocLinks {
     return '$url#$hash';
   }
 }
+
+/// The DevTools mode in which a controller object was created.
+enum ControllerCreationMode {
+  /// Not interacting with app or data from a previous session.
+  disconnected,
+
+  /// Interacting with a connected application.
+  connected,
+
+  /// Showing data saved from a previous session and ignoring connection status.
+  offlineData,
+}

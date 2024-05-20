@@ -7,8 +7,9 @@
 @JS()
 library;
 
+import 'dart:js_interop';
+
 import 'package:flutter/foundation.dart';
-import 'package:js/js.dart';
 
 import '../../shared/development_helpers.dart';
 import 'analytics.dart' as ga;
@@ -17,7 +18,7 @@ import 'analytics.dart' as ga;
 /// For debugging install the Chrome Plugin "Google Analytics Debugger".
 
 @JS('gtag')
-external void _gTagCommandName(String command, String name, [Object? params]);
+external void _gTagCommandName(String command, String name, [JSObject? params]);
 
 // TODO(jacobr): refactor this code if we do not migrate off gtags.
 // ignore: avoid_classes_with_only_static_members
@@ -30,7 +31,7 @@ class GTag {
     String eventName, {
     required GtagEvent Function() gaEventProvider,
   }) async {
-    if (debugAnalytics || (kReleaseMode && await ga.isAnalyticsEnabled())) {
+    if (debugSendAnalytics || (kReleaseMode && await ga.isAnalyticsEnabled())) {
       _gTagCommandName(_event, eventName, gaEventProvider());
     }
   }
@@ -38,44 +39,33 @@ class GTag {
   static void exception({
     required GtagException Function() gaExceptionProvider,
   }) async {
-    if (debugAnalytics || (kReleaseMode && await ga.isAnalyticsEnabled())) {
+    if (debugSendAnalytics || (kReleaseMode && await ga.isAnalyticsEnabled())) {
       _gTagCommandName(_event, _exception, gaExceptionProvider());
     }
   }
 }
 
-@JS()
-@anonymous
-class GtagEvent {
+extension type GtagEvent._(JSObject _) implements JSObject {
   external factory GtagEvent({
     String? event_category,
     String? event_label, // Event e.g., gaScreenViewEvent, gaSelectEvent, etc.
     String? send_to, // UA ID of target GA property to receive event data.
 
-    int value = 0,
-    bool non_interaction = false,
-    Object? custom_map,
+    int value,
+    bool non_interaction,
+    JSObject? custom_map,
   });
 
   external String? get event_category;
-
   external String? get event_label;
-
   external String? get send_to;
-
   external int get value; // Positive number.
   external bool get non_interaction;
-
-  external Object? get custom_map; // Custom metrics
+  external JSObject? get custom_map; // Custom metrics
 }
 
-@JS()
-@anonymous
-class GtagException {
-  external factory GtagException({
-    String? description,
-    bool fatal = false,
-  });
+extension type GtagException._(JSObject _) implements JSObject {
+  external factory GtagException({String? description, bool fatal});
 
   external String? get description; // Description of the error.
   external bool get fatal; // Fatal error.

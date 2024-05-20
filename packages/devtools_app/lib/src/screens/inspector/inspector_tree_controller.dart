@@ -39,13 +39,13 @@ class _InspectorTreeRowWidget extends StatefulWidget {
   /// Constructs a [_InspectorTreeRowWidget] that presents a line in the
   /// Inspector tree.
   const _InspectorTreeRowWidget({
-    required Key key,
+    required super.key,
     required this.row,
     required this.inspectorTreeState,
     this.error,
     required this.scrollControllerX,
     required this.viewportWidth,
-  }) : super(key: key);
+  });
 
   final _InspectorTreeState inspectorTreeState;
 
@@ -735,14 +735,13 @@ abstract class InspectorControllerClient {
 
 class InspectorTree extends StatefulWidget {
   const InspectorTree({
-    Key? key,
+    super.key,
     required this.treeController,
     this.summaryTreeController,
     this.isSummaryTree = false,
     this.widgetErrors,
     this.screenId,
-  })  : assert(isSummaryTree == (summaryTreeController == null)),
-        super(key: key);
+  }) : assert(isSummaryTree == (summaryTreeController == null));
 
   final InspectorTreeController? treeController;
 

@@ -4,6 +4,7 @@
 
 import 'package:devtools_shared/devtools_extensions.dart';
 
+import '../preferences/preferences.dart';
 import '../screen.dart';
 
 part 'constants/_cpu_profiler_constants.dart';
@@ -41,6 +42,7 @@ final deeplink = ScreenMetaData.deepLinks.id;
 // GA events not associated with a any screen e.g., hotReload, hotRestart, etc
 const devToolsMain = 'main';
 const appDisconnected = 'appDisconnected';
+const init = 'init';
 
 // DevTools UI action selected (clicked).
 
@@ -77,6 +79,10 @@ const treeNodeSelection = 'treeNodeSelection';
 const inspectorSettings = 'inspectorSettings';
 const loggingSettings = 'loggingSettings';
 const refreshPubRoots = 'refreshPubRoots';
+final defaultDetailsViewToLayoutExplorer =
+    InspectorDetailsViewType.layoutExplorer.name;
+final defaultDetailsViewToWidgetDetails =
+    InspectorDetailsViewType.widgetDetailsTree.name;
 
 enum HomeScreenEvents {
   connectToApp,

@@ -21,6 +21,7 @@ import '../../../test_infra/test_data/memory.dart';
 import '../../../test_infra/test_data/memory_allocation.dart';
 import '../../test_data/memory/heap/heap_data.dart';
 import '../../test_data/memory/heap/heap_graph_fakes.dart';
+import '../scene_test_extensions.dart';
 
 // To run:
 // flutter run -t test/test_infra/scenes/memory/default.stager_app.g.dart -d macos
@@ -79,6 +80,13 @@ class MemoryDefaultScene extends Scene {
     );
   }
 
+  Future<void> pump(WidgetTester tester) async {
+    await tester.pumpSceneAsync(this);
+    // Delay to ensure the memory profiler has collected data.
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(find.byType(MemoryBody), findsOneWidget);
+  }
+
   @override
 
   /// Sets up the scene.
@@ -127,6 +135,7 @@ class MemoryDefaultScene extends Scene {
     when(fakeServiceConnection.serviceManager.vm.operatingSystem)
         .thenReturn('ios');
     setGlobal(ServiceConnectionManager, fakeServiceConnection);
+    setGlobal(OfflineDataController, OfflineDataController());
 
     final showAllFilter = ClassFilter(
       filterType: ClassFilterType.showAll,
@@ -135,17 +144,23 @@ class MemoryDefaultScene extends Scene {
     );
 
     final diffController =
-        DiffPaneController(HeapGraphLoaderProvided(heapProviders))
+        DiffPaneController(loader: HeapGraphLoaderProvided(heapProviders))
           ..derived.applyFilter(showAllFilter);
 
-    final profileController = ProfilePaneController()..setFilter(showAllFilter);
+    final profileController =
+        ProfilePaneController(mode: ControllerCreationMode.connected)
+          ..setFilter(showAllFilter);
 
     controller = MemoryController(
-      diffPaneController: diffController,
-      profilePaneController: profileController,
-    )
-      ..chart.memoryTimeline.offlineData.clear()
-      ..chart.memoryTimeline.offlineData.addAll(memoryJson.data);
+      connectedDiff: diffController,
+      connectedProfile: profileController,
+    );
+
+    await controller.initialized;
+
+    controller.chart.data.timeline.data
+      ..clear()
+      ..addAll(memoryJson.data);
   }
 
   @override
