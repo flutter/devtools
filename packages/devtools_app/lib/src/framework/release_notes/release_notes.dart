@@ -32,7 +32,7 @@ const String? _debugReleaseNotesUrl = null;
 
 const releaseNotesKey = Key('release_notes');
 final _baseUrlRelativeMarkdownLinkPattern = RegExp(
-  r'(\[.*?]\()(\/.*\s*)',
+  r'(\[.*?]\()(/.*\s*)',
   multiLine: true,
 );
 const _releaseNotesPath = '/f/devtools-releases.json';
@@ -149,7 +149,7 @@ class ReleaseNotesController extends SidePanelController {
     // release notes (e.g. 2.11.4 -> 2.11.3 -> 2.11.2 -> ...).
     while (patchToCheck >= minimumPatch) {
       final releaseToCheck = '$majorMinor.$patchToCheck';
-      if (releases[releaseToCheck] case final String releaseNotePath) {
+      if (releases[releaseToCheck] case final releaseNotePath?) {
         final String releaseNotesMarkdown;
         try {
           releaseNotesMarkdown = await http.read(
@@ -205,7 +205,7 @@ class ReleaseNotesController extends SidePanelController {
   /// Calls [_emptyAndClose] and returns `null` if
   /// the retrieval or parsing fails.
   @visibleForTesting
-  Future<Map<String, Object?>?> retrieveReleasesFromIndex() async {
+  Future<Map<String, String>?> retrieveReleasesFromIndex() async {
     final Map<String, Object?> releaseIndex;
     try {
       final releaseIndexString = await http.read(releaseIndexUrl);
@@ -223,7 +223,7 @@ class ReleaseNotesController extends SidePanelController {
       );
       return null;
     }
-    return releaseIndex;
+    return releases.cast<String, String>();
   }
 
   /// Set the release notes viewer as having no contents, hidden,
