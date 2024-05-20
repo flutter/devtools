@@ -47,7 +47,9 @@ class DiffSnapshotScene extends Scene {
     setGlobal(ServiceConnectionManager, fakeServiceConnection);
 
     diffController = DiffPaneController(
-        loader: HeapGraphLoaderGoldens(), rootPackage: 'root');
+      loader: HeapGraphLoaderGoldens(),
+      rootPackage: 'root',
+    );
     setClassFilterToShowAll();
 
     await diffController.takeSnapshot();
