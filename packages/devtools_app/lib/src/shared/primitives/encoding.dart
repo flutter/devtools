@@ -33,8 +33,8 @@ class HeapSnapshotGraphEncodeDecode extends EncodeDecode<HeapSnapshotGraph> {
   @override
   HeapSnapshotGraph decode(Object value) {
     if (value is HeapSnapshotGraph) return value;
-
-    value = (value as List).cast<String>();
+    if (value is String) value = jsonDecode(value);
+    value = value as List;
     final chunks =
         value.map((s) => ByteDataEncodeDecode.instance.decode(s)).toList();
     return HeapSnapshotGraph.fromChunks(chunks);

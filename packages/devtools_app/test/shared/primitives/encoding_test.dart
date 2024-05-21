@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:devtools_app/src/shared/primitives/encoding.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,23 +10,24 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../test_infra/test_data/memory/heap/heap_data.dart';
 
 void main() {
-  test('$HeapSnapshotGraphEncodeDecode', () async {
+  test('$HeapSnapshotGraphEncodeDecode and $ByteDataEncodeDecode', () async {
     final (graph, _) = await HeapGraphLoaderGoldens().load();
     final encodeDecode = HeapSnapshotGraphEncodeDecode.instance;
 
-    final encoded = encodeDecode.toEncodable(graph);
+    final encoded = jsonEncode(graph, toEncodable: toEncodable);
     final decoded = encodeDecode.decode(encoded);
 
     expect(decoded.classes.length, graph.classes.length);
+    expect(decoded.objects.length, graph.objects.length);
   });
 
-  test('$ByteDataEncodeDecode', () async {
-    final (graph, _) = await HeapGraphLoaderGoldens().load();
-    final encodeDecode = HeapSnapshotGraphEncodeDecode.instance;
+  test('$DateTimeEncodeDecode', () {
+    final date = DateTime.now();
+    final encodeDecode = DateTimeEncodeDecode.instance;
 
-    final encoded = encodeDecode.toEncodable(graph);
+    final encoded = encodeDecode.toEncodable(date);
     final decoded = encodeDecode.decode(encoded);
 
-    expect(decoded.classes.length, graph.classes.length);
+    expect(decoded, date);
   });
 }
