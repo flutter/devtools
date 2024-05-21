@@ -349,14 +349,14 @@ Future<void> _changeExtensionSetting(
 Future<void> _verifyExtensionVisibilitySetting(WidgetTester tester) async {
   logStatus('verify we can toggle the "show only enabled extensions" setting');
   expect(
-    preferences.devToolsExtensions.showOnlyEnabledExtensions,
+    preferences.devToolsExtensions.showOnlyEnabledExtensions.value,
     isFalse,
   );
   expect(extensionService.visibleExtensions.length, 5);
   // No need to open the settings menu as it should already be open.
   await _toggleShowOnlyEnabledExtensions(tester);
   expect(
-    preferences.devToolsExtensions.showOnlyEnabledExtensions,
+    preferences.devToolsExtensions.showOnlyEnabledExtensions.value,
     isTrue,
   );
   expect(extensionService.visibleExtensions.length, 0);
@@ -364,7 +364,7 @@ Future<void> _verifyExtensionVisibilitySetting(WidgetTester tester) async {
   // Return the setting to its original state.
   await _toggleShowOnlyEnabledExtensions(tester);
   expect(
-    preferences.devToolsExtensions.showOnlyEnabledExtensions,
+    preferences.devToolsExtensions.showOnlyEnabledExtensions.value,
     isFalse,
   );
   expect(extensionService.visibleExtensions.length, 5);
