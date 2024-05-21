@@ -3,9 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:devtools_app_shared/service.dart';
 import 'package:intl/intl.dart';
+import 'package:meta/meta.dart';
 
 import '../../../../devtools.dart';
 import '../../globals.dart';
@@ -174,6 +176,22 @@ abstract class ExportController {
 
   String encode(Map<String, dynamic> offlineScreenData) {
     final data = generateDataForExport(offlineScreenData: offlineScreenData);
-    return jsonEncode(data);
+    return jsonEncode(
+      data,
+      toEncodable: toEncodable,
+    );
   }
+}
+
+@visibleForTesting
+Object? toEncodable(Object? value) {
+  if (value is ByteData) {
+    return _byteDataToEncodable(value);
+  }
+  throw UnsupportedError('Cannot convert to JSON: $value');
+}
+
+String _byteDataToEncodable(ByteData value) {
+  final list = value.buffer.asUint8List();
+  return base64Encode(list);
 }
