@@ -47,7 +47,7 @@ class HeapGraphLoaderFile implements HeapGraphLoader {
   }
 }
 
-/// Loads a heap snapshot from `List<ByteData>` created with HeapSnapshotGraph.toChunks.
+/// Loads a heap snapshot directly with instance of graph.
 class HeapGraphLoaderDirect implements HeapGraphLoader {
   HeapGraphLoaderDirect({required this.graph, required this.created});
 
@@ -60,17 +60,3 @@ class HeapGraphLoaderDirect implements HeapGraphLoader {
     return (graph, created);
   }
 }
-
-// /// Loads a heap snapshot from `List<ByteData>` created with HeapSnapshotGraph.toChunks.
-// class HeapGraphLoaderFromChunks implements HeapGraphLoader {
-//   HeapGraphLoaderFromChunks({required this.chunks, required this.created});
-
-//   final List<ByteData> chunks;
-
-//   final DateTime created;
-
-//   @override
-//   (HeapSnapshotGraph, DateTime) load() {
-//     return (HeapSnapshotGraph.fromChunks(chunks), created);
-//   }
-// }
