@@ -117,6 +117,7 @@ class MemoryController extends DisposableController
         }
     }
     assert(_dataInitialized.isCompleted);
+    assert(profile == null || profile!.rootPackage == diff.core.rootPackage);
   }
 
   void _initializeData({
