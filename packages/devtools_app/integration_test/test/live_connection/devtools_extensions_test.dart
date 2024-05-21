@@ -193,8 +193,7 @@ Future<void> _switchToExtensionScreen(
   required int extensionIndex,
   bool initialLoad = false,
 }) async {
-  final extensionConfig =
-      extensionService.availableExtensions[extensionIndex];
+  final extensionConfig = extensionService.availableExtensions[extensionIndex];
   await switchToScreen(
     tester,
     tabIcon: extensionConfig.icon,
@@ -222,8 +221,7 @@ Future<void> _verifyExtensionTabVisibility(
     'verify the extension at index $extensionIndex is '
     '${!visible ? 'not' : ''} visible',
   );
-  final extensionConfig =
-      extensionService.availableExtensions[extensionIndex];
+  final extensionConfig = extensionService.availableExtensions[extensionIndex];
   final tabFinder = await findTab(tester, extensionConfig.icon);
   expect(tabFinder.evaluate(), visible ? isNotEmpty : isEmpty);
 }
