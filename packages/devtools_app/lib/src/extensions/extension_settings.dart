@@ -25,7 +25,8 @@ class ExtensionSettingsAction extends ScaffoldAction {
               showDialog(
                 context: context,
                 builder: (context) => ExtensionSettingsDialog(
-                  extensions: extensionService.currentExtensions.value.availableExtensions,
+                  extensions: extensionService
+                      .currentExtensions.value.availableExtensions,
                 ),
               ),
             );
