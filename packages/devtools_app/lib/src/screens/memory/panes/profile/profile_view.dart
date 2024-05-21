@@ -536,6 +536,7 @@ class _AllocationProfileTable extends StatelessWidget {
       ClassFilterData(
         filter: controller.classFilter,
         onChanged: controller.setFilter,
+        rootPackage: controller.rootPackage,
       ),
     ),
     _FieldInstanceCountColumn(heap: HeapGeneration.total),

@@ -14,7 +14,6 @@ import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/config_specific/import_export/import_export.dart';
 import '../../../../../shared/file_import.dart';
-import '../../../../../shared/globals.dart';
 import '../../../../../shared/memory/class_name.dart';
 import '../../../../../shared/memory/classes.dart';
 import '../../../../../shared/memory/heap_graph_loader.dart';
@@ -32,14 +31,16 @@ import 'snapshot_item.dart';
 @visibleForTesting
 enum Json {
   snapshots,
-  diffWith;
+  diffWith,
+  rootPackage;
 }
 
 class DiffPaneController extends DisposableController {
   DiffPaneController({
     required this.loader,
+    required String? rootPackage,
     List<SnapshotDataItem>? snapshots,
-  }) {
+  }) : core = CoreData(rootPackage) {
     if (snapshots != null) {
       core._snapshots.addAll(snapshots);
     }
@@ -66,6 +67,7 @@ class DiffPaneController extends DisposableController {
     return DiffPaneController(
       loader: null,
       snapshots: snapshots,
+      rootPackage: json[Json.rootPackage.name] as String,
     );
   }
 
@@ -86,6 +88,7 @@ class DiffPaneController extends DisposableController {
     return {
       Json.snapshots.name: snapshots,
       Json.diffWith.name: diffWithIndices,
+      Json.rootPackage.name: core.rootPackage,
     };
   }
 
@@ -93,7 +96,7 @@ class DiffPaneController extends DisposableController {
 
   final retainingPathController = RetainingPathController();
 
-  final core = CoreData();
+  final CoreData core;
   late final derived = DerivedData(core);
 
   /// True, if the list contains snapshots, i.e. items beyond the first
@@ -229,8 +232,9 @@ class DiffPaneController extends DisposableController {
 /// Widgets should not update the fields directly, they should use
 /// [DiffPaneController] or [DerivedData] for this.
 class CoreData {
-  late final rootPackage =
-      serviceConnection.serviceManager.rootInfoNow().package;
+  CoreData(this.rootPackage);
+
+  final String? rootPackage;
 
   /// The list contains one item that show information and all others
   /// are snapshots.
@@ -274,6 +278,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     final classFilterData = ClassFilterData(
       filter: _core.classFilter,
       onChanged: applyFilter,
+      rootPackage: _core.rootPackage,
     );
 
     classesTableSingle = ClassesTableSingleData(
