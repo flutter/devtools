@@ -5,12 +5,11 @@
 import 'dart:async';
 
 import 'package:devtools_app_shared/utils.dart';
-import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../../shared/memory/heap_data.dart';
 import '../../../../../shared/memory/heap_graph_loader.dart';
-import '../../../../../shared/primitives/serialization.dart';
+import '../../../../../shared/primitives/encoding.dart';
 
 abstract class SnapshotItem extends DisposableController {
   /// Number to show with auto-generated names that may be non unique, like isolate name.
@@ -45,12 +44,15 @@ class SnapshotDataItem extends SnapshotItem implements RenamableItem {
       nameOverride: json[Json.nameOverride.name] as String?,
     );
 
-    final graph = decodeHeapSnapshotGraph(json[Json.graph.name]);
+    final graph = HeapSnapshotGraphEncodeDecode.instance
+        .decodeNullable(json[Json.graph.name]);
     if (graph == null) return result;
 
     final loader = HeapGraphLoaderDirect(
       graph: graph,
-      created: decodeDateTime(json[Json.created.name]) ?? DateTime.now(),
+      created: DateTimeEncodeDecode.instance
+              .decodeNullable(json[Json.created.name]) ??
+          DateTime.now(),
     );
 
     // Start the loading process, that will result in progress indicator in UI.

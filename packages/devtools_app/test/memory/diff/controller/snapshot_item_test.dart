@@ -5,7 +5,7 @@
 import 'dart:convert';
 
 import 'package:devtools_app/src/screens/memory/panes/diff/controller/snapshot_item.dart';
-import 'package:devtools_app/src/shared/primitives/serialization.dart';
+import 'package:devtools_app/src/shared/primitives/encoding.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../../test_infra/test_data/memory/heap/heap_data.dart';
