@@ -62,6 +62,8 @@ projects. - [#7742](https://github.com/flutter/devtools/pull/7742)
 * Add an example to `package:devtools_extensions` that shows how to
 interact with the Dart Tooling Daemon from a DevTools
 extension. - [#7752](https://github.com/flutter/devtools/pull/7752)
+* Fix a DevTools routing bug related to disabling an
+extension. - [#7791](https://github.com/flutter/devtools/pull/7791)
 
 ## Full commit history
 
