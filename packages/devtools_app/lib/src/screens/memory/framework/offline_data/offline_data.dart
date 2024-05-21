@@ -16,7 +16,8 @@ enum Json {
   classFilter,
   diffData,
   profileData,
-  chartData;
+  chartData,
+  rootPackage;
 }
 
 class OfflineMemoryData {
@@ -26,6 +27,7 @@ class OfflineMemoryData {
     this.chart,
     this.filter, {
     required this.selectedTab,
+    required this.rootPackage,
   });
 
   factory OfflineMemoryData.fromJson(Map<String, dynamic> json) {
@@ -44,6 +46,7 @@ class OfflineMemoryData {
         ClassFilter.fromJson,
       ),
       selectedTab: json[Json.selectedTab.name] as int? ?? 0,
+      rootPackage: json[Json.rootPackage.name] as String?,
     );
   }
 
@@ -54,11 +57,13 @@ class OfflineMemoryData {
       Json.profileData.name: profile,
       Json.chartData.name: chart,
       Json.classFilter.name: filter,
+      Json.rootPackage.name: rootPackage,
     };
   }
 
   final int selectedTab;
-  final ClassFilter filter; // filter is shared between tabs, so it's here
+  final ClassFilter filter; // shared between tabs, so it's here
+  final String? rootPackage; // shared between tabs, so it's here
 
   final DiffPaneController diff;
   final ProfilePaneController? profile;

@@ -133,25 +133,17 @@ class MemoryController extends DisposableController
         ? MemoryChartPaneController(mode, data: offlineData?.chart)
         : null;
 
-    final rootPackage = isConnected
-        ? serviceConnection.serviceManager.rootInfoNow().package!
-        : null;
-
     diff = diffPaneController ??
         offlineData?.diff ??
         DiffPaneController(
           loader:
               isConnected ? HeapGraphLoaderRuntime(chart!.data.timeline) : null,
-          rootPackage: rootPackage,
         );
 
     if (hasData) {
       profile = profilePaneController ??
           offlineData?.profile ??
-          ProfilePaneController(
-            mode: mode,
-            rootPackage: rootPackage!,
-          );
+          ProfilePaneController(mode: mode);
     } else {
       profile = null;
     }
@@ -167,10 +159,24 @@ class MemoryController extends DisposableController
     selectedFeatureTabIndex =
         offlineData?.selectedTab ?? selectedFeatureTabIndex;
 
-    if (offlineData != null) profile?.setFilter(offlineData.filter);
-    if (hasData) _shareClassFilterBetweenProfileAndDiff();
+    _initializeSharedData(offlineData);
 
     _dataInitialized.complete();
+  }
+
+  void _initializeSharedData(OfflineMemoryData? offlineData) {
+    // Root package.
+    final rootPackage = mode == ControllerCreationMode.connected
+        ? serviceConnection.serviceManager.rootInfoNow().package!
+        : offlineData?.rootPackage;
+    profile?.rootPackage = rootPackage;
+    diff.core.rootPackage = rootPackage;
+
+    // Class filter.
+    if (offlineData != null) profile?.setFilter(offlineData.filter);
+    if (mode != ControllerCreationMode.disconnected) {
+      _shareClassFilterBetweenProfileAndDiff();
+    }
   }
 
   @override
@@ -186,6 +192,7 @@ class MemoryController extends DisposableController
           chart?.data,
           diff.core.classFilter.value,
           selectedTab: selectedFeatureTabIndex,
+          rootPackage: diff.core.rootPackage,
         ),
       },
     );

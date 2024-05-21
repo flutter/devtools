@@ -84,6 +84,8 @@ class MemoryTabView extends StatelessWidget {
     final hasData = controller.mode != ControllerCreationMode.disconnected;
     return [
       if (hasData) _profile(),
+      // Diff is enabled even in disconnected mode to allow users to load
+      // snapshots from file.
       _diff(),
       if (hasData) _trace(),
     ];

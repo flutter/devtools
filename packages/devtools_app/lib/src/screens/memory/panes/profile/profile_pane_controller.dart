@@ -16,15 +16,13 @@ import 'model.dart';
 
 @visibleForTesting
 enum Json {
-  profile,
-  rootPackage;
+  profile;
 }
 
 class ProfilePaneController extends DisposableController
     with AutoDisposeControllerMixin {
   ProfilePaneController({
     required this.mode,
-    required this.rootPackage,
     AdaptedProfile? profile,
   }) : assert(
           (mode == ControllerCreationMode.connected && profile == null) ||
@@ -43,14 +41,12 @@ class ProfilePaneController extends DisposableController
     return ProfilePaneController(
       mode: ControllerCreationMode.offlineData,
       profile: AdaptedProfile.fromJson(json[Json.profile.name]),
-      rootPackage: json[Json.rootPackage.name],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       Json.profile.name: _currentAllocationProfile.value,
-      Json.rootPackage.name: rootPackage,
     };
   }
 
@@ -121,7 +117,7 @@ class ProfilePaneController extends DisposableController
     );
   }
 
-  final String rootPackage;
+  String? rootPackage;
 
   @visibleForTesting
   void clearCurrentProfile() => _currentAllocationProfile.value = null;
