@@ -41,7 +41,7 @@ void main() {
       await extensionService.initialize();
       expect(extensionService.staticExtensions.length, 4);
       expect(extensionService.runtimeExtensions.length, 3);
-      expect(extensionService.availableExtensions.value.length, 5);
+      expect(extensionService.availableExtensions.length, 5);
     });
 
     tearDown(() {

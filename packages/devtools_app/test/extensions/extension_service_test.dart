@@ -37,14 +37,14 @@ void main() {
       final service = ExtensionService(
         fixedAppRoot: Uri.parse('file:///Users/me/package_root_1'),
       );
-      expect(service.availableExtensions.value, isEmpty);
+      expect(service.availableExtensions, isEmpty);
       expect(service.staticExtensions, isEmpty);
       expect(service.runtimeExtensions, isEmpty);
 
       await service.initialize();
       expect(service.staticExtensions.length, 4);
       expect(service.runtimeExtensions.length, 3);
-      expect(service.availableExtensions.value.length, 5);
+      expect(service.availableExtensions.length, 5);
 
       final ignoredStaticExtensions =
           service.staticExtensions.where(service.isExtensionIgnored);
@@ -65,12 +65,12 @@ void main() {
       final service = ExtensionService(ignoreServiceConnection: true);
       expect(service.staticExtensions, isEmpty);
       expect(service.runtimeExtensions, isEmpty);
-      expect(service.availableExtensions.value, isEmpty);
+      expect(service.availableExtensions, isEmpty);
 
       await service.initialize();
       expect(service.staticExtensions.length, 4);
       expect(service.runtimeExtensions, isEmpty);
-      expect(service.availableExtensions.value.length, 1);
+      expect(service.availableExtensions.length, 1);
 
       final ignoredStaticExtensions =
           service.staticExtensions.where(service.isExtensionIgnored);
@@ -89,7 +89,7 @@ void main() {
       await service.initialize();
       expect(service.staticExtensions.length, 4);
       expect(service.runtimeExtensions.length, 3);
-      expect(service.availableExtensions.value.length, 5);
+      expect(service.availableExtensions.length, 5);
 
       Future<ExtensionEnabledState> enabledOnDisk(
         DevToolsExtensionConfig ext,

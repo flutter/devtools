@@ -124,10 +124,10 @@ class _DevToolsExtensionsState extends State<_DevToolsExtensions>
     _extensionService = ExtensionService(ignoreServiceConnection: true);
 
     cancelListeners();
-    extensions = _extensionService!.visibleExtensions.value;
-    addAutoDisposeListener(_extensionService!.visibleExtensions, () {
+    extensions = _extensionService!.visibleExtensions;
+    addAutoDisposeListener(_extensionService!.currentExtensions, () {
       setState(() {
-        extensions = _extensionService!.visibleExtensions.value;
+        extensions = _extensionService!.visibleExtensions;
       });
     });
 
