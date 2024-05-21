@@ -7,6 +7,7 @@ import 'dart:typed_data';
 
 import 'package:vm_service/vm_service.dart';
 
+/// Encodes and decodes a value of type [T].
 abstract class EncodeDecode<T> {
   Object toEncodable(T value);
 
@@ -18,6 +19,7 @@ abstract class EncodeDecode<T> {
   }
 }
 
+/// Encodes and decodes HeapSnapshotGraph.
 class HeapSnapshotGraphEncodeDecode extends EncodeDecode<HeapSnapshotGraph> {
   HeapSnapshotGraphEncodeDecode._();
 
@@ -39,6 +41,7 @@ class HeapSnapshotGraphEncodeDecode extends EncodeDecode<HeapSnapshotGraph> {
   }
 }
 
+/// Encodes and decodes ByteData.
 class ByteDataEncodeDecode extends EncodeDecode<ByteData> {
   ByteDataEncodeDecode._();
 
@@ -59,6 +62,7 @@ class ByteDataEncodeDecode extends EncodeDecode<ByteData> {
   }
 }
 
+/// Encodes and decodes DateTime.
 class DateTimeEncodeDecode extends EncodeDecode<DateTime> {
   DateTimeEncodeDecode._();
 
@@ -76,12 +80,7 @@ class DateTimeEncodeDecode extends EncodeDecode<DateTime> {
   }
 }
 
-final encoders = <Type, EncodeDecode>{
-  HeapSnapshotGraph: HeapSnapshotGraphEncodeDecode.instance,
-  ByteData: ByteDataEncodeDecode.instance,
-  DateTime: DateTimeEncodeDecode.instance,
-};
-
+/// Function to be passed to [jsonEncode] to enable encoding for more types.
 Object? toEncodable(Object? value) {
   if (value == null) return null;
 
