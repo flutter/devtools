@@ -193,6 +193,10 @@ class ReleaseNotesController extends SidePanelController {
 
   /// Convert all site-base-url relative links in [markdownContent]
   /// to absolute links from the specified [baseUrl].
+  ///
+  /// For example, if `baseUrl` is `https://docs.flutter.dev`,
+  /// the path `/tools/devtools` would be converted
+  /// to `https://docs.flutter.dev/tools/devtools`.
   String _convertBaseUrlRelativeLinks(String markdownContent, Uri baseUrl) =>
       markdownContent.replaceAllMapped(
         _baseUrlRelativeMarkdownLinkPattern,
