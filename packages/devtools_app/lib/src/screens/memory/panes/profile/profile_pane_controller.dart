@@ -14,10 +14,19 @@ import '../../../../shared/primitives/simple_items.dart';
 import '../../shared/heap/class_filter.dart';
 import 'model.dart';
 
+@visibleForTesting
+enum Json {
+  profile,
+  rootPackage;
+}
+
 class ProfilePaneController extends DisposableController
     with AutoDisposeControllerMixin {
-  ProfilePaneController({required this.mode, AdaptedProfile? profile})
-      : assert(
+  ProfilePaneController({
+    required this.mode,
+    required this.rootPackage,
+    AdaptedProfile? profile,
+  }) : assert(
           (mode == ControllerCreationMode.connected && profile == null) ||
               (mode == ControllerCreationMode.offlineData && profile != null),
         ) {
@@ -25,7 +34,7 @@ class ProfilePaneController extends DisposableController
       _currentAllocationProfile.value = AdaptedProfile.withNewFilter(
         profile,
         classFilter.value,
-        _rootPackage,
+        rootPackage,
       );
     }
   }
@@ -33,17 +42,17 @@ class ProfilePaneController extends DisposableController
   factory ProfilePaneController.fromJson(Map<String, dynamic> json) {
     return ProfilePaneController(
       mode: ControllerCreationMode.offlineData,
-      profile: AdaptedProfile.fromJson(json[_jsonProfile]),
+      profile: AdaptedProfile.fromJson(json[Json.profile.name]),
+      rootPackage: json[Json.rootPackage.name],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      _jsonProfile: _currentAllocationProfile.value,
+      Json.profile.name: _currentAllocationProfile.value,
+      Json.rootPackage.name: rootPackage,
     };
   }
-
-  static const _jsonProfile = 'profile';
 
   final ControllerCreationMode mode;
 
@@ -83,7 +92,7 @@ class ProfilePaneController extends DisposableController
     _currentAllocationProfile.value = AdaptedProfile.fromAllocationProfile(
       profile,
       classFilter.value,
-      _rootPackage,
+      rootPackage,
     );
     _initializeSelection();
   }
@@ -108,12 +117,11 @@ class ProfilePaneController extends DisposableController
     _currentAllocationProfile.value = AdaptedProfile.withNewFilter(
       currentProfile,
       classFilter.value,
-      _rootPackage,
+      rootPackage,
     );
   }
 
-  late final _rootPackage =
-      serviceConnection.serviceManager.rootInfoNow().package;
+  final String rootPackage;
 
   @visibleForTesting
   void clearCurrentProfile() => _currentAllocationProfile.value = null;

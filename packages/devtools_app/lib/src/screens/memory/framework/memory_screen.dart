@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../shared/analytics/analytics.dart' as ga;
+import '../../../shared/feature_flags.dart';
 import '../../../shared/primitives/listenable.dart';
 import '../../../shared/screen.dart';
 import 'screen_body.dart';
@@ -25,6 +26,12 @@ class MemoryScreen extends Screen {
 
   @override
   Widget buildScreenBody(BuildContext context) => const MemoryBody();
+
+  @override
+  Widget? buildDisconnectedScreenBody(BuildContext context) =>
+      FeatureFlags.memoryOffline
+          ? const MemoryBody()
+          : super.buildDisconnectedScreenBody(context);
 
   // TODO(polina-c): when embedded and VSCode console features are implemented,
   // should be in native console in VSCode

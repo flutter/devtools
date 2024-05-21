@@ -32,7 +32,7 @@ const _windowSize = Size(2225.0, 1000.0);
 void _verifyFiltersAreEqual(MemoryDefaultScene scene, [ClassFilter? filter]) {
   expect(
     scene.controller.diff.core.classFilter.value,
-    equals(scene.controller.profile.classFilter.value),
+    equals(scene.controller.profile!.classFilter.value),
   );
 
   if (filter != null) {
@@ -66,7 +66,7 @@ void main() {
       scene.controller.diff.derived.applyFilter(_filter1);
       _verifyFiltersAreEqual(scene, _filter1);
 
-      scene.controller.profile.setFilter(_filter2);
+      scene.controller.profile!.setFilter(_filter2);
       _verifyFiltersAreEqual(scene, _filter2);
     },
   );
