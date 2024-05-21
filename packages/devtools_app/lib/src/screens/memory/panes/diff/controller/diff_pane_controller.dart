@@ -38,7 +38,7 @@ enum Json {
 class DiffPaneController extends DisposableController {
   DiffPaneController({
     required this.loader,
-    required String rootPackage,
+    required String? rootPackage,
     List<SnapshotDataItem>? snapshots,
   }) : core = CoreData(rootPackage) {
     if (snapshots != null) {
@@ -234,7 +234,7 @@ class DiffPaneController extends DisposableController {
 class CoreData {
   CoreData(this.rootPackage);
 
-  final String rootPackage;
+  final String? rootPackage;
 
   /// The list contains one item that show information and all others
   /// are snapshots.
@@ -278,6 +278,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     final classFilterData = ClassFilterData(
       filter: _core.classFilter,
       onChanged: applyFilter,
+      rootPackage: _core.rootPackage,
     );
 
     classesTableSingle = ClassesTableSingleData(

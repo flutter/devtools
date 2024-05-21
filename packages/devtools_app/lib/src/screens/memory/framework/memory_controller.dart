@@ -133,7 +133,9 @@ class MemoryController extends DisposableController
         ? MemoryChartPaneController(mode, data: offlineData?.chart)
         : null;
 
-    final rootPackage = serviceConnection.serviceManager.rootInfoNow().package!;
+    final rootPackage = isConnected
+        ? serviceConnection.serviceManager.rootInfoNow().package!
+        : null;
 
     diff = diffPaneController ??
         offlineData?.diff ??
@@ -148,7 +150,7 @@ class MemoryController extends DisposableController
           offlineData?.profile ??
           ProfilePaneController(
             mode: mode,
-            rootPackage: rootPackage,
+            rootPackage: rootPackage!,
           );
     } else {
       profile = null;
