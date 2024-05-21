@@ -21,10 +21,7 @@ class ClassFilterData {
   });
 
   final ValueListenable<ClassFilter> filter;
-
   final ApplyFilterCallback onChanged;
-
-  /// Root package of the application.
   final String? rootPackage;
 }
 

@@ -31,14 +31,16 @@ import 'snapshot_item.dart';
 @visibleForTesting
 enum Json {
   snapshots,
-  diffWith;
+  diffWith,
+  rootPackage;
 }
 
 class DiffPaneController extends DisposableController {
   DiffPaneController({
     required this.loader,
+    required String? rootPackage,
     List<SnapshotDataItem>? snapshots,
-  }) : core = CoreData() {
+  }) : core = CoreData(rootPackage) {
     if (snapshots != null) {
       core._snapshots.addAll(snapshots);
     }
@@ -65,6 +67,7 @@ class DiffPaneController extends DisposableController {
     return DiffPaneController(
       loader: null,
       snapshots: snapshots,
+      rootPackage: json[Json.rootPackage.name] as String,
     );
   }
 
@@ -85,6 +88,7 @@ class DiffPaneController extends DisposableController {
     return {
       Json.snapshots.name: snapshots,
       Json.diffWith.name: diffWithIndices,
+      Json.rootPackage.name: core.rootPackage,
     };
   }
 
@@ -228,10 +232,9 @@ class DiffPaneController extends DisposableController {
 /// Widgets should not update the fields directly, they should use
 /// [DiffPaneController] or [DerivedData] for this.
 class CoreData {
-  CoreData();
+  CoreData(this.rootPackage);
 
-  /// Root package of the application.
-  String? rootPackage;
+  final String? rootPackage;
 
   /// The list contains one item that show information and all others
   /// are snapshots.

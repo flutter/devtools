@@ -19,12 +19,8 @@ class HeapClassView extends StatelessWidget {
   });
 
   final HeapClassName theClass;
-
   final bool showCopyButton;
-
   final String? copyGaItem;
-
-  /// Root package of the application.
   final String? rootPackage;
 
   @override
