@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:devtools_app_shared/utils.dart';
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../../shared/memory/heap_data.dart';
@@ -49,7 +50,7 @@ class SnapshotDataItem extends SnapshotItem implements RenamableItem {
 
     final loader = HeapGraphLoaderDirect(
       graph: graph,
-      created: json[Json.created.name] as DateTime? ?? DateTime.now(),
+      created: decodeDateTime(json[Json.created.name]) ?? DateTime.now(),
     );
 
     // Start the loading process, that will result in progress indicator in UI.

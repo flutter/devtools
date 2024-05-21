@@ -47,6 +47,8 @@ Object? _dateTimeToEncodable(DateTime dateTime) {
   return dateTime.microsecondsSinceEpoch;
 }
 
-DateTime decodeDateTime(int microsecondsSinceEpoch) {
-  return DateTime.fromMicrosecondsSinceEpoch(microsecondsSinceEpoch);
+DateTime? decodeDateTime(Object? value) {
+  if (value == null) return null;
+  if (value is DateTime) return value;
+  return DateTime.fromMicrosecondsSinceEpoch(value as int);
 }
