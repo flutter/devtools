@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../../../../shared/memory/heap_data.dart';
 import '../../../../../shared/memory/heap_graph_loader.dart';
+import '../../../../../shared/primitives/serialization.dart';
 
 abstract class SnapshotItem extends DisposableController {
   /// Number to show with auto-generated names that may be non unique, like isolate name.
@@ -24,7 +25,7 @@ class SnapshotDocItem extends SnapshotItem {
 enum Json {
   defaultName,
   displayNumber,
-  chunks,
+  graph,
   created,
   nameOverride;
 }
@@ -43,11 +44,11 @@ class SnapshotDataItem extends SnapshotItem implements RenamableItem {
       nameOverride: json[Json.nameOverride.name] as String?,
     );
 
-    final chunks = json[Json.chunks.name] as List<ByteData>?;
-    if (chunks == null) return result;
+    final graph = decodeHeapSnapshotGraph(json[Json.graph.name]);
+    if (graph == null) return result;
 
-    final loader = HeapGraphLoaderFromChunks(
-      chunks: chunks,
+    final loader = HeapGraphLoaderDirect(
+      graph: graph,
       created: json[Json.created.name] as DateTime? ?? DateTime.now(),
     );
 
@@ -62,7 +63,7 @@ class SnapshotDataItem extends SnapshotItem implements RenamableItem {
       Json.defaultName.name: defaultName,
       Json.displayNumber.name: displayNumber,
       Json.nameOverride.name: nameOverride,
-      Json.chunks.name: _heap?.graph.toChunks(),
+      Json.graph.name: _heap?.graph,
       Json.created.name: _heap?.created,
     };
   }

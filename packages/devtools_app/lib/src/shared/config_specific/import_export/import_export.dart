@@ -3,14 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:devtools_app_shared/service.dart';
 import 'package:intl/intl.dart';
-import 'package:meta/meta.dart';
-
 import '../../../../devtools.dart';
 import '../../globals.dart';
+import '../../primitives/serialization.dart';
 import '../../primitives/utils.dart';
 import '../../screen.dart';
 import '_export_desktop.dart' if (dart.library.js_interop) '_export_web.dart';
@@ -181,17 +179,4 @@ abstract class ExportController {
       toEncodable: toEncodable,
     );
   }
-}
-
-@visibleForTesting
-Object? toEncodable(Object? value) {
-  if (value is ByteData) {
-    return _byteDataToEncodable(value);
-  }
-  throw UnsupportedError('Cannot convert to JSON: $value');
-}
-
-String _byteDataToEncodable(ByteData value) {
-  final list = value.buffer.asUint8List();
-  return base64Encode(list);
 }
