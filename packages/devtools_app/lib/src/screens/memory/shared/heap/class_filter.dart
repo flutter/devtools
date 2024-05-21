@@ -5,7 +5,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../../../shared/globals.dart';
 import '../../../../shared/memory/class_name.dart';
 
 enum ClassFilterType {
@@ -18,12 +17,12 @@ class ClassFilterData {
   ClassFilterData({
     required this.filter,
     required this.onChanged,
+    required this.rootPackage,
   });
 
   final ValueListenable<ClassFilter> filter;
   final ApplyFilterCallback onChanged;
-  late final String? rootPackage =
-      serviceConnection.serviceManager.rootInfoNow().package;
+  final String? rootPackage;
 }
 
 /// What should be done to apply new filter to a set of data.
