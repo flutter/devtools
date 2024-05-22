@@ -88,6 +88,6 @@ Object? toEncodable(Object? value) {
       HeapSnapshotGraphEncodeDecode.instance.toEncodable(value),
     (final ByteData value) => ByteDataEncodeDecode.instance.toEncodable(value),
     (final DateTime value) => DateTimeEncodeDecode.instance.toEncodable(value),
-    _ => null,
+    _ => value,
   };
 }
