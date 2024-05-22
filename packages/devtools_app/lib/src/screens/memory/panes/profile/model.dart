@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/memory/class_name.dart';
 import '../../../../shared/memory/gc_stats.dart';
-import '../../../../shared/primitives/encoding.dart';
 import '../../../../shared/table/table_data.dart';
 import '../../../vm_developer/vm_service_private_extensions.dart';
 import '../../shared/heap/class_filter.dart';

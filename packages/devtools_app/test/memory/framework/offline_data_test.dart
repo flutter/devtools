@@ -10,13 +10,11 @@ import 'package:devtools_app/src/screens/memory/framework/offline_data/offline_d
 import 'package:devtools_app/src/screens/memory/panes/chart/controller/chart_data.dart';
 import 'package:devtools_app/src/screens/memory/panes/chart/data/primitives.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/controller/diff_pane_controller.dart';
-import 'package:devtools_app/src/screens/memory/panes/profile/model.dart';
 import 'package:devtools_app/src/screens/memory/panes/profile/profile_pane_controller.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/class_filter.dart';
 import 'package:devtools_app/src/screens/memory/shared/primitives/memory_timeline.dart';
 import 'package:devtools_app/src/shared/primitives/simple_items.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:vm_service/vm_service.dart';
 
 void main() {
   for (final encode in [true, false]) {

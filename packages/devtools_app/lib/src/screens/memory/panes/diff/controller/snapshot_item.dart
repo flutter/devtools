@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:devtools_app_shared/utils.dart';
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../../shared/memory/heap_data.dart';
@@ -30,7 +31,9 @@ enum Json {
   nameOverride;
 }
 
-class SnapshotDataItem extends SnapshotItem implements RenamableItem {
+class SnapshotDataItem extends SnapshotItem
+    with Serializable
+    implements RenamableItem {
   SnapshotDataItem({
     required this.defaultName,
     this.displayNumber,
@@ -61,6 +64,7 @@ class SnapshotDataItem extends SnapshotItem implements RenamableItem {
     return result;
   }
 
+  @override
   Map<String, dynamic> toJson() {
     return {
       Json.defaultName.name: defaultName,

@@ -5,7 +5,6 @@
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../../../../shared/primitives/encoding.dart';
 import '../../../../../shared/primitives/simple_items.dart';
 import '../../../shared/primitives/memory_timeline.dart';
 import '../data/primitives.dart';

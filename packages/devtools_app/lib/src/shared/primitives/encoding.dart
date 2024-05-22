@@ -5,6 +5,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:vm_service/vm_service.dart';
 
 /// Encodes and decodes a value of type [T].
@@ -17,14 +18,6 @@ abstract class EncodeDecode<T> {
     if (value == null) return null;
     return decode(value);
   }
-}
-
-/// Mixin to declare a class as serializable.
-///
-/// Classes that implement this mixin should also implement [toJson] method.
-/// See https://docs.flutter.dev/data-and-backend/serialization/json#serializing-json-inside-model-classes.
-mixin Serializable {
-  Map<String, dynamic> toJson();
 }
 
 /// Encodes and decodes [HeapSnapshotGraph].

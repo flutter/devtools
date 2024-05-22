@@ -11,7 +11,6 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/config_specific/import_export/import_export.dart';
 import '../../../../shared/globals.dart';
-import '../../../../shared/primitives/encoding.dart';
 import '../../../../shared/primitives/simple_items.dart';
 import '../../shared/heap/class_filter.dart';
 import 'model.dart';

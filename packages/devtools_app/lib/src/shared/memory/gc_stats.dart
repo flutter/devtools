@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../primitives/encoding.dart';
+import 'package:devtools_shared/devtools_shared.dart';
 
 class _Json {
   static const heap = 'heap';

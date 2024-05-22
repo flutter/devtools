@@ -5,7 +5,6 @@
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:meta/meta.dart';
 
-import '../../../../shared/primitives/encoding.dart';
 import '../../panes/chart/controller/chart_data.dart';
 import '../../panes/diff/controller/diff_pane_controller.dart';
 import '../../panes/profile/profile_pane_controller.dart';

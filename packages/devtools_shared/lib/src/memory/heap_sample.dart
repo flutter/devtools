@@ -30,7 +30,7 @@ enum Json {
 }
 
 /// DevTools Plotted and JSON persisted memory information.
-class HeapSample {
+class HeapSample with Serializable {
   HeapSample(
     this.timestamp,
     this.rss,
@@ -70,6 +70,7 @@ class HeapSample {
     );
   }
 
+  @override
   Map<String, dynamic> toJson() => <String, dynamic>{
         Json.timestamp.key: timestamp,
         Json.rss.key: rss,
