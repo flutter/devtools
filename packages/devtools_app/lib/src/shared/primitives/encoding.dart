@@ -19,6 +19,14 @@ abstract class EncodeDecode<T> {
   }
 }
 
+/// Mixin to declare a class as serializable.
+///
+/// Classes that implement this mixin should also implement [toJson] method.
+/// See https://docs.flutter.dev/data-and-backend/serialization/json#serializing-json-inside-model-classes.
+mixin Serializable {
+  Map<String, dynamic> toJson();
+}
+
 /// Encodes and decodes HeapSnapshotGraph.
 class HeapSnapshotGraphEncodeDecode extends EncodeDecode<HeapSnapshotGraph> {
   HeapSnapshotGraphEncodeDecode._();
@@ -96,5 +104,12 @@ Object? toEncodable(Object? value) {
     return DateTimeEncodeDecode.instance.toEncodable(value);
   }
 
-  return value;
+  if (value is Serializable) {
+    return value.toJson();
+  }
+
+  // For some reasons the failures return different error:
+  // `Converting object to an encodable object failed: Instance of 'some other type'`.
+  // To see the actual type, put breakpoint here.
+  throw StateError('Unsupported type: ${value.runtimeType}');
 }

@@ -6,15 +6,36 @@ import 'package:devtools_shared/src/utils/serialization.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('deserialize works for json', () {
-    final json = {'key': 'value'};
-    String deserializer(Map<String, dynamic> json) => 'correct';
-    expect(deserialize<String>(json, deserializer), 'correct');
+  group('deserialize', () {
+    test('works for json', () {
+      final json = {'key': 'value'};
+      String deserializer(Map<String, dynamic> json) => 'correct';
+      expect(deserialize<String>(json, deserializer), 'correct');
+    });
+
+    test('works for object', () {
+      const json = 'correct';
+      String deserializer(Map<String, dynamic> json) => 'wrong';
+      expect(deserialize<String>(json, deserializer), 'correct');
+    });
   });
 
-  test('deserialize works for object', () {
-    const json = 'correct';
-    String deserializer(Map<String, dynamic> json) => 'wrong';
-    expect(deserialize<String>(json, deserializer), 'correct');
+  group('deserialize', () {
+    test('deserializeNullable works for json', () {
+      final json = {'key': 'value'};
+      String deserializer(Map<String, dynamic> json) => 'correct';
+      expect(deserializeNullable<String>(json, deserializer), 'correct');
+    });
+
+    test('deserializeNullable works for object', () {
+      const json = 'correct';
+      String deserializer(Map<String, dynamic> json) => 'wrong';
+      expect(deserializeNullable<String>(json, deserializer), 'correct');
+    });
+
+    test('deserializeNullable works for null', () {
+      String deserializer(Map<String, dynamic> json) => 'wrong';
+      expect(deserializeNullable<String>(null, deserializer), null);
+    });
   });
 }

@@ -6,10 +6,11 @@ import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../shared/primitives/encoding.dart';
 import '../../../../shared/primitives/utils.dart';
 
 /// All Raw data received from the VM or offline data.
-class MemoryTimeline {
+class MemoryTimeline with Serializable {
   MemoryTimeline({List<HeapSample>? data}) {
     this.data = data ?? []; // Not using const because data is mutable.
   }
@@ -22,6 +23,7 @@ class MemoryTimeline {
     );
   }
 
+  @override
   Map<String, dynamic> toJson() {
     return {
       _jsonData: data,

@@ -5,11 +5,13 @@
 import 'dart:async';
 
 import 'package:devtools_app_shared/utils.dart';
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/config_specific/import_export/import_export.dart';
 import '../../../../shared/globals.dart';
+import '../../../../shared/primitives/encoding.dart';
 import '../../../../shared/primitives/simple_items.dart';
 import '../../shared/heap/class_filter.dart';
 import 'model.dart';
@@ -21,14 +23,14 @@ enum Json {
 }
 
 class ProfilePaneController extends DisposableController
-    with AutoDisposeControllerMixin {
+    with AutoDisposeControllerMixin, Serializable {
   ProfilePaneController({
     required this.mode,
     required this.rootPackage,
     AdaptedProfile? profile,
   }) : assert(
           (mode == ControllerCreationMode.connected && profile == null) ||
-              (mode == ControllerCreationMode.offlineData && profile != null),
+              (mode == ControllerCreationMode.offlineData),
         ) {
     if (profile != null) {
       _currentAllocationProfile.value = AdaptedProfile.withNewFilter(
@@ -42,11 +44,12 @@ class ProfilePaneController extends DisposableController
   factory ProfilePaneController.fromJson(Map<String, dynamic> json) {
     return ProfilePaneController(
       mode: ControllerCreationMode.offlineData,
-      profile: AdaptedProfile.fromJson(json[Json.profile.name]),
+      profile: deserialize(json[Json.profile.name], AdaptedProfile.fromJson),
       rootPackage: json[Json.rootPackage.name],
     );
   }
 
+  @override
   Map<String, dynamic> toJson() {
     return {
       Json.profile.name: _currentAllocationProfile.value,
