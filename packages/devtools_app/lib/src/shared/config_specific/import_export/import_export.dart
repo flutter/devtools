@@ -6,9 +6,9 @@ import 'dart:convert';
 
 import 'package:devtools_app_shared/service.dart';
 import 'package:intl/intl.dart';
-
 import '../../../../devtools.dart';
 import '../../globals.dart';
+import '../../primitives/encoding.dart';
 import '../../primitives/utils.dart';
 import '../../screen.dart';
 import '_export_desktop.dart' if (dart.library.js_interop) '_export_web.dart';
@@ -174,6 +174,9 @@ abstract class ExportController {
 
   String encode(Map<String, dynamic> offlineScreenData) {
     final data = generateDataForExport(offlineScreenData: offlineScreenData);
-    return jsonEncode(data);
+    return jsonEncode(
+      data,
+      toEncodable: toEncodable,
+    );
   }
 }

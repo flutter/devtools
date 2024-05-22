@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:file_selector/file_selector.dart';
 import 'package:vm_service/vm_service.dart';
@@ -48,16 +47,16 @@ class HeapGraphLoaderFile implements HeapGraphLoader {
   }
 }
 
-/// Loads a heap snapshot from `List<ByteData>` created with HeapSnapshotGraph.toChunks.
-class HeapGraphLoaderFromChunks implements HeapGraphLoader {
-  HeapGraphLoaderFromChunks({required this.chunks, required this.created});
+/// Loads a heap snapshot directly with instance of graph.
+class HeapGraphLoaderDirect implements HeapGraphLoader {
+  HeapGraphLoaderDirect({required this.graph, required this.created});
 
-  final List<ByteData> chunks;
+  final HeapSnapshotGraph graph;
 
   final DateTime created;
 
   @override
   (HeapSnapshotGraph, DateTime) load() {
-    return (HeapSnapshotGraph.fromChunks(chunks), created);
+    return (graph, created);
   }
 }
