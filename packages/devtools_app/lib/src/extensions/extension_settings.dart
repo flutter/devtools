@@ -12,6 +12,8 @@ import '../shared/analytics/analytics.dart' as ga;
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
+import '../shared/routing.dart';
+import 'extension_screen.dart';
 
 /// A [ScaffoldAction] that, when clicked, will open a dialog menu for
 /// managing DevTools extension states.
@@ -25,7 +27,8 @@ class ExtensionSettingsAction extends ScaffoldAction {
               showDialog(
                 context: context,
                 builder: (context) => ExtensionSettingsDialog(
-                  extensions: extensionService.availableExtensions.value,
+                  extensions: extensionService
+                      .currentExtensions.value.availableExtensions,
                 ),
               ),
             );
@@ -169,6 +172,10 @@ class ExtensionSetting extends StatelessWidget {
               enable: false,
             ),
           );
+          final router = DevToolsRouterDelegate.of(context);
+          if (router.currentConfiguration?.page == extension.screenId) {
+            router.navigateHome(clearScreenParam: true);
+          }
         },
       ),
     ];

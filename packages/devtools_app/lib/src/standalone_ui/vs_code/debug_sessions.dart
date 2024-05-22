@@ -248,12 +248,12 @@ class _DevToolsMenuState extends State<_DevToolsMenu> {
           ),
         if (_extensionServiceForSession != null)
           ValueListenableBuilder(
-            valueListenable: _extensionServiceForSession!.visibleExtensions,
-            builder: (context, extensions, _) {
-              return extensions.isEmpty
+            valueListenable: _extensionServiceForSession!.currentExtensions,
+            builder: (context, currentExtensions, _) {
+              return currentExtensions.visibleExtensions.isEmpty
                   ? const SizedBox.shrink()
                   : ExtensionScreenMenuItem(
-                      extensions: extensions,
+                      extensions: currentExtensions.visibleExtensions,
                       onPressed: (e) {
                         ga.select(
                           gac.VsCodeFlutterSidebar.id,
