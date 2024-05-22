@@ -20,20 +20,20 @@ void main() {
     });
   });
 
-  group('deserialize', () {
-    test('deserializeNullable works for json', () {
+  group('deserializeNullable', () {
+    test('works for json', () {
       final json = {'key': 'value'};
       String deserializer(Map<String, dynamic> json) => 'correct';
       expect(deserializeNullable<String>(json, deserializer), 'correct');
     });
 
-    test('deserializeNullable works for object', () {
+    test('works for object', () {
       const json = 'correct';
       String deserializer(Map<String, dynamic> json) => 'wrong';
       expect(deserializeNullable<String>(json, deserializer), 'correct');
     });
 
-    test('deserializeNullable works for null', () {
+    test('works for null', () {
       String deserializer(Map<String, dynamic> json) => 'wrong';
       expect(deserializeNullable<String>(null, deserializer), null);
     });

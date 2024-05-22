@@ -19,7 +19,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   for (final encode in [true, false]) {
     test(
-      '$OfflineMemoryData serializes and deserializes correctly',
+      '$OfflineMemoryData serializes and deserializes correctly, encode: $encode',
       () {
         final item = OfflineMemoryData(
           DiffPaneController(loader: null, rootPackage: 'root'),

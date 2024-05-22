@@ -25,6 +25,5 @@ T deserialize<T>(dynamic json, FromJson<T> deserializer) {
 // ignore: avoid-dynamic, serialization is exception for the rule.
 T? deserializeNullable<T>(dynamic json, FromJson<T> deserializer) {
   if (json == null) return null;
-  if (json is T) return json;
   return deserializer(json);
 }

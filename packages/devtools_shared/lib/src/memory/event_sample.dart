@@ -4,7 +4,7 @@
 
 import 'dart:convert';
 
-import '../../devtools_shared.dart';
+import '../utils/serialization.dart';
 
 /// Monitor heap object allocations (in the VM).  The allocation monitor will
 /// cause 'start' event exist in the HeapSample. Immediately afterwards a

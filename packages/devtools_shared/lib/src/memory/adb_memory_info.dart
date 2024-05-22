@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(terry): Need the iOS version of this data.
-import '../../devtools_shared.dart';
+import '../utils/serialization.dart';
 
 /// Android ADB dumpsys meminfo data.
 class AdbMemoryInfo with Serializable {
