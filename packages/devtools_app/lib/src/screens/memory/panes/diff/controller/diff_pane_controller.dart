@@ -19,7 +19,6 @@ import '../../../../../shared/memory/classes.dart';
 import '../../../../../shared/memory/heap_graph_loader.dart';
 import '../../../../../shared/memory/retaining_path.dart';
 import '../../../../../shared/memory/simple_items.dart';
-import '../../../../../shared/primitives/encoding.dart';
 import '../../../shared/heap/class_filter.dart';
 import '../../../shared/primitives/memory_utils.dart';
 import '../data/classes_diff.dart';
@@ -36,7 +35,7 @@ enum Json {
   rootPackage;
 }
 
-class DiffPaneController extends DisposableController with Serializable {
+class DiffPaneController extends DisposableController {
   DiffPaneController({
     required this.loader,
     required String? rootPackage,
@@ -72,7 +71,6 @@ class DiffPaneController extends DisposableController with Serializable {
     );
   }
 
-  @override
   Map<String, dynamic> toJson() {
     final snapshots = core.snapshots.value
         .whereType<SnapshotDataItem>()

@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../primitives/encoding.dart';
 import '../primitives/simple_items.dart';
 import '../ui/icons.dart';
 
@@ -80,7 +79,7 @@ class _Json {
 /// Fully qualified Class name.
 ///
 /// Equal class names are not stored twice in memory.
-class HeapClassName with Serializable {
+class HeapClassName {
   @visibleForTesting
   HeapClassName({required String? library, required this.className})
       : library = _normalizeLibrary(library);
@@ -92,7 +91,6 @@ class HeapClassName with Serializable {
     );
   }
 
-  @override
   Map<String, dynamic> toJson() {
     return {
       _Json.className: className,

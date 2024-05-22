@@ -5,7 +5,6 @@
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:meta/meta.dart';
 
-import '../../../../shared/primitives/encoding.dart';
 import '../../panes/chart/controller/chart_data.dart';
 import '../../panes/diff/controller/diff_pane_controller.dart';
 import '../../panes/profile/profile_pane_controller.dart';
@@ -20,7 +19,7 @@ enum Json {
   chartData;
 }
 
-class OfflineMemoryData with Serializable {
+class OfflineMemoryData {
   OfflineMemoryData(
     this.diff,
     this.profile,
@@ -35,14 +34,11 @@ class OfflineMemoryData with Serializable {
         json[Json.diffData.name],
         DiffPaneController.fromJson,
       ),
-      deserializeNullable<ProfilePaneController>(
+      deserialize<ProfilePaneController>(
         json[Json.profileData.name],
         ProfilePaneController.fromJson,
       ),
-      deserializeNullable<ChartData>(
-        json[Json.chartData.name],
-        ChartData.fromJson,
-      ),
+      deserialize<ChartData>(json[Json.chartData.name], ChartData.fromJson),
       deserialize<ClassFilter>(
         json[Json.classFilter.name],
         ClassFilter.fromJson,
@@ -51,7 +47,6 @@ class OfflineMemoryData with Serializable {
     );
   }
 
-  @override
   Map<String, dynamic> toJson() {
     return {
       Json.selectedTab.name: selectedTab,

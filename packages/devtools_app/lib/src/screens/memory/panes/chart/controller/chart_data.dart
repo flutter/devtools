@@ -5,7 +5,6 @@
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../../../../shared/primitives/encoding.dart';
 import '../../../../../shared/primitives/simple_items.dart';
 import '../../../shared/primitives/memory_timeline.dart';
 import '../data/primitives.dart';
@@ -19,7 +18,7 @@ enum Json {
 }
 
 /// Chart data, that should be saved when transferred to offline data mode.
-class ChartData with Serializable {
+class ChartData {
   ChartData({
     required ControllerCreationMode mode,
     this.isDeviceAndroid,
@@ -55,7 +54,6 @@ class ChartData with Serializable {
     return result;
   }
 
-  @override
   Map<String, dynamic> toJson() {
     return {
       Json.isDeviceAndroid.name: isDeviceAndroid ?? false,

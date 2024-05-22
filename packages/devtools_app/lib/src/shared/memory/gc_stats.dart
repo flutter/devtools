@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../primitives/encoding.dart';
-
 class _Json {
   static const heap = 'heap';
   static const usage = 'usage';
@@ -12,7 +10,7 @@ class _Json {
   static const averageCollectionTime = 'act';
 }
 
-class GCStats with Serializable {
+class GCStats {
   GCStats({
     required this.heap,
     required this.usage,
@@ -45,7 +43,6 @@ class GCStats with Serializable {
     );
   }
 
-  @override
   Map<String, dynamic> toJson() => {
         _Json.heap: heap,
         _Json.usage: usage,

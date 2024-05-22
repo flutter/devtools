@@ -6,7 +6,6 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/memory/class_name.dart';
 import '../../../../shared/memory/gc_stats.dart';
-import '../../../../shared/primitives/encoding.dart';
 import '../../../../shared/table/table_data.dart';
 import '../../../vm_developer/vm_service_private_extensions.dart';
 import '../../shared/heap/class_filter.dart';
@@ -19,7 +18,7 @@ class _ProfileJson {
   static const totalGC = 'totalGC';
 }
 
-class AdaptedProfile with Serializable {
+class AdaptedProfile {
   AdaptedProfile._({
     required ProfileRecord total,
     required List<ProfileRecord> items,
@@ -82,7 +81,6 @@ class AdaptedProfile with Serializable {
     );
   }
 
-  @override
   Map<String, dynamic> toJson() {
     return {
       _ProfileJson.total: _total,
@@ -135,7 +133,7 @@ class _RecordJson {
   static const oldSpaceExternalSize = 'oes';
 }
 
-class ProfileRecord with PinnableListEntry, Serializable {
+class ProfileRecord with PinnableListEntry {
   ProfileRecord._({
     required this.isTotal,
     required this.heapClass,
@@ -220,7 +218,6 @@ class ProfileRecord with PinnableListEntry, Serializable {
     );
   }
 
-  @override
   Map<String, dynamic> toJson() {
     return {
       _RecordJson.isTotal: isTotal,
