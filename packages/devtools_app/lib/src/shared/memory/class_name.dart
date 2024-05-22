@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -79,7 +80,7 @@ class _Json {
 /// Fully qualified Class name.
 ///
 /// Equal class names are not stored twice in memory.
-class HeapClassName {
+class HeapClassName with Serializable {
   @visibleForTesting
   HeapClassName({required String? library, required this.className})
       : library = _normalizeLibrary(library);
@@ -91,6 +92,7 @@ class HeapClassName {
     );
   }
 
+  @override
   Map<String, dynamic> toJson() {
     return {
       _Json.className: className,

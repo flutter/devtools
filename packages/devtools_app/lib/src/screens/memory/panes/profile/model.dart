@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/memory/class_name.dart';
@@ -18,7 +19,7 @@ class _ProfileJson {
   static const totalGC = 'totalGC';
 }
 
-class AdaptedProfile {
+class AdaptedProfile with Serializable {
   AdaptedProfile._({
     required ProfileRecord total,
     required List<ProfileRecord> items,
@@ -81,6 +82,7 @@ class AdaptedProfile {
     );
   }
 
+  @override
   Map<String, dynamic> toJson() {
     return {
       _ProfileJson.total: _total,
@@ -133,7 +135,7 @@ class _RecordJson {
   static const oldSpaceExternalSize = 'oes';
 }
 
-class ProfileRecord with PinnableListEntry {
+class ProfileRecord with PinnableListEntry, Serializable {
   ProfileRecord._({
     required this.isTotal,
     required this.heapClass,
@@ -218,6 +220,7 @@ class ProfileRecord with PinnableListEntry {
     );
   }
 
+  @override
   Map<String, dynamic> toJson() {
     return {
       _RecordJson.isTotal: isTotal,

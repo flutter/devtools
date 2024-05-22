@@ -35,7 +35,7 @@ enum Json {
   rootPackage;
 }
 
-class DiffPaneController extends DisposableController {
+class DiffPaneController extends DisposableController with Serializable {
   DiffPaneController({
     required this.loader,
     required String? rootPackage,
@@ -71,6 +71,7 @@ class DiffPaneController extends DisposableController {
     );
   }
 
+  @override
   Map<String, dynamic> toJson() {
     final snapshots = core.snapshots.value
         .whereType<SnapshotDataItem>()

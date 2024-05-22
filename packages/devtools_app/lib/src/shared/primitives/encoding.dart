@@ -88,6 +88,10 @@ Object? toEncodable(Object? value) {
       HeapSnapshotGraphEncodeDecode.instance.toEncodable(value),
     final ByteData value => ByteDataEncodeDecode.instance.toEncodable(value),
     final DateTime value => DateTimeEncodeDecode.instance.toEncodable(value),
-    _ => value,
+    _ =>
+      // For some reasons the failures show different error:
+      // `Converting object to an encodable object failed: Instance of 'some other type'`.
+      // To see the actual type, put breakpoint here:
+      throw StateError('Unsupported type: ${value.runtimeType}'),
   };
 }
