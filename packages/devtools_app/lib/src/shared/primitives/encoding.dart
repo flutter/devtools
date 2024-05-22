@@ -82,19 +82,12 @@ class DateTimeEncodeDecode extends EncodeDecode<DateTime> {
 
 /// Function to be passed to [jsonEncode] to enable encoding for more types.
 Object? toEncodable(Object? value) {
-  if (value == null) return null;
-
-  if (value is HeapSnapshotGraph) {
-    return HeapSnapshotGraphEncodeDecode.instance.toEncodable(value);
-  }
-
-  if (value is ByteData) {
-    return ByteDataEncodeDecode.instance.toEncodable(value);
-  }
-
-  if (value is DateTime) {
-    return DateTimeEncodeDecode.instance.toEncodable(value);
-  }
-
-  return value;
+  return switch (value) {
+    (null) => null,
+    (final HeapSnapshotGraph value) =>
+      HeapSnapshotGraphEncodeDecode.instance.toEncodable(value),
+    (final ByteData value) => ByteDataEncodeDecode.instance.toEncodable(value),
+    (final DateTime value) => DateTimeEncodeDecode.instance.toEncodable(value),
+    _ => null,
+  };
 }
