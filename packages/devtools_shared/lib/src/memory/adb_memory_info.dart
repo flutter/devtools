@@ -3,8 +3,10 @@
 // found in the LICENSE file.
 
 // TODO(terry): Need the iOS version of this data.
+import '../../devtools_shared.dart';
+
 /// Android ADB dumpsys meminfo data.
-class AdbMemoryInfo {
+class AdbMemoryInfo with Serializable {
   AdbMemoryInfo(
     this.realtime,
     this.javaHeap,
@@ -82,6 +84,7 @@ class AdbMemoryInfo {
   static const String systemKey = 'System';
   static const String totalKey = 'Total';
 
+  @override
   Map<String, dynamic> toJson() => <String, dynamic>{
         realTimeKey: realtime,
         javaHeapKey: javaHeap,

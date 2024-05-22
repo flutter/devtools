@@ -4,6 +4,8 @@
 
 import 'dart:convert';
 
+import '../../devtools_shared.dart';
+
 /// Monitor heap object allocations (in the VM).  The allocation monitor will
 /// cause 'start' event exist in the HeapSample. Immediately afterwards a
 /// 'continues' event is added on each subsequent timestamp tick (HeapSample)
@@ -153,7 +155,7 @@ class ExtensionEvents {
       '${const JsonEncoder.withIndent('  ').convert(toJson())}]';
 }
 
-class EventSample {
+class EventSample with Serializable {
   EventSample(
     this.timestamp,
     this.isEventGC,
@@ -231,6 +233,7 @@ class EventSample {
     );
   }
 
+  @override
   Map<String, dynamic> toJson() => <String, dynamic>{
         'timestamp': timestamp,
         'gcEvent': isEventGC,
@@ -287,7 +290,7 @@ class EventSample {
 }
 
 /// Engine's Raster Cache estimates.
-class RasterCache {
+class RasterCache with Serializable {
   RasterCache._({required this.layerBytes, required this.pictureBytes});
 
   factory RasterCache.fromJson(Map<String, dynamic> json) {
@@ -306,6 +309,7 @@ class RasterCache {
 
   int pictureBytes;
 
+  @override
   Map<String, dynamic> toJson() => {
         'layerBytes': layerBytes,
         'pictureBytes': pictureBytes,
