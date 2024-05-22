@@ -19,7 +19,7 @@ abstract class EncodeDecode<T> {
   }
 }
 
-/// Encodes and decodes HeapSnapshotGraph.
+/// Encodes and decodes [HeapSnapshotGraph].
 class HeapSnapshotGraphEncodeDecode extends EncodeDecode<HeapSnapshotGraph> {
   HeapSnapshotGraphEncodeDecode._();
 
@@ -41,7 +41,7 @@ class HeapSnapshotGraphEncodeDecode extends EncodeDecode<HeapSnapshotGraph> {
   }
 }
 
-/// Encodes and decodes ByteData.
+/// Encodes and decodes [ByteData].
 class ByteDataEncodeDecode extends EncodeDecode<ByteData> {
   ByteDataEncodeDecode._();
 
@@ -62,7 +62,7 @@ class ByteDataEncodeDecode extends EncodeDecode<ByteData> {
   }
 }
 
-/// Encodes and decodes DateTime.
+/// Encodes and decodes [DateTime].
 class DateTimeEncodeDecode extends EncodeDecode<DateTime> {
   DateTimeEncodeDecode._();
 
