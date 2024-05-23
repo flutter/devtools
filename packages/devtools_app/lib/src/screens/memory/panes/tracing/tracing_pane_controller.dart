@@ -7,7 +7,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../../../devtools_app.dart';
+import '../../../../shared/globals.dart';
+import '../../../../shared/primitives/simple_items.dart';
 import 'tracing_data.dart';
 
 class TracingPaneController extends DisposableController
