@@ -19,7 +19,7 @@ enum Json {
   chartData;
 }
 
-class OfflineMemoryData {
+class OfflineMemoryData with Serializable {
   OfflineMemoryData(
     this.diff,
     this.profile,
@@ -34,11 +34,14 @@ class OfflineMemoryData {
         json[Json.diffData.name],
         DiffPaneController.fromJson,
       ),
-      deserialize<ProfilePaneController>(
+      deserializeNullable<ProfilePaneController>(
         json[Json.profileData.name],
         ProfilePaneController.fromJson,
       ),
-      deserialize<ChartData>(json[Json.chartData.name], ChartData.fromJson),
+      deserializeNullable<ChartData>(
+        json[Json.chartData.name],
+        ChartData.fromJson,
+      ),
       deserialize<ClassFilter>(
         json[Json.classFilter.name],
         ClassFilter.fromJson,
@@ -47,6 +50,7 @@ class OfflineMemoryData {
     );
   }
 
+  @override
   Map<String, dynamic> toJson() {
     return {
       Json.selectedTab.name: selectedTab,

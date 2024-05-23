@@ -1,6 +1,7 @@
 # 10.0.0-dev.3
-* Added helper `deserialize`
+* Added helper `deserialize` and `deserializeNullable`
 * Extended serialization for `HeapSample` and `ExtensionEvents`
+* Added mixin `Serializable`
 
 # 10.0.0-dev.2
 * Support detecting package roots for nested Dart projects in the

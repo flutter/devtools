@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:devtools_app/src/screens/memory/framework/offline_data/offline_data.dart';
 import 'package:devtools_app/src/screens/memory/framework/offline_data/offline_data.dart'
     as offline_data show Json;
@@ -15,47 +17,61 @@ import 'package:devtools_app/src/shared/primitives/simple_items.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test(
-    '$OfflineMemoryData serializes and deserializes correctly',
-    () {
-      final item = OfflineMemoryData(
-        DiffPaneController(loader: null, rootPackage: 'root'),
-        ProfilePaneController(
-          mode: ControllerCreationMode.connected,
-          rootPackage: 'root',
-        ),
-        ChartData(
-          mode: ControllerCreationMode.offlineData,
-          isDeviceAndroid: true,
-          timeline: MemoryTimeline(),
-          interval: ChartInterval.theDefault,
-          isLegendVisible: true,
-        ),
-        ClassFilter.empty(),
-        selectedTab: 0,
-      );
+  for (final encode in [true, false]) {
+    test(
+      '$OfflineMemoryData serializes and deserializes correctly, encode: $encode',
+      () {
+        final item = OfflineMemoryData(
+          DiffPaneController(loader: null, rootPackage: 'root'),
+          ProfilePaneController(
+            mode: ControllerCreationMode.connected,
+            rootPackage: 'root',
+          ),
+          ChartData(
+            mode: ControllerCreationMode.offlineData,
+            isDeviceAndroid: true,
+            timeline: MemoryTimeline(),
+            interval: ChartInterval.theDefault,
+            isLegendVisible: true,
+          ),
+          ClassFilter.empty(),
+          selectedTab: 0,
+        );
 
-      final json = item.toJson();
-      expect(
-        json.keys.toSet(),
-        equals(offline_data.Json.values.map((e) => e.name).toSet()),
-      );
-      final fromJson = OfflineMemoryData.fromJson(json);
+        var json = item.toJson();
 
-      expect(fromJson.selectedTab, item.selectedTab);
-      expect(fromJson.filter, item.filter);
-      expect(fromJson.diff, item.diff);
-      expect(fromJson.profile, item.profile);
-      expect(fromJson.chart!.isDeviceAndroid, item.chart!.isDeviceAndroid);
-      expect(fromJson.chart!.timeline, item.chart!.timeline);
-      expect(
-        fromJson.chart!.displayInterval.name,
-        item.chart!.displayInterval.name,
-      );
-      expect(
-        fromJson.chart!.isLegendVisible.value,
-        item.chart!.isLegendVisible.value,
-      );
-    },
-  );
+        if (encode) {
+          final encoded = jsonEncode(json);
+          json = jsonDecode(encoded);
+        }
+
+        expect(
+          json.keys.toSet(),
+          equals(offline_data.Json.values.map((e) => e.name).toSet()),
+        );
+        final fromJson = OfflineMemoryData.fromJson(json);
+
+        expect(fromJson.selectedTab, item.selectedTab);
+        expect(fromJson.filter, item.filter);
+        expect(
+          fromJson.diff.core.snapshots.value.length,
+          item.diff.core.snapshots.value.length,
+        );
+        expect(fromJson.profile!.rootPackage, item.profile!.rootPackage);
+        expect(fromJson.chart!.isDeviceAndroid, item.chart!.isDeviceAndroid);
+        expect(
+          fromJson.chart!.timeline.data.length,
+          item.chart!.timeline.data.length,
+        );
+        expect(
+          fromJson.chart!.displayInterval.name,
+          item.chart!.displayInterval.name,
+        );
+        expect(
+          fromJson.chart!.isLegendVisible.value,
+          item.chart!.isLegendVisible.value,
+        );
+      },
+    );
+  }
 }

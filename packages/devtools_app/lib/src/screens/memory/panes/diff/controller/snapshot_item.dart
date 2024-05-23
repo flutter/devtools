@@ -5,10 +5,12 @@
 import 'dart:async';
 
 import 'package:devtools_app_shared/utils.dart';
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../../shared/memory/heap_data.dart';
 import '../../../../../shared/memory/heap_graph_loader.dart';
+import '../../../../../shared/primitives/encoding.dart';
 
 abstract class SnapshotItem extends DisposableController {
   /// Number to show with auto-generated names that may be non unique, like isolate name.
@@ -24,12 +26,14 @@ class SnapshotDocItem extends SnapshotItem {
 enum Json {
   defaultName,
   displayNumber,
-  chunks,
+  graph,
   created,
   nameOverride;
 }
 
-class SnapshotDataItem extends SnapshotItem implements RenamableItem {
+class SnapshotDataItem extends SnapshotItem
+    with Serializable
+    implements RenamableItem {
   SnapshotDataItem({
     required this.defaultName,
     this.displayNumber,
@@ -43,12 +47,15 @@ class SnapshotDataItem extends SnapshotItem implements RenamableItem {
       nameOverride: json[Json.nameOverride.name] as String?,
     );
 
-    final chunks = json[Json.chunks.name] as List<ByteData>?;
-    if (chunks == null) return result;
+    final graph = HeapSnapshotGraphEncodeDecode.instance
+        .decodeNullable(json[Json.graph.name]);
+    if (graph == null) return result;
 
-    final loader = HeapGraphLoaderFromChunks(
-      chunks: chunks,
-      created: json[Json.created.name] as DateTime? ?? DateTime.now(),
+    final loader = HeapGraphLoaderDirect(
+      graph: graph,
+      created: DateTimeEncodeDecode.instance
+              .decodeNullable(json[Json.created.name]) ??
+          DateTime.now(),
     );
 
     // Start the loading process, that will result in progress indicator in UI.
@@ -57,12 +64,13 @@ class SnapshotDataItem extends SnapshotItem implements RenamableItem {
     return result;
   }
 
+  @override
   Map<String, dynamic> toJson() {
     return {
       Json.defaultName.name: defaultName,
       Json.displayNumber.name: displayNumber,
       Json.nameOverride.name: nameOverride,
-      Json.chunks.name: _heap?.graph.toChunks(),
+      Json.graph.name: _heap?.graph,
       Json.created.name: _heap?.created,
     };
   }
