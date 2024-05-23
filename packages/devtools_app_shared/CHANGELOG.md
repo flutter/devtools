@@ -1,4 +1,4 @@
-## 0.3.0-dev.0
+## 0.2.0-dev.1
 * Add `navigateToCode` utility method for jumping to code in IDEs.
 
 ## 0.2.0-dev.0
