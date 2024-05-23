@@ -45,7 +45,7 @@ class TracingPaneState extends State<TracingPane> {
         child: Markdown(
           data: '''
 Historical data for tracing is not supported.
-Upvote [the issue](https://github.com/flutter/devtools/issues/7801) if you need it.
+Upvote [the issue](https://github.com/flutter/devtools/issues/7801) if you want the support to be implemented.
 ''',
           styleSheet: MarkdownStyleSheet(
             p: Theme.of(context).regularTextStyle,
