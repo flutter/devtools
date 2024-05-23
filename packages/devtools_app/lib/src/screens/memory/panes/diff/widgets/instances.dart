@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
+import '../../../../../shared/analytics/constants.dart';
 import '../../../../../shared/memory/class_name.dart';
 import '../../../../../shared/memory/classes.dart';
 import '../../../../../shared/memory/heap_object.dart';
@@ -126,11 +129,21 @@ class _StoreAsOneVariableMenu extends StatelessWidget {
     return SubmenuButton(
       menuChildren: <Widget>[
         MenuItemButton(
-          onPressed: sampler.oneStaticToConsole,
+          onPressed: () => unawaited(
+            sampler.oneStaticToConsole(
+              sourceFeature: MemoryAreas.snapshotDiff.name,
+            ),
+          ),
           child: const Text('Any'),
         ),
         MenuItemButton(
-          onPressed: liveItemsEnabled ? sampler.oneLiveStaticToConsole : null,
+          onPressed: liveItemsEnabled
+              ? () => unawaited(
+                    sampler.oneLiveStaticToConsole(
+                      sourceFeature: MemoryAreas.snapshotDiff.name,
+                    ),
+                  )
+              : null,
           child: const Text('Any, not garbage collected'),
         ),
       ],

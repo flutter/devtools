@@ -9,13 +9,13 @@ void main() {
   group('deserialize', () {
     test('works for json', () {
       final json = {'key': 'value'};
-      String deserializer(Map<String, dynamic> json) => 'correct';
+      String deserializer(Map<String, dynamic> _) => 'correct';
       expect(deserialize<String>(json, deserializer), 'correct');
     });
 
     test('works for object', () {
       const json = 'correct';
-      String deserializer(Map<String, dynamic> json) => 'wrong';
+      String deserializer(Map<String, dynamic> _) => 'wrong';
       expect(deserialize<String>(json, deserializer), 'correct');
     });
   });
@@ -23,18 +23,18 @@ void main() {
   group('deserializeNullable', () {
     test('works for json', () {
       final json = {'key': 'value'};
-      String deserializer(Map<String, dynamic> json) => 'correct';
+      String deserializer(Map<String, dynamic> _) => 'correct';
       expect(deserializeNullable<String>(json, deserializer), 'correct');
     });
 
     test('works for object', () {
       const json = 'correct';
-      String deserializer(Map<String, dynamic> json) => 'wrong';
+      String deserializer(Map<String, dynamic> _) => 'wrong';
       expect(deserializeNullable<String>(json, deserializer), 'correct');
     });
 
     test('works for null', () {
-      String deserializer(Map<String, dynamic> json) => 'wrong';
+      String deserializer(Map<String, dynamic> _) => 'wrong';
       expect(deserializeNullable<String>(null, deserializer), null);
     });
   });
