@@ -276,7 +276,13 @@ class RebuildCountModel {
 }
 
 class Location {
-  Location({required this.id, this.fileUriString, this.line, this.column, this.name});
+  Location({
+    required this.id,
+    this.fileUriString,
+    this.line,
+    this.column,
+    this.name,
+  });
 
   final int id;
 
