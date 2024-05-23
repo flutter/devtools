@@ -40,21 +40,6 @@ class TracingPaneState extends State<TracingPane> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.controller.mode == ControllerCreationMode.offlineData) {
-      return Expanded(
-        child: Markdown(
-          data: '''
-Historical data for tracing is not supported.
-Upvote [the issue](https://github.com/flutter/devtools/issues/7801) if you want the support to be implemented.
-''',
-          styleSheet: MarkdownStyleSheet(
-            p: Theme.of(context).regularTextStyle,
-          ),
-          onTapLink: (text, url, title) =>
-              unawaited(launchUrlWithErrorHandling(url!)),
-        ),
-      );
-    }
     final isProfileMode =
         serviceConnection.serviceManager.connectedApp?.isProfileBuildNow ??
             false;
