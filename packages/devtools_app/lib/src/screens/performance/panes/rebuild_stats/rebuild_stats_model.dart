@@ -96,7 +96,7 @@ class LocationMap {
     for (var location in _locationMap.values) {
       if (location.isResolved) {
         pathToLocations
-            .putIfAbsent(location.path!, () => <Location>[])
+            .putIfAbsent(location.fileUri!, () => <Location>[])
             .add(location);
       }
     }
@@ -134,10 +134,10 @@ class LocationMap {
         final id = ids[i];
         final existing = _locationMap[id];
         if (existing != null) {
-          if (existing.path == null) {
+          if (existing.fileUri == null) {
             // Fill in the empty placeholder location in _locationsMap for this
             // location id. The empty placeholder entry must be completely empty.
-            existing.path = path;
+            existing.fileUri = path;
             assert(existing.line == null);
             existing.line = lines[i];
             assert(existing.column == null);
@@ -149,7 +149,7 @@ class LocationMap {
             // Existing entry already has a path. Ensure it is consistent.
             // Data could become inconsistent if we had a bug and comingled data
             // from before and after a hot restart.
-            assert(existing.path == path);
+            assert(existing.fileUri == path);
             assert(existing.line == lines[i]);
             assert(existing.column == columns[i]);
             assert(existing.name == names[i]);
@@ -157,7 +157,7 @@ class LocationMap {
         } else {
           final location = Location(
             id: id,
-            path: path,
+            fileUri: path,
             line: lines[i],
             column: columns[i],
             name: names[i],
@@ -276,17 +276,17 @@ class RebuildCountModel {
 }
 
 class Location {
-  Location({required this.id, this.path, this.line, this.column, this.name});
+  Location({required this.id, this.fileUri, this.line, this.column, this.name});
 
   final int id;
 
   /// Either all of path, line, column, and name are null or none are.
-  String? path;
+  String? fileUri;
   int? line;
   int? column;
   String? name;
 
-  bool get isResolved => path != null;
+  bool get isResolved => fileUri != null;
 }
 
 class RebuildLocation {

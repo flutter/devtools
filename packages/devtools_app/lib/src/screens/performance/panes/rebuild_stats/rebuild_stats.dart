@@ -211,12 +211,12 @@ class _RebuildTableState extends State<RebuildTable> {
         defaultSortDirection: sortDirection,
         onItemSelected: (item) async {
           final location = item?.location;
-          if (location?.path != null) {
+          if (location?.fileUri != null) {
             await _service?.navigateToCode(
-              fileUri: location?.path ?? '',
+              fileUri: location?.fileUri ?? '',
               line: location?.line ?? 0,
               column: location?.column ?? 0,
-              source: 'flutter.performance',
+              source: 'devtools.rebuildStats',
             );
           }
         },
@@ -243,7 +243,7 @@ class _LocationColumn extends ColumnData<RebuildLocationStats> {
 
   @override
   String getValue(RebuildLocationStats dataObject) {
-    final path = dataObject.location.path;
+    final path = dataObject.location.fileUri;
     if (path == null) {
       return '<resolving location>';
     }
@@ -253,11 +253,11 @@ class _LocationColumn extends ColumnData<RebuildLocationStats> {
 
   @override
   String getTooltip(RebuildLocationStats dataObject) {
-    if (dataObject.location.path == null) {
+    if (dataObject.location.fileUri == null) {
       return '<resolving location>';
     }
 
-    return '${dataObject.location.path}:${dataObject.location.line}';
+    return '${dataObject.location.fileUri}:${dataObject.location.line}';
   }
 }
 
