@@ -18,7 +18,7 @@ enum Json {
 }
 
 /// Chart data, that should be saved when transferred to offline data mode.
-class ChartData {
+class ChartData with Serializable {
   ChartData({
     required ControllerCreationMode mode,
     this.isDeviceAndroid,
@@ -54,6 +54,7 @@ class ChartData {
     return result;
   }
 
+  @override
   Map<String, dynamic> toJson() {
     return {
       Json.isDeviceAndroid.name: isDeviceAndroid ?? false,

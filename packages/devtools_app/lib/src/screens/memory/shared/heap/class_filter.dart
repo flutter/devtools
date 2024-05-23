@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:collection/collection.dart';
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../shared/memory/class_name.dart';
@@ -51,7 +52,7 @@ class _Json {
 const _defaultFilterType = ClassFilterType.except;
 
 @immutable
-class ClassFilter {
+class ClassFilter with Serializable {
   ClassFilter({
     required this.filterType,
     required String except,
@@ -84,6 +85,7 @@ class ClassFilter {
     );
   }
 
+  @override
   Map<String, dynamic> toJson() {
     return {
       _Json.type: filterType.name,
