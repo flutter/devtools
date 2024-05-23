@@ -213,7 +213,7 @@ class _RebuildTableState extends State<RebuildTable> {
           final location = item?.location;
           if (location?.fileUriString != null) {
             await _service?.navigateToCode(
-              fileUri: location?.fileUriString ?? '',
+              fileUriString: location?.fileUriString ?? '',
               line: location?.line ?? 0,
               column: location?.column ?? 0,
               source: 'devtools.rebuildStats',
