@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:dds_service_extensions/dds_service_extensions.dart';
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -10,6 +11,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../service/service_extension_widgets.dart';
 import '../../../../service/service_extensions.dart' as extensions;
+import '../../../../service/vm_service_wrapper.dart';
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
@@ -171,6 +173,8 @@ class _RebuildTableState extends State<RebuildTable> {
   /// column objects for the same column.
   final _columnCache = <String, _RebuildCountColumn>{};
 
+  VmServiceWrapper? get _service => serviceConnection.serviceManager.service;
+
   List<_RebuildCountColumn> get _metricsColumns {
     final columns = <_RebuildCountColumn>[];
     for (var i = 0; i < widget.metricNames.length; i++) {
@@ -207,8 +211,15 @@ class _RebuildTableState extends State<RebuildTable> {
         defaultSortColumn: _metricsColumns.first,
         defaultSortDirection: sortDirection,
         onItemSelected: (item) {
-          // TODO(jacobr): navigate to selected widget in IDE or display the
-          // content side by side with the rebuild table.
+          final location = item?.location;
+          if (location?.path != null) {
+            _service?.postEvent('ToolEvent', 'navigate', <String, Object>{
+              'fileUri': location?.path ?? '',
+              'line': location?.line ?? 0,
+              'column': location?.column ?? 0,
+              'source': 'flutter.performance'
+            });
+          }
         },
       ),
     );
