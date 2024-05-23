@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:dds_service_extensions/dds_service_extensions.dart';
 import 'package:vm_service/vm_service.dart';
 
 extension VmServiceExtension on VmService {
@@ -45,6 +46,23 @@ extension VmServiceExtension on VmService {
     Future<void> Function(IsolateRef) callback,
   ) async {
     await forEachIsolateHelper(this, callback);
+  }
+
+  /// Posts an event to jump to code at the specified [line] and [column] in the
+  /// specified [fileUri]. The [source] should indicate the tool and/or feature
+  /// that is making the jump to code request.
+  Future<void> navigateToCode({
+    required String fileUri,
+    required int line,
+    required int column,
+    required String source,
+  }) async {
+    await postEvent('ToolEvent', 'navigate', <String, Object>{
+      'fileUri': fileUri,
+      'line': line,
+      'column': column,
+      'source': source,
+    });
   }
 }
 

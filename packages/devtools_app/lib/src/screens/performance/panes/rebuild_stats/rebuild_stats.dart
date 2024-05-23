@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:dds_service_extensions/dds_service_extensions.dart';
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -213,12 +212,12 @@ class _RebuildTableState extends State<RebuildTable> {
         onItemSelected: (item) async {
           final location = item?.location;
           if (location?.path != null) {
-            await _service?.postEvent('ToolEvent', 'navigate', <String, Object>{
-              'fileUri': location?.path ?? '',
-              'line': location?.line ?? 0,
-              'column': location?.column ?? 0,
-              'source': 'flutter.performance',
-            });
+            await _service?.navigateToCode(
+              fileUri: location?.path ?? '',
+              line: location?.line ?? 0,
+              column: location?.column ?? 0,
+              source: 'flutter.performance',
+            );
           }
         },
       ),
