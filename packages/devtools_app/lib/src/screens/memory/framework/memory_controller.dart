@@ -163,7 +163,7 @@ class MemoryController extends DisposableController
       exportData: exportData,
     );
 
-    tracing = hasData ? TracingPaneController() : null;
+    tracing = hasData ? TracingPaneController(mode) : null;
 
     selectedFeatureTabIndex =
         offlineData?.selectedTab ?? selectedFeatureTabIndex;

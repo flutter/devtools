@@ -6,11 +6,13 @@ import 'dart:async';
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/simple_items.dart';
+import '../../../../shared/utils.dart';
 import '../../shared/widgets/shared_memory_widgets.dart';
 import 'class_table.dart';
 import 'tracing_pane_controller.dart';
@@ -38,6 +40,21 @@ class TracingPaneState extends State<TracingPane> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.controller.mode == ControllerCreationMode.offlineData) {
+      return Expanded(
+        child: Markdown(
+          data: '''
+Historical data for tracing is not supported.
+Upvote [the issue](https://github.com/flutter/devtools/issues/7801) if you need it.
+''',
+          styleSheet: MarkdownStyleSheet(
+            p: Theme.of(context).regularTextStyle,
+          ),
+          onTapLink: (text, url, title) =>
+              unawaited(launchUrlWithErrorHandling(url!)),
+        ),
+      );
+    }
     final isProfileMode =
         serviceConnection.serviceManager.connectedApp?.isProfileBuildNow ??
             false;
