@@ -55,6 +55,8 @@ extension VmServiceExtension on VmService {
   /// starts with "file://"). The [source] should indicate the tool and/or
   /// feature (i.e. in the format "someTool.someFeature") that is making the
   /// jump to code request.
+  ///
+  /// If there are no IDEs listening for this event, then this will be a no-op.
   Future<void> navigateToCode({
     required String fileUriString,
     required int line,

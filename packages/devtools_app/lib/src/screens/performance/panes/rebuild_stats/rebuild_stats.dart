@@ -243,12 +243,12 @@ class _LocationColumn extends ColumnData<RebuildLocationStats> {
 
   @override
   String getValue(RebuildLocationStats dataObject) {
-    final path = dataObject.location.fileUriString;
-    if (path == null) {
+    final fileUriString = dataObject.location.fileUriString;
+    if (fileUriString == null) {
       return '<resolving location>';
     }
 
-    return '${path.split('/').last}:${dataObject.location.line}';
+    return '${fileUriString.split('/').last}:${dataObject.location.line}';
   }
 
   @override
