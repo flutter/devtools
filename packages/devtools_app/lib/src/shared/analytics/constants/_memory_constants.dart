@@ -69,8 +69,10 @@ class MemoryEvent {
 
   static const browseRefLimit = 'browseRefLimit';
 
-  static const dropOneLiveVariable = 'dropOneLiveVariable';
-  static const dropOneStaticVariable = 'dropOneStaticVariable';
+  static String dropOneLiveVariable({required String sourceFeature}) =>
+      'dropOneLiveVariable_$sourceFeature';
+  static String dropOneStaticVariable({required String sourceFeature}) =>
+      'dropOneStaticVariable_$sourceFeature';
   static String dropAllLiveToConsole({
     required bool includeSubclasses,
     required bool includeImplementers,

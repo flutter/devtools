@@ -8,13 +8,13 @@ import 'package:test/test.dart';
 void main() {
   test('deserialize works for json', () {
     final json = {'key': 'value'};
-    String deserializer(Map<String, dynamic> json) => 'correct';
+    String deserializer(Map<String, dynamic> _) => 'correct';
     expect(deserialize<String>(json, deserializer), 'correct');
   });
 
   test('deserialize works for object', () {
     const json = 'correct';
-    String deserializer(Map<String, dynamic> json) => 'wrong';
+    String deserializer(Map<String, dynamic> _) => 'wrong';
     expect(deserialize<String>(json, deserializer), 'correct');
   });
 }
