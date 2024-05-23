@@ -210,14 +210,14 @@ class _RebuildTableState extends State<RebuildTable> {
             ValueKey<String?>('${location.location.id}'),
         defaultSortColumn: _metricsColumns.first,
         defaultSortDirection: sortDirection,
-        onItemSelected: (item) {
+        onItemSelected: (item) async {
           final location = item?.location;
           if (location?.path != null) {
-            _service?.postEvent('ToolEvent', 'navigate', <String, Object>{
+            await _service?.postEvent('ToolEvent', 'navigate', <String, Object>{
               'fileUri': location?.path ?? '',
               'line': location?.line ?? 0,
               'column': location?.column ?? 0,
-              'source': 'flutter.performance'
+              'source': 'flutter.performance',
             });
           }
         },
