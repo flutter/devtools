@@ -211,9 +211,9 @@ class _RebuildTableState extends State<RebuildTable> {
         defaultSortDirection: sortDirection,
         onItemSelected: (item) async {
           final location = item?.location;
-          if (location?.fileUri != null) {
+          if (location?.fileUriString != null) {
             await _service?.navigateToCode(
-              fileUri: location?.fileUri ?? '',
+              fileUri: location?.fileUriString ?? '',
               line: location?.line ?? 0,
               column: location?.column ?? 0,
               source: 'devtools.rebuildStats',
@@ -243,7 +243,7 @@ class _LocationColumn extends ColumnData<RebuildLocationStats> {
 
   @override
   String getValue(RebuildLocationStats dataObject) {
-    final path = dataObject.location.fileUri;
+    final path = dataObject.location.fileUriString;
     if (path == null) {
       return '<resolving location>';
     }
@@ -253,11 +253,11 @@ class _LocationColumn extends ColumnData<RebuildLocationStats> {
 
   @override
   String getTooltip(RebuildLocationStats dataObject) {
-    if (dataObject.location.fileUri == null) {
+    if (dataObject.location.fileUriString == null) {
       return '<resolving location>';
     }
 
-    return '${dataObject.location.fileUri}:${dataObject.location.line}';
+    return '${dataObject.location.fileUriString}:${dataObject.location.line}';
   }
 }
 

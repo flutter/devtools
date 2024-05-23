@@ -48,17 +48,21 @@ extension VmServiceExtension on VmService {
     await forEachIsolateHelper(this, callback);
   }
 
-  /// Posts an event to jump to code at the specified [line] and [column] in the
-  /// specified [fileUri]. The [source] should indicate the tool and/or feature
-  /// that is making the jump to code request.
+  /// Posts an event to jump to code.
+  ///
+  /// The event directs an IDE to move to the [line] and [column] in the
+  /// specified [fileUriString], which is expected to be a proper file URI (i.e.
+  /// starts with "file://"). The [source] should indicate the tool and/or
+  /// feature (i.e. in the format "someTool.someFeature") that is making the
+  /// jump to code request.
   Future<void> navigateToCode({
-    required String fileUri,
+    required String fileUriString,
     required int line,
     required int column,
     required String source,
   }) async {
     await postEvent('ToolEvent', 'navigate', <String, Object>{
-      'fileUri': fileUri,
+      'fileUri': fileUriString,
       'line': line,
       'column': column,
       'source': source,
