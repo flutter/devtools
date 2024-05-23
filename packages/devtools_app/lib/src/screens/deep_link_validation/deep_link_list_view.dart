@@ -39,20 +39,17 @@ class DeepLinkListView extends StatefulWidget {
 
 class _DeepLinkListViewState extends State<DeepLinkListView>
     with ProvidedControllerMixin<DeepLinksController, DeepLinkListView> {
-  List<String> get androidVariants =>
-      controller.selectedProject.value!.androidVariants;
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     initController();
     callWhenControllerReady((_) {
-      int releaseVariantIndex = controller
-          .selectedProject.value!.androidVariants
-          .indexWhere((variant) => variant.toLowerCase().contains('release'));
-      // If not found, default to 0.
-      releaseVariantIndex = max(releaseVariantIndex, 0);
-      controller.selectedVariantIndex.value = releaseVariantIndex;
+      controller.selectedAndroidVariantIndex.value = _getReleaseVariantIndex(
+        controller.selectedProject.value!.androidVariants,
+      );
+      controller.selectedIosConfigurationIndex.value = _getReleaseVariantIndex(
+        controller.selectedProject.value!.iosBuildOptions.configurations,
+      );
     });
   }
 
@@ -70,6 +67,13 @@ class _DeepLinkListViewState extends State<DeepLinkListView>
         ),
       ),
     );
+  }
+
+  int _getReleaseVariantIndex(List<String> variants) {
+    final index = variants
+        .indexWhere((variant) => variant.toLowerCase().contains('release'));
+    // If not found, default to 0.
+    return max(index, 0);
   }
 }
 
@@ -273,24 +277,19 @@ class _DeepLinkListViewTopPanel extends StatelessWidget {
       includeBottomBorder: false,
       tall: true,
       title: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             'Validate and fix',
             style: Theme.of(context).textTheme.titleSmall,
           ),
-          ValueListenableBuilder(
-            valueListenable: controller.selectedVariantIndex,
-            builder: (_, value, __) {
-              return _AndroidVariantDropdown(
-                androidVariants:
-                    controller.selectedProject.value!.androidVariants,
-                index: value,
-                onVariantIndexSelected: (index) {
-                  controller.selectedVariantIndex.value = index;
-                },
-              );
-            },
+          const Spacer(),
+          _VariantDropdown(
+            os: PlatformOS.android,
+            controller: controller,
+          ),
+          _VariantDropdown(
+            os: PlatformOS.ios,
+            controller: controller,
           ),
         ],
       ),
@@ -298,36 +297,44 @@ class _DeepLinkListViewTopPanel extends StatelessWidget {
   }
 }
 
-class _AndroidVariantDropdown extends StatelessWidget {
-  const _AndroidVariantDropdown({
-    required this.androidVariants,
-    required this.index,
-    required this.onVariantIndexSelected,
+class _VariantDropdown extends StatelessWidget {
+  const _VariantDropdown({
+    required this.os,
+    required this.controller,
   });
-
-  final List<String> androidVariants;
-  final int index;
-  final ValueChanged<int> onVariantIndexSelected;
+  final PlatformOS os;
+  final DeepLinksController controller;
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        const Text('Android Variant:'),
-        RoundedDropDownButton<int>(
-          roundedCornerOptions: RoundedCornerOptions.empty,
-          value: index,
-          items: [
-            for (int i = 0; i < androidVariants.length; i++)
-              DropdownMenuItem<int>(
-                value: i,
-                child: Text(androidVariants[i]),
-              ),
+    return ValueListenableBuilder(
+      valueListenable: os == PlatformOS.android
+          ? controller.selectedAndroidVariantIndex
+          : controller.selectedIosConfigurationIndex,
+      builder: (_, index, __) {
+        final variants = os == PlatformOS.android
+            ? controller.selectedProject.value!.androidVariants
+            : controller.selectedProject.value!.iosBuildOptions.configurations;
+        return Row(
+          children: [
+            Text('${os.description} Variant:'),
+            RoundedDropDownButton<int>(
+              roundedCornerOptions: RoundedCornerOptions.empty,
+              value: index,
+              items: [
+                for (int i = 0; i < variants.length; i++)
+                  DropdownMenuItem<int>(value: i, child: Text(variants[i])),
+              ],
+              onChanged: (int? newIndex) {
+                if (os == PlatformOS.android) {
+                  controller.selectedAndroidVariantIndex.value = newIndex!;
+                } else {
+                  controller.selectedIosConfigurationIndex.value = newIndex!;
+                }
+              },
+            ),
           ],
-          onChanged: (int? index) {
-            onVariantIndexSelected(index!);
-          },
-        ),
-      ],
+        );
+      },
     );
   }
 }
