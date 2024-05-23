@@ -287,6 +287,7 @@ class _DeepLinkListViewTopPanel extends StatelessWidget {
             os: PlatformOS.android,
             controller: controller,
           ),
+          const SizedBox(width: denseSpacing),
           _VariantDropdown(
             os: PlatformOS.ios,
             controller: controller,

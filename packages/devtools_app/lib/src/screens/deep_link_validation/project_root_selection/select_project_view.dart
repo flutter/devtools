@@ -64,7 +64,7 @@ class _SelectProjectViewState extends State<SelectProjectView>
     ga.timeStart(gac.deeplink, gac.AnalyzeFlutterProject.loadVariants.name);
     final List<String> androidVariants =
         await server.requestAndroidBuildVariants(directory);
-    if (androidVariants.isEmpty) {
+    if (androidVariants.isEmpty || !mounted) {
       // If the project is not a Flutter project, cancel timing and return an empty list.
       ga.cancelTimingOperation(
         gac.deeplink,

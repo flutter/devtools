@@ -140,18 +140,14 @@ class DisplayOptions {
   }
 }
 
-class DeepLinksController extends DisposableController {
+class DeepLinksController extends DisposableController
+    with AutoDisposeControllerMixin {
   DeepLinksController() {
-    selectedAndroidVariantIndex
-        .addListener(_handleSelectedAndroidVariantIndexChanged);
+    addAutoDisposeListener(
+      selectedAndroidVariantIndex,
+      _handleSelectedAndroidVariantIndexChanged,
+    );
     // TODO(Hangyujin): Add listerner for selectedIosConfigurationIndex.
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    selectedAndroidVariantIndex
-        .removeListener(_handleSelectedAndroidVariantIndexChanged);
   }
 
   DisplayOptions get displayOptions => displayOptionsNotifier.value;
