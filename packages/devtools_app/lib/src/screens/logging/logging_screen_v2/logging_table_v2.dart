@@ -42,8 +42,6 @@ class _LoggingTableV2State extends State<LoggingTableV2> {
     fontSize: 12.0,
   );
   double maxWidth = 0.0;
-  //TODO: may need to rebuild the table at the current scroll position when we get sections that are longer?
-  // We would need to min width to the current screen size
   final _progressStopwatch = Stopwatch();
 
   @override
@@ -164,7 +162,7 @@ class _LoggingTableV2State extends State<LoggingTableV2> {
                       if (!_progressStopwatch.isRunning) {
                         _progressStopwatch.start();
                       }
-                      print(_progressStopwatch.elapsedMilliseconds);
+
                       if (_progressStopwatch.elapsedMilliseconds <
                           _millisecondsUntilCacheProgressShows) {
                         progress = 0.0;

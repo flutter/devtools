@@ -660,6 +660,10 @@ class LogDataV2 with SearchableDataMixin {
     }
   }
 
+  String asLogDetails() {
+    return needsComputing.value ? '<fetching>' : prettyPrinted() ?? '';
+  }
+
   @override
   bool matchesSearchToken(RegExp regExpSearch) {
     return kind.caseInsensitiveContains(regExpSearch) ||

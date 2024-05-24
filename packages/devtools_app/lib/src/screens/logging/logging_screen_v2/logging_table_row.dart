@@ -33,14 +33,13 @@ class LoggingTableRow extends StatefulWidget {
   static const TextStyle _detailsStyle = TextStyle();
   static const TextStyle _metaDataStyle = TextStyle();
 
-  // TODO: find out where this extra 10.0 is coming from;
   static const double _dividerHeight = 10.0;
   static double calculateRowHeight(LogDataV2 log, double width) {
-    final text = log.prettyPrinted() ?? '';
+    final text = log.asLogDetails();
 
     final row1 = _textSize(_detailsSpan(text), width: width);
 
-    // TODO: Improve row2 height by manually flowing metadas into another row
+    // TODO(danchevalier): Improve row2 height by manually flowing metadas into another row
     // if theyoverflow.
     final row2 = _textSize(
       _metadataSpan('always a single line of text'),
@@ -66,7 +65,6 @@ class LoggingTableRow extends StatefulWidget {
 class _LoggingTableRowState extends State<LoggingTableRow> {
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     Color? color = alternatingColorForIndex(
       widget.index,
       Theme.of(context).colorScheme,
@@ -85,8 +83,7 @@ class _LoggingTableRowState extends State<LoggingTableRow> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               RichText(
-                text: LoggingTableRow._detailsSpan(
-                    widget.data.prettyPrinted() ?? '<fetching>'),
+                text: LoggingTableRow._detailsSpan(widget.data.asLogDetails()),
               ),
               Row(
                 children: [
