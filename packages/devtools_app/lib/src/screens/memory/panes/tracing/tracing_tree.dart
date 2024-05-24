@@ -24,7 +24,7 @@ const double _countColumnWidth = 100;
 class AllocationTracingTree extends StatefulWidget {
   const AllocationTracingTree({super.key, required this.controller});
 
-  final TracingPaneController controller;
+  final TracePaneController controller;
 
   static final _bottomUpTab = _buildTab(tabName: 'Bottom Up');
   static final _callTreeTab = _buildTab(tabName: 'Call Tree');
@@ -169,7 +169,7 @@ class _TracingTreeHeader extends StatelessWidget {
     required this.updateTreeStateCallback,
   });
 
-  final TracingPaneController controller;
+  final TracePaneController controller;
   final void Function(VoidCallback) updateTreeStateCallback;
   final TabController tabController;
   final List<DevToolsTab> tabs;

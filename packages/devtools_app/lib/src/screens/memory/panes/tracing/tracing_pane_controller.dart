@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
@@ -18,16 +19,25 @@ enum Json {
   selection;
 }
 
-class TracingPaneController extends DisposableController
+class TracePaneController extends DisposableController
     with AutoDisposeControllerMixin, Serializable {
-  TracingPaneController(
+  TracePaneController(
     this.mode, {
     this.stateForIsolate = const {},
     String? selectedIsolateId,
-  });
+  }) {
+    final isolate = stateForIsolate.values
+        .firstWhereOrNull((i) => i.isolate.id == selectedIsolateId);
+    if (selectedIsolateId != null && isolate == null) {
+      throw ArgumentError(
+        '$selectedIsolateId must be a key in stateForIsolate',
+      );
+    }
+    if (isolate != null) _selection.value = isolate;
+  }
 
-  factory TracingPaneController.fromJson(Map<String, dynamic> json) {
-    return TracingPaneController(
+  factory TracePaneController.fromJson(Map<String, dynamic> json) {
+    return TracePaneController(
       ControllerCreationMode.offlineData,
       stateForIsolate: (json[Json.stateForIsolate.name] as Map).map(
         (key, value) => MapEntry(

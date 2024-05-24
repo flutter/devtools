@@ -45,9 +45,9 @@ class OfflineMemoryData with Serializable {
         json[Json.chartData.name],
         ChartData.fromJson,
       ),
-      deserializeNullable<TracingPaneController>(
+      deserializeNullable<TracePaneController>(
         json[Json.trace.name],
-        TracingPaneController.fromJson,
+        TracePaneController.fromJson,
       ),
       deserialize<ClassFilter>(
         json[Json.classFilter.name],
@@ -75,5 +75,5 @@ class OfflineMemoryData with Serializable {
   final DiffPaneController diff;
   final ProfilePaneController? profile;
   final ChartData? chart;
-  final TracingPaneController? trace;
+  final TracePaneController? trace;
 }

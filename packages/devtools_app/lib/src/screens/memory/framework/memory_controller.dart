@@ -66,7 +66,7 @@ class MemoryController extends DisposableController
 
   late final MemoryChartPaneController? chart;
 
-  late final TracingPaneController? trace;
+  late final TracePaneController? trace;
 
   late final MemoryControlPaneController control;
 
@@ -163,7 +163,7 @@ class MemoryController extends DisposableController
       exportData: exportData,
     );
 
-    trace = hasData ? TracingPaneController(mode) : null;
+    trace = hasData ? TracePaneController(mode) : null;
 
     selectedFeatureTabIndex =
         offlineData?.selectedTab ?? selectedFeatureTabIndex;

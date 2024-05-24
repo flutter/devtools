@@ -35,7 +35,7 @@ void main() {
             interval: ChartInterval.theDefault,
             isLegendVisible: true,
           ),
-          TracingPaneController(
+          TracePaneController(
             ControllerCreationMode.offlineData,
           ),
           ClassFilter.empty(),

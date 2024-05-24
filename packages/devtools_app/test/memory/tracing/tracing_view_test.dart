@@ -36,7 +36,7 @@ void main() {
   /// Clears the class filter text field.
   Future<void> clearFilter(
     WidgetTester tester,
-    TracingPaneController controller,
+    TracePaneController controller,
   ) async {
     final originalClassCount = classList.classes!.length;
     final clearFilterButton = find.byIcon(Icons.clear);
