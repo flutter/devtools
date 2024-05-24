@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+/v Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -239,6 +239,7 @@ double get defaultHeaderHeight => scaleByFontFactor(28.0);
 double get defaultButtonHeight => scaleByFontFactor(26.0);
 double get defaultRowHeight => scaleByFontFactor(24.0);
 double get defaultLinearProgressIndicatorHeight => scaleByFontFactor(4.0);
+double get defaultLinearProgressIndicatorWidth => scaleByFontFactor(200.0);
 double get buttonMinWidth => scaleByFontFactor(26.0);
 
 const defaultIconSizeBeforeScaling = 14.0;

@@ -10,7 +10,6 @@ import 'package:provider/provider.dart';
 import '../../../service/service_extension_widgets.dart';
 import '../../../shared/analytics/analytics.dart' as ga;
 import '../../../shared/analytics/constants.dart' as gac;
-import '../../../shared/common_widgets.dart';
 import '../../../shared/screen.dart';
 import '../../../shared/utils.dart';
 import 'logging_controller_v2.dart';
@@ -85,10 +84,8 @@ class _LoggingScreenBodyV2State extends State<LoggingScreenBodyV2>
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: LoggingTableV2(
-        model: controller.loggingModel,
-      ),
+    return LoggingTableV2(
+      model: controller.loggingModel,
     );
   }
 }

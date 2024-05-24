@@ -4,11 +4,13 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'logging_model.dart';
+import 'logging_table_row.dart';
 
 /// A builder that includes an Offset to draw the context menu at.
 typedef ContextMenuBuilder = Widget Function(
@@ -31,6 +33,8 @@ class _LoggingTableV2State extends State<LoggingTableV2> {
   final Set<int> selections = <int>{};
   final Map<int, double> cachedOffets = {};
   final normalTextStyle = const TextStyle(color: Colors.black, fontSize: 14.0);
+  static const _millisecondsUntilCacheProgressShows = 500;
+  static const _millisecondsUntilCacheProgressHelperShows = 2000;
   String lastSearch = '';
   final metadataTextStyle = const TextStyle(
     color: Colors.black,
@@ -40,6 +44,7 @@ class _LoggingTableV2State extends State<LoggingTableV2> {
   double maxWidth = 0.0;
   //TODO: may need to rebuild the table at the current scroll position when we get sections that are longer?
   // We would need to min width to the current screen size
+  final _progressStopwatch = Stopwatch();
 
   @override
   void initState() {
@@ -75,6 +80,7 @@ class _LoggingTableV2State extends State<LoggingTableV2> {
     return LayoutBuilder(
       builder: (context, constraints) {
         widget.model.tableWidth = constraints.maxWidth;
+        _progressStopwatch.reset();
         return Column(
           children: [
             Row(
@@ -148,25 +154,77 @@ class _LoggingTableV2State extends State<LoggingTableV2> {
                     ],
                   );
                 },
-                child: Scrollbar(
-                  thumbVisibility: true,
-                  controller: _verticalController,
-                  child: ListenableBuilder(
-                    listenable: widget.model,
-                    builder: (context, _) {
-                      return CustomScrollView(
-                        controller: _verticalController,
-                        slivers: <Widget>[
-                          SliverVariedExtentList.builder(
-                            itemCount: widget.model.logCount,
-                            itemBuilder: widget.model.buildRow,
-                            itemExtentBuilder: (index, _) =>
-                                widget.model.getRowHeight(index),
-                          ),
-                        ],
+                child: ListenableBuilder(
+                  listenable: widget.model.cacheLoadProgress,
+                  builder: (context, _) {
+                    final cacheLoadProgress =
+                        widget.model.cacheLoadProgress.value;
+                    if (cacheLoadProgress != null) {
+                      double progress = cacheLoadProgress;
+                      if (!_progressStopwatch.isRunning) {
+                        _progressStopwatch.start();
+                      }
+                      print(_progressStopwatch.elapsedMilliseconds);
+                      if (_progressStopwatch.elapsedMilliseconds <
+                          _millisecondsUntilCacheProgressShows) {
+                        progress = 0.0;
+                      }
+
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text(
+                              'Resizing... this will only take a moment.',
+                            ),
+                            const SizedBox(height: defaultSpacing),
+                            SizedBox(
+                              width: defaultLinearProgressIndicatorWidth,
+                              height: defaultLinearProgressIndicatorHeight,
+                              child: LinearProgressIndicator(
+                                value: progress,
+                              ),
+                            ),
+                            const SizedBox(height: defaultSpacing),
+                            if (_progressStopwatch.elapsedMilliseconds >
+                                _millisecondsUntilCacheProgressHelperShows)
+                              const Text(
+                                'To make this process faster, then reduce the "Log Retention" setting.',
+                              ),
+                          ],
+                        ),
                       );
-                    },
-                  ),
+                    } else {
+                      _progressStopwatch.stop();
+                      _progressStopwatch.reset();
+                      return Scrollbar(
+                        thumbVisibility: true,
+                        controller: _verticalController,
+                        child: ListenableBuilder(
+                          listenable: widget.model,
+                          builder: (context, _) {
+                            return CustomScrollView(
+                              controller: _verticalController,
+                              slivers: <Widget>[
+                                SliverVariedExtentList.builder(
+                                  itemCount: widget.model.logCount,
+                                  itemBuilder: (context, index) {
+                                    return LoggingTableRow(
+                                      index: index,
+                                      data: widget.model.getLog(index),
+                                      isSelected: false,
+                                    );
+                                  },
+                                  itemExtentBuilder: (index, _) =>
+                                      widget.model.getRowHeight(index),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                      );
+                    }
+                  },
                 ),
               ),
             ),

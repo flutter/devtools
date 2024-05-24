@@ -1,17 +1,15 @@
 import 'dart:async';
+import 'dart:math';
 
-import 'package:async/async.dart';
-import 'package:devtools_app_shared/ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
 import 'logging_controller_v2.dart';
+import 'logging_table_row.dart';
 
 class LoggingTableModel extends ChangeNotifier {
-  LoggingTableModel();
-  final TextStyle _detailsStyle = const TextStyle();
-  final TextStyle _metaDataStyle = const TextStyle();
-  final double _additionalHeight =
-      10.0; // TODO: find out where this extra 10.0 is coming from
+  LoggingTableModel() {
+    _worker = InterruptableChunkWorker(callback: getRowHeight);
+  }
 
   final List<LogDataV2> _logs = [];
   final List<LogDataV2> _filteredLogs = [];
@@ -20,14 +18,26 @@ class LoggingTableModel extends ChangeNotifier {
   final Map<int, double> cachedHeights = {};
   final Map<int, double> cachedOffets = {};
 
-  CancelableOperation? _getAllRowHeightsOp;
+  late final InterruptableChunkWorker _worker;
+  final Debouncer _debouncer = Debouncer(milliseconds: 250);
+
+  /// Represents the state of reloading the height caches.
+  ///
+  /// When null, then the cache is not loading.
+  /// When double, then the value is represents how much progress has been made.
+  ValueListenable<double?> get cacheLoadProgress => _cacheLoadProgress;
+  final _cacheLoadProgress = ValueNotifier<double?>(null);
 
   set tableWidth(double width) {
     _tableWidth = width;
     cachedHeights.clear();
     cachedOffets.clear();
-    unawaited(_preFetchRowHeights());
+    // _debouncer.run();
+    Future.delayed(const Duration(), _preFetchRowHeights);
+    // unawaited(_preFetchRowHeights());
   }
+
+  LogDataV2 getLog(int index) => _logs[index];
 
   double _tableWidth = 0.0;
 
@@ -39,109 +49,99 @@ class LoggingTableModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Size _textSize(
-    TextSpan textSpan, {
-    double width = double.infinity,
-  }) {
-    final TextPainter textPainter = TextPainter(
-      text: textSpan,
-      textDirection: TextDirection.ltr,
-    )..layout(maxWidth: width);
-    return textPainter.size;
-  }
-
   double getRowOffset(int index) {
     throw 'Implement this when needed';
   }
 
-  Widget? buildRow(BuildContext context, int index) {
-    final row = _filteredLogs.elementAt(index);
-    Color? color = alternatingColorForIndex(
-      index,
-      Theme.of(context).colorScheme,
-    );
-
-    if (_selectedLogs.contains(index)) {
-      color = Colors.blueGrey;
-    }
-
-    return Container(
-      decoration: BoxDecoration(color: color),
-      child: ValueListenableBuilder(
-        valueListenable: row.needsComputing,
-        builder: (context, _, __) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              RichText(text: _detailsSpan(row.prettyPrinted() ?? '<fetching>')),
-              Row(
-                children: [
-                  RichText(
-                    text: _metadataSpan('Some METADATA'),
-                  ),
-                  const SizedBox(width: 20.0),
-                  RichText(
-                    text: _metadataSpan('Goes Here'),
-                  ),
-                ],
-              ),
-              const Divider(
-                height: 10.0,
-                color: Colors.black,
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  TextSpan _detailsSpan(String text) {
-    return TextSpan(
-      text: text,
-      style: _detailsStyle,
-    );
-  }
-
-  TextSpan _metadataSpan(String text) {
-    return TextSpan(
-      text: text,
-      style: _metaDataStyle,
-    );
-  }
-
   double getRowHeight(int index) {
-    // TODO cached height
     final cachedHeight = cachedHeights[index];
     if (cachedHeight != null) return cachedHeight;
-
-    final log = _logs[index];
-    final text = log.prettyPrinted() ?? '';
-
-    final row1 = _textSize(_detailsSpan(text), width: _tableWidth);
-
-    // TODO: Improve row2 height by manually flowing metadas into another row
-    // if theyoverflow.
-    final row2 = _textSize(
-      _metadataSpan('always a single line of text'),
-      width: _tableWidth,
+    final newHeight = LoggingTableRow.calculateRowHeight(
+      _logs[index],
+      _tableWidth,
     );
-    final newHeight = row1.height + row2.height + _additionalHeight;
     cachedHeights[index] = newHeight;
     return newHeight;
   }
 
-  Future<void> _preFetchRowHeights() async {
-    if (_getAllRowHeightsOp != null) {
-      await _getAllRowHeightsOp!.cancel();
+  Future<bool> _preFetchRowHeights() async {
+    _cacheLoadProgress.value = 0.0;
+    final didComplete = await _worker.doWork(
+      _logs.length,
+      (progress) => _cacheLoadProgress.value = progress,
+    );
+    if (didComplete) {
+      _cacheLoadProgress.value = null;
     }
+    return didComplete;
+  }
+}
 
-    Future<void> fetchAllRows() async {
-      for (var i = 0; i < _logs.length; i++) {
-        getRowHeight(i);
+class InterruptableChunkWorker {
+  InterruptableChunkWorker({
+    int chunkSize = 50,
+    required this.callback,
+  }) : _chunkSize = chunkSize;
+
+  final int _chunkSize;
+  int _workId = 0;
+  void Function(int) callback;
+
+  final _sw = Stopwatch();
+
+  Future<bool> doWork(
+    int length,
+    void Function(double progress) progressCallback,
+  ) async {
+    final completer = Completer<bool>();
+    final localWorkId = ++_workId;
+    final sw = Stopwatch();
+
+    Function(int i)? doChunkWork;
+
+    // Found out what the problem is, when scrolled to the bottom the single asks for height have to wait until the others are called. So we would need to implement a priority queue.
+    doChunkWork = (i) {
+      // print(
+      //   'CHUNKWORK(globalId: $_workId, localId:$localWorkId), length: $length, i: $i)',
+      // );
+      if (i >= length) {
+        sw.stop();
+        return completer.complete(true);
       }
-    }
 
-    _getAllRowHeightsOp = CancelableOperation.fromFuture(fetchAllRows());
+      // If our localWorkId is no longer active, then do not continue working
+      if (localWorkId != _workId) return completer.complete(false);
+
+      _sw.reset();
+      _sw.start();
+
+      final J = min(length, i + _chunkSize);
+      int j = i;
+      for (; j < J; j++) {
+        callback(j);
+      }
+      _sw.stop();
+
+      progressCallback(j / length);
+      Future.delayed(const Duration(), () {
+        doChunkWork!.call(i + _chunkSize);
+      });
+    };
+    sw.start();
+    doChunkWork(0);
+    return completer.future;
+  }
+}
+
+class Debouncer {
+  Debouncer({required this.milliseconds});
+  final int milliseconds;
+  Timer? _timer;
+
+  void run(VoidCallback action) {
+    if (_timer != null) {
+      _timer!.cancel();
+    }
+    _timer = Timer(Duration(milliseconds: milliseconds), action);
   }
 }
