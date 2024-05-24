@@ -50,7 +50,7 @@ void main() {
       (WidgetTester tester) async {
         await scene.pump(tester);
 
-        final allocationProfileController = scene.controller.profile;
+        final allocationProfileController = scene.controller.profile!;
 
         preferences.toggleVmDeveloperMode(false);
         await navigateToAllocationProfile(tester, allocationProfileController);
@@ -149,7 +149,7 @@ void main() {
       (WidgetTester tester) async {
         await scene.pump(tester);
 
-        final allocationProfileController = scene.controller.profile;
+        final allocationProfileController = scene.controller.profile!;
         await navigateToAllocationProfile(tester, allocationProfileController);
 
         // We'll clear it for now so we can tell when it's refreshed.
@@ -178,7 +178,7 @@ void main() {
       (WidgetTester tester) async {
         await scene.pump(tester);
 
-        final allocationProfileController = scene.controller.profile;
+        final allocationProfileController = scene.controller.profile!;
 
         await navigateToAllocationProfile(tester, allocationProfileController);
 
@@ -203,6 +203,8 @@ void main() {
 
         // Emit a GC event to trigger a refresh.
         fakeService.emitGCEvent();
+        // Time to refresh.
+        await tester.runAsync(() => Future.delayed(const Duration(seconds: 1)));
         await tester.pumpAndSettle();
 
         // Ensure that we have populated the current allocation profile.

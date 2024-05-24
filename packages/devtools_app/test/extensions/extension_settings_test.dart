@@ -42,10 +42,10 @@ void main() {
       await extensionService.initialize();
       expect(extensionService.staticExtensions.length, 4);
       expect(extensionService.runtimeExtensions.length, 3);
-      expect(extensionService.availableExtensions.value.length, 5);
+      expect(extensionService.availableExtensions.length, 5);
 
       dialog = ExtensionSettingsDialog(
-        extensions: extensionService.availableExtensions.value,
+        extensions: extensionService.availableExtensions,
       );
     });
 
@@ -57,7 +57,7 @@ void main() {
       'builds dialog with no available extensions',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          wrapSimple(const ExtensionSettingsDialog(extensions: [])),
+          wrap(const ExtensionSettingsDialog(extensions: [])),
         );
         await tester.pumpAndSettle();
         expect(find.text('DevTools Extensions'), findsOneWidget);
@@ -74,7 +74,7 @@ void main() {
     testWidgets(
       'builds dialog with available extensions',
       (WidgetTester tester) async {
-        await tester.pumpWidget(wrapSimple(dialog));
+        await tester.pumpWidget(wrap(dialog));
         await tester.pumpAndSettle();
         expect(find.text('DevTools Extensions'), findsOneWidget);
         expect(
@@ -96,7 +96,7 @@ void main() {
     testWidgets(
       'pressing toggle buttons makes calls to the $ExtensionService',
       (WidgetTester tester) async {
-        await tester.pumpWidget(wrapSimple(dialog));
+        await tester.pumpWidget(wrap(dialog));
         await tester.pumpAndSettle();
 
         expect(
@@ -246,7 +246,7 @@ void main() {
           ExtensionEnabledState.enabled,
         );
 
-        await tester.pumpWidget(wrapSimple(dialog));
+        await tester.pumpWidget(wrap(dialog));
         await tester.pumpAndSettle();
         await expectLater(
           find.byWidget(dialog),
@@ -260,7 +260,7 @@ void main() {
     testWidgets(
       'toggle buttons update for changes to value notifiers',
       (WidgetTester tester) async {
-        await tester.pumpWidget(wrapSimple(dialog));
+        await tester.pumpWidget(wrap(dialog));
         await tester.pumpAndSettle();
         await expectLater(
           find.byWidget(dialog),
@@ -290,7 +290,7 @@ void main() {
           enable: true,
         );
 
-        await tester.pumpWidget(wrapSimple(dialog));
+        await tester.pumpWidget(wrap(dialog));
         await tester.pumpAndSettle();
         await expectLater(
           find.byWidget(dialog),

@@ -290,3 +290,10 @@ ControllerCreationMode get devToolsMode {
           ? ControllerCreationMode.connected
           : ControllerCreationMode.disconnected;
 }
+
+Future<void> launchUrlWithErrorHandling(String url) async {
+  await launchUrl(
+    url,
+    onError: () => notificationService.push('Unable to open $url.'),
+  );
+}

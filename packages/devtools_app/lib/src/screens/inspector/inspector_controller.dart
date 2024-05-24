@@ -789,7 +789,7 @@ class InspectorController extends DisposableController
     if (_disposed) return;
 
     if (instanceRef != null) {
-      serviceConnection.consoleService.appendInstanceRef(
+      await serviceConnection.consoleService.appendInstanceRef(
         value: instanceRef,
         diagnostic: node.diagnostic,
         isolateRef: isolateRef,

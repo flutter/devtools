@@ -81,7 +81,7 @@ class _FeedbackLink extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RichText(
-      text: LinkTextSpan(
+      text: GaLinkTextSpan(
         link: devToolsExtensionPoints.issueTrackerLink(),
         context: context,
       ),
@@ -98,8 +98,8 @@ class _ContributingLink extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RichText(
-      text: LinkTextSpan(
-        link: const Link(
+      text: GaLinkTextSpan(
+        link: const GaLink(
           display: 'CONTRIBUTING',
           url: _contributingGuideUrl,
           gaScreenName: gac.devToolsMain,
@@ -119,8 +119,8 @@ class _DiscordLink extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RichText(
-      text: LinkTextSpan(
-        link: const Link(
+      text: GaLinkTextSpan(
+        link: const GaLink(
           display: 'Discord',
           url: _discordWikiUrl,
           gaScreenName: gac.devToolsMain,

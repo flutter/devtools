@@ -3,6 +3,7 @@
 // in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/screens/memory/framework/memory_tabs.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/controller/diff_pane_controller.dart';
 import 'package:devtools_app/src/screens/memory/panes/profile/profile_pane_controller.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/class_filter.dart';
@@ -143,13 +144,15 @@ class MemoryDefaultScene extends Scene {
       only: '',
     );
 
-    final diffController =
-        DiffPaneController(loader: HeapGraphLoaderProvided(heapProviders))
-          ..derived.applyFilter(showAllFilter);
+    final diffController = DiffPaneController(
+      loader: HeapGraphLoaderProvided(heapProviders),
+      rootPackage: 'root',
+    )..derived.applyFilter(showAllFilter);
 
-    final profileController =
-        ProfilePaneController(mode: ControllerCreationMode.connected)
-          ..setFilter(showAllFilter);
+    final profileController = ProfilePaneController(
+      mode: ControllerCreationMode.connected,
+      rootPackage: 'root',
+    )..setFilter(showAllFilter);
 
     controller = MemoryController(
       connectedDiff: diffController,
@@ -158,13 +161,26 @@ class MemoryDefaultScene extends Scene {
 
     await controller.initialized;
 
-    controller.chart.data.timeline.data
+    controller.chart!.data.timeline.data
       ..clear()
       ..addAll(memoryJson.data);
   }
 
   @override
   String get title => '$MemoryDefaultScene';
+
+  Future<void> takeSnapshot(WidgetTester tester) async {
+    final snapshots = controller.diff.core.snapshots;
+    final length = snapshots.value.length;
+    await tester.tap(find.byIcon(Icons.fiber_manual_record).first);
+    await tester.pumpAndSettle();
+    expect(snapshots.value.length, equals(length + 1));
+  }
+
+  Future<void> goToDiffTab(WidgetTester tester) async {
+    await tester.tap(find.byKey(MemoryScreenKeys.diffTab));
+    await tester.pumpAndSettle();
+  }
 
   void tearDown() {}
 }

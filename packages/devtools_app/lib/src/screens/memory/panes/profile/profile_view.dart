@@ -468,7 +468,7 @@ class AllocationProfileTableViewState
         Padding(
           padding: const EdgeInsets.all(denseSpacing),
           child: _AllocationProfileTableControls(
-            allocationProfileController: widget.controller,
+            controller: widget.controller,
           ),
         ),
         ValueListenableBuilder<bool>(
@@ -536,6 +536,7 @@ class _AllocationProfileTable extends StatelessWidget {
       ClassFilterData(
         filter: controller.classFilter,
         onChanged: controller.setFilter,
+        rootPackage: controller.rootPackage,
       ),
     ),
     _FieldInstanceCountColumn(heap: HeapGeneration.total),
@@ -597,28 +598,30 @@ class _AllocationProfileTable extends StatelessWidget {
 
 class _AllocationProfileTableControls extends StatelessWidget {
   const _AllocationProfileTableControls({
-    required this.allocationProfileController,
+    required this.controller,
   });
 
-  final ProfilePaneController allocationProfileController;
+  final ProfilePaneController controller;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         _ExportAllocationProfileButton(
-          allocationProfileController: allocationProfileController,
+          allocationProfileController: controller,
         ),
-        const SizedBox(width: denseSpacing),
-        RefreshButton(
-          gaScreen: gac.memory,
-          gaSelection: gac.MemoryEvent.profileRefreshManual,
-          onPressed: allocationProfileController.refresh,
-        ),
-        const SizedBox(width: denseSpacing),
-        _RefreshOnGCToggleButton(
-          allocationProfileController: allocationProfileController,
-        ),
+        if (controller.mode == ControllerCreationMode.connected) ...[
+          const SizedBox(width: denseSpacing),
+          RefreshButton(
+            gaScreen: gac.memory,
+            gaSelection: gac.MemoryEvent.profileRefreshManual,
+            onPressed: controller.refresh,
+          ),
+          const SizedBox(width: denseSpacing),
+          _RefreshOnGCToggleButton(
+            allocationProfileController: controller,
+          ),
+        ],
         const SizedBox(width: denseSpacing),
         const _ProfileHelpLink(),
       ],

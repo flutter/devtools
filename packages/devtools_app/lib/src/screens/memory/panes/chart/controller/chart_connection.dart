@@ -73,14 +73,19 @@ class ChartVmConnection extends DisposableController
     _polling = DebounceTimer.periodic(
       chartUpdateDelay,
       () async {
-        if (!serviceConnection.serviceManager.connectedState.value.connected) {
+        if (!_isConnected) {
           _polling?.cancel();
           return;
         }
         try {
           await _memoryTracker.pollMemory();
-        } catch (e) {
-          if (serviceConnection.serviceManager.connectedState.value.connected) {
+        } catch (e, trace) {
+          // TODO (polina-c): remove after fixing https://github.com/flutter/devtools/issues/7808
+          // and https://github.com/flutter/devtools/issues/7722
+          final isDisconnectionError = e.toString().contains('connection') ||
+              trace.toString().contains('isFlutterApp');
+
+          if (_isConnected && !isDisconnectionError) {
             rethrow;
           }
         }
@@ -89,6 +94,9 @@ class ChartVmConnection extends DisposableController
 
     initialized = true;
   }
+
+  bool get _isConnected =>
+      serviceConnection.serviceManager.connectedState.value.connected;
 
   @override
   void dispose() {

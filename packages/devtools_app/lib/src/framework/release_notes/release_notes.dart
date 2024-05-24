@@ -31,7 +31,10 @@ bool debugTestReleaseNotes = false;
 const String? _debugReleaseNotesUrl = null;
 
 const releaseNotesKey = Key('release_notes');
-const _unsupportedPathSyntax = '{{site.url}}';
+final _baseUrlRelativeMarkdownLinkPattern = RegExp(
+  r'(\[.*?]\()(/.*\s*)',
+  multiLine: true,
+);
 const _releaseNotesPath = '/f/devtools-releases.json';
 final _flutterDocsSite = Uri.https('docs.flutter.dev');
 
@@ -97,10 +100,11 @@ class ReleaseNotesController extends SidePanelController {
       final debugUri = Uri.parse(debugUrl);
       final releaseNotesMarkdown = await http.read(debugUri);
 
-      // Update image links to use debug/testing URL.
-      markdown.value = releaseNotesMarkdown.replaceAll(
-        _unsupportedPathSyntax,
-        debugUri.replace(path: '').toString(),
+      // Update the base-url-relative links in the file to
+      // absolute links using the debug/testing URL.
+      markdown.value = _convertBaseUrlRelativeLinks(
+        releaseNotesMarkdown,
+        debugUri.replace(path: ''),
       );
 
       toggleVisibility(true);
@@ -145,7 +149,7 @@ class ReleaseNotesController extends SidePanelController {
     // release notes (e.g. 2.11.4 -> 2.11.3 -> 2.11.2 -> ...).
     while (patchToCheck >= minimumPatch) {
       final releaseToCheck = '$majorMinor.$patchToCheck';
-      if (releases[releaseToCheck] case final String releaseNotePath) {
+      if (releases[releaseToCheck] case final releaseNotePath?) {
         final String releaseNotesMarkdown;
         try {
           releaseNotesMarkdown = await http.read(
@@ -161,11 +165,10 @@ class ReleaseNotesController extends SidePanelController {
           continue;
         }
 
-        // Replace the {{site.url}} template syntax that the
-        // Flutter docs website uses to specify site URLs.
-        markdown.value = releaseNotesMarkdown.replaceAll(
-          _unsupportedPathSyntax,
-          _flutterDocsSite.toString(),
+        // Update the base-url-relative links in the file to absolute links.
+        markdown.value = _convertBaseUrlRelativeLinks(
+          releaseNotesMarkdown,
+          _flutterDocsSite,
         );
 
         toggleVisibility(true);
@@ -188,13 +191,25 @@ class ReleaseNotesController extends SidePanelController {
     return;
   }
 
+  /// Convert all site-base-url relative links in [markdownContent]
+  /// to absolute links from the specified [baseUrl].
+  ///
+  /// For example, if `baseUrl` is `https://docs.flutter.dev`,
+  /// the path `/tools/devtools` would be converted
+  /// to `https://docs.flutter.dev/tools/devtools`.
+  String _convertBaseUrlRelativeLinks(String markdownContent, Uri baseUrl) =>
+      markdownContent.replaceAllMapped(
+        _baseUrlRelativeMarkdownLinkPattern,
+        (m) => '${m[1]}${baseUrl.toString()}${m[2]}',
+      );
+
   /// Retrieve and parse the release note index from the
   /// Flutter website at [_flutterDocsSite]/[_releaseNotesPath].
   ///
   /// Calls [_emptyAndClose] and returns `null` if
   /// the retrieval or parsing fails.
   @visibleForTesting
-  Future<Map<String, Object?>?> retrieveReleasesFromIndex() async {
+  Future<Map<String, String>?> retrieveReleasesFromIndex() async {
     final Map<String, Object?> releaseIndex;
     try {
       final releaseIndexString = await http.read(releaseIndexUrl);
@@ -212,7 +227,7 @@ class ReleaseNotesController extends SidePanelController {
       );
       return null;
     }
-    return releaseIndex;
+    return releases.cast<String, String>();
   }
 
   /// Set the release notes viewer as having no contents, hidden,

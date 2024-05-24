@@ -8,9 +8,10 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_deeplink.dart';
 import 'package:flutter/material.dart';
 
-import '../../../devtools_app.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
+import '../../shared/globals.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/server/server.dart' as server;
 import 'deep_link_list_view.dart';
 import 'deep_links_model.dart';

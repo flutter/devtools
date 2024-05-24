@@ -56,6 +56,8 @@ enum ScreenMetaData {
     title: 'Memory',
     icon: Octicons.package,
     requiresDartVm: true,
+    // ignore: avoid_redundant_argument_values, false positive
+    requiresConnection: !FeatureFlags.memoryOffline,
     tutorialVideoTimestamp: '?t=420',
     // ignore: avoid_redundant_argument_values, false positive
     worksWithOfflineData: FeatureFlags.memoryOffline,

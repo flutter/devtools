@@ -55,33 +55,35 @@ class _ChartControlPaneState extends State<ChartControlPane>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Row(
-          children: [
-            ValueListenableBuilder<bool>(
-              valueListenable: widget.chart.paused,
-              builder: (context, paused, _) {
-                return PauseResumeButtonGroup(
-                  paused: paused,
-                  onPause: _onPause,
-                  onResume: _onResume,
-                  pauseTooltip: ChartPaneTooltips.pauseTooltip,
-                  resumeTooltip: ChartPaneTooltips.resumeTooltip,
-                  gaScreen: gac.memory,
-                  gaSelectionPause: gac.MemoryEvent.pauseChart,
-                  gaSelectionResume: gac.MemoryEvent.resumeChart,
-                );
-              },
-            ),
-            const SizedBox(width: defaultSpacing),
-            ClearButton(
-              onPressed: _clearTimeline,
-              tooltip: 'Clear memory chart.',
-              gaScreen: gac.memory,
-              gaSelection: gac.MemoryEvent.clearChart,
-              iconOnly: true,
-            ),
-          ],
-        ),
+        if (widget.chart.mode == ControllerCreationMode.connected) ...[
+          Row(
+            children: [
+              ValueListenableBuilder<bool>(
+                valueListenable: widget.chart.paused,
+                builder: (context, paused, _) {
+                  return PauseResumeButtonGroup(
+                    paused: paused,
+                    onPause: _onPause,
+                    onResume: _onResume,
+                    pauseTooltip: ChartPaneTooltips.pauseTooltip,
+                    resumeTooltip: ChartPaneTooltips.resumeTooltip,
+                    gaScreen: gac.memory,
+                    gaSelectionPause: gac.MemoryEvent.pauseChart,
+                    gaSelectionResume: gac.MemoryEvent.resumeChart,
+                  );
+                },
+              ),
+              const SizedBox(width: defaultSpacing),
+              ClearButton(
+                onPressed: _clearTimeline,
+                tooltip: 'Clear memory chart.',
+                gaScreen: gac.memory,
+                gaSelection: gac.MemoryEvent.clearChart,
+                iconOnly: true,
+              ),
+            ],
+          ),
+        ],
         const SizedBox(height: denseSpacing),
         Row(
           children: [

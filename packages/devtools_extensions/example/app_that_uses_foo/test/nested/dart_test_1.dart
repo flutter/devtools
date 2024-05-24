@@ -5,8 +5,9 @@
 import 'package:dart_foo/dart_foo.dart';
 import 'package:test/test.dart';
 
-// This test can be run to verify that the `package:foo` DevTools extension
-// loads properly when debugging a Dart test target with DevTools.
+// This test can be run to verify that the DevTools extensions available for
+// package:app_that_uses_foo load properly when debugging a Dart test target
+// with DevTools.
 //
 // This doubles as a test to make sure the DevTools extension loads properly
 // when the test target is in a subdirectory of 'test/'.
@@ -14,7 +15,11 @@ import 'package:test/test.dart';
 // To test this, run the following command and copy the VM service URI to
 // connect to DevTools:
 //
-// dart run test/dart_test/example_dart_test.dart --start-paused
+// dart test test/nested/dart_test_1.dart --pause-after-load
+//
+// To test this test as part of a suite, use this command instead:
+//
+// dart test test/nested/ --pause-after-load
 
 void main() {
   test('a simple dart test', () {

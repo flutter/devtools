@@ -4,6 +4,8 @@
 
 import 'dart:convert';
 
+import '../utils/serialization.dart';
+
 /// Monitor heap object allocations (in the VM).  The allocation monitor will
 /// cause 'start' event exist in the HeapSample. Immediately afterwards a
 /// 'continues' event is added on each subsequent timestamp tick (HeapSample)
@@ -115,7 +117,7 @@ class ExtensionEvent {
 
 class ExtensionEvents {
   ExtensionEvents(List<ExtensionEvent> events) {
-    theEvents.addAll(events);
+    this.events.addAll(events);
   }
 
   factory ExtensionEvents.fromJson(Map<String, Object> json) {
@@ -129,18 +131,10 @@ class ExtensionEvents {
     return ExtensionEvents(events);
   }
 
-  final theEvents = <ExtensionEvent>[];
-
-  bool get isEmpty => theEvents.isEmpty;
-
-  bool get isNotEmpty => theEvents.isNotEmpty;
-
-  void clear() => theEvents.clear();
-
   Map<String, dynamic> toJson() {
     final eventsAsJson = <String, dynamic>{};
     var index = 0;
-    for (var event in theEvents) {
+    for (var event in events) {
       eventsAsJson['$index'] = event.toJson();
       index++;
     }
@@ -148,12 +142,20 @@ class ExtensionEvents {
     return eventsAsJson;
   }
 
+  final events = <ExtensionEvent>[];
+
+  bool get isEmpty => events.isEmpty;
+
+  bool get isNotEmpty => events.isNotEmpty;
+
+  void clear() => events.clear();
+
   @override
   String toString() => '[ExtensionEvents = '
       '${const JsonEncoder.withIndent('  ').convert(toJson())}]';
 }
 
-class EventSample {
+class EventSample with Serializable {
   EventSample(
     this.timestamp,
     this.isEventGC,
@@ -231,6 +233,7 @@ class EventSample {
     );
   }
 
+  @override
   Map<String, dynamic> toJson() => <String, dynamic>{
         'timestamp': timestamp,
         'gcEvent': isEventGC,
@@ -287,7 +290,7 @@ class EventSample {
 }
 
 /// Engine's Raster Cache estimates.
-class RasterCache {
+class RasterCache with Serializable {
   RasterCache._({required this.layerBytes, required this.pictureBytes});
 
   factory RasterCache.fromJson(Map<String, dynamic> json) {
@@ -306,6 +309,7 @@ class RasterCache {
 
   int pictureBytes;
 
+  @override
   Map<String, dynamic> toJson() => {
         'layerBytes': layerBytes,
         'pictureBytes': pictureBytes,

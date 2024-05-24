@@ -9,7 +9,7 @@ import '../diagnostics/inspector_service.dart';
 abstract class DevToolsEnvironmentParameters {
   List<ScriptPopupMenuOption> buildExtraDebuggerScriptPopupMenuOptions();
 
-  Link issueTrackerLink({String? additionalInfo, String? issueTitle});
+  GaLink issueTrackerLink({String? additionalInfo, String? issueTitle});
 
   String? username();
 
@@ -17,7 +17,7 @@ abstract class DevToolsEnvironmentParameters {
 
   InspectorServiceBase? inspectorServiceProvider();
 
-  Link? enableSourceMapsLink();
+  GaLink? enableSourceMapsLink();
 
   String get perfettoIndexLocation;
 

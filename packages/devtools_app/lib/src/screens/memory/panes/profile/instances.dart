@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../../shared/analytics/constants.dart';
@@ -91,7 +93,9 @@ class _StoreAsOneVariableMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MenuItemButton(
-      onPressed: sampler.oneLiveToConsole,
+      onPressed: () => unawaited(
+        sampler.oneLiveToConsole(sourceFeature: MemoryAreas.profile.name),
+      ),
       child: const Text('Store one instance as a console variable'),
     );
   }

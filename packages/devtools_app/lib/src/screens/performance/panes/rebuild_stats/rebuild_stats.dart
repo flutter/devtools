@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../service/service_extension_widgets.dart';
 import '../../../../service/service_extensions.dart' as extensions;
+import '../../../../service/vm_service_wrapper.dart';
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
@@ -171,6 +172,8 @@ class _RebuildTableState extends State<RebuildTable> {
   /// column objects for the same column.
   final _columnCache = <String, _RebuildCountColumn>{};
 
+  VmServiceWrapper? get _service => serviceConnection.serviceManager.service;
+
   List<_RebuildCountColumn> get _metricsColumns {
     final columns = <_RebuildCountColumn>[];
     for (var i = 0; i < widget.metricNames.length; i++) {
@@ -206,9 +209,16 @@ class _RebuildTableState extends State<RebuildTable> {
             ValueKey<String?>('${location.location.id}'),
         defaultSortColumn: _metricsColumns.first,
         defaultSortDirection: sortDirection,
-        onItemSelected: (item) {
-          // TODO(jacobr): navigate to selected widget in IDE or display the
-          // content side by side with the rebuild table.
+        onItemSelected: (item) async {
+          final location = item?.location;
+          if (location?.fileUriString != null) {
+            await _service?.navigateToCode(
+              fileUriString: location?.fileUriString ?? '',
+              line: location?.line ?? 0,
+              column: location?.column ?? 0,
+              source: 'devtools.rebuildStats',
+            );
+          }
         },
       ),
     );
@@ -233,21 +243,21 @@ class _LocationColumn extends ColumnData<RebuildLocationStats> {
 
   @override
   String getValue(RebuildLocationStats dataObject) {
-    final path = dataObject.location.path;
-    if (path == null) {
+    final fileUriString = dataObject.location.fileUriString;
+    if (fileUriString == null) {
       return '<resolving location>';
     }
 
-    return '${path.split('/').last}:${dataObject.location.line}';
+    return '${fileUriString.split('/').last}:${dataObject.location.line}';
   }
 
   @override
   String getTooltip(RebuildLocationStats dataObject) {
-    if (dataObject.location.path == null) {
+    if (dataObject.location.fileUriString == null) {
       return '<resolving location>';
     }
 
-    return '${dataObject.location.path}:${dataObject.location.line}';
+    return '${dataObject.location.fileUriString}:${dataObject.location.line}';
   }
 }
 

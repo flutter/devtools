@@ -74,7 +74,7 @@ class VariableConsoleLine extends ConsoleLine {
 /// Source of truth for the state of the Console including both events from the
 /// VM and events emitted from other UI.
 class ConsoleService with DisposerMixin {
-  void appendBrowsableInstance({
+  Future<void> appendBrowsableInstance({
     required InstanceRef? instanceRef,
     required IsolateRef? isolateRef,
     required HeapObject? heapSelection,
@@ -92,7 +92,7 @@ class ConsoleService with DisposerMixin {
 
     // If instanceRef is null at this point, user will see static references.
 
-    appendInstanceRef(
+    await appendInstanceRef(
       value: instanceRef,
       diagnostic: null,
       isolateRef: isolateRef,
@@ -101,7 +101,7 @@ class ConsoleService with DisposerMixin {
     );
   }
 
-  void appendInstanceRef({
+  Future<void> appendInstanceRef({
     String? name,
     required InstanceRef? value,
     required RemoteDiagnosticsNode? diagnostic,
@@ -283,7 +283,7 @@ class ConsoleService with DisposerMixin {
       }
       // TODO(jacobr): events may be out of order. Use unique ids to ensure
       // consistent order of regular print statements and structured messages.
-      appendInstanceRef(
+      await appendInstanceRef(
         value: null,
         diagnostic: RemoteDiagnosticsNode(
           e.extensionData!.data,
@@ -302,7 +302,7 @@ class ConsoleService with DisposerMixin {
     _serviceInitialized = false;
   }
 
-  void _handleDebugEvent(Event event) async {
+  Future<void> _handleDebugEvent(Event event) async {
     // TODO(jacobr): keep events in order by tracking the original time and
     // sorting.
     if (event.kind == EventKind.kInspect) {
@@ -332,7 +332,7 @@ class ConsoleService with DisposerMixin {
           // returned getting the inspector ref.
         }
       }
-      appendInstanceRef(
+      await appendInstanceRef(
         value: event.inspectee,
         isolateRef: event.isolate,
         diagnostic: null,
