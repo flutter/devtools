@@ -11,6 +11,7 @@ import 'package:devtools_app/src/screens/memory/panes/chart/controller/chart_dat
 import 'package:devtools_app/src/screens/memory/panes/chart/data/primitives.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/controller/diff_pane_controller.dart';
 import 'package:devtools_app/src/screens/memory/panes/profile/profile_pane_controller.dart';
+import 'package:devtools_app/src/screens/memory/panes/tracing/tracing_pane_controller.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/class_filter.dart';
 import 'package:devtools_app/src/screens/memory/shared/primitives/memory_timeline.dart';
 import 'package:devtools_app/src/shared/primitives/simple_items.dart';
@@ -33,6 +34,9 @@ void main() {
             timeline: MemoryTimeline(),
             interval: ChartInterval.theDefault,
             isLegendVisible: true,
+          ),
+          TracingPaneController(
+            ControllerCreationMode.offlineData,
           ),
           ClassFilter.empty(),
           selectedTab: 0,
@@ -70,6 +74,14 @@ void main() {
         expect(
           fromJson.chart!.isLegendVisible.value,
           item.chart!.isLegendVisible.value,
+        );
+        expect(
+          fromJson.trace!.selection.value.isolate.id,
+          item.trace!.selection.value.isolate.id,
+        );
+        expect(
+          fromJson.trace!.stateForIsolate.keys.toSet(),
+          item.trace!.stateForIsolate.keys.toSet(),
         );
       },
     );
