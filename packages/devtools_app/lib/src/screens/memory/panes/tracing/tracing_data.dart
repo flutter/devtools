@@ -137,6 +137,17 @@ class TracingIsolateState with Serializable {
           deserialize<TracedClass>(value, TracedClass.fromJson),
         ),
       ),
+      tracedClassesProfiles:
+          (json[TracingIsolateStateJson.tracedClasses.name] as Map).map(
+        (key, value) => MapEntry(
+          key,
+          deserialize<CpuProfileData>(value, CpuProfileData.fromJson),
+        ),
+      ),
+      unfilteredClassList:
+          (json[TracingIsolateStateJson.unfilteredClassList.name] as List)
+              .map((e) => deserialize<TracedClass>(e, TracedClass.fromJson))
+              .toList(),
     );
   }
 

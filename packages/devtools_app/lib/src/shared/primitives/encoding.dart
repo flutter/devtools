@@ -5,6 +5,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -130,6 +131,7 @@ Object? toEncodable(Object? value) {
     final IsolateRef value =>
       IsolateRefEncodeDecode.instance.toEncodable(value),
     final ClassRef value => ClassRefEncodeDecode.instance.toEncodable(value),
+    final Serializable value => value.toJson(),
     _ =>
       // For some reasons the failures show different error:
       // `Converting object to an encodable object failed: Instance of 'some other type'`.
