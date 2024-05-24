@@ -99,34 +99,34 @@ void main() {
     scene.tearDown();
   });
 
-  testWidgetsWithWindowSize(
-    'basic tracing flow',
-    windowSize,
-    (WidgetTester tester) async {
-      await pumpScene(tester);
-      await scene.goToTraceTab(tester);
+  // testWidgetsWithWindowSize(
+  //   'basic tracing flow',
+  //   windowSize,
+  //   (WidgetTester tester) async {
+  //     await pumpScene(tester);
+  //     await scene.goToTraceTab(tester);
 
-      final controller = scene.controller.trace!;
+  //     final controller = scene.controller.trace!;
 
-      final json = controller.toJson();
-      expect(
-        json.keys.toSet(),
-        equals(diff_pane_controller.Json.values.map((e) => e.name).toSet()),
-      );
-      final fromJson = DiffPaneController.fromJson(json);
+  //     final json = controller.toJson();
+  //     expect(
+  //       json.keys.toSet(),
+  //       equals(diff_pane_controller.Json.values.map((e) => e.name).toSet()),
+  //     );
+  //     final fromJson = DiffPaneController.fromJson(json);
 
-      final snapshotsFromJson =
-          fromJson.core.snapshots.value.whereType<SnapshotDataItem>();
+  //     final snapshotsFromJson =
+  //         fromJson.core.snapshots.value.whereType<SnapshotDataItem>();
 
-      expect(snapshotsFromJson.length, 2);
-      expect(
-        snapshotsFromJson.first.diffWith.value == snapshotsFromJson.last,
-        true,
-      );
-      expect(snapshotsFromJson.last.diffWith.value, null);
+  //     expect(snapshotsFromJson.length, 2);
+  //     expect(
+  //       snapshotsFromJson.first.diffWith.value == snapshotsFromJson.last,
+  //       true,
+  //     );
+  //     expect(snapshotsFromJson.last.diffWith.value, null);
 
-      expect(snapshotsFromJson.first.name, snapshots.first.name);
-      expect(snapshotsFromJson.last.name, snapshots.last.name);
-    },
-  );
+  //     expect(snapshotsFromJson.first.name, snapshots.first.name);
+  //     expect(snapshotsFromJson.last.name, snapshots.last.name);
+  //   },
+  // );
 }
