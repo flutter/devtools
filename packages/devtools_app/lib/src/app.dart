@@ -120,7 +120,9 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     // the IDE one (since the user can't access the preference, and the
     // preference may have been set in an external window and differ from the
     // IDE theme).
-    return isEmbedded() ? ideTheme.isDarkMode : _isDarkThemeEnabledPreference;
+    return isEmbedded() && ideTheme.ideSpecifiedTheme
+        ? ideTheme.isDarkMode
+        : _isDarkThemeEnabledPreference;
   }
 
   bool _isDarkThemeEnabledPreference = true;

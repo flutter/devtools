@@ -21,18 +21,27 @@ final class IdeTheme {
     this.foregroundColor,
     this.fontSize = unscaledDefaultFontSize,
     this.embedMode = EmbedMode.none,
-    this.isDarkMode = true,
-  });
+    bool? isDarkMode,
+  }) : _isDarkMode = isDarkMode;
 
   final Color? backgroundColor;
   final Color? foregroundColor;
   final double fontSize;
   final EmbedMode embedMode;
-  final bool isDarkMode;
+  final bool? _isDarkMode;
 
   double get fontSizeFactor => fontSize / unscaledDefaultFontSize;
 
   bool get embedded => embedMode.embedded;
+
+  bool get isDarkMode => _isDarkMode ?? true;
+
+  /// Whehter the IDE specified the DevTools color theme.
+  /// 
+  /// If this returns false, that means the
+  /// [IdeThemeQueryParams.devToolsThemeKey] query parameter was not passed to
+  /// DevTools from the IDE.
+  bool get ideSpecifiedTheme => _isDarkMode != null;
 }
 
 extension type IdeThemeQueryParams(Map<String, String?> params) {
