@@ -32,9 +32,7 @@ class LoggingTableModel extends ChangeNotifier {
     _tableWidth = width;
     cachedHeights.clear();
     cachedOffets.clear();
-    // _debouncer.run();
-    Future.delayed(const Duration(), _preFetchRowHeights);
-    // unawaited(_preFetchRowHeights());
+    unawaited(_preFetchRowHeights());
   }
 
   LogDataV2 getLog(int index) => _logs[index];
