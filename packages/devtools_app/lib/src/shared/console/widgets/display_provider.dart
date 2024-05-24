@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
@@ -153,10 +155,12 @@ class _DisplayProviderState extends State<DisplayProvider> {
           onPressed: () {
             ContextMenuController.removeAny();
             final ref = widget.variable.ref;
-            serviceConnection.consoleService.appendBrowsableInstance(
-              instanceRef: widget.variable.value as InstanceRef?,
-              isolateRef: ref?.isolateRef,
-              heapSelection: ref?.heapSelection,
+            unawaited(
+              serviceConnection.consoleService.appendBrowsableInstance(
+                instanceRef: widget.variable.value as InstanceRef?,
+                isolateRef: ref?.isolateRef,
+                heapSelection: ref?.heapSelection,
+              ),
             );
           },
           label: 'Reroot',

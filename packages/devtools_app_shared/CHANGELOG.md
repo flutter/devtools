@@ -1,3 +1,6 @@
+## 0.2.0-dev.1
+* Add `navigateToCode` utility method for jumping to code in IDEs.
+
 ## 0.2.0-dev.0
 * Add `tooltipWaitExtraLong` to `utils.dart`.
 * Bump `devtools_shared` dependency to `^10.0.0`.

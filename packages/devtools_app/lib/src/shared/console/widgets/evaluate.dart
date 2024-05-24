@@ -364,7 +364,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
 
       // Display the response to the user.
       if (response is InstanceRef) {
-        _emitRefToConsole(response, isolateRef);
+        await _emitRefToConsole(response, isolateRef);
       } else {
         String? value = response.toString();
 
@@ -388,11 +388,8 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
     );
   }
 
-  void _emitRefToConsole(
-    InstanceRef ref,
-    IsolateRef? isolate,
-  ) {
-    serviceConnection.consoleService.appendInstanceRef(
+  Future<void> _emitRefToConsole(InstanceRef ref, IsolateRef? isolate) async {
+    await serviceConnection.consoleService.appendInstanceRef(
       value: ref,
       diagnostic: null,
       isolateRef: isolate,

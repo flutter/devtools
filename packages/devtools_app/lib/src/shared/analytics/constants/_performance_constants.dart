@@ -8,7 +8,6 @@ enum PerformanceEvents {
   refreshTimelineEvents,
   includeCpuSamplesInTimeline,
   performanceOverlay,
-  timelineFlameChartHelp,
   framesChartVisibility,
   selectFlutterFrame,
   trackRebuilds,
