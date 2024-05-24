@@ -10,6 +10,8 @@ import '../analytics/analytics.dart' as ga;
 double get _tabHeight => scaleByFontFactor(46.0);
 double get _textAndIconTabHeight => scaleByFontFactor(72.0);
 
+typedef TabAndView = ({DevToolsTab tab, Widget tabView});
+
 class DevToolsTab extends Tab {
   /// Creates a material design [TabBar] tab styled for DevTools.
   ///
@@ -89,7 +91,7 @@ class AnalyticsTabbedView extends StatefulWidget {
           (index) => tabs[index].tab.trailing ?? const SizedBox(),
         );
 
-  final List<({DevToolsTab tab, Widget tabView})> tabs;
+  final List<TabAndView> tabs;
 
   final String gaScreen;
 

@@ -19,7 +19,8 @@ void main() {
       setUp(() async {
         PathFromRoot.resetSingletons();
 
-        heap = await HeapData.calculate(await t.loadHeap(), DateTime.now());
+        heap = HeapData(await t.loadHeap(), created: DateTime.now());
+        await heap.calculate;
         expect(PathFromRoot.debugUsage.stored, isPositive);
         expect(
           PathFromRoot.debugUsage.constructed,

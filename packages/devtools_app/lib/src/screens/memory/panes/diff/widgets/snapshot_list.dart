@@ -17,7 +17,7 @@ import '../../../../../shared/dialogs.dart';
 import '../../../../../shared/primitives/byte_utils.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../controller/diff_pane_controller.dart';
-import '../controller/item_controller.dart';
+import '../controller/snapshot_item.dart';
 
 final _log = Logger('snapshot_list');
 
@@ -72,15 +72,18 @@ class _ListControlPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hasLoader = controller.loader != null;
     return Row(
       children: [
-        ToolbarAction(
-          icon: iconToTakeSnapshot,
-          size: defaultIconSize,
-          tooltip: 'Take heap snapshot for the selected isolate',
-          onPressed: () => unawaited(_takeSnapshot(context)),
-        ),
-        const SizedBox(width: densePadding),
+        if (hasLoader) ...[
+          ToolbarAction(
+            icon: iconToTakeSnapshot,
+            size: defaultIconSize,
+            tooltip: 'Take heap snapshot for the selected isolate',
+            onPressed: () => unawaited(_takeSnapshot(context)),
+          ),
+          const SizedBox(width: densePadding),
+        ],
         ValueListenableBuilder(
           valueListenable: controller.core.snapshots,
           builder: (context, snapshots, _) {
@@ -206,20 +209,25 @@ class SnapshotListTitle extends StatelessWidget {
       throw StateError('Unknown item type: $theItem');
     }
 
-    return ValueListenableBuilder<bool>(
-      valueListenable: theItem.isProcessing,
-      builder: (_, isProcessing, __) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: denseRowSpacing),
-        child: Row(
-          children: [
-            leading,
-            if (isProcessing)
-              CenteredCircularProgressIndicator(size: smallProgressSize)
-            else
-              ...trailing,
-          ],
-        ),
-      ),
+    return FutureBuilder(
+      future: theItem is SnapshotDataItem ? theItem.process : null,
+      builder: (_, __) {
+        final isProcessing =
+            theItem is SnapshotDataItem ? !theItem.isProcessed : false;
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: denseRowSpacing),
+          child: Row(
+            children: [
+              leading,
+              if (isProcessing)
+                CenteredCircularProgressIndicator(size: smallProgressSize)
+              else
+                ...trailing,
+            ],
+          ),
+        );
+      },
     );
   }
 }

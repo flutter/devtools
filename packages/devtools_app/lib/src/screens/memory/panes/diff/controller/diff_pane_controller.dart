@@ -7,13 +7,13 @@ import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:devtools_app_shared/utils.dart';
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/config_specific/import_export/import_export.dart';
 import '../../../../../shared/file_import.dart';
-import '../../../../../shared/globals.dart';
 import '../../../../../shared/memory/class_name.dart';
 import '../../../../../shared/memory/classes.dart';
 import '../../../../../shared/memory/heap_graph_loader.dart';
@@ -26,26 +26,78 @@ import '../data/csv.dart';
 import '../data/heap_diff_data.dart';
 import '../data/heap_diff_store.dart';
 import 'class_data.dart';
-import 'item_controller.dart';
+import 'snapshot_item.dart';
 
-class DiffPaneController extends DisposableController {
-  DiffPaneController({required this.loader});
+@visibleForTesting
+enum Json {
+  snapshots,
+  diffWith,
+  rootPackage;
+}
 
-  factory DiffPaneController.fromJson(Map<String, dynamic> json) {
-    // TODO(polina-c): implement, https://github.com/flutter/devtools/issues/6972
-    return DiffPaneController(loader: null);
+class DiffPaneController extends DisposableController with Serializable {
+  DiffPaneController({
+    required this.loader,
+    required String? rootPackage,
+    List<SnapshotDataItem>? snapshots,
+  }) : core = CoreData(rootPackage) {
+    if (snapshots != null) {
+      core._snapshots.addAll(snapshots);
+    }
+    derived._updateValues();
   }
 
+  factory DiffPaneController.fromJson(Map<String, dynamic> json) {
+    final snapshots = (json[Json.snapshots.name] as List)
+        .map((e) => deserialize<SnapshotDataItem>(e, SnapshotDataItem.fromJson))
+        .toList();
+
+    final diffWith =
+        (json[Json.diffWith.name] as List).map((e) => e as int?).toList();
+
+    assert(snapshots.length == diffWith.length);
+
+    for (var i = 0; i < snapshots.length; i++) {
+      final diffIndex = diffWith[i];
+      if (diffIndex != null) {
+        snapshots[i].diffWith.value = snapshots[diffIndex];
+      }
+    }
+
+    return DiffPaneController(
+      loader: null,
+      snapshots: snapshots,
+      rootPackage: json[Json.rootPackage.name] as String,
+    );
+  }
+
+  @override
   Map<String, dynamic> toJson() {
-    // TODO(polina-c): implement, https://github.com/flutter/devtools/issues/6972
-    return {};
+    final snapshots = core.snapshots.value
+        .whereType<SnapshotDataItem>()
+        .where((s) => s.heap != null)
+        .toList();
+
+    final snapshotToIndex =
+        snapshots.asMap().map((index, item) => MapEntry(item, index));
+
+    final diffWithIndices = snapshots.map((item) {
+      final diffWith = item.diffWith.value;
+      return diffWith == null ? null : snapshotToIndex[diffWith];
+    }).toList();
+
+    return {
+      Json.snapshots.name: snapshots,
+      Json.diffWith.name: diffWithIndices,
+      Json.rootPackage.name: core.rootPackage,
+    };
   }
 
   final HeapGraphLoader? loader;
 
   final retainingPathController = RetainingPathController();
 
-  final core = CoreData();
+  final CoreData core;
   late final derived = DerivedData(core);
 
   /// True, if the list contains snapshots, i.e. items beyond the first
@@ -181,8 +233,9 @@ class DiffPaneController extends DisposableController {
 /// Widgets should not update the fields directly, they should use
 /// [DiffPaneController] or [DerivedData] for this.
 class CoreData {
-  late final rootPackage =
-      serviceConnection.serviceManager.rootInfoNow().package;
+  CoreData(this.rootPackage);
+
+  final String? rootPackage;
 
   /// The list contains one item that show information and all others
   /// are snapshots.
@@ -226,6 +279,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     final classFilterData = ClassFilterData(
       filter: _core.classFilter,
       onChanged: applyFilter,
+      rootPackage: _core.rootPackage,
     );
 
     classesTableSingle = ClassesTableSingleData(
@@ -315,7 +369,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
       var diffHidden = true;
       var details = 'no data';
       final item = selectedItem.value;
-      if (item is SnapshotDataItem && item.hasData) {
+      if (item is SnapshotDataItem && item.isProcessed) {
         diffHidden = item.diffWith.value == null;
         singleHidden = !diffHidden;
         details = diffHidden ? 'single' : 'diff';
@@ -330,8 +384,14 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
         assert(classesTableDiff.selection.value == null, details);
       }
 
-      assert((singleClassesToShow.value == null) == singleHidden, details);
-      assert((diffClassesToShow.value == null) == diffHidden, details);
+      assert(
+        (singleClassesToShow.value == null) == singleHidden,
+        '$details, ${singleClassesToShow.value}, $singleHidden',
+      );
+      assert(
+        (diffClassesToShow.value == null) == diffHidden,
+        '$details, ${singleClassesToShow.value}, $singleHidden',
+      );
 
       return true;
     }());

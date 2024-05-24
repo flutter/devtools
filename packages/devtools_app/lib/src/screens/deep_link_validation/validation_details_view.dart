@@ -8,8 +8,8 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/common_widgets.dart';
-import '../../shared/config_specific/launch_url/launch_url.dart';
 import '../../shared/ui/colors.dart';
+import '../../shared/utils.dart';
 import 'deep_link_list_view.dart';
 import 'deep_links_controller.dart';
 import 'deep_links_model.dart';
@@ -375,7 +375,7 @@ class _ViewDeveloperGuide extends StatelessWidget {
       child: DevToolsButton(
         onPressed: () {
           unawaited(
-            launchUrl(
+            launchUrlWithErrorHandling(
               'https://developer.android.com/training/app-links/verify-android-applinks',
             ),
           );

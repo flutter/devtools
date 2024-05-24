@@ -8,10 +8,15 @@ import 'package:flutter/widgets.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/globals.dart';
+import '../../../../shared/primitives/simple_items.dart';
 import 'tracing_data.dart';
 
 class TracingPaneController extends DisposableController
     with AutoDisposeControllerMixin {
+  TracingPaneController(this.mode);
+
+  final ControllerCreationMode mode;
+
   /// Set to `true` if the controller has not yet finished initializing.
   ValueListenable<bool> get initializing => _initializing;
   final _initializing = ValueNotifier<bool>(true);
@@ -34,6 +39,8 @@ class TracingPaneController extends DisposableController
   final textEditingController = TextEditingController();
 
   bool _initialized = false;
+
+  /// Initializes the controller if it is not initialized yet.
   Future<void> initialize() async {
     if (_initialized) return;
     _initialized = true;

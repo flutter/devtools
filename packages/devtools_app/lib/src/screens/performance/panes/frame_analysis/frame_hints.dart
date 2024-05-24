@@ -365,8 +365,8 @@ class ShaderCompilationHint extends StatelessWidget {
                       'pitfalls. Try ',
                   style: theme.regularTextStyle,
                 ),
-                LinkTextSpan(
-                  link: Link(
+                GaLinkTextSpan(
+                  link: GaLink(
                     display: 'Impeller',
                     url: impellerDocsUrl,
                     gaScreenName: gac.performance,
@@ -443,9 +443,9 @@ class _ExpensiveOperationHint extends StatelessWidget {
             text: ' This may ',
             style: theme.regularTextStyle,
           ),
-          LinkTextSpan(
+          GaLinkTextSpan(
             context: context,
-            link: Link(
+            link: GaLink(
               display: 'negatively affect your app\'s performance',
               url: docsUrl,
               gaScreenName: gaScreenName,

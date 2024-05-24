@@ -111,7 +111,11 @@ void main() {
     test(
       '$SingleClassData does not double-count self-referenced classes, ${t.name}.',
       () async {
-        final heapData = await HeapData.calculate(t.heap, DateTime.now());
+        final heapData = HeapData(
+          t.heap,
+          created: DateTime.now(),
+        );
+        await heapData.calculate;
 
         final classes = heapData.classes!;
         final classData = classes.byName(_classA)!;

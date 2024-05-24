@@ -4,7 +4,7 @@ publish_to: none
 
 # Note: this version should only be updated by running tools/update_version.dart
 # that updates all versions of devtools packages (devtools_app, devtools_test).
-version: 2.36.0-dev.6
+version: 2.36.0-dev.17
 
 repository: https://github.com/flutter/devtools/tree/master/packages/devtools_app
 
@@ -24,9 +24,9 @@ dependencies:
   collection: ^1.15.0
   dap: ^1.1.0
   dds_service_extensions: ^2.0.0
-  devtools_app_shared: ^0.2.0-dev.0
+  devtools_app_shared: ^0.2.0-dev.1
   devtools_extensions: ^0.2.0-dev.0
-  devtools_shared: ^10.0.0-dev.1
+  devtools_shared: ^10.0.0-dev.2
   dtd: ^2.2.0
   file: ">=6.0.0 <8.0.0"
   file_selector: ^1.0.0
@@ -57,8 +57,6 @@ dependencies:
   stream_channel: ^2.1.1
   string_scanner: ^1.1.0
   unified_analytics: ^6.1.0
-  url_launcher: ^6.1.0
-  url_launcher_web: ^2.0.6
   vm_service: ^14.2.1
   vm_service_protos: ^1.0.0
   # TODO https://github.com/dart-lang/sdk/issues/52853 - unpin this version

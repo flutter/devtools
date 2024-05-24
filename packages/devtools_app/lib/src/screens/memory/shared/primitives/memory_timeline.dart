@@ -9,7 +9,7 @@ import 'package:intl/intl.dart';
 import '../../../../shared/primitives/utils.dart';
 
 /// All Raw data received from the VM or offline data.
-class MemoryTimeline {
+class MemoryTimeline with Serializable {
   MemoryTimeline({List<HeapSample>? data}) {
     this.data = data ?? []; // Not using const because data is mutable.
   }
@@ -22,9 +22,10 @@ class MemoryTimeline {
     );
   }
 
+  @override
   Map<String, dynamic> toJson() {
     return {
-      _jsonData: data.map((e) => e.toJson()).toList(),
+      _jsonData: data,
     };
   }
 

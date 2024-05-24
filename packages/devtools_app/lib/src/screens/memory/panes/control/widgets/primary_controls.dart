@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
+import '../../../../../shared/primitives/simple_items.dart';
 import '../../../shared/primitives/simple_elements.dart';
 import '../controller/control_pane_controller.dart';
 
@@ -22,6 +23,9 @@ class PrimaryControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (controller.mode == ControllerCreationMode.disconnected) {
+      return const SizedBox();
+    }
     return VisibilityButton(
       show: controller.isChartVisible,
       gaScreen: gac.memory,

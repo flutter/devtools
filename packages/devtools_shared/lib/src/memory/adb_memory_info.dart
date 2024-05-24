@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(terry): Need the iOS version of this data.
+import '../utils/serialization.dart';
+
 /// Android ADB dumpsys meminfo data.
-class AdbMemoryInfo {
+class AdbMemoryInfo with Serializable {
   AdbMemoryInfo(
     this.realtime,
     this.javaHeap,
@@ -82,6 +83,7 @@ class AdbMemoryInfo {
   static const String systemKey = 'System';
   static const String totalKey = 'Total';
 
+  @override
   Map<String, dynamic> toJson() => <String, dynamic>{
         realTimeKey: realtime,
         javaHeapKey: javaHeap,

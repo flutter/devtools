@@ -93,7 +93,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     if (FeatureFlags.devToolsExtensions) {
       // TODO(https://github.com/flutter/devtools/issues/6273): stop special
       // casing the package:provider extension.
-      final containsProviderExtension = extensionService.visibleExtensions.value
+      final containsProviderExtension = extensionService
+          .currentExtensions.value.visibleExtensions
           .where((e) => e.name == 'provider')
           .isNotEmpty;
       final devToolsScreens = containsProviderExtension
@@ -110,7 +111,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       widget.originalScreens.map((s) => s.screen).toList();
 
   Iterable<Screen> get _extensionScreens =>
-      extensionService.visibleExtensions.value.map(
+      extensionService.visibleExtensions.map(
         (e) => DevToolsScreen<void>(ExtensionScreen(e)).screen,
       );
 
@@ -152,11 +153,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
 
     if (FeatureFlags.devToolsExtensions) {
       addAutoDisposeListener(
-        extensionService.availableExtensions,
-        clearRoutesAndSetState,
-      );
-      addAutoDisposeListener(
-        extensionService.visibleExtensions,
+        extensionService.currentExtensions,
         clearRoutesAndSetState,
       );
     }
@@ -263,8 +260,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       return MultiValueListenableBuilder(
         listenables: [
           preferences.vmDeveloperModeEnabled,
-          extensionService.availableExtensions,
-          extensionService.visibleExtensions,
+          extensionService.currentExtensions,
         ],
         builder: (_, __, child) {
           final screens = _visibleScreens()

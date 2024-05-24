@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_extensions/api.dart';
 import 'package:devtools_extensions/devtools_extensions.dart';
 import 'package:flutter/material.dart';
@@ -45,17 +44,6 @@ class _ListeningForDevToolsEventExampleState
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '3. Example of listening for a DevTools event',
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        const PaddedDivider.thin(),
-        Text('Received an unknown event from DevTools: $message'),
-      ],
-    );
+    return Text('Received an unknown event from DevTools: $message');
   }
 }

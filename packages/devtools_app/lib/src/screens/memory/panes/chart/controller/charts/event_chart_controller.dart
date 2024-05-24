@@ -283,7 +283,7 @@ class EventChartController extends ChartController {
       final data = chart_trace.DataAggregate(
         sample.timestamp,
         _Sizes.extensions,
-        (events.extensionEvents?.theEvents ?? []).length,
+        (events.extensionEvents?.events ?? []).length,
       );
       addDataToTrace(_EventsTraceName.extensionEvents.index, data);
     }

@@ -17,6 +17,23 @@ final _log = Logger('ExtensionService');
 // TODO(https://github.com/flutter/devtools/issues/7594): detect extensions from
 // globally activated pub packages.
 
+/// Data pattern containing a [List] of available extensions and a [List] of
+/// visible extensions.
+typedef DevToolsExtensionsGroup = ({
+  /// All the DevTools extensions, runtime and static, that are available for
+  /// the connected application, regardless of whether they have been enabled or
+  /// disabled by the user.
+  ///
+  /// This set of extensions will include one version of a DevTools extension
+  /// per package and will exclude any duplicates that have been marked as
+  /// ignored in [_maybeIgnoreExtensions].
+  List<DevToolsExtensionConfig> availableExtensions,
+
+  /// DevTools extensions that are visible in their own DevTools screen (i.e.
+  /// extensions that have not been manually disabled by the user).
+  List<DevToolsExtensionConfig> visibleExtensions,
+});
+
 class ExtensionService extends DisposableController
     with AutoDisposeControllerMixin {
   ExtensionService({this.fixedAppRoot, this.ignoreServiceConnection = false});
@@ -36,6 +53,21 @@ class ExtensionService extends DisposableController
   /// [ExtensionService] will manage DevTools extensions for.
   Uri? _appRoot;
 
+  /// A listenable for the current set of DevTools extensions.
+  ///
+  /// The [DevToolsExtensionsGroup] contains both the List of available
+  /// extensions and the List of visible extensions. These values are updated
+  /// in tandem in the common case, so storing them as a group saves listeners
+  /// from having to listen to two separate notifiers.
+  ValueListenable<DevToolsExtensionsGroup> get currentExtensions =>
+      _currentExtensions;
+  final _currentExtensions = ValueNotifier<DevToolsExtensionsGroup>(
+    (
+      availableExtensions: <DevToolsExtensionConfig>[],
+      visibleExtensions: <DevToolsExtensionConfig>[],
+    ),
+  );
+
   /// All the DevTools extensions, runtime and static, that are available for
   /// the connected application, regardless of whether they have been enabled or
   /// disabled by the user.
@@ -43,15 +75,13 @@ class ExtensionService extends DisposableController
   /// This set of extensions will include one version of a DevTools extension
   /// per package and will exclude any duplicates that have been marked as
   /// ignored in [_maybeIgnoreExtensions].
-  ValueListenable<List<DevToolsExtensionConfig>> get availableExtensions =>
-      _availableExtensions;
-  final _availableExtensions = ValueNotifier<List<DevToolsExtensionConfig>>([]);
+  List<DevToolsExtensionConfig> get availableExtensions =>
+      _currentExtensions.value.availableExtensions;
 
   /// DevTools extensions that are visible in their own DevTools screen (i.e.
   /// extensions that have not been manually disabled by the user).
-  ValueListenable<List<DevToolsExtensionConfig>> get visibleExtensions =>
-      _visibleExtensions;
-  final _visibleExtensions = ValueNotifier<List<DevToolsExtensionConfig>>([]);
+  List<DevToolsExtensionConfig> get visibleExtensions =>
+      _currentExtensions.value.visibleExtensions;
 
   /// DevTools extensions available in the user's project that do not require a
   /// running application.
@@ -132,7 +162,9 @@ class ExtensionService extends DisposableController
     addAutoDisposeListener(
       preferences.devToolsExtensions.showOnlyEnabledExtensions,
       () async {
-        await _refreshExtensionEnabledStates();
+        await _refreshExtensionEnabledStates(
+          availableExtensions: _currentExtensions.value.availableExtensions,
+        );
       },
     );
 
@@ -152,7 +184,7 @@ class ExtensionService extends DisposableController
         serviceConnection.serviceManager.connectedState.value.connected &&
         serviceConnection.serviceManager.isolateManager.mainIsolate.value !=
             null) {
-      _appRoot = await _connectedAppRoot();
+      _appRoot = await serviceConnection.connectedAppPackageRoot();
     }
 
     // TODO(kenz): gracefully handle app connections / disconnects when there
@@ -166,11 +198,11 @@ class ExtensionService extends DisposableController
     staticExtensions =
         allExtensions.where((e) => e.detectedFromStaticContext).toList();
     _maybeIgnoreExtensions(connectedToApp: _appRoot != null);
-    _availableExtensions.value = [
+    final available = [
       ...runtimeExtensions,
       ...staticExtensions.where((ext) => !isExtensionIgnored(ext)),
     ]..sort();
-    await _refreshExtensionEnabledStates();
+    await _refreshExtensionEnabledStates(availableExtensions: available);
     _refreshInProgress.value = false;
   }
 
@@ -254,12 +286,14 @@ class ExtensionService extends DisposableController
     }
   }
 
-  Future<void> _refreshExtensionEnabledStates() async {
+  Future<void> _refreshExtensionEnabledStates({
+    required List<DevToolsExtensionConfig> availableExtensions,
+  }) async {
     final onlyIncludeEnabled =
         preferences.devToolsExtensions.showOnlyEnabledExtensions.value;
 
     final visible = <DevToolsExtensionConfig>[];
-    for (final extension in _availableExtensions.value) {
+    for (final extension in availableExtensions) {
       final stateFromOptionsFile = await server.extensionEnabledState(
         devtoolsOptionsFileUri: extension.devtoolsOptionsUri,
         extensionName: extension.name,
@@ -282,11 +316,12 @@ class ExtensionService extends DisposableController
       'visible extensions after refreshing - ${visible.map((e) => e.name).toList()}',
     );
 
-    // [_visibleExtensions] should be set last so that all extension states in
-    // [_extensionEnabledStates] are updated by the time we notify listeners of
-    // [visibleExtensions]. It is not necessary to sort [visible] because
-    // [_availableExtensions] is already sorted.
-    _visibleExtensions.value = visible;
+    // It is not necessary to sort [visible] because [availableExtensions] is
+    // already sorted.
+    _currentExtensions.value = (
+      availableExtensions: availableExtensions,
+      visibleExtensions: visible,
+    );
   }
 
   /// Sets the enabled state for [extension] and any currently ignored
@@ -310,7 +345,9 @@ class ExtensionService extends DisposableController
           enable: enable,
         ),
     ]);
-    await _refreshExtensionEnabledStates();
+    await _refreshExtensionEnabledStates(
+      availableExtensions: _currentExtensions.value.availableExtensions,
+    );
   }
 
   /// Marks this extension configuration as ignored or unignored based on the
@@ -339,9 +376,10 @@ class ExtensionService extends DisposableController
     runtimeExtensions.clear();
     staticExtensions.clear();
     _ignoredStaticExtensionsByHashCode.clear();
-
-    _availableExtensions.value = [];
-    _visibleExtensions.value = [];
+    _currentExtensions.value = (
+      availableExtensions: <DevToolsExtensionConfig>[],
+      visibleExtensions: <DevToolsExtensionConfig>[],
+    );
     _extensionEnabledStates.clear();
     _refreshInProgress.value = false;
   }
@@ -351,18 +389,10 @@ class ExtensionService extends DisposableController
     for (final notifier in _extensionEnabledStates.values) {
       notifier.dispose();
     }
-    _availableExtensions.dispose();
-    _visibleExtensions.dispose();
+    _currentExtensions.dispose();
     _refreshInProgress.dispose();
     super.dispose();
   }
-}
-
-Future<Uri?> _connectedAppRoot() async {
-  final packageUriString =
-      await serviceConnection.rootPackageDirectoryForMainIsolate();
-  if (packageUriString == null) return null;
-  return Uri.parse(packageUriString);
 }
 
 /// Compares the versions of extension configurations [a] and [b] and returns

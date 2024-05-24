@@ -9,11 +9,14 @@ import 'package:vm_service/vm_service.dart';
 
 import 'heap_graph_fakes.dart';
 
-Future<HeapData> testHeapData([FakeHeapSnapshotGraph? graph]) async =>
-    await HeapData.calculate(
-      graph ?? FakeHeapSnapshotGraph(),
-      DateTime.now(),
-    );
+Future<HeapData> testHeapData([FakeHeapSnapshotGraph? graph]) async {
+  final heapData = HeapData(
+    graph ?? FakeHeapSnapshotGraph(),
+    created: DateTime.now(),
+  );
+  await heapData.calculate;
+  return heapData;
+}
 
 SingleClassData testClassData(
   HeapClassName className,

@@ -7,9 +7,9 @@ import 'dart:async';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../shared/config_specific/launch_url/launch_url.dart';
 import 'config_specific/copy_to_clipboard/copy_to_clipboard.dart';
 import 'globals.dart';
+import 'utils.dart';
 
 /// A dialog, that reports unexpected error and allows to copy details and create issue.
 class UnexpectedErrorDialog extends StatelessWidget {
@@ -43,7 +43,7 @@ class UnexpectedErrorDialog extends StatelessWidget {
         DialogTextButton(
           child: const Text('Create issue'),
           onPressed: () => unawaited(
-            launchUrl(
+            launchUrlWithErrorHandling(
               devToolsExtensionPoints
                   .issueTrackerLink(additionalInfo: additionalInfo)
                   .url,
