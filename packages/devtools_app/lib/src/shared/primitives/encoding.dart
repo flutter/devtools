@@ -5,6 +5,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 /// Encodes and decodes a value of type [T].
@@ -80,6 +81,44 @@ class DateTimeEncodeDecode extends EncodeDecode<DateTime> {
   }
 }
 
+/// Encodes and decodes [IsolateRef].
+class IsolateRefEncodeDecode extends EncodeDecode<IsolateRef> {
+  IsolateRefEncodeDecode._();
+
+  static final instance = IsolateRefEncodeDecode._();
+
+  @override
+  Object toEncodable(IsolateRef value) {
+    return value.toJson();
+  }
+
+  @override
+  IsolateRef decode(Object value) {
+    if (value is IsolateRef) return value;
+    final json = value as Map<String, dynamic>;
+    return IsolateRef.parse(json)!;
+  }
+}
+
+/// Encodes and decodes [ClassRef].
+class ClassRefEncodeDecode extends EncodeDecode<ClassRef> {
+  ClassRefEncodeDecode._();
+
+  static final instance = ClassRefEncodeDecode._();
+
+  @override
+  Object toEncodable(ClassRef value) {
+    return value.toJson();
+  }
+
+  @override
+  ClassRef decode(Object value) {
+    if (value is ClassRef) return value;
+    final json = value as Map<String, dynamic>;
+    return ClassRef.parse(json)!;
+  }
+}
+
 /// Function to be passed to [jsonEncode] to enable encoding for more types.
 Object? toEncodable(Object? value) {
   return switch (value) {
@@ -88,6 +127,9 @@ Object? toEncodable(Object? value) {
       HeapSnapshotGraphEncodeDecode.instance.toEncodable(value),
     final ByteData value => ByteDataEncodeDecode.instance.toEncodable(value),
     final DateTime value => DateTimeEncodeDecode.instance.toEncodable(value),
+    final IsolateRef value =>
+      IsolateRefEncodeDecode.instance.toEncodable(value),
+    final ClassRef value => ClassRefEncodeDecode.instance.toEncodable(value),
     _ =>
       // For some reasons the failures show different error:
       // `Converting object to an encodable object failed: Instance of 'some other type'`.

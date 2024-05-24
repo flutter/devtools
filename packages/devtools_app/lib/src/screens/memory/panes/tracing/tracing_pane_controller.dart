@@ -33,6 +33,7 @@ class TracingPaneController extends DisposableController
     TracingIsolateState.empty(),
   );
 
+  /// Maps isolate IDs to their allocation tracing states.
   final _stateForIsolate = <String, TracingIsolateState>{};
 
   /// The [TextEditingController] for the 'Class Filter' text field.
