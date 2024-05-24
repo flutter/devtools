@@ -202,3 +202,19 @@ MockLoggingController createMockLoggingControllerWithDefaults({
   when(mockLoggingController.matchIndex).thenReturn(ValueNotifier<int>(0));
   return mockLoggingController;
 }
+
+MockLoggingControllerV2 createMockLoggingControllerV2WithDefaults({
+  List<LogDataV2> data = const [],
+}) {
+  provideDummy<ListValueNotifier<LogDataV2>>(
+    ListValueNotifier<LogDataV2>(data),
+  );
+  final mockLoggingController = MockLoggingControllerV2();
+  when(mockLoggingController.data).thenReturn(data);
+  when(mockLoggingController.filteredData)
+      .thenReturn(ListValueNotifier<LogDataV2>(data));
+  when(mockLoggingController.isFilterActive).thenReturn(false);
+  when(mockLoggingController.selectedLog)
+      .thenReturn(ValueNotifier<LogDataV2?>(null));
+  return mockLoggingController;
+}
