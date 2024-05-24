@@ -40,32 +40,36 @@ void main() {
     });
 
     test('initial state', () {
-      expect(controller.data, isEmpty);
-      expect(controller.filteredData.value, isEmpty);
+      expect(controller.loggingModel.logCount, 0);
+      expect(controller.loggingModel.filteredLogCount, 0);
+      expect(controller.loggingModel.selectedLogCount, 0);
       expect(controller.activeFilter.value.isEmpty, isTrue);
     });
 
     test('receives data', () {
-      expect(controller.data, isEmpty);
+      expect(controller.loggingModel.logCount, 0);
+      expect(controller.loggingModel.filteredLogCount, 0);
+      expect(controller.loggingModel.selectedLogCount, 0);
 
       addStdoutData('Abc.');
 
-      expect(controller.data, isNotEmpty);
-      expect(controller.filteredData.value, isNotEmpty);
+      expect(controller.loggingModel.logCount, 1);
+      expect(controller.loggingModel.filteredLogCount, 1);
+      expect(controller.loggingModel.selectedLogCount, 0);
 
-      expect(controller.data.first.summary, contains('Abc'));
+      expect(controller.loggingModel.getLog(0).summary, contains('Abc'));
     });
 
     test('clear', () {
       addStdoutData('Abc.');
 
-      expect(controller.data, isNotEmpty);
-      expect(controller.filteredData.value, isNotEmpty);
+      expect(controller.loggingModel.logCount, 1);
+      expect(controller.loggingModel.filteredLogCount, 1);
 
       controller.clear();
 
-      expect(controller.data, isEmpty);
-      expect(controller.filteredData.value, isEmpty);
+      expect(controller.loggingModel.logCount, 0);
+      expect(controller.loggingModel.filteredLogCount, 0);
     });
   });
 

@@ -39,11 +39,19 @@ class LoggingTableModel extends ChangeNotifier {
 
   double _tableWidth = 0.0;
 
-  int get logCount => _filteredLogs.length;
+  int get logCount => _logs.length;
+  int get filteredLogCount => _filteredLogs.length;
+  int get selectedLogCount => _selectedLogs.length;
 
   void add(LogDataV2 log) {
     _logs.add(log);
     _filteredLogs.add(log);
+    notifyListeners();
+  }
+
+  void clear() {
+    _logs.clear();
+    _filteredLogs.clear();
     notifyListeners();
   }
 

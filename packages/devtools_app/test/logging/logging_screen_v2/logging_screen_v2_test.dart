@@ -4,6 +4,7 @@
 
 @TestOn('vm')
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/screens/logging/logging_screen_v2/logging_table_v2.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -30,8 +31,7 @@ void main() {
     setUp(() {
       mockLoggingController = createMockLoggingControllerV2WithDefaults();
 
-      final FakeServiceConnectionManager fakeServiceConnection =
-          FakeServiceConnectionManager();
+      final fakeServiceConnection = FakeServiceConnectionManager();
       when(
         fakeServiceConnection.serviceManager.connectedApp!.isFlutterWebAppNow,
       ).thenReturn(false);
@@ -63,7 +63,7 @@ void main() {
       (WidgetTester tester) async {
         await pumpLoggingScreen(tester);
         expect(find.byType(LoggingScreenBodyV2), findsOneWidget);
-        expect(find.byType(LogsTableV2), findsOneWidget);
+        expect(find.byType(LoggingTableV2), findsOneWidget);
       },
     );
   });

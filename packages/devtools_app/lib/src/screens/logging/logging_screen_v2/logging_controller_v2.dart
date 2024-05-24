@@ -92,16 +92,8 @@ class LoggingControllerV2 extends DisposableController
   /// See also [statusText].
   Stream<String> get onLogStatusChanged => _logStatusController.stream;
 
-  List<LogDataV2> data = <LogDataV2>[];
-
   final selectedLog = ValueNotifier<LogDataV2?>(null);
   final loggingModel = LoggingTableModel();
-  void _updateData(List<LogDataV2> logs) {
-    data = logs;
-    filteredData.replaceAll(logs);
-    _updateSelection();
-    _updateStatus();
-  }
 
   void _updateSelection() {
     final selected = selectedLog.value;
@@ -117,7 +109,7 @@ class LoggingControllerV2 extends DisposableController
       serviceConnection.consoleService.objectGroup as ObjectGroup;
 
   String get statusText {
-    final int totalCount = data.length;
+    final int totalCount = loggingModel.logCount;
     final int showingCount = filteredData.value.length;
 
     String label;
@@ -137,7 +129,9 @@ class LoggingControllerV2 extends DisposableController
   }
 
   void clear() {
-    _updateData([]);
+    loggingModel.clear();
+    _updateSelection();
+    _updateStatus();
     serviceConnection.errorBadgeManager.clearErrors(LoggingScreen.id);
   }
 
