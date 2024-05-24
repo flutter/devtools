@@ -26,8 +26,8 @@ class OfflineMemoryData with Serializable {
     this.diff,
     this.profile,
     this.chart,
-    this.filter,
-    this.trace, {
+    this.trace,
+    this.filter, {
     required this.selectedTab,
   });
 
@@ -45,13 +45,13 @@ class OfflineMemoryData with Serializable {
         json[Json.chartData.name],
         ChartData.fromJson,
       ),
-      deserialize<ClassFilter>(
-        json[Json.classFilter.name],
-        ClassFilter.fromJson,
-      ),
       deserializeNullable<TracingPaneController>(
         json[Json.trace.name],
         TracingPaneController.fromJson,
+      ),
+      deserialize<ClassFilter>(
+        json[Json.classFilter.name],
+        ClassFilter.fromJson,
       ),
       selectedTab: json[Json.selectedTab.name] as int? ?? 0,
     );
@@ -65,7 +65,7 @@ class OfflineMemoryData with Serializable {
       Json.profileData.name: profile,
       Json.chartData.name: chart,
       Json.classFilter.name: filter,
-      Json.trace.name: filter,
+      Json.trace.name: trace,
     };
   }
 

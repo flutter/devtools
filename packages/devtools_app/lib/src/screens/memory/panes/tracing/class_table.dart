@@ -177,7 +177,7 @@ class _AllocationTracingTableState extends State<AllocationTracingTable> {
           child: MultiValueListenableBuilder(
             listenables: [
               widget.controller.refreshing,
-              widget.controller.stateForIsolate,
+              widget.controller.selection,
             ],
             builder: (context, values, __) {
               final state = values.second as TracingIsolateState;

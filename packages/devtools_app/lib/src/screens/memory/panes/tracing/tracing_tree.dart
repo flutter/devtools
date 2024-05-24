@@ -67,7 +67,7 @@ class _AllocationTracingTreeState extends State<AllocationTracingTree>
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<TracingIsolateState>(
-      valueListenable: widget.controller.stateForIsolate,
+      valueListenable: widget.controller.selection,
       builder: (context, state, _) {
         return ValueListenableBuilder<TracedClass?>(
           valueListenable: state.selectedTracedClass,
@@ -189,7 +189,7 @@ class _TracingTreeHeader extends StatelessWidget {
             TextSpan(
               style: theme.fixedFontStyle,
               text: controller
-                  .stateForIsolate.value.selectedTracedClass.value?.cls.name!,
+                  .selection.value.selectedTracedClass.value?.cls.name!,
             ),
           ],
         ),
@@ -235,8 +235,7 @@ class _TracingTreeHeader extends StatelessWidget {
   List<CpuStackFrame> get _currentDataRoots {
     final isBottomUp =
         tabs[tabController.index] == AllocationTracingTree._bottomUpTab;
-    final data =
-        controller.stateForIsolate.value.selectedTracedClassAllocationData!;
+    final data = controller.selection.value.selectedTracedClassAllocationData!;
     return isBottomUp ? data.bottomUpRoots : data.callTreeRoots;
   }
 }

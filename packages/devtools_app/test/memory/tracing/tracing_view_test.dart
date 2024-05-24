@@ -44,7 +44,7 @@ void main() {
     await tester.tap(clearFilterButton);
     await tester.pumpAndSettle();
     expect(
-      controller.stateForIsolate.value.filteredClassList.value.length,
+      controller.selection.value.filteredClassList.value.length,
       originalClassCount,
     );
   }
@@ -108,7 +108,7 @@ void main() {
         await pumpScene(tester);
 
         final controller = scene.controller.trace!;
-        final state = controller.stateForIsolate.value;
+        final state = controller.selection.value;
         expect(state.filteredClassList.value.isNotEmpty, isTrue);
         expect(controller.initializing.value, isFalse);
         expect(controller.refreshing.value, isFalse);
@@ -273,7 +273,7 @@ void main() {
         await pumpScene(tester);
 
         final controller = scene.controller.trace!;
-        final state = controller.stateForIsolate.value;
+        final state = controller.selection.value;
         expect(state.filteredClassList.value.isNotEmpty, isTrue);
         expect(controller.initializing.value, isFalse);
         expect(controller.refreshing.value, isFalse);
@@ -377,7 +377,7 @@ void main() {
         await pumpScene(tester);
 
         final controller = scene.controller.trace!;
-        final state = controller.stateForIsolate.value;
+        final state = controller.selection.value;
 
         final filterTextField = find.byType(DevToolsClearableTextField);
         expect(filterTextField, findsOneWidget);
@@ -404,7 +404,7 @@ void main() {
           await pumpScene(tester);
 
           final controller = scene.controller.trace!;
-          final state = controller.stateForIsolate.value;
+          final state = controller.selection.value;
 
           final checkboxes = find.byType(Checkbox);
           expect(checkboxes, findsNWidgets(classList.classes!.length));
@@ -445,7 +445,7 @@ void main() {
           await pumpScene(tester);
 
           final controller = scene.controller.trace!;
-          final state = controller.stateForIsolate.value;
+          final state = controller.selection.value;
 
           expect(state.selectedTracedClass.value, isNull);
 

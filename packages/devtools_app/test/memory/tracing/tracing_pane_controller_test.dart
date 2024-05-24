@@ -42,7 +42,7 @@ Future<void> clearFilter(
   await tester.tap(clearFilterButton);
   await tester.pumpAndSettle();
   expect(
-    controller.stateForIsolate.value.filteredClassList.value.length,
+    controller.selection.value.filteredClassList.value.length,
     originalClassCount,
   );
 }

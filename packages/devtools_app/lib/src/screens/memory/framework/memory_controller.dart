@@ -185,6 +185,7 @@ class MemoryController extends DisposableController
           diff,
           profile,
           chart?.data,
+          trace,
           diff.core.classFilter.value,
           selectedTab: selectedFeatureTabIndex,
         ),
