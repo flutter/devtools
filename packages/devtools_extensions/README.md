@@ -48,6 +48,7 @@ for reference.
       - [Step 4: Debug your extension](#step-4-debug-your-extension)
 3. [Publish your package with a DevTools extension](#publish-your-package-with-a-DevTools-extension)
 4. [Resources and support](#resources-and-support)
+5. [Testimonies from extension authors](#testimonies-from-extension-authors)
 
 ## Supported tools
 
@@ -402,3 +403,24 @@ For other documentation and guides, check out the
 [DevTools Extensions](https://docs.flutter.dev/tools/devtools/extensions) page on flutter.dev or
 [Dart and Flutter DevTools extensions](https://medium.com/flutter/dart-flutter-devtools-extensions-c8bc1aaf8e5f),
 a free article on Medium.
+
+## Testimonies from extension authors
+
+Several packages authors in the Dart and Flutter ecosystem have built their own DevTools
+extensions to provide their users with a great developer experience.
+
+* "By allowing developers to inspect databases and find potential issues in the familiar
+DevTools environment, Drift's DevTools extension saves users a lot of time and makes the
+package easier to use. Writing the extension was straightforward, and I think even simple
+extensions can help users a lot." - Simon Binder, [package:drift](https://pub.dev/packages/drift)
+
+* "Our DevTools extension allows Serverpod to make our developer tooling available for more
+platforms and with better integration with the Dart ecosystem. Having the tools bundled with
+our Serverpod package is a huge benefit, as our users won't have to install any additional
+applications." - Viktor Lidholt, [package:serverpod](https://pub.dev/packages/serverpod)
+
+* "Thanks to DevTools extensions we could develop a separate inspector tab for interacting
+with native platform views (such as a native Android button). It allowed our Patrol users
+to explore native view hierarchies without installing any additional tooling - distributed
+within the Patrol package itself." - Mateusz Wojtczak & the Patrol
+team, [package:patrol](https://pub.dev/packages/patrol)
