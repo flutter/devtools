@@ -66,7 +66,7 @@ class MemoryController extends DisposableController
 
   late final MemoryChartPaneController? chart;
 
-  late final TracingPaneController? tracing;
+  late final TracingPaneController? trace;
 
   late final MemoryControlPaneController control;
 
@@ -75,7 +75,7 @@ class MemoryController extends DisposableController
     super.dispose();
     HeapClassName.dispose();
     chart?.dispose();
-    tracing?.dispose();
+    trace?.dispose();
     diff.dispose();
     profile?.dispose();
   }
@@ -163,7 +163,7 @@ class MemoryController extends DisposableController
       exportData: exportData,
     );
 
-    tracing = hasData ? TracingPaneController(mode) : null;
+    trace = hasData ? TracingPaneController(mode) : null;
 
     selectedFeatureTabIndex =
         offlineData?.selectedTab ?? selectedFeatureTabIndex;

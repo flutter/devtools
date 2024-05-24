@@ -60,7 +60,7 @@ void main() {
     Future<void> pumpScene(WidgetTester tester) async {
       await scene.pump(tester);
       await tester.tap(
-        find.byKey(MemoryScreenKeys.dartHeapAllocationTracingTab),
+        find.byKey(MemoryScreenKeys.traceTab),
       );
       await tester.pumpAndSettle();
     }
@@ -107,7 +107,7 @@ void main() {
       (WidgetTester tester) async {
         await pumpScene(tester);
 
-        final controller = scene.controller.tracing!;
+        final controller = scene.controller.trace!;
         final state = controller.stateForIsolate.value;
         expect(state.filteredClassList.value.isNotEmpty, isTrue);
         expect(controller.initializing.value, isFalse);
@@ -272,7 +272,7 @@ void main() {
       (WidgetTester tester) async {
         await pumpScene(tester);
 
-        final controller = scene.controller.tracing!;
+        final controller = scene.controller.trace!;
         final state = controller.stateForIsolate.value;
         expect(state.filteredClassList.value.isNotEmpty, isTrue);
         expect(controller.initializing.value, isFalse);
@@ -376,7 +376,7 @@ void main() {
       testWidgetsWithWindowSize('simple', windowSize, (tester) async {
         await pumpScene(tester);
 
-        final controller = scene.controller.tracing!;
+        final controller = scene.controller.trace!;
         final state = controller.stateForIsolate.value;
 
         final filterTextField = find.byType(DevToolsClearableTextField);
@@ -403,7 +403,7 @@ void main() {
         (tester) async {
           await pumpScene(tester);
 
-          final controller = scene.controller.tracing!;
+          final controller = scene.controller.trace!;
           final state = controller.stateForIsolate.value;
 
           final checkboxes = find.byType(Checkbox);
@@ -444,7 +444,7 @@ void main() {
         (tester) async {
           await pumpScene(tester);
 
-          final controller = scene.controller.tracing!;
+          final controller = scene.controller.trace!;
           final state = controller.stateForIsolate.value;
 
           expect(state.selectedTracedClass.value, isNull);
