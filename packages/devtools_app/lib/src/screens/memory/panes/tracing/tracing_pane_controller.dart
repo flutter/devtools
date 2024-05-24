@@ -23,10 +23,13 @@ class TracePaneController extends DisposableController
     with AutoDisposeControllerMixin, Serializable {
   TracePaneController(
     this.mode, {
-    this.stateForIsolate = const {},
+    Map<String, TracingIsolateState>? stateForIsolate,
     String? selectedIsolateId,
   }) {
-    final isolate = stateForIsolate.values
+    this.stateForIsolate = stateForIsolate ?? {};
+    final isolate = this
+        .stateForIsolate
+        .values
         .firstWhereOrNull((i) => i.isolate.id == selectedIsolateId);
     if (selectedIsolateId != null && isolate == null) {
       throw ArgumentError(
@@ -60,7 +63,7 @@ class TracePaneController extends DisposableController
   final ControllerCreationMode mode;
 
   /// Maps isolate IDs to their allocation tracing states.
-  final Map<String, TracingIsolateState> stateForIsolate;
+  late final Map<String, TracingIsolateState> stateForIsolate;
 
   /// The allocation tracing state for the currently selected isolate.
   ValueListenable<TracingIsolateState> get selection => _selection;

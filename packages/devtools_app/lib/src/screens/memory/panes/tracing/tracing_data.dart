@@ -106,17 +106,21 @@ enum TracingIsolateStateJson {
 class TracingIsolateState with Serializable {
   TracingIsolateState({
     required this.isolate,
-    this.tracedClasses = const {},
-    this.tracedClassesProfiles = const {},
-    this.unfilteredClassList = const [],
+    Map<String, TracedClass>? tracedClasses,
+    Map<String, CpuProfileData>? tracedClassesProfiles,
+    List<TracedClass>? unfilteredClassList,
     String? selectedClass,
   }) {
+    this.unfilteredClassList = unfilteredClassList ?? [];
+    this.tracedClasses = tracedClasses ?? {};
+    this.tracedClassesProfiles = tracedClassesProfiles ?? {};
+
     if (selectedClass == null) {
-      selectedTracedClass.value = unfilteredClassList.firstOrNull;
+      selectedTracedClass.value = null;
     } else {
-      selectedTracedClass.value = unfilteredClassList.firstWhereOrNull(
-        (e) => e.name.fullName == selectedClass,
-      );
+      selectedTracedClass.value = this.unfilteredClassList.firstWhereOrNull(
+            (e) => e.name.fullName == selectedClass,
+          );
     }
   }
 
@@ -149,9 +153,9 @@ class TracingIsolateState with Serializable {
   final IsolateRef isolate;
 
   // Keeps track of which classes have allocation tracing enabling.
-  final Map<String, TracedClass> tracedClasses;
-  final Map<String, CpuProfileData> tracedClassesProfiles;
-  final List<TracedClass> unfilteredClassList;
+  late final Map<String, TracedClass> tracedClasses;
+  late final Map<String, CpuProfileData> tracedClassesProfiles;
+  late final List<TracedClass> unfilteredClassList;
 
   /// The current class selection in the [AllocationTracingTable]
   final selectedTracedClass = ValueNotifier<TracedClass?>(null);
