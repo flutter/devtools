@@ -158,6 +158,8 @@ class TracingIsolateState with Serializable {
       TracingIsolateStateJson.tracedClasses.name: tracedClasses,
       TracingIsolateStateJson.tracedClassesProfiles.name: tracedClassesProfiles,
       TracingIsolateStateJson.unfilteredClassList.name: unfilteredClassList,
+      TracingIsolateStateJson.selectedClass.name:
+          selectedTracedClass.value?.name.fullName,
     };
   }
 
