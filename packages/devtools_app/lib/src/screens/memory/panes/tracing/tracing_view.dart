@@ -37,6 +37,15 @@ class TracingPaneState extends State<TracingPane> {
   }
 
   @override
+  void didUpdateWidget(TracingPane oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.controller != widget.controller) {
+      unawaited(widget.controller.initialize());
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final isProfileMode =
         serviceConnection.serviceManager.connectedApp?.isProfileBuildNow ??

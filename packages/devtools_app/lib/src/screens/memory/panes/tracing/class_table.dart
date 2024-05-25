@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import '../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
-import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/table/table.dart';
 import '../../../../shared/table/table_controller.dart';
@@ -45,6 +44,9 @@ class _TraceCheckBoxColumn extends ColumnData<TracedClass>
     bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
+    if (item.traceAllocations) {
+      print('item.traceAllocations: ${item.traceAllocations}');
+    }
     return Checkbox(
       value: item.traceAllocations,
       onChanged: (value) async {
@@ -70,7 +72,7 @@ class _TraceCheckBoxColumn extends ColumnData<TracedClass>
 
 class _ClassNameColumn extends ColumnData<TracedClass>
     implements ColumnRenderer<TracedClass> {
-  _ClassNameColumn() : super.wide('Class');
+  _ClassNameColumn({required this.rootPackage}) : super.wide('Class');
 
   @override
   String? getValue(TracedClass stats) => stats.cls.name;
@@ -78,6 +80,8 @@ class _ClassNameColumn extends ColumnData<TracedClass>
   // We are removing the tooltip, because it is provided by [HeapClassView].
   @override
   String getTooltip(TracedClass dataObject) => '';
+
+  final String? rootPackage;
 
   @override
   bool get supportsSorting => true;
@@ -94,7 +98,7 @@ class _ClassNameColumn extends ColumnData<TracedClass>
       theClass: data.name,
       showCopyButton: isRowSelected,
       copyGaItem: gac.MemoryEvent.diffClassSingleCopy,
-      rootPackage: serviceConnection.serviceManager.rootInfoNow().package,
+      rootPackage: rootPackage,
     );
   }
 }
@@ -128,7 +132,7 @@ class AllocationTracingTable extends StatefulWidget {
 
 class _AllocationTracingTableState extends State<AllocationTracingTable> {
   late final _TraceCheckBoxColumn _checkboxColumn;
-  static final _classNameColumn = _ClassNameColumn();
+  late final _classNameColumn;
   static final _instancesColumn = _InstancesColumn();
 
   late final List<ColumnData<TracedClass>> columns;
@@ -136,6 +140,10 @@ class _AllocationTracingTableState extends State<AllocationTracingTable> {
   @override
   void initState() {
     super.initState();
+
+    _classNameColumn =
+        _ClassNameColumn(rootPackage: widget.controller.rootPackage);
+
     _checkboxColumn = _TraceCheckBoxColumn(controller: widget.controller);
     columns = <ColumnData<TracedClass>>[
       _checkboxColumn,

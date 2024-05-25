@@ -163,7 +163,10 @@ class MemoryController extends DisposableController
       exportData: exportData,
     );
 
-    trace = hasData ? TracePaneController(mode) : null;
+    trace = hasData
+        ? (offlineData?.trace ??
+            TracePaneController(mode, rootPackage: rootPackage))
+        : null;
 
     selectedFeatureTabIndex =
         offlineData?.selectedTab ?? selectedFeatureTabIndex;

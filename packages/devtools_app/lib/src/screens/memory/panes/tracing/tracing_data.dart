@@ -11,6 +11,7 @@ import 'package:vm_service/vm_service.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/memory/class_name.dart';
 import '../../../../shared/primitives/encoding.dart';
+import '../../../../shared/primitives/simple_items.dart';
 import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/table/table_data.dart';
 import '../../../profiler/cpu_profile_model.dart';
@@ -38,6 +39,10 @@ class TracedClass with PinnableListEntry, Serializable {
   }) : name = HeapClassName.fromClassRef(cls);
 
   factory TracedClass.fromJson(Map<String, dynamic> json) {
+    bool trace = json[TracedClassJson.allocations.name] as bool;
+    if (trace) {
+      print('fromJson.traceAllocations: $trace');
+    }
     return TracedClass._(
       instances: json[TracedClassJson.instances.name] as int,
       cls: ClassRefEncodeDecode.instance.decode(json[TracedClassJson.cls.name]),
@@ -47,6 +52,9 @@ class TracedClass with PinnableListEntry, Serializable {
 
   @override
   Map<String, dynamic> toJson() {
+    if (traceAllocations) {
+      print('toJson.traceAllocations: $traceAllocations');
+    }
     return {
       TracedClassJson.allocations.name: traceAllocations,
       TracedClassJson.cls.name: cls,
@@ -105,6 +113,7 @@ enum TracingIsolateStateJson {
 /// consumers the allocation tracing state for the currently selected isolate.
 class TracingIsolateState with Serializable {
   TracingIsolateState({
+    required this.mode,
     required this.isolate,
     Map<String, TracedClass>? tracedClasses,
     Map<String, CpuProfileData>? tracedClassesProfiles,
@@ -124,10 +133,12 @@ class TracingIsolateState with Serializable {
     }
   }
 
-  TracingIsolateState.empty() : this(isolate: IsolateRef());
+  TracingIsolateState.empty()
+      : this(isolate: IsolateRef(), mode: ControllerCreationMode.connected);
 
   factory TracingIsolateState.fromJson(Map<String, dynamic> json) {
     return TracingIsolateState(
+      mode: ControllerCreationMode.offlineData,
       isolate: IsolateRefEncodeDecode.instance
           .decode(json[TracingIsolateStateJson.isolate.name]),
       tracedClasses:
@@ -163,6 +174,8 @@ class TracingIsolateState with Serializable {
     };
   }
 
+  final ControllerCreationMode mode;
+
   final IsolateRef isolate;
 
   // Keeps track of which classes have allocation tracing enabling.
@@ -192,13 +205,19 @@ class TracingIsolateState with Serializable {
   int _lastClearTimeMicros = 0;
 
   Future<void> initialize() async {
-    final classList = await serviceConnection.serviceManager.service!
-        .getClassList(isolate.id!);
-    for (final cls in classList.classes!) {
-      tracedClasses[cls.id!] = TracedClass(cls: cls);
+    if (mode == ControllerCreationMode.connected) {
+      final classList = await serviceConnection.serviceManager.service!
+          .getClassList(isolate.id!);
+      for (final cls in classList.classes!) {
+        tracedClasses[cls.id!] = TracedClass(cls: cls);
+      }
+      unfilteredClassList.addAll(tracedClasses.values);
+    } else {
+      for (final kv in tracedClassesProfiles.entries) {
+        _setProfile(tracedClasses[kv.key]!, kv.value);
+      }
     }
-    _filteredClassList.replaceAll(tracedClasses.values);
-    unfilteredClassList.addAll(tracedClasses.values);
+    _filteredClassList.replaceAll(unfilteredClassList);
   }
 
   Future<void> refresh() async {
@@ -319,14 +338,20 @@ class TracingIsolateState with Serializable {
     final transformer = CpuProfileTransformer();
     await transformer.processData(profileData, processId: '');
 
+    _setProfile(tracedClass, profileData);
+
+    return profileData;
+  }
+
+  void _setProfile(TracedClass tracedClass, CpuProfileData profileData) {
     // Update the traced class data with the updated profile length.
     final updated = tracedClass.copyWith(
       instances: profileData.cpuSamples.length,
     );
+    final cls = tracedClass.cls;
     tracedClasses[cls.id!] = updated;
     tracedClassesProfiles[cls.id!] = profileData;
 
     _updateClassState(tracedClass, updated);
-    return profileData;
   }
 }

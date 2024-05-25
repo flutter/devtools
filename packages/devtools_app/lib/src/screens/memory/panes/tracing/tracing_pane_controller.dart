@@ -16,7 +16,8 @@ import 'tracing_data.dart';
 @visibleForTesting
 enum Json {
   stateForIsolate,
-  selection;
+  selection,
+  rootPackage;
 }
 
 class TracePaneController extends DisposableController
@@ -25,6 +26,7 @@ class TracePaneController extends DisposableController
     this.mode, {
     Map<String, TracingIsolateState>? stateForIsolate,
     String? selectedIsolateId,
+    required this.rootPackage,
   }) {
     this.stateForIsolate = stateForIsolate ?? {};
     final isolate = this
@@ -49,6 +51,7 @@ class TracePaneController extends DisposableController
         ),
       ),
       selectedIsolateId: json[Json.selection.name] as String?,
+      rootPackage: json[Json.rootPackage.name] as String?,
     );
   }
 
@@ -57,6 +60,7 @@ class TracePaneController extends DisposableController
     return {
       Json.selection.name: selection.value.isolate.id,
       Json.stateForIsolate.name: stateForIsolate,
+      Json.rootPackage.name: rootPackage,
     };
   }
 
@@ -85,6 +89,8 @@ class TracePaneController extends DisposableController
 
   bool _initialized = false;
 
+  final String? rootPackage;
+
   /// Initializes the controller if it is not initialized yet.
   Future<void> initialize() async {
     if (_initialized) return;
@@ -106,7 +112,7 @@ class TracePaneController extends DisposableController
         // TODO(bkonyi): we don't need to request this unless we've had a hot reload.
         // We generally need to rebuild this data if we've had a hot reload or
         // switched the currently selected isolate.
-        state = TracingIsolateState(isolate: isolate);
+        state = TracingIsolateState(isolate: isolate, mode: mode);
         await state.initialize();
         stateForIsolate[isolateId] = state;
       }
@@ -115,13 +121,19 @@ class TracePaneController extends DisposableController
       _selection.value = state;
     }
 
-    addAutoDisposeListener(
-      serviceConnection.serviceManager.isolateManager.selectedIsolate,
-      updateState,
-    );
+    if (mode == ControllerCreationMode.connected) {
+      addAutoDisposeListener(
+        serviceConnection.serviceManager.isolateManager.selectedIsolate,
+        updateState,
+      );
 
-    await updateState();
-    await refresh();
+      await updateState();
+      await refresh();
+    } else {
+      for (final state in stateForIsolate.values) {
+        await state.initialize();
+      }
+    }
 
     _initializing.value = false;
   }
@@ -139,7 +151,7 @@ class TracePaneController extends DisposableController
     _refreshing.value = false;
   }
 
-  /// Refreshes the allocation profiles for the current isolate's traced classes.
+  /// Clears the allocation profiles for the current isolate's traced classes.
   Future<void> clear() async {
     _refreshing.value = true;
     await selection.value.clear();
