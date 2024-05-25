@@ -32,7 +32,7 @@ class _TraceCheckBoxColumn extends ColumnData<TracedClass>
           alignment: ColumnAlignment.left,
         );
 
-  final TracingPaneController controller;
+  final TracePaneController controller;
 
   @override
   bool get supportsSorting => false;
@@ -120,7 +120,7 @@ class _InstancesColumn extends ColumnData<TracedClass> {
 class AllocationTracingTable extends StatefulWidget {
   const AllocationTracingTable({super.key, required this.controller});
 
-  final TracingPaneController controller;
+  final TracePaneController controller;
 
   @override
   State<AllocationTracingTable> createState() => _AllocationTracingTableState();
@@ -177,7 +177,7 @@ class _AllocationTracingTableState extends State<AllocationTracingTable> {
           child: MultiValueListenableBuilder(
             listenables: [
               widget.controller.refreshing,
-              widget.controller.stateForIsolate,
+              widget.controller.selection,
             ],
             builder: (context, values, __) {
               final state = values.second as TracingIsolateState;

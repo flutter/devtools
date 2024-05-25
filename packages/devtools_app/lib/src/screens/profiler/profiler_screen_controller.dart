@@ -152,7 +152,7 @@ class ProfilerScreenController extends DisposableController
   @override
   OfflineScreenData prepareOfflineScreenData() => OfflineScreenData(
         screenId: ProfilerScreen.id,
-        data: cpuProfileData!.toJson,
+        data: cpuProfileData!.toJson(),
       );
 
   Future<void> clear() async {

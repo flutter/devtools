@@ -2,19 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:devtools_app_shared/utils.dart';
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/globals.dart';
 import '../../../../shared/memory/class_name.dart';
+import '../../../../shared/primitives/encoding.dart';
 import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/table/table_data.dart';
 import '../../../profiler/cpu_profile_model.dart';
 import '../../../profiler/cpu_profile_transformer.dart';
 
+@visibleForTesting
+enum TracedClassJson {
+  cls,
+  instances,
+  allocations,
+}
+
 /// A representation of a class and it's allocation tracing state.
-class TracedClass with PinnableListEntry {
+class TracedClass with PinnableListEntry, Serializable {
   TracedClass({
     required this.cls,
   })  : traceAllocations = false,
@@ -26,6 +36,23 @@ class TracedClass with PinnableListEntry {
     required this.instances,
     required this.traceAllocations,
   }) : name = HeapClassName.fromClassRef(cls);
+
+  factory TracedClass.fromJson(Map<String, dynamic> json) {
+    return TracedClass._(
+      instances: json[TracedClassJson.instances.name] as int,
+      cls: ClassRefEncodeDecode.instance.decode(json[TracedClassJson.cls.name]),
+      traceAllocations: json[TracedClassJson.allocations.name] as bool,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      TracedClassJson.allocations.name: traceAllocations,
+      TracedClassJson.cls.name: cls,
+      TracedClassJson.instances.name: instances,
+    };
+  }
 
   TracedClass copyWith({
     ClassRef? cls,
@@ -63,21 +90,85 @@ class TracedClass with PinnableListEntry {
       '${cls.name} instances: $instances trace: $traceAllocations';
 }
 
+@visibleForTesting
+enum TracingIsolateStateJson {
+  isolate,
+  tracedClasses,
+  tracedClassesProfiles,
+  unfilteredClassList,
+  selectedClass;
+}
+
 /// Contains allocation tracing state for a single isolate.
 ///
 /// `AllocationProfileTracingController` is effectively only used to provide
 /// consumers the allocation tracing state for the currently selected isolate.
-class TracingIsolateState {
-  TracingIsolateState({required this.isolate});
+class TracingIsolateState with Serializable {
+  TracingIsolateState({
+    required this.isolate,
+    Map<String, TracedClass>? tracedClasses,
+    Map<String, CpuProfileData>? tracedClassesProfiles,
+    List<TracedClass>? unfilteredClassList,
+    String? selectedClass,
+  }) {
+    this.unfilteredClassList = unfilteredClassList ?? [];
+    this.tracedClasses = tracedClasses ?? {};
+    this.tracedClassesProfiles = tracedClassesProfiles ?? {};
 
-  TracingIsolateState.empty() : isolate = IsolateRef();
+    if (selectedClass == null) {
+      selectedTracedClass.value = null;
+    } else {
+      selectedTracedClass.value = this.unfilteredClassList.firstWhereOrNull(
+            (e) => e.name.fullName == selectedClass,
+          );
+    }
+  }
+
+  TracingIsolateState.empty() : this(isolate: IsolateRef());
+
+  factory TracingIsolateState.fromJson(Map<String, dynamic> json) {
+    return TracingIsolateState(
+      isolate: IsolateRefEncodeDecode.instance
+          .decode(json[TracingIsolateStateJson.isolate.name]),
+      tracedClasses:
+          (json[TracingIsolateStateJson.tracedClasses.name] as Map).map(
+        (key, value) => MapEntry(
+          key,
+          deserialize<TracedClass>(value, TracedClass.fromJson),
+        ),
+      ),
+      tracedClassesProfiles:
+          (json[TracingIsolateStateJson.tracedClasses.name] as Map).map(
+        (key, value) => MapEntry(
+          key,
+          deserialize<CpuProfileData>(value, CpuProfileData.fromJson),
+        ),
+      ),
+      unfilteredClassList:
+          (json[TracingIsolateStateJson.unfilteredClassList.name] as List)
+              .map((e) => deserialize<TracedClass>(e, TracedClass.fromJson))
+              .toList(),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      TracingIsolateStateJson.isolate.name: isolate,
+      TracingIsolateStateJson.tracedClasses.name: tracedClasses,
+      TracingIsolateStateJson.tracedClassesProfiles.name: tracedClassesProfiles,
+      TracingIsolateStateJson.unfilteredClassList.name: unfilteredClassList,
+      TracingIsolateStateJson.selectedClass.name:
+          selectedTracedClass.value?.name.fullName,
+    };
+  }
 
   final IsolateRef isolate;
 
   // Keeps track of which classes have allocation tracing enabling.
-  final tracedClasses = <String, TracedClass>{};
-  final tracedClassesProfiles = <String, CpuProfileData>{};
-  final unfilteredClassList = <TracedClass>[];
+  late final Map<String, TracedClass> tracedClasses;
+  late final Map<String, CpuProfileData> tracedClassesProfiles;
+  late final List<TracedClass> unfilteredClassList;
 
   /// The current class selection in the [AllocationTracingTable]
   final selectedTracedClass = ValueNotifier<TracedClass?>(null);

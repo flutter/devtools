@@ -15,9 +15,8 @@ import 'memory_controller.dart';
 
 @visibleForTesting
 class MemoryScreenKeys {
-  static const dartHeapTableProfileTab = Key('Dart Heap Profile Tab');
-  static const dartHeapAllocationTracingTab =
-      Key('Dart Heap Allocation Tracing Tab');
+  static const profileTab = Key('Dart Heap Profile Tab');
+  static const traceTab = Key('Trace Tab');
   static const diffTab = Key('Diff Tab');
 }
 
@@ -58,7 +57,7 @@ class MemoryTabView extends StatelessWidget {
 
   TabAndView _profile() => (
         tab: DevToolsTab.create(
-          key: MemoryScreenKeys.dartHeapTableProfileTab,
+          key: MemoryScreenKeys.profileTab,
           tabName: 'Profile Memory',
           gaPrefix: _gaPrefix,
         ),
@@ -71,12 +70,12 @@ class MemoryTabView extends StatelessWidget {
 
   TabAndView _trace() => (
         tab: DevToolsTab.create(
-          key: MemoryScreenKeys.dartHeapAllocationTracingTab,
+          key: MemoryScreenKeys.traceTab,
           tabName: 'Trace Instances',
           gaPrefix: _gaPrefix,
         ),
         tabView: KeepAliveWrapper(
-          child: TracingPane(controller: controller.tracing!),
+          child: TracingPane(controller: controller.trace!),
         ),
       );
 

@@ -24,7 +24,7 @@ const double _countColumnWidth = 100;
 class AllocationTracingTree extends StatefulWidget {
   const AllocationTracingTree({super.key, required this.controller});
 
-  final TracingPaneController controller;
+  final TracePaneController controller;
 
   static final _bottomUpTab = _buildTab(tabName: 'Bottom Up');
   static final _callTreeTab = _buildTab(tabName: 'Call Tree');
@@ -67,7 +67,7 @@ class _AllocationTracingTreeState extends State<AllocationTracingTree>
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<TracingIsolateState>(
-      valueListenable: widget.controller.stateForIsolate,
+      valueListenable: widget.controller.selection,
       builder: (context, state, _) {
         return ValueListenableBuilder<TracedClass?>(
           valueListenable: state.selectedTracedClass,
@@ -169,7 +169,7 @@ class _TracingTreeHeader extends StatelessWidget {
     required this.updateTreeStateCallback,
   });
 
-  final TracingPaneController controller;
+  final TracePaneController controller;
   final void Function(VoidCallback) updateTreeStateCallback;
   final TabController tabController;
   final List<DevToolsTab> tabs;
@@ -189,7 +189,7 @@ class _TracingTreeHeader extends StatelessWidget {
             TextSpan(
               style: theme.fixedFontStyle,
               text: controller
-                  .stateForIsolate.value.selectedTracedClass.value?.cls.name!,
+                  .selection.value.selectedTracedClass.value?.cls.name!,
             ),
           ],
         ),
@@ -235,8 +235,7 @@ class _TracingTreeHeader extends StatelessWidget {
   List<CpuStackFrame> get _currentDataRoots {
     final isBottomUp =
         tabs[tabController.index] == AllocationTracingTree._bottomUpTab;
-    final data =
-        controller.stateForIsolate.value.selectedTracedClassAllocationData!;
+    final data = controller.selection.value.selectedTracedClassAllocationData!;
     return isBottomUp ? data.bottomUpRoots : data.callTreeRoots;
   }
 }
