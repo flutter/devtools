@@ -36,6 +36,7 @@ TODO: Remove this section if there are not any general updates.
 
 * Add better support for narrow viewing windows, like when this
 screen is embedded in the IDE. - [#7726](https://github.com/flutter/devtools/pull/7726)
+* Display query parameters for requests. - [#7825](https://github.com/flutter/devtools/pull/7825)
 
 ## Logging updates
 

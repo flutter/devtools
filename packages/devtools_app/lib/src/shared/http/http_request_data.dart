@@ -115,6 +115,7 @@ class DartIOHttpRequestData extends NetworkRequest {
         'reasonPhrase': _request.response!.reasonPhrase,
         'redirects': _request.response!.redirects,
         'statusCode': _request.response!.statusCode,
+        'queryParameters': _request.uri.queryParameters,
       },
     };
   }
@@ -208,6 +209,9 @@ class DartIOHttpRequestData extends NetworkRequest {
 
   /// The response headers for the HTTP request.
   Map<String, dynamic>? get responseHeaders => _request.response?.headers;
+
+  /// The query parameters for the request.
+  Map<String, dynamic>? get queryParameters => _request.uri.queryParameters;
 
   @override
   bool get didFail {
