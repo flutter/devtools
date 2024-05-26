@@ -95,8 +95,7 @@ class TracedClass with PinnableListEntry, Serializable {
 enum TracingIsolateStateJson {
   isolate,
   classes,
-  profiles,
-  selectedClass;
+  profiles;
 }
 
 /// Contains allocation tracing state for a single isolate.
@@ -114,14 +113,6 @@ class TracingIsolateState with Serializable {
     this.classes = classes ?? [];
     classesById = {for (var e in this.classes) e.cls.id!: e};
     this.profiles = profiles ?? {};
-
-    if (selectedClass == null) {
-      this.selectedClass.value = null;
-    } else {
-      this.selectedClass.value = this.classes.firstWhereOrNull(
-            (e) => e.name.fullName == selectedClass,
-          );
-    }
   }
 
   TracingIsolateState.empty()
@@ -141,8 +132,6 @@ class TracingIsolateState with Serializable {
       classes: (json[TracingIsolateStateJson.classes.name] as List)
           .map((e) => deserialize<TracedClass>(e, TracedClass.fromJson))
           .toList(),
-      selectedClass:
-          json[TracingIsolateStateJson.selectedClass.name] as String?,
     );
   }
 
@@ -152,8 +141,6 @@ class TracingIsolateState with Serializable {
       TracingIsolateStateJson.isolate.name: isolate,
       TracingIsolateStateJson.classes.name: classesById.values.toList(),
       TracingIsolateStateJson.profiles.name: profiles,
-      TracingIsolateStateJson.selectedClass.name:
-          selectedClass.value?.name.fullName,
     };
   }
 
