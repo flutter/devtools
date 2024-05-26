@@ -69,6 +69,8 @@ class _AllocationTracingTreeState extends State<AllocationTracingTree>
     return ValueListenableBuilder<TracingIsolateState>(
       valueListenable: widget.controller.selection,
       builder: (context, state, _) {
+        final data = state.selectedTracedClassAllocationData;
+
         return ValueListenableBuilder<TracedClass?>(
           valueListenable: state.selectedTracedClass,
           builder: (context, selection, _) {
@@ -80,9 +82,7 @@ class _AllocationTracingTreeState extends State<AllocationTracingTree>
                     '${selection.cls.name}.',
               );
             } else if (selection.traceAllocations &&
-                (state.selectedTracedClassAllocationData == null ||
-                    state.selectedTracedClassAllocationData!.bottomUpRoots
-                        .isEmpty)) {
+                (data == null || data.bottomUpRoots.isEmpty)) {
               return Padding(
                 padding: const EdgeInsets.all(largeSpacing),
                 child: Text(

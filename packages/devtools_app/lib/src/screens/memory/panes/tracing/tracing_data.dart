@@ -152,6 +152,8 @@ class TracingIsolateState with Serializable {
           (json[TracingIsolateStateJson.unfilteredClassList.name] as List)
               .map((e) => deserialize<TracedClass>(e, TracedClass.fromJson))
               .toList(),
+      selectedClass:
+          json[TracingIsolateStateJson.selectedClass.name] as String?,
     );
   }
 
