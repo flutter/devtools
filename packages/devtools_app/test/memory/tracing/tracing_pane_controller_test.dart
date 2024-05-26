@@ -24,11 +24,13 @@ class _Tests {
     ControllerCreationMode.connected,
     stateForIsolate: {
       'isolate1': TracingIsolateState(
-          isolate: IsolateRef(id: 'isolate1'),
-          mode: ControllerCreationMode.connected),
+        isolate: IsolateRef(id: 'isolate1'),
+        mode: ControllerCreationMode.connected,
+      ),
       'isolate2': TracingIsolateState(
-          isolate: IsolateRef(id: 'isolate2'),
-          mode: ControllerCreationMode.connected),
+        isolate: IsolateRef(id: 'isolate2'),
+        mode: ControllerCreationMode.connected,
+      ),
     },
     rootPackage: 'root',
     selectedIsolateId: 'isolate1',
@@ -38,11 +40,13 @@ class _Tests {
     ControllerCreationMode.connected,
     stateForIsolate: {
       'isolate1': TracingIsolateState(
-          isolate: IsolateRef(id: 'isolate1'),
-          mode: ControllerCreationMode.connected),
+        isolate: IsolateRef(id: 'isolate1'),
+        mode: ControllerCreationMode.connected,
+      ),
       'isolate2': TracingIsolateState(
-          isolate: IsolateRef(id: 'isolate2'),
-          mode: ControllerCreationMode.connected),
+        isolate: IsolateRef(id: 'isolate2'),
+        mode: ControllerCreationMode.connected,
+      ),
     },
     rootPackage: 'root',
   );
@@ -63,11 +67,13 @@ void main() {
         ControllerCreationMode.connected,
         stateForIsolate: {
           'isolate1': TracingIsolateState(
-              isolate: IsolateRef(id: 'isolate1'),
-              mode: ControllerCreationMode.connected),
+            isolate: IsolateRef(id: 'isolate1'),
+            mode: ControllerCreationMode.connected,
+          ),
           'isolate2': TracingIsolateState(
-              isolate: IsolateRef(id: 'isolate2'),
-              mode: ControllerCreationMode.connected),
+            isolate: IsolateRef(id: 'isolate2'),
+            mode: ControllerCreationMode.connected,
+          ),
         },
         selectedIsolateId: 'isolate3',
       ),
