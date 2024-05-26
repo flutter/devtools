@@ -44,9 +44,6 @@ class _TraceCheckBoxColumn extends ColumnData<TracedClass>
     bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
-    if (item.traceAllocations) {
-      print('item.traceAllocations: ${item.traceAllocations}');
-    }
     return Checkbox(
       value: item.traceAllocations,
       onChanged: (value) async {
