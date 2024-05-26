@@ -39,10 +39,6 @@ class TracedClass with PinnableListEntry, Serializable {
   }) : name = HeapClassName.fromClassRef(cls);
 
   factory TracedClass.fromJson(Map<String, dynamic> json) {
-    bool trace = json[TracedClassJson.allocations.name] as bool;
-    if (trace) {
-      print('fromJson.traceAllocations: $trace');
-    }
     return TracedClass._(
       instances: json[TracedClassJson.instances.name] as int,
       cls: ClassRefEncodeDecode.instance.decode(json[TracedClassJson.cls.name]),
@@ -52,9 +48,6 @@ class TracedClass with PinnableListEntry, Serializable {
 
   @override
   Map<String, dynamic> toJson() {
-    if (traceAllocations) {
-      print('toJson.traceAllocations: $traceAllocations');
-    }
     return {
       TracedClassJson.allocations.name: traceAllocations,
       TracedClassJson.cls.name: cls,
@@ -149,7 +142,7 @@ class TracingIsolateState with Serializable {
         ),
       ),
       tracedClassesProfiles:
-          (json[TracingIsolateStateJson.tracedClasses.name] as Map).map(
+          (json[TracingIsolateStateJson.tracedClassesProfiles.name] as Map).map(
         (key, value) => MapEntry(
           key,
           deserialize<CpuProfileData>(value, CpuProfileData.fromJson),
