@@ -129,7 +129,7 @@ class AllocationTracingTable extends StatefulWidget {
 
 class _AllocationTracingTableState extends State<AllocationTracingTable> {
   late final _TraceCheckBoxColumn _checkboxColumn;
-  late final _classNameColumn;
+  late final _ClassNameColumn _classNameColumn;
   static final _instancesColumn = _InstancesColumn();
 
   late final List<ColumnData<TracedClass>> columns;
