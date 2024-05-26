@@ -685,12 +685,14 @@ class CpuProfileData with Serializable {
 
   List<CpuStackFrame> get bottomUpRoots {
     if (!processed) return <CpuStackFrame>[];
-    return _bottomUpRoots ??=
-        BottomUpTransformer<CpuStackFrame>().bottomUpRootsFor(
+
+    _bottomUpRoots ??= BottomUpTransformer<CpuStackFrame>().bottomUpRootsFor(
       topDownRoot: _cpuProfileRoot,
       mergeSamples: mergeCpuProfileRoots,
       rootedAtTags: rootedAtTags,
     );
+
+    return _bottomUpRoots!;
   }
 
   List<CpuStackFrame>? _bottomUpRoots;

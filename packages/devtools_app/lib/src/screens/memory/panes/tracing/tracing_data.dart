@@ -209,7 +209,9 @@ class TracingIsolateState with Serializable {
       unfilteredClassList.addAll(tracedClasses.values);
     } else {
       for (final kv in tracedClassesProfiles.entries) {
-        _setProfile(tracedClasses[kv.key]!, kv.value);
+        final profile = kv.value;
+        profile.processed = true;
+        _setProfile(tracedClasses[kv.key]!, profile);
       }
     }
     _filteredClassList.replaceAll(unfilteredClassList);
@@ -327,18 +329,21 @@ class TracingIsolateState with Serializable {
       cpuSamples: trace,
     );
 
+    await _setProfile(tracedClass, profileData);
+
+    return profileData;
+  }
+
+  Future<void> _setProfile(
+    TracedClass tracedClass,
+    CpuProfileData profileData,
+  ) async {
     // Process the allocation profile into a tree. We can reuse the transformer
     // from the CPU Profiler tooling since it also makes use of a `CpuSamples`
     // response.
     final transformer = CpuProfileTransformer();
     await transformer.processData(profileData, processId: '');
 
-    _setProfile(tracedClass, profileData);
-
-    return profileData;
-  }
-
-  void _setProfile(TracedClass tracedClass, CpuProfileData profileData) {
     // Update the traced class data with the updated profile length.
     final updated = tracedClass.copyWith(
       instances: profileData.cpuSamples.length,

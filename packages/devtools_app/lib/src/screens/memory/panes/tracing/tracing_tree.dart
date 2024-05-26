@@ -69,11 +69,11 @@ class _AllocationTracingTreeState extends State<AllocationTracingTree>
     return ValueListenableBuilder<TracingIsolateState>(
       valueListenable: widget.controller.selection,
       builder: (context, state, _) {
-        final data = state.selectedTracedClassAllocationData;
-
         return ValueListenableBuilder<TracedClass?>(
           valueListenable: state.selectedTracedClass,
           builder: (context, selection, _) {
+            final data = state.selectedTracedClassAllocationData;
+
             if (selection == null) {
               return const _TracingInstructions();
             } else if (!selection.traceAllocations) {
