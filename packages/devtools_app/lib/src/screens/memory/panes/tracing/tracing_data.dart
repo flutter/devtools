@@ -210,7 +210,7 @@ class TracingIsolateState with Serializable {
     } else {
       for (final kv in tracedClassesProfiles.entries) {
         final profile = kv.value;
-        _setProfile(tracedClasses[kv.key]!, profile);
+        await _setProfile(tracedClasses[kv.key]!, profile);
       }
     }
     _filteredClassList.replaceAll(unfilteredClassList);
