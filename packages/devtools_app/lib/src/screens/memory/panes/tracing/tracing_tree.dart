@@ -70,9 +70,9 @@ class _AllocationTracingTreeState extends State<AllocationTracingTree>
       valueListenable: widget.controller.selection,
       builder: (context, state, _) {
         return ValueListenableBuilder<TracedClass?>(
-          valueListenable: state.selectedTracedClass,
+          valueListenable: state.selectedClass,
           builder: (context, selection, _) {
-            final data = state.selectedTracedClassAllocationData;
+            final data = state.selectedClassProfile;
 
             if (selection == null) {
               return const _TracingInstructions();
@@ -105,13 +105,11 @@ class _AllocationTracingTreeState extends State<AllocationTracingTree>
                     children: [
                       // Bottom-up tree view
                       TracingTable(
-                        dataRoots: state
-                            .selectedTracedClassAllocationData!.bottomUpRoots,
+                        dataRoots: state.selectedClassProfile!.bottomUpRoots,
                       ),
                       // Call tree view
                       TracingTable(
-                        dataRoots: state
-                            .selectedTracedClassAllocationData!.callTreeRoots,
+                        dataRoots: state.selectedClassProfile!.callTreeRoots,
                       ),
                     ],
                   ),
@@ -188,8 +186,7 @@ class _TracingTreeHeader extends StatelessWidget {
             ),
             TextSpan(
               style: theme.fixedFontStyle,
-              text: controller
-                  .selection.value.selectedTracedClass.value?.cls.name!,
+              text: controller.selection.value.selectedClass.value?.cls.name!,
             ),
           ],
         ),
@@ -235,7 +232,7 @@ class _TracingTreeHeader extends StatelessWidget {
   List<CpuStackFrame> get _currentDataRoots {
     final isBottomUp =
         tabs[tabController.index] == AllocationTracingTree._bottomUpTab;
-    final data = controller.selection.value.selectedTracedClassAllocationData!;
+    final data = controller.selection.value.selectedClassProfile!;
     return isBottomUp ? data.bottomUpRoots : data.callTreeRoots;
   }
 }

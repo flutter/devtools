@@ -112,8 +112,8 @@ void main() {
         expect(state.filteredClassList.value.isNotEmpty, isTrue);
         expect(controller.initializing.value, isFalse);
         expect(controller.refreshing.value, isFalse);
-        expect(state.selectedTracedClass.value, isNull);
-        expect(state.selectedTracedClassAllocationData, isNull);
+        expect(state.selectedClass.value, isNull);
+        expect(state.selectedClassProfile, isNull);
 
         final refresh = find.text('Refresh');
         expect(refresh, findsOneWidget);
@@ -155,8 +155,8 @@ void main() {
         await tester.pumpAndSettle();
 
         // No allocations have occurred, so the trace viewer shows an error message.
-        expect(state.selectedTracedClass.value, selectedTrace);
-        expect(state.selectedTracedClassAllocationData, isNotNull);
+        expect(state.selectedClass.value, selectedTrace);
+        expect(state.selectedClassProfile, isNotNull);
         expect(
           find.text(
             'No allocation samples have been collected for class ${selectedTrace.cls.name}.\n',
@@ -186,10 +186,8 @@ void main() {
         expect(find.text('Exclusive'), findsOneWidget);
         expect(find.text('Method'), findsOneWidget);
 
-        final bottomUpRoots =
-            state.selectedTracedClassAllocationData!.bottomUpRoots;
-        final callTreeRoots =
-            state.selectedTracedClassAllocationData!.callTreeRoots;
+        final bottomUpRoots = state.selectedClassProfile!.bottomUpRoots;
+        final callTreeRoots = state.selectedClassProfile!.callTreeRoots;
         for (final root in bottomUpRoots) {
           expect(root.isExpanded, false);
         }
@@ -277,8 +275,8 @@ void main() {
         expect(state.filteredClassList.value.isNotEmpty, isTrue);
         expect(controller.initializing.value, isFalse);
         expect(controller.refreshing.value, isFalse);
-        expect(state.selectedTracedClass.value, isNull);
-        expect(state.selectedTracedClassAllocationData, isNull);
+        expect(state.selectedClass.value, isNull);
+        expect(state.selectedClassProfile, isNull);
 
         final refresh = find.text('Refresh');
         expect(refresh, findsOneWidget);
@@ -320,8 +318,8 @@ void main() {
         await tester.pumpAndSettle();
 
         // No allocations have occurred, so the trace viewer shows an error message.
-        expect(state.selectedTracedClass.value, selectedTrace);
-        expect(state.selectedTracedClassAllocationData, isNotNull);
+        expect(state.selectedClass.value, selectedTrace);
+        expect(state.selectedClassProfile, isNotNull);
         expect(
           find.text(
             'No allocation samples have been collected for class ${selectedTrace.cls.name}.\n',
@@ -347,7 +345,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Clearing should zero out all the instance counts.
-        expect(state.selectedTracedClass.value, isNotNull);
+        expect(state.selectedClass.value, isNotNull);
         for (final cls in state.filteredClassList.value) {
           expect(cls.instances, 0);
         }
@@ -365,7 +363,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Expect no new samples.
-        expect(state.selectedTracedClass.value, isNotNull);
+        expect(state.selectedClass.value, isNotNull);
         for (final cls in state.filteredClassList.value) {
           expect(cls.instances, 0);
         }
@@ -447,7 +445,7 @@ void main() {
           final controller = scene.controller.trace!;
           final state = controller.selection.value;
 
-          expect(state.selectedTracedClass.value, isNull);
+          expect(state.selectedClass.value, isNull);
 
           // Select one of the class entries.
           final selection = find.richTextContaining(
@@ -458,8 +456,8 @@ void main() {
           await tester.tap(selection);
           await tester.pumpAndSettle();
 
-          expect(state.selectedTracedClass.value, isNotNull);
-          final originalSelection = state.selectedTracedClass.value;
+          expect(state.selectedClass.value, isNotNull);
+          final originalSelection = state.selectedClass.value;
 
           // Filter out all classes, ensure the selection is still valid, then
           // clear the filter and check again.
@@ -470,11 +468,11 @@ void main() {
           await tester.pumpAndSettle();
           expect(state.filteredClassList.value.isEmpty, true);
 
-          expect(state.selectedTracedClass.value, originalSelection);
+          expect(state.selectedClass.value, originalSelection);
 
           await clearFilter(tester, controller);
 
-          expect(state.selectedTracedClass.value, originalSelection);
+          expect(state.selectedClass.value, originalSelection);
         },
       );
     });

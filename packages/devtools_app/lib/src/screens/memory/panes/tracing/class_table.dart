@@ -196,7 +196,7 @@ class _AllocationTracingTableState extends State<AllocationTracingTable> {
                     columns: columns,
                     defaultSortColumn: _classNameColumn,
                     defaultSortDirection: SortDirection.ascending,
-                    selectionNotifier: state.selectedTracedClass,
+                    selectionNotifier: state.selectedClass,
                     pinBehavior: FlatTablePinBehavior.pinOriginalToTop,
                   );
                 },

@@ -116,9 +116,9 @@ class TracingIsolateState with Serializable {
     this.profiles = profiles ?? {};
 
     if (selectedClass == null) {
-      selectedTracedClass.value = null;
+      this.selectedClass.value = null;
     } else {
-      selectedTracedClass.value = this.classes.firstWhereOrNull(
+      this.selectedClass.value = this.classes.firstWhereOrNull(
             (e) => e.name.fullName == selectedClass,
           );
     }
@@ -154,7 +154,7 @@ class TracingIsolateState with Serializable {
       TracingIsolateStateJson.classes.name: classesById.values.toList(),
       TracingIsolateStateJson.profiles.name: profiles,
       TracingIsolateStateJson.selectedClass.name:
-          selectedTracedClass.value?.name.fullName,
+          selectedClass.value?.name.fullName,
     };
   }
 
@@ -168,7 +168,7 @@ class TracingIsolateState with Serializable {
   late final List<TracedClass> classes;
 
   /// The current class selection in the [AllocationTracingTable]
-  final selectedTracedClass = ValueNotifier<TracedClass?>(null);
+  final selectedClass = ValueNotifier<TracedClass?>(null);
 
   /// The list of classes for the currently selected isolate.
   ValueListenable<List<TracedClass>> get filteredClassList =>
@@ -179,8 +179,8 @@ class TracingIsolateState with Serializable {
 
   /// The allocation profile data for the current class selection in the
   /// [AllocationTracingTable].
-  CpuProfileData? get selectedTracedClassAllocationData {
-    return profiles[selectedTracedClass.value?.cls.id!];
+  CpuProfileData? get selectedClassProfile {
+    return profiles[selectedClass.value?.cls.id!];
   }
 
   /// The last time, in microseconds, the table was cleared. This time is based
@@ -280,8 +280,8 @@ class TracingIsolateState with Serializable {
   void _updateClassState(TracedClass original, TracedClass updated) {
     final cls = original.cls;
     // Update the currently selected class, if it's still being traced.
-    if (selectedTracedClass.value?.cls.id == cls.id) {
-      selectedTracedClass.value = updated;
+    if (selectedClass.value?.cls.id == cls.id) {
+      selectedClass.value = updated;
     }
     classesById[cls.id!] = updated;
     _filteredClassList.replace(original, updated);
