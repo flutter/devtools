@@ -12,27 +12,39 @@ import 'package:vm_service/vm_service.dart';
 class _Tests {
   static final TracePaneController emptyConnected = TracePaneController(
     ControllerCreationMode.connected,
+    rootPackage: '',
   );
 
   static final TracePaneController emptyOffline = TracePaneController(
     ControllerCreationMode.offlineData,
+    rootPackage: '',
   );
 
   static final TracePaneController selection = TracePaneController(
     ControllerCreationMode.connected,
     stateForIsolate: {
-      'isolate1': TracingIsolateState(isolate: IsolateRef(id: 'isolate1')),
-      'isolate2': TracingIsolateState(isolate: IsolateRef(id: 'isolate2')),
+      'isolate1': TracingIsolateState(
+          isolate: IsolateRef(id: 'isolate1'),
+          mode: ControllerCreationMode.connected),
+      'isolate2': TracingIsolateState(
+          isolate: IsolateRef(id: 'isolate2'),
+          mode: ControllerCreationMode.connected),
     },
+    rootPackage: 'root',
     selectedIsolateId: 'isolate1',
   );
 
   static final TracePaneController noSelection = TracePaneController(
     ControllerCreationMode.connected,
     stateForIsolate: {
-      'isolate1': TracingIsolateState(isolate: IsolateRef(id: 'isolate1')),
-      'isolate2': TracingIsolateState(isolate: IsolateRef(id: 'isolate2')),
+      'isolate1': TracingIsolateState(
+          isolate: IsolateRef(id: 'isolate1'),
+          mode: ControllerCreationMode.connected),
+      'isolate2': TracingIsolateState(
+          isolate: IsolateRef(id: 'isolate2'),
+          mode: ControllerCreationMode.connected),
     },
+    rootPackage: 'root',
   );
 
   static final all = {
@@ -47,10 +59,15 @@ void main() {
   test('$TracePaneController construction with wrong isolate fails', () {
     expect(
       () => TracePaneController(
+        rootPackage: 'root',
         ControllerCreationMode.connected,
         stateForIsolate: {
-          'isolate1': TracingIsolateState(isolate: IsolateRef(id: 'isolate1')),
-          'isolate2': TracingIsolateState(isolate: IsolateRef(id: 'isolate2')),
+          'isolate1': TracingIsolateState(
+              isolate: IsolateRef(id: 'isolate1'),
+              mode: ControllerCreationMode.connected),
+          'isolate2': TracingIsolateState(
+              isolate: IsolateRef(id: 'isolate2'),
+              mode: ControllerCreationMode.connected),
         },
         selectedIsolateId: 'isolate3',
       ),

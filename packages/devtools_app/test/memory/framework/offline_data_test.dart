@@ -37,6 +37,7 @@ void main() {
           ),
           TracePaneController(
             ControllerCreationMode.offlineData,
+            rootPackage: '',
           ),
           ClassFilter.empty(),
           selectedTab: 0,
