@@ -112,7 +112,7 @@ void main() {
     });
 
     test('profileData to json', () {
-      expect(cpuProfileData.toJson, equals(goldenCpuProfileDataJson));
+      expect(cpuProfileData.toJson(), equals(goldenCpuProfileDataJson));
     });
 
     test(
@@ -125,7 +125,7 @@ void main() {
         );
 
         expect(
-          generatedCpuProfileData.toJson,
+          generatedCpuProfileData.toJson(),
           equals(goldenCpuProfileDataJson),
         );
       },
