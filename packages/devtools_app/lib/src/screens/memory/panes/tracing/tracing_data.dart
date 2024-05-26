@@ -94,9 +94,8 @@ class TracedClass with PinnableListEntry, Serializable {
 @visibleForTesting
 enum TracingIsolateStateJson {
   isolate,
-  tracedClasses,
-  tracedClassesProfiles,
-  unfilteredClassList,
+  classes,
+  profiles,
   selectedClass;
 }
 
@@ -108,22 +107,27 @@ class TracingIsolateState with Serializable {
   TracingIsolateState({
     required this.mode,
     required this.isolate,
-    Map<String, TracedClass>? tracedClasses,
-    Map<String, CpuProfileData>? tracedClassesProfiles,
-    List<TracedClass>? unfilteredClassList,
+    Map<String, CpuProfileData>? profiles,
+    List<TracedClass>? classes,
     String? selectedClass,
   }) {
-    this.unfilteredClassList = unfilteredClassList ?? [];
-    this.tracedClasses = tracedClasses ?? {};
-    this.tracedClassesProfiles = tracedClassesProfiles ?? {};
+    this.unfilteredClasses = classes ?? [];
+    this.tracedClasses = {for (var e in unfilteredClasses) e.cls.id!: e};
+    this.profiles = profiles ?? {};
 
     if (selectedClass == null) {
       selectedTracedClass.value = null;
     } else {
-      selectedTracedClass.value = this.unfilteredClassList.firstWhereOrNull(
+      selectedTracedClass.value = this.unfilteredClasses.firstWhereOrNull(
             (e) => e.name.fullName == selectedClass,
           );
     }
+    updateClassFilter('', force: true);
+
+    final pinned1 = this.tracedClasses.values.where((e) => e.traceAllocations);
+    final pinned2 = this.unfilteredClasses.where((e) => e.traceAllocations);
+    final pinned3 =
+        this._filteredClassList.value.where((e) => e.traceAllocations);
   }
 
   TracingIsolateState.empty()
@@ -134,24 +138,15 @@ class TracingIsolateState with Serializable {
       mode: ControllerCreationMode.offlineData,
       isolate: IsolateRefEncodeDecode.instance
           .decode(json[TracingIsolateStateJson.isolate.name]),
-      tracedClasses:
-          (json[TracingIsolateStateJson.tracedClasses.name] as Map).map(
-        (key, value) => MapEntry(
-          key,
-          deserialize<TracedClass>(value, TracedClass.fromJson),
-        ),
-      ),
-      tracedClassesProfiles:
-          (json[TracingIsolateStateJson.tracedClassesProfiles.name] as Map).map(
+      profiles: (json[TracingIsolateStateJson.profiles.name] as Map).map(
         (key, value) => MapEntry(
           key,
           deserialize<CpuProfileData>(value, CpuProfileData.fromJson),
         ),
       ),
-      unfilteredClassList:
-          (json[TracingIsolateStateJson.unfilteredClassList.name] as List)
-              .map((e) => deserialize<TracedClass>(e, TracedClass.fromJson))
-              .toList(),
+      classes: (json[TracingIsolateStateJson.classes.name] as List)
+          .map((e) => deserialize<TracedClass>(e, TracedClass.fromJson))
+          .toList(),
       selectedClass:
           json[TracingIsolateStateJson.selectedClass.name] as String?,
     );
@@ -161,9 +156,8 @@ class TracingIsolateState with Serializable {
   Map<String, dynamic> toJson() {
     return {
       TracingIsolateStateJson.isolate.name: isolate,
-      TracingIsolateStateJson.tracedClasses.name: tracedClasses,
-      TracingIsolateStateJson.tracedClassesProfiles.name: tracedClassesProfiles,
-      TracingIsolateStateJson.unfilteredClassList.name: unfilteredClassList,
+      TracingIsolateStateJson.classes.name: tracedClasses.values.toList(),
+      TracingIsolateStateJson.profiles.name: profiles,
       TracingIsolateStateJson.selectedClass.name:
           selectedTracedClass.value?.name.fullName,
     };
@@ -175,8 +169,8 @@ class TracingIsolateState with Serializable {
 
   // Keeps track of which classes have allocation tracing enabling.
   late final Map<String, TracedClass> tracedClasses;
-  late final Map<String, CpuProfileData> tracedClassesProfiles;
-  late final List<TracedClass> unfilteredClassList;
+  late final Map<String, CpuProfileData> profiles;
+  late final List<TracedClass> unfilteredClasses;
 
   /// The current class selection in the [AllocationTracingTable]
   final selectedTracedClass = ValueNotifier<TracedClass?>(null);
@@ -191,7 +185,7 @@ class TracingIsolateState with Serializable {
   /// The allocation profile data for the current class selection in the
   /// [AllocationTracingTable].
   CpuProfileData? get selectedTracedClassAllocationData {
-    return tracedClassesProfiles[selectedTracedClass.value?.cls.id!];
+    return profiles[selectedTracedClass.value?.cls.id!];
   }
 
   /// The last time, in microseconds, the table was cleared. This time is based
@@ -206,14 +200,14 @@ class TracingIsolateState with Serializable {
       for (final cls in classList.classes!) {
         tracedClasses[cls.id!] = TracedClass(cls: cls);
       }
-      unfilteredClassList.addAll(tracedClasses.values);
+      unfilteredClasses.addAll(tracedClasses.values);
     } else {
-      for (final kv in tracedClassesProfiles.entries) {
+      for (final kv in profiles.entries) {
         final profile = kv.value;
         await _setProfile(tracedClasses[kv.key]!, profile);
       }
     }
-    _filteredClassList.replaceAll(unfilteredClassList);
+    _filteredClassList.replaceAll(unfilteredClasses);
   }
 
   Future<void> refresh() async {
@@ -236,7 +230,7 @@ class TracingIsolateState with Serializable {
     final updatedFilteredClassList =
         (newFilter.caseInsensitiveContains(currentFilter) && !force
                 ? _filteredClassList.value
-                : unfilteredClassList)
+                : unfilteredClasses)
             .where(
               (e) => e.cls.name!.caseInsensitiveContains(newFilter),
             )
@@ -262,13 +256,13 @@ class TracingIsolateState with Serializable {
       ..addAll(updatedTracedClasses);
 
     // Reset the unfiltered class list with the new `TracedClass` instances.
-    unfilteredClassList
+    unfilteredClasses
       ..clear()
       ..addAll(tracedClasses.values);
     updateClassFilter(currentFilter, force: true);
 
     // Since there's no longer any tracing data, clear the existing profiles.
-    tracedClassesProfiles.clear();
+    profiles.clear();
   }
 
   /// Enables or disables tracing of allocations of [cls].
@@ -349,7 +343,7 @@ class TracingIsolateState with Serializable {
     );
     final cls = tracedClass.cls;
     tracedClasses[cls.id!] = updated;
-    tracedClassesProfiles[cls.id!] = profileData;
+    profiles[cls.id!] = profileData;
 
     _updateClassState(tracedClass, updated);
   }
