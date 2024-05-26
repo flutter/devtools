@@ -122,7 +122,6 @@ class TracingIsolateState with Serializable {
             (e) => e.name.fullName == selectedClass,
           );
     }
-    updateClassFilter('', force: true);
   }
 
   TracingIsolateState.empty()
@@ -202,7 +201,7 @@ class TracingIsolateState with Serializable {
         await _setProfile(classesById[kv.key]!, profile);
       }
     }
-    _filteredClassList.replaceAll(classes);
+    updateClassFilter('', force: true);
   }
 
   Future<void> refresh() async {
