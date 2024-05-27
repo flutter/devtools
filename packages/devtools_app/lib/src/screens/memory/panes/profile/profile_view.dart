@@ -456,9 +456,19 @@ class AllocationProfileTableView extends StatefulWidget {
 class AllocationProfileTableViewState
     extends State<AllocationProfileTableView> {
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  void initState() {
+    super.initState();
+
     widget.controller.initialize();
+  }
+
+  @override
+  void didUpdateWidget(AllocationProfileTableView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.controller != widget.controller) {
+      widget.controller.initialize();
+    }
   }
 
   @override
