@@ -136,7 +136,10 @@ class _PerfettoViewController extends DisposableController
   EventListener? _handleMessageListener;
 
   void init() {
-    resetReadySignals();
+    _perfettoIFrameReady = Completer<void>();
+    _perfettoHandlerReady = Completer<void>();
+    _devtoolsThemeHandlerReady = Completer<void>();
+    _perfettoIFrameUnloaded = false;
 
     unawaited(
       perfettoController.perfettoIFrame.onLoad.first.then((_) {
@@ -335,13 +338,6 @@ class _PerfettoViewController extends DisposableController
     }
   }
 
-  void resetReadySignals() {
-    _perfettoIFrameReady = Completer<void>();
-    _perfettoHandlerReady = Completer<void>();
-    _devtoolsThemeHandlerReady = Completer<void>();
-    _perfettoIFrameUnloaded = false;
-  }
-
   @override
   void dispose() {
     window.removeEventListener('message', _handleMessageListener);
@@ -350,7 +346,6 @@ class _PerfettoViewController extends DisposableController
     _pollForPerfettoHandlerReady = null;
     _pollForThemeHandlerReady?.cancel();
     _pollForThemeHandlerReady = null;
-    resetReadySignals();
     super.dispose();
   }
 }
