@@ -189,7 +189,7 @@ void main() {
     testWidgetsWithWindowSize(
       'builds content for Rebuild Stats tab',
       windowSize,
-          (WidgetTester tester) async {
+      (WidgetTester tester) async {
         await tester.runAsync(() async {
           await setUpServiceManagerWithTimeline();
           await pumpView(tester);
