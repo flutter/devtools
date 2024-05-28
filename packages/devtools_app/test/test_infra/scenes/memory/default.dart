@@ -182,5 +182,10 @@ class MemoryDefaultScene extends Scene {
     await tester.pumpAndSettle();
   }
 
+  Future<void> goToTraceTab(WidgetTester tester) async {
+    await tester.tap(find.byKey(MemoryScreenKeys.traceTab));
+    await tester.pumpAndSettle();
+  }
+
   void tearDown() {}
 }
