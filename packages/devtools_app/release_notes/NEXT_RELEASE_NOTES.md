@@ -18,7 +18,7 @@ TODO: Remove this section if there are not any general updates.
 
 ## Performance updates
 
-TODO: Remove this section if there are not any general updates.
+* Add panel that shows widget rebuild counts - [#7838](https://github.com/flutter/devtools/pull/7838)
 
 ## CPU profiler updates
 
@@ -66,6 +66,8 @@ extension. - [#7752](https://github.com/flutter/devtools/pull/7752)
 extension. - [#7791](https://github.com/flutter/devtools/pull/7791)
 * Fix a bug causing a "Page Not Found" error when refreshing DevTools
 from an extension screen. - [#7822](https://github.com/flutter/devtools/pull/7822)
+* Fix a themeing issue when extensions are embedded in an
+IDE - [#7824](https://github.com/flutter/devtools/pull/7824)
 
 ## Full commit history
 
