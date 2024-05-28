@@ -5,6 +5,7 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 
 import '../../../service/service_extension_widgets.dart';
@@ -60,7 +61,6 @@ class _LoggingScreenBodyV2State extends State<LoggingScreenBodyV2>
         ProvidedControllerMixin<LoggingControllerV2, LoggingScreenBodyV2> {
   List<String> items = [];
   late List<LogDataV2> filteredLogs;
-
   @override
   void initState() {
     super.initState();
