@@ -54,7 +54,7 @@ abstract class FeatureFlags {
   /// Flag to enable widget rebuild stats ui.
   ///
   /// https://github.com/flutter/devtools/issues/4564.
-  static bool widgetRebuildStats = enableExperiments;
+  static bool widgetRebuildStats = true;
 
   /// Flag to enable offline data on memory screen.
   ///
