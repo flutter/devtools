@@ -62,6 +62,11 @@ abstract class FeatureFlags {
   static const bool memoryOffline =
       _kMemoryOfflineExperiment; // requires special handling because it needs to be const
 
+  /// Flag to enable offline data on memory screen for testing.
+  ///
+  /// https://github.com/flutter/devtools/issues/5606
+  static bool memoryOfflineRuntime = memoryOffline || enableExperiments;
+
   /// Flag to enable the deep link validation tooling in DevTools, both for the
   /// DevTools screen and the standalone tool for IDE embedding.
   ///

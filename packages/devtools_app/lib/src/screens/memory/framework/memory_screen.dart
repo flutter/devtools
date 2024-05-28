@@ -29,7 +29,7 @@ class MemoryScreen extends Screen {
 
   @override
   Widget? buildDisconnectedScreenBody(BuildContext context) =>
-      FeatureFlags.memoryOffline
+      FeatureFlags.memoryOfflineRuntime
           ? const MemoryBody()
           : super.buildDisconnectedScreenBody(context);
 
