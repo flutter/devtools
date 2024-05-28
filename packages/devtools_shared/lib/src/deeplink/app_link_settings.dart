@@ -34,6 +34,8 @@ class AppLinkSettings {
   }
 
   /// Used when the the server can't retrieve app link settings.
+  ///
+  /// The input needs to be in json format from devtool server response.
   factory AppLinkSettings.fromErrorJson(String json) {
     final jsonObject = jsonDecode(json) as Map;
     final message = jsonObject[_kErrorKey]! as String;
