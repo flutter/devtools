@@ -4,7 +4,6 @@
 
 import 'package:devtools_app/src/screens/performance/panes/flutter_frames/flutter_frames_chart.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/perfetto/_perfetto_web.dart';
-import 'package:devtools_app/src/shared/feature_flags.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:devtools_test/integration_test.dart';
 import 'package:devtools_test/test_data.dart';
@@ -17,10 +16,9 @@ import 'package:integration_test/integration_test.dart';
 
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-  FeatureFlags.memoryOfflineRuntime = true;
 
   testWidgets(
-    'Perfetto trace viewer loads data and scrolls for Flutter frames',
+    'Memory screen can load offline data',
     (tester) async {
       await pumpDevTools(tester);
       await loadSampleData(tester, performanceFileName);

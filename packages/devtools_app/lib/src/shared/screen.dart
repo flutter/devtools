@@ -12,7 +12,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
-import 'feature_flags.dart';
 import 'globals.dart';
 import 'primitives/listenable.dart';
 import 'ui/icons.dart';
@@ -56,11 +55,9 @@ enum ScreenMetaData {
     title: 'Memory',
     icon: Octicons.package,
     requiresDartVm: true,
-    // ignore: avoid_redundant_argument_values, false positive
-    requiresConnection: !FeatureFlags.memoryOffline,
+    requiresConnection: false,
     tutorialVideoTimestamp: '?t=420',
-    // ignore: avoid_redundant_argument_values, false positive
-    worksWithOfflineData: FeatureFlags.memoryOffline,
+    worksWithOfflineData: true,
   ),
   debugger(
     'debugger',
