@@ -248,7 +248,9 @@ class TracingIsolateState with Serializable {
 
   /// Enables or disables tracing of allocations of [clazz].
   Future<void> setAllocationTracingForClass(
-      ClassRef clazz, bool enabled) async {
+    ClassRef clazz,
+    bool enabled,
+  ) async {
     final service = serviceConnection.serviceManager.service!;
     final isolate =
         serviceConnection.serviceManager.isolateManager.selectedIsolate.value!;
