@@ -370,6 +370,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
 
   void _clearCachedRoutes() {
     _routes = null;
+    routerDelegate.refreshPages();
   }
 
   List<Screen> _visibleScreens() => _screens.where(shouldShowScreen).toList();
