@@ -5,6 +5,7 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/performance/panes/frame_analysis/frame_analysis.dart';
 import 'package:devtools_app/src/screens/performance/panes/raster_stats/raster_stats.dart';
+import 'package:devtools_app/src/screens/performance/panes/rebuild_stats/rebuild_stats.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/perfetto/perfetto.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/timeline_events_view.dart';
 import 'package:devtools_app/src/screens/performance/tabbed_performance_view.dart';
