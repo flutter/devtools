@@ -18,7 +18,7 @@ TODO: Remove this section if there are not any general updates.
 
 ## Performance updates
 
-TODO: Remove this section if there are not any general updates.
+* Add panel that shows widget rebuild counts - [#7838](https://github.com/flutter/devtools/pull/7838)
 
 ## CPU profiler updates
 
