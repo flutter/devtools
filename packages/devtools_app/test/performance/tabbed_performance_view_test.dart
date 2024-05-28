@@ -138,7 +138,7 @@ void main() {
           await pumpView(tester, performanceController: controller);
 
           expect(find.byType(AnalyticsTabbedView), findsOneWidget);
-          expect(find.byType(DevToolsTab), findsNWidgets(3));
+          expect(find.byType(DevToolsTab), findsNWidgets(4));
 
           // The frame analysis tab should be selected by default.
           expect(find.byType(FlutterFrameAnalysisView), findsOneWidget);
@@ -202,7 +202,6 @@ void main() {
           await tester.pumpAndSettle();
 
           expect(find.byType(RebuildStatsView), findsOneWidget);
-          expect(find.text('Track rebuild build counts'), findsOneWidget);
         });
       },
     );
@@ -216,7 +215,7 @@ void main() {
           await pumpView(tester);
 
           expect(find.byType(AnalyticsTabbedView), findsOneWidget);
-          expect(find.byType(DevToolsTab), findsNWidgets(3));
+          expect(find.byType(DevToolsTab), findsNWidgets(4));
 
           await tester.tap(find.text('Timeline Events'));
           await tester.pumpAndSettle();
