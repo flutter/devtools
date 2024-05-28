@@ -409,6 +409,10 @@ a free article on Medium.
 Several packages authors in the Dart and Flutter ecosystem have built their own DevTools
 extensions to provide their users with a great developer experience.
 
+* "DevTools extensions are a neat way to save hours of debugging by showing information
+that would be otherwise difficult to obtain." - Remi Rousselet,
+[package:provider](https://pub.dev/packages/provider)
+
 * "By allowing developers to inspect databases and find potential issues in the familiar
 DevTools environment, Drift's DevTools extension saves users a lot of time and makes the
 package easier to use. Writing the extension was straightforward, and I think even simple
