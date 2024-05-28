@@ -112,11 +112,12 @@ void main() {
           await pumpView(tester);
 
           expect(find.byType(AnalyticsTabbedView), findsOneWidget);
-          expect(find.byType(DevToolsTab), findsNWidgets(3));
+          expect(find.byType(DevToolsTab), findsNWidgets(4));
 
           expect(find.text('Timeline Events'), findsOneWidget);
           expect(find.text('Frame Analysis'), findsOneWidget);
           expect(find.text('Raster Stats'), findsOneWidget);
+          expect(find.text('Rebuild Stats'), findsOneWidget);
         });
       },
     );
@@ -153,7 +154,7 @@ void main() {
           await pumpView(tester);
 
           expect(find.byType(AnalyticsTabbedView), findsOneWidget);
-          expect(find.byType(DevToolsTab), findsNWidgets(3));
+          expect(find.byType(DevToolsTab), findsNWidgets(4));
 
           // The frame analysis tab should be selected by default.
           expect(
@@ -173,7 +174,7 @@ void main() {
           await pumpView(tester);
           await tester.pumpAndSettle();
           expect(find.byType(AnalyticsTabbedView), findsOneWidget);
-          expect(find.byType(DevToolsTab), findsNWidgets(3));
+          expect(find.byType(DevToolsTab), findsNWidgets(4));
 
           await tester.tap(find.text('Raster Stats'));
           await tester.pumpAndSettle();
@@ -181,6 +182,26 @@ void main() {
           expect(find.byType(RasterStatsView), findsOneWidget);
           expect(find.text('Take Snapshot'), findsOneWidget);
           expect(find.byType(ClearButton), findsOneWidget);
+        });
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'builds content for Rebuild Stats tab',
+      windowSize,
+          (WidgetTester tester) async {
+        await tester.runAsync(() async {
+          await setUpServiceManagerWithTimeline();
+          await pumpView(tester);
+          await tester.pumpAndSettle();
+          expect(find.byType(AnalyticsTabbedView), findsOneWidget);
+          expect(find.byType(DevToolsTab), findsNWidgets(4));
+
+          await tester.tap(find.text('Rebuild Stats'));
+          await tester.pumpAndSettle();
+
+          expect(find.byType(RebuildStatsView), findsOneWidget);
+          expect(find.text('Track rebuild build counts'), findsOneWidget);
         });
       },
     );
