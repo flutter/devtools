@@ -47,7 +47,7 @@ TODO: Remove this section if there are not any general updates.
 
 ## Deep links tool updates
 
-TODO: Remove this section if there are not any general updates.
+Adds an error page to explain the issue when the tool fails to parse the project.
 
 ## VS Code Sidebar updates
 

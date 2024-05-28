@@ -120,10 +120,11 @@ class _DeepLinkListViewMainPanel extends StatelessWidget {
                 Expanded(
                   child: OutlineDecoration(
                     child: SingleChildScrollView(
-                        child: Text(
-                      controller.currentAppLinkSettings!.error!,
-                      style: theme.errorTextStyle,
-                    )),
+                      child: Text(
+                        controller.currentAppLinkSettings!.error!,
+                        style: theme.errorTextStyle,
+                      ),
+                    ),
                   ),
                 ),
               ],
