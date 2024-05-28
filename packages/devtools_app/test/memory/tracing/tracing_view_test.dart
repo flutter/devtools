@@ -125,7 +125,7 @@ void main() {
         // There should be classes in the example class list.
         expect(find.byType(Checkbox), findsNWidgets(classList.classes!.length));
         for (final cls in state.filteredClassList.value) {
-          expect(find.byKey(Key(cls.cls.id!)), findsOneWidget);
+          expect(find.byKey(Key(cls.clazz.id!)), findsOneWidget);
         }
 
         // Enable allocation tracing for one of them.
@@ -145,7 +145,7 @@ void main() {
         );
 
         expect(find.byType(TracingTable), findsNothing);
-        final traceElement = find.byKey(Key(selectedTrace.cls.id!));
+        final traceElement = find.byKey(Key(selectedTrace.clazz.id!));
         expect(traceElement, findsOneWidget);
 
         // Select the list item for the traced class and refresh to fetch data.
@@ -159,7 +159,7 @@ void main() {
         expect(state.selectedClassProfile, isNotNull);
         expect(
           find.text(
-            'No allocation samples have been collected for class ${selectedTrace.cls.name}.\n',
+            'No allocation samples have been collected for class ${selectedTrace.clazz.name}.\n',
           ),
           findsOneWidget,
         );
@@ -288,7 +288,7 @@ void main() {
         // There should be classes in the example class list.
         expect(find.byType(Checkbox), findsNWidgets(classList.classes!.length));
         for (final cls in state.filteredClassList.value) {
-          expect(find.byKey(Key(cls.cls.id!)), findsOneWidget);
+          expect(find.byKey(Key(cls.clazz.id!)), findsOneWidget);
         }
 
         // Enable allocation tracing for one of them.
@@ -308,7 +308,7 @@ void main() {
         );
 
         expect(find.byType(TracingTable), findsNothing);
-        final traceElement = find.byKey(Key(selectedTrace.cls.id!));
+        final traceElement = find.byKey(Key(selectedTrace.clazz.id!));
         expect(traceElement, findsOneWidget);
 
         // Select the list item for the traced class and refresh to fetch data.
@@ -322,7 +322,7 @@ void main() {
         expect(state.selectedClassProfile, isNotNull);
         expect(
           find.text(
-            'No allocation samples have been collected for class ${selectedTrace.cls.name}.\n',
+            'No allocation samples have been collected for class ${selectedTrace.clazz.name}.\n',
           ),
           findsOneWidget,
         );
@@ -384,7 +384,7 @@ void main() {
         await tester.enterText(filterTextField, 'F');
         await tester.pumpAndSettle();
         expect(state.filteredClassList.value.length, 1);
-        expect(state.filteredClassList.value.first.cls.name, 'Foo');
+        expect(state.filteredClassList.value.first.clazz.name, 'Foo');
 
         // Filter for 'Fooo'
         await tester.enterText(filterTextField, 'Fooo');
@@ -415,7 +415,7 @@ void main() {
               .where((e) => e.traceAllocations)
               .toList();
           expect(tracedClassList.length, 1);
-          expect(tracedClassList.first.cls, classList.classes!.first);
+          expect(tracedClassList.first.clazz, classList.classes!.first);
 
           // Filter out all classes and then clear the filter
           final filterTextField = find.byType(DevToolsClearableTextField);

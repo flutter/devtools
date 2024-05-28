@@ -18,7 +18,7 @@ import '../../../profiler/cpu_profile_transformer.dart';
 
 @visibleForTesting
 enum TracedClassJson {
-  cls,
+  clazz,
   instances,
   allocations,
 }
@@ -26,21 +26,22 @@ enum TracedClassJson {
 /// A representation of a class and it's allocation tracing state.
 class TracedClass with PinnableListEntry, Serializable {
   TracedClass({
-    required this.cls,
+    required this.clazz,
   })  : traceAllocations = false,
         instances = 0,
-        name = HeapClassName.fromClassRef(cls);
+        name = HeapClassName.fromClassRef(clazz);
 
   TracedClass._({
-    required this.cls,
+    required this.clazz,
     required this.instances,
     required this.traceAllocations,
-  }) : name = HeapClassName.fromClassRef(cls);
+  }) : name = HeapClassName.fromClassRef(clazz);
 
   factory TracedClass.fromJson(Map<String, dynamic> json) {
     return TracedClass._(
       instances: json[TracedClassJson.instances.name] as int,
-      cls: ClassRefEncodeDecode.instance.decode(json[TracedClassJson.cls.name]),
+      clazz: ClassRefEncodeDecode.instance
+          .decode(json[TracedClassJson.clazz.name]),
       traceAllocations: json[TracedClassJson.allocations.name] as bool,
     );
   }
@@ -49,45 +50,45 @@ class TracedClass with PinnableListEntry, Serializable {
   Map<String, dynamic> toJson() {
     return {
       TracedClassJson.allocations.name: traceAllocations,
-      TracedClassJson.cls.name: cls,
+      TracedClassJson.clazz.name: clazz,
       TracedClassJson.instances.name: instances,
     };
   }
 
   TracedClass copyWith({
-    ClassRef? cls,
+    ClassRef? clazz,
     int? instances,
     bool? traceAllocations,
   }) {
     return TracedClass._(
-      cls: cls ?? this.cls,
+      clazz: clazz ?? this.clazz,
       instances: instances ?? this.instances,
       traceAllocations: traceAllocations ?? this.traceAllocations,
     );
   }
 
   final HeapClassName name;
-  final ClassRef cls;
+  final ClassRef clazz;
   final int instances;
   final bool traceAllocations;
 
   @override
   bool operator ==(Object other) {
     if (other is! TracedClass) return false;
-    return cls == other.cls &&
+    return clazz == other.clazz &&
         instances == other.instances &&
         traceAllocations == other.traceAllocations;
   }
 
   @override
-  int get hashCode => Object.hash(cls, instances, traceAllocations);
+  int get hashCode => Object.hash(clazz, instances, traceAllocations);
 
   @override
   bool get pinToTop => traceAllocations;
 
   @override
   String toString() =>
-      '${cls.name} instances: $instances trace: $traceAllocations';
+      '${clazz.name} instances: $instances trace: $traceAllocations';
 }
 
 @visibleForTesting
@@ -110,7 +111,7 @@ class TracingIsolateState with Serializable {
     String? selectedClass,
   }) {
     this.classes = classes ?? [];
-    classesById = {for (var e in this.classes) e.cls.id!: e};
+    classesById = {for (var e in this.classes) e.clazz.id!: e};
     this.profiles = profiles ?? {};
   }
 
@@ -165,7 +166,7 @@ class TracingIsolateState with Serializable {
   /// The allocation profile data for the current class selection in the
   /// [AllocationTracingTable].
   CpuProfileData? get selectedClassProfile {
-    return profiles[selectedClass.value?.cls.id!];
+    return profiles[selectedClass.value?.clazz.id!];
   }
 
   /// The last time, in microseconds, the table was cleared. This time is based
@@ -177,8 +178,8 @@ class TracingIsolateState with Serializable {
     if (mode == ControllerCreationMode.connected) {
       final classList = await serviceConnection.serviceManager.service!
           .getClassList(isolate.id!);
-      for (final cls in classList.classes!) {
-        classesById[cls.id!] = TracedClass(cls: cls);
+      for (final clazz in classList.classes!) {
+        classesById[clazz.id!] = TracedClass(clazz: clazz);
       }
       classes.addAll(classesById.values);
     } else {
@@ -212,9 +213,9 @@ class TracingIsolateState with Serializable {
                 ? _filteredClassList.value
                 : classes)
             .where(
-              (e) => e.cls.name!.caseInsensitiveContains(newFilter),
+              (e) => e.clazz.name!.caseInsensitiveContains(newFilter),
             )
-            .map((e) => classesById[e.cls.id!]!)
+            .map((e) => classesById[e.clazz.id!]!)
             .toList();
 
     _filteredClassList.replaceAll(updatedFilteredClassList);
@@ -245,16 +246,17 @@ class TracingIsolateState with Serializable {
     profiles.clear();
   }
 
-  /// Enables or disables tracing of allocations of [cls].
-  Future<void> setAllocationTracingForClass(ClassRef cls, bool enabled) async {
+  /// Enables or disables tracing of allocations of [clazz].
+  Future<void> setAllocationTracingForClass(
+      ClassRef clazz, bool enabled) async {
     final service = serviceConnection.serviceManager.service!;
     final isolate =
         serviceConnection.serviceManager.isolateManager.selectedIsolate.value!;
-    final tracedClass = classesById[cls.id!]!;
+    final tracedClass = classesById[clazz.id!]!;
 
-    // Only update if the tracing state has changed for `cls`.
+    // Only update if the tracing state has changed for `clazz`.
     if (tracedClass.traceAllocations != enabled) {
-      await service.setTraceClassAllocation(isolate.id!, cls.id!, enabled);
+      await service.setTraceClassAllocation(isolate.id!, clazz.id!, enabled);
       final update = tracedClass.copyWith(
         traceAllocations: enabled,
       );
@@ -263,12 +265,12 @@ class TracingIsolateState with Serializable {
   }
 
   void _updateClassState(TracedClass original, TracedClass updated) {
-    final cls = original.cls;
+    final clazz = original.clazz;
     // Update the currently selected class, if it's still being traced.
-    if (selectedClass.value?.cls.id == cls.id) {
+    if (selectedClass.value?.clazz.id == clazz.id) {
       selectedClass.value = updated;
     }
-    classesById[cls.id!] = updated;
+    classesById[clazz.id!] = updated;
     _filteredClassList.replace(original, updated);
   }
 
@@ -283,7 +285,7 @@ class TracingIsolateState with Serializable {
     final service = serviceConnection.serviceManager.service!;
     final isolateId = serviceConnection
         .serviceManager.isolateManager.selectedIsolate.value!.id!;
-    final cls = tracedClass.cls;
+    final clazz = tracedClass.clazz;
 
     // Note: we need to provide `timeExtentMicros` to `getAllocationTraces`,
     // otherwise the VM will respond with all samples, not just the samples
@@ -292,7 +294,7 @@ class TracingIsolateState with Serializable {
     // Request the allocation profile for the traced class.
     final trace = await service.getAllocationTraces(
       isolateId,
-      classId: cls.id!,
+      classId: clazz.id!,
       timeOriginMicros: _lastClearTimeMicros,
       timeExtentMicros: maxJsInt,
     );
@@ -321,9 +323,9 @@ class TracingIsolateState with Serializable {
     final updated = tracedClass.copyWith(
       instances: profileData.cpuSamples.length,
     );
-    final cls = tracedClass.cls;
-    classesById[cls.id!] = updated;
-    profiles[cls.id!] = profileData;
+    final clazz = tracedClass.clazz;
+    classesById[clazz.id!] = updated;
+    profiles[clazz.id!] = profileData;
 
     _updateClassState(tracedClass, updated);
   }

@@ -51,7 +51,7 @@ class _TraceCheckBoxColumn extends ColumnData<TracedClass>
           gac.memory,
           '${gac.MemoryEvent.tracingTraceCheck}-$value',
         );
-        await controller.setAllocationTracingForClass(item.cls, value!);
+        await controller.setAllocationTracingForClass(item.clazz, value!);
       },
     );
   }
@@ -72,7 +72,7 @@ class _ClassNameColumn extends ColumnData<TracedClass>
   _ClassNameColumn({required this.rootPackage}) : super.wide('Class');
 
   @override
-  String? getValue(TracedClass stats) => stats.cls.name;
+  String? getValue(TracedClass stats) => stats.clazz.name;
 
   // We are removing the tooltip, because it is provided by [HeapClassView].
   @override
@@ -190,7 +190,7 @@ class _AllocationTracingTableState extends State<AllocationTracingTable> {
                 valueListenable: state.filteredClassList,
                 builder: (context, filteredClassList, _) {
                   return FlatTable<TracedClass>(
-                    keyFactory: (e) => Key(e.cls.id!),
+                    keyFactory: (e) => Key(e.clazz.id!),
                     data: filteredClassList,
                     dataKey: 'allocation-tracing',
                     columns: columns,

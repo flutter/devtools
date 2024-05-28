@@ -79,14 +79,14 @@ class _AllocationTracingTreeState extends State<AllocationTracingTree>
             } else if (!selection.traceAllocations) {
               return _TracingInstructions(
                 prefix: 'Allocation tracing is not enabled for class '
-                    '${selection.cls.name}.',
+                    '${selection.clazz.name}.',
               );
             } else if (selection.traceAllocations &&
                 (data == null || data.bottomUpRoots.isEmpty)) {
               return Padding(
                 padding: const EdgeInsets.all(largeSpacing),
                 child: Text(
-                  'No allocation samples have been collected for class ${selection.cls.name}.\n',
+                  'No allocation samples have been collected for class ${selection.clazz.name}.\n',
                 ),
               );
             }
@@ -186,7 +186,7 @@ class _TracingTreeHeader extends StatelessWidget {
             ),
             TextSpan(
               style: theme.fixedFontStyle,
-              text: controller.selection.value.selectedClass.value?.cls.name!,
+              text: controller.selection.value.selectedClass.value?.clazz.name!,
             ),
           ],
         ),
