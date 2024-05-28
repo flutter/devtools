@@ -101,6 +101,13 @@ class _PerfettoViewController extends DisposableController
   /// 'onLoad' stream.
   late final Completer<void> _perfettoIFrameReady;
 
+  /// Whether the perfetto iFrame has been unloaded after loading.
+  ///
+  /// This is stored to prevent race conditions where the iFrame's content
+  /// window has become null. This is set to true when the perfetto iFrame has
+  /// received the first event on the 'unload' stream.
+  bool _perfettoIFrameUnloaded = false;
+
   /// Completes when the Perfetto postMessage handler is ready, which is
   /// signaled by receiving a [_perfettoPong] event in response to sending a
   /// [_perfettoPing] event.
@@ -132,10 +139,20 @@ class _PerfettoViewController extends DisposableController
     _perfettoIFrameReady = Completer<void>();
     _perfettoHandlerReady = Completer<void>();
     _devtoolsThemeHandlerReady = Completer<void>();
+    _perfettoIFrameUnloaded = false;
 
     unawaited(
       perfettoController.perfettoIFrame.onLoad.first.then((_) {
         _perfettoIFrameReady.complete();
+      }),
+    );
+
+    unawaited(
+      perfettoController.perfettoIFrame.onUnload.first.then((_) {
+        if (_perfettoIFrameReady.isCompleted) {
+          // Only set to true if this occurs after the iFrame has been loaded.
+          _perfettoIFrameUnloaded = true;
+        }
       }),
     );
 
@@ -242,6 +259,7 @@ class _PerfettoViewController extends DisposableController
 
   void _postMessage(Object message) async {
     await _perfettoIFrameReady.future;
+    if (_perfettoIFrameUnloaded) return;
     assert(
       perfettoController.perfettoIFrame.contentWindow != null,
       'Something went wrong. The iFrame\'s contentWindow is null after the'
