@@ -1,5 +1,5 @@
 ## 0.2.0-dev.1
-* Add testimonies from extension authors to the README.md.
+* Add testimonies from extension authors to the `README.md`.
 
 ## 0.2.0-dev.0
 * Deprecate the `DevToolsExtension.requiresRunningApplication` field.
