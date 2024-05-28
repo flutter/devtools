@@ -136,10 +136,7 @@ class _PerfettoViewController extends DisposableController
   EventListener? _handleMessageListener;
 
   void init() {
-    _perfettoIFrameReady = Completer<void>();
-    _perfettoHandlerReady = Completer<void>();
-    _devtoolsThemeHandlerReady = Completer<void>();
-    _perfettoIFrameUnloaded = false;
+    resetReadySignals();
 
     unawaited(
       perfettoController.perfettoIFrame.onLoad.first.then((_) {
@@ -147,14 +144,16 @@ class _PerfettoViewController extends DisposableController
       }),
     );
 
-    unawaited(
-      perfettoController.perfettoIFrame.onUnload.first.then((_) {
-        if (_perfettoIFrameReady.isCompleted) {
-          // Only set to true if this occurs after the iFrame has been loaded.
-          _perfettoIFrameUnloaded = true;
-        }
-      }),
-    );
+    // TODO(kenz): uncomment once https://github.com/dart-lang/web/pull/246 is
+    // landed and package:web 0.6.0 is published.
+    // unawaited(
+    //   perfettoController.perfettoIFrame.onUnload.first.then((_) {
+    //     if (_perfettoIFrameReady.isCompleted) {
+    //       // Only set to true if this occurs after the iFrame has been loaded.
+    //       _perfettoIFrameUnloaded = true;
+    //     }
+    //   }),
+    // );
 
     window.addEventListener(
       'message',
@@ -336,12 +335,22 @@ class _PerfettoViewController extends DisposableController
     }
   }
 
+  void resetReadySignals() {
+    _perfettoIFrameReady = Completer<void>();
+    _perfettoHandlerReady = Completer<void>();
+    _devtoolsThemeHandlerReady = Completer<void>();
+    _perfettoIFrameUnloaded = false;
+  }
+
   @override
   void dispose() {
     window.removeEventListener('message', _handleMessageListener);
     _handleMessageListener = null;
     _pollForPerfettoHandlerReady?.cancel();
+    _pollForPerfettoHandlerReady = null;
     _pollForThemeHandlerReady?.cancel();
+    _pollForThemeHandlerReady = null;
+    resetReadySignals();
     super.dispose();
   }
 }
