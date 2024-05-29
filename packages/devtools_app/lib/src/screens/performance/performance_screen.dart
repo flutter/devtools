@@ -77,7 +77,6 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
 
     cancelListeners();
     addAutoDisposeListener(controller.loadingOfflineData);
-    addAutoDisposeListener(controller.flutterFramesController.selectedFrame);
   }
 
   @override

@@ -485,14 +485,17 @@ final structuredErrors = ToggleableServiceExtensionDescription<bool>.from(
   tooltip: 'Toggle showing structured errors for Flutter framework issues',
 );
 
-final trackRebuildWidgets = ToggleableServiceExtensionDescription<bool>.from(
+final trackWidgetBuildCounts = ToggleableServiceExtensionDescription<bool>.from(
   extensions.trackRebuildWidgets,
   title: 'Track widget build counts',
   iconAsset: 'icons/inspector/diagram@2x.png',
-  description: 'Tells you what has been rebuilt in your app\'s current screen.',
-  tooltip: 'Show widget rebuild counts since the last reload',
-  gaScreenName: gac.inspector,
+  gaScreenName: gac.performance,
   gaItem: gac.trackRebuildWidgets,
+  description: 'Tracks widget build counts for each Flutter frame.',
+  tooltip: '''Enable this option to see the widgets that were built in each 
+Flutter frame using the Frame Analysis tool, or to see an aggregate
+summary of these counts using the Rebuild Stats tool.''',
+  // TODO(https://github.com/flutter/website/issues/10666): link docs
 );
 
 final profilePlatformChannels =

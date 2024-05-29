@@ -41,12 +41,12 @@ class FrameHints extends StatelessWidget {
       return const Text('No suggestions for this frame - no jank detected.');
     }
 
+    final theme = Theme.of(context);
     final saveLayerCount = frameAnalysis.saveLayerCount;
     final intrinsicOperationsCount = frameAnalysis.intrinsicOperationsCount;
-
     final uiHints = showUiJankHints
         ? [
-            const Text('UI Jank Detected'),
+            Text('UI Jank Detected', style: theme.errorTextStyle),
             const SizedBox(height: denseSpacing),
             EnhanceTracingHint(
               longestPhase: frameAnalysis.longestUiPhase,
@@ -60,7 +60,7 @@ class FrameHints extends StatelessWidget {
         : <Widget>[];
     final rasterHints = showRasterJankHints
         ? [
-            const Text('Raster Jank Detected'),
+            Text('Raster Jank Detected', style: theme.errorTextStyle),
             const SizedBox(height: denseSpacing),
             if (saveLayerCount > 0) CanvasSaveLayerHint(saveLayerCount),
             const SizedBox(height: denseSpacing),
