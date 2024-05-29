@@ -98,6 +98,7 @@ abstract class FeatureFlags {
     'memoryOffline': memoryOffline,
     'dapDebugging': dapDebugging,
     'loggingV2': loggingV2,
+    'deepLinkIosCheck': deepLinkIosCheck,
   };
 
   /// A helper to print the status of all the feature flags.
