@@ -118,7 +118,8 @@ class _DeepLinkListViewMainPanel extends StatelessWidget {
                 ),
                 const SizedBox(height: densePadding),
                 Expanded(
-                  child: OutlineDecoration(
+                  child: Scrollbar(
+                    thumbVisibility: true,
                     child: SingleChildScrollView(
                       child: Text(
                         controller.currentAppLinkSettings!.error!,
