@@ -22,10 +22,10 @@ dependencies:
   web: ^0.4.1
 
 dev_dependencies:
-  flutter_lints: ^2.0.3
+  flutter_lints: ^4.0.0
   flutter_test:
     sdk: flutter
-  lints: ^2.1.1
+  lints: ^4.0.0
   test: ^1.21.0
 
 flutter:

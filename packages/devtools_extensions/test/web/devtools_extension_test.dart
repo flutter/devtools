@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 @TestOn('browser')
+library;
 
 import 'package:devtools_extensions/devtools_extensions.dart';
 import 'package:flutter/material.dart';

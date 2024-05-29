@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
+library;
+
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_shared/devtools_test_utils.dart';
 import 'package:flutter_test/flutter_test.dart';

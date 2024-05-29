@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
+library;
+
 import 'dart:async';
 
 import 'package:devtools_app/devtools_app.dart';

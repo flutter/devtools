@@ -5,7 +5,7 @@ publish_to: 'none'
 version: 1.0.0
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: ^3.2.0
   flutter: '>=3.0.0'
 
 dependencies:
@@ -26,4 +26,4 @@ dependency_overrides:
     path: ../../../../devtools_extensions 
   devtools_shared:
     path: ../../../../devtools_shared
-  flutter_lints: ^2.0.3
+  flutter_lints: ^4.0.0
