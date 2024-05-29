@@ -20,6 +20,8 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
+  integration_test:
+    sdk: flutter
   standalone_extension:
     path: ../packages_with_extensions/standalone_extension
   test: ^1.21.0
