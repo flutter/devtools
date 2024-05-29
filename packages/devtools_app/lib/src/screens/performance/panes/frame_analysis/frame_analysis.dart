@@ -61,18 +61,16 @@ class FlutterFrameAnalysisView extends StatelessWidget {
             ),
           ),
           const PaddedDivider(
-            padding: EdgeInsets.only(
-              bottom: denseSpacing,
-            ),
+            padding: EdgeInsets.only(bottom: denseSpacing),
           ),
-          if (frameAnalysis == null)
+          if (frameAnalysis == null) ...[
             const Text(
-              'No analysis data available for this frame. This means that the '
-              'timeline events for this frame occurred too long ago and '
-              'DevTools could not access them. To avoid this, open the '
+              'No timeline event analysis data available for this frame. This '
+              'means that the timeline events for this frame occurred too long '
+              'ago and DevTools could not access them. To avoid this, open the '
               'DevTools Performance page earlier.',
-            )
-          else ...[
+            ),
+          ] else ...[
             // TODO(jacobr): we might have so many frame hints that this content
             // needs to scroll. Supporting that would be hard as the RebuildTable
             // also needs to scroll and the devtools table functionality does not
@@ -89,20 +87,14 @@ class FlutterFrameAnalysisView extends StatelessWidget {
               },
             ),
             const PaddedDivider(
-              padding: EdgeInsets.only(
-                top: denseSpacing,
-                bottom: denseSpacing,
-              ),
+              padding: EdgeInsets.symmetric(vertical: denseSpacing),
             ),
             FrameTimeVisualizer(frameAnalysis: frameAnalysis),
-            const PaddedDivider(
-              padding: EdgeInsets.only(
-                top: denseSpacing,
-                bottom: denseSpacing,
-              ),
-            ),
           ],
           if (FeatureFlags.widgetRebuildStats) ...[
+            const PaddedDivider(
+              padding: EdgeInsets.only(top: denseSpacing),
+            ),
             if (rebuilds.isNullOrEmpty)
               ValueListenableBuilder<bool>(
                 valueListenable: serviceConnection

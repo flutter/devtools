@@ -72,7 +72,9 @@ void main() {
         );
 
         expect(
-          find.textContaining('No analysis data available for this frame.'),
+          find.textContaining(
+            'No timeline event analysis data available for this frame.',
+          ),
           findsOneWidget,
         );
         expect(find.byType(FrameHints), findsNothing);
@@ -87,7 +89,9 @@ void main() {
         await pumpAnalysisView(tester, frame);
 
         expect(
-          find.textContaining('No analysis data available for this frame.'),
+          find.textContaining(
+            'No timeline event  analysis data available for this frame.',
+          ),
           findsNothing,
         );
         expect(find.byType(FrameHints), findsOneWidget);
