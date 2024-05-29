@@ -20,7 +20,8 @@ TODO: Remove this section if there are not any general updates.
 
 * Added a feature for showing widget build counts. Enable this setting to see widget build counts
 for each Flutter frame in the "Frame Analysis" tool, or to see an aggregate summary of these
-counts in the new "Rebuild Stats" tool.  - [#7838](https://github.com/flutter/devtools/pull/7838)
+counts in the new "Rebuild Stats" tool.  - [#7838](https://github.com/flutter/devtools/pull/7838),
+[#7847](https://github.com/flutter/devtools/pull/7847)
 
     ![Track widget build counts setting](images/track_build_counts_setting.png "Track widget build counts setting")
 
