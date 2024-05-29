@@ -12,7 +12,7 @@ import 'package:integration_test/integration_test.dart';
 // dart run integration_test/run_tests.dart --target=integration_test/test/offline/memory_offline_data_test.dart
 
 void main() {
-  final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets(
     'Memory screen can load offline data',
