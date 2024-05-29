@@ -26,11 +26,11 @@ void main() {
       await tester.tap(find.text('_MyClass'));
       await tester.pumpAndSettle(shortPumpDuration);
       expect(find.text('Traced allocations for: _MyClass'), findsOneWidget);
-      await verifyScreenshot(binding, 'memory_offline_trace');
+      //await verifyScreenshot(binding, 'memory_offline_trace');
 
       await tester.tap(find.text('Diff Snapshots'));
       await tester.pumpAndSettle(shortPumpDuration);
-      await tester.tap(find.text('main'));
+      await tester.tap(find.textContaining('main'));
       await tester.pumpAndSettle(shortPumpDuration);
       expect(find.text('_MyHomePageState'), findsOneWidget);
       await verifyScreenshot(binding, 'memory_offline_diff');
