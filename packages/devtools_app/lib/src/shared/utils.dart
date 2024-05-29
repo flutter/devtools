@@ -7,6 +7,7 @@
 // Utils, that do not have dependencies, should go to primitives/utils.dart.
 
 import 'dart:async';
+import 'dart:math';
 
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
@@ -296,4 +297,75 @@ Future<void> launchUrlWithErrorHandling(String url) async {
     url,
     onError: () => notificationService.push('Unable to open $url.'),
   );
+}
+
+/// A worker that will run [callback] in groups of [chunkSize], when [doWork] is called.
+///
+/// [progressCallback] will be called with 0.0 progress when starting the work and any
+/// time a chunk finishes running, with a value that represents the proportion of
+/// indices that have been completed so far.
+///
+/// This class may be helpful when sets of work need to be done over an array, while
+/// avoiding blocking the UI thread.
+class InterruptableChunkWorker {
+  InterruptableChunkWorker({
+    int chunkSize = 50,
+    required this.callback,
+    required this.progressCallback,
+  }) : _chunkSize = chunkSize;
+
+  final int _chunkSize;
+  int _workId = 0;
+  void Function(int) callback;
+  void Function(double progress) progressCallback;
+
+  final _sw = Stopwatch();
+
+  /// Start doing the chunked work.
+  ///
+  /// [callback] will be called on every index from 0...[length-1], inclusive,
+  /// in chunks of [_chunkSize]
+  ///
+  /// If [doWork] is called again, then [callback] will no longer be called
+  /// on any remaining indices from previous [doWork] calls.
+  ///
+  Future<bool> doWork(
+    int length,
+  ) async {
+    final completer = Completer<bool>();
+    final localWorkId = ++_workId;
+    final sw = Stopwatch();
+
+    Function(int i)? doChunkWork;
+
+    doChunkWork = (i) {
+      if (i >= length) {
+        sw.stop();
+        return completer.complete(true);
+      }
+
+      _sw.reset();
+      _sw.start();
+
+      final J = min(length, i + _chunkSize);
+      int j = i;
+      for (; j < J; j++) {
+        // If our localWorkId is no longer active, then do not continue working
+        if (localWorkId != _workId) return completer.complete(false);
+        callback(j);
+      }
+      _sw.stop();
+
+      progressCallback(j / length);
+      Future.delayed(const Duration(), () {
+        doChunkWork!.call(i + _chunkSize);
+      });
+    };
+    sw.start();
+
+    progressCallback(0.0);
+    doChunkWork(0);
+
+    return completer.future;
+  }
 }
