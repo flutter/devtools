@@ -19,6 +19,7 @@ void main() {
     (tester) async {
       await pumpDevTools(tester);
       await loadSampleData(tester, memoryFileName);
+      await tester.pumpAndSettle(longPumpDuration);
 
       await tester.tap(find.text('_MyClass'));
       await tester.pumpAndSettle(shortPumpDuration);
