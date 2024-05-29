@@ -233,6 +233,10 @@ class DeepLinksController extends DisposableController {
           );
           _androidAppLinks[selectedVariantIndex.value] = result;
         } catch (_) {
+          ga.select(
+            gac.deeplink,
+            gac.AnalyzeFlutterProject.flutterAppLinkLoadingError.name,
+          );
           pagePhase.value = PagePhase.validationErrorPage;
         }
       },
@@ -424,16 +428,28 @@ class DeepLinksController extends DisposableController {
     }
     if (appLinkSettings.error != null) {
       pagePhase.value = PagePhase.analyzeErrorPage;
+      ga.select(
+        gac.deeplink,
+        gac.AnalyzeFlutterProject.flutterAppLinkLoadingError.name,
+      );
       return;
     }
     pagePhase.value = PagePhase.linksValidating;
     var linkdata = _allRawLinkDatas(appLinkSettings);
     if (linkdata.isEmpty) {
+      ga.select(
+        gac.deeplink,
+        gac.AnalyzeFlutterProject.flutterNoAppLink.name,
+      );
       pagePhase.value = PagePhase.noLinks;
       return;
     }
 
     // There are deep links to validate.
+    ga.select(
+      gac.deeplink,
+      gac.AnalyzeFlutterProject.flutterHasAppLinks.name,
+    );
     linkdata = await _validateAndroidDomain(linkdata);
     if (pagePhase.value == PagePhase.validationErrorPage) {
       return;
