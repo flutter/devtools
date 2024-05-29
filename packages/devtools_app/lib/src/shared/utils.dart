@@ -363,6 +363,10 @@ class InterruptableChunkWorker {
     };
     sw.start();
 
+    if (length <= 0) {
+      return Future.value(true);
+    }
+
     progressCallback(0.0);
     doChunkWork(0);
 
