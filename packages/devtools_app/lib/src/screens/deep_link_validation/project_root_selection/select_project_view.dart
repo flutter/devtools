@@ -91,31 +91,46 @@ class _SelectProjectViewState extends State<SelectProjectView>
     return iosBuildOptions;
   }
 
+  Future<void> showNonFlutterProjectDialog() async {
+    await showDialog(
+      context: context,
+      builder: (_) {
+        return const DevToolsDialog(
+          title: Text('You selected a non Flutter project'),
+          content: Text(
+            'It looks like you have selected a non-Flutter project. Please select a Flutter project instead.',
+          ),
+          actions: [
+            DialogCloseButton(),
+          ],
+        );
+      },
+    );
+    setState(() {
+      _retrievingFlutterProject = false;
+    });
+  }
+
   void _handleValidateProject(String directory) async {
     setState(() {
       _retrievingFlutterProject = true;
     });
+    final connected =
+        serviceConnection.serviceManager.connectedState.value.connected;
+    if (connected &&
+        !(serviceConnection.serviceManager.connectedApp!.isFlutterAppNow ??
+            false)) {
+      await showNonFlutterProjectDialog();
+      return;
+    }
+
     final List<String> androidVariants =
         await _requestAndridVariants(directory);
     if (!mounted) {
       return;
     }
     if (androidVariants.isEmpty) {
-      await showDialog(
-        context: context,
-        builder: (_) {
-          return const DevToolsDialog(
-            title: Text('You selected a non Flutter project'),
-            content: Text(
-              'It looks like you have selected a non-Flutter project. Please select a Flutter project instead.',
-            ),
-            actions: [
-              DialogCloseButton(),
-            ],
-          );
-        },
-      );
-      return;
+      await showNonFlutterProjectDialog();
     }
     final iosBuildOptions = await _requestiOSBuildOptions(directory);
     ga.select(

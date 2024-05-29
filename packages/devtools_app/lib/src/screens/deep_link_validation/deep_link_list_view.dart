@@ -70,8 +70,9 @@ class _DeepLinkListViewState extends State<DeepLinkListView>
   }
 
   int _getReleaseVariantIndex(List<String> variants) {
-    final index = variants
-        .indexWhere((variant) => variant.toLowerCase().contains('release'));
+    final index = variants.indexWhere(
+      (variant) => variant.caseInsensitiveContains('release'),
+    );
     // If not found, default to 0.
     return max(index, 0);
   }
