@@ -23,35 +23,23 @@ void main() {
       await pumpDevTools(tester);
       await loadSampleData(tester, memoryFileName);
 
-      // await tester.tap(find.widgetWithText(InkWell, 'Timeline Events'));
-      // await tester.pumpAndSettle(longPumpDuration);
+      await tester.tap(find.text('_MyClass'));
+      await tester.pumpAndSettle(shortPumpDuration);
+      expect(find.textContaining('package:counter/main.dart'), findsOneWidget);
+      await verifyScreenshot(binding, 'memory_offline_trace');
 
-      // logStatus('verify HtmlElementView has loaded');
-      // expect(find.byType(Perfetto), findsOneWidget);
-      // expect(find.byType(HtmlElementView), findsOneWidget);
+      await tester.tap(find.text('Diff Snapshots'));
+      await tester.pumpAndSettle(shortPumpDuration);
+      await tester.tap(find.text('main'));
+      await tester.pumpAndSettle(shortPumpDuration);
+      expect(find.text('_MyHomePageState'), findsOneWidget);
+      await verifyScreenshot(binding, 'memory_offline_diff');
 
-      // await verifyScreenshot(binding, 'perfetto_initial_load');
-
-      // logStatus('select a different Flutter Frame');
-      // await tester.tap(find.byType(FlutterFramesChartItem).last);
-      // await tester.pumpAndSettle(safePumpDuration);
-
-      // await verifyScreenshot(binding, 'perfetto_frame_selection');
-
-      // logStatus(
-      //   'switch to a different feature tab and back to Timeline Events',
-      // );
-      // await tester.tap(find.widgetWithText(InkWell, 'Frame Analysis'));
-      // await tester.pump(safePumpDuration);
-
-      // await tester.tap(find.widgetWithText(InkWell, 'Timeline Events'));
-      // await tester.pump(safePumpDuration);
-
-      // await verifyScreenshot(
-      //   binding,
-      //   'perfetto_frame_selection_2',
-      //   lastScreenshot: true,
-      // );
+      await tester.tap(find.text('Profile Memory'));
+      await tester.pumpAndSettle(shortPumpDuration);
+      expect(find.text('CSV'), findsOneWidget);
+      expect(find.text('MyApp'), findsOneWidget);
+      await verifyScreenshot(binding, 'memory_offline_profile');
     },
   );
 }
