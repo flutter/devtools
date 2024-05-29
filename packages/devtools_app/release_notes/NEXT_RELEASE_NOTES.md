@@ -29,6 +29,8 @@ TODO: Remove this section if there are not any general updates.
 * Enable offline analysis of snapshots, historical data analysis and save/load.
 - [#7843](https://github.com/flutter/devtools/pull/7843)
 
+    ![Memory offline data](images/memory-save-load.png "Memory offline data")
+
 ## Debugger updates
 
 TODO: Remove this section if there are not any general updates.
