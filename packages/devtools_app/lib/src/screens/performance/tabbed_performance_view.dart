@@ -134,7 +134,7 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
           tabView: KeepAliveWrapper(
             child: _selectedFlutterFrame != null
                 ? FlutterFrameAnalysisView(
-                    frameAnalysis: _selectedFlutterFrame!.frameAnalysis,
+                    frame: _selectedFlutterFrame!,
                     enhanceTracingController:
                         controller.enhanceTracingController,
                     rebuildCountModel: controller.rebuildCountModel,

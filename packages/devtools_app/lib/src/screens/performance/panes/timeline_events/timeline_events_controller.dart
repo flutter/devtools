@@ -440,7 +440,9 @@ class TimelineEventsController extends PerformanceFeatureController
       );
     }
 
-    perfettoController.scrollToTimeRange(frame.timeFromFrameTiming);
+    if (frame.timeFromFrameTiming.isWellFormed) {
+      perfettoController.scrollToTimeRange(frame.timeFromFrameTiming);
+    }
   }
 
   void addTimelineEvent(FlutterTimelineEvent event) {

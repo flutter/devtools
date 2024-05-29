@@ -105,13 +105,15 @@ class _RebuildStatsViewState extends State<RebuildStatsView>
                   gaSelection: gac.PerformanceEvents.clearRebuildStats.name,
                   onPressed: widget.model.clearAllCounts,
                 ),
-                const SizedBox(width: denseSpacing),
-                Flexible(
-                  child: ServiceExtensionCheckbox(
-                    serviceExtension: extensions.trackRebuildWidgets,
+                Expanded(
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: denseSpacing),
+                    child: ServiceExtensionCheckbox(
+                      serviceExtension: extensions.trackWidgetBuildCounts,
+                    ),
                   ),
                 ),
-                const Spacer(),
               ],
             ),
           ),
@@ -121,7 +123,7 @@ class _RebuildStatsViewState extends State<RebuildStatsView>
             valueListenable: serviceConnection
                 .serviceManager.serviceExtensionManager
                 .getServiceExtensionState(
-              extensions.trackRebuildWidgets.extension,
+              extensions.trackWidgetBuildCounts.extension,
             ),
             builder: (context, state, _) {
               if (metrics.isEmpty && !state.enabled) {
