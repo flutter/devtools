@@ -12,8 +12,9 @@ class AppLinkSettings {
   const AppLinkSettings._(
     this.applicationId,
     this.deeplinkingFlagEnabled,
-    this.deeplinks,
-  );
+    this.deeplinks, [
+    this.error,
+  ]);
 
   factory AppLinkSettings.fromJson(String json) {
     final jsonObject = jsonDecode(json) as Map;
@@ -33,11 +34,33 @@ class AppLinkSettings {
   }
 
   /// Used when the the server can't retrieve app link settings.
-  static const empty = AppLinkSettings._('', false, <AndroidDeeplink>[]);
+  ///
+  /// The input needs to be in json format from DevTools server response.
+  factory AppLinkSettings.fromErrorJson(String json) {
+    final jsonObject = jsonDecode(json) as Map;
+    final message = jsonObject[_kErrorKey]! as String;
+    return AppLinkSettings._(
+      '',
+      false,
+      <AndroidDeeplink>[],
+      message,
+    );
+  }
+
+  /// Used when the the server can't retrieve app link settings.
+  factory AppLinkSettings.error(String message) {
+    return AppLinkSettings._(
+      '',
+      false,
+      <AndroidDeeplink>[],
+      message,
+    );
+  }
 
   static const _kApplicationIdKey = 'applicationId';
   static const _kDeeplinkingFlagEnabledKey = 'deeplinkingFlagEnabled';
   static const _kDeeplinksKey = 'deeplinks';
+  static const _kErrorKey = 'error';
 
   /// The application id of the Android build of this Flutter project.
   final String applicationId;
@@ -49,6 +72,9 @@ class AppLinkSettings {
   ///
   /// This list also include deeplinks with custom scheme.
   final List<AndroidDeeplink> deeplinks;
+
+  /// The error message when requesting app link settings.
+  final String? error;
 }
 
 /// A deep link in a Android build of a Flutter project.

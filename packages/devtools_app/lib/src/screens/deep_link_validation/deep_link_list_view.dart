@@ -79,7 +79,7 @@ class _DeepLinkListViewMainPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Provider.of<DeepLinksController>(context);
-
+    final theme = Theme.of(context);
     return ValueListenableBuilder<PagePhase>(
       valueListenable: controller.pagePhase,
       builder: (context, pagePhase, _) {
@@ -96,7 +96,7 @@ class _DeepLinkListViewMainPanel extends StatelessWidget {
                   pagePhase == PagePhase.linksLoading
                       ? 'Loading deep links...'
                       : 'Validating deep links...',
-                  style: Theme.of(context).subtleTextStyle,
+                  style: theme.subtleTextStyle,
                 ),
               ],
             );
@@ -104,11 +104,36 @@ class _DeepLinkListViewMainPanel extends StatelessWidget {
             return const _ValidatedDeepLinksView();
           case PagePhase.noLinks:
             // TODO(hangyujin): This is just a place holder to add UI.
-            return const Text('Your flutter project has no Links to verify.');
+            return const CenteredMessage(
+              'Your Flutter project has no Links to verify.',
+            );
+          case PagePhase.analyzeErrorPage:
+            assert(controller.currentAppLinkSettings?.error != null);
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Failed to retrieve deep links from the Flutter project. '
+                  'This can be a result of errors in the project.',
+                ),
+                const SizedBox(height: densePadding),
+                Expanded(
+                  child: Scrollbar(
+                    thumbVisibility: true,
+                    child: SingleChildScrollView(
+                      child: Text(
+                        controller.currentAppLinkSettings!.error!,
+                        style: theme.errorTextStyle,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
 
-          case PagePhase.errorPage:
+          case PagePhase.validationErrorPage:
             // TODO(hangyujin): This is just a place holder to add Error handling.
-            return const Text('Error');
+            return const CenteredMessage('Error validating domain ');
         }
       },
     );
