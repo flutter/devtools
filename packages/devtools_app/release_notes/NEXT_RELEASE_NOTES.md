@@ -18,7 +18,15 @@ TODO: Remove this section if there are not any general updates.
 
 ## Performance updates
 
-* Add panel that shows widget rebuild counts - [#7838](https://github.com/flutter/devtools/pull/7838)
+* Added a feature for showing widget build counts. Enable this setting to see widget build counts
+for each Flutter frame in the "Frame Analysis" tool, or to see an aggregate summary of these
+counts in the new "Rebuild Stats" tool.  - [#7838](https://github.com/flutter/devtools/pull/7838)
+
+    ![Track widget build counts setting](images/track_build_counts_setting.png "Track widget build counts setting")
+
+    ![Widget rebuild counts in the Frame Analysis view](images/rebuild_counts_frame_analysis.png "Widget rebuilds counts for a flutter frame")
+
+    ![Widget rebuild counts in the Rebuild Stats view](images/rebuild_stats.png "Widget rebuilds counts aggregate stats")
 
 ## CPU profiler updates
 
@@ -34,7 +42,7 @@ TODO: Remove this section if there are not any general updates.
 
 ## Network profiler updates
 
-* Add better support for narrow viewing windows, like when this
+* Added better support for narrow viewing windows, like when this
 screen is embedded in the IDE. - [#7726](https://github.com/flutter/devtools/pull/7726)
 
 ## Logging updates
@@ -55,18 +63,18 @@ TODO: Remove this section if there are not any general updates.
 
 ## DevTools Extension updates
 
-* Fix an issue with detecting extensions for Dart or Flutter
+* Fixed an issue with detecting extensions for Dart or Flutter
 tests. - [#7717](https://github.com/flutter/devtools/pull/7717)
-* Fix an issue with detecting extensions for nested Dart or Flutter
+* Fixed an issue with detecting extensions for nested Dart or Flutter
 projects. - [#7742](https://github.com/flutter/devtools/pull/7742)
-* Add an example to `package:devtools_extensions` that shows how to
+* Added an example to `package:devtools_extensions` that shows how to
 interact with the Dart Tooling Daemon from a DevTools
 extension. - [#7752](https://github.com/flutter/devtools/pull/7752)
-* Fix a DevTools routing bug related to disabling an
+* Fixed a DevTools routing bug related to disabling an
 extension. - [#7791](https://github.com/flutter/devtools/pull/7791)
-* Fix a bug causing a "Page Not Found" error when refreshing DevTools
+* Fixed a bug causing a "Page Not Found" error when refreshing DevTools
 from an extension screen. - [#7822](https://github.com/flutter/devtools/pull/7822)
-* Fix a themeing issue when extensions are embedded in an
+* Fixed a themeing issue when extensions are embedded in an
 IDE - [#7824](https://github.com/flutter/devtools/pull/7824)
 
 ## Full commit history

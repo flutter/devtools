@@ -144,6 +144,7 @@ class _RebuildStatsViewState extends State<RebuildStatsView>
                 key: const Key('Rebuild Table'),
                 metricNames: metricNames,
                 metrics: metrics,
+                includeBorder: false,
               );
             },
           ),
@@ -158,10 +159,12 @@ class RebuildTable extends StatefulWidget {
     super.key,
     required this.metricNames,
     required this.metrics,
+    this.includeBorder = true,
   });
 
   final List<String> metricNames;
   final List<RebuildLocationStats> metrics;
+  final bool includeBorder;
 
   @override
   State<RebuildTable> createState() => _RebuildTableState();
@@ -198,32 +201,27 @@ class _RebuildTableState extends State<RebuildTable> {
 
   @override
   Widget build(BuildContext context) {
-    final borderSide = defaultBorderSide(Theme.of(context));
-    return Container(
-      decoration: BoxDecoration(
-        border: Border(right: borderSide),
-      ),
-      child: FlatTable<RebuildLocationStats>(
-        dataKey: 'RebuildMetricsTable',
-        columns: _columns,
-        data: widget.metrics,
-        keyFactory: (RebuildLocationStats location) =>
-            ValueKey<String?>('${location.location.id}'),
-        defaultSortColumn: _metricsColumns.first,
-        defaultSortDirection: sortDirection,
-        onItemSelected: (item) async {
-          final location = item?.location;
-          if (location?.fileUriString != null) {
-            await _service?.navigateToCode(
-              fileUriString: location?.fileUriString ?? '',
-              line: location?.line ?? 0,
-              column: location?.column ?? 0,
-              source: 'devtools.rebuildStats',
-            );
-          }
-        },
-      ),
+    final table = FlatTable<RebuildLocationStats>(
+      dataKey: 'RebuildMetricsTable',
+      columns: _columns,
+      data: widget.metrics,
+      keyFactory: (RebuildLocationStats location) =>
+          ValueKey<String?>('${location.location.id}'),
+      defaultSortColumn: _metricsColumns.first,
+      defaultSortDirection: sortDirection,
+      onItemSelected: (item) async {
+        final location = item?.location;
+        if (location?.fileUriString != null) {
+          await _service?.navigateToCode(
+            fileUriString: location?.fileUriString ?? '',
+            line: location?.line ?? 0,
+            column: location?.column ?? 0,
+            source: 'devtools.rebuildStats',
+          );
+        }
+      },
     );
+    return widget.includeBorder ? OutlineDecoration(child: table) : table;
   }
 }
 

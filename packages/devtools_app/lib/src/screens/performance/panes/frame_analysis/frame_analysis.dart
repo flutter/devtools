@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -60,9 +61,7 @@ class FlutterFrameAnalysisView extends StatelessWidget {
               ],
             ),
           ),
-          const PaddedDivider(
-            padding: EdgeInsets.only(bottom: denseSpacing),
-          ),
+          const PaddedDivider.noPadding(),
           if (frameAnalysis == null) ...[
             const Text(
               'No timeline event analysis data available for this frame. This '
@@ -86,24 +85,21 @@ class FlutterFrameAnalysisView extends StatelessWidget {
                 );
               },
             ),
-            const PaddedDivider(
-              padding: EdgeInsets.symmetric(vertical: denseSpacing),
-            ),
+
+            const PaddedDivider.noPadding(),
             FrameTimeVisualizer(frameAnalysis: frameAnalysis),
           ],
           if (FeatureFlags.widgetRebuildStats) ...[
-            const PaddedDivider(
-              padding: EdgeInsets.only(top: denseSpacing),
-            ),
-            if (rebuilds.isNullOrEmpty)
-              ValueListenableBuilder<bool>(
+            if (rebuilds.isNullOrEmpty) ...[
+              const PaddedDivider.noPadding(),
+              ValueListenableBuilder<ServiceExtensionState>(
                 valueListenable: serviceConnection
                     .serviceManager.serviceExtensionManager
-                    .hasServiceExtension(
+                    .getServiceExtensionState(
                   extensions.trackWidgetBuildCounts.extension,
                 ),
-                builder: (context, hasExtension, _) {
-                  if (hasExtension) {
+                builder: (context, extensionState, _) {
+                  if (!extensionState.enabled) {
                     return Row(
                       children: [
                         const Text(
@@ -121,6 +117,7 @@ class FlutterFrameAnalysisView extends StatelessWidget {
                   return const SizedBox();
                 },
               ),
+            ],
             if (rebuilds == null)
               const Text(
                 'Rebuild information not available for this frame.',
@@ -130,13 +127,15 @@ class FlutterFrameAnalysisView extends StatelessWidget {
                 'No widget rebuilds occurred for widgets that were directly '
                 'created in your project.',
               )
-            else
+            else ...[
+              const SizedBox(height: defaultSpacing),
               Expanded(
                 child: RebuildTable(
                   metricNames: const ['Rebuild Count'],
                   metrics: combineStats([rebuilds]),
                 ),
               ),
+            ],
           ],
         ],
       ),
