@@ -56,7 +56,7 @@ class LoggingTableModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  double getRowOffset(int index) {
+  double getRowOffset(int _) {
     throw 'Implement this when needed';
   }
 

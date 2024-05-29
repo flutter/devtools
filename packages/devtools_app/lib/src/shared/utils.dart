@@ -331,7 +331,7 @@ class InterruptableChunkWorker {
   ///
   Future<bool> doWork(
     int length,
-  ) async {
+  ) {
     final completer = Completer<bool>();
     final localWorkId = ++_workId;
     final sw = Stopwatch();
