@@ -393,7 +393,7 @@ class TimelineEventsController extends PerformanceFeatureController
         final timelineEventsUnavailable =
             perfettoController.processor.frameIsBeforeTimelineData(frame.id);
         if (timelineEventsUnavailable) {
-          pushNoTimelineEventsAvailableWarning();
+          _maybePushNoTimelineEventsWarning();
           return;
         }
         await onProcessMore();
@@ -434,7 +434,7 @@ class TimelineEventsController extends PerformanceFeatureController
             // At this point, we still have not processed any timeline events
             // for this Flutter frame, which means we will never have access to
             // the timeline events for [frame].
-            pushNoTimelineEventsAvailableWarning();
+            _maybePushNoTimelineEventsWarning();
           }
         },
       );
@@ -498,6 +498,12 @@ class TimelineEventsController extends PerformanceFeatureController
         ? offlineData != null && offlineData.frames.isNotEmpty
         : serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ??
             false;
+  }
+
+  void _maybePushNoTimelineEventsWarning() {
+    if (isActiveFeature) {
+      pushNoTimelineEventsAvailableWarning();
+    }
   }
 
   @override

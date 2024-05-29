@@ -147,6 +147,17 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
           ),
           featureController: null,
         ),
+      if (showRebuildStats)
+        (
+          tab: _buildTab(tabName: 'Rebuild Stats'),
+          tabView: KeepAliveWrapper(
+            child: RebuildStatsView(
+              model: controller.rebuildCountModel,
+              selectedFrame: controller.flutterFramesController.selectedFrame,
+            ),
+          ),
+          featureController: controller.rebuildStatsController,
+        ),
       if (showRasterStats)
         (
           tab: _buildTab(tabName: 'Raster Stats'),
@@ -159,17 +170,6 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
             ),
           ),
           featureController: controller.rasterStatsController,
-        ),
-      if (showRebuildStats)
-        (
-          tab: _buildTab(tabName: 'Rebuild Stats'),
-          tabView: KeepAliveWrapper(
-            child: RebuildStatsView(
-              model: controller.rebuildCountModel,
-              selectedFrame: controller.flutterFramesController.selectedFrame,
-            ),
-          ),
-          featureController: null,
         ),
       (
         tab: _buildTab(
