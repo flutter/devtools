@@ -26,7 +26,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## Memory updates
 
-TODO: Remove this section if there are not any general updates.
+* Enable offline analysis of snapshots, historical data analysis and save/load.
+- [#7843](https://github.com/flutter/devtools/pull/7843)
 
 ## Debugger updates
 

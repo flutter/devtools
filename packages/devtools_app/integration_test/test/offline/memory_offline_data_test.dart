@@ -25,7 +25,7 @@ void main() {
 
       await tester.tap(find.text('_MyClass'));
       await tester.pumpAndSettle(shortPumpDuration);
-      expect(find.textContaining('package:counter/main.dart'), findsOneWidget);
+      expect(find.text('Traced allocations for: _MyClass'), findsOneWidget);
       await verifyScreenshot(binding, 'memory_offline_trace');
 
       await tester.tap(find.text('Diff Snapshots'));
