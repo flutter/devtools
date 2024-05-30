@@ -21,6 +21,7 @@ import '../utils.dart';
 
 part '_extension_preferences.dart';
 part '_inspector_preferences.dart';
+part '_inspector_v2_preferences.dart';
 part '_memory_preferences.dart';
 part '_performance_preferences.dart';
 
@@ -37,8 +38,13 @@ class PreferencesController extends DisposableController
       ValueNotifier<bool>(Logger.root.level == verboseLoggingLevel);
   static const _verboseLoggingStorageId = 'verboseLogging';
 
+  // TODO(https://github.com/flutter/devtools/issues/7860): Clean-up after
+  // Inspector V2 has been released.
   InspectorPreferencesController get inspector => _inspector;
   final _inspector = InspectorPreferencesController();
+
+  InspectorV2PreferencesController get inspectorV2 => _inspectorV2;
+  final _inspectorV2 = InspectorV2PreferencesController();
 
   MemoryPreferencesController get memory => _memory;
   final _memory = MemoryPreferencesController();

@@ -4,11 +4,11 @@
 
 part of 'preferences.dart';
 
-enum InspectorDetailsViewType {
-  layoutExplorer(nameOverride: 'Layout Explorer'),
-  widgetDetailsTree(nameOverride: 'Widget Details Tree');
+enum InspectorV2DetailsViewType {
+  layoutExplorer(nameOverride: 'Layout Explorer 2.0'),
+  widgetDetailsTree(nameOverride: 'Widget Details Tree 2.0');
 
-  const InspectorDetailsViewType({String? nameOverride})
+  const InspectorV2DetailsViewType({String? nameOverride})
       : _nameOverride = nameOverride;
 
   final String? _nameOverride;
@@ -16,10 +16,10 @@ enum InspectorDetailsViewType {
   String get key => _nameOverride ?? name;
 }
 
-class InspectorPreferencesController extends DisposableController
+class InspectorV2PreferencesController extends DisposableController
     with AutoDisposeControllerMixin {
   ValueListenable<bool> get hoverEvalModeEnabled => _hoverEvalMode;
-  ValueListenable<InspectorDetailsViewType> get defaultDetailsView =>
+  ValueListenable<InspectorV2DetailsViewType> get defaultDetailsView =>
       _defaultDetailsView;
   ListValueNotifier<String> get pubRootDirectories => _pubRootDirectories;
   ValueListenable<bool> get isRefreshingPubRootDirectories =>
@@ -31,8 +31,8 @@ class InspectorPreferencesController extends DisposableController
   final _pubRootDirectories = ListValueNotifier<String>([]);
   final _pubRootDirectoriesAreBusy = ValueNotifier<bool>(false);
   final _busyCounter = ValueNotifier<int>(0);
-  final _defaultDetailsView = ValueNotifier<InspectorDetailsViewType>(
-    InspectorDetailsViewType.layoutExplorer,
+  final _defaultDetailsView = ValueNotifier<InspectorV2DetailsViewType>(
+    InspectorV2DetailsViewType.layoutExplorer,
   );
 
   static const _hoverEvalModeStorageId = 'inspector.hoverEvalMode';
@@ -99,7 +99,7 @@ class InspectorPreferencesController extends DisposableController
         await storage.getValue(_defaultDetailsViewStorageId);
 
     if (inspectorDetailsView != null) {
-      _defaultDetailsView.value = InspectorDetailsViewType.values
+      _defaultDetailsView.value = InspectorV2DetailsViewType.values
           .firstWhere((e) => e.name.toString() == inspectorDetailsView);
     }
   }
@@ -373,7 +373,7 @@ class InspectorPreferencesController extends DisposableController
     _hoverEvalMode.value = enableHoverEvalMode;
   }
 
-  void setDefaultInspectorDetailsView(InspectorDetailsViewType value) {
+  void setDefaultInspectorDetailsView(InspectorV2DetailsViewType value) {
     _defaultDetailsView.value = value;
   }
 }

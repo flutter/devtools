@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -32,24 +32,24 @@ class InspectorDetails extends StatelessWidget {
   Widget build(BuildContext context) {
     final tabs = [
       (
-        tab: _buildTab(tabName: InspectorDetailsViewType.layoutExplorer.key),
+        tab: _buildTab(tabName: InspectorV2DetailsViewType.layoutExplorer.key),
         tabView: LayoutExplorerTab(controller: controller),
       ),
       (
         tab: _buildTab(
-          tabName: InspectorDetailsViewType.widgetDetailsTree.key,
+          tabName: InspectorV2DetailsViewType.widgetDetailsTree.key,
           trailing: InspectorExpandCollapseButtons(controller: controller),
         ),
         tabView: detailsTree,
       ),
     ];
     return ValueListenableBuilder(
-      valueListenable: preferences.inspector.defaultDetailsView,
+      valueListenable: preferences.inspectorV2.defaultDetailsView,
       builder: (BuildContext context, value, Widget? child) {
         int defaultInspectorViewIndex = 0;
 
-        if (preferences.inspector.defaultDetailsView.value ==
-            InspectorDetailsViewType.widgetDetailsTree) {
+        if (preferences.inspectorV2.defaultDetailsView.value ==
+            InspectorV2DetailsViewType.widgetDetailsTree) {
           defaultInspectorViewIndex = 1;
         }
 

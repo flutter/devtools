@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -128,7 +128,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         searchPreventClose = false;
       }
     });
-    addAutoDisposeListener(preferences.inspector.pubRootDirectories, () {
+    addAutoDisposeListener(preferences.inspectorV2.pubRootDirectories, () {
       if (serviceConnection.serviceManager.hasConnection &&
           controller.firstInspectorTreeLoadCompleted) {
         _refreshInspector();
@@ -350,7 +350,7 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
               'General',
             ),
             CheckboxSetting(
-              notifier: preferences.inspector.hoverEvalModeEnabled
+              notifier: preferences.inspectorV2.hoverEvalModeEnabled
                   as ValueNotifier<bool?>,
               title: 'Enable hover inspection',
               description:
@@ -425,7 +425,7 @@ class InspectorSummaryTreeControls extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
                 child: Text(
-                  'Widget Tree',
+                  'Widget Tree 2.0',
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
               ),
@@ -580,7 +580,7 @@ class InspectorDefaultDetailsViewOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: preferences.inspector.defaultDetailsView,
+      valueListenable: preferences.inspectorV2.defaultDetailsView,
       builder: (context, selection, _) {
         final theme = Theme.of(context);
         return Column(
@@ -594,21 +594,21 @@ class InspectorDefaultDetailsViewOption extends StatelessWidget {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Radio<InspectorDetailsViewType>(
-                  value: InspectorDetailsViewType.layoutExplorer,
+                Radio<InspectorV2DetailsViewType>(
+                  value: InspectorV2DetailsViewType.layoutExplorer,
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   groupValue: selection,
                   onChanged: _onChanged,
                 ),
-                Text(InspectorDetailsViewType.layoutExplorer.key),
+                Text(InspectorV2DetailsViewType.layoutExplorer.key),
                 const SizedBox(width: denseSpacing),
-                Radio<InspectorDetailsViewType>(
+                Radio<InspectorV2DetailsViewType>(
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  value: InspectorDetailsViewType.widgetDetailsTree,
+                  value: InspectorV2DetailsViewType.widgetDetailsTree,
                   groupValue: selection,
                   onChanged: _onChanged,
                 ),
-                Text(InspectorDetailsViewType.widgetDetailsTree.key),
+                Text(InspectorV2DetailsViewType.widgetDetailsTree.key),
               ],
             ),
           ],
@@ -617,10 +617,10 @@ class InspectorDefaultDetailsViewOption extends StatelessWidget {
     );
   }
 
-  void _onChanged(InspectorDetailsViewType? value) {
+  void _onChanged(InspectorV2DetailsViewType? value) {
     if (value != null) {
-      preferences.inspector.setDefaultInspectorDetailsView(value);
-      final item = value.name == InspectorDetailsViewType.layoutExplorer.name
+      preferences.inspectorV2.setDefaultInspectorDetailsView(value);
+      final item = value.name == InspectorV2DetailsViewType.layoutExplorer.name
           ? gac.defaultDetailsViewToLayoutExplorer
           : gac.defaultDetailsViewToWidgetDetails;
       ga.select(
@@ -645,19 +645,20 @@ class PubRootDirectorySection extends StatelessWidget {
           child: EditableList(
             gaScreen: gac.inspector,
             gaRefreshSelection: gac.refreshPubRoots,
-            entries: preferences.inspector.pubRootDirectories,
+            entries: preferences.inspectorV2.pubRootDirectories,
             textFieldLabel: 'Enter a new package directory',
-            isRefreshing: preferences.inspector.isRefreshingPubRootDirectories,
+            isRefreshing:
+                preferences.inspectorV2.isRefreshingPubRootDirectories,
             onEntryAdded: (p0) => unawaited(
-              preferences.inspector.addPubRootDirectories(
+              preferences.inspectorV2.addPubRootDirectories(
                 [p0],
                 shouldCache: true,
               ),
             ),
-            onEntryRemoved: (p0) =>
-                unawaited(preferences.inspector.removePubRootDirectories([p0])),
+            onEntryRemoved: (p0) => unawaited(
+                preferences.inspectorV2.removePubRootDirectories([p0])),
             onRefreshTriggered: () =>
-                unawaited(preferences.inspector.loadPubRootDirectories()),
+                unawaited(preferences.inspectorV2.loadPubRootDirectories()),
           ),
         );
       },
