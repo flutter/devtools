@@ -1,24 +1,36 @@
+// Copyright 2024 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+
 import '../../../shared/utils.dart';
 import 'logging_controller_v2.dart';
 import 'logging_table_row.dart';
+import 'logging_table_v2.dart';
 
+/// A class for holding state and state changes relevant to [LoggingControllerV2]
+/// and [LoggingTableV2].
+///
+/// The [LoggingTableV2] table uses variable height rows. This model caches the
+/// relevant heights and offsets so that the row heights only need to be calculated
+/// once per parent width.
 class LoggingTableModel extends ChangeNotifier {
   LoggingTableModel() {
     _worker = InterruptableChunkWorker(
-      callback: getRowHeight,
+      callback: getFilteredLogHeight,
       progressCallback: (progress) => _cacheLoadProgress.value = progress,
     );
   }
 
-  final List<LogDataV2> _logs = [];
-  final List<LogDataV2> _filteredLogs = [];
-  final Set<int> _selectedLogs = <int>{};
+  final _logs = <LogDataV2>[];
+  final _filteredLogs = <LogDataV2>[];
+  final _selectedLogs = <int>{};
 
-  final Map<int, double> cachedHeights = {};
-  final Map<int, double> cachedOffets = {};
+  final cachedHeights = <int, double>{};
+  final cachedOffets = <int, double>{};
 
   late final InterruptableChunkWorker _worker;
 
@@ -29,6 +41,16 @@ class LoggingTableModel extends ChangeNotifier {
   ValueListenable<double?> get cacheLoadProgress => _cacheLoadProgress;
   final _cacheLoadProgress = ValueNotifier<double?>(null);
 
+  @override
+  void dispose() {
+    super.dispose();
+    _cacheLoadProgress.dispose();
+  }
+
+  /// Update the width of the table.
+  ///
+  /// This will flush all of the calculated heights, and recalculate their heights
+  /// in the background.
   set tableWidth(double width) {
     _tableWidth = width;
     cachedHeights.clear();
@@ -36,31 +58,43 @@ class LoggingTableModel extends ChangeNotifier {
     unawaited(_preFetchRowHeights());
   }
 
-  LogDataV2 getLog(int index) => _logs[index];
+  /// Get the filtered log at [index].
+  LogDataV2 getFilteredLog(int index) => _filteredLogs[index];
 
   double _tableWidth = 0.0;
 
+  /// The total number of logs being held by the [LoggingTableModel].
   int get logCount => _logs.length;
+
+  /// The number of filtered logs.
   int get filteredLogCount => _filteredLogs.length;
+
+  /// The number of selected logs.
   int get selectedLogCount => _selectedLogs.length;
 
+  /// Add a log to the list of tracked logs.
   void add(LogDataV2 log) {
+    // TODO(danchevalier): ensure that search and filter lists are updated here.
+
     _logs.add(log);
     _filteredLogs.add(log);
     notifyListeners();
   }
 
+  /// Clears all of the logs from the model.
   void clear() {
     _logs.clear();
     _filteredLogs.clear();
     notifyListeners();
   }
 
-  double getRowOffset(int _) {
+  /// Get the offset of a filtered log, at [index], from the top of the list of filtered logs.
+  double getFilteredLogOffset(int _) {
     throw 'Implement this when needed';
   }
 
-  double getRowHeight(int index) {
+  /// Get the height of a filtered Log at [index].
+  double getFilteredLogHeight(int index) {
     final cachedHeight = cachedHeights[index];
     if (cachedHeight != null) return cachedHeight;
     final newHeight = LoggingTableRow.calculateRowHeight(

@@ -26,7 +26,7 @@ import '../../../shared/ui/search.dart';
 import '../logging_controller.dart'
     show NavigationInfo, ServiceExtensionStateChangedInfo;
 import '../logging_screen.dart';
-import './logging_model.dart';
+import 'logging_model.dart';
 
 final _log = Logger('logging_controller');
 

@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyight 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -305,21 +305,21 @@ Future<void> launchUrlWithErrorHandling(String url) async {
 /// time a chunk finishes running, with a value that represents the proportion of
 /// indices that have been completed so far.
 ///
-/// This class may be helpful when sets of work need to be done over an array, while
+/// This class may be helpful when sets of work need to be done over a list, while
 /// avoiding blocking the UI thread.
 class InterruptableChunkWorker {
   InterruptableChunkWorker({
-    int chunkSize = 50,
+    int chunkSize = _defaultChunkSize,
     required this.callback,
     required this.progressCallback,
   }) : _chunkSize = chunkSize;
+
+  static const _defaultChunkSize = 50;
 
   final int _chunkSize;
   int _workId = 0;
   void Function(int) callback;
   void Function(double progress) progressCallback;
-
-  final _sw = Stopwatch();
 
   /// Start doing the chunked work.
   ///
@@ -329,39 +329,30 @@ class InterruptableChunkWorker {
   /// If [doWork] is called again, then [callback] will no longer be called
   /// on any remaining indices from previous [doWork] calls.
   ///
-  Future<bool> doWork(
-    int length,
-  ) {
+  Future<bool> doWork(int length) {
     final completer = Completer<bool>();
     final localWorkId = ++_workId;
-    final sw = Stopwatch();
 
-    Function(int i)? doChunkWork;
-
-    doChunkWork = (i) {
-      if (i >= length) {
-        sw.stop();
+    void doChunkWork(int chunkStartingIndex) {
+      if (chunkStartingIndex >= length) {
         return completer.complete(true);
       }
 
-      _sw.reset();
-      _sw.start();
+      final chunkUpperIndexLimit = min(length, chunkStartingIndex + _chunkSize);
 
-      final J = min(length, i + _chunkSize);
-      int j = i;
-      for (; j < J; j++) {
+      for (int indexIterator = chunkStartingIndex;
+          indexIterator < chunkUpperIndexLimit;
+          indexIterator++) {
         // If our localWorkId is no longer active, then do not continue working
         if (localWorkId != _workId) return completer.complete(false);
-        callback(j);
+        callback(indexIterator);
       }
-      _sw.stop();
 
-      progressCallback(j / length);
+      progressCallback(chunkUpperIndexLimit / length);
       Future.delayed(const Duration(), () {
-        doChunkWork!.call(i + _chunkSize);
+        doChunkWork.call(chunkStartingIndex + _chunkSize);
       });
-    };
-    sw.start();
+    }
 
     if (length <= 0) {
       return Future.value(true);

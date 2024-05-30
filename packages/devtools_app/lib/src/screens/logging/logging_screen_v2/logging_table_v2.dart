@@ -209,12 +209,12 @@ class _LoggingTableV2State extends State<LoggingTableV2> {
                                   itemBuilder: (context, index) {
                                     return LoggingTableRow(
                                       index: index,
-                                      data: widget.model.getLog(index),
+                                      data: widget.model.getFilteredLog(index),
                                       isSelected: false,
                                     );
                                   },
                                   itemExtentBuilder: (index, _) =>
-                                      widget.model.getRowHeight(index),
+                                      widget.model.getFilteredLogHeight(index),
                                 ),
                               ],
                             );

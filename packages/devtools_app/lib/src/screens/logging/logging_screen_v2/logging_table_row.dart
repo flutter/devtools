@@ -1,7 +1,11 @@
+// Copyright 2024 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../devtools_app.dart';
+import 'logging_controller_v2.dart';
 
 class LoggingTableRow extends StatefulWidget {
   const LoggingTableRow({
@@ -10,12 +14,14 @@ class LoggingTableRow extends StatefulWidget {
     required this.data,
     required this.isSelected,
   });
+
   final int index;
   final LogDataV2 data;
   final bool isSelected;
 
   @override
   State<LoggingTableRow> createState() => _LoggingTableRowState();
+
   static TextSpan _detailsSpan(String text) {
     return TextSpan(
       text: text,
@@ -30,10 +36,12 @@ class LoggingTableRow extends StatefulWidget {
     );
   }
 
-  static const TextStyle _detailsStyle = TextStyle();
-  static const TextStyle _metaDataStyle = TextStyle();
+  static const _detailsStyle = TextStyle();
+
+  static const _metaDataStyle = TextStyle();
 
   static const double _dividerHeight = 10.0;
+
   static double calculateRowHeight(LogDataV2 log, double width) {
     final text = log.asLogDetails();
 
