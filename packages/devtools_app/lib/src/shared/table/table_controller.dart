@@ -96,7 +96,7 @@ class FlatTableController<T> extends TableControllerBase<T> {
     ColumnData<T>? secondarySortColumn,
     String? dataKey,
   }) {
-    final List<T> data;
+    List<T> data;
     if (sortOriginalData) {
       data = _modifiableOriginalData;
     } else {
