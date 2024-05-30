@@ -32,7 +32,9 @@ void main() {
       await tester.pumpAndSettle(longPumpDuration);
       logStatus('6 - pumped and settled');
       expect(
-          find.text('Class type legend:', findRichText: true), findsOneWidget);
+        find.text('Class type legend:', findRichText: true),
+        findsOneWidget,
+      );
       logStatus('7 - found Class type legend');
 
       await tester.tap(find.text('Profile Memory'));
