@@ -14,6 +14,7 @@ import '../../../shared/globals.dart';
 import '../../../shared/primitives/utils.dart';
 import '../../../shared/server/server.dart' as server;
 import '../../../shared/utils.dart';
+import '../../../shared/feature_flags.dart';
 import '../deep_links_controller.dart';
 import '../deep_links_model.dart';
 import 'root_selector.dart';
@@ -132,11 +133,14 @@ class _SelectProjectViewState extends State<SelectProjectView>
     if (androidVariants.isEmpty) {
       await showNonFlutterProjectDialog();
     }
-    final iosBuildOptions = await _requestiOSBuildOptions(directory);
-    ga.select(
-      gac.deeplink,
-      gac.AnalyzeFlutterProject.flutterProjectSelected.name,
-    );
+    XcodeBuildOptions iosBuildOptions = XcodeBuildOptions.empty;
+    if (FeatureFlags.deepLinkIosCheck) {
+      iosBuildOptions = await _requestiOSBuildOptions(directory);
+      ga.select(
+        gac.deeplink,
+        gac.AnalyzeFlutterProject.flutterProjectSelected.name,
+      );
+    }
     controller.selectedProject.value = FlutterProject(
       path: directory,
       androidVariants: androidVariants,

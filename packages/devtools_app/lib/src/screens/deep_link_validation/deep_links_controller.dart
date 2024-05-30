@@ -206,7 +206,7 @@ class DeepLinksController extends DisposableController
   }
 
   AppLinkSettings? get currentAppLinkSettings =>
-      _androidAppLinks[selectedVariantIndex.value];
+      _androidAppLinks[selectedAndroidVariantIndex.value];
 
   final Map<int, AppLinkSettings> _androidAppLinks = <int, AppLinkSettings>{};
 

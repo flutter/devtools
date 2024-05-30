@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../shared/common_widgets.dart';
+import '../../shared/feature_flags.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
@@ -288,11 +289,13 @@ class _DeepLinkListViewTopPanel extends StatelessWidget {
             os: PlatformOS.android,
             controller: controller,
           ),
-          const SizedBox(width: denseSpacing),
-          _VariantDropdown(
-            os: PlatformOS.ios,
-            controller: controller,
-          ),
+          if (FeatureFlags.deepLinkIosCheck) ...[
+            const SizedBox(width: denseSpacing),
+            _VariantDropdown(
+              os: PlatformOS.ios,
+              controller: controller,
+            ),
+          ],
         ],
       ),
     );
