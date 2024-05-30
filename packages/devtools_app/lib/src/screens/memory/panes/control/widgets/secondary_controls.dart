@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
+import '../../../../../shared/feature_flags.dart';
 import '../../../../../shared/file_import.dart';
 import '../../../../../shared/primitives/simple_items.dart';
 import '../../../../../shared/screen.dart';
@@ -40,11 +41,13 @@ class SecondaryControls extends StatelessWidget {
           ),
           const SizedBox(width: denseSpacing),
         ],
-        OpenSaveButtonGroup(
-          screenId: ScreenMetaData.memory.id,
-          onSave: controller.exportData,
-        ),
-        const SizedBox(width: denseSpacing),
+        if (FeatureFlags.memoryOffline) ...[
+          OpenSaveButtonGroup(
+            screenId: ScreenMetaData.memory.id,
+            onSave: controller.exportData,
+          ),
+          const SizedBox(width: denseSpacing),
+        ],
         SettingsOutlinedButton(
           gaScreen: gac.memory,
           gaSelection: gac.MemoryEvent.settings,

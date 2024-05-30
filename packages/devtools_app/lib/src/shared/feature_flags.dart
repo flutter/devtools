@@ -35,6 +35,9 @@ void setEnableExperiments() {
 @visibleForTesting
 bool get enableBeta => enableExperiments || !isExternalBuild;
 
+const bool _kMemoryOfflineExperiment =
+    bool.fromEnvironment('memory_offline_experiment', defaultValue: true);
+
 // It is ok to have enum-like static only classes.
 // ignore: avoid_classes_with_only_static_members
 /// Flags to hide features under construction.
@@ -53,11 +56,22 @@ abstract class FeatureFlags {
   /// https://github.com/flutter/devtools/issues/4564.
   static bool widgetRebuildStats = true;
 
+  /// Flag to enable offline data on memory screen.
+  ///
+  /// https://github.com/flutter/devtools/issues/5606
+  static const bool memoryOffline =
+      _kMemoryOfflineExperiment; // requires special handling because it needs to be const
+
   /// Flag to enable the deep link validation tooling in DevTools, both for the
   /// DevTools screen and the standalone tool for IDE embedding.
   ///
   /// https://github.com/flutter/devtools/issues/6013
   static bool deepLinkValidation = true;
+
+  /// Flag to enable ios checks in deep link validation.
+  ///
+  /// https://github.com/flutter/devtools/issues/7799
+  static bool deepLinkIosCheck = false;
 
   /// Flag to enable DevTools extensions.
   ///
@@ -81,8 +95,10 @@ abstract class FeatureFlags {
   /// well.
   static final _allFlags = <String, bool>{
     'widgetRebuildStats': widgetRebuildStats,
+    'memoryOffline': memoryOffline,
     'dapDebugging': dapDebugging,
     'loggingV2': loggingV2,
+    'deepLinkIosCheck': deepLinkIosCheck,
   };
 
   /// A helper to print the status of all the feature flags.
