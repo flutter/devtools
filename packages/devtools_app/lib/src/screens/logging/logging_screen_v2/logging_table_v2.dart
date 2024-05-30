@@ -97,7 +97,7 @@ class _LoggingTableV2State extends State<LoggingTableV2> {
   }
 }
 
-class _LoggingTableContents extends StatelessWidget {
+class _LoggingTableContents extends StatefulWidget {
   _LoggingTableContents({
     required this.model,
     required ScrollController verticalController,
@@ -107,19 +107,25 @@ class _LoggingTableContents extends StatelessWidget {
   static const _millisecondsUntilCacheProgressHelperShows = 2000;
 
   final LoggingTableModel model;
-  final Stopwatch _progressStopwatch = Stopwatch();
   final ScrollController _verticalController;
+
+  @override
+  State<_LoggingTableContents> createState() => _LoggingTableContentsState();
+}
+
+class _LoggingTableContentsState extends State<_LoggingTableContents> {
+  final Stopwatch _progressStopwatch = Stopwatch();
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        model.tableWidth = constraints.maxWidth;
+        widget.model.tableWidth = constraints.maxWidth;
         _progressStopwatch.reset();
         return ListenableBuilder(
-          listenable: model.cacheLoadProgress,
+          listenable: widget.model.cacheLoadProgress,
           builder: (context, _) {
-            final cacheLoadProgress = model.cacheLoadProgress.value;
+            final cacheLoadProgress = widget.model.cacheLoadProgress.value;
             if (cacheLoadProgress != null) {
               double progress = cacheLoadProgress;
               if (!_progressStopwatch.isRunning) {
@@ -127,7 +133,7 @@ class _LoggingTableContents extends StatelessWidget {
               }
 
               if (_progressStopwatch.elapsedMilliseconds <
-                  _millisecondsUntilCacheProgressShows) {
+                  _LoggingTableContents._millisecondsUntilCacheProgressShows) {
                 progress = 0.0;
               }
 
@@ -148,7 +154,8 @@ class _LoggingTableContents extends StatelessWidget {
                     ),
                     const SizedBox(height: defaultSpacing),
                     if (_progressStopwatch.elapsedMilliseconds >
-                        _millisecondsUntilCacheProgressHelperShows)
+                        _LoggingTableContents
+                            ._millisecondsUntilCacheProgressHelperShows)
                       const Text(
                         'To make this process faster, then reduce the "Log Retention" setting.',
                       ),
@@ -160,24 +167,24 @@ class _LoggingTableContents extends StatelessWidget {
               _progressStopwatch.reset();
               return Scrollbar(
                 thumbVisibility: true,
-                controller: _verticalController,
+                controller: widget._verticalController,
                 child: ListenableBuilder(
-                  listenable: model,
+                  listenable: widget.model,
                   builder: (context, _) {
                     return CustomScrollView(
-                      controller: _verticalController,
+                      controller: widget._verticalController,
                       slivers: <Widget>[
                         SliverVariedExtentList.builder(
-                          itemCount: model.logCount,
+                          itemCount: widget.model.logCount,
                           itemBuilder: (context, index) {
                             return LoggingTableRow(
                               index: index,
-                              data: model.getFilteredLog(index),
+                              data: widget.model.getFilteredLog(index),
                               isSelected: false,
                             );
                           },
                           itemExtentBuilder: (index, _) =>
-                              model.getFilteredLogHeight(index),
+                              widget.model.getFilteredLogHeight(index),
                         ),
                       ],
                     );
@@ -189,6 +196,12 @@ class _LoggingTableContents extends StatelessWidget {
         );
       },
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _progressStopwatch.stop();
   }
 }
 
