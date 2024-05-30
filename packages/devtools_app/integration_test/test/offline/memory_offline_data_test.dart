@@ -22,19 +22,31 @@ void main() {
       await tester.pumpAndSettle(longPumpDuration);
 
       await tester.tap(find.text('_MyClass'));
-      await tester.pumpAndSettle(shortPumpDuration);
+      print(1111114);
+      await tester.pumpAndSettle(longPumpDuration);
+      print(1111115);
       expect(find.text('Traced allocations for: _MyClass'), findsOneWidget);
+      print(1111116);
 
       await tester.tap(find.text('Diff Snapshots'));
+      print(1111117);
       await tester.pumpAndSettle(shortPumpDuration);
+      print(1111118);
       await tester.tap(find.textContaining('main'));
+      print(1111119);
       await tester.pumpAndSettle(shortPumpDuration);
+      print(11111110);
       expect(find.text('_MyHomePageState'), findsOneWidget);
 
+      print(11111111);
       await tester.tap(find.text('Profile Memory'));
+      print(11111112);
       await tester.pumpAndSettle(shortPumpDuration);
+      print(11111113);
       expect(find.text('CSV'), findsOneWidget);
+      print(11111114);
       expect(find.text('MyApp'), findsOneWidget);
+      print(11111115);
     },
   );
 }
