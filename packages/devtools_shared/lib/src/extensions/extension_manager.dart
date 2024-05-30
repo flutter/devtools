@@ -159,7 +159,6 @@ class ExtensionsManager {
         '${extensions.map((e) => e.package).toList()}',
       );
     } catch (e) {
-      extensions = <Extension>[];
       rethrow;
     }
 
