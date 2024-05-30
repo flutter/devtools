@@ -98,7 +98,7 @@ class _LoggingTableV2State extends State<LoggingTableV2> {
 }
 
 class _LoggingTableContents extends StatefulWidget {
-  _LoggingTableContents({
+  const _LoggingTableContents({
     required this.model,
     required ScrollController verticalController,
   }) : _verticalController = verticalController;
