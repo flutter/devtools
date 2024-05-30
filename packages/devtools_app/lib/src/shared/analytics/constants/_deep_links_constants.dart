@@ -8,16 +8,16 @@ enum AnalyzeFlutterProject {
   /// A valid flutter project has been selected.
   flutterProjectSelected,
 
-  /// Used for recording the time spends in loading Android variants.
+  /// Used for recording the time spent in loading Android variants.
   loadVariants,
 
-  /// Used for recording the time spends in loading App Links.
+  /// Used for recording the time spent in loading App Links.
   loadAppLinks,
 
   /// App Links are loaded and there is at least one link.
   flutterHasAppLinks,
 
-  /// App Links are loaded and there is at least one link.
+  /// There is no app link in the project.
   flutterNoAppLink,
 
   /// App Links can't be loaded.
