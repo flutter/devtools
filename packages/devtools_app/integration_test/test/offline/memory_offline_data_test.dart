@@ -5,6 +5,7 @@
 import 'package:devtools_test/helpers.dart';
 import 'package:devtools_test/integration_test.dart';
 import 'package:devtools_test/test_data.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
@@ -18,38 +19,28 @@ void main() {
     'Memory screen can load offline data',
     (tester) async {
       await pumpDevTools(tester);
-      logStatus('!!!!!!!! 1');
+      logStatus('1 - pumped devtools');
       await loadSampleData(tester, memoryFileName);
-      logStatus('!!!!!!!! 2');
+      logStatus('2 - loaded sample data');
       await tester.pumpAndSettle(longPumpDuration);
-      logStatus('!!!!!!!! 3');
+      logStatus('3 - pumped and settled');
 
-      await tester.tap(find.text('_MyClass'));
-      logStatus('!!!!!!!! 4');
-      // await tester.pumpAndSettle(longPumpDuration);  // fails locally if this is uncommented
-      // logStatus('!!!!!!!! 5');
-      // expect(find.text('Traced allocations for: _MyClass'), findsOneWidget);
-      // logStatus('!!!!!!!! 6');
+      expect(find.text('_MyClass'), findsOneWidget);
+      logStatus('4 - tapped _MyClass');
 
-      // await tester.tap(find.text('Diff Snapshots'));
-      // logStatus('!!!!!!!! 7');
-      // await tester.pumpAndSettle(shortPumpDuration);
-      // logStatus('!!!!!!!! 8');
-      // await tester.tap(find.textContaining('main'));
-      // logStatus('!!!!!!!! 9');
-      // await tester.pumpAndSettle(shortPumpDuration);
-      // logStatus('!!!!!!!! 10');
-      // expect(find.text('_MyHomePageState'), findsOneWidget);
+      await tester.tap(find.text('Diff Snapshots'));
+      logStatus('5 - tapped Diff Snapshots');
+      await tester.pumpAndSettle(longPumpDuration);
+      logStatus('6 - pumped and settled');
+      expect(find.text('Class type legend:'), findsOneWidget);
+      logStatus('7 - found Class type legend');
 
-      // logStatus('!!!!!!!! 11');
-      // await tester.tap(find.text('Profile Memory'));
-      // logStatus('!!!!!!!! 12');
-      // await tester.pumpAndSettle(shortPumpDuration);
-      // logStatus('!!!!!!!! 13');
-      // expect(find.text('CSV'), findsOneWidget);
-      // logStatus('!!!!!!!! 14');
-      // expect(find.text('MyApp'), findsOneWidget);
-      // logStatus('!!!!!!!! 15');
+      await tester.tap(find.text('Profile Memory'));
+      logStatus('8 - tapped Profile Memory');
+      await tester.pumpAndSettle(longPumpDuration);
+      logStatus('9 - pumped and settled');
+      expect(find.text('CSV'), findsOneWidget);
+      logStatus('10 - found CSV');
     },
   );
 }
