@@ -18,35 +18,38 @@ void main() {
     'Memory screen can load offline data',
     (tester) async {
       await pumpDevTools(tester);
+      logStatus('!!!!!!!! 1');
       await loadSampleData(tester, memoryFileName);
+      logStatus('!!!!!!!! 2');
       await tester.pumpAndSettle(longPumpDuration);
+      logStatus('!!!!!!!! 3');
 
       await tester.tap(find.text('_MyClass'));
-      print(1111114);
+      logStatus('!!!!!!!! 4');
       await tester.pumpAndSettle(longPumpDuration);
-      print(1111115);
+      logStatus('!!!!!!!! 5');
       expect(find.text('Traced allocations for: _MyClass'), findsOneWidget);
-      print(1111116);
+      logStatus('!!!!!!!! 6');
 
       await tester.tap(find.text('Diff Snapshots'));
-      print(1111117);
+      logStatus('!!!!!!!! 7');
       await tester.pumpAndSettle(shortPumpDuration);
-      print(1111118);
+      logStatus('!!!!!!!! 8');
       await tester.tap(find.textContaining('main'));
-      print(1111119);
+      logStatus('!!!!!!!! 9');
       await tester.pumpAndSettle(shortPumpDuration);
-      print(11111110);
+      logStatus('!!!!!!!! 10');
       expect(find.text('_MyHomePageState'), findsOneWidget);
 
-      print(11111111);
+      logStatus('!!!!!!!! 11');
       await tester.tap(find.text('Profile Memory'));
-      print(11111112);
+      logStatus('!!!!!!!! 12');
       await tester.pumpAndSettle(shortPumpDuration);
-      print(11111113);
+      logStatus('!!!!!!!! 13');
       expect(find.text('CSV'), findsOneWidget);
-      print(11111114);
+      logStatus('!!!!!!!! 14');
       expect(find.text('MyApp'), findsOneWidget);
-      print(11111115);
+      logStatus('!!!!!!!! 15');
     },
   );
 }
