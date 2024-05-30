@@ -176,7 +176,7 @@ class HeapClassName with Serializable {
     return false;
   }
 
-  late final shortName =
+  late final String shortName =
       className == 'Context' && library == '' ? 'Closure Context' : className;
 
   ClassType? _cachedClassType;
@@ -196,7 +196,7 @@ class HeapClassName with Serializable {
     return ClassType.dependency;
   }
 
-  late final bool isCreatedByGoogle = isPackageless || isDartOrFlutter;
+  bool get isCreatedByGoogle => isPackageless || isDartOrFlutter;
 
   /// True, if the library does not belong to a package.
   ///
@@ -208,9 +208,9 @@ class HeapClassName with Serializable {
       (!library.startsWith(PackagePrefixes.dart) &&
           !library.startsWith(PackagePrefixes.genericDartPackage));
 
-  /// True, if the package has prefix `dart:` or has perfix `package:` and is
+  /// True, if the package has prefix `dart:` or has prefix `package:` and is
   /// published by Dart or Flutter org.
-  late final isDartOrFlutter = _isDartOrFlutter(library);
+  late final bool isDartOrFlutter = _isDartOrFlutter(library);
 
   static bool _isDartOrFlutter(String library) {
     if (library.startsWith(PackagePrefixes.dart)) return true;
