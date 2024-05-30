@@ -119,8 +119,7 @@ class _SelectProjectViewState extends State<SelectProjectView>
     final connected =
         serviceConnection.serviceManager.connectedState.value.connected;
     if (connected &&
-        !(serviceConnection.serviceManager.connectedApp!.isFlutterAppNow ??
-            false)) {
+        !serviceConnection.serviceManager.connectedApp!.isFlutterAppNow!) {
       await showNonFlutterProjectDialog();
       return;
     }

@@ -48,9 +48,12 @@ class _DeepLinkListViewState extends State<DeepLinkListView>
       controller.selectedAndroidVariantIndex.value = _getReleaseVariantIndex(
         controller.selectedProject.value!.androidVariants,
       );
-      controller.selectedIosConfigurationIndex.value = _getReleaseVariantIndex(
-        controller.selectedProject.value!.iosBuildOptions.configurations,
-      );
+      if (FeatureFlags.deepLinkIosCheck) {
+        controller.selectedIosConfigurationIndex.value =
+            _getReleaseVariantIndex(
+          controller.selectedProject.value!.iosBuildOptions.configurations,
+        );
+      }
     });
   }
 

@@ -31,5 +31,4 @@ enum AnalyzeFlutterProject {
   /// One possible cause is that the project can't be compiled due to dart
   /// error or gradle build error.
   flutterAppLinkLoadingError,
-
 }
