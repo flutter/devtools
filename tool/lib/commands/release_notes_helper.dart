@@ -14,14 +14,22 @@ import 'package:path/path.dart' as p;
 
 class ReleaseNotesCommand extends Command {
   ReleaseNotesCommand() {
-    argParser.addOption(
-      _websiteRepoPath,
-      abbr: 'w',
-      help: 'The absolute path to the flutter/website repo clone on disk.',
-    );
+    argParser
+      ..addOption(
+        _websiteRepoPath,
+        abbr: 'w',
+        help: 'The absolute path to the flutter/website repo clone on disk.',
+      )
+      ..addFlag(
+        _useCurrentBranch,
+        abbr: 'c',
+        help: 'Whether to use the current branch on the local flutter/website '
+            'checkout instead of creating a new one.',
+      );
   }
 
   static const _websiteRepoPath = 'website-repo';
+  static const _useCurrentBranch = 'use-current-branch';
 
   @override
   String get description =>
@@ -49,30 +57,33 @@ class ReleaseNotesCommand extends Command {
       'Drafting release notes for DevTools version $releaseNotesVersion...',
     );
 
-    // Create a local branch on the flutter/website repo.
+    // Maybe create a new branch on the flutter/website repo.
     final websiteRepoPath = argResults![_websiteRepoPath] as String;
-    try {
-      await processManager.runAll(
-        commands: [
-          CliCommand.git(['stash']),
-          CliCommand.git(['checkout', 'main']),
-          CliCommand.git(['pull']),
-          CliCommand.git(['submodule', 'update', '--init', '--recursive']),
-          CliCommand.git(
-            ['checkout', '-b', 'devtools-release-notes-$releaseNotesVersion'],
-          ),
-        ],
-        workingDirectory: websiteRepoPath,
-      );
-    } catch (e) {
-      log.stderr(
-        'Something went wrong while trying to prepare a branch on the '
-        'flutter/website repo. Please make sure your flutter/website clone '
-        'is set up as specified by the contributing instructions: '
-        'https://github.com/flutter/website?tab=readme-ov-file#contributing.'
-        '\n\n$e',
-      );
-      return;
+    final useCurrentBranch = argResults![_useCurrentBranch] as bool;
+    if (!useCurrentBranch) {
+      try {
+        await processManager.runAll(
+          commands: [
+            CliCommand.git(['stash']),
+            CliCommand.git(['checkout', 'main']),
+            CliCommand.git(['pull']),
+            CliCommand.git(['submodule', 'update', '--init', '--recursive']),
+            CliCommand.git(
+              ['checkout', '-b', 'devtools-release-notes-$releaseNotesVersion'],
+            ),
+          ],
+          workingDirectory: websiteRepoPath,
+        );
+      } catch (e) {
+        log.stderr(
+          'Something went wrong while trying to prepare a branch on the '
+          'flutter/website repo. Please make sure your flutter/website clone '
+          'is set up as specified by the contributing instructions: '
+          'https://github.com/flutter/website?tab=readme-ov-file#contributing.'
+          '\n\n$e',
+        );
+        return;
+      }
     }
 
     final websiteReleaseNotesDir = Directory(
@@ -168,11 +179,20 @@ toc: false
   - '$releaseNotesVersion\'''');
     releasesYml.writeAsStringSync(releasesYmlContent, flush: true);
 
+    const firstPartInstructions =
+        'Release notes successfully drafted in a local flutter/website branch. '
+        'Please clean them up by deleting empty sections and fixing any '
+        'grammar mistakes or typos. Run the following to open the release '
+        'notes source file:';
     log.stdout(
-      'Release notes successfully drafted in a local flutter/website branch. '
-      'Please clean them up by deleting empty sections and fixing any grammar '
-      'mistakes or typos.\n\nCreate a PR on the flutter/website repo when you are '
-      'finished.',
+      '''
+$firstPartInstructions
+
+cd $websiteRepoPath;
+code ${releaseNotesSrcMd.absolute.path}
+
+Create a PR on the flutter/website repo when you are finished.
+''',
     );
   }
 }
@@ -234,5 +254,5 @@ class _DevToolsReleaseNotes {
   final List<String> srcLines;
   final Set<int> imageLineIndices;
 
-  static const _imagePathMarker = './images/';
+  static final _imagePathMarker = RegExp(r'images\/.*\.png');
 }
