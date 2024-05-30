@@ -176,7 +176,7 @@ class HeapClassName with Serializable {
     return false;
   }
 
-  late final String shortName =
+  late final shortName =
       className == 'Context' && library == '' ? 'Closure Context' : className;
 
   ClassType? _cachedClassType;
@@ -210,7 +210,7 @@ class HeapClassName with Serializable {
 
   /// True, if the package has prefix `dart:` or has prefix `package:` and is
   /// published by Dart or Flutter org.
-  late final bool isDartOrFlutter = _isDartOrFlutter(library);
+  late final isDartOrFlutter = _isDartOrFlutter(library);
 
   static bool _isDartOrFlutter(String library) {
     if (library.startsWith(PackagePrefixes.dart)) return true;
