@@ -33,8 +33,6 @@ class _LoggingTableV2State extends State<LoggingTableV2> {
   final Set<int> selections = <int>{};
   final Map<int, double> cachedOffets = {};
   final normalTextStyle = const TextStyle(color: Colors.black, fontSize: 14.0);
-  static const _millisecondsUntilCacheProgressShows = 500;
-  static const _millisecondsUntilCacheProgressHelperShows = 2000;
   String lastSearch = '';
   final metadataTextStyle = const TextStyle(
     color: Colors.black,
@@ -42,7 +40,6 @@ class _LoggingTableV2State extends State<LoggingTableV2> {
     fontSize: 12.0,
   );
   double maxWidth = 0.0;
-  final _progressStopwatch = Stopwatch();
 
   @override
   void initState() {
@@ -62,6 +59,199 @@ class _LoggingTableV2State extends State<LoggingTableV2> {
     super.dispose();
   }
 
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: 'Filter',
+                ),
+                onSubmitted: (value) {},
+              ),
+            ),
+            const Expanded(
+              child: TextField(
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: 'Search',
+                ),
+              ),
+            ),
+          ],
+        ),
+        Expanded(
+          child: _LoggingTableContextMenu(
+            child: _LoggingTableContents(
+              model: widget.model,
+              verticalController: _verticalController,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _LoggingTableContents extends StatelessWidget {
+  _LoggingTableContents({
+    required this.model,
+    required ScrollController verticalController,
+  }) : _verticalController = verticalController;
+
+  static const _millisecondsUntilCacheProgressShows = 500;
+  static const _millisecondsUntilCacheProgressHelperShows = 2000;
+
+  final LoggingTableModel model;
+  final Stopwatch _progressStopwatch = Stopwatch();
+  final ScrollController _verticalController;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        model.tableWidth = constraints.maxWidth;
+        _progressStopwatch.reset();
+        return ListenableBuilder(
+          listenable: model.cacheLoadProgress,
+          builder: (context, _) {
+            final cacheLoadProgress = model.cacheLoadProgress.value;
+            if (cacheLoadProgress != null) {
+              double progress = cacheLoadProgress;
+              if (!_progressStopwatch.isRunning) {
+                _progressStopwatch.start();
+              }
+
+              if (_progressStopwatch.elapsedMilliseconds <
+                  _millisecondsUntilCacheProgressShows) {
+                progress = 0.0;
+              }
+
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'Resizing... this will only take a moment.',
+                    ),
+                    const SizedBox(height: defaultSpacing),
+                    SizedBox(
+                      width: defaultLinearProgressIndicatorWidth,
+                      height: defaultLinearProgressIndicatorHeight,
+                      child: LinearProgressIndicator(
+                        value: progress,
+                      ),
+                    ),
+                    const SizedBox(height: defaultSpacing),
+                    if (_progressStopwatch.elapsedMilliseconds >
+                        _millisecondsUntilCacheProgressHelperShows)
+                      const Text(
+                        'To make this process faster, then reduce the "Log Retention" setting.',
+                      ),
+                  ],
+                ),
+              );
+            } else {
+              _progressStopwatch.stop();
+              _progressStopwatch.reset();
+              return Scrollbar(
+                thumbVisibility: true,
+                controller: _verticalController,
+                child: ListenableBuilder(
+                  listenable: model,
+                  builder: (context, _) {
+                    return CustomScrollView(
+                      controller: _verticalController,
+                      slivers: <Widget>[
+                        SliverVariedExtentList.builder(
+                          itemCount: model.logCount,
+                          itemBuilder: (context, index) {
+                            return LoggingTableRow(
+                              index: index,
+                              data: model.getFilteredLog(index),
+                              isSelected: false,
+                            );
+                          },
+                          itemExtentBuilder: (index, _) =>
+                              model.getFilteredLogHeight(index),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              );
+            }
+          },
+        );
+      },
+    );
+  }
+}
+
+class _LoggingTableContextMenu extends StatelessWidget {
+  const _LoggingTableContextMenu({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return _ContextMenuRegion(
+      contextMenuBuilder: (context, offset) {
+        // The custom context menu will look like the default context menu
+        // on the current platform with a single 'Print' button.
+        return AdaptiveTextSelectionToolbar.buttonItems(
+          anchors: TextSelectionToolbarAnchors(
+            primaryAnchor: offset,
+          ),
+          buttonItems: <ContextMenuButtonItem>[
+            ContextMenuButtonItem(
+              onPressed: () {
+                ContextMenuController.removeAny();
+                _showDialog(context, 'You copied selected rows');
+              },
+              label: 'Copy Selected Rows',
+            ),
+            ContextMenuButtonItem(
+              onPressed: () {
+                ContextMenuController.removeAny();
+                _showDialog(
+                  context,
+                  'You copied selected rows with metadata',
+                );
+              },
+              label: 'Copy Selected Rows with Metadata',
+            ),
+            ContextMenuButtonItem(
+              onPressed: () {
+                ContextMenuController.removeAny();
+                _showDialog(
+                  context,
+                  'Hiding items with the same address',
+                );
+              },
+              label: 'Hide items with same Address',
+            ),
+            ContextMenuButtonItem(
+              onPressed: () {
+                ContextMenuController.removeAny();
+                _showDialog(
+                  context,
+                  'Showing items with the same address',
+                );
+              },
+              label: 'Show items with same Address',
+            ),
+          ],
+        );
+      },
+      child: child,
+    );
+  }
+
   void _showDialog(BuildContext context, String message) {
     unawaited(
       Navigator.of(context).push(
@@ -70,165 +260,6 @@ class _LoggingTableV2State extends State<LoggingTableV2> {
           builder: (BuildContext context) => AlertDialog(title: Text(message)),
         ),
       ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        widget.model.tableWidth = constraints.maxWidth;
-        _progressStopwatch.reset();
-        return Column(
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      hintText: 'Filter',
-                    ),
-                    onSubmitted: (value) {},
-                  ),
-                ),
-                const Expanded(
-                  child: TextField(
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      hintText: 'Search',
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            Expanded(
-              child: _ContextMenuRegion(
-                contextMenuBuilder: (context, offset) {
-                  // The custom context menu will look like the default context menu
-                  // on the current platform with a single 'Print' button.
-                  return AdaptiveTextSelectionToolbar.buttonItems(
-                    anchors: TextSelectionToolbarAnchors(
-                      primaryAnchor: offset,
-                    ),
-                    buttonItems: <ContextMenuButtonItem>[
-                      ContextMenuButtonItem(
-                        onPressed: () {
-                          ContextMenuController.removeAny();
-                          _showDialog(context, 'You copied selected rows');
-                        },
-                        label: 'Copy Selected Rows',
-                      ),
-                      ContextMenuButtonItem(
-                        onPressed: () {
-                          ContextMenuController.removeAny();
-                          _showDialog(
-                            context,
-                            'You copied selected rows with metadata',
-                          );
-                        },
-                        label: 'Copy Selected Rows with Metadata',
-                      ),
-                      ContextMenuButtonItem(
-                        onPressed: () {
-                          ContextMenuController.removeAny();
-                          _showDialog(
-                            context,
-                            'Hiding items with the same address',
-                          );
-                        },
-                        label: 'Hide items with same Address',
-                      ),
-                      ContextMenuButtonItem(
-                        onPressed: () {
-                          ContextMenuController.removeAny();
-                          _showDialog(
-                            context,
-                            'Showing items with the same address',
-                          );
-                        },
-                        label: 'Show items with same Address',
-                      ),
-                    ],
-                  );
-                },
-                child: ListenableBuilder(
-                  listenable: widget.model.cacheLoadProgress,
-                  builder: (context, _) {
-                    final cacheLoadProgress =
-                        widget.model.cacheLoadProgress.value;
-                    if (cacheLoadProgress != null) {
-                      double progress = cacheLoadProgress;
-                      if (!_progressStopwatch.isRunning) {
-                        _progressStopwatch.start();
-                      }
-
-                      if (_progressStopwatch.elapsedMilliseconds <
-                          _millisecondsUntilCacheProgressShows) {
-                        progress = 0.0;
-                      }
-
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text(
-                              'Resizing... this will only take a moment.',
-                            ),
-                            const SizedBox(height: defaultSpacing),
-                            SizedBox(
-                              width: defaultLinearProgressIndicatorWidth,
-                              height: defaultLinearProgressIndicatorHeight,
-                              child: LinearProgressIndicator(
-                                value: progress,
-                              ),
-                            ),
-                            const SizedBox(height: defaultSpacing),
-                            if (_progressStopwatch.elapsedMilliseconds >
-                                _millisecondsUntilCacheProgressHelperShows)
-                              const Text(
-                                'To make this process faster, then reduce the "Log Retention" setting.',
-                              ),
-                          ],
-                        ),
-                      );
-                    } else {
-                      _progressStopwatch.stop();
-                      _progressStopwatch.reset();
-                      return Scrollbar(
-                        thumbVisibility: true,
-                        controller: _verticalController,
-                        child: ListenableBuilder(
-                          listenable: widget.model,
-                          builder: (context, _) {
-                            return CustomScrollView(
-                              controller: _verticalController,
-                              slivers: <Widget>[
-                                SliverVariedExtentList.builder(
-                                  itemCount: widget.model.logCount,
-                                  itemBuilder: (context, index) {
-                                    return LoggingTableRow(
-                                      index: index,
-                                      data: widget.model.getFilteredLog(index),
-                                      isSelected: false,
-                                    );
-                                  },
-                                  itemExtentBuilder: (index, _) =>
-                                      widget.model.getFilteredLogHeight(index),
-                                ),
-                              ],
-                            );
-                          },
-                        ),
-                      );
-                    }
-                  },
-                ),
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 }
