@@ -109,7 +109,7 @@ class InspectorTreeController extends DisposableController
       gac.inspector,
       gac.inspectorTreeControllerInitialized,
       nonInteraction: true,
-      screenMetricsProvider: () => InspectorScreenMetrics.legacy(
+      screenMetricsProvider: () => InspectorScreenMetrics.v2(
         inspectorTreeControllerId: gaId,
         rootSetCount: _rootSetCount,
         rowCount: _root?.subtreeSize,
@@ -170,7 +170,7 @@ class InspectorTreeController extends DisposableController
         gac.inspector,
         gac.inspectorTreeControllerRootChange,
         nonInteraction: true,
-        screenMetricsProvider: () => InspectorScreenMetrics.legacy(
+        screenMetricsProvider: () => InspectorScreenMetrics.v2(
           inspectorTreeControllerId: gaId,
           rootSetCount: ++_rootSetCount,
           rowCount: _root?.subtreeSize,

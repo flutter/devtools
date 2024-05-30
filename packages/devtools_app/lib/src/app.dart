@@ -28,6 +28,9 @@ import 'screens/deep_link_validation/deep_links_screen.dart';
 import 'screens/inspector/inspector_controller.dart';
 import 'screens/inspector/inspector_screen.dart';
 import 'screens/inspector/inspector_tree_controller.dart';
+import 'screens/inspector_v2/inspector_controller.dart' as inspector_v2;
+import 'screens/inspector_v2/inspector_screen.dart' as inspector_v2;
+import 'screens/inspector_v2/inspector_tree_controller.dart' as inspector_v2;
 import 'screens/logging/logging_controller.dart';
 import 'screens/logging/logging_screen.dart';
 import 'screens/logging/logging_screen_v2/logging_controller_v2.dart';
@@ -594,18 +597,34 @@ List<DevToolsScreen> defaultScreens({
 }) {
   return devtoolsScreens ??= <DevToolsScreen>[
     DevToolsScreen<void>(HomeScreen(sampleData: sampleData)),
-    DevToolsScreen<InspectorController>(
-      InspectorScreen(),
-      createController: (_) => InspectorController(
-        inspectorTree: InspectorTreeController(
-          gaId: InspectorScreenMetrics.summaryTreeGaId,
+    // TODO(https://github.com/flutter/devtools/issues/7860): Clean-up after
+    // Inspector V2 has been released.
+    if (FeatureFlags.inspectorV2)
+      DevToolsScreen<inspector_v2.InspectorController>(
+        inspector_v2.InspectorScreen(),
+        createController: (_) => inspector_v2.InspectorController(
+          inspectorTree: inspector_v2.InspectorTreeController(
+            gaId: InspectorScreenMetrics.summaryTreeGaId,
+          ),
+          detailsTree: inspector_v2.InspectorTreeController(
+            gaId: InspectorScreenMetrics.detailsTreeGaId,
+          ),
+          treeType: FlutterTreeType.widget,
         ),
-        detailsTree: InspectorTreeController(
-          gaId: InspectorScreenMetrics.detailsTreeGaId,
-        ),
-        treeType: FlutterTreeType.widget,
       ),
-    ),
+    if (!FeatureFlags.inspectorV2)
+      DevToolsScreen<InspectorController>(
+        InspectorScreen(),
+        createController: (_) => InspectorController(
+          inspectorTree: InspectorTreeController(
+            gaId: InspectorScreenMetrics.summaryTreeGaId,
+          ),
+          detailsTree: InspectorTreeController(
+            gaId: InspectorScreenMetrics.detailsTreeGaId,
+          ),
+          treeType: FlutterTreeType.widget,
+        ),
+      ),
     DevToolsScreen<PerformanceController>(
       PerformanceScreen(),
       createController: (_) => PerformanceController(),
