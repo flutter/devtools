@@ -33,7 +33,7 @@ class AppLinkSettings {
     );
   }
 
-  /// Used when the the server can't retrieve app link settings.
+  /// Used when the server can't retrieve app link settings.
   ///
   /// The input needs to be in json format from DevTools server response.
   factory AppLinkSettings.fromErrorJson(String json) {
@@ -47,7 +47,7 @@ class AppLinkSettings {
     );
   }
 
-  /// Used when the the server can't retrieve app link settings.
+  /// Used when the server can't retrieve app link settings.
   factory AppLinkSettings.error(String message) {
     return AppLinkSettings._(
       '',
