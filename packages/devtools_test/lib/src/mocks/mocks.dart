@@ -7,13 +7,14 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:devtools_app/devtools_app.dart';
+// ignore: implementation_imports, required to separate V2 inspector imports.
+import 'package:devtools_app/src/screens/inspector_v2/inspector_controller.dart'
+    as inspector_v2;
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
-import 'package:devtools_app/src/screens/inspector_v2/inspector_controller.dart'
-    as inspector_v2;
 
 import 'generated_mocks_factories.dart';
 
