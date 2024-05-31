@@ -206,8 +206,7 @@ class FlutterSdk {
   static String get dartWrapperExecutableName =>
       Platform.isWindows ? 'dart.bat' : 'dart';
 
-  String get flutterExePath =>
-      path.join(sdkPath, 'bin', flutterExecutableName);
+  String get flutterExePath => path.join(sdkPath, 'bin', flutterExecutableName);
 
   String get dartExePath =>
       path.join(sdkPath, 'bin', dartWrapperExecutableName);
