@@ -447,7 +447,7 @@ List<DartObjectNode> _createLiveOutboundReferencesForFields(
 ) {
   final variables = <DartObjectNode>[];
 
-  for (var field in instance.fields!) {
+  for (final field in instance.fields!) {
     _addLiveReferenceToNode(
       variables,
       isolateRef,

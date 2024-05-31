@@ -158,7 +158,7 @@ class DeepLinksController extends DisposableController {
   @visibleForTesting
   List<LinkData> linkDatasByPath(List<LinkData> linkdatas) {
     final linkDatasByPath = <String, LinkData>{};
-    for (var linkData in linkdatas) {
+    for (final linkData in linkdatas) {
       final previousRecord = linkDatasByPath[linkData.path];
       linkDatasByPath[linkData.path] = LinkData(
         domain: linkData.domain,
@@ -186,7 +186,7 @@ class DeepLinksController extends DisposableController {
   @visibleForTesting
   List<LinkData> linkDatasByDomain(List<LinkData> linkdatas) {
     final linkDatasByDomain = <String, LinkData>{};
-    for (var linkData in linkdatas) {
+    for (final linkData in linkdatas) {
       if (linkData.domain.isNullOrEmpty) {
         continue;
       }

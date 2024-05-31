@@ -90,7 +90,7 @@ class MemoryTracker {
 
   Future<void> pollMemory() async {
     final isolateMemory = <IsolateRef, MemoryUsage>{};
-    for (IsolateRef isolateRef
+    for (final isolateRef
         in serviceConnection.serviceManager.isolateManager.isolates.value) {
       if (await _isIsolateLive(isolateRef.id!)) {
         isolateMemory[isolateRef] = await serviceConnection
@@ -137,7 +137,7 @@ class MemoryTracker {
 
     _isolateHeaps.clear();
 
-    for (IsolateRef isolateRef in isolateMemory.keys) {
+    for (final IsolateRef isolateRef in isolateMemory.keys) {
       _isolateHeaps[isolateRef.id!] = isolateMemory[isolateRef]!;
     }
 

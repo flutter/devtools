@@ -687,7 +687,7 @@ class AppSizeController {
     int totalByteSize = 0;
 
     // Given a child, build its subtree.
-    for (Map<String, dynamic> child in rawChildren) {
+    for (final Map<String, dynamic> child in rawChildren) {
       final childTreemapNode = showDiff
           ? generateDiffTree(child, diffTreeType!)
           : generateTree(child);
@@ -721,7 +721,7 @@ class AppSizeController {
     }
     final childrenMap = <String, TreemapNode>{};
 
-    for (TreemapNode child in children) {
+    for (final TreemapNode child in children) {
       childrenMap[child.name] = child;
     }
 

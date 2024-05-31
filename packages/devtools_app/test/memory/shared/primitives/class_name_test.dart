@@ -66,7 +66,7 @@ final _classTests = [
 
 void main() {
   group('$HeapClassName', () {
-    for (var t in _classTests) {
+    for (final t in _classTests) {
       test('isCore and isDartOrFlutter for ${t.name}', () {
         final theClass =
             HeapClassName.fromPath(className: 'x', library: t.library);

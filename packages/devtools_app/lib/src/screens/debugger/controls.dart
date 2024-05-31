@@ -258,7 +258,7 @@ class BreakOnExceptionsControl extends StatelessWidget {
                 },
           isDense: true,
           items: [
-            for (var mode in ExceptionMode.modes)
+            for (final mode in ExceptionMode.modes)
               DropdownMenuItem<ExceptionMode>(
                 value: mode,
                 child: Text(

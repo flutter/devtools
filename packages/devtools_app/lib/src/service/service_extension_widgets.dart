@@ -79,9 +79,9 @@ class _ServiceExtensionButtonGroupState
   void _onMainIsolateChanged() => _initExtensionState();
 
   void _initExtensionState() {
-    _extensionStates = [for (var e in widget.extensions) ExtensionState(e)];
+    _extensionStates = [for (final e in widget.extensions) ExtensionState(e)];
 
-    for (var extension in _extensionStates) {
+    for (final extension in _extensionStates) {
       // Listen for changes to the state of each service extension using the
       // VMServiceManager.
       final extensionName = extension.description.extension;
@@ -128,10 +128,10 @@ class _ServiceExtensionButtonGroupState
     return SizedBox(
       height: defaultButtonHeight,
       child: DevToolsToggleButtonGroup(
-        selectedStates: [for (var e in _extensionStates) e.isSelected],
+        selectedStates: [for (final e in _extensionStates) e.isSelected],
         onPressed: available ? _onPressed : null,
         children: <Widget>[
-          for (var extensionState in _extensionStates)
+          for (final extensionState in _extensionStates)
             ServiceExtensionButton(
               extensionState: extensionState,
               minScreenWidthForTextBeforeScaling:

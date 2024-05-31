@@ -70,7 +70,7 @@ class _ConnectionDescriptionColumn extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for (var entry in entries)
+        for (final entry in entries)
           Padding(
             padding: EdgeInsets.only(
               bottom: entry == entries.last ? 0.0 : denseRowSpacing,

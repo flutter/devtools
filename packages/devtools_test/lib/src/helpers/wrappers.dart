@@ -160,7 +160,7 @@ void testWidgetsWithContext(
   testWidgets(description, (WidgetTester widgetTester) async {
     // set up the context
     final Map<Type, dynamic> oldValues = {};
-    for (Type type in context.keys) {
+    for (final type in context.keys) {
       oldValues[type] = globals[type];
       setGlobal(type, context[type]);
     }
@@ -169,7 +169,7 @@ void testWidgetsWithContext(
       await callback(widgetTester);
     } finally {
       // restore previous global values
-      for (Type type in oldValues.keys) {
+      for (final type in oldValues.keys) {
         final oldGlobal = oldValues[type];
         if (oldGlobal != null) {
           setGlobal(type, oldGlobal);

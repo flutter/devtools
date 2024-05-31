@@ -99,7 +99,7 @@ void main() {
     expect(_Tests.noSelection.stateForIsolate.length, 2);
   });
 
-  for (var t in _Tests.all.keys) {
+  for (final t in _Tests.all.keys) {
     test(
       '$TracePaneController serializes and deserializes correctly, $t',
       () {

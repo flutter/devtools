@@ -134,7 +134,7 @@ class ExtensionEvents {
   Map<String, dynamic> toJson() {
     final eventsAsJson = <String, dynamic>{};
     var index = 0;
-    for (var event in events) {
+    for (final event in events) {
       eventsAsJson['$index'] = event.toJson();
       index++;
     }

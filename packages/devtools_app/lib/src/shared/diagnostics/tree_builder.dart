@@ -30,7 +30,7 @@ Future<void> _addExpandableChildren(
   bool expandAll = false,
 }) async {
   final tasks = <Future>[];
-  for (var child in children) {
+  for (final child in children) {
     if (expandAll) {
       tasks.add(buildVariablesTree(child, expandAll: expandAll));
     }
@@ -149,7 +149,7 @@ Future<void> _addInstanceRefItems(
   assert(ref is! ObjectReferences);
 
   final existingNames = <String>{};
-  for (var child in variable.children) {
+  for (final child in variable.children) {
     final name = child.name;
     if (name != null && name.isNotEmpty) {
       existingNames.add(name);
@@ -370,7 +370,7 @@ Future<void> _addInspectorItems(
       }
     }
 
-    for (var child in variable.children) {
+    for (final child in variable.children) {
       tasks.add(maybeUpdateRef(child));
     }
     if (tasks.isNotEmpty) {

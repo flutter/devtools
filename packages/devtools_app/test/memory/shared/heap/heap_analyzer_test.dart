@@ -10,7 +10,7 @@ import 'package:vm_service/vm_service.dart';
 import '../../../test_infra/test_data/memory/heap/heap_graph_fakes.dart';
 
 void main() {
-  for (var t in _sizeTests) {
+  for (final t in _sizeTests) {
     test('has expected root and unreachable sizes, ${t.name}.', () async {
       final heap = HeapData(
         t.heap,

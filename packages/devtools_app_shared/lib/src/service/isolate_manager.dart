@@ -225,11 +225,11 @@ final class IsolateManager with DisposerMixin {
     if (_isolateStates.isEmpty) return null;
 
     final service = _service;
-    for (var isolateState in _isolateStates.values) {
+    for (final isolateState in _isolateStates.values) {
       if (_selectedIsolate.value == null) {
         final isolate = await isolateState.isolate;
         if (service != _service) return null;
-        for (String extensionName in isolate?.extensionRPCs ?? []) {
+        for (final extensionName in isolate?.extensionRPCs ?? <String>[]) {
           if (extensions.isFlutterExtension(extensionName)) {
             return isolateState.isolateRef;
           }
@@ -289,7 +289,7 @@ final class IsolateManager with DisposerMixin {
   }
 
   void _clearIsolateStates() {
-    for (var isolateState in _isolateStates.values) {
+    for (final isolateState in _isolateStates.values) {
       isolateState.dispose();
     }
     _isolateStates.clear();

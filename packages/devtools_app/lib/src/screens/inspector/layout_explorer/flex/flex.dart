@@ -155,7 +155,7 @@ class FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
               : colorScheme.crossAxisColor,
           selectedItemBuilder: (context) {
             return [
-              for (var alignment in alignmentEnumEntries)
+              for (final alignment in alignmentEnumEntries)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -190,7 +190,7 @@ class FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
             ];
           },
           items: [
-            for (var alignment in alignmentEnumEntries)
+            for (final alignment in alignmentEnumEntries)
               DropdownMenuItem(
                 value: alignment,
                 child: Container(
@@ -510,7 +510,7 @@ class _VisualizeFlexChildrenState extends State<VisualizeFlexChildren> {
           }
 
           final freeSpacesWidgets = [
-            for (var renderProperties in [
+            for (final renderProperties in [
               ...mainAxisSpaces,
               ...crossAxisSpaces,
             ])

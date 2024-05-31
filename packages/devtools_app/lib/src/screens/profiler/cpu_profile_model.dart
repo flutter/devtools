@@ -625,7 +625,7 @@ class CpuProfileData with Serializable {
       urisWithoutPackageUri.toList(),
     );
 
-    for (var stackFrameJson in stackFramesWaitingOnPackageUri) {
+    for (final stackFrameJson in stackFramesWaitingOnPackageUri) {
       final resolvedUri =
           stackFrameJson[CpuProfileData.resolvedUrlKey] as String;
       final packageUri = serviceConnection.serviceManager.resolvedUriManager
@@ -1032,7 +1032,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
   @override
   CpuStackFrame deepCopy() {
     final copy = shallowCopy();
-    for (CpuStackFrame child in children) {
+    for (final child in children) {
       copy.addChild(child.deepCopy());
     }
     return copy;

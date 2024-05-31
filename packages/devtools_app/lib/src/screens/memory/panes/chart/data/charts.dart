@@ -238,7 +238,8 @@ class ChartsValues {
 
     if (eventInfo.hasExtensionEvents) {
       final events = <Map<String, Object>>[];
-      for (ExtensionEvent event in eventInfo.extensionEvents?.events ?? []) {
+      for (final event
+          in eventInfo.extensionEvents?.events ?? <ExtensionEvent>[]) {
         if (event.customEventName != null) {
           events.add(
             {

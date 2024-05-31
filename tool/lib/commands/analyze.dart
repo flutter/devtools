@@ -41,7 +41,7 @@ class AnalyzeCommand extends Command {
 
     int failureCount = 0;
 
-    for (Package p in packages) {
+    for (final p in packages) {
       if (!p.hasAnyDartCode) {
         continue;
       }

@@ -298,10 +298,10 @@ class BreakpointManager with DisposerMixin {
 
     final positions = <SourcePosition>[];
 
-    for (SourceReportRange range in report.ranges!) {
+    for (final range in report.ranges!) {
       final possibleBreakpoints = range.possibleBreakpoints;
       if (possibleBreakpoints != null) {
-        for (int tokenPos in possibleBreakpoints) {
+        for (final tokenPos in possibleBreakpoints) {
           positions.add(SourcePosition.calculatePosition(script, tokenPos));
         }
       }
@@ -361,7 +361,7 @@ class BreakpointManager with DisposerMixin {
       case EventKind.kBreakpointResolved:
         final breakpoint = event.breakpoint!;
         _breakpoints.value = [
-          for (var b in _breakpoints.value)
+          for (final b in _breakpoints.value)
             if (b != event.breakpoint) b,
           breakpoint,
         ];
@@ -393,12 +393,12 @@ class BreakpointManager with DisposerMixin {
         final breakpoint = event.breakpoint;
 
         _breakpoints.value = [
-          for (var b in _breakpoints.value)
+          for (final b in _breakpoints.value)
             if (b != breakpoint) b,
         ];
 
         _breakpointsWithLocation.value = [
-          for (var b in _breakpointsWithLocation.value)
+          for (final b in _breakpointsWithLocation.value)
             if (b.breakpoint != breakpoint) b,
         ];
 

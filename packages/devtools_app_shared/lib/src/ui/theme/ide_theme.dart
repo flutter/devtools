@@ -37,7 +37,7 @@ final class IdeTheme {
   bool get isDarkMode => _isDarkMode ?? true;
 
   /// Whether the IDE specified the DevTools color theme.
-  /// 
+  ///
   /// If this returns false, that means the
   /// [IdeThemeQueryParams.devToolsThemeKey] query parameter was not passed to
   /// DevTools from the IDE.
