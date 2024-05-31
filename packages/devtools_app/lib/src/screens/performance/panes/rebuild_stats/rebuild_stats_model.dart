@@ -122,7 +122,7 @@ class LocationMap {
   }
 
   void processLocationMap(Map<String, dynamic> json) {
-    for (final String path in json.keys) {
+    for (final path in json.keys) {
       final entries = (json[path]! as Map).cast<String, List<Object?>>();
 
       final ids = entries[_idsKey]!.cast<int>();
@@ -214,7 +214,7 @@ class RebuildCountModel {
 
     _rebuildsForFrame.forEach((id, rebuilds) {
       final events = <int>[];
-      for (final RebuildLocation rebuild in rebuilds) {
+      for (final rebuild in rebuilds) {
         events
           ..add(rebuild.location.id)
           ..add(rebuild.buildCount);

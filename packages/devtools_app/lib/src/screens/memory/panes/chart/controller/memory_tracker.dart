@@ -137,7 +137,7 @@ class MemoryTracker {
 
     _isolateHeaps.clear();
 
-    for (final IsolateRef isolateRef in isolateMemory.keys) {
+    for (final isolateRef in isolateMemory.keys) {
       _isolateHeaps[isolateRef.id!] = isolateMemory[isolateRef]!;
     }
 

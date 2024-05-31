@@ -408,7 +408,7 @@ class LoggingControllerV2 extends DisposableController
       if (summary != null) return summary;
     }
 
-    for (final RemoteDiagnosticsNode child in node.childrenNow) {
+    for (final child in node.childrenNow) {
       summary = _findFirstSummary(child);
       if (summary != null) return summary;
     }

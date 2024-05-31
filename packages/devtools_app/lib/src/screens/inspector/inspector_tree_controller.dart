@@ -582,7 +582,7 @@ class InspectorTreeController extends DisposableController
     }
     final inlineProperties = parent.inlineProperties;
 
-    for (final RemoteDiagnosticsNode property in inlineProperties) {
+    for (final property in inlineProperties) {
       appendChild(
         treeNode,
         setupInspectorTreeNode(
@@ -596,7 +596,7 @@ class InspectorTreeController extends DisposableController
       );
     }
     if (children != null) {
-      for (final RemoteDiagnosticsNode child in children) {
+      for (final child in children) {
         appendChild(
           treeNode,
           setupInspectorTreeNode(

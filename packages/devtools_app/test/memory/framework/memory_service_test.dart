@@ -34,7 +34,7 @@ void main() {
 }
 
 void validateHeapInfo(MemoryTimeline timeline) {
-  for (final HeapSample sample in timeline.data) {
+  for (final sample in timeline.data) {
     expect(sample.timestamp, greaterThan(0));
     expect(sample.timestamp, greaterThan(previousTimestamp));
 

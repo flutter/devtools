@@ -721,7 +721,7 @@ class AppSizeController {
     }
     final childrenMap = <String, TreemapNode>{};
 
-    for (final TreemapNode child in children) {
+    for (final child in children) {
       childrenMap[child.name] = child;
     }
 
