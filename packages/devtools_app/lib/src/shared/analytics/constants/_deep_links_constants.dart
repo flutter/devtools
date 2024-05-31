@@ -11,8 +11,14 @@ enum AnalyzeFlutterProject {
   /// Used for recording the time spent in loading Android variants.
   loadVariants,
 
+  /// Used for recording the time spent in loading iOS build options.
+  loadIosBuildOptions,
+
   /// Used for recording the time spent in loading App Links.
   loadAppLinks,
+
+  /// Used for recording the time spent in loading iOS Links.
+  loadIosLinks,
 
   /// App Links are loaded and there is at least one link.
   flutterHasAppLinks,
