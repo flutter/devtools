@@ -17,8 +17,7 @@ class ReleaseHelperCommand extends Command {
     argParser.addFlag(
       _debugFlag,
       negatable: false,
-      help:
-          'Whether to run this script for development purposes. This allows '
+      help: 'Whether to run this script for development purposes. This allows '
           'local changes to be made to this script without throwing an '
           'exception, and will checkout the current branch after executing.',
     );
