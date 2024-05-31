@@ -50,11 +50,20 @@ extension BuildCommandArgsExtension on ArgParser {
           '"tool/flutter-sdk" directory.',
     );
   }
+
+  void addWasmFlag() {
+    addFlag(
+      BuildCommandArgs.wasm.flagName,
+      defaultsTo: false,
+      help: 'Whether to build DevTools with dart2wasm instead of dart2js.',
+    );
+  }
 }
 
 enum BuildCommandArgs {
   buildMode('build-mode'),
   pubGet('pub-get'),
+  wasm('wasm'),
   updateFlutter('update-flutter'),
   updatePerfetto('update-perfetto');
 
