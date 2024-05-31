@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 import '../../panes/chart/controller/chart_data.dart';
 import '../../panes/diff/controller/diff_pane_controller.dart';
 import '../../panes/profile/profile_pane_controller.dart';
+import '../../panes/tracing/tracing_pane_controller.dart';
 import '../../shared/heap/class_filter.dart';
 
 @visibleForTesting
@@ -16,7 +17,8 @@ enum Json {
   classFilter,
   diffData,
   profileData,
-  chartData;
+  chartData,
+  trace;
 }
 
 class OfflineMemoryData with Serializable {
@@ -24,6 +26,7 @@ class OfflineMemoryData with Serializable {
     this.diff,
     this.profile,
     this.chart,
+    this.trace,
     this.filter, {
     required this.selectedTab,
   });
@@ -42,6 +45,10 @@ class OfflineMemoryData with Serializable {
         json[Json.chartData.name],
         ChartData.fromJson,
       ),
+      deserializeNullable<TracePaneController>(
+        json[Json.trace.name],
+        TracePaneController.fromJson,
+      ),
       deserialize<ClassFilter>(
         json[Json.classFilter.name],
         ClassFilter.fromJson,
@@ -58,6 +65,7 @@ class OfflineMemoryData with Serializable {
       Json.profileData.name: profile,
       Json.chartData.name: chart,
       Json.classFilter.name: filter,
+      Json.trace.name: trace,
     };
   }
 
@@ -67,4 +75,5 @@ class OfflineMemoryData with Serializable {
   final DiffPaneController diff;
   final ProfilePaneController? profile;
   final ChartData? chart;
+  final TracePaneController? trace;
 }

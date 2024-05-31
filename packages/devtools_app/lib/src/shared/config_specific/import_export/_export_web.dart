@@ -23,8 +23,7 @@ class ExportControllerWeb extends ExportController {
   }) {
     final element = document.createElement('a') as HTMLAnchorElement;
 
-    late final Blob blob;
-
+    final Blob blob;
     if (content is String) {
       blob = Blob([content.toJS].toJS);
     } else if (content is Uint8List) {

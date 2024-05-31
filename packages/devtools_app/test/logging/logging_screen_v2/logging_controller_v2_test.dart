@@ -5,6 +5,8 @@
 // ignore_for_file: unused_import
 
 @TestOn('vm')
+library;
+
 import 'dart:convert';
 
 import 'package:devtools_app/devtools_app.dart';

@@ -79,6 +79,7 @@ class ServeCommand extends Command {
       ..addUpdatePerfettoFlag()
       ..addPubGetFlag()
       ..addBulidModeOption()
+      ..addWasmFlag()
       // Flags defined in the server in DDS.
       ..addFlag(
         _machineFlag,
@@ -120,22 +121,25 @@ class ServeCommand extends Command {
     final repo = DevToolsRepo.getInstance();
     final processManager = ProcessManager();
 
-    final buildApp = argResults![_buildAppFlag] as bool;
-    final debugServer = argResults![_debugServerFlag] as bool;
+    final results = argResults!;
+    final buildApp = results[_buildAppFlag] as bool;
+    final debugServer = results[_debugServerFlag] as bool;
     final updateFlutter =
-        argResults![BuildCommandArgs.updateFlutter.flagName] as bool;
+        results[BuildCommandArgs.updateFlutter.flagName] as bool;
     final updatePerfetto =
-        argResults![BuildCommandArgs.updatePerfetto.flagName] as bool;
-    final runPubGet = argResults![BuildCommandArgs.pubGet.flagName] as bool;
+        results[BuildCommandArgs.updatePerfetto.flagName] as bool;
+    final useWasm = results[BuildCommandArgs.wasm.flagName] as bool;
+    final runPubGet = results[BuildCommandArgs.pubGet.flagName] as bool;
     final devToolsAppBuildMode =
-        argResults![BuildCommandArgs.buildMode.flagName] as String;
-    final serveWithDartSdk = argResults![_serveWithDartSdkFlag] as String?;
+        results[BuildCommandArgs.buildMode.flagName] as String;
+    final serveWithDartSdk = results[_serveWithDartSdkFlag] as String?;
 
     // Any flag that we aren't removing here is intended to be passed through.
-    final remainingArguments = List.of(argResults!.arguments)
+    final remainingArguments = List.of(results.arguments)
       ..remove(BuildCommandArgs.updateFlutter.asArg())
       ..remove(BuildCommandArgs.updateFlutter.asArg(negated: true))
       ..remove(BuildCommandArgs.updatePerfetto.asArg())
+      ..remove(BuildCommandArgs.wasm.asArg())
       ..remove(valueAsArg(_buildAppFlag))
       ..remove(valueAsArg(_buildAppFlag, negated: true))
       ..remove(valueAsArg(_debugServerFlag))
@@ -174,6 +178,7 @@ class ServeCommand extends Command {
           'build',
           BuildCommandArgs.updateFlutter.asArg(negated: !updateFlutter),
           if (updatePerfetto) BuildCommandArgs.updatePerfetto.asArg(),
+          if (useWasm) BuildCommandArgs.wasm.asArg(),
           '${BuildCommandArgs.buildMode.asArg()}=$devToolsAppBuildMode',
           BuildCommandArgs.pubGet.asArg(negated: !runPubGet),
         ]),

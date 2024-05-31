@@ -63,7 +63,7 @@ class FakeHeapSnapshotGraph extends Fake implements HeapSnapshotGraph {
   /// Returns index of the object.
   int addChain(List<String> path) {
     var referrer = heapRootIndex;
-    for (var name in path) {
+    for (final name in path) {
       final classId =
           maybeAddClass(HeapClassName(library: _library, className: name));
       final index = add();

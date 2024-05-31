@@ -112,7 +112,7 @@ void main() {
     });
 
     test('profileData to json', () {
-      expect(cpuProfileData.toJson, equals(goldenCpuProfileDataJson));
+      expect(cpuProfileData.toJson(), equals(goldenCpuProfileDataJson));
     });
 
     test(
@@ -125,7 +125,7 @@ void main() {
         );
 
         expect(
-          generatedCpuProfileData.toJson,
+          generatedCpuProfileData.toJson(),
           equals(goldenCpuProfileDataJson),
         );
       },
@@ -368,7 +368,7 @@ void main() {
       final copy = testStackFrame.deepCopy();
       expect(copy.isExpanded, isFalse);
       expect(copy.children.length, equals(1));
-      for (CpuStackFrame child in copy.children) {
+      for (final child in copy.children) {
         expect(child.parent, equals(copy));
       }
       copy.addChild(stackFrameG);

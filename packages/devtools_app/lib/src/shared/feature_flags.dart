@@ -54,7 +54,7 @@ abstract class FeatureFlags {
   /// Flag to enable widget rebuild stats ui.
   ///
   /// https://github.com/flutter/devtools/issues/4564.
-  static bool widgetRebuildStats = enableExperiments;
+  static bool widgetRebuildStats = true;
 
   /// Flag to enable offline data on memory screen.
   ///
@@ -67,6 +67,11 @@ abstract class FeatureFlags {
   ///
   /// https://github.com/flutter/devtools/issues/6013
   static bool deepLinkValidation = true;
+
+  /// Flag to enable ios checks in deep link validation.
+  ///
+  /// https://github.com/flutter/devtools/issues/7799
+  static bool deepLinkIosCheck = false;
 
   /// Flag to enable DevTools extensions.
   ///
@@ -84,6 +89,11 @@ abstract class FeatureFlags {
   /// https://github.com/flutter/devtools/issues/6056
   static bool dapDebugging = enableExperiments;
 
+  /// Flag to enable the new Inspector panel.
+  ///
+  /// https://github.com/flutter/devtools/issues/7854
+  static bool inspectorV2 = enableExperiments;
+
   /// Stores a map of all the feature flags for debugging purposes.
   ///
   /// When adding a new flag, you are responsible for adding it to this map as
@@ -93,6 +103,8 @@ abstract class FeatureFlags {
     'memoryOffline': memoryOffline,
     'dapDebugging': dapDebugging,
     'loggingV2': loggingV2,
+    'deepLinkIosCheck': deepLinkIosCheck,
+    'inspectorV2': inspectorV2,
   };
 
   /// A helper to print the status of all the feature flags.

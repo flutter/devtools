@@ -84,7 +84,7 @@ class FileSystemDesktop {
       }
 
       final allFiles = directory.listSync(followLinks: false);
-      for (FileSystemEntity entry in allFiles) {
+      for (final entry in allFiles) {
         final basename = path.basename(entry.path);
         if (_fs.isFileSync(entry.path) && basename.startsWith(prefix)) {
           logs.add(basename);

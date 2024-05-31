@@ -4,6 +4,7 @@
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
+import 'package:devtools_shared/devtools_deeplink.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/primitives/utils.dart';
@@ -703,9 +704,11 @@ class FlutterProject {
   FlutterProject({
     required this.path,
     required this.androidVariants,
+    required this.iosBuildOptions,
   });
   final String path;
   final List<String> androidVariants;
+  final XcodeBuildOptions iosBuildOptions;
 }
 
 int _compareLinkData(

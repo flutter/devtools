@@ -321,7 +321,7 @@ Future<List<DartObjectNode>> createVariablesForDiagnostics(
   IsolateRef isolateRef,
 ) async {
   final variables = <Future<DartObjectNode>>[];
-  for (var diagnostic in diagnostics) {
+  for (final diagnostic in diagnostics) {
     // Omit hidden properties.
     if (diagnostic.level == DiagnosticLevel.hidden) continue;
     variables.add(_buildVariable(diagnostic, objectGroupApi, isolateRef));
@@ -551,7 +551,7 @@ List<DartObjectNode> createVariablesForFields(
   Set<String>? existingNames,
 }) {
   final result = <DartObjectNode>[];
-  for (var field in instance.fields!) {
+  for (final field in instance.fields!) {
     final name = field.decl?.name;
     if (name == null) {
       result.add(

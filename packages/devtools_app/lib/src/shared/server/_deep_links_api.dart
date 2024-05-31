@@ -35,13 +35,16 @@ Future<AppLinkSettings> requestAndroidAppLinkSettings(
       },
     );
     final resp = await request(uri.toString());
-    if (resp?.statusOk ?? false) {
-      return AppLinkSettings.fromJson(resp!.body);
-    } else {
-      logWarning(resp, DeeplinkApi.androidAppLinkSettings);
+    if (resp != null) {
+      if (resp.statusOk) {
+        return AppLinkSettings.fromJson(resp.body);
+      } else {
+        logWarning(resp, DeeplinkApi.androidAppLinkSettings);
+        return AppLinkSettings.fromErrorJson(resp.body.toString());
+      }
     }
   }
-  return AppLinkSettings.empty;
+  return AppLinkSettings.error('DevTools server is not available');
 }
 
 Future<XcodeBuildOptions> requestIosBuildOptions(String path) async {

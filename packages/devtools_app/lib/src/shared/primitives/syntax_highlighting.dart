@@ -45,11 +45,11 @@ class TextmateGrammar {
 
   void _parseRules() {
     final Map repository = _definition['repository'];
-    for (String name in repository.keys.cast<String>()) {
+    for (final name in repository.keys.cast<String>()) {
       _ruleMap[name] = Rule(name);
     }
 
-    for (String name in _ruleMap.keys) {
+    for (final name in _ruleMap.keys) {
       _ruleMap[name]!._parse(repository[name]);
     }
 
@@ -58,7 +58,7 @@ class TextmateGrammar {
 
   void _parseFileRules() {
     final List<Object?> patterns = _definition['patterns'];
-    for (Map info in patterns.cast<Map<Object?, Object?>>()) {
+    for (final Map info in patterns.cast<Map<Object?, Object?>>()) {
       _fileRules.add(Rule(info['name']).._parse(info));
     }
     _log.info('fileRules: $_fileRules');

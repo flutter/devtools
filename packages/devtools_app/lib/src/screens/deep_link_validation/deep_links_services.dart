@@ -63,7 +63,7 @@ class DeepLinksServices {
     required String? localFingerprint,
   }) async {
     final domainErrors = <String, List<DomainError>>{
-      for (var domain in domains) domain: <DomainError>[],
+      for (final domain in domains) domain: <DomainError>[],
     };
 
     // The request can take 1000 domains at most, make a few calls in serial with a batch of _domainBatchSize.

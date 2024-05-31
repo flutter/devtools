@@ -49,6 +49,8 @@ MockPerformanceController createMockPerformanceControllerWithDefaults() {
 
   // Stubs for Rebuild Count feature
   when(controller.rebuildCountModel).thenReturn(RebuildCountModel());
+  when(controller.rebuildStatsController)
+      .thenReturn(RebuildStatsController(controller));
 
   return controller;
 }

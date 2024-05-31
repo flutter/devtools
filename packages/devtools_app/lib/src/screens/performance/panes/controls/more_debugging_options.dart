@@ -29,7 +29,7 @@ class MoreDebuggingOptionsButton extends StatelessWidget {
         extensions.disableClipLayers,
         extensions.disableOpacityLayers,
         extensions.disablePhysicalShapeLayers,
-        if (FeatureFlags.widgetRebuildStats) extensions.trackRebuildWidgets,
+        if (FeatureFlags.widgetRebuildStats) extensions.trackWidgetBuildCounts,
       ],
       overlayDescription: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

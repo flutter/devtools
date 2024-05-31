@@ -154,7 +154,7 @@ class SnapshotListTitle extends StatelessWidget {
     final theItem = item;
     final theme = Theme.of(context);
 
-    late final Widget leading;
+    final Widget leading;
     final trailing = <Widget>[];
     if (theItem is SnapshotDocItem) {
       leading = Icon(

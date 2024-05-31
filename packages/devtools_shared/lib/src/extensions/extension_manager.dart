@@ -139,7 +139,7 @@ class ExtensionsManager {
     required bool staticContext,
   }) async {
     _assertUriFormat(rootFileUriString);
-    late final List<Extension> extensions;
+    final List<Extension> extensions;
     try {
       // TODO(https://github.com/dart-lang/pub/issues/4218): this assumes that
       // the .dart_tool/package_config.json file is in the package root, which
@@ -159,7 +159,6 @@ class ExtensionsManager {
         '${extensions.map((e) => e.package).toList()}',
       );
     } catch (e) {
-      extensions = <Extension>[];
       rethrow;
     }
 

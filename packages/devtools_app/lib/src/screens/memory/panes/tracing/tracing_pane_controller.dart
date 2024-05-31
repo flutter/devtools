@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:devtools_app_shared/utils.dart';
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:vm_service/vm_service.dart';
@@ -11,11 +13,67 @@ import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/simple_items.dart';
 import 'tracing_data.dart';
 
-class TracingPaneController extends DisposableController
-    with AutoDisposeControllerMixin {
-  TracingPaneController(this.mode);
+@visibleForTesting
+enum Json {
+  stateForIsolate,
+  selection,
+  rootPackage;
+}
+
+class TracePaneController extends DisposableController
+    with AutoDisposeControllerMixin, Serializable {
+  TracePaneController(
+    this.mode, {
+    Map<String, TracingIsolateState>? stateForIsolate,
+    String? selectedIsolateId,
+    required this.rootPackage,
+  }) {
+    this.stateForIsolate = stateForIsolate ?? {};
+    final isolate = this
+        .stateForIsolate
+        .values
+        .firstWhereOrNull((i) => i.isolate.id == selectedIsolateId);
+    if (selectedIsolateId != null && isolate == null) {
+      throw ArgumentError(
+        '$selectedIsolateId must be a key in stateForIsolate',
+      );
+    }
+    if (isolate != null) _selection.value = isolate;
+  }
+
+  factory TracePaneController.fromJson(Map<String, dynamic> json) {
+    return TracePaneController(
+      ControllerCreationMode.offlineData,
+      stateForIsolate: (json[Json.stateForIsolate.name] as Map).map(
+        (key, value) => MapEntry(
+          key,
+          deserialize<TracingIsolateState>(value, TracingIsolateState.fromJson),
+        ),
+      ),
+      selectedIsolateId: json[Json.selection.name] as String?,
+      rootPackage: json[Json.rootPackage.name] as String?,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      Json.selection.name: selection.value.isolate.id,
+      Json.stateForIsolate.name: stateForIsolate,
+      Json.rootPackage.name: rootPackage,
+    };
+  }
 
   final ControllerCreationMode mode;
+
+  /// Maps isolate IDs to their allocation tracing states.
+  late final Map<String, TracingIsolateState> stateForIsolate;
+
+  /// The allocation tracing state for the currently selected isolate.
+  ValueListenable<TracingIsolateState> get selection => _selection;
+  final _selection = ValueNotifier<TracingIsolateState>(
+    TracingIsolateState.empty(),
+  );
 
   /// Set to `true` if the controller has not yet finished initializing.
   ValueListenable<bool> get initializing => _initializing;
@@ -26,19 +84,12 @@ class TracingPaneController extends DisposableController
   ValueListenable<bool> get refreshing => _refreshing;
   final _refreshing = ValueNotifier<bool>(false);
 
-  /// The allocation tracing state for the currently selected isolate.
-  ValueListenable<TracingIsolateState> get stateForIsolate =>
-      _stateForIsolateListenable;
-  final _stateForIsolateListenable = ValueNotifier<TracingIsolateState>(
-    TracingIsolateState.empty(),
-  );
-
-  final _stateForIsolate = <String, TracingIsolateState>{};
-
   /// The [TextEditingController] for the 'Class Filter' text field.
   final textEditingController = TextEditingController();
 
   bool _initialized = false;
+
+  final String? rootPackage;
 
   /// Initializes the controller if it is not initialized yet.
   Future<void> initialize() async {
@@ -51,32 +102,38 @@ class TracingPaneController extends DisposableController
           serviceConnection.serviceManager.isolateManager.selectedIsolate.value;
 
       if (isolate == null) {
-        _stateForIsolateListenable.value = TracingIsolateState.empty();
+        _selection.value = TracingIsolateState.empty();
         return;
       }
 
       final isolateId = isolate.id!;
-      var state = _stateForIsolate[isolateId];
+      var state = stateForIsolate[isolateId];
       if (state == null) {
         // TODO(bkonyi): we don't need to request this unless we've had a hot reload.
         // We generally need to rebuild this data if we've had a hot reload or
         // switched the currently selected isolate.
-        state = TracingIsolateState(isolate: isolate);
+        state = TracingIsolateState(isolate: isolate, mode: mode);
         await state.initialize();
-        _stateForIsolate[isolateId] = state;
+        stateForIsolate[isolateId] = state;
       }
       // Restore the previously applied filter for the isolate.
       textEditingController.text = state.currentFilter;
-      _stateForIsolateListenable.value = state;
+      _selection.value = state;
     }
 
-    addAutoDisposeListener(
-      serviceConnection.serviceManager.isolateManager.selectedIsolate,
-      updateState,
-    );
+    if (mode == ControllerCreationMode.connected) {
+      addAutoDisposeListener(
+        serviceConnection.serviceManager.isolateManager.selectedIsolate,
+        updateState,
+      );
 
-    await updateState();
-    await refresh();
+      await updateState();
+      await refresh();
+    } else {
+      for (final state in stateForIsolate.values) {
+        await state.initialize();
+      }
+    }
 
     _initializing.value = false;
   }
@@ -90,26 +147,26 @@ class TracingPaneController extends DisposableController
   /// Refreshes the allocation profiles for the current isolate's traced classes.
   Future<void> refresh() async {
     _refreshing.value = true;
-    await stateForIsolate.value.refresh();
+    await selection.value.refresh();
     _refreshing.value = false;
   }
 
-  /// Refreshes the allocation profiles for the current isolate's traced classes.
+  /// Clears the allocation profiles for the current isolate's traced classes.
   Future<void> clear() async {
     _refreshing.value = true;
-    await stateForIsolate.value.clear();
+    await selection.value.clear();
     _refreshing.value = false;
   }
 
   /// Enables or disables tracing of allocations of [cls] in the current
   /// isolate.
   Future<void> setAllocationTracingForClass(ClassRef cls, bool enabled) async {
-    await stateForIsolate.value.setAllocationTracingForClass(cls, enabled);
+    await selection.value.setAllocationTracingForClass(cls, enabled);
   }
 
   /// Updates the class filter criteria for the current isolate's allocation
   /// tracing state.
   void updateClassFilter(String value) {
-    stateForIsolate.value.updateClassFilter(value);
+    selection.value.updateClassFilter(value);
   }
 }

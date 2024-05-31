@@ -22,7 +22,7 @@ class TracingPane extends StatefulWidget {
     required this.controller,
   });
 
-  final TracingPaneController controller;
+  final TracePaneController controller;
 
   @override
   State<TracingPane> createState() => TracingPaneState();
@@ -34,6 +34,15 @@ class TracingPaneState extends State<TracingPane> {
     super.initState();
 
     unawaited(widget.controller.initialize());
+  }
+
+  @override
+  void didUpdateWidget(TracingPane oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.controller != widget.controller) {
+      unawaited(widget.controller.initialize());
+    }
   }
 
   @override
@@ -81,7 +90,7 @@ class _TracingControls extends StatelessWidget {
 
   final bool isProfileMode;
 
-  final TracingPaneController controller;
+  final TracePaneController controller;
 
   @override
   Widget build(BuildContext context) {

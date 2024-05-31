@@ -71,7 +71,7 @@ class InspectorTreeNode {
   void updateShouldShow(bool value) {
     if (value != _shouldShow) {
       _shouldShow = value;
-      for (var child in children) {
+      for (final child in children) {
         child.updateShouldShow(value);
       }
     }
@@ -113,7 +113,7 @@ class InspectorTreeNode {
       _isExpanded = value;
       isDirty = true;
       if (_shouldShow ?? false) {
-        for (var child in children) {
+        for (final child in children) {
           child.updateShouldShow(value);
         }
       }
@@ -146,7 +146,7 @@ class InspectorTreeNode {
       return childrenCountLocal;
     }
     int count = 0;
-    for (InspectorTreeNode child in _children) {
+    for (final child in _children) {
       count += child.subtreeSize;
     }
     return _childrenCount = count;
@@ -168,7 +168,7 @@ class InspectorTreeNode {
       if (parent == null) {
         break;
       }
-      for (InspectorTreeNode sibling in parent._children) {
+      for (final sibling in parent._children) {
         if (sibling == node) {
           break;
         }

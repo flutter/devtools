@@ -24,7 +24,7 @@ const double _countColumnWidth = 100;
 class AllocationTracingTree extends StatefulWidget {
   const AllocationTracingTree({super.key, required this.controller});
 
-  final TracingPaneController controller;
+  final TracePaneController controller;
 
   static final _bottomUpTab = _buildTab(tabName: 'Bottom Up');
   static final _callTreeTab = _buildTab(tabName: 'Call Tree');
@@ -67,26 +67,26 @@ class _AllocationTracingTreeState extends State<AllocationTracingTree>
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<TracingIsolateState>(
-      valueListenable: widget.controller.stateForIsolate,
+      valueListenable: widget.controller.selection,
       builder: (context, state, _) {
         return ValueListenableBuilder<TracedClass?>(
-          valueListenable: state.selectedTracedClass,
+          valueListenable: state.selectedClass,
           builder: (context, selection, _) {
+            final data = state.selectedClassProfile;
+
             if (selection == null) {
               return const _TracingInstructions();
             } else if (!selection.traceAllocations) {
               return _TracingInstructions(
                 prefix: 'Allocation tracing is not enabled for class '
-                    '${selection.cls.name}.',
+                    '${selection.clazz.name}.',
               );
             } else if (selection.traceAllocations &&
-                (state.selectedTracedClassAllocationData == null ||
-                    state.selectedTracedClassAllocationData!.bottomUpRoots
-                        .isEmpty)) {
+                (data == null || data.bottomUpRoots.isEmpty)) {
               return Padding(
                 padding: const EdgeInsets.all(largeSpacing),
                 child: Text(
-                  'No allocation samples have been collected for class ${selection.cls.name}.\n',
+                  'No allocation samples have been collected for class ${selection.clazz.name}.\n',
                 ),
               );
             }
@@ -105,13 +105,11 @@ class _AllocationTracingTreeState extends State<AllocationTracingTree>
                     children: [
                       // Bottom-up tree view
                       TracingTable(
-                        dataRoots: state
-                            .selectedTracedClassAllocationData!.bottomUpRoots,
+                        dataRoots: state.selectedClassProfile!.bottomUpRoots,
                       ),
                       // Call tree view
                       TracingTable(
-                        dataRoots: state
-                            .selectedTracedClassAllocationData!.callTreeRoots,
+                        dataRoots: state.selectedClassProfile!.callTreeRoots,
                       ),
                     ],
                   ),
@@ -169,7 +167,7 @@ class _TracingTreeHeader extends StatelessWidget {
     required this.updateTreeStateCallback,
   });
 
-  final TracingPaneController controller;
+  final TracePaneController controller;
   final void Function(VoidCallback) updateTreeStateCallback;
   final TabController tabController;
   final List<DevToolsTab> tabs;
@@ -188,8 +186,7 @@ class _TracingTreeHeader extends StatelessWidget {
             ),
             TextSpan(
               style: theme.fixedFontStyle,
-              text: controller
-                  .stateForIsolate.value.selectedTracedClass.value?.cls.name!,
+              text: controller.selection.value.selectedClass.value?.clazz.name!,
             ),
           ],
         ),
@@ -235,8 +232,7 @@ class _TracingTreeHeader extends StatelessWidget {
   List<CpuStackFrame> get _currentDataRoots {
     final isBottomUp =
         tabs[tabController.index] == AllocationTracingTree._bottomUpTab;
-    final data =
-        controller.stateForIsolate.value.selectedTracedClassAllocationData!;
+    final data = controller.selection.value.selectedClassProfile!;
     return isBottomUp ? data.bottomUpRoots : data.callTreeRoots;
   }
 }

@@ -263,12 +263,12 @@ class FileNode extends TreeNode<FileNode> {
     // The name of this node is not exposed to users.
     final root = FileNode('<root>');
 
-    for (var script in scripts) {
+    for (final script in scripts) {
       final directoryParts = ScriptRefUtils.splitDirectoryParts(script);
 
       FileNode node = root;
 
-      for (var name in directoryParts) {
+      for (final name in directoryParts) {
         node = node._getCreateChild(name);
       }
 
@@ -294,7 +294,7 @@ class FileNode extends TreeNode<FileNode> {
   void _trimChildrenAsMapEntries() {
     _childrenAsMap.clear();
 
-    for (var child in children) {
+    for (final child in children) {
       child._trimChildrenAsMapEntries();
     }
   }

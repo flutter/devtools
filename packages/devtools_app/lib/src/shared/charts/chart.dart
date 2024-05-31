@@ -384,7 +384,7 @@ class ChartPainter extends CustomPainter {
         chartController.zeroYPosition + 1,
         (canvas) {
           // Draw the X-axis labels.
-          for (var timestamp in chartController.labelTimestamps) {
+          for (final timestamp in chartController.labelTimestamps) {
             final xCoord = chartController.timestampToXCanvasCoord(timestamp);
             drawXTick(canvas, timestamp, xCoord, axis, displayTime: true);
           }

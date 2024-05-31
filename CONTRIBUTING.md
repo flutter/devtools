@@ -74,7 +74,7 @@ with the upstream DevTools repo.
 		- Click the **New** button and paste in `<DEVTOOLS_DIR>/tool/bin`, replacing `<DEVTOOLS_DIR>`
 		with the local path to your DevTools repo.
 
-	Explore the commands and helpers that the `devtools_tool` provides by running `devtools_tool -h`.
+	Explore the commands and helpers that `devtools_tool` provides by running `devtools_tool -h`.
 4. **Optional:** enable and activate DCM (Dart Code Metrics) - see the [DCM section below](#enable-and-activate-dcm-dart-code-metrics)
 
 #### Set up your IDE

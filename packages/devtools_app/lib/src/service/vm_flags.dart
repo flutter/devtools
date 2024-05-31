@@ -35,7 +35,7 @@ class VmFlagManager with DisposerMixin {
     final flagList = await service.getFlagList();
     _flags.value = flagList;
 
-    for (var flag in flagList.flags ?? <Flag>[]) {
+    for (final flag in flagList.flags ?? <Flag>[]) {
       _flagNotifiers[flag.name ?? ''] = ValueNotifier<Flag>(flag);
     }
   }

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
+library;
 
 import 'package:devtools_app/src/screens/network/network_controller.dart';
 import 'package:devtools_app/src/screens/network/network_model.dart';

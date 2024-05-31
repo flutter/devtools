@@ -138,7 +138,7 @@ class ClassDataList<T extends ClassData> {
   final List<T>? _filtered;
 
   Map<HeapClassName, T> asMap() =>
-      {for (var c in _originalList) c.className: c};
+      {for (final c in _originalList) c.className: c};
 
   ClassDataList<T> filtered(ClassFilter newFilter, String? rootPackage) {
     final filtered = ClassFilter.filter(

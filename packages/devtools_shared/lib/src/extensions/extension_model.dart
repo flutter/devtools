@@ -56,7 +56,7 @@ class DevToolsExtensionConfig implements Comparable<DevToolsExtensionConfig> {
 
       // Defaults to the code point for [Icons.extensions_outlined] if parsing
       // fails.
-      late int codePoint;
+      final int codePoint;
       const defaultCodePoint = 0xf03f;
       if (codePointFromJson is String) {
         codePoint = int.tryParse(codePointFromJson) ?? defaultCodePoint;

@@ -18,4 +18,4 @@ dependencies:
 dependency_overrides:
   devtools_shared:
     path: ../packages/devtools_shared
-  lints: ^3.0.0
+  lints: ^4.0.0

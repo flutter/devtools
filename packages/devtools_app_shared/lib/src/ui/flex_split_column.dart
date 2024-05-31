@@ -106,7 +106,7 @@ final class FlexSplitColumn extends StatelessWidget {
     double totalHeight,
   ) {
     var totalHeaderHeight = 0.0;
-    for (var header in headers) {
+    for (final header in headers) {
       totalHeaderHeight += header.preferredSize.height;
     }
     final intendedContentHeight = totalHeight - totalHeaderHeight;
