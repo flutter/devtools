@@ -21,17 +21,20 @@ void main() {
       logStatus('1 - pumped devtools');
       await loadSampleData(tester, memoryFileName);
       logStatus('2 - loaded sample data');
+
+      // trace tab
       await tester.pumpAndSettle(longPumpDuration);
       logStatus('3 - pumped and settled');
-
       expect(find.text('_MyClass'), findsOneWidget);
       logStatus('4 - tapped _MyClass');
 
+      // diff tab
       await tester.tap(find.text('Diff Snapshots'));
       logStatus('5 - tapped Diff Snapshots');
       await tester.pumpAndSettle(longPumpDuration);
       logStatus('6 - pumped and settled');
 
+      // profile tab
       await tester.tap(find.text('Profile Memory'));
       logStatus('8 - tapped Profile Memory');
       await tester.pumpAndSettle(longPumpDuration);
