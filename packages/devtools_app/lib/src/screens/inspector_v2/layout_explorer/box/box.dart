@@ -135,7 +135,7 @@ class BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
     final length = sizes.length;
     double total = 1.0; // This isn't set to zero to avoid divide by zero bugs.
     final fractions = minFractions.toList();
-    for (var size in sizes) {
+    for (final size in sizes) {
       if (size != null) {
         total += math.max(0, size);
       }
@@ -157,7 +157,7 @@ class BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
       }
     }
     final output = <double>[];
-    for (var fraction in fractions) {
+    for (final fraction in fractions) {
       output.add(fraction * availableSize);
     }
     return output;
