@@ -7,10 +7,21 @@
 
 import 'dart:convert';
 
-import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/screens/inspector/layout_explorer/flex/flex.dart';
-import 'package:devtools_app/src/screens/inspector/layout_explorer/layout_explorer.dart';
+import 'package:devtools_app/devtools_app.dart'
+    hide
+        InspectorController,
+        InspectorScreen,
+        InspectorTreeController,
+        InspectorScreenBody,
+        ErrorNavigator,
+        FlutterInspectorSettingsDialog;
+import 'package:devtools_app/src/screens/inspector_v2/inspector_controller.dart';
+import 'package:devtools_app/src/screens/inspector_v2/inspector_screen.dart';
+import 'package:devtools_app/src/screens/inspector_v2/inspector_tree_controller.dart';
+import 'package:devtools_app/src/screens/inspector_v2/layout_explorer/flex/flex.dart';
+import 'package:devtools_app/src/screens/inspector_v2/layout_explorer/layout_explorer.dart';
 import 'package:devtools_app/src/service/service_extensions.dart' as extensions;
+import 'package:devtools_app/src/shared/feature_flags.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -35,11 +46,12 @@ void main() {
     return wrapWithControllers(
       Builder(builder: screen.build),
       debugger: debuggerController,
-      inspector: inspectorController,
+      inspectorV2: inspectorController,
     );
   }
 
   setUp(() {
+    setEnableExperiments();
     fakeServiceConnection = FakeServiceConnectionManager();
     fakeExtensionManager =
         fakeServiceConnection.serviceManager.serviceExtensionManager;
@@ -302,7 +314,8 @@ void main() {
       'should render StoryOfYourFlexWidget',
       windowSize,
       (WidgetTester tester) async {
-        final controller = TestInspectorController()..setSelectedNode(treeNode);
+        final controller = TestInspectorV2Controller()
+          ..setSelectedNode(treeNode);
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
@@ -320,7 +333,7 @@ void main() {
       'should listen to controller selection event',
       windowSize,
       (WidgetTester tester) async {
-        final controller = TestInspectorController();
+        final controller = TestInspectorV2Controller();
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
@@ -371,7 +384,7 @@ void main() {
           await tester.tap(hoverModeCheckBox);
           await tester.pumpAndSettle();
           expect(
-            preferences.inspector.hoverEvalModeEnabled.value,
+            preferences.inspectorV2.hoverEvalModeEnabled.value,
             !startingHoverEvalModeValue,
           );
         },

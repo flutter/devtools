@@ -4,7 +4,7 @@
 
 import 'dart:convert';
 
-import 'package:devtools_app/src/screens/inspector/layout_explorer/flex/flex.dart';
+import 'package:devtools_app/src/screens/inspector_v2/layout_explorer/flex/flex.dart';
 import 'package:devtools_app/src/shared/console/eval/inspector_tree.dart';
 import 'package:devtools_app/src/shared/diagnostics/diagnostics_node.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -259,7 +259,7 @@ void main() {
       final diagnostic =
           RemoteDiagnosticsNode(rowWidgetJsonNode, null, false, null);
       final treeNode = InspectorTreeNode()..diagnostic = diagnostic;
-      final controller = TestInspectorController()..setSelectedNode(treeNode);
+      final controller = TestInspectorV2Controller()..setSelectedNode(treeNode);
       final widget = wrap(FlexLayoutExplorerWidget(controller));
       await pump(tester, widget);
       await tester.pumpAndSettle();
@@ -279,7 +279,7 @@ void main() {
       final diagnostic =
           RemoteDiagnosticsNode(columnWidgetJsonNode, null, false, null);
       final treeNode = InspectorTreeNode()..diagnostic = diagnostic;
-      final controller = TestInspectorController()..setSelectedNode(treeNode);
+      final controller = TestInspectorV2Controller()..setSelectedNode(treeNode);
       final widget = wrap(FlexLayoutExplorerWidget(controller));
       await pump(tester, widget);
       await expectLater(

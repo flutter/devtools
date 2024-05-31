@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/screens/inspector/inspector_breadcrumbs.dart';
+import 'package:devtools_app/devtools_app.dart'
+    hide InspectorController, InspectorTreeController, InspectorTree;
+import 'package:devtools_app/src/screens/inspector_v2/inspector_breadcrumbs.dart';
+import 'package:devtools_app/src/screens/inspector_v2/inspector_controller.dart';
+import 'package:devtools_app/src/screens/inspector_v2/inspector_tree_controller.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -57,7 +60,7 @@ void main() {
         isSummaryTree ? null : InspectorTreeController();
     await tester.pumpWidget(
       wrapWithControllers(
-        inspector: inspectorController,
+        inspectorV2: inspectorController,
         debugger: debuggerController,
         InspectorTree(
           treeController: treeController,

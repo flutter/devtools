@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/devtools_app.dart'
+    hide InspectorScreen, InspectorScreenBodyState, InspectorScreenBody;
+import 'package:devtools_app/src/screens/inspector_v2/inspector_screen.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -58,7 +60,10 @@ void main() {
 
         final screen = InspectorScreen();
         await tester.pumpWidget(
-          wrapWithInspectorControllers(Builder(builder: screen.build)),
+          wrapWithInspectorControllers(
+            Builder(builder: screen.build),
+            v2: true,
+          ),
         );
         await tester.pump(const Duration(seconds: 1));
         final InspectorScreenBodyState state =
@@ -73,7 +78,7 @@ void main() {
         await expectLater(
           find.byType(InspectorScreenBody),
           matchesDevToolsGolden(
-            '../test_infra/goldens/integration_inspector_initial_load.png',
+            '../test_infra/goldens/integration_inspector_v2_initial_load.png',
           ),
         );
 
@@ -83,21 +88,21 @@ void main() {
         await expectLater(
           find.byType(InspectorScreenBody),
           matchesDevToolsGolden(
-            '../test_infra/goldens/integration_inspector_select_center.png',
+            '../test_infra/goldens/integration_inspector_v2_select_center.png',
           ),
         );
 
         // Select the details tree.
         await tester.tap(
           find.text(
-            InspectorDetailsViewType.widgetDetailsTree.key,
+            InspectorV2DetailsViewType.widgetDetailsTree.key,
           ),
         );
         await tester.pumpAndSettle(inspectorChangeSettleTime);
         await expectLater(
           find.byType(InspectorScreenBody),
           matchesDevToolsGolden(
-            '../test_infra/goldens/integration_inspector_select_center_details_tree.png',
+            '../test_infra/goldens/integration_inspector_v2_select_center_details_tree.png',
           ),
         );
 
@@ -107,7 +112,7 @@ void main() {
         await expectLater(
           find.byType(InspectorScreenBody),
           matchesDevToolsGolden(
-            '../test_infra/goldens/integration_inspector_richtext_selected.png',
+            '../test_infra/goldens/integration_inspector_v2_richtext_selected.png',
           ),
         );
 
@@ -129,7 +134,7 @@ void main() {
         await expectLater(
           find.byType(InspectorScreenBody),
           matchesDevToolsGolden(
-            '../test_infra/goldens/integration_inspector_scaffold_selected.png',
+            '../test_infra/goldens/integration_inspector_v2_scaffold_selected.png',
           ),
         );
 
@@ -141,7 +146,7 @@ void main() {
         await expectLater(
           find.byType(InspectorScreenBody),
           matchesDevToolsGolden(
-            '../test_infra/goldens/integration_animated_physical_model_selected.png',
+            '../test_infra/goldens/integration_inspector_v2_animated_physical_model_selected.png',
           ),
         );
 
@@ -417,7 +422,10 @@ void main() {
 
         final screen = InspectorScreen();
         await tester.pumpWidget(
-          wrapWithInspectorControllers(Builder(builder: screen.build)),
+          wrapWithInspectorControllers(
+            Builder(builder: screen.build),
+            v2: true,
+          ),
         );
         await tester.pumpAndSettle(const Duration(seconds: 1));
         final InspectorScreenBodyState state =
@@ -433,7 +441,7 @@ void main() {
         await expectLater(
           find.byType(InspectorScreenBody),
           matchesDevToolsGolden(
-            '../test_infra/goldens/integration_inspector_errors_1_initial_load.png',
+            '../test_infra/goldens/integration_inspector_v2_errors_1_initial_load.png',
           ),
         );
 
@@ -445,7 +453,7 @@ void main() {
         await expectLater(
           find.byType(InspectorScreenBody),
           matchesDevToolsGolden(
-            '../test_infra/goldens/integration_inspector_errors_2_error_selected.png',
+            '../test_infra/goldens/integration_inspector_v2_errors_2_error_selected.png',
           ),
         );
 

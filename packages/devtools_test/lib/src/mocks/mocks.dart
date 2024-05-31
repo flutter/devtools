@@ -12,6 +12,8 @@ import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
+import 'package:devtools_app/src/screens/inspector_v2/inspector_controller.dart'
+    as inspector_v2;
 
 import 'generated_mocks_factories.dart';
 
@@ -65,6 +67,23 @@ class FakeInspectorService extends Fake implements InspectorService {
 }
 
 class TestInspectorController extends Fake implements InspectorController {
+  InspectorService service = FakeInspectorService();
+
+  @override
+  ValueListenable<InspectorTreeNode?> get selectedNode => _selectedNode;
+  final ValueNotifier<InspectorTreeNode?> _selectedNode = ValueNotifier(null);
+
+  @override
+  void setSelectedNode(InspectorTreeNode? newSelection) {
+    _selectedNode.value = newSelection;
+  }
+
+  @override
+  InspectorService get inspectorService => service;
+}
+
+class TestInspectorV2Controller extends Fake
+    implements inspector_v2.InspectorController {
   InspectorService service = FakeInspectorService();
 
   @override

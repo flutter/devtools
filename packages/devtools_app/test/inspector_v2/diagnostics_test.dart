@@ -5,6 +5,7 @@
 import 'dart:convert';
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/shared/feature_flags.dart';
 import 'package:devtools_app/src/shared/ui/utils.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -48,6 +49,7 @@ void main() {
       ''',
     );
     setUp(() {
+      setEnableExperiments();
       setGlobal(
         DevToolsEnvironmentParameters,
         ExternalDevToolsEnvironmentParameters(),
@@ -74,7 +76,7 @@ void main() {
       late DiagnosticsNodeDescription diagnosticsNodeDescription;
 
       setUp(() {
-        preferences.inspector.setHoverEvalMode(true);
+        preferences.inspectorV2.setHoverEvalMode(true);
         diagnosticsNodeDescription = DiagnosticsNodeDescription(
           diagnostic,
         );
@@ -94,7 +96,7 @@ void main() {
       testWidgets(
         'can be disabled from preferences',
         (WidgetTester tester) async {
-          preferences.inspector.setHoverEvalMode(false);
+          preferences.inspectorV2.setHoverEvalMode(false);
 
           await tester.pumpWidget(wrap(diagnosticsNodeDescription));
 
