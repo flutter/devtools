@@ -8,7 +8,7 @@ enum AnalyzeFlutterProject {
   /// A valid flutter project has been selected.
   flutterProjectSelected,
 
-  /// A invalid flutter project has been selected.
+  /// An invalid flutter project has been selected.
   ///
   /// This can be a result of the user didn't select a Flutter project or
   /// the their Android sub project threw error when parsing.
