@@ -130,38 +130,15 @@ class _SelectProjectViewState extends State<SelectProjectView>
       return;
     }
     if (androidVariants.isEmpty) {
-<<<<<<< Updated upstream
+      ga.select(
+        gac.deeplink,
+        gac.AnalyzeFlutterProject.flutterInvalidProjectSelected.name,
+      );
       await showNonFlutterProjectDialog();
     }
     XcodeBuildOptions iosBuildOptions = XcodeBuildOptions.empty;
     if (FeatureFlags.deepLinkIosCheck) {
       iosBuildOptions = await _requestiOSBuildOptions(directory);
-=======
-      ga.select(
-        gac.deeplink,
-        gac.AnalyzeFlutterProject.flutterInvalidProjectSelected.name,
-      );
-      ga.cancelTimingOperation(
-        gac.deeplink,
-        gac.AnalyzeFlutterProject.loadVariants.name,
-      );
-      await showDialog(
-        context: context,
-        builder: (_) {
-          return const DevToolsDialog(
-            title: Text('You selected a non Flutter project'),
-            content: Text(
-              'It looks like you have selected a non-Flutter project. Please select a Flutter project instead.',
-            ),
-            actions: [
-              DialogCloseButton(),
-            ],
-          );
-        },
-      );
-    } else {
-      ga.timeEnd(gac.deeplink, gac.AnalyzeFlutterProject.loadVariants.name);
->>>>>>> Stashed changes
       ga.select(
         gac.deeplink,
         gac.AnalyzeFlutterProject.flutterProjectSelected.name,
