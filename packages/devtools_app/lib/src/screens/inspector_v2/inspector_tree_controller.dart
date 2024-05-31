@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -109,7 +109,7 @@ class InspectorTreeController extends DisposableController
       gac.inspector,
       gac.inspectorTreeControllerInitialized,
       nonInteraction: true,
-      screenMetricsProvider: () => InspectorScreenMetrics.legacy(
+      screenMetricsProvider: () => InspectorScreenMetrics.v2(
         inspectorTreeControllerId: gaId,
         rootSetCount: _rootSetCount,
         rowCount: _root?.subtreeSize,
@@ -147,13 +147,13 @@ class InspectorTreeController extends DisposableController
   // Method defined to avoid a direct Flutter dependency.
   void setState(VoidCallback fn) {
     fn();
-    for (final client in _clients) {
+    for (var client in _clients) {
       client.onChanged();
     }
   }
 
   void requestFocus() {
-    for (final client in _clients) {
+    for (var client in _clients) {
       client.requestFocus();
     }
   }
@@ -170,7 +170,7 @@ class InspectorTreeController extends DisposableController
         gac.inspector,
         gac.inspectorTreeControllerRootChange,
         nonInteraction: true,
-        screenMetricsProvider: () => InspectorScreenMetrics.legacy(
+        screenMetricsProvider: () => InspectorScreenMetrics.v2(
           inspectorTreeControllerId: gaId,
           rootSetCount: ++_rootSetCount,
           rowCount: _root?.subtreeSize,
@@ -468,7 +468,7 @@ class InspectorTreeController extends DisposableController
   }
 
   void scrollToRect(Rect targetRect) {
-    for (final client in _clients) {
+    for (var client in _clients) {
       client.scrollToRect(targetRect);
     }
   }
@@ -499,7 +499,7 @@ class InspectorTreeController extends DisposableController
   void animateToTargets(List<InspectorTreeNode> targets) {
     Rect? targetRect;
 
-    for (final target in targets) {
+    for (InspectorTreeNode target in targets) {
       final row = getRowForNode(target);
       if (row != null) {
         final rowRect = getBoundingBox(row);
@@ -582,7 +582,7 @@ class InspectorTreeController extends DisposableController
     }
     final inlineProperties = parent.inlineProperties;
 
-    for (final RemoteDiagnosticsNode property in inlineProperties) {
+    for (RemoteDiagnosticsNode property in inlineProperties) {
       appendChild(
         treeNode,
         setupInspectorTreeNode(
@@ -596,7 +596,7 @@ class InspectorTreeController extends DisposableController
       );
     }
     if (children != null) {
-      for (final RemoteDiagnosticsNode child in children) {
+      for (RemoteDiagnosticsNode child in children) {
         appendChild(
           treeNode,
           setupInspectorTreeNode(
@@ -1133,7 +1133,7 @@ class _RowPainter extends CustomPainter {
 
     final InspectorTreeNode node = row.node;
     final bool showExpandCollapse = node.showExpandCollapse;
-    for (final int tick in row.ticks) {
+    for (int tick in row.ticks) {
       currentX = _controller.getDepthIndent(tick) - inspectorColumnWidth * 0.5;
       // Draw a vertical line for each tick identifying a connection between
       // an ancestor of this node and some other node in the tree.
