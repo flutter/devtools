@@ -89,7 +89,8 @@ class BuildCommand extends Command {
     );
 
     logStatus(
-      'building DevTools in $buildMode mode${useWasm ? ' with dart2wasm' : ''}',
+      'building DevTools in $buildMode mode with '
+      '${useWasm ? 'dart2wasm' : 'dart2js'}',
     );
     await processManager.runAll(
       commands: [
