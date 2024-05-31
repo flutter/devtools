@@ -4,7 +4,6 @@
 
 import 'package:devtools_app/src/screens/memory/framework/memory_controller.dart';
 import 'package:devtools_app/src/screens/memory/shared/primitives/memory_timeline.dart';
-import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../test_infra/flutter_test_driver.dart' show FlutterRunConfiguration;
