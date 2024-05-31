@@ -132,7 +132,7 @@ class _SelectProjectViewState extends State<SelectProjectView>
     if (androidVariants.isEmpty) {
       ga.select(
         gac.deeplink,
-        gac.AnalyzeFlutterProject.flutterInvalidProjectSelected.name,
+        gac.AnalyzeFlutterProject.flutterInvalidAndroidProjectSelected.name,
       );
       await showNonFlutterProjectDialog();
     }
