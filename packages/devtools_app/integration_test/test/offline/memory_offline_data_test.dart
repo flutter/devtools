@@ -35,34 +35,6 @@ void main() {
         expect(find.text(tab), findsOneWidget);
         logStatus('6.$tab - found');
       }
-
-      // expect(find.text('Trace Instances'), findsOneWidget);
-      // logStatus('4 - found Trace Instances');
-
-      // logStatus('5 - found _MyClass');
-      // expect(find.text('Diff Snapshots'), findsOneWidget);
-      // logStatus('6 - found Diff Snapshots');
-      // expect(find.text('Profile Memory'), findsOneWidget);
-      // logStatus('7 - found Profile Memory');
-
-      // expect(find.text('_MyClass'), findsOneWidget);
-      // logStatus('4 - found _MyClass');
-
-      // // diff tab
-      // await tester.tap(find.text('Diff Snapshots'));
-      // logStatus('5 - tapped Diff Snapshots');
-      // await tester.pumpAndSettle(longPumpDuration);
-      // logStatus('6 - pumped and settled');
-      // await tester.pumpAndSettle(longPumpDuration);
-      // logStatus('6 - pumped and settled');
-
-      // // profile tab
-      // await tester.tap(find.text('Profile Memory'));
-      // logStatus('8 - tapped Profile Memory');
-      // await tester.pumpAndSettle(longPumpDuration);
-      // logStatus('9 - pumped and settled');
-      // expect(find.text('CSV'), findsOneWidget);
-      // logStatus('10 - found CSV');
     },
   );
 }
