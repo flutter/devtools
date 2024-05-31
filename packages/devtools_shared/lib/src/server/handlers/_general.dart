@@ -43,7 +43,7 @@ abstract class Handler {
     }
 
     final connectedAsString = queryParams[apiParameterVmServiceConnected]!;
-    late bool connected;
+    final bool connected;
     try {
       connected = bool.parse(connectedAsString);
     } catch (e) {
@@ -101,7 +101,7 @@ abstract class Handler {
     required ServerApi api,
     required DartToolingDaemon dtd,
   }) async {
-    late Uri rootPackageUri;
+    final Uri rootPackageUri;
     if (connected) {
       // TODO(kenz): should we first try to lookup the root from
       // [_packageRootsForVmServiceConnections]? Could the root library of the

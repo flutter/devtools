@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 @TestOn('chrome')
+library;
 
 import 'package:ansi_up/ansi_up.dart';
 import 'package:ansicolor/ansicolor.dart';

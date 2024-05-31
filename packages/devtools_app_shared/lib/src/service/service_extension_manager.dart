@@ -129,10 +129,10 @@ final class ServiceExtensionManager with DisposerMixin {
     final expectedValueType =
         extensions.serviceExtensionsAllowlist[name]!.values.first.runtimeType;
     switch (expectedValueType) {
-      case bool:
+      case const (bool):
         return encodedValue == 'true';
-      case int:
-      case double:
+      case const (int):
+      case const (double):
         return num.parse(encodedValue);
       default:
         return encodedValue;
@@ -289,17 +289,17 @@ final class ServiceExtensionManager with DisposerMixin {
         if (isolateRef != _mainIsolate) return;
 
         switch (expectedValueType) {
-          case bool:
+          case const (bool):
             final bool enabled =
                 response.json!['enabled'] == 'true' ? true : false;
             await _maybeRestoreExtension(name, enabled);
             return;
-          case String:
+          case const (String):
             final String? value = response.json!['value'];
             await _maybeRestoreExtension(name, value);
             return;
-          case int:
-          case double:
+          case const (int):
+          case const (double):
             final num value = num.parse(
               response.json![name.substring(name.lastIndexOf('.') + 1)],
             );

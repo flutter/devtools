@@ -5,6 +5,8 @@
 // ignore_for_file: avoid_print
 
 @TestOn('vm')
+library;
+
 import 'dart:async';
 
 import 'package:devtools_app/devtools_app.dart';

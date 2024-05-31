@@ -89,6 +89,11 @@ abstract class FeatureFlags {
   /// https://github.com/flutter/devtools/issues/6056
   static bool dapDebugging = enableExperiments;
 
+  /// Flag to enable the new Inspector panel.
+  ///
+  /// https://github.com/flutter/devtools/issues/7854
+  static bool inspectorV2 = enableExperiments;
+
   /// Stores a map of all the feature flags for debugging purposes.
   ///
   /// When adding a new flag, you are responsible for adding it to this map as
@@ -99,6 +104,7 @@ abstract class FeatureFlags {
     'dapDebugging': dapDebugging,
     'loggingV2': loggingV2,
     'deepLinkIosCheck': deepLinkIosCheck,
+    'inspectorV2': inspectorV2,
   };
 
   /// A helper to print the status of all the feature flags.

@@ -61,7 +61,6 @@ class _ColumnHeader<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    late Widget content;
     final title = Text(
       column.title,
       overflow: TextOverflow.ellipsis,
@@ -92,7 +91,7 @@ class _ColumnHeader<T> extends StatelessWidget {
       ],
     );
 
-    content = column.includeHeader
+    return column.includeHeader
         ? InkWell(
             canRequestFocus: false,
             onTap: column.supportsSorting
@@ -104,7 +103,6 @@ class _ColumnHeader<T> extends StatelessWidget {
             child: headerContent,
           )
         : headerContent;
-    return content;
   }
 
   void _handleSortChange(

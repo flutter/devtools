@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../shared/common_widgets.dart';
+import '../../shared/feature_flags.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
@@ -39,20 +40,20 @@ class DeepLinkListView extends StatefulWidget {
 
 class _DeepLinkListViewState extends State<DeepLinkListView>
     with ProvidedControllerMixin<DeepLinksController, DeepLinkListView> {
-  List<String> get androidVariants =>
-      controller.selectedProject.value!.androidVariants;
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     initController();
     callWhenControllerReady((_) {
-      int releaseVariantIndex = controller
-          .selectedProject.value!.androidVariants
-          .indexWhere((variant) => variant.toLowerCase().contains('release'));
-      // If not found, default to 0.
-      releaseVariantIndex = max(releaseVariantIndex, 0);
-      controller.selectedVariantIndex.value = releaseVariantIndex;
+      controller.selectedAndroidVariantIndex.value = _getReleaseVariantIndex(
+        controller.selectedProject.value!.androidVariants,
+      );
+      if (FeatureFlags.deepLinkIosCheck) {
+        controller.selectedIosConfigurationIndex.value =
+            _getReleaseVariantIndex(
+          controller.selectedProject.value!.iosBuildOptions.configurations,
+        );
+      }
     });
   }
 
@@ -71,6 +72,14 @@ class _DeepLinkListViewState extends State<DeepLinkListView>
       ),
     );
   }
+
+  int _getReleaseVariantIndex(List<String> variants) {
+    final index = variants.indexWhere(
+      (variant) => variant.caseInsensitiveContains('release'),
+    );
+    // If not found, default to 0.
+    return max(index, 0);
+  }
 }
 
 class _DeepLinkListViewMainPanel extends StatelessWidget {
@@ -79,7 +88,7 @@ class _DeepLinkListViewMainPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Provider.of<DeepLinksController>(context);
-
+    final theme = Theme.of(context);
     return ValueListenableBuilder<PagePhase>(
       valueListenable: controller.pagePhase,
       builder: (context, pagePhase, _) {
@@ -96,7 +105,7 @@ class _DeepLinkListViewMainPanel extends StatelessWidget {
                   pagePhase == PagePhase.linksLoading
                       ? 'Loading deep links...'
                       : 'Validating deep links...',
-                  style: Theme.of(context).subtleTextStyle,
+                  style: theme.subtleTextStyle,
                 ),
               ],
             );
@@ -104,11 +113,36 @@ class _DeepLinkListViewMainPanel extends StatelessWidget {
             return const _ValidatedDeepLinksView();
           case PagePhase.noLinks:
             // TODO(hangyujin): This is just a place holder to add UI.
-            return const Text('Your flutter project has no Links to verify.');
+            return const CenteredMessage(
+              'Your Flutter project has no Links to verify.',
+            );
+          case PagePhase.analyzeErrorPage:
+            assert(controller.currentAppLinkSettings?.error != null);
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Failed to retrieve deep links from the Flutter project. '
+                  'This can be a result of errors in the project.',
+                ),
+                const SizedBox(height: densePadding),
+                Expanded(
+                  child: Scrollbar(
+                    thumbVisibility: true,
+                    child: SingleChildScrollView(
+                      child: Text(
+                        controller.currentAppLinkSettings!.error!,
+                        style: theme.errorTextStyle,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
 
-          case PagePhase.errorPage:
+          case PagePhase.validationErrorPage:
             // TODO(hangyujin): This is just a place holder to add Error handling.
-            return const Text('Error');
+            return const CenteredMessage('Error validating domain ');
         }
       },
     );
@@ -248,61 +282,67 @@ class _DeepLinkListViewTopPanel extends StatelessWidget {
       includeBottomBorder: false,
       tall: true,
       title: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             'Validate and fix',
             style: Theme.of(context).textTheme.titleSmall,
           ),
-          ValueListenableBuilder(
-            valueListenable: controller.selectedVariantIndex,
-            builder: (_, value, __) {
-              return _AndroidVariantDropdown(
-                androidVariants:
-                    controller.selectedProject.value!.androidVariants,
-                index: value,
-                onVariantIndexSelected: (index) {
-                  controller.selectedVariantIndex.value = index;
-                },
-              );
-            },
+          const Spacer(),
+          _VariantDropdown(
+            os: PlatformOS.android,
+            controller: controller,
           ),
+          if (FeatureFlags.deepLinkIosCheck) ...[
+            const SizedBox(width: denseSpacing),
+            _VariantDropdown(
+              os: PlatformOS.ios,
+              controller: controller,
+            ),
+          ],
         ],
       ),
     );
   }
 }
 
-class _AndroidVariantDropdown extends StatelessWidget {
-  const _AndroidVariantDropdown({
-    required this.androidVariants,
-    required this.index,
-    required this.onVariantIndexSelected,
+class _VariantDropdown extends StatelessWidget {
+  const _VariantDropdown({
+    required this.os,
+    required this.controller,
   });
-
-  final List<String> androidVariants;
-  final int index;
-  final ValueChanged<int> onVariantIndexSelected;
+  final PlatformOS os;
+  final DeepLinksController controller;
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        const Text('Android Variant:'),
-        RoundedDropDownButton<int>(
-          roundedCornerOptions: RoundedCornerOptions.empty,
-          value: index,
-          items: [
-            for (int i = 0; i < androidVariants.length; i++)
-              DropdownMenuItem<int>(
-                value: i,
-                child: Text(androidVariants[i]),
-              ),
+    return ValueListenableBuilder(
+      valueListenable: os == PlatformOS.android
+          ? controller.selectedAndroidVariantIndex
+          : controller.selectedIosConfigurationIndex,
+      builder: (_, index, __) {
+        final variants = os == PlatformOS.android
+            ? controller.selectedProject.value!.androidVariants
+            : controller.selectedProject.value!.iosBuildOptions.configurations;
+        return Row(
+          children: [
+            Text('${os.description} Variant:'),
+            RoundedDropDownButton<int>(
+              roundedCornerOptions: RoundedCornerOptions.empty,
+              value: index,
+              items: [
+                for (int i = 0; i < variants.length; i++)
+                  DropdownMenuItem<int>(value: i, child: Text(variants[i])),
+              ],
+              onChanged: (int? newIndex) {
+                if (os == PlatformOS.android) {
+                  controller.selectedAndroidVariantIndex.value = newIndex!;
+                } else {
+                  controller.selectedIosConfigurationIndex.value = newIndex!;
+                }
+              },
+            ),
           ],
-          onChanged: (int? index) {
-            onVariantIndexSelected(index!);
-          },
-        ),
-      ],
+        );
+      },
     );
   }
 }

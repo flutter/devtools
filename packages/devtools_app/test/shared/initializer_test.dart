@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
+library;
+
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/framework/initializer.dart';
 import 'package:devtools_app/src/shared/framework_controller.dart';
