@@ -140,20 +140,19 @@ class DisplayOptions {
   }
 }
 
-class DeepLinksController extends DisposableController {
+class DeepLinksController extends DisposableController
+    with AutoDisposeControllerMixin {
   DeepLinksController() {
-    selectedVariantIndex.addListener(_handleSelectedVariantIndexChanged);
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    selectedVariantIndex.removeListener(_handleSelectedVariantIndexChanged);
+    addAutoDisposeListener(
+      selectedAndroidVariantIndex,
+      _handleSelectedAndroidVariantIndexChanged,
+    );
+    // TODO(Hangyujin): Add listerner for selectedIosConfigurationIndex.
   }
 
   DisplayOptions get displayOptions => displayOptionsNotifier.value;
   String get applicationId =>
-      _androidAppLinks[selectedVariantIndex.value]?.applicationId ?? '';
+      _androidAppLinks[selectedAndroidVariantIndex.value]?.applicationId ?? '';
 
   @visibleForTesting
   List<LinkData> linkDatasByPath(List<LinkData> linkdatas) {
@@ -207,20 +206,21 @@ class DeepLinksController extends DisposableController {
   }
 
   AppLinkSettings? get currentAppLinkSettings =>
-      _androidAppLinks[selectedVariantIndex.value];
+      _androidAppLinks[selectedAndroidVariantIndex.value];
 
   final Map<int, AppLinkSettings> _androidAppLinks = <int, AppLinkSettings>{};
 
-  late final selectedVariantIndex = ValueNotifier<int>(0);
-  void _handleSelectedVariantIndexChanged() {
+  late final selectedAndroidVariantIndex = ValueNotifier<int>(0);
+  late final selectedIosConfigurationIndex = ValueNotifier<int>(0);
+  void _handleSelectedAndroidVariantIndexChanged() {
     unawaited(loadAndroidAppLinksAndValidate());
   }
 
   Future<void> loadAndroidAppLinksAndValidate() async {
     pagePhase.value = PagePhase.linksLoading;
 
-    final variant =
-        selectedProject.value!.androidVariants[selectedVariantIndex.value];
+    final variant = selectedProject
+        .value!.androidVariants[selectedAndroidVariantIndex.value];
     await ga.timeAsync(
       gac.deeplink,
       gac.AnalyzeFlutterProject.loadAppLinks.name,
@@ -231,7 +231,7 @@ class DeepLinksController extends DisposableController {
             selectedProject.value!.path,
             buildVariant: variant,
           );
-          _androidAppLinks[selectedVariantIndex.value] = result;
+          _androidAppLinks[selectedAndroidVariantIndex.value] = result;
         } catch (_) {
           ga.select(
             gac.deeplink,
