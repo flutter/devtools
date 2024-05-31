@@ -12,7 +12,7 @@ import '../../../../../shared/memory/heap_data.dart';
 import '../../../../../shared/memory/heap_graph_loader.dart';
 import '../../../../../shared/primitives/encoding.dart';
 
-abstract class SnapshotItem extends DisposableController {
+sealed class SnapshotItem extends DisposableController {
   /// Number to show with auto-generated names that may be non unique, like isolate name.
   int? get displayNumber;
 }
