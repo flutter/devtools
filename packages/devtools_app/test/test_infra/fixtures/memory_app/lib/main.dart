@@ -105,7 +105,7 @@ class _MyGarbage {
       };
 
       map = {
-        for (var _ in Iterable<void>.generate(_width))
+        for (final _ in Iterable<void>.generate(_width))
           createInstance(): createInstance(),
       };
 

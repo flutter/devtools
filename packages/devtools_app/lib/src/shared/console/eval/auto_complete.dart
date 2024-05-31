@@ -142,7 +142,7 @@ Future<Set<String>> _libraryMemberAndImportsAutocompletes(
     final dependencies = library.dependencies;
 
     if (dependencies != null) {
-      for (var dependency in library.dependencies!) {
+      for (final dependency in library.dependencies!) {
         final prefix = dependency.prefix;
         final target = dependency.target;
         if (prefix != null && prefix.isNotEmpty) {
@@ -211,7 +211,7 @@ Future<Set<String>> _libraryMemberAutocompletes(
 
   if (debugIncludeExports) {
     final List<Future<Set<String>>> futures = <Future<Set<String>>>[];
-    for (var dependency in library.dependencies!) {
+    for (final dependency in library.dependencies!) {
       if (!dependency.isImport!) {
         final prefix = dependency.prefix;
         final target = dependency.target;
@@ -283,7 +283,7 @@ Future<Set<String>> _autoCompleteMembersFor(
 
     final functions = clazz.functions;
     if (functions != null) {
-      for (var funcRef in functions) {
+      for (final funcRef in functions) {
         if (_validFunction(funcRef, clazz, staticContext)) {
           final isConstructor = _isConstructor(funcRef, clazz);
           final funcName = funcRef.name;

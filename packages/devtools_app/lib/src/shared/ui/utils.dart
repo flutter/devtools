@@ -27,7 +27,7 @@ TextSpan truncateTextSpan(TextSpan span, int length) {
     }
     if (span.children != null) {
       children = <TextSpan>[];
-      for (var child in span.children!) {
+      for (final child in span.children!) {
         if (available <= 0) break;
         children.add(truncateHelper(child as TextSpan));
       }

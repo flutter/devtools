@@ -70,7 +70,7 @@ class _CpuProfileFlameChartState
 
       rows[row].addNode(node);
 
-      for (CpuStackFrame child in stackFrame.children) {
+      for (final child in stackFrame.children) {
         createChartNodes(child, row + 1);
       }
     }

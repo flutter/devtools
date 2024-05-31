@@ -91,7 +91,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
       if (details == null) return;
 
       final copied = TapLocation.copy(value);
-      for (var location in allLocations) {
+      for (final location in allLocations) {
         if (location != tapLocation) location.value = copied;
       }
 
@@ -130,7 +130,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
       widget.chart.android.tapLocation,
     ];
 
-    for (var location in allLocations) {
+    for (final location in allLocations) {
       _addTapLocationListener(location, allLocations);
     }
 
@@ -341,7 +341,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
     if (firstWidget != null) results.add(firstWidget);
 
-    for (var entry in dataToDisplay.entries) {
+    for (final entry in dataToDisplay.entries) {
       final keys = entry.value.keys;
       final image = keys.contains(renderImage)
           ? entry.value[renderImage] as String?
@@ -471,7 +471,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     final colorScheme = Theme.of(context).colorScheme;
     final eventsDisplayed = chartsValues.eventsToDisplay(colorScheme.isLight);
 
-    for (var entry in eventsDisplayed.entries) {
+    for (final entry in eventsDisplayed.entries) {
       final widget = _hoverRow(name: ' ${entry.key}', image: entry.value);
       results.add(widget);
     }
@@ -486,7 +486,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
     final widgets = <Widget>[];
     var index = 1;
-    for (var event in allEvents) {
+    for (final event in allEvents) {
       late String? name;
       if (event[eventName] == devToolsEvent && event.containsKey(customEvent)) {
         final custom = event[customEvent] as Map<dynamic, dynamic>;
@@ -567,7 +567,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
         event.containsKey(customEvent)) {
       final custom = event[customEvent] as Map<Object?, Object?>;
       final data = custom[customEventData] as Map<Object?, Object?>;
-      for (var key in data.keys) {
+      for (final key in data.keys) {
         output.write('$key=');
         output.writeln(_longValueToShort(data[key] as String));
       }

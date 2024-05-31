@@ -25,7 +25,7 @@ class ListCommand extends Command {
 
     print('\n${packages.length} packages:');
 
-    for (Package p in packages) {
+    for (final p in packages) {
       print('  ${p.relativePath}${path.separator}');
     }
   }

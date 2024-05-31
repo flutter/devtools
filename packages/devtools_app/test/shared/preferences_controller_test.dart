@@ -385,7 +385,7 @@ void main() {
       );
 
       // Flip the values in storage.
-      for (var key in storage.values.keys) {
+      for (final key in storage.values.keys) {
         storage.values[key] = (!(storage.values[key] == 'true')).toString();
       }
 
@@ -445,7 +445,7 @@ void main() {
       );
 
       // Flip the values in storage.
-      for (var key in storage.values.keys) {
+      for (final key in storage.values.keys) {
         storage.values[key] = (!(storage.values[key] == 'true')).toString();
       }
 
@@ -500,7 +500,7 @@ void main() {
       );
 
       // Flip the values in storage.
-      for (var key in storage.values.keys) {
+      for (final key in storage.values.keys) {
         storage.values[key] = (!(storage.values[key] == 'true')).toString();
       }
 

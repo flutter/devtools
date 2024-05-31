@@ -442,7 +442,7 @@ class RetainingPathWidget extends StatelessWidget {
         ],
       ),
       if (retainingPath.elements!.length > 1)
-        for (RetainingObject object in retainingPath.elements!.sublist(1))
+        for (final object in retainingPath.elements!.sublist(1))
           Row(
             children: [
               Flexible(

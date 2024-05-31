@@ -276,7 +276,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   Widget build(BuildContext context) {
     // Build the screens for each tab and wrap them in the appropriate styling.
     final tabBodies = [
-      for (var screen in widget.screens)
+      for (final screen in widget.screens)
         Align(
           alignment: Alignment.topLeft,
           child: FocusScope(

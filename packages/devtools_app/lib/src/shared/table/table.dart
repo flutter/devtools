@@ -255,7 +255,7 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
         widget.tableController.columns.numSpacers - numColumnGroupSpacers;
     tableWidth += numColumnSpacers * columnSpacing;
     tableWidth += numColumnGroupSpacers * columnGroupSpacingWithPadding;
-    for (var columnWidth in widget.columnWidths) {
+    for (final columnWidth in widget.columnWidths) {
       tableWidth += columnWidth;
     }
     return tableWidth;

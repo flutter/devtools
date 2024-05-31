@@ -172,7 +172,7 @@ class PathFromRoot {
     bool justAddedEllipsis = false;
     if (hideStandard) {
       data = [];
-      for (var item in path.asMap().entries) {
+      for (final item in path.asMap().entries) {
         if (item.key == 0 ||
             item.key == path.length - 1 ||
             !item.value.isCreatedByGoogle) {

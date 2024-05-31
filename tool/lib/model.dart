@@ -48,7 +48,7 @@ class DevToolsRepo {
     final result = <Package>[];
     final repoDir = Directory(repoPath);
 
-    for (FileSystemEntity entity in repoDir.listSync()) {
+    for (final entity in repoDir.listSync()) {
       final name = path.basename(entity.path);
       if (entity is Directory && !name.startsWith('.')) {
         _collectPackages(entity, result);
@@ -87,7 +87,7 @@ class DevToolsRepo {
       result.add(Package._(this, dir.path));
     }
 
-    for (FileSystemEntity entity in dir.listSync(followLinks: false)) {
+    for (final entity in dir.listSync(followLinks: false)) {
       final name = path.basename(entity.path);
       if (entity is Directory && !name.startsWith('.') && name != 'build') {
         _collectPackages(entity, result);
@@ -236,7 +236,7 @@ class Package {
   }
 
   void _collectDartFiles(Directory dir, List<String> result) {
-    for (FileSystemEntity entity in dir.listSync(followLinks: false)) {
+    for (final entity in dir.listSync(followLinks: false)) {
       final name = path.basename(entity.path);
       if (entity is Directory && !name.startsWith('.') && name != 'build') {
         _collectDartFiles(entity, result);

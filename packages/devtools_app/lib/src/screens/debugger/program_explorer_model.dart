@@ -376,7 +376,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
   void _trimChildrenAsMapEntries() {
     _childrenAsMap.clear();
 
-    for (var child in children) {
+    for (final child in children) {
       child._trimChildrenAsMapEntries();
     }
   }

@@ -39,7 +39,7 @@ class FakeServiceConnectionManager extends Fake
       availableServices: availableServices,
       rootLibrary: rootLibrary,
     );
-    for (var screenId in screenIds) {
+    for (final screenId in screenIds) {
       when(errorBadgeManager.erroredItemsForPage(screenId)).thenReturn(
         FixedValueListenable(LinkedHashMap<String, DevToolsError>()),
       );

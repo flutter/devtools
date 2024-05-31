@@ -109,7 +109,7 @@ class HttpDate {
     String? monthStr;
     String? yearStr;
 
-    for (var token in tokens) {
+    for (final token in tokens) {
       if (token.length < 1) continue;
       if (timeStr == null &&
           token.length >= 5 &&

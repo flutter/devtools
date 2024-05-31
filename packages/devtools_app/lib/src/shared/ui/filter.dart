@@ -343,7 +343,7 @@ class QueryFilter {
       if (querySeparatorIndex != -1) {
         final value = part.substring(querySeparatorIndex + 1).trim();
         if (value.isNotEmpty) {
-          for (var arg in args.values) {
+          for (final arg in args.values) {
             if (arg.matchesKey(part)) {
               arg.isNegative =
                   part.startsWith(QueryFilterArgument.negativePrefix);

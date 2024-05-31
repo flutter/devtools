@@ -246,7 +246,7 @@ class InspectorService extends InspectorServiceBase {
 
   void onExtensionVmServiceReceived(Event e) {
     if ('Flutter.Frame' == e.extensionKind) {
-      for (InspectorServiceClient client in clients) {
+      for (final client in clients) {
         try {
           client.onFlutterFrame();
         } catch (e) {
@@ -324,7 +324,7 @@ class InspectorService extends InspectorServiceBase {
   void _onRootDirectoriesChanged(List<String> directories) {
     _rootDirectories.value = directories;
     _rootPackagePrefixes = [];
-    for (var directory in directories) {
+    for (final directory in directories) {
       // TODO(jacobr): add an API to DDS to provide the actual mapping to and
       // from absolute file paths to packages instead of having to guess it
       // here.
@@ -438,7 +438,7 @@ class InspectorService extends InspectorServiceBase {
       _currentSelection = pendingSelection;
       assert(group == _selectionGroups.next);
       _selectionGroups.promoteNext();
-      for (InspectorServiceClient client in clients) {
+      for (final client in clients) {
         client.onInspectorSelectionChanged();
       }
     }
@@ -685,7 +685,7 @@ abstract class InspectorObjectGroupBase
   ) {
     if (disposed || jsonObject == null) return const [];
     final nodes = <RemoteDiagnosticsNode>[];
-    for (var element in jsonObject.cast<Map<String, Object?>>()) {
+    for (final element in jsonObject.cast<Map<String, Object?>>()) {
       nodes.add(RemoteDiagnosticsNode(element, this, isProperty, parent));
     }
     return nodes;
@@ -794,7 +794,7 @@ abstract class InspectorObjectGroupBase
     if (disposed || clazz == null) return null;
 
     final properties = <String, InstanceRef>{};
-    for (FieldRef field in clazz.fields!) {
+    for (final field in clazz.fields!) {
       final String name = field.name!;
       if (isPrivateMember(name)) {
         // Needed to filter out _deleted_enum_sentinel synthetic property.
@@ -820,7 +820,7 @@ abstract class InspectorObjectGroupBase
     String name,
   ) async {
     final clazz = await inspectorLibrary.getClass(classRef, this) as Class;
-    for (FuncRef f in clazz.functions!) {
+    for (final f in clazz.functions!) {
       // TODO(pq): check for properties that match name.
       if (f.name == name) {
         final func = await inspectorLibrary.getFunc(f, this) as Func;

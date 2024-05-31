@@ -32,7 +32,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
         allocationSamples = allocationSamples ?? _defaultProfile {
     _reverseResolvedUriMap = <String, String>{};
     if (_resolvedUriMap != null) {
-      for (var e in _resolvedUriMap.entries) {
+      for (final e in _resolvedUriMap.entries) {
         _reverseResolvedUriMap![e.value] = e.key;
       }
     }
@@ -170,7 +170,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
     bool? gc,
   }) {
     final memberStats = <ClassHeapStats>[];
-    for (var data in _allocationData!.data) {
+    for (final data in _allocationData!.data) {
       final stats = ClassHeapStats(
         classRef: data.classRef,
         accumulatedSize: 0,

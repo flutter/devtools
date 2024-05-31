@@ -93,7 +93,7 @@ class LocationMap {
   Map<String, Object> toJson() {
     final json = <String, Object>{};
     final pathToLocations = <String, List<Location>>{};
-    for (var location in _locationMap.values) {
+    for (final location in _locationMap.values) {
       if (location.isResolved) {
         pathToLocations
             .putIfAbsent(location.fileUriString!, () => <Location>[])
@@ -105,7 +105,7 @@ class LocationMap {
       final lines = <int>[];
       final columns = <int>[];
       final names = <String>[];
-      for (var location in locations) {
+      for (final location in locations) {
         ids.add(location.id);
         lines.add(location.line!);
         columns.add(location.column!);
@@ -122,7 +122,7 @@ class LocationMap {
   }
 
   void processLocationMap(Map<String, dynamic> json) {
-    for (final String path in json.keys) {
+    for (final path in json.keys) {
       final entries = (json[path]! as Map).cast<String, List<Object?>>();
 
       final ids = entries[_idsKey]!.cast<int>();
@@ -214,7 +214,7 @@ class RebuildCountModel {
 
     _rebuildsForFrame.forEach((id, rebuilds) {
       final events = <int>[];
-      for (RebuildLocation rebuild in rebuilds) {
+      for (final rebuild in rebuilds) {
         events
           ..add(rebuild.location.id)
           ..add(rebuild.buildCount);
@@ -319,7 +319,7 @@ List<RebuildLocationStats> combineStats(
   final output = <Location, RebuildLocationStats>{};
   for (int i = 0; i < rebuildStats.length; i++) {
     final statsForIndex = rebuildStats[i];
-    for (var entry in statsForIndex) {
+    for (final entry in statsForIndex) {
       output
           .putIfAbsent(
             entry.location,

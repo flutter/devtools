@@ -386,7 +386,7 @@ class ChartController extends DisposableController
 
   /// Clear all data in the chart.
   void reset() {
-    for (var trace in traces) {
+    for (final trace in traces) {
       trace.clearData();
     }
     timestampsClear();

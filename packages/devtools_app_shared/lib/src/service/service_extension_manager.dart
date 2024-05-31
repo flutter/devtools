@@ -149,7 +149,7 @@ final class ServiceExtensionManager with DisposerMixin {
     final extensionsToProcess = _pendingServiceExtensions.toList();
     _pendingServiceExtensions.clear();
     await Future.wait([
-      for (String extension in extensionsToProcess)
+      for (final extension in extensionsToProcess)
         _addServiceExtension(extension),
     ]);
   }
@@ -186,12 +186,12 @@ final class ServiceExtensionManager with DisposerMixin {
           return;
         }
         await Future.wait([
-          for (String extension in mainIsolate.extensionRPCs!)
+          for (final extension in mainIsolate.extensionRPCs!)
             _maybeAddServiceExtension(extension),
         ]);
       } else {
         await Future.wait([
-          for (String extension in mainIsolate.extensionRPCs!)
+          for (final extension in mainIsolate.extensionRPCs!)
             _addServiceExtension(extension),
         ]);
       }

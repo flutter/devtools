@@ -68,11 +68,11 @@ List<double> computeRenderSizes({
     // and we can just divide the size evenly
     // but it should be at least as big as [smallestRenderSize]
     final renderSize = math.max(smallestRenderSize, maxSizeAvailable / n);
-    return [for (var _ in sizes) renderSize];
+    return [for (final _ in sizes) renderSize];
   }
 
   List<double> transformToRenderSize(double largestRenderSize) => [
-        for (var s in sizes)
+        for (final s in sizes)
           (s - smallestSize) *
                   (largestRenderSize - smallestRenderSize) /
                   (largestSize - smallestSize) +
@@ -84,7 +84,7 @@ List<double> computeRenderSizes({
   if (useMaxSizeAvailable && sum(renderSizes) < maxSizeAvailable) {
     largestRenderSize = (maxSizeAvailable - n * smallestRenderSize) *
             (largestSize - smallestSize) /
-            sum([for (var s in sizes) s - smallestSize]) +
+            sum([for (final s in sizes) s - smallestSize]) +
         smallestRenderSize;
     renderSizes = transformToRenderSize(largestRenderSize);
   }
@@ -108,7 +108,7 @@ class LayoutProperties {
                   (child) => LayoutProperties(child, copyLevel: copyLevel - 1),
                 )
                 .toList(growable: false) {
-    for (var child in children) {
+    for (final child in children) {
       child.parent = this;
     }
   }
@@ -123,7 +123,7 @@ class LayoutProperties {
     required this.size,
     required this.flexFit,
   }) {
-    for (var child in children) {
+    for (final child in children) {
       child.parent = this;
     }
   }

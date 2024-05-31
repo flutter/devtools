@@ -65,7 +65,7 @@ void main() {
         );
 
         // Record three snapshots.
-        for (var i in Iterable<int>.generate(3)) {
+        for (final i in Iterable<int>.generate(3)) {
           await takeSnapshot(tester, scene);
           expect(find.text('selected-isolate-${i + 1}'), findsOneWidget);
         }

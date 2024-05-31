@@ -603,7 +603,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     final jsonArray = json['children'] as List<Object?>?;
     if (jsonArray?.isNotEmpty == true) {
       final nodes = <RemoteDiagnosticsNode>[];
-      for (var element in jsonArray!.cast<Map<String, Object?>>()) {
+      for (final element in jsonArray!.cast<Map<String, Object?>>()) {
         final child =
             RemoteDiagnosticsNode(element, objectGroupApi, false, parent);
         child.parent = this;
@@ -622,7 +622,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
       cachedProperties = [];
       if (json.containsKey('properties')) {
         final jsonArray = json['properties'] as List<Object?>;
-        for (var element in jsonArray.cast<Map<String, Object?>>()) {
+        for (final element in jsonArray.cast<Map<String, Object?>>()) {
           cachedProperties!.add(
             RemoteDiagnosticsNode(element, objectGroupApi, true, parent),
           );
@@ -657,7 +657,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     if (entries.length != node.json.entries.length) {
       return false;
     }
-    for (var entry in entries) {
+    for (final entry in entries) {
       final String key = entry.key;
       if (key == 'valueId') {
         continue;
@@ -672,7 +672,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    for (var property in inlineProperties) {
+    for (final property in inlineProperties) {
       properties.add(DiagnosticsProperty(property.name, property));
     }
   }
@@ -682,7 +682,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     final children = childrenNow;
     if (children.isEmpty) return const <DiagnosticsNode>[];
     final regularChildren = <DiagnosticsNode>[];
-    for (var child in children) {
+    for (final child in children) {
       regularChildren.add(child.toDiagnosticsNode());
     }
     return regularChildren;
