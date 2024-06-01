@@ -1149,10 +1149,6 @@ extension UriExtension on Uri {
   }
 }
 
-Iterable<T> removeNullValues<T>(Iterable<T?> values) {
-  return values.whereType<T>();
-}
-
 // TODO(mtaylee): Prefer to use this helper method whenever a call to
 // .split('/').last is made on a String (usually on URIs).
 // See https://github.com/flutter/devtools/issues/4360.
