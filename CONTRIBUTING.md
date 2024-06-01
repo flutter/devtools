@@ -2,10 +2,10 @@
 
 ![GitHub contributors](https://img.shields.io/github/contributors/flutter/devtools.svg)
 
-_tl;dr: join [Discord](https://github.com/flutter/flutter/wiki/Chat), be
+_tl;dr: join [Discord](https://github.com/flutter/flutter/blob/master/docs/contributing/Chat.md), be
 [courteous](https://github.com/flutter/flutter/blob/master/CODE_OF_CONDUCT.md), follow the steps below
 to set up a development environment; if you stick around and contribute, you can
-[join the team](https://github.com/flutter/flutter/wiki/Contributor-access) and get commit access._
+[join the team](https://github.com/flutter/flutter/blob/master/docs/contributing/Contributor-access.md) and get commit access._
 
 > If you are here because you just want to test the bleeding-edge (unreleased) DevTools functionality,
 follow our [beta testing guidance](https://github.com/flutter/devtools/blob/master/BETA_TESTING.md).
@@ -17,7 +17,7 @@ We gladly accept contributions via GitHub pull requests! We encourage you to rea
 framework's contributing guide, as all of that information applies to contributing to the `flutter/devtools`
 repo as well.
 
-We communicate primarily over GitHub and [Discord](https://github.com/flutter/flutter/wiki/Chat) on the
+We communicate primarily over GitHub and [Discord](https://github.com/flutter/flutter/blob/master/docs/contributing/Chat.md) on the
 [#hackers-devtools](https://discord.com/channels/608014603317936148/1106667330093723668) channel.
 
 Before contributing code:

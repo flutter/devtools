@@ -423,7 +423,7 @@ class WebBuildFixture {
     // directly to prevent Windows-based test runs getting killed but leaving
     // the pub process behind. Something similar might be needed here.
     // See here for more information:
-    // https://github.com/flutter/flutter/wiki/The-flutter-tool#debugging-the-flutter-command-line-tool
+    // https://github.com/flutter/flutter/blob/master/docs/tool/README.md#debugging-the-flutter-command-line-tool
     final executable = Platform.isWindows ? 'flutter.bat' : 'flutter';
 
     if (verbose) {

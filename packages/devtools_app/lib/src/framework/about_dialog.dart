@@ -114,7 +114,7 @@ class _ContributingLink extends StatelessWidget {
 class _DiscordLink extends StatelessWidget {
   const _DiscordLink();
 
-  static const _discordWikiUrl = 'https://github.com/flutter/flutter/wiki/Chat';
+  static const _discordWikiUrl = 'https://github.com/flutter/flutter/blob/master/docs/contributing/Chat.md';
 
   @override
   Widget build(BuildContext context) {
