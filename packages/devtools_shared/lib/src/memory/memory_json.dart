@@ -16,24 +16,24 @@ abstract class DecodeEncode<T> {
   /// More than one Encoded entry, add a comma and the Encoded entry.
   String encodeAnother(T sample);
 
-  T fromJson(Map<String, dynamic> json);
+  T fromJson(Map<String, Object?> json);
 }
 
 abstract class MemoryJson<T> implements DecodeEncode<T> {
   MemoryJson();
 
-  /// Given a JSON string representing an array of HeapSample, decode to a
+  /// Given a JSON string representing an array of [HeapSample], decode to a
   /// List of HeapSample.
   MemoryJson.decode(
     String payloadName, {
     required String argJsonString,
-    Map<String, dynamic>? argDecodedMap,
+    Map<String, Object?>? argDecodedMap,
   }) {
-    final Map<String, dynamic> decodedMap =
-        argDecodedMap ?? jsonDecode(argJsonString);
-    Map<String, dynamic> payload = decodedMap[payloadName];
+    final decodedMap =
+        argDecodedMap ?? (jsonDecode(argJsonString) as Map<String, Object?>);
+    var payload = decodedMap[payloadName] as Map<String, Object?>;
 
-    int payloadVersion = payload[jsonVersionField];
+    var payloadVersion = payload[jsonVersionField] as int;
     final payloadDevToolsScreen = payload[jsonDevToolsScreenField];
 
     if (payloadVersion != version) {
@@ -47,15 +47,15 @@ abstract class MemoryJson<T> implements DecodeEncode<T> {
     // Any problem return (data is empty).
     if (!isMatchedVersion || !isMemoryPayload) return;
 
-    final List dynamicList = payload[jsonDataField];
+    final dynamicList = payload[jsonDataField] as List<Object?>;
     for (var index = 0; index < dynamicList.length; index++) {
-      final sample = fromJson(dynamicList[index] as Map<String, dynamic>);
+      final sample = fromJson(dynamicList[index] as Map<String, Object?>);
       data.add(sample);
     }
   }
 
   Map<String, dynamic> upgradeToVersion(
-    Map<String, dynamic> payload,
+    Map<String, Object?> payload,
     int oldVersion,
   );
 
@@ -91,10 +91,10 @@ class SamplesMemoryJson extends MemoryJson<HeapSample> {
   SamplesMemoryJson();
 
   /// Given a JSON string representing an array of HeapSample, decode to a
-  /// List of HeapSample.
+  /// list of [HeapSample].
   SamplesMemoryJson.decode({
     required String argJsonString,
-    Map<String, dynamic>? argDecodedMap,
+    Map<String, Object?>? argDecodedMap,
   }) : super.decode(
           _jsonMemoryPayloadField,
           argJsonString: argJsonString,
@@ -104,71 +104,80 @@ class SamplesMemoryJson extends MemoryJson<HeapSample> {
   /// Exported JSON payload of collected memory statistics.
   static const String _jsonMemoryPayloadField = 'samples';
 
-  /// Structure of the memory JSON file:
+  /// ## Structure of the memory JSON file
   ///
+  /// ```json
   /// {
   ///   "samples": {
   ///     "version": 1,
   ///     "dartDevToolsScreen": "memory"
   ///     "data": [
-  ///       Encoded Heap Sample see section below.
+  ///       # Encoded Heap Sample see section below.
   ///     ]
   ///   }
   /// }
-
-  /// Header portion (memoryJsonHeader) e.g.,
-  /// =======================================
+  /// ```
+  ///
+  /// ## Header portion (`memoryJsonHeader`)
+  ///
+  /// ```json
   /// {
   ///   "samples": {
   ///     "version": 1,
   ///     "dartDevToolsScreen": "memory"
   ///     "data": [
+  /// ```
   ///
-  /// Encoded Allocations entry (SamplesMemoryJson),
-  /// ==============================================================================
-  ///     {
-  ///       "timestamp":1581540967479,
-  ///       "rss":211419136,
-  ///       "capacity":50956576,
-  ///       "used":41384952,
-  ///       "external":166176,
-  ///       "gc":false,
-  ///       "adb_memoryInfo":{
-  ///         "Realtime":450147758,
-  ///         "Java Heap":7416,
-  ///         "Native Heap":41712,
-  ///         "Code":12644,
-  ///         "Stack":52,
-  ///         "Graphics":0,
-  ///         "Private Other":94420,
-  ///         "System":6178,
-  ///         "Total":162422
-  ///       }
-  ///     },
+  /// ## Encoded Allocations entry (`SamplesMemoryJson`),
   ///
-  /// Trailer portion (memoryJsonTrailer) e.g.,
-  /// =========================================
+  /// ```json
+  /// {
+  ///   "timestamp":1581540967479,
+  ///   "rss":211419136,
+  ///   "capacity":50956576,
+  ///   "used":41384952,
+  ///   "external":166176,
+  ///   "gc":false,
+  ///   "adb_memoryInfo":{
+  ///     "Realtime":450147758,
+  ///     "Java Heap":7416,
+  ///     "Native Heap":41712,
+  ///     "Code":12644,
+  ///     "Stack":52,
+  ///     "Graphics":0,
+  ///     "Private Other":94420,
+  ///     "System":6178,
+  ///     "Total":162422
+  ///   }
+  /// },
+  /// ```
+  ///
+  /// ## Trailer portion (`memoryJsonTrailer`)
+  ///
+  /// ```json
   ///     ]
   ///   }
   /// }
+  /// ```
 
   @override
   int get version => HeapSample.version;
 
-  /// Encoded Heap Sample
+  /// Encode the specified [sample].
   @override
   String encode(HeapSample sample) => jsonEncode(sample);
 
-  /// More than one Encoded Heap Sample, add a comma and the Encoded Heap Sample.
+  /// More than one encoded [HeapSample],
+  /// add a comma and the encoded [sample].
   @override
   String encodeAnother(HeapSample sample) => ',\n${jsonEncode(sample)}';
 
   @override
-  HeapSample fromJson(Map<String, dynamic> json) => HeapSample.fromJson(json);
+  HeapSample fromJson(Map<String, Object?> json) => HeapSample.fromJson(json);
 
   @override
   Map<String, dynamic> upgradeToVersion(
-    Map<String, dynamic> payload,
+    Map<String, Object?> payload,
     int oldVersion,
   ) =>
       throw UnimplementedError(
@@ -197,62 +206,70 @@ class SamplesMemoryJson extends MemoryJson<HeapSample> {
       '"${MemoryJson.jsonDataField}": [\n';
 }
 
-/// Structure of the memory JSON file:
+/// ## Structure of the memory JSON file
 ///
+/// ```json
 /// {
 ///   "allocations": {
 ///     "version": 2,
 ///     "dartDevToolsScreen": "memory"
 ///     "data": [
-///       Encoded ClassHeapStats see section below.
+///       # Encoded ClassHeapStats see section below.
 ///     ]
 ///   }
 /// }
-
-/// Header portion (memoryJsonHeader) e.g.,
-/// =======================================
+/// ```
+///
+/// ## Header portion (`memoryJsonHeader`)
+///
+/// ```json
 /// {
 ///   "allocations": {
 ///     "version": 2,
 ///     "dartDevToolsScreen": "memory"
 ///     "data": [
+/// ```
 ///
-/// Encoded Allocations entry (AllocationMemoryJson),
-/// ==============================================================================
-///     {
-///       "class" : {
-///          id: "classes/1"
-///          name: "AClassName"
-///        },
-///       "instancesCurrent": 100,
-///       "instancesAccumulated": 0,
-///       "bytesCurrent": 55,
-///       "accumulatedSize": 5,
-///       "_new": [
-///         100,
-///         50,
-///         5
-///       ],
-///       "_old": [
-///         0,
-///         0,
-///         0
-///       ]
-///     },
+/// ## Encoded Allocations entry (`AllocationMemoryJson`)
 ///
-/// Trailer portion (memoryJsonTrailer) e.g.,
-/// =========================================
+/// ```json
+/// {
+///   "class" : {
+///      id: "classes/1"
+///      name: "AClassName"
+///    },
+///   "instancesCurrent": 100,
+///   "instancesAccumulated": 0,
+///   "bytesCurrent": 55,
+///   "accumulatedSize": 5,
+///   "_new": [
+///     100,
+///     50,
+///     5
+///   ],
+///   "_old": [
+///     0,
+///     0,
+///     0
+///   ]
+/// },
+/// ```
+///
+/// ## Trailer portion (`memoryJsonTrailer`)
+///
+/// ```json
 ///     ]
 ///   }
 /// }
+/// ```
 class AllocationMemoryJson extends MemoryJson<ClassHeapStats> {
   AllocationMemoryJson();
 
   /// Given a JSON string representing an array of HeapSample, decode to a
-  /// List of HeapSample.
+  /// list of [HeapSample].
   AllocationMemoryJson.decode({
     required String argJsonString,
-    Map<String, dynamic>? argDecodedMap,
+    Map<String, Object?>? argDecodedMap,
   }) : super.decode(
           _jsonAllocationPayloadField,
           argJsonString: argJsonString,
@@ -262,34 +279,35 @@ class AllocationMemoryJson extends MemoryJson<ClassHeapStats> {
   /// Exported JSON payload of collected memory statistics.
   static const String _jsonAllocationPayloadField = 'allocations';
 
-  /// Encoded ClassHeapDetailStats
+  /// JSON encoded version of the [sample].
   @override
   String encode(ClassHeapStats sample) => jsonEncode(sample.json);
 
-  /// More than one Encoded ClassHeapDetailStats, add a comma and the Encoded ClassHeapDetailStats entry.
+  /// More than one encoded [ClassHeapStats],
+  /// add a comma and the encoded [sample].
   @override
   String encodeAnother(ClassHeapStats sample) =>
       ',\n${jsonEncode(sample.json)}';
 
   @override
-  ClassHeapStats fromJson(Map<String, dynamic> json) =>
+  ClassHeapStats fromJson(Map<String, Object?> json) =>
       ClassHeapStats.parse(json)!;
 
   @override
   Map<String, dynamic> upgradeToVersion(
-    Map<String, dynamic> payload,
+    Map<String, Object?> payload,
     int oldVersion,
   ) {
     assert(oldVersion < version);
     assert(oldVersion == 1);
-    final updatedPayload = Map<String, dynamic>.of(payload);
+    final updatedPayload = Map<String, Object?>.of(payload);
     updatedPayload['version'] = version;
     final oldData = (payload['data'] as List).map((e) => _OldData(e));
     updatedPayload['data'] = [
       for (final data in oldData)
         {
           'type': 'ClassHeapStats',
-          'class': <String, dynamic>{
+          'class': <String, Object?>{
             'type': '@Class',
             ...data.class_,
           },
@@ -342,14 +360,14 @@ class AllocationMemoryJson extends MemoryJson<ClassHeapStats> {
       '"${MemoryJson.jsonDataField}": [\n';
 }
 
-extension type _OldData(Map<String, dynamic> data) {
-  Map<String, dynamic> get class_ => data['class'];
+extension type _OldData(Map<String, Object?> data) {
+  Map<String, Object?> get class_ => data['class'] as Map<String, Object?>;
 
-  int get bytesCurrent => data['bytesCurrent'];
+  int get bytesCurrent => data['bytesCurrent'] as int;
 
-  int get bytesDelta => data['bytesDelta'];
+  int get bytesDelta => data['bytesDelta'] as int;
 
-  int get instancesCurrent => data['instancesCurrent'];
+  int get instancesCurrent => data['instancesCurrent'] as int;
 
-  int get instancesDelta => data['instancesDelta'];
+  int get instancesDelta => data['instancesDelta'] as int;
 }
