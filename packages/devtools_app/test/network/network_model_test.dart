@@ -101,7 +101,10 @@ void main() {
     });
 
     test('uri returns correct value', () {
-      expect(httpGet.uri, 'https://jsonplaceholder.typicode.com/albums/1?userId=1&title=myalbum');
+      expect(
+        httpGet.uri,
+        'https://jsonplaceholder.typicode.com/albums/1?userId=1&title=myalbum',
+      );
       expect(httpGetWithError.uri, 'https://www.examplez.com/1');
       expect(httpPost.uri, 'https://jsonplaceholder.typicode.com/posts');
       expect(httpPut.uri, 'https://jsonplaceholder.typicode.com/posts/1');
@@ -235,7 +238,8 @@ void main() {
       expect(
         collectionEquals(httpGet.general, {
           'method': 'GET',
-          'uri': 'https://jsonplaceholder.typicode.com/albums/1?userId=1&title=myalbum',
+          'uri':
+              'https://jsonplaceholder.typicode.com/albums/1?userId=1&title=myalbum',
           'connectionInfo': {
             'localPort': 45648,
             'remoteAddress': '2606:4700:3033::ac43:bdd9',
