@@ -78,7 +78,7 @@ final _rawProviderNodeProvider =
     Future<Instance> getFieldWithName(String name) {
       return eval.safeGetInstance(
         providerNodeInstance.fields!
-            .firstWhere((e) => e.decl?.name == name)
+            .firstWhere((e) => e.name == name)
             .value as InstanceRef,
         isAlive,
       );

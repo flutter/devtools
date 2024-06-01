@@ -250,14 +250,12 @@ Future<void> _addAllInstanceMembersToAutocompleteList(
       staticContext: false,
     ),
   );
-  // TODO(grouma) - This shouldn't be necessary but package:dwds does
-  // not properly provide superclass information.
-  final fields = instance.fields;
-  if (fields == null) return;
   final clazz = await controller.classFor(classRef);
+  final fields = clazz?.fields;
+  if (fields == null) return;
   final fieldNames = fields
-      .where((field) => field.decl?.isStatic != null && !field.decl!.isStatic!)
-      .map((field) => field.decl?.name);
+      .where((field) => field.isStatic ?? false)
+      .map((field) => field.name);
   result.addAll(
     removeNullValues(fieldNames).where(
       (member) => _isAccessible(member, clazz),

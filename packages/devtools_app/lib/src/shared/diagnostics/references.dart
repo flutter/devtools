@@ -454,7 +454,7 @@ List<DartObjectNode> _createLiveOutboundReferencesForFields(
       field.value,
       RefNodeType.liveOutRefs,
       heapSelection.withoutObject(),
-      namePrefix: '${field.decl?.name}:',
+      namePrefix: '${field.name}:',
     );
   }
   return variables;
