@@ -1154,7 +1154,7 @@ extension UriExtension on Uri {
 // See https://github.com/flutter/devtools/issues/4360.
 /// Returns the file name from a URI or path string, by splitting the [uri] at
 /// the directory separators '/', and returning the last element.
-String? fileNameFromUri(String? uri) => uri?.split('/').last;
+String? fileNameFromUri(String? uri) => uri?.split('/').lastOrNull;
 
 /// Calculates subtraction of two maps.
 ///

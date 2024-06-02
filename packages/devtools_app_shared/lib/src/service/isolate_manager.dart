@@ -202,8 +202,7 @@ final class IsolateManager with DisposerMixin {
         _mainIsolate.value = null;
       }
       if (_selectedIsolate.value == event.isolate) {
-        _selectedIsolate.value =
-            _isolateStates.isEmpty ? null : _isolateStates.keys.first;
+        _selectedIsolate.value = _isolateStates.keys.firstOrNull;
       }
       _isolateRunnableCompleters.remove(event.isolate!.id);
     }
