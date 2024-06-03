@@ -143,7 +143,7 @@ String _snapshotDocumentation(bool isDark) {
   final filePostfix = isDark ? 'dark' : 'light';
 
   /// See https://stackoverflow.com/questions/62292512/firebase-flutter-web-app-works-locally-but-when-deployed-images-are-not-shown
-  const isWebProd = kIsWeb && kReleaseMode;
+  const isWebProd = kIsWeb && !kDebugMode;
   const imagePath = isWebProd ? 'assets/' : '';
   final uploadImageUrl = '${imagePath}assets/img/doc/upload_$filePostfix.png';
 
