@@ -10,7 +10,6 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../connected_app.dart';
 import '../../globals.dart';
-import '../../primitives/utils.dart';
 import '../../ui/search.dart';
 import 'eval_service.dart';
 
@@ -23,7 +22,7 @@ Future<List<String>> autoCompleteResultsFor(
   final result = <String>{};
   if (!parts.isField) {
     final variables = _appState.variables.value;
-    result.addAll(removeNullValues(variables.map((variable) => variable.name)));
+    result.addAll(variables.map((variable) => variable.name).nonNulls);
 
     final thisVariable = variables.firstWhereOrNull(
       (variable) => variable.name == 'this',
@@ -98,7 +97,7 @@ Future<List<String>> autoCompleteResultsFor(
       }
     } catch (_) {}
   }
-  return removeNullValues(result)
+  return result.nonNulls
       .where((name) => name.startsWith(parts.activeWord))
       .toList();
 }
@@ -114,13 +113,13 @@ Future<Set<String>> libraryMemberAndImportsAutocompletes(
   LibraryRef libraryRef,
   EvalService evalService,
 ) async {
-  final values = removeNullValues(
-    await _appState.cache.libraryMemberAndImportsAutocomplete.putIfAbsent(
-      libraryRef,
-      () => _libraryMemberAndImportsAutocompletes(libraryRef, evalService),
-    ),
+  final autocompletes =
+      await _appState.cache.libraryMemberAndImportsAutocomplete.putIfAbsent(
+    libraryRef,
+    () => _libraryMemberAndImportsAutocompletes(libraryRef, evalService),
   );
-  return values.toSet();
+
+  return autocompletes.nonNulls.toSet();
 }
 
 Future<Set<String>> _libraryMemberAndImportsAutocompletes(
@@ -172,12 +171,11 @@ Future<Set<String>> libraryMemberAutocompletes(
   LibraryRef libraryRef, {
   required bool includePrivates,
 }) async {
-  var result = removeNullValues(
-    await _appState.cache.libraryMemberAutocomplete.putIfAbsent(
-      libraryRef,
-      () => _libraryMemberAutocompletes(evalService, libraryRef),
-    ),
-  );
+  var result = (await _appState.cache.libraryMemberAutocomplete.putIfAbsent(
+    libraryRef,
+    () => _libraryMemberAutocompletes(evalService, libraryRef),
+  ))
+      .nonNulls;
   if (!includePrivates) {
     result = result.where((name) => !isPrivateMember(name));
   }
@@ -193,20 +191,20 @@ Future<Set<String>> _libraryMemberAutocompletes(
   final variables = library.variables;
   if (variables != null) {
     final fields = variables.map((field) => field.name);
-    result.addAll(removeNullValues(fields));
+    result.addAll(fields.nonNulls);
   }
   final functions = library.functions;
   if (functions != null) {
     // The VM shows setters as `<member>=`.
     final members =
         functions.map((funcRef) => funcRef.name!.replaceAll('=', ''));
-    result.addAll(removeNullValues(members));
+    result.addAll(members.nonNulls);
   }
   final classes = library.classes;
   if (classes != null) {
     // Autocomplete class names as well
     final classNames = classes.map((clazz) => clazz.name);
-    result.addAll(removeNullValues(classNames));
+    result.addAll(classNames.nonNulls);
   }
 
   if (debugIncludeExports) {
@@ -259,7 +257,7 @@ Future<void> _addAllInstanceMembersToAutocompleteList(
       .where((field) => field.decl?.isStatic != null && !field.decl!.isStatic!)
       .map((field) => field.decl?.name);
   result.addAll(
-    removeNullValues(fieldNames).where(
+    fieldNames.nonNulls.where(
       (member) => _isAccessible(member, clazz),
     ),
   );
@@ -278,7 +276,7 @@ Future<Set<String>> _autoCompleteMembersFor(
       final fieldNames = fields
           .where((f) => f.isStatic == staticContext)
           .map((field) => field.name);
-      result.addAll(removeNullValues(fieldNames));
+      result.addAll(fieldNames.nonNulls);
     }
 
     final functions = clazz.functions;

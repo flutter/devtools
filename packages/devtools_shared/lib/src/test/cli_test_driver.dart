@@ -50,7 +50,7 @@ class AppFixture {
 
   Future<void> get onAppStarted => _onAppStarted;
 
-  IsolateRef? get mainIsolate => isolates.isEmpty ? null : isolates.first;
+  IsolateRef? get mainIsolate => isolates.firstOrNull;
 
   Future<Response> invoke(String expression) async {
     final IsolateRef isolateRef = mainIsolate!;
