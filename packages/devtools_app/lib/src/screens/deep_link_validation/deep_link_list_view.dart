@@ -5,6 +5,7 @@
 import 'dart:math';
 
 import 'package:devtools_app_shared/ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -45,13 +46,19 @@ class _DeepLinkListViewState extends State<DeepLinkListView>
     super.didChangeDependencies();
     initController();
     callWhenControllerReady((_) {
-      controller.selectedAndroidVariantIndex.value = _getReleaseVariantIndex(
+      controller.selectedAndroidVariantIndex.value = _getDefaultVariantIndex(
         controller.selectedProject.value!.androidVariants,
+        defaultVariant: 'release',
       );
       if (FeatureFlags.deepLinkIosCheck) {
         controller.selectedIosConfigurationIndex.value =
-            _getReleaseVariantIndex(
+            _getDefaultVariantIndex(
           controller.selectedProject.value!.iosBuildOptions.configurations,
+          defaultVariant: 'release',
+        );
+        controller.selectedIosTargetIndex.value = _getDefaultVariantIndex(
+          controller.selectedProject.value!.iosBuildOptions.configurations,
+          defaultVariant: 'runner',
         );
       }
     });
@@ -73,9 +80,10 @@ class _DeepLinkListViewState extends State<DeepLinkListView>
     );
   }
 
-  int _getReleaseVariantIndex(List<String> variants) {
+  int _getDefaultVariantIndex(List<String> variants,
+      {required String defaultVariant}) {
     final index = variants.indexWhere(
-      (variant) => variant.caseInsensitiveContains('release'),
+      (variant) => variant.caseInsensitiveContains(defaultVariant),
     );
     // If not found, default to 0.
     return max(index, 0);
@@ -289,14 +297,24 @@ class _DeepLinkListViewTopPanel extends StatelessWidget {
           ),
           const Spacer(),
           _VariantDropdown(
-            os: PlatformOS.android,
-            controller: controller,
+            title: 'Android Variant:',
+            valuenotifier: controller.selectedAndroidVariantIndex,
+            variants: controller.selectedProject.value!.androidVariants,
           ),
           if (FeatureFlags.deepLinkIosCheck) ...[
             const SizedBox(width: denseSpacing),
             _VariantDropdown(
-              os: PlatformOS.ios,
-              controller: controller,
+              title: 'iOS Configuration:',
+              valuenotifier: controller.selectedIosConfigurationIndex,
+              variants: controller
+                  .selectedProject.value!.iosBuildOptions.configurations,
+            ),
+            const SizedBox(width: denseSpacing),
+            _VariantDropdown(
+              title: 'iOS Target:',
+              valuenotifier: controller.selectedIosTargetIndex,
+              variants:
+                  controller.selectedProject.value!.iosBuildOptions.targets,
             ),
           ],
         ],
@@ -307,24 +325,21 @@ class _DeepLinkListViewTopPanel extends StatelessWidget {
 
 class _VariantDropdown extends StatelessWidget {
   const _VariantDropdown({
-    required this.os,
-    required this.controller,
+    required this.valuenotifier,
+    required this.variants,
+    required this.title,
   });
-  final PlatformOS os;
-  final DeepLinksController controller;
+  final ValueNotifier<int> valuenotifier;
+  final List<String> variants;
+  final String title;
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: os == PlatformOS.android
-          ? controller.selectedAndroidVariantIndex
-          : controller.selectedIosConfigurationIndex,
+      valueListenable: valuenotifier,
       builder: (_, index, __) {
-        final variants = os == PlatformOS.android
-            ? controller.selectedProject.value!.androidVariants
-            : controller.selectedProject.value!.iosBuildOptions.configurations;
         return Row(
           children: [
-            Text('${os.description} Variant:'),
+            Text(title),
             RoundedDropDownButton<int>(
               roundedCornerOptions: RoundedCornerOptions.empty,
               value: index,
@@ -333,11 +348,7 @@ class _VariantDropdown extends StatelessWidget {
                   DropdownMenuItem<int>(value: i, child: Text(variants[i])),
               ],
               onChanged: (int? newIndex) {
-                if (os == PlatformOS.android) {
-                  controller.selectedAndroidVariantIndex.value = newIndex!;
-                } else {
-                  controller.selectedIosConfigurationIndex.value = newIndex!;
-                }
+                valuenotifier.value = newIndex!;
               },
             ),
           ],
