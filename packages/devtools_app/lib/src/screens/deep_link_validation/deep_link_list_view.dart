@@ -5,7 +5,6 @@
 import 'dart:math';
 
 import 'package:devtools_app_shared/ui.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -80,8 +79,10 @@ class _DeepLinkListViewState extends State<DeepLinkListView>
     );
   }
 
-  int _getDefaultVariantIndex(List<String> variants,
-      {required String defaultVariant}) {
+  int _getDefaultVariantIndex(
+    List<String> variants, {
+    required String defaultVariant,
+  }) {
     final index = variants.indexWhere(
       (variant) => variant.caseInsensitiveContains(defaultVariant),
     );
