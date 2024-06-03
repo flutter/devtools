@@ -18,10 +18,10 @@ class AdbMemoryInfo with Serializable {
     this.total,
   );
 
-  /// All data inside of AdbMemoryInfo is in total bytes. When receiving ADB data
-  /// from the service extension (directly from ADB) then the data is in kilobytes.
-  /// See the factory constructor fromJsonInKB.
-  factory AdbMemoryInfo.fromJson(Map<String, dynamic> json) => AdbMemoryInfo(
+  /// All data inside of [AdbMemoryInfo] is in total bytes.
+  /// When receiving ADB data from the service extension (directly from ADB)
+  /// then the data is in kilobytes. See the factory constructor [fromJsonInKB].
+  factory AdbMemoryInfo.fromJson(Map<String, Object?> json) => AdbMemoryInfo(
         json[realTimeKey] as int,
         json[javaHeapKey] as int,
         json[nativeHeapKey] as int,
@@ -33,21 +33,19 @@ class AdbMemoryInfo with Serializable {
         json[totalKey] as int,
       );
 
-  /// Use when converting data received from the service extension, directly from
-  /// ADB. All data received from ADB dumpsys meminfo is in kilobytes must adjust to
-  /// total bytes for AdbMemoryInfo data.
-  factory AdbMemoryInfo.fromJsonInKB(
-    Map<String, dynamic> json,
-  ) {
-    final int realTime = json[realTimeKey];
-    int javaHeap = json[javaHeapKey];
-    int nativeHeap = json[nativeHeapKey];
-    int code = json[codeKey];
-    int stack = json[stackKey];
-    int graphics = json[graphicsKey];
-    int other = json[otherKey];
-    int system = json[systemKey];
-    int total = json[totalKey];
+  /// Use when converting data received from the service extension,
+  /// directly from ADB. All data received from ADB dumpsys meminfo is
+  /// in kilobytes must adjust to total bytes for [AdbMemoryInfo] data.
+  factory AdbMemoryInfo.fromJsonInKB(Map<String, Object?> json) {
+    final realTime = json[realTimeKey] as int;
+    var javaHeap = json[javaHeapKey] as int;
+    var nativeHeap = json[nativeHeapKey] as int;
+    var code = json[codeKey] as int;
+    var stack = json[stackKey] as int;
+    var graphics = json[graphicsKey] as int;
+    var other = json[otherKey] as int;
+    var system = json[systemKey] as int;
+    var total = json[totalKey] as int;
 
     // Convert to total bytes.
     javaHeap *= 1024;
@@ -72,7 +70,8 @@ class AdbMemoryInfo with Serializable {
     );
   }
 
-  /// JSON keys of data retrieved from ADB tool.
+  // JSON keys of data retrieved from ADB tool.
+
   static const String realTimeKey = 'Realtime';
   static const String javaHeapKey = 'Java Heap';
   static const String nativeHeapKey = 'Native Heap';
@@ -84,7 +83,7 @@ class AdbMemoryInfo with Serializable {
   static const String totalKey = 'Total';
 
   @override
-  Map<String, dynamic> toJson() => <String, dynamic>{
+  Map<String, dynamic> toJson() => <String, Object?>{
         realTimeKey: realtime,
         javaHeapKey: javaHeap,
         nativeHeapKey: nativeHeap,
@@ -96,7 +95,7 @@ class AdbMemoryInfo with Serializable {
         totalKey: total,
       };
 
-  /// Create an empty AdbMemoryInfo (all values are)
+  /// Create an empty [AdbMemoryInfo], where all values are 0.
   static AdbMemoryInfo empty() => AdbMemoryInfo(0, 0, 0, 0, 0, 0, 0, 0, 0);
 
   /// Milliseconds since the device was booted (value zero) including deep sleep.
@@ -106,8 +105,8 @@ class AdbMemoryInfo with Serializable {
   /// This DateTime, from USA PST, would be Dec 31, 1960 16:00:00 (UTC - 8 hours).
   final int realtime;
 
-  /// All remaining values are received from ADB in kilobytes but converted to total
-  /// bytes using the AdbMemoryInfo.fromJsonInKilobytes factory.
+  /// All remaining values are received from ADB in kilobytes but converted to
+  /// total bytes using the [fromJsonInKB] factory.
   final int javaHeap;
 
   final int nativeHeap;
