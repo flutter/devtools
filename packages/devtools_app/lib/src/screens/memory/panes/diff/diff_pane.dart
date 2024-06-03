@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:devtools_app_shared/ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
@@ -140,7 +141,10 @@ class SnapshotInstanceItemPane extends StatelessWidget {
 
 String _snapshotDocumentation(bool isDark) {
   final filePostfix = isDark ? 'dark' : 'light';
-  final uploadImageUrl = 'assets/img/doc/upload_$filePostfix.png';
+
+  /// See https://stackoverflow.com/questions/62292512/firebase-flutter-web-app-works-locally-but-when-deployed-images-are-not-shown
+  const imagePath = kDebugMode ? '' : 'assets/';
+  final uploadImageUrl = '$imagePath/assets/img/doc/upload_$filePostfix.png';
 
   // `\v` adds vertical space
   return '''
