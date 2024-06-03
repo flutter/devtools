@@ -80,11 +80,9 @@ class _LoggingTableV2State extends State<LoggingTableV2> {
           ],
         ),
         Expanded(
-          child: _LoggingTableContextMenu(
-            child: _LoggingTableContents(
-              model: widget.model,
-              verticalController: _verticalController,
-            ),
+          child: _LoggingTableContents(
+            model: widget.model,
+            verticalController: _verticalController,
           ),
         ),
       ],
@@ -201,78 +199,6 @@ class _LoggingTableContentsState extends State<_LoggingTableContents> {
     super.dispose();
     widget.model.removeListener(onModelUpdate);
     _progressStopwatch.stop();
-  }
-}
-
-class _LoggingTableContextMenu extends StatelessWidget {
-  const _LoggingTableContextMenu({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return _ContextMenuRegion(
-      contextMenuBuilder: (context, offset) {
-        // The custom context menu will look like the default context menu
-        // on the current platform with a single 'Print' button.
-        return AdaptiveTextSelectionToolbar.buttonItems(
-          anchors: TextSelectionToolbarAnchors(
-            primaryAnchor: offset,
-          ),
-          buttonItems: <ContextMenuButtonItem>[
-            ContextMenuButtonItem(
-              onPressed: () {
-                ContextMenuController.removeAny();
-                _showDialog(context, 'You copied selected rows');
-              },
-              label: 'Copy Selected Rows',
-            ),
-            ContextMenuButtonItem(
-              onPressed: () {
-                ContextMenuController.removeAny();
-                _showDialog(
-                  context,
-                  'You copied selected rows with metadata',
-                );
-              },
-              label: 'Copy Selected Rows with Metadata',
-            ),
-            ContextMenuButtonItem(
-              onPressed: () {
-                ContextMenuController.removeAny();
-                _showDialog(
-                  context,
-                  'Hiding items with the same address',
-                );
-              },
-              label: 'Hide items with same Address',
-            ),
-            ContextMenuButtonItem(
-              onPressed: () {
-                ContextMenuController.removeAny();
-                _showDialog(
-                  context,
-                  'Showing items with the same address',
-                );
-              },
-              label: 'Show items with same Address',
-            ),
-          ],
-        );
-      },
-      child: child,
-    );
-  }
-
-  void _showDialog(BuildContext context, String message) {
-    unawaited(
-      Navigator.of(context).push(
-        DialogRoute<void>(
-          context: context,
-          builder: (BuildContext context) => AlertDialog(title: Text(message)),
-        ),
-      ),
-    );
   }
 }
 
