@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../shared/common_widgets.dart';
 import 'logging_model.dart';
 import 'logging_table_row.dart';
 
@@ -18,8 +19,8 @@ typedef ContextMenuBuilder = Widget Function(
   Offset offset,
 );
 
+/// A Widget for displaying logs with line wrapping, along with log metadata.
 class LoggingTableV2 extends StatefulWidget {
-  /// Creates a screen that demonstrates the TableView widget.
   const LoggingTableV2({super.key, required this.model});
 
   final LoggingTableModel model;
@@ -30,8 +31,8 @@ class LoggingTableV2 extends StatefulWidget {
 
 class _LoggingTableV2State extends State<LoggingTableV2> {
   late final ScrollController _verticalController = ScrollController();
-  final Set<int> selections = <int>{};
-  final Map<int, double> cachedOffets = {};
+  final selections = <int>{};
+  final cachedOffets = <int, double>{};
   final normalTextStyle = const TextStyle(color: Colors.black, fontSize: 14.0);
   String lastSearch = '';
   final metadataTextStyle = const TextStyle(
@@ -66,20 +67,14 @@ class _LoggingTableV2State extends State<LoggingTableV2> {
         Row(
           children: [
             Expanded(
-              child: TextField(
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: 'Filter',
-                ),
+              child: DevToolsClearableTextField(
+                labelText: 'Filter',
                 onSubmitted: (value) {},
               ),
             ),
-            const Expanded(
-              child: TextField(
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: 'Search',
-                ),
+            Expanded(
+              child: DevToolsClearableTextField(
+                labelText: 'Search',
               ),
             ),
           ],
@@ -103,9 +98,6 @@ class _LoggingTableContents extends StatefulWidget {
     required ScrollController verticalController,
   }) : _verticalController = verticalController;
 
-  static const _millisecondsUntilCacheProgressShows = 500;
-  static const _millisecondsUntilCacheProgressHelperShows = 2000;
-
   final LoggingTableModel model;
   final ScrollController _verticalController;
 
@@ -114,7 +106,19 @@ class _LoggingTableContents extends StatefulWidget {
 }
 
 class _LoggingTableContentsState extends State<_LoggingTableContents> {
-  final Stopwatch _progressStopwatch = Stopwatch();
+  final _progressStopwatch = Stopwatch();
+
+  static const _millisecondsUntilCacheProgressShows = 500;
+  static const _millisecondsUntilCacheProgressHelperShows = 2000;
+  void onModelUpdate() {
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    widget.model.addListener(onModelUpdate);
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -122,10 +126,9 @@ class _LoggingTableContentsState extends State<_LoggingTableContents> {
       builder: (context, constraints) {
         widget.model.tableWidth = constraints.maxWidth;
         _progressStopwatch.reset();
-        return ListenableBuilder(
-          listenable: widget.model.cacheLoadProgress,
-          builder: (context, _) {
-            final cacheLoadProgress = widget.model.cacheLoadProgress.value;
+        return ValueListenableBuilder(
+          valueListenable: widget.model.cacheLoadProgress,
+          builder: (context, cacheLoadProgress, _) {
             if (cacheLoadProgress != null) {
               double progress = cacheLoadProgress;
               if (!_progressStopwatch.isRunning) {
@@ -133,7 +136,7 @@ class _LoggingTableContentsState extends State<_LoggingTableContents> {
               }
 
               if (_progressStopwatch.elapsedMilliseconds <
-                  _LoggingTableContents._millisecondsUntilCacheProgressShows) {
+                  _millisecondsUntilCacheProgressShows) {
                 progress = 0.0;
               }
 
@@ -154,8 +157,7 @@ class _LoggingTableContentsState extends State<_LoggingTableContents> {
                     ),
                     const SizedBox(height: defaultSpacing),
                     if (_progressStopwatch.elapsedMilliseconds >
-                        _LoggingTableContents
-                            ._millisecondsUntilCacheProgressHelperShows)
+                        _millisecondsUntilCacheProgressHelperShows)
                       const Text(
                         'To make this process faster, then reduce the "Log Retention" setting.',
                       ),
@@ -163,32 +165,28 @@ class _LoggingTableContentsState extends State<_LoggingTableContents> {
                 ),
               );
             } else {
-              _progressStopwatch.stop();
-              _progressStopwatch.reset();
+              _progressStopwatch
+                ..stop()
+                ..reset();
               return Scrollbar(
                 thumbVisibility: true,
                 controller: widget._verticalController,
-                child: ListenableBuilder(
-                  listenable: widget.model,
-                  builder: (context, _) {
-                    return CustomScrollView(
-                      controller: widget._verticalController,
-                      slivers: <Widget>[
-                        SliverVariedExtentList.builder(
-                          itemCount: widget.model.logCount,
-                          itemBuilder: (context, index) {
-                            return LoggingTableRow(
-                              index: index,
-                              data: widget.model.getFilteredLog(index),
-                              isSelected: false,
-                            );
-                          },
-                          itemExtentBuilder: (index, _) =>
-                              widget.model.getFilteredLogHeight(index),
-                        ),
-                      ],
-                    );
-                  },
+                child: CustomScrollView(
+                  controller: widget._verticalController,
+                  slivers: <Widget>[
+                    SliverVariedExtentList.builder(
+                      itemCount: widget.model.logCount,
+                      itemBuilder: (context, index) {
+                        return LoggingTableRow(
+                          index: index,
+                          data: widget.model.filteredLogAt(index),
+                          isSelected: false,
+                        );
+                      },
+                      itemExtentBuilder: (index, _) =>
+                          widget.model.getFilteredLogHeight(index),
+                    ),
+                  ],
                 ),
               );
             }
@@ -201,6 +199,7 @@ class _LoggingTableContentsState extends State<_LoggingTableContents> {
   @override
   void dispose() {
     super.dispose();
+    widget.model.removeListener(onModelUpdate);
     _progressStopwatch.stop();
   }
 }

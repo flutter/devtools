@@ -58,7 +58,7 @@ void main() {
       expect(controller.loggingModel.selectedLogCount, 0);
 
       expect(
-        controller.loggingModel.getFilteredLog(0).summary,
+        controller.loggingModel.filteredLogAt(0).summary,
         contains('Abc'),
       );
     });

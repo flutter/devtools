@@ -59,7 +59,7 @@ class LoggingTableModel extends ChangeNotifier {
   }
 
   /// Get the filtered log at [index].
-  LogDataV2 getFilteredLog(int index) => _filteredLogs[index];
+  LogDataV2 filteredLogAt(int index) => _filteredLogs[index];
 
   double _tableWidth = 0.0;
 
@@ -89,26 +89,23 @@ class LoggingTableModel extends ChangeNotifier {
   }
 
   /// Get the offset of a filtered log, at [index], from the top of the list of filtered logs.
-  double getFilteredLogOffset(int _) {
-    throw 'Implement this when needed';
+  double filteredLogOffsetAt(int _) {
+    throw Exception('Implement this when needed');
   }
 
   /// Get the height of a filtered Log at [index].
   double getFilteredLogHeight(int index) {
     final cachedHeight = cachedHeights[index];
     if (cachedHeight != null) return cachedHeight;
-    final newHeight = LoggingTableRow.calculateRowHeight(
+
+    return cachedHeights[index] = LoggingTableRow.calculateRowHeight(
       _logs[index],
       _tableWidth,
     );
-    cachedHeights[index] = newHeight;
-    return newHeight;
   }
 
   Future<bool> _preFetchRowHeights() async {
-    final didComplete = await _worker.doWork(
-      _logs.length,
-    );
+    final didComplete = await _worker.doWork(_logs.length);
     if (didComplete) {
       _cacheLoadProgress.value = null;
     }

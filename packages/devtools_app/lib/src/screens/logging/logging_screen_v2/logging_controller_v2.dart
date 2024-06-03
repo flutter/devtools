@@ -627,21 +627,21 @@ class LogDataV2 with SearchableDataMixin {
 
   String? get details => _details;
 
-  ValueListenable<bool> get needsComputing => _needsComputing;
-  final ValueNotifier<bool> _needsComputing = ValueNotifier<bool>(true);
+  ValueListenable<bool> get detailsComputed => _detailsComputed;
+  final ValueNotifier<bool> _detailsComputed = ValueNotifier<bool>(false);
 
   Future<void> compute() async {
-    if (needsComputing.value) {
+    if (!detailsComputed.value) {
       if (detailsComputer != null) {
         _details = await detailsComputer!();
       }
       detailsComputer = null;
-      _needsComputing.value = false;
+      _detailsComputed.value = true;
     }
   }
 
   String? prettyPrinted() {
-    if (needsComputing.value) {
+    if (!detailsComputed.value) {
       return details;
     }
 
@@ -655,7 +655,7 @@ class LogDataV2 with SearchableDataMixin {
   }
 
   String asLogDetails() {
-    return needsComputing.value ? '<fetching>' : prettyPrinted() ?? '';
+    return !detailsComputed.value ? '<fetching>' : prettyPrinted() ?? '';
   }
 
   @override

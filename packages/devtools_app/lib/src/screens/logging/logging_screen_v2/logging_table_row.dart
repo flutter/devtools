@@ -5,6 +5,8 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../devtools_app.dart';
+import '../../../shared/ui/utils.dart';
 import 'logging_controller_v2.dart';
 
 class LoggingTableRow extends StatefulWidget {
@@ -39,41 +41,30 @@ class LoggingTableRow extends StatefulWidget {
   static const _detailsStyle = TextStyle();
 
   static const _metaDataStyle = TextStyle();
-
-  static const double _dividerHeight = 10.0;
+  static final _padding = scaleByFontFactor(8.0);
 
   static double calculateRowHeight(LogDataV2 log, double width) {
     final text = log.asLogDetails();
 
-    final row1 = _textSize(_detailsSpan(text), width: width);
+    final row1Height = calculateTextSpanHeight(
+      _detailsSpan(text),
+      maxWidth: width - _padding * 2,
+    );
 
     // TODO(danchevalier): Improve row2 height by manually flowing metadas into another row
     // if theyoverflow.
-    final row2 = _textSize(
+    final row2Height = calculateTextSpanHeight(
       _metadataSpan('always a single line of text'),
-      width: width,
+      maxWidth: width,
     );
-    return row1.height + row2.height + _dividerHeight;
-  }
-
-  static Size _textSize(
-    TextSpan textSpan, {
-    double width = double.infinity,
-  }) {
-    final TextPainter textPainter = TextPainter(
-      text: textSpan,
-      textDirection: TextDirection.ltr,
-    )..layout(maxWidth: width);
-    final size = textPainter.size;
-    textPainter.dispose();
-    return size;
+    return row1Height + row2Height + _padding * 2;
   }
 }
 
 class _LoggingTableRowState extends State<LoggingTableRow> {
   @override
   Widget build(BuildContext context) {
-    Color? color = alternatingColorForIndex(
+    var color = alternatingColorForIndex(
       widget.index,
       Theme.of(context).colorScheme,
     );
@@ -83,32 +74,32 @@ class _LoggingTableRowState extends State<LoggingTableRow> {
     }
 
     return Container(
-      decoration: BoxDecoration(color: color),
-      child: ValueListenableBuilder(
-        valueListenable: widget.data.needsComputing,
+      color: color,
+      child: ValueListenableBuilder<bool>(
+        valueListenable: widget.data.detailsComputed,
         builder: (context, _, __) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              RichText(
-                text: LoggingTableRow._detailsSpan(widget.data.asLogDetails()),
-              ),
-              Row(
-                children: [
-                  RichText(
-                    text: LoggingTableRow._metadataSpan('Some METADATA'),
-                  ),
-                  const SizedBox(width: 20.0),
-                  RichText(
-                    text: LoggingTableRow._metadataSpan('Goes Here'),
-                  ),
-                ],
-              ),
-              const Divider(
-                height: LoggingTableRow._dividerHeight,
-                color: Colors.black,
-              ),
-            ],
+          return Padding(
+            padding: EdgeInsets.all(LoggingTableRow._padding),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                RichText(
+                  text:
+                      LoggingTableRow._detailsSpan(widget.data.asLogDetails()),
+                ),
+                Row(
+                  children: [
+                    RichText(
+                      text: LoggingTableRow._metadataSpan('Some METADATA'),
+                    ),
+                    const SizedBox(width: defaultSpacing),
+                    RichText(
+                      text: LoggingTableRow._metadataSpan('Goes Here'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           );
         },
       ),
