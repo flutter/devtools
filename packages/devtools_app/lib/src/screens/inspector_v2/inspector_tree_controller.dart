@@ -1163,15 +1163,15 @@ class _RowPainter extends CustomPainter {
       );
     }
 
-    if (row.hasSingleChild) {
+    if (row.hasSingleChild && node.isExpanded) {
       currentX = _controller.getDepthIndent(row.depth - 1) -
           inspectorColumnWidth * 0.5;
       final double width = showExpandCollapse
           ? inspectorColumnWidth * 0.5
           : inspectorColumnWidth;
       canvas.drawLine(
-        Offset(currentX + (width * 1.25), inspectorRowHeight * 0.75),
-        Offset(currentX + (width * 1.25), inspectorRowHeight * 1.25),
+        Offset(currentX + width * 2.75, inspectorRowHeight * 0.75),
+        Offset(currentX + width * 2.75, inspectorRowHeight * 1.25),
         paint,
       );
     }
