@@ -348,7 +348,9 @@ class _ConfigurationDropdown extends StatelessWidget {
               items: [
                 for (int i = 0; i < configurations.length; i++)
                   DropdownMenuItem<int>(
-                      value: i, child: Text(configurations[i])),
+                    value: i,
+                    child: Text(configurations[i]),
+                  ),
               ],
               onChanged: (int? newIndex) {
                 notifier.value = newIndex!;
