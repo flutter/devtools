@@ -272,6 +272,7 @@ class DeepLinksController extends DisposableController
     final iosBuildOptions = selectedProject.value!.iosBuildOptions;
     final configuration =
         iosBuildOptions.configurations[selectedIosConfigurationIndex.value];
+    final target = iosBuildOptions.targets[selectedIosTargetIndex.value];
     await ga.timeAsync(
       gac.deeplink,
       gac.AnalyzeFlutterProject.loadIosLinks.name,
@@ -281,7 +282,7 @@ class DeepLinksController extends DisposableController
           result = await server.requestIosUniversalLinkSettings(
             selectedProject.value!.path,
             configuration: configuration,
-            target: iosBuildOptions.targets[selectedIosTargetIndex.value],
+            target: target,
           );
           _iosLinks[selectedAndroidVariantIndex.value] = result;
         } catch (_) {
