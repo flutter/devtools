@@ -9,6 +9,7 @@ import '../../diagnostics/dart_object_node.dart';
 import '../../diagnostics/diagnostics_node.dart';
 import '../../diagnostics/tree_builder.dart';
 import '../../diagnostics_text_styles.dart';
+import '../../feature_flags.dart';
 import '../../globals.dart';
 import '../../primitives/utils.dart';
 import '../../ui/hover.dart';
@@ -185,8 +186,13 @@ class DiagnosticsNodeDescription extends StatelessWidget {
 
     return HoverCardTooltip.async(
       enabled: () =>
-          preferences.inspector.hoverEvalModeEnabled.value &&
-          diagnosticLocal.objectGroupApi != null,
+          // TODO(https://github.com/flutter/devtools/issues/7860) Clean up
+          // after Inspector V2 release.
+          FeatureFlags.inspectorV2
+              ? preferences.inspectorV2.hoverEvalModeEnabled.value &&
+                  diagnosticLocal.objectGroupApi != null
+              : preferences.inspector.hoverEvalModeEnabled.value &&
+                  diagnosticLocal.objectGroupApi != null,
       asyncGenerateHoverCardData: ({
         required event,
         required isHoverStale,

@@ -7,6 +7,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:devtools_app/devtools_app.dart';
+// ignore: implementation_imports, required to separate V2 inspector imports.
+import 'package:devtools_app/src/screens/inspector_v2/inspector_controller.dart'
+    as inspector_v2;
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
@@ -65,6 +68,23 @@ class FakeInspectorService extends Fake implements InspectorService {
 }
 
 class TestInspectorController extends Fake implements InspectorController {
+  InspectorService service = FakeInspectorService();
+
+  @override
+  ValueListenable<InspectorTreeNode?> get selectedNode => _selectedNode;
+  final ValueNotifier<InspectorTreeNode?> _selectedNode = ValueNotifier(null);
+
+  @override
+  void setSelectedNode(InspectorTreeNode? newSelection) {
+    _selectedNode.value = newSelection;
+  }
+
+  @override
+  InspectorService get inspectorService => service;
+}
+
+class TestInspectorV2Controller extends Fake
+    implements inspector_v2.InspectorController {
   InspectorService service = FakeInspectorService();
 
   @override
