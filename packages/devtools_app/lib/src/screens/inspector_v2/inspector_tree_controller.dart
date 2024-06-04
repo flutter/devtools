@@ -258,7 +258,7 @@ class InspectorTreeController extends DisposableController
   }
 
   double getRowOffset(int index) {
-    return (getCachedRow(index)?.depth ?? 0) * inspectorColumnWidth;
+    return (getCachedRow(index)?.depth ?? 0) * inspectorColumnIndent;
   }
 
   List<InspectorTreeNode> getPathFromSelectedRowToRoot() {
@@ -349,8 +349,12 @@ class InspectorTreeController extends DisposableController
 
   double get horizontalPadding => 10.0;
 
+  /// Returns the indentation of a row at the given [depth] in the inspector.
+  ///
+  /// This indentation corresponds to the center of the icon next to the widget
+  /// name.
   double getDepthIndent(int depth) {
-    return (depth + 1) * inspectorColumnWidth + horizontalPadding;
+    return (depth + 1) * inspectorColumnIndent + horizontalPadding;
   }
 
   double rowYTop(int index) {
@@ -946,7 +950,7 @@ class _InspectorTreeState extends State<InspectorTree>
     required double initialX,
     int padCount = _scrollPadCount,
   }) {
-    return initialX - inspectorColumnWidth * padCount;
+    return initialX - inspectorColumnIndent * padCount;
   }
 
   /// Pad [initialY] so that a row would be placed in the vertical center of
@@ -1128,52 +1132,53 @@ class _RowPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    double currentX = 0;
     final paint = _defaultPaint(colorScheme);
 
     final InspectorTreeNode node = row.node;
     final bool showExpandCollapse = node.showExpandCollapse;
-    final xOffset = inspectorColumnWidth * 0.68;
+    final distanceFromExpandCollapseToRowStart = inspectorColumnIndent * 0.68;
     for (final tick in row.ticks) {
-      currentX = _controller.getDepthIndent(tick) - xOffset;
+      final expandCollapseX = _controller.getDepthIndent(tick) -
+          distanceFromExpandCollapseToRowStart;
       // Draw a vertical line for each tick identifying a connection between
       // an ancestor of this node and some other node in the tree.
       canvas.drawLine(
-        Offset(currentX, 0.0),
-        Offset(currentX, inspectorRowHeight),
+        Offset(expandCollapseX, 0.0),
+        Offset(expandCollapseX, inspectorRowHeight),
         paint,
       );
     }
     // If this row is itself connected to a parent then draw the L shaped line
     // to make that connection.
     if (row.lineToParent) {
-      currentX = _controller.getDepthIndent(row.depth - 1) -
-          xOffset;
+      final parentExpandCollapseX = _controller.getDepthIndent(row.depth - 1) -
+          distanceFromExpandCollapseToRowStart;
       final double width = showExpandCollapse
-          ? inspectorColumnWidth * 0.6
-          : inspectorColumnWidth;
+          ? inspectorColumnIndent * 0.6
+          : inspectorColumnIndent;
       canvas.drawLine(
-        Offset(currentX, 0.0),
-        Offset(currentX, inspectorRowHeight * 0.5),
+        Offset(parentExpandCollapseX, 0.0),
+        Offset(parentExpandCollapseX, inspectorRowHeight * 0.5),
         paint,
       );
       canvas.drawLine(
-        Offset(currentX, inspectorRowHeight * 0.5),
-        Offset(currentX + width, inspectorRowHeight * 0.5),
+        Offset(parentExpandCollapseX, inspectorRowHeight * 0.5),
+        Offset(parentExpandCollapseX + width, inspectorRowHeight * 0.5),
         paint,
       );
     }
 
     if (row.hasSingleChild && node.isExpanded) {
-      currentX = _controller.getDepthIndent(row.depth - 1) -
-          inspectorColumnWidth * 0.5;
+      final distanceFromIconCenterToRowStart = inspectorColumnIndent * 0.15;
+      final iconCenterX = _controller.getDepthIndent(row.depth) -
+          distanceFromIconCenterToRowStart;
       canvas.drawLine(
         Offset(
-          currentX + inspectorColumnWidth * 1.38,
+          iconCenterX,
           inspectorRowHeight * 0.75,
         ),
         Offset(
-          currentX + inspectorColumnWidth * 1.38,
+          iconCenterX,
           inspectorRowHeight * 1.25,
         ),
         paint,
@@ -1230,7 +1235,7 @@ class InspectorRowContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double currentX =
-        controller.getDepthIndent(row.depth) - inspectorColumnWidth;
+        controller.getDepthIndent(row.depth) - inspectorColumnIndent;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
