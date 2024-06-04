@@ -733,11 +733,11 @@ int _compareLinkData(
       }
       return 0;
     case SortingOption.aToZ:
-      if (compareDomain) return (a.safeDomain).compareTo(b.safeDomain);
+      if (compareDomain) return a.safeDomain.compareTo(b.safeDomain);
 
       return a.safePath.compareTo(b.safePath);
     case SortingOption.zToA:
-      if (compareDomain) return (b.safeDomain).compareTo(a.safeDomain);
+      if (compareDomain) return b.safeDomain.compareTo(a.safeDomain);
 
       return b.safePath.compareTo(a.safePath);
   }
