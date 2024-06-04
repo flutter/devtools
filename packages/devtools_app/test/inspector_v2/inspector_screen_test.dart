@@ -14,13 +14,15 @@ import 'package:devtools_app/devtools_app.dart'
         InspectorTreeController,
         InspectorScreenBody,
         ErrorNavigator,
-        FlutterInspectorSettingsDialog;
+        FlutterInspectorSettingsDialog,
+        InspectorTreeNode;
 import 'package:devtools_app/src/screens/inspector_v2/inspector_controller.dart';
 import 'package:devtools_app/src/screens/inspector_v2/inspector_screen.dart';
 import 'package:devtools_app/src/screens/inspector_v2/inspector_tree_controller.dart';
 import 'package:devtools_app/src/screens/inspector_v2/layout_explorer/flex/flex.dart';
 import 'package:devtools_app/src/screens/inspector_v2/layout_explorer/layout_explorer.dart';
 import 'package:devtools_app/src/service/service_extensions.dart' as extensions;
+import 'package:devtools_app/src/shared/console/eval/inspector_tree_v2.dart';
 import 'package:devtools_app/src/shared/feature_flags.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';

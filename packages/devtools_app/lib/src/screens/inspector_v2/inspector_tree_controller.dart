@@ -18,7 +18,7 @@ import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/analytics/metrics.dart';
 import '../../shared/collapsible_mixin.dart';
 import '../../shared/common_widgets.dart';
-import '../../shared/console/eval/inspector_tree.dart';
+import '../../shared/console/eval/inspector_tree_v2.dart';
 import '../../shared/console/widgets/description.dart';
 import '../../shared/diagnostics/diagnostics_node.dart';
 import '../../shared/diagnostics_text_styles.dart';

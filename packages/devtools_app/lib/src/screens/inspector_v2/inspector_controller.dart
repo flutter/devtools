@@ -23,7 +23,7 @@ import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../service/service_extensions.dart' as extensions;
-import '../../shared/console/eval/inspector_tree.dart';
+import '../../shared/console/eval/inspector_tree_v2.dart';
 import '../../shared/console/primitives/simple_items.dart';
 import '../../shared/diagnostics/diagnostics_node.dart';
 import '../../shared/diagnostics/inspector_service.dart';
