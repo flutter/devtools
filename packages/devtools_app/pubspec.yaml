@@ -89,9 +89,7 @@ flutter:
   assets:
     - assets/
     - assets/img/
-    # We have to explicitly list `upload...` assets, to get them accessible.
-    - assets/img/doc/upload_dark.png
-    - assets/img/doc/upload_light.png
+    - assets/img/doc/
     - assets/img/layout_explorer/
     - assets/img/layout_explorer/cross_axis_alignment/
     - assets/img/layout_explorer/main_axis_alignment/
