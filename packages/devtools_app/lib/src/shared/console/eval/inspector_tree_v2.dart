@@ -101,11 +101,8 @@ class InspectorTreeNode {
   bool get isExpanded => _isExpanded;
   bool _isExpanded;
 
-  bool allowExpandCollapse = true;
-
   bool get showExpandCollapse {
-    return (diagnostic?.hasChildren == true || children.isNotEmpty) &&
-        allowExpandCollapse;
+    return diagnostic?.hasChildren == true || children.isNotEmpty;
   }
 
   set isExpanded(bool value) {

@@ -1133,8 +1133,9 @@ class _RowPainter extends CustomPainter {
 
     final InspectorTreeNode node = row.node;
     final bool showExpandCollapse = node.showExpandCollapse;
+    final xOffset = inspectorColumnWidth * 0.68;
     for (final tick in row.ticks) {
-      currentX = _controller.getDepthIndent(tick) - inspectorColumnWidth * 0.5;
+      currentX = _controller.getDepthIndent(tick) - xOffset;
       // Draw a vertical line for each tick identifying a connection between
       // an ancestor of this node and some other node in the tree.
       canvas.drawLine(
@@ -1147,9 +1148,9 @@ class _RowPainter extends CustomPainter {
     // to make that connection.
     if (row.lineToParent) {
       currentX = _controller.getDepthIndent(row.depth - 1) -
-          inspectorColumnWidth * 0.5;
+          xOffset;
       final double width = showExpandCollapse
-          ? inspectorColumnWidth * 0.5
+          ? inspectorColumnWidth * 0.6
           : inspectorColumnWidth;
       canvas.drawLine(
         Offset(currentX, 0.0),
@@ -1166,12 +1167,15 @@ class _RowPainter extends CustomPainter {
     if (row.hasSingleChild && node.isExpanded) {
       currentX = _controller.getDepthIndent(row.depth - 1) -
           inspectorColumnWidth * 0.5;
-      final double width = showExpandCollapse
-          ? inspectorColumnWidth * 0.5
-          : inspectorColumnWidth;
       canvas.drawLine(
-        Offset(currentX + width * 2.75, inspectorRowHeight * 0.75),
-        Offset(currentX + width * 2.75, inspectorRowHeight * 1.25),
+        Offset(
+          currentX + inspectorColumnWidth * 1.38,
+          inspectorRowHeight * 0.75,
+        ),
+        Offset(
+          currentX + inspectorColumnWidth * 1.38,
+          inspectorRowHeight * 1.25,
+        ),
         paint,
       );
     }
