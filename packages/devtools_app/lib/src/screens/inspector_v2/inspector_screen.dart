@@ -16,7 +16,7 @@ import '../../service/service_extensions.dart' as extensions;
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
-import '../../shared/console/eval/inspector_tree.dart';
+import '../../shared/console/eval/inspector_tree_v2.dart';
 import '../../shared/editable_list.dart';
 import '../../shared/error_badge_manager.dart';
 import '../../shared/globals.dart';

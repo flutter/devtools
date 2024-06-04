@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/devtools_app.dart' hide InspectorTreeController;
+import 'package:devtools_app/devtools_app.dart'
+    hide InspectorTreeController, InspectorTreeConfig, InspectorTreeNode;
 import 'package:devtools_app/src/screens/inspector_v2/inspector_tree_controller.dart';
+import 'package:devtools_app/src/shared/console/eval/inspector_tree_v2.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
