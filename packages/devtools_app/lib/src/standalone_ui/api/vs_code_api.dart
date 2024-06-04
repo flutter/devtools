@@ -32,15 +32,6 @@ abstract interface class VsCodeApi {
   /// An event with initial sessions is sent after [initialize] is called.
   Stream<VsCodeDebugSessionsEvent> get debugSessionsChanged;
 
-  /// Executes a VS Code command.
-  ///
-  /// Commands can be native VS Code commands or commands registered by the
-  /// Dart/Flutter extensions.
-  ///
-  /// Which commands are available is not part of the API contract so callers
-  /// should take care when calling APIs that might evolve over time.
-  Future<Object?> executeCommand(String command, [List<Object?>? arguments]);
-
   /// Changes the current Flutter device.
   ///
   /// The selected device is the same one shown in the status bar in VS Code.
@@ -77,7 +68,6 @@ abstract interface class VsCodeApi {
   static const jsonApiName = 'vsCode';
 
   static const jsonInitializeMethod = 'initialize';
-  static const jsonExecuteCommandMethod = 'executeCommand';
 
   static const jsonSelectDeviceMethod = 'selectDevice';
   static const jsonOpenDevToolsPageMethod = 'openDevToolsPage';
@@ -226,10 +216,6 @@ abstract interface class VsCodeDebugSessionsEvent {
 /// [VsCodeCapabilities] to advertise which capabilities are available and
 /// handle any changes in behaviour.
 abstract interface class VsCodeCapabilities {
-  /// Whether the `executeCommand` method is available to call to execute VS
-  /// Code commands.
-  bool get executeCommand;
-
   /// Whether the `selectDevice` method is available to call to change the
   /// selected Flutter device.
   bool get selectDevice;
@@ -251,7 +237,6 @@ abstract interface class VsCodeCapabilities {
   /// debug session.
   bool get hotRestart;
 
-  static const jsonExecuteCommandField = 'executeCommand';
   static const jsonSelectDeviceField = 'selectDevice';
   static const openDevToolsPageField = 'openDevToolsPage';
   static const openDevToolsExternallyField = 'openDevToolsExternally';

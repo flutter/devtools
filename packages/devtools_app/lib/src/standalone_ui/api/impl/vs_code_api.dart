@@ -41,17 +41,6 @@ final class VsCodeApiImpl extends ToolApiImpl implements VsCodeApi {
   late final VsCodeCapabilities capabilities;
 
   @override
-  Future<Object?> executeCommand(String command, [List<Object?>? arguments]) {
-    return sendRequest(
-      VsCodeApi.jsonExecuteCommandMethod,
-      {
-        VsCodeApi.jsonCommandParameter: command,
-        VsCodeApi.jsonArgumentsParameter: arguments,
-      },
-    );
-  }
-
-  @override
   Future<bool> selectDevice(String id) {
     return sendRequest(
       VsCodeApi.jsonSelectDeviceMethod,
@@ -285,10 +274,6 @@ class VsCodeCapabilitiesImpl implements VsCodeCapabilities {
   VsCodeCapabilitiesImpl(this._raw);
 
   final Map<String, Object?>? _raw;
-
-  @override
-  bool get executeCommand =>
-      _raw?[VsCodeCapabilities.jsonExecuteCommandField] == true;
 
   @override
   bool get selectDevice =>
