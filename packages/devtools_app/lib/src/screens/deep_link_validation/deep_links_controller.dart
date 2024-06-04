@@ -212,6 +212,8 @@ class DeepLinksController extends DisposableController
 
   late final selectedAndroidVariantIndex = ValueNotifier<int>(0);
   late final selectedIosConfigurationIndex = ValueNotifier<int>(0);
+  late final selectedIosTargetIndex = ValueNotifier<int>(0);
+
   void _handleSelectedAndroidVariantIndexChanged() {
     unawaited(loadAndroidAppLinksAndValidate());
   }
