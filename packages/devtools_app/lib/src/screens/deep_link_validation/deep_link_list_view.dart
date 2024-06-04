@@ -45,19 +45,20 @@ class _DeepLinkListViewState extends State<DeepLinkListView>
     super.didChangeDependencies();
     initController();
     callWhenControllerReady((_) {
-      controller.selectedAndroidVariantIndex.value = _getDefaultVariantIndex(
+      controller.selectedAndroidVariantIndex.value =
+          _getDefaultConfigurationIndex(
         controller.selectedProject.value!.androidVariants,
-        defaultVariant: 'release',
+        containsString: 'release',
       );
       if (FeatureFlags.deepLinkIosCheck) {
         controller.selectedIosConfigurationIndex.value =
-            _getDefaultVariantIndex(
+            _getDefaultConfigurationIndex(
           controller.selectedProject.value!.iosBuildOptions.configurations,
-          defaultVariant: 'release',
+          containsString: 'release',
         );
-        controller.selectedIosTargetIndex.value = _getDefaultVariantIndex(
+        controller.selectedIosTargetIndex.value = _getDefaultConfigurationIndex(
           controller.selectedProject.value!.iosBuildOptions.configurations,
-          defaultVariant: 'runner',
+          containsString: 'runner',
         );
       }
     });
@@ -79,12 +80,12 @@ class _DeepLinkListViewState extends State<DeepLinkListView>
     );
   }
 
-  int _getDefaultVariantIndex(
-    List<String> variants, {
-    required String defaultVariant,
+  int _getDefaultConfigurationIndex(
+    List<String> configurations, {
+    required String containsString,
   }) {
-    final index = variants.indexWhere(
-      (variant) => variant.caseInsensitiveContains(defaultVariant),
+    final index = configurations.indexWhere(
+      (config) => config.caseInsensitiveContains(containsString),
     );
     // If not found, default to 0.
     return max(index, 0);
@@ -297,24 +298,24 @@ class _DeepLinkListViewTopPanel extends StatelessWidget {
             style: Theme.of(context).textTheme.titleSmall,
           ),
           const Spacer(),
-          _VariantDropdown(
+          _ConfigurationDropdown(
             title: 'Android Variant:',
-            valuenotifier: controller.selectedAndroidVariantIndex,
-            variants: controller.selectedProject.value!.androidVariants,
+            notifier: controller.selectedAndroidVariantIndex,
+            configurations: controller.selectedProject.value!.androidVariants,
           ),
           if (FeatureFlags.deepLinkIosCheck) ...[
             const SizedBox(width: denseSpacing),
-            _VariantDropdown(
+            _ConfigurationDropdown(
               title: 'iOS Configuration:',
-              valuenotifier: controller.selectedIosConfigurationIndex,
-              variants: controller
+              notifier: controller.selectedIosConfigurationIndex,
+              configurations: controller
                   .selectedProject.value!.iosBuildOptions.configurations,
             ),
             const SizedBox(width: denseSpacing),
-            _VariantDropdown(
+            _ConfigurationDropdown(
               title: 'iOS Target:',
-              valuenotifier: controller.selectedIosTargetIndex,
-              variants:
+              notifier: controller.selectedIosTargetIndex,
+              configurations:
                   controller.selectedProject.value!.iosBuildOptions.targets,
             ),
           ],
@@ -324,19 +325,19 @@ class _DeepLinkListViewTopPanel extends StatelessWidget {
   }
 }
 
-class _VariantDropdown extends StatelessWidget {
-  const _VariantDropdown({
-    required this.valuenotifier,
-    required this.variants,
+class _ConfigurationDropdown extends StatelessWidget {
+  const _ConfigurationDropdown({
+    required this.notifier,
+    required this.configurations,
     required this.title,
   });
-  final ValueNotifier<int> valuenotifier;
-  final List<String> variants;
+  final ValueNotifier<int> notifier;
+  final List<String> configurations;
   final String title;
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: valuenotifier,
+      valueListenable: notifier,
       builder: (_, index, __) {
         return Row(
           children: [
@@ -345,11 +346,12 @@ class _VariantDropdown extends StatelessWidget {
               roundedCornerOptions: RoundedCornerOptions.empty,
               value: index,
               items: [
-                for (int i = 0; i < variants.length; i++)
-                  DropdownMenuItem<int>(value: i, child: Text(variants[i])),
+                for (int i = 0; i < configurations.length; i++)
+                  DropdownMenuItem<int>(
+                      value: i, child: Text(configurations[i])),
               ],
               onChanged: (int? newIndex) {
-                valuenotifier.value = newIndex!;
+                notifier.value = newIndex!;
               },
             ),
           ],
