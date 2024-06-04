@@ -281,7 +281,7 @@ class DeepLinksController extends DisposableController
           result = await server.requestIosUniversalLinkSettings(
             selectedProject.value!.path,
             configuration: configuration,
-            target: iosBuildOptions.targets[0],
+            target: iosBuildOptions.targets[selectedIosTargetIndex.value],
           );
           _iosLinks[selectedAndroidVariantIndex.value] = result;
         } catch (_) {
