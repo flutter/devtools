@@ -11,6 +11,7 @@ environment:
 dependencies:
   async: ^2.0.0
   collection: ^1.15.0
+  dap: ^1.1.0
   devtools_app:
     path: ../devtools_app
   devtools_app_shared:
