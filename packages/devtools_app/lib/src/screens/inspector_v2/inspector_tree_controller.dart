@@ -1162,6 +1162,19 @@ class _RowPainter extends CustomPainter {
         paint,
       );
     }
+
+    if (row.hasSingleChild) {
+      currentX = _controller.getDepthIndent(row.depth - 1) -
+          inspectorColumnWidth * 0.5;
+      final double width = showExpandCollapse
+          ? inspectorColumnWidth * 0.5
+          : inspectorColumnWidth;
+      canvas.drawLine(
+        Offset(currentX + (width * 1.25), inspectorRowHeight * 0.75),
+        Offset(currentX + (width * 1.25), inspectorRowHeight * 1.25),
+        paint,
+      );
+    }
   }
 
   @override
