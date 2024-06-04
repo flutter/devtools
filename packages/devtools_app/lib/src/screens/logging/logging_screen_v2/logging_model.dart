@@ -49,13 +49,15 @@ class LoggingTableModel extends ChangeNotifier {
 
   /// Update the width of the table.
   ///
-  /// This will flush all of the calculated heights, and recalculate their heights
+  /// If different from the last width, this will flush all of the calculated heights, and recalculate their heights
   /// in the background.
   set tableWidth(double width) {
-    _tableWidth = width;
-    cachedHeights.clear();
-    cachedOffets.clear();
-    unawaited(_preFetchRowHeights());
+    if (width != _tableWidth) {
+      _tableWidth = width;
+      cachedHeights.clear();
+      cachedOffets.clear();
+      unawaited(_preFetchRowHeights());
+    }
   }
 
   /// Get the filtered log at [index].
@@ -78,6 +80,7 @@ class LoggingTableModel extends ChangeNotifier {
 
     _logs.add(log);
     _filteredLogs.add(log);
+    getFilteredLogHeight(_logs.length - 1);
     notifyListeners();
   }
 
