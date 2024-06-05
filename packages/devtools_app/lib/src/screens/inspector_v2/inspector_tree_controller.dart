@@ -351,9 +351,10 @@ class InspectorTreeController extends DisposableController
 
   /// Returns the indentation of a row at the given [depth] in the inspector.
   ///
-  /// This indentation corresponds to the center of the icon next to the widget
-  /// name.
+  /// This indentation roughly corresponds to the center of the icon next to the
+  /// widget name.
   double getDepthIndent(int depth) {
+    // Note: depth is 0-based, therefore add 1.
     return (depth + 1) * inspectorColumnIndent + horizontalPadding;
   }
 
@@ -1136,7 +1137,8 @@ class _RowPainter extends CustomPainter {
 
     final InspectorTreeNode node = row.node;
     final bool showExpandCollapse = node.showExpandCollapse;
-    final distanceFromExpandCollapseToRowStart = inspectorColumnIndent * 0.68;
+    final distanceFromExpandCollapseToRowStart =
+        inspectorColumnIndent * expandCollapseToRowStartDistancePercentage;
     for (final tick in row.ticks) {
       final expandCollapseX = _controller.getDepthIndent(tick) -
           distanceFromExpandCollapseToRowStart;
@@ -1169,7 +1171,8 @@ class _RowPainter extends CustomPainter {
     }
 
     if (row.hasSingleChild && node.isExpanded) {
-      final distanceFromIconCenterToRowStart = inspectorColumnIndent * 0.15;
+      final distanceFromIconCenterToRowStart =
+          inspectorColumnIndent * iconCenterToRowStartDistancePercentage;
       final iconCenterX = _controller.getDepthIndent(row.depth) -
           distanceFromIconCenterToRowStart;
       canvas.drawLine(
