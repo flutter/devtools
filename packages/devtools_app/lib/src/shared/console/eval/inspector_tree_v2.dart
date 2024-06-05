@@ -31,14 +31,6 @@ const double chartLineStrokeWidth = 1.0;
 double get inspectorColumnIndent => scaleByFontFactor(24.0);
 double get inspectorRowHeight => scaleByFontFactor(20.0);
 
-/// The distance between the expand/collapse and the start of the row, as
-/// determined by a percentage of the [inspectorColumnIndent].
-const expandCollapseToRowStartDistancePercentage = 0.68;
-
-/// The distance between the center of the widget icon and the start of the row,
-/// as determined by a percentage of the [inspectorColumnIndent].
-const iconCenterToRowStartDistancePercentage = 0.15;
-
 /// This class could be refactored out to be a reasonable generic collapsible
 /// tree ui node class but we choose to instead make it widget inspector
 /// specific as that is the only case we care about.

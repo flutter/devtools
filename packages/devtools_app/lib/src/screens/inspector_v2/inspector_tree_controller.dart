@@ -1115,6 +1115,24 @@ Paint _defaultPaint(ColorScheme colorScheme) => Paint()
   ..color = colorScheme.treeGuidelineColor
   ..strokeWidth = chartLineStrokeWidth;
 
+/// The distance (on the x-axis) between the expand/collapse and the start of
+/// the row, as determined by a percentage of the [inspectorColumnIndent].
+const _expandCollapseToRowStartXDistancePercentage = 0.68;
+
+/// The distance (on the x-axis) between the center of the widget icon and the
+/// start of the row, as determined by a percentage of the
+/// [inspectorColumnIndent].
+const _iconCenterToRowStartXDistancePercentage = 0.15;
+
+/// The distance (on the y-axis) between the bottom of the widget icon and the
+/// top of the row, as determined by a percentage of the [inspectorRowHeight].
+const _iconBottomToRowTopYDistancePercentage = 0.75;
+
+/// The distance (on the y-axis) between the top of the child widget's icon and
+/// the top of the current row, as determined by a percentage of the
+/// [inspectorRowHeight].
+const _childIconTopToRowTopYDistancePercentage = 1.25;
+
 /// Custom painter that draws lines indicating how parent and child rows are
 /// connected to each other.
 ///
@@ -1138,7 +1156,7 @@ class _RowPainter extends CustomPainter {
     final InspectorTreeNode node = row.node;
     final bool showExpandCollapse = node.showExpandCollapse;
     final distanceFromExpandCollapseToRowStart =
-        inspectorColumnIndent * expandCollapseToRowStartDistancePercentage;
+        inspectorColumnIndent * _expandCollapseToRowStartXDistancePercentage;
     for (final tick in row.ticks) {
       final expandCollapseX = _controller.getDepthIndent(tick) -
           distanceFromExpandCollapseToRowStart;
@@ -1172,17 +1190,19 @@ class _RowPainter extends CustomPainter {
 
     if (row.hasSingleChild && node.isExpanded) {
       final distanceFromIconCenterToRowStart =
-          inspectorColumnIndent * iconCenterToRowStartDistancePercentage;
+          inspectorColumnIndent * _iconCenterToRowStartXDistancePercentage;
       final iconCenterX = _controller.getDepthIndent(row.depth) -
           distanceFromIconCenterToRowStart;
+      // Draw a line from the bottom of the current row's icon to the top of the
+      // child row's icon:
       canvas.drawLine(
         Offset(
           iconCenterX,
-          inspectorRowHeight * 0.75,
+          inspectorRowHeight * _iconBottomToRowTopYDistancePercentage,
         ),
         Offset(
           iconCenterX,
-          inspectorRowHeight * 1.25,
+          inspectorRowHeight * _childIconTopToRowTopYDistancePercentage,
         ),
         paint,
       );
