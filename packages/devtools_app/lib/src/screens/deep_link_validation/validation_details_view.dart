@@ -228,7 +228,7 @@ class _HostingIssues extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final errors = controller.selectedLink.value!.domainErrors
-        .where((error) => domainHostingErrors.contains(error))
+        .where((error) => domainAndroidHostingErrors.contains(error))
         .toList();
     return ExpansionTile(
       controlAffinity: ListTileControlAffinity.leading,

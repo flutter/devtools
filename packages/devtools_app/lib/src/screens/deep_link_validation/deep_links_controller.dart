@@ -25,7 +25,7 @@ const domainAssetLinksJsonFileErrors = {
   AndroidDomainError.appIdentifier,
   AndroidDomainError.fingerprints,
 };
-const domainHostingErrors = {
+const domainAndroidHostingErrors = {
   AndroidDomainError.contentType,
   AndroidDomainError.httpsAccessibility,
   AndroidDomainError.nonRedirect,
