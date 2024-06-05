@@ -30,7 +30,7 @@ const String _failedChecksKey = 'failedChecks';
 const String _generatedContentKey = 'generatedContent';
 const int _domainBatchSize = 500;
 
-const Map<String,DomainError> checkNameToDomainError = {
+const Map<String, DomainError> checkNameToDomainError = {
   'EXISTENCE': AndroidDomainError.existence,
   'APP_IDENTIFIER': AndroidDomainError.appIdentifier,
   'FINGERPRINT': AndroidDomainError.fingerprints,
