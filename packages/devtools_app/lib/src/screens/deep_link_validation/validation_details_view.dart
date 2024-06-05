@@ -8,6 +8,7 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/common_widgets.dart';
+import '../../shared/feature_flags.dart';
 import '../../shared/ui/colors.dart';
 import '../../shared/utils.dart';
 import 'deep_link_list_view.dart';
@@ -61,6 +62,9 @@ class ValidationDetailView extends StatelessWidget {
                 if (viewType == TableViewType.pathView ||
                     viewType == TableViewType.singleUrlView)
                   _PathCheckTable(controller: controller),
+                if (FeatureFlags.deepLinkIosCheck &&
+                    viewType == TableViewType.domainView)
+                  _CrossCheckTable(controller: controller),
                 const SizedBox(height: extraLargeSpacing),
                 Align(
                   alignment: Alignment.bottomRight,
@@ -542,6 +546,58 @@ class _DomainAssociatedLinksPanel extends StatelessWidget {
             ),
           ),
         ),
+      ],
+    );
+  }
+}
+
+class _CrossCheckTable extends StatelessWidget {
+  const _CrossCheckTable({required this.controller});
+
+  final DeepLinksController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final linkData = controller.selectedLink.value!;
+    // TODO (hangyujin): Update this bool to actually check if aasa file exists.
+    const hasIosAasaFile = true;
+    final hasAndroidAssetLinksFile =
+        !linkData.domainErrors.contains(DomainError.existence);
+
+    final missingIos = hasIosAasaFile && !linkData.os.contains(PlatformOS.ios);
+    final missingAndroid =
+        hasAndroidAssetLinksFile && !linkData.os.contains(PlatformOS.android);
+
+    final theme = Theme.of(context);
+    final domainMissing = Text(
+      'Domain missing',
+      style: theme.regularTextStyleWithColor(
+        theme.colorScheme.onWarningContainerLink,
+      ),
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: intermediateSpacing),
+        Text(
+          'App check',
+          style: theme.textTheme.titleSmall,
+        ),
+        const SizedBox(height: intermediateSpacing),
+        const _CheckTableHeader(),
+        const Divider(height: 1.0),
+        if (missingAndroid)
+          _CheckExpansionTile(
+            checkName: 'Manifest file',
+            status: domainMissing,
+            children: const <Widget>[],
+          ),
+        if (missingIos)
+          _CheckExpansionTile(
+            checkName: 'Settings',
+            status: domainMissing,
+            children: const <Widget>[],
+          ),
       ],
     );
   }
