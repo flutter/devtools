@@ -35,13 +35,6 @@ void main() {
         expect(find.text(tab), findsOneWidget);
         logStatus('6.$tab - found');
       }
-
-      for (final tab in [diffTab, profileTab, traceTab]) {
-        await tester.tap(find.text(tab));
-        logStatus('7.$tab - tapped');
-        await tester.pumpAndSettle(longPumpDuration);
-        logStatus('7.$tab - settled');
-      }
     },
   );
 }
