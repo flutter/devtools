@@ -36,9 +36,11 @@ class CommonError {
   final String explanation;
   final String fixDetails;
 }
-
 class DomainError extends CommonError {
   const DomainError(super.title, super.explanation, super.fixDetails);
+}
+class AndroidDomainError extends DomainError {
+  const AndroidDomainError(super.title, super.explanation, super.fixDetails);
 
   /// Existence of an asset link file.
   static const existence = DomainError(
@@ -115,6 +117,18 @@ class DomainError extends CommonError {
   /// Issues that are not covered by other checks. An example that may be in this
   /// category is Android validation API failures.
   static const other = DomainError('Check failed', '', '');
+}
+
+class IosDomainError extends DomainError {
+  const IosDomainError(super.title, super.explanation, super.fixDetails);
+  // TODO: Add  domain errors for iOS.
+
+  /// Existence of an aasa file.
+  static const existence = DomainError(
+    'Apple-App-Site-Association file does not exist',
+    '',
+    '',
+  );
 }
 
 /// There are currently two types of path errors, errors from intent filters and path format errors.

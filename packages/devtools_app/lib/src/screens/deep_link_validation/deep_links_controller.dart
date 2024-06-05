@@ -21,15 +21,15 @@ import 'deep_links_services.dart';
 typedef _DomainAndPath = ({String? domain, String? path});
 
 const domainAssetLinksJsonFileErrors = {
-  DomainError.existence,
-  DomainError.appIdentifier,
-  DomainError.fingerprints,
+  AndroidDomainError.existence,
+  AndroidDomainError.appIdentifier,
+  AndroidDomainError.fingerprints,
 };
 const domainHostingErrors = {
-  DomainError.contentType,
-  DomainError.httpsAccessibility,
-  DomainError.nonRedirect,
-  DomainError.hostForm,
+  AndroidDomainError.contentType,
+  AndroidDomainError.httpsAccessibility,
+  AndroidDomainError.nonRedirect,
+  AndroidDomainError.hostForm,
 };
 
 /// The phase of the deep link page.

@@ -155,8 +155,10 @@ class _DomainCheckTable extends StatelessWidget {
             _CheckExpansionTile(
               initiallyExpanded: !fingerprintExists,
               checkName: 'Digital assets link file',
-              status:
-                  _CheckStatusText(hasError: linkData.domainErrors.isNotEmpty),
+              status: _CheckStatusText(
+                hasError:
+                    linkData.domainErrors.any((e) => e is AndroidDomainError),
+              ),
               children: <Widget>[
                 _Fingerprint(controller: controller),
                 // The following checks are only displayed if a fingerprint exists.
