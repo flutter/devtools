@@ -44,7 +44,8 @@ class BuildCommand extends Command {
       ..addUpdatePerfettoFlag()
       ..addPubGetFlag()
       ..addBulidModeOption()
-      ..addWasmFlag();
+      ..addWasmFlag()
+      ..addNoStripWasmFlag();
   }
 
   @override
@@ -65,6 +66,7 @@ class BuildCommand extends Command {
     final runPubGet = results[BuildCommandArgs.pubGet.flagName] as bool;
     final buildMode = results[BuildCommandArgs.buildMode.flagName] as String;
     final useWasm = results[BuildCommandArgs.wasm.flagName] as bool;
+    final noStripWasm = results[BuildCommandArgs.noStripWasm.flagName] as bool;
 
     final webBuildDir =
         Directory(path.join(repo.devtoolsAppDirectoryPath, 'build', 'web'));
@@ -99,9 +101,10 @@ class BuildCommand extends Command {
           [
             'build',
             'web',
-            if (useWasm)
-              '--wasm'
-            else ...[
+            if (useWasm) ...[
+              BuildCommandArgs.wasm.asArg(),
+              if (noStripWasm) BuildCommandArgs.noStripWasm.asArg(),
+            ] else ...[
               '--web-renderer',
               'canvaskit',
               // Do not minify stack traces in debug mode.

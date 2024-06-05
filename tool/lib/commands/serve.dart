@@ -80,6 +80,7 @@ class ServeCommand extends Command {
       ..addPubGetFlag()
       ..addBulidModeOption()
       ..addWasmFlag()
+      ..addNoStripWasmFlag()
       // Flags defined in the server in DDS.
       ..addFlag(
         _machineFlag,
@@ -129,6 +130,7 @@ class ServeCommand extends Command {
     final updatePerfetto =
         results[BuildCommandArgs.updatePerfetto.flagName] as bool;
     final useWasm = results[BuildCommandArgs.wasm.flagName] as bool;
+    final noStripWasm = results[BuildCommandArgs.noStripWasm.flagName] as bool;
     final runPubGet = results[BuildCommandArgs.pubGet.flagName] as bool;
     final devToolsAppBuildMode =
         results[BuildCommandArgs.buildMode.flagName] as String;
@@ -140,6 +142,7 @@ class ServeCommand extends Command {
       ..remove(BuildCommandArgs.updateFlutter.asArg(negated: true))
       ..remove(BuildCommandArgs.updatePerfetto.asArg())
       ..remove(BuildCommandArgs.wasm.asArg())
+      ..remove(BuildCommandArgs.noStripWasm.asArg())
       ..remove(valueAsArg(_buildAppFlag))
       ..remove(valueAsArg(_buildAppFlag, negated: true))
       ..remove(valueAsArg(_debugServerFlag))
@@ -179,6 +182,7 @@ class ServeCommand extends Command {
           BuildCommandArgs.updateFlutter.asArg(negated: !updateFlutter),
           if (updatePerfetto) BuildCommandArgs.updatePerfetto.asArg(),
           if (useWasm) BuildCommandArgs.wasm.asArg(),
+          if (noStripWasm) BuildCommandArgs.noStripWasm.asArg(),
           '${BuildCommandArgs.buildMode.asArg()}=$devToolsAppBuildMode',
           BuildCommandArgs.pubGet.asArg(negated: !runPubGet),
         ]),
