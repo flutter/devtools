@@ -201,9 +201,9 @@ class LinkData with SearchableDataMixin {
     this.associatedDomains = const <String>[],
   });
 
-  final String path;
+  final String? path;
   final String? domain;
-  final List<PlatformOS> os;
+  final Set<PlatformOS> os;
   final Set<String> scheme;
   final List<DomainError> domainErrors;
   Set<PathError> pathErrors;
@@ -214,11 +214,14 @@ class LinkData with SearchableDataMixin {
   @override
   bool matchesSearchToken(RegExp regExpSearch) {
     return (domain?.caseInsensitiveContains(regExpSearch) ?? false) ||
-        path.caseInsensitiveContains(regExpSearch);
+        (path?.caseInsensitiveContains(regExpSearch) ?? false);
   }
 
   @override
   String toString() => 'LinkData($domain $path)';
+
+  String get safePath => path ?? '';
+  String get safeDomain => domain ?? '';
 }
 
 class _ErrorAwareText extends StatelessWidget {
@@ -392,7 +395,7 @@ class PathColumn extends ColumnData<LinkData>
   }
 
   @override
-  String getValue(LinkData dataObject) => dataObject.path;
+  String getValue(LinkData dataObject) => dataObject.safePath;
 
   @override
   Widget build(
@@ -405,7 +408,7 @@ class PathColumn extends ColumnData<LinkData>
     return _ErrorAwareText(
       isError: dataObject.pathErrors.isNotEmpty,
       controller: controller,
-      text: dataObject.path,
+      text: dataObject.safePath,
       link: dataObject,
     );
   }
@@ -730,12 +733,12 @@ int _compareLinkData(
       }
       return 0;
     case SortingOption.aToZ:
-      if (compareDomain) return (a.domain ?? '').compareTo(b.domain ?? '');
+      if (compareDomain) return a.safeDomain.compareTo(b.safeDomain);
 
-      return a.path.compareTo(b.path);
+      return a.safePath.compareTo(b.safePath);
     case SortingOption.zToA:
-      if (compareDomain) return (b.domain ?? '').compareTo(a.domain ?? '');
+      if (compareDomain) return b.safeDomain.compareTo(a.safeDomain);
 
-      return b.path.compareTo(a.path);
+      return b.safePath.compareTo(a.safePath);
   }
 }
