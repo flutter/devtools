@@ -28,8 +28,8 @@ typedef TreeEventCallback = void Function(InspectorTreeNode node);
 
 const double iconPadding = 4.0;
 const double chartLineStrokeWidth = 1.0;
-double get inspectorColumnWidth => scaleByFontFactor(12.0);
-double get inspectorRowHeight => scaleByFontFactor(16.0);
+double get inspectorColumnIndent => scaleByFontFactor(24.0);
+double get inspectorRowHeight => scaleByFontFactor(20.0);
 
 /// This class could be refactored out to be a reasonable generic collapsible
 /// tree ui node class but we choose to instead make it widget inspector
@@ -101,11 +101,8 @@ class InspectorTreeNode {
   bool get isExpanded => _isExpanded;
   bool _isExpanded;
 
-  bool allowExpandCollapse = true;
-
   bool get showExpandCollapse {
-    return (diagnostic?.hasChildren == true || children.isNotEmpty) &&
-        allowExpandCollapse;
+    return diagnostic?.hasChildren == true || children.isNotEmpty;
   }
 
   set isExpanded(bool value) {
@@ -208,6 +205,7 @@ class InspectorTreeNode {
           lineToParent: !node.isProperty &&
               index != 0 &&
               node.parent!.showLinesToChildren,
+          hasSingleChild: node.children.length == 1,
         );
       }
       assert(index > current);
@@ -231,7 +229,8 @@ class InspectorTreeNode {
         current += subtreeSize;
       }
       assert(i < children.length);
-      if (indented) {
+      // Don't indent if a widget has only one child:
+      if (indented && children.length > 1) {
         depth++;
       }
     }
@@ -264,6 +263,7 @@ class InspectorTreeRow with SearchableDataMixin {
     required this.ticks,
     required this.depth,
     required this.lineToParent,
+    required this.hasSingleChild,
   });
 
   final InspectorTreeNode node;
@@ -273,6 +273,7 @@ class InspectorTreeRow with SearchableDataMixin {
   final int depth;
   final int index;
   final bool lineToParent;
+  final bool hasSingleChild;
 
   bool get isSelected => node.selected;
 }
