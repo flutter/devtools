@@ -564,7 +564,7 @@ class _CrossCheckTable extends StatelessWidget {
     // TODO (hangyujin): Update this bool to actually check if aasa file exists.
     const hasIosAasaFile = true;
     final hasAndroidAssetLinksFile =
-        !linkData.domainErrors.contains(DomainError.existence);
+        !linkData.domainErrors.contains(AndroidDomainError.existence);
 
     final missingIos = hasIosAasaFile && !linkData.os.contains(PlatformOS.ios);
     final missingAndroid =
