@@ -601,12 +601,14 @@ class _CrossCheckTable extends StatelessWidget {
         const Divider(height: 1.0),
         if (missingAndroid)
           _CheckExpansionTile(
+            os: PlatformOS.android,
             checkName: 'Manifest file',
             status: domainMissing,
             children: const <Widget>[],
           ),
         if (missingIos)
           _CheckExpansionTile(
+            os: PlatformOS.ios,
             checkName: 'Settings',
             status: domainMissing,
             children: const <Widget>[],
