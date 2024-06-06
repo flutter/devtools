@@ -155,8 +155,10 @@ class _DomainCheckTable extends StatelessWidget {
             _CheckExpansionTile(
               initiallyExpanded: !fingerprintExists,
               checkName: 'Digital assets link file',
-              status:
-                  _CheckStatusText(hasError: linkData.domainErrors.isNotEmpty),
+              status: _CheckStatusText(
+                hasError:
+                    linkData.domainErrors.any((e) => e is AndroidDomainError),
+              ),
               children: <Widget>[
                 _Fingerprint(controller: controller),
                 // The following checks are only displayed if a fingerprint exists.
@@ -226,7 +228,7 @@ class _HostingIssues extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final errors = controller.selectedLink.value!.domainErrors
-        .where((error) => domainHostingErrors.contains(error))
+        .where((error) => domainAndroidHostingErrors.contains(error))
         .toList();
     return ExpansionTile(
       controlAffinity: ListTileControlAffinity.leading,
@@ -562,7 +564,7 @@ class _CrossCheckTable extends StatelessWidget {
     // TODO (hangyujin): Update this bool to actually check if aasa file exists.
     const hasIosAasaFile = true;
     final hasAndroidAssetLinksFile =
-        !linkData.domainErrors.contains(DomainError.existence);
+        !linkData.domainErrors.contains(AndroidDomainError.existence);
 
     final missingIos = hasIosAasaFile && !linkData.os.contains(PlatformOS.ios);
     final missingAndroid =

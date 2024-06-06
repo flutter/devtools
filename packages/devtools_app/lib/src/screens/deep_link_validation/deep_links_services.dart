@@ -31,14 +31,14 @@ const String _generatedContentKey = 'generatedContent';
 const int _domainBatchSize = 500;
 
 const Map<String, DomainError> checkNameToDomainError = {
-  'EXISTENCE': DomainError.existence,
-  'APP_IDENTIFIER': DomainError.appIdentifier,
-  'FINGERPRINT': DomainError.fingerprints,
-  'CONTENT_TYPE': DomainError.contentType,
-  'HTTPS_ACCESSIBILITY': DomainError.httpsAccessibility,
-  'NON_REDIRECT': DomainError.nonRedirect,
-  'HOST_FORMED_PROPERLY': DomainError.hostForm,
-  'OTHER_CHECKS': DomainError.other,
+  'EXISTENCE': AndroidDomainError.existence,
+  'APP_IDENTIFIER': AndroidDomainError.appIdentifier,
+  'FINGERPRINT': AndroidDomainError.fingerprints,
+  'CONTENT_TYPE': AndroidDomainError.contentType,
+  'HTTPS_ACCESSIBILITY': AndroidDomainError.httpsAccessibility,
+  'NON_REDIRECT': AndroidDomainError.nonRedirect,
+  'HOST_FORMED_PROPERLY': AndroidDomainError.hostForm,
+  'OTHER_CHECKS': AndroidDomainError.other,
 };
 
 class GenerateAssetLinksResult {
