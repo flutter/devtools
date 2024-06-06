@@ -48,7 +48,7 @@ final domainErrorlinkData = LinkData(
   domain: 'www.google.com',
   path: '/',
   os: {PlatformOS.android, PlatformOS.ios},
-  domainErrors: [ AndroidDomainError.existence],
+  domainErrors: [AndroidDomainError.existence],
 );
 
 final pathErrorlinkData = LinkData(
@@ -427,7 +427,7 @@ void main() {
             domain: 'www.domain1.com',
             path: '/',
             os: {PlatformOS.android},
-            domainErrors: [ AndroidDomainError.existence],
+            domainErrors: [AndroidDomainError.existence],
           ),
           LinkData(
             domain: 'www.domain2.com',
@@ -499,7 +499,7 @@ void main() {
             domain: 'www.domain2.com',
             path: '/path',
             os: {PlatformOS.ios},
-            domainErrors: [ AndroidDomainError.existence],
+            domainErrors: [AndroidDomainError.existence],
           ),
           LinkData(
             domain: 'www.google.com',
@@ -631,7 +631,7 @@ void main() {
             domain: 'www.domain1.com',
             path: '/path1',
             os: {PlatformOS.android},
-            domainErrors: [ AndroidDomainError.existence],
+            domainErrors: [AndroidDomainError.existence],
           ),
           LinkData(
             domain: 'www.domain2.com',

@@ -36,9 +36,11 @@ class CommonError {
   final String explanation;
   final String fixDetails;
 }
+
 class DomainError extends CommonError {
   const DomainError(super.title, super.explanation, super.fixDetails);
 }
+
 class AndroidDomainError extends DomainError {
   const AndroidDomainError(super.title, super.explanation, super.fixDetails);
 
@@ -123,7 +125,7 @@ class IosDomainError extends DomainError {
   const IosDomainError(super.title, super.explanation, super.fixDetails);
   // TODO: Add  domain errors for iOS.
 
-  /// Existence of an aasa file.
+  /// Existence of an Apple-App-Site-Association file.
   static const existence = DomainError(
     'Apple-App-Site-Association file does not exist',
     '',
