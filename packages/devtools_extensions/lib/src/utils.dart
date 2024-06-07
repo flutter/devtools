@@ -7,7 +7,7 @@ import 'dart:js_interop';
 import 'package:devtools_app_shared/web_utils.dart';
 import 'package:web/web.dart';
 
-import '../api.dart';
+import 'api/model.dart';
 
 DevToolsExtensionEvent? tryParseExtensionEvent(Event e) {
   if (e.isMessageEvent) {
