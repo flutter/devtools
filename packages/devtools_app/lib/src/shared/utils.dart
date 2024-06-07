@@ -18,6 +18,7 @@ import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
+// ignore: avoid-importing-entrypoint-exports, special case for getting version.
 import '../../devtools.dart' as devtools;
 import 'common_widgets.dart';
 import 'connected_app.dart';
@@ -116,7 +117,7 @@ List<String> issueLinkDetails() {
   final issueDescriptionItems = [
     '<-- Please describe your problem here. Be sure to include repro steps. -->',
     '___', // This will create a separator in the rendered markdown.
-    '**DevTools version**: ${devtools.version}',
+    '**DevTools version**: $devToolsVersion',
     if (ide != null) '**IDE**: $ide',
   ];
   final vm = serviceConnection.serviceManager.vm;
@@ -297,3 +298,5 @@ Future<void> launchUrlWithErrorHandling(String url) async {
     onError: () => notificationService.push('Unable to open $url.'),
   );
 }
+
+String get devToolsVersion => devtools.version;

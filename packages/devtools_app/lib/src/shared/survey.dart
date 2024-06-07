@@ -10,7 +10,6 @@ import 'package:flutter/widgets.dart';
 import 'package:http/http.dart';
 import 'package:logging/logging.dart';
 
-import '../../../devtools.dart' as devtools show version;
 import '../shared/notifications.dart';
 import 'analytics/analytics.dart' as ga;
 import 'development_helpers.dart';
@@ -235,7 +234,7 @@ extension ShowSurveyExtension on DevToolsSurvey {
 
   bool get meetsMinVersionRequirement =>
       minDevToolsVersion == null ||
-      SemanticVersion.parse(devtools.version)
+      SemanticVersion.parse(devToolsVersion)
           .isSupported(minSupportedVersion: minDevToolsVersion!);
 
   bool get meetsEnvironmentRequirement =>
