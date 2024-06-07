@@ -153,6 +153,7 @@ class _DomainCheckTable extends StatelessWidget {
             const SizedBox(height: denseSpacing),
             const _CheckTableHeader(),
             _CheckExpansionTile(
+              os: PlatformOS.android,
               initiallyExpanded: !fingerprintExists,
               checkName: 'Digital assets link file',
               status: _CheckStatusText(
@@ -168,6 +169,16 @@ class _DomainCheckTable extends StatelessWidget {
                 ],
               ],
             ),
+            if (FeatureFlags.deepLinkIosCheck)
+              const _CheckExpansionTile(
+                os: PlatformOS.ios,
+                checkName: 'Apple-App-Site-Association file',
+                status: _CheckStatusText(
+                  //TODO (hangyu jin): add iOS domain errors when api is ready.
+                  hasError: false,
+                ),
+                children: <Widget>[],
+              ),
             const SizedBox(height: intermediateSpacing),
           ],
         );
@@ -590,12 +601,14 @@ class _CrossCheckTable extends StatelessWidget {
         const Divider(height: 1.0),
         if (missingAndroid)
           _CheckExpansionTile(
+            os: PlatformOS.android,
             checkName: 'Manifest file',
             status: domainMissing,
             children: const <Widget>[],
           ),
         if (missingIos)
           _CheckExpansionTile(
+            os: PlatformOS.ios,
             checkName: 'Settings',
             status: domainMissing,
             children: const <Widget>[],
@@ -645,6 +658,7 @@ class _ManifestFileCheck extends StatelessWidget {
         .toList();
 
     return _CheckExpansionTile(
+      os: PlatformOS.android,
       checkName: 'Manifest file',
       status: _CheckStatusText(hasError: errors.isNotEmpty),
       children: <Widget>[
@@ -683,6 +697,7 @@ class _PathFormatCheck extends StatelessWidget {
     final hasError = linkData.pathErrors.contains(PathError.pathFormat);
 
     return _CheckExpansionTile(
+      os: PlatformOS.android,
       checkName: 'URL format',
       status: _CheckStatusText(hasError: hasError),
       children: <Widget>[
@@ -723,12 +738,14 @@ class _CheckTableHeader extends StatelessWidget {
 
 class _CheckExpansionTile extends StatelessWidget {
   const _CheckExpansionTile({
+    required this.os,
     required this.checkName,
     required this.status,
     required this.children,
     this.initiallyExpanded = false,
   });
 
+  final PlatformOS os;
   final String checkName;
   final Widget status;
   final bool initiallyExpanded;
@@ -740,7 +757,7 @@ class _CheckExpansionTile extends StatelessWidget {
     final title = Row(
       children: [
         const SizedBox(width: defaultSpacing),
-        const Expanded(child: Text('Android')),
+        Expanded(child: Text(os == PlatformOS.ios ? 'iOS' : 'Android')),
         Expanded(child: Text(checkName)),
         Expanded(child: status),
       ],
