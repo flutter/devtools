@@ -79,7 +79,6 @@ class ReleaseNotesController extends SidePanelController {
     if (server.isDevToolsServerAvailable) {
       final lastReleaseNotesShownVersion =
           await server.getLastShownReleaseNotesVersion();
-          'after calling last shown: $lastReleaseNotesShownVersion which is a ${lastReleaseNotesShownVersion.runtimeType}');
       if (lastReleaseNotesShownVersion.isNotEmpty) {
         previousVersion = SemanticVersion.parse(lastReleaseNotesShownVersion);
       }
