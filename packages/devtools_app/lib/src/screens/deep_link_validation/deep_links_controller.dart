@@ -153,10 +153,6 @@ class DeepLinksController extends DisposableController
         selectedIosConfigurationIndex,
         _handleIosConfigurationChanged,
       );
-      addAutoDisposeListener(
-        selectedIosTargetIndex,
-        _handleIosConfigurationChanged,
-      );
     }
   }
 
