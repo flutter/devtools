@@ -76,23 +76,18 @@ class LocalFileSystem {
     return jsonEncode(json);
   }
 
-  /// The location of the Flutter store file, ~/.flutter.
-  static String flutterStoreLocation() {
-    return path.join(_userHomeDir(), '.flutter');
-  }
-
   /// Whether the flutter store file exists.
   static bool flutterStoreExists() {
-    final flutterStore = File(flutterStoreLocation());
+    final flutterStore = File(path.join(_userHomeDir(), '.flutter'));
     return flutterStore.existsSync();
   }
 }
 
-class IOPersistentProperties extends PersistentProperties {
+class IOPersistentProperties {
   IOPersistentProperties(
-    String name, {
+    this.name, {
     String? documentDirPath,
-  }) : super(name) {
+  }) {
     final String fileName = name.replaceAll(' ', '_');
     documentDirPath ??= LocalFileSystem._userHomeDir();
     _file = File(path.join(documentDirPath, fileName));
@@ -102,7 +97,7 @@ class IOPersistentProperties extends PersistentProperties {
     syncSettings();
   }
 
-  IOPersistentProperties.fromFile(File file) : super(path.basename(file.path)) {
+  IOPersistentProperties.fromFile(File file) : name = path.basename(file.path) {
     _file = file;
     if (!_file.existsSync()) {
       _file.createSync(recursive: true);
@@ -110,15 +105,14 @@ class IOPersistentProperties extends PersistentProperties {
     syncSettings();
   }
 
+  final String name;
+
   late File _file;
 
   late Map<String, Object?> _map;
 
-  @override
-  // ignore: avoid-dynamic, necessary here.
-  dynamic operator [](String key) => _map[key];
+  Object? operator [](String key) => _map[key];
 
-  @override
   void operator []=(String key, Object? value) {
     if (value == null && !_map.containsKey(key)) return;
     if (_map[key] == value) return;
@@ -134,7 +128,9 @@ class IOPersistentProperties extends PersistentProperties {
     } catch (_) {}
   }
 
-  @override
+  /// Re-read settings from the backing store.
+  ///
+  /// May be a no-op on some platforms.
   void syncSettings() {
     try {
       String contents = _file.readAsStringSync();
@@ -148,23 +144,6 @@ class IOPersistentProperties extends PersistentProperties {
   void remove(String propertyName) {
     _map.remove(propertyName);
   }
-}
-
-abstract class PersistentProperties {
-  PersistentProperties(this.name);
-
-  final String name;
-
-  // ignore: avoid-dynamic, dynamic by design.
-  dynamic operator [](String key);
-
-  // ignore: avoid-dynamic, dynamic by design.
-  void operator []=(String key, dynamic value);
-
-  /// Re-read settings from the backing store.
-  ///
-  /// May be a no-op on some platforms.
-  void syncSettings();
 }
 
 const JsonEncoder _jsonEncoder = JsonEncoder.withIndent('  ');
