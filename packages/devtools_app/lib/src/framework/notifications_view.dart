@@ -249,7 +249,7 @@ class _NotificationState extends State<_Notification>
         margin: const EdgeInsets.fromLTRB(0, 0, 0, densePadding),
         child: DefaultTextStyle(
           style: theme.snackBarTheme.contentTextStyle ??
-              theme.primaryTextTheme.titleMedium!,
+              theme.textTheme.titleMedium!,
           child: Padding(
             padding: const EdgeInsets.all(denseSpacing),
             child: Column(

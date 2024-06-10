@@ -76,12 +76,12 @@ final class DialogTitleText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) =>
-      Text(text, style: Theme.of(context).textTheme.titleMedium);
+      Text(text, style: Theme.of(context).textTheme.headlineMedium);
 }
 
 List<Widget> dialogSubHeader(ThemeData theme, String titleText) {
   return [
-    Text(titleText, style: theme.textTheme.titleSmall),
+    Text(titleText, style: theme.textTheme.titleLarge),
     const PaddedDivider(padding: EdgeInsets.only(bottom: denseRowSpacing)),
   ];
 }

@@ -125,7 +125,6 @@ class _VMProcessMemoryViewBodyState extends State<VMProcessMemoryViewBody>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
     final colorScheme = theme.colorScheme;
     final currentTab = widget.tabs[_tabController.index];
     return Column(
@@ -141,7 +140,7 @@ class _VMProcessMemoryViewBodyState extends State<VMProcessMemoryViewBody>
           leftPadding: 0,
           tall: true,
           title: TabBar(
-            labelColor: textTheme.bodyLarge?.color ?? colorScheme.onSurface,
+            labelColor: colorScheme.onSurface,
             isScrollable: true,
             controller: _tabController,
             tabs: widget.tabs,

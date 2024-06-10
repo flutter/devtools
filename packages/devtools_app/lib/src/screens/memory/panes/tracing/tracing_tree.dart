@@ -175,7 +175,6 @@ class _TracingTreeHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
     final colorScheme = theme.colorScheme;
     return AreaPaneHeader(
       title: Text.rich(
@@ -196,7 +195,7 @@ class _TracingTreeHeader extends StatelessWidget {
       actions: [
         const Spacer(),
         TabBar(
-          labelColor: textTheme.bodyLarge?.color ?? colorScheme.primary,
+          labelColor: colorScheme.primary,
           tabs: tabs,
           isScrollable: true,
           controller: tabController,

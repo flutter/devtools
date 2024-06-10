@@ -118,6 +118,7 @@ class _Row extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       width: constraints.minWidth,
       padding: _rowPadding,
@@ -126,13 +127,11 @@ class _Row extends StatelessWidget {
         children: [
           Text(
             '${entry.key}: ',
-            style: Theme.of(context).textTheme.titleSmall,
+            style: theme.textTheme.titleMedium,
           ),
           Expanded(
             child: Text(
-              style: isErrorValue
-                  ? TextStyle(color: Theme.of(context).colorScheme.error)
-                  : null,
+              style: isErrorValue ? theme.errorTextStyle : null,
               '${entry.value}',
             ),
           ),
@@ -448,16 +447,12 @@ class ImageResponseView extends StatelessWidget {
         children: [
           Text(
             '$key: ',
-            style: Theme.of(context).textTheme.titleSmall,
+            style: Theme.of(context).textTheme.titleMedium,
           ),
           Expanded(
             child: Text(
               value,
-              // TODO(kenz): use top level overflow parameter if
-              // https://github.com/flutter/flutter/issues/82722 is fixed.
-              // TODO(kenz): add overflow after flutter 2.3.0 is stable. It was
-              // added in commit 65388ee2eeaf0d2cf087eaa4a325e3689020c46a.
-              // style: const TextStyle(overflow: TextOverflow.ellipsis),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -909,7 +904,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
           width: _keyWidth,
           child: Text(
             title.isEmpty ? '' : '$title: ',
-            style: Theme.of(context).textTheme.titleSmall,
+            style: Theme.of(context).textTheme.titleMedium,
           ),
         ),
         Expanded(

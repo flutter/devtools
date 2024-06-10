@@ -93,7 +93,7 @@ class _TimelineEventsTabViewState extends State<TimelineEventsTabView>
                       'This may take a few seconds. Please do not\n'
                       'refresh the page.',
                       textAlign: TextAlign.center,
-                      style: theme.textTheme.titleSmall,
+                      style: theme.textTheme.titleMedium,
                     ),
                   ),
                 ),
