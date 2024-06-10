@@ -628,7 +628,7 @@ class LogDataV2 with SearchableDataMixin {
   String? get details => _details;
 
   ValueListenable<bool> get detailsComputed => _detailsComputed;
-  final ValueNotifier<bool> _detailsComputed = ValueNotifier<bool>(false);
+  final _detailsComputed = ValueNotifier<bool>(false);
 
   Future<void> compute() async {
     if (!detailsComputed.value) {
