@@ -150,8 +150,8 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
                               Expanded(
                                 child: Text(
                                   title,
-                                  style:
-                                      _titleStyle ?? theme.textTheme.titleMedium,
+                                  style: _titleStyle ??
+                                      theme.textTheme.titleMedium,
                                 ),
                               ),
                             ],
