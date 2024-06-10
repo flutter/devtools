@@ -87,7 +87,7 @@ class IOPersistentProperties {
     this.name, {
     String? documentDirPath,
   }) {
-    final String fileName = name.replaceAll(' ', '_');
+    final fileName = name.replaceAll(' ', '_');
     documentDirPath ??= LocalFileSystem._userHomeDir();
     _file = File(path.join(documentDirPath, fileName));
     if (!_file.existsSync()) {
@@ -145,4 +145,4 @@ class IOPersistentProperties {
   }
 }
 
-const JsonEncoder _jsonEncoder = JsonEncoder.withIndent('  ');
+const _jsonEncoder = JsonEncoder.withIndent('  ');
