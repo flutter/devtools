@@ -15,6 +15,7 @@ import '../../../../shared/common_widgets.dart';
 import '../../../../shared/file_import.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/screen.dart';
+import '../../../../shared/ui/utils.dart';
 import '../../panes/timeline_events/timeline_events_controller.dart';
 import '../../performance_controller.dart';
 import 'enhance_tracing/enhance_tracing.dart';
@@ -83,6 +84,8 @@ class _PrimaryControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = ScreenSize(context).width;
+    final terse = screenWidth <= MediaSize.xs;
     return Row(
       children: [
         if (serviceConnection
@@ -92,7 +95,7 @@ class _PrimaryControls extends StatelessWidget {
             gaScreen: gac.performance,
             onPressed:
                 controller.flutterFramesController.toggleShowFlutterFrames,
-            label: 'Flutter frames',
+            label: terse ? 'Frames' : 'Flutter frames',
             tooltip: 'Toggle visibility of the Flutter frames chart',
           ),
           const SizedBox(width: denseSpacing),
