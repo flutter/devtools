@@ -131,7 +131,7 @@ class NotificationService {
   void dismiss(String message) {
     // Remove those that were not picked up yet by UI.
     final toRemove = toPush.where((e) => e.text == message).toList();
-    for (var messageToRemove in toRemove) {
+    for (final messageToRemove in toRemove) {
       toPush.remove(messageToRemove);
       activeMessages.remove(messageToRemove);
     }

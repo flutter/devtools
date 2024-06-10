@@ -11,6 +11,7 @@ import 'package:devtools_app/src/screens/deep_link_validation/validation_details
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
+import 'package:devtools_shared/devtools_deeplink.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:dtd/dtd.dart';
@@ -24,36 +25,36 @@ final linkDatas = [
   LinkData(
     domain: 'www.domain1.com',
     path: '/',
-    os: [PlatformOS.android],
+    os: {PlatformOS.android},
   ),
   LinkData(
     domain: 'www.domain2.com',
     path: '/',
-    os: [PlatformOS.ios],
+    os: {PlatformOS.ios},
   ),
   LinkData(
     domain: 'www.google.com',
     path: '/',
-    os: [PlatformOS.android, PlatformOS.ios],
+    os: {PlatformOS.android, PlatformOS.ios},
   ),
   LinkData(
     domain: 'www.google.com',
     path: '/home',
-    os: [PlatformOS.android, PlatformOS.ios],
+    os: {PlatformOS.android, PlatformOS.ios},
   ),
 ];
 
 final domainErrorlinkData = LinkData(
   domain: 'www.google.com',
   path: '/',
-  os: [PlatformOS.android, PlatformOS.ios],
-  domainErrors: [DomainError.existence],
+  os: {PlatformOS.android, PlatformOS.ios},
+  domainErrors: [AndroidDomainError.existence],
 );
 
 final pathErrorlinkData = LinkData(
   domain: 'www.google.com',
   path: '/abcd',
-  os: [PlatformOS.android, PlatformOS.ios],
+  os: {PlatformOS.android, PlatformOS.ios},
   pathErrors: {
     PathError.intentFilterActionView,
     PathError.intentFilterDefault,
@@ -135,8 +136,11 @@ void main() {
       'builds deeplink list page with no links',
       windowSize,
       (WidgetTester tester) async {
-        deepLinksController.selectedProject.value =
-            FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
+        deepLinksController.selectedProject.value = FlutterProject(
+          path: '/abc',
+          androidVariants: ['debug', 'release'],
+          iosBuildOptions: XcodeBuildOptions.empty,
+        );
         await pumpDeepLinkScreen(
           tester,
           controller: deepLinksController,
@@ -155,8 +159,11 @@ void main() {
       (WidgetTester tester) async {
         final deepLinksController = DeepLinksTestController();
 
-        deepLinksController.selectedProject.value =
-            FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
+        deepLinksController.selectedProject.value = FlutterProject(
+          path: '/abc',
+          androidVariants: ['debug', 'release'],
+          iosBuildOptions: XcodeBuildOptions.empty,
+        );
 
         deepLinksController.validatedLinkDatas = ValidatedLinkDatas(
           all: linkDatas,
@@ -181,8 +188,11 @@ void main() {
       (WidgetTester tester) async {
         final deepLinksController = DeepLinksTestController();
 
-        deepLinksController.selectedProject.value =
-            FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
+        deepLinksController.selectedProject.value = FlutterProject(
+          path: '/abc',
+          androidVariants: ['debug', 'release'],
+          iosBuildOptions: XcodeBuildOptions.empty,
+        );
 
         deepLinksController.validatedLinkDatas = ValidatedLinkDatas(
           all: linkDatas,
@@ -211,8 +221,11 @@ void main() {
       (WidgetTester tester) async {
         final deepLinksController = DeepLinksTestController();
 
-        deepLinksController.selectedProject.value =
-            FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
+        deepLinksController.selectedProject.value = FlutterProject(
+          path: '/abc',
+          androidVariants: ['debug', 'release'],
+          iosBuildOptions: XcodeBuildOptions.empty,
+        );
 
         deepLinksController.validatedLinkDatas = ValidatedLinkDatas(
           all: [domainErrorlinkData],
@@ -236,8 +249,11 @@ void main() {
       (WidgetTester tester) async {
         final deepLinksController = DeepLinksTestController();
 
-        deepLinksController.selectedProject.value =
-            FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
+        deepLinksController.selectedProject.value = FlutterProject(
+          path: '/abc',
+          androidVariants: ['debug', 'release'],
+          iosBuildOptions: XcodeBuildOptions.empty,
+        );
 
         deepLinksController.validatedLinkDatas = ValidatedLinkDatas(
           all: [pathErrorlinkData],
@@ -261,8 +277,11 @@ void main() {
       (WidgetTester tester) async {
         final deepLinksController = DeepLinksTestController();
 
-        deepLinksController.selectedProject.value =
-            FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
+        deepLinksController.selectedProject.value = FlutterProject(
+          path: '/abc',
+          androidVariants: ['debug', 'release'],
+          iosBuildOptions: XcodeBuildOptions.empty,
+        );
         deepLinksController.validatedLinkDatas = ValidatedLinkDatas(
           all: [domainErrorlinkData],
           byDomain: [domainErrorlinkData],
@@ -290,8 +309,11 @@ void main() {
       (WidgetTester tester) async {
         final deepLinksController = DeepLinksTestController();
 
-        deepLinksController.selectedProject.value =
-            FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
+        deepLinksController.selectedProject.value = FlutterProject(
+          path: '/abc',
+          androidVariants: ['debug', 'release'],
+          iosBuildOptions: XcodeBuildOptions.empty,
+        );
 
         deepLinksController.validatedLinkDatas = ValidatedLinkDatas(
           all: linkDatas,
@@ -324,24 +346,27 @@ void main() {
       (WidgetTester tester) async {
         final deepLinksController = DeepLinksTestController();
 
-        deepLinksController.selectedProject.value =
-            FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
+        deepLinksController.selectedProject.value = FlutterProject(
+          path: '/abc',
+          androidVariants: ['debug', 'release'],
+          iosBuildOptions: XcodeBuildOptions.empty,
+        );
 
         final linkDatas = [
           LinkData(
             domain: 'www.domain1.com',
             path: '/',
-            os: [PlatformOS.android],
+            os: {PlatformOS.android},
           ),
           LinkData(
             domain: 'www.domain2.com',
             path: '/',
-            os: [PlatformOS.ios],
+            os: {PlatformOS.ios},
           ),
           LinkData(
             domain: 'www.google.com',
             path: '/',
-            os: [PlatformOS.android, PlatformOS.ios],
+            os: {PlatformOS.android, PlatformOS.ios},
           ),
         ];
 
@@ -391,26 +416,29 @@ void main() {
       (WidgetTester tester) async {
         final deepLinksController = DeepLinksTestController();
 
-        deepLinksController.selectedProject.value =
-            FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
+        deepLinksController.selectedProject.value = FlutterProject(
+          path: '/abc',
+          androidVariants: ['debug', 'release'],
+          iosBuildOptions: XcodeBuildOptions.empty,
+        );
 
         final linkDatas = [
           LinkData(
             domain: 'www.domain1.com',
             path: '/',
-            os: [PlatformOS.android],
-            domainErrors: [DomainError.existence],
+            os: {PlatformOS.android},
+            domainErrors: [AndroidDomainError.existence],
           ),
           LinkData(
             domain: 'www.domain2.com',
             path: '/path',
-            os: [PlatformOS.ios],
+            os: {PlatformOS.ios},
             pathErrors: {PathError.intentFilterActionView},
           ),
           LinkData(
             domain: 'www.google.com',
             path: '/',
-            os: [PlatformOS.android, PlatformOS.ios],
+            os: {PlatformOS.android, PlatformOS.ios},
           ),
         ];
 
@@ -465,23 +493,26 @@ void main() {
           LinkData(
             domain: 'www.domain1.com',
             path: '/',
-            os: [PlatformOS.android],
+            os: {PlatformOS.android},
           ),
           LinkData(
             domain: 'www.domain2.com',
             path: '/path',
-            os: [PlatformOS.ios],
-            domainErrors: [DomainError.existence],
+            os: {PlatformOS.ios},
+            domainErrors: [AndroidDomainError.existence],
           ),
           LinkData(
             domain: 'www.google.com',
             path: '/',
-            os: [PlatformOS.android, PlatformOS.ios],
+            os: {PlatformOS.android, PlatformOS.ios},
           ),
         ];
 
-        deepLinksController.selectedProject.value =
-            FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
+        deepLinksController.selectedProject.value = FlutterProject(
+          path: '/abc',
+          androidVariants: ['debug', 'release'],
+          iosBuildOptions: XcodeBuildOptions.empty,
+        );
         deepLinksController.validatedLinkDatas = ValidatedLinkDatas(
           all: linkDatas,
           byDomain: deepLinksController.linkDatasByDomain(linkDatas),
@@ -544,19 +575,22 @@ void main() {
       (WidgetTester tester) async {
         final deepLinksController = DeepLinksTestController();
 
-        deepLinksController.selectedProject.value =
-            FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
+        deepLinksController.selectedProject.value = FlutterProject(
+          path: '/abc',
+          androidVariants: ['debug', 'release'],
+          iosBuildOptions: XcodeBuildOptions.empty,
+        );
 
         final linkDatas = [
           LinkData(
             domain: 'www.domain1.com',
             path: '/',
-            os: [PlatformOS.android],
+            os: {PlatformOS.android},
           ),
           LinkData(
             domain: 'www.domain2.com',
             path: '/',
-            os: [PlatformOS.ios],
+            os: {PlatformOS.ios},
             scheme: {'http'},
           ),
         ];
@@ -586,26 +620,29 @@ void main() {
       (WidgetTester tester) async {
         final deepLinksController = DeepLinksTestController();
 
-        deepLinksController.selectedProject.value =
-            FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
+        deepLinksController.selectedProject.value = FlutterProject(
+          path: '/abc',
+          androidVariants: ['debug', 'release'],
+          iosBuildOptions: XcodeBuildOptions.empty,
+        );
 
         final linkDatas = [
           LinkData(
             domain: 'www.domain1.com',
             path: '/path1',
-            os: [PlatformOS.android],
-            domainErrors: [DomainError.existence],
+            os: {PlatformOS.android},
+            domainErrors: [AndroidDomainError.existence],
           ),
           LinkData(
             domain: 'www.domain2.com',
             path: '/path2',
-            os: [PlatformOS.ios],
+            os: {PlatformOS.ios},
             pathErrors: {PathError.intentFilterActionView},
           ),
           LinkData(
             domain: 'www.google.com',
             path: '/path3',
-            os: [PlatformOS.android, PlatformOS.ios],
+            os: {PlatformOS.android, PlatformOS.ios},
           ),
         ];
 

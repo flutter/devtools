@@ -160,7 +160,7 @@ class FlutterTimelineEvent extends TreeNode<FlutterTimelineEvent> {
   FlutterTimelineEvent deepCopy() {
     final copy = shallowCopy();
     copy.parent = parent;
-    for (FlutterTimelineEvent child in children) {
+    for (final child in children) {
       copy.addChild(child.deepCopy());
     }
     return copy;
@@ -177,7 +177,7 @@ class FlutterTimelineEvent extends TreeNode<FlutterTimelineEvent> {
     final begin = trackEvents.first;
     final end = trackEvents.safeLast;
     buf.writeln(begin.toString());
-    for (FlutterTimelineEvent child in children) {
+    for (final child in children) {
       child.writeTrackEventsToBuffer(buf);
     }
     if (end != null) {
@@ -187,7 +187,7 @@ class FlutterTimelineEvent extends TreeNode<FlutterTimelineEvent> {
 
   void format(StringBuffer buf, String indent) {
     buf.writeln('$indent$name $time');
-    for (FlutterTimelineEvent child in children) {
+    for (final child in children) {
       child.format(buf, '  $indent');
     }
   }

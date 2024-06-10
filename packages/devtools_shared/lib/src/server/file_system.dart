@@ -7,7 +7,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
-import 'usage.dart';
+import 'devtools_store.dart';
 
 // ignore: avoid_classes_with_only_static_members, requires refactor.
 class LocalFileSystem {
@@ -82,3 +82,68 @@ class LocalFileSystem {
     return flutterStore.existsSync();
   }
 }
+
+class IOPersistentProperties {
+  IOPersistentProperties(
+    this.name, {
+    String? documentDirPath,
+  }) {
+    final String fileName = name.replaceAll(' ', '_');
+    documentDirPath ??= LocalFileSystem._userHomeDir();
+    _file = File(path.join(documentDirPath, fileName));
+    if (!_file.existsSync()) {
+      _file.createSync(recursive: true);
+    }
+    syncSettings();
+  }
+
+  IOPersistentProperties.fromFile(File file) : name = path.basename(file.path) {
+    _file = file;
+    if (!_file.existsSync()) {
+      _file.createSync(recursive: true);
+    }
+    syncSettings();
+  }
+
+  final String name;
+
+  late File _file;
+
+  late Map<String, Object?> _map;
+
+  Object? operator [](String key) => _map[key];
+
+  void operator []=(String key, Object? value) {
+    if (value == null && !_map.containsKey(key)) return;
+    if (_map[key] == value) return;
+
+    if (value == null) {
+      _map.remove(key);
+    } else {
+      _map[key] = value;
+    }
+
+    try {
+      _file.writeAsStringSync('${_jsonEncoder.convert(_map)}\n');
+    } catch (_) {}
+  }
+
+  /// Re-read settings from the backing store.
+  ///
+  /// May be a no-op on some platforms.
+  void syncSettings() {
+    try {
+      String contents = _file.readAsStringSync();
+      if (contents.isEmpty) contents = '{}';
+      _map = (jsonDecode(contents) as Map).cast<String, Object>();
+    } catch (_) {
+      _map = {};
+    }
+  }
+
+  void remove(String propertyName) {
+    _map.remove(propertyName);
+  }
+}
+
+const JsonEncoder _jsonEncoder = JsonEncoder.withIndent('  ');

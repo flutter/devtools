@@ -45,7 +45,7 @@ class HeapSample with Serializable {
         memoryEventInfo = memoryEventInfo ?? EventSample.empty(),
         rasterCache = rasterCache ?? RasterCache.empty();
 
-  factory HeapSample.fromJson(Map<String, dynamic> json) {
+  factory HeapSample.fromJson(Map<String, Object?> json) {
     return HeapSample(
       json[Json.timestamp.key] as int,
       json[Json.rss.key] as int,
@@ -71,7 +71,7 @@ class HeapSample with Serializable {
   }
 
   @override
-  Map<String, dynamic> toJson() => <String, dynamic>{
+  Map<String, dynamic> toJson() => <String, Object?>{
         Json.timestamp.key: timestamp,
         Json.rss.key: rss,
         Json.capacity.key: capacity,

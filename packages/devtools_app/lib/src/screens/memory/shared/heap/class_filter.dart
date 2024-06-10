@@ -194,7 +194,7 @@ class ClassFilter with Serializable {
 
     if (filterType == ClassFilterType.showAll) return true;
 
-    for (var filter in filters) {
+    for (final filter in filters) {
       if (_isMatch(className, filter, rootPackage)) {
         return filterType == ClassFilterType.only;
       }

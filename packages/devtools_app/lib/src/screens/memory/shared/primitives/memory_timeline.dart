@@ -104,9 +104,7 @@ class MemoryTimeline with Serializable {
 
   /// Grab and remove the event to be posted.
   EventSample pullEventSample() {
-    final result = _eventSamples.first;
-    _eventSamples.removeAt(0);
-    return result;
+    return _eventSamples.removeAt(0);
   }
 
   void addSnapshotEvent({bool auto = false}) {

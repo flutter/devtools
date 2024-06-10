@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 @TestOn('chrome')
+library;
 
 import 'package:ansi_up/ansi_up.dart';
 import 'package:ansicolor/ansicolor.dart';
@@ -72,7 +73,7 @@ void main() {
       }
 
       final output = StringBuffer();
-      for (var entry in decodeAnsiColorEscapeCodes(sb.toString(), AnsiUp())) {
+      for (final entry in decodeAnsiColorEscapeCodes(sb.toString(), AnsiUp())) {
         if (entry.style.isNotEmpty) {
           output.write("<span style='${entry.style}'>${entry.text}</span>");
         } else {

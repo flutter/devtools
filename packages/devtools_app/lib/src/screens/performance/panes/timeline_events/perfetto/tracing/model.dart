@@ -97,7 +97,7 @@ class PerfettoTrackEvent extends _PerfettoTracePacket
         }
         return null;
       }),
-    ].whereNotNull(),
+    ].nonNulls,
   );
 
   List<String> get categories => event.categories;

@@ -2,14 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-import 'dart:io';
-
-import 'package:path/path.dart' as path;
-
 import 'file_system.dart';
 
-// Access the DevTools on disk store (~/.flutter-devtools/.devtools).
+/// Provides access to the local DevTools store (~/.flutter-devtools/.devtools).
 class DevToolsUsage {
   DevToolsUsage() {
     LocalFileSystem.maybeMoveLegacyDevToolsStore();
@@ -157,85 +152,4 @@ class DevToolsUsage {
 extension type _ActiveSurveyJson(Map<String, Object?> json) {
   bool get surveyActionTaken => json[DevToolsUsage._surveyActionTaken] as bool;
   int? get surveyShownCount => json[DevToolsUsage._surveyShownCount] as int?;
-}
-
-abstract class PersistentProperties {
-  PersistentProperties(this.name);
-
-  final String name;
-
-  // ignore: avoid-dynamic, dynamic by design.
-  dynamic operator [](String key);
-
-  // ignore: avoid-dynamic, dynamic by design.
-  void operator []=(String key, dynamic value);
-
-  /// Re-read settings from the backing store.
-  ///
-  /// May be a no-op on some platforms.
-  void syncSettings();
-}
-
-const JsonEncoder _jsonEncoder = JsonEncoder.withIndent('  ');
-
-class IOPersistentProperties extends PersistentProperties {
-  IOPersistentProperties(
-    String name, {
-    String? documentDirPath,
-  }) : super(name) {
-    final String fileName = name.replaceAll(' ', '_');
-    documentDirPath ??= LocalFileSystem.devToolsDir();
-    _file = File(path.join(documentDirPath, fileName));
-    if (!_file.existsSync()) {
-      _file.createSync(recursive: true);
-    }
-    syncSettings();
-  }
-
-  IOPersistentProperties.fromFile(File file) : super(path.basename(file.path)) {
-    _file = file;
-    if (!_file.existsSync()) {
-      _file.createSync(recursive: true);
-    }
-    syncSettings();
-  }
-
-  late File _file;
-
-  late Map<String, Object?> _map;
-
-  @override
-  // ignore: avoid-dynamic, necessary here.
-  dynamic operator [](String key) => _map[key];
-
-  @override
-  void operator []=(String key, Object? value) {
-    if (value == null && !_map.containsKey(key)) return;
-    if (_map[key] == value) return;
-
-    if (value == null) {
-      _map.remove(key);
-    } else {
-      _map[key] = value;
-    }
-
-    try {
-      _file.writeAsStringSync('${_jsonEncoder.convert(_map)}\n');
-    } catch (_) {}
-  }
-
-  @override
-  void syncSettings() {
-    try {
-      String contents = _file.readAsStringSync();
-      if (contents.isEmpty) contents = '{}';
-      _map = (jsonDecode(contents) as Map).cast<String, Object>();
-    } catch (_) {
-      _map = {};
-    }
-  }
-
-  void remove(String propertyName) {
-    _map.remove(propertyName);
-  }
 }

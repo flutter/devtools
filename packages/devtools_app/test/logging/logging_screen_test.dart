@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
+library;
+
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/logging/_log_details.dart';
 import 'package:devtools_app/src/screens/logging/_logs_table.dart';

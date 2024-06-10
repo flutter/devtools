@@ -2,32 +2,33 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../service/service_extension_widgets.dart';
 import '../../../../service/service_extensions.dart' as extensions;
-import '../../../../shared/common_widgets.dart';
 import '../../../../shared/feature_flags.dart';
 import '../../../../shared/globals.dart';
+import '../../../../shared/primitives/utils.dart';
 import '../controls/enhance_tracing/enhance_tracing_controller.dart';
+import '../flutter_frames/flutter_frame_model.dart';
 import '../rebuild_stats/rebuild_stats.dart';
 import '../rebuild_stats/rebuild_stats_model.dart';
-import 'frame_analysis_model.dart';
 import 'frame_hints.dart';
 import 'frame_time_visualizer.dart';
 
 class FlutterFrameAnalysisView extends StatelessWidget {
   const FlutterFrameAnalysisView({
     super.key,
-    required this.frameAnalysis,
+    required this.frame,
     required this.enhanceTracingController,
     required this.rebuildCountModel,
     required this.displayRefreshRateNotifier,
   });
 
-  final FrameAnalysis? frameAnalysis;
+  final FlutterFrame frame;
 
   final EnhanceTracingController enhanceTracingController;
 
@@ -37,16 +38,8 @@ class FlutterFrameAnalysisView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final frameAnalysis = this.frameAnalysis;
-    if (frameAnalysis == null) {
-      return const CenteredMessage(
-        'No analysis data available for this frame. This means that the '
-        'timeline events\nfor this frame occurred too long ago and DevTools '
-        'could not access them.\n\nTo avoid this, open the DevTools Performance '
-        'page earlier.',
-      );
-    }
-    final rebuilds = rebuildCountModel.rebuildsForFrame(frameAnalysis.frame.id);
+    final frameAnalysis = frame.frameAnalysis;
+    final rebuilds = rebuildCountModel.rebuildsForFrame(frame.id);
     final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.all(defaultSpacing),
@@ -61,57 +54,52 @@ class FlutterFrameAnalysisView extends StatelessWidget {
                   style: theme.regularTextStyle,
                 ),
                 TextSpan(
-                  text: '${frameAnalysis.frame.id}',
+                  text: '${frame.id}',
                   style: theme.fixedFontStyle
                       .copyWith(color: theme.colorScheme.primary),
                 ),
               ],
             ),
           ),
-          const PaddedDivider(
-            padding: EdgeInsets.only(
-              bottom: denseSpacing,
+          const PaddedDivider.noPadding(),
+          if (frameAnalysis == null) ...[
+            const Text(
+              'No timeline event analysis data available for this frame. This '
+              'means that the timeline events for this frame occurred too long '
+              'ago and DevTools could not access them. To avoid this, open the '
+              'DevTools Performance page earlier.',
             ),
-          ),
-          // TODO(jacobr): we might have so many frame hints that this content
-          // needs to scroll. Supporting that would be hard as the RebuildTable
-          // also needs to scroll and the devtools table functionality does not
-          // support the shrinkWrap property and has features that would make
-          //it difficult to handle robustly.
-          ValueListenableBuilder(
-            valueListenable: displayRefreshRateNotifier,
-            builder: (context, refreshRate, _) {
-              return FrameHints(
-                frameAnalysis: frameAnalysis,
-                enhanceTracingController: enhanceTracingController,
-                displayRefreshRate: refreshRate,
-              );
-            },
-          ),
-          const PaddedDivider(
-            padding: EdgeInsets.only(
-              top: denseSpacing,
-              bottom: denseSpacing,
+          ] else ...[
+            // TODO(jacobr): we might have so many frame hints that this content
+            // needs to scroll. Supporting that would be hard as the RebuildTable
+            // also needs to scroll and the devtools table functionality does not
+            // support the shrinkWrap property and has features that would make
+            //it difficult to handle robustly.
+            ValueListenableBuilder(
+              valueListenable: displayRefreshRateNotifier,
+              builder: (context, refreshRate, _) {
+                return FrameHints(
+                  frameAnalysis: frameAnalysis,
+                  enhanceTracingController: enhanceTracingController,
+                  displayRefreshRate: refreshRate,
+                );
+              },
             ),
-          ),
-          FrameTimeVisualizer(frameAnalysis: frameAnalysis),
-          const PaddedDivider(
-            padding: EdgeInsets.only(
-              top: denseSpacing,
-              bottom: denseSpacing,
-            ),
-          ),
 
+            const PaddedDivider.noPadding(),
+            FrameTimeVisualizer(frameAnalysis: frameAnalysis),
+          ],
           if (FeatureFlags.widgetRebuildStats) ...[
-            if (rebuilds == null || rebuilds.isEmpty)
-              ValueListenableBuilder<bool>(
+            if (rebuilds.isNullOrEmpty) ...[
+              const PaddedDivider.noPadding(),
+              ValueListenableBuilder<ServiceExtensionState>(
                 valueListenable: serviceConnection
                     .serviceManager.serviceExtensionManager
-                    .hasServiceExtension(
-                  extensions.trackRebuildWidgets.extension,
+                    .getServiceExtensionState(
+                  extensions.trackWidgetBuildCounts.extension,
                 ),
-                builder: (context, hasExtension, _) {
-                  if (hasExtension) {
+                builder: (context, extensionState, _) {
+                  if (!extensionState.enabled) {
                     return Row(
                       children: [
                         const Text(
@@ -119,7 +107,7 @@ class FlutterFrameAnalysisView extends StatelessWidget {
                         ),
                         Flexible(
                           child: ServiceExtensionCheckbox(
-                            serviceExtension: extensions.trackRebuildWidgets,
+                            serviceExtension: extensions.trackWidgetBuildCounts,
                             showDescription: false,
                           ),
                         ),
@@ -129,21 +117,25 @@ class FlutterFrameAnalysisView extends StatelessWidget {
                   return const SizedBox();
                 },
               ),
+            ],
             if (rebuilds == null)
               const Text(
                 'Rebuild information not available for this frame.',
               )
             else if (rebuilds.isEmpty)
               const Text(
-                'No widget rebuilds occurred for widgets that were directly created in your project.',
+                'No widget rebuilds occurred for widgets that were directly '
+                'created in your project.',
               )
-            else
+            else ...[
+              const SizedBox(height: defaultSpacing),
               Expanded(
                 child: RebuildTable(
                   metricNames: const ['Rebuild Count'],
                   metrics: combineStats([rebuilds]),
                 ),
               ),
+            ],
           ],
         ],
       ),

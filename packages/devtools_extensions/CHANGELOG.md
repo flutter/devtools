@@ -1,3 +1,7 @@
+## 0.2.0-dev.1
+* Add testimonies from extension authors to the `README.md`.
+* Add an integration test to the example app, `app_that_uses_foo`.
+
 ## 0.2.0-dev.0
 * Deprecate the `DevToolsExtension.requiresRunningApplication` field.
 * Update `extension_config_spec.md` to include an optional field `requiresConnection`.

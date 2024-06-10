@@ -393,12 +393,12 @@ class LoggingControllerV2 extends DisposableController
       return node;
     }
     RemoteDiagnosticsNode? summary;
-    for (var property in node.inlineProperties) {
+    for (final property in node.inlineProperties) {
       summary = _findFirstSummary(property);
       if (summary != null) return summary;
     }
 
-    for (RemoteDiagnosticsNode child in node.childrenNow) {
+    for (final child in node.childrenNow) {
       summary = _findFirstSummary(child);
       if (summary != null) return summary;
     }

@@ -139,8 +139,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   final _routes = ListQueue<DevToolsRouteConfiguration>();
 
   @override
-  DevToolsRouteConfiguration? get currentConfiguration =>
-      _routes.isEmpty ? null : _routes.last;
+  DevToolsRouteConfiguration? get currentConfiguration => _routes.lastOrNull;
 
   @override
   Widget build(BuildContext context) {
@@ -158,6 +157,16 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
         notifyListeners();
       },
     );
+  }
+
+  /// Refreshes the pages for the Navigator created in [build].
+  ///
+  /// Call this when the DevTools pages need to be regenerated from [_getPage].
+  /// This may happen when some condition changes that would cause a DevTools
+  /// page to be added or removed (e.g. a DevTools extension became available
+  /// or was disabled).
+  void refreshPages() {
+    notifyListeners();
   }
 
   /// Navigates to a new page, optionally updating arguments and state.

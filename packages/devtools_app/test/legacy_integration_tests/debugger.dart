@@ -72,7 +72,7 @@ void debuggingTests() {
     await delay();
 
     // set and verify breakpoints
-    for (int line in breakpointLines) {
+    for (final line in breakpointLines) {
       await debuggingManager.addBreakpoint(appFixture.appScriptPath, line);
     }
 
@@ -161,7 +161,7 @@ void debuggingTests() {
     );
 
     // test stepping
-    for (int stepLine in steppingLines) {
+    for (final stepLine in steppingLines) {
       // step
       await debuggingManager.step();
 

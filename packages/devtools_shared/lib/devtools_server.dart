@@ -2,6 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+export 'src/server/devtools_store.dart';
 export 'src/server/file_system.dart';
 export 'src/server/server_api.dart';
-export 'src/server/usage.dart';

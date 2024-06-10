@@ -21,7 +21,7 @@ class ObjectSetDiff {
 
     final allCodes = mapBefore.keys.toSet().union(mapAfter.keys.toSet());
 
-    for (var code in allCodes) {
+    for (final code in allCodes) {
       final before = mapBefore[code];
       final after = mapAfter[code];
 
@@ -88,7 +88,7 @@ class ObjectSetDiff {
   ) {
     if (ids == null || data == null) return const {};
     return {
-      for (var id in ids.indexes) data.graph.objects[id].identityHashCode: id,
+      for (final id in ids.indexes) data.graph.objects[id].identityHashCode: id,
     };
   }
 

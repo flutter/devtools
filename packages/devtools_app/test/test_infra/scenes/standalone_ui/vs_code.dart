@@ -4,9 +4,11 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/standalone_ui/vs_code/flutter_panel.dart';
+import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:stager/stager.dart';
 
@@ -59,6 +61,11 @@ class VsCodeScene extends Scene {
   @override
   Future<void> setUp() async {
     setStagerMode();
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
+    setGlobal(DTDManager, MockDTDManager());
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(PreferencesController, PreferencesController());
   }

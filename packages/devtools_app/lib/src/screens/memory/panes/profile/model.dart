@@ -94,11 +94,10 @@ class AdaptedProfile with Serializable {
   }
 
   /// A record per class plus one total record, with applied filter.
-  late final List<ProfileRecord> records = _records ??= [
+  late final List<ProfileRecord> records = [
     _total,
     ..._itemsFiltered,
   ];
-  List<ProfileRecord>? _records;
 
   /// Record for totals.
   late final ProfileRecord _total;

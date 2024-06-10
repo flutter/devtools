@@ -16,18 +16,19 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../test_infra/matchers/matchers.dart';
 import '../../test_infra/test_data/performance/sample_performance_data.dart';
 
+// TODO(https://github.com/flutter/devtools/issues/4564): add tests here for
+// widget rebuild counts in the Frame Analysis view.
+
 void main() {
   const windowSize = Size(1500.0, 500.0);
 
   group('FlutterFrameAnalysisView', () {
     late FlutterFrame frame;
-    late FrameAnalysis frameAnalysis;
     late MockEnhanceTracingController mockEnhanceTracingController;
     late RebuildCountModel rebuildCountModel;
 
     setUp(() {
       frame = FlutterFrame4.frameWithExtras;
-      frameAnalysis = FrameAnalysis(frame);
       mockEnhanceTracingController = MockEnhanceTracingController();
       rebuildCountModel = RebuildCountModel();
       setGlobal(IdeTheme, IdeTheme());
@@ -45,12 +46,12 @@ void main() {
 
     Future<void> pumpAnalysisView(
       WidgetTester tester,
-      FrameAnalysis? analysis,
+      FlutterFrame frame,
     ) async {
       await tester.pumpWidget(
         wrapSimple(
           FlutterFrameAnalysisView(
-            frameAnalysis: analysis,
+            frame: frame,
             enhanceTracingController: mockEnhanceTracingController,
             rebuildCountModel: rebuildCountModel,
             displayRefreshRateNotifier:
@@ -65,10 +66,15 @@ void main() {
       'builds with null data',
       windowSize,
       (WidgetTester tester) async {
-        await pumpAnalysisView(tester, null);
+        await pumpAnalysisView(
+          tester,
+          FlutterFrame6.frameWithoutTimelineEvents,
+        );
 
         expect(
-          find.textContaining('No analysis data available for this frame.'),
+          find.textContaining(
+            'No timeline event analysis data available for this frame.',
+          ),
           findsOneWidget,
         );
         expect(find.byType(FrameHints), findsNothing);
@@ -80,10 +86,12 @@ void main() {
       'builds with non-null data',
       windowSize,
       (WidgetTester tester) async {
-        await pumpAnalysisView(tester, frameAnalysis);
+        await pumpAnalysisView(tester, frame);
 
         expect(
-          find.textContaining('No analysis data available for this frame.'),
+          find.textContaining(
+            'No timeline event  analysis data available for this frame.',
+          ),
           findsNothing,
         );
         expect(find.byType(FrameHints), findsOneWidget);
@@ -106,7 +114,7 @@ void main() {
         'builds successfully',
         windowSize,
         (WidgetTester tester) async {
-          await pumpVisualizer(tester, frameAnalysis);
+          await pumpVisualizer(tester, frame.frameAnalysis!);
 
           expect(find.text('UI phases:'), findsOneWidget);
           expect(find.textContaining('Build - '), findsOneWidget);
@@ -141,7 +149,7 @@ void main() {
         'builds with icons only for narrow screen',
         const Size(200.0, 500.0),
         (WidgetTester tester) async {
-          await pumpVisualizer(tester, frameAnalysis);
+          await pumpVisualizer(tester, frame.frameAnalysis!);
 
           expect(find.text('UI phases:'), findsOneWidget);
           expect(find.textContaining('Build - '), findsNothing);
@@ -174,7 +182,7 @@ void main() {
         windowSize,
         (WidgetTester tester) async {
           frame = testFrameWithShaderJank;
-          frameAnalysis = FrameAnalysis(frame);
+          final frameAnalysis = FrameAnalysis(frame);
           await pumpVisualizer(tester, frameAnalysis);
 
           expect(find.text('UI phases:'), findsOneWidget);

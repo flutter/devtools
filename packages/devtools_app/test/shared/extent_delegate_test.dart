@@ -5,6 +5,8 @@
 // ignore_for_file: avoid_print
 
 @TestOn('vm')
+library;
+
 import 'package:devtools_app/src/shared/primitives/extent_delegate_list.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';

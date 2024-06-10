@@ -68,7 +68,7 @@ void main() {
       }) {
         expect(stackFrame.exclusiveSampleCount, targetExcl);
         expect(stackFrame.inclusiveSampleCount, targetIncl);
-        for (CpuStackFrame child in stackFrame.children) {
+        for (final child in stackFrame.children) {
           verifySampleCount(
             child,
             targetExcl: targetExcl,
@@ -105,7 +105,7 @@ void main() {
       bottomUpRoots.forEach(transformer.cascadeSampleCounts);
 
       final buf = StringBuffer();
-      for (CpuStackFrame stackFrame in bottomUpRoots) {
+      for (final stackFrame in bottomUpRoots) {
         buf.writeln(stackFrame.profileAsString());
       }
       expect(buf.toString(), bottomUpPreMergeGolden);
@@ -116,7 +116,7 @@ void main() {
       expect(bottomUpRoots.length, 4);
 
       buf.clear();
-      for (CpuStackFrame stackFrame in bottomUpRoots) {
+      for (final stackFrame in bottomUpRoots) {
         buf.writeln(stackFrame.profileAsString());
       }
       expect(buf.toString(), bottomUpGolden);
@@ -137,7 +137,7 @@ void main() {
       bottomUpRoots.forEach(transformer.cascadeSampleCounts);
 
       final buf = StringBuffer();
-      for (CpuStackFrame stackFrame in bottomUpRoots) {
+      for (final stackFrame in bottomUpRoots) {
         buf.writeln(stackFrame.profileAsString());
       }
       expect(buf.toString(), bottomUpPreMergeGolden);
@@ -148,7 +148,7 @@ void main() {
       expect(bottomUpRoots.length, 4);
 
       buf.clear();
-      for (CpuStackFrame stackFrame in bottomUpRoots) {
+      for (final stackFrame in bottomUpRoots) {
         buf.writeln(stackFrame.profileAsString());
       }
       expect(buf.toString(), bottomUpGolden);
@@ -174,7 +174,7 @@ void main() {
       expect(bottomUpRoots.length, 4);
 
       final buf = StringBuffer();
-      for (CpuStackFrame stackFrame in bottomUpRoots) {
+      for (final stackFrame in bottomUpRoots) {
         buf.writeln(stackFrame.profileAsString());
       }
       expect(buf.toString(), bottomUpGolden);
@@ -204,7 +204,7 @@ void main() {
       expect(bottomUpRoots.length, equals(1));
 
       final buf = StringBuffer();
-      for (CpuStackFrame stackFrame in bottomUpRoots) {
+      for (final stackFrame in bottomUpRoots) {
         buf.writeln(stackFrame.profileAsString());
       }
       expect(buf.toString(), tagRootedBottomUpGolden);

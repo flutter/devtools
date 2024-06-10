@@ -8,6 +8,7 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/common_widgets.dart';
+import '../../shared/feature_flags.dart';
 import '../../shared/ui/colors.dart';
 import '../../shared/utils.dart';
 import 'deep_link_list_view.dart';
@@ -61,12 +62,15 @@ class ValidationDetailView extends StatelessWidget {
                 if (viewType == TableViewType.pathView ||
                     viewType == TableViewType.singleUrlView)
                   _PathCheckTable(controller: controller),
+                if (FeatureFlags.deepLinkIosCheck &&
+                    viewType == TableViewType.domainView)
+                  _CrossCheckTable(controller: controller),
                 const SizedBox(height: extraLargeSpacing),
                 Align(
                   alignment: Alignment.bottomRight,
                   child: FilledButton(
                     onPressed: () async {
-                      await controller.loadAndroidAppLinksAndValidate();
+                      await controller.loadLinksAndValidate();
                       controller.autoSelectLink(viewType);
                     },
                     child: const Text('Recheck all'),
@@ -149,10 +153,13 @@ class _DomainCheckTable extends StatelessWidget {
             const SizedBox(height: denseSpacing),
             const _CheckTableHeader(),
             _CheckExpansionTile(
+              os: PlatformOS.android,
               initiallyExpanded: !fingerprintExists,
               checkName: 'Digital assets link file',
-              status:
-                  _CheckStatusText(hasError: linkData.domainErrors.isNotEmpty),
+              status: _CheckStatusText(
+                hasError:
+                    linkData.domainErrors.any((e) => e is AndroidDomainError),
+              ),
               children: <Widget>[
                 _Fingerprint(controller: controller),
                 // The following checks are only displayed if a fingerprint exists.
@@ -162,6 +169,16 @@ class _DomainCheckTable extends StatelessWidget {
                 ],
               ],
             ),
+            if (FeatureFlags.deepLinkIosCheck)
+              const _CheckExpansionTile(
+                os: PlatformOS.ios,
+                checkName: 'Apple-App-Site-Association file',
+                status: _CheckStatusText(
+                  //TODO (hangyu jin): add iOS domain errors when api is ready.
+                  hasError: false,
+                ),
+                children: <Widget>[],
+              ),
             const SizedBox(height: intermediateSpacing),
           ],
         );
@@ -222,7 +239,7 @@ class _HostingIssues extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final errors = controller.selectedLink.value!.domainErrors
-        .where((error) => domainHostingErrors.contains(error))
+        .where((error) => domainAndroidHostingErrors.contains(error))
         .toList();
     return ExpansionTile(
       controlAffinity: ListTileControlAffinity.leading,
@@ -547,6 +564,60 @@ class _DomainAssociatedLinksPanel extends StatelessWidget {
   }
 }
 
+class _CrossCheckTable extends StatelessWidget {
+  const _CrossCheckTable({required this.controller});
+
+  final DeepLinksController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final linkData = controller.selectedLink.value!;
+    // TODO (hangyujin): Update this bool to actually check if aasa file exists.
+    const hasIosAasaFile = true;
+    final hasAndroidAssetLinksFile =
+        !linkData.domainErrors.contains(AndroidDomainError.existence);
+
+    final missingIos = hasIosAasaFile && !linkData.os.contains(PlatformOS.ios);
+    final missingAndroid =
+        hasAndroidAssetLinksFile && !linkData.os.contains(PlatformOS.android);
+
+    final theme = Theme.of(context);
+    final domainMissing = Text(
+      'Domain missing',
+      style: theme.regularTextStyleWithColor(
+        theme.colorScheme.onWarningContainerLink,
+      ),
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: intermediateSpacing),
+        Text(
+          'App check',
+          style: theme.textTheme.titleSmall,
+        ),
+        const SizedBox(height: intermediateSpacing),
+        const _CheckTableHeader(),
+        const Divider(height: 1.0),
+        if (missingAndroid)
+          _CheckExpansionTile(
+            os: PlatformOS.android,
+            checkName: 'Manifest file',
+            status: domainMissing,
+            children: const <Widget>[],
+          ),
+        if (missingIos)
+          _CheckExpansionTile(
+            os: PlatformOS.ios,
+            checkName: 'Settings',
+            status: domainMissing,
+            children: const <Widget>[],
+          ),
+      ],
+    );
+  }
+}
+
 class _PathCheckTable extends StatelessWidget {
   const _PathCheckTable({required this.controller});
 
@@ -587,6 +658,7 @@ class _ManifestFileCheck extends StatelessWidget {
         .toList();
 
     return _CheckExpansionTile(
+      os: PlatformOS.android,
       checkName: 'Manifest file',
       status: _CheckStatusText(hasError: errors.isNotEmpty),
       children: <Widget>[
@@ -625,6 +697,7 @@ class _PathFormatCheck extends StatelessWidget {
     final hasError = linkData.pathErrors.contains(PathError.pathFormat);
 
     return _CheckExpansionTile(
+      os: PlatformOS.android,
       checkName: 'URL format',
       status: _CheckStatusText(hasError: hasError),
       children: <Widget>[
@@ -665,12 +738,14 @@ class _CheckTableHeader extends StatelessWidget {
 
 class _CheckExpansionTile extends StatelessWidget {
   const _CheckExpansionTile({
+    required this.os,
     required this.checkName,
     required this.status,
     required this.children,
     this.initiallyExpanded = false,
   });
 
+  final PlatformOS os;
   final String checkName;
   final Widget status;
   final bool initiallyExpanded;
@@ -682,7 +757,7 @@ class _CheckExpansionTile extends StatelessWidget {
     final title = Row(
       children: [
         const SizedBox(width: defaultSpacing),
-        const Expanded(child: Text('Android')),
+        Expanded(child: Text(os == PlatformOS.ios ? 'iOS' : 'Android')),
         Expanded(child: Text(checkName)),
         Expanded(child: status),
       ],

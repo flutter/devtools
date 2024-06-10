@@ -76,8 +76,8 @@ Future<void> resetReleaseNotes({
   if (semVerMatch == null) {
     throw 'Version format is unexpected';
   }
-  var major = int.parse(semVerMatch.namedGroup('major')!, radix: 10);
-  var minor = int.parse(semVerMatch.namedGroup('minor')!, radix: 10);
+  final major = int.parse(semVerMatch.namedGroup('major')!, radix: 10);
+  final minor = int.parse(semVerMatch.namedGroup('minor')!, radix: 10);
   final normalizedVersionNumber = '$major.$minor.0';
 
   final templateFile =

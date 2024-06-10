@@ -8,10 +8,10 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../devtools.dart' as devtools;
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
+import '../shared/utils.dart';
 import 'release_notes/release_notes.dart';
 
 class DevToolsAboutDialog extends StatelessWidget {
@@ -30,7 +30,7 @@ class DevToolsAboutDialog extends StatelessWidget {
         children: [
           Wrap(
             children: [
-              const SelectableText('DevTools version ${devtools.version}'),
+              SelectableText('DevTools version $devToolsVersion'),
               const Text(' - '),
               InkWell(
                 child: Text(

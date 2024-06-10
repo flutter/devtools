@@ -234,7 +234,7 @@ class _FramePhaseBlock extends StatelessWidget {
     required this.width,
   });
 
-  static const _height = 30.0;
+  static const _height = 24.0;
 
   static const minBlockWidth = defaultIconSizeBeforeScaling + densePadding * 8;
 

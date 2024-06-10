@@ -22,8 +22,9 @@ import '../extensions/extension_manager.dart';
 import '../service/service.dart';
 import '../service_utils.dart';
 import '../utils/file_utils.dart';
+import 'devtools_store.dart';
 import 'file_system.dart';
-import 'usage.dart';
+import 'flutter_store.dart';
 
 // TODO(kenz): consider using Dart augmentation libraries instead of part files
 // if there is a clear benefit.
@@ -66,27 +67,38 @@ class ServerApi {
           queryParams,
           dtd,
         );
+
       // ----- Flutter Tool GA store. -----
       case apiGetFlutterGAEnabled:
         // Is Analytics collection enabled?
-        return _encodeResponse('', api: api);
+        return _encodeResponse(
+          LocalFileSystem.flutterStoreExists()
+              ? _flutterStore.gaEnabled
+              : false,
+          api: api,
+        );
       case apiGetFlutterGAClientId:
         // Flutter Tool GA clientId - ONLY get Flutter's clientId if enabled is
         // true.
-        return _encodeResponse('', api: api);
+        return _encodeResponse(
+          LocalFileSystem.flutterStoreExists()
+              ? _flutterStore.flutterClientId
+              : '',
+          api: api,
+        );
 
       // ----- DevTools GA store. -----
 
       case apiResetDevTools:
-        _devToolsUsage.reset();
+        _devToolsStore.reset();
         return _encodeResponse(true, api: api);
       case apiGetDevToolsFirstRun:
         // Has DevTools been run first time? To bring up analytics dialog.
-        final isFirstRun = _devToolsUsage.isFirstRun;
+        final isFirstRun = _devToolsStore.isFirstRun;
         return _encodeResponse(isFirstRun, api: api);
       case apiGetDevToolsEnabled:
         // Is DevTools Analytics collection enabled?
-        final isEnabled = _devToolsUsage.analyticsEnabled;
+        final isEnabled = _devToolsStore.analyticsEnabled;
         return _encodeResponse(isEnabled, api: api);
       case apiSetDevToolsEnabled:
         // Enable or disable DevTools analytics collection.
@@ -94,9 +106,9 @@ class ServerApi {
           final analyticsEnabled =
               json.decode(queryParams[devToolsEnabledPropertyName]!);
 
-          _devToolsUsage.analyticsEnabled = analyticsEnabled;
+          _devToolsStore.analyticsEnabled = analyticsEnabled;
         }
-        return _encodeResponse(_devToolsUsage.analyticsEnabled, api: api);
+        return _encodeResponse(_devToolsStore.analyticsEnabled, api: api);
 
       // ----- DevTools survey store. -----
 
@@ -112,26 +124,26 @@ class ServerApi {
           final String theSurveyName = queryParams[activeSurveyName]!;
 
           // Set the current activeSurvey.
-          _devToolsUsage.activeSurvey = theSurveyName;
+          _devToolsStore.activeSurvey = theSurveyName;
           result = true;
         }
         return _encodeResponse(result, api: api);
       case apiGetSurveyActionTaken:
         // Request setActiveSurvey has not been requested.
-        if (_devToolsUsage.activeSurvey == null) {
+        if (_devToolsStore.activeSurvey == null) {
           return api.badRequest(
             '$errorNoActiveSurvey '
             '- $apiGetSurveyActionTaken',
           );
         }
         // SurveyActionTaken has the survey been acted upon (taken or dismissed)
-        return _encodeResponse(_devToolsUsage.surveyActionTaken, api: api);
+        return _encodeResponse(_devToolsStore.surveyActionTaken, api: api);
       // TODO(terry): remove the query param logic for this request.
       // setSurveyActionTaken should only be called with the value of true, so
       // we can remove the extra complexity.
       case apiSetSurveyActionTaken:
         // Request setActiveSurvey has not been requested.
-        if (_devToolsUsage.activeSurvey == null) {
+        if (_devToolsStore.activeSurvey == null) {
           return api.badRequest(
             '$errorNoActiveSurvey '
             '- $apiSetSurveyActionTaken',
@@ -140,46 +152,46 @@ class ServerApi {
         // Set the SurveyActionTaken.
         // Has the survey been taken or dismissed..
         if (queryParams.containsKey(surveyActionTakenPropertyName)) {
-          _devToolsUsage.surveyActionTaken =
+          _devToolsStore.surveyActionTaken =
               json.decode(queryParams[surveyActionTakenPropertyName]!);
         }
-        return _encodeResponse(_devToolsUsage.surveyActionTaken, api: api);
+        return _encodeResponse(_devToolsStore.surveyActionTaken, api: api);
       case apiGetSurveyShownCount:
         // Request setActiveSurvey has not been requested.
-        if (_devToolsUsage.activeSurvey == null) {
+        if (_devToolsStore.activeSurvey == null) {
           return api.badRequest(
             '$errorNoActiveSurvey '
             '- $apiGetSurveyShownCount',
           );
         }
         // SurveyShownCount how many times have we asked to take survey.
-        return _encodeResponse(_devToolsUsage.surveyShownCount, api: api);
+        return _encodeResponse(_devToolsStore.surveyShownCount, api: api);
       case apiIncrementSurveyShownCount:
         // Request setActiveSurvey has not been requested.
-        if (_devToolsUsage.activeSurvey == null) {
+        if (_devToolsStore.activeSurvey == null) {
           return api.badRequest(
             '$errorNoActiveSurvey '
             '- $apiIncrementSurveyShownCount',
           );
         }
         // Increment the SurveyShownCount, we've asked about the survey.
-        _devToolsUsage.incrementSurveyShownCount();
-        return _encodeResponse(_devToolsUsage.surveyShownCount, api: api);
+        _devToolsStore.incrementSurveyShownCount();
+        return _encodeResponse(_devToolsStore.surveyShownCount, api: api);
 
       // ----- Release notes api. -----
 
       case apiGetLastReleaseNotesVersion:
         return _encodeResponse(
-          _devToolsUsage.lastReleaseNotesVersion,
+          _devToolsStore.lastReleaseNotesVersion,
           api: api,
         );
       case apiSetLastReleaseNotesVersion:
         if (queryParams.containsKey(lastReleaseNotesVersionPropertyName)) {
-          _devToolsUsage.lastReleaseNotesVersion =
+          _devToolsStore.lastReleaseNotesVersion =
               queryParams[lastReleaseNotesVersionPropertyName]!;
         }
         return _encodeResponse(
-          _devToolsUsage.lastReleaseNotesVersion,
+          _devToolsStore.lastReleaseNotesVersion,
           api: api,
         );
 
@@ -298,10 +310,13 @@ class ServerApi {
         : null;
   }
 
-  // Accessing DevTools usage file e.g., ~/.flutter-devtools/.devtools
-  static final _devToolsUsage = DevToolsUsage();
+  /// Accessing DevTools store file e.g., ~/.flutter-devtools/.devtools
+  static final _devToolsStore = DevToolsUsage();
 
-  static DevToolsUsage get devToolsPreferences => _devToolsUsage;
+  /// Accessing Flutter store file e.g., ~/.flutter
+  static final _flutterStore = FlutterStore();
+
+  static DevToolsUsage get devToolsPreferences => _devToolsStore;
 
   /// Provides read and write access to DevTools options files
   /// (e.g. path/to/app/root/devtools_options.yaml).

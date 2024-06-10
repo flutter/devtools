@@ -121,7 +121,7 @@ class EvalOnDartLibrary extends DisposableController
         return;
       }
       _isolate = isolate;
-      for (LibraryRef library in isolate?.libraries ?? []) {
+      for (final library in isolate?.libraries ?? <LibraryRef>[]) {
         if (libraryName == library.uri) {
           assert(!_libraryRef.isCompleted);
           _libraryRef.complete(library);

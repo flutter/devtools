@@ -20,7 +20,7 @@ RemoteDiagnosticsNode? findNodeMatching(
       node.description?.startsWith(text) == true) {
     return node;
   }
-  for (var child in node.childrenNow) {
+  for (final child in node.childrenNow) {
     final match = findNodeMatching(child, text);
     if (match != null) {
       return match;

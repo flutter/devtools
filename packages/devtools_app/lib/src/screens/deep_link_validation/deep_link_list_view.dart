@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../shared/common_widgets.dart';
+import '../../shared/feature_flags.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
@@ -39,20 +40,27 @@ class DeepLinkListView extends StatefulWidget {
 
 class _DeepLinkListViewState extends State<DeepLinkListView>
     with ProvidedControllerMixin<DeepLinksController, DeepLinkListView> {
-  List<String> get androidVariants =>
-      controller.selectedProject.value!.androidVariants;
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     initController();
     callWhenControllerReady((_) {
-      int releaseVariantIndex = controller
-          .selectedProject.value!.androidVariants
-          .indexWhere((variant) => variant.toLowerCase().contains('release'));
-      // If not found, default to 0.
-      releaseVariantIndex = max(releaseVariantIndex, 0);
-      controller.selectedVariantIndex.value = releaseVariantIndex;
+      controller.selectedAndroidVariantIndex.value =
+          _getDefaultConfigurationIndex(
+        controller.selectedProject.value!.androidVariants,
+        containsString: 'release',
+      );
+      if (FeatureFlags.deepLinkIosCheck) {
+        controller.selectedIosConfigurationIndex.value =
+            _getDefaultConfigurationIndex(
+          controller.selectedProject.value!.iosBuildOptions.configurations,
+          containsString: 'release',
+        );
+        controller.selectedIosTargetIndex.value = _getDefaultConfigurationIndex(
+          controller.selectedProject.value!.iosBuildOptions.configurations,
+          containsString: 'runner',
+        );
+      }
     });
   }
 
@@ -71,6 +79,17 @@ class _DeepLinkListViewState extends State<DeepLinkListView>
       ),
     );
   }
+
+  int _getDefaultConfigurationIndex(
+    List<String> configurations, {
+    required String containsString,
+  }) {
+    final index = configurations.indexWhere(
+      (config) => config.caseInsensitiveContains(containsString),
+    );
+    // If not found, default to 0.
+    return max(index, 0);
+  }
 }
 
 class _DeepLinkListViewMainPanel extends StatelessWidget {
@@ -79,7 +98,7 @@ class _DeepLinkListViewMainPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Provider.of<DeepLinksController>(context);
-
+    final theme = Theme.of(context);
     return ValueListenableBuilder<PagePhase>(
       valueListenable: controller.pagePhase,
       builder: (context, pagePhase, _) {
@@ -96,7 +115,7 @@ class _DeepLinkListViewMainPanel extends StatelessWidget {
                   pagePhase == PagePhase.linksLoading
                       ? 'Loading deep links...'
                       : 'Validating deep links...',
-                  style: Theme.of(context).subtleTextStyle,
+                  style: theme.subtleTextStyle,
                 ),
               ],
             );
@@ -104,11 +123,36 @@ class _DeepLinkListViewMainPanel extends StatelessWidget {
             return const _ValidatedDeepLinksView();
           case PagePhase.noLinks:
             // TODO(hangyujin): This is just a place holder to add UI.
-            return const Text('Your flutter project has no Links to verify.');
+            return const CenteredMessage(
+              'Your Flutter project has no Links to verify.',
+            );
+          case PagePhase.analyzeErrorPage:
+            assert(controller.currentAppLinkSettings?.error != null);
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Failed to retrieve deep links from the Flutter project. '
+                  'This can be a result of errors in the project.',
+                ),
+                const SizedBox(height: densePadding),
+                Expanded(
+                  child: Scrollbar(
+                    thumbVisibility: true,
+                    child: SingleChildScrollView(
+                      child: Text(
+                        controller.currentAppLinkSettings!.error!,
+                        style: theme.errorTextStyle,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
 
-          case PagePhase.errorPage:
+          case PagePhase.validationErrorPage:
             // TODO(hangyujin): This is just a place holder to add Error handling.
-            return const Text('Error');
+            return const CenteredMessage('Error validating domain ');
         }
       },
     );
@@ -248,61 +292,73 @@ class _DeepLinkListViewTopPanel extends StatelessWidget {
       includeBottomBorder: false,
       tall: true,
       title: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             'Validate and fix',
             style: Theme.of(context).textTheme.titleSmall,
           ),
-          ValueListenableBuilder(
-            valueListenable: controller.selectedVariantIndex,
-            builder: (_, value, __) {
-              return _AndroidVariantDropdown(
-                androidVariants:
-                    controller.selectedProject.value!.androidVariants,
-                index: value,
-                onVariantIndexSelected: (index) {
-                  controller.selectedVariantIndex.value = index;
-                },
-              );
-            },
+          const Spacer(),
+          _ConfigurationDropdown(
+            title: 'Android Variant:',
+            notifier: controller.selectedAndroidVariantIndex,
+            configurations: controller.selectedProject.value!.androidVariants,
           ),
+          if (FeatureFlags.deepLinkIosCheck) ...[
+            const SizedBox(width: denseSpacing),
+            _ConfigurationDropdown(
+              title: 'iOS Configuration:',
+              notifier: controller.selectedIosConfigurationIndex,
+              configurations: controller
+                  .selectedProject.value!.iosBuildOptions.configurations,
+            ),
+            const SizedBox(width: denseSpacing),
+            _ConfigurationDropdown(
+              title: 'iOS Target:',
+              notifier: controller.selectedIosTargetIndex,
+              configurations:
+                  controller.selectedProject.value!.iosBuildOptions.targets,
+            ),
+          ],
         ],
       ),
     );
   }
 }
 
-class _AndroidVariantDropdown extends StatelessWidget {
-  const _AndroidVariantDropdown({
-    required this.androidVariants,
-    required this.index,
-    required this.onVariantIndexSelected,
+class _ConfigurationDropdown extends StatelessWidget {
+  const _ConfigurationDropdown({
+    required this.notifier,
+    required this.configurations,
+    required this.title,
   });
-
-  final List<String> androidVariants;
-  final int index;
-  final ValueChanged<int> onVariantIndexSelected;
+  final ValueNotifier<int> notifier;
+  final List<String> configurations;
+  final String title;
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        const Text('Android Variant:'),
-        RoundedDropDownButton<int>(
-          roundedCornerOptions: RoundedCornerOptions.empty,
-          value: index,
-          items: [
-            for (int i = 0; i < androidVariants.length; i++)
-              DropdownMenuItem<int>(
-                value: i,
-                child: Text(androidVariants[i]),
-              ),
+    return ValueListenableBuilder(
+      valueListenable: notifier,
+      builder: (_, index, __) {
+        return Row(
+          children: [
+            Text(title),
+            RoundedDropDownButton<int>(
+              roundedCornerOptions: RoundedCornerOptions.empty,
+              value: index,
+              items: [
+                for (int i = 0; i < configurations.length; i++)
+                  DropdownMenuItem<int>(
+                    value: i,
+                    child: Text(configurations[i]),
+                  ),
+              ],
+              onChanged: (int? newIndex) {
+                notifier.value = newIndex!;
+              },
+            ),
           ],
-          onChanged: (int? index) {
-            onVariantIndexSelected(index!);
-          },
-        ),
-      ],
+        );
+      },
     );
   }
 }

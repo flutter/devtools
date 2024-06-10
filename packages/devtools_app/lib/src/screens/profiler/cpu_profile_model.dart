@@ -4,6 +4,7 @@
 
 import 'dart:convert';
 
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -158,7 +159,7 @@ class CpuProfilePair {
 }
 
 /// Data model for DevTools CPU profile.
-class CpuProfileData {
+class CpuProfileData with Serializable {
   CpuProfileData._({
     required this.stackFrames,
     required this.cpuSamples,
@@ -624,7 +625,7 @@ class CpuProfileData {
       urisWithoutPackageUri.toList(),
     );
 
-    for (var stackFrameJson in stackFramesWaitingOnPackageUri) {
+    for (final stackFrameJson in stackFramesWaitingOnPackageUri) {
       final resolvedUri =
           stackFrameJson[CpuProfileData.resolvedUrlKey] as String;
       final packageUri = serviceConnection.serviceManager.resolvedUriManager
@@ -684,12 +685,14 @@ class CpuProfileData {
 
   List<CpuStackFrame> get bottomUpRoots {
     if (!processed) return <CpuStackFrame>[];
-    return _bottomUpRoots ??=
-        BottomUpTransformer<CpuStackFrame>().bottomUpRootsFor(
+
+    _bottomUpRoots ??= BottomUpTransformer<CpuStackFrame>().bottomUpRootsFor(
       topDownRoot: _cpuProfileRoot,
       mergeSamples: mergeCpuProfileRoots,
       rootedAtTags: rootedAtTags,
     );
+
+    return _bottomUpRoots!;
   }
 
   List<CpuStackFrame>? _bottomUpRoots;
@@ -732,7 +735,8 @@ class CpuProfileData {
 
   CpuStackFrame? selectedStackFrame;
 
-  Map<String, Object?> get toJson => {
+  @override
+  Map<String, Object?> toJson() => {
         'type': '_CpuProfileTimeline',
         _samplePeriodKey: profileMetaData.samplePeriod,
         _sampleCountKey: profileMetaData.sampleCount,
@@ -1028,7 +1032,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
   @override
   CpuStackFrame deepCopy() {
     final copy = shallowCopy();
-    for (CpuStackFrame child in children) {
+    for (final child in children) {
       copy.addChild(child.deepCopy());
     }
     return copy;

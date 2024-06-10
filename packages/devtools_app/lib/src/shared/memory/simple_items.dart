@@ -43,7 +43,7 @@ extension HeapSnapshotGraphSerialization on HeapSnapshotGraph {
   /// See https://api.flutter.dev/flutter/dart-developer/NativeRuntime/writeHeapSnapshotToFile.html
   Uint8List toUint8List() {
     final b = BytesBuilder();
-    for (var chunk in toChunks()) {
+    for (final chunk in toChunks()) {
       b.add(chunk.buffer.asUint8List());
     }
     return b.toBytes();

@@ -598,7 +598,7 @@ class Reporter implements Listenable {
   /// a notification callback leads to a change in the listeners,
   /// only the original listeners will be called.
   void notify() {
-    for (var callback in _listeners.toList()) {
+    for (final callback in _listeners.toList()) {
       callback();
     }
   }
@@ -1036,7 +1036,7 @@ extension ListExtension<T> on List<T> {
   }
 
   bool containsWhere(bool Function(T element) test) {
-    for (var e in this) {
+    for (final e in this) {
       if (test(e)) {
         return true;
       }
@@ -1068,7 +1068,7 @@ extension NullableListExtension<T> on List<T>? {
 
 extension SetExtension<T> on Set<T> {
   bool containsWhere(bool Function(T element) test) {
-    for (var e in this) {
+    for (final e in this) {
       if (test(e)) {
         return true;
       }
@@ -1077,7 +1077,7 @@ extension SetExtension<T> on Set<T> {
   }
 
   bool containsAny(Iterable<T> any) {
-    for (var e in any) {
+    for (final e in any) {
       if (contains(e)) {
         return true;
       }
@@ -1149,20 +1149,16 @@ extension UriExtension on Uri {
   }
 }
 
-Iterable<T> removeNullValues<T>(Iterable<T?> values) {
-  return values.whereType<T>();
-}
-
 // TODO(mtaylee): Prefer to use this helper method whenever a call to
 // .split('/').last is made on a String (usually on URIs).
 // See https://github.com/flutter/devtools/issues/4360.
 /// Returns the file name from a URI or path string, by splitting the [uri] at
 /// the directory separators '/', and returning the last element.
-String? fileNameFromUri(String? uri) => uri?.split('/').last;
+String? fileNameFromUri(String? uri) => uri?.split('/').lastOrNull;
 
 /// Calculates subtraction of two maps.
 ///
-/// Result map keys is union of the imput maps' keys.
+/// Result map keys is union of the input maps' keys.
 Map<K, R> subtractMaps<K, F, S, R>({
   required Map<K, S>? subtract,
   required Map<K, F>? from,
@@ -1174,7 +1170,7 @@ Map<K, R> subtractMaps<K, F, S, R>({
   final result = <K, R>{};
   final unionOfKeys = from.keys.toSet().union(subtract.keys.toSet());
 
-  for (var key in unionOfKeys) {
+  for (final key in unionOfKeys) {
     final diff = subtractor(from: from[key], subtract: subtract[key]);
     if (diff != null) result[key] = diff;
   }

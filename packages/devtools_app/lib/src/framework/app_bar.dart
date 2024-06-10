@@ -65,7 +65,7 @@ class DevToolsAppBar extends StatelessWidget {
         isScrollable: true,
         labelPadding: EdgeInsets.zero,
         tabs: [
-          for (var screen in visibleScreens)
+          for (final screen in visibleScreens)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: tabBarSpacing),
               child: screen.buildTab(context),
@@ -73,7 +73,7 @@ class DevToolsAppBar extends StatelessWidget {
           // We need to include a widget in the tab bar for the overflow screens
           // because the [_tabController] expects a length equal to the total
           // number of screens, hidden or not.
-          for (var _ in overflowScreens) const SizedBox.shrink(),
+          for (final _ in overflowScreens) const SizedBox.shrink(),
         ],
       );
 

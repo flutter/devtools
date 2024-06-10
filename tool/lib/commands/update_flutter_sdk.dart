@@ -79,7 +79,7 @@ class UpdateFlutterSdkCommand extends Command {
     final repo = DevToolsRepo.getInstance();
     final processManager = ProcessManager();
 
-    late String flutterTag;
+    final String flutterTag;
     if (useCachedVersion) {
       flutterTag =
           'tags/${repo.readFile(Uri.parse('flutter-candidate.txt')).trim()}';

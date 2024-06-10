@@ -203,7 +203,7 @@ class _LinkedScrollController extends ScrollController {
   Iterable<_LinkedScrollActivity> link(_LinkedScrollPosition driver) {
     assert(hasClients);
     final activities = <_LinkedScrollActivity>[];
-    for (ScrollPosition position in positions) {
+    for (final position in positions) {
       activities.add((position as _LinkedScrollPosition).link(driver));
     }
     return activities;
@@ -249,7 +249,7 @@ class _LinkedScrollPosition extends ScrollPositionWithSingleContext {
     if (newActivity == null) {
       return;
     }
-    for (var activity in _peerActivities) {
+    for (final activity in _peerActivities) {
       activity.unlink(this);
     }
 
@@ -271,7 +271,7 @@ class _LinkedScrollPosition extends ScrollPositionWithSingleContext {
 
     if (owner.canLinkWithPeers) {
       _peerActivities.addAll(owner.linkWithPeers(this));
-      for (var activity in _peerActivities) {
+      for (final activity in _peerActivities) {
         activity.moveTo(newPixels);
       }
     }
@@ -294,7 +294,7 @@ class _LinkedScrollPosition extends ScrollPositionWithSingleContext {
 
     if (owner.canLinkWithPeers) {
       _peerActivities.addAll(owner.linkWithPeers(this));
-      for (var activity in _peerActivities) {
+      for (final activity in _peerActivities) {
         activity.jumpTo(value);
       }
     }
@@ -376,7 +376,7 @@ class _LinkedScrollActivity extends ScrollActivity {
   void _updateUserScrollDirection() {
     assert(drivers.isNotEmpty);
     ScrollDirection? commonDirection;
-    for (var driver in drivers) {
+    for (final driver in drivers) {
       commonDirection ??= driver.userScrollDirection;
       if (driver.userScrollDirection != commonDirection) {
         commonDirection = ScrollDirection.idle;
@@ -387,7 +387,7 @@ class _LinkedScrollActivity extends ScrollActivity {
 
   @override
   void dispose() {
-    for (var driver in drivers) {
+    for (final driver in drivers) {
       driver.unlink(this);
     }
     super.dispose();

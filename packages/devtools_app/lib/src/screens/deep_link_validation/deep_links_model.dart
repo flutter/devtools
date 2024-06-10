@@ -4,6 +4,7 @@
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
+import 'package:devtools_shared/devtools_deeplink.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/primitives/utils.dart';
@@ -38,6 +39,10 @@ class CommonError {
 
 class DomainError extends CommonError {
   const DomainError(super.title, super.explanation, super.fixDetails);
+}
+
+class AndroidDomainError extends DomainError {
+  const AndroidDomainError(super.title, super.explanation, super.fixDetails);
 
   /// Existence of an asset link file.
   static const existence = DomainError(
@@ -114,6 +119,18 @@ class DomainError extends CommonError {
   /// Issues that are not covered by other checks. An example that may be in this
   /// category is Android validation API failures.
   static const other = DomainError('Check failed', '', '');
+}
+
+class IosDomainError extends DomainError {
+  const IosDomainError(super.title, super.explanation, super.fixDetails);
+  // TODO: Add  domain errors for iOS.
+
+  /// Existence of an Apple-App-Site-Association file.
+  static const existence = DomainError(
+    'Apple-App-Site-Association file does not exist',
+    '',
+    '',
+  );
 }
 
 /// There are currently two types of path errors, errors from intent filters and path format errors.
@@ -200,9 +217,9 @@ class LinkData with SearchableDataMixin {
     this.associatedDomains = const <String>[],
   });
 
-  final String path;
+  final String? path;
   final String? domain;
-  final List<PlatformOS> os;
+  final Set<PlatformOS> os;
   final Set<String> scheme;
   final List<DomainError> domainErrors;
   Set<PathError> pathErrors;
@@ -213,11 +230,14 @@ class LinkData with SearchableDataMixin {
   @override
   bool matchesSearchToken(RegExp regExpSearch) {
     return (domain?.caseInsensitiveContains(regExpSearch) ?? false) ||
-        path.caseInsensitiveContains(regExpSearch);
+        (path?.caseInsensitiveContains(regExpSearch) ?? false);
   }
 
   @override
   String toString() => 'LinkData($domain $path)';
+
+  String get safePath => path ?? '';
+  String get safeDomain => domain ?? '';
 }
 
 class _ErrorAwareText extends StatelessWidget {
@@ -391,7 +411,7 @@ class PathColumn extends ColumnData<LinkData>
   }
 
   @override
-  String getValue(LinkData dataObject) => dataObject.path;
+  String getValue(LinkData dataObject) => dataObject.safePath;
 
   @override
   Widget build(
@@ -404,7 +424,7 @@ class PathColumn extends ColumnData<LinkData>
     return _ErrorAwareText(
       isError: dataObject.pathErrors.isNotEmpty,
       controller: controller,
-      text: dataObject.path,
+      text: dataObject.safePath,
       link: dataObject,
     );
   }
@@ -703,9 +723,11 @@ class FlutterProject {
   FlutterProject({
     required this.path,
     required this.androidVariants,
+    required this.iosBuildOptions,
   });
   final String path;
   final List<String> androidVariants;
+  final XcodeBuildOptions iosBuildOptions;
 }
 
 int _compareLinkData(
@@ -727,12 +749,12 @@ int _compareLinkData(
       }
       return 0;
     case SortingOption.aToZ:
-      if (compareDomain) return (a.domain ?? '').compareTo(b.domain ?? '');
+      if (compareDomain) return a.safeDomain.compareTo(b.safeDomain);
 
-      return a.path.compareTo(b.path);
+      return a.safePath.compareTo(b.safePath);
     case SortingOption.zToA:
-      if (compareDomain) return (b.domain ?? '').compareTo(a.domain ?? '');
+      if (compareDomain) return b.safeDomain.compareTo(a.safeDomain);
 
-      return b.path.compareTo(a.path);
+      return b.safePath.compareTo(a.safePath);
   }
 }

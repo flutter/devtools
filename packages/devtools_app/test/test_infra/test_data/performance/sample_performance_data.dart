@@ -951,16 +951,20 @@ abstract class FlutterFrame4 {
 
 /// Data for Frame (id: 6)
 abstract class FlutterFrame6 {
-  static final frame = FlutterFrame.fromJson({
+  static final frame = FlutterFrame.fromJson(_frameJson)
+    ..setEventFlow(uiEvent)
+    ..setEventFlow(rasterEvent);
+
+  static final frameWithoutTimelineEvents = FlutterFrame.fromJson(_frameJson);
+
+  static const _frameJson = {
     'number': 6,
     'startTime': 713836329948,
     'elapsed': 2843,
     'build': 745,
     'raster': 883,
     'vsyncOverhead': 1108,
-  })
-    ..setEventFlow(uiEvent)
-    ..setEventFlow(rasterEvent);
+  };
 
   static const uiEventAsString =
       '''  Animator::BeginFrame [713836329948 μs - 713836331003 μs]

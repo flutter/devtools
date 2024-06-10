@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
+library;
+
 import 'package:devtools_app/src/shared/primitives/custom_pointer_scroll_view.dart';
 import 'package:devtools_app/src/shared/primitives/extent_delegate_list.dart';
 import 'package:flutter/gestures.dart';

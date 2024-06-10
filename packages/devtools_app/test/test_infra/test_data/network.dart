@@ -124,7 +124,7 @@ final Map<String, dynamic> httpGetJson = {
   'id': '1',
   'isolateId': 'isolates/2013291945734727',
   'method': 'GET',
-  'uri': 'https://jsonplaceholder.typicode.com/albums/1',
+  'uri': 'https://jsonplaceholder.typicode.com/albums/1?userId=1&title=myalbum',
   'events': [
     {'timestamp': 6326808941, 'event': 'Connection established'},
     {'timestamp': 6326808965, 'event': 'Request sent'},
