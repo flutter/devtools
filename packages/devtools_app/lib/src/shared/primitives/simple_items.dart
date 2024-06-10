@@ -25,7 +25,7 @@ class PackagePrefixes {
   static const dartUi = 'dart:ui';
 }
 
-const String traceEventsFieldName = 'traceEvents';
+const traceEventsFieldName = 'traceEvents';
 
 const closureName = '<closure>';
 

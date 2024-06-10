@@ -25,15 +25,14 @@ void debuggingTests() {
       'test/test_infra/fixtures/debugging_app.dart',
     );
 
-    final DevtoolsManager tools =
-        DevtoolsManager(tabInstance, webBuildFixture.baseUri);
+    final tools = DevtoolsManager(tabInstance, webBuildFixture.baseUri);
     await tools.start(appFixture);
     await tools.switchPage('debugger');
 
-    final String? currentPageId = await tools.currentPageId();
+    final currentPageId = await tools.currentPageId();
     expect(currentPageId, 'debugger');
 
-    final DebuggingManager debuggingManager = DebuggingManager(tools);
+    final debuggingManager = DebuggingManager(tools);
 
     // Allow some time for the scripts view to be populated, as it requires
     // some isolate events to fire that we have not already waited for.
@@ -41,7 +40,7 @@ void debuggingTests() {
       () async => (await debuggingManager.getScripts()).isNotEmpty,
       timeoutMessage: 'Scripts view was not populated',
     );
-    final List<String> scripts = await debuggingManager.getScripts();
+    final scripts = await debuggingManager.getScripts();
     expect(scripts, isNotEmpty);
     expect(scripts, anyElement(endsWith(appFixture.appScriptPath)));
   });
@@ -51,19 +50,17 @@ void debuggingTests() {
       'test/test_infra/fixtures/debugging_app.dart',
     );
 
-    final String source = appFixture.scriptSource;
-    final List<int> breakpointLines =
-        CliAppFixture.parseBreakpointLines(source);
+    final source = appFixture.scriptSource;
+    final breakpointLines = CliAppFixture.parseBreakpointLines(source);
 
-    final DevtoolsManager tools =
-        DevtoolsManager(tabInstance, webBuildFixture.baseUri);
+    final tools = DevtoolsManager(tabInstance, webBuildFixture.baseUri);
     await tools.start(appFixture);
     await tools.switchPage('debugger');
 
-    final String? currentPageId = await tools.currentPageId();
+    final currentPageId = await tools.currentPageId();
     expect(currentPageId, 'debugger');
 
-    final DebuggingManager debuggingManager = DebuggingManager(tools);
+    final debuggingManager = DebuggingManager(tools);
 
     // clear and verify breakpoints
     List<String> breakpoints = await debuggingManager.getBreakpoints();
@@ -91,7 +88,7 @@ void debuggingTests() {
     );
 
     // verify stack frame
-    final List<String> frames = await debuggingManager.getCallStackFrames();
+    final frames = await debuggingManager.getCallStackFrames();
     expect(frames.length, greaterThan(2));
     expect(frames.sublist(0, 2), [
       'Cat.performAction:debugging_app.dart',
@@ -119,20 +116,18 @@ void debuggingTests() {
       'test/test_infra/fixtures/debugging_app_async.dart',
     );
 
-    final String source = appFixture.scriptSource;
-    final int breakpointLine =
-        CliAppFixture.parseBreakpointLines(source).single;
-    final List<int> steppingLines = CliAppFixture.parseSteppingLines(source);
+    final source = appFixture.scriptSource;
+    final breakpointLine = CliAppFixture.parseBreakpointLines(source).single;
+    final steppingLines = CliAppFixture.parseSteppingLines(source);
 
-    final DevtoolsManager tools =
-        DevtoolsManager(tabInstance, webBuildFixture.baseUri);
+    final tools = DevtoolsManager(tabInstance, webBuildFixture.baseUri);
     await tools.start(appFixture);
     await tools.switchPage('debugger');
 
-    final String? currentPageId = await tools.currentPageId();
+    final currentPageId = await tools.currentPageId();
     expect(currentPageId, 'debugger');
 
-    final DebuggingManager debuggingManager = DebuggingManager(tools);
+    final debuggingManager = DebuggingManager(tools);
 
     // clear and verify breakpoints
     List<String> breakpoints = await debuggingManager.getBreakpoints();
@@ -178,7 +173,7 @@ void debuggingTests() {
     }
 
     // verify an async stack frame
-    final List<String> frames = await debuggingManager.getCallStackFrames();
+    final frames = await debuggingManager.getCallStackFrames();
     expect(frames.length, greaterThan(4));
     expect(frames.sublist(0, 4), [
       'performAction:debugging_app_async.dart',
@@ -202,18 +197,17 @@ void debuggingTests() {
       'test/test_infra/fixtures/debugging_app_exception.dart',
     );
 
-    final String source = appFixture.scriptSource;
-    final int exceptionLine = CliAppFixture.parseExceptionLines(source).first;
+    final source = appFixture.scriptSource;
+    final exceptionLine = CliAppFixture.parseExceptionLines(source).first;
 
-    final DevtoolsManager tools =
-        DevtoolsManager(tabInstance, webBuildFixture.baseUri);
+    final tools = DevtoolsManager(tabInstance, webBuildFixture.baseUri);
     await tools.start(appFixture);
     await tools.switchPage('debugger');
 
-    final String? currentPageId = await tools.currentPageId();
+    final currentPageId = await tools.currentPageId();
     expect(currentPageId, 'debugger');
 
-    final DebuggingManager debuggingManager = DebuggingManager(tools);
+    final debuggingManager = DebuggingManager(tools);
 
     // verify running state
     expect(await debuggingManager.getState(), 'running');
@@ -300,15 +294,14 @@ void debuggingTests() {
       'test/test_infra/fixtures/debugging_app.dart',
     );
 
-    final DevtoolsManager tools =
-        DevtoolsManager(tabInstance, webBuildFixture.baseUri);
+    final tools = DevtoolsManager(tabInstance, webBuildFixture.baseUri);
     await tools.start(appFixture);
     await tools.switchPage('debugger');
 
-    final String? currentPageId = await tools.currentPageId();
+    final currentPageId = await tools.currentPageId();
     expect(currentPageId, 'debugger');
 
-    final DebuggingManager debuggingManager = DebuggingManager(tools);
+    final debuggingManager = DebuggingManager(tools);
 
     // verify running state
     expect(await debuggingManager.getState(), 'running');
@@ -348,26 +341,23 @@ class DebuggingManager {
   }
 
   Future<String?> getLocation() async {
-    final AppResponse response =
-        await tools.tabInstance.send('debugger.getLocation');
+    final response = await tools.tabInstance.send('debugger.getLocation');
     return response.result as String?;
   }
 
   Future<List<String>> getVariables() async {
-    final AppResponse response =
-        await tools.tabInstance.send('debugger.getVariables');
-    final List<Object?> result = response.result as List<Object?>;
+    final response = await tools.tabInstance.send('debugger.getVariables');
+    final result = response.result as List<Object?>;
     return result.cast<String>();
   }
 
   Future<String?> getState() async {
-    final AppResponse response =
-        await tools.tabInstance.send('debugger.getState');
+    final response = await tools.tabInstance.send('debugger.getState');
     return response.result as String?;
   }
 
   Future<String?> getConsoleContents() async {
-    final AppResponse response =
+    final response =
         await tools.tabInstance.send('debugger.getConsoleContents');
     return response.result as String?;
   }
@@ -385,27 +375,24 @@ class DebuggingManager {
   }
 
   Future<List<String>> getBreakpoints() async {
-    final AppResponse response =
-        await tools.tabInstance.send('debugger.getBreakpoints');
+    final response = await tools.tabInstance.send('debugger.getBreakpoints');
     final result = response.result as List<Object?>;
     return result.cast<String>();
   }
 
   Future<List<String>> getScripts() async {
-    final AppResponse response =
-        await tools.tabInstance.send('debugger.getScripts');
+    final response = await tools.tabInstance.send('debugger.getScripts');
     final result = response.result as List<Object?>;
     return result.cast<String>();
   }
 
   Future<bool> supportsScripts() async {
-    final AppResponse response =
-        await tools.tabInstance.send('debugger.supportsScripts');
+    final response = await tools.tabInstance.send('debugger.supportsScripts');
     return response.result as bool;
   }
 
   Future<List<String>> getCallStackFrames() async {
-    final AppResponse response =
+    final response =
         await tools.tabInstance.send('debugger.getCallStackFrames');
     final result = response.result as List<Object?>;
     return result.cast<String>();

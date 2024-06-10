@@ -42,44 +42,44 @@ const imageSizesForFrameEvent = 'Flutter.ImageSizesForFrame';
 const displaySizeInBytesData = 'displaySizeInBytes';
 const decodedSizeInBytesData = 'decodedSizeInBytes';
 
-const String eventName = 'name';
-const String eventData = 'data';
-const String customEvent = 'custom';
-const String customEventName = 'name';
-const String customEventData = 'data';
+const eventName = 'name';
+const eventData = 'data';
+const customEvent = 'custom';
+const customEventName = 'name';
+const customEventData = 'data';
 
-const String indexPayloadJson = 'index';
-const String timestampPayloadJson = 'timestamp';
-const String prettyTimestampPayloadJson = 'prettyTimestamp';
-const String eventPayloadJson = 'event';
-const String vmPayloadJson = 'vm';
-const String androidPayloadJson = 'android';
+const indexPayloadJson = 'index';
+const timestampPayloadJson = 'timestamp';
+const prettyTimestampPayloadJson = 'prettyTimestamp';
+const eventPayloadJson = 'event';
+const vmPayloadJson = 'vm';
+const androidPayloadJson = 'android';
 
 /// VM Data
-const String rssJsonName = 'rss';
-const String capacityJsonName = 'capacity';
-const String usedJsonName = 'used';
-const String externalJsonName = 'external';
-const String rasterPictureJsonName = 'rasterLayer';
-const String rasterLayerJsonName = 'rasterPicture';
+const rssJsonName = 'rss';
+const capacityJsonName = 'capacity';
+const usedJsonName = 'used';
+const externalJsonName = 'external';
+const rasterPictureJsonName = 'rasterLayer';
+const rasterLayerJsonName = 'rasterPicture';
 
 /// Android data
-const String adbTotalJsonName = 'total';
-const String adbOtherJsonName = 'other';
-const String adbCodeJsonName = 'code';
-const String adbNativeHeapJsonName = 'nativeHeap';
-const String adbJavaHeapJsonName = 'javaHeap';
-const String adbStackJsonName = 'stack';
-const String adbGraphicsJsonName = 'graphics';
+const adbTotalJsonName = 'total';
+const adbOtherJsonName = 'other';
+const adbCodeJsonName = 'code';
+const adbNativeHeapJsonName = 'nativeHeap';
+const adbJavaHeapJsonName = 'javaHeap';
+const adbStackJsonName = 'stack';
+const adbGraphicsJsonName = 'graphics';
 
 /// Events data
-const String snapshotJsonName = 'snapshot';
-const String autoSnapshotJsonName = 'autoSnapshot';
-const String monitorStartJsonName = 'monitorStart';
-const String monitorResetJsonName = 'monitorReset';
-const String extensionEventsJsonName = 'extensionEvents';
-const String manualGCJsonName = 'manualGC';
-const String gcJsonName = 'gc';
+const snapshotJsonName = 'snapshot';
+const autoSnapshotJsonName = 'autoSnapshot';
+const monitorStartJsonName = 'monitorStart';
+const monitorResetJsonName = 'monitorReset';
+const extensionEventsJsonName = 'extensionEvents';
+const manualGCJsonName = 'manualGC';
+const gcJsonName = 'gc';
 
 /// Dart VM trace names
 const allocatedDisplay = 'Allocated';
@@ -264,7 +264,7 @@ class ChartsValues {
   }
 
   void _getVMData(Map<String, Object> results) {
-    final HeapSample heapSample = memoryTimeline.data[index];
+    final heapSample = memoryTimeline.data[index];
 
     results[rssJsonName] = heapSample.rss;
     results[capacityJsonName] = heapSample.capacity;
@@ -276,7 +276,7 @@ class ChartsValues {
   }
 
   void _getAndroidData(Map<String, Object> results) {
-    final AdbMemoryInfo androidData = memoryTimeline.data[index].adbMemoryInfo;
+    final androidData = memoryTimeline.data[index].adbMemoryInfo;
 
     results[adbTotalJsonName] = androidData.total;
     results[adbOtherJsonName] = androidData.other;

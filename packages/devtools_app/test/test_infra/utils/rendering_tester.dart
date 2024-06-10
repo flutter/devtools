@@ -78,7 +78,7 @@ class TestRenderingFlutterBinding extends BindingBase
   ///
   /// Called automatically when the binding is created.
   RenderView initRenderView(FlutterView view) {
-    final RenderView renderView = RenderView(view: view);
+    final renderView = RenderView(view: view);
     rootPipelineOwner.rootNode = renderView;
     addRenderView(renderView);
     renderView.prepareInitialFrame();
@@ -112,7 +112,7 @@ class TestRenderingFlutterBinding extends BindingBase
     return TestRenderingFlutterBinding(onErrors: onErrors);
   }
 
-  final List<FlutterErrorDetails> _errors = <FlutterErrorDetails>[];
+  final _errors = <FlutterErrorDetails>[];
 
   /// A function called after drawing a frame if [FlutterError] caught any errors.
   ///
@@ -446,7 +446,7 @@ class TestClipPaintingContext extends PaintingContext {
 class TestPushLayerPaintingContext extends PaintingContext {
   TestPushLayerPaintingContext() : super(ContainerLayer(), Rect.zero);
 
-  final List<ContainerLayer> pushedLayers = <ContainerLayer>[];
+  final pushedLayers = <ContainerLayer>[];
 
   @override
   void pushLayer(
@@ -467,10 +467,9 @@ class TestPushLayerPaintingContext extends PaintingContext {
 
 // Absorbs errors that don't have "overflowed" in their error details.
 void absorbOverflowedErrors() {
-  final Iterable<FlutterErrorDetails> errorDetails =
+  final errorDetails =
       TestRenderingFlutterBinding.instance.takeAllFlutterErrorDetails();
-  final Iterable<FlutterErrorDetails> filtered =
-      errorDetails.where((FlutterErrorDetails details) {
+  final filtered = errorDetails.where((FlutterErrorDetails details) {
     return !details.toString().contains('overflowed');
   });
   if (filtered.isNotEmpty) {
@@ -480,7 +479,7 @@ void absorbOverflowedErrors() {
 
 // Reports any FlutterErrors.
 void expectNoFlutterErrors() {
-  final Iterable<FlutterErrorDetails> errorDetails =
+  final errorDetails =
       TestRenderingFlutterBinding.instance.takeAllFlutterErrorDetails();
   errorDetails.forEach(FlutterError.reportError);
 }

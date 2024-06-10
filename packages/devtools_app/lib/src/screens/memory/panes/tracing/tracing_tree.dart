@@ -17,7 +17,7 @@ import '../../../profiler/panes/cpu_profile_columns.dart';
 import 'tracing_data.dart';
 import 'tracing_pane_controller.dart';
 
-const double _countColumnWidth = 100;
+const _countColumnWidth = 100.0;
 
 /// Displays an allocation profile as a tree of stack frames, displaying
 /// inclusive and exclusive allocation counts.
@@ -253,7 +253,7 @@ class _InclusiveCountColumn extends ColumnData<CpuStackFrame> {
 
   @override
   int compare(CpuStackFrame a, CpuStackFrame b) {
-    final int result = super.compare(a, b);
+    final result = super.compare(a, b);
     if (result == 0) {
       return a.name.compareTo(b.name);
     }
@@ -286,7 +286,7 @@ class _ExclusiveCountColumn extends ColumnData<CpuStackFrame> {
 
   @override
   int compare(CpuStackFrame a, CpuStackFrame b) {
-    final int result = super.compare(a, b);
+    final result = super.compare(a, b);
     if (result == 0) {
       return a.name.compareTo(b.name);
     }

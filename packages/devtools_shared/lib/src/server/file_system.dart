@@ -12,8 +12,7 @@ import 'devtools_store.dart';
 // ignore: avoid_classes_with_only_static_members, requires refactor.
 class LocalFileSystem {
   static String _userHomeDir() {
-    final String envKey =
-        Platform.operatingSystem == 'windows' ? 'APPDATA' : 'HOME';
+    final envKey = Platform.operatingSystem == 'windows' ? 'APPDATA' : 'HOME';
     return Platform.environment[envKey] ?? '.';
   }
 
@@ -88,7 +87,7 @@ class IOPersistentProperties {
     this.name, {
     String? documentDirPath,
   }) {
-    final String fileName = name.replaceAll(' ', '_');
+    final fileName = name.replaceAll(' ', '_');
     documentDirPath ??= LocalFileSystem._userHomeDir();
     _file = File(path.join(documentDirPath, fileName));
     if (!_file.existsSync()) {
@@ -146,4 +145,4 @@ class IOPersistentProperties {
   }
 }
 
-const JsonEncoder _jsonEncoder = JsonEncoder.withIndent('  ');
+const _jsonEncoder = JsonEncoder.withIndent('  ');

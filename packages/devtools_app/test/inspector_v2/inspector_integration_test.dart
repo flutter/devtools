@@ -23,7 +23,7 @@ void main() {
   initializeLiveTestWidgetsFlutterBindingWithAssets();
   const windowSize = Size(2600.0, 1200.0);
 
-  final FlutterTestEnvironment env = FlutterTestEnvironment(
+  final env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
   );
 

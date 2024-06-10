@@ -9,7 +9,7 @@ import 'dart:async';
 void main() {
   print('starting debugging app');
 
-  final Cat cat = Cat('Fluffy');
+  final cat = Cat('Fluffy');
 
   void run() {
     Timer(const Duration(milliseconds: 100), () {

@@ -71,7 +71,7 @@ class WidgetTheme {
     color: contentWidgetColor,
   );
 
-  static const Map<String, WidgetTheme> themeMap = {
+  static const themeMap = <String, WidgetTheme>{
     // High-level
     'RenderObjectToWidgetAdapter': WidgetTheme(
       iconAsset: WidgetIcons.root,
@@ -197,58 +197,53 @@ class WidgetTheme {
 }
 
 class WidgetIcons {
-  static const String root = 'icons/inspector/widget_icons/root.png';
-  static const String text = 'icons/inspector/widget_icons/text.png';
-  static const String icon = 'icons/inspector/widget_icons/icon.png';
-  static const String image = 'icons/inspector/widget_icons/image.png';
-  static const String floatingActionButton =
+  static const root = 'icons/inspector/widget_icons/root.png';
+  static const text = 'icons/inspector/widget_icons/text.png';
+  static const icon = 'icons/inspector/widget_icons/icon.png';
+  static const image = 'icons/inspector/widget_icons/image.png';
+  static const floatingActionButton =
       'icons/inspector/widget_icons/floatingab.png';
-  static const String checkbox = 'icons/inspector/widget_icons/checkbox.png';
-  static const String radio = 'icons/inspector/widget_icons/radio.png';
-  static const String toggle = 'icons/inspector/widget_icons/toggle.png';
-  static const String animated = 'icons/inspector/widget_icons/animated.png';
-  static const String transition =
-      'icons/inspector/widget_icons/transition.png';
-  static const String hero = 'icons/inspector/widget_icons/hero.png';
-  static const String container = 'icons/inspector/widget_icons/container.png';
-  static const String center = 'icons/inspector/widget_icons/center.png';
-  static const String row = 'icons/inspector/widget_icons/row.png';
-  static const String column = 'icons/inspector/widget_icons/column.png';
-  static const String padding = 'icons/inspector/widget_icons/padding.png';
-  static const String scaffold = 'icons/inspector/widget_icons/scaffold.png';
-  static const String sizedBox = 'icons/inspector/widget_icons/sizedbox.png';
-  static const String align = 'icons/inspector/widget_icons/align.png';
-  static const String scroll = 'icons/inspector/widget_icons/scroll.png';
-  static const String stack = 'icons/inspector/widget_icons/stack.png';
-  static const String inkWell = 'icons/inspector/widget_icons/inkwell.png';
-  static const String gesture = 'icons/inspector/widget_icons/gesture.png';
-  static const String textButton =
-      'icons/inspector/widget_icons/textbutton.png';
-  static const String outlinedButton =
+  static const checkbox = 'icons/inspector/widget_icons/checkbox.png';
+  static const radio = 'icons/inspector/widget_icons/radio.png';
+  static const toggle = 'icons/inspector/widget_icons/toggle.png';
+  static const animated = 'icons/inspector/widget_icons/animated.png';
+  static const transition = 'icons/inspector/widget_icons/transition.png';
+  static const hero = 'icons/inspector/widget_icons/hero.png';
+  static const container = 'icons/inspector/widget_icons/container.png';
+  static const center = 'icons/inspector/widget_icons/center.png';
+  static const row = 'icons/inspector/widget_icons/row.png';
+  static const column = 'icons/inspector/widget_icons/column.png';
+  static const padding = 'icons/inspector/widget_icons/padding.png';
+  static const scaffold = 'icons/inspector/widget_icons/scaffold.png';
+  static const sizedBox = 'icons/inspector/widget_icons/sizedbox.png';
+  static const align = 'icons/inspector/widget_icons/align.png';
+  static const scroll = 'icons/inspector/widget_icons/scroll.png';
+  static const stack = 'icons/inspector/widget_icons/stack.png';
+  static const inkWell = 'icons/inspector/widget_icons/inkwell.png';
+  static const gesture = 'icons/inspector/widget_icons/gesture.png';
+  static const textButton = 'icons/inspector/widget_icons/textbutton.png';
+  static const outlinedButton =
       'icons/inspector/widget_icons/outlinedbutton.png';
-  static const String gridView = 'icons/inspector/widget_icons/gridview.png';
-  static const String listView = 'icons/inspector/widget_icons/listView.png';
+  static const gridView = 'icons/inspector/widget_icons/gridview.png';
+  static const listView = 'icons/inspector/widget_icons/listView.png';
 
-  static const String alertDialog =
-      'icons/inspector/widget_icons/alertdialog.png';
-  static const String card = 'icons/inspector/widget_icons/card.png';
-  static const String circleAvatar =
-      'icons/inspector/widget_icons/circleavatar.png';
-  static const String circularProgress =
+  static const alertDialog = 'icons/inspector/widget_icons/alertdialog.png';
+  static const card = 'icons/inspector/widget_icons/card.png';
+  static const circleAvatar = 'icons/inspector/widget_icons/circleavatar.png';
+  static const circularProgress =
       'icons/inspector/widget_icons/circularprogress.png';
-  static const String constrainedBox =
+  static const constrainedBox =
       'icons/inspector/widget_icons/constrainedbox.png';
-  static const String divider = 'icons/inspector/widget_icons/divider.png';
-  static const String drawer = 'icons/inspector/widget_icons/drawer.png';
-  static const String expand = 'icons/inspector/widget_icons/expand.png';
-  static const String material = 'icons/inspector/widget_icons/material.png';
-  static const String opacity = 'icons/inspector/widget_icons/opacity.png';
-  static const String tab = 'icons/inspector/widget_icons/tab.png';
-  static const String wrap = 'icons/inspector/widget_icons/wrap.png';
-  static const String pageView = 'icons/inspector/widget_icons/pageView.png';
-  static const String appBar = 'icons/inspector/widget_icons/appbar.png';
-  static const String materialApp =
-      'icons/inspector/widget_icons/materialapp.png';
-  static const String bottomNavigationBar =
+  static const divider = 'icons/inspector/widget_icons/divider.png';
+  static const drawer = 'icons/inspector/widget_icons/drawer.png';
+  static const expand = 'icons/inspector/widget_icons/expand.png';
+  static const material = 'icons/inspector/widget_icons/material.png';
+  static const opacity = 'icons/inspector/widget_icons/opacity.png';
+  static const tab = 'icons/inspector/widget_icons/tab.png';
+  static const wrap = 'icons/inspector/widget_icons/wrap.png';
+  static const pageView = 'icons/inspector/widget_icons/pageView.png';
+  static const appBar = 'icons/inspector/widget_icons/appbar.png';
+  static const materialApp = 'icons/inspector/widget_icons/materialapp.png';
+  static const bottomNavigationBar =
       'icons/inspector/widget_icons/bottomnavigationbar.png';
 }

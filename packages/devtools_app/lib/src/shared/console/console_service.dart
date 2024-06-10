@@ -164,8 +164,8 @@ class ConsoleService with DisposerMixin {
 
   /// Append to the stdout / stderr buffer.
   void appendStdio(String text) {
-    const int kMaxLogItemsLowerBound = 5000;
-    const int kMaxLogItemsUpperBound = 5500;
+    const kMaxLogItemsLowerBound = 5000;
+    const kMaxLogItemsUpperBound = 5500;
 
     // Parse out the new lines and append to the end of the existing lines.
 
@@ -210,12 +210,12 @@ class ConsoleService with DisposerMixin {
   }
 
   void _handleStdoutEvent(Event event) {
-    final String text = decodeBase64(event.bytes!);
+    final text = decodeBase64(event.bytes!);
     appendStdio(text);
   }
 
   void _handleStderrEvent(Event event) {
-    final String text = decodeBase64(event.bytes!);
+    final text = decodeBase64(event.bytes!);
     // TODO(devoncarew): Change to reporting stdio along with information about
     // whether the event was stdout or stderr.
     appendStdio(text);

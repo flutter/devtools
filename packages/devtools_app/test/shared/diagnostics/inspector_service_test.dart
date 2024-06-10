@@ -23,7 +23,7 @@ import '../../test_infra/matchers/matchers.dart';
 void main() {
   initializeLiveTestWidgetsFlutterBindingWithAssets();
 
-  final FlutterTestEnvironment env = FlutterTestEnvironment(
+  final env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
   );
 
@@ -130,8 +130,9 @@ void main() {
             final rootLibrary =
                 await serviceConnection.mainIsolateRootLibraryUriAsString();
             await inspectorServiceLocal.addPubRootDirectories([rootLibrary!]);
-            final List<String> rootDirectories =
-                await inspectorServiceLocal.getPubRootDirectories() ?? [];
+            final rootDirectories =
+                await inspectorServiceLocal.getPubRootDirectories() ??
+                    <String>[];
             expect(rootDirectories.length, 1);
             expect(rootDirectories.first, endsWith('/fixtures/flutter_app'));
             final originalRootDirectories = rootDirectories.toList();
@@ -266,8 +267,7 @@ void main() {
       test('widget tree', () async {
         await env.setupEnvironment();
         final group = inspectorService!.createObjectGroup('test-group');
-        final RemoteDiagnosticsNode root =
-            (await group.getRoot(FlutterTreeType.widget))!;
+        final root = (await group.getRoot(FlutterTreeType.widget))!;
         // Tree only contains widgets from local app.
         expect(
           treeToDebugString(root),

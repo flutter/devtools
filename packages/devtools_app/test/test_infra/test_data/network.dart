@@ -73,7 +73,7 @@ final httpGetResponseBodyData = [
 ];
 
 final testSocket1 = WebSocket(SocketStatistic.parse(testSocket1Json)!, 0);
-final Map<String, dynamic> testSocket1Json = {
+final testSocket1Json = <String, Object?>{
   'id': '10000',
   'startTime': 1000000,
   'endTime': 2000000,
@@ -87,7 +87,7 @@ final Map<String, dynamic> testSocket1Json = {
 };
 
 final testSocket2 = WebSocket(SocketStatistic.parse(testSocket2Json)!, 0);
-final Map<String, dynamic> testSocket2Json = {
+final testSocket2Json = <String, Object?>{
   'id': '11111',
   'startTime': 3000000,
   // This socket has no end time.
@@ -101,7 +101,7 @@ final Map<String, dynamic> testSocket2Json = {
 };
 
 final testSocket3 = WebSocket(SocketStatistic.parse(testSocket3Json)!, 0);
-final Map<String, dynamic> testSocket3Json = {
+final testSocket3Json = <String, Object?>{
   'id': '10000',
   'startTime': 1000000,
   'endTime': 2000000,
@@ -119,7 +119,7 @@ final httpGet = DartIOHttpRequestData(
   httpGetRequest,
   requestFullDataFromVmService: false,
 );
-final Map<String, dynamic> httpGetJson = {
+final httpGetJson = <String, Object?>{
   'type': 'HttpProfileRequest',
   'id': '1',
   'isolateId': 'isolates/2013291945734727',
@@ -184,7 +184,7 @@ final httpPost = DartIOHttpRequestData(
   httpPostRequest,
   requestFullDataFromVmService: false,
 );
-final Map<String, dynamic> httpPostJson = {
+final httpPostJson = <String, Object?>{
   'type': 'HttpProfileRequest',
   'id': '2',
   'isolateId': 'isolates/979700762893215',
@@ -260,7 +260,7 @@ final httpPut = DartIOHttpRequestData(
   httpPutRequest,
   requestFullDataFromVmService: false,
 );
-final Map<String, dynamic> httpPutJson = {
+final httpPutJson = <String, Object?>{
   'type': 'HttpProfileRequest',
   'id': '3',
   'isolateId': 'isolates/4447876918484683',
@@ -338,7 +338,7 @@ final httpPatch = DartIOHttpRequestData(
   httpPatchRequest,
   requestFullDataFromVmService: false,
 );
-final Map<String, dynamic> httpPatchJson = {
+final httpPatchJson = <String, Object?>{
   'type': 'HttpProfileRequest',
   'id': '4',
   'isolateId': 'isolates/4447876918484683',
@@ -419,7 +419,7 @@ final httpGetWithError = DartIOHttpRequestData(
   httpGetWithErrorRequest,
   requestFullDataFromVmService: false,
 );
-final Map<String, dynamic> httpGetWithErrorJson = {
+final httpGetWithErrorJson = <String, Object?>{
   'type': '@HttpProfileRequest',
   'id': '5',
   'isolateId': 'isolates/1939772779732043',
@@ -438,7 +438,7 @@ final httpWsHandshake = DartIOHttpRequestData(
   httpWsHandshakeRequest,
   requestFullDataFromVmService: false,
 );
-final Map<String, dynamic> httpWsHandshakeJson = {
+final httpWsHandshakeJson = <String, Object?>{
   'type': 'HttpProfileRequest',
   'id': '6',
   'isolateId': 'isolates/1350291957483171',
@@ -498,7 +498,7 @@ final Map<String, dynamic> httpWsHandshakeJson = {
   'responseBody': [],
 };
 
-final Map<String, dynamic> httpGetPendingJson = {
+final httpGetPendingJson = <String, Object?>{
   'type': 'HttpProfileRequest',
   'id': '7',
   'isolateId': 'isolates/2013291945734727',

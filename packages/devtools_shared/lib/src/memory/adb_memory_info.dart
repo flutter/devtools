@@ -72,15 +72,15 @@ class AdbMemoryInfo with Serializable {
 
   // JSON keys of data retrieved from ADB tool.
 
-  static const String realTimeKey = 'Realtime';
-  static const String javaHeapKey = 'Java Heap';
-  static const String nativeHeapKey = 'Native Heap';
-  static const String codeKey = 'Code';
-  static const String stackKey = 'Stack';
-  static const String graphicsKey = 'Graphics';
-  static const String otherKey = 'Private Other';
-  static const String systemKey = 'System';
-  static const String totalKey = 'Total';
+  static const realTimeKey = 'Realtime';
+  static const javaHeapKey = 'Java Heap';
+  static const nativeHeapKey = 'Native Heap';
+  static const codeKey = 'Code';
+  static const stackKey = 'Stack';
+  static const graphicsKey = 'Graphics';
+  static const otherKey = 'Private Other';
+  static const systemKey = 'System';
+  static const totalKey = 'Total';
 
   @override
   Map<String, dynamic> toJson() => <String, Object?>{

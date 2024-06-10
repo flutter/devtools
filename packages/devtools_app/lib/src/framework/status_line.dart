@@ -78,7 +78,7 @@ class StatusLine extends StatelessWidget {
     final theme = Theme.of(context);
     final color = highlightForConnection ? theme.colorScheme.onPrimary : null;
     final screenWidth = ScreenSize(context).width;
-    final Widget? pageStatus = currentScreen.buildStatus(context);
+    final pageStatus = currentScreen.buildStatus(context);
     final widerThanXxs = screenWidth > MediaSize.xxs;
     final screenMetaData = ScreenMetaData.lookup(currentScreen.screenId);
     final showVideoTutorial = screenMetaData?.tutorialVideoTimestamp != null;
@@ -270,8 +270,7 @@ class IsolateSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final IsolateManager isolateManager =
-        serviceConnection.serviceManager.isolateManager;
+    final isolateManager = serviceConnection.serviceManager.isolateManager;
     return MultiValueListenableBuilder(
       listenables: [
         isolateManager.isolates,

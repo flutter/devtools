@@ -54,7 +54,7 @@ class FakeInspectorService extends Fake implements InspectorService {
   bool get useDaemonApi => true;
 
   @override
-  final Set<InspectorServiceClient> clients = {};
+  final clients = <InspectorServiceClient>{};
 
   @override
   void addClient(InspectorServiceClient client) {
@@ -75,7 +75,7 @@ class TestInspectorController extends Fake implements InspectorController {
 
   @override
   ValueListenable<InspectorTreeNode?> get selectedNode => _selectedNode;
-  final ValueNotifier<InspectorTreeNode?> _selectedNode = ValueNotifier(null);
+  final _selectedNode = ValueNotifier<InspectorTreeNode?>(null);
 
   @override
   void setSelectedNode(InspectorTreeNode? newSelection) {
@@ -93,8 +93,7 @@ class TestInspectorV2Controller extends Fake
   @override
   ValueListenable<inspector_v2.InspectorTreeNode?> get selectedNode =>
       _selectedNode;
-  final ValueNotifier<inspector_v2.InspectorTreeNode?> _selectedNode =
-      ValueNotifier(null);
+  final _selectedNode = ValueNotifier<inspector_v2.InspectorTreeNode?>(null);
 
   @override
   void setSelectedNode(inspector_v2.InspectorTreeNode? newSelection) {
@@ -204,7 +203,7 @@ void mockFlutterVersion(
 }
 
 // ignore: prefer_single_quotes, false positive.
-final Grammar mockGrammar = Grammar.fromJson(
+final mockGrammar = Grammar.fromJson(
   jsonDecode(
     '''
 {
@@ -235,11 +234,11 @@ final mockEmptyScriptRef = ScriptRef(
   id: 'mock-script-no-source',
 );
 
-final Script? mockScript = _loadScript('script.json');
+final mockScript = _loadScript('script.json');
 
-final Script? mockLargeScript = _loadScript('large_script.json');
+final mockLargeScript = _loadScript('large_script.json');
 
-final Script mockEmptyScript = Script(
+final mockEmptyScript = Script(
   uri: 'package:gallery/src/unknown.dart',
   id: 'mock-script-no-source',
 );

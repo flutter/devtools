@@ -75,8 +75,8 @@ class InspectorScreenMetrics extends ScreenAnalyticsMetrics {
     required this.inspectorTreeControllerId,
   }) : isV2 = true;
 
-  static const int summaryTreeGaId = 0;
-  static const int detailsTreeGaId = 1;
+  static const summaryTreeGaId = 0;
+  static const detailsTreeGaId = 1;
 
   /// Whether these metrics are for the V2 inspector.
   final bool isV2;

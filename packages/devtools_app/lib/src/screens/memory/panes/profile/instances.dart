@@ -29,7 +29,7 @@ class ProfileInstanceTableCell extends StatelessWidget {
   final int count;
   final bool _shouldShowMenu;
   final HeapClassName heapClass;
-  late final LiveClassSampler _sampler = LiveClassSampler(heapClass);
+  late final _sampler = LiveClassSampler(heapClass);
 
   @override
   Widget build(BuildContext context) {

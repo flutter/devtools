@@ -76,12 +76,12 @@ abstract class MemoryJson<T> implements DecodeEncode<T> {
   /// JSON file loaded is a memory file.
   final data = <T>[];
 
-  static const String jsonDevToolsScreenField = 'dartDevToolsScreen';
+  static const jsonDevToolsScreenField = 'dartDevToolsScreen';
   // TODO(terry): Expose Timeline.
-  // const String _devToolsScreenValueTimeline = 'timeline';
-  static const String devToolsScreenValueMemory = 'memory';
-  static const String jsonVersionField = 'version';
-  static const String jsonDataField = 'data';
+  // const _devToolsScreenValueTimeline = 'timeline';
+  static const devToolsScreenValueMemory = 'memory';
+  static const jsonVersionField = 'version';
+  static const jsonDataField = 'data';
 
   /// Trailer portion:
   static String get trailer => '\n]\n}}';
@@ -102,7 +102,7 @@ class SamplesMemoryJson extends MemoryJson<HeapSample> {
         );
 
   /// Exported JSON payload of collected memory statistics.
-  static const String _jsonMemoryPayloadField = 'samples';
+  static const _jsonMemoryPayloadField = 'samples';
 
   /// ## Structure of the memory JSON file
   ///
@@ -277,7 +277,7 @@ class AllocationMemoryJson extends MemoryJson<ClassHeapStats> {
         );
 
   /// Exported JSON payload of collected memory statistics.
-  static const String _jsonAllocationPayloadField = 'allocations';
+  static const _jsonAllocationPayloadField = 'allocations';
 
   /// JSON encoded version of the [sample].
   @override
@@ -334,7 +334,7 @@ class AllocationMemoryJson extends MemoryJson<ClassHeapStats> {
   @override
   int get version => allocationFormatVersion;
 
-  static const int allocationFormatVersion = 2;
+  static const allocationFormatVersion = 2;
 
   /// Given a list of HeapSample, encode as a Json string.
   static String encodeList(List<ClassHeapStats> data) {

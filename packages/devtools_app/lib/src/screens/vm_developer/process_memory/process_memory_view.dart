@@ -51,8 +51,8 @@ enum ProcessMemoryTab {
   final String title;
   final Key key;
 
-  static const Key _treeTab = Key('process memory usage tree tab');
-  static const Key _treeMapTab = Key('process memory usage tree map tab');
+  static const _treeTab = Key('process memory usage tree tab');
+  static const _treeMapTab = Key('process memory usage tree map tab');
 
   static ProcessMemoryTab byKey(Key? k) {
     return ProcessMemoryTab.values.firstWhere((tab) => tab.key == k);

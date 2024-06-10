@@ -104,8 +104,8 @@ mixin AutoDisposeMixin<T extends StatefulWidget> on State<T>
 /// * [AutoDisposeMixin], which integrates this functionality with [State]
 ///   objects.
 mixin DisposerMixin {
-  final List<StreamSubscription> _subscriptions = [];
-  final List<FocusNode> _focusNodes = [];
+  final _subscriptions = <StreamSubscription>[];
+  final _focusNodes = <FocusNode>[];
 
   @protected
   @visibleForTesting
@@ -117,8 +117,8 @@ mixin DisposerMixin {
   @visibleForTesting
   List<void Function()> get listeners => _listeners;
 
-  final List<Listenable> _listenables = [];
-  final List<VoidCallback> _listeners = [];
+  final _listenables = <Listenable>[];
+  final _listeners = <VoidCallback>[];
 
   /// An [Expando] that tracks listener ids when [addAutoDisposeListener] is
   /// called with a non-null [id] parameter.

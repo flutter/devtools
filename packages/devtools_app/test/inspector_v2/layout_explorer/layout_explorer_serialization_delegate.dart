@@ -18,7 +18,7 @@ class LayoutExplorerSerializationDelegate
           summaryTree: true,
           addAdditionalPropertiesCallback: (node, delegate) {
             final additionalJson = <String, Object>{};
-            final Object? value = node.value;
+            final value = node.value;
             if (value is Element) {
               final renderObject = value.renderObject!;
               additionalJson['renderObject'] =
@@ -30,7 +30,7 @@ class LayoutExplorerSerializationDelegate
                       );
               // Required for test.
               // ignore: invalid_use_of_protected_member
-              final Constraints constraints = renderObject.constraints;
+              final constraints = renderObject.constraints;
 
               final constraintsProperty = <String, Object>{
                 'type': constraints.runtimeType.toString(),
@@ -52,7 +52,7 @@ class LayoutExplorerSerializationDelegate
                   'height': renderObject.size.height.toString(),
                 };
 
-                final ParentData? parentData = renderObject.parentData;
+                final parentData = renderObject.parentData;
                 if (parentData is FlexParentData) {
                   additionalJson['flexFactor'] = parentData.flex ?? 0;
                   additionalJson['flexFit'] =

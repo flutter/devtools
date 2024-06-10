@@ -162,8 +162,7 @@ final class ServiceExtensionManager with DisposerMixin {
     _checkForFirstFrameStarted = false;
 
     final isolateRef = _isolateManager.mainIsolate.value!;
-    final Isolate? isolate =
-        await _isolateManager.isolateState(isolateRef).isolate;
+    final isolate = await _isolateManager.isolateState(isolateRef).isolate;
 
     if (isolate == null) return;
 
@@ -199,7 +198,7 @@ final class ServiceExtensionManager with DisposerMixin {
   }
 
   Future<void> _maybeCheckForFirstFlutterFrame() async {
-    final IsolateRef? lastMainIsolate = _isolateManager.mainIsolate.value;
+    final lastMainIsolate = _isolateManager.mainIsolate.value;
     if (_checkForFirstFrameStarted ||
         _firstFrameEventReceived ||
         lastMainIsolate == null) return;
@@ -290,8 +289,7 @@ final class ServiceExtensionManager with DisposerMixin {
 
         switch (expectedValueType) {
           case const (bool):
-            final bool enabled =
-                response.json!['enabled'] == 'true' ? true : false;
+            final enabled = response.json!['enabled'] == 'true' ? true : false;
             await _maybeRestoreExtension(name, enabled);
             return;
           case const (String):
@@ -300,7 +298,7 @@ final class ServiceExtensionManager with DisposerMixin {
             return;
           case const (int):
           case const (double):
-            final num value = num.parse(
+            final value = num.parse(
               response.json![name.substring(name.lastIndexOf('.') + 1)],
             );
             await _maybeRestoreExtension(name, value);
@@ -320,8 +318,7 @@ final class ServiceExtensionManager with DisposerMixin {
 
     if (isolateRef != _mainIsolate) return;
 
-    final Isolate? isolate =
-        await _isolateManager.isolateState(isolateRef).isolate;
+    final isolate = await _isolateManager.isolateState(isolateRef).isolate;
     if (isolateRef != _mainIsolate) return;
 
     // Do not try to restore Dart IO extensions for a paused isolate.
@@ -403,8 +400,7 @@ final class ServiceExtensionManager with DisposerMixin {
     }
 
     if (mainIsolate == null) return;
-    final Isolate? isolate =
-        await _isolateManager.isolateState(mainIsolate).isolate;
+    final isolate = await _isolateManager.isolateState(mainIsolate).isolate;
     if (_isolateManager.mainIsolate.value != mainIsolate) return;
 
     // Do not try to call Dart IO extensions for a paused isolate.

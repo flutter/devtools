@@ -75,7 +75,7 @@ class _EditableListState extends State<EditableList> {
   }
 
   late final TextEditingController textFieldController;
-  final FocusNode textFieldFocusNode = FocusNode();
+  final textFieldFocusNode = FocusNode();
 
   @override
   void dispose() {
@@ -206,7 +206,7 @@ class _EditableListContentView extends StatelessWidget {
 
   final ListValueNotifier<String> entries;
   final void Function(String) onEntryRemoved;
-  final ScrollController _listContentScrollController = ScrollController();
+  final _listContentScrollController = ScrollController();
 
   @override
   Widget build(BuildContext context) {

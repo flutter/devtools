@@ -73,7 +73,7 @@ TextSpan? findLongestTextSpan(List<TextSpan> spans) {
   int longestLength = 0;
   TextSpan? longestSpan;
   for (final span in spans) {
-    final int currentLength = span.toPlainText().length;
+    final currentLength = span.toPlainText().length;
     if (currentLength > longestLength) {
       longestLength = currentLength;
       longestSpan = span;

@@ -265,7 +265,7 @@ extension LayoutPropertiesExtension on LayoutProperties {
   }
 }
 
-final Expando<FlexLayoutProperties> _flexLayoutExpando = Expando();
+final _flexLayoutExpando = Expando<FlexLayoutProperties>();
 
 extension MainAxisAlignmentExtension on MainAxisAlignment {
   MainAxisAlignment get reversed {
@@ -355,7 +355,7 @@ class FlexLayoutProperties extends LayoutProperties {
   }
 
   static FlexLayoutProperties _buildNode(RemoteDiagnosticsNode node) {
-    final Map<String, Object?> renderObjectJson = node.renderObject!.json;
+    final renderObjectJson = node.renderObject!.json;
     final properties = (renderObjectJson['properties'] as List<Object?>)
         .cast<Map<String, Object?>>();
 

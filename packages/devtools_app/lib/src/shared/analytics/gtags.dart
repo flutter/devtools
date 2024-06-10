@@ -23,8 +23,8 @@ external void _gTagCommandName(String command, String name, [JSObject? params]);
 // TODO(jacobr): refactor this code if we do not migrate off gtags.
 // ignore: avoid_classes_with_only_static_members
 class GTag {
-  static const String _event = 'event';
-  static const String _exception = 'exception';
+  static const _event = 'event';
+  static const _exception = 'exception';
 
   /// Collect the analytic's event and its parameters.
   static void event(

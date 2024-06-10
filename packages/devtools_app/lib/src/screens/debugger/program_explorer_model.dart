@@ -97,7 +97,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
       } else {
         lib = libNode.object as Library;
       }
-      final ScriptRef s = (object is ScriptRef) ? object as ScriptRef : script!;
+      final s = (object is ScriptRef) ? object as ScriptRef : script!;
       uri = s.uri ?? '';
     }
 
@@ -203,7 +203,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
         final path = parts.join('/');
         for (int i = 0; i < root.children.length; ++i) {
           if (root.children[i].name.startsWith(path)) {
-            final VMServiceObjectNode rootLibNode = root.removeChildAtIndex(i);
+            final rootLibNode = root.removeChildAtIndex(i);
             root.addChild(rootLibNode, index: 0);
             break;
           }
@@ -301,7 +301,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
 
   VMServiceObjectNode _collapseSingleChildDirectoryNodes() {
     if (children.length == 1) {
-      final VMServiceObjectNode child = children.first;
+      final child = children.first;
       if (child.isDirectory) {
         final collapsed = VMServiceObjectNode(
           controller,
@@ -346,7 +346,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     int? tokenPos = 0;
     final object = this.object;
 
-    final SourceLocation? sourceLocation = switch (object) {
+    final sourceLocation = switch (object) {
       FieldRef(:final location) ||
       FuncRef(:final location) ||
       ClassRef(:final location) =>
@@ -504,7 +504,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
   @override
   bool operator ==(Object other) {
     if (other is! VMServiceObjectNode) return false;
-    final VMServiceObjectNode node = other;
+    final node = other;
 
     return node.name == name &&
         node.object == object &&

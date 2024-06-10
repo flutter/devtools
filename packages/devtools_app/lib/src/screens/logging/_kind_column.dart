@@ -31,7 +31,7 @@ class KindColumn extends ColumnData<LogData>
     bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
-    final String kind = item.kind;
+    final kind = item.kind;
 
     Color color = const Color.fromARGB(0xff, 0x61, 0x61, 0x61);
 

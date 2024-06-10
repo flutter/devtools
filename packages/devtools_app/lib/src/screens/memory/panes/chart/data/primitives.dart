@@ -30,4 +30,4 @@ enum ChartInterval {
   }
 }
 
-const Duration chartUpdateDelay = Duration(milliseconds: 500);
+const chartUpdateDelay = Duration(milliseconds: 500);

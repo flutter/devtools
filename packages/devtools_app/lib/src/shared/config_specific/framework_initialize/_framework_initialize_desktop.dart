@@ -20,12 +20,12 @@ Future<String> initializePlatform() async {
 }
 
 class FlutterDesktopStorage implements Storage {
-  late final Map<String, dynamic> _values = _readValues();
+  late final _values = _readValues();
   bool _fileAndDirVerified = false;
 
   @override
   Future<String?> getValue(String key) async {
-    return _values[key];
+    return _values[key] as String?;
   }
 
   @override
@@ -40,8 +40,8 @@ class FlutterDesktopStorage implements Storage {
     _preferencesFile.writeAsStringSync('${encoder.convert(_values)}\n');
   }
 
-  Map<String, dynamic> _readValues() {
-    final File file = _preferencesFile;
+  Map<String, Object?> _readValues() {
+    final file = _preferencesFile;
     try {
       if (file.existsSync()) {
         return jsonDecode(file.readAsStringSync()) ?? {};
@@ -59,9 +59,8 @@ class FlutterDesktopStorage implements Storage {
       File(path.join(_userHomeDir(), '.flutter-devtools/.devtools'));
 
   static String _userHomeDir() {
-    final String envKey =
-        Platform.operatingSystem == 'windows' ? 'APPDATA' : 'HOME';
-    final String? value = Platform.environment[envKey];
+    final envKey = Platform.operatingSystem == 'windows' ? 'APPDATA' : 'HOME';
+    final value = Platform.environment[envKey];
     return value ?? '.';
   }
 }

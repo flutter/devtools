@@ -19,12 +19,12 @@ import 'network_controller.dart';
 import 'network_model.dart';
 
 // Approximately double the indent of the expandable tile's title.
-const double _rowIndentPadding = 30;
+const _rowIndentPadding = 30.0;
 
 // No padding between the last element and the divider of a expandable tile.
-const double _rowSpacingPadding = 15;
+const _rowSpacingPadding = 15.0;
 
-const EdgeInsets _rowPadding =
+const _rowPadding =
     EdgeInsets.only(left: _rowIndentPadding, bottom: _rowSpacingPadding);
 
 /// Helper to build ExpansionTile widgets for inspector views.
@@ -251,11 +251,11 @@ class HttpResponseTrailingDropDown extends StatelessWidget {
     return ListenableBuilder(
       listenable: data,
       builder: (_, __) {
-        final bool visible = (data.contentType != null &&
+        final visible = (data.contentType != null &&
                 !data.contentType!.contains('image')) &&
             data.responseBody!.isNotEmpty;
 
-        final List<NetworkResponseViewType> availableResponseTypes = [
+        final availableResponseTypes = <NetworkResponseViewType>[
           NetworkResponseViewType.auto,
           if (isJsonDecodable()) NetworkResponseViewType.json,
           NetworkResponseViewType.text,

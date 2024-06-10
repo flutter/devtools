@@ -161,8 +161,7 @@ class _LinkedScrollController extends ScrollController {
       '_LinkedScrollControllers can only be used with'
       ' _LinkedScrollPositions.',
     );
-    final _LinkedScrollPosition linkedPosition =
-        position as _LinkedScrollPosition;
+    final linkedPosition = position as _LinkedScrollPosition;
     assert(
       linkedPosition.owner == this,
       '_LinkedScrollPosition cannot change controllers once created.',
@@ -228,7 +227,7 @@ class _LinkedScrollPosition extends ScrollPositionWithSingleContext {
 
   final _LinkedScrollController owner;
 
-  final Set<_LinkedScrollActivity> _peerActivities = <_LinkedScrollActivity>{};
+  final _peerActivities = <_LinkedScrollActivity>{};
 
   // We override hold to propagate it to all peer controllers.
   @override
@@ -310,8 +309,7 @@ class _LinkedScrollPosition extends ScrollPositionWithSingleContext {
     if (this.activity is! _LinkedScrollActivity) {
       beginActivity(_LinkedScrollActivity(this));
     }
-    final _LinkedScrollActivity activity =
-        this.activity as _LinkedScrollActivity;
+    final activity = this.activity as _LinkedScrollActivity;
     activity.link(driver);
     return activity;
   }
@@ -339,7 +337,7 @@ class _LinkedScrollActivity extends ScrollActivity {
   @override
   _LinkedScrollPosition get delegate => super.delegate as _LinkedScrollPosition;
 
-  final Set<_LinkedScrollPosition> drivers = <_LinkedScrollPosition>{};
+  final drivers = <_LinkedScrollPosition>{};
 
   void link(_LinkedScrollPosition driver) {
     drivers.add(driver);

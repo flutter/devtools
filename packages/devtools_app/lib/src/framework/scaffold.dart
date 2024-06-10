@@ -105,7 +105,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     with AutoDisposeMixin, TickerProviderStateMixin {
   /// A tag used for [Hero] widgets to keep the [AppBar] in the same place
   /// across route transitions.
-  static const Object _appBarTag = 'DevTools AppBar';
+  static const _appBarTag = 'DevTools AppBar';
 
   /// The controller for animating between tabs.
   ///

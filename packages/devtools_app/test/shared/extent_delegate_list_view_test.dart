@@ -89,7 +89,7 @@ void main() {
     testWidgets(
       'inherits PrimaryScrollController automatically',
       (tester) async {
-        final ScrollController controller = ScrollController();
+        final controller = ScrollController();
         await wrapAndPump(
           tester,
           PrimaryScrollController(
@@ -112,7 +112,7 @@ void main() {
     );
 
     testWidgets('inherits PrimaryScrollController explicitly', (tester) async {
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       await wrapAndPump(
         tester,
         PrimaryScrollController(
@@ -137,7 +137,7 @@ void main() {
     testWidgets(
       'inherits PrimaryScrollController explicitly - horizontal',
       (tester) async {
-        final ScrollController controller = ScrollController();
+        final controller = ScrollController();
         await wrapAndPump(
           tester,
           PrimaryScrollController(
@@ -164,7 +164,7 @@ void main() {
     testWidgets(
       'does not inherit PrimaryScrollController - horizontal',
       (tester) async {
-        final ScrollController controller = ScrollController();
+        final controller = ScrollController();
         await wrapAndPump(
           tester,
           PrimaryScrollController(
@@ -191,7 +191,7 @@ void main() {
     testWidgets(
       'does not inherit PrimaryScrollController - explicitly set',
       (tester) async {
-        final ScrollController controller = ScrollController();
+        final controller = ScrollController();
         await wrapAndPump(
           tester,
           PrimaryScrollController(
@@ -219,8 +219,8 @@ void main() {
     testWidgets(
       'does not inherit PrimaryScrollController - other controller set',
       (tester) async {
-        final ScrollController primaryController = ScrollController();
-        final ScrollController listController = ScrollController();
+        final primaryController = ScrollController();
+        final listController = ScrollController();
         await wrapAndPump(
           tester,
           PrimaryScrollController(
@@ -246,7 +246,7 @@ void main() {
     );
 
     testWidgets('asserts there is a scroll controller', (tester) async {
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       await wrapAndPump(
         tester,
         PrimaryScrollController(
@@ -265,7 +265,7 @@ void main() {
         ),
       );
 
-      final AssertionError error = tester.takeException() as AssertionError;
+      final error = tester.takeException() as AssertionError;
       expect(
         error.message,
         'No ScrollController has been provided to the CustomPointerScrollView.',

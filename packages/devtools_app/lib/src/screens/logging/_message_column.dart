@@ -26,8 +26,8 @@ class MessageColumn extends ColumnData<LogData>
 
   @override
   int compare(LogData a, LogData b) {
-    final String valueA = getValue(a);
-    final String valueB = getValue(b);
+    final valueA = getValue(a);
+    final valueB = getValue(b);
     // Matches frame descriptions (e.g. '#12  11.4ms ')
     final regex = RegExp(r'#(\d+)\s+\d+.\d+ms\s*');
     final valueAIsFrameLog = valueA.startsWith(regex);
@@ -53,8 +53,8 @@ class MessageColumn extends ColumnData<LogData>
     VoidCallback? onPressed,
   }) {
     if (data.kind == 'flutter.frame') {
-      const Color color = Color.fromARGB(0xff, 0x00, 0x91, 0xea);
-      final Text text = Text(
+      const color = Color.fromARGB(0xff, 0x00, 0x91, 0xea);
+      final text = Text(
         getDisplayValue(data),
         overflow: TextOverflow.ellipsis,
       );
