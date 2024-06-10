@@ -32,13 +32,7 @@ class LoggingTableV2 extends StatefulWidget {
 class _LoggingTableV2State extends State<LoggingTableV2> {
   final selections = <int>{};
   final cachedOffets = <int, double>{};
-  final normalTextStyle = const TextStyle(color: Colors.black, fontSize: 14.0);
   String lastSearch = '';
-  final metadataTextStyle = const TextStyle(
-    color: Colors.black,
-    fontStyle: FontStyle.italic,
-    fontSize: 12.0,
-  );
   double maxWidth = 0.0;
 
   @override
@@ -215,7 +209,7 @@ class _LoggingTableRowsState extends State<_LoggingTableRows> {
               );
             },
             itemExtentBuilder: (index, _) =>
-                widget.model.getFilteredLogHeight(index),
+                widget.model.getFilteredLogHeight(context, index),
           ),
         ],
       ),
