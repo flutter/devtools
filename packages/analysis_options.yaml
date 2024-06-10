@@ -157,6 +157,8 @@ dart_code_metrics:
   rules:
 #    - arguments-ordering Too strict
 #    - avoid-banned-imports # TODO(polina-c): add configuration
+    - avoid-importing-entrypoint-exports:
+        only-in-src: true
     - avoid-cascade-after-if-null
     - avoid-collection-methods-with-unrelated-types
     - avoid-duplicate-exports

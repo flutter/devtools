@@ -6,11 +6,12 @@ import 'dart:convert';
 
 import 'package:devtools_app_shared/service.dart';
 import 'package:intl/intl.dart';
-import '../../../../devtools.dart';
+
 import '../../globals.dart';
 import '../../primitives/encoding.dart';
 import '../../primitives/utils.dart';
 import '../../screen.dart';
+import '../../utils.dart';
 import '_export_desktop.dart' if (dart.library.js_interop) '_export_web.dart';
 
 const nonDevToolsFileMessage = 'The imported file is not a Dart DevTools file.'
@@ -162,7 +163,7 @@ abstract class ExportController {
   }) {
     final contents = {
       DevToolsExportKeys.devToolsSnapshot.name: true,
-      DevToolsExportKeys.devToolsVersion.name: version,
+      DevToolsExportKeys.devToolsVersion.name: devToolsVersion,
       DevToolsExportKeys.connectedApp.name: connectedApp?.toJson() ??
           serviceConnection.serviceManager.connectedApp!.toJson(),
       ...offlineScreenData,

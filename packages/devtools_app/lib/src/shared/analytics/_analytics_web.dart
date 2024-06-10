@@ -15,7 +15,6 @@ import 'package:logging/logging.dart';
 import 'package:unified_analytics/unified_analytics.dart' as ua;
 import 'package:web/web.dart';
 
-import '../../../devtools.dart' as devtools show version;
 import '../dtd_manager_extensions.dart';
 import '../globals.dart';
 import '../server/server.dart' as server;
@@ -638,7 +637,7 @@ String _devtoolsPlatformType =
     ''; // dimension4 MacIntel/Linux/Windows/Android_n
 String _devtoolsChrome = ''; // dimension5 Chrome/n.n.n  or Crios/n.n.n
 
-const devtoolsVersion = devtools.version; //dimension6 n.n.n
+final devtoolsVersion = devToolsVersion; //dimension6 n.n.n
 
 String _ideLaunched = ''; // dimension7 IDE launched DevTools (VSCode, CLI, ...)
 
