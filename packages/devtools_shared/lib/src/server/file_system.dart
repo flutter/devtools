@@ -12,8 +12,7 @@ import 'usage.dart';
 // ignore: avoid_classes_with_only_static_members, requires refactor.
 class LocalFileSystem {
   static String _userHomeDir() {
-    final String envKey =
-        Platform.operatingSystem == 'windows' ? 'APPDATA' : 'HOME';
+    final envKey = Platform.operatingSystem == 'windows' ? 'APPDATA' : 'HOME';
     return Platform.environment[envKey] ?? '.';
   }
 

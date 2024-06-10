@@ -122,7 +122,7 @@ class ExtensionEvents {
   }
 
   factory ExtensionEvents.fromJson(Map<String, Object> json) {
-    final List<ExtensionEvent> events = [];
+    final events = <ExtensionEvent>[];
 
     json.forEach((key, value) {
       final event = ExtensionEvent.fromJson(value as Map<String, Object?>);

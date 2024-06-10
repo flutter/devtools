@@ -55,7 +55,7 @@ extension FlatColumnWidthExtension<T> on FlatTableController<T> {
     maxWidth = max(0, maxWidth);
     double available = maxWidth;
     // Columns sorted by increasing minWidth.
-    final List<ColumnData<T>> sortedColumns = columns.toList()
+    final sortedColumns = columns.toList()
       ..sort((a, b) {
         if (a.minWidthPx != null && b.minWidthPx != null) {
           return a.minWidthPx!.compareTo(b.minWidthPx!);

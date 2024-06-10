@@ -29,7 +29,7 @@ class ChartVmConnection extends DisposableController
   final MemoryTimeline timeline;
   final ValueListenable<bool> isAndroidChartVisible;
 
-  late final MemoryTracker _memoryTracker = MemoryTracker(
+  late final _memoryTracker = MemoryTracker(
     timeline,
     isAndroidChartVisible: isAndroidChartVisible,
   );

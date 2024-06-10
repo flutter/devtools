@@ -54,7 +54,7 @@ class _Notifications extends StatefulWidget {
 class _NotificationsState extends State<_Notifications> with AutoDisposeMixin {
   OverlayEntry? _overlayEntry;
 
-  final List<_Notification> _notifications = [];
+  final _notifications = <_Notification>[];
 
   @override
   void didChangeDependencies() {

@@ -181,7 +181,7 @@ abstract class ClassData {
     return byPath.containsKey(path);
   }
 
-  late final PathFromRoot pathWithMaxRetainedSize = () {
+  late final pathWithMaxRetainedSize = () {
     assert(byPath.isNotEmpty);
     return byPath.keys.reduce(
       (a, b) => byPath[a]!.retainedSize > byPath[b]!.retainedSize ? a : b,
@@ -194,6 +194,7 @@ class SingleClassData extends ClassData {
   SingleClassData({required super.className});
 
   @override
+  // ignore: avoid-explicit-type-declaration, required to override base class.
   final ObjectSet objects = ObjectSet();
 
   @override
@@ -205,7 +206,7 @@ class SingleClassData extends ClassData {
     required List<int>? retainers,
     required List<int>? retainedSizes,
   }) {
-    final PathFromRoot? path = retainers == null
+    final path = retainers == null
         ? null
         : PathFromRoot.forObject(
             graph,
@@ -213,7 +214,7 @@ class SingleClassData extends ClassData {
             index: index,
           );
 
-    final bool excludeFromRetained = path != null &&
+    final excludeFromRetained = path != null &&
         retainedSizes != null &&
         path.classes.contains(className);
 

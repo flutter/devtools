@@ -55,7 +55,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// area using the right style.
   TextStyle? descriptionTextStyleFromBuild;
 
-  static final CustomIconMaker iconMaker = CustomIconMaker();
+  static final iconMaker = CustomIconMaker();
 
   static BoxConstraints deserializeConstraints(Map<String, Object?> json) {
     return BoxConstraints(
@@ -658,7 +658,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
       return false;
     }
     for (final entry in entries) {
-      final String key = entry.key;
+      final key = entry.key;
       if (key == 'valueId') {
         continue;
       }

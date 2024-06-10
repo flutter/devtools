@@ -26,23 +26,23 @@ import 'gtags.dart';
 import 'metrics.dart';
 
 // Dimensions1 AppType values:
-const String appTypeFlutter = 'flutter';
-const String appTypeWeb = 'web';
-const String appTypeFlutterWeb = 'flutter_web';
-const String appTypeDartCLI = 'dart_cli';
+const appTypeFlutter = 'flutter';
+const appTypeWeb = 'web';
+const appTypeFlutterWeb = 'flutter_web';
+const appTypeDartCLI = 'dart_cli';
 // Dimensions2 BuildType values:
-const String buildTypeDebug = 'debug';
-const String buildTypeProfile = 'profile';
+const buildTypeDebug = 'debug';
+const buildTypeProfile = 'profile';
 // Start with Android_n.n.n
-const String devToolsPlatformTypeAndroid = 'Android_';
+const devToolsPlatformTypeAndroid = 'Android_';
 // Dimension5 devToolsChrome starts with
-const String devToolsChromeName = 'Chrome/'; // starts with and ends with n.n.n
-const String devToolsChromeIos = 'Crios/'; // starts with and ends with n.n.n
-const String devToolsChromeOS = 'CrOS'; // Chrome OS
+const devToolsChromeName = 'Chrome/'; // starts with and ends with n.n.n
+const devToolsChromeIos = 'Crios/'; // starts with and ends with n.n.n
+const devToolsChromeOS = 'CrOS'; // Chrome OS
 // Dimension6 devToolsVersion
 
 // Dimension7 ideLaunched
-const String ideLaunchedCLI = 'CLI'; // Command Line Interface
+const ideLaunchedCLI = 'CLI'; // Command Line Interface
 
 final _log = Logger('_analytics_web');
 
@@ -638,7 +638,7 @@ String _devtoolsPlatformType =
     ''; // dimension4 MacIntel/Linux/Windows/Android_n
 String _devtoolsChrome = ''; // dimension5 Chrome/n.n.n  or Crios/n.n.n
 
-const String devtoolsVersion = devtools.version; //dimension6 n.n.n
+const devtoolsVersion = devtools.version; //dimension6 n.n.n
 
 String _ideLaunched = ''; // dimension7 IDE launched DevTools (VSCode, CLI, ...)
 
@@ -740,15 +740,15 @@ external void jsHookupListenerForGA();
 /// devtoolsChrome.
 void computeDevToolsCustomGTagsData() {
   // Platform
-  final String platform = window.navigator.platform;
+  final platform = window.navigator.platform;
   platform.replaceAll(' ', '_');
   devtoolsPlatformType = platform;
 
-  final String appVersion = window.navigator.appVersion;
-  final List<String> splits = appVersion.split(' ');
+  final appVersion = window.navigator.appVersion;
+  final splits = appVersion.split(' ');
   final len = splits.length;
   for (int index = 0; index < len; index++) {
-    final String value = splits[index];
+    final value = splits[index];
     // Chrome or Chrome iOS
     if (value.startsWith(devToolsChromeName) ||
         value.startsWith(devToolsChromeIos)) {

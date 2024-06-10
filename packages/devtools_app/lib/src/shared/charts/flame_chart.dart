@@ -23,7 +23,7 @@ import '../ui/search.dart';
 import '../ui/utils.dart';
 import '../utils.dart';
 
-const double rowPadding = 2.0;
+const rowPadding = 2.0;
 // Flame chart rows contain text so are not readable if they do not scale with
 // the font factor.
 double get chartRowHeight => scaleByFontFactor(22.0);
@@ -34,8 +34,8 @@ double get rowHeightWithPadding => chartRowHeight + rowPadding;
 // on the font size scale factor. TODO(jacobr): clean up the section spacing so
 // it is not used in a case where it is not really spacing.
 double get sectionSpacing => scaleByFontFactor(16.0);
-const double sideInset = 70.0;
-const double sideInsetSmall = 60.0;
+const sideInset = 70.0;
+const sideInsetSmall = 60.0;
 
 double get baseTimelineGridIntervalPx => scaleByFontFactor(150.0);
 
@@ -69,7 +69,7 @@ abstract class FlameChart<T, V> extends StatefulWidget {
   ///
   /// This isn't really needed but is a reasonable for safety in case we
   /// aren't handling some mouse based scroll wheel behavior well, etc.
-  static const double maxScrollWheelDelta = 20.0;
+  static const maxScrollWheelDelta = 20.0;
 
   final T data;
 
@@ -107,9 +107,9 @@ abstract class FlameChartState<T extends FlameChart,
   // each node is positioned inside its own list.
   final flameChartNodeTop = 0.0;
 
-  final List<FlameChartRow<V>> rows = [];
+  final rows = <FlameChartRow<V>>[];
 
-  final List<FlameChartSection> sections = [];
+  final sections = <FlameChartSection>[];
 
   final focusNode = FocusNode(debugLabel: 'flame-chart');
 
@@ -1005,7 +1005,7 @@ class FlameChartSection {
 class FlameChartRow<T extends FlameChartDataMixin<T>> {
   FlameChartRow(this.index);
 
-  final List<FlameChartNode<T>> nodes = [];
+  final nodes = <FlameChartNode<T>>[];
 
   final int index;
 

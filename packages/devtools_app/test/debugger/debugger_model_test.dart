@@ -8,10 +8,10 @@ import 'package:vm_service/vm_service.dart';
 
 void main() {
   group('debugger_model', () {
-    final ScriptRef ref1 = ScriptRef(uri: 'package:foo', id: 'id-1');
-    final ScriptRef ref2 = ScriptRef(uri: 'package:foo/foo.dart', id: 'id-2');
-    final ScriptRef ref3 = ScriptRef(uri: 'package:bar/bar.dart', id: 'id-3');
-    final ScriptRef ref4 = ScriptRef(uri: 'package:bar/baz.dart', id: 'id-4');
+    final ref1 = ScriptRef(uri: 'package:foo', id: 'id-1');
+    final ref2 = ScriptRef(uri: 'package:foo/foo.dart', id: 'id-2');
+    final ref3 = ScriptRef(uri: 'package:bar/bar.dart', id: 'id-3');
+    final ref4 = ScriptRef(uri: 'package:bar/baz.dart', id: 'id-4');
 
     group('FileNode', () {
       test('handles an empty list', () {
@@ -27,7 +27,7 @@ void main() {
         expect(root.name, 'package:foo');
         expect(root.scriptRef, isNull);
         expect(root.children, hasLength(1));
-        final FileNode child = root.children.first;
+        final child = root.children.first;
         expect(child.name, 'foo.dart');
         expect(child.scriptRef, isNotNull);
         expect(child.children, isEmpty);

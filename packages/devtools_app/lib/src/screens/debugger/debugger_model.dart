@@ -255,7 +255,7 @@ class FileNode extends TreeNode<FileNode> {
   ScriptRef? scriptRef;
 
   /// This exists to allow for O(1) lookup of children when building the tree.
-  final Map<String, FileNode> _childrenAsMap = {};
+  final _childrenAsMap = <String, FileNode>{};
 
   /// Given a flat list of service protocol scripts, return a tree of scripts
   /// representing the best hierarchical grouping.
@@ -313,7 +313,7 @@ class FileNode extends TreeNode<FileNode> {
   @override
   bool operator ==(Object other) {
     if (other is! FileNode) return false;
-    final FileNode node = other;
+    final node = other;
 
     if (scriptRef == null) {
       return node.scriptRef != null ? false : name == node.name;

@@ -25,7 +25,7 @@ part of 'http.dart';
 class HttpDate {
   // Parse a cookie date string.
   static DateTime _parseCookieDate(String date) {
-    const List monthsLowerCase = const [
+    const monthsLowerCase = const <String>[
       "jan",
       "feb",
       "mar",

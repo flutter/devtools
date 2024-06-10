@@ -8,9 +8,9 @@
 // We use an empty initial page so that the benchmark server does not attempt
 // to load the default page 'index.html', which will show up as "page not
 // found" in DevTools.
-const String benchmarkInitialPage = '';
+const benchmarkInitialPage = '';
 
-const String devtoolsBenchmarkPrefix = 'devtools';
+const devtoolsBenchmarkPrefix = 'devtools';
 
 enum DevToolsBenchmark {
   navigateThroughOfflineScreens,

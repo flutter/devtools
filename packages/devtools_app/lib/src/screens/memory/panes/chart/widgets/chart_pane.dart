@@ -292,7 +292,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
     final displayTimestamp = prettyTimestamp(chartsValues.timestamp);
 
-    final OverlayState overlayState = Overlay.of(context);
+    final overlayState = Overlay.of(context);
     _hoverOverlayEntry ??= OverlayEntry(
       builder: (context) => Positioned(
         top: position.dy + _hoverYOffset,

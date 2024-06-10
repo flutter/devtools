@@ -739,7 +739,7 @@ class RoundedCornerOptions {
   });
 
   /// Static constant instance with all borders hidden
-  static const RoundedCornerOptions empty = RoundedCornerOptions(
+  static const empty = RoundedCornerOptions(
     showTopLeft: false,
     showTopRight: false,
     showBottomLeft: false,
@@ -993,7 +993,7 @@ class OutlinedRowGroup extends StatelessWidget {
 class ThickDivider extends StatelessWidget {
   const ThickDivider({super.key});
 
-  static const double thickDividerHeight = 5;
+  static const thickDividerHeight = 5.0;
 
   @override
   Widget build(BuildContext context) {
@@ -1569,7 +1569,7 @@ class Legend extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textStyle = dense ? Theme.of(context).legendTextStyle : null;
-    final List<Widget> legendItems = entries
+    final legendItems = entries
         .map(
           (entry) => _legendItem(
             entry.description,
@@ -2225,8 +2225,8 @@ class ContextMenuButton extends StatelessWidget {
     double? iconSize,
   }) : iconSize = iconSize ?? tableIconSize;
 
-  static const double defaultWidth = 14.0;
-  static const double densePadding = 2.0;
+  static const defaultWidth = 14.0;
+  static const densePadding = 2.0;
 
   final Color? color;
   final String? gaScreen;

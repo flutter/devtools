@@ -14,7 +14,6 @@ import '../../../shared/config_specific/logger/logger_helpers.dart';
 import '../../../shared/config_specific/post_message/post_message.dart';
 import '../../../shared/constants.dart';
 import '../dart_tooling_api.dart';
-import '../vs_code_api.dart';
 import 'vs_code_api.dart';
 
 // TODO(https://github.com/flutter/devtools/issues/7055): migrate away from
@@ -75,7 +74,7 @@ class DartToolingApiImpl implements DartToolingApi {
   ///
   /// Lazy-initialized and completes with `null` if VS Code is not available.
   @override
-  late final Future<VsCodeApi?> vsCode = VsCodeApiImpl.tryConnect(_rpc);
+  late final vsCode = VsCodeApiImpl.tryConnect(_rpc);
 
   void dispose() {
     unawaited(_rpc.close());

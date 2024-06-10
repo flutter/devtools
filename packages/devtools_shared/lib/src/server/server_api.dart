@@ -109,10 +109,10 @@ class ServerApi {
         // apiIncrementSurveyShownCount calls.
         if (queryParams.keys.length == 1 &&
             queryParams.containsKey(activeSurveyName)) {
-          final String theSurveyName = queryParams[activeSurveyName]!;
+          final surveyName = queryParams[activeSurveyName]!;
 
           // Set the current activeSurvey.
-          _devToolsUsage.activeSurvey = theSurveyName;
+          _devToolsUsage.activeSurvey = surveyName;
           result = true;
         }
         return _encodeResponse(result, api: api);

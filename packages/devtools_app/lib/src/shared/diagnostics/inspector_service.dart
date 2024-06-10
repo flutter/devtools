@@ -132,7 +132,7 @@ abstract class InspectorServiceBase extends DisposableController
     String methodName, [
     List<String>? args,
   ]) {
-    final Map<String, Object?> params = {};
+    final params = <String, Object?>{};
     if (args != null) {
       for (int i = 0; i < args.length; ++i) {
         params['arg$i'] = args[i];
@@ -200,7 +200,7 @@ class InspectorService extends InspectorServiceBase {
     );
   }
 
-  final ValueNotifier<List<String>> _rootDirectories = ValueNotifier([]);
+  final _rootDirectories = ValueNotifier<List<String>>(<String>[]);
 
   @visibleForTesting
   List<String> get rootPackagePrefixes => _rootPackagePrefixes;
@@ -272,7 +272,7 @@ class InspectorService extends InspectorServiceBase {
   /// possible to trigger an infinite loop ping-ponging back and forth between
   /// selecting two different nodes in the inspector tree if the selection was
   /// changed more rapidly than the running flutter app could update.
-  final Map<InspectorInstanceRef, List<int>> _expectedSelectionChanges = {};
+  final _expectedSelectionChanges = <InspectorInstanceRef, List<int>>{};
 
   /// Maximum time in milliseconds that we ever expect it will take for a
   /// selection change to apply.
@@ -712,7 +712,7 @@ abstract class InspectorObjectGroupBase
 
     if (disposed || instance == null) return null;
 
-    final String? json = instance.valueAsString;
+    final json = instance.valueAsString;
     if (json == null) return null;
     return jsonDecode(json);
   }
@@ -760,7 +760,7 @@ abstract class InspectorObjectGroupBase
     const objectName = 'that';
     final expression =
         '[${propertyNames.map((propertyName) => '$objectName.$propertyName').join(',')}]';
-    final Map<String, String> scope = {objectName: instanceRef!.id!};
+    final scope = {objectName: instanceRef!.id!};
     final instance = await getInstance(
       inspectorLibrary.eval(expression, isAlive: this, scope: scope),
     );
@@ -771,8 +771,7 @@ abstract class InspectorObjectGroupBase
     // property values.
 
     final properties = <String, InstanceRef>{};
-    final List<InstanceRef> values =
-        instance!.elements!.toList().cast<InstanceRef>();
+    final values = instance!.elements!.toList().cast<InstanceRef>();
     assert(values.length == propertyNames.length);
     for (int i = 0; i < propertyNames.length; ++i) {
       properties[propertyNames[i]] = values[i];
@@ -795,7 +794,7 @@ abstract class InspectorObjectGroupBase
 
     final properties = <String, InstanceRef>{};
     for (final field in clazz.fields!) {
-      final String name = field.name!;
+      final name = field.name!;
       if (isPrivateMember(name)) {
         // Needed to filter out _deleted_enum_sentinel synthetic property.
         // If showing enum values is useful we could special case
@@ -824,13 +823,13 @@ abstract class InspectorObjectGroupBase
       // TODO(pq): check for properties that match name.
       if (f.name == name) {
         final func = await inspectorLibrary.getFunc(f, this) as Func;
-        final SourceLocation? location = func.location;
+        final location = func.location;
         throw UnimplementedError(
           'getSourcePosition not implemented. $location',
         );
       }
     }
-    final ClassRef? superClass = clazz.superClass;
+    final superClass = clazz.superClass;
     return superClass == null
         ? null
         : getPropertyLocationHelper(superClass, name);
@@ -1014,8 +1013,7 @@ class ObjectGroup extends InspectorObjectGroupBase {
     assert(!disposed);
     if (disposed) return null;
     RemoteDiagnosticsNode? newSelection;
-    final InspectorInstanceRef? previousSelectionRef =
-        previousSelection?.valueRef;
+    final previousSelectionRef = previousSelection?.valueRef;
 
     switch (treeType) {
       case FlutterTreeType.widget:

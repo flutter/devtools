@@ -63,8 +63,7 @@ class _SelectProjectViewState extends State<SelectProjectView>
 
   Future<List<String>> _requestAndridVariants(String directory) async {
     ga.timeStart(gac.deeplink, gac.AnalyzeFlutterProject.loadVariants.name);
-    final List<String> androidVariants =
-        await server.requestAndroidBuildVariants(directory);
+    final androidVariants = await server.requestAndroidBuildVariants(directory);
     if (androidVariants.isEmpty || !mounted) {
       // If the project is not a Flutter project, cancel timing and return an empty list.
       ga.cancelTimingOperation(
@@ -124,8 +123,7 @@ class _SelectProjectViewState extends State<SelectProjectView>
       return;
     }
 
-    final List<String> androidVariants =
-        await _requestAndridVariants(directory);
+    final androidVariants = await _requestAndridVariants(directory);
     if (!mounted) {
       return;
     }

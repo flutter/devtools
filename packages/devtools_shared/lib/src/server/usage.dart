@@ -176,14 +176,14 @@ abstract class PersistentProperties {
   void syncSettings();
 }
 
-const JsonEncoder _jsonEncoder = JsonEncoder.withIndent('  ');
+const _jsonEncoder = JsonEncoder.withIndent('  ');
 
 class IOPersistentProperties extends PersistentProperties {
   IOPersistentProperties(
     String name, {
     String? documentDirPath,
   }) : super(name) {
-    final String fileName = name.replaceAll(' ', '_');
+    final fileName = name.replaceAll(' ', '_');
     documentDirPath ??= LocalFileSystem.devToolsDir();
     _file = File(path.join(documentDirPath, fileName));
     if (!_file.existsSync()) {

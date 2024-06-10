@@ -108,7 +108,7 @@ abstract class FrameworkCore {
       final finishedCompleter = Completer<void>();
 
       try {
-        final VmServiceWrapper service = await connect<VmServiceWrapper>(
+        final service = await connect<VmServiceWrapper>(
           uri: uri,
           finishedCompleter: finishedCompleter,
           serviceFactory: ({

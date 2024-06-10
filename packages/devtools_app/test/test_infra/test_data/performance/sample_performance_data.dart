@@ -26,7 +26,8 @@ PerfettoTimeline perfettoVmTimeline = PerfettoTimeline.parse({
 })!;
 
 Map<String, Object?> rawPerformanceData =
-    samplePerformanceData[ScreenMetaData.performance.id];
+    (samplePerformanceData[ScreenMetaData.performance.id] as Map)
+        .cast<String, Object?>();
 
 final testUiTrackId = Int64(22787);
 final testRasterTrackId = Int64(31491);

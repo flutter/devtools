@@ -179,6 +179,7 @@ dart_code_metrics:
     - avoid-unnecessary-type-casts
     - avoid-unrelated-type-assertions
     - avoid-unused-parameters
+    - avoid-explicit-type-declaration
     # - ban-name # TODO(polina-c): add configuration
     # - binary-expression-operand-order Some nice catches but too many false positives to enable.
     - double-literal-format
@@ -238,3 +239,5 @@ dart_code_metrics:
     # - prefer-extracting-callbacks I'm not clear this is always a good idea. Seems like a workaround.
     # - prefer-single-widget-per-file
     - prefer-using-list-view
+    - prefer-explicit-type-arguments
+    - prefer-explicit-function-type

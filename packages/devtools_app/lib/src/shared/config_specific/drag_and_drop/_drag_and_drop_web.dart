@@ -60,7 +60,7 @@ class DragAndDropManagerWeb extends DragAndDropManager {
     // handler, return early.
     if (activeState?.widget.handleDrop == null) return;
 
-    final FileList files = (event as DragEvent).dataTransfer!.files;
+    final files = (event as DragEvent).dataTransfer!.files;
     if (files.length > 1) {
       notificationService.push('You cannot import more than one file.');
       return;
@@ -75,7 +75,7 @@ class DragAndDropManagerWeb extends DragAndDropManager {
       return;
     }
 
-    final FileReader reader = FileReader();
+    final reader = FileReader();
     (reader as Element).onLoad.listen((event) {
       try {
         final Object json = jsonDecode(reader.result as String);

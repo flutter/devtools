@@ -243,8 +243,7 @@ class ClassesTableDiffColumns {
 
   late final sizeDeltaColumn = _SizeColumn(_DataPart.delta, sizeType);
 
-  late final List<ColumnData<DiffClassData>> columnList =
-      <ColumnData<DiffClassData>>[
+  late final columnList = <ColumnData<DiffClassData>>[
     _ClassNameColumn(diffData),
     _InstanceColumn(_DataPart.created, diffData),
     _InstanceColumn(_DataPart.deleted, diffData),

@@ -163,6 +163,6 @@ String topicDocumentationLink(String topic) => '${topic}DocumentationLink';
 /// Analytic event constants specific for console.
 class ConsoleEvent {
   static const helpInline = 'consoleHelpInline';
-  static const String evalInStoppedApp = 'consoleEvalInStoppedApp';
-  static const String evalInRunningApp = 'consoleEvalInRunningApp';
+  static const evalInStoppedApp = 'consoleEvalInStoppedApp';
+  static const evalInRunningApp = 'consoleEvalInRunningApp';
 }

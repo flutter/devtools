@@ -17,7 +17,7 @@ import 'dart:math';
 abstract class TreeNode<T extends TreeNode<T>> {
   T? parent;
 
-  final List<T> children = [];
+  final children = <T>[];
 
   // TODO(jacobr) should impact depth.
   bool indentChildren = true;

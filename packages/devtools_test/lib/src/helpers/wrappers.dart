@@ -179,7 +179,7 @@ void testWidgetsWithContext(
 }) {
   testWidgets(description, (WidgetTester widgetTester) async {
     // set up the context
-    final Map<Type, dynamic> oldValues = {};
+    final oldValues = <Type, Object?>{};
     for (final type in context.keys) {
       oldValues[type] = globals[type];
       setGlobal(type, context[type]);

@@ -58,7 +58,7 @@ class DevToolsAppBar extends StatelessWidget {
     final actionsWithSpacer = List<Widget>.from(actions ?? [])
       ..insert(0, VerticalLineSpacer(height: defaultToolbarHeight));
 
-    final bool hasMultipleTabs = screens.length > 1;
+    final hasMultipleTabs = screens.length > 1;
     if (hasMultipleTabs) {
       tabBar = TabBar(
         controller: tabController,

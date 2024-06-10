@@ -128,7 +128,7 @@ Future<Set<String>> _libraryMemberAndImportsAutocompletes(
 ) async {
   final result = <String>{};
   try {
-    final List<Future<Set<String>>> futures = <Future<Set<String>>>[];
+    final futures = <Future<Set<String>>>[];
     futures.add(
       libraryMemberAutocompletes(
         evalService,
@@ -137,7 +137,7 @@ Future<Set<String>> _libraryMemberAndImportsAutocompletes(
       ),
     );
 
-    final Library library = await evalService.getObject(libraryRef) as Library;
+    final library = await evalService.getObject(libraryRef) as Library;
     final dependencies = library.dependencies;
 
     if (dependencies != null) {
@@ -187,7 +187,7 @@ Future<Set<String>> _libraryMemberAutocompletes(
   LibraryRef libraryRef,
 ) async {
   final result = <String>{};
-  final Library library = await evalService.getObject(libraryRef) as Library;
+  final library = await evalService.getObject(libraryRef) as Library;
   final variables = library.variables;
   if (variables != null) {
     final fields = variables.map((field) => field.name);
@@ -208,7 +208,7 @@ Future<Set<String>> _libraryMemberAutocompletes(
   }
 
   if (debugIncludeExports) {
-    final List<Future<Set<String>>> futures = <Future<Set<String>>>[];
+    final futures = <Future<Set<String>>>[];
     for (final dependency in library.dependencies!) {
       if (!dependency.isImport!) {
         final prefix = dependency.prefix;
@@ -238,7 +238,7 @@ Future<void> _addAllInstanceMembersToAutocompleteList(
   InstanceRef response,
   EvalService controller,
 ) async {
-  final Instance instance = await controller.getObject(response) as Instance;
+  final instance = await controller.getObject(response) as Instance;
   final classRef = instance.classRef;
   if (classRef == null) return;
   result.addAll(

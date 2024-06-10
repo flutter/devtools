@@ -49,7 +49,7 @@ abstract class MemoryDefaultSceneHeaps {
     return result;
   }
 
-  static final List<HeapProvider> forDiffTesting = [
+  static final forDiffTesting = [
     {'A': 1, 'B': 2, 'C': 1},
     {'A': 1, 'B': 2},
     {'B': 1, 'C': 2, 'D': 3},

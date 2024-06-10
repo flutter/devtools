@@ -79,9 +79,9 @@ class VmServiceWrapper extends VmService {
 
   final bool _trackFutures;
 
-  final Map<String, Future<Success>> _activeStreams = {};
+  final _activeStreams = <String, Future<Success>>{};
 
-  final Set<TrackedFuture<Object>> activeFutures = {};
+  final activeFutures = <TrackedFuture<Object>>{};
 
   Future<void> get allFuturesCompleted => _allFuturesCompleter.future;
 

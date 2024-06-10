@@ -68,7 +68,7 @@ class MemoryTimeline with Serializable {
     data.clear();
   }
 
-  static final DateFormat _milliFormat = DateFormat('HH:mm:ss.SSS');
+  static final _milliFormat = DateFormat('HH:mm:ss.SSS');
 
   static String fineGrainTimestampFormat(int timestamp) =>
       _milliFormat.format(DateTime.fromMillisecondsSinceEpoch(timestamp));

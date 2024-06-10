@@ -108,7 +108,7 @@ class CodeViewController extends DisposableController
 
   final programExplorerController = ProgramExplorerController();
 
-  final ScriptsHistory scriptsHistory = ScriptsHistory();
+  final scriptsHistory = ScriptsHistory();
   late VoidCallback _scriptHistoryListener;
 
   ValueListenable<bool> get showCodeCoverage => _showCodeCoverage;

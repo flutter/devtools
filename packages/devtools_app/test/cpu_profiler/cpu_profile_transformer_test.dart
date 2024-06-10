@@ -89,8 +89,7 @@ void main() {
 
     test('processData step by step', () {
       expect(testStackFrame.profileAsString(), testStackFrameStringGolden);
-      final List<CpuStackFrame> bottomUpRoots =
-          transformer.generateBottomUpRoots(
+      final bottomUpRoots = transformer.generateBottomUpRoots(
         node: testStackFrame,
         currentBottomUpRoot: null,
         bottomUpRoots: [],
@@ -123,8 +122,7 @@ void main() {
     });
 
     test('processData step by step when skipping the root node', () {
-      final List<CpuStackFrame> bottomUpRoots =
-          transformer.generateBottomUpRoots(
+      final bottomUpRoots = transformer.generateBottomUpRoots(
         node: testStackFrameWithRoot,
         currentBottomUpRoot: null,
         bottomUpRoots: [],
@@ -159,7 +157,7 @@ void main() {
         testStackFrameWithRoot.profileAsString(),
         testStackFrameWithRootStringGolden,
       );
-      final List<CpuStackFrame> bottomUpRoots = transformer.bottomUpRootsFor(
+      final bottomUpRoots = transformer.bottomUpRootsFor(
         topDownRoot: testStackFrameWithRoot,
         mergeSamples: mergeCpuProfileRoots,
         rootedAtTags: false,
@@ -188,7 +186,7 @@ void main() {
 
       // Note: this needs to be rooted at a root frame before transforming as
       // a tree rooted at a root frame is what is provided in cpu_profile_model.dart.
-      final List<CpuStackFrame> bottomUpRoots = transformer.bottomUpRootsFor(
+      final bottomUpRoots = transformer.bottomUpRootsFor(
         topDownRoot: CpuStackFrame.root(zeroProfileMetaData)
           ..addChild(testTagRootedStackFrame),
         mergeSamples: mergeCpuProfileRoots,

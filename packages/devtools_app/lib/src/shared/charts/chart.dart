@@ -150,7 +150,7 @@ class ChartPainter extends CustomPainter {
 
   final ColorScheme colorScheme;
 
-  static const double axisWidth = 2;
+  static const axisWidth = 2.0;
 
   @override
   void paint(Canvas canvas, Size size) {

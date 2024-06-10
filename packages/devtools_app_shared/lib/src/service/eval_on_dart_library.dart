@@ -114,7 +114,7 @@ class EvalOnDartLibrary extends DisposableController
     }
 
     try {
-      final Isolate? isolate =
+      final isolate =
           await serviceManager.isolateManager.isolateState(isolateRef).isolate;
       if (_currentRequestId != requestId) {
         // The initialize request is obsolete.
@@ -564,7 +564,7 @@ class EvalOnDartLibrary extends DisposableController
       return request();
     }
     // Future that completes when the request has finished.
-    final Completer<T?> response = Completer();
+    final response = Completer<T?>();
     // This is an optimization to avoid sending stale requests across the wire.
     void wrappedRequest() async {
       if (isAlive != null && isAlive.disposed || _disposed) {
@@ -596,7 +596,7 @@ class EvalOnDartLibrary extends DisposableController
         return response.future;
       }
 
-      final Future<void> previousDone = allPendingRequestsDone!.future;
+      final previousDone = allPendingRequestsDone!.future;
       allPendingRequestsDone = response;
       // Schedule this request only after the previous request completes.
       try {
