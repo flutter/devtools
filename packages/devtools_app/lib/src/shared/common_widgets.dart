@@ -26,11 +26,6 @@ import 'primitives/utils.dart';
 import 'routing.dart';
 import 'utils.dart';
 
-/// The width of the package:flutter_test debugger device.
-const debuggerDeviceWidth = 800.0;
-
-const defaultDialogRadius = 20.0;
-
 double get assumedMonospaceCharacterWidth =>
     scaleByFontFactor(_assumedMonospaceCharacterWidth);
 double _assumedMonospaceCharacterWidth = 9.0;

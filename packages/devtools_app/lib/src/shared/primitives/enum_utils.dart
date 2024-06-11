@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(kenz): see if this class can be removed now that advanced enums are
+// supported in Dart.
+
 /// Class that converts enum value names to enum entries and vice versa.
 ///
 /// Example usage:

@@ -61,8 +61,6 @@ class CpuProfiler extends StatefulWidget {
 
   final List<DevToolsTab> tabs;
 
-  static const dataProcessingKey = Key('CpuProfiler - data is processing');
-
   static final searchableTabKeys = <Key>[
     ProfilerTab.methodTable.key,
     ProfilerTab.cpuFlameChart.key,

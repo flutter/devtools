@@ -116,7 +116,6 @@ const requestSize = 'requestSize';
 // Settings actions:
 const settingsDialog = 'settings';
 const darkTheme = 'darkTheme';
-const denseMode = 'denseMode';
 const analytics = 'analytics';
 const vmDeveloperMode = 'vmDeveloperMode';
 const verboseLogging = 'verboseLogging';

@@ -215,6 +215,7 @@ class ColorPair {
 class ThemedColorPair {
   const ThemedColorPair({required this.background, required this.foreground});
 
+  @visibleForTesting
   factory ThemedColorPair.from(ColorPair colorPair) {
     return ThemedColorPair(
       foreground: ThemedColor.fromSingle(colorPair.foreground),
