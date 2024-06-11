@@ -137,7 +137,7 @@ class LandingScreenSection extends StatelessWidget {
             Expanded(
               child: Text(
                 title,
-                style: textTheme.titleMedium,
+                style: textTheme.headlineMedium,
               ),
             ),
             ...actions,
@@ -238,7 +238,7 @@ class _ConnectInputState extends State<ConnectInput> with BlockingActionMixin {
         children: [
           Text(
             'Connect to a Running App',
-            style: textTheme.titleSmall,
+            style: textTheme.titleMedium,
           ),
           const SizedBox(height: denseRowSpacing),
           Text(

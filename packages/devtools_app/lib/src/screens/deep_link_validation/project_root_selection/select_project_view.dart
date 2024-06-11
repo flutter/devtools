@@ -162,7 +162,7 @@ class _SelectProjectViewState extends State<SelectProjectView>
           child: Text(
             'Select a local flutter project to check the status of all deep links.',
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.titleSmall,
+            style: Theme.of(context).textTheme.titleMedium,
           ),
         ),
         if (!projectRoots.isNullOrEmpty) ...[

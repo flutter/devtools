@@ -202,7 +202,7 @@ class TabOverflowButton extends StatelessWidget {
             child: MenuItemButton(
               style: const ButtonStyle().copyWith(
                 textStyle: WidgetStateProperty.resolveWith<TextStyle>((_) {
-                  return theme.textTheme.titleSmall!;
+                  return theme.textTheme.titleMedium!;
                 }),
               ),
               onPressed: () => onItemSelected(i),
