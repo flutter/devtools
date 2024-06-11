@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../../app.dart';
 import '../../../shared/utils.dart';
 import 'logging_controller_v2.dart';
 import 'logging_table_row.dart';
@@ -23,7 +22,6 @@ class LoggingTableModel extends ChangeNotifier {
   LoggingTableModel() {
     _worker = InterruptableChunkWorker(
       callback: (index) => getFilteredLogHeight(
-        DevToolsAppState.navigatorKey.currentContext!,
         index,
       ),
       progressCallback: (progress) => _cacheLoadProgress.value = progress,
@@ -85,7 +83,6 @@ class LoggingTableModel extends ChangeNotifier {
     _logs.add(log);
     _filteredLogs.add(log);
     getFilteredLogHeight(
-      DevToolsAppState.navigatorKey.currentContext!,
       _logs.length - 1,
     );
     notifyListeners();
@@ -104,12 +101,11 @@ class LoggingTableModel extends ChangeNotifier {
   }
 
   /// Get the height of a filtered Log at [index].
-  double getFilteredLogHeight(BuildContext context, int index) {
+  double getFilteredLogHeight(int index) {
     final cachedHeight = cachedHeights[index];
     if (cachedHeight != null) return cachedHeight;
 
     return cachedHeights[index] = LoggingTableRow.calculateRowHeight(
-      context,
       _logs[index],
       _tableWidth,
     );

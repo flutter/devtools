@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../devtools_app.dart';
 import '../../../shared/ui/utils.dart';
-import 'logging_controller_v2.dart';
 
 class LoggingTableRow extends StatefulWidget {
   const LoggingTableRow({
@@ -35,7 +34,6 @@ class LoggingTableRow extends StatefulWidget {
   static final _padding = scaleByFontFactor(8.0);
 
   static double calculateRowHeight(
-    BuildContext context,
     LogDataV2 log,
     double width,
   ) {
@@ -92,7 +90,7 @@ class _LoggingTableRowState extends State<LoggingTableRow> {
                         style: Theme.of(context).subtleTextStyle,
                       ),
                     ),
-                    SizedBox(width: defaultSpacing),
+                    const SizedBox(width: defaultSpacing),
                     RichText(
                       text: TextSpan(
                         text: 'Some OTHER META data',

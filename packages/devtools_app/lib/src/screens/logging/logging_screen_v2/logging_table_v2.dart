@@ -209,7 +209,7 @@ class _LoggingTableRowsState extends State<_LoggingTableRows> {
               );
             },
             itemExtentBuilder: (index, _) =>
-                widget.model.getFilteredLogHeight(context, index),
+                widget.model.getFilteredLogHeight(index),
           ),
         ],
       ),
