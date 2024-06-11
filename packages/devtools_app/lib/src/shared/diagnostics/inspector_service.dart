@@ -978,6 +978,8 @@ class ObjectGroup extends InspectorObjectGroupBase {
         ),
       );
     } else {
+      // TODO(https://github.com/flutter/devtools/issues/7902): Remove usage of
+      // this API.
       return parseDiagnosticsNodeDaemon(
         invokeServiceMethodDaemonParams(
           WidgetInspectorServiceExtensions
