@@ -111,7 +111,7 @@ void main() {
 
       final textFieldFinder = find.byType(TextField);
       expect(textFieldFinder, findsOneWidget);
-      final TextField textField = tester.widget(textFieldFinder) as TextField;
+      final textField = tester.widget(textFieldFinder) as TextField;
       expect(textField.enabled, isTrue);
       await tester.enterText(find.byType(TextField), 'abc');
     },

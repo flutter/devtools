@@ -293,24 +293,23 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         switch (propertyType) {
           case 'Color':
             {
-              final int alpha = JsonUtils.getIntMember(properties, 'alpha');
-              final int red = JsonUtils.getIntMember(properties, 'red');
-              final int green = JsonUtils.getIntMember(properties, 'green');
-              final int blue = JsonUtils.getIntMember(properties, 'blue');
+              final alpha = JsonUtils.getIntMember(properties, 'alpha');
+              final red = JsonUtils.getIntMember(properties, 'red');
+              final green = JsonUtils.getIntMember(properties, 'green');
+              final blue = JsonUtils.getIntMember(properties, 'blue');
               String radix(int chan) => chan.toRadixString(16).padLeft(2, '0');
               description = alpha == 255
                   ? '#${radix(red)}${radix(green)}${radix(blue)}'
                   : '#${radix(alpha)}${radix(red)}${radix(green)}${radix(blue)}';
 
-              final Color color = Color.fromARGB(alpha, red, green, blue);
+              final color = Color.fromARGB(alpha, red, green, blue);
               children.add(_paddedIcon(_colorIconMaker.getCustomIcon(color)));
               break;
             }
 
           case 'IconData':
             {
-              final int codePoint =
-                  JsonUtils.getIntMember(properties, 'codePoint');
+              final codePoint = JsonUtils.getIntMember(properties, 'codePoint');
               if (codePoint > 0) {
                 final icon = FlutterMaterialIcons.getIconForCodePoint(
                   codePoint,

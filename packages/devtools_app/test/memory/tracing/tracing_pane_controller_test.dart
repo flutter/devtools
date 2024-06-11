@@ -10,17 +10,17 @@ import 'package:vm_service/vm_service.dart';
 
 // ignore: avoid_classes_with_only_static_members, ok for enum-like class
 class _Tests {
-  static final TracePaneController emptyConnected = TracePaneController(
+  static final emptyConnected = TracePaneController(
     ControllerCreationMode.connected,
     rootPackage: '',
   );
 
-  static final TracePaneController emptyOffline = TracePaneController(
+  static final emptyOffline = TracePaneController(
     ControllerCreationMode.offlineData,
     rootPackage: '',
   );
 
-  static final TracePaneController selection = TracePaneController(
+  static final selection = TracePaneController(
     ControllerCreationMode.connected,
     stateForIsolate: {
       'isolate1': TracingIsolateState(
@@ -36,7 +36,7 @@ class _Tests {
     selectedIsolateId: 'isolate1',
   );
 
-  static final TracePaneController noSelection = TracePaneController(
+  static final noSelection = TracePaneController(
     ControllerCreationMode.connected,
     stateForIsolate: {
       'isolate1': TracingIsolateState(

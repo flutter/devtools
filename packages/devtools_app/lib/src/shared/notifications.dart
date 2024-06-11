@@ -21,7 +21,7 @@ class NotificationMessage {
   });
 
   /// The default duration for notifications to show.
-  static const Duration defaultDuration = Duration(seconds: 7);
+  static const defaultDuration = Duration(seconds: 7);
 
   final String text;
   final List<Widget> actions;
@@ -37,7 +37,7 @@ class NotificationService {
   final toDismiss = Queue<NotificationMessage>();
 
   /// Notifies about added messages or dismissals.
-  final ValueNotifier<int> newTasks = ValueNotifier(0);
+  final newTasks = ValueNotifier<int>(0);
 
   /// Messages that are planned to be shown or are currently shown in UI.
   @visibleForTesting

@@ -28,7 +28,7 @@ void main() {
           ),
         );
 
-        final Row row = tester.widget(find.byType(Row)) as Row;
+        final row = tester.widget(find.byType(Row)) as Row;
         expect(
           row.children.length,
           equals(1),
@@ -53,7 +53,7 @@ void main() {
         ),
       );
 
-      final Row row = tester.widget(find.byType(Row)) as Row;
+      final row = tester.widget(find.byType(Row)) as Row;
       expect(
         row.children.length,
         equals(2),

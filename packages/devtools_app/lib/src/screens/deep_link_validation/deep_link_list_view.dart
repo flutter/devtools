@@ -181,20 +181,17 @@ class _ValidatedDeepLinksView extends StatelessWidget {
               Expanded(
                 child: ValueListenableBuilder<LinkData?>(
                   valueListenable: controller.selectedLink,
-                  builder: (context, selectedLink, _) => TabBarView(
+                  builder: (context, _, __) => TabBarView(
                     children: [
                       ValidationDetailView(
-                        linkData: selectedLink!,
                         controller: controller,
                         viewType: TableViewType.domainView,
                       ),
                       ValidationDetailView(
-                        linkData: selectedLink,
                         controller: controller,
                         viewType: TableViewType.pathView,
                       ),
                       ValidationDetailView(
-                        linkData: selectedLink,
                         controller: controller,
                         viewType: TableViewType.singleUrlView,
                       ),
@@ -295,7 +292,7 @@ class _DeepLinkListViewTopPanel extends StatelessWidget {
         children: [
           Text(
             'Validate and fix',
-            style: Theme.of(context).textTheme.titleSmall,
+            style: Theme.of(context).textTheme.titleMedium,
           ),
           const Spacer(),
           _ConfigurationDropdown(
@@ -390,7 +387,7 @@ class _AllDeepLinkDataTable extends StatelessWidget {
                       const EdgeInsets.symmetric(horizontal: defaultSpacing),
                   child: Text(
                     'All deep links',
-                    style: textTheme.titleSmall,
+                    style: textTheme.titleMedium,
                   ),
                 ),
                 Padding(

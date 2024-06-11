@@ -243,8 +243,8 @@ void main() {
     await tester.runAsync(() async {
       await tester.pumpWidget(w);
       for (final element in find.byType(Image).evaluate()) {
-        final Image widget = element.widget as Image;
-        final ImageProvider image = widget.image;
+        final widget = element.widget as Image;
+        final image = widget.image;
         await precacheImage(image, element);
         await tester.pumpAndSettle();
       }

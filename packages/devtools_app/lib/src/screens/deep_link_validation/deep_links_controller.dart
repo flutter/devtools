@@ -412,7 +412,7 @@ class DeepLinksController extends DisposableController
   bool addLocalFingerprint(String fingerprint) {
     // A valid fingerprint consists of 32 pairs of hexadecimal digits separated by colons.
     bool isValidFingerprint(String input) {
-      final RegExp pattern =
+      final pattern =
           RegExp(r'^([0-9a-f]{2}:){31}[0-9a-f]{2}$', caseSensitive: false);
       return pattern.hasMatch(input);
     }
@@ -641,7 +641,7 @@ class DeepLinksController extends DisposableController
 
   @visibleForTesting
   List<LinkData> getFilterredLinks(List<LinkData> linkDatas) {
-    final String searchContent = displayOptions.searchContent;
+    final searchContent = displayOptions.searchContent;
     linkDatas = linkDatas.where((linkData) {
       if (searchContent.isNotEmpty &&
           !linkData.matchesSearchToken(

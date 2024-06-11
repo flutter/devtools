@@ -116,7 +116,6 @@ const requestSize = 'requestSize';
 // Settings actions:
 const settingsDialog = 'settings';
 const darkTheme = 'darkTheme';
-const denseMode = 'denseMode';
 const analytics = 'analytics';
 const vmDeveloperMode = 'vmDeveloperMode';
 const verboseLogging = 'verboseLogging';
@@ -163,6 +162,6 @@ String topicDocumentationLink(String topic) => '${topic}DocumentationLink';
 /// Analytic event constants specific for console.
 class ConsoleEvent {
   static const helpInline = 'consoleHelpInline';
-  static const String evalInStoppedApp = 'consoleEvalInStoppedApp';
-  static const String evalInRunningApp = 'consoleEvalInRunningApp';
+  static const evalInStoppedApp = 'consoleEvalInStoppedApp';
+  static const evalInRunningApp = 'consoleEvalInRunningApp';
 }

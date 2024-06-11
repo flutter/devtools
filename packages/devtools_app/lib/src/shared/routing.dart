@@ -15,8 +15,6 @@ import 'globals.dart';
 import 'primitives/utils.dart';
 import 'query_parameters.dart';
 
-const memoryAnalysisScreenId = 'memoryanalysis';
-
 const homeScreenId = '';
 const snapshotScreenId = 'snapshot';
 

@@ -191,7 +191,7 @@ class _AppSizeBodyState extends State<AppSizeBody>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   TabBar(
-                    labelColor: Theme.of(context).textTheme.bodyLarge!.color,
+                    labelColor: Theme.of(context).regularTextStyle.color,
                     isScrollable: true,
                     controller: _tabController,
                     tabs: tabs,
@@ -358,40 +358,30 @@ class _AnalysisViewState extends State<AnalysisView>
     return ValueListenableBuilder<bool>(
       valueListenable: controller.processingNotifier,
       builder: (context, processing, _) {
-        if (processing) {
-          return Center(
-            child: Text(
-              AppSizeScreen.loadingMessage,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Theme.of(context).textTheme.displayLarge!.color,
-              ),
-            ),
-          );
-        } else {
-          return Column(
-            children: [
-              Flexible(
-                child: FileImportContainer(
-                  title: 'Size analysis',
-                  instructions: AnalysisView.importInstructions,
-                  actionText: 'Analyze Size',
-                  gaScreen: gac.appSize,
-                  gaSelectionImport: gac.importFileSingle,
-                  gaSelectionAction: gac.analyzeSingle,
-                  onAction: (jsonFile) {
-                    controller.loadTreeFromJsonFile(
-                      jsonFile: jsonFile,
-                      onError: (error) {
-                        if (mounted) notificationService.push(error);
+        return processing
+            ? const CenteredMessage(AppSizeScreen.loadingMessage)
+            : Column(
+                children: [
+                  Flexible(
+                    child: FileImportContainer(
+                      title: 'Size analysis',
+                      instructions: AnalysisView.importInstructions,
+                      actionText: 'Analyze Size',
+                      gaScreen: gac.appSize,
+                      gaSelectionImport: gac.importFileSingle,
+                      gaSelectionAction: gac.analyzeSingle,
+                      onAction: (jsonFile) {
+                        controller.loadTreeFromJsonFile(
+                          jsonFile: jsonFile,
+                          onError: (error) {
+                            if (mounted) notificationService.push(error);
+                          },
+                        );
                       },
-                    );
-                  },
-                ),
-              ),
-            ],
-          );
-        }
+                    ),
+                  ),
+                ],
+              );
       },
     );
   }
@@ -473,48 +463,34 @@ class _DiffViewState extends State<DiffView>
     return ValueListenableBuilder<bool>(
       valueListenable: controller.processingNotifier,
       builder: (context, processing, _) {
-        if (processing) {
-          return _buildLoadingMessage();
-        } else {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                child: DualFileImportContainer(
-                  firstFileTitle: 'Old',
-                  secondFileTitle: 'New',
-                  // TODO(kenz): perhaps bold "original" and "modified".
-                  firstInstructions: DiffView.importOldInstructions,
-                  secondInstructions: DiffView.importNewInstructions,
-                  actionText: 'Analyze Diff',
-                  gaScreen: gac.appSize,
-                  gaSelectionImportFirst: gac.importFileDiffFirst,
-                  gaSelectionImportSecond: gac.importFileDiffSecond,
-                  gaSelectionAction: gac.analyzeDiff,
-                  onAction: (oldFile, newFile, onError) =>
-                      controller.loadDiffTreeFromJsonFiles(
-                    oldFile: oldFile,
-                    newFile: newFile,
-                    onError: onError,
+        return processing
+            ? const CenteredMessage(AppSizeScreen.loadingMessage)
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    child: DualFileImportContainer(
+                      firstFileTitle: 'Old',
+                      secondFileTitle: 'New',
+                      // TODO(kenz): perhaps bold "original" and "modified".
+                      firstInstructions: DiffView.importOldInstructions,
+                      secondInstructions: DiffView.importNewInstructions,
+                      actionText: 'Analyze Diff',
+                      gaScreen: gac.appSize,
+                      gaSelectionImportFirst: gac.importFileDiffFirst,
+                      gaSelectionImportSecond: gac.importFileDiffSecond,
+                      gaSelectionAction: gac.analyzeDiff,
+                      onAction: (oldFile, newFile, onError) =>
+                          controller.loadDiffTreeFromJsonFiles(
+                        oldFile: oldFile,
+                        newFile: newFile,
+                        onError: onError,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            ],
-          );
-        }
+                ],
+              );
       },
-    );
-  }
-
-  Widget _buildLoadingMessage() {
-    return Center(
-      child: Text(
-        AppSizeScreen.loadingMessage,
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          color: Theme.of(context).textTheme.displayLarge!.color,
-        ),
-      ),
     );
   }
 }

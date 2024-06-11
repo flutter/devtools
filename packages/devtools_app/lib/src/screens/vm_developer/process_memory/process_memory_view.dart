@@ -36,8 +36,6 @@ class VMProcessMemoryView extends VMDeveloperView {
           icon: Icons.memory,
         );
 
-  static const id = 'vm-process-memory';
-
   @override
   Widget build(BuildContext context) => VMProcessMemoryViewBody();
 }
@@ -51,12 +49,8 @@ enum ProcessMemoryTab {
   final String title;
   final Key key;
 
-  static const Key _treeTab = Key('process memory usage tree tab');
-  static const Key _treeMapTab = Key('process memory usage tree map tab');
-
-  static ProcessMemoryTab byKey(Key? k) {
-    return ProcessMemoryTab.values.firstWhere((tab) => tab.key == k);
-  }
+  static const _treeTab = Key('process memory usage tree tab');
+  static const _treeMapTab = Key('process memory usage tree map tab');
 }
 
 class VMProcessMemoryViewBody extends StatefulWidget {
@@ -125,7 +119,6 @@ class _VMProcessMemoryViewBodyState extends State<VMProcessMemoryViewBody>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
     final colorScheme = theme.colorScheme;
     final currentTab = widget.tabs[_tabController.index];
     return Column(
@@ -141,7 +134,7 @@ class _VMProcessMemoryViewBodyState extends State<VMProcessMemoryViewBody>
           leftPadding: 0,
           tall: true,
           title: TabBar(
-            labelColor: textTheme.bodyLarge?.color ?? colorScheme.onSurface,
+            labelColor: colorScheme.onSurface,
             isScrollable: true,
             controller: _tabController,
             tabs: widget.tabs,

@@ -28,7 +28,6 @@ class IsolateStatisticsView extends VMDeveloperView {
           title: 'Isolates',
           icon: Icons.bar_chart,
         );
-  static const id = 'isolate-statistics';
 
   @override
   bool get showIsolateSelector => true;
@@ -325,8 +324,7 @@ class StackTraceViewerWidget extends StatelessWidget {
     return ValueListenableBuilder<InstanceRef?>(
       valueListenable: stackTrace,
       builder: (context, stackTrace, _) {
-        final List<String>? lines = stackTrace
-            ?.allocationLocation?.valueAsString
+        final lines = stackTrace?.allocationLocation?.valueAsString
             ?.split('\n')
             .where((e) => e.isNotEmpty)
             .toList();

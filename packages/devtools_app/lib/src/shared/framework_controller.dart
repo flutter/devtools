@@ -16,15 +16,11 @@ class FrameworkController {
     _init();
   }
 
-  final StreamController<String> _showPageIdController =
-      StreamController.broadcast();
-  final StreamController<ConnectVmEvent> _connectVmController =
-      StreamController.broadcast();
-  final StreamController<String> _connectedController =
-      StreamController.broadcast();
-  final StreamController _disconnectedController = StreamController.broadcast();
-  final StreamController<PageChangeEvent> _pageChangeController =
-      StreamController.broadcast();
+  final _showPageIdController = StreamController<String>.broadcast();
+  final _connectVmController = StreamController<ConnectVmEvent>.broadcast();
+  final _connectedController = StreamController<String>.broadcast();
+  final _disconnectedController = StreamController<void>.broadcast();
+  final _pageChangeController = StreamController<PageChangeEvent>.broadcast();
 
   /// Show the indicated page.
   Stream<String> get onShowPageId => _showPageIdController.stream;

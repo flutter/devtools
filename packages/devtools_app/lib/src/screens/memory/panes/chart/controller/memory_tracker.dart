@@ -49,10 +49,10 @@ class MemoryTracker {
   Timer? _monitorContinues;
 
   void onGCEvent(Event event) {
-    final HeapSpace newHeap = HeapSpace.parse(event.json!['new'])!;
-    final HeapSpace oldHeap = HeapSpace.parse(event.json!['old'])!;
+    final newHeap = HeapSpace.parse(event.json!['new'])!;
+    final oldHeap = HeapSpace.parse(event.json!['old'])!;
 
-    final MemoryUsage memoryUsage = MemoryUsage(
+    final memoryUsage = MemoryUsage(
       externalUsage: newHeap.external! + oldHeap.external!,
       heapCapacity: newHeap.capacity! + oldHeap.capacity!,
       heapUsage: newHeap.used! + oldHeap.used!,
@@ -122,7 +122,7 @@ class MemoryTracker {
       await service.getIsolate(isolateId);
     } catch (e) {
       if (e is SentinelException) {
-        final SentinelException sentinelErr = e;
+        final sentinelErr = e;
         final message = 'isIsolateLive: Isolate sentinel $isolateId '
             '${sentinelErr.sentinel.kind}';
         debugLogger(message);
@@ -232,7 +232,7 @@ class MemoryTracker {
       );
     }
 
-    final HeapSample sample = HeapSample(
+    final sample = HeapSample(
       time,
       _processRss,
       // Displaying capacity dashed line on top of stacked (used + external).

@@ -96,7 +96,7 @@ class MemoryChartLegend extends StatelessWidget {
       // The height is specified here,
       // because [legendRows] are designed to take all available space.
       height: isAndroidVisible ? _legendHeight2Charts : _legendHeight1Chart,
-      padding: const EdgeInsets.fromLTRB(0, densePadding, densePadding, 0),
+      padding: const EdgeInsets.only(top: densePadding, right: densePadding),
       decoration: BoxDecoration(
         color: colorScheme.defaultBackgroundColor,
         border: Border.all(color: theme.focusColor),

@@ -15,11 +15,9 @@ import '../../shared/ui/search.dart';
 import 'deep_link_list_view.dart';
 import 'deep_links_controller.dart';
 
-const kDeeplinkTableCellDefaultWidth = 200.0;
 const kToolTipWidth = 344.0;
 const metaDataDeepLinkingFlagTag =
     '<meta-data android:name="flutter_deeplinking_enabled" android:value="true" />';
-const missingDomain = 'missing domain';
 const missingScheme = 'missing scheme';
 
 enum PlatformOS {
@@ -45,7 +43,7 @@ class AndroidDomainError extends DomainError {
   const AndroidDomainError(super.title, super.explanation, super.fixDetails);
 
   /// Existence of an asset link file.
-  static const existence = DomainError(
+  static const existence = AndroidDomainError(
     'Digital Asset Links JSON file does not exist',
     'This test checks whether the assetlinks.json file, '
         'which is used to verify the association between the app and the '
@@ -56,7 +54,7 @@ class AndroidDomainError extends DomainError {
   );
 
   /// Asset link file should define a link to this app.
-  static const appIdentifier = DomainError(
+  static const appIdentifier = AndroidDomainError(
     'Package name not found',
     'The test checks your Digital Asset Links JSON file '
         'for package name validation, which the mobile device '
@@ -68,7 +66,7 @@ class AndroidDomainError extends DomainError {
   );
 
   /// Asset link file should contain the correct fingerprint.
-  static const fingerprints = DomainError(
+  static const fingerprints = AndroidDomainError(
     'Fingerprint validation failed',
     'This test checks your Digital Asset Links JSON file for '
         'sha256 fingerprint validation, which the mobile device uses '
@@ -80,7 +78,7 @@ class AndroidDomainError extends DomainError {
   );
 
   /// Asset link file should be served with the correct content type.
-  static const contentType = DomainError(
+  static const contentType = AndroidDomainError(
     'JSON content type incorrect',
     'This test checks your Digital Asset Links JSON file for content type '
         'validation, which defines the format of the JSON file. This allows '
@@ -89,7 +87,7 @@ class AndroidDomainError extends DomainError {
   );
 
   /// Asset link file should be accessible via https.
-  static const httpsAccessibility = DomainError(
+  static const httpsAccessibility = AndroidDomainError(
     'HTTPS accessibility check failed',
     'This test tries to access your Digital Asset Links '
         'JSON file over an HTTPS connection, which must be '
@@ -100,7 +98,7 @@ class AndroidDomainError extends DomainError {
   );
 
   /// Asset link file should be accessible with no redirects.
-  static const nonRedirect = DomainError(
+  static const nonRedirect = AndroidDomainError(
     'Domain non-redirect check failed',
     'This test checks that your domain is accessible without '
         'redirects. This domain must be directly accessible '
@@ -109,7 +107,7 @@ class AndroidDomainError extends DomainError {
   );
 
   /// Asset link domain should be valid/not malformed.
-  static const hostForm = DomainError(
+  static const hostForm = AndroidDomainError(
     'Host attribute is not formed properly',
     'This test checks that your android:host attribute has a valid domain URL pattern.',
     'Make sure the host is a properly formed web address such '
@@ -118,7 +116,7 @@ class AndroidDomainError extends DomainError {
 
   /// Issues that are not covered by other checks. An example that may be in this
   /// category is Android validation API failures.
-  static const other = DomainError('Check failed', '', '');
+  static const other = AndroidDomainError('Check failed', '', '');
 }
 
 class IosDomainError extends DomainError {
@@ -126,7 +124,7 @@ class IosDomainError extends DomainError {
   // TODO: Add  domain errors for iOS.
 
   /// Existence of an Apple-App-Site-Association file.
-  static const existence = DomainError(
+  static const existence = IosDomainError(
     'Apple-App-Site-Association file does not exist',
     '',
     '',

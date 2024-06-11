@@ -326,7 +326,7 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
     final isMaxWidth = autoComplete.isMaxWidth;
     final searchAutoComplete = controller.searchAutoComplete;
 
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     final autoCompleteTextStyle = Theme.of(context)
         .regularTextStyle
@@ -358,8 +358,7 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
     // Find the searchField and place overlay below bottom of TextField and
     // make overlay width of TextField. This is also we decide the height of
     // the ListTile height, position above (if bottom is false).
-    final RenderBox box =
-        searchFieldKey.currentContext!.findRenderObject() as RenderBox;
+    final box = searchFieldKey.currentContext!.findRenderObject() as RenderBox;
 
     // Compute to global coordinates.
     final offset = box.localToGlobal(Offset.zero);
@@ -397,7 +396,7 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
     // Compute the Y position of the popup (auto-complete list). Its bottom
     // will be positioned at the top of the text field. Add 1 includes
     // the TextField border.
-    final double yCoord =
+    final yCoord =
         bottom ? 0.0 : -((count * tileEntryHeight) + box.size.height + 1);
 
     final xCoord = controller.xPosition;
@@ -552,7 +551,7 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
       searchAutoComplete;
 
   /// Layer links autoComplete popup to the search TextField widget.
-  final LayerLink autoCompleteLayerLink = LayerLink();
+  final autoCompleteLayerLink = LayerLink();
 
   OverlayEntry? autoCompleteOverlay;
 

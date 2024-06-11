@@ -118,7 +118,7 @@ class InspectorTreeController extends DisposableController
   }
 
   /// Clients the controller notifies to trigger changes to the UI.
-  final Set<InspectorControllerClient> _clients = {};
+  final _clients = <InspectorControllerClient>{};
 
   /// Identifier used when sending Google Analytics about events in this
   /// [InspectorTreeController].
@@ -421,7 +421,7 @@ class InspectorTreeController extends DisposableController
   InspectorTreeRow? getRow(Offset offset) {
     final rootLocal = root;
     if (rootLocal == null) return null;
-    final int row = getRowIndex(offset.dy);
+    final row = getRowIndex(offset.dy);
     return row < rootLocal.subtreeSize ? getCachedRow(row) : null;
   }
 
@@ -481,7 +481,7 @@ class InspectorTreeController extends DisposableController
   /// Width each row in the tree should have ignoring its indent.
   ///
   /// Content in rows should wrap if it exceeds this width.
-  final double rowWidth = 1200;
+  final rowWidth = 1200;
 
   /// Maximum indent of the tree in pixels.
   double? _maxIndent;
@@ -555,7 +555,7 @@ class InspectorTreeController extends DisposableController
     if (diagnosticsNode.hasChildren ||
         diagnosticsNode.inlineProperties.isNotEmpty) {
       if (diagnosticsNode.childrenReady || !diagnosticsNode.hasChildren) {
-        final bool styleIsMultiline =
+        final styleIsMultiline =
             expandPropertiesByDefault(diagnosticsNode.style);
         setupChildren(
           diagnosticsNode,
@@ -616,7 +616,7 @@ class InspectorTreeController extends DisposableController
   }
 
   Future<void> maybePopulateChildren(InspectorTreeNode treeNode) async {
-    final RemoteDiagnosticsNode? diagnostic = treeNode.diagnostic;
+    final diagnostic = treeNode.diagnostic;
     if (diagnostic != null &&
         diagnostic.hasChildren &&
         (treeNode.hasPlaceholderChildren || treeNode.children.isEmpty)) {
@@ -658,7 +658,7 @@ class InspectorTreeController extends DisposableController
     final matches = <InspectorTreeRow>[];
 
     if (searchPreviousMatches) {
-      final List<InspectorTreeRow> previousMatches = searchMatches.value;
+      final previousMatches = searchMatches.value;
       for (final previousMatch in previousMatches) {
         if (previousMatch.node.diagnostic!.searchValue
             .caseInsensitiveContains(search)) {
@@ -784,7 +784,7 @@ class _InspectorTreeState extends State<InspectorTree>
   late FocusNode _focusNode;
 
   /// When autoscrolling, the number of rows to pad the target location with.
-  static const int _scrollPadCount = 3;
+  static const _scrollPadCount = 3;
 
   @override
   void initState() {
@@ -817,7 +817,7 @@ class _InspectorTreeState extends State<InspectorTree>
 
   @override
   void didUpdateWidget(InspectorTree oldWidget) {
-    final InspectorTreeController? oldTreeController = oldWidget.treeController;
+    final oldTreeController = oldWidget.treeController;
     if (oldTreeController != widget.treeController) {
       oldTreeController?.removeClient(this);
 
@@ -1025,7 +1025,7 @@ class _InspectorTreeState extends State<InspectorTree>
     return LayoutBuilder(
       builder: (context, constraints) {
         final viewportWidth = constraints.maxWidth;
-        final Widget tree = Scrollbar(
+        final tree = Scrollbar(
           thumbVisibility: true,
           controller: _scrollControllerX,
           child: SingleChildScrollView(
@@ -1059,8 +1059,7 @@ class _InspectorTreeState extends State<InspectorTree>
                           if (index == treeControllerLocal.numRows) {
                             return SizedBox(height: inspectorRowHeight);
                           }
-                          final InspectorTreeRow row =
-                              treeControllerLocal.getCachedRow(index)!;
+                          final row = treeControllerLocal.getCachedRow(index)!;
                           final inspectorRef = row.node.diagnostic?.valueRef.id;
                           return _InspectorTreeRowWidget(
                             key: PageStorageKey(row.node),
@@ -1085,7 +1084,7 @@ class _InspectorTreeState extends State<InspectorTree>
           ),
         );
 
-        final bool shouldShowBreadcrumbs = !widget.isSummaryTree;
+        final shouldShowBreadcrumbs = !widget.isSummaryTree;
         if (shouldShowBreadcrumbs) {
           final inspectorTreeController = widget.summaryTreeController!;
 
@@ -1153,8 +1152,8 @@ class _RowPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = _defaultPaint(colorScheme);
 
-    final InspectorTreeNode node = row.node;
-    final bool showExpandCollapse = node.showExpandCollapse;
+    final node = row.node;
+    final showExpandCollapse = node.showExpandCollapse;
     final distanceFromExpandCollapseToRowStart =
         inspectorColumnIndent * _expandCollapseToRowStartXDistancePercentage;
     for (final tick in row.ticks) {
@@ -1173,7 +1172,7 @@ class _RowPainter extends CustomPainter {
     if (row.lineToParent) {
       final parentExpandCollapseX = _controller.getDepthIndent(row.depth - 1) -
           distanceFromExpandCollapseToRowStart;
-      final double width = showExpandCollapse
+      final width = showExpandCollapse
           ? inspectorColumnIndent * 0.6
           : inspectorColumnIndent;
       canvas.drawLine(
@@ -1257,7 +1256,7 @@ class InspectorRowContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double currentX =
+    final currentX =
         controller.getDepthIndent(row.depth) - inspectorColumnIndent;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;

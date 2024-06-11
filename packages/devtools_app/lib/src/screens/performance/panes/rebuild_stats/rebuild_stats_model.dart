@@ -185,7 +185,7 @@ class RebuildCountModel {
 
   // Maximum number of historic frames to keep rebuild counts to ensure memory
   // usage from rebuild counts is not excessive.
-  static const int rebuildFrameCacheSize = 10000;
+  static const rebuildFrameCacheSize = 10000;
 
   /// Source of truth for all resolution fo location ids to [Location] objects.
   final locationMap = LocationMap();
@@ -258,7 +258,7 @@ class RebuildCountModel {
 
     final int frameNumber = json[_frameNumberKey];
     // parse events
-    final List<int> events = (json[_eventsKey] as List).cast<int>();
+    final events = (json[_eventsKey] as List).cast<int>();
     final rebuildsForFrame = <RebuildLocation>[];
     for (int i = 0; i < events.length; i += 2) {
       final id = events[i];

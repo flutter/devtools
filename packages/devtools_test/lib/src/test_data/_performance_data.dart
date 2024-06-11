@@ -8,7 +8,7 @@
 
 import '_performance_raster_stats.dart';
 
-final Map<String, dynamic> samplePerformanceData = <String, dynamic>{
+final samplePerformanceData = <String, Object?>{
   "devToolsSnapshot": true,
   "devToolsVersion": "2.34.0",
   "connectedApp": {

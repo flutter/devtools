@@ -91,7 +91,7 @@ void main() {
 
   group('printBytes', () {
     test('${ByteUnit.kb}', () {
-      const int kb = 1024;
+      const kb = 1024;
       expect(printBytes(0, unit: ByteUnit.kb, fractionDigits: 0), '0');
       expect(printBytes(1, unit: ByteUnit.kb, fractionDigits: 0), '1');
       expect(printBytes(kb - 1, unit: ByteUnit.kb, fractionDigits: 0), '1');
@@ -108,7 +108,7 @@ void main() {
     });
 
     test('${ByteUnit.mb}', () {
-      const int mb = 1024 * 1024;
+      const mb = 1024 * 1024;
 
       expect(printBytes(10 * mb, unit: ByteUnit.mb, fractionDigits: 0), '10');
       expect(printBytes(10 * mb, unit: ByteUnit.mb), '10.0');
@@ -137,8 +137,8 @@ void main() {
   });
 
   test('prettyPrintBytes', () {
-    const int kb = 1024;
-    const int mb = 1024 * kb;
+    const kb = 1024;
+    const mb = 1024 * kb;
 
     expect(prettyPrintBytes(51, includeUnit: true), '51 B');
     expect(prettyPrintBytes(52, includeUnit: true), '0.1 KB');

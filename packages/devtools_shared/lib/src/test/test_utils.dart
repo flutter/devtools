@@ -8,7 +8,7 @@ Future<void> waitFor(
   String timeoutMessage = 'condition not satisfied',
   Duration delay = _shortDelay,
 }) async {
-  final DateTime end = DateTime.now().add(timeout);
+  final end = DateTime.now().add(timeout);
   while (!end.isBefore(DateTime.now())) {
     if (await condition()) {
       return;

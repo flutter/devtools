@@ -22,8 +22,6 @@ final _api = FakeDartToolingApi();
 ///
 ///   flutter run -t test/test_infra/scenes/standalone_ui/vs_code.stager_app.g.dart --dart-define=enable_experiments=true -d chrome
 class VsCodeScene extends Scene {
-  late PerformanceController controller;
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

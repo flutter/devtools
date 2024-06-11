@@ -22,7 +22,7 @@ void main() {
   // TODO(https://github.com/flutter/devtools/issues/2053): rewrite.
   // ignore: dead_code
   if (false) {
-    final FlutterTestEnvironment env = FlutterTestEnvironment(
+    final env = FlutterTestEnvironment(
       const FlutterRunConfiguration(withDebugger: true),
     );
 

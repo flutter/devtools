@@ -31,7 +31,7 @@ class SectionHeader extends StatelessWidget {
         if (requirements != null)
           Text(
             requirements!,
-            style: theme.textTheme.titleSmall!.copyWith(
+            style: theme.textTheme.titleMedium!.copyWith(
               color: theme.colorScheme.tertiary,
             ),
           ),

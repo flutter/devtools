@@ -19,12 +19,10 @@ import 'deep_links_services.dart';
 class ValidationDetailView extends StatelessWidget {
   const ValidationDetailView({
     super.key,
-    required this.linkData,
     required this.viewType,
     required this.controller,
   });
 
-  final LinkData linkData;
   final TableViewType viewType;
   final DeepLinksController controller;
 
@@ -114,7 +112,7 @@ class ValidationDetailHeader extends StatelessWidget {
               viewType == TableViewType.domainView
                   ? 'Selected domain validation details'
                   : 'Selected Deep link validation details',
-              style: Theme.of(context).textTheme.titleSmall,
+              style: Theme.of(context).textTheme.titleMedium,
             ),
             IconButton(
               onPressed: () =>
@@ -149,7 +147,7 @@ class _DomainCheckTable extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const SizedBox(height: intermediateSpacing),
-            Text('Web check', style: theme.textTheme.titleSmall),
+            Text('Web check', style: theme.textTheme.titleMedium),
             const SizedBox(height: denseSpacing),
             const _CheckTableHeader(),
             _CheckExpansionTile(
@@ -526,7 +524,7 @@ class _DomainAssociatedLinksPanel extends StatelessWidget {
       children: [
         Text(
           'Associated deep link URL',
-          style: theme.textTheme.titleSmall,
+          style: theme.textTheme.titleMedium,
         ),
         Card(
           color: theme.colorScheme.surface,
@@ -594,7 +592,7 @@ class _CrossCheckTable extends StatelessWidget {
         const SizedBox(height: intermediateSpacing),
         Text(
           'App check',
-          style: theme.textTheme.titleSmall,
+          style: theme.textTheme.titleMedium,
         ),
         const SizedBox(height: intermediateSpacing),
         const _CheckTableHeader(),
@@ -632,7 +630,7 @@ class _PathCheckTable extends StatelessWidget {
         const SizedBox(height: intermediateSpacing),
         Text(
           'App check',
-          style: theme.textTheme.titleSmall,
+          style: theme.textTheme.titleMedium,
         ),
         const SizedBox(height: intermediateSpacing),
         const _CheckTableHeader(),

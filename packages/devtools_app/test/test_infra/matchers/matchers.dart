@@ -33,14 +33,6 @@ String treeToDebugString(RemoteDiagnosticsNode node) {
   return node.toDiagnosticsNode().toStringDeep();
 }
 
-String treeToDebugStringTruncated(RemoteDiagnosticsNode node, int maxLines) {
-  List<String> lines = node.toDiagnosticsNode().toStringDeep().split('\n');
-  if (lines.length > maxLines) {
-    lines = lines.take(maxLines).toList()..add('...');
-  }
-  return lines.join('\n');
-}
-
 /// Asserts that a [path] matches a golden file after normalizing likely hash
 /// codes.
 ///
@@ -74,7 +66,7 @@ class _EqualsGoldenIgnoringHashCodes extends Matcher {
   late String path;
   late String _value;
 
-  static final Object _mismatchedValueKey = Object();
+  static final _mismatchedValueKey = Object();
 
   static bool get updateGoldens => autoUpdateGoldenFiles;
 
@@ -84,7 +76,7 @@ class _EqualsGoldenIgnoringHashCodes extends Matcher {
 
   @override
   bool matches(Object? object, Map<dynamic, dynamic> matchState) {
-    final String description = _normalize(object as String);
+    final description = _normalize(object as String);
     if (_value != description) {
       if (updateGoldens) {
         io.File(path).writeAsStringSync(description);

@@ -18,7 +18,7 @@ import '../test_infra/flutter_test_storage.dart';
 void main() {
   setGlobal(Storage, FlutterTestStorage());
 
-  final FlutterTestEnvironment env = FlutterTestEnvironment(
+  final env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
   );
 

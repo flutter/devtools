@@ -36,7 +36,7 @@ class CpuSamplingRateDropdown extends StatelessWidget {
 
   /// The key to identify the dropdown button.
   @visibleForTesting
-  static const Key dropdownKey = Key('CpuSamplingRateDropdown DropdownButton');
+  static const dropdownKey = Key('CpuSamplingRateDropdown DropdownButton');
 
   @override
   Widget build(BuildContext context) {

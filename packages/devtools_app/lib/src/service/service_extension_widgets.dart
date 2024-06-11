@@ -299,17 +299,17 @@ Future<void> _wrapReloadCall(
   Future<void> Function() reloadCall,
 ) async {
   try {
-    final Stopwatch timer = Stopwatch()..start();
+    final timer = Stopwatch()..start();
     messageBus.addEvent(BusEvent('$name.start'));
     await reloadCall();
     timer.stop();
     // 'restarted in 1.6s'
-    final String message = '${name}ed in ${durationText(timer.elapsed)}';
+    final message = '${name}ed in ${durationText(timer.elapsed)}';
     messageBus.addEvent(BusEvent('$name.end', data: message));
     // TODO(devoncarew): Add analytics.
     //ga.select(ga.devToolsMain, ga.hotRestart, timer.elapsed.inMilliseconds);
   } catch (_) {
-    final String message = 'error performing $name';
+    final message = 'error performing $name';
     messageBus.addEvent(BusEvent('$name.end', data: message));
     rethrow;
   }
@@ -1027,7 +1027,7 @@ class ServiceExtensionRichTooltip extends StatelessWidget {
   final ToggleableServiceExtensionDescription description;
   final Widget child;
 
-  static const double _tooltipWidth = 300.0;
+  static const _tooltipWidth = 300.0;
 
   @override
   Widget build(BuildContext context) {

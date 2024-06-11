@@ -78,7 +78,7 @@ class ServiceManager<T extends VmService> {
   /// Mapping of service name to service method.
   Map<String, String> get registeredMethodsForService =>
       _registeredMethodsForService;
-  final Map<String, String> _registeredMethodsForService = {};
+  final _registeredMethodsForService = <String, String>{};
 
   final isolateManager = IsolateManager();
 
@@ -142,10 +142,10 @@ class ServiceManager<T extends VmService> {
 
   ValueListenable<ConnectedState> get connectedState => _connectedState;
 
-  final ValueNotifier<ConnectedState> _connectedState =
-      ValueNotifier(const ConnectedState(false));
+  final _connectedState =
+      ValueNotifier<ConnectedState>(const ConnectedState(false));
 
-  final ValueNotifier<bool> _deviceBusy = ValueNotifier<bool>(false);
+  final _deviceBusy = ValueNotifier<bool>(false);
 
   /// Whether the device is currently busy - performing a long-lived, blocking
   /// operation.

@@ -14,8 +14,6 @@ import 'simple_items.dart';
 bool Function(List<dynamic>? list1, List<dynamic>? list2) _listEquality =
     const ListEquality().equals;
 
-typedef PathContainsClass = Map<(PathFromRoot, HeapClassName), bool>;
-
 @visibleForTesting
 class DebugRetainingPathUsage {
   /// Path is expected to be constructed for each object.
@@ -145,11 +143,6 @@ class PathFromRoot {
 
   @override
   final int hashCode;
-
-  @visibleForTesting
-  static void disposeSingletons() {
-    _instances = null;
-  }
 
   String toShortString({String? delimiter, bool inverted = false}) {
     return _asString(

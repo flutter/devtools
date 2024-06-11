@@ -35,7 +35,7 @@ void main() {
     onSelected: (_) {},
   )..sectionIndex = 0;
 
-  const Key testNodeKey = Key('test node');
+  const testNodeKey = Key('test node');
   final testNode = FlameChartNode<CpuStackFrame>(
     key: testNodeKey,
     text: 'Test node 1',

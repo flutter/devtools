@@ -31,8 +31,7 @@ void main() {
   late CpuProfileData cpuProfileData;
   late CpuProfilerController controller;
 
-  final ServiceConnectionManager fakeServiceManager =
-      FakeServiceConnectionManager();
+  final fakeServiceManager = FakeServiceConnectionManager();
   final app = fakeServiceManager.serviceManager.connectedApp!;
   when(app.isFlutterNativeAppNow).thenReturn(false);
   when(app.isFlutterAppNow).thenReturn(false);
@@ -86,7 +85,6 @@ void main() {
         );
         await tester.pumpWidget(wrap(cpuProfiler));
         expect(find.byType(TabBar), findsOneWidget);
-        expect(find.byKey(CpuProfiler.dataProcessingKey), findsNothing);
         expect(find.byType(CpuBottomUpTable), findsOneWidget);
         expect(find.byType(CpuCallTreeTable), findsNothing);
         expect(find.byType(CpuMethodTable), findsNothing);
@@ -121,7 +119,6 @@ void main() {
         );
         await tester.pumpWidget(wrap(cpuProfiler));
         expect(find.byType(TabBar), findsOneWidget);
-        expect(find.byKey(CpuProfiler.dataProcessingKey), findsNothing);
         expect(find.byType(CpuBottomUpTable), findsOneWidget);
         expect(find.byType(CpuProfileStats), findsOneWidget);
         expect(find.byType(UserTagDropdown), findsOneWidget);
@@ -298,7 +295,6 @@ void main() {
         );
         await tester.pumpWidget(wrap(cpuProfiler));
         expect(find.byType(TabBar), findsOneWidget);
-        expect(find.byKey(CpuProfiler.dataProcessingKey), findsNothing);
         expect(find.byType(CpuBottomUpTable), findsOneWidget);
         expect(find.byType(CpuCallTreeTable), findsNothing);
         expect(find.byType(CpuMethodTable), findsNothing);

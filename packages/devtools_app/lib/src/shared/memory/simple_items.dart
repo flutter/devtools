@@ -28,7 +28,7 @@ class MemoryFootprint {
 
 /// Value for rootIndex is taken from the doc:
 /// https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/heap_snapshot.md#object-ids
-const int heapRootIndex = 1;
+const heapRootIndex = 1;
 
 extension HeapSnapshotGraphSerialization on HeapSnapshotGraph {
   static Future<HeapSnapshotGraph> load(XFile file) async {

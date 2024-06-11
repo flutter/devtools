@@ -28,7 +28,7 @@ typedef ShortestRetainersResult = ({
 });
 
 /// Index of the sentinel object.
-const int _sentinelIndex = 0;
+const _sentinelIndex = 0;
 
 /// Finds shortest retainers for each object in the graph.
 ///

@@ -73,7 +73,7 @@ class FileSystemDesktop {
 
   /// List of files (basename only).
   List<String> list({required String prefix, bool isMemory = false}) {
-    final List<String> logs = [];
+    final logs = <String>[];
 
     try {
       // TODO(terry): Use path_provider when available?

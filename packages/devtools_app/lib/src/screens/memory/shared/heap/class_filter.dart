@@ -150,7 +150,7 @@ class ClassFilter with Serializable {
     }
   }
 
-  late final Set<String> filters = _filtersAsSet();
+  late final filters = _filtersAsSet();
 
   /// Task to be applied when filter changed.
   @visibleForTesting

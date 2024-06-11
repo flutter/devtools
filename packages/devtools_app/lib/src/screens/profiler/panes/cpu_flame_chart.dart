@@ -53,9 +53,8 @@ class _CpuProfileFlameChartState
     );
 
     void createChartNodes(CpuStackFrame stackFrame, int row) {
-      final double width =
-          widget.startingContentWidth * stackFrame.totalTimeRatio -
-              stackFramePadding;
+      final width = widget.startingContentWidth * stackFrame.totalTimeRatio -
+          stackFramePadding;
       final left = startingLeftForStackFrame(stackFrame);
       final colorPair = _colorPairForStackFrame(stackFrame);
 
@@ -130,7 +129,7 @@ class _CpuProfileFlameChartState
   }
 
   double startingLeftForStackFrame(CpuStackFrame stackFrame) {
-    final CpuStackFrame? parent = stackFrame.parent;
+    final parent = stackFrame.parent;
     late double left;
     if (parent == null) {
       left = widget.startInset;
@@ -144,7 +143,7 @@ class _CpuProfileFlameChartState
         assert(stackFrameIndex != -1);
         // [stackFrame] is not the first child of its parent. [left] should
         // equal the right value of its previous sibling.
-        final CpuStackFrame previous = parent.children[stackFrameIndex - 1];
+        final previous = parent.children[stackFrameIndex - 1];
         left = stackFrameLefts[previous.id]! +
             (widget.startingContentWidth * previous.totalTimeRatio);
       }

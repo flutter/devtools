@@ -14,4 +14,6 @@ abstract interface class DartToolingApi {
   /// Access to APIs provided by VS Code and/or the Dart/Flutter VS Code
   /// extensions.
   Future<VsCodeApi?> get vsCode;
+
+  void dispose();
 }

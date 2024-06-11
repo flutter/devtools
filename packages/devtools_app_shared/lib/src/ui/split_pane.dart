@@ -298,8 +298,8 @@ final class _SplitPaneState extends State<SplitPane> {
 final class DefaultSplitter extends StatelessWidget {
   const DefaultSplitter({super.key, required this.isHorizontal});
 
-  static const double iconSize = 24.0;
-  static const double splitterWidth = 12.0;
+  static const iconSize = 24.0;
+  static const splitterWidth = 12.0;
 
   final bool isHorizontal;
 
