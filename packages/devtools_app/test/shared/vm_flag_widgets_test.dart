@@ -14,7 +14,6 @@ import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
 void main() {
