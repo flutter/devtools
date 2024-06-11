@@ -80,7 +80,7 @@ class _LoggingTableRowState extends State<LoggingTableRow> {
                 RichText(
                   text: TextSpan(
                     text: widget.data.asLogDetails(),
-                    style: Theme.of(context).regularTextStyle,
+                    style: LoggingTableRow.detailsStyle,
                   ),
                 ),
                 Row(
@@ -88,14 +88,14 @@ class _LoggingTableRowState extends State<LoggingTableRow> {
                     RichText(
                       text: TextSpan(
                         text: 'Some META data',
-                        style: Theme.of(context).subtleTextStyle,
+                        style: LoggingTableRow.metadataStyle,
                       ),
                     ),
                     const SizedBox(width: defaultSpacing),
                     RichText(
                       text: TextSpan(
                         text: 'Some OTHER META data',
-                        style: Theme.of(context).subtleTextStyle,
+                        style: LoggingTableRow.metadataStyle,
                       ),
                     ),
                   ],
