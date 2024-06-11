@@ -264,11 +264,12 @@ void main() {
         });
       });
 
+      // TODO(https://github.com/flutter/devtools/issues/7911): Update test once
+      // Flutter has https://github.com/flutter/flutter/pull/150010.
       test('widget tree', () async {
         await env.setupEnvironment();
         final group = inspectorService!.createObjectGroup('test-group');
-        final RemoteDiagnosticsNode root = (await group
-            .getRoot(
+        final RemoteDiagnosticsNode root = (await group.getRoot(
           FlutterTreeType.widget,
           isSummaryTree: false,
         ))!;
