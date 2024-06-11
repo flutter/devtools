@@ -42,6 +42,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     this.multiline = false,
     this.style,
     this.nodeDescriptionHighlightStyle,
+    this.emphasizeNodesFromLocalProject = false,
   });
 
   final RemoteDiagnosticsNode? diagnostic;
@@ -51,6 +52,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
   final bool multiline;
   final TextStyle? style;
   final TextStyle? nodeDescriptionHighlightStyle;
+  final bool emphasizeNodesFromLocalProject;
 
   static Widget _paddedIcon(Widget icon) {
     return Padding(
@@ -264,7 +266,6 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         colorScheme,
       ),
     );
-    var descriptionTextStyle = textStyle;
     // TODO(jacobr): use TextSpans and SelectableText instead of Text.
     if (diagnosticLocal.isProperty) {
       // Display of inline properties.
@@ -280,8 +281,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         );
         // provide some contrast between the name and description if both are
         // present.
-        descriptionTextStyle =
-            descriptionTextStyle.merge(theme.subtleTextStyle);
+        textStyle = textStyle.merge(theme.subtleTextStyle);
       }
 
       if (diagnosticLocal.isCreatedByLocalProject) {
@@ -332,7 +332,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         Flexible(
           child: buildDescription(
             description: description,
-            textStyle: descriptionTextStyle,
+            textStyle: textStyle,
             colorScheme: colorScheme,
             diagnostic: diagnostic,
             searchValue: searchValue,
@@ -382,14 +382,16 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         }
       }
 
-      if (!diagnosticLocal.isSummaryTree &&
-          diagnosticLocal.isCreatedByLocalProject) {
-        textStyle = textStyle.merge(DiagnosticsTextStyles.regularBold);
+      // Grey out nodes that were not created by the local project to emphasize
+      // those that were:
+      if (emphasizeNodesFromLocalProject &&
+          !diagnosticLocal.isCreatedByLocalProject) {
+        textStyle = textStyle.merge(theme.subtleTextStyle);
       }
 
       var diagnosticDescription = buildDescription(
         description: diagnosticLocal.description ?? '',
-        textStyle: descriptionTextStyle,
+        textStyle: textStyle,
         colorScheme: colorScheme,
         diagnostic: diagnostic,
         searchValue: searchValue,

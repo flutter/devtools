@@ -948,23 +948,44 @@ class ObjectGroup extends InspectorObjectGroupBase {
   @override
   bool canSetSelectionInspector = true;
 
-  Future<RemoteDiagnosticsNode?> getRoot(FlutterTreeType type) {
+  Future<RemoteDiagnosticsNode?> getRoot(
+    FlutterTreeType type, {
+    required bool isSummaryTree,
+  }) {
     // There is no excuse to call this method on a disposed group.
     assert(!disposed);
     switch (type) {
       case FlutterTreeType.widget:
-        return getRootWidget();
+        return getRootWidgetTree(isSummaryTree: isSummaryTree);
     }
   }
 
-  Future<RemoteDiagnosticsNode?> getRootWidget() {
-    return parseDiagnosticsNodeDaemon(
-      invokeServiceMethodDaemonParams(
-        WidgetInspectorServiceExtensions
-            .getRootWidgetSummaryTreeWithPreviews.name,
-        {'groupName': groupName},
-      ),
-    );
+  Future<RemoteDiagnosticsNode?> getRootWidgetTree({
+    required bool isSummaryTree,
+  }) {
+    const newApi = 'getRootWidgetTree';
+    final supportsNewApi =
+        WidgetInspectorServiceExtensions.values.asNameMap().containsKey(newApi);
+    if (supportsNewApi) {
+      return parseDiagnosticsNodeDaemon(
+        invokeServiceMethodDaemonParams(
+          newApi,
+          {
+            'groupName': groupName,
+            'isSummaryTree': '$isSummaryTree',
+            'withPreviews': 'true',
+          },
+        ),
+      );
+    } else {
+      return parseDiagnosticsNodeDaemon(
+        invokeServiceMethodDaemonParams(
+          WidgetInspectorServiceExtensions
+              .getRootWidgetSummaryTreeWithPreviews.name,
+          {'groupName': groupName},
+        ),
+      );
+    }
   }
 
 // TODO these ones could be not needed.

@@ -267,7 +267,11 @@ void main() {
       test('widget tree', () async {
         await env.setupEnvironment();
         final group = inspectorService!.createObjectGroup('test-group');
-        final root = (await group.getRoot(FlutterTreeType.widget))!;
+        final RemoteDiagnosticsNode root = (await group
+            .getRoot(
+          FlutterTreeType.widget,
+          isSummaryTree: false,
+        ))!;
         // Tree only contains widgets from local app.
         expect(
           treeToDebugString(root),
