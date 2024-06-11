@@ -246,7 +246,7 @@ class _NotificationState extends State<_Notification>
       },
       child: Card(
         color: theme.snackBarTheme.backgroundColor,
-        margin: const EdgeInsets.fromLTRB(0, 0, 0, densePadding),
+        margin: const EdgeInsets.only(bottom: densePadding),
         child: DefaultTextStyle(
           style: theme.snackBarTheme.contentTextStyle ??
               theme.textTheme.titleMedium!,
@@ -319,11 +319,10 @@ class _NotificationMessage extends StatelessWidget {
     final theme = Theme.of(context);
     final textStyle = theme.regularTextStyle;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        denseSpacing,
-        denseSpacing,
-        denseSpacing,
-        0,
+      padding: const EdgeInsets.only(
+        left: denseSpacing,
+        top: denseSpacing,
+        right: denseSpacing,
       ),
       child: Text(
         widget.message.text,

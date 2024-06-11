@@ -17,8 +17,8 @@ import '../test_data/sample_data.dart';
 
 /// Required to have multiple test cases in a file.
 Future<void> resetHistory() async {
-  // ignore: avoid-dynamic, necessary here.
   await (ui.PlatformDispatcher.instance.views.single
+          // ignore: avoid-dynamic, necessary here.
           as dynamic /* EngineFlutterWindow */)
       // This dynamic call is necessary as `EngineFlutterWindow` is declared in
       // the web-specific implementation of the Flutter Engine, at

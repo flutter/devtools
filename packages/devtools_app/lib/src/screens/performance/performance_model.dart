@@ -92,7 +92,7 @@ extension type _PerformanceDataJson(Map<String, Object?> json) {
   List<FlutterFrame> get frames =>
       (json[OfflinePerformanceData.flutterFramesKey] as List? ?? [])
           .cast<Map>()
-          .map((f) => f.cast<String, dynamic>())
+          .map((f) => f.cast<String, Object?>())
           .map((f) => FlutterFrame.fromJson(f))
           .toList();
 
@@ -104,7 +104,7 @@ extension type _PerformanceDataJson(Map<String, Object?> json) {
   RebuildCountModel? get rebuildCountModel {
     final raw =
         (json[OfflinePerformanceData.rebuildCountModelKey] as Map? ?? {})
-            .cast<String, dynamic>();
+            .cast<String, Object?>();
     return raw.isNotEmpty ? RebuildCountModel.fromJson(raw) : null;
   }
 }

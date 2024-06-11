@@ -50,11 +50,10 @@ final class DevToolsDialog extends StatelessWidget {
                 : const SizedBox(height: defaultSpacing),
           ],
         ),
-        contentPadding: const EdgeInsets.fromLTRB(
-          contentPadding,
-          0,
-          contentPadding,
-          contentPadding,
+        contentPadding: const EdgeInsets.only(
+          left: contentPadding,
+          right: contentPadding,
+          bottom: contentPadding,
         ),
         content: DefaultTextStyle(
           style: Theme.of(context).regularTextStyle,
