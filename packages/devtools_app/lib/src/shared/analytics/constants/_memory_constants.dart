@@ -6,7 +6,6 @@ part of '../constants.dart';
 
 /// Analytics time constants specific for memory screen.
 class MemoryTime {
-  static const adaptSnapshot = 'adaptSnapshot';
   static const calculateDiff = 'calculateDiff';
   static const updateValues = 'updateValues';
 }
@@ -28,8 +27,6 @@ class MemoryEvent {
   static const hideChart = 'hideChart';
   static const chartInterval = 'chartInterval';
   static const chartHelp = 'memoryChartHelp';
-
-  static const leaksAnalyze = 'leaksAnalyze';
 
   static const profileDownloadCsv = 'profileDownloadCsv';
   static const profileRefreshManual = 'profileRefreshManual';
@@ -84,10 +81,7 @@ class MemoryEvent {
 /// by a widget used in different contexts.
 enum MemoryAreas {
   profile('profile'),
-  snapshotSingle('single'),
-  snapshotDiff('diff'),
-  snapshotDiffDelta('diff-delta'),
-  snapshotDiffNew('diff-new');
+  snapshotDiff('diff');
 
   const MemoryAreas(this.name);
 

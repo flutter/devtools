@@ -68,8 +68,6 @@ class ObjectSetStats {
 
 /// Statistical and detailed size-information about objects.
 class ObjectSet extends ObjectSetStats {
-  static ObjectSet empty = ObjectSet();
-
   /// Indexes of the objects in a heap snapshot.
   final indexes = <int>[];
 

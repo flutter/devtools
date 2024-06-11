@@ -4,11 +4,6 @@
 
 import 'package:collection/collection.dart';
 
-enum ChartType {
-  dartHeaps,
-  androidHeaps,
-}
-
 /// Automatic pruning of collected memory statistics (plotted) full data is
 /// still retained. Default is the best view each tick is 10 pixels, the
 /// width of an event symbol e.g., snapshot, monitor, etc.
