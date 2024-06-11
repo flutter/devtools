@@ -19,12 +19,10 @@ import 'deep_links_services.dart';
 class ValidationDetailView extends StatelessWidget {
   const ValidationDetailView({
     super.key,
-    required this.linkData,
     required this.viewType,
     required this.controller,
   });
 
-  final LinkData linkData;
   final TableViewType viewType;
   final DeepLinksController controller;
 
