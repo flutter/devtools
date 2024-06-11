@@ -18,16 +18,19 @@ class LoggingTableRow extends StatefulWidget {
   });
 
   final int index;
-  final LogDataV2 data;
-  final bool isSelected;
 
-  @override
-  State<LoggingTableRow> createState() => _LoggingTableRowState();
+  final LogDataV2 data;
+
+  final bool isSelected;
 
   static TextStyle get metadataStyle =>
       Theme.of(DevToolsAppState.navigatorKey.currentContext!).subtleTextStyle;
+
   static TextStyle get detailsStyle =>
       Theme.of(DevToolsAppState.navigatorKey.currentContext!).regularTextStyle;
+
+  @override
+  State<LoggingTableRow> createState() => _LoggingTableRowState();
 
   static final _padding = scaleByFontFactor(8.0);
 
