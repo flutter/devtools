@@ -19,7 +19,6 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('LoggingControllerV2', () {
     late LoggingControllerV2 controller;
-    setGlobal(MessageBus, MessageBus());
 
     void addStdoutData(String message) {
       controller.log(
@@ -37,6 +36,7 @@ void main() {
         ServiceConnectionManager,
         FakeServiceConnectionManager(),
       );
+      setGlobal(MessageBus, MessageBus());
 
       controller = LoggingControllerV2();
     });

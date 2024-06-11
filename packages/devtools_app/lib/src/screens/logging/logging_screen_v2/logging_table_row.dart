@@ -58,14 +58,12 @@ class LoggingTableRow extends StatefulWidget {
 class _LoggingTableRowState extends State<LoggingTableRow> {
   @override
   Widget build(BuildContext context) {
-    var color = alternatingColorForIndex(
-      widget.index,
-      Theme.of(context).colorScheme,
-    );
-
-    if (widget.isSelected) {
-      color = Colors.blueGrey;
-    }
+    final color = widget.isSelected
+        ? Colors.blueGrey
+        : alternatingColorForIndex(
+            widget.index,
+            Theme.of(context).colorScheme,
+          );
 
     return Container(
       color: color,

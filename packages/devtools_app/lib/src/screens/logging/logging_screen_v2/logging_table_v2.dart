@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -21,6 +22,7 @@ typedef ContextMenuBuilder = Widget Function(
 
 /// A Widget for displaying logs with line wrapping, along with log metadata.
 class LoggingTableV2 extends StatefulWidget {
+  // TODO(danchevalier): Use SearchControllerMixin and FilterControllerMixin.
   const LoggingTableV2({super.key, required this.model});
 
   final LoggingTableModel model;
@@ -71,6 +73,9 @@ class _LoggingTableV2State extends State<LoggingTableV2> {
               ),
             ),
           ],
+        ),
+        const SizedBox(
+          height: denseSpacing,
         ),
         Expanded(
           child: _LoggingTableProgress(
@@ -156,13 +161,13 @@ class _LoggingTableProgressState extends State<_LoggingTableProgress> {
 
   @override
   void dispose() {
-    super.dispose();
     _progressStopwatch.stop();
+    super.dispose();
   }
 }
 
 class _LoggingTableRows extends StatefulWidget {
-  const _LoggingTableRows({
+  _LoggingTableRows({
     required this.model,
   });
 
@@ -172,23 +177,14 @@ class _LoggingTableRows extends StatefulWidget {
   State<_LoggingTableRows> createState() => _LoggingTableRowsState();
 }
 
-class _LoggingTableRowsState extends State<_LoggingTableRows> {
+class _LoggingTableRowsState extends State<_LoggingTableRows>
+    with AutoDisposeMixin {
   late final ScrollController _verticalController = ScrollController();
-
-  void onModelUpdate() {
-    setState(() {});
-  }
 
   @override
   void initState() {
-    widget.model.addListener(onModelUpdate);
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    widget.model.removeListener(onModelUpdate);
-    super.dispose();
+    addAutoDisposeListener(widget.model);
   }
 
   @override
@@ -238,22 +234,7 @@ class _ContextMenuRegion extends StatefulWidget {
 }
 
 class _ContextMenuRegionState extends State<_ContextMenuRegion> {
-  Offset? _longPressOffset;
-
-  final ContextMenuController _contextMenuController = ContextMenuController();
-
-  static bool get _longPressEnabled {
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-      case TargetPlatform.iOS:
-        return true;
-      case TargetPlatform.macOS:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        return false;
-    }
-  }
+  final _contextMenuController = ContextMenuController();
 
   void _onSecondaryTapUp(TapUpDetails details) {
     _show(details.globalPosition);
@@ -264,16 +245,6 @@ class _ContextMenuRegionState extends State<_ContextMenuRegion> {
       return;
     }
     _hide();
-  }
-
-  void _onLongPressStart(LongPressStartDetails details) {
-    _longPressOffset = details.globalPosition;
-  }
-
-  void _onLongPress() {
-    assert(_longPressOffset != null);
-    _show(_longPressOffset!);
-    _longPressOffset = null;
   }
 
   void _show(Offset position) {
@@ -301,8 +272,6 @@ class _ContextMenuRegionState extends State<_ContextMenuRegion> {
       behavior: HitTestBehavior.opaque,
       onSecondaryTapUp: _onSecondaryTapUp,
       onTap: _onTap,
-      onLongPress: _longPressEnabled ? _onLongPress : null,
-      onLongPressStart: _longPressEnabled ? _onLongPressStart : null,
       child: widget.child,
     );
   }
