@@ -181,20 +181,17 @@ class _ValidatedDeepLinksView extends StatelessWidget {
               Expanded(
                 child: ValueListenableBuilder<LinkData?>(
                   valueListenable: controller.selectedLink,
-                  builder: (context, selectedLink, _) => TabBarView(
+                  builder: (context, _, __) => TabBarView(
                     children: [
                       ValidationDetailView(
-                        linkData: selectedLink!,
                         controller: controller,
                         viewType: TableViewType.domainView,
                       ),
                       ValidationDetailView(
-                        linkData: selectedLink,
                         controller: controller,
                         viewType: TableViewType.pathView,
                       ),
                       ValidationDetailView(
-                        linkData: selectedLink,
                         controller: controller,
                         viewType: TableViewType.singleUrlView,
                       ),
