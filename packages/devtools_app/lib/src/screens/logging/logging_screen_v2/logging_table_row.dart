@@ -39,17 +39,18 @@ class LoggingTableRow extends StatefulWidget {
     double width,
   ) {
     final text = log.asLogDetails();
+    final maxWidth = width - _padding * 2;
 
     final row1Height = calculateTextSpanHeight(
       TextSpan(text: text, style: detailsStyle),
-      maxWidth: width - _padding * 2,
+      maxWidth: maxWidth,
     );
 
     // TODO(danchevalier): Improve row2 height by manually flowing metadas into another row
     // if theyoverflow.
     final row2Height = calculateTextSpanHeight(
       TextSpan(text: text, style: metadataStyle),
-      maxWidth: width - _padding * 2,
+      maxWidth: maxWidth,
     );
     return row1Height + row2Height + _padding * 2;
   }
