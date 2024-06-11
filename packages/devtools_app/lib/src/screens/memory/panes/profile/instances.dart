@@ -25,6 +25,7 @@ class ProfileInstanceTableCell extends StatelessWidget {
     required this.count,
   }) : _shouldShowMenu = isSelected && count > 0;
 
+  // TODO(kenz): this is a bug that this is unused.
   final MemoryAreas gaContext;
   final int count;
   final bool _shouldShowMenu;

@@ -98,10 +98,6 @@ const androidJavaDisplay = 'Java';
 const androidStackDisplay = 'Stack';
 const androidGraphicsDisplay = 'Graphics';
 
-/// Display name is either '1 Event' or 'n Events'
-const eventDisplayName = ' Event';
-const eventsDisplayName = ' Events';
-
 /// Manages how legend and hover data and trace color and
 /// dash lines are drawn.
 const renderLine = 'color';
