@@ -38,6 +38,12 @@ class _VsCodeFlutterPanelState extends State<VsCodeFlutterPanel> {
   }
 
   @override
+  void dispose() {
+    widget.api.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       children: [
