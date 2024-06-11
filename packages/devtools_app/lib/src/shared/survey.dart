@@ -21,9 +21,9 @@ import 'utils.dart';
 final _log = Logger('survey');
 
 class SurveyService {
-  static const _noThanksLabel = 'NO THANKS';
+  static const _noThanksLabel = 'No thanks';
 
-  static const _takeSurveyLabel = 'TAKE SURVEY';
+  static const _takeSurveyLabel = 'Take survey';
 
   static const _maxShowSurveyCount = 5;
 
@@ -43,7 +43,7 @@ class SurveyService {
 
   Future<DevToolsSurvey?> get activeSurvey async {
     // If the server is unavailable we don't need to do anything survey related.
-    if (!server.isDevToolsServerAvailable) return null;
+    if (!server.isDevToolsServerAvailable && !debugSurvey) return null;
 
     _cachedSurvey ??= await fetchSurveyContent();
     if (_cachedSurvey?.id != null) {
@@ -62,14 +62,14 @@ class SurveyService {
       final message = survey.title!;
       final actions = [
         NotificationAction(
-          _noThanksLabel,
-          () => _noThanksPressed(
+          label: _noThanksLabel,
+          onPressed: () => _noThanksPressed(
             message: message,
           ),
         ),
         NotificationAction(
-          _takeSurveyLabel,
-          () => _takeSurveyPressed(
+          label: _takeSurveyLabel,
+          onPressed: () => _takeSurveyPressed(
             surveyUrl: _generateSurveyUrl(survey.url!),
             message: message,
           ),

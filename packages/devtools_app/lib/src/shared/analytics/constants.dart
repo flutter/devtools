@@ -8,6 +8,7 @@ import '../preferences/preferences.dart';
 import '../screen.dart';
 
 part 'constants/_cpu_profiler_constants.dart';
+part 'constants/_debugger_constants.dart';
 part 'constants/_deep_links_constants.dart';
 part 'constants/_extension_constants.dart';
 part 'constants/_memory_constants.dart';
@@ -89,12 +90,6 @@ enum HomeScreenEvents {
   connectToNewApp,
   viewVmFlags,
 }
-
-// Debugger UX actions:
-const refreshStatistics = 'refreshStatistics';
-const showFileExplorer = 'showFileExplorer';
-const hideFileExplorer = 'hideFileExplorer';
-const pausedWithNoFrames = 'pausedWithNoFrames';
 
 // Logging UX actions:
 const structuredErrors = 'structuredErrors';
