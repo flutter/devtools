@@ -24,19 +24,10 @@ class LoggingTableRow extends StatefulWidget {
   @override
   State<LoggingTableRow> createState() => _LoggingTableRowState();
 
-  static TextSpan _detailsSpan(BuildContext context, String text) {
-    return TextSpan(
-      text: text,
-      style: Theme.of(context).regularTextStyle,
-    );
-  }
-
-  static TextSpan _metadataSpan(BuildContext context, String text) {
-    return TextSpan(
-      text: text,
-      style: Theme.of(context).subtleTextStyle,
-    );
-  }
+  static TextStyle get metadataStyle =>
+      Theme.of(DevToolsAppState.navigatorKey.currentContext!).subtleTextStyle;
+  static TextStyle get detailsStyle =>
+      Theme.of(DevToolsAppState.navigatorKey.currentContext!).regularTextStyle;
 
   static final _padding = scaleByFontFactor(8.0);
 
@@ -48,15 +39,15 @@ class LoggingTableRow extends StatefulWidget {
     final text = log.asLogDetails();
 
     final row1Height = calculateTextSpanHeight(
-      _detailsSpan(context, text),
+      TextSpan(text: text, style: detailsStyle),
       maxWidth: width - _padding * 2,
     );
 
     // TODO(danchevalier): Improve row2 height by manually flowing metadas into another row
     // if theyoverflow.
     final row2Height = calculateTextSpanHeight(
-      _metadataSpan(context, 'always a single line of text'),
-      maxWidth: width,
+      TextSpan(text: text, style: metadataStyle),
+      maxWidth: width - _padding * 2,
     );
     return row1Height + row2Height + _padding * 2;
   }
@@ -85,22 +76,25 @@ class _LoggingTableRowState extends State<LoggingTableRow> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 RichText(
-                  text: LoggingTableRow._detailsSpan(
-                    context,
-                    widget.data.asLogDetails(),
+                  text: TextSpan(
+                    text: widget.data.asLogDetails(),
+                    style: Theme.of(context).regularTextStyle,
                   ),
                 ),
                 Row(
                   children: [
                     RichText(
-                      text: LoggingTableRow._metadataSpan(
-                        context,
-                        'Some METADATA',
+                      text: TextSpan(
+                        text: 'Some META data',
+                        style: Theme.of(context).subtleTextStyle,
                       ),
                     ),
-                    const SizedBox(width: defaultSpacing),
+                    SizedBox(width: defaultSpacing),
                     RichText(
-                      text: LoggingTableRow._metadataSpan(context, 'Goes Here'),
+                      text: TextSpan(
+                        text: 'Some OTHER META data',
+                        style: Theme.of(context).subtleTextStyle,
+                      ),
                     ),
                   ],
                 ),
