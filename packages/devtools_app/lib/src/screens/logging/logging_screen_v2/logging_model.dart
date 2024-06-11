@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 
 import '../../../shared/utils.dart';
 import 'logging_controller_v2.dart';

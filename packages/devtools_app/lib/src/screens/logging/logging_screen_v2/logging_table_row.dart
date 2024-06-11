@@ -5,8 +5,9 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../devtools_app.dart';
+import '../../../app.dart';
 import '../../../shared/ui/utils.dart';
+import 'logging_controller_v2.dart';
 
 class LoggingTableRow extends StatefulWidget {
   const LoggingTableRow({
