@@ -963,31 +963,16 @@ class ObjectGroup extends InspectorObjectGroupBase {
   Future<RemoteDiagnosticsNode?> getRootWidgetTree({
     required bool isSummaryTree,
   }) {
-    const newApi = 'getRootWidgetTree';
-    final supportsNewApi =
-        WidgetInspectorServiceExtensions.values.asNameMap().containsKey(newApi);
-    if (supportsNewApi) {
-      return parseDiagnosticsNodeDaemon(
-        invokeServiceMethodDaemonParams(
-          newApi,
-          {
-            'groupName': groupName,
-            'isSummaryTree': '$isSummaryTree',
-            'withPreviews': 'true',
-          },
-        ),
-      );
-    } else {
-      // TODO(https://github.com/flutter/devtools/issues/7902): Remove usage of
-      // this API.
-      return parseDiagnosticsNodeDaemon(
-        invokeServiceMethodDaemonParams(
-          WidgetInspectorServiceExtensions
-              .getRootWidgetSummaryTreeWithPreviews.name,
-          {'groupName': groupName},
-        ),
-      );
-    }
+    return parseDiagnosticsNodeDaemon(
+      invokeServiceMethodDaemonParams(
+        WidgetInspectorServiceExtensions.getRootWidgetTree.name,
+        {
+          'groupName': groupName,
+          'isSummaryTree': '$isSummaryTree',
+          'withPreviews': 'true',
+        },
+      ),
+    );
   }
 
 // TODO these ones could be not needed.

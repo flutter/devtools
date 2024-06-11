@@ -264,97 +264,129 @@ void main() {
         });
       });
 
-      // TODO(https://github.com/flutter/devtools/issues/7911): Update test once
-      // Flutter has https://github.com/flutter/flutter/pull/150010.
-      test('widget tree', () async {
-        await env.setupEnvironment();
-        final group = inspectorService!.createObjectGroup('test-group');
-        final RemoteDiagnosticsNode root = (await group.getRoot(
-          FlutterTreeType.widget,
-          isSummaryTree: false,
-        ))!;
-        // Tree only contains widgets from local app.
-        expect(
-          treeToDebugString(root),
-          equalsIgnoringHashCodes(
-            '''
-[root]
- └─MyApp
-   └─MaterialApp
-     └─Scaffold
-       ├─Center
-       │ └─Text
-       ├─AppBar
-       │ └─Text
-       └─FloatingActionButton
-         └─Icon
-''',
-          ),
-        );
-        RemoteDiagnosticsNode nodeInSummaryTree =
-            findNodeMatching(root, 'MaterialApp')!;
-        expect(nodeInSummaryTree, isNotNull);
-        expect(
-          treeToDebugString(nodeInSummaryTree),
-          equalsIgnoringHashCodes(
-            '''
-MaterialApp
- └─Scaffold
-   ├─Center
-   │ └─Text
-   ├─AppBar
-   │ └─Text
-   └─FloatingActionButton
-     └─Icon
-''',
-          ),
-        );
-        RemoteDiagnosticsNode nodeInDetailsTree =
-            (await group.getDetailsSubtree(nodeInSummaryTree))!;
-        // When flutter rolls, this string may sometimes change due to
-        // implementation details.
-        expect(
-          treeToDebugStringTruncated(nodeInDetailsTree, 30),
-          equalsGoldenIgnoringHashCodes('inspector_service_details_tree.txt'),
-        );
+      group('widget trees', () {
+        test('isSummaryTree = true', () async {
+          await env.setupEnvironment();
+          final group = inspectorService!.createObjectGroup('test-group');
+          final RemoteDiagnosticsNode root = (await group.getRoot(
+            FlutterTreeType.widget,
+            isSummaryTree: true,
+          ))!;
+          // Tree only contains widgets from local app.
+          expect(
+            treeToDebugString(root),
+            equals(
+              equalsGoldenIgnoringHashCodes(
+                'inspector_service_tree_summary.txt',
+              ),
+            ),
+          );
+          final nodeInSummaryTree = findNodeMatching(root, 'MaterialApp')!;
+          expect(nodeInSummaryTree, isNotNull);
 
-        nodeInSummaryTree = findNodeMatching(root, 'Text')!;
-        expect(nodeInSummaryTree, isNotNull);
-        expect(
-          treeToDebugString(nodeInSummaryTree),
-          equalsIgnoringHashCodes(
-            'Text\n',
-          ),
-        );
+          expect(
+            treeToDebugString(nodeInSummaryTree),
+            equals(
+              equalsGoldenIgnoringHashCodes(
+                'inspector_service_node_summary.txt',
+              ),
+            ),
+          );
 
-        nodeInDetailsTree = (await group.getDetailsSubtree(nodeInSummaryTree))!;
+          await group.dispose();
+        });
 
-        expect(
-          treeToDebugString(nodeInDetailsTree),
-          equalsGoldenIgnoringHashCodes(
-            'inspector_service_text_details_tree.txt',
-          ),
-        );
+        test('isSummaryTree = false', () async {
+          await env.setupEnvironment();
+          final group = inspectorService!.createObjectGroup('test-group');
+          final RemoteDiagnosticsNode root = (await group.getRoot(
+            FlutterTreeType.widget,
+            isSummaryTree: false,
+          ))!;
+          // Tree contains all widgets.
+          expect(
+            treeToDebugString(root),
+            equals(
+              equalsGoldenIgnoringHashCodes(
+                'inspector_service_tree_no_summary.txt',
+              ),
+            ),
+          );
+          final nodeInTree = findNodeMatching(root, 'MaterialApp')!;
+          expect(nodeInTree, isNotNull);
+          expect(
+            treeToDebugString(nodeInTree),
+            equals(
+              equalsGoldenIgnoringHashCodes(
+                'inspector_service_node_no_summary.txt',
+              ),
+            ),
+          );
 
-        expect(nodeInDetailsTree.valueRef, equals(nodeInSummaryTree.valueRef));
+          await group.dispose();
+        });
 
-        await group.setSelectionInspector(nodeInDetailsTree.valueRef, true);
-        final selection = (await group.getSelection(
-          null,
-          FlutterTreeType.widget,
-          isSummaryTree: false,
-        ))!;
-        expect(selection, isNotNull);
-        expect(selection.valueRef, equals(nodeInDetailsTree.valueRef));
-        expect(
-          treeToDebugString(selection),
-          equalsIgnoringHashCodes(
-            'Text\n'
-            ' └─RichText\n',
-          ),
-        );
+        test('details tree', () async {
+          await env.setupEnvironment();
+          final group = inspectorService!.createObjectGroup('test-group');
+          final RemoteDiagnosticsNode root = (await group.getRoot(
+            FlutterTreeType.widget,
+            isSummaryTree: true,
+          ))!;
 
-        await group.dispose();
+          RemoteDiagnosticsNode nodeInSummaryTree =
+              findNodeMatching(root, 'MaterialApp')!;
+          expect(nodeInSummaryTree, isNotNull);
+
+          RemoteDiagnosticsNode nodeInDetailsTree =
+              (await group.getDetailsSubtree(nodeInSummaryTree))!;
+          // When flutter rolls, this string may sometimes change due to
+          // implementation details.
+          expect(
+            treeToDebugStringTruncated(nodeInDetailsTree, 30),
+            equalsGoldenIgnoringHashCodes('inspector_service_details_tree.txt'),
+          );
+
+          nodeInSummaryTree = findNodeMatching(root, 'Text')!;
+          expect(nodeInSummaryTree, isNotNull);
+          expect(
+            treeToDebugString(nodeInSummaryTree),
+            equalsIgnoringHashCodes(
+              'Text\n',
+            ),
+          );
+
+          nodeInDetailsTree =
+              (await group.getDetailsSubtree(nodeInSummaryTree))!;
+
+          expect(
+            treeToDebugString(nodeInDetailsTree),
+            equalsGoldenIgnoringHashCodes(
+              'inspector_service_text_details_tree.txt',
+            ),
+          );
+
+          expect(
+              nodeInDetailsTree.valueRef, equals(nodeInSummaryTree.valueRef));
+
+          await group.setSelectionInspector(nodeInDetailsTree.valueRef, true);
+          final selection = (await group.getSelection(
+            null,
+            FlutterTreeType.widget,
+            isSummaryTree: false,
+          ))!;
+          expect(selection, isNotNull);
+          expect(selection.valueRef, equals(nodeInDetailsTree.valueRef));
+          expect(
+            treeToDebugString(selection),
+            equalsIgnoringHashCodes(
+              'Text\n'
+              ' └─RichText\n',
+            ),
+          );
+
+          await group.dispose();
+        });
       });
 
       test('enables hover eval mode by default', () async {
