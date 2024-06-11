@@ -76,6 +76,7 @@ class DartToolingApiImpl implements DartToolingApi {
   @override
   late final vsCode = VsCodeApiImpl.tryConnect(_rpc);
 
+  @override
   void dispose() {
     unawaited(_rpc.close());
   }
