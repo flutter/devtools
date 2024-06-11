@@ -68,9 +68,6 @@ import 'standalone_ui/standalone_screen.dart';
 // WARNING: Do not check in this file if debugEnableSampleScreen is true.
 const debugEnableSampleScreen = false;
 
-// Disabled until VM developer mode functionality is added.
-const showVmDeveloperMode = false;
-
 /// Top-level configuration for the app.
 @immutable
 class DevToolsApp extends StatefulWidget {

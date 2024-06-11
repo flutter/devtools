@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
 /// An event type for use with [MessageBus].
 class BusEvent {
   BusEvent(this.type, {this.data});
@@ -41,6 +43,7 @@ class MessageBus {
   /// Close (destroy) this [MessageBus]. This is generally not used outside of a
   /// testing context. All stream listeners will be closed and the bus will not
   /// fire any more events.
+  @visibleForTesting
   void close() {
     unawaited(_controller.close());
   }

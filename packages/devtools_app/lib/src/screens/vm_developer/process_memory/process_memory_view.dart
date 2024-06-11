@@ -36,8 +36,6 @@ class VMProcessMemoryView extends VMDeveloperView {
           icon: Icons.memory,
         );
 
-  static const id = 'vm-process-memory';
-
   @override
   Widget build(BuildContext context) => VMProcessMemoryViewBody();
 }
@@ -53,10 +51,6 @@ enum ProcessMemoryTab {
 
   static const _treeTab = Key('process memory usage tree tab');
   static const _treeMapTab = Key('process memory usage tree map tab');
-
-  static ProcessMemoryTab byKey(Key? k) {
-    return ProcessMemoryTab.values.firstWhere((tab) => tab.key == k);
-  }
 }
 
 class VMProcessMemoryViewBody extends StatefulWidget {

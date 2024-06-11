@@ -28,7 +28,6 @@ class IsolateStatisticsView extends VMDeveloperView {
           title: 'Isolates',
           icon: Icons.bar_chart,
         );
-  static const id = 'isolate-statistics';
 
   @override
   bool get showIsolateSelector => true;

@@ -419,15 +419,6 @@ final httpEnableTimelineLogging =
   tooltip: 'Toggle HTTP timeline logging',
 );
 
-final socketProfiling = ToggleableServiceExtensionDescription<bool>.from(
-  extensions.socketProfiling,
-  title: 'Whether socket profiling is enabled',
-  iconData: Icons.outlet_outlined,
-  gaScreenName: null,
-  gaItem: null,
-  tooltip: 'Toggle socket profiling',
-);
-
 // Legacy extension to show the inspector and enable inspector select mode.
 final toggleOnDeviceWidgetInspector =
     ToggleableServiceExtensionDescription<bool>.from(

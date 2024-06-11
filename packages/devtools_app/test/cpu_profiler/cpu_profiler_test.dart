@@ -85,7 +85,6 @@ void main() {
         );
         await tester.pumpWidget(wrap(cpuProfiler));
         expect(find.byType(TabBar), findsOneWidget);
-        expect(find.byKey(CpuProfiler.dataProcessingKey), findsNothing);
         expect(find.byType(CpuBottomUpTable), findsOneWidget);
         expect(find.byType(CpuCallTreeTable), findsNothing);
         expect(find.byType(CpuMethodTable), findsNothing);
@@ -120,7 +119,6 @@ void main() {
         );
         await tester.pumpWidget(wrap(cpuProfiler));
         expect(find.byType(TabBar), findsOneWidget);
-        expect(find.byKey(CpuProfiler.dataProcessingKey), findsNothing);
         expect(find.byType(CpuBottomUpTable), findsOneWidget);
         expect(find.byType(CpuProfileStats), findsOneWidget);
         expect(find.byType(UserTagDropdown), findsOneWidget);
@@ -297,7 +295,6 @@ void main() {
         );
         await tester.pumpWidget(wrap(cpuProfiler));
         expect(find.byType(TabBar), findsOneWidget);
-        expect(find.byKey(CpuProfiler.dataProcessingKey), findsNothing);
         expect(find.byType(CpuBottomUpTable), findsOneWidget);
         expect(find.byType(CpuCallTreeTable), findsNothing);
         expect(find.byType(CpuMethodTable), findsNothing);

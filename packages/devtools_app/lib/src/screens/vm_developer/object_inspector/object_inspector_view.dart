@@ -28,7 +28,6 @@ class ObjectInspectorView extends VMDeveloperView {
           title: 'Objects',
           icon: Icons.data_object_outlined,
         );
-  static const id = 'object-inspector-view';
 
   @override
   bool get showIsolateSelector => true;

@@ -225,10 +225,6 @@ void main() {
   });
 }
 
-BannerMessagesController bannerMessagesController(BuildContext context) {
-  return Provider.of<BannerMessagesController>(context, listen: false);
-}
-
 Future<Flag?> getProfileGranularityFlag(
   FakeServiceConnectionManager serviceManager,
 ) async {

@@ -143,7 +143,7 @@ class TimelineEventsTabControls extends StatelessWidget {
           // TODO(kenz): add a switch to enable the CPU profiler once the
           // tracing format supports it (when we switch to protozero).
           const SizedBox(width: densePadding),
-          TimelineSettingsButton(controller: controller),
+          const TimelineSettingsButton(),
           const SizedBox(width: densePadding),
           RefreshTimelineEventsButton(controller: controller),
         ],
@@ -153,9 +153,7 @@ class TimelineEventsTabControls extends StatelessWidget {
 }
 
 class TimelineSettingsButton extends StatelessWidget {
-  const TimelineSettingsButton({required this.controller, super.key});
-
-  final TimelineEventsController controller;
+  const TimelineSettingsButton({super.key});
 
   @override
   Widget build(BuildContext context) {

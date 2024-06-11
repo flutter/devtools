@@ -33,14 +33,6 @@ String treeToDebugString(RemoteDiagnosticsNode node) {
   return node.toDiagnosticsNode().toStringDeep();
 }
 
-String treeToDebugStringTruncated(RemoteDiagnosticsNode node, int maxLines) {
-  List<String> lines = node.toDiagnosticsNode().toStringDeep().split('\n');
-  if (lines.length > maxLines) {
-    lines = lines.take(maxLines).toList()..add('...');
-  }
-  return lines.join('\n');
-}
-
 /// Asserts that a [path] matches a golden file after normalizing likely hash
 /// codes.
 ///
