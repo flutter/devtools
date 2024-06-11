@@ -22,6 +22,7 @@ void main() {
       Future<Response> sendNotifyRequest({
         required DTDConnectionInfo dtd,
         Map<String, Object?>? queryParameters,
+      // ignore: avoid-redundant-async, returning FutureOr.
       }) async {
         final request = Request(
           'get',

@@ -37,11 +37,9 @@ class StatusLine extends StatelessWidget {
   static const deviceInfoTooltip = 'Device Info';
 
   /// The padding around the footer in the DevTools UI.
-  EdgeInsets get padding => const EdgeInsets.fromLTRB(
-        defaultSpacing,
-        densePadding,
-        defaultSpacing,
-        densePadding,
+  EdgeInsets get padding => const EdgeInsets.symmetric(
+        horizontal: defaultSpacing,
+        vertical: densePadding,
       );
 
   @override

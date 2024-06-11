@@ -82,8 +82,7 @@ class _SelectProjectViewState extends State<SelectProjectView>
       gac.deeplink,
       gac.AnalyzeFlutterProject.loadIosBuildOptions.name,
     );
-    final XcodeBuildOptions iosBuildOptions =
-        await server.requestIosBuildOptions(directory);
+    final iosBuildOptions = await server.requestIosBuildOptions(directory);
     ga.timeEnd(
       gac.deeplink,
       gac.AnalyzeFlutterProject.loadIosBuildOptions.name,

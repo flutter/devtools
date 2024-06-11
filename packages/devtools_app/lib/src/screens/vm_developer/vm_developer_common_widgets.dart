@@ -305,10 +305,7 @@ class VmExpansionTile extends StatelessWidget {
               child: Text(title),
             ),
             onExpansionChanged: onExpanded,
-            tilePadding: const EdgeInsets.only(
-              left: defaultSpacing,
-              right: defaultSpacing,
-            ),
+            tilePadding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
             children: children,
           ),
         ),

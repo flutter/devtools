@@ -174,7 +174,7 @@ class LoggingControllerV2 extends DisposableController
     };
 
     if (e.extensionKind == _FrameInfo.eventName) {
-      final _FrameInfo frame = _FrameInfo(e.extensionData!.data);
+      final frame = _FrameInfo(e.extensionData!.data);
 
       final frameId = '#${frame.number}';
       final frameInfoText =
@@ -704,7 +704,7 @@ extension type _ImageSizesForFrame(Map<String, dynamic> json) {
   String get summary {
     final file = path.basename(source);
 
-    final double expansion =
+    final expansion =
         math.sqrt(decodedSizeInBytes ?? 0) / math.sqrt(displaySizeInBytes ?? 1);
 
     return 'Image $file • displayed at '
