@@ -6,6 +6,7 @@ MaterialApp
    │
    └─HeroControllerScope
      └─Focus
+       │ dependencies: [_FocusInheritedScope]
        │ state: _FocusState#00000
        │
        └─_FocusInheritedScope
@@ -27,5 +28,4 @@ MaterialApp
                    │
                    └─UnmanagedRestorationScope
                      └─SharedAppData
-                       │ state: _SharedAppDataState#00000
 ...
