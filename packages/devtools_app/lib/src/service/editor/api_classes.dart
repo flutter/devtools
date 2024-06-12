@@ -2,21 +2,37 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_shared/devtools_shared.dart';
+
 /// Known kinds of events that may come from the editor.
 ///
 /// This list is not guaranteed to match actual events from any given editor as
 /// the editor might not implement all functionality or may be a future version
 /// running against an older version of this code/DevTools.
 enum EditorEventKind {
-  // Device.
+  // Devices.
+
+  /// The kind for a [DeviceAddedEvent].
   deviceAdded,
+
+  /// The kind for a [DeviceRemovedEvent].
   deviceRemoved,
+
+  /// The kind for a [DeviceChangedEvent].
   deviceChanged,
+
+  /// The kind for a [DeviceSelectedEvent].
   deviceSelected,
 
-  // Debug Session.
+  // Debug Sessions.
+
+  /// The kind for a [DebugSessionStartedEvent].
   debugSessionStarted,
+
+  /// The kind for a [DebugSessionChangedEvent].
   debugSessionChanged,
+
+  /// The kind for a [DebugSessionStoppedEvent].
   debugSessionStopped,
 }
 
@@ -48,10 +64,8 @@ abstract class _Field {
 /// The set of subclasses is not guaranteed to match actual events from any
 /// given editor as the editor might not implement all functionality or may be a
 /// future version running against an older version of this code/DevTools.
-sealed class EditorEvent {
+sealed class EditorEvent with Serializable {
   EditorEventKind get event;
-
-  Map<String, Object?> toJson();
 }
 
 /// An event sent by an editor when a new device becomes available.
