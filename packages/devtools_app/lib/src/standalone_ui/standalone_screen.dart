@@ -19,7 +19,7 @@ enum StandaloneScreenType {
   Widget get screen {
     return switch (this) {
       StandaloneScreenType.vsCodeFlutterPanel =>
-        VsCodeFlutterPanel(DartToolingApiImpl.postMessage()),
+        VsCodePostMessageSidebarPanel(PostMessageToolApiImpl.postMessage()),
     };
   }
 }

@@ -10,24 +10,25 @@ import 'package:flutter/material.dart';
 
 import '../../extensions/extension_screen.dart';
 import '../../extensions/extension_service.dart';
+import '../../service/editor/api_classes.dart';
+import '../../service/editor/editor_client.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/constants.dart';
 import '../../shared/feature_flags.dart';
 import '../../shared/screen.dart';
-import '../api/vs_code_api.dart';
 
 class DebugSessions extends StatelessWidget {
   const DebugSessions({
-    required this.api,
+    required this.editor,
     required this.sessions,
-    required this.deviceMap,
+    required this.devices,
     super.key,
   });
 
-  final VsCodeApi api;
-  final List<VsCodeDebugSession> sessions;
-  final Map<String, VsCodeDevice> deviceMap;
+  final EditorClient editor;
+  final Map<String, EditorDebugSession> sessions;
+  final Map<String, EditorDevice> devices;
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +53,7 @@ class DebugSessions extends StatelessWidget {
                 FixedColumnWidth(actionsIconSize + denseSpacing),
             defaultVerticalAlignment: TableCellVerticalAlignment.middle,
             children: [
-              for (final session in sessions)
+              for (final session in sessions.values)
                 _debugSessionRow(session, context),
             ],
           ),
@@ -60,13 +61,13 @@ class DebugSessions extends StatelessWidget {
     );
   }
 
-  TableRow _debugSessionRow(VsCodeDebugSession session, BuildContext context) {
+  TableRow _debugSessionRow(EditorDebugSession session, BuildContext context) {
     final mode = session.flutterMode;
     final isDebug = mode == 'debug';
     final isProfile = mode == 'profile';
     final isRelease = mode == 'release' || mode == 'jit_release';
     final isFlutter = session.debuggerType?.contains('Flutter') ?? false;
-    final isWeb = deviceMap[session.flutterDeviceId]?.platformType == 'web';
+    final isWeb = devices[session.flutterDeviceId]?.platformType == 'web';
 
     final label = session.flutterMode != null
         ? '${session.name} (${session.flutterMode})'
@@ -79,41 +80,41 @@ class DebugSessions extends StatelessWidget {
           style: Theme.of(context).regularTextStyle,
         ),
         IconButton(
-          onPressed: api.capabilities.hotReload && (isDebug || !isFlutter)
+          onPressed: editor.supportsHotReload && (isDebug || !isFlutter)
               ? () {
                   ga.select(
                     gac.VsCodeFlutterSidebar.id,
                     gac.hotReload,
                   );
-                  unawaited(api.hotReload(session.id));
+                  unawaited(editor.hotReload(session.id));
                 }
               : null,
           tooltip: 'Hot Reload',
           icon: Icon(hotReloadIcon, size: actionsIconSize),
         ),
         IconButton(
-          onPressed: api.capabilities.hotRestart && (isDebug || !isFlutter)
+          onPressed: editor.supportsHotRestart && (isDebug || !isFlutter)
               ? () {
                   ga.select(
                     gac.VsCodeFlutterSidebar.id,
                     gac.hotRestart,
                   );
-                  unawaited(api.hotRestart(session.id));
+                  unawaited(editor.hotRestart(session.id));
                 }
               : null,
           tooltip: 'Hot Restart',
           icon: Icon(hotRestartIcon, size: actionsIconSize),
         ),
-        if (api.capabilities.openDevToolsPage)
+        if (editor.supportsOpenDevToolsPage)
           _DevToolsMenu(
-            api: api,
+            editor: editor,
             session: session,
             isFlutter: isFlutter,
             isDebug: isDebug,
             isProfile: isProfile,
             isRelease: isRelease,
             isWeb: isWeb,
-            supportsOpenExternal: api.capabilities.openDevToolsExternally,
+            supportsOpenExternal: editor.supportsOpenDevToolsExternally,
           ),
       ],
     );
@@ -122,7 +123,7 @@ class DebugSessions extends StatelessWidget {
 
 class _DevToolsMenu extends StatefulWidget {
   const _DevToolsMenu({
-    required this.api,
+    required this.editor,
     required this.session,
     required this.isFlutter,
     required this.isDebug,
@@ -132,8 +133,8 @@ class _DevToolsMenu extends StatefulWidget {
     required this.supportsOpenExternal,
   });
 
-  final VsCodeApi api;
-  final VsCodeDebugSession session;
+  final EditorClient editor;
+  final EditorDebugSession session;
   final bool isFlutter;
   final bool isDebug;
   final bool isProfile;
@@ -215,7 +216,7 @@ class _DevToolsMenuState extends State<_DevToolsMenu> {
             gac.VsCodeFlutterSidebar.openDevToolsScreen(screen.id),
           );
           unawaited(
-            widget.api.openDevToolsPage(
+            widget.editor.openDevToolsPage(
               widget.session.id,
               page: screen.id,
             ),
@@ -239,7 +240,7 @@ class _DevToolsMenuState extends State<_DevToolsMenu> {
                 gac.VsCodeFlutterSidebar.openDevToolsExternally.name,
               );
               unawaited(
-                widget.api.openDevToolsPage(
+                widget.editor.openDevToolsPage(
                   widget.session.id,
                   forceExternal: true,
                 ),
@@ -264,7 +265,7 @@ class _DevToolsMenuState extends State<_DevToolsMenu> {
                           ),
                         );
                         unawaited(
-                          widget.api.openDevToolsPage(
+                          widget.editor.openDevToolsPage(
                             widget.session.id,
                             page: e.screenId,
                           ),

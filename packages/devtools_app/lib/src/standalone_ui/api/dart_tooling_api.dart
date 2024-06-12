@@ -10,7 +10,7 @@ import 'vs_code_api.dart';
 /// `Future` that will return null if the requested API is unavailable (for
 /// example the VS Code APIs if not running inside VS Code, or the LSP APIs if
 /// no LSP server is available).
-abstract interface class DartToolingApi {
+abstract interface class PostMessageToolApi {
   /// Access to APIs provided by VS Code and/or the Dart/Flutter VS Code
   /// extensions.
   Future<VsCodeApi?> get vsCode;
