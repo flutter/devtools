@@ -77,7 +77,7 @@ final _verboseFlutterServiceLogKinds = [
   FlutterEvent.serviceExtensionStateChanged,
 ];
 
-/// Logs kinds to show without a summary in the table.
+/// Log kinds to show without a summary in the table.
 final _hideSummaryLogKinds = <String>{
   FlutterEvent.firstFrame,
   FlutterEvent.frameworkInitialization,
