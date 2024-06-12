@@ -28,7 +28,7 @@ final _log = Logger('dev_helpers');
 /// server, which is not convenient for development.
 ///
 /// You can use a real DTD URI from an IDE (VS Code or IntelliJ / Android
-/// Studio) using the 'Copy DTD URI' action, or you can run a Dart or Flutter
+/// Studio) using the "Copy DTD URI" action, or you can run a Dart or Flutter
 /// app from the command line with the `--print-dtd` flag.
 String? get debugDtdUri => kReleaseMode ? null : _debugDtdUri;
 String? _debugDtdUri;
