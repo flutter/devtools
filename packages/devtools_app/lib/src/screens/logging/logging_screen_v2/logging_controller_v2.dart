@@ -4,14 +4,12 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:math' as math;
 
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
-import 'package:path/path.dart' as path;
 import 'package:vm_service/vm_service.dart';
 
 import '../../../service/vm_service_wrapper.dart';
@@ -24,7 +22,11 @@ import '../../../shared/primitives/utils.dart';
 import '../../../shared/ui/filter.dart';
 import '../../../shared/ui/search.dart';
 import '../logging_controller.dart'
-    show NavigationInfo, ServiceExtensionStateChangedInfo;
+    show
+        NavigationInfo,
+        ServiceExtensionStateChangedInfo,
+        FrameInfo,
+        ImageSizesForFrame;
 import '../logging_screen.dart';
 
 final _log = Logger('logging_controller');
@@ -52,8 +54,11 @@ Future<String> _retrieveFullStringValue(
       Future.value(fallback);
 }
 
-const _flutterFirstFrameKind = 'Flutter.FirstFrame';
-const _flutterFrameworkInitializationKind = 'Flutter.FrameworkInitialization';
+/// Logs kinds to show without a summary in the table.
+final _hideSummaryLogKinds = <String>{
+  FlutterEvent.firstFrame,
+  FlutterEvent.frameworkInitialization,
+};
 
 class LoggingControllerV2 extends DisposableController
     with AutoDisposeControllerMixin, FilterControllerMixin<LogDataV2> {
@@ -167,14 +172,8 @@ class LoggingControllerV2 extends DisposableController
   }
 
   void _handleExtensionEvent(Event e) {
-    // Events to show without a summary in the table.
-    const untitledEvents = <String>{
-      _flutterFirstFrameKind,
-      _flutterFrameworkInitializationKind,
-    };
-
-    if (e.extensionKind == _FrameInfo.eventName) {
-      final frame = _FrameInfo(e.extensionData!.data);
+    if (e.extensionKind == FlutterEvent.frame) {
+      final frame = FrameInfo(e.extensionData!.data);
 
       final frameId = '#${frame.number}';
       final frameInfoText =
@@ -188,9 +187,8 @@ class LoggingControllerV2 extends DisposableController
           summary: frameInfoText,
         ),
       );
-    } else if (e.extensionKind == _ImageSizesForFrame.eventName) {
-      final images = _ImageSizesForFrame.from(e.extensionData!.data);
-
+    } else if (e.extensionKind == FlutterEvent.imageSizesForFrame) {
+      final images = ImageSizesForFrame.from(e.extensionData!.data);
       for (final image in images) {
         log(
           LogDataV2(
@@ -201,7 +199,7 @@ class LoggingControllerV2 extends DisposableController
           ),
         );
       }
-    } else if (e.extensionKind == NavigationInfo.eventName) {
+    } else if (e.extensionKind == FlutterEvent.navigation) {
       final navInfo = NavigationInfo.from(e.extensionData!.data);
 
       log(
@@ -212,7 +210,7 @@ class LoggingControllerV2 extends DisposableController
           summary: navInfo.routeDescription,
         ),
       );
-    } else if (untitledEvents.contains(e.extensionKind)) {
+    } else if (_hideSummaryLogKinds.contains(e.extensionKind)) {
       log(
         LogDataV2(
           e.extensionKind!.toLowerCase(),
@@ -221,7 +219,7 @@ class LoggingControllerV2 extends DisposableController
           summary: '',
         ),
       );
-    } else if (e.extensionKind == ServiceExtensionStateChangedInfo.eventName) {
+    } else if (e.extensionKind == FlutterEvent.serviceExtensionStateChanged) {
       final changedInfo =
           ServiceExtensionStateChangedInfo.from(e.extensionData!.data);
 
@@ -233,7 +231,7 @@ class LoggingControllerV2 extends DisposableController
           summary: '${changedInfo.extension}: ${changedInfo.value}',
         ),
       );
-    } else if (e.extensionKind == 'Flutter.Error') {
+    } else if (e.extensionKind == FlutterEvent.error) {
       // TODO(pq): add tests for error extension handling once framework changes
       // are landed.
       final node = RemoteDiagnosticsNode(
@@ -661,62 +659,4 @@ class LogDataV2 with SearchableDataMixin {
 
   @override
   String toString() => 'LogData($kind, $timestamp)';
-}
-
-extension type _FrameInfo(Map<String, dynamic> _json) {
-  static const eventName = 'Flutter.Frame';
-
-  int? get number => _json['number'];
-  num get elapsedMs => (_json['elapsed'] as num) / 1000;
-}
-
-extension type _ImageSizesForFrame(Map<String, dynamic> json) {
-  static const eventName = 'Flutter.ImageSizesForFrame';
-
-  static List<_ImageSizesForFrame> from(Map<String, dynamic> data) {
-    //     "packages/flutter_gallery_assets/assets/icons/material/2.0x/material.png": {
-    //       "source": "packages/flutter_gallery_assets/assets/icons/material/2.0x/material.png",
-    //       "displaySize": {
-    //         "width": 64.0,
-    //         "height": 63.99999999999999
-    //       },
-    //       "imageSize": {
-    //         "width": 128.0,
-    //         "height": 128.0
-    //       },
-    //       "displaySizeInBytes": 21845,
-    //       "decodedSizeInBytes": 87381
-    //     }
-
-    return data.values.map((entry_) => _ImageSizesForFrame(entry_)).toList();
-  }
-
-  String get source => json['source'];
-
-  _ImageSize get displaySize => _ImageSize(json['displaySize']);
-
-  _ImageSize get imageSize => _ImageSize(json['imageSize']);
-
-  int? get displaySizeInBytes => json['displaySizeInBytes'];
-
-  int? get decodedSizeInBytes => json['decodedSizeInBytes'];
-
-  String get summary {
-    final file = path.basename(source);
-
-    final expansion =
-        math.sqrt(decodedSizeInBytes ?? 0) / math.sqrt(displaySizeInBytes ?? 1);
-
-    return 'Image $file • displayed at '
-        '${displaySize.width.round()}x${displaySize.height.round()}'
-        ' • created at '
-        '${imageSize.width.round()}x${imageSize.height.round()}'
-        ' • ${expansion.toStringAsFixed(1)}x';
-  }
-}
-
-extension type _ImageSize(Map<String, dynamic> json) {
-  double get width => json['width'];
-
-  double get height => json['height'];
 }

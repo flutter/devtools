@@ -12,6 +12,7 @@ import 'package:vm_service/vm_service.dart' hide Error;
 
 import '../utils/auto_dispose.dart';
 import 'connected_app.dart';
+import 'constants.dart';
 import 'isolate_manager.dart';
 import 'service_extensions.dart' as extensions;
 import 'service_utils.dart';
@@ -66,21 +67,21 @@ final class ServiceExtensionManager with DisposerMixin {
 
   Future<void> _handleExtensionEvent(Event event) async {
     switch (event.extensionKind) {
-      case 'Flutter.FirstFrame':
-      case 'Flutter.Frame':
+      case FlutterEvent.firstFrame:
+      case FlutterEvent.frame:
         await _onFrameEventReceived();
         break;
-      case 'Flutter.ServiceExtensionStateChanged':
+      case FlutterEvent.serviceExtensionStateChanged:
         final name = event.rawExtensionData['extension'].toString();
         final encodedValue = event.rawExtensionData['value'].toString();
         await _updateServiceExtensionForStateChange(name, encodedValue);
         break;
-      case 'HttpTimelineLoggingStateChange':
+      case DeveloperServiceEvent.httpTimelineLoggingStateChange:
         final name = extensions.httpEnableTimelineLogging.extension;
         final encodedValue = event.rawExtensionData['enabled'].toString();
         await _updateServiceExtensionForStateChange(name, encodedValue);
         break;
-      case 'SocketProfilingStateChange':
+      case DeveloperServiceEvent.socketProfilingStateChange:
         final name = extensions.socketProfiling.extension;
         final encodedValue = event.rawExtensionData['enabled'].toString();
         await _updateServiceExtensionForStateChange(name, encodedValue);

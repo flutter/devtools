@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
@@ -274,8 +275,8 @@ class ConsoleService with DisposerMixin {
   }
 
   void _handleExtensionEvent(Event e) async {
-    if (e.extensionKind == 'Flutter.Error' ||
-        e.extensionKind == 'Flutter.Print') {
+    if (e.extensionKind == FlutterEvent.error ||
+        e.extensionKind == FlutterEvent.print) {
       if (serviceConnection.serviceManager.connectedApp?.isProfileBuildNow !=
           true) {
         // The app isn't a debug build.
