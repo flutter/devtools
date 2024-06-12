@@ -184,7 +184,8 @@ class ExtensionService extends DisposableController
         serviceConnection.serviceManager.connectedState.value.connected &&
         serviceConnection.serviceManager.isolateManager.mainIsolate.value !=
             null) {
-      _appRoot = await serviceConnection.connectedAppPackageRoot();
+      _appRoot = await serviceConnection.serviceManager
+          .connectedAppPackageRoot(dtdManager);
     }
 
     // TODO(kenz): gracefully handle app connections / disconnects when there

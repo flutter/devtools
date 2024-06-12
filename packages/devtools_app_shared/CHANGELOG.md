@@ -1,6 +1,8 @@
 ## 0.2.0
 * Add `navigateToCode` utility method for jumping to code in IDEs.
 * Add `FlutterEvent` and `DeveloperServiceEvent` constants.
+* Add `connectedAppPackageRoot`, `rootPackageDirectoryForMainIsolate`, and
+`mainIsolateRootLibraryUriAsString` methods to the `ServiceManager` class.
 
 ## 0.2.0-dev.0
 * Add `tooltipWaitExtraLong` to `utils.dart`.

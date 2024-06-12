@@ -311,8 +311,8 @@ class DeepLinksController extends DisposableController
     if (!serviceConnection.serviceManager.hasConnection) {
       return null;
     }
-    final packageUriString =
-        await serviceConnection.rootPackageDirectoryForMainIsolate();
+    final packageUriString = await serviceConnection.serviceManager
+        .rootPackageDirectoryForMainIsolate(dtdManager);
     if (packageUriString == null) return null;
     return Uri.parse(packageUriString).toFilePath();
   }
