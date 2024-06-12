@@ -74,9 +74,7 @@ class _LoggingTableV2State extends State<LoggingTableV2> {
             ),
           ],
         ),
-        const SizedBox(
-          height: denseSpacing,
-        ),
+        const SizedBox(height: denseSpacing),
         Expanded(
           child: _LoggingTableProgress(
             model: widget.model,
@@ -167,9 +165,7 @@ class _LoggingTableProgressState extends State<_LoggingTableProgress> {
 }
 
 class _LoggingTableRows extends StatefulWidget {
-  _LoggingTableRows({
-    required this.model,
-  });
+  const _LoggingTableRows({required this.model});
 
   final LoggingTableModel model;
 

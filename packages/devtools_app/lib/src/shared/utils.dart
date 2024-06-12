@@ -21,10 +21,12 @@ import 'package:vm_service/vm_service.dart';
 
 // ignore: avoid-importing-entrypoint-exports, special case for getting version.
 import '../../devtools.dart' as devtools;
+
 import 'common_widgets.dart';
 import 'connected_app.dart';
 import 'globals.dart';
 import 'primitives/simple_items.dart';
+import 'primitives/utils.dart';
 
 final _log = Logger('lib/src/shared/utils');
 
@@ -334,7 +336,7 @@ class InterruptableChunkWorker {
     final completer = Completer<bool>();
     final localWorkId = ++_workId;
 
-    void doChunkWork(int chunkStartingIndex) {
+    void doChunkWork(int chunkStartingIndex) async {
       if (chunkStartingIndex >= length) {
         return completer.complete(true);
       }
@@ -350,9 +352,8 @@ class InterruptableChunkWorker {
       }
 
       progressCallback(chunkUpperIndexLimit / length);
-      Future.delayed(Duration.zero, () {
-        doChunkWork.call(chunkStartingIndex + _chunkSize);
-      });
+      await delayToReleaseUiThread();
+      doChunkWork(chunkStartingIndex + _chunkSize);
     }
 
     if (length <= 0) {
