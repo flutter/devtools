@@ -184,8 +184,7 @@ class CpuProfileData with Serializable {
 
     // Initialize all stack frames.
     final stackFrames = <String, CpuStackFrame>{};
-    final stackFramesJson =
-        json.stackFrames ?? const <String, Object?>{};
+    final stackFramesJson = json.stackFrames ?? const <String, Object?>{};
     for (final entry in stackFramesJson.entries) {
       final stackFrameJson = entry.value as Map<String, Object?>;
       final resolvedUrl = (stackFrameJson[resolvedUrlKey] as String?) ?? '';
