@@ -1,4 +1,4 @@
-## 0.2.0-dev.1 (wip)
+## 0.2.0
 * Add `navigateToCode` utility method for jumping to code in IDEs.
 * Add `FlutterEvent` and `DeveloperServiceEvent` constants.
 * Add `connectedAppPackageRoot`, `rootPackageDirectoryForMainIsolate`, and
