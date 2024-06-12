@@ -5,7 +5,9 @@
 import 'dart:async';
 import 'dart:core';
 
+import 'package:collection/collection.dart';
 import 'package:dds_service_extensions/dds_service_extensions.dart';
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
@@ -13,6 +15,7 @@ import 'package:vm_service/vm_service.dart' hide Error;
 
 import '../utils/utils.dart';
 import 'connected_app.dart';
+import 'dtd_manager.dart';
 import 'flutter_version.dart';
 import 'isolate_manager.dart';
 import 'isolate_state.dart';
@@ -494,6 +497,115 @@ class ServiceManager<T extends VmService> {
     } catch (_) {
       isolateManager.hotRestartInProgress = false;
     }
+  }
+
+  /// Returns the package root URI for the connected app.
+  ///
+  /// This should be the directory up the tree from the debugging target that
+  /// contains the .dart_tool/package_config.json file.
+  ///
+  /// This method contains special logic for detecting the package root for
+  /// test targets (i.e., a VM service connections spawned from `dart test` or
+  /// `flutter test`). This is because the main isolate for test targets is
+  /// running the test runner, and not the test library itself, so we have to do
+  /// some extra work to find the package root of the test target.
+  Future<Uri?> connectedAppPackageRoot(DTDManager dtdManager) async {
+    var packageRootUriString =
+        await rootPackageDirectoryForMainIsolate(dtdManager);
+    _log.fine(
+      '[connectedAppPackageRoot] root package directory for main isolate: '
+      '$packageRootUriString',
+    );
+
+    // If a Dart library URI was returned, this may be a test target (i.e. a
+    // VM service connection spawned from `dart test` or `flutter test`).
+    if (packageRootUriString?.endsWith('.dart') ?? false) {
+      final rootLibrary = await _mainIsolateRootLibrary();
+      final testTargetFileUriString =
+          (rootLibrary?.dependencies ?? <LibraryDependency>[])
+              .firstWhereOrNull((dep) => dep.prefix == 'test')
+              ?.target
+              ?.uri;
+      if (testTargetFileUriString != null) {
+        _log.fine(
+          '[connectedAppPackageRoot] detected test library from root library '
+          'imports: $testTargetFileUriString',
+        );
+        packageRootUriString = await packageRootFromFileUriString(
+          testTargetFileUriString,
+          dtd: dtdManager.connection.value,
+        );
+        _log.fine(
+          '[connectedAppPackageRoot] package root for test target: '
+          '$packageRootUriString',
+        );
+      }
+    }
+
+    return packageRootUriString == null
+        ? null
+        : Uri.parse(packageRootUriString);
+  }
+
+  Future<Library?> _mainIsolateRootLibrary() async {
+    final ref =
+        (await isolateManager.waitForMainIsolateState())?.isolateNow?.rootLib;
+    if (ref == null) return null;
+    try {
+      final library = await service!.getObject(
+        isolateManager.mainIsolate.value!.id!,
+        ref.id!,
+      );
+      assert(library is Library);
+      return library as Library;
+    } on SentinelException catch (_) {
+      // Fail gracefully if the request to get the Library object fails.
+      return null;
+    }
+  }
+
+  // TODO(kenz): consider caching this value for the duration of the VM service
+  // connection.
+  /// Returns a file URI String for the root library of the connected app's main
+  /// isolate.
+  ///
+  /// If a non-null value is returned, the value will be a file URI String and
+  /// it will NOT have a trailing slash.
+  Future<String?> mainIsolateRootLibraryUriAsString() async {
+    final mainIsolateState = await isolateManager.waitForMainIsolateState();
+    if (mainIsolateState == null) return null;
+
+    final rootLib = mainIsolateState.rootInfo?.library;
+    if (rootLib == null) return null;
+
+    final selectedIsolateRefId = isolateManager.mainIsolate.value!.id!;
+    await resolvedUriManager.fetchFileUris(selectedIsolateRefId, [rootLib]);
+    final fileUriString = resolvedUriManager.lookupFileUri(
+      selectedIsolateRefId,
+      rootLib,
+    );
+    _log.fine('rootLibraryForMainIsolate: $fileUriString');
+    return fileUriString;
+  }
+
+  // TODO(kenz): consider caching this value for the duration of the VM service
+  // connection.
+  /// Returns the root package directory for the main isolate.
+  ///
+  /// If a non-null value is returned, the value will be a file URI String and
+  /// it will NOT have a trailing slash.
+  Future<String?> rootPackageDirectoryForMainIsolate(
+    DTDManager dtdManager,
+  ) async {
+    final fileUriString = await mainIsolateRootLibraryUriAsString();
+    final packageUriString = fileUriString != null
+        ? await packageRootFromFileUriString(
+            fileUriString,
+            dtd: dtdManager.connection.value,
+          )
+        : null;
+    _log.fine('rootPackageDirectoryForMainIsolate: $packageUriString');
+    return packageUriString;
   }
 }
 

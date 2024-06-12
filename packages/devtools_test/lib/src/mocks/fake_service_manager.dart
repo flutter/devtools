@@ -89,13 +89,6 @@ class FakeServiceConnectionManager extends Fake
   }) {
     return Future.value();
   }
-
-  @override
-  Future<String?> mainIsolateRootLibraryUriAsString() {
-    final fakeIsolateManager =
-        _serviceManager.isolateManager as FakeIsolateManager;
-    return Future.value(fakeIsolateManager.rootLibrary);
-  }
 }
 
 // ignore: subtype_of_sealed_class, fake for testing.
@@ -303,5 +296,11 @@ class FakeServiceManager extends Fake
     resolvedUriManager.vmServiceOpened(service);
     await initFlagManager();
     return Future.value();
+  }
+
+  @override
+  Future<String?> mainIsolateRootLibraryUriAsString() {
+    final fakeIsolateManager = isolateManager as FakeIsolateManager;
+    return Future.value(fakeIsolateManager.rootLibrary);
   }
 }
