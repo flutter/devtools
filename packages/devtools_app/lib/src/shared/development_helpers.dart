@@ -28,7 +28,7 @@ final _log = Logger('dev_helpers');
 /// server, which is not convenient for development.
 ///
 /// You can use a real DTD URI from an IDE (VS Code or IntelliJ / Android
-/// Studio) using the "Copy DTD URI" action, or you can run a Dart or Flutter
+/// Studio) using the 'Copy DTD URI' action, or you can run a Dart or Flutter
 /// app from the command line with the `--print-dtd` flag.
 String? get debugDtdUri => kReleaseMode ? null : _debugDtdUri;
 String? _debugDtdUri;
@@ -223,11 +223,15 @@ final debugSurveyMetadata = DevToolsSurvey.fromJson(
       'title should not exceed 45 characters.',
       'startDate and endDate should follow ISO 8601 standard with a timezone offset.',
     ],
-    'uniqueId': '2023-Q4',
-    'title': 'Help improve DevTools! Take our 2023 Q4 survey.',
+    'uniqueId': '2024-Q2',
+    'title': 'Take our survey to help us improve DevTools!',
     'url': 'https://google.qualtrics.com/jfe/form/SV_2l4XcyscF8mQtDM',
-    'startDate': '2023-09-20T09:00:00-07:00',
-    'endDate': '2023-10-20T09:00:00-07:00',
+    'startDate': '2024-06-18T09:00:00-07:00',
+    'endDate': '2024-07-02T09:00:00-07:00',
+    'minDevToolsVersion': '2.35.0',
+    // This list is optional and can be used to limit the survey to a specific
+    // set of users based on their development environment.
+    'devEnvironments': ['Android-Studio', 'IntelliJ-IDEA', 'VSCode', 'CLI'],
   },
 );
 
