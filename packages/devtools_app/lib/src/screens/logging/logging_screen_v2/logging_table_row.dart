@@ -59,12 +59,12 @@ class LoggingTableRow extends StatefulWidget {
 class _LoggingTableRowState extends State<LoggingTableRow> {
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
     final color = widget.isSelected
-        ? theme.colorScheme.selectedRowBackgroundColor
+        ? colorScheme.selectedRowBackgroundColor
         : alternatingColorForIndex(
             widget.index,
-            theme.colorScheme,
+            colorScheme,
           );
 
     return Container(

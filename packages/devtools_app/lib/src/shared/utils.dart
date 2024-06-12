@@ -336,7 +336,7 @@ class InterruptableChunkWorker {
     final completer = Completer<bool>();
     final localWorkId = ++_workId;
 
-    void doChunkWork(int chunkStartingIndex) async {
+    Future<void> doChunkWork(int chunkStartingIndex) async {
       if (chunkStartingIndex >= length) {
         return completer.complete(true);
       }
@@ -353,7 +353,7 @@ class InterruptableChunkWorker {
 
       progressCallback(chunkUpperIndexLimit / length);
       await delayToReleaseUiThread();
-      doChunkWork(chunkStartingIndex + _chunkSize);
+      await doChunkWork(chunkStartingIndex + _chunkSize);
     }
 
     if (length <= 0) {
