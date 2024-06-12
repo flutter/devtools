@@ -245,7 +245,7 @@ class _NotificationState extends State<_Notification>
         );
       },
       child: Card(
-        color: theme.snackBarTheme.backgroundColor,
+        color: theme.colorScheme.secondaryContainer,
         margin: const EdgeInsets.only(bottom: densePadding),
         child: DefaultTextStyle(
           style: theme.snackBarTheme.contentTextStyle ??
@@ -276,7 +276,7 @@ class _NotificationState extends State<_Notification>
                         widget: widget,
                       ),
                 const SizedBox(height: defaultSpacing),
-                _NotificationActions(widget: widget),
+                _NotificationActions(actions: widget.message.actions),
               ],
             ),
           ),
@@ -317,7 +317,8 @@ class _NotificationMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final textStyle = theme.regularTextStyle;
+    final textStyle =
+        theme.regularTextStyleWithColor(theme.colorScheme.onSecondaryContainer);
     return Padding(
       padding: const EdgeInsets.only(
         left: denseSpacing,
@@ -337,15 +338,12 @@ class _NotificationMessage extends StatelessWidget {
 }
 
 class _NotificationActions extends StatelessWidget {
-  const _NotificationActions({
-    required this.widget,
-  });
+  const _NotificationActions({required this.actions});
 
-  final _Notification widget;
+  final List<Widget> actions;
 
   @override
   Widget build(BuildContext context) {
-    final actions = widget.message.actions;
     if (actions.isEmpty) return const SizedBox();
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,

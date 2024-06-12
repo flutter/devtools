@@ -139,7 +139,9 @@ class _DebuggingControlsState extends State<DebuggingControls>
           label: 'File Explorer',
           onPressed: controller.codeViewController.toggleLibrariesVisible,
           gaScreen: gac.debugger,
-          gaSelection: visible ? gac.hideFileExplorer : gac.showFileExplorer,
+          gaSelection: visible
+              ? gac.DebuggerEvents.hideFileExplorer.name
+              : gac.DebuggerEvents.showFileExplorer.name,
           minScreenWidthForTextBeforeScaling:
               DebuggingControls.minWidthBeforeScaling,
         );
@@ -195,7 +197,7 @@ class CodeStatisticsControls extends StatelessWidget {
               iconOnly: true,
               tooltip: 'Refresh statistics',
               gaScreen: gac.debugger,
-              gaSelection: gac.refreshStatistics,
+              gaSelection: gac.DebuggerEvents.refreshStatistics.name,
               onPressed: showCodeCoverage || showProfileInformation
                   ? () => unawaited(
                         controller.codeViewController.refreshCodeStatistics(),
