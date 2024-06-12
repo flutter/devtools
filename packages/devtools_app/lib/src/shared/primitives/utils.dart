@@ -904,9 +904,7 @@ class DevToolsJsonFile extends DevToolsFile<Object> {
     required String name,
     required super.lastModifiedTime,
     required super.data,
-  }) : super(
-          path: name,
-        );
+  }) : super(path: name);
 }
 
 class DevToolsFile<T> {

@@ -65,17 +65,23 @@ Future<String> _retrieveFullStringValue(
 }
 
 const _gcLogKind = 'gc';
-const _flutterFirstFrameKind = 'Flutter.FirstFrame';
-const _flutterFrameworkInitializationKind = 'Flutter.FrameworkInitialization';
-const _verboseFlutterFrameworkLogKinds = [
-  _flutterFirstFrameKind,
-  _flutterFrameworkInitializationKind,
-  _FrameInfo.eventName,
-  _ImageSizesForFrame.eventName,
+
+final _verboseFlutterFrameworkLogKinds = [
+  FlutterEvent.firstFrame,
+  FlutterEvent.frameworkInitialization,
+  FlutterEvent.frame,
+  FlutterEvent.imageSizesForFrame,
 ];
-const _verboseFlutterServiceLogKinds = [
-  ServiceExtensionStateChangedInfo.eventName,
+
+final _verboseFlutterServiceLogKinds = [
+  FlutterEvent.serviceExtensionStateChanged,
 ];
+
+/// Log kinds to show without a summary in the table.
+final _hideSummaryLogKinds = <String>{
+  FlutterEvent.firstFrame,
+  FlutterEvent.frameworkInitialization,
+};
 
 class LoggingController extends DisposableController
     with
@@ -231,14 +237,8 @@ class LoggingController extends DisposableController
   }
 
   void _handleExtensionEvent(Event e) {
-    // Events to show without a summary in the table.
-    const untitledEvents = <String>{
-      _flutterFirstFrameKind,
-      _flutterFrameworkInitializationKind,
-    };
-
-    if (e.extensionKind == _FrameInfo.eventName) {
-      final frame = _FrameInfo(e.extensionData!.data);
+    if (e.extensionKind == FlutterEvent.frame) {
+      final frame = FrameInfo(e.extensionData!.data);
 
       final frameId = '#${frame.number}';
       final frameInfoText =
@@ -252,8 +252,8 @@ class LoggingController extends DisposableController
           summary: frameInfoText,
         ),
       );
-    } else if (e.extensionKind == _ImageSizesForFrame.eventName) {
-      final images = _ImageSizesForFrame.from(e.extensionData!.data);
+    } else if (e.extensionKind == FlutterEvent.imageSizesForFrame) {
+      final images = ImageSizesForFrame.from(e.extensionData!.data);
 
       for (final image in images) {
         log(
@@ -265,7 +265,7 @@ class LoggingController extends DisposableController
           ),
         );
       }
-    } else if (e.extensionKind == NavigationInfo.eventName) {
+    } else if (e.extensionKind == FlutterEvent.navigation) {
       final navInfo = NavigationInfo.from(e.extensionData!.data);
 
       log(
@@ -276,7 +276,7 @@ class LoggingController extends DisposableController
           summary: navInfo.routeDescription,
         ),
       );
-    } else if (untitledEvents.contains(e.extensionKind)) {
+    } else if (_hideSummaryLogKinds.contains(e.extensionKind)) {
       log(
         LogData(
           e.extensionKind!.toLowerCase(),
@@ -285,7 +285,7 @@ class LoggingController extends DisposableController
           summary: '',
         ),
       );
-    } else if (e.extensionKind == ServiceExtensionStateChangedInfo.eventName) {
+    } else if (e.extensionKind == FlutterEvent.serviceExtensionStateChanged) {
       final changedInfo =
           ServiceExtensionStateChangedInfo.from(e.extensionData!.data);
 
@@ -297,7 +297,7 @@ class LoggingController extends DisposableController
           summary: '${changedInfo.extension}: ${changedInfo.value}',
         ),
       );
-    } else if (e.extensionKind == 'Flutter.Error') {
+    } else if (e.extensionKind == FlutterEvent.error) {
       // TODO(pq): add tests for error extension handling once framework changes
       // are landed.
       final node = RemoteDiagnosticsNode(
@@ -788,17 +788,19 @@ class LogData with SearchableDataMixin {
   String toString() => 'LogData($kind, $timestamp)';
 }
 
-extension type _FrameInfo(Map<String, dynamic> _json) {
-  static const eventName = 'Flutter.Frame';
-
+// TODO(https://github.com/flutter/devtools/issues/7703): make this private once
+// Logging V2 lands.
+extension type FrameInfo(Map<String, dynamic> _json) {
   int? get number => _json['number'];
   num get elapsedMs => (_json['elapsed'] as num) / 1000;
 }
 
-extension type _ImageSizesForFrame(Map<String, dynamic> json) {
-  static const eventName = 'Flutter.ImageSizesForFrame';
-
-  static List<_ImageSizesForFrame> from(Map<String, dynamic> data) {
+// TODO(https://github.com/flutter/devtools/issues/7703): make this private once
+// Logging V2 lands.
+extension type ImageSizesForFrame(Map<String, dynamic> json) {
+  static List<ImageSizesForFrame> from(Map<String, dynamic> data) {
+    // Example payload:
+    //
     //     "packages/flutter_gallery_assets/assets/icons/material/2.0x/material.png": {
     //       "source": "packages/flutter_gallery_assets/assets/icons/material/2.0x/material.png",
     //       "displaySize": {
@@ -812,15 +814,14 @@ extension type _ImageSizesForFrame(Map<String, dynamic> json) {
     //       "displaySizeInBytes": 21845,
     //       "decodedSizeInBytes": 87381
     //     }
-
-    return data.values.map((entry_) => _ImageSizesForFrame(entry_)).toList();
+    return data.values.map((entry_) => ImageSizesForFrame(entry_)).toList();
   }
 
   String get source => json['source'];
 
-  _ImageSize get displaySize => _ImageSize(json['displaySize']);
+  ImageSize get displaySize => ImageSize(json['displaySize']);
 
-  _ImageSize get imageSize => _ImageSize(json['imageSize']);
+  ImageSize get imageSize => ImageSize(json['imageSize']);
 
   int? get displaySizeInBytes => json['displaySizeInBytes'];
 
@@ -840,7 +841,9 @@ extension type _ImageSizesForFrame(Map<String, dynamic> json) {
   }
 }
 
-extension type _ImageSize(Map<String, dynamic> json) {
+// TODO(https://github.com/flutter/devtools/issues/7703): make this private once
+// Logging V2 lands.
+extension type ImageSize(Map<String, dynamic> json) {
   double get width => json['width'];
 
   double get height => json['height'];
@@ -848,8 +851,6 @@ extension type _ImageSize(Map<String, dynamic> json) {
 
 class NavigationInfo {
   NavigationInfo(this._route);
-
-  static const eventName = 'Flutter.Navigation';
 
   static NavigationInfo from(Map<String, dynamic> data) {
     return NavigationInfo(data['route']);
@@ -862,8 +863,6 @@ class NavigationInfo {
 
 class ServiceExtensionStateChangedInfo {
   ServiceExtensionStateChangedInfo(this.extension, this.value);
-
-  static const eventName = 'Flutter.ServiceExtensionStateChanged';
 
   static ServiceExtensionStateChangedInfo from(Map<String, dynamic> data) {
     return ServiceExtensionStateChangedInfo(data['extension'], data['value']);

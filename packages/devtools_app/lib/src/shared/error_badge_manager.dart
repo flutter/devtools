@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:collection/collection.dart' show IterableExtension;
+import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
@@ -58,7 +59,7 @@ class ErrorBadgeManager extends DisposableController
   }
 
   void _handleExtensionEvent(Event e) {
-    if (e.extensionKind == 'Flutter.Error') {
+    if (e.extensionKind == FlutterEvent.error) {
       incrementBadgeCount(LoggingScreen.id);
 
       final inspectableError = _extractInspectableError(e);

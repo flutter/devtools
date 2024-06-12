@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/service.dart' show FlutterEvent;
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
+import '../../shared/primitives/utils.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
 import 'logging_controller.dart';
@@ -35,7 +37,9 @@ class KindColumn extends ColumnData<LogData>
 
     Color color = const Color.fromARGB(0xff, 0x61, 0x61, 0x61);
 
-    if (kind == 'stderr' || item.isError || kind == 'flutter.error') {
+    if (kind == 'stderr' ||
+        item.isError ||
+        kind.caseInsensitiveEquals(FlutterEvent.error)) {
       color = const Color.fromARGB(0xff, 0xF4, 0x43, 0x36);
     } else if (kind == 'stdout') {
       color = const Color.fromARGB(0xff, 0x78, 0x90, 0x9C);

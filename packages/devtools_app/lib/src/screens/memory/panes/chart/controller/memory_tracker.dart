@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:devtools_app_shared/service.dart' show FlutterEvent;
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
@@ -70,7 +71,7 @@ class MemoryTracker {
     }
     final jsonData = data.extensionData!.data.cast<String, Object>();
     switch (extensionEventKind) {
-      case 'Flutter.ImageSizesForFrame':
+      case FlutterEvent.imageSizesForFrame:
         timeline.addExtensionEvent(
           data.timestamp,
           data.extensionKind,

@@ -4,6 +4,7 @@
 
 import 'dart:convert';
 
+import 'package:devtools_app_shared/service.dart' show FlutterEvent;
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
@@ -52,7 +53,7 @@ class MessageColumn extends ColumnData<LogData>
     bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
-    if (data.kind == 'flutter.frame') {
+    if (data.kind.caseInsensitiveEquals(FlutterEvent.frame)) {
       const color = Color.fromARGB(0xff, 0x00, 0x91, 0xea);
       final text = Text(
         getDisplayValue(data),
