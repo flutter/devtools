@@ -1,4 +1,4 @@
-# 10.0.0-dev.3
+# 10.0.0
 * Added helper `deserialize` and `deserializeNullable`
 * Extended serialization for `HeapSample` and `ExtensionEvents`
 * Added mixin `Serializable`
