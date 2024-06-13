@@ -15,8 +15,8 @@ import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:stager/stager.dart';
 
+import 'editor_service/post_message_fake_editor.dart';
 import 'mock_editor_widget.dart';
-import 'post_message_fake_editor.dart';
 
 /// To run, use the "standalone_ui/vs_code" launch configuration with the
 /// `devtools/packages/` folder open in VS Code, or run:

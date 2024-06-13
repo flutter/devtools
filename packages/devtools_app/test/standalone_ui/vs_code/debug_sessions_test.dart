@@ -17,7 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-import '../../test_infra/test_data/editor_service/fake_editor.dart';
+import '../../test_infra/scenes/standalone_ui/editor_service/fake_editor.dart';
 
 void main() {
   const windowSize = Size(2000.0, 2000.0);

@@ -5,13 +5,13 @@
 import 'dart:async';
 
 import 'package:devtools_app/src/service/editor/api_classes.dart';
-import 'package:devtools_app/src/service/editor/editor_server.dart';
 import 'package:devtools_app/src/standalone_ui/api/impl/vs_code_api.dart';
 import 'package:devtools_app/src/standalone_ui/api/vs_code_api.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc_2;
 import 'package:stream_channel/stream_channel.dart';
 
-import '../../test_data/editor_service/fake_editor.dart';
+import 'editor_server.dart';
+import 'fake_editor.dart';
 
 /// An implementation of [EditorServer] that wraps the legacy `postMessage` APIs.
 ///

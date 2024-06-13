@@ -4,8 +4,7 @@
 
 import 'dart:async';
 
-import 'api_classes.dart';
-import 'editor_client.dart';
+import 'package:devtools_app/src/service/editor/api_classes.dart';
 
 /// A base for classes that can act as an Editor (agnostic to the communication
 /// channel).

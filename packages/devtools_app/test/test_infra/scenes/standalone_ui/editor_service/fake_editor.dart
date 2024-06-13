@@ -5,7 +5,8 @@
 import 'dart:async';
 
 import 'package:devtools_app/src/service/editor/api_classes.dart';
-import 'package:devtools_app/src/service/editor/editor_server.dart';
+
+import 'editor_server.dart';
 
 /// A mixin for [EditorServer]s that provides some useful mock editor
 /// functionality to allow working on the sidebar with a Stager app without

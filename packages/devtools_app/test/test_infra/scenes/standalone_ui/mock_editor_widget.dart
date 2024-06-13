@@ -8,7 +8,7 @@ import 'dart:convert';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../test_data/editor_service/fake_editor.dart';
+import 'editor_service/fake_editor.dart';
 
 /// A simple UI that acts as a stand-in host editor to simplify the development
 /// workflow when working on embedded tooling.
