@@ -39,7 +39,7 @@ void main() {
       );
       setGlobal(IdeTheme, getIdeTheme());
       setGlobal(MessageBus, MessageBus());
-
+      TestWidgetsFlutterBinding.ensureInitialized();
       controller = LoggingControllerV2();
     });
 
