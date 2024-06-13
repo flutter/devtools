@@ -46,7 +46,7 @@ for reference.
       - [Step 2: Configure your extension](#step-2-configure-your-extension)
       - [Step 3: Build your extension](#step-3-build-your-extension)
       - [Step 4: Debug your extension](#step-4-debug-your-extension)
-3. [Publish your package with a DevTools extension](#publish-your-package-with-a-DevTools-extension)
+3. [Publish your package with a DevTools extension](#publish-your-package-with-a-devTools-extension)
 4. [Resources and support](#resources-and-support)
 5. [Testimonies from extension authors](#testimonies-from-extension-authors)
 

@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -129,11 +130,11 @@ class PerformanceController extends DisposableController
         serviceConnection
             .serviceManager.service!.onExtensionEventWithHistorySafe
             .listen((event) {
-          if (event.extensionKind == 'Flutter.Frame') {
+          if (event.extensionKind == FlutterEvent.frame) {
             final frame = FlutterFrame.fromJson(event.extensionData!.data);
             enhanceTracingController.assignStateForFrame(frame);
             flutterFramesController.addFrame(frame);
-          } else if (event.extensionKind == 'Flutter.RebuiltWidgets' &&
+          } else if (event.extensionKind == FlutterEvent.rebuiltWidgets &&
               FeatureFlags.widgetRebuildStats) {
             if (_currentRebuildWidgetsIsolate != event.isolate) {
               rebuildCountModel.clearFromRestart();

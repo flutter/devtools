@@ -245,7 +245,7 @@ class InspectorService extends InspectorServiceBase {
   bool get hoverEvalModeEnabledByDefault => !isEmbedded();
 
   void onExtensionVmServiceReceived(Event e) {
-    if ('Flutter.Frame' == e.extensionKind) {
+    if (e.extensionKind == FlutterEvent.frame) {
       for (final client in clients) {
         try {
           client.onFlutterFrame();

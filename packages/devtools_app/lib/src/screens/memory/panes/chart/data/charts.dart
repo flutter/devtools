@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/service.dart' show FlutterEvent;
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
@@ -38,7 +39,7 @@ String eventLegendAsset(int eventCount) =>
 
 /// Event types handled for hover card.
 const devToolsEvent = 'DevTools.Event';
-const imageSizesForFrameEvent = 'Flutter.ImageSizesForFrame';
+const imageSizesForFrameEvent = FlutterEvent.imageSizesForFrame;
 const displaySizeInBytesData = 'displaySizeInBytes';
 const decodedSizeInBytesData = 'decodedSizeInBytes';
 

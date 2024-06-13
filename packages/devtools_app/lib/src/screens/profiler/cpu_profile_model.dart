@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
@@ -186,8 +184,7 @@ class CpuProfileData with Serializable {
 
     // Initialize all stack frames.
     final stackFrames = <String, CpuStackFrame>{};
-    final Map<String, Object?> stackFramesJson =
-        jsonDecode(jsonEncode(json.stackFrames ?? <String, Object?>{}));
+    final stackFramesJson = json.stackFrames ?? const <String, Object?>{};
     for (final entry in stackFramesJson.entries) {
       final stackFrameJson = entry.value as Map<String, Object?>;
       final resolvedUrl = (stackFrameJson[resolvedUrlKey] as String?) ?? '';

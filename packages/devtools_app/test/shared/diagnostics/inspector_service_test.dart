@@ -127,8 +127,8 @@ void main() {
               await inspectorServiceLocal.isWidgetCreationTracked(),
               isTrue,
             );
-            final rootLibrary =
-                await serviceConnection.mainIsolateRootLibraryUriAsString();
+            final rootLibrary = await serviceConnection.serviceManager
+                .mainIsolateRootLibraryUriAsString();
             await inspectorServiceLocal.addPubRootDirectories([rootLibrary!]);
             final rootDirectories =
                 await inspectorServiceLocal.getPubRootDirectories() ??

@@ -389,9 +389,7 @@ class DevToolsButton extends StatelessWidget {
               : IconButton(
                   onPressed: onPressed,
                   iconSize: defaultIconSize,
-                  icon: Icon(
-                    icon,
-                  ),
+                  icon: Icon(icon),
                 ),
         ),
       );
