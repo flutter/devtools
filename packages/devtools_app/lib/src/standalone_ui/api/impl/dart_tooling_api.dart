@@ -96,70 +96,77 @@ class PostMessageEditorClient implements EditorClient {
     // In PostMessage world, we just get events with the entire new list so
     // we must figure out what the actual changes are so we can produce the
     // same kinds of events as the new DTD version.
-    _api.devicesChanged.listen((e) {
-      final supportedDevices = e.devices.map(
-        (d) => EditorDevice.fromJson({...d.toJson(), 'supported': true}),
-      );
-      final unsupportedDevices = e.unsupportedDevices?.map(
-            (d) => EditorDevice.fromJson({...d.toJson(), 'supported': false}),
-          ) ??
-          [];
-      final newDevices =
-          supportedDevices.followedBy(unsupportedDevices).toList();
-      final newIds = newDevices.map((d) => d.id).toSet();
-      final oldIds = _currentDevices.map((d) => d.id).toSet();
-
-      // Devices that are not in the new set have been removed.
-      for (final id in oldIds.difference(newIds)) {
-        _eventController.add(DeviceRemovedEvent(deviceId: id));
-      }
-      // Devices in the new set have either been changed or were added.
-      for (final device in newDevices) {
-        if (oldIds.contains(device.id)) {
-          _eventController.add(DeviceChangedEvent(device: device));
-        } else {
-          _eventController.add(DeviceAddedEvent(device: device));
-        }
-      }
-      // And record the updated set.
-      _currentDevices
-        ..clear()
-        ..addAll(newDevices);
-
-      // Finally, handle if the selection changed.
-      if (e.selectedDeviceId != _currentSelectedDeviceId) {
-        _currentSelectedDeviceId = e.selectedDeviceId;
-        _eventController.add(
-          DeviceSelectedEvent(deviceId: _currentSelectedDeviceId),
-        );
-      }
-    });
-    _api.debugSessionsChanged.listen((e) {
-      final newIds = e.sessions.map((d) => d.id).toSet();
-      final oldIds = _currentDebugSessions.map((d) => d.id).toSet();
-
-      // Sessions that are not in the new set have been removed.
-      for (final id in oldIds.difference(newIds)) {
-        _eventController.add(DebugSessionStoppedEvent(debugSessionId: id));
-      }
-      // Sessions in the new set have either been changed or were added.
-      for (final session in e.sessions) {
-        if (oldIds.contains(session.id)) {
-          _eventController.add(DebugSessionChangedEvent(debugSession: session));
-        } else {
-          _eventController.add(DebugSessionStartedEvent(debugSession: session));
-        }
-      }
-      // And record the updated set.
-      _currentDebugSessions
-        ..clear()
-        ..addAll(e.sessions);
-    });
+    _api.devicesChanged.listen(_devicesChanged);
+    _api.debugSessionsChanged.listen(_debugSessionsChanged);
 
     // Trigger the initial initialization now we have the handlers set up.
     // In the old postMessage world, this is how we get the initial set of
     // devices/sessions.
     unawaited(_api.initialize());
+  }
+
+  /// Handles the `postMessage` [VsCodeDevicesEvent] and converts the updates
+  /// into events in the format of the new DTD `editor` event stream.
+  void _devicesChanged(VsCodeDevicesEvent e) {
+    final supportedDevices = e.devices.map(
+      (d) => EditorDevice.fromJson({...d.toJson(), 'supported': true}),
+    );
+    final unsupportedDevices = e.unsupportedDevices?.map(
+          (d) => EditorDevice.fromJson({...d.toJson(), 'supported': false}),
+        ) ??
+        [];
+    final newDevices = supportedDevices.followedBy(unsupportedDevices).toList();
+    final newIds = newDevices.map((d) => d.id).toSet();
+    final oldIds = _currentDevices.map((d) => d.id).toSet();
+
+    // Devices that are not in the new set have been removed.
+    for (final id in oldIds.difference(newIds)) {
+      _eventController.add(DeviceRemovedEvent(deviceId: id));
+    }
+    // Devices in the new set have either been changed or were added.
+    for (final device in newDevices) {
+      if (oldIds.contains(device.id)) {
+        _eventController.add(DeviceChangedEvent(device: device));
+      } else {
+        _eventController.add(DeviceAddedEvent(device: device));
+      }
+    }
+    // And record the updated set.
+    _currentDevices
+      ..clear()
+      ..addAll(newDevices);
+
+    // Finally, handle if the selection changed.
+    if (e.selectedDeviceId != _currentSelectedDeviceId) {
+      _currentSelectedDeviceId = e.selectedDeviceId;
+      _eventController.add(
+        DeviceSelectedEvent(deviceId: _currentSelectedDeviceId),
+      );
+    }
+  }
+
+  /// Handles the `postMessage` [VsCodeDebugSessionsEvent] and converts the
+  /// updates into events in the format of the new DTD `editor` event stream.
+  void _debugSessionsChanged(VsCodeDebugSessionsEvent e) {
+    final newIds = e.sessions.map((d) => d.id).toSet();
+    final oldIds = _currentDebugSessions.map((d) => d.id).toSet();
+
+    // Sessions that are not in the new set have been removed.
+    for (final id in oldIds.difference(newIds)) {
+      _eventController.add(DebugSessionStoppedEvent(debugSessionId: id));
+    }
+    // Sessions in the new set have either been changed or were added.
+    for (final session in e.sessions) {
+      if (oldIds.contains(session.id)) {
+        _eventController.add(DebugSessionChangedEvent(debugSession: session));
+      } else {
+        _eventController.add(DebugSessionStartedEvent(debugSession: session));
+      }
+    }
+    // And record the updated set.
+    _currentDebugSessions
+      ..clear()
+      ..addAll(e.sessions);
   }
 
   final VsCodeApi _api;
