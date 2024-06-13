@@ -19,6 +19,7 @@ void main() {
   late LoggingScreenV2 screen;
   late MockLoggingControllerV2 mockLoggingController;
   const windowSize = Size(1000.0, 1000.0);
+  TestWidgetsFlutterBinding.ensureInitialized();
 
   group('Logging Screen', () {
     Future<void> pumpLoggingScreen(WidgetTester tester) async {
