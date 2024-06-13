@@ -114,7 +114,7 @@ class PostMessageEditorClient implements EditorClient {
     final unsupportedDevices = e.unsupportedDevices?.map(
           (d) => EditorDevice.fromJson({...d.toJson(), 'supported': false}),
         ) ??
-        [];
+        <EditorDevice>[];
     final newDevices = supportedDevices.followedBy(unsupportedDevices).toList();
     final newIds = newDevices.map((d) => d.id).toSet();
     final oldIds = _currentDevices.map((d) => d.id).toSet();

@@ -94,7 +94,6 @@ class _VsCodeConnectedPanelState extends State<_VsCodeConnectedPanel>
           switch (event) {
             // Devices.
             case DeviceAddedEvent(:final device):
-              devices[device.id] = device;
             case DeviceChangedEvent(:final device):
               devices[device.id] = device;
             case DeviceRemovedEvent(:final deviceId):
@@ -103,7 +102,6 @@ class _VsCodeConnectedPanelState extends State<_VsCodeConnectedPanel>
               selectedDeviceId = deviceId;
             // Debug sessions.
             case DebugSessionStartedEvent(:final debugSession):
-              debugSessions[debugSession.id] = debugSession;
             case DebugSessionChangedEvent(:final debugSession):
               debugSessions[debugSession.id] = debugSession;
             case DebugSessionStoppedEvent(:final debugSessionId):
