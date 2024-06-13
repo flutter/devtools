@@ -87,15 +87,6 @@ class DeviceAddedEvent extends EditorEvent {
   Map<String, Object?> toJson() => {
         _Field.device: device,
       };
-
-  @override
-  bool operator ==(Object other) =>
-      other is DeviceAddedEvent &&
-      other.runtimeType == runtimeType &&
-      other.device == device;
-
-  @override
-  int get hashCode => device.hashCode;
 }
 
 /// An event sent by an editor when an existing device is updated.
@@ -120,15 +111,6 @@ class DeviceChangedEvent extends EditorEvent {
   Map<String, Object?> toJson() => {
         _Field.device: device,
       };
-
-  @override
-  bool operator ==(Object other) =>
-      other is DeviceChangedEvent &&
-      other.runtimeType == runtimeType &&
-      other.device == device;
-
-  @override
-  int get hashCode => device.hashCode;
 }
 
 /// An event sent by an editor when a device is no longer available.
@@ -149,15 +131,6 @@ class DeviceRemovedEvent extends EditorEvent {
   Map<String, Object?> toJson() => {
         _Field.deviceId: deviceId,
       };
-
-  @override
-  bool operator ==(Object other) =>
-      other is DeviceRemovedEvent &&
-      other.runtimeType == runtimeType &&
-      other.deviceId == deviceId;
-
-  @override
-  int get hashCode => deviceId.hashCode;
 }
 
 /// An event sent by an editor when the current selected device was changed.
@@ -185,15 +158,6 @@ class DeviceSelectedEvent extends EditorEvent {
   Map<String, Object?> toJson() => {
         _Field.deviceId: deviceId,
       };
-
-  @override
-  bool operator ==(Object other) =>
-      other is DeviceSelectedEvent &&
-      other.runtimeType == runtimeType &&
-      other.deviceId == deviceId;
-
-  @override
-  int get hashCode => deviceId.hashCode;
 }
 
 /// An event sent by an editor when a new debug session is started.
@@ -216,15 +180,6 @@ class DebugSessionStartedEvent extends EditorEvent {
   Map<String, Object?> toJson() => {
         _Field.debugSession: debugSession,
       };
-
-  @override
-  bool operator ==(Object other) =>
-      other is DebugSessionStartedEvent &&
-      other.runtimeType == runtimeType &&
-      other.debugSession == debugSession;
-
-  @override
-  int get hashCode => debugSession.hashCode;
 }
 
 /// An event sent by an editor when a debug session is started (for example the
@@ -248,15 +203,6 @@ class DebugSessionChangedEvent extends EditorEvent {
   Map<String, Object?> toJson() => {
         _Field.debugSession: debugSession,
       };
-
-  @override
-  bool operator ==(Object other) =>
-      other is DebugSessionChangedEvent &&
-      other.runtimeType == runtimeType &&
-      other.debugSession == debugSession;
-
-  @override
-  int get hashCode => debugSession.hashCode;
 }
 
 /// An event sent by an editor when a debug session ends.
@@ -277,15 +223,6 @@ class DebugSessionStoppedEvent extends EditorEvent {
   Map<String, Object?> toJson() => {
         _Field.debugSessionId: debugSessionId,
       };
-
-  @override
-  bool operator ==(Object other) =>
-      other is DebugSessionStoppedEvent &&
-      other.runtimeType == runtimeType &&
-      other.debugSessionId == debugSessionId;
-
-  @override
-  int get hashCode => debugSessionId.hashCode;
 }
 
 /// A debug session running in the editor.
@@ -329,29 +266,6 @@ class EditorDebugSession with Serializable {
         _Field.debuggerType: debuggerType,
         _Field.projectRootPath: projectRootPath,
       };
-
-  @override
-  bool operator ==(Object other) =>
-      other is EditorDebugSession &&
-      other.runtimeType == runtimeType &&
-      other.id == id &&
-      other.name == name &&
-      other.vmServiceUri == vmServiceUri &&
-      other.flutterMode == flutterMode &&
-      other.flutterDeviceId == flutterDeviceId &&
-      other.debuggerType == debuggerType &&
-      other.projectRootPath == projectRootPath;
-
-  @override
-  int get hashCode => Object.hashAll([
-        id,
-        name,
-        vmServiceUri,
-        flutterMode,
-        flutterDeviceId,
-        debuggerType,
-        projectRootPath,
-      ]);
 }
 
 /// A device that is available in the editor.
@@ -409,29 +323,4 @@ class EditorDevice with Serializable {
         _Field.platformType: platformType,
         _Field.supported: supported,
       };
-
-  @override
-  bool operator ==(Object other) =>
-      other is EditorDevice &&
-      other.runtimeType == runtimeType &&
-      other.id == id &&
-      other.name == name &&
-      other.category == category &&
-      other.emulator == emulator &&
-      other.emulatorId == emulatorId &&
-      other.ephemeral == ephemeral &&
-      other.platform == platform &&
-      other.platformType == platformType;
-
-  @override
-  int get hashCode => Object.hashAll([
-        id,
-        name,
-        category,
-        emulator,
-        emulatorId,
-        ephemeral,
-        platform,
-        platformType,
-      ]);
 }
