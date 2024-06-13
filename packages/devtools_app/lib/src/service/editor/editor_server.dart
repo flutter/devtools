@@ -5,9 +5,14 @@
 import 'dart:async';
 
 import 'api_classes.dart';
+import 'editor_client.dart';
 
 /// A base for classes that can act as an Editor (agnostic to the communication
 /// channel).
+///
+/// This class is for the part of an editor connected to DTD that is providing
+/// the editor services. It is the opposite of [EditorClient] which is for
+/// consuming the services provided by the editor(server).
 abstract class EditorServer {
   /// Close any communication channel.
   Future<void> close();

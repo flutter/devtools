@@ -161,6 +161,7 @@ class DeviceRemovedEvent extends EditorEvent {
 }
 
 /// An event sent by an editor when the current selected device was changed.
+///
 /// This could be as a result of the client itself calling the `selectDevice`
 /// method or because the device changed for another reason (such as the user
 /// selecting a device in the editor directly, or the previously selected device

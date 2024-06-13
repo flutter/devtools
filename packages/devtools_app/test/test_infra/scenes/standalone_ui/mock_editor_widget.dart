@@ -11,8 +11,10 @@ import 'package:flutter/material.dart';
 import '../../test_data/editor_service/fake_editor.dart';
 
 /// A simple UI that acts as a stand-in host editor to simplify the development
-/// workflow when working on embedded tooling. Uses a [FakeEditor] to provide
-/// functionality over DTD (or legacy `postMessage`).
+/// workflow when working on embedded tooling.
+///
+/// Uses a [FakeEditor] to provide functionality over DTD (or legacy
+/// `postMessage`).
 class MockEditorWidget extends StatefulWidget {
   const MockEditorWidget({
     super.key,

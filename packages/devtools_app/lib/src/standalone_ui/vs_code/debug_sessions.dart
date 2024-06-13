@@ -27,7 +27,11 @@ class DebugSessions extends StatelessWidget {
   });
 
   final EditorClient editor;
+
+  /// A map of debug session IDs to their debug sessions.
   final Map<String, EditorDebugSession> sessions;
+
+  /// A map of device IDs to their devices.
   final Map<String, EditorDevice> devices;
 
   @override

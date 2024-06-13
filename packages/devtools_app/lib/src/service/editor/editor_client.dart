@@ -28,9 +28,10 @@ abstract class EditorClient {
   /// Gets the set of currently active debug sessions from the editor.
   Future<List<EditorDebugSession>> getDebugSessions();
 
-  /// Requests the editor selects a specific device. It should not be assumed
-  /// that calling this method succeeds (if it does, a `deviceSelected` event
-  /// will provide the appropriate update).
+  /// Requests the editor selects a specific device.
+  ///
+  /// It should not be assumed that calling this method succeeds (if it does, a
+  /// `deviceSelected` event will provide the appropriate update).
   Future<void> selectDevice(EditorDevice? device);
 
   /// Requests the editor Hot Reloads the given debug session.
