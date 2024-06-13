@@ -175,7 +175,7 @@ class _LoggingTableRows extends StatefulWidget {
 
 class _LoggingTableRowsState extends State<_LoggingTableRows>
     with AutoDisposeMixin {
-  late final ScrollController _verticalController = ScrollController();
+  late final _verticalController = ScrollController();
 
   @override
   void initState() {

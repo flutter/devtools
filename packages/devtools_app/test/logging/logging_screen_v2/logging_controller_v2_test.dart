@@ -33,7 +33,7 @@ void main() {
       );
     }
 
-    setUp(() async {
+    setUp(() {
       setGlobal(
         ServiceConnectionManager,
         FakeServiceConnectionManager(),

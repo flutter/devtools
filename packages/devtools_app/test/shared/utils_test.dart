@@ -8,7 +8,6 @@ import 'package:devtools_app/src/shared/utils.dart';
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-void main() {
   group('DebounceTimer', () {
     test('the callback happens immediately', () {
       fakeAsync((async) {
@@ -112,7 +111,7 @@ void main() {
     late InterruptableChunkWorker worker;
     late List<int> indexes;
     late List<double> progresses;
-    const int chunkSize = 3;
+    const chunkSize = 3;
     setUp(() {
       indexes = [];
       progresses = [];
