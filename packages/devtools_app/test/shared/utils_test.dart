@@ -8,6 +8,7 @@ import 'package:devtools_app/src/shared/utils.dart';
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+void main() {
   group('DebounceTimer', () {
     test('the callback happens immediately', () {
       fakeAsync((async) {
