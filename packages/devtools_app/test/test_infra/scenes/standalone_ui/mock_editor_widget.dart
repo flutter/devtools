@@ -8,33 +8,31 @@ import 'dart:convert';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../../test_infra/test_data/dart_tooling_api/mock_api.dart';
+import 'editor_service/fake_editor.dart';
 
-/// A simple UI that acts as a stand-in host IDE to simplify the development
+/// A simple UI that acts as a stand-in host editor to simplify the development
 /// workflow when working on embedded tooling.
 ///
-/// This UI interacts with [FakeDartToolingApi] to allow triggering events that
-/// would normally be fired by the IDE and also shows a log of recent requests.
-class VsCodeFlutterPanelMockEditor extends StatefulWidget {
-  const VsCodeFlutterPanelMockEditor({
+/// Uses a [FakeEditor] to provide functionality over DTD (or legacy
+/// `postMessage`).
+class MockEditorWidget extends StatefulWidget {
+  const MockEditorWidget({
     super.key,
-    required this.api,
+    required this.editor,
     this.child,
   });
 
-  /// The mock API to interact with.
-  final FakeDartToolingApi api;
+  /// The fake editor API we can use to simulate an editor.
+  final FakeEditor editor;
 
   final Widget? child;
 
   @override
-  State<VsCodeFlutterPanelMockEditor> createState() =>
-      _VsCodeFlutterPanelMockEditorState();
+  State<MockEditorWidget> createState() => _MockEditorWidgetState();
 }
 
-class _VsCodeFlutterPanelMockEditorState
-    extends State<VsCodeFlutterPanelMockEditor> {
-  FakeDartToolingApi get api => widget.api;
+class _MockEditorWidgetState extends State<MockEditorWidget> {
+  FakeEditor get editor => widget.editor;
 
   /// The number of communication messages to keep in the log.
   static const maxLogEvents = 20;
@@ -56,8 +54,7 @@ class _VsCodeFlutterPanelMockEditorState
   void initState() {
     super.initState();
 
-    // Listen to the log stream to maintain our buffer and trigger rebuilds.
-    logUpdated = api.log.map((log) {
+    logUpdated = editor.log.map((log) {
       logRing.add(log);
       while (logRing.length > maxLogEvents) {
         logRing.removeFirst();
@@ -118,11 +115,11 @@ class _VsCodeFlutterPanelMockEditorState
                     children: [
                       const Text('Devices: '),
                       ElevatedButton(
-                        onPressed: api.connectDevices,
+                        onPressed: editor.connectDevices,
                         child: const Text('Connect'),
                       ),
                       ElevatedButton(
-                        onPressed: api.disconnectDevices,
+                        onPressed: editor.disconnectDevices,
                         child: const Text('Disconnect'),
                       ),
                     ],
@@ -133,7 +130,7 @@ class _VsCodeFlutterPanelMockEditorState
                   Row(
                     children: [
                       ElevatedButton(
-                        onPressed: () => api.startSession(
+                        onPressed: () => editor.startSession(
                           debuggerType: 'Flutter',
                           deviceId: 'macos',
                           flutterMode: 'debug',
@@ -142,7 +139,7 @@ class _VsCodeFlutterPanelMockEditorState
                       ),
                       const SizedBox(width: denseSpacing),
                       ElevatedButton(
-                        onPressed: () => api.startSession(
+                        onPressed: () => editor.startSession(
                           debuggerType: 'Flutter',
                           deviceId: 'macos',
                           flutterMode: 'profile',
@@ -151,7 +148,7 @@ class _VsCodeFlutterPanelMockEditorState
                       ),
                       const SizedBox(width: denseSpacing),
                       ElevatedButton(
-                        onPressed: () => api.startSession(
+                        onPressed: () => editor.startSession(
                           debuggerType: 'Flutter',
                           deviceId: 'macos',
                           flutterMode: 'release',
@@ -160,7 +157,7 @@ class _VsCodeFlutterPanelMockEditorState
                       ),
                       const SizedBox(width: denseSpacing),
                       ElevatedButton(
-                        onPressed: () => api.startSession(
+                        onPressed: () => editor.startSession(
                           debuggerType: 'Flutter',
                           deviceId: 'macos',
                           flutterMode: 'jit_release',
@@ -173,7 +170,7 @@ class _VsCodeFlutterPanelMockEditorState
                   Row(
                     children: [
                       ElevatedButton(
-                        onPressed: () => api.startSession(
+                        onPressed: () => editor.startSession(
                           debuggerType: 'Flutter',
                           deviceId: 'chrome',
                           flutterMode: 'debug',
@@ -182,7 +179,7 @@ class _VsCodeFlutterPanelMockEditorState
                       ),
                       const SizedBox(width: denseSpacing),
                       ElevatedButton(
-                        onPressed: () => api.startSession(
+                        onPressed: () => editor.startSession(
                           debuggerType: 'Flutter',
                           deviceId: 'chrome',
                           flutterMode: 'profile',
@@ -191,7 +188,7 @@ class _VsCodeFlutterPanelMockEditorState
                       ),
                       const SizedBox(width: denseSpacing),
                       ElevatedButton(
-                        onPressed: () => api.startSession(
+                        onPressed: () => editor.startSession(
                           debuggerType: 'Flutter',
                           deviceId: 'chrome',
                           flutterMode: 'release',
@@ -204,7 +201,7 @@ class _VsCodeFlutterPanelMockEditorState
                   Row(
                     children: [
                       ElevatedButton(
-                        onPressed: () => api.startSession(
+                        onPressed: () => editor.startSession(
                           debuggerType: 'Dart',
                           deviceId: 'macos',
                         ),
@@ -214,7 +211,7 @@ class _VsCodeFlutterPanelMockEditorState
                   ),
                   const SizedBox(height: denseSpacing),
                   ElevatedButton(
-                    onPressed: () => api.endSessions(),
+                    onPressed: () => editor.stopAllSessions(),
                     style: theme.elevatedButtonTheme.style!.copyWith(
                       backgroundColor: const WidgetStatePropertyAll(
                         Colors.red,

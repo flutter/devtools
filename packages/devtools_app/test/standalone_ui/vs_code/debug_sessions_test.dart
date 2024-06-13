@@ -5,8 +5,8 @@
 import 'dart:io';
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/service/editor/api_classes.dart';
 import 'package:devtools_app/src/shared/constants.dart';
-import 'package:devtools_app/src/standalone_ui/api/impl/vs_code_api.dart';
 import 'package:devtools_app/src/standalone_ui/vs_code/debug_sessions.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -17,13 +17,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-import '../../test_infra/test_data/dart_tooling_api/mock_api.dart';
+import '../../test_infra/scenes/standalone_ui/editor_service/fake_editor.dart';
 
 void main() {
   const windowSize = Size(2000.0, 2000.0);
 
-  late MockVsCodeApi mockVsCodeApi;
-  late final Map<String, VsCodeDevice> deviceMap;
+  late MockEditorClient mockEditorClient;
+  late final Map<String, EditorDevice> deviceMap;
 
   setUpAll(() {
     // Set test mode so that the debug list of extensions will be used.
@@ -34,17 +34,13 @@ void main() {
   });
 
   setUp(() {
-    mockVsCodeApi = MockVsCodeApi();
-    when(mockVsCodeApi.capabilities).thenReturn(
-      VsCodeCapabilitiesImpl({
-        'executeCommand': true,
-        'selectDevice': true,
-        'openDevToolsPage': true,
-        'openDevToolsExternally': true,
-        'hotReload': true,
-        'hotRestart': true,
-      }),
-    );
+    mockEditorClient = MockEditorClient();
+    when(mockEditorClient.supportsGetDevices).thenReturn(true);
+    when(mockEditorClient.supportsSelectDevice).thenReturn(true);
+    when(mockEditorClient.supportsOpenDevToolsPage).thenReturn(true);
+    when(mockEditorClient.supportsOpenDevToolsExternally).thenReturn(true);
+    when(mockEditorClient.supportsHotReload).thenReturn(true);
+    when(mockEditorClient.supportsHotRestart).thenReturn(true);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(PreferencesController, PreferencesController());
   });
@@ -53,9 +49,10 @@ void main() {
     await tester.pumpWidget(
       wrap(
         DebugSessions(
-          api: mockVsCodeApi,
-          sessions: _debugSessions,
-          deviceMap: deviceMap,
+          editor: mockEditorClient,
+          sessions:
+              Map.fromEntries(_debugSessions.map((s) => MapEntry(s.id, s))),
+          devices: deviceMap,
         ),
       ),
     );
@@ -216,7 +213,7 @@ void main() {
   });
 }
 
-final _debugSessions = <VsCodeDebugSession>[
+final _debugSessions = [
   // Flutter native apps.
   generateDebugSession(
     debuggerType: 'Flutter',
@@ -261,12 +258,12 @@ final _debugSessions = <VsCodeDebugSession>[
   ),
 ];
 
-VsCodeDebugSession generateDebugSession({
+EditorDebugSession generateDebugSession({
   required String debuggerType,
   required String deviceId,
   String? flutterMode,
 }) {
-  return VsCodeDebugSessionImpl(
+  return EditorDebugSession(
     id: '$debuggerType-$deviceId-$flutterMode',
     name: 'Session ($debuggerType) ($deviceId)',
     vmServiceUri: 'ws://127.0.0.1:1234/ws',
