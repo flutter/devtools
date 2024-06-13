@@ -65,7 +65,7 @@ abstract class _Field {
 /// given editor as the editor might not implement all functionality or may be a
 /// future version running against an older version of this code/DevTools.
 sealed class EditorEvent with Serializable {
-  EditorEventKind get event;
+  EditorEventKind get kind;
 }
 
 /// An event sent by an editor when a new device becomes available.
@@ -79,7 +79,7 @@ class DeviceAddedEvent extends EditorEvent {
         );
 
   @override
-  EditorEventKind get event => EditorEventKind.deviceAdded;
+  EditorEventKind get kind => EditorEventKind.deviceAdded;
 
   final EditorDevice device;
 
@@ -112,7 +112,7 @@ class DeviceChangedEvent extends EditorEvent {
         );
 
   @override
-  EditorEventKind get event => EditorEventKind.deviceChanged;
+  EditorEventKind get kind => EditorEventKind.deviceChanged;
 
   final EditorDevice device;
 
@@ -141,7 +141,7 @@ class DeviceRemovedEvent extends EditorEvent {
         );
 
   @override
-  EditorEventKind get event => EditorEventKind.deviceRemoved;
+  EditorEventKind get kind => EditorEventKind.deviceRemoved;
 
   final String deviceId;
 
@@ -174,7 +174,7 @@ class DeviceSelectedEvent extends EditorEvent {
         );
 
   @override
-  EditorEventKind get event => EditorEventKind.deviceSelected;
+  EditorEventKind get kind => EditorEventKind.deviceSelected;
 
   final String? deviceId;
 
@@ -205,7 +205,7 @@ class DebugSessionStartedEvent extends EditorEvent {
         );
 
   @override
-  EditorEventKind get event => EditorEventKind.debugSessionStarted;
+  EditorEventKind get kind => EditorEventKind.debugSessionStarted;
 
   final EditorDebugSession debugSession;
 
@@ -237,7 +237,7 @@ class DebugSessionChangedEvent extends EditorEvent {
         );
 
   @override
-  EditorEventKind get event => EditorEventKind.debugSessionChanged;
+  EditorEventKind get kind => EditorEventKind.debugSessionChanged;
 
   final EditorDebugSession debugSession;
 
@@ -266,7 +266,7 @@ class DebugSessionStoppedEvent extends EditorEvent {
         );
 
   @override
-  EditorEventKind get event => EditorEventKind.debugSessionStopped;
+  EditorEventKind get kind => EditorEventKind.debugSessionStopped;
 
   final String debugSessionId;
 
