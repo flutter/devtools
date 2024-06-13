@@ -176,6 +176,8 @@ class DeviceSelectedEvent extends EditorEvent {
   @override
   EditorEventKind get kind => EditorEventKind.deviceSelected;
 
+  /// The ID of the device being selected, or `null` if the current device is
+  /// being unselected without a new device being selected.
   final String? deviceId;
 
   @override
