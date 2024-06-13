@@ -288,7 +288,7 @@ class DebugSessionStoppedEvent extends EditorEvent {
 }
 
 /// A debug session running in the editor.
-class EditorDebugSession {
+class EditorDebugSession with Serializable {
   EditorDebugSession({
     required this.id,
     required this.name,
@@ -318,6 +318,7 @@ class EditorDebugSession {
   final String? debuggerType;
   final String? projectRootPath;
 
+  @override
   Map<String, Object?> toJson() => {
         _Field.id: id,
         _Field.name: name,
@@ -353,7 +354,7 @@ class EditorDebugSession {
 }
 
 /// A device that is available in the editor.
-class EditorDevice {
+class EditorDevice with Serializable {
   EditorDevice({
     required this.id,
     required this.name,
@@ -395,6 +396,7 @@ class EditorDevice {
   /// are made).
   final bool supported;
 
+  @override
   Map<String, Object?> toJson() => {
         _Field.id: id,
         _Field.name: name,
