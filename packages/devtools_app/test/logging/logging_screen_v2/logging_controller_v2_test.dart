@@ -33,26 +33,28 @@ void main() {
       );
     }
 
-    setUp(() {
+    setUp(() async {
       setGlobal(
         ServiceConnectionManager,
         FakeServiceConnectionManager(),
       );
       setGlobal(IdeTheme, getIdeTheme());
       setGlobal(MessageBus, MessageBus());
-      setGlobal(GlobalKey<NavigatorState>, GlobalKey<NavigatorState>());
       TestWidgetsFlutterBinding.ensureInitialized();
       controller = LoggingControllerV2();
+      controller.loggingModel.tableWidth = 100.0;
     });
 
-    test('initial state', () {
+    testWidgets('initial state', (WidgetTester tester) async {
+      await tester.pumpWidget(wrap(const Text('')));
       expect(controller.loggingModel.logCount, 0);
       expect(controller.loggingModel.filteredLogCount, 0);
       expect(controller.loggingModel.selectedLogCount, 0);
       expect(controller.activeFilter.value.isEmpty, isTrue);
     });
 
-    test('receives data', () {
+    testWidgets('receives data', (WidgetTester tester) async {
+      await tester.pumpWidget(wrap(const Text('')));
       expect(controller.loggingModel.logCount, 0);
       expect(controller.loggingModel.filteredLogCount, 0);
       expect(controller.loggingModel.selectedLogCount, 0);
@@ -69,7 +71,8 @@ void main() {
       );
     });
 
-    test('clear', () {
+    testWidgets('clear', (WidgetTester tester) async {
+      await tester.pumpWidget(wrap(const Text('')));
       addStdoutData('Abc.');
 
       expect(controller.loggingModel.logCount, 1);
