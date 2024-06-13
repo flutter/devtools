@@ -11,16 +11,14 @@ import 'dart:convert';
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/primitives/message_bus.dart';
+import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:devtools_test/helpers.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  setUp(() {
-    setGlobal(MessageBus, MessageBus());
-  });
-
   group('LoggingControllerV2', () {
     late LoggingControllerV2 controller;
 
@@ -36,38 +34,54 @@ void main() {
     }
 
     setUp(() {
-      setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
-
+      setGlobal(
+        ServiceConnectionManager,
+        FakeServiceConnectionManager(),
+      );
+      setGlobal(IdeTheme, getIdeTheme());
+      setGlobal(MessageBus, MessageBus());
+      TestWidgetsFlutterBinding.ensureInitialized();
       controller = LoggingControllerV2();
+      controller.loggingModel.tableWidth = 100.0;
     });
 
-    test('initial state', () {
-      expect(controller.data, isEmpty);
-      expect(controller.filteredData.value, isEmpty);
+    testWidgets('initial state', (WidgetTester tester) async {
+      await tester.pumpWidget(wrap(const Text('')));
+      expect(controller.loggingModel.logCount, 0);
+      expect(controller.loggingModel.filteredLogCount, 0);
+      expect(controller.loggingModel.selectedLogCount, 0);
       expect(controller.activeFilter.value.isEmpty, isTrue);
     });
 
-    test('receives data', () {
-      expect(controller.data, isEmpty);
+    testWidgets('receives data', (WidgetTester tester) async {
+      await tester.pumpWidget(wrap(const Text('')));
+      expect(controller.loggingModel.logCount, 0);
+      expect(controller.loggingModel.filteredLogCount, 0);
+      expect(controller.loggingModel.selectedLogCount, 0);
 
       addStdoutData('Abc.');
 
-      expect(controller.data, isNotEmpty);
-      expect(controller.filteredData.value, isNotEmpty);
+      expect(controller.loggingModel.logCount, 1);
+      expect(controller.loggingModel.filteredLogCount, 1);
+      expect(controller.loggingModel.selectedLogCount, 0);
 
-      expect(controller.data.first.summary, contains('Abc'));
+      expect(
+        controller.loggingModel.filteredLogAt(0).summary,
+        contains('Abc'),
+      );
     });
 
-    test('clear', () {
+    testWidgets('clear', (WidgetTester tester) async {
+      await tester.pumpWidget(wrap(const Text('')));
       addStdoutData('Abc.');
 
-      expect(controller.data, isNotEmpty);
-      expect(controller.filteredData.value, isNotEmpty);
+      expect(controller.loggingModel.logCount, 1);
+      expect(controller.loggingModel.filteredLogCount, 1);
 
       controller.clear();
 
-      expect(controller.data, isEmpty);
-      expect(controller.filteredData.value, isEmpty);
+      expect(controller.loggingModel.logCount, 0);
+      expect(controller.loggingModel.filteredLogCount, 0);
     });
   });
 

@@ -29,6 +29,7 @@ final _testNavigatorKey = GlobalKey<NavigatorState>();
 /// [Material] to support elements like [TextField] that draw ink effects, and a
 /// [Directionality] to support [RenderFlex] widgets like [Row] and [Column].
 Widget wrap(Widget widget, {DevToolsQueryParams? queryParams}) {
+  setGlobal(GlobalKey<NavigatorState>, _testNavigatorKey);
   return MaterialApp.router(
     theme: themeFor(
       isDarkTheme: false,
