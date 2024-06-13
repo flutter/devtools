@@ -1,6 +1,8 @@
-## 0.2.0
+## 0.2.1
 * Add testimonies from extension authors to the `README.md`.
 * Add an integration test to the example app, `app_that_uses_foo`.
+* Bump minimum Dart SDK version to Dart stable `3.4.3` and minimum Flutter SDK
+version to Flutter stable `3.22.2`.
 
 ## 0.2.0-dev.0
 * Deprecate the `DevToolsExtension.requiresRunningApplication` field.
