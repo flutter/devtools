@@ -43,6 +43,7 @@ void main() {
       when(
         fakeServiceConnection.errorBadgeManager.errorCountNotifier('logging'),
       ).thenReturn(ValueNotifier<int>(0));
+      setGlobal(GlobalKey<NavigatorState>, GlobalKey<NavigatorState>());
       setGlobal(NotificationService, NotificationService());
       setGlobal(
         DevToolsEnvironmentParameters,

@@ -5,7 +5,7 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../../app.dart';
+import '../../../shared/globals.dart';
 import '../../../shared/ui/utils.dart';
 import 'logging_controller_v2.dart';
 
@@ -24,10 +24,10 @@ class LoggingTableRow extends StatefulWidget {
   final bool isSelected;
 
   static TextStyle get metadataStyle =>
-      Theme.of(DevToolsAppState.navigatorKey.currentContext!).subtleTextStyle;
+      Theme.of(navigatorKey.currentContext!).subtleTextStyle;
 
   static TextStyle get detailsStyle =>
-      Theme.of(DevToolsAppState.navigatorKey.currentContext!).regularTextStyle;
+      Theme.of(navigatorKey.currentContext!).regularTextStyle;
 
   @override
   State<LoggingTableRow> createState() => _LoggingTableRowState();

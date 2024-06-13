@@ -131,13 +131,12 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
 
   late ReleaseNotesController releaseNotesController;
 
-  static final navigatorKey = GlobalKey<NavigatorState>();
-
-  late final routerDelegate = DevToolsRouterDelegate(_getPage, navigatorKey);
+  late final routerDelegate = DevToolsRouterDelegate(_getPage);
 
   @override
   void initState() {
     super.initState();
+    setGlobal(GlobalKey<NavigatorState>, routerDelegate.navigatorKey);
 
     // TODO(https://github.com/flutter/devtools/issues/6018): Once
     // https://github.com/flutter/flutter/issues/129692 is fixed, disable the
