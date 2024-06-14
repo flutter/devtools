@@ -130,8 +130,9 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   final hoverCardController = HoverCardController();
 
   late ReleaseNotesController releaseNotesController;
+  static final navigatorKey = GlobalKey<NavigatorState>();
 
-  late final routerDelegate = DevToolsRouterDelegate(_getPage);
+  late final routerDelegate = DevToolsRouterDelegate(_getPage, navigatorKey);
 
   @override
   void initState() {

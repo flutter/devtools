@@ -10,7 +10,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../service/service_extension_widgets.dart';
+import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/common_widgets.dart';
+import '../../../shared/globals.dart';
 import 'logging_model.dart';
 import 'logging_table_row.dart';
 
@@ -22,9 +25,7 @@ typedef ContextMenuBuilder = Widget Function(
 
 /// A Widget for displaying logs with line wrapping, along with log metadata.
 class LoggingTableV2 extends StatefulWidget {
-  // TODO(danchevalier): Use SearchControllerMixin and FilterControllerMixin.
   const LoggingTableV2({super.key, required this.model});
-
   final LoggingTableModel model;
 
   @override
@@ -67,10 +68,25 @@ class _LoggingTableV2State extends State<LoggingTableV2> {
                 onSubmitted: (value) {},
               ),
             ),
+            const SizedBox(width: defaultSpacing),
             Expanded(
               child: DevToolsClearableTextField(
                 labelText: 'Search',
               ),
+            ),
+            const SizedBox(width: defaultSpacing),
+            SettingsOutlinedButton(
+              gaScreen: gac.logging,
+              gaSelection: gac.loggingSettings,
+              tooltip: 'Logging Settings',
+              onPressed: () {
+                unawaited(
+                  showDialog(
+                    context: context,
+                    builder: (context) => const LoggingSettingsDialogV2(),
+                  ),
+                );
+              },
             ),
           ],
         ),
@@ -97,9 +113,10 @@ class _LoggingTableProgress extends StatefulWidget {
 }
 
 class _LoggingTableProgressState extends State<_LoggingTableProgress> {
-  final _progressStopwatch = Stopwatch();
   static const _millisecondsUntilCacheProgressShows = 500;
   static const _millisecondsUntilCacheProgressHelperShows = 2000;
+
+  final _progressStopwatch = Stopwatch();
 
   @override
   Widget build(BuildContext context) {
@@ -209,66 +226,97 @@ class _LoggingTableRowsState extends State<_LoggingTableRows>
   }
 }
 
-/// Shows and hides the context menu based on user gestures.
-///
-/// By default, shows the menu on right clicks and long presses.
-class _ContextMenuRegion extends StatefulWidget {
-  /// Creates an instance of [_ContextMenuRegion].
-  const _ContextMenuRegion({
-    required this.child,
-    required this.contextMenuBuilder,
-  });
-
-  /// Builds the context menu.
-  final ContextMenuBuilder contextMenuBuilder;
-
-  /// The child widget that will be listened to for gestures.
-  final Widget child;
+class LoggingSettingsDialogV2 extends StatefulWidget {
+  const LoggingSettingsDialogV2({super.key});
 
   @override
-  State<_ContextMenuRegion> createState() => _ContextMenuRegionState();
+  State<LoggingSettingsDialogV2> createState() =>
+      _LoggingSettingsDialogV2State();
 }
 
-class _ContextMenuRegionState extends State<_ContextMenuRegion> {
-  final _contextMenuController = ContextMenuController();
-
-  void _onSecondaryTapUp(TapUpDetails details) {
-    _show(details.globalPosition);
+class _LoggingSettingsDialogV2State extends State<LoggingSettingsDialogV2> {
+  void updateRetentionLimit() {
+    newRetentionLimit = preferences.logging.retentionLimit.value;
   }
 
-  void _onTap() {
-    if (!_contextMenuController.isShown) {
-      return;
-    }
-    _hide();
-  }
+  @override
+  void initState() {
+    preferences.logging.retentionLimit.addListener(updateRetentionLimit);
+    updateRetentionLimit();
 
-  void _show(Offset position) {
-    _contextMenuController.show(
-      context: context,
-      contextMenuBuilder: (BuildContext context) {
-        return widget.contextMenuBuilder(context, position);
-      },
-    );
-  }
-
-  void _hide() {
-    _contextMenuController.remove();
+    super.initState();
   }
 
   @override
   void dispose() {
-    _hide();
+    preferences.logging.retentionLimit.removeListener(updateRetentionLimit);
     super.dispose();
   }
 
+  late int newRetentionLimit;
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onSecondaryTapUp: _onSecondaryTapUp,
-      onTap: _onTap,
-      child: widget.child,
+    final theme = Theme.of(context);
+    return DevToolsDialog(
+      title: const DialogTitleText('Logging Settings'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ...dialogSubHeader(
+            theme,
+            'General',
+          ),
+          const StructuredErrorsToggle(),
+          const SizedBox(height: defaultSpacing),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(preferences.logging.retentionLimitTitle),
+                    Text(
+                      'Used to limit the number of log messages retained.',
+                      style: theme.subtleTextStyle,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: defaultSpacing),
+              SizedBox(
+                height: defaultTextFieldHeight,
+                width: defaultTextFieldNumberWidth,
+                child: TextField(
+                  style: theme.regularTextStyle,
+                  decoration: singleLineDialogTextFieldDecoration,
+                  controller: TextEditingController(
+                    text: newRetentionLimit.toString(),
+                  ),
+                  inputFormatters: <TextInputFormatter>[
+                    // Only positive integers.
+                    FilteringTextInputFormatter.allow(
+                      RegExp(r'^[1-9][0-9]*'),
+                    ),
+                  ],
+                  onChanged: (String text) {
+                    final newValue = int.parse(text);
+                    newRetentionLimit = newValue;
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+      actions: [
+        DialogApplyButton(
+          onPressed: () {
+            preferences.logging.retentionLimit.value = newRetentionLimit;
+          },
+        ),
+        const DialogCloseButton(),
+      ],
     );
   }
 }

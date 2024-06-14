@@ -140,7 +140,7 @@ class LoggingControllerV2 extends DisposableController
   }
 
   void _handleConnectionStart(VmServiceWrapper service) {
-    // Log stdout events.
+    // Log stdout eventss:ta
     final stdoutHandler = _StdoutEventHandler(this, 'stdout');
     autoDisposeStreamSubscription(
       service.onStdoutEventWithHistorySafe.listen(stdoutHandler.handle),
