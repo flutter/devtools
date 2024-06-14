@@ -13,7 +13,6 @@ import 'package:flutter/services.dart';
 import '../../../service/service_extension_widgets.dart';
 import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/common_widgets.dart';
-import '../../../shared/globals.dart';
 import 'logging_model.dart';
 import 'logging_table_row.dart';
 
