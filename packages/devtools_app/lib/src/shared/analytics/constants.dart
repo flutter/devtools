@@ -12,7 +12,6 @@ part 'constants/_debugger_constants.dart';
 part 'constants/_deep_links_constants.dart';
 part 'constants/_extension_constants.dart';
 part 'constants/_memory_constants.dart';
-part 'constants/_logging_constants.dart';
 part 'constants/_performance_constants.dart';
 part 'constants/_vs_code_sidebar_constants.dart';
 part 'constants/_inspector_constants.dart';

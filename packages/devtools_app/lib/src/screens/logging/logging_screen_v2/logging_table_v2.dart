@@ -25,7 +25,9 @@ typedef ContextMenuBuilder = Widget Function(
 
 /// A Widget for displaying logs with line wrapping, along with log metadata.
 class LoggingTableV2 extends StatefulWidget {
+  // TODO(danchevalier): Use SearchControllerMixin and FilterControllerMixin.
   const LoggingTableV2({super.key, required this.model});
+
   final LoggingTableModel model;
 
   @override
@@ -113,10 +115,9 @@ class _LoggingTableProgress extends StatefulWidget {
 }
 
 class _LoggingTableProgressState extends State<_LoggingTableProgress> {
+  final _progressStopwatch = Stopwatch();
   static const _millisecondsUntilCacheProgressShows = 500;
   static const _millisecondsUntilCacheProgressHelperShows = 2000;
-
-  final _progressStopwatch = Stopwatch();
 
   @override
   Widget build(BuildContext context) {
@@ -235,24 +236,6 @@ class LoggingSettingsDialogV2 extends StatefulWidget {
 }
 
 class _LoggingSettingsDialogV2State extends State<LoggingSettingsDialogV2> {
-  void updateRetentionLimit() {
-    newRetentionLimit = preferences.logging.retentionLimit.value;
-  }
-
-  @override
-  void initState() {
-    preferences.logging.retentionLimit.addListener(updateRetentionLimit);
-    updateRetentionLimit();
-
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    preferences.logging.retentionLimit.removeListener(updateRetentionLimit);
-    super.dispose();
-  }
-
   late int newRetentionLimit;
   @override
   Widget build(BuildContext context) {
@@ -268,54 +251,10 @@ class _LoggingSettingsDialogV2State extends State<LoggingSettingsDialogV2> {
             'General',
           ),
           const StructuredErrorsToggle(),
-          const SizedBox(height: defaultSpacing),
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(preferences.logging.retentionLimitTitle),
-                    Text(
-                      'Used to limit the number of log messages retained.',
-                      style: theme.subtleTextStyle,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: defaultSpacing),
-              SizedBox(
-                height: defaultTextFieldHeight,
-                width: defaultTextFieldNumberWidth,
-                child: TextField(
-                  style: theme.regularTextStyle,
-                  decoration: singleLineDialogTextFieldDecoration,
-                  controller: TextEditingController(
-                    text: newRetentionLimit.toString(),
-                  ),
-                  inputFormatters: <TextInputFormatter>[
-                    // Only positive integers.
-                    FilteringTextInputFormatter.allow(
-                      RegExp(r'^[1-9][0-9]*'),
-                    ),
-                  ],
-                  onChanged: (String text) {
-                    final newValue = int.parse(text);
-                    newRetentionLimit = newValue;
-                  },
-                ),
-              ),
-            ],
-          ),
         ],
       ),
-      actions: [
-        DialogApplyButton(
-          onPressed: () {
-            preferences.logging.retentionLimit.value = newRetentionLimit;
-          },
-        ),
-        const DialogCloseButton(),
+      actions: const [
+        DialogCloseButton(),
       ],
     );
   }

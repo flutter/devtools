@@ -26,6 +26,7 @@ import 'common_widgets.dart';
 import 'connected_app.dart';
 import 'globals.dart';
 import 'primitives/simple_items.dart';
+import 'primitives/utils.dart';
 
 final _log = Logger('lib/src/shared/utils');
 
@@ -335,7 +336,7 @@ class InterruptableChunkWorker {
     final completer = Completer<bool>();
     final localWorkId = ++_workId;
 
-    void doChunkWork(int chunkStartingIndex) {
+    Future<void> doChunkWork(int chunkStartingIndex) async {
       if (chunkStartingIndex >= length) {
         return completer.complete(true);
       }
@@ -351,9 +352,8 @@ class InterruptableChunkWorker {
       }
 
       progressCallback(chunkUpperIndexLimit / length);
-      Future.delayed(Duration.zero, () {
-        doChunkWork.call(chunkStartingIndex + _chunkSize);
-      });
+      await delayToReleaseUiThread();
+      await doChunkWork(chunkStartingIndex + _chunkSize);
     }
 
     if (length <= 0) {

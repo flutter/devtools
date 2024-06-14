@@ -6,8 +6,6 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
-import '../../../shared/globals.dart';
-
 import '../../../shared/utils.dart';
 import 'logging_controller_v2.dart';
 import 'logging_table_row.dart';
@@ -27,14 +25,11 @@ class LoggingTableModel extends ChangeNotifier {
       ),
       progressCallback: (progress) => _cacheLoadProgress.value = progress,
     );
-    preferences.logging.retentionLimit.addListener(_onRetentionLimitUpdate);
-    _retentionLimit = preferences.logging.retentionLimit.value;
   }
-  // Make sure this is right data type to facilitate deletions.
+
   final _logs = <LogDataV2>[];
   final _filteredLogs = <LogDataV2>[];
   final _selectedLogs = <int>{};
-  late int _retentionLimit;
 
   final cachedHeights = <int, double>{};
   final cachedOffets = <int, double>{};
@@ -47,17 +42,9 @@ class LoggingTableModel extends ChangeNotifier {
   ValueListenable<double?> get cacheLoadProgress => _cacheLoadProgress;
   final _cacheLoadProgress = ValueNotifier<double?>(null);
 
-  void _onRetentionLimitUpdate() {
-    _retentionLimit = preferences.logging.retentionLimit.value;
-    _logs.removeRange(0, _logs.length - _retentionLimit);
-    _filteredLogs.replaceRange(0, _filteredLogs.length, _logs);
-    notifyListeners();
-  }
-
   @override
   void dispose() {
     super.dispose();
-    preferences.logging.retentionLimit.removeListener(_onRetentionLimitUpdate);
     _cacheLoadProgress.dispose();
   }
 
@@ -94,13 +81,6 @@ class LoggingTableModel extends ChangeNotifier {
 
     _logs.add(log);
     _filteredLogs.add(log);
-    if (_logs.length > _retentionLimit) {
-      if (identical(_logs.first, _filteredLogs.first)) {
-        _filteredLogs.removeAt(0);
-      }
-      _logs.removeAt(0);
-    }
-
     getFilteredLogHeight(
       _logs.length - 1,
     );

@@ -23,7 +23,6 @@ part '_extension_preferences.dart';
 part '_inspector_preferences.dart';
 part '_inspector_v2_preferences.dart';
 part '_memory_preferences.dart';
-part '_logging_preferences.dart';
 part '_performance_preferences.dart';
 
 const _thirdPartyPathSegment = 'third_party';
@@ -49,9 +48,6 @@ class PreferencesController extends DisposableController
 
   MemoryPreferencesController get memory => _memory;
   final _memory = MemoryPreferencesController();
-
-  LoggingPreferencesController get logging => _logging;
-  final _logging = LoggingPreferencesController();
 
   PerformancePreferencesController get performance => _performance;
   final _performance = PerformancePreferencesController();
@@ -83,7 +79,6 @@ class PreferencesController extends DisposableController
 
     await inspector.init();
     await memory.init();
-    await logging.init();
     await performance.init();
     await devToolsExtensions.init();
 
@@ -108,7 +103,6 @@ class PreferencesController extends DisposableController
   void dispose() {
     inspector.dispose();
     memory.dispose();
-    logging.dispose();
     performance.dispose();
     devToolsExtensions.dispose();
     super.dispose();
