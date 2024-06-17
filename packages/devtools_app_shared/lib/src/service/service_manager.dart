@@ -526,8 +526,8 @@ class ServiceManager<T extends VmService> {
         packageRootUriString =
             (await _lookupPackageConfigByEval(rootLibrary)) ??
                 // TODO(kenz): remove this fallback once all test bootstrap
-                // generators are including the `packageConfigLocation` constant
-                // we can evaluate.
+                // generators include the `packageConfigLocation` constant we
+                // can evaluate.
                 await _lookupTestLibraryByPrefix(rootLibrary, dtdManager);
       }
     }
