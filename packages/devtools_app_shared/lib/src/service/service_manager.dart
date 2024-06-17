@@ -531,7 +531,10 @@ class ServiceManager<T extends VmService> {
                 await _lookupTestLibraryByPrefix(rootLibrary, dtdManager);
       }
     }
-
+    _log.fine(
+      '[connectedAppPackageRoot] package root for test target: '
+      '$packageRootUriString',
+    );
     return packageRootUriString == null
         ? null
         : Uri.parse(packageRootUriString);
