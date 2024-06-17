@@ -392,7 +392,7 @@ popd
 
 ## Resources and support
 
-Please join the [Flutter Discord server](https://github.com/flutter/flutter/wiki/Chat) and then check out
+Please join the [Flutter Discord server](https://github.com/flutter/flutter/blob/master/docs/contributing/Chat.md) and then check out
 the [#devtools-extension-authors](https://discord.com/channels/608014603317936148/1159561514072690739)
 channel to connect with other DevTools extension authors and the DevTools team.
 
