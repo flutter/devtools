@@ -370,7 +370,7 @@ onto the `flutter/devtools` protected branch (`master`).
 
 ### Additional resources
 - `dart-lang/sdk` cherry-pick [Wiki](https://github.com/dart-lang/sdk/wiki/Cherry-picks-to-a-release-channel)
-- Flutter cherry-pick [Wiki](https://github.com/flutter/flutter/blob/master/docs/releases/Flutter-Cherrypick-Process.md)
+- Flutter cherry-pick [docs](https://github.com/flutter/flutter/blob/master/docs/releases/Flutter-Cherrypick-Process.md)
 - Example cherry-pick cl: https://dart-review.googlesource.com/c/sdk/+/336827
 - Example cherry-pick issue: https://github.com/dart-lang/sdk/issues/54085
 - Example merge commit on `flutter/devtools`: https://github.com/flutter/devtools/pull/6812

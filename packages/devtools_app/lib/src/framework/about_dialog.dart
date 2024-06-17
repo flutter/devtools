@@ -114,7 +114,7 @@ class _ContributingLink extends StatelessWidget {
 class _DiscordLink extends StatelessWidget {
   const _DiscordLink();
 
-  static const _discordWikiUrl =
+  static const _discordDocsUrl =
       'https://github.com/flutter/flutter/blob/master/docs/contributing/Chat.md';
 
   @override
@@ -123,7 +123,7 @@ class _DiscordLink extends StatelessWidget {
       text: GaLinkTextSpan(
         link: const GaLink(
           display: 'Discord',
-          url: _discordWikiUrl,
+          url: _discordDocsUrl,
           gaScreenName: gac.devToolsMain,
           gaSelectedItemDescription: gac.discordLink,
         ),

@@ -20,7 +20,7 @@ For each new issue that comes in, perform all of these tasks that apply:
 
 ### Prioritize the issue. 
 
-Follow the prioritization rubric [here](https://github.com/flutter/flutter/wiki/Issue-hygiene#priorities). 
+Follow the prioritization rubric [here](https://github.com/flutter/flutter/blob/master/docs/contributing/issue_hygiene/README.md#priorities).
 
 Tag the area owner in a comment if the issue requires specific expertise. Assign to an owner if the issue is a work in process or if the issue needs immediate / almost-immediate attention (P0, P1).
 
