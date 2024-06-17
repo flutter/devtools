@@ -10,6 +10,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../service/service_extension_widgets.dart';
+import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/common_widgets.dart';
 import 'logging_model.dart';
 import 'logging_table_row.dart';
@@ -67,10 +69,25 @@ class _LoggingTableV2State extends State<LoggingTableV2> {
                 onSubmitted: (value) {},
               ),
             ),
+            const SizedBox(width: defaultSpacing),
             Expanded(
               child: DevToolsClearableTextField(
                 labelText: 'Search',
               ),
+            ),
+            const SizedBox(width: defaultSpacing),
+            SettingsOutlinedButton(
+              gaScreen: gac.logging,
+              gaSelection: gac.loggingSettings,
+              tooltip: 'Logging Settings',
+              onPressed: () {
+                unawaited(
+                  showDialog(
+                    context: context,
+                    builder: (context) => const LoggingSettingsDialogV2(),
+                  ),
+                );
+              },
             ),
           ],
         ),
@@ -205,6 +222,32 @@ class _LoggingTableRowsState extends State<_LoggingTableRows>
           ),
         ],
       ),
+    );
+  }
+}
+
+class LoggingSettingsDialogV2 extends StatelessWidget {
+  const LoggingSettingsDialogV2({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return DevToolsDialog(
+      title: const DialogTitleText('Logging Settings'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ...dialogSubHeader(
+            theme,
+            'General',
+          ),
+          const StructuredErrorsToggle(),
+        ],
+      ),
+      actions: const [
+        DialogCloseButton(),
+      ],
     );
   }
 }
