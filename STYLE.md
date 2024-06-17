@@ -2,7 +2,7 @@
 
 We fully follow [Effective Dart](https://dart.dev/guides/language/effective-dart)
 and some items of
-[Style guide for Flutter repo](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo):
+[Style guide for Flutter repo](https://github.com/flutter/flutter/blob/master/docs/contributing/Style-guide-for-Flutter-repo.md):
 
 ## Order of getters and setters
 
@@ -11,7 +11,7 @@ more complicated than just public field
 we declare the related class members always in the same order,
 without new lines separating the members,
 in compliance with
-[Flutter repo style guide]( https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#order-other-class-members-in-a-way-that-makes-sense):
+[Flutter repo style guide](https://github.com/flutter/flutter/blob/master/docs/contributing/Style-guide-for-Flutter-repo.md#order-other-class-members-in-a-way-that-makes-sense):
 
 1. Public getter
 2. Private field
@@ -19,11 +19,11 @@ in compliance with
 
 ## Naming for typedefs and function variables
 
-Follow [Flutter repo naming rules for typedefs and function variables](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#naming-rules-for-typedefs-and-function-variables).
+Follow [Flutter repo naming rules for typedefs and function variables](https://github.com/flutter/flutter/blob/master/docs/contributing/Style-guide-for-Flutter-repo.md#naming-rules-for-typedefs-and-function-variables).
 
 ## Overriding equality
 
-Use [boilerplate](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#common-boilerplates-for-operator--and-hashcode).
+Use [boilerplate](https://github.com/flutter/flutter/blob/master/docs/contributing/Style-guide-for-Flutter-repo.md#common-boilerplates-for-operator--and-hashcode).
 
 ## URIs and File Paths
 
