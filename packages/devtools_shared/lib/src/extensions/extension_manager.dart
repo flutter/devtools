@@ -146,8 +146,8 @@ class ExtensionsManager {
       // may be an incorrect assumption for monorepos.
       final packageConfigPath = path.posix.join(
         rootFileUriString,
-        '.dart_tool',
-        'package_config.json',
+        dartToolDirectoryName,
+        packageConfigFileName,
       );
       extensions = await findExtensions(
         'devtools',

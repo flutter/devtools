@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:core';
 
-import 'package:collection/collection.dart';
 import 'package:dds_service_extensions/dds_service_extensions.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
@@ -16,6 +15,7 @@ import 'package:vm_service/vm_service.dart' hide Error;
 import '../utils/utils.dart';
 import 'connected_app.dart';
 import 'dtd_manager.dart';
+import 'eval_on_dart_library.dart' hide SentinelException;
 import 'flutter_version.dart';
 import 'isolate_manager.dart';
 import 'isolate_state.dart';
@@ -521,24 +521,35 @@ class ServiceManager<T extends VmService> {
     // VM service connection spawned from `dart test` or `flutter test`).
     if (packageRootUriString?.endsWith('.dart') ?? false) {
       final rootLibrary = await _mainIsolateRootLibrary();
-      final testTargetFileUriString =
-          (rootLibrary?.dependencies ?? <LibraryDependency>[])
-              .firstWhereOrNull((dep) => dep.prefix == 'test')
-              ?.target
-              ?.uri;
-      if (testTargetFileUriString != null) {
-        _log.fine(
-          '[connectedAppPackageRoot] detected test library from root library '
-          'imports: $testTargetFileUriString',
+      if (rootLibrary != null) {
+        final eval = EvalOnDartLibrary(
+          rootLibrary.uri!,
+          this.service! as VmService,
+          serviceManager: this,
         );
-        packageRootUriString = await packageRootFromFileUriString(
-          testTargetFileUriString,
-          dtd: dtdManager.connection.value,
-        );
-        _log.fine(
-          '[connectedAppPackageRoot] package root for test target: '
-          '$packageRootUriString',
-        );
+        final evalDisposable = Disposable();
+        final packageConfig = (await eval.evalInstance(
+          'packageConfigLocationn',
+          isAlive: evalDisposable,
+        ))
+            .valueAsString;
+        evalDisposable.dispose();
+
+        if (packageConfig?.endsWith(packageConfigIdentifier) ?? false) {
+          _log.fine(
+            '[connectedAppPackageRoot] detected test package config from root '
+            'library eval: $packageConfig.',
+          );
+          packageRootUriString = packageConfig!.substring(
+            0,
+            // Minus 1 to remove the trailing slash.
+            packageConfig.length - packageConfigIdentifier.length - 1,
+          );
+          _log.fine(
+            '[connectedAppPackageRoot] package root for test target: '
+            '$packageRootUriString',
+          );
+        }
       }
     }
 

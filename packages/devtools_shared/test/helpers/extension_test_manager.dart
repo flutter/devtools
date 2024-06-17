@@ -4,6 +4,7 @@
 
 import 'dart:io';
 
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
@@ -109,10 +110,7 @@ class ExtensionTestManager {
         );
       }
 
-      final packageConfigFile = File(
-        p.join(packageRoot.path, '.dart_tool', 'package_config.json'),
-      );
-      expect(packageConfigFile.existsSync(), isTrue);
+      expect(File(packageConfigIdentifier).existsSync(), isTrue);
     }
   }
 
