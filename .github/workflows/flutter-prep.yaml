@@ -33,8 +33,11 @@ jobs:
 
       - name: Get Latest Flutter Candidate
         id: flutter-candidate
+        # TODO(https://github.com/flutter/devtools/issues/7939): Switch back to using
+        # LATEST_FLUTTER_CANDIDATE=$(./tool/latest_flutter_candidate.sh)
+        # once Flutter rolls are tagged again:
         run: |
-          LATEST_FLUTTER_CANDIDATE=$(./tool/latest_flutter_candidate.sh)
+          LATEST_FLUTTER_CANDIDATE=1c77696615558bf8f9fa7a6e2a473f438f1c03ca
           echo "FLUTTER_CANDIDATE=$LATEST_FLUTTER_CANDIDATE" >> $GITHUB_OUTPUT
 
       - name: Load Cached Flutter SDK
