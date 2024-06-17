@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:core';
 
+import 'package:collection/collection.dart';
 import 'package:dds_service_extensions/dds_service_extensions.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
@@ -522,40 +523,68 @@ class ServiceManager<T extends VmService> {
     if (packageRootUriString?.endsWith('.dart') ?? false) {
       final rootLibrary = await _mainIsolateRootLibrary();
       if (rootLibrary != null) {
-        final eval = EvalOnDartLibrary(
-          rootLibrary.uri!,
-          this.service! as VmService,
-          serviceManager: this,
-        );
-        final evalDisposable = Disposable();
-        final packageConfig = (await eval.evalInstance(
-          'packageConfigLocationn',
-          isAlive: evalDisposable,
-        ))
-            .valueAsString;
-        evalDisposable.dispose();
-
-        if (packageConfig?.endsWith(packageConfigIdentifier) ?? false) {
-          _log.fine(
-            '[connectedAppPackageRoot] detected test package config from root '
-            'library eval: $packageConfig.',
-          );
-          packageRootUriString = packageConfig!.substring(
-            0,
-            // Minus 1 to remove the trailing slash.
-            packageConfig.length - packageConfigIdentifier.length - 1,
-          );
-          _log.fine(
-            '[connectedAppPackageRoot] package root for test target: '
-            '$packageRootUriString',
-          );
-        }
+        packageRootUriString =
+            (await _lookupPackageConfigByEval(rootLibrary)) ??
+                // TODO(kenz): remove this fallback once all test bootstrap
+                // generators are including the `packageConfigLocation` constant
+                // we can evaluate.
+                await _lookupTestLibraryByPrefix(rootLibrary, dtdManager);
       }
     }
 
     return packageRootUriString == null
         ? null
         : Uri.parse(packageRootUriString);
+  }
+
+  Future<String?> _lookupPackageConfigByEval(Library rootLibrary) async {
+    final eval = EvalOnDartLibrary(
+      rootLibrary.uri!,
+      this.service! as VmService,
+      serviceManager: this,
+    );
+    final evalDisposable = Disposable();
+    final packageConfig = (await eval.evalInstance(
+      'packageConfigLocation',
+      isAlive: evalDisposable,
+    ))
+        .valueAsString;
+    evalDisposable.dispose();
+
+    if (packageConfig?.endsWith(packageConfigIdentifier) ?? false) {
+      _log.fine(
+        '[connectedAppPackageRoot] detected test package config from root '
+        'library eval: $packageConfig.',
+      );
+      return packageConfig!.substring(
+        0,
+        // Minus 1 to remove the trailing slash.
+        packageConfig.length - packageConfigIdentifier.length - 1,
+      );
+    }
+    return null;
+  }
+
+  Future<String?> _lookupTestLibraryByPrefix(
+    Library rootLibrary,
+    DTDManager dtdManager,
+  ) async {
+    final testTargetFileUriString =
+        (rootLibrary.dependencies ?? <LibraryDependency>[])
+            .firstWhereOrNull((dep) => dep.prefix == 'test')
+            ?.target
+            ?.uri;
+    if (testTargetFileUriString != null) {
+      _log.fine(
+        '[connectedAppPackageRoot] detected test library from root library '
+        'imports: $testTargetFileUriString',
+      );
+      return await packageRootFromFileUriString(
+        testTargetFileUriString,
+        dtd: dtdManager.connection.value,
+      );
+    }
+    return null;
   }
 
   Future<Library?> _mainIsolateRootLibrary() async {
