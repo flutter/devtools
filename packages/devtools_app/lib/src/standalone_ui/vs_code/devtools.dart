@@ -11,22 +11,22 @@ import 'package:flutter/material.dart';
 
 import '../../extensions/extension_screen.dart';
 import '../../extensions/extension_service.dart';
+import '../../service/editor/editor_client.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/screen.dart';
-import '../api/vs_code_api.dart';
 
 /// A widget that displays DevTools options, including buttons to open static
 /// screens, and a list of static DevTools extensions available for the IDE
 /// workspace.
 class DevToolsSidebarOptions extends StatelessWidget {
   const DevToolsSidebarOptions({
-    required this.api,
+    required this.editor,
     required this.hasDebugSessions,
     super.key,
   });
 
-  final VsCodeApi api;
+  final EditorClient editor;
   final bool hasDebugSessions;
 
   @override
@@ -48,21 +48,21 @@ class DevToolsSidebarOptions extends StatelessWidget {
                 label: screen.title ?? screen.id,
                 icon: screen.icon!,
                 screenId: screen.id,
-                api: api,
+                editor: editor,
                 theme: theme,
               ),
-            if (api.capabilities.openDevToolsExternally)
+            if (editor.supportsOpenDevToolsExternally)
               _createDevToolsScreenRow(
                 label: 'Open in Browser',
                 icon: Icons.open_in_browser,
-                api: api,
+                editor: editor,
                 theme: theme,
                 onPressed: () {
                   ga.select(
                     gac.VsCodeFlutterSidebar.id,
                     gac.VsCodeFlutterSidebar.openDevToolsExternally.name,
                   );
-                  unawaited(api.openDevToolsPage(null, forceExternal: true));
+                  unawaited(editor.openDevToolsPage(null, forceExternal: true));
                 },
               ),
           ],
@@ -74,7 +74,7 @@ class DevToolsSidebarOptions extends StatelessWidget {
         ),
         const SizedBox(height: denseSpacing),
         _DevToolsExtensions(
-          api: api,
+          editor: editor,
           hasDebugSessions: hasDebugSessions,
         ),
       ],
@@ -97,11 +97,11 @@ class DevToolsSidebarOptions extends StatelessWidget {
 
 class _DevToolsExtensions extends StatefulWidget {
   const _DevToolsExtensions({
-    required this.api,
+    required this.editor,
     required this.hasDebugSessions,
   });
 
-  final VsCodeApi api;
+  final EditorClient editor;
   final bool hasDebugSessions;
 
   @override
@@ -160,7 +160,7 @@ class _DevToolsExtensionsState extends State<_DevToolsExtensions>
               _createDevToolsScreenRow(
                 label: ext.name,
                 icon: ext.icon,
-                api: widget.api,
+                editor: widget.editor,
                 theme: theme,
                 onPressed: () {
                   ga.select(
@@ -170,7 +170,7 @@ class _DevToolsExtensionsState extends State<_DevToolsExtensions>
                     ),
                   );
                   unawaited(
-                    widget.api.openDevToolsPage(null, page: ext.screenId),
+                    widget.editor.openDevToolsPage(null, page: ext.screenId),
                   );
                 },
               ),
@@ -189,7 +189,7 @@ class _DevToolsExtensionsState extends State<_DevToolsExtensions>
 TableRow _createDevToolsScreenRow({
   required String label,
   required IconData icon,
-  required VsCodeApi api,
+  required EditorClient editor,
   required ThemeData theme,
   String? screenId,
   void Function()? onPressed,
@@ -224,7 +224,7 @@ TableRow _createDevToolsScreenRow({
                   gac.VsCodeFlutterSidebar.id,
                   gac.VsCodeFlutterSidebar.openDevToolsScreen(screenId!),
                 );
-                unawaited(api.openDevToolsPage(null, page: screenId));
+                unawaited(editor.openDevToolsPage(null, page: screenId));
               },
         ),
       ),

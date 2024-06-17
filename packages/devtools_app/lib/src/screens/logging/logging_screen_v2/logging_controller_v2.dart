@@ -28,6 +28,7 @@ import '../logging_controller.dart'
         FrameInfo,
         ImageSizesForFrame;
 import '../logging_screen.dart';
+import 'logging_model.dart';
 
 final _log = Logger('logging_controller');
 
@@ -95,16 +96,8 @@ class LoggingControllerV2 extends DisposableController
   /// See also [statusText].
   Stream<String> get onLogStatusChanged => _logStatusController.stream;
 
-  List<LogDataV2> data = <LogDataV2>[];
-
   final selectedLog = ValueNotifier<LogDataV2?>(null);
-
-  void _updateData(List<LogDataV2> logs) {
-    data = logs;
-    filteredData.replaceAll(logs);
-    _updateSelection();
-    _updateStatus();
-  }
+  final loggingModel = LoggingTableModel();
 
   void _updateSelection() {
     final selected = selectedLog.value;
@@ -120,7 +113,7 @@ class LoggingControllerV2 extends DisposableController
       serviceConnection.consoleService.objectGroup as ObjectGroup;
 
   String get statusText {
-    final totalCount = data.length;
+    final totalCount = loggingModel.logCount;
     final showingCount = filteredData.value.length;
 
     String label;
@@ -140,7 +133,9 @@ class LoggingControllerV2 extends DisposableController
   }
 
   void clear() {
-    _updateData([]);
+    loggingModel.clear();
+    _updateSelection();
+    _updateStatus();
     serviceConnection.errorBadgeManager.clearErrors(LoggingScreen.id);
   }
 
@@ -385,12 +380,7 @@ class LoggingControllerV2 extends DisposableController
   }
 
   void log(LogDataV2 log) {
-    data.add(log);
-    // TODO(danchevalier): Add filtersearch behavior
-    // TODO(danchevalier): Add Search behavior
-    // TODO(danchevalier): Add Selection update behavior
-    // TODO(danchevalier): Add status update
-    filteredData.add(log);
+    loggingModel.add(log);
   }
 
   static RemoteDiagnosticsNode? _findFirstSummary(RemoteDiagnosticsNode node) {
@@ -614,7 +604,10 @@ class LogDataV2 with SearchableDataMixin {
     this.isError = false,
     this.detailsComputer,
     this.node,
-  });
+  }) {
+    // Fetch details immediately on creation.
+    unawaited(compute());
+  }
 
   final String kind;
   final int? timestamp;
@@ -629,15 +622,21 @@ class LogDataV2 with SearchableDataMixin {
 
   String? get details => _details;
 
-  bool get needsComputing => detailsComputer != null;
+  ValueListenable<bool> get detailsComputed => _detailsComputed;
+  final _detailsComputed = ValueNotifier<bool>(false);
 
   Future<void> compute() async {
-    _details = await detailsComputer!();
-    detailsComputer = null;
+    if (!detailsComputed.value) {
+      if (detailsComputer != null) {
+        _details = await detailsComputer!();
+      }
+      detailsComputer = null;
+      _detailsComputed.value = true;
+    }
   }
 
   String? prettyPrinted() {
-    if (needsComputing) {
+    if (!detailsComputed.value) {
       return details;
     }
 
@@ -648,6 +647,10 @@ class LogDataV2 with SearchableDataMixin {
     } catch (_) {
       return details;
     }
+  }
+
+  String asLogDetails() {
+    return !detailsComputed.value ? '<fetching>' : prettyPrinted() ?? '';
   }
 
   @override

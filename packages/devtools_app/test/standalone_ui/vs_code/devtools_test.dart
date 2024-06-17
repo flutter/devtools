@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/standalone_ui/api/impl/vs_code_api.dart';
 import 'package:devtools_app/src/standalone_ui/vs_code/devtools.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -16,7 +15,7 @@ import 'package:mockito/mockito.dart';
 void main() {
   const windowSize = Size(2000.0, 2000.0);
 
-  late MockVsCodeApi mockVsCodeApi;
+  late MockEditorClient mockEditorClient;
 
   setUpAll(() {
     // Set test mode so that the debug list of extensions will be used.
@@ -24,17 +23,13 @@ void main() {
   });
 
   setUp(() {
-    mockVsCodeApi = MockVsCodeApi();
-    when(mockVsCodeApi.capabilities).thenReturn(
-      VsCodeCapabilitiesImpl({
-        'executeCommand': true,
-        'selectDevice': true,
-        'openDevToolsPage': true,
-        'openDevToolsExternally': true,
-        'hotReload': true,
-        'hotRestart': true,
-      }),
-    );
+    mockEditorClient = MockEditorClient();
+    when(mockEditorClient.supportsGetDevices).thenReturn(true);
+    when(mockEditorClient.supportsSelectDevice).thenReturn(true);
+    when(mockEditorClient.supportsOpenDevToolsPage).thenReturn(true);
+    when(mockEditorClient.supportsOpenDevToolsExternally).thenReturn(true);
+    when(mockEditorClient.supportsHotReload).thenReturn(true);
+    when(mockEditorClient.supportsHotRestart).thenReturn(true);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(PreferencesController, PreferencesController());
   });
@@ -46,7 +41,7 @@ void main() {
     await tester.pumpWidget(
       wrap(
         DevToolsSidebarOptions(
-          api: mockVsCodeApi,
+          editor: mockEditorClient,
           hasDebugSessions: hasDebugSessions,
         ),
       ),
