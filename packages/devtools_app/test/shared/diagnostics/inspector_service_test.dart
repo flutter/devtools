@@ -367,7 +367,9 @@ void main() {
           );
 
           expect(
-              nodeInDetailsTree.valueRef, equals(nodeInSummaryTree.valueRef));
+            nodeInDetailsTree.valueRef,
+            equals(nodeInSummaryTree.valueRef),
+          );
 
           await group.setSelectionInspector(nodeInDetailsTree.valueRef, true);
           final selection = (await group.getSelection(
