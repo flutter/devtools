@@ -226,16 +226,9 @@ class _LoggingTableRowsState extends State<_LoggingTableRows>
   }
 }
 
-class LoggingSettingsDialogV2 extends StatefulWidget {
+class LoggingSettingsDialogV2 extends StatelessWidget {
   const LoggingSettingsDialogV2({super.key});
 
-  @override
-  State<LoggingSettingsDialogV2> createState() =>
-      _LoggingSettingsDialogV2State();
-}
-
-class _LoggingSettingsDialogV2State extends State<LoggingSettingsDialogV2> {
-  late int newRetentionLimit;
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
