@@ -545,25 +545,34 @@ class ServiceManager<T extends VmService> {
       rootLibrary.uri!,
       this.service! as VmService,
       serviceManager: this,
+      // Swallow exceptions since this evaluation may be called on an older
+      // version of package:test where we do not expect the evaluation to
+      // succeed.
+      logExceptions: false,
     );
     final evalDisposable = Disposable();
-    final packageConfig = (await eval.evalInstance(
-      'packageConfigLocation',
-      isAlive: evalDisposable,
-    ))
-        .valueAsString;
-    evalDisposable.dispose();
+    try {
+      final packageConfig = (await eval.evalInstance(
+        'packageConfigLocationn',
+        isAlive: evalDisposable,
+      ))
+          .valueAsString;
 
-    if (packageConfig?.endsWith(packageConfigIdentifier) ?? false) {
-      _log.fine(
-        '[connectedAppPackageRoot] detected test package config from root '
-        'library eval: $packageConfig.',
-      );
-      return packageConfig!.substring(
-        0,
-        // Minus 1 to remove the trailing slash.
-        packageConfig.length - packageConfigIdentifier.length - 1,
-      );
+      if (packageConfig?.endsWith(packageConfigIdentifier) ?? false) {
+        _log.fine(
+          '[connectedAppPackageRoot] detected test package config from root '
+          'library eval: $packageConfig.',
+        );
+        return packageConfig!.substring(
+          0,
+          // Minus 1 to remove the trailing slash.
+          packageConfig.length - packageConfigIdentifier.length - 1,
+        );
+      }
+    } catch (_) {
+      // Fail gracefully if the evaluation fails.
+    } finally {
+      evalDisposable.dispose();
     }
     return null;
   }

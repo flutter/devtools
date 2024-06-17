@@ -40,6 +40,7 @@ class EvalOnDartLibrary extends DisposableController
     ValueListenable<IsolateRef?>? isolate,
     this.disableBreakpoints = true,
     this.oneRequestAtATime = false,
+    this.logExceptions = true,
   }) : _clientId = Random().nextInt(1000000000) {
     _libraryRef = Completer<LibraryRef>();
 
@@ -59,6 +60,9 @@ class EvalOnDartLibrary extends DisposableController
 
   /// Whether to disable breakpoints triggered while evaluating expressions.
   final bool disableBreakpoints;
+
+  /// Whether to log exceptions to stdout on failed evaluations.
+  final bool logExceptions;
 
   /// An ID unique to this instance, so that [asyncEval] keeps working even if
   /// the devtool is opened on multiple tabs at the same time.
@@ -261,7 +265,7 @@ class EvalOnDartLibrary extends DisposableController
   }
 
   void _handleError(Object e, StackTrace stack) {
-    if (_disposed) return;
+    if (_disposed || !logExceptions) return;
 
     if (e is RPCError) {
       _log.shout('RPCError: $e', e, stack);
